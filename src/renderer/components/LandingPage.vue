@@ -1,28 +1,24 @@
 <template>
   <div id="wrapper">
-    <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
     <main>
       <div class="left-side">
         <span class="title">
-          Welcome to your new project!
+          Welcome to SPlayer!
         </span>
-        <system-information></system-information>
+        <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
       </div>
 
       <div class="right-side">
         <div class="doc">
           <div class="title">Getting Started</div>
           <p>
-            electron-vue comes packed with detailed documentation that covers everything from
-            internal configurations, using the project structure, building your application,
-            and so much more.
+            Open a video file to begin
           </p>
-          <button @click="open('https://simulatedgreg.gitbooks.io/electron-vue/content/')">Read the Docs</button><br><br>
+          <button @click="open('./')">Open</button><br><br>
         </div>
         <div class="doc">
-          <div class="title alt">Other Documentation</div>
-          <button class="alt" @click="open('https://electron.atom.io/docs/')">Electron</button>
-          <button class="alt" @click="open('https://vuejs.org/v2/guide/')">Vue.js</button>
+          <div class="title alt">System</div>
+          <system-information></system-information>
         </div>
       </div>
     </main>
@@ -37,7 +33,31 @@
     components: { SystemInformation },
     methods: {
       open(link) {
-        this.$electron.shell.openExternal(link);
+        const self = this;
+        const remote = this.$electron.remote;
+        const dialog = remote.dialog;
+        const browserWindow = remote.BrowserWindow;
+        const focusedWindow = browserWindow.getFocusedWindow();
+
+        dialog.showOpenDialog(focusedWindow, {
+          title: 'Open Dialog',
+          defaultPath: link,
+          filters: [{
+            name: 'Media Files',
+            extensions: ['mp4', 'mov', '*'],
+          }],
+          properties: ['openFile'],
+        }, (item) => {
+          if (item) {
+            alert(item[0]);
+            self.openFile(item[0]);
+          }
+        });
+      },
+      openFile(path) {
+        const self = this;
+
+        console.log(path, self);
       },
     },
   };
