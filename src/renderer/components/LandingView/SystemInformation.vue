@@ -11,6 +11,10 @@
         <div class="value">{{ name }}</div>
       </div>
       <div class="item">
+        <div class="name">Route Params</div>
+        <div class="value">{{ params }}</div>
+      </div>
+      <div class="item">
         <div class="name">Vue.js:</div>
         <div class="value">{{ vue }}</div>
       </div>
@@ -40,6 +44,7 @@
         path: this.$route.path,
         platform: require('os').platform(),
         vue: require('vue/package.json').version,
+        params: this.$route.params,
       };
     },
   };
