@@ -15,6 +15,8 @@
           Open a video file to begin
         </p>
         <button @click="open('./')">Open</button><br><br>
+
+        <button @click="openFile('media/animation.mp4')">Test</button><br><br>
       </div>
       <div class="doc">
         <div class="title alt">System</div>

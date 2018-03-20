@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" class="application">
     <router-view></router-view>
   </div>
 </template>
@@ -12,4 +12,30 @@
 
 <style>
   /* CSS */
+
+  * {
+  	margin: 0;
+  	padding: 0;
+  	background: transparent;
+  }
+
+  html {
+  	width: 100%;
+  	height: 100%;
+  }
+
+  body {
+  	position: relative;
+  	width: 100%;
+  	height: 100%;
+  }
+
+  .application {
+  	position: relative;
+  	width: 100%;
+  	height: 100%;
+  	border-radius: 4px;
+  	overflow: hidden;
+  	-webkit-app-region: drag;
+  }
 </style>

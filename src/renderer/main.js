@@ -15,4 +15,13 @@ new Vue({
   router,
   store,
   template: '<App/>',
+  mounted() {
+    window.addEventListener('keypress', (e) => {
+      console.log(String.fromCharCode(e.keyCode));
+      if (event.keyCode === 32) {
+        console.log('pausing');
+        this.$store.dispatch('pausePlayback');
+      }
+    });
+  },
 }).$mount('#app');
