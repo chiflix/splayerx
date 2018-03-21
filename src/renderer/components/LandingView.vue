@@ -16,7 +16,7 @@
         </p>
         <button @click="open('./')">Open</button><br><br>
 
-        <button @click="openFile(lastPlayedFile)">{{ lastPlayedFile }}</button><br><br>
+        <button v-if="showTestButton" @click="openFile(lastPlayedFile)">{{ lastPlayedFile }}</button><br><br>
 
       </div>
       <div class="doc">
@@ -33,12 +33,19 @@ import SystemInformation from './LandingView/SystemInformation';
 
 export default {
   name: 'landing-view',
-  data: {
-    showingPopupDialog: false,
-    lastPlayedFile: '',
+  data() {
+    return {
+      showingPopupDialog: false,
+      lastPlayedFile: '',
+    };
   },
   components: {
     SystemInformation,
+  },
+  computed: {
+    showTestButton() {
+      return this.lastPlayedFile && this.lastPlayedFile.length > 0;
+    },
   },
   mounted() {
     this.$storage.get('recent-played', (err, data) => {
