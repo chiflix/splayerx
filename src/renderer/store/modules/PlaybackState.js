@@ -1,5 +1,11 @@
+const PlaybackState = Object.freeze({
+  PLAYING: Symbol('playing'),
+  PAUSED: Symbol('paused'),
+  UNKNOWN: Symbol('unknown'),
+});
+
 const state = {
-  playback: 'unknown',
+  playback: PlaybackState.UNKNOWN,
 };
 
 const getters = {
@@ -8,10 +14,10 @@ const getters = {
 
 const mutations = {
   PAUSE_PLAYBACK(state) {
-    state.playback = 'paused';
+    state.playback = PlaybackState.PAUSED;
   },
   START_PLAYBACK(state) {
-    state.playback = 'played';
+    state.playback = PlaybackState.PLAYING;
   },
 };
 
@@ -23,6 +29,18 @@ const actions = {
   startPlayback({ commit }) {
     // do something async
     commit('START_PLAYBACK');
+  },
+  togglePlayback({ commit }) {
+    // do something async
+    switch (state.playback) {
+      case PlaybackState.PAUSED:
+        commit('START_PLAYBACK');
+        break;
+      case PlaybackState.PLAYING:
+      default:
+        commit('PAUSE_PLAYBACK');
+        break;
+    }
   },
 };
 

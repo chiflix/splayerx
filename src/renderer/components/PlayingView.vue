@@ -1,7 +1,7 @@
 <template>
   <div class="player">
     <div class="video">
-      <video id="html-video-object" autoplay="autoplay"
+      <video ref="videoCanvas" autoplay="autoplay"
         preload="metadata" :src="uri" @click="pause">
       </video>
     </div>
@@ -58,8 +58,10 @@ export default {
     playbackStat(val) {
       switch (val) {
         case 'paused':
-          console.log('pausing by click');
-          document.getElementById('html-video-object').pause();
+          this.$refs.videoCanvas.pause();
+          break;
+        case 'played':
+          this.$refs.videoCanvas.play();
           break;
         default:
           break;

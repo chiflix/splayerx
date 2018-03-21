@@ -20,7 +20,7 @@ new Vue({
       console.log(String.fromCharCode(e.keyCode));
       if (event.keyCode === 32) {
         console.log('pausing');
-        this.$store.dispatch('pausePlayback');
+        this.$store.dispatch('togglePlayback');
       }
     });
   },
