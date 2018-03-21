@@ -32,11 +32,19 @@ import SystemInformation from './LandingView/SystemInformation';
 
 export default {
   name: 'landing-view',
+  data: {
+    showingPopupDialog: false,
+  },
   components: {
     SystemInformation,
   },
   methods: {
     open(link) {
+      if (this.showingPopupDialog) {
+        // skip if there is already a popup dialog
+        return;
+      }
+
       const self = this;
       const remote = this.$electron.remote;
       const dialog = remote.dialog;
@@ -44,6 +52,7 @@ export default {
       const focusedWindow = browserWindow.getFocusedWindow();
       const VALID_EXTENSION = ['mp4', 'mkv', 'mov'];
 
+      this.showingPopupDialog = true;
       dialog.showOpenDialog(focusedWindow, {
         title: 'Open Dialog',
         defaultPath: link,
@@ -53,13 +62,13 @@ export default {
         }],
         properties: ['openFile'],
       }, (item) => {
+        this.showingPopupDialog = false;
         if (item) {
           self.openFile(`file:///${item[0]}`);
         }
       });
     },
     openFile(path) {
-      console.log(path, self);
       this.$router.push({
         name: 'playing-view',
         params: {
