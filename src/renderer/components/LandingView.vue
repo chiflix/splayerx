@@ -42,18 +42,19 @@ export default {
       const dialog = remote.dialog;
       const browserWindow = remote.BrowserWindow;
       const focusedWindow = browserWindow.getFocusedWindow();
+      const VALID_EXTENSION = ['mp4', 'mkv', 'mov'];
 
       dialog.showOpenDialog(focusedWindow, {
         title: 'Open Dialog',
         defaultPath: link,
         filters: [{
-          name: 'Media Files',
-          extensions: ['mp4', 'mov', '*'],
+          name: 'Video Files',
+          extensions: VALID_EXTENSION,
         }],
         properties: ['openFile'],
       }, (item) => {
         if (item) {
-          self.openFile(item[0]);
+          self.openFile(`file:///${item[0]}`);
         }
       });
     },
