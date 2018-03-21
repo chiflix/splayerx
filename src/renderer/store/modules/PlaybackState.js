@@ -34,11 +34,13 @@ const actions = {
     // do something async
     switch (state.playback) {
       case PlaybackState.PAUSED:
+      case PlaybackState.UNKNOWN:
         commit('START_PLAYBACK');
         break;
       case PlaybackState.PLAYING:
-      default:
         commit('PAUSE_PLAYBACK');
+        break;
+      default:
         break;
     }
   },

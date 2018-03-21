@@ -17,9 +17,7 @@ new Vue({
   template: '<App/>',
   mounted() {
     window.addEventListener('keypress', (e) => {
-      console.log(String.fromCharCode(e.keyCode));
-      if (event.keyCode === 32) {
-        console.log('pausing');
+      if (e.keyCode === 32) { // space
         this.$store.dispatch('togglePlayback');
       }
     });
