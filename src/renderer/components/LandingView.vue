@@ -16,7 +16,8 @@
         </p>
         <button @click="open('./')">Open</button><br><br>
 
-        <button @click="openFile('media/animation.mp4')">Test</button><br><br>
+        <button @click="openFile(lastPlayedFile)">{{ lastPlayedFile }}</button><br><br>
+
       </div>
       <div class="doc">
         <div class="title alt">System</div>
@@ -34,9 +35,20 @@ export default {
   name: 'landing-view',
   data: {
     showingPopupDialog: false,
+    lastPlayedFile: '',
   },
   components: {
     SystemInformation,
+  },
+  mounted() {
+    this.$storage.get('recent-played', (err, data) => {
+      if (err) {
+        // TODO: proper error handle
+        console.error(err);
+      } else {
+        this.lastPlayedFile = data;
+      }
+    });
   },
   methods: {
     open(link) {
@@ -69,6 +81,7 @@ export default {
       });
     },
     openFile(path) {
+      this.$storage.set('recent-played', path);
       this.$router.push({
         name: 'playing-view',
         params: {
