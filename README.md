@@ -1,4 +1,4 @@
-# splayer
+# SPlayer [![Dependencies Status](https://david-dm.org/chiflix/splayerx/status.svg)](https://david-dm.org/chiflix/splayerx) [![devDependencies Status](https://david-dm.org/chiflix/splayerx/dev-status.svg)](https://david-dm.org/chiflix/splayerx?type=dev)
 
 > a media player
 
