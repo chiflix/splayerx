@@ -33,7 +33,7 @@ build_script:
 test: off
 
 deploy:
-  release: SPlayerX2018-$(appveyor_repo_tag_name)
+  release: $(appveyor_repo_tag_name)
   description: 'Release description'
   provider: GitHub
   auth_token:
