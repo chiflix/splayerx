@@ -18,12 +18,15 @@ before_install:
 - bash test/ci/before_install.sh
 install:
 - export DISPLAY=':99.0'
-- xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+- Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 - npm install -g codecov
 - npm install
 - npm update
 before_script:
 script:
+#- xvfb-maybe node_modules/.bin/karma start test/unit/karma.conf.js
+#- yarn run pack && xvfb-maybe node_modules/.bin/mocha test/e2e
+#- yarn run build
 - npm run build
 deploy:
   provider: releases
@@ -31,7 +34,7 @@ deploy:
     secure: "PAPFtI8FpGjP2RvXKfUUNr8dBpAoLFukGtM+kxvBAzAyXIEH1IkINrDAPm4+TuyuareuG6xPvkpdktxhoDfbO62aAUs0/KioQxQfgmIv6xzvhuv/wfBpKezL/AffAoclMWwIl1JiqZwD6SKAVBU8A2teTskQrWnKIyRXkdxrEaBrmdZWuimc5H7Lb4MaMTO6Nmmm9eU2R2Gg2bOYhgAHBxUwGvxEacunl/VdJCFQdb70lQeREHqkPJ4SiXRWolCaEF33Y9UHpOAVUeup6ERzWri2LHn5cBVWFZ3DeEJr4MN+c7GpEFRWj3C1JsZ/e5mTNmvefldrFP386JW5zeyFGWjBiWgbV5au3hRVA/y76b+t39Xor39pBLz8RJhJs9TEwaBelminirFU/bk67CQ32KmxBHJNH8MgxGmgMBB8X/JgGOLpIrMgMTeErQY8XRMFBhzma4cbJ3DAl3JBV43759AZPL7h9+4NqCqBPPOrOehDNIe//bMVRi5Rd3tDtK3eC1F+NKobTq3xYYsKqktzzSkxJ/KC4oVL58ILnCND6EQ/MZtFphfvqnVTxS+Q2Mk2dMNjv0ZakrvDi/quGlgfionCPhgRbUiiYDnxEsVNJhkVfFiv2qk0clKJhQ10OarinTedLiqf7c2qT5Kj5shJXzSYyB+1eIC4KUttQgXZNLI="
   file_glob: true
   file:
-    - build/*.zip
+    - build/*.dmg
   skip_cleanup: true
   on:
     tags: true
