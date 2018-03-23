@@ -37,6 +37,8 @@ deploy:
   - build/*.dmg
   - build/*.AppImage
   skip_cleanup: true
+  on:
+    tags: true
 after_success:
 - codecov
 branches:
