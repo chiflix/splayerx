@@ -2,9 +2,10 @@
 # https://simulatedgreg.gitbooks.io/electron-vue/content/en/testing.html#on-the-subject-of-ci-testing
 version: 0.1.{build}
 
-branches:
+# branches:
 
 image: Visual Studio 2017
+
 platform:
   - x64
 
