@@ -41,6 +41,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { PLAYBACKSTATE } from '../constants';
 import SystemInformation from './LandingView/SystemInformation';
 
 export default {
@@ -56,11 +57,16 @@ export default {
   },
   watch: {
     playbackStat(val) {
+      console.log(val);
+      console.log(PLAYBACKSTATE.PAUSED);
+      console.log(val === PLAYBACKSTATE.PAUSED);
       switch (val) {
-        case 'paused':
+        case PLAYBACKSTATE.PAUSED:
+          console.log('pause');
+          console.log(this.$refs.videoCanvas);
           this.$refs.videoCanvas.pause();
           break;
-        case 'played':
+        case PLAYBACKSTATE.PLAYING:
           this.$refs.videoCanvas.play();
           break;
         default:
