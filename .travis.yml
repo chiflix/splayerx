@@ -14,7 +14,8 @@ cache:
 - directories:
   - "node_modules"
   - "$HOME/.electron"
-before_install: test/ci/before_install.sh
+before_install:
+- bash test/ci/before_install.sh
 install:
 - export DISPLAY=':99.0'
 - xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
