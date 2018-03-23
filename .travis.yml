@@ -6,19 +6,15 @@ dist: trusty
 osx_image: xcode8
 language: node_js
 node_js:
-- '4'
-- '6'
-- '8'
-- '9'
+- 'node'
 matrix:
   allow_failures:
-  - node_js: '9'
 cache:
 - apt: true
 - directories:
   - "node_modules"
   - "$HOME/.electron"
-before_install: ci/before_install.sh
+before_install: test/ci/before_install.sh
 install:
 - export DISPLAY=':99.0'
 - xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
