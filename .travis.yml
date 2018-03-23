@@ -20,18 +20,21 @@ cache:
   - "$HOME/.electron"
 before_install: ci/before_install.sh
 install:
+- export DISPLAY=':99.0'
+- xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+- npm install -g codecov
 - npm install
-- npm run bu
+- npm update
+script:
+- npm run build
+- codecov
 before_script:
 after_success: npm run codecov
 branches:
 addons:
-    apt:
-      packages:
-        - xvfb
-  install:
-    - export DISPLAY=':99.0'
-    - Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+  apt:
+    packages:
+    - xvfb
 env:
   global:
     # prevent wine popup dialogs about installing additional packages
