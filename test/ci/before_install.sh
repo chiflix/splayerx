@@ -35,5 +35,3 @@ case "$TRAVIS_OS_NAME" in
     npm install -g yarn
     ;;
 esac
-
-npm install -g cnpm
