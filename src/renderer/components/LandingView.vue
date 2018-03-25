@@ -65,8 +65,8 @@ export default {
       }
 
       const self = this;
-      const remote = this.$electron.remote;
-      const dialog = remote.dialog;
+      const { remote } = this.$electron;
+      const { dialog } = remote.dialog;
       const browserWindow = remote.BrowserWindow;
       const focusedWindow = browserWindow.getFocusedWindow();
       const VALID_EXTENSION = ['mp4', 'mkv', 'mov'];
