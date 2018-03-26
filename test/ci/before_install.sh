@@ -12,8 +12,8 @@ case "$TRAVIS_OS_NAME" in
     sudo apt-get update
     sudo apt-get install -y wine1.6 yarn
     export DISPLAY=':99.0'
-    Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-    npm install -g xvfb-maybe
+    /etc/init.d/xvfb start
+    sleep 3
     ;;
   "osx")
     # Create CA

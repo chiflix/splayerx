@@ -1,5 +1,5 @@
-import electron from 'electron'
-import { Application } from 'spectron'
+const Application = require('spectron').Application;
+const path = require('path');
 
 export default {
   afterEach () {
@@ -11,8 +11,14 @@ export default {
   },
   beforeEach () {
     this.timeout(10000)
+
+    var electronPath = path.join(__dirname, "../../node_modules", ".bin", "electron");
+    if (process.platform === "win32") {
+        electronPath += ".cmd";
+    }
+
     this.app = new Application({
-      path: electron,
+      path: electronPath,
       args: ['dist/electron/main.js'],
       startTimeout: 10000,
       waitTimeout: 10000
