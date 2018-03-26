@@ -11,8 +11,7 @@ case "$TRAVIS_OS_NAME" in
     sudo dpkg --add-architecture i386
     sudo apt-get update
     sudo apt-get install -y wine1.6 yarn
-    export DISPLAY=':99.0'
-    Xvfb :99 -screen 0 1024x768x24 &
+    npm install -g electron
     ;;
   "osx")
     # Create CA
