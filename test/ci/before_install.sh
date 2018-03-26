@@ -11,9 +11,9 @@ case "$TRAVIS_OS_NAME" in
     sudo dpkg --add-architecture i386
     sudo apt-get update
     sudo apt-get install -y wine1.6 yarn
-    export DISPLAY=':99.0'
-    /etc/init.d/xvfb start
-    sleep 3
+    sudo export DISPLAY=':99.0'
+    sudo /etc/init.d/xvfb start
+    sudo sleep 3
     ;;
   "osx")
     # Create CA
