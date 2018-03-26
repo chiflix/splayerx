@@ -17,8 +17,6 @@ cache:
 before_install:
 - bash test/ci/before_install.sh
 install:
-- export DISPLAY=':99.0'
-- Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 - npm install -g codecov
 - npm install
 - npm update
@@ -26,7 +24,7 @@ before_script:
 script:
 #- xvfb-maybe node_modules/.bin/karma start test/unit/karma.conf.js
 #- yarn run pack && xvfb-maybe node_modules/.bin/mocha test/e2e
-#- yarn run build
+- if [ $TRAVIS_OS_NAME == "linux" ]; then xvfb-maybe npm run unit; else npm run unit; fi
 - npm run build
 deploy:
   provider: releases
