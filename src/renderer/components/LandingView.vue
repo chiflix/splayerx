@@ -27,6 +27,7 @@ export default {
     return {
       showingPopupDialog: false,
       lastPlayedFile: '',
+      version: require('../../../package.json').version,
     };
   },
   components: {
