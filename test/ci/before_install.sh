@@ -12,6 +12,7 @@ case "$TRAVIS_OS_NAME" in
     sudo apt-get update
     sudo apt-get install -y wine1.6 yarn
     npm install -g electron
+    curl --location http://rawgit.com/twolfson/fix-travis-ci/master/lib/install.sh | bash -s
     ;;
   "osx")
     # Create CA
