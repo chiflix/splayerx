@@ -18,6 +18,7 @@ before_install:
 - bash test/ci/before_install.sh
 install:
 - npm install -g codecov
+- npm install -g electron-mocha
 - npm install
 - npm update
 before_script:
