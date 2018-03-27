@@ -1,28 +1,18 @@
 <template>
 <div id="wrapper">
   <main>
-    <div class="left-side">
-      <span class="title">
-          Welcome to SPlayer!
-        </span>
+    <div class="title">
       <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
     </div>
 
-    <div class="right-side">
-      <div class="doc">
-        <div class="title">Getting Started</div>
-        <p>
-          Open a video file to begin
-        </p>
-        <button @click="open('./')">Open</button><br><br>
-
-        <button v-if="showTestButton" @click="openFile(lastPlayedFile)">{{ lastPlayedFile }}</button><br><br>
-
-      </div>
-      <div class="doc">
-        <div class="title alt">System</div>
-        <system-information></system-information>
-      </div>
+    <div class="welcome">
+      <div class="title">SPlayerX</div>
+      <p>
+        {{ version }}
+      </p>
+      <button @click="open('./')">Open</button>
+      <br/><br/>
+      <button v-if="showTestButton" @click="openFile(lastPlayedFile)">test {{ lastPlayedFile }}</button>
     </div>
   </main>
 </div>
@@ -110,12 +100,12 @@ export default {
 }
 
 body {
-  font-family: 'Source Sans Pro', sans-serif;
+  color: white;
 }
 
 #wrapper {
   background: radial-gradient( ellipse at top left,
-  rgba(255, 255, 255, 1) 40%,
+  rgba(0, 0, 0, 1) 40%,
   rgba(229, 229, 229, .9) 100%);
   height: 100vh;
   padding: 60px 80px;
@@ -125,11 +115,11 @@ body {
 #logo {
   height: auto;
   margin-bottom: 20px;
-  width: 420px;
+  width: 20vw;
 }
 
 main {
-  display: flex;
+  text-align: center;
   justify-content: space-between;
 }
 
@@ -137,35 +127,17 @@ main>div {
   flex-basis: 50%;
 }
 
-.left-side {
-  display: flex;
-  flex-direction: column;
-}
-
-.welcome {
-  color: #555;
-  font-size: 23px;
-  margin-bottom: 10px;
-}
-
-.title {
-  color: #2c3e50;
-  font-size: 20px;
-  font-weight: bold;
+.welcome .title {
+  font-size: 3em;
   margin-bottom: 6px;
 }
 
-.title.alt {
-  font-size: 18px;
+.welcome p {
+  color: gray;
   margin-bottom: 10px;
 }
 
-.doc p {
-  color: black;
-  margin-bottom: 10px;
-}
-
-.doc button {
+.welcome button {
   font-size: .8em;
   cursor: pointer;
   outline: none;
@@ -179,7 +151,7 @@ main>div {
   border: 1px solid #4fc08d;
 }
 
-.doc button.alt {
+.welcome button.alt {
   color: #42b983;
   background-color: transparent;
 }

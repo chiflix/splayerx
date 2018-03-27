@@ -6,6 +6,7 @@
 [![codecov](https://codecov.io/gh/chiflix/splayerx/branch/master/graph/badge.svg)](https://codecov.io/gh/chiflix/splayerx)
 
 > a media player
+> 通过空格键暂停和播放。添加tag时会自动打包生成新的 Releases
 
 #### Build Setup
 
