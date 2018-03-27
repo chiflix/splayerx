@@ -23,9 +23,7 @@ install:
 before_script:
 # Generate a virtual framebuffer X server to collect Electron windows
 - export DISPLAY=:99.0
-- sh -e /etc/init.d/xvfb start
-# Wait for Xvfb to start
-- sleep 3
+- if [ $TRAVIS_OS_NAME == "linux" ]; then sh -e /etc/init.d/xvfb start; sleep 3; fi
 script:
 #- xvfb-maybe node_modules/.bin/karma start test/unit/karma.conf.js
 #- yarn run pack && xvfb-maybe node_modules/.bin/mocha test/e2e
