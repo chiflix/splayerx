@@ -1,7 +1,7 @@
 <template>
 <div id="wrapper">
   <main>
-    <div class="title">
+    <div>
       <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
     </div>
 
@@ -11,8 +11,9 @@
         {{ version }}
       </p>
       <button @click="open('./')">Open</button>
-      <br/><br/>
-      <button v-if="showTestButton" @click="openFile(lastPlayedFile)">test {{ lastPlayedFile }}</button>
+      <br/>
+      <br/>
+      <a v-if="showTestButton" href="#" @click="openFile(lastPlayedFile)">quick open {{ lastPlayedFile }}</a>
     </div>
   </main>
 </div>
@@ -155,5 +156,9 @@ main>div {
 .welcome button.alt {
   color: #42b983;
   background-color: transparent;
+}
+
+.welcome a {
+  color: #d3ded3;
 }
 </style>
