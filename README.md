@@ -5,22 +5,22 @@
 [![appveyor](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)
 [![codecov](https://codecov.io/gh/chiflix/splayerx/branch/master/graph/badge.svg)](https://codecov.io/gh/chiflix/splayerx)
 
-> 目前版本的代码主要目的是建立基础架构，
+> 目前版本的代码主要目的是建立基础架构（脚手架），
 > 功能上仅支持打开文件后通过空格键暂停和播放，
 
 #### 开发指南
 
-目前架构的特点在 Electron 的基础上使用了 [Vue](https://vuejs.org/) 框架。
+目前架构的特点在 Electron 的基础上使用了 [Vue](https://vuejs.org/) MVVM组件化开发框架。
 
 > - 开发中使用 webpack，运行 `npm run dev` 修改代码后可以同步至表现层，hot reload，不用重新启动。
-> - 使用 eslint 控制代码质量，不满足的代码无法通过编译并会报错。
+> - 使用 eslint 控制代码质量，不满足标准的代码无法通过编译并会报错。
 > - 每次版本提交会通过 travis-ci 和 appveyor 自动编译，如果不能通过编译会记录错误，且相应的 badge: [![Build Status](https://travis-ci.org/chiflix/splayerx.svg?branch=master)](https://travis-ci.org/chiflix/splayerx) 或
 [![appveyor](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)
 会变红色。
-> - 当 tag 一个特定版本时，ci 工具会自动打包发行版本，并放入 [GitHub Releases](https://github.com/chiflix/splayerx/releases)。
+> - 当 [tag](https://github.com/chiflix/video-player/releases/new) 一个新的commit时，CI 工具会自动打包发行版本，并放入 [GitHub Releases](https://github.com/chiflix/splayerx/releases)。
 > - 使用 Karma 进行单元测试，codecov的badge [![codecov](https://codecov.io/gh/chiflix/splayerx/branch/master/graph/badge.svg)](https://codecov.io/gh/chiflix/splayerx)
  会显示当前代码的测试覆盖率。
-> - 使用 [vue-router](https://router.vuejs.org/en/) 和 [vuex](https://vuex.vuejs.org/en/intro.html)。
+> - 使用 [vue-router](https://router.vuejs.org/en/) 和 [vuex](https://vuex.vuejs.org/en/intro.html) 用于跨组件数据交互。
 
 #### Build Setup
 
