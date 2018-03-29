@@ -20,8 +20,6 @@
 </template>
 
 <script>
-import SystemInformation from './LandingView/SystemInformation';
-
 export default {
   name: 'landing-view',
   data() {
@@ -32,7 +30,6 @@ export default {
     };
   },
   components: {
-    SystemInformation,
   },
   computed: {
     showTestButton() {

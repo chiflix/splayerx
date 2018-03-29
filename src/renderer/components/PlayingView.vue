@@ -1,8 +1,8 @@
 <template>
   <div class="player">
     <div class="video">
-      <video ref="videoCanvas" autoplay="autoplay"
-        preload="metadata" :src="uri" @click="pause">
+      <video ref="videoCanvas"
+        preload="metadata" :src="uri">
       </video>
     </div>
     <div  class="video-controller" id="video-controller">
@@ -34,20 +34,16 @@
 				</div>
 			</div>
 		</div>
-    {{ this.playbackStat }}  {{ this.$route.params.uri }}
-    <system-information></system-information>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import { PLAYBACKSTATE } from '../constants';
-import SystemInformation from './LandingView/SystemInformation';
 
 export default {
   name: 'playing-view',
   components: {
-    SystemInformation,
   },
   methods: {
     pause() {
@@ -73,6 +69,13 @@ export default {
           break;
       }
     },
+  },
+  mounted() {
+    console.log('PlayingView.playbackStat:');
+    console.log(this.playbackStat);
+    console.log('PlayingView.$route.params.uri');
+    console.log(this.$route.params.uri);
+    this.$store.dispatch('startPlayback');
   },
   computed: {
     ...mapGetters({
