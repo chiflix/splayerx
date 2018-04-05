@@ -1,9 +1,8 @@
 <template>
   <div class="player">
     <div class="video">
-      <video ref="videoCanvas"
-        preload="metadata" :src="uri">
-      </video>
+      <VideoCanvas :src="uri" ref="videoCanvas">
+      </VideoCanvas>
     </div>
     <div  class="video-controller" id="video-controller">
 			<div class="background"></div>
@@ -40,10 +39,12 @@
 <script>
 import { mapGetters } from 'vuex';
 import { PLAYBACKSTATE } from '../constants';
+import VideoCanvas from './PlayingView/VideoCanvas.vue';
 
 export default {
   name: 'playing-view',
   components: {
+    VideoCanvas,
   },
   methods: {
     pause() {
@@ -60,10 +61,14 @@ export default {
         case PLAYBACKSTATE.PAUSED:
           console.log('pause');
           console.log(this.$refs.videoCanvas);
-          this.$refs.videoCanvas.pause();
+          // this.$refs.videoCanvas.pause();
+          this.$emit('pause', 'uri');
+          this.$refs.videoCanvas.state = 'pause';
           break;
         case PLAYBACKSTATE.PLAYING:
-          this.$refs.videoCanvas.play();
+          // this.$refs.videoCanvas.play();
+          this.$emit('play', 'uri');
+          this.$refs.videoCanvas.state = 'play';
           break;
         default:
           break;
