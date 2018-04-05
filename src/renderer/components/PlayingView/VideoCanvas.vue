@@ -10,29 +10,30 @@ export default {
     return {
     };
   },
-  props: ['src', 'state'],
+  props: ['src'],
   created() {
-    this.$on('play', ($event) => {
-      console.log('My event has been triggered', $event);
-      this.$refs.videoCanvas.play();
+    const self = this;
+    self.state = '';
+    this.$bus.$on('toggle-playback', ($event) => {
+      console.log('toggle-playback event has been triggered', $event);
+      if (self.state === 'pause') {
+        self.$bus.$emit('play');
+      } else {
+        self.$bus.$emit('pause');
+      }
     });
-    this.$on('pause', ($event) => {
-      console.log('My event has been triggered', $event);
-      this.$refs.videoCanvas.pause();
+    this.$bus.$on('play', ($event) => {
+      console.log('play event has been triggered', $event);
+      self.state = 'play';
+      self.$refs.videoCanvas.play();
+    });
+    this.$bus.$on('pause', ($event) => {
+      console.log('pause event has been triggered', $event);
+      self.state = 'pause';
+      self.$refs.videoCanvas.pause();
     });
   },
   watch: {
-    state(cmd) {
-      switch (cmd) {
-        default:
-        case 'play':
-          this.$refs.videoCanvas.play();
-          break;
-        case 'pause':
-          this.$refs.videoCanvas.pause();
-          break;
-      }
-    },
   },
 };
 </script>

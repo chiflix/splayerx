@@ -60,7 +60,7 @@ export default {
       const focusedWindow = browserWindow.getFocusedWindow();
       const VALID_EXTENSION = ['mp4', 'mkv', 'mov'];
 
-      this.showingPopupDialog = true;
+      self.showingPopupDialog = true;
       dialog.showOpenDialog(focusedWindow, {
         title: 'Open Dialog',
         defaultPath: link,
@@ -70,7 +70,7 @@ export default {
         }],
         properties: ['openFile'],
       }, (item) => {
-        this.showingPopupDialog = false;
+        self.showingPopupDialog = false;
         if (item) {
           self.openFile(`file:///${item[0]}`);
         }
@@ -90,7 +90,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 
 $themeColor-Light: white;
 

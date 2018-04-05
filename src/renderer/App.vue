@@ -10,10 +10,10 @@
   };
 </script>
 
-<style>
+<style lang="scss">
   /* CSS */
-
   @import url('https://fonts.googleapis.com/css?family=Open+Sans');
+  @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
 
   * {
   	margin: 0;

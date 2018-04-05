@@ -12,6 +12,8 @@ Vue.config.productionTip = false;
 
 Vue.use(VueElectronJSONStorage);
 
+Vue.prototype.$bus = new Vue(); // Global event bus
+
 /* eslint-disable no-new */
 new Vue({
   components: { App },
@@ -21,7 +23,7 @@ new Vue({
   mounted() {
     window.addEventListener('keypress', (e) => {
       if (e.keyCode === 32) { // space
-        this.$store.dispatch('togglePlayback');
+        this.$bus.$emit('toggle-playback');
       }
     });
     window.addEventListener('drop', (e) => {

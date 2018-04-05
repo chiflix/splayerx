@@ -37,8 +37,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import { PLAYBACKSTATE } from '../constants';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 
 export default {
@@ -47,45 +45,13 @@ export default {
     VideoCanvas,
   },
   methods: {
-    pause() {
-      // change the playback state
-      this.$store.dispatch('pausePlayback');
-    },
   },
   watch: {
-    playbackStat(val) {
-      console.log(val);
-      console.log(PLAYBACKSTATE.PAUSED);
-      console.log(val === PLAYBACKSTATE.PAUSED);
-      switch (val) {
-        case PLAYBACKSTATE.PAUSED:
-          console.log('pause');
-          console.log(this.$refs.videoCanvas);
-          // this.$refs.videoCanvas.pause();
-          this.$emit('pause', 'uri');
-          this.$refs.videoCanvas.state = 'pause';
-          break;
-        case PLAYBACKSTATE.PLAYING:
-          // this.$refs.videoCanvas.play();
-          this.$emit('play', 'uri');
-          this.$refs.videoCanvas.state = 'play';
-          break;
-        default:
-          break;
-      }
-    },
   },
   mounted() {
-    console.log('PlayingView.playbackStat:');
-    console.log(this.playbackStat);
-    console.log('PlayingView.$route.params.uri');
-    console.log(this.$route.params.uri);
-    this.$store.dispatch('startPlayback');
+    this.$bus.$emit('play');
   },
   computed: {
-    ...mapGetters({
-      playbackStat: 'getPlaybackStat',
-    }),
     uri() {
       return this.$route.params.uri;
     },
