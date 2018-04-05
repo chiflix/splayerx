@@ -22,8 +22,8 @@ export default {
     });
   },
   watch: {
-    state(newVal, oldVal) {
-      switch (newVal) {
+    state(cmd) {
+      switch (cmd) {
         default:
         case 'play':
           this.$refs.videoCanvas.play();

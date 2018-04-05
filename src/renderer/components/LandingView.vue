@@ -89,8 +89,10 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 @import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
+
+$themeColor-Light: white;
 
 * {
   box-sizing: border-box;
@@ -99,7 +101,7 @@ export default {
 }
 
 body {
-  color: white;
+  color: $themeColor-Light;
 }
 
 #wrapper {
