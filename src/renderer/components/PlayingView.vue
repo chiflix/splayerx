@@ -4,7 +4,7 @@
       <VideoCanvas :src="uri" ref="videoCanvas">
       </VideoCanvas>
     </div>
-    <div  class="video-controller" id="video-controller">
+    <div class="video-controller" id="video-controller">
 			<div class="background"></div>
 			<div class="playstate" id="playstate"></div>
 			<div class="progress" id="progress">
@@ -15,7 +15,7 @@
 			</div>
 			<div class="timing" id="timing">
 					<span class="time timing--current" id="timing--current"></span>
-					<span class="time">/</span>
+					<span class="time">{{ currentTime }}</span>
 					<span class="time timing--total" id="timing--total"></span>
 			</div>
 			<div class="volume" id="volume">
@@ -52,6 +52,28 @@ export default {
     this.$bus.$emit('play');
   },
   computed: {
+    currentTime() {
+      const dt = new Date(this.$store.state.PlaybackState.CurrentTime * 1000);
+      let hours = dt.getUTCHours();
+      let minutes = dt.getUTCMinutes();
+      let seconds = dt.getUTCSeconds();
+
+      // the above dt.get...() functions return a single digit
+      // so I prepend the zero here when needed
+      if (minutes < 10) {
+        minutes = `0${minutes}`;
+      }
+      if (seconds < 10) {
+        seconds = `0${seconds}`;
+      }
+      if (hours > 0) {
+        if (hours < 10) {
+          hours = `0${hours}`;
+        }
+        return `${hours}:${minutes}:${seconds}`;
+      }
+      return `${minutes}:${seconds}`;
+    },
     uri() {
       return this.$route.params.uri;
     },
@@ -59,7 +81,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .player {
 	position: relative;
 	width: 100%;
