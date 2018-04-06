@@ -7,13 +7,17 @@
 
     <div class="welcome">
       <div class="title">SPlayerX</div>
-      <p>
-        {{ version }}
-      </p>
-      <button @click="open('./')">Open</button>
-      <br/>
-      <br/>
-      <a v-if="showTestButton" href="#" @click="openFile(lastPlayedFile)">quick open {{ lastPlayedFile }}</a>
+      <p> {{ version }} </p>
+    </div>
+
+    <div class="controller">
+      <div class="playlist">
+        <a class="item" v-if="hasRecentPlaylist" href="#" @click="openFile(lastPlayedFile)">
+        </a>
+      </div>
+      <button @click="open('./')">
+        <img src="~@/assets/icon-open.svg" type="image/svg+xml">
+      </button>
     </div>
   </main>
 </div>
@@ -32,7 +36,7 @@ export default {
   components: {
   },
   computed: {
-    showTestButton() {
+    hasRecentPlaylist() {
       return this.lastPlayedFile && this.lastPlayedFile.length > 0;
     },
   },
@@ -104,9 +108,9 @@ body {
 }
 
 #wrapper {
-  background: radial-gradient( ellipse at top left,
-  rgba(0, 0, 0, 1) 40%,
-  rgba(229, 229, 229, .9) 100%);
+  background: radial-gradient( ellipse at top center,
+  rgba(0, 0, 0, .9) 20%,
+  rgba(44, 44, 44, .95) 80%);
   height: 100vh;
   padding: 60px 80px;
   width: 100vw;
@@ -137,26 +141,47 @@ main>div {
   margin-bottom: 10px;
 }
 
-.welcome button {
+.controller a {
+  color: #e4e4c4;
+}
+
+.controller {
+  position: absolute;
+  right: 0;
+  bottom: 1em;
+  width: 100vw;
+}
+
+.controller .playlist {
+  display: block;
+  margin-left: 1em;
+  float: left;
+}
+
+.controller .playlist .item {
+  display: block;
+  background: radial-gradient( ellipse at top center,
+  rgba(0, 0, 0, .9) 20%,
+  rgba(44, 44, 44, .95) 80%);
+  height: 4.5em;
+  width: 8em;
+  color: gray;
+  cursor: pointer;
+}
+
+.controller button {
+  position: absolute;
+  bottom: 1em;
+  right: 1em;
   font-size: .8em;
   cursor: pointer;
   outline: none;
-  padding: 0.75em 2em;
-  border-radius: 2em;
-  display: inline-block;
-  color: #fff;
-  background-color: #4fc08d;
   transition: all 0.15s ease;
-  box-sizing: border-box;
-  border: 1px solid #4fc08d;
+  border: 0px;
 }
 
-.welcome button.alt {
-  color: #42b983;
+.controller button.alt {
   background-color: transparent;
 }
 
-.welcome a {
-  color: #d3ded3;
-}
 </style>
