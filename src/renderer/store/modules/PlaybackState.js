@@ -1,15 +1,18 @@
 
 const state = {
   CurrentTime: 0, // current position (in seconds) of the audio/video playback
+  Duration: NaN,
 };
 
 const getters = {
-  getCurrentTime: state => state.CurrentTime,
 };
 
 const mutations = {
   CurrentTime(state, t) {
     state.CurrentTime = t;
+  },
+  Duration(state, t) {
+    state.Duration = t;
   },
 };
 

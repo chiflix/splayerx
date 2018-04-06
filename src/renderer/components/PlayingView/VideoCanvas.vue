@@ -4,6 +4,7 @@
     v-on:playing="onplaying"
     v-on:pause="onpause"
     v-on:timeupdate="timeupdate"
+    v-on:durationchange="durationchange"
     :src="src">
   </video>
 </template>;
@@ -29,6 +30,13 @@ export default {
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
+      }
+    },
+    durationchange() {
+      console.log('durationchange');
+      const t = Math.floor(this.$refs.videoCanvas.duration);
+      if (t !== this.$store.state.PlaybackState.duration) {
+        this.$store.commit('Duration', t);
       }
     },
   },
