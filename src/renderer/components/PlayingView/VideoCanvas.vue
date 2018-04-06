@@ -26,7 +26,10 @@ export default {
     },
     timeupdate() {
       console.log('ontimeupdate');
-      this.$store.commit('CurrentTime', this.$refs.videoCanvas.currentTime);
+      const t = Math.floor(this.$refs.videoCanvas.currentTime);
+      if (t !== this.$store.state.PlaybackState.CurrentTime) {
+        this.$store.commit('CurrentTime', t);
+      }
     },
   },
   created() {
