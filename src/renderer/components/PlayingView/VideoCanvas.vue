@@ -1,8 +1,9 @@
 <template>
   <video ref="videoCanvas"
     preload="metadata"
-    onplaying="onplaying"
-    onpause="onpause"
+    v-on:playing="onplaying"
+    v-on:pause="onpause"
+    v-on:timeupdate="timeupdate"
     :src="src">
   </video>
 </template>;
@@ -17,11 +18,15 @@ export default {
   },
   props: ['src'],
   methods: {
-    onpause(e) {
-      console.log(e);
+    onpause() {
+      console.log('onpause');
     },
-    onplaying(e) {
-      console.log(e);
+    onplaying() {
+      console.log('onplaying');
+    },
+    timeupdate() {
+      console.log('ontimeupdate');
+      this.$store.commit('CurrentTime', this.$refs.videoCanvas.currentTime);
     },
   },
   created() {

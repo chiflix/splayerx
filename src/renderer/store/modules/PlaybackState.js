@@ -1,45 +1,19 @@
-import { PLAYBACKSTATE } from '../../constants';
 
 const state = {
-  playback: PLAYBACKSTATE.UNKNOWN,
+  CurrentTime: 0, // current position (in seconds) of the audio/video playback
 };
 
 const getters = {
-  getPlaybackStat: state => state.playback,
+  getCurrentTime: state => state.CurrentTime,
 };
 
 const mutations = {
-  PAUSE_PLAYBACK(state) {
-    state.playback = PLAYBACKSTATE.PAUSED;
-  },
-  START_PLAYBACK(state) {
-    state.playback = PLAYBACKSTATE.PLAYING;
+  CurrentTime(state, t) {
+    state.CurrentTime = t;
   },
 };
 
 const actions = {
-  pausePlayback({ commit }) {
-    // do something async
-    commit('PAUSE_PLAYBACK');
-  },
-  startPlayback({ commit }) {
-    // do something async
-    commit('START_PLAYBACK');
-  },
-  togglePlayback({ commit }) {
-    // do something async
-    switch (state.playback) {
-      case PLAYBACKSTATE.PAUSED:
-      case PLAYBACKSTATE.UNKNOWN:
-        commit('START_PLAYBACK');
-        break;
-      case PLAYBACKSTATE.PLAYING:
-        commit('PAUSE_PLAYBACK');
-        break;
-      default:
-        break;
-    }
-  },
 };
 
 export default {
