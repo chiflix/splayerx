@@ -119,6 +119,7 @@ body {
 #logo {
   height: auto;
   margin-bottom: 20px;
+  margin-top: 5vh;
   width: 20vw;
 }
 
@@ -132,11 +133,12 @@ main>div {
 }
 
 .welcome .title {
-  font-size: 3em;
+  font-size: 7vw;
   margin-bottom: 6px;
 }
 
 .welcome p {
+  font-size: 2vw;
   color: gray;
   margin-bottom: 10px;
 }

@@ -24,6 +24,8 @@ function createWindow() {
     frame: false,
     titleBarStyle: 'hiddenInset',
     transparent: true,
+    minHeight: 320,
+    minWidth: 480,
     webPreferences: {
       webSecurity: false,
     },
