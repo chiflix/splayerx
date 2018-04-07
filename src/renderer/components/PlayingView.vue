@@ -13,11 +13,7 @@
 					<!-- <div class="light"></div> -->
 				</div>
 			</div>
-			<div class="timing" id="timing">
-					<span class="time timing--current" id="timing--current"></span>
-					<span class="time">{{ currentTime }}<span v-if="hasDuration">/{{ duration }}</span></span>
-					<span class="time timing--total" id="timing--total"></span>
-			</div>
+      <TimeStatus/>
 			<div class="volume" id="volume">
 				<div class="volume--bar volume--mouseover">
 					<div class="volume--current">
@@ -38,11 +34,13 @@
 
 <script>
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
+import TimeStatus from './PlayingView/TimeStatus.vue';
 
 export default {
   name: 'playing-view',
   components: {
     VideoCanvas,
+    TimeStatus,
   },
   methods: {
   },
@@ -52,15 +50,6 @@ export default {
     this.$bus.$emit('play');
   },
   computed: {
-    hasDuration() {
-      return !Number.isNaN(this.$store.state.PlaybackState.Duration);
-    },
-    duration() {
-      return this.timecodeFromSeconds(this.$store.state.PlaybackState.Duration);
-    },
-    currentTime() {
-      return this.timecodeFromSeconds(this.$store.state.PlaybackState.CurrentTime);
-    },
     uri() {
       return this.$route.params.uri;
     },
@@ -132,21 +121,7 @@ export default {
       height: 300px;
       opacity: 0.1;
       background-image: linear-gradient(-180deg, rgba(255, 255, 255, 0) 76%, #FFFFFF 100%); }
-  .video-controller .timing {
-    position: absolute;
-    bottom: 25px;
-    left: 30px;
-    height: 24px; }
-    .video-controller .timing .time {
-      display: inline-block;
-      color: #FFFFFF;
-      font: 600 18px 'Avenir';
-      line-height: 24px;
-      letter-spacing: 0.2px;
-      user-select: none;
-      opacity: .5; }
-    .video-controller .timing .timing--current {
-      opacity: 1; }
+
   .video-controller .volume {
     position: absolute;
     bottom: 25px;
