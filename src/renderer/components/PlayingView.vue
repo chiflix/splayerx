@@ -1,9 +1,8 @@
 <template>
   <div class="player">
     <VideoCanvas :src="uri" />
-    <div class="video-controller" id="video-controller">
-			<div class="background"></div>
-			<div class="playstate" id="playstate"></div>
+    <div class="video-controller" id="video-controller"
+      v-on:click.capture="togglePlayback">
 			<TimeProgressBar/>
       <TimeStatus/>
 			<VolumeControl/>
@@ -29,6 +28,9 @@ export default {
     AdvanceControl,
   },
   methods: {
+    togglePlayback() {
+      this.$bus.$emit('toggle-playback');
+    },
   },
   watch: {
   },

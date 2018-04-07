@@ -6,6 +6,7 @@
       v-on:pause="onpause"
       v-on:timeupdate="timeupdate"
       v-on:durationchange="durationchange"
+      v-on:click=""
       :src="src">
     </video>
   </div>
@@ -26,6 +27,9 @@ export default {
     },
     onplaying() {
       console.log('onplaying');
+    },
+    togglePlayback() {
+
     },
     timeupdate() {
       console.log('ontimeupdate');
