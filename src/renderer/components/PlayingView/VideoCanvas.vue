@@ -1,12 +1,14 @@
 <template>
-  <video ref="videoCanvas"
-    preload="metadata"
-    v-on:playing="onplaying"
-    v-on:pause="onpause"
-    v-on:timeupdate="timeupdate"
-    v-on:durationchange="durationchange"
-    :src="src">
-  </video>
+  <div class="video">
+    <video ref="videoCanvas"
+      preload="metadata"
+      v-on:playing="onplaying"
+      v-on:pause="onpause"
+      v-on:timeupdate="timeupdate"
+      v-on:durationchange="durationchange"
+      :src="src">
+    </video>
+  </div>
 </template>;
 
 <script>
@@ -63,5 +65,20 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+
+.video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.video video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 </style>
