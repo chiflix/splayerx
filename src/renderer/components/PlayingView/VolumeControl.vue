@@ -1,19 +1,31 @@
 <template>
   <div class="volume" id="volume">
-    <div class="volume--bar volume--mouseover">
+    <div class="volume--bar" v-if="shouldShowVolumeBar">
       <div class="volume--current">
       </div>
     </div>
-    <div class="button" id="volume--button" >
+    <div class="button" v-on:click="toggleVolumeBar" >
       <img src="~@/assets/icon-volume.svg" type="image/svg+xml" wmode="transparent">
     </div>
   </div>
 </template>;
 
 <script>
+export default {
+  data() {
+    return {
+      shouldShowVolumeBar: false,
+    };
+  },
+  methods: {
+    toggleVolumeBar() {
+      this.shouldShowVolumeBar = !this.shouldShowVolumeBar;
+    },
+  },
+};
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
 .video-controller .volume {
   position: absolute;
@@ -23,15 +35,10 @@
   height: 150px;
 }
 .video-controller .volume .volume--bar {
-  display: none;
   width: 15px;
   height: 80%;
   margin: 0 auto;
   background-color: white;
-  opacity: 0;
-}
-.video-controller .volume .volume--bar.volume--mouseover {
-  opacity: 1;
 }
 
 </style>
