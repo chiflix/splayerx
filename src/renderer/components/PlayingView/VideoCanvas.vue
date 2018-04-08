@@ -20,7 +20,19 @@ export default {
     return {
     };
   },
-  props: ['src'],
+  props: {
+    src: {
+      type: String,
+      required: true,
+      validator(value) {
+        // TODO: check if its a file or url
+        if (value.length <= 0) {
+          return false;
+        }
+        return true;
+      },
+    },
+  },
   methods: {
     onpause() {
       console.log('onpause');
