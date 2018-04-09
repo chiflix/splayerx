@@ -1,7 +1,11 @@
 <template>
   <div class="volume" id="volume">
-    <div class="volume--bar" v-if="shouldShowVolumeBar">
-      <div class="volume--current">
+    <div class="container"
+          v-if="showVolumeSlider"
+          ref="sliderContainer"
+          v-on:click.capture.stop="onVolumeSliderClick">
+      <div class="slider" ref="slider"
+            v-bind:style="{ height: sliderHeight + '%' }">
       </div>
     </div>
     <div class="button" v-on:click.capture.stop="toggleVolumeBar" >
@@ -14,13 +18,19 @@
 export default {
   data() {
     return {
-      shouldShowVolumeBar: false,
+      showVolumeSlider: false,
+      sliderHeight: 90,
     };
   },
   methods: {
+    onVolumeSliderClick(e) {
+      const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
+      this.sliderHeight = ((sliderOffsetBottom - e.clientY) * 100)
+                          / this.$refs.sliderContainer.clientHeight;
+    },
     toggleVolumeBar() {
       console.log('toggleVolumeBar');
-      this.shouldShowVolumeBar = !this.shouldShowVolumeBar;
+      this.showVolumeSlider = !this.showVolumeSlider;
     },
   },
 };
@@ -35,11 +45,19 @@ export default {
   width: 30px;
   height: 150px;
 }
-.video-controller .volume .volume--bar {
+.video-controller .volume .container {
+  position: relative;
   width: 15px;
-  height: 80%;
+  height: 100px;
   margin: 0 auto;
+}
+
+.video-controller .volume .slider {
+  position: absolute;
+  bottom: 0;
+  width: 15px;
   background-color: white;
+  transition: height 100ms;
 }
 
 </style>
