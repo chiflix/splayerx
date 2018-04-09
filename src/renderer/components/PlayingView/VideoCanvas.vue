@@ -2,10 +2,11 @@
   <div class="video">
     <video ref="videoCanvas"
       preload="metadata"
-      v-on:playing="onplaying"
-      v-on:pause="onpause"
-      v-on:timeupdate="timeupdate"
-      v-on:durationchange="durationchange"
+      v-on:playing="onPlaying"
+      v-on:pause="onPause"
+      v-on:canplay="onCanPlay"
+      v-on:timeupdate="onTimeupdate"
+      v-on:durationchange="onDurationChange"
       v-on:click=""
       :src="src">
     </video>
@@ -34,28 +35,40 @@ export default {
     },
   },
   methods: {
-    onpause() {
+    onPause() {
       console.log('onpause');
     },
-    onplaying() {
+    onPlaying() {
       console.log('onplaying');
     },
-    togglePlayback() {
-
+    onCanPlay() {
+      // the video is ready to start playing
+      this.$store.commit('Volume', this.$refs.videoCanvas.volume);
     },
-    timeupdate() {
+    onTimeupdate() {
       console.log('ontimeupdate');
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
       }
     },
-    durationchange() {
+    onDurationChange() {
       console.log('durationchange');
       const t = Math.floor(this.$refs.videoCanvas.duration);
       if (t !== this.$store.state.PlaybackState.duration) {
         this.$store.commit('Duration', t);
       }
+    },
+  },
+  computed: {
+    volume() {
+      return this.$store.state.PlaybackState.Volume;
+    },
+  },
+  watch: {
+    volume(newVolume) {
+      console.log(`set video volume ${newVolume}`);
+      this.$refs.videoCanvas.volume = newVolume;
     },
   },
   created() {
@@ -75,8 +88,6 @@ export default {
       console.log('pause event has been triggered', $event);
       this.$refs.videoCanvas.pause();
     });
-  },
-  watch: {
   },
 };
 </script>

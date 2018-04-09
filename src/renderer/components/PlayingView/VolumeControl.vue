@@ -5,7 +5,7 @@
           ref="sliderContainer"
           v-on:click.capture.stop="onVolumeSliderClick">
       <div class="slider" ref="slider"
-            v-bind:style="{ height: sliderHeight + '%' }">
+            v-bind:style="{ height: volume + '%' }">
       </div>
     </div>
     <div class="button" v-on:click.capture.stop="toggleVolumeBar" >
@@ -19,18 +19,21 @@ export default {
   data() {
     return {
       showVolumeSlider: false,
-      sliderHeight: 90,
     };
   },
   methods: {
     onVolumeSliderClick(e) {
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
-      this.sliderHeight = ((sliderOffsetBottom - e.clientY) * 100)
-                          / this.$refs.sliderContainer.clientHeight;
+      this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
     },
     toggleVolumeBar() {
       console.log('toggleVolumeBar');
       this.showVolumeSlider = !this.showVolumeSlider;
+    },
+  },
+  computed: {
+    volume() {
+      return 100 * this.$store.state.PlaybackState.Volume;
     },
   },
 };
