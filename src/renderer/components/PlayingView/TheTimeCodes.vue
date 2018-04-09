@@ -9,6 +9,7 @@
 <script>
 
 export default {
+  name: 'TimeCodes',
   computed: {
     hasDuration() {
       return !Number.isNaN(this.$store.state.PlaybackState.Duration);

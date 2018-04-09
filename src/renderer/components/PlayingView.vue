@@ -4,7 +4,7 @@
     <div class="video-controller" id="video-controller"
       v-on:click.stop="togglePlayback">
 			<TimeProgressBar/>
-      <TimeStatus/>
+      <TheTimeCodes/>
 			<VolumeControl/>
 			<AdvanceControl/>
 		</div>
@@ -13,7 +13,7 @@
 
 <script>
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
-import TimeStatus from './PlayingView/TimeStatus.vue';
+import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
 import TimeProgressBar from './PlayingView/TimeProgressBar.vue';
 import VolumeControl from './PlayingView/VolumeControl.vue';
 import AdvanceControl from './PlayingView/AdvanceControl.vue';
@@ -22,7 +22,7 @@ export default {
   name: 'playing-view',
   components: {
     VideoCanvas,
-    TimeStatus,
+    TheTimeCodes,
     TimeProgressBar,
     VolumeControl,
     AdvanceControl,
