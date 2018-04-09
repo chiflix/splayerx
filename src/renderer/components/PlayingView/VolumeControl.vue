@@ -4,7 +4,7 @@
       <div class="volume--current">
       </div>
     </div>
-    <div class="button" v-on:click="toggleVolumeBar" >
+    <div class="button" v-on:click.capture.stop="toggleVolumeBar" >
       <img src="~@/assets/icon-volume.svg" type="image/svg+xml" wmode="transparent">
     </div>
   </div>
@@ -19,6 +19,7 @@ export default {
   },
   methods: {
     toggleVolumeBar() {
+      console.log('toggleVolumeBar');
       this.shouldShowVolumeBar = !this.shouldShowVolumeBar;
     },
   },

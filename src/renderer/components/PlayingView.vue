@@ -2,7 +2,7 @@
   <div class="player">
     <VideoCanvas :src="uri" />
     <div class="video-controller" id="video-controller"
-      v-on:click.capture="togglePlayback">
+      v-on:click.stop="togglePlayback">
 			<TimeProgressBar/>
       <TimeStatus/>
 			<VolumeControl/>
