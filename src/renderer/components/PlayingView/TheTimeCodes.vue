@@ -1,7 +1,7 @@
 <template>
   <div class="timing" id="timing">
       <span class="time timing--current" id="timing--current"></span>
-      <span class="time">{{ currentTime }}<span v-if="hasDuration">/{{ duration }}</span></span>
+      <span class="time">{{ currentTime }}<span v-if="hasDuration"> / {{ duration }}</span></span>
       <span class="time timing--total" id="timing--total"></span>
   </div>
 </template>;
