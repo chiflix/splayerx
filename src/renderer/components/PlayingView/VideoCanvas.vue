@@ -72,21 +72,25 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('toggle-playback', ($event) => {
-      console.log('toggle-playback event has been triggered', $event);
+    this.$bus.$on('toggle-playback', () => {
+      console.log('toggle-playback event has been triggered');
       if (this.$refs.videoCanvas.paused) {
         this.$bus.$emit('play');
       } else {
         this.$bus.$emit('pause');
       }
     });
-    this.$bus.$on('play', ($event) => {
-      console.log('play event has been triggered', $event);
+    this.$bus.$on('play', () => {
+      console.log('play event has been triggered');
       this.$refs.videoCanvas.play();
     });
-    this.$bus.$on('pause', ($event) => {
-      console.log('pause event has been triggered', $event);
+    this.$bus.$on('pause', () => {
+      console.log('pause event has been triggered');
       this.$refs.videoCanvas.pause();
+    });
+    this.$bus.$on('seek', (e) => {
+      console.log('seek event has been triggered', e);
+      this.$refs.videoCanvas.currentTime = e;
     });
   },
 };
