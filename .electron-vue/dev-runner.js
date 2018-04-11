@@ -43,9 +43,9 @@ function startRenderer () {
     rendererConfig.entry.renderer = [path.join(__dirname, 'dev-client')].concat(rendererConfig.entry.renderer)
 
     const compiler = webpack(rendererConfig)
-    hotMiddleware = webpackHotMiddleware(compiler, { 
-      log: false, 
-      heartbeat: 2500 
+    hotMiddleware = webpackHotMiddleware(compiler, {
+      log: false,
+      heartbeat: 2500
     })
 
     compiler.plugin('compilation', compilation => {
@@ -114,7 +114,7 @@ function startMain () {
 }
 
 function startElectron () {
-  electronProcess = spawn(electron, ['--inspect=5858', path.join(__dirname, '../dist/electron/main.js')])
+  electronProcess = spawn(electron, ['--inspect=5858', path.join(__dirname, '../')])
 
   electronProcess.stdout.on('data', data => {
     electronLog(data, 'blue')
