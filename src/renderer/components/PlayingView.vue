@@ -2,7 +2,7 @@
   <div class="player">
     <VideoCanvas :src="uri" />
     <div class="video-controller" id="video-controller"
-      v-on:click.stop="togglePlayback">
+      v-on:mousedown.stop="togglePlayback">
 			<TimeProgressBar/>
       <TheTimeCodes/>
 			<VolumeControl/>

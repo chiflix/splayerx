@@ -1,6 +1,8 @@
 <template>
   <div class="progress" ref="sliderContainer"
-       v-on:click.capture.stop="onProgresssBarClick">
+       v-on:mousedown="onProgresssBarClick"
+       v-on:mousemove="onProgresssBarMove"
+       v-on:mouseup="releaseClick">
     <div class="progress--container">
       <div class="progress--played"
       :style="{ width: progress +'%' }">
@@ -13,15 +15,34 @@
 <script>
 
 export default {
+  data() {
+    return {
+      state: 0,
+    };
+  },
   methods: {
+    releaseClick() {
+      this.state = 0;
+    },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return;
       }
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
+      this.state = 1;
 
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
+    },
+    onProgresssBarMove(e) {
+      // if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
+      //   return;
+      // }
+      if (this.state) {
+        const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
+        const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
+        this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
+      }
     },
   },
   computed: {
@@ -47,6 +68,7 @@ export default {
   height: 30px;
   padding-top: 28px;
   transition: padding-top 250ms;
+  -webkit-app-region: no-drag;
 }
 
 .video-controller .progress:hover {
@@ -66,7 +88,8 @@ export default {
   left: 0;
   width: 0;
   height: 100%;
-  transition: width 1.2s;
+  transition: width 100ms;
+
 }
 
 .video-controller .progress--played .line {
