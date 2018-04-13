@@ -30,7 +30,7 @@ export default {
     return {
       showingPopupDialog: false,
       lastPlayedFile: '',
-      version: require('../../../package.json').version,
+      version: '',
     };
   },
   components: {
@@ -41,6 +41,10 @@ export default {
     },
   },
   mounted() {
+    const { app } = this.$electron.remote;
+    this.version = app.getVersion();
+    console.log(app.getVersion(), app.getName());
+
     this.$storage.get('recent-played', (err, data) => {
       if (err) {
         // TODO: proper error handle

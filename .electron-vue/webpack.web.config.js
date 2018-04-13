@@ -69,7 +69,7 @@ let webConfig = {
         }
       },
       {
-        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+        test: /\.(woff2?|eot|ttf|ttc|otf)(\?.*)?$/,
         use: {
           loader: 'url-loader',
           query: {
