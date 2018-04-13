@@ -10,7 +10,7 @@
             v-bind:style="{ height: volume + '%' }">
       </div>
     </div>
-    <div class="button" v-on:click.capture.stop="toggleVolumeBar" >
+    <div class="button" v-on:mousedown.capture.stop="toggleVolumeBar" >
       <img src="~@/assets/icon-volume.svg" type="image/svg+xml" wmode="transparent">
     </div>
   </div>
@@ -33,7 +33,7 @@ export default {
     onVolumeSliderMove(e) {
       if (this.state) {
         const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
-        if (sliderOffsetBottom - e.clientY > 2) {
+        if (sliderOffsetBottom - e.clientY > 1) {
           this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
         } else {
           this.$store.commit('Volume', 0);
@@ -78,7 +78,7 @@ export default {
   bottom: 0;
   width: 15px;
   background-color: white;
-  transition: height 100ms;
+  transition: height 10ms;
 }
 
 </style>

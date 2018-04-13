@@ -1,8 +1,8 @@
 <template>
   <div class="progress" ref="sliderContainer"
-       v-on:mousedown="onProgresssBarClick"
-       v-on:mousemove="onProgresssBarMove"
-       v-on:mouseup="releaseClick">
+       v-on:mousedown.capture.stop="onProgresssBarClick"
+       v-on:mousemove.capture.stop="onProgresssBarMove"
+       v-on:mouseup.capture.stop="releaseClick">
     <div class="progress--container">
       <div class="progress--played"
       :style="{ width: progress +'%' }">
