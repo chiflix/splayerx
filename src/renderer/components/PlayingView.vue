@@ -2,7 +2,8 @@
   <div class="player">
     <VideoCanvas :src="uri" />
     <div class="video-controller" id="video-controller"
-      v-on:click.stop="togglePlayback">
+      @mousedown.stop="togglePlayback"
+      @mousewheel="wheelVolumeControll">
 			<TimeProgressBar/>
       <TheTimeCodes/>
 			<VolumeControl/>
@@ -30,6 +31,22 @@ export default {
   methods: {
     togglePlayback() {
       this.$bus.$emit('toggle-playback');
+    },
+    wheelVolumeControll(e) {
+      if (e.deltaY < 0) {
+        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
+          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+        } else {
+          this.$store.commit('Volume', 1);
+        }
+      } else if (e.deltaY > 0) {
+        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
+          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+        } else {
+          this.$store.commit('Volume', 0);
+        }
+      }
+      // this.$store.state.PlaybackState.Volume
     },
   },
   mounted() {
