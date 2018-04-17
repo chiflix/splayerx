@@ -2,12 +2,13 @@
   <div class="video">
     <video ref="videoCanvas"
       preload="metadata"
-      v-on:playing="onPlaying"
-      v-on:pause="onPause"
-      v-on:canplay="onCanPlay"
-      v-on:timeupdate="onTimeupdate"
-      v-on:durationchange="onDurationChange"
-      v-on:click=""
+      @playing="onPlaying"
+      @pause="onPause"
+      @canplay="onCanPlay"
+      @loadedmetadata="onMetaLoaded"
+      @timeupdate="onTimeupdate"
+      @durationchange="onDurationChange"
+      @click=""
       :src="src">
     </video>
   </div>
@@ -40,6 +41,34 @@ export default {
     },
     onPlaying() {
       console.log('onplaying');
+    },
+    onMetaLoaded() {
+      console.log('loadedmetadata');
+
+      const { videoHeight, videoWidth } = this.$refs.videoCanvas;
+
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+
+      const [width, height] = currentWindow.getSize();
+
+      const [MIN_WIDTH, MIN_HEIGHT] = currentWindow.getMinimumSize();
+
+      let newWidth = width;
+      let newHeight = height;
+
+      if (width < MIN_WIDTH) {
+        newWidth = MIN_WIDTH;
+      }
+      newHeight = newWidth * (videoHeight / videoWidth);
+      if (newHeight < MIN_HEIGHT) {
+        newHeight = MIN_HEIGHT;
+        newWidth = newHeight * (videoWidth / videoHeight);
+      }
+
+      console.log(newWidth);
+
+      currentWindow.setSize(newWidth, newHeight);
+      currentWindow.setAspectRatio(newWidth / newHeight);
     },
     onCanPlay() {
       // the video is ready to start playing
