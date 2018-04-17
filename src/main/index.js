@@ -18,14 +18,14 @@ function createWindow() {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 540,
+    height: 432,
     useContentSize: true,
-    width: 960,
+    width: 768,
     frame: false,
     titleBarStyle: 'hiddenInset',
     transparent: true,
-    minHeight: 320,
-    minWidth: 480,
+    minHeight: 240,
+    minWidth: 427,
     webPreferences: {
       webSecurity: false,
     },

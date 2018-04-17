@@ -1,16 +1,21 @@
 <template>
-  <div class="volume" id="volume">
+  <div class="volume" id="volume"
+    @mouseover="appearVolumeBar"
+    @mouseout.capture.stop="hideVolumeBar"
+    @mouseup.capture.stop="releaseClick">
+    <transition name="fade">
     <div class="container"
-          v-if="showVolumeSlider"
+          v-show="showVolumeSlider"
           ref="sliderContainer"
-          v-on:mousedown.capture.stop="onVolumeSliderClick"
-          v-on:mousemove.capture.stop="onVolumeSliderMove"
-          v-on:mouseup.capture.stop="releaseClick">
+          @mousedown.capture.stop="onVolumeSliderClick"
+          @mousemove.capture.stop="onVolumeSliderMove">
       <div class="slider" ref="slider"
             v-bind:style="{ height: volume + '%' }">
       </div>
     </div>
-    <div class="button" v-on:mousedown.capture.stop="toggleVolumeBar" >
+  </transition>
+    <div class="button"
+          >
       <img src="~@/assets/icon-volume.svg" type="image/svg+xml" wmode="transparent">
     </div>
   </div>
@@ -20,13 +25,13 @@
 export default {
   data() {
     return {
-      state: 0,
+      state: false,
       showVolumeSlider: false,
     };
   },
   methods: {
     onVolumeSliderClick(e) {
-      this.state = 1;
+      this.state = true;
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
       this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
     },
@@ -41,10 +46,14 @@ export default {
       }
     },
     releaseClick() {
-      this.state = 0;
+      this.state = !this.state;
     },
-    toggleVolumeBar() {
-      console.log('toggleVolumeBar');
+    appearVolumeBar() {
+      console.log('appearVolumeBar');
+      this.showVolumeSlider = !this.showVolumeSlider;
+    },
+    hideVolumeBar() {
+      console.log('hideVolumeBar');
       this.showVolumeSlider = !this.showVolumeSlider;
     },
   },
@@ -65,20 +74,38 @@ export default {
   width: 30px;
   height: 150px;
   -webkit-app-region: no-drag;
-}
-.video-controller .volume .container {
-  position: relative;
-  width: 15px;
-  height: 100px;
-  margin: 0 auto;
+
+  .container {
+    position: relative;
+    width: 15px;
+    height: 100px;
+    margin: 0 auto;
+    background-color: rgba(255,255,255,0.2);
+  }
+
+  .slider {
+    position: absolute;
+    bottom: 0;
+    width: 15px;
+    background-color: white;
+  }
+
+  .fade-enter-active {
+   transition: opacity .5s;
+  }
+
+  .fade-leave-active {
+   transition: opacity .5s;
+  }
+
+  .fade-enter-to, .fade-leave {
+   opacity: 1;
+  }
+
+  .fade-enter, .fade-leave-to {
+   opacity: 0;
+  }
 }
 
-.video-controller .volume .slider {
-  position: absolute;
-  bottom: 0;
-  width: 15px;
-  background-color: white;
-  transition: height 10ms;
-}
 
 </style>

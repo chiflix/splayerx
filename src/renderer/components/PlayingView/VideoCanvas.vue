@@ -60,15 +60,17 @@ export default {
         newWidth = MIN_WIDTH;
       }
       newHeight = newWidth * (videoHeight / videoWidth);
+
+      console.log(newHeight);
+
       if (newHeight < MIN_HEIGHT) {
         newHeight = MIN_HEIGHT;
-        newWidth = newHeight * (videoWidth / videoHeight);
       }
+      newWidth = newHeight * (videoWidth / videoHeight);
 
-      console.log(newWidth);
 
-      currentWindow.setSize(newWidth, newHeight);
-      currentWindow.setAspectRatio(newWidth / newHeight);
+      currentWindow.setSize(parseInt(newWidth, 10), parseInt(newHeight, 10));
+      currentWindow.setAspectRatio(videoWidth / videoHeight);
     },
     onCanPlay() {
       // the video is ready to start playing
