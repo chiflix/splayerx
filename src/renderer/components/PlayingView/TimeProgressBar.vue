@@ -1,7 +1,7 @@
 <template>
   <div class="progress" ref="sliderContainer"
        v-on:mousedown.capture.stop="onProgresssBarClick"
-       v-on:mousemove.capture.stop="onProgresssBarMove"
+       v-on:mousemove.capture.stop="onProgresssBarDrag"
        v-on:mouseup.capture.stop="releaseClick">
     <div class="progress--container">
       <div class="progress--played"
@@ -17,12 +17,12 @@
 export default {
   data() {
     return {
-      state: 0,
+      onProgresssBarMouseDown: false,
     };
   },
   methods: {
     releaseClick() {
-      this.state = 0;
+      this.onProgresssBarMouseDown = false;
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -30,17 +30,13 @@ export default {
       }
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
-      this.state = 1;
+      this.onProgresssBarMouseDown = true;
 
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
     },
-    onProgresssBarMove(e) {
-      // if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
-      //   return;
-      // }
-      if (this.state) {
-        const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
-        const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
+    onProgresssBarDrag(e) {
+      if (this.onProgresssBarMouseDown) {
+        const p = e.clientX / this.$refs.sliderContainer.clientWidth;
         this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       }
     },
@@ -88,8 +84,7 @@ export default {
   left: 0;
   width: 0;
   height: 100%;
-  transition: width 100ms;
-
+  // transition: width 5ms;
 }
 
 .video-controller .progress--played .line {

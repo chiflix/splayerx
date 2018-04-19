@@ -44,14 +44,14 @@ export default {
     },
     onMetaLoaded() {
       console.log('loadedmetadata');
-
       const { videoHeight, videoWidth } = this.$refs.videoCanvas;
 
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-
-      const [width, height] = currentWindow.getSize();
-
-      const [MIN_WIDTH, MIN_HEIGHT] = currentWindow.getMinimumSize();
+      this.$_calculateWindowSizeByVideoSize(videoWidth, videoHeight);
+    },
+    $_calculateWindowSizeByVideoSize(videoWidth, videoHeight) {
+      const currentWindow = this.$electron.remote.getCurrentWindow(); // current BrowserWindow
+      const [width, height] = currentWindow.getSize(); // size of current window
+      const [MIN_WIDTH, MIN_HEIGHT] = currentWindow.getMinimumSize(); // minsize of current window
 
       let newWidth = width;
       let newHeight = height;
@@ -61,13 +61,10 @@ export default {
       }
       newHeight = newWidth * (videoHeight / videoWidth);
 
-      console.log(newHeight);
-
       if (newHeight < MIN_HEIGHT) {
         newHeight = MIN_HEIGHT;
       }
       newWidth = newHeight * (videoWidth / videoHeight);
-
 
       currentWindow.setSize(parseInt(newWidth, 10), parseInt(newHeight, 10));
       currentWindow.setAspectRatio(videoWidth / videoHeight);
@@ -122,6 +119,7 @@ export default {
     this.$bus.$on('seek', (e) => {
       console.log('seek event has been triggered', e);
       this.$refs.videoCanvas.currentTime = e;
+      this.$store.commit('CurrentTime', e);
     });
   },
 };
