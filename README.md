@@ -36,6 +36,10 @@
 - 字体文件放在fonts目录下，css|scss文件放在css目录下
 - 优先使用CSS来制作动态效果
 
+#### Branching Model
+
+- http://nvie.com/posts/a-successful-git-branching-model/
+
 #### Build
 
 ``` bash
