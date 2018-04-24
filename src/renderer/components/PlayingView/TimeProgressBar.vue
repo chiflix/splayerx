@@ -1,12 +1,17 @@
 <template>
   <div class="progress" ref="sliderContainer"
-       v-on:mousedown.capture.stop="onProgresssBarClick"
-       v-on:mousemove.capture.stop="onProgresssBarDrag"
-       v-on:mouseup.capture.stop="releaseClick">
+       @mousedown.capture.stop="onProgresssBarClick"
+       @mousemove.capture.stop="onProgresssBarDrag"
+       @mouseup.capture.stop="releaseClick">
     <div class="progress--container">
+      <div class="progress--readytoplay"
+      :style="{ width: widthOfReadyProgressBar +'px' }">
+        <div class="readyline"></div>
+      </div>
       <div class="progress--played"
       :style="{ width: progress +'%' }">
-        <div class="line"></div>
+        <div class="playedline"></div>
+        <div class="light"></div>
       </div>
     </div>
   </div>
@@ -18,6 +23,7 @@ export default {
   data() {
     return {
       onProgresssBarMouseDown: false,
+      widthOfReadyProgressBar: 0,
     };
   },
   methods: {
@@ -36,8 +42,12 @@ export default {
     },
     onProgresssBarDrag(e) {
       if (this.onProgresssBarMouseDown) {
-        const p = e.clientX / this.$refs.sliderContainer.clientWidth;
+        const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
+        const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
         this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
+      } else {
+        this.widthOfReadyProgressBar = e.clientX;
+        console.log(this.widthOfReadyProgressBar);
       }
     },
   },
@@ -65,38 +75,65 @@ export default {
   padding-top: 28px;
   transition: padding-top 250ms;
   -webkit-app-region: no-drag;
+
+  .progress--container {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .video-controller .progress:hover {
   padding-top: 20px;
 }
 
-.video-controller .progress .progress--container {
-  position: relative;
+.video-controller .progress--played {
+  position: absolute;
   bottom: 0;
-  width: 100%;
+  left: 0;
+  width: 0;
   height: 100%;
+  transition: width 5ms;
+
+  .playedline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #FFFFFF;
+    box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
+    transition: height 200ms;
+  }
+  .light {
+    pointer-events: none;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: (450rem/16);
+    opacity: 0.1;
+    background-image: linear-gradient(-180deg, rgba(255,255,255,0.00) 76%, #FFFFFF 100%);
+  }
 }
 
-.video-controller .progress--played {
-  position: relative;
+.video-controller .progress--readytoplay {
+  position: absolute;
   bottom: 0;
   left: 0;
   width: 0;
   height: 100%;
   // transition: width 5ms;
+
+  .readyline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.1);
+    transition: height 200ms;
+  }
 }
-
-.video-controller .progress--played .line {
-  position: relative;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #FFFFFF;
-  box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
-  transition: height 200ms;
-}
-
-
 </style>

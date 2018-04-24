@@ -1,4 +1,3 @@
-
 const state = {
   CurrentTime: 0, // current position (in seconds) of the audio/video playback
   Duration: NaN,
