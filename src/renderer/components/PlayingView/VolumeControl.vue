@@ -1,15 +1,13 @@
 <template>
   <div class="volume" id="volume"
     @mouseover="appearVolumeBar"
-    @mouseout.capture.stop="hideVolumeBar"
-    @mouseup.capture.stop="releaseClick">
+    @mouseout.capture.stop="hideVolumeBar">
     <transition name="fade">
-    <div class="container"
+    <div class="container" ref="sliderContainer"
       v-show="showVolumeSlider"
-      ref="sliderContainer"
       @mousedown.capture.stop="onVolumeSliderClick"
-      @mousemove.capture.stop="onVolumeSliderMove">
-      <div class="slider" ref="slider"
+      @mousemove.capture.stop="onVolumeSliderDrag">
+      <div class="slider"
         :style="{ height: volume + '%' }">
       </div>
     </div>
@@ -17,7 +15,7 @@
     <div class="button"
       @mousedown.capture.stop="onVolumeButtonClick">
       <img type="image/svg+xml" wmode="transparent"
-        :src="srcOfVolumeButtonImage">
+        src="~@/assets/icon-volume.svg">
     </div>
   </div>
 </template>;
@@ -31,6 +29,7 @@ export default {
       isMuted: false,
       currentVolume: 0,
       srcOfVolumeButtonImage: '~@/assets/icon-volume.svg',
+      timeoutIdOfVolumeBarDisappearDelay: 0,
     };
   },
   methods: {
@@ -38,14 +37,12 @@ export default {
       this.onVolumeSliderMousedown = true;
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
       this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
-      console.log(this.volume);
     },
-    onVolumeSliderMove(e) {
+    onVolumeSliderDrag(e) {
       if (this.onVolumeSliderMousedown) {
         const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
         if (sliderOffsetBottom - e.clientY > 1) {
           this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
-          console.log(this.volume);
         } else {
           this.$store.commit('Volume', 0);
           this.isMuted = true;
@@ -66,22 +63,36 @@ export default {
         this.srcOfVolumeButtonImage = '~@/assets/icon-volume.svg';
       }
     },
-    releaseClick() {
-      this.onVolumeSliderMousedown = !this.onVolumeSliderMousedown;
-    },
     appearVolumeBar() {
       console.log('appearVolumeBar');
-      this.showVolumeSlider = !this.showVolumeSlider;
+      this.showVolumeSlider = true;
     },
     hideVolumeBar() {
       console.log('hideVolumeBar');
-      this.showVolumeSlider = !this.showVolumeSlider;
+      if (!this.onVolumeSliderMousedown) {
+        this.showVolumeSlider = false;
+      }
     },
   },
   computed: {
     volume() {
       return 100 * this.$store.state.PlaybackState.Volume;
     },
+  },
+  created() {
+    this.$bus.$on('volumeslider-appear', () => {
+      console.log('volumeslider-appear event has been trigger');
+      this.appearVolumeBar();
+      if (typeof this.timeoutIdOfVolumeBarDisappearDelay === 'number') {
+        clearTimeout(this.timeoutIdOfVolumeBarDisappearDelay);
+        this.timeoutIdOfVolumeBarDisappearDelay = setTimeout(this.hideVolumeBar, 3000);
+      } else {
+        this.timeoutIdOfVolumeBarDisappearDelay = setTimeout(this.hideVolumeBar, 3000);
+      }
+    });
+    this.$bus.$on('VolumeMouseup', () => {
+      this.onVolumeSliderMousedown = false;
+    });
   },
 };
 </script>
