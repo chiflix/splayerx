@@ -12,20 +12,20 @@
 <style lang="scss">
 .video-controller .advanced {
   position: absolute;
-  bottom: 25px;
-  right: 30px;
+  bottom: 27px;
+  right: 37+35px;
   width: 30px;
   height: 120px;
 }
 .video-controller .button {
   position: absolute;
   bottom: 0px;
-  width: 30px;
-  height: 24px;
+  width: 35px;
+  height: 30px;
 }
 .video-controller .button img {
-  width: 30px;
-  height: 24px;
+  width: 35px;
+  height: 30px;
   pointer-events: none;
 }
 </style>

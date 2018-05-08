@@ -56,6 +56,7 @@ new Vue({
     window.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowUp') {
         this.$bus.$emit('volumeslider-appear');
+        this.$bus.$emit('VolumeControlAppear');
         if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
           this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
         } else {
