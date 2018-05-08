@@ -15,7 +15,8 @@
     <div class="button"
       @mousedown.capture.stop="onVolumeButtonClick">
       <img type="image/svg+xml" wmode="transparent"
-        :src="srcOfVolumeButtonImage">
+        src="~@/assets/icon-volume.svg">
+        <!-- src需要绑定srcOfVolumeButtonImage对象以改变图标，但地址无法读出 -->
     </div>
   </div>
 </template>;
@@ -26,7 +27,9 @@ export default {
     return {
       showVolumeSlider: false,
       onVolumeSliderMousedown: false,
+      isMuted: false,
       currentVolume: 0,
+      srcOfVolumeButtonImage: '~@/assets/icon-volume.svg',
       timeoutIdOfVolumeBarDisappearDelay: 0,
     };
   },
@@ -44,16 +47,22 @@ export default {
           this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
         } else {
           this.$store.commit('Volume', 0);
+          this.isMuted = true;
+          this.srcOfVolumeButtonImage = '~@/assets/icon-volume-mute.svg';
         }
       }
     },
     onVolumeButtonClick() {
       console.log('onVolumeButtonClick');
-      if (this.volume !== 0) {
+      if (!this.isMuted) {
         this.currentVolume = this.volume;
         this.$store.commit('Volume', 0);
+        this.isMuted = !this.isMuted;
+        this.srcOfVolumeButtonImage = '~@/assets/icon-volume-mute.svg';
       } else {
         this.$store.commit('Volume', this.currentVolume / 100);
+        this.isMuted = !this.isMuted;
+        this.srcOfVolumeButtonImage = '~@/assets/icon-volume.svg';
       }
     },
     appearVolumeBar() {
@@ -70,19 +79,6 @@ export default {
   computed: {
     volume() {
       return 100 * this.$store.state.PlaybackState.Volume;
-    },
-    srcOfVolumeButtonImage() {
-      let srcOfVolumeButtonImage;
-      if (this.volume === 0) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume-mute.svg');
-      } else if (this.volume > 0 && this.volume <= 33) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume.svg');
-      } else if (this.volume > 33 && this.volume <= 66) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume.svg');
-      } else if (this.volume > 66 && this.volume <= 100) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume.svg');
-      }
-      return srcOfVolumeButtonImage;
     },
   },
   created() {
@@ -107,8 +103,8 @@ export default {
 
 .video-controller .volume {
   position: absolute;
-  bottom: 27px;
-  right: 37+35+15+35px;
+  bottom: 25px;
+  right: 75px;
   width: 30px;
   height: 150px;
   -webkit-app-region: no-drag;
@@ -116,31 +112,18 @@ export default {
   .container {
     position: relative;
     width: 15px;
-    height: 105px;
+    height: 100px;
     margin: 0 auto;
-    background-color: rgba(255,255,255,0.2);
-    border-radius: 1px;
   }
 
   .slider {
     position: absolute;
     bottom: 0;
     width: 15px;
-    background: rgba(255,255,255,0.70);
-    border-radius: 1px;
-    transition: height 50ms;
+    background-color: white;
+    transition: height 100ms;
   }
 
-  .button {
-    position: absolute;
-    bottom: 0;
-    width: 35px;
-    height: 30px;
-  }
-  .button img {
-    width: 35px;
-    height: 30px;
-  }
   .fade-enter-active {
    transition: opacity .5s;
   }
