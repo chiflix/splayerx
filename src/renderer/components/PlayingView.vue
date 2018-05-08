@@ -4,7 +4,8 @@
     <div class="video-controller" id="video-controller"
       @mousedown.stop="togglePlayback"
       @mouseup.stop="sendMouseupMessage"
-      @mousewheel="wheelVolumeControll">
+      @mousewheel="wheelVolumeControll"
+      @mousemove="wakeUpAllWidgets">
 			<TimeProgressBar/>
       <TheTimeCodes/>
 			<VolumeControl/>
@@ -30,15 +31,18 @@ export default {
     AdvanceControl,
   },
   methods: {
+    wakeUpAllWidgets() {
+      this.$bus.$emit('volumebutton-appear');
+    },
     togglePlayback() {
       this.$bus.$emit('toggle-playback');
     },
     sendMouseupMessage() {
-      this.$bus.$emit('VolumeMouseup');
-      this.$bus.$emit('ProgressBarMouseup');
+      this.$bus.$emit('volume-mouseup');
+      this.$bus.$emit('progressbar-mouseup');
     },
     wheelVolumeControll(e) {
-      this.$bus.$emit('volumeslider-appear');
+      this.$bus.$emit('volumecontroller-appear');
       if (e.deltaY < 0) {
         if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
           this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);

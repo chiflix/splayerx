@@ -1,22 +1,25 @@
 <template>
   <div class="volume" id="volume"
-    @mouseover="appearVolumeBar"
-    @mouseout.capture.stop="hideVolumeBar">
-    <transition name="fade">
-    <div class="container"  ref="sliderContainer"
-      v-show="showVolumeSlider"
-      @mousedown.capture.stop="onVolumeSliderClick"
-      @mousemove.capture.stop="onVolumeSliderDrag">
-      <div class="slider" ref="slider"
-        :style="{ height: volume + '%' }">
+    @mouseover.capture.stop="appearVolumeController"
+    @mouseout.capture.stop="hideVolumeController">
+    <transition-group name="fade" tag="div">
+      <div class="container"  ref="sliderContainer"
+        v-show="showVolumeSlider"
+        @mousedown.capture.stop="onVolumeSliderClick"
+        @mousemove.capture.stop="onVolumeSliderDrag"
+        key="slider">
+        <div class="slider" ref="slider"
+          :style="{ height: volume + '%' }">
+        </div>
       </div>
-    </div>
-    </transition>
-    <div class="button"
-      @mousedown.capture.stop="onVolumeButtonClick">
-      <img type="image/svg+xml" wmode="transparent"
-        :src="srcOfVolumeButtonImage">
-    </div>
+      <div class="button"
+        @mousedown.capture.stop="onVolumeButtonClick"
+        v-show="showVolumeButton"
+        key="button">
+        <img type="image/svg+xml" wmode="transparent"
+          :src="srcOfVolumeButtonImage">
+      </div>
+    </transition-group>
   </div>
 </template>;
 
@@ -24,10 +27,12 @@
 export default {
   data() {
     return {
+      showVolumeButton: true,
       showVolumeSlider: false,
       onVolumeSliderMousedown: false,
       currentVolume: 0,
-      timeoutIdOfVolumeBarDisappearDelay: 0,
+      timeoutIdOfVolumeButtonDisappearDelay: 0,
+      timeoutIdOfVolumeControllerDisappearDelay: 0,
     };
   },
   methods: {
@@ -56,14 +61,29 @@ export default {
         this.$store.commit('Volume', this.currentVolume / 100);
       }
     },
-    appearVolumeBar() {
-      console.log('appearVolumeBar');
-      this.showVolumeSlider = true;
+    appearVolumeButton() {
+      console.log('appearVolumeButton');
+      this.showVolumeButton = true;
     },
-    hideVolumeBar() {
-      console.log('hideVolumeBar');
+    hideVolumeButton() {
+      console.log('hideVolumeButton');
+      if (!this.onVolumeSliderMousedown) {
+        this.showVolumeButton = false;
+      }
+    },
+    appearVolumeController() {
+      console.log('appearVolumeController');
+      if (this.timeoutIdOfVolumeButtonDisappearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfVolumeButtonDisappearDelay);
+      }
+      this.showVolumeSlider = true;
+      this.showVolumeButton = true;
+    },
+    hideVolumeController() {
+      console.log('hideVolumeController');
       if (!this.onVolumeSliderMousedown) {
         this.showVolumeSlider = false;
+        this.showVolumeButton = false;
       }
     },
   },
@@ -86,17 +106,30 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('volumeslider-appear', () => {
-      console.log('volumeslider-appear event has been trigger');
-      this.appearVolumeBar();
-      if (this.timeoutIdOfVolumeBarDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfVolumeBarDisappearDelay);
-        this.timeoutIdOfVolumeBarDisappearDelay = setTimeout(this.hideVolumeBar, 3000);
+    this.$bus.$on('volumecontroller-appear', () => {
+      console.log('volumecontroller-appear event has been trigger');
+      this.appearVolumeController();
+      if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
+        this.timeoutIdOfVolumeControllerDisappearDelay
+        = setTimeout(this.hideVolumeController, 3000);
       } else {
-        this.timeoutIdOfVolumeBarDisappearDelay = setTimeout(this.hideVolumeBar, 3000);
+        this.timeoutIdOfVolumeControllerDisappearDelay
+        = setTimeout(this.hideVolumeController, 3000);
       }
     });
-    this.$bus.$on('VolumeMouseup', () => {
+    this.$bus.$on('volumebutton-appear', () => {
+      console.log('volumebutton-appear event has been trigger');
+      this.appearVolumeButton();
+      if (this.timeoutIdOfVolumeButtonDisappearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfVolumeButtonDisappearDelay);
+        this.timeoutIdOfVolumeButtonDisappearDelay
+        = setTimeout(this.hideVolumeButton, 3000);
+      } else {
+        this.timeoutIdOfVolumeButtonDisappearDelay = setTimeout(this.hideVolumeButton, 3000);
+      }
+    });
+    this.$bus.$on('volume-mouseup', () => {
       this.onVolumeSliderMousedown = false;
     });
   },
@@ -141,12 +174,13 @@ export default {
     width: 35px;
     height: 30px;
   }
+
   .fade-enter-active {
-   transition: opacity .5s;
+   transition: opacity 100ms;
   }
 
   .fade-leave-active {
-   transition: opacity .5s;
+   transition: opacity 200ms;
   }
 
   .fade-enter-to, .fade-leave {
