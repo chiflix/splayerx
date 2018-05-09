@@ -1,5 +1,5 @@
 <template>
-  <transition name="fade">
+  <transition name="fade" appear>
   <div class="volume" id="volume"
     @mouseover.capture.stop="appearVolumeSlider"
     @mouseout.capture.stop="hideVolumeSlider"
@@ -53,6 +53,7 @@ export default {
     },
     onVolumeButtonClick() {
       console.log('onVolumeButtonClick');
+      this.$_clearTimeoutDelay();
       if (this.volume !== 0) {
         this.currentVolume = this.volume;
         this.$store.commit('Volume', 0);
@@ -62,6 +63,7 @@ export default {
     },
     appearVolumeSlider() {
       console.log('appearVolumeSlider');
+      this.$_clearTimeoutDelay();
       this.showVolumeSlider = true;
     },
     hideVolumeSlider() {
@@ -78,6 +80,14 @@ export default {
       console.log('hideVolumeController');
       if (!this.onVolumeSliderMousedown) {
         this.showVolumeController = false;
+        if (this.showVolumeSlider) {
+          this.showVolumeSlider = false;
+        }
+      }
+    },
+    $_clearTimeoutDelay() {
+      if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
       }
     },
   },
@@ -90,11 +100,11 @@ export default {
       if (this.volume === 0) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-mute.svg');
       } else if (this.volume > 0 && this.volume <= 33) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume.svg');
+        srcOfVolumeButtonImage = require('../../assets/icon-volume-1.svg');
       } else if (this.volume > 33 && this.volume <= 66) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume.svg');
+        srcOfVolumeButtonImage = require('../../assets/icon-volume-2.svg');
       } else if (this.volume > 66 && this.volume <= 100) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume.svg');
+        srcOfVolumeButtonImage = require('../../assets/icon-volume-3.svg');
       }
       return srcOfVolumeButtonImage;
     },
@@ -111,6 +121,10 @@ export default {
         this.timeoutIdOfVolumeControllerDisappearDelay
         = setTimeout(this.hideVolumeController, 3000);
       }
+    });
+    this.$bus.$on('volumeslider-appear', () => {
+      console.log('volumeslider-appear event has been trigger');
+      this.appearVolumeSlider();
     });
     this.$bus.$on('volume-mouseup', () => {
       this.onVolumeSliderMousedown = false;
