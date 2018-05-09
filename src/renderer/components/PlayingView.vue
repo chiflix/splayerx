@@ -32,7 +32,7 @@ export default {
   },
   methods: {
     wakeUpAllWidgets() {
-      this.$bus.$emit('volumebutton-appear');
+      this.$bus.$emit('volumecontroller-appear');
     },
     togglePlayback() {
       this.$bus.$emit('toggle-playback');

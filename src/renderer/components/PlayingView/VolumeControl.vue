@@ -1,37 +1,36 @@
 <template>
+  <transition name="fade">
   <div class="volume" id="volume"
-    @mouseover.capture.stop="appearVolumeController"
-    @mouseout.capture.stop="hideVolumeController">
-    <transition-group name="fade" tag="div">
+    @mouseover.capture.stop="appearVolumeSlider"
+    @mouseout.capture.stop="hideVolumeSlider"
+    v-show="showVolumeController">
+    <transition name="fade">
       <div class="container"  ref="sliderContainer"
-        v-show="showVolumeSlider"
         @mousedown.capture.stop="onVolumeSliderClick"
         @mousemove.capture.stop="onVolumeSliderDrag"
-        key="slider">
+        v-show="showVolumeSlider">
         <div class="slider" ref="slider"
           :style="{ height: volume + '%' }">
         </div>
       </div>
+    </transition>
       <div class="button"
-        @mousedown.capture.stop="onVolumeButtonClick"
-        v-show="showVolumeButton"
-        key="button">
+        @mousedown.capture.stop="onVolumeButtonClick">
         <img type="image/svg+xml" wmode="transparent"
           :src="srcOfVolumeButtonImage">
       </div>
-    </transition-group>
   </div>
+</transition>
 </template>;
 
 <script>
 export default {
   data() {
     return {
-      showVolumeButton: true,
       showVolumeSlider: false,
+      showVolumeController: true,
       onVolumeSliderMousedown: false,
       currentVolume: 0,
-      timeoutIdOfVolumeButtonDisappearDelay: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
     };
   },
@@ -61,29 +60,24 @@ export default {
         this.$store.commit('Volume', this.currentVolume / 100);
       }
     },
-    appearVolumeButton() {
-      console.log('appearVolumeButton');
-      this.showVolumeButton = true;
+    appearVolumeSlider() {
+      console.log('appearVolumeSlider');
+      this.showVolumeSlider = true;
     },
-    hideVolumeButton() {
-      console.log('hideVolumeButton');
+    hideVolumeSlider() {
+      console.log('hideVolumeSlider');
       if (!this.onVolumeSliderMousedown) {
-        this.showVolumeButton = false;
+        this.showVolumeSlider = false;
       }
     },
     appearVolumeController() {
       console.log('appearVolumeController');
-      if (this.timeoutIdOfVolumeButtonDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfVolumeButtonDisappearDelay);
-      }
-      this.showVolumeSlider = true;
-      this.showVolumeButton = true;
+      this.showVolumeController = true;
     },
     hideVolumeController() {
       console.log('hideVolumeController');
       if (!this.onVolumeSliderMousedown) {
-        this.showVolumeSlider = false;
-        this.showVolumeButton = false;
+        this.showVolumeController = false;
       }
     },
   },
@@ -116,17 +110,6 @@ export default {
       } else {
         this.timeoutIdOfVolumeControllerDisappearDelay
         = setTimeout(this.hideVolumeController, 3000);
-      }
-    });
-    this.$bus.$on('volumebutton-appear', () => {
-      console.log('volumebutton-appear event has been trigger');
-      this.appearVolumeButton();
-      if (this.timeoutIdOfVolumeButtonDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfVolumeButtonDisappearDelay);
-        this.timeoutIdOfVolumeButtonDisappearDelay
-        = setTimeout(this.hideVolumeButton, 3000);
-      } else {
-        this.timeoutIdOfVolumeButtonDisappearDelay = setTimeout(this.hideVolumeButton, 3000);
       }
     });
     this.$bus.$on('volume-mouseup', () => {
@@ -174,22 +157,22 @@ export default {
     width: 35px;
     height: 30px;
   }
+}
 
-  .fade-enter-active {
-   transition: opacity 100ms;
-  }
+.fade-enter-active {
+ transition: opacity 100ms;
+}
 
-  .fade-leave-active {
-   transition: opacity 200ms;
-  }
+.fade-leave-active {
+ transition: opacity 200ms;
+}
 
-  .fade-enter-to, .fade-leave {
-   opacity: 1;
-  }
+.fade-enter-to, .fade-leave {
+ opacity: 1;
+}
 
-  .fade-enter, .fade-leave-to {
-   opacity: 0;
-  }
+.fade-enter, .fade-leave-to {
+ opacity: 0;
 }
 
 </style>
