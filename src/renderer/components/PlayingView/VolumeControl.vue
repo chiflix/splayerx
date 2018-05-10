@@ -3,7 +3,6 @@
   <div class="volume" id="volume"
     @mouseover.capture.stop="appearVolumeSlider"
     @mouseout.capture.stop="hideVolumeSlider"
-    :style="{ cursor: cursorStyle }"
     v-show="showVolumeController">
     <transition name="fade">
       <div class="container"  ref="sliderContainer"
@@ -31,7 +30,6 @@ export default {
       showVolumeSlider: false,
       showVolumeController: true,
       onVolumeSliderMousedown: false,
-      cursorStyle: 'auto',
       currentVolume: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
     };
@@ -39,7 +37,6 @@ export default {
   methods: {
     onVolumeSliderClick(e) {
       console.log('onVolumeSliderClick');
-      this.cursorStyle = 'pointer';
       this.onVolumeSliderMousedown = true;
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
       this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
@@ -76,12 +73,10 @@ export default {
       }
     },
     appearVolumeController() {
-      this.cursorStyle = 'pointer';
       console.log('appearVolumeController');
       this.showVolumeController = true;
     },
     hideVolumeController() {
-      this.cursorStyle = 'auto';
       console.log('hideVolumeController');
       if (!this.onVolumeSliderMousedown) {
         this.showVolumeController = false;
@@ -157,6 +152,10 @@ export default {
     border-radius: 1px;
   }
 
+  .container:hover {
+    cursor:  pointer;
+  }
+
   .slider {
     position: absolute;
     bottom: 0;
@@ -172,6 +171,11 @@ export default {
     width: 35px;
     height: 30px;
   }
+
+  .button:hover {
+    cursor: pointer;
+  }
+
   .button img {
     width: 35px;
     height: 30px;
