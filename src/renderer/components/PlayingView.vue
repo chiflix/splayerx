@@ -2,7 +2,10 @@
   <div class="player">
     <VideoCanvas :src="uri" />
     <div class="video-controller" id="video-controller"
-      v-on:click.stop="togglePlayback">
+      @mousedown.stop="togglePlayback"
+      @mouseup.stop="sendMouseupMessage"
+      @mousewheel="wheelVolumeControll"
+      @mousemove="wakeUpAllWidgets">
 			<TimeProgressBar/>
       <TheTimeCodes/>
 			<VolumeControl/>
@@ -28,8 +31,32 @@ export default {
     AdvanceControl,
   },
   methods: {
+    wakeUpAllWidgets() {
+      this.$bus.$emit('volumecontroller-appear');
+    },
     togglePlayback() {
       this.$bus.$emit('toggle-playback');
+    },
+    sendMouseupMessage() {
+      this.$bus.$emit('volume-mouseup');
+      this.$bus.$emit('progressbar-mouseup');
+    },
+    wheelVolumeControll(e) {
+      this.$bus.$emit('volumecontroller-appear');
+      this.$bus.$emit('volumeslider-appear');
+      if (e.deltaY < 0) {
+        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
+          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+        } else {
+          this.$store.commit('Volume', 1);
+        }
+      } else if (e.deltaY > 0) {
+        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
+          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+        } else {
+          this.$store.commit('Volume', 0);
+        }
+      }
     },
   },
   mounted() {

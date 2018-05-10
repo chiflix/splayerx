@@ -49,8 +49,31 @@ new Vue({
   template: '<App/>',
   mounted() {
     window.addEventListener('keypress', (e) => {
-      if (e.keyCode === 32) { // space
+      if (e.key === ' ') { // space
         this.$bus.$emit('toggle-playback');
+      }
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') {
+        this.$bus.$emit('volumecontroller-appear');
+        this.$bus.$emit('volumeslider-appear');
+        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
+          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+        } else {
+          this.$store.commit('Volume', 1);
+        }
+      } else if (e.key === 'ArrowDown') {
+        this.$bus.$emit('volumecontroller-appear');
+        this.$bus.$emit('volumeslider-appear');
+        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
+          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+        } else {
+          this.$store.commit('Volume', 0);
+        }
+      } else if (e.key === 'ArrowLeft') {
+        this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 10);
+      } else if (e.key === 'ArrowRight') {
+        this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 10);
       }
     });
     window.addEventListener('drop', (e) => {
