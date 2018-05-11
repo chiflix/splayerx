@@ -6,6 +6,7 @@
       v-on:pause="onPause"
       v-on:canplay="onCanPlay"
       v-on:timeupdate="onTimeupdate"
+      v-on:loadedmetadata="onMetaLoaded"
       v-on:durationchange="onDurationChange"
       v-on:click=""
       :src="src">
@@ -44,6 +45,33 @@ export default {
     onCanPlay() {
       // the video is ready to start playing
       this.$store.commit('Volume', this.$refs.videoCanvas.volume);
+    },
+    onMetaLoaded() {
+      console.log('loadedmetadata');
+      const { videoHeight, videoWidth } = this.$refs.videoCanvas;
+
+      this.$_calculateWindowSizeByVideoSize(videoWidth, videoHeight);
+    },
+    $_calculateWindowSizeByVideoSize(videoWidth, videoHeight) {
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      const [width, height] = currentWindow.getSize();
+      const [MIN_WIDTH, MIN_HEIGHT] = currentWindow.getMinimumSize();
+
+      let newWidth = width;
+      let newHeight = height;
+
+      if (width < MIN_WIDTH) {
+        newWidth = MIN_WIDTH;
+      }
+      newHeight = newWidth * (videoHeight / videoWidth);
+
+      if (newHeight < MIN_HEIGHT) {
+        newHeight = MIN_HEIGHT;
+      }
+      newWidth = newHeight * (videoWidth / videoHeight);
+
+      currentWindow.setSize(parseInt(newWidth, 10), parseInt(newHeight, 10));
+      currentWindow.setAspectRatio(videoWidth / videoHeight);
     },
     onTimeupdate() {
       console.log('ontimeupdate');
