@@ -50,7 +50,7 @@ export default {
       console.log('loadedmetadata');
       const { videoHeight, videoWidth } = this.$refs.videoCanvas;
 
-      this.$_controlWindowSizeByVideoSize(videoWidth, videoHeight);
+      this.$_calculateWindowSizeInConditionOfVideoExisted(videoWidth, videoHeight);
     },
     onTimeupdate() {
       console.log('ontimeupdate');
@@ -66,38 +66,40 @@ export default {
         this.$store.commit('Duration', t);
       }
     },
-    $_controlWindowSizeByVideoSize(videoWidth, videoHeight) {
+    $_calculateWindowSizeInConditionOfVideoExisted(videoWidth, videoHeight) {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       const [windowWidth, windowHeight] = currentWindow.getSize();
       const [minWidth, minHeight] = currentWindow.getMinimumSize();
 
-      let newWidth, newHeight;
-      let videoRatio = videoWidth / videoHeight;
-      let windowRatio = windowWidth / windowHeight;
+      const videoRatio = videoWidth / videoHeight;
+      const windowRatio = windowWidth / windowHeight;
       const minWindowRatio = minWidth / minHeight;
+
+      let newWidth;
+      let newHeight;
 
       if (videoWidth < windowWidth && videoHeight < windowHeight) {
         [newWidth, newHeight] = [videoWidth, videoHeight];
-      } else if (videoWidth > windwoWidth || videoHeight > windowHeight) {
+      } else if (videoWidth > windowWidth || videoHeight > windowHeight) {
         if (videoRatio > windowRatio) {
           newWidth = windowWidth;
-          newHeight = $_calculateHeightByWidth(videoWidth, videoHeight, newWidth);
+          newHeight = this.$_calculateHeightByWidth(videoWidth, videoHeight, newWidth);
         } else if (videoRatio < windowRatio) {
           newHeight = windowHeight;
-          newWidth = $_calculateWidthByHeight(videoWidth, videoHeight, newHeight);
-        } else if(videoRatio === windowRatio) {
-          [newWidth, newHeight] = [videoWidth, videoHeight];
+          newWidth = this.$_calculateWidthByHeight(videoWidth, videoHeight, newHeight);
+        } else if (videoRatio === windowRatio) {
+          [newWidth, newHeight] = [windowWidth, windowHeight];
         }
       }
-      
+
       if (newWidth < minWidth || newHeight < minHeight) {
         if (videoRatio > minWindowRatio) {
           newHeight = minHeight;
-          newWidth = $_calculateWidthByHeight(videoWidth, videoHeight, newHeight);
+          newWidth = this.$_calculateWidthByHeight(videoWidth, videoHeight, newHeight);
         } else if (videoRatio < minWindowRatio) {
           newWidth = minWidth;
-          newHeight = $_calculateHeightByWidth(videoWidth, videoHeight, newWidth);
-        } else if(videoRatio === minWindowRatio) {
+          newHeight = this.$_calculateHeightByWidth(videoWidth, videoHeight, newWidth);
+        } else if (videoRatio === minWindowRatio) {
           [newWidth, newHeight] = [videoWidth, videoHeight];
         }
       }
