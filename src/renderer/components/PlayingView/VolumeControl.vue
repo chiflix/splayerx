@@ -125,6 +125,14 @@ export default {
     this.$bus.$on('volumeslider-appear', () => {
       console.log('volumeslider-appear event has been trigger');
       this.appearVolumeSlider();
+      if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
+        this.timeoutIdOfVolumeControllerDisappearDelay
+        = setTimeout(this.hideVolumeController, 3000);
+      } else {
+        this.timeoutIdOfVolumeControllerDisappearDelay
+        = setTimeout(this.hideVolumeController, 3000);
+      }
     });
     this.$bus.$on('volume-mouseup', () => {
       this.onVolumeSliderMousedown = false;
