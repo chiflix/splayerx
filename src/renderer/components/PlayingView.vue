@@ -5,7 +5,8 @@
       @mousedown.stop="togglePlayback"
       @mouseup.stop="sendMouseupMessage"
       @mousewheel="wheelVolumeControll"
-      @mousemove="wakeUpAllWidgets">
+      @mousemove="wakeUpAllWidgets"
+      @dblclick="toggleFullScreenState">
 			<TimeProgressBar/>
       <TheTimeCodes/>
 			<VolumeControl/>
@@ -31,6 +32,14 @@ export default {
     AdvanceControl,
   },
   methods: {
+    toggleFullScreenState() {
+      if (this.currentWindow.isFullScreen()) {
+        this.currentWindow.setFullScreen(false);
+      } else {
+        this.currentWindow.setFullScreen(true);
+      }
+      this.$bus.$emit('fit-fullscreensize');
+    },
     wakeUpAllWidgets() {
       this.$bus.$emit('volumecontroller-appear');
     },
@@ -66,6 +75,9 @@ export default {
     uri() {
       return this.$route.params.uri;
     },
+    currentWindow() {
+      return this.$electron.remote.getCurrentWindow();
+    },
   },
 };
 </script>
@@ -75,6 +87,7 @@ export default {
 	position: relative;
 	width: 100%;
 	height: 100%;
+  background-color: black;
 }
 
 /*
