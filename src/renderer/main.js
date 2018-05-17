@@ -47,7 +47,128 @@ new Vue({
   router,
   store,
   template: '<App/>',
+  methods: {
+    createMenu() {
+      const { Menu, app, dialog } = this.$electron.remote;
+      const template = [
+        {
+          label: 'File',
+          submenu: [
+            {
+              label: 'Open',
+              accelerator: 'Cmd+N',
+              filters: [
+                { name: 'Video Files', extensions: ['mp4', 'mkv', 'mov'] },
+              ],
+              click: () => {
+                dialog.showOpenDialog({
+                  properties: ['openFile'],
+                }, (file) => {
+                  const path = `file:///${file}`;
+                  this.$storage.set('recent-played', path);
+                  this.$store.commit('SrcOfVideo', path);
+                  this.$router.push({
+                    name: 'playing-view',
+                  });
+                });
+              },
+            },
+            { label: 'Open URL' },
+            { label: 'Open Recent' },
+            { label: 'Close' },
+          ],
+        },
+        {
+          label: 'Playback',
+          submenu: [
+            { label: 'Play from last stopped place' },
+            { label: 'Increase Size' },
+            { label: 'Decrease Size' },
+            { type: 'separator' },
+            { label: 'Increase Playback Speed' },
+            { label: 'Decrease Playback Speed' },
+            { type: 'separator' },
+            { label: 'Increase Volume' },
+            { label: 'Decrease Volume' },
+            { type: 'separator' },
+            { label: 'Increase Audio Delay' },
+            { label: 'Decrease Audio Delay' },
+            { type: 'separator' },
+            { label: 'Capture Screen' },
+          ],
+        },
+        {
+          label: 'Subtitle',
+          submenu: [
+            { label: 'Main Subtitle' },
+            { label: 'Secondary Subtitle' },
+            { type: 'separator' },
+            { label: 'Outside of Picture' },
+            { type: 'separator' },
+            { label: 'Increase Subtitle Size' },
+            { label: 'Decrease Subtitle Size' },
+            { type: 'separator' },
+            { label: 'Increase Subtitle Delay' },
+            { label: 'Decrease Subtitle Delay' },
+            { type: 'separator' },
+            { label: 'Increase Audio Delay' },
+            { label: 'Decrease Audio Delay' },
+            { type: 'separator' },
+            { label: 'Smart Translating' },
+            { label: 'Search on Shooter.cn' },
+          ],
+        },
+        {
+          label: 'Window',
+          submenu: [
+            { role: 'minimize' },
+            { label: 'Enter Full Screen', accelerator: 'Ctrl+Cmd+F' },
+            { role: 'close' },
+            { type: 'separator' },
+            { label: 'Media Info' },
+          ],
+        },
+        {
+          role: 'help',
+          submenu: [
+            {
+              label: 'SplayerX Help',
+            },
+          ],
+        },
+      ];
+
+      if (process.platform === 'darwin') {
+        template.unshift({
+          label: app.getName(),
+          submenu: [
+            { role: 'about' },
+            {
+              label: 'Preferences',
+              accelerator: 'Cmd+,',
+            },
+            {
+              label: 'Homepage',
+            },
+            {
+              label: 'Feedback',
+            },
+            { type: 'separator' },
+            { role: 'services', submenu: [] },
+            { type: 'separator' },
+            { role: 'hide' },
+            { role: 'hideothers' },
+            { role: 'quit' },
+          ],
+        });
+      }
+
+      const menu = Menu.buildFromTemplate(template);
+      Menu.setApplicationMenu(menu);
+    },
+  },
   mounted() {
+    this.createMenu();
     window.addEventListener('keypress', (e) => {
       if (e.key === ' ') { // space
         this.$bus.$emit('toggle-playback');

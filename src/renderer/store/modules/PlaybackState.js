@@ -3,12 +3,16 @@ const state = {
   CurrentTime: 0, // current position (in seconds) of the audio/video playback
   Duration: NaN,
   Volume: 0.2,
+  SrcOfVideo: '',
 };
 
 const getters = {
 };
 
 const mutations = {
+  SrcOfVideo(state, t) {
+    state.SrcOfVideo = t;
+  },
   CurrentTime(state, t) {
     state.CurrentTime = t;
   },

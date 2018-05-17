@@ -73,7 +73,7 @@ export default {
   },
   computed: {
     uri() {
-      return this.$route.params.uri;
+      return this.$store.state.PlaybackState.SrcOfVideo;
     },
     currentWindow() {
       return this.$electron.remote.getCurrentWindow();
