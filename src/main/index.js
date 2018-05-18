@@ -25,15 +25,14 @@ function createWindow() {
     frame: false,
     titleBarStyle: 'hiddenInset',
     transparent: true,
-    minHeight: 240,
     minWidth: 427,
+    minHeight: 240,
     webPreferences: {
       webSecurity: false,
     },
   });
 
   mainWindow.loadURL(winURL);
-
   mainWindow.on('closed', () => {
     mainWindow = null;
   });

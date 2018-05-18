@@ -57,19 +57,22 @@ new Vue({
             {
               label: 'Open',
               accelerator: 'Cmd+N',
-              filters: [
-                { name: 'Video Files', extensions: ['mp4', 'mkv', 'mov'] },
-              ],
               click: () => {
                 dialog.showOpenDialog({
                   properties: ['openFile'],
+                  filters: [{
+                    name: 'Video Files',
+                    extensions: ['mp4', 'mkv', 'mov'],
+                  }],
                 }, (file) => {
-                  const path = `file:///${file}`;
-                  this.$storage.set('recent-played', path);
-                  this.$store.commit('SrcOfVideo', path);
-                  this.$router.push({
-                    name: 'playing-view',
-                  });
+                  if (file) {
+                    const path = `file:///${file}`;
+                    this.$storage.set('recent-played', path);
+                    this.$store.commit('SrcOfVideo', path);
+                    this.$router.push({
+                      name: 'playing-view',
+                    });
+                  }
                 });
               },
             },

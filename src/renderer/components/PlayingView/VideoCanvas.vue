@@ -81,6 +81,7 @@ export default {
       });
       this.currentWindow.setAspectRatio(newWidth / newHeight);
     },
+
     $_calculateWindowSizeAtTheFirstTime(videoWidth, videoHeight) {
       const { width: screenWidth, height: screenHeight } = this.currentScreen.workAreaSize;
       const [minWidth, minHeight] = this.currentWindow.getMinimumSize();
@@ -117,6 +118,7 @@ export default {
         [this.newWidthOfWindow, this.newHeightOfWindow] = [videoWidth, videoHeight];
       }
     },
+
     $_calculateWindowSizeInConditionOfVideoExisted(videoWidth, videoHeight) {
       const [windowWidth, windowHeight] = this.currentWindow.getSize();
       const [minWidth, minHeight] = this.currentWindow.getMinimumSize();
@@ -157,9 +159,11 @@ export default {
         }
       }
     },
+
     $_calculateHeightByWidth(videoWidth, videoHeight, newWidth) {
       return newWidth / (videoWidth / videoHeight);
     },
+
     $_calculateWidthByHeight(videoWidth, videoHeight, newHeight) {
       return newHeight * (videoWidth / videoHeight);
     },
@@ -182,11 +186,8 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('fit-fullscreensize', () => {
-      console.log(`screenSize:${this.currentScreen.bounds.width}`);
-      console.log((`windowWidth:${this.currentWindow.getSize()}`));
-      // const { width, height } = this.currentScreen.size;
-      // this.currentWindow.setSize(width, height);
+    this.$bus.$on('reset-windowsize', () => {
+      this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
     });
     this.$bus.$on('toggle-playback', () => {
       console.log('toggle-playback event has been triggered');

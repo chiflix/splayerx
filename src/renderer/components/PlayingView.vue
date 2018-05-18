@@ -35,10 +35,11 @@ export default {
     toggleFullScreenState() {
       if (this.currentWindow.isFullScreen()) {
         this.currentWindow.setFullScreen(false);
+        this.$bus.$emit('reset-windowsize');
       } else {
+        this.currentWindow.setAspectRatio(0);
         this.currentWindow.setFullScreen(true);
       }
-      this.$bus.$emit('fit-fullscreensize');
     },
     wakeUpAllWidgets() {
       this.$bus.$emit('volumecontroller-appear');
