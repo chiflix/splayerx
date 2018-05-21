@@ -39,7 +39,7 @@ function createWindow() {
 }
 
 app.on('ready', () => {
-  app.setName('SplayerX');
+  app.setName('SPlayerX');
   createWindow();
 });
 

@@ -111,10 +111,10 @@ export default {
       if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
         this.timeoutIdOfVolumeControllerDisappearDelay
-        = setTimeout(this.hideVolumeController, 3000);
+          = setTimeout(this.hideVolumeController, 3000);
       } else {
         this.timeoutIdOfVolumeControllerDisappearDelay
-        = setTimeout(this.hideVolumeController, 3000);
+          = setTimeout(this.hideVolumeController, 3000);
       }
     });
     this.$bus.$on('volumeslider-appear', () => {
@@ -122,10 +122,10 @@ export default {
       if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
         this.timeoutIdOfVolumeControllerDisappearDelay
-        = setTimeout(this.hideVolumeController, 3000);
+          = setTimeout(this.hideVolumeController, 3000);
       } else {
         this.timeoutIdOfVolumeControllerDisappearDelay
-        = setTimeout(this.hideVolumeController, 3000);
+          = setTimeout(this.hideVolumeController, 3000);
       }
     });
     this.$bus.$on('volume-mouseup', () => {

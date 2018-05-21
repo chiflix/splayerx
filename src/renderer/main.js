@@ -135,7 +135,7 @@ new Vue({
           role: 'help',
           submenu: [
             {
-              label: 'SplayerX Help',
+              label: 'SPlayerX Help',
             },
           ],
         },
