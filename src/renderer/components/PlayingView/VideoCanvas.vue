@@ -2,12 +2,12 @@
   <div class="video">
     <video ref="videoCanvas"
       preload="metadata"
-      v-on:playing="onPlaying"
-      v-on:pause="onPause"
-      v-on:canplay="onCanPlay"
-      v-on:timeupdate="onTimeupdate"
-      v-on:durationchange="onDurationChange"
-      v-on:click=""
+      @playing="onPlaying"
+      @pause="onPause"
+      @canplay="onCanPlay"
+      @timeupdate="onTimeupdate"
+      @loadedmetadata="onMetaLoaded"
+      @durationchange="onDurationChange"
       :src="src">
     </video>
   </div>
@@ -19,6 +19,9 @@
 export default {
   data() {
     return {
+      videoExisted: false,
+      newWidthOfWindow: 0,
+      newHeightOfWindow: 0,
     };
   },
   props: {
@@ -45,6 +48,19 @@ export default {
       // the video is ready to start playing
       this.$store.commit('Volume', this.$refs.videoCanvas.volume);
     },
+    onMetaLoaded() {
+      console.log('loadedmetadata');
+      this.$bus.$emit('play');
+      const { videoHeight, videoWidth } = this.$refs.videoCanvas;
+      if (this.videoExisted) {
+        this.$_calculateWindowSizeInConditionOfVideoExisted(videoWidth, videoHeight);
+        this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
+      } else {
+        this.$_calculateWindowSizeAtTheFirstTime(videoWidth, videoHeight);
+        this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
+        this.videoExisted = true;
+      }
+    },
     onTimeupdate() {
       console.log('ontimeupdate');
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
@@ -59,10 +75,108 @@ export default {
         this.$store.commit('Duration', t);
       }
     },
+    $_controlWindowSize(newWidth, newHeight) {
+      this.currentWindow.setBounds({
+        x: 0, y: 0, width: parseInt(newWidth, 10), height: parseInt(newHeight, 10),
+      });
+      this.currentWindow.setAspectRatio(newWidth / newHeight);
+    },
+
+    $_calculateWindowSizeAtTheFirstTime(videoWidth, videoHeight) {
+      const { width: screenWidth, height: screenHeight } = this.currentScreen.workAreaSize;
+      const [minWidth, minHeight] = this.currentWindow.getMinimumSize();
+      const screenRatio = screenWidth / screenHeight;
+      const videoRatio = videoWidth / videoHeight;
+      const minWindowRatio = minWidth / minHeight;
+
+      if (videoWidth > screenWidth || videoHeight > screenHeight) {
+        if (videoRatio > screenRatio) {
+          this.newWidthOfWindow = screenWidth;
+          this.newHeightOfWindow
+            = this.$_calculateHeightByWidth(videoWidth, videoHeight, this.newWidthOfWindow);
+        } else if (videoRatio < screenRatio) {
+          this.newHeightOfWindow = screenHeight;
+          this.newWidthOfWindow
+            = this.$_calculateWidthByHeight(videoWidth, videoHeight, this.newHeightOfWindow);
+        } else if (videoRatio === screenRatio) {
+          [this.newWidthOfWindow, this.newHeightOfWindow] = [screenWidth, screenHeight];
+        }
+      } else if (videoWidth < minWidth || videoHeight < minHeight) {
+        if (videoRatio > minWindowRatio) {
+          this.newHeightOfWindow = minHeight;
+          this.newWidthOfWindow
+            = this.$_calculateWidthByHeight(videoWidth, videoHeight, this.newHeightOfWindow);
+        } else if (videoRatio < minWindowRatio) {
+          this.newWidthOfWindow = minWidth;
+          this.newHeightOfWindow
+            = this.$_calculateHeightByWidth(videoWidth, videoHeight, this.newWidthOfWindow);
+        } else if (videoRatio === minWindowRatio) {
+          [this.newWidthOfWindow, this.newHeightOfWindow]
+            = [videoWidth, videoHeight];
+        }
+      } else {
+        [this.newWidthOfWindow, this.newHeightOfWindow] = [videoWidth, videoHeight];
+      }
+    },
+
+    $_calculateWindowSizeInConditionOfVideoExisted(videoWidth, videoHeight) {
+      const [windowWidth, windowHeight] = this.currentWindow.getSize();
+      const [minWidth, minHeight] = this.currentWindow.getMinimumSize();
+
+      const videoRatio = videoWidth / videoHeight;
+      const windowRatio = windowWidth / windowHeight;
+      const minWindowRatio = minWidth / minHeight;
+
+      if (videoWidth < windowWidth && videoHeight < windowHeight) {
+        [this.newWidthOfWindow, this.newHeightOfWindow] = [videoWidth, videoHeight];
+      } else if (videoWidth > windowWidth || videoHeight > windowHeight) {
+        if (videoRatio > windowRatio) {
+          this.newWidthOfWindow = windowWidth;
+          this.newHeightOfWindow
+            = this.$_calculateHeightByWidth(videoWidth, videoHeight, this.newWidthOfWindow);
+        } else if (videoRatio < windowRatio) {
+          this.newHeightOfWindow = windowHeight;
+          this.newWidthOfWindow
+            = this.$_calculateWidthByHeight(videoWidth, videoHeight, this.newHeightOfWindow);
+        } else if (videoRatio === windowRatio) {
+          [this.newWidthOfWindow, this.newHeightOfWindow]
+            = [windowWidth, windowHeight];
+        }
+      }
+
+      if (this.newWidthOfWindow < minWidth || this.newHeightOfWindow < minHeight) {
+        if (videoRatio > minWindowRatio) {
+          this.newHeightOfWindow = minHeight;
+          this.newWidthOfWindow
+            = this.$_calculateWidthByHeight(videoWidth, videoHeight, this.newHeightOfWindow);
+        } else if (videoRatio < minWindowRatio) {
+          this.newWidthOfWindow = minWidth;
+          this.newHeightOfWindow
+            = this.$_calculateHeightByWidth(videoWidth, videoHeight, this.newWidthOfWindow);
+        } else if (videoRatio === minWindowRatio) {
+          [this.newWidthOfWindow, this.newHeightOfWindow]
+            = [videoWidth, videoHeight];
+        }
+      }
+    },
+
+    $_calculateHeightByWidth(videoWidth, videoHeight, newWidth) {
+      return newWidth / (videoWidth / videoHeight);
+    },
+
+    $_calculateWidthByHeight(videoWidth, videoHeight, newHeight) {
+      return newHeight * (videoWidth / videoHeight);
+    },
   },
   computed: {
     volume() {
       return this.$store.state.PlaybackState.Volume;
+    },
+    currentWindow() {
+      return this.$electron.remote.getCurrentWindow();
+    },
+    currentScreen() {
+      return this.$electron.screen.getPrimaryDisplay();
     },
   },
   watch: {
@@ -72,6 +186,9 @@ export default {
     },
   },
   created() {
+    this.$bus.$on('reset-windowsize', () => {
+      this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
+    });
     this.$bus.$on('toggle-playback', () => {
       console.log('toggle-playback event has been triggered');
       if (this.$refs.videoCanvas.paused) {

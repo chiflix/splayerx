@@ -86,11 +86,9 @@ export default {
     },
     openFile(path) {
       this.$storage.set('recent-played', path);
+      this.$store.commit('SrcOfVideo', path);
       this.$router.push({
         name: 'playing-view',
-        params: {
-          uri: path,
-        },
       });
     },
   },

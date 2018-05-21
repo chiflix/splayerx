@@ -62,22 +62,18 @@ export default {
       }
     },
     appearVolumeSlider() {
-      console.log('appearVolumeSlider');
       this.$_clearTimeoutDelay();
       this.showVolumeSlider = true;
     },
     hideVolumeSlider() {
-      console.log('hideVolumeSlider');
       if (!this.onVolumeSliderMousedown) {
         this.showVolumeSlider = false;
       }
     },
     appearVolumeController() {
-      console.log('appearVolumeController');
       this.showVolumeController = true;
     },
     hideVolumeController() {
-      console.log('hideVolumeController');
       if (!this.onVolumeSliderMousedown) {
         this.showVolumeController = false;
         if (this.showVolumeSlider) {
@@ -111,20 +107,26 @@ export default {
   },
   created() {
     this.$bus.$on('volumecontroller-appear', () => {
-      console.log('volumecontroller-appear event has been trigger');
       this.appearVolumeController();
       if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
         this.timeoutIdOfVolumeControllerDisappearDelay
-        = setTimeout(this.hideVolumeController, 3000);
+          = setTimeout(this.hideVolumeController, 3000);
       } else {
         this.timeoutIdOfVolumeControllerDisappearDelay
-        = setTimeout(this.hideVolumeController, 3000);
+          = setTimeout(this.hideVolumeController, 3000);
       }
     });
     this.$bus.$on('volumeslider-appear', () => {
-      console.log('volumeslider-appear event has been trigger');
       this.appearVolumeSlider();
+      if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
+        this.timeoutIdOfVolumeControllerDisappearDelay
+          = setTimeout(this.hideVolumeController, 3000);
+      } else {
+        this.timeoutIdOfVolumeControllerDisappearDelay
+          = setTimeout(this.hideVolumeController, 3000);
+      }
     });
     this.$bus.$on('volume-mouseup', () => {
       this.onVolumeSliderMousedown = false;

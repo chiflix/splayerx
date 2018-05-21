@@ -1,14 +1,15 @@
 @charset "UTF-8";
+@import url("https://use.typekit.net/ybq0nrw.css");
 
 @font-face {
-	font-family: 'Avenir';
-	src: url('~@/fonts/Avenir.ttc');
+	font-family: 'soleil';
 }
 
 * {
 	margin: 0;
 	padding: 0;
 	background: transparent;
+	user-select: none;
 }
 
 html {
@@ -17,7 +18,7 @@ html {
 }
 
 body {
-  font-family: 'Avenir', sans-serif;
+  font-family: 'soleil', sans-serif;
 	position: relative;
 	width: 100%;
 	height: 100%;

@@ -13,32 +13,35 @@ const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
 
+
 function createWindow() {
   /**
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 540,
+    height: 432,
     useContentSize: true,
-    width: 960,
+    width: 768,
     frame: false,
     titleBarStyle: 'hiddenInset',
     transparent: true,
-    minHeight: 320,
-    minWidth: 480,
+    minWidth: 427,
+    minHeight: 240,
     webPreferences: {
       webSecurity: false,
     },
   });
 
   mainWindow.loadURL(winURL);
-
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
 }
 
-app.on('ready', createWindow);
+app.on('ready', () => {
+  app.setName('SPlayerX');
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
