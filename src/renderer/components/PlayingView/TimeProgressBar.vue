@@ -8,7 +8,8 @@
     v-show="showProgressBar">
     <div class="progress-container">
       <div class="screenshot-background"
-      :style="{ left: positionOfScreenshot +'px' }">
+      v-if="showScreenshot"
+      :style="{ left: positionOfScreenshot +'%' }">
         <div class="screenshot">
           <div class="">
             {{ screenshotContext }}
@@ -18,7 +19,7 @@
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
         <div class="line"
-        :style="{ width: widthOfReadyToPlay +'px' }"></div>
+        :style="{ width: positionOfReadyBar +'%' }"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
       :style="{ width: progress +'%' }">
@@ -38,7 +39,7 @@ export default {
       showProgressBar: true,
       onProgressSliderMousedown: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
-      positionOfCursor: 0,
+      widthOfReadyToPlay: 0,
     };
   },
   methods: {
@@ -50,7 +51,7 @@ export default {
     },
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
-        // this.showScreenshot = false;
+        this.showScreenshot = false;
         this.$refs.playedSlider.style.height = '4px';
         this.$refs.readySlider.style.height = '0px';
       }
@@ -73,12 +74,15 @@ export default {
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
     },
     onProgresssBarDrag(e) {
+      if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
+        return;
+      }
       if (this.onProgressSliderMousedown) {
         const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
         const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
         this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       } else {
-        this.positionOfCursor = e.clientX;
+        this.widthOfReadyToPlay = e.clientX / this.$refs.sliderContainer.clientWidth;
       }
     },
     $_clearTimeoutDelay() {
@@ -88,9 +92,6 @@ export default {
     },
   },
   computed: {
-    clientWidth() {
-      return this.$refs.sliderContainer.clientWidth;
-    },
     progress() {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return 0;
@@ -98,15 +99,15 @@ export default {
       return (100 * this.$store.state.PlaybackState.CurrentTime)
         / this.$store.state.PlaybackState.Duration;
     },
-    widthOfReadyToPlay() {
-      return this.positionOfCursor;
-    },
     positionOfScreenshot() {
-      return this.widthOfReadyToPlay;
+      return this.widthOfReadyToPlay * 100;
+    },
+    positionOfReadyBar() {
+      return this.widthOfReadyToPlay * 100;
     },
     screenshotContext() {
       return this.timecodeFromSeconds(this.widthOfReadyToPlay
-        * this.$store.state.PlaybackState.CurrentTime);
+        * this.$store.state.PlaybackState.Duration);
     },
   },
   created() {

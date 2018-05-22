@@ -43,7 +43,7 @@ export default {
     },
     wakeUpAllWidgets() {
       this.$bus.$emit('volumecontroller-appear');
-      // this.$bus.$emit('progressbar-appear');
+      this.$bus.$emit('progressbar-appear');
     },
     togglePlayback() {
       this.$bus.$emit('toggle-playback');
