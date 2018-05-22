@@ -11,7 +11,7 @@
       v-if="showScreenshot"
       :style="{ left: positionOfScreenshot +'%' }">
         <div class="screenshot">
-          <div class="">
+          <div class="time">
             {{ screenshotContext }}
           </div>
         </div>
@@ -162,19 +162,32 @@ export default {
      position: relative;
      width: 170px;
      height: 100px;
-     border: 2px solid transparent;
-     border-radius: 2px;
+     border: 1px solid transparent;
+     border-radius: 1px;
      background-color: #000;
      background-clip: padding-box;
+
+     .time {
+       color: rgba(255,255,255,0.70);
+       font-size: 24px;
+       letter-spacing: 0.2px;
+       position: absolute;
+       width: 100%;
+       height: 100px;
+       line-height: 100px;
+       text-align: center;
+     }
    }
 
    .screenshot-background {
      position: absolute;
      height: 100px;
      width: 170px;
-     bottom: 32px;
-     background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.2) 0%, rgba(84, 84, 84, 0.5) 100%);
-     border-radius: 2px;
+     bottom: 26px;
+     // background-color: rgba(255, 255, 255, .8);
+     box-shadow: rgba(0,0,0,.3) 1px 1px 5px;
+     background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5) 0%, rgba(84, 84, 84, 0.5) 100%);
+     border-radius: 1px;
      z-index: 100;
    }
  }
