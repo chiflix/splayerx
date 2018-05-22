@@ -32,6 +32,7 @@
 - video-controller 之下的 child components 需要响应 click 事件时注意使用 `v-on:click.capture.stop` 以保证先于 video-controller 触发点击事件并避免事件穿透
 - 代码引用文件时使用 `~@/` 代表代码根目录，例如 `src="~@/assets/"`
 - 字体文件放在fonts目录下，css|scss文件放在css目录下
+- 使用 vue-i18n 做多语言支持
 - 优先使用CSS来制作动态效果
 
 #### Branching Model
