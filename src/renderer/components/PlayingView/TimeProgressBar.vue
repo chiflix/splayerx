@@ -8,8 +8,8 @@
     v-show="showProgressBar">
     <div class="progress-container">
       <div class="screenshot-background"
-      v-if="showScreenshot"
-      :style="{ left: positionOfScreenshot +'%' }">
+      v-show="showScreenshot"
+      :style="{ left: positionOfScreenshot +'px', height: heightofScreenshot +'px' }">
         <div class="screenshot">
           <div class="time">
             {{ screenshotContext }}
@@ -19,7 +19,7 @@
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
         <div class="line"
-        :style="{ width: positionOfReadyBar +'%' }"></div>
+        :style="{ width: positionOfReadyBar +'px' }"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
       :style="{ width: progress +'%' }">
@@ -39,7 +39,9 @@ export default {
       showProgressBar: true,
       onProgressSliderMousedown: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
+      percentageOfReadyToPlay: 0,
       widthOfReadyToPlay: 0,
+      videoRatio: 0,
     };
   },
   methods: {
@@ -82,7 +84,8 @@ export default {
         const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
         this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       } else {
-        this.widthOfReadyToPlay = e.clientX / this.$refs.sliderContainer.clientWidth;
+        this.percentageOfReadyToPlay = e.clientX / this.$refs.sliderContainer.clientWidth;
+        this.widthOfReadyToPlay = e.clientX;
       }
     },
     $_clearTimeoutDelay() {
@@ -99,14 +102,28 @@ export default {
       return (100 * this.$store.state.PlaybackState.CurrentTime)
         / this.$store.state.PlaybackState.Duration;
     },
+    heightofScreenshot() {
+      return 170 / this.videoRatio;
+    },
     positionOfScreenshot() {
-      return this.widthOfReadyToPlay * 100;
+      const halfWidthOfScreenshot = 170 / 2;
+      const minWidth = halfWidthOfScreenshot + 37;
+      const maxWidth = this.currentWindow.getSize()[0] - 37;
+      if (this.widthOfReadyToPlay < minWidth) {
+        return 37;
+      } else if (this.widthOfReadyToPlay + halfWidthOfScreenshot > maxWidth) {
+        return maxWidth - 170;
+      }
+      return this.widthOfReadyToPlay - halfWidthOfScreenshot;
+    },
+    currentWindow() {
+      return this.$electron.remote.getCurrentWindow();
     },
     positionOfReadyBar() {
-      return this.widthOfReadyToPlay * 100;
+      return this.widthOfReadyToPlay;
     },
     screenshotContext() {
-      return this.timecodeFromSeconds(this.widthOfReadyToPlay
+      return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
     },
   },
@@ -136,6 +153,9 @@ export default {
           = setTimeout(this.hideProgressBar, 3000);
       }
     });
+    this.$bus.$on('screenshot-sizeset', (e) => {
+      this.videoRatio = e;
+    });
   },
 };
 
@@ -161,31 +181,27 @@ export default {
    .screenshot {
      position: relative;
      width: 170px;
-     height: 100px;
+     height: 100%;
      border: 1px solid transparent;
      border-radius: 1px;
      background-color: #000;
      background-clip: padding-box;
 
      .time {
-       color: rgba(255,255,255,0.70);
+       color: rgba(255, 255, 255, 0.7);
        font-size: 24px;
        letter-spacing: 0.2px;
        position: absolute;
        width: 100%;
-       height: 100px;
-       line-height: 100px;
        text-align: center;
      }
    }
 
    .screenshot-background {
      position: absolute;
-     height: 100px;
      width: 170px;
      bottom: 26px;
-     // background-color: rgba(255, 255, 255, .8);
-     box-shadow: rgba(0,0,0,.3) 1px 1px 5px;
+     box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 5px;
      background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5) 0%, rgba(84, 84, 84, 0.5) 100%);
      border-radius: 1px;
      z-index: 100;

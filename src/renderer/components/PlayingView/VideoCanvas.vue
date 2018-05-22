@@ -52,6 +52,7 @@ export default {
       console.log('loadedmetadata');
       this.$bus.$emit('play');
       const { videoHeight, videoWidth } = this.$refs.videoCanvas;
+      this.$bus.$emit('screenshot-sizeset', videoWidth / videoHeight);
       if (this.videoExisted) {
         this.$_calculateWindowSizeInConditionOfVideoExisted(videoWidth, videoHeight);
         this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);

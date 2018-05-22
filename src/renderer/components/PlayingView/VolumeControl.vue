@@ -140,8 +140,8 @@ export default {
 .video-controller .volume {
   position: absolute;
   bottom: 27px;
-  right: 37+35+15+35px;
-  width: 30px;
+  right: 37+15+35px;
+  width: 35px;
   height: 150px;
   -webkit-app-region: no-drag;
 
