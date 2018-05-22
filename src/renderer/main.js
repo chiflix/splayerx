@@ -195,9 +195,13 @@ new Vue({
           this.$store.commit('Volume', 0);
         }
       } else if (e.key === 'ArrowLeft') {
-        this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 10);
+        this.$bus.$emit('progressbar-appear');
+        this.$bus.$emit('progressslider-appear');
+        this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
       } else if (e.key === 'ArrowRight') {
-        this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 10);
+        this.$bus.$emit('progressbar-appear');
+        this.$bus.$emit('progressslider-appear');
+        this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
       }
     });
     window.addEventListener('drop', (e) => {

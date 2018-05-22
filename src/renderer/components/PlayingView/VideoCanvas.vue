@@ -208,6 +208,7 @@ export default {
     this.$bus.$on('seek', (e) => {
       console.log('seek event has been triggered', e);
       this.$refs.videoCanvas.currentTime = e;
+      this.$store.commit('CurrentTime', e);
     });
   },
 };

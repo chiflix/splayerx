@@ -3,12 +3,12 @@
   <div class="volume" id="volume"
     @mouseover.capture.stop="appearVolumeSlider"
     @mouseout.capture.stop="hideVolumeSlider"
-    v-show="showVolumeController">
+    v-if="showVolumeController">
     <transition name="fade">
       <div class="container"  ref="sliderContainer"
         @mousedown.capture.stop="onVolumeSliderClick"
         @mousemove.capture.stop="onVolumeSliderDrag"
-        v-show="showVolumeSlider">
+        v-if="showVolumeSlider">
         <div class="slider" ref="slider"
           :style="{ height: volume + '%' }">
         </div>
@@ -164,7 +164,6 @@ export default {
     width: 15px;
     background: rgba(255,255,255,0.70);
     border-radius: 1px;
-    transition: height 50ms;
   }
 
   .button {

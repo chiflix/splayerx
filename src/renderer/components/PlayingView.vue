@@ -43,6 +43,7 @@ export default {
     },
     wakeUpAllWidgets() {
       this.$bus.$emit('volumecontroller-appear');
+      // this.$bus.$emit('progressbar-appear');
     },
     togglePlayback() {
       this.$bus.$emit('toggle-playback');
@@ -105,10 +106,6 @@ export default {
   overflow: hidden;
   opacity: 1;
   transition: opacity 400ms;
-}
-
-.video-controller:not(:hover){
-  opacity: 0;
 }
 
 </style>
