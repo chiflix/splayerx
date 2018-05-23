@@ -1,11 +1,14 @@
 <template>
   <div class="player">
     <VideoCanvas :src="uri" />
+    <div class="masking"
+      v-show="showMask"></div>
     <div class="video-controller" id="video-controller"
       @mousedown.stop="togglePlayback"
       @mouseup.stop="sendMouseupMessage"
       @mousewheel="wheelVolumeControll"
       @mousemove="wakeUpAllWidgets"
+      @mouseout.stop="hideAllWidgets"
       @dblclick="toggleFullScreenState">
 			<TimeProgressBar/>
       <TheTimeCodes/>
@@ -31,6 +34,11 @@ export default {
     VolumeControl,
     AdvanceControl,
   },
+  data() {
+    return {
+      showMask: false,
+    };
+  },
   methods: {
     toggleFullScreenState() {
       if (this.currentWindow.isFullScreen()) {
@@ -42,8 +50,17 @@ export default {
       }
     },
     wakeUpAllWidgets() {
+      this.showMask = true;
       this.$bus.$emit('volumecontroller-appear');
       this.$bus.$emit('progressbar-appear');
+      this.$bus.$emit('timecode-appear');
+    },
+    hideAllWidgets() {
+      console.log('mouseout');
+      this.showMask = false;
+      this.$bus.$emit('volumecontroller-hide');
+      this.$bus.$emit('progressbar-hide');
+      this.$bus.$emit('timecode-hide');
     },
     togglePlayback() {
       this.$bus.$emit('toggle-playback');
@@ -91,7 +108,15 @@ export default {
   height: 100%;
   background-color: black;
 }
-
+.masking {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 50%;
+  opacity: 0.3;
+  background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.19) 62%, rgba(0,0,0,0.29) 100%);
+}
 /*
  * Controller
  * 视频控制组件
