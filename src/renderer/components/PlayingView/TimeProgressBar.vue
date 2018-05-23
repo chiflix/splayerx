@@ -107,10 +107,10 @@ export default {
     },
     positionOfScreenshot() {
       const halfWidthOfScreenshot = 170 / 2;
-      const minWidth = halfWidthOfScreenshot + 37;
-      const maxWidth = this.currentWindow.getSize()[0] - 37;
+      const minWidth = halfWidthOfScreenshot + 16;
+      const maxWidth = this.currentWindow.getSize()[0] - 16;
       if (this.widthOfReadyToPlay < minWidth) {
-        return 37;
+        return 16;
       } else if (this.widthOfReadyToPlay + halfWidthOfScreenshot > maxWidth) {
         return maxWidth - 170;
       }
@@ -168,7 +168,7 @@ export default {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 30px;
+  height: 20px;
   -webkit-app-region: no-drag;
 
   .progress-container {
