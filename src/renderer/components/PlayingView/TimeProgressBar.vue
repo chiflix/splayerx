@@ -1,10 +1,10 @@
 <template>
   <transition name="fade" appear>
   <div class="progress" ref="sliderContainer"
-    @mouseover.capture.stop="appearProgressSlider"
-    @mouseout.capture.stop="hideProgressSlider"
+    @mouseover.capture="appearProgressSlider"
+    @mouseout.capture="hideProgressSlider"
     @mousedown.capture.stop="onProgresssBarClick"
-    @mousemove.capture="onProgresssBarDrag"
+    @mousemove.capture="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="progress-container">
       <div class="screenshot-background"
@@ -47,13 +47,13 @@ export default {
   methods: {
     appearProgressSlider() {
       this.$_clearTimeoutDelay();
-      this.showScreenshot = true;
       this.$refs.playedSlider.style.height = '10px';
       this.$refs.readySlider.style.height = '10px';
     },
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
         this.showScreenshot = false;
+        this.widthOfReadyToPlay = 0;
         this.$refs.playedSlider.style.height = '4px';
         this.$refs.readySlider.style.height = '0px';
       }
@@ -75,7 +75,7 @@ export default {
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
     },
-    onProgresssBarDrag(e) {
+    onProgresssBarMove(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return;
       }
@@ -86,6 +86,7 @@ export default {
       } else {
         this.percentageOfReadyToPlay = e.clientX / this.$refs.sliderContainer.clientWidth;
         this.widthOfReadyToPlay = e.clientX;
+        this.showScreenshot = true;
       }
     },
     $_clearTimeoutDelay() {
@@ -170,6 +171,10 @@ export default {
   width: 100%;
   height: 20px;
   -webkit-app-region: no-drag;
+
+  .progress-container:hover {
+    cursor: pointer;
+  }
 
   .progress-container {
    position: absolute;
