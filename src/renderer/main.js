@@ -17,7 +17,7 @@ Vue.prototype.$bus = new Vue(); // Global event bus
 Vue.mixin({
   methods: {
     timecodeFromSeconds(s) {
-      const dt = new Date(s * 1000);
+      const dt = new Date(Math.abs(s) * 1000);
       let hours = dt.getUTCHours();
       let minutes = dt.getUTCMinutes();
       let seconds = dt.getUTCSeconds();
@@ -32,9 +32,15 @@ Vue.mixin({
       }
       if (hours > 0) {
         if (hours < 10) {
-          hours = `0${hours}`;
+          hours = `${hours}`;
+        }
+        if (s < 0) {
+          return `-${hours}:${minutes}:${seconds}`;
         }
         return `${hours}:${minutes}:${seconds}`;
+      }
+      if (s < 0) {
+        return `-${minutes}:${seconds}`;
       }
       return `${minutes}:${seconds}`;
     },
@@ -197,10 +203,12 @@ new Vue({
       } else if (e.key === 'ArrowLeft') {
         this.$bus.$emit('progressbar-appear');
         this.$bus.$emit('progressslider-appear');
+        this.$bus.$emit('timecode-appear');
         this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
       } else if (e.key === 'ArrowRight') {
         this.$bus.$emit('progressbar-appear');
         this.$bus.$emit('progressslider-appear');
+        this.$bus.$emit('timecode-appear');
         this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
       }
     });
@@ -209,13 +217,15 @@ new Vue({
       const { files } = e.dataTransfer;
       console.log(files);
       // TODO: play it if it's video file
-      if (files[0]) {
+      if (files[0].type.startsWith('video/')) {
         const path = `file:///${files[0].path}`;
         this.$storage.set('recent-played', path);
         this.$store.commit('SrcOfVideo', path);
         this.$router.push({
           name: 'playing-view',
         });
+      } else {
+        alert('We support video type only right now.');
       }
       /*
       for (const file in files) {
