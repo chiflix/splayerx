@@ -209,7 +209,14 @@ new Vue({
       const { files } = e.dataTransfer;
       console.log(files);
       // TODO: play it if it's video file
-      alert(`drag and drop are not yet supported.\nfile: ${files[0].path} ${files[0].name}`);
+      if (files[0]) {
+        const path = `file:///${files[0].path}`;
+        this.$storage.set('recent-played', path);
+        this.$store.commit('SrcOfVideo', path);
+        this.$router.push({
+          name: 'playing-view',
+        });
+      }
       /*
       for (const file in files) {
         if (files.hasOwnProperty(file)) {
