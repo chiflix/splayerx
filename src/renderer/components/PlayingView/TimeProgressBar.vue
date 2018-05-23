@@ -154,6 +154,9 @@ export default {
           = setTimeout(this.hideProgressBar, 3000);
       }
     });
+    this.$bus.$on('progressbar-hide', () => {
+      this.hideProgressBar();
+    });
     this.$bus.$on('screenshot-sizeset', (e) => {
       this.videoRatio = e;
     });

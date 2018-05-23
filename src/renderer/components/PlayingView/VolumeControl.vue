@@ -131,6 +131,9 @@ export default {
     this.$bus.$on('volume-mouseup', () => {
       this.onVolumeSliderMousedown = false;
     });
+    this.$bus.$on('volumecontroller-hide', () => {
+      this.hideVolumeController();
+    });
   },
 };
 </script>
