@@ -194,6 +194,9 @@ export default {
      border-radius: 1px;
      background-color: #000;
      background-clip: padding-box;
+     display: flex;
+     justify-content: center;
+     align-items: center;
 
      .time {
        color: rgba(255, 255, 255, 0.7);
