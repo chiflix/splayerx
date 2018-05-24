@@ -53,7 +53,8 @@ let webConfig = {
             extractCSS: true,
             loaders: {
               sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax=1',
-              scss: 'vue-style-loader!css-loader!sass-loader'
+              scss: 'vue-style-loader!css-loader!sass-loader',
+              i18n: 'vue-i18n-loader'
             }
           }
         }

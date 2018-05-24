@@ -6,7 +6,7 @@
     </div>
 
     <div class="welcome">
-      <div class="title">SPlayerX</div>
+      <div class="title">{{ $t("msg.titleName") }}</div>
       <p> {{ version }} </p>
     </div>
 

@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import VueI18n from 'vue-i18n';
 import axios from 'axios';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 
@@ -10,6 +11,7 @@ if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 
+Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
 
 Vue.prototype.$bus = new Vue(); // Global event bus
@@ -47,8 +49,29 @@ Vue.mixin({
   },
 });
 
+// Ready translated locale messages
+const messages = {
+  en: {
+    msg: {
+      titleName: 'SPlayerX',
+    },
+  },
+  cn: {
+    msg: {
+      titleName: '射手影音',
+    },
+  },
+};
+
+// Create VueI18n instance with options
+const i18n = new VueI18n({
+  locale: 'cn', // set locale
+  messages, // set locale messages
+});
+
 /* eslint-disable no-new */
 new Vue({
+  i18n,
   components: { App },
   router,
   store,
