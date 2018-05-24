@@ -184,32 +184,49 @@ new Vue({
       }
     });
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp') {
-        this.$bus.$emit('volumecontroller-appear');
-        this.$bus.$emit('volumeslider-appear');
-        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
-        } else {
-          this.$store.commit('Volume', 1);
-        }
-      } else if (e.key === 'ArrowDown') {
-        this.$bus.$emit('volumecontroller-appear');
-        this.$bus.$emit('volumeslider-appear');
-        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
-        } else {
-          this.$store.commit('Volume', 0);
-        }
-      } else if (e.key === 'ArrowLeft') {
-        this.$bus.$emit('progressbar-appear');
-        this.$bus.$emit('progressslider-appear');
-        this.$bus.$emit('timecode-appear');
-        this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
-      } else if (e.key === 'ArrowRight') {
-        this.$bus.$emit('progressbar-appear');
-        this.$bus.$emit('progressslider-appear');
-        this.$bus.$emit('timecode-appear');
-        this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
+      switch (e.key) {
+        case 'ArrowUp':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+          } else {
+            this.$store.commit('Volume', 1);
+          }
+          break;
+
+        case 'ArrowDown':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+          } else {
+            this.$store.commit('Volume', 0);
+          }
+          break;
+
+        case 'ArrowLeft':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
+          }
+          break;
+
+        case 'ArrowRight':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
+          }
+          break;
+        default:
       }
     });
     window.addEventListener('drop', (e) => {
