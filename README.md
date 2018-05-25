@@ -1,9 +1,9 @@
-# SPlayer
+develop# SPlayer
 [![Dependencies Status](https://david-dm.org/chiflix/splayerx/status.svg)](https://david-dm.org/chiflix/splayerx)
 [![devDependencies Status](https://david-dm.org/chiflix/splayerx/dev-status.svg)](https://david-dm.org/chiflix/splayerx?type=dev)
-[![Build Status](https://travis-ci.org/chiflix/splayerx.svg?branch=master)](https://travis-ci.org/chiflix/splayerx)
+[![Build Status](https://travis-ci.org/chiflix/splayerx.svg?branch=develop)](https://travis-ci.org/chiflix/splayerx)
 [![appveyor](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)
-[![codecov](https://codecov.io/gh/chiflix/splayerx/branch/master/graph/badge.svg)](https://codecov.io/gh/chiflix/splayerx)
+[![codecov](https://codecov.io/gh/chiflix/splayerx/branch/develop/graph/badge.svg)](https://codecov.io/gh/chiflix/splayerx)
 
 ### 开发指南
 
@@ -11,11 +11,11 @@
 
 - 开发中使用 webpack，运行 `npm run dev` 修改代码后可以同步至表现层，hot reload，不用重新启动。
 - 使用 eslint 控制代码质量，不满足标准的代码无法通过编译并会报错。
-- 每次版本提交会通过 travis-ci 和 appveyor 自动编译，如果不能通过编译会记录错误，且相应的 badge: [![Build Status](https://travis-ci.org/chiflix/splayerx.svg?branch=master)](https://travis-ci.org/chiflix/splayerx) 或
+- 每次版本提交会通过 travis-ci 和 appveyor 自动编译，如果不能通过编译会记录错误，且相应的 badge: [![Build Status](https://travis-ci.org/chiflix/splayerx.svg?branch=develop)](https://travis-ci.org/chiflix/splayerx) 或
 [![appveyor](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)
 会变红色。
 - 当 [tag](https://github.com/chiflix/video-player/releases/new) 一个新的commit时，CI 工具会自动打包发行版本，并放入 [GitHub Releases](https://github.com/chiflix/splayerx/releases)。
-- 使用 Karma 进行单元测试，codecov的badge [![codecov](https://codecov.io/gh/chiflix/splayerx/branch/master/graph/badge.svg)](https://codecov.io/gh/chiflix/splayerx)
+- 使用 Karma 进行单元测试，codecov的badge [![codecov](https://codecov.io/gh/chiflix/splayerx/branch/develop/graph/badge.svg)](https://codecov.io/gh/chiflix/splayerx)
  会显示当前代码的测试覆盖率。
 - 使用 [Global Event Bus](https://alligator.io/vuejs/global-event-bus/) 做消息通讯
 - 使用 [vue-router](https://router.vuejs.org/en/) 和 [vuex](https://vuex.vuejs.org/en/intro.html) 用于跨组件数据交互。
