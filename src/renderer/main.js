@@ -6,6 +6,7 @@ import VueElectronJSONStorage from 'vue-electron-json-storage';
 import App from './App';
 import router from './router';
 import store from './store';
+import messages from './locales';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
@@ -43,21 +44,6 @@ Vue.mixin({
   },
 });
 
-// Ready translated locale messages
-const messages = {
-  en: {
-    msg: {
-      titleName: 'SPlayerX',
-    },
-  },
-  cn: {
-    msg: {
-      titleName: '射手影音',
-    },
-  },
-};
-
-// Create VueI18n instance with options
 const i18n = new VueI18n({
   locale: 'cn', // set locale
   messages, // set locale messages

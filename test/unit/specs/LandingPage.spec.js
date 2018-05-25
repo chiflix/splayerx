@@ -1,10 +1,20 @@
 import Vue from 'vue';
+import VueI18n from 'vue-i18n';
 import LandingView from '@/components/LandingView';
+import messages from '@/locales';
 
 describe('LandingView.vue', () => {
   it('should render correct contents', () => {
+    Vue.use(VueI18n);
+
+    const i18n = new VueI18n({
+      locale: 'en', // set locale
+      messages, // set locale messages
+    });
+
     const vm = new Vue({
       el: document.createElement('div'),
+      i18n,
       render: h => h(LandingView),
     }).$mount();
 
