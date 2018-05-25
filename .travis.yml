@@ -7,7 +7,11 @@ osx_image: xcode9.2
 language: node_js
 node_js:
 - 'node'
+<<<<<<< HEAD
 - '9'
+=======
+- ‘9’
+>>>>>>> 1ee37f821b596e8c61ac20fdf2add97ac9afddd4
 matrix:
   allow_failures:
 cache:
