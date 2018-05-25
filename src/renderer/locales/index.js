@@ -5,10 +5,16 @@ const messages = {
     msg: {
       titleName: 'SPlayerX',
     },
+    css: {
+      titleFontSize: { fontSize: '7vw' },
+    },
   },
   cn: {
     msg: {
       titleName: '射手影音',
+    },
+    css: {
+      titleFontSize: { fontSize: '4vw' },
     },
   },
 };
