@@ -3,9 +3,11 @@ import VueI18n from 'vue-i18n';
 import axios from 'axios';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 
-import App from './App';
-import router from './router';
-import store from './store';
+import App from '@/App';
+import router from '@/router';
+import store from '@/store';
+import messages from '@/locales';
+import helpers from '@/helpers';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
@@ -13,57 +15,9 @@ Vue.config.productionTip = false;
 
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
-
+Vue.mixin(helpers);
 Vue.prototype.$bus = new Vue(); // Global event bus
 
-Vue.mixin({
-  methods: {
-    timecodeFromSeconds(s) {
-      const dt = new Date(Math.abs(s) * 1000);
-      let hours = dt.getUTCHours();
-      let minutes = dt.getUTCMinutes();
-      let seconds = dt.getUTCSeconds();
-
-      // the above dt.get...() functions return a single digit
-      // so I prepend the zero here when needed
-      if (minutes < 10) {
-        minutes = `0${minutes}`;
-      }
-      if (seconds < 10) {
-        seconds = `0${seconds}`;
-      }
-      if (hours > 0) {
-        if (hours < 10) {
-          hours = `${hours}`;
-        }
-        if (s < 0) {
-          return `-${hours}:${minutes}:${seconds}`;
-        }
-        return `${hours}:${minutes}:${seconds}`;
-      }
-      if (s < 0) {
-        return `-${minutes}:${seconds}`;
-      }
-      return `${minutes}:${seconds}`;
-    },
-  },
-});
-
-// Ready translated locale messages
-const messages = {
-  en: {
-    msg: {
-      titleName: 'SPlayerX',
-    },
-  },
-  cn: {
-    msg: {
-      titleName: '射手影音',
-    },
-  },
-};
-
-// Create VueI18n instance with options
 const i18n = new VueI18n({
   locale: 'cn', // set locale
   messages, // set locale messages

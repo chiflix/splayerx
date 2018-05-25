@@ -6,7 +6,7 @@
     </div>
 
     <div class="welcome">
-      <div class="title">{{ $t("msg.titleName") }}</div>
+      <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
       <p> {{ version }} </p>
     </div>
 
