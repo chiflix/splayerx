@@ -56,7 +56,6 @@
     "linux": {
       "icon": "build/icons",
       "target": [
-        "rpm",
         "deb"
       ]
     }
