@@ -10,9 +10,10 @@ case "$TRAVIS_OS_NAME" in
     echo "deb http://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
     sudo dpkg --add-architecture i386
     sudo apt-get update
-    sudo apt-get install -y wine1.6 yarn
+    sudo apt-get install -y wine1.6 yarn snapd
     npm install -g electron
     curl --location http://rawgit.com/twolfson/fix-travis-ci/master/lib/install.sh | bash -s
+    sudo snap install snapcraft --classic
     ;;
   "osx")
     # Create CA
