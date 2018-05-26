@@ -41,7 +41,8 @@ deploy:
   overwrite: true
   file:
   - build/*.dmg
-  - build/*.AppImage
+  - build/*.deb
+  - build/*.rpm
   skip_cleanup: true
   on:
     tags: true
