@@ -11,9 +11,9 @@ case "$TRAVIS_OS_NAME" in
     sudo dpkg --add-architecture i386
     sudo apt-get update
     sudo apt-get install -y wine1.6 yarn snapd
+    sudo snap install snapcraft --classic
     npm install -g electron
     curl --location http://rawgit.com/twolfson/fix-travis-ci/master/lib/install.sh | bash -s
-    sudo snap install snapcraft --classic
     ;;
   "osx")
     # Create CA
