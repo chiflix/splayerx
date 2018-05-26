@@ -1,6 +1,7 @@
 {
   "name": "splayer",
   "productName": "splayer",
+  "homepage": "https://splayer.org",
   "version": "0.0.1",
   "author": "tomasen <tomasen@gmail.com>",
   "description": "a media player",
