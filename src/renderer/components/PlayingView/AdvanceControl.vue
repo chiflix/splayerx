@@ -13,8 +13,8 @@
 .video-controller .advanced {
   position: absolute;
   bottom: 27px;
-  right: 37+35px;
-  width: 30px;
+  right: 37px;
+  width: 35px;
   height: 120px;
 }
 .video-controller .button {

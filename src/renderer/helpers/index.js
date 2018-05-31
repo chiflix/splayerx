@@ -1,7 +1,7 @@
 export default {
   methods: {
     timecodeFromSeconds(s) {
-      const dt = new Date(s * 1000);
+      const dt = new Date(Math.abs(s) * 1000);
       let hours = dt.getUTCHours();
       let minutes = dt.getUTCMinutes();
       let seconds = dt.getUTCSeconds();
@@ -16,9 +16,15 @@ export default {
       }
       if (hours > 0) {
         if (hours < 10) {
-          hours = `0${hours}`;
+          hours = `${hours}`;
+        }
+        if (s < 0) {
+          return `-${hours}:${minutes}:${seconds}`;
         }
         return `${hours}:${minutes}:${seconds}`;
+      }
+      if (s < 0) {
+        return `-${minutes}:${seconds}`;
       }
       return `${minutes}:${seconds}`;
     },

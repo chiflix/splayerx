@@ -161,26 +161,49 @@ new Vue({
       }
     });
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowUp') {
-        this.$bus.$emit('volumecontroller-appear');
-        this.$bus.$emit('volumeslider-appear');
-        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
-        } else {
-          this.$store.commit('Volume', 1);
-        }
-      } else if (e.key === 'ArrowDown') {
-        this.$bus.$emit('volumecontroller-appear');
-        this.$bus.$emit('volumeslider-appear');
-        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
-        } else {
-          this.$store.commit('Volume', 0);
-        }
-      } else if (e.key === 'ArrowLeft') {
-        this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 10);
-      } else if (e.key === 'ArrowRight') {
-        this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 10);
+      switch (e.key) {
+        case 'ArrowUp':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+          } else {
+            this.$store.commit('Volume', 1);
+          }
+          break;
+
+        case 'ArrowDown':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+          } else {
+            this.$store.commit('Volume', 0);
+          }
+          break;
+
+        case 'ArrowLeft':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
+          }
+          break;
+
+        case 'ArrowRight':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
+          }
+          break;
+        default:
       }
     });
     window.addEventListener('drop', (e) => {
@@ -188,7 +211,16 @@ new Vue({
       const { files } = e.dataTransfer;
       console.log(files);
       // TODO: play it if it's video file
-      alert(`drag and drop are not yet supported.\nfile: ${files[0].path} ${files[0].name}`);
+      if (files[0].type.startsWith('video/')) {
+        const path = `file:///${files[0].path}`;
+        this.$storage.set('recent-played', path);
+        this.$store.commit('SrcOfVideo', path);
+        this.$router.push({
+          name: 'playing-view',
+        });
+      } else {
+        alert('We support video type only right now.');
+      }
       /*
       for (const file in files) {
         if (files.hasOwnProperty(file)) {

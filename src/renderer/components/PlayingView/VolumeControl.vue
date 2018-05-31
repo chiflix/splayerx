@@ -3,12 +3,12 @@
   <div class="volume" id="volume"
     @mouseover.capture.stop="appearVolumeSlider"
     @mouseout.capture.stop="hideVolumeSlider"
-    v-show="showVolumeController">
+    v-if="showVolumeController">
     <transition name="fade">
       <div class="container"  ref="sliderContainer"
         @mousedown.capture.stop="onVolumeSliderClick"
         @mousemove.capture.stop="onVolumeSliderDrag"
-        v-show="showVolumeSlider">
+        v-if="showVolumeSlider">
         <div class="slider" ref="slider"
           :style="{ height: volume + '%' }">
         </div>
@@ -131,6 +131,9 @@ export default {
     this.$bus.$on('volume-mouseup', () => {
       this.onVolumeSliderMousedown = false;
     });
+    this.$bus.$on('volumecontroller-hide', () => {
+      this.hideVolumeController();
+    });
   },
 };
 </script>
@@ -140,8 +143,8 @@ export default {
 .video-controller .volume {
   position: absolute;
   bottom: 27px;
-  right: 37+35+15+35px;
-  width: 30px;
+  right: 37+15+35px;
+  width: 35px;
   height: 150px;
   -webkit-app-region: no-drag;
 
@@ -164,7 +167,6 @@ export default {
     width: 15px;
     background: rgba(255,255,255,0.70);
     border-radius: 1px;
-    transition: height 50ms;
   }
 
   .button {
