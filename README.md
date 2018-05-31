@@ -2,7 +2,7 @@ develop# SPlayer
 [![Dependencies Status](https://david-dm.org/chiflix/splayerx/status.svg)](https://david-dm.org/chiflix/splayerx)
 [![devDependencies Status](https://david-dm.org/chiflix/splayerx/dev-status.svg)](https://david-dm.org/chiflix/splayerx?type=dev)
 [![Build Status](https://travis-ci.org/chiflix/splayerx.svg?branch=develop)](https://travis-ci.org/chiflix/splayerx)
-[![appveyor](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)
+[![appveyor](https://ci.appveyor.com/api/projects/status/32r7s2skrgm9ubva?svg=true)](https://ci.appveyor.com/project/tomasen/splayerx)
 [![codecov](https://codecov.io/gh/chiflix/splayerx/branch/develop/graph/badge.svg)](https://codecov.io/gh/chiflix/splayerx)
 
 ### 开发指南
