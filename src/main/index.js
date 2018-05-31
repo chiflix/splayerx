@@ -29,6 +29,7 @@ function createWindow() {
     minHeight: 240,
     webPreferences: {
       webSecurity: false,
+      experimentalFeatures: true,
     },
   });
 
