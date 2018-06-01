@@ -7,7 +7,6 @@ osx_image: xcode9.2
 language: node_js
 node_js:
 - 'node'
-- '9'
 matrix:
   allow_failures:
 cache:
