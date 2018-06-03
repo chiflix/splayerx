@@ -29,6 +29,9 @@
     "directories": {
       "output": "build"
     },
+    "electronDownload": {
+      "verifyChecksum": false
+    },
     "files": [
       "dist/electron/**/*"
     ],
