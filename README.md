@@ -2,7 +2,7 @@
 [![Dependencies Status](https://david-dm.org/chiflix/splayerx/develop/status.svg)](https://david-dm.org/chiflix/splayerx/develop/)
 [![devDependencies Status](https://david-dm.org/chiflix/splayerx/develop/dev-status.svg)](https://david-dm.org/chiflix/splayerx/develop?type=dev)
 [![Build Status](https://travis-ci.org/chiflix/splayerx.svg?branch=develop)](https://travis-ci.org/chiflix/splayerx?branch=develop)
-[![appveyor](https://ci.appveyor.com/api/projects/status/branch/develop/32r7s2skrgm9ubva?svg=true)](https://ci.appveyor.com/project/tomasen/splayerx/branch/develop)
+[![appveyor](https://ci.appveyor.com/api/projects/status/github/chiflix/splayerx?branch=develop&svg=true)](https://ci.appveyor.com/project/tomasen/splayerx/branch/develop)
 [![codecov](https://codecov.io/gh/chiflix/splayerx/branch/develop/graph/badge.svg)](https://codecov.io/gh/chiflix/splayerx/branch/develop)
 
 ### 开发指南
