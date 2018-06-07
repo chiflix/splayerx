@@ -1,10 +1,10 @@
 <template>
   <transition name="fade" appear>
   <div class="progress" ref="sliderContainer"
-    @mouseover.capture="appearProgressSlider"
-    @mouseout.capture="hideProgressSlider"
-    @mousedown.capture.stop="onProgresssBarClick"
-    @mousemove.capture="onProgresssBarMove"
+    @mouseover="appearProgressSlider"
+    @mouseout="hideProgressSlider"
+    @mousedown="onProgresssBarClick"
+    @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="progress-container">
       <div class="screenshot-background"
