@@ -118,6 +118,8 @@ export default {
   .firstContext {
     display: inline-block;
     color: rgba(255, 255, 255, 1);
+    text-shadow:  0 1px 0 rgba(0,0,0,.1),
+                  1px 1px 0 rgba(0,0,0,.1);
     font-weight: 500;
     font-size: 23px;
     line-height: 24px;
