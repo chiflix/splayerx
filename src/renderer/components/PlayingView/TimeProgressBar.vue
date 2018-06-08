@@ -174,6 +174,7 @@ export default {
   width: 100%;
   height: 20px;
   -webkit-app-region: no-drag;
+  z-index: 700;
 
   .progress-container:hover {
     cursor: pointer;

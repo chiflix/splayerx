@@ -3,11 +3,11 @@
     <div class="advanced"
       v-if="isAcitve">
       <div class="flex-container">
-        <div class="items"
-          v-for="item in menuList" key="item.title">
-          <div>{{ item.title }}</div>
-          <div>{{ item.functionality }}</div>
-        </div>
+        <AdvanceControlMenuItem
+          v-for="item in menuList"
+          :key="item.id"
+          :item="item">
+        </AdvanceControlMenuItem>
       </div>
     </div>
     <div class="button"
@@ -18,7 +18,12 @@
 </template>;
 
 <script>
+import AdvanceControlMenuItem from './AdvanceControlMenuItem.vue';
+
 export default {
+  components: {
+    AdvanceControlMenuItem,
+  },
   data() {
     return {
       menuStyleObject: {
@@ -30,17 +35,41 @@ export default {
       },
       menuList: [
         {
+          id: 0,
           title: 'Speed',
           functionality: '1x',
         },
         {
+          id: 1,
           title: 'Subtitle',
           functionality: 'On',
         },
         {
+          id: 2,
           title: 'Audio',
         },
         {
+          id: 3,
+          title: 'Media Info',
+        },
+      ],
+      settingLevel: [
+        {
+          id: 0,
+          title: 'Speed',
+          functionality: '1x',
+        },
+        {
+          id: 1,
+          title: 'Subtitle',
+          functionality: 'On',
+        },
+        {
+          id: 2,
+          title: 'Audio',
+        },
+        {
+          id: 3,
           title: 'Media Info',
         },
       ],
@@ -48,12 +77,17 @@ export default {
     };
   },
   methods: {
+    onSecondItemClick() {
+      console.log('itemclick');
+    },
     onMenuItemClick() {
-      console.log('');
+      console.log('menuclick');
+      console.log(this.$refs.menuList[0].key);
     },
     switchSettingMenuState() {
       console.log('switching');
       if (this.isAcitve) {
+        this.menuList = this.settingLevel;
         this.closeMenuSetting();
       } else {
         this.openMenuSetting();
@@ -62,13 +96,24 @@ export default {
     closeMenuSetting() {
       this.menuStyleObject.width = `${45}px`;
       this.menuStyleObject.height = `${40}px`;
+      this.menuList = this.settingLevel;
       this.isAcitve = false;
     },
     openMenuSetting() {
       this.menuStyleObject.width = `${208}px`;
-      this.menuStyleObject.height = `${208}px`;
+      this.$_fitMenuSize();
       this.isAcitve = true;
     },
+    $_fitMenuSize() {
+      console.log(this.menuList.length);
+      this.menuStyleObject.height = `${(this.menuList.length * 22) + 120}px`;
+    },
+  },
+  created() {
+    this.$bus.$on('changeMenuList', (changedLevel) => {
+      this.menuList = changedLevel;
+      this.$_fitMenuSize();
+    });
   },
 };
 </script>
@@ -81,7 +126,9 @@ export default {
     right: 0;
     width: 100%;
     height: 100%;
-    background-color: yellow;
+    background-color: white;
+    opacity: 0.3;
+    backdrop-filter: blur(20px);
     color: black;
     border-radius: 4.8px;
     z-index: 750;
@@ -92,11 +139,6 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
-  }
-
-  .items {
-    display: flex;
-    justify-content: space-between;
   }
 
   .button {
