@@ -1,7 +1,10 @@
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
+import os from 'os';
 import axios from 'axios';
+import uuidv4 from 'uuid/v4';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
+import VueResource from 'vue-resource';
 
 import App from '@/App';
 import router from '@/router';
@@ -15,7 +18,10 @@ Vue.config.productionTip = false;
 
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
+Vue.use(VueResource);
+
 Vue.mixin(helpers);
+
 Vue.prototype.$bus = new Vue(); // Global event bus
 
 const i18n = new VueI18n({
@@ -33,6 +39,10 @@ new Vue({
   methods: {
     openVideoFile(file) {
       const path = `file:///${file}`;
+      // TODO: check if file exist
+      // TODO: check if there is subtitle file in the same directory
+      // TODO: load subtitles? or add subtitle file to playlist
+
       this.$storage.set('recent-played', path);
       this.$store.commit('SrcOfVideo', path);
       this.$router.push({
@@ -156,6 +166,23 @@ new Vue({
   },
   mounted() {
     this.createMenu();
+
+    // TODO: Setup user identity
+    this.$storage.get('user-uuid', (err, userUUID) => {
+      if (err) {
+        userUUID = uuidv4();
+        this.$storage.set('user-uuid', userUUID);
+      }
+      const platform = os.platform() + os.release();
+      const { app } = this.$electron.remote;
+      const version = app.getVersion();
+
+      Vue.http.headers.common.Authorization = `Basic ${userUUID}`;
+      Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
+
+      console.log(Vue.http.headers.common.Authorization);
+    });
+
     window.addEventListener('keypress', (e) => {
       if (e.key === ' ') { // space
         this.$bus.$emit('toggle-playback');
