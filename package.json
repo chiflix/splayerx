@@ -24,7 +24,7 @@
     "postinstall": "npm run lint:fix"
   },
   "_moduleAliases": {
-    "electron"  : "node_modules/@chiflix/electron"
+    "electron": "node_modules/@chiflix/electron"
   },
   "build": {
     "productName": "SPlayer",
@@ -70,15 +70,17 @@
     "axios": "^0.18.0",
     "electron-json-storage": "^4.1.0",
     "module-alias": "^2.0.6",
-    "npm": "^5.10.0",
+    "npm": "^6.1.0",
     "vue": "^2.3.3",
     "vue-electron": "^1.0.6",
     "vue-electron-json-storage": "^1.0.1",
     "vue-i18n": "^7.7.0",
+    "vue-resource": "^1.5.1",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
+    "@chiflix/electron": "^2.0.2",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",
     "babel-loader": "^7.1.1",
@@ -96,8 +98,7 @@
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "@chiflix/electron": "^2.0.2",
-    "electron-builder": "^20.15.0",
+    "electron-builder": "^20.15.3",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.4",
     "eslint": "^4.19.1",
