@@ -31,6 +31,14 @@ new Vue({
   store,
   template: '<App/>',
   methods: {
+    openVideoFile(file) {
+      const path = `file:///${file}`;
+      this.$storage.set('recent-played', path);
+      this.$store.commit('SrcOfVideo', path);
+      this.$router.push({
+        name: 'playing-view',
+      });
+    },
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
       const template = [
@@ -48,14 +56,7 @@ new Vue({
                     extensions: ['mp4', 'mkv', 'mov'],
                   }],
                 }, (file) => {
-                  if (file) {
-                    const path = `file:///${file}`;
-                    this.$storage.set('recent-played', path);
-                    this.$store.commit('SrcOfVideo', path);
-                    this.$router.push({
-                      name: 'playing-view',
-                    });
-                  }
+                  this.openVideoFile(file);
                 });
               },
             },
@@ -211,16 +212,9 @@ new Vue({
       const { files } = e.dataTransfer;
       console.log(files);
       // TODO: play it if it's video file
-      if (files[0].type.startsWith('video/')) {
-        const path = `file:///${files[0].path}`;
-        this.$storage.set('recent-played', path);
-        this.$store.commit('SrcOfVideo', path);
-        this.$router.push({
-          name: 'playing-view',
-        });
-      } else {
-        alert('We support video type only right now.');
-      }
+
+      this.openVideoFile(files[0].path);
+
       /*
       for (const file in files) {
         if (files.hasOwnProperty(file)) {
