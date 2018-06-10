@@ -62,7 +62,8 @@ export default {
         this.videoExisted = true;
       }
       // TODO: If there is already text track, load it
-      // TODO: If there is already subtitle files, load it
+      // TODO: If there is already subtitle files(same dir), load it
+      // TODO: If there is already subtitle files(opened or loaded), load it
       // TODO: If there is no (chinese/default language) text track, try translate api
 
       this.loadTextTrack(null);
@@ -244,5 +245,12 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+// https://www.w3.org/TR/webvtt1/
+video::cue {
+  color: yellow;
+  text-shadow: 0px 0px 2px black;
+  background-color: transparent;
 }
 </style>
