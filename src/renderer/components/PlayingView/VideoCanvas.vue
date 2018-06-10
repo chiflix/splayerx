@@ -83,13 +83,26 @@ export default {
       }
     },
     loadTextTrack(file) {
-      // TODO: https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
-      const sub0 = this.$refs.videoCanvas.addTextTrack('subtitles');
-      if (file === null) {
-        const cue0 = new VTTCue(0, 30000, '测试字幕 subtitle test');
+      // https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
+      // Hide all the current text tracks
+      const vid = this.$refs.videoCanvas;
+      let sub0 = null;
+      for (let i = 0; i < vid.textTracks.length; i += 1) {
+        vid.textTracks[i].mode = 'hidden';
+        if (vid.textTracks[i].label === 'splayer-custom') {
+          sub0 = vid.textTracks[i];
+          vid.textTracks[i].mode = 'showing';
+        }
+      }
+
+      if (sub0 === null) {
+        sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
+        const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
         sub0.addCue(cue0);
         sub0.mode = 'showing';
       }
+
+      console.log(file);
     },
     $_controlWindowSize(newWidth, newHeight) {
       this.currentWindow.setBounds({
