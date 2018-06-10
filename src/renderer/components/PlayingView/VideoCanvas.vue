@@ -9,11 +9,6 @@
       @loadedmetadata="onMetaLoaded"
       @durationchange="onDurationChange"
       :src="src">
-      <track ref="customTrack"
-        kind="subtitles"
-        label="splayer-custom"
-        @load="onSubTrackLoaded"
-        />
     </video>
   </div>
 </template>;
@@ -70,6 +65,7 @@ export default {
         this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
         this.videoExisted = true;
       }
+      // TODO: move subtitle process to another component
       // TODO: If there is already text track, load it
       // TODO: If there is already subtitle files(same dir), load it
       // TODO: If there is already subtitle files(opened or loaded), load it
