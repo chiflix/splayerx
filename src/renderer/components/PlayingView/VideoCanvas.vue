@@ -14,7 +14,6 @@
 </template>;
 
 <script>
-import path from 'path';
 import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
@@ -65,13 +64,8 @@ export default {
         this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
         this.videoExisted = true;
       }
-      // TODO: move subtitle process to another component
-      // TODO: If there is already text track, load it
-      // TODO: If there is already subtitle files(same dir), load it
-      // TODO: If there is already subtitle files(opened or loaded), load it
-      // TODO: If there is no (chinese/default language) text track, try translate api
 
-      this.loadTextTrack();
+      this.loadTextTracks();
     },
     onTimeupdate() {
       console.log('ontimeupdate');
@@ -91,56 +85,74 @@ export default {
       console.log('onSubTrackLoaded');
       this.$refs.customTrack.mode = 'showing';
     },
-    loadTextTrack() {
-      // https://gist.github.com/denilsonsa/aeb06c662cf98e29c379
-      // https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
-      // Hide all the current text tracks
+    loadTextTracks() {
+      /* TODO:
+       * 字幕代码我自己觉得很不满意，期待更好的处理 - Tomasen
+       * move subtitle process to another component
+       * DOCs:
+       * https://gist.github.com/denilsonsa/aeb06c662cf98e29c379
+       * https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
+       * https://hacks.mozilla.org/2014/07/adding-captions-and-subtitles-to-html5-video/
+       */
+
       const vid = this.$refs.videoCanvas;
+
+      // hide every text text/subtitle tracks at beginning
       for (let i = 0; i < vid.textTracks.length; i += 1) {
-        // hide every track at beginning
         vid.textTracks[i].mode = 'hidden';
       }
-      // create our subtitle track
+
+      // create our own text/subtitle track
       const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
 
-      let subPath = path.basename(vid.src, path.extname(vid.src));
-      subPath += '.srt';
-      subPath = path.join(path.dirname(vid.src), subPath);
-      subPath = subPath.replace(/^file:/, '');
+      /*
+       * TODO:
+       * If there is already text track, load it
+       * If there is already subtitle files(opened or loaded), load it
+       * If there is no (chinese/default language) text track, try translate api
+       */
 
-      fs.exists(subPath, (exists) => {
-        console.log(exists ? 'subtitle is here' : 'no subtitle!');
-
-        if (exists) {
-          // Automatically track and cleanup files at exit
-          // temp.track();
-          // const stream = temp.createWriteStream({ suffix: '.vtt' });
-          const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
-          parser.oncue = (cue) => {
-            sub0.addCue(cue);
-            console.log(cue);
-          };
-          parser.onflush = () => {
+      let loadingTextTrack = false;
+      let shownTextTrack = false;
+      // If there is already subtitle files(same dir), load it
+      this.findSubtitleFilesByVidPath(vid.src, (subPath) => {
+        console.log(subPath);
+        // Automatically track and cleanup files at exit
+        // temp.track();
+        // const stream = temp.createWriteStream({ suffix: '.vtt' });
+        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+        parser.oncue = (cue) => {
+          sub0.addCue(cue);
+          console.log(cue);
+        };
+        parser.onflush = () => {
+          if (!shownTextTrack) {
             sub0.mode = 'showing';
-          };
+            shownTextTrack = true;
+          }
+        };
+        loadingTextTrack = true;
 
-          const readStream = fs.createReadStream(subPath).pipe(srt2vtt());
-          readStream
-            .on('data', (chunk) => {
-              parser.parse(chunk.toString('utf8'));
-            })
-            .on('end', () => {
-              parser.flush();
-              console.log('finish reading srt');
-            });
-        } else if (process.env.NODE_ENV !== 'production') {
+        const readStream = fs.createReadStream(subPath).pipe(srt2vtt());
+        readStream
+          .on('data', (chunk) => {
+            parser.parse(chunk.toString('utf8'));
+          })
+          .on('end', () => {
+            parser.flush();
+            console.log('finish reading srt');
+          });
+      });
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`loadingTextTrack ${loadingTextTrack}`);
+        if (!loadingTextTrack) {
           // Loading subtitle test
           const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
           sub0.addCue(cue0);
           sub0.mode = 'showing';
         }
-      });
-      console.log(subPath);
+      }
     },
     $_controlWindowSize(newWidth, newHeight) {
       this.currentWindow.setBounds({
