@@ -61,6 +61,11 @@ export default {
         this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
         this.videoExisted = true;
       }
+      // TODO: If there is already text track, load it
+      // TODO: If there is already subtitle files, load it
+      // TODO: If there is no (chinese/default language) text track, try translate api
+
+      this.loadTextTrack(null);
     },
     onTimeupdate() {
       console.log('ontimeupdate');
@@ -74,6 +79,15 @@ export default {
       const t = Math.floor(this.$refs.videoCanvas.duration);
       if (t !== this.$store.state.PlaybackState.duration) {
         this.$store.commit('Duration', t);
+      }
+    },
+    loadTextTrack(file) {
+      // TODO: https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
+      const sub0 = this.$refs.videoCanvas.addTextTrack('subtitles');
+      if (file === null) {
+        const cue0 = new VTTCue(0, 30000, '测试字幕 subtitle test');
+        sub0.addCue(cue0);
+        sub0.mode = 'showing';
       }
     },
     $_controlWindowSize(newWidth, newHeight) {

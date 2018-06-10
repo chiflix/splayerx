@@ -177,10 +177,8 @@ new Vue({
       const { app } = this.$electron.remote;
       const version = app.getVersion();
 
-      Vue.http.headers.common.Authorization = `Basic ${userUUID}`;
+      Vue.http.headers.common['X-Application-Token'] = userUUID;
       Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
-
-      console.log(Vue.http.headers.common.Authorization);
     });
 
     window.addEventListener('keypress', (e) => {
