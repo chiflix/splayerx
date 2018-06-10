@@ -9,11 +9,20 @@
       @loadedmetadata="onMetaLoaded"
       @durationchange="onDurationChange"
       :src="src">
+      <track ref="customTrack"
+        kind="subtitles"
+        label="splayer-custom"
+        @load="onSubTrackLoaded"
+        />
     </video>
   </div>
 </template>;
 
 <script>
+import path from 'path';
+import fs from 'fs';
+import srt2vtt from 'srt-to-vtt';
+import { WebVTT } from 'vtt.js';
 // https://www.w3schools.com/tags/ref_av_dom.asp
 
 export default {
@@ -66,7 +75,7 @@ export default {
       // TODO: If there is already subtitle files(opened or loaded), load it
       // TODO: If there is no (chinese/default language) text track, try translate api
 
-      this.loadTextTrack(null);
+      this.loadTextTrack();
     },
     onTimeupdate() {
       console.log('ontimeupdate');
@@ -82,27 +91,60 @@ export default {
         this.$store.commit('Duration', t);
       }
     },
-    loadTextTrack(file) {
+    onSubTrackLoaded() {
+      console.log('onSubTrackLoaded');
+      this.$refs.customTrack.mode = 'showing';
+    },
+    loadTextTrack() {
+      // https://gist.github.com/denilsonsa/aeb06c662cf98e29c379
       // https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
       // Hide all the current text tracks
       const vid = this.$refs.videoCanvas;
-      let sub0 = null;
       for (let i = 0; i < vid.textTracks.length; i += 1) {
+        // hide every track at beginning
         vid.textTracks[i].mode = 'hidden';
-        if (vid.textTracks[i].label === 'splayer-custom') {
-          sub0 = vid.textTracks[i];
-          vid.textTracks[i].mode = 'showing';
+      }
+      // create our subtitle track
+      const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
+
+      let subPath = path.basename(vid.src, path.extname(vid.src));
+      subPath += '.srt';
+      subPath = path.join(path.dirname(vid.src), subPath);
+      subPath = subPath.replace(/^file:/, '');
+
+      fs.exists(subPath, (exists) => {
+        console.log(exists ? 'subtitle is here' : 'no subtitle!');
+
+        if (exists) {
+          // Automatically track and cleanup files at exit
+          // temp.track();
+          // const stream = temp.createWriteStream({ suffix: '.vtt' });
+          const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+          parser.oncue = (cue) => {
+            sub0.addCue(cue);
+            console.log(cue);
+          };
+          parser.onflush = () => {
+            sub0.mode = 'showing';
+          };
+
+          const readStream = fs.createReadStream(subPath).pipe(srt2vtt());
+          readStream
+            .on('data', (chunk) => {
+              parser.parse(chunk.toString('utf8'));
+            })
+            .on('end', () => {
+              parser.flush();
+              console.log('finish reading srt');
+            });
+        } else if (process.env.NODE_ENV !== 'production') {
+          // Loading subtitle test
+          const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
+          sub0.addCue(cue0);
+          sub0.mode = 'showing';
         }
-      }
-
-      if (sub0 === null) {
-        sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
-        const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
-        sub0.addCue(cue0);
-        sub0.mode = 'showing';
-      }
-
-      console.log(file);
+      });
+      console.log(subPath);
     },
     $_controlWindowSize(newWidth, newHeight) {
       this.currentWindow.setBounds({
