@@ -1,6 +1,3 @@
-import path from 'path';
-import fs from 'fs';
-
 export default {
   methods: {
     timecodeFromSeconds(s) {
@@ -30,29 +27,6 @@ export default {
         return `-${minutes}:${seconds}`;
       }
       return `${minutes}:${seconds}`;
-    },
-    findSubtitleFilesByVidPath(vidPath, callback) {
-      vidPath = vidPath.replace(/^file:\/\//, '');
-      const baseName = path.basename(vidPath, path.extname(vidPath));
-      const dirPath = path.dirname(vidPath);
-      const filter = /\.(srt|vtt)$/;
-
-      if (!fs.existsSync(dirPath)) {
-        console.log(`no dir ${dirPath}`);
-        return;
-      }
-
-      const files = fs.readdirSync(dirPath);
-      for (let i = 0; i < files.length; i += 1) {
-        const filename = path.join(dirPath, files[i]);
-        const stat = fs.lstatSync(filename);
-        if (!stat.isDirectory()) {
-          if (files[i].startsWith(baseName) && filter.test(files[i])) {
-            console.log(`found subtitle file: ${files[i]}`);
-            callback(filename);
-          }
-        }
-      }
     },
   },
 };
