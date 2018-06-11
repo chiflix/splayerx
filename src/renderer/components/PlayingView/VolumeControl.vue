@@ -147,6 +147,7 @@ export default {
   width: 35px;
   height: 150px;
   -webkit-app-region: no-drag;
+  z-index: 500;
 
   .container {
     position: relative;
@@ -172,6 +173,7 @@ export default {
   .button {
     position: absolute;
     bottom: 0;
+    right:0;
     width: 35px;
     height: 30px;
   }
