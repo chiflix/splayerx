@@ -57,7 +57,10 @@ export default {
     },
     onPlaying() {
       console.log('onplaying');
-      this.globalIntervalFunc = setInterval(this.timeUpdate, 50);
+      // set interval to get update time
+      if (this.$refs.videoCanvas.duration <= 120) {
+        this.globalIntervalFunc = setInterval(this.timeUpdate, 50);
+      }
     },
     onCanPlay() {
       // the video is ready to start playing
@@ -304,12 +307,8 @@ export default {
     });
   },
   mounted() {
-    /**
-     * Todo:
-     * improve the effeciency
-     */
-    this.timeUpdate();
-    this.globalIntervalFunc = setInterval(this.timeUpdate, 50);
+    // this.timeUpdate();
+    // this.globalIntervalFunc = setInterval(this.timeUpdate, 50);
   },
 };
 </script>
