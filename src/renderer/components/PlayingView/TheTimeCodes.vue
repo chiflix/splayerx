@@ -89,8 +89,8 @@ export default {
       }
     },
     isRemainTime() {
-      
-    }
+
+    },
   },
   created() {
     this.$bus.$on('timecode-appear', () => {
