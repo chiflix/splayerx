@@ -4,7 +4,9 @@
     @mousedown.capture.stop="switchStateOfContext"
     @mouseover.capture.stop="appearTimeCode"
     v-show="showTimeCode">
-        <span class="firstContext">{{ firstContext }}<span class="secondContext" v-if="hasDuration"> / {{ secondContext }}</span></span>
+        <span class="minusSign" v-if="isRemainTime"></span>
+        <span class="firstContext">{{ firstContext }}</span>
+        <span class="secondContext" v-if="hasDuration"> / {{ secondContext }}</span>
   </div>
 </transition>
 </template>;
@@ -86,6 +88,9 @@ export default {
         default: return this.duration;
       }
     },
+    isRemainTime() {
+      
+    }
   },
   created() {
     this.$bus.$on('timecode-appear', () => {
@@ -125,10 +130,10 @@ export default {
     line-height: 24px;
     letter-spacing: 0.2px;
     user-select: none;
+  }
 
-    .secondContext {
-      color: rgba(255, 255, 255, 0.5);
-    }
+  .secondContext {
+    color: rgba(255, 255, 255, 0.5);
   }
 }
 .timing:hover {
