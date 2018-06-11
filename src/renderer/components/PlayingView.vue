@@ -56,7 +56,6 @@ export default {
       this.$bus.$emit('timecode-appear');
     },
     hideAllWidgets() {
-      console.log('mouseout');
       this.showMask = false;
       this.$bus.$emit('volumecontroller-hide');
       this.$bus.$emit('progressbar-hide');

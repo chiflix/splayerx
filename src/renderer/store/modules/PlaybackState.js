@@ -4,12 +4,16 @@ const state = {
   Duration: NaN,
   Volume: 0.2,
   SrcOfVideo: '',
+  PlaybackRate: 1.0,
 };
 
 const getters = {
 };
 
 const mutations = {
+  PlaybackRate(state, t) {
+    state.PlaybackRate = t;
+  },
   SrcOfVideo(state, t) {
     state.SrcOfVideo = t;
   },

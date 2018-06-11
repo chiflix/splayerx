@@ -248,6 +248,9 @@ export default {
     },
   },
   computed: {
+    playbackRate() {
+      return this.$store.state.PlaybackState.PlaybackRate;
+    },
     volume() {
       return this.$store.state.PlaybackState.Volume;
     },
@@ -262,6 +265,10 @@ export default {
     volume(newVolume) {
       console.log(`set video volume ${newVolume}`);
       this.$refs.videoCanvas.volume = newVolume;
+    },
+    playbackRate(newRate) {
+      console.log(`set video volume ${newRate}`);
+      this.$refs.videoCanvas.playbackRate = newRate;
     },
   },
   created() {
