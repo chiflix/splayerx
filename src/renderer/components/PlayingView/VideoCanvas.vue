@@ -17,6 +17,7 @@
 import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
+import { setInterval, clearInterval } from 'timers';
 // https://www.w3schools.com/tags/ref_av_dom.asp
 
 export default {
@@ -41,6 +42,10 @@ export default {
     },
   },
   methods: {
+    timeUpdate() {
+      const time = this.$refs.videoCanvas.currentTime;
+      this.$store.commit('AccurateTime', time);
+    },
     onPause() {
       console.log('onpause');
     },
@@ -68,7 +73,6 @@ export default {
       this.loadTextTracks();
     },
     onTimeupdate() {
-      this.$store.commit('AccurateTime', this.$refs.videoCanvas.currentTime);
       console.log('ontimeupdate');
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
@@ -289,8 +293,20 @@ export default {
       console.log('seek event has been triggered', e);
       this.$refs.videoCanvas.currentTime = e;
       this.$store.commit('CurrentTime', e);
-      this.$store.commit('AccurateTime', e);
     });
+  },
+  mounted() {
+    /**
+     * Todo:
+     * improve the effeciency
+     */
+    this.timeUpdate();
+    const videoElement = document.getElementsByTagName('video')[0];
+    const update = setInterval(this.timeUpdate, 50);
+    if (videoElement.currentTime >= videoElement.duration) {
+      console.log('clearInterval');
+      clearInterval(update);
+    }
   },
 };
 </script>

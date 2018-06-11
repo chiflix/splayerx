@@ -22,7 +22,7 @@
         :style="{ width: positionOfReadyBar +'px' }"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
-      :style="{ width: progress +'%', transition:`width ${transitionTime}ms linear` }">
+      :style="{ width: progress +'%' }">
         <div class="line"></div>
       </div>
     </div>
@@ -31,7 +31,6 @@
 </template>;
 
 <script>
-import { setTimeout, clearTimeout } from 'timers';
 
 export default {
   data() {
@@ -43,8 +42,6 @@ export default {
       percentageOfReadyToPlay: 0,
       widthOfReadyToPlay: 0,
       videoRatio: 0,
-      onProgressBarClicked: false,
-      onProgressBarMoved: false,
     };
   },
   methods: {
@@ -73,7 +70,6 @@ export default {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return;
       }
-      this.onProgressBarClicked = true;
       this.onProgressSliderMousedown = true;
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
@@ -83,13 +79,11 @@ export default {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return;
       }
-      this.onProgressBarMoved = true;
       if (this.onProgressSliderMousedown) {
         const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
         const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
         this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       } else {
-        this.onProgressBarMoved = false;
         this.percentageOfReadyToPlay = e.clientX / this.$refs.sliderContainer.clientWidth;
         this.widthOfReadyToPlay = e.clientX;
         this.showScreenshot = true;
@@ -108,39 +102,6 @@ export default {
       }
       return (100 * this.$store.state.PlaybackState.AccurateTime)
         / this.$store.state.PlaybackState.Duration;
-    },
-    /**
-     * TODO:
-     * 1. 可拖拽进度条 -- done
-     * 2. 播放中进度条变化的处理(暂停后再继续)
-     */
-    transitionTime() {
-      const curTime = this.$store.state.PlaybackState.AccurateTime;
-      const totalTime = this.$store.state.PlaybackState.Duration;
-      if (curTime >= totalTime) {
-        return 185;
-      }
-      const videoElement = document.getElementsByTagName('video')[0];
-      if (this.onProgressBarMoved) {
-        return 0;
-      }
-      if (this.onProgressBarClicked) {
-        videoElement.pause();
-        this.onProgressBarClicked = false;
-        // videoElement.play();
-        // const delay = setTimeout(() => {
-        //   clearTimeout(delay);
-        //   this.onProgressBarClicked = false;
-        //   videoElement.play();
-        // }, 1);
-        return 0;
-      }
-      if (curTime > 0 && videoElement.paused) {
-        console.log(videoElement.currentTime);
-        this.$store.commit('AccurateTime', videoElement.currentTime);
-        return 50;
-      }
-      return 467;
     },
     heightofScreenshot() {
       return 170 / this.videoRatio;
