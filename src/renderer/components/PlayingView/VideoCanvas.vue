@@ -17,6 +17,7 @@
 import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
+import { setInterval, clearInterval } from 'timers';
 // https://www.w3schools.com/tags/ref_av_dom.asp
 
 export default {
@@ -25,6 +26,7 @@ export default {
       videoExisted: false,
       newWidthOfWindow: 0,
       newHeightOfWindow: 0,
+      globalIntervalFunc: null,
     };
   },
   props: {
@@ -41,11 +43,24 @@ export default {
     },
   },
   methods: {
+    timeUpdate() {
+      const { currentTime, duration } = this.$refs.videoCanvas;
+      if (currentTime >= duration || this.$refs.videoCanvas.paused) {
+        clearInterval(this.globalIntervalFunc);
+      } else {
+        console.log('time update');
+        this.$store.commit('AccurateTime', currentTime);
+      }
+    },
     onPause() {
       console.log('onpause');
     },
     onPlaying() {
       console.log('onplaying');
+      // set interval to get update time
+      if (this.$refs.videoCanvas.duration <= 120) {
+        this.globalIntervalFunc = setInterval(this.timeUpdate, 50);
+      }
     },
     onCanPlay() {
       // the video is ready to start playing
@@ -288,7 +303,12 @@ export default {
       console.log('seek event has been triggered', e);
       this.$refs.videoCanvas.currentTime = e;
       this.$store.commit('CurrentTime', e);
+      this.$store.commit('AccurateTime', e);
     });
+  },
+  mounted() {
+    // this.timeUpdate();
+    // this.globalIntervalFunc = setInterval(this.timeUpdate, 50);
   },
 };
 </script>
