@@ -14,6 +14,9 @@
 </template>;
 
 <script>
+import fs from 'fs';
+import srt2vtt from 'srt-to-vtt';
+import { WebVTT } from 'vtt.js';
 // https://www.w3schools.com/tags/ref_av_dom.asp
 
 export default {
@@ -61,6 +64,8 @@ export default {
         this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
         this.videoExisted = true;
       }
+
+      this.loadTextTracks();
     },
     onTimeupdate() {
       console.log('ontimeupdate');
@@ -74,6 +79,79 @@ export default {
       const t = Math.floor(this.$refs.videoCanvas.duration);
       if (t !== this.$store.state.PlaybackState.duration) {
         this.$store.commit('Duration', t);
+      }
+    },
+    onSubTrackLoaded() {
+      console.log('onSubTrackLoaded');
+      this.$refs.customTrack.mode = 'showing';
+    },
+    loadTextTracks() {
+      /* TODO:
+       * 字幕代码我自己觉得很不满意，期待更好的处理 - Tomasen
+       * move subtitle process to another component
+       * DOCs:
+       * https://gist.github.com/denilsonsa/aeb06c662cf98e29c379
+       * https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
+       * https://hacks.mozilla.org/2014/07/adding-captions-and-subtitles-to-html5-video/
+       */
+
+      const vid = this.$refs.videoCanvas;
+
+      // hide every text text/subtitle tracks at beginning
+      for (let i = 0; i < vid.textTracks.length; i += 1) {
+        vid.textTracks[i].mode = 'hidden';
+      }
+
+      // create our own text/subtitle track
+      const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
+
+      /*
+       * TODO:
+       * If there is already text track, load it
+       * If there is already subtitle files(opened or loaded), load it
+       * If there is no (chinese/default language) text track, try translate api
+       */
+
+      let loadingTextTrack = false;
+      let shownTextTrack = false;
+      // If there is already subtitle files(same dir), load it
+      this.findSubtitleFilesByVidPath(vid.src, (subPath) => {
+        console.log(subPath);
+        // Automatically track and cleanup files at exit
+        // temp.track();
+        // const stream = temp.createWriteStream({ suffix: '.vtt' });
+        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+        parser.oncue = (cue) => {
+          sub0.addCue(cue);
+          console.log(cue);
+        };
+        parser.onflush = () => {
+          if (!shownTextTrack) {
+            sub0.mode = 'showing';
+            shownTextTrack = true;
+          }
+        };
+        loadingTextTrack = true;
+
+        const readStream = fs.createReadStream(subPath).pipe(srt2vtt());
+        readStream
+          .on('data', (chunk) => {
+            parser.parse(chunk.toString('utf8'));
+          })
+          .on('end', () => {
+            parser.flush();
+            console.log('finish reading srt');
+          });
+      });
+
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`loadingTextTrack ${loadingTextTrack}`);
+        if (!loadingTextTrack) {
+          // Loading subtitle test
+          const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
+          sub0.addCue(cue0);
+          sub0.mode = 'showing';
+        }
       }
     },
     $_controlWindowSize(newWidth, newHeight) {
@@ -230,5 +308,12 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+// https://www.w3.org/TR/webvtt1/
+video::cue {
+  color: yellow;
+  text-shadow: 0px 0px 2px black;
+  background-color: transparent;
 }
 </style>

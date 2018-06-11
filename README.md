@@ -17,6 +17,7 @@
  会显示当前代码的测试覆盖率。
 - 使用 [Global Event Bus](https://alligator.io/vuejs/global-event-bus/) 做消息通讯
 - 使用 [vue-router](https://router.vuejs.org/en/) 和 [vuex](https://vuex.vuejs.org/en/intro.html) 用于跨组件数据交互。
+- 使用 [vue-resource](https://github.com/pagekit/vue-resource) 进行与 Restful API 服务器之间的通讯
 
 #### 注意事项
 
