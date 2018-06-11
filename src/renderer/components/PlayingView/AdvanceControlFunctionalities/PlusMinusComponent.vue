@@ -32,7 +32,7 @@ export default {
   },
   data() {
     return {
-      speed: 1,
+      //
     };
   },
   methods: {

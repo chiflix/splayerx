@@ -7,14 +7,23 @@
   <div
     :style="titleStyle"
     class="title">{{ item.title }}</div>
-  <PlusMinusComponent
-    v-if="item.functionality === 'plusMinus'"
+  <PlusMinusComponent v-if="item.functionality === 'plusMinus'"
     :direction="menuItemStyle.flexDirection"/>
-  <SwitchComponent v-else-if="item.functionality === 'switch'"/>
-  <SliderComponent v-else-if="item.functionality === 'slider'"/>
-  <SelectorComponent v-else-if="item.functionality === 'selector'"/>
-  <ListComponent v-else-if="item.functionality === 'list'"/>
-  <InfoComponent v-else-if="item.functionality === 'info'"/>
+  <SwitchComponent v-else-if="item.functionality === 'switch'"
+    :direction="menuItemStyle.flexDirection"/>
+
+  <SliderComponent v-else-if="item.functionality === 'slider'"
+    :direction="menuItemStyle.flexDirection"/>
+
+  <SelectorComponent v-else-if="item.functionality === 'selector'"
+    :direction="menuItemStyle.flexDirection"/>
+
+  <ListComponent v-else-if="item.functionality === 'list'"
+    :direction="menuItemStyle.flexDirection"/>
+
+  <InfoComponent v-else-if="item.functionality === 'info'"
+    :direction="menuItemStyle.flexDirection"/>
+
 </div>
 </template>;
 
