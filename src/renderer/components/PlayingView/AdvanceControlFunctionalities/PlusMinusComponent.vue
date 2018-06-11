@@ -2,22 +2,25 @@
   <div class="plus-minus">
     <div class="functionality"
       v-if="direction === 'column'">
-      <div class="plus-button">
-        +
-      </div>
-      <div class="current-speed">
-        {{ speed }}
-      </div>
-      <div class="minus-button">
+      <div class="minus-button"
+      @mousedown="onMinusButtonClick">
         -
       </div>
-      <div class="">
+      <div class="current-speed">
+        {{ playbackRate }}x
+      </div>
+      <div class="plus-button"
+       @mousedown="onPlusButtonClick">
+        +
+      </div>
+      <div class="reset-button"
+      @mousedown="onResetButtonClick">
         @
       </div>
     </div>
     <div class="brief-info"
       v-else-if="direction === 'row'">
-      {{ speed + 'x' }}
+      {{ playbackRate + 'x' }}
     </div>
   </div>
 </template>;
@@ -32,6 +35,26 @@ export default {
       speed: 1,
     };
   },
+  methods: {
+    onMinusButtonClick() {
+      if (this.playbackRate > 0) {
+        this.$store.commit('PlaybackRate', this.playbackRate - 0.1);
+      } else {
+        this.$store.commit('PlaybackRate', 0);
+      }
+    },
+    onPlusButtonClick() {
+      this.$store.commit('PlaybackRate', this.playbackRate + 0.1);
+    },
+    onResetButtonClick() {
+      this.$store.commit('PlaybackRate', 1);
+    },
+  },
+  computed: {
+    playbackRate() {
+      return Math.round(this.$store.state.PlaybackState.PlaybackRate * 10) / 10;
+    },
+  },
 };
 </script>
 
@@ -40,9 +63,19 @@ export default {
   order: 2;
 
   .functionality {
+    font-size: 16px;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+  }
+
+  .plus-button:hover, .minus-button:hover, .reset-button:hover {
+    cursor: pointer;
+  }
+
+  .current-speed {
+    cursor: default;
+    width: 5px;
   }
 
   .brief-info {
