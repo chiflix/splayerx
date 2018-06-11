@@ -1,12 +1,12 @@
 <template>
   <transition name="fade">
   <div class="timing" id="timing"
-    @mousedown.capture.stop="switchStateOfContext"
-    @mouseover.capture.stop="appearTimeCode"
+    @mousedown.stop="switchStateOfContent"
+    @mouseover.stop="appearTimeCode"
     v-show="showTimeCode">
-        <span class="minusSign" v-if="isRemainTime"></span>
-        <span class="firstContext">{{ firstContext }}</span>
-        <span class="secondContext" v-if="hasDuration"> / {{ secondContext }}</span>
+        <span class="firstContent" v-bind:class="{ remainTime: isRemainTime.first }">{{ content.first }}</span>
+        <span class="splitSign">/</span>
+        <span class="secondContent" v-bind:class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ content.second }}</span>
   </div>
 </transition>
 </template>;
@@ -17,26 +17,20 @@ export default {
   name: 'TimeCodes',
   data() {
     return {
-      contextState: 0,
       showTimeCode: false,
       timeoutIdOftimeCodeDisappearDelay: 0,
+      contentState: 0,
+      ContentStateEnum: {
+        DEFAULT: 0,
+        CURRENT_REMAIN: 1,
+        REMAIN_DURATION: 2,
+      },
     };
   },
   methods: {
-    switchStateOfContext() {
+    switchStateOfContent() {
       this.$_clearTimeoutDelay();
-      switch (this.contextState) {
-        case 0:
-          this.contextState = 1;
-          break;
-        case 1:
-          this.contextState = 2;
-          break;
-        case 2:
-          this.contextState = 0;
-          break;
-        default: this.contextState = 0;
-      }
+      this.contentState = (this.contentState + 1) % 3;
     },
     appearTimeCode() {
       this.$_clearTimeoutDelay();
@@ -55,6 +49,12 @@ export default {
     hasDuration() {
       return !Number.isNaN(this.$store.state.PlaybackState.Duration);
     },
+    isRemainTime() {
+      return {
+        first: this.contentState === this.ContentStateEnum.REMAIN_DURATION,
+        second: this.contentState === this.ContentStateEnum.CURRENT_REMAIN,
+      };
+    },
     duration() {
       return this.timecodeFromSeconds(this.$store.state.PlaybackState.Duration);
     },
@@ -66,30 +66,16 @@ export default {
         = -(this.$store.state.PlaybackState.Duration - this.$store.state.PlaybackState.CurrentTime);
       return this.timecodeFromSeconds(remainTime);
     },
-    firstContext() {
-      switch (this.contextState) {
-        case 0:
-          return this.currentTime;
-        case 1:
-          return this.remainTime;
-        case 2:
-          return this.currentTime;
-        default: return this.currentTime;
+    content() {
+      switch (this.contentState) {
+        case this.ContentStateEnum.DEFAULT:
+          return { first: this.currentTime, second: this.duration };
+        case this.ContentStateEnum.CURRENT_REMAIN:
+          return { first: this.currentTime, second: this.remainTime };
+        case this.ContentStateEnum.REMAIN_DURATION:
+          return { first: this.remainTime, second: this.duration };
+        default: return { first: this.currentTime, second: this.duration };
       }
-    },
-    secondContext() {
-      switch (this.contextState) {
-        case 0:
-          return this.duration;
-        case 1:
-          return this.duration;
-        case 2:
-          return this.remainTime;
-        default: return this.duration;
-      }
-    },
-    isRemainTime() {
-
     },
   },
   created() {
@@ -117,22 +103,35 @@ export default {
   position: absolute;
   bottom: 31px;
   left: 37px;
-  height: 22px;
+  height: 23px;
   width: auto;
 
-  .firstContext {
+  .firstContent {
     display: inline-block;
     color: rgba(255, 255, 255, 1);
     text-shadow:  0 1px 0 rgba(0,0,0,.1),
                   1px 1px 0 rgba(0,0,0,.1);
     font-weight: 500;
     font-size: 23px;
-    line-height: 24px;
+    line-height: 23px;
     letter-spacing: 0.2px;
     user-select: none;
   }
 
-  .secondContext {
+  .secondContent {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .remainTime {
+    &::before {
+      content: '-';
+      padding-right: 2px;
+      font-family: sans-serif;
+      display: inline-block;
+    }
+  }
+  
+  .splitSign {
     color: rgba(255, 255, 255, 0.5);
   }
 }

@@ -22,12 +22,12 @@ export default {
           hours = `${hours}`;
         }
         if (s < 0) {
-          return `-${hours}:${minutes}:${seconds}`;
+          return `${hours}:${minutes}:${seconds}`;
         }
         return `${hours}:${minutes}:${seconds}`;
       }
       if (s < 0) {
-        return `-${minutes}:${seconds}`;
+        return `${minutes}:${seconds}`;
       }
       return `${minutes}:${seconds}`;
     },
