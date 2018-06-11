@@ -68,8 +68,8 @@ export default {
       this.loadTextTracks();
     },
     onTimeupdate() {
-      console.log('ontimeupdate');
       this.$store.commit('AccurateTime', this.$refs.videoCanvas.currentTime);
+      console.log('ontimeupdate');
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
@@ -289,6 +289,7 @@ export default {
       console.log('seek event has been triggered', e);
       this.$refs.videoCanvas.currentTime = e;
       this.$store.commit('CurrentTime', e);
+      this.$store.commit('AccurateTime', e);
     });
   },
 };
