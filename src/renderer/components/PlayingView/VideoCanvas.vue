@@ -26,6 +26,7 @@ export default {
       videoExisted: false,
       newWidthOfWindow: 0,
       newHeightOfWindow: 0,
+      globalIntervalFunc: null,
     };
   },
   props: {
@@ -43,14 +44,20 @@ export default {
   },
   methods: {
     timeUpdate() {
-      const time = this.$refs.videoCanvas.currentTime;
-      this.$store.commit('AccurateTime', time);
+      const { currentTime, duration } = this.$refs.videoCanvas;
+      if (currentTime >= duration || this.$refs.videoCanvas.paused) {
+        clearInterval(this.globalIntervalFunc);
+      } else {
+        console.log('time update');
+        this.$store.commit('AccurateTime', currentTime);
+      }
     },
     onPause() {
       console.log('onpause');
     },
     onPlaying() {
       console.log('onplaying');
+      this.globalIntervalFunc = setInterval(this.timeUpdate, 50);
     },
     onCanPlay() {
       // the video is ready to start playing
@@ -293,6 +300,7 @@ export default {
       console.log('seek event has been triggered', e);
       this.$refs.videoCanvas.currentTime = e;
       this.$store.commit('CurrentTime', e);
+      this.$store.commit('AccurateTime', e);
     });
   },
   mounted() {
@@ -301,12 +309,7 @@ export default {
      * improve the effeciency
      */
     this.timeUpdate();
-    const videoElement = document.getElementsByTagName('video')[0];
-    const update = setInterval(this.timeUpdate, 50);
-    if (videoElement.currentTime >= videoElement.duration) {
-      console.log('clearInterval');
-      clearInterval(update);
-    }
+    this.globalIntervalFunc = setInterval(this.timeUpdate, 50);
   },
 };
 </script>
