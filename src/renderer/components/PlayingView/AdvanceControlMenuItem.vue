@@ -15,7 +15,7 @@
   <SliderComponent v-else-if="item.functionality === 'slider'"
     :direction="menuItemStyle.flexDirection"/>
 
-  <SelectorComponent v-else-if="item.functionality === 'selector'"
+  <PickerComponent v-else-if="item.functionality === 'selector'"
     :direction="menuItemStyle.flexDirection"/>
 
   <ListComponent v-else-if="item.functionality === 'list'"
@@ -31,7 +31,7 @@
 import PlusMinusComponent from './AdvanceControlFunctionalities/PlusMinusComponent.vue';
 import SwitchComponent from './AdvanceControlFunctionalities/SwitchComponent.vue';
 import SliderComponent from './AdvanceControlFunctionalities/SliderComponent.vue';
-import SelectorComponent from './AdvanceControlFunctionalities/SelectorComponent.vue';
+import PickerComponent from './AdvanceControlFunctionalities/PickerComponent.vue';
 import ListComponent from './AdvanceControlFunctionalities/ListComponent.vue';
 import InfoComponent from './AdvanceControlFunctionalities/InfoComponent.vue';
 
@@ -40,7 +40,7 @@ export default {
     PlusMinusComponent,
     SwitchComponent,
     SliderComponent,
-    SelectorComponent,
+    PickerComponent,
     ListComponent,
     InfoComponent,
   },
