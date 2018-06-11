@@ -100,7 +100,7 @@ export default {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return 0;
       }
-      return (100 * this.$store.state.PlaybackState.CurrentTime)
+      return (100 * this.$store.state.PlaybackState.AccurateTime)
         / this.$store.state.PlaybackState.Duration;
     },
     heightofScreenshot() {
