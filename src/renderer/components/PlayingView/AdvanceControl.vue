@@ -37,12 +37,12 @@ export default {
         {
           id: 0,
           title: 'Speed',
-          functionality: '1x',
+          functionality: 'plusMinus',
         },
         {
           id: 1,
           title: 'Subtitle',
-          functionality: 'On',
+          functionality: 'switch',
         },
         {
           id: 2,
@@ -57,12 +57,12 @@ export default {
         {
           id: 0,
           title: 'Speed',
-          functionality: '1x',
+          functionality: 'plusMinus',
         },
         {
           id: 1,
           title: 'Subtitle',
-          functionality: 'On',
+          functionality: 'switch',
         },
         {
           id: 2,

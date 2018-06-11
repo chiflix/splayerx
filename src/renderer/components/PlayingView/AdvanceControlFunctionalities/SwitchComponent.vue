@@ -1,6 +1,6 @@
 <template>
-  <div class="advanced" id="advanced">
-    Hey！
+  <div class="switch">
+    Hello!
   </div>
 </template>;
 
@@ -8,4 +8,7 @@
 </script>
 
 <style lang="scss">
+.switch {
+  order: 2;
+}
 </style>

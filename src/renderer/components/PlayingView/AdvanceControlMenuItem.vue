@@ -7,17 +7,34 @@
   <div
     :style="titleStyle"
     class="title">{{ item.title }}</div>
-  <div
-    :style="functionStyle"
-    class="functionality"
-    @mousedown.stop="onSecondItemClick">
-    {{ item.functionality }}
-  </div>
+  <PlusMinusComponent
+    v-if="item.functionality === 'plusMinus'"
+    :direction="menuItemStyle.flexDirection"/>
+  <SwitchComponent v-else-if="item.functionality === 'switch'"/>
+  <SliderComponent v-else-if="item.functionality === 'slider'"/>
+  <SelectorComponent v-else-if="item.functionality === 'selector'"/>
+  <ListComponent v-else-if="item.functionality === 'list'"/>
+  <InfoComponent v-else-if="item.functionality === 'info'"/>
 </div>
 </template>;
 
 <script>
+import PlusMinusComponent from './AdvanceControlFunctionalities/PlusMinusComponent.vue';
+import SwitchComponent from './AdvanceControlFunctionalities/SwitchComponent.vue';
+import SliderComponent from './AdvanceControlFunctionalities/SliderComponent.vue';
+import SelectorComponent from './AdvanceControlFunctionalities/SelectorComponent.vue';
+import ListComponent from './AdvanceControlFunctionalities/ListComponent.vue';
+import InfoComponent from './AdvanceControlFunctionalities/InfoComponent.vue';
+
 export default {
+  components: {
+    PlusMinusComponent,
+    SwitchComponent,
+    SliderComponent,
+    SelectorComponent,
+    ListComponent,
+    InfoComponent,
+  },
   props: {
     item: Object,
   },
@@ -34,19 +51,16 @@ export default {
       titleStyle: {
         order: 1,
       },
-      functionStyle: {
-        order: 2,
-      },
       settingLevel: [
         {
           id: 0,
           title: 'Speed',
-          functionality: '1x',
+          functionality: 'plusMinus',
         },
         {
           id: 1,
           title: 'Subtitle',
-          functionality: 'On',
+          functionality: 'switch',
         },
         {
           id: 2,
@@ -61,12 +75,12 @@ export default {
         {
           id: 0,
           title: 'Language',
-          functionality: '1x',
+          functionality: 'plusMinus',
         },
         {
           id: 1,
           title: 'Source',
-          functionality: 'On',
+          functionality: 'switch',
         },
         {
           id: 2,
@@ -123,12 +137,7 @@ export default {
       this.titleStyle.color = 'rgba(0,0,0,1)';
       this.titleStyle.height = '100%';
 
-      this.functionStyle.textAlign = 'right';
-      this.functionStyle.height = '100%';
-
       this.menuItemStyle.flexDirection = 'row';
-
-      this.item.functionality = this.currentFunctionality;
     },
     onMenuItemMouseOver() {
       this.$_setItemBackground();
@@ -139,32 +148,13 @@ export default {
           this.titleStyle.fontSize = '12px';
           this.titleStyle.color = 'rgba(0, 0, 0, 1)';
 
-          this.functionStyle.height = '70%';
-          this.functionStyle.textAlign = 'center';
-
           this.menuItemStyle.flexDirection = 'column';
-
-          this.currentFunctionality = this.item.functionality;
-          this.item.functionality = this.$_setContent();
           break;
         case 'Audio':
         case 'Media Info':
           this.menuItemStyle.backgroundColor = 'rgba(0, 0, 0, 0.3)';
-          this.item.functionality = this.$_setContent();
           break;
         default: break;
-      }
-    },
-    $_setContent() {
-      switch (this.item.title) {
-        case 'Speed':
-          return '+ 1x -';
-        case 'Subtitle':
-          return 'On Off';
-        case 'Audio':
-        case 'Media Info':
-          return '>';
-        default: return '';
       }
     },
     $_setItemBackground() {
@@ -205,11 +195,6 @@ export default {
   .items {
     display: flex;
     height: 35px;
-
-    .functionality {
-      padding: 0;
-      cursor: pointer;
-    }
 
     .title {
       padding: 0;
