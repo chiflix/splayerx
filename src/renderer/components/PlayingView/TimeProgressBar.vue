@@ -172,7 +172,7 @@ export default {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 20px;
+  height: 30px;
   -webkit-app-region: no-drag;
 
   .progress-container:hover {
