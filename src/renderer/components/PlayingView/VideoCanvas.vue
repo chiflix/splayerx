@@ -17,7 +17,6 @@
 import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
-import { setInterval, clearInterval } from 'timers';
 // https://www.w3schools.com/tags/ref_av_dom.asp
 
 export default {
@@ -58,8 +57,9 @@ export default {
     onPlaying() {
       console.log('onplaying');
       // set interval to get update time
-      if (this.$refs.videoCanvas.duration <= 120) {
-        this.globalIntervalFunc = setInterval(this.timeUpdate, 50);
+      const { duration } = this.$refs.videoCanvas;
+      if (duration <= 240) {
+        this.globalIntervalFunc = setInterval(this.timeUpdate, 10);
       }
     },
     onCanPlay() {

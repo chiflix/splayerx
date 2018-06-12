@@ -42,6 +42,7 @@ new Vue({
       // TODO: check if file exist
       // TODO: check if there is subtitle file in the same directory
       // TODO: load subtitles? or add subtitle file to playlist
+
       this.$storage.set('recent-played', path);
       this.$store.commit('SrcOfVideo', path);
       this.$router.push({
@@ -56,7 +57,7 @@ new Vue({
           submenu: [
             {
               label: 'Open',
-              accelerator: 'Cmd+O',
+              accelerator: 'Cmd+N',
               click: () => {
                 dialog.showOpenDialog({
                   properties: ['openFile'],
@@ -65,99 +66,32 @@ new Vue({
                     extensions: ['mp4', 'mkv', 'mov'],
                   }],
                 }, (file) => {
-                  if (file) {
-                    const path = `file:///${file}`;
-                    this.$storage.set('recent-played', path);
-                    this.$store.commit('SrcOfVideo', path);
-                    this.$router.push({
-                      name: 'playing-view',
-                    });
-                  }
+                  this.openVideoFile(file);
                 });
               },
             },
-            {
-              label: 'Open URL',
-              accelerator: 'Cmd+U',
-            },
+            { label: 'Open URL' },
             { label: 'Open Recent' },
-            { role: 'Close' },
+            { label: 'Close' },
           ],
         },
         {
           label: 'Playback',
           submenu: [
             { label: 'Play from last stopped place' },
-            {
-              label: 'Increase Size',
-              click: () => {
-                // const currentScreen = this.$electron.screen.getPrimaryDisplay();
-                // const { videoHeight, videoWidth } = this.$refs.videoCanvas;
-                // const { width: screenWidth, height: screenHeight } = currentScreen.workAreaSize;
-              },
-            },
+            { label: 'Increase Size' },
             { label: 'Decrease Size' },
             { type: 'separator' },
             { label: 'Increase Playback Speed' },
             { label: 'Decrease Playback Speed' },
-            /** */
             { type: 'separator' },
-            {
-              label: 'Forward 10s',
-              accelerator: 'Right',
-              click: () => {
-                this.timeControl('Forward', 10);
-              },
-            },
-            {
-              label: 'Forward 1min',
-              accelerator: 'Option+Right',
-              click: () => {
-                this.timeControl('Forward', 60);
-              },
-            },
-            {
-              label: 'Rewind 10s',
-              accelerator: 'Left',
-              click: () => {
-                this.timeControl('Rewind', 10);
-              },
-            },
-            {
-              label: 'Rewind 1min',
-              accelerator: 'Option+Left',
-              click: () => {
-                this.timeControl('Rewind', 60);
-              },
-            },
-            /** */
+            { label: 'Increase Volume' },
+            { label: 'Decrease Volume' },
             { type: 'separator' },
-            {
-              label: 'Increase Volume',
-              accelerator: 'Up',
-              click: () => {
-                this.volumeControl('Increse');
-              },
-            },
-            {
-              label: 'Decrease Volume',
-              accelerator: 'Down',
-              click: () => {
-                this.volumeControl('Decrese');
-              },
-            },
-            /** */
+            { label: 'Increase Audio Delay' },
+            { label: 'Decrease Audio Delay' },
             { type: 'separator' },
-            {
-              label: 'Increase Audio Delay',
-            },
-            {
-              label: 'Decrease Audio Delay',
-            },
-            { type: 'separator' },
-            {
-              label: 'Capture Screen',
-            },
+            { label: 'Capture Screen' },
           ],
         },
         {
@@ -186,7 +120,7 @@ new Vue({
           submenu: [
             { role: 'minimize' },
             { label: 'Enter Full Screen', accelerator: 'Ctrl+Cmd+F' },
-            { label: 'Bring All To Front', role: 'hideOthers', accelerator: '' },
+            { role: 'close' },
             { type: 'separator' },
             { label: 'Media Info' },
           ],
@@ -229,42 +163,6 @@ new Vue({
       const menu = Menu.buildFromTemplate(template);
       Menu.setApplicationMenu(menu);
     },
-    timeControl(type, seconds) {
-      // show progress bar
-      this.$bus.$emit('progressbar-appear');
-      this.$bus.$emit('progressslider-appear');
-      this.$bus.$emit('timecode-appear');
-      const curTime = this.$store.state.PlaybackState.CurrentTime;
-      // const duration = this.$store.PlaybackState.Duration;
-      if (type === 'Forward') {
-        this.$bus.$emit('seek', curTime + seconds);
-      }
-      if (type === 'Rewind') {
-        if (curTime < seconds) {
-          seconds = curTime;
-        }
-        this.$bus.$emit('seek', curTime - seconds);
-      }
-    },
-    volumeControl(type) {
-      // show volume controller
-      this.$bus.$emit('volumecontroller-appear');
-      this.$bus.$emit('volumeslider-appear');
-      if (type === 'Increse') {
-        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
-        } else {
-          this.$store.commit('Volume', 1);
-        }
-      }
-      if (type === 'Decrese') {
-        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
-        } else {
-          this.$store.commit('Volume', 0);
-        }
-      }
-    },
   },
   mounted() {
     this.createMenu();
@@ -286,6 +184,52 @@ new Vue({
     window.addEventListener('keypress', (e) => {
       if (e.key === ' ') { // space
         this.$bus.$emit('toggle-playback');
+      }
+    });
+    window.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'ArrowUp':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+          } else {
+            this.$store.commit('Volume', 1);
+          }
+          break;
+
+        case 'ArrowDown':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+          } else {
+            this.$store.commit('Volume', 0);
+          }
+          break;
+
+        case 'ArrowLeft':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
+          }
+          break;
+
+        case 'ArrowRight':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
+          }
+          break;
+        default:
       }
     });
     window.addEventListener('drop', (e) => {
