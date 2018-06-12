@@ -25,6 +25,7 @@ export default {
       videoExisted: false,
       newWidthOfWindow: 0,
       newHeightOfWindow: 0,
+      globalIntervalFunc: null,
     };
   },
   props: {
@@ -41,11 +42,25 @@ export default {
     },
   },
   methods: {
+    timeUpdate() {
+      const { currentTime, duration } = this.$refs.videoCanvas;
+      if (currentTime >= duration || this.$refs.videoCanvas.paused) {
+        clearInterval(this.globalIntervalFunc);
+      } else {
+        console.log('time update');
+        this.$store.commit('AccurateTime', currentTime);
+      }
+    },
     onPause() {
       console.log('onpause');
     },
     onPlaying() {
       console.log('onplaying');
+      // set interval to get update time
+      const { duration } = this.$refs.videoCanvas;
+      if (duration <= 240) {
+        this.globalIntervalFunc = setInterval(this.timeUpdate, 10);
+      }
     },
     onCanPlay() {
       // the video is ready to start playing
@@ -69,6 +84,7 @@ export default {
     },
     onTimeupdate() {
       console.log('ontimeupdate');
+      this.$store.commit('AccurateTime', this.$refs.videoCanvas.currentTime);
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
@@ -248,6 +264,9 @@ export default {
     },
   },
   computed: {
+    playbackRate() {
+      return this.$store.state.PlaybackState.PlaybackRate;
+    },
     volume() {
       return this.$store.state.PlaybackState.Volume;
     },
@@ -262,6 +281,10 @@ export default {
     volume(newVolume) {
       console.log(`set video volume ${newVolume}`);
       this.$refs.videoCanvas.volume = newVolume;
+    },
+    playbackRate(newRate) {
+      console.log(`set video volume ${newRate}`);
+      this.$refs.videoCanvas.playbackRate = newRate;
     },
   },
   created() {
@@ -288,6 +311,7 @@ export default {
       console.log('seek event has been triggered', e);
       this.$refs.videoCanvas.currentTime = e;
       this.$store.commit('CurrentTime', e);
+      this.$store.commit('AccurateTime', e);
     });
   },
 };
