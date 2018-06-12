@@ -20,6 +20,9 @@
         <div class="background-line"></div>
         <div class="line"
         :style="{ width: positionOfReadyBar +'px' }"></div>
+        <div class="playback-line"
+        v-show="playbackwardLineShow"
+        :style="{ left: positionOfReadyBar + 'px', width: widthPlaybackward + 'px'}"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
       :style="{ width: progress +'%' }">
@@ -37,10 +40,12 @@ export default {
     return {
       showScreenshot: false,
       showProgressBar: true,
+      playbackwardLineShow: false,
       onProgressSliderMousedown: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       percentageOfReadyToPlay: 0,
       widthOfReadyToPlay: 0,
+      lengthPlayBack: 0,
       videoRatio: 0,
     };
   },
@@ -84,8 +89,16 @@ export default {
         const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
         this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       } else {
-        this.percentageOfReadyToPlay = e.clientX / this.$refs.sliderContainer.clientWidth;
-        this.widthOfReadyToPlay = e.clientX;
+        const curProgressBarWidth = this.currentWindow.getSize()[0] * (this.progress / 100);
+        const widthProgressBarMove = e.clientX;
+        if (widthProgressBarMove < curProgressBarWidth) {
+          this.playbackwardLineShow = true;
+        } else {
+          this.playbackwardLineShow = false;
+        }
+        this.percentageOfReadyToPlay = widthProgressBarMove
+          / this.$refs.sliderContainer.clientWidth;
+        this.widthOfReadyToPlay = widthProgressBarMove;
         this.showScreenshot = true;
       }
     },
@@ -126,6 +139,10 @@ export default {
     screenshotContext() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
+    },
+    widthPlaybackward() {
+      return (this.currentWindow.getSize()[0] * (this.progress / 100))
+        - this.widthOfReadyToPlay;
     },
   },
   created() {
@@ -263,6 +280,13 @@ export default {
     height: 100%;
     background: rgba(255, 255, 255, 0.1);
   }
+  .playback-line {
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    background: rgba(151, 151, 151, 0.9);
+    z-index: 23;
+  }
 }
 
 .fade-enter-active {
@@ -279,6 +303,10 @@ export default {
 
 .fade-enter, .fade-leave-to {
  opacity: 0;
+}
+
+@keyframes progressbar {
+  
 }
 
 </style>
