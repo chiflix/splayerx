@@ -179,9 +179,9 @@ export default {
   },
   created() {
     this.documentMouseMoveClear();
-    this.$bus.$on('progressbar-mouseup', () => {
-      this.onProgressSliderMousedown = false;
-    });
+    // this.$bus.$on('progressbar-mouseup', () => {
+    //   this.onProgressSliderMousedown = false;
+    // });
     this.$bus.$on('progressslider-appear', () => {
       this.appearProgressSlider();
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
