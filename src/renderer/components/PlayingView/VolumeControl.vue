@@ -7,7 +7,6 @@
     <transition name="fade">
       <div class="container"  ref="sliderContainer"
         @mousedown.capture.stop="onVolumeSliderClick"
-        @mousemove.capture.stop="onVolumeSliderDrag"
         v-if="showVolumeSlider">
         <div class="slider" ref="slider"
           :style="{ height: volume + '%' }">
@@ -32,25 +31,11 @@ export default {
       onVolumeSliderMousedown: false,
       currentVolume: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
+      percentageVolumeMoved: 0,
+      flagVolumeSliderMoved: false,
     };
   },
   methods: {
-    onVolumeSliderClick(e) {
-      console.log('onVolumeSliderClick');
-      this.onVolumeSliderMousedown = true;
-      const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
-      this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
-    },
-    onVolumeSliderDrag(e) {
-      if (this.onVolumeSliderMousedown) {
-        const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
-        if (sliderOffsetBottom - e.clientY > 1) {
-          this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
-        } else {
-          this.$store.commit('Volume', 0);
-        }
-      }
-    },
     onVolumeButtonClick() {
       console.log('onVolumeButtonClick');
       this.$_clearTimeoutDelay();
@@ -60,6 +45,61 @@ export default {
       } else {
         this.$store.commit('Volume', this.currentVolume / 100);
       }
+    },
+    onVolumeSliderClick(e) {
+      console.log('onVolumeSliderClick');
+      this.onVolumeSliderMousedown = true;
+      const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
+      this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
+      this.documentVoluemeMoveClear();
+      this.documentVolumeMoveEvent();
+    },
+    effectVolumeSliderMove(e) {
+      const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
+      if (sliderOffsetBottom - e.clientY > 1) {
+        this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
+      } else {
+        this.$store.commit('Volume', 0);
+      }
+    },
+    /**
+     * Todo:
+     * 1. 需要解决移动音量条超出范围的问题
+     */
+    /**
+     * documentVolumeMoveEvent fuction help to set a
+     * mouse move event to change the volume when the
+     * cursor is at mouse down event and is moved in
+     * the screen.
+     */
+    documentVolumeMoveEvent() {
+      document.onmousemove = (e) => {
+        this.effectVolumeSliderMove(e);
+        const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
+        if (sliderOffsetBottom - e.clientY > 1) {
+          this.percentageVolumeMoved = (sliderOffsetBottom - e.clientY)
+           / this.$refs.sliderContainer.clientHeight;
+        } else {
+          this.percentageVolumeMoved = 0;
+        }
+        this.flagVolumeSliderMoved = true;
+      };
+    },
+    /**
+     * documentVolumeMoveClear function is an event to
+     * clear the document mouse move event and clear
+     * mouse down status
+     */
+    documentVoluemeMoveClear() {
+      document.onmouseup = () => {
+        this.onVolumeSliderMousedown = false;
+        document.onmousemove = null;
+        // 可以考虑其他的方案
+        if (this.flagVolumeSliderMoved) {
+          this.$store.commit('Volume', this.percentageVolumeMoved);
+          this.flagVolumeSliderMoved = false;
+        }
+      };
     },
     appearVolumeSlider() {
       this.$_clearTimeoutDelay();
@@ -127,9 +167,6 @@ export default {
         this.timeoutIdOfVolumeControllerDisappearDelay
           = setTimeout(this.hideVolumeController, 3000);
       }
-    });
-    this.$bus.$on('volume-mouseup', () => {
-      this.onVolumeSliderMousedown = false;
     });
     this.$bus.$on('volumecontroller-hide', () => {
       this.hideVolumeController();

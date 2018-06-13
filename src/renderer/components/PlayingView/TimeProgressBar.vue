@@ -47,7 +47,7 @@ export default {
       widthOfReadyToPlay: 0,
       lengthPlayBack: 0,
       videoRatio: 0,
-      videoPercentargeMoved: 0,
+      percentargeVideoMoved: 0,
       flagProgressBarMoved: false,
     };
   },
@@ -81,9 +81,10 @@ export default {
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
-      this.documentMouseMoveEvent();
+      this.documentProgressMoveClear();
+      this.documentProgressMoveEvent();
     },
-    progressBarMoveEffect(e) {
+    effectProgressBarMove(e) {
       const curProgressBarWidth = this.currentWindow.getSize()[0] * (this.progress / 100);
       const widthProgressBarMove = e.clientX;
       if (widthProgressBarMove < curProgressBarWidth) {
@@ -97,42 +98,32 @@ export default {
       this.showScreenshot = true;
     },
     /**
-     * Todo:
-     * 1. 解决document.mouseup和PlayingView的Event Bus
-     * 中的mouseup冲突问题。
-     * 2. 当拖动进度条到结束时间后在拖回，视频仍会保持结束时的
-     * 暂停状态，而不会自动开始播放。-- done
-     * 3. 当拖动时，视频继续按照正常速度播放，并显示预览图，拖
-     * 动结束后才开始改变播放位置 --- done
-     * 4. 拖动时仍然得显示进度条的变化 --- done
-     */
-    /**
-     * documentMouseMoveEvent fuction help to set a
+     * documentProgressMoveEvent fuction help to set a
      * mouse move event to seek the video when the
      * cursor is at mouse down event and is moved in
      * the screen.
      */
-    documentMouseMoveEvent() {
+    documentProgressMoveEvent() {
       document.onmousemove = (e) => {
-        this.progressBarMoveEffect(e);
+        this.effectProgressBarMove(e);
         const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
-        this.videoPercentargeMoved = (e.clientX - sliderOffsetLeft)
+        this.percentargeVideoMoved = (e.clientX - sliderOffsetLeft)
          / this.$refs.sliderContainer.clientWidth;
         this.flagProgressBarMoved = true;
       };
     },
     /**
-     * documentMouseMoveClear function is an event to
+     * documentProgressMoveClear function is an event to
      * clear the document mouse move event and clear
      * mouse down status
      */
-    documentMouseMoveClear() {
+    documentProgressMoveClear() {
       document.onmouseup = () => {
         this.onProgressSliderMousedown = false;
         document.onmousemove = null;
-        // 需要解决普通的单击释放时也会产生seek事件
+        // 可以考虑其他的方案
         if (this.flagProgressBarMoved) {
-          this.$bus.$emit('seek', this.videoPercentargeMoved
+          this.$bus.$emit('seek', this.percentargeVideoMoved
            * this.$store.state.PlaybackState.Duration);
           this.flagProgressBarMoved = false;
         }
@@ -147,7 +138,7 @@ export default {
         return;
       }
       if (!this.onProgressSliderMousedown) {
-        this.progressBarMoveEffect(e);
+        this.effectProgressBarMove(e);
       }
     },
     $_clearTimeoutDelay() {
@@ -194,10 +185,6 @@ export default {
     },
   },
   created() {
-    this.documentMouseMoveClear();
-    // this.$bus.$on('progressbar-mouseup', () => {
-    //   this.onProgressSliderMousedown = false;
-    // });
     this.$bus.$on('progressslider-appear', () => {
       this.appearProgressSlider();
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
