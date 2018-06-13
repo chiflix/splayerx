@@ -82,6 +82,13 @@ export default {
       this.documentMouseMoveEvent();
     },
     /**
+     * Todo:
+     * 1. 解决document.mouseup和PlayingView的Event Bus
+     * 中的mouseup冲突问题。
+     * 2. 当拖动进度条到结束时间后在拖回，视频仍会保持结束时的
+     * 暂停状态，而不会自动开始播放。
+     */
+    /**
      * documentMouseMoveEvent fuction help to set a
      * mouse move event to seek the video when the
      * cursor is at mouse down event and is moved in
