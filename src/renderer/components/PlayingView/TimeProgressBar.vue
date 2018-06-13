@@ -87,6 +87,8 @@ export default {
      * 中的mouseup冲突问题。
      * 2. 当拖动进度条到结束时间后在拖回，视频仍会保持结束时的
      * 暂停状态，而不会自动开始播放。
+     * 3. 当拖动时，视频继续按照正常速度播放，并显示预览图，拖
+     * 动结束后才开始改变播放位置
      */
     /**
      * documentMouseMoveEvent fuction help to set a
@@ -99,6 +101,17 @@ export default {
         const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
         const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
         this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
+      };
+    },
+    /**
+     * documentMouseMoveClear function is an event to
+     * clear the document mouse move event and clear
+     * mouse down status
+     */
+    documentMouseMoveClear() {
+      document.onmouseup = () => {
+        this.onProgressSliderMousedown = false;
+        document.onmousemove = null;
       };
     },
     /**
@@ -122,17 +135,6 @@ export default {
         this.widthOfReadyToPlay = widthProgressBarMove;
         this.showScreenshot = true;
       }
-    },
-    /**
-     * documentMouseMoveClear function is an event to
-     * clear the document mouse move event and clear
-     * mouse down status
-     */
-    documentMouseMoveClear() {
-      document.onmouseup = () => {
-        this.onProgressSliderMousedown = false;
-        document.onmousemove = null;
-      };
     },
     $_clearTimeoutDelay() {
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
