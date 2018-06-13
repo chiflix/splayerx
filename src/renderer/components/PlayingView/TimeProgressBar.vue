@@ -79,16 +79,30 @@ export default {
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
+      this.documentMouseMoveEvent();
     },
+    /**
+     * documentMouseMoveEvent fuction help to set a
+     * mouse move event to seek the video when the
+     * cursor is at mouse down event and is moved in
+     * the screen.
+     */
+    documentMouseMoveEvent() {
+      document.onmousemove = (e) => {
+        const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
+        const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
+        this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
+      };
+    },
+    /**
+     * This mousemove event only works when the cursor
+     * is not at mouse down event.
+     */
     onProgresssBarMove(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return;
       }
-      if (this.onProgressSliderMousedown) {
-        const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
-        const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
-        this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
-      } else {
+      if (!this.onProgressSliderMousedown) {
         const curProgressBarWidth = this.currentWindow.getSize()[0] * (this.progress / 100);
         const widthProgressBarMove = e.clientX;
         if (widthProgressBarMove < curProgressBarWidth) {
@@ -101,6 +115,17 @@ export default {
         this.widthOfReadyToPlay = widthProgressBarMove;
         this.showScreenshot = true;
       }
+    },
+    /**
+     * documentMouseMoveClear function is an event to
+     * clear the document mouse move event and clear
+     * mouse down status
+     */
+    documentMouseMoveClear() {
+      document.onmouseup = () => {
+        this.onProgressSliderMousedown = false;
+        document.onmousemove = null;
+      };
     },
     $_clearTimeoutDelay() {
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
@@ -146,6 +171,7 @@ export default {
     },
   },
   created() {
+    this.documentMouseMoveClear();
     this.$bus.$on('progressbar-mouseup', () => {
       this.onProgressSliderMousedown = false;
     });
