@@ -31,8 +31,6 @@ export default {
       onVolumeSliderMousedown: false,
       currentVolume: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
-      percentageVolumeMoved: 0,
-      flagVolumeSliderMoved: false,
     };
   },
   methods: {
@@ -57,15 +55,16 @@ export default {
     effectVolumeSliderMove(e) {
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
       if (sliderOffsetBottom - e.clientY > 1) {
-        this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
+        const volume = (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight;
+        if (volume >= 1) {
+          this.$store.commit('Volume', 1);
+        } else {
+          this.$store.commit('Volume', volume);
+        }
       } else {
         this.$store.commit('Volume', 0);
       }
     },
-    /**
-     * Todo:
-     * 1. 需要解决移动音量条超出范围的问题
-     */
     /**
      * documentVolumeMoveEvent fuction help to set a
      * mouse move event to change the volume when the
@@ -75,14 +74,6 @@ export default {
     documentVolumeMoveEvent() {
       document.onmousemove = (e) => {
         this.effectVolumeSliderMove(e);
-        const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
-        if (sliderOffsetBottom - e.clientY > 1) {
-          this.percentageVolumeMoved = (sliderOffsetBottom - e.clientY)
-           / this.$refs.sliderContainer.clientHeight;
-        } else {
-          this.percentageVolumeMoved = 0;
-        }
-        this.flagVolumeSliderMoved = true;
       };
     },
     /**
@@ -94,11 +85,6 @@ export default {
       document.onmouseup = () => {
         this.onVolumeSliderMousedown = false;
         document.onmousemove = null;
-        // 可以考虑其他的方案
-        if (this.flagVolumeSliderMoved) {
-          this.$store.commit('Volume', this.percentageVolumeMoved);
-          this.flagVolumeSliderMoved = false;
-        }
       };
     },
     appearVolumeSlider() {
