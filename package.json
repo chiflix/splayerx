@@ -24,7 +24,7 @@
     "postinstall": "npm run lint:fix"
   },
   "_moduleAliases": {
-    "electron"  : "node_modules/@chiflix/electron"
+    "electron": "node_modules/@chiflix/electron"
   },
   "build": {
     "productName": "SPlayer",
@@ -68,6 +68,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "electron-context-menu": "^0.9.1",
     "electron-json-storage": "^4.1.0",
     "module-alias": "^2.0.6",
     "npm": "^5.10.0",
