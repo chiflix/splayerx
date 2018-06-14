@@ -6,7 +6,7 @@
     v-if="showVolumeController">
     <transition name="fade">
       <div class="container"  ref="sliderContainer"
-        @mousedown.capture.stop="onVolumeSliderClick"
+        @mousedown.capture.stop.left="onVolumeSliderClick"
         v-if="showVolumeSlider">
         <div class="slider" ref="slider"
           :style="{ height: volume + '%' }">
@@ -14,7 +14,7 @@
       </div>
     </transition>
       <div class="button"
-        @mousedown.capture.stop="onVolumeButtonClick">
+        @mousedown.capture.stop.left="onVolumeButtonClick">
         <img type="image/svg+xml" wmode="transparent"
           :src="srcOfVolumeButtonImage">
       </div>

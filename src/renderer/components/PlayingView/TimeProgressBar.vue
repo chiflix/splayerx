@@ -3,7 +3,7 @@
   <div class="progress" ref="sliderContainer"
     @mouseover.capture="appearProgressSlider"
     @mouseout.capture="hideProgressSlider"
-    @mousedown.capture.stop="onProgresssBarClick"
+    @mousedown.capture.stop.left="onProgresssBarClick"
     @mousemove.capture="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="progress-container">
