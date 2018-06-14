@@ -4,9 +4,9 @@
     @mousedown.stop="switchStateOfContent"
     @mouseover.stop="appearTimeCode"
     v-show="showTimeCode">
-        <span class="firstContent" v-bind:class="{ remainTime: isRemainTime.first }">{{ content.first }}</span>
+        <span class="firstContent" :class="{ remainTime: isRemainTime.first }">{{ content.first }}</span>
         <span class="splitSign">/</span>
-        <span class="secondContent" v-bind:class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ content.second }}</span>
+        <span class="secondContent" :class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ content.second }}</span>
   </div>
 </transition>
 </template>;
