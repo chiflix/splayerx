@@ -5,7 +5,7 @@
       v-show="showMask"></div>
     <div class="video-controller" id="video-controller"
       @mousedown.self="resetDraggingState"
-      @mouseup="sendMouseupMessage"
+      @mouseup="togglePlayback"
       @mousewheel="wheelVolumeControll"
       @mousemove="wakeUpAllWidgets"
       @mouseout="hideAllWidgets"
@@ -66,9 +66,7 @@ export default {
     resetDraggingState() {
       this.isDragging = false;
     },
-    sendMouseupMessage() {
-      this.$bus.$emit('volume-mouseup');
-      this.$bus.$emit('progressbar-mouseup');
+    togglePlayback() {
       if (!this.isDragging) {
         this.$bus.$emit('toggle-playback');
       }

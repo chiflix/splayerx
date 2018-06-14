@@ -3,7 +3,7 @@
   <div class="progress" ref="sliderContainer"
     @mouseover="appearProgressSlider"
     @mouseout="hideProgressSlider"
-    @mousedown="onProgresssBarClick"
+    @mousedown.left="onProgresssBarClick"
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="progress-container">
@@ -20,6 +20,9 @@
         <div class="background-line"></div>
         <div class="line"
         :style="{ width: positionOfReadyBar +'px' }"></div>
+        <div class="playbackward-line"
+        v-if="playbackwardLineShow"
+        :style="{ left: positionOfReadyBar + 'px', width: widthPlaybackward + 'px'}"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
       :style="{ width: progress +'%' }">
@@ -37,11 +40,14 @@ export default {
     return {
       showScreenshot: false,
       showProgressBar: true,
+      playbackwardLineShow: false,
       onProgressSliderMousedown: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       percentageOfReadyToPlay: 0,
       widthOfReadyToPlay: 0,
       videoRatio: 0,
+      percentageVideoDraged: 0,
+      flagProgressBarDraged: false,
     };
   },
   methods: {
@@ -74,19 +80,75 @@ export default {
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
+      this.documentProgressDragClear();
+      this.documentProgressDragEvent();
     },
+    /**
+     * @param e mousemove event
+     */
+    effectProgressBarDraged(e) {
+      const curProgressBarWidth = this.currentWindow.getSize()[0] * (this.progress / 100);
+      const widthProgressBarDraged = e.clientX;
+      if (widthProgressBarDraged < curProgressBarWidth) {
+        this.playbackwardLineShow = true;
+      } else {
+        this.playbackwardLineShow = false;
+      }
+      const progress = widthProgressBarDraged
+        / this.$refs.sliderContainer.clientWidth;
+      if (progress >= 1) {
+        this.percentageOfReadyToPlay = 1;
+      } else if (progress <= 0) {
+        this.percentageOfReadyToPlay = 0;
+      } else {
+        this.percentageOfReadyToPlay = progress;
+      }
+      this.widthOfReadyToPlay = widthProgressBarDraged;
+      this.showScreenshot = true;
+    },
+    /**
+     * documentProgressDragEvent fuction help to set a
+     * mouse move event to seek the video when the
+     * cursor is at mouse down event and is moved in
+     * the screen.
+     */
+    documentProgressDragEvent() {
+      document.onmousemove = (e) => {
+        this.effectProgressBarDraged(e);
+        const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
+        this.percentageVideoDraged = (e.clientX - sliderOffsetLeft)
+         / this.$refs.sliderContainer.clientWidth;
+        this.flagProgressBarDraged = true;
+      };
+    },
+    /**
+     * documentProgressDragClear function is an event to
+     * clear the document mouse move event and clear
+     * mouse down status
+     */
+    documentProgressDragClear() {
+      document.onmouseup = () => {
+        this.onProgressSliderMousedown = false;
+        document.onmousemove = null;
+        // 可以考虑其他的方案
+        if (this.flagProgressBarDraged) {
+          this.$bus.$emit('seek', this.percentageVideoDraged
+           * this.$store.state.PlaybackState.Duration);
+          this.flagProgressBarDraged = false;
+        }
+      };
+    },
+    /**
+     * @param e mousemove event
+     * This mousemove event only works when the cursor
+     * is not at mouse down event.
+     */
     onProgresssBarMove(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return;
       }
-      if (this.onProgressSliderMousedown) {
-        const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
-        const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
-        this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
-      } else {
-        this.percentageOfReadyToPlay = e.clientX / this.$refs.sliderContainer.clientWidth;
-        this.widthOfReadyToPlay = e.clientX;
-        this.showScreenshot = true;
+      if (!this.onProgressSliderMousedown) {
+        this.effectProgressBarDraged(e);
       }
     },
     $_clearTimeoutDelay() {
@@ -127,11 +189,12 @@ export default {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
     },
+    widthPlaybackward() {
+      return (this.currentWindow.getSize()[0] * (this.progress / 100))
+        - this.widthOfReadyToPlay;
+    },
   },
   created() {
-    this.$bus.$on('progressbar-mouseup', () => {
-      this.onProgressSliderMousedown = false;
-    });
     this.$bus.$on('progressslider-appear', () => {
       this.appearProgressSlider();
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
@@ -262,6 +325,13 @@ export default {
     width: 100%;
     height: 100%;
     background: rgba(255, 255, 255, 0.1);
+  }
+  .playbackward-line {
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    background: rgba(151, 151, 151, 0.9);
+    z-index: 23;
   }
 }
 
