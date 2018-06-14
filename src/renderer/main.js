@@ -226,8 +226,6 @@ new Vue({
       Menu.setApplicationMenu(menu);
     },
     createRightMenu() {
-      // alert('创建右键菜单啦');
-      // const { app } = this.$electron.remote;
       const {
         Menu, MenuItem, dialog,
       } = this.$electron.remote;
@@ -382,15 +380,6 @@ new Vue({
           },
         ],
       }));
-      /* app.on('browser-window-created', (e, win) => {
-        win.webContents.on('context-menu', (e, params) => {
-          menu.popup(win, params.x, params.y);
-        });
-      }); */
-      /* ipc.on('show-context-menu', (event) => {
-        const win = BrowserWindow.fromWebContents(event.sender);
-        rightwindow.popup(win);
-      }); */
       this.globalMenu = menu;
     },
     timeControl(type, seconds) {
