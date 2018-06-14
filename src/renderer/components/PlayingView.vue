@@ -4,12 +4,12 @@
     <div class="masking"
       v-show="showMask"></div>
     <div class="video-controller" id="video-controller"
-      @mousedown.stop="togglePlayback"
-      @mouseup.stop="sendMouseupMessage"
+      @mousedown.self="resetDraggingState"
+      @mouseup="sendMouseupMessage"
       @mousewheel="wheelVolumeControll"
       @mousemove="wakeUpAllWidgets"
-      @mouseout.stop="hideAllWidgets"
-      @dblclick="toggleFullScreenState">
+      @mouseout="hideAllWidgets"
+      @dblclick.self="toggleFullScreenState">
 			<TimeProgressBar/>
       <TheTimeCodes/>
 			<VolumeControl/>
@@ -37,6 +37,7 @@ export default {
   data() {
     return {
       showMask: false,
+      isDragging: false,
     };
   },
   methods: {
@@ -51,6 +52,7 @@ export default {
     },
     wakeUpAllWidgets() {
       this.showMask = true;
+      this.isDragging = true;
       this.$bus.$emit('volumecontroller-appear');
       this.$bus.$emit('progressbar-appear');
       this.$bus.$emit('timecode-appear');
@@ -61,12 +63,15 @@ export default {
       this.$bus.$emit('progressbar-hide');
       this.$bus.$emit('timecode-hide');
     },
-    togglePlayback() {
-      this.$bus.$emit('toggle-playback');
+    resetDraggingState() {
+      this.isDragging = false;
     },
     sendMouseupMessage() {
       this.$bus.$emit('volume-mouseup');
       this.$bus.$emit('progressbar-mouseup');
+      if (!this.isDragging) {
+        this.$bus.$emit('toggle-playback');
+      }
     },
     wheelVolumeControll(e) {
       this.$bus.$emit('volumecontroller-appear');
