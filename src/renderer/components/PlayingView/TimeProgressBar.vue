@@ -95,8 +95,15 @@ export default {
       } else {
         this.playbackwardLineShow = false;
       }
-      this.percentageOfReadyToPlay = widthProgressBarDraged
+      const progress = widthProgressBarDraged
         / this.$refs.sliderContainer.clientWidth;
+      if (progress >= 1) {
+        this.percentageOfReadyToPlay = 1;
+      } else if (progress <= 0) {
+        this.percentageOfReadyToPlay = 0;
+      } else {
+        this.percentageOfReadyToPlay = progress;
+      }
       this.widthOfReadyToPlay = widthProgressBarDraged;
       this.showScreenshot = true;
     },
