@@ -21,7 +21,7 @@
         <div class="line"
         :style="{ width: positionOfReadyBar +'px' }"></div>
         <div class="playbackward-line"
-        v-show="playbackwardLineShow"
+        v-if="playbackwardLineShow"
         :style="{ left: positionOfReadyBar + 'px', width: widthPlaybackward + 'px'}"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
