@@ -4,7 +4,7 @@
     <div class="masking"
       v-show="showMask"></div>
     <div class="video-controller" id="video-controller"
-      @click="togglePlayback"
+      @mousedown.left.stop="togglePlayback"
       @mouseup.stop="sendMouseupMessage"
       @mousewheel="wheelVolumeControll"
       @mousemove="wakeUpAllWidgets"
