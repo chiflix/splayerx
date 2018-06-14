@@ -20,7 +20,7 @@
         <div class="background-line"></div>
         <div class="line"
         :style="{ width: positionOfReadyBar +'px' }"></div>
-        <div class="playback-line"
+        <div class="playbackward-line"
         v-show="playbackwardLineShow"
         :style="{ left: positionOfReadyBar + 'px', width: widthPlaybackward + 'px'}"></div>
       </div>
@@ -45,7 +45,6 @@ export default {
       timeoutIdOfProgressBarDisappearDelay: 0,
       percentageOfReadyToPlay: 0,
       widthOfReadyToPlay: 0,
-      lengthPlayBack: 0,
       videoRatio: 0,
       percentageVideoDraged: 0,
       flagProgressBarDraged: false,
@@ -95,8 +94,15 @@ export default {
       } else {
         this.playbackwardLineShow = false;
       }
-      this.percentageOfReadyToPlay = widthProgressBarDraged
+      const progress = widthProgressBarDraged
         / this.$refs.sliderContainer.clientWidth;
+      if (progress >= 1) {
+        this.percentageOfReadyToPlay = 1;
+      } else if (progress <= 0) {
+        this.percentageOfReadyToPlay = 0;
+      } else {
+        this.percentageOfReadyToPlay = progress;
+      }
       this.widthOfReadyToPlay = widthProgressBarDraged;
       this.showScreenshot = true;
     },
@@ -320,7 +326,7 @@ export default {
     height: 100%;
     background: rgba(255, 255, 255, 0.1);
   }
-  .playback-line {
+  .playbackward-line {
     position: absolute;
     bottom: 0;
     height: 100%;
