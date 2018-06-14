@@ -1,10 +1,10 @@
 <template>
   <transition name="fade" appear>
   <div class="progress" ref="sliderContainer"
-    @mouseover.capture="appearProgressSlider"
-    @mouseout.capture="hideProgressSlider"
-    @mousedown.capture.stop.left="onProgresssBarClick"
-    @mousemove.capture="onProgresssBarMove"
+    @mouseover="appearProgressSlider"
+    @mouseout="hideProgressSlider"
+    @mousedown.left="onProgresssBarClick"
+    @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="progress-container">
       <div class="screenshot-background"
@@ -235,7 +235,7 @@ export default {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 20px;
+  height: 30px;
   -webkit-app-region: no-drag;
   z-index: 700;
 
