@@ -22,27 +22,6 @@ const i18n = new VueI18n({
   locale: 'cn', // set locale
   messages, // set locale messages
 });
-//  右键菜单
-// const remote = Electron.remote;
-// const rightwindow = null;
-
-/* eslint-disable no-new */
-// Importing this adds a right-click menu with 'Inspect Element' option
-/* const remote = require('remote');
-const Menu = remote.require('menu');
-const MenuItem = remote.require('menu-item');
-
-let rightClickPosition = null;
-
-const menu = new Menu();
-const menuItem = new MenuItem({
-  label: 'Inspect Element',
-  click: () => {
-    remote.getCurrentWindow().webContents
-      .inspectElement(rightClickPosition.x, rightClickPosition.y);
-  },
-});
-menu.append(menuItem); */
 new Vue({
   i18n,
   components: { App },
@@ -229,82 +208,6 @@ new Vue({
       const {
         Menu, MenuItem, dialog,
       } = this.$electron.remote;
-      // const ipc = this.$electron.ipcRenderer;
-      // const electron = require('electron');
-      // const ipc = electron.ipcMain;
-      /* const rightTemplate = [
-        {
-          label: '打开文件',
-          accelerator: 'Ctrl+O',
-          click: () => {
-            dialog.showOpenDialog({
-              properties: ['openFile'],
-              filters: [{
-                name: 'Video Files',
-                extensions: ['mp4', 'mkv', 'mov'],
-              }],
-            }, (file) => {
-              if (file) {
-                const path = `file:///${file}`;
-                this.$storage.set('recent-played', path);
-                this.$store.commit('SrcOfVideo', path);
-                this.$router.push({
-                  name: 'playing-view',
-                });
-              }
-            });
-          },
-        },
-        {
-          label: '播放',
-          submenu: [
-            {
-              label: '快进5秒',
-              click: () => {
-                this.timeControl('Forward', 5);
-              },
-            },
-            {
-              label: '快退5秒',
-              click: () => {
-                this.timeControl('Rewind', 5);
-              },
-            },
-            {
-              label: '快进1分钟',
-              click: () => {
-                this.timeControl('Rewind', 60);
-              },
-            },
-            {
-              label: '快退1分钟',
-              click: () => {
-                this.timeControl('Rewind', 60);
-              },
-            },
-          ],
-        },
-        {
-          label: '音量',
-          submenu: [
-            {
-              label: '增加音量',
-              click: () => {
-                this.volumeControl('Increse');
-              },
-            },
-            {
-              label: '减少音量',
-              click: () => {
-                this.volumeControl('Decrese');
-              },
-            },
-          ],
-        },
-      ];
-      // 右键菜单
-      const rightMenu = MenuItem.buildFromTemplate(rightTemplate);
-      rightwindow.setContextMenu(rightMenu); */
       const menu = new Menu();
       menu.append(new MenuItem({
         label: '打开文件',
