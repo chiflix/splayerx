@@ -9,7 +9,7 @@
       @mousewheel="wheelVolumeControll"
       @mousemove="wakeUpAllWidgets"
       @mouseout="hideAllWidgets"
-      @dblclick="toggleFullScreenState">
+      @dblclick.self="toggleFullScreenState">
 			<TimeProgressBar/>
       <TheTimeCodes/>
 			<VolumeControl/>
