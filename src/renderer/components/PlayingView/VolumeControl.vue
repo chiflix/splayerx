@@ -136,6 +136,7 @@ export default {
   },
   created() {
     this.$bus.$on('volumecontroller-appear', () => {
+      console.log('vc-appear');
       this.appearVolumeController();
       if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
@@ -147,6 +148,7 @@ export default {
       }
     });
     this.$bus.$on('volumeslider-appear', () => {
+      console.log('vs-appear');
       this.appearVolumeSlider();
       if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
