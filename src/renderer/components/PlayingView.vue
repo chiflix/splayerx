@@ -1,5 +1,6 @@
 <template>
-  <div class="player">
+  <div class="player"
+  :style="{ cursor: cursorStyle }">
     <VideoCanvas :src="uri" />
     <div class="masking"
       v-show="showMask"></div>
@@ -36,8 +37,10 @@ export default {
   },
   data() {
     return {
-      showMask: false,
       isDragging: false,
+      showMask: false,
+      cursorShow: true,
+      cursorDelay: null,
     };
   },
   methods: {
@@ -50,9 +53,22 @@ export default {
         this.currentWindow.setFullScreen(true);
       }
     },
+    /**
+     * When the cursor shows, add a timeout function
+     * to hide the cursor. Each time the cursor moves,
+     * clear the timeout function and add a new one.
+     */
+    cursorDisplayControl() {
+      this.cursorShow = true;
+      clearTimeout(this.cursorDelay);
+      this.cursorDelay = setTimeout(() => {
+        this.cursorShow = false;
+      }, 3000);
+    },
     wakeUpAllWidgets() {
       this.showMask = true;
       this.isDragging = true;
+      this.cursorDisplayControl();
       this.$bus.$emit('volumecontroller-appear');
       this.$bus.$emit('progressbar-appear');
       this.$bus.$emit('timecode-appear');
@@ -98,6 +114,9 @@ export default {
     },
     currentWindow() {
       return this.$electron.remote.getCurrentWindow();
+    },
+    cursorStyle() {
+      return this.cursorShow ? 'default' : 'none';
     },
   },
 };
