@@ -37,6 +37,7 @@ export default {
   },
   data() {
     return {
+      isDragging: false,
       showMask: false,
       cursorShow: true,
       cursorDelay: null,
@@ -66,6 +67,7 @@ export default {
     },
     wakeUpAllWidgets() {
       this.showMask = true;
+      this.isDragging = true;
       this.cursorDisplayControl();
       this.$bus.$emit('volumecontroller-appear');
       this.$bus.$emit('progressbar-appear');
