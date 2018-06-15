@@ -75,9 +75,6 @@ new Vue({
         } else if (Object.keys(data).length === 0 && data.constructor === Object) {
           // if there's no value for key 'recent-played'
           this.$storage.set('recent-played', []);
-        } else if (typeof data === 'string') {
-          // TODO: delete this if branch after done
-          this.$storage.set('recent-played', []);
         }
       });
       this.$store.commit('SrcOfVideo', path);
