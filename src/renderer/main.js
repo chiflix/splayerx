@@ -242,28 +242,28 @@ new Vue({
         submenu: [
           {
             label: '快进5秒',
-            accelerator: 'Right',
+            // accelerator: 'Right',
             click: () => {
               this.timeControl('Forward', 5);
             },
           },
           {
             label: '快退5秒',
-            accelerator: 'Left',
+            // accelerator: 'Left',
             click: () => {
               this.timeControl('Rewind', 5);
             },
           },
           {
             label: '快进1分钟',
-            accelerator: 'Shift+Right',
+            // accelerator: 'Shift+Right',
             click: () => {
-              this.timeControl('Rewind', 60);
+              this.timeControl('Forward', 60);
             },
           },
           {
             label: '快退1分钟',
-            accelerator: 'Shift+Left',
+            // accelerator: 'Shift+Left',
             click: () => {
               this.timeControl('Rewind', 60);
             },
@@ -275,14 +275,14 @@ new Vue({
         submenu: [
           {
             label: '增加音量',
-            accelerator: 'Up',
+            // accelerator: 'Up',
             click: () => {
               this.volumeControl('Increse');
             },
           },
           {
             label: '减少音量',
-            accelerator: 'Down',
+            // accelerator: 'Down',
             click: () => {
               this.volumeControl('Decrese');
             },
