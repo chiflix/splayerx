@@ -116,10 +116,7 @@ export default {
       return this.$electron.remote.getCurrentWindow();
     },
     cursorStyle() {
-      if (this.cursorShow) {
-        return 'default';
-      }
-      return 'none';
+      return this.cursorShow ? 'default' : 'none';
     },
   },
 };
