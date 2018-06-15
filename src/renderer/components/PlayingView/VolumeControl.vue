@@ -105,9 +105,9 @@ export default {
     hideVolumeController() {
       if (!this.onVolumeSliderMousedown) {
         this.showVolumeController = false;
-        if (this.showVolumeSlider) {
+        /* if (this.showVolumeSlider) {
           this.showVolumeSlider = false;
-        }
+        } */
       }
     },
     $_clearTimeoutDelay() {
