@@ -48,5 +48,65 @@ export default {
         }
       }
     },
+    openFile(path) {
+      // this.$storage.set('recent-played', []);
+      this.$storage.get('recent-played', (err, data) => {
+        console.log(data);
+        const newElement = {
+          path,
+          shortCut: '',
+          lastPlayedTime: 0.0,
+        };
+        if (err) {
+          // TODO: proper error handle
+          console.error(err);
+        } else if (Array.isArray(data)) {
+          console.log('its an array!');
+          if (data.length < 5) {
+            if (this.$_indexOfExistedFileIn(data, path) === -1) {
+              console.log(1);
+              data.unshift(newElement);
+            } else {
+              console.log(2);
+              data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+              data.unshift(newElement);
+            }
+            console.log('changed:');
+            console.log(data);
+            this.$storage.set('recent-played', data);
+          } else {
+            if (this.$_indexOfExistedFileIn(data, path) === -1) {
+              data.pop();
+              data.unshift(newElement);
+            } else {
+              data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+              data.unshift(newElement);
+            }
+            console.log('changed:');
+            console.log(data);
+            this.$storage.set('recent-played', data);
+          }
+        } else if (Object.keys(data).length === 0 && data.constructor === Object) {
+          // if there's no value for key 'recent-played'
+          this.$storage.set('recent-played', [newElement]);
+        }
+      });
+      this.$store.commit('SrcOfVideo', path);
+      this.$router.push({
+        name: 'playing-view',
+      });
+    },
+    $_indexOfExistedFileIn(data, path) {
+      for (let i = 0; i < data.length; i += 1) {
+        const object = data[i];
+        const iterator = Object.keys(object).indexOf('path');
+        if (iterator !== -1) {
+          if (object.path === path) {
+            return iterator;
+          }
+        }
+      }
+      return -1;
+    },
   },
 };

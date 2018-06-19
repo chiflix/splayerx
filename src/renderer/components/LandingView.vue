@@ -15,7 +15,7 @@
           v-if="hasRecentPlaylist">
           <div class="item"
             v-for="item in lastPlayedFile"
-            @click="openFile(item)">
+            @click="openFile(item.path)">
           </div>
         </div>
       <div class="button"
@@ -46,6 +46,10 @@ export default {
   },
   mounted() {
     const { app } = this.$electron.remote;
+    if (this.$electron.remote.getCurrentWindow().isResizable()) {
+      this.$electron.remote.getCurrentWindow().setResizable(false);
+    }
+
     this.version = app.getVersion();
     console.log(app.getVersion(), app.getName());
 
@@ -88,47 +92,6 @@ export default {
           self.openFile(`file:///${item[0]}`);
         }
       });
-    },
-    openFile(path) {
-      console.log(`open:${path}`);
-      this.$storage.get('recent-played', (err, data) => {
-        console.log(data);
-        if (err) {
-          // TODO: proper error handle
-          console.error(err);
-        } else if (Array.isArray(data)) {
-          console.log('its an array!');
-          if (data.length < 5) {
-            if (data.indexOf(path) === -1) {
-              data.unshift(path);
-            } else {
-              data.splice(data.indexOf(path), 1);
-              data.unshift(path);
-            }
-            console.log('changed:');
-            console.log(data);
-            this.$storage.set('recent-played', data);
-          } else {
-            if (data.indexOf(path) === -1) {
-              data.pop();
-              data.unshift(path);
-            } else {
-              data.splice(data.indexOf(path), 1);
-              data.unshift(path);
-            }
-            console.log('changed:');
-            console.log(data);
-            this.$storage.set('recent-played', data);
-          }
-        } else if (Object.keys(data).length === 0 && data.constructor === Object) {
-          // if there's no value for key 'recent-played'
-          this.$storage.set('recent-played', []);
-        }
-      });
-      this.$store.commit('SrcOfVideo', path);
-      // this.$router.push({
-      //   name: 'playing-view',
-      // });
     },
   },
 };
@@ -188,25 +151,25 @@ main>div {
 .controller {
   position: absolute;
   right: 0;
-  bottom: 1em;
+  bottom: 40px;
   width: 100vw;
 
   .playlist {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    margin-left: 1em;
+    margin-left: 45px;
 
     .item {
       color: #e4e4c4;
       background: radial-gradient( ellipse at top center,
       rgba(0, 0, 0, .9) 20%,
       rgba(44, 44, 44, .95) 80%);
-      height: 4.5em;
-      width: 8em;
+      height: 65px;
+      width: 114px;
       color: gray;
       cursor: pointer;
-      margin-right: 1em;
+      margin-right: 15px;
     }
   }
 

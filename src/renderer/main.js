@@ -37,51 +37,6 @@ new Vue({
   store,
   template: '<App/>',
   methods: {
-    openVideoFile(file) {
-      const path = `file:///${file}`;
-      // TODO: check if file exist
-      // TODO: check if there is subtitle file in the same directory
-      // TODO: load subtitles? or add subtitle file to playlist
-
-      this.$storage.get('recent-played', (err, data) => {
-        console.log(data);
-        if (err) {
-          // TODO: proper error handle
-          console.error(err);
-        } else if (Array.isArray(data)) {
-          console.log('its an array!');
-          if (data.length < 5) {
-            if (data.indexOf(path) === -1) {
-              data.unshift(path);
-            } else {
-              data.splice(data.indexOf(path), 1);
-              data.unshift(path);
-            }
-            console.log('changed:');
-            console.log(data);
-            this.$storage.set('recent-played', data);
-          } else {
-            if (data.indexOf(path) === -1) {
-              data.pop();
-              data.unshift(path);
-            } else {
-              data.splice(data.indexOf(path), 1);
-              data.unshift(path);
-            }
-            console.log('changed:');
-            console.log(data);
-            this.$storage.set('recent-played', data);
-          }
-        } else if (Object.keys(data).length === 0 && data.constructor === Object) {
-          // if there's no value for key 'recent-played'
-          this.$storage.set('recent-played', []);
-        }
-      });
-      this.$store.commit('SrcOfVideo', path);
-      this.$router.push({
-        name: 'playing-view',
-      });
-    },
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
       const template = [
@@ -99,7 +54,8 @@ new Vue({
                     extensions: ['mp4', 'mkv', 'mov'],
                   }],
                 }, (file) => {
-                  this.openVideoFile(file);
+                  const path = `file:///${file}`;
+                  this.openFile(path);
                 });
               },
             },

@@ -42,12 +42,11 @@ export default {
     },
   },
   methods: {
-    timeUpdate() {
+    accurateTimeUpdate() {
       const { currentTime, duration } = this.$refs.videoCanvas;
       if (currentTime >= duration || this.$refs.videoCanvas.paused) {
         clearInterval(this.globalIntervalFunc);
       } else {
-        console.log('time update');
         this.$store.commit('AccurateTime', currentTime);
       }
     },
@@ -59,7 +58,7 @@ export default {
       // set interval to get update time
       const { duration } = this.$refs.videoCanvas;
       if (duration <= 240) {
-        this.globalIntervalFunc = setInterval(this.timeUpdate, 10);
+        this.globalIntervalFunc = setInterval(this.accurateTimeUpdate, 10);
       }
     },
     onCanPlay() {
