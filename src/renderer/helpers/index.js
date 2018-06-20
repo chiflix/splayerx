@@ -54,7 +54,7 @@ export default {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');
       }
-
+      let res;
       fs.readFile(path.join(__dirname, file), (err, data) => {
         if (err) {
           console.error(err);
@@ -71,9 +71,10 @@ export default {
           const tmp = data.slice(offset[i], offset[i] + 4096);
           tmpRes[i] = md5Hex(tmp);
         }
-        // console.log(tmpRes.join('-'));
-        return tmpRes.join('-');
+        res = tmpRes.join('-');
       });
+      // console.log(res);
+      return res;
     },
 
 
