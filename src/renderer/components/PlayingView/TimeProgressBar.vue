@@ -8,8 +8,8 @@
     v-show="showProgressBar">
     <div class="progress-container">
       <div class="screenshot-background"
-      v-show="showScreenshot"
-      :style="{ left: positionOfScreenshot +'px', height: heightofScreenshot +'px' }">
+        v-show="showScreenshot"
+        :style="{ left: positionOfScreenshot +'px', height: heightofScreenshot +'px' }">
         <div class="screenshot">
           <div class="time">
             {{ screenshotContext }}
@@ -19,13 +19,13 @@
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
         <div class="line"
-        :style="{ width: positionOfReadyBar +'px' }"></div>
+          :style="{ width: positionOfReadyBar +'px' }"></div>
         <div class="playbackward-line"
-        v-if="playbackwardLineShow"
-        :style="{ left: positionOfReadyBar + 'px', width: widthPlaybackward + 'px'}"></div>
+          v-if="playbackwardLineShow"
+          :style="{ left: positionOfReadyBar + 'px', width: widthPlaybackward + 'px'}"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
-      :style="{ width: progress +'%' }">
+        :style="{ width: progress +'%' }">
         <div class="line"></div>
       </div>
     </div>

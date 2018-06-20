@@ -10,6 +10,7 @@
       @durationchange="onDurationChange"
       :src="src">
     </video>
+    <canvas id="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
 
@@ -304,6 +305,19 @@ export default {
     });
     this.$bus.$on('pause', () => {
       console.log('pause event has been triggered');
+      const canvas = this.$refs.thumbnailCanvas;
+      const canvasCTX = canvas.getContext('2d');
+      const windowRatio = this.newWidthOfWindow / this.newHeightOfWindow;
+
+      canvasCTX.drawImage(this.$refs.videoCanvas, 0, 0, windowRatio * 200, 200);
+      const string = canvas.toDataURL();
+      const regex = /^data:.+\/(.+);base64,(.*)$/;
+
+      const matches = string.match(regex);
+      const ext = matches[1];
+      const data = matches[2];
+      const buffer = Buffer.from(data, 'base64');
+      fs.writeFileSync(`/Users/jinnaide/Desktop/Programing/Yuri/图片/data.${ext}`, buffer);
       this.$refs.videoCanvas.pause();
     });
     this.$bus.$on('seek', (e) => {
