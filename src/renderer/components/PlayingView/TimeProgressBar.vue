@@ -1,15 +1,19 @@
 <template>
   <transition name="fade" appear>
-  <div class="progress" ref="sliderContainer"
+  <div class="progress"
     @mouseover="appearProgressSlider"
     @mouseout="hideProgressSlider"
-    @mousedown.left="onProgresssBarClick"
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
-    <div class="progress-container">
+    <div class="fool-proof-bar" ref="foolProofBar"
+      @mousedown.left="videoRestart">
+      <div class="button"></div>
+    </div>
+    <div class="progress-container" ref="sliderContainer"
+      @mousedown.left="onProgresssBarClick">
       <div class="screenshot-background"
-      v-show="showScreenshot"
-      :style="{ left: positionOfScreenshot +'px', height: heightofScreenshot +'px' }">
+        v-show="showScreenshot"
+        :style="{ left: positionOfScreenshot +'px', height: heightofScreenshot +'px' }">
         <div class="screenshot">
           <div class="time">
             {{ screenshotContext }}
@@ -19,10 +23,10 @@
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
         <div class="line"
-        :style="{ width: positionOfReadyBar +'px' }"></div>
+        :style="{ width: cursorPosition +'px' }"></div>
         <div class="playbackward-line"
-        v-if="playbackwardLineShow"
-        :style="{ left: positionOfReadyBar + 'px', width: widthPlaybackward + 'px'}"></div>
+        v-if="showProgressBackward"
+        :style="{ left: cursorPosition + 'px', width: backwardWidth + 'px'}"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
       :style="{ width: progress +'%' }">
@@ -34,13 +38,29 @@
 </template>;
 
 <script>
+/**
+ * TODO:
+ * 1. 常量变量放入常量组件
+ * 2. seek进度条产生的问题
+ * 3. seek 后backward line的left保持为0
+*/
+
+const WIDTH_OF_SCREENSHOT = 170;
+const HALF_WIDTH_OF_SCREENSHOT = 85;
+const SCREENSHOT_SIDE_MARGIN_WIDTH = 16;
+
+const PROGRESS_BAR_HEIGHT = '10px';
+const PROGRESS_BAR_SLIDER_HIDE_HEIGHT = '4px';
+const PROGRESS_BAR_HIDE_HEIGHT = '0px';
+
+const FOOL_PROOFING_BAR_WIDTH = 20;
 
 export default {
   data() {
     return {
       showScreenshot: false,
       showProgressBar: true,
-      playbackwardLineShow: false,
+      showProgressBackward: false,
       onProgressSliderMousedown: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       percentageOfReadyToPlay: 0,
@@ -53,15 +73,17 @@ export default {
   methods: {
     appearProgressSlider() {
       this.$_clearTimeoutDelay();
-      this.$refs.playedSlider.style.height = '10px';
-      this.$refs.readySlider.style.height = '10px';
+      this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
+      this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
+      this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
     },
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
         this.showScreenshot = false;
         this.widthOfReadyToPlay = 0;
-        this.$refs.playedSlider.style.height = '4px';
-        this.$refs.readySlider.style.height = '0px';
+        this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
+        this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
+        this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
       }
     },
     appearProgressBar() {
@@ -71,6 +93,9 @@ export default {
       if (!this.onProgressSliderMousedown) {
         this.showProgressBar = false;
       }
+    },
+    videoRestart() {
+      this.$bus.$emit('seek', 0);
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -87,14 +112,22 @@ export default {
      * @param e mousemove event
      */
     effectProgressBarDraged(e) {
-      const curProgressBarWidth = this.currentWindow.getSize()[0] * (this.progress / 100);
-      const widthProgressBarDraged = e.clientX;
-      if (widthProgressBarDraged < curProgressBarWidth) {
-        this.playbackwardLineShow = true;
+      const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
+      const curProgressBarWidth = (progressBarWidth * (this.progress / 100))
+       + FOOL_PROOFING_BAR_WIDTH;
+      const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
+      // console.log(curProgressBarWidth);
+      // console.log(cursorPosition);
+      if (cursorPosition < curProgressBarWidth) {
+        if (cursorPosition >= 0 || (curProgressBarWidth > 0 && cursorPosition < 0)) {
+          this.showProgressBackward = true;
+        } else {
+          this.showProgressBackward = false;
+        }
       } else {
-        this.playbackwardLineShow = false;
+        this.showProgressBackward = false;
       }
-      const progress = widthProgressBarDraged
+      const progress = cursorPosition
         / this.$refs.sliderContainer.clientWidth;
       if (progress >= 1) {
         this.percentageOfReadyToPlay = 1;
@@ -103,7 +136,7 @@ export default {
       } else {
         this.percentageOfReadyToPlay = progress;
       }
-      this.widthOfReadyToPlay = widthProgressBarDraged;
+      this.widthOfReadyToPlay = cursorPosition;
       this.showScreenshot = true;
     },
     /**
@@ -163,35 +196,42 @@ export default {
         return 0;
       }
       return (100 * this.$store.state.PlaybackState.AccurateTime)
-        / this.$store.state.PlaybackState.Duration;
+        / (this.$store.state.PlaybackState.Duration);
+    },
+    backwardWidth() {
+      const progressBarWidth = this.currentWindow.getSize()[0];
+      const width = (progressBarWidth * (this.progress / 100))
+        - this.cursorPosition;
+      // console.log(this.$store.state.PlaybackState.AccurateTime);
+      // console.log(progressBarWidth);
+      // console.log(`progressbarWidth ${progressBarWidth * (this.progress / 100)}`);
+      // console.log(`cursorPosition ${this.cursorPosition}`);
+      // console.log(`width ${width}`);
+      return width > 0 ? width : 0;
     },
     heightofScreenshot() {
-      return 170 / this.videoRatio;
+      return WIDTH_OF_SCREENSHOT / this.videoRatio;
     },
     positionOfScreenshot() {
-      const halfWidthOfScreenshot = 170 / 2;
-      const minWidth = halfWidthOfScreenshot + 16;
-      const maxWidth = this.currentWindow.getSize()[0] - 16;
+      const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
+      const minWidth = HALF_WIDTH_OF_SCREENSHOT + SCREENSHOT_SIDE_MARGIN_WIDTH;
+      const maxWidth = progressBarWidth - SCREENSHOT_SIDE_MARGIN_WIDTH;
       if (this.widthOfReadyToPlay < minWidth) {
-        return 16;
-      } else if (this.widthOfReadyToPlay + halfWidthOfScreenshot > maxWidth) {
-        return maxWidth - 170;
+        return SCREENSHOT_SIDE_MARGIN_WIDTH - FOOL_PROOFING_BAR_WIDTH;
+      } else if (this.widthOfReadyToPlay + HALF_WIDTH_OF_SCREENSHOT > maxWidth) {
+        return maxWidth - WIDTH_OF_SCREENSHOT;
       }
-      return this.widthOfReadyToPlay - halfWidthOfScreenshot;
-    },
-    currentWindow() {
-      return this.$electron.remote.getCurrentWindow();
-    },
-    positionOfReadyBar() {
-      return this.widthOfReadyToPlay;
+      return this.widthOfReadyToPlay - HALF_WIDTH_OF_SCREENSHOT;
     },
     screenshotContext() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
     },
-    widthPlaybackward() {
-      return (this.currentWindow.getSize()[0] * (this.progress / 100))
-        - this.widthOfReadyToPlay;
+    currentWindow() {
+      return this.$electron.remote.getCurrentWindow();
+    },
+    cursorPosition() {
+      return this.widthOfReadyToPlay;
     },
   },
   created() {
@@ -243,9 +283,27 @@ export default {
     cursor: pointer;
   }
 
+  .fool-proof-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 4px;
+    width: 20px;
+    transition: height 150ms;
+
+    .button {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
+    }
+  }
   .progress-container {
    position: absolute;
-   left: 0;
+   left: 20px;
    bottom: 0;
    width: 100%;
    height: 100%;
