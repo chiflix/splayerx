@@ -71,7 +71,8 @@ export default {
           const tmp = data.slice(offset[i], offset[i] + 4096);
           tmpRes[i] = md5Hex(tmp);
         }
-        console.log(tmpRes.join('-'));
+        // console.log(tmpRes.join('-'));
+        return tmpRes.join('-');
       });
     },
 
