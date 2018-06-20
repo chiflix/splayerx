@@ -54,8 +54,10 @@ new Vue({
                     extensions: ['mp4', 'mkv', 'mov'],
                   }],
                 }, (file) => {
-                  const path = `file:///${file}`;
-                  this.openFile(path);
+                  if (file !== undefined) {
+                    const path = `file:///${file}`;
+                    this.openFile(path);
+                  }
                 });
               },
             },

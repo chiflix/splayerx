@@ -10,7 +10,7 @@
       @durationchange="onDurationChange"
       :src="src">
     </video>
-    <canvas id="canvas" ref="thumbnailCanvas"></canvas>
+    <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
 
@@ -262,6 +262,35 @@ export default {
     $_calculateWidthByHeight(videoWidth, videoHeight, newHeight) {
       return newHeight * (videoWidth / videoHeight);
     },
+    $_getShortCut() {
+      const canvas = this.$refs.thumbnailCanvas;
+      const canvasCTX = canvas.getContext('2d');
+      const { videoHeight, videoWidth } = this.$refs.videoCanvas;
+      [canvas.width, canvas.height] = [videoWidth, videoHeight];
+      const landingViewWidth = 768;
+
+      canvasCTX.drawImage(
+        this.$refs.videoCanvas, 0, 0, videoWidth, videoHeight,
+        0, 0, videoWidth, videoHeight,
+      );
+      const string = canvas.toDataURL('image/png', landingViewWidth / videoWidth);
+      this.$storage.get('recent-played', (err, data) => {
+        if (err) {
+          // TODO: proper error handle
+          console.error(err);
+        } else {
+          const object = data[0];
+          const iterator = Object.keys(object).indexOf('path');
+          if (iterator !== -1) {
+            object.shortCut = string;
+            data.splice(0, 1);
+            data.unshift(object);
+            this.$storage.set('recent-played', data);
+          }
+        }
+      });
+      console.log('shortCut!');
+    },
   },
   computed: {
     playbackRate() {
@@ -305,20 +334,8 @@ export default {
     });
     this.$bus.$on('pause', () => {
       console.log('pause event has been triggered');
-      const canvas = this.$refs.thumbnailCanvas;
-      const canvasCTX = canvas.getContext('2d');
-      const windowRatio = this.newWidthOfWindow / this.newHeightOfWindow;
-
-      canvasCTX.drawImage(this.$refs.videoCanvas, 0, 0, windowRatio * 200, 200);
-      const string = canvas.toDataURL();
-      const regex = /^data:.+\/(.+);base64,(.*)$/;
-
-      const matches = string.match(regex);
-      const ext = matches[1];
-      const data = matches[2];
-      const buffer = Buffer.from(data, 'base64');
-      fs.writeFileSync(`/Users/jinnaide/Desktop/Programing/Yuri/图片/data.${ext}`, buffer);
       this.$refs.videoCanvas.pause();
+      this.$_getShortCut();
     });
     this.$bus.$on('seek', (e) => {
       console.log('seek event has been triggered', e);
@@ -340,11 +357,12 @@ export default {
   height: 100%;
   border-radius: 4px;
   overflow: hidden;
-}
-.video video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 }
 
 // https://www.w3.org/TR/webvtt1/

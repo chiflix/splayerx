@@ -1,40 +1,51 @@
 <template>
 <div class="wrapper">
   <main>
+    <div class="background-image"
+      v-if="showShortcutImage">
+      <img
+        :src="backgroundUrl">
+      <div class="item-name">
+        {{ itemBasename() }}
+      </div>
+    </div>
     <div>
       <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
     </div>
 
     <div class="welcome">
       <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-      <p> {{ version }} </p>
     </div>
 
     <div class="controller">
-        <div class="playlist"
-          v-if="hasRecentPlaylist">
-          <div class="item"
-            v-for="item in lastPlayedFile"
-            @click="openFile(item.path)">
-          </div>
+      <div class="playlist"
+        v-if="hasRecentPlaylist">
+        <div class="item"
+          v-for="item in lastPlayedFile"
+          :style="{ backgroundImage: itemShortcut(item.shortCut), backgroundPosition: 'center center', backgroundSize: '114px'}"
+          @click="openFile(item.path)"
+          @mouseover="onRecentItemMouseover(item)">
         </div>
-      <div class="button"
-        @click="open('./')">
-        <img src="~@/assets/icon-open.svg" type="image/svg+xml">
       </div>
+    </div>
+    <div
+      @click="open('./')">
+      <img class="button" src="~@/assets/icon-open.svg" type="image/svg+xml">
     </div>
   </main>
 </div>
 </template>
 
 <script>
+import path from 'path';
 export default {
   name: 'landing-view',
   data() {
     return {
       showingPopupDialog: false,
       lastPlayedFile: [],
-      version: '',
+      backgroundUrl: '',
+      showShortcutImage: false,
     };
   },
   components: {
@@ -50,7 +61,6 @@ export default {
       this.$electron.remote.getCurrentWindow().setResizable(false);
     }
 
-    this.version = app.getVersion();
     console.log(app.getVersion(), app.getName());
 
     this.$storage.get('recent-played', (err, data) => {
@@ -64,6 +74,19 @@ export default {
     });
   },
   methods: {
+    itemShortcut(shortCut) {
+      return `url("${shortCut}")`;
+    },
+    itemBasename() {
+      return path.basename(this.item.path, path.extname(this.item.path));
+    },
+    onRecentItemMouseover(item) {
+      this.item = item;
+      if (item.shortCut !== '') {
+        this.backgroundUrl = item.shortCut;
+        this.showShortcutImage = true;
+      }
+    },
     open(link) {
       if (this.showingPopupDialog) {
         // skip if there is already a popup dialog
@@ -116,15 +139,31 @@ body {
   rgba(0, 0, 0, .9) 20%,
   rgba(44, 44, 44, .95) 80%);
   height: 100vh;
-  padding: 60px 80px;
   width: 100vw;
+  z-index: -1;
 }
+.background-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
 
+  .item-name {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 30px;
+  }
+  img {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
 .logo {
-  height: auto;
-  margin-bottom: 20px;
-  margin-top: 5vh;
-  width: 20vw;
+  height: 136px;
+  width: 136px;
+  margin-top: 80px;
 }
 
 main {
@@ -132,11 +171,8 @@ main {
   justify-content: space-between;
 }
 
-main>div {
-  flex-basis: 50%;
-}
-
 .welcome {
+  margin-top: 15px;
   .title {
     font-size: 7vw;
     margin-bottom: 6px;
@@ -150,9 +186,9 @@ main>div {
 
 .controller {
   position: absolute;
-  right: 0;
+  left: 0;
   bottom: 40px;
-  width: 100vw;
+  width: 100%;
 
   .playlist {
     display: flex;
@@ -172,21 +208,19 @@ main>div {
       margin-right: 15px;
     }
   }
+}
+.button {
+  position: absolute;
+  bottom: 57px;
+  right: 45px;
+  width: 35px;
+  height: 30px;
 
-  .button {
-    position: absolute;
-    bottom: 1em;
-    right: 1em;
-    font-size: .8em;
-    cursor: pointer;
-    outline: none;
-    transition: all 0.15s ease;
-    border: 0px;
-
-    .alt {
-      background-color: transparent;
-    }
-  }
+  font-size: .8em;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  border: 0px;
 }
 
 </style>

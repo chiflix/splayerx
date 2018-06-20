@@ -62,14 +62,13 @@ export default {
           console.error(err);
         } else if (Array.isArray(data)) {
           console.log('its an array!');
-          if (data.length < 5) {
+          if (data.length < 4) {
             if (this.$_indexOfExistedFileIn(data, path) === -1) {
-              console.log(1);
               data.unshift(newElement);
             } else {
               console.log(2);
-              data.splice(this.$_indexOfExistedFileIn(data, path), 1);
-              data.unshift(newElement);
+              const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+              data.unshift(item[0]);
             }
             console.log('changed:');
             console.log(data);
@@ -79,8 +78,8 @@ export default {
               data.pop();
               data.unshift(newElement);
             } else {
-              data.splice(this.$_indexOfExistedFileIn(data, path), 1);
-              data.unshift(newElement);
+              const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+              data.unshift(item[0]);
             }
             console.log('changed:');
             console.log(data);
@@ -102,7 +101,7 @@ export default {
         const iterator = Object.keys(object).indexOf('path');
         if (iterator !== -1) {
           if (object.path === path) {
-            return iterator;
+            return i;
           }
         }
       }
