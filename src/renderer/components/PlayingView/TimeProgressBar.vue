@@ -74,10 +74,6 @@ export default {
     };
   },
   methods: {
-    /**
-     * 在mounted后，无法正常得通过调用appearPorgressSlider方法来
-     * 操纵refs， 但是在mounted中使用refs时没有问题。
-     */
     appearProgressSlider() {
       console.log('appear progress slider');
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
@@ -88,12 +84,10 @@ export default {
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
         console.log('hide progress slider');
-        // this.showScreenshot = false;
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
         this.$refs.backwardSlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
-        // this.widthOfReadyToPlay = 0;
       }
     },
     appearProgressBar() {
