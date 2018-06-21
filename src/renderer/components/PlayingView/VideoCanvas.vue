@@ -172,7 +172,12 @@ export default {
     },
     handleResize() {
       const screenWidth = document.documentElement.clientWidth;
-      this.$bus.$emit('window-resize', screenWidth);
+      const screenHeight = document.documentElement.clientHeight;
+      const screenSize = {
+        screenWidth,
+        screenHeight
+      };
+      this.$bus.$emit('window-resize', screenSize);
     },
     $_controlWindowSize(newWidth, newHeight) {
       this.currentWindow.setBounds({
