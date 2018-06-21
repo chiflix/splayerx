@@ -9,7 +9,7 @@
     <div class="progress-container">
       <div class="screenshot-background"
       v-show="showScreenshot"
-      :style="{ left: positionOfScreenshot +'px', height: heightofScreenshot +'px' }">
+      :style="{ left: positionOfScreenshot +'px', width: widthOfThumbnail + 'px', height: heightofScreenshot +'px' }">
         <div class="screenshot">
           <div class="time">
             {{ screenshotContext }}
@@ -48,6 +48,7 @@ export default {
       videoRatio: 0,
       percentageVideoDraged: 0,
       flagProgressBarDraged: false,
+      widthOfWindow: 0,
     };
   },
   methods: {
@@ -165,17 +166,25 @@ export default {
       return (100 * this.$store.state.PlaybackState.AccurateTime)
         / this.$store.state.PlaybackState.Duration;
     },
+    widthOfThumbnail() {
+      if (this.widthOfWindow < 845) {
+        return 100;
+      } else if (this.widthOfWindow < 1920) {
+        return 170;
+      }
+      return 200;
+    },
     heightofScreenshot() {
-      return 170 / this.videoRatio;
+      return this.widthOfThumbnail / this.videoRatio;
     },
     positionOfScreenshot() {
-      const halfWidthOfScreenshot = 170 / 2;
-      const minWidth = halfWidthOfScreenshot + 16;
+      const halfWidthOfScreenshot = this.widthOfThumbnail / 2;
+      const minWidth = this.widthOfThumbnail + 16;
       const maxWidth = this.currentWindow.getSize()[0] - 16;
       if (this.widthOfReadyToPlay < minWidth) {
         return 16;
       } else if (this.widthOfReadyToPlay + halfWidthOfScreenshot > maxWidth) {
-        return maxWidth - 170;
+        return maxWidth - this.widthOfThumbnail;
       }
       return this.widthOfReadyToPlay - halfWidthOfScreenshot;
     },
@@ -223,6 +232,10 @@ export default {
     this.$bus.$on('screenshot-sizeset', (e) => {
       this.videoRatio = e;
     });
+    this.$bus.$on('window-resize', (e) => {
+      this.widthOfWindow = e.screenWidth;
+      console.log(`Current window width: ${this.widthOfWindow}.`);
+    });
   },
 };
 
@@ -239,6 +252,16 @@ export default {
   -webkit-app-region: no-drag;
   z-index: 700;
 
+  @media screen and (max-width: 854px) {
+    height: 16px;
+  }
+  @media screen and (min-width: 854px) and (max-width: 1920px) {
+    height: 22px;
+  }
+  @media screen and (min-width: 1920px) {
+    height: 30px;
+  }
+
   .progress-container:hover {
     cursor: pointer;
   }
@@ -252,7 +275,6 @@ export default {
 
    .screenshot {
      position: relative;
-     width: 170px;
      height: 100%;
      border: 1px solid transparent;
      border-radius: 1px;
@@ -274,12 +296,21 @@ export default {
 
    .screenshot-background {
      position: absolute;
-     width: 170px;
+     width: 100%;
      bottom: 26px;
      box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 5px;
      background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5) 0%, rgba(84, 84, 84, 0.5) 100%);
      border-radius: 1px;
      z-index: 100;
+     @media screen and (max-width: 854px) {
+       bottom: 16px;
+     }
+     @media screen and (min-width: 854px) and (max-width: 1920px) {
+       bottom: 24px;
+     }
+     @media screen and (min-width: 1920px) {
+       bottom: 28px;
+     }
    }
  }
 }
