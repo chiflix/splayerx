@@ -9,6 +9,7 @@
       @mouseup="togglePlayback"
       @mousewheel="wheelVolumeControll"
       @mousemove="wakeUpAllWidgets"
+      @mouseover="focusCurrentWindow"
       @mouseout="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
 			<TimeProgressBar/>
@@ -65,6 +66,9 @@ export default {
         this.cursorShow = false;
       }, 3000);
     },
+    focusCurrentWindow() {
+      this.currentWindow.focus();
+    },
     wakeUpAllWidgets() {
       this.showMask = true;
       this.isDragging = true;
@@ -107,9 +111,6 @@ export default {
   },
   mounted() {
     this.$bus.$emit('play');
-    window.addEventListener('mouseover', () => {
-      this.$electron.remote.getCurrentWindow().focus();
-    });
   },
   computed: {
     uri() {
