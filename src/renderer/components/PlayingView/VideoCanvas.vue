@@ -139,7 +139,7 @@ export default {
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         parser.oncue = (cue) => {
           sub0.addCue(cue);
-          console.log(cue);
+          // console.log(cue);
         };
         parser.onflush = () => {
           if (!shownTextTrack) {
@@ -169,6 +169,10 @@ export default {
           sub0.mode = 'showing';
         }
       }
+    },
+    handleResize() {
+      const screenWidth = document.documentElement.clientWidth;
+      this.$bus.$emit('window-resize', screenWidth);
     },
     $_controlWindowSize(newWidth, newHeight) {
       this.currentWindow.setBounds({
@@ -313,6 +317,10 @@ export default {
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
     });
+    window.addEventListener('resize', this.handleResize);
+  },
+  beforeDestory() {
+    window.removeEventListener('resize', this.handleResize);
   },
 };
 </script>
