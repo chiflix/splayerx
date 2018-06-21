@@ -138,10 +138,10 @@ export default {
     line-height: 18px;
   }
   @media screen and (min-width: 854px) and (max-width: 1920px) {
-    bottom: 28.75px;
+    bottom: 28px;
     left: 31.25px;
     height: 22.5px;
-    font-size: 22.5px;
+    font-size: 24px;
     line-height: 22.5px;
   }
   @media screen and (min-width: 1920px) {
