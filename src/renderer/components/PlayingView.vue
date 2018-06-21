@@ -14,7 +14,7 @@
 			<TimeProgressBar/>
       <TheTimeCodes/>
 			<VolumeControl/>
-			<AdvanceControl/>
+			<!-- <AdvanceControl/> -->
 		</div>
   </div>
 </template>
