@@ -6,7 +6,13 @@
       <img
         :src="backgroundUrl">
       <div class="item-name">
-        {{ itemBasename() }}
+        {{ itemInfo().baseName }}
+      </div>
+      <div class="item-description">
+        {{ itemInfo().baseName }}
+      </div>
+      <div class="item-timing">
+        {{ timecodeFromSeconds(itemInfo().lastTime) }}
       </div>
     </div>
     <div>
@@ -21,10 +27,16 @@
       <div class="playlist"
         v-if="hasRecentPlaylist">
         <div class="item"
-          v-for="item in lastPlayedFile"
-          :style="{ backgroundImage: itemShortcut(item.shortCut), backgroundPosition: 'center center', backgroundSize: '114px'}"
+          v-for="(item, index) in lastPlayedFile"
+          :key="item.path"
+          :style="{
+              backgroundImage: itemShortcut(item.shortCut),
+              width: item.chosen ? '140px' : '114px',
+              height: item.chosen ? '80px' : '65px',
+            }"
           @click="openFile(item.path)"
-          @mouseover="onRecentItemMouseover(item)">
+          @mouseover="onRecentItemMouseover(item, index)"
+          @mouseout="onRecentItemMouseout(index)">
         </div>
       </div>
     </div>
@@ -77,15 +89,23 @@ export default {
     itemShortcut(shortCut) {
       return `url("${shortCut}")`;
     },
-    itemBasename() {
-      return path.basename(this.item.path, path.extname(this.item.path));
+    itemInfo() {
+      return {
+        baseName: path.basename(this.item.path, path.extname(this.item.path)),
+        lastTime: this.item.lastPlayedTime,
+      };
     },
-    onRecentItemMouseover(item) {
+    onRecentItemMouseover(item, index) {
       this.item = item;
+      this.$set(this.lastPlayedFile[index], 'chosen', true);
       if (item.shortCut !== '') {
+        this.isChanging = true;
         this.backgroundUrl = item.shortCut;
         this.showShortcutImage = true;
       }
+    },
+    onRecentItemMouseout(index) {
+      this.$set(this.lastPlayedFile[index], 'chosen', false);
     },
     open(link) {
       if (this.showingPopupDialog) {
@@ -149,9 +169,26 @@ body {
 
   .item-name {
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 100px;
+    left: 45px;
     font-size: 30px;
+    font-weight: bold;
+  }
+  .item-description {
+    position: absolute;
+    opacity: 0.4;
+    top: 140px;
+    left: 45px;
+    font-size: 20px;
+    font-weight: lighter;
+  }
+  .item-timing {
+    position: absolute;
+    opacity: 0.4;
+    top: 160px;
+    left: 45px;
+    font-size: 20px;
+    font-weight: lighter;
   }
   img {
     position: absolute;
@@ -194,18 +231,23 @@ main {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
+    align-items: flex-end;
     margin-left: 45px;
 
     .item {
       color: #e4e4c4;
-      background: radial-gradient( ellipse at top center,
-      rgba(0, 0, 0, .9) 20%,
-      rgba(44, 44, 44, .95) 80%);
-      height: 65px;
+      border-radius: 2px;
       width: 114px;
+      height: 65px;
+      box-shadow: 0px 0px 30px 1px black;
       color: gray;
       cursor: pointer;
       margin-right: 15px;
+      background-size: contain;
+      background-color: black;
+      background-repeat: no-repeat;
+      background-position: center center;
+      transition: width 150ms ease-out, height 150ms ease-out;
     }
   }
 }
@@ -215,7 +257,6 @@ main {
   right: 45px;
   width: 35px;
   height: 30px;
-
   font-size: .8em;
   cursor: pointer;
   outline: none;
