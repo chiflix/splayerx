@@ -222,7 +222,7 @@ export default {
     positionOfScreenshot() {
       const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
       const halfWidthOfScreenshot = this.widthOfThumbnail / 2;
-      const minWidth = halfWidthOfScreenshot + SCREENSHOT_SIDE_MARGIN_WIDTH;
+      const minWidth = this.widthOfThumbnail + SCREENSHOT_SIDE_MARGIN_WIDTH;
       const maxWidth = progressBarWidth - SCREENSHOT_SIDE_MARGIN_WIDTH;
       if (this.widthOfReadyToPlay < minWidth) {
         return SCREENSHOT_SIDE_MARGIN_WIDTH - FOOL_PROOFING_BAR_WIDTH;
