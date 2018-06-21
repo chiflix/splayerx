@@ -9,6 +9,7 @@
       @mouseup="togglePlayback"
       @mousewheel="wheelVolumeControll"
       @mousemove="wakeUpAllWidgets"
+      @mouseover="focusCurrentWindow"
       @mouseout="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
 			<TimeProgressBar/>
@@ -64,6 +65,9 @@ export default {
       this.cursorDelay = setTimeout(() => {
         this.cursorShow = false;
       }, 3000);
+    },
+    focusCurrentWindow() {
+      this.currentWindow.focus();
     },
     wakeUpAllWidgets() {
       this.showMask = true;
