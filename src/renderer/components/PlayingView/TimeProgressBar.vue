@@ -48,15 +48,15 @@
  * 4. 重做回退进度条 -- done
 */
 
-const WIDTH_OF_SCREENSHOT = 170;
-const HALF_WIDTH_OF_SCREENSHOT = 85;
-const SCREENSHOT_SIDE_MARGIN_WIDTH = 16;
-
-const PROGRESS_BAR_HEIGHT = '10px';
-const PROGRESS_BAR_SLIDER_HIDE_HEIGHT = '4px';
-const PROGRESS_BAR_HIDE_HEIGHT = '0px';
-
-const FOOL_PROOFING_BAR_WIDTH = 20;
+import {
+  WIDTH_OF_SCREENSHOT,
+  HALF_WIDTH_OF_SCREENSHOT,
+  SCREENSHOT_SIDE_MARGIN_WIDTH,
+  PROGRESS_BAR_HEIGHT,
+  PROGRESS_BAR_HIDE_HEIGHT,
+  PROGRESS_BAR_SLIDER_HIDE_HEIGHT,
+  FOOL_PROOFING_BAR_WIDTH,
+} from '@/constants';
 
 export default {
   data() {
@@ -75,7 +75,6 @@ export default {
   },
   methods: {
     appearProgressSlider() {
-      console.log('appear progress slider');
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
@@ -83,7 +82,7 @@ export default {
     },
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
-        console.log('hide progress slider');
+        this.showScreenshot = false;
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
@@ -238,6 +237,7 @@ export default {
   created() {
     this.$bus.$on('progressslider-appear', () => {
       this.showProgressBackward = false;
+      this.showScreenshot = false;
       this.widthOfReadyToPlay = 0;
       this.appearProgressSlider();
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
