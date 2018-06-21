@@ -226,7 +226,7 @@ export default {
     }
   }
   @media screen and (min-width: 854px) and (max-width: 1920px) {
-    bottom: 30px;
+    bottom: 25px;
     right: 12.5+35+31.25px;
     width: 35px;
     height: 30px;
