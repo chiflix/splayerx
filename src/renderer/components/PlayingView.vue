@@ -107,6 +107,9 @@ export default {
   },
   mounted() {
     this.$bus.$emit('play');
+    window.addEventListener('mouseover', () => {
+      this.$electron.remote.getCurrentWindow().focus();
+    });
   },
   computed: {
     uri() {
