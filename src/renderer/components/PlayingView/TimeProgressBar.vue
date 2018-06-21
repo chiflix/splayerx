@@ -168,11 +168,11 @@ export default {
     },
     widthOfThumbnail() {
       if (this.widthOfWindow < 845) {
-        return 100;
+        return 136;
       } else if (this.widthOfWindow < 1920) {
         return 170;
       }
-      return 200;
+      return 240;
     },
     heightofScreenshot() {
       return this.widthOfThumbnail / this.videoRatio;
@@ -252,16 +252,6 @@ export default {
   -webkit-app-region: no-drag;
   z-index: 700;
 
-  @media screen and (max-width: 854px) {
-    height: 16px;
-  }
-  @media screen and (min-width: 854px) and (max-width: 1920px) {
-    height: 22px;
-  }
-  @media screen and (min-width: 1920px) {
-    height: 30px;
-  }
-
   .progress-container:hover {
     cursor: pointer;
   }
@@ -302,17 +292,51 @@ export default {
      background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5) 0%, rgba(84, 84, 84, 0.5) 100%);
      border-radius: 1px;
      z-index: 100;
-     @media screen and (max-width: 854px) {
-       bottom: 16px;
-     }
-     @media screen and (min-width: 854px) and (max-width: 1920px) {
-       bottom: 24px;
-     }
-     @media screen and (min-width: 1920px) {
-       bottom: 28px;
-     }
    }
  }
+ /* Progress bar's responsive trigger area. */
+  @media screen and (max-width: 854px) {
+    height: 20px;
+    .progress-container {
+      .screenshot-background {
+        bottom: 20px;
+        .screenshot {
+          .time {
+            font-size: 20px;
+          }
+        } 
+      }
+    }
+  }
+  @media screen and (min-width: 854px) and (max-width: 1920px) {
+    height: 20px;
+    .progress-container {
+      .screenshot-background {
+        bottom: 20px;
+        .screenshot {
+          .time {
+            font-size: 24px;
+          }
+        } 
+      }
+    }
+  }
+  @media screen and (min-width: 1920px) {
+    height: 20px;
+    .progress-container {
+      .screenshot-background {
+        bottom: 20px;
+        .screenshot {
+          .time {
+            font-size: 40px;
+          }
+        } 
+      }
+    }
+    .time {
+      font-size: 40px;
+    }
+  }
 }
 
 .video-controller .progress-played {
