@@ -220,9 +220,6 @@ new Vue({
         this.$bus.$emit('seek', curTime + seconds);
       }
       if (type === 'Rewind') {
-        if (curTime < seconds) {
-          seconds = curTime;
-        }
         this.$bus.$emit('seek', curTime - seconds);
       }
     },

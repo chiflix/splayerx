@@ -1,8 +1,8 @@
 <template>
   <transition name="fade" appear>
   <div class="progress"
-    @mouseover="appearProgressSlider"
-    @mouseout="hideProgressSlider"
+    @mouseover.stop="appearProgressSlider"
+    @mouseout.stop="hideProgressSlider"
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
@@ -24,12 +24,14 @@
         <div class="background-line"></div>
         <div class="line"
         :style="{ width: cursorPosition +'px' }"></div>
-        <div class="playbackward-line"
-        v-if="showProgressBackward"
-        :style="{ left: cursorPosition + 'px', width: backwardWidth + 'px'}"></div>
+      </div>
+      <div class="progress-backward" ref="backwardSlider"
+        v-show="showProgressBackward"
+        :style="{ left: cursorPosition + 'px', width: backwardWidth + 'px' }">
+        <div class="line"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
-      :style="{ width: progress +'%' }">
+        :style="{ width: progress +'%' }">
         <div class="line"></div>
       </div>
     </div>
@@ -41,8 +43,9 @@
 /**
  * TODO:
  * 1. 常量变量放入常量组件
- * 2. seek进度条产生的问题
- * 3. seek 后backward line的left保持为0
+ * 2. seek 后快进的不正常显示 -- done
+ * 3. 由于mouseover于mouseout而产生的多次调用问题
+ * 4. 重做回退进度条 -- done
 */
 
 const WIDTH_OF_SCREENSHOT = 170;
@@ -71,19 +74,27 @@ export default {
     };
   },
   methods: {
+    /**
+     * 在mounted后，无法正常得通过调用appearPorgressSlider方法来
+     * 操纵refs， 但是在mounted中使用refs时没有问题。
+     */
     appearProgressSlider() {
       this.$_clearTimeoutDelay();
+      console.log('appear progress slider');
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
+      this.$refs.backwardSlider.style.height = PROGRESS_BAR_HEIGHT;
     },
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
+        console.log('hide progress slider');
         this.showScreenshot = false;
         this.widthOfReadyToPlay = 0;
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
+        this.$refs.backwardSlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
       }
     },
     appearProgressBar() {
@@ -92,6 +103,7 @@ export default {
     hideProgressBar() {
       if (!this.onProgressSliderMousedown) {
         this.showProgressBar = false;
+        this.hideProgressSlider();
       }
     },
     videoRestart() {
@@ -116,8 +128,6 @@ export default {
       const curProgressBarWidth = (progressBarWidth * (this.progress / 100))
        + FOOL_PROOFING_BAR_WIDTH;
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
-      // console.log(curProgressBarWidth);
-      // console.log(cursorPosition);
       if (cursorPosition < curProgressBarWidth) {
         if (cursorPosition >= 0 || (curProgressBarWidth > 0 && cursorPosition < 0)) {
           this.showProgressBackward = true;
@@ -202,11 +212,6 @@ export default {
       const progressBarWidth = this.currentWindow.getSize()[0];
       const width = (progressBarWidth * (this.progress / 100))
         - this.cursorPosition;
-      // console.log(this.$store.state.PlaybackState.AccurateTime);
-      // console.log(progressBarWidth);
-      // console.log(`progressbarWidth ${progressBarWidth * (this.progress / 100)}`);
-      // console.log(`cursorPosition ${this.cursorPosition}`);
-      // console.log(`width ${width}`);
       return width > 0 ? width : 0;
     },
     heightofScreenshot() {
@@ -236,14 +241,15 @@ export default {
   },
   created() {
     this.$bus.$on('progressslider-appear', () => {
+      this.showProgressBackward = false;
       this.appearProgressSlider();
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
         this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
+          = setTimeout(this.hideProgressSlider, 3000);
       } else {
         this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
+          = setTimeout(this.hideProgressSlider, 3000);
       }
     });
     this.$bus.$on('progressbar-appear', () => {
@@ -384,12 +390,22 @@ export default {
     height: 100%;
     background: rgba(255, 255, 255, 0.1);
   }
-  .playbackward-line {
+}
+
+.video-controller .progress-backward {
+  position: absolute;
+  bottom: 0;
+  height: 0px;
+  transition: height 150ms;
+
+  .line {
     position: absolute;
     bottom: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
     background: rgba(151, 151, 151, 0.9);
-    z-index: 23;
+    z-index: 700;
   }
 }
 
