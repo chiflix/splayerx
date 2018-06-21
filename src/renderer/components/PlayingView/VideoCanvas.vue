@@ -175,7 +175,7 @@ export default {
       const screenHeight = document.documentElement.clientHeight;
       const screenSize = {
         screenWidth,
-        screenHeight
+        screenHeight,
       };
       this.$bus.$emit('window-resize', screenSize);
     },
