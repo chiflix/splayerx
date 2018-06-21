@@ -79,7 +79,6 @@ export default {
      * 操纵refs， 但是在mounted中使用refs时没有问题。
      */
     appearProgressSlider() {
-      this.$_clearTimeoutDelay();
       console.log('appear progress slider');
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
@@ -98,6 +97,7 @@ export default {
       }
     },
     appearProgressBar() {
+      this.$_clearTimeoutDelay();
       this.showProgressBar = true;
     },
     hideProgressBar() {
@@ -171,8 +171,8 @@ export default {
      */
     documentProgressDragClear() {
       document.onmouseup = () => {
-        this.onProgressSliderMousedown = false;
         document.onmousemove = null;
+        this.onProgressSliderMousedown = false;
         // 可以考虑其他的方案
         if (this.flagProgressBarDraged) {
           this.$bus.$emit('seek', this.percentageVideoDraged
@@ -404,8 +404,9 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(151, 151, 151, 0.9);
-    z-index: 700;
+    // background: rgba(150, 150, 150, 0.9);
+    // z-index: 100;
+    background: rgb(0, 0, 0);
   }
 }
 
