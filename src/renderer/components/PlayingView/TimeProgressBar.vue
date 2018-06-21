@@ -13,7 +13,7 @@
       @mousedown.left.stop="onProgresssBarClick">
       <div class="screenshot-background"
         v-show="showScreenshot"
-        :style="{ left: positionOfScreenshot +'px', height: heightofScreenshot +'px' }">
+        :style="{ left: positionOfScreenshot +'px', width: widthOfThumbnail + 'px', height: heightofScreenshot +'px' }">
         <div class="screenshot">
           <div class="time">
             {{ screenshotContext }}
@@ -49,8 +49,6 @@
 */
 
 import {
-  WIDTH_OF_SCREENSHOT,
-  HALF_WIDTH_OF_SCREENSHOT,
   SCREENSHOT_SIDE_MARGIN_WIDTH,
   PROGRESS_BAR_HEIGHT,
   PROGRESS_BAR_HIDE_HEIGHT,
@@ -210,19 +208,28 @@ export default {
         - this.cursorPosition;
       return width > 0 ? width : 0;
     },
+    widthOfThumbnail() {
+      if (this.widthOfWindow < 845) {
+        return 136;
+      } else if (this.widthOfWindow < 1920) {
+        return 170;
+      }
+      return 240;
+    },
     heightofScreenshot() {
-      return WIDTH_OF_SCREENSHOT / this.videoRatio;
+      return this.widthOfThumbnail / this.videoRatio;
     },
     positionOfScreenshot() {
       const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
-      const minWidth = HALF_WIDTH_OF_SCREENSHOT + SCREENSHOT_SIDE_MARGIN_WIDTH;
+      const halfWidthOfScreenshot = this.widthOfThumbnail / 2;
+      const minWidth = halfWidthOfScreenshot + SCREENSHOT_SIDE_MARGIN_WIDTH;
       const maxWidth = progressBarWidth - SCREENSHOT_SIDE_MARGIN_WIDTH;
       if (this.widthOfReadyToPlay < minWidth) {
         return SCREENSHOT_SIDE_MARGIN_WIDTH - FOOL_PROOFING_BAR_WIDTH;
-      } else if (this.widthOfReadyToPlay + HALF_WIDTH_OF_SCREENSHOT > maxWidth) {
-        return maxWidth - WIDTH_OF_SCREENSHOT;
+      } else if (this.widthOfReadyToPlay + halfWidthOfScreenshot > maxWidth) {
+        return maxWidth - this.widthOfThumbnail;
       }
-      return this.widthOfReadyToPlay - HALF_WIDTH_OF_SCREENSHOT;
+      return this.widthOfReadyToPlay - halfWidthOfScreenshot;
     },
     screenshotContext() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
