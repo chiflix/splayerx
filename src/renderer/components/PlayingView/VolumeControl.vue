@@ -177,6 +177,7 @@ export default {
 
   .container {
     position: relative;
+    bottom: 115px;
     width: 15px;
     height: 105px;
     margin: 0 auto;
@@ -191,7 +192,7 @@ export default {
   .slider {
     position: absolute;
     bottom: 0;
-    width: 15px;
+    width: 100%;
     background: rgba(255,255,255,0.70);
     border-radius: 1px;
   }
@@ -200,8 +201,8 @@ export default {
     position: absolute;
     bottom: 0;
     right:0;
-    width: 35px;
-    height: 30px;
+    width: 100%;
+    height: 100%;
   }
 
   .button:hover {
@@ -209,8 +210,42 @@ export default {
   }
 
   .button img {
+    width: 100%;
+    height: 100%;
+  }
+
+  @media screen and (max-width: 854px) {
+    bottom: 22px;
+    right: 10+28+25px;
+    width: 28px;
+    height: 24px;
+    .container {
+      width: 12px;
+      height: 84px;
+      bottom: 90px;
+    }
+  }
+  @media screen and (min-width: 854px) and (max-width: 1920px) {
+    bottom: 30px;
+    right: 12.5+35+31.25px;
     width: 35px;
     height: 30px;
+    .container {
+      width: 15px;
+      height: 105px;
+      bottom: 115px;
+    }
+  }
+  @media screen and (min-width:1920px) {
+    bottom: 40px;
+    right: 20+56+50px;
+    width: 56px;
+    height: 48px;
+    .container {
+      width: 24px;
+      height: 168px;
+      bottom: 180px;
+    }
   }
 }
 
