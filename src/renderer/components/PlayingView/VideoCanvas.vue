@@ -283,6 +283,7 @@ export default {
           const iterator = Object.keys(object).indexOf('path');
           if (iterator !== -1) {
             object.shortCut = string;
+            object.lastPlayedTime = this.currentTime;
             data.splice(0, 1);
             data.unshift(object);
             this.$storage.set('recent-played', data);
@@ -293,6 +294,9 @@ export default {
     },
   },
   computed: {
+    currentTime() {
+      return this.$store.state.PlaybackState.CurrentTime;
+    },
     playbackRate() {
       return this.$store.state.PlaybackState.PlaybackRate;
     },
@@ -343,6 +347,9 @@ export default {
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
     });
+  },
+  beforeDestroy() {
+    this.$_getShortCut();
   },
 };
 </script>
