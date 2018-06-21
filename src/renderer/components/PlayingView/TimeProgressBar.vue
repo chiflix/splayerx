@@ -6,11 +6,11 @@
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.left="videoRestart">
+      @mousedown.left.stop="videoRestart">
       <div class="button"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
-      @mousedown.left="onProgresssBarClick">
+      @mousedown.left.stop="onProgresssBarClick">
       <div class="screenshot-background"
         v-show="showScreenshot"
         :style="{ left: positionOfScreenshot +'px', height: heightofScreenshot +'px' }">
@@ -27,7 +27,7 @@
       </div>
       <div class="progress-backward" ref="backwardSlider"
         v-show="showProgressBackward"
-        :style="{ left: cursorPosition + 'px', width: backwardWidth + 'px' }">
+        :style="{ left: cursorPosition + 0.1 + 'px', width: backwardWidth + 'px' }">
         <div class="line"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
@@ -88,12 +88,12 @@ export default {
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
         console.log('hide progress slider');
-        this.showScreenshot = false;
-        this.widthOfReadyToPlay = 0;
+        // this.showScreenshot = false;
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
         this.$refs.backwardSlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
+        // this.widthOfReadyToPlay = 0;
       }
     },
     appearProgressBar() {
@@ -107,6 +107,7 @@ export default {
       }
     },
     videoRestart() {
+      this.showProgressBackward = false;
       this.$bus.$emit('seek', 0);
     },
     onProgresssBarClick(e) {
@@ -173,6 +174,7 @@ export default {
       document.onmouseup = () => {
         document.onmousemove = null;
         this.onProgressSliderMousedown = false;
+        this.showScreenshot = false;
         // 可以考虑其他的方案
         if (this.flagProgressBarDraged) {
           this.$bus.$emit('seek', this.percentageVideoDraged
@@ -242,14 +244,15 @@ export default {
   created() {
     this.$bus.$on('progressslider-appear', () => {
       this.showProgressBackward = false;
+      this.widthOfReadyToPlay = 0;
       this.appearProgressSlider();
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
         this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressSlider, 3000);
+          = setTimeout(this.hideProgressBar, 3000);
       } else {
         this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressSlider, 3000);
+          = setTimeout(this.hideProgressBar, 3000);
       }
     });
     this.$bus.$on('progressbar-appear', () => {
@@ -404,9 +407,9 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
-    // background: rgba(150, 150, 150, 0.9);
-    // z-index: 100;
-    background: rgb(0, 0, 0);
+    background: rgba(150, 150, 150, 0.9);
+    z-index: 100;
+    // background: rgb(0, 0, 0);
   }
 }
 
