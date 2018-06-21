@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 
 export default {
   methods: {
@@ -48,5 +49,34 @@ export default {
         }
       }
     },
+
+    mediaQuickHash(file) {
+      function md5Hex(text) {
+        return crypto.createHash('md5').update(text).digest('hex');
+      }
+      let res;
+      fs.readFile(path.join(__dirname, file), (err, data) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        const offset = [
+          4096,
+          Math.floor(data.length / 3),
+          Math.floor(data.length / 3) * 2,
+          data.length - 8192,
+        ];
+        const tmpRes = [];
+        for (let i = 0; i < 4; i += 1) {
+          const tmp = data.slice(offset[i], offset[i] + 4096);
+          tmpRes[i] = md5Hex(tmp);
+        }
+        res = tmpRes.join('-');
+      });
+      // console.log(res);
+      return res;
+    },
+
+
   },
 };
