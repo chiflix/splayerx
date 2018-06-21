@@ -136,13 +136,19 @@ export default {
     height: 18px;
     font-size: 18px;
     line-height: 18px;
+    .secondContent {
+      font-size: 12px;
+    }
   }
   @media screen and (min-width: 854px) and (max-width: 1920px) {
     bottom: 28px;
     left: 31.25px;
-    height: 22.5px;
+    height: 24px;
     font-size: 24px;
-    line-height: 22.5px;
+    line-height: 24px;
+    .secondContent {
+      font-size: 16px;
+    }
   }
   @media screen and (min-width: 1920px) {
     bottom: 46px;
@@ -150,6 +156,9 @@ export default {
     height: 36px;
     font-size: 36px;
     line-height: 36px;
+    .secondContent {
+      font-size: 24px;
+    }
   }
 }
 .timing:hover {
