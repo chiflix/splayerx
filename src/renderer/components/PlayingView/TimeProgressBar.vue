@@ -1,14 +1,20 @@
 <template>
   <transition name="fade" appear>
-  <div class="progress" ref="sliderContainer"
-    @mouseover="appearProgressSlider"
-    @mouseout="hideProgressSlider"
-    @mousedown.left="onProgresssBarClick"
+  <div class="progress"
+    @mouseover.stop="appearProgressSlider"
+    @mouseout.stop="hideProgressSlider"
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
-    <div class="progress-container">
+    <div class="fool-proof-bar" ref="foolProofBar"
+      @mousedown.left.stop="videoRestart"
+      @mouseenter="hideBackwardLine"
+      @mouseleave="showBackwardLine">
+      <div class="button"></div>
+    </div>
+    <div class="progress-container" ref="sliderContainer"
+      @mousedown.left.stop="onProgresssBarClick">
       <div class="screenshot-background"
-      v-show="showScreenshot"
+        v-show="showScreenshot"
         :style="{ left: positionOfScreenshot +'px', width: widthOfThumbnail + 'px', height: heightofScreenshot +'px' }">
         <div class="screenshot">
           <div class="time">
@@ -19,10 +25,12 @@
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
         <div class="line"
-          :style="{ width: positionOfReadyBar +'px' }"></div>
-        <div class="playbackward-line"
-          v-if="playbackwardLineShow"
-          :style="{ left: positionOfReadyBar + 'px', width: widthPlaybackward + 'px'}"></div>
+        :style="{ width: cursorPosition +'px' }"></div>
+      </div>
+      <div class="progress-backward" ref="backwardSlider"
+        v-show="showProgressBackward"
+        :style="{ left: cursorPosition + 0.1 + 'px', width: backwardWidth + 'px' }">
+        <div class="line"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
         :style="{ width: progress +'%' }">
@@ -35,12 +43,19 @@
 
 <script>
 
+import {
+  PROGRESS_BAR_HEIGHT,
+  PROGRESS_BAR_HIDE_HEIGHT,
+  PROGRESS_BAR_SLIDER_HIDE_HEIGHT,
+  FOOL_PROOFING_BAR_WIDTH,
+} from '@/constants';
+
 export default {
   data() {
     return {
       showScreenshot: false,
       showProgressBar: true,
-      playbackwardLineShow: false,
+      showProgressBackward: false,
       onProgressSliderMousedown: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       percentageOfReadyToPlay: 0,
@@ -53,25 +68,38 @@ export default {
   },
   methods: {
     appearProgressSlider() {
-      this.$_clearTimeoutDelay();
-      this.$refs.playedSlider.style.height = '10px';
-      this.$refs.readySlider.style.height = '10px';
+      this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
+      this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
+      this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
+      this.$refs.backwardSlider.style.height = PROGRESS_BAR_HEIGHT;
     },
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
         this.showScreenshot = false;
-        this.widthOfReadyToPlay = 0;
-        this.$refs.playedSlider.style.height = '4px';
-        this.$refs.readySlider.style.height = '0px';
+        this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
+        this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
+        this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
+        this.$refs.backwardSlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
       }
     },
     appearProgressBar() {
+      this.$_clearTimeoutDelay();
       this.showProgressBar = true;
     },
     hideProgressBar() {
       if (!this.onProgressSliderMousedown) {
         this.showProgressBar = false;
+        this.hideProgressSlider();
       }
+    },
+    showBackwardLine() {
+      this.showProgressBackward = true;
+    },
+    hideBackwardLine() {
+      this.showProgressBackward = false;
+    },
+    videoRestart() {
+      this.$bus.$emit('seek', 0);
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -88,14 +116,20 @@ export default {
      * @param e mousemove event
      */
     effectProgressBarDraged(e) {
-      const curProgressBarWidth = this.currentWindow.getSize()[0] * (this.progress / 100);
-      const widthProgressBarDraged = e.clientX;
-      if (widthProgressBarDraged < curProgressBarWidth) {
-        this.playbackwardLineShow = true;
+      const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
+      const curProgressBarWidth = (progressBarWidth * (this.progress / 100))
+       + FOOL_PROOFING_BAR_WIDTH;
+      const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
+      if (cursorPosition < curProgressBarWidth) {
+        if (cursorPosition >= 0 || (curProgressBarWidth > 0 && cursorPosition < 0)) {
+          this.showProgressBackward = true;
+        } else {
+          this.showProgressBackward = false;
+        }
       } else {
-        this.playbackwardLineShow = false;
+        this.showProgressBackward = false;
       }
-      const progress = widthProgressBarDraged
+      const progress = cursorPosition
         / this.$refs.sliderContainer.clientWidth;
       if (progress >= 1) {
         this.percentageOfReadyToPlay = 1;
@@ -104,7 +138,7 @@ export default {
       } else {
         this.percentageOfReadyToPlay = progress;
       }
-      this.widthOfReadyToPlay = widthProgressBarDraged;
+      this.widthOfReadyToPlay = cursorPosition;
       this.showScreenshot = true;
     },
     /**
@@ -129,8 +163,9 @@ export default {
      */
     documentProgressDragClear() {
       document.onmouseup = () => {
-        this.onProgressSliderMousedown = false;
         document.onmousemove = null;
+        this.onProgressSliderMousedown = false;
+        this.showScreenshot = false;
         // 可以考虑其他的方案
         if (this.flagProgressBarDraged) {
           this.$bus.$emit('seek', this.percentageVideoDraged
@@ -164,7 +199,13 @@ export default {
         return 0;
       }
       return (100 * this.$store.state.PlaybackState.AccurateTime)
-        / this.$store.state.PlaybackState.Duration;
+        / (this.$store.state.PlaybackState.Duration);
+    },
+    backwardWidth() {
+      const progressBarWidth = this.currentWindow.getSize()[0];
+      const width = (progressBarWidth * (this.progress / 100))
+        - this.cursorPosition;
+      return width > 0 ? width : 0;
     },
     widthOfThumbnail() {
       if (this.widthOfWindow < 845) {
@@ -183,29 +224,28 @@ export default {
       const minWidth = (this.widthOfThumbnail / 2) + 16;
       const maxWidth = progressBarWidth - 16;
       if (this.widthOfReadyToPlay < minWidth) {
-        return 16;
+        return 16 - FOOL_PROOFING_BAR_WIDTH;
       } else if (this.widthOfReadyToPlay + halfWidthOfScreenshot > maxWidth) {
         return maxWidth - this.widthOfThumbnail;
       }
       return this.widthOfReadyToPlay - halfWidthOfScreenshot;
     },
-    currentWindow() {
-      return this.$electron.remote.getCurrentWindow();
-    },
-    positionOfReadyBar() {
-      return this.widthOfReadyToPlay;
-    },
     screenshotContext() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
     },
-    widthPlaybackward() {
-      return (this.currentWindow.getSize()[0] * (this.progress / 100))
-        - this.widthOfReadyToPlay;
+    currentWindow() {
+      return this.$electron.remote.getCurrentWindow();
+    },
+    cursorPosition() {
+      return this.widthOfReadyToPlay;
     },
   },
   created() {
     this.$bus.$on('progressslider-appear', () => {
+      this.showProgressBackward = false;
+      this.showScreenshot = false;
+      this.widthOfReadyToPlay = 0;
       this.appearProgressSlider();
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
@@ -257,9 +297,33 @@ export default {
     cursor: pointer;
   }
 
+  .fool-proof-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 4px;
+    width: 20px;
+    transition: height 150ms;
+    z-index: 701;
+
+    .button {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
+    }
+  }
+  
+  .fool-proof-bar:hover {
+    cursor: pointer;
+  }
+
   .progress-container {
    position: absolute;
-   left: 0;
+   left: 20px;
    bottom: 0;
    width: 100%;
    height: 100%;
@@ -382,12 +446,23 @@ export default {
     height: 100%;
     background: rgba(255, 255, 255, 0.1);
   }
-  .playbackward-line {
+}
+
+.video-controller .progress-backward {
+  position: absolute;
+  bottom: 0;
+  height: 0px;
+  transition: height 150ms;
+
+  .line {
     position: absolute;
     bottom: 0;
+    left: 0;
+    width: 100%;
     height: 100%;
-    background: rgba(151, 151, 151, 0.9);
-    z-index: 23;
+    background: rgba(150, 150, 150, 0.9);
+    z-index: 100;
+    // background: rgb(0, 0, 0);
   }
 }
 
