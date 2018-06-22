@@ -49,46 +49,8 @@ export default {
       this.onVolumeSliderMousedown = true;
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
       this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
-      this.documentVoluemeDragClear();
-      this.documentVolumeSliderDragEvent();
-    },
-    /**
-     * @param e mousemove event
-     */
-    effectVolumeSliderDrag(e) {
-      const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
-      if (sliderOffsetBottom - e.clientY > 1) {
-        const volume = (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight;
-        if (volume >= 1) {
-          this.$store.commit('Volume', 1);
-        } else {
-          this.$store.commit('Volume', volume);
-        }
-      } else {
-        this.$store.commit('Volume', 0);
-      }
-    },
-    /**
-     * documentVolumeSliderDragEvent fuction help to set a
-     * mouse move event to change the volume when the
-     * cursor is at mouse down event and is moved in
-     * the screen.
-     */
-    documentVolumeSliderDragEvent() {
-      document.onmousemove = (e) => {
-        this.effectVolumeSliderDrag(e);
-      };
-    },
-    /**
-     * documentVolumeMoveClear function is an event to
-     * clear the document mouse move event and clear
-     * mouse down status
-     */
-    documentVoluemeDragClear() {
-      document.onmouseup = () => {
-        this.onVolumeSliderMousedown = false;
-        document.onmousemove = null;
-      };
+      this.$_documentVoluemeDragClear();
+      this.$_documentVolumeSliderDragEvent();
     },
     appearVolumeSlider() {
       this.$_clearTimeoutDelay();
@@ -114,6 +76,44 @@ export default {
       if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
       }
+    },
+    /**
+     * @param e mousemove event
+     */
+    $_effectVolumeSliderDrag(e) {
+      const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
+      if (sliderOffsetBottom - e.clientY > 1) {
+        const volume = (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight;
+        if (volume >= 1) {
+          this.$store.commit('Volume', 1);
+        } else {
+          this.$store.commit('Volume', volume);
+        }
+      } else {
+        this.$store.commit('Volume', 0);
+      }
+    },
+    /**
+     * $_documentVolumeSliderDragEvent fuction help to set a
+     * mouse move event to change the volume when the
+     * cursor is at mouse down event and is moved in
+     * the screen.
+     */
+    $_documentVolumeSliderDragEvent() {
+      document.onmousemove = (e) => {
+        this.$_effectVolumeSliderDrag(e);
+      };
+    },
+    /**
+     * documentVolumeMoveClear function is an event to
+     * clear the document mouse move event and clear
+     * mouse down status
+     */
+    $_documentVoluemeDragClear() {
+      document.onmouseup = () => {
+        this.onVolumeSliderMousedown = false;
+        document.onmousemove = null;
+      };
     },
   },
   computed: {

@@ -110,13 +110,31 @@ export default {
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
-      this.documentProgressDragClear();
-      this.documentProgressDragEvent();
+      this.$_documentProgressDragClear();
+      this.$_documentProgressDragEvent();
+    },
+    /**
+     * @param e mousemove event
+     * This mousemove event only works when the cursor
+     * is not at mouse down event.
+     */
+    onProgresssBarMove(e) {
+      if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
+        return;
+      }
+      if (!this.onProgressSliderMousedown) {
+        this.$_effectProgressBarDraged(e);
+      }
+    },
+    $_clearTimeoutDelay() {
+      if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
+      }
     },
     /**
      * @param e mousemove event
      */
-    effectProgressBarDraged(e) {
+    $_effectProgressBarDraged(e) {
       const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
       const curProgressBarWidth = (progressBarWidth * (this.progress / 100))
        + FOOL_PROOFING_BAR_WIDTH;
@@ -143,14 +161,14 @@ export default {
       this.showScreenshot = true;
     },
     /**
-     * documentProgressDragEvent fuction help to set a
+     * $_documentProgressDragEvent fuction help to set a
      * mouse move event to seek the video when the
      * cursor is at mouse down event and is moved in
      * the screen.
      */
-    documentProgressDragEvent() {
+    $_documentProgressDragEvent() {
       document.onmousemove = (e) => {
-        this.effectProgressBarDraged(e);
+        this.$_effectProgressBarDraged(e);
         const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
         this.percentageVideoDraged = (e.clientX - sliderOffsetLeft)
          / this.$refs.sliderContainer.clientWidth;
@@ -158,11 +176,11 @@ export default {
       };
     },
     /**
-     * documentProgressDragClear function is an event to
+     * $_documentProgressDragClear function is an event to
      * clear the document mouse move event and clear
      * mouse down status
      */
-    documentProgressDragClear() {
+    $_documentProgressDragClear() {
       document.onmouseup = () => {
         document.onmousemove = null;
         this.onProgressSliderMousedown = false;
@@ -174,24 +192,6 @@ export default {
           this.flagProgressBarDraged = false;
         }
       };
-    },
-    /**
-     * @param e mousemove event
-     * This mousemove event only works when the cursor
-     * is not at mouse down event.
-     */
-    onProgresssBarMove(e) {
-      if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
-        return;
-      }
-      if (!this.onProgressSliderMousedown) {
-        this.effectProgressBarDraged(e);
-      }
-    },
-    $_clearTimeoutDelay() {
-      if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
-      }
     },
   },
   computed: {
