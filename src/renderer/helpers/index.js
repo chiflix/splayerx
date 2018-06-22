@@ -54,29 +54,25 @@ export default {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');
       }
-      let res;
-      fs.readFile(path.join(__dirname, file), (err, data) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        const offset = [
-          4096,
-          Math.floor(data.length / 3),
-          Math.floor(data.length / 3) * 2,
-          data.length - 8192,
-        ];
-        const tmpRes = [];
-        for (let i = 0; i < 4; i += 1) {
-          const tmp = data.slice(offset[i], offset[i] + 4096);
-          tmpRes[i] = md5Hex(tmp);
-        }
-        res = tmpRes.join('-');
-      });
-      // console.log(res);
+      const filePath = path.join(__dirname, file);
+      const fd = fs.openSync(filePath, 'r');
+      const len = fs.statSync(filePath).size;
+      const position = [
+        4096,
+        Math.floor(len / 3),
+        Math.floor(len / 3) * 2,
+        len - 8192,
+      ];
+      const tmpRes = [];
+      const buf = Buffer.alloc(4096);
+      for (let i = 0; i < 4; i += 1) {
+        fs.readSync(fd, buf, 0, 4096, position[i]);
+        tmpRes[i] = md5Hex(buf);
+      }
+      fs.closeSync(fd);
+      const res = tmpRes.join('-');
       return res;
     },
-
 
   },
 };
