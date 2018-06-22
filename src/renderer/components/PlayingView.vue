@@ -67,7 +67,7 @@ export default {
       }, 3000);
     },
     focusCurrentWindow() {
-      this.currentWindow.focus();
+      // this.currentWindow.focus();
     },
     wakeUpAllWidgets() {
       this.showMask = true;
