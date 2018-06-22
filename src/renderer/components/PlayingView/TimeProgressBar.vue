@@ -93,11 +93,9 @@ export default {
       }
     },
     showBackwardLine() {
-      console.log(1111111);
       this.showProgressBackward = true;
     },
     hideBackwardLine() {
-      console.log(2222222);
       this.showProgressBackward = false;
     },
     videoRestart() {
