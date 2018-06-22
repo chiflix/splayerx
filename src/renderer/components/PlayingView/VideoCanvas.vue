@@ -131,7 +131,7 @@ export default {
       let loadingTextTrack = false;
       let shownTextTrack = false;
       // If there is already subtitle files(same dir), load it
-      this.findSubtitleFilesByVidPath(vid.src, (subPath) => {
+      this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         console.log(subPath);
         // Automatically track and cleanup files at exit
         // temp.track();
