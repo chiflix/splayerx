@@ -63,15 +63,14 @@ export default {
         Math.floor(len / 3) * 2,
         len - 8192,
       ];
-      const tmpRes = [];
+      const res = [];
       const buf = Buffer.alloc(4096);
       for (let i = 0; i < 4; i += 1) {
-        fs.readSync(fd, buf, 0, 4096, position[i]);
-        tmpRes[i] = md5Hex(buf);
+        const bufLen = fs.readSync(fd, buf, 0, 4096, position[i]);
+        res[i] = md5Hex(buf.slice(0, bufLen));
       }
       fs.closeSync(fd);
-      const res = tmpRes.join('-');
-      return res;
+      return res.join('-');
     },
 
   },
