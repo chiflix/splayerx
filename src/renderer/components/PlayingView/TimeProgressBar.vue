@@ -44,7 +44,6 @@
 <script>
 
 import {
-  SCREENSHOT_SIDE_MARGIN_WIDTH,
   PROGRESS_BAR_HEIGHT,
   PROGRESS_BAR_HIDE_HEIGHT,
   PROGRESS_BAR_SLIDER_HIDE_HEIGHT,
@@ -222,12 +221,12 @@ export default {
       return this.widthOfThumbnail / this.videoRatio;
     },
     positionOfScreenshot() {
-      const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
+      const progressBarWidth = this.currentWindow.getSize()[0] - 20;
       const halfWidthOfScreenshot = this.widthOfThumbnail / 2;
-      const minWidth = halfWidthOfScreenshot + SCREENSHOT_SIDE_MARGIN_WIDTH;
-      const maxWidth = progressBarWidth - SCREENSHOT_SIDE_MARGIN_WIDTH;
+      const minWidth = (this.widthOfThumbnail / 2) + 16;
+      const maxWidth = progressBarWidth - 16;
       if (this.widthOfReadyToPlay < minWidth) {
-        return SCREENSHOT_SIDE_MARGIN_WIDTH - FOOL_PROOFING_BAR_WIDTH;
+        return 16 - FOOL_PROOFING_BAR_WIDTH;
       } else if (this.widthOfReadyToPlay + halfWidthOfScreenshot > maxWidth) {
         return maxWidth - this.widthOfThumbnail;
       }
