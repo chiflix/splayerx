@@ -12,7 +12,7 @@
       <div class="button"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
-      @mousedown.left.stop="onProgresssBarClick">
+      @mousedown.left="onProgresssBarClick">
       <div class="screenshot-background"
         v-show="showScreenshot"
         :style="{ left: positionOfScreenshot +'px', width: widthOfThumbnail + 'px', height: heightofScreenshot +'px' }">
@@ -100,6 +100,7 @@ export default {
     },
     videoRestart() {
       this.$bus.$emit('seek', 0);
+      this.widthOfReadyToPlay = 0;
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
