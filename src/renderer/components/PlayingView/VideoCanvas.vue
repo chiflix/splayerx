@@ -171,8 +171,8 @@ export default {
       }
     },
     handleResize() {
-      const screenWidth = document.documentElement.clientWidth;
-      const screenHeight = document.documentElement.clientHeight;
+      const screenWidth = this.currentWindow.getSize()[0];
+      const screenHeight = this.currentWindow.getSize()[1];
       const screenSize = {
         screenWidth,
         screenHeight,
