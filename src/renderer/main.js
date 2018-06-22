@@ -262,8 +262,9 @@ new Vue({
       const { files } = e.dataTransfer;
       console.log(files);
       // TODO: play it if it's video file
+      const path = `file:///${files[0].path}`;
 
-      this.openVideoFile(files[0].path);
+      this.openFile(path);
 
       /*
       for (const file in files) {
