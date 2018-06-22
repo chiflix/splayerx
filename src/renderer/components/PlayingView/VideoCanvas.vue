@@ -10,6 +10,7 @@
       @durationchange="onDurationChange"
       :src="src">
     </video>
+    <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
 
@@ -42,12 +43,11 @@ export default {
     },
   },
   methods: {
-    timeUpdate() {
+    accurateTimeUpdate() {
       const { currentTime, duration } = this.$refs.videoCanvas;
       if (currentTime >= duration || this.$refs.videoCanvas.paused) {
         clearInterval(this.globalIntervalFunc);
       } else {
-        console.log('time update');
         this.$store.commit('AccurateTime', currentTime);
       }
     },
@@ -59,7 +59,7 @@ export default {
       // set interval to get update time
       const { duration } = this.$refs.videoCanvas;
       if (duration <= 240) {
-        this.globalIntervalFunc = setInterval(this.timeUpdate, 10);
+        this.globalIntervalFunc = setInterval(this.accurateTimeUpdate, 10);
       }
     },
     onCanPlay() {
@@ -271,8 +271,41 @@ export default {
     $_calculateWidthByHeight(videoWidth, videoHeight, newHeight) {
       return newHeight * (videoWidth / videoHeight);
     },
+    $_getShortCut() {
+      const canvas = this.$refs.thumbnailCanvas;
+      const canvasCTX = canvas.getContext('2d');
+      const { videoHeight, videoWidth } = this.$refs.videoCanvas;
+      [canvas.width, canvas.height] = [videoWidth, videoHeight];
+      const landingViewWidth = 768;
+
+      canvasCTX.drawImage(
+        this.$refs.videoCanvas, 0, 0, videoWidth, videoHeight,
+        0, 0, videoWidth, videoHeight,
+      );
+      const string = canvas.toDataURL('image/png', landingViewWidth / videoWidth);
+      this.$storage.get('recent-played', (err, data) => {
+        if (err) {
+          // TODO: proper error handle
+          console.error(err);
+        } else {
+          const object = data[0];
+          const iterator = Object.keys(object).indexOf('path');
+          if (iterator !== -1) {
+            object.shortCut = string;
+            object.lastPlayedTime = this.currentTime;
+            data.splice(0, 1);
+            data.unshift(object);
+            this.$storage.set('recent-played', data);
+          }
+        }
+      });
+      console.log('shortCut!');
+    },
   },
   computed: {
+    currentTime() {
+      return this.$store.state.PlaybackState.CurrentTime;
+    },
     playbackRate() {
       return this.$store.state.PlaybackState.PlaybackRate;
     },
@@ -292,7 +325,7 @@ export default {
       this.$refs.videoCanvas.volume = newVolume;
     },
     playbackRate(newRate) {
-      console.log(`set video volume ${newRate}`);
+      console.log(`set video playbackRate ${newRate}`);
       this.$refs.videoCanvas.playbackRate = newRate;
     },
   },
@@ -315,6 +348,7 @@ export default {
     this.$bus.$on('pause', () => {
       console.log('pause event has been triggered');
       this.$refs.videoCanvas.pause();
+      this.$_getShortCut();
     });
     this.$bus.$on('seek', (e) => {
       console.log('seek event has been triggered', e);
@@ -326,6 +360,9 @@ export default {
   },
   beforeDestory() {
     window.removeEventListener('resize', this.handleResize);
+  },
+  beforeDestroy() {
+    this.$_getShortCut();
   },
 };
 </script>
@@ -340,11 +377,12 @@ export default {
   height: 100%;
   border-radius: 4px;
   overflow: hidden;
-}
-.video video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 }
 
 // https://www.w3.org/TR/webvtt1/
