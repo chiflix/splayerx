@@ -316,7 +316,7 @@ export default {
       this.$refs.videoCanvas.volume = newVolume;
     },
     playbackRate(newRate) {
-      console.log(`set video volume ${newRate}`);
+      console.log(`set video playbackRate ${newRate}`);
       this.$refs.videoCanvas.playbackRate = newRate;
     },
   },

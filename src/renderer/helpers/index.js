@@ -55,7 +55,7 @@ export default {
         const newElement = {
           path,
           shortCut: '',
-          lastPlayedTime: 0.0,
+          lastPlayedTime: 0,
         };
         if (err) {
           // TODO: proper error handle
@@ -66,8 +66,10 @@ export default {
             if (this.$_indexOfExistedFileIn(data, path) === -1) {
               data.unshift(newElement);
             } else {
-              console.log(2);
               const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+              if (item[0].lastPlayedTime !== 0) {
+                this.$bus.$emit('seek', item[0].lastPlayedTime);
+              }
               data.unshift(item[0]);
             }
             console.log('changed:');
@@ -85,8 +87,7 @@ export default {
             console.log(data);
             this.$storage.set('recent-played', data);
           }
-        } else if (Object.keys(data).length === 0 && data.constructor === Object) {
-          // if there's no value for key 'recent-played'
+        } else {
           this.$storage.set('recent-played', [newElement]);
         }
       });
