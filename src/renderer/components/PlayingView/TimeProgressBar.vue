@@ -358,6 +358,7 @@ export default {
      background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5) 0%, rgba(84, 84, 84, 0.5) 100%);
      border-radius: 1px;
      z-index: 100;
+     -webkit-app-region: no-drag;
    }
  }
  /* Progress bar's responsive trigger area. */
