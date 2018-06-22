@@ -229,7 +229,7 @@ export default {
       } else if (this.widthOfReadyToPlay + halfWidthOfScreenshot > maxWidth) {
         return maxWidth - this.widthOfThumbnail;
       }
-      return this.widthOfReadyToPlay - HALF_WIDTH_OF_SCREENSHOT;
+      return this.widthOfReadyToPlay - halfWidthOfScreenshot;
     },
     screenshotContext() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
