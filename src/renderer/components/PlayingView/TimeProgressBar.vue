@@ -178,9 +178,10 @@ export default {
       return this.widthOfThumbnail / this.videoRatio;
     },
     positionOfScreenshot() {
+      const progressBarWidth = this.currentWindow.getSize()[0] - 20;
       const halfWidthOfScreenshot = this.widthOfThumbnail / 2;
-      const minWidth = this.widthOfThumbnail + 16;
-      const maxWidth = this.currentWindow.getSize()[0] - 16;
+      const minWidth = (this.widthOfThumbnail / 2) + 16;
+      const maxWidth = progressBarWidth - 16;
       if (this.widthOfReadyToPlay < minWidth) {
         return 16;
       } else if (this.widthOfReadyToPlay + halfWidthOfScreenshot > maxWidth) {
