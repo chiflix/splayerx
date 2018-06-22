@@ -13,7 +13,7 @@
       @mousedown.left.stop="onProgresssBarClick">
       <div class="screenshot-background"
         v-show="showScreenshot"
-        :style="{ left: positionOfScreenshot +'px', height: heightofScreenshot +'px' }">
+        :style="{ left: positionOfScreenshot +'px', width: widthOfThumbnail + 'px', height: heightofScreenshot +'px' }">
         <div class="screenshot">
           <div class="time">
             {{ screenshotContext }}
@@ -49,8 +49,6 @@
 */
 
 import {
-  WIDTH_OF_SCREENSHOT,
-  HALF_WIDTH_OF_SCREENSHOT,
   SCREENSHOT_SIDE_MARGIN_WIDTH,
   PROGRESS_BAR_HEIGHT,
   PROGRESS_BAR_HIDE_HEIGHT,
@@ -71,6 +69,7 @@ export default {
       videoRatio: 0,
       percentageVideoDraged: 0,
       flagProgressBarDraged: false,
+      widthOfWindow: 0,
     };
   },
   methods: {
@@ -209,17 +208,26 @@ export default {
         - this.cursorPosition;
       return width > 0 ? width : 0;
     },
+    widthOfThumbnail() {
+      if (this.widthOfWindow < 845) {
+        return 136;
+      } else if (this.widthOfWindow < 1920) {
+        return 170;
+      }
+      return 240;
+    },
     heightofScreenshot() {
-      return WIDTH_OF_SCREENSHOT / this.videoRatio;
+      return this.widthOfThumbnail / this.videoRatio;
     },
     positionOfScreenshot() {
       const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
-      const minWidth = HALF_WIDTH_OF_SCREENSHOT + SCREENSHOT_SIDE_MARGIN_WIDTH;
+      const halfWidthOfScreenshot = this.widthOfThumbnail / 2;
+      const minWidth = halfWidthOfScreenshot + SCREENSHOT_SIDE_MARGIN_WIDTH;
       const maxWidth = progressBarWidth - SCREENSHOT_SIDE_MARGIN_WIDTH;
       if (this.widthOfReadyToPlay < minWidth) {
         return SCREENSHOT_SIDE_MARGIN_WIDTH - FOOL_PROOFING_BAR_WIDTH;
-      } else if (this.widthOfReadyToPlay + HALF_WIDTH_OF_SCREENSHOT > maxWidth) {
-        return maxWidth - WIDTH_OF_SCREENSHOT;
+      } else if (this.widthOfReadyToPlay + halfWidthOfScreenshot > maxWidth) {
+        return maxWidth - this.widthOfThumbnail;
       }
       return this.widthOfReadyToPlay - HALF_WIDTH_OF_SCREENSHOT;
     },
@@ -265,6 +273,10 @@ export default {
     });
     this.$bus.$on('screenshot-sizeset', (e) => {
       this.videoRatio = e;
+    });
+    this.$bus.$on('window-resize', (e) => {
+      this.widthOfWindow = e.screenWidth;
+      console.log(`Current window width: ${this.widthOfWindow}.`);
     });
   },
 };
@@ -313,7 +325,6 @@ export default {
 
    .screenshot {
      position: relative;
-     width: 170px;
      height: 100%;
      border: 1px solid transparent;
      border-radius: 1px;
@@ -335,7 +346,7 @@ export default {
 
    .screenshot-background {
      position: absolute;
-     width: 170px;
+     width: 100%;
      bottom: 26px;
      box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 5px;
      background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5) 0%, rgba(84, 84, 84, 0.5) 100%);
@@ -343,6 +354,49 @@ export default {
      z-index: 100;
    }
  }
+ /* Progress bar's responsive trigger area. */
+  @media screen and (max-width: 854px) {
+    height: 20px;
+    .progress-container {
+      .screenshot-background {
+        bottom: 20px;
+        .screenshot {
+          .time {
+            font-size: 20px;
+          }
+        } 
+      }
+    }
+  }
+  @media screen and (min-width: 854px) and (max-width: 1920px) {
+    height: 20px;
+    .progress-container {
+      .screenshot-background {
+        bottom: 20px;
+        .screenshot {
+          .time {
+            font-size: 24px;
+          }
+        } 
+      }
+    }
+  }
+  @media screen and (min-width: 1920px) {
+    height: 20px;
+    .progress-container {
+      .screenshot-background {
+        bottom: 20px;
+        .screenshot {
+          .time {
+            font-size: 40px;
+          }
+        } 
+      }
+    }
+    .time {
+      font-size: 40px;
+    }
+  }
 }
 
 .video-controller .progress-played {

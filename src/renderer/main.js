@@ -66,7 +66,9 @@ new Vue({
                     extensions: ['mp4', 'mkv', 'mov'],
                   }],
                 }, (file) => {
-                  this.openVideoFile(file);
+                  if (file) {
+                    this.openVideoFile(file);
+                  }
                 });
               },
             },

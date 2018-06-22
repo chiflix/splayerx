@@ -101,9 +101,6 @@ export default {
 
 .video-controller .timing {
   position: absolute;
-  bottom: 31px;
-  left: 37px;
-  height: 23px;
   width: auto;
 
   .firstContent {
@@ -112,8 +109,6 @@ export default {
     text-shadow:  0 1px 0 rgba(0,0,0,.1),
                   1px 1px 0 rgba(0,0,0,.1);
     font-weight: 500;
-    font-size: 23px;
-    line-height: 23px;
     letter-spacing: 0.2px;
     user-select: none;
   }
@@ -133,6 +128,37 @@ export default {
   
   .splitSign {
     color: rgba(255, 255, 255, 0.5);
+  }
+  
+  @media screen and (max-width: 854px) {
+    bottom: 23px;
+    left: 25px;
+    height: 18px;
+    font-size: 18px;
+    line-height: 18px;
+    .secondContent {
+      font-size: 12px;
+    }
+  }
+  @media screen and (min-width: 854px) and (max-width: 1920px) {
+    bottom: 28px;
+    left: 31.25px;
+    height: 24px;
+    font-size: 24px;
+    line-height: 24px;
+    .secondContent {
+      font-size: 16px;
+    }
+  }
+  @media screen and (min-width: 1920px) {
+    bottom: 46px;
+    left: 50px;
+    height: 36px;
+    font-size: 36px;
+    line-height: 36px;
+    .secondContent {
+      font-size: 24px;
+    }
   }
 }
 .timing:hover {
