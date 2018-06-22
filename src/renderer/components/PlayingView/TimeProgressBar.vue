@@ -6,7 +6,9 @@
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.left.stop="videoRestart">
+      @mousedown.left.stop="videoRestart"
+      @mouseenter="hideBackwardLine"
+      @mouseleave="showBackwardLine">
       <div class="button"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
@@ -40,13 +42,6 @@
 </template>;
 
 <script>
-/**
- * TODO:
- * 1. 常量变量放入常量组件
- * 2. seek 后快进的不正常显示 -- done
- * 3. 由于mouseover于mouseout而产生的多次调用问题
- * 4. 重做回退进度条 -- done
-*/
 
 import {
   SCREENSHOT_SIDE_MARGIN_WIDTH,
@@ -98,8 +93,15 @@ export default {
         this.hideProgressSlider();
       }
     },
-    videoRestart() {
+    showBackwardLine() {
+      console.log(1111111);
+      this.showProgressBackward = true;
+    },
+    hideBackwardLine() {
+      console.log(2222222);
       this.showProgressBackward = false;
+    },
+    videoRestart() {
       this.$bus.$emit('seek', 0);
     },
     onProgresssBarClick(e) {
@@ -305,6 +307,7 @@ export default {
     height: 4px;
     width: 20px;
     transition: height 150ms;
+    z-index: 701;
 
     .button {
       position: absolute;
@@ -316,6 +319,11 @@ export default {
       box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
     }
   }
+  
+  .fool-proof-bar:hover {
+    cursor: pointer;
+  }
+
   .progress-container {
    position: absolute;
    left: 20px;
