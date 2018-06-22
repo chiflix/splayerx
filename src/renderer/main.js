@@ -28,7 +28,6 @@ const i18n = new VueI18n({
   locale: 'cn', // set locale
   messages, // set locale messages
 });
-
 /* eslint-disable no-new */
 new Vue({
   i18n,
@@ -39,10 +38,6 @@ new Vue({
   methods: {
     openVideoFile(file) {
       const path = `file:///${file}`;
-      // TODO: check if file exist
-      // TODO: check if there is subtitle file in the same directory
-      // TODO: load subtitles? or add subtitle file to playlist
-
       this.$storage.set('recent-played', path);
       this.$store.commit('SrcOfVideo', path);
       this.$router.push({
@@ -117,7 +112,6 @@ new Vue({
                 this.timeControl('Rewind', 60);
               },
             },
-            /** */
             { type: 'separator' },
             {
               label: 'Increase Volume',
@@ -329,7 +323,6 @@ new Vue({
   },
   mounted() {
     this.createMenu();
-
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
       if (err) {
@@ -357,24 +350,6 @@ new Vue({
       // TODO: play it if it's video file
 
       this.openVideoFile(files[0].path);
-
-      /*
-      for (const file in files) {
-        if (files.hasOwnProperty(file)) {
-          const filename = files[file].name
-          const fileExt = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase()
-          if (Videos.allowedExtensions().indexOf(fileExt) !== -1) {
-            const video = {
-              id: videos.length + 1,
-              status: 'loading',
-              name: filename,
-              path: files[file].path,
-              size: files[file].size
-            }
-            videos.push(video)
-          }
-        }
-      } */
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
