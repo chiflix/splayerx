@@ -28,7 +28,6 @@ const i18n = new VueI18n({
   locale: 'cn', // set locale
   messages, // set locale messages
 });
-
 /* eslint-disable no-new */
 new Vue({
   i18n,
@@ -39,10 +38,6 @@ new Vue({
   methods: {
     openVideoFile(file) {
       const path = `file:///${file}`;
-      // TODO: check if file exist
-      // TODO: check if there is subtitle file in the same directory
-      // TODO: load subtitles? or add subtitle file to playlist
-
       this.$storage.set('recent-played', path);
       this.$store.commit('SrcOfVideo', path);
       this.$router.push({
@@ -119,7 +114,6 @@ new Vue({
                 this.timeControl('Rewind', 60);
               },
             },
-            /** */
             { type: 'separator' },
             {
               label: 'Increase Volume',
@@ -212,6 +206,87 @@ new Vue({
       const menu = Menu.buildFromTemplate(template);
       Menu.setApplicationMenu(menu);
     },
+    createRightMenu() {
+      const {
+        Menu, MenuItem, dialog,
+      } = this.$electron.remote;
+      const menu = new Menu();
+      menu.append(new MenuItem({
+        label: '打开文件',
+        accelerator: 'Ctrl+O',
+        click: () => {
+          dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [{
+              name: 'Video Files',
+              extensions: ['mp4', 'mkv', 'mov'],
+            }],
+          }, (file) => {
+            if (file) {
+              const path = `file:///${file}`;
+              this.$storage.set('recent-played', path);
+              this.$store.commit('SrcOfVideo', path);
+              this.$router.push({
+                name: 'playing-view',
+              });
+            }
+          });
+        },
+      }));
+      menu.append(new MenuItem({
+        label: '播放',
+        submenu: [
+          {
+            label: '快进5秒',
+            // accelerator: 'Right',
+            click: () => {
+              this.timeControl('Forward', 5);
+            },
+          },
+          {
+            label: '快退5秒',
+            // accelerator: 'Left',
+            click: () => {
+              this.timeControl('Rewind', 5);
+            },
+          },
+          {
+            label: '快进1分钟',
+            // accelerator: 'Shift+Right',
+            click: () => {
+              this.timeControl('Forward', 60);
+            },
+          },
+          {
+            label: '快退1分钟',
+            // accelerator: 'Shift+Left',
+            click: () => {
+              this.timeControl('Rewind', 60);
+            },
+          },
+        ],
+      }));
+      menu.append(new MenuItem({
+        label: '音量',
+        submenu: [
+          {
+            label: '增加音量',
+            // accelerator: 'Up',
+            click: () => {
+              this.volumeControl('Increse');
+            },
+          },
+          {
+            label: '减少音量',
+            // accelerator: 'Down',
+            click: () => {
+              this.volumeControl('Decrese');
+            },
+          },
+        ],
+      }));
+      this.globalMenu = menu;
+    },
     timeControl(type, seconds) {
       // show progress bar
       this.$bus.$emit('progressbar-appear');
@@ -250,7 +325,6 @@ new Vue({
   },
   mounted() {
     this.createMenu();
-
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
       if (err) {
@@ -278,27 +352,14 @@ new Vue({
       // TODO: play it if it's video file
 
       this.openVideoFile(files[0].path);
-
-      /*
-      for (const file in files) {
-        if (files.hasOwnProperty(file)) {
-          const filename = files[file].name
-          const fileExt = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase()
-          if (Videos.allowedExtensions().indexOf(fileExt) !== -1) {
-            const video = {
-              id: videos.length + 1,
-              status: 'loading',
-              name: filename,
-              path: files[file].path,
-              size: files[file].size
-            }
-            videos.push(video)
-          }
-        }
-      } */
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
     });
+    window.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      this.createRightMenu();
+      this.globalMenu.popup(this.$electron.remote.getCurrentWindow());
+    }, false);
   },
 }).$mount('#app');
