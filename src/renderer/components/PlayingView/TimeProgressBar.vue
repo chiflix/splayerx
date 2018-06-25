@@ -10,6 +10,7 @@
       <div class="button"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
+      :style="{width: currentWindow.getSize()[0] - 20 + 'px'}"
       @mousedown.left="onProgresssBarClick">
       <div class="screenshot-background"
         v-show="showScreenshot"
@@ -195,7 +196,7 @@ export default {
         / (this.$store.state.PlaybackState.Duration);
     },
     backwardWidth() {
-      const progressBarWidth = this.currentWindow.getSize()[0];
+      const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
       const width = (progressBarWidth * (this.progress / 100))
         - this.cursorPosition;
       return width > 0 ? width : 0;
@@ -318,7 +319,6 @@ export default {
    position: absolute;
    left: 20px;
    bottom: 0;
-   width: 100%;
    height: 100%;
 
    .screenshot {
