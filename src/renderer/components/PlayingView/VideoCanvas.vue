@@ -65,7 +65,7 @@ export default {
       if (duration <= 240) {
         this.timeUpdateIntervalID = setInterval(this.accurateTimeUpdate, 10);
       }
-      this.shortCutIntervalID = setInterval(this.$_getShortCut, 1000);
+      this.shortCutIntervalID = setInterval(this.$_getThumbnail, 1000);
     },
     onCanPlay() {
       // the video is ready to start playing
@@ -74,7 +74,7 @@ export default {
     onMetaLoaded() {
       console.log('loadedmetadata');
       this.$bus.$emit('play');
-      this.$_getShortCut();
+      this.$_getThumbnail();
       this.videoWidth = this.$refs.videoCanvas.videoWidth;
       this.videoHeight = this.$refs.videoCanvas.videoHeight;
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
@@ -273,7 +273,7 @@ export default {
       }
       console.log(this.newWidthOfWindow);
     },
-    $_getShortCut() {
+    $_getThumbnail() {
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       const { videoHeight, videoWidth } = this.$refs.videoCanvas;
@@ -350,7 +350,7 @@ export default {
     this.$bus.$on('pause', () => {
       console.log('pause event has been triggered');
       this.$refs.videoCanvas.pause();
-      this.$_getShortCut();
+      this.$_getThumbnail();
     });
     this.$bus.$on('seek', (e) => {
       console.log('seek event has been triggered', e);
