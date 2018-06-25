@@ -29,7 +29,6 @@ export default {
       videoWidth: 0,
       videoHeight: 0,
       timeUpdateIntervalID: null,
-      shortCutIntervalID: null,
     };
   },
   props: {
@@ -56,7 +55,6 @@ export default {
     },
     onPause() {
       console.log('onpause');
-      clearInterval(this.shortCutIntervalID);
     },
     onPlaying() {
       console.log('onplaying');
@@ -65,7 +63,6 @@ export default {
       if (duration <= 240) {
         this.timeUpdateIntervalID = setInterval(this.accurateTimeUpdate, 10);
       }
-      this.shortCutIntervalID = setInterval(this.$_getThumbnail, 1000);
     },
     onCanPlay() {
       // the video is ready to start playing
@@ -354,7 +351,6 @@ export default {
     });
     this.$bus.$on('seek', (e) => {
       console.log('seek event has been triggered', e);
-      clearInterval(this.shortCutIntervalID);
       this.$refs.videoCanvas.currentTime = e;
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
