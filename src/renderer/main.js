@@ -82,47 +82,47 @@ new Vue({
             { type: 'separator' },
             {
               label: 'Forward 10s',
-              accelerator: 'Right',
-              click: () => {
-                this.timeControl('Forward', 10);
-              },
+              // accelerator: 'Right',
+              // click: () => {
+              //   this.timeControl('Forward', 10);
+              // },
             },
             {
               label: 'Forward 1min',
-              accelerator: 'Option+Right',
-              click: () => {
-                this.timeControl('Forward', 60);
-              },
+              // accelerator: 'Option+Right',
+              // click: () => {
+              //   this.timeControl('Forward', 60);
+              // },
             },
             {
               label: 'Rewind 10s',
-              accelerator: 'Left',
-              click: () => {
-                this.timeControl('Rewind', 10);
-              },
+              // accelerator: 'Left',
+              // click: () => {
+              //   this.timeControl('Rewind', 10);
+              // },
             },
             {
               label: 'Rewind 1min',
-              accelerator: 'Option+Left',
-              click: () => {
-                this.timeControl('Rewind', 60);
-              },
+              // accelerator: 'Option+Left',
+              // click: () => {
+              //   this.timeControl('Rewind', 60);
+              // },
             },
             /** */
             { type: 'separator' },
             {
               label: 'Increase Volume',
-              accelerator: 'Up',
-              click: () => {
-                this.volumeControl('Increse');
-              },
+              // accelerator: 'Up',
+              // click: () => {
+              //   this.volumeControl('Increse');
+              // },
             },
             {
               label: 'Decrease Volume',
-              accelerator: 'Down',
-              click: () => {
-                this.volumeControl('Decrese');
-              },
+              // accelerator: 'Down',
+              // click: () => {
+              //   this.volumeControl('Decrese');
+              // },
             },
             /** */
             { type: 'separator' },
@@ -254,6 +254,52 @@ new Vue({
     window.addEventListener('keypress', (e) => {
       if (e.key === ' ') { // space
         this.$bus.$emit('toggle-playback');
+      }
+    });
+    window.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'ArrowUp':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+          } else {
+            this.$store.commit('Volume', 1);
+          }
+          break;
+
+        case 'ArrowDown':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+          } else {
+            this.$store.commit('Volume', 0);
+          }
+          break;
+
+        case 'ArrowLeft':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
+          }
+          break;
+
+        case 'ArrowRight':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
+          }
+          break;
+        default:
       }
     });
 
