@@ -140,7 +140,7 @@ export default {
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
       this.widthOfReadyToPlay = cursorPosition;
       if (cursorPosition < curProgressBarWidth) {
-        if (cursorPosition >= 0 || (curProgressBarWidth > 0 && cursorPosition < 0)) {
+        if (curProgressBarWidth > 0) {
           this.showProgressBackward = true;
         } else {
           this.showProgressBackward = false;
