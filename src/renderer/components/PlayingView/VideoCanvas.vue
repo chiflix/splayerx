@@ -28,7 +28,8 @@ export default {
       newHeightOfWindow: 0,
       videoWidth: 0,
       videoHeight: 0,
-      globalIntervalFunc: null,
+      timeUpdateIntervalID: null,
+      shortCutIntervalID: null,
     };
   },
   props: {
@@ -48,21 +49,23 @@ export default {
     accurateTimeUpdate() {
       const { currentTime, duration } = this.$refs.videoCanvas;
       if (currentTime >= duration || this.$refs.videoCanvas.paused) {
-        clearInterval(this.globalIntervalFunc);
+        clearInterval(this.timeUpdateIntervalID);
       } else {
         this.$store.commit('AccurateTime', currentTime);
       }
     },
     onPause() {
       console.log('onpause');
+      clearInterval(this.shortCutIntervalID);
     },
     onPlaying() {
       console.log('onplaying');
       // set interval to get update time
       const { duration } = this.$refs.videoCanvas;
       if (duration <= 240) {
-        this.globalIntervalFunc = setInterval(this.accurateTimeUpdate, 10);
+        this.timeUpdateIntervalID = setInterval(this.accurateTimeUpdate, 10);
       }
+      this.shortCutIntervalID = setInterval(this.$_getShortCut, 1000);
     },
     onCanPlay() {
       // the video is ready to start playing
@@ -71,6 +74,7 @@ export default {
     onMetaLoaded() {
       console.log('loadedmetadata');
       this.$bus.$emit('play');
+      this.$_getShortCut();
       this.videoWidth = this.$refs.videoCanvas.videoWidth;
       this.videoHeight = this.$refs.videoCanvas.videoHeight;
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
@@ -350,17 +354,15 @@ export default {
     });
     this.$bus.$on('seek', (e) => {
       console.log('seek event has been triggered', e);
+      clearInterval(this.shortCutIntervalID);
       this.$refs.videoCanvas.currentTime = e;
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
     });
     window.addEventListener('resize', this.handleResize);
   },
-  beforeDestory() {
-    window.removeEventListener('resize', this.handleResize);
-  },
   beforeDestroy() {
-    this.$_getShortCut();
+    window.removeEventListener('resize', this.handleResize);
   },
 };
 </script>

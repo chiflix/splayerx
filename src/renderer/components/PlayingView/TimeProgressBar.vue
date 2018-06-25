@@ -116,7 +116,8 @@ export default {
      * @param e mousemove event
      */
     effectProgressBarDraged(e) {
-      const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      const progressBarWidth = currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
       const curProgressBarWidth = (progressBarWidth * (this.progress / 100))
        + FOOL_PROOFING_BAR_WIDTH;
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
@@ -202,7 +203,7 @@ export default {
         / (this.$store.state.PlaybackState.Duration);
     },
     backwardWidth() {
-      const progressBarWidth = this.currentWindow.getSize()[0];
+      const progressBarWidth = this.$electron.remote.getCurrentWindow().getSize()[0];
       const width = (progressBarWidth * (this.progress / 100))
         - this.cursorPosition;
       return width > 0 ? width : 0;
@@ -219,7 +220,7 @@ export default {
       return this.widthOfThumbnail / this.videoRatio;
     },
     positionOfScreenshot() {
-      const progressBarWidth = this.currentWindow.getSize()[0] - 20;
+      const progressBarWidth = this.$electron.remote.getCurrentWindow().getSize()[0] - 20;
       const halfWidthOfScreenshot = this.widthOfThumbnail / 2;
       const minWidth = (this.widthOfThumbnail / 2) + 16;
       const maxWidth = progressBarWidth - 16;
@@ -233,9 +234,6 @@ export default {
     screenshotContext() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
-    },
-    currentWindow() {
-      return this.$electron.remote.getCurrentWindow();
     },
     cursorPosition() {
       return this.widthOfReadyToPlay;
@@ -316,7 +314,7 @@ export default {
       box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
     }
   }
-  
+
   .fool-proof-bar:hover {
     cursor: pointer;
   }
@@ -369,7 +367,7 @@ export default {
           .time {
             font-size: 20px;
           }
-        } 
+        }
       }
     }
   }
@@ -382,7 +380,7 @@ export default {
           .time {
             font-size: 24px;
           }
-        } 
+        }
       }
     }
   }
@@ -395,7 +393,7 @@ export default {
           .time {
             font-size: 40px;
           }
-        } 
+        }
       }
     }
     .time {
