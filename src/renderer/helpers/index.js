@@ -59,7 +59,8 @@ export default {
         };
         if (err) {
           // TODO: proper error handle
-          console.error(err);
+          this.$storage.set('recent-played', [newElement]);
+          console.log(err);
         } else if (Array.isArray(data)) {
           console.log('its an array!');
           if (data.length < 4) {

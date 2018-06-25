@@ -17,6 +17,12 @@
         v-show="showScreenshot"
         :style="{ left: positionOfScreenshot +'px', width: widthOfThumbnail + 'px', height: heightofScreenshot +'px' }">
         <div class="screenshot">
+          <video ref="thumbnailVideoCanvas"
+            @loadedmetadata="onMetaLoaded"
+            :width="widthOfThumbnail"
+            :height="heightofScreenshot"
+            :src="src">
+          </video>
           <div class="time">
             {{ screenshotContext }}
           </div>
@@ -51,6 +57,19 @@ import {
 } from '@/constants';
 
 export default {
+  props: {
+    src: {
+      type: String,
+      required: true,
+      validator(value) {
+        // TODO: check if its a file or url
+        if (value.length <= 0) {
+          return false;
+        }
+        return true;
+      },
+    },
+  },
   data() {
     return {
       showScreenshot: false,
@@ -67,6 +86,9 @@ export default {
     };
   },
   methods: {
+    onMetaLoaded() {
+      this.$refs.thumbnailVideoCanvas.pause();
+    },
     appearProgressSlider() {
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
@@ -138,6 +160,8 @@ export default {
         this.percentageOfReadyToPlay = 0;
       } else {
         this.percentageOfReadyToPlay = progress;
+        this.$refs.thumbnailVideoCanvas.currentTime
+          = progress * this.$store.state.PlaybackState.Duration;
       }
       this.widthOfReadyToPlay = cursorPosition;
       this.showScreenshot = true;
