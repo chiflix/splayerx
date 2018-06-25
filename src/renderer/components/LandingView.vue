@@ -1,48 +1,78 @@
 <template>
-<div id="wrapper">
+<div class="wrapper">
   <main>
+    <div class="background-image"
+      v-if="showShortcutImage">
+      <img
+        :src="backgroundUrl">
+      <div class="item-name">
+        {{ itemInfo().baseName }}
+      </div>
+      <div class="item-description">
+        {{ itemInfo().baseName }}
+      </div>
+      <div class="item-timing">
+        {{ timecodeFromSeconds(itemInfo().lastTime) }}
+      </div>
+    </div>
     <div>
-      <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
+      <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
     </div>
 
     <div class="welcome">
       <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-      <p> {{ version }} </p>
     </div>
 
     <div class="controller">
-      <div class="playlist">
-        <a class="item" v-if="hasRecentPlaylist" href="#" @click="openFile(lastPlayedFile)">
-        </a>
+      <div class="playlist"
+        v-if="hasRecentPlaylist">
+        <div class="item"
+          v-for="(item, index) in lastPlayedFile"
+          :key="item.path"
+          :style="{
+              backgroundImage: itemShortcut(item.shortCut),
+              width: item.chosen ? '140px' : '114px',
+              height: item.chosen ? '80px' : '65px',
+            }"
+          @click="openFile(item.path)"
+          @mouseover="onRecentItemMouseover(item, index)"
+          @mouseout="onRecentItemMouseout(index)">
+        </div>
       </div>
-      <button @click="open('./')">
-        <img src="~@/assets/icon-open.svg" type="image/svg+xml">
-      </button>
+    </div>
+    <div
+      @click="open('./')">
+      <img class="button" src="~@/assets/icon-open.svg" type="image/svg+xml">
     </div>
   </main>
 </div>
 </template>
 
 <script>
+import path from 'path';
 export default {
   name: 'landing-view',
   data() {
     return {
       showingPopupDialog: false,
-      lastPlayedFile: '',
-      version: '',
+      lastPlayedFile: [],
+      backgroundUrl: '',
+      showShortcutImage: false,
     };
   },
   components: {
   },
   computed: {
     hasRecentPlaylist() {
-      return this.lastPlayedFile && this.lastPlayedFile.length > 0;
+      return this.lastPlayedFile.length > 0;
     },
   },
   mounted() {
     const { app } = this.$electron.remote;
-    this.version = app.getVersion();
+    if (this.$electron.remote.getCurrentWindow().isResizable()) {
+      this.$electron.remote.getCurrentWindow().setResizable(false);
+    }
+
     console.log(app.getVersion(), app.getName());
 
     this.$storage.get('recent-played', (err, data) => {
@@ -51,10 +81,32 @@ export default {
         console.error(err);
       } else {
         this.lastPlayedFile = data;
+        console.log(data);
       }
     });
   },
   methods: {
+    itemShortcut(shortCut) {
+      return `url("${shortCut}")`;
+    },
+    itemInfo() {
+      return {
+        baseName: path.basename(this.item.path, path.extname(this.item.path)),
+        lastTime: this.item.lastPlayedTime,
+      };
+    },
+    onRecentItemMouseover(item, index) {
+      this.item = item;
+      this.$set(this.lastPlayedFile[index], 'chosen', true);
+      if (item.shortCut !== '') {
+        this.isChanging = true;
+        this.backgroundUrl = item.shortCut;
+        this.showShortcutImage = true;
+      }
+    },
+    onRecentItemMouseout(index) {
+      this.$set(this.lastPlayedFile[index], 'chosen', false);
+    },
     open(link) {
       if (this.showingPopupDialog) {
         // skip if there is already a popup dialog
@@ -84,13 +136,6 @@ export default {
         }
       });
     },
-    openFile(path) {
-      this.$storage.set('recent-played', path);
-      this.$store.commit('SrcOfVideo', path);
-      this.$router.push({
-        name: 'playing-view',
-      });
-    },
   },
 };
 </script>
@@ -109,20 +154,53 @@ body {
   color: $themeColor-Light;
 }
 
-#wrapper {
+.wrapper {
   background: radial-gradient( ellipse at top center,
   rgba(0, 0, 0, .9) 20%,
   rgba(44, 44, 44, .95) 80%);
   height: 100vh;
-  padding: 60px 80px;
   width: 100vw;
+  z-index: -1;
 }
+.background-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
 
-#logo {
-  height: auto;
-  margin-bottom: 20px;
-  margin-top: 5vh;
-  width: 20vw;
+  .item-name {
+    position: absolute;
+    top: 100px;
+    left: 45px;
+    font-size: 30px;
+    font-weight: bold;
+  }
+  .item-description {
+    position: absolute;
+    opacity: 0.4;
+    top: 140px;
+    left: 45px;
+    font-size: 20px;
+    font-weight: lighter;
+  }
+  .item-timing {
+    position: absolute;
+    opacity: 0.4;
+    top: 160px;
+    left: 45px;
+    font-size: 20px;
+    font-weight: lighter;
+  }
+  img {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+.logo {
+  height: 136px;
+  width: 136px;
+  margin-top: 80px;
 }
 
 main {
@@ -130,62 +208,60 @@ main {
   justify-content: space-between;
 }
 
-main>div {
-  flex-basis: 50%;
-}
-
-.welcome .title {
-  font-size: 7vw;
-  margin-bottom: 6px;
-}
-
-.welcome p {
-  font-size: 2vw;
-  color: gray;
-  margin-bottom: 10px;
-}
-
-.controller a {
-  color: #e4e4c4;
+.welcome {
+  margin-top: 15px;
+  .title {
+    font-size: 7vw;
+    margin-bottom: 6px;
+  }
+  p {
+    font-size: 2vw;
+    color: gray;
+    margin-bottom: 10px;
+  }
 }
 
 .controller {
   position: absolute;
-  right: 0;
-  bottom: 1em;
-  width: 100vw;
-}
+  left: 0;
+  bottom: 40px;
+  width: 100%;
 
-.controller .playlist {
-  display: block;
-  margin-left: 1em;
-  float: left;
-}
+  .playlist {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-end;
+    margin-left: 45px;
 
-.controller .playlist .item {
-  display: block;
-  background: radial-gradient( ellipse at top center,
-  rgba(0, 0, 0, .9) 20%,
-  rgba(44, 44, 44, .95) 80%);
-  height: 4.5em;
-  width: 8em;
-  color: gray;
-  cursor: pointer;
+    .item {
+      color: #e4e4c4;
+      border-radius: 2px;
+      width: 114px;
+      height: 65px;
+      box-shadow: 0px 0px 30px 1px black;
+      color: gray;
+      cursor: pointer;
+      margin-right: 15px;
+      background-size: contain;
+      background-color: black;
+      background-repeat: no-repeat;
+      background-position: center center;
+      transition: width 150ms ease-out, height 150ms ease-out;
+    }
+  }
 }
-
-.controller button {
+.button {
   position: absolute;
-  bottom: 1em;
-  right: 1em;
+  bottom: 57px;
+  right: 45px;
+  width: 35px;
+  height: 30px;
   font-size: .8em;
   cursor: pointer;
   outline: none;
   transition: all 0.15s ease;
   border: 0px;
-}
-
-.controller button.alt {
-  background-color: transparent;
 }
 
 </style>

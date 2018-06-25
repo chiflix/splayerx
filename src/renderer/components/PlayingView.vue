@@ -111,6 +111,7 @@ export default {
   },
   mounted() {
     this.$bus.$emit('play');
+    this.currentWindow.setResizable(true);
   },
   computed: {
     uri() {
