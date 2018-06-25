@@ -6,9 +6,7 @@
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.left.stop="videoRestart"
-      @mouseenter="hideBackwardLine"
-      @mouseleave="showBackwardLine">
+      @mousedown.left.stop="videoRestart">
       <div class="button"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
@@ -91,12 +89,6 @@ export default {
         this.showProgressBar = false;
         this.hideProgressSlider();
       }
-    },
-    showBackwardLine() {
-      this.showProgressBackward = true;
-    },
-    hideBackwardLine() {
-      this.showProgressBackward = false;
     },
     videoRestart() {
       this.$bus.$emit('seek', 0);
@@ -464,7 +456,6 @@ export default {
     height: 100%;
     background: rgba(150, 150, 150, 0.9);
     z-index: 100;
-    // background: rgb(0, 0, 0);
   }
 }
 
