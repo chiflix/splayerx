@@ -359,10 +359,10 @@ export default {
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
     });
-    window.addEventListener('resize', this.handleResize);
+    // window.addEventListener('resize', this.handleResize);
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.handleResize);
+    // window.removeEventListener('resize', this.handleResize);
   },
 };
 </script>
