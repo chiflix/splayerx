@@ -82,7 +82,7 @@ export default {
       videoRatio: 0,
       percentageVideoDraged: 0,
       flagProgressBarDraged: false,
-      widthOfWindow: 0,
+      widthOfThumbnail: 0,
     };
   },
   methods: {
@@ -232,14 +232,6 @@ export default {
         - this.cursorPosition;
       return width > 0 ? width : 0;
     },
-    widthOfThumbnail() {
-      if (this.widthOfWindow < 845) {
-        return 136;
-      } else if (this.widthOfWindow < 1920) {
-        return 170;
-      }
-      return 240;
-    },
     heightofScreenshot() {
       return this.widthOfThumbnail / this.videoRatio;
     },
@@ -264,6 +256,17 @@ export default {
     },
   },
   created() {
+    this.$electron.remote.getCurrentWindow().on('resize', () => {
+      const widthOfWindow = this.$electron.remote.getCurrentWindow().getSize()[0];
+      console.log(widthOfWindow);
+      if (widthOfWindow < 845) {
+        this.widthOfThumbnail = 136;
+      } else if (widthOfWindow < 1920) {
+        this.widthOfThumbnail = 170;
+      } else {
+        this.widthOfThumbnail = 240;
+      }
+    });
     this.$bus.$on('progressslider-appear', () => {
       this.showProgressBackward = false;
       this.showScreenshot = false;
@@ -294,10 +297,6 @@ export default {
     });
     this.$bus.$on('screenshot-sizeset', (e) => {
       this.videoRatio = e;
-    });
-    this.$bus.$on('window-resize', (e) => {
-      this.widthOfWindow = e.screenWidth;
-      console.log(`Current window width: ${this.widthOfWindow}.`);
     });
   },
 };

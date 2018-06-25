@@ -174,16 +174,6 @@ export default {
         }
       }
     },
-    handleResize() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      const screenWidth = currentWindow.getSize()[0];
-      const screenHeight = currentWindow.getSize()[1];
-      const screenSize = {
-        screenWidth,
-        screenHeight,
-      };
-      this.$bus.$emit('window-resize', screenSize);
-    },
     $_controlWindowSize() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       currentWindow.setBounds({
@@ -355,10 +345,6 @@ export default {
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
     });
-    // window.addEventListener('resize', this.handleResize);
-  },
-  beforeDestroy() {
-    // window.removeEventListener('resize', this.handleResize);
   },
 };
 </script>
