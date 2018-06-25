@@ -112,6 +112,12 @@ export default {
      * is not at mouse down event.
      */
     onProgresssBarMove(e) {
+      /**
+       * TODO:
+       * 1. 解决由于mousemove触发机制导致的进度条拖动效果不平滑
+       * 解决方案1: 将事件放在document上尝试解决
+       */
+      console.log(e.clientX);
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return;
       }
