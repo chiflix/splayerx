@@ -138,6 +138,7 @@ export default {
       const curProgressBarWidth = (progressBarWidth * (this.progress / 100))
        + FOOL_PROOFING_BAR_WIDTH;
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
+      this.widthOfReadyToPlay = cursorPosition;
       if (cursorPosition < curProgressBarWidth) {
         if (cursorPosition >= 0 || (curProgressBarWidth > 0 && cursorPosition < 0)) {
           this.showProgressBackward = true;
@@ -156,7 +157,6 @@ export default {
       } else {
         this.percentageOfReadyToPlay = progress;
       }
-      this.widthOfReadyToPlay = cursorPosition;
       this.showScreenshot = true;
     },
     /**
