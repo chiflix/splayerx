@@ -80,50 +80,6 @@ new Vue({
             { label: 'Decrease Playback Speed' },
             /** */
             { type: 'separator' },
-            {
-              label: 'Forward 10s',
-              // accelerator: 'Right',
-              // click: () => {
-              //   this.timeControl('Forward', 10);
-              // },
-            },
-            {
-              label: 'Forward 1min',
-              // accelerator: 'Option+Right',
-              // click: () => {
-              //   this.timeControl('Forward', 60);
-              // },
-            },
-            {
-              label: 'Rewind 10s',
-              // accelerator: 'Left',
-              // click: () => {
-              //   this.timeControl('Rewind', 10);
-              // },
-            },
-            {
-              label: 'Rewind 1min',
-              // accelerator: 'Option+Left',
-              // click: () => {
-              //   this.timeControl('Rewind', 60);
-              // },
-            },
-            /** */
-            { type: 'separator' },
-            {
-              label: 'Increase Volume',
-              // accelerator: 'Up',
-              // click: () => {
-              //   this.volumeControl('Increse');
-              // },
-            },
-            {
-              label: 'Decrease Volume',
-              // accelerator: 'Down',
-              // click: () => {
-              //   this.volumeControl('Decrese');
-              // },
-            },
             /** */
             { type: 'separator' },
             { label: 'Increase Audio Delay' },
@@ -200,38 +156,6 @@ new Vue({
 
       const menu = Menu.buildFromTemplate(template);
       Menu.setApplicationMenu(menu);
-    },
-    timeControl(type, seconds) {
-      // show progress bar
-      this.$bus.$emit('progressbar-appear');
-      this.$bus.$emit('progressslider-appear');
-      this.$bus.$emit('timecode-appear');
-      const curTime = this.$store.state.PlaybackState.CurrentTime;
-      if (type === 'Forward') {
-        this.$bus.$emit('seek', curTime + seconds);
-      }
-      if (type === 'Rewind') {
-        this.$bus.$emit('seek', curTime - seconds);
-      }
-    },
-    volumeControl(type) {
-      // show volume controller
-      this.$bus.$emit('volumecontroller-appear');
-      this.$bus.$emit('volumeslider-appear');
-      if (type === 'Increse') {
-        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
-        } else {
-          this.$store.commit('Volume', 1);
-        }
-      }
-      if (type === 'Decrese') {
-        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
-        } else {
-          this.$store.commit('Volume', 0);
-        }
-      }
     },
   },
   mounted() {
