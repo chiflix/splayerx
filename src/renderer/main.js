@@ -37,18 +37,6 @@ new Vue({
   store,
   template: '<App/>',
   methods: {
-    openVideoFile(file) {
-      const path = `file:///${file}`;
-      // TODO: check if file exist
-      // TODO: check if there is subtitle file in the same directory
-      // TODO: load subtitles? or add subtitle file to playlist
-
-      this.$storage.set('recent-played', path);
-      this.$store.commit('SrcOfVideo', path);
-      this.$router.push({
-        name: 'playing-view',
-      });
-    },
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
       const template = [
@@ -66,7 +54,10 @@ new Vue({
                     extensions: ['mp4', 'mkv', 'mov'],
                   }],
                 }, (file) => {
-                  this.openVideoFile(file);
+                  if (file !== undefined) {
+                    const path = `file:///${file}`;
+                    this.openFile(path);
+                  }
                 });
               },
             },
@@ -220,9 +211,6 @@ new Vue({
         this.$bus.$emit('seek', curTime + seconds);
       }
       if (type === 'Rewind') {
-        if (curTime < seconds) {
-          seconds = curTime;
-        }
         this.$bus.$emit('seek', curTime - seconds);
       }
     },
@@ -274,8 +262,9 @@ new Vue({
       const { files } = e.dataTransfer;
       console.log(files);
       // TODO: play it if it's video file
+      const path = `file:///${files[0].path}`;
 
-      this.openVideoFile(files[0].path);
+      this.openFile(path);
 
       /*
       for (const file in files) {
