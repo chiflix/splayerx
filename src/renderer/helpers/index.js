@@ -49,6 +49,7 @@ export default {
         }
       }
     },
+<<<<<<< HEAD
 
     mediaQuickHash(file) {
       function md5Hex(text) {
@@ -73,5 +74,67 @@ export default {
       return res.join('-');
     },
 
+=======
+    openFile(path) {
+      // this.$storage.set('recent-played', []);
+      this.$storage.get('recent-played', (err, data) => {
+        console.log(data);
+        const newElement = {
+          path,
+          shortCut: '',
+          lastPlayedTime: 0,
+        };
+        if (err) {
+          // TODO: proper error handle
+          console.error(err);
+        } else if (Array.isArray(data)) {
+          console.log('its an array!');
+          if (data.length < 4) {
+            if (this.$_indexOfExistedFileIn(data, path) === -1) {
+              data.unshift(newElement);
+            } else {
+              const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+              if (item[0].lastPlayedTime !== 0) {
+                this.$bus.$emit('seek', item[0].lastPlayedTime);
+              }
+              data.unshift(item[0]);
+            }
+            console.log('changed:');
+            console.log(data);
+            this.$storage.set('recent-played', data);
+          } else {
+            if (this.$_indexOfExistedFileIn(data, path) === -1) {
+              data.pop();
+              data.unshift(newElement);
+            } else {
+              const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+              data.unshift(item[0]);
+            }
+            console.log('changed:');
+            console.log(data);
+            this.$storage.set('recent-played', data);
+          }
+        } else {
+          this.$storage.set('recent-played', [newElement]);
+        }
+      });
+      this.$store.commit('SrcOfVideo', path);
+      this.$router.push({
+        name: 'playing-view',
+      });
+    },
+    $_indexOfExistedFileIn(data, path) {
+      for (let i = 0; i < data.length; i += 1) {
+        const object = data[i];
+        const iterator = Object.keys(object).indexOf('path');
+        if (iterator !== -1) {
+          if (object.path === path) {
+            return i;
+          }
+        }
+      }
+      return -1;
+    },
+>>>>>>> 3d7e2da4329f2b7f36da299fe65003f8004f3d3c
   },
 };

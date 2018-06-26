@@ -9,12 +9,13 @@
       @mouseup="togglePlayback"
       @mousewheel="wheelVolumeControll"
       @mousemove="wakeUpAllWidgets"
+      @mouseover="focusCurrentWindow"
       @mouseout="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
 			<TimeProgressBar/>
       <TheTimeCodes/>
 			<VolumeControl/>
-			<AdvanceControl/>
+			<!-- <AdvanceControl/> -->
 		</div>
   </div>
 </template>
@@ -65,6 +66,9 @@ export default {
         this.cursorShow = false;
       }, 3000);
     },
+    focusCurrentWindow() {
+      this.currentWindow.focus();
+    },
     wakeUpAllWidgets() {
       this.showMask = true;
       this.isDragging = true;
@@ -107,6 +111,7 @@ export default {
   },
   mounted() {
     this.$bus.$emit('play');
+    this.currentWindow.setResizable(true);
   },
   computed: {
     uri() {
