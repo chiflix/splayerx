@@ -12,7 +12,7 @@ import { WebVTT } from 'vtt.js';
 export default {
   data() {
     return {
-
+      subtitleArr: [],
     };
   },
   methods: {
@@ -34,7 +34,6 @@ export default {
 
       // create our own text/subtitle track
 
-      const subtitleArr = [];
       /*
        * TODO:
        * If there is already text track, load it
@@ -79,11 +78,11 @@ export default {
           .on('end', () => {
             parser.flush();
             console.log('finish reading srt');
-            subtitleArr.push(textTrack);
+            this.subtitleArr.push(textTrack);
           });
       });
 
-      console.log(subtitleArr);
+      console.log(this.subtitleArr);
       // if (process.env.NODE_ENV !== 'production') {
       //   const sub = vid.addTextTrack('subtitles', 'splayer-custom');
       //   console.log(`loadingTextTrack ${loadingTextTrack}`);
@@ -94,6 +93,9 @@ export default {
       //     sub.mode = 'showing';
       //   }
       // }
+    },
+    showSubtitle(id) {
+      const subtitle = this.subtitleArr[id];
     },
   },
   created() {
