@@ -10,7 +10,7 @@
       <div class="button"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
-      :style="{width: currentWindow.getSize()[0] - 20 + 'px'}"
+      :style="{width: this.$electron.remote.getCurrentWindow().getSize()[0] - 20 + 'px'}"
       @mousedown.left="onProgresssBarClick">
       <div class="screenshot-background"
         v-show="showScreenshot"
@@ -226,7 +226,8 @@ export default {
         / (this.$store.state.PlaybackState.Duration);
     },
     backwardWidth() {
-      const progressBarWidth = this.$electron.remote.getCurrentWindow().getSize()[0];
+      const progressBarWidth = this.$electron.remote.getCurrentWindow().getSize()[0]
+        - FOOL_PROOFING_BAR_WIDTH;
       const width = (progressBarWidth * (this.progress / 100))
         - this.cursorPosition;
       return width > 0 ? width : 0;
