@@ -25,7 +25,7 @@ Vue.mixin(helpers);
 Vue.prototype.$bus = new Vue(); // Global event bus
 
 const i18n = new VueI18n({
-  locale: 'cn', // set locale
+  locale: 'znCH', // set locale
   messages, // set locale messages
 });
 
@@ -41,10 +41,10 @@ new Vue({
       const { Menu, app, dialog } = this.$electron.remote;
       const template = [
         {
-          label: 'File',
+          label: this.$t('msg.file.name'),
           submenu: [
             {
-              label: 'Open',
+              label: this.$t('msg.file.open'),
               accelerator: 'Cmd+O',
               click: () => {
                 dialog.showOpenDialog({
@@ -62,72 +62,82 @@ new Vue({
               },
             },
             {
-              label: 'Open URL',
+              label: this.$t('msg.file.openURL'),
               accelerator: 'Cmd+U',
             },
-            { label: 'Open Recent' },
-            { role: 'Close' },
+            { label: this.$t('msg.file.openRecent').concat('>') },
+            {
+              label: this.$t('msg.file.closeWindow'),
+              role: 'Close',
+            },
           ],
         },
         {
-          label: 'Playback',
+          label: this.$t('msg.playback.name'),
           submenu: [
-            { label: 'Full Screen', accelerator: 'F' },
+            {
+              label: this.$t('msg.playback.fullScreen'),
+              accelerator: 'F',
+            },
             // { label: 'Play from last stopped place' },
             // { label: 'Increase Size' },
             // { label: 'Decrease Size' },
             { type: 'separator' },
-            { label: 'Increase Playback Speed' },
-            { label: 'Decrease Playback Speed' },
+            { label: this.$t('msg.playback.increasePlaybackSpeed') },
+            { label: this.$t('msg.playback.decreasePlaybackSpeed') },
             /** */
             { type: 'separator' },
-            { label: 'Capture Screen' },
-            { label: 'Capture Video Clip' },
+            { label: this.$t('msg.playback.captureScreen') },
+            { label: this.$t('msg.playback.captureVideoClip') },
 
             { type: 'separator' },
-            { label: 'Media Info' },
+            { label: this.$t('msg.playback.mediaInfo') },
           ],
         },
         {
-          label: 'Audio',
+          label: this.$t('msg.audio.name'),
           submenu: [
-            { label: 'Increase Audio Delay' },
-            { label: 'Decrease Audio Delay' },
+            { label: this.$t('msg.audio.increaseAudioDelay') },
+            { label: this.$t('msg.audio.decreaseAudioDelay') },
             { type: 'separator' },
-            { label: 'Switch Audio Track >' },
+            { label: this.$t('msg.audio.switchAudioTrack').concat('>') },
           ],
         },
         {
-          label: 'Subtitle',
+          label: this.$t('msg.subtitle.name'),
           submenu: [
-            { label: 'Main Subtitle >' },
-            { label: 'Secondary Subtitle >' },
+            { label: this.$t('msg.subtitle.mainSubtitle').concat('>') },
+            { label: this.$t('msg.subtitle.secondarySubtitle').concat('>') },
             { type: 'separator' },
-            { label: 'Subtitle Style >' },
+            { label: this.$t('msg.subtitle.subtitleStyle').concat('>') },
             { type: 'separator' },
-            { label: 'Increase Subtitle Size' },
-            { label: 'Decrease Subtitle Size' },
+            { label: this.$t('msg.subtitle.increaseSubtitleSize') },
+            { label: this.$t('msg.subtitle.decreaseSubtitleSize') },
             { type: 'separator' },
-            { label: 'Increase Subtitle Delay' },
-            { label: 'Decrease Subtitle Delay' },
+            { label: this.$t('msg.subtitle.increaseSubtitleDelay') },
+            { label: this.$t('msg.subtitle.decreaseSubtitleDelay') },
             // { type: 'separator' },
             // { label: 'Smart Translating' },
             // { label: 'Search on Shooter.cn' },
           ],
         },
         {
-          label: 'Window',
+          label: this.$t('msg.window_.name'),
           submenu: [
-            { role: 'minimize' },
-            { label: 'Enter Full Screen', accelerator: 'Ctrl+Cmd+F' },
-            { label: 'Bring All To Front', role: 'hideOthers', accelerator: '' },
+            {
+              label: this.$t('msg.window_.minimize'),
+              role: 'minimize',
+            },
+            { label: this.$t('msg.window_.enterFullScreen'), accelerator: 'Ctrl+Cmd+F' },
+            { label: this.$t('msg.window_.bringAllToFront'), role: 'hideOthers', accelerator: '' },
           ],
         },
         {
+          label: this.$t('msg.help.name'),
           role: 'help',
           submenu: [
             {
-              label: 'SPlayerX Help',
+              label: this.$t('msg.help.splayerxHelp'),
             },
           ],
         },
@@ -137,23 +147,39 @@ new Vue({
         template.unshift({
           label: app.getName(),
           submenu: [
-            { role: 'about' },
             {
-              label: 'Preferences',
+              label: this.$t('msg.splayerx.about'),
+              role: 'about',
+            },
+            {
+              label: this.$t('msg.splayerx.preferences'),
               accelerator: 'Cmd+,',
             },
             {
-              label: 'Homepage',
+              label: this.$t('msg.splayerx.homepage'),
             },
             {
-              label: 'Feedback',
+              label: this.$t('msg.splayerx.feedback'),
             },
             { type: 'separator' },
-            { role: 'services', submenu: [] },
+            {
+              label: this.$t('msg.splayerx.services'),
+              role: 'services',
+              submenu: [],
+            },
             { type: 'separator' },
-            { role: 'hide' },
-            { role: 'hideothers' },
-            { role: 'quit' },
+            {
+              label: this.$t('msg.splayerx.hide'),
+              role: 'hide',
+            },
+            {
+              label: this.$t('msg.splayerx.hideOthers'),
+              role: 'hideothers',
+            },
+            {
+              label: this.$t('msg.splayerx.quit'),
+              role: 'quit',
+            },
           ],
         });
       }
