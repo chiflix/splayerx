@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 
 export default {
   methods: {
@@ -48,6 +49,32 @@ export default {
         }
       }
     },
+<<<<<<< HEAD
+
+    mediaQuickHash(file) {
+      function md5Hex(text) {
+        return crypto.createHash('md5').update(text).digest('hex');
+      }
+      const filePath = path.join(__dirname, file);
+      const fd = fs.openSync(filePath, 'r');
+      const len = fs.statSync(filePath).size;
+      const position = [
+        4096,
+        Math.floor(len / 3),
+        Math.floor(len / 3) * 2,
+        len - 8192,
+      ];
+      const res = [];
+      const buf = Buffer.alloc(4096);
+      for (let i = 0; i < 4; i += 1) {
+        const bufLen = fs.readSync(fd, buf, 0, 4096, position[i]);
+        res[i] = md5Hex(buf.slice(0, bufLen));
+      }
+      fs.closeSync(fd);
+      return res.join('-');
+    },
+
+=======
     openFile(path) {
       // this.$storage.set('recent-played', []);
       this.$storage.get('recent-played', (err, data) => {
@@ -108,5 +135,6 @@ export default {
       }
       return -1;
     },
+>>>>>>> 3d7e2da4329f2b7f36da299fe65003f8004f3d3c
   },
 };
