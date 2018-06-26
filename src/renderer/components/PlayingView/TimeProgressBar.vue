@@ -16,6 +16,10 @@
         v-show="showScreenshot"
         :style="{ left: positionOfScreenshot +'px', width: widthOfThumbnail + 'px', height: heightofScreenshot +'px' }">
         <div class="screenshot">
+          <video ref="thumbnailVideoCanvas"
+            @loadedmetadata="onMetaLoaded"
+            :src="src">
+          </video>
           <div class="time">
             {{ screenshotContext }}
           </div>
@@ -50,6 +54,19 @@ import {
 } from '@/constants';
 
 export default {
+  props: {
+    src: {
+      type: String,
+      required: true,
+      validator(value) {
+        // TODO: check if its a file or url
+        if (value.length <= 0) {
+          return false;
+        }
+        return true;
+      },
+    },
+  },
   data() {
     return {
       showScreenshot: false,
@@ -62,10 +79,13 @@ export default {
       videoRatio: 0,
       percentageVideoDraged: 0,
       flagProgressBarDraged: false,
-      widthOfWindow: 0,
+      widthOfThumbnail: 0,
     };
   },
   methods: {
+    onMetaLoaded() {
+      this.$refs.thumbnailVideoCanvas.pause();
+    },
     appearProgressSlider() {
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
@@ -134,7 +154,9 @@ export default {
      * @param e mousemove event
      */
     $_effectProgressBarDraged(e) {
-      const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      const progressBarWidth = currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
+
       const curProgressBarWidth = (progressBarWidth * (this.progress / 100))
        + FOOL_PROOFING_BAR_WIDTH;
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
@@ -156,6 +178,8 @@ export default {
         this.percentageOfReadyToPlay = 0;
       } else {
         this.percentageOfReadyToPlay = progress;
+        this.$refs.thumbnailVideoCanvas.currentTime
+          = progress * this.$store.state.PlaybackState.Duration;
       }
       this.showScreenshot = true;
     },
@@ -202,24 +226,16 @@ export default {
         / (this.$store.state.PlaybackState.Duration);
     },
     backwardWidth() {
-      const progressBarWidth = this.currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
+      const progressBarWidth = this.$electron.remote.getCurrentWindow().getSize()[0];
       const width = (progressBarWidth * (this.progress / 100))
         - this.cursorPosition;
       return width > 0 ? width : 0;
-    },
-    widthOfThumbnail() {
-      if (this.widthOfWindow < 845) {
-        return 136;
-      } else if (this.widthOfWindow < 1920) {
-        return 170;
-      }
-      return 240;
     },
     heightofScreenshot() {
       return this.widthOfThumbnail / this.videoRatio;
     },
     positionOfScreenshot() {
-      const progressBarWidth = this.currentWindow.getSize()[0] - 20;
+      const progressBarWidth = this.$electron.remote.getCurrentWindow().getSize()[0] - 20;
       const halfWidthOfScreenshot = this.widthOfThumbnail / 2;
       const minWidth = (this.widthOfThumbnail / 2) + 16;
       const maxWidth = progressBarWidth - 16;
@@ -234,14 +250,22 @@ export default {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
     },
-    currentWindow() {
-      return this.$electron.remote.getCurrentWindow();
-    },
     cursorPosition() {
       return this.widthOfReadyToPlay;
     },
   },
   created() {
+    this.$electron.remote.getCurrentWindow().on('resize', () => {
+      const widthOfWindow = this.$electron.remote.getCurrentWindow().getSize()[0];
+      console.log(widthOfWindow);
+      if (widthOfWindow < 845) {
+        this.widthOfThumbnail = 136;
+      } else if (widthOfWindow < 1920) {
+        this.widthOfThumbnail = 170;
+      } else {
+        this.widthOfThumbnail = 240;
+      }
+    });
     this.$bus.$on('progressslider-appear', () => {
       this.showProgressBackward = false;
       this.showScreenshot = false;
@@ -272,10 +296,6 @@ export default {
     });
     this.$bus.$on('screenshot-sizeset', (e) => {
       this.videoRatio = e;
-    });
-    this.$bus.$on('window-resize', (e) => {
-      this.widthOfWindow = e.screenWidth;
-      console.log(`Current window width: ${this.widthOfWindow}.`);
     });
   },
 };
@@ -316,7 +336,7 @@ export default {
       box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
     }
   }
-  
+
   .fool-proof-bar:hover {
     cursor: pointer;
   }
@@ -329,7 +349,6 @@ export default {
 
    .screenshot {
      position: relative;
-     height: 100%;
      border: 1px solid transparent;
      border-radius: 1px;
      background-color: #000;
@@ -337,6 +356,11 @@ export default {
      display: flex;
      justify-content: center;
      align-items: center;
+
+     video {
+       height: 100%;
+       width: 99%;
+     }
 
      .time {
        color: rgba(255, 255, 255, 0.7);
@@ -369,7 +393,7 @@ export default {
           .time {
             font-size: 20px;
           }
-        } 
+        }
       }
     }
   }
@@ -382,7 +406,7 @@ export default {
           .time {
             font-size: 24px;
           }
-        } 
+        }
       }
     }
   }
@@ -395,11 +419,8 @@ export default {
           .time {
             font-size: 40px;
           }
-        } 
+        }
       }
-    }
-    .time {
-      font-size: 40px;
     }
   }
 }

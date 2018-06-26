@@ -9,14 +9,13 @@
       @mouseup="togglePlayback"
       @mousewheel="wheelVolumeControll"
       @mousemove="wakeUpAllWidgets"
-      @mouseover="focusCurrentWindow"
       @mouseout="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
-			<TimeProgressBar/>
+      <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
-			<VolumeControl/>
-			<!-- <AdvanceControl/> -->
-		</div>
+      <VolumeControl/>
+      <!-- <AdvanceControl/> -->
+    </div>
   </div>
 </template>
 
@@ -46,12 +45,13 @@ export default {
   },
   methods: {
     toggleFullScreenState() {
-      if (this.currentWindow.isFullScreen()) {
-        this.currentWindow.setFullScreen(false);
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      if (currentWindow.isFullScreen()) {
+        currentWindow.setFullScreen(false);
         this.$bus.$emit('reset-windowsize');
       } else {
-        this.currentWindow.setAspectRatio(0);
-        this.currentWindow.setFullScreen(true);
+        currentWindow.setAspectRatio(0);
+        currentWindow.setFullScreen(true);
       }
     },
     /**
@@ -65,9 +65,6 @@ export default {
       this.cursorDelay = setTimeout(() => {
         this.cursorShow = false;
       }, 3000);
-    },
-    focusCurrentWindow() {
-      this.currentWindow.focus();
     },
     wakeUpAllWidgets() {
       this.showMask = true;
@@ -111,14 +108,11 @@ export default {
   },
   mounted() {
     this.$bus.$emit('play');
-    this.currentWindow.setResizable(true);
+    this.$electron.remote.getCurrentWindow().setResizable(true);
   },
   computed: {
     uri() {
       return this.$store.state.PlaybackState.SrcOfVideo;
-    },
-    currentWindow() {
-      return this.$electron.remote.getCurrentWindow();
     },
     cursorStyle() {
       return this.cursorShow ? 'default' : 'none';
