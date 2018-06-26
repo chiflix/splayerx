@@ -19,8 +19,6 @@
         <div class="screenshot">
           <video ref="thumbnailVideoCanvas"
             @loadedmetadata="onMetaLoaded"
-            :width="widthOfThumbnail"
-            :height="heightofScreenshot"
             :src="src">
           </video>
           <div class="time">
@@ -351,7 +349,6 @@ export default {
 
    .screenshot {
      position: relative;
-     height: 100%;
      border: 1px solid transparent;
      border-radius: 1px;
      background-color: #000;
@@ -359,6 +356,11 @@ export default {
      display: flex;
      justify-content: center;
      align-items: center;
+
+     video {
+       height: 100%;
+       width: 99%;
+     }
 
      .time {
        color: rgba(255, 255, 255, 0.7);
