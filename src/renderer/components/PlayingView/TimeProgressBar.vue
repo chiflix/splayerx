@@ -398,9 +398,6 @@ export default {
         } 
       }
     }
-    .time {
-      font-size: 40px;
-    }
   }
 }
 
