@@ -123,8 +123,8 @@ export default {
       }
 
       // create our own text/subtitle track
-      const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
 
+      const subtitleArr = [];
       /*
        * TODO:
        * If there is already text track, load it
@@ -132,26 +132,34 @@ export default {
        * If there is no (chinese/default language) text track, try translate api
        */
 
-      let loadingTextTrack = false;
-      let shownTextTrack = false;
+      // let loadingTextTrack = false;
+      // let shownTextTrack = false;
+
       // If there is already subtitle files(same dir), load it
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
-        console.log(subPath);
+        // console.log(subPath);
         // Automatically track and cleanup files at exit
         // temp.track();
         // const stream = temp.createWriteStream({ suffix: '.vtt' });
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+        // const sub = vid.addTextTrack('subtitles', 'splayer-custom');
+        const textTrack = [];
         parser.oncue = (cue) => {
-          sub0.addCue(cue);
-          // console.log(cue);
+          // sub.addCue(cue);
+          // textTrack.push(cue);
+          textTrack.push({
+            endTime: cue.endTime,
+            startTime: cue.startTime,
+            text: cue.text,
+          });
         };
         parser.onflush = () => {
-          if (!shownTextTrack) {
-            sub0.mode = 'showing';
-            shownTextTrack = true;
-          }
+          // if (!shownTextTrack) {
+          //   // sub.mode = 'showing';
+          //   shownTextTrack = true;
+          // }
         };
-        loadingTextTrack = true;
+        // loadingTextTrack = true;
 
         const readStream = fs.createReadStream(subPath).pipe(srt2vtt());
         readStream
@@ -161,18 +169,21 @@ export default {
           .on('end', () => {
             parser.flush();
             console.log('finish reading srt');
+            subtitleArr.push(textTrack);
           });
       });
 
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(`loadingTextTrack ${loadingTextTrack}`);
-        if (!loadingTextTrack) {
-          // Loading subtitle test
-          const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
-          sub0.addCue(cue0);
-          sub0.mode = 'showing';
-        }
-      }
+      console.log(subtitleArr);
+      // if (process.env.NODE_ENV !== 'production') {
+      //   const sub = vid.addTextTrack('subtitles', 'splayer-custom');
+      //   console.log(`loadingTextTrack ${loadingTextTrack}`);
+      //   if (!loadingTextTrack) {
+      //     // Loading subtitle test
+      //     const cue = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
+      //     sub.addCue(cue);
+      //     sub.mode = 'showing';
+      //   }
+      // }
     },
     $_controlWindowSize() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
