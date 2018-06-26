@@ -12,11 +12,11 @@
       @mouseover="focusCurrentWindow"
       @mouseout="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
-			<TimeProgressBar :src="uri" />
+      <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
-			<VolumeControl/>
-			<!-- <AdvanceControl/> -->
-		</div>
+      <VolumeControl/>
+      <!-- <AdvanceControl/> -->
+    </div>
   </div>
 </template>
 
