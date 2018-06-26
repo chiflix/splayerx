@@ -5,6 +5,10 @@
 </template>;
 
 <script>
+import fs from 'fs';
+import srt2vtt from 'srt-to-vtt';
+import { WebVTT } from 'vtt.js';
+
 export default {
   data() {
     return {
@@ -12,7 +16,8 @@ export default {
     };
   },
   methods: {
-    loadTextTracks() {
+    // 可以考虑其他的传递方法
+    loadTextTracks(vid) {
       /* TODO:
        * 字幕代码我自己觉得很不满意，期待更好的处理 - Tomasen
        * move subtitle process to another component
@@ -21,8 +26,6 @@ export default {
        * https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
        * https://hacks.mozilla.org/2014/07/adding-captions-and-subtitles-to-html5-video/
        */
-
-      const vid = this.$refs.videoCanvas;
 
       // hide every text text/subtitle tracks at beginning
       for (let i = 0; i < vid.textTracks.length; i += 1) {
@@ -92,8 +95,13 @@ export default {
       //   }
       // }
     },
-  }
-}
+  },
+  created() {
+    this.$bus.$on('metaLoaded', (vid) => {
+      this.loadTextTracks(vid);
+    });
+  },
+};
 </script>
 
 <style>
