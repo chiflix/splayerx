@@ -72,85 +72,46 @@ new Vue({
         {
           label: 'Playback',
           submenu: [
-            { label: 'Play from last stopped place' },
-            { label: 'Increase Size' },
-            { label: 'Decrease Size' },
+            { label: 'Full Screen', accelerator: 'F' },
+            // { label: 'Play from last stopped place' },
+            // { label: 'Increase Size' },
+            // { label: 'Decrease Size' },
             { type: 'separator' },
             { label: 'Increase Playback Speed' },
             { label: 'Decrease Playback Speed' },
             /** */
             { type: 'separator' },
-            {
-              label: 'Forward 10s',
-              accelerator: 'Right',
-              click: () => {
-                this.timeControl('Forward', 10);
-              },
-            },
-            {
-              label: 'Forward 1min',
-              accelerator: 'Option+Right',
-              click: () => {
-                this.timeControl('Forward', 60);
-              },
-            },
-            {
-              label: 'Rewind 10s',
-              accelerator: 'Left',
-              click: () => {
-                this.timeControl('Rewind', 10);
-              },
-            },
-            {
-              label: 'Rewind 1min',
-              accelerator: 'Option+Left',
-              click: () => {
-                this.timeControl('Rewind', 60);
-              },
-            },
-            /** */
+            { label: 'Capture Screen' },
+            { label: 'Capture Video Clip' },
             { type: 'separator' },
-            {
-              label: 'Increase Volume',
-              accelerator: 'Up',
-              click: () => {
-                this.volumeControl('Increse');
-              },
-            },
-            {
-              label: 'Decrease Volume',
-              accelerator: 'Down',
-              click: () => {
-                this.volumeControl('Decrese');
-              },
-            },
-            /** */
-            { type: 'separator' },
+            { label: 'Media Info' },
+          ],
+        },
+        {
+          label: 'Audio',
+          submenu: [
             { label: 'Increase Audio Delay' },
             { label: 'Decrease Audio Delay' },
             { type: 'separator' },
-            { label: 'Capture Screen' },
+            { label: 'Switch Audio Track >' },
           ],
         },
         {
           label: 'Subtitle',
           submenu: [
-            { label: 'Main Subtitle' },
-            { label: 'Secondary Subtitle' },
+            { label: 'Main Subtitle >' },
+            { label: 'Secondary Subtitle >' },
             { type: 'separator' },
-            { label: 'Outside of Picture' },
+            { label: 'Subtitle Style >' },
             { type: 'separator' },
             { label: 'Increase Subtitle Size' },
             { label: 'Decrease Subtitle Size' },
             { type: 'separator' },
             { label: 'Increase Subtitle Delay' },
             { label: 'Decrease Subtitle Delay' },
-            { type: 'separator' },
-            { label: 'Increase Audio Delay' },
-            { label: 'Decrease Audio Delay' },
-            { type: 'separator' },
-            { label: 'Smart Translating' },
-            { label: 'Search on Shooter.cn' },
+            // { type: 'separator' },
+            // { label: 'Smart Translating' },
+            // { label: 'Search on Shooter.cn' },
           ],
         },
         {
@@ -159,8 +120,6 @@ new Vue({
             { role: 'minimize' },
             { label: 'Enter Full Screen', accelerator: 'Ctrl+Cmd+F' },
             { label: 'Bring All To Front', role: 'hideOthers', accelerator: '' },
-            { type: 'separator' },
-            { label: 'Media Info' },
           ],
         },
         {
