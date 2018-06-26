@@ -83,6 +83,7 @@ new Vue({
             { type: 'separator' },
             { label: 'Capture Screen' },
             { label: 'Capture Video Clip' },
+
             { type: 'separator' },
             { label: 'Media Info' },
           ],
@@ -160,38 +161,6 @@ new Vue({
       const menu = Menu.buildFromTemplate(template);
       Menu.setApplicationMenu(menu);
     },
-    timeControl(type, seconds) {
-      // show progress bar
-      this.$bus.$emit('progressbar-appear');
-      this.$bus.$emit('progressslider-appear');
-      this.$bus.$emit('timecode-appear');
-      const curTime = this.$store.state.PlaybackState.CurrentTime;
-      if (type === 'Forward') {
-        this.$bus.$emit('seek', curTime + seconds);
-      }
-      if (type === 'Rewind') {
-        this.$bus.$emit('seek', curTime - seconds);
-      }
-    },
-    volumeControl(type) {
-      // show volume controller
-      this.$bus.$emit('volumecontroller-appear');
-      this.$bus.$emit('volumeslider-appear');
-      if (type === 'Increse') {
-        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
-        } else {
-          this.$store.commit('Volume', 1);
-        }
-      }
-      if (type === 'Decrese') {
-        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
-        } else {
-          this.$store.commit('Volume', 0);
-        }
-      }
-    },
   },
   mounted() {
     this.createMenu();
@@ -213,6 +182,52 @@ new Vue({
     window.addEventListener('keypress', (e) => {
       if (e.key === ' ') { // space
         this.$bus.$emit('toggle-playback');
+      }
+    });
+    window.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'ArrowUp':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+          } else {
+            this.$store.commit('Volume', 1);
+          }
+          break;
+
+        case 'ArrowDown':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+          } else {
+            this.$store.commit('Volume', 0);
+          }
+          break;
+
+        case 'ArrowLeft':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
+          }
+          break;
+
+        case 'ArrowRight':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
+          }
+          break;
+        default:
       }
     });
 
