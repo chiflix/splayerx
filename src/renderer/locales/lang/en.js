@@ -1,6 +1,6 @@
 export default {
   msg: {
-    titleName: 'SplayerX',
+    titleName: 'SPlayerX',
     file: {
       name: 'File',
       open: 'Open',
@@ -41,10 +41,10 @@ export default {
     },
     help: {
       name: 'Help',
-      splayerxHelp: 'SplayerX Help',
+      splayerxHelp: 'SPlayerX Help',
     },
     splayerx: {
-      about: 'About SplayerX',
+      about: 'About SPlayerX',
       preferences: 'Preferences',
       homepage: 'Homepage',
       feedback: 'Feedback',
