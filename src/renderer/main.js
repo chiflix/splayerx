@@ -25,7 +25,7 @@ Vue.mixin(helpers);
 Vue.prototype.$bus = new Vue(); // Global event bus
 
 const i18n = new VueI18n({
-  locale: 'znCH', // set locale
+  locale: 'zhCN', // set locale
   messages, // set locale messages
 });
 
@@ -187,8 +187,25 @@ new Vue({
       const menu = Menu.buildFromTemplate(template);
       Menu.setApplicationMenu(menu);
     },
+    getSystemLocale() {
+      const localeMap = {
+        'en': 'en',   // eslint-disable-line
+        'en-AU': 'en',
+        'en-CA': 'en',
+        'en-GB': 'en',
+        'en-NZ': 'en',
+        'en-US': 'en',
+        'en-ZA': 'en',
+        'zh-CN': 'zhCN',
+        'zh-TW': 'zhTW',
+      };
+      const { app } = this.$electron.remote;
+      const locale = app.getLocale();
+      this.$i18n.locale = localeMap[locale] || this.$i18n.locale;
+    },
   },
   mounted() {
+    this.getSystemLocale();
     this.createMenu();
 
     // TODO: Setup user identity

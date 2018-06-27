@@ -1,8 +1,8 @@
 import en from './lang/en.js';
-import znCH from './lang/znCH.js';
-import znTW from './lang/znTW.js';
+import zhCN from './lang/zhCN.js';
+import zhTW from './lang/zhTW.js';
 
 // Ready translated locale messages
-const messages = { en, znCH, znTW };
+const messages = { en, zhCN, zhTW };
 
 export default messages;
