@@ -1,6 +1,19 @@
 <template>
   <div>
-    <div class="subtitle"></div>
+    <div class="subtitle">
+      <div class="subtitle-wrapper">
+        <div class="subtitle-content"
+          v-for="(div, keys) in subtitleDivs"
+          :key="keys"
+          v-show="subtitleAppearFlag"
+          v-html="div.innerHTML">
+        </div>
+      </div>
+      <div class="subtitle-button"
+        @click="toggleSubtitle">
+        <img src="" alt="subtitle-button">
+      </div>
+    </div>
   </div>
 </template>;
 
@@ -12,62 +25,33 @@ import { WebVTT } from 'vtt.js';
 export default {
   data() {
     return {
+      vid: {},
+      subtitleDivs: [],
       subtitleArr: [],
+      startIndex: 0,
+      subtitleAppearFlag: true,
     };
   },
   methods: {
     // 可以考虑其他的传递方法
-    loadTextTracks(vid) {
-      /* TODO:
-       * 字幕代码我自己觉得很不满意，期待更好的处理 - Tomasen
-       * move subtitle process to another component
-       * DOCs:
-       * https://gist.github.com/denilsonsa/aeb06c662cf98e29c379
-       * https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
-       * https://hacks.mozilla.org/2014/07/adding-captions-and-subtitles-to-html5-video/
-       */
-
+    loadTextTracks() {
+      const { vid } = this;
+      this.startIndex = vid.textTracks.length;
       // hide every text text/subtitle tracks at beginning
-      for (let i = 0; i < vid.textTracks.length; i += 1) {
-        vid.textTracks[i].mode = 'hidden';
+      for (let i = this.startIndex; i < this.startIndex; i += 1) {
+        vid.textTracks[i].mode = 'disabled';
       }
-
-      // create our own text/subtitle track
-
-      /*
-       * TODO:
-       * If there is already text track, load it
-       * If there is already subtitle files(opened or loaded), load it
-       * If there is no (chinese/default language) text track, try translate api
-       */
-
-      // let loadingTextTrack = false;
-      // let shownTextTrack = false;
-
-      // If there is already subtitle files(same dir), load it
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
-        // console.log(subPath);
-        // Automatically track and cleanup files at exit
-        // temp.track();
-        // const stream = temp.createWriteStream({ suffix: '.vtt' });
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
-        // const sub = vid.addTextTrack('subtitles', 'splayer-custom');
-        const textTrack = [];
+        const sub = vid.addTextTrack('subtitles', 'splayer-custom');
+        this.subtitleArr.push(subPath);
+
+        // 后期改变字幕时间轴时在这里进行处理，保存一个新文件进行读取
         parser.oncue = (cue) => {
-          // sub.addCue(cue);
-          // textTrack.push(cue);
-          textTrack.push({
-            endTime: cue.endTime,
-            startTime: cue.startTime,
-            text: cue.text,
-          });
+          sub.addCue(cue);
         };
-        parser.onflush = () => {
-          // if (!shownTextTrack) {
-          //   // sub.mode = 'showing';
-          //   shownTextTrack = true;
-          // }
-        };
+        // parser.onflush = () => {
+        // };
         // loadingTextTrack = true;
 
         const readStream = fs.createReadStream(subPath).pipe(srt2vtt());
@@ -78,33 +62,59 @@ export default {
           .on('end', () => {
             parser.flush();
             console.log('finish reading srt');
-            this.subtitleArr.push(textTrack);
           });
+        this.showSubtitle(this.startIndex);
       });
-
-      console.log(this.subtitleArr);
-      // if (process.env.NODE_ENV !== 'production') {
-      //   const sub = vid.addTextTrack('subtitles', 'splayer-custom');
-      //   console.log(`loadingTextTrack ${loadingTextTrack}`);
-      //   if (!loadingTextTrack) {
-      //     // Loading subtitle test
-      //     const cue = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
-      //     sub.addCue(cue);
-      //     sub.mode = 'showing';
-      //   }
-      // }
     },
     showSubtitle(id) {
-      const subtitle = this.subtitleArr[id];
+      const { vid } = this;
+      // 消除之前的字幕oncuechange事件
+      vid.textTracks[0].oncuechange = null;
+      vid.textTracks[id].oncuechange = (cue) => {
+        if (vid.textTracks[id].activeCues.length === 0) {
+          this.subtitleDivs.pop();
+        } else {
+          const cueText = cue.currentTarget.activeCues[0].text;
+          const div = WebVTT.convertCueToDOMTree(window, cueText);
+          // subtitleDivs没有内容时，无效的pop
+          this.subtitleDivs.pop();
+          this.subtitleDivs.push(div);
+        }
+        console.log(this.subtitleDivs);
+      };
+    },
+    toggleSubtitle() {
+      this.subtitleAppearFlag = !this.subtitleAppearFlag;
     },
   },
   created() {
-    this.$bus.$on('metaLoaded', (vid) => {
-      this.loadTextTracks(vid);
+    this.$bus.$on('metaLoaded', (video) => {
+      this.vid = video;
+      this.loadTextTracks();
     });
   },
 };
 </script>
 
 <style>
+.subtitle {
+  position: absolute;
+  width: 100%;
+  bottom: 20px;
+}
+.subtitle-button {
+  position: absolute;
+  bottom: 10px;
+  right: 100px;
+  float: right;
+}
+.subtitle-button:hover {
+  cursor: pointer;
+}
+.subtitle-content {
+  font-size: 20px;
+  color: yellow;
+  text-align: center;
+  white-space: pre;
+}
 </style>
