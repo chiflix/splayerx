@@ -37,6 +37,14 @@ import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
 
+/**
+ * Todo:
+ * 1. 修改helper函数，传回basename，
+ *  将label更改为basename存入
+ * 2. 利用vuex实现对外的可操作性，
+ * 使用mixin来构建函数帮助后期高级功能
+ * 调用方法。
+ */
 export default {
   data() {
     return {
