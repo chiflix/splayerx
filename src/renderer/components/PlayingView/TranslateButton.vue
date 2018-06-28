@@ -1,16 +1,30 @@
 <template>
   <div>
     <div class="subtitle">
-      <div class="subtitle-wrapper">
+      <div class="subtitle-wrapper"
+        :style="{bottom: subtitleBottom+'px'}">
+        <div class="subtitle-controller"
+          v-show="subtitleCtrlFlag">
+          <span class="subtitle-menu-button">
+            测试字幕1
+          </span>
+          <span class="subtitle-show-button"
+            @click.stop.capture="toggleSubtitle">
+            <img src="" alt="button">
+          </span>
+          <span class="subtitle-add-button"
+            @click.stop.capture="subtitleAdd">+</span>
+        </div>
         <div class="subtitle-content"
           v-for="(div, keys) in subtitleDivs"
           :key="keys"
-          v-show="subtitleAppearFlag"
-          v-html="div.innerHTML">
+          v-if="subtitleAppearFlag"
+          v-html="div.innerHTML"
+        >
         </div>
       </div>
       <div class="subtitle-button"
-        @click="toggleSubtitle">
+        @click.stop.capture="toggleSubtitleCtrl">
         <img src="" alt="subtitle-button">
       </div>
     </div>
@@ -30,6 +44,8 @@ export default {
       subtitleArr: [],
       startIndex: 0,
       subtitleAppearFlag: true,
+      subtitleBottom: 0,
+      subtitleCtrlFlag: false,
     };
   },
   methods: {
@@ -86,6 +102,12 @@ export default {
     toggleSubtitle() {
       this.subtitleAppearFlag = !this.subtitleAppearFlag;
     },
+    toggleSubtitleCtrl() {
+      this.subtitleCtrlFlag = !this.subtitleCtrlFlag;
+    },
+    subtitleAdd() {
+
+    },
   },
   created() {
     this.$bus.$on('metaLoaded', (video) => {
@@ -97,18 +119,22 @@ export default {
 </script>
 
 <style>
-.subtitle {
+.video-controller .subtitle {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+.subtitle-wrapper {
   position: absolute;
   width: 100%;
-  bottom: 20px;
+  display: -webkit-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
-.subtitle-button {
-  position: absolute;
-  bottom: 10px;
-  right: 100px;
-  float: right;
-}
-.subtitle-button:hover {
+.subtitle-show-button:hover, .subtitle-add-button:hover {
   cursor: pointer;
 }
 .subtitle-content {
@@ -116,5 +142,14 @@ export default {
   color: yellow;
   text-align: center;
   white-space: pre;
+}
+.subtitle-button {
+  position: absolute;
+  bottom: 20px;
+  right: 100px;
+  float: right;
+}
+.subtitle-button:hover {
+  cursor: pointer;
 }
 </style>
