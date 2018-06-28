@@ -42,7 +42,7 @@ export default {
     return {
       vid: {},
       subtitleDivs: [],
-      subtitleArr: [],
+      subtitleNameArr: [],
       startIndex: 0,
       curIndex: 0,
       subtitleAppearFlag: true,
@@ -56,13 +56,14 @@ export default {
       const { vid } = this;
       this.startIndex = vid.textTracks.length;
       // hide every text text/subtitle tracks at beginning
-      for (let i = this.startIndex; i < this.startIndex; i += 1) {
+      for (let i = this.curIndex; i < this.startIndex; i += 1) {
         vid.textTracks[i].mode = 'disabled';
       }
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         const sub = vid.addTextTrack('subtitles', 'splayer-custom');
-        this.subtitleArr.push(subPath);
+        console.log(subPath);
+        this.subtitleNameArr.push(subPath);
 
         // 后期改变字幕时间轴时在这里进行处理，保存一个新文件进行读取
         parser.oncue = (cue) => {
@@ -81,14 +82,15 @@ export default {
             parser.flush();
             console.log('finish reading srt');
           });
-        this.curIndex = this.startIndex;
-        this.showSubtitle(this.startIndex);
+        this.subtitleShow(this.startIndex);
       });
     },
-    showSubtitle(id) {
+    subtitleShow(id) {
       const { vid } = this;
       // 消除之前的字幕oncuechange事件
       vid.textTracks[this.curIndex].oncuechange = null;
+      this.curIndex = id;
+      // vid.textTracks[this.curIndex - this.startIndex].oncuechange = null;
       vid.textTracks[id].oncuechange = (cue) => {
         if (vid.textTracks[id].activeCues.length === 0) {
           this.subtitleDivs.pop();
@@ -99,7 +101,6 @@ export default {
           this.subtitleDivs.pop();
           this.subtitleDivs.push(div);
         }
-        console.log(this.subtitleDivs);
       };
     },
     toggleSubtitle() {
@@ -110,7 +111,7 @@ export default {
     },
     subtitleChange() {
       const targetSubtitle = this.curIndex + 1;
-      this.showSubtitle(targetSubtitle);
+      this.subtitleShow(targetSubtitle);
       this.curIndex = targetSubtitle;
     },
     subtitleAdd() {
