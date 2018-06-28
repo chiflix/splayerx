@@ -5,7 +5,8 @@
         :style="{bottom: subtitleBottom+'px'}">
         <div class="subtitle-controller"
           v-show="subtitleCtrlFlag">
-          <span class="subtitle-menu-button">
+          <span class="subtitle-menu-button"
+          @click.stop.capture="subtitleChange">
             测试字幕1
           </span>
           <span class="subtitle-show-button"
@@ -43,6 +44,7 @@ export default {
       subtitleDivs: [],
       subtitleArr: [],
       startIndex: 0,
+      curIndex: 0,
       subtitleAppearFlag: true,
       subtitleBottom: 0,
       subtitleCtrlFlag: false,
@@ -79,13 +81,14 @@ export default {
             parser.flush();
             console.log('finish reading srt');
           });
+        this.curIndex = this.startIndex;
         this.showSubtitle(this.startIndex);
       });
     },
     showSubtitle(id) {
       const { vid } = this;
       // 消除之前的字幕oncuechange事件
-      vid.textTracks[0].oncuechange = null;
+      vid.textTracks[this.curIndex].oncuechange = null;
       vid.textTracks[id].oncuechange = (cue) => {
         if (vid.textTracks[id].activeCues.length === 0) {
           this.subtitleDivs.pop();
@@ -104,6 +107,11 @@ export default {
     },
     toggleSubtitleCtrl() {
       this.subtitleCtrlFlag = !this.subtitleCtrlFlag;
+    },
+    subtitleChange() {
+      const targetSubtitle = this.curIndex + 1;
+      this.showSubtitle(targetSubtitle);
+      this.curIndex = targetSubtitle;
     },
     subtitleAdd() {
 
@@ -143,7 +151,7 @@ export default {
   justify-content: center;
   align-items: center;
 }
-.subtitle-show-button:hover, .subtitle-add-button:hover {
+.subtitle-show-button:hover, .subtitle-add-button:hover, .subtitle-menu-button:hover {
   cursor: pointer;
 }
 .subtitle-content {
