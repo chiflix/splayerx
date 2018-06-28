@@ -114,6 +114,15 @@ export default {
       this.vid = video;
       this.loadTextTracks();
     });
+    this.$bus.$on('progressslider-appear', () => {
+      this.subtitleBottom = 10;
+    });
+    this.$bus.$on('progressbar-appear', () => {
+      this.subtitleBottom = 10;
+    });
+    this.$bus.$on('progressbar-hide', () => {
+      this.subtitleBottom = 0;
+    });
   },
 };
 </script>
