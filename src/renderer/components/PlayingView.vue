@@ -1,6 +1,9 @@
 <template>
   <div class="player"
   :style="{ cursor: cursorStyle }">
+    <img src="~@/assets/icon-pause.svg" type="image/svg+xml"
+      ref="pauseIcon"
+      @animationiteration="animationPause">
     <VideoCanvas :src="uri" />
     <div class="masking"
       v-show="showMask"></div>
@@ -105,9 +108,15 @@ export default {
         }
       }
     },
+    animationPause() {
+      this.$refs.pauseIcon.style.animationPlayState = 'paused';
+    },
   },
   mounted() {
     this.$bus.$emit('play');
+    this.$bus.$on('show-pause-icon', () => {
+      this.$refs.pauseIcon.style.animationPlayState = 'running';
+    });
     this.$electron.remote.getCurrentWindow().setResizable(true);
   },
   computed: {
@@ -153,4 +162,20 @@ export default {
   transition: opacity 400ms;
 }
 
+
+@keyframes fadeOut {
+  0% {opacity: 0};
+  99% {opacity: 1};
+  100% {opacity: 0};
+}
+img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  animation: fadeOut 400ms;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+}
 </style>

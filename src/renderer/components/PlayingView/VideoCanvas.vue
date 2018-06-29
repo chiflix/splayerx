@@ -337,6 +337,7 @@ export default {
     this.$bus.$on('pause', () => {
       console.log('pause event has been triggered');
       this.$refs.videoCanvas.pause();
+      this.$bus.$emit('show-pause-icon');
       this.$_getThumbnail();
     });
     this.$bus.$on('seek', (e) => {

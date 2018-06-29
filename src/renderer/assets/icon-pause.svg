@@ -1,0 +1,8 @@
+
+<svg width="85" height="85" viewBox="0 0 85 85"
+  version="1.1" xmlns="http://www.w3.org/2000/svg">
+  <rect width="35" height="85" x="0" y="0"
+    fill="#DEDEDE" rx="3"></rect>
+  <rect width="35" height="85" x="50" y="0"
+    fill="#DEDEDE" rx="3"></rect>
+</svg>
