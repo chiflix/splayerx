@@ -1,33 +1,32 @@
 <template>
-  <div>
-    <div class="subtitle">
-      <div class="subtitle-wrapper"
-        :style="{bottom: subtitleBottom+'px'}">
-        <div class="subtitle-controller"
-          v-show="subtitleAppearFlag">
-          <div class="subtitle-menu"
-            v-show="subtitleMenuAppearFlag">
-            <SubtitleList/>
-          </div>
-          <span class="subtitle-menu-button"
-          @click.stop.capture="toggleSubtitleMenu">
-            {{curSubtitleName}}
-          </span>
-          <span class="subtitle-add-button"
-            @click.stop.capture="subtitleAdd">+</span>
+  <div class="subtitle">
+    <div class="subtitle-wrapper"
+      :style="{bottom: subtitleBottom+'px'}">
+      <div class="subtitle-controller"
+        v-show="subtitleAppearFlag">
+        <div class="subtitle-menu"
+          v-show="subtitleMenuAppearFlag">
+          <SubtitleList/>
         </div>
-        <div class="subtitle-content"
-          v-for="(div, key) in subtitleDivs"
-          :key="key"
-          v-if="subtitleAppearFlag"
-          v-html="div.innerHTML"
-        >
+        <div class="subtitle-menu-button"
+          @click.stop.capture="toggleSubtitleMenu"
+          :title="curSubtitleName">
+          {{curSubtitleName}}
         </div>
+        <div class="subtitle-add-button"
+          @click.stop.capture="subtitleAdd">+</div>
       </div>
-      <div class="subtitle-button"
-        @click.stop.capture="toggleSubtitle">
-        <img src="" alt="subtitle-button">
+      <div class="subtitle-content"
+        v-for="(div, key) in subtitleDivs"
+        :key="key"
+        v-if="subtitleAppearFlag"
+        v-html="div.innerHTML"
+      >
       </div>
+    </div>
+    <div class="subtitle-button"
+      @click.stop.capture="toggleSubtitle">
+      <img src="" alt="subtitle-button">
     </div>
   </div>
 </template>;
@@ -147,38 +146,63 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .video-controller .subtitle {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
+
+  .subtitle-wrapper {
+    position: absolute;
+    width: 100%;
+    display: -webkit-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .subtitle-controller {
+      display: inline;
+      .subtitle-menu {
+        width: 250px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .subtitle-menu-button {
+        display: inline-block;
+        width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .subtitle-add-button {
+        width: 50px;
+        text-align: center;
+        display: inline-block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .subtitle-add-button:hover, .subtitle-menu-button:hover {
+        cursor: pointer;
+      }
+    }
+    .subtitle-content {
+      font-size: 20px;
+      color: greenyellow;
+      text-align: center;
+      white-space: pre;
+    }
+  }
+
 }
-.subtitle-wrapper {
-  position: absolute;
-  width: 100%;
-  display: -webkit-flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.subtitle-show-button:hover, .subtitle-add-button:hover, .subtitle-menu-button:hover {
-  cursor: pointer;
-}
-.subtitle-content {
-  font-size: 20px;
-  color: yellow;
-  text-align: center;
-  white-space: pre;
-}
-.subtitle-button {
+.video-controller .subtitle-button {
   position: absolute;
   bottom: 20px;
   right: 100px;
   float: right;
 }
-.subtitle-button:hover {
+.video-controller .subtitle-button:hover {
   cursor: pointer;
 }
 </style>

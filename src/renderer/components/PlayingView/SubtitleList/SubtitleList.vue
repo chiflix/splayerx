@@ -3,7 +3,8 @@
     <div class="subtitle-list-item"
     v-for="(item, id) in subtitleList"
     :key="id"
-    @click.capture.stop="subtitleSelect(id)">
+    @click.capture.stop="subtitleSelect(id)"
+    :title="item">
     {{item}}
     </div>
   </div>
@@ -43,6 +44,11 @@ export default {
 <style>
 .subtitle-list-item:hover {
   cursor: pointer;
+}
+.subtitle-list-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
 
