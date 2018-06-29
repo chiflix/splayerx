@@ -4,28 +4,28 @@
       <div class="subtitle-wrapper"
         :style="{bottom: subtitleBottom+'px'}">
         <div class="subtitle-controller"
-          v-show="subtitleCtrlFlag">
+          v-show="subtitleAppearFlag">
+          <div class="subtitle-menu"
+            v-show="subtitleMenuAppearFlag">
+            <SubtitleList/>
+          </div>
           <span class="subtitle-menu-button"
-          @click.stop.capture="subtitleChange">
-            测试字幕1
-          </span>
-          <span class="subtitle-show-button"
-            @click.stop.capture="toggleSubtitle">
-            <img src="" alt="button">
+          @click.stop.capture="toggleSubtitleMenu">
+            {{curSubtitleName}}
           </span>
           <span class="subtitle-add-button"
             @click.stop.capture="subtitleAdd">+</span>
         </div>
         <div class="subtitle-content"
-          v-for="(div, keys) in subtitleDivs"
-          :key="keys"
+          v-for="(div, key) in subtitleDivs"
+          :key="key"
           v-if="subtitleAppearFlag"
           v-html="div.innerHTML"
         >
         </div>
       </div>
       <div class="subtitle-button"
-        @click.stop.capture="toggleSubtitleCtrl">
+        @click.stop.capture="toggleSubtitle">
         <img src="" alt="subtitle-button">
       </div>
     </div>
@@ -39,21 +39,26 @@ import { WebVTT } from 'vtt.js';
 import path from 'path';
 import subtitleMixin from '@/commons/js/mixin';
 import { SUBTITLE_BOTTOM } from '@/constants';
+import SubtitleList from './SubtitleList/SubtitleList';
+
 /**
  * Todo:
- * 2. 利用vuex实现对外的可操作性，
- * 使用mixin来构建函数帮助后期高级功能
- * 调用方法。
+ * 1. 当无字幕时的处理。
+ * 2. css样式修改。
  */
 export default {
   mixins: [subtitleMixin],
+  components: {
+    SubtitleList,
+  },
   data() {
     return {
       vid: {},
       subtitleDivs: [],
+      subtitleMenuAppearFlag: false,
       subtitleAppearFlag: true,
-      subtitleBottom: 0,
       subtitleCtrlFlag: false,
+      subtitleBottom: 0,
     };
   },
   methods: {
@@ -76,6 +81,7 @@ export default {
           sub.addCue(cue);
         };
         // 每当有一个字幕加载，为其添加oncuechange事件，并改变mode为disabled
+        // 可以拆分出来做一个函数
         sub.mode = 'disabled';
         sub.oncuechange = (cue) => {
           if (sub.activeCues.length === 0) {
@@ -110,10 +116,22 @@ export default {
     toggleSubtitleCtrl() {
       this.subtitleCtrlFlag = !this.subtitleCtrlFlag;
     },
+    toggleSubtitleMenu() {
+      this.subtitleMenuAppearFlag = !this.subtitleMenuAppearFlag;
+    },
+  },
+  computed: {
+    curSubtitleName() {
+      if (!this.vid.textTracks) {
+        return '';
+      }
+      return this.vid.textTracks[this.$store.state.PlaybackState.CurrentIndex].label;
+    },
   },
   created() {
     this.$bus.$on('metaLoaded', (video) => {
       this.vid = video;
+      console.log('loadTextTracks');
       this.loadTextTracks();
     });
     this.$bus.$on('progressslider-appear', () => {
