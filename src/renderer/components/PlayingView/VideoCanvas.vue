@@ -326,20 +326,19 @@ export default {
       console.log('toggle-playback event has been triggered');
       if (this.$refs.videoCanvas.paused) {
         this.$bus.$emit('play');
+        this.$bus.$emit('twinkle-play-icon');
       } else {
         this.$bus.$emit('pause');
+        this.$bus.$emit('twinkle-pause-icon');
       }
     });
     this.$bus.$on('play', () => {
       console.log('play event has been triggered');
       this.$refs.videoCanvas.play();
-      this.$bus.$emit('hide-play-icon');
     });
     this.$bus.$on('pause', () => {
       console.log('pause event has been triggered');
       this.$refs.videoCanvas.pause();
-      this.$bus.$emit('show-pause-icon');
-      this.$bus.$emit('show-play-icon');
       this.$_getThumbnail();
     });
     this.$bus.$on('seek', (e) => {

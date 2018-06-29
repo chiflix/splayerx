@@ -2,10 +2,11 @@
   <div class="player"
   :style="{ cursor: cursorStyle }">
     <img src="~@/assets/icon-pause.svg" type="image/svg+xml"
-      ref="pauseIcon" class="pauseIcon"
-      @animationiteration="animationPause">
+      ref="pauseIcon" class="icon"
+      @animationiteration="pauseIconPause">
     <img src="~@/assets/icon-play.svg" type="image/svg+xml"
-      ref="playIcon" class="playIcon">
+      ref="playIcon" class="icon"
+      @animationiteration="playIconPause">
     <VideoCanvas :src="uri" />
     <div class="masking"
       v-show="showMask"></div>
@@ -110,23 +111,21 @@ export default {
         }
       }
     },
-    animationPause() {
+    pauseIconPause() {
       this.$refs.pauseIcon.style.animationPlayState = 'paused';
+    },
+    playIconPause() {
+      this.$refs.playIcon.style.animationPlayState = 'paused';
     },
   },
   mounted() {
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
-    this.$bus.$on('show-pause-icon', () => {
+    this.$bus.$on('twinkle-pause-icon', () => {
       this.$refs.pauseIcon.style.animationPlayState = 'running';
     });
-    this.$bus.$on('show-play-icon', () => {
-      setTimeout(() => {
-        this.$refs.playIcon.style.opacity = 0.5;
-      }, 400);
-    });
-    this.$bus.$on('hide-play-icon', () => {
-      this.$refs.playIcon.style.opacity = 0;
+    this.$bus.$on('twinkle-play-icon', () => {
+      this.$refs.playIcon.style.animationPlayState = 'running';
     });
   },
   computed: {
@@ -173,29 +172,21 @@ export default {
 }
 
 
-@keyframes fadeOut {
-  0% {opacity: 0};
-  99% {opacity: 0.5};
-  100% {opacity: 0};
+@keyframes twinkle {
+  0% {opacity: 0; width: 85px; height: 85px;};
+  3% {opacity: 0; width: 85px; height: 85px;};
+  50% {opacity: 1; width: 185px; height: 185px;};
+  100% {opacity: 0; width: 285px; height: 285px;};
 }
-.pauseIcon {
+.icon {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   opacity: 0;
-  animation: fadeOut 400ms;
+  animation: twinkle 400ms;
   animation-iteration-count: infinite;
   animation-play-state: paused;
   z-index: 1;
-}
-.playIcon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  z-index: 1;
-  transition: all 200ms;
 }
 </style>
