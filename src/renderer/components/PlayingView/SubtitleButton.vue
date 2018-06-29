@@ -36,23 +36,21 @@
 import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
-
+import path from 'path';
+import subtitleMixin from '@/commons/js/mixin';
+import { SUBTITLE_BOTTOM } from '@/constants';
 /**
  * Todo:
- * 1. 修改helper函数，传回basename，
- *  将label更改为basename存入
  * 2. 利用vuex实现对外的可操作性，
  * 使用mixin来构建函数帮助后期高级功能
  * 调用方法。
  */
 export default {
+  mixins: [subtitleMixin],
   data() {
     return {
       vid: {},
       subtitleDivs: [],
-      subtitleNameArr: [],
-      startIndex: 0,
-      curIndex: 0,
       subtitleAppearFlag: true,
       subtitleBottom: 0,
       subtitleCtrlFlag: false,
@@ -62,20 +60,33 @@ export default {
     // 可以考虑其他的传递方法
     loadTextTracks() {
       const { vid } = this;
-      this.startIndex = vid.textTracks.length;
+      const startIndex = vid.textTracks.length;
+      this.$store.commit('StartIndex', startIndex);
       // hide every text text/subtitle tracks at beginning
-      for (let i = this.curIndex; i < this.startIndex; i += 1) {
+      for (let i = this.$store.state.PlaybackState.CurrentIndex; i < startIndex; i += 1) {
         vid.textTracks[i].mode = 'disabled';
       }
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
-        const sub = vid.addTextTrack('subtitles', 'splayer-custom');
-        console.log(subPath);
-        this.subtitleNameArr.push(subPath);
+        const filename = path.parse(subPath).name;
+        const sub = vid.addTextTrack('subtitles', filename);
 
         // 后期改变字幕时间轴时在这里进行处理，保存一个新文件进行读取
         parser.oncue = (cue) => {
           sub.addCue(cue);
+        };
+        // 每当有一个字幕加载，为其添加oncuechange事件，并改变mode为disabled
+        sub.mode = 'disabled';
+        sub.oncuechange = (cue) => {
+          if (sub.activeCues.length === 0) {
+            this.subtitleDivs.pop();
+          } else {
+            const cueText = cue.currentTarget.activeCues[0].text;
+            const div = WebVTT.convertCueToDOMTree(window, cueText);
+            // subtitleDivs没有内容时，无效的pop
+            this.subtitleDivs.pop();
+            this.subtitleDivs.push(div);
+          }
         };
         // parser.onflush = () => {
         // };
@@ -90,40 +101,14 @@ export default {
             parser.flush();
             console.log('finish reading srt');
           });
-        this.subtitleShow(this.startIndex);
+        this.subtitleShow(startIndex);
       });
-    },
-    subtitleShow(id) {
-      const { vid } = this;
-      // 消除之前的字幕oncuechange事件
-      vid.textTracks[this.curIndex].oncuechange = null;
-      this.curIndex = id;
-      // vid.textTracks[this.curIndex - this.startIndex].oncuechange = null;
-      vid.textTracks[id].oncuechange = (cue) => {
-        if (vid.textTracks[id].activeCues.length === 0) {
-          this.subtitleDivs.pop();
-        } else {
-          const cueText = cue.currentTarget.activeCues[0].text;
-          const div = WebVTT.convertCueToDOMTree(window, cueText);
-          // subtitleDivs没有内容时，无效的pop
-          this.subtitleDivs.pop();
-          this.subtitleDivs.push(div);
-        }
-      };
     },
     toggleSubtitle() {
       this.subtitleAppearFlag = !this.subtitleAppearFlag;
     },
     toggleSubtitleCtrl() {
       this.subtitleCtrlFlag = !this.subtitleCtrlFlag;
-    },
-    subtitleChange() {
-      const targetSubtitle = this.curIndex + 1;
-      this.subtitleShow(targetSubtitle);
-      this.curIndex = targetSubtitle;
-    },
-    subtitleAdd() {
-
     },
   },
   created() {
@@ -132,10 +117,10 @@ export default {
       this.loadTextTracks();
     });
     this.$bus.$on('progressslider-appear', () => {
-      this.subtitleBottom = 10;
+      this.subtitleBottom = SUBTITLE_BOTTOM;
     });
     this.$bus.$on('progressbar-appear', () => {
-      this.subtitleBottom = 10;
+      this.subtitleBottom = SUBTITLE_BOTTOM;
     });
     this.$bus.$on('progressbar-hide', () => {
       this.subtitleBottom = 0;

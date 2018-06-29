@@ -6,6 +6,9 @@ const state = {
   Volume: 0.2,
   SrcOfVideo: '',
   PlaybackRate: 1.0,
+
+  StartIndex: 0,
+  CurrentIndex: 0,
 };
 
 const getters = {
@@ -29,6 +32,13 @@ const mutations = {
   },
   Volume(state, v) {
     state.Volume = v;
+  },
+
+  StartIndex(state, id) {
+    state.StartIndex = id;
+  },
+  CurrentIndex(state, id) {
+    state.CurrentIndex = id;
   },
 };
 
