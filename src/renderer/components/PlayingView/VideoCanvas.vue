@@ -326,8 +326,10 @@ export default {
       console.log('toggle-playback event has been triggered');
       if (this.$refs.videoCanvas.paused) {
         this.$bus.$emit('play');
+        this.$bus.$emit('twinkle-play-icon');
       } else {
         this.$bus.$emit('pause');
+        this.$bus.$emit('twinkle-pause-icon');
       }
     });
     this.$bus.$on('play', () => {

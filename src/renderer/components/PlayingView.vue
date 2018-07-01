@@ -1,6 +1,12 @@
 <template>
   <div class="player"
   :style="{ cursor: cursorStyle }">
+    <img src="~@/assets/icon-pause.svg" type="image/svg+xml"
+      ref="pauseIcon" class="icon"
+      @animationiteration="pauseIconPause">
+    <img src="~@/assets/icon-play.svg" type="image/svg+xml"
+      ref="playIcon" class="icon"
+      @animationiteration="playIconPause">
     <VideoCanvas :src="uri" />
     <div class="masking"
       v-show="showMask"></div>
@@ -105,10 +111,22 @@ export default {
         }
       }
     },
+    pauseIconPause() {
+      this.$refs.pauseIcon.style.animationPlayState = 'paused';
+    },
+    playIconPause() {
+      this.$refs.playIcon.style.animationPlayState = 'paused';
+    },
   },
   mounted() {
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
+    this.$bus.$on('twinkle-pause-icon', () => {
+      this.$refs.pauseIcon.style.animationPlayState = 'running';
+    });
+    this.$bus.$on('twinkle-play-icon', () => {
+      this.$refs.playIcon.style.animationPlayState = 'running';
+    });
   },
   computed: {
     uri() {
@@ -153,4 +171,22 @@ export default {
   transition: opacity 400ms;
 }
 
+
+@keyframes twinkle {
+  0% {opacity: 0; width: 85px; height: 85px;};
+  3% {opacity: 0; width: 85px; height: 85px;};
+  50% {opacity: 1; width: 185px; height: 185px;};
+  100% {opacity: 0; width: 285px; height: 285px;};
+}
+.icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  animation: twinkle 400ms;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+  z-index: 1;
+}
 </style>
