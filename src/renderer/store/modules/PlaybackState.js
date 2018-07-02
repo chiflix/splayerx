@@ -7,6 +7,7 @@ const state = {
   SrcOfVideo: '',
   PlaybackRate: 1.0,
 
+  VideoCanvas: null,
   StartIndex: 0,
   CurrentIndex: 0,
 };
@@ -34,6 +35,9 @@ const mutations = {
     state.Volume = v;
   },
 
+  VideoCanvas(state, vid) {
+    state.VideoCanvas = vid;
+  },
   StartIndex(state, id) {
     state.StartIndex = id;
   },

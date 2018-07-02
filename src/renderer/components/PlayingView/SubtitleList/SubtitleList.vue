@@ -1,11 +1,16 @@
 <template>
   <div class="subtitle-list">
-    <div class="subtitle-list-item"
-    v-for="(item, id) in subtitleList"
-    :key="id"
-    @click.capture.stop.left="subtitleSelect(id)"
-    :title="item">
-    {{item}}
+    <div
+      v-for="(item, id) in subtitleList"
+      :key="id"
+      @click.capture.stop.left="subtitleSelect(id)"
+      :title="item">
+      <div class="subtitle-list-item">
+        {{item}}
+      </div>
+      <div class="icon-selected">
+        *
+      </div>
     </div>
   </div>
 </template>
@@ -17,23 +22,23 @@ export default {
   mixins: [subtitleMixin],
   data() {
     return {
-      vid: {},
       subtitleList: [],
     };
   },
   methods: {
     loadSubtitleList() {
       // this.subtitleList = [];
+      const vid = this.$store.state.PlaybackState.VideoCanvas;
+      console.log(vid);
       this.subtitleList.splice(0, this.subtitleList.length);
       const startIndex = this.$store.state.PlaybackState.StartIndex;
-      for (let i = startIndex; i < this.vid.textTracks.length; i += 1) {
-        this.subtitleList.push(this.vid.textTracks[i].label);
+      for (let i = startIndex; i < vid.textTracks.length; i += 1) {
+        this.subtitleList.push(vid.textTracks[i].label);
       }
     },
   },
   created() {
-    this.$bus.$on('metaLoaded', (video) => {
-      this.vid = video;
+    this.$bus.$on('metaLoaded', () => {
       console.log('loadSubtitle');
       this.loadSubtitleList();
     });
@@ -41,7 +46,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .subtitle-list-item:hover {
   cursor: pointer;
 }
@@ -49,6 +54,33 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  width: 200px;
+}
+
+.icon-selected {
+  position: relative;
+  display: inline-block;
+}
+// 使用动态样式变化height
+.subtitle-list {
+  -webkit-app-region: no-drag;
+  overflow: auto;
+  height: 100px;
+  width: 250px;
+  // padding: 10px;
+  background-color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.7)
+}
+.subtitle-list::-webkit-scrollbar {
+  background: grey; 
+  border-radius: 10px;
+}
+.subtitle-list::-webkit-scrollbar-thumb {
+  background: white;
+  border-radius: 10px;
+}
+.subtitle-list::-webkit-scrollbar-track {
+  border-radius: 10px;
 }
 </style>
 

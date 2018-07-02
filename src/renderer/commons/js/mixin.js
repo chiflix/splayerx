@@ -9,7 +9,7 @@ export default {
    * @param id the target subtitle index in the array
    */
     subtitleShow(id) {
-      const { vid } = this;
+      const vid = this.$store.state.PlaybackState.VideoCanvas;
       // 消除之前的字幕
       const curIndex = this.$store.state.PlaybackState.CurrentIndex;
       vid.textTracks[curIndex].mode = 'disabled';

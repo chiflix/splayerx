@@ -13,16 +13,22 @@
           :title="curSubtitleName">
           {{curSubtitleName}}
         </div>
-        <div class="subtitle-add-button"
-          @click.stop.capture.left="subtitleAdd">+</div>
+        <!-- <div class="subtitle-add-button"
+          @click.stop.capture.left="subtitleAdd">+</div> -->
       </div>
-      <div class="subtitle-content"
+      <div class="main-subtitle-content"
         v-for="(div, key) in subtitleDivs"
         :key="key"
         v-if="subtitleAppearFlag"
         v-html="div.innerHTML"
       >
       </div>
+      <!-- <div class="minor-subtitle-content"
+        v-for="(div, key) in minorSubDivs"
+        :key="key"
+        v-if="minorSubAppearFlag"
+        v-html="div.innerHTML">
+      </div> -->
     </div>
     <div class="subtitle-button"
       @click.stop.capture="toggleSubtitle">
@@ -52,10 +58,11 @@ export default {
   },
   data() {
     return {
-      vid: {},
       subtitleDivs: [],
+      minorSubDivs: [],
       subtitleMenuAppearFlag: false,
       subtitleAppearFlag: true,
+      minorSubAppearFlag: false,
       subtitleCtrlFlag: false,
       subtitleBottom: 0,
     };
@@ -63,7 +70,7 @@ export default {
   methods: {
     // 可以考虑其他的传递方法
     loadTextTracks() {
-      const { vid } = this;
+      const vid = this.$store.state.PlaybackState.VideoCanvas;
       const startIndex = vid.textTracks.length;
       this.$store.commit('StartIndex', startIndex);
       // hide every text text/subtitle tracks at beginning
@@ -121,16 +128,17 @@ export default {
   },
   computed: {
     curSubtitleName() {
-      if (!this.vid.textTracks) {
+      if (!this.$store.state.PlaybackState.VideoCanvas) {
         return '';
       }
-      return this.vid.textTracks[this.$store.state.PlaybackState.CurrentIndex].label;
+      return this.$store.state.PlaybackState.VideoCanvas
+        .textTracks[this.$store.state.PlaybackState.CurrentIndex].label;
     },
   },
   created() {
-    this.$bus.$on('metaLoaded', (video) => {
-      this.vid = video;
+    this.$bus.$on('metaLoaded', () => {
       console.log('loadTextTracks');
+      // console.log(this.$store.state.PlaybackState.VideoCanvas);
       this.loadTextTracks();
     });
     this.$bus.$on('progressslider-appear', () => {
@@ -160,15 +168,13 @@ export default {
     .subtitle-controller {
       display: inline;
       .subtitle-menu {
-        width: 250px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        // height: 100px;
+        // width: 250px;
       }
 
       .subtitle-menu-button {
         display: inline-block;
-        width: 200px;
+        width: 250px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -187,7 +193,7 @@ export default {
         cursor: pointer;
       }
     }
-    .subtitle-content {
+    .main-subtitle-content {
       font-size: 20px;
       color: greenyellow;
       text-align: center;

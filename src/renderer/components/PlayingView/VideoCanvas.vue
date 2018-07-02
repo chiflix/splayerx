@@ -85,7 +85,8 @@ export default {
       }
 
       // this.loadTextTracks();
-      this.$bus.$emit('metaLoaded', this.$refs.videoCanvas);
+      this.$store.commit('VideoCanvas', this.$refs.videoCanvas);
+      this.$bus.$emit('metaLoaded');
     },
     onTimeupdate() {
       console.log('ontimeupdate');
