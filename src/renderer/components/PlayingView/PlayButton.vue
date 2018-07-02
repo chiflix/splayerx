@@ -2,13 +2,11 @@
   <div>
     <transition name="twinkle">
       <img src='~@/assets/icon-pause.svg' type="image/svg+xml"
-        class="icon" v-show="isPauseRunning"
-        @animationend="pauseAnimationEnd">
+        class="icon" v-show="isPauseRunning">
     </transition>
     <transition name="twinkle">
       <img src='~@/assets/icon-play.svg' type="image/svg+xml"
-        class="icon" v-show="isPlayRunning"
-        @animationend="playAnimationEnd">
+        class="icon" v-show="isPlayRunning">
     </transition>
 
   </div>
@@ -22,22 +20,12 @@ export default {
       isPlayRunning: false,
     };
   },
-  methods: {
-    pauseAnimationEnd() {
-      this.isPauseRunning = false;
-    },
-    playAnimationEnd() {
-      this.isPlayRunning = false;
-    },
-  },
   mounted() {
     this.$bus.$on('twinkle-pause-icon', () => {
-      console.log('twinkle-pause-icon');
-      this.isPauseRunning = true;
+      this.isPauseRunning = !this.isPauseRunning;
     });
     this.$bus.$on('twinkle-play-icon', () => {
-      console.log('twinkle-play-icon');
-      this.isPlayRunning = true;
+      this.isPlayRunning = !this.isPlayRunning;
     });
   },
 };
@@ -50,14 +38,18 @@ export default {
   100% {opacity: 0; transform: scale(2)};
 }
 .icon {
+  display: block;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   opacity: 0;
+  z-index: -1;
 }
-.twinkle-enter-active {
+.twinkle-enter-active, .twinkle-leave-active {
+  z-index: 1;
   animation: twinkle .4s;
 }
 </style>
