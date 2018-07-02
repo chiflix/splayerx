@@ -259,10 +259,10 @@ main {
 }
 .button {
   position: absolute;
-  bottom: 57px;
+  bottom: 50px;
   right: 45px;
-  width: 35px;
-  height: 30px;
+  width: 49px;
+  height: 42px;
   font-size: .8em;
   cursor: pointer;
   outline: none;
