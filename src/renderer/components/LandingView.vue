@@ -61,6 +61,10 @@ export default {
       lastPlayedFile: [],
       backgroundUrl: '',
       showShortcutImage: false,
+      isDragging: false,
+      mouseDown: false,
+      windowStartPosition: null,
+      mousedownPosition: null,
     };
   },
   components: {
@@ -111,7 +115,7 @@ export default {
       this.$set(this.lastPlayedFile[index], 'chosen', false);
     },
     open(link) {
-      if (this.showingPopupDialog) {
+      if (this.showingPopupDialog || this.isDragging) {
         // skip if there is already a popup dialog
         return;
       }
@@ -142,6 +146,7 @@ export default {
     handleLeftClick(event) {
       // Handle dragging-related variables
       this.mouseDown = true;
+      this.isDragging = false;
       this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
       this.mousedownPosition = [event.screenX, event.screenY];
     },
@@ -149,6 +154,7 @@ export default {
       // Handle dragging-related variables and methods
       if (this.mouseDown) {
         if (this.windowStartPosition !== null) {
+          this.isDragging = true;
           const startPos = this.mousedownPosition;
           const offset = [event.screenX - startPos[0], event.screenY - startPos[1]];
           const winStartPos = this.windowStartPosition;
