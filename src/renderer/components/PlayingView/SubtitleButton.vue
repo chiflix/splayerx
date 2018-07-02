@@ -9,12 +9,12 @@
           <SubtitleList/>
         </div>
         <div class="subtitle-menu-button"
-          @click.stop.capture="toggleSubtitleMenu"
+          @click.stop.capture.left="toggleSubtitleMenu"
           :title="curSubtitleName">
           {{curSubtitleName}}
         </div>
         <div class="subtitle-add-button"
-          @click.stop.capture="subtitleAdd">+</div>
+          @click.stop.capture.left="subtitleAdd">+</div>
       </div>
       <div class="subtitle-content"
         v-for="(div, key) in subtitleDivs"

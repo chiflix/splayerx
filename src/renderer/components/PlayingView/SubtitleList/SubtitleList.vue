@@ -3,7 +3,7 @@
     <div class="subtitle-list-item"
     v-for="(item, id) in subtitleList"
     :key="id"
-    @click.capture.stop="subtitleSelect(id)"
+    @click.capture.stop.left="subtitleSelect(id)"
     :title="item">
     {{item}}
     </div>
