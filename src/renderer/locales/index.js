@@ -1,22 +1,8 @@
+import en from './lang/en.js';
+import zhCN from './lang/zhCN.js';
+import zhTW from './lang/zhTW.js';
 
 // Ready translated locale messages
-const messages = {
-  en: {
-    msg: {
-      titleName: 'SPlayerX',
-    },
-    css: {
-      titleFontSize: { fontSize: '7vw' },
-    },
-  },
-  cn: {
-    msg: {
-      titleName: '射手影音',
-    },
-    css: {
-      titleFontSize: { fontSize: '4vw' },
-    },
-  },
-};
+const messages = { en, zhCN, zhTW };
 
 export default messages;

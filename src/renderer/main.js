@@ -25,7 +25,7 @@ Vue.mixin(helpers);
 Vue.prototype.$bus = new Vue(); // Global event bus
 
 const i18n = new VueI18n({
-  locale: 'cn', // set locale
+  locale: 'zhCN', // set locale
   messages, // set locale messages
 });
 
@@ -41,10 +41,10 @@ new Vue({
       const { Menu, app, dialog } = this.$electron.remote;
       const template = [
         {
-          label: 'File',
+          label: this.$t('msg.file.name'),
           submenu: [
             {
-              label: 'Open',
+              label: this.$t('msg.file.open'),
               accelerator: 'Cmd+O',
               click: () => {
                 dialog.showOpenDialog({
@@ -62,112 +62,82 @@ new Vue({
               },
             },
             {
-              label: 'Open URL',
+              label: this.$t('msg.file.openURL'),
               accelerator: 'Cmd+U',
             },
-            { label: 'Open Recent' },
-            { role: 'Close' },
+            { label: this.$t('msg.file.openRecent').concat('>') },
+            {
+              label: this.$t('msg.file.closeWindow'),
+              role: 'Close',
+            },
           ],
         },
         {
-          label: 'Playback',
+          label: this.$t('msg.playback.name'),
           submenu: [
-            { label: 'Play from last stopped place' },
-            { label: 'Increase Size' },
-            { label: 'Decrease Size' },
+            {
+              label: this.$t('msg.playback.fullScreen'),
+              accelerator: 'F',
+            },
+            // { label: 'Play from last stopped place' },
+            // { label: 'Increase Size' },
+            // { label: 'Decrease Size' },
             { type: 'separator' },
-            { label: 'Increase Playback Speed' },
-            { label: 'Decrease Playback Speed' },
+            { label: this.$t('msg.playback.increasePlaybackSpeed') },
+            { label: this.$t('msg.playback.decreasePlaybackSpeed') },
             /** */
             { type: 'separator' },
-            {
-              label: 'Forward 10s',
-              accelerator: 'Right',
-              click: () => {
-                this.timeControl('Forward', 10);
-              },
-            },
-            {
-              label: 'Forward 1min',
-              accelerator: 'Option+Right',
-              click: () => {
-                this.timeControl('Forward', 60);
-              },
-            },
-            {
-              label: 'Rewind 10s',
-              accelerator: 'Left',
-              click: () => {
-                this.timeControl('Rewind', 10);
-              },
-            },
-            {
-              label: 'Rewind 1min',
-              accelerator: 'Option+Left',
-              click: () => {
-                this.timeControl('Rewind', 60);
-              },
-            },
-            /** */
+            { label: this.$t('msg.playback.captureScreen') },
+            { label: this.$t('msg.playback.captureVideoClip') },
+
             { type: 'separator' },
-            {
-              label: 'Increase Volume',
-              accelerator: 'Up',
-              click: () => {
-                this.volumeControl('Increse');
-              },
-            },
-            {
-              label: 'Decrease Volume',
-              accelerator: 'Down',
-              click: () => {
-                this.volumeControl('Decrese');
-              },
-            },
-            /** */
-            { type: 'separator' },
-            { label: 'Increase Audio Delay' },
-            { label: 'Decrease Audio Delay' },
-            { type: 'separator' },
-            { label: 'Capture Screen' },
+            { label: this.$t('msg.playback.mediaInfo') },
           ],
         },
         {
-          label: 'Subtitle',
+          label: this.$t('msg.audio.name'),
           submenu: [
-            { label: 'Main Subtitle' },
-            { label: 'Secondary Subtitle' },
+            { label: this.$t('msg.audio.increaseAudioDelay') },
+            { label: this.$t('msg.audio.decreaseAudioDelay') },
             { type: 'separator' },
-            { label: 'Outside of Picture' },
-            { type: 'separator' },
-            { label: 'Increase Subtitle Size' },
-            { label: 'Decrease Subtitle Size' },
-            { type: 'separator' },
-            { label: 'Increase Subtitle Delay' },
-            { label: 'Decrease Subtitle Delay' },
-            { type: 'separator' },
-            { label: 'Increase Audio Delay' },
-            { label: 'Decrease Audio Delay' },
-            { type: 'separator' },
-            { label: 'Smart Translating' },
-            { label: 'Search on Shooter.cn' },
+            { label: this.$t('msg.audio.switchAudioTrack').concat('>') },
           ],
         },
         {
-          label: 'Window',
+          label: this.$t('msg.subtitle.name'),
           submenu: [
-            { role: 'minimize' },
-            { label: 'Enter Full Screen', accelerator: 'Ctrl+Cmd+F' },
-            { label: 'Bring All To Front', role: 'hideOthers', accelerator: '' },
+            { label: this.$t('msg.subtitle.mainSubtitle').concat('>') },
+            { label: this.$t('msg.subtitle.secondarySubtitle').concat('>') },
             { type: 'separator' },
-            { label: 'Media Info' },
+            { label: this.$t('msg.subtitle.subtitleStyle').concat('>') },
+            { type: 'separator' },
+            { label: this.$t('msg.subtitle.increaseSubtitleSize') },
+            { label: this.$t('msg.subtitle.decreaseSubtitleSize') },
+            { type: 'separator' },
+            { label: this.$t('msg.subtitle.increaseSubtitleDelay') },
+            { label: this.$t('msg.subtitle.decreaseSubtitleDelay') },
+            // { type: 'separator' },
+            // { label: 'Smart Translating' },
+            // { label: 'Search on Shooter.cn' },
           ],
         },
         {
+          label: this.$t('msg.window_.name'),
+          submenu: [
+            {
+              label: this.$t('msg.window_.minimize'),
+              role: 'minimize',
+            },
+            { label: this.$t('msg.window_.enterFullScreen'), accelerator: 'Ctrl+Cmd+F' },
+            { label: this.$t('msg.window_.bringAllToFront'), role: 'hideOthers', accelerator: '' },
+          ],
+        },
+        {
+          label: this.$t('msg.help.name'),
           role: 'help',
           submenu: [
             {
-              label: 'SPlayerX Help',
+              label: this.$t('msg.help.splayerxHelp'),
             },
           ],
         },
@@ -177,23 +147,39 @@ new Vue({
         template.unshift({
           label: app.getName(),
           submenu: [
-            { role: 'about' },
             {
-              label: 'Preferences',
+              label: this.$t('msg.splayerx.about'),
+              role: 'about',
+            },
+            {
+              label: this.$t('msg.splayerx.preferences'),
               accelerator: 'Cmd+,',
             },
             {
-              label: 'Homepage',
+              label: this.$t('msg.splayerx.homepage'),
             },
             {
-              label: 'Feedback',
+              label: this.$t('msg.splayerx.feedback'),
             },
             { type: 'separator' },
-            { role: 'services', submenu: [] },
+            {
+              label: this.$t('msg.splayerx.services'),
+              role: 'services',
+              submenu: [],
+            },
             { type: 'separator' },
-            { role: 'hide' },
-            { role: 'hideothers' },
-            { role: 'quit' },
+            {
+              label: this.$t('msg.splayerx.hide'),
+              role: 'hide',
+            },
+            {
+              label: this.$t('msg.splayerx.hideOthers'),
+              role: 'hideothers',
+            },
+            {
+              label: this.$t('msg.splayerx.quit'),
+              role: 'quit',
+            },
           ],
         });
       }
@@ -201,40 +187,25 @@ new Vue({
       const menu = Menu.buildFromTemplate(template);
       Menu.setApplicationMenu(menu);
     },
-    timeControl(type, seconds) {
-      // show progress bar
-      this.$bus.$emit('progressbar-appear');
-      this.$bus.$emit('progressslider-appear');
-      this.$bus.$emit('timecode-appear');
-      const curTime = this.$store.state.PlaybackState.CurrentTime;
-      if (type === 'Forward') {
-        this.$bus.$emit('seek', curTime + seconds);
-      }
-      if (type === 'Rewind') {
-        this.$bus.$emit('seek', curTime - seconds);
-      }
-    },
-    volumeControl(type) {
-      // show volume controller
-      this.$bus.$emit('volumecontroller-appear');
-      this.$bus.$emit('volumeslider-appear');
-      if (type === 'Increse') {
-        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
-        } else {
-          this.$store.commit('Volume', 1);
-        }
-      }
-      if (type === 'Decrese') {
-        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
-        } else {
-          this.$store.commit('Volume', 0);
-        }
-      }
+    getSystemLocale() {
+      const localeMap = {
+        'en': 'en',   // eslint-disable-line
+        'en-AU': 'en',
+        'en-CA': 'en',
+        'en-GB': 'en',
+        'en-NZ': 'en',
+        'en-US': 'en',
+        'en-ZA': 'en',
+        'zh-CN': 'zhCN',
+        'zh-TW': 'zhTW',
+      };
+      const { app } = this.$electron.remote;
+      const locale = app.getLocale();
+      this.$i18n.locale = localeMap[locale] || this.$i18n.locale;
     },
   },
   mounted() {
+    this.getSystemLocale();
     this.createMenu();
 
     // TODO: Setup user identity
@@ -254,6 +225,52 @@ new Vue({
     window.addEventListener('keypress', (e) => {
       if (e.key === ' ') { // space
         this.$bus.$emit('toggle-playback');
+      }
+    });
+    window.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'ArrowUp':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+          } else {
+            this.$store.commit('Volume', 1);
+          }
+          break;
+
+        case 'ArrowDown':
+          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumeslider-appear');
+          if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
+            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+          } else {
+            this.$store.commit('Volume', 0);
+          }
+          break;
+
+        case 'ArrowLeft':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
+          }
+          break;
+
+        case 'ArrowRight':
+          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressslider-appear');
+          this.$bus.$emit('timecode-appear');
+          if (e.altKey === true) {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
+          } else {
+            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
+          }
+          break;
+        default:
       }
     });
 

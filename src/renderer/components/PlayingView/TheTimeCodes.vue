@@ -143,7 +143,7 @@ export default {
   @media screen and (min-width: 854px) and (max-width: 1920px) {
     bottom: 28.75px;
     left: 31.25px;
-    height: 24px;
+    height: 22.5px;
     font-size: 22.5px;
     line-height: 24px;
     .secondContent {
