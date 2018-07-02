@@ -129,8 +129,6 @@ export default {
       if (this.popupShow === true) {
         menu.closePopup();
         this.popupShow = false;
-      } else {
-        this.togglePlayback();
       }
     },
     pauseIconPause() {
