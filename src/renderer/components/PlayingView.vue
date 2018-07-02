@@ -12,9 +12,10 @@
       v-show="showMask"></div>
     <div class="video-controller" id="video-controller"
       @mousedown.self="resetDraggingState"
-      @mouseup="togglePlayback"
+      @mousedown.left.stop.prevent="handleLeftClick"
+      @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
-      @mousemove="wakeUpAllWidgets"
+      @mousemove="handleMouseMove"
       @mouseout="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
       <TimeProgressBar :src="uri" />
@@ -110,6 +111,33 @@ export default {
           this.$store.commit('Volume', 0);
         }
       }
+    },
+    handleLeftClick(event) {
+      // Handle dragging-related variables
+      this.mouseDown = true;
+      this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
+      this.mousedownPosition = [event.screenX, event.screenY];
+      console.log(this.windowStartPosition);
+    },
+    handleMouseMove(event) {
+      this.wakeUpAllWidgets();
+      // Handle dragging-related variables and methods
+      if (this.mouseDown) {
+        if (this.windowStartPosition !== null) {
+          console.log(this.mousedownPosition);
+          const startPos = this.mousedownPosition;
+          const offset = [event.screenX - startPos[0], event.screenY - startPos[1]];
+          const winStartPos = this.windowStartPosition;
+          this.$electron.remote.getCurrentWindow().setPosition(
+            winStartPos[0] + offset[0],
+            winStartPos[1] + offset[1],
+          );
+        }
+      }
+    },
+    handleMouseUp() {
+      this.mouseDown = false;
+      this.togglePlayback();
     },
     pauseIconPause() {
       this.$refs.pauseIcon.style.animationPlayState = 'paused';
