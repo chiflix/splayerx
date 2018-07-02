@@ -165,14 +165,12 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  backdrop-filter: blur(30px);
 
   .item-name {
     position: relative;
     top: 100px;
     left: 45px;
     width: 500px;
-    // overflow: hidden;
     word-break: break-all;
     font-size: 30px;
     font-weight: bold;
