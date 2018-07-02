@@ -12,7 +12,8 @@
       v-show="showMask"></div>
     <div class="video-controller" id="video-controller"
       @mousedown.self="resetDraggingState"
-      @mouseup="togglePlayback"
+      @mousedown.left.stop="handleLeftClick"
+      @mousedown.right.stop="handleRightClick"
       @mousewheel="wheelVolumeControll"
       @mousemove="wakeUpAllWidgets"
       @mouseout="hideAllWidgets"
@@ -26,20 +27,20 @@
 </template>
 
 <script>
-import VideoCanvas from './PlayingView/VideoCanvas.vue';
-import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
-import TimeProgressBar from './PlayingView/TimeProgressBar.vue';
-import VolumeControl from './PlayingView/VolumeControl.vue';
-import AdvanceControl from './PlayingView/AdvanceControl.vue';
+import VideoCanvas from "./PlayingView/VideoCanvas.vue";
+import TheTimeCodes from "./PlayingView/TheTimeCodes.vue";
+import TimeProgressBar from "./PlayingView/TimeProgressBar.vue";
+import VolumeControl from "./PlayingView/VolumeControl.vue";
+import AdvanceControl from "./PlayingView/AdvanceControl.vue";
 
 export default {
-  name: 'playing-view',
+  name: "playing-view",
   components: {
     VideoCanvas,
     TheTimeCodes,
     TimeProgressBar,
     VolumeControl,
-    AdvanceControl,
+    AdvanceControl
   },
   data() {
     return {
@@ -47,6 +48,7 @@ export default {
       showMask: false,
       cursorShow: true,
       cursorDelay: null,
+      popupShow: false
     };
   },
   methods: {
@@ -54,7 +56,7 @@ export default {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       if (currentWindow.isFullScreen()) {
         currentWindow.setFullScreen(false);
-        this.$bus.$emit('reset-windowsize');
+        this.$bus.$emit("reset-windowsize");
       } else {
         currentWindow.setAspectRatio(0);
         currentWindow.setFullScreen(true);
@@ -76,56 +78,76 @@ export default {
       this.showMask = true;
       this.isDragging = true;
       this.cursorDisplayControl();
-      this.$bus.$emit('volumecontroller-appear');
-      this.$bus.$emit('progressbar-appear');
-      this.$bus.$emit('timecode-appear');
+      this.$bus.$emit("volumecontroller-appear");
+      this.$bus.$emit("progressbar-appear");
+      this.$bus.$emit("timecode-appear");
     },
     hideAllWidgets() {
       this.showMask = false;
-      this.$bus.$emit('volumecontroller-hide');
-      this.$bus.$emit('progressbar-hide');
-      this.$bus.$emit('timecode-hide');
+      this.$bus.$emit("volumecontroller-hide");
+      this.$bus.$emit("progressbar-hide");
+      this.$bus.$emit("timecode-hide");
     },
     resetDraggingState() {
       this.isDragging = false;
     },
     togglePlayback() {
       if (!this.isDragging) {
-        this.$bus.$emit('toggle-playback');
+        this.$bus.$emit("toggle-playback");
       }
     },
     wheelVolumeControll(e) {
-      this.$bus.$emit('volumecontroller-appear');
-      this.$bus.$emit('volumeslider-appear');
+      this.$bus.$emit("volumecontroller-appear");
+      this.$bus.$emit("volumeslider-appear");
       if (e.deltaY < 0) {
         if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+          this.$store.commit(
+            "Volume",
+            this.$store.state.PlaybackState.Volume + 0.1
+          );
         } else {
-          this.$store.commit('Volume', 1);
+          this.$store.commit("Volume", 1);
         }
       } else if (e.deltaY > 0) {
         if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+          this.$store.commit(
+            "Volume",
+            this.$store.state.PlaybackState.Volume - 0.1
+          );
         } else {
-          this.$store.commit('Volume', 0);
+          this.$store.commit("Volume", 0);
         }
       }
     },
+    handleRightClick() {
+      const menu = this.$electron.remote.Menu.getApplicationMenu();
+      menu.popup(this.$electron.remote.getCurrentWindow());
+      this.popupShow = true;
+    },
+    handleLeftClick() {
+      const menu = this.$electron.remote.Menu.getApplicationMenu();
+      if (this.popupShow === true) {
+        menu.closePopup();
+        this.popupShow = false;
+      } else {
+        this.togglePlayback();
+      }
+    },
     pauseIconPause() {
-      this.$refs.pauseIcon.style.animationPlayState = 'paused';
+      this.$refs.pauseIcon.style.animationPlayState = "paused";
     },
     playIconPause() {
-      this.$refs.playIcon.style.animationPlayState = 'paused';
-    },
+      this.$refs.playIcon.style.animationPlayState = "paused";
+    }
   },
   mounted() {
-    this.$bus.$emit('play');
+    this.$bus.$emit("play");
     this.$electron.remote.getCurrentWindow().setResizable(true);
-    this.$bus.$on('twinkle-pause-icon', () => {
-      this.$refs.pauseIcon.style.animationPlayState = 'running';
+    this.$bus.$on("twinkle-pause-icon", () => {
+      this.$refs.pauseIcon.style.animationPlayState = "running";
     });
-    this.$bus.$on('twinkle-play-icon', () => {
-      this.$refs.playIcon.style.animationPlayState = 'running';
+    this.$bus.$on("twinkle-play-icon", () => {
+      this.$refs.playIcon.style.animationPlayState = "running";
     });
   },
   computed: {
@@ -133,9 +155,9 @@ export default {
       return this.$store.state.PlaybackState.SrcOfVideo;
     },
     cursorStyle() {
-      return this.cursorShow ? 'default' : 'none';
-    },
-  },
+      return this.cursorShow ? "default" : "none";
+    }
+  }
 };
 </script>
 
@@ -153,7 +175,12 @@ export default {
   width: 100%;
   height: 50%;
   opacity: 0.3;
-  background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.19) 62%, rgba(0,0,0,0.29) 100%);
+  background-image: linear-gradient(
+    -180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.19) 62%,
+    rgba(0, 0, 0, 0.29) 100%
+  );
 }
 /*
  * Controller
@@ -171,12 +198,27 @@ export default {
   transition: opacity 400ms;
 }
 
-
 @keyframes twinkle {
-  0% {opacity: 0; width: 85px; height: 85px;};
-  3% {opacity: 0; width: 85px; height: 85px;};
-  50% {opacity: 1; width: 185px; height: 185px;};
-  100% {opacity: 0; width: 285px; height: 285px;};
+  0% {
+    opacity: 0;
+    width: 85px;
+    height: 85px;
+  }
+  3% {
+    opacity: 0;
+    width: 85px;
+    height: 85px;
+  }
+  50% {
+    opacity: 1;
+    width: 185px;
+    height: 185px;
+  }
+  100% {
+    opacity: 0;
+    width: 285px;
+    height: 285px;
+  }
 }
 .icon {
   position: absolute;
