@@ -15,3 +15,5 @@ export const PROGRESS_BAR_SLIDER_HIDE_HEIGHT = '4px';
 export const PROGRESS_BAR_HIDE_HEIGHT = '0px';
 
 export const FOOL_PROOFING_BAR_WIDTH = 20;
+
+export const SUBTITLE_BOTTOM = 10;
