@@ -1,9 +1,10 @@
 <template>
 <div class="wrapper">
-  <main
-    @mousedown.left.stop.prevent="handleLeftClick"
-    @mouseup.left.stop.prevent="handleMouseUp"
-    @mousemove="handleMouseMove">
+  <main>
+    <div class="mask"
+      @mousedown.left.stop="handleLeftClick"
+      @mouseup.left.stop="handleMouseUp"
+      @mousemove="handleMouseMove"></div>
     <div class="background-image"
       v-if="showShortcutImage">
       <img
@@ -25,7 +26,6 @@
     <div class="welcome">
       <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
     </div>
-
     <div class="controller">
       <div class="playlist"
         v-if="hasRecentPlaylist">
@@ -37,7 +37,7 @@
               width: item.chosen ? '140px' : '114px',
               height: item.chosen ? '80px' : '65px',
             }"
-          @click="openFile(item.path)"
+          @click.stop="openFile(item.path)"
           @mouseover="onRecentItemMouseover(item, index)"
           @mouseout="onRecentItemMouseout(index)">
         </div>
@@ -45,7 +45,7 @@
     </div>
     <div
       @click="open('./')">
-      <img class="button" src="~@/assets/icon-open.svg" type="image/svg+xml">
+      <img class="button" src="~@/assets/icon-open.svg" type="image/svg+xml" style="-webkit-user-drag: none;">
     </div>
   </main>
 </div>
@@ -198,6 +198,7 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
+  z-index: 2;
 
   .item-name {
     position: absolute;
@@ -227,6 +228,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
+    -webkit-user-drag: none;
   }
 }
 .logo {
@@ -242,6 +244,7 @@ main {
 
 .welcome {
   margin-top: 15px;
+  z-index: 1;
   .title {
     font-size: 7vw;
     margin-bottom: 6px;
@@ -251,6 +254,13 @@ main {
     color: gray;
     margin-bottom: 10px;
   }
+}
+
+.mask {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
 }
 
 .controller {
@@ -280,6 +290,7 @@ main {
       background-repeat: no-repeat;
       background-position: center center;
       transition: width 150ms ease-out, height 150ms ease-out;
+      z-index: 4;
     }
   }
 }
@@ -294,6 +305,7 @@ main {
   outline: none;
   transition: all 0.15s ease;
   border: 0px;
+  z-index: 5;
 }
 
 </style>
