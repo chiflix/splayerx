@@ -48,6 +48,27 @@ export default {
   opacity: 0;
   z-index: -1;
 }
+@media screen and (max-width: 854px) {
+  .icon {
+    width: 42.5px;
+    height: 42.5px;
+  }
+}
+
+@media screen and (min-width: 854px) and (max-width: 1920px) {
+  .icon {
+    width: 85px;
+    height: 85px;
+  }
+}
+
+@media screen and (min-width: 1920px) {
+  .icon {
+    width: 127.5px;
+    height: 127.5px;
+  }
+}
+
 .twinkle-enter-active, .twinkle-leave-active {
   z-index: 1;
   animation: twinkle .4s;
