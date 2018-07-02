@@ -48,6 +48,9 @@ export default {
       showMask: false,
       cursorShow: true,
       cursorDelay: null,
+      mouseDown: false,
+      windowStartPosition: null,
+      mousedownPosition: null,
     };
   },
   methods: {
