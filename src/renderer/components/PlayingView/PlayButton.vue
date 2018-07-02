@@ -47,6 +47,7 @@ export default {
   bottom: 0;
   opacity: 0;
   z-index: -1;
+  -webkit-user-select: none;
 }
 @media screen and (max-width: 854px) {
   .icon {
