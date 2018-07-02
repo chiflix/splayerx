@@ -11,7 +11,7 @@
       <div class="item-description">
       </div>
       <div class="item-timing">
-        {{ timecodeFromSeconds(itemInfo().lastTime) }}
+        {{ timecodeFromSeconds(itemInfo().lastTime) }} / {{ timecodeFromSeconds(itemInfo().duration) }}
       </div>
     </div>
     <div class="logo-container">
@@ -92,6 +92,7 @@ export default {
       return {
         baseName: path.basename(this.item.path, path.extname(this.item.path)),
         lastTime: this.item.lastPlayedTime,
+        duration: this.item.duration,
       };
     },
     onRecentItemMouseover(item, index) {
@@ -154,7 +155,7 @@ body {
 }
 
 .wrapper {
-  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.5);
   height: 100vh;
   width: 100vw;
   z-index: -1;
