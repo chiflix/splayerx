@@ -13,7 +13,7 @@
     <div class="video-controller" id="video-controller"
       @mousedown.self="resetDraggingState"
       @mousedown.left.stop.prevent="handleLeftClick"
-      @mouseup.left.stop.prevent="handleMouseUp"
+      @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mousemove="handleMouseMove"
       @mouseout="hideAllWidgets"
