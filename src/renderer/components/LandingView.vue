@@ -1,6 +1,9 @@
 <template>
 <div class="wrapper">
-  <main>
+  <main
+    @mousedown.left.stop.prevent="handleLeftClick"
+    @mouseup.left.stop.prevent="handleMouseUp"
+    @mousemove="handleMouseMove">
     <div class="background-image"
       v-if="showShortcutImage">
       <img
@@ -135,6 +138,29 @@ export default {
           self.openFile(`file:///${item[0]}`);
         }
       });
+    },
+    handleLeftClick(event) {
+      // Handle dragging-related variables
+      this.mouseDown = true;
+      this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
+      this.mousedownPosition = [event.screenX, event.screenY];
+    },
+    handleMouseMove(event) {
+      // Handle dragging-related variables and methods
+      if (this.mouseDown) {
+        if (this.windowStartPosition !== null) {
+          const startPos = this.mousedownPosition;
+          const offset = [event.screenX - startPos[0], event.screenY - startPos[1]];
+          const winStartPos = this.windowStartPosition;
+          this.$electron.remote.getCurrentWindow().setPosition(
+            winStartPos[0] + offset[0],
+            winStartPos[1] + offset[1],
+          );
+        }
+      }
+    },
+    handleMouseUp() {
+      this.mouseDown = false;
     },
   },
 };

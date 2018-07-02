@@ -13,7 +13,7 @@
     <div class="video-controller" id="video-controller"
       @mousedown.self="resetDraggingState"
       @mousedown.left.stop.prevent="handleLeftClick"
-      @mouseup.left.prevent="handleMouseUp"
+      @mouseup.left.stop.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mousemove="handleMouseMove"
       @mouseout="hideAllWidgets"
@@ -117,14 +117,12 @@ export default {
       this.mouseDown = true;
       this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
       this.mousedownPosition = [event.screenX, event.screenY];
-      console.log(this.windowStartPosition);
     },
     handleMouseMove(event) {
       this.wakeUpAllWidgets();
       // Handle dragging-related variables and methods
       if (this.mouseDown) {
         if (this.windowStartPosition !== null) {
-          console.log(this.mousedownPosition);
           const startPos = this.mousedownPosition;
           const offset = [event.screenX - startPos[0], event.screenY - startPos[1]];
           const winStartPos = this.windowStartPosition;
