@@ -9,13 +9,12 @@
         {{ itemInfo().baseName }}
       </div>
       <div class="item-description">
-        {{ itemInfo().baseName }}
       </div>
       <div class="item-timing">
         {{ timecodeFromSeconds(itemInfo().lastTime) }}
       </div>
     </div>
-    <div>
+    <div class="logo-container">
       <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
     </div>
 
@@ -155,9 +154,7 @@ body {
 }
 
 .wrapper {
-  background: radial-gradient( ellipse at top center,
-  rgba(0, 0, 0, .9) 20%,
-  rgba(44, 44, 44, .95) 80%);
+  background-color: rgb(0,0,0);
   height: 100vh;
   width: 100vw;
   z-index: -1;
@@ -166,26 +163,30 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
+  backdrop-filter: blur(30px);
 
   .item-name {
-    position: absolute;
+    position: relative;
     top: 100px;
     left: 45px;
+    width: 500px;
+    // overflow: hidden;
+    word-break: break-all;
     font-size: 30px;
     font-weight: bold;
   }
   .item-description {
-    position: absolute;
+    position: relative;
     opacity: 0.4;
-    top: 140px;
+    top: 100px;
     left: 45px;
     font-size: 20px;
     font-weight: lighter;
   }
   .item-timing {
-    position: absolute;
+    position: relative;
+    top: 100px;
     opacity: 0.4;
-    top: 160px;
     left: 45px;
     font-size: 20px;
     font-weight: lighter;
@@ -197,19 +198,22 @@ body {
     height: 100%;
   }
 }
-.logo {
-  height: 136px;
-  width: 136px;
-  margin-top: 80px;
+.logo-container {
+  text-align: center;
+  padding-top: 80px;
+  .logo {
+    height: 136px;
+    width: 136px;
+  }
 }
 
 main {
-  text-align: center;
   justify-content: space-between;
 }
 
 .welcome {
   margin-top: 15px;
+  text-align: center;
   .title {
     font-size: 7vw;
     margin-bottom: 6px;
@@ -243,7 +247,7 @@ main {
       color: gray;
       cursor: pointer;
       margin-right: 15px;
-      background-size: contain;
+      background-size: cover;
       background-color: black;
       background-repeat: no-repeat;
       background-position: center center;
