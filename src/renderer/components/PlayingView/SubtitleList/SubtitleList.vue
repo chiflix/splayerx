@@ -1,6 +1,6 @@
 <template>
   <div class="subtitle-list"
-    @mousewheel.stop="subtitleListScroll">
+    @mousewheel.stop="preventScroll">
     <div
       v-for="(item, id) in subtitleList"
       :key="id"
@@ -36,6 +36,10 @@ export default {
       for (let i = startIndex; i < vid.textTracks.length; i += 1) {
         this.subtitleList.push(vid.textTracks[i].label);
       }
+    },
+    preventScroll() {
+      // console.log(e.detail);
+      // e.preventDefault();
     },
   },
   created() {
