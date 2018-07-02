@@ -156,6 +156,7 @@ body {
 
 .wrapper {
   background-color: rgba(0,0,0,0.5);
+  background-image: url('~@/assets/Noise.png');
   height: 100vh;
   width: 100vw;
   z-index: -1;
