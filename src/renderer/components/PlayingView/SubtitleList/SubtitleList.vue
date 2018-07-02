@@ -37,6 +37,7 @@ export default {
         this.subtitleList.push(vid.textTracks[i].label);
       }
     },
+    // 需要解决键盘触发的问题，当在div内点击后，两个事件一起触发，div外点击后，仅触发音量改变事件
     preventScroll() {
       // console.log(e.detail);
       // e.preventDefault();
