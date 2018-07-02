@@ -1,7 +1,6 @@
 <template>
   <div class="subtitle">
-    <div class="subtitle-wrapper"
-      :style="{bottom: subtitleBottom+'px'}">
+    <div class="subtitle-wrapper">
       <div class="subtitle-controller"
         v-show="subtitleAppearFlag">
         <div class="subtitle-menu"
@@ -19,9 +18,8 @@
       <div class="main-subtitle-content"
         v-for="(div, key) in subtitleDivs"
         :key="key"
-        v-if="subtitleAppearFlag"
-        v-html="div.innerHTML"
-      >
+        v-show="subtitleAppearFlag"
+        v-html="div.innerHTML">
       </div>
       <!-- <div class="minor-subtitle-content"
         v-for="(div, key) in minorSubDivs"
@@ -43,7 +41,7 @@ import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
 import path from 'path';
 import subtitleMixin from '@/commons/js/mixin';
-import { SUBTITLE_BOTTOM } from '@/constants';
+// import { SUBTITLE_BOTTOM } from '@/constants';
 import SubtitleList from './SubtitleList/SubtitleList';
 
 /**
@@ -64,7 +62,7 @@ export default {
       subtitleAppearFlag: true,
       minorSubAppearFlag: false,
       subtitleCtrlFlag: false,
-      subtitleBottom: 0,
+      subtitleBottom: 10,
     };
   },
   methods: {
@@ -141,15 +139,6 @@ export default {
       // console.log(this.$store.state.PlaybackState.VideoCanvas);
       this.loadTextTracks();
     });
-    this.$bus.$on('progressslider-appear', () => {
-      this.subtitleBottom = SUBTITLE_BOTTOM;
-    });
-    this.$bus.$on('progressbar-appear', () => {
-      this.subtitleBottom = SUBTITLE_BOTTOM;
-    });
-    this.$bus.$on('progressbar-hide', () => {
-      this.subtitleBottom = 0;
-    });
   },
 };
 </script>
@@ -160,15 +149,21 @@ export default {
   .subtitle-wrapper {
     position: absolute;
     width: 100%;
-    display: -webkit-flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    text-align: center;
+    bottom: 10px;
 
     .subtitle-controller {
-      display: inline;
+      position: absolute;
+      // display: inline;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
       .subtitle-menu {
+        position:absolute;
+        bottom: 30px;
+        display: inline-block;
         width: 250px;
+        text-align: center;
       }
 
       .subtitle-menu-button {
@@ -196,7 +191,7 @@ export default {
       font-size: 20px;
       color: greenyellow;
       text-align: center;
-      white-space: pre;
+      // white-space: pre;
     }
   }
 

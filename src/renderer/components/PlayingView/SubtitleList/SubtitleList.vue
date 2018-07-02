@@ -1,5 +1,6 @@
 <template>
-  <div class="subtitle-list">
+  <div class="subtitle-list"
+    @mousewheel.stop="subtitleListScroll">
     <div
       v-for="(item, id) in subtitleList"
       :key="id"
