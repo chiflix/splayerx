@@ -9,7 +9,7 @@
         {{item}}
       </div>
       <div class="icon-selected">
-        *
+        √
       </div>
     </div>
   </div>
@@ -51,28 +51,29 @@ export default {
   cursor: pointer;
 }
 .subtitle-list-item {
+  display: inline-block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  width: 200px;
+  width: 210px;
 }
 
 .icon-selected {
-  position: relative;
   display: inline-block;
+  overflow: hidden;
 }
 // 使用动态样式变化height
 .subtitle-list {
   -webkit-app-region: no-drag;
   overflow: auto;
   height: 100px;
-  width: 250px;
-  // padding: 10px;
+  padding: 10px;
   background-color: rgba(255,255,255,0.3);
   color: rgba(255,255,255,0.7)
 }
 .subtitle-list::-webkit-scrollbar {
   background: grey; 
+  width: 4px;
   border-radius: 10px;
 }
 .subtitle-list::-webkit-scrollbar-thumb {

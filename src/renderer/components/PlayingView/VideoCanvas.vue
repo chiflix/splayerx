@@ -117,6 +117,7 @@ export default {
        * https://hacks.mozilla.org/2014/07/adding-captions-and-subtitles-to-html5-video/
        */
 
+      // let loadingTextTrack = false;
       const vid = this.$refs.videoCanvas;
 
       // hide every text text/subtitle tracks at beginning

@@ -168,8 +168,7 @@ export default {
     .subtitle-controller {
       display: inline;
       .subtitle-menu {
-        // height: 100px;
-        // width: 250px;
+        width: 250px;
       }
 
       .subtitle-menu-button {
