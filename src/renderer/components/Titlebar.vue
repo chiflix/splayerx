@@ -76,6 +76,9 @@ export default {
       this.$electron.remote.getCurrentWindow().minimize();
     },
     handleMaximize() {
+      if (this.isDarwin) {
+        this.$electron.remote.getCurrentWindow().setFullScreen(true);
+      }
       this.$electron.remote.getCurrentWindow().maximize();
     },
     handleClose() {
