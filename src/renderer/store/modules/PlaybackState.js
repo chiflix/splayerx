@@ -8,6 +8,7 @@ const state = {
   PlaybackRate: 1.0,
 
   StartIndex: 0,
+  FirstSubIndex: 0,
 };
 
 const getters = {
@@ -35,6 +36,9 @@ const mutations = {
 
   StartIndex(state, index) {
     state.StartIndex = index;
+  },
+  FirstSubIndex(state, index) {
+    state.FirstSubIndex = index;
   },
 };
 

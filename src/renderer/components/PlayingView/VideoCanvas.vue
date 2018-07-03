@@ -170,7 +170,7 @@ export default {
             console.log('finish reading srt');
           });
 
-        vid.textTracks[startIndex].mode = 'showing';
+        this.subtitleShow(startIndex);
       });
 
 
@@ -186,6 +186,13 @@ export default {
           sub0.mode = 'showing';
         }
       }
+    },
+    subtitleShow(index) {
+      const vid = this.$refs.videoCanvas;
+      const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
+      vid.textTracks[firstSubIndex].mode = 'disabled';
+      vid.textTracks[index].mode = 'showing';
+      this.$store.commit('FirstSubIndex', index);
     },
     $_controlWindowSize() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
