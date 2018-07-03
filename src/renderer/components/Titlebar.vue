@@ -1,18 +1,23 @@
 <template>
-  <div class="titlebar" :style="{ width: titlebarWidth + 'px' }">
+  <div class="titlebar">
     <div class="title-button close"
          @click="handleClose">
       <span>关闭</span>
     </div>
     <div class="title-button maximize"
-         :style="{ display: showMax }"
+         v-if="show.Maximize"
          @click="handleMaximize">
       <span>最大化</span>
     </div>
     <div class="title-button restore"
-         :style="{ display: showRestore }"
+         v-if="show.Restore"
          @click="handleRestore">
       <span>恢复</span>
+    </div>
+    <div class="title-button exit-fullscreen"
+         v-if="show.FullscreenExit"
+         @click="handleFullscreenExit">
+      <span>退出全屏</span>
     </div>
     <div class="title-button minimize"
          @click="handleMinimize">
@@ -26,10 +31,14 @@ export default {
   name: 'titlebar',
   data() {
     return {
-      showTitlebar: false,
-      showMax: 'block',
-      showResize: 'none',
-      titlebarWidth: 'auto',
+      showTitlebar: true,
+      middleButtonStatus: 'maximize',
+      buttonStyle: null,
+      windowInfo: {
+        screenWidth: null,
+        windowWidth: null,
+        windowPosition: null,
+      },
       maximize: false,
     };
   },
@@ -39,29 +48,100 @@ export default {
     },
     handleMaximize() {
       this.$electron.remote.getCurrentWindow().maximize();
-      this.maximize = true;
-      this.switchStatus();
+      console.log(this.maximize);
     },
     handleClose() {
       this.$electron.remote.getCurrentWindow().close();
     },
     handleRestore() {
       this.$electron.remote.getCurrentWindow().unmaximize();
-      this.maximize = false;
-      this.switchStatus();
     },
-    switchStatus() {
-      this.showMax = this.maximize ? 'none' : 'block';
-      this.showRestore = this.maximize ? 'block' : 'none';
+    handleFullscreenExit() {
+      this.$electron.remote.getCurrentWindow().setFullscreen(false);
     },
+    statusChange() {
+      const window = this.$electron.remote.getCurrentWindow();
+      if (window.isFullScreen()) {
+        this.middleButtonStatus = 'exit-fullscreen';
+      } else if (this.maximize) {
+        this.middleButtonStatus = 'restore';
+      } else {
+        this.middleButtonStatus = 'maximize';
+      }
+    },
+    setWindowInfo() {
+      [this.windowInfo.screenWidth, this.windowInfo.windowWidth] = [
+        this.$electron.screen.getPrimaryDisplay().workAreaSize.width,
+        this.$electron.remote.getCurrentWindow().getSize()[0],
+      ];
+      this.windowInfo.windowPosition = this.$electron.remote.getCurrentWindow().getPosition();
+      this.updateMaximize(this.windowInfo);
+    },
+    updateMaximize(val) {
+      const sizeOffset = Math.abs(val.screenWidth - val.windowWidth);
+      const positionOffset = Math.sqrt((this.windowInfo.windowPosition[0] ** 2) +
+        (this.windowInfo.windowPosition[1] ** 2));
+      console.log(sizeOffset, positionOffset);
+      if (sizeOffset <= 5 && positionOffset <= 5) {
+        this.maximize = true;
+      } else {
+        this.maximize = false;
+      }
+      console.log(this.maximize);
+    },
+  },
+  beforeMount() {
+    this.setWindowInfo();
+    this.statusChange();
   },
   mounted() {
     this.$electron.remote.getCurrentWindow().on('resize', () => {
+      this.setWindowInfo();
+      this.statusChange();
+      console.log(this.windowInfo);
       this.titlebarWidth = this.$electron.remote.getCurrentWindow().getSize();
       this.originalSize = this.$electron.remote.getCurrentWindow().getSize();
       console.log('Window resized!', this.$electron.remote.getCurrentWindow().getSize());
-      console.log('Current maximize status: ', this.maximize);
+      console.log('Current maximize status: ', this.middleButtonStatus);
     });
+    this.$electron.remote.getCurrentWindow().on('move', () => {
+      this.setWindowInfo();
+    });
+    this.$bus.$on('titlebar-appear', () => {
+      this.showTitlebar = true;
+    });
+    this.$bus.$on('titlebar-hide', () => {
+      this.showTitlebar = false;
+    });
+  },
+  computed: {
+    show: () => {
+      if (this.showTitlebar === false) {
+        return {
+          Maximize: false,
+          Restore: false,
+          FullscreenExit: false,
+        };
+      }
+      if (this.middleButtonStatus === 'exit-fullscreen') {
+        return {
+          Maximize: false,
+          Restore: false,
+          FullscreenExit: true,
+        };
+      } else if (this.middleButtonStatus === 'restore') {
+        return {
+          Maximize: false,
+          Restore: true,
+          FullscreenExit: false,
+        };
+      }
+      return {
+        Maximize: true,
+        Restore: false,
+        FullscreenExit: false,
+      };
+    },
   },
 };
 </script>
@@ -87,7 +167,7 @@ export default {
   line-height: 29px;
   -webkit-app-region: no-drag;
 }
-.minimize:hover, .maximize:hover, .restore:hover {
+.minimize:hover, .maximize:hover, .restore:hover, .exit-fullscreen {
   background-color: rgba(255, 255, 255, 0.8);
   transition: 0.5s;
 }
