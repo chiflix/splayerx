@@ -165,7 +165,7 @@ export default {
   flex-wrap: nowrap;
   position: absolute;
   top: 0;
-  right: 2px;
+  right: 5px;
   -webkit-app-region: drag;
   border-radius: 4px 4px 0px 0px;
 }
@@ -173,8 +173,8 @@ export default {
 .title-button {
   float: right;
   margin: 0px 2px 2px 0px;
-  width: 52px;
-  height: 32px;
+  width: 45px;
+  height: 28px;
   text-align: center;
   cursor: pointer;
   -webkit-app-region: no-drag;
@@ -183,7 +183,7 @@ rect, path {
   fill: #FFFFFF;
 }
 .minimize:hover, .maximize:hover, .restore:hover, .exit-fullscreen:hover {
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 	background-color: rgba(255,255,255,.2);
   transition: 0.5s;
 }
