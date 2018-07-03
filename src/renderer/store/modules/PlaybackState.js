@@ -6,6 +6,10 @@ const state = {
   Volume: 0.2,
   SrcOfVideo: '',
   PlaybackRate: 1.0,
+
+  VideoCanvas: null,
+  StartIndex: 0,
+  CurrentIndex: 0,
 };
 
 const getters = {
@@ -29,6 +33,16 @@ const mutations = {
   },
   Volume(state, v) {
     state.Volume = v;
+  },
+
+  VideoCanvas(state, vid) {
+    state.VideoCanvas = vid;
+  },
+  StartIndex(state, id) {
+    state.StartIndex = id;
+  },
+  CurrentIndex(state, id) {
+    state.CurrentIndex = id;
   },
 };
 

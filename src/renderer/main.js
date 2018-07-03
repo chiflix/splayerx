@@ -304,5 +304,10 @@ new Vue({
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
     });
+    require('electron').ipcRenderer.once('dom', (event, message) => {
+      if (message === 'win32') {
+        document.querySelector('.application').style.webkitAppRegion = 'no-drag';
+      }
+    });
   },
 }).$mount('#app');

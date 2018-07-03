@@ -11,7 +11,7 @@
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.$electron.remote.getCurrentWindow().getSize()[0] - 20 + 'px'}"
-      @mousedown.left="onProgresssBarClick">
+      @mousedown.left.stop="onProgresssBarClick">
       <div class="screenshot-background"
         v-show="showScreenshot"
         :style="{ left: positionOfScreenshot +'px', width: widthOfThumbnail + 'px', height: heightofScreenshot +'px' }">
@@ -272,13 +272,20 @@ export default {
       this.showScreenshot = false;
       this.widthOfReadyToPlay = 0;
       this.appearProgressSlider();
+      // 这一部分的代码重复利用了，可以重构一下
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
         this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
+          // = setTimeout(this.hideProgressBar, 3000);
+          = setTimeout(() => {
+            this.$bus.$emit('progressbar-hide');
+          }, 3000);
       } else {
         this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
+          // = setTimeout(this.hideProgressBar, 3000);
+          = setTimeout(() => {
+            this.$bus.$emit('progressbar-hide');
+          }, 3000);
       }
     });
     this.$bus.$on('progressbar-appear', () => {
@@ -286,10 +293,16 @@ export default {
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
         this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
+          // = setTimeout(this.hideProgressBar, 3000);
+          = setTimeout(() => {
+            this.$bus.$emit('progressbar-hide');
+          }, 3000);
       } else {
         this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
+          // = setTimeout(this.hideProgressBar, 3000);
+          = setTimeout(() => {
+            this.$bus.$emit('progressbar-hide');
+          }, 3000);
       }
     });
     this.$bus.$on('progressbar-hide', () => {

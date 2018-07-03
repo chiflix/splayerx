@@ -12,15 +12,17 @@
       v-show="showMask"></div>
     <div class="video-controller" id="video-controller"
       @mousedown.self="resetDraggingState"
-      @mousedown.left.stop="handleLeftClick"
       @mousedown.right.stop="handleRightClick"
+      @mousedown.left.stop.prevent="handleLeftClick"
+      @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
-      @mousemove="wakeUpAllWidgets"
+      @mousemove="handleMouseMove"
       @mouseout="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
       <VolumeControl/>
+      <SubtitleButton/>
       <!-- <AdvanceControl/> -->
     </div>
   </div>
@@ -32,6 +34,7 @@ import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
 import TimeProgressBar from './PlayingView/TimeProgressBar.vue';
 import VolumeControl from './PlayingView/VolumeControl.vue';
 import AdvanceControl from './PlayingView/AdvanceControl.vue';
+import SubtitleButton from './PlayingView/SubtitleButton.vue';
 
 export default {
   name: 'playing-view',
@@ -41,6 +44,7 @@ export default {
     TimeProgressBar,
     VolumeControl,
     AdvanceControl,
+    SubtitleButton,
   },
   data() {
     return {
@@ -49,6 +53,9 @@ export default {
       cursorShow: true,
       cursorDelay: null,
       popupShow: false,
+      mouseDown: false,
+      windowStartPosition: null,
+      mousedownPosition: null,
     };
   },
   methods: {
@@ -124,12 +131,35 @@ export default {
       menu.popup(this.$electron.remote.getCurrentWindow());
       this.popupShow = true;
     },
-    handleLeftClick() {
+    handleLeftClick(event) {
       const menu = this.$electron.remote.Menu.getApplicationMenu();
       if (this.popupShow === true) {
         menu.closePopup();
         this.popupShow = false;
       }
+      // Handle dragging-related variables
+      this.mouseDown = true;
+      this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
+      this.mousedownPosition = [event.screenX, event.screenY];
+    },
+    handleMouseMove(event) {
+      this.wakeUpAllWidgets();
+      // Handle dragging-related variables and methods
+      if (this.mouseDown) {
+        if (this.windowStartPosition !== null) {
+          const startPos = this.mousedownPosition;
+          const offset = [event.screenX - startPos[0], event.screenY - startPos[1]];
+          const winStartPos = this.windowStartPosition;
+          this.$electron.remote.getCurrentWindow().setPosition(
+            winStartPos[0] + offset[0],
+            winStartPos[1] + offset[1],
+          );
+        }
+      }
+    },
+    handleMouseUp() {
+      this.mouseDown = false;
+      this.togglePlayback();
     },
     pauseIconPause() {
       this.$refs.pauseIcon.style.animationPlayState = 'paused';
