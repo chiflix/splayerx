@@ -396,6 +396,10 @@ export default {
     this.$bus.$on('toggleSubtitle', () => {
       this.toggleSubtitle();
     });
+    this.$bus.$on('changeSubtitle', (targetIndex) => {
+      const index = this.$state.PlaybackState.StartIndex + targetIndex;
+      this.subtitleShow(index);
+    });
   },
 };
 </script>
