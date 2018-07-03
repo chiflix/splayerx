@@ -194,6 +194,15 @@ export default {
       vid.textTracks[index].mode = 'showing';
       this.$store.commit('FirstSubIndex', index);
     },
+    toggleSubtitle() {
+      const vid = this.$refs.videoCanvas;
+      const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
+      if (vid.textTracks[firstSubIndex].mode === 'disabled') {
+        vid.textTracks[firstSubIndex].mode = 'showing';
+      } else {
+        vid.textTracks[firstSubIndex].mode = 'disabled';
+      }
+    },
     $_controlWindowSize() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       currentWindow.setBounds({
@@ -366,6 +375,10 @@ export default {
       this.$refs.videoCanvas.currentTime = e;
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
+    });
+
+    this.$bus.$on('toggleSubtitle', () => {
+      this.toggleSubtitle();
     });
   },
 };
