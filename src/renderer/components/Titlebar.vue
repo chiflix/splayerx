@@ -1,53 +1,106 @@
 <template>
   <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }" v-show="showTitlebar">
-    <div class="title-button minimize"
-         @click="handleMinimize">
-      <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <defs></defs>
-        <g id="minimize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-            <rect fill="#000000" x="90" y="70" width="50" height="5"></rect>
-        </g>
-      </svg>
+    <div class="win-icons" v-if="!isDarwin">
+      <div class="title-button minimize"
+          @click="handleMinimize">
+        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs></defs>
+          <g id="minimize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <rect fill="#000000" x="90" y="70" width="50" height="5"></rect>
+          </g>
+        </svg>
+      </div>
+      <div class="title-button maximize middle"
+          v-if="show.Maximize"
+          @click.prevent="handleMaximize">
+        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs></defs>
+          <g id="fullscreen" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <path d="M90,45 L140,45 L140,95 L90,95 L90,45 Z M95,50 L95,90 L135,90 L135,50 L95,50 Z" fill="#000000"></path>
+          </g>
+        </svg>
+      </div>
+      <div class="title-button restore middle"
+          v-if="show.Restore"
+          @click="handleRestore">
+        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs></defs>
+          <g id="maximize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <path d="M128,87 L128,82.0504173 L139,82.0504173 L139,46.0504173 L103,46.0504173 L103,57 L98,57 L98,41 L144,41 L144,87 L128,87 Z" fill="#000000"></path>
+              <path d="M87,52 L133,52 L133,98 L87,98 L87,52 Z M92,57.0504173 L92,93.0504173 L128,93.0504173 L128,57.0504173 L92,57.0504173 Z" fill="#000000"></path>
+          </g>
+        </svg>
+      </div>
+      <div class="title-button exit-fullscreen middle"
+          v-if="show.FullscreenExit"
+          @click="handleFullscreenExit">
+        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs></defs>
+          <g id="resize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <path d="M128.537757,60 L136,60 L136,65 L125,65 L120,65 L120,49 L125,49 L125,56.4661613 L137.724334,43.7418268 L141.260132,47.2776245 L128.537757,60 Z M104,84.5377566 L92.2795834,96.2581732 L88.7437858,92.7223755 L100.466161,81 L93,81 L93,76 L109,76 L109,81 L109,92 L104,92 L104,84.5377566 Z" fill="#000000"></path>
+          </g>
+        </svg>
+      </div>
+      <div class="title-button close"
+          @click="handleClose">
+        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs></defs>
+          <g id="close" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <path d="M118.537757,70 L141.260132,92.7223755 L137.724334,96.2581732 L115.001959,73.5357977 L92.2795834,96.2581732 L88.7437858,92.7223755 L111.466161,70 L88.7437858,47.2776245 L92.2795834,43.7418268 L115.001959,66.4642023 L137.724334,43.7418268 L141.260132,47.2776245 L118.537757,70 Z" fill="#000000"></path>
+          </g>
+        </svg>
+      </div>
     </div>
-    <div class="title-button maximize middle"
-         v-if="show.Maximize"
-         @click.prevent="handleMaximize">
-      <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <defs></defs>
-        <g id="fullscreen" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-            <path d="M90,45 L140,45 L140,95 L90,95 L90,45 Z M95,50 L95,90 L135,90 L135,50 L95,50 Z" fill="#000000"></path>
-        </g>
-      </svg>
-    </div>
-    <div class="title-button restore middle"
-         v-if="show.Restore"
-         @click="handleRestore">
-      <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <defs></defs>
-        <g id="maximize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-            <path d="M128,87 L128,82.0504173 L139,82.0504173 L139,46.0504173 L103,46.0504173 L103,57 L98,57 L98,41 L144,41 L144,87 L128,87 Z" fill="#000000"></path>
-            <path d="M87,52 L133,52 L133,98 L87,98 L87,52 Z M92,57.0504173 L92,93.0504173 L128,93.0504173 L128,57.0504173 L92,57.0504173 Z" fill="#000000"></path>
-        </g>
-      </svg>
-    </div>
-    <div class="title-button exit-fullscreen middle"
-         v-if="show.FullscreenExit"
-         @click="handleFullscreenExit">
-      <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <defs></defs>
-        <g id="resize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-            <path d="M128.537757,60 L136,60 L136,65 L125,65 L120,65 L120,49 L125,49 L125,56.4661613 L137.724334,43.7418268 L141.260132,47.2776245 L128.537757,60 Z M104,84.5377566 L92.2795834,96.2581732 L88.7437858,92.7223755 L100.466161,81 L93,81 L93,76 L109,76 L109,81 L109,92 L104,92 L104,84.5377566 Z" fill="#000000"></path>
-        </g>
-      </svg>
-    </div>
-    <div class="title-button close"
-         @click="handleClose">
-      <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-        <defs></defs>
-        <g id="close" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-            <path d="M118.537757,70 L141.260132,92.7223755 L137.724334,96.2581732 L115.001959,73.5357977 L92.2795834,96.2581732 L88.7437858,92.7223755 L111.466161,70 L88.7437858,47.2776245 L92.2795834,43.7418268 L115.001959,66.4642023 L137.724334,43.7418268 L141.260132,47.2776245 L118.537757,70 Z" fill="#000000"></path>
-        </g>
-      </svg>
+    <div class="mac-icons" v-if="isDarwin">
+      <div class="title-button minimize"
+          @click="handleMinimize">
+        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs></defs>
+          <g id="minimize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <rect fill="#000000" x="90" y="70" width="50" height="5"></rect>
+          </g>
+        </svg>
+      </div>
+      <div class="title-button maximize middle"
+          v-if="show.Maximize"
+          @click.prevent="handleMaximize">
+        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs></defs>
+          <g id="fullscreen" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <path d="M90,45 L140,45 L140,95 L90,95 L90,45 Z M95,50 L95,90 L135,90 L135,50 L95,50 Z" fill="#000000"></path>
+          </g>
+        </svg>
+      </div>
+      <div class="title-button restore middle"
+          v-if="show.Restore"
+          @click="handleRestore">
+        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs></defs>
+          <g id="maximize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <path d="M128,87 L128,82.0504173 L139,82.0504173 L139,46.0504173 L103,46.0504173 L103,57 L98,57 L98,41 L144,41 L144,87 L128,87 Z" fill="#000000"></path>
+              <path d="M87,52 L133,52 L133,98 L87,98 L87,52 Z M92,57.0504173 L92,93.0504173 L128,93.0504173 L128,57.0504173 L92,57.0504173 Z" fill="#000000"></path>
+          </g>
+        </svg>
+      </div>
+      <div class="title-button exit-fullscreen middle"
+          v-if="show.FullscreenExit"
+          @click="handleFullscreenExit">
+        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs></defs>
+          <g id="resize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <path d="M128.537757,60 L136,60 L136,65 L125,65 L120,65 L120,49 L125,49 L125,56.4661613 L137.724334,43.7418268 L141.260132,47.2776245 L128.537757,60 Z M104,84.5377566 L92.2795834,96.2581732 L88.7437858,92.7223755 L100.466161,81 L93,81 L93,76 L109,76 L109,81 L109,92 L104,92 L104,84.5377566 Z" fill="#000000"></path>
+          </g>
+        </svg>
+      </div>
+      <div class="title-button close"
+          @click="handleClose">
+        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <defs></defs>
+          <g id="close" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <path d="M118.537757,70 L141.260132,92.7223755 L137.724334,96.2581732 L115.001959,73.5357977 L92.2795834,96.2581732 L88.7437858,92.7223755 L111.466161,70 L88.7437858,47.2776245 L92.2795834,43.7418268 L115.001959,66.4642023 L137.724334,43.7418268 L141.260132,47.2776245 L118.537757,70 Z" fill="#000000"></path>
+          </g>
+        </svg>
+      </div>
     </div>
   </div>
 </template>
@@ -193,7 +246,16 @@ export default {
   z-index: 6;
 }
 
-.title-button {
+.win-icons .title-button {
+  float: left;
+  margin: 0px 2px 2px 0px;
+  width: 45px;
+  height: 28px;
+  text-align: center;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.mac-icons .title-button {
   float: right;
   margin: 0px 2px 2px 0px;
   width: 45px;
@@ -202,6 +264,7 @@ export default {
   cursor: pointer;
   -webkit-app-region: no-drag;
 }
+
 rect, path {
   fill: #FFFFFF;
 }
