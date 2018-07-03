@@ -57,7 +57,7 @@ export default {
       this.$electron.remote.getCurrentWindow().unmaximize();
     },
     handleFullscreenExit() {
-      this.$electron.remote.getCurrentWindow().setFullscreen(false);
+      this.$electron.remote.getCurrentWindow().setFullScreen(false);
     },
     statusChange() {
       const window = this.$electron.remote.getCurrentWindow();
@@ -115,7 +115,7 @@ export default {
     });
   },
   computed: {
-    show: () => {
+    show() {
       if (this.showTitlebar === false) {
         return {
           Maximize: false,
@@ -123,23 +123,10 @@ export default {
           FullscreenExit: false,
         };
       }
-      if (this.middleButtonStatus === 'exit-fullscreen') {
-        return {
-          Maximize: false,
-          Restore: false,
-          FullscreenExit: true,
-        };
-      } else if (this.middleButtonStatus === 'restore') {
-        return {
-          Maximize: false,
-          Restore: true,
-          FullscreenExit: false,
-        };
-      }
       return {
-        Maximize: true,
-        Restore: false,
-        FullscreenExit: false,
+        Maximize: this.middleButtonStatus === 'maximize',
+        Restore: this.middleButtonStatus === 'restore',
+        FullscreenExit: this.middleButtonStatus === 'exit-fullscreen',
       };
     },
   },
@@ -167,7 +154,7 @@ export default {
   line-height: 29px;
   -webkit-app-region: no-drag;
 }
-.minimize:hover, .maximize:hover, .restore:hover, .exit-fullscreen {
+.minimize:hover, .maximize:hover, .restore:hover, .exit-fullscreen:hover {
   background-color: rgba(255, 255, 255, 0.8);
   transition: 0.5s;
 }
