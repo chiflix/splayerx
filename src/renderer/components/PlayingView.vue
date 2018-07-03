@@ -79,12 +79,14 @@ export default {
       this.$bus.$emit('volumecontroller-appear');
       this.$bus.$emit('progressbar-appear');
       this.$bus.$emit('timecode-appear');
+      this.$bus.$emit('titlebar-appear');
     },
     hideAllWidgets() {
       this.showMask = false;
       this.$bus.$emit('volumecontroller-hide');
       this.$bus.$emit('progressbar-hide');
       this.$bus.$emit('timecode-hide');
+      this.$bus.$emit('titlebar-hide');
     },
     resetDraggingState() {
       this.isDragging = false;
