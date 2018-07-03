@@ -1,27 +1,53 @@
 <template>
   <div class="titlebar">
-    <div class="title-button close"
-         @click="handleClose">
-      <span>关闭</span>
+    <div class="title-button minimize"
+         @click="handleMinimize">
+      <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs></defs>
+        <g id="minimize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+            <rect fill="#000000" x="90" y="70" width="50" height="5"></rect>
+        </g>
+      </svg>
     </div>
     <div class="title-button maximize"
          v-if="show.Maximize"
          @click="handleMaximize">
-      <span>最大化</span>
+      <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs></defs>
+        <g id="fullscreen" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+            <path d="M90,45 L140,45 L140,95 L90,95 L90,45 Z M95,50 L95,90 L135,90 L135,50 L95,50 Z" fill="#000000"></path>
+        </g>
+      </svg>
     </div>
     <div class="title-button restore"
          v-if="show.Restore"
          @click="handleRestore">
-      <span>恢复</span>
+      <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs></defs>
+        <g id="maximize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+            <path d="M128,87 L128,82.0504173 L139,82.0504173 L139,46.0504173 L103,46.0504173 L103,57 L98,57 L98,41 L144,41 L144,87 L128,87 Z" fill="#000000"></path>
+            <path d="M87,52 L133,52 L133,98 L87,98 L87,52 Z M92,57.0504173 L92,93.0504173 L128,93.0504173 L128,57.0504173 L92,57.0504173 Z" fill="#000000"></path>
+        </g>
+      </svg>
     </div>
     <div class="title-button exit-fullscreen"
          v-if="show.FullscreenExit"
          @click="handleFullscreenExit">
-      <span>退出全屏</span>
+      <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs></defs>
+        <g id="resize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+            <path d="M128.537757,60 L136,60 L136,65 L125,65 L120,65 L120,49 L125,49 L125,56.4661613 L137.724334,43.7418268 L141.260132,47.2776245 L128.537757,60 Z M104,84.5377566 L92.2795834,96.2581732 L88.7437858,92.7223755 L100.466161,81 L93,81 L93,76 L109,76 L109,81 L109,92 L104,92 L104,84.5377566 Z" fill="#000000"></path>
+        </g>
+      </svg>
     </div>
-    <div class="title-button minimize"
-         @click="handleMinimize">
-      <span>最小化</span>
+    <div class="title-button close"
+         @click="handleClose">
+      <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs></defs>
+        <g id="close" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+            <path d="M118.537757,70 L141.260132,92.7223755 L137.724334,96.2581732 L115.001959,73.5357977 L92.2795834,96.2581732 L88.7437858,92.7223755 L111.466161,70 L88.7437858,47.2776245 L92.2795834,43.7418268 L115.001959,66.4642023 L137.724334,43.7418268 L141.260132,47.2776245 L118.537757,70 Z" fill="#000000"></path>
+        </g>
+      </svg>
     </div>
   </div>
 </template>
@@ -135,11 +161,11 @@ export default {
 
 <style>
 .titlebar {
-  position: fixed;
-  height: 32px;
-  right: 0px;
-  transition: 0.5s;
-  z-index: 2000;
+  display: flex;
+  flex-wrap: nowrap;
+  position: absolute;
+  top: 0;
+  right: 2px;
   -webkit-app-region: drag;
   border-radius: 4px 4px 0px 0px;
 }
@@ -147,15 +173,18 @@ export default {
 .title-button {
   float: right;
   margin: 0px 2px 2px 0px;
-  width: 64px;
+  width: 52px;
+  height: 32px;
   text-align: center;
   cursor: pointer;
-  height: auto;
-  line-height: 29px;
   -webkit-app-region: no-drag;
 }
+rect, path {
+  fill: #FFFFFF;
+}
 .minimize:hover, .maximize:hover, .restore:hover, .exit-fullscreen:hover {
-  background-color: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(10px);
+	background-color: rgba(255,255,255,.2);
   transition: 0.5s;
 }
 .close:hover {
