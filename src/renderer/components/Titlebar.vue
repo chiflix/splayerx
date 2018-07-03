@@ -1,5 +1,5 @@
 <template>
-  <div class="titlebar" v-show="showTitlebar">
+  <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }" v-show="showTitlebar">
     <div class="title-button minimize"
          @click="handleMinimize">
       <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -65,6 +65,7 @@ export default {
         windowPosition: null,
       },
       maximize: false,
+      isDarwin: process.platform === 'darwin',
     };
   },
   props: {
@@ -76,7 +77,6 @@ export default {
     },
     handleMaximize() {
       this.$electron.remote.getCurrentWindow().maximize();
-      console.log(this.maximize);
     },
     handleClose() {
       this.$electron.remote.getCurrentWindow().close();
@@ -116,15 +116,12 @@ export default {
       }
     },
     disableMiddleButton() {
-      console.log(this.currentView);
       if (this.currentView !== 'PlayingView') {
         const buttons = document.getElementsByClassName('middle');
-        console.log(typeof buttons);
         Array.prototype.forEach.call(buttons, (element) => {
           element.style.pointerEvents = 'none';
           element.style.opacity = '0.2';
           element.style.webkitAppRegion = 'drag';
-          console.log(element.style.pointerEvents);
         });
       }
     },
@@ -180,6 +177,17 @@ export default {
   right: 5px;
   -webkit-app-region: drag;
   border-radius: 4px 4px 0px 0px;
+  z-index: 6;
+}
+.darwin-titlebar {
+  display: flex;
+  flex-wrap: nowrap;
+  position: absolute;
+  top: 0;
+  left: 5px;
+  -webkit-app-region: drag;
+  border-radius: 4px 4px 0px 0px;
+  z-index: 6;
 }
 
 .title-button {
