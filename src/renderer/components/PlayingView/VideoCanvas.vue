@@ -30,6 +30,7 @@ export default {
       videoWidth: 0,
       videoHeight: 0,
       timeUpdateIntervalID: null,
+      subNameArr: [],
     };
   },
   props: {
@@ -186,6 +187,8 @@ export default {
           sub0.mode = 'showing';
         }
       }
+
+      this.$_loadSubNameArr();
     },
     subtitleShow(index) {
       const vid = this.$refs.videoCanvas;
@@ -202,6 +205,19 @@ export default {
       } else {
         vid.textTracks[firstSubIndex].mode = 'disabled';
       }
+    },
+    /**
+     * 不需要这么麻烦，可以直接在loadTextTrack中获得字幕文件名，
+     * 存入数组中后commit
+     */
+    $_loadSubNameArr() {
+      const vid = this.$refs.videoCanvas;
+      const subNameARR = [];
+      const startIndex = this.$store.state.PlaybackState.StartIndex;
+      for (let i = startIndex; i < vid.textTracks.length; i += 1) {
+        subNameARR.push(vid.textTracks[i].label);
+      }
+      this.$store.commit('SubtitleNameArr', subNameARR);
     },
     $_controlWindowSize() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
