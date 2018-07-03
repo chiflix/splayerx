@@ -51,10 +51,10 @@ export default {
 <style lang="scss" scoped>
 .screenshot {
   position: relative;
-  border: 2px solid rgba(255,255,255,.3);
+  border: 1px solid transparent;
   border-radius: 1px;
+  background-clip: padding-box;
   background-color: #000;
-  background-clip: content-box;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -72,8 +72,8 @@ export default {
 .screenshot-background {
   position: absolute;
   bottom: 26px;
-  box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 5px;
-  // background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5) 0%, rgba(84, 84, 84, 0.5) 100%);
+  // box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 5px;
+  background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5) 0%, rgba(84, 84, 84, 0.5) 100%);
   border-radius: 1px;
   z-index: 100;
   -webkit-app-region: no-drag;
