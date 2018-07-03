@@ -18,6 +18,7 @@
 import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
+import path from 'path';
 // https://www.w3schools.com/tags/ref_av_dom.asp
 
 export default {
@@ -116,14 +117,16 @@ export default {
        */
 
       const vid = this.$refs.videoCanvas;
-
+      const startIndex = vid.textTracks.length;
+      this.$store.commit('StartIndex', startIndex);
       // hide every text text/subtitle tracks at beginning
-      for (let i = 0; i < vid.textTracks.length; i += 1) {
-        vid.textTracks[i].mode = 'hidden';
+      // 没有做对内挂字幕的处理
+      for (let i = this.$store.state.PlaybackState.CurrentIndex; i < startIndex; i += 1) {
+        vid.textTracks[i].mode = 'disabled';
       }
 
-      // create our own text/subtitle track
-      const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
+      // // create our own text/subtitle track
+      // const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
 
       /*
        * TODO:
@@ -141,13 +144,17 @@ export default {
         // temp.track();
         // const stream = temp.createWriteStream({ suffix: '.vtt' });
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+        const filename = path.parse(subPath).name;
+        const sub = vid.addTextTrack('subtitles', filename);
         parser.oncue = (cue) => {
-          sub0.addCue(cue);
+          sub.addCue(cue);
           // console.log(cue);
         };
+
+        sub.mode = 'disabled';
         parser.onflush = () => {
           if (!shownTextTrack) {
-            sub0.mode = 'showing';
+            // sub.mode = 'showing';
             shownTextTrack = true;
           }
         };
@@ -162,7 +169,13 @@ export default {
             parser.flush();
             console.log('finish reading srt');
           });
+
+        vid.textTracks[startIndex].mode = 'showing';
       });
+
+
+      // create our own text/subtitle track
+      const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
 
       if (process.env.NODE_ENV !== 'production') {
         console.log(`loadingTextTrack ${loadingTextTrack}`);
