@@ -127,9 +127,11 @@ export default {
       }
     },
     handleRightClick() {
-      const menu = this.$electron.remote.Menu.getApplicationMenu();
-      menu.popup(this.$electron.remote.getCurrentWindow());
-      this.popupShow = true;
+      if (process.platform !== 'darwin') {
+        const menu = this.$electron.remote.Menu.getApplicationMenu();
+        menu.popup(this.$electron.remote.getCurrentWindow());
+        this.popupShow = true;
+      }
     },
     handleLeftClick(event) {
       const menu = this.$electron.remote.Menu.getApplicationMenu();
