@@ -15,8 +15,9 @@
       @mouseup="togglePlayback"
       @mousewheel="wheelVolumeControll"
       @mousemove="wakeUpAllWidgets"
-      @mouseout="hideAllWidgets"
+      @mouseleave="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
+      <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
       <VolumeControl/>
@@ -26,6 +27,7 @@
 </template>
 
 <script>
+import Titlebar from '@/components/Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
 import TimeProgressBar from './PlayingView/TimeProgressBar.vue';
@@ -40,6 +42,7 @@ export default {
     TimeProgressBar,
     VolumeControl,
     AdvanceControl,
+    Titlebar,
   },
   data() {
     return {

@@ -1,6 +1,7 @@
 <template>
 <div class="wrapper">
   <main>
+    <titlebar currentView="LandingView"></titlebar>
     <div class="background-image"
       v-if="showShortcutImage">
       <img
@@ -49,6 +50,7 @@
 </template>
 
 <script>
+import Titlebar from '@/components/Titlebar.vue';
 import path from 'path';
 export default {
   name: 'landing-view',
@@ -61,6 +63,7 @@ export default {
     };
   },
   components: {
+    Titlebar,
   },
   computed: {
     hasRecentPlaylist() {
