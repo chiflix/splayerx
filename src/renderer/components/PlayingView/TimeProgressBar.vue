@@ -11,7 +11,7 @@
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.$electron.remote.getCurrentWindow().getSize()[0] - 20 + 'px'}"
-      @mousedown.left="onProgresssBarClick">
+      @mousedown.left.stop="onProgresssBarClick">
       <div class="screenshot-background"
         v-show="showScreenshot"
         :style="{ left: positionOfScreenshot +'px', width: widthOfThumbnail + 'px', height: heightofScreenshot +'px' }">
