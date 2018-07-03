@@ -1,5 +1,5 @@
 <template>
-  <div class="titlebar">
+  <div class="titlebar" v-show="showTitlebar">
     <div class="title-button minimize"
          @click="handleMinimize">
       <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -9,9 +9,9 @@
         </g>
       </svg>
     </div>
-    <div class="title-button maximize"
+    <div class="title-button maximize middle"
          v-if="show.Maximize"
-         @click="handleMaximize">
+         @click.prevent="handleMaximize">
       <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <defs></defs>
         <g id="fullscreen" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -19,7 +19,7 @@
         </g>
       </svg>
     </div>
-    <div class="title-button restore"
+    <div class="title-button restore middle"
          v-if="show.Restore"
          @click="handleRestore">
       <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -30,7 +30,7 @@
         </g>
       </svg>
     </div>
-    <div class="title-button exit-fullscreen"
+    <div class="title-button exit-fullscreen middle"
          v-if="show.FullscreenExit"
          @click="handleFullscreenExit">
       <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -59,7 +59,6 @@ export default {
     return {
       showTitlebar: true,
       middleButtonStatus: 'maximize',
-      buttonStyle: null,
       windowInfo: {
         screenWidth: null,
         windowWidth: null,
@@ -67,6 +66,9 @@ export default {
       },
       maximize: false,
     };
+  },
+  props: {
+    currentView: String,
   },
   methods: {
     handleMinimize() {
@@ -107,13 +109,24 @@ export default {
       const sizeOffset = Math.abs(val.screenWidth - val.windowWidth);
       const positionOffset = Math.sqrt((this.windowInfo.windowPosition[0] ** 2) +
         (this.windowInfo.windowPosition[1] ** 2));
-      console.log(sizeOffset, positionOffset);
       if (sizeOffset <= 5 && positionOffset <= 5) {
         this.maximize = true;
       } else {
         this.maximize = false;
       }
-      console.log(this.maximize);
+    },
+    disableMiddleButton() {
+      console.log(this.currentView);
+      if (this.currentView !== 'PlayingView') {
+        const buttons = document.getElementsByClassName('middle');
+        console.log(typeof buttons);
+        Array.prototype.forEach.call(buttons, (element) => {
+          element.style.pointerEvents = 'none';
+          element.style.opacity = '0.2';
+          element.style.webkitAppRegion = 'drag';
+          console.log(element.style.pointerEvents);
+        });
+      }
     },
   },
   beforeMount() {
@@ -127,8 +140,6 @@ export default {
       console.log(this.windowInfo);
       this.titlebarWidth = this.$electron.remote.getCurrentWindow().getSize();
       this.originalSize = this.$electron.remote.getCurrentWindow().getSize();
-      console.log('Window resized!', this.$electron.remote.getCurrentWindow().getSize());
-      console.log('Current maximize status: ', this.middleButtonStatus);
     });
     this.$electron.remote.getCurrentWindow().on('move', () => {
       this.setWindowInfo();
@@ -139,6 +150,7 @@ export default {
     this.$bus.$on('titlebar-hide', () => {
       this.showTitlebar = false;
     });
+    this.disableMiddleButton();
   },
   computed: {
     show() {
