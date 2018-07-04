@@ -43,7 +43,6 @@ function createWindow() {
   });
 
   mainWindow.once('ready-to-show', () => {
-    mainWindow.webContents.send('dom', process.platform);
     mainWindow.show();
   });
 }

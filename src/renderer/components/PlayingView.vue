@@ -12,6 +12,7 @@
       v-show="showMask"></div>
     <div class="video-controller" id="video-controller"
       @mousedown.self="resetDraggingState"
+      @mousedown.right.stop="handleRightClick"
       @mousedown.left.stop.prevent="handleLeftClick"
       @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
@@ -51,6 +52,7 @@ export default {
       showMask: false,
       cursorShow: true,
       cursorDelay: null,
+      popupShow: false,
       mouseDown: false,
       windowStartPosition: null,
       mousedownPosition: null,
@@ -106,19 +108,37 @@ export default {
       this.$bus.$emit('volumeslider-appear');
       if (e.deltaY < 0) {
         if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+          this.$store.commit(
+            'Volume',
+            this.$store.state.PlaybackState.Volume + 0.1,
+          );
         } else {
           this.$store.commit('Volume', 1);
         }
       } else if (e.deltaY > 0) {
         if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+          this.$store.commit(
+            'Volume',
+            this.$store.state.PlaybackState.Volume - 0.1,
+          );
         } else {
           this.$store.commit('Volume', 0);
         }
       }
     },
+    handleRightClick() {
+      if (process.platform !== 'darwin') {
+        const menu = this.$electron.remote.Menu.getApplicationMenu();
+        menu.popup(this.$electron.remote.getCurrentWindow());
+        this.popupShow = true;
+      }
+    },
     handleLeftClick(event) {
+      const menu = this.$electron.remote.Menu.getApplicationMenu();
+      if (this.popupShow === true) {
+        menu.closePopup();
+        this.popupShow = false;
+      }
       // Handle dragging-related variables
       this.mouseDown = true;
       this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
@@ -185,7 +205,12 @@ export default {
   width: 100%;
   height: 50%;
   opacity: 0.3;
-  background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.19) 62%, rgba(0,0,0,0.29) 100%);
+  background-image: linear-gradient(
+    -180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.19) 62%,
+    rgba(0, 0, 0, 0.29) 100%
+  );
 }
 /*
  * Controller
@@ -203,12 +228,27 @@ export default {
   transition: opacity 400ms;
 }
 
-
 @keyframes twinkle {
-  0% {opacity: 0; width: 85px; height: 85px;};
-  3% {opacity: 0; width: 85px; height: 85px;};
-  50% {opacity: 1; width: 185px; height: 185px;};
-  100% {opacity: 0; width: 285px; height: 285px;};
+  0% {
+    opacity: 0;
+    width: 85px;
+    height: 85px;
+  }
+  3% {
+    opacity: 0;
+    width: 85px;
+    height: 85px;
+  }
+  50% {
+    opacity: 1;
+    width: 185px;
+    height: 185px;
+  }
+  100% {
+    opacity: 0;
+    width: 285px;
+    height: 285px;
+  }
 }
 .icon {
   position: absolute;
