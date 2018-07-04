@@ -397,7 +397,7 @@ export default {
       this.toggleSubtitle();
     });
     this.$bus.$on('changeSubtitle', (targetIndex) => {
-      const index = this.$state.PlaybackState.StartIndex + targetIndex;
+      const index = this.$store.state.PlaybackState.StartIndex + targetIndex;
       this.subtitleShow(index);
     });
   },

@@ -7,7 +7,8 @@
         <ul class="subtitle-menu">
           <li class="subtitle-menu-item"
             v-for="(name, index) in subtitleNameArr"
-            :key="index">
+            :key="index"
+            @click.capture.stop.left="subtitleSelect(index)">
             {{name}}
           </li>
         </ul>
@@ -46,14 +47,19 @@ export default {
     toggleSubtitleMenu() {
       this.subtitleMenuAppearFlag = !this.subtitleMenuAppearFlag;
     },
+    subtitleSelect(index) {
+      console.log(index);
+      this.$bus.$emit('changeSubtitle', index);
+    },
   },
   computed: {
     subtitleNameArr() {
       return this.$store.state.PlaybackState.SubtitleNameArr;
     },
     curSubName() {
-      return this.$store.state.PlaybackState.SubtitleNameArr[
-        this.$store.state.PlaybackState.FirstSubIndex];
+      const curIndex = this.$store.state.PlaybackState.FirstSubIndex
+        - this.$store.state.PlaybackState.StartIndex;
+      return this.$store.state.PlaybackState.SubtitleNameArr[curIndex];
     },
   },
   watch: {
@@ -85,6 +91,10 @@ export default {
   right: 90px;
 }
 .video-controller .subtitle-button:hover {
+  cursor: pointer;
+}
+
+.subtitle-menu-item:hover {
   cursor: pointer;
 }
 </style>
