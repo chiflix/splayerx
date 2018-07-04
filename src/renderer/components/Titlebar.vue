@@ -10,7 +10,7 @@
           </g>
         </svg>
       </div>
-      <div class="title-button maximize middle"
+      <div class="title-button maximize middle" :class="{ disabled: currentView === 'LandingView' }"
           v-if="show.Maximize"
           @click.prevent="handleMaximize">
         <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -61,7 +61,7 @@
           </g>
         </svg>
       </div>
-      <div class="title-button maximize middle"
+      <div class="title-button maximize middle" :class="{ disabled: currentView === 'LandingView' }"
           v-if="show.Maximize"
           @click.prevent="handleMaximize">
         <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -171,16 +171,6 @@ export default {
         this.maximize = false;
       }
     },
-    disableMiddleButton() {
-      if (this.currentView !== 'PlayingView') {
-        const buttons = document.getElementsByClassName('middle');
-        Array.prototype.forEach.call(buttons, (element) => {
-          element.style.pointerEvents = 'none';
-          element.style.opacity = '0.2';
-          element.style.webkitAppRegion = 'drag';
-        });
-      }
-    },
   },
   beforeMount() {
     this.setWindowInfo();
@@ -254,6 +244,8 @@ export default {
   text-align: center;
   cursor: pointer;
   -webkit-app-region: no-drag;
+  background-color: rgba(255,255,255,0);
+  transition: background-color 200ms;
 }
 .mac-icons .title-button {
   float: right;
@@ -264,17 +256,16 @@ export default {
   cursor: pointer;
   -webkit-app-region: no-drag;
 }
-
+.win-icons .title-button:hover {
+	background-color: rgba(221, 221, 221, 0.2);
+}
 rect, path {
   fill: #FFFFFF;
 }
-.minimize:hover, .maximize:hover, .restore:hover, .exit-fullscreen:hover {
-  backdrop-filter: blur(10px);
-	background-color: rgba(255,255,255,.2);
-  transition: 0.5s;
-}
-.close:hover {
-  background-color: red;
-  transition: 0.5s;
+.disabled {
+  pointer-events: none;
+  fill: #CCCCCC;
+  opacity: 0.8;
+  -webkit-app-region: drag;
 }
 </style>
