@@ -188,6 +188,7 @@ body {
 
 .wrapper {
   background-color: rgba(0,0,0,0.5);
+  background-image: url('~@/assets/Noise.png');
   height: 100vh;
   width: 100vw;
   z-index: -1;
@@ -204,7 +205,6 @@ body {
     top: 100px;
     left: 45px;
     width: 500px;
-    // overflow: hidden;
     word-break: break-all;
     font-size: 30px;
     font-weight: bold;
@@ -301,10 +301,10 @@ main {
 }
 .button {
   position: absolute;
-  bottom: 57px;
+  bottom: 50px;
   right: 45px;
-  width: 35px;
-  height: 30px;
+  width: 49px;
+  height: 42px;
   font-size: .8em;
   cursor: pointer;
   outline: none;
