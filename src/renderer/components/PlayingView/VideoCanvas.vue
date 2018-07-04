@@ -149,7 +149,6 @@ export default {
         const sub = vid.addTextTrack('subtitles', filename);
         parser.oncue = (cue) => {
           sub.addCue(cue);
-          // console.log(cue);
         };
 
         sub.mode = 'disabled';
@@ -171,7 +170,7 @@ export default {
             console.log('finish reading srt');
           });
 
-        this.subtitleShow(startIndex);
+        this.subtitleShow(startIndex, 'first');
       });
 
 
@@ -190,20 +189,41 @@ export default {
 
       this.$_loadSubNameArr();
     },
-    subtitleShow(index) {
+    // 待改善函数结构
+    // 判断重合情况
+    // 主字幕与副字幕选择同一个字幕情况下，是消去一个字幕还是保持上次的结果？
+    subtitleShow(index, type) {
       const vid = this.$refs.videoCanvas;
-      const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
-      vid.textTracks[firstSubIndex].mode = 'disabled';
-      vid.textTracks[index].mode = 'showing';
-      this.$store.commit('FirstSubIndex', index);
+      if (type === 'first') {
+        const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
+        vid.textTracks[firstSubIndex].mode = 'disabled';
+        vid.textTracks[index].mode = 'showing';
+        this.$store.commit('FirstSubIndex', index);
+      }
+      if (type === 'second') {
+        console.log('showSecondSub');
+        const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
+        console.log(secondSubIndex);
+        console.log(this.$store.state.PlaybackState.FirstSubIndex);
+        if (index !== this.$store.state.PlaybackState.FirstSubIndex) {
+          if (secondSubIndex !== -1) {
+            vid.textTracks[secondSubIndex].mode = 'disabled';
+          }
+          vid.textTracks[index].mode = 'showing';
+          this.$store.commit('SecondSubIndex', index);
+        }
+      }
     },
     toggleSubtitle() {
       const vid = this.$refs.videoCanvas;
       const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
+      const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
       if (vid.textTracks[firstSubIndex].mode === 'disabled') {
         vid.textTracks[firstSubIndex].mode = 'showing';
+        vid.textTracks[secondSubIndex].mode = 'showing';
       } else {
         vid.textTracks[firstSubIndex].mode = 'disabled';
+        vid.textTracks[secondSubIndex].mode = 'disabled';
       }
     },
     /**
@@ -396,9 +416,14 @@ export default {
     this.$bus.$on('toggleSubtitle', () => {
       this.toggleSubtitle();
     });
-    this.$bus.$on('changeSubtitle', (targetIndex) => {
+    // 可以二合一
+    this.$bus.$on('subFirstChange', (targetIndex) => {
       const index = this.$store.state.PlaybackState.StartIndex + targetIndex;
-      this.subtitleShow(index);
+      this.subtitleShow(index, 'first');
+    });
+    this.$bus.$on('subSecondChange', (targetIndex) => {
+      const index = this.$store.state.PlaybackState.StartIndex + targetIndex;
+      this.subtitleShow(index, 'second');
     });
   },
 };
@@ -423,9 +448,12 @@ export default {
 }
 
 // https://www.w3.org/TR/webvtt1/
-// video::cue {
-//   color: yellow;
-//   text-shadow: 0px 0px 2px black;
-//   background-color: transparent;
-// }
+video::cue {
+  color: yellow;
+  font-size: 2vw;
+  text-shadow: 0px 0px 2px black;
+  background-color: transparent;
+  // white-space: normal;
+  line-height: 3vw;
+}
 </style>

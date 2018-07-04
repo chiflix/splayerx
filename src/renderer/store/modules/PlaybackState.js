@@ -9,6 +9,7 @@ const state = {
 
   StartIndex: 0,
   FirstSubIndex: 0,
+  SecondSubIndex: -1,
   SubtitleNameArr: [],
 };
 
@@ -40,6 +41,9 @@ const mutations = {
   },
   FirstSubIndex(state, index) {
     state.FirstSubIndex = index;
+  },
+  SecondSubIndex(state, index) {
+    state.SecondSubIndex = index;
   },
   SubtitleNameArr(state, arr) {
     state.SubtitleNameArr = arr;

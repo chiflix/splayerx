@@ -1,14 +1,26 @@
 <template>
   <div class="subtitle-control">
     <div class="subtitle-control-board"
-      v-show="subtitleCtrlAppearFlag">
+      v-show="subtitleAppearFlag"
+      :style="{bottom: barBottom + 'vw'}">
       <div class="subtitle-menu-wrapper"
         v-show="subtitleMenuAppearFlag">
         <ul class="subtitle-menu">
           <li class="subtitle-menu-item"
             v-for="(name, index) in subtitleNameArr"
             :key="index"
-            @click.capture.stop.left="subtitleSelect(index)">
+            @click.capture.stop.left="firstSubSelect(index)">
+            {{name}}
+          </li>
+        </ul>
+      </div>
+      <div class="subtitle-menu-wrapper"
+        v-show="subSecondMenuAppearFlag">
+        <ul class="subtitle-menu">
+          <li class="subtitle-menu-item"
+            v-for="(name, index) in subtitleNameArr"
+            :key="index"
+            @click.capture.stop.left="secondSubSelect(index)">
             {{name}}
           </li>
         </ul>
@@ -17,6 +29,8 @@
         @click.capture.stop.left="toggleSubtitleMenu">
         {{curSubName}}
       </div>
+      <div class="second-sub-button"
+        @click.capture.stop.left="toggleSecondSubMenu">+</div>
     </div>
     <div class="subtitle-button"
       @click.capture.stop.left="toggleSubtitle">
@@ -35,10 +49,13 @@ export default {
       subtitleAppearFlag: true,
       subtitleCtrlAppearFlag: true,
       subtitleMenuAppearFlag: false,
+      subSecondMenuAppearFlag: false,
+      barBottom: 6,
     };
   },
   methods: {
     toggleSubtitle() {
+      this.subtitleAppearFlag = !this.subtitleAppearFlag;
       this.$bus.$emit('toggleSubtitle');
     },
     toggleSubtitleCtrl() {
@@ -47,9 +64,17 @@ export default {
     toggleSubtitleMenu() {
       this.subtitleMenuAppearFlag = !this.subtitleMenuAppearFlag;
     },
-    subtitleSelect(index) {
-      console.log(index);
-      this.$bus.$emit('changeSubtitle', index);
+    toggleSecondSubMenu() {
+      this.subSecondMenuAppearFlag = !this.subSecondMenuAppearFlag;
+    },
+    // 需要refactor
+    firstSubSelect(index) {
+      // console.log(index);
+      this.$bus.$emit('subFirstChange', index);
+    },
+    secondSubSelect(index) {
+      this.barBottom = 14;
+      this.$bus.$emit('subSecondChange', index);
     },
   },
   computed: {
@@ -76,12 +101,30 @@ export default {
   position: absolute;
   bottom: 0;
   width: 100%;
+
+  // .subtitle-background {
+  //   position: absolute;
+  //   width: 100%;
+  //   height: 300px;
+  //   backdrop-filter: blur(30px);
+  //   background-color: white;
+  //   opacity: 0.3;
+  //   bottom: 0;
+  //   // z-index: 30;
+
+  // }
   .subtitle-control-board {
     position: relative;
-    bottom: 90px;
+    // bottom: 5vw;
     text-align: center;
   }
-  .subtitle-menu-button:hover {
+  .subtitle-menu-button {
+    display: inline;
+  }
+  .second-sub-button {
+    display: inline;
+  }
+  .subtitle-menu-button:hover, .second-sub-button:hover {
     cursor: pointer;
   }
 }
@@ -96,5 +139,9 @@ export default {
 
 .subtitle-menu-item:hover {
   cursor: pointer;
+}
+
+.subtitle-menu-wrapper {
+  background-color: rgba(0, 0, 0, 0.3)
 }
 </style>
