@@ -193,7 +193,6 @@ export default {
     this.$bus.$on('titlebar-hide', () => {
       this.showTitlebar = false;
     });
-    this.disableMiddleButton();
   },
   computed: {
     show() {
@@ -214,39 +213,49 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
 .titlebar {
-  display: flex;
-  flex-wrap: nowrap;
   position: absolute;
   top: 0;
   right: 5px;
-  -webkit-app-region: drag;
   border-radius: 4px 4px 0px 0px;
   z-index: 6;
 }
 .darwin-titlebar {
-  display: flex;
-  flex-wrap: nowrap;
   position: absolute;
   top: 0;
   left: 5px;
-  -webkit-app-region: drag;
   border-radius: 4px 4px 0px 0px;
   z-index: 6;
 }
 
-.win-icons .title-button {
-  float: left;
-  margin: 0px 2px 2px 0px;
-  width: 45px;
-  height: 28px;
-  text-align: center;
-  cursor: pointer;
-  -webkit-app-region: no-drag;
-  background-color: rgba(255,255,255,0);
-  transition: background-color 200ms;
+.win-icons {
+  display: flex;
+  flex-wrap: nowrap;
+  rect, path {
+    fill: #FFFFFF;
+  }
+  .title-button {
+    margin: 0px 2px 2px 0px;
+    width: 45px;
+    height: 28px;
+    text-align: center;
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+    background-color: rgba(255,255,255,0);
+    transition: background-color 200ms;
+  }
+  .title-button:hover {
+    background-color: rgba(221, 221, 221, 0.2);
+  }
+  .disabled {
+    pointer-events: none;
+    fill: #CCCCCC;
+    opacity: 0.3;
+    -webkit-app-region: drag;
+  }
 }
+
 .mac-icons .title-button {
   float: right;
   margin: 0px 2px 2px 0px;
@@ -255,17 +264,5 @@ export default {
   text-align: center;
   cursor: pointer;
   -webkit-app-region: no-drag;
-}
-.win-icons .title-button:hover {
-	background-color: rgba(221, 221, 221, 0.2);
-}
-rect, path {
-  fill: #FFFFFF;
-}
-.disabled {
-  pointer-events: none;
-  fill: #CCCCCC;
-  opacity: 0.8;
-  -webkit-app-region: drag;
 }
 </style>
