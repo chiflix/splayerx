@@ -2,6 +2,16 @@
   <div class="subtitle-control">
     <div class="subtitle-control-board"
       v-show="subtitleCtrlAppearFlag">
+      <div class="subtitle-menu-wrapper"
+        v-show="subtitleMenuAppearFlag">
+        <ul class="subtitle-menu">
+          <li class="subtitle-menu-item"
+            v-for="(name, index) in subtitleNameArr"
+            :key="index">
+            {{name}}
+          </li>
+        </ul>
+      </div>
       <div class="subtitle-menu-button"
         @click.capture.stop.left="toggleSubtitleMenu">
         {{curSubName}}
