@@ -20,6 +20,7 @@
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
       <VolumeControl/>
+      <SubtitleControl/>
       <!-- <AdvanceControl/> -->
     </div>
   </div>
@@ -31,6 +32,7 @@ import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
 import TimeProgressBar from './PlayingView/TimeProgressBar.vue';
 import VolumeControl from './PlayingView/VolumeControl.vue';
 import AdvanceControl from './PlayingView/AdvanceControl.vue';
+import SubtitleControl from './PlayingView/SubtitleControl.vue';
 
 export default {
   name: 'playing-view',
@@ -40,6 +42,7 @@ export default {
     TimeProgressBar,
     VolumeControl,
     AdvanceControl,
+    SubtitleControl,
   },
   data() {
     return {

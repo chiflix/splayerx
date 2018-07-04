@@ -423,9 +423,9 @@ export default {
 }
 
 // https://www.w3.org/TR/webvtt1/
-video::cue {
-  color: yellow;
-  text-shadow: 0px 0px 2px black;
-  background-color: transparent;
-}
+// video::cue {
+//   color: yellow;
+//   text-shadow: 0px 0px 2px black;
+//   background-color: transparent;
+// }
 </style>
