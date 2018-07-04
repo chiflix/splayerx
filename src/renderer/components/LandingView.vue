@@ -13,13 +13,12 @@
         {{ itemInfo().baseName }}
       </div>
       <div class="item-description">
-        {{ itemInfo().baseName }}
       </div>
       <div class="item-timing">
-        {{ timecodeFromSeconds(itemInfo().lastTime) }}
+        {{ timecodeFromSeconds(itemInfo().lastTime) }} / {{ timecodeFromSeconds(itemInfo().duration) }}
       </div>
     </div>
-    <div>
+    <div class="logo-container">
       <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
     </div>
 
@@ -100,6 +99,7 @@ export default {
       return {
         baseName: path.basename(this.item.path, path.extname(this.item.path)),
         lastTime: this.item.lastPlayedTime,
+        duration: this.item.duration,
       };
     },
     onRecentItemMouseover(item, index) {
@@ -187,9 +187,8 @@ body {
 }
 
 .wrapper {
-  background: radial-gradient( ellipse at top center,
-  rgba(0, 0, 0, .9) 20%,
-  rgba(44, 44, 44, .95) 80%);
+  background-color: rgba(0,0,0,0.5);
+  background-image: url('~@/assets/Noise.png');
   height: 100vh;
   width: 100vw;
   z-index: -1;
@@ -201,24 +200,26 @@ body {
   z-index: 2;
 
   .item-name {
-    position: absolute;
+    position: relative;
     top: 100px;
     left: 45px;
+    width: 500px;
+    word-break: break-all;
     font-size: 30px;
     font-weight: bold;
   }
   .item-description {
-    position: absolute;
+    position: relative;
     opacity: 0.4;
-    top: 140px;
+    top: 100px;
     left: 45px;
     font-size: 20px;
     font-weight: lighter;
   }
   .item-timing {
-    position: absolute;
+    position: relative;
+    top: 100px;
     opacity: 0.4;
-    top: 160px;
     left: 45px;
     font-size: 20px;
     font-weight: lighter;
@@ -231,19 +232,22 @@ body {
     -webkit-user-drag: none;
   }
 }
-.logo {
-  height: 136px;
-  width: 136px;
-  margin-top: 80px;
+.logo-container {
+  text-align: center;
+  padding-top: 80px;
+  .logo {
+    height: 136px;
+    width: 136px;
+  }
 }
 
 main {
-  text-align: center;
   justify-content: space-between;
 }
 
 .welcome {
   margin-top: 15px;
+  text-align: center;
   z-index: 1;
   .title {
     font-size: 7vw;
@@ -285,7 +289,7 @@ main {
       color: gray;
       cursor: pointer;
       margin-right: 15px;
-      background-size: contain;
+      background-size: cover;
       background-color: black;
       background-repeat: no-repeat;
       background-position: center center;
@@ -296,10 +300,10 @@ main {
 }
 .button {
   position: absolute;
-  bottom: 57px;
+  bottom: 50px;
   right: 45px;
-  width: 35px;
-  height: 30px;
+  width: 49px;
+  height: 42px;
   font-size: .8em;
   cursor: pointer;
   outline: none;
