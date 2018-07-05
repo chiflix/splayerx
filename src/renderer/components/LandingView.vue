@@ -2,6 +2,10 @@
 <div class="wrapper">
   <main>
     <titlebar currentView="LandingView"></titlebar>
+    <div class="mask"
+      @mousedown.left.stop="handleLeftClick"
+      @mouseup.left.stop="handleMouseUp"
+      @mousemove="handleMouseMove"></div>
     <div class="background-image"
       v-if="showShortcutImage">
       <img
@@ -10,20 +14,18 @@
         {{ itemInfo().baseName }}
       </div>
       <div class="item-description">
-        {{ itemInfo().baseName }}
       </div>
       <div class="item-timing">
-        {{ timecodeFromSeconds(itemInfo().lastTime) }}
+        {{ timecodeFromSeconds(itemInfo().lastTime) }} / {{ timecodeFromSeconds(itemInfo().duration) }}
       </div>
     </div>
-    <div>
+    <div class="logo-container">
       <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
     </div>
 
     <div class="welcome">
       <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
     </div>
-
     <div class="controller">
       <div class="playlist"
         v-if="hasRecentPlaylist">
@@ -35,7 +37,7 @@
               width: item.chosen ? '140px' : '114px',
               height: item.chosen ? '80px' : '65px',
             }"
-          @click="openFile(item.path)"
+          @click.stop="openFile(item.path)"
           @mouseover="onRecentItemMouseover(item, index)"
           @mouseout="onRecentItemMouseout(index)">
         </div>
@@ -43,7 +45,7 @@
     </div>
     <div
       @click="open('./')">
-      <img class="button" src="~@/assets/icon-open.svg" type="image/svg+xml">
+      <img class="button" src="~@/assets/icon-open.svg" type="image/svg+xml" style="-webkit-user-drag: none;">
     </div>
   </main>
 </div>
@@ -60,6 +62,10 @@ export default {
       lastPlayedFile: [],
       backgroundUrl: '',
       showShortcutImage: false,
+      isDragging: false,
+      mouseDown: false,
+      windowStartPosition: null,
+      mousedownPosition: null,
     };
   },
   components: {
@@ -96,6 +102,7 @@ export default {
       return {
         baseName: path.basename(this.item.path, path.extname(this.item.path)),
         lastTime: this.item.lastPlayedTime,
+        duration: this.item.duration,
       };
     },
     onRecentItemMouseover(item, index) {
@@ -111,7 +118,7 @@ export default {
       this.$set(this.lastPlayedFile[index], 'chosen', false);
     },
     open(link) {
-      if (this.showingPopupDialog) {
+      if (this.showingPopupDialog || this.isDragging) {
         // skip if there is already a popup dialog
         return;
       }
@@ -139,6 +146,31 @@ export default {
         }
       });
     },
+    handleLeftClick(event) {
+      // Handle dragging-related variables
+      this.mouseDown = true;
+      this.isDragging = false;
+      this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
+      this.mousedownPosition = [event.screenX, event.screenY];
+    },
+    handleMouseMove(event) {
+      // Handle dragging-related variables and methods
+      if (this.mouseDown) {
+        if (this.windowStartPosition !== null) {
+          this.isDragging = true;
+          const startPos = this.mousedownPosition;
+          const offset = [event.screenX - startPos[0], event.screenY - startPos[1]];
+          const winStartPos = this.windowStartPosition;
+          this.$electron.remote.getCurrentWindow().setPosition(
+            winStartPos[0] + offset[0],
+            winStartPos[1] + offset[1],
+          );
+        }
+      }
+    },
+    handleMouseUp() {
+      this.mouseDown = false;
+    },
   },
 };
 </script>
@@ -158,9 +190,8 @@ body {
 }
 
 .wrapper {
-  background: radial-gradient( ellipse at top center,
-  rgba(0, 0, 0, .9) 20%,
-  rgba(44, 44, 44, .95) 80%);
+  background-color: rgba(0,0,0,0.5);
+  background-image: url('~@/assets/Noise.png');
   height: 100vh;
   width: 100vw;
   z-index: -1;
@@ -169,26 +200,30 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
+  backdrop-filter: blur(30px);
+  z-index: 2;
 
   .item-name {
-    position: absolute;
+    position: relative;
     top: 100px;
     left: 45px;
+    width: 500px;
+    word-break: break-all;
     font-size: 30px;
     font-weight: bold;
   }
   .item-description {
-    position: absolute;
+    position: relative;
     opacity: 0.4;
-    top: 140px;
+    top: 100px;
     left: 45px;
     font-size: 20px;
     font-weight: lighter;
   }
   .item-timing {
-    position: absolute;
+    position: relative;
+    top: 100px;
     opacity: 0.4;
-    top: 160px;
     left: 45px;
     font-size: 20px;
     font-weight: lighter;
@@ -198,21 +233,26 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
+    -webkit-user-drag: none;
   }
 }
-.logo {
-  height: 136px;
-  width: 136px;
-  margin-top: 80px;
+.logo-container {
+  text-align: center;
+  padding-top: 80px;
+  .logo {
+    height: 136px;
+    width: 136px;
+  }
 }
 
 main {
-  text-align: center;
   justify-content: space-between;
 }
 
 .welcome {
   margin-top: 15px;
+  text-align: center;
+  z-index: 1;
   .title {
     font-size: 7vw;
     margin-bottom: 6px;
@@ -222,6 +262,13 @@ main {
     color: gray;
     margin-bottom: 10px;
   }
+}
+
+.mask {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
 }
 
 .controller {
@@ -246,25 +293,27 @@ main {
       color: gray;
       cursor: pointer;
       margin-right: 15px;
-      background-size: contain;
+      background-size: cover;
       background-color: black;
       background-repeat: no-repeat;
       background-position: center center;
       transition: width 150ms ease-out, height 150ms ease-out;
+      z-index: 4;
     }
   }
 }
 .button {
   position: absolute;
-  bottom: 57px;
+  bottom: 50px;
   right: 45px;
-  width: 35px;
-  height: 30px;
+  width: 49px;
+  height: 42px;
   font-size: .8em;
   cursor: pointer;
   outline: none;
   transition: all 0.15s ease;
   border: 0px;
+  z-index: 5;
 }
 
 </style>
