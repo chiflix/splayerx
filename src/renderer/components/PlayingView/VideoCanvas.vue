@@ -10,6 +10,7 @@
       @durationchange="onDurationChange"
       :src="src">
     </video>
+    <div class='subtitle'></div>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -156,6 +157,7 @@ export default {
           if (!shownTextTrack) {
             // sub.mode = 'showing';
             shownTextTrack = true;
+            this.$bus.$emit('subtitle-loaded');
           }
         };
         loadingTextTrack = true;
@@ -242,7 +244,11 @@ export default {
       const subNameARR = [];
       const startIndex = this.$store.state.PlaybackState.StartIndex;
       for (let i = startIndex; i < vid.textTracks.length; i += 1) {
-        subNameARR.push(vid.textTracks[i].label);
+        subNameARR.push({
+          name: vid.textTracks[i].label,
+          index: i - startIndex,
+          isSelected: false,
+        });
       }
       this.$store.commit('SubtitleNameArr', subNameARR);
     },
@@ -456,15 +462,5 @@ export default {
     height: 100%;
     object-fit: contain;
   }
-}
-
-// https://www.w3.org/TR/webvtt1/
-video::cue {
-  color: yellow;
-  font-size: 2vw;
-  text-shadow: 0px 0px 2px black;
-  background-color: transparent;
-  // white-space: normal;
-  line-height: 0;
 }
 </style>

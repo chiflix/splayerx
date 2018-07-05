@@ -7,10 +7,10 @@
         v-show="subtitleMenuAppearFlag">
         <ul class="subtitle-menu">
           <li class="subtitle-menu-item"
-            v-for="(name, index) in subtitleNameArr"
-            :key="index"
-            @click.capture.stop.left="firstSubSelect(index)">
-            {{name}}
+            v-for="item in subtitleNameArr"
+            :key="item.index"
+            @click.capture.stop.left="firstSubSelect(item.index)">
+            {{item.name}}
           </li>
         </ul>
       </div>
@@ -18,18 +18,21 @@
         v-show="subSecondMenuAppearFlag">
         <ul class="subtitle-menu">
           <li class="subtitle-menu-item"
-            v-for="(name, index) in subtitleNameArr"
-            :key="index"
-            @click.capture.stop.left="secondSubSelect(index)">
-            {{name}}
+            v-for="item in subtitleNameArr"
+            :key="item.index"
+            :class="{selected: item.index === isSelected}"
+            @click.capture.stop.left="secondSubSelect(item.index)">
+            {{item.name}}
           </li>
         </ul>
       </div>
       <div class="subtitle-menu-button"
+        v-if="subtitleLoadedFlag"
         @click.capture.stop.left="toggleSubtitleMenu">
         {{curSubName}}
       </div>
       <div class="second-sub-button"
+        v-if="subtitleLoadedFlag"
         @click.capture.stop.left="toggleSecondSubMenu">
         +
       </div>
@@ -39,6 +42,7 @@
       </div>
     </div>
     <div class="subtitle-button"
+      v-if="subtitleLoadedFlag"
       @click.capture.stop.left="toggleSubtitle">
       <img src="" alt="Button">
     </div>
@@ -56,6 +60,7 @@ export default {
       subtitleCtrlAppearFlag: true,
       subtitleMenuAppearFlag: false,
       subSecondMenuAppearFlag: false,
+      subtitleLoadedFlag: false,
       barBottom: 6,
     };
   },
@@ -96,14 +101,19 @@ export default {
     curSubName() {
       const curIndex = this.$store.state.PlaybackState.FirstSubIndex
         - this.$store.state.PlaybackState.StartIndex;
-      return this.$store.state.PlaybackState.SubtitleNameArr[curIndex];
+      return this.$store.state.PlaybackState.SubtitleNameArr[curIndex].name;
+    },
+    isSelected() {
+      return this.$store.state.PlaybackState.FirstSubIndex;
     },
   },
   watch: {
 
   },
   created() {
-
+    this.$bus.$on('subtitle-loaded', () => {
+      this.subtitleLoadedFlag = true;
+    });
   },
 };
 </script>
@@ -155,5 +165,10 @@ export default {
 
 .subtitle-menu-wrapper {
   background-color: rgba(0, 0, 0, 0.3)
+}
+.selected {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.6;
 }
 </style>

@@ -9,6 +9,7 @@ const state = {
 
   StartIndex: 0,
   FirstSubIndex: 0,
+  // SecondSubIndex的选择，当未选择字幕时该设置为何值
   SecondSubIndex: -1,
   SubtitleNameArr: [],
 };
