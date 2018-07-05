@@ -318,14 +318,15 @@ export default {
       if (type === 'first') {
         const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
         vid.textTracks[firstSubIndex].mode = 'disabled';
-        vid.textTracks[index].mode = 'showing';
+        vid.textTracks[firstSubIndex].oncuechange = null;
+        this.$_onCueChangeEventAdd(vid.textTracks[firstSubIndex]);
+        vid.textTracks[index].mode = 'hidden';
         this.$store.commit('FirstSubIndex', index);
       }
       if (type === 'second') {
+        // 需要重写
         console.log('showSecondSub');
         const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
-        console.log(secondSubIndex);
-        console.log(this.$store.state.PlaybackState.FirstSubIndex);
         if (index !== this.$store.state.PlaybackState.FirstSubIndex) {
           if (secondSubIndex !== -1) {
             vid.textTracks[secondSubIndex].mode = 'disabled';
