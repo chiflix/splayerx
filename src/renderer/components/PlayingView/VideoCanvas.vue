@@ -217,18 +217,25 @@ export default {
     toggleSubtitle() {
       const vid = this.$refs.videoCanvas;
       const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
-      const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
       if (vid.textTracks[firstSubIndex].mode === 'disabled') {
         vid.textTracks[firstSubIndex].mode = 'showing';
-        vid.textTracks[secondSubIndex].mode = 'showing';
       } else {
         vid.textTracks[firstSubIndex].mode = 'disabled';
+      }
+    },
+    toggleSecondSub() {
+      const vid = this.$refs.videoCanvas;
+      const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
+      if (vid.textTracks[secondSubIndex].mode === 'disabled') {
+        vid.textTracks[secondSubIndex].mode = 'showing';
+      } else {
         vid.textTracks[secondSubIndex].mode = 'disabled';
       }
     },
     /**
      * 不需要这么麻烦，可以直接在loadTextTrack中获得字幕文件名，
      * 存入数组中后commit
+     * 是不是做一个对象数组，一个name，一个isChoosed？
      */
     $_loadSubNameArr() {
       const vid = this.$refs.videoCanvas;
@@ -416,6 +423,9 @@ export default {
     this.$bus.$on('toggleSubtitle', () => {
       this.toggleSubtitle();
     });
+    this.$bus.$on('toggleSecondSub', () => {
+      this.toggleSecondSub();
+    });
     // 可以二合一
     this.$bus.$on('subFirstChange', (targetIndex) => {
       const index = this.$store.state.PlaybackState.StartIndex + targetIndex;
@@ -454,6 +464,6 @@ video::cue {
   text-shadow: 0px 0px 2px black;
   background-color: transparent;
   // white-space: normal;
-  line-height: 3vw;
+  line-height: 0;
 }
 </style>

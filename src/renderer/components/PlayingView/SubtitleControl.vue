@@ -30,7 +30,13 @@
         {{curSubName}}
       </div>
       <div class="second-sub-button"
-        @click.capture.stop.left="toggleSecondSubMenu">+</div>
+        @click.capture.stop.left="toggleSecondSubMenu">
+        +
+      </div>
+      <div class='second-sub-ctl'
+        @click.capture.stop.left="toggleSecondSub">
+        second-sub-control
+      </div>
     </div>
     <div class="subtitle-button"
       @click.capture.stop.left="toggleSubtitle">
@@ -57,6 +63,12 @@ export default {
     toggleSubtitle() {
       this.subtitleAppearFlag = !this.subtitleAppearFlag;
       this.$bus.$emit('toggleSubtitle');
+    },
+    toggleSecondSub() {
+      // 关闭第二字幕和取消第二字幕的两套逻辑
+      // 加一个flag确定开关，控制高度
+      this.$bus.$emit('toggleSecondSub');
+      this.barBottom = 6;
     },
     toggleSubtitleCtrl() {
       this.subtitleCtrlAppearFlag = !this.subtitleCtrlAppearFlag;
