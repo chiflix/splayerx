@@ -334,6 +334,7 @@ export default {
         }
       }
     },
+    // 需要优化
     toggleSubtitle() {
       const vid = this.$refs.videoCanvas;
       const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;

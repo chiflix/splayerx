@@ -41,7 +41,9 @@
         second-sub-control
       </div>
     </div> -->
-    <div class="btn-sub-ctrl">
+    <transition name="fade" appear>
+    <div class="btn-sub-ctrl"
+      v-if="subCtrlBtnAppearFlag">
       <div class='btn-menu-wrapper'
         v-show="btnMenuAppearFalg">
         <ul class="btn-menu">
@@ -62,6 +64,7 @@
         <img src="~@/assets/icon-subtitle.svg" alt="Button">
       </div>
     </div>
+    </transition>
   </div>
 </template>;
 
@@ -78,10 +81,18 @@ export default {
       subSecondMenuAppearFlag: false,
       subtitleLoadedFlag: false,
       btnMenuAppearFalg: false,
+      subCtrlBtnAppearFlag: false,
       barBottom: 6,
+      timeoutIdOfSubCtrlDisappearDelay: 0,
     };
   },
   methods: {
+    subCtrlAppear() {
+      this.subCtrlBtnAppearFlag = true;
+    },
+    subCtrlHide() {
+      this.subCtrlBtnAppearFlag = false;
+    },
     showSubtitle() {
       this.subtitleAppearFlag = !this.subtitleAppearFlag;
       this.$bus.$emit('toggleSubtitle');
@@ -111,7 +122,13 @@ export default {
       this.$bus.$emit('subSecondChange', index);
     },
     toggleButtonMenu() {
+      this.$_clearTimeoutDelay();
       this.btnMenuAppearFalg = !this.btnMenuAppearFalg;
+    },
+    $_clearTimeoutDelay() {
+      if (this.timeoutIdOfSubCtrlDisappearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfSubCtrlDisappearDelay);
+      }
     },
   },
   computed: {
@@ -131,8 +148,22 @@ export default {
 
   },
   created() {
-    this.$bus.$on('subtitle-loaded', () => {
-      this.subtitleLoadedFlag = true;
+    // this.$bus.$on('subtitle-loaded', () => {
+    //   this.subtitleLoadedFlag = true;
+    // });
+    this.$bus.$on('sub-ctrl-appear', () => {
+      this.subCtrlAppear();
+      if (this.timeoutIdOfSubCtrlDisappearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfSubCtrlDisappearDelay);
+        this.timeoutIdOfSubCtrlDisappearDelay
+          = setTimeout(this.subCtrlHide, 3000);
+      } else {
+        this.timeoutIdOfSubCtrlDisappearDelay
+          = setTimeout(this.subCtrlHide, 3000);
+      }
+    });
+    this.$bus.$on('sub-ctrl-hide', () => {
+      this.subCtrlHide();
     });
   },
 };
@@ -195,5 +226,21 @@ export default {
   pointer-events: none;
   cursor: default;
   color: red;
+}
+
+.fade-enter-active {
+ transition: opacity 100ms;
+}
+
+.fade-leave-active {
+ transition: opacity 200ms;
+}
+
+.fade-enter-to, .fade-leave {
+ opacity: 1;
+}
+
+.fade-enter, .fade-leave-to {
+ opacity: 0;
 }
 </style>

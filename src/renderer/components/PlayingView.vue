@@ -17,7 +17,7 @@
       @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mousemove="handleMouseMove"
-      @mouseout="hideAllWidgets"
+      @mouseout.self="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
@@ -88,12 +88,15 @@ export default {
       this.$bus.$emit('volumecontroller-appear');
       this.$bus.$emit('progressbar-appear');
       this.$bus.$emit('timecode-appear');
+      this.$bus.$emit('sub-ctrl-appear');
     },
     hideAllWidgets() {
+      console.log(11111);
       this.showMask = false;
       this.$bus.$emit('volumecontroller-hide');
       this.$bus.$emit('progressbar-hide');
       this.$bus.$emit('timecode-hide');
+      this.$bus.$emit('sub-ctrl-hide');
     },
     resetDraggingState() {
       this.isDragging = false;
