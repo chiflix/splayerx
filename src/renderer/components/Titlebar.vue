@@ -52,54 +52,33 @@
       </div>
     </div>
     <div class="mac-icons" v-if="isDarwin">
-      <div class="title-button minimize"
-          @click="handleMinimize">
-        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <defs></defs>
-          <g id="minimize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <rect fill="#000000" x="90" y="70" width="50" height="5"></rect>
-          </g>
-        </svg>
+      <div class="title-button close"
+          @click="handleClose"
+          @mouseover="handleMouseOver">
+        <img :src="macTitlebar.normal" />
       </div>
-      <div class="title-button maximize middle" :class="{ disabled: currentView === 'LandingView' }"
+      <div class="title-button minimize"
+          @click="handleMinimize"
+          @mouseover="handleMouseOver">
+        <img :src="macTitlebar.normal" />
+      </div>
+      <div class="title-button maximize middle"
           v-if="show.Maximize"
-          @click.prevent="handleMaximize">
-        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <defs></defs>
-          <g id="fullscreen" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <path d="M90,45 L140,45 L140,95 L90,95 L90,45 Z M95,50 L95,90 L135,90 L135,50 L95,50 Z" fill="#000000"></path>
-          </g>
-        </svg>
+          @click.prevent="handleMaximize"
+          @mouseover="handleMouseOver">
+        <img :src="macTitlebar.normal" />
       </div>
       <div class="title-button restore middle"
           v-if="show.Restore"
-          @click="handleRestore">
-        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <defs></defs>
-          <g id="maximize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <path d="M128,87 L128,82.0504173 L139,82.0504173 L139,46.0504173 L103,46.0504173 L103,57 L98,57 L98,41 L144,41 L144,87 L128,87 Z" fill="#000000"></path>
-              <path d="M87,52 L133,52 L133,98 L87,98 L87,52 Z M92,57.0504173 L92,93.0504173 L128,93.0504173 L128,57.0504173 L92,57.0504173 Z" fill="#000000"></path>
-          </g>
-        </svg>
+          @click="handleRestore"
+          @mouseover="handleMouseOver">
+        <img :src="macTitlebar.normal" />
       </div>
       <div class="title-button exit-fullscreen middle"
           v-if="show.FullscreenExit"
-          @click="handleFullscreenExit">
-        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <defs></defs>
-          <g id="resize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <path d="M128.537757,60 L136,60 L136,65 L125,65 L120,65 L120,49 L125,49 L125,56.4661613 L137.724334,43.7418268 L141.260132,47.2776245 L128.537757,60 Z M104,84.5377566 L92.2795834,96.2581732 L88.7437858,92.7223755 L100.466161,81 L93,81 L93,76 L109,76 L109,81 L109,92 L104,92 L104,84.5377566 Z" fill="#000000"></path>
-          </g>
-        </svg>
-      </div>
-      <div class="title-button close"
-          @click="handleClose">
-        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <defs></defs>
-          <g id="close" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <path d="M118.537757,70 L141.260132,92.7223755 L137.724334,96.2581732 L115.001959,73.5357977 L92.2795834,96.2581732 L88.7437858,92.7223755 L111.466161,70 L88.7437858,47.2776245 L92.2795834,43.7418268 L115.001959,66.4642023 L137.724334,43.7418268 L141.260132,47.2776245 L118.537757,70 Z" fill="#000000"></path>
-          </g>
-        </svg>
+          @click="handleFullscreenExit"
+          @mouseover="handleMouseOver">
+        <img :src="macTitlebar.normal" />
       </div>
     </div>
   </div>
@@ -119,6 +98,19 @@ export default {
       },
       maximize: false,
       isDarwin: process.platform === 'darwin',
+      macTitlebar: {
+        normalSrc: require('../assets/macos-normal.svg'),
+        closeSrc: require('../assets/macos-close.svg'),
+        disabledSrc: require('../assets/macos-disabled.svg'),
+        minimizeSrc: require('../assets/macos-minimize.svg'),
+        fullscreenSrc: require('../assets/macos-fullscreen.svg'),
+        restoreSrc: require('../assets/macos-restore.svg'),
+        normal: null,
+        close: null,
+        disabled: null,
+        minimize: null,
+        fullscreen: null,
+      },
     };
   },
   props: {
@@ -143,6 +135,9 @@ export default {
     handleFullscreenExit() {
       this.$electron.remote.getCurrentWindow().setFullScreen(false);
     },
+    handleMouseOver(e) {
+      console.log(e.path[1].className);
+    },
     statusChange() {
       const window = this.$electron.remote.getCurrentWindow();
       if (window.isFullScreen()) {
@@ -161,6 +156,13 @@ export default {
       this.windowInfo.windowPosition = this.$electron.remote.getCurrentWindow().getPosition();
       this.updateMaximize(this.windowInfo);
     },
+    setMacTitlebar() {
+      this.macTitlebar.normal = this.macTitlebar.normalSrc;
+      this.macTitlebar.close = this.macTitlebar.normalSrc;
+      this.macTitlebar.minimize = this.macTitlebar.normalSrc;
+      this.macTitlebar.fullscreen = this.macTitlebar.normalSrc;
+      this.macTitlebar.restore = this.macTitlebar.normalSrc;
+    },
     updateMaximize(val) {
       const sizeOffset = Math.abs(val.screenWidth - val.windowWidth);
       const positionOffset = Math.sqrt((this.windowInfo.windowPosition[0] ** 2) +
@@ -175,6 +177,7 @@ export default {
   beforeMount() {
     this.setWindowInfo();
     this.statusChange();
+    this.setMacTitlebar();
   },
   mounted() {
     this.$electron.remote.getCurrentWindow().on('resize', () => {
@@ -220,49 +223,47 @@ export default {
   right: 5px;
   border-radius: 4px 4px 0px 0px;
   z-index: 6;
+  .win-icons {
+    display: flex;
+    flex-wrap: nowrap;
+    rect, path {
+      fill: #FFFFFF;
+    }
+    .title-button {
+      margin: 0px 2px 2px 0px;
+      width: 45px;
+      height: 28px;
+      text-align: center;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      background-color: rgba(255,255,255,0);
+      transition: background-color 200ms;
+    }
+    .title-button:hover {
+      background-color: rgba(221, 221, 221, 0.2);
+    }
+    .disabled {
+      pointer-events: none;
+      fill: #CCCCCC;
+      opacity: 0.3;
+      -webkit-app-region: drag;
+    }
+  }
 }
 .darwin-titlebar {
   position: absolute;
-  top: 0;
-  left: 5px;
+  top: 6px;
+  left: 8px;
   border-radius: 4px 4px 0px 0px;
   z-index: 6;
-}
-
-.win-icons {
-  display: flex;
-  flex-wrap: nowrap;
-  rect, path {
-    fill: #FFFFFF;
+  .mac-icons {
+    display: flex;
+    flex-wrap: nowrap;
   }
   .title-button {
-    margin: 0px 2px 2px 0px;
-    width: 45px;
-    height: 28px;
-    text-align: center;
-    cursor: pointer;
-    -webkit-app-region: no-drag;
-    background-color: rgba(255,255,255,0);
-    transition: background-color 200ms;
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
   }
-  .title-button:hover {
-    background-color: rgba(221, 221, 221, 0.2);
-  }
-  .disabled {
-    pointer-events: none;
-    fill: #CCCCCC;
-    opacity: 0.3;
-    -webkit-app-region: drag;
-  }
-}
-
-.mac-icons .title-button {
-  float: right;
-  margin: 0px 2px 2px 0px;
-  width: 45px;
-  height: 28px;
-  text-align: center;
-  cursor: pointer;
-  -webkit-app-region: no-drag;
 }
 </style>
