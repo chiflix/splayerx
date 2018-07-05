@@ -1,5 +1,8 @@
 <template>
-  <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }" v-show="showTitlebar">
+  <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }" 
+    v-show="showTitlebar"
+    @mouseover="handleMouseOver"
+    @mouseleave="handleMouseLeave">
     <div class="win-icons" v-if="!isDarwin">
       <div class="title-button minimize"
           @click="handleMinimize">
@@ -51,34 +54,36 @@
         </svg>
       </div>
     </div>
-    <div class="mac-icons" v-if="isDarwin">
+    <div class="mac-icons" v-if="isDarwin" >
       <div class="title-button close"
-          @click="handleClose"
-          @mouseover="handleMouseOver">
-        <img :src="macTitlebar.normal" />
+          @click="handleClose">
+        <svg viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <g id="macos-close" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <circle id="normal" stroke="#808086" stroke-width="0.5" fill="#ACACAC" cx="6" cy="6" r="5.75"></circle>
+              <path v-show="macShowup" d="M7.20208156,6 L8.81711343,7.61503187 C9.0576764,7.85559484 9.0576764,8.24562446 8.81711343,8.48618743 L8.48618743,8.81711343 C8.24562446,9.0576764 7.85559484,9.0576764 7.61503187,8.81711343 L6,7.20208156 L4.38496813,8.81711343 C4.14440516,9.0576764 3.75437554,9.0576764 3.51381257,8.81711343 L3.18288657,8.48618743 C2.9423236,8.24562446 2.9423236,7.85559484 3.18288657,7.61503187 L4.79791844,6 L3.18288657,4.38496813 C2.9423236,4.14440516 2.9423236,3.75437554 3.18288657,3.51381257 L3.51381257,3.18288657 C3.75437554,2.9423236 4.14440516,2.9423236 4.38496813,3.18288657 L6,4.79791844 L7.61503187,3.18288657 C7.85559484,2.9423236 8.24562446,2.9423236 8.48618743,3.18288657 L8.81711343,3.51381257 C9.0576764,3.75437554 9.0576764,4.14440516 8.81711343,4.38496813 L7.20208156,6 Z" id="close" fill="#3B3B40"></path>
+          </g>
+        </svg>
       </div>
       <div class="title-button minimize"
-          @click="handleMinimize"
-          @mouseover="handleMouseOver">
-        <img :src="macTitlebar.normal" />
+          @click="handleMinimize">
+        <svg viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <g id="macos-minimize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <circle id="normal" stroke="#808086" stroke-width="0.5" fill="#ACACAC" cx="6" cy="6" r="5.75"></circle>
+              <rect id="minimize" v-show="macShowup && middleButtonStatus !== 'exit-fullscreen'" fill="#3B3B40" x="2.25" y="5.14999998" width="7.5" height="1.70000005" rx="0.1232"></rect>
+              <circle id="disabled" v-show="middleButtonStatus === 'exit-fullscreen'" stroke="#808086" stroke-width="0.5" fill="#DDDDDD" cx="6" cy="6" r="5.75"></circle>
+          </g>
+        </svg>
       </div>
-      <div class="title-button maximize middle"
-          v-if="show.Maximize"
-          @click.prevent="handleMaximize"
-          @mouseover="handleMouseOver">
-        <img :src="macTitlebar.normal" />
-      </div>
-      <div class="title-button restore middle"
-          v-if="show.Restore"
-          @click="handleRestore"
-          @mouseover="handleMouseOver">
-        <img :src="macTitlebar.normal" />
-      </div>
-      <div class="title-button exit-fullscreen middle"
-          v-if="show.FullscreenExit"
-          @click="handleFullscreenExit"
-          @mouseover="handleMouseOver">
-        <img :src="macTitlebar.normal" />
+      <div class="title-button maximize"
+          @click="handleMaximize">
+        <svg viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <g id="macos-maximize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+              <circle id="normal" stroke="#808086" stroke-width="0.5" fill="#ACACAC" cx="6" cy="6" r="5.75"></circle>
+              <circle id="disabled" v-show="currentView === 'LandingView'" stroke="#808086" stroke-width="0.5" fill="#DDDDDD" cx="6" cy="6" r="5.75"></circle>
+              <path id="fullscreen" v-show="macShowup && currentView !== 'LandingView' && middleButtonStatus === 'maximize'" d="M3.22720992,4.58865097 L7.49916992,8.80209097 L3.81240992,8.80209097 C3.48921288,8.80209097 3.22720992,8.54008801 3.22720992,8.21689097 L3.22720992,4.58865097 Z M8.77279008,7.41134903 L4.50083008,3.19790903 L8.18759008,3.19790903 C8.51078712,3.19790903 8.77279008,3.45991199 8.77279008,3.78310903 L8.77279008,7.41134903 Z" fill="#3B3B40"></path>
+              <path id="restore" v-show="macShowup && middleButtonStatus === 'exit-fullscreen'" d="M6,1.78656 L10.27196,6 L6.5852,6 C6.26200296,6 6,5.73799704 6,5.4148 L6,1.78656 Z M6,10.21344 L1.72804,6 L5.4148,6 C5.73799704,6 6,6.26200296 6,6.5852 L6,10.21344 Z" fill="#3B3B40"></path>
+          </g>
+        </svg>
       </div>
     </div>
   </div>
@@ -98,19 +103,7 @@ export default {
       },
       maximize: false,
       isDarwin: process.platform === 'darwin',
-      macTitlebar: {
-        normalSrc: require('../assets/macos-normal.svg'),
-        closeSrc: require('../assets/macos-close.svg'),
-        disabledSrc: require('../assets/macos-disabled.svg'),
-        minimizeSrc: require('../assets/macos-minimize.svg'),
-        fullscreenSrc: require('../assets/macos-fullscreen.svg'),
-        restoreSrc: require('../assets/macos-restore.svg'),
-        normal: null,
-        close: null,
-        disabled: null,
-        minimize: null,
-        fullscreen: null,
-      },
+      macShowup: false,
     };
   },
   props: {
@@ -121,10 +114,17 @@ export default {
       this.$electron.remote.getCurrentWindow().minimize();
     },
     handleMaximize() {
-      if (this.isDarwin) {
-        this.$electron.remote.getCurrentWindow().setFullScreen(true);
+      if (this.isDarwin && this.currentView !== 'LandingView') {
+        if (this.middleButtonStatus === 'maximize') {
+          this.$electron.remote.getCurrentWindow().setFullScreen(true);
+        } else if (this.middleButtonStatus === 'restore') {
+          this.handleClose();
+        } else {
+          this.handleFullscreenExit();
+        }
+      } else if (!this.isDarwin) {
+        this.$electron.remote.getCurrentWindow().maximize();
       }
-      this.$electron.remote.getCurrentWindow().maximize();
     },
     handleClose() {
       this.$electron.remote.getCurrentWindow().close();
@@ -135,8 +135,11 @@ export default {
     handleFullscreenExit() {
       this.$electron.remote.getCurrentWindow().setFullScreen(false);
     },
-    handleMouseOver(e) {
-      console.log(e.path[1].className);
+    handleMouseOver() {
+      this.macShowup = true;
+    },
+    handleMouseLeave() {
+      this.macShowup = false;
     },
     statusChange() {
       const window = this.$electron.remote.getCurrentWindow();
@@ -156,13 +159,6 @@ export default {
       this.windowInfo.windowPosition = this.$electron.remote.getCurrentWindow().getPosition();
       this.updateMaximize(this.windowInfo);
     },
-    setMacTitlebar() {
-      this.macTitlebar.normal = this.macTitlebar.normalSrc;
-      this.macTitlebar.close = this.macTitlebar.normalSrc;
-      this.macTitlebar.minimize = this.macTitlebar.normalSrc;
-      this.macTitlebar.fullscreen = this.macTitlebar.normalSrc;
-      this.macTitlebar.restore = this.macTitlebar.normalSrc;
-    },
     updateMaximize(val) {
       const sizeOffset = Math.abs(val.screenWidth - val.windowWidth);
       const positionOffset = Math.sqrt((this.windowInfo.windowPosition[0] ** 2) +
@@ -177,7 +173,6 @@ export default {
   beforeMount() {
     this.setWindowInfo();
     this.statusChange();
-    this.setMacTitlebar();
   },
   mounted() {
     this.$electron.remote.getCurrentWindow().on('resize', () => {
@@ -256,6 +251,8 @@ export default {
   left: 8px;
   border-radius: 4px 4px 0px 0px;
   z-index: 6;
+  height: 20px;
+  box-sizing: content-box;
   .mac-icons {
     display: flex;
     flex-wrap: nowrap;
