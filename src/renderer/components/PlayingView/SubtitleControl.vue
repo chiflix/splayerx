@@ -1,6 +1,6 @@
 <template>
   <div class="subtitle-control">
-    <div class="subtitle-control-board"
+    <!-- <div class="subtitle-control-board"
       v-show="subtitleAppearFlag"
       :style="{bottom: barBottom + 'vw'}">
       <div class="subtitle-menu-wrapper"
@@ -27,7 +27,7 @@
         </ul>
       </div>
       <div class="subtitle-menu-button"
-        v-if="subtitleLoadedFlag"
+        v-if="subtitleLoadedFlag" 
         @click.capture.stop.left="toggleSubtitleMenu">
         {{curSubName}}
       </div>
@@ -40,11 +40,27 @@
         @click.capture.stop.left="toggleSecondSub">
         second-sub-control
       </div>
-    </div>
-    <div class="subtitle-button"
-      v-if="subtitleLoadedFlag"
-      @click.capture.stop.left="toggleSubtitle">
-      <img src="" alt="Button">
+    </div> -->
+    <div class="btn-sub-ctrl">
+      <div class='btn-menu-wrapper'
+        v-show="btnMenuAppearFalg">
+        <ul class="btn-menu">
+          <li class="btn-menu-item"
+            @click.stop.capture.left="showSubtitle"
+            :class="{show: subtitleAppearFlag}">
+            <img src="" alt="Show">
+          </li>
+          <li class="btn-menu-item"
+            @click.stop.capture.left="showSubtitle"
+            :class="{show: !subtitleAppearFlag}">
+            <img src="" alt="Close">
+          </li>
+        </ul>
+      </div>
+      <div class='btn-wrapper'
+        @click.capture.stop.left="toggleButtonMenu">
+        <img src="~@/assets/icon-subtitle.svg" alt="Button">
+      </div>
     </div>
   </div>
 </template>;
@@ -61,11 +77,12 @@ export default {
       subtitleMenuAppearFlag: false,
       subSecondMenuAppearFlag: false,
       subtitleLoadedFlag: false,
+      btnMenuAppearFalg: false,
       barBottom: 6,
     };
   },
   methods: {
-    toggleSubtitle() {
+    showSubtitle() {
       this.subtitleAppearFlag = !this.subtitleAppearFlag;
       this.$bus.$emit('toggleSubtitle');
     },
@@ -92,6 +109,9 @@ export default {
     secondSubSelect(index) {
       this.barBottom = 14;
       this.$bus.$emit('subSecondChange', index);
+    },
+    toggleButtonMenu() {
+      this.btnMenuAppearFalg = !this.btnMenuAppearFalg;
     },
   },
   computed: {
@@ -150,12 +170,12 @@ export default {
     cursor: pointer;
   }
 }
-.video-controller .subtitle-button {
+.video-controller .btn-sub-ctrl {
   position: absolute;
-  bottom: 30px;
+  bottom: 10px;
   right: 90px;
 }
-.video-controller .subtitle-button:hover {
+.video-controller .btn-sub-ctrl:hover {
   cursor: pointer;
 }
 
@@ -170,5 +190,10 @@ export default {
   pointer-events: none;
   cursor: default;
   opacity: 0.6;
+}
+.show {
+  pointer-events: none;
+  cursor: default;
+  color: red;
 }
 </style>
