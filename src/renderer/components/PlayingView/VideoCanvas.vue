@@ -31,6 +31,7 @@ export default {
       videoWidth: 0,
       videoHeight: 0,
       timeUpdateIntervalID: null,
+      activeCue: null,
       subNameArr: [],
     };
   },
@@ -370,6 +371,11 @@ export default {
         });
       }
       this.$store.commit('SubtitleNameArr', subNameARR);
+    },
+    $_onCueChangeEventAdd(textTrack) {
+      textTrack.oncuechange = (cue) => {
+        this.activeCue = cue;
+      };
     },
   },
   computed: {
