@@ -12,19 +12,14 @@
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.$electron.remote.getCurrentWindow().getSize()[0] - 20 + 'px'}"
       @mousedown.left="onProgresssBarClick">
-      <div class="screenshot-background"
-        v-show="showScreenshot"
-        :style="{ left: positionOfScreenshot +'px', width: widthOfThumbnail + 'px', height: heightofScreenshot +'px' }">
-        <div class="screenshot">
-          <video ref="thumbnailVideoCanvas"
-            @loadedmetadata="onMetaLoaded"
-            :src="src">
-          </video>
-          <div class="time">
-            {{ screenshotContext }}
-          </div>
-        </div>
-      </div>
+      <Thumbnail
+        v-if="showScreenshot"
+        :src=src
+        :positionOfScreenshot="positionOfScreenshot"
+        :widthOfThumbnail="widthOfThumbnail"
+        :heightofScreenshot="heightofScreenshot"
+        :screenshotContent="screenshotContent"
+        :currentTime="thumbnailCurrentTime"/>
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
         <div class="line"
@@ -52,8 +47,12 @@ import {
   PROGRESS_BAR_SLIDER_HIDE_HEIGHT,
   FOOL_PROOFING_BAR_WIDTH,
 } from '@/constants';
+import Thumbnail from './Thumbnail.vue';
 
 export default {
+  components: {
+    Thumbnail,
+  },
   props: {
     src: {
       type: String,
@@ -80,12 +79,10 @@ export default {
       percentageVideoDraged: 0,
       flagProgressBarDraged: false,
       widthOfThumbnail: 0,
+      thumbnailCurrentTime: 0,
     };
   },
   methods: {
-    onMetaLoaded() {
-      this.$refs.thumbnailVideoCanvas.pause();
-    },
     appearProgressSlider() {
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
@@ -178,7 +175,7 @@ export default {
         this.percentageOfReadyToPlay = 0;
       } else {
         this.percentageOfReadyToPlay = progress;
-        this.$refs.thumbnailVideoCanvas.currentTime
+        this.thumbnailCurrentTime
           = progress * this.$store.state.PlaybackState.Duration;
       }
       this.showScreenshot = true;
@@ -207,7 +204,6 @@ export default {
       document.onmouseup = () => {
         document.onmousemove = null;
         this.onProgressSliderMousedown = false;
-        this.showScreenshot = false;
         // 可以考虑其他的方案
         if (this.flagProgressBarDraged) {
           this.$bus.$emit('seek', this.percentageVideoDraged
@@ -247,7 +243,7 @@ export default {
       }
       return this.widthOfReadyToPlay - halfWidthOfScreenshot;
     },
-    screenshotContext() {
+    screenshotContent() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
     },
@@ -347,43 +343,7 @@ export default {
    left: 20px;
    bottom: 0;
    height: 100%;
-
-   .screenshot {
-     position: relative;
-     border: 1px solid transparent;
-     border-radius: 1px;
-     background-color: #000;
-     background-clip: padding-box;
-     display: flex;
-     justify-content: center;
-     align-items: center;
-
-     video {
-       height: 100%;
-       width: 99%;
-     }
-
-     .time {
-       color: rgba(255, 255, 255, 0.7);
-       font-size: 24px;
-       letter-spacing: 0.2px;
-       position: absolute;
-       width: 100%;
-       text-align: center;
-     }
-   }
-
-   .screenshot-background {
-     position: absolute;
-     width: 100%;
-     bottom: 26px;
-     box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 5px;
-     background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5) 0%, rgba(84, 84, 84, 0.5) 100%);
-     border-radius: 1px;
-     z-index: 100;
-     -webkit-app-region: no-drag;
-   }
- }
+  }
  /* Progress bar's responsive trigger area. */
   @media screen and (max-width: 854px) {
     height: 20px;
