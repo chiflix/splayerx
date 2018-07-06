@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import Titlebar from '@/components/Titlebar.vue';
+import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
 import TimeProgressBar from './PlayingView/TimeProgressBar.vue';

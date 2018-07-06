@@ -52,8 +52,8 @@
 </template>
 
 <script>
-import Titlebar from '@/components/Titlebar.vue';
 import path from 'path';
+import Titlebar from './Titlebar.vue';
 export default {
   name: 'landing-view',
   data() {
