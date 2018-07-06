@@ -91,6 +91,7 @@ export default {
       },
       maximize: false,
       isDarwin: process.platform === 'darwin',
+      titlebarDelay: 0,
     };
   },
   props: {
@@ -153,6 +154,15 @@ export default {
         this.maximize = false;
       }
     },
+    appearTitlebar() {
+      if (this.titlebarDelay !== 0) {
+        clearTimeout(this.titlebarDelay);
+      }
+      this.showTitlebar = true;
+    },
+    hideTitlebar() {
+      this.showTitlebar = false;
+    },
   },
   beforeMount() {
     this.setWindowInfo();
@@ -170,10 +180,16 @@ export default {
       this.setWindowInfo();
     });
     this.$bus.$on('titlebar-appear', () => {
-      this.showTitlebar = true;
+      this.appearTitlebar();
+      if (this.showTitlebar !== 0) {
+        clearTimeout(this.titlebarDelay);
+        this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
+      } else {
+        this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
+      }
     });
     this.$bus.$on('titlebar-hide', () => {
-      this.showTitlebar = false;
+      this.hideTitlebar();
     });
   },
   computed: {
