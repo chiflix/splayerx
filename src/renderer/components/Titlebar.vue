@@ -55,16 +55,22 @@
       </div>
     </div>
     <div class="mac-icons" v-if="isDarwin">
-      <div id="close" class="title-button">
+      <div id="close" class="title-button"
+        @click="handleClose">
         <img src="~@/assets/mac-titlebar-icons.png" />
       </div>
-      <div id="minimize" class="title-button">
+      <div id="minimize" class="title-button"
+        @click="handleMinimize">
         <img :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }" src="~@/assets/mac-titlebar-icons.png" />
       </div>
-      <div id="maximize" class="title-button">
+      <div id="maximize" class="title-button"
+        @click="handleMacMaximize"
+        v-show="middleButtonStatus !== 'exit-fullscreen'">
         <img :class="{ disabled: currentView === 'LandingView'}" src="~@/assets/mac-titlebar-icons.png" />
       </div>
-      <div id="restore" class="title-button">
+      <div id="restore" class="title-button"
+        @click="handleFullscreenExit"
+        v-show="middleButtonStatus === 'exit-fullscreen'">
         <img src="~@/assets/mac-titlebar-icons.png" />
       </div>
     </div>
@@ -96,17 +102,7 @@ export default {
       this.$electron.remote.getCurrentWindow().minimize();
     },
     handleMaximize() {
-      if (this.isDarwin && this.currentView !== 'LandingView') {
-        if (this.middleButtonStatus === 'maximize') {
-          this.$electron.remote.getCurrentWindow().setFullScreen(true);
-        } else if (this.middleButtonStatus === 'restore') {
-          this.handleClose();
-        } else {
-          this.handleFullscreenExit();
-        }
-      } else if (!this.isDarwin) {
-        this.$electron.remote.getCurrentWindow().maximize();
-      }
+      this.$electron.remote.getCurrentWindow().maximize();
     },
     handleClose() {
       this.$electron.remote.getCurrentWindow().close();
@@ -118,6 +114,11 @@ export default {
       this.$electron.remote.getCurrentWindow().setFullScreen(false);
     },
     // OS-specific methods
+    handleMacMaximize() {
+      if (this.currentView !== 'LandingView') {
+        this.$electron.remote.getCurrentWindow().setFullScreen(true);
+      }
+    },
     handleMouseOver() {
       this.macShowup = true;
     },
@@ -236,6 +237,20 @@ export default {
   z-index: 6;
   height: 20px;
   box-sizing: content-box;
+  &:hover {
+    #close img {
+      object-position: 0 0;
+    }
+    #minimize img {
+      object-position: 0 -24px;
+    }
+    #maximize img {
+      object-position: 0 -48px;
+    }
+    #restore img {
+      object-position: 0 -72px;
+    }
+  }
   .mac-icons {
     display: flex;
     flex-wrap: nowrap;
@@ -250,12 +265,10 @@ export default {
     width: 12px;
     height: 12px;
     -webkit-user-drag: none;
+    -webkit-app-region: no-drag;
   }
   #close img {
     object-position: 0 -96px;
-    &:hover {
-      object-position: 0 0;
-    }
     &:active {
       object-position: 0 -12px;
     }
@@ -265,9 +278,6 @@ export default {
     &.disabled {
       object-position: 0 -108px;
       pointer-events: none;
-    }
-    &:hover {
-      object-position: 0 -24px;
     }
     &:active {
       object-position: 0 -36px;
@@ -279,18 +289,12 @@ export default {
       object-position: 0 -108px;
       pointer-events: none;
     }
-    &:hover {
-      object-position: 0 -48px;
-    }
     &:active {
       object-position: 0 -60px;
     }
   }
   #restore img {
     object-position: 0 -96px;
-    &:hover {
-      object-position: 0 -72px;
-    }
     &:active {
       object-position: 0 -84px;
     }
