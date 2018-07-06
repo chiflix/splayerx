@@ -57,6 +57,7 @@ export default {
           path,
           shortCut: '',
           lastPlayedTime: 0,
+          duration: 0,
         };
         if (err) {
           // TODO: proper error handle
