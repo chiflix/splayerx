@@ -54,36 +54,18 @@
         </svg>
       </div>
     </div>
-    <div class="mac-icons" v-if="isDarwin" >
-      <div class="title-button close"
-          @click="handleClose">
-        <svg viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <g id="macos-close" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <circle id="normal" stroke="#808086" stroke-width="0.5" fill="#ACACAC" cx="6" cy="6" r="5.75"></circle>
-              <path v-show="macShowup" d="M7.20208156,6 L8.81711343,7.61503187 C9.0576764,7.85559484 9.0576764,8.24562446 8.81711343,8.48618743 L8.48618743,8.81711343 C8.24562446,9.0576764 7.85559484,9.0576764 7.61503187,8.81711343 L6,7.20208156 L4.38496813,8.81711343 C4.14440516,9.0576764 3.75437554,9.0576764 3.51381257,8.81711343 L3.18288657,8.48618743 C2.9423236,8.24562446 2.9423236,7.85559484 3.18288657,7.61503187 L4.79791844,6 L3.18288657,4.38496813 C2.9423236,4.14440516 2.9423236,3.75437554 3.18288657,3.51381257 L3.51381257,3.18288657 C3.75437554,2.9423236 4.14440516,2.9423236 4.38496813,3.18288657 L6,4.79791844 L7.61503187,3.18288657 C7.85559484,2.9423236 8.24562446,2.9423236 8.48618743,3.18288657 L8.81711343,3.51381257 C9.0576764,3.75437554 9.0576764,4.14440516 8.81711343,4.38496813 L7.20208156,6 Z" id="close" fill="#3B3B40"></path>
-          </g>
-        </svg>
+    <div class="mac-icons" v-if="isDarwin">
+      <div id="close" class="title-button">
+        <img src="~@/assets/mac-titlebar-icons.png" />
       </div>
-      <div class="title-button minimize"
-          @click="handleMinimize">
-        <svg viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <g id="macos-minimize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <circle id="normal" stroke="#808086" stroke-width="0.5" fill="#ACACAC" cx="6" cy="6" r="5.75"></circle>
-              <rect id="minimize" v-show="macShowup && middleButtonStatus !== 'exit-fullscreen'" fill="#3B3B40" x="2.25" y="5.14999998" width="7.5" height="1.70000005" rx="0.1232"></rect>
-              <circle id="disabled" v-show="middleButtonStatus === 'exit-fullscreen'" stroke="#808086" stroke-width="0.5" fill="#DDDDDD" cx="6" cy="6" r="5.75"></circle>
-          </g>
-        </svg>
+      <div id="minimize" class="title-button">
+        <img :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }" src="~@/assets/mac-titlebar-icons.png" />
       </div>
-      <div class="title-button maximize"
-          @click="handleMaximize">
-        <svg viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <g id="macos-maximize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <circle id="normal" stroke="#808086" stroke-width="0.5" fill="#ACACAC" cx="6" cy="6" r="5.75"></circle>
-              <circle id="disabled" v-show="currentView === 'LandingView'" stroke="#808086" stroke-width="0.5" fill="#DDDDDD" cx="6" cy="6" r="5.75"></circle>
-              <path id="fullscreen" v-show="macShowup && currentView !== 'LandingView' && middleButtonStatus === 'maximize'" d="M3.22720992,4.58865097 L7.49916992,8.80209097 L3.81240992,8.80209097 C3.48921288,8.80209097 3.22720992,8.54008801 3.22720992,8.21689097 L3.22720992,4.58865097 Z M8.77279008,7.41134903 L4.50083008,3.19790903 L8.18759008,3.19790903 C8.51078712,3.19790903 8.77279008,3.45991199 8.77279008,3.78310903 L8.77279008,7.41134903 Z" fill="#3B3B40"></path>
-              <path id="restore" v-show="macShowup && middleButtonStatus === 'exit-fullscreen'" d="M6,1.78656 L10.27196,6 L6.5852,6 C6.26200296,6 6,5.73799704 6,5.4148 L6,1.78656 Z M6,10.21344 L1.72804,6 L5.4148,6 C5.73799704,6 6,6.26200296 6,6.5852 L6,10.21344 Z" fill="#3B3B40"></path>
-          </g>
-        </svg>
+      <div id="maximize" class="title-button">
+        <img :class="{ disabled: currentView === 'LandingView'}" src="~@/assets/mac-titlebar-icons.png" />
+      </div>
+      <div id="restore" class="title-button">
+        <img src="~@/assets/mac-titlebar-icons.png" />
       </div>
     </div>
   </div>
@@ -103,13 +85,13 @@ export default {
       },
       maximize: false,
       isDarwin: process.platform === 'darwin',
-      macShowup: false,
     };
   },
   props: {
     currentView: String,
   },
   methods: {
+    // Methods to handle window behavior
     handleMinimize() {
       this.$electron.remote.getCurrentWindow().minimize();
     },
@@ -135,6 +117,7 @@ export default {
     handleFullscreenExit() {
       this.$electron.remote.getCurrentWindow().setFullScreen(false);
     },
+    // OS-specific methods
     handleMouseOver() {
       this.macShowup = true;
     },
@@ -261,6 +244,56 @@ export default {
     width: 12px;
     height: 12px;
     margin-right: 8px;
+  }
+  img {
+    object-fit: none;
+    width: 12px;
+    height: 12px;
+    -webkit-user-drag: none;
+  }
+  #close img {
+    object-position: 0 -96px;
+    &:hover {
+      object-position: 0 0;
+    }
+    &:active {
+      object-position: 0 -12px;
+    }
+  }
+  #minimize img {
+    object-position: 0 -96px;
+    &.disabled {
+      object-position: 0 -108px;
+      pointer-events: none;
+    }
+    &:hover {
+      object-position: 0 -24px;
+    }
+    &:active {
+      object-position: 0 -36px;
+    }
+  }
+  #maximize img {
+    object-position: 0 -96px;
+    &.disabled {
+      object-position: 0 -108px;
+      pointer-events: none;
+    }
+    &:hover {
+      object-position: 0 -48px;
+    }
+    &:active {
+      object-position: 0 -60px;
+    }
+  }
+  #restore img {
+    object-position: 0 -96px;
+    &:hover {
+      object-position: 0 -72px;
+    }
+    &:active {
+      object-position: 0 -84px;
+    }
   }
 }
 </style>
