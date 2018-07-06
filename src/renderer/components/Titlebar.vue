@@ -4,54 +4,28 @@
     @mouseover="handleMouseOver"
     @mouseleave="handleMouseLeave">
     <div class="win-icons" v-if="!isDarwin">
-      <div class="title-button minimize"
-          @click="handleMinimize">
-        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <defs></defs>
-          <g id="minimize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <rect fill="#000000" x="90" y="70" width="50" height="5"></rect>
-          </g>
-        </svg>
+      <div id="minimize" class="title-button"
+        @click="handleMinimize">
+        <img src="~@/assets/windows-titlebar-icons.png" />
       </div>
-      <div class="title-button maximize middle" :class="{ disabled: currentView === 'LandingView' }"
-          v-if="show.Maximize"
-          @click.prevent="handleMaximize">
-        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <defs></defs>
-          <g id="fullscreen" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <path d="M90,45 L140,45 L140,95 L90,95 L90,45 Z M95,50 L95,90 L135,90 L135,50 L95,50 Z" fill="#000000"></path>
-          </g>
-        </svg>
+      <div id="maximize" class="title-button"
+        @click="handleMaximize"
+        v-show="middleButtonStatus === 'maximize'">
+        <img :class="{ disabled: currentView === 'LandingView' }" src="~@/assets/windows-titlebar-icons.png" />
       </div>
-      <div class="title-button restore middle"
-          v-if="show.Restore"
-          @click="handleRestore">
-        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <defs></defs>
-          <g id="maximize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <path d="M128,87 L128,82.0504173 L139,82.0504173 L139,46.0504173 L103,46.0504173 L103,57 L98,57 L98,41 L144,41 L144,87 L128,87 Z" fill="#000000"></path>
-              <path d="M87,52 L133,52 L133,98 L87,98 L87,52 Z M92,57.0504173 L92,93.0504173 L128,93.0504173 L128,57.0504173 L92,57.0504173 Z" fill="#000000"></path>
-          </g>
-        </svg>
+      <div id="restore" class="title-button"
+        @click="handleRestore"
+        v-show="middleButtonStatus === 'restore'">
+        <img src="~@/assets/windows-titlebar-icons.png" />
       </div>
-      <div class="title-button exit-fullscreen middle"
-          v-if="show.FullscreenExit"
-          @click="handleFullscreenExit">
-        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <defs></defs>
-          <g id="resize" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <path d="M128.537757,60 L136,60 L136,65 L125,65 L120,65 L120,49 L125,49 L125,56.4661613 L137.724334,43.7418268 L141.260132,47.2776245 L128.537757,60 Z M104,84.5377566 L92.2795834,96.2581732 L88.7437858,92.7223755 L100.466161,81 L93,81 L93,76 L109,76 L109,81 L109,92 L104,92 L104,84.5377566 Z" fill="#000000"></path>
-          </g>
-        </svg>
+      <div id="exit-fullscreen" class="title-button"
+        @click="handleFullscreenExit"
+        v-show="middleButtonStatus === 'exit-fullscreen'">
+        <img src="~@/assets/windows-titlebar-icons.png" />
       </div>
-      <div class="title-button close"
-          @click="handleClose">
-        <svg viewBox="0 0 230 140" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <defs></defs>
-          <g id="close" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <path d="M118.537757,70 L141.260132,92.7223755 L137.724334,96.2581732 L115.001959,73.5357977 L92.2795834,96.2581732 L88.7437858,92.7223755 L111.466161,70 L88.7437858,47.2776245 L92.2795834,43.7418268 L115.001959,66.4642023 L137.724334,43.7418268 L141.260132,47.2776245 L118.537757,70 Z" fill="#000000"></path>
-          </g>
-        </svg>
+      <div id="close" class="title-button"
+        @click="handleClose">
+        <img src="~@/assets/windows-titlebar-icons.png" />
       </div>
     </div>
     <div class="mac-icons" v-if="isDarwin">
@@ -66,7 +40,7 @@
       <div id="maximize" class="title-button"
         @click="handleMacMaximize"
         v-show="middleButtonStatus !== 'exit-fullscreen'">
-        <img :class="{ disabled: currentView === 'LandingView'}" src="~@/assets/mac-titlebar-icons.png" />
+        <img :class="{ disabled: currentView === 'LandingView' }" src="~@/assets/mac-titlebar-icons.png" />
       </div>
       <div id="restore" class="title-button"
         @click="handleFullscreenExit"
@@ -221,15 +195,10 @@ export default {
   .win-icons {
     display: flex;
     flex-wrap: nowrap;
-    rect, path {
-      fill: #FFFFFF;
-    }
     .title-button {
       margin: 0px 2px 2px 0px;
       width: 45px;
       height: 28px;
-      text-align: center;
-      cursor: pointer;
       -webkit-app-region: no-drag;
       background-color: rgba(255,255,255,0);
       transition: background-color 200ms;
@@ -237,12 +206,35 @@ export default {
     .title-button:hover {
       background-color: rgba(221, 221, 221, 0.2);
     }
-    .disabled {
-      pointer-events: none;
-      fill: #CCCCCC;
-      opacity: 0.3;
+    .title-button:active {
+      background-color: rgba(221, 221, 221, 0.5);
+    }
+  }
+  img {
+    object-fit: none;
+    width: 45px;
+    height: 28px;
+    -webkit-user-drag: none;
+    -webkit-app-region: no-drag;
+  }
+  #minimize img {
+    object-position: 0 0
+  }
+  #maximize img {
+    object-position: 0 -28px;
+    &.disabled {
+      object-position: 0 -140px;
       -webkit-app-region: drag;
     }
+  }
+  #restore img {
+    object-position: 0 -56px;
+  }
+  #exit-fullscreen img {
+    object-position: 0 -84px;
+  }
+  #close img {
+    object-position: 0 -112px;
   }
 }
 .darwin-titlebar {
