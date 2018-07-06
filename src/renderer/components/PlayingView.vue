@@ -120,8 +120,6 @@ export default {
         }
       }
     },
-<<<<<<< HEAD
-=======
     handleRightClick() {
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
@@ -159,13 +157,6 @@ export default {
       this.mouseDown = false;
       this.togglePlayback();
     },
-    pauseIconPause() {
-      this.$refs.pauseIcon.style.animationPlayState = 'paused';
-    },
-    playIconPause() {
-      this.$refs.playIcon.style.animationPlayState = 'paused';
-    },
->>>>>>> develop
   },
   mounted() {
     this.$bus.$emit('play');
@@ -219,42 +210,6 @@ export default {
   transition: opacity 400ms;
 }
 
-<<<<<<< HEAD
 
 
-=======
-@keyframes twinkle {
-  0% {
-    opacity: 0;
-    width: 85px;
-    height: 85px;
-  }
-  3% {
-    opacity: 0;
-    width: 85px;
-    height: 85px;
-  }
-  50% {
-    opacity: 1;
-    width: 185px;
-    height: 185px;
-  }
-  100% {
-    opacity: 0;
-    width: 285px;
-    height: 285px;
-  }
-}
-.icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  animation: twinkle 400ms;
-  animation-iteration-count: infinite;
-  animation-play-state: paused;
-  z-index: 1;
-}
->>>>>>> develop
 </style>
