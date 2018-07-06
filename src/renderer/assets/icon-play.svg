@@ -1,41 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="85px" height="85px" viewBox="108 0 85 172" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 48.2 (47327) - http://www.bohemiancoding.com/sketch -->
-    <title>icon-play</title>
+<svg width="170px" height="171px" viewBox="0 0 170 171" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>player/icon/play</title>
     <desc>Created with Sketch.</desc>
     <defs>
-        <filter x="-39.9%" y="-39.9%" width="179.8%" height="179.7%" filterUnits="objectBoundingBox" id="filter-1">
+        <filter x="-41.2%" y="-41.6%" width="182.3%" height="183.2%" filterUnits="objectBoundingBox" id="filter-1">
             <feGaussianBlur stdDeviation="22.4857955 0" in="SourceGraphic"></feGaussianBlur>
         </filter>
-        <filter x="-4.6%" y="-4.6%" width="109.3%" height="109.3%" filterUnits="objectBoundingBox" id="filter-2">
+        <filter x="-4.8%" y="-4.8%" width="109.6%" height="109.7%" filterUnits="objectBoundingBox" id="filter-2">
             <feGaussianBlur stdDeviation="2.62073864 0" in="SourceGraphic"></feGaussianBlur>
         </filter>
-        <path d="M0,169.882812 L0,0.6640625 L169.101562,85.2734375 L0,169.882812 Z M18.75,31.015625 L18.75,139.53125 L127.148438,85.2734375 L18.75,31.015625 Z" id="path-3"></path>
-        <radialGradient cx="50%" cy="54.0688058%" fx="50%" fy="54.0688058%" r="35.4492055%" id="radialGradient-5">
-            <stop stop-color="#FFFFFF" offset="0%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0" offset="100%"></stop>
-        </radialGradient>
-        <linearGradient x1="74.8286995%" y1="-9.88210257%" x2="0%" y2="100%" id="linearGradient-6">
+        <linearGradient x1="74.8286995%" y1="-9.88210257%" x2="0%" y2="100%" id="linearGradient-3">
             <stop stop-color="#FFFFFF" offset="0%"></stop>
             <stop stop-color="#C2C2C2" offset="65.0888871%"></stop>
             <stop stop-color="#DBDBDB" stop-opacity="0.74535779" offset="80.8035714%"></stop>
             <stop stop-color="#FFFFFF" stop-opacity="0" offset="100%"></stop>
         </linearGradient>
     </defs>
-    <g id="播放/暂停在中间-质感" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(-545.000000, -324.000000)" opacity="0.9">
-        <g id="icon-play" transform="translate(611.000000, 325.000000)">
-            <path d="M0,169.882812 L0,0.6640625 L169.101562,85.2734375 L0,169.882812 Z M18.75,31.015625 L18.75,139.53125 L127.148438,85.2734375 L18.75,31.015625 Z" id="play" fill="#000000" opacity="0.0501019022" style="mix-blend-mode: overlay;" filter="url(#filter-1)"></path>
-            <path d="M0,169.882812 L0,0.6640625 L169.101562,85.2734375 L0,169.882812 Z M18.75,31.015625 L18.75,139.53125 L127.148438,85.2734375 L18.75,31.015625 Z" id="play" fill="#FFFFFF" opacity="0.5" style="mix-blend-mode: overlay;" filter="url(#filter-2)"></path>
-            <path d="M0,169.882812 L0,0.6640625 L169.101562,85.2734375 L0,169.882812 Z M18.75,31.015625 L18.75,139.53125 L127.148438,85.2734375 L18.75,31.015625 Z" id="play" fill-opacity="0.325407609" fill="#FFFFFF" opacity="0.54540308"></path>
-            <g id="play-hoverlight">
-                <mask id="mask-4" fill="white">
-                    <use xlink:href="#path-3"></use>
-                </mask>
-                <g id="play-shape" opacity="0.54540308"></g>
-                <circle id="Oval-2" fill="url(#radialGradient-5)" mask="url(#mask-4)" cx="82" cy="71" r="146"></circle>
-                <circle id="Oval-2" fill="url(#radialGradient-5)" opacity="0.291610054" mask="url(#mask-4)" cx="122" cy="30" r="105"></circle>
-            </g>
-            <path d="M-0.5,170.69208 L-0.5,-0.145205246 L170.218977,85.2734375 L-0.5,170.69208 Z M19.25,31.8250332 L19.25,138.721842 L126.031369,85.2734375 L19.25,31.8250332 Z" id="play-border" stroke="url(#linearGradient-6)" opacity="0.277513587"></path>
+    <g id="player/icon/play" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.9">
+        <g id="icon-play">
+            <path d="M160.159061,90.0837244 L8.94250171,165.744401 C4.00295356,168.215886 0,165.741401 0,160.21831 L0,11.0004396 C0,5.48260427 4.00369439,3.00323448 8.94250171,5.47434943 L160.159061,81.1350256 C165.098609,83.6065112 165.097868,87.6126095 160.159061,90.0837244 Z M122.148438,85.609375 L23.75,37.3515625 L23.75,133.867187 L122.148438,85.609375 Z" id="play--overlay" fill="#FFFFFF" opacity="0.366548295" style="mix-blend-mode: overlay;"></path>
+            <path d="M160.159061,89.7477869 L8.94250171,165.408463 C4.00295356,167.879949 0,165.405463 0,159.882373 L0,10.6645021 C0,5.14666677 4.00369439,2.66729698 8.94250171,5.13841193 L160.159061,80.7990881 C165.098609,83.2705737 165.097868,87.276672 160.159061,89.7477869 Z M122.148438,85.2734375 L23.75,37.015625 L23.75,133.53125 L122.148438,85.2734375 Z" id="play--motion-blur-black" fill="#000000" opacity="0.0501019022" style="mix-blend-mode: overlay;" filter="url(#filter-1)"></path>
+            <path d="M160.159061,89.7477869 L8.94250171,165.408463 C4.00295356,167.879949 0,165.405463 0,159.882373 L0,10.6645021 C0,5.14666677 4.00369439,2.66729698 8.94250171,5.13841193 L160.159061,80.7990881 C165.098609,83.2705737 165.097868,87.276672 160.159061,89.7477869 Z M122.148438,85.2734375 L23.75,37.015625 L23.75,133.53125 L122.148438,85.2734375 Z" id="play--motion-blur" fill="#FFFFFF" opacity="0.5" style="mix-blend-mode: overlay;" filter="url(#filter-2)"></path>
+            <path d="M160.159061,89.7477869 L8.94250171,165.408463 C4.00295356,167.879949 0,165.405463 0,159.882373 L0,10.6645021 C0,5.14666677 4.00369439,2.66729698 8.94250171,5.13841193 L160.159061,80.7990881 C165.098609,83.2705737 165.097868,87.276672 160.159061,89.7477869 Z M122.148438,85.2734375 L23.75,37.015625 L23.75,133.53125 L122.148438,85.2734375 Z" id="play--bg-blur" fill-opacity="0.325407609" fill="#FFFFFF" opacity="0.54540308"></path>
+            <path d="M160.382792,90.1949385 L9.16623245,165.855615 C3.89445015,168.493332 -0.5,165.777466 -0.5,159.882373 L-0.5,10.6645021 C-0.5,4.77320223 3.89649762,2.05456695 9.16623245,4.69126033 L160.382792,80.3519365 C165.690458,83.0076087 165.690199,87.5393959 160.382792,90.1949385 Z M121.012922,85.2734375 L24.25,37.8177355 L24.25,132.72914 L121.012922,85.2734375 Z" id="play--border" stroke="url(#linearGradient-3)" opacity="0.277513587"></path>
         </g>
     </g>
 </svg>
