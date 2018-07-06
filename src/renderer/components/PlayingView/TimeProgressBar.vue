@@ -4,7 +4,7 @@
     @mouseover.stop="appearProgressSlider"
     @mouseout.stop="hideProgressSlider"
     @mousemove="onProgresssBarMove"
-    v-show="true">
+    v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.left.stop="videoRestart">
       <div class="button"></div>
@@ -27,6 +27,7 @@
         :style="{ left: readyBarLeft + 'px', width: readyBarWidth +'px' }"></div>
       </div>
       <div class="progress-played" ref="playedSlider"
+        :class="{cursorOn: !isOnProgress}"
         :style="{ width: playedBarWidth +'px' }">
         <div class="line"></div>
       </div>
@@ -76,16 +77,19 @@ export default {
       widthOfThumbnail: 0,
       thumbnailCurrentTime: 0,
       isCursorLeft: false,
+      isOnProgress: false,
     };
   },
   methods: {
     appearProgressSlider() {
+      this.isOnProgress = true;
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
     },
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
+        this.isOnProgress = false;
         this.showScreenshot = false;
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
@@ -104,8 +108,6 @@ export default {
     },
     videoRestart() {
       this.$bus.$emit('seek', 0);
-      this.cursorPosition = 0;
-      this.isCursorLeft = false;
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -147,7 +149,6 @@ export default {
     $_effectProgressBarDraged(e) {
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
       this.cursorPosition = cursorPosition;
-      console.log(this.cursorPosition);
       if (cursorPosition < this.curProgressBarEdge) {
         this.isCursorLeft = true;
       } else {
@@ -212,16 +213,19 @@ export default {
     // 是不是watch isCursorLeft更好？
     readyBarLeft() {
       if (this.isCursorLeft) {
-        return this.cursorPosition;
+        return this.cursor;
       }
       return this.curProgressBarEdge;
     },
     readyBarWidth() {
-      return Math.abs(this.curProgressBarEdge - this.cursorPosition);
+      return Math.abs(this.curProgressBarEdge - this.cursor);
     },
     playedBarWidth() {
       if (this.isCursorLeft) {
-        return this.cursorPosition;
+        if (this.cursor <= 0) {
+          return 0;
+        }
+        return this.cursor;
       }
       return this.curProgressBarEdge;
     },
@@ -244,6 +248,13 @@ export default {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
     },
+    cursor() {
+      console.log(this.cursorPosition);
+      if (this.isOnProgress) {
+        return this.cursorPosition;
+      }
+      return this.curProgressBarEdge;
+    },
   },
   watch: {
 
@@ -264,6 +275,7 @@ export default {
       this.showScreenshot = false;
       this.cursorPosition = 0;
       this.appearProgressSlider();
+      this.isOnProgress = false;
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
         this.timeoutIdOfProgressBarDisappearDelay
@@ -382,6 +394,9 @@ export default {
   }
 }
 
+.cursorOn {
+    transition: all 150ms;
+}
 .video-controller .progress-played {
   position: absolute;
   bottom: 0;
