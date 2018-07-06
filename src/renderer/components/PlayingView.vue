@@ -10,9 +10,10 @@
       @mousedown.left.stop.prevent="handleLeftClick"
       @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
+      @mouseleave="hideAllWidgets"
       @mousemove="handleMouseMove"
-      @mouseout="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
+      <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
       <VolumeControl/>
@@ -23,6 +24,7 @@
 </template>
 
 <script>
+import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
 import TimeProgressBar from './PlayingView/TimeProgressBar.vue';
@@ -38,6 +40,7 @@ export default {
     TimeProgressBar,
     VolumeControl,
     AdvanceControl,
+    Titlebar,
     PlayButton,
   },
   data() {
@@ -82,12 +85,14 @@ export default {
       this.$bus.$emit('volumecontroller-appear');
       this.$bus.$emit('progressbar-appear');
       this.$bus.$emit('timecode-appear');
+      this.$bus.$emit('titlebar-appear');
     },
     hideAllWidgets() {
       this.showMask = false;
       this.$bus.$emit('volumecontroller-hide');
       this.$bus.$emit('progressbar-hide');
       this.$bus.$emit('timecode-hide');
+      this.$bus.$emit('titlebar-hide');
     },
     resetDraggingState() {
       this.isDragging = false;

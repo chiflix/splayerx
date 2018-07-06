@@ -23,7 +23,7 @@ function createWindow() {
     useContentSize: true,
     width: 768,
     frame: false,
-    titleBarStyle: 'hiddenInset',
+    titleBarStyle: 'none',
     minWidth: 427,
     minHeight: 240,
     webPreferences: {
