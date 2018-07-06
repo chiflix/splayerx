@@ -232,12 +232,14 @@ export default {
 .darwin-titlebar {
   position: absolute;
   top: 6px;
-  left: 8px;
-  border-radius: 4px 4px 0px 0px;
+  left: 10px;
   z-index: 6;
   height: 20px;
   box-sizing: content-box;
   &:hover {
+    img {
+      opacity: 1;
+    }
     #close img {
       object-position: 0 0;
     }
@@ -266,15 +268,15 @@ export default {
     height: 12px;
     -webkit-user-drag: none;
     -webkit-app-region: no-drag;
+    object-position: 0 -96px;
+    opacity: 0.5;
   }
   #close img {
-    object-position: 0 -96px;
     &:active {
       object-position: 0 -12px;
     }
   }
   #minimize img {
-    object-position: 0 -96px;
     &.disabled {
       object-position: 0 -108px;
       pointer-events: none;
@@ -284,7 +286,6 @@ export default {
     }
   }
   #maximize img {
-    object-position: 0 -96px;
     &.disabled {
       object-position: 0 -108px;
       pointer-events: none;
@@ -294,7 +295,6 @@ export default {
     }
   }
   #restore img {
-    object-position: 0 -96px;
     &:active {
       object-position: 0 -84px;
     }
