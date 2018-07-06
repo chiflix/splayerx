@@ -43,7 +43,7 @@
     </div> -->
     <transition name="fade" appear>
     <div class="btn-sub-ctrl"
-      v-if="subCtrlBtnAppearFlag">
+      v-if="true">
       <div class='btn-menu-wrapper'
         v-show="btnMenuAppearFalg">
         <ul class="btn-menu">
@@ -59,9 +59,9 @@
           </li>
         </ul>
       </div>
-      <div class='btn-wrapper'
+      <div
         @click.capture.stop.left="toggleButtonMenu">
-        <img src="~@/assets/icon-subtitle.svg" alt="Button">
+        <img class='btn' type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
       </div>
     </div>
     </transition>
@@ -169,64 +169,74 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+ul, li {
+  list-style-type: none;
+}
 .video-controller .subtitle-control {
   position: absolute;
   bottom: 0;
   width: 100%;
-
-  // .subtitle-background {
-  //   position: absolute;
-  //   width: 100%;
-  //   height: 300px;
-  //   backdrop-filter: blur(30px);
-  //   background-color: white;
-  //   opacity: 0.3;
-  //   bottom: 0;
-  //   // z-index: 30;
-
-  // }
-  .subtitle-control-board {
-    position: relative;
-    // bottom: 5vw;
-    text-align: center;
-  }
-  .subtitle-menu-button {
-    display: inline;
-  }
-  .second-sub-button {
-    display: inline;
-  }
-  .subtitle-menu-button:hover, .second-sub-button:hover {
+  .btn:hover, .btn-menu-item:hover{
     cursor: pointer;
   }
-}
-.video-controller .btn-sub-ctrl {
-  position: absolute;
-  bottom: 10px;
-  right: 90px;
-}
-.video-controller .btn-sub-ctrl:hover {
-  cursor: pointer;
-}
 
-.subtitle-menu-item:hover {
-  cursor: pointer;
-}
+  .show {
+    pointer-events: none;
+    cursor: default;
+  }
 
-.subtitle-menu-wrapper {
-  background-color: rgba(0, 0, 0, 0.3)
+  .btn-menu-wrapper {
+    background-color:rgba(255, 255, 255, 0.1)
+  }
+
+
+  @media screen and (max-width: 854px) {
+    .btn-menu-wrapper {
+      position: absolute;
+      right: 25+28+10px;
+      bottom: 22+30px;
+    }
+    .btn {
+      position: absolute;
+      bottom: 22px;
+      right: 25+28+10px;
+      height: 24px;
+    }
+  }
+  @media screen and (min-width: 854px) and (max-width: 1920px) {
+    .btn-menu-wrapper {
+      position: absolute;
+      bottom: 60px;
+      right: 31.25+35+12.5px;
+    }
+    .btn{
+      position: absolute;
+      bottom: 25px;
+      right: 31.25+35+12.5px;
+      height: 30px;
+    }
+  }
+  @media screen and (min-width: 1920px) {
+    .btn-menu-wrapper {
+      position: absolute;
+      width: 24px;
+      bottom: 60px;
+      right: 50+56+20px;
+    }
+    .btn{
+      position: absolute;
+      bottom: 40px;
+      right: 50+56+20px;
+      height: 48px;
+    }
+  }
 }
-.selected {
-  pointer-events: none;
-  cursor: default;
-  opacity: 0.6;
-}
-.show {
-  pointer-events: none;
-  cursor: default;
-  color: red;
-}
+// .selected {
+//   pointer-events: none;
+//   cursor: default;
+//   opacity: 0.6;
+// }
 
 .fade-enter-active {
  transition: opacity 100ms;
