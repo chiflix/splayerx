@@ -10,9 +10,11 @@
       @durationchange="onDurationChange"
       :src="src">
     </video>
-    <div class='subtitle'
-      v-for="(html, key) in cueHTML"
-      :key="key"></div>
+    <div class="subtitle-wrapper">
+      <div class='subtitle-content'
+        v-for="(html, key) in cueHTML"
+        :key="key">{{html}}</div>
+    </div>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -345,8 +347,9 @@ export default {
       const vid = this.$refs.videoCanvas;
       const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
       if (vid.textTracks[firstSubIndex].mode === 'disabled') {
-        vid.textTracks[firstSubIndex].mode = 'showing';
+        vid.textTracks[firstSubIndex].mode = 'hidden';
       } else {
+        this.activeCue = null;
         vid.textTracks[firstSubIndex].mode = 'disabled';
       }
     },
@@ -411,10 +414,12 @@ export default {
     },
     activeCue(newVal) {
       this.cueHTML.pop();
-      // 这里对cue进行处理
-      // 得到cue的line和position确定位置
-      console.log(WebVTT.convertCueToDOMTree(window, this.activeCue.text).html);
-      this.cueHTML.push(WebVTT.convertCueToDOMTree(window, this.activeCue.text).html);
+      console.log(newVal);
+      if (newVal) {
+        // 这里对cue进行处理
+        // 得到cue的line和position确定位置
+        this.cueHTML.push(WebVTT.convertCueToDOMTree(window, this.activeCue.text).innerHTML);
+      }
     },
   },
   created() {
@@ -483,6 +488,24 @@ export default {
     width: 100%;
     height: 100%;
     object-fit: contain;
+  }
+}
+
+.video {
+  .subtitle-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    .subtitle-content {
+      position: absolute;
+      bottom: 20px;
+      text-align: center;
+      width: 100%;
+      white-space: pre;
+    }
   }
 }
 </style>
