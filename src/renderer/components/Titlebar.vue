@@ -244,6 +244,10 @@ export default {
   z-index: 6;
   height: 20px;
   box-sizing: content-box;
+  .mac-icons {
+    display: flex;
+    flex-wrap: nowrap;
+  }
   &:hover {
     img {
       opacity: 1;
@@ -253,17 +257,19 @@ export default {
     }
     #minimize img {
       object-position: 0 -24px;
+      &.disabled {
+        opacity: 0.5;
+      }
     }
     #maximize img {
       object-position: 0 -48px;
+      &.disabled {
+        opacity: 0.5;
+      }
     }
     #restore img {
       object-position: 0 -72px;
     }
-  }
-  .mac-icons {
-    display: flex;
-    flex-wrap: nowrap;
   }
   .title-button {
     width: 12px;
@@ -301,6 +307,9 @@ export default {
     &:active {
       object-position: 0 -60px;
     }
+  }
+  #maximize img.disabled:hover {
+    opacity: 0.5;
   }
   #restore img {
     &:active {
