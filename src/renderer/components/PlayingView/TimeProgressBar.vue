@@ -31,6 +31,10 @@
         :style="{ width: curProgressBarEdge +'px', opacity: progressOpacity }">
         <div class="line"></div>
       </div>
+      <div class="progress-back" ref="backSlider"
+        :style="{ width: backBarWidth + 'px' }">
+        <div class="line"></div>
+      </div>
       <div class="progress-back" ref="backSlider">
         
       </div>
