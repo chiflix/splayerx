@@ -10,7 +10,9 @@
       @durationchange="onDurationChange"
       :src="src">
     </video>
-    <div class='subtitle'></div>
+    <div class='subtitle'
+      v-for="(html, key) in cueHTML"
+      :key="key"></div>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -26,12 +28,14 @@ export default {
   data() {
     return {
       videoExisted: false,
+      shownTextTrack: false,
       newWidthOfWindow: 0,
       newHeightOfWindow: 0,
       videoWidth: 0,
       videoHeight: 0,
       timeUpdateIntervalID: null,
       activeCue: null,
+      cueHTML: [],
       subNameArr: [],
     };
   },
@@ -257,7 +261,7 @@ export default {
        */
 
       let loadingTextTrack = false;
-      let shownTextTrack = false;
+      // let shownTextTrack = false;
       // If there is already subtitle files(same dir), load it
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         console.log(subPath);
@@ -273,9 +277,9 @@ export default {
 
         sub.mode = 'disabled';
         parser.onflush = () => {
-          if (!shownTextTrack) {
+          if (!this.shownTextTrack) {
             // sub.mode = 'showing';
-            shownTextTrack = true;
+            this.shownTextTrack = true;
             this.$bus.$emit('subtitle-loaded');
           }
         };
@@ -358,7 +362,6 @@ export default {
     /**
      * 不需要这么麻烦，可以直接在loadTextTrack中获得字幕文件名，
      * 存入数组中后commit
-     * 是不是做一个对象数组，一个name，一个isChoosed？
      */
     $_loadSubNameArr() {
       const vid = this.$refs.videoCanvas;
@@ -375,7 +378,8 @@ export default {
     },
     $_onCueChangeEventAdd(textTrack) {
       textTrack.oncuechange = (cue) => {
-        this.activeCue = cue;
+        const tempCue = cue.currentTarget.activeCues[0];
+        this.activeCue = tempCue;
       };
     },
   },
@@ -404,6 +408,13 @@ export default {
     playbackRate(newRate) {
       console.log(`set video playbackRate ${newRate}`);
       this.$refs.videoCanvas.playbackRate = newRate;
+    },
+    activeCue(newVal) {
+      this.cueHTML.pop();
+      // 这里对cue进行处理
+      // 得到cue的line和position确定位置
+      console.log(WebVTT.convertCueToDOMTree(window, this.activeCue.text).html);
+      this.cueHTML.push(WebVTT.convertCueToDOMTree(window, this.activeCue.text).html);
     },
   },
   created() {
