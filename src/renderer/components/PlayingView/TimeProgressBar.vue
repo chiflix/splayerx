@@ -24,12 +24,15 @@
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
         <div class="line"
-        :style="{ left: readyBarLeft + 'px', width: readyBarWidth +'px' }"></div>
+        :style="{ left: curProgressBarEdge + 'px', width: readyBarWidth +'px' }"></div>
       </div>
-      <div class="progress-played" ref="playedSlider"
-        :class="{cursorOn: !isOnProgress}"
-        :style="{ width: playedBarWidth +'px' }">
+      <div ref="playedSlider"
+        :class="{cursorOn: !isCursorLeft, progressPlayed: isCursorLeft}"
+        :style="{ width: curProgressBarEdge +'px', opacity: progressOpacity }">
         <div class="line"></div>
+      </div>
+      <div class="progress-back" ref="backSlider">
+        
       </div>
     </div>
   </div>
@@ -210,24 +213,14 @@ export default {
       return (this.$store.state.PlaybackState.AccurateTime
         / this.$store.state.PlaybackState.Duration) * progressBarWidth;
     },
-    // 是不是watch isCursorLeft更好？
-    readyBarLeft() {
-      if (this.isCursorLeft) {
-        return this.cursor;
-      }
-      return this.curProgressBarEdge;
-    },
     readyBarWidth() {
-      return Math.abs(this.curProgressBarEdge - this.cursor);
+      return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursor);
     },
-    playedBarWidth() {
-      if (this.isCursorLeft) {
-        if (this.cursor <= 0) {
-          return 0;
-        }
-        return this.cursor;
+    progressOpacity() {
+      if (this.isOnProgress) {
+        return this.isCursorLeft ? 0.3 : 0.9;
       }
-      return this.curProgressBarEdge;
+      return 0.9;
     },
     heightofScreenshot() {
       return this.widthOfThumbnail / this.videoRatio;
@@ -394,10 +387,7 @@ export default {
   }
 }
 
-.cursorOn {
-    transition: all 150ms;
-}
-.video-controller .progress-played {
+.video-controller .cursorOn {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -411,8 +401,27 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
+    background: rgb(255, 255, 255);
+    box-shadow: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.video-controller .progressPlayed {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 4px;
+  transition: height 150ms, opacity 1000ms;
+
+  .line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(255, 255, 255);
+    box-shadow: rgba(255, 255, 255, 0.5);
   }
 }
 
