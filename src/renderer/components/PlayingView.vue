@@ -1,12 +1,6 @@
 <template>
   <div class="player"
   :style="{ cursor: cursorStyle }">
-    <img src="~@/assets/icon-pause.svg" type="image/svg+xml"
-      ref="pauseIcon" class="icon"
-      @animationiteration="pauseIconPause">
-    <img src="~@/assets/icon-play.svg" type="image/svg+xml"
-      ref="playIcon" class="icon"
-      @animationiteration="playIconPause">
     <VideoCanvas :src="uri" />
     <div class="masking"
       v-show="showMask"></div>
@@ -16,25 +10,30 @@
       @mousedown.left.stop.prevent="handleLeftClick"
       @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
+      @mouseleave="hideAllWidgets"
       @mousemove="handleMouseMove"
       @mouseout.self="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
+      <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
       <VolumeControl/>
       <SubtitleControl/>
+      <PlayButton/>
       <!-- <AdvanceControl/> -->
     </div>
   </div>
 </template>
 
 <script>
+import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
 import TimeProgressBar from './PlayingView/TimeProgressBar.vue';
 import VolumeControl from './PlayingView/VolumeControl.vue';
 import AdvanceControl from './PlayingView/AdvanceControl.vue';
 import SubtitleControl from './PlayingView/SubtitleControl.vue';
+import PlayButton from './PlayingView/PlayButton.vue';
 
 export default {
   name: 'playing-view',
@@ -45,6 +44,8 @@ export default {
     VolumeControl,
     AdvanceControl,
     SubtitleControl,
+    Titlebar,
+    PlayButton,
   },
   data() {
     return {
@@ -89,6 +90,7 @@ export default {
       this.$bus.$emit('progressbar-appear');
       this.$bus.$emit('timecode-appear');
       this.$bus.$emit('sub-ctrl-appear');
+      this.$bus.$emit('titlebar-appear');
     },
     hideAllWidgets() {
       console.log(11111);
@@ -97,6 +99,7 @@ export default {
       this.$bus.$emit('progressbar-hide');
       this.$bus.$emit('timecode-hide');
       this.$bus.$emit('sub-ctrl-hide');
+      this.$bus.$emit('titlebar-hide');
     },
     resetDraggingState() {
       this.isDragging = false;
@@ -166,22 +169,10 @@ export default {
       this.mouseDown = false;
       this.togglePlayback();
     },
-    pauseIconPause() {
-      this.$refs.pauseIcon.style.animationPlayState = 'paused';
-    },
-    playIconPause() {
-      this.$refs.playIcon.style.animationPlayState = 'paused';
-    },
   },
   mounted() {
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
-    this.$bus.$on('twinkle-pause-icon', () => {
-      this.$refs.pauseIcon.style.animationPlayState = 'running';
-    });
-    this.$bus.$on('twinkle-play-icon', () => {
-      this.$refs.playIcon.style.animationPlayState = 'running';
-    });
   },
   computed: {
     uri() {
@@ -231,37 +222,6 @@ export default {
   transition: opacity 400ms;
 }
 
-@keyframes twinkle {
-  0% {
-    opacity: 0;
-    width: 85px;
-    height: 85px;
-  }
-  3% {
-    opacity: 0;
-    width: 85px;
-    height: 85px;
-  }
-  50% {
-    opacity: 1;
-    width: 185px;
-    height: 185px;
-  }
-  100% {
-    opacity: 0;
-    width: 285px;
-    height: 285px;
-  }
-}
-.icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  animation: twinkle 400ms;
-  animation-iteration-count: infinite;
-  animation-play-state: paused;
-  z-index: 1;
-}
+
+
 </style>

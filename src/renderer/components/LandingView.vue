@@ -1,6 +1,7 @@
 <template>
 <div class="wrapper">
   <main>
+    <titlebar currentView="LandingView"></titlebar>
     <div class="mask"
       @mousedown.left.stop="handleLeftClick"
       @mouseup.left.stop="handleMouseUp"
@@ -52,6 +53,7 @@
 
 <script>
 import path from 'path';
+import Titlebar from './Titlebar.vue';
 export default {
   name: 'landing-view',
   data() {
@@ -67,6 +69,7 @@ export default {
     };
   },
   components: {
+    Titlebar,
   },
   computed: {
     hasRecentPlaylist() {
