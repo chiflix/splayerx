@@ -45,7 +45,7 @@ new Vue({
           submenu: [
             {
               label: this.$t('msg.file.open'),
-              accelerator: 'Cmd+O',
+              accelerator: 'CmdOrCtrl+O',
               click: () => {
                 dialog.showOpenDialog({
                   properties: ['openFile'],
@@ -63,7 +63,7 @@ new Vue({
             },
             {
               label: this.$t('msg.file.openURL'),
-              accelerator: 'Cmd+U',
+              accelerator: 'CmdOrCtrl+U',
             },
             { label: this.$t('msg.file.openRecent').concat('>') },
             {
@@ -77,7 +77,7 @@ new Vue({
           submenu: [
             {
               label: this.$t('msg.playback.fullScreen'),
-              accelerator: 'F',
+              accelerator: 'CmdOrCtrl+F',
             },
             // { label: 'Play from last stopped place' },
             // { label: 'Increase Size' },

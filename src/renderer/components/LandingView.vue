@@ -1,6 +1,11 @@
 <template>
 <div class="wrapper">
   <main>
+    <titlebar currentView="LandingView"></titlebar>
+    <div class="mask"
+      @mousedown.left.stop="handleLeftClick"
+      @mouseup.left.stop="handleMouseUp"
+      @mousemove="handleMouseMove"></div>
     <div class="background-image"
       v-if="showShortcutImage">
       <img
@@ -21,7 +26,6 @@
     <div class="welcome">
       <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
     </div>
-
     <div class="controller">
       <div class="playlist"
         v-if="hasRecentPlaylist">
@@ -33,7 +37,7 @@
               width: item.chosen ? '140px' : '114px',
               height: item.chosen ? '80px' : '65px',
             }"
-          @click="openFile(item.path)"
+          @click.stop="openFile(item.path)"
           @mouseover="onRecentItemMouseover(item, index)"
           @mouseout="onRecentItemMouseout(index)">
         </div>
@@ -41,7 +45,7 @@
     </div>
     <div
       @click="open('./')">
-      <img class="button" src="~@/assets/icon-open.svg" type="image/svg+xml">
+      <img class="button" src="~@/assets/icon-open.svg" type="image/svg+xml" style="-webkit-user-drag: none;">
     </div>
   </main>
 </div>
@@ -49,6 +53,7 @@
 
 <script>
 import path from 'path';
+import Titlebar from './Titlebar.vue';
 export default {
   name: 'landing-view',
   data() {
@@ -57,9 +62,14 @@ export default {
       lastPlayedFile: [],
       backgroundUrl: '',
       showShortcutImage: false,
+      isDragging: false,
+      mouseDown: false,
+      windowStartPosition: null,
+      mousedownPosition: null,
     };
   },
   components: {
+    Titlebar,
   },
   computed: {
     hasRecentPlaylist() {
@@ -108,7 +118,7 @@ export default {
       this.$set(this.lastPlayedFile[index], 'chosen', false);
     },
     open(link) {
-      if (this.showingPopupDialog) {
+      if (this.showingPopupDialog || this.isDragging) {
         // skip if there is already a popup dialog
         return;
       }
@@ -135,6 +145,31 @@ export default {
           self.openFile(`file:///${item[0]}`);
         }
       });
+    },
+    handleLeftClick(event) {
+      // Handle dragging-related variables
+      this.mouseDown = true;
+      this.isDragging = false;
+      this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
+      this.mousedownPosition = [event.screenX, event.screenY];
+    },
+    handleMouseMove(event) {
+      // Handle dragging-related variables and methods
+      if (this.mouseDown) {
+        if (this.windowStartPosition !== null) {
+          this.isDragging = true;
+          const startPos = this.mousedownPosition;
+          const offset = [event.screenX - startPos[0], event.screenY - startPos[1]];
+          const winStartPos = this.windowStartPosition;
+          this.$electron.remote.getCurrentWindow().setPosition(
+            winStartPos[0] + offset[0],
+            winStartPos[1] + offset[1],
+          );
+        }
+      }
+    },
+    handleMouseUp() {
+      this.mouseDown = false;
     },
   },
 };
@@ -165,6 +200,8 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
+  backdrop-filter: blur(30px);
+  z-index: 2;
 
   .item-name {
     position: relative;
@@ -196,6 +233,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
+    -webkit-user-drag: none;
   }
 }
 .logo-container {
@@ -214,6 +252,7 @@ main {
 .welcome {
   margin-top: 15px;
   text-align: center;
+  z-index: 1;
   .title {
     font-size: 7vw;
     margin-bottom: 6px;
@@ -223,6 +262,13 @@ main {
     color: gray;
     margin-bottom: 10px;
   }
+}
+
+.mask {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
 }
 
 .controller {
@@ -252,6 +298,7 @@ main {
       background-repeat: no-repeat;
       background-position: center center;
       transition: width 150ms ease-out, height 150ms ease-out;
+      z-index: 4;
     }
   }
 }
@@ -266,6 +313,7 @@ main {
   outline: none;
   transition: all 0.15s ease;
   border: 0px;
+  z-index: 5;
 }
 
 </style>
