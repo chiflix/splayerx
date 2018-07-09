@@ -35,9 +35,6 @@
         :style="{ width: backBarWidth + 'px' }">
         <div class="line"></div>
       </div>
-      <div class="progress-back" ref="backSlider">
-        
-      </div>
     </div>
   </div>
 </transition>
@@ -75,16 +72,16 @@ export default {
       showScreenshot: false,
       showProgressBar: true,
       onProgressSliderMousedown: false,
+      flagProgressBarDraged: false,
+      isCursorLeft: false,
+      isOnProgress: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
       videoRatio: 0,
       percentageVideoDraged: 0,
-      flagProgressBarDraged: false,
       widthOfThumbnail: 0,
       thumbnailCurrentTime: 0,
-      isCursorLeft: false,
-      isOnProgress: false,
     };
   },
   methods: {
@@ -93,6 +90,7 @@ export default {
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
+      this.$refs.backSlider.style.height = PROGRESS_BAR_HEIGHT;
     },
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
@@ -101,6 +99,7 @@ export default {
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
+        this.$refs.backSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
       }
     },
     appearProgressBar() {
@@ -217,8 +216,17 @@ export default {
       return (this.$store.state.PlaybackState.AccurateTime
         / this.$store.state.PlaybackState.Duration) * progressBarWidth;
     },
+    cursorState() {
+      if (this.isOnProgress) {
+        return this.cursorPosition;
+      }
+      return this.curProgressBarEdge;
+    },
     readyBarWidth() {
-      return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursor);
+      return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursorState);
+    },
+    backBarWidth() {
+      return this.isCursorLeft ? this.cursorPosition + 0.1 : 0;
     },
     progressOpacity() {
       if (this.isOnProgress) {
@@ -244,13 +252,6 @@ export default {
     screenshotContent() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
-    },
-    cursor() {
-      console.log(this.cursorPosition);
-      if (this.isOnProgress) {
-        return this.cursorPosition;
-      }
-      return this.curProgressBarEdge;
     },
   },
   watch: {
@@ -416,7 +417,7 @@ export default {
   left: 0;
   width: 0;
   height: 4px;
-  transition: height 150ms, opacity 1000ms;
+  transition: height 150ms, opacity 300ms;
 
   .line {
     position: absolute;
@@ -451,6 +452,22 @@ export default {
     width: 100%;
     height: 100%;
     background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.video-controller .progress-back {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  transition: height 150ms;
+
+  .line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.9);
   }
 }
 
