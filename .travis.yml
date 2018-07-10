@@ -1,6 +1,7 @@
 sudo: required
 os:
-- linux
+# Temporary disable CI on linux untils the electron-slim-linux is date out.
+# - linux
 - osx
 dist: trusty
 osx_image: xcode9.2
