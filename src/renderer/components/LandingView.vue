@@ -190,8 +190,8 @@ body {
 }
 
 .wrapper {
-  background-color: rgba(0,0,0,0.5);
-  background-image: url('~@/assets/Noise.png');
+  background-image: url(../assets/gradient-bg.png);
+  background-size: 768px 432px;
   height: 100vh;
   width: 100vw;
   z-index: -1;
