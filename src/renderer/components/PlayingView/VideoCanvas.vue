@@ -262,7 +262,7 @@ export default {
        * If there is no (chinese/default language) text track, try translate api
        */
 
-      let loadingTextTrack = false;
+      // let loadingTextTrack = false;
       // let shownTextTrack = false;
       // If there is already subtitle files(same dir), load it
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
@@ -285,7 +285,7 @@ export default {
             this.$bus.$emit('subtitle-loaded');
           }
         };
-        loadingTextTrack = true;
+        // loadingTextTrack = true;
 
         const readStream = fs.createReadStream(subPath).pipe(srt2vtt());
         readStream
@@ -297,22 +297,23 @@ export default {
             console.log('finish reading srt');
           });
 
+        console.log(startIndex);
         this.subtitleShow(startIndex, 'first');
       });
 
 
       // create our own text/subtitle track
-      const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
+      // const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
 
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(`loadingTextTrack ${loadingTextTrack}`);
-        if (!loadingTextTrack) {
-          // Loading subtitle test
-          const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
-          sub0.addCue(cue0);
-          sub0.mode = 'showing';
-        }
-      }
+      // if (process.env.NODE_ENV !== 'production') {
+      //   console.log(`loadingTextTrack ${loadingTextTrack}`);
+      //   if (!loadingTextTrack) {
+      //     // Loading subtitle test
+      //     const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
+      //     sub0.addCue(cue0);
+      //     sub0.mode = 'showing';
+      //   }
+      // }
 
       this.$_loadSubNameArr();
     },
@@ -414,7 +415,7 @@ export default {
     },
     activeCue(newVal) {
       this.cueHTML.pop();
-      console.log(newVal);
+      // console.log(newVal);
       if (newVal) {
         // 这里对cue进行处理
         // 得到cue的line和position确定位置

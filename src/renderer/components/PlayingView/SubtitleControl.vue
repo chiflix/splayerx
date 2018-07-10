@@ -43,7 +43,7 @@
     </div> -->
     <transition name="fade" appear>
     <div class="btn-sub-ctrl"
-      v-if="true">
+      v-if="subCtrlBtnAppearFlag">
       <div class='btn-menu-wrapper'
         v-show="btnMenuAppearFalg">
         <ul class="btn-menu">
@@ -57,6 +57,7 @@
             :class="{show: !subtitleAppearFlag}">
             <img src="" alt="Close">
           </li>
+          <li>{{curSubName}}</li>
         </ul>
       </div>
       <div
@@ -138,7 +139,10 @@ export default {
     curSubName() {
       const curIndex = this.$store.state.PlaybackState.FirstSubIndex
         - this.$store.state.PlaybackState.StartIndex;
-      return this.$store.state.PlaybackState.SubtitleNameArr[curIndex].name;
+      if (this.subtitleNameArr[curIndex]) {
+        return this.$store.state.PlaybackState.SubtitleNameArr[curIndex].name;
+      }
+      return 'No subtitle';
     },
     isSelected() {
       return this.$store.state.PlaybackState.FirstSubIndex;
