@@ -76,7 +76,7 @@ export default {
   },
   data() {
     return {
-      subtitleAppearFlag: true,
+      subtitleAppearFlag: false,
       subtitleCtrlAppearFlag: true,
       subtitleMenuAppearFlag: false,
       subSecondMenuAppearFlag: false,
@@ -96,6 +96,7 @@ export default {
     },
     showSubtitle() {
       this.subtitleAppearFlag = !this.subtitleAppearFlag;
+      this.$bus.$emit('subStyleChange', { fontSize: 50 });
       this.$bus.$emit('toggleSubtitle');
     },
     toggleSecondSub() {
@@ -115,7 +116,6 @@ export default {
     },
     // 需要refactor
     firstSubSelect(index) {
-      // console.log(index);
       this.$bus.$emit('subFirstChange', index);
     },
     secondSubSelect(index) {
@@ -149,7 +149,14 @@ export default {
     },
   },
   watch: {
-
+    // watch方法确定字幕有无状态
+    subtitleNameArr() {
+      if (this.subtitleNameArr.length !== 0) {
+        this.subtitleAppearFlag = true;
+      } else {
+        this.subtitleAppearFlag = false;
+      }
+    },
   },
   created() {
     // this.$bus.$on('subtitle-loaded', () => {

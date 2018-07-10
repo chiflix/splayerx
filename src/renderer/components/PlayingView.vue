@@ -93,7 +93,6 @@ export default {
       this.$bus.$emit('titlebar-appear');
     },
     hideAllWidgets() {
-      console.log(11111);
       this.showMask = false;
       this.$bus.$emit('volumecontroller-hide');
       this.$bus.$emit('progressbar-hide');

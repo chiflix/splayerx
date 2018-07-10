@@ -12,7 +12,12 @@
     </video>
     <div class="subtitle-wrapper">
       <div class='subtitle-content'
-        v-for="(html, key) in cueHTML"
+        :style="subStyle"
+        v-for="(html, key) in firstCueHTML"
+        :key="key">{{html}}</div>
+      <div class='subtitle-content'
+        :style="subStyle"
+        v-for="(html, key) in secondCueHTML"
         :key="key">{{html}}</div>
     </div>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
@@ -36,9 +41,19 @@ export default {
       videoWidth: 0,
       videoHeight: 0,
       timeUpdateIntervalID: null,
-      activeCue: null,
-      cueHTML: [],
+      firstActiveCue: null,
+      secondActiveCue: null,
+      firstCueHTML: [],
+      secondCueHTML: [],
       subNameArr: [],
+      // 将style的内容修改为object
+      subStyle: {},
+      fontSize: 24,
+      letterSpacing: 1,
+      opcacity: 1,
+      color: '',
+      border: '',
+      background: '',
     };
   },
   props: {
@@ -266,7 +281,7 @@ export default {
       // let shownTextTrack = false;
       // If there is already subtitle files(same dir), load it
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
-        console.log(subPath);
+        // console.log(subPath);
         // Automatically track and cleanup files at exit
         // temp.track();
         // const stream = temp.createWriteStream({ suffix: '.vtt' });
@@ -296,9 +311,6 @@ export default {
             parser.flush();
             console.log('finish reading srt');
           });
-
-        console.log(startIndex);
-        this.subtitleShow(startIndex, 'first');
       });
 
 
@@ -314,7 +326,8 @@ export default {
       //     sub0.mode = 'showing';
       //   }
       // }
-
+      this.subStyleChange();
+      this.subtitleShow(startIndex, 'first');
       this.$_loadSubNameArr();
     },
     // 待改善函数结构
@@ -323,12 +336,16 @@ export default {
     subtitleShow(index, type) {
       const vid = this.$refs.videoCanvas;
       if (type === 'first') {
+        // 当直接播放无字幕视频时，会报错
         const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
         vid.textTracks[firstSubIndex].mode = 'disabled';
         vid.textTracks[firstSubIndex].oncuechange = null;
-        this.$_onCueChangeEventAdd(vid.textTracks[firstSubIndex]);
-        vid.textTracks[index].mode = 'hidden';
-        this.$store.commit('FirstSubIndex', index);
+        // 判断有无字幕
+        if (vid.textTracks.length > index) {
+          this.$_onCueChangeEventAdd(vid.textTracks[index]);
+          vid.textTracks[index].mode = 'hidden';
+          this.$store.commit('FirstSubIndex', index);
+        }
       }
       if (type === 'second') {
         // 需要重写
@@ -338,7 +355,8 @@ export default {
           if (secondSubIndex !== -1) {
             vid.textTracks[secondSubIndex].mode = 'disabled';
           }
-          vid.textTracks[index].mode = 'showing';
+          this.$_onCueChangeEventAdd(vid.textTracks[index], 'second');
+          vid.textTracks[index].mode = 'hidden';
           this.$store.commit('SecondSubIndex', index);
         }
       }
@@ -350,7 +368,7 @@ export default {
       if (vid.textTracks[firstSubIndex].mode === 'disabled') {
         vid.textTracks[firstSubIndex].mode = 'hidden';
       } else {
-        this.activeCue = null;
+        this.firstActiveCue = null;
         vid.textTracks[firstSubIndex].mode = 'disabled';
       }
     },
@@ -358,14 +376,45 @@ export default {
       const vid = this.$refs.videoCanvas;
       const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
       if (vid.textTracks[secondSubIndex].mode === 'disabled') {
-        vid.textTracks[secondSubIndex].mode = 'showing';
+        vid.textTracks[secondSubIndex].mode = 'hidden';
       } else {
+        this.secondActiveCue = null;
         vid.textTracks[secondSubIndex].mode = 'disabled';
       }
     },
     /**
+     * @param obj style information object
+     *
+     * obj contains 6 keys to control the css
+     * style of the subtitle. If any one is
+     * not exsited, it will use
+     * default values.
+     */
+    subStyleChange(obj = {}) {
+      const fontSize = obj.fontSize ? obj.fontSize : this.fontSize;
+      const letterSpacing = obj.letterSpacing ? obj.letterSpacing : this.letterSpacing;
+      const opcacity = obj.opcacity ? obj.opacity : this.opacity;
+      const color = obj.color ? obj.color : this.color;
+      const border = obj.border ? obj.border : this.border;
+      const background = obj.background ? obj.background : this.background;
+      this.subStyle = {
+        fontSize: `${fontSize}px`,
+        letterSpacing: `${letterSpacing}px`,
+        opcacity,
+        color,
+        border,
+        background,
+      };
+      this.fontSize = fontSize;
+      this.letterSpacing = letterSpacing;
+      this.opcacity = opcacity;
+      this.color = color;
+      this.border = border;
+      this.background = background;
+    },
+    /**
      * 不需要这么麻烦，可以直接在loadTextTrack中获得字幕文件名，
-     * 存入数组中后commit
+     * 存入数组中后commit, 需要对index进行处理.
      */
     $_loadSubNameArr() {
       const vid = this.$refs.videoCanvas;
@@ -375,16 +424,24 @@ export default {
         subNameARR.push({
           name: vid.textTracks[i].label,
           index: i - startIndex,
-          isSelected: false,
         });
       }
       this.$store.commit('SubtitleNameArr', subNameARR);
     },
-    $_onCueChangeEventAdd(textTrack) {
-      textTrack.oncuechange = (cue) => {
+    /**
+     * @param textTrack target textTrack
+     * @param type choose first or second subtitle
+     */
+    $_onCueChangeEventAdd(textTrack, type = 'first') {
+      const firstSubEvent = (cue) => {
         const tempCue = cue.currentTarget.activeCues[0];
-        this.activeCue = tempCue;
+        this.firstActiveCue = tempCue;
       };
+      const secondSubEvent = (cue) => {
+        const tempCue = cue.currentTarget.activeCues[0];
+        this.secondActiveCue = tempCue;
+      };
+      textTrack.oncuechange = type === 'first' ? firstSubEvent : secondSubEvent;
     },
   },
   computed: {
@@ -413,13 +470,25 @@ export default {
       console.log(`set video playbackRate ${newRate}`);
       this.$refs.videoCanvas.playbackRate = newRate;
     },
-    activeCue(newVal) {
+    // 需要对这一部分内容优化
+    firstActiveCue(newVal) {
+      this.firstCueHTML.pop();
+      // console.log(newVal);
+      if (newVal) {
+        // 这里对cue进行处理
+        // 得到cue的line和position确定位置
+        this.firstCueHTML.push(WebVTT.convertCueToDOMTree(window, this.firstActiveCue.text)
+          .innerHTML);
+      }
+    },
+    secondActiveCue(newVal) {
       this.cueHTML.pop();
       // console.log(newVal);
       if (newVal) {
         // 这里对cue进行处理
         // 得到cue的line和position确定位置
-        this.cueHTML.push(WebVTT.convertCueToDOMTree(window, this.activeCue.text).innerHTML);
+        this.secondCueHTML.push(WebVTT.convertCueToDOMTree(window, this.secondActiveCue.text)
+          .innerHTML);
       }
     },
   },
@@ -455,9 +524,7 @@ export default {
 
     // Subtitle Display Control
 
-    this.$bus.$on('toggleSubtitle', () => {
-      this.toggleSubtitle();
-    });
+    this.$bus.$on('toggleSubtitle', this.toggleSubtitle);
     this.$bus.$on('toggleSecondSub', () => {
       this.toggleSecondSub();
     });
@@ -470,6 +537,8 @@ export default {
       const index = this.$store.state.PlaybackState.StartIndex + targetIndex;
       this.subtitleShow(index, 'second');
     });
+
+    this.$bus.$on('subStyleChange', this.subStyleChange);
   },
 };
 </script>
