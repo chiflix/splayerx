@@ -48,12 +48,14 @@ export default {
       subNameArr: [],
       // 将style的内容修改为object
       subStyle: {},
-      fontSize: 24,
-      letterSpacing: 1,
-      opcacity: 1,
-      color: '',
-      border: '',
-      background: '',
+      curStyle: {
+        fontSize: 24,
+        letterSpacing: 1,
+        opcacity: 1,
+        color: '',
+        border: '',
+        background: '',
+      },
     };
   },
   props: {
@@ -391,26 +393,28 @@ export default {
      * default values.
      */
     subStyleChange(obj = {}) {
-      const fontSize = obj.fontSize ? obj.fontSize : this.fontSize;
-      const letterSpacing = obj.letterSpacing ? obj.letterSpacing : this.letterSpacing;
-      const opcacity = obj.opcacity ? obj.opacity : this.opacity;
-      const color = obj.color ? obj.color : this.color;
-      const border = obj.border ? obj.border : this.border;
-      const background = obj.background ? obj.background : this.background;
+      const fontSize = obj.fontSize ? obj.fontSize : this.curStyle.fontSize;
+      const letterSpacing = obj.letterSpacing ? obj.letterSpacing : this.curStyle.letterSpacing;
+      const opacity = obj.opacity ? obj.opacity : this.curStyle.opacity;
+      const color = obj.color ? obj.color : this.curStyle.color;
+      const border = obj.border ? obj.border : this.curStyle.border;
+      const background = obj.background ? obj.background : this.curStyle.background;
       this.subStyle = {
         fontSize: `${fontSize}px`,
         letterSpacing: `${letterSpacing}px`,
-        opcacity,
+        opacity,
         color,
         border,
         background,
       };
-      this.fontSize = fontSize;
-      this.letterSpacing = letterSpacing;
-      this.opcacity = opcacity;
-      this.color = color;
-      this.border = border;
-      this.background = background;
+      this.curStyle = {
+        fontSize,
+        letterSpacing,
+        opacity,
+        color,
+        border,
+        background,
+      };
     },
     /**
      * 不需要这么麻烦，可以直接在loadTextTrack中获得字幕文件名，
