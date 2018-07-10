@@ -190,8 +190,9 @@ body {
 }
 
 .wrapper {
-  background-color: rgba(0,0,0,0.5);
-  background-image: url('~@/assets/Noise.png');
+  background-color: rgba(0,0,0,0.3);
+  background-image: url('~@/assets/lv-bg.png');
+  background-size: 768px 432px;
   height: 100vh;
   width: 100vw;
   z-index: -1;
