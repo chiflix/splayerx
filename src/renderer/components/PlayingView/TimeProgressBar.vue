@@ -20,18 +20,19 @@
         :heightofScreenshot="heightofScreenshot"
         :screenshotContent="screenshotContent"
         :currentTime="thumbnailCurrentTime"/>
+        <!-- translate优化 -->
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
         <div class="line"
-        :style="{ width: cursorPosition +'px' }"></div>
+        :style="{ left: curProgressBarEdge + 'px', width: readyBarWidth +'px' }"></div>
       </div>
-      <div class="progress-backward" ref="backwardSlider"
-        v-show="showProgressBackward"
-        :style="{ left: cursorPosition + 0.1 + 'px', width: backwardWidth + 'px' }">
+      <div ref="playedSlider"
+        :class="{cursorOn: !isCursorLeft, progressPlayed: isCursorLeft}"
+        :style="{ width: curProgressBarEdge +'px', opacity: progressOpacity }">
         <div class="line"></div>
       </div>
-      <div class="progress-played" ref="playedSlider"
-        :style="{ width: progress +'%' }">
+      <div class="progress-back" ref="backSlider"
+        :style="{ width: backBarWidth + 'px' }">
         <div class="line"></div>
       </div>
     </div>
@@ -70,32 +71,35 @@ export default {
     return {
       showScreenshot: false,
       showProgressBar: true,
-      showProgressBackward: false,
       onProgressSliderMousedown: false,
+      flagProgressBarDraged: false,
+      isCursorLeft: false,
+      isOnProgress: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       percentageOfReadyToPlay: 0,
-      widthOfReadyToPlay: 0,
+      cursorPosition: 0,
       videoRatio: 0,
       percentageVideoDraged: 0,
-      flagProgressBarDraged: false,
       widthOfThumbnail: 0,
       thumbnailCurrentTime: 0,
     };
   },
   methods: {
     appearProgressSlider() {
+      this.isOnProgress = true;
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
-      this.$refs.backwardSlider.style.height = PROGRESS_BAR_HEIGHT;
+      this.$refs.backSlider.style.height = PROGRESS_BAR_HEIGHT;
     },
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
+        this.isOnProgress = false;
         this.showScreenshot = false;
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
-        this.$refs.backwardSlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
+        this.$refs.backSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
       }
     },
     appearProgressBar() {
@@ -110,7 +114,6 @@ export default {
     },
     videoRestart() {
       this.$bus.$emit('seek', 0);
-      this.widthOfReadyToPlay = 0;
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -150,21 +153,12 @@ export default {
      * @param e mousemove event
      */
     $_effectProgressBarDraged(e) {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      const progressBarWidth = currentWindow.getSize()[0] - FOOL_PROOFING_BAR_WIDTH;
-
-      const curProgressBarWidth = (progressBarWidth * (this.progress / 100))
-       + FOOL_PROOFING_BAR_WIDTH;
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
-      this.widthOfReadyToPlay = cursorPosition;
-      if (cursorPosition < curProgressBarWidth) {
-        if (curProgressBarWidth > 0) {
-          this.showProgressBackward = true;
-        } else {
-          this.showProgressBackward = false;
-        }
+      this.cursorPosition = cursorPosition;
+      if (cursorPosition < this.curProgressBarEdge) {
+        this.isCursorLeft = true;
       } else {
-        this.showProgressBackward = false;
+        this.isCursorLeft = false;
       }
       const progress = cursorPosition
         / this.$refs.sliderContainer.clientWidth;
@@ -213,19 +207,32 @@ export default {
     },
   },
   computed: {
-    progress() {
+    curProgressBarEdge() {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return 0;
       }
-      return (100 * this.$store.state.PlaybackState.AccurateTime)
-        / (this.$store.state.PlaybackState.Duration);
-    },
-    backwardWidth() {
       const progressBarWidth = this.$electron.remote.getCurrentWindow().getSize()[0]
         - FOOL_PROOFING_BAR_WIDTH;
-      const width = (progressBarWidth * (this.progress / 100))
-        - this.cursorPosition;
-      return width > 0 ? width : 0;
+      return (this.$store.state.PlaybackState.AccurateTime
+        / this.$store.state.PlaybackState.Duration) * progressBarWidth;
+    },
+    cursorState() {
+      if (this.isOnProgress) {
+        return this.cursorPosition;
+      }
+      return this.curProgressBarEdge;
+    },
+    readyBarWidth() {
+      return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursorState);
+    },
+    backBarWidth() {
+      return this.isCursorLeft ? this.cursorPosition + 0.1 : 0;
+    },
+    progressOpacity() {
+      if (this.isOnProgress) {
+        return this.isCursorLeft ? 0.3 : 0.9;
+      }
+      return 0.9;
     },
     heightofScreenshot() {
       return this.widthOfThumbnail / this.videoRatio;
@@ -235,20 +242,20 @@ export default {
       const halfWidthOfScreenshot = this.widthOfThumbnail / 2;
       const minWidth = (this.widthOfThumbnail / 2) + 16;
       const maxWidth = progressBarWidth - 16;
-      if (this.widthOfReadyToPlay < minWidth) {
+      if (this.cursorPosition < minWidth) {
         return 16 - FOOL_PROOFING_BAR_WIDTH;
-      } else if (this.widthOfReadyToPlay + halfWidthOfScreenshot > maxWidth) {
+      } else if (this.cursorPosition + halfWidthOfScreenshot > maxWidth) {
         return maxWidth - this.widthOfThumbnail;
       }
-      return this.widthOfReadyToPlay - halfWidthOfScreenshot;
+      return this.cursorPosition - halfWidthOfScreenshot;
     },
     screenshotContent() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
     },
-    cursorPosition() {
-      return this.widthOfReadyToPlay;
-    },
+  },
+  watch: {
+
   },
   created() {
     this.$electron.remote.getCurrentWindow().on('resize', () => {
@@ -263,10 +270,10 @@ export default {
       }
     });
     this.$bus.$on('progressslider-appear', () => {
-      this.showProgressBackward = false;
       this.showScreenshot = false;
-      this.widthOfReadyToPlay = 0;
+      this.cursorPosition = 0;
       this.appearProgressSlider();
+      this.isOnProgress = false;
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
         this.timeoutIdOfProgressBarDisappearDelay
@@ -385,7 +392,7 @@ export default {
   }
 }
 
-.video-controller .progress-played {
+.video-controller .cursorOn {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -399,8 +406,27 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
+    background: rgb(255, 255, 255);
+    box-shadow: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.video-controller .progressPlayed {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 4px;
+  transition: height 150ms, opacity 300ms;
+
+  .line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(255, 255, 255);
+    box-shadow: rgba(255, 255, 255, 0.5);
   }
 }
 
@@ -429,20 +455,19 @@ export default {
   }
 }
 
-.video-controller .progress-backward {
+.video-controller .progress-back {
   position: absolute;
   bottom: 0;
-  height: 0px;
+  left: 0;
   transition: height 150ms;
 
   .line {
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 100%;
     height: 100%;
-    background: rgba(150, 150, 150, 0.9);
-    z-index: 100;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.9);
   }
 }
 
