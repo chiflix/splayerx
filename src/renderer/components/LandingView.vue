@@ -289,7 +289,7 @@ main {
       border-radius: 2px;
       width: 114px;
       height: 65px;
-      box-shadow: 0px 0px 30px 1px black;
+      box-shadow: 0 20px 30px 0 rgba(0,0,0,0.30);
       color: gray;
       cursor: pointer;
       margin-right: 15px;
