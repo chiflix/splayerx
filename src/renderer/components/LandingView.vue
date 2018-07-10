@@ -190,8 +190,7 @@ body {
 }
 
 .wrapper {
-  background-color: rgba(0,0,0,0.3);
-  background-image: url('~@/assets/lv-bg.png');
+  background-image: url(../assets/gradient-bg.png);
   background-size: 768px 432px;
   height: 100vh;
   width: 100vw;
