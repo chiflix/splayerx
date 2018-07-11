@@ -29,21 +29,19 @@
     <div class="mac-icons" v-if="isDarwin">
       <div id="close" class="title-button"
         @click="handleClose">
-        <img src="~@/assets/mac-titlebar-icons.png" />
       </div>
       <div id="minimize" class="title-button"
-        @click="handleMinimize">
-        <img :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }" src="~@/assets/mac-titlebar-icons.png" />
+        @click="handleMinimize"
+        :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }">
       </div>
       <div id="maximize" class="title-button"
         @click="handleMacMaximize"
-        v-show="middleButtonStatus !== 'exit-fullscreen'">
-        <img :class="{ disabled: currentView === 'LandingView' }" src="~@/assets/mac-titlebar-icons.png" />
+        v-show="middleButtonStatus !== 'exit-fullscreen'"
+        :class="{ disabled: currentView === 'LandingView' }">
       </div>
       <div id="restore" class="title-button"
         @click="handleFullscreenExit"
         v-show="middleButtonStatus === 'exit-fullscreen'">
-        <img src="~@/assets/mac-titlebar-icons.png" />
       </div>
     </div>
   </div>
@@ -237,157 +235,90 @@ export default {
   position: absolute;
   z-index: 6;
   box-sizing: content-box;
+  top: 6px;
+  left: 10px;
+  height: 20px;
   .mac-icons {
     display: flex;
     flex-wrap: nowrap;
   }
-  @media screen and (-webkit-min-device-pixel-ratio: 1) and (-webkit-max-device-pixel-ratio: 2) {
-    top: 6px;
-    left: 10px;
-    height: 20px;
+  .title-button {
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    background-image: url('../assets/mac-titlebar-icons.png');
+    background-repeat: no-repeat;
+    -webkit-app-region: no-drag;
+    opacity: 0.5;
+    border-radius: 100%;
+  }
+  .mac-icons {
     &:hover {
-      img {
+      #close {
+        background-position-y: 0;
         opacity: 1;
-      }
-      #close img {
-        object-position: 0 0;
-      }
-      #minimize img {
-        object-position: 0 -24px;
-        &.disabled {
-          opacity: 0.5;
+        &:active {
+          background-position-y: -12px;
         }
       }
-      #maximize img {
-        object-position: 0 -48px;
+      #minimize {
+        background-position-y: -24px;
+        opacity: 1;
         &.disabled {
-          opacity: 0.5;
+          background-position-y: -108px;
+          opacity: 0.25;
+        }
+        &:active {
+          background-position-y: -36px;
         }
       }
-      #restore img {
-        object-position: 0 -72px;
+      #maximize {
+        background-position-y: -48px;
+        opacity: 1;
+        &.disabled {
+          background-position-y: -108px;
+          opacity: 0.25;
+        }
+        &:active {
+          background-position-y: -60px;
+        }
       }
-    }
-    .title-button {
-      width: 12px;
-      height: 12px;
-      margin-right: 8px;
-    }
-    img {
-      object-fit: none;
-      width: 12px;
-      height: 12px;
-      -webkit-user-drag: none;
-      -webkit-app-region: no-drag;
-      object-position: 0 -96px;
-      opacity: 0.5;
-    }
-    #close img {
-      &:active {
-        object-position: 0 -12px;
-      }
-    }
-    #minimize img {
-      &.disabled {
-        object-position: 0 -108px;
-        pointer-events: none;
-        opacity: 0.25;
-      }
-      &:active {
-        object-position: 0 -36px;
-      }
-    }
-    #maximize img {
-      &.disabled {
-        object-position: 0 -108px;
-        pointer-events: none;
-        opacity: 0.25;
-      }
-      &:active {
-        object-position: 0 -60px;
-      }
-    }
-    #maximize img.disabled:hover {
-      opacity: 0.5;
-    }
-    #restore img {
-      &:active {
-        object-position: 0 -84px;
+      #restore {
+        background-position-y: -72px;
+        opacity: 1;
+        &:active {
+          background-position-y: -84px;
+        }
       }
     }
   }
-  @media screen and (-webkit-min-device-pixel-ratio: 2) {
-    top: 12px;
-    left: 20px;
-    height: 40px;
-    &:hover {
-      img {
-        opacity: 1;
-      }
-      #close img {
-        object-position: -24px 0;
-      }
-      #minimize img {
-        object-position: -24px -24px;
-        &.disabled {
-          opacity: 0.5;
-        }
-      }
-      #maximize img {
-        object-position: -24px -48px;
-        &.disabled {
-          opacity: 0.5;
-        }
-      }
-      #restore img {
-        object-position: -24px -72px;
-      }
+  .title-button {
+    background-position-y: -96px;
+  }
+  #minimize {
+    &.disabled {
+      background-position-y: -108px;
+      pointer-events: none;
+      opacity: 0.25;
     }
+  }
+  #maximize {
+    &.disabled {
+      background-position-y: -108px;
+      pointer-events: none;
+      opacity: 0.25;
+    }
+  }
+  @media screen and (-webkit-min-device-pixel-ratio: 1) and (-webkit-max-device-pixel-ratio: 2) {
     .title-button {
-      width: 24px;
-      height: 24px;
-      margin-right: 16px;
+      background-size: 36px 240px;
+      background-position-x: 0;
     }
-    img {
-      object-fit: none;
-      width: 24px;
-      height: 24px;
-      -webkit-user-drag: none;
-      -webkit-app-region: no-drag;
-      object-position: -24px -96px;
-      opacity: 0.5;
-    }
-    #close img {
-      &:active {
-        object-position: -24px -12px;
-      }
-    }
-    #minimize img {
-      &.disabled {
-        object-position: -24px -108px;
-        pointer-events: none;
-      }
-      &:active {
-        object-position: -24px -36px;
-      }
-    }
-    #maximize img {
-      &.disabled {
-        object-position: -24px -108px;
-        pointer-events: none;
-        opacity: 0.5;
-      }
-      &:active {
-        object-position: -24px -60px;
-      }
-    }
-    #maximize img.disabled:hover {
-      opacity: 0.5;
-    }
-    #restore img {
-      &:active {
-        object-position: -24px -84px;
-      }
+  }
+  @media screen and (-webkit-min-device-pixel-ratio: 2) {
+    .title-button {
+      background-size: 18px 120px;
+      background-position-x: -6px;
     }
   }
 }
