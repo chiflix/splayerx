@@ -27,7 +27,7 @@
         </ul>
       </div>
       <div class="subtitle-menu-button"
-        v-if="subtitleLoadedFlag" 
+        v-if="subtitleLoadedFlag"
         @click.capture.stop.left="toggleSubtitleMenu">
         {{curSubName}}
       </div>
@@ -43,17 +43,17 @@
     </div> -->
     <transition name="fade" appear>
     <div class="btn-sub-ctrl"
-      v-if="subCtrlBtnAppearFlag">
+      v-if="isSubCtrlBtnAppear">
       <div class='btn-menu-wrapper'
-        v-show="btnMenuAppearFalg">
+        v-show="isBtnMenuAppear">
         <ul class="btn-menu">
           <li class="btn-menu-item"
-            @click.stop.capture.left="showSubtitle"
+            @click.stop.capture.left="subtitleOn"
             :class="{show: subtitleAppearFlag}">
             <img src="" alt="Show">
           </li>
           <li class="btn-menu-item"
-            @click.stop.capture.left="showSubtitle"
+            @click.stop.capture.left="subtitleOff"
             :class="{show: !subtitleAppearFlag}">
             <img src="" alt="Close">
           </li>
@@ -98,22 +98,26 @@ export default {
       subtitleMenuAppearFlag: false,
       subSecondMenuAppearFlag: false,
       subtitleLoadedFlag: false,
-      btnMenuAppearFalg: false,
-      subCtrlBtnAppearFlag: false,
+      isBtnMenuAppear: false,
+      isSubCtrlBtnAppear: false,
       barBottom: 6,
       timeoutIdOfSubCtrlDisappearDelay: 0,
     };
   },
   methods: {
     subCtrlAppear() {
-      this.subCtrlBtnAppearFlag = true;
+      this.isSubCtrlBtnAppear = true;
     },
     subCtrlHide() {
-      this.subCtrlBtnAppearFlag = false;
+      // this.isSubCtrlBtnAppear = false;
     },
-    showSubtitle() {
-      this.subtitleAppearFlag = !this.subtitleAppearFlag;
-      this.$bus.$emit('toggleSubtitle');
+    subtitleOn() {
+      this.subtitleAppearFlag = true;
+      this.$bus.$emit('subtitleOn');
+    },
+    subtitleOff() {
+      this.subtitleAppearFlag = false;
+      this.$bus.$emit('subtitleOff');
     },
     toggleSecondSub() {
       // 关闭第二字幕和取消第二字幕的两套逻辑
@@ -138,7 +142,7 @@ export default {
     },
     toggleButtonMenu() {
       this.$_clearTimeoutDelay();
-      this.btnMenuAppearFalg = !this.btnMenuAppearFalg;
+      this.isBtnMenuAppear = !this.isBtnMenuAppear;
     },
     $_clearTimeoutDelay() {
       if (this.timeoutIdOfSubCtrlDisappearDelay !== 0) {
@@ -236,12 +240,12 @@ ul, li {
     .btn-menu-wrapper {
       position: absolute;
       bottom: 60px;
-      right: 31.25+35+12.5px;
+      right: 31.25+35+35+12.5+12.5px;
     }
     .btn{
       position: absolute;
       bottom: 25px;
-      right: 31.25+35+12.5px;
+      right: 31.25+35+35+12.5+12.5px;
       height: 30px;
     }
   }

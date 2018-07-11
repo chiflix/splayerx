@@ -368,17 +368,6 @@ export default {
         }
       }
     },
-    // 需要优化
-    toggleSubtitle() {
-      const vid = this.$refs.videoCanvas;
-      const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
-      if (vid.textTracks[firstSubIndex].mode === 'disabled') {
-        vid.textTracks[firstSubIndex].mode = 'hidden';
-      } else {
-        this.firstActiveCue = null;
-        vid.textTracks[firstSubIndex].mode = 'disabled';
-      }
-    },
     toggleSecondSub() {
       const vid = this.$refs.videoCanvas;
       const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
@@ -543,8 +532,22 @@ export default {
     });
 
     // Subtitle Display Control
+    this.$bus.$on('subtitleOn', () => {
+      const vid = this.$refs.videoCanvas;
+      const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
+      if (vid.textTracks[firstSubIndex].mode === 'disabled') {
+        vid.textTracks[firstSubIndex].mode = 'hidden';
+      }
+    });
 
-    this.$bus.$on('toggleSubtitle', this.toggleSubtitle);
+    this.$bus.$on('subtitleOff', () => {
+      const vid = this.$refs.videoCanvas;
+      const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
+      if (vid.textTracks[firstSubIndex].mode !== 'disabled') {
+        this.firstActiveCue = null;
+        vid.textTracks[firstSubIndex].mode = 'disabled';
+      }
+    });
     this.$bus.$on('toggleSecondSub', () => {
       this.toggleSecondSub();
     });
