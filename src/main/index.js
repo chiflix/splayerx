@@ -49,7 +49,7 @@ function createWindow() {
         webSecurity: false,
         experimentalFeatures: true,
       },
-        // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
+      // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
       backgroundColor: '#802e2c29',
       show: false,
     });

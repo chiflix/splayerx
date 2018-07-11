@@ -1,8 +1,6 @@
 <template>
-  <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }" 
-    v-show="showTitlebar"
-    @mouseover="handleMouseOver"
-    @mouseleave="handleMouseLeave">
+  <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
+    v-show="showTitlebar">
     <div class="win-icons" v-if="!isDarwin">
       <div id="minimize" class="title-button"
         @click="handleMinimize">
@@ -94,12 +92,6 @@ export default {
         this.$electron.remote.getCurrentWindow().setFullScreen(true);
       }
     },
-    handleMouseOver() {
-      this.macShowup = true;
-    },
-    handleMouseLeave() {
-      this.macShowup = false;
-    },
     statusChange() {
       const window = this.$electron.remote.getCurrentWindow();
       if (window.isFullScreen()) {
@@ -146,7 +138,6 @@ export default {
     this.$electron.remote.getCurrentWindow().on('resize', () => {
       this.setWindowInfo();
       this.statusChange();
-      console.log(this.windowInfo);
       this.titlebarWidth = this.$electron.remote.getCurrentWindow().getSize();
       this.originalSize = this.$electron.remote.getCurrentWindow().getSize();
     });
@@ -189,12 +180,16 @@ export default {
 .titlebar {
   position: absolute;
   top: 0;
-  right: 5px;
-  border-radius: 4px 4px 0px 0px;
+  border-radius: 10px;
+  width: 100%;
+  -webkit-app-region: drag;
+  height: 28px;
   z-index: 6;
   .win-icons {
     display: flex;
     flex-wrap: nowrap;
+    position: absolute;
+    right: 5px;
     .title-button {
       margin: 0px 2px 2px 0px;
       width: 45px;
@@ -241,7 +236,6 @@ export default {
   position: absolute;
   top: 6px;
   left: 10px;
-  z-index: 6;
   height: 20px;
   box-sizing: content-box;
   &:hover {
