@@ -57,7 +57,24 @@
             :class="{show: !subtitleAppearFlag}">
             <img src="" alt="Close">
           </li>
-          <li>{{curSubName}}</li>
+        </ul>
+        <ul class="subtitle-menu">
+          <li class="subtitle-menu-item"
+            v-for="item in subtitleNameArr"
+            :key="item.index"
+            :class="{selected: item.index === curFirstSubIndex || item.index === curSecondSubIndex}"
+            @click.capture.stop.left="firstSubSelect(item.index)">
+            {{item.name}}
+          </li>
+        </ul>
+        <ul class="subtitle-menu">
+          <li class="subtitle-menu-item"
+            v-for="item in subtitleNameArr"
+            :key="item.index"
+            :class="{selected: item.index === curFirstSubIndex || item.index === curSecondSubIndex}"
+            @click.capture.stop.left="secondSubSelect(item.index)">
+            {{item.name}}
+          </li>
         </ul>
       </div>
       <div
@@ -96,14 +113,12 @@ export default {
     },
     showSubtitle() {
       this.subtitleAppearFlag = !this.subtitleAppearFlag;
-      this.$bus.$emit('subStyleChange', { fontSize: 50 });
       this.$bus.$emit('toggleSubtitle');
     },
     toggleSecondSub() {
       // 关闭第二字幕和取消第二字幕的两套逻辑
       // 加一个flag确定开关，控制高度
       this.$bus.$emit('toggleSecondSub');
-      this.barBottom = 6;
     },
     toggleSubtitleCtrl() {
       this.subtitleCtrlAppearFlag = !this.subtitleCtrlAppearFlag;
@@ -119,7 +134,6 @@ export default {
       this.$bus.$emit('subFirstChange', index);
     },
     secondSubSelect(index) {
-      this.barBottom = 14;
       this.$bus.$emit('subSecondChange', index);
     },
     toggleButtonMenu() {
@@ -144,8 +158,11 @@ export default {
       }
       return 'No subtitle';
     },
-    isSelected() {
+    curFirstSubIndex() {
       return this.$store.state.PlaybackState.FirstSubIndex;
+    },
+    curSecondSubIndex() {
+      return this.$store.state.PlaybackState.SecondSubIndex;
     },
   },
   watch: {
@@ -243,11 +260,11 @@ ul, li {
     }
   }
 }
-// .selected {
-//   pointer-events: none;
-//   cursor: default;
-//   opacity: 0.6;
-// }
+.selected {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.6;
+}
 
 .fade-enter-active {
  transition: opacity 100ms;

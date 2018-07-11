@@ -11,14 +11,17 @@
       :src="src">
     </video>
     <div class="subtitle-wrapper">
+      <!-- Need a way not to use v-html -->
       <div class='subtitle-content'
         :style="subStyle"
         v-for="(html, key) in firstCueHTML"
-        :key="key">{{html}}</div>
+        :key="key"
+        v-html="html"></div>
       <div class='subtitle-content'
         :style="subStyle"
         v-for="(html, key) in secondCueHTML"
-        :key="key">{{html}}</div>
+        :key="key"
+        v-html="html"></div>
     </div>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
@@ -329,6 +332,8 @@ export default {
       //   }
       // }
       this.subStyleChange();
+      // 需要消除之前的字幕(第二字幕))
+      // this.$_clearSubtitle();
       this.subtitleShow(startIndex, 'first');
       this.$_loadSubNameArr();
     },
@@ -385,12 +390,11 @@ export default {
       }
     },
     /**
-     * @param obj style information object
+     * @param obj contains all needed style property
      *
-     * obj contains 6 keys to control the css
-     * style of the subtitle. If any one is
-     * not exsited, it will use
-     * default values.
+     * obj contains 6 values to control the css
+     * style of the subtitle. Each unset property
+     * will use default value.
      */
     subStyleChange(obj = {}) {
       const fontSize = obj.fontSize ? obj.fontSize : this.curStyle.fontSize;
@@ -399,6 +403,7 @@ export default {
       const color = obj.color ? obj.color : this.curStyle.color;
       const border = obj.border ? obj.border : this.curStyle.border;
       const background = obj.background ? obj.background : this.curStyle.background;
+
       this.subStyle = {
         fontSize: `${fontSize}px`,
         letterSpacing: `${letterSpacing}px`,
@@ -445,7 +450,17 @@ export default {
         const tempCue = cue.currentTarget.activeCues[0];
         this.secondActiveCue = tempCue;
       };
+      // write a same sub event to handle same subtitle situation
       textTrack.oncuechange = type === 'first' ? firstSubEvent : secondSubEvent;
+    },
+    $_clearSubtitle() {
+      const vid = this.$refs.videoCanvas;
+      const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
+      const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
+      vid.textTracks[firstSubIndex].mode = 'disabled';
+      vid.textTracks[firstSubIndex].oncuechange = null;
+      vid.textTracks[secondSubIndex].mode = 'disabled';
+      vid.textTracks[secondSubIndex].oncuechange = null;
     },
   },
   computed: {
@@ -486,11 +501,12 @@ export default {
       }
     },
     secondActiveCue(newVal) {
-      this.cueHTML.pop();
+      this.secondCueHTML.pop();
       // console.log(newVal);
       if (newVal) {
         // 这里对cue进行处理
         // 得到cue的line和position确定位置
+        console.log(111111);
         this.secondCueHTML.push(WebVTT.convertCueToDOMTree(window, this.secondActiveCue.text)
           .innerHTML);
       }
