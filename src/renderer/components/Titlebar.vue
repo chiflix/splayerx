@@ -52,8 +52,12 @@
 </template>
 
 <script>
+import Icon from './Icon.vue';
 export default {
   name: 'titlebar',
+  components: {
+    Icon,
+  },
   data() {
     return {
       showTitlebar: true,
@@ -66,6 +70,18 @@ export default {
       maximize: false,
       isDarwin: process.platform === 'darwin',
       titlebarDelay: 0,
+      macIcons: {
+        close: require('../assets/close.svg'),
+        closeMousedown: require('../assets/close-mousedown.svg'),
+        minimize: require('../assets/minimize.svg'),
+        minimizeMousedown: require('../assets/minimize-mousedown.svg'),
+        maximize: require('../assets/fullscreen.svg'),
+        maximizeMousedown: require('../assets/fullscreen-mousedown.svg'),
+        restore: require('../assets/restore.svg'),
+        restoreMousedown: require('../assets/restore-mousedown.svg'),
+        normal: require('../assets/normal.svg'),
+        disabled: require('../assets/disabled.svg'),
+      },
     };
   },
   props: {
@@ -79,7 +95,8 @@ export default {
     handleMaximize() {
       this.$electron.remote.getCurrentWindow().maximize();
     },
-    handleClose() {
+    handleClose(e) {
+      console.log(e);
       this.$electron.remote.getCurrentWindow().close();
     },
     handleRestore() {
@@ -239,81 +256,158 @@ export default {
 }
 .darwin-titlebar {
   position: absolute;
-  top: 6px;
-  left: 10px;
   z-index: 6;
-  height: 20px;
   box-sizing: content-box;
   .mac-icons {
     display: flex;
     flex-wrap: nowrap;
   }
-  &:hover {
+  @media screen and (-webkit-min-device-pixel-ratio: 1) and (-webkit-max-device-pixel-ratio: 2) {
+    top: 6px;
+    left: 10px;
+    height: 20px;
+    &:hover {
+      img {
+        opacity: 1;
+      }
+      #close img {
+        object-position: 0 0;
+      }
+      #minimize img {
+        object-position: 0 -24px;
+        &.disabled {
+          opacity: 0.5;
+        }
+      }
+      #maximize img {
+        object-position: 0 -48px;
+        &.disabled {
+          opacity: 0.5;
+        }
+      }
+      #restore img {
+        object-position: 0 -72px;
+      }
+    }
+    .title-button {
+      width: 12px;
+      height: 12px;
+      margin-right: 8px;
+    }
     img {
-      opacity: 1;
+      object-fit: none;
+      width: 12px;
+      height: 12px;
+      -webkit-user-drag: none;
+      -webkit-app-region: no-drag;
+      object-position: 0 -96px;
+      opacity: 0.5;
     }
     #close img {
-      object-position: 0 0;
+      &:active {
+        object-position: 0 -12px;
+      }
     }
     #minimize img {
-      object-position: 0 -24px;
       &.disabled {
-        opacity: 0.5;
+        object-position: 0 -108px;
+        pointer-events: none;
+      }
+      &:active {
+        object-position: 0 -36px;
       }
     }
     #maximize img {
-      object-position: 0 -48px;
       &.disabled {
+        object-position: 0 -108px;
+        pointer-events: none;
         opacity: 0.5;
       }
+      &:active {
+        object-position: 0 -60px;
+      }
+    }
+    #maximize img.disabled:hover {
+      opacity: 0.5;
     }
     #restore img {
-      object-position: 0 -72px;
+      &:active {
+        object-position: 0 -84px;
+      }
     }
   }
-  .title-button {
-    width: 12px;
-    height: 12px;
-    margin-right: 8px;
-  }
-  img {
-    object-fit: none;
-    width: 12px;
-    height: 12px;
-    -webkit-user-drag: none;
-    -webkit-app-region: no-drag;
-    object-position: 0 -96px;
-    opacity: 0.5;
-  }
-  #close img {
-    &:active {
-      object-position: 0 -12px;
+  @media screen and (-webkit-min-device-pixel-ratio: 2) {
+    top: 12px;
+    left: 20px;
+    height: 40px;
+    &:hover {
+      img {
+        opacity: 1;
+      }
+      #close img {
+        object-position: -24px 0;
+      }
+      #minimize img {
+        object-position: -24px -24px;
+        &.disabled {
+          opacity: 0.5;
+        }
+      }
+      #maximize img {
+        object-position: -24px -48px;
+        &.disabled {
+          opacity: 0.5;
+        }
+      }
+      #restore img {
+        object-position: -24px -72px;
+      }
     }
-  }
-  #minimize img {
-    &.disabled {
-      object-position: 0 -108px;
-      pointer-events: none;
+    .title-button {
+      width: 12px;
+      height: 12px;
+      margin-right: 8px;
     }
-    &:active {
-      object-position: 0 -36px;
+    img {
+      object-fit: none;
+      width: 24px;
+      height: 24px;
+      -webkit-user-drag: none;
+      -webkit-app-region: no-drag;
+      object-position: -24px -96px;
+      opacity: 0.5;
     }
-  }
-  #maximize img {
-    &.disabled {
-      object-position: 0 -108px;
-      pointer-events: none;
+    #close img {
+      &:active {
+        object-position: -24px -12px;
+      }
     }
-    &:active {
-      object-position: 0 -60px;
+    #minimize img {
+      &.disabled {
+        object-position: -24px -108px;
+        pointer-events: none;
+      }
+      &:active {
+        object-position: -24px -36px;
+      }
     }
-  }
-  #maximize img.disabled:hover {
-    opacity: 0.5;
-  }
-  #restore img {
-    &:active {
-      object-position: 0 -84px;
+    #maximize img {
+      &.disabled {
+        object-position: -24px -108px;
+        pointer-events: none;
+        opacity: 0.5;
+      }
+      &:active {
+        object-position: -24px -60px;
+      }
+    }
+    #maximize img.disabled:hover {
+      opacity: 0.5;
+    }
+    #restore img {
+      &:active {
+        object-position: -24px -84px;
+      }
     }
   }
 }
