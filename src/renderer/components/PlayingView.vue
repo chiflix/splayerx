@@ -12,11 +12,13 @@
       @mousewheel="wheelVolumeControll"
       @mouseleave="hideAllWidgets"
       @mousemove="handleMouseMove"
+      @mouseout.self="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
       <VolumeControl/>
+      <SubtitleControl/>
       <PlayButton/>
       <!-- <AdvanceControl/> -->
     </div>
@@ -30,6 +32,7 @@ import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
 import TimeProgressBar from './PlayingView/TimeProgressBar.vue';
 import VolumeControl from './PlayingView/VolumeControl.vue';
 import AdvanceControl from './PlayingView/AdvanceControl.vue';
+import SubtitleControl from './PlayingView/SubtitleControl.vue';
 import PlayButton from './PlayingView/PlayButton.vue';
 
 export default {
@@ -40,6 +43,7 @@ export default {
     TimeProgressBar,
     VolumeControl,
     AdvanceControl,
+    SubtitleControl,
     Titlebar,
     PlayButton,
   },
@@ -83,6 +87,7 @@ export default {
       this.$bus.$emit('volumecontroller-appear');
       this.$bus.$emit('progressbar-appear');
       this.$bus.$emit('timecode-appear');
+      this.$bus.$emit('sub-ctrl-appear');
       this.$bus.$emit('titlebar-appear');
     },
     hideAllWidgets() {
@@ -93,6 +98,8 @@ export default {
       if (process.platform !== 'win32') {
         this.$bus.$emit('titlebar-hide');
       }
+      this.$bus.$emit('sub-ctrl-hide');
+      this.$bus.$emit('titlebar-hide');
     },
     resetDraggingState() {
       this.isDragging = false;
