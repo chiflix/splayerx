@@ -95,7 +95,9 @@ export default {
       this.$bus.$emit('volumecontroller-hide');
       this.$bus.$emit('progressbar-hide');
       this.$bus.$emit('timecode-hide');
-      this.$bus.$emit('titlebar-hide');
+      if (process.platform !== 'win32') {
+        this.$bus.$emit('titlebar-hide');
+      }
     },
     resetDraggingState() {
       this.isDragging = false;
