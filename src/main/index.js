@@ -18,23 +18,42 @@ function createWindow() {
   /**
    * Initial window options
    */
-  mainWindow = new BrowserWindow({
-    height: 432,
-    useContentSize: true,
-    width: 768,
-    frame: false,
-    titleBarStyle: 'none',
-    minWidth: 427,
-    minHeight: 240,
-    webPreferences: {
-      webSecurity: false,
-      experimentalFeatures: true,
-    },
-
-    // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-    backgroundColor: '#802e2c29',
-    show: false,
-  });
+  if (process.platform === 'win32') {
+    mainWindow = new BrowserWindow({
+      height: 432,
+      useContentSize: true,
+      width: 768,
+      frame: false,
+      titleBarStyle: 'none',
+      minWidth: 427,
+      minHeight: 240,
+      webPreferences: {
+        webSecurity: false,
+        experimentalFeatures: true,
+      },
+      // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
+      backgroundColor: '#802e2c29',
+      show: false,
+    });
+  } else {
+    mainWindow = new BrowserWindow({
+      height: 432,
+      useContentSize: true,
+      width: 768,
+      frame: false,
+      titleBarStyle: 'none',
+      minWidth: 427,
+      minHeight: 240,
+      transparent: true,
+      webPreferences: {
+        webSecurity: false,
+        experimentalFeatures: true,
+      },
+      // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
+      backgroundColor: '#802e2c29',
+      show: false,
+    });
+  }
 
   mainWindow.loadURL(winURL);
   mainWindow.on('closed', () => {

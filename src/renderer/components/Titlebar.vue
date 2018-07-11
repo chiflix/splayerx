@@ -1,8 +1,6 @@
 <template>
-  <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }" 
-    v-show="showTitlebar"
-    @mouseover="handleMouseOver"
-    @mouseleave="handleMouseLeave">
+  <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
+    v-show="showTitlebar">
     <div class="win-icons" v-if="!isDarwin">
       <div id="minimize" class="title-button"
         @click="handleMinimize">
@@ -31,21 +29,19 @@
     <div class="mac-icons" v-if="isDarwin">
       <div id="close" class="title-button"
         @click="handleClose">
-        <img src="~@/assets/mac-titlebar-icons.png" />
       </div>
       <div id="minimize" class="title-button"
-        @click="handleMinimize">
-        <img :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }" src="~@/assets/mac-titlebar-icons.png" />
+        @click="handleMinimize"
+        :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }">
       </div>
       <div id="maximize" class="title-button"
         @click="handleMacMaximize"
-        v-show="middleButtonStatus !== 'exit-fullscreen'">
-        <img :class="{ disabled: currentView === 'LandingView' }" src="~@/assets/mac-titlebar-icons.png" />
+        v-show="middleButtonStatus !== 'exit-fullscreen'"
+        :class="{ disabled: currentView === 'LandingView' }">
       </div>
       <div id="restore" class="title-button"
         @click="handleFullscreenExit"
         v-show="middleButtonStatus === 'exit-fullscreen'">
-        <img src="~@/assets/mac-titlebar-icons.png" />
       </div>
     </div>
   </div>
@@ -79,7 +75,8 @@ export default {
     handleMaximize() {
       this.$electron.remote.getCurrentWindow().maximize();
     },
-    handleClose() {
+    handleClose(e) {
+      console.log(e);
       this.$electron.remote.getCurrentWindow().close();
     },
     handleRestore() {
@@ -93,12 +90,6 @@ export default {
       if (this.currentView !== 'LandingView') {
         this.$electron.remote.getCurrentWindow().setFullScreen(true);
       }
-    },
-    handleMouseOver() {
-      this.macShowup = true;
-    },
-    handleMouseLeave() {
-      this.macShowup = false;
     },
     statusChange() {
       const window = this.$electron.remote.getCurrentWindow();
@@ -146,7 +137,6 @@ export default {
     this.$electron.remote.getCurrentWindow().on('resize', () => {
       this.setWindowInfo();
       this.statusChange();
-      console.log(this.windowInfo);
       this.titlebarWidth = this.$electron.remote.getCurrentWindow().getSize();
       this.originalSize = this.$electron.remote.getCurrentWindow().getSize();
     });
@@ -189,12 +179,16 @@ export default {
 .titlebar {
   position: absolute;
   top: 0;
-  right: 5px;
-  border-radius: 4px 4px 0px 0px;
+  border-radius: 10px;
+  width: 100%;
+  -webkit-app-region: drag;
+  height: 28px;
   z-index: 6;
   .win-icons {
     display: flex;
     flex-wrap: nowrap;
+    position: absolute;
+    right: 5px;
     .title-button {
       margin: 0px 2px 2px 0px;
       width: 45px;
@@ -239,28 +233,11 @@ export default {
 }
 .darwin-titlebar {
   position: absolute;
+  z-index: 6;
+  box-sizing: content-box;
   top: 6px;
   left: 10px;
-  z-index: 6;
   height: 20px;
-  box-sizing: content-box;
-  &:hover {
-    img {
-      opacity: 1;
-    }
-    #close img {
-      object-position: 0 0;
-    }
-    #minimize img {
-      object-position: 0 -24px;
-    }
-    #maximize img {
-      object-position: 0 -48px;
-    }
-    #restore img {
-      object-position: 0 -72px;
-    }
-  }
   .mac-icons {
     display: flex;
     flex-wrap: nowrap;
@@ -269,42 +246,79 @@ export default {
     width: 12px;
     height: 12px;
     margin-right: 8px;
-  }
-  img {
-    object-fit: none;
-    width: 12px;
-    height: 12px;
-    -webkit-user-drag: none;
+    background-image: url('../assets/mac-titlebar-icons.png');
+    background-repeat: no-repeat;
     -webkit-app-region: no-drag;
-    object-position: 0 -96px;
     opacity: 0.5;
+    border-radius: 100%;
   }
-  #close img {
-    &:active {
-      object-position: 0 -12px;
+  .mac-icons {
+    &:hover {
+      #close {
+        background-position-y: 0;
+        opacity: 1;
+        &:active {
+          background-position-y: -12px;
+        }
+      }
+      #minimize {
+        background-position-y: -24px;
+        opacity: 1;
+        &.disabled {
+          background-position-y: -108px;
+          opacity: 0.25;
+        }
+        &:active {
+          background-position-y: -36px;
+        }
+      }
+      #maximize {
+        background-position-y: -48px;
+        opacity: 1;
+        &.disabled {
+          background-position-y: -108px;
+          opacity: 0.25;
+        }
+        &:active {
+          background-position-y: -60px;
+        }
+      }
+      #restore {
+        background-position-y: -72px;
+        opacity: 1;
+        &:active {
+          background-position-y: -84px;
+        }
+      }
     }
   }
-  #minimize img {
+  .title-button {
+    background-position-y: -96px;
+  }
+  #minimize {
     &.disabled {
-      object-position: 0 -108px;
+      background-position-y: -108px;
       pointer-events: none;
-    }
-    &:active {
-      object-position: 0 -36px;
+      opacity: 0.25;
     }
   }
-  #maximize img {
+  #maximize {
     &.disabled {
-      object-position: 0 -108px;
+      background-position-y: -108px;
       pointer-events: none;
-    }
-    &:active {
-      object-position: 0 -60px;
+      opacity: 0.25;
     }
   }
-  #restore img {
-    &:active {
-      object-position: 0 -84px;
+  @media screen and (-webkit-min-device-pixel-ratio: 1) and (-webkit-max-device-pixel-ratio: 2) {
+    .title-button {
+      background-size: 36px 240px;
+      background-position-x: 0;
+    }
+  }
+  @media screen and (-webkit-min-device-pixel-ratio: 2) {
+    .title-button {
+      background-size: 18px 120px;
+      background-position-x: -6px;
     }
   }
 }
