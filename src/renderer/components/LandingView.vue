@@ -201,7 +201,6 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  backdrop-filter: blur(30px);
   z-index: 2;
 
   .background-mask {
