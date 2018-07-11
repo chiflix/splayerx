@@ -344,9 +344,9 @@ export default {
       }
     }
     .title-button {
-      width: 12px;
-      height: 12px;
-      margin-right: 8px;
+      width: 24px;
+      height: 24px;
+      margin-right: 16px;
     }
     img {
       object-fit: none;
