@@ -52,12 +52,8 @@
 </template>
 
 <script>
-import Icon from './Icon.vue';
 export default {
   name: 'titlebar',
-  components: {
-    Icon,
-  },
   data() {
     return {
       showTitlebar: true,
@@ -70,18 +66,6 @@ export default {
       maximize: false,
       isDarwin: process.platform === 'darwin',
       titlebarDelay: 0,
-      macIcons: {
-        close: require('../assets/close.svg'),
-        closeMousedown: require('../assets/close-mousedown.svg'),
-        minimize: require('../assets/minimize.svg'),
-        minimizeMousedown: require('../assets/minimize-mousedown.svg'),
-        maximize: require('../assets/fullscreen.svg'),
-        maximizeMousedown: require('../assets/fullscreen-mousedown.svg'),
-        restore: require('../assets/restore.svg'),
-        restoreMousedown: require('../assets/restore-mousedown.svg'),
-        normal: require('../assets/normal.svg'),
-        disabled: require('../assets/disabled.svg'),
-      },
     };
   },
   props: {
@@ -312,6 +296,7 @@ export default {
       &.disabled {
         object-position: 0 -108px;
         pointer-events: none;
+        opacity: 0.25;
       }
       &:active {
         object-position: 0 -36px;
@@ -321,7 +306,7 @@ export default {
       &.disabled {
         object-position: 0 -108px;
         pointer-events: none;
-        opacity: 0.5;
+        opacity: 0.25;
       }
       &:active {
         object-position: 0 -60px;
