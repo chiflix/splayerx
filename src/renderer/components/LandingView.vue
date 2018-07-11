@@ -64,8 +64,6 @@ export default {
       showShortcutImage: false,
       isDragging: false,
       mouseDown: false,
-      windowStartPosition: null,
-      mousedownPosition: null,
     };
   },
   components: {
@@ -150,22 +148,11 @@ export default {
       // Handle dragging-related variables
       this.mouseDown = true;
       this.isDragging = false;
-      this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
-      this.mousedownPosition = [event.screenX, event.screenY];
     },
     handleMouseMove(event) {
       // Handle dragging-related variables and methods
       if (this.mouseDown) {
-        if (this.windowStartPosition !== null) {
-          this.isDragging = true;
-          const startPos = this.mousedownPosition;
-          const offset = [event.screenX - startPos[0], event.screenY - startPos[1]];
-          const winStartPos = this.windowStartPosition;
-          this.$electron.remote.getCurrentWindow().setPosition(
-            winStartPos[0] + offset[0],
-            winStartPos[1] + offset[1],
-          );
-        }
+        this.isDragging = true;
       }
     },
     handleMouseUp() {
