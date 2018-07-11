@@ -10,6 +10,7 @@
       v-if="showShortcutImage">
       <img
         :src="backgroundUrl">
+      <div class="background-mask"></div>
       <div class="item-name">
         {{ itemInfo().baseName }}
       </div>
@@ -29,7 +30,7 @@
     <div class="controller">
       <div class="playlist"
         v-if="hasRecentPlaylist">
-        <div class="item"
+        <div class="item shadow"
           v-for="(item, index) in lastPlayedFile"
           :key="item.path"
           :style="{
@@ -200,9 +201,18 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  backdrop-filter: blur(30px);
   z-index: 2;
 
+  .background-mask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    background-image: radial-gradient(circle at 37% 35%, 
+                    rgba(0,0,0,0.00) 13%, 
+                    rgba(0,0,0,0.43) 47%, 
+                    rgba(0,0,0,0.80) 100%);
+  }
   .item-name {
     position: relative;
     top: 100px;
@@ -211,6 +221,7 @@ body {
     word-break: break-all;
     font-size: 30px;
     font-weight: bold;
+    z-index: 4;
   }
   .item-description {
     position: relative;
@@ -227,6 +238,7 @@ body {
     left: 45px;
     font-size: 20px;
     font-weight: lighter;
+    z-index: 4;
   }
   img {
     position: absolute;
@@ -254,7 +266,6 @@ main {
   text-align: center;
   z-index: 1;
   .title {
-    font-size: 7vw;
     margin-bottom: 6px;
   }
   p {
@@ -289,7 +300,6 @@ main {
       border-radius: 2px;
       width: 114px;
       height: 65px;
-      box-shadow: 0 20px 30px 0 rgba(0,0,0,0.30);
       color: gray;
       cursor: pointer;
       margin-right: 15px;
@@ -299,6 +309,27 @@ main {
       background-position: center center;
       transition: width 150ms ease-out, height 150ms ease-out;
       z-index: 4;
+    }
+
+    .shadow {
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;
+      &:before, &:after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        top: 50%;
+        bottom: 0;
+        left: 10px;
+        right: 10px;
+        border-radius: 50px;
+      }
+      &:after {
+        right: 10px;
+        left: auto;
+        transform: skew(8deg) rotate(3deg);
+      }
     }
   }
 }
