@@ -1,11 +1,10 @@
 <template>
 <div class="wrapper">
-  <main>
+  <main
+    @mousedown.left.stop="handleLeftClick"
+    @mouseup.left.stop="handleMouseUp"
+    @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
-    <div class="mask"
-      @mousedown.left.stop="handleLeftClick"
-      @mouseup.left.stop="handleMouseUp"
-      @mousemove="handleMouseMove"></div>
     <div class="background-image"
       v-if="showShortcutImage">
       <img
@@ -64,8 +63,6 @@ export default {
       showShortcutImage: false,
       isDragging: false,
       mouseDown: false,
-      windowStartPosition: null,
-      mousedownPosition: null,
     };
   },
   components: {
@@ -93,6 +90,10 @@ export default {
         console.log(data);
       }
     });
+    if (process.platform === 'win32') {
+      document.querySelector('.application').style.webkitAppRegion = 'no-drag';
+      document.querySelector('.application').style.borderRadius = 0;
+    }
   },
   methods: {
     itemShortcut(shortCut) {
@@ -146,26 +147,15 @@ export default {
         }
       });
     },
-    handleLeftClick(event) {
+    handleLeftClick() {
       // Handle dragging-related variables
       this.mouseDown = true;
       this.isDragging = false;
-      this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
-      this.mousedownPosition = [event.screenX, event.screenY];
     },
-    handleMouseMove(event) {
+    handleMouseMove() {
       // Handle dragging-related variables and methods
       if (this.mouseDown) {
-        if (this.windowStartPosition !== null) {
-          this.isDragging = true;
-          const startPos = this.mousedownPosition;
-          const offset = [event.screenX - startPos[0], event.screenY - startPos[1]];
-          const winStartPos = this.windowStartPosition;
-          this.$electron.remote.getCurrentWindow().setPosition(
-            winStartPos[0] + offset[0],
-            winStartPos[1] + offset[1],
-          );
-        }
+        this.isDragging = true;
       }
     },
     handleMouseUp() {
@@ -262,13 +252,6 @@ main {
     color: gray;
     margin-bottom: 10px;
   }
-}
-
-.mask {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  z-index: 3;
 }
 
 .controller {
