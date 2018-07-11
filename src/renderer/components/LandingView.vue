@@ -100,8 +100,10 @@ export default {
       return `url("${shortCut}")`;
     },
     itemInfo() {
+      const preBaseName = path.basename(this.item.path, path.extname(this.item.path));
+      const shortenedBaseName = `${preBaseName.substring(0, 30)}...`;
       return {
-        baseName: path.basename(this.item.path, path.extname(this.item.path)),
+        baseName: preBaseName.length > 30 ? shortenedBaseName : preBaseName,
         lastTime: this.item.lastPlayedTime,
         duration: this.item.duration,
       };
@@ -208,9 +210,9 @@ body {
     width: 100%;
     height: 100%;
     z-index: 3;
-    background-image: radial-gradient(circle at 37% 35%, 
-                    rgba(0,0,0,0.00) 13%, 
-                    rgba(0,0,0,0.43) 47%, 
+    background-image: radial-gradient(circle at 37% 35%,
+                    rgba(0,0,0,0.00) 13%,
+                    rgba(0,0,0,0.43) 47%,
                     rgba(0,0,0,0.80) 100%);
   }
   .item-name {

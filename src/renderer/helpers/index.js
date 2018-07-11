@@ -65,7 +65,7 @@ export default {
           console.log(err);
         } else if (Array.isArray(data)) {
           console.log('its an array!');
-          if (data.length < 4) {
+          if (data.length <= 4) {
             if (this.$_indexOfExistedFileIn(data, path) === -1) {
               data.unshift(newElement);
             } else {
