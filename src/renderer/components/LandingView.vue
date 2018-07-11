@@ -5,18 +5,27 @@
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
-    <div class="background-image"
+
+    <div class="background"
       v-if="showShortcutImage">
-      <img
-        :src="backgroundUrl">
-      <div class="background-mask"></div>
-      <div class="item-name">
+      <div class="background background-image">
+        <transition name="background-transition" mode="in-out">
+          <img
+          :key="imageTurn"
+          :src="backgroundUrl">
+        </transition>
+      </div>
+      <div class="background background-mask"></div>
+      <div class="iteminfo item-name">
         {{ itemInfo().baseName }}
       </div>
-      <div class="item-description">
+      <div class="iteminfo item-description">
       </div>
-      <div class="item-timing">
+      <div class="iteminfo item-timing">
         {{ timecodeFromSeconds(itemInfo().lastTime) }} / {{ timecodeFromSeconds(itemInfo().duration) }}
+      </div>
+      <div class="iteminfo item-progress">
+        <div class="progress-played" v-bind:style="{ width: itemInfo().percentage + '%' }"></div>
       </div>
     </div>
     <div class="logo-container">
@@ -60,7 +69,10 @@ export default {
     return {
       showingPopupDialog: false,
       lastPlayedFile: [],
-      backgroundUrl: '',
+      imageTurn: '',
+      isTurnToOdd: false,
+      backgroundUrlOdd: '',
+      backgroundUrlEven: '',
       showShortcutImage: false,
       isDragging: false,
       mouseDown: false,
@@ -72,6 +84,13 @@ export default {
   computed: {
     hasRecentPlaylist() {
       return this.lastPlayedFile.length > 0;
+    },
+    backgroundUrl() {
+      switch (this.imageTurn) {
+        case 'odd': return this.backgroundUrlOdd;
+        case 'even': return this.backgroundUrlEven;
+        default: return '';
+      }
     },
   },
   mounted() {
@@ -105,6 +124,7 @@ export default {
         baseName: path.basename(this.item.path, path.extname(this.item.path)),
         lastTime: this.item.lastPlayedTime,
         duration: this.item.duration,
+        percentage: (this.item.lastPlayedTime / this.item.duration) * 100,
       };
     },
     onRecentItemMouseover(item, index) {
@@ -112,7 +132,14 @@ export default {
       this.$set(this.lastPlayedFile[index], 'chosen', true);
       if (item.shortCut !== '') {
         this.isChanging = true;
-        this.backgroundUrl = item.shortCut;
+        this.isTurnToOdd = !this.isTurnToOdd;
+        if (this.isTurnToOdd) {
+          this.imageTurn = 'odd';
+          this.backgroundUrlOdd = item.shortCut;
+        } else {
+          this.imageTurn = 'even';
+          this.backgroundUrlEven = item.shortCut;
+        }
         this.showShortcutImage = true;
       }
     },
@@ -187,48 +214,53 @@ body {
   width: 100vw;
   z-index: -1;
 }
-.background-image {
+.background {
   position: absolute;
   width: 100%;
   height: 100%;
   z-index: 2;
 
   .background-mask {
-    position: absolute;
-    width: 100%;
-    height: 100%;
     z-index: 3;
     background-image: radial-gradient(circle at 37% 35%, 
                     rgba(0,0,0,0.00) 13%, 
                     rgba(0,0,0,0.43) 47%, 
                     rgba(0,0,0,0.80) 100%);
   }
-  .item-name {
+  .iteminfo {
     position: relative;
     top: 100px;
     left: 45px;
+    z-index: 4;
+  }
+  .item-name {
     width: 500px;
     word-break: break-all;
     font-size: 30px;
     font-weight: bold;
-    z-index: 4;
   }
   .item-description {
-    position: relative;
     opacity: 0.4;
-    top: 100px;
-    left: 45px;
-    font-size: 20px;
+    font-size: 14px;
     font-weight: lighter;
   }
   .item-timing {
-    position: relative;
-    top: 100px;
     opacity: 0.4;
-    left: 45px;
-    font-size: 20px;
-    font-weight: lighter;
-    z-index: 4;
+    font-size: 15px;
+    font-weight: 400;
+  }
+  .item-progress {
+    width: 130px;
+    height: 4px;
+    margin-top: 9px;
+    border-radius: 1px;
+    background-color: rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    .progress-played {
+      height: 100%;
+      width: 70px;
+      background-color: #fff;
+    }
   }
   img {
     position: absolute;
@@ -270,6 +302,7 @@ main {
   left: 0;
   bottom: 40px;
   width: 100%;
+  z-index: 4;
 
   .playlist {
     display: flex;
@@ -291,28 +324,27 @@ main {
       background-repeat: no-repeat;
       background-position: center center;
       transition: width 150ms ease-out, height 150ms ease-out;
-      z-index: 4;
     }
 
     .shadow {
       position: relative;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;
-      &:before, &:after {
-        content: "";
-        position: absolute;
-        z-index: -1;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-        top: 50%;
-        bottom: 0;
-        left: 10px;
-        right: 10px;
-        border-radius: 50px;
-      }
-      &:after {
-        right: 10px;
-        left: auto;
-        transform: skew(8deg) rotate(3deg);
-      }
+    }
+    .shadow:before, .shadow:after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      top: 50%;
+      bottom: 0;
+      left: 10px;
+      right: 10px;
+      border-radius: 50px;
+    }
+    .shadow:after {
+      right: 10px;
+      left: auto;
+      transform: skew(8deg) rotate(3deg);
     }
   }
 }
@@ -328,6 +360,14 @@ main {
   transition: all 0.15s ease;
   border: 0px;
   z-index: 5;
+}
+
+.background-transition-enter-active, .background-transition-leave-active {
+  transition: opacity .3s;
+  transition-delay: .15s;
+}
+.background-transition-enter, .background-transition-leave-to {
+  opacity: 0;
 }
 
 </style>
