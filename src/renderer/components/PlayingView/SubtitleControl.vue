@@ -70,29 +70,20 @@ export default {
     firstSubtitleOn() {
       this.$store.commit('FirstSubtitleOn');
       this.$store.commit('SecondSubtitleOn');
-      // this.subtitleAppearFlag = true;
-      // this.$bus.$emit('subtitleOn');
-      // this.$bus.$emit('SecondSubOn');
     },
     firstSubtitleOff() {
       this.$store.commit('FirstSubtitleOff');
       this.$store.commit('SecondSubtitleOff');
-      // this.subtitleAppearFlag = false;
-      // this.$bus.$emit('subtitleOff');
-      // this.$bus.$emit('SecondSubOff');
     },
     secondSubtitleOn() {
       this.$store.commit('SecondSubtitleOn');
-      // this.$bus.$emit('SecondSubOn');
     },
     secondSubtitleOff() {
       this.$store.commit('SecondSubtitleOff');
-      // this.$bus.$emit('SecondSubOff');
     },
     // 需要refactor
     firstSubSelect(index) {
       this.$bus.$emit('subFirstChange', index);
-      // this.subtitleAppearFlag = true;
     },
     secondSubSelect(index) {
       this.$bus.$emit('subSecondChange', index);
@@ -134,19 +125,8 @@ export default {
     },
   },
   watch: {
-    // watch方法确定字幕有无状态
-    // subtitleNameArr() {
-    //   if (this.subtitleNameArr.length !== 0) {
-    //     this.subtitleAppearFlag = true;
-    //   } else {
-    //     this.subtitleAppearFlag = false;
-    //   }
-    // },
   },
   created() {
-    // this.$bus.$on('subtitle-loaded', () => {
-    //   this.subtitleLoadedFlag = true;
-    // });
     this.$bus.$on('sub-ctrl-appear', () => {
       this.subCtrlAppear();
       if (this.timeoutIdOfSubCtrlDisappearDelay !== 0) {

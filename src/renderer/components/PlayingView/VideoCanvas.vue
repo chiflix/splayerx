@@ -567,51 +567,6 @@ export default {
       this.$store.commit('AccurateTime', e);
     });
 
-    // Subtitle Display Control
-    // this.$bus.$on('subtitleOn', () => {
-    //   const vid = this.$refs.videoCanvas;
-    //   const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
-    //   if (vid.textTracks[firstSubIndex].mode === 'disabled') {
-    //     vid.textTracks[firstSubIndex].mode = 'hidden';
-    //   }
-    // });
-
-    // this.$bus.$on('subtitleOff', () => {
-    //   const vid = this.$refs.videoCanvas;
-    //   const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
-    //   if (vid.textTracks[firstSubIndex].mode !== 'disabled') {
-    //     this.firstActiveCue = null;
-    //     vid.textTracks[firstSubIndex].mode = 'disabled';
-    //   }
-    // });
-
-    // Second Subtitle Display Control
-    // this.$bus.$on('SecondSubOn', () => {
-    //   const vid = this.$refs.videoCanvas;
-    //   const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
-    //   // 如果未选第二字幕的时候开启，如何处理
-    //   if (secondSubIndex === -1) {
-    //     console.log('Warn: No Second Subtitle');
-    //   } else if (vid.textTracks[secondSubIndex].mode === 'disabled') {
-    //     vid.textTracks[secondSubIndex].mode = 'hidden';
-    //   } else {
-    //     console.log('Error: mode is not correct');
-    //   }
-    // });
-
-    // this.$bus.$on('SecondSubOff', () => {
-    //   const vid = this.$refs.videoCanvas;
-    //   const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
-    //   if (secondSubIndex === -1) {
-    //     console.log('Warn: No second subtitle');
-    //   } else if (vid.textTracks[secondSubIndex].mode !== 'disabled') {
-    //     this.secondActiveCue = null;
-    //     vid.textTracks[secondSubIndex].mode = 'disabled';
-    //   } else {
-    //     console.log('Error: mode is not correct');
-    //   }
-    // });
-
     // 可以二合一
     this.$bus.$on('subFirstChange', (targetIndex) => {
       const index = this.$store.state.PlaybackState.StartIndex + targetIndex;
