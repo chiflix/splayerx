@@ -10,6 +10,17 @@
       @durationchange="onDurationChange"
       :src="src">
     </video>
+    <div class="subtitle-wrapper">
+      <!-- Need a way not to use v-html -->
+      <div class='subtitle-content'
+        :style="subStyle"
+        v-for="(html, key) in firstCueHTML"
+        v-html="html"></div>
+      <div class='subtitle-content'
+        :style="subStyle"
+        v-for="(html, key) in secondCueHTML"
+        v-html="html"></div>
+    </div>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -18,17 +29,34 @@
 import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
+import path from 'path';
 // https://www.w3schools.com/tags/ref_av_dom.asp
 
 export default {
   data() {
     return {
       videoExisted: false,
+      shownTextTrack: false,
       newWidthOfWindow: 0,
       newHeightOfWindow: 0,
       videoWidth: 0,
       videoHeight: 0,
       timeUpdateIntervalID: null,
+      firstActiveCue: null,
+      secondActiveCue: null,
+      firstCueHTML: [],
+      secondCueHTML: [],
+      subNameArr: [],
+      // 将style的内容修改为object
+      subStyle: {},
+      curStyle: {
+        fontSize: 24,
+        letterSpacing: 1,
+        opcacity: 1,
+        color: '',
+        border: '',
+        background: '',
+      },
     };
   },
   props: {
@@ -104,75 +132,6 @@ export default {
     onSubTrackLoaded() {
       console.log('onSubTrackLoaded');
       this.$refs.customTrack.mode = 'showing';
-    },
-    loadTextTracks() {
-      /* TODO:
-       * 字幕代码我自己觉得很不满意，期待更好的处理 - Tomasen
-       * move subtitle process to another component
-       * DOCs:
-       * https://gist.github.com/denilsonsa/aeb06c662cf98e29c379
-       * https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
-       * https://hacks.mozilla.org/2014/07/adding-captions-and-subtitles-to-html5-video/
-       */
-
-      const vid = this.$refs.videoCanvas;
-
-      // hide every text text/subtitle tracks at beginning
-      for (let i = 0; i < vid.textTracks.length; i += 1) {
-        vid.textTracks[i].mode = 'hidden';
-      }
-
-      // create our own text/subtitle track
-      const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
-
-      /*
-       * TODO:
-       * If there is already text track, load it
-       * If there is already subtitle files(opened or loaded), load it
-       * If there is no (chinese/default language) text track, try translate api
-       */
-
-      let loadingTextTrack = false;
-      let shownTextTrack = false;
-      // If there is already subtitle files(same dir), load it
-      this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
-        console.log(subPath);
-        // Automatically track and cleanup files at exit
-        // temp.track();
-        // const stream = temp.createWriteStream({ suffix: '.vtt' });
-        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
-        parser.oncue = (cue) => {
-          sub0.addCue(cue);
-          // console.log(cue);
-        };
-        parser.onflush = () => {
-          if (!shownTextTrack) {
-            sub0.mode = 'showing';
-            shownTextTrack = true;
-          }
-        };
-        loadingTextTrack = true;
-
-        const readStream = fs.createReadStream(subPath).pipe(srt2vtt());
-        readStream
-          .on('data', (chunk) => {
-            parser.parse(chunk.toString('utf8'));
-          })
-          .on('end', () => {
-            parser.flush();
-            console.log('finish reading srt');
-          });
-      });
-
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(`loadingTextTrack ${loadingTextTrack}`);
-        if (!loadingTextTrack) {
-          // Loading subtitle test
-          const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
-          sub0.addCue(cue0);
-          sub0.mode = 'showing';
-        }
-      }
     },
     $_controlWindowSize() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
@@ -291,6 +250,209 @@ export default {
       });
       console.log('shortCut!');
     },
+
+    loadTextTracks() {
+      /* TODO:
+       * 字幕代码我自己觉得很不满意，期待更好的处理 - Tomasen
+       * move subtitle process to another component
+       * DOCs:
+       * https://gist.github.com/denilsonsa/aeb06c662cf98e29c379
+       * https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
+       * https://hacks.mozilla.org/2014/07/adding-captions-and-subtitles-to-html5-video/
+       */
+
+      const vid = this.$refs.videoCanvas;
+      const startIndex = vid.textTracks.length;
+      this.$store.commit('StartIndex', startIndex);
+      // hide every text text/subtitle tracks at beginning
+      // 没有做对内挂字幕的处理
+      for (let i = this.$store.state.PlaybackState.CurrentIndex; i < startIndex; i += 1) {
+        vid.textTracks[i].mode = 'disabled';
+      }
+
+      // // create our own text/subtitle track
+      // const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
+
+      /*
+       * TODO:
+       * If there is already text track, load it
+       * If there is already subtitle files(opened or loaded), load it
+       * If there is no (chinese/default language) text track, try translate api
+       */
+
+      // let loadingTextTrack = false;
+      // let shownTextTrack = false;
+      // If there is already subtitle files(same dir), load it
+      this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
+        // console.log(subPath);
+        // Automatically track and cleanup files at exit
+        // temp.track();
+        // const stream = temp.createWriteStream({ suffix: '.vtt' });
+        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+        const filename = path.parse(subPath).name;
+        const sub = vid.addTextTrack('subtitles', filename);
+        parser.oncue = (cue) => {
+          sub.addCue(cue);
+        };
+
+        sub.mode = 'disabled';
+        parser.onflush = () => {
+          if (!this.shownTextTrack) {
+            // sub.mode = 'showing';
+            this.shownTextTrack = true;
+            this.$bus.$emit('subtitle-loaded');
+          }
+        };
+        // loadingTextTrack = true;
+
+        const readStream = fs.createReadStream(subPath).pipe(srt2vtt());
+        readStream
+          .on('data', (chunk) => {
+            parser.parse(chunk.toString('utf8'));
+          })
+          .on('end', () => {
+            parser.flush();
+            console.log('finish reading srt');
+          });
+      });
+
+
+      // create our own text/subtitle track
+      // const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
+
+      // if (process.env.NODE_ENV !== 'production') {
+      //   console.log(`loadingTextTrack ${loadingTextTrack}`);
+      //   if (!loadingTextTrack) {
+      //     // Loading subtitle test
+      //     const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
+      //     sub0.addCue(cue0);
+      //     sub0.mode = 'showing';
+      //   }
+      // }
+      this.subStyleChange();
+      // 需要消除之前的字幕
+      this.$_clearSubtitle();
+      this.subtitleShow(startIndex, 'first');
+      this.$_loadSubNameArr();
+    },
+    // 待改善函数结构
+    // 判断重合情况
+    // 主字幕与副字幕选择同一个字幕情况下，是消去一个字幕还是保持上次的结果？
+    subtitleShow(index, type) {
+      const vid = this.$refs.videoCanvas;
+      if (type === 'first') {
+        // 当直接播放无字幕视频时，会报错,需要error handle
+        // 判断有无字幕
+        if (vid.textTracks.length > index) {
+          this.$store.commit('FirstSubtitleOn');
+          const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
+          vid.textTracks[firstSubIndex].mode = 'disabled';
+          vid.textTracks[firstSubIndex].oncuechange = null;
+          this.$_onCueChangeEventAdd(vid.textTracks[index]);
+          vid.textTracks[index].mode = 'hidden';
+          this.$store.commit('FirstSubIndex', index);
+        } else {
+          this.$store.commit('FirstSubtitleOff');
+          console.log('no subtitle');
+        }
+      }
+      if (type === 'second') {
+        // 需要重写
+        console.log('showSecondSub');
+        const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
+        if (index !== this.$store.state.PlaybackState.FirstSubIndex) {
+          if (secondSubIndex !== -1) {
+            vid.textTracks[secondSubIndex].mode = 'disabled';
+            this.$store.commit('SecondSubtitleOn');
+          } else {
+            this.$store.commit('SecondSubtitleOff');
+            console.log('Warning: no selected second subtitle');
+          }
+          this.$_onCueChangeEventAdd(vid.textTracks[index], 'second');
+          vid.textTracks[index].mode = 'hidden';
+          this.$store.commit('SecondSubIndex', index);
+        }
+      }
+    },
+    /**
+     * @param obj contains all needed style property
+     *
+     * obj contains 6 values to control the css
+     * style of the subtitle. Each unset property
+     * will use default value.
+     */
+    subStyleChange(obj = {}) {
+      const fontSize = obj.fontSize ? obj.fontSize : this.curStyle.fontSize;
+      const letterSpacing = obj.letterSpacing ? obj.letterSpacing : this.curStyle.letterSpacing;
+      const opacity = obj.opacity ? obj.opacity : this.curStyle.opacity;
+      const color = obj.color ? obj.color : this.curStyle.color;
+      const border = obj.border ? obj.border : this.curStyle.border;
+      const background = obj.background ? obj.background : this.curStyle.background;
+
+      this.subStyle = {
+        fontSize: `${fontSize}px`,
+        letterSpacing: `${letterSpacing}px`,
+        opacity,
+        color,
+        border,
+        background,
+      };
+      this.curStyle = {
+        fontSize,
+        letterSpacing,
+        opacity,
+        color,
+        border,
+        background,
+      };
+    },
+    /**
+     * 不需要这么麻烦，可以直接在loadTextTrack中获得字幕文件名，
+     * 存入数组中后commit, 需要对index进行处理.
+     */
+    $_loadSubNameArr() {
+      const vid = this.$refs.videoCanvas;
+      const subNameARR = [];
+      const startIndex = this.$store.state.PlaybackState.StartIndex;
+      for (let i = startIndex; i < vid.textTracks.length; i += 1) {
+        subNameARR.push({
+          title: vid.textTracks[i].label,
+          index: i - startIndex,
+        });
+      }
+      this.$store.commit('SubtitleNameArr', subNameARR);
+    },
+    /**
+     * @param textTrack target textTrack
+     * @param type choose first or second subtitle
+     */
+    $_onCueChangeEventAdd(textTrack, type = 'first') {
+      const firstSubEvent = (cue) => {
+        const tempCue = cue.currentTarget.activeCues[0];
+        this.firstActiveCue = tempCue;
+      };
+      const secondSubEvent = (cue) => {
+        const tempCue = cue.currentTarget.activeCues[0];
+        this.secondActiveCue = tempCue;
+      };
+      // write a same sub event to handle same subtitle situation
+      textTrack.oncuechange = type === 'first' ? firstSubEvent : secondSubEvent;
+    },
+    $_clearSubtitle() {
+      const vid = this.$refs.videoCanvas;
+      const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
+      const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
+      vid.textTracks[firstSubIndex].mode = 'disabled';
+      vid.textTracks[firstSubIndex].oncuechange = null;
+      // 未设置第二字幕时，消除字幕的error handler
+      if (secondSubIndex === -1) {
+        console.log('second subtitle not set');
+      } else {
+        vid.textTracks[secondSubIndex].mode = 'disabled';
+        vid.textTracks[secondSubIndex].oncuechange = null;
+        this.$store.commit('SecondSubIndex', -1);
+      }
+    },
   },
   computed: {
     calculateHeightByWidth() {
@@ -308,6 +470,13 @@ export default {
     volume() {
       return this.$store.state.PlaybackState.Volume;
     },
+
+    firstSubState() {
+      return this.$store.state.PlaybackState.FirstSubtitleState;
+    },
+    secondSubState() {
+      return this.$store.state.PlaybackState.SecondSubtitleState;
+    },
   },
   watch: {
     volume(newVolume) {
@@ -317,6 +486,55 @@ export default {
     playbackRate(newRate) {
       console.log(`set video playbackRate ${newRate}`);
       this.$refs.videoCanvas.playbackRate = newRate;
+    },
+
+    firstSubState(newVal) {
+      const vid = this.$refs.videoCanvas;
+      const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
+      if (newVal && vid.textTracks[firstSubIndex].mode === 'disabled') {
+        vid.textTracks[firstSubIndex].mode = 'hidden';
+      } else if (!newVal && vid.textTracks[firstSubIndex].mode !== 'disabled') {
+        this.firstActiveCue = null;
+        vid.textTracks[firstSubIndex].mode = 'disabled';
+      } else {
+        console.log('Error: mode is not correct');
+      }
+    },
+    secondSubState(newVal) {
+      const vid = this.$refs.videoCanvas;
+      const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
+      // 如果未选第二字幕的时候开启，如何处理
+      if (secondSubIndex === -1) {
+        console.log('Warn: No Second Subtitle');
+      } else if (newVal && vid.textTracks[secondSubIndex].mode === 'disabled') {
+        vid.textTracks[secondSubIndex].mode = 'hidden';
+      } else if (!newVal && vid.textTracks[secondSubIndex].mode !== 'disabled') {
+        this.secondActiveCue = null;
+        vid.textTracks[secondSubIndex].mode = 'disabled';
+      } else {
+        console.log('Error: mode is not correct');
+      }
+    },
+    // 需要对这一部分内容优化
+    firstActiveCue(newVal) {
+      this.firstCueHTML.pop();
+      // console.log(newVal);
+      if (newVal) {
+        // 这里对cue进行处理
+        // 得到cue的line和position确定位置
+        this.firstCueHTML.push(WebVTT.convertCueToDOMTree(window, this.firstActiveCue.text)
+          .innerHTML);
+      }
+    },
+    secondActiveCue(newVal) {
+      this.secondCueHTML.pop();
+      // console.log(newVal);
+      if (newVal) {
+        // 这里对cue进行处理
+        // 得到cue的line和position确定位置
+        this.secondCueHTML.push(WebVTT.convertCueToDOMTree(window, this.secondActiveCue.text)
+          .innerHTML);
+      }
     },
   },
   created() {
@@ -348,6 +566,19 @@ export default {
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
     });
+
+    // 可以二合一
+    this.$bus.$on('subFirstChange', (targetIndex) => {
+      const index = this.$store.state.PlaybackState.StartIndex + targetIndex;
+      this.subtitleShow(index, 'first');
+    });
+    this.$bus.$on('subSecondChange', (targetIndex) => {
+      const index = this.$store.state.PlaybackState.StartIndex + targetIndex;
+      // 增加一个判断第一字幕是否开启的状态
+      this.subtitleShow(index, 'second');
+    });
+
+    this.$bus.$on('subStyleChange', this.subStyleChange);
   },
 };
 </script>
@@ -370,10 +601,21 @@ export default {
   }
 }
 
-// https://www.w3.org/TR/webvtt1/
-video::cue {
-  color: yellow;
-  text-shadow: 0px 0px 2px black;
-  background-color: transparent;
+.video {
+  .subtitle-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    .subtitle-content {
+      position: absolute;
+      bottom: 20px;
+      text-align: center;
+      width: 100%;
+      white-space: pre;
+    }
+  }
 }
 </style>
