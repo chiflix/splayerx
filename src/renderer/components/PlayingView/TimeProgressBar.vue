@@ -2,12 +2,13 @@
   <transition name="fade" appear>
   <div class="progress"
     @mouseover.stop.capture="appearProgressSlider"
-    @mouseout.stop="hideProgressSlider"
+    @mouseout.stop.self="hideProgressSlider"
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.left.stop="videoRestart">
       <div class="button"
+        :class="{shake: isShaking}"
         :style="{borderTopRightRadius: buttonRadius + 'px', borderBottomRightRadius: buttonRadius + 'px', width: buttonWidth + 'px'}"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
@@ -28,7 +29,7 @@
         :style="{ left: curProgressBarEdge + 'px', width: readyBarWidth +'px' }"></div>
       </div>
       <div ref="playedSlider"
-        :class="{cursorOn: !isCursorLeft, progressPlayed: isCursorLeft}"
+        :class="{hidePlayedSlider: !isCursorLeft, progressPlayed: isCursorLeft}"
         :style="{ width: curProgressBarEdge +'px', opacity: progressOpacity }">
         <div class="line"></div>
       </div>
@@ -76,6 +77,7 @@ export default {
       flagProgressBarDraged: false,
       isCursorLeft: false,
       isOnProgress: false,
+      isShaking: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
@@ -83,6 +85,8 @@ export default {
       percentageVideoDraged: 0,
       widthOfThumbnail: 0,
       thumbnailCurrentTime: 0,
+      buttonWidth: 20,
+      buttonRadius: 0,
     };
   },
   methods: {
@@ -97,6 +101,11 @@ export default {
       if (!this.onProgressSliderMousedown) {
         this.isOnProgress = false;
         this.showScreenshot = false;
+        // Reset restart button
+        this.buttonWidth = 20;
+        this.buttonRadius = 0;
+        this.isShaking = false;
+
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
@@ -115,6 +124,10 @@ export default {
     },
     videoRestart() {
       this.$bus.$emit('seek', 0);
+      // Reset restart button
+      this.buttonWidth = 20;
+      this.buttonRadius = 0;
+      this.isShaking = false;
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -201,6 +214,11 @@ export default {
         this.onProgressSliderMousedown = false;
         // 可以考虑其他的方案
         if (this.flagProgressBarDraged) {
+          // Reset restart button
+          this.buttonWidth = 20;
+          this.buttonRadius = 0;
+          this.isShaking = false;
+
           this.$bus.$emit('seek', this.percentageVideoDraged
            * this.$store.state.PlaybackState.Duration);
           this.flagProgressBarDraged = false;
@@ -224,28 +242,12 @@ export default {
       }
       return this.curProgressBarEdge;
     },
-    buttonRadius() {
-      if (this.isOnProgress) {
-        if (this.cursorPosition <= 0) {
-          return Math.abs(this.cursorPosition);
-        }
-      }
-      return 0;
-    },
-    buttonWidth() {
-      console.log(this.cursorPosition);
-      if (this.isOnProgress) {
-        if (this.cursorPosition <= 0) {
-          return this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
-        }
-      }
-      return 20;
-    },
     readyBarWidth() {
       return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursorState);
     },
     backBarWidth() {
       // 当isOnPorgress为false，backBarWidth为0，增加一个opacity transition的class，避免消失过快
+      console.log(111111);
       if (this.cursorPosition < 0) {
         return 0;
       }
@@ -275,6 +277,33 @@ export default {
     screenshotContent() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
+    },
+  },
+  watch: {
+    // if 判断内的内容重复
+    cursorPosition(newVal, oldVal) {
+      console.log(`oldVal: ${oldVal}`);
+      console.log(newVal);
+      if (this.isOnProgress && newVal <= 0 && newVal < oldVal) {
+        this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
+        this.buttonRadius = Math.abs(this.cursorPosition);
+        this.isShaking = true;
+      } else {
+        this.buttonWidth = 20;
+        this.buttonRadius = 0;
+        this.isShaking = false;
+      }
+    },
+    isOnProgress(newVal, oldVal) {
+      if (!oldVal && newVal && this.cursorPosition <= 0) {
+        this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
+        this.buttonRadius = Math.abs(this.cursorPosition);
+        this.isShaking = true;
+      } else {
+        this.buttonWidth = 20;
+        this.buttonRadius = 0;
+        this.isShaking = false;
+      }
     },
   },
   created() {
@@ -347,7 +376,7 @@ export default {
     height: 4px;
     width: 20px;
     transition: height 150ms;
-    z-index: 701;
+    // z-index: 701;
     background: rgba(255, 255, 255, 0.38);
 
     .button {
@@ -414,7 +443,7 @@ export default {
   }
 }
 
-.video-controller .cursorOn {
+.video-controller .hidePlayedSlider {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -507,6 +536,30 @@ export default {
 
 .fade-enter, .fade-leave-to {
  opacity: 0;
+}
+
+.shake {
+  transform-origin: left center;
+  animation-name: shake;
+  animation-duration: 200ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.shake:hover {
+}
+
+@keyframes shake {
+  25% {
+    transform: rotate(5deg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  
 }
 
 </style>
