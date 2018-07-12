@@ -94,6 +94,7 @@ export default {
     },
     onCanPlay() {
       // the video is ready to start playing
+      this.$_getThumbnail();
       this.$store.commit('Volume', this.$refs.videoCanvas.volume);
     },
     onMetaLoaded() {
@@ -120,6 +121,7 @@ export default {
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
+        if (t % 10 === 0) { this.$_getThumbnail(); }
       }
     },
     onDurationChange() {

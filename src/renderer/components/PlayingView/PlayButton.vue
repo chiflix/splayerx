@@ -1,7 +1,6 @@
 <template>
   <img type="image/svg+xml" class="icon" :class="mode"
-    ref="icon" @animationend="animationEnd"
-    :src="src">
+    ref="icon" :src="src">
 </template>;
 
 <script>
@@ -69,6 +68,7 @@ export default {
 }
 .playing-mode {
   animation: twinkle1 .4s linear 1 normal forwards;
+  left: 14px;
 }
 .paused-mode {
   animation: twinkle2 .4s linear 1 normal forwards;
