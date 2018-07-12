@@ -1,16 +1,15 @@
 <template>
   <transition name="fade" appear>
   <div class="progress"
-    @mouseover.stop="appearProgressSlider"
+    @mouseover.stop.capture="appearProgressSlider"
     @mouseout.stop="hideProgressSlider"
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.left.stop="videoRestart">
       <div class="button"
-        :style="{borderRadius: buttonRadius + 'px'}"></div>
+        :style="{borderTopRightRadius: buttonRadius + 'px', borderBottomRightRadius: buttonRadius + 'px', width: buttonWidth + 'px'}"></div>
     </div>
-    <div class="progress-background" ref="bgSlider">
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.$electron.remote.getCurrentWindow().getSize()[0] - 20 + 'px'}"
       @mousedown.left="onProgresssBarClick">
@@ -23,9 +22,8 @@
         :screenshotContent="screenshotContent"
         :currentTime="thumbnailCurrentTime"/>
         <!-- translate优化 -->
-        <div class="background-line"></div>
-      </div>
       <div class="progress-ready" ref="readySlider">
+        <div class="background-line"></div>
         <div class="line"
         :style="{ left: curProgressBarEdge + 'px', width: readyBarWidth +'px' }"></div>
       </div>
@@ -94,7 +92,6 @@ export default {
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.backSlider.style.height = PROGRESS_BAR_HEIGHT;
-      this.$refs.bgSlider.style.height = PROGRESS_BAR_HEIGHT;
     },
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
@@ -102,9 +99,8 @@ export default {
         this.showScreenshot = false;
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
-        this.$refs.backSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
-        this.$refs.bgSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
+        this.$refs.backSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
       }
     },
     appearProgressBar() {
@@ -160,7 +156,7 @@ export default {
     $_effectProgressBarDraged(e) {
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
       this.cursorPosition = cursorPosition;
-      console.log(this.cursorPosition);
+      // console.log(this.cursorPosition);
       if (cursorPosition < this.curProgressBarEdge) {
         this.isCursorLeft = true;
       } else {
@@ -229,15 +225,30 @@ export default {
       return this.curProgressBarEdge;
     },
     buttonRadius() {
-      if (this.cursorPosition < 0) {
-        return 2 * Math.abs(this.cursorPosition);
+      if (this.isOnProgress) {
+        if (this.cursorPosition <= 0) {
+          return Math.abs(this.cursorPosition);
+        }
       }
       return 0;
+    },
+    buttonWidth() {
+      console.log(this.cursorPosition);
+      if (this.isOnProgress) {
+        if (this.cursorPosition <= 0) {
+          return this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
+        }
+      }
+      return 20;
     },
     readyBarWidth() {
       return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursorState);
     },
     backBarWidth() {
+      // 当isOnPorgress为false，backBarWidth为0，增加一个opacity transition的class，避免消失过快
+      if (this.cursorPosition < 0) {
+        return 0;
+      }
       return this.isCursorLeft ? this.cursorPosition + 0.1 : 0;
     },
     progressOpacity() {
@@ -265,9 +276,6 @@ export default {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
     },
-  },
-  watch: {
-
   },
   created() {
     this.$electron.remote.getCurrentWindow().on('resize', () => {
@@ -340,15 +348,17 @@ export default {
     width: 20px;
     transition: height 150ms;
     z-index: 701;
+    background: rgba(255, 255, 255, 0.38);
 
     .button {
       position: absolute;
       bottom: 0;
       left: 0;
-      width: 100%;
       height: 100%;
       background: rgba(255, 255, 255, 0.9);
       box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
     }
   }
 
@@ -442,23 +452,6 @@ export default {
   }
 }
 
-.video-controller .progress-background {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 0%;
-  transition: height 150ms;
-
-  .background-line {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.1);
-  }
-}
 .video-controller .progress-ready {
   position: absolute;
   bottom: 0;
@@ -473,6 +466,14 @@ export default {
     left: 0;
     height: 100%;
     background: rgba(255, 255, 255, 0.3);
+  }
+  .background-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
   }
 }
 
