@@ -17,10 +17,10 @@
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
-      <VolumeControl/>
+      <!-- <VolumeControl/> -->
       <SubtitleControl/>
-      <PlayButton/>
-      <!-- <AdvanceControl/> -->
+      <PlayPauseButton/>
+      <AdvanceControl/>
     </div>
   </div>
 </template>
@@ -34,6 +34,7 @@ import VolumeControl from './PlayingView/VolumeControl.vue';
 import AdvanceControl from './PlayingView/AdvanceControl.vue';
 import SubtitleControl from './PlayingView/SubtitleControl.vue';
 import PlayButton from './PlayingView/PlayButton.vue';
+import PlayPauseButton from './PlayingView/PlayPauseButton.vue';
 
 export default {
   name: 'playing-view',
@@ -46,6 +47,7 @@ export default {
     SubtitleControl,
     Titlebar,
     PlayButton,
+    PlayPauseButton,
   },
   data() {
     return {
@@ -57,6 +59,7 @@ export default {
       mouseDown: false,
       windowStartPosition: null,
       mousedownPosition: null,
+      icon_show: true,
     };
   },
   methods: {
