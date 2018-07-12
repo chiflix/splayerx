@@ -10,6 +10,7 @@
       <div class="button"
         :style="{borderRadius: buttonRadius + 'px'}"></div>
     </div>
+    <div class="progress-background" ref="bgSlider">
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.$electron.remote.getCurrentWindow().getSize()[0] - 20 + 'px'}"
       @mousedown.left="onProgresssBarClick">
@@ -22,8 +23,9 @@
         :screenshotContent="screenshotContent"
         :currentTime="thumbnailCurrentTime"/>
         <!-- translate优化 -->
-      <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
+      </div>
+      <div class="progress-ready" ref="readySlider">
         <div class="line"
         :style="{ left: curProgressBarEdge + 'px', width: readyBarWidth +'px' }"></div>
       </div>
@@ -92,6 +94,7 @@ export default {
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.backSlider.style.height = PROGRESS_BAR_HEIGHT;
+      this.$refs.bgSlider.style.height = PROGRESS_BAR_HEIGHT;
     },
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
@@ -99,8 +102,9 @@ export default {
         this.showScreenshot = false;
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
-        this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
         this.$refs.backSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
+        this.$refs.bgSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
+        this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
       }
     },
     appearProgressBar() {
@@ -438,6 +442,23 @@ export default {
   }
 }
 
+.video-controller .progress-background {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  transition: height 150ms;
+
+  .background-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
 .video-controller .progress-ready {
   position: absolute;
   bottom: 0;
@@ -452,14 +473,6 @@ export default {
     left: 0;
     height: 100%;
     background: rgba(255, 255, 255, 0.3);
-  }
-  .background-line {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.1);
   }
 }
 
