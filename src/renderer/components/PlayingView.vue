@@ -12,7 +12,6 @@
       @mousewheel="wheelVolumeControll"
       @mouseleave="hideAllWidgets"
       @mousemove="handleMouseMove"
-      @mouseout.self="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />

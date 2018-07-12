@@ -52,7 +52,7 @@ export default {
   },
   data() {
     return {
-      subtitleAppearFlag: false,
+      // subtitleAppearFlag: false,
       isBtnMenuAppear: false,
       isSubCtrlBtnAppear: false,
       barBottom: 6,
@@ -64,29 +64,35 @@ export default {
       this.isSubCtrlBtnAppear = true;
     },
     subCtrlHide() {
-      this.isBtnMenuAppear = false;
       this.isSubCtrlBtnAppear = false;
+      this.isBtnMenuAppear = false;
     },
     firstSubtitleOn() {
-      this.subtitleAppearFlag = true;
-      this.$bus.$emit('subtitleOn');
-      this.$bus.$emit('SecondSubOn');
+      this.$store.commit('FirstSubtitleState', true);
+      this.$store.commit('SecondSubtitleState', true);
+      // this.subtitleAppearFlag = true;
+      // this.$bus.$emit('subtitleOn');
+      // this.$bus.$emit('SecondSubOn');
     },
     firstSubtitleOff() {
-      this.subtitleAppearFlag = false;
-      this.$bus.$emit('subtitleOff');
-      this.$bus.$emit('SecondSubOff');
+      this.$store.commit('FirstSubtitleState', false);
+      this.$store.commit('SecondSubtitleState', false);
+      // this.subtitleAppearFlag = false;
+      // this.$bus.$emit('subtitleOff');
+      // this.$bus.$emit('SecondSubOff');
     },
     secondSubtitleOn() {
-      this.$bus.$emit('SecondSubOn');
+      this.$store.commit('SecondSubtitleState', true);
+      // this.$bus.$emit('SecondSubOn');
     },
     secondSubtitleOff() {
-      this.$bus.$emit('SecondSubOff');
+      this.$store.commit('SecondSubtitleState', false);
+      // this.$bus.$emit('SecondSubOff');
     },
     // 需要refactor
     firstSubSelect(index) {
       this.$bus.$emit('subFirstChange', index);
-      this.subtitleAppearFlag = true;
+      // this.subtitleAppearFlag = true;
     },
     secondSubSelect(index) {
       this.$bus.$emit('subSecondChange', index);
@@ -122,16 +128,20 @@ export default {
       return this.$store.state.PlaybackState.SecondSubIndex
         - this.$store.state.PlaybackState.StartIndex;
     },
+
+    subtitleAppearFlag() {
+      return this.$store.state.PlaybackState.FirstSubtitleState;
+    },
   },
   watch: {
     // watch方法确定字幕有无状态
-    subtitleNameArr() {
-      if (this.subtitleNameArr.length !== 0) {
-        this.subtitleAppearFlag = true;
-      } else {
-        this.subtitleAppearFlag = false;
-      }
-    },
+    // subtitleNameArr() {
+    //   if (this.subtitleNameArr.length !== 0) {
+    //     this.subtitleAppearFlag = true;
+    //   } else {
+    //     this.subtitleAppearFlag = false;
+    //   }
+    // },
   },
   created() {
     // this.$bus.$on('subtitle-loaded', () => {
@@ -170,6 +180,8 @@ ul, li {
   .show {
     pointer-events: none;
     cursor: default;
+    color: yellow;
+    opacity: 0.7;
   }
 
   .btn-menu-wrapper {
