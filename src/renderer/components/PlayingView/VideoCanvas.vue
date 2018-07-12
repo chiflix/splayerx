@@ -412,7 +412,7 @@ export default {
       const startIndex = this.$store.state.PlaybackState.StartIndex;
       for (let i = startIndex; i < vid.textTracks.length; i += 1) {
         subNameARR.push({
-          name: vid.textTracks[i].label,
+          title: vid.textTracks[i].label,
           index: i - startIndex,
         });
       }

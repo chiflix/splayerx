@@ -23,7 +23,7 @@
             :key="item.index"
             :class="{firstSelected: item.index === curFirstSubIndex}"
             @mousedown.capture.stop.left="firstSubSelect(item.index)">
-            {{item.name}}
+            {{item.title}}
           </li>
         </ul>
         <ul class="subtitle-menu">
@@ -32,7 +32,7 @@
             :key="item.index"
             :class="{secondSelected: item.index === curSecondSubIndex}"
             @mousedown.capture.stop.left="secondSubSelect(item.index)">
-            {{item.name}}
+            {{item.title}}
           </li>
         </ul>
       </div>
@@ -64,7 +64,8 @@ export default {
       this.isSubCtrlBtnAppear = true;
     },
     subCtrlHide() {
-      // this.isSubCtrlBtnAppear = false;
+      this.isBtnMenuAppear = false;
+      this.isSubCtrlBtnAppear = false;
     },
     firstSubtitleOn() {
       this.subtitleAppearFlag = true;
@@ -108,7 +109,7 @@ export default {
       const curIndex = this.$store.state.PlaybackState.FirstSubIndex
         - this.$store.state.PlaybackState.StartIndex;
       if (this.subtitleNameArr[curIndex]) {
-        return this.$store.state.PlaybackState.SubtitleNameArr[curIndex].name;
+        return this.$store.state.PlaybackState.SubtitleNameArr[curIndex].title;
       }
       return 'No subtitle';
     },
