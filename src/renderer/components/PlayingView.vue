@@ -158,17 +158,6 @@ export default {
   mounted() {
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
-    this.$bus.$on('twinkle-pause-icon', () => {
-      this.$refs.pauseIcon.style.animationPlayState = 'running';
-    });
-    this.$bus.$on('twinkle-play-icon', () => {
-      this.$refs.playIcon.style.animationPlayState = 'running';
-    });
-    if (process.platform === 'win32') {
-      document.querySelector('.application').style.borderRadius = 0;
-      document.querySelector('.video').style.borderRadius = 0;
-      document.querySelector('.video-controller').style.borderRadius = 0;
-    }
   },
   computed: {
     uri() {
