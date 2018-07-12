@@ -11,7 +11,8 @@
       @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="hideAllWidgets"
-      @mousemove="handleMouseMove"
+      @mousemove="throttledWakeUpCall"
+      @mouseenter="wakeUpAllWidgets"
       @dblclick.self="toggleFullScreenState">
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
@@ -25,6 +26,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
@@ -54,6 +56,7 @@ export default {
       cursorDelay: null,
       popupShow: false,
       mouseDown: false,
+      throttledWakeUpCall: null,
     };
   },
   methods: {
@@ -154,6 +157,9 @@ export default {
       this.mouseDown = false;
       this.togglePlayback();
     },
+  },
+  beforeMount() {
+    this.throttledWakeUpCall = _.throttle(this.wakeUpAllWidgets, 1000);
   },
   mounted() {
     this.$bus.$emit('play');
