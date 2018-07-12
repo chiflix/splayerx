@@ -7,7 +7,8 @@
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.left.stop="videoRestart">
-      <div class="button"></div>
+      <div class="button"
+        :style="{borderRadius: buttonRadius + 'px'}"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.$electron.remote.getCurrentWindow().getSize()[0] - 20 + 'px'}"
@@ -155,6 +156,7 @@ export default {
     $_effectProgressBarDraged(e) {
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
       this.cursorPosition = cursorPosition;
+      console.log(this.cursorPosition);
       if (cursorPosition < this.curProgressBarEdge) {
         this.isCursorLeft = true;
       } else {
@@ -221,6 +223,12 @@ export default {
         return this.cursorPosition;
       }
       return this.curProgressBarEdge;
+    },
+    buttonRadius() {
+      if (this.cursorPosition < 0) {
+        return 2 * Math.abs(this.cursorPosition);
+      }
+      return 0;
     },
     readyBarWidth() {
       return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursorState);
