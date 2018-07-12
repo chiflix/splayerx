@@ -68,25 +68,25 @@ export default {
       this.isBtnMenuAppear = false;
     },
     firstSubtitleOn() {
-      this.$store.commit('FirstSubtitleState', true);
-      this.$store.commit('SecondSubtitleState', true);
+      this.$store.commit('FirstSubtitleOn');
+      this.$store.commit('SecondSubtitleOn');
       // this.subtitleAppearFlag = true;
       // this.$bus.$emit('subtitleOn');
       // this.$bus.$emit('SecondSubOn');
     },
     firstSubtitleOff() {
-      this.$store.commit('FirstSubtitleState', false);
-      this.$store.commit('SecondSubtitleState', false);
+      this.$store.commit('FirstSubtitleOff');
+      this.$store.commit('SecondSubtitleOff');
       // this.subtitleAppearFlag = false;
       // this.$bus.$emit('subtitleOff');
       // this.$bus.$emit('SecondSubOff');
     },
     secondSubtitleOn() {
-      this.$store.commit('SecondSubtitleState', true);
+      this.$store.commit('SecondSubtitleOn');
       // this.$bus.$emit('SecondSubOn');
     },
     secondSubtitleOff() {
-      this.$store.commit('SecondSubtitleState', false);
+      this.$store.commit('SecondSubtitleOff');
       // this.$bus.$emit('SecondSubOff');
     },
     // 需要refactor

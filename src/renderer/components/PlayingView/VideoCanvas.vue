@@ -344,7 +344,7 @@ export default {
         // 当直接播放无字幕视频时，会报错,需要error handle
         // 判断有无字幕
         if (vid.textTracks.length > index) {
-          this.$store.commit('FirstSubtitleState', true);
+          this.$store.commit('FirstSubtitleOn');
           const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
           vid.textTracks[firstSubIndex].mode = 'disabled';
           vid.textTracks[firstSubIndex].oncuechange = null;
@@ -352,7 +352,7 @@ export default {
           vid.textTracks[index].mode = 'hidden';
           this.$store.commit('FirstSubIndex', index);
         } else {
-          this.$store.commit('FirstSubtitleState', false);
+          this.$store.commit('FirstSubtitleOff');
           console.log('no subtitle');
         }
       }
@@ -363,9 +363,9 @@ export default {
         if (index !== this.$store.state.PlaybackState.FirstSubIndex) {
           if (secondSubIndex !== -1) {
             vid.textTracks[secondSubIndex].mode = 'disabled';
-            this.$store.commit('SecondSubtitleState', true);
+            this.$store.commit('SecondSubtitleOn');
           } else {
-            this.$store.commit('SecondSubtitleState', false);
+            this.$store.commit('SecondSubtitleOff');
             console.log('Warning: no selected second subtitle');
           }
           this.$_onCueChangeEventAdd(vid.textTracks[index], 'second');

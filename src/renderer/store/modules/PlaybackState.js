@@ -39,11 +39,17 @@ const mutations = {
     state.Volume = v;
   },
 
-  FirstSubtitleState(state, flag) {
-    state.FirstSubtitleState = flag;
+  FirstSubtitleOn(state) {
+    state.FirstSubtitleState = true;
   },
-  SecondSubtitleState(state, flag) {
-    state.SecondSubtitleState = flag;
+  FirstSubtitleOff(state) {
+    state.FirstSubtitleState = false;
+  },
+  SecondSubtitleOn(state) {
+    state.SecondSubtitleState = true;
+  },
+  SecondSubtitleOff(state) {
+    state.SecondSubtitleState = false;
   },
   StartIndex(state, index) {
     state.StartIndex = index;
