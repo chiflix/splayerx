@@ -22,7 +22,8 @@
       <div class="iteminfo item-description">
       </div>
       <div class="iteminfo item-timing">
-        {{ timecodeFromSeconds(itemInfo().lastTime) }} / {{ timecodeFromSeconds(itemInfo().duration) }}
+        <span class="timing-played">{{ timecodeFromSeconds(itemInfo().lastTime) }}</span>
+         / {{ timecodeFromSeconds(itemInfo().duration) }}
       </div>
       <div class="iteminfo item-progress">
         <div class="progress-played" v-bind:style="{ width: itemInfo().percentage + '%' }"></div>
@@ -34,6 +35,7 @@
 
     <div class="welcome">
       <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
+      <div class="version">v {{ this.$electron.remote.app.getVersion() }}</div>
     </div>
     <div class="controller">
       <div class="playlist"
@@ -246,7 +248,8 @@ body {
     width: 500px;
     word-break: break-all;
     font-size: 30px;
-    font-weight: bold;
+    font-weight: 600;
+    letter-spacing: 1px;
   }
   .item-description {
     opacity: 0.4;
@@ -254,12 +257,17 @@ body {
     font-weight: lighter;
   }
   .item-timing {
-    opacity: 0.4;
+    color: rgba(255, 255, 255, .4);
     font-size: 15px;
     font-weight: 400;
+    letter-spacing: .5px;
+    margin-top: 10px;
+    span.timing-played {
+      color: rgba(255, 255, 255, .9);
+    }
   }
   .item-progress {
-    width: 130px;
+    width: 100px;
     height: 4px;
     margin-top: 9px;
     border-radius: 1px;
@@ -293,11 +301,20 @@ main {
 }
 
 .welcome {
-  margin-top: 15px;
+  margin-top: 7px;
   text-align: center;
   z-index: 1;
+
   .title {
-    margin-bottom: 6px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+  }
+  .version {
+    margin-top: 5px;
+    font-size: 2vw;
+    color: #AAA;
+    font-weight: 100;
+    letter-spacing: 1px;
   }
   p {
     font-size: 2vw;
@@ -379,8 +396,8 @@ main {
 }
 
 .background-transition-enter-active, .background-transition-leave-active {
-  transition: opacity .3s;
-  transition-delay: .15s;
+  transition: opacity .3s ease-in;
+  transition-delay: .2s;
 }
 .background-transition-enter, .background-transition-leave-to {
   opacity: 0;

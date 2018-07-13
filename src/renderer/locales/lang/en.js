@@ -55,6 +55,6 @@ export default {
     },
   },
   css: {
-    titleFontSize: { fontSize: '5vw' },
+    titleFontSize: { fontSize: '3vw' },
   },
 };
