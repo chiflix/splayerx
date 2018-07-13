@@ -83,17 +83,22 @@ export default {
       this.$electron.remote.getCurrentWindow().unmaximize();
     },
     handleFullscreenExit() {
-      this.$electron.remote.getCurrentWindow().setFullScreen(false);
+      this.$store.dispatch('rendererSetFullscreen', false);
     },
     // OS-specific methods
     handleMacMaximize() {
       if (this.currentView !== 'LandingView') {
-        this.$electron.remote.getCurrentWindow().setFullScreen(true);
+        this.$store.dispatch('rendererSetFullscreen', true);
       }
     },
+    handleResize() {
+      this.setWindowInfo();
+      this.statusChange();
+      this.titlebarWidth = this.winWidth;
+      this.originalSize = this.winSize;
+    },
     statusChange() {
-      const window = this.$electron.remote.getCurrentWindow();
-      if (window.isFullScreen()) {
+      if (this.$store.getters.fullscreen) {
         this.middleButtonStatus = 'exit-fullscreen';
       } else if (this.maximize) {
         this.middleButtonStatus = 'restore';
@@ -134,13 +139,8 @@ export default {
     this.statusChange();
   },
   mounted() {
-    this.$electron.ipcRenderer.on('resize', () => {
-      this.setWindowInfo();
-      this.statusChange();
-      this.titlebarWidth = this.winWidth;
-      this.originalSize = this.winSize;
-    });
-    this.$electron.ipcRenderer.on('move', () => {
+    window.addEventListener('resize', this.handleResize);
+    window.addEventListener('move', () => {
       this.setWindowInfo();
     });
     this.$bus.$on('titlebar-appear', () => {
