@@ -17,6 +17,7 @@
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
       <VolumeControl/>
+      <SubtitleControl/>
       <PlayButton/>
       <!-- <AdvanceControl/> -->
     </div>
@@ -30,6 +31,7 @@ import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
 import TimeProgressBar from './PlayingView/TimeProgressBar.vue';
 import VolumeControl from './PlayingView/VolumeControl.vue';
 import AdvanceControl from './PlayingView/AdvanceControl.vue';
+import SubtitleControl from './PlayingView/SubtitleControl.vue';
 import PlayButton from './PlayingView/PlayButton.vue';
 
 export default {
@@ -40,6 +42,7 @@ export default {
     TimeProgressBar,
     VolumeControl,
     AdvanceControl,
+    SubtitleControl,
     Titlebar,
     PlayButton,
   },
@@ -51,8 +54,6 @@ export default {
       cursorDelay: null,
       popupShow: false,
       mouseDown: false,
-      windowStartPosition: null,
-      mousedownPosition: null,
     };
   },
   methods: {
@@ -85,6 +86,7 @@ export default {
       this.$bus.$emit('volumecontroller-appear');
       this.$bus.$emit('progressbar-appear');
       this.$bus.$emit('timecode-appear');
+      this.$bus.$emit('sub-ctrl-appear');
       this.$bus.$emit('titlebar-appear');
     },
     hideAllWidgets() {
@@ -92,6 +94,10 @@ export default {
       this.$bus.$emit('volumecontroller-hide');
       this.$bus.$emit('progressbar-hide');
       this.$bus.$emit('timecode-hide');
+      if (process.platform !== 'win32') {
+        this.$bus.$emit('titlebar-hide');
+      }
+      this.$bus.$emit('sub-ctrl-hide');
       this.$bus.$emit('titlebar-hide');
     },
     resetDraggingState() {
@@ -132,7 +138,7 @@ export default {
         this.popupShow = true;
       }
     },
-    handleLeftClick(event) {
+    handleLeftClick() {
       const menu = this.$electron.remote.Menu.getApplicationMenu();
       if (this.popupShow === true) {
         menu.closePopup();
@@ -140,23 +146,9 @@ export default {
       }
       // Handle dragging-related variables
       this.mouseDown = true;
-      this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
-      this.mousedownPosition = [event.screenX, event.screenY];
     },
-    handleMouseMove(event) {
+    handleMouseMove() {
       this.wakeUpAllWidgets();
-      // Handle dragging-related variables and methods
-      if (this.mouseDown) {
-        if (this.windowStartPosition !== null) {
-          const startPos = this.mousedownPosition;
-          const offset = [event.screenX - startPos[0], event.screenY - startPos[1]];
-          const winStartPos = this.windowStartPosition;
-          this.$electron.remote.getCurrentWindow().setPosition(
-            winStartPos[0] + offset[0],
-            winStartPos[1] + offset[1],
-          );
-        }
-      }
     },
     handleMouseUp() {
       this.mouseDown = false;
@@ -166,6 +158,17 @@ export default {
   mounted() {
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
+    this.$bus.$on('twinkle-pause-icon', () => {
+      this.$refs.pauseIcon.style.animationPlayState = 'running';
+    });
+    this.$bus.$on('twinkle-play-icon', () => {
+      this.$refs.playIcon.style.animationPlayState = 'running';
+    });
+    if (process.platform === 'win32') {
+      document.querySelector('.application').style.borderRadius = 0;
+      document.querySelector('.video').style.borderRadius = 0;
+      document.querySelector('.video-controller').style.borderRadius = 0;
+    }
   },
   computed: {
     uri() {
