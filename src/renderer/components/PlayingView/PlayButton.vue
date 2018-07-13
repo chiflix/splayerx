@@ -1,63 +1,45 @@
 <template>
-  <img type="image/svg+xml" class="icon" :class="mode"
-    ref="icon" :src="src">
-</template>;
+  <div>
+  <img type="image/svg+xml"  :src="src" class="icon"
+        :class="ani_mode"
+        @animationend="animationEnd"
+        v-if="iconAppear">
+  </div>
+</template>
 
 <script>
 export default {
   data() {
     return {
-      icon: 'icon',
-      mode: 'playing-mode',
+      iconAppear: false, // control whether the icon show up or not
+      ani_mode: '', // change the CSS
       src: '',
     };
   },
   methods: {
     animationEnd() {
-      this.$refs.icon.style.display = 'none';
-      this.mode = '';
+      this.iconAppear = false; // after the animation ends, icon disappears
     },
   },
   mounted() {
     this.$bus.$on('twinkle-pause-icon', () => {
-      this.$refs.icon.style.display = 'none';
-      this.mode = '';
-      this.src = require('../../assets/icon-pause.svg');
-      this.$refs.icon.style.display = 'block';
-      this.mode = 'paused-mode';
+      this.src = require('../../assets/icon-pause.svg'); // set path of icon
+      this.iconAppear = true;
+      this.ani_mode = 'icon-ani-pause';// css for pause button animation
     });
     this.$bus.$on('twinkle-play-icon', () => {
-      this.$refs.icon.style.display = 'none';
-      this.mode = '';
       this.src = require('../../assets/icon-play.svg');
-      this.$refs.icon.style.display = 'block';
-      this.mode = 'playing-mode';
+      this.iconAppear = true;
+      this.ani_mode = 'icon-ani-play';
     });
   },
 };
 </script>
 
-<style lang='scss'>
-/* @keyframes twinkle1 {
-  0% {opacity: 0; transform: scale(1)};
-  50% {opacity: 1; transform: scale(1.5)};
-  100% {opacity: 0; transform: scale(2)};
-}
-@keyframes twinkle2 {
-  0% {opacity: 0; transform: scale(1)};
-  50% {opacity: 1; transform: scale(1.5)};
-  100% {opacity: 0; transform: scale(2)};
-} */
-@keyframes twinkle1 {
-  0% {opacity: 1; transform: scale(1)};
-  100% {opacity: 0; transform: scale(2)};
-}
-@keyframes twinkle2 {
-  0% {opacity: 1; transform: scale(1)};
-  100% {opacity: 0; transform: scale(2)};
-}
+
+<style>
 .icon {
-  display: none;
+  /* display: none; */
   position: absolute;
   margin: auto;
   top: 0;
@@ -66,12 +48,23 @@ export default {
   bottom: 0;
   -webkit-user-select: none;
 }
-.playing-mode {
-  animation: twinkle1 .4s linear 1 normal forwards;
+
+.icon-ani-pause {
+  animation: ytp-bezel-fadeout1 500ms linear 1 normal forwards;
+}
+.icon-ani-play {
+  animation: ytp-bezel-fadeout2 500ms linear 1 normal forwards;
   left: 14px;
 }
-.paused-mode {
-  animation: twinkle2 .4s linear 1 normal forwards;
+@keyframes ytp-bezel-fadeout1 {
+  0% {opacity: 1; transform: scale(0.25)};
+  50% {opacity: 0.5; transform: scale(0.5)}
+  100% {opacity: 0; transform: scale(1)};
+}
+@keyframes ytp-bezel-fadeout2 {
+  0% {opacity: 1; transform: scale(0.25)};
+  50% {opacity: 0.5; transform: scale(0.5)}
+  100% {opacity: 0; transform: scale(1)};
 }
 
 @media screen and (max-width: 854px) {

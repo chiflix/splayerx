@@ -240,6 +240,11 @@ body {
     width: 500px;
     word-break: break-all;
     font-size: 30px;
+    font-weight: bold;
+    z-index: 4;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     font-weight: 600;
     letter-spacing: 1px;
   }
