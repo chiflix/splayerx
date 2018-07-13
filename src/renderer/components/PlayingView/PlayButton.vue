@@ -1,25 +1,14 @@
 <template>
-  <!-- <img type="image/svg+xml" class="icon" :class="mode"
-    ref="icon"  @animationend="animationEnd"
-    :src="src"
-    v-if="show"> -->
-    <div>
-      <button v-on:click="show = !show">
-        Toggle
-      </button>
-      <transition name="fade">
-        <img type="image/svg+xml" :src="require('../../assets/icon-pause.svg')" >
-      </transition>
-    </div>
+  <img type="image/svg+xml" class="icon" :class="mode"
+    ref="icon" :src="src">
 </template>;
 
 <script>
 export default {
   data() {
     return {
-      show: false,
       icon: 'icon',
-      mode: '',
+      mode: 'playing-mode',
       src: '',
     };
   },
@@ -27,25 +16,22 @@ export default {
     animationEnd() {
       this.$refs.icon.style.display = 'none';
       this.mode = '';
-      this.show = false;
     },
   },
   mounted() {
     this.$bus.$on('twinkle-pause-icon', () => {
-      this.show = true;
-      if (this.show) {
-        this.src = require('../../assets/icon-pause.svg');
-        this.$refs.icon.style.display = 'block';
-        this.mode = 'paused-mode';
-      }
+      this.$refs.icon.style.display = 'none';
+      this.mode = '';
+      this.src = require('../../assets/icon-pause.svg');
+      this.$refs.icon.style.display = 'block';
+      this.mode = 'paused-mode';
     });
     this.$bus.$on('twinkle-play-icon', () => {
-      this.show = true;
-      if (this.show) {
-        this.src = require('../../assets/icon-play.svg');
-        this.$refs.icon.style.display = 'block';
-        this.mode = 'playing-mode';
-      }
+      this.$refs.icon.style.display = 'none';
+      this.mode = '';
+      this.src = require('../../assets/icon-play.svg');
+      this.$refs.icon.style.display = 'block';
+      this.mode = 'playing-mode';
     });
   },
 };
@@ -81,13 +67,12 @@ export default {
   -webkit-user-select: none;
 }
 .playing-mode {
-  animation: twinkle1 1s linear 1 normal forwards;
+  animation: twinkle1 .4s linear 1 normal forwards;
   left: 14px;
 }
 .paused-mode {
-  animation: twinkle2 1s linear 1 normal forwards;
+  animation: twinkle2 .4s linear 1 normal forwards;
 }
-
 @media screen and (max-width: 854px) {
   .icon {
     width: 42.5px;
