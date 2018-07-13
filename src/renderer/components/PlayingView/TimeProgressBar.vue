@@ -7,7 +7,10 @@
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.left.stop="videoRestart">
+      <div class="line"
+        v-show="!isShaking"></div>
       <div class="button"
+        v-show="isShaking"
         :class="{shake: isShaking}"
         :style="{borderTopRightRadius: buttonRadius + 'px', borderBottomRightRadius: buttonRadius + 'px', width: buttonWidth + 'px'}"></div>
     </div>
@@ -78,6 +81,7 @@ export default {
       isCursorLeft: false,
       isOnProgress: false,
       isShaking: false,
+      // isOnButton: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
@@ -102,9 +106,9 @@ export default {
         this.isOnProgress = false;
         this.showScreenshot = false;
         // Reset restart button
+        this.isShaking = false;
         this.buttonWidth = 20;
         this.buttonRadius = 0;
-        this.isShaking = false;
 
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
@@ -128,6 +132,7 @@ export default {
       this.buttonWidth = 20;
       this.buttonRadius = 0;
       this.isShaking = false;
+      // this.isOnButton = false;
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -247,8 +252,7 @@ export default {
     },
     backBarWidth() {
       // 当isOnPorgress为false，backBarWidth为0，增加一个opacity transition的class，避免消失过快
-      console.log(111111);
-      if (this.cursorPosition < 0) {
+      if (this.cursorPosition <= 0) {
         return 0;
       }
       return this.isCursorLeft ? this.cursorPosition + 0.1 : 0;
@@ -282,27 +286,28 @@ export default {
   watch: {
     // if 判断内的内容重复
     cursorPosition(newVal, oldVal) {
-      console.log(`oldVal: ${oldVal}`);
-      console.log(newVal);
-      if (this.isOnProgress && newVal <= 0 && newVal < oldVal) {
+      if (newVal < oldVal && this.isOnProgress && newVal <= 0) {
         this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
         this.buttonRadius = Math.abs(this.cursorPosition);
         this.isShaking = true;
       } else {
+        console.log('trigger cursor Position');
         this.buttonWidth = 20;
         this.buttonRadius = 0;
         this.isShaking = false;
       }
     },
+    // 使用mouseenter和mouseleave改写, 减少性能上的损失
     isOnProgress(newVal, oldVal) {
       if (!oldVal && newVal && this.cursorPosition <= 0) {
+        console.log('trigger is shaking');
+        this.isShaking = true;
         this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
         this.buttonRadius = Math.abs(this.cursorPosition);
-        this.isShaking = true;
       } else {
+        this.isShaking = false;
         this.buttonWidth = 20;
         this.buttonRadius = 0;
-        this.isShaking = false;
       }
     },
   },
@@ -388,6 +393,16 @@ export default {
       box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
       border-bottom-left-radius: 0;
       border-top-left-radius: 0;
+    }
+
+    .line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5); 
     }
   }
 
@@ -541,7 +556,7 @@ export default {
 .shake {
   transform-origin: left center;
   animation-name: shake;
-  animation-duration: 200ms;
+  animation-duration: 180ms;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
 }
@@ -551,10 +566,10 @@ export default {
 
 @keyframes shake {
   25% {
-    transform: rotate(5deg);
+    transform: rotate(4deg);
   }
   75% {
-    transform: rotate(-5deg);
+    transform: rotate(-4deg);
   }
   0%, 100% {
     transform: rotate(0deg);
