@@ -65,7 +65,23 @@ new Vue({
               label: this.$t('msg.file.openURL'),
               accelerator: 'CmdOrCtrl+U',
             },
-            { label: this.$t('msg.file.openRecent').concat('>') },
+            {
+              label: this.$t('msg.file.openRecent'),
+              submenu: [
+                {
+                  label: '文件1',
+                },
+                {
+                  label: '文件2',
+                },
+                {
+                  label: '文件3',
+                },
+                {
+                  label: '文件4',
+                },
+              ],
+            },
             {
               label: this.$t('msg.file.closeWindow'),
               role: 'Close',
@@ -100,16 +116,16 @@ new Vue({
             { label: this.$t('msg.audio.increaseAudioDelay') },
             { label: this.$t('msg.audio.decreaseAudioDelay') },
             { type: 'separator' },
-            { label: this.$t('msg.audio.switchAudioTrack').concat('>') },
+            { label: this.$t('msg.audio.switchAudioTrack') },
           ],
         },
         {
           label: this.$t('msg.subtitle.name'),
           submenu: [
-            { label: this.$t('msg.subtitle.mainSubtitle').concat('>') },
-            { label: this.$t('msg.subtitle.secondarySubtitle').concat('>') },
+            { label: this.$t('msg.subtitle.mainSubtitle') },
+            { label: this.$t('msg.subtitle.secondarySubtitle') },
             { type: 'separator' },
-            { label: this.$t('msg.subtitle.subtitleStyle').concat('>') },
+            { label: this.$t('msg.subtitle.subtitleStyle') },
             { type: 'separator' },
             { label: this.$t('msg.subtitle.increaseSubtitleSize') },
             { label: this.$t('msg.subtitle.decreaseSubtitleSize') },
