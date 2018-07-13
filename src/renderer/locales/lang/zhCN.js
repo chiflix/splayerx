@@ -3,7 +3,7 @@ export default {
     titleName: '射手影音',
     file: {
       name: '文件',
-      open: '打开文件',
+      open: '打开文件...',
       openURL: '打开URL',
       openRecent: '最近播放',
       closeWindow: '关闭',
