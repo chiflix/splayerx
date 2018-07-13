@@ -100,8 +100,10 @@ export default {
       return `url("${shortCut}")`;
     },
     itemInfo() {
+      const preBaseName = path.basename(this.item.path, path.extname(this.item.path));
+      const shortenedBaseName = `${preBaseName.substring(0, 30)}...`;
       return {
-        baseName: path.basename(this.item.path, path.extname(this.item.path)),
+        baseName: preBaseName.length > 30 ? shortenedBaseName : preBaseName,
         lastTime: this.item.lastPlayedTime,
         duration: this.item.duration,
       };
@@ -222,9 +224,6 @@ body {
     font-size: 30px;
     font-weight: bold;
     z-index: 4;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
   }
   .item-description {
     position: relative;
