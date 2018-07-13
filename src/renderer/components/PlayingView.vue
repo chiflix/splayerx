@@ -17,10 +17,10 @@
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
-      <!-- <VolumeControl/> -->
+      <VolumeControl/>
       <SubtitleControl/>
       <PlayButton/>
-      <AdvanceControl/>
+      <!-- <AdvanceControl/> -->
     </div>
   </div>
 </template>

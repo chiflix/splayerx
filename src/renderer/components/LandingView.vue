@@ -101,9 +101,9 @@ export default {
     },
     itemInfo() {
       const preBaseName = path.basename(this.item.path, path.extname(this.item.path));
-      const shortenedBaseName = `${preBaseName.substring(0, 25)}...`;
+      const shortenedBaseName = `${preBaseName.substring(0, 30)}...`;
       return {
-        baseName: preBaseName.length > 25 ? shortenedBaseName : preBaseName,
+        baseName: preBaseName.length > 30 ? shortenedBaseName : preBaseName,
         lastTime: this.item.lastPlayedTime,
         duration: this.item.duration,
       };
