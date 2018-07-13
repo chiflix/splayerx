@@ -71,18 +71,21 @@ app.on('ready', () => {
   mainWindow.on('resize', () => {
     mainWindow.webContents.send('resize');
     mainWindow.webContents.send('mainDispatch', 'mainWindowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'fullscreen', mainWindow.isFullScreen());
   });
   mainWindow.on('move', () => {
     mainWindow.webContents.send('move');
     mainWindow.webContents.send('mainDispatch', 'mainWindowPosition', mainWindow.getPosition());
   });
+  /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
-    console.log(event);
     mainWindow.setSize(...args);
   });
   ipcMain.on('windowPositionChange', (event, args) => {
-    console.log(event);
     mainWindow.setPosition(...args);
+  });
+  ipcMain.on('fullscreenStateChange', (event, args) => {
+    mainWindow.setFullScreen(args);
   });
 });
 
