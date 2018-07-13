@@ -1,84 +1,43 @@
 <template>
   <div class="subtitle-control">
-    <!-- <div class="subtitle-control-board"
-      v-show="subtitleAppearFlag"
-      :style="{bottom: barBottom + 'vw'}">
-      <div class="subtitle-menu-wrapper"
-        v-show="subtitleMenuAppearFlag">
-        <ul class="subtitle-menu">
-          <li class="subtitle-menu-item"
-            v-for="item in subtitleNameArr"
-            :key="item.index"
-            @click.capture.stop.left="firstSubSelect(item.index)">
-            {{item.name}}
-          </li>
-        </ul>
-      </div>
-      <div class="subtitle-menu-wrapper"
-        v-show="subSecondMenuAppearFlag">
-        <ul class="subtitle-menu">
-          <li class="subtitle-menu-item"
-            v-for="item in subtitleNameArr"
-            :key="item.index"
-            :class="{selected: item.index === isSelected}"
-            @click.capture.stop.left="secondSubSelect(item.index)">
-            {{item.name}}
-          </li>
-        </ul>
-      </div>
-      <div class="subtitle-menu-button"
-        v-if="subtitleLoadedFlag" 
-        @click.capture.stop.left="toggleSubtitleMenu">
-        {{curSubName}}
-      </div>
-      <div class="second-sub-button"
-        v-if="subtitleLoadedFlag"
-        @click.capture.stop.left="toggleSecondSubMenu">
-        +
-      </div>
-      <div class='second-sub-ctl'
-        @click.capture.stop.left="toggleSecondSub">
-        second-sub-control
-      </div>
-    </div> -->
     <transition name="fade" appear>
     <div class="btn-sub-ctrl"
-      v-if="subCtrlBtnAppearFlag">
+      v-if="isSubCtrlBtnAppear">
       <div class='btn-menu-wrapper'
-        v-show="btnMenuAppearFalg">
+        v-show="isBtnMenuAppear">
         <ul class="btn-menu">
           <li class="btn-menu-item"
-            @click.stop.capture.left="showSubtitle"
+            @mousedown.stop.capture.left="firstSubtitleOn"
             :class="{show: subtitleAppearFlag}">
-            <img src="" alt="Show">
+            <img src="" alt="On">
           </li>
           <li class="btn-menu-item"
-            @click.stop.capture.left="showSubtitle"
+            @mousedown.stop.capture.left="firstSubtitleOff"
             :class="{show: !subtitleAppearFlag}">
-            <img src="" alt="Close">
+            <img src="" alt="Off">
           </li>
         </ul>
         <ul class="subtitle-menu">
           <li class="subtitle-menu-item"
             v-for="item in subtitleNameArr"
             :key="item.index"
-            :class="{selected: item.index === curFirstSubIndex || item.index === curSecondSubIndex}"
-            @click.capture.stop.left="firstSubSelect(item.index)">
-            {{item.name}}
+            :class="{firstSelected: item.index === curFirstSubIndex}"
+            @mousedown.capture.stop.left="firstSubSelect(item.index)">
+            {{item.title}}
           </li>
         </ul>
         <ul class="subtitle-menu">
           <li class="subtitle-menu-item"
             v-for="item in subtitleNameArr"
             :key="item.index"
-            :class="{selected: item.index === curFirstSubIndex || item.index === curSecondSubIndex}"
-            @click.capture.stop.left="secondSubSelect(item.index)">
-            {{item.name}}
+            :class="{secondSelected: item.index === curSecondSubIndex}"
+            @mousedown.capture.stop.left="secondSubSelect(item.index)">
+            {{item.title}}
           </li>
         </ul>
       </div>
       <div
-        @click.capture.stop.left="toggleButtonMenu">
+        @mousedown.capture.stop.left="toggleButtonMenu">
         <img class='btn' type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
       </div>
     </div>
@@ -93,41 +52,34 @@ export default {
   },
   data() {
     return {
-      subtitleAppearFlag: false,
-      subtitleCtrlAppearFlag: true,
-      subtitleMenuAppearFlag: false,
-      subSecondMenuAppearFlag: false,
-      subtitleLoadedFlag: false,
-      btnMenuAppearFalg: false,
-      subCtrlBtnAppearFlag: false,
+      // subtitleAppearFlag: false,
+      isBtnMenuAppear: false,
+      isSubCtrlBtnAppear: false,
       barBottom: 6,
       timeoutIdOfSubCtrlDisappearDelay: 0,
     };
   },
   methods: {
     subCtrlAppear() {
-      this.subCtrlBtnAppearFlag = true;
+      this.isSubCtrlBtnAppear = true;
     },
     subCtrlHide() {
-      this.subCtrlBtnAppearFlag = false;
+      this.isSubCtrlBtnAppear = false;
+      this.isBtnMenuAppear = false;
     },
-    showSubtitle() {
-      this.subtitleAppearFlag = !this.subtitleAppearFlag;
-      this.$bus.$emit('toggleSubtitle');
+    firstSubtitleOn() {
+      this.$store.commit('FirstSubtitleOn');
+      this.$store.commit('SecondSubtitleOn');
     },
-    toggleSecondSub() {
-      // 关闭第二字幕和取消第二字幕的两套逻辑
-      // 加一个flag确定开关，控制高度
-      this.$bus.$emit('toggleSecondSub');
+    firstSubtitleOff() {
+      this.$store.commit('FirstSubtitleOff');
+      this.$store.commit('SecondSubtitleOff');
     },
-    toggleSubtitleCtrl() {
-      this.subtitleCtrlAppearFlag = !this.subtitleCtrlAppearFlag;
+    secondSubtitleOn() {
+      this.$store.commit('SecondSubtitleOn');
     },
-    toggleSubtitleMenu() {
-      this.subtitleMenuAppearFlag = !this.subtitleMenuAppearFlag;
-    },
-    toggleSecondSubMenu() {
-      this.subSecondMenuAppearFlag = !this.subSecondMenuAppearFlag;
+    secondSubtitleOff() {
+      this.$store.commit('SecondSubtitleOff');
     },
     // 需要refactor
     firstSubSelect(index) {
@@ -138,7 +90,7 @@ export default {
     },
     toggleButtonMenu() {
       this.$_clearTimeoutDelay();
-      this.btnMenuAppearFalg = !this.btnMenuAppearFalg;
+      this.isBtnMenuAppear = !this.isBtnMenuAppear;
     },
     $_clearTimeoutDelay() {
       if (this.timeoutIdOfSubCtrlDisappearDelay !== 0) {
@@ -154,31 +106,27 @@ export default {
       const curIndex = this.$store.state.PlaybackState.FirstSubIndex
         - this.$store.state.PlaybackState.StartIndex;
       if (this.subtitleNameArr[curIndex]) {
-        return this.$store.state.PlaybackState.SubtitleNameArr[curIndex].name;
+        return this.$store.state.PlaybackState.SubtitleNameArr[curIndex].title;
       }
       return 'No subtitle';
     },
     curFirstSubIndex() {
-      return this.$store.state.PlaybackState.FirstSubIndex;
+      return this.$store.state.PlaybackState.FirstSubIndex
+        - this.$store.state.PlaybackState.StartIndex;
     },
     curSecondSubIndex() {
-      return this.$store.state.PlaybackState.SecondSubIndex;
+      console.log(this.$store.state.PlaybackState.SecondSubIndex);
+      return this.$store.state.PlaybackState.SecondSubIndex
+        - this.$store.state.PlaybackState.StartIndex;
+    },
+
+    subtitleAppearFlag() {
+      return this.$store.state.PlaybackState.FirstSubtitleState;
     },
   },
   watch: {
-    // watch方法确定字幕有无状态
-    subtitleNameArr() {
-      if (this.subtitleNameArr.length !== 0) {
-        this.subtitleAppearFlag = true;
-      } else {
-        this.subtitleAppearFlag = false;
-      }
-    },
   },
   created() {
-    // this.$bus.$on('subtitle-loaded', () => {
-    //   this.subtitleLoadedFlag = true;
-    // });
     this.$bus.$on('sub-ctrl-appear', () => {
       this.subCtrlAppear();
       if (this.timeoutIdOfSubCtrlDisappearDelay !== 0) {
@@ -212,6 +160,8 @@ ul, li {
   .show {
     pointer-events: none;
     cursor: default;
+    color: yellow;
+    opacity: 0.7;
   }
 
   .btn-menu-wrapper {
@@ -236,12 +186,12 @@ ul, li {
     .btn-menu-wrapper {
       position: absolute;
       bottom: 60px;
-      right: 31.25+35+12.5px;
+      right: 31.25+35+35+12.5+12.5px;
     }
     .btn{
       position: absolute;
       bottom: 25px;
-      right: 31.25+35+12.5px;
+      right: 31.25+35+35+12.5+12.5px;
       height: 30px;
     }
   }
@@ -260,9 +210,17 @@ ul, li {
     }
   }
 }
-.selected {
+.firstSelected {
   pointer-events: none;
   cursor: default;
+  background: red;
+  opacity: 0.6;
+}
+
+.secondSelected {
+  pointer-events: none;
+  cursor: default;
+  background: greenyellow;
   opacity: 0.6;
 }
 

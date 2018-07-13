@@ -7,6 +7,8 @@ const state = {
   SrcOfVideo: '',
   PlaybackRate: 1.0,
 
+  FirstSubtitleState: false,
+  SecondSubtitleState: false,
   StartIndex: 0,
   FirstSubIndex: 0,
   // SecondSubIndex的选择，当未选择字幕时该设置为何值
@@ -37,6 +39,18 @@ const mutations = {
     state.Volume = v;
   },
 
+  FirstSubtitleOn(state) {
+    state.FirstSubtitleState = true;
+  },
+  FirstSubtitleOff(state) {
+    state.FirstSubtitleState = false;
+  },
+  SecondSubtitleOn(state) {
+    state.SecondSubtitleState = true;
+  },
+  SecondSubtitleOff(state) {
+    state.SecondSubtitleState = false;
+  },
   StartIndex(state, index) {
     state.StartIndex = index;
   },

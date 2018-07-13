@@ -12,7 +12,6 @@
       @mousewheel="wheelVolumeControll"
       @mouseleave="hideAllWidgets"
       @mousemove="handleMouseMove"
-      @mouseout.self="hideAllWidgets"
       @dblclick.self="toggleFullScreenState">
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
@@ -55,8 +54,6 @@ export default {
       cursorDelay: null,
       popupShow: false,
       mouseDown: false,
-      windowStartPosition: null,
-      mousedownPosition: null,
     };
   },
   methods: {
@@ -97,6 +94,9 @@ export default {
       this.$bus.$emit('volumecontroller-hide');
       this.$bus.$emit('progressbar-hide');
       this.$bus.$emit('timecode-hide');
+      if (process.platform !== 'win32') {
+        this.$bus.$emit('titlebar-hide');
+      }
       this.$bus.$emit('sub-ctrl-hide');
       this.$bus.$emit('titlebar-hide');
     },
@@ -138,7 +138,7 @@ export default {
         this.popupShow = true;
       }
     },
-    handleLeftClick(event) {
+    handleLeftClick() {
       const menu = this.$electron.remote.Menu.getApplicationMenu();
       if (this.popupShow === true) {
         menu.closePopup();
@@ -146,23 +146,9 @@ export default {
       }
       // Handle dragging-related variables
       this.mouseDown = true;
-      this.windowStartPosition = this.$electron.remote.getCurrentWindow().getPosition();
-      this.mousedownPosition = [event.screenX, event.screenY];
     },
-    handleMouseMove(event) {
+    handleMouseMove() {
       this.wakeUpAllWidgets();
-      // Handle dragging-related variables and methods
-      if (this.mouseDown) {
-        if (this.windowStartPosition !== null) {
-          const startPos = this.mousedownPosition;
-          const offset = [event.screenX - startPos[0], event.screenY - startPos[1]];
-          const winStartPos = this.windowStartPosition;
-          this.$electron.remote.getCurrentWindow().setPosition(
-            winStartPos[0] + offset[0],
-            winStartPos[1] + offset[1],
-          );
-        }
-      }
     },
     handleMouseUp() {
       this.mouseDown = false;
