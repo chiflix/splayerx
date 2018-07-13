@@ -19,7 +19,7 @@
       <TheTimeCodes/>
       <!-- <VolumeControl/> -->
       <SubtitleControl/>
-      <PlayPauseButton/>
+      <PlayButton/>
       <AdvanceControl/>
     </div>
   </div>
@@ -34,7 +34,6 @@ import VolumeControl from './PlayingView/VolumeControl.vue';
 import AdvanceControl from './PlayingView/AdvanceControl.vue';
 import SubtitleControl from './PlayingView/SubtitleControl.vue';
 import PlayButton from './PlayingView/PlayButton.vue';
-import PlayPauseButton from './PlayingView/PlayPauseButton.vue';
 
 export default {
   name: 'playing-view',
@@ -47,7 +46,6 @@ export default {
     SubtitleControl,
     Titlebar,
     PlayButton,
-    PlayPauseButton,
   },
   data() {
     return {
