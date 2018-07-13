@@ -1,15 +1,18 @@
 <template>
-  <div class="screenshot-background"
-    :style="{ left: positionOfScreenshot +'px' }">
-    <div class="screenshot">
-      <video ref="thumbnailVideoCanvas"
-        @loadedmetadata="onMetaLoaded"
-        :width=widthOfThumbnail
-        :height=heightofScreenshot
-        :src="src">
-      </video>
-      <div class="time">
-        {{ screenshotContent }}
+  <div class="screenshot-wrapper"
+    :style="{width: widthOfThumbnail + 32 + 'px', left: positionOfScreenshot - 16 + 'px'}">
+    <div class="screenshot-background"
+      :style="{width: widthOfThumbnail + 2 + 'px'}">
+      <div class="screenshot">
+        <video ref="thumbnailVideoCanvas"
+          @loadedmetadata="onMetaLoaded"
+          :width=widthOfThumbnail
+          :height=heightofScreenshot
+          :src="src">
+        </video>
+        <div class="time">
+          {{ screenshotContent }}
+        </div>
       </div>
     </div>
   </div>
@@ -70,12 +73,17 @@ export default {
 }
 
 .screenshot-background {
-  position: absolute;
-  bottom: 26px;
   // box-shadow: rgba(0, 0, 0, 0.3) 1px 1px 5px;
+  margin-left: 15px;
+  margin-right: 15px;
   background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5) 0%, rgba(84, 84, 84, 0.5) 100%);
-  border-radius: 1px;
   z-index: 100;
+  border-radius: 1px;
+}
+
+.screenshot-wrapper {
+  position: absolute;
+  bottom: 20px;
   -webkit-app-region: no-drag;
 }
 </style>

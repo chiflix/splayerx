@@ -1,13 +1,19 @@
 <template>
   <transition name="fade" appear>
+    <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
   <div class="progress"
-    @mouseover.stop="appearProgressSlider"
-    @mouseout.stop="hideProgressSlider"
+    @mouseover.stop.capture="appearProgressSlider"
+    @mouseleave="hideProgressSlider"
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.left.stop="videoRestart">
-      <div class="button"></div>
+      <div class="line"
+        v-show="!isShaking"></div>
+      <div class="button"
+        v-show="isShaking"
+        :class="{shake: isShaking}"
+        :style="{borderTopRightRadius: buttonRadius + 'px', borderBottomRightRadius: buttonRadius + 'px', width: buttonWidth + 'px'}"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.$electron.remote.getCurrentWindow().getSize()[0] - 20 + 'px'}"
@@ -27,7 +33,7 @@
         :style="{ left: curProgressBarEdge + 'px', width: readyBarWidth +'px' }"></div>
       </div>
       <div ref="playedSlider"
-        :class="{cursorOn: !isCursorLeft, progressPlayed: isCursorLeft}"
+        :class="{hidePlayedSlider: !isCursorLeft, progressPlayed: isCursorLeft}"
         :style="{ width: curProgressBarEdge +'px', opacity: progressOpacity }">
         <div class="line"></div>
       </div>
@@ -75,6 +81,7 @@ export default {
       flagProgressBarDraged: false,
       isCursorLeft: false,
       isOnProgress: false,
+      isShaking: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
@@ -82,6 +89,8 @@ export default {
       percentageVideoDraged: 0,
       widthOfThumbnail: 0,
       thumbnailCurrentTime: 0,
+      buttonWidth: 20,
+      buttonRadius: 0,
     };
   },
   methods: {
@@ -96,6 +105,11 @@ export default {
       if (!this.onProgressSliderMousedown) {
         this.isOnProgress = false;
         this.showScreenshot = false;
+        // Reset restart button
+        this.isShaking = false;
+        this.buttonWidth = 20;
+        this.buttonRadius = 0;
+
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
@@ -114,6 +128,10 @@ export default {
     },
     videoRestart() {
       this.$bus.$emit('seek', 0);
+      // Reset restart button
+      this.buttonWidth = 20;
+      this.buttonRadius = 0;
+      this.isShaking = false;
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -122,6 +140,11 @@ export default {
       this.onProgressSliderMousedown = true;
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
+      if (p <= 0.1) {
+        this.buttonWidth = 20;
+        this.buttonRadius = 0;
+        this.isShaking = false;
+      }
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       this.$_documentProgressDragClear();
       this.$_documentProgressDragEvent();
@@ -155,6 +178,7 @@ export default {
     $_effectProgressBarDraged(e) {
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
       this.cursorPosition = cursorPosition;
+      // console.log(this.cursorPosition);
       if (cursorPosition < this.curProgressBarEdge) {
         this.isCursorLeft = true;
       } else {
@@ -199,6 +223,11 @@ export default {
         this.onProgressSliderMousedown = false;
         // 可以考虑其他的方案
         if (this.flagProgressBarDraged) {
+          // Reset restart button
+          this.buttonWidth = 20;
+          this.buttonRadius = 0;
+          this.isShaking = false;
+
           this.$bus.$emit('seek', this.percentageVideoDraged
            * this.$store.state.PlaybackState.Duration);
           this.flagProgressBarDraged = false;
@@ -226,6 +255,10 @@ export default {
       return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursorState);
     },
     backBarWidth() {
+      // 当isOnPorgress为false，backBarWidth为0，增加一个opacity transition的class，避免消失过快
+      if (this.cursorPosition <= 0) {
+        return 0;
+      }
       return this.isCursorLeft ? this.cursorPosition + 0.1 : 0;
     },
     progressOpacity() {
@@ -255,7 +288,32 @@ export default {
     },
   },
   watch: {
-
+    // if 判断内的内容重复
+    cursorPosition(newVal, oldVal) {
+      if (newVal < oldVal && this.isOnProgress && newVal <= 0) {
+        this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
+        this.buttonRadius = Math.abs(this.cursorPosition);
+        this.isShaking = true;
+      } else {
+        console.log('trigger cursor Position');
+        this.buttonWidth = 20;
+        this.buttonRadius = 0;
+        this.isShaking = false;
+      }
+    },
+    // 使用mouseenter和mouseleave改写, 减少性能上的损失
+    isOnProgress(newVal, oldVal) {
+      if (!oldVal && newVal && this.cursorPosition <= 0) {
+        console.log('trigger is shaking');
+        this.isShaking = true;
+        this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
+        this.buttonRadius = Math.abs(this.cursorPosition);
+      } else {
+        this.isShaking = false;
+        this.buttonWidth = 20;
+        this.buttonRadius = 0;
+      }
+    },
   },
   created() {
     this.$electron.remote.getCurrentWindow().on('resize', () => {
@@ -327,16 +385,27 @@ export default {
     height: 4px;
     width: 20px;
     transition: height 150ms;
-    z-index: 701;
+    background: rgba(255, 255, 255, 0.38);
 
     .button {
       position: absolute;
       bottom: 0;
       left: 0;
-      width: 100%;
       height: 100%;
       background: rgba(255, 255, 255, 0.9);
       box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+    }
+
+    .line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5); 
     }
   }
 
@@ -392,7 +461,7 @@ export default {
   }
 }
 
-.video-controller .cursorOn {
+.video-controller .hidePlayedSlider {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -485,6 +554,30 @@ export default {
 
 .fade-enter, .fade-leave-to {
  opacity: 0;
+}
+
+.shake {
+  transform-origin: left center;
+  animation-name: shake;
+  animation-duration: 180ms;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.shake:hover {
+}
+
+@keyframes shake {
+  25% {
+    transform: rotate(4deg);
+  }
+  75% {
+    transform: rotate(-4deg);
+  }
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  
 }
 
 </style>
