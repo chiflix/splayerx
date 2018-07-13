@@ -3,6 +3,7 @@ import { ipcRenderer } from 'electron';
 const state = {
   windowSize: [0, 0],
   windowPosition: [0, 0],
+  fullscreenState: false,
 };
 
 const getters = {
@@ -12,6 +13,7 @@ const getters = {
   winPosX: state => state.windowPosition[0],
   winPosY: state => state.windowPosition[1],
   winPos: state => state.windowPosition,
+  fullscreen: state => state.fullscreenState,
 };
 
 const mutations = {
@@ -20,6 +22,9 @@ const mutations = {
   },
   windowPosition(state, payload) {
     state.windowPosition = payload;
+  },
+  fullscreen(state, payload) {
+    state.fullscreenState = payload;
   },
 };
 
@@ -37,6 +42,10 @@ const actions = {
   rendererWindowPosition(context, payload) {
     ipcRenderer.send('windowPositionChange', payload);
     context.commit('windowPosition', payload);
+  },
+  rendererSetFullscreen(context, payload) {
+    ipcRenderer.send('fullscreenStateChange', payload);
+    context.commit('fullscreen', payload);
   },
 };
 
