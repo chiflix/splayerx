@@ -57,7 +57,6 @@ export default {
       mouseDown: false,
       windowStartPosition: null,
       mousedownPosition: null,
-      icon_show: true,
     };
   },
   methods: {
