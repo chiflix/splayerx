@@ -104,9 +104,9 @@ export default {
     setWindowInfo() {
       [this.windowInfo.screenWidth, this.windowInfo.windowWidth] = [
         this.$electron.screen.getPrimaryDisplay().workAreaSize.width,
-        this.$electron.remote.getCurrentWindow().getSize()[0],
+        this.winWidth,
       ];
-      this.windowInfo.windowPosition = this.$electron.remote.getCurrentWindow().getPosition();
+      this.windowInfo.windowPosition = this.winPos;
       this.updateMaximize(this.windowInfo);
     },
     updateMaximize(val) {
@@ -134,13 +134,13 @@ export default {
     this.statusChange();
   },
   mounted() {
-    this.$electron.remote.getCurrentWindow().on('resize', () => {
+    this.$electron.ipcRenderer.on('resize', () => {
       this.setWindowInfo();
       this.statusChange();
-      this.titlebarWidth = this.$electron.remote.getCurrentWindow().getSize();
-      this.originalSize = this.$electron.remote.getCurrentWindow().getSize();
+      this.titlebarWidth = this.winWidth;
+      this.originalSize = this.winSize;
     });
-    this.$electron.remote.getCurrentWindow().on('move', () => {
+    this.$electron.ipcRenderer.on('move', () => {
       this.setWindowInfo();
     });
     this.$bus.$on('titlebar-appear', () => {
@@ -170,6 +170,15 @@ export default {
         Restore: this.middleButtonStatus === 'restore',
         FullscreenExit: this.middleButtonStatus === 'exit-fullscreen',
       };
+    },
+    winSize() {
+      return this.$store.getters.winSize;
+    },
+    winWidth() {
+      return this.$store.getters.winWidth;
+    },
+    winPos() {
+      return this.$store.getters.winPos;
     },
   },
 };
