@@ -82,7 +82,6 @@ export default {
       isCursorLeft: false,
       isOnProgress: false,
       isShaking: false,
-      // isOnButton: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
@@ -141,6 +140,11 @@ export default {
       this.onProgressSliderMousedown = true;
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
+      if (p <= 0.1) {
+        this.buttonWidth = 20;
+        this.buttonRadius = 0;
+        this.isShaking = false;
+      }
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       this.$_documentProgressDragClear();
       this.$_documentProgressDragEvent();
