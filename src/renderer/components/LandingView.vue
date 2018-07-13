@@ -5,7 +5,6 @@
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
-
     <div class="background"
       v-if="showShortcutImage">
       <div class="background background-image">
@@ -270,6 +269,7 @@ body {
       height: 100%;
       width: 70px;
       background-color: #fff;
+      opacity: 0.7;
     }
   }
   img {
