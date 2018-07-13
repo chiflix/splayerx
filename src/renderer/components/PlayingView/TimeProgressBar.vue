@@ -1,8 +1,9 @@
 <template>
   <transition name="fade" appear>
+    <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
   <div class="progress"
     @mouseover.stop.capture="appearProgressSlider"
-    @mouseout.stop.self="hideProgressSlider"
+    @mouseleave="hideProgressSlider"
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
@@ -132,7 +133,6 @@ export default {
       this.buttonWidth = 20;
       this.buttonRadius = 0;
       this.isShaking = false;
-      // this.isOnButton = false;
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -381,7 +381,6 @@ export default {
     height: 4px;
     width: 20px;
     transition: height 150ms;
-    // z-index: 701;
     background: rgba(255, 255, 255, 0.38);
 
     .button {

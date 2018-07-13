@@ -83,7 +83,7 @@ export default {
 
 .screenshot-wrapper {
   position: absolute;
-  bottom: 26px;
+  bottom: 20px;
   -webkit-app-region: no-drag;
 }
 </style>
