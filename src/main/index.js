@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, ipcMain } from 'electron' // eslint-disable-line
 
 /**
  * Set `__static` path to static files in production
@@ -68,6 +68,22 @@ function createWindow() {
 app.on('ready', () => {
   app.setName('SPlayerX');
   createWindow();
+  mainWindow.on('resize', () => {
+    mainWindow.webContents.send('resize');
+    mainWindow.webContents.send('mainDispatch', 'mainWindowSize', mainWindow.getSize());
+  });
+  mainWindow.on('move', () => {
+    mainWindow.webContents.send('move');
+    mainWindow.webContents.send('mainDispatch', 'mainWindowPosition', mainWindow.getPosition());
+  });
+  ipcMain.on('windowSizeChange', (event, args) => {
+    console.log(event);
+    mainWindow.setSize(...args);
+  });
+  ipcMain.on('windowPositionChange', (event, args) => {
+    console.log(event);
+    mainWindow.setPosition(...args);
+  });
 });
 
 app.on('window-all-closed', () => {
