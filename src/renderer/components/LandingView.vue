@@ -121,10 +121,8 @@ export default {
       return `url("${shortCut}")`;
     },
     itemInfo() {
-      const preBaseName = path.basename(this.item.path, path.extname(this.item.path));
-      const shortenedBaseName = `${preBaseName.substring(0, 30)}...`;
       return {
-        baseName: preBaseName.length > 30 ? shortenedBaseName : preBaseName,
+        baseName: path.basename(this.item.path, path.extname(this.item.path)),
         lastTime: this.item.lastPlayedTime,
         duration: this.item.duration,
         percentage: (this.item.lastPlayedTime / this.item.duration) * 100,
