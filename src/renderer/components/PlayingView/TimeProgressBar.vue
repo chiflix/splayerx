@@ -10,7 +10,7 @@
       <div class="button"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
-      :style="{width: this.$electron.remote.getCurrentWindow().getSize()[0] - 20 + 'px'}"
+      :style="{width: this.winWidth - 20 + 'px'}"
       @mousedown.left="onProgresssBarClick">
       <Thumbnail
         v-if="showScreenshot"
@@ -211,8 +211,7 @@ export default {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return 0;
       }
-      const progressBarWidth = this.$electron.remote.getCurrentWindow().getSize()[0]
-        - FOOL_PROOFING_BAR_WIDTH;
+      const progressBarWidth = this.winWidth - FOOL_PROOFING_BAR_WIDTH;
       return (this.$store.state.PlaybackState.AccurateTime
         / this.$store.state.PlaybackState.Duration) * progressBarWidth;
     },
@@ -238,7 +237,7 @@ export default {
       return this.widthOfThumbnail / this.videoRatio;
     },
     positionOfScreenshot() {
-      const progressBarWidth = this.$electron.remote.getCurrentWindow().getSize()[0] - 20;
+      const progressBarWidth = this.winWidth - 20;
       const halfWidthOfScreenshot = this.widthOfThumbnail / 2;
       const minWidth = (this.widthOfThumbnail / 2) + 16;
       const maxWidth = progressBarWidth - 16;
@@ -253,14 +252,13 @@ export default {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
     },
-  },
-  watch: {
-
+    winWidth() {
+      return this.$store.getters.winWidth;
+    },
   },
   created() {
-    this.$electron.remote.getCurrentWindow().on('resize', () => {
-      const widthOfWindow = this.$electron.remote.getCurrentWindow().getSize()[0];
-      console.log(widthOfWindow);
+    window.addEventListener('resize', () => {
+      const widthOfWindow = this.winWidth;
       if (widthOfWindow < 845) {
         this.widthOfThumbnail = 136;
       } else if (widthOfWindow < 1920) {
