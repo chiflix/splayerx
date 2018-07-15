@@ -254,7 +254,7 @@ export default {
     },
     /**
      * when cursor is not on progress bar, the cursor position
-     * should be the current progress bar edge to ensure the 
+     * should be the current progress bar edge to ensure the
      * progress bar display correctly.
      */
     cursorState() {
