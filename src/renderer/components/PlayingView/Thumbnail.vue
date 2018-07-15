@@ -48,6 +48,9 @@ export default {
       this.$refs.thumbnailVideoCanvas.pause();
     },
   },
+  mounted() {
+    this.currentTime = 0;
+  },
 };
 </script>
 
