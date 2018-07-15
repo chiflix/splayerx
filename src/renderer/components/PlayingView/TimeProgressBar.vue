@@ -559,9 +559,6 @@ export default {
   animation-iteration-count: infinite;
 }
 
-.shake:hover {
-}
-
 @keyframes shake {
   25% {
     transform: rotate(4deg);
