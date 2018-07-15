@@ -108,6 +108,8 @@ export default {
         this.isOnProgress = false;
         this.showScreenshot = false;
         this.$_resetRestartButton();
+        // 通过设置延时函数，回避backSlider突变到0产生的视觉问题
+        setTimeout(() => { this.cursorPosition = 0; }, 300);
 
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
@@ -250,6 +252,11 @@ export default {
       return (this.$store.state.PlaybackState.AccurateTime
         / this.$store.state.PlaybackState.Duration) * progressBarWidth;
     },
+    /**
+     * when cursor is not on progress bar, the cursor position
+     * should be the current progress bar edge to ensure the 
+     * progress bar display correctly.
+     */
     cursorState() {
       if (this.isOnProgress) {
         return this.cursorPosition;
@@ -317,7 +324,7 @@ export default {
     });
     this.$bus.$on('progressslider-appear', () => {
       this.showScreenshot = false;
-      this.cursorPosition = 0;
+      // this.cursorPosition = 0;
       this.appearProgressSlider();
       this.isOnProgress = false;
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
