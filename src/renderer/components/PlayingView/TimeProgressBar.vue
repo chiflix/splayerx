@@ -7,7 +7,9 @@
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.left.stop="videoRestart">
+      @mousedown.left.stop="videoRestart"
+      @mouseenter="appearShakingEffect"
+      @mouseleave="hideShakingEffect">
       <div class="line"
         v-show="!isShaking"></div>
       <div class="button"
@@ -105,10 +107,7 @@ export default {
       if (!this.onProgressSliderMousedown) {
         this.isOnProgress = false;
         this.showScreenshot = false;
-        // Reset restart button
-        this.isShaking = false;
-        this.buttonWidth = 20;
-        this.buttonRadius = 0;
+        this.$_resetRestartButton();
 
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
@@ -127,11 +126,8 @@ export default {
       }
     },
     videoRestart() {
+      this.$_resetRestartButton();
       this.$bus.$emit('seek', 0);
-      // Reset restart button
-      this.buttonWidth = 20;
-      this.buttonRadius = 0;
-      this.isShaking = false;
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -140,10 +136,9 @@ export default {
       this.onProgressSliderMousedown = true;
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
-      if (p <= 0.1) {
-        this.buttonWidth = 20;
-        this.buttonRadius = 0;
-        this.isShaking = false;
+      // Reset restart button when seek to the 0s of the video
+      if (p <= 0) {
+        this.$_resetRestartButton();
       }
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       this.$_documentProgressDragClear();
@@ -223,16 +218,26 @@ export default {
         this.onProgressSliderMousedown = false;
         // 可以考虑其他的方案
         if (this.flagProgressBarDraged) {
-          // Reset restart button
-          this.buttonWidth = 20;
-          this.buttonRadius = 0;
-          this.isShaking = false;
-
+          this.$_resetRestartButton();
           this.$bus.$emit('seek', this.percentageVideoDraged
            * this.$store.state.PlaybackState.Duration);
           this.flagProgressBarDraged = false;
         }
       };
+    },
+
+    appearShakingEffect() {
+      this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
+      this.buttonRadius = Math.abs(this.cursorPosition);
+      this.isShaking = true;
+    },
+    hideShakingEffect() {
+      this.$_resetRestartButton();
+    },
+    $_resetRestartButton() {
+      this.buttonWidth = FOOL_PROOFING_BAR_WIDTH;
+      this.buttonRadius = 0;
+      this.isShaking = false;
     },
   },
   computed: {
@@ -288,30 +293,13 @@ export default {
     },
   },
   watch: {
-    // if 判断内的内容重复
     cursorPosition(newVal, oldVal) {
       if (newVal < oldVal && this.isOnProgress && newVal <= 0) {
         this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
         this.buttonRadius = Math.abs(this.cursorPosition);
         this.isShaking = true;
       } else {
-        console.log('trigger cursor Position');
-        this.buttonWidth = 20;
-        this.buttonRadius = 0;
-        this.isShaking = false;
-      }
-    },
-    // 使用mouseenter和mouseleave改写, 减少性能上的损失
-    isOnProgress(newVal, oldVal) {
-      if (!oldVal && newVal && this.cursorPosition <= 0) {
-        console.log('trigger is shaking');
-        this.isShaking = true;
-        this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
-        this.buttonRadius = Math.abs(this.cursorPosition);
-      } else {
-        this.isShaking = false;
-        this.buttonWidth = 20;
-        this.buttonRadius = 0;
+        this.$_resetRestartButton();
       }
     },
   },
