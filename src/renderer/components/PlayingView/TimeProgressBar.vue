@@ -7,7 +7,9 @@
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.left.stop="videoRestart">
+      @mousedown.left.stop="videoRestart"
+      @mouseenter="appearShakingEffect"
+      @mouseleave="hideShakingEffect">
       <div class="line"
         v-show="!isShaking"></div>
       <div class="button"
@@ -83,6 +85,7 @@ export default {
       isOnProgress: false,
       isShaking: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
+      timeoutIdOfBackBarDisapppearDelay: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
       videoRatio: 0,
@@ -105,10 +108,7 @@ export default {
       if (!this.onProgressSliderMousedown) {
         this.isOnProgress = false;
         this.showScreenshot = false;
-        // Reset restart button
-        this.isShaking = false;
-        this.buttonWidth = 20;
-        this.buttonRadius = 0;
+        this.$_resetRestartButton();
 
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
@@ -127,11 +127,8 @@ export default {
       }
     },
     videoRestart() {
+      this.$_resetRestartButton();
       this.$bus.$emit('seek', 0);
-      // Reset restart button
-      this.buttonWidth = 20;
-      this.buttonRadius = 0;
-      this.isShaking = false;
     },
     onProgresssBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -140,10 +137,9 @@ export default {
       this.onProgressSliderMousedown = true;
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
-      if (p <= 0.1) {
-        this.buttonWidth = 20;
-        this.buttonRadius = 0;
-        this.isShaking = false;
+      // Reset restart button when seek to the 0s of the video
+      if (p <= 0) {
+        this.$_resetRestartButton();
       }
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       this.$_documentProgressDragClear();
@@ -178,8 +174,7 @@ export default {
     $_effectProgressBarDraged(e) {
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
       this.cursorPosition = cursorPosition;
-      // console.log(this.cursorPosition);
-      if (cursorPosition < this.curProgressBarEdge) {
+      if (cursorPosition <= this.curProgressBarEdge) {
         this.isCursorLeft = true;
       } else {
         this.isCursorLeft = false;
@@ -223,16 +218,26 @@ export default {
         this.onProgressSliderMousedown = false;
         // 可以考虑其他的方案
         if (this.flagProgressBarDraged) {
-          // Reset restart button
-          this.buttonWidth = 20;
-          this.buttonRadius = 0;
-          this.isShaking = false;
-
+          this.$_resetRestartButton();
           this.$bus.$emit('seek', this.percentageVideoDraged
            * this.$store.state.PlaybackState.Duration);
           this.flagProgressBarDraged = false;
         }
       };
+    },
+
+    appearShakingEffect() {
+      this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
+      this.buttonRadius = Math.abs(this.cursorPosition);
+      this.isShaking = true;
+    },
+    hideShakingEffect() {
+      this.$_resetRestartButton();
+    },
+    $_resetRestartButton() {
+      this.buttonWidth = FOOL_PROOFING_BAR_WIDTH;
+      this.buttonRadius = 0;
+      this.isShaking = false;
     },
   },
   computed: {
@@ -245,6 +250,11 @@ export default {
       return (this.$store.state.PlaybackState.AccurateTime
         / this.$store.state.PlaybackState.Duration) * progressBarWidth;
     },
+    /**
+     * when cursor is not on progress bar, the cursor position
+     * should be the current progress bar edge to ensure the
+     * progress bar display correctly.
+     */
     cursorState() {
       if (this.isOnProgress) {
         return this.cursorPosition;
@@ -255,11 +265,10 @@ export default {
       return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursorState);
     },
     backBarWidth() {
-      // 当isOnPorgress为false，backBarWidth为0，增加一个opacity transition的class，避免消失过快
       if (this.cursorPosition <= 0) {
         return 0;
       }
-      return this.isCursorLeft ? this.cursorPosition + 0.1 : 0;
+      return this.isCursorLeft ? this.cursorPosition : 0;
     },
     progressOpacity() {
       if (this.isOnProgress) {
@@ -288,30 +297,25 @@ export default {
     },
   },
   watch: {
-    // if 判断内的内容重复
     cursorPosition(newVal, oldVal) {
-      if (newVal < oldVal && this.isOnProgress && newVal <= 0) {
+      if (newVal < oldVal && this.isOnProgress && newVal <= 0 && oldVal <= 0) {
         this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
         this.buttonRadius = Math.abs(this.cursorPosition);
+        console.log('watch');
         this.isShaking = true;
       } else {
-        console.log('trigger cursor Position');
-        this.buttonWidth = 20;
-        this.buttonRadius = 0;
-        this.isShaking = false;
+        this.$_resetRestartButton();
       }
     },
-    // 使用mouseenter和mouseleave改写, 减少性能上的损失
-    isOnProgress(newVal, oldVal) {
-      if (!oldVal && newVal && this.cursorPosition <= 0) {
-        console.log('trigger is shaking');
-        this.isShaking = true;
-        this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
-        this.buttonRadius = Math.abs(this.cursorPosition);
+    isOnProgress(newVal) {
+      if (newVal) {
+        if (this.timeoutIdOfBackBarDisapppearDelay !== 0) {
+          clearTimeout(this.timeoutIdOfBackBarDisapppearDelay);
+        }
       } else {
-        this.isShaking = false;
-        this.buttonWidth = 20;
-        this.buttonRadius = 0;
+        // 通过设置延时函数，回避backSlider突变到0产生的视觉问题
+        this.timeoutIdOfBackBarDisapppearDelay =
+         setTimeout(() => { this.cursorPosition = 0; }, 3000);
       }
     },
   },
@@ -329,7 +333,6 @@ export default {
     });
     this.$bus.$on('progressslider-appear', () => {
       this.showScreenshot = false;
-      this.cursorPosition = 0;
       this.appearProgressSlider();
       this.isOnProgress = false;
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
@@ -562,9 +565,6 @@ export default {
   animation-duration: 180ms;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
-}
-
-.shake:hover {
 }
 
 @keyframes shake {
