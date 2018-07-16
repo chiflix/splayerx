@@ -11,9 +11,8 @@
       @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="hideAllWidgets"
-      @mousemove="handleMouseMove"
-      >
-      <!-- @dblclick.self="toggleFullScreenState" -->
+      @mousemove="handleMouseMove">
+      
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
