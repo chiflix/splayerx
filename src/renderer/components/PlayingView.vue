@@ -8,7 +8,7 @@
       @mousedown.self="resetDraggingState"
       @mousedown.right.stop="handleRightClick"
       @mousedown.left.stop.prevent="handleLeftClick"
-      @mouseup.left.prevent="handleMouseUp()"
+      @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="hideAllWidgets"
       @mousemove="handleMouseMove"
