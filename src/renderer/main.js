@@ -12,12 +12,6 @@ import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
 
-import { webFrame } from 'electron';
-
-// https://github.com/electron/electron/issues/3609
-// Disable Zooming
-webFrame.setVisualZoomLevelLimits(1, 1);
-
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
@@ -211,6 +205,9 @@ new Vue({
     },
   },
   mounted() {
+    // https://github.com/electron/electron/issues/3609
+    // Disable Zooming
+    this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
     this.getSystemLocale();
     this.createMenu();
 
