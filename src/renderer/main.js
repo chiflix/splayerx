@@ -67,18 +67,11 @@ new Vue({
             },
             {
               label: this.$t('msg.file.openRecent'),
+              id: 'recent-play',
               submenu: [
                 {
-                  label: '文件1',
-                },
-                {
-                  label: '文件2',
-                },
-                {
-                  label: '文件3',
-                },
-                {
-                  label: '文件4',
+                  id: 'recent-placeholder',
+                  visible: false,
                 },
               ],
             },
@@ -227,11 +220,42 @@ new Vue({
       const locale = app.getLocale();
       this.$i18n.locale = localeMap[locale] || this.$i18n.locale;
     },
+    createRecentItem(path, key) {
+      const { MenuItem } = this.$electron.remote;
+      const recentItem = new MenuItem({
+        label: this.pathProcess(path),
+        id: key,
+        click: () => {
+          this.openFile(this.pathProcess(path));
+        },
+      });
+      return recentItem;
+    },
+    pathProcess(path) {
+      if (process.platform === 'win32') {
+        return path.toString().replace(/^file:\/\/\//, '');
+      }
+      return path.toString().replace(/^file\/\//, '');
+    },
+  },
+  data() {
+    return {
+      recentPlayed: {},
+    };
   },
   mounted() {
     this.getSystemLocale();
     this.createMenu();
-
+    this.$storage.get('recent-played', (err, data) => {
+      if (Object.keys(data).length !== 0) {
+        const recentPlaceholder = this.$electron.remote.Menu.getApplicationMenu().getMenuItemById('recent-placeholder').menu;
+        Object.keys(data).forEach((element) => {
+          recentPlaceholder.append(this.createRecentItem(data[element].path, `recent-${parseInt(element, 10) + 1}`));
+        });
+      } else {
+        this.$electron.remote.Menu.getApplicationMenu().getMenuItemById('recent-play').enabled = false;
+      }
+    });
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
       if (err) {
