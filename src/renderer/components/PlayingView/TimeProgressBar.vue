@@ -3,7 +3,7 @@
     <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
   <div class="progress"
     @mouseover.stop.capture="appearProgressSlider"
-    @mouseout.stop.capture.prevent="hideProgressSlider"
+    @mouseleave="hideProgressSlider"
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
@@ -99,9 +99,6 @@ export default {
   methods: {
     appearProgressSlider() {
       this.isOnProgress = true;
-      if (this.timeoutIdOfBackBarDisapppearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfBackBarDisapppearDelay);
-      }
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
@@ -112,10 +109,6 @@ export default {
         this.isOnProgress = false;
         this.showScreenshot = false;
         this.$_resetRestartButton();
-        // 通过设置延时函数，回避backSlider突变到0产生的视觉问题
-        console.log(1231443214132);
-        this.timeoutIdOfBackBarDisapppearDelay =
-         setTimeout(() => { this.cursorPosition = 0; }, 600);
 
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
@@ -181,7 +174,7 @@ export default {
     $_effectProgressBarDraged(e) {
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
       this.cursorPosition = cursorPosition;
-      if (cursorPosition < this.curProgressBarEdge) {
+      if (cursorPosition <= this.curProgressBarEdge) {
         this.isCursorLeft = true;
       } else {
         this.isCursorLeft = false;
@@ -272,7 +265,6 @@ export default {
       return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursorState);
     },
     backBarWidth() {
-      // 当isOnPorgress为false，backBarWidth为0，增加一个opacity transition的class，避免消失过快
       if (this.cursorPosition <= 0) {
         return 0;
       }
@@ -313,6 +305,17 @@ export default {
         this.isShaking = true;
       } else {
         this.$_resetRestartButton();
+      }
+    },
+    isOnProgress(newVal) {
+      if (newVal) {
+        if (this.timeoutIdOfBackBarDisapppearDelay !== 0) {
+          clearTimeout(this.timeoutIdOfBackBarDisapppearDelay);
+        }
+      } else {
+        // 通过设置延时函数，回避backSlider突变到0产生的视觉问题
+        this.timeoutIdOfBackBarDisapppearDelay =
+         setTimeout(() => { this.cursorPosition = 0; }, 3000);
       }
     },
   },
