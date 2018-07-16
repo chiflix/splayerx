@@ -3,7 +3,7 @@
     <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
   <div class="progress"
     @mouseover.stop.capture="appearProgressSlider"
-    @mouseleave="hideProgressSlider"
+    @mouseout.stop.capture.prevent="hideProgressSlider"
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
@@ -85,6 +85,7 @@ export default {
       isOnProgress: false,
       isShaking: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
+      timeoutIdOfBackBarDisapppearDelay: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
       videoRatio: 0,
@@ -98,6 +99,9 @@ export default {
   methods: {
     appearProgressSlider() {
       this.isOnProgress = true;
+      if (this.timeoutIdOfBackBarDisapppearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfBackBarDisapppearDelay);
+      }
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
@@ -109,7 +113,9 @@ export default {
         this.showScreenshot = false;
         this.$_resetRestartButton();
         // 通过设置延时函数，回避backSlider突变到0产生的视觉问题
-        setTimeout(() => { this.cursorPosition = 0; }, 300);
+        console.log(1231443214132);
+        this.timeoutIdOfBackBarDisapppearDelay =
+         setTimeout(() => { this.cursorPosition = 0; }, 600);
 
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
@@ -175,7 +181,6 @@ export default {
     $_effectProgressBarDraged(e) {
       const cursorPosition = e.clientX - FOOL_PROOFING_BAR_WIDTH;
       this.cursorPosition = cursorPosition;
-      // console.log(this.cursorPosition);
       if (cursorPosition < this.curProgressBarEdge) {
         this.isCursorLeft = true;
       } else {
@@ -271,7 +276,7 @@ export default {
       if (this.cursorPosition <= 0) {
         return 0;
       }
-      return this.isCursorLeft ? this.cursorPosition + 0.1 : 0;
+      return this.isCursorLeft ? this.cursorPosition : 0;
     },
     progressOpacity() {
       if (this.isOnProgress) {
@@ -301,9 +306,10 @@ export default {
   },
   watch: {
     cursorPosition(newVal, oldVal) {
-      if (newVal < oldVal && this.isOnProgress && newVal <= 0) {
+      if (newVal < oldVal && this.isOnProgress && newVal <= 0 && oldVal <= 0) {
         this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
         this.buttonRadius = Math.abs(this.cursorPosition);
+        console.log('watch');
         this.isShaking = true;
       } else {
         this.$_resetRestartButton();
@@ -324,7 +330,6 @@ export default {
     });
     this.$bus.$on('progressslider-appear', () => {
       this.showScreenshot = false;
-      // this.cursorPosition = 0;
       this.appearProgressSlider();
       this.isOnProgress = false;
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
