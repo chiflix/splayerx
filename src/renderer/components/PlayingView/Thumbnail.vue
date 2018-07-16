@@ -49,7 +49,7 @@ export default {
     },
   },
   mounted() {
-    this.currentTime = 0;
+    this.$refs.thumbnailVideoCanvas.currentTime = this.currentTime;
   },
 };
 </script>
