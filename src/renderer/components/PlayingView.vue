@@ -11,9 +11,8 @@
       @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="hideAllWidgets"
-      @mousemove="handleMouseMove"
-      @mouseout.self="hideAllWidgets"
-      @dblclick.self="toggleFullScreenState">
+      @mousemove="handleMouseMove">
+      
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
@@ -55,6 +54,11 @@ export default {
       cursorDelay: null,
       popupShow: false,
       mouseDown: false,
+      // the following 3 properties are used for checking if an event is a click or an dblclick
+      // during 200miliseconds, if a second click is detected, will toggle "FullScreen"
+      delay: 200, // changable and should be discussed.
+      clicks: 0,
+      timer: null,
     };
   },
   methods: {
@@ -153,23 +157,23 @@ export default {
     },
     handleMouseUp() {
       this.mouseDown = false;
-      this.togglePlayback();
+      this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
+      if (this.clicks === 1) { // if one click has been detected - clicks === 1
+        const self = this; // define a constant "self" for the following scope to use
+        this.timer = setTimeout(() => { // define timer as setTimeOut function
+          self.togglePlayback(); // which is togglePlayback
+          self.clicks = 0; // reset the "clicks" to zero for next event
+        }, this.delay);
+      } else { // else, if a second click has been detected - clicks === 2
+        clearTimeout(this.timer); // cancel the time out
+        this.toggleFullScreenState();
+        this.clicks = 0;// reset the "clicks" to zero
+      }
     },
   },
   mounted() {
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
-    this.$bus.$on('twinkle-pause-icon', () => {
-      this.$refs.pauseIcon.style.animationPlayState = 'running';
-    });
-    this.$bus.$on('twinkle-play-icon', () => {
-      this.$refs.playIcon.style.animationPlayState = 'running';
-    });
-    if (process.platform === 'win32') {
-      document.querySelector('.application').style.borderRadius = 0;
-      document.querySelector('.video').style.borderRadius = 0;
-      document.querySelector('.video-controller').style.borderRadius = 0;
-    }
   },
   computed: {
     uri() {
