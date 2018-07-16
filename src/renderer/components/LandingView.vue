@@ -21,8 +21,9 @@
       <div class="iteminfo item-description">
       </div>
       <div class="iteminfo item-timing">
-        <span class="timing-played">{{ timecodeFromSeconds(itemInfo().lastTime) }}</span>
-         / {{ timecodeFromSeconds(itemInfo().duration) }}
+        <span class="timing-played">
+          {{ timeInValidForm(timecodeFromSeconds(itemInfo().lastTime)) }}</span>
+        / {{ timeInValidForm(timecodeFromSeconds(itemInfo().duration)) }}
       </div>
       <div class="iteminfo item-progress">
         <div class="progress-played" v-bind:style="{ width: itemInfo().percentage + '%' }"></div>
@@ -77,6 +78,7 @@ export default {
       showShortcutImage: false,
       isDragging: false,
       mouseDown: false,
+      invalidTimeRepresentation: '--',
     };
   },
   components: {
@@ -121,14 +123,15 @@ export default {
       return `url("${shortCut}")`;
     },
     itemInfo() {
-      const preBaseName = path.basename(this.item.path, path.extname(this.item.path));
-      const shortenedBaseName = `${preBaseName.substring(0, 30)}...`;
       return {
-        baseName: preBaseName.length > 30 ? shortenedBaseName : preBaseName,
+        baseName: path.basename(this.item.path, path.extname(this.item.path)),
         lastTime: this.item.lastPlayedTime,
         duration: this.item.duration,
         percentage: (this.item.lastPlayedTime / this.item.duration) * 100,
       };
+    },
+    timeInValidForm(time) {
+      return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);
     },
     onRecentItemMouseover(item, index) {
       this.item = item;

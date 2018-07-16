@@ -408,7 +408,7 @@ export default {
       height: 100%;
       width: 100%;
       background: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5); 
+      box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
     }
   }
 
@@ -577,7 +577,7 @@ export default {
   0%, 100% {
     transform: rotate(0deg);
   }
-  
+
 }
 
 </style>
