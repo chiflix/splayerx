@@ -17,24 +17,6 @@
             <img src="" alt="Off">
           </li>
         </ul>
-        <ul class="subtitle-menu">
-          <li class="subtitle-menu-item"
-            v-for="item in subtitleNameArr"
-            :key="item.index"
-            :class="{firstSelected: item.index === curFirstSubIndex}"
-            @mousedown.capture.stop.left="firstSubSelect(item.index)">
-            {{item.title}}
-          </li>
-        </ul>
-        <ul class="subtitle-menu">
-          <li class="subtitle-menu-item"
-            v-for="item in subtitleNameArr"
-            :key="item.index"
-            :class="{secondSelected: item.index === curSecondSubIndex}"
-            @mousedown.capture.stop.left="secondSubSelect(item.index)">
-            {{item.title}}
-          </li>
-        </ul>
       </div>
       <div
         @mousedown.capture.stop.left="toggleButtonMenu">
