@@ -96,6 +96,7 @@ export default {
         } else {
           this.$storage.set('recent-played', [newElement]);
         }
+        this.$bus.$emit('new-file-open');
       });
       this.$store.commit('SrcOfVideo', path);
       this.$router.push({
