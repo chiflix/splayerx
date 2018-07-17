@@ -69,23 +69,20 @@ app.on('ready', () => {
   app.setName('SPlayerX');
   createWindow();
   mainWindow.on('resize', () => {
-    mainWindow.webContents.send('resize');
-    mainWindow.webContents.send('mainDispatch', 'mainWindowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
     mainWindow.webContents.send('mainCommit', 'fullscreen', mainWindow.isFullScreen());
   });
   mainWindow.on('move', () => {
-    mainWindow.webContents.send('move');
-    mainWindow.webContents.send('mainDispatch', 'mainWindowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
     mainWindow.setSize(...args);
+    event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
   ipcMain.on('windowPositionChange', (event, args) => {
     mainWindow.setPosition(...args);
-  });
-  ipcMain.on('fullscreenStateChange', (event, args) => {
-    mainWindow.setFullScreen(args);
+    event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
   });
 });
 
