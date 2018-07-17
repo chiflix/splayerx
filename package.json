@@ -71,8 +71,11 @@
   "dependencies": {
     "axios": "^0.18.0",
     "electron-json-storage": "^4.1.0",
+    "google-protobuf": "^3.6.0",
+    "grpc": "^1.13.0",
     "module-alias": "^2.0.6",
     "npm": "^6.1.0",
+    "sagi-apis-client": "^1.0.6",
     "srt-to-vtt": "^1.1.2",
     "temp": "^0.8.3",
     "uuid": "^3.2.1",
