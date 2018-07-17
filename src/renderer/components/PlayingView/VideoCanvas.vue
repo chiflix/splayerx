@@ -94,6 +94,7 @@ export default {
     },
     onCanPlay() {
       // the video is ready to start playing
+      this.$_getThumbnail();
       this.$store.commit('Volume', this.$refs.videoCanvas.volume);
     },
     onMetaLoaded() {
@@ -120,6 +121,7 @@ export default {
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
+        if (t % 10 === 0) { this.$_getThumbnail(); }
       }
     },
     onDurationChange() {
@@ -464,13 +466,6 @@ export default {
     currentTime() {
       return this.$store.state.PlaybackState.CurrentTime;
     },
-    playbackRate() {
-      return this.$store.state.PlaybackState.PlaybackRate;
-    },
-    volume() {
-      return this.$store.state.PlaybackState.Volume;
-    },
-
     firstSubState() {
       return this.$store.state.PlaybackState.FirstSubtitleState;
     },
@@ -479,15 +474,6 @@ export default {
     },
   },
   watch: {
-    volume(newVolume) {
-      console.log(`set video volume ${newVolume}`);
-      this.$refs.videoCanvas.volume = newVolume;
-    },
-    playbackRate(newRate) {
-      console.log(`set video playbackRate ${newRate}`);
-      this.$refs.videoCanvas.playbackRate = newRate;
-    },
-
     firstSubState(newVal) {
       const vid = this.$refs.videoCanvas;
       const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
@@ -538,6 +524,16 @@ export default {
     },
   },
   created() {
+    this.$bus.$on('playback-rate', (newRate) => {
+      console.log(`set video playbackRate ${newRate}`);
+      this.$refs.videoCanvas.playbackRate = newRate;
+      this.$store.commit('PlaybackRate', newRate);
+    });
+    this.$bus.$on('volume', (newVolume) => {
+      console.log(`set video volume ${newVolume}`);
+      this.$refs.videoCanvas.volume = newVolume;
+      this.$store.commit('Volume', newVolume);
+    });
     this.$bus.$on('reset-windowsize', () => {
       this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
     });

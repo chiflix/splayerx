@@ -84,6 +84,9 @@ export default {
               data.unshift(newElement);
             } else {
               const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+              if (item[0].lastPlayedTime !== 0) {
+                this.$bus.$emit('seek', item[0].lastPlayedTime);
+              }
               data.unshift(item[0]);
             }
             console.log('changed:');
