@@ -163,7 +163,7 @@ export default {
       const { dialog } = remote;
       const browserWindow = remote.BrowserWindow;
       const focusedWindow = browserWindow.getFocusedWindow();
-      const VALID_EXTENSION = ['mp4', 'mkv', 'mov'];
+      const VALID_EXTENSION = []; // ['mp4', 'mkv', 'mov'];
 
       self.showingPopupDialog = true;
       dialog.showOpenDialog(focusedWindow, {
