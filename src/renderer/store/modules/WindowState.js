@@ -29,23 +29,39 @@ const mutations = {
 };
 
 const actions = {
-  mainWindowSize(context, payload) {
+  mainWindowSizeSet(context, payload) {
     context.commit('windowSize', payload);
   },
-  rendererWindowSize(context, payload) {
+  rendererWindowSizeSet(context, payload) {
     ipcRenderer.send('windowSizeChange', payload);
-    context.commit('windowSize', payload);
+    return new Promise((resolve, reject) => {
+      ipcRenderer.once('windowSizeChange-asyncReply', (actualSize) => {
+        if (actualSize === 'payload') {
+          context.commit('windowSize', actualSize);
+          resolve(actualSize);
+        } else {
+          console.error('Error: window size set failed.');
+          reject(actualSize);
+        }
+      });
+    });
   },
   mainWindowPosition(context, payload) {
     context.commit('windowPosition', payload);
   },
-  rendererWindowPosition(context, payload) {
+  rendererWindowPositionSet(context, payload) {
     ipcRenderer.send('windowPositionChange', payload);
-    context.commit('windowPosition', payload);
-  },
-  rendererSetFullscreen(context, payload) {
-    ipcRenderer.send('fullscreenStateChange', payload);
-    context.commit('fullscreen', payload);
+    return new Promise((resolve, reject) => {
+      ipcRenderer.once('windowPositionChange-asyncReply', (actualPos) => {
+        if (actualPos === 'payload') {
+          context.commit('windowPosition', actualPos);
+          resolve(actualPos);
+        } else {
+          console.error('Error: window position set failed.');
+          reject(actualPos);
+        }
+      });
+    });
   },
 };
 
