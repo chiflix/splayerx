@@ -83,12 +83,12 @@ export default {
       this.$electron.remote.getCurrentWindow().unmaximize();
     },
     handleFullscreenExit() {
-      this.$store.dispatch('rendererSetFullscreen', false);
+      this.$electron.remote.getCurrentWindow().setFullScreen(false);
     },
     // OS-specific methods
     handleMacMaximize() {
       if (this.currentView !== 'LandingView') {
-        this.$store.dispatch('rendererSetFullscreen', true);
+        this.$electron.remote.getCurrentWindow().setFullScreen(true);
       }
     },
     handleResize() {
