@@ -315,7 +315,7 @@ export default {
       } else {
         // 通过设置延时函数，回避backSlider突变到0产生的视觉问题
         this.timeoutIdOfBackBarDisapppearDelay =
-         setTimeout(() => { this.cursorPosition = 0; }, 3000);
+         setTimeout(() => { this.cursorPosition = 0; }, 300);
       }
     },
   },

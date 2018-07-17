@@ -12,7 +12,7 @@
       @mousewheel="wheelVolumeControll"
       @mouseleave="hideAllWidgets"
       @mousemove="handleMouseMove">
-      
+
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
@@ -118,21 +118,21 @@ export default {
       this.$bus.$emit('volumeslider-appear');
       if (e.deltaY < 0) {
         if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$store.commit(
-            'Volume',
+          this.$bus.$emit(
+            'volume',
             this.$store.state.PlaybackState.Volume + 0.1,
           );
         } else {
-          this.$store.commit('Volume', 1);
+          this.$bus.$emit('volume', 1);
         }
       } else if (e.deltaY > 0) {
         if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$store.commit(
-            'Volume',
+          this.$bus.$emit(
+            'volume',
             this.$store.state.PlaybackState.Volume - 0.1,
           );
         } else {
-          this.$store.commit('Volume', 0);
+          this.$bus.$emit('volume', 0);
         }
       }
     },

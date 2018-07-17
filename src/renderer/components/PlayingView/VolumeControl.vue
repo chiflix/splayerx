@@ -39,16 +39,16 @@ export default {
       this.$_clearTimeoutDelay();
       if (this.volume !== 0) {
         this.currentVolume = this.volume;
-        this.$store.commit('Volume', 0);
+        this.$bus.$emit('volume', 0);
       } else {
-        this.$store.commit('Volume', this.currentVolume / 100);
+        this.$bus.$emit('volume', this.currentVolume / 100);
       }
     },
     onVolumeSliderClick(e) {
       console.log('onVolumeSliderClick');
       this.onVolumeSliderMousedown = true;
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
-      this.$store.commit('Volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
+      this.$bus.$emit('volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
       this.$_documentVoluemeDragClear();
       this.$_documentVolumeSliderDragEvent();
     },
@@ -85,12 +85,12 @@ export default {
       if (sliderOffsetBottom - e.clientY > 1) {
         const volume = (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight;
         if (volume >= 1) {
-          this.$store.commit('Volume', 1);
+          this.$bus.$emit('volume', 1);
         } else {
-          this.$store.commit('Volume', volume);
+          this.$bus.$emit('volume', volume);
         }
       } else {
-        this.$store.commit('Volume', 0);
+        this.$bus.$emit('volume', 0);
       }
     },
     /**

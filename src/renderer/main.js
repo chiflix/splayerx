@@ -313,6 +313,9 @@ new Vue({
     },
   },
   mounted() {
+    // https://github.com/electron/electron/issues/3609
+    // Disable Zooming
+    this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
     this.getSystemLocale();
     this.createMenu();
     this.$bus.$on('new-file-open', this.refreshMenu);
@@ -341,9 +344,9 @@ new Vue({
           this.$bus.$emit('volumecontroller-appear');
           this.$bus.$emit('volumeslider-appear');
           if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume + 0.1);
+            this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
           } else {
-            this.$store.commit('Volume', 1);
+            this.$bus.$emit('volume', 1);
           }
           break;
 
@@ -351,9 +354,9 @@ new Vue({
           this.$bus.$emit('volumecontroller-appear');
           this.$bus.$emit('volumeslider-appear');
           if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-            this.$store.commit('Volume', this.$store.state.PlaybackState.Volume - 0.1);
+            this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
           } else {
-            this.$store.commit('Volume', 0);
+            this.$bus.$emit('volume', 0);
           }
           break;
 
