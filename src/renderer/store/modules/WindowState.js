@@ -1,5 +1,3 @@
-import { ipcRenderer } from 'electron';
-
 const state = {
   windowSize: [0, 0],
   windowPosition: [0, 0],
@@ -33,9 +31,9 @@ const actions = {
     context.commit('windowSize', payload);
   },
   rendererWindowSizeSet(context, payload) {
-    ipcRenderer.send('windowSizeChange', payload);
+    this.$electron.ipcRenderer.send('windowSizeChange', payload);
     return new Promise((resolve, reject) => {
-      ipcRenderer.once('windowSizeChange-asyncReply', (actualSize) => {
+      this.$electron.ipcRenderer.once('windowSizeChange-asyncReply', (actualSize) => {
         if (actualSize === 'payload') {
           context.commit('windowSize', actualSize);
           resolve(actualSize);
@@ -50,9 +48,9 @@ const actions = {
     context.commit('windowPosition', payload);
   },
   rendererWindowPositionSet(context, payload) {
-    ipcRenderer.send('windowPositionChange', payload);
+    this.$electron.ipcRenderer.send('windowPositionChange', payload);
     return new Promise((resolve, reject) => {
-      ipcRenderer.once('windowPositionChange-asyncReply', (actualPos) => {
+      this.$electron.ipcRenderer.once('windowPositionChange-asyncReply', (actualPos) => {
         if (actualPos === 'payload') {
           context.commit('windowPosition', actualPos);
           resolve(actualPos);

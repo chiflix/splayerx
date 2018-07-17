@@ -17,10 +17,10 @@
     },
     mounted() {
       /* eslint-disable no-unused-vars */
-      require('electron').ipcRenderer.on('mainCommit', (event, commitType, commitPayload) => {
+      this.$electron.ipcRenderer.on('mainCommit', (event, commitType, commitPayload) => {
         this.mainCommitProxy(commitType, commitPayload);
       });
-      require('electron').ipcRenderer.on('mainDispatch', (event, actionType, actionPayload) => {
+      this.$electron.ipcRenderer.on('mainDispatch', (event, actionType, actionPayload) => {
         this.mainDispatchProxy(actionType, actionPayload);
       });
     },
