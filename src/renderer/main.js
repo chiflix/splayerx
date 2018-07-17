@@ -309,7 +309,7 @@ new Vue({
     },
     refreshMenu() {
       this.$electron.remote.Menu.getApplicationMenu().clear();
-      setTimeout(this.createMenu, 100);
+      setTimeout(this.createMenu, 1000);
     },
   },
   mounted() {
