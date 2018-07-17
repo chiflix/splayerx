@@ -66,16 +66,6 @@ new Vue({
               accelerator: 'CmdOrCtrl+U',
             },
             {
-              label: this.$t('msg.file.openRecent'),
-              id: 'recent-play',
-              submenu: [
-                {
-                  id: 'recent-placeholder',
-                  visible: false,
-                },
-              ],
-            },
-            {
               label: this.$t('msg.file.closeWindow'),
               role: 'Close',
             },
@@ -151,58 +141,63 @@ new Vue({
           ],
         },
       ];
-
-      if (process.platform === 'darwin') {
-        template.unshift({
-          label: app.getName(),
-          submenu: [
-            {
-              label: this.$t('msg.splayerx.about'),
-              role: 'about',
-            },
-            {
-              label: this.$t('msg.splayerx.preferences'),
-              accelerator: 'Cmd+,',
-            },
-            {
-              label: this.$t('msg.splayerx.homepage'),
-            },
-            {
-              label: this.$t('msg.splayerx.feedback'),
-            },
-            { type: 'separator' },
-            {
-              label: this.$t('msg.splayerx.services'),
-              role: 'services',
-              submenu: [],
-            },
-            { type: 'separator' },
-            {
-              label: this.$t('msg.splayerx.hide'),
-              role: 'hide',
-            },
-            {
-              label: this.$t('msg.splayerx.hideOthers'),
-              role: 'hideothers',
-            },
-            {
-              label: this.$t('msg.splayerx.quit'),
-              role: 'quit',
-            },
-          ],
-        });
-      }
-
-      if (process.platform === 'win32') {
-        const file = template.shift();
-        file.submenu = Array.reverse(file.submenu);
-        file.submenu.forEach((menuItem) => {
-          template.unshift(menuItem);
-        });
-      }
-
-      const menu = Menu.buildFromTemplate(template);
-      Menu.setApplicationMenu(menu);
+      this.updateRecentPlay().then((result) => {
+        template.splice(2, 0, result);
+        if (process.platform === 'darwin') {
+          template.unshift({
+            label: app.getName(),
+            submenu: [
+              {
+                label: this.$t('msg.splayerx.about'),
+                role: 'about',
+              },
+              {
+                label: this.$t('msg.splayerx.preferences'),
+                accelerator: 'Cmd+,',
+              },
+              {
+                label: this.$t('msg.splayerx.homepage'),
+              },
+              {
+                label: this.$t('msg.splayerx.feedback'),
+              },
+              { type: 'separator' },
+              {
+                label: this.$t('msg.splayerx.services'),
+                role: 'services',
+                submenu: [],
+              },
+              { type: 'separator' },
+              {
+                label: this.$t('msg.splayerx.hide'),
+                role: 'hide',
+              },
+              {
+                label: this.$t('msg.splayerx.hideOthers'),
+                role: 'hideothers',
+              },
+              {
+                label: this.$t('msg.splayerx.quit'),
+                role: 'quit',
+              },
+            ],
+          });
+        }
+        if (process.platform === 'win32') {
+          const file = template.shift();
+          file.submenu = Array.reverse(file.submenu);
+          file.submenu.forEach((menuItem) => {
+            template.unshift(menuItem);
+          });
+        }
+        return template;
+      }).then((result) => {
+        const menu = Menu.buildFromTemplate(result);
+        Menu.setApplicationMenu(menu);
+        console.log(menu.getMenuItemById('recent-play').submenu.items);
+      }).catch((err) => {
+        console.log(err);
+      });
     },
     getSystemLocale() {
       const localeMap = {
@@ -220,16 +215,15 @@ new Vue({
       const locale = app.getLocale();
       this.$i18n.locale = localeMap[locale] || this.$i18n.locale;
     },
-    createRecentItem(path, key) {
-      const { MenuItem } = this.$electron.remote;
-      const recentItem = new MenuItem({
-        label: this.pathProcess(path),
+    updateRecentItem(key, value) {
+      return {
         id: key,
+        visible: true,
+        label: value.label,
         click: () => {
-          this.openFile(this.pathProcess(path));
+          this.openFile(value.path);
         },
-      });
-      return recentItem;
+      };
     },
     pathProcess(path) {
       if (process.platform === 'win32') {
@@ -237,25 +231,91 @@ new Vue({
       }
       return path.toString().replace(/^file\/\//, '');
     },
-  },
-  data() {
-    return {
-      recentPlayed: {},
-    };
+    updateRecentPlay() {
+      console.log('Updating recent play!');
+      const recentMenuTemplate = {
+        label: this.$t('msg.file.openRecent'),
+        id: 'recent-play',
+        submenu: [
+          {
+            id: 'recent-1',
+            visible: false,
+          },
+          {
+            id: 'recent-2',
+            visible: false,
+          },
+          {
+            id: 'recent-3',
+            visible: false,
+          },
+          {
+            id: 'recent-4',
+            visible: false,
+          },
+        ],
+      };
+      return new Promise((resolve, reject) => {
+        let menuRecentData = null;
+        this.$storage.get('recent-played', (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            menuRecentData = this.processRecentPlay(data);
+            console.log(menuRecentData);
+            recentMenuTemplate.submenu.forEach((element, index) => {
+              const value = menuRecentData.get(element.id);
+              if (value.label !== '') {
+                recentMenuTemplate.submenu
+                  .splice(index, 1, this.updateRecentItem(element.id, value));
+              }
+            });
+            resolve(recentMenuTemplate);
+          }
+        });
+      });
+    },
+    processRecentPlay(recentPlayData) {
+      const menuRecentData = new Map([
+        ['recent-1', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-2', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-3', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-4', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+      ]);
+      for (let i = 1; i <= recentPlayData.length; i += 1) {
+        menuRecentData.set(`recent-${i}`, {
+          label: this.pathProcess(recentPlayData[i - 1].path),
+          path: recentPlayData[i - 1].path,
+          visible: true,
+        });
+      }
+      return menuRecentData;
+    },
+    refreshMenu() {
+      this.$electron.remote.Menu.getApplicationMenu().clear();
+      setTimeout(this.createMenu, 100);
+    },
   },
   mounted() {
     this.getSystemLocale();
     this.createMenu();
-    this.$storage.get('recent-played', (err, data) => {
-      if (Object.keys(data).length !== 0) {
-        const recentPlaceholder = this.$electron.remote.Menu.getApplicationMenu().getMenuItemById('recent-placeholder').menu;
-        Object.keys(data).forEach((element) => {
-          recentPlaceholder.append(this.createRecentItem(data[element].path, `recent-${parseInt(element, 10) + 1}`));
-        });
-      } else {
-        this.$electron.remote.Menu.getApplicationMenu().getMenuItemById('recent-play').enabled = false;
-      }
-    });
+    this.$bus.$on('new-file-open', this.refreshMenu);
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
       if (err) {
