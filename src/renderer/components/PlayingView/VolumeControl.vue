@@ -1,12 +1,13 @@
 <template>
   <transition name="fade" appear>
   <div class="volume" id="volume"
-    @mouseover.capture.stop="appearVolumeSlider"
-    @mouseout.capture.stop="hideVolumeSlider"
+    @mouseover.stop="appearVolumeSlider"
+    @mouseout.stop="hideVolumeSlider"
+    @mousemove="throttledCall"
     v-if="showVolumeController">
     <transition name="fade">
       <div class="container"  ref="sliderContainer"
-        @mousedown.capture.stop.left="onVolumeSliderClick"
+        @mousedown.stop.left="onVolumeSliderClick"
         v-if="showVolumeSlider">
         <div class="slider" ref="slider"
           :style="{ height: volume + '%' }">
@@ -14,7 +15,7 @@
       </div>
     </transition>
       <div class="button"
-        @mousedown.capture.stop.left="onVolumeButtonClick">
+        @mousedown.stop.left="onVolumeButtonClick">
         <img type="image/svg+xml" wmode="transparent"
           :src="srcOfVolumeButtonImage">
       </div>
@@ -23,6 +24,8 @@
 </template>;
 
 <script>
+import _ from 'lodash';
+
 export default {
   data() {
     return {
@@ -31,6 +34,7 @@ export default {
       onVolumeSliderMousedown: false,
       currentVolume: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
+      throttledCall: null,
     };
   },
   methods: {
@@ -51,6 +55,9 @@ export default {
       this.$bus.$emit('volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
       this.$_documentVoluemeDragClear();
       this.$_documentVolumeSliderDragEvent();
+    },
+    clearAllWidgetsTimeout() {
+      this.$bus.$emit('clearAllWidgetDisappearDelay');
     },
     appearVolumeSlider() {
       this.$_clearTimeoutDelay();
@@ -135,7 +142,7 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('volumecontroller-appear', () => {
+    this.$bus.$on('volumecontroller-appear-delay', () => {
       this.appearVolumeController();
       if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
@@ -157,9 +164,11 @@ export default {
           = setTimeout(this.hideVolumeController, 3000);
       }
     });
-    this.$bus.$on('volumecontroller-hide', () => {
-      this.hideVolumeController();
-    });
+    this.$bus.$on('volumecontroller-appear', this.appearVolumeController);
+    this.$bus.$on('volumecontroller-hide', this.hideVolumeController);
+  },
+  beforeMount() {
+    this.throttledCall = _.throttle(this.clearAllWidgetsTimeout, 500);
   },
 };
 </script>

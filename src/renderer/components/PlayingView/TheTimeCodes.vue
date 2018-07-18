@@ -3,6 +3,7 @@
   <div class="timing" id="timing"
     @mousedown.stop="switchStateOfContent"
     @mouseover.stop="appearTimeCode"
+    @mousemove.stop="throttledCall"
     v-show="showTimeCode">
         <span class="firstContent" :class="{ remainTime: isRemainTime.first }">{{ content.first }}</span>
         <span class="splitSign">/</span>
@@ -12,6 +13,7 @@
 </template>;
 
 <script>
+import _ from 'lodash';
 
 export default {
   name: 'TimeCodes',
@@ -25,6 +27,7 @@ export default {
         CURRENT_REMAIN: 1,
         REMAIN_DURATION: 2,
       },
+      throttledCall: null,
     };
   },
   methods: {
@@ -38,6 +41,9 @@ export default {
     },
     hideTimeCode() {
       this.showTimeCode = false;
+    },
+    clearAllWidgetsTimeout() {
+      this.$bus.$emit('clearAllWidgetDisappearDelay');
     },
     $_clearTimeoutDelay() {
       if (this.timeoutIdOftimeCodeDisappearDelay !== 0) {
@@ -79,7 +85,7 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('timecode-appear', () => {
+    this.$bus.$on('timecode-appear-delay', () => {
       this.appearTimeCode();
       if (this.timeoutIdOftimeCodeDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOftimeCodeDisappearDelay);
@@ -90,9 +96,11 @@ export default {
           = setTimeout(this.hideTimeCode, 3000);
       }
     });
-    this.$bus.$on('timecode-hide', () => {
-      this.hideTimeCode();
-    });
+    this.$bus.$on('timecode-appear', this.appearTimeCode);
+    this.$bus.$on('timecode-hide', this.hideTimeCode);
+  },
+  beforeMount() {
+    this.throttledCall = _.throttle(this.clearAllWidgetsTimeout, 500);
   },
 };
 </script>
