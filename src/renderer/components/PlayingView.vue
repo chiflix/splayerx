@@ -8,12 +8,11 @@
       @mousedown.self="resetDraggingState"
       @mousedown.right.stop="handleRightClick"
       @mousedown.left.stop.prevent="handleLeftClick"
-      @mouseup.left.prevent="handleMouseUp"
+      @mouseup.left.prevent.self="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="hideAllWidgets"
-      @mousemove="handleMouseMove"
-      @mouseout.self="hideAllWidgets"
-      @dblclick.self="toggleFullScreenState">
+      @mousemove="throttledWakeUpCall"
+      @mouseenter="wakeUpAllWidgets">
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
@@ -26,6 +25,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
@@ -55,6 +55,12 @@ export default {
       cursorDelay: null,
       popupShow: false,
       mouseDown: false,
+      throttledWakeUpCall: null,
+      // the following 3 properties are used for checking if an event is a click or an dblclick
+      // during 200miliseconds, if a second click is detected, will toggle "FullScreen"
+      delay: 200, // changable and should be discussed.
+      clicks: 0,
+      timer: null,
     };
   },
   methods: {
@@ -114,21 +120,21 @@ export default {
       this.$bus.$emit('volumeslider-appear');
       if (e.deltaY < 0) {
         if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$store.commit(
-            'Volume',
+          this.$bus.$emit(
+            'volume',
             this.$store.state.PlaybackState.Volume + 0.1,
           );
         } else {
-          this.$store.commit('Volume', 1);
+          this.$bus.$emit('volume', 1);
         }
       } else if (e.deltaY > 0) {
         if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$store.commit(
-            'Volume',
+          this.$bus.$emit(
+            'volume',
             this.$store.state.PlaybackState.Volume - 0.1,
           );
         } else {
-          this.$store.commit('Volume', 0);
+          this.$bus.$emit('volume', 0);
         }
       }
     },
@@ -153,23 +159,26 @@ export default {
     },
     handleMouseUp() {
       this.mouseDown = false;
-      this.togglePlayback();
+      this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
+      if (this.clicks === 1) { // if one click has been detected - clicks === 1
+        const self = this; // define a constant "self" for the following scope to use
+        this.timer = setTimeout(() => { // define timer as setTimeOut function
+          self.togglePlayback(); // which is togglePlayback
+          self.clicks = 0; // reset the "clicks" to zero for next event
+        }, this.delay);
+      } else { // else, if a second click has been detected - clicks === 2
+        clearTimeout(this.timer); // cancel the time out
+        this.toggleFullScreenState();
+        this.clicks = 0;// reset the "clicks" to zero
+      }
     },
+  },
+  beforeMount() {
+    this.throttledWakeUpCall = _.throttle(this.wakeUpAllWidgets, 1000);
   },
   mounted() {
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
-    this.$bus.$on('twinkle-pause-icon', () => {
-      this.$refs.pauseIcon.style.animationPlayState = 'running';
-    });
-    this.$bus.$on('twinkle-play-icon', () => {
-      this.$refs.playIcon.style.animationPlayState = 'running';
-    });
-    if (process.platform === 'win32') {
-      document.querySelector('.application').style.borderRadius = 0;
-      document.querySelector('.video').style.borderRadius = 0;
-      document.querySelector('.video-controller').style.borderRadius = 0;
-    }
   },
   computed: {
     uri() {
