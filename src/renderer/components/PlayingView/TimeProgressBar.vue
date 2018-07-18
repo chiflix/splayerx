@@ -322,7 +322,7 @@ export default {
     },
   },
   created() {
-    window.addEventListener('resize', () => {
+    this.$electron.ipcRenderer.on('main-resize', () => {
       const widthOfWindow = this.winWidth;
       if (widthOfWindow < 845) {
         this.widthOfThumbnail = 136;
