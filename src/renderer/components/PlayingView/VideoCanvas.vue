@@ -307,7 +307,8 @@ export default {
         };
         // loadingTextTrack = true;
 
-        const readStream = fs.createReadStream(subPath).pipe(srt2vtt());
+        fs.createReadStream(subPath).pipe(srt2vtt()).pipe(fs.createWriteStream(`${filename}.vtt`));
+        const readStream = fs.createReadStream(`${filename}.vtt`);
         readStream
           .on('data', (chunk) => {
             parser.parse(chunk.toString('utf8'));
