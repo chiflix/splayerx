@@ -71,9 +71,11 @@ app.on('ready', () => {
   mainWindow.on('resize', () => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
     mainWindow.webContents.send('mainCommit', 'fullscreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('main-resize');
   });
   mainWindow.on('move', () => {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('main-move');
   });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
