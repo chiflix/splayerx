@@ -51,7 +51,7 @@ new Vue({
                   properties: ['openFile'],
                   filters: [{
                     name: 'Video Files',
-                    extensions: [], // ['mp4', 'mkv', 'mov'],
+                    extensions: [],
                   }],
                 }, (file) => {
                   if (file !== undefined) {
