@@ -65,13 +65,7 @@
 
 <script>
 import path from 'path';
-import grpc from 'grpc';
-import fs from 'fs';
-import sagiHealthMessages from 'sagi-apis-client/health/v1/health_pb';
-import sagiHealthServices from 'sagi-apis-client/health/v1/health_grpc_pb';
-
 import Titlebar from './Titlebar.vue';
-
 
 export default {
   name: 'landing-view',
@@ -127,23 +121,6 @@ export default {
       document.querySelector('.application').style.webkitAppRegion = 'no-drag';
       document.querySelector('.application').style.borderRadius = 0;
     }
-
-    const sslCreds = grpc.credentials.createSsl(
-      fs.readFileSync('@assets/certs/ca.pem'),
-      fs.readFileSync('@assets/certs/key.pem'),
-      fs.readFileSync('@assets/certs/cert.pem'),
-    );
-    const client = new sagiHealthServices.HealthClient(
-      'apis.sagittarius.ai:8443',
-      sslCreds,
-    );
-    const request = new sagiHealthMessages.HealthCheckRequest();
-
-    client.check(request, (err, response) => {
-      if (response) {
-        this.sagiHealthStatus = response.getStatus();
-      }
-    });
   },
   methods: {
     itemShortcut(shortCut) {
