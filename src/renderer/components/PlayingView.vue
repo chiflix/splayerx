@@ -8,11 +8,11 @@
       @mousedown.self="resetDraggingState"
       @mousedown.right.stop="handleRightClick"
       @mousedown.left.stop.prevent="handleLeftClick"
-      @mouseup.left.prevent="handleMouseUp"
+      @mouseup.left.prevent.self="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="hideAllWidgets"
-      @mousemove="handleMouseMove">
-
+      @mousemove="throttledWakeUpCall"
+      @mouseenter="wakeUpAllWidgets">
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
@@ -54,6 +55,7 @@ export default {
       cursorDelay: null,
       popupShow: false,
       mouseDown: false,
+      throttledWakeUpCall: null,
       // the following 3 properties are used for checking if an event is a click or an dblclick
       // during 200miliseconds, if a second click is detected, will toggle "FullScreen"
       delay: 200, // changable and should be discussed.
@@ -170,6 +172,9 @@ export default {
         this.clicks = 0;// reset the "clicks" to zero
       }
     },
+  },
+  beforeMount() {
+    this.throttledWakeUpCall = _.throttle(this.wakeUpAllWidgets, 1000);
   },
   mounted() {
     this.$bus.$emit('play');

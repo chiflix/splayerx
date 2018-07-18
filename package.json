@@ -73,6 +73,7 @@
     "electron-json-storage": "^4.1.0",
     "google-protobuf": "^3.6.0",
     "grpc": "^1.13.0",
+    "lodash": "^4.17.10",
     "module-alias": "^2.0.6",
     "npm": "^6.1.0",
     "sagi-apis-client": "^1.0.6",
