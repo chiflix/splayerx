@@ -8,7 +8,8 @@
           ref="thumbnailCanvas"
           :width=widthOfThumbnail
           :height=heightofThumbnail
-          v-if="videoStatus">
+          v-if="videoStatus"
+          v-show=false>
         </canvas>
         <video 
           preload="metadata"
@@ -18,9 +19,10 @@
           :width=widthOfThumbnail
           :height=heightofThumbnail
           :src="this.$store.state.PlaybackState.SrcOfVideo"
-          v-if="videoStatus">
+          v-if="videoStatus"
+          v-show=false>
         </video>
-        <img 
+        <img
           :width=widthOfThumbnail
           :height=heightofThumbnail
           :src="imageURL" />
@@ -62,22 +64,18 @@ export default {
         currentTime: 0,
         currentIndex: 0,
         thumbnailCount: 0,
-        thumbnailPace: 6,
+        thumbnailPace: 15,
       },
-      imageArray: [],
+      imageMap: new Map(),
       imageURL: null,
     };
   },
   watch: {
     currentTime(newValue) {
-      this.videoInfo.currentIndex = parseInt(newValue / this.videoInfo.thumbnailPace, 10);
-      const { currentIndex } = this.videoInfo;
-      this.videoInfo.currentTime = currentIndex * this.videoInfo.thumbnailPace;
-      if (!this.imageArray[currentIndex]) {
-        this.thumbnailVideo.currentTime = this.videoInfo.currentTime;
-        console.log('Array Image:', currentIndex, 'read!');
-      } else {
-        this.imageURL = this.imageArray[currentIndex];
+      const currentIndex = parseInt(newValue / this.videoInfo.thumbnailPace, 10);
+      // const currentTime = currentIndex * this.videoInfo.thumbnailPace;
+      if (this.imageMap.get(currentIndex)) {
+        this.imageURL = this.imageMap.get(currentIndex);
         console.log(`Horay! Number ${currentIndex} found!`);
       }
     },
@@ -92,6 +90,7 @@ export default {
     thumbnailCanvasInit() {
       this.thumbnailCanvas = this.$refs.thumbnailCanvas;
       this.thumbnailVideo = this.$refs.thumbnailVideo || document.querySelector('#thumbnailVideo');
+      this.imageMap = new Map();
     },
     videoInfoInit() {
       this.videoInfo.duration = parseInt(this.$refs.thumbnailVideo.duration, 10);
@@ -110,11 +109,10 @@ export default {
           0, 0, videoWidth, videoHeight,
           0, 0, this.widthOfThumbnail, this.heightofThumbnail,
         );
-        this.imageURL = this.thumbnailCanvas.toDataURL('image/webp', 0.92);
-        this.imageArray[currentIndex] = this.imageURL;
-        console.log('Array Image:', currentIndex, 'Saved');
+        this.imageMap.set(currentIndex, this.thumbnailCanvas.toDataURL('image/webp', 0.92));
+        // console.log('Array Image:', currentIndex, 'Saved');
       }
-      if (this.imageArray[currentIndex]
+      if (this.imageMap.get(currentIndex)
         && this.videoInfo.currentIndex < this.videoInfo.thumbnailCount) {
         this.videoInfo.currentIndex += 1;
         this.thumbnailVideo.currentTime
@@ -125,7 +123,7 @@ export default {
         this.$bus.$emit('thumbnail-load-finished');
         console.log('Horay!');
       }
-      console.log(`Video seeked at ${destTime} successfully!`);
+      // console.log(`Video seeked at ${destTime} successfully!`);
     },
   },
   mounted() {
@@ -134,6 +132,7 @@ export default {
     this.$bus.$on('thumbnail-load-finished', () => {
       this.videoStatus = false;
       this.thumbnailVideo.removeEventListener('seeked', this.getCurrentThumbnail);
+      console.log(this.imageMap);
     });
   },
 };
@@ -157,6 +156,7 @@ export default {
     position: absolute;
     width: 100%;
     text-align: center;
+    align-items: center;
   }
 }
 
