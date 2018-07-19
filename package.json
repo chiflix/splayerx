@@ -21,7 +21,7 @@
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js",
-    "postinstall": "npm run lint:fix"
+    "postinstall": "npm install grpc --runtime=electron --target=2.0.2 && npm run lint:fix"
   },
   "_moduleAliases": {
     "electron": "node_modules/@chiflix/electron"
@@ -71,9 +71,12 @@
   "dependencies": {
     "axios": "^0.18.0",
     "electron-json-storage": "^4.1.0",
+    "google-protobuf": "^3.6.0",
+    "grpc": "^1.13.0",
     "lodash": "^4.17.10",
     "module-alias": "^2.0.6",
     "npm": "^6.1.0",
+    "sagi-apis-client": "^1.0.6",
     "srt-to-vtt": "^1.1.2",
     "temp": "^0.8.3",
     "uuid": "^3.2.1",

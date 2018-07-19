@@ -36,6 +36,7 @@
     <div class="welcome">
       <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
       <div class="version">v {{ this.$electron.remote.app.getVersion() }}</div>
+      <div class="version">API Status: {{ sagiHealthStatus }} </div>
     </div>
     <div class="controller">
       <div class="playlist"
@@ -65,6 +66,7 @@
 <script>
 import path from 'path';
 import Titlebar from './Titlebar.vue';
+
 export default {
   name: 'landing-view',
   data() {
@@ -79,6 +81,7 @@ export default {
       isDragging: false,
       mouseDown: false,
       invalidTimeRepresentation: '--',
+      sagiHealthStatus: 'UNSET',
     };
   },
   components: {
@@ -113,6 +116,7 @@ export default {
         console.log(data);
       }
     });
+
     if (process.platform === 'win32') {
       document.querySelector('.application').style.webkitAppRegion = 'no-drag';
       document.querySelector('.application').style.borderRadius = 0;
