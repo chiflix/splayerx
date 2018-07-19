@@ -4,12 +4,26 @@
     <div class="screenshot-background"
       :style="{width: widthOfThumbnail + 2 + 'px'}">
       <div class="screenshot">
-        <video ref="thumbnailVideoCanvas"
+        <canvas
+          ref="thumbnailCanvas"
+          :width=widthOfThumbnail
+          :height=heightofThumbnail
+          v-if="videoStatus">
+        </canvas>
+        <video 
+          preload="metadata"
+          ref="thumbnailVideo"
+          id="thumbnailVideo"
           @loadedmetadata="onMetaLoaded"
           :width=widthOfThumbnail
-          :height=heightofScreenshot
-          :src="src">
+          :height=heightofThumbnail
+          :src="this.$store.state.PlaybackState.SrcOfVideo"
+          v-if="videoStatus">
         </video>
+        <img 
+          :width=widthOfThumbnail
+          :height=heightofThumbnail
+          :src="imageURL" />
         <div class="time">
           {{ screenshotContent }}
         </div>
@@ -34,22 +48,93 @@ export default {
     },
     positionOfScreenshot: Number,
     widthOfThumbnail: Number,
-    heightofScreenshot: Number,
+    heightofThumbnail: Number,
     screenshotContent: null,
     currentTime: Number,
   },
+  data() {
+    return {
+      videoStatus: true,
+      thumbnailCanvas: null,
+      thumbnailVideo: null,
+      videoInfo: {
+        duration: 0,
+        currentTime: 0,
+        currentIndex: 0,
+        thumbnailCount: 0,
+        thumbnailPace: 6,
+      },
+      imageArray: [],
+      imageURL: null,
+    };
+  },
   watch: {
     currentTime(newValue) {
-      this.$refs.thumbnailVideoCanvas.currentTime = newValue;
+      this.videoInfo.currentIndex = parseInt(newValue / this.videoInfo.thumbnailPace, 10);
+      const { currentIndex } = this.videoInfo;
+      this.videoInfo.currentTime = currentIndex * this.videoInfo.thumbnailPace;
+      if (!this.imageArray[currentIndex]) {
+        this.thumbnailVideo.currentTime = this.videoInfo.currentTime;
+        console.log('Array Image:', currentIndex, 'read!');
+      } else {
+        this.imageURL = this.imageArray[currentIndex];
+        console.log(`Horay! Number ${currentIndex} found!`);
+      }
     },
   },
   methods: {
     onMetaLoaded() {
-      this.$refs.thumbnailVideoCanvas.pause();
+      this.$refs.thumbnailVideo.pause();
+      this.$refs.thumbnailVideo.currentTime = this.videoInfo.currentTime = 0;
+      this.videoInfoInit();
+      this.thumbnailCanvasInit();
+    },
+    thumbnailCanvasInit() {
+      this.thumbnailCanvas = this.$refs.thumbnailCanvas;
+      this.thumbnailVideo = this.$refs.thumbnailVideo || document.querySelector('#thumbnailVideo');
+    },
+    videoInfoInit() {
+      this.videoInfo.duration = parseInt(this.$refs.thumbnailVideo.duration, 10);
+      this.videoInfo.thumbnailCount =
+      parseInt(this.videoInfo.duration / this.videoInfo.thumbnailPace, 10);
+      this.videoInfo.currentIndex = 0;
+    },
+    getCurrentThumbnail(event) {
+      const actualTime = event.target.currentTime;
+      const destTime = this.videoInfo.currentTime;
+      const { currentIndex } = this.videoInfo;
+      const { videoWidth, videoHeight } = document.querySelector('video');
+      if (actualTime === destTime) {
+        this.thumbnailCanvas.getContext('2d').drawImage(
+          this.thumbnailVideo,
+          0, 0, videoWidth, videoHeight,
+          0, 0, this.widthOfThumbnail, this.heightofThumbnail,
+        );
+        this.imageURL = this.thumbnailCanvas.toDataURL('image/webp', 0.92);
+        this.imageArray[currentIndex] = this.imageURL;
+        console.log('Array Image:', currentIndex, 'Saved');
+      }
+      if (this.imageArray[currentIndex]
+        && this.videoInfo.currentIndex < this.videoInfo.thumbnailCount) {
+        this.videoInfo.currentIndex += 1;
+        this.thumbnailVideo.currentTime
+        = this.videoInfo.currentTime
+        = this.videoInfo.currentIndex * this.videoInfo.thumbnailPace;
+      }
+      if (this.videoInfo.currentIndex === this.videoInfo.thumbnailCount) {
+        this.$bus.$emit('thumbnail-load-finished');
+        console.log('Horay!');
+      }
+      console.log(`Video seeked at ${destTime} successfully!`);
     },
   },
   mounted() {
-    this.$refs.thumbnailVideoCanvas.currentTime = this.currentTime;
+    this.thumbnailCanvasInit();
+    this.thumbnailVideo.addEventListener('seeked', this.getCurrentThumbnail);
+    this.$bus.$on('thumbnail-load-finished', () => {
+      this.videoStatus = false;
+      this.thumbnailVideo.removeEventListener('seeked', this.getCurrentThumbnail);
+    });
   },
 };
 </script>
