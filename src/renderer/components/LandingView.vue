@@ -69,6 +69,7 @@ export default {
   name: 'landing-view',
   data() {
     return {
+      sagiHealthStatus: 'UNSET',
       showingPopupDialog: false,
       lastPlayedFile: [],
       imageTurn: '',
@@ -102,7 +103,14 @@ export default {
       this.$electron.remote.getCurrentWindow().setResizable(false);
     }
 
-    console.log(app.getVersion(), app.getName());
+    this.sagi().healthCheck().then((status) => {
+      if (process.env.NODE_ENV !== 'production') {
+        this.sagiHealthStatus = status;
+        console.log(app.getName(), app.getVersion());
+        console.log(`sagi API Status: ${this.sagiHealthStatus}`);
+      }
+    });
+
 
     this.$storage.get('recent-played', (err, data) => {
       if (err) {
