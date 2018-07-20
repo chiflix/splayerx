@@ -323,10 +323,13 @@ export default {
 
       // If there is already subtitle files(same dir), load it
 
+      this.$_clearSubtitle();
+      console.log('heyyyyyyy');
       const files = [];
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         files.push(subPath);
       });
+
 
       const subNameArr = files.map((file, index) => this.$_subNameProcess(file, index));
       this.$store.commit('SubtitleNameArr', subNameArr);
@@ -351,7 +354,6 @@ export default {
           parser.onflush = () => {
             console.log('finished reading subtitle files');
             this.subStyleChange();
-            this.$_clearSubtitle();
             this.subtitleShow(startIndex);
           };
           const result = results[i];
@@ -455,12 +457,17 @@ export default {
       // write a same sub event to handle same subtitle situation
       textTrack.oncuechange = type === 'first' ? firstSubEvent : secondSubEvent;
     },
+    /**
+     * need to process subtitle init event
+     */
     $_clearSubtitle() {
       const vid = this.$refs.videoCanvas;
       const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
       const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
-      vid.textTracks[firstSubIndex].mode = 'disabled';
-      vid.textTracks[firstSubIndex].oncuechange = null;
+      if (vid.textTracks[firstSubIndex]) {
+        vid.textTracks[firstSubIndex].mode = 'disabled';
+        vid.textTracks[firstSubIndex].oncuechange = null;
+      }
       // 未设置第二字幕时，消除字幕的error handler
       if (secondSubIndex === -1) {
         console.log('second subtitle not set');
