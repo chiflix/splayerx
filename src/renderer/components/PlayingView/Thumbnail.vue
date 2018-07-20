@@ -65,6 +65,7 @@ export default {
         currentIndex: 0,
         thumbnailCount: 0,
         thumbnailPace: 15,
+        thumbnailQuality: 0.5,
       },
       imageMap: new Map(),
       imageURL: null,
@@ -109,8 +110,11 @@ export default {
           0, 0, videoWidth, videoHeight,
           0, 0, this.widthOfThumbnail, this.heightofThumbnail,
         );
-        this.imageMap.set(currentIndex, this.thumbnailCanvas.toDataURL('image/webp', 0.92));
+        this.imageMap.set(currentIndex, this.thumbnailCanvas.toDataURL('image/webp', this.videoInfo.thumbnailQuality));
         // console.log('Array Image:', currentIndex, 'Saved');
+      }
+      if (this.videoInfo.currentIndex === 0) {
+        console.log(`[Thumbnail]: Generation started at ${Date.now()}.`);
       }
       if (this.imageMap.get(currentIndex)
         && this.videoInfo.currentIndex < this.videoInfo.thumbnailCount) {
@@ -121,7 +125,9 @@ export default {
       }
       if (this.videoInfo.currentIndex === this.videoInfo.thumbnailCount) {
         this.$bus.$emit('thumbnail-load-finished');
-        console.log('Horay!');
+        console.log(`[Thumbnail]: Generation finished at ${Date.now()}.`);
+        console.log(`[Thumbnail]: A total of ${this.videoInfo.thumbnailCount} webp thumbnails of quality ${this.videoInfo.thumbnailQuality} generated.`);
+        console.log('[Thumbnail]:', this.videoInfo);
       }
       // console.log(`Video seeked at ${destTime} successfully!`);
     },
