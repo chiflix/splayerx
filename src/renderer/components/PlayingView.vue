@@ -11,8 +11,8 @@
       @mouseup.left.prevent.self="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="hideAllWidgets"
-      @mousemove="handleMouseMove">
-
+      @mousemove.self="throttledWakeUpCall"
+      @mouseenter="wakeUpAllWidgets">
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
@@ -25,6 +25,7 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
@@ -51,9 +52,10 @@ export default {
       isDragging: false,
       showMask: false,
       cursorShow: true,
-      cursorDelay: null,
       popupShow: false,
       mouseDown: false,
+      throttledWakeUpCall: null,
+      timeoutIdOfAllWidgetsDisappearDelay: Number,
       // the following 3 properties are used for checking if an event is a click or an dblclick
       // during 200miliseconds, if a second click is detected, will toggle "FullScreen"
       delay: 200, // changable and should be discussed.
@@ -72,29 +74,27 @@ export default {
         currentWindow.setFullScreen(true);
       }
     },
-    /**
-     * When the cursor shows, add a timeout function
-     * to hide the cursor. Each time the cursor moves,
-     * clear the timeout function and add a new one.
-     */
-    cursorDisplayControl() {
-      this.cursorShow = true;
-      clearTimeout(this.cursorDelay);
-      this.cursorDelay = setTimeout(() => {
-        this.cursorShow = false;
-      }, 3000);
-    },
     wakeUpAllWidgets() {
+      console.log('wakeup');
       this.showMask = true;
       this.isDragging = true;
-      this.cursorDisplayControl();
+      this.cursorShow = true;
       this.$bus.$emit('volumecontroller-appear');
       this.$bus.$emit('progressbar-appear');
       this.$bus.$emit('timecode-appear');
       this.$bus.$emit('sub-ctrl-appear');
       this.$bus.$emit('titlebar-appear');
+      if (this.timeoutIdOfAllWidgetsDisappearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
+        this.timeoutIdOfAllWidgetsDisappearDelay
+          = setTimeout(this.hideAllWidgets, 3000);
+      } else {
+        this.timeoutIdOfAllWidgetsDisappearDelay
+          = setTimeout(this.hideAllWidgets, 3000);
+      }
     },
     hideAllWidgets() {
+      console.log('leave');
       this.showMask = false;
       this.$bus.$emit('volumecontroller-hide');
       this.$bus.$emit('progressbar-hide');
@@ -104,6 +104,7 @@ export default {
       }
       this.$bus.$emit('sub-ctrl-hide');
       this.$bus.$emit('titlebar-hide');
+      this.cursorShow = false;
     },
     resetDraggingState() {
       this.isDragging = false;
@@ -114,7 +115,7 @@ export default {
       }
     },
     wheelVolumeControll(e) {
-      this.$bus.$emit('volumecontroller-appear');
+      this.$bus.$emit('volumecontroller-appear-delay');
       this.$bus.$emit('volumeslider-appear');
       if (e.deltaY < 0) {
         if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
@@ -171,9 +172,16 @@ export default {
       }
     },
   },
+  beforeMount() {
+    this.throttledWakeUpCall = _.throttle(this.wakeUpAllWidgets, 100);
+  },
   mounted() {
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
+    this.$bus.$on('clearAllWidgetDisappearDelay', () => {
+      console.log('clear');
+      clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
+    });
   },
   computed: {
     uri() {
