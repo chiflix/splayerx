@@ -112,9 +112,9 @@ export default {
     pauseThumbnailGeneration() {
       if (this.pauseDelay !== 0) {
         clearTimeout(this.pauseDelay);
-        this.pauseDelay = setTimeout(this.resumeThumbnailGeneration, 3500);
+        this.pauseDelay = setTimeout(this.resumeThumbnailGeneration, 4000);
       } else {
-        this.pauseDelay = setTimeout(this.resumeThumbnailGeneration, 3500);
+        this.pauseDelay = setTimeout(this.resumeThumbnailGeneration, 4000);
       }
     },
     resumeThumbnailGeneration() {
