@@ -24,6 +24,6 @@ describe('LandingView.vue', () => {
       render: h => h(LandingView),
     }).$mount();
 
-    expect(vm.$el.querySelector('.title').textContent).to.contain('SPlayer');
+    expect(vm.$el.querySelector('.title').textContent).contains('SPlayerX');
   });
 });
