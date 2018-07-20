@@ -4,7 +4,7 @@
   <div class="progress"
     @mouseover.stop.capture="appearProgressSlider"
     @mouseleave="hideProgressSlider"
-    @mousemove="onProgresssBarMove"
+    @mousemove="onProgressBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.left.stop="videoRestart"
@@ -19,7 +19,7 @@
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.winWidth - 20 + 'px'}"
-      @mousedown.left="onProgresssBarClick">
+      @mousedown.left="onProgressBarClick">
       <Thumbnail
         v-show="showScreenshot"
         :src=src
@@ -130,7 +130,7 @@ export default {
       this.$_resetRestartButton();
       this.$bus.$emit('seek', 0);
     },
-    onProgresssBarClick(e) {
+    onProgressBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return;
       }
@@ -150,7 +150,7 @@ export default {
      * This mousemove event only works when the cursor
      * is not at mouse down event.
      */
-    onProgresssBarMove(e) {
+    onProgressBarMove(e) {
       /**
        * TODO:
        * 1. 解决由于mousemove触发机制导致的进度条拖动效果不平滑
