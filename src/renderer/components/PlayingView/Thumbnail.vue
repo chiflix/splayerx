@@ -154,11 +154,11 @@ export default {
       if (this.autoGeneration) {
         destTime = autoGenerationIndex * pace;
         currentIndex = autoGenerationIndex;
-        console.log(`[Thumbnail]: Siwtched to auto generated index ${autoGenerationIndex}.`);
+        console.log(`[Thumbnail]: Switched to auto generated index ${autoGenerationIndex}.`);
       } else {
         destTime = manualGenerationIndex * pace;
         currentIndex = manualGenerationIndex;
-        console.log(`[Thumbnail]: Siwtched to manual generated index ${manualGenerationIndex}.`);
+        console.log(`[Thumbnail]: Switched to manual generated index ${manualGenerationIndex}.`);
       }
       if (destTime !== null && currentIndex !== null) {
         if (actualTime === destTime && !this.imageMap.get(currentIndex)) {
