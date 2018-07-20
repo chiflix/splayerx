@@ -141,7 +141,7 @@ export default {
   mounted() {
     this.$electron.ipcRenderer.on('main-resize', this.handleResize);
     this.$electron.ipcRenderer.on('main-move', this.setWindowInfo);
-    this.$bus.$on('titlebar-appear', () => {
+    this.$bus.$on('titlebar-appear-delay', () => {
       this.appearTitlebar();
       if (this.showTitlebar !== 0) {
         clearTimeout(this.titlebarDelay);
@@ -150,9 +150,8 @@ export default {
         this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
       }
     });
-    this.$bus.$on('titlebar-hide', () => {
-      this.hideTitlebar();
-    });
+    this.$bus.$on('titlebar-appear', this.appearTitlebar);
+    this.$bus.$on('titlebar-hide', this.hideTitlebar);
   },
   computed: {
     show() {

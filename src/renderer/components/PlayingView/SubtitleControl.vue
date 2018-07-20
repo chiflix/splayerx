@@ -109,7 +109,7 @@ export default {
   watch: {
   },
   created() {
-    this.$bus.$on('sub-ctrl-appear', () => {
+    this.$bus.$on('sub-ctrl-appear-delay', () => {
       this.subCtrlAppear();
       if (this.timeoutIdOfSubCtrlDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfSubCtrlDisappearDelay);
@@ -120,9 +120,8 @@ export default {
           = setTimeout(this.subCtrlHide, 3000);
       }
     });
-    this.$bus.$on('sub-ctrl-hide', () => {
-      this.subCtrlHide();
-    });
+    this.$bus.$on('sub-ctrl-appear', this.subCtrlAppear);
+    this.$bus.$on('sub-ctrl-hide', this.subCtrlHide);
   },
 };
 </script>

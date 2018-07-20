@@ -65,9 +65,7 @@ function createWindow() {
   });
 }
 
-app.on('ready', () => {
-  app.setName('SPlayerX');
-  createWindow();
+function initMainWindowEvent() {
   mainWindow.on('resize', () => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
     mainWindow.webContents.send('mainCommit', 'fullscreen', mainWindow.isFullScreen());
@@ -86,6 +84,12 @@ app.on('ready', () => {
     mainWindow.setPosition(...args);
     event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
   });
+}
+
+app.on('ready', () => {
+  app.setName('SPlayerX');
+  createWindow();
+  initMainWindowEvent();
 });
 
 app.on('window-all-closed', () => {
@@ -97,5 +101,6 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
+    initMainWindowEvent();
   }
 });
