@@ -11,7 +11,7 @@
           v-if="videoCanvasShow"
           v-show=false>
         </canvas>
-        <video 
+        <video
           preload="metadata"
           ref="thumbnailVideo"
           id="thumbnailVideo"
@@ -77,13 +77,16 @@ export default {
       imageURL: null, // temp variable for img src attribute
       manualGenerationIndex: 0, // isolated thumbnail index variable for manual generation
       // constants
-      MAX_THUMBNAIL_COUNT: 60, // max number of thumbnail generated
+      MAX_THUMBNAIL_COUNT: 600, // max number of thumbnail generated
       IMAGE_QUALITY: 0.5, // the quality of thumbnail images (only webp or jpeg type)
     };
   },
   watch: {
     currentTime(newValue) {
       this.setImageURL(newValue);
+    },
+    src() {
+      this.videoCanvasShow = true;
     },
   },
   methods: {
@@ -114,8 +117,10 @@ export default {
     thumbnailInfoInit() {
       this.thumbnailInfo.canvas = this.$refs.thumbnailCanvas;
       this.thumbnailInfo.video = this.$refs.thumbnailVideo || document.querySelector('#thumbnailVideo');
+      this.thumbnailInfo.video.addEventListener('seeked', this.thumbnailGeneration);
       this.thumbnailInfo.finished = false;
       this.imageMap = new Map();
+      this.$bus.$on('thumbnail-generation-paused', this.pauseAutoGeneration);
     },
     // Initialize video info
     videoInfoInit() {
@@ -209,10 +214,7 @@ export default {
       }
     },
   },
-  mounted() {
-    this.thumbnailInfoInit();
-    this.thumbnailInfo.video.addEventListener('seeked', this.thumbnailGeneration);
-    this.$bus.$on('thumbnail-generation-paused', this.pauseAutoGeneration);
+  created() {
     this.$bus.$on('thumbnail-generation-finished', () => {
       this.videoCanvasShow = false;
       this.$bus.$off('thumbnail-generation-paused', this.pauseAutoGeneration);
