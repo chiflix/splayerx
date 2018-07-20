@@ -2,7 +2,7 @@
   <transition name="fade" appear>
     <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
   <div class="progress"
-    @mouseover.stop.capture="appearProgressSlider"
+    @mouseover.stop="appearProgressSlider"
     @mouseleave="hideProgressSlider"
     @mousemove="onProgresssBarMove"
     v-show="showProgressBar">
@@ -18,7 +18,7 @@
         :style="{borderTopRightRadius: buttonRadius + 'px', borderBottomRightRadius: buttonRadius + 'px', width: buttonWidth + 'px'}"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
-      :style="{width: this.$electron.remote.getCurrentWindow().getSize()[0] - 20 + 'px'}"
+      :style="{width: this.winWidth - 20 + 'px'}"
       @mousedown.left="onProgresssBarClick">
       <Thumbnail
         v-if="showScreenshot"
@@ -99,6 +99,7 @@ export default {
   methods: {
     appearProgressSlider() {
       this.isOnProgress = true;
+      this.$bus.$emit('clearAllWidgetDisappearDelay');
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
@@ -245,8 +246,7 @@ export default {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return 0;
       }
-      const progressBarWidth = this.$electron.remote.getCurrentWindow().getSize()[0]
-        - FOOL_PROOFING_BAR_WIDTH;
+      const progressBarWidth = this.winWidth - FOOL_PROOFING_BAR_WIDTH;
       return (this.$store.state.PlaybackState.AccurateTime
         / this.$store.state.PlaybackState.Duration) * progressBarWidth;
     },
@@ -280,7 +280,7 @@ export default {
       return this.widthOfThumbnail / this.videoRatio;
     },
     positionOfScreenshot() {
-      const progressBarWidth = this.$electron.remote.getCurrentWindow().getSize()[0] - 20;
+      const progressBarWidth = this.winWidth - 20;
       const halfWidthOfScreenshot = this.widthOfThumbnail / 2;
       const minWidth = (this.widthOfThumbnail / 2) + 16;
       const maxWidth = progressBarWidth - 16;
@@ -294,6 +294,9 @@ export default {
     screenshotContent() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
         * this.$store.state.PlaybackState.Duration);
+    },
+    winWidth() {
+      return this.$store.getters.winWidth;
     },
   },
   watch: {
@@ -320,9 +323,8 @@ export default {
     },
   },
   created() {
-    this.$electron.remote.getCurrentWindow().on('resize', () => {
-      const widthOfWindow = this.$electron.remote.getCurrentWindow().getSize()[0];
-      console.log(widthOfWindow);
+    this.$electron.ipcRenderer.on('main-resize', () => {
+      const widthOfWindow = this.winWidth;
       if (widthOfWindow < 845) {
         this.widthOfThumbnail = 136;
       } else if (widthOfWindow < 1920) {
@@ -344,7 +346,7 @@ export default {
           = setTimeout(this.hideProgressBar, 3000);
       }
     });
-    this.$bus.$on('progressbar-appear', () => {
+    this.$bus.$on('progressbar-appear-delay', () => {
       this.appearProgressBar();
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
@@ -355,9 +357,8 @@ export default {
           = setTimeout(this.hideProgressBar, 3000);
       }
     });
-    this.$bus.$on('progressbar-hide', () => {
-      this.hideProgressBar();
-    });
+    this.$bus.$on('progressbar-appear', this.appearProgressBar);
+    this.$bus.$on('progressbar-hide', this.hideProgressBar);
     this.$bus.$on('screenshot-sizeset', (e) => {
       this.videoRatio = e;
     });

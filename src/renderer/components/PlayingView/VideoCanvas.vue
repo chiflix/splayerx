@@ -31,6 +31,7 @@ import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
 import path from 'path';
 // https://www.w3schools.com/tags/ref_av_dom.asp
+import parallel from 'run-parallel';
 
 export default {
   data() {
@@ -252,7 +253,45 @@ export default {
       });
       console.log('shortCut!');
     },
-
+    /**
+     * @param callback Has two parameters, err and result
+     * It is function that runs after all buffers are concated.
+     */
+    concatStream(stream, callback) {
+      const chunks = [];
+      stream.on('data', (chunk) => {
+        chunks.push(chunk);
+      });
+      stream.on('end', () => {
+        if (callback) {
+          callback(null, Buffer.concat(chunks));
+        }
+        callback = null;
+      });
+      stream.once('error', (err) => {
+        if (callback) {
+          callback(err);
+        }
+        callback = null;
+      });
+    },
+    $_subNameProcess(file, index) {
+      return {
+        title: path.parse(file).name,
+        index,
+      };
+    },
+    /**
+     * Todo:
+     * 1. process ass subtitles
+     * 2. second subtitle css
+     * 3. accept subtitle from drag event and menu
+     * 4. detect subtitle language
+     */
+    /**
+     * Load all available text tracks in the
+     * same path
+     */
     loadTextTracks() {
       /* TODO:
        * 字幕代码我自己觉得很不满意，期待更好的处理 - Tomasen
@@ -282,65 +321,59 @@ export default {
        * If there is no (chinese/default language) text track, try translate api
        */
 
-      // let loadingTextTrack = false;
-      // let shownTextTrack = false;
       // If there is already subtitle files(same dir), load it
+
+      this.$_clearSubtitle();
+      console.log('heyyyyyyy');
+      const files = [];
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
-        // console.log(subPath);
-        // Automatically track and cleanup files at exit
-        // temp.track();
-        // const stream = temp.createWriteStream({ suffix: '.vtt' });
-        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
-        const filename = path.parse(subPath).name;
-        const sub = vid.addTextTrack('subtitles', filename);
-        parser.oncue = (cue) => {
-          sub.addCue(cue);
-        };
-
-        sub.mode = 'disabled';
-        parser.onflush = () => {
-          if (!this.shownTextTrack) {
-            // sub.mode = 'showing';
-            this.shownTextTrack = true;
-            this.$bus.$emit('subtitle-loaded');
-          }
-        };
-        // loadingTextTrack = true;
-
-        const readStream = fs.createReadStream(subPath).pipe(srt2vtt());
-        readStream
-          .on('data', (chunk) => {
-            parser.parse(chunk.toString('utf8'));
-          })
-          .on('end', () => {
-            parser.flush();
-            console.log('finish reading srt');
-          });
+        files.push(subPath);
       });
 
 
-      // create our own text/subtitle track
-      // const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
+      const subNameArr = files.map((file, index) => this.$_subNameProcess(file, index));
+      this.$store.commit('SubtitleNameArr', subNameArr);
+      this.$bus.$emit('subName-loaded');
 
-      // if (process.env.NODE_ENV !== 'production') {
-      //   console.log(`loadingTextTrack ${loadingTextTrack}`);
-      //   if (!loadingTextTrack) {
-      //     // Loading subtitle test
-      //     const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
-      //     sub0.addCue(cue0);
-      //     sub0.mode = 'showing';
-      //   }
-      // }
-      this.subStyleChange();
-      // 需要消除之前的字幕
-      this.$_clearSubtitle();
-      this.subtitleShow(startIndex, 'first');
-      this.$_loadSubNameArr();
+      /**
+       * Referenced from WebTorrent
+       */
+      /* eslint-disable arrow-parens */
+      const tasks = files.map((subPath) => (cb) => this.subPathProcess(subPath, cb));
+      parallel(tasks, (err, results) => {
+        if (err) {
+          console.error(err);
+        }
+        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+        for (let i = 0; i < results.length; i += 1) {
+          const sub = vid.addTextTrack('subtitles');
+          sub.mode = 'disabled';
+          parser.oncue = (cue) => {
+            sub.addCue(cue);
+          };
+          parser.onflush = () => {
+            console.log('finished reading subtitle files');
+            this.subStyleChange();
+            this.subtitleShow(startIndex);
+          };
+          const result = results[i];
+          parser.parse(result.toString('utf8'));
+        }
+        parser.flush();
+      });
+    },
+    subPathProcess(subPath, cb) {
+      const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
+      this.concatStream(vttStream, (err, buf) => {
+        if (err) {
+          console.error(err);
+        }
+        cb(null, buf);
+      });
     },
     // 待改善函数结构
     // 判断重合情况
-    // 主字幕与副字幕选择同一个字幕情况下，是消去一个字幕还是保持上次的结果？
-    subtitleShow(index, type) {
+    subtitleShow(index, type = 'first') {
       const vid = this.$refs.videoCanvas;
       if (type === 'first') {
         // 当直接播放无字幕视频时，会报错,需要error handle
@@ -409,22 +442,6 @@ export default {
       };
     },
     /**
-     * 不需要这么麻烦，可以直接在loadTextTrack中获得字幕文件名，
-     * 存入数组中后commit, 需要对index进行处理.
-     */
-    $_loadSubNameArr() {
-      const vid = this.$refs.videoCanvas;
-      const subNameARR = [];
-      const startIndex = this.$store.state.PlaybackState.StartIndex;
-      for (let i = startIndex; i < vid.textTracks.length; i += 1) {
-        subNameARR.push({
-          title: vid.textTracks[i].label,
-          index: i - startIndex,
-        });
-      }
-      this.$store.commit('SubtitleNameArr', subNameARR);
-    },
-    /**
      * @param textTrack target textTrack
      * @param type choose first or second subtitle
      */
@@ -440,12 +457,17 @@ export default {
       // write a same sub event to handle same subtitle situation
       textTrack.oncuechange = type === 'first' ? firstSubEvent : secondSubEvent;
     },
+    /**
+     * need to process subtitle init event
+     */
     $_clearSubtitle() {
       const vid = this.$refs.videoCanvas;
       const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
       const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
-      vid.textTracks[firstSubIndex].mode = 'disabled';
-      vid.textTracks[firstSubIndex].oncuechange = null;
+      if (vid.textTracks[firstSubIndex]) {
+        vid.textTracks[firstSubIndex].mode = 'disabled';
+        vid.textTracks[firstSubIndex].oncuechange = null;
+      }
       // 未设置第二字幕时，消除字幕的error handler
       if (secondSubIndex === -1) {
         console.log('second subtitle not set');

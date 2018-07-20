@@ -1,9 +1,11 @@
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import Sagi from './sagi';
 
 export default {
   methods: {
+    sagi() { return Sagi; },
     timecodeFromSeconds(s) {
       const dt = new Date(Math.abs(s) * 1000);
       let hours = dt.getUTCHours();
