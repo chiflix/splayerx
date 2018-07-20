@@ -1,9 +1,8 @@
 import Vue from 'vue';
 import PlayButton from '@/components/PlayingView/PlayButton';
-import { mount } from '../../../node_modules/@vue/test-utils';
+import { mount } from '@vue/test-utils';
 
 describe('PlayButton.vue', () => {
-  // Vue.prototype.$bus = new Vue(); // Global event bus
 
   it('correct data when mounted', () => {
     const wrapper = mount(PlayButton);

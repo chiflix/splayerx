@@ -1,8 +1,8 @@
 import Vuex from 'vuex';
 import PlaybackState from '@/store/modules/PlaybackState';
 import VolumeControl from '@/components/PlayingView/VolumeControl';
-import { shallowMount, createLocalVue } from '../../../node_modules/@vue/test-utils';
-import sinon from '../../../node_modules/sinon';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import sinon from 'sinon';
 
 // 这两行是必须的 for testing with Vuex
 const localVue = createLocalVue();
@@ -37,23 +37,24 @@ describe('VolumnColtrol.vue', () => {
     const wrapper = shallowMount(VolumeControl, { store, localVue });
     wrapper.vm.onVolumeButtonClick();
     expect(wrapper.vm.currentVolume).equal(20);
-  }); // 测试emit的写法在下面被注释掉了，需要研究
+  });
 
-  // it('onVolumeButtonClick method works fine', (done) => {
-  //   const wrapper = shallowMount(VolumeControl, { store, localVue });
-  //   var eventFired = false
-  //   setTimeout( () => {
-  //     expect(wrapper.emitted('volume')).equal(undefined);
-  //     expect(wrapper.emitted('volume')).equal(undefined);
-  //     done();
-  //   },1000);
-  //   wrapper.vm.$on('volume',() => {
-  //     eventFired = true
-  //   });
-  //   wrapper.vm.onVolumeButtonClick();
-  //   expect(wrapper.vm.currentVolume).equal(20);
-  // });
-
+  /* 测试 eventbus中emit和on的写法，需要研究
+  it('onVolumeButtonClick method works fine', (done) => {
+    const wrapper = shallowMount(VolumeControl, { store, localVue });
+    var eventFired = false
+    setTimeout( () => {
+      expect(wrapper.emitted('volume')).equal(undefined);
+      expect(wrapper.emitted('volume')).equal(undefined);
+      done();
+    },1000);
+    wrapper.vm.$on('volume',() => {
+      eventFired = true
+    });
+    wrapper.vm.onVolumeButtonClick();
+    expect(wrapper.vm.currentVolume).equal(20);
+  });
+  */
 
   it('appearVolumeSlider method works fine', () => {
     const wrapper = shallowMount(VolumeControl, { store, localVue });
