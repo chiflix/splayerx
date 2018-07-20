@@ -64,6 +64,7 @@ export default {
         duration: null, // duration of the video loaded
         currentTime: 0, // video time of current auto-generation process
         currentIndex: 0, // index of current auto-generated thumbnail
+        lastIndex: 0,
       },
       thumbnailInfo: {
         canvas: null, // reference of thumbnail canvas element
@@ -201,7 +202,11 @@ export default {
     setImageURL(newValue) {
       let currentIndex = parseInt(newValue / this.thumbnailInfo.generationInterval, 10);
       const currentTime = currentIndex * this.thumbnailInfo.generationInterval;
+      if (currentIndex === this.videoInfo.lastIndex && currentIndex !== 0) {
+        return;
+      }
       if (this.imageMap.get(currentIndex)) {
+        console.log(`Image ${currentIndex} set!`);
         this.imageURL = this.imageMap.get(currentIndex);
         console.log(`Horay! Number ${currentIndex} found!`);
       } else if (!this.thumbnailInfo.finished) {
@@ -212,6 +217,7 @@ export default {
       } else if (currentIndex >= this.imageMap.length) {
         currentIndex = this.imageMap.length - 1;
       }
+      this.videoInfo.lastIndex = currentIndex;
     },
   },
   created() {
