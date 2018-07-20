@@ -252,7 +252,29 @@ export default {
       });
       console.log('shortCut!');
     },
-
+    /**
+     * @param callback Has two parameters, err and result
+     * It is function that runs after all buffers are concated.
+     */
+    concatStream(stream, callback) {
+      const chunks = [];
+      stream.on('data', (chunk) => {
+        chunks.push(chunk);
+      });
+      stream.on('end', () => {
+        if (callback) callback(null, Buffer.concat(chunks));
+        callback = null;
+      });
+      stream.once('error', (err) => {
+        if (callback) callback(err);
+        callback = null;
+      });
+    },
+    /**
+     * Todo:
+     * 1. Rewrite loadSubNameArray
+     * 2. Use parallel to improve the speed of loading subtitles
+     */
     loadTextTracks() {
       /* TODO:
        * 字幕代码我自己觉得很不满意，期待更好的处理 - Tomasen
@@ -286,52 +308,23 @@ export default {
       // let shownTextTrack = false;
       // If there is already subtitle files(same dir), load it
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
-        // console.log(subPath);
-        // Automatically track and cleanup files at exit
-        // temp.track();
-        // const stream = temp.createWriteStream({ suffix: '.vtt' });
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         const filename = path.parse(subPath).name;
         const sub = vid.addTextTrack('subtitles', filename);
+        sub.mode = 'disabled';
         parser.oncue = (cue) => {
           sub.addCue(cue);
         };
-
-        sub.mode = 'disabled';
         parser.onflush = () => {
-          if (!this.shownTextTrack) {
-            // sub.mode = 'showing';
-            this.shownTextTrack = true;
-            this.$bus.$emit('subtitle-loaded');
-          }
+          this.$bus.$emit('subtitle-loaded');
         };
-        // loadingTextTrack = true;
-
-        fs.createReadStream(subPath).pipe(srt2vtt()).pipe(fs.createWriteStream(`${filename}.vtt`));
-        const readStream = fs.createReadStream(`${filename}.vtt`);
-        readStream
-          .on('data', (chunk) => {
-            parser.parse(chunk.toString('utf8'));
-          })
-          .on('end', () => {
-            parser.flush();
-            console.log('finish reading srt');
-          });
+        const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
+        this.concatStream(vttStream, (err, buf) => {
+          if (err) console.log(err);
+          parser.parse(buf.toString('utf8'));
+          parser.flush();
+        });
       });
-
-
-      // create our own text/subtitle track
-      // const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
-
-      // if (process.env.NODE_ENV !== 'production') {
-      //   console.log(`loadingTextTrack ${loadingTextTrack}`);
-      //   if (!loadingTextTrack) {
-      //     // Loading subtitle test
-      //     const cue0 = new VTTCue(0, 30000, '字幕测试 Subtitle Test');
-      //     sub0.addCue(cue0);
-      //     sub0.mode = 'showing';
-      //   }
-      // }
       this.subStyleChange();
       // 需要消除之前的字幕
       this.$_clearSubtitle();
@@ -340,7 +333,6 @@ export default {
     },
     // 待改善函数结构
     // 判断重合情况
-    // 主字幕与副字幕选择同一个字幕情况下，是消去一个字幕还是保持上次的结果？
     subtitleShow(index, type) {
       const vid = this.$refs.videoCanvas;
       if (type === 'first') {
