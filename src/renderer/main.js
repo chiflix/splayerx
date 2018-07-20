@@ -51,7 +51,7 @@ new Vue({
                   properties: ['openFile'],
                   filters: [{
                     name: 'Video Files',
-                    extensions: ['mp4', 'mkv', 'mov'],
+                    extensions: [],
                   }],
                 }, (file) => {
                   if (file !== undefined) {
@@ -341,7 +341,7 @@ new Vue({
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowUp':
-          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumecontroller-appear-delay');
           this.$bus.$emit('volumeslider-appear');
           if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
             this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
@@ -351,7 +351,7 @@ new Vue({
           break;
 
         case 'ArrowDown':
-          this.$bus.$emit('volumecontroller-appear');
+          this.$bus.$emit('volumecontroller-appear-delay');
           this.$bus.$emit('volumeslider-appear');
           if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
             this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
@@ -361,9 +361,9 @@ new Vue({
           break;
 
         case 'ArrowLeft':
-          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressbar-appear-delay');
           this.$bus.$emit('progressslider-appear');
-          this.$bus.$emit('timecode-appear');
+          this.$bus.$emit('timecode-appear-delay');
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
           } else {
@@ -372,9 +372,9 @@ new Vue({
           break;
 
         case 'ArrowRight':
-          this.$bus.$emit('progressbar-appear');
+          this.$bus.$emit('progressbar-appear-delay');
           this.$bus.$emit('progressslider-appear');
-          this.$bus.$emit('timecode-appear');
+          this.$bus.$emit('timecode-appear-delay');
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
           } else {

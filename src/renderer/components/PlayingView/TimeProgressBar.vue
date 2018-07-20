@@ -2,7 +2,7 @@
   <transition name="fade" appear>
     <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
   <div class="progress"
-    @mouseover.stop.capture="appearProgressSlider"
+    @mouseover.stop="appearProgressSlider"
     @mouseleave="hideProgressSlider"
     @mousemove="onProgressBarMove"
     v-show="showProgressBar">
@@ -99,6 +99,7 @@ export default {
   methods: {
     appearProgressSlider() {
       this.isOnProgress = true;
+      this.$bus.$emit('clearAllWidgetDisappearDelay');
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
@@ -346,7 +347,7 @@ export default {
           = setTimeout(this.hideProgressBar, 3000);
       }
     });
-    this.$bus.$on('progressbar-appear', () => {
+    this.$bus.$on('progressbar-appear-delay', () => {
       this.appearProgressBar();
       if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
@@ -357,9 +358,8 @@ export default {
           = setTimeout(this.hideProgressBar, 3000);
       }
     });
-    this.$bus.$on('progressbar-hide', () => {
-      this.hideProgressBar();
-    });
+    this.$bus.$on('progressbar-appear', this.appearProgressBar);
+    this.$bus.$on('progressbar-hide', this.hideProgressBar);
     this.$bus.$on('screenshot-sizeset', (e) => {
       this.videoRatio = e;
     });
