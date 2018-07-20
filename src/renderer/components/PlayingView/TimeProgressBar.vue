@@ -21,11 +21,11 @@
       :style="{width: this.winWidth - 20 + 'px'}"
       @mousedown.left="onProgresssBarClick">
       <Thumbnail
-        v-if="showScreenshot"
+        v-show="showScreenshot"
         :src=src
         :positionOfScreenshot="positionOfScreenshot"
         :widthOfThumbnail="widthOfThumbnail"
-        :heightofScreenshot="heightofScreenshot"
+        :heightOfThumbnail="heightOfThumbnail"
         :screenshotContent="screenshotContent"
         :currentTime="thumbnailCurrentTime"/>
         <!-- translate优化 -->
@@ -275,7 +275,7 @@ export default {
       }
       return 0.9;
     },
-    heightofScreenshot() {
+    heightOfThumbnail() {
       return this.widthOfThumbnail / this.videoRatio;
     },
     positionOfScreenshot() {
@@ -331,6 +331,7 @@ export default {
       } else {
         this.widthOfThumbnail = 240;
       }
+      console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
     });
     this.$bus.$on('progressslider-appear', () => {
       this.showScreenshot = false;

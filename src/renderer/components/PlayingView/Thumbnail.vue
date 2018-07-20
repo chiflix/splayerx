@@ -7,7 +7,7 @@
         <canvas
           ref="thumbnailCanvas"
           :width=widthOfThumbnail
-          :height=heightofThumbnail
+          :height=heightOfThumbnail
           v-if="videoStatus"
           v-show=false>
         </canvas>
@@ -17,7 +17,7 @@
           id="thumbnailVideo"
           @loadedmetadata="onMetaLoaded"
           :width=widthOfThumbnail
-          :height=heightofThumbnail
+          :height=heightOfThumbnail
           :src="this.$store.state.PlaybackState.SrcOfVideo"
           v-if="videoStatus"
           v-show="thumbnailGenerationPause">
@@ -25,7 +25,7 @@
         <img
           v-show="!thumbnailGenerationPause"
           :width=widthOfThumbnail
-          :height=heightofThumbnail
+          :height=heightOfThumbnail
           :src="imageURL" />
         <div class="time">
           {{ screenshotContent }}
@@ -51,7 +51,7 @@ export default {
     },
     positionOfScreenshot: Number,
     widthOfThumbnail: Number,
-    heightofThumbnail: Number,
+    heightOfThumbnail: Number,
     screenshotContent: null,
     currentTime: Number,
   },
@@ -131,7 +131,7 @@ export default {
           this.thumbnailCanvas.getContext('2d').drawImage(
             this.thumbnailVideo,
             0, 0, videoWidth, videoHeight,
-            0, 0, this.widthOfThumbnail, this.heightofThumbnail,
+            0, 0, this.widthOfThumbnail, this.heightOfThumbnail,
           );
           this.imageMap.set(currentIndex, this.thumbnailCanvas.toDataURL('image/webp', this.videoInfo.thumbnailQuality));
           console.log(`[Thumbnail]: No.${currentIndex} image generated!`);
