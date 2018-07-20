@@ -20,9 +20,10 @@
           :height=heightofThumbnail
           :src="this.$store.state.PlaybackState.SrcOfVideo"
           v-if="videoStatus"
-          v-show=false>
+          v-show="thumbnailGenerationPause">
         </video>
         <img
+          v-show="!thumbnailGenerationPause"
           :width=widthOfThumbnail
           :height=heightofThumbnail
           :src="imageURL" />
@@ -57,6 +58,8 @@ export default {
   data() {
     return {
       videoStatus: true,
+      thumbnailGenerationPause: false,
+      pauseDelay: 0,
       thumbnailCanvas: null,
       thumbnailVideo: null,
       videoInfo: {
@@ -74,17 +77,20 @@ export default {
   watch: {
     currentTime(newValue) {
       const currentIndex = parseInt(newValue / this.videoInfo.thumbnailPace, 10);
-      // const currentTime = currentIndex * this.videoInfo.thumbnailPace;
+      const currentTime = currentIndex * this.videoInfo.thumbnailPace;
       if (this.imageMap.get(currentIndex)) {
         this.imageURL = this.imageMap.get(currentIndex);
         console.log(`Horay! Number ${currentIndex} found!`);
+      } else {
+        this.thumbnailGenerationPause = true;
+        this.$bus.$emit('thumbnail-generation-paused');
+        this.thumbnailVideo.currentTime = currentTime;
       }
     },
   },
   methods: {
     onMetaLoaded() {
       this.$refs.thumbnailVideo.pause();
-      this.$refs.thumbnailVideo.currentTime = this.videoInfo.currentTime = 0;
       this.videoInfoInit();
       this.thumbnailCanvasInit();
     },
@@ -99,45 +105,67 @@ export default {
       parseInt(this.videoInfo.duration / this.videoInfo.thumbnailPace, 10);
       this.videoInfo.currentIndex = 0;
     },
+    pauseThumbnailGeneration() {
+      if (this.pauseDelay !== 0) {
+        clearTimeout(this.pauseDelay);
+        this.pauseDelay = setTimeout(this.resumeThumbnailGeneration, 3500);
+      } else {
+        this.pauseDelay = setTimeout(this.resumeThumbnailGeneration, 3500);
+      }
+    },
+    resumeThumbnailGeneration() {
+      this.thumbnailGenerationPause = false;
+      console.log('[Thumbnail]: Thumbnail generation resumed!');
+      console.log(`[Thumbnail]: Current index is ${this.videoInfo.currentIndex}.`);
+      console.log(`[Thumbnail]: Set current time to ${this.videoInfo.currentTime}.`);
+      this.thumbnailVideo.currentTime = this.videoInfo.currentIndex * this.videoInfo.thumbnailPace;
+      console.log(`[Thumbnail]: Actual video current time is ${this.thumbnailVideo.currentTime}.`);
+    },
     getCurrentThumbnail(event) {
       const actualTime = event.target.currentTime;
       const destTime = this.videoInfo.currentTime;
       const { currentIndex } = this.videoInfo;
       const { videoWidth, videoHeight } = document.querySelector('video');
-      if (actualTime === destTime) {
-        this.thumbnailCanvas.getContext('2d').drawImage(
-          this.thumbnailVideo,
-          0, 0, videoWidth, videoHeight,
-          0, 0, this.widthOfThumbnail, this.heightofThumbnail,
-        );
-        this.imageMap.set(currentIndex, this.thumbnailCanvas.toDataURL('image/webp', this.videoInfo.thumbnailQuality));
-        // console.log('Array Image:', currentIndex, 'Saved');
+      if (!this.thumbnailGenerationPause) {
+        if (actualTime === destTime) {
+          this.thumbnailCanvas.getContext('2d').drawImage(
+            this.thumbnailVideo,
+            0, 0, videoWidth, videoHeight,
+            0, 0, this.widthOfThumbnail, this.heightofThumbnail,
+          );
+          this.imageMap.set(currentIndex, this.thumbnailCanvas.toDataURL('image/webp', this.videoInfo.thumbnailQuality));
+          console.log(`[Thumbnail]: No.${currentIndex} image generated!`);
+        }
+        if (this.videoInfo.currentIndex === 0) {
+          console.log(`[Thumbnail]: Generation started at ${Date.now()}.`);
+        }
+        if (this.imageMap.get(currentIndex)
+          && this.videoInfo.currentIndex < this.videoInfo.thumbnailCount) {
+          this.videoInfo.currentIndex += 1;
+          this.thumbnailVideo.currentTime
+          = this.videoInfo.currentTime
+          = this.videoInfo.currentIndex * this.videoInfo.thumbnailPace;
+        }
+        if (this.videoInfo.currentIndex === this.videoInfo.thumbnailCount) {
+          this.$bus.$emit('thumbnail-load-finished');
+          console.log(`[Thumbnail]: Generation finished at ${Date.now()}.`);
+          console.log(`[Thumbnail]: A total of ${this.videoInfo.thumbnailCount} webp thumbnails of quality ${this.videoInfo.thumbnailQuality} generated.`);
+          console.log('[Thumbnail]:', this.videoInfo, this.imageMap);
+          this.thumbnailVideo.removeEventListener('seeked', this.getCurrentThumbnail);
+        }
+        // console.log(`Video seeked at ${destTime} successfully!`);
+      } else {
+        console.log('[Thumbnail]: Generation paused!');
       }
-      if (this.videoInfo.currentIndex === 0) {
-        console.log(`[Thumbnail]: Generation started at ${Date.now()}.`);
-      }
-      if (this.imageMap.get(currentIndex)
-        && this.videoInfo.currentIndex < this.videoInfo.thumbnailCount) {
-        this.videoInfo.currentIndex += 1;
-        this.thumbnailVideo.currentTime
-        = this.videoInfo.currentTime
-        = this.videoInfo.currentIndex * this.videoInfo.thumbnailPace;
-      }
-      if (this.videoInfo.currentIndex === this.videoInfo.thumbnailCount) {
-        this.$bus.$emit('thumbnail-load-finished');
-        console.log(`[Thumbnail]: Generation finished at ${Date.now()}.`);
-        console.log(`[Thumbnail]: A total of ${this.videoInfo.thumbnailCount} webp thumbnails of quality ${this.videoInfo.thumbnailQuality} generated.`);
-        console.log('[Thumbnail]:', this.videoInfo);
-      }
-      // console.log(`Video seeked at ${destTime} successfully!`);
     },
   },
   mounted() {
     this.thumbnailCanvasInit();
     this.thumbnailVideo.addEventListener('seeked', this.getCurrentThumbnail);
-    this.$bus.$on('thumbnail-load-finished', () => {
+    this.$bus.$on('thumbnail-generation-paused', this.pauseThumbnailGeneration);
+    this.$bus.$on('thumbnail-generation-finished', () => {
       this.videoStatus = false;
-      this.thumbnailVideo.removeEventListener('seeked', this.getCurrentThumbnail);
+      this.$bus.$off('thumbnail-generation-paused', this.pauseThumbnailGeneration);
       console.log(this.imageMap);
     });
   },
