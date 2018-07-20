@@ -82,17 +82,7 @@ export default {
   },
   watch: {
     currentTime(newValue) {
-      const currentIndex = parseInt(newValue / this.thumbnailInfo.generationInterval, 10);
-      const currentTime = currentIndex * this.thumbnailInfo.generationInterval;
-      if (this.imageMap.get(currentIndex)) {
-        this.imageURL = this.imageMap.get(currentIndex);
-        console.log(`Horay! Number ${currentIndex} found!`);
-      } else {
-        this.autoGeneration = false;
-        this.$bus.$emit('thumbnail-generation-paused');
-        this.thumbnailInfo.video.currentTime = currentTime;
-        this.manualGenerationIndex = currentIndex;
-      }
+      this.setImageURL(newValue);
     },
   },
   methods: {
@@ -136,13 +126,14 @@ export default {
     pauseAutoGeneration() {
       if (this.autoGenerationDelay !== 0) {
         clearTimeout(this.autoGenerationDelay);
-        this.autoGenerationDelay = setTimeout(this.resumeAutoGeneration, 4000);
+        this.autoGenerationDelay = setTimeout(this.resumeAutoGeneration, 1000);
       } else {
-        this.autoGenerationDelay = setTimeout(this.resumeAutoGeneration, 4000);
+        this.autoGenerationDelay = setTimeout(this.resumeAutoGeneration, 1000);
       }
     },
     // Function to resume thumbnail auto generation
     resumeAutoGeneration() {
+      this.setImageURL(this.thumbnailInfo.video.currentTime);
       this.autoGeneration = true;
       console.log('[Thumbnail]: Thumbnail generation resumed!');
       console.log(`[Thumbnail]: Current index is ${this.videoInfo.currentIndex}.`);
@@ -197,6 +188,20 @@ export default {
           console.log('[Thumbnail]:', this.videoInfo, this.imageMap);
           this.thumbnailInfo.video.removeEventListener('seeked', this.thumbnailGeneration);
         }
+      }
+    },
+    // set imageURL
+    setImageURL(newValue) {
+      const currentIndex = parseInt(newValue / this.thumbnailInfo.generationInterval, 10);
+      const currentTime = currentIndex * this.thumbnailInfo.generationInterval;
+      if (this.imageMap.get(currentIndex)) {
+        this.imageURL = this.imageMap.get(currentIndex);
+        console.log(`Horay! Number ${currentIndex} found!`);
+      } else {
+        this.autoGeneration = false;
+        this.$bus.$emit('thumbnail-generation-paused');
+        this.thumbnailInfo.video.currentTime = currentTime;
+        this.manualGenerationIndex = currentIndex;
       }
     },
   },
