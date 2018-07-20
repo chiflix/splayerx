@@ -74,6 +74,7 @@
     "lodash": "^4.17.10",
     "module-alias": "^2.0.6",
     "npm": "^6.1.0",
+    "run-parallel": "^1.1.9",
     "srt-to-vtt": "^1.1.2",
     "temp": "^0.8.3",
     "uuid": "^3.2.1",

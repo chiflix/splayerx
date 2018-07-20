@@ -31,6 +31,7 @@ import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
 import path from 'path';
 // https://www.w3schools.com/tags/ref_av_dom.asp
+import parallel from 'run-parallel';
 
 export default {
   data() {
@@ -270,10 +271,22 @@ export default {
         callback = null;
       });
     },
+    $_subNameProcess(file, index) {
+      return {
+        title: path.parse(file).name,
+        index,
+      };
+    },
     /**
      * Todo:
-     * 1. Rewrite loadSubNameArray
-     * 2. Use parallel to improve the speed of loading subtitles
+     * 1. process ass subtitles
+     * 2. second subtitle css
+     * 3. accept subtitle from drag event and menu
+     * 4. detect subtitle language
+     */
+    /**
+     * Load all available text tracks in the
+     * same path
      */
     loadTextTracks() {
       /* TODO:
@@ -304,36 +317,54 @@ export default {
        * If there is no (chinese/default language) text track, try translate api
        */
 
-      // let loadingTextTrack = false;
-      // let shownTextTrack = false;
       // If there is already subtitle files(same dir), load it
+
+      const files = [];
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
-        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
-        const filename = path.parse(subPath).name;
-        const sub = vid.addTextTrack('subtitles', filename);
-        sub.mode = 'disabled';
-        parser.oncue = (cue) => {
-          sub.addCue(cue);
-        };
-        parser.onflush = () => {
-          this.$bus.$emit('subtitle-loaded');
-        };
-        const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
-        this.concatStream(vttStream, (err, buf) => {
-          if (err) console.log(err);
-          parser.parse(buf.toString('utf8'));
-          parser.flush();
-        });
+        files.push(subPath);
       });
-      this.subStyleChange();
-      // 需要消除之前的字幕
-      this.$_clearSubtitle();
-      this.subtitleShow(startIndex, 'first');
-      this.$_loadSubNameArr();
+
+      const subNameArr = files.map((file, index) => this.$_subNameProcess(file, index));
+      this.$store.commit('SubtitleNameArr', subNameArr);
+      this.$bus.$emit('subName-loaded');
+
+      /* eslint-disable arrow-parens */
+      const tasks = files.map((subPath) => (cb) => this.subPathProcess(subPath, cb));
+      parallel(tasks, (err, results) => {
+        if (err) {
+          console.error(err);
+        }
+        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+        for (let i = 0; i < results.length; i += 1) {
+          const sub = vid.addTextTrack('subtitles');
+          sub.mode = 'disabled';
+          parser.oncue = (cue) => {
+            sub.addCue(cue);
+          };
+          parser.onflush = () => {
+            console.log('finished reading subtitle files');
+            this.subStyleChange();
+            this.$_clearSubtitle();
+            this.subtitleShow(startIndex);
+          };
+          const result = results[i];
+          parser.parse(result.toString('utf8'));
+        }
+        parser.flush();
+      });
+    },
+    subPathProcess(subPath, cb) {
+      const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
+      this.concatStream(vttStream, (err, buf) => {
+        if (err) {
+          console.error(err);
+        }
+        cb(null, buf);
+      });
     },
     // 待改善函数结构
     // 判断重合情况
-    subtitleShow(index, type) {
+    subtitleShow(index, type = 'first') {
       const vid = this.$refs.videoCanvas;
       if (type === 'first') {
         // 当直接播放无字幕视频时，会报错,需要error handle
@@ -400,22 +431,6 @@ export default {
         border,
         background,
       };
-    },
-    /**
-     * 不需要这么麻烦，可以直接在loadTextTrack中获得字幕文件名，
-     * 存入数组中后commit, 需要对index进行处理.
-     */
-    $_loadSubNameArr() {
-      const vid = this.$refs.videoCanvas;
-      const subNameARR = [];
-      const startIndex = this.$store.state.PlaybackState.StartIndex;
-      for (let i = startIndex; i < vid.textTracks.length; i += 1) {
-        subNameARR.push({
-          title: vid.textTracks[i].label,
-          index: i - startIndex,
-        });
-      }
-      this.$store.commit('SubtitleNameArr', subNameARR);
     },
     /**
      * @param textTrack target textTrack
