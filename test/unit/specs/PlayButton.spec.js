@@ -29,7 +29,7 @@ describe('PlayButton.vue', () => {
     wrapper.vm.iconAppear = true;
     return Vue.nextTick()
       .then(function () {
-        expect(wrapper.vm.iconAppear).true;
+        expect(wrapper.vm.iconAppear).equal(true);
         expect(wrapper.html()).contains('<img type="image/svg+xml"');
       });
   });
