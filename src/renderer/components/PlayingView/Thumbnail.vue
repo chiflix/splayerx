@@ -58,7 +58,7 @@ export default {
   data() {
     return {
       videoStatus: true,
-      thumbnailGenerationPause: false,
+      thumbnailGenerationPause: true,
       pauseDelay: 0,
       thumbnailCanvas: null,
       thumbnailVideo: null,
@@ -93,6 +93,8 @@ export default {
       this.$refs.thumbnailVideo.pause();
       this.videoInfoInit();
       this.thumbnailCanvasInit();
+      this.thumbnailGenerationPause = false;
+      this.thumbnailVideo.currentTime = 0;
     },
     thumbnailCanvasInit() {
       this.thumbnailCanvas = this.$refs.thumbnailCanvas;
