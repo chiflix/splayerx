@@ -71,12 +71,13 @@ export default {
         count: 0, // final total number of thumbnail generated
         generationInterval: 0,
         // auto calculated generation interval by max-count and video-duration
+        finished: false, // whether or not thumbnail load finished
       },
       imageMap: new Map(), // the set for base64 encoded thumbnails
       imageURL: null, // temp variable for img src attribute
       manualGenerationIndex: 0, // isolated thumbnail index variable for manual generation
       // constants
-      MAX_THUMBNAIL_COUNT: 600, // max number of thumbnail generated
+      MAX_THUMBNAIL_COUNT: 60, // max number of thumbnail generated
       IMAGE_QUALITY: 0.5, // the quality of thumbnail images (only webp or jpeg type)
     };
   },
@@ -113,6 +114,7 @@ export default {
     thumbnailInfoInit() {
       this.thumbnailInfo.canvas = this.$refs.thumbnailCanvas;
       this.thumbnailInfo.video = this.$refs.thumbnailVideo || document.querySelector('#thumbnailVideo');
+      this.thumbnailInfo.finished = false;
       this.imageMap = new Map();
     },
     // Initialize video info
@@ -182,7 +184,7 @@ export default {
           = this.videoInfo.currentIndex * this.thumbnailInfo.generationInterval;
         }
         if (this.videoInfo.currentIndex === this.thumbnailInfo.count) {
-          this.$bus.$emit('thumbnail-load-finished');
+          this.$bus.$emit('thumbnail-generation-finished');
           console.log(`[Thumbnail]: Generation finished at ${Date.now()}.`);
           console.log(`[Thumbnail]: A total of ${this.thumbnailInfo.count} webp thumbnails of quality ${this.IMAGE_QUALITY} generated.`);
           console.log('[Thumbnail]:', this.videoInfo, this.imageMap);
@@ -192,16 +194,18 @@ export default {
     },
     // set imageURL
     setImageURL(newValue) {
-      const currentIndex = parseInt(newValue / this.thumbnailInfo.generationInterval, 10);
+      let currentIndex = parseInt(newValue / this.thumbnailInfo.generationInterval, 10);
       const currentTime = currentIndex * this.thumbnailInfo.generationInterval;
       if (this.imageMap.get(currentIndex)) {
         this.imageURL = this.imageMap.get(currentIndex);
         console.log(`Horay! Number ${currentIndex} found!`);
-      } else {
+      } else if (!this.thumbnailInfo.finished) {
         this.autoGeneration = false;
         this.$bus.$emit('thumbnail-generation-paused');
         this.thumbnailInfo.video.currentTime = currentTime;
         this.manualGenerationIndex = currentIndex;
+      } else if (currentIndex >= this.imageMap.length) {
+        currentIndex = this.imageMap.length - 1;
       }
     },
   },
@@ -212,6 +216,7 @@ export default {
     this.$bus.$on('thumbnail-generation-finished', () => {
       this.videoCanvasShow = false;
       this.$bus.$off('thumbnail-generation-paused', this.pauseAutoGeneration);
+      this.thumbnailInfo.finished = true;
     });
   },
 };
