@@ -263,11 +263,15 @@ export default {
         chunks.push(chunk);
       });
       stream.on('end', () => {
-        if (callback) callback(null, Buffer.concat(chunks));
+        if (callback) {
+          callback(null, Buffer.concat(chunks));
+        }
         callback = null;
       });
       stream.once('error', (err) => {
-        if (callback) callback(err);
+        if (callback) {
+          callback(err);
+        }
         callback = null;
       });
     },
@@ -328,6 +332,9 @@ export default {
       this.$store.commit('SubtitleNameArr', subNameArr);
       this.$bus.$emit('subName-loaded');
 
+      /**
+       * Referenced from WebTorrent
+       */
       /* eslint-disable arrow-parens */
       const tasks = files.map((subPath) => (cb) => this.subPathProcess(subPath, cb));
       parallel(tasks, (err, results) => {
