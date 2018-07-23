@@ -175,19 +175,23 @@ export default {
             0, 0, videoWidth, videoHeight,
             0, 0, this.widthOfThumbnail, this.heightOfThumbnail,
           );
-          this.imageMap.set(currentIndex, this.thumbnailInfo.canvas.toDataURL('image/webp', this.IMAGE_QUALITY));
-          console.log(`[Thumbnail]: No.${currentIndex} image generated!`);
+          this.getCanvasBlob(this.thumbnailInfo.canvas, currentIndex).then((blobObject) => {
+            this.imageMap.set(currentIndex, blobObject);
+            if (this.imageMap.get(currentIndex)
+              && this.videoInfo.currentIndex < this.thumbnailInfo.count
+              && this.autoGeneration) {
+              this.videoInfo.currentIndex += 1;
+              this.thumbnailInfo.video.currentTime
+              = this.videoInfo.currentTime
+              = this.videoInfo.currentIndex * this.thumbnailInfo.generationInterval;
+            }
+            console.log(`[Thumbnail]: No.${currentIndex} image generated!`);
+          }).catch((err) => {
+            console.log(err);
+          });
         }
         if (this.videoInfo.currentIndex === 0) {
           console.log(`[Thumbnail]: Generation started at ${Date.now()}.`);
-        }
-        if (this.imageMap.get(currentIndex)
-          && this.videoInfo.currentIndex < this.thumbnailInfo.count
-          && this.autoGeneration) {
-          this.videoInfo.currentIndex += 1;
-          this.thumbnailInfo.video.currentTime
-          = this.videoInfo.currentTime
-          = this.videoInfo.currentIndex * this.thumbnailInfo.generationInterval;
         }
         if (this.videoInfo.currentIndex === this.thumbnailInfo.count) {
           this.$bus.$emit('thumbnail-generation-finished');
@@ -207,7 +211,16 @@ export default {
       }
       if (this.imageMap.get(currentIndex)) {
         console.log(`Image ${currentIndex} set!`);
-        this.imageURL = this.imageMap.get(currentIndex);
+        URL.revokeObjectURL(this.imageMap.get(this.videoInfo.lastIndex));
+        this.imageURL = URL.createObjectURL(this.imageMap.get(currentIndex));
+        console.log(this.imageURL);
+        if (this.imageURL) {
+          console.log('Sucess create imageURL.');
+        } else {
+          console.error('Error create imageURL.');
+          return;
+        }
+        console.log(this.imageURL);
         console.log(`Horay! Number ${currentIndex} found!`);
       } else if (!this.thumbnailInfo.finished) {
         this.autoGeneration = false;
@@ -218,6 +231,17 @@ export default {
         currentIndex = this.imageMap.length - 1;
       }
       this.videoInfo.lastIndex = currentIndex;
+    },
+    getCanvasBlob(canvasElement) {
+      return new Promise((resolve, reject) => {
+        canvasElement.toBlob((blobObject) => {
+          if (blobObject.size) {
+            resolve(blobObject);
+          } else {
+            reject(new Error('[Thumbnail]: Error creating blob ebject.'));
+          }
+        }, 'image/webp');
+      });
     },
   },
   created() {
