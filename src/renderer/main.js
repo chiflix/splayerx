@@ -386,6 +386,10 @@ new Vue({
       }
     });
 
+    /**
+     * Todo:
+     * Handle multiple files
+     */
     window.addEventListener('drop', (e) => {
       e.preventDefault();
       const { files } = e.dataTransfer;
@@ -396,7 +400,7 @@ new Vue({
       const re = new RegExp(regex);
       const extname = Path.extname(path);
       if (re.test(extname)) {
-        this.$bus.$emit('drag-subtitle', path);
+        this.$bus.$emit('add-subtitle', path);
       } else {
         this.openFile(path);
       }

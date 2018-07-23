@@ -51,24 +51,9 @@ export default {
     },
     firstSubtitleOn() {
       this.$store.commit('FirstSubtitleOn');
-      this.$store.commit('SecondSubtitleOn');
     },
     firstSubtitleOff() {
       this.$store.commit('FirstSubtitleOff');
-      this.$store.commit('SecondSubtitleOff');
-    },
-    secondSubtitleOn() {
-      this.$store.commit('SecondSubtitleOn');
-    },
-    secondSubtitleOff() {
-      this.$store.commit('SecondSubtitleOff');
-    },
-    // 需要refactor
-    firstSubSelect(index) {
-      this.$bus.$emit('subFirstChange', index);
-    },
-    secondSubSelect(index) {
-      this.$bus.$emit('subSecondChange', index);
     },
     toggleButtonMenu() {
       this.$_clearTimeoutDelay();
@@ -84,24 +69,6 @@ export default {
     subtitleNameArr() {
       return this.$store.state.PlaybackState.SubtitleNameArr;
     },
-    curSubName() {
-      const curIndex = this.$store.state.PlaybackState.FirstSubIndex
-        - this.$store.state.PlaybackState.StartIndex;
-      if (this.subtitleNameArr[curIndex]) {
-        return this.$store.state.PlaybackState.SubtitleNameArr[curIndex].title;
-      }
-      return 'No subtitle';
-    },
-    curFirstSubIndex() {
-      return this.$store.state.PlaybackState.FirstSubIndex
-        - this.$store.state.PlaybackState.StartIndex;
-    },
-    curSecondSubIndex() {
-      console.log(this.$store.state.PlaybackState.SecondSubIndex);
-      return this.$store.state.PlaybackState.SecondSubIndex
-        - this.$store.state.PlaybackState.StartIndex;
-    },
-
     subtitleAppearFlag() {
       return this.$store.state.PlaybackState.FirstSubtitleState;
     },

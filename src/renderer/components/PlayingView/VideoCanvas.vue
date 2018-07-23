@@ -42,6 +42,9 @@ export default {
       newHeightOfWindow: 0,
       videoWidth: 0,
       videoHeight: 0,
+      startIndex: 0,
+      firstSubIndex: null,
+      secondSubIndex: null,
       timeUpdateIntervalID: null,
       firstActiveCue: null,
       secondActiveCue: null,
@@ -275,10 +278,10 @@ export default {
         callback = null;
       });
     },
-    $_subNameProcess(file, index) {
+    $_subNameProcess(file) {
       return {
         title: path.parse(file).name,
-        index,
+        status: undefined,
       };
     },
     /**
@@ -303,11 +306,10 @@ export default {
        */
 
       const vid = this.$refs.videoCanvas;
-      const startIndex = vid.textTracks.length;
-      this.$store.commit('StartIndex', startIndex);
+      this.startIndex = vid.textTracks.length;
       // hide every text text/subtitle tracks at beginning
       // 没有做对内挂字幕的处理
-      for (let i = this.$store.state.PlaybackState.CurrentIndex; i < startIndex; i += 1) {
+      for (let i = this.$store.state.PlaybackState.CurrentIndex; i < this.startIndex; i += 1) {
         vid.textTracks[i].mode = 'disabled';
       }
 
@@ -331,7 +333,7 @@ export default {
       });
 
 
-      const subNameArr = files.map((file, index) => this.$_subNameProcess(file, index));
+      const subNameArr = files.map(file => this.$_subNameProcess(file));
       this.$store.commit('SubtitleNameArr', subNameArr);
       this.$bus.$emit('subName-loaded');
 
@@ -354,7 +356,7 @@ export default {
           parser.onflush = () => {
             console.log('finished reading subtitle files');
             this.subStyleChange();
-            this.subtitleShow(startIndex);
+            this.subtitleShow(this.startIndex);
           };
           const result = results[i];
           parser.parse(result.toString('utf8'));
@@ -375,38 +377,29 @@ export default {
     // 判断重合情况
     subtitleShow(index, type = 'first') {
       const vid = this.$refs.videoCanvas;
+      const targetIndex = index + this.startIndex;
       if (type === 'first') {
         // 当直接播放无字幕视频时，会报错,需要error handle
         // 判断有无字幕
-        if (vid.textTracks.length > index) {
+        const curVidIndex = this.firstSubIndex + this.startIndex;
+        if (vid.textTracks.length > targetIndex) {
+          vid.textTracks[curVidIndex].mode = 'disabled';
+          vid.textTracks[curVidIndex].oncuechange = null;
+
+          this.$_onCueChangeEventAdd(vid.textTracks[targetIndex]);
+          vid.textTracks[targetIndex].mode = 'hidden';
+
+          this.$store.commit('SubtitleOn', { index, status: 'first' });
           this.$store.commit('FirstSubtitleOn');
-          const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
-          vid.textTracks[firstSubIndex].mode = 'disabled';
-          vid.textTracks[firstSubIndex].oncuechange = null;
-          this.$_onCueChangeEventAdd(vid.textTracks[index]);
-          vid.textTracks[index].mode = 'hidden';
-          this.$store.commit('FirstSubIndex', index);
+          this.firstSubIndex = index;
         } else {
-          this.$store.commit('FirstSubtitleOff');
+          // this.$store.commit('SubtitleOff', index);
+          this.$store.commit('FristSubtitleOff');
           console.log('no subtitle');
         }
       }
       if (type === 'second') {
-        // 需要重写
-        console.log('showSecondSub');
-        const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
-        if (index !== this.$store.state.PlaybackState.FirstSubIndex) {
-          if (secondSubIndex !== -1) {
-            vid.textTracks[secondSubIndex].mode = 'disabled';
-            this.$store.commit('SecondSubtitleOn');
-          } else {
-            this.$store.commit('SecondSubtitleOff');
-            console.log('Warning: no selected second subtitle');
-          }
-          this.$_onCueChangeEventAdd(vid.textTracks[index], 'second');
-          vid.textTracks[index].mode = 'hidden';
-          this.$store.commit('SecondSubIndex', index);
-        }
+        console.log('show second subtitle');
       }
     },
     /**
@@ -462,19 +455,22 @@ export default {
      */
     $_clearSubtitle() {
       const vid = this.$refs.videoCanvas;
-      const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
-      const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
-      if (vid.textTracks[firstSubIndex]) {
-        vid.textTracks[firstSubIndex].mode = 'disabled';
-        vid.textTracks[firstSubIndex].oncuechange = null;
+      const curVidFirstIndex = this.firstSubIndex + this.startIndex;
+      const curVidSecondIndex = this.secondSubIndex + this.startIndex;
+      if (this.firstSubIndex === null) {
+        console.log('first subtitle not set');
+      } else {
+        vid.textTracks[curVidFirstIndex].mode = 'disabled';
+        vid.textTracks[curVidFirstIndex].oncuechange = null;
+        this.firstSubIndex = null;
       }
       // 未设置第二字幕时，消除字幕的error handler
-      if (secondSubIndex === -1) {
+      if (this.secondSubIndex === null) {
         console.log('second subtitle not set');
       } else {
-        vid.textTracks[secondSubIndex].mode = 'disabled';
-        vid.textTracks[secondSubIndex].oncuechange = null;
-        this.$store.commit('SecondSubIndex', -1);
+        vid.textTracks[curVidSecondIndex].mode = 'disabled';
+        vid.textTracks[curVidSecondIndex].oncuechange = null;
+        this.secondSubIndex = null;
       }
     },
   },
@@ -491,38 +487,38 @@ export default {
     firstSubState() {
       return this.$store.state.PlaybackState.FirstSubtitleState;
     },
-    secondSubState() {
-      return this.$store.state.PlaybackState.SecondSubtitleState;
-    },
+    // secondSubState() {
+    //   return this.$store.state.PlaybackState.SecondSubtitleState;
+    // },
   },
   watch: {
     firstSubState(newVal) {
       const vid = this.$refs.videoCanvas;
-      const firstSubIndex = this.$store.state.PlaybackState.FirstSubIndex;
-      if (newVal && vid.textTracks[firstSubIndex].mode === 'disabled') {
-        vid.textTracks[firstSubIndex].mode = 'hidden';
-      } else if (!newVal && vid.textTracks[firstSubIndex].mode !== 'disabled') {
+      const curVidFirstSubIndex = this.startIndex + this.firstSubIndex;
+      if (newVal && vid.textTracks[curVidFirstSubIndex].mode === 'disabled') {
+        vid.textTracks[curVidFirstSubIndex].mode = 'hidden';
+      } else if (!newVal && vid.textTracks[curVidFirstSubIndex].mode !== 'disabled') {
         this.firstActiveCue = null;
-        vid.textTracks[firstSubIndex].mode = 'disabled';
+        vid.textTracks[curVidFirstSubIndex].mode = 'disabled';
       } else {
         console.log('Error: mode is not correct');
       }
     },
-    secondSubState(newVal) {
-      const vid = this.$refs.videoCanvas;
-      const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
-      // 如果未选第二字幕的时候开启，如何处理
-      if (secondSubIndex === -1) {
-        console.log('Warn: No Second Subtitle');
-      } else if (newVal && vid.textTracks[secondSubIndex].mode === 'disabled') {
-        vid.textTracks[secondSubIndex].mode = 'hidden';
-      } else if (!newVal && vid.textTracks[secondSubIndex].mode !== 'disabled') {
-        this.secondActiveCue = null;
-        vid.textTracks[secondSubIndex].mode = 'disabled';
-      } else {
-        console.log('Error: mode is not correct');
-      }
-    },
+    // secondSubState(newVal) {
+    //   const vid = this.$refs.videoCanvas;
+    //   const secondSubIndex = this.$store.state.PlaybackState.SecondSubIndex;
+    //   // 如果未选第二字幕的时候开启，如何处理
+    //   if (secondSubIndex === -1) {
+    //     console.log('Warn: No Second Subtitle');
+    //   } else if (newVal && vid.textTracks[secondSubIndex].mode === 'disabled') {
+    //     vid.textTracks[secondSubIndex].mode = 'hidden';
+    //   } else if (!newVal && vid.textTracks[secondSubIndex].mode !== 'disabled') {
+    //     this.secondActiveCue = null;
+    //     vid.textTracks[secondSubIndex].mode = 'disabled';
+    //   } else {
+    //     console.log('Error: mode is not correct');
+    //   }
+    // },
     // 需要对这一部分内容优化
     firstActiveCue(newVal) {
       this.firstCueHTML.pop();
@@ -587,16 +583,24 @@ export default {
 
     // 可以二合一
     this.$bus.$on('subFirstChange', (targetIndex) => {
-      const index = this.$store.state.PlaybackState.StartIndex + targetIndex;
-      this.subtitleShow(index, 'first');
+      this.subtitleShow(targetIndex);
     });
     this.$bus.$on('subSecondChange', (targetIndex) => {
-      const index = this.$store.state.PlaybackState.StartIndex + targetIndex;
-      // 增加一个判断第一字幕是否开启的状态
-      this.subtitleShow(index, 'second');
+      this.subtitleShow(targetIndex, 'second');
     });
 
     this.$bus.$on('subStyleChange', this.subStyleChange);
+
+    /**
+     * Todo:
+     * handle multiple pathes
+     */
+    this.$bus.$on('add-subtitle', (file) => {
+      const subName = path.parse(file).name;
+      const subNameArr = this.$store.state.PlaybackState.SubtitleNameArr;
+      subNameArr.push({ title: subName, status: undefined });
+      this.$sotre.commit('SubtitleNameArr', subNameArr);
+    });
   },
 };
 </script>
