@@ -305,16 +305,16 @@ export default {
        * https://hacks.mozilla.org/2014/07/adding-captions-and-subtitles-to-html5-video/
        */
 
+      this.$_clearSubtitle();
+      const files = [];
+
       const vid = this.$refs.videoCanvas;
       this.startIndex = vid.textTracks.length;
       // hide every text text/subtitle tracks at beginning
       // 没有做对内挂字幕的处理
-      for (let i = this.$store.state.PlaybackState.CurrentIndex; i < this.startIndex; i += 1) {
-        vid.textTracks[i].mode = 'disabled';
-      }
-
-      // // create our own text/subtitle track
-      // const sub0 = vid.addTextTrack('subtitles', 'splayer-custom');
+      // for (let i = this.$store.state.PlaybackState.CurrentIndex; i < this.startIndex; i += 1) {
+      //   vid.textTracks[i].mode = 'disabled';
+      // }
 
       /*
        * TODO:
@@ -325,12 +325,9 @@ export default {
 
       // If there is already subtitle files(same dir), load it
 
-      this.$_clearSubtitle();
-      const files = [];
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         files.push(subPath);
       });
-
 
       const subNameArr = files.map(file => this.$_subNameProcess(file));
       this.$store.commit('SubtitleNameArr', subNameArr);
@@ -340,7 +337,7 @@ export default {
        * Referenced from WebTorrent
        */
       /* eslint-disable arrow-parens */
-      const tasks = files.map((subPath) => (cb) => this.subPathProcess(subPath, cb));
+      const tasks = files.map((subPath) => (cb) => this.$_subPathProcess(subPath, cb));
       parallel(tasks, (err, results) => {
         if (err) {
           console.error(err);
@@ -363,7 +360,7 @@ export default {
         parser.flush();
       });
     },
-    subPathProcess(subPath, cb) {
+    $_subPathProcess(subPath, cb) {
       const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
       this.concatStream(vttStream, (err, buf) => {
         if (err) {
@@ -456,6 +453,7 @@ export default {
       const vid = this.$refs.videoCanvas;
       const curVidFirstIndex = this.firstSubIndex + this.startIndex;
       const curVidSecondIndex = this.secondSubIndex + this.startIndex;
+      this.$store.commit('FirstSubtitleOff');
       if (this.firstSubIndex === null) {
         console.log('first subtitle not set');
       } else {
