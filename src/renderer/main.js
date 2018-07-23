@@ -11,6 +11,7 @@ import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
+import Path from 'path';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
@@ -388,11 +389,17 @@ new Vue({
     window.addEventListener('drop', (e) => {
       e.preventDefault();
       const { files } = e.dataTransfer;
-      console.log(files);
       // TODO: play it if it's video file
       const path = `file:///${files[0].path}`;
 
-      this.openFile(path);
+      const regex = '^(.srt|.ass|.vtt)$';
+      const re = new RegExp(regex);
+      const extname = Path.extname(path);
+      if (re.test(extname)) {
+        this.$bus.$emit('drag-subtitle', path);
+      } else {
+        this.openFile(path);
+      }
 
       /*
       for (const file in files) {

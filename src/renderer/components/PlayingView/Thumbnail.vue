@@ -143,12 +143,8 @@ export default {
     resumeAutoGeneration() {
       this.setImageURL(this.thumbnailInfo.video.currentTime);
       this.autoGeneration = true;
-      console.log('[Thumbnail]: Thumbnail generation resumed!');
-      console.log(`[Thumbnail]: Current index is ${this.videoInfo.currentIndex}.`);
-      console.log(`[Thumbnail]: Set current time to ${this.videoInfo.currentTime}.`);
       this.thumbnailInfo.video.currentTime
       = this.videoInfo.currentIndex * this.thumbnailInfo.generationInterval;
-      console.log(`[Thumbnail]: Actual video current time is ${this.thumbnailInfo.video.currentTime}.`);
     },
     // Manage thumbnail generation
     thumbnailGeneration(event) {
@@ -162,11 +158,9 @@ export default {
       if (this.autoGeneration) {
         destTime = autoGenerationIndex * pace;
         currentIndex = autoGenerationIndex;
-        console.log(`[Thumbnail]: Switched to auto generated index ${autoGenerationIndex}.`);
       } else {
         destTime = manualGenerationIndex * pace;
         currentIndex = manualGenerationIndex;
-        console.log(`[Thumbnail]: Switched to manual generated index ${manualGenerationIndex}.`);
       }
       if (destTime !== null && currentIndex !== null) {
         if (actualTime === destTime && !this.imageMap.get(currentIndex)) {
@@ -176,7 +170,6 @@ export default {
             0, 0, this.widthOfThumbnail, this.heightOfThumbnail,
           );
           this.imageMap.set(currentIndex, this.thumbnailInfo.canvas.toDataURL('image/webp', this.IMAGE_QUALITY));
-          console.log(`[Thumbnail]: No.${currentIndex} image generated!`);
         }
         if (this.videoInfo.currentIndex === 0) {
           console.log(`[Thumbnail]: Generation started at ${Date.now()}.`);
@@ -191,9 +184,6 @@ export default {
         }
         if (this.videoInfo.currentIndex === this.thumbnailInfo.count) {
           this.$bus.$emit('thumbnail-generation-finished');
-          console.log(`[Thumbnail]: Generation finished at ${Date.now()}.`);
-          console.log(`[Thumbnail]: A total of ${this.thumbnailInfo.count} webp thumbnails of quality ${this.IMAGE_QUALITY} generated.`);
-          console.log('[Thumbnail]:', this.videoInfo, this.imageMap);
           this.thumbnailInfo.video.removeEventListener('seeked', this.thumbnailGeneration);
         }
       }
@@ -206,9 +196,7 @@ export default {
         return;
       }
       if (this.imageMap.get(currentIndex)) {
-        console.log(`Image ${currentIndex} set!`);
         this.imageURL = this.imageMap.get(currentIndex);
-        console.log(`Horay! Number ${currentIndex} found!`);
       } else if (!this.thumbnailInfo.finished) {
         this.autoGeneration = false;
         this.$bus.$emit('thumbnail-generation-paused');
