@@ -326,7 +326,6 @@ export default {
       // If there is already subtitle files(same dir), load it
 
       this.$_clearSubtitle();
-      console.log('heyyyyyyy');
       const files = [];
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         files.push(subPath);
@@ -597,9 +596,28 @@ export default {
      */
     this.$bus.$on('add-subtitle', (file) => {
       const subName = path.parse(file).name;
-      const subNameArr = this.$store.state.PlaybackState.SubtitleNameArr;
-      subNameArr.push({ title: subName, status: undefined });
-      this.$sotre.commit('SubtitleNameArr', subNameArr);
+      this.$store.commit('AddSubtitle', subName);
+      const vttStream = fs.createReadStream(file).pipe(srt2vtt());
+      this.concatStream(vttStream, (err, buf) => {
+        if (err) {
+          console.error(err);
+        }
+        const vid = this.$refs.videoCanvas;
+        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+        const sub = vid.addTextTrack('subtitles');
+        sub.mode = 'disabled';
+        parser.oncue = (cue) => {
+          sub.addCue(cue);
+        };
+        parser.onflush = () => {
+          console.log('finished reading subtitle files');
+          // this.subStyleChange();
+          // this.subtitleShow(this.startIndex);
+        };
+        parser.parse(buf.toString('utf8'));
+        parser.flush();
+        console.log('Add subtitle');
+      });
     });
   },
 };

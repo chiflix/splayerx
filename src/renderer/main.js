@@ -400,7 +400,7 @@ new Vue({
       const re = new RegExp(regex);
       const extname = Path.extname(path);
       if (re.test(extname)) {
-        this.$bus.$emit('add-subtitle', path);
+        this.$bus.$emit('add-subtitle', files[0].path);
       } else {
         this.openFile(path);
       }

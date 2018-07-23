@@ -38,6 +38,9 @@ const mutations = {
   SubtitleNameArr(state, arr) {
     state.SubtitleNameArr = arr;
   },
+  AddSubtitle(state, subName) {
+    state.SubtitleNameArr.push({ title: subName, status: undefined });
+  },
   SubtitleOn(state, obj) {
     state.SubtitleNameArr[obj.index].status = obj.status === 'first' ? 'first' : 'second';
   },
