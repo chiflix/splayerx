@@ -7,12 +7,11 @@ const state = {
   SrcOfVideo: '',
   PlaybackRate: 1.0,
 
-  FirstSubtitleState: false,
-  SecondSubtitleState: false,
   SubtitleNameArr: [],
 };
 
 const getters = {
+  firstSubIndex: state => state.SubtitleNameArr.findIndex(subName => subName.status === 'first'),
 };
 
 const mutations = {
@@ -39,19 +38,17 @@ const mutations = {
     state.SubtitleNameArr = arr;
   },
   AddSubtitle(state, subName) {
-    state.SubtitleNameArr.push({ title: subName, status: undefined });
+    state.SubtitleNameArr.push({ title: subName, status: null });
   },
+  // 需要对subtitle array的状态进行判断，有无数组，是否超出
   SubtitleOn(state, obj) {
     state.SubtitleNameArr[obj.index].status = obj.status === 'first' ? 'first' : 'second';
   },
   SubtitleOff(state, index) {
-    state.SubtitleNameArr[index].status = undefined;
-  },
-  FirstSubtitleOn(state) {
-    state.FirstSubtitleState = true;
-  },
-  FirstSubtitleOff(state) {
-    state.FirstSubtitleState = false;
+    if (index < state.SubtitleNameArr.length) {
+      console.log(state.SubtitleNameArr);
+      state.SubtitleNameArr[index].status = null;
+    }
   },
 };
 

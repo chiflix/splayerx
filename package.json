@@ -89,7 +89,7 @@
     "vuex": "^3.0.1"
   },
   "devDependencies": {
-    "@chiflix/electron": "^2.0.2",
+    "@chiflix/electron": "^3.0.0-beta.3",
     "@vue/test-utils": "^1.0.0-beta.20",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",

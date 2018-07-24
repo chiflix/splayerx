@@ -281,7 +281,7 @@ export default {
     $_subNameProcess(file) {
       return {
         title: path.parse(file).name,
-        status: undefined,
+        status: null,
       };
     },
     /**
@@ -304,12 +304,10 @@ export default {
        * https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
        * https://hacks.mozilla.org/2014/07/adding-captions-and-subtitles-to-html5-video/
        */
-
       this.$_clearSubtitle();
-      const files = [];
-
       const vid = this.$refs.videoCanvas;
       this.startIndex = vid.textTracks.length;
+
       // hide every text text/subtitle tracks at beginning
       // 没有做对内挂字幕的处理
       // for (let i = this.$store.state.PlaybackState.CurrentIndex; i < this.startIndex; i += 1) {
@@ -322,9 +320,8 @@ export default {
        * If there is already subtitle files(opened or loaded), load it
        * If there is no (chinese/default language) text track, try translate api
        */
-
       // If there is already subtitle files(same dir), load it
-
+      const files = [];
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         files.push(subPath);
       });
@@ -352,7 +349,7 @@ export default {
           parser.onflush = () => {
             console.log('finished reading subtitle files');
             this.subStyleChange();
-            this.subtitleShow(this.startIndex);
+            this.subtitleShow(0);
           };
           const result = results[i];
           parser.parse(result.toString('utf8'));
@@ -386,11 +383,10 @@ export default {
           vid.textTracks[targetIndex].mode = 'hidden';
 
           this.$store.commit('SubtitleOn', { index, status: 'first' });
-          this.$store.commit('FirstSubtitleOn');
           this.firstSubIndex = index;
         } else {
           // this.$store.commit('SubtitleOff', index);
-          this.$store.commit('FristSubtitleOff');
+          // this.$store.commit('FristSubtitleOff');
           console.log('no subtitle');
         }
       }
@@ -453,10 +449,10 @@ export default {
       const vid = this.$refs.videoCanvas;
       const curVidFirstIndex = this.firstSubIndex + this.startIndex;
       const curVidSecondIndex = this.secondSubIndex + this.startIndex;
-      this.$store.commit('FirstSubtitleOff');
       if (this.firstSubIndex === null) {
         console.log('first subtitle not set');
       } else {
+        console.log(curVidFirstIndex);
         vid.textTracks[curVidFirstIndex].mode = 'disabled';
         vid.textTracks[curVidFirstIndex].oncuechange = null;
         this.firstSubIndex = null;
@@ -482,7 +478,8 @@ export default {
       return this.$store.state.PlaybackState.CurrentTime;
     },
     firstSubState() {
-      return this.$store.state.PlaybackState.FirstSubtitleState;
+      console.log(this.$store.getters.firstSubIndex);
+      return this.$store.getters.firstSubIndex !== -1;
     },
     // secondSubState() {
     //   return this.$store.state.PlaybackState.SecondSubtitleState;
@@ -492,12 +489,17 @@ export default {
     firstSubState(newVal) {
       const vid = this.$refs.videoCanvas;
       const curVidFirstSubIndex = this.startIndex + this.firstSubIndex;
+      // 这里有个报错需要处理，每当读取新的视频时，会将subtitlenamearr清空，这时firstSubState也产生了变化
+      // 所以会进入watcher，发生undefined错误
+      console.log(vid.textTracks[curVidFirstSubIndex].mode);
       if (newVal && vid.textTracks[curVidFirstSubIndex].mode === 'disabled') {
         vid.textTracks[curVidFirstSubIndex].mode = 'hidden';
       } else if (!newVal && vid.textTracks[curVidFirstSubIndex].mode !== 'disabled') {
         this.firstActiveCue = null;
         vid.textTracks[curVidFirstSubIndex].mode = 'disabled';
       } else {
+        console.log(newVal);
+        console.log(curVidFirstSubIndex);
         console.log('Error: mode is not correct');
       }
     },
@@ -584,6 +586,13 @@ export default {
     });
     this.$bus.$on('subSecondChange', (targetIndex) => {
       this.subtitleShow(targetIndex, 'second');
+    });
+
+    this.$bus.$on('first-subtitle-on', () => {
+      this.$store.commit('SubtitleOn', { index: this.firstSubIndex, status: 'first' });
+    });
+    this.$bus.$on('first-subtitle-off', () => {
+      this.$store.commit('SubtitleOff', this.firstSubIndex);
     });
 
     this.$bus.$on('subStyleChange', this.subStyleChange);

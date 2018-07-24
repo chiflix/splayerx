@@ -50,10 +50,10 @@ export default {
       this.isBtnMenuAppear = false;
     },
     firstSubtitleOn() {
-      this.$store.commit('FirstSubtitleOn');
+      this.$bus.$emit('first-subtitle-on');
     },
     firstSubtitleOff() {
-      this.$store.commit('FirstSubtitleOff');
+      this.$bus.$emit('first-subtitle-off');
     },
     toggleButtonMenu() {
       this.$_clearTimeoutDelay();
@@ -70,7 +70,7 @@ export default {
       return this.$store.state.PlaybackState.SubtitleNameArr;
     },
     subtitleAppearFlag() {
-      return this.$store.state.PlaybackState.FirstSubtitleState;
+      return this.$store.getters.firstSubIndex !== -1;
     },
   },
   watch: {

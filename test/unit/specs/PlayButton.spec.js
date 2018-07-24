@@ -3,7 +3,6 @@ import PlayButton from '@/components/PlayingView/PlayButton';
 import { mount } from '@vue/test-utils';
 
 describe('PlayButton.vue', () => {
-
   it('correct data when mounted', () => {
     const wrapper = mount(PlayButton);
     expect(wrapper.vm.iconAppear).equal(false);
