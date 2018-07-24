@@ -5,7 +5,7 @@ import Promise from 'bluebird';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import messages from '../../renderer/locales';
-const waitTime = 60 * 60 * 5 * 1000;
+const waitTime = 5 * 1000; // todo need to set it
 function setAutoUpdater() {
   // when the update is available, it will not download automatically
   autoUpdater.autoDownload = false;
