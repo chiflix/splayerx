@@ -10,7 +10,8 @@ platform:
   - x64
 
 configuration: Release
-
+# only build on new tag
+skip_non_tags: true
 cache:
   #- node_modules
   #- '%APPDATA%\npm-cache'
@@ -32,9 +33,21 @@ build_script:
 
 test: off
 
-artifacts:
-  - path: 'build\*Setup*.exe'
+after_build:
+  # need appveyor will replace space in filename by ., but electron updater need '-', before deploy need to replace \s by -
+  - cmd: 'forfiles  /P build /m *.blockmap /C "cmd /e:on /v:on /c set \"Phile=@file\" & if @ISDIR==FALSE ren @file !Phile: =-!"'
+  - cmd: 'forfiles  /P build /m *.exe  /C "cmd /e:on /v:on /c set \"Phile=@file\" & if @ISDIR==FALSE ren @file !Phile: =-!"'
 
+artifacts:
+  - path: 'build\*.exe'
+
+  - path: 'build\*exe.blockmap'
+
+  - path: 'build\latest.yml'
+nvironment:
+  #todo need to spercify the GH_TOKEN for electron updater to access git information
+  GH_TOKEN:
+    secure: uSc2xAMUgS8iIOy8RSx2nhUiMgQeVCKZsX1bNfwsNu0SxkJoZWb0ceqXEy3v9/cu # your encrypted token from GitHub
 deploy:
   release: $(appveyor_repo_tag_name)
   description: 'Release description'
