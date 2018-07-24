@@ -26,7 +26,11 @@ async function get(key) {
 
   const filename = path.join(defaultPath, escapedFileName);
   // getFileName()
-
+  // then mkdir
+  // then lockFile
+  // then fs.readFile
+  // then parseJsonObject from last step
+  // error Handle
   return filename;
 }
 export default {
