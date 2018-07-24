@@ -1,4 +1,6 @@
 import path from 'path';
+import fs from 'fs';
+import util from 'util';
 import electron from 'electron';
 import _ from 'lodash';
 
@@ -27,6 +29,7 @@ async function get(key) {
   const filename = path.join(defaultPath, escapedFileName);
   // getFileName()
   // then mkdir
+  const open = util.promisify(fs.open);
   // then lockFile
   // then fs.readFile
   // then parseJsonObject from last step
