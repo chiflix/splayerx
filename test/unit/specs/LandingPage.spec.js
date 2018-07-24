@@ -11,7 +11,7 @@ describe('LandingView.vue', () => {
     Vue.use(VueI18n);
     Vue.use(VueElectronJSONStorage);
     Vue.mixin(helpers);
-    Vue.prototype.$bus = new Vue(); // Global event bus
+    // Vue.prototype.$bus = new Vue(); // Global event bus
 
     const i18n = new VueI18n({
       locale: 'en', // set locale
