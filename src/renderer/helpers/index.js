@@ -7,6 +7,9 @@ import storage from './storage';
 export default {
   methods: {
     sagi() { return Sagi; },
+    setSync(key, json) {
+      storage.setSync(key, json);
+    },
     timecodeFromSeconds(s) {
       const dt = new Date(Math.abs(s) * 1000);
       let hours = dt.getUTCHours();

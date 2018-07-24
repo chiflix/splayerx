@@ -95,13 +95,13 @@ export default {
     },
     onCanPlay() {
       // the video is ready to start playing
-      this.$_getThumbnail();
+      // this.$_getThumbnail();
       this.$store.commit('Volume', this.$refs.videoCanvas.volume);
     },
     onMetaLoaded() {
       console.log('loadedmetadata');
       this.$bus.$emit('play');
-      this.$_getThumbnail();
+      // this.$_getThumbnail();
       this.videoWidth = this.$refs.videoCanvas.videoWidth;
       this.videoHeight = this.$refs.videoCanvas.videoHeight;
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
@@ -122,7 +122,6 @@ export default {
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
-        if (t % 10 === 0) { this.$_getThumbnail(); }
       }
     },
     onDurationChange() {
@@ -251,6 +250,9 @@ export default {
           }
         }
       });
+      let data = this.get('recent-played');
+      // process data
+      this.setSync('recent-played', data);
       console.log('shortCut!');
     },
     /**
@@ -576,7 +578,7 @@ export default {
     this.$bus.$on('pause', () => {
       console.log('pause event has been triggered');
       this.$refs.videoCanvas.pause();
-      this.$_getThumbnail();
+      // this.$_getThumbnail();
     });
     this.$bus.$on('seek', (e) => {
       console.log('seek event has been triggered', e);
