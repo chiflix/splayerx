@@ -44,7 +44,7 @@ artifacts:
   - path: 'build\*exe.blockmap'
 
   - path: 'build\latest.yml'
-nvironment:
+environment:
   #todo need to spercify the GH_TOKEN for electron updater to access git information
   GH_TOKEN:
     secure: uSc2xAMUgS8iIOy8RSx2nhUiMgQeVCKZsX1bNfwsNu0SxkJoZWb0ceqXEy3v9/cu # your encrypted token from GitHub
