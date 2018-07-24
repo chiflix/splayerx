@@ -188,7 +188,7 @@ export default {
     },
   },
   beforeMount() {
-    this.throttledWakeUpCall = _.throttle(this.wakeUpAllWidgets, 100);
+    this.throttledWakeUpCall = _.throttle(this.wakeUpAllWidgets, 1000);
   },
   mounted() {
     this.$bus.$emit('play');
