@@ -23,10 +23,16 @@
           v-show="!this.autoGeneration">
         </video>
         <img
+          v-if=false
           v-show="this.autoGeneration"
           :width=widthOfThumbnail
           :height=heightOfThumbnail
           :src="imageURL" />
+        <canvas
+          ref="bitmapCanvas"
+          :width=widthOfThumbnail
+          :height=heightOfThumbnail>
+        </canvas>
         <div class="time">
           {{ screenshotContent }}
         </div>
@@ -81,7 +87,7 @@ export default {
       imageURL: null, // temp variable for img src attribute
       manualGenerationIndex: 0, // isolated thumbnail index variable for manual generation
       // constants
-      MAX_THUMBNAIL_COUNT: 600, // max number of thumbnail generated
+      MAX_THUMBNAIL_COUNT: 60, // max number of thumbnail generated
       IMAGE_QUALITY: 0.5, // the quality of thumbnail images (only webp or jpeg type)
       // Web Worker
       thumbnailWorker: new ThumbnailWorker(),
@@ -102,13 +108,15 @@ export default {
       this.videoInfoInit();
       this.calculateGenerationInterval();
       this.thumbnailInfoInit();
+      const offscreenImageCanvas = this.$refs.bitmapCanvas.transferControlToOffscreen();
       this.thumbnailWorker.postMessage({
         type: 'generation-start',
         thumbnailSize: [
           this.maxThumbnailWidth,
           this.maxThumbnailHeight,
         ],
-      });
+        bitmapCanvas: offscreenImageCanvas,
+      }, [offscreenImageCanvas]);
       this.autoGeneration = true;
       this.thumbnailInfo.video.currentTime = 0;
     },
@@ -192,6 +200,7 @@ export default {
               type: 'thumbnail-generated',
               thumbnailImageBitmap: result,
               index: currentIndex,
+              originSize: [result.width, result.height],
             }, [result]);
           });
           this.getCanvasBlob(this.thumbnailInfo.canvas, currentIndex).then((blobObject) => {
@@ -230,6 +239,12 @@ export default {
       }
       if (this.imageMap.get(currentIndex)) {
         console.log(`Image ${currentIndex} set!`);
+        console.time('image request');
+        this.thumbnailWorker.postMessage({
+          type: 'thumbnail-request',
+          index: currentIndex,
+        });
+        console.timeEnd('image request');
         URL.revokeObjectURL(this.imageMap.get(this.videoInfo.lastIndex));
         this.imageURL = URL.createObjectURL(this.imageMap.get(currentIndex));
         console.log(this.imageURL);

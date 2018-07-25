@@ -1,5 +1,6 @@
 const imageMap = new Map();
 const canvasMap = new Map();
+let bitmapCanvas = null;
 let thumbnailSize = [];
 let compositionSize = [];
 const THUMBNAILS_PER_COMPOSITION = 30;
@@ -25,7 +26,7 @@ self.addEventListener('message', (event) => {
     }
     case 'generation-start': {
       // Size info initiation
-      ({ thumbnailSize } = event.data);
+      ({ thumbnailSize, bitmapCanvas } = event.data);
       console.log(thumbnailSize);
       compositionSize = thumbnailSize.map(e => e * THUMBNAILS_PER_COMPOSITION);
       console.log('[Thumbnail|Worker]:', ...compositionSize);
@@ -39,16 +40,36 @@ self.addEventListener('message', (event) => {
       }
       const currentCanvas = canvasMap.get(canvasIndex);
       const canvasContext = currentCanvas.getContext('2d');
+      console.log(...event.data.originSize);
       canvasContext.drawImage(
         event.data.thumbnailImageBitmap,
         // Thumbnail source position and size
-        0, 0, ...thumbnailSize,
+        0, 0, ...event.data.originSize,
         // Thumbnail destination position
         ...getImageBitmapPosition(thumbnailIndex, THUMBNAIL_LAYOUT, thumbnailSize),
         // Thumbnail destination size
         ...thumbnailSize,
       );
       imageMap.set(thumbnailIndex, event.data.thumbnailImageBitmap);
+      break;
+    }
+    case 'thumbnail-request': {
+      const thumbnailIndex = event.data.index;
+      const canvasIndex = Math.floor(thumbnailIndex / THUMBNAILS_PER_COMPOSITION);
+      console.log(`I need to draw image No.${thumbnailIndex}!`);
+      if (canvasMap.get(canvasIndex)) {
+        console.time('image draw');
+        createImageBitmap(
+          canvasMap.get(canvasIndex),
+          ...getImageBitmapPosition(thumbnailIndex, THUMBNAIL_LAYOUT, thumbnailSize),
+          ...thumbnailSize,
+        ).then((result) => {
+          const gl = bitmapCanvas.getContext('2d');
+          gl.drawImage(result, 0, 0);
+          gl.commit();
+        });
+        console.timeEnd('image draw');
+      }
     }
   }
 });
