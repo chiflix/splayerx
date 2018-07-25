@@ -10,7 +10,7 @@
       @mousedown.left.stop.prevent="handleLeftClick"
       @mouseup.left.prevent.self="handleMouseUp"
       @mousewheel="wheelVolumeControll"
-      @mouseleave="hideAllWidgets"
+      @mouseleave="mouseleaveHandler"
       @mousemove.self="throttledWakeUpCall"
       @mouseenter="wakeUpAllWidgets">
       <titlebar currentView="Playingview"></titlebar>
@@ -49,6 +49,7 @@ export default {
   },
   data() {
     return {
+      leave: false,
       isDragging: false,
       showMask: false,
       cursorShow: true,
@@ -75,22 +76,36 @@ export default {
       }
     },
     wakeUpAllWidgets() {
-      console.log('wakeup');
-      this.showMask = true;
-      this.isDragging = true;
-      this.cursorShow = true;
-      this.$bus.$emit('volumecontroller-appear');
-      this.$bus.$emit('progressbar-appear');
-      this.$bus.$emit('timecode-appear');
-      this.$bus.$emit('sub-ctrl-appear');
-      this.$bus.$emit('titlebar-appear');
+      if (!this.leave) {
+        console.log('wakeup');
+        this.showMask = true;
+        this.isDragging = true;
+        this.cursorShow = true;
+        this.$bus.$emit('volumecontroller-appear');
+        this.$bus.$emit('progressbar-appear');
+        this.$bus.$emit('timecode-appear');
+        this.$bus.$emit('sub-ctrl-appear');
+        this.$bus.$emit('titlebar-appear');
+        if (this.timeoutIdOfAllWidgetsDisappearDelay !== 0) {
+          clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
+          this.timeoutIdOfAllWidgetsDisappearDelay
+            = setTimeout(this.hideAllWidgets, 3000);
+        } else {
+          this.timeoutIdOfAllWidgetsDisappearDelay
+            = setTimeout(this.hideAllWidgets, 3000);
+        }
+      }
+      this.leave = false;
+    },
+    mouseleaveHandler() {
+      this.leave = true;
       if (this.timeoutIdOfAllWidgetsDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
         this.timeoutIdOfAllWidgetsDisappearDelay
-          = setTimeout(this.hideAllWidgets, 3000);
+         = setTimeout(this.hideAllWidgets, 1500);
       } else {
         this.timeoutIdOfAllWidgetsDisappearDelay
-          = setTimeout(this.hideAllWidgets, 3000);
+         = setTimeout(this.hideAllWidgets, 1500);
       }
     },
     hideAllWidgets() {
@@ -173,7 +188,7 @@ export default {
     },
   },
   beforeMount() {
-    this.throttledWakeUpCall = _.throttle(this.wakeUpAllWidgets, 100);
+    this.throttledWakeUpCall = _.throttle(this.wakeUpAllWidgets, 1000);
   },
   mounted() {
     this.$bus.$emit('play');
