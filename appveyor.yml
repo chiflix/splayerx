@@ -10,8 +10,7 @@ platform:
   - x64
 
 configuration: Release
-# only build on new tag
-skip_non_tags: true
+
 cache:
   #- node_modules
   #- '%APPDATA%\npm-cache'
@@ -40,14 +39,12 @@ after_build:
 
 artifacts:
   - path: 'build\*.exe'
-
   - path: 'build\*exe.blockmap'
-
   - path: 'build\latest.yml'
+
 environment:
-  #todo need to spercify the GH_TOKEN for electron updater to access git information
   GH_TOKEN:
-    secure: uSc2xAMUgS8iIOy8RSx2nhUiMgQeVCKZsX1bNfwsNu0SxkJoZWb0ceqXEy3v9/cu # your encrypted token from GitHub
+    secure:  # todo your encrypted token from GitHub
 deploy:
   release: $(appveyor_repo_tag_name)
   description: 'Release description'
