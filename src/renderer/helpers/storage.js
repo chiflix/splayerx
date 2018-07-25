@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs';
-import util from 'util';
 import electron from 'electron';
 import _ from 'lodash';
 
@@ -32,20 +31,22 @@ function getSync(key) {
 
   // then lockFile
   // then fs.readFile
+  let data;
   try {
-    const data = fs.readFileSync();
+    data = fs.readFileSync(filename);
   } catch (err) {
     if (err instanceof Error) {
       if (err.code === 'ENOENT') {
-        
+        data = JSON.stringify({});
+      } else {
+        throw err;
       }
     }
-
   }
-
   // then parseJsonObject from last step
-  // error Handle
-  return filename;
+  const objectJson = JSON.parse(data);
+
+  return objectJson;
 }
 function setSync(key, json) {
   // getFileName
@@ -75,13 +76,19 @@ function setSync(key, json) {
   if (!data) {
     return Error('Invalid JSON data');
   }
-
-  fs.mkdirSync(path.dirname(filename));
-  fs.writeFileSync(filename, data);
+  try {
+    fs.mkdirSync(path.dirname(filename));
+  } catch (err) {
+    if (err.code === 'EEXIST') {
+      console.log('directory already exist');
+    }
+  } finally {
+    fs.writeFileSync(filename, data);
+  }
 
   return 1;
 }
 export default {
-  get,
+  getSync,
   setSync,
 };

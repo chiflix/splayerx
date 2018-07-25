@@ -1,15 +1,12 @@
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+// import storage from '@/helpers/storage';
 import Sagi from './sagi';
-import storage from './storage';
 
 export default {
   methods: {
     sagi() { return Sagi; },
-    setSync(key, json) {
-      storage.setSync(key, json);
-    },
     timecodeFromSeconds(s) {
       const dt = new Date(Math.abs(s) * 1000);
       let hours = dt.getUTCHours();
@@ -56,61 +53,73 @@ export default {
       }
     },
     openFile(path) {
-      const result = storage.get('recent-played');
-      console.log(result);
-      console.log(path);
-      // this.$storage.set('recent-played', []);
-      // this.$storage.get('recent-played', (err, data) => {
-      //   console.log(data);
-      //   const newElement = {
-      //     path,
-      //     shortCut: '',
-      //     lastPlayedTime: 0,
-      //     duration: 0,
-      //   };
-      //   if (err) {
-      //     // TODO: proper error handle
-      //     this.$storage.set('recent-played', [newElement]);
-      //     console.log(err);
-      //   } else if (Array.isArray(data)) {
-      //     console.log('its an array!');
-      //     if (data.length < 4) {
-      //       if (this.$_indexOfExistedFileIn(data, path) === -1) {
-      //         data.unshift(newElement);
-      //       } else {
-      //         const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
-      //         if (item[0].lastPlayedTime !== 0) {
-      //           this.$bus.$emit('seek', item[0].lastPlayedTime);
-      //         }
-      //         data.unshift(item[0]);
-      //       }
-      //       console.log('changed:');
-      //       console.log(data);
-      //       this.$storage.set('recent-played', data);
-      //     } else {
-      //       if (this.$_indexOfExistedFileIn(data, path) === -1) {
-      //         data.pop();
-      //         data.unshift(newElement);
-      //       } else {
-      //         const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
-      //         if (item[0].lastPlayedTime !== 0) {
-      //           this.$bus.$emit('seek', item[0].lastPlayedTime);
-      //         }
-      //         data.unshift(item[0]);
-      //       }
-      //       console.log('changed:');
-      //       console.log(data);
-      //       this.$storage.set('recent-played', data);
-      //     }
-      //   } else {
-      //     this.$storage.set('recent-played', [newElement]);
-      //   }
-      //   this.$bus.$emit('new-file-open');
-      // });
-      // this.$store.commit('SrcOfVideo', path);
-      // this.$router.push({
-      //   name: 'playing-view',
-      // });
+      // let data;
+      // try {
+      //   data = storage.getSync('recent-played');
+      // } catch (error) {
+      //   console.error(error);
+      // }
+      // console.log(data);
+      // const newElement = {
+      //   path,
+      //   shortCut: '',
+      //   lastPlayedTime: 0,
+      //   duration: 0,
+      // };
+      // storage.setSync('recent-played', data);
+      // const result1 = storage.getSync('bcd');
+      // console.log(result1);
+      this.$storage.get('recent-played', (err, data) => {
+        console.log(data);
+        const newElement = {
+          path,
+          shortCut: '',
+          lastPlayedTime: 0,
+          duration: 0,
+        };
+        if (err) {
+          // TODO: proper error handle
+          this.$storage.set('recent-played', [newElement]);
+          console.log(err);
+        } else if (Array.isArray(data)) {
+          console.log('its an array!');
+          if (data.length < 4) {
+            if (this.$_indexOfExistedFileIn(data, path) === -1) {
+              data.unshift(newElement);
+            } else {
+              const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+              if (item[0].lastPlayedTime !== 0) {
+                this.$bus.$emit('seek', item[0].lastPlayedTime);
+              }
+              data.unshift(item[0]);
+            }
+            console.log('changed:');
+            console.log(data);
+            this.$storage.set('recent-played', data);
+          } else {
+            if (this.$_indexOfExistedFileIn(data, path) === -1) {
+              data.pop();
+              data.unshift(newElement);
+            } else {
+              const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+              if (item[0].lastPlayedTime !== 0) {
+                this.$bus.$emit('seek', item[0].lastPlayedTime);
+              }
+              data.unshift(item[0]);
+            }
+            console.log('changed:');
+            console.log(data);
+            this.$storage.set('recent-played', data);
+          }
+        } else {
+          this.$storage.set('recent-played', [newElement]);
+        }
+        this.$bus.$emit('new-file-open');
+      });
+      this.$store.commit('SrcOfVideo', path);
+      this.$router.push({
+        name: 'playing-view',
+      });
     },
     $_indexOfExistedFileIn(data, path) {
       for (let i = 0; i < data.length; i += 1) {

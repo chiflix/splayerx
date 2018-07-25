@@ -32,6 +32,7 @@ import { WebVTT } from 'vtt.js';
 import path from 'path';
 // https://www.w3schools.com/tags/ref_av_dom.asp
 import parallel from 'run-parallel';
+import storage from '@/helpers/storage';
 
 export default {
   data() {
@@ -84,6 +85,7 @@ export default {
     },
     onPause() {
       console.log('onpause');
+      this.$_saveScreenshot();
     },
     onPlaying() {
       console.log('onplaying');
@@ -95,13 +97,11 @@ export default {
     },
     onCanPlay() {
       // the video is ready to start playing
-      // this.$_getThumbnail();
       this.$store.commit('Volume', this.$refs.videoCanvas.volume);
     },
     onMetaLoaded() {
       console.log('loadedmetadata');
       this.$bus.$emit('play');
-      // this.$_getThumbnail();
       this.videoWidth = this.$refs.videoCanvas.videoWidth;
       this.videoHeight = this.$refs.videoCanvas.videoHeight;
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
@@ -123,6 +123,7 @@ export default {
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
       }
+      this.$_getScreenshot();
     },
     onDurationChange() {
       console.log('durationchange');
@@ -221,39 +222,37 @@ export default {
       }
       console.log(this.newWidthOfWindow);
     },
-    $_getThumbnail() {
+    $_getScreenshot() {
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       const { videoHeight, videoWidth } = this.$refs.videoCanvas;
       [canvas.width, canvas.height] = [videoWidth, videoHeight];
-      const landingViewWidth = 768;
 
       canvasCTX.drawImage(
         this.$refs.videoCanvas, 0, 0, videoWidth, videoHeight,
         0, 0, videoWidth, videoHeight,
       );
-      const imagePath = canvas.toDataURL('image/png', landingViewWidth / videoWidth);
-      this.$storage.get('recent-played', (err, data) => {
-        if (err) {
-          // TODO: proper error handle
-          console.error(err);
-        } else {
-          const object = data[0];
-          const iterator = Object.keys(object).indexOf('path');
-          if (iterator !== -1) {
-            object.shortCut = imagePath;
-            object.lastPlayedTime = this.currentTime;
-            object.duration = this.$store.state.PlaybackState.Duration;
-            data.splice(0, 1);
-            data.unshift(object);
-            this.$storage.set('recent-played', data);
-          }
-        }
-      });
-      let data = this.get('recent-played');
-      // process data
-      this.setSync('recent-played', data);
       console.log('shortCut!');
+    },
+    $_saveScreenshot() {
+      const canvas = this.$refs.thumbnailCanvas;
+      const imagePath = canvas.toDataURL('image/png');
+      let data;
+      try {
+        data = storage.getSync('recent-played');
+      } catch (err) {
+        console.error(err);
+      }
+      const object = data[0];
+      const iterator = Object.keys(object).indexOf('path');
+      if (iterator !== -1) {
+        object.shortCut = imagePath;
+        object.lastPlayedTime = this.currentTime;
+        object.duration = this.$store.state.PlaybackState.Duration;
+        data.splice(0, 1);
+        data.unshift(object);
+      }
+      storage.setSync('recent-played', data);
     },
     /**
      * @param callback Has two parameters, err and result
@@ -578,7 +577,6 @@ export default {
     this.$bus.$on('pause', () => {
       console.log('pause event has been triggered');
       this.$refs.videoCanvas.pause();
-      // this.$_getThumbnail();
     });
     this.$bus.$on('seek', (e) => {
       console.log('seek event has been triggered', e);
@@ -599,6 +597,11 @@ export default {
     });
 
     this.$bus.$on('subStyleChange', this.subStyleChange);
+  },
+  mounted() {
+    window.onbeforeunload = () => {
+      this.$_saveScreenshot();
+    };
   },
 };
 </script>
