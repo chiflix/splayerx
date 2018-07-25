@@ -32,9 +32,19 @@ build_script:
 
 test: off
 
-artifacts:
-  - path: 'build\*Setup*.exe'
+after_build:
+  # need appveyor will replace space in filename by ., but electron updater need '-', before deploy need to replace \s by -
+  - cmd: 'forfiles  /P build /m *.blockmap /C "cmd /e:on /v:on /c set \"Phile=@file\" & if @ISDIR==FALSE ren @file !Phile: =-!"'
+  - cmd: 'forfiles  /P build /m *.exe  /C "cmd /e:on /v:on /c set \"Phile=@file\" & if @ISDIR==FALSE ren @file !Phile: =-!"'
 
+artifacts:
+  - path: 'build\*.exe'
+  - path: 'build\*exe.blockmap'
+  - path: 'build\latest.yml'
+
+environment:
+  GH_TOKEN:
+    secure:  # todo your encrypted token from GitHub
 deploy:
   release: $(appveyor_repo_tag_name)
   description: 'Release description'

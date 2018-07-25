@@ -44,6 +44,9 @@ deploy:
   - build/*.dmg
   - build/*.deb
   - build/*.rpm
+  - build/latest-mac.yml
+  - build/*.blockmap
+  - build/*.zip
   skip_cleanup: true
   on:
     tags: true
@@ -59,3 +62,7 @@ env:
     # prevent wine popup dialogs about installing additional packages
     - WINEDLLOVERRIDES="mscoree,mshtml="
     - WINEDEBUG="-all"
+    - GH_TOKEN : #todo github auth key
+    # for mac signature
+    - CSC_LINK :   #todo the base64 signature file
+    - CSC_KEY_PASSWORD :  #todo the extraction key

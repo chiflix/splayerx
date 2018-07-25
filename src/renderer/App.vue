@@ -1,12 +1,21 @@
 <template>
   <div id="app" class="application">
     <router-view></router-view>
+    <!--lyctest-->
+    <UpdaterProgressIndicator> </UpdaterProgressIndicator>
+    <!--lyctest-->
   </div>
 </template>
 
 <script>
+  import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   export default {
     name: 'splayer',
+    // -> for test todo need delete lyctest
+    components: {
+      UpdaterProgressIndicator,
+    },
+    // <-for test todo need delete lyctest
     methods: {
       mainCommitProxy(commitType, commitPayload) {
         this.$store.commit(commitType, commitPayload);
