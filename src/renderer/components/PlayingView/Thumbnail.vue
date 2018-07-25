@@ -22,13 +22,8 @@
           v-if="videoCanvasShow"
           v-show="!this.autoGeneration">
         </video>
-        <img
-          v-if=false
-          v-show="this.autoGeneration"
-          :width=widthOfThumbnail
-          :height=heightOfThumbnail
-          :src="imageURL" />
         <canvas
+          v-show="this.autoGeneration"
           ref="bitmapCanvas"
           :width=widthOfThumbnail
           :height=heightOfThumbnail>
@@ -84,10 +79,9 @@ export default {
         finished: false, // whether or not thumbnail load finished
       },
       imageMap: new Map(), // the set for base64 encoded thumbnails
-      imageURL: null, // temp variable for img src attribute
       manualGenerationIndex: 0, // isolated thumbnail index variable for manual generation
       // constants
-      MAX_THUMBNAIL_COUNT: 60, // max number of thumbnail generated
+      MAX_THUMBNAIL_COUNT: 100, // max number of thumbnail generated
       IMAGE_QUALITY: 0.5, // the quality of thumbnail images (only webp or jpeg type)
       // Web Worker
       thumbnailWorker: new ThumbnailWorker(),
@@ -95,7 +89,7 @@ export default {
   },
   watch: {
     currentTime(newValue) {
-      this.setImageURL(newValue);
+      this.setImage(newValue);
     },
     src() {
       this.videoCanvasShow = true;
@@ -108,17 +102,8 @@ export default {
       this.videoInfoInit();
       this.calculateGenerationInterval();
       this.thumbnailInfoInit();
-      const offscreenImageCanvas = this.$refs.bitmapCanvas.transferControlToOffscreen();
-      this.thumbnailWorker.postMessage({
-        type: 'generation-start',
-        thumbnailSize: [
-          this.maxThumbnailWidth,
-          this.maxThumbnailHeight,
-        ],
-        bitmapCanvas: offscreenImageCanvas,
-      }, [offscreenImageCanvas]);
+      this.thumbnailWorkerInit();
       this.autoGeneration = true;
-      this.thumbnailInfo.video.currentTime = 0;
     },
     // calculate the interval for auto-generation
     calculateGenerationInterval() {
@@ -138,6 +123,7 @@ export default {
     thumbnailInfoInit() {
       this.thumbnailInfo.canvas = this.$refs.thumbnailCanvas;
       this.thumbnailInfo.video = this.$refs.thumbnailVideo || document.querySelector('#thumbnailVideo');
+      this.thumbnailInfo.video.currentTime = 0;
       this.thumbnailInfo.video.addEventListener('seeked', this.thumbnailGeneration);
       this.thumbnailInfo.finished = false;
       this.imageMap = new Map();
@@ -150,6 +136,19 @@ export default {
       parseInt(this.videoInfo.duration / this.thumbnailInfo.generationInterval, 10);
       this.videoInfo.currentIndex = 0;
     },
+    // Initialize thumbnail worker
+    thumbnailWorkerInit() {
+      const offscreenImageCanvas = this.$refs.bitmapCanvas.transferControlToOffscreen();
+      this.thumbnailWorker.postMessage({
+        type: 'generation-start',
+        thumbnailSize: [
+          this.maxThumbnailWidth,
+          this.maxThumbnailHeight,
+        ],
+        bitmapCanvas: offscreenImageCanvas,
+      }, [offscreenImageCanvas]);
+      this.thumbnailWorker.addEventListener('message', this.setImageOrNot);
+    },
     // Function to pause thumbnail auto generation
     pauseAutoGeneration() {
       if (this.autoGenerationDelay !== 0) {
@@ -161,7 +160,7 @@ export default {
     },
     // Function to resume thumbnail auto generation
     resumeAutoGeneration() {
-      this.setImageURL(this.thumbnailInfo.video.currentTime);
+      this.setImage(this.thumbnailInfo.video.currentTime);
       this.autoGeneration = true;
       console.log('[Thumbnail]: Thumbnail generation resumed!');
       console.log(`[Thumbnail]: Current index is ${this.videoInfo.currentIndex}.`);
@@ -178,7 +177,7 @@ export default {
       let destTime = null;
       let currentIndex = null;
       const { manualGenerationIndex } = this;
-      const { videoWidth, videoHeight } = document.querySelector('video');
+      // const { videoWidth, videoHeight } = document.querySelector('video');
       if (this.autoGeneration) {
         destTime = autoGenerationIndex * pace;
         currentIndex = autoGenerationIndex;
@@ -190,32 +189,17 @@ export default {
       }
       if (destTime !== null && currentIndex !== null) {
         if (actualTime === destTime && !this.imageMap.get(currentIndex)) {
-          this.thumbnailInfo.canvas.getContext('2d').drawImage(
-            this.thumbnailInfo.video,
-            0, 0, videoWidth, videoHeight,
-            0, 0, this.maxThumbnailWidth, this.maxThumbnailHeight,
-          );
+          console.time('create Image');
           createImageBitmap(this.thumbnailInfo.video).then((result) => {
+            console.timeEnd('create Image');
+            console.time('image send');
             this.thumbnailWorker.postMessage({
               type: 'thumbnail-generated',
               thumbnailImageBitmap: result,
               index: currentIndex,
               originSize: [result.width, result.height],
             }, [result]);
-          });
-          this.getCanvasBlob(this.thumbnailInfo.canvas, currentIndex).then((blobObject) => {
-            this.imageMap.set(currentIndex, blobObject);
-            if (this.imageMap.get(currentIndex)
-              && this.videoInfo.currentIndex < this.thumbnailInfo.count
-              && this.autoGeneration) {
-              this.videoInfo.currentIndex += 1;
-              this.thumbnailInfo.video.currentTime
-              = this.videoInfo.currentTime
-              = this.videoInfo.currentIndex * this.thumbnailInfo.generationInterval;
-            }
-            console.log(`[Thumbnail]: No.${currentIndex} image generated!`);
-          }).catch((err) => {
-            console.log(err);
+            console.timeEnd('image send');
           });
         }
         if (this.videoInfo.currentIndex === 0) {
@@ -227,56 +211,49 @@ export default {
           console.log(`[Thumbnail]: A total of ${this.thumbnailInfo.count} webp thumbnails of quality ${this.IMAGE_QUALITY} generated.`);
           console.log('[Thumbnail]:', this.videoInfo, this.imageMap);
           this.thumbnailInfo.video.removeEventListener('seeked', this.thumbnailGeneration);
+          this.thumbnailWorker.removeEventListener('message', this.setImageOrNot);
         }
       }
     },
-    // set imageURL
-    setImageURL(newValue) {
+    // set image
+    setImage(newValue) {
       let currentIndex = parseInt(newValue / this.thumbnailInfo.generationInterval, 10);
       const currentTime = currentIndex * this.thumbnailInfo.generationInterval;
-      if (currentIndex === this.videoInfo.lastIndex && currentIndex !== 0) {
-        return;
-      }
-      if (this.imageMap.get(currentIndex)) {
-        console.log(`Image ${currentIndex} set!`);
-        console.time('image request');
-        this.thumbnailWorker.postMessage({
-          type: 'thumbnail-request',
-          index: currentIndex,
-          size: [this.widthOfThumbnail, this.heightOfThumbnail],
-        });
-        console.timeEnd('image request');
-        URL.revokeObjectURL(this.imageMap.get(this.videoInfo.lastIndex));
-        this.imageURL = URL.createObjectURL(this.imageMap.get(currentIndex));
-        console.log(this.imageURL);
-        if (this.imageURL) {
-          console.log('Sucess create imageURL.');
-        } else {
-          console.error('Error create imageURL.');
-          return;
+      if (currentIndex !== this.videoInfo.lastIndex || currentIndex === 0) {
+        if (this.imageMap.get(currentIndex)) {
+          console.log(`Image ${currentIndex} set!`);
+          console.time('image request');
+          this.thumbnailWorker.postMessage({
+            type: 'thumbnail-request',
+            index: currentIndex,
+            size: [this.widthOfThumbnail, this.heightOfThumbnail],
+          });
+          console.timeEnd('image request');
+        } else if (!this.thumbnailInfo.finished) {
+          this.autoGeneration = false;
+          this.$bus.$emit('thumbnail-generation-paused');
+          this.thumbnailInfo.video.currentTime = currentTime;
+          this.manualGenerationIndex = currentIndex;
+        } else if (currentIndex >= this.imageMap.length) {
+          currentIndex = this.imageMap.length - 1;
         }
-        console.log(this.imageURL);
-        console.log(`Horay! Number ${currentIndex} found!`);
-      } else if (!this.thumbnailInfo.finished) {
-        this.autoGeneration = false;
-        this.$bus.$emit('thumbnail-generation-paused');
-        this.thumbnailInfo.video.currentTime = currentTime;
-        this.manualGenerationIndex = currentIndex;
-      } else if (currentIndex >= this.imageMap.length) {
-        currentIndex = this.imageMap.length - 1;
+        this.videoInfo.lastIndex = currentIndex;
       }
-      this.videoInfo.lastIndex = currentIndex;
     },
-    getCanvasBlob(canvasElement) {
-      return new Promise((resolve, reject) => {
-        canvasElement.toBlob((blobObject) => {
-          if (blobObject.size) {
-            resolve(blobObject);
-          } else {
-            reject(new Error('[Thumbnail]: Error creating blob ebject.'));
-          }
-        }, 'image/webp');
-      });
+    setImageOrNot(event) {
+      if (event.data.type === 'thumbnail-set') {
+        const currentIndex = event.data.index;
+        this.imageMap.set(currentIndex, true);
+        if (this.imageMap.get(currentIndex)
+          && this.videoInfo.currentIndex < this.thumbnailInfo.count
+          && this.autoGeneration) {
+          this.videoInfo.currentIndex += 1;
+          this.thumbnailInfo.video.currentTime
+          = this.videoInfo.currentTime
+           = this.videoInfo.currentIndex * this.thumbnailInfo.generationInterval;
+        }
+        console.log(`[Thumbnail]: No.${currentIndex} image generated!`);
+      }
     },
   },
   created() {

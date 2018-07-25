@@ -40,7 +40,6 @@ self.addEventListener('message', (event) => {
       }
       const currentCanvas = canvasMap.get(canvasIndex);
       const canvasContext = currentCanvas.getContext('2d');
-      console.log(...event.data.originSize);
       canvasContext.drawImage(
         event.data.thumbnailImageBitmap,
         // Thumbnail source position and size
@@ -51,6 +50,10 @@ self.addEventListener('message', (event) => {
         ...thumbnailSize,
       );
       imageMap.set(thumbnailIndex, event.data.thumbnailImageBitmap);
+      postMessage({
+        type: 'thumbnail-set',
+        index: thumbnailIndex,
+      });
       break;
     }
     case 'thumbnail-request': {
