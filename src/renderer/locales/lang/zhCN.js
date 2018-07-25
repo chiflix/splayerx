@@ -53,6 +53,12 @@ export default {
       hideOthers: '隐藏 其他',
       quit: '退出',
     },
+    update: {
+      title: '更新就绪',
+      message: '更新已就绪，是否现在重启?',
+      yes: '是',
+      no: '否',
+    },
   },
   css: {
     titleFontSize: { fontSize: '4vw' },
