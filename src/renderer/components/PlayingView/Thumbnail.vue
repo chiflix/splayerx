@@ -84,7 +84,7 @@ export default {
       MAX_THUMBNAIL_COUNT: 600, // max number of thumbnail generated
       IMAGE_QUALITY: 0.5, // the quality of thumbnail images (only webp or jpeg type)
       // Web Worker
-      thumbnailWorker = new ThumbnailWorker(),
+      thumbnailWorker: new ThumbnailWorker(),
     };
   },
   watch: {
@@ -102,15 +102,15 @@ export default {
       this.videoInfoInit();
       this.calculateGenerationInterval();
       this.thumbnailInfoInit();
-      this.autoGeneration = true;
-      this.thumbnailInfo.video.currentTime = 0;
       this.thumbnailWorker.postMessage({
         type: 'generation-start',
         thumbnailSize: [
-          maxThumbnailWidth,
-          maxThumbnailHeight,
+          this.maxThumbnailWidth,
+          this.maxThumbnailHeight,
         ],
       });
+      this.autoGeneration = true;
+      this.thumbnailInfo.video.currentTime = 0;
     },
     // calculate the interval for auto-generation
     calculateGenerationInterval() {
@@ -187,6 +187,13 @@ export default {
             0, 0, videoWidth, videoHeight,
             0, 0, this.maxThumbnailWidth, this.maxThumbnailHeight,
           );
+          createImageBitmap(this.thumbnailInfo.video).then((result) => {
+            this.thumbnailWorker.postMessage({
+              type: 'thumbnail-generated',
+              thumbnailImageBitmap: result,
+              index: currentIndex,
+            }, [result]);
+          });
           this.getCanvasBlob(this.thumbnailInfo.canvas, currentIndex).then((blobObject) => {
             this.imageMap.set(currentIndex, blobObject);
             if (this.imageMap.get(currentIndex)
