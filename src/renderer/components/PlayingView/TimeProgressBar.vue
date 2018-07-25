@@ -129,6 +129,7 @@ export default {
     },
     videoRestart() {
       this.$_resetRestartButton();
+      this.showScreenshot = false;
       this.$bus.$emit('seek', 0);
     },
     onProgressBarClick(e) {
@@ -141,6 +142,7 @@ export default {
       // Reset restart button when seek to the 0s of the video
       if (p <= 0) {
         this.$_resetRestartButton();
+        this.showScreenshot = false;
       }
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       this.$_documentProgressDragClear();
