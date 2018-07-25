@@ -36,6 +36,7 @@
 </template>;
 
 <script>
+import ThumbnailWorker from '../../worker/thumbnail.worker';
 export default {
   props: {
     src: {
@@ -82,6 +83,8 @@ export default {
       // constants
       MAX_THUMBNAIL_COUNT: 600, // max number of thumbnail generated
       IMAGE_QUALITY: 0.5, // the quality of thumbnail images (only webp or jpeg type)
+      // Web Worker
+      thumbnailWorker = new ThumbnailWorker(),
     };
   },
   watch: {
@@ -101,6 +104,13 @@ export default {
       this.thumbnailInfoInit();
       this.autoGeneration = true;
       this.thumbnailInfo.video.currentTime = 0;
+      this.thumbnailWorker.postMessage({
+        type: 'generation-start',
+        thumbnailSize: [
+          maxThumbnailWidth,
+          maxThumbnailHeight,
+        ],
+      });
     },
     // calculate the interval for auto-generation
     calculateGenerationInterval() {
