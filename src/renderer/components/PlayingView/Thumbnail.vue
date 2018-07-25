@@ -54,6 +54,8 @@ export default {
     heightOfThumbnail: Number,
     screenshotContent: null,
     currentTime: Number,
+    maxThumbnailWidth: Number,
+    maxThumbnailHeight: Number,
   },
   data() {
     return {
@@ -173,7 +175,7 @@ export default {
           this.thumbnailInfo.canvas.getContext('2d').drawImage(
             this.thumbnailInfo.video,
             0, 0, videoWidth, videoHeight,
-            0, 0, this.widthOfThumbnail, this.heightOfThumbnail,
+            0, 0, this.maxThumbnailWidth, this.maxThumbnailHeight,
           );
           this.getCanvasBlob(this.thumbnailInfo.canvas, currentIndex).then((blobObject) => {
             this.imageMap.set(currentIndex, blobObject);

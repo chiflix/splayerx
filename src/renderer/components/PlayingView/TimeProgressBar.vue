@@ -24,10 +24,14 @@
         v-show="showScreenshot"
         :src=src
         :positionOfScreenshot="positionOfScreenshot"
+        :width="widthOfThumbnail"
+        :height="heightOfThumbnail"
         :widthOfThumbnail="widthOfThumbnail"
         :heightOfThumbnail="heightOfThumbnail"
         :screenshotContent="screenshotContent"
-        :currentTime="thumbnailCurrentTime"/>
+        :currentTime="thumbnailCurrentTime"
+        :maxThumbnailWidth="240"
+        :maxThumbnailHeight="Math.floor(240 / videoRatio)" />
         <!-- translate优化 -->
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
