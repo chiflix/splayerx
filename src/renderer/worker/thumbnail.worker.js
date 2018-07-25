@@ -6,6 +6,15 @@ const THUMBNAILS_PER_COMPOSITION = 30;
 // How thumbnails layout ([row, column])
 const THUMBNAIL_LAYOUT = [5, 6];
 
+function getImageBitmapPosition(thumbnailIndex, THUMBNAIL_LAYOUT, thumbnailSize) {
+  return [
+    // Thumbnail destination position X
+    (thumbnailIndex % THUMBNAIL_LAYOUT[1]) * thumbnailSize[0],
+    // Thumbnail destination position Y
+    Math.floor(thumbnailIndex / THUMBNAIL_LAYOUT[0]) * thumbnailSize[1],
+  ];
+}
+
 /* eslint-disable no-restricted-globals */
 self.addEventListener('message', (event) => {
   switch (event.data.type) {
@@ -33,10 +42,8 @@ self.addEventListener('message', (event) => {
         event.data.thumbnailImageBitmap,
         // Thumbnail source position and size
         0, 0, ...thumbnailSize,
-        // Thumbnail destination position X
-        (thumbnailIndex % THUMBNAIL_LAYOUT[1]) * thumbnailSize[0],
-        // Thumbnail destination position Y
-        Math.floor(thumbnailIndex / THUMBNAIL_LAYOUT[0]) * thumbnailSize[1],
+        // Thumbnail destination position
+        ...getImageBitmapPosition(thumbnailIndex, THUMBNAIL_LAYOUT, thumbnailSize),
         // Thumbnail destination size
         ...thumbnailSize,
       );
