@@ -1,7 +1,9 @@
 import path from 'path';
 import fs from 'fs';
-import sagiHealthMessages from 'sagi-apis-client/health/v1/health_pb';
-import sagiHealthServices from 'sagi-apis-client/health/v1/health_grpc_pb';
+import healthMsg from 'sagi-apis-client/health/v1/health_pb';
+import healthRpc from 'sagi-apis-client/health/v1/health_grpc_pb';
+import translationMsg from 'sagi-apis-client/translation/v1/translation_pb';
+import translationRpc from 'sagi-apis-client/translation/v1/translation_grpc_pb';
 /* eslint-disable */
 const grpc = require('grpc');
 /* eslint-enable */
@@ -22,17 +24,33 @@ class Sagi {
     }
   }
 
+  mediaTranslate(mediaIdentity) {
+    return new Promise((resolve, reject) => {
+      const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
+      const req = new translationMsg.MediaTranslationRequest();
+      req.mediaIdentity = mediaIdentity;
+      client.translateMedia(req, (err, response) => {
+        console.log(err, response);
+        if (err) {
+          reject(err);
+        } else {
+          // TODO: get real script
+          resolve(response);
+        }
+      });
+    });
+  }
+
   // check sagi-api health, return UNKNOWN(0), SERVING(1) or XXXXX
   healthCheck() {
     return new Promise((resolve, reject) => {
-      const client = new sagiHealthServices.HealthClient(this.endpoint, this.creds);
-      client.check(new sagiHealthMessages.HealthCheckRequest(), (err, response) => {
-        if (response && response.getStatus()) {
-          this.apiStatus = response.getStatus();
-          resolve(this.apiStatus);
-        } else {
+      const client = new healthRpc.HealthClient(this.endpoint, this.creds);
+      client.check(new healthMsg.HealthCheckRequest(), (err, response) => {
+        if (err) {
           console.log(err);
           reject(err);
+        } else {
+          resolve(response.getStatus());
         }
       });
     });
