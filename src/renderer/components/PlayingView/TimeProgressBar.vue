@@ -92,7 +92,7 @@ export default {
       timeoutIdOfBackBarDisapppearDelay: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
-      videoRatio: 0,
+      videoRatio: 1.78, // Default videoRatio incase of divide by zero error.
       percentageVideoDraged: 0,
       widthOfThumbnail: 0,
       thumbnailCurrentTime: 0,
