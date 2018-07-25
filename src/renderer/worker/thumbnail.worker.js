@@ -11,7 +11,8 @@ function getImageBitmapPosition(thumbnailIndex, THUMBNAIL_LAYOUT, thumbnailSize)
     // Thumbnail destination position X
     (thumbnailIndex % THUMBNAIL_LAYOUT[1]) * thumbnailSize[0],
     // Thumbnail destination position Y
-    Math.floor(thumbnailIndex / THUMBNAIL_LAYOUT[0]) * thumbnailSize[1],
+    Math.floor((thumbnailIndex % THUMBNAILS_PER_COMPOSITION) / THUMBNAIL_LAYOUT[1])
+    * thumbnailSize[1],
   ];
 }
 
