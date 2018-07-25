@@ -58,6 +58,13 @@ let rendererConfig = {
         exclude: /node_modules/
       },
       {
+        // 匹配 *.worker.js
+        test: /\.worker\.js$/,
+        use: {
+          loader: 'worker-loader',
+        }
+      },
+      {
         test: /\.node$/,
         use: 'node-loader'
       },
