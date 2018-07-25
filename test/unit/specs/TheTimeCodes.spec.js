@@ -181,4 +181,17 @@ describe('TheTimeCodes.vue', () => {
     expect(wrapper.vm.content.second).equal(wrapper.vm.duration);
   });
 
+  // event triggerring correct methods testing
+  it('switchStateOfContent method can be triggered by mousedown.stop', () => {
+    const wrapper = shallowMount(TheTimeCodes, { store, localVue });
+    const spy = sinon.spy(wrapper.vm, 'switchStateOfContent');
+    wrapper.find('.timing').trigger('mousedown.stop');
+    expect(spy.calledOnce).equal(true);
+  });
+  it('appearTimeCode method can be triggered by mousedown.stop', () => {
+    const wrapper = shallowMount(TheTimeCodes, { store, localVue });
+    const spy = sinon.spy(wrapper.vm, 'appearTimeCode');
+    wrapper.find('.timing').trigger('mouseover.stop');
+    expect(spy.calledOnce).equal(true);
+  });
 });
