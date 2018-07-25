@@ -22,7 +22,7 @@ describe('PlayingView.vue', () => {
     });
   });
   it('correct data when mounted', () => {
-    const wrapper = shallowMount(PlayingView, ({ store, localVue}));
+    const wrapper = shallowMount(PlayingView, ({ store, localVue }));
     expect(wrapper.vm.leave).equal(false);
     expect(wrapper.vm.isDragging).equal(false);
     expect(wrapper.vm.showMask).equal(false);
