@@ -8,7 +8,7 @@
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
-    "build": "node .electron-vue/build.js && cross-env DEBUG=electron-download electron-builder",
+    "build": "node .electron-vue/build.js && cross-env DEBUG=electron-download electron-builder --p never",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
@@ -27,6 +27,13 @@
     "electron": "node_modules/@chiflix/electron"
   },
   "build": {
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "chiflix",
+        "repo": "splayerx"
+      }
+    ],
     "productName": "SPlayer",
     "appId": "org.splayer.x",
     "directories": {
@@ -56,7 +63,11 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "win": {
       "icon": "build/icons/icon.ico"
@@ -71,6 +82,11 @@
   "dependencies": {
     "axios": "^0.18.0",
     "electron-json-storage": "^4.1.0",
+    "bluebird": "^3.5.1",
+    "electron-builder-http": "^19.27.5",
+    "electron-log": "^1.3.0",
+    "electron-mocha": "^6.0.4",
+    "electron-updater": "^3.0.3",
     "lodash": "^4.17.10",
     "module-alias": "^2.0.6",
     "npm": "^6.1.0",
