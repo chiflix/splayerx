@@ -28,7 +28,7 @@ class Sagi {
     return new Promise((resolve, reject) => {
       const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
       const req = new translationMsg.MediaTranslationRequest();
-      req.mediaIdentity = mediaIdentity;
+      req.setMediaIdentity(mediaIdentity);
       client.translateMedia(req, (err, response) => {
         if (err) {
           console.log(err);
