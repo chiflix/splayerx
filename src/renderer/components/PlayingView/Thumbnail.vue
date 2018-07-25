@@ -78,7 +78,7 @@ export default {
       imageURL: null, // temp variable for img src attribute
       manualGenerationIndex: 0, // isolated thumbnail index variable for manual generation
       // constants
-      MAX_THUMBNAIL_COUNT: 600, // max number of thumbnail generated
+      MAX_THUMBNAIL_COUNT: 1, // max number of thumbnail generated
       IMAGE_QUALITY: 0.5, // the quality of thumbnail images (only webp or jpeg type)
     };
   },

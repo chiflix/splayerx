@@ -7,14 +7,12 @@
     @mousemove="onProgressBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.left.stop="videoRestart"
-      @mouseenter="appearShakingEffect"
-      @mouseleave="hideShakingEffect">
+      @mousedown.left.stop="videoRestart">
       <div class="line"
         v-show="!isShaking"></div>
       <div class="button"
         v-show="isShaking"
-        :class="{shake: isShaking}"
+        :class="{shake: false}"
         :style="{borderTopRightRadius: buttonRadius + 'px', borderBottomRightRadius: buttonRadius + 'px', width: buttonWidth + 'px'}"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
@@ -84,6 +82,7 @@ export default {
       isCursorLeft: false,
       isOnProgress: false,
       isShaking: false,
+      isRestart: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       timeoutIdOfBackBarDisapppearDelay: 0,
       percentageOfReadyToPlay: 0,
@@ -106,7 +105,7 @@ export default {
       this.$refs.backSlider.style.height = PROGRESS_BAR_HEIGHT;
     },
     hideProgressSlider() {
-      if (!this.onProgressSliderMousedown) {
+      if (!this.onProgressSliderMousedown && !this.isRestart) {
         this.isOnProgress = false;
         this.showScreenshot = false;
         this.$_resetRestartButton();
@@ -130,6 +129,7 @@ export default {
     videoRestart() {
       this.$_resetRestartButton();
       this.showScreenshot = false;
+      this.isRestart = true;
       this.$bus.$emit('seek', 0);
     },
     onProgressBarClick(e) {
@@ -141,8 +141,9 @@ export default {
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
       // Reset restart button when seek to the 0s of the video
       if (p <= 0) {
-        this.$_resetRestartButton();
+        this.isRestart = true;
         this.showScreenshot = false;
+        this.$_resetRestartButton();
       }
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       this.$_documentProgressDragClear();
@@ -238,14 +239,14 @@ export default {
       this.$_resetRestartButton();
     },
     $_resetRestartButton() {
-      this.buttonWidth = FOOL_PROOFING_BAR_WIDTH;
+      // this.buttonWidth = FOOL_PROOFING_BAR_WIDTH;
       this.buttonRadius = 0;
-      this.isShaking = false;
+      // this.isShaking = false;
     },
   },
   computed: {
     curProgressBarEdge() {
-      if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
+      if (this.isRestart || Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return 0;
       }
       const progressBarWidth = this.winWidth - FOOL_PROOFING_BAR_WIDTH;
@@ -267,13 +268,16 @@ export default {
       return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursorState);
     },
     backBarWidth() {
+      this.isRestart = false;
       if (this.cursorPosition <= 0) {
         return 0;
       }
       return this.isCursorLeft ? this.cursorPosition : 0;
     },
     progressOpacity() {
-      if (this.isOnProgress) {
+      if (this.isRestart) {
+        return 0.9;
+      } else if (this.isOnProgress) {
         return this.isCursorLeft ? 0.3 : 0.9;
       }
       return 0.9;
@@ -302,13 +306,14 @@ export default {
     },
   },
   watch: {
-    cursorPosition(newVal, oldVal) {
-      if (newVal < oldVal && this.isOnProgress && newVal <= 0 && oldVal <= 0) {
-        this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
-        this.buttonRadius = Math.abs(this.cursorPosition);
-        console.log('watch');
+    cursorPosition(newVal) {
+      if (this.isOnProgress && newVal <= 0) {
+        // this.buttonWidth = 20;
+        this.buttonRadius = 20;
+        // this.isRestart = false;
         this.isShaking = true;
       } else {
+        this.isShaking = false;
         this.$_resetRestartButton();
       }
     },
@@ -401,6 +406,7 @@ export default {
       height: 100%;
       background: rgba(255, 255, 255, 0.9);
       box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
+      transition: border-radius 500ms;
       border-bottom-left-radius: 0;
       border-top-left-radius: 0;
     }
