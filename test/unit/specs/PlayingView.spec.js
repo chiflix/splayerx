@@ -1,6 +1,6 @@
 import PlayingView from '@/components/PlayingView.vue';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'Vuex';
+import Vuex from 'vuex';
 import PlaybackState from '@/store/modules/PlaybackState';
 import sinon from 'sinon';
 
@@ -38,22 +38,22 @@ describe('PlayingView.vue', () => {
   it('mouseleave event trigger', () => {
     const wrapper = shallowMount(PlayingView, ({ store, localVue }));
     wrapper.find('.video-controller').trigger('mouseleave');
-    expect(wrapper.vm.leave).to.be.true;
+    expect(wrapper.vm.leave).equal(true);
   });
   it('hideAllWidgets method works fine', () => {
     const wrapper = shallowMount(PlayingView, ({ store, localVue }));
     const globalEventBusEmitSpy = sinon.spy(wrapper.vm.$bus, '$emit');
     wrapper.vm.hideAllWidgets();
 
-    // whether event bus work fine
+    // whether event bus works fine
     expect(globalEventBusEmitSpy.callCount).equal(6);
-    expect(globalEventBusEmitSpy.calledWith('volumecontroller-hide')).to.be.true;
-    expect(globalEventBusEmitSpy.calledWith('progressbar-hide')).to.be.true;
-    expect(globalEventBusEmitSpy.calledWith('timecode-hide')).to.be.true;
-    expect(globalEventBusEmitSpy.calledWith('sub-ctrl-hide')).to.be.true;
-    expect(globalEventBusEmitSpy.calledWith('titlebar-hide')).to.be.true;
+    expect(globalEventBusEmitSpy.calledWith('volumecontroller-hide')).equal(true);
+    expect(globalEventBusEmitSpy.calledWith('progressbar-hide')).equal(true);
+    expect(globalEventBusEmitSpy.calledWith('timecode-hide')).equal(true);
+    expect(globalEventBusEmitSpy.calledWith('sub-ctrl-hide')).equal(true);
+    expect(globalEventBusEmitSpy.calledWith('titlebar-hide')).equal(true);
 
-    expect(wrapper.vm.cursorShow).to.be.false;
+    expect(wrapper.vm.cursorShow).equal(false);
     globalEventBusEmitSpy.restore();
   });
 });
