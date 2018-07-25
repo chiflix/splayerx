@@ -30,7 +30,6 @@ class Sagi {
       const req = new translationMsg.MediaTranslationRequest();
       req.mediaIdentity = mediaIdentity;
       client.translateMedia(req, (err, response) => {
-
         if (err) {
           console.log(err);
           reject(err);
