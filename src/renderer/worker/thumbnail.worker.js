@@ -56,6 +56,9 @@ self.addEventListener('message', (event) => {
     case 'thumbnail-request': {
       const thumbnailIndex = event.data.index;
       const canvasIndex = Math.floor(thumbnailIndex / THUMBNAILS_PER_COMPOSITION);
+      if (!bitmapCanvas.width || !bitmapCanvas.height) {
+        [bitmapCanvas.width, bitmapCanvas.height] = event.data.size;
+      }
       console.log(`I need to draw image No.${thumbnailIndex}!`);
       if (canvasMap.get(canvasIndex)) {
         console.time('image draw');
@@ -65,7 +68,7 @@ self.addEventListener('message', (event) => {
           ...thumbnailSize,
         ).then((result) => {
           const gl = bitmapCanvas.getContext('2d');
-          gl.drawImage(result, 0, 0);
+          gl.drawImage(result, 0, 0, ...event.data.size);
           gl.commit();
         });
         console.timeEnd('image draw');

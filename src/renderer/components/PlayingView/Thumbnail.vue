@@ -243,6 +243,7 @@ export default {
         this.thumbnailWorker.postMessage({
           type: 'thumbnail-request',
           index: currentIndex,
+          size: [this.widthOfThumbnail, this.heightOfThumbnail],
         });
         console.timeEnd('image request');
         URL.revokeObjectURL(this.imageMap.get(this.videoInfo.lastIndex));
