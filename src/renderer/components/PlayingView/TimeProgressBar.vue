@@ -5,9 +5,13 @@
     @mouseover.stop="appearProgressSlider"
     @mouseleave="hideProgressSlider"
     @mousemove="onProgressBarMove"
-    v-show="showProgressBar">
+    v-show="true">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.left.stop="videoRestart">
+      @mousedown.left.stop.capture="videoRestart">
+      <div class="fake-button"
+        @mouseover.stop="doNothing"
+        @mousemove.stop="doNothing"
+        :style="{height: heightOfThumbnail + 11 + 'px'}"></div>
       <div class="line"
         v-show="!isShaking"></div>
       <div class="button"
@@ -17,7 +21,7 @@
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.winWidth - 20 + 'px'}"
-      @mousedown.left="onProgressBarClick">
+      @mousedown.left.stop.capture="onProgressBarClick">
       <Thumbnail
         v-show="showScreenshot"
         :src=src
@@ -82,7 +86,6 @@ export default {
       isCursorLeft: false,
       isOnProgress: false,
       isShaking: false,
-      isRestart: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       timeoutIdOfBackBarDisapppearDelay: 0,
       percentageOfReadyToPlay: 0,
@@ -96,7 +99,11 @@ export default {
     };
   },
   methods: {
+    doNothing() {
+      console.log('doNothing');
+    },
     appearProgressSlider() {
+      console.log(111111);
       this.isOnProgress = true;
       this.$bus.$emit('clearAllWidgetDisappearDelay');
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
@@ -105,7 +112,7 @@ export default {
       this.$refs.backSlider.style.height = PROGRESS_BAR_HEIGHT;
     },
     hideProgressSlider() {
-      if (!this.onProgressSliderMousedown && !this.isRestart) {
+      if (!this.onProgressSliderMousedown) {
         this.isOnProgress = false;
         this.showScreenshot = false;
         this.$_resetRestartButton();
@@ -129,7 +136,6 @@ export default {
     videoRestart() {
       this.$_resetRestartButton();
       this.showScreenshot = false;
-      this.isRestart = true;
       this.$bus.$emit('seek', 0);
     },
     onProgressBarClick(e) {
@@ -139,12 +145,6 @@ export default {
       this.onProgressSliderMousedown = true;
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
-      // Reset restart button when seek to the 0s of the video
-      if (p <= 0) {
-        this.isRestart = true;
-        this.showScreenshot = false;
-        this.$_resetRestartButton();
-      }
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       this.$_documentProgressDragClear();
       this.$_documentProgressDragEvent();
@@ -246,7 +246,7 @@ export default {
   },
   computed: {
     curProgressBarEdge() {
-      if (this.isRestart || Number.isNaN(this.$store.state.PlaybackState.Duration)) {
+      if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return 0;
       }
       const progressBarWidth = this.winWidth - FOOL_PROOFING_BAR_WIDTH;
@@ -268,16 +268,13 @@ export default {
       return this.isCursorLeft ? 0 : Math.abs(this.curProgressBarEdge - this.cursorState);
     },
     backBarWidth() {
-      this.isRestart = false;
       if (this.cursorPosition <= 0) {
         return 0;
       }
       return this.isCursorLeft ? this.cursorPosition : 0;
     },
     progressOpacity() {
-      if (this.isRestart) {
-        return 0.9;
-      } else if (this.isOnProgress) {
+      if (this.isOnProgress) {
         return this.isCursorLeft ? 0.3 : 0.9;
       }
       return 0.9;
@@ -308,9 +305,7 @@ export default {
   watch: {
     cursorPosition(newVal) {
       if (this.isOnProgress && newVal <= 0) {
-        // this.buttonWidth = 20;
         this.buttonRadius = 20;
-        // this.isRestart = false;
         this.isShaking = true;
       } else {
         this.isShaking = false;
@@ -398,6 +393,15 @@ export default {
     width: 20px;
     transition: height 150ms;
     background: rgba(255, 255, 255, 0.38);
+
+    .fake-button {
+      position: absolute;
+      left: 0;
+      bottom: 10px;
+      width: 15px;
+      background: transparent;
+      z-index: 100;
+    }
 
     .button {
       position: absolute;
