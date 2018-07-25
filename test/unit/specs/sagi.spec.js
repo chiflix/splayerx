@@ -12,6 +12,7 @@ describe('helper.sagi api', function () {
   it('sagi.mediaTranslate should return', function (done) {
     helpers.methods.sagi().mediaTranslate('1-2-3-4').then((resp) => {
       // TODO: check correct response
+      expect(resp.getError().toObject().code).to.equal(200);
       done();
     }).catch((reason) => {
       done(reason);
