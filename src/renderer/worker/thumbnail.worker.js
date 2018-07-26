@@ -1,5 +1,5 @@
-const imageMap = new Map();
 const canvasMap = new Map();
+const thumbnailStatusSet = new Map();
 let bitmapCanvas = null;
 let maxThumbnailSize = [];
 let thumbnailSize = [];
@@ -20,6 +20,32 @@ function getImageBitmapPosition(thumbnailIndex, THUMBNAIL_LAYOUT, maxThumbnailSi
 function setThumbnailSize(size) {
   thumbnailSize = size;
   [bitmapCanvas.width, bitmapCanvas.height] = thumbnailSize;
+}
+function thumbnailSetInit(canvasIndex, thumbnailIndex) {
+  let thumbnailSet = null;
+  if (!thumbnailStatusSet.get(canvasIndex)) {
+    thumbnailSet = new Set();
+  } else {
+    thumbnailSet = thumbnailStatusSet.get(canvasIndex);
+  }
+  thumbnailSet.add(thumbnailIndex);
+  thumbnailStatusSet.set(canvasIndex, thumbnailSet);
+  return thumbnailSet.size;
+}
+function saveBlob(blob, canvasIndex) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    if (reader.readyState === 2) {
+      console.timeEnd('[Thumbnail|Composition|FileReader]');
+      postMessage({
+        type: 'composition-arraybuffer',
+        compositionIndex: canvasIndex,
+        arraybuffer: reader.result,
+      }, [reader.result]);
+    }
+  };
+  reader.readAsArrayBuffer(blob);
+  console.time('[Thumbnail|Composition|FileReader]');
 }
 
 /* eslint-disable no-restricted-globals */
@@ -60,7 +86,17 @@ self.addEventListener('message', (event) => {
         // Thumbnail destination size
         ...maxThumbnailSize,
       );
-      imageMap.set(thumbnailIndex, event.data.thumbnailImageBitmap);
+      if (thumbnailSetInit(canvasIndex, thumbnailIndex) === THUMBNAILS_PER_COMPOSITION) {
+        console.time('Composition');
+        canvasMap.get(canvasIndex).convertToBlob({
+          type: 'image/webp',
+          quality: 0.92,
+        }).then((result) => {
+          console.timeEnd('Composition');
+          console.log(`[Thumbnail|Worker|Composition]: Composition ${canvasIndex} generated!`, result);
+          saveBlob(result, canvasIndex);
+        });
+      }
       postMessage({
         type: 'thumbnail-set',
         index: thumbnailIndex,
