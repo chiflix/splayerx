@@ -1,10 +1,26 @@
 
 import helpers from '@/helpers';
 
-describe('Sagi.healthCheck', function () {
-  it('Testing Sagi.healthCheck', function () {
+describe('helper.sagi api', function () {
+  it('sagi.healthCheck should be 1', function (done) {
     helpers.methods.sagi().healthCheck().then((status) => {
-      expect(status).to.contain(1);
+      expect(status).to.equal(1);
+      done();
+    });
+  });
+
+  it('sagi.mediaTranslate should return OK', function (done) {
+    helpers.methods.sagi().mediaTranslate('11-22-33-44').then((resp) => {
+      // TODO: check correct response
+      expect(resp.getError().toObject().code, 'error').to.equal(0);
+      expect(resp.getError().toObject().message, 'error message').to.equal('OK');
+      const res = resp.getResultsList();
+      expect(res.length, 'results list length').to.be.above(0);
+      expect(res[0].getTranscriptIdentity(), 'result transcript identity').to.contain('this-is-a-developer-test-transcript');
+      done();
+    }).catch((reason) => {
+      // fail the test
+      done(reason);
     });
   });
 });
