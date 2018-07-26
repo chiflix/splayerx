@@ -2,22 +2,23 @@
   <transition name="fade" appear>
     <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
   <div class="progress"
-    @mouseover.stop="appearProgressSlider"
+    @mouseover.stop.capture="appearProgressSlider"
     @mouseleave="hideProgressSlider"
     @mousemove="onProgressBarMove"
-    v-show="true">
+    v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.left.stop.capture="videoRestart">
+      @mousedown.left.stop="videoRestart"
+      :style="{cursor: cursorStyle}">
       <div class="fake-button"
-        @mouseover.stop="doNothing"
-        @mousemove.stop="doNothing"
+        @mousedown="handleFakeBtnClick"
+        @mousemove.stop="handleFakeBtnMove"
         :style="{height: heightOfThumbnail + 11 + 'px'}"></div>
       <div class="line"
         v-show="!isShaking"></div>
       <div class="button"
         v-show="isShaking"
         :class="{shake: false}"
-        :style="{borderTopRightRadius: buttonRadius + 'px', borderBottomRightRadius: buttonRadius + 'px', width: buttonWidth + 'px'}"></div>
+        :style="{borderTopRightRadius: buttonRadius + 'px', borderBottomRightRadius: buttonRadius + 'px', width: buttonWidth + 'px', cursor: cursorStyle}"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.winWidth - 20 + 'px'}"
@@ -86,8 +87,11 @@ export default {
       isCursorLeft: false,
       isOnProgress: false,
       isShaking: false,
+      isRestartClicked: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       timeoutIdOfBackBarDisapppearDelay: 0,
+      timeoutIdOfHideProgressSlider: 0,
+      timeoutIdOfHideAllWidgets: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
       videoRatio: 0,
@@ -96,14 +100,11 @@ export default {
       thumbnailCurrentTime: 0,
       buttonWidth: 20,
       buttonRadius: 0,
+      cursorStyle: 'pointer',
     };
   },
   methods: {
-    doNothing() {
-      console.log('doNothing');
-    },
     appearProgressSlider() {
-      console.log(111111);
       this.isOnProgress = true;
       this.$bus.$emit('clearAllWidgetDisappearDelay');
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
@@ -137,6 +138,10 @@ export default {
       this.$_resetRestartButton();
       this.showScreenshot = false;
       this.$bus.$emit('seek', 0);
+      this.isRestartClicked = true;
+      this.cursorStyle = 'default';
+      // 由于阶段式变化逻辑复杂，需要后期更为妥善的处理
+      // this.$_hideAllWidgets();
     },
     onProgressBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -155,6 +160,15 @@ export default {
      * is not at mouse down event.
      */
     onProgressBarMove(e) {
+      // 需要更好的处理
+      this.isRestartClicked = false;
+      this.cursorStyle = 'pointer';
+      if (this.timeoutIdOfHideAllWidgets) {
+        clearTimeout(this.timeoutIdOfHideAllWidgets);
+      }
+      if (this.timeoutIdOfHideProgressSlider) {
+        clearTimeout(this.timeoutIdOfHideProgressSlider);
+      }
       /**
        * TODO:
        * 1. 解决由于mousemove触发机制导致的进度条拖动效果不平滑
@@ -238,6 +252,22 @@ export default {
     hideShakingEffect() {
       this.$_resetRestartButton();
     },
+    handleFakeBtnClick() {
+      this.timeoutIdOfHideProgressSlider = setTimeout(() => {
+        this.hideProgressSlider();
+        this.$_hideAllWidgets();
+      }, 3000);
+    },
+    handleFakeBtnMove() {
+      if (this.isRestartClicked) {
+        this.hideProgressSlider();
+      }
+    },
+    $_hideAllWidgets() {
+      this.timeoutIdOfHideAllWidgets = setTimeout(() => {
+        this.$bus.$emit('hideAllWidgets');
+      }, 3000);
+    },
     $_resetRestartButton() {
       // this.buttonWidth = FOOL_PROOFING_BAR_WIDTH;
       this.buttonRadius = 0;
@@ -274,6 +304,9 @@ export default {
       return this.isCursorLeft ? this.cursorPosition : 0;
     },
     progressOpacity() {
+      if (this.isRestartClicked) {
+        return 0.9;
+      }
       if (this.isOnProgress) {
         return this.isCursorLeft ? 0.3 : 0.9;
       }
@@ -398,7 +431,7 @@ export default {
       position: absolute;
       left: 0;
       bottom: 10px;
-      width: 15px;
+      width: 20px;
       background: transparent;
       z-index: 100;
     }
@@ -426,9 +459,9 @@ export default {
     }
   }
 
-  .fool-proof-bar:hover {
-    cursor: pointer;
-  }
+  // .fool-proof-bar:hover {
+  //   cursor: pointer;
+  // }
 
   .progress-container {
    position: absolute;
