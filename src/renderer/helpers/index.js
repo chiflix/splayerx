@@ -53,6 +53,20 @@ export default {
       }
     },
     openFile(path) {
+      // if new passed path exists in the storage
+      function indexOfExistedFileIn(data, path) {
+        for (let i = 0; i < data.length; i += 1) {
+          const object = data[i];
+          const iterator = Object.keys(object).indexOf('path');
+          if (iterator !== -1) {
+            if (object.path === path) {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
       let data;
       try {
         data = storage.getSync('recent-played');
@@ -68,20 +82,20 @@ export default {
       };
       if (Array.isArray(data)) {
         if (data.length < 4) {
-          if (this.$_indexOfExistedFileIn(data, path) === -1) {
+          if (indexOfExistedFileIn(data, path) === -1) {
             data.unshift(newElement);
           } else {
-            const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+            const item = data.splice(indexOfExistedFileIn(data, path), 1);
             if (item[0].lastPlayedTime !== 0) {
               this.$store.commit('CurrentTime', item[0].lastPlayedTime);
             }
             data.unshift(item[0]);
           }
-        } else if (this.$_indexOfExistedFileIn(data, path) === -1) {
+        } else if (indexOfExistedFileIn(data, path) === -1) {
           data.pop();
           data.unshift(newElement);
         } else {
-          const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+          const item = data.splice(indexOfExistedFileIn(data, path), 1);
           if (item[0].lastPlayedTime !== 0) {
             this.$store.commit('CurrentTime', item[0].lastPlayedTime);
           }
@@ -97,19 +111,6 @@ export default {
         name: 'playing-view',
       });
     },
-    $_indexOfExistedFileIn(data, path) {
-      for (let i = 0; i < data.length; i += 1) {
-        const object = data[i];
-        const iterator = Object.keys(object).indexOf('path');
-        if (iterator !== -1) {
-          if (object.path === path) {
-            return i;
-          }
-        }
-      }
-      return -1;
-    },
-
     mediaQuickHash(file) {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');

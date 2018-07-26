@@ -1,7 +1,10 @@
 import path from 'path';
 import fs from 'fs';
-import electron from 'electron';
 import _ from 'lodash';
+
+/* eslint-disable */
+const electron = require('electron');
+/* eslint-enable */
 
 function getFileName(key) {
   const app = electron.remote.app || electron.app;
