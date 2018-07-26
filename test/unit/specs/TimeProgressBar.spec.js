@@ -437,8 +437,159 @@ describe('TimeProgressBar.vue', () => {
   });
 
   // rest of the methods testing
-  it('$_documentProgressDragEvent method works fine', () => {
+  // $_documentProgressDragEvent method and
+  // $_documentProgressDragClear method requires document.MouseEvent
+  // as a parameter inside these methods, but both methods themselves
+  // have no input parameter required.
+  // so the testing for the 2 methods - 待
+
+  it('appearShakingEffect method works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
-    wrapper.vm.$_documentProgressDragEvent();
+    wrapper.setData({
+      cursorPosition: -7,
+      isShaking: false,
+    });
+    wrapper.vm.appearShakingEffect();
+    expect(wrapper.vm.buttonWidth).equal(14);
+    expect(wrapper.vm.buttonRadius).equal(7);
+    expect(wrapper.vm.isShaking).equal(true);
+    wrapper.setData({
+      cursorPosition: 10,
+      isShaking: false,
+    });
+    wrapper.vm.appearShakingEffect();
+    expect(wrapper.vm.buttonWidth).equal(30);
+    expect(wrapper.vm.buttonRadius).equal(10);
+    expect(wrapper.vm.isShaking).equal(true);
+    wrapper.setData({
+      cursorPosition: 120.2,
+      isShaking: false,
+    });
+    wrapper.vm.appearShakingEffect();
+    expect(wrapper.vm.buttonWidth).equal(140.2);
+    expect(wrapper.vm.buttonRadius).equal(120.2);
+    expect(wrapper.vm.isShaking).equal(true);
+  });
+
+  it('hideShakingEffect method works fine', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    const spy = sinon.spy(wrapper.vm, '$_resetRestartButton');
+    wrapper.vm.hideShakingEffect();
+    expect(spy.calledOnce).equal(true);
+    expect(spy.firstCall.args.length).equal(0);
+    spy.restore();
+  });
+
+  it('$_resetRestartButton method works fine', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setData({
+      buttonWidth: 0,
+      buttonRadius: -1,
+      isShaking: true,
+    });
+    wrapper.vm.$_resetRestartButton();
+    expect(wrapper.vm.buttonWidth).equal(20);
+    expect(wrapper.vm.buttonRadius).equal(0);
+    expect(wrapper.vm.isShaking).equal(false);
+  });
+
+  // followingh test cases are for testing the watch property
+  it('cursorPosition watched property works as expected - 1', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setData({
+      isShaking: false,
+      isOnProgress: true,
+      cursorPosition: -2,
+    });
+    wrapper.setData({ cursorPosition: -5 });
+    expect(wrapper.vm.buttonWidth).equal(15);
+    expect(wrapper.vm.buttonRadius).equal(5);
+    expect(wrapper.vm.isShaking).equal(true);
+  });
+
+  it('cursorPosition watched property works as expected - 2', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setData({
+      isShaking: false,
+      isOnProgress: false,
+      cursorPosition: 10,
+    });
+    const spy = sinon.spy(wrapper.vm, '$_resetRestartButton');
+    wrapper.setData({ cursorPosition: 20 });
+    expect(wrapper.vm.isShaking).equal(false);
+    expect(wrapper.vm.isOnProgress).equal(false);
+    expect(spy.calledOnce).equal(true);
+    expect(spy.firstCall.args.length).equal(0);
+    spy.restore();
+  });
+
+  it('isOnProgress watched property works as expected - 1', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    const clock = sinon.useFakeTimers();
+    sinon.spy(clock, 'clearTimeout');
+    wrapper.setData({
+      timeoutIdOfBackBarDisapppearDelay: 200,
+    });
+    wrapper.setData({ isOnProgress: true });
+    sinon.assert.calledOnce(clock.clearTimeout);
+    sinon.assert.calledWith(clock.clearTimeout, 200);
+    clock.restore();
+  });
+
+  // testing for created hook
+
+
+  /* 此electron.ipcRenderer发送事件的测试失败了，因为titlebar文件也在
+    监听main-resize事件，此vm发送了这个事件，titlebar也在监听，
+    所以触发了两个on之后的箭头函数，所以测试这个事件的方法待研究。
+  it('the created hook works as expected, event $on - 1.1', () => {
+    const wrapper = shallowMount(TimeProgressBar, { store, localVue });
+    store.state.WindowState.windowSize = [600, 600];
+    wrapper.vm.$electron.ipcRenderer.emit('main-resize');
+    const stub = sinon.stub(wrapper.vm.$electron.ipcRenderer, 'on');
+    stub.yields();
+    expect(wrapper.vm.widthOfThumbnail).equal(136);
+    stub.restore();
+  }); */
+
+  it('created hook works as expected, event $on - 2', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setData({
+      showScreenshot: true,
+      isOnProgress: true,
+    });
+    const spy2 = sinon.spy();
+    wrapper.vm.$bus.$emit('progressslider-appear');
+    const stub = sinon.stub(wrapper.vm.$bus, '$on');
+    stub.yields();
+    stub('progressslider-appear', spy2);
+    expect(spy2.calledOnce).equal(true);
+    expect(wrapper.vm.showScreenshot).equal(false);
+    expect(wrapper.vm.isOnProgress).equal(false);
+    stub.restore();
+  });
+
+  it('created hood works as expected, event $on - 3', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    const spy = sinon.spy(wrapper.vm, 'appearProgressBar');
+    wrapper.vm.$bus.$emit('progressbar-appear');
+    const stub = sinon.stub(wrapper.vm.$bus, '$on');
+    stub.yields();
+    stub('progressbar-appear', spy);
+    expect(spy.calledOnce).equal(true);
+    spy.restore();
+    stub.restore();
+  });
+
+  it('created hood works as expected, event $on - 3', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    const spy = sinon.spy(wrapper.vm, 'hideProgressBar');
+    wrapper.vm.$bus.$emit('progressbar-hide');
+    const stub = sinon.stub(wrapper.vm.$bus, '$on');
+    stub.yields();
+    stub('progressbar-hide', spy);
+    expect(spy.calledOnce).equal(true);
+    spy.restore();
+    stub.restore();
   });
 });
