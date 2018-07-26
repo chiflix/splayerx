@@ -102,6 +102,7 @@ export default {
     onMetaLoaded() {
       console.log('loadedmetadata');
       this.$bus.$emit('play');
+      this.$bus.$emit('seek', this.currentTime);
       this.videoWidth = this.$refs.videoCanvas.videoWidth;
       this.videoHeight = this.$refs.videoCanvas.videoHeight;
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
