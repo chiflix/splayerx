@@ -20,7 +20,8 @@
           :height=heightOfThumbnail
           :src="this.$store.state.PlaybackState.SrcOfVideo"
           v-if="videoCanvasShow"
-          v-show="!this.autoGeneration">
+          v-show="!this.autoGeneration"
+          style="object-fit: fill; opacity: 0.97">
         </video>
         <canvas
           v-show="this.autoGeneration"
@@ -227,7 +228,7 @@ export default {
     setImage(newValue) {
       let currentIndex = Math.floor(newValue / this.thumbnailInfo.generationInterval);
       const currentTime = currentIndex * this.thumbnailInfo.generationInterval;
-      if (currentIndex !== this.videoInfo.lastIndex || currentIndex === 0) {
+      if (currentIndex !== this.videoInfo.lastIndex || currentIndex === 0 || !this.autoGeneration) {
         if (this.imageMap.get(currentIndex)) {
           this.thumbnailWorker.postMessage({
             type: 'thumbnail-request',
