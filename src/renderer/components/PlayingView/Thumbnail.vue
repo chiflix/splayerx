@@ -198,18 +198,19 @@ export default {
       }
       if (destTime !== null && currentIndex !== null) {
         if (actualTime === destTime && !this.imageMap.get(currentIndex)) {
-          console.time('create Image');
-          createImageBitmap(this.thumbnailInfo.video).then((result) => {
-            console.timeEnd('create Image');
-            console.time('image send');
-            this.thumbnailWorker.postMessage({
-              type: 'thumbnail-generated',
-              thumbnailImageBitmap: result,
-              index: currentIndex,
-              originSize: [result.width, result.height],
-            }, [result]);
-            console.timeEnd('image send');
-          });
+          setTimeout(() => {
+            console.time('create Image');
+            createImageBitmap(this.thumbnailInfo.video).then((result) => {
+              console.timeEnd('create Image');
+              console.time('image send');
+              this.thumbnailWorker.postMessage({
+                type: 'thumbnail-generated',
+                thumbnailImageBitmap: result,
+                index: currentIndex,
+              }, [result]);
+              console.timeEnd('image send');
+            });
+          }, 300);
         }
         if (this.videoInfo.currentIndex === 0) {
           console.log(`[Thumbnail]: Generation started at ${Date.now()}.`);
