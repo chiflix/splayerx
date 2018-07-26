@@ -3,8 +3,7 @@ import fs from 'fs';
 import electron from 'electron';
 import _ from 'lodash';
 
-function getSync(key) {
-  // getFileName()
+function getFileName(key) {
   const app = electron.remote.app || electron.app;
   const defaultPath = path.join(app.getPath('userData'), 'storage');
 
@@ -15,8 +14,6 @@ function getSync(key) {
     throw Error('Invalid key');
   }
 
-  // Trick to prevent adding the `.json` twice
-  // if the key already contains it.
   const keyFileName = `${path.basename(key, '.json')}.json`;
 
   // Prevent ENOENT and other similar errors when using
@@ -26,7 +23,10 @@ function getSync(key) {
     .replace(/\*/g, '-').replace(/%20/g, ' ');
 
   const filename = path.join(defaultPath, escapedFileName);
-  // getFileName()
+  return filename;
+}
+function getSync(key) {
+  const filename = getFileName(key);
   // then mkdir
 
   // then lockFile
@@ -49,28 +49,7 @@ function getSync(key) {
   return objectJson;
 }
 function setSync(key, json) {
-  // getFileName
-  const app = electron.remote.app || electron.app;
-  const defaultPath = path.join(app.getPath('userData'), 'storage');
-
-  if (!key) {
-    throw Error('Missing key');
-  }
-  if (!_.isString(key) || key.trim().length === 0) {
-    throw Error('Invalid key');
-  }
-
-  // Trick to prevent adding the `.json` twice
-  // if the key already contains it.
-  const keyFileName = `${path.basename(key, '.json')}.json`;
-
-  // Prevent ENOENT and other similar errors when using
-  // reserved characters in Windows filenames.
-  // See: https://en.wikipedia.org/wiki/Filename#Reserved%5Fcharacters%5Fand%5Fwords
-  const escapedFileName = encodeURIComponent(keyFileName)
-    .replace(/\*/g, '-').replace(/%20/g, ' ');
-
-  const filename = path.join(defaultPath, escapedFileName);
+  const filename = getFileName(key);
   const data = JSON.stringify(json);
 
   if (!data) {

@@ -86,7 +86,6 @@ export default {
     },
     onPause() {
       console.log('onpause');
-      this.$_saveScreenshot();
     },
     onPlaying() {
       console.log('onplaying');
@@ -125,7 +124,6 @@ export default {
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
       }
-      this.$_getScreenshot();
     },
     onDurationChange() {
       console.log('durationchange');
@@ -234,7 +232,7 @@ export default {
       }
       console.log(this.newWidthOfWindow);
     },
-    $_getScreenshot() {
+    $_saveScreenshot() {
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       const { videoHeight, videoWidth } = this.$refs.videoCanvas;
@@ -244,10 +242,6 @@ export default {
         this.$refs.videoCanvas, 0, 0, videoWidth, videoHeight,
         0, 0, videoWidth, videoHeight,
       );
-      console.log('shortCut!');
-    },
-    $_saveScreenshot() {
-      const canvas = this.$refs.thumbnailCanvas;
       const imagePath = canvas.toDataURL('image/png');
       let data;
       try {
