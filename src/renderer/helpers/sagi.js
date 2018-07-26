@@ -31,10 +31,8 @@ class Sagi {
       req.setMediaIdentity(mediaIdentity);
       client.translateMedia(req, (err, response) => {
         if (err) {
-          console.log(err);
           reject(err);
         } else {
-          console.log(response.toObject());
           // TODO: fetch real transcripts
           resolve(response);
         }
