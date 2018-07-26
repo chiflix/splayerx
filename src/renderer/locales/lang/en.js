@@ -53,6 +53,12 @@ export default {
       hideOthers: 'Hide Others',
       quit: 'Quit',
     },
+    update: {
+      title: 'update dialog',
+      message: 'Restart the app now to install update?',
+      yes: 'yes',
+      no: 'no',
+    },
   },
   css: {
     titleFontSize: { fontSize: '3vw' },

@@ -37,6 +37,7 @@ import storage from '@/helpers/storage';
 export default {
   data() {
     return {
+      windowRectangleOld: {},
       videoExisted: false,
       shownTextTrack: false,
       newWidthOfWindow: 0,
@@ -108,7 +109,7 @@ export default {
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
       if (this.videoExisted) {
         this.$_calculateWindowSizeInConditionOfVideoExisted();
-        this.$_controlWindowSize();
+        this.$_controlWindowSizeAtNewVideo();
       } else {
         this.$_calculateWindowSizeAtTheFirstTime();
         this.$_controlWindowSize();
@@ -147,7 +148,17 @@ export default {
       });
       currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
     },
-
+    $_controlWindowSizeAtNewVideo() {
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      const windowXY = this.calcNewWindowXY();
+      currentWindow.setBounds({
+        x: windowXY.windowX,
+        y: windowXY.windowY,
+        width: parseInt(this.newWidthOfWindow, 10),
+        height: parseInt(this.newHeightOfWindow, 10),
+      });
+      currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
+    },
     $_calculateWindowSizeAtTheFirstTime() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       const currentScreen = this.$electron.screen.getPrimaryDisplay();
@@ -479,6 +490,16 @@ export default {
         this.$store.commit('SecondSubIndex', -1);
       }
     },
+    calcNewWindowXY() {
+      if (Object.keys(this.windowRectangleOld).length === 0) {
+        return { windowX: 0, windowY: 0 };
+      }
+      let x = this.windowRectangleOld.x + (this.windowRectangleOld.width / 2);
+      let y = this.windowRectangleOld.y + (this.windowRectangleOld.height / 2);
+      x = Math.round(x - (this.newWidthOfWindow / 2));
+      y = Math.round(y - (this.newHeightOfWindow / 2));
+      return { windowX: x, windowY: y };
+    },
   },
   computed: {
     calculateHeightByWidth() {
@@ -546,6 +567,13 @@ export default {
           .innerHTML);
       }
     },
+    src() {
+      const window = this.$electron.remote.getCurrentWindow();
+      this.windowRectangleOld.x = window.getBounds().x;
+      this.windowRectangleOld.y = window.getBounds().y;
+      this.windowRectangleOld.height = window.getBounds().height;
+      this.windowRectangleOld.width = window.getBounds().width;
+    },
   },
   created() {
     this.$bus.$on('playback-rate', (newRate) => {
@@ -585,7 +613,6 @@ export default {
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
     });
-
     // 可以二合一
     this.$bus.$on('subFirstChange', (targetIndex) => {
       const index = this.$store.state.PlaybackState.StartIndex + targetIndex;
