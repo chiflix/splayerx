@@ -119,9 +119,9 @@ export default {
         this.thumbnailInfo.generationInterval = 1;
         this.thumbnailInfo.count = Math.floor(this.videoInfo.duration);
       } else {
-        this.thumbnailInfo.generationInterval
-        = Math.floor(this.videoInfo.duration / this.MAX_THUMBNAIL_COUNT);
-        this.thumbnailInfo.count = this.MAX_THUMBNAIL_COUNT;
+        this.thumbnailInfo.generationInterval = 3;
+        this.thumbnailInfo.count =
+        Math.round(this.videoInfo.duration / this.thumbnailInfo.generationInterval);
       }
     },
     // initialize thumbnail info
