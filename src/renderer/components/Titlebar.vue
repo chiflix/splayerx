@@ -139,10 +139,8 @@ export default {
     this.statusChange();
   },
   mounted() {
-    window.addEventListener('resize', this.handleResize);
-    window.addEventListener('move', () => {
-      this.setWindowInfo();
-    });
+    this.$electron.ipcRenderer.on('main-resize', this.handleResize);
+    this.$electron.ipcRenderer.on('main-move', this.setWindowInfo);
     this.$bus.$on('titlebar-appear-delay', () => {
       this.appearTitlebar();
       if (this.showTitlebar !== 0) {

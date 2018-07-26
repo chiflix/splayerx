@@ -11,7 +11,6 @@ describe('LandingView.vue', () => {
     Vue.use(VueI18n);
     Vue.use(VueElectronJSONStorage);
     Vue.mixin(helpers);
-    Vue.prototype.$bus = new Vue(); // Global event bus
 
     const i18n = new VueI18n({
       locale: 'en', // set locale
@@ -24,6 +23,6 @@ describe('LandingView.vue', () => {
       render: h => h(LandingView),
     }).$mount();
 
-    expect(vm.$el.querySelector('.title').textContent).to.contain('SPlayer');
+    expect(vm.$el.querySelector('.title').textContent).contains('SPlayerX');
   });
 });

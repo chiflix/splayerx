@@ -336,7 +336,7 @@ export default {
       this.widthOfThumbnail = 240;
     }
     console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
-    window.addEventListener('resize', () => {
+    this.$electron.ipcRenderer.on('main-resize', () => {
       const widthOfWindow = this.winWidth;
       if (widthOfWindow < 845) {
         this.widthOfThumbnail = 136;
