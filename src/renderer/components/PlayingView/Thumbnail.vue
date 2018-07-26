@@ -186,7 +186,6 @@ export default {
       let destTime = null;
       let currentIndex = null;
       const { manualGenerationIndex } = this;
-      // const { videoWidth, videoHeight } = document.querySelector('video');
       if (this.autoGeneration) {
         destTime = autoGenerationIndex * pace;
         currentIndex = autoGenerationIndex;
@@ -196,8 +195,8 @@ export default {
         currentIndex = manualGenerationIndex;
         console.log(`[Thumbnail]: Switched to manual generated index ${manualGenerationIndex}.`);
       }
-      if (destTime !== null && currentIndex !== null) {
-        if (actualTime === destTime && !this.imageMap.get(currentIndex)) {
+      if (destTime !== null && currentIndex !== null && actualTime === destTime) {
+        if (!this.imageMap.get(currentIndex)) {
           setTimeout(() => {
             console.time('create Image');
             createImageBitmap(this.thumbnailInfo.video).then((result) => {
@@ -211,6 +210,11 @@ export default {
               console.timeEnd('image send');
             });
           }, 300);
+        } else if (this.autoGeneration) {
+          this.videoInfo.currentIndex += 1;
+          this.thumbnailInfo.video.currentTime
+          = this.videoInfo.currentTime
+           = this.videoInfo.currentIndex * this.thumbnailInfo.generationInterval;
         }
         if (this.videoInfo.currentIndex === 0) {
           console.log(`[Thumbnail]: Generation started at ${Date.now()}.`);
