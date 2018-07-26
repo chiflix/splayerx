@@ -56,7 +56,7 @@ export default {
       popupShow: false,
       mouseDown: false,
       throttledWakeUpCall: null,
-      timeoutIdOfAllWidgetsDisappearDelay: Number,
+      timeoutIdOfAllWidgetsDisappearDelay: 0,
       // the following 3 properties are used for checking if an event is a click or an dblclick
       // during 200miliseconds, if a second click is detected, will toggle "FullScreen"
       delay: 200, // changable and should be discussed.
