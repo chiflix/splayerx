@@ -27,9 +27,6 @@ function getFileName(key) {
 }
 function getSync(key) {
   const filename = getFileName(key);
-  // then mkdir
-
-  // then lockFile
   // then fs.readFile
   let data;
   try {
