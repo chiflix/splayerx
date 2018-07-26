@@ -143,19 +143,13 @@ export default {
     },
     // Initialize thumbnail worker
     thumbnailWorkerInit() {
-      const offscreenImageCanvas = this.$refs.bitmapCanvas.transferControlToOffscreen();
       this.thumbnailWorker.postMessage({
         type: 'generation-start',
         maxThumbnailSize: [
           this.maxThumbnailWidth,
           this.maxThumbnailHeight,
         ],
-        actualSize: [
-          this.widthOfThumbnail,
-          this.heightOfThumbnail,
-        ],
-        bitmapCanvas: offscreenImageCanvas,
-      }, [offscreenImageCanvas]);
+      });
       this.thumbnailWorker.addEventListener('message', this.setImageOrNot);
     },
     // Function to pause thumbnail auto generation
@@ -266,12 +260,21 @@ export default {
       }
     },
   },
-  created() {
+  mounted() {
     this.$bus.$on('thumbnail-generation-finished', () => {
       this.thumbnailInfo.finished = true;
       this.videoCanvasShow = false;
       this.$bus.$off('thumbnail-generation-paused', this.pauseAutoGeneration);
     });
+    const offscreenImageCanvas = this.$refs.bitmapCanvas.transferControlToOffscreen();
+    this.thumbnailWorker.postMessage({
+      type: 'offscreencanvas-init',
+      bitmapCanvas: offscreenImageCanvas,
+      actualSize: [
+        this.widthOfThumbnail,
+        this.heightOfThumbnail,
+      ],
+    }, [offscreenImageCanvas]);
   },
 };
 </script>

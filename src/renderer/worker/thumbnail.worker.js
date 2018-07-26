@@ -29,11 +29,15 @@ self.addEventListener('message', (event) => {
       console.error(`[Thumbnail|Worker]: ${event.data.type || 'Event type'} is not defined.`);
       break;
     }
-    case 'generation-start': {
-      // Size info initiation
-      ({ maxThumbnailSize, bitmapCanvas } = event.data);
+    case 'offscreencanvas-init': {
+      ({ bitmapCanvas } = event.data);
       setThumbnailSize(event.data.actualSize);
       console.log('[Thumbnail|Worker|Start]: Canvas Size:', event.data.actualSize, bitmapCanvas.width, bitmapCanvas.height);
+      break;
+    }
+    case 'generation-start': {
+      // Size info initiation
+      ({ maxThumbnailSize } = event.data);
       console.log(maxThumbnailSize);
       compositionSize = maxThumbnailSize.map(e => e * THUMBNAILS_PER_COMPOSITION);
       console.log('[Thumbnail|Worker]:', ...compositionSize);
