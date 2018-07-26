@@ -13,7 +13,6 @@ describe('VolumnColtrol.vue', () => {
   let store;
 
   beforeEach(() => {
-    // state = PlaybackState.state;
     store = new Vuex.Store({
       modules: {
         PlaybackState: {
@@ -43,9 +42,10 @@ describe('VolumnColtrol.vue', () => {
   it('onVolumeButtonClick method works fine', (done) => {
     const wrapper = shallowMount(VolumeControl, { store, localVue });
     var eventFired = false
+    store.state.PlaybackState.Volume = 0.2;
     setTimeout( () => {
-      expect(wrapper.emitted('volume')).equal(undefined);
-      expect(wrapper.emitted('volume')).equal(undefined);
+      expect(wrapper.emitted('volume')).equal();
+      expect(wrapper.emitted('volume')).equal( ? );
       done();
     },1000);
     wrapper.vm.$on('volume',() => {
@@ -53,8 +53,7 @@ describe('VolumnColtrol.vue', () => {
     });
     wrapper.vm.onVolumeButtonClick();
     expect(wrapper.vm.currentVolume).equal(20);
-  });
-  */
+  }); */
 
   it('appearVolumeSlider method works fine', () => {
     const wrapper = shallowMount(VolumeControl, { store, localVue });

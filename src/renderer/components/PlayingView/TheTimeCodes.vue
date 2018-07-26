@@ -133,11 +133,11 @@ export default {
       display: inline-block;
     }
   }
-  
+
   .splitSign {
     color: rgba(255, 255, 255, 0.5);
   }
-  
+
   @media screen and (max-width: 854px) {
     bottom: 23px;
     left: 25px;
