@@ -50,7 +50,7 @@ self.addEventListener('message', (event) => {
       canvasContext.drawImage(
         event.data.thumbnailImageBitmap,
         // Thumbnail source position and size
-        0, 0, ...event.data.originSize,
+        0, 0, event.data.thumbnailImageBitmap.width, event.data.thumbnailImageBitmap.height,
         // Thumbnail destination position
         ...getImageBitmapPosition(thumbnailIndex, THUMBNAIL_LAYOUT, maxThumbnailSize),
         // Thumbnail destination size
