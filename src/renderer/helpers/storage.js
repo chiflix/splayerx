@@ -1,11 +1,32 @@
 import path from 'path';
 import fs from 'fs';
 import _ from 'lodash';
+import storage from 'electron-json-storage';
 
 /* eslint-disable */
 const electron = require('electron');
 /* eslint-enable */
 
+function get(key) {
+  return new Promise((resolve, reject) => {
+    storage.get(key, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+}
+function set(key, json) {
+  return new Promise((resolve, reject) => {
+    storage.set(key, json, (err) => {
+      if (err) {
+        reject(err);
+      }
+    });
+  });
+}
 function getFileName(key) {
   const app = electron.remote.app || electron.app;
   const defaultPath = path.join(app.getPath('userData'), 'storage');
@@ -70,4 +91,6 @@ function setSync(key, json) {
 export default {
   getSync,
   setSync,
+  get,
+  set,
 };
