@@ -122,7 +122,7 @@ export default {
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
-        // if (t % 10 === 0) { this.$_getThumbnail(); }
+        if (t % 10 === 0) { this.$_getThumbnail(); }
       }
     },
     onDurationChange() {

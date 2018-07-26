@@ -116,7 +116,7 @@ export default {
       if (!this.onProgressSliderMousedown) {
         this.isOnProgress = false;
         this.showScreenshot = false;
-        this.$_resetRestartButton();
+        this.buttonRadius = 0;
 
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
@@ -135,13 +135,11 @@ export default {
       }
     },
     videoRestart() {
-      this.$_resetRestartButton();
+      this.buttonRadius = 0;
       this.showScreenshot = false;
       this.$bus.$emit('seek', 0);
       this.isRestartClicked = true;
       this.cursorStyle = 'default';
-      // 由于阶段式变化逻辑复杂，需要后期更为妥善的处理
-      // this.$_hideAllWidgets();
     },
     onProgressBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -160,7 +158,6 @@ export default {
      * is not at mouse down event.
      */
     onProgressBarMove(e) {
-      // 需要更好的处理
       this.isRestartClicked = false;
       this.cursorStyle = 'pointer';
       if (this.timeoutIdOfHideAllWidgets) {
@@ -169,11 +166,7 @@ export default {
       if (this.timeoutIdOfHideProgressSlider) {
         clearTimeout(this.timeoutIdOfHideProgressSlider);
       }
-      /**
-       * TODO:
-       * 1. 解决由于mousemove触发机制导致的进度条拖动效果不平滑
-       * 解决方案1: 将事件放在document上尝试解决
-       */
+
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return;
       }
@@ -236,7 +229,7 @@ export default {
         this.onProgressSliderMousedown = false;
         // 可以考虑其他的方案
         if (this.flagProgressBarDraged) {
-          this.$_resetRestartButton();
+          this.buttonRadius = 0;
           this.$bus.$emit('seek', this.percentageVideoDraged
            * this.$store.state.PlaybackState.Duration);
           this.flagProgressBarDraged = false;
@@ -250,7 +243,7 @@ export default {
       this.isShaking = true;
     },
     hideShakingEffect() {
-      this.$_resetRestartButton();
+      this.buttonRadius = 0;
     },
     handleFakeBtnClick() {
       this.timeoutIdOfHideProgressSlider = setTimeout(() => {
@@ -267,11 +260,6 @@ export default {
       this.timeoutIdOfHideAllWidgets = setTimeout(() => {
         this.$bus.$emit('hideAllWidgets');
       }, 3000);
-    },
-    $_resetRestartButton() {
-      // this.buttonWidth = FOOL_PROOFING_BAR_WIDTH;
-      this.buttonRadius = 0;
-      // this.isShaking = false;
     },
   },
   computed: {
@@ -342,7 +330,7 @@ export default {
         this.isShaking = true;
       } else {
         this.isShaking = false;
-        this.$_resetRestartButton();
+        this.buttonRadius = 0;
       }
     },
     isOnProgress(newVal) {
