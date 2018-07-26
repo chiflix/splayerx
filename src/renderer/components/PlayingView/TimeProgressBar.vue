@@ -281,7 +281,7 @@ export default {
       return 0.9;
     },
     heightOfThumbnail() {
-      return this.widthOfThumbnail / this.videoRatio;
+      return Math.floor(this.widthOfThumbnail / this.videoRatio);
     },
     positionOfScreenshot() {
       const progressBarWidth = this.winWidth - 20;
@@ -327,6 +327,15 @@ export default {
     },
   },
   created() {
+    const widthOfWindow = this.winWidth;
+    if (widthOfWindow < 845) {
+      this.widthOfThumbnail = 136;
+    } else if (widthOfWindow < 1920) {
+      this.widthOfThumbnail = 170;
+    } else {
+      this.widthOfThumbnail = 240;
+    }
+    console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
     window.addEventListener('resize', () => {
       const widthOfWindow = this.winWidth;
       if (widthOfWindow < 845) {
