@@ -312,8 +312,24 @@ describe('TimeProgressBar.vue', () => {
 
   });
 
-  it('handleFakeBtnMove method works fine', () => {
+  it('handleFakeBtnMove method works fine - 1', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setData({
+      isRestartClicked: false,
+    });
+    const spy = sinon.spy(wrapper.vm, 'hideProgressSlider');
+    expect(spy.calledOnce).equal(false);
+    spy.restore();
+  });
 
+  it('handleFakeBtnMove method works fine - 2', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setData({
+      isRestartClicked: true,
+    });
+    const spy = sinon.spy(wrapper.vm, 'hideProgressSlider');
+    expect(spy.calledOnce).equal(true);
+    spy.restore();
   });
 
   it('$_hideAllWidgets method works fine', () => {
