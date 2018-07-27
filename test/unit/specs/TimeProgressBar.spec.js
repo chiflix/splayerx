@@ -318,6 +318,7 @@ describe('TimeProgressBar.vue', () => {
       isRestartClicked: false,
     });
     const spy = sinon.spy(wrapper.vm, 'hideProgressSlider');
+    wrapper.vm.handleFakeBtnMove();
     expect(spy.calledOnce).equal(false);
     spy.restore();
   });
@@ -328,6 +329,7 @@ describe('TimeProgressBar.vue', () => {
       isRestartClicked: true,
     });
     const spy = sinon.spy(wrapper.vm, 'hideProgressSlider');
+    wrapper.vm.handleFakeBtnMove();
     expect(spy.calledOnce).equal(true);
     spy.restore();
   });
