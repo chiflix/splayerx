@@ -58,8 +58,8 @@ describe('Thumbnail Unit Tests', () => {
     expect(vmShortcut.videoInfo.currentTime).to.be.a('number');
     expect(vmShortcut.videoInfo.currentIndex).to.be.a('number');
     expect(vmShortcut.thumbnailInfo).to.be.a('object');
-    expect(vmShortcut.thumbnailInfo.canvas).to.be.null;
-    expect(vmShortcut.thumbnailInfo.video).to.be.null;
+    expect(vmShortcut.thumbnailInfo.canvas).to.equal(null);
+    expect(vmShortcut.thumbnailInfo.video).to.equal(null);
     expect(vmShortcut.thumbnailInfo.count).to.be.a('number');
     expect(vmShortcut.thumbnailInfo.generationInterval).to.be.a('number');
     expect(vmShortcut.thumbnailInfo.finished).to.be.a('boolean');
@@ -79,12 +79,82 @@ describe('Thumbnail Unit Tests', () => {
     expect(vmShortcut.videoInfo.duration).to.equal(0);
     expect(vmShortcut.videoInfo.currentTime).to.equal(0);
     expect(vmShortcut.videoInfo.currentIndex).to.equal(0);
-    expect(vmShortcut.thumbnailInfo.canvas).to.be.null;
-    expect(vmShortcut.thumbnailInfo.video).to.be.null;
+    expect(vmShortcut.thumbnailInfo.canvas).to.equal(null);
+    expect(vmShortcut.thumbnailInfo.video).to.equal(null);
     expect(vmShortcut.thumbnailInfo.count).to.equal(0);
     expect(vmShortcut.thumbnailInfo.generationInterval).to.equal(0);
     expect(vmShortcut.thumbnailInfo.finished).to.equal(false);
     expect(vmShortcut.manualGenerationIndex).to.equal(0);
     expect(vmShortcut.MAX_THUMBNAIL_COUNT).to.equal(100);
+  });
+
+  it('should onMetaloaded function envoke four init fuctions', () => {
+    const wrapper = shallowMount(Thumbnail, { propsData });
+    const videoInfoInitSpy = sandbox.spy(wrapper.vm, 'videoInfoInit');
+    const thumbnailInfoInitSpy = sandbox.spy(wrapper.vm, 'thumbnailInfoInit');
+    const thumbnailWorkerInitSpy = sandbox.spy(wrapper.vm, 'thumbnailWorkerInit');
+
+    wrapper.vm.onMetaLoaded();
+
+    expect(videoInfoInitSpy.calledOnce).to.equal(true);
+    expect(thumbnailInfoInitSpy.calledOnce).to.equal(true);
+    expect(thumbnailWorkerInitSpy.calledOnce).to.equal(true);
+  });
+  it('should proper videoInfo be set', () => {
+    const wrapper = shallowMount(Thumbnail, { propsData });
+
+    wrapper.vm.videoInfoInit();
+
+    expect(wrapper.vm.videoInfo.currentIndex).to.equal(0);
+  });
+  it('should return right generation interval and count', () => {
+    const wrapper = shallowMount(Thumbnail, { propsData });
+    const durations = [undefined, 50, 400];
+    const intervals = [];
+    const rightIntervals = [
+      {
+        generationInterval: 3,
+        count: 100,
+      },
+      {
+        generationInterval: 1,
+        count: 50,
+      },
+      {
+        generationInterval: 3,
+        count: 133,
+      },
+    ];
+
+    durations.forEach((element) => {
+      intervals.push(wrapper.vm.calculateGenerationInterval(element));
+    });
+
+    intervals.forEach((element, index) => {
+      expect(element.generationInterval).to.equal(rightIntervals[index].generationInterval);
+      expect(element.count).to.equal(rightIntervals[index].count);
+    });
+  });
+  it('should thumbnailInfo be initialized properly', () => {
+    const wrapper = shallowMount(Thumbnail, { propsData });
+    const vmShortcut = wrapper.vm;
+    const thumbShortcut = wrapper.vm.thumbnailInfo;
+    const globalEventBusOnStub = sandbox.stub(wrapper.vm.$bus, '$on');
+    const pauseAutoGenerationSpy = sandbox.spy(wrapper.vm, 'pauseAutoGeneration');
+
+    vmShortcut.thumbnailInfoInit();
+    globalEventBusOnStub.yields();
+    globalEventBusOnStub('thumbnail-generation-paused', pauseAutoGenerationSpy);
+
+    expect(thumbShortcut.generationInterval).to.equal(3);
+    expect(thumbShortcut.count).to.equal(100);
+    expect(thumbShortcut.canvas.outerHTML.toString()).to.equal(wrapper.find({ ref: 'thumbnailCanvas' }).html().toString());
+    expect(thumbShortcut.video.outerHTML.toString()).to.equal(wrapper.find({ ref: 'thumbnailVideo' }).html().toString());
+    expect(thumbShortcut.video.currentTime).to.equal(0);
+    expect(thumbShortcut.finished).to.equal(false);
+    expect(vmShortcut.autoGeneration).to.equal(true);
+    expect(vmShortcut.imageMap.size).to.equal(0);
+    expect(vmShortcut.imageMap instanceof Map).to.equal(true);
+    expect(pauseAutoGenerationSpy.calledOnce).to.equal(true);
   });
 });

@@ -127,26 +127,38 @@ export default {
     // function called when video loaded
     onMetaLoaded() {
       this.videoInfoInit();
-      this.calculateGenerationInterval();
       this.thumbnailInfoInit();
       this.thumbnailWorkerInit();
     },
+    // Initialize video info
+    videoInfoInit() {
+      this.videoInfo.duration = Math.floor(this.$refs.thumbnailVideo.duration);
+      this.videoInfo.currentIndex = 0;
+    },
     // calculate the interval for auto-generation
-    calculateGenerationInterval() {
-      if (!this.videoInfo.duration) {
-        this.thumbnailInfo.generationInterval = 3;
-        this.thumbnailInfo.count = this.MAX_THUMBNAIL_COUNT;
-      } else if (this.videoInfo.duration < this.MAX_THUMBNAIL_COUNT) {
-        this.thumbnailInfo.generationInterval = 1;
-        this.thumbnailInfo.count = Math.floor(this.videoInfo.duration);
+    calculateGenerationInterval(duration) {
+      let generationInterval = 0;
+      let count = 0;
+      if (!duration) {
+        generationInterval = 3;
+        count = this.MAX_THUMBNAIL_COUNT;
+      } else if (duration < this.MAX_THUMBNAIL_COUNT) {
+        generationInterval = 1;
+        count = Math.floor(duration);
       } else {
-        this.thumbnailInfo.generationInterval = 3;
-        this.thumbnailInfo.count =
-        Math.round(this.videoInfo.duration / this.thumbnailInfo.generationInterval);
+        generationInterval = 3;
+        count = Math.round(duration / generationInterval);
       }
+      return {
+        generationInterval,
+        count,
+      };
     },
     // initialize thumbnail info
     thumbnailInfoInit() {
+      const interval = this.calculateGenerationInterval(this.videoInfo.duration);
+      this.thumbnailInfo.generationInterval = interval.generationInterval;
+      this.thumbnailInfo.count = interval.count;
       this.thumbnailInfo.canvas = this.$refs.thumbnailCanvas;
       this.thumbnailInfo.video = this.$refs.thumbnailVideo || document.querySelector('#thumbnailVideo');
       this.thumbnailInfo.video.pause();
@@ -156,13 +168,6 @@ export default {
       this.thumbnailInfo.finished = false;
       this.imageMap = new Map();
       this.$bus.$on('thumbnail-generation-paused', this.pauseAutoGeneration);
-    },
-    // Initialize video info
-    videoInfoInit() {
-      this.videoInfo.duration = Math.floor(this.$refs.thumbnailVideo.duration);
-      this.thumbnailInfo.count =
-      Math.floor(this.videoInfo.duration / this.thumbnailInfo.generationInterval);
-      this.videoInfo.currentIndex = 0;
     },
     // Initialize thumbnail worker
     thumbnailWorkerInit() {
