@@ -18,7 +18,7 @@
           @loadedmetadata="onMetaLoaded"
           :width=widthOfThumbnail
           :height=heightOfThumbnail
-          :src="this.$store.state.PlaybackState.SrcOfVideo"
+          :src="src"
           v-if="videoCanvasShow"
           v-show="!this.autoGeneration"
           style="object-fit: fill; opacity: 0.97">
@@ -51,14 +51,36 @@ export default {
         }
         return true;
       },
+      default: '',
     },
-    positionOfScreenshot: Number,
-    widthOfThumbnail: Number,
-    heightOfThumbnail: Number,
-    screenshotContent: null,
-    currentTime: Number,
-    maxThumbnailWidth: Number,
-    maxThumbnailHeight: Number,
+    screenshotContent: {
+      type: String,
+      default: '00:00',
+    },
+    positionOfScreenshot: {
+      type: Number,
+      default: 16,
+    },
+    widthOfThumbnail: {
+      type: Number,
+      default: 170,
+    },
+    heightOfThumbnail: {
+      type: Number,
+      default: 95,
+    },
+    currentTime: {
+      type: Number,
+      default: 0,
+    },
+    maxThumbnailWidth: {
+      type: Number,
+      default: 240,
+    },
+    maxThumbnailHeight: {
+      type: Number,
+      default: 136,
+    },
   },
   data() {
     return {
@@ -66,7 +88,7 @@ export default {
       autoGeneration: false, // whether current generation is auto-generation
       autoGenerationDelay: 0, // setTimeout for manual generation
       videoInfo: {
-        duration: null, // duration of the video loaded
+        duration: 0, // duration of the video loaded
         currentTime: 0, // video time of current auto-generation process
         currentIndex: 0, // index of current auto-generated thumbnail
         lastIndex: 0,
@@ -108,7 +130,6 @@ export default {
       this.calculateGenerationInterval();
       this.thumbnailInfoInit();
       this.thumbnailWorkerInit();
-      this.autoGeneration = true;
     },
     // calculate the interval for auto-generation
     calculateGenerationInterval() {
@@ -131,6 +152,7 @@ export default {
       this.thumbnailInfo.video.pause();
       this.thumbnailInfo.video.currentTime = 0;
       this.thumbnailInfo.video.addEventListener('seeked', this.thumbnailGeneration);
+      this.autoGeneration = true;
       this.thumbnailInfo.finished = false;
       this.imageMap = new Map();
       this.$bus.$on('thumbnail-generation-paused', this.pauseAutoGeneration);
