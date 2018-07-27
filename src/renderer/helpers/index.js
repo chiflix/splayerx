@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
-import storage from '@/helpers/storage';
+import asyncStorage from '@/helpers/asyncStorage';
 import Sagi from './sagi';
 
 export default {
@@ -67,45 +67,40 @@ export default {
         return -1;
       }
 
-      let data;
-      try {
-        data = storage.getSync('recent-played');
-      } catch (error) {
-        console.error(error);
-      }
-      console.log(data);
-      const newElement = {
-        path,
-        shortCut: '',
-        lastPlayedTime: 0,
-        duration: 0,
-      };
-      if (Array.isArray(data)) {
-        if (data.length < 4) {
-          if (indexOfExistedFileIn(data, path) === -1) {
+      asyncStorage.get('recent-played').then((data) => {
+        const newElement = {
+          path,
+          shortCut: '',
+          lastPlayedTime: 0,
+          duration: 0,
+        };
+        if (Array.isArray(data)) {
+          if (data.length < 4) {
+            if (indexOfExistedFileIn(data, path) === -1) {
+              data.unshift(newElement);
+            } else {
+              const item = data.splice(indexOfExistedFileIn(data, path), 1);
+              if (item[0].lastPlayedTime !== 0) {
+                this.$bus.$emit('seek', item[0].lastPlayedTime);
+              }
+              data.unshift(item[0]);
+            }
+          } else if (indexOfExistedFileIn(data, path) === -1) {
+            data.pop();
             data.unshift(newElement);
           } else {
             const item = data.splice(indexOfExistedFileIn(data, path), 1);
             if (item[0].lastPlayedTime !== 0) {
-              this.$store.commit('CurrentTime', item[0].lastPlayedTime);
+              this.$bus.$emit('seek', item[0].lastPlayedTime);
             }
             data.unshift(item[0]);
           }
-        } else if (indexOfExistedFileIn(data, path) === -1) {
-          data.pop();
-          data.unshift(newElement);
         } else {
-          const item = data.splice(indexOfExistedFileIn(data, path), 1);
-          if (item[0].lastPlayedTime !== 0) {
-            this.$store.commit('CurrentTime', item[0].lastPlayedTime);
-          }
-          data.unshift(item[0]);
+          data = [newElement];
         }
-      } else {
-        data = [newElement];
-      }
-      storage.setSync('recent-played', data);
-      this.$bus.$emit('new-file-open');
+        asyncStorage.set('recent-played', data);
+        this.$bus.$emit('new-file-open');
+      });
       this.$store.commit('SrcOfVideo', path);
       this.$router.push({
         name: 'playing-view',

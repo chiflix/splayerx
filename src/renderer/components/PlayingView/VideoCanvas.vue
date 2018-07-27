@@ -32,7 +32,7 @@ import { WebVTT } from 'vtt.js';
 import path from 'path';
 // https://www.w3schools.com/tags/ref_av_dom.asp
 import parallel from 'run-parallel';
-import storage from '@/helpers/storage';
+import syncStorage from '@/helpers/syncStorage';
 
 export default {
   data() {
@@ -245,7 +245,7 @@ export default {
       const imagePath = canvas.toDataURL('image/png');
       let data;
       try {
-        data = storage.getSync('recent-played');
+        data = syncStorage.getSync('recent-played');
       } catch (err) {
         console.error(err);
       }
@@ -258,7 +258,7 @@ export default {
         data.splice(0, 1);
         data.unshift(object);
       }
-      storage.setSync('recent-played', data);
+      syncStorage.setSync('recent-played', data);
     },
     /**
      * @param callback Has two parameters, err and result

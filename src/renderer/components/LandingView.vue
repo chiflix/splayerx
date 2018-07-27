@@ -64,6 +64,7 @@
 
 <script>
 import path from 'path';
+import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 export default {
   name: 'landing-view',
@@ -111,15 +112,12 @@ export default {
       }
     });
 
-
-    this.$storage.get('recent-played', (err, data) => {
-      if (err) {
-        // TODO: proper error handle
-        console.error(err);
-      } else {
-        this.lastPlayedFile = data;
-        console.log(data);
-      }
+    asyncStorage.get('recent-played').then((data) => {
+      this.lastPlayedFile = data;
+      console.log(data);
+    }).catch((err) => {
+      // TODO: proper error handle
+      console.error(err);
     });
     if (process.platform === 'win32') {
       document.querySelector('.application').style.webkitAppRegion = 'no-drag';
