@@ -44,6 +44,7 @@ describe('TimeProgressBar.vue', () => {
     expect(wrapper.vm.isCursorLeft).equal(false);
     expect(wrapper.vm.isOnProgress).equal(false);
     expect(wrapper.vm.isShaking).equal(false);
+    expect(wrapper.vm.isRestartClicked).equal(false);
     expect(wrapper.vm.timeoutIdOfProgressBarDisappearDelay).equal(0);
     expect(wrapper.vm.timeoutIdOfBackBarDisapppearDelay).equal(0);
     expect(wrapper.vm.percentageOfReadyToPlay).equal(0);
@@ -54,6 +55,7 @@ describe('TimeProgressBar.vue', () => {
     expect(wrapper.vm.thumbnailCurrentTime).equal(0);
     expect(wrapper.vm.buttonWidth).equal(20);
     expect(wrapper.vm.buttonRadius).equal(0);
+    expect(wrapper.vm.cursorStyle).equal('pointer');
   });
 
   it('appearProgressSlider method works fine', () => {
@@ -93,11 +95,10 @@ describe('TimeProgressBar.vue', () => {
       isOnProgress: true,
       showScreenshot: true,
     });
-    const spy = sinon.spy(wrapper.vm, '$_resetRestartButton');
     wrapper.vm.hideProgressSlider();
     expect(wrapper.vm.isOnProgress).equal(false);
     expect(wrapper.vm.showScreenshot).equal(false);
-    expect(spy.calledOnce).equal(true);
+    expect(wrapper.vm.buttonRadius).equal(0);
     const playedSlider = wrapper.find({ ref: 'playedSlider' });
     const foolProofBar = wrapper.find({ ref: 'foolProofBar' });
     const readySlider = wrapper.find({ ref: 'readySlider' });
@@ -106,7 +107,6 @@ describe('TimeProgressBar.vue', () => {
     expect(cssSplit(foolProofBar.attributes().style).height).equal('4px');
     expect(cssSplit(readySlider.attributes().style).height).equal('0px');
     expect(cssSplit(backSlider.attributes().style).height).equal('4px');
-    spy.restore();
   });
 
   it('appearProgressBar method works fine', () => {
@@ -147,15 +147,22 @@ describe('TimeProgressBar.vue', () => {
 
   it('videoRestart method works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
-    const spy1 = sinon.spy(wrapper.vm, '$_resetRestartButton');
-    const spy2 = sinon.spy(wrapper.vm.$bus, '$emit');
+    wrapper.setData({
+      buttonRadius: 20,
+      showScreenshot: true,
+      isRestartClicked: false,
+      cursorStyle: 'pointer',
+    });
+    const spy = sinon.spy(wrapper.vm.$bus, '$emit');
     wrapper.vm.videoRestart();
-    expect(spy1.calledOnce).equal(true);
-    expect(spy2.calledOnce).equal(true);
-    expect(spy2.firstCall.args[0]).equal('seek');
-    expect(spy2.firstCall.args[1]).equal(0);
-    spy1.restore();
-    spy2.restore();
+    expect(wrapper.vm.buttonRadius).equal(0);
+    expect(wrapper.vm.showScreenshot).equal(false);
+    expect(wrapper.vm.isRestartClicked).equal(true);
+    expect(wrapper.vm.cursorStyle).equal('default');
+    expect(spy.calledOnce).equal(true);
+    expect(spy.firstCall.args[0]).equal('seek');
+    expect(spy.firstCall.args[1]).equal(0);
+    spy.restore();
   });
 
   it('onProgressBarClick method can be triggered correctly', () => {
@@ -214,10 +221,15 @@ describe('TimeProgressBar.vue', () => {
     spy.restore();
   });
 
+  // 此处测试如何处理
   it('onProgressBarMove method works fine - 2', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
     store.state.PlaybackState.Duration = 1000;
-    wrapper.setData({ onProgressSliderMousedown: false });
+    wrapper.setData({
+      onProgressSliderMousedown: false,
+      isRestartClicked: true,
+      cursorStyle: 'default',
+    });
     const target = wrapper.find('.progress');
     const testEvent = new MouseEvent(target.trigger('mousedown.left'), {
       clientX: 2000,
@@ -225,6 +237,8 @@ describe('TimeProgressBar.vue', () => {
     });
     const spy = sinon.spy(wrapper.vm, '$_effectProgressBarDraged');
     wrapper.vm.onProgressBarMove(testEvent);
+    expect(wrapper.vm.isRestartClicked).equal(false);
+    expect(wrapper.vm.cursorStyle).equal('pointer');
     expect(spy.calledOnce).equal(true);
     expect(spy.firstCall.args[0]).equal(testEvent);
     spy.restore();
@@ -294,6 +308,17 @@ describe('TimeProgressBar.vue', () => {
     expect(wrapper.vm.showScreenshot).equal(true);
   });
 
+  it('handleFakeBtnClick method works fine', () => {
+
+  });
+
+  it('handleFakeBtnMove method works fine', () => {
+
+  });
+
+  it('$_hideAllWidgets method works fine', () => {
+
+  });
 
   // the methods after onProgressBarMove() manipulate computed methods a lot,
   // so the following test cases will test all the computed properties first.
@@ -378,14 +403,23 @@ describe('TimeProgressBar.vue', () => {
 
   it('progressOpacity computed property works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
-    wrapper.setData({ isOnProgress: false });
+    wrapper.setData({
+      isRestartClicked: true,
+    });
     expect(wrapper.vm.progressOpacity).equal(0.9);
     wrapper.setData({
+      isRestartClicked: false,
+      isOnProgress: false,
+    });
+    expect(wrapper.vm.progressOpacity).equal(0.9);
+    wrapper.setData({
+      isRestartClicked: false,
       isOnProgress: true,
       isCursorLeft: true,
     });
     expect(wrapper.vm.progressOpacity).equal(0.3);
     wrapper.setData({
+      isRestartClicked: false,
       isOnProgress: true,
       isCursorLeft: false,
     });

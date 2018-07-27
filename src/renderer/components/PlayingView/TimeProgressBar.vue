@@ -17,7 +17,7 @@
         v-show="!isShaking"></div>
       <div class="button"
         v-show="isShaking"
-        :class="{shake: false}"
+        :class="{shake: isShaking}"
         :style="{borderTopRightRadius: buttonRadius + 'px', borderBottomRightRadius: buttonRadius + 'px', width: buttonWidth + 'px', cursor: cursorStyle}"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
@@ -237,14 +237,6 @@ export default {
       };
     },
 
-    appearShakingEffect() {
-      this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
-      this.buttonRadius = Math.abs(this.cursorPosition);
-      this.isShaking = true;
-    },
-    hideShakingEffect() {
-      this.buttonRadius = 0;
-    },
     handleFakeBtnClick() {
       this.timeoutIdOfHideProgressSlider = setTimeout(() => {
         this.hideProgressSlider();
@@ -595,11 +587,11 @@ export default {
 }
 
 .shake {
-  transform-origin: left center;
-  animation-name: shake;
-  animation-duration: 180ms;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
+  // transform-origin: left center;
+  // animation-name: shake;
+  // animation-duration: 180ms;
+  // animation-timing-function: ease-in-out;
+  // animation-iteration-count: infinite;
 }
 
 @keyframes shake {
