@@ -167,7 +167,7 @@ export default {
       this.autoGeneration = true;
       this.thumbnailInfo.finished = false;
       this.imageMap = new Map();
-      this.$bus.$on('thumbnail-generation-paused', this.pauseAutoGeneration);
+      this.$on('thumbnail-generation-paused', this.pauseAutoGeneration);
     },
     // Initialize thumbnail worker
     thumbnailWorkerInit() {
@@ -242,7 +242,7 @@ export default {
           console.log(`[Thumbnail]: Generation started at ${Date.now()}.`);
         }
         if (this.videoInfo.currentIndex === this.thumbnailInfo.count) {
-          this.$bus.$emit('thumbnail-generation-finished');
+          this.$emit('thumbnail-generation-finished');
           console.log(`[Thumbnail]: Generation finished at ${Date.now()}.`);
           console.log(`[Thumbnail]: A total of ${this.thumbnailInfo.count} webp thumbnails generated.`);
           console.log('[Thumbnail]:', this.videoInfo, this.imageMap);
@@ -263,7 +263,7 @@ export default {
           });
         } else if (!this.thumbnailInfo.finished) {
           this.autoGeneration = false;
-          this.$bus.$emit('thumbnail-generation-paused');
+          this.$emit('thumbnail-generation-paused');
           this.thumbnailInfo.video.currentTime = currentTime;
           this.manualGenerationIndex = currentIndex;
         } else if (currentIndex >= this.imageMap.length) {
@@ -289,10 +289,10 @@ export default {
     },
   },
   mounted() {
-    this.$bus.$on('thumbnail-generation-finished', () => {
+    this.$on('thumbnail-generation-finished', () => {
       this.thumbnailInfo.finished = true;
       this.videoCanvasShow = false;
-      this.$bus.$off('thumbnail-generation-paused', this.pauseAutoGeneration);
+      this.$off('thumbnail-generation-paused', this.pauseAutoGeneration);
     });
     const offscreenImageCanvas = this.$refs.bitmapCanvas.transferControlToOffscreen();
     this.thumbnailWorker.postMessage({
