@@ -4,13 +4,6 @@
     <div class="screenshot-background"
       :style="{width: widthOfThumbnail + 2 + 'px'}">
       <div class="screenshot">
-        <canvas
-          ref="thumbnailCanvas"
-          :width=widthOfThumbnail
-          :height=heightOfThumbnail
-          v-if="videoCanvasShow"
-          v-show=false>
-        </canvas>
         <video
           preload="metadata"
           ref="thumbnailVideo"
@@ -94,7 +87,6 @@ export default {
         lastIndex: 0,
       },
       thumbnailInfo: {
-        canvas: null, // reference of thumbnail canvas element
         video: null, // reference of thumbnail video element
         count: 0, // final total number of thumbnail generated
         generationInterval: 0,
@@ -159,7 +151,6 @@ export default {
       const interval = this.calculateGenerationInterval(this.videoInfo.duration);
       this.thumbnailInfo.generationInterval = interval.generationInterval;
       this.thumbnailInfo.count = interval.count;
-      this.thumbnailInfo.canvas = this.$refs.thumbnailCanvas;
       this.thumbnailInfo.video = this.$refs.thumbnailVideo || document.querySelector('#thumbnailVideo');
       this.thumbnailInfo.video.pause();
       this.thumbnailInfo.video.currentTime = 0;
