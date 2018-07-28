@@ -19,7 +19,7 @@ const i18n = new VueI18n({
   messages, // set locale messages
 });
 
-const UpdaterFactory = (function () {
+const UpdaterFactory = (() => {
   let instance = null;
 
   class Updater {
