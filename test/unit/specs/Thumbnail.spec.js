@@ -11,6 +11,7 @@ describe('Thumbnail Unit Tests', () => {
   afterEach(() => {
     sandbox.restore();
   });
+  const { calledOnce } = sinon.assert;
 
   // Some vue options
   const propsData = {
@@ -88,7 +89,7 @@ describe('Thumbnail Unit Tests', () => {
     expect(vmShortcut.MAX_THUMBNAIL_COUNT).to.equal(100);
   });
 
-  it('should onMetaloaded function envoke four init fuctions', () => {
+  it('should onMetaloaded function envoke init fuctions', () => {
     const wrapper = shallowMount(Thumbnail, { propsData });
     const videoInfoInitSpy = sandbox.spy(wrapper.vm, 'videoInfoInit');
     const thumbnailInfoInitSpy = sandbox.spy(wrapper.vm, 'thumbnailInfoInit');
@@ -96,9 +97,9 @@ describe('Thumbnail Unit Tests', () => {
 
     wrapper.vm.onMetaLoaded();
 
-    expect(videoInfoInitSpy.calledOnce).to.equal(true);
-    expect(thumbnailInfoInitSpy.calledOnce).to.equal(true);
-    expect(thumbnailWorkerInitSpy.calledOnce).to.equal(true);
+    calledOnce(videoInfoInitSpy);
+    calledOnce(thumbnailInfoInitSpy);
+    calledOnce(thumbnailWorkerInitSpy);
   });
   it('should proper videoInfo be set', () => {
     const wrapper = shallowMount(Thumbnail, { propsData });
@@ -155,6 +156,6 @@ describe('Thumbnail Unit Tests', () => {
     expect(vmShortcut.autoGeneration).to.equal(true);
     expect(vmShortcut.imageMap.size).to.equal(0);
     expect(vmShortcut.imageMap instanceof Map).to.equal(true);
-    expect(pauseAutoGenerationSpy.calledOnce).to.equal(true);
+    calledOnce(pauseAutoGenerationSpy);
   });
 });
