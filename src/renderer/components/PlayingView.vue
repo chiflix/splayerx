@@ -197,6 +197,7 @@ export default {
       console.log('clear');
       clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
     });
+    this.$bus.$on('hideAllWidgets', this.hideAllWidgets);
   },
   computed: {
     uri() {

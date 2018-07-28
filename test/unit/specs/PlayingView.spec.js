@@ -56,4 +56,15 @@ describe('PlayingView.vue', () => {
     expect(wrapper.vm.cursorShow).equal(false);
     globalEventBusEmitSpy.restore();
   });
+
+  it('Im so DOPE', () => {
+    const wrapper = shallowMount(PlayingView, ({ store, localVue}));
+    const stub = sinon.stub(wrapper.vm.$bus, '$on');
+    stub.yields();
+    const spy = sinon.spy(wrapper.vm, 'hideAllWidgets');
+    stub('hideAllWidgets', spy);
+    expect(spy.calledOnce).equal(true);
+    stub.restore();
+    spy.restore();
+  });
 });

@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import asyncStorage from '@/helpers/asyncStorage';
 import Sagi from './sagi';
 
 export default {
@@ -52,52 +53,52 @@ export default {
       }
     },
     openFile(path) {
-      // this.$storage.set('recent-played', []);
-      this.$storage.get('recent-played', (err, data) => {
-        console.log(data);
+      // if new passed path exists in the storage
+      function indexOfExistedFileIn(data, path) {
+        for (let i = 0; i < data.length; i += 1) {
+          const object = data[i];
+          const iterator = Object.keys(object).indexOf('path');
+          if (iterator !== -1) {
+            if (object.path === path) {
+              return i;
+            }
+          }
+        }
+        return -1;
+      }
+
+      asyncStorage.get('recent-played').then((data) => {
         const newElement = {
           path,
           shortCut: '',
           lastPlayedTime: 0,
           duration: 0,
         };
-        if (err) {
-          // TODO: proper error handle
-          this.$storage.set('recent-played', [newElement]);
-          console.log(err);
-        } else if (Array.isArray(data)) {
-          console.log('its an array!');
+        if (Array.isArray(data)) {
           if (data.length < 4) {
-            if (this.$_indexOfExistedFileIn(data, path) === -1) {
+            if (indexOfExistedFileIn(data, path) === -1) {
               data.unshift(newElement);
             } else {
-              const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
+              const item = data.splice(indexOfExistedFileIn(data, path), 1);
               if (item[0].lastPlayedTime !== 0) {
                 this.$bus.$emit('seek', item[0].lastPlayedTime);
               }
               data.unshift(item[0]);
             }
-            console.log('changed:');
-            console.log(data);
-            this.$storage.set('recent-played', data);
+          } else if (indexOfExistedFileIn(data, path) === -1) {
+            data.pop();
+            data.unshift(newElement);
           } else {
-            if (this.$_indexOfExistedFileIn(data, path) === -1) {
-              data.pop();
-              data.unshift(newElement);
-            } else {
-              const item = data.splice(this.$_indexOfExistedFileIn(data, path), 1);
-              if (item[0].lastPlayedTime !== 0) {
-                this.$bus.$emit('seek', item[0].lastPlayedTime);
-              }
-              data.unshift(item[0]);
+            const item = data.splice(indexOfExistedFileIn(data, path), 1);
+            if (item[0].lastPlayedTime !== 0) {
+              this.$bus.$emit('seek', item[0].lastPlayedTime);
             }
-            console.log('changed:');
-            console.log(data);
-            this.$storage.set('recent-played', data);
+            data.unshift(item[0]);
           }
         } else {
-          this.$storage.set('recent-played', [newElement]);
+          data = [newElement];
         }
+        asyncStorage.set('recent-played', data);
         this.$bus.$emit('new-file-open');
       });
       this.$store.commit('SrcOfVideo', path);
@@ -105,19 +106,6 @@ export default {
         name: 'playing-view',
       });
     },
-    $_indexOfExistedFileIn(data, path) {
-      for (let i = 0; i < data.length; i += 1) {
-        const object = data[i];
-        const iterator = Object.keys(object).indexOf('path');
-        if (iterator !== -1) {
-          if (object.path === path) {
-            return i;
-          }
-        }
-      }
-      return -1;
-    },
-
     mediaQuickHash(file) {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');
