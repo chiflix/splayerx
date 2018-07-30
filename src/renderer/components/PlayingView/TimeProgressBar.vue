@@ -2,24 +2,27 @@
   <transition name="fade" appear>
     <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
   <div class="progress"
-    @mouseover.stop="appearProgressSlider"
+    @mouseover.stop.capture="appearProgressSlider"
     @mouseleave="hideProgressSlider"
     @mousemove="onProgressBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.left.stop="videoRestart"
-      @mouseenter="appearShakingEffect"
-      @mouseleave="hideShakingEffect">
+      :style="{cursor: cursorStyle}">
+      <div class="fake-button"
+        @mousedown="handleFakeBtnClick"
+        @mousemove.stop="handleFakeBtnMove"
+        :style="{height: heightOfThumbnail + 11 + 'px'}"></div>
       <div class="line"
         v-show="!isShaking"></div>
       <div class="button"
         v-show="isShaking"
         :class="{shake: isShaking}"
-        :style="{borderTopRightRadius: buttonRadius + 'px', borderBottomRightRadius: buttonRadius + 'px', width: buttonWidth + 'px'}"></div>
+        :style="{borderTopRightRadius: buttonRadius + 'px', borderBottomRightRadius: buttonRadius + 'px', width: buttonWidth + 'px', cursor: cursorStyle}"></div>
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.winWidth - 20 + 'px'}"
-      @mousedown.left="onProgressBarClick">
+      @mousedown.left.stop.capture="onProgressBarClick">
       <Thumbnail
         v-show="showScreenshot"
         :src=src
@@ -84,8 +87,11 @@ export default {
       isCursorLeft: false,
       isOnProgress: false,
       isShaking: false,
+      isRestartClicked: false,
       timeoutIdOfProgressBarDisappearDelay: 0,
       timeoutIdOfBackBarDisapppearDelay: 0,
+      timeoutIdOfHideProgressSlider: 0,
+      timeoutIdOfHideAllWidgets: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
       videoRatio: 0,
@@ -94,6 +100,7 @@ export default {
       thumbnailCurrentTime: 0,
       buttonWidth: 20,
       buttonRadius: 0,
+      cursorStyle: 'pointer',
     };
   },
   methods: {
@@ -109,7 +116,7 @@ export default {
       if (!this.onProgressSliderMousedown) {
         this.isOnProgress = false;
         this.showScreenshot = false;
-        this.$_resetRestartButton();
+        this.buttonRadius = 0;
 
         this.$refs.playedSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
@@ -128,8 +135,11 @@ export default {
       }
     },
     videoRestart() {
-      this.$_resetRestartButton();
+      this.buttonRadius = 0;
+      this.showScreenshot = false;
       this.$bus.$emit('seek', 0);
+      this.isRestartClicked = true;
+      this.cursorStyle = 'default';
     },
     onProgressBarClick(e) {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
@@ -138,10 +148,6 @@ export default {
       this.onProgressSliderMousedown = true;
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
-      // Reset restart button when seek to the 0s of the video
-      if (p <= 0) {
-        this.$_resetRestartButton();
-      }
       this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
       this.$_documentProgressDragClear();
       this.$_documentProgressDragEvent();
@@ -152,11 +158,15 @@ export default {
      * is not at mouse down event.
      */
     onProgressBarMove(e) {
-      /**
-       * TODO:
-       * 1. 解决由于mousemove触发机制导致的进度条拖动效果不平滑
-       * 解决方案1: 将事件放在document上尝试解决
-       */
+      this.isRestartClicked = false;
+      this.cursorStyle = 'pointer';
+      if (this.timeoutIdOfHideAllWidgets) {
+        clearTimeout(this.timeoutIdOfHideAllWidgets);
+      }
+      if (this.timeoutIdOfHideProgressSlider) {
+        clearTimeout(this.timeoutIdOfHideProgressSlider);
+      }
+
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return;
       }
@@ -219,7 +229,7 @@ export default {
         this.onProgressSliderMousedown = false;
         // 可以考虑其他的方案
         if (this.flagProgressBarDraged) {
-          this.$_resetRestartButton();
+          this.buttonRadius = 0;
           this.$bus.$emit('seek', this.percentageVideoDraged
            * this.$store.state.PlaybackState.Duration);
           this.flagProgressBarDraged = false;
@@ -227,18 +237,21 @@ export default {
       };
     },
 
-    appearShakingEffect() {
-      this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
-      this.buttonRadius = Math.abs(this.cursorPosition);
-      this.isShaking = true;
+    handleFakeBtnClick() {
+      this.timeoutIdOfHideProgressSlider = setTimeout(() => {
+        this.hideProgressSlider();
+        this.$_hideAllWidgets();
+      }, 3000);
     },
-    hideShakingEffect() {
-      this.$_resetRestartButton();
+    handleFakeBtnMove() {
+      if (this.isRestartClicked) {
+        this.hideProgressSlider();
+      }
     },
-    $_resetRestartButton() {
-      this.buttonWidth = FOOL_PROOFING_BAR_WIDTH;
-      this.buttonRadius = 0;
-      this.isShaking = false;
+    $_hideAllWidgets() {
+      this.timeoutIdOfHideAllWidgets = setTimeout(() => {
+        this.$bus.$emit('hideAllWidgets');
+      }, 3000);
     },
   },
   computed: {
@@ -271,6 +284,9 @@ export default {
       return this.isCursorLeft ? this.cursorPosition : 0;
     },
     progressOpacity() {
+      if (this.isRestartClicked) {
+        return 0.9;
+      }
       if (this.isOnProgress) {
         return this.isCursorLeft ? 0.3 : 0.9;
       }
@@ -300,14 +316,13 @@ export default {
     },
   },
   watch: {
-    cursorPosition(newVal, oldVal) {
-      if (newVal < oldVal && this.isOnProgress && newVal <= 0 && oldVal <= 0) {
-        this.buttonWidth = this.cursorPosition <= -6 ? 14 : 20 + this.cursorPosition;
-        this.buttonRadius = Math.abs(this.cursorPosition);
-        console.log('watch');
+    cursorPosition(newVal) {
+      if (this.isOnProgress && newVal <= 0) {
+        this.buttonRadius = 20;
         this.isShaking = true;
       } else {
-        this.$_resetRestartButton();
+        this.isShaking = false;
+        this.buttonRadius = 0;
       }
     },
     isOnProgress(newVal) {
@@ -392,6 +407,15 @@ export default {
     transition: height 150ms;
     background: rgba(255, 255, 255, 0.38);
 
+    .fake-button {
+      position: absolute;
+      left: 0;
+      bottom: 10px;
+      width: 20px;
+      background: transparent;
+      z-index: 100;
+    }
+
     .button {
       position: absolute;
       bottom: 0;
@@ -399,6 +423,7 @@ export default {
       height: 100%;
       background: rgba(255, 255, 255, 0.9);
       box-shadow: 0 0 20px 0 rgba(255, 255, 255, 0.5);
+      transition: border-radius 500ms;
       border-bottom-left-radius: 0;
       border-top-left-radius: 0;
     }
@@ -414,9 +439,9 @@ export default {
     }
   }
 
-  .fool-proof-bar:hover {
-    cursor: pointer;
-  }
+  // .fool-proof-bar:hover {
+  //   cursor: pointer;
+  // }
 
   .progress-container {
    position: absolute;
@@ -562,11 +587,11 @@ export default {
 }
 
 .shake {
-  transform-origin: left center;
-  animation-name: shake;
-  animation-duration: 180ms;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
+  // transform-origin: left center;
+  // animation-name: shake;
+  // animation-duration: 180ms;
+  // animation-timing-function: ease-in-out;
+  // animation-iteration-count: infinite;
 }
 
 @keyframes shake {
