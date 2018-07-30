@@ -5,38 +5,44 @@
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
-    <div class="background"
-      v-if="showShortcutImage">
-      <div class="background background-image">
-        <transition name="background-transition" mode="in-out">
-          <img
-          :key="imageTurn"
-          :src="backgroundUrl">
-        </transition>
+    <transition name="background-container-transition" mode="in">
+      <div class="background"
+        v-if="showShortcutImage">
+        <div class="background background-image">
+          <transition name="background-transition" mode="in-out">
+            <img
+            :key="imageTurn"
+            :src="backgroundUrl">
+          </transition>
+        </div>
+        <div class="background background-mask"></div>
+        <div class="iteminfo item-name">
+          {{ itemInfo().baseName }}
+        </div>
+        <div class="iteminfo item-description">
+        </div>
+        <div class="iteminfo item-timing">
+          <span class="timing-played">
+            {{ timeInValidForm(timecodeFromSeconds(itemInfo().lastTime)) }}</span>
+          / {{ timeInValidForm(timecodeFromSeconds(itemInfo().duration)) }}
+        </div>
+        <div class="iteminfo item-progress">
+          <div class="progress-played" v-bind:style="{ width: itemInfo().percentage + '%' }"></div>
+        </div>
       </div>
-      <div class="background background-mask"></div>
-      <div class="iteminfo item-name">
-        {{ itemInfo().baseName }}
-      </div>
-      <div class="iteminfo item-description">
-      </div>
-      <div class="iteminfo item-timing">
-        <span class="timing-played">
-          {{ timeInValidForm(timecodeFromSeconds(itemInfo().lastTime)) }}</span>
-        / {{ timeInValidForm(timecodeFromSeconds(itemInfo().duration)) }}
-      </div>
-      <div class="iteminfo item-progress">
-        <div class="progress-played" v-bind:style="{ width: itemInfo().percentage + '%' }"></div>
-      </div>
-    </div>
-    <div class="logo-container">
-      <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
-    </div>
+    </transition>
+    <transition name="welcome-container-transition" mode="out">
+      <div class="welcome-container" v-if="langdingLogoAppear">
+        <div class="logo-container">
+          <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
+        </div>
 
-    <div class="welcome">
-      <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-      <div class="version">v {{ this.$electron.remote.app.getVersion() }}</div>
-    </div>
+        <div class="welcome">
+          <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
+          <div class="version">v {{ this.$electron.remote.app.getVersion() }}</div>
+        </div>
+      </div>
+  </transition>
     <div class="controller">
       <div class="playlist"
         v-if="hasRecentPlaylist">
@@ -64,6 +70,7 @@
 
 <script>
 import path from 'path';
+import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 export default {
   name: 'landing-view',
@@ -80,6 +87,7 @@ export default {
       isDragging: false,
       mouseDown: false,
       invalidTimeRepresentation: '--',
+      langdingLogoAppear: true,
     };
   },
   components: {
@@ -111,15 +119,12 @@ export default {
       }
     });
 
-
-    this.$storage.get('recent-played', (err, data) => {
-      if (err) {
-        // TODO: proper error handle
-        console.error(err);
-      } else {
-        this.lastPlayedFile = data;
-        console.log(data);
-      }
+    asyncStorage.get('recent-played').then((data) => {
+      this.lastPlayedFile = data;
+      console.log(data);
+    }).catch((err) => {
+      // TODO: proper error handle
+      console.error(err);
     });
     if (process.platform === 'win32') {
       document.querySelector('.application').style.webkitAppRegion = 'no-drag';
@@ -154,7 +159,11 @@ export default {
           this.imageTurn = 'even';
           this.backgroundUrlEven = item.shortCut;
         }
+        this.langdingLogoAppear = false;
         this.showShortcutImage = true;
+      } else {
+        this.langdingLogoAppear = true;
+        this.showShortcutImage = false;
       }
     },
     onRecentItemMouseout(index) {
@@ -402,6 +411,24 @@ main {
   transition-delay: .2s;
 }
 .background-transition-enter, .background-transition-leave-to {
+  opacity: 0;
+}
+
+.welcome-container-transition-enter-active, .welcome-container-transition-leave-active{
+  transition: opacity .3s ease-in;
+  transition-delay: .2s;
+}
+
+.welcome-container-transition-enter, .welcome-container-transition-leave-to {
+  opacity: 0;
+}
+
+.background-container-transition-enter-active, .background-container-transition-leave-active{
+  transition: opacity .3s ease-in;
+  transition-delay: .2s;
+}
+
+.background-container-transition-enter, .background-container-transition-leave-to{
   opacity: 0;
 }
 

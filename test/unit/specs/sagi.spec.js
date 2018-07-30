@@ -15,8 +15,7 @@ describe('helper.sagi api', function () {
       expect(resp.getError().toObject().code, 'error').to.equal(0);
       expect(resp.getError().toObject().message, 'error message').to.equal('OK');
       const res = resp.getResultsList();
-      expect(res.length, 'results list length').to.be.above(0);
-      expect(res[0].getTranscriptIdentity(), 'result transcript identity').to.contain('this-is-a-developer-test-transcript');
+      expect(res.length, 'results list length').to.be.above(1);
       done();
     }).catch((reason) => {
       // fail the test
