@@ -61,11 +61,6 @@ export default {
       onEdEvents: [],
     };
   },
-  watch: {
-    currentTime(newValue) {
-      this.$refs.video.currentTime = newValue;
-    },
-  },
   mounted() {
     this.initializeVideoPlayer();
   },
@@ -80,10 +75,10 @@ export default {
       this.customOptionsInitialization(this.customOptions, this.$refs.video);
     },
     basicInfoInitialization(videoElement) {
-      videoElement.setAttribute('currentTime', this.currentTime);
       videoElement.setAttribute('playbackRate', this.playbackRate);
       videoElement.setAttribute('src', this.src);
       videoElement.setAttribute('volume', this.volume);
+      return videoElement;
     },
     defaultEventsInitialization(eventsArray) {
       // Watch default events
@@ -109,9 +104,7 @@ export default {
     },
     customOptionsInitialization(optionsObject, videoElement) {
       if (optionsObject.pauseOnStart) {
-        videoElement.addEventListener('loadedmetadata', (event) => {
-          event.target.pause();
-        });
+        videoElement.addEventListener('loadedmetadata', this.pause);
       }
     },
     // Video default methods
