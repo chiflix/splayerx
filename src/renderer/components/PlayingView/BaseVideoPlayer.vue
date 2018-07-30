@@ -28,12 +28,12 @@ export default {
     volume: {
       type: Number,
       default: 0.7,
-      validator: value => value >= 0 && value <= 10,
+      validator: value => typeof(value) === 'number' && value >= 0 && value <= 10,
     },
     defaultEvents: {
       type: Array,
       required: true,
-      validator: value => value.every(event => DEFAULT_VIDEO_EVENTS.indexOf(event) !== -1),
+      validator: value => Array.isArray(value) && (value.length === 0 || value.every(element => DEFAULT_VIDEO_EVENTS.indexOf(element) !== -1)),
     },
     defaultOptions: {
       type: Object,
