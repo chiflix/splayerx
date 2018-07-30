@@ -18,9 +18,11 @@ export default {
       type: String,
       required: true,
       validator(value) {
-        return value.length > 0 ||
-        value.match(/^(http|https):\/\//) ||
-        value.match(/^file:\/\/\/?/);
+        const fileSrcRegexes = [
+          RegExp('^(http|https)://'),
+          RegExp('^file:///?'),
+        ];
+        return value.length > 0 && fileSrcRegexes.some(rule => rule.test(value));
       },
     },
     volume: {
