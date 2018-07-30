@@ -520,59 +520,6 @@ describe('TimeProgressBar.vue', () => {
   // have no input parameter required.
   // so the testing for the 2 methods - 待
 
-  it('appearShakingEffect method works fine', () => {
-    const wrapper = mount(TimeProgressBar, { store, localVue });
-    wrapper.setProps({ src: '' });
-    wrapper.setData({
-      cursorPosition: -7,
-      isShaking: false,
-    });
-    wrapper.vm.appearShakingEffect();
-    expect(wrapper.vm.buttonWidth).equal(14);
-    expect(wrapper.vm.buttonRadius).equal(7);
-    expect(wrapper.vm.isShaking).equal(true);
-    wrapper.setData({
-      cursorPosition: 10,
-      isShaking: false,
-    });
-    wrapper.vm.appearShakingEffect();
-    expect(wrapper.vm.buttonWidth).equal(30);
-    expect(wrapper.vm.buttonRadius).equal(10);
-    expect(wrapper.vm.isShaking).equal(true);
-    wrapper.setData({
-      cursorPosition: 120.2,
-      isShaking: false,
-    });
-    wrapper.vm.appearShakingEffect();
-    expect(wrapper.vm.buttonWidth).equal(140.2);
-    expect(wrapper.vm.buttonRadius).equal(120.2);
-    expect(wrapper.vm.isShaking).equal(true);
-  });
-
-  it('hideShakingEffect method works fine', () => {
-    const wrapper = mount(TimeProgressBar, { store, localVue });
-    wrapper.setProps({ src: '' });
-    const spy = sinon.spy(wrapper.vm, '$_resetRestartButton');
-    wrapper.vm.hideShakingEffect();
-    expect(spy.calledOnce).equal(true);
-    expect(spy.firstCall.args.length).equal(0);
-    spy.restore();
-  });
-
-  it('$_resetRestartButton method works fine', () => {
-    const wrapper = mount(TimeProgressBar, { store, localVue });
-    wrapper.setProps({ src: '' });
-    wrapper.setData({
-      buttonWidth: 0,
-      buttonRadius: -1,
-      isShaking: true,
-    });
-    wrapper.vm.$_resetRestartButton();
-    expect(wrapper.vm.buttonWidth).equal(20);
-    expect(wrapper.vm.buttonRadius).equal(0);
-    expect(wrapper.vm.isShaking).equal(false);
-  });
-
   // followingh test cases are for testing the watch property
   it('cursorPosition watched property works as expected - 1', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
@@ -583,8 +530,7 @@ describe('TimeProgressBar.vue', () => {
       cursorPosition: -2,
     });
     wrapper.setData({ cursorPosition: -5 });
-    expect(wrapper.vm.buttonWidth).equal(15);
-    expect(wrapper.vm.buttonRadius).equal(5);
+    expect(wrapper.vm.buttonRadius).equal(20);
     expect(wrapper.vm.isShaking).equal(true);
   });
 
@@ -596,13 +542,9 @@ describe('TimeProgressBar.vue', () => {
       isOnProgress: false,
       cursorPosition: 10,
     });
-    const spy = sinon.spy(wrapper.vm, '$_resetRestartButton');
     wrapper.setData({ cursorPosition: 20 });
     expect(wrapper.vm.isShaking).equal(false);
     expect(wrapper.vm.isOnProgress).equal(false);
-    expect(spy.calledOnce).equal(true);
-    expect(spy.firstCall.args.length).equal(0);
-    spy.restore();
   });
 
   it('isOnProgress watched property works as expected - 1', () => {
