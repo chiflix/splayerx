@@ -154,11 +154,6 @@ describe('TimeProgressBar.vue', () => {
 
   it('videoRestart method works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
-<<<<<<< HEAD
-    wrapper.setProps({ src: '' });
-    const spy1 = sinon.spy(wrapper.vm, '$_resetRestartButton');
-    const spy2 = sinon.spy(wrapper.vm.$bus, '$emit');
-=======
     wrapper.setData({
       buttonRadius: 20,
       showScreenshot: true,
@@ -166,7 +161,6 @@ describe('TimeProgressBar.vue', () => {
       cursorStyle: 'pointer',
     });
     const spy = sinon.spy(wrapper.vm.$bus, '$emit');
->>>>>>> upstream/develop
     wrapper.vm.videoRestart();
     expect(wrapper.vm.buttonRadius).equal(0);
     expect(wrapper.vm.showScreenshot).equal(false);
@@ -449,10 +443,6 @@ describe('TimeProgressBar.vue', () => {
 
   it('progressOpacity computed property works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
-<<<<<<< HEAD
-    wrapper.setProps({ src: '' });
-    wrapper.setData({ isOnProgress: false });
-=======
     wrapper.setData({
       isRestartClicked: true,
     });
@@ -461,7 +451,6 @@ describe('TimeProgressBar.vue', () => {
       isRestartClicked: false,
       isOnProgress: false,
     });
->>>>>>> upstream/develop
     expect(wrapper.vm.progressOpacity).equal(0.9);
     wrapper.setData({
       isRestartClicked: false,
