@@ -12,13 +12,16 @@ export default {
     playbackRate: {
       type: Number,
       default: 1,
-      validator: value => value !== 0 && value <= 100,
+      validator: value => value > 0 && value <= 100,
     },
     src: {
       type: String,
       required: true,
-      default: ' ',
-      validator: value => value.length > 0,
+      validator(value) {
+        return value.length > 0 ||
+        value.match(/^(http|https):\/\//) ||
+        value.match(/^file:\/\/\/?/);
+      },
     },
     volume: {
       type: Number,
@@ -58,7 +61,6 @@ export default {
   },
   watch: {
     currentTime(newValue) {
-      console.log('[BaseVideoPlayer|CurrentTime]:', newValue);
       this.$refs.video.currentTime = newValue;
     },
   },
@@ -88,7 +90,6 @@ export default {
         this.$on(event, this.emitPlayerState(event));
         onEdEvents.push(event);
       });
-      console.log('[BaseVideoPlayer|Events]:', onEdEvents);
       return onEdEvents;
     },
     emitPlayerState(event, value) {
