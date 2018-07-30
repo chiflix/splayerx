@@ -4,18 +4,15 @@
     <div class="screenshot-background"
       :style="{width: widthOfThumbnail + 2 + 'px'}">
       <div class="screenshot">
-        <video
-          preload="metadata"
-          ref="thumbnailVideo"
-          id="thumbnailVideo"
+        <base-video-player
+          :src=src
+          :defaultEvents="['loadedmetadata', 'seeked']"
+          :customOptions="{ pauseOnStart: true }"
           @loadedmetadata="onMetaLoaded"
-          :width=widthOfThumbnail
-          :height=heightOfThumbnail
-          :src="src"
+          @seeked="thumbnailGeneration"
+          ref="thumbnailVideo"
           v-if="videoCanvasShow"
-          v-show="!this.autoGeneration"
-          style="object-fit: fill; opacity: 0.97">
-        </video>
+          v-show="!this.autoGeneration" />
         <canvas
           v-show="this.autoGeneration"
           ref="bitmapCanvas"
@@ -32,7 +29,11 @@
 
 <script>
 import ThumbnailWorker from '../../worker/thumbnail.worker';
+import BaseVideoPlayer from './BaseVideoPlayer';
 export default {
+  components: {
+    BaseVideoPlayer,
+  },
   props: {
     src: {
       type: String,
@@ -124,7 +125,7 @@ export default {
     },
     // Initialize video info
     videoInfoInit() {
-      this.videoInfo.duration = Math.floor(this.$refs.thumbnailVideo.duration);
+      this.videoInfo.duration = Math.floor(this.$refs.thumbnailVideo.duration());
       this.videoInfo.currentIndex = 0;
     },
     // calculate the interval for auto-generation
@@ -151,10 +152,8 @@ export default {
       const interval = this.calculateGenerationInterval(this.videoInfo.duration);
       this.thumbnailInfo.generationInterval = interval.generationInterval;
       this.thumbnailInfo.count = interval.count;
-      this.thumbnailInfo.video = this.$refs.thumbnailVideo || document.querySelector('#thumbnailVideo');
-      this.thumbnailInfo.video.pause();
-      this.thumbnailInfo.video.currentTime = 0;
-      this.thumbnailInfo.video.addEventListener('seeked', this.thumbnailGeneration);
+      this.thumbnailInfo.video = this.$refs.thumbnailVideo.videoElement();
+      this.$refs.thumbnailVideo.pause();
       this.autoGeneration = true;
       this.thumbnailInfo.finished = false;
       this.imageMap = new Map();
@@ -182,18 +181,18 @@ export default {
     },
     // Function to resume thumbnail auto generation
     resumeAutoGeneration() {
-      this.setImage(this.thumbnailInfo.video.currentTime);
+      this.setImage(this.$refs.thumbnailVideo.currentTime());
       this.autoGeneration = true;
       console.log('[Thumbnail]: Thumbnail generation resumed!');
       console.log(`[Thumbnail]: Current index is ${this.videoInfo.currentIndex}.`);
       console.log(`[Thumbnail]: Set current time to ${this.videoInfo.currentTime}.`);
-      this.thumbnailInfo.video.currentTime
-      = this.videoInfo.currentIndex * this.thumbnailInfo.generationInterval;
-      console.log(`[Thumbnail]: Actual video current time is ${this.thumbnailInfo.video.currentTime}.`);
+      this.$refs.thumbnailVideo
+        .currentTime(this.videoInfo.currentIndex * this.thumbnailInfo.generationInterval);
+      console.log(`[Thumbnail]: Actual video current time is ${this.$refs.thumbnailVideo.currentTime()}.`);
     },
     // Manage thumbnail generation
-    thumbnailGeneration(event) {
-      const actualTime = event.target.currentTime;
+    thumbnailGeneration() {
+      const actualTime = this.$refs.thumbnailVideo.currentTime();
       const autoGenerationIndex = this.videoInfo.currentIndex;
       const pace = this.thumbnailInfo.generationInterval;
       let destTime = null;
@@ -212,7 +211,7 @@ export default {
         if (!this.imageMap.get(currentIndex)) {
           setTimeout(() => {
             console.time('create Image');
-            createImageBitmap(this.thumbnailInfo.video).then((result) => {
+            createImageBitmap(this.$refs.thumbnailVideo.videoElement()).then((result) => {
               console.timeEnd('create Image');
               console.time('image send');
               this.thumbnailWorker.postMessage({
@@ -225,9 +224,9 @@ export default {
           }, 300);
         } else if (this.autoGeneration) {
           this.videoInfo.currentIndex += 1;
-          this.thumbnailInfo.video.currentTime
-          = this.videoInfo.currentTime
+          this.videoInfo.currentTime
            = this.videoInfo.currentIndex * this.thumbnailInfo.generationInterval;
+          this.$refs.thumbnailVideo.currentTime(this.videoInfo.currentTime);
         }
         if (this.videoInfo.currentIndex === 0) {
           console.log(`[Thumbnail]: Generation started at ${Date.now()}.`);
@@ -237,7 +236,6 @@ export default {
           console.log(`[Thumbnail]: Generation finished at ${Date.now()}.`);
           console.log(`[Thumbnail]: A total of ${this.thumbnailInfo.count} webp thumbnails generated.`);
           console.log('[Thumbnail]:', this.videoInfo, this.imageMap);
-          this.thumbnailInfo.video.removeEventListener('seeked', this.thumbnailGeneration);
           this.thumbnailWorker.removeEventListener('message', this.setImageOrNot);
         }
       }
@@ -255,7 +253,7 @@ export default {
         } else if (!this.thumbnailInfo.finished) {
           this.autoGeneration = false;
           this.$emit('thumbnail-generation-paused');
-          this.thumbnailInfo.video.currentTime = currentTime;
+          this.$refs.thumbnailVideo.currentTime(currentTime);
           this.manualGenerationIndex = currentIndex;
         } else if (currentIndex >= this.imageMap.length) {
           currentIndex = this.imageMap.length - 1;
@@ -271,15 +269,16 @@ export default {
           && this.videoInfo.currentIndex < this.thumbnailInfo.count
           && this.autoGeneration) {
           this.videoInfo.currentIndex += 1;
-          this.thumbnailInfo.video.currentTime
-          = this.videoInfo.currentTime
+          this.videoInfo.currentTime
            = this.videoInfo.currentIndex * this.thumbnailInfo.generationInterval;
+          this.$refs.thumbnailVideo.currentTime(this.videoInfo.currentTime);
         }
         console.log(`[Thumbnail]: No.${currentIndex} image generated!`);
       }
     },
   },
   mounted() {
+    console.log('[Thumbnail|Refs]:', this.$refs);
     this.$on('thumbnail-generation-finished', () => {
       this.thumbnailInfo.finished = true;
       this.videoCanvasShow = false;
