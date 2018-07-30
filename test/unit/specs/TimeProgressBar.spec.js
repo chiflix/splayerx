@@ -17,7 +17,7 @@ function cssSplit(str) {
   return O;
 }
 
-describe('TimeProgressBar.vue', () => {
+describe.only('TimeProgressBar.vue', () => {
   let store;
 
   beforeEach(() => {
@@ -56,6 +56,71 @@ describe('TimeProgressBar.vue', () => {
     expect(wrapper.vm.buttonWidth).equal(20);
     expect(wrapper.vm.buttonRadius).equal(0);
     expect(wrapper.vm.cursorStyle).equal('pointer');
+  });
+
+  it('progress mouseover trigger', () => {
+    const wrapper = mount(TimeProgressBar, {store, localVue});
+    const spy = sinon.spy(wrapper.vm, 'appearProgressSlider');
+    wrapper.find('.progress').trigger('mouseover.stop.capture');
+    expect(spy.calledOnce).equal(true);
+    spy.restore();
+  });
+
+  it('progress mouseleave trigger', () => {
+    const wrapper = mount(TimeProgressBar, {store, localVue});
+    const spy = sinon.spy(wrapper.vm, 'hideProgressSlider');
+    wrapper.find('.progress').trigger('mouseover.stop.capture');
+    wrapper.find('.progress').trigger('mouseleave');
+    expect(spy.calledOnce).equal(true);
+    spy.restore();
+  });
+
+  it('progress mousemove trigger', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    const spy = sinon.spy(wrapper.vm, 'onProgressBarMove');
+    wrapper.find('.progress').trigger('mouseover.stop.capture');
+    wrapper.find('.progress').trigger('mousemove');
+    expect(spy.calledOnce).equal(true);
+    spy.restore();
+  });
+
+  it('fool-proof-bar mousedown trigger', () => {
+    const wrapper = mount(TimeProgressBar, { store, localVue });
+    const spy = sinon.spy(wrapper.vm, 'videoRestart');
+    wrapper.find('.progress').trigger('mouseover.stop.capture');
+    wrapper.find('.fool-proof-bar').trigger('mousedown.stop');
+    expect(spy.calledOnce).equal(true);
+    spy.restore();
+  });
+
+  it('fake-button mousedonwn trigger', () => {
+    const wrapper = mount(TimeProgressBar, {store, localVue});
+    const spy = sinon.spy(wrapper.vm, 'handleFakeBtnClick');
+    wrapper.find('.progress').trigger('mouseover.stop.capture');
+    wrapper.find('.fake-button').trigger('mousedown');
+    expect(spy.calledOnce).equal(true);
+    spy.restore();
+  });
+
+  it('fake-button mousemove trigger', () => {
+    const wrapper = mount(TimeProgressBar, {store, localVue});
+    const spy = sinon.spy(wrapper.vm, 'handleFakeBtnMove');
+    wrapper.find('.progress').trigger('mouseover.stop.capture');
+    wrapper.find('.fake-button').trigger('mousemove.stop');
+    expect(spy.calledOnce).equal(true);
+    spy.restore();
+  });
+
+  it('progress-container mousedown trigger', () => {
+    const wrapper = mount(TimeProgressBar, {store, localVue});
+    wrapper.setData({
+      winWidth: 1000,
+    });
+    const spy = sinon.spy(wrapper.vm, 'onProgressBarClick');
+    wrapper.find('.progress').trigger('mouseover.stop.capture');
+    wrapper.find('.progress-container').trigger('mousedown.stop.capture');
+    expect(spy.calledOnce).equal(true);
+    spy.restore();
   });
 
   it('appearProgressSlider method works fine', () => {

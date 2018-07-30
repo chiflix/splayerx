@@ -7,7 +7,7 @@
     @mousemove="onProgressBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.left.stop="videoRestart"
+      @mousedown.stop="videoRestart"
       :style="{cursor: cursorStyle}">
       <div class="fake-button"
         @mousedown="handleFakeBtnClick"
@@ -22,7 +22,7 @@
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.winWidth - 20 + 'px'}"
-      @mousedown.left.stop.capture="onProgressBarClick">
+      @mousedown.stop.capture="onProgressBarClick">
       <Thumbnail
         v-show="showScreenshot"
         :src=src
