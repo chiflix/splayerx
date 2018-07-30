@@ -43,14 +43,18 @@ const UpdaterFactory = (function () {
      */
     onStart() {
       return new Promise((resolve) => {
-        this.startUpdate().then((message) => {
-          if (message.substring(0, 5) === 'Error') {
-            setTimeout(() => { resolve(this.onStart()); }, waitTime); // 5min check for once
-          } else {
-            this.ulog(`update finished lyc${message}`);
-            resolve(message);
-          }
-        });
+        if (process.env.NODE_ENV === 'production') {
+          this.startUpdate().then((message) => {
+            if (message.substring(0, 5) === 'Error') {
+              setTimeout(() => { resolve(this.onStart()); }, waitTime); // 5min check for once
+            } else {
+              this.ulog(`update finished lyc${message}`);
+              resolve(message);
+            }
+          });
+        } else {
+          resolve('not production');
+        }
       });
     }
     getSystemLocale() {

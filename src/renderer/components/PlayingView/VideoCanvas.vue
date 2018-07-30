@@ -32,10 +32,12 @@ import { WebVTT } from 'vtt.js';
 import path from 'path';
 // https://www.w3schools.com/tags/ref_av_dom.asp
 import parallel from 'run-parallel';
+import syncStorage from '@/helpers/syncStorage';
 
 export default {
   data() {
     return {
+      windowRectangleOld: {},
       videoExisted: false,
       shownTextTrack: false,
       newWidthOfWindow: 0,
@@ -98,19 +100,18 @@ export default {
     },
     onCanPlay() {
       // the video is ready to start playing
-      this.$_getThumbnail();
       this.$store.commit('Volume', this.$refs.videoCanvas.volume);
     },
     onMetaLoaded() {
       console.log('loadedmetadata');
       this.$bus.$emit('play');
-      this.$_getThumbnail();
+      this.$bus.$emit('seek', this.currentTime);
       this.videoWidth = this.$refs.videoCanvas.videoWidth;
       this.videoHeight = this.$refs.videoCanvas.videoHeight;
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
       if (this.videoExisted) {
         this.$_calculateWindowSizeInConditionOfVideoExisted();
-        this.$_controlWindowSize();
+        this.$_controlWindowSizeAtNewVideo();
       } else {
         this.$_calculateWindowSizeAtTheFirstTime();
         this.$_controlWindowSize();
@@ -125,7 +126,6 @@ export default {
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
-        if (t % 10 === 0) { this.$_getThumbnail(); }
       }
     },
     onDurationChange() {
@@ -149,7 +149,17 @@ export default {
       });
       currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
     },
-
+    $_controlWindowSizeAtNewVideo() {
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      const windowXY = this.calcNewWindowXY();
+      currentWindow.setBounds({
+        x: windowXY.windowX,
+        y: windowXY.windowY,
+        width: parseInt(this.newWidthOfWindow, 10),
+        height: parseInt(this.newHeightOfWindow, 10),
+      });
+      currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
+    },
     $_calculateWindowSizeAtTheFirstTime() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       const currentScreen = this.$electron.screen.getPrimaryDisplay();
@@ -225,36 +235,33 @@ export default {
       }
       console.log(this.newWidthOfWindow);
     },
-    $_getThumbnail() {
+    $_saveScreenshot() {
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       const { videoHeight, videoWidth } = this.$refs.videoCanvas;
       [canvas.width, canvas.height] = [videoWidth, videoHeight];
-      const landingViewWidth = 768;
 
       canvasCTX.drawImage(
         this.$refs.videoCanvas, 0, 0, videoWidth, videoHeight,
         0, 0, videoWidth, videoHeight,
       );
-      const imagePath = canvas.toDataURL('image/png', landingViewWidth / videoWidth);
-      this.$storage.get('recent-played', (err, data) => {
-        if (err) {
-          // TODO: proper error handle
-          console.error(err);
-        } else {
-          const object = data[0];
-          const iterator = Object.keys(object).indexOf('path');
-          if (iterator !== -1) {
-            object.shortCut = imagePath;
-            object.lastPlayedTime = this.currentTime;
-            object.duration = this.$store.state.PlaybackState.Duration;
-            data.splice(0, 1);
-            data.unshift(object);
-            this.$storage.set('recent-played', data);
-          }
-        }
-      });
-      console.log('shortCut!');
+      const imagePath = canvas.toDataURL('image/png');
+      let data;
+      try {
+        data = syncStorage.getSync('recent-played');
+      } catch (err) {
+        console.error(err);
+      }
+      const object = data[0];
+      const iterator = Object.keys(object).indexOf('path');
+      if (iterator !== -1) {
+        object.shortCut = imagePath;
+        object.lastPlayedTime = this.currentTime;
+        object.duration = this.$store.state.PlaybackState.Duration;
+        data.splice(0, 1);
+        data.unshift(object);
+      }
+      syncStorage.setSync('recent-played', data);
     },
     /**
      * @param callback Has two parameters, err and result
@@ -466,6 +473,16 @@ export default {
         this.secondSubIndex = null;
       }
     },
+    calcNewWindowXY() {
+      if (Object.keys(this.windowRectangleOld).length === 0) {
+        return { windowX: 0, windowY: 0 };
+      }
+      let x = this.windowRectangleOld.x + (this.windowRectangleOld.width / 2);
+      let y = this.windowRectangleOld.y + (this.windowRectangleOld.height / 2);
+      x = Math.round(x - (this.newWidthOfWindow / 2));
+      y = Math.round(y - (this.newHeightOfWindow / 2));
+      return { windowX: x, windowY: y };
+    },
   },
   computed: {
     calculateHeightByWidth() {
@@ -539,6 +556,13 @@ export default {
           .innerHTML);
       }
     },
+    src() {
+      const window = this.$electron.remote.getCurrentWindow();
+      this.windowRectangleOld.x = window.getBounds().x;
+      this.windowRectangleOld.y = window.getBounds().y;
+      this.windowRectangleOld.height = window.getBounds().height;
+      this.windowRectangleOld.width = window.getBounds().width;
+    },
   },
   created() {
     this.$bus.$on('playback-rate', (newRate) => {
@@ -571,7 +595,6 @@ export default {
     this.$bus.$on('pause', () => {
       console.log('pause event has been triggered');
       this.$refs.videoCanvas.pause();
-      this.$_getThumbnail();
     });
     this.$bus.$on('seek', (e) => {
       console.log('seek event has been triggered', e);
@@ -579,7 +602,6 @@ export default {
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
     });
-
     // 可以二合一
     this.$bus.$on('subFirstChange', (targetIndex) => {
       this.subtitleShow(targetIndex);
@@ -626,6 +648,11 @@ export default {
         console.log('Add subtitle');
       });
     });
+  },
+  mounted() {
+    window.onbeforeunload = () => {
+      this.$_saveScreenshot();
+    };
   },
 };
 </script>
