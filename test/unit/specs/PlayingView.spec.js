@@ -57,8 +57,8 @@ describe('PlayingView.vue', () => {
     globalEventBusEmitSpy.restore();
   });
 
-  it('Im so DOPE', () => {
-    const wrapper = shallowMount(PlayingView, ({ store, localVue}));
+  it('should call the callback function listen to hideAllWidgets', () => {
+    const wrapper = shallowMount(PlayingView, ({ store, localVue }));
     const stub = sinon.stub(wrapper.vm.$bus, '$on');
     stub.yields();
     const spy = sinon.spy(wrapper.vm, 'hideAllWidgets');
