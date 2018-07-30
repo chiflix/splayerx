@@ -37,6 +37,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('should load correct data', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     expect(wrapper.vm.showScreenshot).equal(false);
     expect(wrapper.vm.showProgressBar).equal(true);
     expect(wrapper.vm.onProgressSliderMousedown).equal(false);
@@ -58,6 +59,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('appearProgressSlider method works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({ isOnProgress: false });
     const spy = sinon.spy(wrapper.vm.$bus, '$emit');
     wrapper.vm.appearProgressSlider();
@@ -78,6 +80,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('hideProgressSlider method works fine - 1', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({
       onProgressSliderMousedown: true,
       isOnProgress: true,
@@ -88,6 +91,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('hideProgressBar method works fine - 2', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({
       onProgressSliderMousedown: false,
       isOnProgress: true,
@@ -111,6 +115,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('appearProgressBar method works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({ showProgressBar: false });
     const spy = sinon.spy(wrapper.vm, '$_clearTimeoutDelay');
     wrapper.vm.appearProgressBar();
@@ -121,6 +126,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('hideProgressBar method works fine - 1', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({
       onProgressSliderMousedown: true,
       showProgressBar: true,
@@ -134,6 +140,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('hideProgressBar method works fine - 2', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({
       onProgressSliderMousedown: false,
       showProgressBar: true,
@@ -147,6 +154,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('videoRestart method works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     const spy1 = sinon.spy(wrapper.vm, '$_resetRestartButton');
     const spy2 = sinon.spy(wrapper.vm.$bus, '$emit');
     wrapper.vm.videoRestart();
@@ -160,6 +168,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('onProgressBarClick method can be triggered correctly', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     const spy = sinon.spy(wrapper.vm, 'onProgressBarClick');
     wrapper.find('.progress-container').trigger('mousedown.left');
     expect(spy.calledOnce).equal(true);
@@ -168,6 +177,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('onProgressBarClick method works fine - 1', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     const target = wrapper.find('.progress-container');
     const testEvent = new MouseEvent(target.trigger('mousedown.left'), {
       clientX: 2000,
@@ -182,6 +192,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('onProgressBarClick method works fine - 2', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     const target = wrapper.find('.progress-container');
     const testEvent = new MouseEvent(target.trigger('mousedown.left'), {
       clientX: 2000,
@@ -205,6 +216,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('onProgressBarMove method works fine - 1', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     store.state.PlaybackState.Duration = NaN;
     wrapper.setData({ onProgressSliderMousedown: false });
     const spy = sinon.spy(wrapper.vm, '$_effectProgressBarDraged');
@@ -216,6 +228,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('onProgressBarMove method works fine - 2', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     store.state.PlaybackState.Duration = 1000;
     wrapper.setData({ onProgressSliderMousedown: false });
     const target = wrapper.find('.progress');
@@ -236,6 +249,7 @@ describe('TimeProgressBar.vue', () => {
       localVue,
       attachToDocument: true,
     });
+    wrapper.setProps({ src: '' });
     const target = wrapper.find('.progress');
     const testEvent = new MouseEvent(target.trigger('mousedown.left'), {
       clientX: 2000,
@@ -257,6 +271,7 @@ describe('TimeProgressBar.vue', () => {
       localVue,
       attachToDocument: true,
     });
+    wrapper.setProps({ src: '' });
     const target = wrapper.find('.progress');
     const testEvent = new MouseEvent(target.trigger('mousedown.left'), {
       clientX: 118,
@@ -279,6 +294,7 @@ describe('TimeProgressBar.vue', () => {
       localVue,
       attachToDocument: true,
     });
+    wrapper.setProps({ src: '' });
     const target = wrapper.find('.progress');
     const testEvent = new MouseEvent(target.trigger('mousedown.left'), {
       clientX: 18,
@@ -301,6 +317,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('winWidth computed property works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     store.state.WindowState.windowSize = [0, 0];
     expect(wrapper.vm.winWidth).equal(0);
     store.state.WindowState.windowSize = [1, 0];
@@ -315,12 +332,14 @@ describe('TimeProgressBar.vue', () => {
 
   it('curProgressBarEdge computed property works fine - 1', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     store.state.PlaybackState.Duration = NaN;
     expect(wrapper.vm.curProgressBarEdge).equal(0);
   });
 
   it('curProgressBarEdge computed property works fine - 2', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
 
     store.state.WindowState.windowSize = [600, 600];
     store.state.PlaybackState.AccurateTime = 100;
@@ -341,18 +360,21 @@ describe('TimeProgressBar.vue', () => {
 
   it('cursorState computed property works fine - 1', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({ isOnProgress: true });
     expect(wrapper.vm.cursorState).equal(wrapper.vm.cursorPosition);
   });
 
   it('cursorState computed property works fine - 2', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({ isOnProgress: false });
     expect(wrapper.vm.cursorState).equal(wrapper.vm.curProgressBarEdge);
   });
 
   it('readyBarWidth computed property works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({ isCursorLeft: true });
     expect(wrapper.vm.readyBarWidth).equal(0);
     wrapper.setData({ isCursorLeft: false });
@@ -362,6 +384,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('backBarWidth computed property works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({ cursorPosition: 0 });
     expect(wrapper.vm.backBarWidth).equal(0);
     wrapper.setData({
@@ -378,6 +401,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('progressOpacity computed property works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({ isOnProgress: false });
     expect(wrapper.vm.progressOpacity).equal(0.9);
     wrapper.setData({
@@ -394,6 +418,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('heightOfThumbnail computed property works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({
       widthOfThumbnail: 200,
       videoRatio: 2,
@@ -413,6 +438,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('positionOfScreenshot computed property works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     store.state.WindowState.windowSize = [600, 600]; // const1 = 580
     // const2  = 50, const3 = 66, const4 = 564
     wrapper.setData({ widthOfThumbnail: 100 });
@@ -428,6 +454,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('screenshotContent computed property works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     store.state.PlaybackState.Duration = 1000;
     wrapper.setData({ percentageOfReadyToPlay: 0.2 });
     expect(wrapper.vm.screenshotContent).equal('03:20');
@@ -445,6 +472,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('appearShakingEffect method works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({
       cursorPosition: -7,
       isShaking: false,
@@ -473,6 +501,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('hideShakingEffect method works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     const spy = sinon.spy(wrapper.vm, '$_resetRestartButton');
     wrapper.vm.hideShakingEffect();
     expect(spy.calledOnce).equal(true);
@@ -482,6 +511,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('$_resetRestartButton method works fine', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({
       buttonWidth: 0,
       buttonRadius: -1,
@@ -496,6 +526,7 @@ describe('TimeProgressBar.vue', () => {
   // followingh test cases are for testing the watch property
   it('cursorPosition watched property works as expected - 1', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({
       isShaking: false,
       isOnProgress: true,
@@ -509,6 +540,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('cursorPosition watched property works as expected - 2', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({
       isShaking: false,
       isOnProgress: false,
@@ -525,6 +557,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('isOnProgress watched property works as expected - 1', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     const clock = sinon.useFakeTimers();
     sinon.spy(clock, 'clearTimeout');
     wrapper.setData({
@@ -554,6 +587,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('created hook works as expected, event $on - 2', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     wrapper.setData({
       showScreenshot: true,
       isOnProgress: true,
@@ -571,6 +605,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('created hood works as expected, event $on - 3', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     const spy = sinon.spy(wrapper.vm, 'appearProgressBar');
     wrapper.vm.$bus.$emit('progressbar-appear');
     const stub = sinon.stub(wrapper.vm.$bus, '$on');
@@ -583,6 +618,7 @@ describe('TimeProgressBar.vue', () => {
 
   it('created hood works as expected, event $on - 3', () => {
     const wrapper = mount(TimeProgressBar, { store, localVue });
+    wrapper.setProps({ src: '' });
     const spy = sinon.spy(wrapper.vm, 'hideProgressBar');
     wrapper.vm.$bus.$emit('progressbar-hide');
     const stub = sinon.stub(wrapper.vm.$bus, '$on');
