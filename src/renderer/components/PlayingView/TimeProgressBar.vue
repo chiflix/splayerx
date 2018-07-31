@@ -10,6 +10,7 @@
       @mousedown.stop="videoRestart"
       :style="{cursor: cursorStyle}">
       <div class="fake-button"
+        v-show="isOnProgress"
         @mousedown="handleFakeBtnClick"
         @mousemove.stop="handleFakeBtnMove"
         :style="{height: heightOfThumbnail + 11 + 'px'}"></div>
@@ -243,9 +244,11 @@ export default {
         this.$_hideAllWidgets();
       }, 3000);
     },
-    handleFakeBtnMove() {
+    handleFakeBtnMove(e) {
       if (this.isRestartClicked) {
         this.hideProgressSlider();
+      } else {
+        this.onProgressBarMove(e);
       }
     },
     $_hideAllWidgets() {

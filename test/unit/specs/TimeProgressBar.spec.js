@@ -397,9 +397,14 @@ describe('TimeProgressBar.vue', () => {
     wrapper.setData({
       isRestartClicked: false,
     });
-    const spy = sinon.spy(wrapper.vm, 'hideProgressSlider');
-    wrapper.vm.handleFakeBtnMove();
-    expect(spy.calledOnce).equal(false);
+    const target = wrapper.find('.fake-button');
+    const testEvent = new MouseEvent(target.trigger('mousemove.stop'), {
+      clientX: 18,
+      clientY: 18,
+    });
+    const spy = sinon.spy(wrapper.vm, 'onProgressBarMove');
+    wrapper.vm.handleFakeBtnMove(testEvent);
+    expect(spy.calledOnce).equal(true);
     spy.restore();
   });
 
