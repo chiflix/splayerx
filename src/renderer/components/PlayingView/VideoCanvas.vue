@@ -260,6 +260,7 @@ export default {
       this.windowRectangleOld.y = window.getBounds().y;
       this.windowRectangleOld.height = window.getBounds().height;
       this.windowRectangleOld.width = window.getBounds().width;
+      this.$_saveScreenshot();
     },
   },
   created() {
