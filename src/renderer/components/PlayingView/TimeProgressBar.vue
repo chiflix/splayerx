@@ -7,9 +7,10 @@
     @mousemove="onProgressBarMove"
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.left.stop="videoRestart"
+      @mousedown.stop="videoRestart"
       :style="{cursor: cursorStyle}">
       <div class="fake-button"
+        v-show="isOnProgress"
         @mousedown="handleFakeBtnClick"
         @mousemove.stop="handleFakeBtnMove"
         :style="{height: heightOfThumbnail + 11 + 'px'}"></div>
@@ -22,7 +23,7 @@
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.winWidth - 20 + 'px'}"
-      @mousedown.left.stop.capture="onProgressBarClick">
+      @mousedown.stop.capture="onProgressBarClick">
       <Thumbnail
         v-show="showScreenshot"
         :src=src
@@ -243,9 +244,11 @@ export default {
         this.$_hideAllWidgets();
       }, 3000);
     },
-    handleFakeBtnMove() {
+    handleFakeBtnMove(e) {
       if (this.isRestartClicked) {
         this.hideProgressSlider();
+      } else {
+        this.onProgressBarMove(e);
       }
     },
     $_hideAllWidgets() {
