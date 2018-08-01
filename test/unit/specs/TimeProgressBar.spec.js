@@ -67,7 +67,7 @@ describe('TimeProgressBar.vue', () => {
     wrapper.vm.appearProgressSlider();
     expect(wrapper.vm.isOnProgress).equal(true);
     expect(spy.calledOnce).equal(true);
-    expect(spy.firstCall.args[0]).equal('clearAllWidgetDisappearDelay');
+    expect(spy.firstCall.args[0]).equal('clear-all-widget-disappear-delay');
     spy.restore();
     wrapper.vm.appearProgressSlider();
     const playedSlider = wrapper.find({ ref: 'playedSlider' });

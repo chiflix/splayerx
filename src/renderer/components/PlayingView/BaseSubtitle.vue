@@ -30,12 +30,11 @@ export default {
       firstCueHTML: [],
       secondCueHTML: [],
       subNameArr: [],
-      // 将style的内容修改为object
       subStyle: {},
       curStyle: {
         fontSize: 24,
         letterSpacing: 1,
-        opcacity: 1,
+        opacity: 1,
         color: '',
         border: '',
         background: '',
@@ -45,7 +44,7 @@ export default {
   methods: {
     /**
      * @param callback Has two parameters, err and result
-     * It is function that runs after all buffers are concated.
+     * It is a function that runs after all buffers are concated.
      */
     concatStream(stream, callback) {
       const chunks = [];
@@ -292,16 +291,16 @@ export default {
           .innerHTML);
       }
     },
-    secondActiveCue(newVal) {
-      this.secondCueHTML.pop();
-      // console.log(newVal);
-      if (newVal) {
-        // 这里对cue进行处理
-        // 得到cue的line和position确定位置
-        this.secondCueHTML.push(WebVTT.convertCueToDOMTree(window, this.secondActiveCue.text)
-          .innerHTML);
-      }
-    },
+    // secondActiveCue(newVal) {
+    //   this.secondCueHTML.pop();
+    //   // console.log(newVal);
+    //   if (newVal) {
+    //     // 这里对cue进行处理
+    //     // 得到cue的line和position确定位置
+    //     this.secondCueHTML.push(WebVTT.convertCueToDOMTree(window, this.secondActiveCue.text)
+    //       .innerHTML);
+    //   }
+    // },
   },
   created() {
     this.$bus.$on('video-loaded', this.loadTextTracks);
