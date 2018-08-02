@@ -43,34 +43,6 @@ export default {
   },
   methods: {
     /**
-     * @param callback Has two parameters, err and result
-     * It is a function that runs after all buffers are concated.
-     */
-    concatStream(stream, callback) {
-      const chunks = [];
-      stream.on('data', (chunk) => {
-        chunks.push(chunk);
-      });
-      stream.on('end', () => {
-        if (callback) {
-          callback(null, Buffer.concat(chunks));
-        }
-        callback = null;
-      });
-      stream.once('error', (err) => {
-        if (callback) {
-          callback(err);
-        }
-        callback = null;
-      });
-    },
-    $_subNameProcess(file) {
-      return {
-        title: path.parse(file).name,
-        status: null,
-      };
-    },
-    /**
      * Todo:
      * 1. process ass subtitles
      * 2. second subtitle css
@@ -81,7 +53,7 @@ export default {
      * Load all available text tracks in the
      * same path
      */
-    loadTextTracks() {
+    autoLoadTextTracks() {
       /* TODO:
        * 字幕代码我自己觉得很不满意，期待更好的处理 - Tomasen
        * move subtitle process to another component
@@ -116,11 +88,72 @@ export default {
       this.$store.commit('SubtitleNameArr', subNameArr);
       this.$bus.$emit('subName-loaded');
 
+      this.addVttToVideoElement(files, () => {
+        console.log('finished reading subtitle files');
+        this.subStyleChange();
+        this.subtitleShow(0);
+      });
+    },
+    /**
+     * @link https://github.com/mafintosh/pumpify
+     * @param {Pumpify} stream duplex stream for subtitles
+     * @param {resultCallback} cb Callback function to process result.
+     * (err, result) are two arguments of callback.
+     */
+    concatStream(stream, cb) {
+      const chunks = [];
+      stream.on('data', (chunk) => {
+        chunks.push(chunk);
+      });
+      stream.on('end', () => {
+        if (cb) {
+          cb(null, Buffer.concat(chunks));
+        }
+        cb = null;
+      });
+      stream.once('error', (err) => {
+        if (cb) {
+          cb(err);
+        }
+        cb = null;
+      });
+    },
+    /**
+     * @param {string} file Subtitle file path
+     * @returns {object} Returns an object that contains subtitle name
+     * and default status(status can be null, first and second)
+     */
+    $_subNameProcess(file) {
+      return {
+        title: path.parse(file).name,
+        status: null,
+      };
+    },
+    /**
+     * @param {string} subPath Subtitle Path
+     * @param {resultCallback} cb Callback function to process result
+     */
+    $_createSubtitleStream(subPath, cb) {
+      const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
+      this.concatStream(vttStream, (err, buf) => {
+        if (err) {
+          console.error(err);
+        }
+        cb(null, buf);
+      });
+    },
+    /**
+     * @param {Array.<string>} files Subtitle pathes array
+     * @param {resultCallback} cb Callback function to process result
+     * @description Process subtitles and add subtitles to video element
+     */
+    addVttToVideoElement(files, cb) {
+      const vid = this.$parent.$refs.videoCanvas;
       /**
        * Referenced from WebTorrent
        */
       /* eslint-disable arrow-parens */
-      const tasks = files.map((subPath) => (cb) => this.$_subPathProcess(subPath, cb));
+      const tasks = files.map((subPath) => (cb) => this.$_createSubtitleStream(subPath, cb));
       parallel(tasks, (err, results) => {
         if (err) {
           console.error(err);
@@ -132,28 +165,19 @@ export default {
           parser.oncue = (cue) => {
             sub.addCue(cue);
           };
-          parser.onflush = () => {
-            console.log('finished reading subtitle files');
-            this.subStyleChange();
-            this.subtitleShow(0);
-          };
+          parser.onflush = cb;
           const result = results[i];
           parser.parse(result.toString('utf8'));
         }
         parser.flush();
       });
     },
-    $_subPathProcess(subPath, cb) {
-      const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
-      this.concatStream(vttStream, (err, buf) => {
-        if (err) {
-          console.error(err);
-        }
-        cb(null, buf);
-      });
-    },
     // 待改善函数结构
     // 判断重合情况
+    /**
+     * @param {number} index Target index of subtitle to show
+     * @param {string} type First or second subtitle
+     */
     subtitleShow(index, type = 'first') {
       const vid = this.$parent.$refs.videoCanvas;
       const targetIndex = index + this.startIndex;
@@ -181,11 +205,10 @@ export default {
       }
     },
     /**
-     * @param obj contains all needed style property
-     *
-     * obj contains 6 values to control the css
-     * style of the subtitle. Each unset property
-     * will use default value.
+     * @param {object} obj Contains style property
+     * @description obj contains 6 values to control
+     * the css style of the subtitle. Each unset
+     * property will use default value.
      */
     subStyleChange(obj = {}) {
       const fontSize = obj.fontSize ? obj.fontSize : this.curStyle.fontSize;
@@ -213,8 +236,9 @@ export default {
       };
     },
     /**
-     * @param textTrack target textTrack
-     * @param type choose first or second subtitle
+     * @param {TextTrack} textTrack target textTrack
+     * @param {string} type Choose first or second subtitle
+     * @description function for oncuechange event
      */
     $_onCueChangeEventAdd(textTrack, type = 'first') {
       const firstSubEvent = (cue) => {
@@ -229,7 +253,7 @@ export default {
       textTrack.oncuechange = type === 'first' ? firstSubEvent : secondSubEvent;
     },
     /**
-     * need to process subtitle init event
+     * @description function to clear former subtitles
      */
     $_clearSubtitle() {
       const vid = this.$parent.$refs.videoCanvas;
@@ -303,7 +327,7 @@ export default {
     // },
   },
   created() {
-    this.$bus.$on('video-loaded', this.loadTextTracks);
+    this.$bus.$on('video-loaded', this.autoLoadTextTracks);
     // 可以二合一
     this.$bus.$on('sub-first-change', (targetIndex) => {
       this.subtitleShow(targetIndex);
@@ -324,29 +348,12 @@ export default {
      * Todo:
      * handle multiple pathes
      */
-    this.$bus.$on('add-subtitle', (file) => {
-      const subName = path.parse(file).name;
-      this.$store.commit('AddSubtitle', subName);
-      const vttStream = fs.createReadStream(file).pipe(srt2vtt());
-      this.concatStream(vttStream, (err, buf) => {
-        if (err) {
-          console.error(err);
-        }
-        const vid = this.$parent.$refs.videoCanvas;
-        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
-        const sub = vid.addTextTrack('subtitles');
-        sub.mode = 'disabled';
-        parser.oncue = (cue) => {
-          sub.addCue(cue);
-        };
-        parser.onflush = () => {
-          console.log('finished reading subtitle files');
-          // this.subStyleChange();
-          // this.subtitleShow(this.startIndex);
-        };
-        parser.parse(buf.toString('utf8'));
-        parser.flush();
-        console.log('Add subtitle');
+    this.$bus.$on('add-subtitle', (files) => {
+      const size = this.$store.getters.SubtitleNameArrSize;
+      const subtitleName = files.map(file => this.$_subNameProcess(file));
+      this.$store.commit('AddSubtitle', subtitleName);
+      this.addVttToVideoElement(files, () => {
+        this.subtitleShow(size);
       });
     });
   },

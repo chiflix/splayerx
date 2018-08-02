@@ -395,12 +395,14 @@ new Vue({
       const { files } = e.dataTransfer;
       // TODO: play it if it's video file
       const path = `file:///${files[0].path}`;
+      const subtitleFiles = [];
 
       const regex = '^(.srt|.ass|.vtt)$';
       const re = new RegExp(regex);
       const extname = Path.extname(path);
       if (re.test(extname)) {
-        this.$bus.$emit('add-subtitle', files[0].path);
+        subtitleFiles.push(files[0].path);
+        this.$bus.$emit('add-subtitle', subtitleFiles);
       } else {
         this.openFile(path);
       }

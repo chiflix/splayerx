@@ -12,6 +12,7 @@ const state = {
 
 const getters = {
   firstSubIndex: state => state.SubtitleNameArr.findIndex(subName => subName.status === 'first'),
+  SubtitleNameArrSize: state => state.SubtitleNameArr.length,
 };
 
 const mutations = {
@@ -38,7 +39,9 @@ const mutations = {
     state.SubtitleNameArr = arr;
   },
   AddSubtitle(state, subName) {
-    state.SubtitleNameArr.push({ title: subName, status: null });
+    for (let i = 0; i < subName.length; i += 1) {
+      state.SubtitleNameArr.push({ title: subName[i], status: null });
+    }
   },
   // 需要对subtitle array的状态进行判断，有无数组，是否超出
   SubtitleOn(state, obj) {
