@@ -109,7 +109,7 @@ export default {
       }
     },
     hideAllWidgets() {
-      // console.log('leave');
+      console.log('leave');
       this.showMask = false;
       this.$bus.$emit('volumecontroller-hide');
       this.$bus.$emit('progressbar-hide');
