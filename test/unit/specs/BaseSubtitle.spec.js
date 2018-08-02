@@ -4,7 +4,6 @@ import BaseSubtitle from '@/components/PlayingView/BaseSubtitle';
 import { mount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
 import fs from 'fs';
-import srt2vtt from 'srt-to-vtt';
 import path from 'path';
 
 const localVue = createLocalVue();
