@@ -28,12 +28,17 @@ export default {
     volume: {
       type: Number,
       default: 0.7,
-      validator: value => typeof(value) === 'number' && value >= 0 && value <= 10,
+      validator: value => typeof value === 'number' && value >= 0 && value <= 1,
     },
     defaultEvents: {
       type: Array,
       required: true,
-      validator: value => Array.isArray(value) && (value.length === 0 || value.every(element => DEFAULT_VIDEO_EVENTS.indexOf(element) !== -1)),
+      default: () => ([
+        'loadedmetadata',
+      ]),
+      validator: value => Array.isArray(value) && (
+        value.length === 0 ||
+        value.every(element => DEFAULT_VIDEO_EVENTS.indexOf(element) !== -1)),
     },
     defaultOptions: {
       type: Object,
@@ -61,6 +66,21 @@ export default {
       onEdEvents: [],
     };
   },
+  watch: {
+    playbackRate(newValue) {
+      this.$refs.video.setAttribute('playbackrate', newValue);
+    },
+    src(newValue) {
+      if (this.$options.props.src.validator(newValue)) {
+        this.$refs.video.setAttribute('src', newValue);
+      }
+    },
+    volume(newValue) {
+      if (this.$options.props.volume.validator(newValue)) {
+        this.$refs.video.setAttribute('volume', newValue);
+      }
+    },
+  },
   mounted() {
     this.initializeVideoPlayer();
   },
@@ -84,8 +104,10 @@ export default {
       // Watch default events
       const onEdEvents = [];
       eventsArray.forEach((event) => {
-        this.$on(event, this.emitPlayerState(event));
-        onEdEvents.push(event);
+        if (DEFAULT_VIDEO_EVENTS.indexOf(event) !== -1) {
+          this.$on(event, this.emitPlayerState(event));
+          onEdEvents.push(event);
+        }
       });
       return onEdEvents;
     },

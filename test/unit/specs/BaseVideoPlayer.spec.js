@@ -1,270 +1,278 @@
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
-
-describe('BaseVideoPlayer Props Unit Tests', () => {
-  let wrapper;
-  const propsData = {
-    src: 'file:///',
-    defaultEvents: ['loadedmetadata'],
-  };
-  beforeEach(() => {
-    wrapper = mount(BaseVideoPlayer, { propsData });
-  });
-
-  it('should have default proper playbackRate', () => {
-    expect(wrapper.vm.playbackRate).to.equal(1);
-  });
-  it('should playbackRate validator function normally', () => {
-    const { validator } = wrapper.vm.$options.props.playbackRate;
-    const playbackRates = [5, 20, 205, -3];
-    const expectedResults = [true, true, false, false];
-
-    playbackRates.forEach((testCase, index) => {
-      expect(validator && validator(testCase)).to.equal(expectedResults[index]);
-    });
-  });
-
-  it('should src props required', () => {
-    expect(wrapper.vm.$options.props.src.required).to.equal(true);
-  });
-  it('should src validator function normally', () => {
-    const { validator } = wrapper.vm.$options.props.src;
-    const srcs = [
-      '',
-      'file:///Users/treve/Documents/Projects/splayerx/test/assets/mediaQuickHash_test.avi',
-      'file://Z:/Documents/testVideoFiles/mediaQuickHash_test.avi',
-      'http://youtube.com/s/sjdfhsjkdfhsk/',
-      'thunder://what.avi',
-    ];
-    const expectedResults = [false, true, true, true, false];
-
-    srcs.forEach((testCase, index) => {
-      expect(validator && validator(testCase)).to.equal(expectedResults[index]);
-    });
-  });
-
-  it('should volume have default value', () => {
-    expect(wrapper.props().volume).to.equal(0.7);
-  });
-  it('should volume validator function normally', () => {
-    const { validator } = wrapper.vm.$options.props.volume;
-    const volumes = [0.8, 0.9, '0.7', -0.5, 12];
-    const expectedResults = [true, true, false, false, false];
-
-    volumes.forEach((testCase, index) => {
-      expect(validator && validator(testCase)).to.equal(expectedResults[index]);
-    });
-  });
-
-  it('should defaultEvents be required', () => {
-    expect(wrapper.vm.$options.props.defaultEvents.required).to.equal(true);
-  });
-  it('should defaultEvents validator function normally', () => {
-    const { validator } = wrapper.vm.$options.props.defaultEvents;
-    const events = [
-      'loadedmetadata',
-      [],
-      [''],
-      ['loadedmetadata', 'canplay'],
-      ['dataloaded', 'canplaythrough'],
-      ['ondataloaded'],
-      [
-        'abort',
-        'canplay',
-        'canplaythrough',
-        'durationchange',
-        'ended',
-        'loadeddata',
-        'loadedmetadata',
-        'loadstart',
-        'pause',
-        'play',
-        'playing',
-        'progress',
-        'ratechange',
-        'seeked',
-        'seeking',
-        'stalled',
-        'suspend',
-        'timeupdate',
-        'volumechange',
-        'waiting',
-      ],
-    ];
-    const expectedResults = [false, true, false, true, false, false, true];
-
-    events.forEach((testCase, index) => {
-      expect(validator && validator(testCase)).to.equal(expectedResults[index]);
-    });
-  });
-
-  it('should defaultOptions have proper value', () => {
-    expect(wrapper.props().defaultOptions).to.deep.equal({
-      autoplay: true,
-      crossOrigin: false,
-      defaultMuted: false,
-      defaultPlaybackRate: 1,
-      loop: false,
-      muted: false,
-      preload: 'auto',
-    });
-  });
-
-  it('should customOptions have proper default value', () => {
-    expect(wrapper.props().customOptions).to.deep.equal({
-      pauseOnStart: false,
-      commitToVuex: false,
-    });
-  });
-});
-
-describe('BaseVideoPlayer functions unit tests', () => {
-  let sandbox;
-  let wrapper;
+describe('Component - BaseVideoPlayer', () => {
   const propsData = {
     src: 'file:///',
     defaultEvents: ['loadedmetadata'],
   };
 
-  beforeEach(() => {
-    sandbox = sinon.createSandbox();
-    wrapper = mount(BaseVideoPlayer, { propsData });
-  });
-  afterEach(() => {
-    sandbox.restore();
-    wrapper.destroy();
+  it('sanity - should render video element', () => {
+    const wrapper = mount(BaseVideoPlayer, { propsData });
+
+    expect(wrapper.contains('video')).to.equal(true);
   });
 
-  const { calledOnce } = sinon.assert;
+  describe('Props', () => {
+    let sandbox;
+    let wrapper;
 
-  it('should call initialization functions upon mounted', () => {
-    const basicInfoInitializationSpy = sandbox.spy(wrapper.vm, 'basicInfoInitialization');
-    const defaultEventsInitializationSpy = sandbox.spy(wrapper.vm, 'defaultEventsInitialization');
-    const defaultOptionsInitializationSpy = sandbox.spy(wrapper.vm, 'defaultOptionsInitialization');
-    const customOptionsInitializationSpy = sandbox.spy(wrapper.vm, 'customOptionsInitialization');
+    beforeEach(() => {
+      sandbox = sinon.createSandbox();
+      wrapper = mount(BaseVideoPlayer, {
+        propsData,
+      });
+    });
+    afterEach(() => {
+      sandbox.restore();
+      wrapper.destroy();
+    });
 
-    wrapper.vm.initializeVideoPlayer();
+    it('should video playbackrate be set dynamically', () => {
+      const playbackrates = [0.8, 1.0, 5.4];
 
-    calledOnce(basicInfoInitializationSpy);
-    calledOnce(defaultEventsInitializationSpy);
-    calledOnce(defaultOptionsInitializationSpy);
-    calledOnce(customOptionsInitializationSpy);
-  });
-  it('should set proper attributes to video element', () => {
-    const videoStub = {
-      setAttribute(attrName, attrValue) {
-        this.attributes[attrName] = attrValue;
-      },
-      getAttribute(attrName) {
-        return this.attributes[attrName];
-      },
-      attributes: {},
-    };
+      playbackrates.forEach((testCase) => {
+        wrapper.setProps({ playbackRate: testCase });
+        const currentPlaybackRate = wrapper.find('video').attributes().playbackrate;
 
-    wrapper.vm.basicInfoInitialization(videoStub);
+        expect(currentPlaybackRate).to.equal(testCase.toString());
+      });
+    });
 
-    expect(videoStub.getAttribute('playbackRate')).to.equal(wrapper.vm.playbackRate);
-    expect(videoStub.getAttribute('src')).to.equal(wrapper.vm.src);
-    expect(videoStub.getAttribute('volume')).to.equal(wrapper.vm.volume);
-  });
-  it('should events initialization return proper value', () => {
-    wrapper.vm.emitPlayerState = sandbox.stub();
-    const eventsTest = ['loadedmetadata', 'canplay'];
+    it('should video src be set dynamically', () => {
+      const srcs = [
+        'file:///Users/treve/Documents/Projects/splayerx/test/assets/mediaQuickHash_test.avi',
+        'file://Z:/Documents/testVideoFiles/mediaQuickHash_test.avi',
+        'http://youtube.com/s/sjdfhsjkdfhsk/',
+      ];
 
-    const results = wrapper.vm.defaultEventsInitialization(eventsTest);
+      srcs.forEach((testCase) => {
+        wrapper.setProps({ src: testCase });
 
-    expect(eventsTest).to.deep.equal(results);
-  });
-  it('should emit proper events without value', () => {
-    const emitSpy = sandbox.spy(wrapper.vm, '$emit');
+        const srcResult = wrapper.find('video').attributes().src;
 
-    wrapper.vm.emitPlayerState('test');
+        expect(srcResult).to.equal(testCase);
+      });
+    });
+    it('should invalid video src be ignored', () => {
+      const invalidSrcs = [
+        '',
+        'thunder://hahahaha',
+        'it is an invalid url',
+        'htps',
+      ];
 
-    sinon.assert.calledWith(emitSpy, 'test');
-  });
-  it('should emit proper events with value', () => {
-    const emitSpy = sandbox.spy(wrapper.vm, '$emit');
+      invalidSrcs.forEach((testCase) => {
+        wrapper.setProps({ src: testCase });
 
-    wrapper.vm.emitPlayerState('test', 'second');
+        const srcResult = wrapper.find('video').attributes().src;
 
-    sinon.assert.calledWith(emitSpy, 'test', { test: 'second' });
-  });
-  it('should set proper attributes according to optionsObject', () => {
-    const videoStub = {
-      setAttribute(attrName, attrValue) {
-        this.attributes[attrName] = attrValue;
-      },
-      getAttribute(attrName) {
-        return this.attributes[attrName];
-      },
-      attributes: {},
-    };
-    const optionsObject = {
-      loop: false,
-      autoplay: true,
-      muted: true,
-    };
+        expect(srcResult).to.equal(propsData.src);
+      });
+    });
 
-    wrapper.vm.defaultOptionsInitialization(optionsObject, videoStub);
+    it('should video volume be set dynamically', () => {
+      const volumes = [0, 0.4, 0.7, 0.999, 1];
 
-    Object.keys(optionsObject).forEach((optionName) => {
-      expect(videoStub.getAttribute(optionName)).to.equal(optionsObject[optionName]);
+      volumes.forEach((testCase) => {
+        wrapper.setProps({ volume: testCase });
+
+        const volumeResult = wrapper.find('video').attributes().volume;
+
+        expect(volumeResult).to.equal(testCase.toString());
+      });
+    });
+    it('should invalid video volume be ignored', () => {
+      const invalidVolumes = [-1, -9, NaN, Infinity, 3];
+
+      invalidVolumes.forEach((testCase) => {
+        wrapper.setProps({ volume: testCase });
+
+        const volumeResult = wrapper.find('video').attributes().volume;
+
+        expect(volumeResult).to.equal(wrapper.vm.$options.props.volume.default.toString());
+      });
+    });
+
+    it('should defaultEvents be initialized', () => {
+      expect(wrapper.vm.onEdEvents).to.deep.equal(propsData.defaultEvents);
+    });
+    it('should defaultEvents be emitted after initialized', () => {
+      expect(Object.keys(wrapper.emitted())).to.deep.equal(wrapper.vm.onEdEvents);
+    });
+    it('should defaultEvents cannot change after initialized', () => {
+      const events = [
+        ['loadedmetadata', 'canplay'],
+        ['dataloaded', 'canplaythrough'],
+        [
+          'abort',
+          'canplay',
+          'canplaythrough',
+          'durationchange',
+          'ended',
+          'loadeddata',
+          'loadedmetadata',
+          'loadstart',
+          'pause',
+          'play',
+          'playing',
+          'progress',
+          'ratechange',
+          'seeked',
+          'seeking',
+          'stalled',
+          'suspend',
+          'timeupdate',
+          'volumechange',
+          'waiting',
+        ],
+      ];
+
+      events.forEach((testCase) => {
+        wrapper.setProps({ defaultEvents: testCase });
+
+        expect(wrapper.vm.onEdEvents).to.deep.equal(propsData.defaultEvents);
+      });
+    });
+    it('should empty defaultEvents clear events', () => {
+      const privateWrapper = mount(BaseVideoPlayer, {
+        propsData: {
+          src: 'file:///',
+          defaultEvents: [],
+        },
+      });
+
+      expect(privateWrapper.vm.onEdEvents).to.deep.equal([]);
+    });
+    it('should invalid defaultEvents items be ignored', () => {
+      const events = [
+        [''],
+        ['dataloaded', 'canplaythrough'],
+        ['ondataloaded'],
+      ];
+      const expectedResults = [
+        [],
+        ['canplaythrough'],
+        [],
+      ];
+
+      events.forEach((testCase, index) => {
+        const newPropsData = Object.assign(
+          {},
+          propsData,
+          { defaultEvents: testCase },
+        );
+
+        const privateWrapper = mount(BaseVideoPlayer, { propsData: newPropsData });
+
+        expect(privateWrapper.vm.onEdEvents).to.deep.equal(expectedResults[index]);
+        privateWrapper.destroy();
+      });
+    });
+
+    it('should default options be set on video element', () => {
+      const videoElementAttributes = wrapper.find('video').attributes();
+
+      Object.keys(wrapper.props().defaultOptions).forEach((testCase) => {
+        expect(videoElementAttributes[testCase.toLowerCase()])
+          .to.equal(wrapper.props().defaultOptions[testCase].toString());
+      });
+    });
+    it('should invalid attributes be ignored', () => {
+      const testOptions = {
+        autoplay: true,
+        mutedOrNot: false,
+        loop: false,
+        preloaded: true,
+        defaultMuted: false,
+      };
+      const expectedResults = {
+        autoplay: true,
+        loop: false,
+        defaultMuted: false,
+      };
+      const invalidOptions = ['mutedOrNot', 'preloaded'];
+
+      const privateWrapper = mount(BaseVideoPlayer, {
+        src: 'file:///',
+        defaultEvents: propsData.defaultEvents,
+        defaultOptions: testOptions,
+      });
+      const videoElementAttributes = privateWrapper.find('video').attributes();
+
+      Object.keys(expectedResults).forEach((testCase) => {
+        expect(videoElementAttributes[testCase.toLowerCase()])
+          .to.deep.equal(expectedResults[testCase].toString());
+      });
+      invalidOptions.forEach((testCase) => {
+        expect(videoElementAttributes[testCase.toLowerCase()]).to.equal(undefined);
+      });
     });
   });
-  it('should addEventListener when pauseOnStart', () => {
-    const videoStub = {
-      addEventListener: sandbox.spy(),
+
+  describe('Methods', () => {
+    let sandbox;
+    let wrapper;
+    const propsData = {
+      src: 'file:///',
+      defaultEvents: ['loadedmetadata'],
     };
 
-    wrapper.vm.customOptionsInitialization({ pauseOnStart: true }, videoStub);
+    beforeEach(() => {
+      sandbox = sinon.createSandbox();
+      wrapper = mount(BaseVideoPlayer, { propsData });
+    });
+    afterEach(() => {
+      sandbox.restore();
+      wrapper.destroy();
+    });
 
-    sinon.assert.calledWith(videoStub.addEventListener, 'loadedmetadata', wrapper.vm.pause);
-  });
+    const { calledOnce } = sinon.assert;
 
-  it('should videoElement return actual videoElement', () => {
-    const videoElement = wrapper.vm.videoElement();
+    it('should videoElement return actual videoElement', () => {
+      const videoElement = wrapper.vm.videoElement();
 
-    expect(videoElement).to.equal(wrapper.vm.$refs.video);
-  });
-  it('should invoke the pause function when pause', () => {
-    const videoStub = {
-      pause: sandbox.spy(),
-    };
-    wrapper.vm.$refs.video = videoStub;
+      expect(videoElement).to.equal(wrapper.vm.$refs.video);
+    });
+    it('should invoke the pause function when pause', () => {
+      const videoStub = {
+        pause: sandbox.spy(),
+      };
+      wrapper.vm.$refs.video = videoStub;
 
-    wrapper.vm.pause();
+      wrapper.vm.pause();
 
-    calledOnce(videoStub.pause);
-  });
-  it('should currentTime update video.currentTime when passed new value', () => {
-    const videoStub = {
-      currentTime: 0,
-    };
-    wrapper.vm.$refs.video = videoStub;
+      calledOnce(videoStub.pause);
+    });
+    it('should currentTime update video.currentTime when passed new value', () => {
+      const videoStub = {
+        currentTime: 0,
+      };
+      wrapper.vm.$refs.video = videoStub;
 
-    wrapper.vm.currentTime(5);
+      wrapper.vm.currentTime(5);
 
-    expect(wrapper.vm.$refs.video.currentTime).to.equal(5);
-  });
-  it('should return currentTime when passed no value', () => {
-    const videoStub = {
-      currentTime: 20,
-    };
-    wrapper.vm.$refs.video = videoStub;
+      expect(wrapper.vm.$refs.video.currentTime).to.equal(5);
+    });
+    it('should return currentTime when passed no value', () => {
+      const videoStub = {
+        currentTime: 20,
+      };
+      wrapper.vm.$refs.video = videoStub;
 
-    const timeResult = wrapper.vm.currentTime();
+      const timeResult = wrapper.vm.currentTime();
 
-    expect(timeResult).to.equal(20);
-  });
-  it('should return duration when invoke duraton', () => {
-    const videoStub = {
-      duration: 20,
-    };
-    wrapper.vm.$refs.video = videoStub;
+      expect(timeResult).to.equal(20);
+    });
+    it('should return duration when invoke duraton', () => {
+      const videoStub = {
+        duration: 20,
+      };
+      wrapper.vm.$refs.video = videoStub;
 
-    const durationResult = wrapper.vm.duration();
+      const durationResult = wrapper.vm.duration();
 
-    expect(durationResult).to.equal(20);
+      expect(durationResult).to.equal(20);
+    });
   });
 });
