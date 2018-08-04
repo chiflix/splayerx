@@ -107,7 +107,7 @@ export default {
   methods: {
     appearProgressSlider() {
       this.isOnProgress = true;
-      this.$bus.$emit('clearAllWidgetDisappearDelay');
+      this.$bus.$emit('clear-all-widget-disappear-delay');
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
@@ -253,7 +253,7 @@ export default {
     },
     $_hideAllWidgets() {
       this.timeoutIdOfHideAllWidgets = setTimeout(() => {
-        this.$bus.$emit('hideAllWidgets');
+        this.$bus.$emit('hide-all-widgets');
       }, 3000);
     },
   },

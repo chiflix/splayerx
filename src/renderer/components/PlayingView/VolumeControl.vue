@@ -57,7 +57,7 @@ export default {
       this.$_documentVolumeSliderDragEvent();
     },
     clearAllWidgetsTimeout() {
-      this.$bus.$emit('clearAllWidgetDisappearDelay');
+      this.$bus.$emit('clear-all-widget-disappear-delay');
     },
     appearVolumeSlider() {
       this.$_clearTimeoutDelay();

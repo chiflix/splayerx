@@ -7,16 +7,12 @@ const state = {
   SrcOfVideo: '',
   PlaybackRate: 1.0,
 
-  FirstSubtitleState: false,
-  SecondSubtitleState: false,
-  StartIndex: 0,
-  FirstSubIndex: 0,
-  // SecondSubIndex的选择，当未选择字幕时该设置为何值
-  SecondSubIndex: -1,
   SubtitleNameArr: [],
 };
 
 const getters = {
+  firstSubIndex: state => state.SubtitleNameArr.findIndex(subName => subName.status === 'first'),
+  SubtitleNameArrSize: state => state.SubtitleNameArr.length,
 };
 
 const mutations = {
@@ -39,29 +35,23 @@ const mutations = {
     state.Volume = v;
   },
 
-  FirstSubtitleOn(state) {
-    state.FirstSubtitleState = true;
-  },
-  FirstSubtitleOff(state) {
-    state.FirstSubtitleState = false;
-  },
-  SecondSubtitleOn(state) {
-    state.SecondSubtitleState = true;
-  },
-  SecondSubtitleOff(state) {
-    state.SecondSubtitleState = false;
-  },
-  StartIndex(state, index) {
-    state.StartIndex = index;
-  },
-  FirstSubIndex(state, index) {
-    state.FirstSubIndex = index;
-  },
-  SecondSubIndex(state, index) {
-    state.SecondSubIndex = index;
-  },
   SubtitleNameArr(state, arr) {
     state.SubtitleNameArr = arr;
+  },
+  AddSubtitle(state, subName) {
+    for (let i = 0; i < subName.length; i += 1) {
+      state.SubtitleNameArr.push({ title: subName[i], status: null });
+    }
+  },
+  // 需要对subtitle array的状态进行判断，有无数组，是否超出
+  SubtitleOn(state, obj) {
+    state.SubtitleNameArr[obj.index].status = obj.status === 'first' ? 'first' : 'second';
+  },
+  SubtitleOff(state, index) {
+    if (index < state.SubtitleNameArr.length) {
+      console.log(state.SubtitleNameArr);
+      state.SubtitleNameArr[index].status = null;
+    }
   },
 };
 
