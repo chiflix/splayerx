@@ -11,6 +11,7 @@
 
 <script>
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
+import { setTimeout, clearTimeout } from 'timers';
 export default {
   name: 'thumbnail-video-player',
   components: {
@@ -44,10 +45,12 @@ export default {
       isAutoGeneration: true,
       videoDuration: 0,
       videoSrc: null,
-      screenWidth: 1920,
       thumbnailSet: new Set(),
       thumbnailChannel: 'thumbnail',
       autoGenerationIndex: 0,
+      generationInterval: 3,
+      autoGenerationTimer: 0,
+      MAX_GENERATION_DELAY: 1000,
     };
   },
   computed: {
@@ -55,7 +58,7 @@ export default {
       if (!this.isAutoGeneration) {
         return Math.floor(this.currentTime / this.generationInterval);
       }
-      return null;
+      return 0;
     },
   },
   watch: {
@@ -65,20 +68,20 @@ export default {
         const newVideoSrc = newValue.videoSrc;
         if (this.videoSrcValidator(newVideoSrc)) {
           this.videoSrc = newVideoSrc;
-        } else {
-          throw(new Error('TypeError: invalid video source'));
         }
       },
     },
     currentTime(newValue) {
-      const index  = Math.floor(newValue / this.generationInterval);
-      if (!this.thumbnailSet.has(index)) {
+      const index = Math.floor(newValue / this.generationInterval);
+      if (!this.thumbnailSet.has(index) && this.$options.props.currentTime.validator(newValue)) {
         this.isAutoGeneration = false;
+        this.pauseAutoGeneration();
         this.videoSeek(index);
       }
     },
   },
   methods: {
+    // Data validators
     videoSrcValidator(src) {
       const fileSrcRegexes = {
         http: RegExp('^(http|https)://'),
@@ -92,11 +95,11 @@ export default {
           return 'file';
         }
       }
-      return null;
+      throw new Error('TypeError: invalid src value.');
     },
+    // Data regenerators
     updateGenerationParameters() {
-      this.videoDuration = this.$refs.video.duration();
-      this.screenWidth = this.$store.getters.screenWidth;
+      this.videoDuration = 2000;
       this.generationInterval = Math.round(this.screenWidth / (this.videoDuration / 4));
       this.autoGenerationIndex = Math.floor(this.currentTime / this.generationInterval);
     },
@@ -116,8 +119,35 @@ export default {
       }
       videoElement.currentTime = index * this.generationInterval;
     },
+    pauseAutoGeneration() {
+      if (this.autoGenerationTimer !== 0) {
+        clearTimeout(this.autoGenerationTimer);
+        this.autoGenerationTimer = setTimeout(this.resumeAutoGeneration, this.MAX_GENERATION_DELAY);
+      } else {
+        this.autoGenerationTimer = setTimeout(this.resumeAutoGeneration, this.MAX_GENERATION_DELAY);
+      }
+    },
+    resumeAutoGeneration() {
+      this.isAutoGeneration = true;
+    },
   },
   created() {
+    const videoSrc = this.outerThumbnailInfo.videoSrc;
+    if (this.currentTime !== 0) {
+      if (this.videoSrcValidator(videoSrc)) {
+        this.videoSrc = videoSrc;
+        this.videoDuration = this.outerThumbnailInfo.videoDuration;
+        this.screenWidth = this.outerThumbnailInfo.screenWidth;
+        this.generationInterval = this.outerThumbnailInfo.generationInterval;
+        this.autoGenerationIndex = Math.floor(this.currentTime / this.generationInterval);
+      }
+    } else {
+      if (this.videoSrcValidator(videoSrc)) {
+        this.videoSrc = videoSrc;
+        this.screenWidth = this.outerThumbnailInfo.screenWidth;
+      }
+    }
+
     this.thumbnailChannel = new BroadcastChannel(this.channelName);
     this.thumbnailChannel.onmessage = (event) => {
       const { type } = event.data;
@@ -134,6 +164,10 @@ export default {
             this.autoGenerationIndex += 1;
           }
           this.videoSeek(this.autoGenerationIndex);
+          break;
+        }
+        case 'generation-finished': {
+          this.thumbnailChannel.close();
           break;
         }
       }
