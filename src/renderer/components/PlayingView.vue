@@ -193,11 +193,11 @@ export default {
   mounted() {
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
-    this.$bus.$on('clearAllWidgetDisappearDelay', () => {
+    this.$bus.$on('clear-all-widget-disappear-delay', () => {
       console.log('clear');
       clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
     });
-    this.$bus.$on('hideAllWidgets', this.hideAllWidgets);
+    this.$bus.$on('hide-all-widgets', this.hideAllWidgets);
   },
   computed: {
     uri() {

@@ -187,10 +187,10 @@ export default {
         case 'Speed':
           break;
         case 'Audio':
-          this.$bus.$emit('changeMenuList', this.audioLevel);
+          this.$bus.$emit('change-menu-list', this.audioLevel);
           break;
         case 'Media Info':
-          this.$bus.$emit('changeMenuList', this.mediaInfoLevel);
+          this.$bus.$emit('change-menu-list', this.mediaInfoLevel);
           break;
         default: break;
       }

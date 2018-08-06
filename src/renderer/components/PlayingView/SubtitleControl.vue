@@ -89,9 +89,6 @@ export default {
   },
 
   computed: {
-    itemIsChosen() {
-
-    },
   },
 
   watch: {
