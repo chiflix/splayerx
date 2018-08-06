@@ -1,124 +1,134 @@
 <template>
-  <div class="subtitle-control">
+  <div class="sub-control">
     <transition name="fade" appear>
-    <div class="btn-sub-ctrl"
-      v-if="isSubCtrlBtnAppear">
-      <div class='btn-menu-wrapper'
-        v-show="isBtnMenuAppear">
-        <ul class="btn-menu">
-          <li class="btn-menu-item"
-            @mousedown.stop.capture.left="firstSubtitleOn"
-            :class="{show: subtitleAppearFlag}">
-            <img src="" alt="On">
-          </li>
-          <li class="btn-menu-item"
-            @mousedown.stop.capture.left="firstSubtitleOff"
-            :class="{show: !subtitleAppearFlag}">
-            <img src="" alt="Off">
-          </li>
-        </ul>
+      <div class="sub-btn-control"
+           v-if="isSubCtrlBtnAppear">
+        <div class="sub-menu-wrapper"
+             v-if="appearSubtitleMenu">
+          <ul class="sub-menu">
+            <li
+            v-if="localSubAvaliable"
+            class="sub-item"
+            v-for="item in avaliableSuntitlesItems">
+              <div
+                ref="menuItem"
+                @mouseover.stop="toggleItemsMouseOver"
+                :class="{ chosen: itemIsChosen }">
+                {{ item.title }}
+              </div>
+            </li>
+            <li
+            v-if="!localSubAvaliable"
+            ref="menuItem"
+            class="sub-item"
+            :class="{ chosen: itemIsChosen }"
+            @mouseover.stop="toggleItemsMouseOver"
+            @mouseleave.stop="toggleItemsMouseLeave"
+            v-for="item in unavaliableSubtitlesItems">
+              {{ item.title }}
+            </li>
+            </ul>
+          </ul>
+        </div>
+        <div
+          @mousedown.capture.stop.left="toggleSubtitleMenu">
+          <img class='btn' type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
+        </div>
       </div>
-      <div
-        @mousedown.capture.stop.left="toggleButtonMenu">
-        <img class='btn' type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
-      </div>
-    </div>
     </transition>
   </div>
-</template>;
+</template>
+
+
 
 <script>
 export default {
-  components: {
-
-  },
   data() {
     return {
-      // subtitleAppearFlag: false,
-      isBtnMenuAppear: false,
-      isSubCtrlBtnAppear: false,
-      barBottom: 6,
-      timeoutIdOfSubCtrlDisappearDelay: 0,
+      avaliableSuntitlesItems: [
+        { title: 'Chinese 1' },
+        { title: 'English 1' },
+        { title: 'Chinese / English' },
+        { title: '人人影视.S05E04.CN' },
+        { title: '迅雷字幕.S05E04.中文字幕' },
+        { title: '迅雷字幕.S05E04.中英双语' },
+        { title: '无' },
+      ],
+      unavaliableSubtitlesItems: [
+        { title: '加载翻译结果' },
+        { title: '导入字幕文件...' },
+      ],
+      isSubCtrlBtnAppear: true,
+      itemIsChosen: false,
+      appearSubtitleMenu: false,
+      localSubAvaliable: true,
+      mouseOverDisItem: false,
     };
   },
+
   methods: {
-    subCtrlAppear() {
+    subCtrlBtnAppear() {
       this.isSubCtrlBtnAppear = true;
     },
-    subCtrlHide() {
+    subCtrlBtnHide() {
       this.isSubCtrlBtnAppear = false;
-      this.isBtnMenuAppear = false;
+      this.appearSubtitleMenu = false;
     },
-    firstSubtitleOn() {
-      this.$bus.$emit('first-subtitle-on');
-    },
-    firstSubtitleOff() {
-      this.$bus.$emit('first-subtitle-off');
-    },
-    toggleButtonMenu() {
-      this.$_clearTimeoutDelay();
-      this.isBtnMenuAppear = !this.isBtnMenuAppear;
-    },
-    $_clearTimeoutDelay() {
-      if (this.timeoutIdOfSubCtrlDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfSubCtrlDisappearDelay);
-      }
-    },
-  },
-  computed: {
-    subtitleNameArr() {
-      return this.$store.state.PlaybackState.SubtitleNameArr;
-    },
-    subtitleAppearFlag() {
-      return this.$store.getters.firstSubIndex !== -1;
-    },
-  },
-  watch: {
-  },
-  created() {
-    this.$bus.$on('sub-ctrl-appear-delay', () => {
-      this.subCtrlAppear();
-      if (this.timeoutIdOfSubCtrlDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfSubCtrlDisappearDelay);
-        this.timeoutIdOfSubCtrlDisappearDelay
-          = setTimeout(this.subCtrlHide, 3000);
+    toggleSubtitleMenu() {
+      if (!this.appearSubtitleMenu) {
+        this.appearSubtitleMenu = true;
       } else {
-        this.timeoutIdOfSubCtrlDisappearDelay
-          = setTimeout(this.subCtrlHide, 3000);
+        this.appearSubtitleMenu = false;
       }
-    });
-    this.$bus.$on('sub-ctrl-appear', this.subCtrlAppear);
-    this.$bus.$on('sub-ctrl-hide', this.subCtrlHide);
+    },
+    toggleItemsMouseOver() {
+      this.itemIsChosen = true;
+    },
+  },
+
+  computed: {
+  },
+
+  watch: {
+
+  },
+
+  created() {
+    this.$bus.$on('sub-ctrl-appear', this.subCtrlBtnAppear);
+    this.$bus.$on('sub-ctrl-hide', this.subCtrlBtnHide);
   },
 };
 </script>
 
+
+
 <style lang="scss" scoped>
+
 ul, li {
   list-style-type: none;
 }
-.video-controller .subtitle-control {
+
+.video-controller .sub-control {
   position: absolute;
   bottom: 0;
   width: 100%;
-  .btn:hover, .btn-menu-item:hover{
+  .btn:hover, .sub-item:hover{
     cursor: pointer;
   }
 
-  .show {
+  .chosenFake {
     pointer-events: none;
     cursor: default;
     color: yellow;
     opacity: 0.7;
   }
 
-  .btn-menu-wrapper {
-    background-color:rgba(255, 255, 255, 0.1)
+  .sub-menu-wrapper {
+
   }
 
-
-  @media screen and (max-width: 854px) {
-    .btn-menu-wrapper {
+  @media screen and (max-width: 639px) {
+    .sub-menu-wrapper {
       position: absolute;
       right: 25+28+10px;
       bottom: 22+30px;
@@ -126,12 +136,61 @@ ul, li {
     .btn {
       position: absolute;
       bottom: 22px;
-      right: 25+28+10px;
-      height: 24px;
+      right: 101px;
+      height: 28px;
+      width: 24px;
     }
   }
-  @media screen and (min-width: 854px) and (max-width: 1920px) {
-    .btn-menu-wrapper {
+  @media screen and (min-width: 640px) and (max-width: 853px) {
+    .sub-menu-wrapper {
+      position: absolute;
+      bottom: 62px;
+      right: 18px;
+      width: 184px;
+      height: 244px;
+      border-radius: 20px;
+    }
+    .sub-menu{
+      top: 4px;
+      bottom: 4px;
+    }
+    .sub-item{
+
+    }
+    ul {
+      border-radius: 20px;
+      clip-path: inset(0px round 20px);
+      // clip-path: circle(50px at 0 100px);
+      // background-clip: padding-box;
+      padding-top: 4px;
+      padding-bottom: 4px;
+      background-color:rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(20px);
+    }
+    li {
+      padding-left: 18px;
+      padding-right: 18px;
+      margin-right: 18px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      left: 10px;
+      height: 36px;
+      text-align: left;
+      font-family: Avenir-Roman;
+      font-size: 15px;
+      overflow:hidden; //超出的文本隐藏
+      white-space:nowrap;
+    }
+    .btn{
+      position: absolute;
+      bottom: 25px;
+      right: 104px;
+      height: 17px;
+      width: 23px;
+    }
+  }
+  @media screen and (min-width: 854px) and (max-width: 1919px) {
+    .sub-menu-wrapper {
       position: absolute;
       bottom: 60px;
       right: 31.25+35+35+12.5+12.5px;
@@ -144,7 +203,7 @@ ul, li {
     }
   }
   @media screen and (min-width: 1920px) {
-    .btn-menu-wrapper {
+    .sub-menu-wrapper {
       position: absolute;
       width: 24px;
       bottom: 60px;
@@ -157,19 +216,6 @@ ul, li {
       height: 48px;
     }
   }
-}
-.firstSelected {
-  pointer-events: none;
-  cursor: default;
-  background: red;
-  opacity: 0.6;
-}
-
-.secondSelected {
-  pointer-events: none;
-  cursor: default;
-  background: greenyellow;
-  opacity: 0.6;
 }
 
 .fade-enter-active {

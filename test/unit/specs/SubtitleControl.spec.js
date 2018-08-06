@@ -27,54 +27,58 @@ describe('SubtitleControl.vue', () => {
 
   it('should load with correct data', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    expect(wrapper.vm.isBtnMenuAppear).equal(false);
-    expect(wrapper.vm.isSubCtrlBtnAppear).equal(false);
-    expect(wrapper.vm.barBottom).equal(6);
-    expect(wrapper.vm.timeoutIdOfSubCtrlDisappearDelay).equal(0);
+    expect(wrapper.vm.avaliableSuntitlesItems.length).equal(7);
+    expect(wrapper.vm.avaliableSuntitlesItems[0].title).equal('Chinese 1');
+    expect(wrapper.vm.avaliableSuntitlesItems[6].title).equal('无');
+    expect(wrapper.vm.isSubCtrlBtnAppear).equal(true);
+    expect(wrapper.vm.itemIsChosen).equal(false);
+    expect(wrapper.vm.appearSubtitleMenu).equal(false);
+    expect(wrapper.vm.localSubAvaliable).equal(true);
+    expect(wrapper.vm.mouseOverDisItem).equal(false);
   });
 
   it('should render correct HTML elements', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
     wrapper.setData({
-      isSubCtrlBtnAppear: true,
-      isBtnMenuAppear: true,
+      appearSubtitleMenu: true,
+      localSubAvaliable: true,
     });
-    expect(wrapper.html()).contains('alt="On"');
-    expect(wrapper.html()).contains('alt="Off"');
+    expect(wrapper.html()).contains('Chinese 1');
+    expect(wrapper.html()).contains('无');
   });
 
-  it('subCtrlAppear method works fine', () => {
+  it('subCtrlBtnAppear method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
     wrapper.setData({ isSubCtrlBtnAppear: false });
-    wrapper.vm.subCtrlAppear();
+    wrapper.vm.subCtrlBtnAppear();
     expect(wrapper.vm.isSubCtrlBtnAppear).equal(true);
   });
 
-  it('subCtrlHide method works fine', () => {
+  it('subCtrlBtnHide method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
     wrapper.setData({
       isSubCtrlBtnAppear: true,
-      isBtnMenuAppear: true,
+      appearSubtitleMenu: true,
     });
-    wrapper.vm.subCtrlHide();
+    wrapper.vm.subCtrlBtnHide();
     expect(wrapper.vm.isSubCtrlBtnAppear).equal(false);
-    expect(wrapper.vm.isBtnMenuAppear).equal(false);
+    expect(wrapper.vm.appearSubtitleMenu).equal(false);
   });
 
-  it('toggleButtonMenu method works fine', () => {
+  it('toggleSubtitleMenu method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    wrapper.setData({ isBtnMenuAppear: false });
-    wrapper.vm.toggleButtonMenu();
-    expect(wrapper.vm.isBtnMenuAppear).equal(true);
+    wrapper.setData({ appearSubtitleMenu: false });
+    wrapper.vm.toggleSubtitleMenu();
+    expect(wrapper.vm.appearSubtitleMenu).equal(true);
     wrapper.setData({ isBtnMenuAppear: true });
-    wrapper.vm.toggleButtonMenu();
-    expect(wrapper.vm.isBtnMenuAppear).equal(false);
+    wrapper.vm.toggleSubtitleMenu();
+    expect(wrapper.vm.appearSubtitleMenu).equal(false);
   });
 
-  it('subtitleNameArr computed property works fine', () => {
+  it('toggleItemsMouseOver method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    store.state.PlaybackState.SubtitleNameArr = testSubArr;
-    expect(wrapper.vm.subtitleNameArr).equal(testSubArr);
+    wrapper.setData({ itemIsChosen: false });
+    wrapper.vm.toggleItemsMouseOver();
+    expect(wrapper.vm.itemIsChosen).equal(true);
   });
-  // 测试 eventbus emit and on - 待
 });

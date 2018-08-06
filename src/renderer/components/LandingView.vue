@@ -5,7 +5,7 @@
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
-    <transition name="background-container-transition" mode="in">
+    <transition name="background-container-transition" mode="">
       <div class="background"
         v-if="showShortcutImage">
         <div class="background background-image">
@@ -31,7 +31,7 @@
         </div>
       </div>
     </transition>
-    <transition name="welcome-container-transition" mode="out">
+    <transition name="welcome-container-transition" mode="">
       <div class="welcome-container" v-if="langdingLogoAppear">
         <div class="logo-container">
           <img class="logo" src="~@/assets/logo.png" alt="electron-vue">

@@ -1,8 +1,9 @@
-import PlayingView from '@/components/PlayingView.vue';
+
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import PlaybackState from '@/store/modules/PlaybackState';
 import sinon from 'sinon';
+import PlayingView from '@/components/PlayingView';
 
 const localVue = createLocalVue();
 
@@ -58,7 +59,7 @@ describe('PlayingView.vue', () => {
   });
 
   it('Im so DOPE', () => {
-    const wrapper = shallowMount(PlayingView, ({ store, localVue}));
+    const wrapper = shallowMount(PlayingView, ({ store, localVue }));
     const stub = sinon.stub(wrapper.vm.$bus, '$on');
     stub.yields();
     const spy = sinon.spy(wrapper.vm, 'hideAllWidgets');

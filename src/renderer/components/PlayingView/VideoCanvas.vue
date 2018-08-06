@@ -19,7 +19,6 @@
 // https://www.w3schools.com/tags/ref_av_dom.asp
 import syncStorage from '@/helpers/syncStorage';
 import Subtitle from './BaseSubtitle.vue';
-
 export default {
   components: {
     Subtitle,
@@ -88,7 +87,6 @@ export default {
         this.$_controlWindowSize();
         this.videoExisted = true;
       }
-
       this.$bus.$emit('video-loaded');
       // this.loadTextTracks();
     },
@@ -131,13 +129,11 @@ export default {
     $_calculateWindowSizeAtTheFirstTime() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       const currentScreen = this.$electron.screen.getPrimaryDisplay();
-
       const { width: screenWidth, height: screenHeight } = currentScreen.workAreaSize;
       const [minWidth, minHeight] = currentWindow.getMinimumSize();
       const screenRatio = screenWidth / screenHeight;
       const minWindowRatio = minWidth / minHeight;
       const videoRatio = this.videoWidth / this.videoHeight;
-
       if (this.videoWidth > screenWidth || this.videoHeight > screenHeight) {
         if (videoRatio > screenRatio) {
           this.newWidthOfWindow = screenWidth;
@@ -163,17 +159,13 @@ export default {
         [this.newWidthOfWindow, this.newHeightOfWindow] = [this.videoWidth, this.videoHeight];
       }
     },
-
     $_calculateWindowSizeInConditionOfVideoExisted() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
-
       const [windowWidth, windowHeight] = currentWindow.getSize();
       const [minWidth, minHeight] = currentWindow.getMinimumSize();
-
       const windowRatio = windowWidth / windowHeight;
       const minWindowRatio = minWidth / minHeight;
       const videoRatio = this.videoWidth / this.videoHeight;
-
       if (this.videoWidth < windowWidth && this.videoHeight < windowHeight) {
         [this.newWidthOfWindow, this.newHeightOfWindow] = [this.videoWidth, this.videoHeight];
       } else if (this.videoWidth > windowWidth || this.videoHeight > windowHeight) {
@@ -188,7 +180,6 @@ export default {
             = [windowWidth, windowHeight];
         }
       }
-
       if (this.newWidthOfWindow < minWidth || this.newHeightOfWindow < minHeight) {
         if (videoRatio > minWindowRatio) {
           this.newHeightOfWindow = minHeight;
@@ -208,7 +199,6 @@ export default {
       const canvasCTX = canvas.getContext('2d');
       const { videoHeight, videoWidth } = this.$refs.videoCanvas;
       [canvas.width, canvas.height] = [videoWidth, videoHeight];
-
       canvasCTX.drawImage(
         this.$refs.videoCanvas, 0, 0, videoWidth, videoHeight,
         0, 0, videoWidth, videoHeight,
@@ -311,7 +301,6 @@ export default {
 </script>
 
 <style lang="scss">
-
 .video {
   position: absolute;
   top: 0;
@@ -320,7 +309,6 @@ export default {
   height: 100%;
   border-radius: 4px;
   overflow: hidden;
-
   video {
     width: 100%;
     height: 100%;
