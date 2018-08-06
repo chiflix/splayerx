@@ -353,7 +353,7 @@ export default {
       const subtitleName = files.map(file => this.$_subNameProcess(file));
       this.$store.commit('AddSubtitle', subtitleName);
       this.addVttToVideoElement(files, () => {
-        this.subtitleShow(size);
+        this.subtitleShow(size); // the size is the fucking STARTING INDEX
       });
     });
   },
@@ -379,4 +379,3 @@ export default {
   }
 }
 </style>
-

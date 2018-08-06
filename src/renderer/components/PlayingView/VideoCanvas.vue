@@ -87,10 +87,6 @@ export default {
         this.$_controlWindowSize();
         this.videoExisted = true;
       }
-<<<<<<< HEAD
-=======
-
->>>>>>> upstream/develop
       this.$bus.$emit('video-loaded');
       // this.loadTextTracks();
     },
