@@ -60,7 +60,7 @@ describe('TimeProgressBar.vue', () => {
   });
 
   it('progress mouseover trigger', () => {
-    const wrapper = mount(TimeProgressBar, {store, localVue});
+    const wrapper = mount(TimeProgressBar, { store, localVue });
     const spy = sinon.spy(wrapper.vm, 'appearProgressSlider');
     wrapper.find('.progress').trigger('mouseover.stop.capture');
     expect(spy.calledOnce).equal(true);
@@ -68,7 +68,7 @@ describe('TimeProgressBar.vue', () => {
   });
 
   it('progress mouseleave trigger', () => {
-    const wrapper = mount(TimeProgressBar, {store, localVue});
+    const wrapper = mount(TimeProgressBar, { store, localVue });
     const spy = sinon.spy(wrapper.vm, 'hideProgressSlider');
     wrapper.find('.progress').trigger('mouseover.stop.capture');
     wrapper.find('.progress').trigger('mouseleave');
@@ -95,7 +95,7 @@ describe('TimeProgressBar.vue', () => {
   });
 
   it('fake-button mousedonwn trigger', () => {
-    const wrapper = mount(TimeProgressBar, {store, localVue});
+    const wrapper = mount(TimeProgressBar, { store, localVue });
     const spy = sinon.spy(wrapper.vm, 'handleFakeBtnClick');
     wrapper.find('.progress').trigger('mouseover.stop.capture');
     wrapper.find('.fake-button').trigger('mousedown');
@@ -104,7 +104,7 @@ describe('TimeProgressBar.vue', () => {
   });
 
   it('fake-button mousemove trigger', () => {
-    const wrapper = mount(TimeProgressBar, {store, localVue});
+    const wrapper = mount(TimeProgressBar, { store, localVue });
     const spy = sinon.spy(wrapper.vm, 'handleFakeBtnMove');
     wrapper.find('.progress').trigger('mouseover.stop.capture');
     wrapper.find('.fake-button').trigger('mousemove.stop');
@@ -113,7 +113,7 @@ describe('TimeProgressBar.vue', () => {
   });
 
   it('progress-container mousedown trigger', () => {
-    const wrapper = mount(TimeProgressBar, {store, localVue});
+    const wrapper = mount(TimeProgressBar, { store, localVue });
     wrapper.setData({
       winWidth: 1000,
     });
