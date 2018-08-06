@@ -4,7 +4,7 @@ import ThumbnailWorker from '@/worker/thumbnail.worker';
 import { shallowMount } from '@vue/test-utils';
 import sinon from 'sinon';
 
-describe('Component - ThumbnailVideoPlayer', () => {
+describe.only('Component - ThumbnailVideoPlayer', () => {
   let wrapper;
   let sandbox;
   const propsData = {
@@ -26,13 +26,11 @@ describe('Component - ThumbnailVideoPlayer', () => {
     expect(baseVideoPlayer.is(BaseVideoPlayer)).to.equal(true);
   });
 
-  describe.only('Behavior - Should start autoGeneration when shallowMounted', () => {
+  describe('Behavior - Should start autoGeneration when shallowMounted', () => {
     beforeEach(() => {
-      wrapper = shallowMount(ThumbnailVideoPlayer, { propsData });
       sandbox = sinon.createSandbox();
     });
     afterEach(() => {
-      wrapper.destroy();
       sandbox.restore();
     });
 
@@ -42,25 +40,123 @@ describe('Component - ThumbnailVideoPlayer', () => {
       const expectedResults = [0, 9, 375, 30];
 
       currentTimes.forEach((testCase, index) => {
-        const newPropsData = Object.assign(
-          {},
-          propsData,
-          { generationInterval: intervals[index] },
-          { currentTime: testCase },
-          { thumbnailWorker: new ThumbnailWorker() },
-        );
-        wrapper.setProps(newPropsData);
-        expect(wrapper.vm.autoGenerationIndex).to.equal(expectedResults[index]);
+        const newPropsData = {
+          currentTime: testCase,
+          channelName: 'thumbnail',
+          outerThumbnailInfo: {
+            videoSrc: 'file:///',
+            videoDuration: 2000,
+            generationInterval: intervals[index],
+            screenWidth: 1920,
+          },
+        };
+        const tempWrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData });
+        expect(tempWrapper.vm.autoGenerationIndex).to.equal(expectedResults[index]);
       });
     });
     it('should zero currentTime only accept screenWidth props', () => {
+      const screenWidths = [720, 1024, 4096, 800];
+      const intervals = [200, 384, 4, 7];
+      screenWidths.forEach((testCase, index) => {
+        const newPropsData = {
+          currentTime: 0,
+          channelName: 'thumbnail',
+          outerThumbnailInfo: {
+            videoSrc: 'file:///',
+            videoDuration: 800,
+            generationInterval: intervals[index],
+            screenWidth: testCase,
+          },
+        };
 
+        const tempWrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData });
+
+        expect(tempWrapper.vm.screenWidth).to.equal(testCase);
+        expect(tempWrapper.vm.videoDuration)
+          .to.not.equal(newPropsData.outerThumbnailInfo.videoDuration);
+        expect(tempWrapper.vm.generationInterval).to.not.equal(intervals[index]);
+      });
     });
     it('should non-zero currentTime video use props as generation parameters', () => {
+      const currentTimes = [760, 4000, 751, 90];
+      const screenWidths = [720, 1024, 4096, 800];
+      const intervals = [200, 384, 4, 7];
+      currentTimes.forEach((testCase, index) => {
+        const newPropsData = {
+          currentTime: testCase,
+          channelName: 'thumbnail',
+          outerThumbnailInfo: {
+            videoSrc: 'file:///',
+            videoDuration: 800,
+            generationInterval: intervals[index],
+            screenWidth: screenWidths[index],
+          },
+        };
 
+        const tempWrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData });
+
+        expect(tempWrapper.vm.screenWidth).to.equal(screenWidths[index]);
+        expect(tempWrapper.vm.generationInterval).to.equal(intervals[index]);
+        expect(tempWrapper.vm.videoDuration)
+          .to.equal(newPropsData.outerThumbnailInfo.videoDuration);
+      });
     });
     it('should auto generation be started upon shallowMounted', () => {
+      const wrapper = shallowMount(ThumbnailVideoPlayer, { propsData });
 
+      expect(wrapper.vm.isAutoGeneration).to.equal(true);
+    });
+  });
+
+  describe('Behavior - Should auto generation function normally', () => {
+    beforeEach(() => {
+      sandbox = sinon.createSandbox();
+      wrapper = shallowMount(ThumbnailVideoPlayer, { propsData });
+    });
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    it('should properly changed currentTime stop auto generation', () => {
+      wrapper.setProps({ currentTime: 76 });
+
+      expect(wrapper.vm.isAutoGeneration).to.equal(false);
+    });
+    it('should valid changed currentTime in set be ignored', () => {
+      wrapper.vm.thumbnailSet.add(25);
+      wrapper.setProps({ currentTime: 76 });
+
+      expect(wrapper.vm.isAutoGeneration).to.equal(true);
+    });
+    it('should invalid changed currentTime be ignored', () => {
+      wrapper.setProps({ currentTime: NaN });
+
+      expect(wrapper.vm.isAutoGeneration).to.equal(true);
+    });
+  });
+
+  describe.only('Behavior - Should autoGeneration and manualGeneration switch properly', () => {
+    let generationClock;
+    beforeEach(() => {
+      sandbox = sinon.createSandbox();
+      generationClock = sandbox.useFakeTimers();
+      wrapper = shallowMount(ThumbnailVideoPlayer, { propsData });
+    });
+    afterEach(() => {
+      sandbox.restore();
+      generationClock.restore();
+    });
+
+    it('should auto generation be resumed after MAX_GENERARION_DELAY', () => {
+      const delay = wrapper.vm.MAX_GENERATION_DELAY;
+      const pauseGenerationSpy = sandbox.spy(wrapper.vm, 'pauseAutoGeneration');
+      wrapper.setProps({ currentTime: 75 });
+
+      setTimeout(wrapper.vm.resumeAutoGeneration, delay);
+      generationClock.tick(delay);
+
+      sinon.assert.calledOnce(pauseGenerationSpy);
+      expect(wrapper.vm.isAutoGeneration).to.equal(true);
     });
   });
 });
