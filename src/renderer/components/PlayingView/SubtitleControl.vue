@@ -82,9 +82,7 @@ export default {
       }
     },
     toggleItemsMouseOver() {
-      // this.$refs.menuItem.style.height = 'red';
       this.itemIsChosen = true;
-      // this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
     },
   },
 
@@ -178,11 +176,9 @@ ul, li {
       left: 10px;
       height: 36px;
       text-align: left;
-      // font-family: calibri;
       font-family: Avenir-Roman;
       font-size: 15px;
       overflow:hidden; //超出的文本隐藏
-      // text-overflow:ellipsis; //溢出用省略号显示
       white-space:nowrap;
     }
     .btn{
