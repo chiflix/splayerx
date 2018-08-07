@@ -23,19 +23,16 @@
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.winWidth - 20 + 'px'}"
       @mousedown.left.stop.capture="onProgressBarClick">
-      <Thumbnail
+        <!-- translate优化 -->
+      <the-preview-thumbnail 
         v-show="showScreenshot"
-        :src=src
-        :positionOfScreenshot="positionOfScreenshot"
-        :width="widthOfThumbnail"
-        :height="heightOfThumbnail"
-        :widthOfThumbnail="widthOfThumbnail"
-        :heightOfThumbnail="heightOfThumbnail"
-        :screenshotContent="screenshotContent"
+        :src="src"
+        :thumbnailWidth="widthOfThumbnail"
+        :thumbnailHeight="heightOfThumbnail"
         :currentTime="thumbnailCurrentTime"
         :maxThumbnailWidth="240"
-        :maxThumbnailHeight="Math.floor(240 / videoRatio)" />
-        <!-- translate优化 -->
+        :videoRatio="videoRatio"
+        :positionOfThumbnail="positionOfScreenshot" />
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
         <div class="line"
@@ -64,10 +61,12 @@ import {
   FOOL_PROOFING_BAR_WIDTH,
 } from '@/constants';
 import Thumbnail from './Thumbnail.vue';
+import ThePreviewThumbnail from './ThePreviewThumbnail';
 
 export default {
   components: {
     Thumbnail,
+    'the-preview-thumbnail': ThePreviewThumbnail,
   },
   props: {
     src: {
@@ -599,13 +598,13 @@ export default {
  opacity: 0;
 }
 
-.shake {
-  // transform-origin: left center;
-  // animation-name: shake;
-  // animation-duration: 180ms;
-  // animation-timing-function: ease-in-out;
-  // animation-iteration-count: infinite;
-}
+// .shake {
+//   transform-origin: left center;
+//   animation-name: shake;
+//   animation-duration: 180ms;
+//   animation-timing-function: ease-in-out;
+//   animation-iteration-count: infinite;
+// }
 
 @keyframes shake {
   25% {
