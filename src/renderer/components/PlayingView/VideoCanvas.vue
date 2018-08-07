@@ -14,9 +14,11 @@
       <!-- Need a way not to use v-html -->
       <div class='subtitle-content'
         :style="subStyle"
+        :key="key"
         v-for="(html, key) in firstCueHTML"
         v-html="html"></div>
       <div class='subtitle-content'
+        :key="key"
         :style="subStyle"
         v-for="(html, key) in secondCueHTML"
         v-html="html"></div>
