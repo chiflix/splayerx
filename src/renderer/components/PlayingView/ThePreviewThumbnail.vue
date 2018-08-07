@@ -1,6 +1,6 @@
 <template>
   <div class="the-preview-thumbnail"
-    :style="{width: thumbnailWidth + 32 + 'px', left: positionOfThumbnail - 16 + 'px'}">
+    :style="{width: thumbnailWidth +'px', height: thumbnailHeight + 'px', left: positionOfThumbnail + 'px'}">
     <thumbnail-video-player
       :currentTime="currentTime"
       :thumbnailWidth="thumbnailWidth"
@@ -43,5 +43,9 @@ export default {
   position: absolute;
   bottom: 20px;
   -webkit-app-region: no-drag;
+  border: 2px solid;
+  border-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5)) 10;
+  box-sizing: content-box;
+  background-color: #000;
 }
 </style>

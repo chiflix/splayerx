@@ -1,6 +1,7 @@
 <template>
   <div class="base-video-player">
-    <video class="video-element" ref="video"></video>
+    <video class="video-element" ref="video"
+      :style="{width: videoSize.width + 'px', height: videoSize.height + 'px'}"></video>
   </div>
 </template>
 
@@ -58,6 +59,13 @@ export default {
       default: () => ({
         pauseOnStart: false,
         commitToVuex: false,
+      }),
+    },
+    videoSize: {
+      type: Object,
+      default: () => ({
+        width: 170,
+        height: 95,
       }),
     },
   },
@@ -151,10 +159,5 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-video {
-  object-fit: contain;
-  width: 240px;
-  height: 135px;
-}
 </style>
 

@@ -1,11 +1,11 @@
 <template>
-  <div class="thumbnail-video-player"
-    :style="{ width: thumbnailWidth, height: thumbnailHeight }">
+  <div class="thumbnail-video-player">
     <base-video-player
       ref="video"
       :src="videoSrc"
       :defaultEvents="['loadedmetadata', 'seeked']"
       :customOptions="{ pauseOnStart: true }"
+      :videoSize="{ width: thumbnailWidth, height: thumbnailHeight}"
       @loadedmetadata="updateGenerationParameters"
       @seeked="thumbnailGeneration" />
   </div>
@@ -173,8 +173,5 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.thumbnail-video-player {
-  bottom: 20px;
-}
 </style>
 
