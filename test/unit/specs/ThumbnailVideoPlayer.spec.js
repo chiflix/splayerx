@@ -135,7 +135,7 @@ describe.only('Component - ThumbnailVideoPlayer', () => {
     });
   });
 
-  describe('Behavior - Should autoGeneration and manualGeneration switch properly', () => {
+  describe.only('Behavior - Should autoGeneration and manualGeneration switch properly', () => {
     let generationClock;
     beforeEach(() => {
       sandbox = sinon.createSandbox();
@@ -179,9 +179,9 @@ describe.only('Component - ThumbnailVideoPlayer', () => {
     it('should resumed autoGeneration have proper autoGenerationIndex restored', () => {
       wrapper.setProps({ currentTime: 97 });
 
-      generationClock.tick(1001);
+      generationClock.tick(wrapper.vm.MAX_GENERATION_DELAY + 10);
 
-      expect(wrapper.vm.autoGenerationIndex).to.equal(0);
+      expect(wrapper.vm.autoGenerationIndex).to.equal(-1);
     });
   });
 });
