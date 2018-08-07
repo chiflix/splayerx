@@ -75,7 +75,7 @@ export default {
       if (!this.thumbnailSet.has(index) && this.$options.props.currentTime.validator(newValue)) {
         this.isAutoGeneration = false;
         this.pauseAutoGeneration();
-        // this.videoSeek(index);
+        this.videoSeek(index);
       }
     },
   },
