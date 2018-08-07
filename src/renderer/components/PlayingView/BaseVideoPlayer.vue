@@ -105,17 +105,19 @@ export default {
       const onEdEvents = [];
       eventsArray.forEach((event) => {
         if (DEFAULT_VIDEO_EVENTS.indexOf(event) !== -1) {
-          this.$on(event, this.emitPlayerState(event));
+          // this.$on(event, this.emitPlayerState(event));
+          this.$refs.video.addEventListener(event, (value) => {
+            this.emitPlayerState(event, value);
+          });
           onEdEvents.push(event);
         }
       });
       return onEdEvents;
     },
     emitPlayerState(event, value) {
-      if (event) {
+      if (event && !value) {
         this.$emit(event);
-      }
-      if (value) {
+      } else if (value) {
         this.$emit(event, { [event]: value });
       }
     },
