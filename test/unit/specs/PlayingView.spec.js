@@ -1,8 +1,9 @@
-import PlayingView from '@/components/PlayingView.vue';
+
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import PlaybackState from '@/store/modules/PlaybackState';
 import sinon from 'sinon';
+import PlayingView from '@/components/PlayingView';
 
 const localVue = createLocalVue();
 

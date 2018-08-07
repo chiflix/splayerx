@@ -1,0 +1,4 @@
+1
+00:00:08,234 --> 00:00:10,829
+<i>Kids, on my first day
+as a college professor,</i>

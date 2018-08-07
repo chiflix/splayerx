@@ -110,7 +110,7 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('changeMenuList', (changedLevel) => {
+    this.$bus.$on('change-menu-list', (changedLevel) => {
       this.menuList = changedLevel;
       this.$_fitMenuSize();
     });

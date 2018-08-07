@@ -11,6 +11,7 @@ import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
+import Path from 'path';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
@@ -21,7 +22,6 @@ Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
 
 Vue.mixin(helpers);
-
 Vue.prototype.$bus = new Vue(); // Global event bus
 
 const i18n = new VueI18n({
@@ -385,14 +385,32 @@ new Vue({
       }
     });
 
+    /**
+     * Todo:
+     * Handle multiple files
+     */
     window.addEventListener('drop', (e) => {
       e.preventDefault();
+      let potentialVidPath;
+      let tempFilePath;
       const { files } = e.dataTransfer;
-      console.log(files);
       // TODO: play it if it's video file
-      const path = `file:///${files[0].path}`;
-
-      this.openFile(path);
+      const subtitleFiles = [];
+      const regex = '^(.srt|.ass|.vtt)$';
+      const re = new RegExp(regex);
+      // const extname = Path.extname(path);
+      for (let i = 0; i < files.length; i += 1) {
+        tempFilePath = `file:///${files[i].path}`;
+        if (re.test(Path.extname(tempFilePath))) {
+          subtitleFiles.push(files[i].path);
+        } else {
+          potentialVidPath = tempFilePath;
+        }
+      }
+      if (potentialVidPath) {
+        this.openFile(potentialVidPath);
+      }
+      this.$bus.$emit('add-subtitle', subtitleFiles);
 
       /*
       for (const file in files) {
