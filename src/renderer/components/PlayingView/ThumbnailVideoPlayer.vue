@@ -11,7 +11,6 @@
 
 <script>
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
-import { setTimeout, clearTimeout } from 'timers';
 export default {
   name: 'thumbnail-video-player',
   components: {
@@ -76,7 +75,7 @@ export default {
       if (!this.thumbnailSet.has(index) && this.$options.props.currentTime.validator(newValue)) {
         this.isAutoGeneration = false;
         this.pauseAutoGeneration();
-        this.videoSeek(index);
+        // this.videoSeek(index);
       }
     },
   },
@@ -95,7 +94,7 @@ export default {
           return 'file';
         }
       }
-      throw new Error('TypeError: invalid src value.');
+      throw new TypeError('invalid src value.');
     },
     // Data regenerators
     updateGenerationParameters() {
@@ -113,10 +112,10 @@ export default {
       });
     },
     videoSeek(index) {
-      const videoElement = this.$refs.video.videoElement();
-      if (!videoElement) {
+      if (!this.$refs.video.videoElement) {
         return;
       }
+      const videoElement = this.$refs.video.videoElement();
       videoElement.currentTime = index * this.generationInterval;
     },
     pauseAutoGeneration() {
@@ -129,6 +128,7 @@ export default {
     },
     resumeAutoGeneration() {
       this.isAutoGeneration = true;
+      this.videoSeek(this.autoGenerationIndex);
     },
   },
   created() {

@@ -150,13 +150,22 @@ describe.only('Component - ThumbnailVideoPlayer', () => {
     it('should auto generation be resumed after MAX_GENERARION_DELAY', () => {
       const delay = wrapper.vm.MAX_GENERATION_DELAY;
       const pauseGenerationSpy = sandbox.spy(wrapper.vm, 'pauseAutoGeneration');
-      wrapper.setProps({ currentTime: 75 });
 
-      setTimeout(wrapper.vm.resumeAutoGeneration, delay);
+      wrapper.setProps({ currentTime: 75 });
       generationClock.tick(delay);
 
       sinon.assert.calledOnce(pauseGenerationSpy);
       expect(wrapper.vm.isAutoGeneration).to.equal(true);
+    });
+    it('should unstoppable currentTime pause autoGeneration consistently', () => {
+      const delay = wrapper.vm.MAX_GENERATION_DELAY;
+      const currentTimes = [79, 94, 104, 9000];
+      currentTimes.forEach((testCase) => {
+        wrapper.setProps({ currentTime: testCase });
+
+        generationClock.tick(delay - 5);
+        expect(wrapper.vm.isAutoGeneration).to.equal(false);
+      });
     });
   });
 });
