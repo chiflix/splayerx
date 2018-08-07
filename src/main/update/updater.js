@@ -19,7 +19,7 @@ const i18n = new VueI18n({
   messages, // set locale messages
 });
 
-const UpdaterFactory = (() => {
+const UpdaterFactory = ((() => {
   let instance = null;
 
   class Updater {
@@ -219,5 +219,5 @@ const UpdaterFactory = (() => {
       return instance;
     },
   };
-}());
+})());
 export { UpdaterFactory as default };
