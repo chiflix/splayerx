@@ -194,7 +194,6 @@ new Vue({
       }).then((result) => {
         const menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(menu);
-        console.log(menu.getMenuItemById('recent-play').submenu.items);
       }).catch((err) => {
         console.log(err);
       });
@@ -262,7 +261,6 @@ new Vue({
             reject(err);
           } else {
             menuRecentData = this.processRecentPlay(data);
-            console.log(menuRecentData);
             recentMenuTemplate.submenu.forEach((element, index) => {
               const value = menuRecentData.get(element.id);
               if (value.label !== '') {
