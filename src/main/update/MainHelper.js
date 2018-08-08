@@ -75,9 +75,9 @@ export class MainHelper {
 export class MainHelperForMac extends MainHelper {
   // for mac if it downloaded the update it will install it
   onUpdateDownloaded(info) {
-    return new Promise(() => {
+    return new Promise((resolve) => {
       const infop = UpdateInfo.getFromUpdaterUpdateInfo(info);
-      this.storage.willInstall(infop);
+      resolve(this.storage.willInstall(infop));
     });
   }
 }

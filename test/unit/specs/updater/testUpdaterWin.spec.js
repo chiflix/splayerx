@@ -23,7 +23,7 @@ const options = {
 const updateInfo = { version: '0.5.1', note: 'hello' };
 const updateInfoNext = { version: '0.5.1', note: 'hello' };
 let wrapper;
-describe('UpdaterNotification.vue', () => {
+describe('UpdaterNotification.vue', (done) => {
   beforeEach(() => {
     ipcMain.removeAllListener();
     wrapper = shallowMount(UpdaterNotification, options);
@@ -39,57 +39,59 @@ describe('UpdaterNotification.vue', () => {
     expect(wrapper.vm.buttons).eql([]);
     expect(wrapper.vm.linkProp['webkit-animation-name']).equal(null);
   });
-  it('test for win downloaded update for the first use', (done) => {
+  it('test for win downloaded update for the first use', () => {
     storage.clearPreviousDownload()
-      .then(() => { mainHelper.onUpdateDownloaded(updateInfoNext); }).then(() => {
-        expect(wrapper.vm.helper).not.equal(null);
+      .then(() => mainHelper.onUpdateDownloaded(updateInfoNext)).then(() => {
         setTimeout(() => {
+          expect(wrapper.vm.helper).not.equal(null);
           expect(wrapper.vm.position.left).equal('');
           done();
-        }, 500);
+        }, 100);
       });
   });
-  it('test for win when can install after first use update and user choose to install', (done) => {
+  it('test for win when can install after first use update and user choose to install', () => {
     mainHelper.onUpdateDownloaded(updateInfo).then(() => {
-      expect(wrapper.vm.helper).not.equal(null);
       setTimeout(() => {
+        expect(wrapper.vm.helper).not.equal(null);
+        expect(wrapper.vm.visibility).not.equal('hidden');
         expect(wrapper.vm.position.left).not.equal('');
         wrapper.vm.helper.install();
         done();
-      }, 500);
+      }, 100);
     });
   });
   // this one must is after previous test to have installed info in storage
-  it('test for win has previous installed update', (done) => {
+  it('test for win has previous installed update', () => {
     mainHelper.onStart();
-    expect(wrapper.vm.helper).not.equal(null);
     setTimeout(() => {
+      expect(wrapper.vm.helper).not.equal(null);
       expect(wrapper.vm.position.left).not.equal('');
+      expect(wrapper.vm.breathType).equal('breatheSuccess');
       done();
-    }, 500);
+    }, 100);
   });
 
-  it('test for win when can install update and cancel install', (done) => {
+  it('test for win when can install update and cancel install', () => {
     mainHelper.onUpdateDownloaded(updateInfo);
-    expect(wrapper.vm.helper).not.equal(null);
     setTimeout(() => {
+      expect(wrapper.vm.helper).not.equal(null);
       expect(wrapper.vm.position.left).not.equal('');
       wrapper.vm.helper.notInstall();
       setTimeout(() => {
         expect(wrapper.vm.visibility).equal('hidden');
         expect(wrapper.vm.$refs.showWindow.className).equal('updateContainerDisappear');
         done();
-      }, 500);
-    }, 500);
+      }, 100);
+    }, 100);
   });
 
-  it('test for win not have previous installed update', (done) => {
+  it('test for win not have previous installed update', () => {
     mainHelper.onStart();
-    expect(wrapper.vm.helper).not.equal(null);
     setTimeout(() => {
+      expect(wrapper.vm.helper).not.equal(null);
       expect(wrapper.vm.position.left).equal('');
       done();
-    }, 500);
+    }, 100);
   });
 });
 

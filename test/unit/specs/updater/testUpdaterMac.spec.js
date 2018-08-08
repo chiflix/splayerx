@@ -6,6 +6,8 @@ import VueI18n from 'vue-i18n';
 import { ipcMain, ipcRenderer } from './ipcMock.js';
 import { RendererHelperForMac } from '../../../../src/main/update/RendererHelper.js';
 import MainHelper from './mainSimulator.js';
+import Storage from '../../../../src/main/update/Updatestorage.js';
+const storage = new Storage();
 let mainHelper;
 Vue.use(VueI18n);
 const $i18n = new VueI18n({
@@ -20,8 +22,9 @@ const options = {
 };
 let wrapper;
 const updateInfo = { version: '0.5.1', note: 'hello' };
-
-describe('UpdaterNotification.vue', () => {
+storage.clearPreviousDownload();
+storage.clearUpdateInstalled();
+describe('UpdaterNotification.vue', (done) => {
   beforeEach(() => {
     ipcMain.removeAllListener();
     ipcRenderer.removeAllListener();
@@ -38,20 +41,21 @@ describe('UpdaterNotification.vue', () => {
     expect(wrapper.vm.buttons).eql([]);
     expect(wrapper.vm.linkProp['webkit-animation-name']).equal(null);
   });
-  it('test for mac when can install update', (done) => {
-    mainHelper.onUpdateDownloaded(updateInfo);
-    expect(wrapper.vm.helper).not.equal(null);
-    setTimeout(() => {
-      expect(wrapper.vm.position.right).equal('');
-      done();
-    }, 500);
+  it('test for mac when can install update', () => {
+    mainHelper.onUpdateDownloaded(updateInfo).then(() => {
+      setTimeout(() => {
+        expect(wrapper.vm.helper).not.equal(null);
+        expect(wrapper.vm.position.right).equal('');
+        done();
+      }, 100);
+    });
   });
-  it('test for mac when installed update last round', (done) => {
+  it('test for mac when installed update last round', () => {
     expect(wrapper.vm.helper).not.equal(null);
     mainHelper.onStart();
     setTimeout(() => {
       expect(wrapper.vm.position.right).not.equal('');
       done();
-    }, 500);
+    }, 100);
   });
 });
