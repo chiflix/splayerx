@@ -37,7 +37,32 @@ export default {
         maxThumbnailWidth: 240,
         videoRatio: this.videoRatio,
       },
+      quickHash: null,
     };
+  },
+  watch: {
+    src(newValue) {
+      this.updateMediaQuickHash(newValue);
+    },
+  },
+  created() {
+    this.updateMediaQuickHash(this.src);
+  },
+  methods: {
+    updateMediaQuickHash(src) {
+      const regexes = {
+        file: new RegExp('^file:///?'),
+        http: new RegExp('^(http|https)://'),
+      };
+
+      let filePath = src;
+      Object.keys(regexes).forEach((fileType) => {
+        if (regexes[fileType].test(src)) {
+          filePath = src.replace(regexes[fileType], '');
+        }
+      });
+      this.quickHash = this.mediaQuickHash(filePath);
+    },
   },
 };
 </script>
@@ -46,10 +71,16 @@ export default {
   position: absolute;
   bottom: 20px;
   -webkit-app-region: no-drag;
-  border: 2px solid;
+  border: 1px solid;
   border-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5)) 10;
   box-sizing: content-box;
   background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5));
+  @media screen and (min-width: 854px) and (max-width: 1920px) {
+    border-width: 1px 0px;
+  }
+  @media screen and (min-width: 1920px) {
+    border-width: 1px;
+  }
 }
 .time {
   position: absolute;
