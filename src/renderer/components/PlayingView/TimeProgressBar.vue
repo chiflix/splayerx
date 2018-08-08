@@ -33,7 +33,8 @@
         :currentTime="thumbnailCurrentTime"
         :maxThumbnailWidth="240"
         :videoRatio="videoRatio"
-        :positionOfThumbnail="positionOfScreenshot" />
+        :positionOfThumbnail="positionOfScreenshot"
+        :videoTime="screenshotContent" />
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
         <div class="line"
@@ -470,11 +471,6 @@ export default {
     .progress-container {
       .screenshot-background {
         bottom: 20px;
-        .screenshot {
-          .time {
-            font-size: 20px;
-          }
-        }
       }
     }
   }
@@ -483,11 +479,6 @@ export default {
     .progress-container {
       .screenshot-background {
         bottom: 20px;
-        .screenshot {
-          .time {
-            font-size: 24px;
-          }
-        }
       }
     }
   }
@@ -496,11 +487,6 @@ export default {
     .progress-container {
       .screenshot-background {
         bottom: 20px;
-        .screenshot {
-          .time {
-            font-size: 40px;
-          }
-        }
       }
     }
   }

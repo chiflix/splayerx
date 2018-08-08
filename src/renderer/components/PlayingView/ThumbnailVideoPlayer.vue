@@ -1,5 +1,6 @@
 <template>
   <div class="thumbnail-video-player">
+    <slot></slot>
     <base-video-player
       ref="video"
       :src="videoSrc"

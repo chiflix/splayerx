@@ -5,7 +5,9 @@
       :currentTime="currentTime"
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
-      :outerThumbnailInfo="outerThumbnailInfo"/>
+      :outerThumbnailInfo="outerThumbnailInfo">
+      <span class="time">{{ videoTime }}</span>
+    </thumbnail-video-player>
   </div>
 </template>
 
@@ -23,6 +25,7 @@ export default {
     thumbnailWidth: Number,
     thumbnailHeight: Number,
     positionOfThumbnail: Number,
+    videoTime: String,
   },
   data() {
     return {
@@ -47,5 +50,22 @@ export default {
   border-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5)) 10;
   box-sizing: content-box;
   background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5));
+}
+.time {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.2px;
+  @media screen and (max-width: 854px) {
+    font-size: 20px;
+  }
+  @media screen and (min-width: 854px) and (max-width: 1920px) {
+    font-size: 24px;
+  }
+  @media screen and (min-width: 1920px) {
+    font-size: 40px;
+  }
 }
 </style>
