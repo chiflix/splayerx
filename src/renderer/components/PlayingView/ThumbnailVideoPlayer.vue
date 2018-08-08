@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import Dexie from 'dexie';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
 export default {
   name: 'thumbnail-video-player',
@@ -40,6 +41,8 @@ export default {
     },
     thumbnailWidth: Number,
     thumbnailHeight: Number,
+    versionNumber: 1,
+    quickHash: String,
   },
   data() {
     return {
@@ -56,14 +59,17 @@ export default {
       maxThumbnailHeight: 135,
       maxThumbnailCount: 600,
       manualGenerationIndex: -1,
+      thumbnailDB: new Dexie('splayerx-thumbnails'),
     };
   },
   watch: {
     outerThumbnailInfo: {
       deep: true,
-      handler: (newValue) => {
+      /* eslint-disable object-shorthand */
+      handler: function (newValue) {
         const newVideoSrc = newValue.videoSrc;
         if (this.videoSrcValidator(newVideoSrc)) {
+          console.log('[ThumbnailVideoPlayer]:', newVideoSrc);
           this.videoSrc = newVideoSrc;
         }
       },
@@ -101,9 +107,10 @@ export default {
     // Data regenerators
     updateGenerationParameters() {
       this.videoDuration = this.videoElement.duration;
-      this.generationInterval = Math.round(this.screenWidth / (this.videoDuration / 4));
+      this.generationInterval = Math.round(this.videoDuration / (this.screenWidth / 4));
       this.autoGenerationIndex = Math.floor(this.currentTime / this.generationInterval);
       this.maxThumbnailCount = Math.floor(this.videoDuration / this.generationInterval);
+      console.log('[ThumbnailVideoPlayer|Info]:', this.videoDuration, this.maxThumbnailCount, this.generationInterval);
     },
     thumbnailGeneration() {
       const context = this.canvasContainer.getContext('2d');
@@ -111,11 +118,19 @@ export default {
         this.videoElement,
         0, 0, this.maxThumbnailWidth, this.maxThumbnailHeight,
       );
-      this.canvasContainer.toBlob(() => {
+      this.canvasContainer.toBlob((blobResult) => {
         this.thumbnailSet.add(this.autoGenerationIndex);
-        if (this.isAutoGeneration && this.autoGenerationIndex < this.maxThumbnailCount) {
-          this.autoGenerationIndex += 1;
-        }
+        console.log(this.autoGenerationIndex, blobResult);
+        // console.time('[IndexedDB|Write]');
+        // this.thumbnailDB[this.quickHash].put({
+        //   index: this.autoGenerationIndex,
+        //   blobImage: blobResult,
+        // }).then(() => {
+        //   console.timeEnd('[IndexedDB|Write]');
+        //   if (this.isAutoGeneration && this.autoGenerationIndex < this.maxThumbnailCount) {
+        //     this.autoGenerationIndex += 1;
+        //   }
+        // });
       }, 'image/webp', 0.1);
     },
     videoSeek(index) {
@@ -165,6 +180,9 @@ export default {
   mounted() {
     this.videoElement = this.$refs.video.videoElement ?
       this.$refs.video.videoElement() : document.querySelector('.base-video-player');
+    this.thumbnailDB.version(1).stores({
+      [this.quickHash]: '&index, blobImage',
+    });
   },
 };
 </script>

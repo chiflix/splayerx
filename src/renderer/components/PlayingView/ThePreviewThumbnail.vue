@@ -2,6 +2,7 @@
   <div class="the-preview-thumbnail"
     :style="{width: thumbnailWidth +'px', height: thumbnailHeight + 'px', left: positionOfThumbnail + 'px'}">
     <thumbnail-video-player
+      :quickHash="quickHash"
       :currentTime="currentTime"
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
@@ -43,6 +44,7 @@ export default {
   watch: {
     src(newValue) {
       this.updateMediaQuickHash(newValue);
+      this.$set(this.outerThumbnailInfo, 'videoSrc', newValue);
     },
   },
   created() {
