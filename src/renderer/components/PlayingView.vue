@@ -77,7 +77,6 @@ export default {
     },
     wakeUpAllWidgets() {
       if (!this.leave) {
-        console.log('wakeup');
         this.showMask = true;
         this.isDragging = true;
         this.cursorShow = true;
@@ -109,7 +108,6 @@ export default {
       }
     },
     hideAllWidgets() {
-      console.log('leave');
       this.showMask = false;
       this.$bus.$emit('volumecontroller-hide');
       this.$bus.$emit('progressbar-hide');
@@ -194,7 +192,6 @@ export default {
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
     this.$bus.$on('clear-all-widget-disappear-delay', () => {
-      console.log('clear');
       clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
     });
     this.$bus.$on('hide-all-widgets', this.hideAllWidgets);

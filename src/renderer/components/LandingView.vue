@@ -121,7 +121,6 @@ export default {
 
     asyncStorage.get('recent-played').then((data) => {
       this.lastPlayedFile = data;
-      console.log(data);
     }).catch((err) => {
       // TODO: proper error handle
       console.error(err);

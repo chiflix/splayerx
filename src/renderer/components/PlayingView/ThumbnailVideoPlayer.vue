@@ -78,7 +78,6 @@ export default {
       }
     },
     autoGenerationIndex(newValue) {
-      console.log('[ThumbnailVideoPlayer|AutoGeneration]:', newValue, this.videoElement.currentTime);
       this.videoSeek(newValue);
     },
   },
@@ -112,11 +111,7 @@ export default {
         this.videoElement,
         0, 0, this.maxThumbnailWidth, this.maxThumbnailHeight,
       );
-      this.canvasContainer.toBlob((blobResult) => {
-        console.log(
-          blobResult,
-          this.isAutoGeneration ? this.autoGenerationIndex : this.manualGenerationIndex,
-        );
+      this.canvasContainer.toBlob(() => {
         this.thumbnailSet.add(this.autoGenerationIndex);
         if (this.isAutoGeneration && this.autoGenerationIndex < this.maxThumbnailCount) {
           this.autoGenerationIndex += 1;
