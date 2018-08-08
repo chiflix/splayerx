@@ -1,7 +1,7 @@
 <template>
   <div class="base-video-player">
     <video class="video-element" ref="video"
-      :style="{width: videoSize.width + 'px', height: videoSize.height + 'px'}"></video>
+      :style="{height: videoSize.height + 'px'}"></video>
   </div>
 </template>
 
@@ -159,5 +159,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.video-element {
+  width: 100%;
+  object-fit: cover;
+}
 </style>
 

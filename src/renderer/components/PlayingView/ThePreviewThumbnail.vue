@@ -75,14 +75,9 @@ export default {
   -webkit-app-region: no-drag;
   border: 1px solid;
   border-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5)) 10;
+  border-radius: 1px;
   box-sizing: content-box;
   background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5));
-  @media screen and (min-width: 854px) and (max-width: 1920px) {
-    border-width: 1px 0px;
-  }
-  @media screen and (min-width: 1920px) {
-    border-width: 1px;
-  }
 }
 .time {
   position: absolute;
