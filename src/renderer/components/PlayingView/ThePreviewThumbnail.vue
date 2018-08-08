@@ -46,6 +46,6 @@ export default {
   border: 2px solid;
   border-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5)) 10;
   box-sizing: content-box;
-  background-color: #000;
+  background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5));
 }
 </style>
