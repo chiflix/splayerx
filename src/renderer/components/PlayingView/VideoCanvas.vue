@@ -104,7 +104,6 @@ export default {
       // this.loadTextTracks();
     },
     onTimeupdate() {
-      console.log('ontimeupdate');
       this.$store.commit('AccurateTime', this.$refs.videoCanvas.currentTime);
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
