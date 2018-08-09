@@ -63,7 +63,11 @@ export class RendererHelperForWin extends RendererHelper {
   }
   hasUpdateWaitingForInstall() {
     this.vue.show();
-    const buttons = [{ text: this.vue.$t('msg.update.yes'), callBack: this.install, THIS: this }, { text: this.vue.$t('msg.update.no'), callBack: this.notInstall, THIS: this }];
+    const buttons = [{
+      text: this.vue.$t('msg.update.no'), callBack: this.notInstall, THIS: this, classC: 'defaultC',
+    }, {
+      text: this.vue.$t('msg.update.yes'), callBack: this.install, THIS: this, classC: 'importantC',
+    }];
     this.vue.registerCallBackButton(buttons);
     this.vue.forWin();
     this.vue.setMessage(this.vue.$t('msg.update.message'));

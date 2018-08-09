@@ -57,7 +57,7 @@ export default {
       title: '更新就绪',
       message: '更新已就绪，是否现在重启?',
       yes: '更新',
-      no: '暫不更新',
+      no: '暂不更新',
       updateInstalled: '播放器已更新至最新版本!',
     },
   },

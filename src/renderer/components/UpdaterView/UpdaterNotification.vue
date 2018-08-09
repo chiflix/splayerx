@@ -7,7 +7,9 @@
             {{content}}
             <div class="linksInUpdater">
                 <div class="clickLinks" v-for="(item) in buttons">
-                <a href='#' v-on:click=item.callBack.call(item.THIS)> {{item.text}} </a>
+                    <span :class=item.classC>
+                        <a href='#' v-on:click=item.callBack.call(item.THIS)> {{item.text}} </a>
+                    </span>
                 </div>
             </div>
         </div>
@@ -103,7 +105,7 @@
             display: inline-block;
             height: 30px;
             color: #FFFFFF;
-            font-size: 9px;
+            font-size: 12px;
             line-height: 30px;
             letter-spacing: normal;
             top: 20px;
@@ -149,6 +151,7 @@
                 right: 24px;
             }
         }
+        backdrop-filter: blur(2px);
         .backGround {
 
             z-index: 1;
@@ -161,27 +164,26 @@
             height: inherit;
             clip-path: inherit;
             // border-radius: inherit;
-            background-color: rgba(0,0,0,0.6);
+            background-color: rgba(0.3,.3,0.3,0.5);
             // -webkit-filter: blur(10px);
-            backdrop-filter: blur(10px);
         }
             .overInner {
                 // font-family: "PingFang SC";
-                @media screen and (max-width: 640px) {
+                @media screen and (max-width: 511px) {
                   padding-right: 10px;
                   padding-left: 10px;
                 }
-                @media screen and (min-width: 640px) and (max-width: 854px) {
+                @media screen and (min-width: 512px) and (max-width: 853px) {
                     padding-right: 10px;
-                    padding-left: 10px;
+                    padding-left: 11px;
                 }
                 @media screen and (min-width: 854px) and (max-width: 1920px) {
                     padding-right: 10px;
-                    padding-left: 10px;
+                    padding-left: 9px;
                 }
                 @media screen and (min-width: 1920px) {
                     padding-right: 15px;
-                    padding-left: 10px;
+                    padding-left: 18px;
                 }
                 position: relative;
                 height: inherit;
@@ -197,18 +199,30 @@
                 .linksInUpdater {
                     position: relative;
                     display: inline-block;
-                    margin-left: 10px;
-                    a:active, a:visited, a:link {
-                        text-decoration: none;
-                        color: rgba(135, 205, 255, 0.7);
-                    }
-                    a:hover {
-                        text-decoration: none;
-                        color: rgb(255, 255, 255);
-                    }
-                    .clickLinks{
+                    margin-left: 19px;
+                    .clickLinks {
                         display: inline;
                         margin-right: 3px;
+                        .importantC {
+                            a {
+                                text-decoration: none;
+                                color: rgba(135, 205, 255, 0.7);
+                            }
+                            a:hover {
+                                text-decoration: none;
+                                color: rgb(255, 255, 255);
+                            }
+                        }
+                        .defaultC {
+                            a {
+                                text-decoration: none;
+                                color: rgba(185, 185, 185, 0.4);
+                            }
+                            a:hover {
+                                text-decoration: none;
+                                color: rgb(255, 255, 255);
+                            }
+                        }
                     }
                 }
             }
@@ -219,25 +233,25 @@
         display: none;
     }
     .breathe-div {
-        @media screen and (max-width: 640px) {
+        @media screen and (max-width: 511px) {
             height: 8px;
             width: 8px;
             left: 11px;
         }
-        @media screen and (min-width: 640px) and (max-width: 854px) {
+        @media screen and (min-width: 512px) and (max-width: 853px) {
             height: 8px;
             width: 8px;
             left: 11px;
         }
         @media screen and (min-width: 854px) and (max-width: 1920px) {
-            height: 10px;
-            width: 10px;
-            left: 13.75px;
+            height: 12px;
+            width: 12px;
+            left: 12px;
         }
         @media screen and (min-width: 1920px) {
-            height: 16px;
-            width: 16px;
-            left: 22px;
+            height: 14px;
+            width: 14px;
+            left: 18px;
         }
         z-index: 3;
         position: absolute;
@@ -245,7 +259,7 @@
         transform: translate(0, -50%);
         background-color: #bbb;
         border-radius: 50%;
-        overflow: hidden;
+        // overflow: hidden;
         -webkit-animation-timing-function: ease-in-out;
         -webkit-animation-duration: 1500ms;
         -webkit-animation-iteration-count: infinite;
@@ -264,11 +278,11 @@
     @-webkit-keyframes breatheSuccess {
         0% {
             opacity: .4;
-            box-shadow: 1px 1px 1px rgba(183,255,111,0.5), 10px 10px 10px rgba(183,255,111,0.3) inset;;
+            box-shadow: 0.1px 0.1px 2px rgba(183,255,111,0.5), 10px 10px 10px rgba(183,255,111,0.3) inset;;
         }
         100% {
-            opacity: 0.8;
-            box-shadow: 1px 1px 1px greenyellow, 10px 10px 10px green inset;
+            opacity: 1;
+            box-shadow: 0.1px 0.1px 15px green, 10px 10px 1px green inset;
         }
     }
 
