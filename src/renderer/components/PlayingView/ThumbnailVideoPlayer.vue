@@ -71,7 +71,6 @@ export default {
       handler: function (newValue) {
         const newVideoSrc = newValue.videoSrc;
         if (this.videoSrcValidator(newVideoSrc)) {
-          console.log('[ThumbnailVideoPlayer]:', newVideoSrc);
           this.videoSrc = newVideoSrc;
         }
       },
@@ -89,8 +88,6 @@ export default {
       this.videoSeek(newValue);
     },
     quickHash(newValue) {
-      this.thumbnailDB.close();
-      console.log(newValue);
       this.thumbnailDB.version(1).stores({
         [newValue]: '&index, blobImage',
       });
@@ -156,12 +153,10 @@ export default {
         while (this.thumbnailSet.has(internalIndex)) {
           internalIndex += 1;
         }
-        console.log('[ThumbnailVideoPlayer|VideoSeek]:', internalIndex, this.thumbnailSet.has(internalIndex));
         this.videoElement.currentTime = internalIndex * this.generationInterval;
         if (this.isAutoGeneration) {
           this.autoGenerationIndex = internalIndex;
         }
-        console.log('[ThumbnailVideoPlayer|VideoSeek]:', this.videoElement.currentTime);
       }
     },
     pauseAutoGeneration() {
@@ -174,7 +169,6 @@ export default {
     },
     resumeAutoGeneration() {
       this.isAutoGeneration = true;
-      console.log('resume!', this.autoGenerationIndex);
       this.videoSeek(this.autoGenerationIndex);
     },
   },
