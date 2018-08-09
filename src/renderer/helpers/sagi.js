@@ -40,6 +40,22 @@ class Sagi {
     });
   }
 
+  getTranscript(transcriptIdentity) {
+    return new Promise((resolve, reject) => {
+      const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
+      const req = new translationMsg.TranscriptRequest();
+      req.setTranscriptIdentity(transcriptIdentity);
+      client.transcript(req, (err, res) => {
+        if (err) {
+          reject(err);
+        } else {
+          console.log(res);
+          resolve(res);
+        }
+      });
+    });
+  }
+
   // check sagi-api health, return UNKNOWN(0), SERVING(1) or XXXXX
   healthCheck() {
     return new Promise((resolve, reject) => {

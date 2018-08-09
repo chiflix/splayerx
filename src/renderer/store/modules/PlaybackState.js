@@ -43,6 +43,10 @@ const mutations = {
       state.SubtitleNameArr.push({ title: subName[i], status: null });
     }
   },
+  AddServerSubtitle(state, subName) {
+    const objArr = subName.map(title => ({ title, status: null }));
+    state.SubtitleNameArr.unshift(...objArr);
+  },
   // 需要对subtitle array的状态进行判断，有无数组，是否超出
   SubtitleOn(state, obj) {
     state.SubtitleNameArr[obj.index].status = obj.status === 'first' ? 'first' : 'second';

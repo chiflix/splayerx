@@ -27,10 +27,12 @@ export default {
       secondSubIndex: null,
       firstActiveCue: null,
       secondActiveCue: null,
+      Sagi: null,
       firstCueHTML: [],
       secondCueHTML: [],
       subNameArr: [],
       subStyle: {},
+      mediaHash: '',
       curStyle: {
         fontSize: 24,
         letterSpacing: 1,
@@ -42,6 +44,14 @@ export default {
     };
   },
   methods: {
+    init() {
+      const vid = this.$parent.$refs.videoCanvas;
+      this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
+      // fs.writeFile('111.txt', this.mediaHash, (err) => {
+      //   console.log(err);
+      // });
+      this.Sagi = this.sagi();
+    },
     /**
      * Todo:
      * 1. process ass subtitles
@@ -65,7 +75,6 @@ export default {
       this.$_clearSubtitle();
       const vid = this.$parent.$refs.videoCanvas;
       this.startIndex = vid.textTracks.length;
-
       // hide every text text/subtitle tracks at beginning
       // 没有做对内挂字幕的处理
       // for (let i = this.$store.state.PlaybackState.CurrentIndex; i < this.startIndex; i += 1) {
@@ -84,15 +93,22 @@ export default {
         files.push(subPath);
       });
 
-      const subNameArr = files.map(file => this.$_subNameProcess(file));
-      this.$store.commit('SubtitleNameArr', subNameArr);
-      this.$bus.$emit('subName-loaded');
+      if (files.length > 0) {
+        const subNameArr = files.map(file => this.$_subNameProcess(file));
+        this.$store.commit('SubtitleNameArr', subNameArr);
+        this.$bus.$emit('subName-loaded');
 
-      this.addVttToVideoElement(files, () => {
-        console.log('finished reading subtitle files');
-        this.subStyleChange();
-        this.subtitleShow(0);
-      });
+        this.addVttToVideoElement(files, () => {
+          console.log('finished reading subtitle files');
+          this.subStyleChange();
+          this.subtitleShow(0);
+        });
+      } else {
+        this.loadServerTextTracks(() => {
+          this.subStyleChange();
+          this.subtitleShow(0);
+        });
+      }
     },
     /**
      * @link https://github.com/mafintosh/pumpify
@@ -126,6 +142,21 @@ export default {
     $_subNameProcess(file) {
       return {
         title: path.parse(file).name,
+        status: null,
+      };
+    },
+    /**
+     * @param {}
+     */
+    $_serverSubnameProcess(textTrack) {
+      let title = '';
+      if (textTrack[2]) {
+        console.log(textTrack);
+      }
+      // process language code to subtitle name
+      title = 'subtitle';
+      return {
+        title,
         status: null,
       };
     },
@@ -258,23 +289,89 @@ export default {
     $_clearSubtitle() {
       const vid = this.$parent.$refs.videoCanvas;
       const curVidFirstIndex = this.firstSubIndex + this.startIndex;
-      const curVidSecondIndex = this.secondSubIndex + this.startIndex;
+      // const curVidSecondIndex = this.secondSubIndex + this.startIndex;
       if (this.firstSubIndex === null) {
         console.log('first subtitle not set');
       } else {
+        console.log('Aloha!!!!!!!!!!');
         console.log(curVidFirstIndex);
         vid.textTracks[curVidFirstIndex].mode = 'disabled';
         vid.textTracks[curVidFirstIndex].oncuechange = null;
         this.firstSubIndex = null;
       }
       // 未设置第二字幕时，消除字幕的error handler
-      if (this.secondSubIndex === null) {
-        console.log('second subtitle not set');
-      } else {
-        vid.textTracks[curVidSecondIndex].mode = 'disabled';
-        vid.textTracks[curVidSecondIndex].oncuechange = null;
-        this.secondSubIndex = null;
+      // if (this.secondSubIndex === null) {
+      //   console.log('second subtitle not set');
+      // } else {
+      //   vid.textTracks[curVidSecondIndex].mode = 'disabled';
+      //   vid.textTracks[curVidSecondIndex].oncuechange = null;
+      //   this.secondSubIndex = null;
+      // }
+    },
+    /**
+     * @param {Number} second
+     * @param {Number} nanosecond
+     * @returns {Number}
+     */
+    timeProcess(second = 0, nanosecond = 0) {
+      const ns = nanosecond / 1000000000;
+      return second + ns;
+    },
+    addCuesArray(cueArray) {
+      const vid = this.$parent.$refs.videoCanvas;
+      const subtitle = vid.addTextTrack('subtitles');
+      subtitle.mode = 'disabled';
+      // Add cues to TextTrack
+      for (let i = 0; i < cueArray.length; i += 1) {
+        const element = cueArray[i];
+        const startTime = this.timeProcess(element[0][0], element[0][1]);
+        const endTime = this.timeProcess(element[1][0], element[1][1]);
+        subtitle.addCue(new VTTCue(startTime, endTime, element[2]));
       }
+    },
+    loadServerTextTracks(cb) {
+      this.Sagi.mediaTranslate(this.mediaHash)
+        .then((res) => {
+          // handle 2 situations:
+          if (res.array[0][1]) {
+            console.log('Error: error');
+            console.log(res);
+          } else {
+            const textTrackList = res.array[1];
+
+            const subtitleNameArr = textTrackList
+              .map(textTrack => this.$_serverSubnameProcess(textTrack));
+            this.$store.commit('AddServerSubtitle', subtitleNameArr);
+            const vid = this.$parent.$refs.videoCanvas;
+            // 记得处理本地字幕与服务端字幕共存的情况
+            this.$_clearSubtitle();
+            this.startIndex = vid.textTracks.length;
+            for (let i = 0; i < textTrackList.length; i += 1) {
+              const textTrack = textTrackList[i];
+              const transcriptId = textTrack[0];
+              this.Sagi.getTranscript(transcriptId)
+                .then((res) => {
+                  // handle error
+                  console.log(res);
+                  if (false) {
+                    console.log('Error: error code');
+                    console.log(res);
+                  } else {
+                    const cueArray = res.array[1];
+                    this.addCuesArray(cueArray);
+                    // Need to process
+                    // Use callback parameter
+                    // to control the behavior
+                    cb();
+                  }
+                }, (err) => {
+                  console.log(err);
+                });
+            }
+          }
+        }, (err) => {
+          console.log(err);
+        });
     },
   },
   computed: {
@@ -282,9 +379,6 @@ export default {
       console.log(this.$store.getters.firstSubIndex);
       return this.$store.getters.firstSubIndex !== -1;
     },
-    // secondSubState() {
-    //   return this.$store.state.PlaybackState.SecondSubtitleState;
-    // },
   },
   watch: {
     firstSubState(newVal) {
@@ -315,19 +409,12 @@ export default {
           .innerHTML);
       }
     },
-    // secondActiveCue(newVal) {
-    //   this.secondCueHTML.pop();
-    //   // console.log(newVal);
-    //   if (newVal) {
-    //     // 这里对cue进行处理
-    //     // 得到cue的line和position确定位置
-    //     this.secondCueHTML.push(WebVTT.convertCueToDOMTree(window, this.secondActiveCue.text)
-    //       .innerHTML);
-    //   }
-    // },
   },
   created() {
-    this.$bus.$on('video-loaded', this.autoLoadTextTracks);
+    this.$bus.$on('video-loaded', () => {
+      this.init();
+      this.autoLoadTextTracks();
+    });
     // 可以二合一
     this.$bus.$on('sub-first-change', (targetIndex) => {
       this.subtitleShow(targetIndex);
