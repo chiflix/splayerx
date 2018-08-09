@@ -44,7 +44,7 @@ class RendererHelper {
 export class RendererHelperForMac extends RendererHelper {
   learntHasInstalledUpdate() {
     super.learntHasInstalledUpdate();
-    this.vue.onRightForMac();
+    this.vue.forMac();
   }
 }
 
@@ -59,13 +59,13 @@ export class RendererHelperForWin extends RendererHelper {
   }
   learntHasInstalledUpdate() {
     super.learntHasInstalledUpdate();
-    this.vue.onLeftForWin();
+    this.vue.forWin();
   }
   hasUpdateWaitingForInstall() {
     this.vue.show();
     const buttons = [{ text: this.vue.$t('msg.update.yes'), callBack: this.install, THIS: this }, { text: this.vue.$t('msg.update.no'), callBack: this.notInstall, THIS: this }];
     this.vue.registerCallBackButton(buttons);
-    this.vue.onLeftForWin();
+    this.vue.forWin();
     this.vue.setMessage(this.vue.$t('msg.update.message'));
     this.vue.setBreathType('breatheAlert');
   }
@@ -79,7 +79,6 @@ export class RendererHelperForWin extends RendererHelper {
       Message.willInstallOrNotTitle,
       { [Message.willInstallOrNotTitle]: yesOrNo },
     );
-    console.log('send');
     this.ipc.send('update-message', message.toString());
   }
   install() {

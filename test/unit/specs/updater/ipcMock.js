@@ -36,6 +36,13 @@ class IpcRenderer extends baseIpc {
     return this.event.once(`${message}ipcRenderer`, callback);
   }
 }
-const event = new EventEmitter();
-export const ipcMain = new IpcMain(event);
-export const ipcRenderer = new IpcRenderer(event);
+
+
+const getIpcs = function () {
+  const event = new EventEmitter();
+  const ipcMain = new IpcMain(event);
+  const ipcRenderer = new IpcRenderer(event);
+  return { ipcMain, ipcRenderer };
+};
+
+export default getIpcs;

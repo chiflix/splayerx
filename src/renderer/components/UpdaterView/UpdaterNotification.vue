@@ -25,7 +25,9 @@
         helper: null,
         content: '',
         buttons: [],
-        position: { right: '', top: '', left: '' },
+        containerStyle: {
+          platform: '',
+        },
         breathType: null,
         visibility: 'hidden',
       };
@@ -57,20 +59,14 @@
           this.$refs.showWindow.className = 'updateContainerDisappear';
         }, time);
       },
-      setPosition(position) {
-        this.position = position;
-      },
       setBreathType(breath) {
         this.breathType = breath;
       },
-      topCenter() {
-        this.position = { left: '50%', transform: 'translateX(-50%)' };
+      forWin() {
+        this.containerStyle.platform = 'win32';
       },
-      onLeftForWin() {
-        this.position = { left: '18px' };
-      },
-      onRightForMac() {
-        this.position = { right: '18px' };
+      forMac() {
+        this.containerStyle.platform = 'darwin';
       },
     },
     computed: {
@@ -78,7 +74,7 @@
         return ({ 'webkit-animation-name': this.breathType });
       },
       containerProp() {
-        return (this.position);
+        return (this.containerStyle);
       },
       hideOrNot() {
         return ({ visibility: this.visibility });
@@ -90,6 +86,7 @@
 <style lang="scss">
     $bs: 0.5px; //bulb shadow weight
     $bsl: 1px;  //large bulb shadow weight
+    $side: ('10px', '14px', '24px');
     .updateContainer {
         position: fixed;
         z-index: 2;
@@ -99,46 +96,58 @@
         flex-direction: row;
         opacity: 1;
         transition: opacity 4s linear;
-        @media screen and (max-width: 640px) {
-            line-height: 30px;
-            height:30px;
-            font-size: 12px;
-            letter-spacing: normal;
-            top: 20px;
-            // border-radius: 15px;
-            clip-path: inset(0px round 15px);
-            box-shadow: $bs $bs 0 0 rgba(255,255,255,0.15), $bs $bs 5px 0 rgba(0,0,0,0.3);
+        @media screen and (max-width: 511px) {
+            display: none;
         }
-        @media screen and (min-width: 640px) and (max-width: 853px) {
+        @media screen and (min-width: 512px) and (max-width: 853px) {
+            display: inline-block;
             height: 30px;
             color: #FFFFFF;
-            font-size: 12px;
+            font-size: 9px;
             line-height: 30px;
             letter-spacing: normal;
             top: 20px;
             // border-radius: 15px;
             clip-path: inset(0px round 15px);
             box-shadow: $bs $bs 0 0 rgba(255,255,255,0.15), $bs $bs 5px 0 rgba(0,0,0,0.3);
+            @if platform = 'darwin'{
+                right: 10px;
+            }
+            @if platform = 'win32'{
+                right: 10px;
+            }
         }
-        @media screen and (min-width: 853px) and (max-width: 1920px) {
-            height: 37.5px;
-            font-size: 15px;
-            line-height: 37.5px;
+        @media screen and (min-width: 854px) and (max-width: 1919px) {
+            height: 33px;
+            font-size: 13px;
+            line-height: 33px;
             letter-spacing: normal;
             top: 20px;
             // border-radius: 18.75px;
             clip-path: inset(0px round 18.75px);
             box-shadow: $bs $bs 0 0 rgba(255,255,255,0.15), $bs $bs 7px 0 rgba(0,0,0,0.3);
+            @if platform = 'darwin'{
+                right: 14px;
+            }
+            @if platform = 'win32'{
+                right: 14px;
+            }
         }
         @media screen and (min-width: 1920px) {
-            height: 60px;
-            font-size: 24px;
-            line-height: 60px;
+            height: 50px;
+            font-size: 20px;
+            line-height: 50px;
             letter-spacing: normal;
             top: 20px;
             // border-radius: 30px;
             clip-path: inset(0px round 30px);
             box-shadow: $bsl $bsl 0 0 rgba(255,255,255,0.15), $bsl $bsl 15px 0 rgba(0,0,0,0.3);
+            @if platform = 'darwin'{
+                right: 24px;
+            }
+            @if platform = 'win32'{
+                right: 24px;
+            }
         }
         .backGround {
 
