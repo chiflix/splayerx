@@ -41,8 +41,6 @@ export default {
     },
     thumbnailWidth: Number,
     thumbnailHeight: Number,
-    versionNumber: 1,
-    quickHash: String,
   },
   data() {
     return {
@@ -59,8 +57,6 @@ export default {
       maxThumbnailHeight: 135,
       maxThumbnailCount: 600,
       manualGenerationIndex: -1,
-      thumbnailDB: new Dexie('splayerx-thumbnails'),
-      currentThumbnailDB: null,
       tempBlobArray: [],
     };
   },
@@ -86,12 +82,6 @@ export default {
     },
     autoGenerationIndex(newValue) {
       this.videoSeek(newValue);
-    },
-    quickHash(newValue) {
-      this.thumbnailDB.version(1).stores({
-        [newValue]: '&index, blobImage',
-      });
-      this.currentThumbnailDB = this.thumbnailDB[newValue];
     },
   },
   methods: {
@@ -134,13 +124,6 @@ export default {
             index,
             blobImage: blobResult,
           });
-          if (this.tempBlobArray.length === 10 || index >= this.maxThumbnailCount) {
-            console.time('bulkAdd');
-            this.currentThumbnailDB.bulkAdd(this.tempBlobArray).then(() => {
-              this.tempBlobArray = [];
-              console.timeEnd('bulkAdd');
-            });
-          }
           if (this.isAutoGeneration && this.autoGenerationIndex < this.maxThumbnailCount) {
             this.autoGenerationIndex += 1;
           }
@@ -201,10 +184,6 @@ export default {
   mounted() {
     this.videoElement = this.$refs.video.videoElement ?
       this.$refs.video.videoElement() : document.querySelector('.base-video-player');
-    this.thumbnailDB.version(1).stores({
-      [this.quickHash]: '&index, blobImage',
-    });
-    this.currentThumbnailDB = this.thumbnailDB[this.quickHash];
   },
 };
 </script>
