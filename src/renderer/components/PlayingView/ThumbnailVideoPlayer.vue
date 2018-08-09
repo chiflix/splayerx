@@ -60,6 +60,8 @@ export default {
       maxThumbnailCount: 600,
       manualGenerationIndex: -1,
       thumbnailDB: new Dexie('splayerx-thumbnails'),
+      currentThumbnailDB: null,
+      tempBlobArray: [],
     };
   },
   watch: {
@@ -85,6 +87,14 @@ export default {
     },
     autoGenerationIndex(newValue) {
       this.videoSeek(newValue);
+    },
+    quickHash(newValue) {
+      this.thumbnailDB.close();
+      console.log(newValue);
+      this.thumbnailDB.version(1).stores({
+        [newValue]: '&index, blobImage',
+      });
+      this.currentThumbnailDB = this.thumbnailDB[newValue];
     },
   },
   methods: {
@@ -113,29 +123,45 @@ export default {
       console.log('[ThumbnailVideoPlayer|Info]:', this.videoDuration, this.maxThumbnailCount, this.generationInterval);
     },
     thumbnailGeneration() {
-      const context = this.canvasContainer.getContext('2d');
-      context.drawImage(
-        this.videoElement,
-        0, 0, this.maxThumbnailWidth, this.maxThumbnailHeight,
-      );
-      this.canvasContainer.toBlob((blobResult) => {
-        this.thumbnailSet.add(this.autoGenerationIndex);
-        console.log(this.autoGenerationIndex, blobResult);
-        // console.time('[IndexedDB|Write]');
-        // this.thumbnailDB[this.quickHash].put({
-        //   index: this.autoGenerationIndex,
-        //   blobImage: blobResult,
-        // }).then(() => {
-        //   console.timeEnd('[IndexedDB|Write]');
-        //   if (this.isAutoGeneration && this.autoGenerationIndex < this.maxThumbnailCount) {
-        //     this.autoGenerationIndex += 1;
-        //   }
-        // });
-      }, 'image/webp', 0.1);
+      const index = this.isAutoGeneration ? this.autoGenerationIndex : this.manualGenerationIndex;
+      if (!this.thumbnailSet.has(index)) {
+        const context = this.canvasContainer.getContext('2d');
+        context.drawImage(
+          this.videoElement,
+          0, 0, this.maxThumbnailWidth, this.maxThumbnailHeight,
+        );
+        this.canvasContainer.toBlob((blobResult) => {
+          this.thumbnailSet.add(index);
+          console.log(this.isAutoGeneration, index, blobResult);
+          this.tempBlobArray.push({
+            index,
+            blobImage: blobResult,
+          });
+          if (this.tempBlobArray.length === 10 || index >= this.maxThumbnailCount) {
+            console.time('bulkAdd');
+            this.currentThumbnailDB.bulkAdd(this.tempBlobArray).then(() => {
+              this.tempBlobArray = [];
+              console.timeEnd('bulkAdd');
+            });
+          }
+          if (this.isAutoGeneration && this.autoGenerationIndex < this.maxThumbnailCount) {
+            this.autoGenerationIndex += 1;
+          }
+        }, 'image/webp', 0.1);
+      }
     },
     videoSeek(index) {
-      if (this.videoElement && index <= this.maxThumbnailCount && !this.thumbnailSet.has(index)) {
-        this.videoElement.currentTime = index * this.generationInterval;
+      let internalIndex = index;
+      if (this.videoElement && internalIndex <= this.maxThumbnailCount) {
+        while (this.thumbnailSet.has(internalIndex)) {
+          internalIndex += 1;
+        }
+        console.log('[ThumbnailVideoPlayer|VideoSeek]:', internalIndex, this.thumbnailSet.has(internalIndex));
+        this.videoElement.currentTime = internalIndex * this.generationInterval;
+        if (this.isAutoGeneration) {
+          this.autoGenerationIndex = internalIndex;
+        }
+        console.log('[ThumbnailVideoPlayer|VideoSeek]:', this.videoElement.currentTime);
       }
     },
     pauseAutoGeneration() {
@@ -148,7 +174,8 @@ export default {
     },
     resumeAutoGeneration() {
       this.isAutoGeneration = true;
-      this.videoSeek(this.autoGenerationIndex * this.generationInterval);
+      console.log('resume!', this.autoGenerationIndex);
+      this.videoSeek(this.autoGenerationIndex);
     },
   },
   created() {
@@ -183,6 +210,7 @@ export default {
     this.thumbnailDB.version(1).stores({
       [this.quickHash]: '&index, blobImage',
     });
+    this.currentThumbnailDB = this.thumbnailDB[this.quickHash];
   },
 };
 </script>
