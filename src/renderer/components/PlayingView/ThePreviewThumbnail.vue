@@ -41,25 +41,38 @@ export default {
       },
       quickHash: null,
       thumbnailDB: new Dexie('splayerx-preview-thumbnails'),
+      tablesIndex: [],
       version: 1,
+      thumbnailSchema: '&index, imageBlob',
     };
   },
   watch: {
     src(newValue) {
       this.updateMediaQuickHash(newValue);
-      this.$store.commit('preview-thumbnail-dbversion', this.version += 1);
-      this.version = this.$store.getters.thumbnailDBVersion;
-      this.thumbnailDB.version(this.version).stores({
-        [this.quickHash]: '&index, imageBlob',
-      });
+      if (this.tablesIndex.includes(this.quickHash)) {
+        console.log(`[ThePreviewThumbnail|Database]: database ${this.quickHash} already exists.`);
+      } else {
+        this.addTable(this.quickHash, this.thumbnailSchema).then((db) => {
+          this.version = db.verno;
+          this.thumbnailDB = db;
+          this.tablesIndex = db.tables;
+        });
+      }
       this.$set(this.outerThumbnailInfo, 'videoSrc', newValue);
     },
   },
   created() {
-    this.version = this.$store.getters.thumbnailDBVersion;
+    this.thumbnailDB.open().then((db) => {
+      this.version = db.verno;
+      console.log(`[ThePreviewThumbnail|Database]: Open thumbnail at version ${this.version}.`);
+      this.tablesIndex = db.tables;
+      this.tablesIndex.forEach((name) => {
+        console.log(`[ThePreviewThumbnail|Database]: Found a table with name: ${name}.`);
+      });
+    });
     this.updateMediaQuickHash(this.src);
     this.thumbnailDB.version(this.version).stores({
-      [this.quickHash]: '&index, imageBlob',
+      [this.quickHash]: this.thumbnailSchema,
     });
   },
   methods: {
@@ -76,6 +89,20 @@ export default {
         }
       });
       this.quickHash = this.mediaQuickHash(filePath);
+    },
+    addTable(tableName, tableSchema) {
+      this.version = this.thumbnailDB.verno;
+      this.thumbnailDB.close();
+      const newSchema = {
+        [tableName]: tableSchema,
+      };
+
+      const upgraderDB = new Dexie('splayerx-preview-thumbnails');
+      upgraderDB.version(this.version + 1).stores(newSchema);
+      return upgraderDB.open().then((db) => {
+        upgraderDB.close();
+        return db.open();
+      });
     },
   },
 };
