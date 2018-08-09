@@ -14,6 +14,7 @@
 
 <script>
 import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
+import { Dexie } from 'dexie';
 export default {
   components: {
     'thumbnail-video-player': ThumbnailVideoPlayer,
@@ -39,16 +40,27 @@ export default {
         videoRatio: this.videoRatio,
       },
       quickHash: null,
+      thumbnailDB: new Dexie('splayerx-preview-thumbnails'),
+      version: 1,
     };
   },
   watch: {
     src(newValue) {
       this.updateMediaQuickHash(newValue);
+      this.$store.commit('preview-thumbnail-dbversion', this.version += 1);
+      this.version = this.$store.getters.thumbnailDBVersion;
+      this.thumbnailDB.version(this.version).stores({
+        [this.quickHash]: '&index, imageBlob',
+      });
       this.$set(this.outerThumbnailInfo, 'videoSrc', newValue);
     },
   },
   created() {
+    this.version = this.$store.getters.thumbnailDBVersion;
     this.updateMediaQuickHash(this.src);
+    this.thumbnailDB.version(this.version).stores({
+      [this.quickHash]: '&index, imageBlob',
+    });
   },
   methods: {
     updateMediaQuickHash(src) {
