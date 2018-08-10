@@ -19,6 +19,7 @@
 // https://www.w3schools.com/tags/ref_av_dom.asp
 import syncStorage from '@/helpers/syncStorage';
 import Subtitle from './BaseSubtitle.vue';
+import { WindowSizeHelper } from '../../helpers/WindowSizeHelper.js';
 export default {
   components: {
     Subtitle,
@@ -33,6 +34,7 @@ export default {
       videoWidth: 0,
       videoHeight: 0,
       timeUpdateIntervalID: null,
+      windowSizeHelper: null,
     };
   },
   props: {
@@ -88,6 +90,7 @@ export default {
         this.videoExisted = true;
       }
       this.$bus.$emit('video-loaded');
+      this.windowSizeHelper.setNewWindowSize();
       // this.loadTextTracks();
     },
     onTimeupdate() {
@@ -291,6 +294,7 @@ export default {
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
     });
+    this.windowSizeHelper = new WindowSizeHelper(this);
   },
   mounted() {
     window.onbeforeunload = () => {

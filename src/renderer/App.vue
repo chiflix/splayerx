@@ -11,12 +11,16 @@
 <script>
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
+  import { WindowSizeHelperForApp } from './helpers/WindowSizeHelper.js';
   export default {
     name: 'splayer',
     // -> for test todo need delete lyctest
     components: {
       UpdaterProgressIndicator,
       UpdaterNotification,
+    },
+    data: {
+      windowHelper: null,
     },
     // <-for test todo need delete lyctest
     methods: {
@@ -35,6 +39,7 @@
       this.$electron.ipcRenderer.on('mainDispatch', (event, actionType, actionPayload) => {
         this.mainDispatchProxy(actionType, actionPayload);
       });
+      this.windowHelper = new WindowSizeHelperForApp(this);
     },
   };
 </script>
