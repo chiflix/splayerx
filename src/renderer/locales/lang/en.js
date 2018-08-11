@@ -58,6 +58,7 @@ export default {
       message: 'Restart the app now to install update?',
       yes: 'yes',
       no: 'no',
+      updateInstalled: 'has successfully installed update!',
     },
   },
   css: {
