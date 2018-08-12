@@ -19,7 +19,7 @@
 // https://www.w3schools.com/tags/ref_av_dom.asp
 import syncStorage from '@/helpers/syncStorage';
 import Subtitle from './BaseSubtitle.vue';
-import { WindowSizeHelper } from '../../helpers/WindowSizeHelper.js';
+import WindowSizeHelper from '../../helpers/WindowSizeHelper.js';
 export default {
   components: {
     Subtitle,
