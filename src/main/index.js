@@ -11,7 +11,6 @@ if (process.env.NODE_ENV !== 'development') {
 
 let mainWindow;
 let updater;
-let resizer;
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -86,7 +85,6 @@ function initMainWindowEvent() {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
     mainWindow.webContents.send('mainCommit', 'fullscreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('main-resize');
-    if (process.platform === 'win32') resizer.onResize();
   });
   mainWindow.on('move', () => {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
@@ -106,7 +104,8 @@ function initMainWindowEvent() {
 app.on('ready', () => {
   app.setName('SPlayerX');
   createWindow();
-  resizer = new WindowResizer(mainWindow);
+  const resizer = new WindowResizer(mainWindow);
+  resizer.onStart(); // will only register listener for win
   initMainWindowEvent();
   updater = Updater.getInstance(mainWindow, app);
   updater.onStart().then((message) => { console.log(message); });

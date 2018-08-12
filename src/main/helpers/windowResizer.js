@@ -7,13 +7,42 @@ export default class WindowResize {
     this.height = null;
     this.type = null;
     this.ipc = ipcMain;
-    this.ipc.on('main-setNewWindowSize', () => { this.onSetNewWindowSize(); });
-    this.ipc.on('main-reset-size-listener', () => { this.onReset(); });
     this.ready = false;
     this.status = 'idle';
     this.goBackTime = 200;
     this.goBack = false;
     this.timeStamp = new Date();
+  }
+  onStart() {
+    if (process.platform === 'win32') { this.registerMessage(); }
+  }
+    onResize() { // eslint-disable-line
+    if (!this.ready) return;
+    this.goBack = false;
+    switch (this.status) {
+      case 'idle':
+        this.type = this.changeType();
+        if (!this.type) {
+          this.status = 'idle';
+          return;
+        }
+        this.status = 'resize1';
+        this.goBackToIdleTimer();
+        break;
+      case 'resize1':
+        this.goBackToIdleTimer();
+        this.update();
+        this.win.setSize(this.width, this.height);
+        break;
+      default:
+    }
+  }
+  registerMessage() {
+    this.win.on('resize', () => {
+      this.onResize();
+    });
+    this.ipc.on('main-setNewWindowSize', () => { this.onSetNewWindowSize(); });
+    this.ipc.on('main-reset-size-listener', () => { this.onReset(); });
   }
   onReset() {
     this.ratio = null;
@@ -33,29 +62,6 @@ export default class WindowResize {
       this.ratio = this.calcRatio();
     }
     this.ready = true;
-  }
-    onResize() { // eslint-disable-line
-    if (!this.ready) return;
-    this.goBack = false;
-    switch (this.status) {
-      case 'idle':
-        this.type = this.changeType();
-        console.log(this.type);
-        if (!this.type) {
-          this.status = 'idle';
-          return;
-        }
-        this.status = 'resize1';
-        this.goBackToIdleTimer();
-        break;
-      case 'resize1':
-        console.log('re1');
-        this.goBackToIdleTimer();
-        this.update();
-        this.win.setSize(this.width, this.height);
-        break;
-      default:
-    }
   }
   goBackToIdleTimer() {
     // will first change timestamp then other settimeout will be
@@ -87,8 +93,6 @@ export default class WindowResize {
     // if changed together
     const widthNow = this.win.getSize()[0];
     const heightNow = this.win.getSize()[1];
-    console.log(`lyc${this.width}..${this.height}`);
-    console.log(`lyc${widthNow}..${heightNow}`);
     if (widthNow !== this.width && heightNow !== this.height) {
       return null;
     }
