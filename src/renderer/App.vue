@@ -18,9 +18,6 @@
       UpdaterProgressIndicator,
       UpdaterNotification,
     },
-    data: {
-      windowHelper: null,
-    },
     // <-for test todo need delete lyctest
     methods: {
       mainCommitProxy(commitType, commitPayload) {
