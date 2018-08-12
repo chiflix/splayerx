@@ -147,6 +147,79 @@ export default {
      * @param {resultCallback} cb Callback function to process result
      * @description Process subtitles and add subtitles to video element
      */
+
+    /* this method is used to convert the timecodes extracted from matroska-subtitle
+      library (convert) to the timecodes format for VTT format.
+
+    msToTime(s) {
+      const ms = s % 1000;
+      s = (s - ms) / 1000;
+      const secs = s % 60;
+      s = (s - secs) / 60;
+      const mins = s % 60;
+      const hrs = (s - mins) / 60;
+      return (`${z(2, hrs)}:${z(2, mins)}:${z(2, secs)}.${z(3, ms)}`);
+    }, */
+
+
+    /*
+    the following method reads the subtitles embeded in the MKV files,
+    and add these fubtitles into the video's texttracks.
+    But the structure of this method need to be changed and improved.
+
+    autoloadMkvSubtitles(filePath, cb) {
+      console.log(filePath);
+      const ectractFn = filePath => new Promise((resolve) => {
+        let tracks;
+        const subs = new MatroskaSubtitles();
+        subs.once('tracks', (track) => {
+          console.log(track);
+          tracks = track;
+          tracks.forEach((trac) => {
+            trac.subContent = '';
+          });
+        });
+        subs.on('subtitle', (sub, trackNumber) => {
+          const currentTrackIndex = trackNumber - 1;
+          let currentContent = '';
+          // the indices for each cue is probably can be ignored as it's VTT format
+
+          currentContent += `${this.msToTime(sub.time)} -->
+            ${this.msToTime(sub.time + sub.duration)}\r\n`;
+          currentContent += `${(sub.text)}\r\n\r\n`;
+
+          tracks[currentTrackIndex].subContent += currentContent;
+        });
+
+        subs.on('finish', () => {
+          resolve(tracks);
+        });
+        const realPath = filePath.substring(8);
+        fs.createReadStream(realPath).pipe(subs);
+      });
+      ectractFn(filePath).then((realTracks) => {
+        // now transfer string into VTT
+        console.log(realTracks);
+        const vid = this.$parent.$refs.videoCanvas;
+
+        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+        for (let i = 0; i < realTracks.length; i += 1) {
+          const sub = vid.addTextTrack('subtitles');
+          sub.mode = 'disabled';
+          parser.oncue = (cue) => {
+            sub.addCue(cue);
+          };
+          const webVttFormatStr = 'WEBVTT\r\n\r\n';
+          const preResult = realTracks[i].subContent;
+          const result = webVttFormatStr.concat(preResult);
+          parser.parse(result);
+        }
+        parser.onflush = cb;
+        parser.flush();
+      });
+    },
+    */
+
     addVttToVideoElement(files, cb) {
       const vid = this.$parent.$refs.videoCanvas;
       /**
@@ -165,10 +238,10 @@ export default {
           parser.oncue = (cue) => {
             sub.addCue(cue);
           };
-          parser.onflush = cb;
           const result = results[i];
           parser.parse(result.toString('utf8'));
         }
+        parser.onflush = cb;
         parser.flush();
       });
     },
@@ -185,12 +258,14 @@ export default {
         // 当直接播放无字幕视频时，会报错,需要error handle
         // 判断有无字幕
         const curVidIndex = this.firstSubIndex + this.startIndex;
-        if (vid.textTracks.length > targetIndex) {
+        if (targetIndex < vid.textTracks.length) {
           vid.textTracks[curVidIndex].mode = 'disabled';
+          this.$store.commit('SubtitleOff', curVidIndex);
           vid.textTracks[curVidIndex].oncuechange = null;
 
           this.$_onCueChangeEventAdd(vid.textTracks[targetIndex]);
           vid.textTracks[targetIndex].mode = 'hidden';
+
 
           this.$store.commit('SubtitleOn', { index, status: 'first' });
           this.firstSubIndex = index;
@@ -327,7 +402,9 @@ export default {
     // },
   },
   created() {
-    this.$bus.$on('video-loaded', this.autoLoadTextTracks);
+    this.$bus.$on('video-loaded', () => {
+      this.autoLoadTextTracks();
+    });
     // 可以二合一
     this.$bus.$on('sub-first-change', (targetIndex) => {
       this.subtitleShow(targetIndex);
