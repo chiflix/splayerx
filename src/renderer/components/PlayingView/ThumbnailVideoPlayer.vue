@@ -121,7 +121,6 @@ export default {
         );
         this.canvasContainer.toBlob((blobResult) => {
           this.thumbnailSet.add(index);
-          console.log(this.isAutoGeneration, index, blobResult, this.quickHash);
           this.tempBlobArray.push({
             index,
             blobImage: blobResult,
@@ -133,6 +132,7 @@ export default {
                 const tx = db.transaction(storeName, 'readwrite');
                 const store = tx.objectStore(storeName);
                 store.add({
+                  id: `${blob.index}-${this.quickHash}`,
                   quickHash: this.quickHash,
                   index: blob.index,
                   blob: blob.blobImage,
