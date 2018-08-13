@@ -14,6 +14,7 @@
 
 <script>
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
+import { THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION } from '@/constants';
 export default {
   name: 'thumbnail-video-player',
   components: {

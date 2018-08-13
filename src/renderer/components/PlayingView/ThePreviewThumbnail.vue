@@ -14,6 +14,7 @@
 
 <script>
 import idb from 'idb';
+import { THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION } from '@/constants';
 import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
 export default {
   components: {
@@ -67,7 +68,7 @@ export default {
     },
   },
   created() {
-    idb.open(this.THUMBNAIL_DB_NAME, this.THUMBNAIL_DB_VERSION, (upgradeDB) => {
+    idb.open(THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION, (upgradeDB) => {
       const { oldVersion } = upgradeDB;
       switch (oldVersion) {
         default: {
