@@ -79,7 +79,7 @@ export default {
           console.log('[IndexedDB]: Initial objectStore.');
           const store = upgradeDB.createObjectStore(
             `thumbnail-width-${this.maxThumbnailWidth}`,
-            { keyPath: 'id', autoIncrement: true },
+            { keyPath: 'id', autoIncrement: false, unique: true },
           );
           store.createIndex('quickHash', 'quickHash', { unique: false });
           store.createIndex('index', 'index', { unique: false });
