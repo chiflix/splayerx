@@ -13,8 +13,9 @@
 </template>
 
 <script>
-import Dexie from 'dexie';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
+import { THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION } from '@/constants';
+import idb from 'idb';
 export default {
   name: 'thumbnail-video-player',
   components: {
@@ -41,6 +42,7 @@ export default {
     },
     thumbnailWidth: Number,
     thumbnailHeight: Number,
+    quickHash: String,
   },
   data() {
     return {
@@ -64,7 +66,7 @@ export default {
     outerThumbnailInfo: {
       deep: true,
       /* eslint-disable object-shorthand */
-      handler: function (newValue) {
+      handler: function outerThumbnailInfoHandler(newValue) {
         const newVideoSrc = newValue.videoSrc;
         if (this.videoSrcValidator(newVideoSrc)) {
           this.videoSrc = newVideoSrc;
@@ -119,11 +121,22 @@ export default {
         );
         this.canvasContainer.toBlob((blobResult) => {
           this.thumbnailSet.add(index);
-          console.log(this.isAutoGeneration, index, blobResult);
           this.tempBlobArray.push({
             index,
             blobImage: blobResult,
           });
+          if (this.tempBlobArray.length === 30) {
+            const array = this.tempBlobArray;
+            this.thumbnailArrayHandler(array).then(() => {
+              console.log(`${30} thumbnails added.`);
+              this.$emit('update-thumbnail-info', {
+                index: this.autoGenerationIndex,
+                interval: this.generationInterval,
+                count: this.maxThumbnailCount,
+              });
+            });
+            this.tempBlobArray = [];
+          }
           if (this.isAutoGeneration && this.autoGenerationIndex < this.maxThumbnailCount) {
             this.autoGenerationIndex += 1;
           }
@@ -153,6 +166,23 @@ export default {
     resumeAutoGeneration() {
       this.isAutoGeneration = true;
       this.videoSeek(this.autoGenerationIndex);
+    },
+    thumbnailArrayHandler(array) {
+      const promiseArray = [];
+      idb.open(THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION).then((db) => {
+        const name = `thumbnail-width-${this.maxThumbnailWidth}`;
+        const tx = db.transaction(name, 'readwrite');
+        const store = tx.objectStore(name);
+        array.forEach((thumbnail) => {
+          promiseArray.push(store.put({
+            id: `${thumbnail.index}-${this.quickHash}`,
+            blob: thumbnail.blobImage,
+            quickHash: this.quickHash,
+            index: thumbnail.index,
+          }));
+        });
+      });
+      return Promise.all(promiseArray);
     },
   },
   created() {

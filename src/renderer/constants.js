@@ -53,3 +53,7 @@ export const DEFAULT_VIDEO_OPTIONS = [
   'src',
   'volume',
 ];
+export const THUMBNAIL_DB_NAME = 'splayerx-preview-thumbnails';
+export const THUMBNAIL_DB_VERSION = 1;
+export const INFO_DATABASE_NAME = 'Info';
+export const INFO_DATABASE_VERSION = 1;

@@ -6,7 +6,8 @@
       :currentTime="currentTime"
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
-      :outerThumbnailInfo="outerThumbnailInfo">
+      :outerThumbnailInfo="outerThumbnailInfo"
+      @update-thumbnail-info="updateThumbnailInfo">
       <span class="time">{{ videoTime }}</span>
     </thumbnail-video-player>
   </div>
@@ -14,6 +15,10 @@
 
 <script>
 import idb from 'idb';
+import {
+  THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION,
+  INFO_DATABASE_NAME, INFO_DATABASE_VERSION,
+} from '@/constants';
 import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
 export default {
   components: {
@@ -40,6 +45,8 @@ export default {
         videoRatio: this.videoRatio,
       },
       quickHash: null,
+      THUMBNAIL_DB_NAME: 'splayerx-preview-thumbnails',
+      THUMBNAIL_DB_VERSION: 1,
     };
   },
   watch: {
@@ -47,9 +54,6 @@ export default {
       this.updateMediaQuickHash(newValue);
       this.$set(this.outerThumbnailInfo, 'videoSrc', newValue);
     },
-  },
-  created() {
-    
   },
   methods: {
     updateMediaQuickHash(src) {
@@ -66,6 +70,55 @@ export default {
       });
       this.quickHash = this.mediaQuickHash(filePath);
     },
+    updateThumbnailInfo(event) {
+      idb.open(INFO_DATABASE_NAME, INFO_DATABASE_VERSION).then((db) => {
+        const tx = db.transaction('the-preview-thumbnail', 'readwrite');
+        const store = tx.objectStore('the-preview-thumbnail');
+        store.put({
+          quickHash: this.quickHash,
+          lastGenerationIndex: event.index,
+          generationInterval: event.interval,
+          maxThumbnailCount: event.count,
+        });
+      });
+    },
+  },
+  created() {
+    this.updateMediaQuickHash(this.src);
+    idb.open(THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION, (upgradeDB) => {
+      const { oldVersion } = upgradeDB;
+      switch (oldVersion) {
+        default: {
+          break;
+        }
+        case 0: {
+          console.log('[IndexedDB]: Initial previewThumbnail objectStore.');
+          const store = upgradeDB.createObjectStore(
+            `thumbnail-width-${this.maxThumbnailWidth}`,
+            { keyPath: 'id', autoIncrement: false, unique: true },
+          );
+          store.createIndex('quickHash', 'quickHash', { unique: false });
+          store.createIndex('index', 'index', { unique: false });
+          break;
+        }
+      }
+    });
+    idb.open(INFO_DATABASE_NAME, INFO_DATABASE_VERSION, (upgradeDB) => {
+      const { oldVersion } = upgradeDB;
+      switch (oldVersion) {
+        default: {
+          break;
+        }
+        case 0: {
+          console.log('[IndexedDB]: Initial thumbnailInfo objectStore.');
+          upgradeDB.createObjectStore(
+            'the-preview-thumbnail',
+            { keyPath: 'quickHash' }, { unique: true },
+          );
+          break;
+        }
+      }
+    });
   },
 };
 </script>
