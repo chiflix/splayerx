@@ -2,10 +2,12 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import asyncStorage from '@/helpers/asyncStorage';
+import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
 export default {
   methods: {
+    infoDB() { return InfoDB; },
     sagi() { return Sagi; },
     timecodeFromSeconds(s) {
       const dt = new Date(Math.abs(s) * 1000);
@@ -66,7 +68,15 @@ export default {
         }
         return -1;
       }
-
+      const vidPath = path.replace(/^file:\/\//, '');
+      this.infoDB().set({
+        quickHash: this.mediaQuickHash(vidPath),
+        path,
+        shortCut: '',
+        lastPlayedTime: 0,
+        duration: 0,
+        lastOpened: Date(),
+      });
       asyncStorage.get('recent-played').then((data) => {
         const newElement = {
           path,
@@ -110,7 +120,7 @@ export default {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');
       }
-      const filePath = path.join(file);
+      const filePath = file;
       const fd = fs.openSync(filePath, 'r');
       const len = fs.statSync(filePath).size;
       const position = [
