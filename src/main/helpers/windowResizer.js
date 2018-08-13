@@ -1,7 +1,8 @@
-import { ipcMain } from 'electron'; //eslint-disable-line
+import { ipcMain, default as electron } from 'electron'; //eslint-disable-line
 export default class WindowResize {
   constructor(win) {
     this.win = win;
+    this.electron = electron;
     this.ratio = null;
     this.width = null;
     this.height = null;
@@ -10,29 +11,36 @@ export default class WindowResize {
     this.ready = false;
     this.status = 'idle';
     this.goBackTime = 200;
-    this.goBack = false;
     this.timeStamp = new Date();
+    this.counter = 0;
+    this.c0 = 16; // corner length for other corners
+    this.c1 = 4; // corner length for left/right - bottom
   }
   onStart() {
     if (process.platform === 'win32') { this.registerMessage(); }
   }
     onResize() { // eslint-disable-line
     if (!this.ready) return;
-    this.goBack = false;
     switch (this.status) {
       case 'idle':
         this.type = this.changeType();
-        if (!this.type) {
-          this.status = 'idle';
-          return;
+        if (!this.type) return;
+        if (this.type === 'corner') {
+          this.status = 'corner';
+        } else {
+          this.status = 'resize_WH';
         }
-        this.status = 'resize1';
         this.goBackToIdleTimer();
         break;
-      case 'resize1':
+      case 'resize_WH':
+        if (!this.pickOneInTwo()) return;
         this.goBackToIdleTimer();
         this.update();
         this.win.setSize(this.width, this.height);
+        break;
+      case 'corner':
+        this.update();
+        this.goBackToIdleTimer();
         break;
       default:
     }
@@ -41,7 +49,7 @@ export default class WindowResize {
     this.win.on('resize', () => {
       this.onResize();
     });
-    this.ipc.on('main-setNewWindowSize', () => { this.onSetNewWindowSize(); });
+    this.ipc.on('main-setNewWindowSize', (event, args) => { this.onSetNewWindowSize(args); });
     this.ipc.on('main-reset-size-listener', () => { this.onReset(); });
   }
   onReset() {
@@ -68,45 +76,59 @@ export default class WindowResize {
     // disabled when atempting to change status to idle
     const timeStamp = new Date();
     this.timeStamp = timeStamp;
-    this.goBack = true;
     setTimeout(() => {
-      if (this.goBack) {
-        this.changeStatusIfLatest(timeStamp);
-      }
+      this.changeStatusIfLatest(timeStamp);
     }, this.goBackTime);
   }
   calcRatio() {
     return this.height / this.width;
+  }
+  pickOneInTwo() {
+    this.counter += 1;
+    this.counter %= 2;
+    if (this.counter === 1) {
+      return true;
+    }
+    return false;
   }
   update() {
     if (this.type) {
       if (this.type === 'width') {
         this.width = this.win.getSize()[0]; //eslint-disable-line
         this.height = Math.ceil(this.width * this.ratio);
-      } else {
+      } else if (this.type === 'height') {
         this.height = this.win.getSize()[1];  //eslint-disable-line
         this.width = Math.ceil(this.height / this.ratio);
+      } else {
+        this.width = this.win.getSize()[0]; //eslint-disable-line
+        this.height = this.win.getSize()[1]; //eslint-disable-line
       }
     }
   }
   changeType() {
-    // if changed together
-    const widthNow = this.win.getSize()[0];
-    const heightNow = this.win.getSize()[1];
-    if (widthNow !== this.width && heightNow !== this.height) {
-      return null;
+    const bound = this.win.getBounds();
+    let typeNumber = 0;
+    const cp = this.electron.screen.getCursorScreenPoint();
+    const x1 = bound.x + this.c0;
+    const x2 = (bound.x + bound.width) - this.c0;
+    const y1 = bound.y + this.c0;
+    const y2 = (bound.y - this.c1) + bound.height;
+    if (x1 < cp.x && cp.x < x2) {
+      typeNumber += 1;
     }
-    const sumOfBefore = this.width + this.height;
-    const sumOfNow = widthNow + heightNow;
-    if (sumOfBefore < sumOfNow) {
-      if (this.width < widthNow) {
+    if (y1 < cp.y && cp.y < y2) {
+      typeNumber += 2;
+    }
+    switch (typeNumber) {
+      case 0:
+        return 'corner';
+      case 2:
         return 'width';
-      }
-      return 'height';
-    } else if (this.width > widthNow) {
-      return 'width';
+      case 1:
+        return 'height';
+      default:
+        return null;
     }
-    return 'height';
   }
   changeStatusIfLatest(timeStamp, status = 'idle') {
     if (timeStamp >= this.timeStamp) {
