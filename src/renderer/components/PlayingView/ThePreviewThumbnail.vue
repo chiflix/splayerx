@@ -52,7 +52,18 @@ export default {
   watch: {
     src(newValue) {
       this.updateMediaQuickHash(newValue);
-      this.$set(this.outerThumbnailInfo, 'videoSrc', newValue);
+      this.retrieveThumbnailInfo(this.quickHash).then((result) => {
+        if (result) {
+          const thumnailInfo = result;
+          console.log(thumnailInfo);
+          this.outerThumbnailInfo = Object.assign(
+            {},
+            this.outerThumbnailInfo,
+            thumnailInfo,
+            { videoSrc: this.src },
+          );
+        }
+      });
     },
   },
   methods: {
@@ -82,9 +93,28 @@ export default {
         });
       });
     },
+    retrieveThumbnailInfo(quickHash) {
+      return new Promise((resolve, reject) => {
+        idb.open(INFO_DATABASE_NAME).then((db) => {
+          const tx = db.transaction('the-preview-thumbnail', 'readonly');
+          const store = tx.objectStore('the-preview-thumbnail');
+          store.get(quickHash).then((result) => {
+            if (result) {
+              console.log(result);
+              const { lastGenerationIndex, maxThumbnailCount, generationInterval } = result;
+              resolve({
+                lastGenerationIndex,
+                maxThumbnailCount,
+                generationInterval,
+              });
+            }
+            reject();
+          });
+        });
+      });
+    },
   },
   created() {
-    this.updateMediaQuickHash(this.src);
     idb.open(THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION, (upgradeDB) => {
       const { oldVersion } = upgradeDB;
       switch (oldVersion) {
@@ -117,6 +147,19 @@ export default {
           );
           break;
         }
+      }
+    });
+    this.updateMediaQuickHash(this.src);
+    this.retrieveThumbnailInfo(this.quickHash).then((result) => {
+      if (result) {
+        const thumnailInfo = result;
+        console.log(thumnailInfo);
+        this.outerThumbnailInfo = Object.assign(
+          {},
+          this.outerThumbnailInfo,
+          thumnailInfo,
+          { videoSrc: this.src },
+        );
       }
     });
   },
