@@ -24,14 +24,14 @@
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.winWidth - 20 + 'px'}"
       @mousedown.stop.capture="onProgressBarClick">
-      <Thumbnail
+      <!-- <Thumbnail
         v-show="showScreenshot"
         :src=src
         :positionOfScreenshot="positionOfScreenshot"
         :widthOfThumbnail="widthOfThumbnail"
         :heightOfThumbnail="heightOfThumbnail"
         :screenshotContent="screenshotContent"
-        :currentTime="thumbnailCurrentTime"/>
+        :currentTime="thumbnailCurrentTime"/> -->
         <!-- translate优化 -->
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>

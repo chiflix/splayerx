@@ -105,6 +105,8 @@ export default {
         });
       } else {
         this.loadServerTextTracks(() => {
+          // 记得处理本地字幕与服务端字幕共存的情况
+          this.$_clearSubtitle();
           this.subStyleChange();
           this.subtitleShow(0);
         });
@@ -329,49 +331,56 @@ export default {
         subtitle.addCue(new VTTCue(startTime, endTime, element[2]));
       }
     },
+    /**
+     * @param {resultCallback} cb callback function to process result
+     * after server transcript loaded.
+     * @description Load transcript from server and do callback function
+     * after finished all request.
+     */
     loadServerTextTracks(cb) {
       this.Sagi.mediaTranslate(this.mediaHash)
         .then((res) => {
           // handle 2 situations:
           if (res.array[0][1]) {
-            console.log('Error: error');
+            console.log('Error: No server transcripts.');
             console.log(res);
           } else {
             const textTrackList = res.array[1];
+            const vid = this.$parent.$refs.videoCanvas;
+            this.startIndex = vid.textTracks.length;
 
             const subtitleNameArr = textTrackList
               .map(textTrack => this.$_serverSubnameProcess(textTrack));
             this.$store.commit('AddServerSubtitle', subtitleNameArr);
-            const vid = this.$parent.$refs.videoCanvas;
-            // 记得处理本地字幕与服务端字幕共存的情况
-            this.$_clearSubtitle();
-            this.startIndex = vid.textTracks.length;
-            for (let i = 0; i < textTrackList.length; i += 1) {
-              const textTrack = textTrackList[i];
-              const transcriptId = textTrack[0];
-              this.Sagi.getTranscript(transcriptId)
-                .then((res) => {
-                  // handle error
-                  console.log(res);
-                  if (false) {
-                    console.log('Error: error code');
-                    console.log(res);
-                  } else {
-                    const cueArray = res.array[1];
-                    this.addCuesArray(cueArray);
-                    // Need to process
-                    // Use callback parameter
-                    // to control the behavior
-                    cb();
-                  }
-                }, (err) => {
-                  console.log(err);
-                });
-            }
+
+            this.getAllTranscriptsFromServer(textTrackList).then((resArray) => {
+              for (let i = 0; i < resArray.length; i += 1) {
+                const res = resArray[i];
+                this.addCuesArray(res.array[1]);
+              }
+              cb();
+            });
           }
         }, (err) => {
           console.log(err);
         });
+    },
+    // Todo:
+    // 这里有个问题，获取后端字幕的速度不够快，会有一定时间的延迟
+    /**
+     * @description This is a
+     */
+    async getAllTranscriptsFromServer(textTrackList) {
+      let resArray = [];
+      const waitArray = [];
+      for (let i = 0; i < textTrackList.length; i += 1) {
+        const transcriptId = textTrackList[i][0];
+        const res = this.Sagi.getTranscript(transcriptId);
+        waitArray.push(res);
+        console.log(res);
+      }
+      resArray = await Promise.all(waitArray);
+      return resArray;
     },
   },
   computed: {
