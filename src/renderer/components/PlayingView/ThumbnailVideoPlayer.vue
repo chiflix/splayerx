@@ -13,7 +13,6 @@
 </template>
 
 <script>
-import Dexie from 'dexie';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
 export default {
   name: 'thumbnail-video-player',
@@ -64,7 +63,7 @@ export default {
     outerThumbnailInfo: {
       deep: true,
       /* eslint-disable object-shorthand */
-      handler: function (newValue) {
+      handler: function outerThumbnailInfoHandler(newValue) {
         const newVideoSrc = newValue.videoSrc;
         if (this.videoSrcValidator(newVideoSrc)) {
           this.videoSrc = newVideoSrc;
