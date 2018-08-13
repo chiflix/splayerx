@@ -40,6 +40,8 @@ export default {
         videoRatio: this.videoRatio,
       },
       quickHash: null,
+      THUMBNAIL_DB_NAME: 'splayerx-preview-thumbnails',
+      THUMBNAIL_DB_VERSION: 1,
     };
   },
   watch: {
@@ -47,9 +49,6 @@ export default {
       this.updateMediaQuickHash(newValue);
       this.$set(this.outerThumbnailInfo, 'videoSrc', newValue);
     },
-  },
-  created() {
-    
   },
   methods: {
     updateMediaQuickHash(src) {
@@ -66,6 +65,25 @@ export default {
       });
       this.quickHash = this.mediaQuickHash(filePath);
     },
+  },
+  created() {
+    idb.open(this.THUMBNAIL_DB_NAME, this.THUMBNAIL_DB_VERSION, (upgradeDB) => {
+      const { oldVersion } = upgradeDB;
+      switch (oldVersion) {
+        default: {
+          break;
+        }
+        case 0: {
+          console.log('[IndexedDB]: Initial objectStore.');
+          const store = upgradeDB.createObjectStore(
+            `thumbnail-width-${this.maxThumbnailWidth}`,
+            { keyPath: 'id', autoIncrement: true },
+          );
+          store.createIndex('quickHash', 'quickHash', { unique: false });
+          break;
+        }
+      }
+    });
   },
 };
 </script>
