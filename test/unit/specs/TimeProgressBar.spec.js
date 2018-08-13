@@ -17,7 +17,7 @@ function cssSplit(str) {
   return O;
 }
 
-describe.only('TimeProgressBar.vue', () => {
+describe('TimeProgressBar.vue', () => {
   let store;
 
   beforeEach(() => {
