@@ -110,7 +110,7 @@ export default {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');
       }
-      const filePath = path.join(__dirname, file);
+      const filePath = path.join(file);
       const fd = fs.openSync(filePath, 'r');
       const len = fs.statSync(filePath).size;
       const position = [
