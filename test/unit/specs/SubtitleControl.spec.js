@@ -7,7 +7,7 @@ import sinon from 'sinon';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-describe.only('SubtitleControl.vue', () => {
+describe('SubtitleControl.vue', () => {
   let store;
 
   beforeEach(() => {
