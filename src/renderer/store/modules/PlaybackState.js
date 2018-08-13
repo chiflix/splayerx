@@ -45,10 +45,8 @@ const mutations = {
     }
   },
   AddServerSubtitle(state, subtitles) {
-    // const objArr = subtitles.map(title => ({ title, status: null }));
     state.SubtitleNameArr.unshift(...subtitles);
   },
-  // 需要对subtitle array的状态进行判断，有无数组，是否超出
   SubtitleOn(state, obj) {
     const index = state.SubtitleNameArr.findIndex(subName => subName.textTrackID === obj.index);
     state.SubtitleNameArr[index].status = obj.status === 'first' ? 'first' : 'second';

@@ -386,7 +386,6 @@ export default {
     // 需要对这一部分内容优化
     firstActiveCue(newVal) {
       this.firstCueHTML.pop();
-      // console.log(newVal);
       if (newVal) {
         // 这里对cue进行处理
         // 得到cue的line和position确定位置
