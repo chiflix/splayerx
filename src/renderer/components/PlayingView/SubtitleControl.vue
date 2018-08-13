@@ -11,13 +11,13 @@
               @click.stop="toggleItemClick(index+10)"
               @mouseover.stop.self="toggleItemsMouseOver"
               @mouseleave.stop.self="toggleItemsMouseLeave"
-              :class="{ chosenText: computedBool(index+10) }">
+              :class="{ chosenText: itemHasBeenChosen(index+10) }">
               <div class="menu-item-text-wrapper"
                    :class="{ chineseChosen: itemTitleHasChineseChar(item.title) }">
                 {{ item.title }}
               </div>
               <div class="chosen-dot"
-                   v-if="computedBool(index+10)">
+                   v-if="itemHasBeenChosen(index+10)">
               </div>
             </li>
 
@@ -26,25 +26,25 @@
               @click.stop="toggleItemClick(index)"
               @mouseover.stop.self="toggleItemsMouseOver"
               @mouseleave.stop.self="toggleItemsMouseLeave"
-              :class="{ chosenText: computedBool(index) }">
+              :class="{ chosenText: itemHasBeenChosen(index) }">
               <div class="menu-item-text-wrapper"
                    :class="{ chineseChosen: itemTitleHasChineseChar(item.title) }">
                 {{ item.title }}
               </div>
               <div class="chosen-dot"
-                   v-if="computedBool(index)">
+                   v-if="itemHasBeenChosen(index)">
               </div>
             </li>
 
             <li @click.stop="toggleSubtitleOff"
             @mouseover.stop.self="toggleItemsMouseOver"
             @mouseleave.stop.self="toggleItemsMouseLeave"
-            :class="{ chosenText: computedBool(-1) }">
+            :class="{ chosenText: itemHasBeenChosen(-1) }">
               <div class="menu-item-text-wrapper">
                 无
               </div>
               <div class="chosen-dot"
-                   v-if="computedBool(-1)">
+                   v-if="itemHasBeenChosen(-1)">
               </div>
             </li>
 
@@ -90,7 +90,6 @@ export default {
       itemIsChosen: false,
       appearSubtitleMenu: false,
       localSubAvaliable: true,
-      mouseOverDisItem: false,
       itemIsHover: false,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
       currentSubIden: 0,
@@ -121,7 +120,6 @@ export default {
       e.target.style.backgroundImage = 'none';
     },
     toggleItemClick(index) {
-      console.log('YOU MOTHER FUCKER.');
       this.currentSubIden = index;
       this.$bus.$emit('sub-first-change', index);
     },
@@ -129,7 +127,7 @@ export default {
       this.currentSubIden = -1;
       this.$bus.$emit('first-subtitle-off');
     },
-    computedBool(index = 0) {
+    itemHasBeenChosen(index = 0) {
       return index === this.currentSubIden;
     },
     itemTitleHasChineseChar(str) {

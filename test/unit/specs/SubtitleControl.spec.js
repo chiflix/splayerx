@@ -2,16 +2,12 @@ import Vuex from 'vuex';
 import PlaybackState from '@/store/modules/PlaybackState';
 import SubtitleControl from '@/components/PlayingView/SubtitleControl';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import sinon from 'sinon';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('SubtitleControl.vue', () => {
-  const testSubArr = [];
-  testSubArr[0] = { title: 'something index 0' };
-  testSubArr[1] = { title: 'something index 1' };
-  testSubArr[2] = { title: 'something index 2' };
-
   let store;
 
   beforeEach(() => {
@@ -19,6 +15,7 @@ describe('SubtitleControl.vue', () => {
       modules: {
         PlaybackState: {
           state: PlaybackState.state,
+          getters: PlaybackState.getters,
           mutations: PlaybackState.mutations,
         },
       },
@@ -27,25 +24,26 @@ describe('SubtitleControl.vue', () => {
 
   it('should load with correct data', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    expect(wrapper.vm.avaliableSuntitlesItems.length).equal(7);
-    expect(wrapper.vm.avaliableSuntitlesItems[0].title).equal('Chinese 1');
-    expect(wrapper.vm.avaliableSuntitlesItems[6].title).equal('无');
+    expect(wrapper.vm.onlineSubsPlaceHolder.length).equal(3);
+    expect(wrapper.vm.unavaliableSubtitlesItems.length).equal(2);
     expect(wrapper.vm.isSubCtrlBtnAppear).equal(true);
     expect(wrapper.vm.itemIsChosen).equal(false);
     expect(wrapper.vm.appearSubtitleMenu).equal(false);
     expect(wrapper.vm.localSubAvaliable).equal(true);
-    expect(wrapper.vm.mouseOverDisItem).equal(false);
+    expect(wrapper.vm.itemIsHover).equal(false);
+    expect(wrapper.vm.preStyle).contains('linear-gradient');
+    expect(wrapper.vm.currentSubIden).equal(0);
   });
 
-  it('should render correct HTML elements', () => {
-    const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    wrapper.setData({
-      appearSubtitleMenu: true,
-      localSubAvaliable: true,
-    });
-    expect(wrapper.html()).contains('Chinese 1');
-    expect(wrapper.html()).contains('无');
-  });
+  // it('should render correct HTML elements', () => {
+  //   const wrapper = shallowMount(SubtitleControl, { store, localVue });
+  //   wrapper.setData({
+  //     appearSubtitleMenu: true,
+  //     localSubAvaliable: true,
+  //   });
+  //   expect(wrapper.html()).contains('Chinese 1');
+  //   expect(wrapper.html()).contains('无');
+  // });
 
   it('subCtrlBtnAppear method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
@@ -75,10 +73,65 @@ describe('SubtitleControl.vue', () => {
     expect(wrapper.vm.appearSubtitleMenu).equal(false);
   });
 
-  it('toggleItemsMouseOver method works fine', () => {
+  it('toggleItemClick method works fine', () => {
+    const wrapper = shallowMount(SubtitleControl, {
+      store,
+      localVue,
+      attachToDocument: true,
+    });
+    wrapper.setData({ isSubCtrlBtnAppear: true });
+    wrapper.setData({ appearSubtitleMenu: true });
+    const spy = sinon.spy(wrapper.vm.$bus, '$emit');
+    wrapper.vm.toggleItemClick(1);
+    expect(wrapper.vm.currentSubIden).equal(1);
+    expect(spy.calledOnce).equal(true);
+    expect(spy.firstCall.args[0]).equal('sub-first-change');
+    expect(spy.firstCall.args[1]).equal(1);
+    spy.restore();
+  });
+
+  it('toggleSubtitleOff method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    wrapper.setData({ itemIsChosen: false });
-    wrapper.vm.toggleItemsMouseOver();
-    expect(wrapper.vm.itemIsChosen).equal(true);
+    wrapper.setData({ isSubCtrlBtnAppear: true });
+    wrapper.setData({ appearSubtitleMenu: true });
+    const spy = sinon.spy(wrapper.vm.$bus, '$emit');
+    wrapper.vm.toggleSubtitleOff();
+    expect(wrapper.vm.currentSubIden).equal(-1);
+    expect(spy.calledOnce).equal(true);
+    expect(spy.firstCall.args.length).equal(1);
+    expect(spy.firstCall.args[0]).equal('first-subtitle-off');
+    spy.restore();
+  });
+
+  it('itemHasBeenChosen method works fine', () => {
+    const wrapper = shallowMount(SubtitleControl, { store, localVue });
+    wrapper.setData({
+      isSubCtrlBtnAppear: true,
+      appearSubtitleMenu: true,
+      currentSubIden: 0,
+    });
+    expect(wrapper.vm.itemHasBeenChosen()).equal(true);
+    wrapper.setData({ currentSubIden: 1 });
+    expect(wrapper.vm.itemHasBeenChosen(2)).equal(false);
+  });
+
+  it('itemTitleHasChineseChar method works fine', () => {
+    const wrapper = shallowMount(SubtitleControl, { store, localVue });
+    expect(wrapper.vm.itemTitleHasChineseChar('你好')).equal(true);
+    expect(wrapper.vm.itemTitleHasChineseChar('世界')).equal(true);
+    expect(wrapper.vm.itemTitleHasChineseChar('Hello')).equal(false);
+    expect(wrapper.vm.itemTitleHasChineseChar('123')).equal(false);
+    expect(wrapper.vm.itemTitleHasChineseChar('旰')).equal(true);
+  });
+
+  it('computedAvaliableItems computed property works fine', () => {
+    const testSubArr = [
+      { title: 'something index 0' },
+      { title: 'something index 1' },
+      { title: 'something index 2' },
+    ];
+    const wrapper = shallowMount(SubtitleControl, { store, localVue });
+    store.state.PlaybackState.SubtitleNameArr = testSubArr;
+    expect(wrapper.vm.computedAvaliableItems.length).equal(3);
   });
 });
