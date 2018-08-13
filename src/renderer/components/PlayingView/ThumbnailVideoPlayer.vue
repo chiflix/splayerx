@@ -129,8 +129,13 @@ export default {
             const array = this.tempBlobArray;
             this.thumbnailArrayHandler(array).then(() => {
               console.log(`${30} thumbnails added.`);
-              this.tempBlobArray = [];
+              this.$emit('update-thumbnail-info', {
+                index: this.autoGenerationIndex,
+                interval: this.generationInterval,
+                count: this.maxThumbnailCount,
+              });
             });
+            this.tempBlobArray = [];
           }
           if (this.isAutoGeneration && this.autoGenerationIndex < this.maxThumbnailCount) {
             this.autoGenerationIndex += 1;
@@ -169,7 +174,7 @@ export default {
         const tx = db.transaction(name, 'readwrite');
         const store = tx.objectStore(name);
         array.forEach((thumbnail) => {
-          promiseArray.push(store.add({
+          promiseArray.push(store.put({
             id: `${thumbnail.index}-${this.quickHash}`,
             blob: thumbnail.blobImage,
             quickHash: this.quickHash,
