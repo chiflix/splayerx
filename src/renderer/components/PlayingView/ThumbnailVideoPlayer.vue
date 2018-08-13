@@ -126,23 +126,11 @@ export default {
             blobImage: blobResult,
           });
           if (this.tempBlobArray.length === 30) {
-            this.tempBlobArray.forEach((blob) => {
-              idb.open(THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION).then((db) => {
-                const storeName = `thumbnail-width-${this.maxThumbnailWidth}`;
-                const tx = db.transaction(storeName, 'readwrite');
-                const store = tx.objectStore(storeName);
-                store.add({
-                  id: `${blob.index}-${this.quickHash}`,
-                  quickHash: this.quickHash,
-                  index: blob.index,
-                  blob: blob.blobImage,
-                });
-                return tx.complete;
-              }).then(() => {
-                console.log(`${30} blobs added.`);
-              });
+            const array = this.tempBlobArray;
+            this.thumbnailArrayHandler(array).then(() => {
+              console.log(`${30} thumbnails added.`);
+              this.tempBlobArray = [];
             });
-            this.tempBlobArray = [];
           }
           if (this.isAutoGeneration && this.autoGenerationIndex < this.maxThumbnailCount) {
             this.autoGenerationIndex += 1;
@@ -173,6 +161,23 @@ export default {
     resumeAutoGeneration() {
       this.isAutoGeneration = true;
       this.videoSeek(this.autoGenerationIndex);
+    },
+    thumbnailArrayHandler(array) {
+      const promiseArray = [];
+      idb.open(THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION).then((db) => {
+        const name = `thumbnail-width-${this.maxThumbnailWidth}`;
+        const tx = db.transaction(name, 'readwrite');
+        const store = tx.objectStore(name);
+        array.forEach((thumbnail) => {
+          promiseArray.push(store.add({
+            id: `${thumbnail.index}-${this.quickHash}`,
+            blob: thumbnail.blobImage,
+            quickHash: this.quickHash,
+            index: thumbnail.index,
+          }));
+        });
+      });
+      return Promise.all(promiseArray);
     },
   },
   created() {
