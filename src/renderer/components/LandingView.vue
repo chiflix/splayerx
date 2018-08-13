@@ -15,19 +15,19 @@
             :src="backgroundUrl">
           </transition>
         </div>
-        <div class="background background-mask"></div>
-        <div class="iteminfo item-name">
-          {{ itemInfo().baseName }}
+       <div class="background background-mask"></div>
+         <div class="iteminfo item-name">
+          {{ item.baseName }}
         </div>
         <div class="iteminfo item-description">
         </div>
         <div class="iteminfo item-timing">
           <span class="timing-played">
-            {{ timeInValidForm(timecodeFromSeconds(itemInfo().lastTime)) }}</span>
-          / {{ timeInValidForm(timecodeFromSeconds(itemInfo().duration)) }}
+            {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}</span>
+          / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
         </div>
         <div class="iteminfo item-progress">
-          <div class="progress-played" v-bind:style="{ width: itemInfo().percentage + '%' }"></div>
+          <div class="progress-played" v-bind:style="{ width: item.percentage + '%' }"></div>
         </div>
       </div>
     </transition>
@@ -43,67 +43,40 @@
         </div>
       </div>
   </transition>
-    <div class="controller">
-      <div class="playlist"
-        v-if="hasRecentPlaylist">
-        <div class="item shadow"
-          v-for="(item, index) in lastPlayedFile"
-          :key="item.path"
-          :style="{
-              backgroundImage: itemShortcut(item.shortCut),
-              width: item.chosen ? '140px' : '114px',
-              height: item.chosen ? '80px' : '65px',
-            }"
-          @click.stop="openFile(item.path)"
-          @mouseover="onRecentItemMouseover(item, index)"
-          @mouseout="onRecentItemMouseout(index)">
-        </div>
-      </div>
-    </div>
-    <div
-      @click="open('./')">
-      <img class="button" src="~@/assets/icon-open.svg" type="image/svg+xml" style="-webkit-user-drag: none;">
-    </div>
+      <playlist :lastPlayedFile="lastPlayedFile"></playlist>
+  <Openbutton :isDragging="isDragging"></Openbutton>
   </main>
 </div>
 </template>
 
 <script>
-import path from 'path';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
+import Playlist from './LandingView/Playlist.vue';
+import Openbutton from './LandingView/Openbutton.vue';
+
 export default {
   name: 'landing-view',
   data() {
     return {
-      sagiHealthStatus: 'UNSET',
-      showingPopupDialog: false,
       lastPlayedFile: [],
+      sagiHealthStatus: 'UNSET',
       imageTurn: '',
-      isTurnToOdd: false,
-      backgroundUrlOdd: '',
-      backgroundUrlEven: '',
       showShortcutImage: false,
-      isDragging: false,
       mouseDown: false,
       invalidTimeRepresentation: '--',
       langdingLogoAppear: true,
+      backgroundUrl: '',
+      item: [],
+      isDragging: false,
     };
   },
   components: {
     Titlebar,
+    Playlist,
+    Openbutton,
   },
   computed: {
-    hasRecentPlaylist() {
-      return this.lastPlayedFile.length > 0;
-    },
-    backgroundUrl() {
-      switch (this.imageTurn) {
-        case 'odd': return this.backgroundUrlOdd;
-        case 'even': return this.backgroundUrlEven;
-        default: return '';
-      }
-    },
   },
   mounted() {
     const { app } = this.$electron.remote;
@@ -118,7 +91,6 @@ export default {
         console.log(`sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
-
     asyncStorage.get('recent-played').then((data) => {
       this.lastPlayedFile = data;
       console.log(data);
@@ -130,73 +102,20 @@ export default {
       document.querySelector('.application').style.webkitAppRegion = 'no-drag';
       document.querySelector('.application').style.borderRadius = 0;
     }
+    this.$bus.$on('displayInfo', (displayInfo) => {
+      this.imageTurn = displayInfo.imageTurn;
+      this.backgroundUrl = displayInfo.backgroundUrl;
+      this.langdingLogoAppear = displayInfo.langdingLogoAppear;
+      this.showShortcutImage = displayInfo.showShortcutImage;
+      this.item.baseName = displayInfo.baseName;
+      this.item.lastTime = displayInfo.lastTime;
+      this.item.duration = displayInfo.duration;
+      this.item.percentage = displayInfo.percentage;
+    });
   },
   methods: {
-    itemShortcut(shortCut) {
-      return `url("${shortCut}")`;
-    },
-    itemInfo() {
-      return {
-        baseName: path.basename(this.item.path, path.extname(this.item.path)),
-        lastTime: this.item.lastPlayedTime,
-        duration: this.item.duration,
-        percentage: (this.item.lastPlayedTime / this.item.duration) * 100,
-      };
-    },
     timeInValidForm(time) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);
-    },
-    onRecentItemMouseover(item, index) {
-      this.item = item;
-      this.$set(this.lastPlayedFile[index], 'chosen', true);
-      if (item.shortCut !== '') {
-        this.isChanging = true;
-        this.isTurnToOdd = !this.isTurnToOdd;
-        if (this.isTurnToOdd) {
-          this.imageTurn = 'odd';
-          this.backgroundUrlOdd = item.shortCut;
-        } else {
-          this.imageTurn = 'even';
-          this.backgroundUrlEven = item.shortCut;
-        }
-        this.langdingLogoAppear = false;
-        this.showShortcutImage = true;
-      } else {
-        this.langdingLogoAppear = true;
-        this.showShortcutImage = false;
-      }
-    },
-    onRecentItemMouseout(index) {
-      this.$set(this.lastPlayedFile[index], 'chosen', false);
-    },
-    open(link) {
-      if (this.showingPopupDialog || this.isDragging) {
-        // skip if there is already a popup dialog
-        return;
-      }
-
-      const self = this;
-      const { remote } = this.$electron;
-      const { dialog } = remote;
-      const browserWindow = remote.BrowserWindow;
-      const focusedWindow = browserWindow.getFocusedWindow();
-      const VALID_EXTENSION = [];
-
-      self.showingPopupDialog = true;
-      dialog.showOpenDialog(focusedWindow, {
-        title: 'Open Dialog',
-        defaultPath: link,
-        filters: [{
-          name: 'Video Files',
-          extensions: VALID_EXTENSION,
-        }],
-        properties: ['openFile'],
-      }, (item) => {
-        self.showingPopupDialog = false;
-        if (item) {
-          self.openFile(`file:///${item[0]}`);
-        }
-      });
     },
     handleLeftClick() {
       // Handle dragging-related variables
@@ -339,71 +258,6 @@ main {
     color: gray;
     margin-bottom: 10px;
   }
-}
-
-.controller {
-  position: absolute;
-  left: 0;
-  bottom: 40px;
-  width: 100%;
-  z-index: 4;
-
-  .playlist {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: flex-end;
-    margin-left: 45px;
-
-    .item {
-      color: #e4e4c4;
-      border-radius: 2px;
-      width: 114px;
-      height: 65px;
-      color: gray;
-      cursor: pointer;
-      margin-right: 15px;
-      background-size: cover;
-      background-color: black;
-      background-repeat: no-repeat;
-      background-position: center center;
-      transition: width 150ms ease-out, height 150ms ease-out;
-    }
-
-    .shadow {
-      position: relative;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;
-    }
-    .shadow:before, .shadow:after {
-      content: "";
-      position: absolute;
-      z-index: -1;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-      top: 50%;
-      bottom: 0;
-      left: 10px;
-      right: 10px;
-      border-radius: 50px;
-    }
-    .shadow:after {
-      right: 10px;
-      left: auto;
-      transform: skew(8deg) rotate(3deg);
-    }
-  }
-}
-.button {
-  position: absolute;
-  bottom: 50px;
-  right: 45px;
-  width: 49px;
-  height: 42px;
-  font-size: .8em;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.15s ease;
-  border: 0px;
-  z-index: 5;
 }
 
 .background-transition-enter-active, .background-transition-leave-active {
