@@ -164,7 +164,7 @@ export default {
 
     /*
     the following method reads the subtitles embeded in the MKV files,
-    and add these fubtitles into the video's texttracks.
+    and add these subtitles into the video's texttracks.
     But the structure of this method need to be changed and improved.
 
     autoloadMkvSubtitles(filePath, cb) {
