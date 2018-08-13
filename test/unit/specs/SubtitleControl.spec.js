@@ -7,7 +7,7 @@ import sinon from 'sinon';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-describe('SubtitleControl.vue', () => {
+describe.only('SubtitleControl.vue', () => {
   let store;
 
   beforeEach(() => {
@@ -35,15 +35,16 @@ describe('SubtitleControl.vue', () => {
     expect(wrapper.vm.currentSubIden).equal(0);
   });
 
-  // it('should render correct HTML elements', () => {
-  //   const wrapper = shallowMount(SubtitleControl, { store, localVue });
-  //   wrapper.setData({
-  //     appearSubtitleMenu: true,
-  //     localSubAvaliable: true,
-  //   });
-  //   expect(wrapper.html()).contains('Chinese 1');
-  //   expect(wrapper.html()).contains('无');
-  // });
+  it('should render correct HTML elements', () => {
+    const wrapper = shallowMount(SubtitleControl, { store, localVue });
+    wrapper.setData({
+      isSubCtrlBtnAppear: true,
+      appearSubtitleMenu: true,
+    });
+    expect(wrapper.html()).contains('ul');
+    expect(wrapper.html()).contains('li');
+    expect(wrapper.html()).contains('img');
+  });
 
   it('subCtrlBtnAppear method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
@@ -129,9 +130,11 @@ describe('SubtitleControl.vue', () => {
       { title: 'something index 0' },
       { title: 'something index 1' },
       { title: 'something index 2' },
+      { title: 'something index 3' },
     ];
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    store.state.PlaybackState.SubtitleNameArr = testSubArr;
+    store.commit('SubtitleNameArr', testSubArr);
     expect(wrapper.vm.computedAvaliableItems.length).equal(3);
+
   });
 });
