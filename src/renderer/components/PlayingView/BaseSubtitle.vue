@@ -102,6 +102,7 @@ export default {
           console.log('finished reading subtitle files');
           this.subStyleChange();
           this.subtitleShow(0);
+          this.$bus.$emit('load-server-transcripts');
         });
       } else {
         this.loadServerTextTracks(() => {
@@ -301,14 +302,6 @@ export default {
         vid.textTracks[curVidFirstIndex].oncuechange = null;
         this.firstSubIndex = null;
       }
-      // 未设置第二字幕时，消除字幕的error handler
-      // if (this.secondSubIndex === null) {
-      //   console.log('second subtitle not set');
-      // } else {
-      //   vid.textTracks[curVidSecondIndex].mode = 'disabled';
-      //   vid.textTracks[curVidSecondIndex].oncuechange = null;
-      //   this.secondSubIndex = null;
-      // }
     },
     /**
      * @param {Number} second
@@ -342,7 +335,7 @@ export default {
         .then((res) => {
           // handle 2 situations:
           if (res.array[0][1]) {
-            console.log('Error: No server transcripts.');
+            console.log('Warning: No server transcripts.');
             console.log(res);
           } else {
             const textTrackList = res.array[1];
@@ -450,6 +443,13 @@ export default {
       this.$store.commit('AddSubtitle', subtitleName);
       this.addVttToVideoElement(files, () => {
         this.subtitleShow(size);
+      });
+    });
+
+    this.$bus.$on('load-server-transcripts', () => {
+      this.$_clearSubtitle();
+      this.loadServerTextTracks(() => {
+        this.subtitleShow(0);
       });
     });
   },
