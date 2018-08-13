@@ -32,7 +32,13 @@ export default {
       return `${minutes}:${seconds}`;
     },
     findSubtitleFilesByVidPath(vidPath, callback) {
-      vidPath = vidPath.replace(/^file:\/\//, '');
+      vidPath = decodeURI(vidPath);
+      if (process.platform === 'win32') {
+        vidPath = vidPath.replace(/^file:\/\/\//, '');
+      } else {
+        vidPath = vidPath.replace(/^file:\/\//, '');
+      }
+
       const baseName = path.basename(vidPath, path.extname(vidPath));
       const dirPath = path.dirname(vidPath);
       const filter = /\.(srt|vtt)$/;
@@ -68,7 +74,14 @@ export default {
         }
         return -1;
       }
-      const vidPath = path.replace(/^file:\/\//, '');
+      let vidPath;
+      path = decodeURI(path);
+      if (process.platform === 'win32') {
+        vidPath = path.replace(/^file:\/\/\//, '');
+      } else {
+        vidPath = path.replace(/^file:\/\//, '');
+      }
+
       this.infoDB().set({
         quickHash: this.mediaQuickHash(vidPath),
         path,
