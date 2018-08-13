@@ -68,6 +68,7 @@ export default {
     },
   },
   created() {
+    this.updateMediaQuickHash(this.src);
     idb.open(THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION, (upgradeDB) => {
       const { oldVersion } = upgradeDB;
       switch (oldVersion) {
@@ -81,6 +82,7 @@ export default {
             { keyPath: 'id', autoIncrement: true },
           );
           store.createIndex('quickHash', 'quickHash', { unique: false });
+          store.createIndex('index', 'index', { unique: false });
           break;
         }
       }

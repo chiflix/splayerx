@@ -15,6 +15,7 @@
 <script>
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
 import { THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION } from '@/constants';
+import idb from 'idb';
 export default {
   name: 'thumbnail-video-player',
   components: {
@@ -41,6 +42,7 @@ export default {
     },
     thumbnailWidth: Number,
     thumbnailHeight: Number,
+    quickHash: String,
   },
   data() {
     return {
@@ -119,11 +121,29 @@ export default {
         );
         this.canvasContainer.toBlob((blobResult) => {
           this.thumbnailSet.add(index);
-          console.log(this.isAutoGeneration, index, blobResult);
+          console.log(this.isAutoGeneration, index, blobResult, this.quickHash);
           this.tempBlobArray.push({
             index,
             blobImage: blobResult,
           });
+          if (this.tempBlobArray.length === 30) {
+            this.tempBlobArray.forEach((blob) => {
+              idb.open(THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION).then((db) => {
+                const storeName = `thumbnail-width-${this.maxThumbnailWidth}`;
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                store.add({
+                  quickHash: this.quickHash,
+                  index: blob.index,
+                  blob: blob.blobImage,
+                });
+                return tx.complete;
+              }).then(() => {
+                console.log(`${30} blobs added.`);
+              });
+            });
+            this.tempBlobArray = [];
+          }
           if (this.isAutoGeneration && this.autoGenerationIndex < this.maxThumbnailCount) {
             this.autoGenerationIndex += 1;
           }
