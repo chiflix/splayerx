@@ -7,7 +7,8 @@
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
       :outerThumbnailInfo="outerThumbnailInfo"
-      @update-thumbnail-info="updateThumbnailInfo">
+      @update-thumbnail-info="updateThumbnailInfo"
+      v-if="initialized">
       <span class="time">{{ videoTime }}</span>
     </thumbnail-video-player>
   </div>
@@ -16,8 +17,8 @@
 <script>
 import idb from 'idb';
 import {
-  THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION,
-  INFO_DATABASE_NAME, INFO_DATABASE_VERSION,
+  THUMBNAIL_DB_NAME,
+  INFO_DATABASE_NAME,
 } from '@/constants';
 import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
 export default {
@@ -46,7 +47,7 @@ export default {
       },
       quickHash: null,
       THUMBNAIL_DB_NAME: 'splayerx-preview-thumbnails',
-      THUMBNAIL_DB_VERSION: 1,
+      initialized: false,
     };
   },
   watch: {
@@ -55,7 +56,6 @@ export default {
       this.retrieveThumbnailInfo(this.quickHash).then((result) => {
         if (result) {
           const thumnailInfo = result;
-          console.log(thumnailInfo);
           this.outerThumbnailInfo = Object.assign(
             {},
             this.outerThumbnailInfo,
@@ -82,7 +82,7 @@ export default {
       this.quickHash = this.mediaQuickHash(filePath);
     },
     updateThumbnailInfo(event) {
-      idb.open(INFO_DATABASE_NAME, INFO_DATABASE_VERSION).then((db) => {
+      idb.open(INFO_DATABASE_NAME).then((db) => {
         const tx = db.transaction('the-preview-thumbnail', 'readwrite');
         const store = tx.objectStore('the-preview-thumbnail');
         store.put({
@@ -100,7 +100,6 @@ export default {
           const store = tx.objectStore('the-preview-thumbnail');
           store.get(quickHash).then((result) => {
             if (result) {
-              console.log(result);
               const { lastGenerationIndex, maxThumbnailCount, generationInterval } = result;
               resolve({
                 lastGenerationIndex,
@@ -108,20 +107,20 @@ export default {
                 generationInterval,
               });
             }
-            reject();
+            resolve({});
           });
+        }).catch((err) => {
+          reject(err);
         });
       });
     },
   },
   created() {
-    idb.open(THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION, (upgradeDB) => {
-      const { oldVersion } = upgradeDB;
-      switch (oldVersion) {
-        default: {
-          break;
-        }
-        case 0: {
+    idb.open(THUMBNAIL_DB_NAME).then((db) => {
+      const obejctStoreName = `thumbnail-width-${this.maxThumbnailWidth}`;
+      db.close();
+      if (!db.objectStoreNames.contains(obejctStoreName)) {
+        return idb.open(THUMBNAIL_DB_NAME, db.version + 1, (upgradeDB) => {
           console.log('[IndexedDB]: Initial previewThumbnail objectStore.');
           const store = upgradeDB.createObjectStore(
             `thumbnail-width-${this.maxThumbnailWidth}`,
@@ -129,31 +128,26 @@ export default {
           );
           store.createIndex('quickHash', 'quickHash', { unique: false });
           store.createIndex('index', 'index', { unique: false });
-          break;
-        }
+        });
       }
-    });
-    idb.open(INFO_DATABASE_NAME, INFO_DATABASE_VERSION, (upgradeDB) => {
-      const { oldVersion } = upgradeDB;
-      switch (oldVersion) {
-        default: {
-          break;
-        }
-        case 0: {
-          console.log('[IndexedDB]: Initial thumbnailInfo objectStore.');
-          upgradeDB.createObjectStore(
-            'the-preview-thumbnail',
-            { keyPath: 'quickHash' }, { unique: true },
-          );
-          break;
-        }
+      return idb.open(INFO_DATABASE_NAME);
+      /* eslint-disable newline-per-chained-call */
+    }).then((db) => {
+      const obejctStoreName = 'the-preview-thumbnail';
+      this.infoDB().db.close();
+      if (!db.objectStoreNames.contains(obejctStoreName)) {
+        console.log('[IndexedDB]: Initial preview thumbnail info objectStore.');
+        return idb.open(INFO_DATABASE_NAME, db.version + 1, (upgradeDB) => {
+          upgradeDB.createObjectStore(obejctStoreName, { keyPath: 'quickHash' }, { unique: true });
+        });
       }
-    });
-    this.updateMediaQuickHash(this.src);
-    this.retrieveThumbnailInfo(this.quickHash).then((result) => {
+      return idb.open(INFO_DATABASE_NAME);
+    }).then(() => {
+      this.updateMediaQuickHash(this.src);
+      return this.retrieveThumbnailInfo(this.quickHash);
+    }).then((result) => {
       if (result) {
         const thumnailInfo = result;
-        console.log(thumnailInfo);
         this.outerThumbnailInfo = Object.assign(
           {},
           this.outerThumbnailInfo,
@@ -161,6 +155,9 @@ export default {
           { videoSrc: this.src },
         );
       }
+      this.initialized = true;
+    }).catch((err) => {
+      console.log(err);
     });
   },
 };
