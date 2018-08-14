@@ -14,7 +14,7 @@
 
 <script>
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
-import { THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION } from '@/constants';
+import { THUMBNAIL_DB_NAME } from '@/constants';
 import idb from 'idb';
 export default {
   name: 'thumbnail-video-player',
@@ -169,7 +169,7 @@ export default {
     },
     thumbnailArrayHandler(array) {
       const promiseArray = [];
-      idb.open(THUMBNAIL_DB_NAME, THUMBNAIL_DB_VERSION).then((db) => {
+      idb.open(THUMBNAIL_DB_NAME).then((db) => {
         const name = `thumbnail-width-${this.maxThumbnailWidth}`;
         const tx = db.transaction(name, 'readwrite');
         const store = tx.objectStore(name);
