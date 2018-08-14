@@ -8,7 +8,7 @@
       :thumbnailHeight="thumbnailHeight"
       :outerThumbnailInfo="outerThumbnailInfo"
       @update-thumbnail-info="updateThumbnailInfo"
-      v-if="initialized"
+      v-if="mountVideo"
       v-show="displayVideo">
       <span class="time">{{ videoTime }}</span>
     </thumbnail-video-player>
@@ -48,12 +48,12 @@ export default {
         videoRatio: this.videoRatio,
       },
       quickHash: null,
-      initialized: false,
       displayVideo: true,
       videoCurrentTime: 0,
       canvasCurrentTime: 0,
       autoGenerationIndex: 0,
       generationInterval: 3,
+      mountVideo: false,
     };
   },
   watch: {
@@ -68,8 +68,8 @@ export default {
             thumnailInfo,
             { videoSrc: this.src },
           );
-          this.displayVideo = result.lastGenerationIndex &&
-            result.lastGenerationIndex === result.maxGenerationCount;
+          this.mountVideo = !result.lastGenerationIndex ||
+            result.lastGenerationIndex < result.maxGenerationCount;
         }
       });
     },
@@ -82,6 +82,14 @@ export default {
         this.displayVideo = true;
         this.videoCurrentTime = newValue;
       }
+    },
+    autoGenerationIndex(newValue) {
+      const index = Math.abs(Math.floor(this.currentTime / this.generationInterval));
+      this.displayVideo = index <= newValue;
+    },
+    displayVideo(newValue) {
+      console.log('Video is', newValue);
+      console.log('Initialized is', this.mountVideo);
     },
   },
   methods: {
@@ -178,12 +186,10 @@ export default {
           thumnailInfo,
           { videoSrc: this.src },
         );
-        this.displayVideo = result.lastGenerationIndex &&
-          result.lastGenerationIndex === result.maxGenerationCount;
+        this.mountVideo = !result.lastGenerationIndex ||
+          result.lastGenerationIndex < result.maxGenerationCount;
       }
       this.videoCurrentTime = result.generationInterval * result.lastGenerationIndex || 0;
-      console.log(this.videoCurrentTime);
-      this.initialized = true;
     }).catch((err) => {
       console.log(err);
     });
