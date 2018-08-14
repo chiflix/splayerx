@@ -22,6 +22,7 @@ class InfoDB {
           return tx.complete;
         });
       }
+      db.transaction(this.schema, 'readwrite').objectStore(this.schema).put(data);
     });
   }
 
