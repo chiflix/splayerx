@@ -130,6 +130,79 @@ export default {
      * @param {Array.<string>} files File pathes array
      * @param {resultCallback} cb Callback function to process result
      */
+
+    /* this method is used to convert the timecodes extracted from matroska-subtitle
+      library (convert) to the timecodes format for VTT format.
+
+    msToTime(s) {
+      const ms = s % 1000;
+      s = (s - ms) / 1000;
+      const secs = s % 60;
+      s = (s - secs) / 60;
+      const mins = s % 60;
+      const hrs = (s - mins) / 60;
+      return (`${z(2, hrs)}:${z(2, mins)}:${z(2, secs)}.${z(3, ms)}`);
+    }, */
+
+
+    /*
+    the following method reads the subtitles embeded in the MKV files,
+    and add these subtitles into the video's texttracks.
+    But the structure of this method need to be changed and improved.
+
+    autoloadMkvSubtitles(filePath, cb) {
+      console.log(filePath);
+      const ectractFn = filePath => new Promise((resolve) => {
+        let tracks;
+        const subs = new MatroskaSubtitles();
+        subs.once('tracks', (track) => {
+          console.log(track);
+          tracks = track;
+          tracks.forEach((trac) => {
+            trac.subContent = '';
+          });
+        });
+        subs.on('subtitle', (sub, trackNumber) => {
+          const currentTrackIndex = trackNumber - 1;
+          let currentContent = '';
+          // the indices for each cue is probably can be ignored as it's VTT format
+
+          currentContent += `${this.msToTime(sub.time)} -->
+            ${this.msToTime(sub.time + sub.duration)}\r\n`;
+          currentContent += `${(sub.text)}\r\n\r\n`;
+
+          tracks[currentTrackIndex].subContent += currentContent;
+        });
+
+        subs.on('finish', () => {
+          resolve(tracks);
+        });
+        const realPath = filePath.substring(8);
+        fs.createReadStream(realPath).pipe(subs);
+      });
+      ectractFn(filePath).then((realTracks) => {
+        // now transfer string into VTT
+        console.log(realTracks);
+        const vid = this.$parent.$refs.videoCanvas;
+
+        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+        for (let i = 0; i < realTracks.length; i += 1) {
+          const sub = vid.addTextTrack('subtitles');
+          sub.mode = 'disabled';
+          parser.oncue = (cue) => {
+            sub.addCue(cue);
+          };
+          const webVttFormatStr = 'WEBVTT\r\n\r\n';
+          const preResult = realTracks[i].subContent;
+          const result = webVttFormatStr.concat(preResult);
+          parser.parse(result);
+        }
+        parser.onflush = cb;
+        parser.flush();
+      });
+    },
+    */
+
     addVttToVideoElement(files, cb) {
       const vid = this.$parent.$refs.videoCanvas;
       /* eslint-disable arrow-parens */
@@ -145,10 +218,10 @@ export default {
           parser.oncue = (cue) => {
             sub.addCue(cue);
           };
-          parser.onflush = cb;
           const result = results[i];
           parser.parse(result.toString('utf8'));
         }
+        parser.onflush = cb;
         parser.flush();
       });
     },

@@ -4,23 +4,25 @@
              v-if="hasRecentPlaylist">
             <div class="item shadow"
                  v-for="(item, index) in lastPlayedFile"
+                 :id="'item'+index"
                  :key="item.path"
                  :style="{
               backgroundImage: itemShortcut(item.shortCut),
               width: item.chosen ? '140px' : '114px',
               height: item.chosen ? '80px' : '65px',
             }"
-                 @click.stop="openFile(item.path)"
+                 @click.stop="onRecentItemClick(item)"
                  @mouseover="onRecentItemMouseover(item, index)"
-                 @mouseout="onRecentItemMouseout(index)">
+                 @mouseout="onRecentItemMouseout(index)"
+                 @mousedown.stop.capture="onRecentItemMousedown($event, index)">
             </div>
         </div>
     </div>
-
 </template>
 
 <script>
 import path from 'path';
+import asyncStorage from '@/helpers/asyncStorage';
 export default {
   name: 'playlist',
   data() {
@@ -32,6 +34,11 @@ export default {
       showShortcutImage: false,
       langdingLogoAppear: true,
       displayInfo: [],
+      mouseDown: false,
+      isDragging: false,
+      disX: '',
+      disY: '',
+      recentFileDel: false,
     };
   },
   props: {
@@ -99,6 +106,52 @@ export default {
     onRecentItemMouseout(index) {
       this.$set(this.lastPlayedFile[index], 'chosen', false);
     },
+    onRecentItemMousedown(ev, index) {
+      this.mouseDown = true;
+      this.isDragging = false;
+      this.disX = ev.clientX;
+      this.disY = ev.clientY;
+      const vm = this;
+      const item = document.querySelector(`#item${index}`);
+      item.style.zIndex = 5;
+      function mousemove(ev) {
+        if (vm.mouseDown) {
+          vm.isDragging = true;
+          const l = ev.clientX - vm.disX;
+          const t = ev.clientY - vm.disY;
+          item.style.left = `${l}px`;
+          item.style.top = `${t}px`;
+          if (l <= -140 || l >= 140 || t >= 80 || t <= -80) {
+            vm.recentFileDel = true;
+          } else {
+            vm.recentFileDel = false;
+          }
+        }
+      }
+      function mouseup() {
+        vm.mouseDown = false;
+        if (vm.recentFileDel) {
+          vm.displayInfo.langdingLogoAppear = true;
+          vm.displayInfo.showShortcutImage = false;
+          vm.$bus.$emit('displayInfo', vm.displayInfo);
+          vm.lastPlayedFile.splice(index, 1);
+          asyncStorage.set('recent-played', vm.lastPlayedFile);
+          vm.recentFileDel = false;
+        } else {
+          item.style.zIndex = 4;
+          item.style.left = '';
+          item.style.top = '';
+        }
+      }
+      document.onmousemove = mousemove;
+      document.querySelector('main').onmouseup = mouseup;
+      document.onmouseup = mouseup;
+    },
+    onRecentItemClick(item) {
+      if (!this.isDragging) {
+        this.openFile(item.path);
+      }
+    },
   },
 };
 </script>
@@ -112,6 +165,7 @@ export default {
         z-index: 4;
 
         .playlist {
+            -webkit-app-region: no-drag;
             display: flex;
             flex-direction: row;
             justify-content: flex-start;
