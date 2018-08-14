@@ -8,7 +8,8 @@
       :thumbnailHeight="thumbnailHeight"
       :outerThumbnailInfo="outerThumbnailInfo"
       @update-thumbnail-info="updateThumbnailInfo"
-      v-if="initialized">
+      v-if="initialized"
+      v-show="displayVideo">
       <span class="time">{{ videoTime }}</span>
     </thumbnail-video-player>
   </div>
@@ -48,6 +49,9 @@ export default {
       },
       quickHash: null,
       initialized: false,
+      displayVideo: true,
+      videoCurrentTime: 0,
+      canvasCurrentTime: 0,
     };
   },
   watch: {
@@ -62,6 +66,8 @@ export default {
             thumnailInfo,
             { videoSrc: this.src },
           );
+          this.displayVideo = result.lastGenerationIndex &&
+            result.lastGenerationIndex === result.maxGenerationCount;
         }
       });
     },
@@ -91,6 +97,7 @@ export default {
           generationInterval: event.interval,
           maxThumbnailCount: event.count,
         });
+        this.displayVideo = event.index !== event.count;
       });
     },
     retrieveThumbnailInfo(quickHash) {
@@ -155,8 +162,11 @@ export default {
           thumnailInfo,
           { videoSrc: this.src },
         );
+        this.displayVideo = result.lastGenerationIndex &&
+          result.lastGenerationIndex === result.maxGenerationCount;
       }
-      console.log(this.outerThumbnailInfo);
+      this.videoCurrentTime = result.generationInterval * result.lastGenerationIndex;
+      console.log(this.videoCurrentTime);
       this.initialized = true;
     }).catch((err) => {
       console.log(err);
