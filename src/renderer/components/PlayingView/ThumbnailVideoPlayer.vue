@@ -106,7 +106,7 @@ export default {
     // Data regenerators
     updateGenerationParameters() {
       this.videoDuration = this.videoElement.duration;
-      this.generationInterval = Math.round(this.videoDuration / (this.screenWidth / 4));
+      this.generationInterval = Math.round(this.videoDuration / (this.screenWidth / 4)) || 1;
       this.autoGenerationIndex = Math.floor(this.currentTime / this.generationInterval);
       this.maxThumbnailCount = Math.floor(this.videoDuration / this.generationInterval);
       console.log('[ThumbnailVideoPlayer|Info]:', this.videoDuration, this.maxThumbnailCount, this.generationInterval);
@@ -125,10 +125,12 @@ export default {
             index,
             blobImage: blobResult,
           });
-          if (this.tempBlobArray.length === 30) {
+          if (
+            (this.isAutoGeneration && index >= this.maxThumbnailCount) ||
+            this.tempBlobArray.length === 30) {
             const array = this.tempBlobArray;
             this.thumbnailArrayHandler(array).then(() => {
-              console.log(`${30} thumbnails added.`);
+              console.log(`${array.length} thumbnails added.`);
               this.$emit('update-thumbnail-info', {
                 index: this.autoGenerationIndex,
                 interval: this.generationInterval,
@@ -188,11 +190,12 @@ export default {
   created() {
     const { videoSrc } = this.outerThumbnailInfo;
     if (this.videoSrcValidator(videoSrc)) {
-      if (this.currentTime !== 0) {
+      if (!this.outerThumbnailInfo.newVideo) {
         this.videoSrc = videoSrc;
-        this.videoDuration = this.outerThumbnailInfo.videoDuration;
+        this.videoDuration = this.outerThumbnailInfo.videoDuration <= 0;
         this.screenWidth = this.outerThumbnailInfo.screenWidth;
-        this.generationInterval = this.outerThumbnailInfo.generationInterval;
+        this.generationInterval = this.outerThumbnailInfo.generationInterval <= 0 ?
+          this.generationInterval : this.outerThumbnailInfo.generationInterval;
         this.autoGenerationIndex = Math.floor(this.currentTime / this.generationInterval);
       } else {
         this.videoSrc = videoSrc;
@@ -212,6 +215,7 @@ export default {
     this.canvasContainer = document.createElement('canvas');
   },
   mounted() {
+    // Use document to pass unit test
     this.videoElement = this.$refs.video.videoElement ?
       this.$refs.video.videoElement() : document.querySelector('.base-video-player');
   },
