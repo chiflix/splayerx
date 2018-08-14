@@ -109,6 +109,11 @@ export default {
       this.generationInterval = Math.round(this.videoDuration / (this.screenWidth / 4)) || 1;
       this.autoGenerationIndex = Math.floor(this.currentTime / this.generationInterval);
       this.maxThumbnailCount = Math.floor(this.videoDuration / this.generationInterval);
+      this.$emit('update-thumbnail-info', {
+        index: this.autoGenerationIndex,
+        interval: this.generationInterval,
+        count: this.maxThumbnailCount,
+      });
       console.log('[ThumbnailVideoPlayer|Info]:', this.videoDuration, this.maxThumbnailCount, this.generationInterval);
     },
     thumbnailGeneration() {
