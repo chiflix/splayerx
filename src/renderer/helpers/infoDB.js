@@ -1,46 +1,28 @@
 
+import idb from 'idb';
+
 class InfoDB {
   constructor() {
-    const req = indexedDB.open('Info');
-    this.data = [];
-    req.onsuccess = () => {
-      this.db = req.result;
-      console.log('initDb DONE');
-    };
-    req.onerror = (evt) => {
-      console.error('initDb:', evt.target.errorCode);
-    };
-
-    req.onupgradeneeded = (evt) => {
-      console.log('initDb.onupgradeneeded');
-      const store = evt.target.result.createObjectStore('recent-played', { keyPath: 'quickHash' });
-
-      store.createIndex('lastOpened', 'lastOpened', { unique: false });
-    };
-  }
-
-  get() {
-    if (!indexedDB) {
-      console.log('doesn\'t support indexedDB');
-    }
-    if (this.db) {
-      const req = this.db.transaction('recent-played', 'readwrite').objectStore('recent-played').getAll();
-      req.onsuccess = () => {
-        this.data = req.result;
-      };
-    }
+    idb.open('Info', 1, (upgradeDB) => {
+      upgradeDB.createObjectStore('recent-played', { keyPath: 'quickHash' });
+    }).then((db) => {
+      const tx = db.transaction('recent-played', 'readonly');
+      this.data = tx.objectStore('recent-played').getAll();
+      return tx.complete;
+    }).then((allVal) => {
+      console.log(`infoData = ${allVal}`);
+    });
   }
 
   set(data) {
-    this.get();
-    if (!indexedDB) {
-      console.log('doesn\'t support indexedDB');
-    }
-    console.log('invoked');
-    if (this.db) {
-      this.db.transaction('recent-played', 'readwrite').objectStore('recent-played').put(data);
-    }
+    idb.open('Info').then(async (db) => {
+      const tx = db.transaction('recent-played', 'readwrite');
+      const store = tx.objectStore('recent-played');
+      await store.put(data);
+      this.data = store.getAll();
+      return tx.complete;
+    });
   }
 }
 
-export default new InfoDB();
+export default InfoDB;
