@@ -4,10 +4,7 @@
       <div class='subtitle-content'
         :style="subStyle"
         v-for="(html, key) in firstCueHTML"
-        v-html="html"></div>
-      <div class='subtitle-content'
-        :style="subStyle"
-        v-for="(html, key) in secondCueHTML"
+        :key="key"
         v-html="html"></div>
     </div>
 </template>
@@ -24,14 +21,14 @@ export default {
     return {
       textTrackID: 0,
       firstSubIndex: null,
-      firstActiveCue: null,
-      secondActiveCue: null,
       Sagi: null,
+      mediaHash: '',
+      firstActiveCues: [],
+      secondActiveCues: [],
       firstCueHTML: [],
       secondCueHTML: [],
       subNameArr: [],
       subStyle: {},
-      mediaHash: '',
       curStyle: {
         fontSize: 24,
         letterSpacing: 1,
@@ -43,56 +40,21 @@ export default {
     };
   },
   methods: {
-    init() {
+    subtitleInitialize() {
       const vid = this.$parent.$refs.videoCanvas;
       this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
       // fs.writeFile('111.txt', this.mediaHash, (err) => {
       //   console.log(err);
       // });
       this.Sagi = this.sagi();
-      this.loadLocalTextTracks();
-    },
-    /**
-     * Todo:
-     * 1. process ass subtitles
-     * 2. second subtitle css
-     * 3. accept subtitle from drag event and menu
-     * 4. detect subtitle language
-     */
-    /**
-     * @description Load all available text tracks in the
-     * same path. If no avalible subtitles, try to load
-     * textTracks from server.
-     */
-    loadLocalTextTracks() {
-      /* TODO:
-       * 字幕代码我自己觉得很不满意，期待更好的处理 - Tomasen
-       * move subtitle process to another component
-       * DOCs:
-       * https://gist.github.com/denilsonsa/aeb06c662cf98e29c379
-       * https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
-       * https://hacks.mozilla.org/2014/07/adding-captions-and-subtitles-to-html5-video/
-       */
-      const vid = this.$parent.$refs.videoCanvas;
-
-      /*
-       * TODO:
-       * If there is already text track, load it
-       * If there is already subtitle files(opened or loaded), load it
-       * If there is no (chinese/default language) text track, try translate api
-       */
-      // If there is already subtitle files(same dir), load it
       const files = [];
+      // Find local subtitles
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         files.push(subPath);
       });
 
       if (files.length > 0) {
-        const subNameArr = files.map(file => this.$_subNameFromLocalProcess(file));
-        this.$store.commit('SubtitleNameArr', subNameArr);
-
-        this.addVttToVideoElement(files, () => {
-          console.log('finished reading subtitle files');
+        this.loadLocalTextTracks(files, () => {
           this.subStyleChange();
           this.subtitleShow(0);
         });
@@ -102,6 +64,34 @@ export default {
           this.subtitleShow(0);
         });
       }
+    },
+    /**
+     * @param {Array.<string>} files File pathes array
+     * @param {callback} cb callback after finished function
+     */
+    loadLocalTextTracks(files, cb) {
+      /* TODO:
+       * 字幕代码我自己觉得很不满意，期待更好的处理 - Tomasen
+       * move subtitle process to another component
+       * DOCs:
+       * https://gist.github.com/denilsonsa/aeb06c662cf98e29c379
+       * https://developer.mozilla.org/en-US/docs/Web/API/VTTCue
+       * https://hacks.mozilla.org/2014/07/adding-captions-and-subtitles-to-html5-video/
+       */
+      /*
+       * TODO:
+       * If there is already text track, load it
+       * If there is already subtitle files(opened or loaded), load it
+       * If there is no (chinese/default language) text track, try translate api
+       */
+      // If there is already subtitle files(same dir), load it
+      const subNameArr = files.map(file => this.$_subNameFromLocalProcess(file));
+      this.$store.commit('SubtitleNameArr', subNameArr);
+
+      this.addVttToVideoElement(files, () => {
+        console.log('finished reading subtitle files');
+        cb();
+      });
     },
     /**
      * @param {resultCallback} cb callback function to process result
@@ -136,9 +126,9 @@ export default {
         });
     },
     /**
-     * @param {Array.<string>} files Subtitle pathes array
-     * @param {resultCallback} cb Callback function to process result
      * @description Process subtitles and add subtitles to video element
+     * @param {Array.<string>} files File pathes array
+     * @param {resultCallback} cb Callback function to process result
      */
     addVttToVideoElement(files, cb) {
       const vid = this.$parent.$refs.videoCanvas;
@@ -335,12 +325,14 @@ export default {
      */
     $_onCueChangeEventAdd(textTrack, type = 'first') {
       const firstSubEvent = (cue) => {
-        const tempCue = cue.currentTarget.activeCues[0];
-        this.firstActiveCue = tempCue;
+        const { activeCues } = cue.currentTarget;
+        this.firstActiveCues.pop();
+        this.firstActiveCues.push(activeCues);
       };
       const secondSubEvent = (cue) => {
-        const tempCue = cue.currentTarget.activeCues[0];
-        this.secondActiveCue = tempCue;
+        const { activeCues } = cue.currentTarget;
+        this.secondActiveCues.pop();
+        this.secondActiveCues.push(activeCues);
       };
       // write a same sub event to handle same subtitle situation
       textTrack.oncuechange = type === 'first' ? firstSubEvent : secondSubEvent;
@@ -375,7 +367,7 @@ export default {
       if (newVal && vid.textTracks[this.firstSubIndex].mode === 'disabled') {
         vid.textTracks[this.firstSubIndex].mode = 'hidden';
       } else if (!newVal && vid.textTracks[this.firstSubIndex].mode !== 'disabled') {
-        this.firstActiveCue = null;
+        this.firstActiveCues.pop();
         vid.textTracks[this.firstSubIndex].mode = 'disabled';
       } else {
         console.log(newVal);
@@ -384,24 +376,23 @@ export default {
       }
     },
     // 需要对这一部分内容优化
-    firstActiveCue(newVal) {
-      this.firstCueHTML.pop();
-      if (newVal) {
-        // 这里对cue进行处理
-        // 得到cue的line和position确定位置
-        this.firstCueHTML.push(WebVTT.convertCueToDOMTree(window, this.firstActiveCue.text)
-          .innerHTML);
+    firstActiveCues(newVal) {
+      const activeCues = newVal[0];
+      while (this.firstCueHTML.length !== 0) {
+        this.firstCueHTML.pop();
       }
+      for (let i = 0; i < activeCues.length; i += 1) {
+        this.firstCueHTML.push(WebVTT.convertCueToDOMTree(window, activeCues[i].text).innerHTML);
+      }
+      // const divs = WebVTT.processCues(window, activeCues, this.$refs.firstSubtitleContent);
+      // console.log(divs);
     },
   },
   created() {
-    this.$bus.$on('video-loaded', this.init);
-    // 可以二合一
+    this.$bus.$on('video-loaded', this.subtitleInitialize);
+
     this.$bus.$on('sub-first-change', (targetIndex) => {
       this.subtitleShow(targetIndex);
-    });
-    this.$bus.$on('sub-second-change', (targetIndex) => {
-      this.subtitleShow(targetIndex, 'second');
     });
 
     this.$bus.$on('first-subtitle-on', () => {
