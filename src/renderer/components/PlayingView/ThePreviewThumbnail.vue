@@ -38,6 +38,7 @@ export default {
   data() {
     return {
       outerThumbnailInfo: {
+        newVideo: true,
         videoSrc: this.src,
         videoDuration: -1,
         generationInterval: -1,
@@ -46,7 +47,6 @@ export default {
         videoRatio: this.videoRatio,
       },
       quickHash: null,
-      THUMBNAIL_DB_NAME: 'splayerx-preview-thumbnails',
       initialized: false,
     };
   },
@@ -105,9 +105,12 @@ export default {
                 lastGenerationIndex,
                 maxThumbnailCount,
                 generationInterval,
+                newVideo: false,
               });
             }
-            resolve({});
+            resolve({
+              newVideo: true,
+            });
           });
         }).catch((err) => {
           reject(err);
@@ -133,6 +136,7 @@ export default {
       return idb.open(INFO_DATABASE_NAME);
       /* eslint-disable newline-per-chained-call */
     }).then((db) => {
+      this.updateMediaQuickHash(this.src);
       const obejctStoreName = 'the-preview-thumbnail';
       this.infoDB().db.close();
       if (!db.objectStoreNames.contains(obejctStoreName)) {
@@ -142,10 +146,7 @@ export default {
         });
       }
       return idb.open(INFO_DATABASE_NAME);
-    }).then(() => {
-      this.updateMediaQuickHash(this.src);
-      return this.retrieveThumbnailInfo(this.quickHash);
-    }).then((result) => {
+    }).then(() => this.retrieveThumbnailInfo(this.quickHash)).then((result) => {
       if (result) {
         const thumnailInfo = result;
         this.outerThumbnailInfo = Object.assign(
@@ -155,6 +156,7 @@ export default {
           { videoSrc: this.src },
         );
       }
+      console.log(this.outerThumbnailInfo);
       this.initialized = true;
     }).catch((err) => {
       console.log(err);
