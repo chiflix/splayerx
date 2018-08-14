@@ -169,7 +169,6 @@ export default {
     }).then((db) => {
       this.updateMediaQuickHash(this.src);
       const obejctStoreName = 'the-preview-thumbnail';
-      this.infoDB().db.close();
       if (!db.objectStoreNames.contains(obejctStoreName)) {
         console.log('[IndexedDB]: Initial preview thumbnail info objectStore.');
         return idb.open(INFO_DATABASE_NAME, db.version + 1, (upgradeDB) => {
