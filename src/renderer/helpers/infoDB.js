@@ -2,24 +2,41 @@
 import idb from 'idb';
 
 class InfoDB {
-  constructor() {
-    idb.open('Info', 1, (upgradeDB) => {
-      upgradeDB.createObjectStore('recent-played', { keyPath: 'quickHash' });
-    }).then((db) => {
-      const tx = db.transaction('recent-played', 'readonly');
-      this.data = tx.objectStore('recent-played').getAll();
-      return tx.complete;
-    }).then((allVal) => {
-      console.log(`infoData = ${allVal}`);
+  /**
+   * @param  {string} schema specify which schema
+   *   you want to operate in Info databse
+   *   create if doesn't exist
+   */
+  constructor(schema) {
+    this.schema = schema;
+  }
+
+  add(data) {
+    idb.open('Info').then((db) => {
+      if (!db.objectStoreNames.contains(this.schema)) {
+        idb.open('Info', db.version + 1, (upgradeDB) => {
+          const store = upgradeDB.createObjectStore(this.schema, { keyPath: 'quickHash' });
+          store.createIndex('lastOpened', 'lastOpened', { unique: false });
+        }).then((db) => {
+          const tx = db.transaction(this.schema, 'readwrite').objectStore(this.schema).put(data);
+          return tx.complete;
+        });
+      }
     });
   }
 
-  set(data) {
-    idb.open('Info').then(async (db) => {
-      const tx = db.transaction('recent-played', 'readwrite');
-      const store = tx.objectStore('recent-played');
-      await store.put(data);
-      this.data = store.getAll();
+  get(key) {
+    return idb.open('Info').then(async (db) => {
+      const value = await db.transaction(this.schema).objectStore(this.schema).get(key);
+      return value;
+    });
+  }
+
+  getAll() {
+    return idb.open('Info').then(async (db) => {
+      const tx = db.transaction(this.schema, 'readonly');
+      const val = await tx.objectStore(this.schema).getAll();
+      this.data = val;
       return tx.complete;
     });
   }

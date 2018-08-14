@@ -80,8 +80,8 @@ export default {
       } else {
         vidPath = path.replace(/^file:\/\//, '');
       }
-      const db = new InfoDB();
-      db.set({
+      const db = new InfoDB('recent-played');
+      db.add({
         quickHash: this.mediaQuickHash(vidPath),
         path,
         shortCut: '',
