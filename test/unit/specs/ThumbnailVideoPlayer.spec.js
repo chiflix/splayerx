@@ -1,6 +1,5 @@
 import ThumbnailVideoPlayer from '@/components/PlayingView/ThumbnailVideoPlayer';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
-import ThumbnailWorker from '@/worker/thumbnail.worker';
 import { shallowMount } from '@vue/test-utils';
 import sinon from 'sinon';
 
