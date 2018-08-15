@@ -10,7 +10,7 @@ export default {
     imgSrc: {
       required: true,
     },
-    style: {
+    _style: {
       type: Object,
     },
     width: Number,
@@ -83,7 +83,7 @@ export default {
       switch (type) {
         default: {
           options = {
-            style: this.style,
+            style: this._style,
             attrs: outerWidth && outerHeight ? {
               width: outerWidth,
               height: outerHeight,
