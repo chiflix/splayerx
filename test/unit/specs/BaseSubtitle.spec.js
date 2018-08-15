@@ -1,6 +1,8 @@
 import Vuex from 'vuex';
 import PlaybackState from '@/store/modules/PlaybackState';
+import WindowState from '@/store/modules/WindowState';
 import BaseSubtitle from '@/components/PlayingView/BaseSubtitle';
+import VideoCanvas from '@/components/PlayingView/VideoCanvas';
 import { mount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
 import fs from 'fs';
@@ -10,7 +12,7 @@ import srt2vtt from 'srt-to-vtt';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-describe('BaseSubtitle.vue', () => {
+describe.only('BaseSubtitle.vue', () => {
   let store;
 
   beforeEach(() => {
@@ -20,6 +22,11 @@ describe('BaseSubtitle.vue', () => {
           state: PlaybackState.state,
           mutations: PlaybackState.mutations,
           getters: PlaybackState.getters,
+        },
+        WindowState: {
+          state: WindowState.state,
+          mutations: WindowState.mutations,
+          getters: WindowState.getters,
         },
       },
     });
@@ -45,8 +52,28 @@ describe('BaseSubtitle.vue', () => {
     expect(wrapper.vm.curStyle.background).equal('');
   });
 
-  it('subtitleInitialize and load local subtitles', () => {
-  })
+  // it('subtitleInitialize and load local subtitles', () => {
+  // })
+
+  // Due to arrow functions, (this) is not vue instance
+  // which will cause warning
+  it('loadLocalTextTracks test', (done) => {
+    const wrapper = mount(VideoCanvas, {
+      store,
+      localVue,
+      propsData: {
+        src: 'file:///./test/assets/test.avi',
+      },
+    });
+    const childWrapper = wrapper.find(BaseSubtitle);
+    const files = ['./test/assets/test3.srt', './test/assets/test.srt'];
+    const spy = sinon.spy(childWrapper.vm, 'addVttToVideoElement');
+    childWrapper.vm.loadLocalTextTracks(files, () => {
+      sinon.assert.called(spy);
+      spy.restore();
+      done();
+    });
+  });
 
   it('$_concatStream success test', (done) => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
@@ -77,8 +104,22 @@ describe('BaseSubtitle.vue', () => {
     expect(res).equal(0);
   });
 
+  it('$_createSubtitleStream success', () => {
+    const wrapper = mount(BaseSubtitle, { store, localVue });
+    const subPath = './test/assets/test3.srt';
+    const spy = sinon.spy();
+    const concatStream = sinon.stub(wrapper.vm, '$_concatStream');
+    concatStream.yields();
+    wrapper.vm.$_createSubtitleStream(subPath, spy);
+    concatStream.restore();
+    sinon.assert.calledOnce(spy);
+  });
+
   it('$_subNameFromLocalProcess test', () => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
+    wrapper.setData({
+      textTrackID: 0,
+    });
     const file = './test/assets/test3.srt';
     const result = wrapper.vm.$_subNameFromLocalProcess(file);
     const target = {
@@ -90,29 +131,44 @@ describe('BaseSubtitle.vue', () => {
     expect(result).deep.equal(target);
   });
 
-  it('$_createSubtitleStream success', () => {
+  it('$_subNameFromServerProcess has language code', () => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
-    const subPath = './test/assets/test3.srt';
-    const spy = sinon.spy();
-    const concatStream = sinon.stub(wrapper.vm, '$_concatStream');
-    concatStream.yields();
-    wrapper.vm.$_createSubtitleStream(subPath, spy);
-    // done();
-    concatStream.restore();
-    sinon.assert.calledOnce(spy);
+    wrapper.setData({
+      testTrackID: 0,
+    });
+    const textTrack = [1, 'CN'];
+    const target = {
+      title: 'CN',
+      status: null,
+      textTrackID: 0,
+      origin: 'server',
+    };
+    const res = wrapper.vm.$_subnameFromServerProcess(textTrack);
+    expect(res).deep.equal(target);
   });
 
-  // it('addVttToVideoElement success', () => {
-  //   const wrapper = mount(BaseSubtitle, { store, localVue });
-  //   const files = ['./test/assets/test3.srt'];
-  //   const spy = sinon.spy();
-  //   const stub = sinon.stub(wrapper.vm, 'addVttToVideoElement');
-  //   // stub.yields();
-  //   // stub(files, spy);
-  //   // stub.restore();
-  //   // wrapper.vm.addVttToVideoElement(files, (err, res) => {
-  //   //   spy();
-  //   // });
-  //   // sinon.assert.calledOnce(spy);
+  it('$_subNameFromServerProcess does not have language code', () => {
+    const wrapper = mount(BaseSubtitle, { store, localVue });
+    wrapper.setData({
+      testTrackID: 0,
+    });
+    const textTrack = [1, ''];
+    const target = {
+      title: 'subtitle',
+      status: null,
+      textTrackID: 0,
+      origin: 'server',
+    };
+    const res = wrapper.vm.$_subnameFromServerProcess(textTrack);
+    expect(res).deep.equal(target);
+  });
+
+  // it('$_onCueChangeEventAdd test - first', () => {
+  // });
+
+  // it('$_onCueChangeEventAdd test - first', () => {
+  // });
+
+  // it('$_clearSubtitle test', () => {
   // });
 });
