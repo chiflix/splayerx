@@ -11,7 +11,7 @@
       //
     },
     mounted() {
-      this.$electron.ipcRenderer.on('update-message', (event, text) => {
+      this.$electron.ipcRenderer.on('update-message-test', (event, text) => {
         console.log(text);
       });
     },

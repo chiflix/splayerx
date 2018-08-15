@@ -83,6 +83,7 @@ export default {
       }
     },
     autoGenerationIndex(newValue) {
+      console.log('AutoGenerationIndex:', newValue);
       this.videoSeek(newValue);
     },
   },
@@ -124,11 +125,11 @@ export default {
           this.videoElement,
           0, 0, this.maxThumbnailWidth, this.maxThumbnailHeight,
         );
-        this.canvasContainer.toBlob((blobResult) => {
+        createImageBitmap(this.canvasContainer).then((imageBitmap) => {
           this.thumbnailSet.add(index);
           this.tempBlobArray.push({
             index,
-            blobImage: blobResult,
+            imageBitmap: imageBitmap,
           });
           if (
             (this.isAutoGeneration && index >= this.maxThumbnailCount) ||
@@ -147,7 +148,7 @@ export default {
           if (this.isAutoGeneration && this.autoGenerationIndex < this.maxThumbnailCount) {
             this.autoGenerationIndex += 1;
           }
-        }, 'image/webp', 0.1);
+        });
       }
     },
     videoSeek(index) {
@@ -183,7 +184,7 @@ export default {
         array.forEach((thumbnail) => {
           promiseArray.push(store.put({
             id: `${thumbnail.index}-${this.quickHash}`,
-            blob: thumbnail.blobImage,
+            imageBitmap: thumbnail.imageBitmap,
             quickHash: this.quickHash,
             index: thumbnail.index,
           }));
@@ -218,6 +219,8 @@ export default {
       }
     }
     this.canvasContainer = document.createElement('canvas');
+    this.canvasContainer.width = this.maxThumbnailWidth;
+    this.canvasContainer.height = this.maxThumbnailHeight;
   },
   mounted() {
     // Use document to pass unit test

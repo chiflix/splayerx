@@ -1,24 +1,17 @@
-import { dialog } from 'electron'; // eslint-disable-line
-import VueI18n from 'vue-i18n';
-import Vue from 'vue';
 import Promise from 'bluebird';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
-import messages from '../../renderer/locales';
+import GetMainHelper from './MainHelper.js';
+
 const waitTime = 5 * 1000; // todo need to set it
+
 function setAutoUpdater() {
   // when the update is available, it will not download automatically
   autoUpdater.autoDownload = false;
-  // if user does not install downloaded app, it will auto install when quit the app
-  autoUpdater.autoInstallOnAppQuit = false;
+  if (process.platform === 'win32') autoUpdater.autoInstallOnAppQuit = false;
+  if (process.platform === 'darwin') autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.allowDowngrade = false;
 }
-Vue.use(VueI18n);
-const i18n = new VueI18n({
-  locale: 'zhCN', // set locale
-  messages, // set locale messages
-});
-
 const UpdaterFactory = ((() => {
   let instance = null;
 
@@ -30,11 +23,13 @@ const UpdaterFactory = ((() => {
       if (!autoUpdater) {
         return null;
       }
+      this.autoUpdater = autoUpdater;
       autoUpdater.logger = log;
       autoUpdater.logger.transports.file.level = 'info';
       this.win = window;
       this.app = app;
-      this.getSystemLocale();
+      this.mainHelper = new GetMainHelper(this);
+      this.mainHelper.registerMessageReceiver();
     }
     /*
      *it should be called when the app starts
@@ -43,7 +38,12 @@ const UpdaterFactory = ((() => {
      */
     onStart() {
       return new Promise((resolve) => {
+        // test lyc ->
+        // this.mainHelper.onUpdateDownloaded({ version: 123, note: 123 });
+        // setTimeout(() => { this.mainHelper.onStart(); }, 2000);
+        // <- test
         if (process.env.NODE_ENV === 'production') {
+          this.mainHelper.onStart();
           this.startUpdate().then((message) => {
             if (message.substring(0, 5) === 'Error') {
               setTimeout(() => { resolve(this.onStart()); }, waitTime); // 5min check for once
@@ -56,21 +56,6 @@ const UpdaterFactory = ((() => {
           resolve('not production');
         }
       });
-    }
-    getSystemLocale() {
-      const localeMap = {
-        'en': 'en',   // eslint-disable-line
-        'en-AU': 'en',
-        'en-CA': 'en',
-        'en-GB': 'en',
-        'en-NZ': 'en',
-        'en-US': 'en',
-        'en-ZA': 'en',
-        'zh-CN': 'zhCN',
-        'zh-TW': 'zhTW',
-      };
-      const locale = this.app.getLocale();
-      i18n.locale = localeMap[locale] || i18n.locale;
     }
     startUpdate() {
       return new Promise((resolve) => {
@@ -89,10 +74,10 @@ const UpdaterFactory = ((() => {
           this.doUpdate().catch((err) => {
             switch (err.toString()) {
               case 'Error: net::ERR_INTERNET_DISCONNECTED':
-                handelResolve('Err:Connect Error');
+                handelResolve('Error:Connect Error');
                 break;
               case 'Error: net::ERR_NETWORK_CHANGED':
-                handelResolve('Err:Connect Error');
+                handelResolve('Error:Connect Error');
                 break;
               case 'Error: net::ERR_CONNECTION_RESET':
                 handelResolve('Error:Connect Error');
@@ -107,7 +92,6 @@ const UpdaterFactory = ((() => {
         }
       });
     }
-
 
     doUpdate() {
       return new Promise((resolve, reject) => {
@@ -133,6 +117,7 @@ const UpdaterFactory = ((() => {
         autoUpdater.on('update-available', (info) => {
           this.ulog(`update available ${JSON.stringify(info)}`);
           if (this.checkUpdateInfo(info)) {
+            this.currentUpdateInfo = info;
             autoUpdater.downloadUpdate().catch(handleRejection);
           } else {
             handleResolve('updateNotAvailable');
@@ -149,37 +134,20 @@ const UpdaterFactory = ((() => {
           let logMessage = `Download speed: ${progressObj.bytesPerSecond}`;
           logMessage = `${logMessage} - Downloaded ${progressObj.percent}%`;
           logMessage = `${logMessage} (${progressObj.transferred}/${progressObj.total})`;
-          this.sendStatusToWindow(logMessage);
+          this.mainHelper.sendStatusToWindow(logMessage);
         });
         autoUpdater.on('update-downloaded', () => {
-          // todo multi language
-          dialog.showMessageBox({
-            type: 'question',
-            buttons: [i18n.t('msg.update.yes'), i18n.t('msg.update.no')],
-            title: i18n.t('msg.update.title'),
-            message: i18n.t('msg.update.message'),
-          }, (response) => {
-            if (response === 0) { // Runs the following if 'Yes' is clicked
-              this.app.showExitPrompt = false;
-              autoUpdater.quitAndInstall(false, false);
-              resolve('restart');
-            } else {
-              handleResolve('wait');
-            }
-          });
+          this.mainHelper.onUpdateDownloaded(this.currentUpdateInfo);
         });
         autoUpdater.checkForUpdates().catch(handleRejection);
       });
     }
 
-    sendStatusToWindow(text) {
-      if (this.win) {
-        try {
-          this.win.webContents.send('update-message', text);
-        } catch (err) {
-          // means window is closed
-        }
-      }
+    quitAndInstall() {
+      return new Promise((resolve) => {
+        this.ulog('quit and install');
+        resolve(autoUpdater.quitAndInstall());
+      });
     }
 
     /*
@@ -194,14 +162,8 @@ const UpdaterFactory = ((() => {
       // compare(this.currentUpdateInfo, updateInfo);
       return true;
     }
-    set Window(win) {
-      this.win = win;
-    }
-    get Window() {
-      return this.win;
-    }
     ulog(object) {
-      this.sendStatusToWindow(object.toString());
+      this.mainHelper.sendStatusToWindow(object.toString(), 'update-message-test');
       log.info(object.toString());
     }
   }
