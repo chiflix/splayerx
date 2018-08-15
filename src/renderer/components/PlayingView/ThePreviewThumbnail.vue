@@ -18,7 +18,8 @@
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
       :outerThumbnailInfo="outerThumbnailInfo"
-      v-if="!mountVideo"
+      :lastGenerationIndex="lastGenerationIndex"
+      :maxThumbnailCount="maxThumbnailCount"
       v-show="!displayVideo" />
   </div>
 </template>
@@ -56,6 +57,7 @@ export default {
         screenWidth: 1920,
         maxThumbnailWidth: 240,
         videoRatio: this.videoRatio,
+        lastGenerationIndex: 0,
       },
       quickHash: null,
       displayVideo: true,
@@ -64,28 +66,17 @@ export default {
       autoGenerationIndex: 0,
       generationInterval: 3,
       mountVideo: false,
+      maxThumbnailCount: 0,
       lastGenerationIndex: 0,
-      maxGenerationCount: 0,
     };
   },
   watch: {
     src(newValue) {
+      if (this.mountVideo) {
+        this.mountVideo = false;
+      }
       this.updateMediaQuickHash(newValue);
-      this.retrieveThumbnailInfo(this.quickHash).then((result) => {
-        if (result) {
-          const thumnailInfo = result;
-          this.outerThumbnailInfo = Object.assign(
-            {},
-            this.outerThumbnailInfo,
-            thumnailInfo,
-            { videoSrc: this.src },
-          );
-          this.lastGenerationIndex = result.lastGenerationIndex || 0;
-          this.maxGenerationCount = result.maxGenerationCount || 0;
-          this.mountVideo = !result.lastGenerationIndex ||
-            result.lastGenerationIndex < result.maxGenerationCount;
-        }
-      });
+      this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
     },
     currentTime(newValue) {
       const index = Math.abs(Math.floor(newValue / this.generationInterval));
@@ -100,10 +91,6 @@ export default {
     autoGenerationIndex(newValue) {
       const index = Math.abs(Math.floor(this.currentTime / this.generationInterval));
       this.displayVideo = index <= newValue;
-    },
-    displayVideo(newValue) {
-      console.log('Video is', newValue);
-      console.log('Initialized is', this.mountVideo);
     },
   },
   methods: {
@@ -122,11 +109,9 @@ export default {
       this.quickHash = this.mediaQuickHash(filePath);
     },
     updateThumbnailInfo(event) {
-      this.displayVideo = event.index !== event.count;
+      this.displayVideo = event.index < event.count;
       this.autoGenerationIndex = event.index;
       this.generationInterval = event.interval;
-      this.lastGenerationIndex = event.index || 0;
-      this.maxGenerationCount = event.count || 0;
       idb.open(INFO_DATABASE_NAME).then((db) => {
         const tx = db.transaction('the-preview-thumbnail', 'readwrite');
         const store = tx.objectStore('the-preview-thumbnail');
@@ -164,6 +149,27 @@ export default {
         });
       });
     },
+    updateThumbnailData(dataResult) {
+      const result = dataResult;
+      if (result) {
+        const thumnailInfo = result;
+        // Update Generation Parameters
+        this.lastGenerationIndex = result.lastGenerationIndex || 0;
+        this.maxThumbnailCount = result.maxThumbnailCount || 0;
+        // Update mountVideo
+        this.mountVideo = !result.lastGenerationIndex ||
+          result.lastGenerationIndex < result.maxThumbnailCount;
+        this.videoCurrentTime = result.generationInterval * result.lastGenerationIndex || 0;
+        // Update outerThumbnailInfo
+        this.outerThumbnailInfo = Object.assign(
+          {},
+          this.outerThumbnailInfo,
+          thumnailInfo,
+          { videoSrc: this.src },
+          { lastGenerationIndex: this.lastGenerationIndex },
+        );
+      }
+    },
   },
   created() {
     idb.open(THUMBNAIL_DB_NAME).then((db) => {
@@ -192,24 +198,11 @@ export default {
         });
       }
       return idb.open(INFO_DATABASE_NAME);
-    }).then(() => this.retrieveThumbnailInfo(this.quickHash)).then((result) => {
-      if (result) {
-        const thumnailInfo = result;
-        this.outerThumbnailInfo = Object.assign(
-          {},
-          this.outerThumbnailInfo,
-          thumnailInfo,
-          { videoSrc: this.src },
-        );
-        this.lastGenerationIndex = result.lastGenerationIndex || 0;
-        this.maxGenerationCount = result.maxGenerationCount || 0;
-        this.mountVideo = !result.lastGenerationIndex ||
-          result.lastGenerationIndex < result.maxGenerationCount;
-      }
-      this.videoCurrentTime = result.generationInterval * result.lastGenerationIndex || 0;
-    }).catch((err) => {
-      console.log(err);
-    });
+    })
+      .then(() => this.retrieveThumbnailInfo(this.quickHash))
+      .then(this.updateThumbnailData).catch((err) => {
+        console.log(err);
+      });
   },
 };
 </script>
