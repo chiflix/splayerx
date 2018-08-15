@@ -426,10 +426,12 @@ export default {
     },
     /**
      * @description function to clear former subtitles
+     * @param {string} type clear first, second or all subtitles
      */
     $_clearSubtitle(type = 'first') {
       if (type === 'first') {
         if (this.firstSubState) {
+          console.log(111111);
           const vid = this.$parent.$refs.videoCanvas;
           vid.textTracks[this.firstSubIndex].mode = 'disabled';
           vid.textTracks[this.firstSubIndex].oncuechange = null;
@@ -443,7 +445,6 @@ export default {
   },
   computed: {
     firstSubState() {
-      console.log(this.$store.getters.firstSubIndex);
       return this.$store.getters.firstSubIndex !== -1;
     },
   },
@@ -528,6 +529,7 @@ export default {
     align-items: center;
   }
 }
+// 将来放弃flex时使用
 // .video {
   // .subtitle-wrapper {
   //   position: absolute;
