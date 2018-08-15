@@ -112,40 +112,30 @@ export default {
       this.displayVideo = event.index < event.count;
       this.autoGenerationIndex = event.index;
       this.generationInterval = event.interval;
-      idb.open(INFO_DATABASE_NAME).then((db) => {
-        const tx = db.transaction('the-preview-thumbnail', 'readwrite');
-        const store = tx.objectStore('the-preview-thumbnail');
-        store.put({
-          quickHash: this.quickHash,
-          lastGenerationIndex: event.index,
-          generationInterval: event.interval,
-          maxThumbnailCount: event.count,
-        });
+      this.infoDB().add('the-preview-thumbnail', {
+        quickHash: this.quickHash,
+        lastGenerationIndex: event.index,
+        generationInterval: event.interval,
+        maxThumbnailCount: event.count,
       });
     },
     retrieveThumbnailInfo(quickHash) {
-      return new Promise((resolve, reject) => {
-        idb.open(INFO_DATABASE_NAME).then((db) => {
-          const tx = db.transaction('the-preview-thumbnail', 'readonly');
-          const store = tx.objectStore('the-preview-thumbnail');
-          store.get(quickHash).then((result) => {
-            if (result) {
-              const { lastGenerationIndex, maxThumbnailCount, generationInterval } = result;
-              this.autoGenerationIndex = lastGenerationIndex;
-              this.generationInterval = generationInterval;
-              resolve({
-                lastGenerationIndex,
-                maxThumbnailCount,
-                generationInterval,
-                newVideo: false,
-              });
-            }
+      return new Promise((resolve) => {
+        this.infoDB().get('the-preview-thumbnail', quickHash).then((result) => {
+          if (result) {
+            const { lastGenerationIndex, maxThumbnailCount, generationInterval } = result;
+            this.autoGenerationIndex = lastGenerationIndex;
+            this.generationInterval = generationInterval;
             resolve({
-              newVideo: true,
+              lastGenerationIndex,
+              maxThumbnailCount,
+              generationInterval,
+              newVideo: false,
             });
+          }
+          resolve({
+            newVideo: true,
           });
-        }).catch((err) => {
-          reject(err);
         });
       });
     },
