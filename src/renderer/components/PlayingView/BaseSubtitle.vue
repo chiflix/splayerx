@@ -1,11 +1,13 @@
 <template>
     <div class="subtitle-wrapper">
       <!-- Need a way to avoid v-html -->
-      <div class='subtitle-content'
-        :style="subStyle"
-        v-for="(html, key) in firstCueHTML"
-        :key="key"
-        v-html="html"></div>
+      <div class='flex-box'>
+        <div class='subtitle-content'
+          :style="subStyle"
+          v-for="(html, key) in firstCueHTML"
+          :key="key"
+          v-html="html"></div>
+      </div>
     </div>
 </template>
 
@@ -43,6 +45,7 @@ export default {
     subtitleInitialize() {
       const vid = this.$parent.$refs.videoCanvas;
       this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
+      // This code is aim to get mediaHash of video
       // fs.writeFile('111.txt', this.mediaHash, (err) => {
       //   console.log(err);
       // });
@@ -67,7 +70,7 @@ export default {
     },
     /**
      * @param {Array.<string>} files File pathes array
-     * @param {callback} cb callback after finished function
+     * @param {function} cb callback after finished function
      */
     loadLocalTextTracks(files, cb) {
       /* TODO:
@@ -94,7 +97,7 @@ export default {
       });
     },
     /**
-     * @param {resultCallback} cb callback function to process result
+     * @param {function} cb callback function to process result
      * after server transcript loaded.
      * @description Load transcript from server and do callback function
      * after finished all request.
@@ -103,33 +106,40 @@ export default {
       this.Sagi.mediaTranslate(this.mediaHash)
         .then((res) => {
           // handle 2 situations:
-          if (res.array[0][1]) {
+          if (res.array[0][1] && res.array[0][1] !== 'OK') {
             console.log('Warning: No server transcripts.');
-            console.log(res);
+            console.log('Please load stream translate.');
           } else {
             const textTrackList = res.array[1];
 
-            const subtitleNameArr = textTrackList
-              .map(textTrack => this.$_subnameFromServerProcess(textTrack));
-            this.$store.commit('SubtitleNameArr', subtitleNameArr);
+            this.getAllTranscriptsFromServer(textTrackList)
+              .then((resArray) => {
+                for (let i = 0; i < resArray.length; i += 1) {
+                  const res = resArray[i];
+                  this.addCuesArray(res.array[1]);
+                }
 
-            this.getAllTranscriptsFromServer(textTrackList).then((resArray) => {
-              for (let i = 0; i < resArray.length; i += 1) {
-                const res = resArray[i];
-                this.addCuesArray(res.array[1]);
-              }
-              cb();
-            });
+                // Only when all subtitles are successfully loaded,
+                // users can see the server subtitles in Subtitle Menu.
+                const subtitleNameArr = textTrackList
+                  .map(textTrack => this.$_subnameFromServerProcess(textTrack));
+                this.$store.commit('SubtitleNameArr', subtitleNameArr);
+
+                cb();
+              })
+              .catch((err) => {
+                console.log('-----');
+                console.log('Error: load all transcripts error');
+                console.log(err);
+              });
           }
-        }, (err) => {
+        })
+        .catch((err) => {
+          console.log('------');
+          console.log('Error: load textTrackList error');
           console.log(err);
         });
     },
-    /**
-     * @description Process subtitles and add subtitles to video element
-     * @param {Array.<string>} files File pathes array
-     * @param {resultCallback} cb Callback function to process result
-     */
 
     /* this method is used to convert the timecodes extracted from matroska-subtitle
       library (convert) to the timecodes format for VTT format.
@@ -202,7 +212,11 @@ export default {
       });
     },
     */
-
+    /**
+     * @description Process subtitles and add subtitles to video element
+     * @param {Array.<string>} files File pathes array
+     * @param {function} cb Callback function to process result
+     */
     addVttToVideoElement(files, cb) {
       const vid = this.$parent.$refs.videoCanvas;
       /* eslint-disable arrow-parens */
@@ -225,10 +239,8 @@ export default {
         parser.flush();
       });
     },
-    // Todo:
-    // 这里有个问题，获取后端字幕的速度不够快，会有一定时间的延迟
     /**
-     * @description This is a
+     * @description Load all transcrips from server
      */
     async getAllTranscriptsFromServer(textTrackList) {
       let resArray = [];
@@ -237,7 +249,6 @@ export default {
         const transcriptId = textTrackList[i][0];
         const res = this.Sagi.getTranscript(transcriptId);
         waitArray.push(res);
-        console.log(res);
       }
       resArray = await Promise.all(waitArray);
       return resArray;
@@ -314,7 +325,7 @@ export default {
     /**
      * @link https://github.com/mafintosh/pumpify
      * @param {Pumpify} stream duplex stream for subtitles
-     * @param {resultCallback} cb Callback function to process result.
+     * @param {function} cb Callback function to process result.
      * (err, result) are two arguments of callback.
      */
     $_concatStream(stream, cb) {
@@ -346,7 +357,7 @@ export default {
     },
     /**
      * @param {string} subPath Subtitle Path
-     * @param {resultCallback} cb Callback function to process result
+     * @param {function} cb Callback function to process result
      */
     $_createSubtitleStream(subPath, cb) {
       const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
@@ -377,11 +388,14 @@ export default {
      */
     $_subnameFromServerProcess(textTrack) {
       let title = '';
-      if (textTrack[2]) {
-        console.log(textTrack);
+      if (textTrack[1]) {
+        title += textTrack[1];
+      } else {
+        console.log('Error: No language code');
+        console.log('Use default subtitle name');
+        title = 'subtitle';
       }
       // process language code to subtitle name
-      title = 'subtitle';
       const res = {
         title,
         status: null,
@@ -436,25 +450,25 @@ export default {
   watch: {
     firstSubState(newVal) {
       const vid = this.$parent.$refs.videoCanvas;
-      console.log(vid.textTracks[this.firstSubIndex].mode);
       if (newVal && vid.textTracks[this.firstSubIndex].mode === 'disabled') {
         vid.textTracks[this.firstSubIndex].mode = 'hidden';
       } else if (!newVal && vid.textTracks[this.firstSubIndex].mode !== 'disabled') {
         this.firstActiveCues.pop();
         vid.textTracks[this.firstSubIndex].mode = 'disabled';
       } else {
-        console.log(newVal);
-        console.log(this.firstSubIndex);
         console.log('Error: mode is not correct');
       }
     },
     // 需要对这一部分内容优化
     firstActiveCues(newVal) {
+      // 此处的处理方式不够完美，需要后期重写
+      // 根据vtt.js的代码，重写一个对于cue的处理函数，添加到div中
+      // 涵盖了各种style与字幕位置
       const activeCues = newVal[0];
       while (this.firstCueHTML.length !== 0) {
         this.firstCueHTML.pop();
       }
-      for (let i = 0; i < activeCues.length; i += 1) {
+      for (let i = 0; activeCues && i < activeCues.length; i += 1) {
         this.firstCueHTML.push(WebVTT.convertCueToDOMTree(window, activeCues[i].text).innerHTML);
       }
       // const divs = WebVTT.processCues(window, activeCues, this.$refs.firstSubtitleContent);
@@ -499,19 +513,37 @@ export default {
 .video {
   .subtitle-wrapper {
     position: absolute;
-    top: 0;
     left: 0;
+    bottom: 20px;
     width: 100%;
-    height: 100%;
-
-    .subtitle-content {
-      position: absolute;
-      bottom: 20px;
-      text-align: center;
-      width: 100%;
-      white-space: pre;
-    }
+  }
+  .subtitle-content {
+    white-space: pre;
+    text-align: center;
+  }
+  .flex-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 }
+// .video {
+  // .subtitle-wrapper {
+  //   position: absolute;
+  //   top: 0;
+  //   left: 0;
+  //   width: 100%;
+  //   height: 100%;
+
+  //   .subtitle-content {
+  //     position: absolute;
+  //     bottom: 20px;
+  //     text-align: center;
+  //     width: 100%;
+  //     white-space: pre;
+  //   }
+  // }
+// }
 </style>
 

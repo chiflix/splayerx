@@ -7,7 +7,7 @@
              v-if="appearSubtitleMenu">
           <ul class="sub-menu">
 
-            <li v-for="(item, index) in onlineSubsPlaceHolder"
+            <!-- <li v-for="(item, index) in onlineSubsPlaceHolder"
               @click.stop="toggleItemClick(index+10)"
               @mouseover.stop.self="toggleItemsMouseOver"
               @mouseleave.stop.self="toggleItemsMouseLeave"
@@ -19,7 +19,7 @@
               <div class="chosen-dot"
                    v-if="itemHasBeenChosen(index+10)">
               </div>
-            </li>
+            </li> -->
 
             <li
               v-for="(item, index) in computedAvaliableItems"
