@@ -12,6 +12,14 @@
       v-show="displayVideo">
       <span class="time">{{ videoTime }}</span>
     </thumbnail-video-player>
+    <thumbnail-display-canvas
+      :quickHash="quickHash"
+      :currentTime="canvasCurrentTime"
+      :thumbnailWidth="thumbnailWidth"
+      :thumbnailHeight="thumbnailHeight"
+      :outerThumbnailInfo="outerThumbnailInfo"
+      v-if="!mountVideo"
+      v-show="!displayVideo" />
   </div>
 </template>
 
@@ -22,9 +30,11 @@ import {
   INFO_DATABASE_NAME,
 } from '@/constants';
 import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
+import ThumbnailDisplayCanvas from './ThumbnailDisplayCanvas';
 export default {
   components: {
     'thumbnail-video-player': ThumbnailVideoPlayer,
+    'thumbnail-display-canvas': ThumbnailVideoPlayer,
   },
   props: {
     src: String,
