@@ -52,7 +52,7 @@ describe('BaseSubtitle.vue', () => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
     const subPath = './test/assets/test3.srt';
     const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
-    wrapper.vm.$_concatStream(vttStream, (err, res) => {
+    wrapper.vm.$_concatStream(vttStream, (err) => {
       expect(err).equal(null);
       done();
     });
@@ -65,7 +65,7 @@ describe('BaseSubtitle.vue', () => {
     wrapper.vm.$nextTick(() => {
       vttStream.emit('error', new Error('OOPS'));
     });
-    wrapper.vm.$_concatStream(vttStream, (err, res) => {
+    wrapper.vm.$_concatStream(vttStream, (err) => {
       expect(err).not.equal(null);
       done();
     });
