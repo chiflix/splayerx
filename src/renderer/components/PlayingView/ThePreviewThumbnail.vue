@@ -34,7 +34,7 @@ import ThumbnailDisplayCanvas from './ThumbnailDisplayCanvas';
 export default {
   components: {
     'thumbnail-video-player': ThumbnailVideoPlayer,
-    'thumbnail-display-canvas': ThumbnailVideoPlayer,
+    'thumbnail-display-canvas': ThumbnailDisplayCanvas,
   },
   props: {
     src: String,
@@ -64,6 +64,8 @@ export default {
       autoGenerationIndex: 0,
       generationInterval: 3,
       mountVideo: false,
+      lastGenerationIndex: 0,
+      maxGenerationCount: 0,
     };
   },
   watch: {
@@ -78,6 +80,8 @@ export default {
             thumnailInfo,
             { videoSrc: this.src },
           );
+          this.lastGenerationIndex = result.lastGenerationIndex || 0;
+          this.maxGenerationCount = result.maxGenerationCount || 0;
           this.mountVideo = !result.lastGenerationIndex ||
             result.lastGenerationIndex < result.maxGenerationCount;
         }
@@ -121,6 +125,8 @@ export default {
       this.displayVideo = event.index !== event.count;
       this.autoGenerationIndex = event.index;
       this.generationInterval = event.interval;
+      this.lastGenerationIndex = event.index || 0;
+      this.maxGenerationCount = event.count || 0;
       idb.open(INFO_DATABASE_NAME).then((db) => {
         const tx = db.transaction('the-preview-thumbnail', 'readwrite');
         const store = tx.objectStore('the-preview-thumbnail');
@@ -195,6 +201,8 @@ export default {
           thumnailInfo,
           { videoSrc: this.src },
         );
+        this.lastGenerationIndex = result.lastGenerationIndex || 0;
+        this.maxGenerationCount = result.maxGenerationCount || 0;
         this.mountVideo = !result.lastGenerationIndex ||
           result.lastGenerationIndex < result.maxGenerationCount;
       }
