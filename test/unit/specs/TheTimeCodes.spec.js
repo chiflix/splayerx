@@ -21,6 +21,10 @@ describe('TheTimeCodes.vue', () => {
     });
   });
 
+  afterEach(() => {
+    sinon.restore();
+  });
+
   it('should load correct data', () => {
     const wrapper = shallowMount(TheTimeCodes, { store, localVue });
     expect(wrapper.vm.showTimeCode).equal(false);

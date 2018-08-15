@@ -4,16 +4,19 @@
     <!--lyctest-->
     <UpdaterProgressIndicator> </UpdaterProgressIndicator>
     <!--lyctest-->
+      <UpdaterNotification></UpdaterNotification>
   </div>
 </template>
 
 <script>
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
+  import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
   export default {
     name: 'splayer',
     // -> for test todo need delete lyctest
     components: {
       UpdaterProgressIndicator,
+      UpdaterNotification,
     },
     // <-for test todo need delete lyctest
     methods: {
