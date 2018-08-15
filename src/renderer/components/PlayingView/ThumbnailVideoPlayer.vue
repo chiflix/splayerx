@@ -65,6 +65,7 @@ export default {
   },
   watch: {
     outerThumbnailInfo(newValue) {
+      console.log('[gen]', newValue);
       this.updateVideoInfo(newValue);
     },
     currentTime(newValue) {
@@ -77,11 +78,8 @@ export default {
       }
     },
     autoGenerationIndex(newValue) {
+      console.log('AutoGenerationIndex', newValue);
       this.videoSeek(newValue);
-    },
-    lastGenerationIndex(newValue) {
-      console.log('Last Generation Index:', newValue);
-      console.log('Auto Generation Index:', this.autoGenerationIndex);
     },
   },
   methods: {
@@ -103,17 +101,16 @@ export default {
     },
     // Data regenerators
     updateGenerationParameters() {
-      this.videoDuration = this.videoElement.duration;
+      this.videoDuration = this.$refs.video.duration();
       this.generationInterval = Math.round(this.videoDuration / (this.screenWidth / 4)) || 1;
-      this.autoGenerationIndex = Math.floor(this.currentTime / this.generationInterval);
       this.maxThumbnailCount = Math.floor(this.videoDuration / this.generationInterval);
+      console.log('[gen]param:', this.autoGenerationIndex, this.outerThumbnailInfo.lastGenerationIndex);
       this.$emit('update-thumbnail-info', {
         index: this.autoGenerationIndex,
         interval: this.generationInterval,
         count: this.maxThumbnailCount,
       });
       this.videoSeek(this.autoGenerationIndex);
-      console.log('[ThumbnailVideoPlayer|Info]:', this.videoDuration, this.maxThumbnailCount, this.generationInterval);
     },
     thumbnailGeneration() {
       const index = this.isAutoGeneration ? this.autoGenerationIndex : this.manualGenerationIndex;
@@ -195,15 +192,13 @@ export default {
       if (this.videoSrcValidator(videoSrc)) {
         this.videoSrc = videoSrc;
         if (!outerThumbnailInfo.newVideo) {
-          this.videoDuration = outerThumbnailInfo.videoDuration <= 0;
           this.screenWidth = outerThumbnailInfo.screenWidth;
           this.generationInterval = outerThumbnailInfo.generationInterval <= 0 ?
             this.generationInterval : outerThumbnailInfo.generationInterval;
-          this.lastGenerationIndex = outerThumbnailInfo.lastGenerationIndex || 0;
-          this.autoGenerationIndex = this.lastGenerationIndex;
+          this.autoGenerationIndex = outerThumbnailInfo.lastGenerationIndex || 0;
         } else {
           this.screenWidth = outerThumbnailInfo.screenWidth;
-          this.autoGenerationIndex = this.lastGenerationIndex = 0;
+          this.autoGenerationIndex = 0;
         }
       }
     },
@@ -228,6 +223,7 @@ export default {
     // Use document to pass unit test
     this.videoElement = this.$refs.video.videoElement ?
       this.$refs.video.videoElement() : document.querySelector('.base-video-player');
+    console.log('[gen]', this.outerThumbnailInfo.newVideo, this.lastGenerationIndex, this.autoGenerationIndex);
   },
 };
 </script>

@@ -156,9 +156,6 @@ export default {
         // Update Generation Parameters
         this.lastGenerationIndex = result.lastGenerationIndex || 0;
         this.maxThumbnailCount = result.maxThumbnailCount || 0;
-        // Update mountVideo
-        this.mountVideo = !result.lastGenerationIndex ||
-          result.lastGenerationIndex < result.maxThumbnailCount;
         this.videoCurrentTime = result.generationInterval * result.lastGenerationIndex || 0;
         // Update outerThumbnailInfo
         this.outerThumbnailInfo = Object.assign(
@@ -167,7 +164,12 @@ export default {
           thumnailInfo,
           { videoSrc: this.src },
           { lastGenerationIndex: this.lastGenerationIndex },
+          { maxThumbnailCount: this.maxThumbnailCount },
         );
+        console.log('[gen]', this.outerThumbnailInfo);
+        // Update mountVideo
+        this.mountVideo = !result.lastGenerationIndex ||
+          result.lastGenerationIndex < result.maxThumbnailCount;
       }
     },
   },
