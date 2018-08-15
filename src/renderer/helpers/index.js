@@ -7,6 +7,9 @@ import Sagi from './sagi';
 
 export default {
   methods: {
+    infoDB() {
+      return InfoDB;
+    },
     sagi() { return Sagi; },
     timecodeFromSeconds(s) {
       const dt = new Date(Math.abs(s) * 1000);
@@ -80,8 +83,7 @@ export default {
       } else {
         vidPath = path.replace(/^file:\/\//, '');
       }
-      const db = new InfoDB('recent-played');
-      db.add({
+      this.infoDB().add('recent-played', {
         quickHash: this.mediaQuickHash(vidPath),
         path,
         shortCut: '',

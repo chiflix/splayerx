@@ -1,46 +1,63 @@
 
 import idb from 'idb';
+import { INFO_SCHEMA } from '@/constants';
 
 class InfoDB {
-  /**
-   * @param  {string} schema specify which schema
-   *   you want to operate in Info databse
-   *   create if doesn't exist
-   */
-  constructor(schema) {
-    this.schema = schema;
+  constructor() {
+    this.version = 1;
   }
 
-  add(data) {
-    idb.open('Info').then((db) => {
-      if (!db.objectStoreNames.contains(this.schema)) {
+  init() {
+    return idb.open('Info').then((db) => {
+      this.version = db.version;
+      const updateStore = [];
+      for (let i = 0; i < INFO_SCHEMA.length; i += 1) {
+        const schema = INFO_SCHEMA[i];
+        if (!db.objectStoreNames.contains(schema.name)) {
+          updateStore.push(schema);
+        }
+      }
+      if (updateStore.length !== 0) {
         idb.open('Info', db.version + 1, (upgradeDB) => {
-          const store = upgradeDB.createObjectStore(this.schema, { keyPath: 'quickHash' });
-          store.createIndex('lastOpened', 'lastOpened', { unique: false });
-        }).then((db) => {
-          const tx = db.transaction(this.schema, 'readwrite').objectStore(this.schema).put(data);
-          return tx.complete;
+          updateStore.forEach((val) => {
+            const store = upgradeDB.createObjectStore(val.name, { keyPath: 'quickHash' });
+            if (val.indexes) {
+              val.indexes.forEach((val) => {
+                store.createIndex(val, val);
+              });
+            }
+          });
         });
       }
-      db.transaction(this.schema, 'readwrite').objectStore(this.schema).put(data);
     });
   }
 
-  get(key) {
+  add(schema, data) {
+    console.log('adding');
+    return idb.open('Info').then((db) => {
+      console.log(this.version);
+      const tx = db.transaction(schema, 'readwrite').objectStore(schema).put(data);
+      return tx.complete;
+    });
+  }
+
+  get(schema, key) {
+    console.log(this.version);
     return idb.open('Info').then(async (db) => {
-      const value = await db.transaction(this.schema).objectStore(this.schema).get(key);
+      const value = await db.transaction(schema).objectStore(schema).get(key);
       return value;
     });
   }
 
-  getAll() {
+  getAll(schema) {
     return idb.open('Info').then(async (db) => {
-      const tx = db.transaction(this.schema, 'readonly');
-      const val = await tx.objectStore(this.schema).getAll();
+      const tx = db.transaction(schema);
+      const val = await tx.objectStore(schema).getAll();
       this.data = val;
-      return tx.complete;
+      return val;
     });
   }
 }
 
-export default InfoDB;
+export default new InfoDB();
+

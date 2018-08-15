@@ -105,6 +105,12 @@ export default {
       }
     },
   },
+  created() {
+    this.infoDB().init().then(() => {
+      const data = this.infoDB().getAll('recent-played');
+      console.log(data);
+    });
+  },
   mounted() {
     const { app } = this.$electron.remote;
     if (this.$electron.remote.getCurrentWindow().isResizable()) {
@@ -118,7 +124,6 @@ export default {
         console.log(`sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
-
     asyncStorage.get('recent-played').then((data) => {
       this.lastPlayedFile = data;
     }).catch((err) => {
