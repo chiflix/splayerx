@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron' // eslint-disable-line
 import Updater from './update/updater.js';
+import WindowResizer from './helpers/windowResizer.js';
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -103,6 +104,8 @@ function initMainWindowEvent() {
 app.on('ready', () => {
   app.setName('SPlayerX');
   createWindow();
+  const resizer = new WindowResizer(mainWindow);
+  resizer.onStart(); // will only register listener for win
   initMainWindowEvent();
   updater = Updater.getInstance(mainWindow, app);
   updater.onStart().then((message) => { console.log(message); });
