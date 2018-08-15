@@ -78,6 +78,12 @@ export default {
   },
   computed: {
   },
+  created() {
+    this.infoDB().init().then(() => {
+      const data = this.infoDB().getAll('recent-played');
+      console.log(data);
+    });
+  },
   mounted() {
     const { app } = this.$electron.remote;
     if (this.$electron.remote.getCurrentWindow().isResizable()) {

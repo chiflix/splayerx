@@ -55,3 +55,12 @@ export const DEFAULT_VIDEO_OPTIONS = [
 ];
 export const THUMBNAIL_DB_NAME = 'splayerx-preview-thumbnails';
 export const INFO_DATABASE_NAME = 'Info';
+export const INFO_SCHEMA = [
+  {
+    name: 'recent-played',
+    indexes: ['lastOpened'],
+  },
+  {
+    name: 'the-preview-thumbnail',
+  },
+];

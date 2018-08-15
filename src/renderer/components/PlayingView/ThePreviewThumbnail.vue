@@ -166,7 +166,6 @@ export default {
           { lastGenerationIndex: this.lastGenerationIndex },
           { maxThumbnailCount: this.maxThumbnailCount },
         );
-        console.log('[gen]', this.outerThumbnailInfo);
         // Update mountVideo
         this.mountVideo = !result.lastGenerationIndex ||
           result.lastGenerationIndex < result.maxThumbnailCount;
