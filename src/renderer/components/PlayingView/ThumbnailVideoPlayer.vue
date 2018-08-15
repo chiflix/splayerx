@@ -60,18 +60,12 @@ export default {
       maxThumbnailCount: 600,
       manualGenerationIndex: -1,
       tempBlobArray: [],
+      lastGenerationIndex: 0,
     };
   },
   watch: {
-    outerThumbnailInfo: {
-      deep: true,
-      /* eslint-disable object-shorthand */
-      handler: function outerThumbnailInfoHandler(newValue) {
-        const newVideoSrc = newValue.videoSrc;
-        if (this.videoSrcValidator(newVideoSrc)) {
-          this.videoSrc = newVideoSrc;
-        }
-      },
+    outerThumbnailInfo(newValue) {
+      this.updateVideoInfo(newValue);
     },
     currentTime(newValue) {
       const index = Math.floor(newValue / this.generationInterval);
@@ -84,6 +78,10 @@ export default {
     },
     autoGenerationIndex(newValue) {
       this.videoSeek(newValue);
+    },
+    lastGenerationIndex(newValue) {
+      console.log('Last Generation Index:', newValue);
+      console.log('Auto Generation Index:', this.autoGenerationIndex);
     },
   },
   methods: {
@@ -114,6 +112,7 @@ export default {
         interval: this.generationInterval,
         count: this.maxThumbnailCount,
       });
+      this.videoSeek(this.autoGenerationIndex);
       console.log('[ThumbnailVideoPlayer|Info]:', this.videoDuration, this.maxThumbnailCount, this.generationInterval);
     },
     thumbnailGeneration() {
@@ -125,11 +124,10 @@ export default {
           0, 0, this.maxThumbnailWidth, this.maxThumbnailHeight,
         );
         createImageBitmap(this.canvasContainer).then((imageBitmap) => {
-          console.log(imageBitmap);
           this.thumbnailSet.add(index);
           this.tempBlobArray.push({
             index,
-            imageBitmap: imageBitmap,
+            imageBitmap,
           });
           if (
             (this.isAutoGeneration && index >= this.maxThumbnailCount) ||
@@ -192,22 +190,26 @@ export default {
       });
       return Promise.all(promiseArray);
     },
+    updateVideoInfo(outerThumbnailInfo) {
+      const { videoSrc } = outerThumbnailInfo;
+      if (this.videoSrcValidator(videoSrc)) {
+        this.videoSrc = videoSrc;
+        if (!outerThumbnailInfo.newVideo) {
+          this.videoDuration = outerThumbnailInfo.videoDuration <= 0;
+          this.screenWidth = outerThumbnailInfo.screenWidth;
+          this.generationInterval = outerThumbnailInfo.generationInterval <= 0 ?
+            this.generationInterval : outerThumbnailInfo.generationInterval;
+          this.lastGenerationIndex = outerThumbnailInfo.lastGenerationIndex || 0;
+          this.autoGenerationIndex = this.lastGenerationIndex;
+        } else {
+          this.screenWidth = outerThumbnailInfo.screenWidth;
+          this.autoGenerationIndex = this.lastGenerationIndex = 0;
+        }
+      }
+    },
   },
   created() {
-    const { videoSrc } = this.outerThumbnailInfo;
-    if (this.videoSrcValidator(videoSrc)) {
-      if (!this.outerThumbnailInfo.newVideo) {
-        this.videoSrc = videoSrc;
-        this.videoDuration = this.outerThumbnailInfo.videoDuration <= 0;
-        this.screenWidth = this.outerThumbnailInfo.screenWidth;
-        this.generationInterval = this.outerThumbnailInfo.generationInterval <= 0 ?
-          this.generationInterval : this.outerThumbnailInfo.generationInterval;
-        this.autoGenerationIndex = Math.floor(this.currentTime / this.generationInterval);
-      } else {
-        this.videoSrc = videoSrc;
-        this.screenWidth = this.outerThumbnailInfo.screenWidth;
-      }
-    }
+    this.updateVideoInfo(this.outerThumbnailInfo);
 
     if (this.outerThumbnailInfo.maxThumbnailWidth) {
       this.maxThumbnailWidth = this.outerThumbnailInfo.maxThumbnailWidth;
