@@ -32,25 +32,26 @@ export default {
   methods: {
     getImageType(imgSrc) {
       const src = imgSrc;
+      let imgType = null;
       if (typeof src === 'string') {
         const imgURLRegexes = {
           'URL': new RegExp(/^https?:\/\//),
           'DataURI': new RegExp(/^data:/),
         };
         Object.keys(imgURLRegexes).forEach((regType) => {
-          if (imgURLRegexes.regType.test(src)) {
-            return regType;
+          if (imgURLRegexes[regType].test(src)) {
+            imgType = regType;
           }
         });
       } else if (typeof src === 'object') {
         const type = Object.prototype.toString.call(src).slice(8, -1);
         this.predefinedTypes.slice(2).forEach((predefinedType) => {
           if (type === predefinedType) {
-            return predefinedType;
+            imgType = predefinedType;
           }
         });
       }
-      return null;
+      return imgType;
     },
     getElementName(imageType) {
       const type = imageType;
@@ -117,6 +118,9 @@ export default {
 
       return options;
     },
+  },
+  created() {
+    this.imageType = this.getImageType(this.imgSrc);
   },
   render(createElement) {
     const imageType = this.getImageType(this.imgSrc);
