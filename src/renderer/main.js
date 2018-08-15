@@ -393,6 +393,7 @@ new Vue({
       e.preventDefault();
       let potentialVidPath;
       let tempFilePath;
+      let containsSubFiles = false;
       const { files } = e.dataTransfer;
       // TODO: play it if it's video file
       const subtitleFiles = [];
@@ -403,6 +404,7 @@ new Vue({
         tempFilePath = `file:///${files[i].path}`;
         if (re.test(Path.extname(tempFilePath))) {
           subtitleFiles.push(files[i].path);
+          containsSubFiles = true;
         } else {
           potentialVidPath = tempFilePath;
         }
@@ -410,7 +412,9 @@ new Vue({
       if (potentialVidPath) {
         this.openFile(potentialVidPath);
       }
-      this.$bus.$emit('add-subtitle', subtitleFiles);
+      if (containsSubFiles) {
+        this.$bus.$emit('add-subtitle', subtitleFiles);
+      }
 
       /*
       for (const file in files) {
