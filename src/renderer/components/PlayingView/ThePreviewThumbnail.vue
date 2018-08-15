@@ -175,10 +175,9 @@ export default {
   created() {
     idb.open(THUMBNAIL_DB_NAME).then((db) => {
       const obejctStoreName = `thumbnail-width-${this.maxThumbnailWidth}`;
-      db.close();
       if (!db.objectStoreNames.contains(obejctStoreName)) {
-        return idb.open(THUMBNAIL_DB_NAME, db.version + 1, (upgradeDB) => {
-          console.log('[IndexedDB]: Initial previewThumbnail objectStore.');
+        idb.open(THUMBNAIL_DB_NAME, db.version + 1, (upgradeDB) => {
+          console.log('[IndexedDB]: Initial thumbnails storage objectStore.');
           const store = upgradeDB.createObjectStore(
             `thumbnail-width-${this.maxThumbnailWidth}`,
             { keyPath: 'id', autoIncrement: false, unique: true },
@@ -187,9 +186,9 @@ export default {
           store.createIndex('index', 'index', { unique: false });
         });
       }
-      return idb.open(INFO_DATABASE_NAME);
       /* eslint-disable newline-per-chained-call */
-    }).then((db) => {
+    });
+    idb.open(INFO_DATABASE_NAME).then((db) => {
       this.updateMediaQuickHash(this.src);
       const obejctStoreName = 'the-preview-thumbnail';
       if (!db.objectStoreNames.contains(obejctStoreName)) {
