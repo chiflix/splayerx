@@ -29,6 +29,7 @@ import idb from 'idb';
 import {
   THUMBNAIL_DB_NAME,
   INFO_DATABASE_NAME,
+  THUMBNAIL_OBJECT_STORE_NAME,
 } from '@/constants';
 import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
 import ThumbnailDisplayCanvas from './ThumbnailDisplayCanvas';
@@ -112,7 +113,7 @@ export default {
       this.displayVideo = event.index < event.count;
       this.autoGenerationIndex = event.index;
       this.generationInterval = event.interval;
-      this.infoDB().add('the-preview-thumbnail', {
+      this.infoDB().add(THUMBNAIL_OBJECT_STORE_NAME, {
         quickHash: this.quickHash,
         lastGenerationIndex: event.index,
         generationInterval: event.interval,
@@ -121,7 +122,7 @@ export default {
     },
     retrieveThumbnailInfo(quickHash) {
       return new Promise((resolve) => {
-        this.infoDB().get('the-preview-thumbnail', quickHash).then((result) => {
+        this.infoDB().get(THUMBNAIL_OBJECT_STORE_NAME, quickHash).then((result) => {
           if (result) {
             const { lastGenerationIndex, maxThumbnailCount, generationInterval } = result;
             this.autoGenerationIndex = lastGenerationIndex;
@@ -180,7 +181,7 @@ export default {
     });
     idb.open(INFO_DATABASE_NAME).then((db) => {
       this.updateMediaQuickHash(this.src);
-      const obejctStoreName = 'the-preview-thumbnail';
+      const obejctStoreName = THUMBNAIL_OBJECT_STORE_NAME;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
         console.log('[IndexedDB]: Initial preview thumbnail info objectStore.');
         return idb.open(INFO_DATABASE_NAME, db.version + 1, (upgradeDB) => {
