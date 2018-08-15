@@ -10,7 +10,7 @@ import srt2vtt from 'srt-to-vtt';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-describe.only('BaseSubtitle.vue', () => {
+describe('BaseSubtitle.vue', () => {
   let store;
 
   beforeEach(() => {
