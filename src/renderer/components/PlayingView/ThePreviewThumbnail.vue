@@ -18,6 +18,8 @@
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
       :outerThumbnailInfo="outerThumbnailInfo"
+      :lastGenerationIndex="lastGenerationIndex"
+      :maxThumbnailCount="maxGenerationCount"
       v-if="!mountVideo"
       v-show="!displayVideo" />
   </div>
@@ -71,7 +73,9 @@ export default {
   watch: {
     src(newValue) {
       this.updateMediaQuickHash(newValue);
+      console.log(newValue, this.quickHash);
       this.retrieveThumbnailInfo(this.quickHash).then((result) => {
+        console.log(result);
         if (result) {
           const thumnailInfo = result;
           this.outerThumbnailInfo = Object.assign(
@@ -122,7 +126,8 @@ export default {
       this.quickHash = this.mediaQuickHash(filePath);
     },
     updateThumbnailInfo(event) {
-      this.displayVideo = event.index !== event.count;
+      console.log(event);
+      this.displayVideo = event.index < event.count;
       this.autoGenerationIndex = event.index;
       this.generationInterval = event.interval;
       this.lastGenerationIndex = event.index || 0;
@@ -194,6 +199,7 @@ export default {
       return idb.open(INFO_DATABASE_NAME);
     }).then(() => this.retrieveThumbnailInfo(this.quickHash)).then((result) => {
       if (result) {
+        console.log(result);
         const thumnailInfo = result;
         this.outerThumbnailInfo = Object.assign(
           {},

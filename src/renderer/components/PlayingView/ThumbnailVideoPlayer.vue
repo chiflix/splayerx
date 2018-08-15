@@ -83,6 +83,7 @@ export default {
       }
     },
     autoGenerationIndex(newValue) {
+      console.log('AutoGenerationIndex:', newValue);
       this.videoSeek(newValue);
     },
   },
@@ -125,7 +126,6 @@ export default {
           0, 0, this.maxThumbnailWidth, this.maxThumbnailHeight,
         );
         createImageBitmap(this.canvasContainer).then((imageBitmap) => {
-          console.log(imageBitmap);
           this.thumbnailSet.add(index);
           this.tempBlobArray.push({
             index,
