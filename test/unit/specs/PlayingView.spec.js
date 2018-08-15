@@ -163,7 +163,7 @@ function videoCanvasMock(vue, bus) {
   vue.$refs.VideoCanvasRef.$refs.videoCanvas = vcanvas;
   return vcanvas;
 }
-describe.only('PlayingView.vue.lyc', () => {
+describe('PlayingView.vue.lyc', () => {
   let store;
   let timer; //eslint-disable-line
   beforeEach(() => {
