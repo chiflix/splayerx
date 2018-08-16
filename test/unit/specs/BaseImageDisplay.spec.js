@@ -12,7 +12,7 @@ describe('Component - BaseImageDisplay', () => {
     expect(wrapper.contains(BaseImageDisplay)).to.equal(true);
   });
 
-  describe('Functionality - render imgSrc test', () => {
+  describe.only('Functionality - render imgSrc test', () => {
     beforeEach(() => {
       sandbox = sinon.createSandbox();
     });
@@ -69,6 +69,32 @@ describe('Component - BaseImageDisplay', () => {
       wrapper.setProps(propsData);
 
       expect(wrapper.contains('canvas')).to.equal(true);
+    });
+    it('should render element with attributes', () => {
+      const propsData = {
+        imgSrc: new Blob(new Uint8Array(1)),
+        attributes: {
+          id: 'xxx-imagedata',
+          width: '20px',
+          ref: 'test-image',
+        },
+      };
+
+      wrapper = mount(BaseImageDisplay, { propsData });
+
+      expect(wrapper.attributes()).to.contains(propsData.attributes);
+    });
+    it('should render element with styles', () => {
+      const propsData = {
+        imgSrc: new Blob(new Uint8Array(1)),
+        $_style: {
+          objectFit: 'cover',
+        },
+      };
+
+      wrapper = mount(BaseImageDisplay, { propsData });
+
+      expect(wrapper.element.style).to.contains(propsData.$_style);
     });
   });
 });
