@@ -12,7 +12,7 @@ describe('Component - BaseImageDisplay', () => {
     expect(wrapper.contains(BaseImageDisplay)).to.equal(true);
   });
 
-  describe.only('Functionality - render imgSrc test', () => {
+  describe('Functionality - render imgSrc test', () => {
     beforeEach(() => {
       sandbox = sinon.createSandbox();
     });
@@ -95,6 +95,18 @@ describe('Component - BaseImageDisplay', () => {
       wrapper = mount(BaseImageDisplay, { propsData });
 
       expect(wrapper.element.style).to.contains(propsData.$_style);
+    });
+    it('should render element with width and height', () => {
+      const propsData = {
+        imgSrc: new ImageData(10, 20),
+        width: 240,
+        height: 135,
+      };
+
+      wrapper = mount(BaseImageDisplay, { propsData });
+
+      expect(wrapper.attributes().width).to.equal(`${propsData.width}px`);
+      expect(wrapper.attributes().height).to.equal(`${propsData.height}px`);
     });
   });
 });
