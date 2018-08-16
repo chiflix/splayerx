@@ -103,10 +103,10 @@ export default {
         case 'DataURI': {
           options = Object.assign(
             options,
-            { 
+            {
               attrs: Object.assign(
                 options.attrs,
-                { src: imgSrc, },
+                { src: imgSrc },
                 this.attributes,
               ),
             },
@@ -117,10 +117,10 @@ export default {
           const url = URL.createObjectURL(imgSrc);
           options = Object.assign(
             options,
-            { 
+            {
               attrs: Object.assign(
                 options.attrs,
-                { src: url, },
+                { src: url },
                 this.attributes,
               ),
             },
@@ -130,7 +130,7 @@ export default {
         default: {
           options = Object.assign(
             options,
-            { 
+            {
               attrs: Object.assign(
                 options.attrs,
                 this.attributes,
@@ -182,4 +182,3 @@ export default {
   },
 };
 </script>
-
