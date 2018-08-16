@@ -12,7 +12,7 @@ import srt2vtt from 'srt-to-vtt';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-describe('BaseSubtitle.vue', () => {
+describe.only('BaseSubtitle.vue', () => {
   let store;
 
   beforeEach(() => {
@@ -42,7 +42,6 @@ describe('BaseSubtitle.vue', () => {
     expect(wrapper.vm.secondActiveCues).deep.equal([]);
     expect(wrapper.vm.firstCueHTML).deep.equal([]);
     expect(wrapper.vm.secondCueHTML).deep.equal([]);
-    expect(wrapper.vm.subNameArr).deep.equal([]);
     expect(wrapper.vm.subStyle).deep.equal({});
     expect(wrapper.vm.curStyle.fontSize).equal(24);
     expect(wrapper.vm.curStyle.letterSpacing).equal(1);
@@ -52,11 +51,6 @@ describe('BaseSubtitle.vue', () => {
     expect(wrapper.vm.curStyle.background).equal('');
   });
 
-  // it('subtitleInitialize and load local subtitles', () => {
-  // })
-
-  // Due to arrow functions, (this) is not vue instance
-  // which will cause warning
   it('loadLocalTextTracks test', (done) => {
     const wrapper = mount(VideoCanvas, {
       store,
@@ -117,9 +111,6 @@ describe('BaseSubtitle.vue', () => {
 
   it('$_subNameFromLocalProcess test', () => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
-    wrapper.setData({
-      textTrackID: 0,
-    });
     const file = './test/assets/test3.srt';
     const result = wrapper.vm.$_subNameFromLocalProcess(file);
     const target = {
@@ -133,9 +124,6 @@ describe('BaseSubtitle.vue', () => {
 
   it('$_subNameFromServerProcess has language code', () => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
-    wrapper.setData({
-      testTrackID: 0,
-    });
     const textTrack = [1, 'CN'];
     const target = {
       title: 'CN',
@@ -149,9 +137,6 @@ describe('BaseSubtitle.vue', () => {
 
   it('$_subNameFromServerProcess does not have language code', () => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
-    wrapper.setData({
-      testTrackID: 0,
-    });
     const textTrack = [1, ''];
     const target = {
       title: 'subtitle',
@@ -162,13 +147,4 @@ describe('BaseSubtitle.vue', () => {
     const res = wrapper.vm.$_subnameFromServerProcess(textTrack);
     expect(res).deep.equal(target);
   });
-
-  // it('$_onCueChangeEventAdd test - first', () => {
-  // });
-
-  // it('$_onCueChangeEventAdd test - first', () => {
-  // });
-
-  // it('$_clearSubtitle test', () => {
-  // });
 });

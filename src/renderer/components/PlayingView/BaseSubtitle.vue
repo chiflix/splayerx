@@ -29,7 +29,6 @@ export default {
       secondActiveCues: [],
       firstCueHTML: [],
       secondCueHTML: [],
-      subNameArr: [],
       subStyle: {},
       curStyle: {
         fontSize: 24,
@@ -88,12 +87,13 @@ export default {
        * If there is no (chinese/default language) text track, try translate api
        */
       // If there is already subtitle files(same dir), load it
-      const subNameArr = files.map(file => this.$_subNameFromLocalProcess(file));
-      this.$store.commit('SubtitleNameArr', subNameArr);
 
       this.addVttToVideoElement(files, () => {
         console.log('finished reading subtitle files');
         cb();
+
+        const subNameArr = files.map(file => this.$_subNameFromLocalProcess(file));
+        this.$store.commit('SubtitleNameArr', subNameArr);
       });
     },
     /**
