@@ -1,11 +1,18 @@
 <template>
-  <span>{{ currentIndex }}</span>
+  <base-image-display
+    :imgSrc="image"
+    :width="thumbnailWidth"
+    :height="thumbnailHeight" />
 </template>
 <script>
 import { THUMBNAIL_DB_NAME } from '@/constants';
 import idb from 'idb';
+import BaseImageDisplay from './BaseImageDisplay';
 export default {
   name: 'thumbnail-display',
+  components: {
+    'base-image-display': BaseImageDisplay,
+  },
   props: {
     quickHash: String,
     autoGenerationIndex: {
@@ -14,11 +21,14 @@ export default {
     },
     maxThumbnailWidth: Number,
     currentIndex: Number,
+    thumbnailWidth: Number,
+    thumbnailHeight: Number,
   },
   data() {
     return {
       thumbnailMap: new Map(),
       tempThumbnailArray: [],
+      image: null,
     };
   },
   watch: {
@@ -30,6 +40,11 @@ export default {
           this.arrayToMap(result);
         });
       });
+    },
+    currentIndex(newValue) {
+      if (this.thumbnailMap.has(newValue)) {
+        this.image = this.thumbnailMap.get(newValue);
+      }
     },
   },
   methods: {
