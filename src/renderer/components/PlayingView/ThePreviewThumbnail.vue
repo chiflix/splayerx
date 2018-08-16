@@ -76,8 +76,8 @@ export default {
   watch: {
     src(newValue) {
       // Reload video and image components
-      this.mountVideo = this.mountVideo === true;
-      this.mountImage = this.mountImage === true;
+      this.mountVideo = false;
+      this.mountImage = false;
       this.updateMediaQuickHash(newValue);
       this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
     },
