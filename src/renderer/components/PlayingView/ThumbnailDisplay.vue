@@ -95,7 +95,6 @@ export default {
           });
           return tx.complete;
         }).then(() => {
-          console.log(`${thumbnailCount} images get!`);
           this.$emit('image-all-get');
         });
       }
@@ -112,6 +111,7 @@ export default {
     this.getThumbnail(0, this.autoGenerationIndex).then((result) => {
       this.$once('image-all-get', () => {
         this.arrayToMap(result);
+        this.image = this.thumbnailMap.get(this.currentIndex);
         this.imageReady = true;
       });
     });
