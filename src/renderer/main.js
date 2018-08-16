@@ -415,6 +415,7 @@ new Vue({
         this.$bus.$emit('add-subtitle', subtitleFiles);
       }
 
+
       /*
       for (const file in files) {
         if (files.hasOwnProperty(file)) {

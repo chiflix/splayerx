@@ -7,20 +7,6 @@
              v-if="appearSubtitleMenu">
           <ul class="sub-menu">
 
-            <li v-for="(item, index) in onlineSubsPlaceHolder"
-              @click.stop="toggleItemClick(index+10)"
-              @mouseover.stop.self="toggleItemsMouseOver"
-              @mouseleave.stop.self="toggleItemsMouseLeave"
-              :class="{ chosenText: itemHasBeenChosen(index+10) }">
-              <div class="menu-item-text-wrapper"
-                   :class="{ chineseChosen: itemTitleHasChineseChar(item.title) }">
-                {{ item.title }}
-              </div>
-              <div class="chosen-dot"
-                   v-if="itemHasBeenChosen(index+10)">
-              </div>
-            </li>
-
             <li
               v-for="(item, index) in computedAvaliableItems"
               @click.stop="toggleItemClick(index)"
@@ -115,6 +101,7 @@ export default {
       this.appearSubtitleMenu = true;
       this.isSubCtrlBtnAppear = true;
       e.target.style.backgroundImage = this.preStyle;
+      this.$bus.$emit('clear-all-widget-disappear-delay');
     },
     toggleItemsMouseLeave(e) {
       e.target.style.backgroundImage = 'none';
@@ -138,7 +125,7 @@ export default {
 
   computed: {
     computedAvaliableItems() {
-      return (this.$store.getters.SubtitleNameArr.slice(0, 3));
+      return (this.$store.getters.SubtitleNameArr);
     },
   },
 

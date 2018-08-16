@@ -107,7 +107,10 @@
     "vue-i18n": "^7.7.0",
     "vue-resource": "^1.5.1",
     "vue-router": "^3.0.1",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "zero-fill": "^2.2.3",
+    "languagedetect": "^1.1.1",
+    "ass-to-vtt": "^1.2.0"
   },
   "devDependencies": {
     "@chiflix/electron": "^3.0.0-beta.3",

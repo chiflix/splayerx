@@ -18,6 +18,10 @@ import srt2vtt from 'srt-to-vtt';
 import { WebVTT } from 'vtt.js';
 import path from 'path';
 import parallel from 'run-parallel';
+import MatroskaSubtitles from 'matroska-subtitles';
+import z from 'zero-fill';
+import ass2vtt from 'ass-to-vtt';
+// import LanguageDetect from 'languagedetect';
 
 export default {
   data() {
@@ -66,19 +70,39 @@ export default {
       const vid = this.$parent.$refs.videoCanvas;
       this.startIndex = vid.textTracks.length;
 
-      // hide every text text/subtitle tracks at beginning
-      // 没有做对内挂字幕的处理
-      // for (let i = this.$store.state.PlaybackState.CurrentIndex; i < this.startIndex; i += 1) {
-      //   vid.textTracks[i].mode = 'disabled';
-      // }
+      // const filePath = this.$store.getters.SrcOfVideo;
+      // const regex = '^(.mkv)$';
+      // const re = new RegExp(regex);
+      // const extname = path.extname(filePath);
 
-      /*
-       * TODO:
-       * If there is already text track, load it
-       * If there is already subtitle files(opened or loaded), load it
-       * If there is no (chinese/default language) text track, try translate api
-       */
-      // If there is already subtitle files(same dir), load it
+      // if (re.test(extname)) {
+      // /* if the test passes, the video is a MKV file,
+      //    then process it as a MKV file, e.g. transfer the embeded subtitles
+      //    into the VTT format. */
+      //   const subNameArr = this.autoloadMkvSubtitles(filePath, () => {
+      //     this.subStyleChange();
+      //     this.subtitleShow(0);
+      //   });
+      //   this.$store.commit('SubtitleNameArr', subNameArr);
+      //   this.$bus.$emit('subName-loaded');
+
+      // const files = [];
+      // this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
+      //   files.push(subPath);
+      // });
+      //
+      // const subNameArr1 = files.map(file => this.$_subNameProcess(file));
+      // this.$store.commit('SubtitleNameArr', subNameArr1);
+      // this.$bus.$emit('subName-loaded');
+      //
+      // this.addVttToVideoElement(files, () => {
+      //   console.log('finished reading subtitle files');
+      //   this.subStyleChange();
+      //   this.subtitleShow(0);
+      // });
+      // } else {
+      /* if the test returns false, then it is a normal video file,
+         auto load the subtitles in the same direction. */
       const files = [];
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         files.push(subPath);
@@ -93,6 +117,22 @@ export default {
         this.subStyleChange();
         this.subtitleShow(0);
       });
+      // }
+
+
+      // hide every text text/subtitle tracks at beginning
+      // 没有做对内挂字幕的处理
+      // for (let i = this.$store.state.PlaybackState.CurrentIndex; i < this.startIndex; i += 1) {
+      //   vid.textTracks[i].mode = 'disabled';
+      // }
+
+      /*
+       * TODO:
+       * If there is already text track, load it
+       * If there is already subtitle files(opened or loaded), load it
+       * If there is no (chinese/default language) text track, try translate api
+       */
+      // If there is already subtitle files(same dir), load it
     },
     /**
      * @link https://github.com/mafintosh/pumpify
@@ -134,7 +174,21 @@ export default {
      * @param {resultCallback} cb Callback function to process result
      */
     $_createSubtitleStream(subPath, cb) {
-      const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
+      const regexSrt = '^(.srt)$';
+      const reSrt = new RegExp(regexSrt);
+      const extname = path.extname(subPath);
+
+      let vttStream;
+
+      if (reSrt.test(extname)) {
+        vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
+        console.log(vttStream);
+      } else {
+        console.log('YOU MOTHER FUCKER LEAVE ME FUCKING ALONE.');
+        vttStream = fs.createReadStream(subPath).pipe(ass2vtt());
+        console.log(vttStream);
+      }
+      // const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
       this.concatStream(vttStream, (err, buf) => {
         if (err) {
           console.error(err);
@@ -150,6 +204,7 @@ export default {
 
     /* this method is used to convert the timecodes extracted from matroska-subtitle
       library (convert) to the timecodes format for VTT format.
+    */
 
     msToTime(s) {
       const ms = s % 1000;
@@ -159,15 +214,17 @@ export default {
       const mins = s % 60;
       const hrs = (s - mins) / 60;
       return (`${z(2, hrs)}:${z(2, mins)}:${z(2, secs)}.${z(3, ms)}`);
-    }, */
+    },
 
 
     /*
     the following method reads the subtitles embeded in the MKV files,
     and add these subtitles into the video's texttracks.
     But the structure of this method need to be changed and improved.
+    */
 
     autoloadMkvSubtitles(filePath, cb) {
+      const subNameArr = [];
       console.log(filePath);
       const ectractFn = filePath => new Promise((resolve) => {
         let tracks;
@@ -180,17 +237,24 @@ export default {
           });
         });
         subs.on('subtitle', (sub, trackNumber) => {
-          const currentTrackIndex = trackNumber - 1;
+          // const currentTrackIndex = trackNumber - 1; // bug: will throw error if
+          // the trackNumber does not start with 1.
           let currentContent = '';
-          // the indices for each cue is probably can be ignored as it's VTT format
+          let cuurentTrackIndex = null;
 
-          currentContent += `${this.msToTime(sub.time)} -->
-            ${this.msToTime(sub.time + sub.duration)}\r\n`;
+          currentContent += `${this.msToTime(sub.time)} --> ${this.msToTime(sub.time + sub.duration)}\r\n`;
           currentContent += `${(sub.text)}\r\n\r\n`;
 
-          tracks[currentTrackIndex].subContent += currentContent;
+          // 这个for loop会掉一些性能 要找到更优的办法 -
+          // 这个for loop负责找到当前输出的cue对应的object in the array
+          for (let i = 0; i < tracks.length; i += 1) {
+            if (tracks[i].number === trackNumber) {
+              cuurentTrackIndex = i;
+              break;
+            }
+          }
+          tracks[cuurentTrackIndex].subContent += currentContent;
         });
-
         subs.on('finish', () => {
           resolve(tracks);
         });
@@ -199,11 +263,15 @@ export default {
       });
       ectractFn(filePath).then((realTracks) => {
         // now transfer string into VTT
-        console.log(realTracks);
         const vid = this.$parent.$refs.videoCanvas;
 
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         for (let i = 0; i < realTracks.length; i += 1) {
+          subNameArr[i] = {
+            title: realTracks[i].language === (undefined || 'und') ?
+              'Unknown' : realTracks[i].language,
+            status: null,
+          };
           const sub = vid.addTextTrack('subtitles');
           sub.mode = 'disabled';
           parser.oncue = (cue) => {
@@ -217,8 +285,8 @@ export default {
         parser.onflush = cb;
         parser.flush();
       });
+      return subNameArr;
     },
-    */
 
     addVttToVideoElement(files, cb) {
       const vid = this.$parent.$refs.videoCanvas;

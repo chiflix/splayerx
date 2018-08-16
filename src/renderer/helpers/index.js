@@ -33,7 +33,7 @@ export default {
       vidPath = vidPath.replace(/^file:\/\//, '');
       const baseName = path.basename(vidPath, path.extname(vidPath));
       const dirPath = path.dirname(vidPath);
-      const filter = /\.(srt|vtt)$/;
+      const filter = /\.(srt|vtt|ass)$/;
 
       if (!fs.existsSync(dirPath)) {
         console.log(`no dir ${dirPath}`);
