@@ -12,7 +12,7 @@
       @update-thumbnail-info="updateThumbnailInfo">
       <span class="time">{{ videoTime }}</span>
     </thumbnail-video-player>
-    <thumbnail-display-canvas
+    <thumbnail-display
       v-if="mountImage"
       v-show="!displayVideo"
       :quickHash="quickHash"
@@ -28,11 +28,11 @@ import {
   THUMBNAIL_OBJECT_STORE_NAME,
 } from '@/constants';
 import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
-import ThumbnailDisplayCanvas from './ThumbnailDisplayCanvas';
+import ThumbnailDisplay from './ThumbnailDisplay';
 export default {
   components: {
     'thumbnail-video-player': ThumbnailVideoPlayer,
-    'thumbnail-display-canvas': ThumbnailDisplayCanvas,
+    'thumbnail-display': ThumbnailDisplay,
   },
   props: {
     src: String,
