@@ -158,7 +158,6 @@ export default {
     return h(this.elementName, visibilityOptions);
   },
   beforeUpdate() {
-    console.log('wow');
     switch (this.imageType) {
       default: {
         this.imageReady = true;
