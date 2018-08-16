@@ -10,7 +10,6 @@
       :thumbnailHeight="thumbnailHeight"
       :outerThumbnailInfo="outerThumbnailInfo"
       @update-thumbnail-info="updateThumbnailInfo">
-      <span class="time">{{ videoTime }}</span>
     </thumbnail-video-player>
     <thumbnail-display
       v-if="mountImage"
@@ -21,6 +20,7 @@
       :currentIndex="currentIndex"
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight" />
+    <span class="time">{{ videoTime }}</span>
   </div>
 </template>
 
