@@ -160,7 +160,7 @@ export default {
       );
     return h(this.elementName, visibilityOptions);
   },
-  mounted() {
+  beforeUpdate() {
     switch (this.imageType) {
       default: {
         this.imageReady = true;
