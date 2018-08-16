@@ -92,6 +92,7 @@ export default {
       }
       options = {
         style: this.$_style,
+        ref: 'image',
         attrs: outerWidth && outerHeight ? {
           width: outerWidth,
           height: outerHeight,
@@ -102,11 +103,13 @@ export default {
         case 'DataURI': {
           options = Object.assign(
             options,
-            { attrs: Object.assign(
-              options.attrs,
-              { src: imgSrc, },
-              this.attributes,
-            )},
+            { 
+              attrs: Object.assign(
+                options.attrs,
+                { src: imgSrc, },
+                this.attributes,
+              ),
+            },
           );
           break;
         }
@@ -114,11 +117,25 @@ export default {
           const url = URL.createObjectURL(imgSrc);
           options = Object.assign(
             options,
-            { attrs: Object.assign(
-              options.attrs,
-              { src: url, },
-              this.attributes,
-            )},
+            { 
+              attrs: Object.assign(
+                options.attrs,
+                { src: url, },
+                this.attributes,
+              ),
+            },
+          );
+          break;
+        }
+        default: {
+          options = Object.assign(
+            options,
+            { 
+              attrs: Object.assign(
+                options.attrs,
+                this.attributes,
+              ),
+            },
           );
           break;
         }
@@ -128,7 +145,40 @@ export default {
     },
   },
   render(h) {
-    return h(this.elementName, this.imageOptions);
+    const visibilityOptions = this.imageReady ?
+      this.imageOptions :
+      Object.assign(
+        {},
+        this.imageOptions,
+        {
+          style: Object.assign(
+            {},
+            this.$_style,
+            { visibility: false },
+          ),
+        },
+      );
+    return h(this.elementName, visibilityOptions);
+  },
+  mounted() {
+    switch (this.imageType) {
+      default: {
+        this.imageReady = true;
+        break;
+      }
+      case 'ImageBitmap': {
+        this.$refs.image.getContext('2d').drawImage(this.imgSrc, 0, 0);
+        this.imageReady = true;
+        break;
+      }
+      case 'ImageData': {
+        createImageBitmap(this.imgSrc).then((image) => {
+          this.$refs.image.getContext('2d').drawImage(image, 0, 0);
+          this.imageReady = true;
+        });
+        break;
+      }
+    }
   },
 };
 </script>
