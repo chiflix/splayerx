@@ -1,6 +1,7 @@
 <template>
   <div class="thumbnail-video-player">
     <base-video-player
+      v-show="useFallback"
       ref="video"
       :src="videoSrc"
       :defaultEvents="['loadedmetadata', 'seeked']"
@@ -8,17 +9,24 @@
       :videoSize="{ width: thumbnailWidth, height: thumbnailHeight}"
       @loadedmetadata="updateGenerationParameters"
       @seeked="thumbnailGeneration" />
+    <base-image-display
+      v-show="!useFallback"
+      :imgSrc="tempImage"
+      :width="thumbnailWidth"
+      :height="thumbnailHeight" />
   </div>
 </template>
 
 <script>
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
+import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay';
 import { THUMBNAIL_DB_NAME } from '@/constants';
 import idb from 'idb';
 export default {
   name: 'thumbnail-video-player',
   components: {
     'base-video-player': BaseVideoPlayer,
+    'base-image-display': BaseImageDisplay,
   },
   props: {
     currentTime: {
@@ -60,6 +68,8 @@ export default {
       manualGenerationIndex: -1,
       tempBlobArray: [],
       lastGenerationIndex: 0,
+      tempImage: null,
+      useFallback: false,
     };
   },
   watch: {
@@ -117,6 +127,9 @@ export default {
           0, 0, this.maxThumbnailWidth, this.maxThumbnailHeight,
         );
         createImageBitmap(this.canvasContainer).then((imageBitmap) => {
+          if (!this.isAutoGeneration) {
+            this.tempImage = imageBitmap;
+          }
           this.thumbnailSet.add(index);
           this.tempBlobArray.push({
             index,
@@ -155,6 +168,7 @@ export default {
       }
     },
     pauseAutoGeneration() {
+      this.useFallback = true;
       if (this.autoGenerationTimer !== 0) {
         clearTimeout(this.autoGenerationTimer);
         this.autoGenerationTimer = setTimeout(this.resumeAutoGeneration, this.MAX_GENERATION_DELAY);
@@ -164,6 +178,7 @@ export default {
     },
     resumeAutoGeneration() {
       this.isAutoGeneration = true;
+      this.useFallback = false;
       this.videoSeek(this.autoGenerationIndex);
     },
     thumbnailArrayHandler(array) {
