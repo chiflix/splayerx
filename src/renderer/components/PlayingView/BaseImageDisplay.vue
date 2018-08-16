@@ -84,19 +84,16 @@ export default {
     getImageOptions(imgSrc, imageType) {
       const type = imageType;
       let options = {};
-      let outerWidth = '';
-      let outerHeight = '';
-      if (this.width >= 0 && this.height >= 0) {
-        outerWidth = `${this.width}px`;
-        outerHeight = `${this.height}px`;
-      }
+      const outerWidth = this.width ? `${this.width}px` : '100%';
+      const outerWidth = this.height ? `${this.height}px` : '100%';
+
       options = {
         style: this.$_style,
         ref: 'image',
-        attrs: outerWidth && outerHeight ? {
+        attrs: {
           width: outerWidth,
           height: outerHeight,
-        } : {},
+        },
       };
       switch (type) {
         case 'URL':
