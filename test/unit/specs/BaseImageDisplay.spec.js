@@ -12,21 +12,63 @@ describe('Component - BaseImageDisplay', () => {
     expect(wrapper.contains(BaseImageDisplay)).to.equal(true);
   });
 
-  describe('Functionality - DataURI/URL image test', () => {
-    const propsData = {
-      imgSrc: 'data:image/gif;',
-    };
+  describe('Functionality - render imgSrc test', () => {
     beforeEach(() => {
       sandbox = sinon.createSandbox();
-      wrapper = mount(BaseImageDisplay, { propsData });
     });
     afterEach(() => {
       sandbox.restore();
       wrapper.destroy();
     });
 
-    it('should render img properly', () => {
-      expect(wrapper.vm.imageType).to.equal('DataURI');
+    it('should render DataURI to img', () => {
+      const propsData = { imgSrc: 'data:image/gif' };
+
+      wrapper = mount(BaseImageDisplay, { propsData });
+
+      expect(wrapper.contains('img')).to.equal(true);
+    });
+    it('should render URL to img', () => {
+      const propsData = { imgSrc: 'https://localhost:9090/example.png' };
+
+      wrapper = mount(BaseImageDisplay, { propsData });
+
+      expect(wrapper.contains('img')).to.equal(true);
+    });
+    it('should render Blob to img', () => {
+      const propsData = { imgSrc: new Blob(new Uint8Array(1)) };
+
+      wrapper = mount(BaseImageDisplay, { propsData });
+
+      expect(wrapper.contains('img')).to.equal(true);
+    });
+    // Todo: should render ImageBitmap to canvas
+    it('should render ImageData to canvas', () => {
+      const propsData = { imgSrc: new ImageData(20, 10) };
+
+      wrapper = mount(BaseImageDisplay, { propsData });
+
+      expect(wrapper.contains('canvas')).to.equal(true);
+    });
+    it('should render unsupported types to span', () => {
+      const propsData = { imgSrc: 'image://' };
+
+      wrapper = mount(BaseImageDisplay, { propsData });
+
+      expect(wrapper.contains('span')).to.equal(true);
+    });
+    it('should rendered element be dynamiacally changed', () => {
+      let propsData = { imgSrc: 'https://localhost:9090/example.png' };
+
+      wrapper = mount(BaseImageDisplay, { propsData });
+
+      expect(wrapper.contains('img')).to.equal(true);
+
+      propsData = { imgSrc: new ImageData(20, 10) };
+
+      wrapper.setProps(propsData);
+
+      expect(wrapper.contains('canvas')).to.equal(true);
     });
   });
 });
