@@ -85,7 +85,7 @@ export default {
       const type = imageType;
       let options = {};
       const outerWidth = this.width ? `${this.width}px` : '100%';
-      const outerWidth = this.height ? `${this.height}px` : '100%';
+      const outerHeight = this.height ? `${this.height}px` : '100%';
 
       options = {
         style: this.$_style,
@@ -158,21 +158,26 @@ export default {
     return h(this.elementName, visibilityOptions);
   },
   beforeUpdate() {
+    console.log('wow');
     switch (this.imageType) {
       default: {
         this.imageReady = true;
         break;
       }
       case 'ImageBitmap': {
-        this.$refs.image.getContext('2d').drawImage(this.imgSrc, 0, 0);
-        this.imageReady = true;
+        if (this.$refs.image.getContext) {
+          this.$refs.image.getContext('2d').drawImage(this.imgSrc, 0, 0, this.width, this.height);
+          this.imageReady = true;
+        }
         break;
       }
       case 'ImageData': {
-        createImageBitmap(this.imgSrc).then((image) => {
-          this.$refs.image.getContext('2d').drawImage(image, 0, 0);
-          this.imageReady = true;
-        });
+        if (this.$refs.image.getContext) {
+          createImageBitmap(this.imgSrc).then((image) => {
+            this.$refs.image.getContext('2d').drawImage(image, 0, 0, this.width, this.height);
+            this.imageReady = true;
+          });
+        }
         break;
       }
     }
