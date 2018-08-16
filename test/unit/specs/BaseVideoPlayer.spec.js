@@ -97,9 +97,6 @@ describe('Component - BaseVideoPlayer', () => {
     it('should defaultEvents be initialized', () => {
       expect(wrapper.vm.onEdEvents).to.deep.equal(propsData.defaultEvents);
     });
-    it('should defaultEvents be emitted after initialized', () => {
-      expect(Object.keys(wrapper.emitted())).to.deep.equal(wrapper.vm.onEdEvents);
-    });
     it('should defaultEvents cannot change after initialized', () => {
       const events = [
         ['loadedmetadata', 'canplay'],
