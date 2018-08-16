@@ -1,5 +1,6 @@
 <template>
   <base-image-display
+    v-if="imageReady"
     :imgSrc="image"
     :width="thumbnailWidth"
     :height="thumbnailHeight" />
@@ -29,21 +30,30 @@ export default {
       thumbnailMap: new Map(),
       tempThumbnailArray: [],
       image: null,
+      imageReady: false,
     };
   },
   watch: {
     autoGenerationIndex(newValue, oldValue) {
       const thumbnailCount = newValue - oldValue;
       const startIndex = oldValue;
+      this.imageReady = false;
       this.getThumbnail(startIndex, thumbnailCount).then((result) => {
         this.$once('image-all-get', () => {
           this.arrayToMap(result);
+          this.imageReady = true;
         });
       });
     },
     currentIndex(newValue) {
       if (this.thumbnailMap.has(newValue)) {
         this.image = this.thumbnailMap.get(newValue);
+      } else {
+        this.$once('image-all-get', () => {
+          if (this.thumbnailMap.has(newValue)) {
+            this.image = this.thumbnailMap.get(newValue);
+          }
+        });
       }
     },
   },
@@ -53,7 +63,6 @@ export default {
       let result = [];
       if (thumbnailCount === 1) {
         const object = await idb.open(THUMBNAIL_DB_NAME).then((db) => {
-          console.log(objectStoreName);
           const tx = db.transaction(objectStoreName, 'readonly');
           return tx.objectStore(objectStoreName).get(`${startIndex}-${this.quickHash}`);
         });
@@ -96,13 +105,14 @@ export default {
       array.forEach((thumbnail) => {
         this.thumbnailMap.set(thumbnail.index, thumbnail.image);
       });
-      console.log(this.thumbnailMap);
     },
   },
   created() {
+    this.imageReady = false;
     this.getThumbnail(0, this.autoGenerationIndex).then((result) => {
       this.$once('image-all-get', () => {
         this.arrayToMap(result);
+        this.imageReady = true;
       });
     });
   },

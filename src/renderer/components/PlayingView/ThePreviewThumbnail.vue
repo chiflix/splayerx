@@ -91,10 +91,6 @@ export default {
         this.videoCurrentTime = newValue;
       }
     },
-    autoGenerationIndex(newValue) {
-      const index = Math.abs(Math.floor(this.currentTime / this.generationInterval));
-      this.displayVideo = index <= newValue;
-    },
   },
   methods: {
     updateMediaQuickHash(src) {
@@ -112,7 +108,6 @@ export default {
       this.quickHash = this.mediaQuickHash(filePath);
     },
     updateThumbnailInfo(event) {
-      this.displayVideo = event.index < event.count;
       this.autoGenerationIndex = event.index;
       this.generationInterval = event.interval;
       this.infoDB().add(THUMBNAIL_OBJECT_STORE_NAME, {
@@ -121,9 +116,12 @@ export default {
         generationInterval: event.interval,
         maxThumbnailCount: event.count,
       });
-      this.mountVideo = event.index < event.count;
-      this.mountImage = this.autoGenerationIndex > 0;
-      console.log('[ThePreviewThumbnail]:', this.mountVideo, this.mountImage, this.autoGenerationIndex);
+      if (!this.mountImage) {
+        this.mountImage = this.autoGenerationIndex > 0;
+      }
+      if (this.mountVideo) {
+        this.mountVideo = event.index < event.count;
+      }
     },
     retrieveThumbnailInfo(quickHash) {
       return new Promise((resolve) => {
