@@ -1,16 +1,11 @@
-<template>
-  <div class="base-image-display">
-    <slot v-show="imageReady">此处为Image插槽</slot>
-  </div>
-</template>
 <script>
 export default {
-  name: "base-image-display",
+  name: 'base-image-display',
   props: {
     imgSrc: {
       required: true,
     },
-    _style: {
+    $_style: {
       type: Object,
     },
     width: Number,
@@ -35,8 +30,8 @@ export default {
       let imgType = null;
       if (typeof src === 'string') {
         const imgURLRegexes = {
-          'URL': new RegExp(/^https?:\/\//),
-          'DataURI': new RegExp(/^data:/),
+          URL: new RegExp(/^https?:\/\//),
+          DataURI: new RegExp(/^data:/),
         };
         Object.keys(imgURLRegexes).forEach((regType) => {
           if (imgURLRegexes[regType].test(src)) {
@@ -78,13 +73,14 @@ export default {
       let outerWidth = '';
       let outerHeight = '';
       if (this.width >= 0 && this.height >= 0) {
-        outerWidth = this.width + 'px';
-        outerHeight = this.height + 'px';
+        outerWidth = `${this.width}px`;
+        outerHeight = `${this.height}px`;
       }
       switch (type) {
+        /* eslint-disable no-fallthrough */
         default: {
           options = {
-            style: this._style,
+            style: this.$_style,
             attrs: outerWidth && outerHeight ? {
               width: outerWidth,
               height: outerHeight,
@@ -122,13 +118,13 @@ export default {
   created() {
     this.imageType = this.getImageType(this.imgSrc);
   },
-  render(createElement) {
+  render(h) {
     const imageType = this.getImageType(this.imgSrc);
     const elementName = this.getElementName(imageType);
     const imageOptions = this.getImageOptions(this.imgSrc, imageType);
 
-    return createElement(elementName, imageOptions);
+    return h(elementName, imageOptions);
   },
-}
+};
 </script>
 
