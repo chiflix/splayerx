@@ -9,8 +9,7 @@
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
       :outerThumbnailInfo="outerThumbnailInfo"
-      @update-thumbnail-info="updateThumbnailInfo">
-    </thumbnail-video-player>
+      @update-thumbnail-info="updateThumbnailInfo" />
     <thumbnail-display
       v-if="mountImage"
       v-show="!displayVideo"
