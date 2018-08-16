@@ -17,7 +17,8 @@
       v-show="!displayVideo"
       :quickHash="quickHash"
       :autoGenerationIndex="autoGenerationIndex"
-      :maxThumbnailWidth="maxThumbnailWidth" />
+      :maxThumbnailWidth="maxThumbnailWidth"
+      :currentIndex="currentIndex" />
   </div>
 </template>
 
@@ -67,6 +68,7 @@ export default {
       mountImage: false,
       maxThumbnailCount: 0,
       lastGenerationIndex: 0,
+      currentIndex: 0,
     };
   },
   watch: {
@@ -79,6 +81,7 @@ export default {
     },
     currentTime(newValue) {
       const index = Math.abs(Math.floor(newValue / this.generationInterval));
+      this.currentIndex = index;
       if (index <= this.autoGenerationIndex) {
         this.displayVideo = false;
         this.canvasCurrentTime = newValue;

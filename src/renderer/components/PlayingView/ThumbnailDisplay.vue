@@ -1,5 +1,5 @@
 <template>
-  <span>hhh</span>
+  <span>{{ currentIndex }}</span>
 </template>
 <script>
 import { THUMBNAIL_DB_NAME } from '@/constants';
@@ -13,6 +13,7 @@ export default {
       validator: value => value > 0,
     },
     maxThumbnailWidth: Number,
+    currentIndex: Number,
   },
   data() {
     return {
