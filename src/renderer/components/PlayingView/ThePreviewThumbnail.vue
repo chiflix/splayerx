@@ -16,7 +16,8 @@
       v-if="mountImage"
       v-show="!displayVideo"
       :quickHash="quickHash"
-      :autoGenerationIndex="autoGenerationIndex" />
+      :autoGenerationIndex="autoGenerationIndex"
+      :maxThumbnailWidth="maxThumbnailWidth" />
   </div>
 </template>
 
