@@ -31,7 +31,7 @@ export default {
       if (typeof src === 'string') {
         const imgURLRegexes = {
           URL: new RegExp(/^https?:\/\//),
-          DataURI: new RegExp(/^data:/),
+          DataURI: new RegExp(/^data:image\//),
         };
         Object.keys(imgURLRegexes).forEach((regType) => {
           if (imgURLRegexes[regType].test(src)) {
@@ -54,13 +54,15 @@ export default {
       switch (type) {
         default: {
           elementName = 'span';
-          break;
         }
-        case 'URL' || 'DataURI' || 'Blob': {
+        case 'URL':
+        case 'DataURI':
+        case 'Blob': {
           elementName = 'img';
           break;
         }
-        case 'ImageBitmap' || 'ImageData': {
+        case 'ImageBitmap':
+        case 'ImageData': {
           elementName = 'canvas';
           break;
         }
@@ -69,32 +71,29 @@ export default {
     },
     getImageOptions(imgSrc, imageType) {
       const type = imageType;
-      let options = null;
+      let options = {};
       let outerWidth = '';
       let outerHeight = '';
       if (this.width >= 0 && this.height >= 0) {
         outerWidth = `${this.width}px`;
         outerHeight = `${this.height}px`;
       }
+      options = {
+        style: this.$_style,
+        attrs: outerWidth && outerHeight ? {
+          width: outerWidth,
+          height: outerHeight,
+        } : {},
+      };
       switch (type) {
-        /* eslint-disable no-fallthrough */
-        default: {
-          options = {
-            style: this.$_style,
-            attrs: outerWidth && outerHeight ? {
-              width: outerWidth,
-              height: outerHeight,
-            } : {},
-          };
-        }
-        case 'URL' || 'DataURI': {
+        case 'URL':
+        case 'DataURI': {
           options = Object.assign(
             options,
-            {
-              attrs: {
-                src: imgSrc,
-              },
-            },
+            { attrs: Object.assign(
+              options.attrs,
+              { src: imgSrc, },
+            )},
           );
           break;
         }
@@ -102,11 +101,10 @@ export default {
           const url = URL.createObjectURL(imgSrc);
           options = Object.assign(
             options,
-            {
-              attrs: {
-                src: url,
-              },
-            },
+            { attrs: Object.assign(
+              options.attrs,
+              { src: url, },
+            )},
           );
           break;
         }
@@ -114,9 +112,6 @@ export default {
 
       return options;
     },
-  },
-  created() {
-    this.imageType = this.getImageType(this.imgSrc);
   },
   render(h) {
     const imageType = this.getImageType(this.imgSrc);
