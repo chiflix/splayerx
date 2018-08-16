@@ -8,6 +8,7 @@ export default {
     $_style: {
       type: Object,
     },
+    attributes: Object,
     width: Number,
     height: Number,
   },
@@ -54,6 +55,7 @@ export default {
       switch (type) {
         default: {
           elementName = 'span';
+          break;
         }
         case 'URL':
         case 'DataURI':
@@ -93,6 +95,7 @@ export default {
             { attrs: Object.assign(
               options.attrs,
               { src: imgSrc, },
+              this.attributes,
             )},
           );
           break;
@@ -104,6 +107,7 @@ export default {
             { attrs: Object.assign(
               options.attrs,
               { src: url, },
+              this.attributes,
             )},
           );
           break;
