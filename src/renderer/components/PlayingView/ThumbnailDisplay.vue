@@ -14,26 +14,38 @@ export default {
     },
     maxThumbnailWidth: Number,
   },
+  data() {
+    return {
+      thumbnailMap: new Map(),
+      tempThumbnailArray: [],
+    };
+  },
   watch: {
     autoGenerationIndex(newValue, oldValue) {
-      console.log('[ThumbnailDisplay]:', newValue, oldValue);
+      const thumbnailCount = newValue - oldValue;
+      const startIndex = oldValue;
+      this.getThumbnail(startIndex, thumbnailCount).then((result) => {
+        this.$once('image-all-get', () => {
+          this.arrayToMap(result);
+        });
+      });
     },
   },
   methods: {
     async getThumbnail(startIndex, thumbnailCount) {
       const objectStoreName = `thumbnail-width-${this.maxThumbnailWidth}`;
-      let result;
+      let result = [];
       if (thumbnailCount === 1) {
         const object = await idb.open(THUMBNAIL_DB_NAME).then((db) => {
           console.log(objectStoreName);
           const tx = db.transaction(objectStoreName, 'readonly');
           return tx.objectStore(objectStoreName).get(`${startIndex}-${this.quickHash}`);
         });
-        result = Object.assign(
+        result.push(Object.assign(
           {},
           { index: object.index },
-          { imageBitmap: object.imageBitmap },
-        );
+          { image: object.imageBitmap },
+        ));
       } else {
         result = [];
         idb.open(THUMBNAIL_DB_NAME).then((db) => {
@@ -50,21 +62,32 @@ export default {
                 result.push(Object.assign(
                   {},
                   { index: value.index },
-                  { imageBitmap: value.imageBitmap },
+                  { image: value.imageBitmap },
                 ));
               });
             }
             cursor.continue();
           });
           return tx.complete;
+        }).then(() => {
+          console.log(`${thumbnailCount} images get!`);
+          this.$emit('image-all-get');
         });
       }
       return result;
     },
+    arrayToMap(array) {
+      array.forEach((thumbnail) => {
+        this.thumbnailMap.set(thumbnail.index, thumbnail.image);
+      });
+      console.log(this.thumbnailMap);
+    },
   },
   created() {
     this.getThumbnail(0, this.autoGenerationIndex).then((result) => {
-      console.log(result);
+      this.$once('image-all-get', () => {
+        this.arrayToMap(result);
+      });
     });
   },
 };
