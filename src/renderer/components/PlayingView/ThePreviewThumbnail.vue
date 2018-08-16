@@ -18,7 +18,9 @@
       :quickHash="quickHash"
       :autoGenerationIndex="autoGenerationIndex"
       :maxThumbnailWidth="maxThumbnailWidth"
-      :currentIndex="currentIndex" />
+      :currentIndex="currentIndex"
+      :thumbnailWidth="thumbnailWidth"
+      :thumbnailHeight="thumbnailHeight" />
   </div>
 </template>
 
