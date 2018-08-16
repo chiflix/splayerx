@@ -21,9 +21,19 @@ export default {
         'ImageBitmap',
         'ImageData',
       ],
-      imageType: null,
       imageReady: false,
     };
+  },
+  computed: {
+    imageType() {
+      return this.getImageType(this.imgSrc);
+    },
+    elementName() {
+      return this.getElementName(this.imageType);
+    },
+    imageOptions() {
+      return this.getImageOptions(this.imgSrc, this.imageType);
+    },
   },
   methods: {
     getImageType(imgSrc) {
@@ -118,11 +128,7 @@ export default {
     },
   },
   render(h) {
-    const imageType = this.getImageType(this.imgSrc);
-    const elementName = this.getElementName(imageType);
-    const imageOptions = this.getImageOptions(this.imgSrc, imageType);
-
-    return h(elementName, imageOptions);
+    return h(this.elementName, this.imageOptions);
   },
 };
 </script>
