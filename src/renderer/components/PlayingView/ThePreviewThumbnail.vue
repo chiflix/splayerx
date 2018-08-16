@@ -2,25 +2,21 @@
   <div class="the-preview-thumbnail"
     :style="{width: thumbnailWidth +'px', height: thumbnailHeight + 'px', left: positionOfThumbnail + 'px'}">
     <thumbnail-video-player
+      v-if="mountVideo"
+      v-show="displayVideo"
       :quickHash="quickHash"
       :currentTime="videoCurrentTime"
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
       :outerThumbnailInfo="outerThumbnailInfo"
-      @update-thumbnail-info="updateThumbnailInfo"
-      v-if="mountVideo"
-      v-show="displayVideo">
+      @update-thumbnail-info="updateThumbnailInfo">
       <span class="time">{{ videoTime }}</span>
     </thumbnail-video-player>
     <thumbnail-display-canvas
+      v-if="mountImage"
+      v-show="!displayVideo"
       :quickHash="quickHash"
-      :currentTime="canvasCurrentTime"
-      :thumbnailWidth="thumbnailWidth"
-      :thumbnailHeight="thumbnailHeight"
-      :outerThumbnailInfo="outerThumbnailInfo"
-      :lastGenerationIndex="lastGenerationIndex"
-      :maxThumbnailCount="maxThumbnailCount"
-      v-show="!displayVideo" />
+      :autoGenerationIndex="autoGenerationIndex" />
   </div>
 </template>
 
@@ -67,15 +63,16 @@ export default {
       autoGenerationIndex: 0,
       generationInterval: 3,
       mountVideo: false,
+      mountImage: false,
       maxThumbnailCount: 0,
       lastGenerationIndex: 0,
     };
   },
   watch: {
     src(newValue) {
-      if (this.mountVideo) {
-        this.mountVideo = false;
-      }
+      // Reload video and image components
+      this.mountVideo = this.mountVideo === true;
+      this.mountImage = this.mountImage === true;
       this.updateMediaQuickHash(newValue);
       this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
     },
@@ -119,6 +116,9 @@ export default {
         generationInterval: event.interval,
         maxThumbnailCount: event.count,
       });
+      this.mountVideo = event.index < event.count;
+      this.mountImage = this.autoGenerationIndex > 0;
+      console.log('[ThePreviewThumbnail]:', this.mountVideo, this.mountImage, this.autoGenerationIndex);
     },
     retrieveThumbnailInfo(quickHash) {
       return new Promise((resolve) => {
@@ -160,6 +160,10 @@ export default {
         // Update mountVideo
         this.mountVideo = !result.lastGenerationIndex ||
           result.lastGenerationIndex < result.maxThumbnailCount;
+        // Update mountImage
+        this.mountImage = typeof result.lastGenerationIndex === 'number' &&
+          result.lastGenerationIndex > 0;
+        console.log('[ThePreviewThumbnail]:', this.mountVideo, this.mountImage);
       }
     },
   },
