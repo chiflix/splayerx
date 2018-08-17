@@ -10,7 +10,7 @@
       @durationchange="onDurationChange"
       :src="src">
     </video>
-    <Subtitle/>
+    <BaseSubtitle/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -18,11 +18,11 @@
 <script>
 // https://www.w3schools.com/tags/ref_av_dom.asp
 import syncStorage from '@/helpers/syncStorage';
-import Subtitle from './BaseSubtitle.vue';
+import BaseSubtitle from './BaseSubtitle.vue';
 import WindowSizeHelper from '../../helpers/WindowSizeHelper.js';
 export default {
   components: {
-    Subtitle,
+    BaseSubtitle,
   },
   data() {
     return {

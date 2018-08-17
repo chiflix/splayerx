@@ -125,7 +125,7 @@ export default {
 
   computed: {
     computedAvaliableItems() {
-      return (this.$store.getters.SubtitleNameArr);
+      return (this.$store.getters.subtitleNameArr.slice(0, 3));
     },
   },
 

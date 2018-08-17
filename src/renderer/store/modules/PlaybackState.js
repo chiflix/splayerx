@@ -11,10 +11,9 @@ const state = {
 };
 
 const getters = {
+  subtitleNameArr: state => state.SubtitleNameArr,
   firstSubIndex: state => state.SubtitleNameArr.findIndex(subName => subName.status === 'first'),
-  SubtitleNameArrSize: state => state.SubtitleNameArr.length,
-  SubtitleNameArr: state => state.SubtitleNameArr,
-  SrcOfVideo: state => state.SrcOfVideo,
+  subtitleNameArrSize: state => state.SubtitleNameArr.length,
 };
 
 const mutations = {
@@ -37,22 +36,27 @@ const mutations = {
     state.Volume = v;
   },
 
-  SubtitleNameArr(state, arr) {
-    state.SubtitleNameArr = arr;
+  SubtitleNameArr(state, subtitles) {
+    state.SubtitleNameArr = subtitles;
   },
-  AddSubtitle(state, subName) {
-    for (let i = 0; i < subName.length; i += 1) {
-      state.SubtitleNameArr.push(subName[i]);
+  AddSubtitle(state, subtitles) {
+    for (let i = 0; i < subtitles.length; i += 1) {
+      state.SubtitleNameArr.push(subtitles[i]);
     }
   },
-  // 需要对subtitle array的状态进行判断，有无数组，是否超出
-  SubtitleOn(state, obj) {
-    state.SubtitleNameArr[obj.index].status = obj.status === 'first' ? 'first' : 'second';
+  AddServerSubtitle(state, subtitles) {
+    state.SubtitleNameArr.unshift(...subtitles);
   },
-  SubtitleOff(state, index) {
-    if (index < state.SubtitleNameArr.length) {
-      console.log(state.SubtitleNameArr);
+  SubtitleOn(state, obj) {
+    const index = state.SubtitleNameArr.findIndex(subName => subName.textTrackID === obj.index);
+    state.SubtitleNameArr[index].status = obj.status === 'first' ? 'first' : 'second';
+  },
+  SubtitleOff(state) {
+    const index = state.SubtitleNameArr.findIndex(subName => subName.status === 'first');
+    if (index !== -1) {
       state.SubtitleNameArr[index].status = null;
+    } else {
+      console.log('Error in PlaybackStates');
     }
   },
 };

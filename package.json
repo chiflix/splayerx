@@ -113,7 +113,7 @@
     "ass-to-vtt": "^1.2.0"
   },
   "devDependencies": {
-    "@chiflix/electron": "^3.0.0-beta.3",
+    "@chiflix/electron": "^3.0.0-beta.5",
     "@vue/test-utils": "^1.0.0-beta.24",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",

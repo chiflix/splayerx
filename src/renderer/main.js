@@ -414,25 +414,6 @@ new Vue({
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);
       }
-
-
-      /*
-      for (const file in files) {
-        if (files.hasOwnProperty(file)) {
-          const filename = files[file].name
-          const fileExt = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase()
-          if (Videos.allowedExtensions().indexOf(fileExt) !== -1) {
-            const video = {
-              id: videos.length + 1,
-              status: 'loading',
-              name: filename,
-              path: files[file].path,
-              size: files[file].size
-            }
-            videos.push(video)
-          }
-        }
-      } */
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
