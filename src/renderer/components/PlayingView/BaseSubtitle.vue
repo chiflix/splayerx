@@ -18,6 +18,8 @@ import ass2vtt from 'ass-to-vtt';
 import { WebVTT } from 'vtt.js';
 import path from 'path';
 import parallel from 'run-parallel';
+import MatroskaSubtitles from 'matroska-subtitles';
+import z from 'zero-fill';
 
 export default {
   data() {
@@ -45,7 +47,7 @@ export default {
   methods: {
     subtitleInitialize() {
       const vid = this.$parent.$refs.videoCanvas;
-      const re = new RegExp('^(.mkv)$');
+      // const re = new RegExp('^(.mkv)$');
       this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
       // This code is aim to get mediaHash of video
       // fs.writeFile('111.txt', this.mediaHash, (err) => {
@@ -58,20 +60,20 @@ export default {
         files.push(subPath);
       });
 
+      const re = new RegExp('^(.mkv)$');
       if (re.test(path.extname(decodeURI(vid.src)))) {
-
+        this.mkvProcess(decodeURI(vid.src), () => {
+          this.$_toggleSutitleShow();
+        });
       }
 
       if (files.length > 0) {
         this.loadLocalTextTracks(files, () => {
-          this.subStyleChange();
-          this.subtitleShow(0);
+          this.$_toggleSutitleShow();
         });
-
       } else {
         this.loadServerTextTracks(() => {
-          this.subStyleChange();
-          this.subtitleShow(0);
+          this.$_toggleSutitleShow();
         });
       }
     },
@@ -98,10 +100,17 @@ export default {
 
       this.addVttToVideoElement(files, () => {
         console.log('finished reading subtitle files');
-        cb();
-
         const subNameArr = files.map(file => this.$_subNameFromLocalProcess(file));
-        this.$store.commit('SubtitleNameArr', subNameArr);
+        this.$store.commit('AddSubtitle', subNameArr);
+        cb();
+      });
+    },
+
+    mkvProcess(vidPath, cb) {
+      console.log('IV STARTING READING MKV');
+      this.addMkvSubstoVideo(vidPath, () => {
+        console.log('finished reading mkv subtitles');
+        cb();
       });
     },
     /**
@@ -151,6 +160,7 @@ export default {
 
     /* this method is used to convert the timecodes extracted from matroska-subtitle
       library (convert) to the timecodes format for VTT format.
+    */
 
     msToTime(s) {
       const ms = s % 1000;
@@ -160,51 +170,62 @@ export default {
       const mins = s % 60;
       const hrs = (s - mins) / 60;
       return (`${z(2, hrs)}:${z(2, mins)}:${z(2, secs)}.${z(3, ms)}`);
-    }, */
-
+    },
 
     /*
     the following method reads the subtitles embeded in the MKV files,
     and add these subtitles into the video's texttracks.
     But the structure of this method need to be changed and improved.
+    */
 
-    autoloadMkvSubtitles(filePath, cb) {
-      console.log(filePath);
+    addMkvSubstoVideo(filePath, cb) {
       const ectractFn = filePath => new Promise((resolve) => {
         let tracks;
         const subs = new MatroskaSubtitles();
         subs.once('tracks', (track) => {
-          console.log(track);
           tracks = track;
+          console.log(tracks);
           tracks.forEach((trac) => {
             trac.subContent = '';
           });
         });
         subs.on('subtitle', (sub, trackNumber) => {
-          const currentTrackIndex = trackNumber - 1;
+          let currentIndex = null;
+          for (let i = 0; i < tracks.length; i += 1) {
+            if (tracks[i].number === trackNumber) {
+              currentIndex = i;
+            }
+          }
           let currentContent = '';
           // the indices for each cue is probably can be ignored as it's VTT format
 
-          currentContent += `${this.msToTime(sub.time)} -->
-            ${this.msToTime(sub.time + sub.duration)}\r\n`;
+          currentContent += `${this.msToTime(sub.time)} --> ${this.msToTime(sub.time + sub.duration)}\r\n`;
           currentContent += `${(sub.text)}\r\n\r\n`;
 
-          tracks[currentTrackIndex].subContent += currentContent;
+          tracks[currentIndex].subContent += currentContent;
         });
 
         subs.on('finish', () => {
           resolve(tracks);
         });
-        const realPath = filePath.substring(8);
+        const realPath = filePath.substring(7);
         fs.createReadStream(realPath).pipe(subs);
+        console.log('OKAY HERE');
       });
       ectractFn(filePath).then((realTracks) => {
         // now transfer string into VTT
         console.log(realTracks);
         const vid = this.$parent.$refs.videoCanvas;
+        const embededSubNames = [];
 
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         for (let i = 0; i < realTracks.length; i += 1) {
+          embededSubNames[i] = {
+            title: realTracks[i].language === undefined || 'und' ? 'Unknown' : realTracks[i].language,
+            status: null,
+            textTrackID: this.textTrackID,
+            origin: 'local',
+          };
           const sub = vid.addTextTrack('subtitles');
           sub.mode = 'disabled';
           parser.oncue = (cue) => {
@@ -217,9 +238,12 @@ export default {
         }
         parser.onflush = cb;
         parser.flush();
+
+        console.log(embededSubNames);
+        this.$store.commit('AddSubtitle', embededSubNames);
       });
     },
-    */
+
     /**
      * @description Process subtitles and add subtitles to video element
      * @param {Array.<string>} files File pathes array
@@ -373,7 +397,7 @@ export default {
       const subExtName = path.extname(subPath);
 
       let vttStream;
-      if (reSrt.rest(subExtName)) {
+      if (reSrt.test(subExtName)) {
         vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
       } else {
         vttStream = fs.createReadStream(subPath).pipe(ass2vtt());
@@ -393,7 +417,7 @@ export default {
      */
     $_subNameFromLocalProcess(file) {
       const res = {
-        title: path.parse(file).name,
+        title: file.language === undefined ? path.parse(file).name : file.language,
         status: null,
         textTrackID: this.textTrackID,
         origin: 'local',
@@ -458,6 +482,12 @@ export default {
         } else {
           console.log('first subtitle not set');
         }
+      }
+    },
+    $_toggleSutitleShow() {
+      if (this.firstSubIndex === null) {
+        this.subStyleChange();
+        this.subtitleShow(0);
       }
     },
   },

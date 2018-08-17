@@ -9,7 +9,7 @@
 
             <li
               v-for="(item, index) in computedAvaliableItems"
-              @click.stop="toggleItemClick(index)"
+              @mouseup.stop="toggleItemClick(index)"
               @mouseover.stop.self="toggleItemsMouseOver"
               @mouseleave.stop.self="toggleItemsMouseLeave"
               :class="{ chosenText: itemHasBeenChosen(index) }">
@@ -22,7 +22,7 @@
               </div>
             </li>
 
-            <li @click.stop="toggleSubtitleOff"
+            <li @mouseup.stop="toggleSubtitleOff"
             @mouseover.stop.self="toggleItemsMouseOver"
             @mouseleave.stop.self="toggleItemsMouseLeave"
             :class="{ chosenText: itemHasBeenChosen(-1) }">
