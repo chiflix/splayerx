@@ -1,7 +1,6 @@
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
-import asyncStorage from '@/helpers/asyncStorage';
 import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
@@ -63,19 +62,6 @@ export default {
       }
     },
     openFile(path) {
-      // if new passed path exists in the storage
-      function indexOfExistedFileIn(data, path) {
-        for (let i = 0; i < data.length; i += 1) {
-          const object = data[i];
-          const iterator = Object.keys(object).indexOf('path');
-          if (iterator !== -1) {
-            if (object.path === path) {
-              return i;
-            }
-          }
-        }
-        return -1;
-      }
       let vidPath;
       path = decodeURI(path);
       if (process.platform === 'win32') {
@@ -86,49 +72,14 @@ export default {
       this.infoDB().add('recent-played', {
         quickHash: this.mediaQuickHash(vidPath),
         path,
-        shortCut: '',
-        lastPlayedTime: 0,
-        duration: 0,
         lastOpened: Date(),
       });
-      asyncStorage.get('recent-played').then((data) => {
-        const newElement = {
-          path,
-          shortCut: '',
-          lastPlayedTime: 0,
-          duration: 0,
-        };
-        if (Array.isArray(data)) {
-          if (data.length < 4) {
-            if (indexOfExistedFileIn(data, path) === -1) {
-              data.unshift(newElement);
-            } else {
-              const item = data.splice(indexOfExistedFileIn(data, path), 1);
-              if (item[0].lastPlayedTime !== 0) {
-                this.$bus.$emit('seek', item[0].lastPlayedTime);
-              }
-              data.unshift(item[0]);
-            }
-          } else if (indexOfExistedFileIn(data, path) === -1) {
-            data.pop();
-            data.unshift(newElement);
-          } else {
-            const item = data.splice(indexOfExistedFileIn(data, path), 1);
-            if (item[0].lastPlayedTime !== 0) {
-              this.$bus.$emit('seek', item[0].lastPlayedTime);
-            }
-            data.unshift(item[0]);
-          }
-        } else {
-          data = [newElement];
-        }
-        asyncStorage.set('recent-played', data);
-        this.$bus.$emit('new-file-open');
-      });
+      // seek lastPlayedTime
       this.$store.commit('SrcOfVideo', path);
       this.$router.push({
         name: 'playing-view',
       });
+      this.$bus.$emit('new-file-open');
     },
     mediaQuickHash(file) {
       function md5Hex(text) {

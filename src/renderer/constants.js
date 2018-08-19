@@ -58,7 +58,7 @@ export const INFO_DATABASE_NAME = 'Info';
 export const INFO_SCHEMA = [
   {
     name: 'recent-played',
-    indexes: ['lastOpened'],
+    indexes: ['lastOpened', 'path'],
   },
   {
     name: 'the-preview-thumbnail',

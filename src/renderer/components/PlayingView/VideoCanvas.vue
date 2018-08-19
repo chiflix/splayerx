@@ -30,6 +30,8 @@
 
 <script>
 // https://www.w3schools.com/tags/ref_av_dom.asp
+import fs from 'fs';
+import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import Subtitle from './BaseSubtitle.vue';
 import WindowSizeHelper from '../../helpers/WindowSizeHelper.js';
@@ -219,22 +221,15 @@ export default {
         0, 0, videoWidth, videoHeight,
       );
       const imagePath = canvas.toDataURL('image/png');
-      let data;
-      try {
-        data = syncStorage.getSync('recent-played');
-      } catch (err) {
-        console.error(err);
-      }
-      const object = data[0];
-      const iterator = Object.keys(object).indexOf('path');
-      if (iterator !== -1) {
-        object.shortCut = imagePath;
-        object.lastPlayedTime = this.currentTime;
-        object.duration = this.$store.state.PlaybackState.Duration;
-        data.splice(0, 1);
-        data.unshift(object);
-      }
+      const data = {
+        shortCut: imagePath,
+        lastPlayedTime: this.currentTime,
+        duration: this.$store.state.PlaybackState.Duration,
+      };
       syncStorage.setSync('recent-played', data);
+      const base64Data = imagePath.replace(/^data:image\/\w+;base64,/, '');
+      const dataBuffer = Buffer.from(base64Data, 'base64');
+      fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', dataBuffer);
     },
     calcNewWindowXY() {
       if (Object.keys(this.windowRectangleOld).length === 0) {
@@ -259,13 +254,21 @@ export default {
     },
   },
   watch: {
-    src() {
+    src(val, oldVal) {
       const window = this.$electron.remote.getCurrentWindow();
       this.windowRectangleOld.x = window.getBounds().x;
       this.windowRectangleOld.y = window.getBounds().y;
       this.windowRectangleOld.height = window.getBounds().height;
       this.windowRectangleOld.width = window.getBounds().width;
       this.$_saveScreenshot();
+      asyncStorage.get('recent-played')
+        .then(async (data) => {
+          const val = await this.infoDB().get('recent-played', 'path', oldVal);
+          if (val && data) {
+            const mergedData = Object.assign(val, data);
+            this.infoDB().add('recent-played', mergedData);
+          }
+        });
     },
   },
   created() {
