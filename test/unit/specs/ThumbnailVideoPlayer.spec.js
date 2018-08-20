@@ -3,7 +3,7 @@ import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
 import { shallowMount } from '@vue/test-utils';
 import sinon from 'sinon';
 
-describe.only('Component - ThumbnailVideoPlayer', () => {
+describe('Component - ThumbnailVideoPlayer', () => {
   let wrapper;
   let sandbox;
   const propsData = {
