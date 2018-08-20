@@ -107,7 +107,6 @@ export default {
     },
 
     mkvProcess(vidPath, cb) {
-      console.log('IV STARTING READING MKV');
       this.addMkvSubstoVideo(vidPath, () => {
         console.log('finished reading mkv subtitles');
         cb();
@@ -184,12 +183,12 @@ export default {
         const subs = new MatroskaSubtitles();
         subs.once('tracks', (track) => {
           tracks = track;
-          console.log(tracks);
           tracks.forEach((trac) => {
             trac.subContent = '';
           });
         });
         subs.on('subtitle', (sub, trackNumber) => {
+          console.log(sub);
           let currentIndex = null;
           for (let i = 0; i < tracks.length; i += 1) {
             if (tracks[i].number === trackNumber) {
@@ -197,8 +196,8 @@ export default {
             }
           }
           let currentContent = '';
-          // the indices for each cue is probably can be ignored as it's VTT format
 
+          // the indices for each cue can probably be ignored as it's in VTT format
           currentContent += `${this.msToTime(sub.time)} --> ${this.msToTime(sub.time + sub.duration)}\r\n`;
           currentContent += `${(sub.text)}\r\n\r\n`;
 
@@ -210,10 +209,9 @@ export default {
         });
         const realPath = filePath.substring(7);
         fs.createReadStream(realPath).pipe(subs);
-        console.log('OKAY HERE');
       });
       ectractFn(filePath).then((realTracks) => {
-        // now transfer string into VTT
+        // transfer string into VTT
         console.log(realTracks);
         const vid = this.$parent.$refs.videoCanvas;
         const embededSubNames = [];
@@ -221,7 +219,8 @@ export default {
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         for (let i = 0; i < realTracks.length; i += 1) {
           embededSubNames[i] = {
-            title: realTracks[i].language === undefined || 'und' ? 'Unknown' : realTracks[i].language,
+            title: realTracks[i].language === undefined || 'und' ?
+              'Unknown' : realTracks[i].language,
             status: null,
             textTrackID: this.textTrackID,
             origin: 'local',

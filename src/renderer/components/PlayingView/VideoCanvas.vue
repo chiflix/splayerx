@@ -1,5 +1,6 @@
 <template>
-  <div class="video">
+  <div class="video"
+       @mouseup.self.stop="handleMouseUp">
     <video ref="videoCanvas"
       preload="metadata"
       @playing="onPlaying"

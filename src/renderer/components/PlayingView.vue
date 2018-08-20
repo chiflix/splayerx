@@ -8,7 +8,7 @@
       @mousedown.self="resetDraggingState"
       @mousedown.right.stop="handleRightClick"
       @mousedown.left.stop.prevent="handleLeftClick"
-      @mouseup.left.prevent="handleMouseUp"
+      @mouseup.left.prevent.self="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="mouseleaveHandler"
       @mousemove.self="throttledWakeUpCall"
@@ -16,8 +16,8 @@
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
-      <VolumeControl/>
       <SubtitleControl/>
+      <VolumeControl/>
       <PlayButton/>
       <!-- <AdvanceControl/> -->
     </div>
@@ -69,6 +69,9 @@ export default {
       dragTime: 200,
       mouseDownTime: null,
       mouseDownCursorPosition: null,
+      subtitleMenuAppear: false,
+      advanceMenuAppear: false,
+      volumeMenuAppear: false,
     };
   },
   created() {
@@ -191,22 +194,27 @@ export default {
       this.wakeUpAllWidgets();
     },
     handleMouseUp() {
-      this.mouseDown = false;
-      this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
-      if (this.clicks === 1) { // if one click has been detected - clicks === 1
-        const self = this; // define a constant "self" for the following scope to use
-        if (this.isValidClick()) {
-          this.timer = setTimeout(() => { // define timer as setTimeOut function
-            self.togglePlayback(); // which is togglePlayback
-            self.clicks = 0; // reset the "clicks" to zero for next event
-          }, this.delay);
-        } else {
-          self.clicks = 0;
+      if (this.subtitleMenuAppear) {
+        this.subtitleMenuAppear = false;
+        this.$bus.$emit('subtitle-menu-off');
+      } else {
+        this.mouseDown = false;
+        this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
+        if (this.clicks === 1) { // if one click has been detected - clicks === 1
+          const self = this; // define a constant "self" for the following scope to use
+          if (this.isValidClick()) {
+            this.timer = setTimeout(() => { // define timer as setTimeOut function
+              self.togglePlayback(); // which is togglePlayback
+              self.clicks = 0; // reset the "clicks" to zero for next event
+            }, this.delay);
+          } else {
+            self.clicks = 0;
+          }
+        } else { // else, if a second click has been detected - clicks === 2
+          clearTimeout(this.timer); // cancel the time out
+          this.toggleFullScreenState();
+          this.clicks = 0;// reset the "clicks" to zero
         }
-      } else { // else, if a second click has been detected - clicks === 2
-        clearTimeout(this.timer); // cancel the time out
-        this.toggleFullScreenState();
-        this.clicks = 0;// reset the "clicks" to zero
       }
     },
     isValidClick() { // this check will be at on mouse up
@@ -234,6 +242,9 @@ export default {
       clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
     });
     this.$bus.$on('hide-all-widgets', this.hideAllWidgets);
+    this.$bus.$on('subtitle-menu-on', () => {
+      this.subtitleMenuAppear = true;
+    });
   },
   computed: {
     uri() {
@@ -242,6 +253,11 @@ export default {
     cursorStyle() {
       return this.cursorShow ? 'default' : 'none';
     },
+    widgetsAppear() {
+      return (this.subtitleMenuAppear || this.advanceMenuAppear || this.volumeMenuAppear);
+    },
+  },
+  watch: {
   },
 };
 </script>

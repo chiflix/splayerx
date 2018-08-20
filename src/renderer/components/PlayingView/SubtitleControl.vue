@@ -93,6 +93,7 @@ export default {
     toggleSubtitleMenu() {
       if (!this.appearSubtitleMenu) {
         this.appearSubtitleMenu = true;
+        this.$bus.$emit('subtitle-menu-on');
       } else {
         this.appearSubtitleMenu = false;
       }
@@ -122,10 +123,9 @@ export default {
       return (REGEX_CHINESE.test(str));
     },
   },
-
   computed: {
     computedAvaliableItems() {
-      return (this.$store.getters.subtitleNameArr.slice(0, 3));
+      return this.$store.getters.subtitleNameArr;
     },
   },
 
@@ -136,6 +136,7 @@ export default {
   created() {
     this.$bus.$on('sub-ctrl-appear', this.subCtrlBtnAppear);
     this.$bus.$on('sub-ctrl-hide', this.subCtrlBtnHide);
+    this.$bus.$on('subtitle-menu-off', this.toggleSubtitleMenu);
   },
 };
 </script>
