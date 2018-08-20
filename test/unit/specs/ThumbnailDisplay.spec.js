@@ -2,7 +2,7 @@ import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
 
-describe('Component - ThumbnailDisplay', () => {
+describe.only('Component - ThumbnailDisplay', () => {
   let wrapper;
   let sandbox;
 
@@ -32,7 +32,7 @@ describe('Component - ThumbnailDisplay', () => {
     sandbox.restore();
   });
 
-  describe.only('Behavior - AutoGenerationIndex changing', () => {
+  describe('Behavior - AutoGenerationIndex changing', () => {
     it('should changing autoGenerationIndex turn off base-image-display', () => {
       wrapper.setProps({ autoGenerationIndex: 30 });
 
@@ -62,6 +62,34 @@ describe('Component - ThumbnailDisplay', () => {
         expect(wrapper.vm.thumbnailMap).to.have.key(1);
         done();
       });
+    });
+  });
+
+  describe('Behavior - CurrentIndex change', () => {
+    it('should already have index get proper image', () => {
+      const testObject = {
+        index: 30,
+        thumbnail: '30',
+      };
+      wrapper.vm.thumbnailMap.set(testObject.index, testObject);
+
+      wrapper.setProps({ currentIndex: 30 });
+
+      expect(wrapper.vm.image).to.deep.equal(testObject);
+    });
+
+    it('should image-all-get refresh ungenerated image', () => {
+      const testObject = {
+        index: 30,
+        thumbnail: '30',
+      };
+
+      wrapper.setProps({ currentIndex: 30 });
+      expect(wrapper.vm.image).to.not.equal(testObject);
+      wrapper.vm.thumbnailMap.set(testObject.index, testObject);
+      wrapper.vm.$emit('image-all-get');
+
+      expect(wrapper.vm.image).to.deep.equal(testObject);
     });
   });
 });
