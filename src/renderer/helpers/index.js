@@ -69,17 +69,24 @@ export default {
       } else {
         vidPath = path.replace(/^file:\/\//, '');
       }
-      this.infoDB().add('recent-played', {
-        quickHash: this.mediaQuickHash(vidPath),
-        path,
-        lastOpened: Date(),
-      });
-      // seek lastPlayedTime
+      this.infoDB().get('recent-played', this.mediaQuickHash(vidPath))
+        .then((value) => {
+          if (value) {
+            this.$bus.$emit('seek', value.lastPlayedTime);
+            this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date() }));
+          } else {
+            this.infoDB().add('recent-played', {
+              quickHash: this.mediaQuickHash(vidPath),
+              path,
+              lastOpened: Date(),
+            });
+          }
+          this.$bus.$emit('new-file-open');
+        });
       this.$store.commit('SrcOfVideo', path);
       this.$router.push({
         name: 'playing-view',
       });
-      this.$bus.$emit('new-file-open');
     },
     mediaQuickHash(file) {
       function md5Hex(text) {

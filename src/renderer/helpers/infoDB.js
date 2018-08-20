@@ -109,7 +109,7 @@ class InfoDB {
    * @param  {String} schema
    * @param  {String} key Optional
    * @param  {String} val
-   * Retrieve the record which Primary key equal to the given val if there's no specified key
+   * Retrieve a record which Primary key equal to the given val if there's no specified key
    * Otherwise retrieve the record which specified key equal to the given val.
    */
   get(schema, key, val) {

@@ -30,7 +30,6 @@
 
 <script>
 // https://www.w3schools.com/tags/ref_av_dom.asp
-import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import Subtitle from './BaseSubtitle.vue';
@@ -227,9 +226,6 @@ export default {
         duration: this.$store.state.PlaybackState.Duration,
       };
       syncStorage.setSync('recent-played', data);
-      const base64Data = imagePath.replace(/^data:image\/\w+;base64,/, '');
-      const dataBuffer = Buffer.from(base64Data, 'base64');
-      fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', dataBuffer);
     },
     calcNewWindowXY() {
       if (Object.keys(this.windowRectangleOld).length === 0) {
