@@ -2,7 +2,7 @@ import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
 
-describe.only('Component - ThumbnailDisplay', () => {
+describe('Component - ThumbnailDisplay', () => {
   let wrapper;
   let sandbox;
 
@@ -32,7 +32,7 @@ describe.only('Component - ThumbnailDisplay', () => {
     sandbox.restore();
   });
 
-  describe('Behavior - Changed autoGenerationIndex', () => {
+  describe.only('Behavior - AutoGenerationIndex changing', () => {
     it('should changing autoGenerationIndex turn off base-image-display', () => {
       wrapper.setProps({ autoGenerationIndex: 30 });
 
@@ -48,6 +48,18 @@ describe.only('Component - ThumbnailDisplay', () => {
       wrapper.vm.$nextTick(() => {
         wrapper.vm.$emit('image-all-get');
         expect(wrapper.vm.imageReady).to.equal(true);
+        done();
+      });
+    });
+    it('should changing autoGenerationIndex update thumbnailMap', (done) => {
+      const getThumbnailFake = sandbox.fake.resolves([{ index: 1, thumbnail: '1' }]);
+      wrapper.vm.getThumbnail = getThumbnailFake;
+
+      wrapper.setProps({ autoGenerationIndex: 2 });
+
+      wrapper.vm.$nextTick(() => {
+        wrapper.vm.$emit('image-all-get');
+        expect(wrapper.vm.thumbnailMap).to.have.key(1);
         done();
       });
     });
