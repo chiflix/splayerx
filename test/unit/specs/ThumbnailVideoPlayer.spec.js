@@ -3,17 +3,20 @@ import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
 import { shallowMount } from '@vue/test-utils';
 import sinon from 'sinon';
 
-describe('Component - ThumbnailVideoPlayer', () => {
+describe.only('Component - ThumbnailVideoPlayer', () => {
   let wrapper;
   let sandbox;
   const propsData = {
     currentTime: 0,
-    newVideo: true,
     outerThumbnailInfo: {
+      newVideo: true,
       videoSrc: 'file:///',
       videoDuration: 0,
+      videoRatio: 1.78,
       generationInterval: 0,
       screenWidth: 1920,
+      maxThumbnailWidth: 240,
+      maxThumbnailCount: 100,
     },
   };
 
@@ -34,15 +37,20 @@ describe('Component - ThumbnailVideoPlayer', () => {
     });
 
     it('should opened file take lastGenerationIndex as correct auto generation start index', () => {
-      const newPropsData = {
-        newVideo: true,
-        currentTime: 0,
-        outerThumbnailInfo: {
-          videoSrc: 'file:///',
-          videoDuration: 800,
-          lastGenerationIndex: 75,
+      const newPropsData = Object.assign(
+        {},
+        propsData,
+        {
+          outerThumbnailInfo: Object.assign(
+            {},
+            propsData.outerThumbnailInfo,
+            {
+              newVideo: false,
+              lastGenerationIndex: 75,
+            },
+          ),
         },
-      };
+      );
 
       wrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData });
 
@@ -53,16 +61,21 @@ describe('Component - ThumbnailVideoPlayer', () => {
       const screenWidths = [720, 1024, 4096, 800];
       const intervals = [200, 384, 4, 7];
       screenWidths.forEach((testCase, index) => {
-        const newPropsData = {
-          newVideo: true,
-          currentTime: 0,
-          outerThumbnailInfo: {
-            videoSrc: 'file:///',
-            videoDuration: 800,
-            generationInterval: intervals[index],
-            screenWidth: testCase,
+        const newPropsData = Object.assign(
+          {},
+          propsData,
+          {
+            outerThumbnailInfo: Object.assign(
+              {},
+              propsData.outerThumbnailInfo,
+              {
+                generationInterval: intervals[index],
+                videoDuration: 800,
+                screenWidth: testCase,
+              },
+            ),
           },
-        };
+        );
 
         const tempWrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData });
 
@@ -70,27 +83,6 @@ describe('Component - ThumbnailVideoPlayer', () => {
         expect(tempWrapper.vm.autoGenerationIndex).to.equal(0);
         expect(tempWrapper.vm.videoDuration)
           .to.not.equal(newPropsData.outerThumbnailInfo.videoDuration);
-      });
-    });
-    it('should non-zero currentTime video use props as generation parameters', () => {
-      const currentTimes = [760, 4000, 751, 90];
-      const screenWidths = [720, 1024, 4096, 800];
-      const intervals = [200, 384, 4, 7];
-      currentTimes.forEach((testCase, index) => {
-        const newPropsData = {
-          currentTime: testCase,
-          outerThumbnailInfo: {
-            videoSrc: 'file:///',
-            videoDuration: 800,
-            generationInterval: intervals[index],
-            screenWidth: screenWidths[index],
-          },
-        };
-
-        const tempWrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData });
-
-        expect(tempWrapper.vm.screenWidth).to.equal(screenWidths[index]);
-        expect(tempWrapper.vm.generationInterval).to.equal(intervals[index]);
       });
     });
     it('should auto generation be started upon mounted', () => {
