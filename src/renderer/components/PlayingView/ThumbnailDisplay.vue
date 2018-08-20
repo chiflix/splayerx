@@ -1,9 +1,11 @@
 <template>
-  <base-image-display
-    v-if="imageReady"
-    :imgSrc="image"
-    :width="thumbnailWidth"
-    :height="thumbnailHeight" />
+  <div class="thumbnail-display">
+    <base-image-display
+      v-if="imageReady"
+      :imgSrc="image"
+      :width="thumbnailWidth"
+      :height="thumbnailHeight" />
+  </div>
 </template>
 <script>
 import { THUMBNAIL_DB_NAME } from '@/constants';
