@@ -254,23 +254,18 @@ new Vue({
           },
         ],
       };
-      return new Promise((resolve, reject) => {
+      return this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
         let menuRecentData = null;
-        this.$storage.get('recent-played', (err, data) => {
-          if (err) {
-            reject(err);
-          } else {
-            menuRecentData = this.processRecentPlay(data);
-            recentMenuTemplate.submenu.forEach((element, index) => {
-              const value = menuRecentData.get(element.id);
-              if (value.label !== '') {
-                recentMenuTemplate.submenu
-                  .splice(index, 1, this.updateRecentItem(element.id, value));
-              }
-            });
-            resolve(recentMenuTemplate);
+        menuRecentData = this.processRecentPlay(data);
+        console.log(menuRecentData);
+        recentMenuTemplate.submenu.forEach((element, index) => {
+          const value = menuRecentData.get(element.id);
+          if (value.label !== '') {
+            recentMenuTemplate.submenu
+              .splice(index, 1, this.updateRecentItem(element.id, value));
           }
         });
+        return recentMenuTemplate;
       });
     },
     processRecentPlay(recentPlayData) {
@@ -307,7 +302,7 @@ new Vue({
     },
     refreshMenu() {
       this.$electron.remote.Menu.getApplicationMenu().clear();
-      setTimeout(this.createMenu, 1000);
+      this.createMenu();
     },
   },
   mounted() {

@@ -59,7 +59,7 @@ export const THUMBNAIL_OBJECT_STORE_NAME = 'the-preview-thumbnail';
 export const INFO_SCHEMA = [
   {
     name: 'recent-played',
-    indexes: ['lastOpened'],
+    indexes: ['lastOpened', 'path', 'lastPlayedTime'],
   },
   {
     name: THUMBNAIL_OBJECT_STORE_NAME,
