@@ -2,7 +2,7 @@ import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
 
-describe.only('Component - ThumbnailDisplay', () => {
+describe('Component - ThumbnailDisplay', () => {
   let wrapper;
   let sandbox;
 
