@@ -1,18 +1,18 @@
 <template>
   <div class="player"
   :style="{ cursor: cursorStyle }">
-    <VideoCanvas :src="uri" />
+    <VideoCanvas :src="uri" ref="VideoCanvasRef"/>
     <div class="masking"
       v-show="showMask"></div>
     <div class="video-controller" id="video-controller"
       @mousedown.self="resetDraggingState"
       @mousedown.right.stop="handleRightClick"
       @mousedown.left.stop.prevent="handleLeftClick"
-      @mouseup.left.prevent.self="handleMouseUp"
+      @mouseup.left.prevent="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="mouseleaveHandler"
       @mousemove.self="throttledWakeUpCall"
-      @mouseenter="wakeUpAllWidgets">
+      @mouseenter="mouseEnter">
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
@@ -34,6 +34,7 @@ import VolumeControl from './PlayingView/VolumeControl.vue';
 import AdvanceControl from './PlayingView/AdvanceControl.vue';
 import SubtitleControl from './PlayingView/SubtitleControl.vue';
 import PlayButton from './PlayingView/PlayButton.vue';
+import UnfousedHelper from './PlayingView/helpers/macUnfocusHelper.js';
 
 export default {
   name: 'playing-view',
@@ -62,7 +63,16 @@ export default {
       delay: 200, // changable and should be discussed.
       clicks: 0,
       timer: null,
+      mainWindow: null,
+      unfocusedHelper: null,
+      dragRadiusSquare: 25,
+      dragTime: 200,
+      mouseDownTime: null,
+      mouseDownCursorPosition: null,
     };
+  },
+  created() {
+    this.mainWindow = this.$electron.remote.getCurrentWindow();
   },
   methods: {
     toggleFullScreenState() {
@@ -88,23 +98,30 @@ export default {
         if (this.timeoutIdOfAllWidgetsDisappearDelay !== 0) {
           clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
           this.timeoutIdOfAllWidgetsDisappearDelay
-            = setTimeout(this.hideAllWidgets, 3000);
+              = setTimeout(this.hideAllWidgets, 3000);
         } else {
           this.timeoutIdOfAllWidgetsDisappearDelay
-            = setTimeout(this.hideAllWidgets, 3000);
+              = setTimeout(this.hideAllWidgets, 3000);
         }
       }
       this.leave = false;
     },
+    mouseEnter() {
+      console.log(document.hidden);
+      if (this.unfocusedHelper.needHandle()) {
+        this.wakeUpAllWidgets();
+      }
+    },
     mouseleaveHandler() {
+      if (!this.unfocusedHelper.needHandle()) return;
       this.leave = true;
       if (this.timeoutIdOfAllWidgetsDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
         this.timeoutIdOfAllWidgetsDisappearDelay
-         = setTimeout(this.hideAllWidgets, 1500);
+            = setTimeout(this.hideAllWidgets, 1500);
       } else {
         this.timeoutIdOfAllWidgetsDisappearDelay
-         = setTimeout(this.hideAllWidgets, 1500);
+            = setTimeout(this.hideAllWidgets, 1500);
       }
     },
     hideAllWidgets() {
@@ -123,9 +140,7 @@ export default {
       this.isDragging = false;
     },
     togglePlayback() {
-      if (!this.isDragging) {
-        this.$bus.$emit('toggle-playback');
-      }
+      this.$bus.$emit('toggle-playback');
     },
     wheelVolumeControll(e) {
       this.$bus.$emit('volumecontroller-appear-delay');
@@ -158,6 +173,8 @@ export default {
       }
     },
     handleLeftClick() {
+      this.mouseDownCursorPosition = this.$electron.screen.getCursorScreenPoint();
+      this.mouseDownTime = new Date();
       const menu = this.$electron.remote.Menu.getApplicationMenu();
       if (this.popupShow === true) {
         menu.closePopup();
@@ -165,8 +182,10 @@ export default {
       }
       // Handle dragging-related variables
       this.mouseDown = true;
+      return false;
     },
     handleMouseMove() {
+      if (!this.unfocusedHelper.needHandle()) return;
       this.wakeUpAllWidgets();
     },
     handleMouseUp() {
@@ -174,21 +193,38 @@ export default {
       this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
       if (this.clicks === 1) { // if one click has been detected - clicks === 1
         const self = this; // define a constant "self" for the following scope to use
-        this.timer = setTimeout(() => { // define timer as setTimeOut function
-          self.togglePlayback(); // which is togglePlayback
-          self.clicks = 0; // reset the "clicks" to zero for next event
-        }, this.delay);
+        if (this.isValidClick()) {
+          this.timer = setTimeout(() => { // define timer as setTimeOut function
+            self.togglePlayback(); // which is togglePlayback
+            self.clicks = 0; // reset the "clicks" to zero for next event
+          }, this.delay);
+        } else {
+          self.clicks = 0;
+        }
       } else { // else, if a second click has been detected - clicks === 2
         clearTimeout(this.timer); // cancel the time out
         this.toggleFullScreenState();
         this.clicks = 0;// reset the "clicks" to zero
       }
     },
+    isValidClick() { // this check will be at on mouse up
+      const cp = this.$electron.screen.getCursorScreenPoint();
+      if (new Date() - this.mouseDownTime > this.dragTime) {
+        return false;
+      }
+      const radiusSquare = ((cp.x - this.mouseDownCursorPosition.x) ** 2) +
+          ((cp.y - this.mouseDownCursorPosition.y) ** 2);
+      if (radiusSquare - this.dragRadiusSquare > 0) {
+        return false;
+      }
+      return true;
+    },
   },
   beforeMount() {
-    this.throttledWakeUpCall = _.throttle(this.wakeUpAllWidgets, 1000);
+    this.throttledWakeUpCall = _.throttle(this.handleMouseMove, 1000);
   },
   mounted() {
+    this.unfocusedHelper = new (UnfousedHelper())(this.mainWindow, this);
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
     this.$bus.$on('clear-all-widget-disappear-delay', () => {

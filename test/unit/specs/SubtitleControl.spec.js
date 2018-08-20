@@ -135,6 +135,5 @@ describe('SubtitleControl.vue', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
     store.commit('SubtitleNameArr', testSubArr);
     expect(wrapper.vm.computedAvaliableItems.length).equal(3);
-
   });
 });

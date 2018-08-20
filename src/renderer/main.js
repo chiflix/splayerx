@@ -386,6 +386,7 @@ new Vue({
       e.preventDefault();
       let potentialVidPath;
       let tempFilePath;
+      let containsSubFiles = false;
       const { files } = e.dataTransfer;
       // TODO: play it if it's video file
       const subtitleFiles = [];
@@ -396,6 +397,7 @@ new Vue({
         tempFilePath = `file:///${files[i].path}`;
         if (re.test(Path.extname(tempFilePath))) {
           subtitleFiles.push(files[i].path);
+          containsSubFiles = true;
         } else {
           potentialVidPath = tempFilePath;
         }
@@ -403,25 +405,9 @@ new Vue({
       if (potentialVidPath) {
         this.openFile(potentialVidPath);
       }
-      this.$bus.$emit('add-subtitle', subtitleFiles);
-
-      /*
-      for (const file in files) {
-        if (files.hasOwnProperty(file)) {
-          const filename = files[file].name
-          const fileExt = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase()
-          if (Videos.allowedExtensions().indexOf(fileExt) !== -1) {
-            const video = {
-              id: videos.length + 1,
-              status: 'loading',
-              name: filename,
-              path: files[file].path,
-              size: files[file].size
-            }
-            videos.push(video)
-          }
-        }
-      } */
+      if (containsSubFiles) {
+        this.$bus.$emit('add-subtitle', subtitleFiles);
+      }
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
