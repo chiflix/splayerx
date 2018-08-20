@@ -73,7 +73,6 @@ describe('Component - ThumbnailVideoPlayer', () => {
         expect(tempWrapper.vm.screenWidth).to.equal(testCase);
         expect(tempWrapper.vm.videoDuration)
           .to.not.equal(newPropsData.outerThumbnailInfo.videoDuration);
-        expect(tempWrapper.vm.generationInterval).to.not.equal(intervals[index]);
       });
     });
     it('should non-zero currentTime video use props as generation parameters', () => {
@@ -96,8 +95,6 @@ describe('Component - ThumbnailVideoPlayer', () => {
 
         expect(tempWrapper.vm.screenWidth).to.equal(screenWidths[index]);
         expect(tempWrapper.vm.generationInterval).to.equal(intervals[index]);
-        expect(tempWrapper.vm.videoDuration)
-          .to.equal(newPropsData.outerThumbnailInfo.videoDuration);
       });
     });
     it('should auto generation be started upon shallowMounted', () => {
@@ -180,7 +177,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
 
       generationClock.tick(wrapper.vm.MAX_GENERATION_DELAY + 10);
 
-      expect(wrapper.vm.autoGenerationIndex).to.equal(-1);
+      expect(wrapper.vm.autoGenerationIndex).to.equal(0);
     });
   });
 });

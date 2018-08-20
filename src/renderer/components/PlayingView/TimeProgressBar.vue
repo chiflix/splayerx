@@ -62,12 +62,10 @@ import {
   PROGRESS_BAR_SLIDER_HIDE_HEIGHT,
   FOOL_PROOFING_BAR_WIDTH,
 } from '@/constants';
-import Thumbnail from './Thumbnail.vue';
 import ThePreviewThumbnail from './ThePreviewThumbnail';
 
 export default {
   components: {
-    Thumbnail,
     'the-preview-thumbnail': ThePreviewThumbnail,
   },
   props: {
