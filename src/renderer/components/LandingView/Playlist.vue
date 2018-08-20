@@ -22,7 +22,6 @@
 
 <script>
 import path from 'path';
-import asyncStorage from '@/helpers/asyncStorage';
 export default {
   name: 'playlist',
   data() {
@@ -134,8 +133,8 @@ export default {
           vm.displayInfo.langdingLogoAppear = true;
           vm.displayInfo.showShortcutImage = false;
           vm.$bus.$emit('displayInfo', vm.displayInfo);
-          vm.lastPlayedFile.splice(index, 1);
-          asyncStorage.set('recent-played', vm.lastPlayedFile);
+          const deletData = vm.lastPlayedFile.splice(index, 1);
+          vm.infoDB().delete('recent-played', deletData[0].quickHash);
           vm.recentFileDel = false;
         } else {
           item.style.zIndex = 4;
