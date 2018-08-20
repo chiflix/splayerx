@@ -20,6 +20,7 @@ describe.only('Component - ThumbnailDisplay', () => {
     quickHash,
     maxThumbnailWidth: 240,
     maxThumbnailHeight: 135,
+    autoGenerationIndex: 1,
   };
 
   beforeEach(() => {
@@ -29,5 +30,26 @@ describe.only('Component - ThumbnailDisplay', () => {
   afterEach(() => {
     wrapper.destroy();
     sandbox.restore();
+  });
+
+  describe('Behavior - Changed autoGenerationIndex', () => {
+    it('should changing autoGenerationIndex turn off base-image-display', () => {
+      wrapper.setProps({ autoGenerationIndex: 30 });
+
+      expect(wrapper.vm.imageReady).to.equal(false);
+    });
+
+    it('should all-image-get restore base-image-display', (done) => {
+      const getThumbnailFake = sandbox.fake.resolves([{ index: 1, thumbnail: '1' }]);
+      wrapper.vm.getThumbnail = getThumbnailFake;
+
+      wrapper.setProps({ autoGenerationIndex: 2 });
+
+      wrapper.vm.$nextTick(() => {
+        wrapper.vm.$emit('image-all-get');
+        expect(wrapper.vm.imageReady).to.equal(true);
+        done();
+      });
+    });
   });
 });
