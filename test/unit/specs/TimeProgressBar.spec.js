@@ -2,7 +2,7 @@ import Vuex from 'vuex';
 import PlaybackState from '@/store/modules/PlaybackState';
 import WindowState from '@/store/modules/WindowState';
 import TimeProgressBar from '@/components/PlayingView/TimeProgressBar';
-import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
+import { mount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
 
 const localVue = createLocalVue();
