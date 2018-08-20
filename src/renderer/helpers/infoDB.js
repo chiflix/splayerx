@@ -65,6 +65,20 @@ class InfoDB {
     });
   }
   /**
+   * @param  {String} schema
+   * @param  {String} val
+   * Delete the record which Primary key equal to the given val
+   */
+  delete(schema, val) {
+    console.log('deleting');
+    return idb.open('Info').then((db) => {
+      console.log(this.version);
+      const tx = db.transaction(schema, 'readwrite');
+      tx.objectStore(schema).delete(val);
+      return tx.complete.then(() => console.log('deleted'));
+    });
+  }
+  /**
    * Retrieve data of last played video from 'recent-played' schema
    */
   lastPlayed() {
