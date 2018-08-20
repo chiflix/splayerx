@@ -8,7 +8,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
   let sandbox;
   const propsData = {
     currentTime: 0,
-    channelName: 'thumbnail',
+    newVideo: true,
     outerThumbnailInfo: {
       videoSrc: 'file:///',
       videoDuration: 0,
@@ -17,7 +17,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
     },
   };
 
-  it('sanity-test - should render BaseVideoPlayer properly', () => {
+  it('Sanity - should render BaseVideoPlayer properly', () => {
     wrapper = shallowMount(ThumbnailVideoPlayer, { propsData });
 
     const baseVideoPlayer = wrapper.find(BaseVideoPlayer);
@@ -25,7 +25,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
     expect(baseVideoPlayer.is(BaseVideoPlayer)).to.equal(true);
   });
 
-  describe('Behavior - Should start autoGeneration when shallowMounted', () => {
+  describe('Behavior - Should start autoGeneration when mounted', () => {
     beforeEach(() => {
       sandbox = sinon.createSandbox();
     });
@@ -33,33 +33,29 @@ describe('Component - ThumbnailVideoPlayer', () => {
       sandbox.restore();
     });
 
-    it('should valid currentTime be normalized as correct auto generation start index', () => {
-      const currentTimes = [0, 29.35, 751, 90];
-      const intervals = [20, 3, 2, 3];
-      const expectedResults = [0, 9, 375, 30];
+    it('should opened file take lastGenerationIndex as correct auto generation start index', () => {
+      const newPropsData = {
+        newVideo: true,
+        currentTime: 0,
+        outerThumbnailInfo: {
+          videoSrc: 'file:///',
+          videoDuration: 800,
+          lastGenerationIndex: 75,
+        },
+      };
 
-      currentTimes.forEach((testCase, index) => {
-        const newPropsData = {
-          currentTime: testCase,
-          channelName: 'thumbnail',
-          outerThumbnailInfo: {
-            videoSrc: 'file:///',
-            videoDuration: 2000,
-            generationInterval: intervals[index],
-            screenWidth: 1920,
-          },
-        };
-        const tempWrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData });
-        expect(tempWrapper.vm.autoGenerationIndex).to.equal(expectedResults[index]);
-      });
+      wrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData });
+
+      expect(wrapper.vm.autoGenerationIndex)
+        .to.equal(newPropsData.outerThumbnailInfo.lastGenerationIndex);
     });
-    it('should zero currentTime only accept screenWidth props', () => {
+    it('should new video file only accept screenWidth props', () => {
       const screenWidths = [720, 1024, 4096, 800];
       const intervals = [200, 384, 4, 7];
       screenWidths.forEach((testCase, index) => {
         const newPropsData = {
+          newVideo: true,
           currentTime: 0,
-          channelName: 'thumbnail',
           outerThumbnailInfo: {
             videoSrc: 'file:///',
             videoDuration: 800,
@@ -71,6 +67,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
         const tempWrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData });
 
         expect(tempWrapper.vm.screenWidth).to.equal(testCase);
+        expect(tempWrapper.vm.autoGenerationIndex).to.equal(0);
         expect(tempWrapper.vm.videoDuration)
           .to.not.equal(newPropsData.outerThumbnailInfo.videoDuration);
       });
@@ -82,7 +79,6 @@ describe('Component - ThumbnailVideoPlayer', () => {
       currentTimes.forEach((testCase, index) => {
         const newPropsData = {
           currentTime: testCase,
-          channelName: 'thumbnail',
           outerThumbnailInfo: {
             videoSrc: 'file:///',
             videoDuration: 800,
@@ -97,7 +93,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
         expect(tempWrapper.vm.generationInterval).to.equal(intervals[index]);
       });
     });
-    it('should auto generation be started upon shallowMounted', () => {
+    it('should auto generation be started upon mounted', () => {
       const wrapper = shallowMount(ThumbnailVideoPlayer, { propsData });
 
       expect(wrapper.vm.isAutoGeneration).to.equal(true);
