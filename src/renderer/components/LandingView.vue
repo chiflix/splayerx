@@ -98,7 +98,7 @@ export default {
       .then(() => {
         this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
           console.log(data);
-          this.lastPlayedFile = data;
+          this.lastPlayedFile = data.slice(0, 4);
         });
       });
   },
