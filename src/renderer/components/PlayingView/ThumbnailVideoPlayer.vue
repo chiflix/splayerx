@@ -87,6 +87,9 @@ export default {
     autoGenerationIndex(newValue) {
       this.videoSeek(newValue);
     },
+    thumbnailHeight(newValue) {
+      this.videoElement.style.height = `${newValue}px`;
+    },
   },
   methods: {
     // Data validators
@@ -234,9 +237,7 @@ export default {
     // Use document to pass unit test
     this.videoElement = this.$refs.video.videoElement ?
       this.$refs.video.videoElement() : document.querySelector('.base-video-player');
+    this.videoElement.style.height = `${this.thumbnailHeight}px`;
   },
 };
 </script>
-<style lang="scss" scoped>
-</style>
-
