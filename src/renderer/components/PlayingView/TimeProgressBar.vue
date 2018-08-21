@@ -8,6 +8,7 @@
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.stop="videoRestart"
+      @mousemove="thumbnailCurrentTime = 0"
       :style="{cursor: cursorStyle}">
       <div class="fake-button"
         v-show="isOnProgress"
