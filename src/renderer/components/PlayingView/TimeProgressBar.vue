@@ -51,6 +51,11 @@
         <div class="line"></div>
       </div>
     </div>
+    <div class="fake-button-left"
+      v-show="isOnProgress"
+      @mousedown.left.stop.capture="onProgressBarClick"
+      @mousemove.stop="handleFakeBtnMove"
+      :style="{height: heightOfThumbnail + 11 + 'px', cursor: cursorStyle}"></div>
   </div>
 </transition>
 </template>;
@@ -605,6 +610,15 @@ export default {
     transform: rotate(0deg);
   }
 
+}
+
+.fake-button-left {
+  position: absolute;
+  right: 0;
+  bottom: 10px;
+  width: 20px;
+  background: transparent;
+  z-index: 100;
 }
 
 </style>
