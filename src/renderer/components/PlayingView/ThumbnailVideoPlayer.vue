@@ -128,12 +128,13 @@ export default {
         createImageBitmap(this.canvasContainer).then((imageBitmap) => {
           if (!this.isAutoGeneration) {
             this.tempImage = imageBitmap;
+          } else {
+            this.thumbnailSet.add(index);
+            this.tempBlobArray.push({
+              index,
+              imageBitmap,
+            });
           }
-          this.thumbnailSet.add(index);
-          this.tempBlobArray.push({
-            index,
-            imageBitmap,
-          });
           if (
             (this.isAutoGeneration && index >= this.maxThumbnailCount) ||
             this.tempBlobArray.length === 30) {
