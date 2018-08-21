@@ -304,8 +304,6 @@ export default {
 
 <style lang="scss">
 .video {
-  // position: absolute;
-  // overflow: hidden;
   position: fixed;
   top: 0;
   left: 0;
