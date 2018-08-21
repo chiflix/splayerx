@@ -19,7 +19,7 @@ import { WebVTT } from 'vtt.js';
 import path from 'path';
 import parallel from 'run-parallel';
 import MatroskaSubtitles from 'matroska-subtitles';
-import z from 'zero-fill';
+import LanguageDetect from 'languagedetect';
 
 export default {
   data() {
@@ -35,7 +35,7 @@ export default {
       secondCueHTML: [],
       subStyle: {},
       curStyle: {
-        fontSize: 24,
+        fontSize: 5,
         letterSpacing: 1,
         opacity: 1,
         color: '',
@@ -47,7 +47,6 @@ export default {
   methods: {
     subtitleInitialize() {
       const vid = this.$parent.$refs.videoCanvas;
-      // const re = new RegExp('^(.mkv)$');
       this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
       // This code is aim to get mediaHash of video
       // fs.writeFile('111.txt', this.mediaHash, (err) => {
@@ -59,7 +58,7 @@ export default {
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         files.push(subPath);
       });
-
+      // check if the file is in MKV format
       const re = new RegExp('^(.mkv)$');
       if (re.test(path.extname(decodeURI(vid.src)))) {
         this.mkvProcess(decodeURI(vid.src), () => {
@@ -157,20 +156,6 @@ export default {
         });
     },
 
-    /* this method is used to convert the timecodes extracted from matroska-subtitle
-      library (convert) to the timecodes format for VTT format.
-    */
-
-    msToTime(s) {
-      const ms = s % 1000;
-      s = (s - ms) / 1000;
-      const secs = s % 60;
-      s = (s - secs) / 60;
-      const mins = s % 60;
-      const hrs = (s - mins) / 60;
-      return (`${z(2, hrs)}:${z(2, mins)}:${z(2, secs)}.${z(3, ms)}`);
-    },
-
     /*
     the following method reads the subtitles embeded in the MKV files,
     and add these subtitles into the video's texttracks.
@@ -180,28 +165,33 @@ export default {
     addMkvSubstoVideo(filePath, cb) {
       const ectractFn = filePath => new Promise((resolve) => {
         let tracks;
+        const lngDetector = new LanguageDetect();
         const subs = new MatroskaSubtitles();
         subs.once('tracks', (track) => {
           tracks = track;
           tracks.forEach((trac) => {
             trac.subContent = '';
+            trac.subLangs = [];
           });
         });
         subs.on('subtitle', (sub, trackNumber) => {
-          console.log(sub);
-          let currentIndex = null;
-          for (let i = 0; i < tracks.length; i += 1) {
-            if (tracks[i].number === trackNumber) {
-              currentIndex = i;
-            }
-          }
+          const currentIndex = tracks.findIndex(track => trackNumber === track.number);
           let currentContent = '';
+          let currentLangDetected = '';
 
           // the indices for each cue can probably be ignored as it's in VTT format
           currentContent += `${this.msToTime(sub.time)} --> ${this.msToTime(sub.time + sub.duration)}\r\n`;
           currentContent += `${(sub.text)}\r\n\r\n`;
-
+          if (currentLangDetected.length < 100) {
+            const temp = lngDetector.detect(sub.text, 3);
+            if (temp === undefined || temp[0] === undefined) {
+              currentLangDetected += 'nothing';
+            } else {
+              currentLangDetected += temp[0][0];
+            }
+          }
           tracks[currentIndex].subContent += currentContent;
+          tracks[currentIndex].subLangs.push(currentLangDetected);
         });
 
         subs.on('finish', () => {
@@ -210,17 +200,16 @@ export default {
         const realPath = filePath.substring(7);
         fs.createReadStream(realPath).pipe(subs);
       });
-      ectractFn(filePath).then((realTracks) => {
+      ectractFn(filePath).then((tracks) => {
         // transfer string into VTT
-        console.log(realTracks);
+        console.log(tracks);
         const vid = this.$parent.$refs.videoCanvas;
         const embededSubNames = [];
 
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
-        for (let i = 0; i < realTracks.length; i += 1) {
+        for (let i = 0; i < tracks.length; i += 1) {
           embededSubNames[i] = {
-            title: realTracks[i].language === undefined || 'und' ?
-              'Unknown' : realTracks[i].language,
+            title: `Embedded - ${this.modeA(tracks[i].subLangs)}`,
             status: null,
             textTrackID: this.textTrackID,
             origin: 'local',
@@ -231,7 +220,7 @@ export default {
             sub.addCue(cue);
           };
           const webVttFormatStr = 'WEBVTT\r\n\r\n';
-          const preResult = realTracks[i].subContent;
+          const preResult = tracks[i].subContent;
           const result = webVttFormatStr.concat(preResult);
           parser.parse(result);
         }
@@ -337,7 +326,7 @@ export default {
       const background = obj.background ? obj.background : this.curStyle.background;
 
       this.subStyle = {
-        fontSize: `${fontSize}px`,
+        fontSize: `${fontSize}vh`,
         letterSpacing: `${letterSpacing}px`,
         opacity,
         color,
@@ -484,10 +473,8 @@ export default {
       }
     },
     $_toggleSutitleShow() {
-      if (this.firstSubIndex === null) {
-        this.subStyleChange();
-        this.subtitleShow(0);
-      }
+      this.subStyleChange();
+      this.subtitleShow(0);
     },
   },
   computed: {

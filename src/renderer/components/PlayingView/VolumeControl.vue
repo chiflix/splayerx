@@ -1,26 +1,32 @@
 <template>
+  <div>
   <transition name="fade" appear>
-  <div class="volume" id="volume"
-    @mouseover.stop="appearVolumeSlider"
-    @mouseout.stop="hideVolumeSlider"
-    @mousemove="throttledCall"
-    v-if="showVolumeController">
-    <transition name="fade">
-      <div class="container"  ref="sliderContainer"
-        @mousedown.stop.left="onVolumeSliderClick"
-        v-if="showVolumeSlider">
-        <div class="slider" ref="slider"
-          :style="{ height: volume + '%' }">
-        </div>
+    <div class="volume" id="volume"
+      @mouseout.stop="hideVolumeSlider"
+      @mousemove="throttledCall"
+      v-if="showVolumeController">
+      <div class="volume-wrapper"
+           @mouseover.stop="appearVolumeSlider">
+        <transition name="fade">
+          <div class="container"  ref="sliderContainer"
+            @mousedown.stop.left="onVolumeSliderClick"
+            v-if="showVolumeSlider">
+            <div class="slider" ref="slider"
+              :style="{ height: volume + '%' }">
+            </div>
+          </div>
+        </transition>
+          <div class="button"
+            @mousedown.stop.left="onVolumeButtonClick">
+            <img type="image/svg+xml" wmode="transparent"
+              :src="srcOfVolumeButtonImage">
+          </div>
       </div>
-    </transition>
-      <div class="button"
-        @mousedown.stop.left="onVolumeButtonClick">
-        <img type="image/svg+xml" wmode="transparent"
-          :src="srcOfVolumeButtonImage">
-      </div>
+    </div>
+  </transition>
+  <div class="mask" v-if="volumeMaskAppear">
   </div>
-</transition>
+</div>
 </template>;
 
 <script>
@@ -35,6 +41,7 @@ export default {
       currentVolume: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
       throttledCall: null,
+      volumeMaskAppear: false,
     };
   },
   methods: {
@@ -166,6 +173,12 @@ export default {
     });
     this.$bus.$on('volumecontroller-appear', this.appearVolumeController);
     this.$bus.$on('volumecontroller-hide', this.hideVolumeController);
+    this.$bus.$on('subtitleMenuOn', () => {
+      this.volumeMaskAppear = true;
+    });
+    this.$bus.$on('subtitleMenuOff', () => {
+      this.volumeMaskAppear = false;
+    });
   },
   beforeMount() {
     this.throttledCall = _.throttle(this.clearAllWidgetsTimeout, 500);
@@ -182,7 +195,7 @@ export default {
   width: 35px;
   height: 150px;
   -webkit-app-region: no-drag;
-  z-index: 500;
+  z-index: 1;
 
   .container {
     position: relative;
@@ -194,7 +207,7 @@ export default {
     border-radius: 1px;
   }
 
-  .container:hover {
+  .volume-wrapper:hover {
     cursor: pointer;
   }
 
@@ -233,7 +246,8 @@ export default {
       bottom: -5px;
     }
     .button {
-      height: 24px;
+      padding-top: 12px;
+      height: 36px;
     }
   }
   @media screen and (min-width: 854px) and (max-width: 1920px) {
@@ -247,7 +261,8 @@ export default {
       bottom: -5px;
     }
     .button {
-      height: 30px;
+      padding-top: 15px;
+      height: 45px;
     }
   }
   @media screen and (min-width: 1920px) {
@@ -261,8 +276,32 @@ export default {
       bottom: 10px;
     }
     .button {
-      height: 48px;
+      padding-top: 24px;
+      height: 72px;
     }
+  }
+}
+.mask {
+  position: absolute;
+  // background: yellow;
+  z-index: 100;
+  @media screen and (max-width: 854px) {
+    bottom: 22px;
+    right: 25px;
+    width: 28px;
+    height: 24+5+10+84px;
+  }
+  @media screen and (min-width: 854px) and (max-width: 1920px) {
+    bottom: 25px;
+    right: 31.25px;
+    width: 35px;
+    height: 30+5+10+105px;
+  }
+  @media screen and (min-width: 1920px) {
+    bottom: 40px;
+    right: 50px;
+    width: 56px;
+    height: 48+5+10+167px;
   }
 }
 

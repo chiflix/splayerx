@@ -10,7 +10,7 @@
             <li
               v-for="(item, index) in computedAvaliableItems"
               @mouseup.stop="toggleItemClick(index)"
-              @mouseover.stop.self="toggleItemsMouseOver"
+              @mouseover.self.stop="toggleItemsMouseOver"
               @mouseleave.stop.self="toggleItemsMouseLeave"
               :class="{ chosenText: itemHasBeenChosen(index) }">
               <div class="menu-item-text-wrapper"
@@ -92,10 +92,12 @@ export default {
     },
     toggleSubtitleMenu() {
       if (!this.appearSubtitleMenu) {
+        this.$bus.$emit('subtitle-menu-toggled');
         this.appearSubtitleMenu = true;
-        this.$bus.$emit('subtitle-menu-on');
+        this.$bus.$emit('subtitleMenuOn');
       } else {
         this.appearSubtitleMenu = false;
+        this.$bus.$emit('subtitleMenuOff');
       }
     },
     toggleItemsMouseOver(e) {
@@ -135,7 +137,10 @@ export default {
 
   created() {
     this.$bus.$on('sub-ctrl-appear', this.subCtrlBtnAppear);
-    this.$bus.$on('sub-ctrl-hide', this.subCtrlBtnHide);
+    this.$bus.$on('sub-ctrl-hide', () => {
+      this.$bus.$emit('subtitleMenuOff');
+      this.subCtrlBtnHide();
+    });
     this.$bus.$on('subtitle-menu-off', this.toggleSubtitleMenu);
   },
 };

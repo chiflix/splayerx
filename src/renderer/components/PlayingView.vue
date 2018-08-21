@@ -70,8 +70,6 @@ export default {
       mouseDownTime: null,
       mouseDownCursorPosition: null,
       subtitleMenuAppear: false,
-      advanceMenuAppear: false,
-      volumeMenuAppear: false,
     };
   },
   created() {
@@ -242,7 +240,7 @@ export default {
       clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
     });
     this.$bus.$on('hide-all-widgets', this.hideAllWidgets);
-    this.$bus.$on('subtitle-menu-on', () => {
+    this.$bus.$on('subtitle-menu-toggled', () => {
       this.subtitleMenuAppear = true;
     });
   },
@@ -253,11 +251,6 @@ export default {
     cursorStyle() {
       return this.cursorShow ? 'default' : 'none';
     },
-    widgetsAppear() {
-      return (this.subtitleMenuAppear || this.advanceMenuAppear || this.volumeMenuAppear);
-    },
-  },
-  watch: {
   },
 };
 </script>
