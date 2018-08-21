@@ -78,6 +78,7 @@ export default {
       // Reload video and image components
       this.mountVideo = false;
       this.mountImage = false;
+      this.generatedIndex = 0;
       this.updateMediaQuickHash(newValue);
       this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
     },
@@ -167,7 +168,6 @@ export default {
         // Update mountImage
         this.mountImage = typeof result.lastGenerationIndex === 'number' &&
           result.lastGenerationIndex > 0;
-        console.log('[ThePreviewThumbnail]:', this.mountVideo, this.mountImage);
       }
     },
   },
