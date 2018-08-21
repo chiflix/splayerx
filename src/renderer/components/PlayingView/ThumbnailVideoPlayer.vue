@@ -6,7 +6,6 @@
       :src="videoSrc"
       :defaultEvents="['loadedmetadata', 'seeked']"
       :customOptions="{ pauseOnStart: true }"
-      :videoSize="{ width: thumbnailWidth, height: thumbnailHeight}"
       @loadedmetadata="updateGenerationParameters"
       @seeked="thumbnailGeneration" />
     <base-image-display

@@ -42,7 +42,7 @@ export default {
   },
   methods: {
     subtitleInitialize() {
-      const vid = this.$parent.$refs.videoCanvas;
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
       this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
       // This code is aim to get mediaHash of video
       // fs.writeFile('111.txt', this.mediaHash, (err) => {
@@ -192,7 +192,7 @@ export default {
       ectractFn(filePath).then((realTracks) => {
         // now transfer string into VTT
         console.log(realTracks);
-        const vid = this.$parent.$refs.videoCanvas;
+        const vid = this.$parent.$refs.videoCanvas.videoElement();
 
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         for (let i = 0; i < realTracks.length; i += 1) {
@@ -217,7 +217,7 @@ export default {
      * @param {function} cb Callback function to process result
      */
     addVttToVideoElement(files, cb) {
-      const vid = this.$parent.$refs.videoCanvas;
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
       /* eslint-disable arrow-parens */
       const tasks = files.map((subPath) => (cb) => this.$_createSubtitleStream(subPath, cb));
       parallel(tasks, (err, results) => {
@@ -257,7 +257,7 @@ export default {
      * and add these cues into video subtitles.
      */
     addCuesArray(cueArray) {
-      const vid = this.$parent.$refs.videoCanvas;
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
       const subtitle = vid.addTextTrack('subtitles');
       subtitle.mode = 'disabled';
       // Add cues to TextTrack
@@ -273,7 +273,7 @@ export default {
      * @param {string} type First or second subtitle
      */
     subtitleShow(index, type = 'first') {
-      const vid = this.$parent.$refs.videoCanvas;
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
       const targetIndex = this.$store.state.PlaybackState.SubtitleNameArr[index].textTrackID;
       if (type === 'first') {
         if (vid.textTracks.length > targetIndex) { // Video has available subtitles
@@ -429,7 +429,7 @@ export default {
     $_clearSubtitle(type = 'first') {
       if (type === 'first') {
         if (this.firstSubState) {
-          const vid = this.$parent.$refs.videoCanvas;
+          const vid = this.$parent.$refs.videoCanvas.videoElement();
           vid.textTracks[this.firstSubIndex].mode = 'disabled';
           vid.textTracks[this.firstSubIndex].oncuechange = null;
           this.$store.commit('SubtitleOff');
@@ -447,7 +447,7 @@ export default {
   },
   watch: {
     firstSubState(newVal) {
-      const vid = this.$parent.$refs.videoCanvas;
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
       if (newVal && vid.textTracks[this.firstSubIndex].mode === 'disabled') {
         vid.textTracks[this.firstSubIndex].mode = 'hidden';
       } else if (!newVal && vid.textTracks[this.firstSubIndex].mode !== 'disabled') {

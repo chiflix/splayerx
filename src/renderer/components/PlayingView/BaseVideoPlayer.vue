@@ -1,7 +1,6 @@
 <template>
   <div class="base-video-player">
-    <video class="video-element" ref="video"
-      :style="{height: videoSize.height + 'px'}"></video>
+    <video class="video-element" ref="video"></video>
   </div>
 </template>
 
@@ -59,13 +58,6 @@ export default {
       default: () => ({
         pauseOnStart: false,
         commitToVuex: false,
-      }),
-    },
-    videoSize: {
-      type: Object,
-      default: () => ({
-        width: 170,
-        height: 95,
       }),
     },
   },
