@@ -70,6 +70,7 @@ export default {
       maxThumbnailCount: 0,
       lastGenerationIndex: 0,
       currentIndex: 0,
+      generatedIndex: 0,
     };
   },
   watch: {
@@ -83,7 +84,7 @@ export default {
     currentTime(newValue) {
       const index = Math.abs(Math.floor(newValue / this.generationInterval));
       this.currentIndex = index;
-      if (index <= this.autoGenerationIndex) {
+      if (index <= this.generatedIndex) {
         this.displayVideo = false;
         this.canvasCurrentTime = newValue;
       } else {
@@ -201,6 +202,9 @@ export default {
       .then(this.updateThumbnailData).catch((err) => {
         console.log(err);
       });
+    this.$bus.$on('image-all-get', (e) => {
+      this.generatedIndex = e;
+    });
   },
 };
 </script>

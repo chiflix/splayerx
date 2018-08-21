@@ -98,6 +98,7 @@ export default {
           return tx.complete;
         }).then(() => {
           this.$emit('image-all-get');
+          this.$bus.$emit('image-all-get', startIndex + thumbnailCount);
         });
       }
       return result;
