@@ -111,7 +111,7 @@
     "vuex": "^3.0.1",
     "zero-fill": "^2.2.3",
     "languagedetect": "^1.1.1",
-    "ass-to-vtt": "^1.2.0"
+    "ass-to-vtt": "^1.2.0",
     "worker-loader": "^2.0.0"
   },
   "devDependencies": {
