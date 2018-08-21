@@ -39,11 +39,9 @@ export default {
     autoGenerationIndex(newValue, oldValue) {
       const thumbnailCount = newValue - oldValue;
       const startIndex = oldValue;
-      this.imageReady = false;
       this.getThumbnail(startIndex, thumbnailCount).then((result) => {
         this.$once('image-all-get', () => {
           this.arrayToMap(result);
-          this.imageReady = true;
         });
       });
     },
