@@ -157,7 +157,7 @@ export default {
     },
 
     /*
-    the following method reads the subtitles embeded in the MKV files,
+    the addMkvSubstoVideo method reads the subtitles embeded in the MKV files,
     and add these subtitles into the video's texttracks.
     But the structure of this method need to be changed and improved.
     */
