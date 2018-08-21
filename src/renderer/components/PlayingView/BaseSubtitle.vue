@@ -202,14 +202,13 @@ export default {
       });
       ectractFn(filePath).then((tracks) => {
         // transfer string into VTT
-        console.log(tracks);
         const vid = this.$parent.$refs.videoCanvas;
         const embededSubNames = [];
 
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         for (let i = 0; i < tracks.length; i += 1) {
           embededSubNames[i] = {
-            title: `Embedded - ${this.modeA(tracks[i].subLangs)}`,
+            title: `Embedded - ${this.findMode(tracks[i].subLangs)}`,
             status: null,
             textTrackID: this.textTrackID,
             origin: 'local',
@@ -227,7 +226,6 @@ export default {
         parser.onflush = cb;
         parser.flush();
 
-        console.log(embededSubNames);
         this.$store.commit('AddSubtitle', embededSubNames);
       });
     },
@@ -461,7 +459,6 @@ export default {
     $_clearSubtitle(type = 'first') {
       if (type === 'first') {
         if (this.firstSubState) {
-          console.log(111111);
           const vid = this.$parent.$refs.videoCanvas;
           vid.textTracks[this.firstSubIndex].mode = 'disabled';
           vid.textTracks[this.firstSubIndex].oncuechange = null;

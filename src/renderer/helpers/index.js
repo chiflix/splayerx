@@ -21,7 +21,7 @@ export default {
       return (`${z(2, hrs)}:${z(2, mins)}:${z(2, secs)}.${z(3, ms)}`);
     },
 
-    modeA(array) {
+    findMode(array) {
       const map = new Map();
       let maxFreq = 0;
       let mode;
