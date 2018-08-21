@@ -8,6 +8,7 @@ import sinon from 'sinon';
 import fs from 'fs';
 import path from 'path';
 import srt2vtt from 'srt-to-vtt';
+import helpers from '@/helpers';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -49,6 +50,39 @@ describe('BaseSubtitle.vue', () => {
     expect(wrapper.vm.curStyle.color).equal('');
     expect(wrapper.vm.curStyle.border).equal('');
     expect(wrapper.vm.curStyle.background).equal('');
+  });
+
+  it('subtitleInitialize to load local subtitles', (done) => {
+    const wrapper = mount(VideoCanvas, {
+      store,
+      localVue,
+      propsData: {
+        src: 'file://./../../../../test/assets/test.avi',
+      },
+    });
+    const childWrapper = wrapper.find(BaseSubtitle);
+    const stub = sinon.stub(childWrapper.vm, 'loadLocalTextTracks').callsFake(() => {
+      done();
+    });
+    childWrapper.vm.subtitleInitialize();
+    sinon.assert.called(stub);
+    stub.restore();
+  });
+
+  it('subtitleInitialize to load server subtitles', (done) => {
+    const wrapper = mount(VideoCanvas, {
+      store,
+      localVue,
+      propsData: {
+        src: 'file://./../../../../test/assets/testServer.avi',
+      },
+    });
+    const childWrapper = wrapper.find(BaseSubtitle);
+    const spy = sinon.spy(childWrapper.vm, 'loadServerTextTracks');
+    childWrapper.vm.subtitleInitialize();
+    sinon.assert.called(spy);
+    spy.restore();
+    done();
   });
 
   it('loadLocalTextTracks test', (done) => {
@@ -146,5 +180,34 @@ describe('BaseSubtitle.vue', () => {
     };
     const res = wrapper.vm.$_subnameFromServerProcess(textTrack);
     expect(res).deep.equal(target);
+  });
+
+  // Event Bus Test
+  it('test video-loaded event listener', (done) => {
+    const wrapper = mount(BaseSubtitle, { store, localVue });
+    wrapper.vm.$bus.$emit('video-loaded');
+    const stub1 = sinon.stub(wrapper.vm.$bus, '$on');
+    const stub2 = sinon.stub(wrapper.vm, 'subtitleInitialize').callsFake(() => {
+      done();
+    });
+    stub1.yields();
+    stub1('video-loaded', stub2);
+    sinon.assert.called(stub2);
+    stub1.restore();
+    stub2.restore();
+  });
+
+  it('test sub-first-change event listened', (done) => {
+    const wrapper = mount(BaseSubtitle, { store, localVue });
+    wrapper.vm.$bus.$emit('sub-first-change');
+    const stub1 = sinon.stub(wrapper.vm.$bus, '$on');
+    const stub2 = sinon.stub(wrapper.vm, 'subtitleShow').callsFake(() => {
+      done();
+    });
+    stub1.yields();
+    stub1('sub-first-change', stub2);
+    sinon.assert.called(stub2);
+    stub1.restore();
+    stub2.restore();
   });
 });
