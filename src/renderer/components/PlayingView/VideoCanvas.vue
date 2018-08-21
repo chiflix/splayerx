@@ -16,11 +16,10 @@
 </template>;
 
 <script>
-// https://www.w3schools.com/tags/ref_av_dom.asp
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import BaseSubtitle from './BaseSubtitle.vue';
-import WindowSizeHelper from '../../helpers/WindowSizeHelper.js';
+import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
 export default {
   components: {
     BaseSubtitle,
@@ -60,11 +59,7 @@ export default {
         this.$store.commit('AccurateTime', currentTime);
       }
     },
-    onPause() {
-      console.log('onpause');
-    },
     onPlaying() {
-      console.log('onplaying');
       // set interval to get update time
       const { duration } = this.$refs.videoCanvas;
       if (duration <= 240) {
@@ -76,7 +71,6 @@ export default {
       this.$store.commit('Volume', this.$refs.videoCanvas.volume);
     },
     onMetaLoaded() {
-      console.log('loadedmetadata');
       this.$bus.$emit('play');
       this.$bus.$emit('seek', this.currentTime);
       this.videoWidth = this.$refs.videoCanvas.videoWidth;
@@ -102,7 +96,6 @@ export default {
       }
     },
     onDurationChange() {
-      console.log('durationchange');
       const t = Math.floor(this.$refs.videoCanvas.duration);
       if (t !== this.$store.state.PlaybackState.duration) {
         this.$store.commit('Duration', t);
@@ -195,7 +188,6 @@ export default {
             = [this.videoWidth, this.videoHeight];
         }
       }
-      console.log(this.newWidthOfWindow);
     },
     $_saveScreenshot() {
       const canvas = this.$refs.thumbnailCanvas;
@@ -256,12 +248,10 @@ export default {
   },
   created() {
     this.$bus.$on('playback-rate', (newRate) => {
-      console.log(`set video playbackRate ${newRate}`);
       this.$refs.videoCanvas.playbackRate = newRate;
       this.$store.commit('PlaybackRate', newRate);
     });
     this.$bus.$on('volume', (newVolume) => {
-      console.log(`set video volume ${newVolume}`);
       this.$refs.videoCanvas.volume = newVolume;
       this.$store.commit('Volume', newVolume);
     });
@@ -269,7 +259,6 @@ export default {
       this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
     });
     this.$bus.$on('toggle-playback', () => {
-      console.log('toggle-playback event has been triggered');
       if (this.$refs.videoCanvas.paused) {
         this.$bus.$emit('play');
         this.$bus.$emit('twinkle-play-icon');
@@ -279,15 +268,12 @@ export default {
       }
     });
     this.$bus.$on('play', () => {
-      console.log('play event has been triggered');
       this.$refs.videoCanvas.play();
     });
     this.$bus.$on('pause', () => {
-      console.log('pause event has been triggered');
       this.$refs.videoCanvas.pause();
     });
     this.$bus.$on('seek', (e) => {
-      console.log('seek event has been triggered', e);
       this.$refs.videoCanvas.currentTime = e;
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
