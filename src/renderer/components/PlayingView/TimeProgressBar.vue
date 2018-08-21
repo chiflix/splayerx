@@ -23,16 +23,18 @@
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.winWidth - 20 + 'px'}"
-      @mousedown.stop.capture="onProgressBarClick">
-      <Thumbnail
-        v-show="showScreenshot"
-        :src=src
-        :positionOfScreenshot="positionOfScreenshot"
-        :widthOfThumbnail="widthOfThumbnail"
-        :heightOfThumbnail="heightOfThumbnail"
-        :screenshotContent="screenshotContent"
-        :currentTime="thumbnailCurrentTime"/>
+      @mousedown.left.stop.capture="onProgressBarClick">
         <!-- translate优化 -->
+      <the-preview-thumbnail 
+        v-show="showScreenshot"
+        :src="src"
+        :thumbnailWidth="widthOfThumbnail"
+        :thumbnailHeight="heightOfThumbnail"
+        :currentTime="thumbnailCurrentTime"
+        :maxThumbnailWidth="240"
+        :videoRatio="videoRatio"
+        :positionOfThumbnail="positionOfScreenshot"
+        :videoTime="screenshotContent" />
       <div class="progress-ready" ref="readySlider">
         <div class="background-line"></div>
         <div class="line"
@@ -60,11 +62,11 @@ import {
   PROGRESS_BAR_SLIDER_HIDE_HEIGHT,
   FOOL_PROOFING_BAR_WIDTH,
 } from '@/constants';
-import Thumbnail from './Thumbnail.vue';
+import ThePreviewThumbnail from './ThePreviewThumbnail';
 
 export default {
   components: {
-    Thumbnail,
+    'the-preview-thumbnail': ThePreviewThumbnail,
   },
   props: {
     src: {
@@ -95,7 +97,7 @@ export default {
       timeoutIdOfHideAllWidgets: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
-      videoRatio: 0,
+      videoRatio: 1.78, // Default videoRatio incase of divide by zero error.
       percentageVideoDraged: 0,
       widthOfThumbnail: 0,
       thumbnailCurrentTime: 0,
@@ -296,7 +298,7 @@ export default {
       return 0.9;
     },
     heightOfThumbnail() {
-      return this.widthOfThumbnail / this.videoRatio;
+      return Math.floor(this.widthOfThumbnail / this.videoRatio);
     },
     positionOfScreenshot() {
       const progressBarWidth = this.winWidth - 20;
@@ -341,6 +343,15 @@ export default {
     },
   },
   created() {
+    const widthOfWindow = this.winWidth;
+    if (widthOfWindow < 845) {
+      this.widthOfThumbnail = 136;
+    } else if (widthOfWindow < 1920) {
+      this.widthOfThumbnail = 170;
+    } else {
+      this.widthOfThumbnail = 240;
+    }
+    console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
     this.$electron.ipcRenderer.on('main-resize', () => {
       const widthOfWindow = this.winWidth;
       if (widthOfWindow < 845) {
@@ -458,11 +469,6 @@ export default {
     .progress-container {
       .screenshot-background {
         bottom: 20px;
-        .screenshot {
-          .time {
-            font-size: 20px;
-          }
-        }
       }
     }
   }
@@ -471,11 +477,6 @@ export default {
     .progress-container {
       .screenshot-background {
         bottom: 20px;
-        .screenshot {
-          .time {
-            font-size: 24px;
-          }
-        }
       }
     }
   }
@@ -484,11 +485,6 @@ export default {
     .progress-container {
       .screenshot-background {
         bottom: 20px;
-        .screenshot {
-          .time {
-            font-size: 40px;
-          }
-        }
       }
     }
   }
@@ -589,13 +585,13 @@ export default {
  opacity: 0;
 }
 
-.shake {
-  // transform-origin: left center;
-  // animation-name: shake;
-  // animation-duration: 180ms;
-  // animation-timing-function: ease-in-out;
-  // animation-iteration-count: infinite;
-}
+// .shake {
+//   transform-origin: left center;
+//   animation-name: shake;
+//   animation-duration: 180ms;
+//   animation-timing-function: ease-in-out;
+//   animation-iteration-count: infinite;
+// }
 
 @keyframes shake {
   25% {

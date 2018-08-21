@@ -78,6 +78,30 @@ export default {
   },
   computed: {
   },
+  created() {
+    /*
+    * Currently use electron-json-storage as buffer for saving the last screenshot
+    * and any info needed to be saved before window closed.
+    * Following code is to merge the buffer into DataBase.
+    */
+    this.infoDB().init()
+      .then(() => asyncStorage.get('recent-played'))
+      .then(async (data) => {
+        const val = await this.infoDB().lastPlayed();
+        if (val && data) {
+          const mergedData = Object.assign(val, data);
+          this.infoDB().add('recent-played', mergedData);
+        }
+      })
+
+    // Get all data and show
+      .then(() => {
+        this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
+          console.log(data);
+          this.lastPlayedFile = data.slice(0, 4);
+        });
+      });
+  },
   mounted() {
     const { app } = this.$electron.remote;
     if (this.$electron.remote.getCurrentWindow().isResizable()) {
@@ -90,13 +114,6 @@ export default {
         console.log(app.getName(), app.getVersion());
         console.log(`sagi API Status: ${this.sagiHealthStatus}`);
       }
-    });
-    asyncStorage.get('recent-played').then((data) => {
-      this.lastPlayedFile = data;
-      console.log(data);
-    }).catch((err) => {
-      // TODO: proper error handle
-      console.error(err);
     });
     if (process.platform === 'win32') {
       document.querySelector('.application').style.webkitAppRegion = 'no-drag';

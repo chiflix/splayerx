@@ -15,3 +15,53 @@ export const PROGRESS_BAR_SLIDER_HIDE_HEIGHT = '4px';
 export const PROGRESS_BAR_HIDE_HEIGHT = '0px';
 
 export const FOOL_PROOFING_BAR_WIDTH = 20;
+
+export const DEFAULT_VIDEO_EVENTS = [
+  'abort',
+  'canplay',
+  'canplaythrough',
+  'durationchange',
+  'ended',
+  'loadeddata',
+  'loadedmetadata',
+  'loadstart',
+  'pause',
+  'play',
+  'playing',
+  'progress',
+  'ratechange',
+  'seeked',
+  'seeking',
+  'stalled',
+  'suspend',
+  'timeupdate',
+  'volumechange',
+  'waiting',
+];
+export const DEFAULT_VIDEO_OPTIONS = [
+  'autoplay',
+  'controls',
+  'crossOrigin',
+  'currentTime',
+  'defaultMuted',
+  'defaultPlaybackRate',
+  'loop',
+  'mediaGroup',
+  'muted',
+  'playbackRate',
+  'preload',
+  'src',
+  'volume',
+];
+export const THUMBNAIL_DB_NAME = 'splayerx-preview-thumbnails';
+export const INFO_DATABASE_NAME = 'Info';
+export const THUMBNAIL_OBJECT_STORE_NAME = 'the-preview-thumbnail';
+export const INFO_SCHEMA = [
+  {
+    name: 'recent-played',
+    indexes: ['lastOpened', 'path', 'lastPlayedTime'],
+  },
+  {
+    name: THUMBNAIL_OBJECT_STORE_NAME,
+  },
+];

@@ -90,6 +90,7 @@
     "electron-mocha": "^6.0.4",
     "electron-updater": "^3.0.3",
     "google-protobuf": "^3.6.0",
+    "idb": "^2.1.3",
     "lodash": "^4.17.10",
     "matroska-subtitles": "^2.0.3",
     "module-alias": "^2.0.6",
@@ -111,6 +112,7 @@
     "zero-fill": "^2.2.3",
     "languagedetect": "^1.1.1",
     "ass-to-vtt": "^1.2.0"
+    "worker-loader": "^2.0.0"
   },
   "devDependencies": {
     "@chiflix/electron": "^3.0.0-beta.5",

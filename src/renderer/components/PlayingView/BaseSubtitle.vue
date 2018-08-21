@@ -96,7 +96,6 @@ export default {
        * If there is no (chinese/default language) text track, try translate api
        */
       // If there is already subtitle files(same dir), load it
-
       this.addVttToVideoElement(files, () => {
         console.log('finished reading subtitle files');
         const subNameArr = files.map(file => this.$_subNameFromLocalProcess(file));
@@ -136,6 +135,7 @@ export default {
 
                 // Only when all subtitles are successfully loaded,
                 // users can see the server subtitles in Subtitle Menu.
+                this.$_clearSubtitle();
                 const subtitleNameArr = textTrackList
                   .map(textTrack => this.$_subnameFromServerProcess(textTrack));
                 this.$store.commit('SubtitleNameArr', subtitleNameArr);
@@ -293,13 +293,12 @@ export default {
      */
     subtitleShow(index, type = 'first') {
       const vid = this.$parent.$refs.videoCanvas;
-      const targetIndex = this.$store.getters.subtitleNameArr[index].textTrackID;
+      const targetIndex = this.$store.state.PlaybackState.SubtitleNameArr[index].textTrackID;
       if (type === 'first') {
-        this.$_clearSubtitle('first');
         if (vid.textTracks.length > targetIndex) { // Video has available subtitles
           this.$_onCueChangeEventAdd(vid.textTracks[targetIndex]);
           vid.textTracks[targetIndex].mode = 'hidden';
-          this.$store.commit('SubtitleOn', { index: targetIndex, status: 'first' });
+          this.$store.commit('SubtitleOn', { index: targetIndex, status: type });
           this.firstSubIndex = targetIndex;
         } else {
           console.log('no subtitle');
@@ -511,6 +510,7 @@ export default {
     this.$bus.$on('video-loaded', this.subtitleInitialize);
 
     this.$bus.$on('sub-first-change', (targetIndex) => {
+      this.$_clearSubtitle();
       this.subtitleShow(targetIndex);
     });
 
@@ -528,12 +528,14 @@ export default {
       const subtitleName = files.map(file => this.$_subNameFromLocalProcess(file));
       this.$store.commit('AddSubtitle', subtitleName);
       this.addVttToVideoElement(files, () => {
+        this.$_clearSubtitle();
         this.subtitleShow(size);
       });
     });
 
     this.$bus.$on('load-server-transcripts', () => {
       this.loadServerTextTracks(() => {
+        this.$_clearSubtitle();
         this.subtitleShow(0);
       });
     });

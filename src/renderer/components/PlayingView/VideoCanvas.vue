@@ -18,6 +18,7 @@
 
 <script>
 // https://www.w3schools.com/tags/ref_av_dom.asp
+import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import BaseSubtitle from './BaseSubtitle.vue';
 import WindowSizeHelper from '../../helpers/WindowSizeHelper.js';
@@ -95,7 +96,6 @@ export default {
       // this.loadTextTracks();
     },
     onTimeupdate() {
-      console.log('ontimeupdate');
       this.$store.commit('AccurateTime', this.$refs.videoCanvas.currentTime);
       const t = Math.floor(this.$refs.videoCanvas.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
@@ -208,21 +208,11 @@ export default {
         0, 0, videoWidth, videoHeight,
       );
       const imagePath = canvas.toDataURL('image/png');
-      let data;
-      try {
-        data = syncStorage.getSync('recent-played');
-      } catch (err) {
-        console.error(err);
-      }
-      const object = data[0];
-      const iterator = Object.keys(object).indexOf('path');
-      if (iterator !== -1) {
-        object.shortCut = imagePath;
-        object.lastPlayedTime = this.currentTime;
-        object.duration = this.$store.state.PlaybackState.Duration;
-        data.splice(0, 1);
-        data.unshift(object);
-      }
+      const data = {
+        shortCut: imagePath,
+        lastPlayedTime: this.currentTime,
+        duration: this.$store.state.PlaybackState.Duration,
+      };
       syncStorage.setSync('recent-played', data);
     },
     calcNewWindowXY() {
@@ -248,13 +238,21 @@ export default {
     },
   },
   watch: {
-    src() {
+    src(val, oldVal) {
       const window = this.$electron.remote.getCurrentWindow();
       this.windowRectangleOld.x = window.getBounds().x;
       this.windowRectangleOld.y = window.getBounds().y;
       this.windowRectangleOld.height = window.getBounds().height;
       this.windowRectangleOld.width = window.getBounds().width;
       this.$_saveScreenshot();
+      asyncStorage.get('recent-played')
+        .then(async (data) => {
+          const val = await this.infoDB().get('recent-played', 'path', oldVal);
+          if (val && data) {
+            const mergedData = Object.assign(val, data);
+            this.infoDB().add('recent-played', mergedData);
+          }
+        });
     },
   },
   created() {

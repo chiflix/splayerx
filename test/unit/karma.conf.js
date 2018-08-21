@@ -32,7 +32,7 @@ webpackConfig.module.rules
 
 module.exports = config => {
   config.set({
-    browsers: ['visibleElectron'],
+    browsers: ['invisibleElectron'],
     client: {
       useIframe: false
     },
@@ -46,8 +46,19 @@ module.exports = config => {
     customLaunchers: {
       'visibleElectron': {
         base: 'Electron',
-        flags: ['--show']
-      }
+        flags: [
+          '--show',
+          '--disable-web-security',
+          '--enable-experimental-web-platform-features',
+        ],
+      },
+      'invisibleElectron': {
+        base: 'Electron',
+        flags: [
+          '--disable-web-security',
+          '--enable-experimental-web-platform-features',
+        ],
+      },
     },
     frameworks: ['mocha', 'chai'],
     files: ['./index.js'],

@@ -62,6 +62,7 @@ export default {
       maximize: false,
       isDarwin: process.platform === 'darwin',
       titlebarDelay: 0,
+      screenWidth: this.$electron.screen.getPrimaryDisplay().workAreaSize.width,
     };
   },
   props: {
@@ -108,7 +109,7 @@ export default {
     },
     setWindowInfo() {
       [this.windowInfo.screenWidth, this.windowInfo.windowWidth] = [
-        this.$electron.screen.getPrimaryDisplay().workAreaSize.width,
+        this.screenWidth,
         this.winWidth,
       ];
       this.windowInfo.windowPosition = this.winPos;

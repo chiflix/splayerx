@@ -3,10 +3,14 @@ import fs from 'fs';
 import crypto from 'crypto';
 import z from 'zero-fill';
 import asyncStorage from '@/helpers/asyncStorage';
+import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
 export default {
   methods: {
+    infoDB() {
+      return InfoDB;
+    },
     sagi() { return Sagi; },
 
     // this method is used to convert the timecodes extracted from matroska-subtitle
@@ -63,7 +67,13 @@ export default {
       return `${minutes}:${seconds}`;
     },
     findSubtitleFilesByVidPath(vidPath, callback) {
-      vidPath = vidPath.replace(/^file:\/\//, '');
+      vidPath = decodeURI(vidPath);
+      if (process.platform === 'win32') {
+        vidPath = vidPath.replace(/^file:\/\/\//, '');
+      } else {
+        vidPath = vidPath.replace(/^file:\/\//, '');
+      }
+
       const baseName = path.basename(vidPath, path.extname(vidPath));
       const dirPath = path.dirname(vidPath);
       const filter = /\.(srt|vtt|ass)$/;
@@ -86,54 +96,27 @@ export default {
       }
     },
     openFile(path) {
-      // if new passed path exists in the storage
-      function indexOfExistedFileIn(data, path) {
-        for (let i = 0; i < data.length; i += 1) {
-          const object = data[i];
-          const iterator = Object.keys(object).indexOf('path');
-          if (iterator !== -1) {
-            if (object.path === path) {
-              return i;
-            }
-          }
-        }
-        return -1;
+      let vidPath;
+      path = decodeURI(path);
+      if (process.platform === 'win32') {
+        vidPath = path.replace(/^file:\/\/\//, '');
+      } else {
+        vidPath = path.replace(/^file:\/\//, '');
       }
-
-      asyncStorage.get('recent-played').then((data) => {
-        const newElement = {
-          path,
-          shortCut: '',
-          lastPlayedTime: 0,
-          duration: 0,
-        };
-        if (Array.isArray(data)) {
-          if (data.length < 4) {
-            if (indexOfExistedFileIn(data, path) === -1) {
-              data.unshift(newElement);
-            } else {
-              const item = data.splice(indexOfExistedFileIn(data, path), 1);
-              if (item[0].lastPlayedTime !== 0) {
-                this.$bus.$emit('seek', item[0].lastPlayedTime);
-              }
-              data.unshift(item[0]);
-            }
-          } else if (indexOfExistedFileIn(data, path) === -1) {
-            data.pop();
-            data.unshift(newElement);
+      this.infoDB().get('recent-played', this.mediaQuickHash(vidPath))
+        .then((value) => {
+          if (value) {
+            this.$bus.$emit('seek', value.lastPlayedTime);
+            this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date() }));
           } else {
-            const item = data.splice(indexOfExistedFileIn(data, path), 1);
-            if (item[0].lastPlayedTime !== 0) {
-              this.$bus.$emit('seek', item[0].lastPlayedTime);
-            }
-            data.unshift(item[0]);
+            this.infoDB().add('recent-played', {
+              quickHash: this.mediaQuickHash(vidPath),
+              path,
+              lastOpened: Date(),
+            });
           }
-        } else {
-          data = [newElement];
-        }
-        asyncStorage.set('recent-played', data);
-        this.$bus.$emit('new-file-open');
-      });
+          this.$bus.$emit('new-file-open');
+        });
       this.$store.commit('SrcOfVideo', path);
       this.$router.push({
         name: 'playing-view',
