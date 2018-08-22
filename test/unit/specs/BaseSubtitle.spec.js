@@ -124,6 +124,21 @@ describe('BaseSubtitle.vue', () => {
   });
 
   it('loadServerTextTracks success test', (done) => {
+    const stub = sinon.stub(helpers.methods.sagi(), 'getTranscript').callsFake(() => {
+      return new Promise((resolve) => {
+        resolve({
+          'array': [
+            0, [
+              [
+                [0, 0],
+                [0, 0],
+                ['test'],
+              ],
+            ],
+          ],
+        });
+      });
+    });
     const Sagi = helpers.methods.sagi();
     const mediaHash = helpers.methods.mediaQuickHash(decodeURI('file://./test/assets/test.avi'.replace('file://', '')));
     const wrapper = mount(VideoCanvas, {
@@ -138,13 +153,10 @@ describe('BaseSubtitle.vue', () => {
       Sagi,
       mediaHash,
     });
-    const cb = sinon.spy();
-    const stub = sinon.stub(childWrapper.vm, 'getAllTranscriptsFromServer').callsFake(() => {
-      sinon.assert.called(stub);
+    childWrapper.vm.loadServerTextTracks(() => {
       stub.restore();
       done();
     });
-    childWrapper.vm.loadServerTextTracks(cb);
   });
 
   it('$_concatStream success test', (done) => {
