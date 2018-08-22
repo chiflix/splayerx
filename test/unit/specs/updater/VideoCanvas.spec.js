@@ -19,7 +19,13 @@ describe('VideoCanvas.vue', () => {
         },
       },
     });
-    wrapper = shallowMount(VideoCanvas, { localVue, store });
+    wrapper = shallowMount(VideoCanvas, { 
+      store,
+      localVue,
+      propsData: {
+        src: 'file://./../../../../test/assets/test.avi',
+      },
+    });
   });
 
   it('shoule load correct data', () => {
