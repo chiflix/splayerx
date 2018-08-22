@@ -45,36 +45,107 @@ export default {
     };
   },
   methods: {
-    subtitleInitialize() {
+    async $_serverSubsExist() {
+      const res = await this.Sagi.mediaTranslate(this.mediaHash);
+      res.array[0][1] = 'NOT OKAY';
+      if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
+        return {
+          found: true,
+          size: res.array[1].length,
+        };
+      }
+      return {
+        found: false,
+        size: 0,
+      };
+    },
+    async subtitleInitialize() {
       const vid = this.$parent.$refs.videoCanvas;
       this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
-      // This code is aim to get mediaHash of video
-      // fs.writeFile('111.txt', this.mediaHash, (err) => {
-      //   console.log(err);
-      // });
       this.Sagi = this.sagi();
+
+      const serverSubsStatus = await this.$_serverSubsExist();
+
       const files = [];
-      // Find local subtitles
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
         files.push(subPath);
       });
-      // check if the file is in MKV format
+      const localSubsStatus = {
+        found: files.length > 0,
+        size: files.length,
+      };
+
       const re = new RegExp('^(.mkv)$');
+      let embeddedSubsStatus;
       if (re.test(path.extname(decodeURI(vid.src)))) {
-        this.mkvProcess(decodeURI(vid.src), () => {
-          this.$_toggleSutitleShow();
-        });
+        embeddedSubsStatus = await this.ifEmbedded(decodeURI(vid.src));
+      } else {
+        embeddedSubsStatus = {
+          found: false,
+          size: 0,
+        };
       }
 
-      if (files.length > 0) {
-        this.loadLocalTextTracks(files, () => {
-          this.$_toggleSutitleShow();
-        });
+      const localSubsOn = localSubsStatus.found;
+      const serverSubsOn = serverSubsStatus.found;
+      const embeddedSubsOn = embeddedSubsStatus.found;
+
+      if (localSubsOn || embeddedSubsOn || serverSubsOn) {
+        if (localSubsOn || embeddedSubsOn) {
+          if (localSubsOn) {
+            this.$bus.$emit('loading-subtitles', {
+              type: 'Local',
+              size: localSubsStatus.size,
+            });
+            this.loadLocalTextTracks(files, () => {
+              this.$_toggleSutitleShow();
+              this.$bus.$emit('subtitles-finished-loading', 'Local');
+            });
+          }
+          if (embeddedSubsOn) {
+            this.$bus.$emit('loading-subtitles', {
+              type: 'Embedded',
+              size: embeddedSubsStatus.size,
+            });
+            this.mkvProcess(decodeURI(vid.src), () => {
+              this.$_toggleSutitleShow();
+              this.$bus.$emit('subtitles-finished-loading', 'Embedded');
+            });
+          }
+        } else {
+          this.$bus.$emit('loading-subtitles', {
+            type: 'Server',
+            size: serverSubsStatus.size,
+          });
+          this.loadServerTextTracks(() => {
+            this.$_toggleSutitleShow();
+            this.$bus.$emit('subtitles-finished-loading', 'Server');
+          });
+        }
       } else {
-        this.loadServerTextTracks(() => {
-          this.$_toggleSutitleShow();
-        });
+        console.log('NO FOUND SUBTITLES');
+        this.$bus.$emit('toggle-no-subtitle-menu');
+        // then emit an event to tell subtitleControl to toggle the small menu
       }
+
+      // if (re.test(path.extname(decodeURI(vid.src))) && embedded) {
+      //   this.mkvProcess(decodeURI(vid.src), () => {
+      //     console.log('IM DONE HERE, WATCH ME');
+      //     this.$_toggleSutitleShow();
+      //   });
+      // } else if (files.length > 0) {
+      //   this.loadLocalTextTracks(files, () => {
+      //     this.$_toggleSutitleShow();
+      //   });
+      // // } else if {
+      // //   // try to find subtitles from server
+      // } else {
+      //   // when no subtitles were returned or no embeded or local subtitles
+      //   // we will triger the second menu
+      //   // second menu:
+      //   //    - 加载翻译结果
+      //   //    - 导入字幕文件
+      // }
     },
     /**
      * @param {Array.<string>} files File pathes array
@@ -156,6 +227,36 @@ export default {
         });
     },
 
+    $_hasEmbeddedSubs(filePath) {
+      return new Promise((resolve) => {
+        let foo;
+        const subs = new MatroskaSubtitles();
+        subs.once('tracks', (track) => {
+          if (track) {
+            resolve({
+              found: true,
+              size: track.length,
+            });
+          }
+        });
+        subs.on('finish', () => {
+          if (foo === undefined) {
+            resolve({
+              found: false,
+              size: 0,
+            });
+          }
+        });
+        const realPath = filePath.substring(7);
+        fs.createReadStream(realPath).pipe(subs);
+      });
+    },
+
+    async ifEmbedded(filePath) {
+      const foo = await (this.$_hasEmbeddedSubs(filePath));
+      return foo;
+    },
+
     /*
     the addMkvSubstoVideo method reads the subtitles embeded in the MKV files,
     and add these subtitles into the video's texttracks.
@@ -208,7 +309,7 @@ export default {
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         for (let i = 0; i < tracks.length; i += 1) {
           embededSubNames[i] = {
-            title: `Embedded - ${this.findMode(tracks[i].subLangs)}`,
+            title: `${this.findMode(tracks[i].subLangs)} - Embedded`,
             status: null,
             textTrackID: this.textTrackID,
             origin: 'local',
@@ -221,12 +322,12 @@ export default {
           const webVttFormatStr = 'WEBVTT\r\n\r\n';
           const preResult = tracks[i].subContent;
           const result = webVttFormatStr.concat(preResult);
+          console.log(result);
           parser.parse(result);
         }
         parser.onflush = cb;
-        parser.flush();
-
         this.$store.commit('AddSubtitle', embededSubNames);
+        parser.flush();
       });
     },
 
@@ -535,9 +636,11 @@ export default {
 
     this.$bus.$on('load-server-transcripts', () => {
       this.loadServerTextTracks(() => {
+        this.$bus.$emit('finished-loading-server-subs');
         this.$_clearSubtitle();
         this.subtitleShow(0);
       });
+      // cb();
     });
   },
 };
