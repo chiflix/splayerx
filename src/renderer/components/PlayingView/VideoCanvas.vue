@@ -83,7 +83,7 @@ export default {
       this.videoHeight = this.$refs.videoCanvas.videoHeight;
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
       if (this.videoExisted) {
-        this.$_calculateWindowSizeInConditionOfVideoExisted();
+        this.$_calculateWindowSizeWhenVideoExisted();
         this.$_controlWindowSizeAtNewVideo();
       } else {
         this.$_calculateWindowSizeAtTheFirstTime();
@@ -156,13 +156,13 @@ export default {
           this.newHeightOfWindow = this.calculateHeightByWidth;
         } else if (videoRatio === minWindowRatio) {
           [this.newWidthOfWindow, this.newHeightOfWindow]
-            = [this.videoWidth, this.videoHeight];
+            = [minWidth, minHeight];
         }
       } else {
         [this.newWidthOfWindow, this.newHeightOfWindow] = [this.videoWidth, this.videoHeight];
       }
     },
-    $_calculateWindowSizeInConditionOfVideoExisted() {
+    $_calculateWindowSizeWhenVideoExisted() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       const [windowWidth, windowHeight] = currentWindow.getSize();
       const [minWidth, minHeight] = currentWindow.getMinimumSize();
@@ -195,7 +195,6 @@ export default {
             = [this.videoWidth, this.videoHeight];
         }
       }
-      console.log(this.newWidthOfWindow);
     },
     $_saveScreenshot() {
       const canvas = this.$refs.thumbnailCanvas;
