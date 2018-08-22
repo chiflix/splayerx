@@ -227,7 +227,7 @@ export default {
       const tasks = files.map((subPath) => (cb) => this.$_createSubtitleStream(subPath, cb));
       parallel(tasks, (err, results) => {
         if (err) {
-          console.error(err);
+          throw err;
         }
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         for (let i = 0; i < results.length; i += 1) {
@@ -366,7 +366,7 @@ export default {
       const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
       this.$_concatStream(vttStream, (err, buf) => {
         if (err) {
-          console.error(err);
+          throw err;
         }
         cb(null, buf);
       });
