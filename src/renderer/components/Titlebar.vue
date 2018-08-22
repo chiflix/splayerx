@@ -9,7 +9,7 @@
       <div id="maximize" class="title-button"
         @click="handleMaximize"
         v-show="middleButtonStatus === 'maximize'">
-        <img :class="{ disabled: currentView === 'LandingView' }" src="~@/assets/windows-titlebar-icons.png" />
+        <img src="~@/assets/windows-titlebar-icons.png" />
       </div>
       <div id="restore" class="title-button"
         @click="handleRestore"
@@ -36,8 +36,7 @@
       </div>
       <div id="maximize" class="title-button"
         @click="handleMacMaximize"
-        v-show="middleButtonStatus !== 'exit-fullscreen'"
-        :class="{ disabled: currentView === 'LandingView' }">
+        v-show="middleButtonStatus !== 'exit-fullscreen'">
       </div>
       <div id="restore" class="title-button"
         @click="handleFullscreenExit"
@@ -88,9 +87,7 @@ export default {
     },
     // OS-specific methods
     handleMacMaximize() {
-      if (this.currentView !== 'LandingView') {
-        this.$electron.remote.getCurrentWindow().setFullScreen(true);
-      }
+      this.$electron.remote.getCurrentWindow().setFullScreen(true);
     },
     handleResize() {
       this.setWindowInfo();

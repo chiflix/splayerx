@@ -252,6 +252,26 @@ new Vue({
             id: 'recent-4',
             visible: false,
           },
+          {
+            id: 'recent-5',
+            visible: false,
+          },
+          {
+            id: 'recent-6',
+            visible: false,
+          },
+          {
+            id: 'recent-7',
+            visible: false,
+          },
+          {
+            id: 'recent-8',
+            visible: false,
+          },
+          {
+            id: 'recent-9',
+            visible: false,
+          },
         ],
       };
       return this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
@@ -286,6 +306,31 @@ new Vue({
           visible: false,
         }],
         ['recent-4', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-5', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-6', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-7', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-8', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-9', {
           label: '',
           path: '',
           visible: false,

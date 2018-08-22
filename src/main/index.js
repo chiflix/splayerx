@@ -35,13 +35,13 @@ function createWindow() {
    */
   if (process.platform === 'win32') {
     mainWindow = new BrowserWindow({
-      height: 432,
+      height: 405,
       useContentSize: true,
-      width: 768,
+      width: 720,
       frame: false,
       titleBarStyle: 'none',
-      minWidth: 427,
-      minHeight: 240,
+      minWidth: 405,
+      minHeight: 720,
       webPreferences: {
         webSecurity: false,
         experimentalFeatures: true,
@@ -52,13 +52,13 @@ function createWindow() {
     });
   } else {
     mainWindow = new BrowserWindow({
-      height: 432,
+      height: 405,
       useContentSize: true,
-      width: 768,
+      width: 720,
       frame: false,
       titleBarStyle: 'none',
-      minWidth: 427,
-      minHeight: 240,
+      minWidth: 720,
+      minHeight: 405,
       transparent: true,
       webPreferences: {
         webSecurity: false,
