@@ -103,6 +103,48 @@ describe('BaseSubtitle.vue', () => {
     });
   });
 
+  it('loadServerTextTracks error test', (done) => {
+    const Sagi = helpers.methods.sagi();
+    const wrapper = mount(VideoCanvas, {
+      store,
+      localVue,
+      propsData: {
+        src: 'file:///./test/assets/test.avi',
+      },
+    });
+    const childWrapper = wrapper.find(BaseSubtitle);
+    childWrapper.setData({
+      Sagi,
+    });
+    const cb = sinon.spy(() => {
+      sinon.assert.called(cb);
+      done();
+    })
+    childWrapper.vm.loadServerTextTracks(cb);
+  });
+
+  it('loadServerTextTracks success test', (done) => {
+    const Sagi = helpers.methods.sagi();
+    const mediaHash = helpers.methods.mediaQuickHash(decodeURI('file://./test/assets/test.avi'.replace('file://', '')));
+    const wrapper = mount(VideoCanvas, {
+      store,
+      localVue,
+      propsData: {
+        src: 'file:///./test/assets/test.avi',
+      },
+    });
+    const childWrapper = wrapper.find(BaseSubtitle);
+    childWrapper.setData({
+      Sagi,
+      mediaHash,
+    });
+    const cb = sinon.spy(() => {
+      sinon.assert.called(cb);
+      done();
+    })
+    childWrapper.vm.loadServerTextTracks(cb);
+  });
+
   it('$_concatStream success test', (done) => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
     const subPath = './test/assets/test3.srt';
