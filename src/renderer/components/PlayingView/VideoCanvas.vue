@@ -3,6 +3,7 @@
     <base-video-player
       ref="videoCanvas"
       :defaultEvents="['playing', 'canplay', 'timeupdate', 'loadedmetadata', 'durationchange']"
+      :styleObject="{objectFit: 'contain', width: '100%', height: '100%'}"
       @playing="onPlaying"
       @canplay="onCanPlay"
       @timeupdate="onTimeupdate"
@@ -290,3 +291,14 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.base-video-player {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+}
+.canvas {
+  visibility: hidden;
+}
+</style>
+
