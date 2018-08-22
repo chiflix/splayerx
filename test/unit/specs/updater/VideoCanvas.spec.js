@@ -19,7 +19,7 @@ describe('VideoCanvas.vue', () => {
         },
       },
     });
-    wrapper = shallowMount(VideoCanvas, { 
+    wrapper = shallowMount(VideoCanvas, {
       store,
       localVue,
       propsData: {
