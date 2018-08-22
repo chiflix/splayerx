@@ -9,7 +9,7 @@
       @loadedmetadata="updateGenerationParameters"
       @seeked="thumbnailGeneration" />
     <base-image-display
-      v-show="!useFallback"
+      v-if="!useFallback"
       :imgSrc="tempImage"
       :width="thumbnailWidth"
       :height="thumbnailHeight" />
@@ -180,8 +180,8 @@ export default {
       }
     },
     resumeAutoGeneration() {
-      this.isAutoGeneration = true;
       this.useFallback = false;
+      this.isAutoGeneration = true;
       this.videoSeek(this.autoGenerationIndex);
     },
     thumbnailArrayHandler(array) {
