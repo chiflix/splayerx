@@ -25,10 +25,13 @@ body {
 }
 
 .application {
-  position: relative;
+  // 使用overflow: hidden来隐藏滚动条并不能实际禁止掉
+  // 浏览器滚动条的使用，反而会在鼠标移动时不停触发滚动条
+  // 移动的功能，为浏览器的实时渲染造成很大的负担，从而导
+  // 致掉帧问题的出现;
+  position: fixed;
   width: 100%;
   height: 100%;
   border-radius: 4px;
-  overflow: hidden;
   -webkit-app-region: drag;
 }
