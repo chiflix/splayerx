@@ -61,7 +61,8 @@ export default {
           this.subtitleShow(0);
         });
       } else {
-        this.loadServerTextTracks(() => {
+        this.loadServerTextTracks((err) => {
+          if (err) throw err;
           this.subStyleChange();
           this.subtitleShow(0);
         });
@@ -103,10 +104,12 @@ export default {
     loadServerTextTracks(cb) {
       this.Sagi.mediaTranslate(this.mediaHash)
         .then((res) => {
+          console.log(res.array);
           // handle 2 situations:
           if (res.array[0][1] && res.array[0][1] !== 'OK') {
             console.log('Warning: No server transcripts.');
             console.log('Please load stream translate.');
+            cb('No server transcripts');
           } else {
             const textTrackList = res.array[1];
 
@@ -130,6 +133,7 @@ export default {
                 console.log('-----');
                 console.log('Error: load all transcripts error');
                 console.log(err);
+                cb(err);
               });
           }
         })
@@ -137,6 +141,7 @@ export default {
           console.log('------');
           console.log('Error: load textTrackList error');
           console.log(err);
+          cb(err);
         });
     },
 
@@ -501,7 +506,8 @@ export default {
     });
 
     this.$bus.$on('load-server-transcripts', () => {
-      this.loadServerTextTracks(() => {
+      this.loadServerTextTracks((err) => {
+        if (err) throw err;
         this.$_clearSubtitle();
         this.subtitleShow(0);
       });
