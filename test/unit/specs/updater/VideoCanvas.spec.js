@@ -3,7 +3,6 @@ import VideoCanvas from '@/components/PlayingView/VideoCanvas';
 import Vuex from 'vuex';
 import sinon from 'sinon';
 import PlaybackState from '@/store/modules/PlaybackState';
-import { wrap } from 'module';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -72,12 +71,17 @@ describe('VideoCanvas.vue', () => {
   });
 
   it('calcNewWindowXY method work fine if windowRectangelOld exist', () => {
-    wrapper.vm.windowRectangleOld = { x: 10, y: 10, width: 100, height: 100};
+    wrapper.vm.windowRectangleOld = {
+      x: 10,
+      y: 10,
+      width: 100,
+      height: 100,
+    };
     wrapper.vm.newHeightOfWindow = wrapper.vm.newWidthOfWindow = 100;
     const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
     wrapper.vm.calcNewWindowXY();
     expect(spy.called).equal(true);
-    expect(spy.returnValues[0]).deep.equal({ windowX: 10, windowY: 10});
+    expect(spy.returnValues[0]).deep.equal({ windowX: 10, windowY: 10 });
     spy.restore();
   });
 
