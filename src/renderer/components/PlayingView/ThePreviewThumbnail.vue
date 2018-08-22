@@ -79,6 +79,7 @@ export default {
       this.mountVideo = false;
       this.mountImage = false;
       this.generatedIndex = 0;
+      this.currentIndex = 0;
       this.updateMediaQuickHash(newValue);
       this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
     },
