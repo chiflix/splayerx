@@ -238,7 +238,11 @@ export default {
     });
     this.$bus.$on('hide-all-widgets', this.hideAllWidgets);
     this.$bus.$on('subtitle-menu-toggled', () => {
-      this.subtitleMenuAppear = true;
+      if (this.subtitleMenuAppear) {
+        this.subtitleMenuAppear = false;
+      } else {
+        this.subtitleMenuAppear = true;
+      }
     });
   },
   computed: {

@@ -43,7 +43,7 @@ describe('BaseSubtitle.vue', () => {
     expect(wrapper.vm.firstCueHTML).deep.equal([]);
     expect(wrapper.vm.secondCueHTML).deep.equal([]);
     expect(wrapper.vm.subStyle).deep.equal({});
-    expect(wrapper.vm.curStyle.fontSize).equal(24);
+    expect(wrapper.vm.curStyle.fontSize).equal(5);
     expect(wrapper.vm.curStyle.letterSpacing).equal(1);
     expect(wrapper.vm.curStyle.opacity).equal(1);
     expect(wrapper.vm.curStyle.color).equal('');

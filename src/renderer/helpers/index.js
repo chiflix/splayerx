@@ -2,7 +2,6 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import z from 'zero-fill';
-import asyncStorage from '@/helpers/asyncStorage';
 import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
