@@ -7,12 +7,14 @@
       :defaultEvents="['loadedmetadata', 'seeked']"
       :customOptions="{ pauseOnStart: true }"
       @loadedmetadata="updateGenerationParameters"
-      @seeked="thumbnailGeneration" />
+      @seeked="thumbnailGeneration"
+      style="opacity: 0.99" />
     <base-image-display
       v-if="!useFallback"
       :imgSrc="tempImage"
       :width="thumbnailWidth"
-      :height="thumbnailHeight" />
+      :height="thumbnailHeight"
+      style="opacity: 0.99" />
   </div>
 </template>
 
