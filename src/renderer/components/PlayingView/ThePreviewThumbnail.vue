@@ -1,25 +1,29 @@
 <template>
-  <div class="the-preview-thumbnail"
-    :style="{width: thumbnailWidth +'px', height: thumbnailHeight + 'px', left: positionOfThumbnail + 'px'}">
-    <thumbnail-video-player
-      v-if="mountVideo"
-      v-show="displayVideo"
-      :quickHash="quickHash"
-      :currentTime="videoCurrentTime"
-      :thumbnailWidth="thumbnailWidth"
-      :thumbnailHeight="thumbnailHeight"
-      :outerThumbnailInfo="outerThumbnailInfo"
-      @update-thumbnail-info="updateThumbnailInfo" />
-    <thumbnail-display
-      v-if="mountImage"
-      v-show="!displayVideo"
-      :quickHash="quickHash"
-      :autoGenerationIndex="autoGenerationIndex"
-      :maxThumbnailWidth="maxThumbnailWidth"
-      :currentIndex="currentIndex"
-      :thumbnailWidth="thumbnailWidth"
-      :thumbnailHeight="thumbnailHeight" />
-    <span class="time">{{ videoTime }}</span>
+  <div class="thumbnail-wrapper"
+    :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', left: positionOfThumbnail + 'px'}">
+    <div class="thumbnail-background" :style="{width: thumbnailWidth + 2 +'px'}">
+      <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
+        <thumbnail-video-player
+          v-if="mountVideo"
+          v-show="displayVideo"
+          :quickHash="quickHash"
+          :currentTime="videoCurrentTime"
+          :thumbnailWidth="thumbnailWidth"
+          :thumbnailHeight="thumbnailHeight"
+          :outerThumbnailInfo="outerThumbnailInfo"
+          @update-thumbnail-info="updateThumbnailInfo" />
+        <thumbnail-display
+          v-if="mountImage"
+          v-show="!displayVideo"
+          :quickHash="quickHash"
+          :autoGenerationIndex="autoGenerationIndex"
+          :maxThumbnailWidth="maxThumbnailWidth"
+          :currentIndex="currentIndex"
+          :thumbnailWidth="thumbnailWidth"
+          :thumbnailHeight="thumbnailHeight" />
+        <span class="time">{{ videoTime }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -70,6 +74,7 @@ export default {
       maxThumbnailCount: 0,
       lastGenerationIndex: 0,
       currentIndex: 0,
+      generatedIndex: 0,
     };
   },
   watch: {
@@ -77,13 +82,15 @@ export default {
       // Reload video and image components
       this.mountVideo = false;
       this.mountImage = false;
+      this.generatedIndex = 0;
+      this.currentIndex = 0;
       this.updateMediaQuickHash(newValue);
       this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
     },
     currentTime(newValue) {
       const index = Math.abs(Math.floor(newValue / this.generationInterval));
       this.currentIndex = index;
-      if (index <= this.autoGenerationIndex) {
+      if (index <= this.generatedIndex) {
         this.displayVideo = false;
         this.canvasCurrentTime = newValue;
       } else {
@@ -166,7 +173,6 @@ export default {
         // Update mountImage
         this.mountImage = typeof result.lastGenerationIndex === 'number' &&
           result.lastGenerationIndex > 0;
-        console.log('[ThePreviewThumbnail]:', this.mountVideo, this.mountImage);
       }
     },
   },
@@ -201,19 +207,29 @@ export default {
       .then(this.updateThumbnailData).catch((err) => {
         console.log(err);
       });
+    this.$bus.$on('image-all-get', (e) => {
+      this.generatedIndex = e;
+    });
   },
 };
 </script>
 <style lang="scss" scoped>
-.the-preview-thumbnail {
+.thumbnail-wrapper {
   position: absolute;
   bottom: 20px;
   -webkit-app-region: no-drag;
-  border: 1px solid;
-  border-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5)) 10;
-  border-radius: 1px;
   box-sizing: content-box;
+}
+.thumbnail-background {
   background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5));
+  border-radius: 1px;
+}
+.the-preview-thumbnail {
+  position: relative;
+  border: 1px solid transparent;
+  border-radius: 1px;
+  background-clip: padding-box;
+  background-color: #000;
 }
 .time {
   position: absolute;

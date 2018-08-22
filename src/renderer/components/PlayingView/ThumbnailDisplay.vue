@@ -39,11 +39,9 @@ export default {
     autoGenerationIndex(newValue, oldValue) {
       const thumbnailCount = newValue - oldValue;
       const startIndex = oldValue;
-      this.imageReady = false;
       this.getThumbnail(startIndex, thumbnailCount).then((result) => {
         this.$once('image-all-get', () => {
           this.arrayToMap(result);
-          this.imageReady = true;
         });
       });
     },
@@ -98,6 +96,7 @@ export default {
           return tx.complete;
         }).then(() => {
           this.$emit('image-all-get');
+          this.$bus.$emit('image-all-get', startIndex + thumbnailCount);
         });
       }
       return result;

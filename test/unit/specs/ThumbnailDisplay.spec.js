@@ -39,18 +39,6 @@ describe('Component - ThumbnailDisplay', () => {
       expect(wrapper.vm.imageReady).to.equal(false);
     });
 
-    it('should all-image-get restore base-image-display', (done) => {
-      const getThumbnailFake = sandbox.fake.resolves([{ index: 1, thumbnail: '1' }]);
-      wrapper.vm.getThumbnail = getThumbnailFake;
-
-      wrapper.setProps({ autoGenerationIndex: 2 });
-
-      wrapper.vm.$nextTick(() => {
-        wrapper.vm.$emit('image-all-get');
-        expect(wrapper.vm.imageReady).to.equal(true);
-        done();
-      });
-    });
     it('should changing autoGenerationIndex update thumbnailMap', (done) => {
       const getThumbnailFake = sandbox.fake.resolves([{ index: 1, thumbnail: '1' }]);
       wrapper.vm.getThumbnail = getThumbnailFake;
