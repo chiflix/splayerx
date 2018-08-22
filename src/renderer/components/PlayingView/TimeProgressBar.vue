@@ -8,12 +8,15 @@
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.stop="videoRestart"
+      @mouseover="thumbnailCurrentTime = 0"
       @mousemove="thumbnailCurrentTime = 0"
       :style="{cursor: cursorStyle}">
       <div class="fake-button"
         v-show="isOnProgress"
         @mousedown="handleFakeBtnClick"
         @mousemove.stop="handleFakeBtnMove"
+        @mouseover="thumbnailCurrentTime = 0"
+        @mousemove="thumbnailCurrentTime = 0"
         :style="{height: heightOfThumbnail + 11 + 'px'}"></div>
       <div class="line"
         v-show="!isShaking"></div>
@@ -346,6 +349,9 @@ export default {
         this.timeoutIdOfBackBarDisapppearDelay =
          setTimeout(() => { this.cursorPosition = 0; }, 300);
       }
+    },
+    thumbnailCurrentTime(newValue) {
+      console.log('CurrentTime:', newValue);
     },
   },
   created() {
