@@ -123,29 +123,9 @@ export default {
           });
         }
       } else {
-        console.log('NO FOUND SUBTITLES');
-        this.$bus.$emit('toggle-no-subtitle-menu');
         // then emit an event to tell subtitleControl to toggle the small menu
+        this.$bus.$emit('toggle-no-subtitle-menu');
       }
-
-      // if (re.test(path.extname(decodeURI(vid.src))) && embedded) {
-      //   this.mkvProcess(decodeURI(vid.src), () => {
-      //     console.log('IM DONE HERE, WATCH ME');
-      //     this.$_toggleSutitleShow();
-      //   });
-      // } else if (files.length > 0) {
-      //   this.loadLocalTextTracks(files, () => {
-      //     this.$_toggleSutitleShow();
-      //   });
-      // // } else if {
-      // //   // try to find subtitles from server
-      // } else {
-      //   // when no subtitles were returned or no embeded or local subtitles
-      //   // we will triger the second menu
-      //   // second menu:
-      //   //    - 加载翻译结果
-      //   //    - 导入字幕文件
-      // }
     },
     /**
      * @param {Array.<string>} files File pathes array
@@ -478,14 +458,15 @@ export default {
      * @param {function} cb Callback function to process result
      */
     $_createSubtitleStream(subPath, cb) {
-      const regexSrt = '^(.srt)$';
-      const reSrt = new RegExp(regexSrt);
+      const reSrt = new RegExp('^(.srt)$');
+      const reAss = new RegExp('^(.ass)$');
       const subExtName = path.extname(subPath);
 
       let vttStream;
       if (reSrt.test(subExtName)) {
         vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
-      } else {
+      }
+      if (reAss.test(subExtName)) {
         vttStream = fs.createReadStream(subPath).pipe(ass2vtt());
       }
 
@@ -631,11 +612,13 @@ export default {
       this.addVttToVideoElement(files, () => {
         this.$_clearSubtitle();
         this.subtitleShow(size);
+        this.$bus.$emit('added-local-subtitles');
       });
     });
 
     this.$bus.$on('load-server-transcripts', () => {
       this.loadServerTextTracks(() => {
+        // handles when users want to load server subs after initializing stage;
         this.$bus.$emit('finished-loading-server-subs');
         this.$_clearSubtitle();
         this.subtitleShow(0);

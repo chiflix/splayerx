@@ -191,8 +191,8 @@ export default {
     },
     handleMouseUp() {
       if (this.subtitleMenuAppear) {
-        this.subtitleMenuAppear = false;
         this.$bus.$emit('subtitle-menu-off');
+        this.subtitleMenuAppear = false;
       } else {
         this.mouseDown = false;
         this.clicks += 1; // one click(mouseUp) triggered, clicks + 1

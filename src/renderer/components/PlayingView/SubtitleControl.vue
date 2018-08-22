@@ -91,11 +91,10 @@ export default {
         server: '',
       },
       isSubCtrlBtnAppear: true,
-      itemIsChosen: false,
       appearSubtitleMenu: false,
       foundSubtitles: true,
-      itemIsHover: false,
       mouseOverComponent: false,
+      showingPopupDialog: false,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
       currentSubIden: 0,
     };
@@ -146,7 +145,31 @@ export default {
       this.$bus.$emit('load-server-transcripts');
     },
     toggleOpenFileDialog() {
+      if (this.showingPopupDialog) {
+        return;
+      }
+      const self = this;
+      const { remote } = this.$electron;
+      const { dialog } = remote;
+      const browserWindow = remote.BrowserWindow;
+      const focusWindow = browserWindow.getFocusedWindow();
+      const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
 
+      self.showingPopupDialog = true;
+      dialog.showOpenDialog(focusWindow, {
+        title: 'Open Dialog',
+        defaultPath: './',
+        filters: [{
+          name: 'Subtitle Files',
+          extensions: VALID_EXTENSION,
+        }],
+        properties: ['openFile'],
+      }, (item) => {
+        self.showingPopupDialog = false;
+        if (item) {
+          self.$bus.$emit('add-subtitle', item);
+        }
+      });
     },
     itemHasBeenChosen(index = 0) {
       return index === this.currentSubIden;
@@ -215,8 +238,9 @@ export default {
     });
     this.$bus.$on('finished-loading-server-subs', () => {
       this.foundSubtitles = true;
-      console.log('HAHA, WATCH ME NIGGA. YOU DIRTY NIGGA');
-      console.log(this.$store.getters.subtitleNameArr);
+    });
+    this.$bus.$on('added-local-subtitles', () => {
+      this.foundSubtitles = true;
     });
   },
 };
@@ -353,7 +377,7 @@ li {
     }
     .sub-menu{
       padding-top: 4px;
-      padding-bottom: 12px;
+      padding-bottom: 4px;
     }
     .menu-item-text-wrapper {
       line-height: 20px;
