@@ -138,12 +138,12 @@ describe('BaseSubtitle.vue', () => {
       Sagi,
       mediaHash,
     });
-    const cb = sinon.spy(() => {
-      sinon.assert.called(cb);
+    const cb = sinon.spy();
+    const stub = sinon.stub(childWrapper.vm, 'getAllTranscriptsFromServer').callsFake(() => {
+      sinon.assert.called(stub);
       stub.restore();
       done();
-    })
-    const stub = sinon.stub(childWrapper.vm, 'getAllTranscriptsFromServer').callsFake(cb);
+    });
     childWrapper.vm.loadServerTextTracks(cb);
   });
 
