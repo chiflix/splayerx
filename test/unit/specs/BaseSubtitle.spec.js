@@ -140,8 +140,10 @@ describe('BaseSubtitle.vue', () => {
     });
     const cb = sinon.spy(() => {
       sinon.assert.called(cb);
+      stub.restore();
       done();
     })
+    const stub = sinon.stub(childWrapper.vm, 'getAllTranscriptsFromServer').callsFake(cb);
     childWrapper.vm.loadServerTextTracks(cb);
   });
 
