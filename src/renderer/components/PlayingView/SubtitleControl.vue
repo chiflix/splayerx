@@ -1,10 +1,8 @@
 <template>
   <div class="sub-control">
     <transition name="fade" appear>
-      <div class="sub-btn-control"
-           v-if="isSubCtrlBtnAppear">
-        <div class="sub-menu-wrapper"
-             v-if="appearSubtitleMenu">
+      <div class="sub-btn-control" v-if="isSubCtrlBtnAppear">
+        <div class="sub-menu-wrapper" v-if="appearSubtitleMenu">
           <ul class="sub-menu">
 
             <li
@@ -193,16 +191,16 @@ li {
     font-family: Avenir-Roman;
   }
 
-  @media screen and (min-width: 320px) and (max-width: 511px) {
+  @media screen and (min-width: 320px) and (max-width: 512px) {
     .sub-menu-wrapper {
       display: none;
     }
   }
-  @media screen and (min-width: 512px) and (max-width: 853px) {
+  @media screen and (min-width: 513px) and (max-width: 854px) {
     .sub-menu-wrapper {
       position: absolute;
-      bottom: 50px;
-      right: 26px;
+      bottom: 30px;
+      right: -97px;
       width: 170px;
       height: 232px;
     }
@@ -233,11 +231,11 @@ li {
       font-size: 14px;
     }
   }
-  @media screen and (min-width: 854px) and (max-width: 1919px) {
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
     .sub-menu-wrapper {
       position: absolute;
-      bottom: 64px;
-      right: 30px;
+      bottom: 40px;
+      right: -130.3px;
       width: 184px;
       height: 260px;
     }
@@ -267,13 +265,13 @@ li {
       font-size: 15px;
     }
   }
-  @media screen and (min-width: 1920px) {
+  @media screen and (min-width: 1921px) {
     .sub-menu-wrapper {
       position: absolute;
       width: 283px;
       height: 400px;
-      bottom: 100px;
-      right: 42px;
+      bottom: 65px;
+      right: -198px;
     }
     .sub-menu{
       padding: 4px, 0px;
