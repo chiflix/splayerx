@@ -48,7 +48,7 @@
       <playlist :lastPlayedFile="lastPlayedFile" :changeSize="changeSize" :showItemNum="showItemNum"
                 :isFull="isFull"
                 :style="{marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
-                         left: this.isFull ? '0px' : `${this.exitFullScreen}px`}"/>
+                         paddingLeft: this.isFull ? '0px' : this.moveItem ? `${this.exitFullScreen}px` : '0px'}"/>
   </main>
 </div>
 </template>
@@ -146,8 +146,12 @@ export default {
       const add = ((this.showItemNum + 1) * 112) + (this.showItemNum * 15);
       const sup = ((this.showItemNum * 112) + ((this.showItemNum - 1) * 15));
       let averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) / this.showItemNum;
-      this.playlistMl = ((this.moveItem * 127) - this.move) -
-        ((averageWidth - 112) * -this.moveItem);
+      if (this.moveItem === 0) {
+        this.playlistMl = 0;
+      } else {
+        this.playlistMl = ((this.moveItem * 127) - this.move) -
+          ((averageWidth - 112) * -this.moveItem);
+      }
       this.changeSize = (averageWidth / changingWidth) * 100;
       if (changingWidth - (100 + add) >= 0 && this.showItemNum <= 9) {
         if (((changingWidth - this.lastSize) + 127) / 127 <= 5) {
@@ -159,16 +163,24 @@ export default {
             this.showItemNum;
           this.lastSize += 127 * Math.floor(((changingWidth - this.lastSize) + 127) / 127);
           this.changeSize = (averageWidth / changingWidth) * 100;
-          this.playlistMl = ((this.moveItem * 127) - this.move) -
-            ((averageWidth - 112) * -this.moveItem);
+          if (this.moveItem === 0) {
+            this.playlistMl = 0;
+          } else {
+            this.playlistMl = ((this.moveItem * 127) - this.move) -
+              ((averageWidth - 112) * -this.moveItem);
+          }
         } else {
           this.showItemNum = 10;
           this.lastSize = 1482;
           averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
             this.showItemNum;
           this.changeSize = ((changingWidth - 235) / (10 * changingWidth)) * 100;
-          this.playlistMl = ((this.moveItem * 127) - this.move) -
-            ((averageWidth - 112) * -this.moveItem);
+          if (this.moveItem === 0) {
+            this.playlistMl = 0;
+          } else {
+            this.playlistMl = ((this.moveItem * 127) - this.move) -
+              ((averageWidth - 112) * -this.moveItem);
+          }
         }
       } else if (changingWidth - (100 + sup) <= 0 && this.showItemNum >= 6) {
         if ((this.lastSize - changingWidth) / 127 <= 5) {
@@ -180,23 +192,38 @@ export default {
           averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
             this.showItemNum;
           this.lastSize -= 127 * Math.floor((this.lastSize - changingWidth) / 127);
+          if (this.lastSize < 847) {
+            this.lastSize = 847;
+          }
           this.changeSize = (averageWidth / changingWidth) * 100;
-          this.playlistMl = ((this.moveItem * 127) - this.move) -
-            ((averageWidth - 112) * -this.moveItem);
+          if (this.moveItem === 0) {
+            this.playlistMl = 0;
+          } else {
+            this.playlistMl = ((this.moveItem * 127) - this.move) -
+              ((averageWidth - 112) * -this.moveItem);
+          }
         } else {
           this.showItemNum = 5;
           averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
             this.showItemNum;
           this.lastSize = 847;
           this.changeSize = (averageWidth / changingWidth) * 100;
-          this.playlistMl = ((this.moveItem * 127) - this.move) -
-            ((averageWidth - 112) * -this.moveItem);
+          if (this.moveItem === 0) {
+            this.playlistMl = 0;
+          } else {
+            this.playlistMl = ((this.moveItem * 127) - this.move) -
+              ((averageWidth - 112) * -this.moveItem);
+          }
         }
       } else if (changingWidth > 1355) {
         this.showItemNum = 10;
         this.changeSize = ((changingWidth - 235) / (10 * changingWidth)) * 100;
-        this.playlistMl = ((this.moveItem * 127) - this.move) -
-          ((averageWidth - 112) * -this.moveItem);
+        if (this.moveItem === 0) {
+          this.playlistMl = 0;
+        } else {
+          this.playlistMl = ((this.moveItem * 127) - this.move) -
+            ((averageWidth - 112) * -this.moveItem);
+        }
       }
     };
     const { app } = this.$electron.remote;

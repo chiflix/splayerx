@@ -119,7 +119,7 @@ export default {
     openOrMove() {
       const divLeft = document.querySelector('.controller');
       if (this.moveItem === -1) {
-        divLeft.style.transition = 'left 0.5s linear';
+        divLeft.style.transition = 'left 150ms linear';
         divLeft.style.left = '0px';
         this.move = 0;
         this.moveItem = 0;
@@ -240,7 +240,6 @@ export default {
       }
     },
     onRecentItemClick(item, index) {
-      console.log(this.changeSize);
       const lf = document.querySelector('.controller');
       if (!this.isDragging) {
         if (index === this.showItemNum - this.moveItem - 1 && !this.isFull) {
@@ -248,14 +247,14 @@ export default {
           this.moveLength = 15 + (this.changeSize * (document.body.clientWidth / 100));
           const ss = this.move - this.moveLength;
           this.move = ss;
-          lf.style.transition = 'left 0.5s linear';
+          lf.style.transition = 'left 150ms linear';
           lf.style.left = `${ss}px`;
           this.$bus.$emit('ifMargin', true);
         } else if (index + this.moveItem === -2 && !this.isFull) {
           this.moveItem += 1;
           const ss = (this.move + 15) + (this.changeSize * (document.body.clientWidth / 100));
           this.move = ss;
-          lf.style.transition = 'left 0.5s linear';
+          lf.style.transition = 'left 150ms linear';
           lf.style.left = `${ss}px`;
           this.$bus.$emit('ifMargin', true);
         } else {
