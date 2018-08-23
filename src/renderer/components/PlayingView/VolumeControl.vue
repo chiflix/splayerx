@@ -8,7 +8,7 @@
     <transition name="fade">
       <div class="container"  ref="sliderContainer"
         @mousedown.stop.left="onVolumeSliderClick"
-        v-if="showVolumeSlider">
+        v-show="showVolumeSlider">
         <div class="slider" ref="slider"
           :style="{ height: volume + '%' }">
         </div>
@@ -25,7 +25,6 @@
 
 <script>
 import _ from 'lodash';
-
 export default {
   data() {
     return {
@@ -174,61 +173,37 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.video-controller {
-  .container {
-    position: relative;
-    bottom: 115px;
-    width: 15px;
-    height: 105px;
-    margin: 0 auto;
-    background-color: rgba(255,255,255,0.2);
-    border-radius: 1px;
-  }
-
-  .container:hover {
+.container {
+  position: absolute;
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 1px;
+  left: 50%;
+  transform: translate(-50%);
+  &:hover {
     cursor: pointer;
   }
 
   .slider {
+    width: 100%;
     position: absolute;
     bottom: 0;
-    width: 100%;
-    background: rgba(255,255,255,0.70);
+    background: rgba(255,255,255,0.7);
     border-radius: 1px;
   }
-
-  @media screen and (max-width: 854px) {
-    bottom: 22px;
-    right: 25px;
-    width: 28px;
-    height: 24+5+10+84px;
-    .container {
-      width: 12px;
-      height: 84px;
-      bottom: -5px;
-    }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    bottom: 18+10px;
+    width: 15px;
+    height: 84px;
   }
-  @media screen and (min-width: 854px) and (max-width: 1920px) {
-    bottom: 25px;
-    right: 31.25px;
-    width: 35px;
-    height: 30+5+10+105px;
-    .container {
-      width: 15px;
-      height: 105px;
-      bottom: -5px;
-    }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    bottom: 24+10px;
+    width: 24px;
+    height: 105px;
   }
-  @media screen and (min-width: 1920px) {
-    bottom: 40px;
-    right: 50px;
-    width: 56px;
-    height: 48+5+10+167px;
-    .container {
-      width: 24px;
-      height: 168px;
-      bottom: 10px;
-    }
+  @media screen and (min-width: 1921px) {
+    bottom: 36+10px;
+    width: 24px;
+    height: 168px;
   }
 }
 .fade-enter-active {
