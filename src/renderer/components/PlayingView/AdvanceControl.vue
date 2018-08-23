@@ -10,7 +10,7 @@
         </AdvanceControlMenuItem>
       </div>
     </div>
-    <div class="button"
+    <div class="button" v-show="showAdvance"
       @mousedown.stop="switchSettingMenuState">
       <img src="~@/assets/icon-advanced.svg" type="image/svg+xml">
     </div>
@@ -74,6 +74,7 @@ export default {
         },
       ],
       isAcitve: false,
+      showAdvance: false,
     };
   },
   methods: {
@@ -113,6 +114,12 @@ export default {
     this.$bus.$on('change-menu-list', (changedLevel) => {
       this.menuList = changedLevel;
       this.$_fitMenuSize();
+    });
+    this.$bus.$on('advance-appear', () => {
+      this.showAdvance = true;
+    });
+    this.$bus.$on('advance-hide', () => {
+      this.showAdvance = false;
     });
   },
 };

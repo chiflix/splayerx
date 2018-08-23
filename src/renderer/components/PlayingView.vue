@@ -97,6 +97,7 @@ export default {
         this.$bus.$emit('timecode-appear');
         this.$bus.$emit('sub-ctrl-appear');
         this.$bus.$emit('titlebar-appear');
+        this.$bus.$emit('advance-appear');
         if (this.timeoutIdOfAllWidgetsDisappearDelay !== 0) {
           clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
           this.timeoutIdOfAllWidgetsDisappearDelay
@@ -136,6 +137,7 @@ export default {
       }
       this.$bus.$emit('sub-ctrl-hide');
       this.$bus.$emit('titlebar-hide');
+      this.$bus.$emit('advance-hide');
       this.cursorShow = false;
     },
     resetDraggingState() {
