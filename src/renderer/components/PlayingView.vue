@@ -283,6 +283,7 @@ export default {
   display: flex;
   justify-content: space-between;
   position: fixed;
+  -webkit-app-region: no-drag;
   .subtitle {
     order: 1;
   }
