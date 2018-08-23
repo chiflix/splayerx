@@ -90,15 +90,16 @@ export default {
         const val = await this.infoDB().lastPlayed();
         if (val && data) {
           const mergedData = Object.assign(val, data);
-          this.infoDB().add('recent-played', mergedData);
+          asyncStorage.set('recent-played', {});
+          await this.infoDB().add('recent-played', mergedData);
+          await this.infoDB().cleanData();
         }
       })
 
     // Get all data and show
       .then(() => {
         this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
-          console.log(data);
-          this.lastPlayedFile = data.slice(0, 4);
+          this.lastPlayedFile = data.slice(0, 5);
         });
       });
   },
