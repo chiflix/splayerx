@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { createLocalVue, mount } from '@vue/test-utils';
 import VideoCanvas from '@/components/PlayingView/VideoCanvas';
 import Vuex from 'vuex';
 import sinon from 'sinon';
@@ -19,7 +19,7 @@ describe('VideoCanvas.vue', () => {
         },
       },
     });
-    wrapper = shallowMount(VideoCanvas, {
+    wrapper = mount(VideoCanvas, {
       store,
       localVue,
       propsData: {
@@ -28,7 +28,7 @@ describe('VideoCanvas.vue', () => {
     });
   });
 
-  it('shoule load correct data', () => {
+  it('should load correct data', () => {
     expect(wrapper.vm.windowRectangleOld).to.be.an('object');
     expect(wrapper.vm.videoExisted).equal(false);
     expect(wrapper.vm.shownTextTrack).equal(false);
