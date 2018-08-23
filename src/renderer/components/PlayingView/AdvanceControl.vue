@@ -1,6 +1,6 @@
 <template>
-  <div :style="menuStyleObject">
-    <div class="advanced"
+  <div>
+    <div :style="menuStyleObject" class="advanced"
       v-if="isAcitve">
       <div class="flex-container">
         <AdvanceControlMenuItem
@@ -10,7 +10,7 @@
         </AdvanceControlMenuItem>
       </div>
     </div>
-    <div class="button"
+    <div class="button" v-show="showAdvance"
       @mousedown.stop="switchSettingMenuState">
       <img src="~@/assets/icon-advanced.svg" type="image/svg+xml">
     </div>
@@ -74,6 +74,7 @@ export default {
         },
       ],
       isAcitve: false,
+      showAdvance: false,
     };
   },
   methods: {
@@ -114,11 +115,17 @@ export default {
       this.menuList = changedLevel;
       this.$_fitMenuSize();
     });
+    this.$bus.$on('advance-appear', () => {
+      this.showAdvance = true;
+    });
+    this.$bus.$on('advance-hide', () => {
+      this.showAdvance = false;
+    });
   },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .video-controller {
   .advanced {
     position: absolute;
@@ -141,22 +148,8 @@ export default {
     justify-content: space-evenly;
   }
 
-  .button {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 35px;
-    height: 30px;
-    z-index: 1000;
-  }
-
   .button:hover {
     cursor: pointer;
-  }
-
-  .button img {
-    width: 35px;
-    height: 30px;
   }
 }
 </style>

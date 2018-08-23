@@ -1,22 +1,21 @@
 <template>
   <transition name="fade" appear>
-  <div class="volume" id="volume"
+  <div
     @mouseover.stop="appearVolumeSlider"
     @mouseout.stop="hideVolumeSlider"
-    @mousemove="throttledCall"
-    v-if="showVolumeController">
+    @mousemove="throttledCall">
     <transition name="fade">
       <div class="container"  ref="sliderContainer"
         @mousedown.stop.left="onVolumeSliderClick"
-        v-if="showVolumeSlider">
+        v-show="showVolumeSlider">
         <div class="slider" ref="slider"
           :style="{ height: volume + '%' }">
         </div>
       </div>
     </transition>
-      <div class="button"
+      <div
         @mousedown.stop.left="onVolumeButtonClick">
-        <img type="image/svg+xml" wmode="transparent"
+        <img type="image/svg+xml" wmode="transparent" v-show="showVolumeController"
           :src="srcOfVolumeButtonImage">
       </div>
   </div>
@@ -25,7 +24,6 @@
 
 <script>
 import _ from 'lodash';
-
 export default {
   data() {
     return {
@@ -131,12 +129,14 @@ export default {
       let srcOfVolumeButtonImage;
       if (this.volume === 0) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-mute.svg');
-      } else if (this.volume > 0 && this.volume <= 33) {
+      } else if (this.volume > 0 && this.volume <= 25) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-1.svg');
-      } else if (this.volume > 33 && this.volume <= 66) {
+      } else if (this.volume > 25 && this.volume <= 50) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-2.svg');
-      } else if (this.volume > 66 && this.volume <= 100) {
+      } else if (this.volume > 50 && this.volume <= 75) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-3.svg');
+      } else if (this.volume > 75 && this.volume <= 100) {
+        srcOfVolumeButtonImage = require('../../assets/icon-volume-4.svg');
       }
       return srcOfVolumeButtonImage;
     },
@@ -174,98 +174,39 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-.video-controller .volume {
+.container {
   position: absolute;
-  bottom: 27px;
-  right: 37+15+35px;
-  width: 35px;
-  height: 150px;
-  -webkit-app-region: no-drag;
-  z-index: 500;
-
-  .container {
-    position: relative;
-    bottom: 115px;
-    width: 15px;
-    height: 105px;
-    margin: 0 auto;
-    background-color: rgba(255,255,255,0.2);
-    border-radius: 1px;
-  }
-
-  .container:hover {
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 1px;
+  left: 50%;
+  transform: translate(-50%);
+  &:hover {
     cursor: pointer;
   }
 
   .slider {
+    width: 100%;
     position: absolute;
     bottom: 0;
-    width: 100%;
-    background: rgba(255,255,255,0.70);
+    background: rgba(255,255,255,0.7);
     border-radius: 1px;
   }
-
-  .button {
-    position: absolute;
-    bottom: 0;
-    right:0;
-    width: 100%;
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    bottom: 18+10px;
+    width: 10px;
+    height: 86px;
   }
-
-  .button:hover {
-    cursor: pointer;
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    bottom: 24+10px;
+    width: 15px;
+    height: 129px;
   }
-
-  .button img {
-    width: 100%;
-    height: 100%;
-  }
-
-  @media screen and (max-width: 854px) {
-    bottom: 22px;
-    right: 25px;
-    width: 28px;
-    height: 24+5+10+84px;
-    .container {
-      width: 12px;
-      height: 84px;
-      bottom: -5px;
-    }
-    .button {
-      height: 24px;
-    }
-  }
-  @media screen and (min-width: 854px) and (max-width: 1920px) {
-    bottom: 25px;
-    right: 31.25px;
-    width: 35px;
-    height: 30+5+10+105px;
-    .container {
-      width: 15px;
-      height: 105px;
-      bottom: -5px;
-    }
-    .button {
-      height: 30px;
-    }
-  }
-  @media screen and (min-width: 1920px) {
-    bottom: 40px;
-    right: 50px;
-    width: 56px;
-    height: 48+5+10+167px;
-    .container {
-      width: 24px;
-      height: 168px;
-      bottom: 10px;
-    }
-    .button {
-      height: 48px;
-    }
+  @media screen and (min-width: 1921px) {
+    bottom: 36+10px;
+    width: 20px;
+    height: 172px;
   }
 }
-
 .fade-enter-active {
  transition: opacity 100ms;
 }
@@ -281,5 +222,4 @@ export default {
 .fade-enter, .fade-leave-to {
  opacity: 0;
 }
-
 </style>

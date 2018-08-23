@@ -67,22 +67,28 @@ export default {
   100% {opacity: 0; transform: scale(1)};
 }
 
-@media screen and (max-width: 854px) {
+@media screen and (max-width: 512px) {
   .icon {
-    width: 42.5px;
-    height: 42.5px;
+    width: 49px;
+    height: 49px;
   }
 }
-@media screen and (min-width: 854px) and (max-width: 1920px) {
+@media screen and (min-width: 513px) and (max-width: 854px) {
   .icon {
-    width: 85px;
-    height: 85px;
+    width: 59px;
+    height: 59px;
   }
 }
-@media screen and (min-width: 1920px) {
+@media screen and (min-width: 855px) and (max-width: 1920px) {
   .icon {
-    width: 127.5px;
-    height: 127.5px;
+    width: 79px;
+    height: 79px;
+  }
+}
+@media screen and (min-width: 1921px) {
+  .icon {
+    width: 109px;
+    height: 108px;
   }
 }
 </style>

@@ -291,6 +291,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.video {
+  height: 0;
+}
 .base-video-player {
   width: 100%;
   height: 100%;
