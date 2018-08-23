@@ -1,10 +1,10 @@
 <template>
   <transition name="fade" appear>
-  <div class="volume" id="volume"
+  <div
     @mouseover.stop="appearVolumeSlider"
     @mouseout.stop="hideVolumeSlider"
     @mousemove="throttledCall"
-    v-if="showVolumeController">
+    v-show="showVolumeController">
     <transition name="fade">
       <div class="container"  ref="sliderContainer"
         @mousedown.stop.left="onVolumeSliderClick"
@@ -14,7 +14,7 @@
         </div>
       </div>
     </transition>
-      <div class="button"
+      <div
         @mousedown.stop.left="onVolumeButtonClick">
         <img type="image/svg+xml" wmode="transparent"
           :src="srcOfVolumeButtonImage">
@@ -174,16 +174,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-.video-controller .volume {
-  position: absolute;
-  bottom: 27px;
-  right: 37+15+35px;
-  width: 35px;
-  height: 150px;
-  -webkit-app-region: no-drag;
-  z-index: 500;
-
+.video-controller {
   .container {
     position: relative;
     bottom: 115px;
@@ -206,22 +197,6 @@ export default {
     border-radius: 1px;
   }
 
-  .button {
-    position: absolute;
-    bottom: 0;
-    right:0;
-    width: 100%;
-  }
-
-  .button:hover {
-    cursor: pointer;
-  }
-
-  .button img {
-    width: 100%;
-    height: 100%;
-  }
-
   @media screen and (max-width: 854px) {
     bottom: 22px;
     right: 25px;
@@ -231,9 +206,6 @@ export default {
       width: 12px;
       height: 84px;
       bottom: -5px;
-    }
-    .button {
-      height: 24px;
     }
   }
   @media screen and (min-width: 854px) and (max-width: 1920px) {
@@ -246,9 +218,6 @@ export default {
       height: 105px;
       bottom: -5px;
     }
-    .button {
-      height: 30px;
-    }
   }
   @media screen and (min-width: 1920px) {
     bottom: 40px;
@@ -260,12 +229,8 @@ export default {
       height: 168px;
       bottom: 10px;
     }
-    .button {
-      height: 48px;
-    }
   }
 }
-
 .fade-enter-active {
  transition: opacity 100ms;
 }
@@ -281,5 +246,4 @@ export default {
 .fade-enter, .fade-leave-to {
  opacity: 0;
 }
-
 </style>
