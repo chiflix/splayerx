@@ -193,18 +193,18 @@ export default {
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
     bottom: 18+10px;
-    width: 15px;
-    height: 84px;
+    width: 10px;
+    height: 86px;
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
     bottom: 24+10px;
-    width: 24px;
-    height: 105px;
+    width: 15px;
+    height: 129px;
   }
   @media screen and (min-width: 1921px) {
     bottom: 36+10px;
-    width: 24px;
-    height: 168px;
+    width: 20px;
+    height: 172px;
   }
 }
 .fade-enter-active {
