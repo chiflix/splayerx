@@ -76,7 +76,6 @@ export default {
     onMetaLoaded() {
       this.$bus.$emit('play');
       this.$bus.$emit('seek', this.currentTime);
-      this.videoElement = this.$refs.videoCanvas.videoElement();
       this.videoWidth = this.videoElement.videoWidth;
       this.videoHeight = this.videoElement.videoHeight;
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
@@ -250,7 +249,9 @@ export default {
         });
     },
   },
-  created() {
+  mounted() {
+    this.videoElement = this.$refs.videoCanvas.videoElement();
+
     this.$bus.$on('playback-rate', (newRate) => {
       this.videoElement.playbackRate = newRate;
       this.$store.commit('PlaybackRate', newRate);
@@ -272,19 +273,17 @@ export default {
       }
     });
     this.$bus.$on('play', () => {
-      this.$refs.videoCanvas.videoElement().play();
+      this.videoElement.play();
     });
     this.$bus.$on('pause', () => {
       this.videoElement.pause();
     });
     this.$bus.$on('seek', (e) => {
-      this.$refs.videoCanvas.videoElement().currentTime = e;
+      this.videoElement.currentTime = e;
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
-  },
-  mounted() {
     window.onbeforeunload = () => {
       this.$_saveScreenshot();
     };
