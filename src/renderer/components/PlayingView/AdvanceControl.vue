@@ -1,6 +1,6 @@
 <template>
-  <div :style="menuStyleObject">
-    <div class="advanced"
+  <div>
+    <div :style="menuStyleObject" class="advanced"
       v-if="isAcitve">
       <div class="flex-container">
         <AdvanceControlMenuItem
@@ -118,7 +118,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .video-controller {
   .advanced {
     position: absolute;
@@ -141,22 +141,8 @@ export default {
     justify-content: space-evenly;
   }
 
-  .button {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 35px;
-    height: 30px;
-    z-index: 1000;
-  }
-
   .button:hover {
     cursor: pointer;
-  }
-
-  .button img {
-    width: 35px;
-    height: 30px;
   }
 }
 </style>
