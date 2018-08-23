@@ -61,7 +61,8 @@ export default {
           this.subtitleShow(0);
         });
       } else {
-        this.loadServerTextTracks(() => {
+        this.loadServerTextTracks((err) => {
+          if (err) throw err;
           this.subStyleChange();
           this.subtitleShow(0);
         });
@@ -103,10 +104,12 @@ export default {
     loadServerTextTracks(cb) {
       this.Sagi.mediaTranslate(this.mediaHash)
         .then((res) => {
+          console.log(res.array);
           // handle 2 situations:
           if (res.array[0][1] && res.array[0][1] !== 'OK') {
             console.log('Warning: No server transcripts.');
             console.log('Please load stream translate.');
+            cb('No server transcripts');
           } else {
             const textTrackList = res.array[1];
 
@@ -130,6 +133,7 @@ export default {
                 console.log('-----');
                 console.log('Error: load all transcripts error');
                 console.log(err);
+                cb(err);
               });
           }
         })
@@ -137,6 +141,7 @@ export default {
           console.log('------');
           console.log('Error: load textTrackList error');
           console.log(err);
+          cb(err);
         });
     },
 
@@ -222,7 +227,7 @@ export default {
       const tasks = files.map((subPath) => (cb) => this.$_createSubtitleStream(subPath, cb));
       parallel(tasks, (err, results) => {
         if (err) {
-          console.error(err);
+          throw err;
         }
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         for (let i = 0; i < results.length; i += 1) {
@@ -361,7 +366,7 @@ export default {
       const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
       this.$_concatStream(vttStream, (err, buf) => {
         if (err) {
-          console.error(err);
+          throw err;
         }
         cb(null, buf);
       });
@@ -501,7 +506,8 @@ export default {
     });
 
     this.$bus.$on('load-server-transcripts', () => {
-      this.loadServerTextTracks(() => {
+      this.loadServerTextTracks((err) => {
+        if (err) throw err;
         this.$_clearSubtitle();
         this.subtitleShow(0);
       });
