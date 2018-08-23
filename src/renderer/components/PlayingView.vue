@@ -283,7 +283,11 @@ export default {
   display: flex;
   justify-content: space-between;
   position: fixed;
-  -webkit-app-region: no-drag;
+  .button {
+    -webkit-app-region: no-drag;
+    cursor: pointer;
+    position: relative;
+  }
   .subtitle {
     order: 1;
   }
@@ -292,6 +296,7 @@ export default {
   }
   .advance {
     order: 3;
+    // tempoary disable advance functionality
     pointer-events: none;
   }
   img {
