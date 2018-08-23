@@ -117,6 +117,7 @@ export default {
           this.$bus.$emit('new-file-open');
         });
       this.$store.commit('SrcOfVideo', path);
+      this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
       });

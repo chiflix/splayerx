@@ -109,11 +109,12 @@ export default {
       this.appearSubtitleMenu = false;
     },
     toggleSubtitleMenu() {
-      this.$bus.$emit('subtitle-menu-toggled');
       if (!this.appearSubtitleMenu) {
+        this.$bus.$emit('subtitle-menu-toggled-on');
         this.appearSubtitleMenu = true;
         this.$bus.$emit('subtitleMenuOn');
       } else {
+        this.$bus.$emit('subtitle-menu-toggled-off');
         this.appearSubtitleMenu = false;
         this.$bus.$emit('subtitleMenuOff');
       }
@@ -205,14 +206,17 @@ export default {
   created() {
     this.$bus.$on('sub-ctrl-appear', this.subCtrlBtnAppear);
     this.$bus.$on('sub-ctrl-hide', () => {
-      if (!this.mouseOverComponent) {
-        this.toggleSubtitleMenu();
-        this.$bus.$emit('subtitleMenuOff');
-        this.subCtrlBtnHide();
+      if (this.mouseOverComponent) {
+        this.isSubCtrlBtnAppear = true;
+        this.$bus.$emit('subtitle-menu-toggled-on');
+      } else {
+        this.isSubCtrlBtnAppear = false;
+        this.$bus.$emit('subtitle-menu-toggled-off');
       }
     });
     this.$bus.$on('subtitle-menu-off', this.toggleSubtitleMenu);
     this.$bus.$on('loading-subtitles', (status) => {
+      this.foundSubtitles = true;
       const placeholderText = 'Loading...';
       if (status.type === 'Local') {
         this.loadingSubsPlaceholders.local = placeholderText;
@@ -235,12 +239,16 @@ export default {
     });
     this.$bus.$on('toggle-no-subtitle-menu', () => {
       this.foundSubtitles = false;
+      this.$store.commit('SubtitleOff');
     });
     this.$bus.$on('finished-loading-server-subs', () => {
       this.foundSubtitles = true;
     });
     this.$bus.$on('added-local-subtitles', () => {
       this.foundSubtitles = true;
+    });
+    this.$bus.$on('new-video-opened', () => {
+      this.currentSubIden = 0;
     });
   },
 };
@@ -327,7 +335,7 @@ li {
       bottom: 50px;
       right: 26px;
       width: 170px;
-      height: 232px;
+      // height: 232px;
     }
     .sub-menu{
       padding: 4px, 0px;
@@ -373,7 +381,7 @@ li {
       bottom: 64px;
       right: 30px;
       width: 184px;
-      height: 260px;
+      // height: 260px;
     }
     .sub-menu{
       padding-top: 4px;
@@ -416,7 +424,7 @@ li {
     .sub-menu-wrapper {
       position: absolute;
       width: 283px;
-      height: 400px;
+      // height: 400px;
       bottom: 100px;
       right: 42px;
     }

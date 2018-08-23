@@ -191,8 +191,8 @@ export default {
     },
     handleMouseUp() {
       if (this.subtitleMenuAppear) {
-        this.$bus.$emit('subtitle-menu-off');
         this.subtitleMenuAppear = false;
+        this.$bus.$emit('subtitle-menu-off');
       } else {
         this.mouseDown = false;
         this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
@@ -237,12 +237,11 @@ export default {
       clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
     });
     this.$bus.$on('hide-all-widgets', this.hideAllWidgets);
-    this.$bus.$on('subtitle-menu-toggled', () => {
-      if (this.subtitleMenuAppear) {
-        this.subtitleMenuAppear = false;
-      } else {
-        this.subtitleMenuAppear = true;
-      }
+    this.$bus.$on('subtitle-menu-toggled-on', () => {
+      this.subtitleMenuAppear = true;
+    });
+    this.$bus.$on('subtitle-memu-toggled-off', () => {
+      this.subtitleMenuAppear = false;
     });
   },
   computed: {

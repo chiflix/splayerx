@@ -28,7 +28,7 @@ export default {
       firstSubIndex: null,
       Sagi: null,
       mediaHash: '',
-      inMkvFormat: false,
+      readingMkv: false,
       firstActiveCues: [],
       secondActiveCues: [],
       firstCueHTML: [],
@@ -47,7 +47,6 @@ export default {
   methods: {
     async $_serverSubsExist() {
       const res = await this.Sagi.mediaTranslate(this.mediaHash);
-      res.array[0][1] = 'NOT OKAY';
       if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
         return {
           found: true,
@@ -86,12 +85,19 @@ export default {
         };
       }
 
+      if (this.readingMkv) {
+        this.$bus.$emit('stop-reading-mkv-subs');
+        this.readingMkv = false;
+        this.$bus.$emit('subtitles-finished-loading', 'Embedded');
+      }
+
       const localSubsOn = localSubsStatus.found;
       const serverSubsOn = serverSubsStatus.found;
       const embeddedSubsOn = embeddedSubsStatus.found;
 
       if (localSubsOn || embeddedSubsOn || serverSubsOn) {
         if (localSubsOn || embeddedSubsOn) {
+          this.$_clearSubtitle();
           if (localSubsOn) {
             this.$bus.$emit('loading-subtitles', {
               type: 'Local',
@@ -113,6 +119,7 @@ export default {
             });
           }
         } else {
+          this.$_clearSubtitle();
           this.$bus.$emit('loading-subtitles', {
             type: 'Server',
             size: serverSubsStatus.size,
@@ -123,6 +130,7 @@ export default {
           });
         }
       } else {
+        this.$_clearSubtitle();
         // then emit an event to tell subtitleControl to toggle the small menu
         this.$bus.$emit('toggle-no-subtitle-menu');
       }
@@ -148,14 +156,16 @@ export default {
        */
       // If there is already subtitle files(same dir), load it
       this.addVttToVideoElement(files, () => {
-        console.log('finished reading subtitle files');
         const subNameArr = files.map(file => this.$_subNameFromLocalProcess(file));
-        this.$store.commit('AddSubtitle', subNameArr);
+        this.$store.commit('SubtitleNameArr', subNameArr);
         cb();
       });
     },
 
     mkvProcess(vidPath, cb) {
+      // this.$store.commit('SubtitleNameArr', []);
+      // const vid = this.$parent.$refs.videoCanvas;
+      // vid.textTracks[this.firstSubIndex].mode = 'disabled';
       this.addMkvSubstoVideo(vidPath, () => {
         console.log('finished reading mkv subtitles');
         cb();
@@ -186,7 +196,6 @@ export default {
 
                 // Only when all subtitles are successfully loaded,
                 // users can see the server subtitles in Subtitle Menu.
-                this.$_clearSubtitle();
                 const subtitleNameArr = textTrackList
                   .map(textTrack => this.$_subnameFromServerProcess(textTrack));
                 this.$store.commit('SubtitleNameArr', subtitleNameArr);
@@ -244,7 +253,9 @@ export default {
     */
 
     addMkvSubstoVideo(filePath, cb) {
-      const ectractFn = filePath => new Promise((resolve) => {
+      const self = this;
+      this.readingMkv = true;
+      const ectractFn = filePath => new Promise((resolve, reject) => {
         let tracks;
         const lngDetector = new LanguageDetect();
         const subs = new MatroskaSubtitles();
@@ -278,10 +289,16 @@ export default {
         subs.on('finish', () => {
           resolve(tracks);
         });
+        self.$bus.$on('stop-reading-mkv-subs', (error) => {
+          reject(error);
+        });
         const realPath = filePath.substring(7);
         fs.createReadStream(realPath).pipe(subs);
       });
-      ectractFn(filePath).then((tracks) => {
+      ectractFn(filePath).then((tracks, error) => {
+        if (error) {
+          return;
+        }
         // transfer string into VTT
         const vid = this.$parent.$refs.videoCanvas;
         const embededSubNames = [];
@@ -294,6 +311,7 @@ export default {
             textTrackID: this.textTrackID,
             origin: 'local',
           };
+          this.textTrackID += 1;
           const sub = vid.addTextTrack('subtitles');
           sub.mode = 'disabled';
           parser.oncue = (cue) => {
@@ -302,11 +320,11 @@ export default {
           const webVttFormatStr = 'WEBVTT\r\n\r\n';
           const preResult = tracks[i].subContent;
           const result = webVttFormatStr.concat(preResult);
-          console.log(result);
           parser.parse(result);
         }
         parser.onflush = cb;
         this.$store.commit('AddSubtitle', embededSubNames);
+        this.readingMkv = false;
         parser.flush();
       });
     },
@@ -547,6 +565,7 @@ export default {
           this.firstSubIndex = null;
         } else {
           console.log('first subtitle not set');
+          // vid.textTracks[this.firstSubIndex].oncuechange = null;
         }
       }
     },
@@ -556,7 +575,7 @@ export default {
     },
   },
   computed: {
-    firstSubState() {
+    firstSubState() { // lazy computed and lazy watched
       return this.$store.getters.firstSubIndex !== -1;
     },
   },
