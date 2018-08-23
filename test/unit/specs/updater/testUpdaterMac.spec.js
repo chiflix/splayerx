@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import messages from '@/locales';
 import UpdaterNotification from '@/components/UpdaterView/UpdaterNotification';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { mount, createLocalVue } from '@vue/test-utils';
 import VueI18n from 'vue-i18n';
 import ipcs from './ipcMock.js';
 import { RendererHelperForMac } from '../../../../src/main/update/RendererHelper.js';
@@ -27,7 +27,7 @@ storage.clearUpdateInstalled();
 describe('UpdaterNotification.vue', () => {
   beforeEach(() => {
     const ipcMr = ipcs();
-    wrapper = shallowMount(UpdaterNotification, options);
+    wrapper = mount(UpdaterNotification, options);
     wrapper.vm.helper = new RendererHelperForMac(wrapper.vm);
     wrapper.vm.helper.ipc = ipcMr.ipcRenderer;
     mainHelper = MainHelper('darwin', ipcMr.ipcMain);

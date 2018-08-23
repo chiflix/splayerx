@@ -23,7 +23,7 @@ describe('VideoCanvas.vue', () => {
       store,
       localVue,
       propsData: {
-        src: 'file://./../../../../test/assets/test.avi',
+        src: 'file:///./../../../../test/assets/test.avi',
       },
     });
   });
