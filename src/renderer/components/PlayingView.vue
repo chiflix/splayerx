@@ -13,13 +13,15 @@
       @mouseleave="mouseleaveHandler"
       @mousemove.self="throttledWakeUpCall"
       @mouseenter="mouseEnter">
+      <PlayButton/>
       <titlebar currentView="Playingview"></titlebar>
       <TimeProgressBar :src="uri" />
       <TheTimeCodes/>
-      <VolumeControl/>
-      <SubtitleControl/>
-      <PlayButton/>
-      <!-- <AdvanceControl/> -->
+      <div class="control-buttons">
+        <VolumeControl class="button volume" />
+        <SubtitleControl class="button subtitle" />
+        <AdvanceControl class="button advance"/>
+      </div>
     </div>
   </div>
 </template>
@@ -245,7 +247,6 @@ export default {
 
 <style lang="scss">
 .player {
-  position: relative;
   width: 100%;
   height: 100%;
   background-color: black;
@@ -269,17 +270,73 @@ export default {
  * 视频控制组件
  */
 .video-controller {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   border-radius: 4px;
-  overflow: hidden;
   opacity: 1;
   transition: opacity 400ms;
 }
-
-
-
+.control-buttons {
+  display: flex;
+  justify-content: space-between;
+  position: fixed;
+  .subtitle {
+    order: 1;
+  }
+  .volume {
+    order: 2;
+  }
+  .advance {
+    order: 3;
+    pointer-events: none;
+  }
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
+@media screen and (max-width: 512px) {
+  .control-buttons {
+    display: none;
+  }
+}
+@media screen and (min-width: 513px) and (max-width: 854px) {
+  .control-buttons {
+    width: 119px;
+    height: 18px;
+    right: 27px;
+    bottom: 20px;
+    .button {
+      width: 23px;
+      height: 18px;
+    }
+  }
+}
+@media screen and (min-width: 855px) and (max-width: 1920px) {
+  .control-buttons {
+    width: 159px;
+    height: 24px;
+    right: 32px;
+    bottom: 24px;
+    .button {
+      width: 30.67px;
+      height: 24px;
+    }
+  }
+}
+@media screen and (min-width: 1921px) {
+  .control-buttons {
+    width: 238px;
+    height: 36px;
+    right: 48px;
+    bottom: 35px;
+    .button {
+      width: 46px;
+      height: 36px;
+    }
+  }
+}
 </style>
