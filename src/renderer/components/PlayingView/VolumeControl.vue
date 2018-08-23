@@ -130,12 +130,14 @@ export default {
       let srcOfVolumeButtonImage;
       if (this.volume === 0) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-mute.svg');
-      } else if (this.volume > 0 && this.volume <= 33) {
+      } else if (this.volume > 0 && this.volume <= 25) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-1.svg');
-      } else if (this.volume > 33 && this.volume <= 66) {
+      } else if (this.volume > 25 && this.volume <= 50) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-2.svg');
-      } else if (this.volume > 66 && this.volume <= 100) {
+      } else if (this.volume > 50 && this.volume <= 75) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-3.svg');
+      } else if (this.volume > 75 && this.volume <= 100) {
+        srcOfVolumeButtonImage = require('../../assets/icon-volume-4.svg');
       }
       return srcOfVolumeButtonImage;
     },
