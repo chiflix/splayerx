@@ -409,7 +409,7 @@ export default {
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
 .video-controller .progress {
   position: absolute;
