@@ -6,14 +6,15 @@
       :src="videoSrc"
       :defaultEvents="['loadedmetadata', 'seeked']"
       :customOptions="{ pauseOnStart: true }"
-      :videoSize="{ width: thumbnailWidth, height: thumbnailHeight}"
       @loadedmetadata="updateGenerationParameters"
-      @seeked="thumbnailGeneration" />
+      @seeked="thumbnailGeneration"
+      style="opacity: 0.99" />
     <base-image-display
-      v-show="!useFallback"
+      v-if="!useFallback"
       :imgSrc="tempImage"
       :width="thumbnailWidth"
-      :height="thumbnailHeight" />
+      :height="thumbnailHeight"
+      style="opacity: 0.99" />
   </div>
 </template>
 
@@ -88,6 +89,11 @@ export default {
     autoGenerationIndex(newValue) {
       this.videoSeek(newValue);
     },
+    thumbnailHeight(newValue) {
+      if (this.videoElement) {
+        this.videoElement.style.height = `${newValue}px`;
+      }
+    },
   },
   methods: {
     // Data validators
@@ -129,12 +135,13 @@ export default {
         createImageBitmap(this.canvasContainer).then((imageBitmap) => {
           if (!this.isAutoGeneration) {
             this.tempImage = imageBitmap;
+          } else {
+            this.thumbnailSet.add(index);
+            this.tempBlobArray.push({
+              index,
+              imageBitmap,
+            });
           }
-          this.thumbnailSet.add(index);
-          this.tempBlobArray.push({
-            index,
-            imageBitmap,
-          });
           if (
             (this.isAutoGeneration && index >= this.maxThumbnailCount) ||
             this.tempBlobArray.length === 30) {
@@ -177,8 +184,8 @@ export default {
       }
     },
     resumeAutoGeneration() {
-      this.isAutoGeneration = true;
       this.useFallback = false;
+      this.isAutoGeneration = true;
       this.videoSeek(this.autoGenerationIndex);
     },
     thumbnailArrayHandler(array) {
@@ -234,9 +241,9 @@ export default {
     // Use document to pass unit test
     this.videoElement = this.$refs.video.videoElement ?
       this.$refs.video.videoElement() : document.querySelector('.base-video-player');
+    if (this.videoElement) {
+      this.videoElement.style.height = `${this.thumbnailHeight}px`;
+    }
   },
 };
 </script>
-<style lang="scss" scoped>
-</style>
-

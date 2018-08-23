@@ -45,6 +45,7 @@ export default {
     };
   },
   methods: {
+
     async $_serverSubsExist() {
       const res = await this.Sagi.mediaTranslate(this.mediaHash);
       if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
@@ -60,6 +61,10 @@ export default {
     },
     async subtitleInitialize() {
       const vid = this.$parent.$refs.videoCanvas;
+    },
+
+    subtitleInitialize() {
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
       this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
       this.Sagi = this.sagi();
 
@@ -124,7 +129,8 @@ export default {
             type: 'Server',
             size: serverSubsStatus.size,
           });
-          this.loadServerTextTracks(() => {
+          this.loadServerTextTracks((err) => {
+            if (err) throw err;
             this.$_toggleSutitleShow();
             this.$bus.$emit('subtitles-finished-loading', 'Server');
           });
@@ -180,10 +186,12 @@ export default {
     loadServerTextTracks(cb) {
       this.Sagi.mediaTranslate(this.mediaHash)
         .then((res) => {
+          console.log(res.array);
           // handle 2 situations:
           if (res.array[0][1] && res.array[0][1] !== 'OK') {
             console.log('Warning: No server transcripts.');
             console.log('Please load stream translate.');
+            cb('No server transcripts');
           } else {
             const textTrackList = res.array[1];
 
@@ -206,6 +214,7 @@ export default {
                 console.log('-----');
                 console.log('Error: load all transcripts error');
                 console.log(err);
+                cb(err);
               });
           }
         })
@@ -213,6 +222,7 @@ export default {
           console.log('------');
           console.log('Error: load textTrackList error');
           console.log(err);
+          cb(err);
         });
     },
 
@@ -335,12 +345,12 @@ export default {
      * @param {function} cb Callback function to process result
      */
     addVttToVideoElement(files, cb) {
-      const vid = this.$parent.$refs.videoCanvas;
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
       /* eslint-disable arrow-parens */
       const tasks = files.map((subPath) => (cb) => this.$_createSubtitleStream(subPath, cb));
       parallel(tasks, (err, results) => {
         if (err) {
-          console.error(err);
+          throw err;
         }
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
         for (let i = 0; i < results.length; i += 1) {
@@ -375,7 +385,7 @@ export default {
      * and add these cues into video subtitles.
      */
     addCuesArray(cueArray) {
-      const vid = this.$parent.$refs.videoCanvas;
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
       const subtitle = vid.addTextTrack('subtitles');
       subtitle.mode = 'disabled';
       // Add cues to TextTrack
@@ -391,7 +401,7 @@ export default {
      * @param {string} type First or second subtitle
      */
     subtitleShow(index, type = 'first') {
-      const vid = this.$parent.$refs.videoCanvas;
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
       const targetIndex = this.$store.state.PlaybackState.SubtitleNameArr[index].textTrackID;
       if (type === 'first') {
         if (vid.textTracks.length > targetIndex) { // Video has available subtitles
@@ -490,7 +500,7 @@ export default {
 
       this.$_concatStream(vttStream, (err, buf) => {
         if (err) {
-          console.error(err);
+          throw err;
         }
         cb(null, buf);
       });
@@ -558,7 +568,7 @@ export default {
     $_clearSubtitle(type = 'first') {
       if (type === 'first') {
         if (this.firstSubState) {
-          const vid = this.$parent.$refs.videoCanvas;
+          const vid = this.$parent.$refs.videoCanvas.videoElement();
           vid.textTracks[this.firstSubIndex].mode = 'disabled';
           vid.textTracks[this.firstSubIndex].oncuechange = null;
           this.$store.commit('SubtitleOff');
@@ -581,7 +591,7 @@ export default {
   },
   watch: {
     firstSubState(newVal) {
-      const vid = this.$parent.$refs.videoCanvas;
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
       if (newVal && vid.textTracks[this.firstSubIndex].mode === 'disabled') {
         vid.textTracks[this.firstSubIndex].mode = 'hidden';
       } else if (!newVal && vid.textTracks[this.firstSubIndex].mode !== 'disabled') {
@@ -636,7 +646,8 @@ export default {
     });
 
     this.$bus.$on('load-server-transcripts', () => {
-      this.loadServerTextTracks(() => {
+      this.loadServerTextTracks((err) => {
+        if (err) throw err;
         // handles when users want to load server subs after initializing stage;
         this.$bus.$emit('finished-loading-server-subs');
         this.$_clearSubtitle();

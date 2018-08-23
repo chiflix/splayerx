@@ -1,7 +1,6 @@
 <template>
   <div class="base-video-player">
-    <video class="video-element" ref="video"
-      :style="{height: videoSize.height + 'px'}"></video>
+    <video class="video-element" ref="video"></video>
   </div>
 </template>
 
@@ -61,12 +60,9 @@ export default {
         commitToVuex: false,
       }),
     },
-    videoSize: {
+    styleObject: {
       type: Object,
-      default: () => ({
-        width: 170,
-        height: 95,
-      }),
+      default: () => ({}),
     },
   },
   data() {
@@ -101,6 +97,7 @@ export default {
       );
       this.defaultOptionsInitialization(this.defaultOptions, this.$refs.video);
       this.customOptionsInitialization(this.customOptions, this.$refs.video);
+      this.initializeStyleObject(this.styleObject);
     },
     basicInfoInitialization(videoElement) {
       videoElement.setAttribute('playbackRate', this.playbackRate);
@@ -137,6 +134,14 @@ export default {
     customOptionsInitialization(optionsObject, videoElement) {
       if (optionsObject.pauseOnStart) {
         videoElement.addEventListener('loadedmetadata', this.pause);
+      }
+    },
+    initializeStyleObject(styleObject) {
+      const style = Object.keys(styleObject);
+      if (style.length > 0) {
+        style.forEach((styleName) => {
+          this.$refs.video.style[styleName] = styleObject[styleName];
+        });
       }
     },
     // Video default methods

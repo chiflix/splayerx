@@ -1,30 +1,32 @@
 <template>
-  <div class="video"
-       @mouseup.self.stop="handleMouseUp">
-    <video ref="videoCanvas"
-      preload="metadata"
+
+  <div class="video">
+    <base-video-player
+      ref="videoCanvas"
+      :defaultEvents="['playing', 'canplay', 'timeupdate', 'loadedmetadata', 'durationchange']"
+      :styleObject="{objectFit: 'contain', width: '100%', height: '100%'}"
+
       @playing="onPlaying"
-      @pause="onPause"
       @canplay="onCanPlay"
       @timeupdate="onTimeupdate"
       @loadedmetadata="onMetaLoaded"
       @durationchange="onDurationChange"
-      :src="src">
-    </video>
+      :src="src" />
     <BaseSubtitle/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
 
 <script>
-// https://www.w3schools.com/tags/ref_av_dom.asp
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
+import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
 import BaseSubtitle from './BaseSubtitle.vue';
-import WindowSizeHelper from '../../helpers/WindowSizeHelper.js';
+import BaseVideoPlayer from './BaseVideoPlayer';
 export default {
   components: {
     BaseSubtitle,
+    'base-video-player': BaseVideoPlayer,
   },
   data() {
     return {
@@ -37,6 +39,7 @@ export default {
       videoHeight: 0,
       timeUpdateIntervalID: null,
       windowSizeHelper: null,
+      videoElement: null,
     };
   },
   props: {
@@ -54,37 +57,32 @@ export default {
   },
   methods: {
     accurateTimeUpdate() {
-      const { currentTime, duration } = this.$refs.videoCanvas;
-      if (currentTime >= duration || this.$refs.videoCanvas.paused) {
+      const { currentTime, duration } = this.videoElement;
+      if (currentTime >= duration || this.videoElement.paused) {
         clearInterval(this.timeUpdateIntervalID);
       } else {
         this.$store.commit('AccurateTime', currentTime);
       }
     },
-    onPause() {
-      console.log('onpause');
-    },
     onPlaying() {
-      console.log('onplaying');
       // set interval to get update time
-      const { duration } = this.$refs.videoCanvas;
+      const { duration } = this.videoElement;
       if (duration <= 240) {
         this.timeUpdateIntervalID = setInterval(this.accurateTimeUpdate, 10);
       }
     },
     onCanPlay() {
       // the video is ready to start playing
-      this.$store.commit('Volume', this.$refs.videoCanvas.volume);
+      this.$store.commit('Volume', this.videoElement.volume);
     },
     onMetaLoaded() {
-      console.log('loadedmetadata');
       this.$bus.$emit('play');
       this.$bus.$emit('seek', this.currentTime);
-      this.videoWidth = this.$refs.videoCanvas.videoWidth;
-      this.videoHeight = this.$refs.videoCanvas.videoHeight;
+      this.videoWidth = this.videoElement.videoWidth;
+      this.videoHeight = this.videoElement.videoHeight;
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
       if (this.videoExisted) {
-        this.$_calculateWindowSizeInConditionOfVideoExisted();
+        this.$_calculateWindowSizeWhenVideoExisted();
         this.$_controlWindowSizeAtNewVideo();
       } else {
         this.$_calculateWindowSizeAtTheFirstTime();
@@ -96,15 +94,14 @@ export default {
       // this.loadTextTracks();
     },
     onTimeupdate() {
-      this.$store.commit('AccurateTime', this.$refs.videoCanvas.currentTime);
-      const t = Math.floor(this.$refs.videoCanvas.currentTime);
+      this.$store.commit('AccurateTime', this.videoElement.currentTime);
+      const t = Math.floor(this.videoElement.currentTime);
       if (t !== this.$store.state.PlaybackState.CurrentTime) {
         this.$store.commit('CurrentTime', t);
       }
     },
     onDurationChange() {
-      console.log('durationchange');
-      const t = Math.floor(this.$refs.videoCanvas.duration);
+      const t = Math.floor(this.$refs.videoCanvas.videoElement().duration);
       if (t !== this.$store.state.PlaybackState.duration) {
         this.$store.commit('Duration', t);
       }
@@ -157,13 +154,13 @@ export default {
           this.newHeightOfWindow = this.calculateHeightByWidth;
         } else if (videoRatio === minWindowRatio) {
           [this.newWidthOfWindow, this.newHeightOfWindow]
-            = [this.videoWidth, this.videoHeight];
+            = [minWidth, minHeight];
         }
       } else {
         [this.newWidthOfWindow, this.newHeightOfWindow] = [this.videoWidth, this.videoHeight];
       }
     },
-    $_calculateWindowSizeInConditionOfVideoExisted() {
+    $_calculateWindowSizeWhenVideoExisted() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       const [windowWidth, windowHeight] = currentWindow.getSize();
       const [minWidth, minHeight] = currentWindow.getMinimumSize();
@@ -196,15 +193,14 @@ export default {
             = [this.videoWidth, this.videoHeight];
         }
       }
-      console.log(this.newWidthOfWindow);
     },
     $_saveScreenshot() {
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
-      const { videoHeight, videoWidth } = this.$refs.videoCanvas;
+      const { videoHeight, videoWidth } = this.videoElement;
       [canvas.width, canvas.height] = [videoWidth, videoHeight];
       canvasCTX.drawImage(
-        this.$refs.videoCanvas, 0, 0, videoWidth, videoHeight,
+        this.videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, videoWidth, videoHeight,
       );
       const imagePath = canvas.toDataURL('image/png');
@@ -255,23 +251,22 @@ export default {
         });
     },
   },
-  created() {
+  mounted() {
+    this.videoElement = this.$refs.videoCanvas.videoElement();
+
     this.$bus.$on('playback-rate', (newRate) => {
-      console.log(`set video playbackRate ${newRate}`);
-      this.$refs.videoCanvas.playbackRate = newRate;
+      this.videoElement.playbackRate = newRate;
       this.$store.commit('PlaybackRate', newRate);
     });
     this.$bus.$on('volume', (newVolume) => {
-      console.log(`set video volume ${newVolume}`);
-      this.$refs.videoCanvas.volume = newVolume;
+      this.videoElement.volume = newVolume;
       this.$store.commit('Volume', newVolume);
     });
     this.$bus.$on('reset-windowsize', () => {
       this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
     });
     this.$bus.$on('toggle-playback', () => {
-      console.log('toggle-playback event has been triggered');
-      if (this.$refs.videoCanvas.paused) {
+      if (this.videoElement.paused) {
         this.$bus.$emit('play');
         this.$bus.$emit('twinkle-play-icon');
       } else {
@@ -280,42 +275,30 @@ export default {
       }
     });
     this.$bus.$on('play', () => {
-      console.log('play event has been triggered');
-      this.$refs.videoCanvas.play();
+      this.videoElement.play();
     });
     this.$bus.$on('pause', () => {
-      console.log('pause event has been triggered');
-      this.$refs.videoCanvas.pause();
+      this.videoElement.pause();
     });
     this.$bus.$on('seek', (e) => {
-      console.log('seek event has been triggered', e);
-      this.$refs.videoCanvas.currentTime = e;
+      this.videoElement.currentTime = e;
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
-  },
-  mounted() {
     window.onbeforeunload = () => {
       this.$_saveScreenshot();
     };
   },
 };
 </script>
-
-<style lang="scss">
-.video {
-  position: absolute;
-  top: 0;
-  left: 0;
+<style lang="scss" scoped>
+.base-video-player {
   width: 100%;
   height: 100%;
-  border-radius: 4px;
-  overflow: hidden;
-  video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+  position: fixed;
+}
+.canvas {
+  visibility: hidden;
 }
 </style>
