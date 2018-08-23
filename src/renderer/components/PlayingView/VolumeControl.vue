@@ -3,8 +3,7 @@
   <div
     @mouseover.stop="appearVolumeSlider"
     @mouseout.stop="hideVolumeSlider"
-    @mousemove="throttledCall"
-    v-show="showVolumeController">
+    @mousemove="throttledCall">
     <transition name="fade">
       <div class="container"  ref="sliderContainer"
         @mousedown.stop.left="onVolumeSliderClick"
@@ -16,7 +15,7 @@
     </transition>
       <div
         @mousedown.stop.left="onVolumeButtonClick">
-        <img type="image/svg+xml" wmode="transparent"
+        <img type="image/svg+xml" wmode="transparent" v-show="showVolumeController"
           :src="srcOfVolumeButtonImage">
       </div>
   </div>

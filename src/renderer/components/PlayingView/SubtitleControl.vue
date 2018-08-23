@@ -1,7 +1,7 @@
 <template>
   <div class="sub-control">
     <transition name="fade" appear>
-      <div class="sub-btn-control" v-if="isSubCtrlBtnAppear">
+      <div class="sub-btn-control">
         <div class="sub-menu-wrapper" v-if="appearSubtitleMenu">
           <ul class="sub-menu">
 
@@ -47,7 +47,7 @@
           </ul>
         </div>
         <div
-          @mousedown.capture.stop.left="toggleSubtitleMenu">
+          @mousedown.capture.stop.left="toggleSubtitleMenu" v-if="isSubCtrlBtnAppear">
           <img type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
         </div>
       </div>
