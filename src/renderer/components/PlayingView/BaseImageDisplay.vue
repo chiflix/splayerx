@@ -163,6 +163,36 @@ export default {
         this.imageReady = true;
         break;
       }
+      case null: {
+        break;
+      }
+      case 'ImageBitmap': {
+        if (this.$refs.image.getContext) {
+          this.$refs.image.getContext('2d').drawImage(this.imgSrc, 0, 0, this.width, this.height);
+          this.imageReady = true;
+        }
+        break;
+      }
+      case 'ImageData': {
+        if (this.$refs.image.getContext) {
+          createImageBitmap(this.imgSrc).then((image) => {
+            this.$refs.image.getContext('2d').drawImage(image, 0, 0, this.width, this.height);
+            this.imageReady = true;
+          });
+        }
+        break;
+      }
+    }
+  },
+  mounted() {
+    switch (this.imageType) {
+      default: {
+        this.imageReady = true;
+        break;
+      }
+      case null: {
+        break;
+      }
       case 'ImageBitmap': {
         if (this.$refs.image.getContext) {
           this.$refs.image.getContext('2d').drawImage(this.imgSrc, 0, 0, this.width, this.height);
