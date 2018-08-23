@@ -50,7 +50,7 @@
         </div>
         <div
           @mousedown.capture.stop.left="toggleSubtitleMenu">
-          <img class='btn' type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
+          <img type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
         </div>
       </div>
     </transition>
@@ -152,9 +152,6 @@ li {
 
 
 .video-controller .sub-control {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
   .btn:hover, .sub-item:hover{
     cursor: pointer;
   }
@@ -200,9 +197,6 @@ li {
     .sub-menu-wrapper {
       display: none;
     }
-    .btn {
-      display: none;
-    }
   }
   @media screen and (min-width: 512px) and (max-width: 853px) {
     .sub-menu-wrapper {
@@ -238,13 +232,6 @@ li {
       height: 32px;
       font-size: 14px;
     }
-    .btn{
-      position: absolute;
-      bottom: 20px;
-      right: 123px;
-      height: 18px;
-      width: 23px;
-    }
   }
   @media screen and (min-width: 854px) and (max-width: 1919px) {
     .sub-menu-wrapper {
@@ -279,13 +266,6 @@ li {
       height: 36px;
       font-size: 15px;
     }
-    .btn{
-      position: absolute;
-      bottom: 24px;
-      right: 160.3px;
-      height: 30.7px;
-      width: 24px;
-    }
   }
   @media screen and (min-width: 1920px) {
     .sub-menu-wrapper {
@@ -318,13 +298,6 @@ li {
       padding: 13px 27px;
       height: 56px;
       font-size: 20px;
-    }
-    .btn{
-      position: absolute;
-      bottom: 35px;
-      right: 240px;
-      width: 46;
-      height: 36px;
     }
   }
 }
