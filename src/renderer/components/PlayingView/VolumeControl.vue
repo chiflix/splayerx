@@ -1,26 +1,23 @@
 <template>
   <div>
   <transition name="fade" appear>
-    <div class="volume" id="volume"
-      @mouseout.stop="hideVolumeSlider"
-      @mousemove="throttledCall"
-      v-if="showVolumeController">
-      <div class="volume-wrapper"
-           @mouseover.stop="appearVolumeSlider">
-        <transition name="fade">
-          <div class="container"  ref="sliderContainer"
-            @mousedown.stop.left="onVolumeSliderClick"
-            v-if="showVolumeSlider">
-            <div class="slider" ref="slider"
-              :style="{ height: volume + '%' }">
-            </div>
-          </div>
-        </transition>
-          <div class="button"
-            @mousedown.stop.left="onVolumeButtonClick">
-            <img type="image/svg+xml" wmode="transparent"
-              :src="srcOfVolumeButtonImage">
-          </div>
+  <div
+    @mouseover.stop="appearVolumeSlider"
+    @mouseout.stop="hideVolumeSlider"
+    @mousemove="throttledCall">
+    <transition name="fade">
+      <div class="container"  ref="sliderContainer"
+        @mousedown.stop.left="onVolumeSliderClick"
+        v-show="showVolumeSlider">
+        <div class="slider" ref="slider"
+          :style="{ height: volume + '%' }">
+        </div>
+      </div>
+    </transition>
+      <div
+        @mousedown.stop.left="onVolumeButtonClick">
+        <img type="image/svg+xml" wmode="transparent" v-show="showVolumeController"
+          :src="srcOfVolumeButtonImage">
       </div>
     </div>
   </transition>
@@ -31,7 +28,6 @@
 
 <script>
 import _ from 'lodash';
-
 export default {
   data() {
     return {
@@ -138,12 +134,14 @@ export default {
       let srcOfVolumeButtonImage;
       if (this.volume === 0) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-mute.svg');
-      } else if (this.volume > 0 && this.volume <= 33) {
+      } else if (this.volume > 0 && this.volume <= 25) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-1.svg');
-      } else if (this.volume > 33 && this.volume <= 66) {
+      } else if (this.volume > 25 && this.volume <= 50) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-2.svg');
-      } else if (this.volume > 66 && this.volume <= 100) {
+      } else if (this.volume > 50 && this.volume <= 75) {
         srcOfVolumeButtonImage = require('../../assets/icon-volume-3.svg');
+      } else if (this.volume > 75 && this.volume <= 100) {
+        srcOfVolumeButtonImage = require('../../assets/icon-volume-4.svg');
       }
       return srcOfVolumeButtonImage;
     },
@@ -187,9 +185,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
-.video-controller .volume {
+.container {
   position: absolute;
+<<<<<<< HEAD
   bottom: 27px;
   right: 37+15+35px;
   width: 35px;
@@ -208,32 +206,24 @@ export default {
   }
 
   .volume-wrapper:hover {
+=======
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 1px;
+  left: 50%;
+  transform: translate(-50%);
+  &:hover {
+>>>>>>> upstream/develop
     cursor: pointer;
   }
 
   .slider {
+    width: 100%;
     position: absolute;
     bottom: 0;
-    width: 100%;
-    background: rgba(255,255,255,0.70);
+    background: rgba(255,255,255,0.7);
     border-radius: 1px;
   }
-
-  .button {
-    position: absolute;
-    bottom: 0;
-    right:0;
-    width: 100%;
-  }
-
-  .button:hover {
-    cursor: pointer;
-  }
-
-  .button img {
-    width: 100%;
-    height: 100%;
-  }
+<<<<<<< HEAD
 
   @media screen and (max-width: 854px) {
     bottom: 22px;
@@ -305,6 +295,24 @@ export default {
   }
 }
 
+=======
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    bottom: 18+10px;
+    width: 10px;
+    height: 86px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    bottom: 24+10px;
+    width: 15px;
+    height: 129px;
+  }
+  @media screen and (min-width: 1921px) {
+    bottom: 36+10px;
+    width: 20px;
+    height: 172px;
+  }
+}
+>>>>>>> upstream/develop
 .fade-enter-active {
  transition: opacity 100ms;
 }
@@ -320,5 +328,4 @@ export default {
 .fade-enter, .fade-leave-to {
  opacity: 0;
 }
-
 </style>
