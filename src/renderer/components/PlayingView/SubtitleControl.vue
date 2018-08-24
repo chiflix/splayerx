@@ -113,11 +113,9 @@ export default {
       if (!this.appearSubtitleMenu) {
         this.appearSubtitleMenu = true;
         this.$bus.$emit('subtitle-menu-toggled-on');
-        this.$bus.$emit('subtitleMenuOn');
       } else {
         this.appearSubtitleMenu = false;
         this.$bus.$emit('subtitle-menu-toggled-off');
-        this.$bus.$emit('subtitleMenuOff');
       }
     },
     toggleItemsMouseOver(e) {
@@ -286,6 +284,7 @@ li {
     background: linear-gradient(to right, white 75%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%);
     -webkit-background-clip: text;
     color: transparent;
+    text-transform: capitalize;
   }
   .placeholder-item-text-wrapper {
     overflow: hidden; //超出的文本隐藏

@@ -45,7 +45,6 @@ export default {
     };
   },
   methods: {
-
     async $_serverSubsExist() {
       const res = await this.Sagi.mediaTranslate(this.mediaHash);
       if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
@@ -60,10 +59,12 @@ export default {
       };
     },
     async subtitleInitialize() {
-      const vid = this.$parent.$refs.videoCanvas;
-    },
+      if (this.readingMkv) {
+        this.$emit('stop-reading-mkv-subs', 'Stopped.');
+        this.readingMkv = false;
+        this.$bus.$emit('subtitles-finished-loading', 'Embedded');
+      }
 
-    subtitleInitialize() {
       const vid = this.$parent.$refs.videoCanvas.videoElement();
       this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
       this.Sagi = this.sagi();
@@ -90,11 +91,6 @@ export default {
         };
       }
 
-      if (this.readingMkv) {
-        this.$bus.$emit('stop-reading-mkv-subs');
-        this.readingMkv = false;
-        this.$bus.$emit('subtitles-finished-loading', 'Embedded');
-      }
 
       const localSubsOn = localSubsStatus.found;
       const serverSubsOn = serverSubsStatus.found;
@@ -102,7 +98,7 @@ export default {
 
       if (localSubsOn || embeddedSubsOn || serverSubsOn) {
         if (localSubsOn || embeddedSubsOn) {
-          this.$_clearSubtitle();
+          const onlyEmbedded = (!localSubsOn) && embeddedSubsOn;
           if (localSubsOn) {
             this.$bus.$emit('loading-subtitles', {
               type: 'Local',
@@ -118,13 +114,12 @@ export default {
               type: 'Embedded',
               size: embeddedSubsStatus.size,
             });
-            this.mkvProcess(decodeURI(vid.src), () => {
+            this.mkvProcess(decodeURI(vid.src), onlyEmbedded, () => {
               this.$_toggleSutitleShow();
               this.$bus.$emit('subtitles-finished-loading', 'Embedded');
             });
           }
         } else {
-          this.$_clearSubtitle();
           this.$bus.$emit('loading-subtitles', {
             type: 'Server',
             size: serverSubsStatus.size,
@@ -136,7 +131,6 @@ export default {
           });
         }
       } else {
-        this.$_clearSubtitle();
         // then emit an event to tell subtitleControl to toggle the small menu
         this.$bus.$emit('toggle-no-subtitle-menu');
       }
@@ -162,17 +156,18 @@ export default {
        */
       // If there is already subtitle files(same dir), load it
       this.addVttToVideoElement(files, () => {
+        this.$_clearSubtitle();
         const subNameArr = files.map(file => this.$_subNameFromLocalProcess(file));
         this.$store.commit('SubtitleNameArr', subNameArr);
         cb();
       });
     },
 
-    mkvProcess(vidPath, cb) {
+    mkvProcess(vidPath, onlyEmbedded, cb) {
       // this.$store.commit('SubtitleNameArr', []);
       // const vid = this.$parent.$refs.videoCanvas;
       // vid.textTracks[this.firstSubIndex].mode = 'disabled';
-      this.addMkvSubstoVideo(vidPath, () => {
+      this.addMkvSubstoVideo(vidPath, onlyEmbedded, () => {
         console.log('finished reading mkv subtitles');
         cb();
       });
@@ -204,6 +199,7 @@ export default {
 
                 // Only when all subtitles are successfully loaded,
                 // users can see the server subtitles in Subtitle Menu.
+                this.$_clearSubtitle();
                 const subtitleNameArr = textTrackList
                   .map(textTrack => this.$_subnameFromServerProcess(textTrack));
                 this.$store.commit('SubtitleNameArr', subtitleNameArr);
@@ -262,13 +258,19 @@ export default {
     But the structure of this method need to be changed and improved.
     */
 
-    addMkvSubstoVideo(filePath, cb) {
+    addMkvSubstoVideo(filePath, onlyEmbedded, cb) {
       const self = this;
       this.readingMkv = true;
+      if (onlyEmbedded) {
+        this.$store.commit('SubtitleNameArr', []);
+      }
       const ectractFn = filePath => new Promise((resolve, reject) => {
         let tracks;
         const lngDetector = new LanguageDetect();
         const subs = new MatroskaSubtitles();
+        self.$on('stop-reading-mkv-subs', (error) => {
+          reject(error);
+        });
         subs.once('tracks', (track) => {
           tracks = track;
           tracks.forEach((trac) => {
@@ -299,44 +301,46 @@ export default {
         subs.on('finish', () => {
           resolve(tracks);
         });
-        self.$bus.$on('stop-reading-mkv-subs', (error) => {
-          reject(error);
-        });
         const realPath = filePath.substring(7);
         fs.createReadStream(realPath).pipe(subs);
       });
-      ectractFn(filePath).then((tracks, error) => {
-        if (error) {
-          return;
-        }
+      ectractFn(filePath)
+        .then((tracks) => {
         // transfer string into VTT
-        const vid = this.$parent.$refs.videoCanvas;
-        const embededSubNames = [];
-
-        const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
-        for (let i = 0; i < tracks.length; i += 1) {
-          embededSubNames[i] = {
-            title: `${this.findMode(tracks[i].subLangs)} - Embedded`,
-            status: null,
-            textTrackID: this.textTrackID,
-            origin: 'local',
-          };
-          this.textTrackID += 1;
-          const sub = vid.addTextTrack('subtitles');
-          sub.mode = 'disabled';
-          parser.oncue = (cue) => {
-            sub.addCue(cue);
-          };
-          const webVttFormatStr = 'WEBVTT\r\n\r\n';
-          const preResult = tracks[i].subContent;
-          const result = webVttFormatStr.concat(preResult);
-          parser.parse(result);
-        }
-        parser.onflush = cb;
-        this.$store.commit('AddSubtitle', embededSubNames);
-        this.readingMkv = false;
-        parser.flush();
-      });
+          const vid = this.$parent.$refs.videoCanvas.videoElement();
+          const embededSubNames = [];
+          const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+          for (let i = 0; i < tracks.length; i += 1) {
+            embededSubNames[i] = {
+              title: `${this.findMode(tracks[i].subLangs)}`,
+              status: null,
+              textTrackID: this.textTrackID,
+              origin: 'local',
+            };
+            this.textTrackID += 1;
+            const sub = vid.addTextTrack('subtitles');
+            sub.mode = 'disabled';
+            parser.oncue = (cue) => {
+              sub.addCue(cue);
+            };
+            const webVttFormatStr = 'WEBVTT\r\n\r\n';
+            const preResult = tracks[i].subContent;
+            const result = webVttFormatStr.concat(preResult);
+            parser.parse(result);
+          }
+          parser.onflush = cb;
+          this.$_clearSubtitle();
+          if (onlyEmbedded) {
+            this.$store.commit('SubtitleNameArr', embededSubNames);
+          } else {
+            this.$store.commit('AddSubtitle', embededSubNames);
+          }
+          this.readingMkv = false;
+          parser.flush();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
 
     /**

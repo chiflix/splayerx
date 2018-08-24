@@ -173,10 +173,10 @@ export default {
     });
     this.$bus.$on('volumecontroller-appear', this.appearVolumeController);
     this.$bus.$on('volumecontroller-hide', this.hideVolumeController);
-    this.$bus.$on('subtitleMenuOn', () => {
+    this.$bus.$on('subtitle-menu-toggled-on', () => {
       this.volumeMaskAppear = true;
     });
-    this.$bus.$on('subtitleMenuOff', () => {
+    this.$bus.$on('subtitle-menu-toggled-off', () => {
       this.volumeMaskAppear = false;
     });
   },
