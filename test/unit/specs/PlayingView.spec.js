@@ -142,7 +142,7 @@ describe('PlayingView.vue', () => {
     wrapper.vm.hideAllWidgets();
 
     // whether event bus works fine
-    expect(globalEventBusEmitSpy.callCount).equal(6);
+    expect(globalEventBusEmitSpy.callCount).equal(7);
     expect(globalEventBusEmitSpy.calledWith('volumecontroller-hide')).equal(true);
     expect(globalEventBusEmitSpy.calledWith('progressbar-hide')).equal(true);
     expect(globalEventBusEmitSpy.calledWith('timecode-hide')).equal(true);

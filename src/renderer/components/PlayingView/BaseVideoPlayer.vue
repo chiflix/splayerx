@@ -60,6 +60,10 @@ export default {
         commitToVuex: false,
       }),
     },
+    styleObject: {
+      type: Object,
+      default: () => ({}),
+    },
   },
   data() {
     return {
@@ -93,6 +97,7 @@ export default {
       );
       this.defaultOptionsInitialization(this.defaultOptions, this.$refs.video);
       this.customOptionsInitialization(this.customOptions, this.$refs.video);
+      this.initializeStyleObject(this.styleObject);
     },
     basicInfoInitialization(videoElement) {
       videoElement.setAttribute('playbackRate', this.playbackRate);
@@ -129,6 +134,14 @@ export default {
     customOptionsInitialization(optionsObject, videoElement) {
       if (optionsObject.pauseOnStart) {
         videoElement.addEventListener('loadedmetadata', this.pause);
+      }
+    },
+    initializeStyleObject(styleObject) {
+      const style = Object.keys(styleObject);
+      if (style.length > 0) {
+        style.forEach((styleName) => {
+          this.$refs.video.style[styleName] = styleObject[styleName];
+        });
       }
     },
     // Video default methods

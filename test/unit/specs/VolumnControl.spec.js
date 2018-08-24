@@ -98,32 +98,6 @@ describe('VolumnColtrol.vue', () => {
     expect(wrapper.vm.timeoutIdOfVolumeControllerDisappearDelay).equal(100);
   });
 
-  it('mouseover event - outer div works fine', () => {
-    const wrapper = shallowMount(VolumeControl, { store, localVue });
-    const volumeIdDiv = wrapper.find('.volume');
-    wrapper.setData({ showVolumeSlider: false });
-    volumeIdDiv.trigger('mouseover');
-    expect(wrapper.vm.showVolumeSlider).equal(true);
-  });
-
-  it('mouseout event - outer div works fine', () => {
-    const wrapper = shallowMount(VolumeControl, { store, localVue });
-    const volumeIdDiv = wrapper.find('.volume');
-    wrapper.setData({ onVolumeSliderMousedown: false });
-    volumeIdDiv.trigger('mouseover');
-    expect(wrapper.vm.showVolumeSlider).equal(true);
-    wrapper.setData({ onVolumeSliderMousedown: true });
-    wrapper.setData({ showVolumeSlider: true });
-    volumeIdDiv.trigger('mouseover');
-    expect(wrapper.vm.showVolumeSlider).equal(true);
-  });
-
-  it('volume class div shows up to correct data value', () => {
-    const wrapper = shallowMount(VolumeControl, { store, localVue });
-    wrapper.setData({ showVolumeController: false });
-    expect(wrapper.find('.volume').exists()).not.equal(true);
-  });
-
   it('onVolumeSliderClick method works fine', () => {
     const wrapper = shallowMount(VolumeControl, { store, localVue });
     const onVolumeSliderClickStub = sinon.stub();
@@ -131,22 +105,6 @@ describe('VolumnColtrol.vue', () => {
     wrapper.setData({ showVolumeSlider: true });
     wrapper.find('.container').trigger('click');
     expect(onVolumeSliderClickStub.called).equal(false);
-  });
-
-  it('shows correct img for Volume', () => {
-    const wrapper = shallowMount(VolumeControl, { store, localVue });
-
-    store.state.PlaybackState.Volume = 0;
-    expect(wrapper.vm.srcOfVolumeButtonImage).contains('PD94bWwgdmVyc2');
-
-    store.state.PlaybackState.Volume = 0.2;
-    expect(wrapper.vm.srcOfVolumeButtonImage).contains('DQ4NjAyNTkgTDEz');
-
-    store.state.PlaybackState.Volume = 0.5;
-    expect(wrapper.vm.srcOfVolumeButtonImage).contains('jIgLTQuNzQyNDk5MjRlLTE');
-
-    store.state.PlaybackState.Volume = 0.8;
-    expect(wrapper.vm.srcOfVolumeButtonImage).contains('DExLjUxNTExODMsM');
   });
 
   it('$_documentVoluemeDragClear method works fine', () => {

@@ -139,33 +139,51 @@ export default {
   }
 
   @media screen and (max-width: 854px) {
-    bottom: 23px;
-    left: 25px;
+    bottom: 17px;
+    left: 20px;
     height: 18px;
     font-size: 18px;
-    line-height: 18px;
     .secondContent {
-      font-size: 12px;
+      font-size: 13px;
+    }
+    .splitSign {
+      font-size: 13px;
     }
   }
-  @media screen and (min-width: 854px) and (max-width: 1920px) {
-    bottom: 28.75px;
-    left: 31.25px;
-    height: 22.5px;
-    font-size: 22.5px;
-    line-height: 24px;
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    bottom: 20px;
+    left: 20px;
+    height: 20px;
+    font-size: 18px;
     .secondContent {
-      font-size: 16px;
+      font-size: 14px;
+    }
+    .splitSign {
+      font-size: 14px;
     }
   }
-  @media screen and (min-width: 1920px) {
-    bottom: 46px;
-    left: 50px;
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    bottom: 24px;
+    left: 27px;
+    height: 24px;
+    font-size: 24px;
+    .secondContent {
+      font-size: 18px;
+    }
+    .splitSign {
+      font-size: 18px;
+    }
+  }
+  @media screen and (min-width: 1921px) {
+    bottom: 35px;
+    left: 37px;
     height: 36px;
     font-size: 36px;
-    line-height: 36px;
     .secondContent {
-      font-size: 24px;
+      font-size: 26px;
+    }
+    .splitSign {
+      font-size: 26px;
     }
   }
 }

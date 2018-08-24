@@ -239,8 +239,8 @@ export default {
   position: absolute;
   z-index: 6;
   box-sizing: content-box;
-  top: 6px;
-  left: 10px;
+  top: 12px;
+  left: 12px;
   height: 20px;
   .mac-icons {
     display: flex;

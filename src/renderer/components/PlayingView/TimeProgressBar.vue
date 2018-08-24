@@ -8,11 +8,15 @@
     v-show="showProgressBar">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.stop="videoRestart"
+      @mouseover="thumbnailCurrentTime = 0"
+      @mousemove="thumbnailCurrentTime = 0"
       :style="{cursor: cursorStyle}">
       <div class="fake-button"
         v-show="isOnProgress"
         @mousedown="handleFakeBtnClick"
         @mousemove.stop="handleFakeBtnMove"
+        @mouseover="thumbnailCurrentTime = 0"
+        @mousemove="thumbnailCurrentTime = 0"
         :style="{height: heightOfThumbnail + 11 + 'px'}"></div>
       <div class="line"
         v-show="!isShaking"></div>
@@ -50,6 +54,11 @@
         <div class="line"></div>
       </div>
     </div>
+    <div class="fake-button-left"
+      v-show="isOnProgress"
+      @mousedown.left.stop.capture="onProgressBarClick"
+      @mousemove.stop="handleFakeBtnMove"
+      :style="{height: heightOfThumbnail + 11 + 'px', cursor: cursorStyle}"></div>
   </div>
 </transition>
 </template>;
@@ -341,6 +350,9 @@ export default {
          setTimeout(() => { this.cursorPosition = 0; }, 300);
       }
     },
+    thumbnailCurrentTime(newValue) {
+      console.log('CurrentTime:', newValue);
+    },
   },
   created() {
     const widthOfWindow = this.winWidth;
@@ -397,7 +409,7 @@ export default {
 
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
 .video-controller .progress {
   position: absolute;
@@ -604,6 +616,15 @@ export default {
     transform: rotate(0deg);
   }
 
+}
+
+.fake-button-left {
+  position: absolute;
+  right: 0;
+  bottom: 10px;
+  width: 20px;
+  background: transparent;
+  z-index: 100;
 }
 
 </style>
