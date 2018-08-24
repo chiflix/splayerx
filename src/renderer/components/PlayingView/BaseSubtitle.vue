@@ -20,6 +20,7 @@ import path from 'path';
 import parallel from 'run-parallel';
 import MatroskaSubtitles from 'matroska-subtitles';
 import LanguageDetect from 'languagedetect';
+import z from 'zero-fill';
 
 export default {
   data() {
@@ -45,66 +46,44 @@ export default {
     };
   },
   methods: {
-    async $_serverSubsExist() {
-      const res = await this.Sagi.mediaTranslate(this.mediaHash);
-      if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
-        return {
-          found: true,
-          size: res.array[1].length,
-        };
-      }
-      return {
-        found: false,
-        size: 0,
-      };
-    },
     async subtitleInitialize() {
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
+
       if (this.readingMkv) {
         this.$emit('stop-reading-mkv-subs', 'Stopped.');
         this.readingMkv = false;
         this.$bus.$emit('subtitles-finished-loading', 'Embedded');
       }
 
-      const vid = this.$parent.$refs.videoCanvas.videoElement();
-      this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
-      this.Sagi = this.sagi();
+      const subStatus = await this.subtitleStatus();
 
-      const serverSubsStatus = await this.$_serverSubsExist();
-
-      const files = [];
-      this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
-        files.push(subPath);
-      });
-      const localSubsStatus = {
-        found: files.length > 0,
-        size: files.length,
-      };
-
-      const re = new RegExp('^(.mkv)$');
-      let embeddedSubsStatus;
-      if (re.test(path.extname(decodeURI(vid.src)))) {
-        embeddedSubsStatus = await this.ifEmbedded(decodeURI(vid.src));
-      } else {
-        embeddedSubsStatus = {
-          found: false,
-          size: 0,
-        };
-      }
-
+      const localSubsStatus = subStatus[0];
+      const embeddedSubsStatus = subStatus[1];
+      const serverSubsStatus = subStatus[2];
 
       const localSubsOn = localSubsStatus.found;
-      const serverSubsOn = serverSubsStatus.found;
-      const embeddedSubsOn = embeddedSubsStatus.found;
+      const serverSubsOn = embeddedSubsStatus.found;
+      const embeddedSubsOn = serverSubsStatus.found;
 
+      // logic of loading subtitles:
+      // if there are some subtitle files in the same direction, load them
+      // also if the video has embedded subtitles, load them
+      // if there are no local or embedded subtitles found, load server subtitles
       if (localSubsOn || embeddedSubsOn || serverSubsOn) {
         if (localSubsOn || embeddedSubsOn) {
+          // the 'onlyEmbedded' constant aims to identify if the following situation
+          // happens:
+          // the video only contains embedded subtitles
+          // or
+          // the video contains local subtitles and embedded subtitles
           const onlyEmbedded = (!localSubsOn) && embeddedSubsOn;
+
           if (localSubsOn) {
             this.$bus.$emit('loading-subtitles', {
               type: 'Local',
               size: localSubsStatus.size,
             });
-            this.loadLocalTextTracks(files, () => {
+            this.loadLocalTextTracks(localSubsStatus.fileList, () => {
               this.$_toggleSutitleShow();
               this.$bus.$emit('subtitles-finished-loading', 'Local');
             });
@@ -131,9 +110,41 @@ export default {
           });
         }
       } else {
+        // there are no subtitles found, no local, embedded or server subtitles
         // then emit an event to tell subtitleControl to toggle the small menu
         this.$bus.$emit('toggle-no-subtitle-menu');
       }
+    },
+    async subtitleStatus() {
+      let subStatus = [];
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
+      this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
+      this.Sagi = this.sagi();
+
+      const serverSubsStatus = await this.$_serverSubsExist();
+
+      const files = [];
+      this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
+        files.push(subPath);
+      });
+      const localSubsStatus = {
+        found: files.length > 0,
+        size: files.length,
+        fileList: files,
+      };
+
+      const re = new RegExp('^(.mkv)$');
+      let embeddedSubsStatus;
+      if (re.test(path.extname(decodeURI(vid.src)))) {
+        embeddedSubsStatus = await this.hasEmbedded(decodeURI(vid.src));
+      } else {
+        embeddedSubsStatus = {
+          found: false,
+          size: 0,
+        };
+      }
+      subStatus = [localSubsStatus, serverSubsStatus, embeddedSubsStatus];
+      return subStatus;
     },
     /**
      * @param {Array.<string>} files File pathes array
@@ -163,15 +174,20 @@ export default {
       });
     },
 
-    mkvProcess(vidPath, onlyEmbedded, cb) {
-      // this.$store.commit('SubtitleNameArr', []);
-      // const vid = this.$parent.$refs.videoCanvas;
-      // vid.textTracks[this.firstSubIndex].mode = 'disabled';
-      this.addMkvSubstoVideo(vidPath, onlyEmbedded, () => {
-        console.log('finished reading mkv subtitles');
-        cb();
-      });
+    async $_serverSubsExist() {
+      const res = await this.Sagi.mediaTranslate(this.mediaHash);
+      if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
+        return {
+          found: true,
+          size: res.array[1].length,
+        };
+      }
+      return {
+        found: false,
+        size: 0,
+      };
     },
+
     /**
      * @param {function} cb callback function to process result
      * after server transcript loaded.
@@ -247,14 +263,22 @@ export default {
       });
     },
 
-    async ifEmbedded(filePath) {
+    async hasEmbedded(filePath) {
       const foo = await (this.$_hasEmbeddedSubs(filePath));
       return foo;
     },
 
+    mkvProcess(vidPath, onlyEmbedded, cb) {
+      this.addMkvSubstoVideo(vidPath, onlyEmbedded, () => {
+        console.log('finished reading mkv subtitles');
+        cb();
+      });
+    },
+
     /*
     the addMkvSubstoVideo method reads the subtitles embeded in the MKV files,
-    and add these subtitles into the video's texttracks.
+    and add these subtitles into the video's texttracks, it also detects the language
+    of the extracted subtitles.
     But the structure of this method need to be changed and improved.
     */
 
@@ -269,7 +293,8 @@ export default {
         const lngDetector = new LanguageDetect();
         const subs = new MatroskaSubtitles();
         self.$on('stop-reading-mkv-subs', (error) => {
-          reject(error);
+          reject(error); // if it is rejected, it will still be reading subtitles,
+          // which loses a lot of performance, needs to be improved.
         });
         subs.once('tracks', (track) => {
           tracks = track;
@@ -452,6 +477,34 @@ export default {
         background,
       };
     },
+    msToTime(s) {
+      const ms = s % 1000;
+      s = (s - ms) / 1000;
+      const secs = s % 60;
+      s = (s - secs) / 60;
+      const mins = s % 60;
+      const hrs = (s - mins) / 60;
+      return (`${z(2, hrs)}:${z(2, mins)}:${z(2, secs)}.${z(3, ms)}`);
+    },
+
+    findMode(array) {
+      const map = new Map();
+      let maxFreq = 0;
+      let mode;
+
+      for (let i = 0; i < array.length; i += 1) {
+        let freq = map.has(array[i]) ? map.get(array[i]) : 0;
+        freq += 1;
+
+        if (freq > maxFreq) {
+          maxFreq = freq;
+          mode = array[i];
+        }
+
+        map.set(array[i], freq);
+      }
+      return mode;
+    },
     /**
      * @link https://github.com/mafintosh/pumpify
      * @param {Pumpify} stream duplex stream for subtitles
@@ -579,7 +632,6 @@ export default {
           this.firstSubIndex = null;
         } else {
           console.log('first subtitle not set');
-          // vid.textTracks[this.firstSubIndex].oncuechange = null;
         }
       }
     },

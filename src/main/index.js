@@ -59,7 +59,8 @@ function createWindow() {
       titleBarStyle: 'none',
       minWidth: 427,
       minHeight: 240,
-      transparent: true,
+      // it can be set true here and be changed during player starting
+      transparent: false, // set to false to solve the backdrop-filter bug
       webPreferences: {
         webSecurity: false,
         experimentalFeatures: true,

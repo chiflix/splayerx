@@ -11,7 +11,7 @@
       @mouseup.left.prevent.self="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="mouseleaveHandler"
-      @mousemove.self="throttledWakeUpCall"
+      @mousemove.self="handleMouseMove"
       @mouseenter="mouseEnter">
       <PlayButton/>
       <titlebar currentView="Playingview"></titlebar>
@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import _ from 'lodash';
+// import _ from 'lodash';
 import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
@@ -58,7 +58,7 @@ export default {
       cursorShow: true,
       popupShow: false,
       mouseDown: false,
-      throttledWakeUpCall: null,
+      // throttledWakeUpCall: null,
       timeoutIdOfAllWidgetsDisappearDelay: 0,
       // the following 3 properties are used for checking if an event is a click or an dblclick
       // during 200miliseconds, if a second click is detected, will toggle "FullScreen"
@@ -230,9 +230,9 @@ export default {
       return true;
     },
   },
-  beforeMount() {
-    this.throttledWakeUpCall = _.throttle(this.handleMouseMove, 1000);
-  },
+  // beforeMount() {
+  //   this.throttledWakeUpCall = _.throttle(this.handleMouseMove, 1000);
+  // },
   mounted() {
     this.unfocusedHelper = new (UnfousedHelper())(this.mainWindow, this);
     this.$bus.$emit('play');

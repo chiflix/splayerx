@@ -1,7 +1,6 @@
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
-import z from 'zero-fill';
 import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
@@ -11,37 +10,6 @@ export default {
       return InfoDB;
     },
     sagi() { return Sagi; },
-
-    // this method is used to convert the timecodes extracted from matroska-subtitle
-    // library (convert) to the timecodes format for VTT format.
-    msToTime(s) {
-      const ms = s % 1000;
-      s = (s - ms) / 1000;
-      const secs = s % 60;
-      s = (s - secs) / 60;
-      const mins = s % 60;
-      const hrs = (s - mins) / 60;
-      return (`${z(2, hrs)}:${z(2, mins)}:${z(2, secs)}.${z(3, ms)}`);
-    },
-
-    findMode(array) {
-      const map = new Map();
-      let maxFreq = 0;
-      let mode;
-
-      for (let i = 0; i < array.length; i += 1) {
-        let freq = map.has(array[i]) ? map.get(array[i]) : 0;
-        freq += 1;
-
-        if (freq > maxFreq) {
-          maxFreq = freq;
-          mode = array[i];
-        }
-
-        map.set(array[i], freq);
-      }
-      return mode;
-    },
 
     timecodeFromSeconds(s) {
       const dt = new Date(Math.abs(s) * 1000);

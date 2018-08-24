@@ -1,12 +1,11 @@
 <template>
-  <div class="sub-control">
+  <div class="sub-control"
+       @mousemove.capture="throttledCall">
     <transition name="fade" appear>
       <div class="sub-btn-control"
            v-if="isSubCtrlBtnAppear">
         <div class="sub-menu-wrapper"
-             v-if="appearSubtitleMenu"
-             @mouseover.stop="toggleMenuMouseover"
-             @mouseleave.stop="toggleMenuMouseleave">
+             v-if="appearSubtitleMenu">
           <ul class="sub-menu">
 
             <li
@@ -82,6 +81,7 @@
 
 
 <script>
+import _ from 'lodash';
 export default {
   data() {
     return {
@@ -93,7 +93,7 @@ export default {
       isSubCtrlBtnAppear: true,
       appearSubtitleMenu: false,
       foundSubtitles: true,
-      mouseOverMenu: false,
+      throttledCall: null,
       showingPopupDialog: false,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
       currentSubIden: 0,
@@ -123,11 +123,8 @@ export default {
       this.isSubCtrlBtnAppear = true;
       e.target.style.backgroundImage = this.preStyle;
     },
-    toggleMenuMouseover() {
-      this.mouseOverMenu = true;
-    },
-    toggleMenuMouseleave() {
-      this.mouseOverMenu = false;
+    toggleSubtitleBtnMouseover() {
+      this.$bus.$emit('clear-all-widget-disappear-delay');
     },
     toggleItemsMouseLeave(e) {
       e.target.style.backgroundImage = 'none';
@@ -196,19 +193,14 @@ export default {
       return res;
     },
   },
-
-  watch: {
-
+  beforeMount() {
+    this.throttledCall = _.throttle(this.toggleSubtitleBtnMouseover, 500);
   },
-
   created() {
     this.$bus.$on('sub-ctrl-appear', this.subCtrlBtnAppear);
     this.$bus.$on('sub-ctrl-hide', () => {
-      if (this.mouseOverMenu) {
-        this.$bus.$emit('subtitle-menu-toggled-on');
-      } else {
-        this.subCtrlBtnHide();
-      }
+      this.subCtrlBtnHide();
+      this.$bus.$emit('subtitle-menu-toggled-off');
     });
     this.$bus.$on('subtitle-menu-off', this.toggleSubtitleMenu);
     this.$bus.$on('loading-subtitles', (status) => {
