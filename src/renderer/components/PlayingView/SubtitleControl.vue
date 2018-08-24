@@ -2,11 +2,11 @@
   <div class="sub-control">
     <transition name="fade" appear>
       <div class="sub-btn-control"
-           v-if="isSubCtrlBtnAppear"
-           @mouseover.stop="toggleButtonMouseover"
-           @mouseleave.stop="toggleButtonMouseleave">
+           v-if="isSubCtrlBtnAppear">
         <div class="sub-menu-wrapper"
-             v-if="appearSubtitleMenu">
+             v-if="appearSubtitleMenu"
+             @mouseover.stop="toggleMenuMouseover"
+             @mouseleave.stop="toggleMenuMouseleave">
           <ul class="sub-menu">
 
             <li
@@ -93,7 +93,7 @@ export default {
       isSubCtrlBtnAppear: true,
       appearSubtitleMenu: false,
       foundSubtitles: true,
-      mouseOverComponent: false,
+      mouseOverMenu: false,
       showingPopupDialog: false,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
       currentSubIden: 0,
@@ -123,12 +123,11 @@ export default {
       this.isSubCtrlBtnAppear = true;
       e.target.style.backgroundImage = this.preStyle;
     },
-    toggleButtonMouseover() {
-      this.mouseOverComponent = true;
-      this.$bus.$emit('clear-all-widget-disappear-delay');
+    toggleMenuMouseover() {
+      this.mouseOverMenu = true;
     },
-    toggleButtonMouseleave() {
-      this.mouseOverComponent = false;
+    toggleMenuMouseleave() {
+      this.mouseOverMenu = false;
     },
     toggleItemsMouseLeave(e) {
       e.target.style.backgroundImage = 'none';
@@ -205,7 +204,7 @@ export default {
   created() {
     this.$bus.$on('sub-ctrl-appear', this.subCtrlBtnAppear);
     this.$bus.$on('sub-ctrl-hide', () => {
-      if (this.mouseOverComponent) {
+      if (this.mouseOverMenu) {
         this.$bus.$emit('subtitle-menu-toggled-on');
       } else {
         this.subCtrlBtnHide();
