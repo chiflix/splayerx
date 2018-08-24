@@ -107,15 +107,16 @@ export default {
     subCtrlBtnHide() {
       this.isSubCtrlBtnAppear = false;
       this.appearSubtitleMenu = false;
+      this.$bus.$emit('subtitle-menu-toggled-off');
     },
     toggleSubtitleMenu() {
       if (!this.appearSubtitleMenu) {
-        this.$bus.$emit('subtitle-menu-toggled-on');
         this.appearSubtitleMenu = true;
+        this.$bus.$emit('subtitle-menu-toggled-on');
         this.$bus.$emit('subtitleMenuOn');
       } else {
-        this.$bus.$emit('subtitle-menu-toggled-off');
         this.appearSubtitleMenu = false;
+        this.$bus.$emit('subtitle-menu-toggled-off');
         this.$bus.$emit('subtitleMenuOff');
       }
     },
@@ -207,11 +208,9 @@ export default {
     this.$bus.$on('sub-ctrl-appear', this.subCtrlBtnAppear);
     this.$bus.$on('sub-ctrl-hide', () => {
       if (this.mouseOverComponent) {
-        this.isSubCtrlBtnAppear = true;
         this.$bus.$emit('subtitle-menu-toggled-on');
       } else {
-        this.isSubCtrlBtnAppear = false;
-        this.$bus.$emit('subtitle-menu-toggled-off');
+        this.subCtrlBtnHide();
       }
     });
     this.$bus.$on('subtitle-menu-off', this.toggleSubtitleMenu);

@@ -240,7 +240,7 @@ export default {
     this.$bus.$on('subtitle-menu-toggled-on', () => {
       this.subtitleMenuAppear = true;
     });
-    this.$bus.$on('subtitle-memu-toggled-off', () => {
+    this.$bus.$on('subtitle-menu-toggled-off', () => {
       this.subtitleMenuAppear = false;
     });
   },
