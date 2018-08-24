@@ -2,6 +2,10 @@
 import idb from 'idb';
 import { INFO_SCHEMA } from '@/constants';
 
+
+/**
+* You can change schema info in 'constants.js'
+*/
 class InfoDB {
   /**
    * Create InfoDB if doesn't exist

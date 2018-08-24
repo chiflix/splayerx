@@ -73,12 +73,12 @@ export default {
         .then((value) => {
           if (value) {
             this.$bus.$emit('seek', value.lastPlayedTime);
-            this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date() }));
+            this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date.now() }));
           } else {
             this.infoDB().add('recent-played', {
               quickHash: this.mediaQuickHash(vidPath),
               path,
-              lastOpened: Date(),
+              lastOpened: Date.now(),
             });
           }
           this.$bus.$emit('new-file-open');
