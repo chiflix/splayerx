@@ -1,6 +1,10 @@
 <template>
-    <div class="controller">
-        <div class="playlist">
+    <div class="controller" :style="{
+            bottom : this.$electron.remote.getCurrentWindow().getSize()[0] > 1355 ? `${40 / 1355 * this.windowSize}px` : '40px'
+            }">
+        <div class="playlist" :style="{
+        marginLeft: this.$electron.remote.getCurrentWindow().getSize()[0] > 1355 ? `${50 / 1355 * this.windowSize}px` : '50px'
+                              }">
             <div class="button"
                  :style="{
                  height:`${changeSize}vh`,
@@ -82,8 +86,35 @@ export default {
       type: Boolean,
       require: true,
     },
+    windowSize: {
+      type: Number,
+    },
   },
   mounted() {
+  },
+  watch: {
+    showItemNum: function change(val, oldval) {
+      if (val > oldval) {
+        if (this.moveItem <= oldval - (1 + this.lastPlayedFile.length) &&
+          oldval <= this.lastPlayedFile.length) {
+          const averageWidth = ((document.body.clientWidth - 100) - ((oldval - 1) * 15)) /
+            oldval;
+          this.move += (averageWidth + 15) * (val - oldval);
+          this.moveItem += val - oldval;
+        } else if (val >= this.moveItem + this.lastPlayedFile
+          .length + 2) {
+          const averageWidth = ((document.body.clientWidth - 100) - ((val - 1) * 15)) /
+            val;
+          this.move += (averageWidth + 15) *
+            (val - this.moveItem - this.lastPlayedFile.length - 1);
+          this.moveItem += val - this.moveItem - this.lastPlayedFile.length - 1;
+        }
+        if (val >= 10 || val >= this.lastPlayedFile.length + 1) {
+          this.move = 0;
+          this.moveItem = 0;
+        }
+      }
+    },
   },
   computed: {
   },
@@ -123,8 +154,9 @@ export default {
         divLeft.style.left = '0px';
         this.move = 0;
         this.moveItem = 0;
-        this.$bus.$emit('ifMargin', false);
         this.$bus.$emit('moveItem', this.moveItem);
+      } else if (this.$electron.remote.getCurrentWindow().getSize()[0] > 1355) {
+        this.open('./');
       } else {
         this.open('./');
       }
@@ -208,9 +240,9 @@ export default {
           } else {
             item.style.border = '';
             item.style.boxShadow = '';
-            document.querySelector(`#item${index} .mask`).style.backgroundColor = '';
-            document.querySelector(`#item${index} .deleteUi`).style.display = 'none';
+            document.querySelector(`#item${index} .mask`).style.backgroundColor = 'rgba(0, 0, 0, 0)';
             document.querySelector(`#item${index} .mask`).style.display = 'none';
+            document.querySelector(`#item${index} .deleteUi`).style.display = 'none';
             vm.recentFileDel = false;
           }
         }
@@ -249,14 +281,12 @@ export default {
           this.move = ss;
           lf.style.transition = 'left 150ms linear';
           lf.style.left = `${ss}px`;
-          this.$bus.$emit('ifMargin', true);
         } else if (index + this.moveItem === -2 && !this.isFull) {
           this.moveItem += 1;
           const ss = (this.move + 15) + (this.changeSize * (document.body.clientWidth / 100));
           this.move = ss;
           lf.style.transition = 'left 150ms linear';
           lf.style.left = `${ss}px`;
-          this.$bus.$emit('ifMargin', true);
         } else {
           this.openFile(item.path);
         }
@@ -272,7 +302,6 @@ export default {
     .controller {
         position: absolute;
         left: 0;
-        bottom: 40px;
         width: auto;
         z-index: 4;
 
@@ -282,7 +311,6 @@ export default {
             flex-direction: row;
             justify-content: flex-start;
             align-items: flex-end;
-            margin-left: 50px;
 
             .button {
                 background-color: rgba(0, 0, 0, 0.12);

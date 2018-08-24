@@ -46,9 +46,9 @@
       </div>
   </transition>
       <playlist :lastPlayedFile="lastPlayedFile" :changeSize="changeSize" :showItemNum="showItemNum"
-                :isFull="isFull"
+                :isFull="isFull" :windowSize="windowSize"
                 :style="{marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
-                         paddingLeft: this.isFull ? '0px' : this.moveItem ? `${this.exitFullScreen}px` : '0px'}"/>
+                         left: this.isFull ? '0px' : `${this.move}px`}"/>
   </main>
 </div>
 </template>
@@ -77,12 +77,11 @@ export default {
       changeSize: (112 / 720) * 100,
       lastSize: 847,
       playlistMl: 0,
-      ifMargin: false,
       windowFlag: false,
       moveItem: 0,
       move: 0,
       isFull: false,
-      exitFullScreen: '',
+      windowSize: 720,
     };
   },
   components: {
@@ -122,108 +121,84 @@ export default {
         this.windowFlag = false;
       }
     });
-    this.windowFlag = false;
-    this.$bus.$on('ifMargin', (ifMargin) => {
-      this.ifMargin = ifMargin;
-    });
     this.$bus.$on('move', (move) => {
       this.move = move;
     });
     window.onresize = () => {
-      if (this.ifMargin) {
-        this.windowFlag = true;
-      }
+      this.windowSize = document.body.clientWidth;
       if (this.$electron.remote.getCurrentWindow().isFullScreen()) {
-        this.windowFlag = false;
         this.isFull = true;
+        this.windowFlag = false;
       } else {
-        this.exitFullScreen = this.move;
-        this.windowFlag = true;
         this.isFull = false;
+        if (this.moveItem === 0) {
+          this.move = 0;
+        } else {
+          this.windowFlag = true;
+        }
       }
       this.logoPos = (document.body.clientHeight * 0.37) - 100;
       const changingWidth = document.body.clientWidth;
       const add = ((this.showItemNum + 1) * 112) + (this.showItemNum * 15);
       const sup = ((this.showItemNum * 112) + ((this.showItemNum - 1) * 15));
       let averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) / this.showItemNum;
+      if (changingWidth - (100 + add) >= 0 && this.showItemNum <= 9) {
+        if (((changingWidth - this.lastSize) + 127) / 127 <= 10 - this.showItemNum) { // 扩大
+          if (this.moveItem <= this.showItemNum - (1 + this.lastPlayedFile.length) &&
+            this.showItemNum <= this.lastPlayedFile.length) { // 1355前的左缩放
+            this.move += (averageWidth + 15) *
+              Math.floor(((changingWidth - this.lastSize) + 127) / 127);
+            this.moveItem += Math.floor(((changingWidth - this.lastSize) + 127) / 127);
+          }
+          this.showItemNum += Math.floor(((changingWidth - this.lastSize) + 127) / 127);
+          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
+            this.showItemNum;
+          this.lastSize += 127 * Math.floor(((changingWidth - this.lastSize) + 127) / 127);
+          if (this.showItemNum >= this.lastPlayedFile.length + 1) {
+            this.move = 0;
+            this.moveItem = 0;
+          } else if (this.showItemNum >= this.moveItem + this.lastPlayedFile
+            .length + 2) {
+            this.move += (averageWidth + 15) *
+              (this.showItemNum - this.moveItem - this.lastPlayedFile.length - 1);
+            this.moveItem += this.showItemNum - this.moveItem - this.lastPlayedFile.length - 1;
+          }
+        } else {
+          this.showItemNum = 10;
+          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
+            this.showItemNum;
+          this.lastSize = 1482;
+          this.move = 0;
+          this.moveItem = 0;
+        }
+      } else if (changingWidth - (100 + sup) <= 0 && this.showItemNum >= 6) { // 缩小
+        if ((this.lastSize - changingWidth) / 127 <= this.showItemNum - 5) {
+          this.showItemNum -= Math.floor((this.lastSize - changingWidth) / 127);
+          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
+            this.showItemNum;
+          this.lastSize -= 127 * Math.floor((this.lastSize - changingWidth) / 127);
+        } else {
+          this.showItemNum = 5;
+          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
+            this.showItemNum;
+          this.lastSize = 847;
+        }
+      } else if (changingWidth > 1355) {
+        this.showItemNum = 10;
+        this.move = 0;
+        this.moveItem = 0;
+      }
       if (this.moveItem === 0) {
         this.playlistMl = 0;
       } else {
         this.playlistMl = ((this.moveItem * 127) - this.move) -
           ((averageWidth - 112) * -this.moveItem);
       }
-      this.changeSize = (averageWidth / changingWidth) * 100;
-      if (changingWidth - (100 + add) >= 0 && this.showItemNum <= 9) {
-        if (((changingWidth - this.lastSize) + 127) / 127 <= 5) {
-          this.showItemNum += Math.floor(((changingWidth - this.lastSize) + 127) / 127);
-          if (this.showItemNum > 10) {
-            this.showItemNum = 10;
-          }
-          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
-            this.showItemNum;
-          this.lastSize += 127 * Math.floor(((changingWidth - this.lastSize) + 127) / 127);
-          this.changeSize = (averageWidth / changingWidth) * 100;
-          if (this.moveItem === 0) {
-            this.playlistMl = 0;
-          } else {
-            this.playlistMl = ((this.moveItem * 127) - this.move) -
-              ((averageWidth - 112) * -this.moveItem);
-          }
-        } else {
-          this.showItemNum = 10;
-          this.lastSize = 1482;
-          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
-            this.showItemNum;
-          this.changeSize = ((changingWidth - 235) / (10 * changingWidth)) * 100;
-          if (this.moveItem === 0) {
-            this.playlistMl = 0;
-          } else {
-            this.playlistMl = ((this.moveItem * 127) - this.move) -
-              ((averageWidth - 112) * -this.moveItem);
-          }
-        }
-      } else if (changingWidth - (100 + sup) <= 0 && this.showItemNum >= 6) {
-        if ((this.lastSize - changingWidth) / 127 <= 5) {
-          if (changingWidth === 720) {
-            this.showItemNum -= Math.floor((this.lastSize - changingWidth) / 127) - 1;
-          } else {
-            this.showItemNum -= Math.floor((this.lastSize - changingWidth) / 127);
-          }
-          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
-            this.showItemNum;
-          this.lastSize -= 127 * Math.floor((this.lastSize - changingWidth) / 127);
-          if (this.lastSize < 847) {
-            this.lastSize = 847;
-          }
-          this.changeSize = (averageWidth / changingWidth) * 100;
-          if (this.moveItem === 0) {
-            this.playlistMl = 0;
-          } else {
-            this.playlistMl = ((this.moveItem * 127) - this.move) -
-              ((averageWidth - 112) * -this.moveItem);
-          }
-        } else {
-          this.showItemNum = 5;
-          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
-            this.showItemNum;
-          this.lastSize = 847;
-          this.changeSize = (averageWidth / changingWidth) * 100;
-          if (this.moveItem === 0) {
-            this.playlistMl = 0;
-          } else {
-            this.playlistMl = ((this.moveItem * 127) - this.move) -
-              ((averageWidth - 112) * -this.moveItem);
-          }
-        }
-      } else if (changingWidth > 1355) {
-        this.showItemNum = 10;
-        this.changeSize = ((changingWidth - 235) / (10 * changingWidth)) * 100;
-        if (this.moveItem === 0) {
-          this.playlistMl = 0;
-        } else {
-          this.playlistMl = ((this.moveItem * 127) - this.move) -
-            ((averageWidth - 112) * -this.moveItem);
-        }
+      if (changingWidth > 1355) {
+        this.changeSize = ((changingWidth - ((100 / 1355) *
+          changingWidth) - 135) * 10) / changingWidth;
+      } else {
+        this.changeSize = (averageWidth / changingWidth) * 100;
       }
     };
     const { app } = this.$electron.remote;
