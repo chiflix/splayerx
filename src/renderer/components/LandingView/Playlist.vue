@@ -28,7 +28,7 @@
               width: item.chosen ? `${changeSize * 9 / 7}vw` : `${changeSize}vw`,
               height: item.chosen ? `${changeSize * 9 / 7}vh` : `${changeSize}vh`,
             }"
-                 @click="onRecentItemClick(item, index)"
+                 @click.stop="onRecentItemClick(item, index)"
                  @mouseover="onRecentItemMouseover(item, index)"
                  @mouseout="onRecentItemMouseout(index)"
                  @mousedown.stop="onRecentItemMousedown($event, index)">
@@ -150,11 +150,12 @@ export default {
     openOrMove() {
       const divLeft = document.querySelector('.controller');
       if (this.moveItem === -1) {
-        divLeft.style.transition = 'left 150ms linear';
+        divLeft.style.transition = 'left 100ms linear';
         divLeft.style.left = '0px';
         this.move = 0;
         this.moveItem = 0;
         this.$bus.$emit('moveItem', this.moveItem);
+        this.$bus.$emit('move', this.move);
       } else if (this.$electron.remote.getCurrentWindow().getSize()[0] > 1355) {
         this.open('./');
       } else {
@@ -279,13 +280,13 @@ export default {
           this.moveLength = 15 + (this.changeSize * (document.body.clientWidth / 100));
           const ss = this.move - this.moveLength;
           this.move = ss;
-          lf.style.transition = 'left 150ms linear';
+          lf.style.transition = 'left 100ms linear';
           lf.style.left = `${ss}px`;
         } else if (index + this.moveItem === -2 && !this.isFull) {
           this.moveItem += 1;
           const ss = (this.move + 15) + (this.changeSize * (document.body.clientWidth / 100));
           this.move = ss;
-          lf.style.transition = 'left 150ms linear';
+          lf.style.transition = 'left 100ms linear';
           lf.style.left = `${ss}px`;
         } else {
           this.openFile(item.path);
