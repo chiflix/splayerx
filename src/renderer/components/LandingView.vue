@@ -33,9 +33,11 @@
     </transition>
     <transition name="welcome-container-transition" mode="">
       <div class="welcome-container" v-if="langdingLogoAppear">
-        <div class="logo-container">
-          <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
-        </div>
+          <div class="logo-container" :style="{
+             paddingTop: `${logoPos}px`
+        }">
+              <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
+          </div>
 
         <div class="welcome">
           <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
@@ -43,8 +45,10 @@
         </div>
       </div>
   </transition>
-      <playlist :lastPlayedFile="lastPlayedFile"></playlist>
-  <Openbutton :isDragging="isDragging"></Openbutton>
+      <playlist :lastPlayedFile="lastPlayedFile" :changeSize="changeSize" :showItemNum="showItemNum"
+                :isFull="isFull" :windowSize="windowSize"
+                :style="{marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
+                         left: this.isFull ? '0px' : `${this.move}px`}"/>
   </main>
 </div>
 </template>
@@ -53,7 +57,6 @@
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
-import Openbutton from './LandingView/Openbutton.vue';
 
 export default {
   name: 'landing-view',
@@ -69,12 +72,21 @@ export default {
       backgroundUrl: '',
       item: [],
       isDragging: false,
+      logoPos: (405 * 0.37) - 92,
+      showItemNum: 5,
+      changeSize: (112 / 720) * 100,
+      lastSize: 847,
+      playlistMl: 0,
+      windowFlag: false,
+      moveItem: 0,
+      move: 0,
+      isFull: false,
+      windowSize: 720,
     };
   },
   components: {
     Titlebar,
     Playlist,
-    Openbutton,
   },
   computed: {
   },
@@ -98,16 +110,92 @@ export default {
       .then(() => {
         this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
           console.log(data);
-          this.lastPlayedFile = data.slice(0, 4);
+          this.lastPlayedFile = data.slice(0, 9);
         });
       });
   },
   mounted() {
+    this.$bus.$on('moveItem', (moveItem) => {
+      this.moveItem = moveItem;
+      if (this.moveItem === 0) {
+        this.windowFlag = false;
+      }
+    });
+    this.$bus.$on('move', (move) => {
+      this.move = move;
+    });
+    window.onresize = () => {
+      this.windowSize = document.body.clientWidth;
+      if (this.$electron.remote.getCurrentWindow().isFullScreen()) {
+        this.isFull = true;
+        this.windowFlag = false;
+      } else {
+        this.isFull = false;
+        if (this.moveItem === 0) {
+          this.move = 0;
+        } else {
+          this.windowFlag = true;
+        }
+      }
+      this.logoPos = (document.body.clientHeight * 0.37) - 100;
+      const changingWidth = document.body.clientWidth;
+      const add = ((this.showItemNum + 1) * 112) + (this.showItemNum * 15);
+      const sup = ((this.showItemNum * 112) + ((this.showItemNum - 1) * 15));
+      let averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) / this.showItemNum;
+      if (changingWidth - (100 + add) >= 0 && this.showItemNum <= 9) {
+        if (((changingWidth - this.lastSize) + 127) / 127 <= 10 - this.showItemNum) {
+          if (this.moveItem <= this.showItemNum - (1 + this.lastPlayedFile.length) &&
+            this.showItemNum <= this.lastPlayedFile.length) {
+            this.move += (averageWidth + 15) *
+              Math.floor(((changingWidth - this.lastSize) + 127) / 127);
+            this.moveItem += Math.floor(((changingWidth - this.lastSize) + 127) / 127);
+          }
+          this.showItemNum += Math.floor(((changingWidth - this.lastSize) + 127) / 127);
+          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
+            this.showItemNum;
+          this.lastSize += 127 * Math.floor(((changingWidth - this.lastSize) + 127) / 127);
+          if (this.showItemNum >= this.lastPlayedFile.length + 1) {
+            this.move = 0;
+            this.moveItem = 0;
+          } else if (this.showItemNum >= this.moveItem + this.lastPlayedFile
+            .length + 2) {
+            this.move += (averageWidth + 15) *
+              (this.showItemNum - this.moveItem - this.lastPlayedFile.length - 1);
+            this.moveItem += this.showItemNum - this.moveItem - this.lastPlayedFile.length - 1;
+          }
+        } else {
+          this.showItemNum = 10;
+          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
+            this.showItemNum;
+          this.lastSize = 1482;
+          this.move = 0;
+          this.moveItem = 0;
+        }
+      } else if (changingWidth - (100 + sup) <= 0 && this.showItemNum >= 6) {
+        if ((this.lastSize - changingWidth) / 127 <= this.showItemNum - 5) {
+          this.showItemNum -= Math.floor((this.lastSize - changingWidth) / 127);
+          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
+            this.showItemNum;
+          this.lastSize -= 127 * Math.floor((this.lastSize - changingWidth) / 127);
+        } else {
+          this.showItemNum = 5;
+          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
+            this.showItemNum;
+          this.lastSize = 847;
+        }
+      } else if (changingWidth > 1355) {
+        this.showItemNum = 10;
+        this.move = 0;
+        this.moveItem = 0;
+      }
+      this.playlistMl = this.moveItem === 0 ? 0 : ((this.moveItem * 127) - this.move) -
+        ((averageWidth - 112) * -this.moveItem);
+      this.changeSize = changingWidth > 1355 ? ((changingWidth - ((100 / 1355) *
+        changingWidth) - 135) * 10) / changingWidth : (averageWidth / changingWidth) * 100;
+    };
     const { app } = this.$electron.remote;
-    if (this.$electron.remote.getCurrentWindow().isResizable()) {
-      this.$electron.remote.getCurrentWindow().setResizable(false);
-    }
-
+    this.$electron.remote.getCurrentWindow().setResizable(true);
+    this.$electron.remote.getCurrentWindow().setAspectRatio(720 / 405);
     this.sagi().healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
@@ -168,7 +256,7 @@ body {
 
 .wrapper {
   background-image: url(../assets/gradient-bg.png);
-  background-size: 768px 432px;
+  background-size: cover;
   height: 100vh;
   width: 100vw;
   z-index: -1;
@@ -243,7 +331,6 @@ body {
 }
 .logo-container {
   text-align: center;
-  padding-top: 80px;
   .logo {
     height: 136px;
     width: 136px;
