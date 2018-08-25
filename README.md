@@ -23,6 +23,7 @@
 #### 注意事项
 
 - 代码风格遵循 https://vuejs.org/v2/style-guide/ ，命名使用 PascalCase 风格
+- commit message 遵循 AngularJS Git Commit Message Conventions，提交需通过 [CommitLint Online](https://commitlint.io/) 检查。
 - 播放事件的生命周期：
 > 1. 通过Global Event Bus `this.$bus` 发出指令，例如 play、pause
 > 2. VideoCanvas 收到 event 之后，调用 DOM 的 function 控制 video 对象
