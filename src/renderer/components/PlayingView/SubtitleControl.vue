@@ -1,14 +1,18 @@
 <template>
-  <div class="sub-control">
+  <div class="sub-control"
+       @mousemove.capture="throttledCall">
     <transition name="fade" appear>
-      <div class="sub-btn-control">
-        <div class="sub-menu-wrapper" v-if="appearSubtitleMenu">
+      <div class="sub-btn-control"
+           v-if="isSubCtrlBtnAppear">
+        <div class="sub-menu-wrapper"
+             v-if="appearSubtitleMenu">
           <ul class="sub-menu">
 
             <li
+              v-if="foundSubtitles"
               v-for="(item, index) in computedAvaliableItems"
-              @click.stop="toggleItemClick(index)"
-              @mouseover.stop.self="toggleItemsMouseOver"
+              @mouseup.stop="toggleItemClick(index)"
+              @mouseover.self.stop="toggleItemsMouseOver"
               @mouseleave.stop.self="toggleItemsMouseLeave"
               :class="{ chosenText: itemHasBeenChosen(index) }">
               <div class="menu-item-text-wrapper"
@@ -20,7 +24,18 @@
               </div>
             </li>
 
-            <li @click.stop="toggleSubtitleOff"
+            <li v-if="loadingPlaceholderList.length > 0"
+              v-for="(item, index) in loadingPlaceholderList"
+              class="placeholders-wrapper">
+              <div class="placeholder-item-text-wrapper"
+                   :class="{ chineseChosen: itemTitleHasChineseChar(item.title) }">
+                {{ item }}
+              </div>
+            </li>
+
+
+            <li v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)"
+            @mouseup.stop="toggleSubtitleOff"
             @mouseover.stop.self="toggleItemsMouseOver"
             @mouseleave.stop.self="toggleItemsMouseLeave"
             :class="{ chosenText: itemHasBeenChosen(-1) }">
@@ -33,17 +48,25 @@
             </li>
 
 
-            <li
-            v-if="!localSubAvaliable"
-            ref="menuItem"
-            class="sub-item"
-            :class="{ chosen: itemIsChosen }"
-            @mouseover.stop="toggleItemsMouseOver"
-            @mouseleave.stop="toggleItemsMouseLeave"
-            v-for="item in unavaliableSubtitlesItems">
-              {{ item.title }}
+            <li v-if="!foundSubtitles"
+                :class="{ chineseChosen: itemTitleHasChineseChar('加载翻译结果') }"
+                @mouseover.self.stop="toggleItemsMouseOver"
+                @mouseleave.stop.self="toggleItemsMouseLeave"
+                @mouseup.stop="toggleLoadServerSubtitles">
+                <div class="menu-item-text-wrapper">
+                  加载翻译结果
+                </div>
             </li>
-            </ul>
+            <li v-if="!foundSubtitles"
+                :class="{ chineseChosen: itemTitleHasChineseChar('导入本地字幕 ...') }"
+                @mouseover.self.stop="toggleItemsMouseOver"
+                @mouseleave.stop.self="toggleItemsMouseLeave"
+                @mouseup.stop="toggleOpenFileDialog">
+                <div class="menu-item-text-wrapper">
+                  导入本地字幕 ...
+                </div>
+            </li>
+
           </ul>
         </div>
         <div
@@ -58,23 +81,20 @@
 
 
 <script>
+import _ from 'lodash';
 export default {
   data() {
     return {
-      onlineSubsPlaceHolder: [
-        { title: 'Placeholder - 1' },
-        { title: 'Placeholder - 2' },
-        { title: 'Placeholder - 3' },
-      ],
-      unavaliableSubtitlesItems: [
-        { title: '加载翻译结果' },
-        { title: '导入字幕文件...' },
-      ],
+      loadingSubsPlaceholders: {
+        local: '',
+        embedded: '',
+        server: '',
+      },
       isSubCtrlBtnAppear: true,
-      itemIsChosen: false,
       appearSubtitleMenu: false,
-      localSubAvaliable: true,
-      itemIsHover: false,
+      foundSubtitles: true,
+      throttledCall: null,
+      showingPopupDialog: false,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
       currentSubIden: 0,
     };
@@ -87,18 +107,24 @@ export default {
     subCtrlBtnHide() {
       this.isSubCtrlBtnAppear = false;
       this.appearSubtitleMenu = false;
+      this.$bus.$emit('subtitle-menu-toggled-off');
     },
     toggleSubtitleMenu() {
       if (!this.appearSubtitleMenu) {
         this.appearSubtitleMenu = true;
+        this.$bus.$emit('subtitle-menu-toggled-on');
       } else {
         this.appearSubtitleMenu = false;
+        this.$bus.$emit('subtitle-menu-toggled-off');
       }
     },
     toggleItemsMouseOver(e) {
       this.appearSubtitleMenu = true;
       this.isSubCtrlBtnAppear = true;
       e.target.style.backgroundImage = this.preStyle;
+    },
+    toggleSubtitleBtnMouseover() {
+      this.$bus.$emit('clear-all-widget-disappear-delay');
     },
     toggleItemsMouseLeave(e) {
       e.target.style.backgroundImage = 'none';
@@ -111,6 +137,36 @@ export default {
       this.currentSubIden = -1;
       this.$bus.$emit('first-subtitle-off');
     },
+    toggleLoadServerSubtitles() {
+      this.$bus.$emit('load-server-transcripts');
+    },
+    toggleOpenFileDialog() {
+      if (this.showingPopupDialog) {
+        return;
+      }
+      const self = this;
+      const { remote } = this.$electron;
+      const { dialog } = remote;
+      const browserWindow = remote.BrowserWindow;
+      const focusWindow = browserWindow.getFocusedWindow();
+      const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
+
+      self.showingPopupDialog = true;
+      dialog.showOpenDialog(focusWindow, {
+        title: 'Open Dialog',
+        defaultPath: './',
+        filters: [{
+          name: 'Subtitle Files',
+          extensions: VALID_EXTENSION,
+        }],
+        properties: ['openFile'],
+      }, (item) => {
+        self.showingPopupDialog = false;
+        if (item) {
+          self.$bus.$emit('add-subtitle', item);
+        }
+      });
+    },
     itemHasBeenChosen(index = 0) {
       return index === this.currentSubIden;
     },
@@ -119,20 +175,69 @@ export default {
       return (REGEX_CHINESE.test(str));
     },
   },
-
   computed: {
     computedAvaliableItems() {
-      return (this.$store.getters.subtitleNameArr.slice(0, 3));
+      return this.$store.getters.subtitleNameArr;
+    },
+    loadingPlaceholderList() {
+      const res = [];
+      if (this.loadingSubsPlaceholders.local !== '') {
+        res.push('Local loading');
+      }
+      if (this.loadingSubsPlaceholders.embedded !== '') {
+        res.push('Embedded loading');
+      }
+      if (this.loadingSubsPlaceholders.server !== '') {
+        res.push('Server loading');
+      }
+      return res;
     },
   },
-
-  watch: {
-
+  beforeMount() {
+    this.throttledCall = _.throttle(this.toggleSubtitleBtnMouseover, 500);
   },
-
   created() {
     this.$bus.$on('sub-ctrl-appear', this.subCtrlBtnAppear);
-    this.$bus.$on('sub-ctrl-hide', this.subCtrlBtnHide);
+    this.$bus.$on('sub-ctrl-hide', () => {
+      this.subCtrlBtnHide();
+      this.$bus.$emit('subtitle-menu-toggled-off');
+    });
+    this.$bus.$on('subtitle-menu-off', this.toggleSubtitleMenu);
+    this.$bus.$on('loading-subtitles', (status) => {
+      this.foundSubtitles = true;
+      const placeholderText = 'Loading...';
+      if (status.type === 'Local') {
+        this.loadingSubsPlaceholders.local = placeholderText;
+      } else if (status.type === 'Embedded') {
+        this.loadingSubsPlaceholders.embedded = placeholderText;
+      } else {
+        this.loadingSubsPlaceholders.server = placeholderText;
+      }
+    });
+    this.$bus.$on('subtitles-finished-loading', (type) => {
+      if (type === 'Local') {
+        this.loadingSubsPlaceholders.local = '';
+      }
+      if (type === 'Embedded') {
+        this.loadingSubsPlaceholders.embedded = '';
+      }
+      if (type === 'Server') {
+        this.loadingSubsPlaceholders.server = '';
+      }
+    });
+    this.$bus.$on('toggle-no-subtitle-menu', () => {
+      this.foundSubtitles = false;
+      this.$store.commit('SubtitleOff');
+    });
+    this.$bus.$on('finished-loading-server-subs', () => {
+      this.foundSubtitles = true;
+    });
+    this.$bus.$on('added-local-subtitles', () => {
+      this.foundSubtitles = true;
+    });
+    this.$bus.$on('new-video-opened', () => {
+      this.currentSubIden = 0;
+    });
   },
 };
 </script>
@@ -167,6 +272,17 @@ li {
     background: linear-gradient(to right, white 75%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%);
     -webkit-background-clip: text;
     color: transparent;
+    text-transform: capitalize;
+  }
+  .placeholder-item-text-wrapper {
+    overflow: hidden; //超出的文本隐藏
+    white-space: nowrap;
+    background: linear-gradient(to right, white 75%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%);
+    -webkit-background-clip: text;
+    color: grey;
+  }
+  .placeholders-wrapper {
+    cursor: default;
   }
   .chosenText{
     font-family: Avenir-Heavy;
@@ -202,12 +318,16 @@ li {
       bottom: 30px;
       right: -97px;
       width: 170px;
-      height: 232px;
+      // height: 232px;
     }
     .sub-menu{
       padding: 4px, 0px;
     }
     .menu-item-text-wrapper {
+      line-height: 18px;
+      width: 136px;
+    }
+    .placeholder-item-text-wrapper {
       line-height: 18px;
       width: 136px;
     }
@@ -237,13 +357,17 @@ li {
       bottom: 40px;
       right: -130.3px;
       width: 184px;
-      height: 260px;
+      // height: 260px;
     }
     .sub-menu{
       padding-top: 4px;
-      padding-bottom: 12px;
+      padding-bottom: 4px;
     }
     .menu-item-text-wrapper {
+      line-height: 20px;
+      width: 148px;
+    }
+    .placeholder-item-text-wrapper {
       line-height: 20px;
       width: 148px;
     }
@@ -279,6 +403,10 @@ li {
     .menu-item-text-wrapper {
       line-height: 30px;
       width: 201px;
+    }
+    .menu-item-text-wrapper {
+      line-height: 20px;
+      width: 148px;
     }
     .chosen-dot {
       line-height: 20px;

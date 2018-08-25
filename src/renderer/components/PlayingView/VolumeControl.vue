@@ -1,4 +1,5 @@
 <template>
+  <div>
   <transition name="fade" appear>
   <div
     @mouseover.stop="appearVolumeSlider"
@@ -18,8 +19,9 @@
         <img type="image/svg+xml" wmode="transparent" v-show="showVolumeController"
           :src="srcOfVolumeButtonImage">
       </div>
-  </div>
-</transition>
+    </div>
+  </transition>
+</div>
 </template>;
 
 <script>
@@ -33,6 +35,7 @@ export default {
       currentVolume: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
       throttledCall: null,
+      volumeMaskAppear: false,
     };
   },
   methods: {

@@ -8,10 +8,10 @@
       @mousedown.self="resetDraggingState"
       @mousedown.right.stop="handleRightClick"
       @mousedown.left.stop.prevent="handleLeftClick"
-      @mouseup.left.prevent="handleMouseUp"
+      @mouseup.left.prevent.self="handleMouseUp"
       @mousewheel="wheelVolumeControll"
       @mouseleave="mouseleaveHandler"
-      @mousemove.self="throttledWakeUpCall"
+      @mousemove.self="handleMouseMove"
       @mouseenter="mouseEnter">
       <PlayButton/>
       <titlebar currentView="Playingview"></titlebar>
@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import _ from 'lodash';
+// import _ from 'lodash';
 import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
@@ -58,7 +58,7 @@ export default {
       cursorShow: true,
       popupShow: false,
       mouseDown: false,
-      throttledWakeUpCall: null,
+      // throttledWakeUpCall: null,
       timeoutIdOfAllWidgetsDisappearDelay: 0,
       // the following 3 properties are used for checking if an event is a click or an dblclick
       // during 200miliseconds, if a second click is detected, will toggle "FullScreen"
@@ -71,6 +71,7 @@ export default {
       dragTime: 200,
       mouseDownTime: null,
       mouseDownCursorPosition: null,
+      subtitleMenuAppear: false,
     };
   },
   created() {
@@ -193,22 +194,27 @@ export default {
       this.wakeUpAllWidgets();
     },
     handleMouseUp() {
-      this.mouseDown = false;
-      this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
-      if (this.clicks === 1) { // if one click has been detected - clicks === 1
-        const self = this; // define a constant "self" for the following scope to use
-        if (this.isValidClick()) {
-          this.timer = setTimeout(() => { // define timer as setTimeOut function
-            self.togglePlayback(); // which is togglePlayback
-            self.clicks = 0; // reset the "clicks" to zero for next event
-          }, this.delay);
-        } else {
-          self.clicks = 0;
+      if (this.subtitleMenuAppear) {
+        this.subtitleMenuAppear = false;
+        this.$bus.$emit('subtitle-menu-off');
+      } else {
+        this.mouseDown = false;
+        this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
+        if (this.clicks === 1) { // if one click has been detected - clicks === 1
+          const self = this; // define a constant "self" for the following scope to use
+          if (this.isValidClick()) {
+            this.timer = setTimeout(() => { // define timer as setTimeOut function
+              self.togglePlayback(); // which is togglePlayback
+              self.clicks = 0; // reset the "clicks" to zero for next event
+            }, this.delay);
+          } else {
+            self.clicks = 0;
+          }
+        } else { // else, if a second click has been detected - clicks === 2
+          clearTimeout(this.timer); // cancel the time out
+          this.toggleFullScreenState();
+          this.clicks = 0;// reset the "clicks" to zero
         }
-      } else { // else, if a second click has been detected - clicks === 2
-        clearTimeout(this.timer); // cancel the time out
-        this.toggleFullScreenState();
-        this.clicks = 0;// reset the "clicks" to zero
       }
     },
     isValidClick() { // this check will be at on mouse up
@@ -224,9 +230,9 @@ export default {
       return true;
     },
   },
-  beforeMount() {
-    this.throttledWakeUpCall = _.throttle(this.handleMouseMove, 1000);
-  },
+  // beforeMount() {
+  //   this.throttledWakeUpCall = _.throttle(this.handleMouseMove, 1000);
+  // },
   mounted() {
     this.unfocusedHelper = new (UnfousedHelper())(this.mainWindow, this);
     this.$bus.$emit('play');
@@ -235,6 +241,12 @@ export default {
       clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
     });
     this.$bus.$on('hide-all-widgets', this.hideAllWidgets);
+    this.$bus.$on('subtitle-menu-toggled-on', () => {
+      this.subtitleMenuAppear = true;
+    });
+    this.$bus.$on('subtitle-menu-toggled-off', () => {
+      this.subtitleMenuAppear = false;
+    });
   },
   computed: {
     uri() {

@@ -24,15 +24,12 @@ describe('SubtitleControl.vue', () => {
 
   it('should load with correct data', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    expect(wrapper.vm.onlineSubsPlaceHolder.length).equal(3);
-    expect(wrapper.vm.unavaliableSubtitlesItems.length).equal(2);
+    expect(wrapper.vm.loadingSubsPlaceholders.local).equal('');
+    expect(wrapper.vm.loadingSubsPlaceholders.embedded).equal('');
+    expect(wrapper.vm.loadingSubsPlaceholders.server).equal('');
     expect(wrapper.vm.isSubCtrlBtnAppear).equal(true);
-    expect(wrapper.vm.itemIsChosen).equal(false);
     expect(wrapper.vm.appearSubtitleMenu).equal(false);
-    expect(wrapper.vm.localSubAvaliable).equal(true);
-    expect(wrapper.vm.itemIsHover).equal(false);
-    expect(wrapper.vm.preStyle).contains('linear-gradient');
-    expect(wrapper.vm.currentSubIden).equal(0);
+
   });
 
   it('should render correct HTML elements', () => {
@@ -134,6 +131,7 @@ describe('SubtitleControl.vue', () => {
     ];
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
     store.commit('SubtitleNameArr', testSubArr);
-    expect(wrapper.vm.computedAvaliableItems.length).equal(3);
+    expect(wrapper.vm.computedAvaliableItems.length).equal(4);
+    expect(wrapper.vm.computedAvaliableItems[2].title).equal('something index 2');
   });
 });
