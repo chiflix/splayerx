@@ -29,7 +29,6 @@ describe('SubtitleControl.vue', () => {
     expect(wrapper.vm.loadingSubsPlaceholders.server).equal('');
     expect(wrapper.vm.isSubCtrlBtnAppear).equal(true);
     expect(wrapper.vm.appearSubtitleMenu).equal(false);
-
   });
 
   it('should render correct HTML elements', () => {
