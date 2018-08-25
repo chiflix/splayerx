@@ -52,7 +52,7 @@ describe('BaseSubtitle.vue', () => {
     expect(wrapper.vm.curStyle.background).equal('');
   });
 
-  it('subtitleInitialize to load local subtitles', (done) => {
+  it('subtitleInitialize to load local subtitles', async () => {
     const wrapper = mount(VideoCanvas, {
       store,
       localVue,
@@ -61,15 +61,36 @@ describe('BaseSubtitle.vue', () => {
       },
     });
     const childWrapper = wrapper.find(BaseSubtitle);
-    const stub = sinon.stub(childWrapper.vm, 'loadLocalTextTracks').callsFake(() => {
-      done();
+    childWrapper.setData({ readingMkv: true });
+    const statusStub = sinon.stub(childWrapper.vm, 'subtitleInitializingStatus').callsFake(() => {
+      return new Promise((resolve) => {
+        resolve([
+          {
+            found: true,
+            size: 1,
+          },
+          {
+            found: false,
+            size: 0,
+          },
+          {
+            found: false,
+            size: 0,
+          },
+        ]);
+      });
     });
-    childWrapper.vm.subtitleInitialize();
+    const stub = sinon.stub(childWrapper.vm, 'loadLocalTextTracks');
+    await childWrapper.vm.subtitleInitialize();
+
+    sinon.assert.called(statusStub);
     sinon.assert.called(stub);
+    expect(childWrapper.vm.readingMkv).equal(false);
     stub.restore();
+    statusStub.restore();
   });
 
-  it('subtitleInitialize to load server subtitles', (done) => {
+  it('subtitleInitialize to load server subtitles', async () => {
     const wrapper = mount(VideoCanvas, {
       store,
       localVue,
@@ -78,11 +99,99 @@ describe('BaseSubtitle.vue', () => {
       },
     });
     const childWrapper = wrapper.find(BaseSubtitle);
-    const spy = sinon.spy(childWrapper.vm, 'loadServerTextTracks');
-    childWrapper.vm.subtitleInitialize();
+    const statusStub = sinon.stub(childWrapper.vm, 'subtitleInitializingStatus').callsFake(() => {
+      return new Promise((resolve) => {
+        resolve([
+          {
+            found: false,
+            size: 0,
+          },
+          {
+            found: false,
+            size: 0,
+          },
+          {
+            found: true,
+            size: 2,
+          },
+        ]);
+      });
+    });
+    const stub = sinon.stub(childWrapper.vm, 'loadServerTextTracks');
+    await childWrapper.vm.subtitleInitialize();
+    sinon.assert.called(statusStub);
+    sinon.assert.called(stub);
+    stub.restore();
+    statusStub.restore();
+  });
+
+  it('subtitleInitialize to load embedded subtitles', async () => {
+    const wrapper = mount(VideoCanvas, {
+      store,
+      localVue,
+      propsData: {
+        src: 'file://./../../../../test/assets/testServer.avi',
+      },
+    });
+    const childWrapper = wrapper.find(BaseSubtitle);
+    const statusStub = sinon.stub(childWrapper.vm, 'subtitleInitializingStatus').callsFake(() => {
+      return new Promise((resolve) => {
+        resolve([
+          {
+            found: false,
+            size: 0,
+          },
+          {
+            found: true,
+            size: 2,
+          },
+          {
+            found: false,
+            size: 0,
+          },
+        ]);
+      });
+    });
+    const stub = sinon.stub(childWrapper.vm, 'mkvProcess');
+    await childWrapper.vm.subtitleInitialize();
+    sinon.assert.called(statusStub);
+    sinon.assert.called(stub);
+    stub.restore();
+    statusStub.restore();
+  });
+
+  it('should emit an event when no subtitles found', async () => {
+    const wrapper = mount(VideoCanvas, {
+      store,
+      localVue,
+      propsData: {
+        src: 'file://./../../../../test/assets/testMkv.mkv',
+      },
+    });
+    const childWrapper = wrapper.find(BaseSubtitle);
+    const statusStub = sinon.stub(childWrapper.vm, 'subtitleInitializingStatus').callsFake(() => {
+      return new Promise((resolve) => {
+        resolve([
+          {
+            found: false,
+            size: 0,
+          },
+          {
+            found: false,
+            size: 0,
+          },
+          {
+            found: false,
+            size: 0,
+          },
+        ]);
+      });
+    });
+    const spy = sinon.spy(childWrapper.vm.$bus, '$emit');
+    await childWrapper.vm.subtitleInitialize();
     sinon.assert.called(spy);
+    expect(spy.calledWith('toggle-no-subtitle-menu')).equal(true);
     spy.restore();
-    done();
   });
 
   it('loadLocalTextTracks test', (done) => {
