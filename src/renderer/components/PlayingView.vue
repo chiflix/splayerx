@@ -27,7 +27,6 @@
 </template>
 
 <script>
-// import _ from 'lodash';
 import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
@@ -230,9 +229,6 @@ export default {
       return true;
     },
   },
-  // beforeMount() {
-  //   this.throttledWakeUpCall = _.throttle(this.handleMouseMove, 1000);
-  // },
   mounted() {
     this.unfocusedHelper = new (UnfousedHelper())(this.mainWindow, this);
     this.$bus.$emit('play');

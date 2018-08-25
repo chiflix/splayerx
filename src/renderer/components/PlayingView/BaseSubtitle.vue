@@ -55,8 +55,8 @@ export default {
         this.$bus.$emit('subtitles-finished-loading', 'Embedded');
       }
 
-      const subStatus = await this.subtitleStatus();
-
+      const subStatus = await this.subtitleInitializingStatus();
+      console.log('hello');
       const localSubsStatus = subStatus[0];
       const embeddedSubsStatus = subStatus[1];
       const serverSubsStatus = subStatus[2];
@@ -115,7 +115,7 @@ export default {
         this.$bus.$emit('toggle-no-subtitle-menu');
       }
     },
-    async subtitleStatus() {
+    async subtitleInitializingStatus() {
       let subStatus = [];
       const vid = this.$parent.$refs.videoCanvas.videoElement();
       this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
@@ -697,7 +697,7 @@ export default {
       this.addVttToVideoElement(files, () => {
         this.$_clearSubtitle();
         this.subtitleShow(size);
-        this.$bus.$emit('added-local-subtitles');
+        this.$bus.$emit('added-local-subtitles', size);
       });
     });
 

@@ -232,8 +232,9 @@ export default {
     this.$bus.$on('finished-loading-server-subs', () => {
       this.foundSubtitles = true;
     });
-    this.$bus.$on('added-local-subtitles', () => {
+    this.$bus.$on('added-local-subtitles', (index) => {
       this.foundSubtitles = true;
+      this.currentSubIden = index;
     });
     this.$bus.$on('new-video-opened', () => {
       this.currentSubIden = 0;
