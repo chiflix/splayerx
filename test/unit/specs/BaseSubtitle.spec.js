@@ -190,8 +190,10 @@ describe('BaseSubtitle.vue', () => {
     const spy = sinon.spy(childWrapper.vm.$bus, '$emit');
     await childWrapper.vm.subtitleInitialize();
     sinon.assert.called(spy);
+    sinon.assert.called(statusStub);
     expect(spy.calledWith('toggle-no-subtitle-menu')).equal(true);
     spy.restore();
+    statusStub.restore();
   });
 
   it('loadLocalTextTracks test', (done) => {
