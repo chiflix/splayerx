@@ -143,9 +143,9 @@ export default {
       const sup = ((this.showItemNum * 112) + ((this.showItemNum - 1) * 15));
       let averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) / this.showItemNum;
       if (changingWidth - (100 + add) >= 0 && this.showItemNum <= 9) {
-        if (((changingWidth - this.lastSize) + 127) / 127 <= 10 - this.showItemNum) { // 扩大
+        if (((changingWidth - this.lastSize) + 127) / 127 <= 10 - this.showItemNum) {
           if (this.moveItem <= this.showItemNum - (1 + this.lastPlayedFile.length) &&
-            this.showItemNum <= this.lastPlayedFile.length) { // 1355前的左缩放
+            this.showItemNum <= this.lastPlayedFile.length) {
             this.move += (averageWidth + 15) *
               Math.floor(((changingWidth - this.lastSize) + 127) / 127);
             this.moveItem += Math.floor(((changingWidth - this.lastSize) + 127) / 127);
@@ -171,7 +171,7 @@ export default {
           this.move = 0;
           this.moveItem = 0;
         }
-      } else if (changingWidth - (100 + sup) <= 0 && this.showItemNum >= 6) { // 缩小
+      } else if (changingWidth - (100 + sup) <= 0 && this.showItemNum >= 6) {
         if ((this.lastSize - changingWidth) / 127 <= this.showItemNum - 5) {
           this.showItemNum -= Math.floor((this.lastSize - changingWidth) / 127);
           averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
@@ -188,18 +188,10 @@ export default {
         this.move = 0;
         this.moveItem = 0;
       }
-      if (this.moveItem === 0) {
-        this.playlistMl = 0;
-      } else {
-        this.playlistMl = ((this.moveItem * 127) - this.move) -
-          ((averageWidth - 112) * -this.moveItem);
-      }
-      if (changingWidth > 1355) {
-        this.changeSize = ((changingWidth - ((100 / 1355) *
-          changingWidth) - 135) * 10) / changingWidth;
-      } else {
-        this.changeSize = (averageWidth / changingWidth) * 100;
-      }
+      this.playlistMl = this.moveItem === 0 ? 0 : ((this.moveItem * 127) - this.move) -
+        ((averageWidth - 112) * -this.moveItem);
+      this.changeSize = changingWidth > 1355 ? ((changingWidth - ((100 / 1355) *
+        changingWidth) - 135) * 10) / changingWidth : (averageWidth / changingWidth) * 100;
     };
     const { app } = this.$electron.remote;
     this.$electron.remote.getCurrentWindow().setResizable(true);

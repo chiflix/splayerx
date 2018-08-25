@@ -150,7 +150,6 @@ export default {
     openOrMove() {
       const divLeft = document.querySelector('.controller');
       if (this.moveItem === -1) {
-        divLeft.style.transition = 'left 100ms linear';
         divLeft.style.left = '0px';
         this.move = 0;
         this.moveItem = 0;
@@ -239,8 +238,6 @@ export default {
             }, 150);
             vm.recentFileDel = true;
           } else {
-            item.style.border = '';
-            item.style.boxShadow = '';
             document.querySelector(`#item${index} .mask`).style.backgroundColor = 'rgba(0, 0, 0, 0)';
             document.querySelector(`#item${index} .mask`).style.display = 'none';
             document.querySelector(`#item${index} .deleteUi`).style.display = 'none';
@@ -280,13 +277,11 @@ export default {
           this.moveLength = 15 + (this.changeSize * (document.body.clientWidth / 100));
           const ss = this.move - this.moveLength;
           this.move = ss;
-          lf.style.transition = 'left 100ms linear';
           lf.style.left = `${ss}px`;
         } else if (index + this.moveItem === -2 && !this.isFull) {
           this.moveItem += 1;
           const ss = (this.move + 15) + (this.changeSize * (document.body.clientWidth / 100));
           this.move = ss;
-          lf.style.transition = 'left 100ms linear';
           lf.style.left = `${ss}px`;
         } else {
           this.openFile(item.path);
@@ -305,6 +300,7 @@ export default {
         left: 0;
         width: auto;
         z-index: 4;
+        transition : left 100ms linear;
 
         .playlist {
             -webkit-app-region: no-drag;
