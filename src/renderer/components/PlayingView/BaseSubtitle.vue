@@ -56,14 +56,14 @@ export default {
       }
 
       const subStatus = await this.subtitleInitializingStatus();
-      console.log('hello');
+
       const localSubsStatus = subStatus[0];
       const embeddedSubsStatus = subStatus[1];
       const serverSubsStatus = subStatus[2];
 
       const localSubsOn = localSubsStatus.found;
-      const serverSubsOn = embeddedSubsStatus.found;
-      const embeddedSubsOn = serverSubsStatus.found;
+      const embeddedSubsOn = embeddedSubsStatus.found;
+      const serverSubsOn = serverSubsStatus.found;
 
       // logic of loading subtitles:
       // if there are some subtitle files in the same direction, load them
@@ -143,7 +143,7 @@ export default {
           size: 0,
         };
       }
-      subStatus = [localSubsStatus, serverSubsStatus, embeddedSubsStatus];
+      subStatus = [localSubsStatus, embeddedSubsStatus, serverSubsStatus];
       return subStatus;
     },
     /**
@@ -264,8 +264,8 @@ export default {
     },
 
     async hasEmbedded(filePath) {
-      const foo = await (this.$_hasEmbeddedSubs(filePath));
-      return foo;
+      const res = await (this.$_hasEmbeddedSubs(filePath));
+      return res;
     },
 
     mkvProcess(vidPath, onlyEmbedded, cb) {
