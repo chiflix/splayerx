@@ -57,7 +57,7 @@ describe('BaseSubtitle.vue', () => {
       store,
       localVue,
       propsData: {
-        src: 'file://./../../../../test/assets/test.avi',
+        src: 'file://../../../../../test/assets/test.avi',
       },
     });
     const childWrapper = wrapper.find(BaseSubtitle);
@@ -95,7 +95,7 @@ describe('BaseSubtitle.vue', () => {
       store,
       localVue,
       propsData: {
-        src: 'file://./../../../../test/assets/testServer.avi',
+        src: 'file://../../../../../test/assets/testServer.avi',
       },
     });
     const childWrapper = wrapper.find(BaseSubtitle);
