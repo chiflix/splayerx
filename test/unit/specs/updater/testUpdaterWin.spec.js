@@ -69,7 +69,6 @@ describe('UpdaterNotification.vue', () => {
       expect(wrapper.vm.helper).not.equal(null);
       expect(wrapper.vm.containerStyle.platform).equal('win32');
       expect(wrapper.vm.breathType).equal('breatheSuccess');
-      console.log(wrapper.vm.visibility);
       done();
     }, 300);
   });
