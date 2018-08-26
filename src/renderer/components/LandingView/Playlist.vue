@@ -47,6 +47,8 @@
 
 <script>
 import path from 'path';
+import { filePathToUrl } from '@/helpers/path';
+
 export default {
   name: 'playlist',
   data() {
@@ -171,7 +173,7 @@ export default {
       }, (item) => {
         self.showingPopupDialog = false;
         if (item) {
-          self.openFile(`file:///${item[0]}`);
+          self.openFile(filePathToUrl(item[0]));
         }
       });
     },
