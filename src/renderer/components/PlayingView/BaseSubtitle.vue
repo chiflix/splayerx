@@ -268,8 +268,8 @@ export default {
       // Add cues to TextTrack
       for (let i = 0; i < cueArray.length; i += 1) {
         const element = cueArray[i];
-        const startTime = this.$_timeProcess(element[0][0], element[0][1]);
-        const endTime = this.$_timeProcess(element[1][0], element[1][1]);
+        const startTime = element[0];
+        const endTime = element[1];
         subtitle.addCue(new VTTCue(startTime, endTime, element[2]));
       }
     },
@@ -348,15 +348,6 @@ export default {
         }
         cb = null;
       });
-    },
-    /**
-     * @param {Number} second
-     * @param {Number} nanosecond
-     * @returns {Number}
-     */
-    $_timeProcess(second = 0, nanosecond = 0) {
-      const ns = nanosecond / 1000000000;
-      return second + ns;
     },
     /**
      * @param {string} subPath Subtitle Path
@@ -554,4 +545,3 @@ export default {
   // }
 // }
 </style>
-
