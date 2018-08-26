@@ -119,7 +119,7 @@ describe('BaseSubtitle.vue', () => {
     const cb = sinon.spy(() => {
       sinon.assert.called(cb);
       done();
-    })
+    });
     childWrapper.vm.loadServerTextTracks(cb);
   });
 
@@ -130,8 +130,8 @@ describe('BaseSubtitle.vue', () => {
           'array': [
             0, [
               [
-                [0, 0],
-                [0, 0],
+                0,
+                0,
                 ['test'],
               ],
             ],

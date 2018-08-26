@@ -268,8 +268,8 @@ export default {
       // Add cues to TextTrack
       for (let i = 0; i < cueArray.length; i += 1) {
         const element = cueArray[i];
-        const startTime = element[0];
-        const endTime = element[1];
+        const startTime = this.$_timeProcess(element[0]);
+        const endTime = this.$_timeProcess(element[1]);
         subtitle.addCue(new VTTCue(startTime, endTime, element[2]));
       }
     },
@@ -348,6 +348,19 @@ export default {
         }
         cb = null;
       });
+    },
+    /**
+     * @param {Number} second
+     * @returns {Number}
+     */
+    $_timeProcess(second) {
+      // Now as per official proto3 documentation, default values are not
+      // serialized to save space during wire transmission.
+      // so if input is 0, it may become undefined
+      if (!second) {
+        return 0;
+      }
+      return second;
     },
     /**
      * @param {string} subPath Subtitle Path
