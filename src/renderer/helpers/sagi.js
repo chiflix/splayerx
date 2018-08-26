@@ -1,9 +1,9 @@
 import path from 'path';
 import fs from 'fs';
-import healthMsg from 'sagi-apis-client/health/v1/health_pb';
-import healthRpc from 'sagi-apis-client/health/v1/health_grpc_pb';
-import translationMsg from 'sagi-apis-client/translation/v1/translation_pb';
-import translationRpc from 'sagi-apis-client/translation/v1/translation_grpc_pb';
+import healthMsg from 'sagi-api/health/v1/health_pb';
+import healthRpc from 'sagi-api/health/v1/health_grpc_pb';
+import translationMsg from 'sagi-api/translation/v1/translation_pb';
+import translationRpc from 'sagi-api/translation/v1/translation_grpc_pb';
 /* eslint-disable */
 const grpc = require('grpc');
 /* eslint-enable */

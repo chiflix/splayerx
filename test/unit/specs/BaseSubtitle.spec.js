@@ -241,8 +241,8 @@ describe('BaseSubtitle.vue', () => {
           array: [
             0, [
               [
-                [0, 0],
-                [0, 0],
+                0,
+                0,
                 ['test'],
               ],
             ],
