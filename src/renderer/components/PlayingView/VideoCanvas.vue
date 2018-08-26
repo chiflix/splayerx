@@ -1,9 +1,11 @@
 <template>
+
   <div class="video">
     <base-video-player
       ref="videoCanvas"
       :defaultEvents="['playing', 'canplay', 'timeupdate', 'loadedmetadata', 'durationchange']"
       :styleObject="{objectFit: 'contain', width: '100%', height: '100%'}"
+
       @playing="onPlaying"
       @canplay="onCanPlay"
       @timeupdate="onTimeupdate"
@@ -303,4 +305,3 @@ export default {
   visibility: hidden;
 }
 </style>
-

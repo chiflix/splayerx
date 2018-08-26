@@ -392,7 +392,6 @@ new Vue({
       const subtitleFiles = [];
       const regex = '^(.srt|.ass|.vtt)$';
       const re = new RegExp(regex);
-      // const extname = Path.extname(path);
       for (let i = 0; i < files.length; i += 1) {
         tempFilePath = `file:///${files[i].path}`;
         if (re.test(Path.extname(tempFilePath))) {
