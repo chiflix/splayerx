@@ -25,7 +25,7 @@ before_script:
 - if [ $TRAVIS_OS_NAME == "linux" ]; then sh -e /etc/init.d/xvfb start; sleep 3; fi
 script:
 - npm run unit
-- npm run build
+# - npm run build
 deploy:
   provider: releases
   name: "$TRAVIS_TAG"
