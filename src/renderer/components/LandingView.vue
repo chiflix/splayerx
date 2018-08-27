@@ -38,8 +38,7 @@
         }">
               <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
           </div>
-
-        <div class="welcome">
+          <div class="welcome">
           <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
           <div class="version">v {{ this.$electron.remote.app.getVersion() }}</div>
         </div>
@@ -102,15 +101,16 @@ export default {
         const val = await this.infoDB().lastPlayed();
         if (val && data) {
           const mergedData = Object.assign(val, data);
-          this.infoDB().add('recent-played', mergedData);
+          asyncStorage.set('recent-played', {});
+          await this.infoDB().add('recent-played', mergedData);
+          await this.infoDB().cleanData();
         }
       })
 
     // Get all data and show
       .then(() => {
         this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
-          console.log(data);
-          this.lastPlayedFile = data.slice(0, 9);
+          this.lastPlayedFile = data.slice(0, 10);
         });
       });
   },
@@ -196,6 +196,7 @@ export default {
     const { app } = this.$electron.remote;
     this.$electron.remote.getCurrentWindow().setResizable(true);
     this.$electron.remote.getCurrentWindow().setAspectRatio(720 / 405);
+
     this.sagi().healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;

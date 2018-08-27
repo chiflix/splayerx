@@ -35,13 +35,13 @@ function createWindow() {
    */
   if (process.platform === 'win32') {
     mainWindow = new BrowserWindow({
-      height: 405,
+      height: 432,
       useContentSize: true,
-      width: 720,
+      width: 768,
       frame: false,
       titleBarStyle: 'none',
-      minWidth: 405,
-      minHeight: 720,
+      minWidth: 427,
+      minHeight: 240,
       webPreferences: {
         webSecurity: false,
         experimentalFeatures: true,
@@ -52,14 +52,15 @@ function createWindow() {
     });
   } else {
     mainWindow = new BrowserWindow({
-      height: 405,
+      height: 432,
       useContentSize: true,
-      width: 720,
+      width: 768,
       frame: false,
       titleBarStyle: 'none',
-      minWidth: 720,
-      minHeight: 405,
-      transparent: true,
+      minWidth: 427,
+      minHeight: 240,
+      // it can be set true here and be changed during player starting
+      transparent: false, // set to false to solve the backdrop-filter bug
       webPreferences: {
         webSecurity: false,
         experimentalFeatures: true,

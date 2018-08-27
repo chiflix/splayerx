@@ -2,18 +2,17 @@
 import idb from 'idb';
 import { INFO_SCHEMA } from '@/constants';
 
+
+/**
+* You can change schema info in 'constants.js'
+*/
 class InfoDB {
-  constructor() {
-    this.version = 1;
-    this.data = new Map();
-  }
   /**
    * Create InfoDB if doesn't exist
    * Update InfoDB if new schema or new index has added
    */
-  init() {
+  static init() {
     return idb.open('Info').then((db) => {
-      this.version = db.version;
       const updateStore = [];
       for (let i = 0; i < INFO_SCHEMA.length; i += 1) {
         const schema = INFO_SCHEMA[i];
@@ -49,16 +48,33 @@ class InfoDB {
       }
     });
   }
+  static cleanData() {
+    return idb.open('Info').then((db) => {
+      const tx = db.transaction('recent-played', 'readwrite');
+      let shortCutCount = 0;
+      tx.objectStore('recent-played').index('lastOpened').iterateCursor(null, 'prev', (cursor) => {
+        if (!cursor) return;
+        if (shortCutCount > 10) {
+          const oldVal = cursor.value;
+          delete oldVal.shortCut;
+          cursor.update(oldVal);
+        } else {
+          shortCutCount += 1;
+        }
+        cursor.continue();
+      });
+      return tx.complete.then(() => { console.log('DB recent-played shortcut cleaned'); });
+    });
+  }
   /**
    * @param  {String} schema
    * @param  {Object} data Must contain quickHash property
    * Add a record if no same quickHash in the current schema
    * Replace a record if the given quickHash existed
    */
-  add(schema, data) {
+  static add(schema, data) {
     console.log('adding');
     return idb.open('Info').then((db) => {
-      console.log(this.version);
       const tx = db.transaction(schema, 'readwrite');
       tx.objectStore(schema).put(data);
       return tx.complete.then(() => console.log('added'));
@@ -69,10 +85,9 @@ class InfoDB {
    * @param  {String} val
    * Delete the record which Primary key equal to the given val
    */
-  delete(schema, val) {
+  static delete(schema, val) {
     console.log('deleting');
     return idb.open('Info').then((db) => {
-      console.log(this.version);
       const tx = db.transaction(schema, 'readwrite');
       tx.objectStore(schema).delete(val);
       return tx.complete.then(() => console.log('deleted'));
@@ -81,8 +96,7 @@ class InfoDB {
   /**
    * Retrieve data of last played video from 'recent-played' schema
    */
-  lastPlayed() {
-    console.log(this.data);
+  static lastPlayed() {
     return idb.open('Info').then((db) => {
       const tx = db.transaction('recent-played');
       let val;
@@ -103,8 +117,7 @@ class InfoDB {
    * 'prevunique' Same as above, except: For duplicate values, only the first record is yielded.
    *  Return a sorted result with the given key and schema
    */
-  sortedResult(schema, key, direction) {
-    console.log(this.data);
+  static sortedResult(schema, key, direction) {
     return idb.open('Info').then((db) => {
       const tx = db.transaction(schema);
       const res = [];
@@ -113,10 +126,7 @@ class InfoDB {
         res.push(cursor.value);
         cursor.continue();
       });
-      return tx.complete.then(() => {
-        this.data = res;
-        return Promise.resolve(res);
-      });
+      return tx.complete.then(() => Promise.resolve(res));
     });
   }
   /**
@@ -126,8 +136,7 @@ class InfoDB {
    * Retrieve a record which Primary key equal to the given val if there's no specified key
    * Otherwise retrieve the record which specified key equal to the given val.
    */
-  get(schema, key, val) {
-    console.log(this.data);
+  static get(schema, key, val) {
     if (val) {
       return idb.open('Info').then(async (db) => {
         const value = await db.transaction(schema).objectStore(schema).index(key).get(val);
@@ -146,7 +155,7 @@ class InfoDB {
    * https://developer.mozilla.org/en-US/docs/Web/API/IDBKeyRange KeyRange Doc
    * Return all records from the given schema if no range specified
    */
-  getAll(schema, keyRange) {
+  static getAll(schema, keyRange) {
     return idb.open('Info').then(async (db) => {
       const tx = db.transaction(schema);
       let val;
@@ -155,11 +164,10 @@ class InfoDB {
       } else {
         val = await tx.objectStore(schema).getAll();
       }
-      this.data.set(schema, val);
       return val;
     });
   }
 }
 
-export default new InfoDB();
+export default InfoDB;
 

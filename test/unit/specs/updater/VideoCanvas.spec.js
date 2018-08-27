@@ -108,6 +108,7 @@ describe('VideoCanvas.vue', () => {
     expect(emitSpy.lastCall.calledWith('video-loaded')).equal(true);
     expect(wrapper.vm.videoExisted).equal(true);
     stub.restore();
+    emitSpy.restore();
   });
 
   it('onMetaLoaded method work fine if video exist', () => {
