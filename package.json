@@ -40,10 +40,12 @@
     "directories": {
       "output": "build"
     },
+    "electronVersion": "3.0.0-beta.7",
+    "electronDist": "node_modules/@chiflix/electron/dist",
     "electronDownload": {
       "mirror": "https://github.com/chiflix/electron/releases/download/v",
       "isVerifyChecksum": false,
-      "version": "2.0.2"
+      "version": "3.0.0-beta.7"
     },
     "files": [
       "dist/electron/**/*"
