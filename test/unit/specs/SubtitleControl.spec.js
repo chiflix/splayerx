@@ -29,6 +29,9 @@ describe('SubtitleControl.vue', () => {
     expect(wrapper.vm.loadingSubsPlaceholders.server).equal('');
     expect(wrapper.vm.isSubCtrlBtnAppear).equal(true);
     expect(wrapper.vm.appearSubtitleMenu).equal(false);
+    expect(wrapper.vm.showingPopupDialog).equal(false);
+    expect(wrapper.vm.preStyle).contains('linear-gradient');
+    expect(wrapper.vm.currentSubIden).equal(0);
   });
 
   it('should render correct HTML elements', () => {
@@ -132,5 +135,60 @@ describe('SubtitleControl.vue', () => {
     store.commit('SubtitleNameArr', testSubArr);
     expect(wrapper.vm.computedAvaliableItems.length).equal(4);
     expect(wrapper.vm.computedAvaliableItems[2].title).equal('something index 2');
+  });
+
+  it('toggleSubtitleBtnMouseover method work fine', () => {
+    const wrapper = shallowMount(SubtitleControl, { store, localVue });
+    const spy = sinon.spy(wrapper.vm.$bus, '$emit');
+    wrapper.vm.toggleSubtitleBtnMouseover();
+    expect(spy.calledOnce).equal(true);
+    expect(spy.args[0][0]).equal('clear-all-widget-disappear-delay');
+    spy.restore();
+  });
+
+  it('toggleLoadServerSubtitles method work fine', () => {
+    const wrapper = shallowMount(SubtitleControl, { store, localVue });
+    const spy = sinon.spy(wrapper.vm.$bus, '$emit');
+    wrapper.vm.toggleLoadServerSubtitles();
+    expect(spy.calledOnce).equal(true);
+    expect(spy.args[0][0]).equal('load-server-transcripts');
+    spy.restore();
+  });
+
+  it('toggleOpenFileDialog method work fine if dialog is showing', () => {
+    const wrapper = shallowMount(SubtitleControl, { store, localVue });
+    wrapper.setData({ showingPopupDialog: true });
+    wrapper.vm.toggleOpenFileDialog();
+    expect(wrapper.vm.showingPopupDialog).equal(true);
+  });
+
+  it('sub-ctrl-hide event listener work fine', () => {
+    const wrapper = shallowMount(SubtitleControl, { store, localVue });
+    wrapper.vm.$bus.$emit('sub-ctrl-hide');
+    const stub1 = sinon.stub(wrapper.vm.$bus, '$on');
+    const spy1 = sinon.spy(wrapper.vm, 'subCtrlBtnHide');
+    const spy2 = sinon.spy(wrapper.vm.$bus, '$emit');
+
+    stub1.yields();
+    stub1('sub-ctrl-hide', spy1, spy2);
+    expect(spy1.called).equal(true);
+    expect(spy2.called).equal(true);
+    expect(spy2.args[0][0]).equal('subtitle-menu-toggled-off');
+    stub1.restore();
+    spy2.restore();
+    spy1.restore();
+  });
+
+  it('added-local-subtitles event listener work fine', () => {
+    const wrapper = shallowMount(SubtitleControl, { store, localVue });
+    wrapper.setData = {
+      foundSubtitles: false,
+      currentSubIden: -1,
+    }
+    wrapper.vm.$bus.$emit('added-local-subtitles', 9);
+    const stub = sinon.stub(wrapper.vm.$bus, '$on');
+    stub('added-local-subtitles');
+    expect(wrapper.vm.foundSubtitles).equal(true);
+    expect(wrapper.vm.currentSubIden).equal(9);
   });
 });

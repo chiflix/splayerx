@@ -91,7 +91,6 @@ export default {
       }
       this.$bus.$emit('video-loaded');
       this.windowSizeHelper.setNewWindowSize();
-      // this.loadTextTracks();
     },
     onTimeupdate() {
       this.$store.commit('AccurateTime', this.videoElement.currentTime);
