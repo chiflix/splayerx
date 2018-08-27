@@ -110,7 +110,7 @@ export default {
     // Get all data and show
       .then(() => {
         this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
-          this.lastPlayedFile = data.slice(0, 10);
+          this.lastPlayedFile = data.slice(0, 9);
         });
       });
   },
