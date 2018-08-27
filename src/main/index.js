@@ -52,13 +52,13 @@ function createWindow() {
     });
   } else {
     mainWindow = new BrowserWindow({
-      height: 432,
+      height: 405,
       useContentSize: true,
-      width: 768,
+      width: 720,
       frame: false,
       titleBarStyle: 'none',
-      minWidth: 427,
-      minHeight: 240,
+      minWidth: 720,
+      minHeight: 405,
       // it can be set true here and be changed during player starting
       transparent: false, // set to false to solve the backdrop-filter bug
       webPreferences: {

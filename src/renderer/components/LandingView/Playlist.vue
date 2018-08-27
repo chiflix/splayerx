@@ -263,10 +263,10 @@ export default {
       this.isDragging = false;
       if (index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) {
         this.mouseDown = true;
-        item.style.zIndex = 5;
         document.onmousemove = mousemove;
-        document.querySelector('main').onmouseup = mouseup;
         document.onmouseup = mouseup;
+        document.querySelector('.controller').parentNode.onmouseup = mouseup;
+        item.style.zIndex = 5;
       }
     },
     onRecentItemClick(item, index) {
@@ -311,7 +311,7 @@ export default {
 
             .button {
                 background-color: rgba(0, 0, 0, 0.12);
-                backdrop-filter: blur(9.8px);
+                backdrop-filter: blur(9.8px); // 删除后快速拖拽背景不会闪动
                 margin-right: 15px;
                 cursor: pointer;
             }
