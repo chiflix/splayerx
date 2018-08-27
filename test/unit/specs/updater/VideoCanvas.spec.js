@@ -1,4 +1,4 @@
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
+import { createLocalVue, mount } from '@vue/test-utils';
 import VideoCanvas from '@/components/PlayingView/VideoCanvas';
 import Vuex from 'vuex';
 import sinon from 'sinon';
