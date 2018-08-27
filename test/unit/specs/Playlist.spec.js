@@ -16,23 +16,6 @@ describe('Playlist.vue', () => {
     expect(wrapper.vm.disX).equal('');
     expect(wrapper.vm.disY).equal('');
     expect(wrapper.vm.recentFileDel).equal(false);
-    expect(wrapper.vm.showingPopupDialog).equal(false);
-    expect(wrapper.vm.move).equal(0);
-    expect(wrapper.vm.moveItem).equal(0);
-    expect(wrapper.vm.moveLength).equal(0);
-  });
-  it('open method works fine', () => {
-    const wrapper = mount(Playlist);
-    wrapper.setData({ showingPopupDialog: false });
-    wrapper.vm.open('');
-    expect(wrapper.vm.showingPopupDialog).equal(true);
-  });
-  it('openOrMove method works fine', () => {
-    const wrapper = mount(Playlist);
-    wrapper.setData({ showingPopupDialog: false });
-    wrapper.setData({ moveItem: 0 });
-    wrapper.vm.openOrMove();
-    expect(wrapper.vm.showingPopupDialog).equal(true);
   });
   it('backgroundUrl method works fine', () => {
     const wrapper = mount(Playlist);
@@ -50,11 +33,17 @@ describe('Playlist.vue', () => {
     wrapper.vm.itemShortcut(link);
     expect(wrapper.vm.itemShortcut(link)).equal(`url("${link}")`);
   });
+  it('hasRecentPlaylist computed property works fine ', () => {
+    const wrapper = mount(Playlist);
+    expect(wrapper.vm.hasRecentPlaylist).equal(false);
+    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4', chosen: true }] });
+    expect(wrapper.vm.hasRecentPlaylist).equal(true);
+  });
   it('onRecentItemMouseover method works fine', () => {
     const wrapper = mount(Playlist);
     const spy = sinon.spy(wrapper.vm, 'onRecentItemMouseover');
-    wrapper.setProps({ isFull: true });
-    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }] });
+    wrapper.setComputed({ hasRecentPlaylist: true });
+    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4', chosen: true }] });
     wrapper.find('.item').trigger('mouseover');
     expect(spy.calledOnce).equal(true);
     spy.restore();
@@ -62,7 +51,8 @@ describe('Playlist.vue', () => {
   it('onRecentItemMouseout method works fine', () => {
     const wrapper = mount(Playlist);
     const spy = sinon.spy(wrapper.vm, 'onRecentItemMouseout');
-    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }] });
+    wrapper.setComputed({ hasRecentPlaylist: true });
+    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4', chosen: true }] });
     wrapper.find('.item').trigger('mouseout');
     expect(spy.calledOnce).equal(true);
     spy.restore();
@@ -71,7 +61,8 @@ describe('Playlist.vue', () => {
     const wrapper = mount(Playlist);
     const spy = sinon.spy(wrapper.vm, 'onRecentItemClick');
     wrapper.setData({ isDragging: true });
-    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }] });
+    wrapper.setComputed({ hasRecentPlaylist: true });
+    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4', chosen: true }] });
     wrapper.find('.item').trigger('click.stop');
     expect(spy.calledOnce).equal(true);
     spy.restore();
