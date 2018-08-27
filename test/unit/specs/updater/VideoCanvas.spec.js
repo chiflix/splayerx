@@ -1,4 +1,4 @@
-import { createLocalVue, mount } from '@vue/test-utils';
+import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
 import VideoCanvas from '@/components/PlayingView/VideoCanvas';
 import Vuex from 'vuex';
 import sinon from 'sinon';
@@ -7,9 +7,10 @@ import PlaybackState from '@/store/modules/PlaybackState';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-let wrapper;
+
 describe('VideoCanvas.vue', () => {
   let store;
+  let wrapper;
   beforeEach(() => {
     store = new Vuex.Store({
       modules: {
@@ -26,6 +27,10 @@ describe('VideoCanvas.vue', () => {
         src: 'file:///./../../../../test/assets/test.avi',
       },
     });
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
   });
 
   it('should load correct data', () => {
@@ -101,11 +106,9 @@ describe('VideoCanvas.vue', () => {
     const stub = sinon.stub(wrapper.vm, '$_controlWindowSize').callsFake();
 
     wrapper.vm.onMetaLoaded();
-    expect(emitSpy.callCount).equal(4);
     expect(emitSpy.firstCall.calledWith('play')).equal(true);
     expect(emitSpy.secondCall.calledWith('seek', 100)).equal(true);
     expect(emitSpy.thirdCall.calledWith('screenshot-sizeset')).equal(true);
-    expect(emitSpy.lastCall.calledWith('video-loaded')).equal(true);
     expect(wrapper.vm.videoExisted).equal(true);
     stub.restore();
     emitSpy.restore();

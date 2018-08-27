@@ -28,7 +28,6 @@ describe('TheTimeCodes.vue', () => {
   it('should load correct data', () => {
     const wrapper = shallowMount(TheTimeCodes, { store, localVue });
     expect(wrapper.vm.showTimeCode).equal(false);
-    expect(wrapper.vm.timeoutIdOftimeCodeDisappearDelay).equal(0);
     expect(wrapper.vm.contentState).equal(0);
     expect(wrapper.vm.ContentStateEnum.DEFAULT).equal(0);
     expect(wrapper.vm.ContentStateEnum.CURRENT_REMAIN).equal(1);
