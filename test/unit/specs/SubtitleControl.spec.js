@@ -184,7 +184,7 @@ describe('SubtitleControl.vue', () => {
     wrapper.setData = {
       foundSubtitles: false,
       currentSubIden: -1,
-    }
+    };
     wrapper.vm.$bus.$emit('added-local-subtitles', 9);
     const stub = sinon.stub(wrapper.vm.$bus, '$on');
     stub('added-local-subtitles');

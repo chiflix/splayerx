@@ -307,11 +307,10 @@ export default {
           const currentIndex = tracks.findIndex(track => trackNumber === track.number);
           let currentContent = '';
           let currentLangDetected = '';
-
           // the indices for each cue can probably be ignored as it's in VTT format
-          currentContent += `${this.msToTime(sub.time)} --> ${this.msToTime(sub.time + sub.duration)}\r\n`;
+          currentContent += `${this.$_msToTime(sub.time)} --> ${this.$_msToTime(sub.time + sub.duration)}\r\n`;
           currentContent += `${(sub.text)}\r\n\r\n`;
-          if (currentLangDetected.length < 100) {
+          if (tracks[currentIndex].subLangs.length < 500) {
             const temp = lngDetector.detect(sub.text, 3);
             if (temp === undefined || temp[0] === undefined) {
               currentLangDetected += 'nothing';
@@ -337,7 +336,7 @@ export default {
           const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
           for (let i = 0; i < tracks.length; i += 1) {
             embededSubNames[i] = {
-              title: `${this.findMode(tracks[i].subLangs)}`,
+              title: `${this.$_findMode(tracks[i].subLangs)}`,
               status: null,
               textTrackID: this.textTrackID,
               origin: 'local',
@@ -477,7 +476,7 @@ export default {
         background,
       };
     },
-    msToTime(s) {
+    $_msToTime(s) {
       const ms = s % 1000;
       s = (s - ms) / 1000;
       const secs = s % 60;
@@ -487,7 +486,7 @@ export default {
       return (`${z(2, hrs)}:${z(2, mins)}:${z(2, secs)}.${z(3, ms)}`);
     },
 
-    findMode(array) {
+    $_findMode(array) {
       const map = new Map();
       let maxFreq = 0;
       let mode;
