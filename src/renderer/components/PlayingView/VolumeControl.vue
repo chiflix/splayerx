@@ -1,5 +1,4 @@
 <template>
-  <div>
   <transition name="fade" appear>
   <div
     @mouseover.stop="appearVolumeSlider"
@@ -9,8 +8,10 @@
       <div class="container"  ref="sliderContainer"
         @mousedown.stop.left="onVolumeSliderClick"
         v-show="showVolumeSlider">
-        <div class="slider" ref="slider"
-          :style="{ height: volume + '%' }">
+        <div class="background">
+          <div class="slider" ref="slider"
+            :style="{ height: volume + '%' }">
+          </div>
         </div>
       </div>
     </transition>
@@ -21,7 +22,6 @@
       </div>
     </div>
   </transition>
-</div>
 </template>;
 
 <script>
@@ -178,15 +178,25 @@ export default {
 
 <style lang="scss" scoped>
 .container {
+  backdrop-filter: blur(18px);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  -webkit-app-region: no-drag;
   position: absolute;
-  background-color: rgba(255,255,255,0.2);
-  border-radius: 1px;
-  left: 50%;
-  transform: translate(-50%);
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
   &:hover {
     cursor: pointer;
   }
 
+  .background{
+    width: 4px;
+    height: 134px;
+    position: absolute;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.2);
+  }
   .slider {
     width: 100%;
     position: absolute;
@@ -201,8 +211,8 @@ export default {
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
     bottom: 24+10px;
-    width: 15px;
-    height: 129px;
+    width: 34px;
+    height: 164px;
   }
   @media screen and (min-width: 1921px) {
     bottom: 36+10px;
