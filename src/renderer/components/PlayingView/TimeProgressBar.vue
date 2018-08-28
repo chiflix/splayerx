@@ -29,7 +29,7 @@
       :style="{width: this.winWidth - 20 + 'px'}"
       @mousedown.left.stop.capture="onProgressBarClick">
         <!-- translate优化 -->
-      <the-preview-thumbnail 
+      <the-preview-thumbnail
         v-show="showScreenshot"
         :src="src"
         :thumbnailWidth="widthOfThumbnail"
@@ -350,8 +350,8 @@ export default {
          setTimeout(() => { this.cursorPosition = 0; }, 300);
       }
     },
-    thumbnailCurrentTime(newValue) {
-      console.log('CurrentTime:', newValue);
+    thumbnailCurrentTime() {
+      // console.log('CurrentTime:', newValue);
     },
   },
   created() {
@@ -363,7 +363,7 @@ export default {
     } else {
       this.widthOfThumbnail = 240;
     }
-    console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
+    // console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
     this.$electron.ipcRenderer.on('main-resize', () => {
       const widthOfWindow = this.winWidth;
       if (widthOfWindow < 845) {
@@ -373,7 +373,7 @@ export default {
       } else {
         this.widthOfThumbnail = 240;
       }
-      console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
+      // console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
     });
     this.$bus.$on('progressslider-appear', () => {
       this.showScreenshot = false;

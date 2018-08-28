@@ -283,6 +283,7 @@ export default {
       this.videoElement.currentTime = e;
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
+      this.$bus.$emit('seek-subtitle', e);
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {
