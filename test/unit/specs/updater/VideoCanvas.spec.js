@@ -101,11 +101,9 @@ describe('VideoCanvas.vue', () => {
     const stub = sinon.stub(wrapper.vm, '$_controlWindowSize').callsFake();
 
     wrapper.vm.onMetaLoaded();
-    expect(emitSpy.callCount).equal(4);
     expect(emitSpy.firstCall.calledWith('play')).equal(true);
     expect(emitSpy.secondCall.calledWith('seek', 100)).equal(true);
     expect(emitSpy.thirdCall.calledWith('screenshot-sizeset')).equal(true);
-    expect(emitSpy.lastCall.calledWith('video-loaded')).equal(true);
     expect(wrapper.vm.videoExisted).equal(true);
     stub.restore();
     emitSpy.restore();
