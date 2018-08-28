@@ -22,7 +22,7 @@ const options = {
 const updateInfo = { version: '0.5.1', note: 'hello' };
 const updateInfoNext = { version: '0.5.1', note: 'hello' };
 
-if (process.platform == 'win32') {
+if (process.platform === 'win32') {
   // only do following unit test for win32
   let wrapper;
   let mainHelper;
