@@ -1,21 +1,20 @@
 <template>
   <transition name="fade" appear>
-  <div
+  <div class="volume"
     @mouseover.stop="appearVolumeSlider"
     @mouseout.stop="hideVolumeSlider"
     @mousemove="throttledCall">
     <transition name="fade">
-      <div class="container"  ref="sliderContainer"
-        @mousedown.stop.left="onVolumeSliderClick"
-        v-show="showVolumeSlider">
-        <div class="background">
+      <div class="container"
+        @mousedown.stop.left="onVolumeSliderClick">
+        <div class="background" ref="sliderContainer">
           <div class="slider" ref="slider"
             :style="{ height: volume + '%' }">
           </div>
         </div>
       </div>
     </transition>
-      <div
+      <div class="img-wrapper"
         @mousedown.stop.left="onVolumeButtonClick">
         <img type="image/svg+xml" wmode="transparent" v-show="showVolumeController"
           :src="srcOfVolumeButtonImage">
@@ -53,7 +52,14 @@ export default {
       console.log('onVolumeSliderClick');
       this.onVolumeSliderMousedown = true;
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
-      this.$bus.$emit('volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
+      let volumeHeight = sliderOffsetBottom - e.clientY;
+      if (volumeHeight < 0) {
+        volumeHeight = 0;
+      } else if (volumeHeight > this.$refs.sliderContainer.clientHeight) {
+        volumeHeight = this.$refs.sliderContainer.clientHeight;
+      }
+      console.log(volumeHeight);
+      this.$bus.$emit('volume', volumeHeight / this.$refs.sliderContainer.clientHeight);
       this.$_documentVoluemeDragClear();
       this.$_documentVolumeSliderDragEvent();
     },
@@ -177,15 +183,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.volume {
+  order: 2;
+}
 .container {
+  clip-path: inset(0px round 10px);
   backdrop-filter: blur(18px);
   display: flex;
   justify-content: space-around;
   align-items: center;
-  -webkit-app-region: no-drag;
+  -webkit-app-region: no-drag; 
   position: absolute;
   background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
   &:hover {
     cursor: pointer;
   }
