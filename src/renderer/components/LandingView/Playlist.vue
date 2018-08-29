@@ -91,6 +91,28 @@ export default {
     },
   },
   mounted() {
+    window.onkeyup = (e) => {
+      const lf = document.querySelector('.controller');
+      if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
+        !this.isFull && e.keyCode === 39) {
+        this.moveItem -= 1;
+        this.moveLength = 15 + (this.changeSize * (document.body.clientWidth / 100));
+        const ss = this.move - this.moveLength;
+        this.move = ss;
+        lf.style.left = `${ss}px`;
+      } else if (this.moveItem === -1 && !this.isFull && e.keyCode === 37) {
+        this.move = 0;
+        this.moveItem = 0;
+        lf.style.left = '0px';
+      } else if (this.moveItem !== 0 && !this.isFull && e.keyCode === 37) {
+        this.moveItem += 1;
+        const ss = (this.move + 15) + (this.changeSize * (document.body.clientWidth / 100));
+        this.move = ss;
+        lf.style.left = `${ss}px`;
+      }
+      this.$bus.$emit('moveItem', this.moveItem);
+      this.$bus.$emit('move', this.move);
+    };
   },
   watch: {
     showItemNum: function change(val, oldval) {
