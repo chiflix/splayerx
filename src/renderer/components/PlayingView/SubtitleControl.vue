@@ -71,10 +71,10 @@
 
           </ul>
         </div>
-        <div
+        <button
           @mousedown.capture.stop.left="toggleSubtitleMenu" v-if="isSubCtrlBtnAppear">
           <img type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
-        </div>
+        </button>
       </div>
     </transition>
   </div>
@@ -259,6 +259,15 @@ li {
 
 
 .video-controller .sub-control {
+  button {
+    border: none;
+  }
+  button:focus {
+    outline: none;
+  }
+  button:hover {
+    cursor: pointer;
+  }
   .btn:hover, .sub-item:hover{
     cursor: pointer;
   }

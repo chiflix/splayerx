@@ -14,11 +14,11 @@
         </div>
       </div>
     </transition>
-      <div
+      <button
         @mousedown.stop.left="onVolumeButtonClick">
         <img type="image/svg+xml" wmode="transparent"
           :src="srcOfVolumeButtonImage">
-      </div>
+      </button>
     </div>
   </transition>
 </div>
@@ -156,6 +156,7 @@ export default {
 
 <style lang="scss" scoped>
 .container {
+  -webkit-app-region: no-drag;
   position: absolute;
   background-color: rgba(255,255,255,0.2);
   border-radius: 1px;
@@ -187,6 +188,15 @@ export default {
     width: 20px;
     height: 172px;
   }
+}
+button {
+  border: none;
+}
+button:focus {
+  outline: none;
+}
+button:hover {
+  cursor: pointer;
 }
 .fade-enter-active {
  transition: opacity 100ms;
