@@ -252,17 +252,21 @@ export default {
             vm.$electron.remote.getCurrentWindow().getSize()[0];
           const limitHeight = (vm.changeSize / 100) *
             vm.$electron.remote.getCurrentWindow().getSize()[1];
+          const itemMask = document.querySelector(`#item${index} .mask`);
+          const itemDelete = document.querySelector(`#item${index} .deleteUi`);
           if (l <= -limitWidth || l >= limitWidth || t >= limitHeight || t <= -limitHeight) {
-            document.querySelector(`#item${index} .mask`).style.display = 'flex';
-            setTimeout(() => {
-              document.querySelector(`#item${index} .mask`).style.backgroundColor = 'rgba(0, 0, 0, 0.43)';
-              document.querySelector(`#item${index} .deleteUi`).style.display = 'inline';
-            }, 150);
+            itemMask.style.display = 'flex';
+            if (itemMask && itemDelete) {
+              setTimeout(() => {
+                itemMask.style.backgroundColor = 'rgba(0, 0, 0, 0.43)';
+                itemDelete.style.display = 'inline';
+              }, 150);
+            }
             vm.recentFileDel = true;
           } else {
-            document.querySelector(`#item${index} .mask`).style.backgroundColor = 'rgba(0, 0, 0, 0)';
-            document.querySelector(`#item${index} .mask`).style.display = 'none';
-            document.querySelector(`#item${index} .deleteUi`).style.display = 'none';
+            itemMask.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+            itemMask.style.display = 'none';
+            itemDelete.style.display = 'none';
             vm.recentFileDel = false;
           }
         }
