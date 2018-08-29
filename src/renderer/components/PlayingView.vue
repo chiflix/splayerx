@@ -310,8 +310,6 @@ export default {
   }
   .advance {
     order: 3;
-    // tempoary disable advance functionality
-    pointer-events: none;
   }
   img {
     width: 100%;

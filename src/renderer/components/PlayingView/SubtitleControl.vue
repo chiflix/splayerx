@@ -1,11 +1,9 @@
 <template>
   <div
     :data-component-name="$options.name"
-    class="sub-control"
-    @mousemove.capture="throttledCall">
+    class="sub-control">
     <transition name="fade" appear>
-      <div class="sub-btn-control"
-           v-if="isSubCtrlBtnAppear">
+      <div class="sub-btn-control">
         <div class="sub-menu-wrapper"
              v-if="appearSubtitleMenu">
           <ul class="sub-menu">
@@ -72,18 +70,14 @@
           </ul>
         </div>
         <button
-          @mousedown.capture.stop.left="toggleSubtitleMenu" v-if="isSubCtrlBtnAppear">
+          @mousedown.capture.stop.left="toggleSubtitleMenu">
           <img type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
         </button>
       </div>
     </transition>
   </div>
 </template>
-
-
-
 <script>
-import _ from 'lodash';
 export default {
   name: 'subtitle-control',
   data() {
@@ -93,25 +87,14 @@ export default {
         embedded: '',
         server: '',
       },
-      isSubCtrlBtnAppear: true,
       appearSubtitleMenu: false,
       foundSubtitles: true,
-      throttledCall: null,
       showingPopupDialog: false,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
       currentSubIden: 0,
     };
   },
-
   methods: {
-    subCtrlBtnAppear() {
-      this.isSubCtrlBtnAppear = true;
-    },
-    subCtrlBtnHide() {
-      this.isSubCtrlBtnAppear = false;
-      this.appearSubtitleMenu = false;
-      this.$bus.$emit('subtitle-menu-toggled-off');
-    },
     toggleSubtitleMenu() {
       if (!this.appearSubtitleMenu) {
         this.appearSubtitleMenu = true;
@@ -123,11 +106,7 @@ export default {
     },
     toggleItemsMouseOver(e) {
       this.appearSubtitleMenu = true;
-      this.isSubCtrlBtnAppear = true;
       e.target.style.backgroundImage = this.preStyle;
-    },
-    toggleSubtitleBtnMouseover() {
-      this.$bus.$emit('clear-all-widget-disappear-delay');
     },
     toggleItemsMouseLeave(e) {
       e.target.style.backgroundImage = 'none';
@@ -196,13 +175,8 @@ export default {
       return res;
     },
   },
-  beforeMount() {
-    this.throttledCall = _.throttle(this.toggleSubtitleBtnMouseover, 500);
-  },
   created() {
-    this.$bus.$on('sub-ctrl-appear', this.subCtrlBtnAppear);
     this.$bus.$on('sub-ctrl-hide', () => {
-      this.subCtrlBtnHide();
       this.$bus.$emit('subtitle-menu-toggled-off');
     });
     this.$bus.$on('subtitle-menu-off', this.toggleSubtitleMenu);
@@ -245,11 +219,7 @@ export default {
   },
 };
 </script>
-
-
-
 <style lang="scss" scoped>
-
 ul, li {
   list-style-type: none;
 }

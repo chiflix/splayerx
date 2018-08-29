@@ -12,8 +12,7 @@
       </div>
     </div>
     <button
-      v-show="showAdvance"
-      @mousedown.stop="switchSettingMenuState">
+      @mousedown.stop="1+1">
       <img src="~@/assets/icon-advanced.svg" type="image/svg+xml">
     </button>
   </div>
@@ -77,19 +76,15 @@ export default {
         },
       ],
       isAcitve: false,
-      showAdvance: false,
     };
   },
   methods: {
     onSecondItemClick() {
-      console.log('itemclick');
     },
     onMenuItemClick() {
-      console.log('menuclick');
       console.log(this.$refs.menuList[0].key);
     },
     switchSettingMenuState() {
-      console.log('switching');
       if (this.isAcitve) {
         this.menuList = this.settingLevel;
         this.closeMenuSetting();
@@ -117,12 +112,6 @@ export default {
     this.$bus.$on('change-menu-list', (changedLevel) => {
       this.menuList = changedLevel;
       this.$_fitMenuSize();
-    });
-    this.$bus.$on('advance-appear', () => {
-      this.showAdvance = true;
-    });
-    this.$bus.$on('advance-hide', () => {
-      this.showAdvance = false;
     });
   },
 };
