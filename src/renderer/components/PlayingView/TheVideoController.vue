@@ -1,8 +1,8 @@
 <template>
-  <div
+  <div ref="controller"
     :data-component-name="$options.name"
-    ref="controller"
-    class="the-video-controller">
+    class="the-video-controller"
+    @mousemove="handleMousemove">
     <div class="control-buttons">
       <volume-control class="button volume" />
       <subtitle-control class="button subtitle" />
@@ -24,6 +24,7 @@ export default {
   data() {
     return {
       UIElements: [],
+      currentWidget: this.$options.name,
     };
   },
   mounted() {
@@ -68,6 +69,9 @@ export default {
         });
       }
       return componentName;
+    },
+    handleMousemove(event) {
+      this.currentWidget = this.getComponentName(event.target);
     },
   },
 };
