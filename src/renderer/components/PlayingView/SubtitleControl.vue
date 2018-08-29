@@ -1,6 +1,8 @@
 <template>
-  <div class="sub-control"
-       @mousemove.capture="throttledCall">
+  <div
+    :data-component-name="$options.name"
+    class="sub-control"
+    @mousemove.capture="throttledCall">
     <transition name="fade" appear>
       <div class="sub-btn-control"
            v-if="isSubCtrlBtnAppear">
@@ -83,6 +85,7 @@
 <script>
 import _ from 'lodash';
 export default {
+  name: 'subtitle-control',
   data() {
     return {
       loadingSubsPlaceholders: {
