@@ -25,6 +25,9 @@ export default {
     return {
       UIElements: [],
       currentWidget: this.$options.name,
+      mousestop: false,
+      mousestopTimer: 0,
+      mousestopDelay: 3000,
     };
   },
   mounted() {
@@ -71,7 +74,14 @@ export default {
       return componentName;
     },
     handleMousemove(event) {
+      // Set currentWidget
       this.currentWidget = this.getComponentName(event.target);
+      // Mousestop timer
+      this.mousestop = false;
+      if (this.mousestopTimer) clearTimeout(this.mousestopTimer);
+      this.mousestopTimer = setTimeout(() => {
+        this.mousestop = true;
+      }, this.mousestopDelay);
     },
   },
 };
