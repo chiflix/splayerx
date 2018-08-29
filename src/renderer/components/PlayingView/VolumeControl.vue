@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div
+    :data-component-name="$options.name">
   <transition name="fade" appear>
   <div
     @mouseover="appearVolumeSlider"
@@ -25,6 +26,7 @@
 
 <script>
 export default {
+  name: 'volume-control',
   data() {
     return {
       showVolumeSlider: false,

@@ -1,7 +1,9 @@
 <template>
   <transition name="fade" appear>
     <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
-  <div class="progress"
+  <div
+    :data-component-name="$options.name"
+    class="progress"
     @mouseover.stop.capture="appearProgressSlider"
     @mouseleave="hideProgressSlider"
     @mousemove="onProgressBarMove"
@@ -74,6 +76,7 @@ import {
 import ThePreviewThumbnail from './ThePreviewThumbnail';
 
 export default {
+  name: 'the-time-progress-bar',
   components: {
     'the-preview-thumbnail': ThePreviewThumbnail,
   },

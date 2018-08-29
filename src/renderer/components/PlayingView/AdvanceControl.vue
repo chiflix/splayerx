@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div
+    :data-component-name="$options.name">
     <div :style="menuStyleObject" class="advanced"
       v-if="isAcitve">
       <div class="flex-container">
@@ -21,6 +22,7 @@
 import AdvanceControlMenuItem from './AdvanceControlMenuItem.vue';
 
 export default {
+  name: 'advance-control',
   components: {
     AdvanceControlMenuItem,
   },

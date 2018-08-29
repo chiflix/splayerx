@@ -1,5 +1,7 @@
 <template>
-  <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
+  <div
+    :data-component-name="$options.name"
+    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
     v-show="showTitlebar">
     <div class="win-icons" v-if="!isDarwin">
       <div id="minimize" class="title-button"

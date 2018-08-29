@@ -1,10 +1,13 @@
 <template>
-  <div class="player"
-  :style="{ cursor: cursorStyle }">
+  <div
+    :data-component-name="$options.name"
+    class="player"
+    :style="{ cursor: cursorStyle }">
     <VideoCanvas :src="uri" ref="VideoCanvasRef"/>
     <div class="masking"
       v-show="showMask"></div>
-    <div class="video-controller" id="video-controller"
+    <the-video-controller />
+    <!-- <div class="video-controller" id="video-controller"
       @mousedown.self="resetDraggingState"
       @mousedown.right.stop="handleRightClick"
       @mousedown.left.stop.prevent="handleLeftClick"
@@ -22,11 +25,12 @@
         <SubtitleControl class="button subtitle" />
         <AdvanceControl class="button advance"/>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <script>
+import TheVideoController from './PlayingView/TheVideoController';
 import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
@@ -40,6 +44,7 @@ import UnfousedHelper from './PlayingView/helpers/macUnfocusHelper.js';
 export default {
   name: 'playing-view',
   components: {
+    'the-video-controller': TheVideoController,
     VideoCanvas,
     TheTimeCodes,
     TimeProgressBar,

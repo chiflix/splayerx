@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div
+    :data-component-name="$options.name">
   <img type="image/svg+xml"  :src="src" class="icon"
         :class="ani_mode"
         @animationend="animationEnd"
@@ -9,6 +10,7 @@
 
 <script>
 export default {
+  name: 'play-button',
   data() {
     return {
       iconAppear: false, // control whether the icon show up or not

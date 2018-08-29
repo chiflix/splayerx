@@ -1,5 +1,7 @@
 <template>
-  <div class="thumbnail-video-player">
+  <div
+    :data-component-name="$options.name"
+    class="thumbnail-video-player">
     <base-video-player
       v-show="useFallback"
       ref="video"
