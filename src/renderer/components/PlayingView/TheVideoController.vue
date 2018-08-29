@@ -30,6 +30,11 @@ export default {
       mousestopDelay: 3000,
     };
   },
+  computed: {
+    showAllWidgets() {
+      return !this.mousestop;
+    },
+  },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
   },
