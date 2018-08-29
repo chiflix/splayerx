@@ -66,6 +66,7 @@ export default {
       move: 0,
       moveItem: 0,
       moveLength: 0,
+      mouseFlag: true,
     };
   },
   props: {
@@ -202,8 +203,8 @@ export default {
       };
     },
     onRecentItemMouseover(item, index) {
-      if ((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
-        this.isFull) {
+      if (((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
+        this.isFull) && this.mouseFlag) {
         this.item = item;
         this.$set(this.lastPlayedFile[index], 'chosen', true);
         if (item.shortCut !== '') {
@@ -234,7 +235,9 @@ export default {
       }
     },
     onRecentItemMouseout(index) {
-      this.$set(this.lastPlayedFile[index], 'chosen', false);
+      if (this.mouseFlag) {
+        this.$set(this.lastPlayedFile[index], 'chosen', false);
+      }
     },
     onRecentItemMousedown(ev, index) {
       const vm = this;
@@ -243,6 +246,7 @@ export default {
       const item = document.querySelector(`#item${index}`);
       function mousemove(ev) {
         if (vm.mouseDown) {
+          vm.mouseFlag = false;
           vm.isDragging = true;
           const l = ev.clientX - vm.disX;
           const t = ev.clientY - vm.disY;
@@ -272,6 +276,7 @@ export default {
         }
       }
       function mouseup() {
+        vm.mouseFlag = true;
         vm.mouseDown = false;
         if (vm.recentFileDel) {
           vm.displayInfo.langdingLogoAppear = true;
