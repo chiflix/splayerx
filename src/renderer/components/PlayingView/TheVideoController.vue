@@ -57,17 +57,17 @@ export default {
       return names;
     },
     getComponentName(element) {
-      let tempName = this.$options.name;
+      let componentName = this.$options.name;
       if (element instanceof HTMLElement) {
         /* eslint-disable consistent-return */
         this.UIElements.forEach((UIElement) => {
           if (UIElement.element.contains(element)) {
-            tempName = UIElement.name;
-            return tempName;
+            componentName = UIElement.name;
+            return componentName;
           }
         });
       }
-      return tempName;
+      return componentName;
     },
   },
 };
@@ -91,15 +91,6 @@ export default {
     -webkit-app-region: no-drag;
     cursor: pointer;
     position: relative;
-  }
-  .subtitle {
-    order: 1;
-  }
-  .volume {
-    order: 2;
-  }
-  .advance {
-    order: 3;
   }
   img {
     width: 100%;
