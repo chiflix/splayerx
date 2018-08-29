@@ -2,9 +2,8 @@
   <div>
   <transition name="fade" appear>
   <div
-    @mouseover.stop="appearVolumeSlider"
-    @mouseout.stop="hideVolumeSlider"
-    @mousemove="throttledCall">
+    @mouseover="appearVolumeSlider"
+    @mouseout="hideVolumeSlider">
     <transition name="fade">
       <div class="container"  ref="sliderContainer"
         @mousedown.stop.left="onVolumeSliderClick"
@@ -16,7 +15,7 @@
     </transition>
       <div
         @mousedown.stop.left="onVolumeButtonClick">
-        <img type="image/svg+xml" wmode="transparent" v-show="showVolumeController"
+        <img type="image/svg+xml" wmode="transparent"
           :src="srcOfVolumeButtonImage">
       </div>
     </div>
@@ -25,12 +24,10 @@
 </template>;
 
 <script>
-import _ from 'lodash';
 export default {
   data() {
     return {
       showVolumeSlider: false,
-      showVolumeController: true,
       onVolumeSliderMousedown: false,
       currentVolume: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
@@ -40,8 +37,6 @@ export default {
   },
   methods: {
     onVolumeButtonClick() {
-      console.log('onVolumeButtonClick');
-      this.$_clearTimeoutDelay();
       if (this.volume !== 0) {
         this.currentVolume = this.volume;
         this.$bus.$emit('volume', 0);
@@ -50,18 +45,13 @@ export default {
       }
     },
     onVolumeSliderClick(e) {
-      console.log('onVolumeSliderClick');
       this.onVolumeSliderMousedown = true;
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
       this.$bus.$emit('volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
       this.$_documentVoluemeDragClear();
       this.$_documentVolumeSliderDragEvent();
     },
-    clearAllWidgetsTimeout() {
-      this.$bus.$emit('clear-all-widget-disappear-delay');
-    },
     appearVolumeSlider() {
-      this.$_clearTimeoutDelay();
       this.showVolumeSlider = true;
     },
     hideVolumeSlider() {
@@ -69,20 +59,11 @@ export default {
         this.showVolumeSlider = false;
       }
     },
-    appearVolumeController() {
-      this.showVolumeController = true;
-    },
     hideVolumeController() {
       if (!this.onVolumeSliderMousedown) {
-        this.showVolumeController = false;
         if (this.showVolumeSlider) {
           this.showVolumeSlider = false;
         }
-      }
-    },
-    $_clearTimeoutDelay() {
-      if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
       }
     },
     /**
@@ -167,11 +148,6 @@ export default {
           = setTimeout(this.hideVolumeController, 3000);
       }
     });
-    this.$bus.$on('volumecontroller-appear', this.appearVolumeController);
-    this.$bus.$on('volumecontroller-hide', this.hideVolumeController);
-  },
-  beforeMount() {
-    this.throttledCall = _.throttle(this.clearAllWidgetsTimeout, 500);
   },
 };
 </script>
