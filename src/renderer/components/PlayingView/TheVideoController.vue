@@ -37,7 +37,20 @@ export default {
   },
   computed: {
     showAllWidgets() {
-      return !this.mousleft && !this.mousestop;
+      // truth table
+      // this.mousestop this.mouseleft this.onOtherWidget result
+      // 0 0 0 1
+      // 0 0 1 1
+      // 0 1 0 0
+      // 0 1 1 0
+      // 1 0 0 0
+      // 1 0 1 1
+      // 1 1 0 0
+      // 1 1 1 0
+      return (!this.mousestop && !this.mouseleft) || (!this.mouseleft && this.onOtherWidget);
+    },
+    onOtherWidget() {
+      return this.currentWidget !== this.$options.name;
     },
   },
   mounted() {
