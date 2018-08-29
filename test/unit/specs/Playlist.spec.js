@@ -75,7 +75,9 @@ describe('Playlist.vue', () => {
     wrapper.find('.item').trigger('mouseover');
     wrapper.setData({ isTurnToOdd: true });
     wrapper.find('.item').trigger('mouseover');
-    expect(spy.calledTwice).equal(true);
+    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4', shortCut: '' }] });
+    wrapper.find('.item').trigger('mouseover');
+    expect(spy.calledThrice).equal(true);
     spy.restore();
   });
   it('onRecentItemMouseout method works fine', () => {
@@ -102,21 +104,22 @@ describe('Playlist.vue', () => {
     expect(wrapper.vm.moveItem).equal(moveitem - 1);
     wrapper.setData({ moveItem: -4 });
     wrapper.vm.onRecentItemClick(item, 2);
+    expect(wrapper.vm.moveItem).equal(-3);
   });
   it('onRecentItemMousedown method works fine', () => {
     const wrapper = mount(Playlist, {
       attachToDocument: true,
     });
     wrapper.setData({
-      moveItem: -1,
+      moveItem: -1, isDragging: true, mouseDown: true,
     });
     wrapper.setProps({ showItemNum: 7 });
-    wrapper.setData({ isDragging: true });
-    wrapper.setData({ mouseDown: true });
     wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }] });
     const e = new window.Event('mousedown');
     wrapper.vm.onRecentItemMousedown(e, 0);
+    expect(wrapper.vm.isDragging).equal(false);
     wrapper.find('.item').trigger('mousemove');
+    expect(wrapper.vm.recentFileDel).equal(false);
     wrapper.find('.item').trigger('mouseup');
     wrapper.setData({ recentFileDel: true });
     wrapper.find('.item').trigger('mouseup');
