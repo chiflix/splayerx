@@ -257,17 +257,17 @@ li {
   cursor: pointer;
 }
 
+button {
+  border: none;
+}
+button:focus {
+  outline: none;
+}
+button:hover {
+  cursor: pointer;
+}
 
 .video-controller .sub-control {
-  button {
-    border: none;
-  }
-  button:focus {
-    outline: none;
-  }
-  button:hover {
-    cursor: pointer;
-  }
   .btn:hover, .sub-item:hover{
     cursor: pointer;
   }

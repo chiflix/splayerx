@@ -129,6 +129,15 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+button {
+  border: none;
+}
+button:focus {
+  outline: none;
+}
+button:hover {
+  cursor: pointer;
+}
 .video-controller {
   .advanced {
     position: absolute;
@@ -149,16 +158,6 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
-  }
-
-  button {
-    border: none;
-  }
-  button:focus {
-    outline: none;
-  }
-  button:hover {
-    cursor: pointer;
   }
 }
 </style>
