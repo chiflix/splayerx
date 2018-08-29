@@ -2,7 +2,9 @@
   <div ref="controller"
     :data-component-name="$options.name"
     class="the-video-controller"
-    @mousemove="handleMousemove">
+    @mousemove="handleMousemove"
+    @mouseenter="handleMouseenter"
+    @mouseleave="handleMouseleave">
     <div class="control-buttons">
       <volume-control class="button volume" />
       <subtitle-control class="button subtitle" />
@@ -28,11 +30,14 @@ export default {
       mousestop: false,
       mousestopTimer: 0,
       mousestopDelay: 3000,
+      mouseleft: false,
+      mouseleftTimer: 0,
+      mouseleftDelay: 1500,
     };
   },
   computed: {
     showAllWidgets() {
-      return !this.mousestop;
+      return !this.mousleft && !this.mousestop;
     },
   },
   mounted() {
@@ -87,6 +92,15 @@ export default {
       this.mousestopTimer = setTimeout(() => {
         this.mousestop = true;
       }, this.mousestopDelay);
+    },
+    handleMouseenter() {
+      this.mouseleft = false;
+      clearTimeout(this.mouseleftTimer);
+    },
+    handleMouseleave() {
+      this.mouseleftTimer = setTimeout(() => {
+        this.mouseleft = true;
+      }, this.mouseleftTimer);
     },
   },
 };
