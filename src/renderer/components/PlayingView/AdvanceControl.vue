@@ -10,10 +10,11 @@
         </AdvanceControlMenuItem>
       </div>
     </div>
-    <div class="button" v-show="showAdvance"
+    <button
+      v-show="showAdvance"
       @mousedown.stop="switchSettingMenuState">
       <img src="~@/assets/icon-advanced.svg" type="image/svg+xml">
-    </div>
+    </button>
   </div>
 </template>;
 
@@ -135,7 +136,6 @@ export default {
     height: 100%;
     background-color: white;
     opacity: 0.3;
-    backdrop-filter: blur(20px);
     color: black;
     border-radius: 4.8px;
     z-index: 750;
@@ -148,7 +148,13 @@ export default {
     justify-content: space-evenly;
   }
 
-  .button:hover {
+  button {
+    border: none;
+  }
+  button:focus {
+    outline: none;
+  }
+  button:hover {
     cursor: pointer;
   }
 }
