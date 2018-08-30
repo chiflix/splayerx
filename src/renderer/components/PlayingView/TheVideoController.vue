@@ -208,7 +208,7 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .the-video-controller {
   position: fixed;
   top: 0;
@@ -227,6 +227,15 @@ export default {
     -webkit-app-region: no-drag;
     cursor: pointer;
     position: relative;
+  }
+  .subtitle {
+    order: 1;
+  }
+  .volume {
+    order: 2;
+  }
+  .advance {
+    order: 3;
   }
   img {
     width: 100%;
