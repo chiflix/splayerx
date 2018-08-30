@@ -5,14 +5,14 @@
     @mousemove="handleMousemove"
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave">
-    <titlebar currentView="Playingview"></titlebar>
-    <the-time-codes />
+    <titlebar currentView="Playingview" v-show="showAllWidgets" ></titlebar>
+    <the-time-codes v-show="showAllWidgets" />
     <div class="control-buttons">
-      <volume-control class="button volume" />
-      <subtitle-control class="button subtitle" />
-      <advance-control class="button advance"/>
+      <volume-control class="button volume" v-show="showAllWidgets" />
+      <subtitle-control class="button subtitle" v-show="showAllWidgets" />
+      <advance-control class="button advance" v-show="showAllWidgets" />
     </div>
-    <the-time-progress-bar :src="this.$store.state.PlaybackState.SrcOfVideo" />
+    <the-time-progress-bar v-show="showAllWidgets" :src="this.$store.state.PlaybackState.SrcOfVideo" />
   </div>
 </template>
 <script>
