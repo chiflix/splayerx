@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, ipcMain, globalShortcut } from 'electron' // eslint-disable-line
 import Updater from './update/updater.js';
 import WindowResizer from './helpers/windowResizer.js';
 /**
@@ -103,6 +103,9 @@ function initMainWindowEvent() {
 }
 
 app.on('ready', () => {
+  globalShortcut.register('CommandOrControl+Shift+I+O+P', () => {
+    mainWindow.openDevTools();
+  });
   app.setName('SPlayerX');
   createWindow();
   const resizer = new WindowResizer(mainWindow);
