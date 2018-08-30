@@ -122,7 +122,7 @@ export default {
     handleMouseleave() {
       this.mouseleftTimer = setTimeout(() => {
         this.mouseleft = true;
-      }, this.mouseleftTimer);
+      }, this.mouseleftDelay);
     },
   },
 };
