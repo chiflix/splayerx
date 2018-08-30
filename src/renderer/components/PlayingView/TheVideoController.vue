@@ -4,7 +4,8 @@
     class="the-video-controller"
     @mousemove="handleMousemove"
     @mouseenter="handleMouseenter"
-    @mouseleave="handleMouseleave">
+    @mouseleave="handleMouseleave"
+    @mousedown.right="handleRightMouseDown">
     <titlebar currentView="Playingview" v-show="showAllWidgets" ></titlebar>
     <the-time-codes v-show="showAllWidgets" />
     <div class="control-buttons">
@@ -42,6 +43,7 @@ export default {
       mouseleft: false,
       mouseleftTimer: 0,
       mouseleftDelay: 1500,
+      popupShow: false,
     };
   },
   computed: {
@@ -123,6 +125,13 @@ export default {
       this.mouseleftTimer = setTimeout(() => {
         this.mouseleft = true;
       }, this.mouseleftDelay);
+    },
+    handleRightMouseDown() {
+      if (process.platform !== 'darwin') {
+        const menu = this.$electron.remote.Menu.getApplicationMenu();
+        menu.popup(this.$electron.remote.getCurrentWindow());
+        this.popupShow = true;
+      }
     },
   },
 };
