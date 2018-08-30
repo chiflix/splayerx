@@ -95,8 +95,7 @@ export default {
     * and any info needed to be saved before window closed.
     * Following code is to merge the buffer into DataBase.
     */
-    this.infoDB().init()
-      .then(() => asyncStorage.get('recent-played'))
+    asyncStorage.get('recent-played')
       .then(async (data) => {
         const val = await this.infoDB().lastPlayed();
         if (val && data) {
