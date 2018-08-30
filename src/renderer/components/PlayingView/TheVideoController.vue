@@ -6,6 +6,7 @@
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave">
     <titlebar currentView="Playingview"></titlebar>
+    <the-time-codes />
     <div class="control-buttons">
       <volume-control class="button volume" />
       <subtitle-control class="button subtitle" />
@@ -15,6 +16,7 @@
 </template>
 <script>
 import Titlebar from '../Titlebar.vue';
+import TheTimeCodes from './TheTimeCodes.vue';
 import VolumeControl from './VolumeControl';
 import AdvanceControl from './AdvanceControl';
 import SubtitleControl from './SubtitleControl';
@@ -22,6 +24,7 @@ export default {
   name: 'the-video-controller',
   components: {
     titlebar: Titlebar,
+    'the-time-codes': TheTimeCodes,
     'subtitle-control': SubtitleControl,
     'volume-control': VolumeControl,
     'advance-control': AdvanceControl,
