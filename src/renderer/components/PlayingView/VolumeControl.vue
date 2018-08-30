@@ -6,7 +6,8 @@
     @mousemove="throttledCall">
     <transition name="fade">
       <div class="container"
-        @mousedown.stop.left="onVolumeSliderClick">
+        @mousedown.stop.left="onVolumeSliderClick"
+        v-show="showVolumeSlider">
         <div class="background" ref="sliderContainer">
           <div class="slider" ref="slider"
             :style="{ height: volume + '%' }">
@@ -183,9 +184,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.volume {
-  order: 2;
-}
 .container {
   clip-path: inset(0px round 10px);
   backdrop-filter: blur(18px);
@@ -227,6 +225,24 @@ export default {
     bottom: 36+10px;
     width: 20px;
     height: 172px;
+  }
+}
+.img-wrapper {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  img {
+    position: absolute;
+    bottom: 0;
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    height: 30px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    height: 40px;
+  }
+  @media screen and (min-width: 1921px) {
+    height: 66px;
   }
 }
 .fade-enter-active {
