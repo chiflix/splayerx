@@ -342,14 +342,15 @@ export default {
 
             .button {
                 background-color: rgba(0, 0, 0, 0.12);
-                backdrop-filter: blur(9.8px); // 删除后快速拖拽背景不会闪动
+                backdrop-filter: blur(9.8px);
                 margin-right: 15px;
                 cursor: pointer;
             }
 
             .btnMask {
                 border-radius: 2px;
-                border: 1px solid rgb(55, 55, 55);
+                border: 1px solid;
+                border-color: rgba(55, 55, 55, 1) rgba(55, 55, 55, 0.8) rgba(55, 55, 55, 0.5) rgba(55, 55, 55, 0.8);
                 display: flex;
             }
 
@@ -360,6 +361,8 @@ export default {
             .item {
                 color: #e4e4c4;
                 border-radius: 2px;
+                border:1px solid;
+                border-color: rgba(231, 231, 231, 0.5) rgba(231, 231, 231, 0.3)  rgba(84, 84, 84, 0.6) rgba(231, 231, 231, 0.3) ;
                 width: 112 / 720vw;
                 height: 63 / 405vh;
                 min-height: 63px;
@@ -378,7 +381,6 @@ export default {
             .mask {
                 border-radius: 2px;
                 display: none;
-                border: 1.3px solid rgba(113, 113, 113, 0.53);
                 box-shadow: 0 26px 39px rgba(0, 0, 0, 0.3), 0 5px 20px rgba(0, 0, 0, 0.14);
                 transition: all 150ms;
             }
