@@ -17,8 +17,6 @@ export default {
   },
   methods: {
     wheelVolumeControll(e) {
-      this.$bus.$emit('volumecontroller-appear-delay');
-      this.$bus.$emit('volumeslider-appear');
       if (e.deltaY < 0) {
         if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
           this.$bus.$emit(
