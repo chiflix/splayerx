@@ -12,6 +12,7 @@
       <subtitle-control class="button subtitle" />
       <advance-control class="button advance"/>
     </div>
+    <the-time-progress-bar :src="this.$store.state.PlaybackState.SrcOfVideo" />
   </div>
 </template>
 <script>
@@ -20,6 +21,7 @@ import TheTimeCodes from './TheTimeCodes.vue';
 import VolumeControl from './VolumeControl';
 import AdvanceControl from './AdvanceControl';
 import SubtitleControl from './SubtitleControl';
+import TimeProgressBar from './TimeProgressBar.vue';
 export default {
   name: 'the-video-controller',
   components: {
@@ -28,6 +30,7 @@ export default {
     'subtitle-control': SubtitleControl,
     'volume-control': VolumeControl,
     'advance-control': AdvanceControl,
+    'the-time-progress-bar': TimeProgressBar,
   },
   data() {
     return {
