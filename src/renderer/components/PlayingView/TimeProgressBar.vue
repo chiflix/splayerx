@@ -4,10 +4,9 @@
   <div
     :data-component-name="$options.name"
     class="progress"
-    @mouseover.stop.capture="appearProgressSlider"
+    @mouseover="appearProgressSlider"
     @mouseleave="hideProgressSlider"
-    @mousemove="onProgressBarMove"
-    v-show="showProgressBar">
+    @mousemove="onProgressBarMove">
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown.stop="videoRestart"
       @mouseover="thumbnailCurrentTime = 0"
@@ -96,7 +95,6 @@ export default {
   data() {
     return {
       showScreenshot: false,
-      showProgressBar: true,
       onProgressSliderMousedown: false,
       flagProgressBarDraged: false,
       isCursorLeft: false,
@@ -137,16 +135,6 @@ export default {
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
         this.$refs.backSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
-      }
-    },
-    appearProgressBar() {
-      this.$_clearTimeoutDelay();
-      this.showProgressBar = true;
-    },
-    hideProgressBar() {
-      if (!this.onProgressSliderMousedown) {
-        this.showProgressBar = false;
-        this.hideProgressSlider();
       }
     },
     videoRestart() {
@@ -353,9 +341,6 @@ export default {
          setTimeout(() => { this.cursorPosition = 0; }, 300);
       }
     },
-    thumbnailCurrentTime(newValue) {
-      console.log('CurrentTime:', newValue);
-    },
   },
   created() {
     const widthOfWindow = this.winWidth;
@@ -366,7 +351,6 @@ export default {
     } else {
       this.widthOfThumbnail = 240;
     }
-    console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
     this.$electron.ipcRenderer.on('main-resize', () => {
       const widthOfWindow = this.winWidth;
       if (widthOfWindow < 845) {
@@ -376,34 +360,7 @@ export default {
       } else {
         this.widthOfThumbnail = 240;
       }
-      console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
     });
-    this.$bus.$on('progressslider-appear', () => {
-      this.showScreenshot = false;
-      this.appearProgressSlider();
-      this.isOnProgress = false;
-      if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
-        this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
-      } else {
-        this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
-      }
-    });
-    this.$bus.$on('progressbar-appear-delay', () => {
-      this.appearProgressBar();
-      if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
-        this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
-      } else {
-        this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
-      }
-    });
-    this.$bus.$on('progressbar-appear', this.appearProgressBar);
-    this.$bus.$on('progressbar-hide', this.hideProgressBar);
     this.$bus.$on('screenshot-sizeset', (e) => {
       this.videoRatio = e;
     });
@@ -414,7 +371,7 @@ export default {
 
 <style lang="scss" scoped>
 
-.video-controller .progress {
+.progress {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -505,7 +462,7 @@ export default {
   }
 }
 
-.video-controller .hidePlayedSlider {
+.hidePlayedSlider {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -524,7 +481,7 @@ export default {
   }
 }
 
-.video-controller .progressPlayed {
+.progressPlayed {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -543,7 +500,7 @@ export default {
   }
 }
 
-.video-controller .progress-ready {
+.progress-ready {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -568,7 +525,7 @@ export default {
   }
 }
 
-.video-controller .progress-back {
+.progress-back {
   position: absolute;
   bottom: 0;
   left: 0;
