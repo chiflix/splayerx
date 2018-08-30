@@ -10,6 +10,7 @@
     @mousedown.left="handleLeftMousedown"
     @mouseup.left="handleLeftMouseup">
     <titlebar currentView="Playingview" v-show="showAllWidgets" ></titlebar>
+    <div class="masking" v-show="showAllWidgets"></div>
     <play-button />
     <the-time-codes v-show="showAllWidgets" />
     <div class="control-buttons">
@@ -218,6 +219,20 @@ export default {
   border-radius: 4px;
   opacity: 1;
   transition: opacity 400ms;
+}
+.masking {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 50%;
+  opacity: 0.3;
+  background-image: linear-gradient(
+    -180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.19) 62%,
+    rgba(0, 0, 0, 0.29) 100%
+  );
 }
 .control-buttons {
   display: flex;
