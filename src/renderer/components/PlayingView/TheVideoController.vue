@@ -10,6 +10,7 @@
     @mousedown.left="handleLeftMousedown"
     @mouseup.left="handleLeftMouseup">
     <titlebar currentView="Playingview" v-show="showAllWidgets" ></titlebar>
+    <play-button />
     <the-time-codes v-show="showAllWidgets" />
     <div class="control-buttons">
       <volume-control class="button volume" v-show="showAllWidgets" />
@@ -21,6 +22,7 @@
 </template>
 <script>
 import Titlebar from '../Titlebar.vue';
+import PlayButton from './PlayButton.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import VolumeControl from './VolumeControl';
 import AdvanceControl from './AdvanceControl';
@@ -30,6 +32,7 @@ export default {
   name: 'the-video-controller',
   components: {
     titlebar: Titlebar,
+    'play-button': PlayButton,
     'the-time-codes': TheTimeCodes,
     'subtitle-control': SubtitleControl,
     'volume-control': VolumeControl,
