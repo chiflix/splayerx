@@ -1,8 +1,7 @@
 <template>
   <div
     :data-component-name="$options.name"
-    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
-    v-show="showTitlebar">
+    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }">
     <div class="win-icons" v-if="!isDarwin">
       <div id="minimize" class="title-button"
         @click="handleMinimize">
@@ -53,7 +52,6 @@ export default {
   name: 'titlebar',
   data() {
     return {
-      showTitlebar: true,
       middleButtonStatus: 'maximize',
       windowInfo: {
         screenWidth: null,
@@ -150,8 +148,6 @@ export default {
         this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
       }
     });
-    this.$bus.$on('titlebar-appear', this.appearTitlebar);
-    this.$bus.$on('titlebar-hide', this.hideTitlebar);
   },
   computed: {
     show() {
