@@ -150,13 +150,7 @@ export default {
   }
 
   button {
-    border: none;
-  }
-  button:focus {
-    outline: none;
-  }
-  button:hover {
-    cursor: pointer;
+    height: 100%;
   }
 }
 </style>

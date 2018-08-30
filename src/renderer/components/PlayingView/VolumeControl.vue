@@ -15,7 +15,7 @@
         </div>
       </div>
     </transition>
-      <button class="img-wrapper"
+      <button
         @mousedown.stop.left="onVolumeButtonClick">
         <img type="image/svg+xml" wmode="transparent" v-show="showVolumeController"
           :src="srcOfVolumeButtonImage">
@@ -198,8 +198,6 @@ export default {
   }
 
   .background{
-    width: 4px;
-    height: 134px;
     position: absolute;
     border-radius: 10px;
     background-color: rgba(255, 255, 255, 0.2);
@@ -212,27 +210,37 @@ export default {
     border-radius: 1px;
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
-    bottom: 18+10px;
-    width: 10px;
-    height: 86px;
+    bottom: 30px;
+    width: 30px;
+    height: 126px;
+    .background {
+      width: 4px;
+      height: 100px;
+    }
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
-    bottom: 24+10px;
+    bottom: 40px;
     width: 34px;
     height: 164px;
+    .background {
+      width: 4px;
+      height: 134px;
+    }
   }
   @media screen and (min-width: 1921px) {
-    bottom: 36+10px;
+    bottom: 66px;
     width: 20px;
     height: 172px;
+    .background {
+      width: 4px;
+      height: 214px;
+    }
   }
 }
-.img-wrapper {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
+button {
   img {
     position: absolute;
+    left: 0;
     bottom: 0;
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
@@ -244,15 +252,6 @@ export default {
   @media screen and (min-width: 1921px) {
     height: 66px;
   }
-}
-button {
-  border: none;
-}
-button:focus {
-  outline: none;
-}
-button:hover {
-  cursor: pointer;
 }
 .fade-enter-active {
  transition: opacity 100ms;

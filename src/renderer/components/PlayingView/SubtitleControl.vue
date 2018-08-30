@@ -257,13 +257,7 @@ li {
 
 .video-controller .sub-control {
   button {
-    border: none;
-  }
-  button:focus {
-    outline: none;
-  }
-  button:hover {
-    cursor: pointer;
+    height: 100%;
   }
   .btn:hover, .sub-item:hover{
     cursor: pointer;
