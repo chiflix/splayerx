@@ -2,6 +2,7 @@
   <div ref="controller"
     :data-component-name="$options.name"
     class="the-video-controller"
+    :style="{ cursor: cursorStyle }"
     @mousemove="handleMousemove"
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
@@ -71,6 +72,9 @@ export default {
     },
     onOtherWidget() {
       return this.currentWidget !== this.$options.name;
+    },
+    cursorStyle() {
+      return this.showAllWidgets ? 'default' : 'none';
     },
   },
   mounted() {
