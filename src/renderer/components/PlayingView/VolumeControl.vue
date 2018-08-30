@@ -15,11 +15,11 @@
         </div>
       </div>
     </transition>
-      <div class="img-wrapper"
+      <button class="img-wrapper"
         @mousedown.stop.left="onVolumeButtonClick">
         <img type="image/svg+xml" wmode="transparent" v-show="showVolumeController"
           :src="srcOfVolumeButtonImage">
-      </div>
+      </button>
     </div>
   </transition>
 </template>;
@@ -244,6 +244,15 @@ export default {
   @media screen and (min-width: 1921px) {
     height: 66px;
   }
+}
+button {
+  border: none;
+}
+button:focus {
+  outline: none;
+}
+button:hover {
+  cursor: pointer;
 }
 .fade-enter-active {
  transition: opacity 100ms;
