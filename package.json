@@ -2,13 +2,13 @@
   "name": "splayer",
   "productName": "splayer",
   "homepage": "https://splayer.org",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "tomasen <tomasen@gmail.com>",
   "description": "a media player",
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
-    "build": "node .electron-vue/build.js && cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true DEBUG=electron-download electron-builder --p never",
+    "build": "node .electron-vue/build.js && electron-builder --p never",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
@@ -66,7 +66,7 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns",
+      "icon": "icons/icon.icns",
       "target": [
         "dmg",
         "zip"
