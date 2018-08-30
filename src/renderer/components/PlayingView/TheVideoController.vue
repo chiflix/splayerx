@@ -6,7 +6,8 @@
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
     @mousedown.right="handleRightMousedown"
-    @mousedown.left="handleLeftMousedown">
+    @mousedown.left="handleLeftMousedown"
+    @mouseup.left="handleLeftMouseup">
     <titlebar currentView="Playingview" v-show="showAllWidgets" ></titlebar>
     <the-time-codes v-show="showAllWidgets" />
     <div class="control-buttons">
@@ -47,6 +48,11 @@ export default {
       popupShow: false,
       mousedownTime: null,
       mousedownCursorPosition: null,
+      clicks: 0,
+      clicksTimer: 0,
+      clicksDelay: 200,
+      dragDelay: 200,
+      dragRadiusSquare: 25,
     };
   },
   computed: {
@@ -110,6 +116,31 @@ export default {
       }
       return componentName;
     },
+    isValidClick() { // this check will be at on mouse up
+      const cp = this.$electron.screen.getCursorScreenPoint();
+      if (new Date() - this.mousedownTime > this.dragDelay) {
+        return false;
+      }
+      const radiusSquare = ((cp.x - this.mousedownCursorPosition.x) ** 2) +
+          ((cp.y - this.mousedownCursorPosition.y) ** 2);
+      if (radiusSquare - this.dragRadiusSquare > 0) {
+        return false;
+      }
+      return true;
+    },
+    toggleFullScreenState() {
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      if (currentWindow.isFullScreen()) {
+        currentWindow.setFullScreen(false);
+        this.$bus.$emit('reset-windowsize');
+      } else {
+        currentWindow.setAspectRatio(0);
+        currentWindow.setFullScreen(true);
+      }
+    },
+    togglePlayback() {
+      this.$bus.$emit('toggle-playback');
+    },
     handleMousemove(event) {
       // Set currentWidget
       this.currentWidget = this.getComponentName(event.target);
@@ -148,6 +179,24 @@ export default {
       // Playback related variables
       this.mousedownCursorPosition = this.$electron.screen.getCursorScreenPoint();
       this.mousedownTime = new Date();
+    },
+    handleLeftMouseup() {
+      this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
+      if (this.clicks === 1) { // if one click has been detected - clicks === 1
+        const self = this; // define a constant "self" for the following scope to use
+        if (this.isValidClick()) {
+          this.clicksTimer = setTimeout(() => { // define timer as setTimeOut function
+            self.togglePlayback(); // which is togglePlayback
+            self.clicks = 0; // reset the "clicks" to zero for next event
+          }, this.clicksDelay);
+        } else {
+          self.clicks = 0;
+        }
+      } else { // else, if a second click has been detected - clicks === 2
+        clearTimeout(this.clicksTimer); // cancel the time out
+        this.toggleFullScreenState();
+        this.clicks = 0;// reset the "clicks" to zero
+      }
     },
   },
 };
