@@ -66,6 +66,7 @@ export default {
       move: 0,
       moveItem: 0,
       moveLength: 0,
+      mouseFlag: true,
     };
   },
   props: {
@@ -91,6 +92,28 @@ export default {
     },
   },
   mounted() {
+    window.onkeyup = (e) => {
+      const lf = document.querySelector('.controller');
+      if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
+        !this.isFull && e.keyCode === 39) {
+        this.moveItem -= 1;
+        this.moveLength = 15 + (this.changeSize * (document.body.clientWidth / 100));
+        const ss = this.move - this.moveLength;
+        this.move = ss;
+        lf.style.left = `${ss}px`;
+      } else if (this.moveItem === -1 && !this.isFull && e.keyCode === 37) {
+        this.move = 0;
+        this.moveItem = 0;
+        lf.style.left = '0px';
+      } else if (this.moveItem !== 0 && !this.isFull && e.keyCode === 37) {
+        this.moveItem += 1;
+        const ss = (this.move + 15) + (this.changeSize * (document.body.clientWidth / 100));
+        this.move = ss;
+        lf.style.left = `${ss}px`;
+      }
+      this.$bus.$emit('moveItem', this.moveItem);
+      this.$bus.$emit('move', this.move);
+    };
   },
   watch: {
     showItemNum: function change(val, oldval) {
@@ -180,8 +203,8 @@ export default {
       };
     },
     onRecentItemMouseover(item, index) {
-      if ((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
-        this.isFull) {
+      if (((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
+        this.isFull) && this.mouseFlag) {
         this.item = item;
         this.$set(this.lastPlayedFile[index], 'chosen', true);
         if (item.shortCut !== '') {
@@ -212,7 +235,9 @@ export default {
       }
     },
     onRecentItemMouseout(index) {
-      this.$set(this.lastPlayedFile[index], 'chosen', false);
+      if (this.mouseFlag) {
+        this.$set(this.lastPlayedFile[index], 'chosen', false);
+      }
     },
     onRecentItemMousedown(ev, index) {
       const vm = this;
@@ -221,6 +246,7 @@ export default {
       const item = document.querySelector(`#item${index}`);
       function mousemove(ev) {
         if (vm.mouseDown) {
+          vm.mouseFlag = false;
           vm.isDragging = true;
           const l = ev.clientX - vm.disX;
           const t = ev.clientY - vm.disY;
@@ -230,22 +256,27 @@ export default {
             vm.$electron.remote.getCurrentWindow().getSize()[0];
           const limitHeight = (vm.changeSize / 100) *
             vm.$electron.remote.getCurrentWindow().getSize()[1];
+          const itemMask = document.querySelector(`#item${index} .mask`);
+          const itemDelete = document.querySelector(`#item${index} .deleteUi`);
           if (l <= -limitWidth || l >= limitWidth || t >= limitHeight || t <= -limitHeight) {
-            document.querySelector(`#item${index} .mask`).style.display = 'flex';
-            setTimeout(() => {
-              document.querySelector(`#item${index} .mask`).style.backgroundColor = 'rgba(0, 0, 0, 0.43)';
-              document.querySelector(`#item${index} .deleteUi`).style.display = 'inline';
-            }, 150);
+            itemMask.style.display = 'flex';
+            if (itemMask && itemDelete) {
+              setTimeout(() => {
+                itemMask.style.backgroundColor = 'rgba(0, 0, 0, 0.43)';
+                itemDelete.style.display = 'inline';
+              }, 150);
+            }
             vm.recentFileDel = true;
           } else {
-            document.querySelector(`#item${index} .mask`).style.backgroundColor = 'rgba(0, 0, 0, 0)';
-            document.querySelector(`#item${index} .mask`).style.display = 'none';
-            document.querySelector(`#item${index} .deleteUi`).style.display = 'none';
+            itemMask.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+            itemMask.style.display = 'none';
+            itemDelete.style.display = 'none';
             vm.recentFileDel = false;
           }
         }
       }
       function mouseup() {
+        vm.mouseFlag = true;
         vm.mouseDown = false;
         if (vm.recentFileDel) {
           vm.displayInfo.langdingLogoAppear = true;
@@ -311,14 +342,15 @@ export default {
 
             .button {
                 background-color: rgba(0, 0, 0, 0.12);
-                backdrop-filter: blur(9.8px); // 删除后快速拖拽背景不会闪动
+                backdrop-filter: blur(9.8px);
                 margin-right: 15px;
                 cursor: pointer;
             }
 
             .btnMask {
                 border-radius: 2px;
-                border: 1px solid rgb(55, 55, 55);
+                border: 1px solid;
+                border-color: rgba(55, 55, 55, 1) rgba(55, 55, 55, 0.8) rgba(55, 55, 55, 0.5) rgba(55, 55, 55, 0.8);
                 display: flex;
             }
 
@@ -329,6 +361,8 @@ export default {
             .item {
                 color: #e4e4c4;
                 border-radius: 2px;
+                border:1px solid;
+                border-color: rgba(231, 231, 231, 0.5) rgba(231, 231, 231, 0.3)  rgba(84, 84, 84, 0.6) rgba(231, 231, 231, 0.3) ;
                 width: 112 / 720vw;
                 height: 63 / 405vh;
                 min-height: 63px;
@@ -347,7 +381,6 @@ export default {
             .mask {
                 border-radius: 2px;
                 display: none;
-                border: 1.3px solid rgba(113, 113, 113, 0.53);
                 box-shadow: 0 26px 39px rgba(0, 0, 0, 0.3), 0 5px 20px rgba(0, 0, 0, 0.14);
                 transition: all 150ms;
             }
