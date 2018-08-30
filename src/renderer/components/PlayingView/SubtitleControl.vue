@@ -237,7 +237,7 @@ button:hover {
   cursor: pointer;
 }
 
-.video-controller .sub-control {
+.sub-control {
   .btn:hover, .sub-item:hover{
     cursor: pointer;
   }

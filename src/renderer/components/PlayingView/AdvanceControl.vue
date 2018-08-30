@@ -127,26 +127,24 @@ button:focus {
 button:hover {
   cursor: pointer;
 }
-.video-controller {
-  .advanced {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    background-color: white;
-    opacity: 0.3;
-    backdrop-filter: blur(20px);
-    color: black;
-    border-radius: 4.8px;
-    z-index: 750;
-  }
+.advanced {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  opacity: 0.3;
+  backdrop-filter: blur(20px);
+  color: black;
+  border-radius: 4.8px;
+  z-index: 750;
+}
 
-  .flex-container {
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-  }
+.flex-container {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
 }
 </style>
