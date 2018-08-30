@@ -286,7 +286,8 @@ export default {
           vm.infoDB().delete('recent-played', deletData[0].quickHash);
           vm.recentFileDel = false;
         } else {
-          item.style.zIndex = 4;
+          item.classList.add('shadow');
+          item.style.zIndex = '';
           item.style.left = '';
           item.style.top = '';
         }
@@ -297,6 +298,7 @@ export default {
         document.onmousemove = mousemove;
         document.onmouseup = mouseup;
         document.querySelector('.controller').parentNode.onmouseup = mouseup;
+        item.classList.remove('shadow');
         item.style.zIndex = 5;
       }
     },
@@ -342,15 +344,20 @@ export default {
 
             .button {
                 background-color: rgba(0, 0, 0, 0.12);
+                transition: background-color 150ms ease-out;
                 backdrop-filter: blur(9.8px);
                 margin-right: 15px;
                 cursor: pointer;
             }
 
+            .button:hover {
+                background-color: rgba(123, 123, 123, 0.12);
+                transition: background-color 150ms ease-out;
+            }
+
             .btnMask {
                 border-radius: 2px;
-                border: 1px solid;
-                border-color: rgba(55, 55, 55, 1) rgba(55, 55, 55, 0.8) rgba(55, 55, 55, 0.5) rgba(55, 55, 55, 0.8);
+                border: 1px solid rgb(55, 55, 55);
                 display: flex;
             }
 
@@ -359,10 +366,10 @@ export default {
             }
 
             .item {
+                position: relative;
                 color: #e4e4c4;
                 border-radius: 2px;
-                border:1px solid;
-                border-color: rgba(231, 231, 231, 0.5) rgba(231, 231, 231, 0.3)  rgba(84, 84, 84, 0.6) rgba(231, 231, 231, 0.3) ;
+                border: 1px solid rgb(55, 55, 55);
                 width: 112 / 720vw;
                 height: 63 / 405vh;
                 min-height: 63px;
@@ -397,7 +404,7 @@ export default {
                 content: "";
                 position: absolute;
                 z-index: -1;
-                //box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+                box-shadow: 0 8px 30px rgba(0,0,0,0.3);
                 top: 50%;
                 bottom: 0;
                 left: 10px;
