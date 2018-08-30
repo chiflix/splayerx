@@ -353,6 +353,7 @@ new Vue({
   mounted() {
     // https://github.com/electron/electron/issues/3609
     // Disable Zooming
+    this.infoDB().init();
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
     this.getSystemLocale();
     this.createMenu();
