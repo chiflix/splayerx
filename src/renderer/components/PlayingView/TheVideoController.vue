@@ -5,7 +5,8 @@
     @mousemove="handleMousemove"
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
-    @mousedown.right="handleRightMouseDown">
+    @mousedown.right="handleRightMousedown"
+    @mousedown.left="handleLeftMousedown">
     <titlebar currentView="Playingview" v-show="showAllWidgets" ></titlebar>
     <the-time-codes v-show="showAllWidgets" />
     <div class="control-buttons">
@@ -44,6 +45,8 @@ export default {
       mouseleftTimer: 0,
       mouseleftDelay: 1500,
       popupShow: false,
+      mousedownTime: null,
+      mousedownCursorPosition: null,
     };
   },
   computed: {
@@ -126,12 +129,25 @@ export default {
         this.mouseleft = true;
       }, this.mouseleftDelay);
     },
-    handleRightMouseDown() {
+    handleRightMousedown() {
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
         menu.popup(this.$electron.remote.getCurrentWindow());
         this.popupShow = true;
       }
+    },
+    handleLeftMousedown() {
+      if (process.platform !== 'darwin') {
+        const menu = this.$electron.remote.Menu.getApplicationMenu();
+        if (this.popupShow === true) {
+          menu.closePopup();
+          this.popupShow = false;
+        }
+      }
+
+      // Playback related variables
+      this.mousedownCursorPosition = this.$electron.screen.getCursorScreenPoint();
+      this.mousedownTime = new Date();
     },
   },
 };
