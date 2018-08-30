@@ -125,4 +125,22 @@ describe('Playlist.vue', () => {
     wrapper.find('.item').trigger('mouseup');
     expect(wrapper.vm.mouseDown).equal(false);
   });
+  it('onkeypress works fine', () => {
+    const wrapper = mount(Playlist, {
+      attachToDocument: true,
+    });
+    wrapper.setProps({ showItemNum: 1, isFull: false });
+    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }] });
+    wrapper.setData({ moveItem: 0 });
+    const e = new window.Event('keyup');
+    e.keyCode = 39;
+    window.onkeyup(e);
+    expect(wrapper.vm.moveItem).equal(-1);
+    wrapper.setData({ moveItem: -2 });
+    e.keyCode = 37;
+    window.onkeyup(e);
+    expect(wrapper.vm.moveItem).equal(-1);
+    window.onkeyup(e);
+    expect(wrapper.vm.moveItem).equal(0);
+  });
 });
