@@ -5,6 +5,7 @@
     @mousemove="handleMousemove"
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave">
+    <titlebar currentView="Playingview"></titlebar>
     <div class="control-buttons">
       <volume-control class="button volume" />
       <subtitle-control class="button subtitle" />
@@ -13,12 +14,14 @@
   </div>
 </template>
 <script>
-import VolumeControl from './VolumeControl.vue';
-import AdvanceControl from './AdvanceControl.vue';
-import SubtitleControl from './SubtitleControl.vue';
+import Titlebar from '../Titlebar.vue';
+import VolumeControl from './VolumeControl';
+import AdvanceControl from './AdvanceControl';
+import SubtitleControl from './SubtitleControl';
 export default {
   name: 'the-video-controller',
   components: {
+    titlebar: Titlebar,
     'subtitle-control': SubtitleControl,
     'volume-control': VolumeControl,
     'advance-control': AdvanceControl,
