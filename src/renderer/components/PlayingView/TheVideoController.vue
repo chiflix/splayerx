@@ -29,6 +29,7 @@ import VolumeControl from './VolumeControl';
 import AdvanceControl from './AdvanceControl';
 import SubtitleControl from './SubtitleControl';
 import TimeProgressBar from './TimeProgressBar.vue';
+import UnfousedHelper from './helpers/macUnfocusHelper.js';
 export default {
   name: 'the-video-controller',
   components: {
@@ -58,6 +59,8 @@ export default {
       clicksDelay: 200,
       dragDelay: 200,
       dragRadiusSquare: 25,
+      mainWindow: null,
+      unfocusedHelper: null,
     };
   },
   computed: {
@@ -83,6 +86,8 @@ export default {
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
+    this.mainWindow = this.$electron.remote.getCurrentWindow();
+    this.unfocusedHelper = new (UnfousedHelper())(this.mainWindow, this);
   },
   methods: {
     getAllUIComponents(rootElement) {
@@ -164,6 +169,7 @@ export default {
       clearTimeout(this.mouseleftTimer);
     },
     handleMouseleave() {
+      if (!this.unfocusedHelper.needHandle()) return;
       this.mouseleftTimer = setTimeout(() => {
         this.mouseleft = true;
       }, this.mouseleftDelay);
