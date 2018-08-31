@@ -264,6 +264,9 @@ li {
   }
 
   .sub-menu-wrapper {
+    // overflow: hidden;
+    // width: 185px;
+    // height: 104px;
     border-radius: 10px;
   }
   .sub-menu {
@@ -359,8 +362,8 @@ li {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 40px;
-      right: -130.3px;
-      width: 184px;
+      right: -198px;
+      width: 283.1px;
       // height: 260px;
     }
     .sub-menu{
@@ -396,38 +399,39 @@ li {
   @media screen and (min-width: 1921px) {
     .sub-menu-wrapper {
       position: absolute;
-      width: 283px;
-      height: 400px;
-      bottom: 65px;
-      right: -198px;
+      bottom: 100px;
+      right: -130.3px;
+      width: 184px;
+      // height: 260px;
     }
     .sub-menu{
-      padding: 4px, 0px;
+      padding-top: 4px;
+      padding-bottom: 4px;
     }
     .menu-item-text-wrapper {
       line-height: 30px;
       width: 201px;
     }
-    .menu-item-text-wrapper {
-      line-height: 20px;
-      width: 148px;
+    .placeholder-item-text-wrapper {
+      line-height: 30px;
+      width: 201px;
     }
     .chosen-dot {
-      line-height: 20px;
-      width: 6px;
-      height: 6px;
+      line-height: 30px;
+      width: 6.2px;
+      height: 6.2px;
       right: 0px;
       top: 50%;
-      margin-top: -3px;
+      margin-top: -3.1px;
     }
     .chineseChosen {
       font-size: 20px;
     }
     li {
-      margin-right: 15px;
+      margin-right: 28px;
       padding: 13px 27px;
       height: 56px;
-      font-size: 20px;
+      font-size: 23px;
     }
   }
 }

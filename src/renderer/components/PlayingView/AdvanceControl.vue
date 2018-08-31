@@ -136,7 +136,6 @@ export default {
     height: 100%;
     background-color: white;
     opacity: 0.3;
-    backdrop-filter: blur(20px);
     color: black;
     border-radius: 4.8px;
     z-index: 750;
