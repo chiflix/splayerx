@@ -252,6 +252,26 @@ new Vue({
             id: 'recent-4',
             visible: false,
           },
+          {
+            id: 'recent-5',
+            visible: false,
+          },
+          {
+            id: 'recent-6',
+            visible: false,
+          },
+          {
+            id: 'recent-7',
+            visible: false,
+          },
+          {
+            id: 'recent-8',
+            visible: false,
+          },
+          {
+            id: 'recent-9',
+            visible: false,
+          },
         ],
       };
       return this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
@@ -290,6 +310,31 @@ new Vue({
           path: '',
           visible: false,
         }],
+        ['recent-5', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-6', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-7', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-8', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
+        ['recent-9', {
+          label: '',
+          path: '',
+          visible: false,
+        }],
       ]);
       for (let i = 1; i <= recentPlayData.length; i += 1) {
         menuRecentData.set(`recent-${i}`, {
@@ -310,8 +355,10 @@ new Vue({
     // Disable Zooming
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
     this.getSystemLocale();
-    this.createMenu();
-    this.$bus.$on('new-file-open', this.refreshMenu);
+    this.infoDB().init().then(() => {
+      this.createMenu();
+      this.$bus.$on('new-file-open', this.refreshMenu);
+    });
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
       if (err) {

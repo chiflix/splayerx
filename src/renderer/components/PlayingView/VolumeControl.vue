@@ -1,27 +1,27 @@
 <template>
-  <div>
   <transition name="fade" appear>
-  <div
+  <div class="volume"
     @mouseover.stop="appearVolumeSlider"
     @mouseout.stop="hideVolumeSlider"
     @mousemove="throttledCall">
     <transition name="fade">
-      <div class="container"  ref="sliderContainer"
+      <div class="container"
         @mousedown.stop.left="onVolumeSliderClick"
         v-show="showVolumeSlider">
-        <div class="slider" ref="slider"
-          :style="{ height: volume + '%' }">
+        <div class="background" ref="sliderContainer">
+          <div class="slider" ref="slider"
+            :style="{ height: volume + '%' }">
+          </div>
         </div>
       </div>
     </transition>
-      <div
+      <button
         @mousedown.stop.left="onVolumeButtonClick">
         <img type="image/svg+xml" wmode="transparent" v-show="showVolumeController"
           :src="srcOfVolumeButtonImage">
-      </div>
+      </button>
     </div>
   </transition>
-</div>
 </template>;
 
 <script>
@@ -53,7 +53,14 @@ export default {
       console.log('onVolumeSliderClick');
       this.onVolumeSliderMousedown = true;
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
-      this.$bus.$emit('volume', (sliderOffsetBottom - e.clientY) / this.$refs.sliderContainer.clientHeight);
+      let volumeHeight = sliderOffsetBottom - e.clientY;
+      if (volumeHeight < 0) {
+        volumeHeight = 0;
+      } else if (volumeHeight > this.$refs.sliderContainer.clientHeight) {
+        volumeHeight = this.$refs.sliderContainer.clientHeight;
+      }
+      console.log(volumeHeight);
+      this.$bus.$emit('volume', volumeHeight / this.$refs.sliderContainer.clientHeight);
       this.$_documentVoluemeDragClear();
       this.$_documentVolumeSliderDragEvent();
     },
@@ -178,15 +185,23 @@ export default {
 
 <style lang="scss" scoped>
 .container {
+  clip-path: inset(0px round 10px);
+  backdrop-filter: blur(18px);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  -webkit-app-region: no-drag; 
   position: absolute;
-  background-color: rgba(255,255,255,0.2);
-  border-radius: 1px;
-  left: 50%;
-  transform: translate(-50%);
+  background-color: rgba(0, 0, 0, 0.2);
   &:hover {
     cursor: pointer;
   }
 
+  .background{
+    position: absolute;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.2);
+  }
   .slider {
     width: 100%;
     position: absolute;
@@ -195,19 +210,47 @@ export default {
     border-radius: 1px;
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
-    bottom: 18+10px;
-    width: 10px;
-    height: 86px;
+    bottom: 30px;
+    width: 30px;
+    height: 126px;
+    .background {
+      width: 4px;
+      height: 100px;
+    }
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
-    bottom: 24+10px;
-    width: 15px;
-    height: 129px;
+    bottom: 40px;
+    width: 34px;
+    height: 164px;
+    .background {
+      width: 4px;
+      height: 134px;
+    }
   }
   @media screen and (min-width: 1921px) {
-    bottom: 36+10px;
+    bottom: 66px;
     width: 20px;
     height: 172px;
+    .background {
+      width: 4px;
+      height: 214px;
+    }
+  }
+}
+button {
+  img {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    height: 30px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    height: 40px;
+  }
+  @media screen and (min-width: 1921px) {
+    height: 66px;
   }
 }
 .fade-enter-active {

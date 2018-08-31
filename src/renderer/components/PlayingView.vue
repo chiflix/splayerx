@@ -308,9 +308,17 @@ export default {
     // tempoary disable advance functionality
     pointer-events: none;
   }
-  img {
+  button {
+    border: none;
+    position: absolute;
+    bottom: 0;
     width: 100%;
-    height: 100%;
+  }
+  button:focus {
+    outline: none;
+  }
+  button:hover {
+    cursor: pointer;
   }
 }
 @media screen and (max-width: 512px) {

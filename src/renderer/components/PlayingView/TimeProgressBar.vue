@@ -350,9 +350,6 @@ export default {
          setTimeout(() => { this.cursorPosition = 0; }, 300);
       }
     },
-    thumbnailCurrentTime() {
-      // console.log('CurrentTime:', newValue);
-    },
   },
   created() {
     const widthOfWindow = this.winWidth;
@@ -363,7 +360,6 @@ export default {
     } else {
       this.widthOfThumbnail = 240;
     }
-    // console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
     this.$electron.ipcRenderer.on('main-resize', () => {
       const widthOfWindow = this.winWidth;
       if (widthOfWindow < 845) {
@@ -373,7 +369,6 @@ export default {
       } else {
         this.widthOfThumbnail = 240;
       }
-      // console.log('Size', this.widthOfThumbnail, this.heightOfThumbnail);
     });
     this.$bus.$on('progressslider-appear', () => {
       this.showScreenshot = false;
