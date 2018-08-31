@@ -283,7 +283,13 @@ export default {
       this.videoElement.currentTime = e;
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
-      this.$bus.$emit('seek-subtitle', e);
+
+      const filePath = decodeURI(this.videoElement.src);
+      const indexOfLastDot = filePath.lastIndexOf('.');
+      const ext = filePath.substring(indexOfLastDot + 1);
+      if (ext === 'mkv') {
+        this.$bus.$emit('seek-subtitle', e);
+      }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {
