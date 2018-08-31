@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain, globalShortcut } from 'electron' // eslint-disable-line
-import Updater from './update/updater.js';
+// import Updater from './update/updater.js';
 import WindowResizer from './helpers/windowResizer.js';
 /**
  * Set `__static` path to static files in production
@@ -111,8 +111,8 @@ app.on('ready', () => {
   const resizer = new WindowResizer(mainWindow);
   resizer.onStart(); // will only register listener for win
   initMainWindowEvent();
-  updater = Updater.getInstance(mainWindow, app);
-  updater.onStart().then((message) => { console.log(message); });
+  // updater = Updater.getInstance(mainWindow, app);
+  // updater.onStart().then((message) => { console.log(message); });
 });
 
 app.on('window-all-closed', () => {

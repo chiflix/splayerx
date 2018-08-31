@@ -13,6 +13,7 @@ class InfoDB {
    */
   static init() {
     return idb.open('Info').then((db) => {
+      console.log('db 1', performance.now());
       const updateStore = [];
       for (let i = 0; i < INFO_SCHEMA.length; i += 1) {
         const schema = INFO_SCHEMA[i];
@@ -28,10 +29,28 @@ class InfoDB {
           }
         }
       }
-
+      console.log('db 2', performance.now());
       if (updateStore.length !== 0) {
-        idb.open('Info', db.version + 1, (upgradeDB) => {
+        return idb.open('Info', db.version + 1, (upgradeDB) => {
+          console.log('db 3', performance.now());
+          // for (let i = 0; i < updateStore.length; i += 1) {
+          //   const schema = updateStore[i];
+          //   console.log('db 4', performance.now());
+          //   let store;
+          //   if (!upgradeDB.objectStoreNames.contains(schema.name)) {
+          //     store = upgradeDB.createObjectStore(schema.name, { keyPath: 'quickHash' });
+          //   } else {
+          //     store = upgradeDB.transaction.objectStore(schema.name);
+          //   }
+          //   if (schema.indexes) {
+          //     schema.indexes.forEach((val) => {
+          //       if (!store.indexNames.contains(val)) store.createIndex(val, val);
+          //     });
+          //   }
+          //   console.log('db 5', performance.now());
+          // }
           updateStore.forEach((schema) => {
+            console.log('db 4', performance.now());
             let store;
             if (!upgradeDB.objectStoreNames.contains(schema.name)) {
               store = upgradeDB.createObjectStore(schema.name, { keyPath: 'quickHash' });
@@ -43,9 +62,12 @@ class InfoDB {
                 if (!store.indexNames.contains(val)) store.createIndex(val, val);
               });
             }
+            console.log('db 5', performance.now());
           });
         });
       }
+      console.log('db end', performance.now());
+      return Promise.resolve();
     });
   }
   static cleanData() {
