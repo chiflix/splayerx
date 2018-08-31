@@ -19,10 +19,11 @@
                     <img class="addUi" src="~@/assets/icon-add.svg" type="image/svg+xml" style="-webkit-user-drag: none;">
                 </div>
             </div>
-            <div class="item shadow"
+            <div class="item"
                  v-for="(item, index) in lastPlayedFile"
                  :id="'item'+index"
                  :key="item.path"
+                 :class="mouseFlag ? 'shadow' : '' "
                  :style="{
               backgroundImage: itemShortcut(item.shortCut),
               width: item.chosen ? `${changeSize * 9 / 7}vw` : `${changeSize}vw`,
@@ -286,7 +287,6 @@ export default {
           vm.infoDB().delete('recent-played', deletData[0].quickHash);
           vm.recentFileDel = false;
         } else {
-          item.classList.add('shadow');
           item.style.zIndex = '';
           item.style.left = '';
           item.style.top = '';
@@ -298,7 +298,6 @@ export default {
         document.onmousemove = mousemove;
         document.onmouseup = mouseup;
         document.querySelector('.controller').parentNode.onmouseup = mouseup;
-        item.classList.remove('shadow');
         item.style.zIndex = 5;
       }
     },
