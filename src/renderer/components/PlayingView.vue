@@ -66,6 +66,8 @@ export default {
       mainWindow: null,
       dragRadiusSquare: 25,
       dragTime: 200,
+      focusTimestamp: null,
+      firstMouseTimeSpan: 500,
       mouseDownTime: null,
       mouseDownCursorPosition: null,
       subtitleMenuAppear: false,
@@ -201,7 +203,15 @@ export default {
           const self = this; // define a constant "self" for the following scope to use
           if (this.isValidClick()) {
             this.timer = setTimeout(() => { // define timer as setTimeOut function
-              self.togglePlayback(); // which is togglePlayback
+              if (self.focusTimestamp
+                && new Date() - self.focusTimestamp < self.firstMouseTimeSpan) {
+                // if click to focus, always start playing
+                if (!self.isPlaying) {
+                  self.$bus.$emit('play');
+                }
+              } else {
+                self.togglePlayback(); // which is togglePlayback
+              }
               self.clicks = 0; // reset the "clicks" to zero for next event
             }, this.delay);
           } else {
@@ -226,12 +236,6 @@ export default {
       }
       return true;
     },
-    cursorInWindow() {
-      const cp = this.$electron.screen.getCursorScreenPoint();
-      const [width, height] = this.$store.state.WindowState.windowSize;
-      const [x, y] = this.$store.state.WindowState.windowPosition;
-      return x < cp.x && cp.x < (x + width) && y < cp.y && cp.y < (y + height);
-    },
   },
   mounted() {
     this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);
@@ -254,21 +258,15 @@ export default {
     },
     ...mapState({
       uri: state => state.PlaybackState.SrcOfVideo,
+      isPlaying: state => state.PlaybackState.isPlaying,
       isFocused: state => state.WindowState.isFocused,
     }),
   },
   watch: {
     isFocused(isFocused, prevIsFocused) {
       if (isFocused && !prevIsFocused) {
-        // // TODO: move isPlaying to global state to prevent nested refs
-        // if (this.$refs.VideoCanvasRef.$refs.videoCanvas.paused) {
-        //   if (this.cursorInWindow()) {
-        //     this.$bus.$emit('play');
-        //   }
-        // } else {
-        //   this.wakeUpAllWidgets();
-        // }
         this.wakeUpAllWidgets();
+        this.focusTimestamp = new Date();
       }
     },
   },

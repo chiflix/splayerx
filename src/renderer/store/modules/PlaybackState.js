@@ -6,14 +6,15 @@ const state = {
   Volume: 0.2,
   SrcOfVideo: '',
   PlaybackRate: 1.0,
-
   SubtitleNameArr: [],
+  isPlaying: false,
 };
 
 const getters = {
   subtitleNameArr: state => state.SubtitleNameArr,
   firstSubIndex: state => state.SubtitleNameArr.findIndex(subName => subName.status === 'first'),
   subtitleNameArrSize: state => state.SubtitleNameArr.length,
+  isPlaying: state => state.isPlaying,
 };
 
 const mutations = {
@@ -60,6 +61,9 @@ const mutations = {
     } else {
       console.log('Error in PlaybackStates');
     }
+  },
+  isPlaying(state, isPlaying) {
+    state.isPlaying = isPlaying;
   },
 };
 
