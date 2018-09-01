@@ -229,6 +229,7 @@ export default {
     },
   },
   mounted() {
+    this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);
     this.unfocusedHelper = new (UnfousedHelper())(this.mainWindow, this);
     this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
