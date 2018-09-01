@@ -1,6 +1,5 @@
 import { app, BrowserWindow, ipcMain, globalShortcut } from 'electron' // eslint-disable-line
 import WindowResizer from './helpers/windowResizer.js';
-// import Updater from './update/updater.js'; 暂时禁用自动更新 Temporary disabled by Tomasen
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -10,7 +9,6 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow;
-let updater;
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -81,7 +79,7 @@ function createWindow() {
   });
 }
 
-function initMainWindowEvent() {
+function registerMainWindowEvent() {
   mainWindow.on('resize', () => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
     mainWindow.webContents.send('mainCommit', 'fullscreen', mainWindow.isFullScreen());
@@ -110,10 +108,7 @@ app.on('ready', () => {
   createWindow();
   const resizer = new WindowResizer(mainWindow);
   resizer.onStart(); // will only register listener for win
-  initMainWindowEvent();
-  // 暂时禁用自动更新 Temporary disabled by Tomasen
-  // updater = Updater.getInstance(mainWindow, app);
-  // updater.onStart().then((message) => { console.log(message); });
+  registerMainWindowEvent();
 });
 
 app.on('window-all-closed', () => {
@@ -126,7 +121,6 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
-    initMainWindowEvent();
-    updater.Window = mainWindow;
+    registerMainWindowEvent();
   }
 });
