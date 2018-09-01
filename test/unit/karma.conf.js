@@ -34,7 +34,10 @@ module.exports = config => {
   config.set({
     browsers: ['invisibleElectron'],
     client: {
-      useIframe: false
+      useIframe: false,
+      mocha: {
+        timeout: '10000'
+      }
     },
     coverageReporter: {
       dir: './coverage',

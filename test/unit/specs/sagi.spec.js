@@ -6,6 +6,9 @@ describe('helper.sagi api', function () {
     helpers.methods.sagi().healthCheck().then((status) => {
       expect(status).to.equal(1);
       done();
+    }).catch((reason) => {
+      // fail the test
+      done(reason);
     });
   });
 
