@@ -27,6 +27,27 @@ app.on('second-instance', () => {
   }
 });
 
+function registerMainWindowEvent() {
+  mainWindow.on('resize', () => {
+    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'fullscreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('main-resize');
+  });
+  mainWindow.on('move', () => {
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('main-move');
+  });
+  /* eslint-disable no-unused-vars */
+  ipcMain.on('windowSizeChange', (event, args) => {
+    mainWindow.setSize(...args);
+    event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
+  });
+  ipcMain.on('windowPositionChange', (event, args) => {
+    mainWindow.setPosition(...args);
+    event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
+  });
+}
+
 function createWindow() {
   /**
    * Initial window options
@@ -77,38 +98,20 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
   });
-}
 
-function registerMainWindowEvent() {
-  mainWindow.on('resize', () => {
-    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-    mainWindow.webContents.send('mainCommit', 'fullscreen', mainWindow.isFullScreen());
-    mainWindow.webContents.send('main-resize');
-  });
-  mainWindow.on('move', () => {
-    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
-    mainWindow.webContents.send('main-move');
-  });
-  /* eslint-disable no-unused-vars */
-  ipcMain.on('windowSizeChange', (event, args) => {
-    mainWindow.setSize(...args);
-    event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
-  });
-  ipcMain.on('windowPositionChange', (event, args) => {
-    mainWindow.setPosition(...args);
-    event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
-  });
-}
-
-app.on('ready', () => {
-  globalShortcut.register('CommandOrControl+Shift+I+O+P', () => {
-    mainWindow.openDevTools();
-  });
-  app.setName('SPlayerX');
-  createWindow();
   const resizer = new WindowResizer(mainWindow);
   resizer.onStart(); // will only register listener for win
   registerMainWindowEvent();
+}
+
+app.on('ready', () => {
+  app.setName('SPlayerX');
+  globalShortcut.register('CommandOrControl+Shift+I+O+P', () => {
+    if (mainWindow !== null) {
+      mainWindow.openDevTools();
+    }
+  });
+  createWindow();
 });
 
 app.on('window-all-closed', () => {
@@ -121,6 +124,5 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
-    registerMainWindowEvent();
   }
 });
