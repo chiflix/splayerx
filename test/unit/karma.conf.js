@@ -70,6 +70,7 @@ module.exports = config => {
     webpack: webpackConfig,
     webpackMiddleware: {
       noInfo: true
-    }
+    },
+    processKillTimeout: 10000
   })
 }
