@@ -70,7 +70,7 @@ describe('Playlist.vue', () => {
   it('onRecentItemMouseover method works fine', () => {
     const wrapper = mount(Playlist);
     const spy = sinon.spy(wrapper.vm, 'onRecentItemMouseover');
-    wrapper.setProps({ isFull: true });
+    wrapper.setProps({ isFullScreen: true });
     wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }] });
     wrapper.find('.item').trigger('mouseover');
     wrapper.setData({ isTurnToOdd: true });
@@ -96,7 +96,7 @@ describe('Playlist.vue', () => {
       isDragging: false, moveItem: 0,
     });
     wrapper.setProps({
-      isFull: false, showItemNum: 5,
+      isFullScreen: false, showItemNum: 5,
     });
     const item = { path: 'file:////Users/tanyang/Desktop/test.mp4' };
     const moveitem = wrapper.vm.moveItem;
@@ -129,7 +129,7 @@ describe('Playlist.vue', () => {
     const wrapper = mount(Playlist, {
       attachToDocument: true,
     });
-    wrapper.setProps({ showItemNum: 1, isFull: false });
+    wrapper.setProps({ showItemNum: 1, isFullScreen: false });
     wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }] });
     wrapper.setData({ moveItem: 0 });
     const e = new window.Event('keyup');

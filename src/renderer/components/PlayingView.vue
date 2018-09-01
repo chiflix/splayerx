@@ -27,6 +27,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
@@ -35,7 +36,6 @@ import VolumeControl from './PlayingView/VolumeControl.vue';
 import AdvanceControl from './PlayingView/AdvanceControl.vue';
 import SubtitleControl from './PlayingView/SubtitleControl.vue';
 import PlayButton from './PlayingView/PlayButton.vue';
-import UnfousedHelper from './PlayingView/helpers/macUnfocusHelper.js';
 
 export default {
   name: 'playing-view',
@@ -64,7 +64,6 @@ export default {
       clicks: 0,
       timer: null,
       mainWindow: null,
-      unfocusedHelper: null,
       dragRadiusSquare: 25,
       dragTime: 200,
       mouseDownTime: null,
@@ -110,12 +109,12 @@ export default {
     },
     mouseEnter() {
       console.log(document.hidden);
-      if (this.unfocusedHelper.needHandle()) {
+      if (this.isFocused) {
         this.wakeUpAllWidgets();
       }
     },
     mouseleaveHandler() {
-      if (!this.unfocusedHelper.needHandle()) return;
+      if (!this.isFocused) return;
       this.leave = true;
       if (this.timeoutIdOfAllWidgetsDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
@@ -188,7 +187,7 @@ export default {
       return false;
     },
     handleMouseMove() {
-      if (!this.unfocusedHelper.needHandle()) return;
+      if (!this.isFocused) return;
       this.wakeUpAllWidgets();
     },
     handleMouseUp() {
@@ -227,12 +226,17 @@ export default {
       }
       return true;
     },
+    cursorInWindow() {
+      const cp = this.$electron.screen.getCursorScreenPoint();
+      const [width, height] = this.$store.state.WindowState.windowSize;
+      const [x, y] = this.$store.state.WindowState.windowPosition;
+      return x < cp.x && cp.x < (x + width) && y < cp.y && cp.y < (y + height);
+    },
   },
   mounted() {
     this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);
-    this.unfocusedHelper = new (UnfousedHelper())(this.mainWindow, this);
-    this.$bus.$emit('play');
     this.$electron.remote.getCurrentWindow().setResizable(true);
+    this.$bus.$emit('play');
     this.$bus.$on('clear-all-widget-disappear-delay', () => {
       clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
     });
@@ -245,11 +249,27 @@ export default {
     });
   },
   computed: {
-    uri() {
-      return this.$store.state.PlaybackState.SrcOfVideo;
-    },
     cursorStyle() {
       return this.cursorShow ? 'default' : 'none';
+    },
+    ...mapState({
+      uri: state => state.PlaybackState.SrcOfVideo,
+      isFocused: state => state.WindowState.isFocused,
+    }),
+  },
+  watch: {
+    isFocused(isFocused, prevIsFocused) {
+      if (isFocused && !prevIsFocused) {
+        // // TODO: move isPlaying to global state to prevent nested refs
+        // if (this.$refs.VideoCanvasRef.$refs.videoCanvas.paused) {
+        //   if (this.cursorInWindow()) {
+        //     this.$bus.$emit('play');
+        //   }
+        // } else {
+        //   this.wakeUpAllWidgets();
+        // }
+        this.wakeUpAllWidgets();
+      }
     },
   },
 };

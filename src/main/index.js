@@ -71,13 +71,26 @@ function createWindow() {
 function initMainWindowEvent() {
   mainWindow.on('resize', () => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-    mainWindow.webContents.send('mainCommit', 'fullscreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('main-resize');
   });
   mainWindow.on('move', () => {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
     mainWindow.webContents.send('main-move');
   });
+  mainWindow.on('enter-full-screen', () => {
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
+  });
+  mainWindow.on('leave-full-screen', () => {
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
+  });
+  mainWindow.on('focus', () => {
+    mainWindow.webContents.send('mainCommit', 'isFocused', true);
+  });
+  mainWindow.on('blur', () => {
+    mainWindow.webContents.send('mainCommit', 'isFocused', false);
+  });
+
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
     mainWindow.setSize(...args);
@@ -86,6 +99,12 @@ function initMainWindowEvent() {
   ipcMain.on('windowPositionChange', (event, args) => {
     mainWindow.setPosition(...args);
     event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
+  });
+  ipcMain.on('windowInit', () => {
+    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
 }
 
