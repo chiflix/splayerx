@@ -203,7 +203,7 @@ export default {
         console.log(`sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
-    if (process.platform === 'win32') {
+    if (process.platform !== 'darwin') {
       document.querySelector('.application').style.webkitAppRegion = 'no-drag';
       document.querySelector('.application').style.borderRadius = 0;
     }

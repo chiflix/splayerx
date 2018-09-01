@@ -33,43 +33,30 @@ function createWindow() {
   /**
    * Initial window options
    */
-  if (process.platform === 'win32') {
-    mainWindow = new BrowserWindow({
-      height: 405,
-      useContentSize: true,
-      width: 720,
-      frame: false,
-      titleBarStyle: 'none',
-      minWidth: 720,
-      minHeight: 405,
-      webPreferences: {
-        webSecurity: false,
-        experimentalFeatures: true,
-      },
-      // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-      backgroundColor: '#802e2c29',
-      show: false,
-    });
-  } else {
-    mainWindow = new BrowserWindow({
-      height: 405,
-      useContentSize: true,
-      width: 720,
-      frame: false,
-      titleBarStyle: 'none',
-      minWidth: 720,
-      minHeight: 405,
-      // it can be set true here and be changed during player starting
-      transparent: false, // set to false to solve the backdrop-filter bug
-      webPreferences: {
-        webSecurity: false,
-        experimentalFeatures: true,
-      },
-      // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-      backgroundColor: '#802e2c29',
-      show: false,
-    });
-  }
+
+  const windowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 720,
+    height: 405,
+    minWidth: 720,
+    minHeight: 405,
+    // it can be set true here and be changed during player starting
+    transparent: false, // set to false to solve the backdrop-filter bug
+    webPreferences: {
+      webSecurity: false,
+      experimentalFeatures: true,
+    },
+    // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
+    backgroundColor: '#802e2c29',
+    show: false,
+    ...({
+      win32: {},
+    })[process.platform],
+  };
+
+  mainWindow = new BrowserWindow(windowOptions);
 
   mainWindow.loadURL(winURL);
   mainWindow.on('closed', () => {
