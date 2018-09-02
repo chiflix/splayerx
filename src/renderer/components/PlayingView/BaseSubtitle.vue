@@ -21,6 +21,7 @@ import parallel from 'run-parallel';
 import MatroskaSubtitles from 'matroska-subtitles';
 import LanguageDetect from 'languagedetect';
 import z from 'zero-fill';
+import { fileUrlToPath } from '@/helpers/path';
 
 export default {
   data() {
@@ -118,7 +119,7 @@ export default {
     async subtitleInitializingStatus() {
       let subStatus = [];
       const vid = this.$parent.$refs.videoCanvas.videoElement();
-      this.mediaHash = this.mediaQuickHash(decodeURI(vid.src.replace('file://', '')));
+      this.mediaHash = this.mediaQuickHash(fileUrlToPath(vid.src));
       this.Sagi = this.sagi();
 
       const serverSubsStatus = await this.$_serverSubsExist();

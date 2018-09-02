@@ -1,10 +1,10 @@
 <template>
     <div class="controller" :style="{
-            bottom : this.$electron.remote.getCurrentWindow().getSize()[0] > 1355 ? `${40 / 1355 * this.windowSize}px` : '40px'
-            }">
-        <div class="playlist" :style="{
-        marginLeft: this.$electron.remote.getCurrentWindow().getSize()[0] > 1355 ? `${50 / 1355 * this.windowSize}px` : '50px'
-                              }">
+      bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px'
+    }">
+      <div class="playlist" :style="{
+          marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'
+      }">
             <div class="button"
                  :style="{
                  height:`${changeSize}vh`,
@@ -47,6 +47,8 @@
 
 <script>
 import path from 'path';
+import { filePathToUrl } from '@/helpers/path';
+
 export default {
   name: 'playlist',
   data() {
@@ -84,11 +86,11 @@ export default {
       type: Number,
       require: true,
     },
-    isFull: {
+    isFullScreen: {
       type: Boolean,
       require: true,
     },
-    windowSize: {
+    windowWidth: {
       type: Number,
     },
   },
@@ -96,17 +98,17 @@ export default {
     window.onkeyup = (e) => {
       const lf = document.querySelector('.controller');
       if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
-        !this.isFull && e.keyCode === 39) {
+        !this.isFullScreen && e.keyCode === 39) {
         this.moveItem -= 1;
         this.moveLength = 15 + (this.changeSize * (document.body.clientWidth / 100));
         const ss = this.move - this.moveLength;
         this.move = ss;
         lf.style.left = `${ss}px`;
-      } else if (this.moveItem === -1 && !this.isFull && e.keyCode === 37) {
+      } else if (this.moveItem === -1 && !this.isFullScreen && e.keyCode === 37) {
         this.move = 0;
         this.moveItem = 0;
         lf.style.left = '0px';
-      } else if (this.moveItem !== 0 && !this.isFull && e.keyCode === 37) {
+      } else if (this.moveItem !== 0 && !this.isFullScreen && e.keyCode === 37) {
         this.moveItem += 1;
         const ss = (this.move + 15) + (this.changeSize * (document.body.clientWidth / 100));
         this.move = ss;
@@ -153,21 +155,25 @@ export default {
       const { dialog } = remote;
       const browserWindow = remote.BrowserWindow;
       const focusedWindow = browserWindow.getFocusedWindow();
-      const VALID_EXTENSION = [];
+      const VALID_EXTENSION = ['3g2', '3gp', '3gp2', '3gpp', 'amv', 'asf', 'avi', 'bik', 'bin', 'crf', 'divx', 'drc', 'dv', 'dvr-ms', 'evo', 'f4v', 'flv', 'gvi', 'gxf', 'iso', 'm1v', 'm2v', 'm2t', 'm2ts', 'm4v', 'mkv', 'mov', 'mp2', 'mp2v', 'mp4', 'mp4v', 'mpe', 'mpeg', 'mpeg1', 'mpeg2', 'mpeg4', 'mpg', 'mpv2', 'mts', 'mtv', 'mxf', 'mxg', 'nsv', 'nuv', 'ogg', 'ogm', 'ogv', 'ogx', 'ps', 'rec', 'rm', 'rmvb', 'rpl', 'thp', 'tod', 'tp', 'ts', 'tts', 'txd', 'vob', 'vro', 'webm', 'wm', 'wmv', 'wtv', 'xesc'];
 
       self.showingPopupDialog = true;
+      // TODO: move openFile method to a single location
       dialog.showOpenDialog(focusedWindow, {
         title: 'Open Dialog',
         defaultPath: link,
         filters: [{
           name: 'Video Files',
           extensions: VALID_EXTENSION,
+        }, {
+          name: 'All Files',
+          extensions: ['*'],
         }],
         properties: ['openFile'],
       }, (item) => {
         self.showingPopupDialog = false;
         if (item) {
-          self.openFile(`file:///${item[0]}`);
+          self.openFile(filePathToUrl(item[0]));
         }
       });
     },
@@ -205,7 +211,7 @@ export default {
     },
     onRecentItemMouseover(item, index) {
       if (((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
-        this.isFull) && this.mouseFlag) {
+        this.isFullScreen) && this.mouseFlag) {
         this.item = item;
         this.$set(this.lastPlayedFile[index], 'chosen', true);
         if (item.shortCut !== '') {
@@ -304,13 +310,13 @@ export default {
     onRecentItemClick(item, index) {
       const lf = document.querySelector('.controller');
       if (!this.isDragging) {
-        if (index === this.showItemNum - this.moveItem - 1 && !this.isFull) {
+        if (index === this.showItemNum - this.moveItem - 1 && !this.isFullScreen) {
           this.moveItem -= 1;
           this.moveLength = 15 + (this.changeSize * (document.body.clientWidth / 100));
           const ss = this.move - this.moveLength;
           this.move = ss;
           lf.style.left = `${ss}px`;
-        } else if (index + this.moveItem === -2 && !this.isFull) {
+        } else if (index + this.moveItem === -2 && !this.isFullScreen) {
           this.moveItem += 1;
           const ss = (this.move + 15) + (this.changeSize * (document.body.clientWidth / 100));
           this.move = ss;

@@ -35,6 +35,7 @@
       this.$electron.ipcRenderer.on('mainDispatch', (event, actionType, actionPayload) => {
         this.mainDispatchProxy(actionType, actionPayload);
       });
+      this.$electron.ipcRenderer.send('windowInit');
     },
   };
 </script>
