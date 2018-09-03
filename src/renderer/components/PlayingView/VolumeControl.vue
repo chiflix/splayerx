@@ -224,8 +224,8 @@ export default {
   }
   @media screen and (min-width: 1921px) {
     bottom: 66px;
-    width: 20px;
-    height: 172px;
+    width: 51px;
+    height: 260px;
     .background {
       width: 4px;
       height: 214px;
