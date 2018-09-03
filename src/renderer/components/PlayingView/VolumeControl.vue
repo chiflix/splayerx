@@ -57,7 +57,6 @@ export default {
       } else if (volumeHeight > this.$refs.sliderContainer.clientHeight) {
         volumeHeight = this.$refs.sliderContainer.clientHeight;
       }
-      console.log(volumeHeight);
       this.$bus.$emit('volume', volumeHeight / this.$refs.sliderContainer.clientHeight);
       this.$_documentVoluemeDragClear();
       this.$_documentVolumeSliderDragEvent();
