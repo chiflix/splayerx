@@ -357,7 +357,6 @@ new Vue({
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
     this.getSystemLocale();
     this.infoDB().init().then(() => {
-      console.log('init finished');
       this.createMenu();
       this.$bus.$on('new-file-open', this.refreshMenu);
     });
