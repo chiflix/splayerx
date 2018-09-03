@@ -1,7 +1,8 @@
 const state = {
   windowSize: [0, 0],
   windowPosition: [0, 0],
-  fullscreenState: false,
+  isFullScreen: false,
+  isFocused: true,
 };
 
 const getters = {
@@ -11,7 +12,8 @@ const getters = {
   winPosX: state => state.windowPosition[0],
   winPosY: state => state.windowPosition[1],
   winPos: state => state.windowPosition,
-  fullscreen: state => state.fullscreenState,
+  isFullScreen: state => state.isFullScreen,
+  isFocused: state => state.isFocused,
 };
 
 const mutations = {
@@ -21,8 +23,11 @@ const mutations = {
   windowPosition(state, payload) {
     state.windowPosition = payload;
   },
-  fullscreen(state, payload) {
-    state.fullscreenState = payload;
+  isFullScreen(state, payload) {
+    state.isFullScreen = payload;
+  },
+  isFocused(state, payload) {
+    state.isFocused = payload;
   },
 };
 
