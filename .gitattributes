@@ -1,2 +1,2 @@
 # Force all files' linebreak style to be UNIX's LF style
-* text=false
+* text=auto eol=lf
