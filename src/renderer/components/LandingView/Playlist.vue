@@ -143,8 +143,6 @@ export default {
       }
     },
   },
-  computed: {
-  },
   methods: {
     open(link) {
       console.log(this.windowWidth);
@@ -365,7 +363,7 @@ export default {
 
             .btnMask {
                 border-radius: 2px;
-                border: 1px solid rgb(55, 55, 55);
+                border: 1px solid rgba(255, 255, 255, 0.1);
                 display: flex;
             }
 
@@ -377,7 +375,7 @@ export default {
                 position: relative;
                 color: #e4e4c4;
                 border-radius: 2px;
-                border: 1px solid rgb(55, 55, 55);
+                border: 1px solid rgba(255, 255, 255, 0.1);
                 width: 112 / 720vw;
                 height: 63 / 405vh;
                 min-height: 63px;
