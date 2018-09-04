@@ -19,7 +19,7 @@ export default class WindowResize {
   onStart() {
     if (process.platform === 'win32') { this.registerMessage(); }
   }
-    onResize() { // eslint-disable-line
+  onResize() { // eslint-disable-line
     if (!this.ready) return;
     switch (this.status) {
       case 'idle':
