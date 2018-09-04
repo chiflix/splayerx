@@ -350,7 +350,7 @@ export default {
 
             .button {
                 background-color: rgba(0, 0, 0, 0.12);
-                transition: background-color 150ms ease-out;
+                transition: background-color 150ms ease-out, width 150ms ease-out, height 150ms ease-out, border 150ms ease-out;
                 backdrop-filter: blur(9.8px);
                 margin-right: 15px;
                 cursor: pointer;
@@ -364,6 +364,7 @@ export default {
             .btnMask {
                 border-radius: 2px;
                 border: 1px solid rgba(255, 255, 255, 0.1);
+                transition: width 150ms ease-out, height 150ms ease-out;
                 display: flex;
             }
 
