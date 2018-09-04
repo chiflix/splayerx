@@ -7,9 +7,10 @@ import PlaybackState from '@/store/modules/PlaybackState';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-let wrapper;
+
 describe('VideoCanvas.vue', () => {
   let store;
+  let wrapper;
   beforeEach(() => {
     store = new Vuex.Store({
       modules: {
@@ -26,6 +27,10 @@ describe('VideoCanvas.vue', () => {
         src: 'file:///./../../../../test/assets/test.avi',
       },
     });
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
   });
 
   it('should load correct data', () => {
@@ -97,16 +102,16 @@ describe('VideoCanvas.vue', () => {
     wrapper.vm.videoHeight = 100;
     store.state.PlaybackState.CurrentTime = 100;
 
-    const emitSpy = sinon.spy(wrapper.vm.$bus, '$emit');
+    const emitStub = sinon.stub(wrapper.vm.$bus, '$emit');
     const stub = sinon.stub(wrapper.vm, '$_controlWindowSize').callsFake();
 
     wrapper.vm.onMetaLoaded();
-    expect(emitSpy.firstCall.calledWith('play')).equal(true);
-    expect(emitSpy.secondCall.calledWith('seek', 100)).equal(true);
-    expect(emitSpy.thirdCall.calledWith('screenshot-sizeset')).equal(true);
+    expect(emitStub.firstCall.calledWith('play')).equal(true);
+    expect(emitStub.secondCall.calledWith('seek', 100)).equal(true);
+    expect(emitStub.thirdCall.calledWith('screenshot-sizeset')).equal(true);
     expect(wrapper.vm.videoExisted).equal(true);
     stub.restore();
-    emitSpy.restore();
+    emitStub.restore();
   });
 
   it('onMetaLoaded method work fine if video exist', () => {
