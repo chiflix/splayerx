@@ -1,6 +1,6 @@
 
 import idb from 'idb';
-import { INFO_SCHEMA } from '@/constants';
+import { INFO_SCHEMA, INFODB_VERSION } from '@/constants';
 
 
 /**
@@ -12,39 +12,31 @@ class InfoDB {
    * Update InfoDB if new schema or new index has added
    */
   static init() {
-    return idb.open('Info').then((db) => {
-      const updateStore = [];
-      for (let i = 0; i < INFO_SCHEMA.length; i += 1) {
-        const schema = INFO_SCHEMA[i];
-        if (!db.objectStoreNames.contains(schema.name)) {
-          updateStore.push(schema);
-        } else if (schema.indexes) {
-          for (let j = 0; j < schema.indexes.length; j += 1) {
-            const index = schema.indexes[j];
-            if (!db.transaction(schema.name).objectStore(schema.name).indexNames.contains(index)) {
-              updateStore.push(schema);
-              break;
-            }
+    return idb.open('Info', INFODB_VERSION, (upgradeDB) => {
+      if (upgradeDB.oldVersion === 0) {
+        INFO_SCHEMA.forEach((schema) => {
+          const store = upgradeDB.createObjectStore(schema.name, { keyPath: 'quickHash' });
+          if (schema.indexes) {
+            schema.indexes.forEach((val) => {
+              if (!store.indexNames.contains(val)) store.createIndex(val, val);
+            });
+          }
+        });
+      } else {
+        for (let i = 0; i < INFO_SCHEMA.length; i += 1) {
+          const schema = INFO_SCHEMA[i];
+          let store;
+          if (!upgradeDB.objectStoreNames.contains(schema.name)) {
+            store = upgradeDB.createObjectStore(schema.name, { keyPath: 'quickHash' });
+          } else {
+            store = upgradeDB.transaction.objectStore(schema.name);
+          }
+          if (schema.indexes) {
+            schema.indexes.forEach((val) => {
+              if (!store.indexNames.contains(val)) store.createIndex(val, val);
+            });
           }
         }
-      }
-
-      if (updateStore.length !== 0) {
-        idb.open('Info', db.version + 1, (upgradeDB) => {
-          updateStore.forEach((schema) => {
-            let store;
-            if (!upgradeDB.objectStoreNames.contains(schema.name)) {
-              store = upgradeDB.createObjectStore(schema.name, { keyPath: 'quickHash' });
-            } else {
-              store = upgradeDB.transaction.objectStore(schema.name);
-            }
-            if (schema.indexes) {
-              schema.indexes.forEach((val) => {
-                if (!store.indexNames.contains(val)) store.createIndex(val, val);
-              });
-            }
-          });
-        });
       }
     });
   }

@@ -3,7 +3,7 @@
   <div class="volume"
     @mouseover.stop="appearVolumeSlider"
     @mouseout.stop="hideVolumeSlider"
-    @mousemove="throttledCall">
+    @mousemove="clearAllWidgetsTimeout">
     <transition name="fade">
       <div class="container"
         @mousedown.stop.left="onVolumeSliderClick"
@@ -25,7 +25,6 @@
 </template>;
 
 <script>
-import _ from 'lodash';
 export default {
   data() {
     return {
@@ -34,7 +33,6 @@ export default {
       onVolumeSliderMousedown: false,
       currentVolume: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
-      throttledCall: null,
       volumeMaskAppear: false,
     };
   },
@@ -59,7 +57,6 @@ export default {
       } else if (volumeHeight > this.$refs.sliderContainer.clientHeight) {
         volumeHeight = this.$refs.sliderContainer.clientHeight;
       }
-      console.log(volumeHeight);
       this.$bus.$emit('volume', volumeHeight / this.$refs.sliderContainer.clientHeight);
       this.$_documentVoluemeDragClear();
       this.$_documentVolumeSliderDragEvent();
@@ -177,9 +174,6 @@ export default {
     this.$bus.$on('volumecontroller-appear', this.appearVolumeController);
     this.$bus.$on('volumecontroller-hide', this.hideVolumeController);
   },
-  beforeMount() {
-    this.throttledCall = _.throttle(this.clearAllWidgetsTimeout, 500);
-  },
 };
 </script>
 
@@ -229,8 +223,8 @@ export default {
   }
   @media screen and (min-width: 1921px) {
     bottom: 66px;
-    width: 20px;
-    height: 172px;
+    width: 51px;
+    height: 260px;
     .background {
       width: 4px;
       height: 214px;
