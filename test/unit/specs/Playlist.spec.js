@@ -19,7 +19,6 @@ describe('Playlist.vue', () => {
     expect(wrapper.vm.showingPopupDialog).equal(false);
     expect(wrapper.vm.move).equal(0);
     expect(wrapper.vm.moveItem).equal(0);
-    expect(wrapper.vm.moveLength).equal(0);
   });
   it('watch works fine', () => {
     const wrapper = mount(Playlist);

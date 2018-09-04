@@ -23,7 +23,7 @@
                  v-for="(item, index) in lastPlayedFile"
                  :id="'item'+index"
                  :key="item.path"
-                 :class="mouseFlag ? 'shadow' : '' "
+                 :class="showShadow ? 'shadow' : '' "
                  :style="{
               backgroundImage: itemShortcut(item.shortCut),
               width: item.chosen ? `${changeSize * 9 / 7}vw` : `${changeSize}vw`,
@@ -68,8 +68,8 @@ export default {
       showingPopupDialog: false,
       move: 0,
       moveItem: 0,
-      moveLength: 0,
       mouseFlag: true,
+      showShadow: true,
     };
   },
   props: {
@@ -95,41 +95,42 @@ export default {
     },
   },
   mounted() {
-    window.onkeyup = (e) => {
-      const lf = document.querySelector('.controller');
-      if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
-        !this.isFullScreen && e.keyCode === 39) {
-        this.moveItem -= 1;
-        this.moveLength = 15 + (this.changeSize * (document.body.clientWidth / 100));
-        const ss = this.move - this.moveLength;
-        this.move = ss;
-        lf.style.left = `${ss}px`;
-      } else if (this.moveItem === -1 && !this.isFullScreen && e.keyCode === 37) {
-        this.move = 0;
-        this.moveItem = 0;
-        lf.style.left = '0px';
-      } else if (this.moveItem !== 0 && !this.isFullScreen && e.keyCode === 37) {
-        this.moveItem += 1;
-        const ss = (this.move + 15) + (this.changeSize * (document.body.clientWidth / 100));
-        this.move = ss;
-        lf.style.left = `${ss}px`;
-      }
-      this.$bus.$emit('moveItem', this.moveItem);
-      this.$bus.$emit('move', this.move);
-    };
+    const lf = document.querySelector('.controller');
+    if (lf) {
+      window.onkeyup = (e) => {
+        if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
+          !this.isFullScreen && e.keyCode === 39) {
+          this.moveItem -= 1;
+          const ss = (this.move - 15) - (this.changeSize * (this.windowWidth / 100));
+          this.move = ss;
+          lf.style.left = `${ss}px`;
+        } else if (this.moveItem === -1 && !this.isFullScreen && e.keyCode === 37) {
+          this.move = 0;
+          this.moveItem = 0;
+          lf.style.left = '0px';
+        } else if (this.moveItem !== 0 && !this.isFullScreen && e.keyCode === 37) {
+          this.moveItem += 1;
+          const ss = (this.move + 15) + (this.changeSize * (this.windowWidth / 100));
+          this.move = ss;
+          lf.style.left = `${ss}px`;
+        }
+        this.$bus.$emit('moveItem', this.moveItem);
+        this.$bus.$emit('move', this.move);
+      };
+    }
   },
   watch: {
     showItemNum: function change(val, oldval) {
       if (val > oldval) {
         if (this.moveItem <= oldval - (1 + this.lastPlayedFile.length) &&
           oldval <= this.lastPlayedFile.length) {
-          const averageWidth = ((document.body.clientWidth - 100) - ((oldval - 1) * 15)) /
+          const averageWidth = ((this.windowWidth - 100) - ((oldval - 1) * 15)) /
             oldval;
           this.move += (averageWidth + 15) * (val - oldval);
           this.moveItem += val - oldval;
         } else if (val >= this.moveItem + this.lastPlayedFile
           .length + 2) {
-          const averageWidth = ((document.body.clientWidth - 100) - ((val - 1) * 15)) /
+          const averageWidth = ((this.windowWidth - 100) - ((val - 1) * 15)) /
             val;
           this.move += (averageWidth + 15) *
             (val - this.moveItem - this.lastPlayedFile.length - 1);
@@ -146,6 +147,7 @@ export default {
   },
   methods: {
     open(link) {
+      console.log(this.windowWidth);
       if (this.showingPopupDialog) {
         // skip if there is already a popup dialog
         return;
@@ -185,7 +187,7 @@ export default {
         this.moveItem = 0;
         this.$bus.$emit('moveItem', this.moveItem);
         this.$bus.$emit('move', this.move);
-      } else if (this.$electron.remote.getCurrentWindow().getSize()[0] > 1355) {
+      } else if (this.windowWidth > 1355) {
         this.open('./');
       } else {
         this.open('./');
@@ -260,9 +262,9 @@ export default {
           item.style.left = `${l}px`;
           item.style.top = `${t}px`;
           const limitWidth = (vm.changeSize / 100) *
-            vm.$electron.remote.getCurrentWindow().getSize()[0];
+            vm.windowWidth;
           const limitHeight = (vm.changeSize / 100) *
-            vm.$electron.remote.getCurrentWindow().getSize()[1];
+            document.body.clientHeight;
           const itemMask = document.querySelector(`#item${index} .mask`);
           const itemDelete = document.querySelector(`#item${index} .deleteUi`);
           if (l <= -limitWidth || l >= limitWidth || t >= limitHeight || t <= -limitHeight) {
@@ -293,6 +295,7 @@ export default {
           vm.infoDB().delete('recent-played', deletData[0].quickHash);
           vm.recentFileDel = false;
         } else {
+          this.showShadow = true;
           item.style.zIndex = '';
           item.style.left = '';
           item.style.top = '';
@@ -304,6 +307,7 @@ export default {
         document.onmousemove = mousemove;
         document.onmouseup = mouseup;
         document.querySelector('.controller').parentNode.onmouseup = mouseup;
+        this.showShadow = false;
         item.style.zIndex = 5;
       }
     },
@@ -312,13 +316,12 @@ export default {
       if (!this.isDragging) {
         if (index === this.showItemNum - this.moveItem - 1 && !this.isFullScreen) {
           this.moveItem -= 1;
-          this.moveLength = 15 + (this.changeSize * (document.body.clientWidth / 100));
-          const ss = this.move - this.moveLength;
+          const ss = (this.move - 15) - (this.changeSize * (this.windowWidth / 100));
           this.move = ss;
           lf.style.left = `${ss}px`;
         } else if (index + this.moveItem === -2 && !this.isFullScreen) {
           this.moveItem += 1;
-          const ss = (this.move + 15) + (this.changeSize * (document.body.clientWidth / 100));
+          const ss = (this.move + 15) + (this.changeSize * (this.windowWidth / 100));
           this.move = ss;
           lf.style.left = `${ss}px`;
         } else {
