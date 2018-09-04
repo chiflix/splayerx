@@ -281,10 +281,6 @@ export default {
     },
 
     mkvProcess(vidPath, onlyEmbedded, cb) {
-      // cb is the toggleSubtitleShow, and emit the finished reading event, for
-      // cancelling the placeholders
-      // need to consider when to insert these functions and emittings
-
       this.mkvProcessInit(vidPath, onlyEmbedded, () => {
         console.log('finished reading initial mkv subtitles');
         cb();
@@ -715,12 +711,6 @@ export default {
       const duration = this.$store.state.PlaybackState.Duration;
       const currentTime = this.$store.state.PlaybackState.CurrentTime;
       return duration > 3000 ? currentTime + 300 : currentTime + (duration / 10);
-    },
-    mkvFileSize() {
-      const vid = this.$parent.$refs.videoCanvas.videoElement();
-      const filePath = decodeURI(vid.src).substring(7);
-      const fileStatus = fs.statSync(filePath);
-      return fileStatus.size;
     },
   },
   watch: {
