@@ -292,7 +292,6 @@ export default {
       const accurateTime = this.$store.state.PlaybackState.AccurateTime;
       const startTime = accurateTime * 1000;
       const endTime = this.mkvInitializingReadingEndTime * 1000;
-      // const endTime = startTime + 20000;
       const processSubNames = true;
       this.parseMkvSubs(filePath, startTime, endTime, onlyEmbedded, processSubNames)
         .then((tracks) => {

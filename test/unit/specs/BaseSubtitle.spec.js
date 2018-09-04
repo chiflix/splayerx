@@ -215,19 +215,6 @@ describe('BaseSubtitle.vue', () => {
     stub.restore();
   });
 
-  // it('mkvSubsSeekedParsed watched property works fine', async () => {
-  //   const wrapper = mount(VideoCanvas, {
-  //     store,
-  //     localVue,
-  //     propsData: {
-  //       src: 'file://./../../../../test/assets/testMkv.mkv',
-  //     },
-  //   });
-  //   const childWrapper = wrapper.find(BaseSubtitle);
-  //   childWrapper.setData({ mkvSubsSeekedParsed: true });
-  //   expect(childWrapper.vm.idleCallbackID).not.equal(0);
-  // });
-
   it('$_concatStream success test', (done) => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
     const subPath = './test/assets/test3.srt';

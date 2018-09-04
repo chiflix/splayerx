@@ -264,9 +264,6 @@ li {
   }
 
   .sub-menu-wrapper {
-    // overflow: hidden;
-    // width: 185px;
-    // height: 104px;
     border-radius: 10px;
   }
   .sub-menu {
