@@ -201,16 +201,16 @@ describe('TimeProgressBar.vue', () => {
       isRestartClicked: false,
       cursorStyle: 'pointer',
     });
-    const spy = sinon.spy(wrapper.vm.$bus, '$emit');
+    const stub = sinon.stub(wrapper.vm.$bus, '$emit');
     wrapper.vm.videoRestart();
+    expect(stub.calledOnce).equal(true);
+    expect(stub.firstCall.args[0]).equal('seek');
+    expect(stub.firstCall.args[1]).equal(0);
+    stub.restore();
     expect(wrapper.vm.buttonRadius).equal(0);
     expect(wrapper.vm.showScreenshot).equal(false);
     expect(wrapper.vm.isRestartClicked).equal(true);
     expect(wrapper.vm.cursorStyle).equal('default');
-    expect(spy.calledOnce).equal(true);
-    expect(spy.firstCall.args[0]).equal('seek');
-    expect(spy.firstCall.args[1]).equal(0);
-    spy.restore();
   });
 
   it('onProgressBarMove method works fine - 1', () => {
