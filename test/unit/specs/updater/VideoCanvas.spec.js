@@ -50,7 +50,7 @@ describe('VideoCanvas.vue', () => {
 
   it('volume event work fine', () => {
     wrapper.vm.$bus.$emit('volume', 1);
-    expect(store.state.PlaybackState.PlaybackRate).equal(1);
+    expect(store.state.PlaybackState.Volume).equal(1);
   });
 
   it('calcNewWindowXY method work fine if no windowRectangleOld exist', () => {

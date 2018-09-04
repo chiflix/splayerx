@@ -27,6 +27,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import Titlebar from './Titlebar.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheTimeCodes from './PlayingView/TheTimeCodes.vue';
@@ -35,7 +36,6 @@ import VolumeControl from './PlayingView/VolumeControl.vue';
 import AdvanceControl from './PlayingView/AdvanceControl.vue';
 import SubtitleControl from './PlayingView/SubtitleControl.vue';
 import PlayButton from './PlayingView/PlayButton.vue';
-import UnfousedHelper from './PlayingView/helpers/macUnfocusHelper.js';
 
 export default {
   name: 'playing-view',
@@ -64,9 +64,10 @@ export default {
       clicks: 0,
       timer: null,
       mainWindow: null,
-      unfocusedHelper: null,
       dragRadiusSquare: 25,
       dragTime: 200,
+      focusTimestamp: null,
+      firstMouseTimeSpan: 500,
       mouseDownTime: null,
       mouseDownCursorPosition: null,
       subtitleMenuAppear: false,
@@ -110,12 +111,12 @@ export default {
     },
     mouseEnter() {
       console.log(document.hidden);
-      if (this.unfocusedHelper.needHandle()) {
+      if (this.isFocused) {
         this.wakeUpAllWidgets();
       }
     },
     mouseleaveHandler() {
-      if (!this.unfocusedHelper.needHandle()) return;
+      if (!this.isFocused) return;
       this.leave = true;
       if (this.timeoutIdOfAllWidgetsDisappearDelay !== 0) {
         clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
@@ -148,7 +149,7 @@ export default {
     wheelVolumeControll(e) {
       this.$bus.$emit('volumecontroller-appear-delay');
       this.$bus.$emit('volumeslider-appear');
-      if (e.deltaY < 0) {
+      if (e.deltaY > 0) {
         if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
           this.$bus.$emit(
             'volume',
@@ -157,7 +158,7 @@ export default {
         } else {
           this.$bus.$emit('volume', 1);
         }
-      } else if (e.deltaY > 0) {
+      } else if (e.deltaY < 0) {
         if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
           this.$bus.$emit(
             'volume',
@@ -188,7 +189,7 @@ export default {
       return false;
     },
     handleMouseMove() {
-      if (!this.unfocusedHelper.needHandle()) return;
+      if (!this.isFocused) return;
       this.wakeUpAllWidgets();
     },
     handleMouseUp() {
@@ -202,7 +203,15 @@ export default {
           const self = this; // define a constant "self" for the following scope to use
           if (this.isValidClick()) {
             this.timer = setTimeout(() => { // define timer as setTimeOut function
-              self.togglePlayback(); // which is togglePlayback
+              if (self.focusTimestamp
+                && new Date() - self.focusTimestamp < self.firstMouseTimeSpan) {
+                // if click to focus, always start playing
+                if (!self.isPlaying) {
+                  self.$bus.$emit('play');
+                }
+              } else {
+                self.togglePlayback(); // which is togglePlayback
+              }
               self.clicks = 0; // reset the "clicks" to zero for next event
             }, this.delay);
           } else {
@@ -229,9 +238,9 @@ export default {
     },
   },
   mounted() {
-    this.unfocusedHelper = new (UnfousedHelper())(this.mainWindow, this);
-    this.$bus.$emit('play');
+    this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);
     this.$electron.remote.getCurrentWindow().setResizable(true);
+    this.$bus.$emit('play');
     this.$bus.$on('clear-all-widget-disappear-delay', () => {
       clearTimeout(this.timeoutIdOfAllWidgetsDisappearDelay);
     });
@@ -244,11 +253,21 @@ export default {
     });
   },
   computed: {
-    uri() {
-      return this.$store.state.PlaybackState.SrcOfVideo;
-    },
     cursorStyle() {
       return this.cursorShow ? 'default' : 'none';
+    },
+    ...mapState({
+      uri: state => state.PlaybackState.SrcOfVideo,
+      isPlaying: state => state.PlaybackState.isPlaying,
+      isFocused: state => state.WindowState.isFocused,
+    }),
+  },
+  watch: {
+    isFocused(isFocused, prevIsFocused) {
+      if (isFocused && !prevIsFocused) {
+        this.wakeUpAllWidgets();
+        this.focusTimestamp = new Date();
+      }
     },
   },
 };

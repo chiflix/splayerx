@@ -1,11 +1,13 @@
 
-import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import PlaybackState from '@/store/modules/PlaybackState';
 import sinon from 'sinon';
-import PlayingView from '@/components/PlayingView';
 import EventEmitter from 'events';
-import { UnfocusedHelperForMac, UnfocusedHelper } from '../../../src/renderer/components/PlayingView/helpers/macUnfocusHelper.js';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import AppState from '@/store/modules/AppState';
+import WindowState from '@/store/modules/WindowState';
+import PlaybackState from '@/store/modules/PlaybackState';
+import PlayingView from '@/components/PlayingView';
+
 class Screen {
   constructor(win) {
     this.win = win;
@@ -54,7 +56,11 @@ class VideoCanvas {
     this.paused = false;
     this.$bus = bus;
     this.$bus.$on('toggle-playback', () => {
-      this.paused = !this.paused;
+      if (this.paused) {
+        this.play();
+      } else {
+        this.pause();
+      }
     });
     this.$bus.$on('play', () => {
       this.play();
@@ -73,6 +79,7 @@ class VideoCanvas {
 function windowMock(vue) {
   const win = new Window();
   vue.mainWindow = win;
+
   return win;
 }
 function electronMock(vue, win) {
@@ -92,7 +99,6 @@ function busMock(vue) {
 }
 function videoCanvasMock(vue, bus) {
   const vcanvas = new VideoCanvas(bus);
-  busMock(vcanvas);
   vue.$refs.VideoCanvasRef.$refs.videoCanvas = vcanvas;
   return vcanvas;
 }
@@ -107,10 +113,9 @@ describe('PlayingView.vue', () => {
     // state = PlaybackState.state;
     store = new Vuex.Store({
       modules: {
-        PlaybackState: {
-          state: PlaybackState.state,
-          getters: PlaybackState.getters,
-        },
+        AppState,
+        WindowState,
+        PlaybackState,
       },
     });
   });
@@ -132,7 +137,6 @@ describe('PlayingView.vue', () => {
   // 待完善
   it('mouseleave event trigger', () => {
     const wrapper = shallowMount(PlayingView, ({ store, localVue }));
-    wrapper.vm.unfocusedHelper = new UnfocusedHelper(); // use default one
     wrapper.find('.video-controller').trigger('mouseleave');
     expect(wrapper.vm.leave).equal(true);
   });
@@ -172,10 +176,9 @@ describe('PlayingView.vue.lyc', () => {
     // state = PlaybackState.state;
     store = new Vuex.Store({
       modules: {
-        PlaybackState: {
-          state: PlaybackState.state,
-          getters: PlaybackState.getters,
-        },
+        AppState,
+        WindowState,
+        PlaybackState,
       },
     });
   });
@@ -186,29 +189,55 @@ describe('PlayingView.vue.lyc', () => {
      * test for mac for not focused
      * test for click pause and stop bug fix
      */
-  it('test for mac for on focus when video is playing', () => {
+  it('should play on focus click when video is playing', () => {
+    store.commit('isPlaying', true);
+    store.commit('isFocused', false);
     const wrapper = shallowMount(PlayingView, ({ store, localVue }));
     const vue = wrapper.vm;
     electronMock(vue, windowMock(vue));
-    const win = vue.mainWindow;
     videoCanvasMock(vue, busMock(vue));
-    vue.unfocusedHelper = new UnfocusedHelperForMac(vue.mainWindow, vue);
-    expect(vue.$refs.VideoCanvasRef.$refs.videoCanvas.paused).equal(false);
-    win.focusWindow();
-    expect(vue.$refs.VideoCanvasRef.$refs.videoCanvas.paused).equal(false);
+    const globalEventBusEmitSpy = sinon.spy(vue.$bus, '$emit');
+    store.commit('isFocused', true);
+    vue.handleLeftClick();
+    vue.handleMouseUp();
+    timer.tick(200);
+    expect(new Date() - vue.focusTimestamp).lessThan(vue.firstMouseTimeSpan);
+    expect(globalEventBusEmitSpy.calledWith('play')).equal(false);
+    expect(globalEventBusEmitSpy.calledWith('toggle-playback')).equal(false);
   });
-  it('test for mac for on focus when video is not playing', () => {
+  it('should play on focus click when video is not playing', () => {
+    store.commit('isPlaying', false);
+    store.commit('isFocused', false);
     const wrapper = shallowMount(PlayingView, ({ store, localVue }));
     const vue = wrapper.vm;
     electronMock(vue, windowMock(vue));
     videoCanvasMock(vue, busMock(vue));
-    vue.$refs.VideoCanvasRef.$refs.videoCanvas.pause();
-    expect(vue.$refs.VideoCanvasRef.$refs.videoCanvas.paused).equal(true);
-    const win = vue.mainWindow;
-    vue.unfocusedHelper = new UnfocusedHelperForMac(vue.mainWindow, vue);
-    win.cursor = { x: 50, y: 50 };
-    win.focusWindow();
-    expect(vue.$refs.VideoCanvasRef.$refs.videoCanvas.paused).equal(false);
+    const globalEventBusEmitSpy = sinon.spy(vue.$bus, '$emit');
+    store.commit('isFocused', true);
+    vue.handleLeftClick();
+    timer.tick(100);
+    vue.handleMouseUp();
+    timer.tick(200);
+    expect(new Date() - vue.focusTimestamp).lessThan(vue.firstMouseTimeSpan);
+    expect(globalEventBusEmitSpy.calledWith('play')).equal(true);
+    expect(globalEventBusEmitSpy.calledWith('toggle-playback')).equal(false);
+  });
+  it('shoud pause on non-focus click when video is playing', () => {
+    store.commit('isPlaying', true);
+    store.commit('isFocused', false);
+    const wrapper = shallowMount(PlayingView, ({ store, localVue }));
+    const vue = wrapper.vm;
+    electronMock(vue, windowMock(vue));
+    videoCanvasMock(vue, busMock(vue));
+    const globalEventBusEmitSpy = sinon.spy(vue.$bus, '$emit');
+    store.commit('isFocused', true);
+    timer.tick(vue.firstMouseTimeSpan);
+    vue.handleLeftClick();
+    timer.tick(100);
+    vue.handleMouseUp();
+    timer.tick(200);
+    expect(globalEventBusEmitSpy.calledWith('play')).equal(false);
+    expect(globalEventBusEmitSpy.calledWith('toggle-playback')).equal(true);
   });
   it('test for when click center validly', () => {
     const wrapper = shallowMount(PlayingView, ({ store, localVue }));
@@ -216,7 +245,6 @@ describe('PlayingView.vue.lyc', () => {
     electronMock(vue, windowMock(vue));
     const win = vue.mainWindow;
     videoCanvasMock(vue, busMock(vue));
-    vue.unfocusedHelper = new UnfocusedHelperForMac(vue.mainWindow, vue);
     expect(vue.$refs.VideoCanvasRef.$refs.videoCanvas.paused).equal(false);
     win.cursor = { x: 50, y: 50 };
     win.focusWindow();
@@ -233,7 +261,6 @@ describe('PlayingView.vue.lyc', () => {
     electronMock(vue, windowMock(vue));
     const win = vue.mainWindow;
     videoCanvasMock(vue, busMock(vue));
-    vue.unfocusedHelper = new UnfocusedHelperForMac(vue.mainWindow, vue);
     expect(vue.$refs.VideoCanvasRef.$refs.videoCanvas.paused).equal(false);
     win.cursor = { x: 50, y: 50 };
     win.focusWindow();
@@ -250,7 +277,6 @@ describe('PlayingView.vue.lyc', () => {
     electronMock(vue, windowMock(vue));
     const win = vue.mainWindow;
     videoCanvasMock(vue, busMock(vue));
-    vue.unfocusedHelper = new UnfocusedHelperForMac(vue.mainWindow, vue);
     expect(vue.$refs.VideoCanvasRef.$refs.videoCanvas.paused).equal(false);
     win.cursor = { x: 50, y: 50 };
     win.focusWindow();
