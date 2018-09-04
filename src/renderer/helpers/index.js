@@ -64,11 +64,12 @@ export default {
     },
     openFile(path) {
       let vidPath;
-      path = decodeURI(path);
+      const savePath = path;
+      path = encodeURI(path).replace(/#/g, '%23').replace(/[?]/g, '%3F');
       if (process.platform === 'win32') {
-        vidPath = path.replace(/^file:\/\/\//, '');
+        vidPath = savePath.replace(/^file:\/\/\//, '');
       } else {
-        vidPath = path.replace(/^file:\/\//, '');
+        vidPath = savePath.replace(/^file:\/\//, '');
       }
       this.infoDB().get('recent-played', this.mediaQuickHash(vidPath))
         .then((value) => {
@@ -78,7 +79,7 @@ export default {
           } else {
             this.infoDB().add('recent-played', {
               quickHash: this.mediaQuickHash(vidPath),
-              path,
+              path: decodeURI(path.replace(/%23/g, '#').replace(/%3F/g, '?')),
               lastOpened: Date.now(),
             });
           }

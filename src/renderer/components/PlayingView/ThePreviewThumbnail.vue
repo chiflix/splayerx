@@ -84,6 +84,7 @@ export default {
       this.mountImage = false;
       this.generatedIndex = 0;
       this.currentIndex = 0;
+      newValue = decodeURI(newValue.replace(/%23/g, '#').replace(/%3F/g, '?'));
       this.updateMediaQuickHash(newValue);
       this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
     },
@@ -193,7 +194,7 @@ export default {
       /* eslint-disable newline-per-chained-call */
     });
     idb.open(INFO_DATABASE_NAME).then((db) => {
-      this.updateMediaQuickHash(this.src);
+      this.updateMediaQuickHash(decodeURI(this.src.toString().replace(/%23/g, '#').replace(/%3F/g, '?')));
       const obejctStoreName = THUMBNAIL_OBJECT_STORE_NAME;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
         console.log('[IndexedDB]: Initial preview thumbnail info objectStore.');

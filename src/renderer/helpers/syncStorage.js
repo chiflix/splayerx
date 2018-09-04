@@ -25,7 +25,6 @@ function getFileName(key) {
   }
 
   const keyFileName = `${path.basename(key, '.json')}.json`;
-
   // Prevent ENOENT and other similar errors when using
   // reserved characters in Windows filenames.
   // See: https://en.wikipedia.org/wiki/Filename#Reserved%5Fcharacters%5Fand%5Fwords

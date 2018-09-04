@@ -251,7 +251,7 @@ export default {
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
-          const val = await this.infoDB().get('recent-played', 'path', oldVal);
+          const val = await this.infoDB().get('recent-played', 'path', decodeURI(oldVal.replace(/%23/g, '#').replace(/%3F/g, '?')));
           if (val && data) {
             const mergedData = Object.assign(val, data);
             this.infoDB().add('recent-played', mergedData);
