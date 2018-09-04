@@ -97,7 +97,7 @@ export default {
               size: localSubsStatus.size,
             });
             this.loadLocalTextTracks(localSubsStatus.fileList, () => {
-              this.$_toggleSutitleShow();
+              this.toggleSutitleShow();
               this.$bus.$emit('subtitles-finished-loading', 'Local');
             });
           }
@@ -107,7 +107,7 @@ export default {
               size: embeddedSubsStatus.size,
             });
             this.mkvProcess(decodeURI(vid.src), onlyEmbedded, () => {
-              this.$_toggleSutitleShow();
+              this.toggleSutitleShow();
               this.$bus.$emit('subtitles-finished-loading', 'Embedded');
             });
           }
@@ -118,7 +118,7 @@ export default {
           });
           this.loadServerTextTracks((err) => {
             if (err) throw err;
-            this.$_toggleSutitleShow();
+            this.toggleSutitleShow();
             this.$bus.$emit('subtitles-finished-loading', 'Server');
           });
         }
@@ -134,7 +134,7 @@ export default {
       this.mediaHash = this.mediaQuickHash(fileUrlToPath(vid.src));
       this.Sagi = this.sagi();
 
-      const serverSubsStatus = await this.$_serverSubsExist();
+      const serverSubsStatus = await this.serverSubsExist();
 
       const files = [];
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
@@ -180,14 +180,14 @@ export default {
        */
       // If there is already subtitle files(same dir), load it
       this.addVttToVideoElement(files, () => {
-        this.$_clearSubtitle();
-        const subNameArr = files.map(file => this.$_subNameFromLocalProcess(file));
+        this.clearSubtitle();
+        const subNameArr = files.map(file => this.subNameFromLocalProcess(file));
         this.$store.commit('SubtitleNameArr', subNameArr);
         cb();
       });
     },
 
-    async $_serverSubsExist() {
+    async serverSubsExist() {
       const res = await this.Sagi.mediaTranslate(this.mediaHash);
       if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
         return {
@@ -228,9 +228,9 @@ export default {
 
                 // Only when all subtitles are successfully loaded,
                 // users can see the server subtitles in Subtitle Menu.
-                this.$_clearSubtitle();
+                this.clearSubtitle();
                 const subtitleNameArr = textTrackList
-                  .map(textTrack => this.$_subnameFromServerProcess(textTrack));
+                  .map(textTrack => this.subnameFromServerProcess(textTrack));
                 this.$store.commit('SubtitleNameArr', subtitleNameArr);
 
                 cb();
@@ -251,7 +251,7 @@ export default {
         });
     },
 
-    $_hasEmbeddedSubs(filePath) {
+    hasEmbeddedSubs(filePath) {
       return new Promise((resolve) => {
         let foo;
         const subs = new MatroskaSubtitles();
@@ -277,7 +277,7 @@ export default {
     },
 
     async hasEmbedded(filePath) {
-      const res = await (this.$_hasEmbeddedSubs(filePath));
+      const res = await (this.hasEmbeddedSubs(filePath));
       return res;
     },
 
@@ -313,7 +313,7 @@ export default {
           };
           this.mkvSubArray.push(currentSubObj);
           embededSubNames[i] = {
-            title: `${this.$_findMode(tracks[i].subLangs)}`,
+            title: `${this.findMode(tracks[i].subLangs)}`,
             status: null,
             textTrackID: this.textTrackID,
             origin: 'local',
@@ -337,7 +337,7 @@ export default {
       }
       parser.onflush = cb;
       if (processSubNames) {
-        this.$_clearSubtitle();
+        this.clearSubtitle();
         if (onlyEmbedded) {
           this.$store.commit('SubtitleNameArr', embededSubNames);
         } else {
@@ -378,10 +378,10 @@ export default {
           // straightly, but this if condition does improves some performance
           // avoiding doing the adding things stuff, manipulating
           // data and data structures.
-          if (startTime < sub.time && this.$_notParsedYet(sub.time)) {
+          if (startTime < sub.time && this.notParsedYet(sub.time)) {
             const currentIndex = tracks.findIndex(track => trackNumber === track.number);
             let currentContent = '';
-            currentContent += `${this.$_msToTime(sub.time)} --> ${this.$_msToTime(sub.time + sub.duration)}\r\n`;
+            currentContent += `${this.msToTime(sub.time)} --> ${this.msToTime(sub.time + sub.duration)}\r\n`;
             currentContent += `${(sub.text)}\r\n\r\n`;
 
             tracks[currentIndex].subContent += currentContent;
@@ -425,7 +425,7 @@ export default {
     addVttToVideoElement(files, cb) {
       const vid = this.$parent.$refs.videoCanvas.videoElement();
       /* eslint-disable arrow-parens */
-      const tasks = files.map((subPath) => (cb) => this.$_createSubtitleStream(subPath, cb));
+      const tasks = files.map((subPath) => (cb) => this.createSubtitleStream(subPath, cb));
       parallel(tasks, (err, results) => {
         if (err) {
           throw err;
@@ -469,8 +469,8 @@ export default {
       // Add cues to TextTrack
       for (let i = 0; i < cueArray.length; i += 1) {
         const element = cueArray[i];
-        const startTime = this.$_timeProcess(element[0]);
-        const endTime = this.$_timeProcess(element[1]);
+        const startTime = this.timeProcess(element[0]);
+        const endTime = this.timeProcess(element[1]);
         subtitle.addCue(new VTTCue(startTime, endTime, element[2]));
       }
     },
@@ -483,7 +483,7 @@ export default {
       const targetIndex = this.$store.state.PlaybackState.SubtitleNameArr[index].textTrackID;
       if (type === 'first') {
         if (vid.textTracks.length > targetIndex) { // Video has available subtitles
-          this.$_onCueChangeEventAdd(vid.textTracks[targetIndex]);
+          this.onCueChangeEventAdd(vid.textTracks[targetIndex]);
           vid.textTracks[targetIndex].mode = 'hidden';
           this.$store.commit('SubtitleOn', { index: targetIndex, status: type });
           this.firstSubIndex = targetIndex;
@@ -526,7 +526,7 @@ export default {
         background,
       };
     },
-    $_notParsedYet(subStartTime) {
+    notParsedYet(subStartTime) {
       for (let i = 0; i < this.mkvParsedTimes.length; i += 1) {
         const startTime = this.mkvParsedTimes[i].start;
         const endTime = this.mkvParsedTimes[i].end;
@@ -536,7 +536,7 @@ export default {
       }
       return true;
     },
-    $_msToTime(s) {
+    msToTime(s) {
       const ms = s % 1000;
       s = (s - ms) / 1000;
       const secs = s % 60;
@@ -546,7 +546,7 @@ export default {
       return (`${z(2, hrs)}:${z(2, mins)}:${z(2, secs)}.${z(3, ms)}`);
     },
 
-    $_findMode(array) {
+    findMode(array) {
       const map = new Map();
       let maxFreq = 0;
       let mode;
@@ -570,7 +570,7 @@ export default {
      * @param {function} cb Callback function to process result.
      * (err, result) are two arguments of callback.
      */
-    $_concatStream(stream, cb) {
+    concatStream(stream, cb) {
       const chunks = [];
       stream.on('data', (chunk) => {
         chunks.push(chunk);
@@ -592,7 +592,7 @@ export default {
      * @param {Number} second
      * @returns {Number}
      */
-    $_timeProcess(second) {
+    timeProcess(second) {
       // Now as per official proto3 documentation, default values are not
       // serialized to save space during wire transmission.
       // so if input is 0, it may become undefined
@@ -605,7 +605,7 @@ export default {
      * @param {string} subPath Subtitle Path
      * @param {function} cb Callback function to process result
      */
-    $_createSubtitleStream(subPath, cb) {
+    createSubtitleStream(subPath, cb) {
       const reSrt = new RegExp('^(.srt)$');
       const reAss = new RegExp('^(.ass)$');
       const subExtName = path.extname(subPath);
@@ -618,7 +618,7 @@ export default {
         vttStream = fs.createReadStream(subPath).pipe(ass2vtt());
       }
 
-      this.$_concatStream(vttStream, (err, buf) => {
+      this.concatStream(vttStream, (err, buf) => {
         if (err) {
           throw err;
         }
@@ -630,7 +630,7 @@ export default {
      * @returns {object} Returns an object that contains subtitle name
      * and default status(status can be null, first and second)
      */
-    $_subNameFromLocalProcess(file) {
+    subNameFromLocalProcess(file) {
       const res = {
         title: file.language === undefined ? path.parse(file).name : file.language,
         status: null,
@@ -643,7 +643,7 @@ export default {
     /**
      * @param {TextTranslationResponse.Text} textTrack translation result for the requested text
      */
-    $_subnameFromServerProcess(textTrack) {
+    subnameFromServerProcess(textTrack) {
       let title = '';
       if (textTrack[1]) {
         title += textTrack[1];
@@ -667,7 +667,7 @@ export default {
      * @param {string} type Choose first or second subtitle
      * @description function for oncuechange event
      */
-    $_onCueChangeEventAdd(textTrack, type = 'first') {
+    onCueChangeEventAdd(textTrack, type = 'first') {
       const firstSubEvent = (cue) => {
         const { activeCues } = cue.currentTarget;
         this.firstActiveCues.pop();
@@ -685,7 +685,7 @@ export default {
      * @description function to clear former subtitles
      * @param {string} type clear first, second or all subtitles
      */
-    $_clearSubtitle(type = 'first') {
+    clearSubtitle(type = 'first') {
       if (type === 'first') {
         if (this.firstSubState) {
           const vid = this.$parent.$refs.videoCanvas.videoElement();
@@ -698,7 +698,7 @@ export default {
         }
       }
     },
-    $_toggleSutitleShow() {
+    toggleSutitleShow() {
       this.subStyleChange();
       this.subtitleShow(0);
     },
@@ -781,7 +781,7 @@ export default {
     this.$bus.$on('video-loaded', this.subtitleInitialize);
 
     this.$bus.$on('sub-first-change', (targetIndex) => {
-      this.$_clearSubtitle();
+      this.clearSubtitle();
       this.subtitleShow(targetIndex);
     });
 
@@ -796,10 +796,10 @@ export default {
 
     this.$bus.$on('add-subtitle', (files) => {
       const size = this.$store.getters.subtitleNameArrSize;
-      const subtitleName = files.map(file => this.$_subNameFromLocalProcess(file));
+      const subtitleName = files.map(file => this.subNameFromLocalProcess(file));
       this.$store.commit('AddSubtitle', subtitleName);
       this.addVttToVideoElement(files, () => {
-        this.$_clearSubtitle();
+        this.clearSubtitle();
         this.subtitleShow(size);
         this.$bus.$emit('added-local-subtitles', size);
       });
@@ -810,7 +810,7 @@ export default {
         if (err) throw err;
         // handles when users want to load server subs after initializing stage;
         this.$bus.$emit('finished-loading-server-subs');
-        this.$_clearSubtitle();
+        this.clearSubtitle();
         this.subtitleShow(0);
       });
       // cb();
