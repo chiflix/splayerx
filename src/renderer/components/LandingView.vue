@@ -283,7 +283,7 @@ body {
     z-index: 4;
   }
   .item-name {
-    width: 500px;
+    width: 69.4vw;
     word-break: break-all;
     font-size: 30px;
     font-weight: bold;
