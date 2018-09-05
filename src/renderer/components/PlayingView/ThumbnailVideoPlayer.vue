@@ -100,17 +100,15 @@ export default {
     videoSrcValidator(src) {
       const fileSrcRegexes = {
         http: RegExp('^(http|https)://'),
-        file: RegExp('^file:///?'),
+        file_notwindows: RegExp('^file:///?'),
+        file_windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
       };
       if (typeof src === 'string') {
-        if (fileSrcRegexes.http.test(src)) {
-          return 'http';
-        }
-        if (fileSrcRegexes.file.test(src)) {
-          return 'file';
-        }
+        Object.keys(fileSrcRegexes).forEach((filetype) => {
+          if (fileSrcRegexes[filetype].test(src)) return filetype;
+          return null;
+        });
       }
-      throw new TypeError('invalid src value.');
     },
     // Data regenerators
     updateGenerationParameters() {
