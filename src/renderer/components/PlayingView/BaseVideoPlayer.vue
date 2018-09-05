@@ -21,6 +21,7 @@ export default {
         const fileSrcRegexes = [
           RegExp('^(http|https)://'),
           RegExp('^file:///?'),
+          RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
         ];
         return value.length > 0 && fileSrcRegexes.some(rule => rule.test(value));
       },
