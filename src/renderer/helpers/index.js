@@ -83,6 +83,7 @@ export default {
         'SrcOfVideo',
         process.platform === 'win32' ? convertedPath : `file://${convertedPath}`,
       );
+      this.$store.commit('OriginSrcOfVideo', originPath);
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
