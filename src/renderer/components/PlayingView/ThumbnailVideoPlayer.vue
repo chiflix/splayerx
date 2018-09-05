@@ -101,8 +101,8 @@ export default {
       let result = '';
       const fileSrcRegexes = {
         http: RegExp('^(http|https)://'),
-        file_notwindows: RegExp('^file://'),
-        file_windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
+        notWindowsFile: RegExp('^file://'),
+        windowsFile: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
       };
       if (typeof src === 'string') {
         Object.keys(fileSrcRegexes).forEach((filetype) => {
