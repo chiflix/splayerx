@@ -11,7 +11,6 @@ import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
-import { filePathToUrl } from '@/helpers/path';
 import Path from 'path';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
@@ -56,8 +55,7 @@ new Vue({
                   }],
                 }, (file) => {
                   if (file !== undefined) {
-                    const path = filePathToUrl(file[0]);
-                    this.openFile(path);
+                    this.openFile(file[0]);
                   }
                 });
               },
