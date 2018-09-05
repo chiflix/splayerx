@@ -98,17 +98,18 @@ export default {
   methods: {
     // Data validators
     videoSrcValidator(src) {
+      let result = '';
       const fileSrcRegexes = {
         http: RegExp('^(http|https)://'),
-        file_notwindows: RegExp('^file:///?'),
+        file_notwindows: RegExp('^file://'),
         file_windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
       };
       if (typeof src === 'string') {
         Object.keys(fileSrcRegexes).forEach((filetype) => {
-          if (fileSrcRegexes[filetype].test(src)) return filetype;
-          return null;
+          if (fileSrcRegexes[filetype].test(src)) result = filetype;
         });
       }
+      return result;
     },
     // Data regenerators
     updateGenerationParameters() {
@@ -206,6 +207,7 @@ export default {
     updateVideoInfo(outerThumbnailInfo) {
       const { videoSrc } = outerThumbnailInfo;
       if (this.videoSrcValidator(videoSrc)) {
+        console.log(videoSrc);
         this.videoSrc = videoSrc;
         if (!outerThumbnailInfo.newVideo) {
           this.screenWidth = outerThumbnailInfo.screenWidth;
