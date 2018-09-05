@@ -2,7 +2,6 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import InfoDB from '@/helpers/infoDB';
-import { filePathToUrl } from '@/helpers/path';
 import Sagi from './sagi';
 
 export default {
@@ -65,6 +64,7 @@ export default {
     },
     openFile(path) {
       const originPath = path;
+      const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
       this.infoDB().get('recent-played', this.mediaQuickHash(originPath))
         .then((value) => {
           if (value) {
@@ -79,7 +79,10 @@ export default {
           }
           this.$bus.$emit('new-file-open');
         });
-      this.$store.commit('SrcOfVideo', filePathToUrl(originPath));
+      this.$store.commit(
+        'SrcOfVideo',
+        process.platform === 'win32' ? convertedPath : `file://${convertedPath}`,
+      );
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
