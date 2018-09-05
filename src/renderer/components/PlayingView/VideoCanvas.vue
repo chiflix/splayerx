@@ -238,9 +238,12 @@ export default {
     currentTime() {
       return this.$store.state.PlaybackState.CurrentTime;
     },
+    originSrcOfVideo() {
+      return this.$store.state.PlaybackState.OriginSrcOfVideo;
+    },
   },
   watch: {
-    src(val, oldVal) {
+    originSrcOfVideo(val, oldVal) {
       const window = this.$electron.remote.getCurrentWindow();
       this.windowRectangleOld.x = window.getBounds().x;
       this.windowRectangleOld.y = window.getBounds().y;
@@ -250,8 +253,10 @@ export default {
       asyncStorage.get('recent-played')
         .then(async (data) => {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
+          console.log(oldVal, val, data);
           if (val && data) {
             const mergedData = Object.assign(val, data);
+            console.log(mergedData);
             this.infoDB().add('recent-played', mergedData);
           }
         });
