@@ -5,7 +5,6 @@
       ref="videoCanvas"
       :defaultEvents="['play', 'pause', 'playing', 'canplay', 'timeupdate', 'loadedmetadata', 'durationchange']"
       :styleObject="{objectFit: 'contain', width: '100%', height: '100%'}"
-
       @play="onPlay"
       @pause="onPause"
       @playing="onPlaying"
@@ -250,7 +249,7 @@ export default {
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
-          const val = await this.infoDB().get('recent-played', 'path', decodeURI(oldVal.replace(/%23/g, '#').replace(/%3F/g, '?')));
+          const val = await this.infoDB().get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
             this.infoDB().add('recent-played', mergedData);
