@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import InfoDB from '@/helpers/infoDB';
+import { filePathToUrl } from '@/helpers/path';
 import Sagi from './sagi';
 
 export default {
@@ -63,29 +64,22 @@ export default {
       }
     },
     openFile(path) {
-      let vidPath;
-      const savePath = path;
-      path = encodeURI(path).replace(/#/g, '%23').replace(/[?]/g, '%3F');
-      if (process.platform === 'win32') {
-        vidPath = savePath.replace(/^file:\/\/\//, '');
-      } else {
-        vidPath = savePath.replace(/^file:\/\//, '');
-      }
-      this.infoDB().get('recent-played', this.mediaQuickHash(vidPath))
+      const originPath = path;
+      this.infoDB().get('recent-played', this.mediaQuickHash(originPath))
         .then((value) => {
           if (value) {
             this.$bus.$emit('seek', value.lastPlayedTime);
             this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date.now() }));
           } else {
             this.infoDB().add('recent-played', {
-              quickHash: this.mediaQuickHash(vidPath),
-              path: decodeURI(path.replace(/%23/g, '#').replace(/%3F/g, '?')),
+              quickHash: this.mediaQuickHash(originPath),
+              path: originPath,
               lastOpened: Date.now(),
             });
           }
           this.$bus.$emit('new-file-open');
         });
-      this.$store.commit('SrcOfVideo', path);
+      this.$store.commit('SrcOfVideo', filePathToUrl(originPath));
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
@@ -112,6 +106,5 @@ export default {
       fs.closeSync(fd);
       return res.join('-');
     },
-
   },
 };
