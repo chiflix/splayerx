@@ -84,7 +84,6 @@ export default {
       this.mountImage = false;
       this.generatedIndex = 0;
       this.currentIndex = 0;
-      console.log(this.$store.state.PlaybackState.OriginSrcOfVideo);
       this.quickHash = this.mediaQuickHash(this.$store.state.PlaybackState.OriginSrcOfVideo);
       this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
     },
