@@ -253,10 +253,8 @@ export default {
       asyncStorage.get('recent-played')
         .then(async (data) => {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
-          console.log(oldVal, val, data);
           if (val && data) {
             const mergedData = Object.assign(val, data);
-            console.log(mergedData);
             this.infoDB().add('recent-played', mergedData);
           }
         });
