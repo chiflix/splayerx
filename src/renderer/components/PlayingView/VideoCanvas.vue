@@ -5,7 +5,6 @@
       ref="videoCanvas"
       :defaultEvents="['play', 'pause', 'playing', 'canplay', 'timeupdate', 'loadedmetadata', 'durationchange']"
       :styleObject="{objectFit: 'contain', width: '100%', height: '100%'}"
-
       @play="onPlay"
       @pause="onPause"
       @playing="onPlaying"
@@ -99,7 +98,6 @@ export default {
       }
       this.$bus.$emit('video-loaded');
       this.windowSizeHelper.setNewWindowSize();
-      // this.loadTextTracks();
     },
     onTimeupdate() {
       this.$store.commit('AccurateTime', this.videoElement.currentTime);
@@ -269,9 +267,12 @@ export default {
     currentTime() {
       return this.$store.state.PlaybackState.CurrentTime;
     },
+    originSrcOfVideo() {
+      return this.$store.state.PlaybackState.OriginSrcOfVideo;
+    },
   },
   watch: {
-    src(val, oldVal) {
+    originSrcOfVideo(val, oldVal) {
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
@@ -324,6 +325,13 @@ export default {
       this.videoElement.currentTime = e;
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
+
+      const filePath = decodeURI(this.videoElement.src);
+      const indexOfLastDot = filePath.lastIndexOf('.');
+      const ext = filePath.substring(indexOfLastDot + 1);
+      if (ext === 'mkv') {
+        this.$bus.$emit('seek-subtitle', e);
+      }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {

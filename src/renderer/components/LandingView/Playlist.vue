@@ -47,7 +47,6 @@
 
 <script>
 import path from 'path';
-import { filePathToUrl } from '@/helpers/path';
 
 export default {
   name: 'playlist',
@@ -143,11 +142,8 @@ export default {
       }
     },
   },
-  computed: {
-  },
   methods: {
     open(link) {
-      console.log(this.windowWidth);
       if (this.showingPopupDialog) {
         // skip if there is already a popup dialog
         return;
@@ -175,7 +171,7 @@ export default {
       }, (item) => {
         self.showingPopupDialog = false;
         if (item) {
-          self.openFile(filePathToUrl(item[0]));
+          self.openFile(item[0]);
         }
       });
     },
@@ -352,7 +348,7 @@ export default {
 
             .button {
                 background-color: rgba(0, 0, 0, 0.12);
-                transition: background-color 150ms ease-out;
+                transition: background-color 150ms ease-out, width 150ms ease-out, height 150ms ease-out, border 150ms ease-out;
                 backdrop-filter: blur(9.8px);
                 margin-right: 15px;
                 cursor: pointer;
@@ -365,7 +361,8 @@ export default {
 
             .btnMask {
                 border-radius: 2px;
-                border: 1px solid rgb(55, 55, 55);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                transition: width 150ms ease-out, height 150ms ease-out;
                 display: flex;
             }
 
@@ -377,7 +374,7 @@ export default {
                 position: relative;
                 color: #e4e4c4;
                 border-radius: 2px;
-                border: 1px solid rgb(55, 55, 55);
+                border: 1px solid rgba(255, 255, 255, 0.1);
                 width: 112 / 720vw;
                 height: 63 / 405vh;
                 min-height: 63px;

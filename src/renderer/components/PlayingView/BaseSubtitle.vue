@@ -12,6 +12,7 @@
 </template>
 
 <script>
+/* eslint-disable no-loop-func, no-use-before-define */
 import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import ass2vtt from 'ass-to-vtt';
@@ -31,6 +32,13 @@ export default {
       Sagi: null,
       mediaHash: '',
       readingMkv: false,
+      currentParsedMkvTime: 0,
+      mkvSubsInitialized: false,
+      mkvSubsSeekedParsed: false,
+      mkvSubsFullyParsed: false,
+      idleCallbackID: null,
+      mkvParsedTimes: [],
+      mkvSubArray: [], // which is the mkvSubNamesArray
       firstActiveCues: [],
       secondActiveCues: [],
       firstCueHTML: [],
@@ -53,6 +61,10 @@ export default {
       if (this.readingMkv) {
         this.$emit('stop-reading-mkv-subs', 'Stopped.');
         this.readingMkv = false;
+        // the following 3 lines may causes some bugs, need to consider the
+        // logic more carefully.
+        this.currentParsedMkvTime = 0;
+        this.mkvSubArray = [];
         this.$bus.$emit('subtitles-finished-loading', 'Embedded');
       }
 
@@ -85,7 +97,7 @@ export default {
               size: localSubsStatus.size,
             });
             this.loadLocalTextTracks(localSubsStatus.fileList, () => {
-              this.$_toggleSutitleShow();
+              this.toggleSutitleShow();
               this.$bus.$emit('subtitles-finished-loading', 'Local');
             });
           }
@@ -95,7 +107,7 @@ export default {
               size: embeddedSubsStatus.size,
             });
             this.mkvProcess(decodeURI(vid.src), onlyEmbedded, () => {
-              this.$_toggleSutitleShow();
+              this.toggleSutitleShow();
               this.$bus.$emit('subtitles-finished-loading', 'Embedded');
             });
           }
@@ -106,7 +118,7 @@ export default {
           });
           this.loadServerTextTracks((err) => {
             if (err) throw err;
-            this.$_toggleSutitleShow();
+            this.toggleSutitleShow();
             this.$bus.$emit('subtitles-finished-loading', 'Server');
           });
         }
@@ -122,7 +134,7 @@ export default {
       this.mediaHash = this.mediaQuickHash(fileUrlToPath(vid.src));
       this.Sagi = this.sagi();
 
-      const serverSubsStatus = await this.$_serverSubsExist();
+      const serverSubsStatus = await this.serverSubsExist();
 
       const files = [];
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
@@ -168,14 +180,14 @@ export default {
        */
       // If there is already subtitle files(same dir), load it
       this.addVttToVideoElement(files, () => {
-        this.$_clearSubtitle();
-        const subNameArr = files.map(file => this.$_subNameFromLocalProcess(file));
+        this.clearSubtitle();
+        const subNameArr = files.map(file => this.subNameFromLocalProcess(file));
         this.$store.commit('SubtitleNameArr', subNameArr);
         cb();
       });
     },
 
-    async $_serverSubsExist() {
+    async serverSubsExist() {
       const res = await this.Sagi.mediaTranslate(this.mediaHash);
       if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
         return {
@@ -216,9 +228,9 @@ export default {
 
                 // Only when all subtitles are successfully loaded,
                 // users can see the server subtitles in Subtitle Menu.
-                this.$_clearSubtitle();
+                this.clearSubtitle();
                 const subtitleNameArr = textTrackList
-                  .map(textTrack => this.$_subnameFromServerProcess(textTrack));
+                  .map(textTrack => this.subnameFromServerProcess(textTrack));
                 this.$store.commit('SubtitleNameArr', subtitleNameArr);
 
                 cb();
@@ -239,7 +251,7 @@ export default {
         });
     },
 
-    $_hasEmbeddedSubs(filePath) {
+    hasEmbeddedSubs(filePath) {
       return new Promise((resolve) => {
         let foo;
         const subs = new MatroskaSubtitles();
@@ -265,108 +277,144 @@ export default {
     },
 
     async hasEmbedded(filePath) {
-      const res = await (this.$_hasEmbeddedSubs(filePath));
+      const res = await (this.hasEmbeddedSubs(filePath));
       return res;
     },
 
     mkvProcess(vidPath, onlyEmbedded, cb) {
-      this.addMkvSubstoVideo(vidPath, onlyEmbedded, () => {
-        console.log('finished reading mkv subtitles');
+      this.mkvProcessInit(vidPath, onlyEmbedded, () => {
+        console.log('finished reading initial mkv subtitles');
         cb();
+        this.mkvSubsInitialized = true;
       });
     },
 
-    /*
-    the addMkvSubstoVideo method reads the subtitles embeded in the MKV files,
-    and add these subtitles into the video's texttracks, it also detects the language
-    of the extracted subtitles.
-    But the structure of this method need to be changed and improved.
-    */
-
-    addMkvSubstoVideo(filePath, onlyEmbedded, cb) {
-      const self = this;
-      this.readingMkv = true;
-      if (onlyEmbedded) {
-        this.$store.commit('SubtitleNameArr', []);
-      }
-      const ectractFn = filePath => new Promise((resolve, reject) => {
-        let tracks;
-        const lngDetector = new LanguageDetect();
-        const subs = new MatroskaSubtitles();
-        self.$on('stop-reading-mkv-subs', (error) => {
-          reject(error); // if it is rejected, it will still be reading subtitles,
-          // which loses a lot of performance, needs to be improved.
+    mkvProcessInit(filePath, onlyEmbedded, cb) {
+      const accurateTime = this.$store.state.PlaybackState.AccurateTime;
+      const startTime = accurateTime * 1000;
+      const endTime = this.mkvInitializingReadingEndTime * 1000;
+      const processSubNames = true;
+      this.parseMkvSubs(filePath, startTime, endTime, onlyEmbedded, processSubNames)
+        .then((tracks) => {
+          this.addMkvSubtitlesToVideoElement(tracks, onlyEmbedded, processSubNames, cb);
         });
-        subs.once('tracks', (track) => {
+    },
+
+    addMkvSubtitlesToVideoElement(tracks, onlyEmbedded, processSubNames, cb) {
+      const vid = this.$parent.$refs.videoCanvas.videoElement();
+      const embededSubNames = [];
+      const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
+      let sub;
+      for (let i = 0; i < tracks.length; i += 1) {
+        if (processSubNames) {
+          const currentSubObj = {
+            trackNumber: tracks[i].number,
+            textTrackID: this.textTrackID,
+          };
+          this.mkvSubArray.push(currentSubObj);
+          embededSubNames[i] = {
+            title: `${this.findMode(tracks[i].subLangs)}`,
+            status: null,
+            textTrackID: this.textTrackID,
+            origin: 'local',
+          };
+          this.textTrackID += 1;
+          sub = vid.addTextTrack('subtitles');
+          sub.mode = 'disabled';
+        } else {
+          const currentArrIndex = this.mkvSubArray
+            .findIndex(trac => trac.trackNumber === tracks[i].number);
+          const currentTextTrackID = this.mkvSubArray[currentArrIndex].textTrackID;
+          sub = vid.textTracks[currentTextTrackID];
+        }
+        parser.oncue = (cue) => {
+          sub.addCue(cue);
+        };
+        const webVttFormatStr = 'WEBVTT\r\n\r\n';
+        const preResult = tracks[i].subContent;
+        const result = webVttFormatStr.concat(preResult);
+        parser.parse(result);
+      }
+      parser.onflush = cb;
+      if (processSubNames) {
+        this.clearSubtitle();
+        if (onlyEmbedded) {
+          this.$store.commit('SubtitleNameArr', embededSubNames);
+        } else {
+          this.$store.commit('AddSubtitle', embededSubNames);
+        }
+      }
+      this.readingMkv = false;
+      parser.flush();
+    },
+
+    parseMkvSubs(filePath, startTime, endTime, onlyEmbedded, processSubNames) {
+      const self = this;
+      return new Promise((resolve, reject) => {
+        let tracks = [];
+        const parser = new MatroskaSubtitles();
+        const lngDetector = new LanguageDetect();
+
+        parser.once('tracks', (track) => {
           tracks = track;
           tracks.forEach((trac) => {
             trac.subContent = '';
-            trac.subLangs = [];
+            if (processSubNames) {
+              trac.subLangs = [];
+            }
           });
         });
-        subs.on('subtitle', (sub, trackNumber) => {
-          const currentIndex = tracks.findIndex(track => trackNumber === track.number);
-          let currentContent = '';
-          let currentLangDetected = '';
 
-          // the indices for each cue can probably be ignored as it's in VTT format
-          currentContent += `${this.msToTime(sub.time)} --> ${this.msToTime(sub.time + sub.duration)}\r\n`;
-          currentContent += `${(sub.text)}\r\n\r\n`;
-          if (currentLangDetected.length < 100) {
-            const temp = lngDetector.detect(sub.text, 3);
-            if (temp === undefined || temp[0] === undefined) {
-              currentLangDetected += 'nothing';
-            } else {
-              currentLangDetected += temp[0][0];
+        self.$on('stop-reading-mkv-subs', (error) => {
+          parser.emit('finish', error);
+        });
+
+        parser.on('subtitle', (sub, trackNumber) => {
+          if (endTime && sub.time > endTime) {
+            self.currentParsedMkvTime = sub.time;
+            parser.emit('finish');
+          }
+          // even currently we can not read subtitles from a specific time
+          // straightly, but this if condition does improves some performance
+          // avoiding doing the adding things stuff, manipulating
+          // data and data structures.
+          if (startTime < sub.time && this.notParsedYet(sub.time)) {
+            const currentIndex = tracks.findIndex(track => trackNumber === track.number);
+            let currentContent = '';
+            currentContent += `${this.msToTime(sub.time)} --> ${this.msToTime(sub.time + sub.duration)}\r\n`;
+            currentContent += `${(sub.text)}\r\n\r\n`;
+
+            tracks[currentIndex].subContent += currentContent;
+
+            if (processSubNames) {
+              let currentLangDetected = '';
+              const temp = lngDetector.detect(sub.text, 3);
+              if (temp === undefined || temp[0] === undefined) {
+                currentLangDetected += 'nothing';
+              } else {
+                currentLangDetected += temp[0][0];
+              }
+
+              tracks[currentIndex].subLangs.push(currentLangDetected);
             }
           }
-          tracks[currentIndex].subContent += currentContent;
-          tracks[currentIndex].subLangs.push(currentLangDetected);
         });
 
-        subs.on('finish', () => {
-          resolve(tracks);
+        parser.on('finish', (err) => {
+          if (err) {
+            reject(err);
+          } else {
+            const parsedMkvTimesObj = {
+              start: startTime,
+              end: endTime,
+            };
+            this.mkvParsedTimes.push(parsedMkvTimesObj);
+            resolve(tracks);
+          }
         });
         const realPath = filePath.substring(7);
-        fs.createReadStream(realPath).pipe(subs);
+        fs.createReadStream(realPath).pipe(parser);
       });
-      ectractFn(filePath)
-        .then((tracks) => {
-        // transfer string into VTT
-          const vid = this.$parent.$refs.videoCanvas.videoElement();
-          const embededSubNames = [];
-          const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
-          for (let i = 0; i < tracks.length; i += 1) {
-            embededSubNames[i] = {
-              title: `${this.findMode(tracks[i].subLangs)}`,
-              status: null,
-              textTrackID: this.textTrackID,
-              origin: 'local',
-            };
-            this.textTrackID += 1;
-            const sub = vid.addTextTrack('subtitles');
-            sub.mode = 'disabled';
-            parser.oncue = (cue) => {
-              sub.addCue(cue);
-            };
-            const webVttFormatStr = 'WEBVTT\r\n\r\n';
-            const preResult = tracks[i].subContent;
-            const result = webVttFormatStr.concat(preResult);
-            parser.parse(result);
-          }
-          parser.onflush = cb;
-          this.$_clearSubtitle();
-          if (onlyEmbedded) {
-            this.$store.commit('SubtitleNameArr', embededSubNames);
-          } else {
-            this.$store.commit('AddSubtitle', embededSubNames);
-          }
-          this.readingMkv = false;
-          parser.flush();
-        })
-        .catch((error) => {
-          console.log(error);
-        });
     },
 
     /**
@@ -377,7 +425,7 @@ export default {
     addVttToVideoElement(files, cb) {
       const vid = this.$parent.$refs.videoCanvas.videoElement();
       /* eslint-disable arrow-parens */
-      const tasks = files.map((subPath) => (cb) => this.$_createSubtitleStream(subPath, cb));
+      const tasks = files.map((subPath) => (cb) => this.createSubtitleStream(subPath, cb));
       parallel(tasks, (err, results) => {
         if (err) {
           throw err;
@@ -421,8 +469,8 @@ export default {
       // Add cues to TextTrack
       for (let i = 0; i < cueArray.length; i += 1) {
         const element = cueArray[i];
-        const startTime = this.$_timeProcess(element[0]);
-        const endTime = this.$_timeProcess(element[1]);
+        const startTime = this.timeProcess(element[0]);
+        const endTime = this.timeProcess(element[1]);
         subtitle.addCue(new VTTCue(startTime, endTime, element[2]));
       }
     },
@@ -435,7 +483,7 @@ export default {
       const targetIndex = this.$store.state.PlaybackState.SubtitleNameArr[index].textTrackID;
       if (type === 'first') {
         if (vid.textTracks.length > targetIndex) { // Video has available subtitles
-          this.$_onCueChangeEventAdd(vid.textTracks[targetIndex]);
+          this.onCueChangeEventAdd(vid.textTracks[targetIndex]);
           vid.textTracks[targetIndex].mode = 'hidden';
           this.$store.commit('SubtitleOn', { index: targetIndex, status: type });
           this.firstSubIndex = targetIndex;
@@ -478,6 +526,16 @@ export default {
         background,
       };
     },
+    notParsedYet(subStartTime) {
+      for (let i = 0; i < this.mkvParsedTimes.length; i += 1) {
+        const startTime = this.mkvParsedTimes[i].start;
+        const endTime = this.mkvParsedTimes[i].end;
+        if (subStartTime >= startTime && subStartTime <= endTime) {
+          return false;
+        }
+      }
+      return true;
+    },
     msToTime(s) {
       const ms = s % 1000;
       s = (s - ms) / 1000;
@@ -512,7 +570,7 @@ export default {
      * @param {function} cb Callback function to process result.
      * (err, result) are two arguments of callback.
      */
-    $_concatStream(stream, cb) {
+    concatStream(stream, cb) {
       const chunks = [];
       stream.on('data', (chunk) => {
         chunks.push(chunk);
@@ -534,7 +592,7 @@ export default {
      * @param {Number} second
      * @returns {Number}
      */
-    $_timeProcess(second) {
+    timeProcess(second) {
       // Now as per official proto3 documentation, default values are not
       // serialized to save space during wire transmission.
       // so if input is 0, it may become undefined
@@ -547,7 +605,7 @@ export default {
      * @param {string} subPath Subtitle Path
      * @param {function} cb Callback function to process result
      */
-    $_createSubtitleStream(subPath, cb) {
+    createSubtitleStream(subPath, cb) {
       const reSrt = new RegExp('^(.srt)$');
       const reAss = new RegExp('^(.ass)$');
       const subExtName = path.extname(subPath);
@@ -560,7 +618,7 @@ export default {
         vttStream = fs.createReadStream(subPath).pipe(ass2vtt());
       }
 
-      this.$_concatStream(vttStream, (err, buf) => {
+      this.concatStream(vttStream, (err, buf) => {
         if (err) {
           throw err;
         }
@@ -572,7 +630,7 @@ export default {
      * @returns {object} Returns an object that contains subtitle name
      * and default status(status can be null, first and second)
      */
-    $_subNameFromLocalProcess(file) {
+    subNameFromLocalProcess(file) {
       const res = {
         title: file.language === undefined ? path.parse(file).name : file.language,
         status: null,
@@ -585,7 +643,7 @@ export default {
     /**
      * @param {TextTranslationResponse.Text} textTrack translation result for the requested text
      */
-    $_subnameFromServerProcess(textTrack) {
+    subnameFromServerProcess(textTrack) {
       let title = '';
       if (textTrack[1]) {
         title += textTrack[1];
@@ -609,7 +667,7 @@ export default {
      * @param {string} type Choose first or second subtitle
      * @description function for oncuechange event
      */
-    $_onCueChangeEventAdd(textTrack, type = 'first') {
+    onCueChangeEventAdd(textTrack, type = 'first') {
       const firstSubEvent = (cue) => {
         const { activeCues } = cue.currentTarget;
         this.firstActiveCues.pop();
@@ -627,7 +685,7 @@ export default {
      * @description function to clear former subtitles
      * @param {string} type clear first, second or all subtitles
      */
-    $_clearSubtitle(type = 'first') {
+    clearSubtitle(type = 'first') {
       if (type === 'first') {
         if (this.firstSubState) {
           const vid = this.$parent.$refs.videoCanvas.videoElement();
@@ -640,7 +698,7 @@ export default {
         }
       }
     },
-    $_toggleSutitleShow() {
+    toggleSutitleShow() {
       this.subStyleChange();
       this.subtitleShow(0);
     },
@@ -648,6 +706,11 @@ export default {
   computed: {
     firstSubState() { // lazy computed and lazy watched
       return this.$store.getters.firstSubIndex !== -1;
+    },
+    mkvInitializingReadingEndTime() {
+      const duration = this.$store.state.PlaybackState.Duration;
+      const currentTime = this.$store.state.PlaybackState.CurrentTime;
+      return duration > 3000 ? currentTime + 300 : currentTime + (duration / 10);
     },
   },
   watch: {
@@ -677,12 +740,48 @@ export default {
       // const divs = WebVTT.processCues(window, activeCues, this.$refs.firstSubtitleContent);
       // console.log(divs);
     },
+    mkvSubsInitialized(newVal) {
+      if (newVal) {
+        // if new value is true -- where should be called in the callback of initialize
+        // stage, if new value is true, toggle the request idle
+        // options can also be passed, [timeout] option
+        const vid = this.$parent.$refs.videoCanvas.videoElement();
+        const filePath = decodeURI(vid.src);
+        this.idleCallbackID = window.requestIdleCallback(() => {
+          this.parseMkvSubs(filePath, 0, null, false, false)
+            .then((tracks) => {
+              this.addMkvSubtitlesToVideoElement(tracks, false, false, () => {
+                console.log('Rest of embedded subtitles have been added.');
+                this.mkvSubsFullyParsed = true;
+              });
+            });
+        });
+      }
+    },
+    mkvSubsSeekedParsed(newVal) {
+      if (newVal) {
+        // if new value is true -- where should be called in the callback of seek sub
+        // stage, if new value is true, toggle the request idle
+        // options can also be passed, [timeout] option
+        const vid = this.$parent.$refs.videoCanvas.videoElement();
+        const filePath = decodeURI(vid.src);
+        this.idleCallbackID = window.requestIdleCallback(() => {
+          this.parseMkvSubs(filePath, 0, null, false, false)
+            .then((tracks) => {
+              this.addMkvSubtitlesToVideoElement(tracks, false, false, () => {
+                console.log('Rest of embedded subtitles have been added.');
+                this.mkvSubsFullyParsed = true;
+              });
+            });
+        });
+      }
+    },
   },
   created() {
     this.$bus.$on('video-loaded', this.subtitleInitialize);
 
     this.$bus.$on('sub-first-change', (targetIndex) => {
-      this.$_clearSubtitle();
+      this.clearSubtitle();
       this.subtitleShow(targetIndex);
     });
 
@@ -697,10 +796,10 @@ export default {
 
     this.$bus.$on('add-subtitle', (files) => {
       const size = this.$store.getters.subtitleNameArrSize;
-      const subtitleName = files.map(file => this.$_subNameFromLocalProcess(file));
+      const subtitleName = files.map(file => this.subNameFromLocalProcess(file));
       this.$store.commit('AddSubtitle', subtitleName);
       this.addVttToVideoElement(files, () => {
-        this.$_clearSubtitle();
+        this.clearSubtitle();
         this.subtitleShow(size);
         this.$bus.$emit('added-local-subtitles', size);
       });
@@ -711,10 +810,27 @@ export default {
         if (err) throw err;
         // handles when users want to load server subs after initializing stage;
         this.$bus.$emit('finished-loading-server-subs');
-        this.$_clearSubtitle();
+        this.clearSubtitle();
         this.subtitleShow(0);
       });
       // cb();
+    });
+    this.$bus.$on('seek-subtitle', (e) => {
+      if (this.mkvSubsInitialized && !this.mkvSubsFullyParsed) {
+        if (this.idleCallbackID !== 0) {
+          window.cancelIdleCallback(this.idleCallbackID);
+          this.$emit('stop-reading-mkv-subs', 'stopped');
+        }
+        const vid = this.$parent.$refs.videoCanvas.videoElement();
+        const filePath = decodeURI(vid.src);
+        this.parseMkvSubs(filePath, (e * 1000), (e + 120) * 1000, false, false)
+          .then((tracks) => {
+            this.addMkvSubtitlesToVideoElement(tracks, false, false, () => {
+              console.log('seeked subtitles have been added');
+              this.mkvSubsSeekedParsed = true;
+            });
+          });
+      }
     });
   },
 };
