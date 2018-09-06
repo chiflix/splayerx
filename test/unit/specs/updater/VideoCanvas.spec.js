@@ -34,7 +34,6 @@ describe('VideoCanvas.vue', () => {
   });
 
   it('should load correct data', () => {
-    expect(wrapper.vm.windowRectangleOld).to.be.an('object');
     expect(wrapper.vm.videoExisted).equal(false);
     expect(wrapper.vm.shownTextTrack).equal(false);
     expect(wrapper.vm.newWidthOfWindow).equal(0);
@@ -53,13 +52,99 @@ describe('VideoCanvas.vue', () => {
     expect(store.state.PlaybackState.Volume).equal(1);
   });
 
-  it('calcNewWindowXY method work fine if no windowRectangleOld exist', () => {
-    wrapper.vm.windowRectangleOld = {};
-    const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
-    wrapper.vm.calcNewWindowXY();
-    expect(spy.called).equal(true);
-    expect(spy.returnValues[0]).deep.equal({ windowX: 0, windowY: 0 });
-    spy.restore();
+  describe('calcNewWindowXY method', () => {
+    it('landingview is on the upper-left', () => {
+      const currentDisplay = {
+        workArea: {
+          width: 1920,
+          height: 1080,
+          x: 0,
+          y: 0,
+        },
+      };
+      const landingViewRectangle = {
+        x: 20,
+        y: 20,
+        width: 500,
+        height: 500,
+      };
+      wrapper.vm.newHeightOfWindow = 1080;
+      wrapper.vm.newWidthOfWindow = 1920;
+      const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
+      wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
+      expect(spy.called).equal(true);
+      expect(spy.returnValues[0]).deep.equal({ windowX: 0, windowY: 0 });
+      spy.restore();
+    });
+    it('landingview is on the upper-right', () => {
+      const currentDisplay = {
+        workArea: {
+          width: 1920,
+          height: 1080,
+          x: 0,
+          y: 0,
+        },
+      };
+      const landingViewRectangle = {
+        x: 1800,
+        y: 20,
+        width: 500,
+        height: 500,
+      };
+      wrapper.vm.newHeightOfWindow = 1080;
+      wrapper.vm.newWidthOfWindow = 1920;
+      const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
+      wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
+      expect(spy.called).equal(true);
+      expect(spy.returnValues[0]).deep.equal({ windowX: 0, windowY: 0 });
+      spy.restore();
+    });
+    it('landingview is on the bottom-left', () => {
+      const currentDisplay = {
+        workArea: {
+          width: 1920,
+          height: 1080,
+          x: 0,
+          y: 0,
+        },
+      };
+      const landingViewRectangle = {
+        x: 20,
+        y: 1800,
+        width: 500,
+        height: 500,
+      };
+      wrapper.vm.newHeightOfWindow = 1080;
+      wrapper.vm.newWidthOfWindow = 1920;
+      const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
+      wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
+      expect(spy.called).equal(true);
+      expect(spy.returnValues[0]).deep.equal({ windowX: 0, windowY: 0 });
+      spy.restore();
+    });
+    it('landingview is on the bottom-left', () => {
+      const currentDisplay = {
+        workArea: {
+          width: 1920,
+          height: 1080,
+          x: 0,
+          y: 0,
+        },
+      };
+      const landingViewRectangle = {
+        x: 1800,
+        y: 1800,
+        width: 500,
+        height: 500,
+      };
+      wrapper.vm.newHeightOfWindow = 1080;
+      wrapper.vm.newWidthOfWindow = 1920;
+      const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
+      wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
+      expect(spy.called).equal(true);
+      expect(spy.returnValues[0]).deep.equal({ windowX: 0, windowY: 0 });
+      spy.restore();
+    });
   });
 
   it('watch OriginSrcOfVideo work fine', () => {
@@ -75,27 +160,7 @@ describe('VideoCanvas.vue', () => {
     }));
 
     wrapper.vm.$store.commit('OriginSrcOfVideo', 'abc');
-
-    expect(wrapper.vm.windowRectangleOld.x).equal(10);
-    expect(wrapper.vm.windowRectangleOld.y).equal(10);
-    expect(wrapper.vm.windowRectangleOld.height).equal(10);
-    expect(wrapper.vm.windowRectangleOld.width).equal(10);
     stub.restore();
-  });
-
-  it('calcNewWindowXY method work fine if windowRectangelOld exist', () => {
-    wrapper.vm.windowRectangleOld = {
-      x: 10,
-      y: 10,
-      width: 100,
-      height: 100,
-    };
-    wrapper.vm.newHeightOfWindow = wrapper.vm.newWidthOfWindow = 100;
-    const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
-    wrapper.vm.calcNewWindowXY();
-    expect(spy.called).equal(true);
-    expect(spy.returnValues[0]).deep.equal({ windowX: 10, windowY: 10 });
-    spy.restore();
   });
 
   it('onMetaLoaded method work fine if video not exist', () => {

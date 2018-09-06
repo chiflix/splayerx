@@ -114,14 +114,14 @@ export default {
     },
     $_controlWindowSize() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
+      const landingViewRectangle = currentWindow.getBounds();
       const [windowX, windowY] = currentWindow.getPosition();
       const windowPosition = { x: windowX, y: windowY };
+
       const allDisplay = this.$electron.screen.getAllDisplays();
       const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
-      console.log(allDisplay);
-      console.log(currentDisplay);
-      const windowXY = this.calcNewWindowXY(currentDisplay);
-      console.log(windowXY);
+
+      const windowXY = this.calcNewWindowXY(currentDisplay, landingViewRectangle);
 
       currentWindow.setSize(
         parseInt(this.newWidthOfWindow, 10),
@@ -143,8 +143,9 @@ export default {
     },
     $_calculateWindowSizeAtTheFirstTime() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
-      const cursor = this.$electron.screen.getCursorScreenPoint();
-      const currentScreen = this.$electron.screen.getDisplayNearestPoint(cursor);
+      const [windowX, windowY] = currentWindow.getPosition();
+      const windowPosition = { x: windowX, y: windowY };
+      const currentScreen = this.$electron.screen.getDisplayNearestPoint(windowPosition);
       const { width: screenWidth, height: screenHeight } = currentScreen.workAreaSize;
       const [minWidth, minHeight] = currentWindow.getMinimumSize();
       const screenRatio = screenWidth / screenHeight;
@@ -227,9 +228,7 @@ export default {
       syncStorage.setSync('recent-played', data);
     },
     // responsible for calculating window position and size relative to LandingView's Center
-    calcNewWindowXY(currentDisplay) {
-      const window = this.$electron.remote.getCurrentWindow();
-      const landingViewRectangle = window.getBounds();
+    calcNewWindowXY(currentDisplay, landingViewRectangle) {
       let x = landingViewRectangle.x + (landingViewRectangle.width / 2);
       let y = landingViewRectangle.y + (landingViewRectangle.height / 2);
       x = Math.round(x - (this.newWidthOfWindow / 2));
