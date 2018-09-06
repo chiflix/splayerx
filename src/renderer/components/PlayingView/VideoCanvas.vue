@@ -133,7 +133,7 @@ export default {
     },
     $_controlWindowSizeAtNewVideo() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
-      console.log(this.newWidthOfWindow, this.newHeightOfWindow);
+
       const [windowX, windowY] = currentWindow.getPosition();
       const windowPosition = { x: windowX, y: windowY };
       const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
