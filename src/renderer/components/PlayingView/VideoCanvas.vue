@@ -31,7 +31,6 @@ export default {
   },
   data() {
     return {
-      windowRectangleOld: {},
       videoExisted: false,
       shownTextTrack: false,
       newWidthOfWindow: 0,
@@ -114,28 +113,45 @@ export default {
     },
     $_controlWindowSize() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
-      currentWindow.setBounds({
-        x: 0,
-        y: 0,
-        width: parseInt(this.newWidthOfWindow, 10),
-        height: parseInt(this.newHeightOfWindow, 10),
-      });
+      const landingViewRectangle = currentWindow.getBounds();
+
+      const [windowX, windowY] = currentWindow.getPosition();
+      const windowPosition = { x: windowX, y: windowY };
+      const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
+
+      const windowXY = this.calcNewWindowXY(currentDisplay, landingViewRectangle);
+
+      currentWindow.setSize(
+        parseInt(this.newWidthOfWindow, 10),
+        parseInt(this.newHeightOfWindow, 10),
+      );
+      currentWindow.setPosition(
+        windowXY.windowX,
+        windowXY.windowY,
+      );
       currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
     },
     $_controlWindowSizeAtNewVideo() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
-      const windowXY = this.calcNewWindowXY();
-      currentWindow.setBounds({
-        x: windowXY.windowX,
-        y: windowXY.windowY,
-        width: parseInt(this.newWidthOfWindow, 10),
-        height: parseInt(this.newHeightOfWindow, 10),
-      });
+
+      const [windowX, windowY] = currentWindow.getPosition();
+      const windowPosition = { x: windowX, y: windowY };
+      const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
+
+      const windowXY = this.avoidBeyondDisplayBorder(currentDisplay, windowX, windowY);
+
+      currentWindow.setSize(
+        parseInt(this.newWidthOfWindow, 10),
+        parseInt(this.newHeightOfWindow, 10),
+      );
+      currentWindow.setPosition(windowXY.windowX, windowXY.windowY);
       currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
     },
     $_calculateWindowSizeAtTheFirstTime() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
-      const currentScreen = this.$electron.screen.getPrimaryDisplay();
+      const [windowX, windowY] = currentWindow.getPosition();
+      const windowPosition = { x: windowX, y: windowY };
+      const currentScreen = this.$electron.screen.getDisplayNearestPoint(windowPosition);
       const { width: screenWidth, height: screenHeight } = currentScreen.workAreaSize;
       const [minWidth, minHeight] = currentWindow.getMinimumSize();
       const screenRatio = screenWidth / screenHeight;
@@ -217,14 +233,35 @@ export default {
       };
       syncStorage.setSync('recent-played', data);
     },
-    calcNewWindowXY() {
-      if (Object.keys(this.windowRectangleOld).length === 0) {
-        return { windowX: 0, windowY: 0 };
-      }
-      let x = this.windowRectangleOld.x + (this.windowRectangleOld.width / 2);
-      let y = this.windowRectangleOld.y + (this.windowRectangleOld.height / 2);
+    // responsible for calculating window position and size relative to LandingView's Center
+    calcNewWindowXY(currentDisplay, landingViewRectangle) {
+      let x = landingViewRectangle.x + (landingViewRectangle.width / 2);
+      let y = landingViewRectangle.y + (landingViewRectangle.height / 2);
       x = Math.round(x - (this.newWidthOfWindow / 2));
       y = Math.round(y - (this.newHeightOfWindow / 2));
+
+      return this.avoidBeyondDisplayBorder(currentDisplay, x, y);
+    },
+    // if the given (x, y) beyond the border of the given display, then adjust the x, y
+    avoidBeyondDisplayBorder(display, x, y) {
+      const {
+        width: displayWidth,
+        height: displayHeight,
+        x: displayX, // the x axis of display's upper-left
+        y: displayY, // the y axis of display's upper-left
+      } = display.workArea;
+
+      if (x < displayX) x = displayX;
+      if (y < displayY) y = displayY;
+
+      const right = x + this.newWidthOfWindow; // the x axis of window's right side
+      if (right > displayX + displayWidth) {
+        x = Math.round((displayX + displayWidth) - this.newWidthOfWindow);
+      }
+      const bottom = y + this.newHeightOfWindow; // the y axis of window's bottom side
+      if (bottom > displayY + displayHeight) {
+        y = Math.round((displayY + displayHeight) - this.newHeightOfWindow);
+      }
       return { windowX: x, windowY: y };
     },
   },
@@ -244,11 +281,6 @@ export default {
   },
   watch: {
     originSrcOfVideo(val, oldVal) {
-      const window = this.$electron.remote.getCurrentWindow();
-      this.windowRectangleOld.x = window.getBounds().x;
-      this.windowRectangleOld.y = window.getBounds().y;
-      this.windowRectangleOld.height = window.getBounds().height;
-      this.windowRectangleOld.width = window.getBounds().width;
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
