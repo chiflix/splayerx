@@ -119,10 +119,10 @@ export default {
       const [windowX, windowY] = currentWindow.getPosition();
       const windowPosition = { x: windowX, y: windowY };
       const allDisplay = this.$electron.screen.getAllDisplays();
-      const nearestDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
+      const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
       console.log(allDisplay);
-      console.log(nearestDisplay);
-      const windowXY = this.calcNewWindowXY(nearestDisplay);
+      console.log(currentDisplay);
+      const windowXY = this.calcNewWindowXY(currentDisplay);
       console.log(windowXY);
 
       currentWindow.setSize(
@@ -235,15 +235,15 @@ export default {
       syncStorage.setSync('recent-played', data);
     },
     // responsible for calculating window position and size from LandingView's Center
-    calcNewWindowXY() {
+    calcNewWindowXY(display) {
       const window = this.$electron.remote.getCurrentWindow();
       const landingViewRectangle = window.getBounds();
+      // (x, y) is the center of the landingview window
       let x = landingViewRectangle.x + (landingViewRectangle.width / 2);
       let y = landingViewRectangle.y + (landingViewRectangle.height / 2);
+      // (x, y) is now the upper-left of the new window
       x = Math.round(x - (this.newWidthOfWindow / 2));
       y = Math.round(y - (this.newHeightOfWindow / 2));
-      if (x < 0) x = 0;
-      if (y < 0) y = 0;
 
       const currentScreen = this.$electron.screen.getPrimaryDisplay();
       const { width: screenWidth, height: screenHeight } = currentScreen.workAreaSize;
