@@ -1,6 +1,5 @@
 <template>
-  <div
-    :data-component-name="$options.name">
+  <div :data-component-name="$options.name">
   <transition name="fade" appear>
   <div
     @mouseover="appearVolumeSlider"
@@ -23,6 +22,7 @@
       </button>
     </div>
   </transition>
+  </div>
 </template>;
 
 <script>
