@@ -117,7 +117,6 @@ export default {
       const [windowX, windowY] = currentWindow.getPosition();
       const windowPosition = { x: windowX, y: windowY };
 
-      const allDisplay = this.$electron.screen.getAllDisplays();
       const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
 
       const windowXY = this.calcNewWindowXY(currentDisplay, landingViewRectangle);
