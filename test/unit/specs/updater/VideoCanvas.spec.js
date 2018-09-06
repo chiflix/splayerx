@@ -53,8 +53,9 @@ describe('VideoCanvas.vue', () => {
   });
 
   describe('calcNewWindowXY method', () => {
-    it('landingview is on the upper-left', () => {
-      const currentDisplay = {
+    let currentDisplay;
+    beforeEach(() => {
+      currentDisplay = {
         workArea: {
           width: 1920,
           height: 1080,
@@ -62,14 +63,16 @@ describe('VideoCanvas.vue', () => {
           y: 0,
         },
       };
+      wrapper.vm.newHeightOfWindow = 1080;
+      wrapper.vm.newWidthOfWindow = 1920;
+    });
+    it('landingview is on the upper-left', () => {
       const landingViewRectangle = {
         x: 20,
         y: 20,
         width: 500,
         height: 500,
       };
-      wrapper.vm.newHeightOfWindow = 1080;
-      wrapper.vm.newWidthOfWindow = 1920;
       const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
       wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
       expect(spy.called).equal(true);
@@ -77,22 +80,12 @@ describe('VideoCanvas.vue', () => {
       spy.restore();
     });
     it('landingview is on the upper-right', () => {
-      const currentDisplay = {
-        workArea: {
-          width: 1920,
-          height: 1080,
-          x: 0,
-          y: 0,
-        },
-      };
       const landingViewRectangle = {
         x: 1800,
         y: 20,
         width: 500,
         height: 500,
       };
-      wrapper.vm.newHeightOfWindow = 1080;
-      wrapper.vm.newWidthOfWindow = 1920;
       const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
       wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
       expect(spy.called).equal(true);
@@ -100,22 +93,12 @@ describe('VideoCanvas.vue', () => {
       spy.restore();
     });
     it('landingview is on the bottom-left', () => {
-      const currentDisplay = {
-        workArea: {
-          width: 1920,
-          height: 1080,
-          x: 0,
-          y: 0,
-        },
-      };
       const landingViewRectangle = {
         x: 20,
         y: 1800,
         width: 500,
         height: 500,
       };
-      wrapper.vm.newHeightOfWindow = 1080;
-      wrapper.vm.newWidthOfWindow = 1920;
       const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
       wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
       expect(spy.called).equal(true);
@@ -123,22 +106,12 @@ describe('VideoCanvas.vue', () => {
       spy.restore();
     });
     it('landingview is on the bottom-left', () => {
-      const currentDisplay = {
-        workArea: {
-          width: 1920,
-          height: 1080,
-          x: 0,
-          y: 0,
-        },
-      };
       const landingViewRectangle = {
         x: 1800,
         y: 1800,
         width: 500,
         height: 500,
       };
-      wrapper.vm.newHeightOfWindow = 1080;
-      wrapper.vm.newWidthOfWindow = 1920;
       const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
       wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
       expect(spy.called).equal(true);
@@ -158,7 +131,6 @@ describe('VideoCanvas.vue', () => {
         };
       },
     }));
-
     wrapper.vm.$store.commit('OriginSrcOfVideo', 'abc');
     stub.restore();
   });
@@ -197,6 +169,9 @@ describe('VideoCanvas.vue', () => {
           getMinimumSize() {
             return [427, 240];
           },
+          getPosition() {
+            return [0, 0];
+          },
         }));
       });
       afterEach(() => {
@@ -231,6 +206,9 @@ describe('VideoCanvas.vue', () => {
         const windowStub = sinon.stub(wrapper.vm.$electron.remote, 'getCurrentWindow').callsFake(() => ({
           getMinimumSize() {
             return [427, 240];
+          },
+          getPosition() {
+            return [0, 0];
           },
         }));
         wrapper.vm.videoWidth = 450;
