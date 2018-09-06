@@ -10,7 +10,7 @@ export function filePathToUrl(filePath) {
   if (!fileUrl.startsWith('/')) {
     fileUrl = `/${fileUrl}`;
   }
-  fileUrl = encodeURI(`file://${fileUrl}`);
+  fileUrl = encodeURI(`file://${fileUrl}`).replace(/#/g, '%23').replace(/[?]/g, '%3F');
   return fileUrl;
 }
 

@@ -62,7 +62,7 @@ describe('VideoCanvas.vue', () => {
     spy.restore();
   });
 
-  it('watch src work fine', () => {
+  it('watch OriginSrcOfVideo work fine', () => {
     const stub = sinon.stub(wrapper.vm.$electron.remote, 'getCurrentWindow').callsFake(() => ({
       getBounds() {
         return {
@@ -73,7 +73,9 @@ describe('VideoCanvas.vue', () => {
         };
       },
     }));
-    wrapper.vm.src = 'abc';
+
+    wrapper.vm.$store.commit('OriginSrcOfVideo', 'abc');
+
     expect(wrapper.vm.windowRectangleOld.x).equal(10);
     expect(wrapper.vm.windowRectangleOld.y).equal(10);
     expect(wrapper.vm.windowRectangleOld.height).equal(10);

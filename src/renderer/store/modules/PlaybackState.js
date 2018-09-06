@@ -5,6 +5,7 @@ const state = {
   Duration: NaN,
   Volume: 0.2,
   SrcOfVideo: '',
+  OriginSrcOfVideo: '',
   PlaybackRate: 1.0,
   SubtitleNameArr: [],
   isPlaying: false,
@@ -23,6 +24,9 @@ const mutations = {
   },
   SrcOfVideo(state, t) {
     state.SrcOfVideo = t;
+  },
+  OriginSrcOfVideo(state, t) {
+    state.OriginSrcOfVideo = t;
   },
   CurrentTime(state, t) {
     state.CurrentTime = t;
