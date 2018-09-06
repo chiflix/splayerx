@@ -31,7 +31,6 @@ export default {
   },
   data() {
     return {
-      windowRectangleOld: {},
       videoExisted: false,
       shownTextTrack: false,
       newWidthOfWindow: 0,
