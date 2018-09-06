@@ -6,11 +6,19 @@ describe('helper.sagi api', function () {
     helpers.methods.sagi().healthCheck().then((status) => {
       expect(status).to.equal(1);
       done();
+    }).catch((reason) => {
+      // fail the test
+      done(reason);
     });
   });
 
   it('sagi.mediaTranslate should return OK', function (done) {
     helpers.methods.sagi().mediaTranslate('11-22-33-44').then((resp) => {
+      if (process.env.NODE_ENV === 'production') {
+        expect(resp.getError().toObject().code, 'error').to.equal(5); // no result
+        done();
+        return;
+      }
       // TODO: check correct response
       expect(resp.getError().toObject().code, 'error').to.equal(0);
       expect(resp.getError().toObject().message, 'error message').to.equal('OK');

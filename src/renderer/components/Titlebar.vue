@@ -96,7 +96,7 @@ export default {
       this.originalSize = this.winSize;
     },
     statusChange() {
-      if (this.$store.getters.fullscreen) {
+      if (this.$store.getters.isFullScreen) {
         this.middleButtonStatus = 'exit-fullscreen';
       } else if (this.maximize) {
         this.middleButtonStatus = 'restore';

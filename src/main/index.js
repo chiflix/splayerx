@@ -1,5 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron' // eslint-disable-line
-import Updater from './update/updater.js';
+import { app, BrowserWindow, ipcMain, globalShortcut } from 'electron' // eslint-disable-line
 import WindowResizer from './helpers/windowResizer.js';
 /**
  * Set `__static` path to static files in production
@@ -10,7 +9,6 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow;
-let updater;
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -29,68 +27,29 @@ app.on('second-instance', () => {
   }
 });
 
-function createWindow() {
-  /**
-   * Initial window options
-   */
-  if (process.platform === 'win32') {
-    mainWindow = new BrowserWindow({
-      height: 432,
-      useContentSize: true,
-      width: 768,
-      frame: false,
-      titleBarStyle: 'none',
-      minWidth: 427,
-      minHeight: 240,
-      webPreferences: {
-        webSecurity: false,
-        experimentalFeatures: true,
-      },
-      // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-      backgroundColor: '#802e2c29',
-      show: false,
-    });
-  } else {
-    mainWindow = new BrowserWindow({
-      height: 405,
-      useContentSize: true,
-      width: 720,
-      frame: false,
-      titleBarStyle: 'none',
-      minWidth: 720,
-      minHeight: 405,
-      // it can be set true here and be changed during player starting
-      transparent: false, // set to false to solve the backdrop-filter bug
-      webPreferences: {
-        webSecurity: false,
-        experimentalFeatures: true,
-      },
-      // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-      backgroundColor: '#802e2c29',
-      show: false,
-    });
-  }
-
-  mainWindow.loadURL(winURL);
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
-
-  mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
-  });
-}
-
-function initMainWindowEvent() {
+function registerMainWindowEvent() {
   mainWindow.on('resize', () => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-    mainWindow.webContents.send('mainCommit', 'fullscreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('main-resize');
   });
   mainWindow.on('move', () => {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
     mainWindow.webContents.send('main-move');
   });
+  mainWindow.on('enter-full-screen', () => {
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
+  });
+  mainWindow.on('leave-full-screen', () => {
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
+  });
+  mainWindow.on('focus', () => {
+    mainWindow.webContents.send('mainCommit', 'isFocused', true);
+  });
+  mainWindow.on('blur', () => {
+    mainWindow.webContents.send('mainCommit', 'isFocused', false);
+  });
+
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
     mainWindow.setSize(...args);
@@ -100,16 +59,66 @@ function initMainWindowEvent() {
     mainWindow.setPosition(...args);
     event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
   });
+  ipcMain.on('windowInit', () => {
+    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
+  });
+}
+
+function createWindow() {
+  /**
+   * Initial window options
+   */
+
+  const windowOptions = {
+    useContentSize: true,
+    frame: false,
+    titleBarStyle: 'none',
+    width: 720,
+    height: 405,
+    minWidth: 720,
+    minHeight: 405,
+    // it can be set true here and be changed during player starting
+    transparent: false, // set to false to solve the backdrop-filter bug
+    webPreferences: {
+      webSecurity: false,
+      experimentalFeatures: true,
+    },
+    // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
+    backgroundColor: '#802e2c29',
+    acceptFirstMouse: true,
+    show: false,
+    ...({
+      win32: {},
+    })[process.platform],
+  };
+
+  mainWindow = new BrowserWindow(windowOptions);
+
+  mainWindow.loadURL(winURL);
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
+
+  const resizer = new WindowResizer(mainWindow);
+  resizer.onStart(); // will only register listener for win
+  registerMainWindowEvent();
 }
 
 app.on('ready', () => {
   app.setName('SPlayerX');
+  globalShortcut.register('CommandOrControl+Shift+I+O+P', () => {
+    if (mainWindow !== null) {
+      mainWindow.openDevTools();
+    }
+  });
   createWindow();
-  const resizer = new WindowResizer(mainWindow);
-  resizer.onStart(); // will only register listener for win
-  initMainWindowEvent();
-  updater = Updater.getInstance(mainWindow, app);
-  updater.onStart().then((message) => { console.log(message); });
 });
 
 app.on('window-all-closed', () => {
@@ -118,11 +127,8 @@ app.on('window-all-closed', () => {
   }
 });
 
-
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
-    initMainWindowEvent();
-    updater.Window = mainWindow;
   }
 });

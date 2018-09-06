@@ -55,8 +55,7 @@ new Vue({
                   }],
                 }, (file) => {
                   if (file !== undefined) {
-                    const path = `file:///${file}`;
-                    this.openFile(path);
+                    this.openFile(file[0]);
                   }
                 });
               },
@@ -355,8 +354,10 @@ new Vue({
     // Disable Zooming
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
     this.getSystemLocale();
-    this.createMenu();
-    this.$bus.$on('new-file-open', this.refreshMenu);
+    this.infoDB().init().then(() => {
+      this.createMenu();
+      this.$bus.$on('new-file-open', this.refreshMenu);
+    });
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
       if (err) {
@@ -447,7 +448,10 @@ new Vue({
         }
       }
       if (potentialVidPath) {
-        this.openFile(potentialVidPath);
+        this.openFile(potentialVidPath.replace(
+          process.platform === 'win32' ? /^file:\/\// : /^file:\/\/\//,
+          '',
+        ));
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);

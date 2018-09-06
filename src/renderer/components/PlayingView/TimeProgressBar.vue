@@ -30,7 +30,7 @@
       :style="{width: this.winWidth - 20 + 'px'}"
       @mousedown.left.stop.capture="onProgressBarClick">
         <!-- translate优化 -->
-      <the-preview-thumbnail 
+      <the-preview-thumbnail
         v-show="showScreenshot"
         :src="src"
         :thumbnailWidth="widthOfThumbnail"

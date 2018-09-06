@@ -100,19 +100,18 @@ export default {
   methods: {
     // Data validators
     videoSrcValidator(src) {
+      let result = '';
       const fileSrcRegexes = {
         http: RegExp('^(http|https)://'),
-        file: RegExp('^file:///?'),
+        notWindowsFile: RegExp('^file://'),
+        windowsFile: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
       };
       if (typeof src === 'string') {
-        if (fileSrcRegexes.http.test(src)) {
-          return 'http';
-        }
-        if (fileSrcRegexes.file.test(src)) {
-          return 'file';
-        }
+        Object.keys(fileSrcRegexes).forEach((filetype) => {
+          if (fileSrcRegexes[filetype].test(src)) result = filetype;
+        });
       }
-      throw new TypeError('invalid src value.');
+      return result;
     },
     // Data regenerators
     updateGenerationParameters() {
@@ -210,6 +209,7 @@ export default {
     updateVideoInfo(outerThumbnailInfo) {
       const { videoSrc } = outerThumbnailInfo;
       if (this.videoSrcValidator(videoSrc)) {
+        console.log(videoSrc);
         this.videoSrc = videoSrc;
         if (!outerThumbnailInfo.newVideo) {
           this.screenWidth = outerThumbnailInfo.screenWidth;

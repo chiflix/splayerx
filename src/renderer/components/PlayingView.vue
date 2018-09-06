@@ -26,7 +26,7 @@ export default {
         } else {
           this.$bus.$emit('volume', 1);
         }
-      } else if (e.deltaY > 0) {
+      } else if (e.deltaY < 0) {
         if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
           this.$bus.$emit(
             'volume',

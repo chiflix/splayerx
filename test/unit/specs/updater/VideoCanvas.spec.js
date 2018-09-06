@@ -7,9 +7,10 @@ import PlaybackState from '@/store/modules/PlaybackState';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-let wrapper;
+
 describe('VideoCanvas.vue', () => {
   let store;
+  let wrapper;
   beforeEach(() => {
     store = new Vuex.Store({
       modules: {
@@ -26,6 +27,10 @@ describe('VideoCanvas.vue', () => {
         src: 'file:///./../../../../test/assets/test.avi',
       },
     });
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
   });
 
   it('should load correct data', () => {
@@ -45,7 +50,7 @@ describe('VideoCanvas.vue', () => {
 
   it('volume event work fine', () => {
     wrapper.vm.$bus.$emit('volume', 1);
-    expect(store.state.PlaybackState.PlaybackRate).equal(1);
+    expect(store.state.PlaybackState.Volume).equal(1);
   });
 
   it('calcNewWindowXY method work fine if no windowRectangleOld exist', () => {
@@ -57,7 +62,7 @@ describe('VideoCanvas.vue', () => {
     spy.restore();
   });
 
-  it('watch src work fine', () => {
+  it('watch OriginSrcOfVideo work fine', () => {
     const stub = sinon.stub(wrapper.vm.$electron.remote, 'getCurrentWindow').callsFake(() => ({
       getBounds() {
         return {
@@ -68,7 +73,9 @@ describe('VideoCanvas.vue', () => {
         };
       },
     }));
-    wrapper.vm.src = 'abc';
+
+    wrapper.vm.$store.commit('OriginSrcOfVideo', 'abc');
+
     expect(wrapper.vm.windowRectangleOld.x).equal(10);
     expect(wrapper.vm.windowRectangleOld.y).equal(10);
     expect(wrapper.vm.windowRectangleOld.height).equal(10);
@@ -97,16 +104,16 @@ describe('VideoCanvas.vue', () => {
     wrapper.vm.videoHeight = 100;
     store.state.PlaybackState.CurrentTime = 100;
 
-    const emitSpy = sinon.spy(wrapper.vm.$bus, '$emit');
+    const emitStub = sinon.stub(wrapper.vm.$bus, '$emit');
     const stub = sinon.stub(wrapper.vm, '$_controlWindowSize').callsFake();
 
     wrapper.vm.onMetaLoaded();
-    expect(emitSpy.firstCall.calledWith('play')).equal(true);
-    expect(emitSpy.secondCall.calledWith('seek', 100)).equal(true);
-    expect(emitSpy.thirdCall.calledWith('screenshot-sizeset')).equal(true);
+    expect(emitStub.firstCall.calledWith('play')).equal(true);
+    expect(emitStub.secondCall.calledWith('seek', 100)).equal(true);
+    expect(emitStub.thirdCall.calledWith('screenshot-sizeset')).equal(true);
     expect(wrapper.vm.videoExisted).equal(true);
     stub.restore();
-    emitSpy.restore();
+    emitStub.restore();
   });
 
   it('onMetaLoaded method work fine if video exist', () => {

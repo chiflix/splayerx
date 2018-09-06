@@ -78,13 +78,13 @@ export default {
     };
   },
   watch: {
-    src(newValue) {
+    src() {
       // Reload video and image components
       this.mountVideo = false;
       this.mountImage = false;
       this.generatedIndex = 0;
       this.currentIndex = 0;
-      this.updateMediaQuickHash(newValue);
+      this.quickHash = this.mediaQuickHash(this.$store.state.PlaybackState.OriginSrcOfVideo);
       this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
     },
     currentTime(newValue) {
@@ -100,20 +100,6 @@ export default {
     },
   },
   methods: {
-    updateMediaQuickHash(src) {
-      const regexes = {
-        file: new RegExp('^file:///?'),
-        http: new RegExp('^(http|https)://'),
-      };
-
-      let filePath = src;
-      Object.keys(regexes).forEach((fileType) => {
-        if (regexes[fileType].test(src)) {
-          filePath = src.replace(regexes[fileType], '');
-        }
-      });
-      this.quickHash = this.mediaQuickHash(filePath);
-    },
     updateThumbnailInfo(event) {
       this.autoGenerationIndex = event.index;
       this.generationInterval = event.interval;
@@ -193,7 +179,7 @@ export default {
       /* eslint-disable newline-per-chained-call */
     });
     idb.open(INFO_DATABASE_NAME).then((db) => {
-      this.updateMediaQuickHash(this.src);
+      this.quickHash = this.mediaQuickHash(this.$store.state.PlaybackState.OriginSrcOfVideo);
       const obejctStoreName = THUMBNAIL_OBJECT_STORE_NAME;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
         console.log('[IndexedDB]: Initial preview thumbnail info objectStore.');

@@ -4,9 +4,10 @@
     class="video">
     <base-video-player
       ref="videoCanvas"
-      :defaultEvents="['playing', 'canplay', 'timeupdate', 'loadedmetadata', 'durationchange']"
+      :defaultEvents="['play', 'pause', 'playing', 'canplay', 'timeupdate', 'loadedmetadata', 'durationchange']"
       :styleObject="{objectFit: 'contain', width: '100%', height: '100%'}"
-
+      @play="onPlay"
+      @pause="onPause"
       @playing="onPlaying"
       @canplay="onCanPlay"
       @timeupdate="onTimeupdate"
@@ -66,6 +67,12 @@ export default {
         this.$store.commit('AccurateTime', currentTime);
       }
     },
+    onPlay() {
+      this.$store.commit('isPlaying', true);
+    },
+    onPause() {
+      this.$store.commit('isPlaying', false);
+    },
     onPlaying() {
       // set interval to get update time
       const { duration } = this.videoElement;
@@ -93,7 +100,6 @@ export default {
       }
       this.$bus.$emit('video-loaded');
       this.windowSizeHelper.setNewWindowSize();
-      // this.loadTextTracks();
     },
     onTimeupdate() {
       this.$store.commit('AccurateTime', this.videoElement.currentTime);
@@ -200,10 +206,10 @@ export default {
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       const { videoHeight, videoWidth } = this.videoElement;
-      [canvas.width, canvas.height] = [videoWidth, videoHeight];
+      [canvas.width, canvas.height] = [1920, 1080];
       canvasCTX.drawImage(
         this.videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, videoWidth, videoHeight,
+        0, 0, 1920, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
       const data = {
@@ -234,9 +240,12 @@ export default {
     currentTime() {
       return this.$store.state.PlaybackState.CurrentTime;
     },
+    originSrcOfVideo() {
+      return this.$store.state.PlaybackState.OriginSrcOfVideo;
+    },
   },
   watch: {
-    src(val, oldVal) {
+    originSrcOfVideo(val, oldVal) {
       const window = this.$electron.remote.getCurrentWindow();
       this.windowRectangleOld.x = window.getBounds().x;
       this.windowRectangleOld.y = window.getBounds().y;
@@ -264,8 +273,16 @@ export default {
       this.videoElement.volume = newVolume;
       this.$store.commit('Volume', newVolume);
     });
-    this.$bus.$on('reset-windowsize', () => {
-      this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
+    this.$bus.$on('toggle-fullscreen', () => {
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      if (currentWindow.isFullScreen()) {
+        currentWindow.setFullScreen(false);
+        this.$bus.$emit('reset-windowsize');
+      } else {
+        currentWindow.setAspectRatio(0);
+        currentWindow.setFullScreen(true);
+      }
+      currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
     });
     this.$bus.$on('toggle-playback', () => {
       if (this.videoElement.paused) {
@@ -286,6 +303,13 @@ export default {
       this.videoElement.currentTime = e;
       this.$store.commit('CurrentTime', e);
       this.$store.commit('AccurateTime', e);
+
+      const filePath = decodeURI(this.videoElement.src);
+      const indexOfLastDot = filePath.lastIndexOf('.');
+      const ext = filePath.substring(indexOfLastDot + 1);
+      if (ext === 'mkv') {
+        this.$bus.$emit('seek-subtitle', e);
+      }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {

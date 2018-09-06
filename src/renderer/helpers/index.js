@@ -63,28 +63,27 @@ export default {
       }
     },
     openFile(path) {
-      let vidPath;
-      path = decodeURI(path);
-      if (process.platform === 'win32') {
-        vidPath = path.replace(/^file:\/\/\//, '');
-      } else {
-        vidPath = path.replace(/^file:\/\//, '');
-      }
-      this.infoDB().get('recent-played', this.mediaQuickHash(vidPath))
+      const originPath = path;
+      const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
+      this.infoDB().get('recent-played', this.mediaQuickHash(originPath))
         .then((value) => {
           if (value) {
             this.$bus.$emit('seek', value.lastPlayedTime);
             this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date.now() }));
           } else {
             this.infoDB().add('recent-played', {
-              quickHash: this.mediaQuickHash(vidPath),
-              path,
+              quickHash: this.mediaQuickHash(originPath),
+              path: originPath,
               lastOpened: Date.now(),
             });
           }
           this.$bus.$emit('new-file-open');
         });
-      this.$store.commit('SrcOfVideo', path);
+      this.$store.commit(
+        'SrcOfVideo',
+        process.platform === 'win32' ? convertedPath : `file://${convertedPath}`,
+      );
+      this.$store.commit('OriginSrcOfVideo', originPath);
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
@@ -111,6 +110,5 @@ export default {
       fs.closeSync(fd);
       return res.join('-');
     },
-
   },
 };

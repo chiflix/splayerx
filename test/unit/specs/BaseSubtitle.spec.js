@@ -57,71 +57,20 @@ describe('BaseSubtitle.vue', () => {
       store,
       localVue,
       propsData: {
-        src: 'file://../../../../../test/assets/test.avi',
+        src: 'file://./../../../../test/assets/test.avi',
       },
     });
     const childWrapper = wrapper.find(BaseSubtitle);
     childWrapper.setData({ readingMkv: true });
-    const statusStub = sinon.stub(childWrapper.vm, 'subtitleInitializingStatus').callsFake(() => new Promise((resolve) => {
-      resolve([
-        {
-          found: true,
-          size: 1,
-        },
-        {
-          found: false,
-          size: 0,
-        },
-        {
-          found: false,
-          size: 0,
-        },
-      ]);
-    }));
     const stub = sinon.stub(childWrapper.vm, 'loadLocalTextTracks');
     await childWrapper.vm.subtitleInitialize();
 
-    sinon.assert.called(statusStub);
     sinon.assert.called(stub);
     expect(childWrapper.vm.readingMkv).equal(false);
     stub.restore();
-    statusStub.restore();
   });
 
   it('subtitleInitialize to load server subtitles', async () => {
-    const wrapper = mount(VideoCanvas, {
-      store,
-      localVue,
-      propsData: {
-        src: 'file://../../../../../test/assets/testServer.avi',
-      },
-    });
-    const childWrapper = wrapper.find(BaseSubtitle);
-    const statusStub = sinon.stub(childWrapper.vm, 'subtitleInitializingStatus').callsFake(() => new Promise((resolve) => {
-      resolve([
-        {
-          found: false,
-          size: 0,
-        },
-        {
-          found: false,
-          size: 0,
-        },
-        {
-          found: true,
-          size: 2,
-        },
-      ]);
-    }));
-    const stub = sinon.stub(childWrapper.vm, 'loadServerTextTracks');
-    await childWrapper.vm.subtitleInitialize();
-    sinon.assert.called(statusStub);
-    sinon.assert.called(stub);
-    stub.restore();
-    statusStub.restore();
-  });
-
-  it('subtitleInitialize to load embedded subtitles', async () => {
     const wrapper = mount(VideoCanvas, {
       store,
       localVue,
@@ -130,28 +79,25 @@ describe('BaseSubtitle.vue', () => {
       },
     });
     const childWrapper = wrapper.find(BaseSubtitle);
-    const statusStub = sinon.stub(childWrapper.vm, 'subtitleInitializingStatus').callsFake(() => new Promise((resolve) => {
-      resolve([
-        {
-          found: false,
-          size: 0,
-        },
-        {
-          found: true,
-          size: 2,
-        },
-        {
-          found: false,
-          size: 0,
-        },
-      ]);
-    }));
-    const stub = sinon.stub(childWrapper.vm, 'mkvProcess');
+    const stub = sinon.stub(childWrapper.vm, 'loadServerTextTracks');
     await childWrapper.vm.subtitleInitialize();
-    sinon.assert.called(statusStub);
     sinon.assert.called(stub);
     stub.restore();
-    statusStub.restore();
+  });
+
+  it('subtitleInitialize to load embedded subtitles', async () => {
+    const wrapper = mount(VideoCanvas, {
+      store,
+      localVue,
+      propsData: {
+        src: 'file://./../../../../test/assets/testMkv.mkv',
+      },
+    });
+    const childWrapper = wrapper.find(BaseSubtitle);
+    const stub = sinon.stub(childWrapper.vm, 'mkvProcess');
+    await childWrapper.vm.subtitleInitialize();
+    sinon.assert.called(stub);
+    stub.restore();
   });
 
   it('should emit an event when no subtitles found', async () => {
@@ -159,7 +105,7 @@ describe('BaseSubtitle.vue', () => {
       store,
       localVue,
       propsData: {
-        src: 'file://./../../../../test/assets/testMkv.mkv',
+        src: 'file://./../../../../test/assets/testServer.avi',
       },
     });
     const childWrapper = wrapper.find(BaseSubtitle);
@@ -260,50 +206,59 @@ describe('BaseSubtitle.vue', () => {
     });
   });
 
-  it('$_concatStream success test', (done) => {
+  it('mkvProcess method works fine', async () => {
+    const wrapper = mount(BaseSubtitle, { store, localVue });
+    wrapper.setData({ mkvSubsInitialized: false });
+    const stub = sinon.stub(wrapper.vm, 'mkvProcessInit');
+    wrapper.vm.mkvProcess();
+    sinon.assert.calledOnce(stub);
+    stub.restore();
+  });
+
+  it('concatStream success test', (done) => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
     const subPath = './test/assets/test3.srt';
     const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
-    wrapper.vm.$_concatStream(vttStream, (err) => {
+    wrapper.vm.concatStream(vttStream, (err) => {
       expect(err).equal(null);
       done();
     });
   });
 
-  it('$_concatStream error test', (done) => {
+  it('concatStream error test', (done) => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
     const subPath = './test/assets/test3.srt';
     const vttStream = fs.createReadStream(subPath).pipe(srt2vtt());
     wrapper.vm.$nextTick(() => {
       vttStream.emit('error', new Error('OOPS'));
     });
-    wrapper.vm.$_concatStream(vttStream, (err) => {
+    wrapper.vm.concatStream(vttStream, (err) => {
       expect(err).not.equal(null);
       done();
     });
   });
 
-  it('$_timeProcess test', () => {
+  it('timeProcess test', () => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
-    const res = wrapper.vm.$_timeProcess();
+    const res = wrapper.vm.timeProcess();
     expect(res).equal(0);
   });
 
-  it('$_createSubtitleStream success', () => {
+  it('createSubtitleStream success', () => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
     const subPath = './test/assets/test3.srt';
     const spy = sinon.spy();
-    const concatStream = sinon.stub(wrapper.vm, '$_concatStream');
+    const concatStream = sinon.stub(wrapper.vm, 'concatStream');
     concatStream.yields();
-    wrapper.vm.$_createSubtitleStream(subPath, spy);
+    wrapper.vm.createSubtitleStream(subPath, spy);
     concatStream.restore();
     sinon.assert.calledOnce(spy);
   });
 
-  it('$_subNameFromLocalProcess test', () => {
+  it('subNameFromLocalProcess test', () => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
     const file = './test/assets/test3.srt';
-    const result = wrapper.vm.$_subNameFromLocalProcess(file);
+    const result = wrapper.vm.subNameFromLocalProcess(file);
     const target = {
       title: path.parse(file).name,
       status: null,
@@ -313,7 +268,7 @@ describe('BaseSubtitle.vue', () => {
     expect(result).deep.equal(target);
   });
 
-  it('$_subNameFromServerProcess has language code', () => {
+  it('subNameFromServerProcess has language code', () => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
     const textTrack = [1, 'CN'];
     const target = {
@@ -322,11 +277,11 @@ describe('BaseSubtitle.vue', () => {
       textTrackID: 0,
       origin: 'server',
     };
-    const res = wrapper.vm.$_subnameFromServerProcess(textTrack);
+    const res = wrapper.vm.subnameFromServerProcess(textTrack);
     expect(res).deep.equal(target);
   });
 
-  it('$_subNameFromServerProcess does not have language code', () => {
+  it('subNameFromServerProcess does not have language code', () => {
     const wrapper = mount(BaseSubtitle, { store, localVue });
     const textTrack = [1, ''];
     const target = {
@@ -335,7 +290,7 @@ describe('BaseSubtitle.vue', () => {
       textTrackID: 0,
       origin: 'server',
     };
-    const res = wrapper.vm.$_subnameFromServerProcess(textTrack);
+    const res = wrapper.vm.subnameFromServerProcess(textTrack);
     expect(res).deep.equal(target);
   });
 

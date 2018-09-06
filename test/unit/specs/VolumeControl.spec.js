@@ -34,26 +34,44 @@ describe('VolumnColtrol.vue', () => {
 
   it('onVolumeButtonClick method works fine', () => {
     const wrapper = shallowMount(VolumeControl, { store, localVue });
+
+    store.state.PlaybackState.Volume = 0.2;
+    const emitSpy = sinon.spy(wrapper.vm.$bus, '$emit');
+
     wrapper.vm.onVolumeButtonClick();
     expect(wrapper.vm.currentVolume).equal(20);
+    expect(emitSpy.withArgs('volume', 0).calledOnce).equal(true);
+    emitSpy.restore();
   });
 
-  /* 测试 eventbus中emit和on的写法，需要研究
-  it('onVolumeButtonClick method works fine', (done) => {
+  it('onVolumeButtonClick method works fine when volume is 0', () => {
     const wrapper = shallowMount(VolumeControl, { store, localVue });
-    var eventFired = false
-    store.state.PlaybackState.Volume = 0.2;
-    setTimeout( () => {
-      expect(wrapper.emitted('volume')).equal();
-      expect(wrapper.emitted('volume')).equal( ? );
-      done();
-    },1000);
-    wrapper.vm.$on('volume',() => {
-      eventFired = true
-    });
+
+    store.state.PlaybackState.Volume = 0;
+    wrapper.vm.currentVolume = 10;
+    const emitSpy = sinon.spy(wrapper.vm.$bus, '$emit');
+
     wrapper.vm.onVolumeButtonClick();
-    expect(wrapper.vm.currentVolume).equal(20);
-  }); */
+    expect(emitSpy.withArgs('volume', 0.1).calledOnce).equal(true);
+    emitSpy.restore();
+  });
+
+  it('onVolumeSliderClick method work fine', () => {
+    const wrapper = shallowMount(VolumeControl, { store, localVue });
+    const emitSpy = sinon.spy(wrapper.vm.$bus, '$emit');
+    const dragClearSpy = sinon.spy(wrapper.vm, '$_documentVoluemeDragClear');
+    const dragEventSpy = sinon.spy(wrapper.vm, '$_documentVolumeSliderDragEvent');
+    const e = { clientY: 0 };
+
+    wrapper.vm.onVolumeSliderClick(e);
+    expect(wrapper.vm.onVolumeSliderMousedown).equal(true);
+    expect(emitSpy.withArgs('volume').calledOnce).equal(true);
+    expect(dragClearSpy.called).equal(true);
+    expect(dragEventSpy.called).equal(true);
+    emitSpy.restore();
+    dragEventSpy.restore();
+    dragClearSpy.restore();
+  });
 
   it('appearVolumeSlider method works fine', () => {
     const wrapper = shallowMount(VolumeControl, { store, localVue });

@@ -42,19 +42,20 @@
           </div>
           <div class="welcome">
           <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-          <div class="version">v {{ this.$electron.remote.app.getVersion() }}</div>
+          <div class="version">v {{ this.version }}</div>
         </div>
       </div>
   </transition>
       <playlist :lastPlayedFile="lastPlayedFile" :changeSize="changeSize" :showItemNum="showItemNum"
-                :isFull="isFull" :windowSize="windowSize"
+                :isFullScreen="isFullScreen" :windowWidth="windowWidth"
                 :style="{marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
-                         left: this.isFull ? '0px' : `${this.move}px`}"/>
+                         left: this.isFullScreen ? '0px' : `${this.move}px`}"/>
   </main>
 </div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
@@ -81,8 +82,7 @@ export default {
       windowFlag: false,
       moveItem: 0,
       move: 0,
-      isFull: false,
-      windowSize: 720,
+      windowWidth: 720,
     };
   },
   components: {
@@ -90,6 +90,10 @@ export default {
     Playlist,
   },
   computed: {
+    ...mapState({
+      version: state => state.AppState.version,
+      isFullScreen: state => state.WindowState.isFullScreen,
+    }),
   },
   created() {
     /*
@@ -97,8 +101,7 @@ export default {
     * and any info needed to be saved before window closed.
     * Following code is to merge the buffer into DataBase.
     */
-    this.infoDB().init()
-      .then(() => asyncStorage.get('recent-played'))
+    asyncStorage.get('recent-played')
       .then(async (data) => {
         const val = await this.infoDB().lastPlayed();
         if (val && data) {
@@ -117,6 +120,8 @@ export default {
       });
   },
   mounted() {
+    this.$store.dispatch('refreshVersion');
+
     this.$bus.$on('moveItem', (moveItem) => {
       this.moveItem = moveItem;
       if (this.moveItem === 0) {
@@ -127,17 +132,13 @@ export default {
       this.move = move;
     });
     window.onresize = () => {
-      this.windowSize = document.body.clientWidth;
-      if (this.$electron.remote.getCurrentWindow().isFullScreen()) {
-        this.isFull = true;
+      this.windowWidth = document.body.clientWidth;
+      if (this.isFullScreen) {
         this.windowFlag = false;
+      } else if (this.moveItem === 0) {
+        this.move = 0;
       } else {
-        this.isFull = false;
-        if (this.moveItem === 0) {
-          this.move = 0;
-        } else {
-          this.windowFlag = true;
-        }
+        this.windowFlag = true;
       }
       this.logoPos = (document.body.clientHeight * 0.37) - 100;
       const changingWidth = document.body.clientWidth;
@@ -206,7 +207,7 @@ export default {
         console.log(`sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
-    if (process.platform === 'win32') {
+    if (process.platform !== 'darwin') {
       document.querySelector('.application').style.webkitAppRegion = 'no-drag';
       document.querySelector('.application').style.borderRadius = 0;
     }
@@ -284,7 +285,7 @@ body {
     z-index: 4;
   }
   .item-name {
-    width: 500px;
+    width: 70%;
     word-break: break-all;
     font-size: 30px;
     font-weight: bold;
