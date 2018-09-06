@@ -243,8 +243,8 @@ export default {
       if (y < displayY) y = displayY;
 
       const right = x + this.newWidthOfWindow; // the x axis of window's right side
-      if (displayWidth - right < displayX) {
-        x = Math.round(displayWidth - this.newWidthOfWindow);
+      if (right > displayX + displayWidth) {
+        x = Math.round((displayX + displayWidth) - this.newWidthOfWindow);
       }
       const bottom = y + this.newHeightOfWindow; // the y axis of window's bottom side
       if (bottom > displayY + displayHeight) {
