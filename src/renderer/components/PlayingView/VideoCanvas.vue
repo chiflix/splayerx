@@ -127,16 +127,10 @@ export default {
         parseInt(this.newWidthOfWindow, 10),
         parseInt(this.newHeightOfWindow, 10),
       );
-      // currentWindow.setPosition(
-      //   windowXY.windowX,
-      //   windowXY.windowY,
-      // );
-      // currentWindow.setBounds({
-      //   x: windowXY.windowX,
-      //   y: windowXY.windowY,
-      //   width: parseInt(this.newWidthOfWindow, 10),
-      //   height: parseInt(this.newHeightOfWindow, 10),
-      // });
+      currentWindow.setPosition(
+        windowXY.windowX,
+        windowXY.windowY,
+      );
       currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
     },
     $_controlWindowSizeAtNewVideo() {
@@ -232,27 +226,32 @@ export default {
       };
       syncStorage.setSync('recent-played', data);
     },
-    // responsible for calculating window position and size from LandingView's Center
-    calcNewWindowXY(display) {
+    // responsible for calculating window position and size relative to LandingView's Center
+    calcNewWindowXY(currentDisplay) {
       const window = this.$electron.remote.getCurrentWindow();
       const landingViewRectangle = window.getBounds();
-      // (x, y) is the center of the landingview window
       let x = landingViewRectangle.x + (landingViewRectangle.width / 2);
       let y = landingViewRectangle.y + (landingViewRectangle.height / 2);
-      // (x, y) is now the upper-left of the new window
       x = Math.round(x - (this.newWidthOfWindow / 2));
       y = Math.round(y - (this.newHeightOfWindow / 2));
 
-      const currentScreen = this.$electron.screen.getPrimaryDisplay();
-      const { width: screenWidth, height: screenHeight } = currentScreen.workAreaSize;
+      const {
+        width: displayWidth,
+        height: displayHeight,
+        x: displayX, // the x axis of display's upper-left
+        y: displayY, // the y axis of display's upper-left
+      } = currentDisplay.workArea;
 
-      const left = x + this.newWidthOfWindow; // the x axis of window's left side
-      if (screenWidth - left < 0) {
-        x = Math.round(screenWidth - this.newWidthOfWindow);
+      if (x < displayX) x = displayX;
+      if (y < displayY) y = displayY;
+
+      const right = x + this.newWidthOfWindow; // the x axis of window's right side
+      if (displayWidth - right < displayX) {
+        x = Math.round(displayWidth - this.newWidthOfWindow);
       }
       const bottom = y + this.newHeightOfWindow; // the y axis of window's bottom side
-      if (screenHeight - bottom < 0) {
-        y = Math.round(screenHeight - this.newHeightOfWindow);
+      if (bottom > displayY + displayHeight) {
+        y = Math.round((displayY + displayHeight) - this.newHeightOfWindow);
       }
       return { windowX: x, windowY: y };
     },
