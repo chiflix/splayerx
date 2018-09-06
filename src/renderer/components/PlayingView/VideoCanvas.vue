@@ -114,9 +114,9 @@ export default {
     $_controlWindowSize() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       const landingViewRectangle = currentWindow.getBounds();
+
       const [windowX, windowY] = currentWindow.getPosition();
       const windowPosition = { x: windowX, y: windowY };
-
       const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
 
       const windowXY = this.calcNewWindowXY(currentDisplay, landingViewRectangle);
@@ -133,10 +133,18 @@ export default {
     },
     $_controlWindowSizeAtNewVideo() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
+      console.log(this.newWidthOfWindow, this.newHeightOfWindow);
+      const [windowX, windowY] = currentWindow.getPosition();
+      const windowPosition = { x: windowX, y: windowY };
+      const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
+
+      const windowXY = this.avoidBeyondDisplayBorder(currentDisplay, windowX, windowY);
+
       currentWindow.setSize(
         parseInt(this.newWidthOfWindow, 10),
         parseInt(this.newHeightOfWindow, 10),
       );
+      currentWindow.setPosition(windowXY.windowX, windowXY.windowY);
       currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
     },
     $_calculateWindowSizeAtTheFirstTime() {
@@ -232,12 +240,16 @@ export default {
       x = Math.round(x - (this.newWidthOfWindow / 2));
       y = Math.round(y - (this.newHeightOfWindow / 2));
 
+      return this.avoidBeyondDisplayBorder(currentDisplay, x, y);
+    },
+    // if the given (x, y) beyond the border of the given display, then adjust the x, y
+    avoidBeyondDisplayBorder(display, x, y) {
       const {
         width: displayWidth,
         height: displayHeight,
         x: displayX, // the x axis of display's upper-left
         y: displayY, // the y axis of display's upper-left
-      } = currentDisplay.workArea;
+      } = display.workArea;
 
       if (x < displayX) x = displayX;
       if (y < displayY) y = displayY;
