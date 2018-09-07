@@ -351,7 +351,7 @@ export default {
         left: 0;
         width: auto;
         z-index: 4;
-        trasition : left 100ms linear;
+        transition : left 100ms linear;
 
         .playlist {
             -webkit-app-region: no-drag;
