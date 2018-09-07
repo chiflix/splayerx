@@ -28,7 +28,6 @@
               backgroundImage: itemShortcut(item.shortCut),
               width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
               height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
-
             }"
                  @click.stop="onRecentItemClick(item, index)"
                  @mouseover="onRecentItemMouseover(item, index)"
@@ -369,14 +368,14 @@ export default {
             }
 
             .button:hover {
-                    background-color: rgba(123, 123, 123, 0.12);
-                    transition: background-color 150ms ease-out;
+                background-color: rgba(123, 123, 123, 0.12);
+                transition: background-color 150ms ease-out;
             }
 
             .btnMask {
-                    border-radius: 2px;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    display: flex;
+                border-radius: 2px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                display: flex;
             }
 
             .addUi {
