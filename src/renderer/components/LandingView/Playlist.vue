@@ -351,7 +351,7 @@ export default {
         left: 0;
         width: auto;
         z-index: 4;
-        transition : left 100ms linear;
+        trasition : left 100ms linear;
 
         .playlist {
             -webkit-app-region: no-drag;
@@ -368,16 +368,16 @@ export default {
                 cursor: pointer;
             }
 
-                .button:hover {
+            .button:hover {
                     background-color: rgba(123, 123, 123, 0.12);
                     transition: background-color 150ms ease-out;
-                }
+            }
 
-                .btnMask {
+            .btnMask {
                     border-radius: 2px;
                     border: 1px solid rgba(255, 255, 255, 0.1);
                     display: flex;
-                }
+            }
 
             .addUi {
                 margin: auto;
