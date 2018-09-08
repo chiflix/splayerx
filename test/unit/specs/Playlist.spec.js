@@ -20,7 +20,7 @@ describe('Playlist.vue', () => {
     expect(wrapper.vm.move).equal(0);
     expect(wrapper.vm.moveItem).equal(0);
   });
-  it('watch works fine', () => {
+  it('showItemNum watcher works fine', () => {
     const wrapper = mount(Playlist);
     wrapper.setProps({ showItemNum: 5 });
     wrapper.setProps({ showItemNum: 10 });
@@ -29,6 +29,15 @@ describe('Playlist.vue', () => {
     wrapper.setProps({ showItemNum: -1 });
     wrapper.setProps({ showItemNum: 0 });
     expect(wrapper.vm.moveItem).equal(-1);
+  });
+  it('windowWidth watcher works fine', () => {
+    const wrapper = mount(Playlist, {
+      attachToDocument: true,
+    });
+    wrapper.setProps({ changeSize: 100 });
+    wrapper.setProps({ windowWidth: 720 });
+    wrapper.setProps({ windowWidth: 1355 });
+    expect(wrapper.vm.itemWidth).equal(1355);
   });
   it('open method works fine', () => {
     const wrapper = mount(Playlist);
@@ -47,8 +56,7 @@ describe('Playlist.vue', () => {
     expect(wrapper.vm.showingPopupDialog).equal(true);
     wrapper.setData({ moveItem: -1 });
     wrapper.vm.openOrMove();
-    const target = wrapper.find('.controller');
-    expect(target.attributes().style).contains('left: 0px');
+    expect(wrapper.vm.moveItem).equal(0);
   });
   it('backgroundUrl method works fine', () => {
     const wrapper = mount(Playlist);
@@ -67,7 +75,9 @@ describe('Playlist.vue', () => {
     expect(wrapper.vm.itemShortcut(link)).equal(`url("${link}")`);
   });
   it('onRecentItemMouseover method works fine', () => {
-    const wrapper = mount(Playlist);
+    const wrapper = mount(Playlist, {
+      attachToDocument: true,
+    });
     const spy = sinon.spy(wrapper.vm, 'onRecentItemMouseover');
     wrapper.setProps({ isFullScreen: true });
     wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }] });
