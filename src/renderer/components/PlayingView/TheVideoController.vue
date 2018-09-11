@@ -58,7 +58,6 @@ export default {
       clicksDelay: 200,
       dragDelay: 200,
       dragRadiusSquare: 25,
-      mainWindow: null,
     };
   },
   computed: {
@@ -82,9 +81,11 @@ export default {
       return this.showAllWidgets ? 'default' : 'none';
     },
   },
+  created() {
+    this.mousemoveEventInfo = {};
+  },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
-    this.mainWindow = this.$electron.remote.getCurrentWindow();
   },
   methods: {
     getAllUIComponents(rootElement) {
@@ -152,6 +153,14 @@ export default {
       this.$bus.$emit('toggle-playback');
     },
     handleMousemove(event) {
+      this.mousemoveEventInfo = Object.assign(
+        {},
+        {
+          target: event.target,
+          position: [event.clientX, event.clientY],
+        },
+      );
+      console.log(this.mousemoveEventInfo);
       // Set currentWidget
       this.currentWidget = this.getComponentName(event.target);
       // Mousestop timer
