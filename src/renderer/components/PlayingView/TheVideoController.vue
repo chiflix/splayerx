@@ -82,10 +82,19 @@ export default {
     },
   },
   created() {
-    this.mousemoveEventInfo = {};
+    this.eventInfo = new Map([
+      ['mousemove', {}],
+      ['mousedown', {}],
+      ['mouseenter', {}],
+      ['mousewheel', {}],
+      ['keydown', {}],
+    ]);
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
+    requestAnimationFrame(() => {
+      console.log(this.eventInfo);
+    });
   },
   methods: {
     getAllUIComponents(rootElement) {
@@ -153,14 +162,10 @@ export default {
       this.$bus.$emit('toggle-playback');
     },
     handleMousemove(event) {
-      this.mousemoveEventInfo = Object.assign(
-        {},
-        {
-          target: event.target,
-          position: [event.clientX, event.clientY],
-        },
-      );
-      console.log(this.mousemoveEventInfo);
+      this.eventInfo.set('mousemove', {
+        target: event.target,
+        position: [event.clientX, event.clientY],
+      });
       // Set currentWidget
       this.currentWidget = this.getComponentName(event.target);
       // Mousestop timer
@@ -171,15 +176,24 @@ export default {
       }, this.mousestopDelay);
     },
     handleMouseenter() {
+      this.eventInfo.set('mouseenter', { mouseLeavingWindow: false });
       this.mouseleft = false;
       clearTimeout(this.mouseleftTimer);
     },
     handleMouseleave() {
+      this.eventInfo.set('mouseenter', {
+        mouseLeavingWindow: true,
+      });
       this.mouseleftTimer = setTimeout(() => {
         this.mouseleft = true;
       }, this.mouseleftDelay);
     },
     handleRightMousedown() {
+      this.eventInfo.set('mousedown', Object.assign(
+        {},
+        this.eventInfo.get('mousedown'),
+        { rightMousedown: true },
+      ));
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
         menu.popup(this.$electron.remote.getCurrentWindow());
@@ -187,6 +201,11 @@ export default {
       }
     },
     handleLeftMousedown() {
+      this.eventInfo.set('mousedown', Object.assign(
+        {},
+        this.eventInfo.get('mousedown'),
+        { leftMousedown: true },
+      ));
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
         if (this.popupShow === true) {
@@ -200,6 +219,11 @@ export default {
       this.mousedownTime = new Date();
     },
     handleLeftMouseup() {
+      this.eventInfo.set('mousedown', Object.assign(
+        {},
+        this.eventInfo.get('mousedown'),
+        { leftMousedown: false },
+      ));
       this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
       if (this.clicks === 1) { // if one click has been detected - clicks === 1
         const self = this; // define a constant "self" for the following scope to use
