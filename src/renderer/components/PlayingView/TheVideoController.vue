@@ -42,6 +42,7 @@ export default {
   },
   data() {
     return {
+      start: null,
       UIElements: [],
       currentWidget: this.$options.name,
       mousestop: false,
@@ -92,11 +93,38 @@ export default {
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
-    requestAnimationFrame(() => {
-      console.log(this.eventInfo);
-    });
+    requestAnimationFrame(this.UIManager);
   },
   methods: {
+    UIManager(timestamp) {
+      if (!this.start) {
+        this.start = timestamp;
+      }
+      const frameTime = timestamp - this.start;
+      this.inputProcess();
+      this.UITimerManager(frameTime);
+      this.UILayerManager();
+      this.UIDisplayManager();
+      this.UIStateManager();
+
+      requestAnimationFrame(this.UIManager);
+      this.start = timestamp;
+    },
+    inputProcess() {
+      
+    },
+    UITimerManager(frameTime) {
+      console.log(frameTime);
+    },
+    UILayerManager() {
+
+    },
+    UIDisplayManager() {
+
+    },
+    UIStateManager() {
+
+    },
     getAllUIComponents(rootElement) {
       const { children } = rootElement;
       const names = [];
