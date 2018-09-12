@@ -448,10 +448,7 @@ new Vue({
         }
       }
       if (potentialVidPath) {
-        this.openFile(potentialVidPath.replace(
-          process.platform === 'win32' ? /^file:\/\// : /^file:\/\/\//,
-          '',
-        ));
+        this.openFile(potentialVidPath.replace(/^file:\/\/\//, ''));
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);
