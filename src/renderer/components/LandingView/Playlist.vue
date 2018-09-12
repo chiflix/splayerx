@@ -259,12 +259,12 @@ export default {
     },
     onRecentItemMousedown(ev, index) {
       const vm = this;
+      this.mouseFlag = false;
       this.disX = ev.clientX;
       this.disY = ev.clientY;
       const item = document.querySelector(`#item${index}`);
       function mousemove(ev) {
         if (vm.mouseDown) {
-          vm.mouseFlag = false;
           vm.isDragging = true;
           const l = ev.clientX - vm.disX;
           const t = ev.clientY - vm.disY;
