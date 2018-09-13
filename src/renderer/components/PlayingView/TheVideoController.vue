@@ -50,6 +50,7 @@ export default {
       mousestopDelay: 3000,
       mouseLeftWindow: false,
       mouseleftDelay: 1500,
+      hideVolume: false,
       popupShow: false,
       mousedownTime: null,
       mousedownCursorPosition: null,
@@ -87,16 +88,26 @@ export default {
       ['mousemove', {}],
       ['mousedown', {}],
       ['mouseenter', {}],
-      ['mousewheel', {}],
-      ['keydown', {}],
+      ['wheel', {}],
+      ['keydown', {
+        ArrowUp: false,
+        ArrowDown: false,
+        ArrowLeft: false,
+        ArrowRight: false,
+        ' ': false,
+      }],
     ]);
     // Use Map constructor to shallow-copy eventInfo
     this.lastEventInfo = new Map(this.eventInfo);
     this.timerManager = new TimerManager();
     this.timerManager.addTimer('mouseStopMoving', this.mousestopDelay);
+    this.timerManager.addTimer('sleepingVolumeButton', this.mousestopDelay);
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
+    document.addEventListener('keydown', this.handleKeydown);
+    document.addEventListener('keyup', this.handleKeyup);
+    document.addEventListener('wheel', this.handleMousewheel);
     requestAnimationFrame(this.UIManager);
   },
   methods: {
@@ -116,14 +127,15 @@ export default {
       requestAnimationFrame(this.UIManager);
     },
     inputProcess(currentEventInfo, lastEventInfo) {
-      // mousemove setTimeout
+      // mousemove timer
+      this.currentWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
       const currentPosition = currentEventInfo.get('mousemove').position;
       const lastPosition = lastEventInfo.get('mousemove').position;
       if (currentPosition !== lastPosition) {
         this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false);
         this.mouseStopMoving = false;
       }
-      // mouseenter setTimeout
+      // mouseenter timer
       const { mouseLeavingWindow } = currentEventInfo.get('mouseenter');
       const changed = mouseLeavingWindow !== lastEventInfo.get('mouseenter').mouseLeavingWindow;
       if (mouseLeavingWindow && changed) {
@@ -132,19 +144,25 @@ export default {
         this.timerManager.removeTimer('mouseLeavingWindow');
         this.mouseLeftWindow = false;
       }
+      // hideVolume timer
+      const volumeKeydown = currentEventInfo.get('keydown').ArrowUp || currentEventInfo.get('keydown').ArrowDown;
+      const mouseScrolling = currentEventInfo.get('wheel').time !== lastEventInfo.get('wheel').time;
+      const wakingupVolume = volumeKeydown || mouseScrolling;
+      if (wakingupVolume) {
+        this.timerManager.updateTimer('sleepingVolumeButton', this.mousestopDelay);
+        this.hideVolume = false;
+      }
 
       return currentEventInfo;
     },
     UITimerManager(frameTime) {
       this.timerManager.tickTimer('mouseStopMoving', frameTime);
       this.timerManager.tickTimer('mouseLeavingWindow', frameTime);
+      this.timerManager.tickTimer('sleepingVolumeButton', frameTime);
       const timeoutTimers = this.timerManager.timeoutTimers();
-      if (timeoutTimers.includes('mouseStopMoving')) {
-        this.mouseStopMoving = true;
-      }
-      if (timeoutTimers.includes('mouseLeavingWindow')) {
-        this.mouseLeftWindow = true;
-      }
+      this.mouseStopMoving = timeoutTimers.includes('mouseStopMoving');
+      this.mouseLeftWindow = timeoutTimers.includes('mouseLeavingWindow');
+      this.hideVolume = timeoutTimers.includes('sleepingVolumeButton');
     },
     // UILayerManager() {
 
@@ -221,11 +239,9 @@ export default {
     },
     handleMousemove(event) {
       this.eventInfo.set('mousemove', {
-        target: this.getComponentName(event.target),
+        target: event.target,
         position: [event.clientX, event.clientY],
       });
-      // Set currentWidget
-      this.currentWidget = this.getComponentName(event.target);
     },
     handleMouseenter() {
       this.eventInfo.set('mouseenter', { mouseLeavingWindow: false });
@@ -287,6 +303,23 @@ export default {
         this.toggleFullScreenState();
         this.clicks = 0;// reset the "clicks" to zero
       }
+    },
+    handleKeydown(event) {
+      this.eventInfo.set('keydown', Object.assign(
+        {},
+        this.eventInfo.get('keydown'),
+        { [event.code]: true },
+      ));
+    },
+    handleKeyup(event) {
+      this.eventInfo.set('keydown', Object.assign(
+        {},
+        this.eventInfo.get('keydown'),
+        { [event.code]: false },
+      ));
+    },
+    handleMousewheel(event) {
+      this.eventInfo.set('wheel', { time: event.timeStamp });
     },
   },
 };
