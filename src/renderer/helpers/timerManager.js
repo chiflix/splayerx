@@ -10,7 +10,7 @@ class FakeTimer {
 
   tick(time) {
     if (timeValidator(time)) {
-      const timeLeft = this.time - time;
+      const timeLeft = this._timeLeft - time;
       this._timeLeft = timeLeft <= 0 ? 0 : timeLeft;
     } else {
       throw (new Error('Time validation error.'));
