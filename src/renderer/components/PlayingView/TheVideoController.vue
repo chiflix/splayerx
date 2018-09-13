@@ -22,6 +22,7 @@
   </div>
 </template>
 <script>
+import TimerManager from '@/helpers/timerManager.js';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
@@ -90,6 +91,7 @@ export default {
       ['mousewheel', {}],
       ['keydown', {}],
     ]);
+    this.timerManager = new TimerManager();
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
@@ -111,7 +113,6 @@ export default {
       this.start = timestamp;
     },
     inputProcess() {
-      
     },
     UITimerManager(frameTime) {
       console.log(frameTime);
