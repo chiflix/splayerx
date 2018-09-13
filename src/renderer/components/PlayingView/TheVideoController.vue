@@ -9,16 +9,16 @@
     @mousedown.right="handleRightMousedown"
     @mousedown.left="handleLeftMousedown"
     @mouseup.left="handleLeftMouseup">
-    <titlebar currentView="Playingview" v-show="showAllWidgets" ></titlebar>
+    <titlebar currentView="Playingview" v-show="displayState['titlebar']" ></titlebar>
     <div class="masking" v-show="showAllWidgets"></div>
     <play-button />
-    <the-time-codes v-show="showAllWidgets" />
+    <the-time-codes v-show="displayState['the-time-codes']" />
     <div class="control-buttons">
-      <volume-control class="button volume" v-show="showAllWidgets" />
-      <subtitle-control class="button subtitle" v-show="showAllWidgets" />
-      <advance-control class="button advance" v-show="showAllWidgets" />
+      <volume-control class="button volume" v-show="displayState['volume-control']" />
+      <subtitle-control class="button subtitle" v-show="displayState['subtitle-control']" />
+      <advance-control class="button advance" v-show="displayState['advance-control']" />
     </div>
-    <the-time-progress-bar v-show="showAllWidgets" :src="this.$store.state.PlaybackState.SrcOfVideo" />
+    <the-time-progress-bar v-show="displayState['the-time-progress-bar']" :src="this.$store.state.PlaybackState.SrcOfVideo" />
   </div>
 </template>
 <script>
@@ -60,6 +60,7 @@ export default {
       clicksDelay: 200,
       dragDelay: 200,
       dragRadiusSquare: 25,
+      displayState: {},
     };
   },
   computed: {
@@ -98,6 +99,8 @@ export default {
         Space: false,
       }],
     ]);
+    // Use Object due to vue's lack support of reactive Map
+    this.timerState = {};
     // Use Map constructor to shallow-copy eventInfo
     this.lastEventInfo = new Map(this.eventInfo);
     this.timerManager = new TimerManager();
@@ -107,6 +110,10 @@ export default {
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
+    this.UIElements.forEach((value) => {
+      this.timerState[value.name] = true;
+      this.displayState[value.name] = true;
+    });
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleMousewheel);
@@ -122,7 +129,7 @@ export default {
       this.lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
       this.UITimerManager(timestamp - this.start);
       // this.UILayerManager();
-      // this.UIDisplayManager();
+      this.UIDisplayManager();
       // this.UIStateManager();
 
       this.start = timestamp;
@@ -161,6 +168,11 @@ export default {
         this.hideProgressBar = false;
       }
 
+      Object.keys(this.timerState).forEach((uiName) => {
+        this.timerState[uiName] = this.showAllWidgets;
+      });
+      this.timerState['volume-control'] = !this.hideVolume;
+      this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
       return currentEventInfo;
     },
     UITimerManager(frameTime) {
@@ -174,13 +186,21 @@ export default {
       this.mouseLeftWindow = timeoutTimers.includes('mouseLeavingWindow');
       this.hideVolume = timeoutTimers.includes('sleepingVolumeButton');
       this.hideProgressBar = timeoutTimers.includes('sleepingProgressBar');
+
+      this.timerState['volume-control'] = !this.hideVolume;
+      this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
     },
     // UILayerManager() {
 
     // },
-    // UIDisplayManager() {
-
-    // },
+    UIDisplayManager() {
+      const tempObject = {};
+      Object.keys(this.displayState).forEach((index) => {
+        tempObject[index] = this.showAllWidgets ||
+          (!this.showAllWidgets && this.timerState[index]);
+      });
+      this.displayState = tempObject;
+    },
     // UIStateManager() {
 
     // },
