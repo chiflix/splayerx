@@ -134,7 +134,20 @@ export default {
       this.mediaHash = this.mediaQuickHash(fileUrlToPath(vid.src));
       this.Sagi = this.sagi();
 
-      const serverSubsStatus = await this.serverSubsExist();
+      // serverSubsExist
+      let serverSubsStatus;
+      const res = await this.Sagi.mediaTranslate(this.mediaHash);
+      if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
+        serverSubsStatus = {
+          found: true,
+          size: res.array[1].length,
+        };
+      } else {
+        serverSubsStatus = {
+          found: false,
+          size: 0,
+        };
+      }
 
       const files = [];
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
@@ -149,7 +162,7 @@ export default {
       const re = new RegExp('^(.mkv)$');
       let embeddedSubsStatus;
       if (re.test(path.extname(decodeURI(vid.src)))) {
-        embeddedSubsStatus = await this.hasEmbedded(decodeURI(vid.src));
+        embeddedSubsStatus = await this.hasEmbeddedSubs(decodeURI(vid.src));
       } else {
         embeddedSubsStatus = {
           found: false,
@@ -187,19 +200,6 @@ export default {
       });
     },
 
-    async serverSubsExist() {
-      const res = await this.Sagi.mediaTranslate(this.mediaHash);
-      if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
-        return {
-          found: true,
-          size: res.array[1].length,
-        };
-      }
-      return {
-        found: false,
-        size: 0,
-      };
-    },
 
     /**
      * @param {function} cb callback function to process result
@@ -275,11 +275,6 @@ export default {
         const realPath = filePath.substring(7);
         fs.createReadStream(realPath).pipe(subs);
       });
-    },
-
-    async hasEmbedded(filePath) {
-      const res = await (this.hasEmbeddedSubs(filePath));
-      return res;
     },
 
     mkvProcess(vidPath, onlyEmbedded, cb) {
