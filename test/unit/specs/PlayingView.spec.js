@@ -214,6 +214,7 @@ describe('PlayingView.vue.lyc', () => {
     videoCanvasMock(vue, busMock(vue));
     const globalEventBusEmitSpy = sinon.spy(vue.$bus, '$emit');
     store.commit('isFocused', true);
+    wrapper.setData({ isValidDbClick: true });
     vue.handleLeftClick();
     timer.tick(100);
     vue.handleMouseUp();
@@ -231,6 +232,7 @@ describe('PlayingView.vue.lyc', () => {
     videoCanvasMock(vue, busMock(vue));
     const globalEventBusEmitSpy = sinon.spy(vue.$bus, '$emit');
     store.commit('isFocused', true);
+    wrapper.setData({ isValidDbClick: true });
     timer.tick(vue.firstMouseTimeSpan);
     vue.handleLeftClick();
     timer.tick(100);

@@ -71,6 +71,8 @@ export default {
       mouseDownTime: null,
       mouseDownCursorPosition: null,
       subtitleMenuAppear: false,
+      isValidFullScreen: true,
+      isValidDbClick: true,
     };
   },
   created() {
@@ -194,7 +196,7 @@ export default {
         this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
         if (this.clicks === 1) { // if one click has been detected - clicks === 1
           const self = this; // define a constant "self" for the following scope to use
-          if (this.isValidClick()) {
+          if (this.isValidClick() && this.isValidDbClick) {
             this.timer = setTimeout(() => { // define timer as setTimeOut function
               if (self.focusTimestamp
                 && new Date() - self.focusTimestamp < self.firstMouseTimeSpan) {
@@ -208,6 +210,11 @@ export default {
               self.clicks = 0; // reset the "clicks" to zero for next event
             }, this.delay);
           } else {
+            if (this.isValidFullScreen) {
+              this.isValidDbClick = true;
+            } else {
+              this.isValidFullScreen = true;
+            }
             self.clicks = 0;
           }
         } else { // else, if a second click has been detected - clicks === 2
@@ -260,6 +267,8 @@ export default {
       if (isFocused && !prevIsFocused) {
         this.wakeUpAllWidgets();
         this.focusTimestamp = new Date();
+        this.isValidFullScreen = false;
+        this.isValidDbClick = false;
       }
     },
   },

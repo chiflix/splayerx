@@ -264,7 +264,6 @@ export default {
       const item = document.querySelector(`#item${index}`);
       function mousemove(ev) {
         if (vm.mouseDown) {
-          vm.mouseFlag = false;
           vm.isDragging = true;
           const l = ev.clientX - vm.disX;
           const t = ev.clientY - vm.disY;
@@ -312,6 +311,7 @@ export default {
       }
       this.isDragging = false;
       if (index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) {
+        this.mouseFlag = false;
         this.mouseDown = true;
         document.onmousemove = mousemove;
         document.onmouseup = mouseup;
