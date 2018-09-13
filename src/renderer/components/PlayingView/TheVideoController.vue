@@ -91,7 +91,10 @@ export default {
       ['mousewheel', {}],
       ['keydown', {}],
     ]);
+    // Use Map constructor to shallow-copy eventInfo
+    this.lastEventInfo = new Map(this.eventInfo);
     this.timerManager = new TimerManager();
+    this.timerManager.addTimer('mouseStopMoving', this.mousestopDelay);
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
@@ -102,21 +105,35 @@ export default {
       if (!this.start) {
         this.start = timestamp;
       }
-      this.inputProcess();
-      // this.UITimerManager(timestamp - this.start);
+
+      // Use Map constructor to shallow-copy eventInfo
+      this.lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
+      this.UITimerManager(timestamp - this.start);
       // this.UILayerManager();
       // this.UIDisplayManager();
       // this.UIStateManager();
 
-      requestAnimationFrame(this.UIManager);
       this.start = timestamp;
+      requestAnimationFrame(this.UIManager);
     },
-    inputProcess() {
+    inputProcess(currentEventInfo, lastEventInfo) {
+      // mousemove setTimeout
+      const currentPosition = currentEventInfo.get('mousemove').position;
+      const lastPosition = lastEventInfo.get('mousemove').position;
+      if (currentPosition !== lastPosition) {
+        this.timerManager.updateTimer('mouseStopMoving', 3000, false);
+        this.mousestop = false;
+      }
 
+      return currentEventInfo;
     },
-    // UITimerManager(frameTime) {
-    //   console.log(frameTime);
-    // },
+    UITimerManager(frameTime) {
+      this.timerManager.tickTimer('mouseStopMoving', frameTime);
+      const timeoutTimers = this.timerManager.timeoutTimers();
+      if (timeoutTimers.includes('mouseStopMoving')) {
+        this.mousestop = true;
+      }
+    },
     // UILayerManager() {
 
     // },
@@ -192,17 +209,11 @@ export default {
     },
     handleMousemove(event) {
       this.eventInfo.set('mousemove', {
-        target: event.target,
+        target: this.getComponentName(event.target),
         position: [event.clientX, event.clientY],
       });
       // Set currentWidget
       this.currentWidget = this.getComponentName(event.target);
-      // Mousestop timer
-      this.mousestop = false;
-      if (this.mousestopTimer) clearTimeout(this.mousestopTimer);
-      this.mousestopTimer = setTimeout(() => {
-        this.mousestop = true;
-      }, this.mousestopDelay);
     },
     handleMouseenter() {
       this.eventInfo.set('mouseenter', { mouseLeavingWindow: false });
