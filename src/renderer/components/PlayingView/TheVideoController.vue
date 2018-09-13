@@ -46,11 +46,9 @@ export default {
       start: null,
       UIElements: [],
       currentWidget: this.$options.name,
-      mousestop: false,
-      mousestopTimer: 0,
+      mouseStopMoving: false,
       mousestopDelay: 3000,
-      mouseleft: false,
-      mouseleftTimer: 0,
+      mouseLeftWindow: false,
       mouseleftDelay: 1500,
       popupShow: false,
       mousedownTime: null,
@@ -65,7 +63,7 @@ export default {
   computed: {
     showAllWidgets() {
       // truth table
-      // this.mousestop this.mouseleft this.onOtherWidget result
+      // this.mouseStopMoving this.mouseLeftWindow this.onOtherWidget result
       // 0 0 0 1
       // 0 0 1 1
       // 0 1 0 0
@@ -74,7 +72,8 @@ export default {
       // 1 0 1 1
       // 1 1 0 0
       // 1 1 1 0
-      return (!this.mousestop && !this.mouseleft) || (!this.mouseleft && this.onOtherWidget);
+      return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
+        (!this.mouseLeftWindow && this.onOtherWidget);
     },
     onOtherWidget() {
       return this.currentWidget !== this.$options.name;
@@ -121,17 +120,30 @@ export default {
       const currentPosition = currentEventInfo.get('mousemove').position;
       const lastPosition = lastEventInfo.get('mousemove').position;
       if (currentPosition !== lastPosition) {
-        this.timerManager.updateTimer('mouseStopMoving', 3000, false);
-        this.mousestop = false;
+        this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false);
+        this.mouseStopMoving = false;
+      }
+      // mouseenter setTimeout
+      const { mouseLeavingWindow } = currentEventInfo.get('mouseenter');
+      const changed = mouseLeavingWindow !== lastEventInfo.get('mouseenter').mouseLeavingWindow;
+      if (mouseLeavingWindow && changed) {
+        this.timerManager.addTimer('mouseLeavingWindow', this.mouseleftDelay);
+      } else if (!mouseLeavingWindow && changed) {
+        this.timerManager.removeTimer('mouseLeavingWindow');
+        this.mouseLeftWindow = false;
       }
 
       return currentEventInfo;
     },
     UITimerManager(frameTime) {
       this.timerManager.tickTimer('mouseStopMoving', frameTime);
+      this.timerManager.tickTimer('mouseLeavingWindow', frameTime);
       const timeoutTimers = this.timerManager.timeoutTimers();
       if (timeoutTimers.includes('mouseStopMoving')) {
-        this.mousestop = true;
+        this.mouseStopMoving = true;
+      }
+      if (timeoutTimers.includes('mouseLeavingWindow')) {
+        this.mouseLeftWindow = true;
       }
     },
     // UILayerManager() {
@@ -217,16 +229,11 @@ export default {
     },
     handleMouseenter() {
       this.eventInfo.set('mouseenter', { mouseLeavingWindow: false });
-      this.mouseleft = false;
-      clearTimeout(this.mouseleftTimer);
     },
     handleMouseleave() {
       this.eventInfo.set('mouseenter', {
         mouseLeavingWindow: true,
       });
-      this.mouseleftTimer = setTimeout(() => {
-        this.mouseleft = true;
-      }, this.mouseleftDelay);
     },
     handleRightMousedown() {
       this.eventInfo.set('mousedown', Object.assign(
