@@ -218,12 +218,13 @@ export default {
             cb('No server transcripts');
           } else {
             const textTrackList = res.array[1];
+            const delay = res.array[4];
 
             this.getAllTranscriptsFromServer(textTrackList)
               .then((resArray) => {
                 for (let i = 0; i < resArray.length; i += 1) {
                   const res = resArray[i];
-                  this.addCuesArray(res.array[1]);
+                  this.addCuesArray(res.array[1], delay);
                 }
 
                 // Only when all subtitles are successfully loaded,
@@ -461,16 +462,17 @@ export default {
     /**
      * @description Transfer cues array from server to vtt files
      * and add these cues into video subtitles.
+     * @param {Number} delay time offset
      */
-    addCuesArray(cueArray) {
+    addCuesArray(cueArray, delay) {
       const vid = this.$parent.$refs.videoCanvas.videoElement();
       const subtitle = vid.addTextTrack('subtitles');
       subtitle.mode = 'disabled';
       // Add cues to TextTrack
       for (let i = 0; i < cueArray.length; i += 1) {
         const element = cueArray[i];
-        const startTime = this.timeProcess(element[0]);
-        const endTime = this.timeProcess(element[1]);
+        const startTime = this.timeProcess(element[0], delay);
+        const endTime = this.timeProcess(element[1], delay);
         subtitle.addCue(new VTTCue(startTime, endTime, element[2]));
       }
     },
@@ -590,14 +592,18 @@ export default {
     },
     /**
      * @param {Number} second
+     * @param {Number} delay
      * @returns {Number}
      */
-    timeProcess(second) {
+    timeProcess(second, delay) {
       // Now as per official proto3 documentation, default values are not
       // serialized to save space during wire transmission.
       // so if input is 0, it may become undefined
       if (!second) {
         return 0;
+      }
+      if (delay) {
+        second += delay;
       }
       return second;
     },
