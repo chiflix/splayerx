@@ -102,30 +102,30 @@ export default {
       if (!this.start) {
         this.start = timestamp;
       }
-      const frameTime = timestamp - this.start;
       this.inputProcess();
-      this.UITimerManager(frameTime);
-      this.UILayerManager();
-      this.UIDisplayManager();
-      this.UIStateManager();
+      // this.UITimerManager(timestamp - this.start);
+      // this.UILayerManager();
+      // this.UIDisplayManager();
+      // this.UIStateManager();
 
       requestAnimationFrame(this.UIManager);
       this.start = timestamp;
     },
     inputProcess() {
-    },
-    UITimerManager(frameTime) {
-      console.log(frameTime);
-    },
-    UILayerManager() {
 
     },
-    UIDisplayManager() {
+    // UITimerManager(frameTime) {
+    //   console.log(frameTime);
+    // },
+    // UILayerManager() {
 
-    },
-    UIStateManager() {
+    // },
+    // UIDisplayManager() {
 
-    },
+    // },
+    // UIStateManager() {
+
+    // },
     getAllUIComponents(rootElement) {
       const { children } = rootElement;
       const names = [];
