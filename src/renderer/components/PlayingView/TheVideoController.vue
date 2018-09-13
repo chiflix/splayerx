@@ -51,6 +51,7 @@ export default {
       mouseLeftWindow: false,
       mouseleftDelay: 1500,
       hideVolume: false,
+      hideProgressBar: false,
       popupShow: false,
       mousedownTime: null,
       mousedownCursorPosition: null,
@@ -94,7 +95,7 @@ export default {
         ArrowDown: false,
         ArrowLeft: false,
         ArrowRight: false,
-        ' ': false,
+        Space: false,
       }],
     ]);
     // Use Map constructor to shallow-copy eventInfo
@@ -102,6 +103,7 @@ export default {
     this.timerManager = new TimerManager();
     this.timerManager.addTimer('mouseStopMoving', this.mousestopDelay);
     this.timerManager.addTimer('sleepingVolumeButton', this.mousestopDelay);
+    this.timerManager.addTimer('sleepingProgressBar', this.mousestopDelay);
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
@@ -152,6 +154,12 @@ export default {
         this.timerManager.updateTimer('sleepingVolumeButton', this.mousestopDelay);
         this.hideVolume = false;
       }
+      // hideProgressBar timer
+      const progressKeydown = currentEventInfo.get('keydown').ArrowLeft || currentEventInfo.get('keydown').ArrowRight;
+      if (progressKeydown) {
+        this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
+        this.hideProgressBar = false;
+      }
 
       return currentEventInfo;
     },
@@ -159,10 +167,13 @@ export default {
       this.timerManager.tickTimer('mouseStopMoving', frameTime);
       this.timerManager.tickTimer('mouseLeavingWindow', frameTime);
       this.timerManager.tickTimer('sleepingVolumeButton', frameTime);
+      this.timerManager.tickTimer('sleepingProgressBar', frameTime);
+
       const timeoutTimers = this.timerManager.timeoutTimers();
       this.mouseStopMoving = timeoutTimers.includes('mouseStopMoving');
       this.mouseLeftWindow = timeoutTimers.includes('mouseLeavingWindow');
       this.hideVolume = timeoutTimers.includes('sleepingVolumeButton');
+      this.hideProgressBar = timeoutTimers.includes('sleepingProgressBar');
     },
     // UILayerManager() {
 
