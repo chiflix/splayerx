@@ -259,7 +259,6 @@ export default {
     },
     onRecentItemMousedown(ev, index) {
       const vm = this;
-      this.mouseFlag = false;
       this.disX = ev.clientX;
       this.disY = ev.clientY;
       const item = document.querySelector(`#item${index}`);
@@ -312,6 +311,7 @@ export default {
       }
       this.isDragging = false;
       if (index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) {
+        this.mouseFlag = false;
         this.mouseDown = true;
         document.onmousemove = mousemove;
         document.onmouseup = mouseup;
