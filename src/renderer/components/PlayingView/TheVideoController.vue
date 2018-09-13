@@ -159,12 +159,20 @@ export default {
       const wakingupVolume = volumeKeydown || mouseScrolling;
       if (wakingupVolume) {
         this.timerManager.updateTimer('sleepingVolumeButton', this.mousestopDelay);
+        // Prevent all widgets display before volume-control
+        if (this.showAllWidgets) {
+          this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
+        }
         this.hideVolume = false;
       }
       // hideProgressBar timer
       const progressKeydown = currentEventInfo.get('keydown').ArrowLeft || currentEventInfo.get('keydown').ArrowRight;
       if (progressKeydown) {
         this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
+        // Prevent all widgets display before the-time-progress-bar
+        if (this.showAllWidgets) {
+          this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
+        }
         this.hideProgressBar = false;
       }
 
