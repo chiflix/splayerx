@@ -104,6 +104,7 @@ export default {
       timeoutIdOfBackBarDisapppearDelay: 0,
       timeoutIdOfHideProgressSlider: 0,
       timeoutIdOfHideAllWidgets: 0,
+      timeoutIdOfScreenshotAppearDelay: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
       videoRatio: 1.78, // Default videoRatio incase of divide by zero error.
@@ -213,7 +214,14 @@ export default {
         this.thumbnailCurrentTime
           = progress * this.$store.state.PlaybackState.Duration;
       }
-      this.showScreenshot = true;
+      if (this.timeoutIdOfScreenshotAppearDelay !== 0) {
+        clearTimeout(this.timeoutIdOfScreenshotAppearDelay);
+        this.timeoutIdOfScreenshotAppearDelay
+          = setTimeout(() => { this.showScreenshot = true; }, 300);
+      } else {
+        this.timeoutIdOfScreenshotAppearDelay
+          = setTimeout(() => { this.showScreenshot = true; }, 300);
+      }
     },
     /**
      * $_documentProgressDragEvent fuction help to set a
