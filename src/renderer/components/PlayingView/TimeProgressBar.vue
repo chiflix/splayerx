@@ -128,6 +128,8 @@ export default {
     hideProgressSlider() {
       if (!this.onProgressSliderMousedown) {
         this.isOnProgress = false;
+        clearTimeout(this.timeoutIdOfScreenshotAppearDelay);
+        this.timeoutIdOfScreenshotAppearDelay = 0;
         this.showScreenshot = false;
         this.buttonRadius = 0;
 
@@ -214,13 +216,9 @@ export default {
         this.thumbnailCurrentTime
           = progress * this.$store.state.PlaybackState.Duration;
       }
-      if (this.timeoutIdOfScreenshotAppearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfScreenshotAppearDelay);
+      if (this.timeoutIdOfScreenshotAppearDelay === 0) {
         this.timeoutIdOfScreenshotAppearDelay
-          = setTimeout(() => { this.showScreenshot = true; }, 300);
-      } else {
-        this.timeoutIdOfScreenshotAppearDelay
-          = setTimeout(() => { this.showScreenshot = true; }, 300);
+          = setTimeout(() => { this.showScreenshot = true; }, 350);
       }
     },
     /**
