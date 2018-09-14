@@ -34,7 +34,7 @@
             </li>
 
 
-            <li v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)"
+            <li v-if="foundSubtitles && !(loadingPlaceholderList.length > 0)"
             @mouseup.stop="toggleSubtitleOff"
             @mouseover.stop.self="toggleItemsMouseOver"
             @mouseleave.stop.self="toggleItemsMouseLeave"
