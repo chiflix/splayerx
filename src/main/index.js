@@ -50,6 +50,10 @@ function registerMainWindowEvent() {
     mainWindow.webContents.send('mainCommit', 'isFocused', false);
   });
 
+  ipcMain.on('main/toggle-fullscreen', (evt, isFullScreen) => {
+    mainWindow.setFullScreen(typeof isFullScreen === 'boolean' ? isFullScreen : !mainWindow.isFullScreen());
+  });
+
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
     mainWindow.setSize(...args);
