@@ -5,7 +5,7 @@
     <transition name="fade" appear>
       <div class="sub-btn-control">
         <div class="sub-menu-wrapper"
-             v-show="selected">
+             v-show="showAttached">
           <ul class="sub-menu">
 
             <li
@@ -69,7 +69,7 @@
 
           </ul>
         </div>
-        <button>
+        <button @mousedown.left="toggleSubMenuDisplay">
           <img type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
         </button>
       </div>
@@ -80,7 +80,7 @@
 export default {
   name: 'subtitle-control',
   props: {
-    selected: Boolean,
+    showAttached: Boolean,
   },
   data() {
     return {
@@ -93,9 +93,26 @@ export default {
       showingPopupDialog: false,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
       currentSubIden: 0,
+      clicks: 0,
     };
   },
   methods: {
+    toggleSubMenuDisplay() {
+      this.clicks = this.showAttached ? 1 : 0;
+      this.clicks += 1;
+      switch (this.clicks) {
+        case 1:
+          this.$emit('update:showAttached', true);
+          break;
+        case 2:
+          this.$emit('update:showAttached', false);
+          this.clicks = 0;
+          break;
+        default:
+          this.clicks = 0;
+          break;
+      }
+    },
     toggleItemsMouseOver(e) {
       e.target.style.backgroundImage = this.preStyle;
     },
