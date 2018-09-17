@@ -18,7 +18,7 @@
       <subtitle-control class="button subtitle" v-show="displayState['subtitle-control']" />
       <advance-control class="button advance" v-show="displayState['advance-control']" />
     </div>
-    <the-time-progress-bar v-show="displayState['the-time-progress-bar']" :src="this.$store.state.PlaybackState.SrcOfVideo" />
+    <the-time-progress-bar :style="{ display: displayState['the-time-progress-bar'] ? 'block' : 'none' }" :src="this.$store.state.PlaybackState.SrcOfVideo" />
   </div>
 </template>
 <script>
