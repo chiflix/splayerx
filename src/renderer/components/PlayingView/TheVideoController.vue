@@ -51,8 +51,6 @@ export default {
       hideVolume: false,
       hideProgressBar: false,
       popupShow: false,
-      mousedownTime: null,
-      mousedownCursorPosition: null,
       clicksTimer: 0,
       clicksDelay: 200,
       dragDelay: 200,
@@ -264,18 +262,6 @@ export default {
       }
       return componentName;
     },
-    isValidClick() { // this check will be at on mouse up
-      const cp = this.$electron.screen.getCursorScreenPoint();
-      if (new Date() - this.mousedownTime > this.dragDelay) {
-        return false;
-      }
-      const radiusSquare = ((cp.x - this.mousedownCursorPosition.x) ** 2) +
-          ((cp.y - this.mousedownCursorPosition.y) ** 2);
-      if (radiusSquare - this.dragRadiusSquare > 0) {
-        return false;
-      }
-      return true;
-    },
     toggleFullScreenState() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       if (currentWindow.isFullScreen()) {
@@ -329,10 +315,6 @@ export default {
           this.popupShow = false;
         }
       }
-
-      // Playback related variables
-      this.mousedownCursorPosition = this.$electron.screen.getCursorScreenPoint();
-      this.mousedownTime = new Date();
     },
     handleLeftMouseup(event) {
       this.eventInfo.set('mousedown', Object.assign(
