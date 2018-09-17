@@ -64,6 +64,7 @@ export default {
       widgetsStatus: {},
       currentSelectedWidget: 'the-video-controller',
       preventSingleClick: false,
+      lastAttachedShowing: false,
     };
   },
   computed: {
@@ -116,7 +117,7 @@ export default {
     this.UIElements.forEach((value) => {
       this.timerState[value.name] = true;
       this.displayState[value.name] = true;
-      this.widgetsStatus[value.name] = { selected: false };
+      this.widgetsStatus[value.name] = { selected: false, showAttached: false };
     });
 
     document.addEventListener('keydown', this.handleKeydown);
@@ -131,11 +132,12 @@ export default {
       }
 
       // Use Map constructor to shallow-copy eventInfo
-      this.lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
+      const lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
       this.UITimerManager(timestamp - this.start);
       // this.UILayerManager();
       this.UIDisplayManager();
       this.UIStateManager();
+      this.lastEventInfo = lastEventInfo;
 
       this.start = timestamp;
       requestAnimationFrame(this.UIManager);
@@ -182,8 +184,9 @@ export default {
       }
 
       // mousedown status
-      this.currentSelectedWidget = this.getComponentName(currentEventInfo.get('mousedown').target);
-
+      if (lastEventInfo.get('mousedown').leftMousedown !== currentEventInfo.get('mousedown').leftMousedown) {
+        this.currentSelectedWidget = this.getComponentName(currentEventInfo.get('mousedown').target);
+      }
 
       Object.keys(this.timerState).forEach((uiName) => {
         this.timerState[uiName] = this.showAllWidgets;
@@ -221,6 +224,9 @@ export default {
       Object.keys(this.widgetsStatus).forEach((name) => {
         this.widgetsStatus[name].selected = this.currentSelectedWidget === name;
       });
+      if (this.currentSelectedWidget !== 'subtitle-control' && this.widgetsStatus['subtitle-control'].showAttached) {
+        this.widgetsStatus['subtitle-control'].showAttached = false;
+      }
     },
     getAllUIComponents(rootElement) {
       const { children } = rootElement;
@@ -331,17 +337,19 @@ export default {
       this.mousedownCursorPosition = this.$electron.screen.getCursorScreenPoint();
       this.mousedownTime = new Date();
     },
-    handleLeftMouseup() {
+    handleLeftMouseup(event) {
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
-        { leftMousedown: false },
+        { leftMousedown: false, target: event.target },
       ));
       this.clicksTimer = setTimeout(() => {
-        if (!this.preventSingleClick && this.currentSelectedWidget === 'the-video-controller') {
+        const attachedShowing = this.lastAttachedShowing;
+        if (this.currentSelectedWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing) {
           this.togglePlayback();
         }
         this.preventSingleClick = false;
+        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached;
       }, this.clicksDelay);
     },
     handleDBClick() {
