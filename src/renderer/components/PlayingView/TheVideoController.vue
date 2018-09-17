@@ -9,7 +9,7 @@
     @mousedown.right="handleRightMousedown"
     @mousedown.left="handleLeftMousedown"
     @mouseup.left="handleLeftMouseup"
-    @dblclick="handleDBClick">
+    @dblclick="handleDoubleClick">
     <titlebar currentView="Playingview" v-show="displayState['titlebar']" ></titlebar>
     <div class="masking" v-show="showAllWidgets"></div>
     <play-button />
@@ -57,7 +57,6 @@ export default {
       clicksTimer: 0,
       clicksDelay: 200,
       dragDelay: 200,
-      dragRadiusSquare: 25,
       displayState: {},
       widgetsStatus: {},
       currentSelectedWidget: 'the-video-controller',
@@ -68,16 +67,6 @@ export default {
   },
   computed: {
     showAllWidgets() {
-      // truth table
-      // this.mouseStopMoving this.mouseLeftWindow this.onOtherWidget result
-      // 0 0 0 1
-      // 0 0 1 1
-      // 0 1 0 0
-      // 0 1 1 0
-      // 1 0 0 0
-      // 1 0 1 1
-      // 1 1 0 0
-      // 1 1 1 0
       return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget);
     },
@@ -121,10 +110,11 @@ export default {
 
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
-    document.addEventListener('wheel', this.handleMousewheel);
+    document.addEventListener('wheel', this.handleWheel);
     requestAnimationFrame(this.UIManager);
   },
   methods: {
+    // UIManagers
     UIManager(timestamp) {
       if (!this.start) {
         this.start = timestamp;
@@ -227,58 +217,7 @@ export default {
         this.widgetsStatus['subtitle-control'].showAttached = false;
       }
     },
-    getAllUIComponents(rootElement) {
-      const { children } = rootElement;
-      const names = [];
-      for (let i = 0; i < children.length; i += 1) {
-        this.processSingleElement(children[i]).forEach((componentName) => {
-          names.push(componentName);
-        });
-      }
-      return names;
-    },
-    processSingleElement(element) {
-      const names = [];
-      const name = element.dataset.componentName;
-      if (name) {
-        names.push({
-          name,
-          element,
-        });
-      } else {
-        const { children } = element;
-        for (let i = 0; i < children.length; i += 1) {
-          names.push(this.processSingleElement(children[i])[0]);
-        }
-      }
-      return names;
-    },
-    getComponentName(element) {
-      let componentName = this.$options.name;
-      if (element instanceof HTMLElement) {
-        /* eslint-disable consistent-return */
-        this.UIElements.forEach((UIElement) => {
-          if (UIElement.element.contains(element)) {
-            componentName = UIElement.name;
-            return componentName;
-          }
-        });
-      }
-      return componentName;
-    },
-    toggleFullScreenState() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      if (currentWindow.isFullScreen()) {
-        currentWindow.setFullScreen(false);
-        this.$bus.$emit('reset-windowsize');
-      } else {
-        currentWindow.setAspectRatio(0);
-        currentWindow.setFullScreen(true);
-      }
-    },
-    togglePlayback() {
-      this.$bus.$emit('toggle-playback');
-    },
+    // Event listeners
     handleMousemove(event) {
       this.eventInfo.set('mousemove', {
         target: event.target,
@@ -339,7 +278,7 @@ export default {
         this.isDragging = false;
       }, this.clicksDelay);
     },
-    handleDBClick() {
+    handleDoubleClick() {
       clearTimeout(this.clicksTimer); // cancel the time out
       this.preventSingleClick = true;
       if (this.currentSelectedWidget === 'the-video-controller') {
@@ -360,8 +299,61 @@ export default {
         { [event.code]: false },
       ));
     },
-    handleMousewheel(event) {
+    handleWheel(event) {
       this.eventInfo.set('wheel', { time: event.timeStamp });
+    },
+    // Helper functions
+    getAllUIComponents(rootElement) {
+      const { children } = rootElement;
+      const names = [];
+      for (let i = 0; i < children.length; i += 1) {
+        this.processSingleElement(children[i]).forEach((componentName) => {
+          names.push(componentName);
+        });
+      }
+      return names;
+    },
+    processSingleElement(element) {
+      const names = [];
+      const name = element.dataset.componentName;
+      if (name) {
+        names.push({
+          name,
+          element,
+        });
+      } else {
+        const { children } = element;
+        for (let i = 0; i < children.length; i += 1) {
+          names.push(this.processSingleElement(children[i])[0]);
+        }
+      }
+      return names;
+    },
+    getComponentName(element) {
+      let componentName = this.$options.name;
+      if (element instanceof HTMLElement) {
+        /* eslint-disable consistent-return */
+        this.UIElements.forEach((UIElement) => {
+          if (UIElement.element.contains(element)) {
+            componentName = UIElement.name;
+            return componentName;
+          }
+        });
+      }
+      return componentName;
+    },
+    toggleFullScreenState() {
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      if (currentWindow.isFullScreen()) {
+        currentWindow.setFullScreen(false);
+        this.$bus.$emit('reset-windowsize');
+      } else {
+        currentWindow.setAspectRatio(0);
+        currentWindow.setFullScreen(true);
+      }
+    },
+    togglePlayback() {
+      this.$bus.$emit('toggle-playback');
     },
   },
 };
