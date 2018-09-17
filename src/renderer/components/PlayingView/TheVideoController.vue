@@ -14,9 +14,9 @@
     <play-button />
     <the-time-codes v-show="displayState['the-time-codes']" />
     <div class="control-buttons">
-      <volume-control class="button volume" v-show="displayState['volume-control']" />
       <subtitle-control class="button subtitle" v-show="displayState['subtitle-control']" />
       <advance-control class="button advance" v-show="displayState['advance-control']" />
+      <volume-control class="button volume" v-show="displayState['volume-control']" />
     </div>
     <the-time-progress-bar :style="{ display: displayState['the-time-progress-bar'] ? 'block' : 'none' }" :src="this.$store.state.PlaybackState.SrcOfVideo" />
   </div>
