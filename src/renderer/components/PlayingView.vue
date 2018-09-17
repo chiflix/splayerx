@@ -1,7 +1,7 @@
 <template>
-  <div :data-component-name="$options.name" class="player" @mousewheel="wheelVolumeControll">
-    <the-video-canvas :src="uri" ref="VideoCanvasRef"/>
-    <the-video-controller/>
+  <div :data-component-name="$options.name" class="player">
+    <the-video-canvas :src="uri" />
+    <the-video-controller :src="uri" />
   </div>
 </template>
 
@@ -14,29 +14,6 @@ export default {
   components: {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
-  },
-  methods: {
-    wheelVolumeControll(e) {
-      if (e.deltaY < 0) {
-        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$bus.$emit(
-            'volume',
-            this.$store.state.PlaybackState.Volume + 0.1,
-          );
-        } else {
-          this.$bus.$emit('volume', 1);
-        }
-      } else if (e.deltaY < 0) {
-        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$bus.$emit(
-            'volume',
-            this.$store.state.PlaybackState.Volume - 0.1,
-          );
-        } else {
-          this.$bus.$emit('volume', 0);
-        }
-      }
-    },
   },
   mounted() {
     this.$bus.$emit('play');

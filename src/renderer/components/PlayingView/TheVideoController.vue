@@ -18,7 +18,7 @@
       <advance-control class="button advance" v-show="displayState['advance-control']" />
       <volume-control class="button volume" v-show="displayState['volume-control']" v-bind.sync="widgetsStatus['volume-control']" />
     </div>
-    <the-time-progress-bar :style="{ display: displayState['the-time-progress-bar'] ? 'block' : 'none' }" :src="this.$store.state.PlaybackState.SrcOfVideo" />
+    <the-time-progress-bar :style="{ display: displayState['the-time-progress-bar'] ? 'block' : 'none' }" :src="src" />
   </div>
 </template>
 <script>
@@ -38,6 +38,9 @@ export default {
     'volume-control': VolumeControl,
     'advance-control': AdvanceControl,
     'the-time-progress-bar': TimeProgressBar,
+  },
+  props: {
+    src: String,
   },
   data() {
     return {
