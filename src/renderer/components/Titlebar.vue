@@ -27,26 +27,32 @@
       </div>
     </div>
     <div class="mac-icons" v-if="isDarwin">
-      <div id="close" class="title-button"
-        @click="handleClose">
-      </div>
-      <div id="minimize" class="title-button"
-        @click="handleMinimize"
-        :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }">
-      </div>
-      <div id="maximize" class="title-button"
-        @click="handleMacMaximize"
-        v-show="middleButtonStatus !== 'exit-fullscreen'">
-      </div>
-      <div id="restore" class="title-button"
-        @click="handleFullscreenExit"
-        v-show="middleButtonStatus === 'exit-fullscreen'">
-      </div>
+      <Icon id="close" class="title-button"
+            type="titleBarClose"
+            @click.native="handleClose"
+            >
+      </Icon>
+      <Icon id="minimize" class="title-button"
+            type="titleBarMin"
+            @click.native="handleClose"
+            :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }">
+      </Icon>
+      <Icon id="maximize" class="title-button"
+            type="titleBarMax"
+            @click.native="handleMacMaximize"
+            v-show="middleButtonStatus !== 'exit-fullscreen'">
+      </Icon>
+      <Icon id="restore" class="title-button"
+        @click.native="handleFullscreenExit"
+        v-show="middleButtonStatus === 'exit-fullscreen'"
+        type="titleBarRecover">
+      </Icon>
     </div>
   </div>
 </template>
 
 <script>
+import Icon from './IconContainer';
 export default {
   name: 'titlebar',
   data() {
@@ -66,6 +72,9 @@ export default {
   },
   props: {
     currentView: String,
+  },
+  components: {
+    Icon,
   },
   methods: {
     // Methods to handle window behavior
@@ -250,13 +259,11 @@ export default {
     width: 12px;
     height: 12px;
     margin-right: 8px;
-    background-image: url('../assets/mac-titlebar-icons.png');
     background-repeat: no-repeat;
     -webkit-app-region: no-drag;
-    opacity: 0.5;
     border-radius: 100%;
   }
-  .mac-icons {
+  /*.mac-icons {
     &:hover {
       #close {
         background-position-y: 0;
@@ -295,7 +302,7 @@ export default {
         }
       }
     }
-  }
+  }*/
   .title-button {
     background-position-y: -96px;
   }

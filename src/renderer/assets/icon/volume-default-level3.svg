@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 46 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <filter x="-14.1%" y="-12.5%" width="128.1%" height="132.1%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <filter x="-75.0%" y="-9.7%" width="250.0%" height="125.0%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Playing-View-/-Button---Volume-V2---Level-3" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Volume" filter="url(#filter-1)" transform="translate(0.000000, 4.000000)">
+            <path d="M1,8 L5,8 C5.55228475,8 6,8.44771525 6,9 L6,19 C6,19.5522847 5.55228475,20 5,20 L1,20 C0.44771525,20 6.76353751e-17,19.5522847 0,19 L0,9 C-6.76353751e-17,8.44771525 0.44771525,8 1,8 Z M14,4 L18,4 C18.5522847,4 19,4.44771525 19,5 L19,23 C19,23.5522847 18.5522847,24 18,24 L14,24 C13.4477153,24 13,23.5522847 13,23 L13,5 C13,4.44771525 13.4477153,4 14,4 Z M27,0 L31,0 C31.5522847,-1.01453063e-16 32,0.44771525 32,1 L32,27 C32,27.5522847 31.5522847,28 31,28 L27,28 C26.4477153,28 26,27.5522847 26,27 L26,1 C26,0.44771525 26.4477153,1.01453063e-16 27,0 Z" id="Combined-Shape" fill-opacity="0.9" fill="#FFFFFF"></path>
+            <path d="M1,8 L5,8 C5.55228475,8 6,8.44771525 6,9 L6,19 C6,19.5522847 5.55228475,20 5,20 L1,20 C0.44771525,20 6.76353751e-17,19.5522847 0,19 L0,9 C-6.76353751e-17,8.44771525 0.44771525,8 1,8 Z M14,4 L18,4 C18.5522847,4 19,4.44771525 19,5 L19,23 C19,23.5522847 18.5522847,24 18,24 L14,24 C13.4477153,24 13,23.5522847 13,23 L13,5 C13,4.44771525 13.4477153,4 14,4 Z M27,0 L31,0 C31.5522847,-1.01453063e-16 32,0.44771525 32,1 L32,27 C32,27.5522847 31.5522847,28 31,28 L27,28 C26.4477153,28 26,27.5522847 26,27 L26,1 C26,0.44771525 26.4477153,1.01453063e-16 27,0 Z" id="Combined-Shape" stroke-opacity="0.3" stroke="#000000" stroke-width="0.5" opacity="0.28"></path>
+        </g>
+        <g id="Volume---level-3" filter="url(#filter-2)" transform="translate(40.000000, 0.000000)">
+            <rect id="Rectangle-5-Copy-4" fill-opacity="0.5" fill="#FFFFFF" x="0" y="0" width="6" height="36" rx="1"></rect>
+            <rect id="Rectangle-5-Copy-4" stroke-opacity="0.3" stroke="#000000" stroke-width="0.5" opacity="0.28" x="0" y="0" width="6" height="36" rx="1"></rect>
+        </g>
+    </g>
+</svg>

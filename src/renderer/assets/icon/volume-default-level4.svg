@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 46 36" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <filter x="-9.8%" y="-9.7%" width="119.6%" height="125.0%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Playing-View-/-Button---Volume-V2---Level-4" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Volume---level-4" filter="url(#filter-1)">
+            <path d="M1,12 L5,12 C5.55228475,12 6,12.4477153 6,13 L6,23 C6,23.5522847 5.55228475,24 5,24 L1,24 C0.44771525,24 6.76353751e-17,23.5522847 0,23 L0,13 C-6.76353751e-17,12.4477153 0.44771525,12 1,12 Z M14,8 L18,8 C18.5522847,8 19,8.44771525 19,9 L19,27 C19,27.5522847 18.5522847,28 18,28 L14,28 C13.4477153,28 13,27.5522847 13,27 L13,9 C13,8.44771525 13.4477153,8 14,8 Z M27,4 L31,4 C31.5522847,4 32,4.44771525 32,5 L32,31 C32,31.5522847 31.5522847,32 31,32 L27,32 C26.4477153,32 26,31.5522847 26,31 L26,5 C26,4.44771525 26.4477153,4 27,4 Z M41,0 L45,0 C45.5522847,-1.01453063e-16 46,0.44771525 46,1 L46,35 C46,35.5522847 45.5522847,36 45,36 L41,36 C40.4477153,36 40,35.5522847 40,35 L40,1 C40,0.44771525 40.4477153,1.01453063e-16 41,0 Z" id="Combined-Shape" fill-opacity="0.9" fill="#FFFFFF"></path>
+            <path d="M1,12 L5,12 C5.55228475,12 6,12.4477153 6,13 L6,23 C6,23.5522847 5.55228475,24 5,24 L1,24 C0.44771525,24 6.76353751e-17,23.5522847 0,23 L0,13 C-6.76353751e-17,12.4477153 0.44771525,12 1,12 Z M14,8 L18,8 C18.5522847,8 19,8.44771525 19,9 L19,27 C19,27.5522847 18.5522847,28 18,28 L14,28 C13.4477153,28 13,27.5522847 13,27 L13,9 C13,8.44771525 13.4477153,8 14,8 Z M27,4 L31,4 C31.5522847,4 32,4.44771525 32,5 L32,31 C32,31.5522847 31.5522847,32 31,32 L27,32 C26.4477153,32 26,31.5522847 26,31 L26,5 C26,4.44771525 26.4477153,4 27,4 Z M41,0 L45,0 C45.5522847,-1.01453063e-16 46,0.44771525 46,1 L46,35 C46,35.5522847 45.5522847,36 45,36 L41,36 C40.4477153,36 40,35.5522847 40,35 L40,1 C40,0.44771525 40.4477153,1.01453063e-16 41,0 Z" id="Combined-Shape" stroke-opacity="0.3" stroke="#000000" stroke-width="0.5" opacity="0.28"></path>
+        </g>
+    </g>
+</svg>

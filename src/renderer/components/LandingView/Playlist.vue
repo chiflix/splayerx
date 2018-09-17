@@ -1,22 +1,22 @@
 <template>
     <div class="controller" :style="{
-      bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px'
+    bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px'
     }">
-      <div class="playlist" :style="{
-          marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'
-      }">
+        <div class="playlist" :style="{
+        marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'
+        }">
             <div class="button"
                  :style="{
                  height:`${itemHeight}px`,
                  width:`${itemWidth}px`,
-            }"
+                 }"
                  @click="openOrMove">
                 <div class="btnMask"
                      :style="{
                  height:`${itemHeight}px`,
                  width:`${itemWidth}px`,
                  }">
-                    <img class="addUi" src="~@/assets/icon-add.svg" type="image/svg+xml" style="-webkit-user-drag: none;">
+                    <Icon class="addUi" type="add"></Icon>
                 </div>
             </div>
             <div class="item"
@@ -35,10 +35,10 @@
                  @mousedown.stop="onRecentItemMousedown($event, index)">
                 <div class="mask"
                      :style="{
-              width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
-              height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
-              }">
-                    <img class="deleteUi" src="~@/assets/icon-delete.svg" type="image/svg+xml">
+                     width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
+                     height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
+                     }">
+                    <Icon class="deleteUi" type="delete"></Icon>
                 </div>
             </div>
         </div>
@@ -47,9 +47,10 @@
 
 <script>
 import path from 'path';
-
+import Icon from '../IconContainer';
 export default {
   name: 'playlist',
+  components: { Icon },
   data() {
     return {
       imageTurn: '',
@@ -403,7 +404,7 @@ export default {
                 border-radius: 2px;
                 display: none;
                 box-shadow: 0 26px 39px rgba(0, 0, 0, 0.3), 0 5px 20px rgba(0, 0, 0, 0.14);
-                transition: all 150ms;
+                transition: background-color 150ms;
             }
 
             .deleteUi {
@@ -432,5 +433,4 @@ export default {
             }
         }
     }
-
 </style>

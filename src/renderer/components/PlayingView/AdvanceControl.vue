@@ -13,17 +13,18 @@
     <button
       v-show="showAdvance"
       @mousedown.stop="switchSettingMenuState">
-      <img src="~@/assets/icon-advanced.svg" type="image/svg+xml">
+      <Icon type="advance"></Icon>
     </button>
   </div>
 </template>;
 
 <script>
 import AdvanceControlMenuItem from './AdvanceControlMenuItem.vue';
-
+import Icon from '../IconContainer';
 export default {
   components: {
     AdvanceControlMenuItem,
+    Icon,
   },
   data() {
     return {
