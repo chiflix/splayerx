@@ -15,11 +15,11 @@
         </div>
       </div>
     </transition>
-      <button
+      <div
         @mousedown.stop.left="onVolumeButtonClick">
         <img type="image/svg+xml" wmode="transparent"
           :src="srcOfVolumeButtonImage">
-      </button>
+      </div>
     </div>
   </transition>
   </div>
