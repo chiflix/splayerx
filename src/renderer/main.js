@@ -380,7 +380,6 @@ new Vue({
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowUp':
-          this.$bus.$emit('volumecontroller-appear-delay');
           this.$bus.$emit('volumeslider-appear');
           if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
             this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
@@ -390,7 +389,6 @@ new Vue({
           break;
 
         case 'ArrowDown':
-          this.$bus.$emit('volumecontroller-appear-delay');
           this.$bus.$emit('volumeslider-appear');
           if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
             this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);

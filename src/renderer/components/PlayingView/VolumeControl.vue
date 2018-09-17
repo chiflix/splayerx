@@ -134,17 +134,6 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('volumecontroller-appear-delay', () => {
-      this.appearVolumeController();
-      if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
-        this.timeoutIdOfVolumeControllerDisappearDelay
-          = setTimeout(this.hideVolumeController, 3000);
-      } else {
-        this.timeoutIdOfVolumeControllerDisappearDelay
-          = setTimeout(this.hideVolumeController, 3000);
-      }
-    });
     this.$bus.$on('volumeslider-appear', () => {
       this.appearVolumeSlider();
       if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
