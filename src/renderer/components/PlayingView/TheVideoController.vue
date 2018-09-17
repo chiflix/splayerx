@@ -13,7 +13,6 @@
     <titlebar currentView="Playingview" v-show="displayState['titlebar']" ></titlebar>
     <div class="masking" v-show="showAllWidgets"></div>
     <play-button />
-    <the-time-codes v-show="displayState['the-time-codes']" />
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-show="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
       <advance-control class="button advance" v-show="displayState['advance-control']" />
@@ -26,7 +25,6 @@
 import TimerManager from '@/helpers/timerManager.js';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
-import TheTimeCodes from './TheTimeCodes.vue';
 import VolumeControl from './VolumeControl';
 import AdvanceControl from './AdvanceControl';
 import SubtitleControl from './SubtitleControl';
@@ -36,7 +34,6 @@ export default {
   components: {
     titlebar: Titlebar,
     'play-button': PlayButton,
-    'the-time-codes': TheTimeCodes,
     'subtitle-control': SubtitleControl,
     'volume-control': VolumeControl,
     'advance-control': AdvanceControl,

@@ -7,6 +7,7 @@
     @mouseover="appearProgressSlider"
     @mouseleave="hideProgressSlider"
     @mousemove="onProgressBarMove">
+    <the-time-codes />
     <div class="fool-proof-bar" ref="foolProofBar"
       @mousedown="videoRestart"
       @mouseover="thumbnailCurrentTime = 0"
@@ -72,12 +73,14 @@ import {
   PROGRESS_BAR_SLIDER_HIDE_HEIGHT,
   FOOL_PROOFING_BAR_WIDTH,
 } from '@/constants';
+import TheTimeCodes from './TheTimeCodes';
 import ThePreviewThumbnail from './ThePreviewThumbnail';
 
 export default {
   name: 'the-time-progress-bar',
   components: {
     'the-preview-thumbnail': ThePreviewThumbnail,
+    'the-time-codes': TheTimeCodes,
   },
   props: {
     src: {
