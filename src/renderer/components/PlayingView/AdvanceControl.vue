@@ -82,7 +82,6 @@ export default {
     onSecondItemClick() {
     },
     onMenuItemClick() {
-      console.log(this.$refs.menuList[0].key);
     },
     switchSettingMenuState() {
       if (this.isAcitve) {
@@ -104,7 +103,6 @@ export default {
       this.isAcitve = true;
     },
     $_fitMenuSize() {
-      console.log(this.menuList.length);
       this.menuStyleObject.height = `${(this.menuList.length * 22) + 120}px`;
     },
   },
