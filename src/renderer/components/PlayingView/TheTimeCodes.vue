@@ -2,7 +2,7 @@
   <transition name="fade">
   <div class="timing"
     :data-component-name="$options.name"
-    @mousedown.stop="switchStateOfContent">
+    @mousedown="switchStateOfContent">
         <span class="firstContent" :class="{ remainTime: isRemainTime.first }">{{ content.first }}</span>
         <span class="splitSign">/</span>
         <span class="secondContent" :class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ content.second }}</span>

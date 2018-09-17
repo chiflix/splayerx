@@ -12,7 +12,7 @@
       </div>
     </div>
     <button
-      @mousedown.stop="1+1">
+      @mousedown="1+1">
       <img src="~@/assets/icon-advanced.svg" type="image/svg+xml">
     </button>
   </div>

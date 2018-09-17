@@ -1,7 +1,7 @@
 <template>
 <div class="items"
   :style="menuItemStyle"
-  @mousedown.stop="onMenuItemClick"
+  @mousedown="onMenuItemClick"
   @mouseover.stop="onMenuItemMouseOver"
   @mouseout.stop="resetAppearence">
   <div

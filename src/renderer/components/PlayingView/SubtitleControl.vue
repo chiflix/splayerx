@@ -11,7 +11,7 @@
             <li
               v-if="foundSubtitles"
               v-for="(item, index) in computedAvaliableItems"
-              @mouseup.stop="toggleItemClick(index)"
+              @mouseup="toggleItemClick(index)"
               @mouseover.self.stop="toggleItemsMouseOver"
               @mouseleave.stop.self="toggleItemsMouseLeave"
               :class="{ chosenText: itemHasBeenChosen(index) }">
@@ -35,7 +35,7 @@
 
 
             <li v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)"
-            @mouseup.stop="toggleSubtitleOff"
+            @mouseup="toggleSubtitleOff"
             @mouseover.stop.self="toggleItemsMouseOver"
             @mouseleave.stop.self="toggleItemsMouseLeave"
             :class="{ chosenText: itemHasBeenChosen(-1) }">
@@ -52,7 +52,7 @@
                 :class="{ chineseChosen: itemTitleHasChineseChar('加载翻译结果') }"
                 @mouseover.self.stop="toggleItemsMouseOver"
                 @mouseleave.stop.self="toggleItemsMouseLeave"
-                @mouseup.stop="toggleLoadServerSubtitles">
+                @mouseup="toggleLoadServerSubtitles">
                 <div class="menu-item-text-wrapper">
                   加载翻译结果
                 </div>
@@ -61,7 +61,7 @@
                 :class="{ chineseChosen: itemTitleHasChineseChar('导入本地字幕 ...') }"
                 @mouseover.self.stop="toggleItemsMouseOver"
                 @mouseleave.stop.self="toggleItemsMouseLeave"
-                @mouseup.stop="toggleOpenFileDialog">
+                @mouseup="toggleOpenFileDialog">
                 <div class="menu-item-text-wrapper">
                   导入本地字幕 ...
                 </div>
@@ -70,7 +70,7 @@
           </ul>
         </div>
         <button
-          @mousedown.capture.stop.left="toggleSubtitleMenu">
+          @mousedown.capture.left="toggleSubtitleMenu">
           <img type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
         </button>
       </div>

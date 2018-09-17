@@ -8,7 +8,7 @@
     @mouseleave="hideProgressSlider"
     @mousemove="onProgressBarMove">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.stop="videoRestart"
+      @mousedown="videoRestart"
       @mouseover="thumbnailCurrentTime = 0"
       @mousemove="thumbnailCurrentTime = 0"
       :style="{cursor: cursorStyle}">
@@ -28,7 +28,7 @@
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.winWidth - 20 + 'px'}"
-      @mousedown.left.stop.capture="onProgressBarClick">
+      @mousedown.left.capture="onProgressBarClick">
         <!-- translate优化 -->
       <the-preview-thumbnail
         v-show="showScreenshot"
@@ -57,7 +57,7 @@
     </div>
     <div class="fake-button-left"
       v-show="isOnProgress"
-      @mousedown.left.stop.capture="onProgressBarClick"
+      @mousedown.left.capture="onProgressBarClick"
       @mousemove.stop="handleFakeBtnMove"
       :style="{height: heightOfThumbnail + 11 + 'px', cursor: cursorStyle}"></div>
   </div>
