@@ -5,7 +5,7 @@
     <transition name="fade" appear>
       <div class="sub-btn-control">
         <div class="sub-menu-wrapper"
-             v-if="appearSubtitleMenu">
+             v-show="selected">
           <ul class="sub-menu">
 
             <li
@@ -69,8 +69,7 @@
 
           </ul>
         </div>
-        <button
-          @mousedown.capture.left="toggleSubtitleMenu">
+        <button>
           <img type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
         </button>
       </div>
@@ -80,6 +79,9 @@
 <script>
 export default {
   name: 'subtitle-control',
+  props: {
+    selected: Boolean,
+  },
   data() {
     return {
       loadingSubsPlaceholders: {
@@ -87,7 +89,6 @@ export default {
         embedded: '',
         server: '',
       },
-      appearSubtitleMenu: false,
       foundSubtitles: true,
       showingPopupDialog: false,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
@@ -95,17 +96,7 @@ export default {
     };
   },
   methods: {
-    toggleSubtitleMenu() {
-      if (!this.appearSubtitleMenu) {
-        this.appearSubtitleMenu = true;
-        this.$bus.$emit('subtitle-menu-toggled-on');
-      } else {
-        this.appearSubtitleMenu = false;
-        this.$bus.$emit('subtitle-menu-toggled-off');
-      }
-    },
     toggleItemsMouseOver(e) {
-      this.appearSubtitleMenu = true;
       e.target.style.backgroundImage = this.preStyle;
     },
     toggleItemsMouseLeave(e) {
@@ -176,10 +167,6 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('sub-ctrl-hide', () => {
-      this.$bus.$emit('subtitle-menu-toggled-off');
-    });
-    this.$bus.$on('subtitle-menu-off', this.toggleSubtitleMenu);
     this.$bus.$on('loading-subtitles', (status) => {
       this.foundSubtitles = true;
       const placeholderText = 'Loading...';
