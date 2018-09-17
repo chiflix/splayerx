@@ -92,11 +92,11 @@ export default {
       this.$electron.remote.getCurrentWindow().unmaximize();
     },
     handleFullscreenExit() {
-      this.$electron.remote.getCurrentWindow().setFullScreen(false);
+      this.$electron.ipcRenderer.send('main/toggle-fullscreen', false);
     },
     // OS-specific methods
     handleMacMaximize() {
-      this.$electron.remote.getCurrentWindow().setFullScreen(true);
+      this.$electron.ipcRenderer.send('main/toggle-fullscreen', true);
     },
     handleResize() {
       this.setWindowInfo();
