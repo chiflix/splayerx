@@ -28,11 +28,9 @@
 <script>
 export default {
   name: 'volume-control',
-  props: {
-    showVolumeSlider: Boolean,
-  },
   data() {
     return {
+      showVolumeSlider: false,
       onVolumeSliderMousedown: false,
       currentVolume: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
@@ -62,17 +60,17 @@ export default {
       this.$_documentVolumeSliderDragEvent();
     },
     appearVolumeSlider() {
-      this.$emit('update:showVolumeSlider', true);
+      this.showVolumeSlider = true;
     },
     hideVolumeSlider() {
       if (!this.onVolumeSliderMousedown) {
-        this.$emit('update:showVolumeSlider', false);
+        this.showVolumeSlider = false;
       }
     },
     hideVolumeController() {
       if (!this.onVolumeSliderMousedown) {
         if (this.showVolumeSlider) {
-          this.$emit('update:showVolumeSlider', false);
+          this.showVolumeSlider = false;
         }
       }
     },
