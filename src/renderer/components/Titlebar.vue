@@ -75,7 +75,7 @@ export default {
     handleMaximize() {
       this.$electron.remote.getCurrentWindow().maximize();
     },
-    handleClose(e) {
+    handleClose() {
       this.$electron.remote.getCurrentWindow().close();
     },
     handleRestore() {
