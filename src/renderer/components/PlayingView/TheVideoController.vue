@@ -60,6 +60,7 @@ export default {
       currentSelectedWidget: 'the-video-controller',
       preventSingleClick: false,
       lastAttachedShowing: false,
+      isDragging: false,
     };
   },
   computed: {
@@ -280,6 +281,9 @@ export default {
         target: event.target,
         position: [event.clientX, event.clientY],
       });
+      if (this.eventInfo.get('mousedown').leftMousedown) {
+        this.isDragging = true;
+      }
     },
     handleMouseenter() {
       this.eventInfo.set('mouseenter', { mouseLeavingWindow: false });
@@ -324,11 +328,12 @@ export default {
       ));
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
-        if (this.currentSelectedWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing) {
+        if (this.currentSelectedWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
           this.togglePlayback();
         }
         this.preventSingleClick = false;
         this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached;
+        this.isDragging = false;
       }, this.clicksDelay);
     },
     handleDBClick() {
