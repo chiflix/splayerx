@@ -14,9 +14,9 @@
     <play-button />
     <the-time-codes v-show="displayState['the-time-codes']" />
     <div class="control-buttons">
-      <subtitle-control class="button subtitle" v-show="displayState['subtitle-control']" />
+      <subtitle-control class="button subtitle" v-show="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
       <advance-control class="button advance" v-show="displayState['advance-control']" />
-      <volume-control class="button volume" v-show="displayState['volume-control']" />
+      <volume-control class="button volume" v-show="displayState['volume-control']" v-bind.sync="widgetsStatus['volume-control']" />
     </div>
     <the-time-progress-bar :style="{ display: displayState['the-time-progress-bar'] ? 'block' : 'none' }" :src="this.$store.state.PlaybackState.SrcOfVideo" />
   </div>
@@ -61,6 +61,8 @@ export default {
       dragDelay: 200,
       dragRadiusSquare: 25,
       displayState: {},
+      widgetsStatus: {},
+      currentSelectedWidget: 'the-video-controller',
     };
   },
   computed: {
@@ -113,7 +115,9 @@ export default {
     this.UIElements.forEach((value) => {
       this.timerState[value.name] = true;
       this.displayState[value.name] = true;
+      this.widgetsStatus[value.name] = { selected: false };
     });
+
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleMousewheel);
@@ -130,7 +134,7 @@ export default {
       this.UITimerManager(timestamp - this.start);
       // this.UILayerManager();
       this.UIDisplayManager();
-      // this.UIStateManager();
+      this.UIStateManager();
 
       this.start = timestamp;
       requestAnimationFrame(this.UIManager);
@@ -176,6 +180,10 @@ export default {
         this.hideProgressBar = false;
       }
 
+      // mousedown status
+      this.currentSelectedWidget = this.getComponentName(currentEventInfo.get('mousedown').target);
+
+
       Object.keys(this.timerState).forEach((uiName) => {
         this.timerState[uiName] = this.showAllWidgets;
       });
@@ -199,7 +207,6 @@ export default {
       this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
     },
     // UILayerManager() {
-
     // },
     UIDisplayManager() {
       const tempObject = {};
@@ -209,9 +216,11 @@ export default {
       });
       this.displayState = tempObject;
     },
-    // UIStateManager() {
-
-    // },
+    UIStateManager() {
+      Object.keys(this.widgetsStatus).forEach((name) => {
+        this.widgetsStatus[name].selected = this.currentSelectedWidget === name;
+      });
+    },
     getAllUIComponents(rootElement) {
       const { children } = rootElement;
       const names = [];
@@ -302,11 +311,12 @@ export default {
         this.popupShow = true;
       }
     },
-    handleLeftMousedown() {
+    handleLeftMousedown(event) {
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
         { leftMousedown: true },
+        { target: event.target },
       ));
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
