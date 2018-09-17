@@ -8,7 +8,8 @@
     @mouseleave="handleMouseleave"
     @mousedown.right="handleRightMousedown"
     @mousedown.left="handleLeftMousedown"
-    @mouseup.left="handleLeftMouseup">
+    @mouseup.left="handleLeftMouseup"
+    @dblclick="handleDBClick">
     <titlebar currentView="Playingview" v-show="displayState['titlebar']" ></titlebar>
     <div class="masking" v-show="showAllWidgets"></div>
     <play-button />
@@ -348,11 +349,14 @@ export default {
           } else {
             self.clicks = 0;
           }
-        } else { // else, if a second click has been detected - clicks === 2
-          clearTimeout(this.clicksTimer); // cancel the time out
-          this.toggleFullScreenState();
-          this.clicks = 0;// reset the "clicks" to zero
         }
+      }
+    },
+    handleDBClick() {
+      if (this.currentSelectedWidget === 'the-video-controller') {
+        clearTimeout(this.clicksTimer); // cancel the time out
+        this.toggleFullScreenState();
+        this.clicks = 0;// reset the "clicks" to zero
       }
     },
     handleKeydown(event) {
