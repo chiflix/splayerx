@@ -56,7 +56,6 @@ export default {
       popupShow: false,
       mousedownTime: null,
       mousedownCursorPosition: null,
-      clicks: 0,
       clicksTimer: 0,
       clicksDelay: 200,
       dragDelay: 200,
@@ -64,6 +63,7 @@ export default {
       displayState: {},
       widgetsStatus: {},
       currentSelectedWidget: 'the-video-controller',
+      preventSingleClick: false,
     };
   },
   computed: {
@@ -337,26 +337,18 @@ export default {
         this.eventInfo.get('mousedown'),
         { leftMousedown: false },
       ));
-      this.clicks += 1; // one click(mouseUp) triggered, clicks + 1
-      if (this.currentSelectedWidget === 'the-video-controller') {
-        if (this.clicks === 1) { // if one click has been detected - clicks === 1
-          const self = this; // define a constant "self" for the following scope to use
-          if (this.isValidClick()) {
-            this.clicksTimer = setTimeout(() => { // define timer as setTimeOut function
-              self.togglePlayback(); // which is togglePlayback
-              self.clicks = 0; // reset the "clicks" to zero for next event
-            }, this.clicksDelay);
-          } else {
-            self.clicks = 0;
-          }
+      this.clicksTimer = setTimeout(() => {
+        if (!this.preventSingleClick && this.currentSelectedWidget === 'the-video-controller') {
+          this.togglePlayback();
         }
-      }
+        this.preventSingleClick = false;
+      }, this.clicksDelay);
     },
     handleDBClick() {
+      clearTimeout(this.clicksTimer); // cancel the time out
+      this.preventSingleClick = true;
       if (this.currentSelectedWidget === 'the-video-controller') {
-        clearTimeout(this.clicksTimer); // cancel the time out
         this.toggleFullScreenState();
-        this.clicks = 0;// reset the "clicks" to zero
       }
     },
     handleKeydown(event) {
