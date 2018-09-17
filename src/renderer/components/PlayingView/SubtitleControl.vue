@@ -80,6 +80,9 @@
 <script>
 export default {
   name: 'subtitle-control',
+  props: {
+    appearSubtitleMenu: Boolean,
+  },
   data() {
     return {
       loadingSubsPlaceholders: {
@@ -87,7 +90,6 @@ export default {
         embedded: '',
         server: '',
       },
-      appearSubtitleMenu: false,
       foundSubtitles: true,
       showingPopupDialog: false,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
@@ -97,15 +99,15 @@ export default {
   methods: {
     toggleSubtitleMenu() {
       if (!this.appearSubtitleMenu) {
-        this.appearSubtitleMenu = true;
+        this.$emit('update:appearSubtitleMenu', true);
         this.$bus.$emit('subtitle-menu-toggled-on');
       } else {
-        this.appearSubtitleMenu = false;
+        this.$emit('update:appearSubtitleMenu', false);
         this.$bus.$emit('subtitle-menu-toggled-off');
       }
     },
     toggleItemsMouseOver(e) {
-      this.appearSubtitleMenu = true;
+      this.$emit('update:appearSubtitleMenu', true);
       e.target.style.backgroundImage = this.preStyle;
     },
     toggleItemsMouseLeave(e) {
