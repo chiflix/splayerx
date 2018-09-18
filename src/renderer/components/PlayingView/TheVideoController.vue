@@ -10,15 +10,15 @@
     @mousedown.left="handleLeftMousedown"
     @mouseup.left="handleLeftMouseup"
     @dblclick="handleDoubleClick">
-    <titlebar currentView="Playingview" v-show="displayState['titlebar']" ></titlebar>
-    <div class="masking" v-show="showAllWidgets"></div>
+    <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
+    <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button />
     <div class="control-buttons">
-      <subtitle-control class="button subtitle" v-show="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
-      <advance-control class="button advance" v-show="displayState['advance-control']" />
-      <volume-control class="button volume" v-show="displayState['volume-control']" v-bind.sync="widgetsStatus['volume-control']" />
+      <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
+      <advance-control class="button advance" v-hidden="displayState['advance-control']" />
+      <volume-control class="button volume" v-hidden="displayState['volume-control']" v-bind.sync="widgetsStatus['volume-control']" />
     </div>
-    <the-time-progress-bar :style="{ display: displayState['the-time-progress-bar'] ? 'block' : 'none' }" :src="src" />
+    <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
   </div>
 </template>
 <script>
