@@ -42,7 +42,7 @@ describe('SubtitleControl.vue', () => {
     });
     expect(wrapper.html()).contains('ul');
     expect(wrapper.html()).contains('li');
-    expect(wrapper.html()).contains('img');
+    expect(wrapper.html()).contains('button');
   });
 
   it('subCtrlBtnAppear method works fine', () => {
