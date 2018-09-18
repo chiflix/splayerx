@@ -69,7 +69,7 @@ export default {
       mouseStopMoving: false,
       mousestopDelay: 3000,
       mouseLeftWindow: false,
-      mouseleftDelay: 1500,
+      mouseleftDelay: 1000,
       hideVolume: false,
       hideProgressBar: false,
       popupShow: false,
