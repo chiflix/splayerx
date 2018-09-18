@@ -42,7 +42,10 @@ export default {
   directives: {
     hidden: {
       update(el, binding) {
-        el.style.visibility = binding.value ? 'visible' : 'hidden';
+        const { oldValue, value } = binding;
+        if (oldValue !== value) {
+          el.style.visibility = value ? 'visible' : 'hidden';
+        }
       },
     },
   },
