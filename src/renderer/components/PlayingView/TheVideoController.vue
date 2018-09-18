@@ -18,6 +18,7 @@
       <advance-control class="button advance" v-hidden="displayState['advance-control']" />
       <volume-control class="button volume" v-hidden="displayState['volume-control']" v-bind.sync="widgetsStatus['volume-control']" />
     </div>
+    <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
     <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
   </div>
 </template>
@@ -28,6 +29,7 @@ import PlayButton from './PlayButton.vue';
 import VolumeControl from './VolumeControl';
 import AdvanceControl from './AdvanceControl';
 import SubtitleControl from './SubtitleControl';
+import TheTimeCodes from './TheTimeCodes';
 import TimeProgressBar from './TimeProgressBar.vue';
 export default {
   name: 'the-video-controller',
@@ -37,6 +39,7 @@ export default {
     'subtitle-control': SubtitleControl,
     'volume-control': VolumeControl,
     'advance-control': AdvanceControl,
+    'the-time-codes': TheTimeCodes,
     'the-time-progress-bar': TimeProgressBar,
   },
   directives: {
