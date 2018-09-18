@@ -1,5 +1,5 @@
 function timeValidator(time) {
-  return typeof time === 'number' && !Number.isNaN(time);
+  return typeof time === 'number' && !Number.isNaN(time) && Math.abs(time) !== Infinity && time >= 0;
 }
 class FakeTimer {
   /* eslint-disable no-underscore-dangle */
@@ -12,8 +12,6 @@ class FakeTimer {
     if (timeValidator(time)) {
       const timeLeft = this._timeLeft - time;
       this._timeLeft = timeLeft <= 0 ? 0 : timeLeft;
-    } else {
-      throw (new Error('Time validation error.'));
     }
   }
   timeLeft() {
@@ -120,11 +118,12 @@ class FakeTimerManager {
    * Reset all timeout timers.
    */
   resetTimeout() {
+    const resetedTimers = [];
     this.timeoutTimers().forEach((value) => {
       this._timerQueue.get(value).reset();
-      return true;
+      resetedTimers.push(value);
     });
-    return false;
+    return resetedTimers;
   }
 }
 
