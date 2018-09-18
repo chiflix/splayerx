@@ -2,7 +2,6 @@
   <div
     :data-component-name="$options.name"
     class="sub-control">
-    <transition name="fade" appear>
       <div class="sub-btn-control">
         <div class="sub-menu-wrapper"
              v-show="showAttached">
@@ -73,7 +72,6 @@
           <img type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
         </button>
       </div>
-    </transition>
   </div>
 </template>
 <script>
@@ -414,21 +412,5 @@ button:hover {
       font-size: 23px;
     }
   }
-}
-
-.fade-enter-active {
- transition: opacity 100ms;
-}
-
-.fade-leave-active {
- transition: opacity 200ms;
-}
-
-.fade-enter-to, .fade-leave {
- opacity: 1;
-}
-
-.fade-enter, .fade-leave-to {
- opacity: 0;
 }
 </style>

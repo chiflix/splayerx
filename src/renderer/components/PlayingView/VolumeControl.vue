@@ -1,6 +1,5 @@
 <template>
   <div :data-component-name="$options.name">
-  <transition name="fade" appear>
   <div
     @mouseover="appearVolumeSlider"
     @mouseout="hideVolumeSlider">
@@ -21,7 +20,6 @@
           :src="srcOfVolumeButtonImage">
       </div>
     </div>
-  </transition>
   </div>
 </template>;
 

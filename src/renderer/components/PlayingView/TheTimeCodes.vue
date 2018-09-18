@@ -1,5 +1,4 @@
 <template>
-  <transition name="fade">
   <div class="timing"
     :data-component-name="$options.name"
     @mousedown="switchStateOfContent">
@@ -7,7 +6,6 @@
         <span class="splitSign">/</span>
         <span class="secondContent" :class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ content.second }}</span>
   </div>
-</transition>
 </template>
 <script>
 export default {
@@ -151,21 +149,5 @@ export default {
 
 .timing .timing--current {
   opacity: 1;
-}
-
-.fade-enter-active {
- transition: opacity 100ms;
-}
-
-.fade-leave-active {
- transition: opacity 400ms;
-}
-
-.fade-enter-to, .fade-leave {
- opacity: 1;
-}
-
-.fade-enter, .fade-leave-to {
- opacity: 0;
 }
 </style>

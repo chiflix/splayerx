@@ -1,6 +1,5 @@
 <template>
-  <transition name="fade" appear>
-    <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
+  <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
   <div
     :data-component-name="$options.name"
     class="progress"
@@ -62,7 +61,6 @@
       @mousemove.stop="handleFakeBtnMove"
       :style="{height: heightOfThumbnail + 11 + 'px', cursor: cursorStyle}"></div>
   </div>
-</transition>
 </template>;
 
 <script>
@@ -543,23 +541,6 @@ export default {
     background: rgba(255, 255, 255, 0.9);
   }
 }
-
-.fade-enter-active {
- transition: opacity 100ms;
-}
-
-.fade-leave-active {
- transition: opacity 400ms;
-}
-
-.fade-enter-to, .fade-leave {
- opacity: 1;
-}
-
-.fade-enter, .fade-leave-to {
- opacity: 0;
-}
-
 // .shake {
 //   transform-origin: left center;
 //   animation-name: shake;
