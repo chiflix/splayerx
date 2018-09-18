@@ -3,27 +3,27 @@
        v-show="showTitlebar">
     <div class="win-icons" v-if="!isDarwin">
       <Icon class="title-button"
-            @click.native="handleMinimize"
-            type="titleBarWinMin">
+        @click.native="handleMinimize"
+        type="titleBarWinMin">
       </Icon>
       <Icon class="title-button"
-            @click.native="handleMaximize"
-            v-show="middleButtonStatus === 'maximize'"
-            type="titleBarWinMax">
+        @click.native="handleMaximize"
+        v-show="middleButtonStatus === 'maximize'"
+        type="titleBarWinMax">
       </Icon>
       <Icon class="title-button"
-            @click.native="handleRestore"
-            type="titleBarWinRestore"
-            v-show="middleButtonStatus === 'restore'">
+        @click.native="handleRestore"
+        type="titleBarWinRestore"
+        v-show="middleButtonStatus === 'restore'">
       </Icon>
       <Icon class="title-button"
-            @click.native="handleFullscreenExit"
-            v-show="middleButtonStatus === 'exit-fullscreen'"
-            type="titleBarWinResize">
+        @click.native="handleFullscreenExit"
+        v-show="middleButtonStatus === 'exit-fullscreen'"
+        type="titleBarWinResize">
       </Icon>
       <Icon class="title-button"
-            @click.native="handleClose"
-            type="titleBarWinClose">
+        @click.native="handleClose"
+        type="titleBarWinClose">
       </Icon>
     </div>
     <div class="mac-icons" v-if="isDarwin"
