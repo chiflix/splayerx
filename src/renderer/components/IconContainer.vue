@@ -27,22 +27,13 @@ export default {
   },
   computed: {
     finalState() {
-      if (this.state === 'hover' && this.isFullScreen !== 'exit-fullscreen') {
-        return this.state;
-      }
-      return 'default';
+      return this.state === 'hover' && this.isFullScreen !== 'exit-fullscreen' ? this.state : 'default';
     },
     hoverState() {
-      if (this.state === 'hover') {
-        return 'hoverState';
-      }
-      return this.type;
+      return this.state === 'hover' ? 'hoverState' : this.type;
     },
     finalEffect() {
-      if (this.effect) {
-        return this.effect;
-      }
-      return 'icon';
+      return this.effect ? this.effect : 'icon';
     },
   },
   created() {
@@ -54,6 +45,11 @@ export default {
 </script>
 
 <style lang="scss">
+    .titleBarWinMin, .titleBarWinMax, .titleBarWinClose {
+        display: flex;
+        width: 45px;
+        height: 28px;
+    }
     .hoverState {
         display: flex;
         width: 12px;

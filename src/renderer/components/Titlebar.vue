@@ -2,29 +2,19 @@
   <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
     v-show="showTitlebar">
     <div class="win-icons" v-if="!isDarwin">
-      <div id="minimize" class="title-button"
-        @click="handleMinimize">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="maximize" class="title-button"
-        @click="handleMaximize"
-        v-show="middleButtonStatus === 'maximize'">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="restore" class="title-button"
-        @click="handleRestore"
-        v-show="middleButtonStatus === 'restore'">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="exit-fullscreen" class="title-button"
-        @click="handleFullscreenExit"
-        v-show="middleButtonStatus === 'exit-fullscreen'">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="close" class="title-button"
-        @click="handleClose">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
+      <Icon id="minimize" class="title-button"
+            @click.native="handleMinimize"
+            type="titleBarWinMin">
+      </Icon>
+      <Icon id="maxmize" class="title-button"
+            @click.native="handleMaximize"
+            v-show="middleButtonStatus === 'maximize'"
+            type="titleBarWinMax">
+      </Icon>
+      <Icon id="close" class="title-button"
+            @click.native="handleClose"
+            type="titleBarWinClose">
+      </Icon>
     </div>
     <div class="mac-icons" v-if="isDarwin"
          @mouseover="handleMouseOver"
