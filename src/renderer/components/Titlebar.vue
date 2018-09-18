@@ -2,16 +2,26 @@
   <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
     v-show="showTitlebar">
     <div class="win-icons" v-if="!isDarwin">
-      <Icon id="minimize" class="title-button"
+      <Icon class="title-button"
             @click.native="handleMinimize"
             type="titleBarWinMin">
       </Icon>
-      <Icon id="maxmize" class="title-button"
+      <Icon class="title-button"
             @click.native="handleMaximize"
             v-show="middleButtonStatus === 'maximize'"
             type="titleBarWinMax">
       </Icon>
-      <Icon id="close" class="title-button"
+      <Icon class="title-button"
+            @click.native="handleRestore"
+            type="titleBarWinRestore"
+            v-show="middleButtonStatus === 'restore'">
+      </Icon>
+      <Icon class="title-button"
+            @click.native="handleFullscreenExit"
+            v-show="middleButtonStatus === 'exit-fullscreen'"
+            type="titleBarWinResize">
+      </Icon>
+      <Icon class="title-button"
             @click.native="handleClose"
             type="titleBarWinClose">
       </Icon>
@@ -220,32 +230,6 @@ export default {
       background-color: rgba(221, 221, 221, 0.5);
     }
   }
-  img {
-    object-fit: none;
-    width: 45px;
-    height: 28px;
-    -webkit-user-drag: none;
-    -webkit-app-region: no-drag;
-  }
-  #minimize img {
-    object-position: 0 0
-  }
-  #maximize img {
-    object-position: 0 -28px;
-    &.disabled {
-      object-position: 0 -140px;
-      -webkit-app-region: drag;
-    }
-  }
-  #restore img {
-    object-position: 0 -56px;
-  }
-  #exit-fullscreen img {
-    object-position: 0 -84px;
-  }
-  #close img {
-    object-position: 0 -112px;
-  }
 }
 .darwin-titlebar {
   position: absolute;
@@ -266,46 +250,6 @@ export default {
     -webkit-app-region: no-drag;
     border-radius: 100%;
   }
-  /*.mac-icons {
-    &:hover {
-      #close {
-        background-position-y: 0;
-        opacity: 1;
-        &:active {
-          background-position-y: -12px;
-        }
-      }
-      #minimize {
-        background-position-y: -24px;
-        opacity: 1;
-        &.disabled {
-          background-position-y: -108px;
-          opacity: 0.25;
-        }
-        &:active {
-          background-position-y: -36px;
-        }
-      }
-      #maximize {
-        background-position-y: -48px;
-        opacity: 1;
-        &.disabled {
-          background-position-y: -108px;
-          opacity: 0.25;
-        }
-        &:active {
-          background-position-y: -60px;
-        }
-      }
-      #restore {
-        background-position-y: -72px;
-        opacity: 1;
-        &:active {
-          background-position-y: -84px;
-        }
-      }
-    }
-  }*/
   .title-button {
     background-position-y: -96px;
   }
