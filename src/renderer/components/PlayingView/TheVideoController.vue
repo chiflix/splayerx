@@ -44,7 +44,13 @@ export default {
       update(el, binding) {
         const { oldValue, value } = binding;
         if (oldValue !== value) {
-          el.style.visibility = value ? 'visible' : 'hidden';
+          if (value) {
+            el.classList.add('fade-in');
+            el.classList.remove('fade-out');
+          } else {
+            el.classList.add('fade-out');
+            el.classList.remove('fade-in');
+          }
         }
       },
     },
@@ -456,5 +462,15 @@ export default {
       height: 36px;
     }
   }
+}
+.fade-in {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 100ms ease-in;
+}
+.fade-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 300ms, opacity 300ms ease-out;
 }
 </style>
