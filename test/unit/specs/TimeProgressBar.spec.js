@@ -72,12 +72,8 @@ describe('TimeProgressBar.vue', () => {
       },
     });
     wrapper.setData({ isOnProgress: false });
-    const spy = sinon.spy(wrapper.vm.$bus, '$emit');
     wrapper.vm.appearProgressSlider();
     expect(wrapper.vm.isOnProgress).equal(true);
-    expect(spy.calledOnce).equal(true);
-    expect(spy.firstCall.args[0]).equal('clear-all-widget-disappear-delay');
-    spy.restore();
     wrapper.vm.appearProgressSlider();
     const playedSlider = wrapper.find({ ref: 'playedSlider' });
     const foolProofBar = wrapper.find({ ref: 'foolProofBar' });
