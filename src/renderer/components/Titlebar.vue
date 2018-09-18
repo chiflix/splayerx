@@ -1,6 +1,6 @@
 <template>
   <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
-    v-show="showTitlebar">
+       v-show="showTitlebar">
     <div class="win-icons" v-if="!isDarwin">
       <Icon class="title-button"
             @click.native="handleMinimize"

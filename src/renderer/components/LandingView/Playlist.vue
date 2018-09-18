@@ -1,47 +1,45 @@
 <template>
-    <div class="controller" :style="{
-    bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px'
-    }">
-        <div class="playlist" :style="{
-        marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'
-        }">
-            <div class="button"
-                 :style="{
-                 height:`${itemHeight}px`,
-                 width:`${itemWidth}px`,
-                 }"
-                 @click="openOrMove">
-                <div class="btnMask"
-                     :style="{
-                 height:`${itemHeight}px`,
-                 width:`${itemWidth}px`,
-                 }">
-                    <Icon class="addUi" type="add"></Icon>
-                </div>
-            </div>
-            <div class="item"
-                 v-for="(item, index) in lastPlayedFile"
-                 :id="'item'+index"
-                 :key="item.path"
-                 :class="showShadow ? 'shadow' : '' "
-                 :style="{
-              backgroundImage: itemShortcut(item.shortCut),
-              width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
-              height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
-            }"
-                 @click.stop="onRecentItemClick(item, index)"
-                 @mouseover="onRecentItemMouseover(item, index)"
-                 @mouseout="onRecentItemMouseout(index)"
-                 @mousedown.stop="onRecentItemMousedown($event, index)">
-                <div class="mask"
-                     :style="{
-                     width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
-                     height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
-                     }">
-                    <Icon class="deleteUi" type="delete"></Icon>
-                </div>
-            </div>
+    <div class="controller"
+         :style="{bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px'}">
+      <div class="playlist"
+           :style="{marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'}">
+        <div class="button"
+             :style="{
+             height:`${itemHeight}px`,
+             width:`${itemWidth}px`,
+             }"
+             @click="openOrMove">
+          <div class="btnMask"
+               :style="{
+               height:`${itemHeight}px`,
+               width:`${itemWidth}px`,
+               }">
+            <Icon class="addUi" type="add"></Icon>
+          </div>
         </div>
+        <div class="item"
+             v-for="(item, index) in lastPlayedFile"
+             :id="'item'+index"
+             :key="item.path"
+             :class="showShadow ? 'shadow' : '' "
+             :style="{
+             backgroundImage: itemShortcut(item.shortCut),
+             width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
+             height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
+             }"
+             @click.stop="onRecentItemClick(item, index)"
+             @mouseover="onRecentItemMouseover(item, index)"
+             @mouseout="onRecentItemMouseout(index)"
+             @mousedown.stop="onRecentItemMousedown($event, index)">
+          <div class="mask"
+               :style="{
+               width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
+               height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
+               }">
+            <Icon class="deleteUi" type="delete"></Icon>
+          </div>
+        </div>
+      </div>
     </div>
 </template>
 

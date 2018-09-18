@@ -71,7 +71,7 @@
         </div>
         <button
           @mousedown.capture.stop.left="toggleSubtitleMenu" v-if="isSubCtrlBtnAppear">
-          <Icon type="subtitle" wmode="transparent" alt="Button">></Icon>
+          <Icon type="subtitle" wmode="transparent" alt="Button"></Icon>
         </button>
       </div>
     </transition>
