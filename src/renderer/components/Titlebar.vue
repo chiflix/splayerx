@@ -26,26 +26,32 @@
         <img src="~@/assets/windows-titlebar-icons.png" />
       </div>
     </div>
-    <div class="mac-icons" v-if="isDarwin">
+    <div class="mac-icons" v-if="isDarwin"
+         @mouseover="handleMouseOver"
+         @mouseout="handleMouseOut">
       <Icon id="close" class="title-button"
             type="titleBarClose"
-            @click.native="handleClose"
-            >
+            :state="state"
+            @click.native="handleClose">
       </Icon>
       <Icon id="minimize" class="title-button"
             type="titleBarMin"
             @click.native="handleClose"
-            :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }">
+            :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
+            :state="state"
+            :isFullScreen="middleButtonStatus">
       </Icon>
       <Icon id="maximize" class="title-button"
             type="titleBarMax"
             @click.native="handleMacMaximize"
-            v-show="middleButtonStatus !== 'exit-fullscreen'">
+            v-show="middleButtonStatus !== 'exit-fullscreen'"
+            :state="state">
       </Icon>
       <Icon id="restore" class="title-button"
-        @click.native="handleFullscreenExit"
-        v-show="middleButtonStatus === 'exit-fullscreen'"
-        type="titleBarRecover">
+            @click.native="handleFullscreenExit"
+            v-show="middleButtonStatus === 'exit-fullscreen'"
+            type="titleBarRecover"
+            :state="state">
       </Icon>
     </div>
   </div>
@@ -68,6 +74,7 @@ export default {
       isDarwin: process.platform === 'darwin',
       titlebarDelay: 0,
       screenWidth: this.$electron.screen.getPrimaryDisplay().workAreaSize.width,
+      state: 'default',
     };
   },
   props: {
@@ -77,6 +84,12 @@ export default {
     Icon,
   },
   methods: {
+    handleMouseOver() {
+      this.state = 'hover';
+    },
+    handleMouseOut() {
+      this.state = 'default';
+    },
     // Methods to handle window behavior
     handleMinimize() {
       this.$electron.remote.getCurrentWindow().minimize();

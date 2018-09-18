@@ -1,7 +1,7 @@
 <template>
     <div>
-        <svg :class="type">
-            <use class="default" v-bind="{'xlink:href': `#${type}-default-${finalEffect}`}"></use>
+        <svg :class="hoverState">
+            <use class='default' v-bind="{'xlink:href': `#${type}-${finalState}-${finalEffect}`}"></use>
             <use class="hover" v-bind="{'xlink:href': `#${type}-hover-${finalEffect}`}"></use>
             <use class="active" v-bind="{'xlink:href': `#${type}-active-${finalEffect}`}"></use>
         </svg>
@@ -18,8 +18,26 @@ export default {
     effect: {
       type: String,
     },
+    state: {
+      type: String,
+    },
+    isFullScreen: {
+      type: String,
+    },
   },
   computed: {
+    finalState() {
+      if (this.state === 'hover' && this.isFullScreen !== 'exit-fullscreen') {
+        return this.state;
+      }
+      return 'default';
+    },
+    hoverState() {
+      if (this.state === 'hover') {
+        return 'hoverState';
+      }
+      return this.type;
+    },
     finalEffect() {
       if (this.effect) {
         return this.effect;
@@ -36,6 +54,36 @@ export default {
 </script>
 
 <style lang="scss">
+    .hoverState {
+        display: flex;
+        width: 12px;
+        height: 12px;
+        margin-right: 8px;
+        background-repeat: no-repeat;
+        -webkit-app-region: no-drag;
+        border-radius: 100%;
+        .default {
+            opacity: 1;
+            display: block;
+        }
+        .hover {
+            display: none;
+        }
+        .active {
+            display: none;
+        }
+        &:active {
+            .default {
+                display: none;
+            }
+            .hover {
+                display: none;
+            }
+            .active {
+                display: block;
+            }
+        }
+    }
     .titleBarMax, .titleBarMin, .titleBarClose, .titleBarRecover {
         display: flex;
         width: 12px;
@@ -55,7 +103,6 @@ export default {
             display: none;
         }
         &:hover {
-            background-position-y: 0;
             opacity: 1;
             .default {
                 display: none;
@@ -86,7 +133,7 @@ export default {
         display: block;
     }
 
-    .advance {
+    .advance, .subtitle, .volume{
         @media screen and (min-width: 513px) and (max-width: 854px) {
             width: 23px;
             height: 18px;
@@ -102,59 +149,7 @@ export default {
         display: block;
     }
 
-    .subtitle {
-        @media screen and (min-width: 513px) and (max-width: 854px) {
-            width: 23px;
-            height: 18px;
-        }
-        @media screen and (min-width: 855px) and (max-width: 1920px) {
-            width: 30.67px;
-            height: 24px;
-        }
-        @media screen and (min-width: 1921px) {
-            width: 46px;
-            height: 36px;
-        }
-        display: block;
-    }
-
-    .volume {
-        @media screen and (min-width: 513px) and (max-width: 854px) {
-            width: 23px;
-            height: 18px;
-        }
-        @media screen and (min-width: 855px) and (max-width: 1920px) {
-            width: 30.67px;
-            height: 24px;
-        }
-        @media screen and (min-width: 1921px) {
-            width: 46px;
-            height: 36px;
-        }
-        display: block;
-    }
-
-    .play {
-        @media screen and (max-width: 512px) {
-            width: 49px;
-            height: 49px;
-        }
-        @media screen and (min-width: 513px) and (max-width: 854px) {
-            width: 59px;
-            height: 59px;
-        }
-        @media screen and (min-width: 855px) and (max-width: 1920px) {
-            width: 79px;
-            height: 79px;
-        }
-        @media screen and (min-width: 1921px) {
-            width: 109px;
-            height: 108px;
-        }
-        display: block;
-    }
-
-    .pause {
+    .play, .pause {
         @media screen and (max-width: 512px) {
             width: 49px;
             height: 49px;
