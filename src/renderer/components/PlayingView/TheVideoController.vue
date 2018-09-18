@@ -39,6 +39,13 @@ export default {
     'advance-control': AdvanceControl,
     'the-time-progress-bar': TimeProgressBar,
   },
+  directives: {
+    hidden: {
+      update(el, binding) {
+        el.style.visibility = binding.value ? 'visible' : 'hidden';
+      },
+    },
+  },
   props: {
     src: String,
   },
