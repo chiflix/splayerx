@@ -155,10 +155,8 @@ export default {
       this.currentWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
       const currentPosition = currentEventInfo.get('mousemove').position;
       const lastPosition = lastEventInfo.get('mousemove').position;
-      if (currentPosition !== lastPosition) {
-        this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false);
-        this.mouseStopMoving = false;
-      }
+      this.mouseStopMoving = currentPosition === lastPosition;
+      if (!this.mouseStopMoving) { this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false); }
       // mouseenter timer
       const { mouseLeavingWindow } = currentEventInfo.get('mouseenter');
       const changed = mouseLeavingWindow !== lastEventInfo.get('mouseenter').mouseLeavingWindow;
