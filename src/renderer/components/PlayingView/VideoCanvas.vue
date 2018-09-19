@@ -304,7 +304,15 @@ export default {
       this.$store.commit('Volume', newVolume);
     });
     this.$bus.$on('toggle-fullscreen', () => {
-      this.$electron.ipcRenderer.send('main/toggle-fullscreen');
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      if (currentWindow.isFullScreen()) {
+        currentWindow.setFullScreen(false);
+        this.$bus.$emit('reset-windowsize');
+      } else {
+        currentWindow.setAspectRatio(0);
+        currentWindow.setFullScreen(true);
+      }
+      currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
     });
     this.$bus.$on('toggle-playback', () => {
       if (this.videoElement.paused) {
