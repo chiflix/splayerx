@@ -309,6 +309,8 @@ export default {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       if (currentWindow.isFullScreen()) {
         currentWindow.setFullScreen(false);
+        console.log(this.newWidthOfWindow / this.newHeightOfWindow);
+        currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
         this.$bus.$emit('reset-windowsize');
       } else {
         currentWindow.setAspectRatio(0);

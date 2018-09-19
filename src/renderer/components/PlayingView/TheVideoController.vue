@@ -388,14 +388,7 @@ export default {
       return Date.now() - this.focusedTimestamp > this.focusDelay;
     },
     toggleFullScreenState() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      if (currentWindow.isFullScreen()) {
-        currentWindow.setFullScreen(false);
-        this.$bus.$emit('reset-windowsize');
-      } else {
-        currentWindow.setAspectRatio(0);
-        currentWindow.setFullScreen(true);
-      }
+      this.$bus.$emit('toggle-fullscreen');
     },
     togglePlayback() {
       this.$bus.$emit('toggle-playback');
