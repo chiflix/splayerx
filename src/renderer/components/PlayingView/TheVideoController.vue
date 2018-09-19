@@ -23,7 +23,6 @@
   </div>
 </template>
 <script>
-import { mapState } from 'vuex';
 import TimerManager from '@/helpers/timerManager';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
@@ -98,14 +97,14 @@ export default {
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ? 'default' : 'none';
     },
-    ...mapState({
-      isFocused: state => state.WindowState.isFocused,
-    }),
+    isFocused() {
+      return this.$store.state.WindowState.isFocused;
+    },
   },
   watch: {
     isFocused(newValue) {
       if (newValue) {
-        this.focusedTimestamp = new Date();
+        this.focusedTimestamp = Date.now();
       }
     },
   },
@@ -386,7 +385,7 @@ export default {
       return componentName;
     },
     isValidClick() {
-      return !this.isDragging && (new Date() - this.focusedTimestamp > this.focusDelay);
+      return Date.now() - this.focusedTimestamp > this.focusDelay;
     },
     toggleFullScreenState() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
