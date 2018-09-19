@@ -6,9 +6,9 @@
     @mousemove="handleMousemove"
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
-    @mousedown.right="handleRightMousedown"
-    @mousedown.left="handleLeftMousedown"
-    @mouseup.left="handleLeftMouseup"
+    @mousedown.right="handleMousedownRight"
+    @mousedown.left="handleMousedownLeft"
+    @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <div class="masking" v-hidden="showAllWidgets"></div>
@@ -254,7 +254,7 @@ export default {
         mouseLeavingWindow: true,
       });
     },
-    handleRightMousedown() {
+    handleMousedownRight() {
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
@@ -266,7 +266,7 @@ export default {
         this.popupShow = true;
       }
     },
-    handleLeftMousedown(event) {
+    handleMousedownLeft(event) {
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
@@ -281,7 +281,7 @@ export default {
         }
       }
     },
-    handleLeftMouseup(event) {
+    handleMouseupLeft(event) {
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
