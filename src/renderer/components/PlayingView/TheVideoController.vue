@@ -23,14 +23,15 @@
   </div>
 </template>
 <script>
-import TimerManager from '@/helpers/timerManager.js';
+import { mapState } from 'vuex';
+import TimerManager from '@/helpers/timerManager';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
 import VolumeControl from './VolumeControl';
 import AdvanceControl from './AdvanceControl';
 import SubtitleControl from './SubtitleControl';
 import TheTimeCodes from './TheTimeCodes';
-import TimeProgressBar from './TimeProgressBar.vue';
+import TimeProgressBar from './TimeProgressBar';
 export default {
   name: 'the-video-controller',
   components: {
@@ -82,6 +83,8 @@ export default {
       preventSingleClick: false,
       lastAttachedShowing: false,
       isDragging: false,
+      focusedTimestamp: 0,
+      focusDelay: 500,
     };
   },
   computed: {
@@ -93,7 +96,17 @@ export default {
       return this.currentWidget !== this.$options.name;
     },
     cursorStyle() {
-      return this.showAllWidgets ? 'default' : 'none';
+      return this.showAllWidgets || !this.isFocused ? 'default' : 'none';
+    },
+    ...mapState({
+      isFocused: state => state.WindowState.isFocused,
+    }),
+  },
+  watch: {
+    isFocused(newValue) {
+      if (newValue) {
+        this.focusedTimestamp = new Date();
+      }
     },
   },
   created() {
@@ -267,6 +280,7 @@ export default {
       }
     },
     handleMousedownLeft(event) {
+      if (!this.isValidClick()) { return; }
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
@@ -282,6 +296,7 @@ export default {
       }
     },
     handleMouseupLeft(event) {
+      if (!this.isValidClick()) { return; }
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
@@ -369,6 +384,9 @@ export default {
         });
       }
       return componentName;
+    },
+    isValidClick() {
+      return !this.isDragging && (new Date() - this.focusedTimestamp > this.focusDelay);
     },
     toggleFullScreenState() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
