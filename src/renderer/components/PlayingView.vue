@@ -17,6 +17,7 @@ export default {
   },
   mounted() {
     this.$bus.$emit('play');
+    this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);
     this.$electron.remote.getCurrentWindow().setResizable(true);
   },
   computed: {
