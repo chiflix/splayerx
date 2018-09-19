@@ -44,7 +44,6 @@ describe('TimeProgressBar.vue', () => {
       },
     });
     expect(wrapper.vm.showScreenshot).equal(false);
-    expect(wrapper.vm.showProgressBar).equal(true);
     expect(wrapper.vm.onProgressSliderMousedown).equal(false);
     expect(wrapper.vm.flagProgressBarDraged).equal(false);
     expect(wrapper.vm.isCursorLeft).equal(false);
@@ -73,12 +72,8 @@ describe('TimeProgressBar.vue', () => {
       },
     });
     wrapper.setData({ isOnProgress: false });
-    const spy = sinon.spy(wrapper.vm.$bus, '$emit');
     wrapper.vm.appearProgressSlider();
     expect(wrapper.vm.isOnProgress).equal(true);
-    expect(spy.calledOnce).equal(true);
-    expect(spy.firstCall.args[0]).equal('clear-all-widget-disappear-delay');
-    spy.restore();
     wrapper.vm.appearProgressSlider();
     const playedSlider = wrapper.find({ ref: 'playedSlider' });
     const foolProofBar = wrapper.find({ ref: 'foolProofBar' });
@@ -131,60 +126,6 @@ describe('TimeProgressBar.vue', () => {
     expect(cssSplit(foolProofBar.attributes().style).height).equal('4px');
     expect(cssSplit(readySlider.attributes().style).height).equal('0px');
     expect(cssSplit(backSlider.attributes().style).height).equal('4px');
-  });
-
-  it('appearProgressBar method works fine', () => {
-    const wrapper = mount(TimeProgressBar, {
-      store,
-      localVue,
-      propsData: {
-        src: ' ',
-      },
-    });
-    wrapper.setData({ showProgressBar: false });
-    const spy = sinon.spy(wrapper.vm, '$_clearTimeoutDelay');
-    wrapper.vm.appearProgressBar();
-    expect(spy.calledOnce).equal(true);
-    expect(wrapper.vm.showProgressBar).equal(true);
-    spy.restore();
-  });
-
-  it('hideProgressBar method works fine - 1', () => {
-    const wrapper = mount(TimeProgressBar, {
-      store,
-      localVue,
-      propsData: {
-        src: ' ',
-      },
-    });
-    wrapper.setData({
-      onProgressSliderMousedown: true,
-      showProgressBar: true,
-    });
-    const spy = sinon.spy(wrapper.vm, 'hideProgressSlider');
-    wrapper.vm.hideProgressBar();
-    expect(wrapper.vm.showProgressBar).not.equal(false);
-    expect(spy.calledOnce).equal(false);
-    spy.restore();
-  });
-
-  it('hideProgressBar method works fine - 2', () => {
-    const wrapper = mount(TimeProgressBar, {
-      store,
-      localVue,
-      propsData: {
-        src: ' ',
-      },
-    });
-    wrapper.setData({
-      onProgressSliderMousedown: false,
-      showProgressBar: true,
-    });
-    const spy = sinon.spy(wrapper.vm, 'hideProgressSlider');
-    wrapper.vm.hideProgressBar();
-    expect(wrapper.vm.showProgressBar).equal(false);
-    expect(spy.calledOnce).equal(true);
-    spy.restore();
   });
 
   it('videoRestart method works fine', () => {
@@ -545,63 +486,4 @@ describe('TimeProgressBar.vue', () => {
     expect(wrapper.vm.widthOfThumbnail).equal(136);
     stub.restore();
   }); */
-
-  it('created hook works as expected, event $on - 2', () => {
-    const wrapper = mount(TimeProgressBar, {
-      store,
-      localVue,
-      propsData: {
-        src: ' ',
-      },
-    });
-    wrapper.setData({
-      showScreenshot: true,
-      isOnProgress: true,
-    });
-    const spy2 = sinon.spy();
-    wrapper.vm.$bus.$emit('progressslider-appear');
-    const stub = sinon.stub(wrapper.vm.$bus, '$on');
-    stub.yields();
-    stub('progressslider-appear', spy2);
-    expect(spy2.calledOnce).equal(true);
-    expect(wrapper.vm.showScreenshot).equal(false);
-    expect(wrapper.vm.isOnProgress).equal(false);
-    stub.restore();
-  });
-
-  it('created hood works as expected, event $on - 3', () => {
-    const wrapper = mount(TimeProgressBar, {
-      store,
-      localVue,
-      propsData: {
-        src: ' ',
-      },
-    });
-    const spy = sinon.spy(wrapper.vm, 'appearProgressBar');
-    wrapper.vm.$bus.$emit('progressbar-appear');
-    const stub = sinon.stub(wrapper.vm.$bus, '$on');
-    stub.yields();
-    stub('progressbar-appear', spy);
-    expect(spy.calledOnce).equal(true);
-    spy.restore();
-    stub.restore();
-  });
-
-  it('created hood works as expected, event $on - 3', () => {
-    const wrapper = mount(TimeProgressBar, {
-      store,
-      localVue,
-      propsData: {
-        src: ' ',
-      },
-    });
-    const spy = sinon.spy(wrapper.vm, 'hideProgressBar');
-    wrapper.vm.$bus.$emit('progressbar-hide');
-    const stub = sinon.stub(wrapper.vm.$bus, '$on');
-    stub.yields();
-    stub('progressbar-hide', spy);
-    expect(spy.calledOnce).equal(true);
-    spy.restore();
-    stub.restore();
-  });
 });

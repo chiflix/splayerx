@@ -1,5 +1,7 @@
 <template>
-  <div class="thumbnail-display">
+  <div
+    :data-component-name="$options.name"
+    class="thumbnail-display">
     <base-image-display
       v-if="imageReady"
       :imgSrc="image"

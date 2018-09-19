@@ -1,5 +1,7 @@
 <template>
-    <div class="subtitle-wrapper">
+    <div
+      :data-component-name="$options.name"
+      class="subtitle-wrapper">
       <!-- Need a way to avoid v-html -->
       <div class='flex-box'>
         <div class='subtitle-content'
@@ -25,6 +27,7 @@ import z from 'zero-fill';
 import { fileUrlToPath } from '@/helpers/path';
 
 export default {
+  name: 'base-subtitle',
   data() {
     return {
       textTrackID: 0,

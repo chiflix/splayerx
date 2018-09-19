@@ -1,7 +1,7 @@
 <template>
 <div class="items"
   :style="menuItemStyle"
-  @mousedown.stop="onMenuItemClick"
+  @mousedown="onMenuItemClick"
   @mouseover.stop="onMenuItemMouseOver"
   @mouseout.stop="resetAppearence">
   <div
@@ -173,7 +173,6 @@ export default {
       this.menuItemStyle.backgroundColor = '';
     },
     onSecondItemClick() {
-      console.log('itemclick');
       switch (this.item.title) {
         case 0:
 
@@ -182,7 +181,6 @@ export default {
       }
     },
     onMenuItemClick() {
-      console.log('menuclick');
       switch (this.item.title) {
         case 'Speed':
           break;

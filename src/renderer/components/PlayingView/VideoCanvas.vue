@@ -1,6 +1,7 @@
 <template>
-
-  <div class="video">
+  <div
+    :data-component-name="$options.name"
+    class="video">
     <base-video-player
       ref="videoCanvas"
       :defaultEvents="['play', 'pause', 'playing', 'canplay', 'timeupdate', 'loadedmetadata', 'durationchange']"
@@ -25,6 +26,7 @@ import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
 import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer';
 export default {
+  name: 'video-canvas',
   components: {
     BaseSubtitle,
     'base-video-player': BaseVideoPlayer,
