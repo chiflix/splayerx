@@ -1,7 +1,7 @@
 import TimerManager from '@/helpers/timerManager.js';
 import sinon from 'sinon';
 
-describe.only('Helper - TimerManager Unit Tests', () => {
+describe('Helper - TimerManager Unit Tests', () => {
   it('Sanity test', () => {
     expect(true).to.equal(true);
   });
