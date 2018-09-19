@@ -11,6 +11,7 @@ export default {
     playback: {
       name: 'Playback',
       fullScreen: 'Full Screen',
+      keepPlayingWindowFront: 'Keep Playing Window Front',
       increasePlaybackSpeed: 'Increase Playback Speed',
       decreasePlaybackSpeed: 'Decrease Playback Speed',
       captureScreen: 'Capture Screen',
