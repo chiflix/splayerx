@@ -9,7 +9,7 @@
     @mousedown.right="handleRightMousedown"
     @mousedown.left="handleLeftMousedown"
     @mouseup.left="handleLeftMouseup"
-    @dblclick="handleDoubleClick">
+    @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button />
@@ -297,7 +297,7 @@ export default {
         this.isDragging = false;
       }, this.clicksDelay);
     },
-    handleDoubleClick() {
+    handleDblclick() {
       clearTimeout(this.clicksTimer); // cancel the time out
       this.preventSingleClick = true;
       if (this.currentSelectedWidget === 'the-video-controller') {
@@ -332,9 +332,18 @@ export default {
       }
       return names;
     },
+    isChildComponent(element) {
+      let componentName = null;
+      this.$children.forEach((childComponenet) => {
+        if (childComponenet.$el === element) {
+          componentName = childComponenet.$options.name;
+        }
+      });
+      return componentName;
+    },
     processSingleElement(element) {
       const names = [];
-      const name = element.dataset.componentName;
+      const name = this.isChildComponent(element);
       if (name) {
         names.push({
           name,
