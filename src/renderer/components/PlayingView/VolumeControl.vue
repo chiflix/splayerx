@@ -1,22 +1,20 @@
 <template>
-  <div :data-component-name="$options.name">
-  <div
+  <div :data-component-name="$options.name"
     @mouseover="appearVolumeSlider"
     @mouseout="hideVolumeSlider">
     <transition name="fade">
-      <div class="container"
-        @mousedown.left="onVolumeSliderClick"
-        v-show="showVolumeSlider">
-        <div class="background" ref="sliderContainer">
-          <div class="slider" ref="slider"
-            :style="{ height: volume + '%' }">
-          </div>
+    <div class="container"
+      @mousedown.left="onVolumeSliderClick"
+      v-show="showVolumeSlider">
+      <div class="background" ref="sliderContainer">
+        <div class="slider" ref="slider"
+          :style="{ height: volume + '%' }">
         </div>
       </div>
+    </div>
     </transition>
-      <div @mousedown.left="onVolumeButtonClick">
-        <Icon class="volume-icon" type="volume" :effect="srcOfVolumeButtonImage"></Icon>
-      </div>
+    <div @mousedown.left="onVolumeButtonClick">
+      <Icon class="volume-icon" type="volume" :effect="srcOfVolumeButtonImage"></Icon>
     </div>
   </div>
 </template>;
