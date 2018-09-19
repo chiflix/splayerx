@@ -232,7 +232,9 @@ export default {
       Object.keys(this.widgetsStatus).forEach((name) => {
         this.widgetsStatus[name].selected = this.currentSelectedWidget === name;
       });
-      if (this.currentSelectedWidget !== 'subtitle-control' && this.widgetsStatus['subtitle-control'].showAttached) {
+      if (
+        (this.currentSelectedWidget !== 'subtitle-control' && this.widgetsStatus['subtitle-control'].showAttached) ||
+        !this.showAllWidgets) {
         this.widgetsStatus['subtitle-control'].showAttached = false;
       }
     },
