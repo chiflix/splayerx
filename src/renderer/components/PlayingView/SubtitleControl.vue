@@ -68,13 +68,14 @@
 
           </ul>
         </div>
-        <button @mousedown.left="toggleSubMenuDisplay">
-          <img type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
-        </button>
+        <div @mousedown.left="toggleSubMenuDisplay">
+          <Icon type="subtitle" wmode="transparent" alt="Button"></Icon>
+        </div>
       </div>
   </div>
 </template>
 <script>
+import Icon from '../IconContainer';
 export default {
   name: 'subtitle-control',
   props: {
@@ -93,6 +94,9 @@ export default {
       currentSubIden: 0,
       clicks: 0,
     };
+  },
+  components: {
+    Icon,
   },
   methods: {
     toggleSubMenuDisplay() {

@@ -168,6 +168,7 @@
     "sass-loader": "^6.0.7",
     "spectron": "^3.8.0",
     "style-loader": "^0.20.3",
+    "svg-sprite-loader": "^3.9.2",
     "url-loader": "^1.0.1",
     "vue-html-loader": "^1.2.4",
     "vue-i18n-loader": "^1.0.0",

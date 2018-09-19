@@ -15,8 +15,8 @@
         <g id="Volume---level-0" filter="url(#filter-1)">
             <rect id="Combined-Shape" fill-opacity="0.5" fill="#FFFFFF" x="0" y="12" width="6" height="12" rx="1"></rect>
             <rect id="Combined-Shape" stroke-opacity="0.3" stroke="#000000" stroke-width="0.5" opacity="0.28" x="0" y="12" width="6" height="12" rx="1"></rect>
-            <path d="M15,8 L17,8 C18.1045695,8 19,8.8954305 19,10 L19,26 C19,27.1045695 18.1045695,28 17,28 L15,28 C13.8954305,28 13,27.1045695 13,26 L13,10 C13,8.8954305 13.8954305,8 15,8 Z" id="Rectangle-5-Copy" fill-opacity="0.5" fill="#FFFFFF"></path>
-            <path d="M15,8 L17,8 C18.1045695,8 19,8.8954305 19,10 L19,26 C19,27.1045695 18.1045695,28 17,28 L15,28 C13.8954305,28 13,27.1045695 13,26 L13,10 C13,8.8954305 13.8954305,8 15,8 Z" id="Rectangle-5-Copy" stroke-opacity="0.3" stroke="#000000" stroke-width="0.5" opacity="0.28"></path>
+            <path d="M14,8 L18,8 C18.5522847,8 19,8.44771525 19,9 L19,27 C19,27.5522847 18.5522847,28 18,28 L14,28 C13.4477153,28 13,27.5522847 13,27 L13,9 C13,8.44771525 13.4477153,8 14,8 Z" id="Rectangle-5-Copy" fill-opacity="0.5" fill="#FFFFFF"></path>
+            <path d="M14,8 L18,8 C18.5522847,8 19,8.44771525 19,9 L19,27 C19,27.5522847 18.5522847,28 18,28 L14,28 C13.4477153,28 13,27.5522847 13,27 L13,9 C13,8.44771525 13.4477153,8 14,8 Z" id="Rectangle-5-Copy" stroke-opacity="0.3" stroke="#000000" stroke-width="0.5" opacity="0.28"></path>
             <rect id="Rectangle-5-Copy-2" fill-opacity="0.5" fill="#FFFFFF" x="26" y="4" width="6" height="28" rx="1"></rect>
             <rect id="Rectangle-5-Copy-2" stroke-opacity="0.3" stroke="#000000" stroke-width="0.5" opacity="0.28" x="26" y="4" width="6" height="28" rx="1"></rect>
             <rect id="Rectangle-5-Copy-4" fill-opacity="0.5" fill="#FFFFFF" x="40" y="0" width="6" height="36" rx="1"></rect>

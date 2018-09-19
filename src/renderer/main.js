@@ -77,6 +77,19 @@ new Vue({
               label: this.$t('msg.playback.fullScreen'),
               accelerator: 'CmdOrCtrl+F',
             },
+            {
+              label: this.$t('msg.playback.keepPlayingWindowFront'),
+              type: 'checkbox',
+              click: (menuItem, browserWindow) => {
+                if (browserWindow.isAlwaysOnTop()) {
+                  browserWindow.setAlwaysOnTop(false);
+                  menuItem.checked = false;
+                } else {
+                  browserWindow.setAlwaysOnTop(true);
+                  menuItem.checked = true;
+                }
+              },
+            },
             // { label: 'Play from last stopped place' },
             // { label: 'Increase Size' },
             // { label: 'Decrease Size' },
@@ -446,10 +459,7 @@ new Vue({
         }
       }
       if (potentialVidPath) {
-        this.openFile(potentialVidPath.replace(
-          process.platform === 'win32' ? /^file:\/\// : /^file:\/\/\//,
-          '',
-        ));
+        this.openFile(potentialVidPath.replace(/^file:\/\/\//, ''));
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);

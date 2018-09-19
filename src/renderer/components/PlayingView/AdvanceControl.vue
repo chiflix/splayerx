@@ -11,20 +11,21 @@
         </AdvanceControlMenuItem>
       </div>
     </div>
-    <button
+    <div
       @mousedown="1+1">
-      <img src="~@/assets/icon-advanced.svg" type="image/svg+xml">
-    </button>
+      <Icon type="advance"></Icon>
+    </div>
   </div>
 </template>;
 
 <script>
 import AdvanceControlMenuItem from './AdvanceControlMenuItem.vue';
-
+import Icon from '../IconContainer';
 export default {
   name: 'advance-control',
   components: {
     AdvanceControlMenuItem,
+    Icon,
   },
   data() {
     return {
