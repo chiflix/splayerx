@@ -17,14 +17,14 @@
     </transition>
       <button
         @mousedown.stop.left="onVolumeButtonClick">
-        <img type="image/svg+xml" wmode="transparent" v-show="showVolumeController"
-          :src="srcOfVolumeButtonImage">
+        <Icon class="volume-icon" v-show="showVolumeController" type="volume" :effect="srcOfVolumeButtonImage"></Icon>
       </button>
     </div>
   </transition>
 </template>;
 
 <script>
+import Icon from '../IconContainer';
 export default {
   data() {
     return {
@@ -35,6 +35,9 @@ export default {
       timeoutIdOfVolumeControllerDisappearDelay: 0,
       volumeMaskAppear: false,
     };
+  },
+  components: {
+    Icon,
   },
   methods: {
     onVolumeButtonClick() {
@@ -135,15 +138,15 @@ export default {
     srcOfVolumeButtonImage() {
       let srcOfVolumeButtonImage;
       if (this.volume === 0) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume-mute.svg');
+        srcOfVolumeButtonImage = 'mute';
       } else if (this.volume > 0 && this.volume <= 25) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume-1.svg');
+        srcOfVolumeButtonImage = 'level1';
       } else if (this.volume > 25 && this.volume <= 50) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume-2.svg');
+        srcOfVolumeButtonImage = 'level2';
       } else if (this.volume > 50 && this.volume <= 75) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume-3.svg');
+        srcOfVolumeButtonImage = 'level3';
       } else if (this.volume > 75 && this.volume <= 100) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume-4.svg');
+        srcOfVolumeButtonImage = 'level4';
       }
       return srcOfVolumeButtonImage;
     },
@@ -184,7 +187,7 @@ export default {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  -webkit-app-region: no-drag; 
+  -webkit-app-region: no-drag;
   position: absolute;
   background-color: rgba(0, 0, 0, 0.2);
   &:hover {
@@ -232,7 +235,7 @@ export default {
   }
 }
 button {
-  img {
+  .volume-icon {
     position: absolute;
     left: 0;
     bottom: 0;

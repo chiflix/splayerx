@@ -71,7 +71,7 @@
         </div>
         <button
           @mousedown.capture.stop.left="toggleSubtitleMenu" v-if="isSubCtrlBtnAppear">
-          <img type="image/svg+xml" wmode="transparent" src="~@/assets/icon-subtitle.svg" alt="Button">
+          <Icon type="subtitle" wmode="transparent" alt="Button"></Icon>
         </button>
       </div>
     </transition>
@@ -82,6 +82,7 @@
 
 <script>
 import _ from 'lodash';
+import Icon from '../IconContainer';
 export default {
   data() {
     return {
@@ -99,7 +100,9 @@ export default {
       currentSubIden: 0,
     };
   },
-
+  components: {
+    Icon,
+  },
   methods: {
     subCtrlBtnAppear() {
       this.isSubCtrlBtnAppear = true;

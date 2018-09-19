@@ -1,55 +1,54 @@
 <template>
-    <div class="controller" :style="{
-      bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px'
-    }">
-      <div class="playlist" :style="{
-          marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'
-      }">
-            <div class="button"
-                 :style="{
-                 height:`${itemHeight}px`,
-                 width:`${itemWidth}px`,
-            }"
-                 @click="openOrMove">
-                <div class="btnMask"
-                     :style="{
-                 height:`${itemHeight}px`,
-                 width:`${itemWidth}px`,
-                 }">
-                    <img class="addUi" src="~@/assets/icon-add.svg" type="image/svg+xml" style="-webkit-user-drag: none;">
-                </div>
-            </div>
-            <div class="item"
-                 v-for="(item, index) in lastPlayedFile"
-                 :id="'item'+index"
-                 :key="item.path"
-                 :class="showShadow ? 'shadow' : '' "
-                 :style="{
-              backgroundImage: itemShortcut(item.shortCut),
-              width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
-              height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
-            }"
-                 @click.stop="onRecentItemClick(item, index)"
-                 @mouseover="onRecentItemMouseover(item, index)"
-                 @mouseout="onRecentItemMouseout(index)"
-                 @mousedown.stop="onRecentItemMousedown($event, index)">
-                <div class="mask"
-                     :style="{
-              width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
-              height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
-              }">
-                    <img class="deleteUi" src="~@/assets/icon-delete.svg" type="image/svg+xml">
-                </div>
-            </div>
+    <div class="controller"
+         :style="{bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px'}">
+      <div class="playlist"
+           :style="{marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'}">
+        <div class="button"
+             :style="{
+             height:`${itemHeight}px`,
+             width:`${itemWidth}px`,
+             }"
+             @click="openOrMove">
+          <div class="btnMask"
+               :style="{
+               height:`${itemHeight}px`,
+               width:`${itemWidth}px`,
+               }">
+            <Icon class="addUi" type="add"></Icon>
+          </div>
         </div>
+        <div class="item"
+             v-for="(item, index) in lastPlayedFile"
+             :id="'item'+index"
+             :key="item.path"
+             :class="showShadow ? 'shadow' : '' "
+             :style="{
+             backgroundImage: itemShortcut(item.shortCut),
+             width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
+             height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
+             }"
+             @click.stop="onRecentItemClick(item, index)"
+             @mouseover="onRecentItemMouseover(item, index)"
+             @mouseout="onRecentItemMouseout(index)"
+             @mousedown.stop="onRecentItemMousedown($event, index)">
+          <div class="mask"
+               :style="{
+               width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
+               height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
+               }">
+            <Icon class="deleteUi" type="delete"></Icon>
+          </div>
+        </div>
+      </div>
     </div>
 </template>
 
 <script>
 import path from 'path';
-
+import Icon from '../IconContainer';
 export default {
   name: 'playlist',
+  components: { Icon },
   data() {
     return {
       imageTurn: '',
@@ -403,7 +402,7 @@ export default {
                 border-radius: 2px;
                 display: none;
                 box-shadow: 0 26px 39px rgba(0, 0, 0, 0.3), 0 5px 20px rgba(0, 0, 0, 0.14);
-                transition: all 150ms;
+                transition: background-color 150ms;
             }
 
             .deleteUi {
@@ -432,5 +431,4 @@ export default {
             }
         }
     }
-
 </style>

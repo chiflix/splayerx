@@ -83,7 +83,16 @@ let rendererConfig = {
         }
       },
       {
+        test: /\.svg$/,
+        loader: 'svg-sprite-loader',
+        include: [path.resolve(__dirname, '../src/renderer/assets/icon')],
+        options: {
+          symbolId: '[name]'
+        }
+      },
+      {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+        exclude: [path.resolve(__dirname, '../src/renderer/assets/icon')],
         use: {
           loader: 'url-loader',
           query: {

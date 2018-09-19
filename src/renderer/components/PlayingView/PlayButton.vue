@@ -1,13 +1,14 @@
 <template>
   <div>
-  <img type="image/svg+xml"  :src="src" class="icon"
-        :class="ani_mode"
-        @animationend="animationEnd"
-        v-if="iconAppear">
+    <Icon :type="src" class="icon" :class="ani_mode"
+          v-if="iconAppear"
+          @animationend.native="animationEnd">
+    </Icon>
   </div>
 </template>
 
 <script>
+import Icon from '../IconContainer';
 export default {
   data() {
     return {
@@ -16,6 +17,9 @@ export default {
       src: '',
     };
   },
+  components: {
+    Icon,
+  },
   methods: {
     animationEnd() {
       this.iconAppear = false; // after the animation ends, icon disappears
@@ -23,12 +27,12 @@ export default {
   },
   mounted() {
     this.$bus.$on('twinkle-pause-icon', () => {
-      this.src = require('../../assets/icon-pause.svg'); // set path of icon
+      this.src = 'pause';
       this.iconAppear = true;
       this.ani_mode = 'icon-ani-pause';// css for pause button animation
     });
     this.$bus.$on('twinkle-play-icon', () => {
-      this.src = require('../../assets/icon-play.svg');
+      this.src = 'play';
       this.iconAppear = true;
       this.ani_mode = 'icon-ani-play';
     });
