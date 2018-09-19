@@ -1,7 +1,7 @@
 import TimerManager from '@/helpers/timerManager.js';
 import sinon from 'sinon';
 
-describe('Helper - TimerManager Unit Tests', () => {
+describe.only('Helper - TimerManager Unit Tests', () => {
   it('Sanity test', () => {
     expect(true).to.equal(true);
   });
@@ -93,6 +93,17 @@ describe('Helper - TimerManager Unit Tests', () => {
     manager.updateTimer(name, time - 100, true);
 
     expect(manager.tickTimer(name, 0)).to.equal(100);
+  });
+
+  it('should timer be get', () => {
+    manager.addTimer(name, time);
+
+    expect(manager.getTimer(name)).to.deep.equal({ name, timeLeft: time });
+  });
+  it('should return null for non-existed timer', () => {
+    manager.addTimer(name, time);
+
+    expect(manager.getTimer(`${name}-1`)).to.equal(null);
   });
 
   it('should timerList return all timers', () => {
