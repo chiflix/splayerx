@@ -1,23 +1,35 @@
+import Vuex from 'vuex';
+import WindowState from '@/store/modules/WindowState';
 import TheVideoController from '@/components/PlayingView/TheVideoController';
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
 
-describe.only('Component - TheVideoController Unit Test', () => {
-  it('Sanity - should component be properly mounted', () => {
-    const wrapper = shallowMount(TheVideoController);
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
-    expect(wrapper.contains(TheVideoController)).to.equal(true);
-  });
-
+describe('Component - TheVideoController Unit Test', () => {
   let wrapper;
   let sandbox;
+  let store;
   beforeEach(() => {
-    wrapper = shallowMount(TheVideoController);
+    store = new Vuex.Store({
+      modules: {
+        WindowState: {
+          state: WindowState.state,
+          mutations: WindowState.mutations,
+        },
+      },
+    });
+    wrapper = shallowMount(TheVideoController, { store, localVue });
     sandbox = sinon.createSandbox();
   });
   afterEach(() => {
     wrapper.destroy();
     sandbox.restore();
+  });
+
+  it('Sanity - should component be properly mounted', () => {
+    expect(wrapper.contains(TheVideoController)).to.equal(true);
   });
 
   it('should event handlers be properly invoked', () => {
