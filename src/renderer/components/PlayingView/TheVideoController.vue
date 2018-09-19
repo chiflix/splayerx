@@ -359,7 +359,7 @@ export default {
     },
     getComponentName(element) {
       let componentName = this.$options.name;
-      if (element instanceof HTMLElement) {
+      if (element instanceof HTMLElement || element instanceof SVGElement) {
         /* eslint-disable consistent-return */
         this.UIElements.forEach((UIElement) => {
           if (UIElement.element.contains(element)) {
