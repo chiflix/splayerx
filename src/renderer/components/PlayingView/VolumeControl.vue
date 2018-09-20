@@ -24,7 +24,7 @@
 </template>;
 
 <script>
-import Icon from '../IconContainer';
+import Icon from '../BaseIconContainer';
 export default {
   data() {
     return {

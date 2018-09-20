@@ -82,7 +82,7 @@
 
 <script>
 import _ from 'lodash';
-import Icon from '../IconContainer';
+import Icon from '../BaseIconContainer';
 export default {
   data() {
     return {
