@@ -113,7 +113,7 @@ export default {
       buttonRadius: 0,
       cursorStyle: 'pointer',
       reactivePhases: {
-        winWidth: [512, 845, 1920, 3840],
+        winWidth: [513, 846, 1921, 3841],
         thumbnailWidth: [100, 136, 170, 272],
       },
     };
