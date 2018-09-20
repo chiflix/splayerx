@@ -432,6 +432,23 @@ new Vue({
         default:
       }
     });
+    window.addEventListener('wheel', (e) => {
+      this.$bus.$emit('volumeslider-appear');
+      const up = e.deltaY < 0;
+      if (up) {
+        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
+          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
+        } else {
+          this.$bus.$emit('volume', 1);
+        }
+      } else if (!up) {
+        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
+          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
+        } else {
+          this.$bus.$emit('volume', 0);
+        }
+      }
+    });
 
     /**
      * Todo:
