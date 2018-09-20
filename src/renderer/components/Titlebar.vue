@@ -1,5 +1,7 @@
 <template>
-  <div
+  <div class="titleBarDoubleClickHandle"
+       @dblclick="handleDoubleClick">
+    <div
     :data-component-name="$options.name"
     :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }">
     <div class="win-icons" v-if="!isDarwin">
@@ -48,6 +50,10 @@
             v-show="middleButtonStatus !== 'exit-fullscreen'"
             :state="state">
       </Icon>
+      <Icon id="maxScreenSize" class="title-button"
+            type="titleBarClose"
+            :state="state">
+      </Icon>
       <Icon id="restore" class="title-button"
             @click.native="handleFullscreenExit"
             v-show="middleButtonStatus === 'exit-fullscreen'"
@@ -55,6 +61,7 @@
             :state="state">
       </Icon>
     </div>
+  </div>
   </div>
 </template>
 
@@ -75,6 +82,7 @@ export default {
       titlebarDelay: 0,
       screenWidth: this.$electron.screen.getPrimaryDisplay().workAreaSize.width,
       state: 'default',
+      windowInfoArray: [],
     };
   },
   props: {
@@ -84,6 +92,37 @@ export default {
     Icon,
   },
   methods: {
+    handleDoubleClick() {
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      const windowSize = currentWindow.getSize();
+      const windowMaxSize = this.$electron.screen.getPrimaryDisplay().workAreaSize;// eslint-disable-line
+      this.windowInfoArray.push({ width: windowSize[0], height: windowSize[1] });
+      currentWindow.isMaximized() ? currentWindow.unmaximize() : currentWindow.maximize();// eslint-disable-line
+      if (this.windowInfoArray.length >= 3) this.windowInfoArray.shift();
+      if (this.windowInfoArray.length>=2 && currentWindow.isMaximized() && (this.windowInfoArray[1].width === windowMaxSize.width || this.windowInfoArray[1].height === windowMaxSize.height)) { // eslint-disable-line
+        console.log('resize');
+        currentWindow.setSize(this.windowInfoArray[0].width, this.windowInfoArray[0].height);
+        this.windowInfoArray.pop();
+      }
+      currentWindow.center();
+    },
+    handleEnterAlt(e) {
+      if (e.key === 'Alt') {
+        const maximizeButton = document.querySelector('#maximize');
+        const maxScreenSizeButton = document.querySelector('#maxScreenSize');
+        if (this.middleButtonStatus === 'maximize') {
+          maximizeButton.style.display = 'none';
+          maxScreenSizeButton.style.display = 'inline';
+        }
+        maxScreenSizeButton.addEventListener('click', this.handleDoubleClick);// eslint-disable-line
+      }
+    },
+    handleLeaveAlt() {
+      const maximizeButton = document.querySelector('#maximize');
+      const maxScreenSizeButton = document.querySelector('#maxScreenSize');
+      maxScreenSizeButton.style.display = 'none';
+      maximizeButton.style.display = 'inline';
+    },
     handleMouseOver() {
       this.state = 'hover';
     },
@@ -169,6 +208,12 @@ export default {
         this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
       }
     });
+    window.addEventListener('keydown', this.handleEnterAlt);
+    window.addEventListener('keyup', this.handleLeaveAlt);
+  },
+  beforeDestroy() {
+    window.removeEventListener('keydown', this.handleEnterAlt);
+    window.removeEventListener('keyup', this.handleLeaveAlt);
   },
   computed: {
     show() {
@@ -203,7 +248,7 @@ export default {
   position: absolute;
   top: 0;
   border-radius: 10px;
-  width: 100%;
+  width: 80%;
   -webkit-app-region: drag;
   height: 28px;
   z-index: 6;
@@ -228,12 +273,19 @@ export default {
     }
   }
 }
+.titleBarDoubleClickHandle{
+  z-index: 3;
+  position: absolute;
+  height:32px;
+  width:100%;
+  background: transparent;
+}
 .darwin-titlebar {
   position: absolute;
   z-index: 6;
   box-sizing: content-box;
-  top: 12px;
-  left: 12px;
+  left:12px;
+  top:12px;
   height: 20px;
   .mac-icons {
     display: flex;
@@ -263,6 +315,10 @@ export default {
       pointer-events: none;
       opacity: 0.25;
     }
+  }
+  #maxScreenSize {
+    transform: rotate(45deg);
+    display: none;
   }
   @media screen and (-webkit-min-device-pixel-ratio: 1) and (-webkit-max-device-pixel-ratio: 2) {
     .title-button {
