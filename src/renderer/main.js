@@ -243,7 +243,6 @@ new Vue({
       return path.toString().replace(/^file\/\//, '');
     },
     updateRecentPlay() {
-      console.log('Updating recent play!');
       const recentMenuTemplate = {
         label: this.$t('msg.file.openRecent'),
         id: 'recent-play',
@@ -289,7 +288,6 @@ new Vue({
       return this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
         let menuRecentData = null;
         menuRecentData = this.processRecentPlay(data);
-        console.log(menuRecentData);
         recentMenuTemplate.submenu.forEach((element, index) => {
           const value = menuRecentData.get(element.id);
           if (value.label !== '') {
