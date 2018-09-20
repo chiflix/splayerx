@@ -1,5 +1,7 @@
 <template>
-<div class="wrapper">
+<div
+  :data-component-name="$options.name"
+  class="wrapper">
   <main
     @mousedown.left.stop="handleLeftClick"
     @mouseup.left.stop="handleMouseUp"
@@ -34,7 +36,7 @@
     <transition name="welcome-container-transition" mode="">
       <div class="welcome-container" v-if="langdingLogoAppear">
           <div class="logo-container" :style="{
-             paddingTop: `${logoPos}px`
+             paddingTop: `${logoPos}vh`
         }">
               <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
           </div>
@@ -72,7 +74,7 @@ export default {
       backgroundUrl: '',
       item: [],
       isDragging: false,
-      logoPos: (405 * 0.37) - 92,
+      logoPos: 37 - (9200 / 405),
       showItemNum: 5,
       changeSize: (112 / 720) * 100,
       lastSize: 847,
@@ -117,6 +119,9 @@ export default {
         });
       });
   },
+  beforeDestroy() {
+    window.onresize = null;
+  },
   mounted() {
     this.$store.dispatch('refreshVersion');
 
@@ -129,7 +134,22 @@ export default {
     this.$bus.$on('move', (move) => {
       this.move = move;
     });
-    window.onresize = () => {
+    function debounce(fn, interval, immediate) {
+      let timeout;
+      return () => {
+        const context = this;
+        const args = { 0: fn, 1: interval, 2: immediate };
+        const later = () => {
+          timeout = null;
+          if (!immediate) fn.apply(context, args);
+        };
+        const callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, interval);
+        if (callNow) fn.apply(context, args);
+      };
+    }
+    const resize = debounce(() => {
       this.windowWidth = document.body.clientWidth;
       if (this.isFullScreen) {
         this.windowFlag = false;
@@ -138,7 +158,7 @@ export default {
       } else {
         this.windowFlag = true;
       }
-      this.logoPos = (document.body.clientHeight * 0.37) - 100;
+      this.logoPos = 37 - (9200 / document.body.clientHeight);
       const changingWidth = document.body.clientWidth;
       const add = ((this.showItemNum + 1) * 112) + (this.showItemNum * 15);
       const sup = ((this.showItemNum * 112) + ((this.showItemNum - 1) * 15));
@@ -193,7 +213,8 @@ export default {
         ((averageWidth - 112) * -this.moveItem);
       this.changeSize = changingWidth > 1355 ? ((changingWidth - ((100 / 1355) *
         changingWidth) - 135) * 10) / changingWidth : (averageWidth / changingWidth) * 100;
-    };
+    }, 0);
+    window.onresize = resize;
     const { app } = this.$electron.remote;
     this.$electron.remote.getCurrentWindow().setResizable(true);
     this.$electron.remote.getCurrentWindow().setAspectRatio(720 / 405);

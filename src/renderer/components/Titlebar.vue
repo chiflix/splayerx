@@ -1,57 +1,69 @@
 <template>
-  <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
-    v-show="showTitlebar">
+  <div
+    :data-component-name="$options.name"
+    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }">
     <div class="win-icons" v-if="!isDarwin">
-      <div id="minimize" class="title-button"
-        @click="handleMinimize">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="maximize" class="title-button"
-        @click="handleMaximize"
-        v-show="middleButtonStatus === 'maximize'">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="restore" class="title-button"
-        @click="handleRestore"
+      <Icon class="title-button"
+        @click.native="handleMinimize"
+        type="titleBarWinMin">
+      </Icon>
+      <Icon class="title-button"
+        @click.native="handleMaximize"
+        v-show="middleButtonStatus === 'maximize'"
+        type="titleBarWinMax">
+      </Icon>
+      <Icon class="title-button"
+        @click.native="handleRestore"
+        type="titleBarWinRestore"
         v-show="middleButtonStatus === 'restore'">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="exit-fullscreen" class="title-button"
-        @click="handleFullscreenExit"
-        v-show="middleButtonStatus === 'exit-fullscreen'">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="close" class="title-button"
-        @click="handleClose">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
+      </Icon>
+      <Icon class="title-button"
+        @click.native="handleFullscreenExit"
+        v-show="middleButtonStatus === 'exit-fullscreen'"
+        type="titleBarWinResize">
+      </Icon>
+      <Icon class="title-button"
+        @click.native="handleClose"
+        type="titleBarWinClose">
+      </Icon>
     </div>
-    <div class="mac-icons" v-if="isDarwin">
-      <div id="close" class="title-button"
-        @click="handleClose">
-      </div>
-      <div id="minimize" class="title-button"
-        @click="handleMinimize"
-        :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }">
-      </div>
-      <div id="maximize" class="title-button"
-        @click="handleMacMaximize"
-        v-show="middleButtonStatus !== 'exit-fullscreen'">
-      </div>
-      <div id="restore" class="title-button"
-        @click="handleFullscreenExit"
-        v-show="middleButtonStatus === 'exit-fullscreen'">
-      </div>
+    <div class="mac-icons" v-if="isDarwin"
+         @mouseover="handleMouseOver"
+         @mouseout="handleMouseOut">
+      <Icon id="close" class="title-button"
+            type="titleBarClose"
+            :state="state"
+            @click.native="handleClose">
+      </Icon>
+      <Icon id="minimize" class="title-button"
+            type="titleBarMin"
+            @click.native="handleClose"
+            :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
+            :state="state"
+            :isFullScreen="middleButtonStatus">
+      </Icon>
+      <Icon id="maximize" class="title-button"
+            type="titleBarMax"
+            @click.native="handleMacMaximize"
+            v-show="middleButtonStatus !== 'exit-fullscreen'"
+            :state="state">
+      </Icon>
+      <Icon id="restore" class="title-button"
+            @click.native="handleFullscreenExit"
+            v-show="middleButtonStatus === 'exit-fullscreen'"
+            type="titleBarRecover"
+            :state="state">
+      </Icon>
     </div>
   </div>
 </template>
 
 <script>
+import Icon from './IconContainer';
 export default {
   name: 'titlebar',
   data() {
     return {
-      showTitlebar: true,
       middleButtonStatus: 'maximize',
       windowInfo: {
         screenWidth: null,
@@ -62,12 +74,22 @@ export default {
       isDarwin: process.platform === 'darwin',
       titlebarDelay: 0,
       screenWidth: this.$electron.screen.getPrimaryDisplay().workAreaSize.width,
+      state: 'default',
     };
   },
   props: {
     currentView: String,
   },
+  components: {
+    Icon,
+  },
   methods: {
+    handleMouseOver() {
+      this.state = 'hover';
+    },
+    handleMouseOut() {
+      this.state = 'default';
+    },
     // Methods to handle window behavior
     handleMinimize() {
       this.$electron.remote.getCurrentWindow().minimize();
@@ -75,8 +97,7 @@ export default {
     handleMaximize() {
       this.$electron.remote.getCurrentWindow().maximize();
     },
-    handleClose(e) {
-      console.log(e);
+    handleClose() {
       this.$electron.remote.getCurrentWindow().close();
     },
     handleRestore() {
@@ -148,8 +169,6 @@ export default {
         this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
       }
     });
-    this.$bus.$on('titlebar-appear', this.appearTitlebar);
-    this.$bus.$on('titlebar-hide', this.hideTitlebar);
   },
   computed: {
     show() {
@@ -208,32 +227,6 @@ export default {
       background-color: rgba(221, 221, 221, 0.5);
     }
   }
-  img {
-    object-fit: none;
-    width: 45px;
-    height: 28px;
-    -webkit-user-drag: none;
-    -webkit-app-region: no-drag;
-  }
-  #minimize img {
-    object-position: 0 0
-  }
-  #maximize img {
-    object-position: 0 -28px;
-    &.disabled {
-      object-position: 0 -140px;
-      -webkit-app-region: drag;
-    }
-  }
-  #restore img {
-    object-position: 0 -56px;
-  }
-  #exit-fullscreen img {
-    object-position: 0 -84px;
-  }
-  #close img {
-    object-position: 0 -112px;
-  }
 }
 .darwin-titlebar {
   position: absolute;
@@ -250,51 +243,9 @@ export default {
     width: 12px;
     height: 12px;
     margin-right: 8px;
-    background-image: url('../assets/mac-titlebar-icons.png');
     background-repeat: no-repeat;
     -webkit-app-region: no-drag;
-    opacity: 0.5;
     border-radius: 100%;
-  }
-  .mac-icons {
-    &:hover {
-      #close {
-        background-position-y: 0;
-        opacity: 1;
-        &:active {
-          background-position-y: -12px;
-        }
-      }
-      #minimize {
-        background-position-y: -24px;
-        opacity: 1;
-        &.disabled {
-          background-position-y: -108px;
-          opacity: 0.25;
-        }
-        &:active {
-          background-position-y: -36px;
-        }
-      }
-      #maximize {
-        background-position-y: -48px;
-        opacity: 1;
-        &.disabled {
-          background-position-y: -108px;
-          opacity: 0.25;
-        }
-        &:active {
-          background-position-y: -60px;
-        }
-      }
-      #restore {
-        background-position-y: -72px;
-        opacity: 1;
-        &:active {
-          background-position-y: -84px;
-        }
-      }
-    }
   }
   .title-button {
     background-position-y: -96px;

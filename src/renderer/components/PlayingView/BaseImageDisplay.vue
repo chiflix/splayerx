@@ -210,6 +210,7 @@ export default {
         break;
       }
     }
+    this.$refs.image.dataset.componentName = this.$options.name;
   },
 };
 </script>

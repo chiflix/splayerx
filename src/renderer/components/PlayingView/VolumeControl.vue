@@ -1,45 +1,42 @@
 <template>
-  <transition name="fade" appear>
-  <div class="volume"
-    @mouseover.stop="appearVolumeSlider"
-    @mouseout.stop="hideVolumeSlider"
-    @mousemove="clearAllWidgetsTimeout">
+  <div :data-component-name="$options.name"
+    @mouseover="appearVolumeSlider"
+    @mouseout="hideVolumeSlider">
     <transition name="fade">
-      <div class="container"
-        @mousedown.stop.left="onVolumeSliderClick"
-        v-show="showVolumeSlider">
-        <div class="background" ref="sliderContainer">
-          <div class="slider" ref="slider"
-            :style="{ height: volume + '%' }">
-          </div>
+    <div class="container"
+      @mousedown.left="onVolumeSliderClick"
+      v-show="showVolumeSlider">
+      <div class="background" ref="sliderContainer">
+        <div class="slider" ref="slider"
+          :style="{ height: volume + '%' }">
         </div>
       </div>
-    </transition>
-      <button
-        @mousedown.stop.left="onVolumeButtonClick">
-        <img type="image/svg+xml" wmode="transparent" v-show="showVolumeController"
-          :src="srcOfVolumeButtonImage">
-      </button>
     </div>
-  </transition>
+    </transition>
+    <div @mousedown.left="onVolumeButtonClick">
+      <Icon class="volume-icon" type="volume" :effect="srcOfVolumeButtonImage"></Icon>
+    </div>
+  </div>
 </template>;
 
 <script>
+import Icon from '../IconContainer';
 export default {
+  name: 'volume-control',
   data() {
     return {
       showVolumeSlider: false,
-      showVolumeController: true,
       onVolumeSliderMousedown: false,
       currentVolume: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
       volumeMaskAppear: false,
     };
   },
+  components: {
+    Icon,
+  },
   methods: {
     onVolumeButtonClick() {
-      console.log('onVolumeButtonClick');
-      this.$_clearTimeoutDelay();
       if (this.volume !== 0) {
         this.currentVolume = this.volume;
         this.$bus.$emit('volume', 0);
@@ -48,7 +45,6 @@ export default {
       }
     },
     onVolumeSliderClick(e) {
-      console.log('onVolumeSliderClick');
       this.onVolumeSliderMousedown = true;
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
       let volumeHeight = sliderOffsetBottom - e.clientY;
@@ -61,11 +57,7 @@ export default {
       this.$_documentVoluemeDragClear();
       this.$_documentVolumeSliderDragEvent();
     },
-    clearAllWidgetsTimeout() {
-      this.$bus.$emit('clear-all-widget-disappear-delay');
-    },
     appearVolumeSlider() {
-      this.$_clearTimeoutDelay();
       this.showVolumeSlider = true;
     },
     hideVolumeSlider() {
@@ -73,20 +65,11 @@ export default {
         this.showVolumeSlider = false;
       }
     },
-    appearVolumeController() {
-      this.showVolumeController = true;
-    },
     hideVolumeController() {
       if (!this.onVolumeSliderMousedown) {
-        this.showVolumeController = false;
         if (this.showVolumeSlider) {
           this.showVolumeSlider = false;
         }
-      }
-    },
-    $_clearTimeoutDelay() {
-      if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
       }
     },
     /**
@@ -135,31 +118,20 @@ export default {
     srcOfVolumeButtonImage() {
       let srcOfVolumeButtonImage;
       if (this.volume === 0) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume-mute.svg');
+        srcOfVolumeButtonImage = 'mute';
       } else if (this.volume > 0 && this.volume <= 25) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume-1.svg');
+        srcOfVolumeButtonImage = 'level1';
       } else if (this.volume > 25 && this.volume <= 50) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume-2.svg');
+        srcOfVolumeButtonImage = 'level2';
       } else if (this.volume > 50 && this.volume <= 75) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume-3.svg');
+        srcOfVolumeButtonImage = 'level3';
       } else if (this.volume > 75 && this.volume <= 100) {
-        srcOfVolumeButtonImage = require('../../assets/icon-volume-4.svg');
+        srcOfVolumeButtonImage = 'level4';
       }
       return srcOfVolumeButtonImage;
     },
   },
   created() {
-    this.$bus.$on('volumecontroller-appear-delay', () => {
-      this.appearVolumeController();
-      if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
-        this.timeoutIdOfVolumeControllerDisappearDelay
-          = setTimeout(this.hideVolumeController, 3000);
-      } else {
-        this.timeoutIdOfVolumeControllerDisappearDelay
-          = setTimeout(this.hideVolumeController, 3000);
-      }
-    });
     this.$bus.$on('volumeslider-appear', () => {
       this.appearVolumeSlider();
       if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
@@ -171,8 +143,6 @@ export default {
           = setTimeout(this.hideVolumeController, 3000);
       }
     });
-    this.$bus.$on('volumecontroller-appear', this.appearVolumeController);
-    this.$bus.$on('volumecontroller-hide', this.hideVolumeController);
   },
 };
 </script>
@@ -184,7 +154,7 @@ export default {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  -webkit-app-region: no-drag; 
+  -webkit-app-region: no-drag;
   position: absolute;
   background-color: rgba(0, 0, 0, 0.2);
   &:hover {
@@ -232,7 +202,7 @@ export default {
   }
 }
 button {
-  img {
+  .volume-icon {
     position: absolute;
     left: 0;
     bottom: 0;

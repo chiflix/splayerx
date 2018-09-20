@@ -27,8 +27,6 @@ describe('SubtitleControl.vue', () => {
     expect(wrapper.vm.loadingSubsPlaceholders.local).equal('');
     expect(wrapper.vm.loadingSubsPlaceholders.embedded).equal('');
     expect(wrapper.vm.loadingSubsPlaceholders.server).equal('');
-    expect(wrapper.vm.isSubCtrlBtnAppear).equal(true);
-    expect(wrapper.vm.appearSubtitleMenu).equal(false);
     expect(wrapper.vm.showingPopupDialog).equal(false);
     expect(wrapper.vm.preStyle).contains('linear-gradient');
     expect(wrapper.vm.currentSubIden).equal(0);
@@ -42,35 +40,7 @@ describe('SubtitleControl.vue', () => {
     });
     expect(wrapper.html()).contains('ul');
     expect(wrapper.html()).contains('li');
-    expect(wrapper.html()).contains('img');
-  });
-
-  it('subCtrlBtnAppear method works fine', () => {
-    const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    wrapper.setData({ isSubCtrlBtnAppear: false });
-    wrapper.vm.subCtrlBtnAppear();
-    expect(wrapper.vm.isSubCtrlBtnAppear).equal(true);
-  });
-
-  it('subCtrlBtnHide method works fine', () => {
-    const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    wrapper.setData({
-      isSubCtrlBtnAppear: true,
-      appearSubtitleMenu: true,
-    });
-    wrapper.vm.subCtrlBtnHide();
-    expect(wrapper.vm.isSubCtrlBtnAppear).equal(false);
-    expect(wrapper.vm.appearSubtitleMenu).equal(false);
-  });
-
-  it('toggleSubtitleMenu method works fine', () => {
-    const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    wrapper.setData({ appearSubtitleMenu: false });
-    wrapper.vm.toggleSubtitleMenu();
-    expect(wrapper.vm.appearSubtitleMenu).equal(true);
-    wrapper.setData({ isBtnMenuAppear: true });
-    wrapper.vm.toggleSubtitleMenu();
-    expect(wrapper.vm.appearSubtitleMenu).equal(false);
+    expect(wrapper.html()).contains('div');
   });
 
   it('toggleItemClick method works fine', () => {
@@ -137,15 +107,6 @@ describe('SubtitleControl.vue', () => {
     expect(wrapper.vm.computedAvaliableItems[2].title).equal('something index 2');
   });
 
-  it('toggleSubtitleBtnMouseover method work fine', () => {
-    const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    const spy = sinon.spy(wrapper.vm.$bus, '$emit');
-    wrapper.vm.toggleSubtitleBtnMouseover();
-    expect(spy.calledOnce).equal(true);
-    expect(spy.args[0][0]).equal('clear-all-widget-disappear-delay');
-    spy.restore();
-  });
-
   it('toggleLoadServerSubtitles method work fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
     const spy = sinon.spy(wrapper.vm.$bus, '$emit');
@@ -160,23 +121,6 @@ describe('SubtitleControl.vue', () => {
     wrapper.setData({ showingPopupDialog: true });
     wrapper.vm.toggleOpenFileDialog();
     expect(wrapper.vm.showingPopupDialog).equal(true);
-  });
-
-  it('sub-ctrl-hide event listener work fine', () => {
-    const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    wrapper.vm.$bus.$emit('sub-ctrl-hide');
-    const stub1 = sinon.stub(wrapper.vm.$bus, '$on');
-    const spy1 = sinon.spy(wrapper.vm, 'subCtrlBtnHide');
-    const spy2 = sinon.spy(wrapper.vm.$bus, '$emit');
-
-    stub1.yields();
-    stub1('sub-ctrl-hide', spy1, spy2);
-    expect(spy1.called).equal(true);
-    expect(spy2.called).equal(true);
-    expect(spy2.args[0][0]).equal('subtitle-menu-toggled-off');
-    stub1.restore();
-    spy2.restore();
-    spy1.restore();
   });
 
   it('added-local-subtitles event listener work fine', () => {

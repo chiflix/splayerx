@@ -1,20 +1,26 @@
 <template>
-  <div>
-  <img type="image/svg+xml"  :src="src" class="icon"
-        :class="ani_mode"
-        @animationend="animationEnd"
-        v-if="iconAppear">
+  <div
+    :data-component-name="$options.name">
+  <Icon :type="src" class="icon" :class="ani_mode"
+          v-if="iconAppear"
+          @animationend.native="animationEnd">
+    </Icon>
   </div>
 </template>
 
 <script>
+import Icon from '../IconContainer';
 export default {
+  name: 'play-button',
   data() {
     return {
       iconAppear: false, // control whether the icon show up or not
       ani_mode: '', // change the CSS
       src: '',
     };
+  },
+  components: {
+    Icon,
   },
   methods: {
     animationEnd() {
@@ -23,12 +29,12 @@ export default {
   },
   mounted() {
     this.$bus.$on('twinkle-pause-icon', () => {
-      this.src = require('../../assets/icon-pause.svg'); // set path of icon
+      this.src = 'pause';
       this.iconAppear = true;
       this.ani_mode = 'icon-ani-pause';// css for pause button animation
     });
     this.$bus.$on('twinkle-play-icon', () => {
-      this.src = require('../../assets/icon-play.svg');
+      this.src = 'play';
       this.iconAppear = true;
       this.ani_mode = 'icon-ani-play';
     });

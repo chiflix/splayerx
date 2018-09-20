@@ -1,5 +1,7 @@
 <template>
-    <div class="subtitle-wrapper">
+    <div
+      :data-component-name="$options.name"
+      class="subtitle-wrapper">
       <!-- Need a way to avoid v-html -->
       <div class='flex-box'>
         <div class='subtitle-content'
@@ -25,6 +27,7 @@ import z from 'zero-fill';
 import { fileUrlToPath } from '@/helpers/path';
 
 export default {
+  name: 'base-subtitle',
   data() {
     return {
       textTrackID: 0,
@@ -134,7 +137,20 @@ export default {
       this.mediaHash = this.mediaQuickHash(fileUrlToPath(vid.src));
       this.Sagi = this.sagi();
 
-      const serverSubsStatus = await this.serverSubsExist();
+      // serverSubsExist
+      let serverSubsStatus;
+      const res = await this.Sagi.mediaTranslate(this.mediaHash);
+      if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
+        serverSubsStatus = {
+          found: true,
+          size: res.array[1].length,
+        };
+      } else {
+        serverSubsStatus = {
+          found: false,
+          size: 0,
+        };
+      }
 
       const files = [];
       this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
@@ -149,7 +165,7 @@ export default {
       const re = new RegExp('^(.mkv)$');
       let embeddedSubsStatus;
       if (re.test(path.extname(decodeURI(vid.src)))) {
-        embeddedSubsStatus = await this.hasEmbedded(decodeURI(vid.src));
+        embeddedSubsStatus = await this.hasEmbeddedSubs(decodeURI(vid.src));
       } else {
         embeddedSubsStatus = {
           found: false,
@@ -187,19 +203,6 @@ export default {
       });
     },
 
-    async serverSubsExist() {
-      const res = await this.Sagi.mediaTranslate(this.mediaHash);
-      if (!(res.array[0][1] && res.array[0][1] !== 'OK')) {
-        return {
-          found: true,
-          size: res.array[1].length,
-        };
-      }
-      return {
-        found: false,
-        size: 0,
-      };
-    },
 
     /**
      * @param {function} cb callback function to process result
@@ -218,12 +221,13 @@ export default {
             cb('No server transcripts');
           } else {
             const textTrackList = res.array[1];
+            const delay = res.array[4];
 
             this.getAllTranscriptsFromServer(textTrackList)
               .then((resArray) => {
                 for (let i = 0; i < resArray.length; i += 1) {
                   const res = resArray[i];
-                  this.addCuesArray(res.array[1]);
+                  this.addCuesArray(res.array[1], delay);
                 }
 
                 // Only when all subtitles are successfully loaded,
@@ -274,11 +278,6 @@ export default {
         const realPath = filePath.substring(7);
         fs.createReadStream(realPath).pipe(subs);
       });
-    },
-
-    async hasEmbedded(filePath) {
-      const res = await (this.hasEmbeddedSubs(filePath));
-      return res;
     },
 
     mkvProcess(vidPath, onlyEmbedded, cb) {
@@ -461,16 +460,17 @@ export default {
     /**
      * @description Transfer cues array from server to vtt files
      * and add these cues into video subtitles.
+     * @param {Number} delay time offset
      */
-    addCuesArray(cueArray) {
+    addCuesArray(cueArray, delay) {
       const vid = this.$parent.$refs.videoCanvas.videoElement();
       const subtitle = vid.addTextTrack('subtitles');
       subtitle.mode = 'disabled';
       // Add cues to TextTrack
       for (let i = 0; i < cueArray.length; i += 1) {
         const element = cueArray[i];
-        const startTime = this.timeProcess(element[0]);
-        const endTime = this.timeProcess(element[1]);
+        const startTime = this.timeProcess(element[0], delay);
+        const endTime = this.timeProcess(element[1], delay);
         subtitle.addCue(new VTTCue(startTime, endTime, element[2]));
       }
     },
@@ -590,14 +590,18 @@ export default {
     },
     /**
      * @param {Number} second
+     * @param {Number} delay
      * @returns {Number}
      */
-    timeProcess(second) {
+    timeProcess(second, delay) {
       // Now as per official proto3 documentation, default values are not
       // serialized to save space during wire transmission.
       // so if input is 0, it may become undefined
       if (!second) {
         return 0;
+      }
+      if (delay) {
+        second += delay;
       }
       return second;
     },

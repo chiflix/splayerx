@@ -1,55 +1,54 @@
 <template>
-    <div class="controller" :style="{
-      bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px'
-    }">
-      <div class="playlist" :style="{
-          marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'
-      }">
-            <div class="button"
-                 :style="{
-                 height:`${changeSize}vh`,
-                 width:`${changeSize}vw`,
-            }"
-                 @click="openOrMove">
-                <div class="btnMask"
-                     :style="{
-                 height:`${changeSize}vh`,
-                 width:`${changeSize}vw`,
-                 }">
-                    <img class="addUi" src="~@/assets/icon-add.svg" type="image/svg+xml" style="-webkit-user-drag: none;">
-                </div>
-            </div>
-            <div class="item"
-                 v-for="(item, index) in lastPlayedFile"
-                 :id="'item'+index"
-                 :key="item.path"
-                 :class="showShadow ? 'shadow' : '' "
-                 :style="{
-              backgroundImage: itemShortcut(item.shortCut),
-              width: item.chosen ? `${changeSize * 9 / 7}vw` : `${changeSize}vw`,
-              height: item.chosen ? `${changeSize * 9 / 7}vh` : `${changeSize}vh`,
-            }"
-                 @click.stop="onRecentItemClick(item, index)"
-                 @mouseover="onRecentItemMouseover(item, index)"
-                 @mouseout="onRecentItemMouseout(index)"
-                 @mousedown.stop="onRecentItemMousedown($event, index)">
-                <div class="mask"
-                     :style="{
-                     width: item.chosen ? `${changeSize * 9 / 7}vw` : `${changeSize}vw`,
-                     height: item.chosen ? `${changeSize * 9 / 7}vh` : `${changeSize}vh`,
-              }">
-                    <img class="deleteUi" src="~@/assets/icon-delete.svg" type="image/svg+xml">
-                </div>
-            </div>
+    <div class="controller"
+         :style="{bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px'}">
+      <div class="playlist"
+           :style="{marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'}">
+        <div class="button"
+             :style="{
+             height:`${itemHeight}px`,
+             width:`${itemWidth}px`,
+             }"
+             @click="openOrMove">
+          <div class="btnMask"
+               :style="{
+               height:`${itemHeight}px`,
+               width:`${itemWidth}px`,
+               }">
+            <Icon class="addUi" type="add"></Icon>
+          </div>
         </div>
+        <div class="item"
+             v-for="(item, index) in lastPlayedFile"
+             :id="'item'+index"
+             :key="item.path"
+             :class="showShadow ? 'shadow' : '' "
+             :style="{
+             backgroundImage: itemShortcut(item.shortCut),
+             width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
+             height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
+             }"
+             @click.stop="onRecentItemClick(item, index)"
+             @mouseover="onRecentItemMouseover(item, index)"
+             @mouseout="onRecentItemMouseout(index)"
+             @mousedown.stop="onRecentItemMousedown($event, index)">
+          <div class="mask"
+               :style="{
+               width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
+               height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
+               }">
+            <Icon class="deleteUi" type="delete"></Icon>
+          </div>
+        </div>
+      </div>
     </div>
 </template>
 
 <script>
 import path from 'path';
-
+import Icon from '../IconContainer';
 export default {
   name: 'playlist',
+  components: { Icon },
   data() {
     return {
       imageTurn: '',
@@ -69,6 +68,8 @@ export default {
       moveItem: 0,
       mouseFlag: true,
       showShadow: true,
+      itemWidth: 112,
+      itemHeight: 65,
     };
   },
   props: {
@@ -91,35 +92,45 @@ export default {
     },
     windowWidth: {
       type: Number,
+      require: true,
     },
+  },
+  destroyed() {
+    document.onmousemove = null;
+    document.onmouseup = null;
+    window.onkeyup = null;
   },
   mounted() {
     const lf = document.querySelector('.controller');
-    if (lf) {
-      window.onkeyup = (e) => {
-        if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
-          !this.isFullScreen && e.keyCode === 39) {
-          this.moveItem -= 1;
-          const ss = (this.move - 15) - (this.changeSize * (this.windowWidth / 100));
-          this.move = ss;
-          lf.style.left = `${ss}px`;
-        } else if (this.moveItem === -1 && !this.isFullScreen && e.keyCode === 37) {
-          this.move = 0;
-          this.moveItem = 0;
-          lf.style.left = '0px';
-        } else if (this.moveItem !== 0 && !this.isFullScreen && e.keyCode === 37) {
-          this.moveItem += 1;
-          const ss = (this.move + 15) + (this.changeSize * (this.windowWidth / 100));
-          this.move = ss;
-          lf.style.left = `${ss}px`;
-        }
-        this.$bus.$emit('moveItem', this.moveItem);
-        this.$bus.$emit('move', this.move);
-      };
-    }
+    window.onkeyup = (e) => {
+      if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
+        !this.isFullScreen && e.keyCode === 39) {
+        this.moveItem -= 1;
+        const ss = (this.move - 15) - (this.changeSize * (this.windowWidth / 100));
+        this.move = ss;
+        lf.style.left = `${ss}px`;
+      } else if (this.moveItem === -1 && !this.isFullScreen && e.keyCode === 37) {
+        this.move = 0;
+        this.moveItem = 0;
+        lf.style.left = '0px';
+      } else if (this.moveItem !== 0 && !this.isFullScreen && e.keyCode === 37) {
+        this.moveItem += 1;
+        const ss = (this.move + 15) + (this.changeSize * (this.windowWidth / 100));
+        this.move = ss;
+        lf.style.left = `${ss}px`;
+      }
+      this.$bus.$emit('moveItem', this.moveItem);
+      this.$bus.$emit('move', this.move);
+    };
   },
+
   watch: {
-    showItemNum: function change(val, oldval) {
+    windowWidth(val) {
+      this.itemWidth = (this.changeSize * val) / 100;
+      this.itemHeight = (this.changeSize * val * 405) / 100 / 720;
+      document.querySelector('.item').style.transition = '';
+    },
+    showItemNum(val, oldval) {
       if (val > oldval) {
         if (this.moveItem <= oldval - (1 + this.lastPlayedFile.length) &&
           oldval <= this.lastPlayedFile.length) {
@@ -210,6 +221,7 @@ export default {
     onRecentItemMouseover(item, index) {
       if (((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
         this.isFullScreen) && this.mouseFlag) {
+        document.querySelector(`#item${index}`).style.transition = 'width 150ms ease-out, height 150ms ease-out, border 150ms ease-out';
         this.item = item;
         this.$set(this.lastPlayedFile[index], 'chosen', true);
         if (item.shortCut !== '') {
@@ -251,7 +263,6 @@ export default {
       const item = document.querySelector(`#item${index}`);
       function mousemove(ev) {
         if (vm.mouseDown) {
-          vm.mouseFlag = false;
           vm.isDragging = true;
           const l = ev.clientX - vm.disX;
           const t = ev.clientY - vm.disY;
@@ -299,6 +310,7 @@ export default {
       }
       this.isDragging = false;
       if (index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) {
+        this.mouseFlag = false;
         this.mouseDown = true;
         document.onmousemove = mousemove;
         document.onmouseup = mouseup;
@@ -348,7 +360,7 @@ export default {
 
             .button {
                 background-color: rgba(0, 0, 0, 0.12);
-                transition: background-color 150ms ease-out, width 150ms ease-out, height 150ms ease-out, border 150ms ease-out;
+                transition: background-color 150ms ease-out;
                 backdrop-filter: blur(9.8px);
                 margin-right: 15px;
                 cursor: pointer;
@@ -362,7 +374,6 @@ export default {
             .btnMask {
                 border-radius: 2px;
                 border: 1px solid rgba(255, 255, 255, 0.1);
-                transition: width 150ms ease-out, height 150ms ease-out;
                 display: flex;
             }
 
@@ -375,8 +386,6 @@ export default {
                 color: #e4e4c4;
                 border-radius: 2px;
                 border: 1px solid rgba(255, 255, 255, 0.1);
-                width: 112 / 720vw;
-                height: 63 / 405vh;
                 min-height: 63px;
                 min-width: 112px;
                 color: gray;
@@ -385,7 +394,6 @@ export default {
                 background-size: cover;
                 background-repeat: no-repeat;
                 background-position: center center;
-                transition: width 150ms ease-out, height 150ms ease-out;
                 display: flex;
                 box-shadow: 0 20px 29px rgba(0, 0, 0, 0.3);
             }
@@ -394,7 +402,7 @@ export default {
                 border-radius: 2px;
                 display: none;
                 box-shadow: 0 26px 39px rgba(0, 0, 0, 0.3), 0 5px 20px rgba(0, 0, 0, 0.14);
-                transition: all 150ms;
+                transition: background-color 150ms;
             }
 
             .deleteUi {
@@ -423,5 +431,4 @@ export default {
             }
         }
     }
-
 </style>

@@ -1,54 +1,28 @@
 <template>
-  <transition name="fade">
-  <div class="timing" id="timing"
-    @mousedown.stop="switchStateOfContent"
-    @mouseover.stop="appearTimeCode"
-    @mousemove.stop="throttledCall"
-    v-show="showTimeCode">
+  <div class="timing"
+    :data-component-name="$options.name"
+    @mousedown="switchStateOfContent">
         <span class="firstContent" :class="{ remainTime: isRemainTime.first }">{{ content.first }}</span>
         <span class="splitSign">/</span>
         <span class="secondContent" :class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ content.second }}</span>
   </div>
-</transition>
-</template>;
-
+</template>
 <script>
-import _ from 'lodash';
-
 export default {
-  name: 'TimeCodes',
+  name: 'the-time-codes',
   data() {
     return {
-      showTimeCode: false,
-      timeoutIdOftimeCodeDisappearDelay: 0,
       contentState: 0,
       ContentStateEnum: {
         DEFAULT: 0,
         CURRENT_REMAIN: 1,
         REMAIN_DURATION: 2,
       },
-      throttledCall: null,
     };
   },
   methods: {
     switchStateOfContent() {
-      this.$_clearTimeoutDelay();
       this.contentState = (this.contentState + 1) % 3;
-    },
-    appearTimeCode() {
-      this.$_clearTimeoutDelay();
-      this.showTimeCode = true;
-    },
-    hideTimeCode() {
-      this.showTimeCode = false;
-    },
-    clearAllWidgetsTimeout() {
-      this.$bus.$emit('clearAllWidgetDisappearDelay');
-    },
-    $_clearTimeoutDelay() {
-      if (this.timeoutIdOftimeCodeDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOftimeCodeDisappearDelay);
-      }
     },
   },
   computed: {
@@ -84,30 +58,12 @@ export default {
       }
     },
   },
-  created() {
-    this.$bus.$on('timecode-appear-delay', () => {
-      this.appearTimeCode();
-      if (this.timeoutIdOftimeCodeDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOftimeCodeDisappearDelay);
-        this.timeoutIdOftimeCodeDisappearDelay
-          = setTimeout(this.hideTimeCode, 3000);
-      } else {
-        this.timeoutIdOftimeCodeDisappearDelay
-          = setTimeout(this.hideTimeCode, 3000);
-      }
-    });
-    this.$bus.$on('timecode-appear', this.appearTimeCode);
-    this.$bus.$on('timecode-hide', this.hideTimeCode);
-  },
-  beforeMount() {
-    this.throttledCall = _.throttle(this.clearAllWidgetsTimeout, 500);
-  },
 };
 </script>
 
 <style lang="scss">
 
-.video-controller .timing {
+.timing {
   position: absolute;
   width: auto;
 
@@ -191,23 +147,7 @@ export default {
   cursor: pointer;
 }
 
-.video-controller .timing .timing--current {
+.timing .timing--current {
   opacity: 1;
-}
-
-.fade-enter-active {
- transition: opacity 100ms;
-}
-
-.fade-leave-active {
- transition: opacity 400ms;
-}
-
-.fade-enter-to, .fade-leave {
- opacity: 1;
-}
-
-.fade-enter, .fade-leave-to {
- opacity: 0;
 }
 </style>

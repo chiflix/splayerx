@@ -18,8 +18,8 @@ describe('PlayButton.vue', () => {
   it('model an animation end', () => {
     const wrapper = mount(PlayButton);
     wrapper.setData({ iconAppear: true });
-    const img = wrapper.find('img');
-    img.trigger('animationend');
+    const icon = wrapper.find('.icon');
+    icon.trigger('animationend');
     expect(wrapper.vm.iconAppear).equal(false);
   });
   it('pause button will appear', () => {
@@ -28,7 +28,7 @@ describe('PlayButton.vue', () => {
     return Vue.nextTick()
       .then(function () {
         expect(wrapper.vm.iconAppear).equal(true);
-        expect(wrapper.html()).contains('<img type="image/svg+xml"');
+        expect(wrapper.html()).contains('<svg');
       });
   });
 });
