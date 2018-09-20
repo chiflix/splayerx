@@ -1,8 +1,9 @@
 <template>
-  <div
+  <div class="titleBarDoubleClickHandle"
+       @dblclick="handleDoubleClick">
+    <div
     :data-component-name="$options.name"
-    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
-    @dblclick="handleDoubleClick">
+    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }">
     <div class="win-icons" v-if="!isDarwin">
       <Icon class="title-button"
         @click.native="handleMinimize"
@@ -61,6 +62,7 @@
       </Icon>
     </div>
   </div>
+  </div>
 </template>
 
 <script>
@@ -80,6 +82,7 @@ export default {
       titlebarDelay: 0,
       screenWidth: this.$electron.screen.getPrimaryDisplay().workAreaSize.width,
       state: 'default',
+      windowInfoArray: [],
     };
   },
   props: {
@@ -91,7 +94,17 @@ export default {
   methods: {
     handleDoubleClick() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
+      const windowSize = currentWindow.getSize();
+      const windowMaxSize = this.$electron.screen.getPrimaryDisplay().workAreaSize;// eslint-disable-line
+      this.windowInfoArray.push({ width: windowSize[0], height: windowSize[1] });
       currentWindow.isMaximized() ? currentWindow.unmaximize() : currentWindow.maximize();// eslint-disable-line
+      if (this.windowInfoArray.length >= 3) this.windowInfoArray.shift();
+      if (this.windowInfoArray.length>=2 && currentWindow.isMaximized() && (this.windowInfoArray[1].width === windowMaxSize.width || this.windowInfoArray[1].height === windowMaxSize.height)) { // eslint-disable-line
+        console.log('resize');
+        currentWindow.setSize(this.windowInfoArray[0].width, this.windowInfoArray[0].height);
+        this.windowInfoArray.pop();
+      }
+      currentWindow.center();
     },
     handleEnterAlt(e) {
       if (e.key === 'Alt') {
@@ -112,13 +125,9 @@ export default {
     },
     handleMouseOver() {
       this.state = 'hover';
-      window.addEventListener('keydown', this.handleEnterAlt);
-      window.addEventListener('keyup', this.handleLeaveAlt);
     },
     handleMouseOut() {
       this.state = 'default';
-      window.removeEventListener('keydown', this.handleEnterAlt);
-      window.removeEventListener('keyup', this.handleLeaveAlt);
     },
     // Methods to handle window behavior
     handleMinimize() {
@@ -199,6 +208,12 @@ export default {
         this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
       }
     });
+    window.addEventListener('keydown', this.handleEnterAlt);
+    window.addEventListener('keyup', this.handleLeaveAlt);
+  },
+  beforeDestroy() {
+    window.removeEventListener('keydown', this.handleEnterAlt);
+    window.removeEventListener('keyup', this.handleLeaveAlt);
   },
   computed: {
     show() {
@@ -258,13 +273,18 @@ export default {
     }
   }
 }
+.titleBarDoubleClickHandle{
+  position: relative;
+  height:32px;
+  width:100%;
+}
 .darwin-titlebar {
-  position: fixed;
+  position: absolute;
   z-index: 6;
   box-sizing: content-box;
-  padding: 12px 12px;
+  left:12px;
+  top:12px;
   height: 20px;
-  width:100%;
   .mac-icons {
     display: flex;
     flex-wrap: nowrap;
