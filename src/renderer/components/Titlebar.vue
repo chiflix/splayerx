@@ -59,6 +59,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import Icon from './IconContainer';
 export default {
   name: 'titlebar',
@@ -117,9 +118,9 @@ export default {
       this.originalSize = this.winSize;
     },
     statusChange() {
-      if (this.$store.getters.isFullScreen) {
+      if (this.isFullScreen) {
         this.middleButtonStatus = 'exit-fullscreen';
-      } else if (this.maximize) {
+      } else if (this.isMaximized) {
         this.middleButtonStatus = 'restore';
       } else {
         this.middleButtonStatus = 'maximize';
@@ -185,15 +186,13 @@ export default {
         FullscreenExit: this.middleButtonStatus === 'exit-fullscreen',
       };
     },
-    winSize() {
-      return this.$store.getters.winSize;
-    },
-    winWidth() {
-      return this.$store.getters.winWidth;
-    },
-    winPos() {
-      return this.$store.getters.winPos;
-    },
+    ...mapGetters([
+      'winSize',
+      'winWidth',
+      'winPos',
+      'isMaximized',
+      'isFullScreen',
+    ]),
   },
 };
 </script>
