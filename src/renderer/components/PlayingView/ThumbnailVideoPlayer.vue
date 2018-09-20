@@ -1,5 +1,7 @@
 <template>
-  <div class="thumbnail-video-player">
+  <div
+    :data-component-name="$options.name"
+    class="thumbnail-video-player">
     <base-video-player
       v-show="useFallback"
       ref="video"
@@ -146,7 +148,6 @@ export default {
             this.tempBlobArray.length === 30) {
             const array = this.tempBlobArray;
             this.thumbnailArrayHandler(array).then(() => {
-              console.log(`${array.length} thumbnails added.`);
               this.$emit('update-thumbnail-info', {
                 index: this.autoGenerationIndex,
                 interval: this.generationInterval,
@@ -207,7 +208,6 @@ export default {
     updateVideoInfo(outerThumbnailInfo) {
       const { videoSrc } = outerThumbnailInfo;
       if (this.videoSrcValidator(videoSrc)) {
-        console.log(videoSrc);
         this.videoSrc = videoSrc;
         if (!outerThumbnailInfo.newVideo) {
           this.screenWidth = outerThumbnailInfo.screenWidth;

@@ -1,6 +1,7 @@
 <template>
-  <div>
-    <Icon :type="src" class="icon" :class="ani_mode"
+  <div
+    :data-component-name="$options.name">
+  <Icon :type="src" class="icon" :class="ani_mode"
           v-if="iconAppear"
           @animationend.native="animationEnd">
     </Icon>
@@ -10,6 +11,7 @@
 <script>
 import Icon from '../BaseIconContainer';
 export default {
+  name: 'play-button',
   data() {
     return {
       iconAppear: false, // control whether the icon show up or not

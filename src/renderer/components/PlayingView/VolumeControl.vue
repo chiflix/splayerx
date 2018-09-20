@@ -1,35 +1,31 @@
 <template>
-  <transition name="fade" appear>
-  <div class="volume"
-    @mouseover.stop="appearVolumeSlider"
-    @mouseout.stop="hideVolumeSlider"
-    @mousemove="clearAllWidgetsTimeout">
+  <div :data-component-name="$options.name"
+    @mouseover="appearVolumeSlider"
+    @mouseout="hideVolumeSlider">
     <transition name="fade">
-      <div class="container"
-        @mousedown.stop.left="onVolumeSliderClick"
-        v-show="showVolumeSlider">
-        <div class="background" ref="sliderContainer">
-          <div class="slider" ref="slider"
-            :style="{ height: volume + '%' }">
-          </div>
+    <div class="container"
+      @mousedown.left="onVolumeSliderClick"
+      v-show="showVolumeSlider">
+      <div class="background" ref="sliderContainer">
+        <div class="slider" ref="slider"
+          :style="{ height: volume + '%' }">
         </div>
       </div>
-    </transition>
-      <button
-        @mousedown.stop.left="onVolumeButtonClick">
-        <Icon class="volume-icon" v-show="showVolumeController" type="volume" :effect="srcOfVolumeButtonImage"></Icon>
-      </button>
     </div>
-  </transition>
+    </transition>
+    <div @mousedown.left="onVolumeButtonClick">
+      <Icon class="volume-icon" type="volume" :effect="srcOfVolumeButtonImage"></Icon>
+    </div>
+  </div>
 </template>;
 
 <script>
 import Icon from '../BaseIconContainer';
 export default {
+  name: 'volume-control',
   data() {
     return {
       showVolumeSlider: false,
-      showVolumeController: true,
       onVolumeSliderMousedown: false,
       currentVolume: 0,
       timeoutIdOfVolumeControllerDisappearDelay: 0,
@@ -41,8 +37,6 @@ export default {
   },
   methods: {
     onVolumeButtonClick() {
-      console.log('onVolumeButtonClick');
-      this.$_clearTimeoutDelay();
       if (this.volume !== 0) {
         this.currentVolume = this.volume;
         this.$bus.$emit('volume', 0);
@@ -51,7 +45,6 @@ export default {
       }
     },
     onVolumeSliderClick(e) {
-      console.log('onVolumeSliderClick');
       this.onVolumeSliderMousedown = true;
       const sliderOffsetBottom = this.$refs.sliderContainer.getBoundingClientRect().bottom;
       let volumeHeight = sliderOffsetBottom - e.clientY;
@@ -64,11 +57,7 @@ export default {
       this.$_documentVoluemeDragClear();
       this.$_documentVolumeSliderDragEvent();
     },
-    clearAllWidgetsTimeout() {
-      this.$bus.$emit('clear-all-widget-disappear-delay');
-    },
     appearVolumeSlider() {
-      this.$_clearTimeoutDelay();
       this.showVolumeSlider = true;
     },
     hideVolumeSlider() {
@@ -76,20 +65,11 @@ export default {
         this.showVolumeSlider = false;
       }
     },
-    appearVolumeController() {
-      this.showVolumeController = true;
-    },
     hideVolumeController() {
       if (!this.onVolumeSliderMousedown) {
-        this.showVolumeController = false;
         if (this.showVolumeSlider) {
           this.showVolumeSlider = false;
         }
-      }
-    },
-    $_clearTimeoutDelay() {
-      if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
       }
     },
     /**
@@ -152,17 +132,6 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('volumecontroller-appear-delay', () => {
-      this.appearVolumeController();
-      if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfVolumeControllerDisappearDelay);
-        this.timeoutIdOfVolumeControllerDisappearDelay
-          = setTimeout(this.hideVolumeController, 3000);
-      } else {
-        this.timeoutIdOfVolumeControllerDisappearDelay
-          = setTimeout(this.hideVolumeController, 3000);
-      }
-    });
     this.$bus.$on('volumeslider-appear', () => {
       this.appearVolumeSlider();
       if (this.timeoutIdOfVolumeControllerDisappearDelay !== 0) {
@@ -174,8 +143,6 @@ export default {
           = setTimeout(this.hideVolumeController, 3000);
       }
     });
-    this.$bus.$on('volumecontroller-appear', this.appearVolumeController);
-    this.$bus.$on('volumecontroller-hide', this.hideVolumeController);
   },
 };
 </script>

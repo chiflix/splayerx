@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div
+    :data-component-name="$options.name">
     <div :style="menuStyleObject" class="advanced"
       v-if="isAcitve">
       <div class="flex-container">
@@ -10,11 +11,10 @@
         </AdvanceControlMenuItem>
       </div>
     </div>
-    <button
-      v-show="showAdvance"
-      @mousedown.stop="switchSettingMenuState">
+    <div
+      @mousedown="1+1">
       <Icon type="advance"></Icon>
-    </button>
+    </div>
   </div>
 </template>;
 
@@ -22,6 +22,7 @@
 import AdvanceControlMenuItem from './AdvanceControlMenuItem.vue';
 import Icon from '../BaseIconContainer';
 export default {
+  name: 'advance-control',
   components: {
     AdvanceControlMenuItem,
     Icon,
@@ -76,19 +77,14 @@ export default {
         },
       ],
       isAcitve: false,
-      showAdvance: false,
     };
   },
   methods: {
     onSecondItemClick() {
-      console.log('itemclick');
     },
     onMenuItemClick() {
-      console.log('menuclick');
-      console.log(this.$refs.menuList[0].key);
     },
     switchSettingMenuState() {
-      console.log('switching');
       if (this.isAcitve) {
         this.menuList = this.settingLevel;
         this.closeMenuSetting();
@@ -108,7 +104,6 @@ export default {
       this.isAcitve = true;
     },
     $_fitMenuSize() {
-      console.log(this.menuList.length);
       this.menuStyleObject.height = `${(this.menuList.length * 22) + 120}px`;
     },
   },
@@ -117,40 +112,38 @@ export default {
       this.menuList = changedLevel;
       this.$_fitMenuSize();
     });
-    this.$bus.$on('advance-appear', () => {
-      this.showAdvance = true;
-    });
-    this.$bus.$on('advance-hide', () => {
-      this.showAdvance = false;
-    });
   },
 };
 </script>
 
 <style lang="scss" scoped>
-.video-controller {
-  .advanced {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    background-color: white;
-    opacity: 0.3;
-    color: black;
-    border-radius: 4.8px;
-    z-index: 750;
-  }
+button {
+  border: none;
+}
+button:focus {
+  outline: none;
+}
+button:hover {
+  cursor: pointer;
+}
+.advanced {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  opacity: 0.3;
+  backdrop-filter: blur(20px);
+  color: black;
+  border-radius: 4.8px;
+  z-index: 750;
+}
 
-  .flex-container {
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-  }
-
-  button {
-    height: 100%;
-  }
+.flex-container {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
 }
 </style>

@@ -26,7 +26,6 @@ describe('VolumnColtrol.vue', () => {
   it('correct data', () => {
     const wrapper = shallowMount(VolumeControl, { store, localVue });
     expect(wrapper.vm.showVolumeSlider).equal(false);
-    expect(wrapper.vm.showVolumeController).equal(true);
     expect(wrapper.vm.onVolumeSliderMousedown).equal(false);
     expect(wrapper.vm.currentVolume).equal(0);
     expect(wrapper.vm.timeoutIdOfVolumeControllerDisappearDelay).equal(0);
@@ -73,12 +72,6 @@ describe('VolumnColtrol.vue', () => {
     dragClearSpy.restore();
   });
 
-  it('appearVolumeSlider method works fine', () => {
-    const wrapper = shallowMount(VolumeControl, { store, localVue });
-    wrapper.vm.appearVolumeSlider();
-    expect(wrapper.vm.showVolumeSlider).equal(true);
-  });
-
   it('hideVolumeSlider method works fine', () => {
     const wrapper = shallowMount(VolumeControl, { store, localVue });
     wrapper.setData({ onVolumeSliderMousedown: false });
@@ -88,13 +81,6 @@ describe('VolumnColtrol.vue', () => {
     wrapper.setData({ showVolumeSlider: true });
     wrapper.vm.hideVolumeSlider();
     expect(wrapper.vm.showVolumeSlider).equal(true);
-  });
-
-  it('appearVolumeController method works fine', () => {
-    const wrapper = shallowMount(VolumeControl, { store, localVue });
-    wrapper.setData({ showVolumeController: false });
-    wrapper.vm.appearVolumeController();
-    expect(wrapper.vm.showVolumeController).equal(true);
   });
 
   it('hideVolumeController method works fine', () => {
@@ -107,13 +93,6 @@ describe('VolumnColtrol.vue', () => {
     wrapper.vm.hideVolumeController();
     expect(wrapper.vm.showVolumeController).not.equal(true);
     expect(wrapper.vm.showVolumeSlider).not.equal(true);
-  });
-
-  it('$_clearTimeoutDelay method works fine', () => {
-    const wrapper = shallowMount(VolumeControl, { store, localVue });
-    wrapper.setData({ timeoutIdOfVolumeControllerDisappearDelay: 100 });
-    wrapper.vm.$_clearTimeoutDelay();
-    expect(wrapper.vm.timeoutIdOfVolumeControllerDisappearDelay).equal(100);
   });
 
   it('onVolumeSliderClick method works fine', () => {

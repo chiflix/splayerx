@@ -1,5 +1,7 @@
 <template>
-<div class="wrapper">
+<div
+  :data-component-name="$options.name"
+  class="wrapper">
   <main
     @mousedown.left.stop="handleLeftClick"
     @mouseup.left.stop="handleMouseUp"

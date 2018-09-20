@@ -1,13 +1,13 @@
 <template>
-  <transition name="fade" appear>
-    <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
-  <div class="progress"
-    @mouseover.stop.capture="appearProgressSlider"
+  <!-- 用mouseout监听会在经过两个div的分界处触发事件 -->
+  <div
+    :data-component-name="$options.name"
+    class="progress"
+    @mouseover="appearProgressSlider"
     @mouseleave="hideProgressSlider"
-    @mousemove="onProgressBarMove"
-    v-show="showProgressBar">
+    @mousemove="onProgressBarMove">
     <div class="fool-proof-bar" ref="foolProofBar"
-      @mousedown.stop="videoRestart"
+      @mousedown="videoRestart"
       @mouseover="thumbnailCurrentTime = 0"
       @mousemove="thumbnailCurrentTime = 0"
       :style="{cursor: cursorStyle}">
@@ -27,7 +27,7 @@
     </div>
     <div class="progress-container" ref="sliderContainer"
       :style="{width: this.winWidth - 20 + 'px'}"
-      @mousedown.left.stop.capture="onProgressBarClick">
+      @mousedown.left.capture="onProgressBarClick">
         <!-- translate优化 -->
       <the-preview-thumbnail
         v-show="showScreenshot"
@@ -56,11 +56,10 @@
     </div>
     <div class="fake-button-left"
       v-show="isOnProgress"
-      @mousedown.left.stop.capture="onProgressBarClick"
+      @mousedown.left.capture="onProgressBarClick"
       @mousemove.stop="handleFakeBtnMove"
       :style="{height: heightOfThumbnail + 11 + 'px', cursor: cursorStyle}"></div>
   </div>
-</transition>
 </template>;
 
 <script>
@@ -74,6 +73,7 @@ import {
 import ThePreviewThumbnail from './ThePreviewThumbnail';
 
 export default {
+  name: 'the-time-progress-bar',
   components: {
     'the-preview-thumbnail': ThePreviewThumbnail,
   },
@@ -93,7 +93,6 @@ export default {
   data() {
     return {
       showScreenshot: false,
-      showProgressBar: true,
       onProgressSliderMousedown: false,
       flagProgressBarDraged: false,
       isCursorLeft: false,
@@ -118,7 +117,6 @@ export default {
   methods: {
     appearProgressSlider() {
       this.isOnProgress = true;
-      this.$bus.$emit('clear-all-widget-disappear-delay');
       this.$refs.playedSlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.readySlider.style.height = PROGRESS_BAR_HEIGHT;
       this.$refs.foolProofBar.style.height = PROGRESS_BAR_HEIGHT;
@@ -134,16 +132,6 @@ export default {
         this.$refs.foolProofBar.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
         this.$refs.readySlider.style.height = PROGRESS_BAR_HIDE_HEIGHT;
         this.$refs.backSlider.style.height = PROGRESS_BAR_SLIDER_HIDE_HEIGHT;
-      }
-    },
-    appearProgressBar() {
-      this.$_clearTimeoutDelay();
-      this.showProgressBar = true;
-    },
-    hideProgressBar() {
-      if (!this.onProgressSliderMousedown) {
-        this.showProgressBar = false;
-        this.hideProgressSlider();
       }
     },
     videoRestart() {
@@ -252,7 +240,6 @@ export default {
     handleFakeBtnClick() {
       this.timeoutIdOfHideProgressSlider = setTimeout(() => {
         this.hideProgressSlider();
-        this.$_hideAllWidgets();
       }, 3000);
     },
     handleFakeBtnMove(e) {
@@ -261,11 +248,6 @@ export default {
       } else {
         this.onProgressBarMove(e);
       }
-    },
-    $_hideAllWidgets() {
-      this.timeoutIdOfHideAllWidgets = setTimeout(() => {
-        this.$bus.$emit('hide-all-widgets');
-      }, 3000);
     },
   },
   computed: {
@@ -370,32 +352,6 @@ export default {
         this.widthOfThumbnail = 240;
       }
     });
-    this.$bus.$on('progressslider-appear', () => {
-      this.showScreenshot = false;
-      this.appearProgressSlider();
-      this.isOnProgress = false;
-      if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
-        this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
-      } else {
-        this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
-      }
-    });
-    this.$bus.$on('progressbar-appear-delay', () => {
-      this.appearProgressBar();
-      if (this.timeoutIdOfProgressBarDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOfProgressBarDisappearDelay);
-        this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
-      } else {
-        this.timeoutIdOfProgressBarDisappearDelay
-          = setTimeout(this.hideProgressBar, 3000);
-      }
-    });
-    this.$bus.$on('progressbar-appear', this.appearProgressBar);
-    this.$bus.$on('progressbar-hide', this.hideProgressBar);
     this.$bus.$on('screenshot-sizeset', (e) => {
       this.videoRatio = e;
     });
@@ -406,7 +362,7 @@ export default {
 
 <style lang="scss" scoped>
 
-.video-controller .progress {
+.progress {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -497,7 +453,7 @@ export default {
   }
 }
 
-.video-controller .hidePlayedSlider {
+.hidePlayedSlider {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -516,7 +472,7 @@ export default {
   }
 }
 
-.video-controller .progressPlayed {
+.progressPlayed {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -535,7 +491,7 @@ export default {
   }
 }
 
-.video-controller .progress-ready {
+.progress-ready {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -560,7 +516,7 @@ export default {
   }
 }
 
-.video-controller .progress-back {
+.progress-back {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -575,23 +531,6 @@ export default {
     background: rgba(255, 255, 255, 0.9);
   }
 }
-
-.fade-enter-active {
- transition: opacity 100ms;
-}
-
-.fade-leave-active {
- transition: opacity 400ms;
-}
-
-.fade-enter-to, .fade-leave {
- opacity: 1;
-}
-
-.fade-enter, .fade-leave-to {
- opacity: 0;
-}
-
 // .shake {
 //   transform-origin: left center;
 //   animation-name: shake;

@@ -1,6 +1,7 @@
 <template>
-  <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
-       v-show="showTitlebar">
+  <div
+    :data-component-name="$options.name"
+    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }">
     <div class="win-icons" v-if="!isDarwin">
       <Icon class="title-button"
         @click.native="handleMinimize"
@@ -63,7 +64,6 @@ export default {
   name: 'titlebar',
   data() {
     return {
-      showTitlebar: true,
       middleButtonStatus: 'maximize',
       windowInfo: {
         screenWidth: null,
@@ -97,8 +97,7 @@ export default {
     handleMaximize() {
       this.$electron.remote.getCurrentWindow().maximize();
     },
-    handleClose(e) {
-      console.log(e);
+    handleClose() {
       this.$electron.remote.getCurrentWindow().close();
     },
     handleRestore() {
@@ -170,8 +169,6 @@ export default {
         this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
       }
     });
-    this.$bus.$on('titlebar-appear', this.appearTitlebar);
-    this.$bus.$on('titlebar-hide', this.hideTitlebar);
   },
   computed: {
     show() {

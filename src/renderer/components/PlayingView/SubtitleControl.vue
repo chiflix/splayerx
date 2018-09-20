@@ -1,17 +1,16 @@
 <template>
-  <div class="sub-control"
-       @mousemove.capture="throttledCall">
-    <transition name="fade" appear>
-      <div class="sub-btn-control"
-           v-if="isSubCtrlBtnAppear">
+  <div
+    :data-component-name="$options.name"
+    class="sub-control">
+      <div class="sub-btn-control">
         <div class="sub-menu-wrapper"
-             v-if="appearSubtitleMenu">
+             v-show="showAttached">
           <ul class="sub-menu">
 
             <li
               v-if="foundSubtitles"
               v-for="(item, index) in computedAvaliableItems"
-              @mouseup.stop="toggleItemClick(index)"
+              @mouseup="toggleItemClick(index)"
               @mouseover.self.stop="toggleItemsMouseOver"
               @mouseleave.stop.self="toggleItemsMouseLeave"
               :class="{ chosenText: itemHasBeenChosen(index) }">
@@ -35,7 +34,7 @@
 
 
             <li v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)"
-            @mouseup.stop="toggleSubtitleOff"
+            @mouseup="toggleSubtitleOff"
             @mouseover.stop.self="toggleItemsMouseOver"
             @mouseleave.stop.self="toggleItemsMouseLeave"
             :class="{ chosenText: itemHasBeenChosen(-1) }">
@@ -52,7 +51,7 @@
                 :class="{ chineseChosen: itemTitleHasChineseChar('加载翻译结果') }"
                 @mouseover.self.stop="toggleItemsMouseOver"
                 @mouseleave.stop.self="toggleItemsMouseLeave"
-                @mouseup.stop="toggleLoadServerSubtitles">
+                @mouseup="toggleLoadServerSubtitles">
                 <div class="menu-item-text-wrapper">
                   加载翻译结果
                 </div>
@@ -61,7 +60,7 @@
                 :class="{ chineseChosen: itemTitleHasChineseChar('导入本地字幕 ...') }"
                 @mouseover.self.stop="toggleItemsMouseOver"
                 @mouseleave.stop.self="toggleItemsMouseLeave"
-                @mouseup.stop="toggleOpenFileDialog">
+                @mouseup="toggleOpenFileDialog">
                 <div class="menu-item-text-wrapper">
                   导入本地字幕 ...
                 </div>
@@ -69,21 +68,19 @@
 
           </ul>
         </div>
-        <button
-          @mousedown.capture.stop.left="toggleSubtitleMenu" v-if="isSubCtrlBtnAppear">
+        <div @mousedown.left="toggleSubMenuDisplay">
           <Icon type="subtitle" wmode="transparent" alt="Button"></Icon>
-        </button>
+        </div>
       </div>
-    </transition>
   </div>
 </template>
-
-
-
 <script>
-import _ from 'lodash';
 import Icon from '../BaseIconContainer';
 export default {
+  name: 'subtitle-control',
+  props: {
+    showAttached: Boolean,
+  },
   data() {
     return {
       loadingSubsPlaceholders: {
@@ -91,43 +88,35 @@ export default {
         embedded: '',
         server: '',
       },
-      isSubCtrlBtnAppear: true,
-      appearSubtitleMenu: false,
       foundSubtitles: true,
-      throttledCall: null,
       showingPopupDialog: false,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
       currentSubIden: 0,
+      clicks: 0,
     };
   },
   components: {
     Icon,
   },
   methods: {
-    subCtrlBtnAppear() {
-      this.isSubCtrlBtnAppear = true;
-    },
-    subCtrlBtnHide() {
-      this.isSubCtrlBtnAppear = false;
-      this.appearSubtitleMenu = false;
-      this.$bus.$emit('subtitle-menu-toggled-off');
-    },
-    toggleSubtitleMenu() {
-      if (!this.appearSubtitleMenu) {
-        this.appearSubtitleMenu = true;
-        this.$bus.$emit('subtitle-menu-toggled-on');
-      } else {
-        this.appearSubtitleMenu = false;
-        this.$bus.$emit('subtitle-menu-toggled-off');
+    toggleSubMenuDisplay() {
+      this.clicks = this.showAttached ? 1 : 0;
+      this.clicks += 1;
+      switch (this.clicks) {
+        case 1:
+          this.$emit('update:showAttached', true);
+          break;
+        case 2:
+          this.$emit('update:showAttached', false);
+          this.clicks = 0;
+          break;
+        default:
+          this.clicks = 0;
+          break;
       }
     },
     toggleItemsMouseOver(e) {
-      this.appearSubtitleMenu = true;
-      this.isSubCtrlBtnAppear = true;
       e.target.style.backgroundImage = this.preStyle;
-    },
-    toggleSubtitleBtnMouseover() {
-      this.$bus.$emit('clear-all-widget-disappear-delay');
     },
     toggleItemsMouseLeave(e) {
       e.target.style.backgroundImage = 'none';
@@ -196,16 +185,7 @@ export default {
       return res;
     },
   },
-  beforeMount() {
-    this.throttledCall = _.throttle(this.toggleSubtitleBtnMouseover, 500);
-  },
   created() {
-    this.$bus.$on('sub-ctrl-appear', this.subCtrlBtnAppear);
-    this.$bus.$on('sub-ctrl-hide', () => {
-      this.subCtrlBtnHide();
-      this.$bus.$emit('subtitle-menu-toggled-off');
-    });
-    this.$bus.$on('subtitle-menu-off', this.toggleSubtitleMenu);
     this.$bus.$on('loading-subtitles', (status) => {
       this.foundSubtitles = true;
       const placeholderText = 'Loading...';
@@ -245,11 +225,7 @@ export default {
   },
 };
 </script>
-
-
-
 <style lang="scss" scoped>
-
 ul, li {
   list-style-type: none;
 }
@@ -257,11 +233,17 @@ li {
   cursor: pointer;
 }
 
+button {
+  border: none;
+}
+button:focus {
+  outline: none;
+}
+button:hover {
+  cursor: pointer;
+}
 
-.video-controller .sub-control {
-  button {
-    height: 100%;
-  }
+.sub-control {
   .btn:hover, .sub-item:hover{
     cursor: pointer;
   }
@@ -434,21 +416,5 @@ li {
       font-size: 23px;
     }
   }
-}
-
-.fade-enter-active {
- transition: opacity 100ms;
-}
-
-.fade-leave-active {
- transition: opacity 200ms;
-}
-
-.fade-enter-to, .fade-leave {
- opacity: 1;
-}
-
-.fade-enter, .fade-leave-to {
- opacity: 0;
 }
 </style>
