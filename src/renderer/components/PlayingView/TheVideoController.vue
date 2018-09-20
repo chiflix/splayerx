@@ -23,14 +23,14 @@
   </div>
 </template>
 <script>
-import TimerManager from '@/helpers/timerManager';
+import TimerManager from '@/helpers/timerManager.js';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
-import VolumeControl from './VolumeControl';
-import AdvanceControl from './AdvanceControl';
-import SubtitleControl from './SubtitleControl';
-import TheTimeCodes from './TheTimeCodes';
-import TimeProgressBar from './TimeProgressBar';
+import VolumeControl from './VolumeControl.vue';
+import AdvanceControl from './AdvanceControl.vue';
+import SubtitleControl from './SubtitleControl.vue';
+import TheTimeCodes from './TheTimeCodes.vue';
+import TimeProgressBar from './TimeProgressBar.vue';
 export default {
   name: 'the-video-controller',
   components: {
