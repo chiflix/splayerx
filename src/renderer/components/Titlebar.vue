@@ -36,7 +36,7 @@
       </Icon>
       <Icon id="minimize" class="title-button"
             type="titleBarMin"
-            @click.native="handleClose"
+            @click.native="handleMinimize"
             :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
             :state="state"
             :isFullScreen="middleButtonStatus">
@@ -58,7 +58,7 @@
 </template>
 
 <script>
-import Icon from './IconContainer';
+import Icon from './BaseIconContainer';
 export default {
   name: 'titlebar',
   data() {
