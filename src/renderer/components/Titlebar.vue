@@ -274,9 +274,11 @@ export default {
   }
 }
 .titleBarDoubleClickHandle{
-  position: relative;
+  z-index: 3;
+  position: absolute;
   height:32px;
   width:100%;
+  background: transparent;
 }
 .darwin-titlebar {
   position: absolute;
