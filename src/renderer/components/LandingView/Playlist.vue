@@ -128,7 +128,8 @@ export default {
     windowWidth(val) {
       this.itemWidth = (this.changeSize * val) / 100;
       this.itemHeight = (this.changeSize * val * 405) / 100 / 720;
-      document.querySelector('.item').style.transition = '';
+      // console.log(document.querySelector('.item'));
+      // document.querySelector('.item').style.transition = '';
     },
     showItemNum(val, oldval) {
       if (val > oldval) {

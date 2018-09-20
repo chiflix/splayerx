@@ -1,7 +1,8 @@
 <template>
   <div
     :data-component-name="$options.name"
-    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }">
+    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
+    @dblclick="handleDoubleClick">
     <div class="win-icons" v-if="!isDarwin">
       <Icon class="title-button"
         @click.native="handleMinimize"
@@ -48,6 +49,10 @@
             v-show="middleButtonStatus !== 'exit-fullscreen'"
             :state="state">
       </Icon>
+      <Icon id="maxScreenSize" class="title-button"
+            type="titleBarClose"
+            :state="state">
+      </Icon>
       <Icon id="restore" class="title-button"
             @click.native="handleFullscreenExit"
             v-show="middleButtonStatus === 'exit-fullscreen'"
@@ -84,11 +89,36 @@ export default {
     Icon,
   },
   methods: {
+    handleDoubleClick() {
+      const currentWindow = this.$electron.remote.getCurrentWindow();
+      currentWindow.isMaximized() ? currentWindow.unmaximize() : currentWindow.maximize();// eslint-disable-line
+    },
+    handleEnterAlt(e) {
+      if (e.key === 'Alt') {
+        const maximizeButton = document.querySelector('#maximize');
+        const maxScreenSizeButton = document.querySelector('#maxScreenSize');
+        if (this.middleButtonStatus === 'maximize') {
+          maximizeButton.style.display = 'none';
+          maxScreenSizeButton.style.display = 'inline';
+        }
+        maxScreenSizeButton.addEventListener('click', this.handleDoubleClick);// eslint-disable-line
+      }
+    },
+    handleLeaveAlt() {
+      const maximizeButton = document.querySelector('#maximize');
+      const maxScreenSizeButton = document.querySelector('#maxScreenSize');
+      maxScreenSizeButton.style.display = 'none';
+      maximizeButton.style.display = 'inline';
+    },
     handleMouseOver() {
       this.state = 'hover';
+      window.addEventListener('keydown', this.handleEnterAlt);
+      window.addEventListener('keyup', this.handleLeaveAlt);
     },
     handleMouseOut() {
       this.state = 'default';
+      window.removeEventListener('keydown', this.handleEnterAlt);
+      window.removeEventListener('keyup', this.handleLeaveAlt);
     },
     // Methods to handle window behavior
     handleMinimize() {
@@ -203,7 +233,7 @@ export default {
   position: absolute;
   top: 0;
   border-radius: 10px;
-  width: 100%;
+  width: 80%;
   -webkit-app-region: drag;
   height: 28px;
   z-index: 6;
@@ -229,12 +259,12 @@ export default {
   }
 }
 .darwin-titlebar {
-  position: absolute;
+  position: fixed;
   z-index: 6;
   box-sizing: content-box;
-  top: 12px;
-  left: 12px;
+  padding: 12px 12px;
   height: 20px;
+  width:100%;
   .mac-icons {
     display: flex;
     flex-wrap: nowrap;
@@ -263,6 +293,10 @@ export default {
       pointer-events: none;
       opacity: 0.25;
     }
+  }
+  #maxScreenSize {
+    transform: rotate(45deg);
+    display: none;
   }
   @media screen and (-webkit-min-device-pixel-ratio: 1) and (-webkit-max-device-pixel-ratio: 2) {
     .title-button {
