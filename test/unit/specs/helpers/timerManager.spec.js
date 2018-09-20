@@ -95,6 +95,17 @@ describe('Helper - TimerManager Unit Tests', () => {
     expect(manager.tickTimer(name, 0)).to.equal(100);
   });
 
+  it('should timer be get', () => {
+    manager.addTimer(name, time);
+
+    expect(manager.getTimer(name)).to.deep.equal({ name, timeLeft: time });
+  });
+  it('should return null for non-existed timer', () => {
+    manager.addTimer(name, time);
+
+    expect(manager.getTimer(`${name}-1`)).to.equal(null);
+  });
+
   it('should timerList return all timers', () => {
     manager.addTimer(name, time);
 

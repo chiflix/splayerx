@@ -37,7 +37,7 @@
       </Icon>
       <Icon id="minimize" class="title-button"
             type="titleBarMin"
-            @click.native="handleClose"
+            @click.native="handleMinimize"
             :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
             :state="state"
             :isFullScreen="middleButtonStatus">

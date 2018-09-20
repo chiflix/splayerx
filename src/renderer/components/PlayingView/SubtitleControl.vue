@@ -305,7 +305,7 @@ button:hover {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 30px;
-      right: -97px;
+      left: -51px;
       width: 170px;
       // height: 232px;
     }
@@ -323,7 +323,7 @@ button:hover {
     .chosen-dot {
       width: 4px;
       height: 4px;
-      right: 0px;
+      right: 15px;
       top: 50%;
       margin-top: -2px;
     }
@@ -334,7 +334,6 @@ button:hover {
       padding: 4px 0px;
     }
     li {
-      margin-right: 15px;
       padding: 7px 17px;
       height: 32px;
       font-size: 14px;
@@ -344,8 +343,8 @@ button:hover {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 40px;
-      right: -198px;
-      width: 283.1px;
+      left: -25px;
+      width: 184px;
       // height: 260px;
     }
     .sub-menu{
@@ -364,7 +363,7 @@ button:hover {
       line-height: 20px;
       width: 4px;
       height: 4px;
-      right: 0px;
+      right: 15px;
       top: 50%;
       margin-top: -2px;
     }
@@ -372,7 +371,6 @@ button:hover {
       font-size: 13px;
     }
     li {
-      margin-right: 15px;
       padding: 8px 18px;
       height: 36px;
       font-size: 15px;
@@ -382,8 +380,8 @@ button:hover {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 100px;
-      right: -130.3px;
-      width: 184px;
+      left: -46px;
+      width: 284px;
       // height: 260px;
     }
     .sub-menu{
@@ -402,7 +400,7 @@ button:hover {
       line-height: 30px;
       width: 6.2px;
       height: 6.2px;
-      right: 0px;
+      right: 28px;
       top: 50%;
       margin-top: -3.1px;
     }
@@ -410,7 +408,6 @@ button:hover {
       font-size: 20px;
     }
     li {
-      margin-right: 28px;
       padding: 13px 27px;
       height: 56px;
       font-size: 23px;

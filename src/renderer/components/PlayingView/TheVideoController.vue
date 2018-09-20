@@ -26,10 +26,10 @@
 import TimerManager from '@/helpers/timerManager.js';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
-import VolumeControl from './VolumeControl';
-import AdvanceControl from './AdvanceControl';
-import SubtitleControl from './SubtitleControl';
-import TheTimeCodes from './TheTimeCodes';
+import VolumeControl from './VolumeControl.vue';
+import AdvanceControl from './AdvanceControl.vue';
+import SubtitleControl from './SubtitleControl.vue';
+import TheTimeCodes from './TheTimeCodes.vue';
 import TimeProgressBar from './TimeProgressBar.vue';
 export default {
   name: 'the-video-controller',
@@ -82,6 +82,8 @@ export default {
       preventSingleClick: false,
       lastAttachedShowing: false,
       isDragging: false,
+      focusedTimestamp: 0,
+      focusDelay: 500,
     };
   },
   computed: {
@@ -93,7 +95,17 @@ export default {
       return this.currentWidget !== this.$options.name;
     },
     cursorStyle() {
-      return this.showAllWidgets ? 'default' : 'none';
+      return this.showAllWidgets || !this.isFocused ? 'default' : 'none';
+    },
+    isFocused() {
+      return this.$store.state.WindowState.isFocused;
+    },
+  },
+  watch: {
+    isFocused(newValue) {
+      if (newValue) {
+        this.focusedTimestamp = Date.now();
+      }
     },
   },
   created() {
@@ -155,10 +167,8 @@ export default {
       this.currentWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
       const currentPosition = currentEventInfo.get('mousemove').position;
       const lastPosition = lastEventInfo.get('mousemove').position;
-      if (currentPosition !== lastPosition) {
-        this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false);
-        this.mouseStopMoving = false;
-      }
+      this.mouseStopMoving = currentPosition === lastPosition;
+      if (!this.mouseStopMoving) { this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false); }
       // mouseenter timer
       const { mouseLeavingWindow } = currentEventInfo.get('mouseenter');
       const changed = mouseLeavingWindow !== lastEventInfo.get('mouseenter').mouseLeavingWindow;
@@ -269,6 +279,7 @@ export default {
       }
     },
     handleMousedownLeft(event) {
+      if (!this.isValidClick()) { return; }
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
@@ -284,6 +295,7 @@ export default {
       }
     },
     handleMouseupLeft(event) {
+      if (!this.isValidClick()) { return; }
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
@@ -372,15 +384,11 @@ export default {
       }
       return componentName;
     },
+    isValidClick() {
+      return Date.now() - this.focusedTimestamp > this.focusDelay;
+    },
     toggleFullScreenState() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      if (currentWindow.isFullScreen()) {
-        currentWindow.setFullScreen(false);
-        this.$bus.$emit('reset-windowsize');
-      } else {
-        currentWindow.setAspectRatio(0);
-        currentWindow.setFullScreen(true);
-      }
+      this.$bus.$emit('toggle-fullscreen');
     },
     togglePlayback() {
       this.$bus.$emit('toggle-playback');
