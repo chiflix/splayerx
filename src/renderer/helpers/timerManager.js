@@ -81,6 +81,19 @@ class FakeTimerManager {
     return false;
   }
   /**
+   * Get a timer's info if existed.
+   * @param {string} name Name of timer to be updated, return null if no such timer.
+   */
+  getTimer(name) {
+    if (this._timerQueue.has(name)) {
+      return {
+        name,
+        timeLeft: this._timerQueue.get(name).timeLeft(),
+      };
+    }
+    return null;
+  }
+  /**
    * Tick a timer for provided time.
    * @param {string} name - Name of the timer to be ticked, return false if no such timer.
    * @param {number} time - Time to tick, return false if invalid time.

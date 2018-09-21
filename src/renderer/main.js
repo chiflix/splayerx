@@ -243,7 +243,6 @@ new Vue({
       return path.toString().replace(/^file\/\//, '');
     },
     updateRecentPlay() {
-      console.log('Updating recent play!');
       const recentMenuTemplate = {
         label: this.$t('msg.file.openRecent'),
         id: 'recent-play',
@@ -289,7 +288,6 @@ new Vue({
       return this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
         let menuRecentData = null;
         menuRecentData = this.processRecentPlay(data);
-        console.log(menuRecentData);
         recentMenuTemplate.submenu.forEach((element, index) => {
           const value = menuRecentData.get(element.id);
           if (value.label !== '') {
@@ -432,6 +430,23 @@ new Vue({
           }
           break;
         default:
+      }
+    });
+    window.addEventListener('wheel', (e) => {
+      this.$bus.$emit('volumeslider-appear');
+      const up = e.deltaY < 0;
+      if (up) {
+        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
+          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
+        } else {
+          this.$bus.$emit('volume', 1);
+        }
+      } else if (!up) {
+        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
+          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
+        } else {
+          this.$bus.$emit('volume', 0);
+        }
       }
     });
 

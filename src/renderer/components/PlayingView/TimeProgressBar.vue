@@ -112,6 +112,10 @@ export default {
       buttonWidth: 20,
       buttonRadius: 0,
       cursorStyle: 'pointer',
+      reactivePhases: {
+        winWidth: [513, 846, 1921, 3841],
+        thumbnailWidth: [100, 136, 170, 272],
+      },
     };
   },
   methods: {
@@ -332,26 +336,20 @@ export default {
          setTimeout(() => { this.cursorPosition = 0; }, 300);
       }
     },
+    winWidth(newValue) {
+      let thumbnailWidth = 0;
+      this.reactivePhases.winWidth.some((value, index) => {
+        if (newValue < value) {
+          thumbnailWidth = this.reactivePhases.thumbnailWidth[index];
+          return true;
+        }
+        return false;
+      });
+      this.widthOfThumbnail = thumbnailWidth;
+    },
   },
   created() {
-    const widthOfWindow = this.winWidth;
-    if (widthOfWindow < 845) {
-      this.widthOfThumbnail = 136;
-    } else if (widthOfWindow < 1920) {
-      this.widthOfThumbnail = 170;
-    } else {
-      this.widthOfThumbnail = 240;
-    }
-    this.$electron.ipcRenderer.on('main-resize', () => {
-      const widthOfWindow = this.winWidth;
-      if (widthOfWindow < 845) {
-        this.widthOfThumbnail = 136;
-      } else if (widthOfWindow < 1920) {
-        this.widthOfThumbnail = 170;
-      } else {
-        this.widthOfThumbnail = 240;
-      }
-    });
+    Object.freeze(this.reactivePhases);
     this.$bus.$on('screenshot-sizeset', (e) => {
       this.videoRatio = e;
     });
