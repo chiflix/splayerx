@@ -374,9 +374,8 @@ export default {
             parser.emit('finish');
           }
           // even currently we can not read subtitles from a specific time
-          // straightly, but this if condition does improves some performance
-          // avoiding doing the adding things stuff, manipulating
-          // data and data structures.
+          // straightly, but this if condition does improve some performance
+          // avoiding adding unnecessary subtitles
           if (startTime < sub.time && this.notParsedYet(sub.time)) {
             const currentIndex = tracks.findIndex(track => trackNumber === track.number);
             let currentContent = '';
