@@ -348,6 +348,7 @@ export default {
     },
 
     parseMkvSubs(filePath, startTime, endTime, onlyEmbedded, processSubNames) {
+      this.readingMkv = true;
       const self = this;
       return new Promise((resolve, reject) => {
         let tracks = [];
@@ -820,7 +821,8 @@ export default {
     });
     this.$bus.$on('seek-subtitle', (e) => {
       if (this.mkvSubsInitialized && !this.mkvSubsFullyParsed) {
-        if (this.idleCallbackID !== 0) {
+        this.mkvSubsSeekedParsed = false;
+        if (this.idleCallbackID !== 0 || this.readingMkv) {
           window.cancelIdleCallback(this.idleCallbackID);
           this.$emit('stop-reading-mkv-subs', 'stopped');
         }
