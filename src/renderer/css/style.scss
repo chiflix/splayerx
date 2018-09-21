@@ -1,9 +1,5 @@
 @charset "UTF-8";
-@import url("https://use.typekit.net/ybq0nrw.css");
-
-@font-face {
-  font-family: 'Avenir';
-}
+@import './fonts.scss';
 
 * {
   margin: 0;
@@ -18,7 +14,6 @@ html {
 }
 
 body {
-  font-family: 'Avenir', sans-serif;
   position: relative;
   width: 100%;
   height: 100%;
