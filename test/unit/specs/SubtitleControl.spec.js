@@ -1,5 +1,6 @@
 import Vuex from 'vuex';
 import PlaybackState from '@/store/modules/PlaybackState';
+import Subtitle from '@/store/modules/Subtitle';
 import SubtitleControl from '@/components/PlayingView/SubtitleControl';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
@@ -17,6 +18,11 @@ describe('SubtitleControl.vue', () => {
           state: PlaybackState.state,
           getters: PlaybackState.getters,
           mutations: PlaybackState.mutations,
+        },
+        Subtitle: {
+          state: Subtitle.state,
+          mutations: Subtitle.mutations,
+          getters: Subtitle.getters,
         },
       },
     });
