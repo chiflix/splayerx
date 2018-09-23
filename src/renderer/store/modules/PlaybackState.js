@@ -41,9 +41,6 @@ const mutations = {
     state.Volume = v;
   },
 
-  AddServerSubtitle(state, subtitles) {
-    state.SubtitleNameArr.unshift(...subtitles);
-  },
   SubtitleOn(state, obj) {
     const index = state.SubtitleNameArr.findIndex(subName => subName.textTrackID === obj.index);
     state.SubtitleNameArr[index].status = obj.status === 'first' ? 'first' : 'second';
