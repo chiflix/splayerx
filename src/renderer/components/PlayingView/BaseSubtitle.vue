@@ -198,12 +198,10 @@ export default {
       this.addVttToVideoElement(files, () => {
         this.clearSubtitle();
         const subNameArr = files.map(file => this.subNameFromLocalProcess(file));
-        this.$store.commit('SubtitleNameArr', subNameArr);
+        this.$store.commit('SubtitleNames', subNameArr);
         cb();
       });
     },
-
-
     /**
      * @param {function} cb callback function to process result
      * after server transcript loaded.
@@ -233,9 +231,9 @@ export default {
                 // Only when all subtitles are successfully loaded,
                 // users can see the server subtitles in Subtitle Menu.
                 this.clearSubtitle();
-                const subtitleNameArr = textTrackList
+                const subtitleNames = textTrackList
                   .map(textTrack => this.subnameFromServerProcess(textTrack));
-                this.$store.commit('SubtitleNameArr', subtitleNameArr);
+                this.$store.commit('SubtitleNames', subtitleNames);
 
                 cb();
               })
@@ -254,7 +252,6 @@ export default {
           cb(err);
         });
     },
-
     hasEmbeddedSubs(filePath) {
       return new Promise((resolve) => {
         let foo;
@@ -279,7 +276,6 @@ export default {
         fs.createReadStream(realPath).pipe(subs);
       });
     },
-
     mkvProcess(vidPath, onlyEmbedded, cb) {
       this.mkvProcessInit(vidPath, onlyEmbedded, () => {
         console.log('finished reading initial mkv subtitles');
@@ -287,7 +283,6 @@ export default {
         this.mkvSubsInitialized = true;
       });
     },
-
     mkvProcessInit(filePath, onlyEmbedded, cb) {
       const accurateTime = this.$store.state.PlaybackState.AccurateTime;
       const startTime = accurateTime * 1000;
@@ -298,7 +293,6 @@ export default {
           this.addMkvSubtitlesToVideoElement(tracks, onlyEmbedded, processSubNames, cb);
         });
     },
-
     addMkvSubtitlesToVideoElement(tracks, onlyEmbedded, processSubNames, cb) {
       const vid = this.$parent.$refs.videoCanvas.videoElement();
       const embededSubNames = [];
@@ -338,7 +332,7 @@ export default {
       if (processSubNames) {
         this.clearSubtitle();
         if (onlyEmbedded) {
-          this.$store.commit('SubtitleNameArr', embededSubNames);
+          this.$store.commit('SubtitleNames', embededSubNames);
         } else {
           this.$store.commit('AddSubtitle', embededSubNames);
         }
@@ -346,7 +340,6 @@ export default {
       this.readingMkv = false;
       parser.flush();
     },
-
     parseMkvSubs(filePath, startTime, endTime, onlyEmbedded, processSubNames) {
       const self = this;
       return new Promise((resolve, reject) => {
@@ -415,7 +408,6 @@ export default {
         fs.createReadStream(realPath).pipe(parser);
       });
     },
-
     /**
      * @description Process subtitles and add subtitles to video element
      * @param {Array.<string>} files File pathes array
@@ -480,7 +472,7 @@ export default {
      */
     subtitleShow(index, type = 'first') {
       const vid = this.$parent.$refs.videoCanvas.videoElement();
-      const targetIndex = this.$store.state.PlaybackState.SubtitleNameArr[index].textTrackID;
+      const targetIndex = this.$store.state.Subtitle.SubtitleNames[index].textTrackID;
       if (type === 'first') {
         if (vid.textTracks.length > targetIndex) { // Video has available subtitles
           this.onCueChangeEventAdd(vid.textTracks[targetIndex]);
@@ -545,7 +537,6 @@ export default {
       const hrs = (s - mins) / 60;
       return (`${z(2, hrs)}:${z(2, mins)}:${z(2, secs)}.${z(3, ms)}`);
     },
-
     findMode(array) {
       const map = new Map();
       let maxFreq = 0;
@@ -799,7 +790,7 @@ export default {
     this.$bus.$on('sub-style-change', this.subStyleChange);
 
     this.$bus.$on('add-subtitle', (files) => {
-      const size = this.$store.getters.subtitleNameArrSize;
+      const size = this.$store.getters.subtitleCount;
       const subtitleName = files.map(file => this.subNameFromLocalProcess(file));
       this.$store.commit('AddSubtitle', subtitleName);
       this.addVttToVideoElement(files, () => {

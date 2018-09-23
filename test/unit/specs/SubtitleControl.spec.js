@@ -102,7 +102,7 @@ describe('SubtitleControl.vue', () => {
       { title: 'something index 3' },
     ];
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    store.commit('SubtitleNameArr', testSubArr);
+    store.commit('SubtitleNames', testSubArr);
     expect(wrapper.vm.computedAvaliableItems.length).equal(4);
     expect(wrapper.vm.computedAvaliableItems[2].title).equal('something index 2');
   });

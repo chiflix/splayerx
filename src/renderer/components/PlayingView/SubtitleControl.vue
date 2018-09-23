@@ -169,7 +169,7 @@ export default {
   },
   computed: {
     computedAvaliableItems() {
-      return this.$store.getters.subtitleNameArr;
+      return this.$store.getters.subtitleNames;
     },
     loadingPlaceholderList() {
       const res = [];

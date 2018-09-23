@@ -41,9 +41,6 @@ const mutations = {
     state.Volume = v;
   },
 
-  SubtitleNameArr(state, subtitles) {
-    state.SubtitleNameArr = subtitles;
-  },
   AddSubtitle(state, subtitles) {
     for (let i = 0; i < subtitles.length; i += 1) {
       state.SubtitleNameArr.push(subtitles[i]);
