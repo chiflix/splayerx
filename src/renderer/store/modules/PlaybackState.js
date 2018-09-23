@@ -41,18 +41,6 @@ const mutations = {
     state.Volume = v;
   },
 
-  SubtitleOn(state, obj) {
-    const index = state.SubtitleNameArr.findIndex(subName => subName.textTrackID === obj.index);
-    state.SubtitleNameArr[index].status = obj.status === 'first' ? 'first' : 'second';
-  },
-  SubtitleOff(state) {
-    const index = state.SubtitleNameArr.findIndex(subName => subName.status === 'first');
-    if (index !== -1) {
-      state.SubtitleNameArr[index].status = null;
-    } else {
-      console.log('Error in PlaybackStates');
-    }
-  },
   isPlaying(state, isPlaying) {
     state.isPlaying = isPlaying;
   },
