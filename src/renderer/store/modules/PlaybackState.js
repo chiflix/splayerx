@@ -41,13 +41,6 @@ const mutations = {
     state.Volume = v;
   },
 
-  AddSubtitle(state, subtitles) {
-    for (let i = 0; i < subtitles.length; i += 1) {
-      state.SubtitleNameArr.push(subtitles[i]);
-    }
-    console.log('PUSHED');
-    console.log(state.SubtitleNameArr);
-  },
   AddServerSubtitle(state, subtitles) {
     state.SubtitleNameArr.unshift(...subtitles);
   },
