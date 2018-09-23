@@ -700,7 +700,7 @@ export default {
   },
   computed: {
     firstSubState() { // lazy computed and lazy watched
-      return this.$store.getters.firstSubIndex !== -1;
+      return this.$store.getters.firstSubtitleIndex !== -1;
     },
     mkvInitializingReadingEndTime() {
       const duration = this.$store.state.PlaybackState.Duration;

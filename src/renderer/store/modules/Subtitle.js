@@ -20,10 +20,10 @@ const mutations = {
   },
   SubtitleOn(state, obj) {
     const index = state.SubtitleNames.findIndex(subtitle => subtitle.textTrackID === obj.index);
-    state.SubtitleNames[index] = obj.status === 'first' ? 'first' : 'second';
+    state.SubtitleNames[index].status = obj.status === 'first' ? 'first' : 'second';
   },
   SubtitleOff(state) {
-    const index = state.firstSubtitleIndex;
+    const index = state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first');
     if (index !== -1) {
       state.SubtitleNames[index].status = null;
     } else {
