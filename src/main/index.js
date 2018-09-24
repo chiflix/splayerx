@@ -14,6 +14,8 @@ if (!process.defaultApp) {
 const cliArgs = process.argv.slice(2);
 let startupOpenedFile = cliArgs.length ? cliArgs[0] : null;
 
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
+
 let mainWindow;
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
