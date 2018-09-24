@@ -142,15 +142,17 @@ describe('VideoCanvas.vue', () => {
     store.state.PlaybackState.CurrentTime = 100;
 
     const emitStub = sinon.stub(wrapper.vm.$bus, '$emit');
+    const storeStub = sinon.stub(wrapper.vm.$store, 'commit');
     const stub = sinon.stub(wrapper.vm, '$_controlWindowSize').callsFake();
 
     wrapper.vm.onMetaLoaded();
     expect(emitStub.firstCall.calledWith('play')).equal(true);
     expect(emitStub.secondCall.calledWith('seek', 100)).equal(true);
-    expect(emitStub.thirdCall.calledWith('screenshot-sizeset')).equal(true);
-    expect(wrapper.vm.videoExisted).equal(true);
+    expect(emitStub.thirdCall.calledWith('video-loaded')).equal(true);
+    expect(storeStub.calledWith('videoMeta')).equal(true);
     stub.restore();
     emitStub.restore();
+    storeStub.restore();
   });
 
   it('onMetaLoaded method work fine if video exist', () => {

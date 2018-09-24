@@ -51,6 +51,14 @@ function registerMainWindowEvent() {
     mainWindow.webContents.send('mainCommit', 'isFocused', false);
   });
 
+  ipcMain.on('toggle-fullscreen', (evt, isFullScreen) => {
+    const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow;
+    currentWindow.setFullScreen(typeof isFullScreen === 'boolean' ? isFullScreen : !currentWindow.isFullScreen());
+  });
+  ipcMain.on('callCurrentWindowMethod', (evt, method, args = []) => {
+    const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow;
+    currentWindow[method](...args);
+  });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
     mainWindow.setSize(...args);
