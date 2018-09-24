@@ -1,5 +1,6 @@
 import Vuex from 'vuex';
 import PlaybackState from '@/store/modules/PlaybackState';
+import Subtitle from '@/store/modules/Subtitle';
 import WindowState from '@/store/modules/WindowState';
 import BaseSubtitle from '@/components/PlayingView/BaseSubtitle';
 import VideoCanvas from '@/components/PlayingView/VideoCanvas';
@@ -23,6 +24,11 @@ describe('BaseSubtitle.vue', () => {
           state: PlaybackState.state,
           mutations: PlaybackState.mutations,
           getters: PlaybackState.getters,
+        },
+        Subtitle: {
+          state: Subtitle.state,
+          mutations: Subtitle.mutations,
+          getters: Subtitle.getters,
         },
         WindowState: {
           state: WindowState.state,
