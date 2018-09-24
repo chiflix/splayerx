@@ -84,23 +84,23 @@ export default {
     },
     // Methods to handle window behavior
     handleMinimize() {
-      this.$electron.remote.getCurrentWindow().minimize();
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'minimize');
     },
     handleMaximize() {
-      this.$electron.remote.getCurrentWindow().maximize();
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'maximize');
     },
     handleClose() {
-      this.$electron.remote.getCurrentWindow().close();
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'close');
     },
     handleRestore() {
-      this.$electron.remote.getCurrentWindow().unmaximize();
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'unmaximize');
     },
     handleFullscreenExit() {
-      this.$electron.remote.getCurrentWindow().setFullScreen(false);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
     },
     // OS-specific methods
     handleMacMaximize() {
-      this.$electron.remote.getCurrentWindow().setFullScreen(true);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
     },
   },
   computed: {
