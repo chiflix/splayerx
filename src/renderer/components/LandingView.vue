@@ -216,8 +216,8 @@ export default {
     }, 0);
     window.onresize = resize;
     const { app } = this.$electron.remote;
-    this.$electron.remote.getCurrentWindow().setResizable(true);
-    this.$electron.remote.getCurrentWindow().setAspectRatio(720 / 405);
+    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setResizable', [true]);
+    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [720 / 405]);
 
     this.sagi().healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
