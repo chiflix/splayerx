@@ -22,6 +22,7 @@ function set(key, json) {
       if (err) {
         reject(err);
       }
+      resolve();
     });
   });
 }
