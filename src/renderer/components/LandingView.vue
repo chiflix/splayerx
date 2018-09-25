@@ -307,6 +307,7 @@ body {
     width: 70%;
     word-break: break-all;
     font-size: 30px;
+    line-height: 30px;
     font-weight: bold;
     z-index: 4;
     overflow: hidden;

@@ -227,10 +227,10 @@ export default {
   @media screen and (max-width: 854px) {
     font-size: 20px;
   }
-  @media screen and (min-width: 854px) and (max-width: 1920px) {
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
     font-size: 24px;
   }
-  @media screen and (min-width: 1920px) {
+  @media screen and (min-width: 1921px) {
     font-size: 40px;
   }
 }

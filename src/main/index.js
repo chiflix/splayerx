@@ -31,6 +31,7 @@ function registerMainWindowEvent() {
   mainWindow.on('resize', () => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
     mainWindow.webContents.send('main-resize');
   });
   mainWindow.on('move', () => {

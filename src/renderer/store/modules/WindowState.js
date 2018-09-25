@@ -3,6 +3,7 @@ const state = {
   windowPosition: [0, 0],
   isFullScreen: false,
   isFocused: true,
+  isMaximized: false,
 };
 
 const getters = {
@@ -14,6 +15,7 @@ const getters = {
   winPos: state => state.windowPosition,
   isFullScreen: state => state.isFullScreen,
   isFocused: state => state.isFocused,
+  isMaximized: state => state.isMaximized,
 };
 
 const mutations = {
@@ -28,6 +30,9 @@ const mutations = {
   },
   isFocused(state, payload) {
     state.isFocused = payload;
+  },
+  isMaximized(state, payload) {
+    state.isMaximized = payload;
   },
 };
 

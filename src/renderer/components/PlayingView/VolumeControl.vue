@@ -1,7 +1,8 @@
 <template>
   <div :data-component-name="$options.name"
     @mouseover="appearVolumeSlider"
-    @mouseout="hideVolumeSlider">
+    @mouseout="hideVolumeSlider"
+    class="volume-container">
     <transition name="fade">
     <div class="container"
       @mousedown.left="onVolumeSliderClick"
@@ -148,6 +149,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.volume-container {
+  display: flex;
+  justify-content: space-around;
+}
 .container {
   clip-path: inset(0px round 10px);
   backdrop-filter: blur(18px);

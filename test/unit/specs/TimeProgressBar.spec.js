@@ -56,7 +56,6 @@ describe('TimeProgressBar.vue', () => {
     expect(wrapper.vm.cursorPosition).equal(0);
     expect(wrapper.vm.videoRatio).equal(1.78);
     expect(wrapper.vm.percentageVideoDraged).equal(0);
-    expect(wrapper.vm.widthOfThumbnail).equal(136);
     expect(wrapper.vm.thumbnailCurrentTime).equal(0);
     expect(wrapper.vm.buttonWidth).equal(20);
     expect(wrapper.vm.buttonRadius).equal(0);

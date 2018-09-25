@@ -1,5 +1,6 @@
 import Vuex from 'vuex';
 import PlaybackState from '@/store/modules/PlaybackState';
+import Subtitle from '@/store/modules/Subtitle';
 import SubtitleControl from '@/components/PlayingView/SubtitleControl';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
@@ -17,6 +18,11 @@ describe('SubtitleControl.vue', () => {
           state: PlaybackState.state,
           getters: PlaybackState.getters,
           mutations: PlaybackState.mutations,
+        },
+        Subtitle: {
+          state: Subtitle.state,
+          mutations: Subtitle.mutations,
+          getters: Subtitle.getters,
         },
       },
     });
@@ -102,7 +108,7 @@ describe('SubtitleControl.vue', () => {
       { title: 'something index 3' },
     ];
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    store.commit('SubtitleNameArr', testSubArr);
+    store.commit('SubtitleNames', testSubArr);
     expect(wrapper.vm.computedAvaliableItems.length).equal(4);
     expect(wrapper.vm.computedAvaliableItems[2].title).equal('something index 2');
   });

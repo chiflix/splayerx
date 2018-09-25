@@ -40,12 +40,12 @@
     "directories": {
       "output": "build"
     },
-    "electronVersion": "3.0.0-beta.7",
+    "electronVersion": "3.0.0",
     "electronDist": "node_modules/@chiflix/electron/dist",
     "electronDownload": {
       "mirror": "https://github.com/chiflix/electron/releases/download/v",
       "isVerifyChecksum": false,
-      "version": "3.0.0-beta.7"
+      "version": "3.0.0"
     },
     "files": [
       "dist/electron/**/*"
@@ -117,7 +117,7 @@
     "worker-loader": "^2.0.0"
   },
   "devDependencies": {
-    "@chiflix/electron": "^3.0.0-beta.5",
+    "@chiflix/electron": "^3.0.0",
     "@vue/test-utils": "^1.0.0-beta.24",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",

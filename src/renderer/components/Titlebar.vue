@@ -59,21 +59,13 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import Icon from './BaseIconContainer';
 export default {
   name: 'titlebar',
   data() {
     return {
-      middleButtonStatus: 'maximize',
-      windowInfo: {
-        screenWidth: null,
-        windowWidth: null,
-        windowPosition: null,
-      },
-      maximize: false,
       isDarwin: process.platform === 'darwin',
-      titlebarDelay: 0,
-      screenWidth: this.$electron.screen.getPrimaryDisplay().workAreaSize.width,
       state: 'default',
     };
   },
@@ -110,89 +102,14 @@ export default {
     handleMacMaximize() {
       this.$electron.remote.getCurrentWindow().setFullScreen(true);
     },
-    handleResize() {
-      this.setWindowInfo();
-      this.statusChange();
-      this.titlebarWidth = this.winWidth;
-      this.originalSize = this.winSize;
-    },
-    statusChange() {
-      if (this.$store.getters.isFullScreen) {
-        this.middleButtonStatus = 'exit-fullscreen';
-      } else if (this.maximize) {
-        this.middleButtonStatus = 'restore';
-      } else {
-        this.middleButtonStatus = 'maximize';
-      }
-    },
-    setWindowInfo() {
-      [this.windowInfo.screenWidth, this.windowInfo.windowWidth] = [
-        this.screenWidth,
-        this.winWidth,
-      ];
-      this.windowInfo.windowPosition = this.winPos;
-      this.updateMaximize(this.windowInfo);
-    },
-    updateMaximize(val) {
-      const sizeOffset = Math.abs(val.screenWidth - val.windowWidth);
-      const positionOffset = Math.sqrt((this.windowInfo.windowPosition[0] ** 2) +
-        (this.windowInfo.windowPosition[1] ** 2));
-      if (sizeOffset <= 5 && positionOffset <= 5) {
-        this.maximize = true;
-      } else {
-        this.maximize = false;
-      }
-    },
-    appearTitlebar() {
-      if (this.titlebarDelay !== 0) {
-        clearTimeout(this.titlebarDelay);
-      }
-      this.showTitlebar = true;
-    },
-    hideTitlebar() {
-      this.showTitlebar = false;
-    },
-  },
-  beforeMount() {
-    this.setWindowInfo();
-    this.statusChange();
-  },
-  mounted() {
-    this.$electron.ipcRenderer.on('main-resize', this.handleResize);
-    this.$electron.ipcRenderer.on('main-move', this.setWindowInfo);
-    this.$bus.$on('titlebar-appear-delay', () => {
-      this.appearTitlebar();
-      if (this.showTitlebar !== 0) {
-        clearTimeout(this.titlebarDelay);
-        this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
-      } else {
-        this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
-      }
-    });
   },
   computed: {
-    show() {
-      if (this.showTitlebar === false) {
-        return {
-          Maximize: false,
-          Restore: false,
-          FullscreenExit: false,
-        };
-      }
-      return {
-        Maximize: this.middleButtonStatus === 'maximize',
-        Restore: this.middleButtonStatus === 'restore',
-        FullscreenExit: this.middleButtonStatus === 'exit-fullscreen',
-      };
-    },
-    winSize() {
-      return this.$store.getters.winSize;
-    },
-    winWidth() {
-      return this.$store.getters.winWidth;
-    },
-    winPos() {
-      return this.$store.getters.winPos;
+    ...mapGetters([
+      'isMaximized',
+      'isFullScreen',
+    ]),
+    middleButtonStatus() {
+      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
     },
   },
 };
@@ -247,33 +164,16 @@ export default {
     -webkit-app-region: no-drag;
     border-radius: 100%;
   }
-  .title-button {
-    background-position-y: -96px;
-  }
   #minimize {
     &.disabled {
-      background-position-y: -108px;
       pointer-events: none;
       opacity: 0.25;
     }
   }
   #maximize {
     &.disabled {
-      background-position-y: -108px;
       pointer-events: none;
       opacity: 0.25;
-    }
-  }
-  @media screen and (-webkit-min-device-pixel-ratio: 1) and (-webkit-max-device-pixel-ratio: 2) {
-    .title-button {
-      background-size: 36px 240px;
-      background-position-x: 0;
-    }
-  }
-  @media screen and (-webkit-min-device-pixel-ratio: 2) {
-    .title-button {
-      background-size: 18px 120px;
-      background-position-x: -6px;
     }
   }
 }
