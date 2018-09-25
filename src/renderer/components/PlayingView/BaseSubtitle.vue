@@ -341,6 +341,7 @@ export default {
       parser.flush();
     },
     parseMkvSubs(filePath, startTime, endTime, onlyEmbedded, processSubNames) {
+      this.readingMkv = true;
       const self = this;
       return new Promise((resolve, reject) => {
         let tracks = [];
@@ -367,9 +368,8 @@ export default {
             parser.emit('finish');
           }
           // even currently we can not read subtitles from a specific time
-          // straightly, but this if condition does improves some performance
-          // avoiding doing the adding things stuff, manipulating
-          // data and data structures.
+          // straightly, but this if condition does improve some performance
+          // avoiding adding unnecessary subtitles
           if (startTime < sub.time && this.notParsedYet(sub.time)) {
             const currentIndex = tracks.findIndex(track => trackNumber === track.number);
             let currentContent = '';
@@ -812,7 +812,8 @@ export default {
     });
     this.$bus.$on('seek-subtitle', (e) => {
       if (this.mkvSubsInitialized && !this.mkvSubsFullyParsed) {
-        if (this.idleCallbackID !== 0) {
+        this.mkvSubsSeekedParsed = false;
+        if (this.idleCallbackID !== 0 || this.readingMkv) {
           window.cancelIdleCallback(this.idleCallbackID);
           this.$emit('stop-reading-mkv-subs', 'stopped');
         }
