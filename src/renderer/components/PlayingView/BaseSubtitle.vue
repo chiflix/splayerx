@@ -153,7 +153,7 @@ export default {
       }
 
       const files = [];
-      this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
+      this.findSubtitleFilesByVidPath(vid.src, (subPath) => {
         files.push(subPath);
       });
       const localSubsStatus = {

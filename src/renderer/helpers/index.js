@@ -34,7 +34,7 @@ export default {
       return `${minutes}:${seconds}`;
     },
     findSubtitleFilesByVidPath(vidPath, callback) {
-      vidPath = decodeURIComponent(vidPath);
+      vidPath = decodeURI(vidPath);
       if (process.platform === 'win32') {
         vidPath = vidPath.replace(/^file:\/\/\//, '');
       } else {

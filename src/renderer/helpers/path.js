@@ -24,7 +24,7 @@ export function filePathToUrl(filePath) {
 export function fileUrlToPath(fileUrl) {
   if (!fileUrl) throw new Error('fileUrl should not be empty');
   let filePath = fileUrl.replace('file://', '').replace(/([?#].*)/g, '');
-  filePath = decodeURIComponent(filePath);
+  filePath = decodeURI(filePath);
   if (process.platform === 'win32') {
     filePath = filePath.substr(1).replace(/\//g, '\\');
   }
