@@ -169,7 +169,7 @@ export default {
   },
   computed: {
     computedAvaliableItems() {
-      return this.$store.getters.subtitleNameArr;
+      return this.$store.getters.subtitleNames;
     },
     loadingPlaceholderList() {
       const res = [];
@@ -274,7 +274,7 @@ button:hover {
     cursor: default;
   }
   .chosenText{
-    font-family: Avenir-Heavy;
+    font-style: bold;
   }
   .chosen-dot {
     content: '';
@@ -293,7 +293,6 @@ button:hover {
   li {
     position: relative;
     text-align: left;
-    font-family: Avenir-Roman;
   }
 
   @media screen and (min-width: 320px) and (max-width: 512px) {

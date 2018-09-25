@@ -85,7 +85,6 @@ export default {
     &::before {
       content: '-';
       padding-right: 2px;
-      font-family: sans-serif;
       display: inline-block;
     }
   }
