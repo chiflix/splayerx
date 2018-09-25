@@ -1,6 +1,6 @@
 import syncStorage from '@/helpers/syncStorage.js';
 
-describe.only('helper syncStorage', () => {
+describe('helper syncStorage', () => {
   const randomValue = Math.floor(Math.random() * 10000);
   it('get & set correct data', () => {
     syncStorage.setSync('foo', { value: randomValue });
