@@ -150,6 +150,7 @@
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",
+    "husky": "^1.0.0-rc.15",
     "inject-loader": "^3.0.0",
     "karma": "^2.0.2",
     "karma-chai": "^0.1.0",
@@ -184,6 +185,12 @@
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint",
+      "pre-push": "npm run lint:fix && npm run unit"
     }
   }
 }
