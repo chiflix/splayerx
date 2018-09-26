@@ -28,5 +28,7 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     // force the use of unix linebreak-syle
     'linebreak-style': ['error', 'unix'],
+    // limit the cyclomatic complexity to 5
+    'complexity': ['error', { max: 5 }]
   }
 }
