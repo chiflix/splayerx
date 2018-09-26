@@ -1,46 +1,50 @@
 <template>
-    <div class="controller"
-      :style="{bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px'}">
-      <div class="playlist"
-        :style="{marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'}">
-        <div class="button"
-          :style="{
+  <div class="controller"
+    :style="{
+      bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px',
+      transition: tranFlag ? 'left 100ms linear' : '',
+    }">
+    <div class="playlist"
+      :style="{marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'}">
+      <div class="button"
+        :style="{
           height:`${itemHeight}px`,
           width:`${itemWidth}px`,
-          }"
-          @click="openOrMove">
-          <div class="btnMask"
-            :style="{
+        }"
+        @click="openOrMove">
+        <div class="btnMask"
+          :style="{
             height:`${itemHeight}px`,
             width:`${itemWidth}px`,
-            }">
-            <Icon class="addUi" type="add"></Icon>
-          </div>
+          }">
+          <Icon class="addUi" type="add"></Icon>
         </div>
-        <div class="item"
-          v-for="(item, index) in lastPlayedFile"
-          :id="'item'+index"
-          :key="item.path"
-          :class="showShadow ? 'shadow' : '' "
-          :style="{
+      </div>
+      <div class="item"
+        v-for="(item, index) in lastPlayedFile"
+        :id="'item'+index"
+        :key="item.path"
+        :class="showShadow ? 'shadow' : '' "
+        :style="{
+          transition: tranFlag ? 'width 150ms ease-out, height 150ms ease-out, border 150ms ease-out' : '',
           backgroundImage: itemShortcut(item.shortCut),
           width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
           height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
-          }"
-          @click.stop="onRecentItemClick(item, index)"
-          @mouseover="onRecentItemMouseover(item, index)"
-          @mouseout="onRecentItemMouseout(index)"
-          @mousedown.stop="onRecentItemMousedown($event, index)">
-          <div class="mask"
-            :style="{
+        }"
+        @click.stop="onRecentItemClick(item, index)"
+        @mouseover="onRecentItemMouseover(item, index)"
+        @mouseout="onRecentItemMouseout(index)"
+        @mousedown.stop="onRecentItemMousedown($event, index)">
+        <div class="mask"
+          :style="{
             width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
             height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
-            }">
-            <Icon class="deleteUi" type="delete"></Icon>
-          </div>
+          }">
+          <Icon class="deleteUi" type="delete"></Icon>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
@@ -70,6 +74,7 @@ export default {
       showShadow: true,
       itemWidth: 112,
       itemHeight: 65,
+      tranFlag: true,
     };
   },
   props: {
@@ -128,7 +133,7 @@ export default {
     windowWidth(val) {
       this.itemWidth = (this.changeSize * val) / 100;
       this.itemHeight = (this.changeSize * val * 405) / 100 / 720;
-      document.querySelector('.item').style.transition = '';
+      this.tranFlag = false;
     },
     showItemNum(val, oldval) {
       if (val > oldval) {
@@ -221,7 +226,7 @@ export default {
     onRecentItemMouseover(item, index) {
       if (((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
         this.isFullScreen) && this.mouseFlag) {
-        document.querySelector(`#item${index}`).style.transition = 'width 150ms ease-out, height 150ms ease-out, border 150ms ease-out';
+        this.tranFlag = true;
         this.item = item;
         this.$set(this.lastPlayedFile[index], 'chosen', true);
         if (item.shortCut !== '') {
@@ -322,6 +327,7 @@ export default {
     onRecentItemClick(item, index) {
       const lf = document.querySelector('.controller');
       if (!this.isDragging) {
+        this.tranFlag = true;
         if (index === this.showItemNum - this.moveItem - 1 && !this.isFullScreen) {
           this.moveItem -= 1;
           const ss = (this.move - 15) - (this.changeSize * (this.windowWidth / 100));
@@ -349,7 +355,6 @@ export default {
   left: 0;
   width: auto;
   z-index: 4;
-  transition : left 100ms linear;
 
   .playlist {
     -webkit-app-region: no-drag;
