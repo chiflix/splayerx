@@ -20,6 +20,7 @@
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
     <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
+    <next-video :duration="a" :name="b"/>
   </div>
 </template>
 <script>
@@ -31,6 +32,7 @@ import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TimeProgressBar from './TimeProgressBar.vue';
+import NextVideo from './NextVideo.vue';
 export default {
   name: 'the-video-controller',
   components: {
@@ -41,6 +43,7 @@ export default {
     'advance-control': AdvanceControl,
     'the-time-codes': TheTimeCodes,
     'the-time-progress-bar': TimeProgressBar,
+    'next-video': NextVideo,
   },
   directives: {
     hidden: {
@@ -63,6 +66,8 @@ export default {
   },
   data() {
     return {
+      a: 500,
+      b: 'asd',
       start: null,
       UIElements: [],
       currentWidget: this.$options.name,
