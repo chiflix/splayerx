@@ -2,14 +2,17 @@
 <div
   :data-component-name="$options.name"
   class="next-video">
-  <img>
+  <div class="preview">
+    <img
+      :src="srcOfThumbnail">
+  </div>
   <div class="content">
     <div class="info">
       <div class="top">
         <div class="duration">{{ formattedDuration }}</div>
-        <div class="title"></div>
+        <div class="title">Next in Playing List</div>
       </div>
-      <div class="vid-name">{{ name }}</div>
+      <div class="vid-name">{{ videoName }}</div>
     </div>
     <Icon/>
   </div>
@@ -23,11 +26,13 @@ export default {
     Icon,
   },
   props: {
-    name: {
+    videoName: {
       type: String,
+      required: true,
     },
     duration: {
       type: Number,
+      required: true,
     },
     srcOfThumbnail: {
       type: String,
@@ -44,23 +49,19 @@ export default {
 </script>
 <style lang="scss" scoped>
 .next-video {
-  position: absolute;
   // temp style
-  right: 0;
-  width: 500px;
   height: 112px;
   background-color: white;
   //temp style
   display: flex;
-  img {
+  .preview {
     height: 100%;
-    width: 30%;
+    width: 100%;
     background-color: black;
   }
   .content {
     padding: 10px;
     display: flex;
-    width: 100%;
     .info {
       display: flex;
       flex-direction: column;

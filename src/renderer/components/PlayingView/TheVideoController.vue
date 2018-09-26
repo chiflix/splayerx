@@ -20,7 +20,7 @@
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
     <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
-    <next-video :duration="a" :name="b"/>
+    <next-video class="next-video"/>
   </div>
 </template>
 <script>
@@ -66,8 +66,6 @@ export default {
   },
   data() {
     return {
-      a: 500,
-      b: 'asd',
       start: null,
       UIElements: [],
       currentWidget: this.$options.name,
@@ -425,6 +423,10 @@ export default {
     rgba(0, 0, 0, 0.19) 62%,
     rgba(0, 0, 0, 0.29) 100%
   );
+}
+.next-video {
+  position: absolute;
+  right: 0;
 }
 .control-buttons {
   display: flex;
