@@ -50,6 +50,12 @@
     "files": [
       "dist/electron/**/*"
     ],
+    "fileAssociations": {
+      "name": "Video",
+      "ext": ["3g2", "3gp", "3gp2", "3gpp", "amv", "asf", "avi", "bik", "bin", "crf", "divx", "drc", "dv", "dvr-ms", "evo", "f4v", "flv", "gvi", "gxf", "iso", "m1v", "m2v", "m2t", "m2ts", "m4v", "mkv", "mov", "mp2", "mp2v", "mp4", "mp4v", "mpe", "mpeg", "mpeg1", "mpeg2", "mpeg4", "mpg", "mpv2", "mts", "mtv", "mxf", "mxg", "nsv", "nuv", "ogg", "ogm", "ogv", "ogx", "ps", "rec", "rm", "rmvb", "rpl", "thp", "tod", "tp", "ts", "tts", "txd", "vob", "vro", "webm", "wm", "wmv", "wtv", "xesc"],
+      "mimeType": "video/avi;video/msvideo;video/x-msvideo;video/mp4;video/x-matroska;video/mpeg;video/ogg;video/webm;video/3gpp;video/3gpp2;",
+      "role": "Viewer"
+    },
     "dmg": {
       "contents": [
         {
@@ -86,7 +92,6 @@
     "@grpc/grpc-js": "^0.2.0",
     "ass-to-vtt": "^1.2.0",
     "axios": "^0.18.0",
-    "bluebird": "^3.5.1",
     "electron-builder-http": "^19.27.5",
     "electron-json-storage": "^4.1.0",
     "electron-log": "^1.3.0",
@@ -150,6 +155,7 @@
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",
+    "husky": "^1.0.0-rc.15",
     "inject-loader": "^3.0.0",
     "karma": "^2.0.2",
     "karma-chai": "^0.1.0",
@@ -184,6 +190,12 @@
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint",
+      "pre-push": "npm run lint:fix && npm run unit"
     }
   }
 }

@@ -1,4 +1,3 @@
-import Promise from 'bluebird';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
 import GetMainHelper from './MainHelper.js';
