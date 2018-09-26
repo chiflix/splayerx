@@ -9,5 +9,5 @@ describe('helper syncStorage', () => {
   it('if the file not exist then return empty object', () => {
     const data = syncStorage.getSync('bar');
     expect(data).deep.equal({});
-  })
+  });
 });
