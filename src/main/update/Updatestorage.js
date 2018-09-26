@@ -6,7 +6,6 @@ const updateDownloadString = 'updateInstalled#loloxdnkdddksk';
 
 export default class Storage {
   constructor() {
-    this.storage = storage;
     this.setAsync = util.promisify(storage.set);
     this.getAsync = util.promisify(storage.get);
   }
