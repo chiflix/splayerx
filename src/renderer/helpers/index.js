@@ -33,6 +33,37 @@ export default {
       }
       return `${minutes}:${seconds}`;
     },
+    findSimilarVideoByVidPath(vidPath) {
+      vidPath = decodeURI(vidPath);
+
+      if (process.platform === 'win32') {
+        vidPath = vidPath.replace(/^file:\/\/\//, '');
+      } else {
+        vidPath = vidPath.replace(/^file:\/\//, '');
+      }
+
+      const baseName = path.basename(vidPath, path.extname(vidPath));
+      const dirPath = path.dirname(vidPath);
+      const filter = /\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$/;
+
+      if (!fs.existsSync(dirPath)) {
+        return [];
+      }
+
+      const similarVideos = [];
+      const files = fs.readdirSync(dirPath);
+      for (let i = 0; i < files.length; i += 1) {
+        const filename = path.join(dirPath, files[i]);
+        const stat = fs.lstatSync(filename);
+        if (!stat.isDirectory()) {
+          if (files[i].startsWith(baseName) && filter.test(files[i])) {
+            console.log(`found similar video file: ${files[i]}`);
+            similarVideos.push(files[i]);
+          }
+        }
+      }
+      return similarVideos;
+    },
     findSubtitleFilesByVidPath(vidPath, callback) {
       vidPath = decodeURI(vidPath);
       if (process.platform === 'win32') {
