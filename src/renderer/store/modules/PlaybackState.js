@@ -31,8 +31,8 @@ const mutations = {
     state.SrcOfVideo = t;
   },
   NextVideo(state) {
-    const index = state.PlayingList.find(value => value === state.SrcOfVideo);
-    if (index && index + 1 < state.this.PlayingList.length) {
+    const index = state.PlayingList.findIndex(value => value === state.SrcOfVideo);
+    if (index !== -1 && index + 1 < state.PlayingList.length) {
       state.SrcOfVideo = state.PlayingList[index + 1];
     }
   },
