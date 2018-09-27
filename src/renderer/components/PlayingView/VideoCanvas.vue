@@ -228,8 +228,15 @@ export default {
         0, 0, 1920, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
+      [canvas.width, canvas.height] = [137.4, 79.7];
+      canvasCTX.drawImage(
+        this.videoElement, 0, 0, videoWidth, videoHeight,
+        0, 0, 137.4, 79.7,
+      );
+      const smallImagePath = canvas.toDataURL('image/png');
       const data = {
         shortCut: imagePath,
+        smallShortCut: smallImagePath,
         lastPlayedTime: this.currentTime,
         duration: this.$store.state.PlaybackState.Duration,
       };
