@@ -35,14 +35,12 @@
     </transition>
     <transition name="welcome-container-transition" mode="">
       <div class="welcome-container" v-if="langdingLogoAppear">
-          <div class="logo-container" :style="{
-             paddingTop: `${logoPos}vh`
-        }">
+          <div class="logo-container">
               <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
           </div>
           <div class="welcome">
-          <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-          <div class="version">v {{ this.version }}</div>
+          <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
+          <div class="version" :style="$t('css.versionFontSize')">v {{ this.version }}</div>
         </div>
       </div>
   </transition>
@@ -361,6 +359,11 @@ body {
     -webkit-user-drag: none;
   }
 }
+.welcome-container {
+    --client-height: 100vh;
+    --pos-y: calc(var(--client-height) * 0.37 - 92px);
+    transform: translateY(var(--pos-y));
+}
 .logo-container {
   text-align: center;
   .logo {
@@ -384,15 +387,9 @@ main {
   }
   .version {
     margin-top: 5px;
-    font-size: 2vw;
     color: #AAA;
     font-weight: 100;
     letter-spacing: 1px;
-  }
-  p {
-    font-size: 2vw;
-    color: gray;
-    margin-bottom: 10px;
   }
 }
 

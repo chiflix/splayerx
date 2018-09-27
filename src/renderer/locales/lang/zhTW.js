@@ -63,6 +63,7 @@ export default {
     },
   },
   css: {
-    titleFontSize: { fontSize: '4vw' },
+    titleFontSize: { fontSize: '21px' },
+    versionFontSize: { fontSize: '14px' },
   },
 };
