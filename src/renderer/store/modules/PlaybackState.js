@@ -13,7 +13,7 @@ const state = {
 const getters = {
   isPlaying: state => state.isPlaying,
   convertedSrcOfVideo: (state) => {
-    const originPath = state.PlaybackState.SrcOfVideo;
+    const originPath = state.SrcOfVideo;
     const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
 
     return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
