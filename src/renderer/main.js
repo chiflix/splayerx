@@ -456,25 +456,27 @@ new Vue({
      */
     window.addEventListener('drop', (e) => {
       e.preventDefault();
-      let potentialVidPath;
       let tempFilePath;
       let containsSubFiles = false;
       const { files } = e.dataTransfer;
       // TODO: play it if it's video file
       const subtitleFiles = [];
-      const regex = '^(.srt|.ass|.vtt)$';
-      const re = new RegExp(regex);
+      const subRegex = new RegExp('^(.srt|.ass|.vtt)$');
+      const videoFiles = [];
+      const vidRegex = new RegExp('^(3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc)$');
       for (let i = 0; i < files.length; i += 1) {
-        tempFilePath = `file:///${files[i].path}`;
-        if (re.test(Path.extname(tempFilePath))) {
-          subtitleFiles.push(files[i].path);
+        console.log(files[i]);
+        tempFilePath = files[i].path;
+        if (subRegex.test(Path.extname(tempFilePath))) {
+          subtitleFiles.push(tempFilePath);
           containsSubFiles = true;
-        } else {
-          potentialVidPath = tempFilePath;
+        } else if (vidRegex.test(Path.extname(tempFilePath))) {
+          videoFiles.push(tempFilePath);
         }
       }
-      if (potentialVidPath) {
-        this.openFile(potentialVidPath.replace(/^file:\/\/\//, ''));
+      if (videoFiles.length !== 0) {
+        this.openFile(videoFiles[0]);
+        this.$store.commit('PlayingList', videoFiles);
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);

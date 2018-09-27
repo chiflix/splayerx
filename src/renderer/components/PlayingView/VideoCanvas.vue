@@ -277,12 +277,12 @@ export default {
     currentTime() {
       return this.$store.state.PlaybackState.CurrentTime;
     },
-    originSrcOfVideo() {
-      return this.$store.state.PlaybackState.OriginSrcOfVideo;
+    srcOfVideo() {
+      return this.$store.state.PlaybackState.SrcOfVideo;
     },
   },
   watch: {
-    originSrcOfVideo(val, oldVal) {
+    srcOfVideo(val, oldVal) {
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {

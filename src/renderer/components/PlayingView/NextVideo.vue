@@ -28,11 +28,9 @@ export default {
   props: {
     videoName: {
       type: String,
-      required: true,
     },
     duration: {
       type: Number,
-      required: true,
     },
     srcOfThumbnail: {
       type: String,

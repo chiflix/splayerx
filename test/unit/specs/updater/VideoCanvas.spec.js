@@ -120,7 +120,7 @@ describe('VideoCanvas.vue', () => {
     });
   });
 
-  it('watch OriginSrcOfVideo work fine', () => {
+  it('watch SrcOfVideo work fine', () => {
     const stub = sinon.stub(wrapper.vm.$electron.remote, 'getCurrentWindow').callsFake(() => ({
       getBounds() {
         return {
@@ -131,7 +131,7 @@ describe('VideoCanvas.vue', () => {
         };
       },
     }));
-    wrapper.vm.$store.commit('OriginSrcOfVideo', 'abc');
+    wrapper.vm.$store.commit('SrcOfVideo', 'abc');
     stub.restore();
   });
 

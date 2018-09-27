@@ -64,7 +64,6 @@ export default {
     },
     openFile(path) {
       const originPath = path;
-      const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
       this.infoDB().get('recent-played', this.mediaQuickHash(originPath))
         .then((value) => {
           if (value) {
@@ -79,11 +78,7 @@ export default {
           }
           this.$bus.$emit('new-file-open');
         });
-      this.$store.commit(
-        'SrcOfVideo',
-        process.platform === 'win32' ? convertedPath : `file://${convertedPath}`,
-      );
-      this.$store.commit('OriginSrcOfVideo', originPath);
+      this.$store.commit('SrcOfVideo', originPath);
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',

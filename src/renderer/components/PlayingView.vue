@@ -22,7 +22,7 @@ export default {
   },
   computed: {
     uri() {
-      return this.$store.state.PlaybackState.SrcOfVideo;
+      return this.$store.getters.convertedSrcOfVideo;
     },
   },
 };
