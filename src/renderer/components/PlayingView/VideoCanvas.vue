@@ -278,7 +278,7 @@ export default {
       return this.$store.state.PlaybackState.CurrentTime;
     },
     srcOfVideo() {
-      return this.$store.state.PlaybackState.SrcOfVideo;
+      return this.$store.state.PlaybackState.OriginSrcOfVideo;
     },
   },
   watch: {
