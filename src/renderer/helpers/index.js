@@ -50,15 +50,37 @@ export default {
         return [];
       }
 
+      function isSimilar(primaryName, secondaryName) {
+        // judget if the similarity is more than half of the primaryName's characters
+        if (primaryName.length < secondaryName.length / 2) {
+          return false;
+        }
+
+        let similarPart;
+        for (let i = 0; i < primaryName.length; i += 1) {
+          similarPart = i;
+          if (primaryName.charAt(i) !== secondaryName.charAt(i)) {
+            break;
+          }
+        }
+
+        if (similarPart >= primaryName.length / 2 && similarPart >= secondaryName.length / 2) {
+          return true;
+        }
+        return false;
+      }
+
       const similarVideos = [];
       const files = fs.readdirSync(dirPath);
       for (let i = 0; i < files.length; i += 1) {
         const filename = path.join(dirPath, files[i]);
         const stat = fs.lstatSync(filename);
         if (!stat.isDirectory()) {
-          if (files[i].startsWith(baseName) && filter.test(files[i])) {
-            console.log(`found similar video file: ${files[i]}`);
-            similarVideos.push(files[i]);
+          if (filter.test(path.extname(files[i]))) {
+            const fileBaseName = path.basename(files[i], path.extname(files[i]));
+            if (isSimilar(baseName, fileBaseName)) {
+              similarVideos.push(files[i]);
+            }
           }
         }
       }
@@ -109,7 +131,7 @@ export default {
           }
           this.$bus.$emit('new-file-open');
         });
-      this.$store.commit('SrcOfVideo', originPath);
+      this.$store.commit('OriginSrcOfVideo', originPath);
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
