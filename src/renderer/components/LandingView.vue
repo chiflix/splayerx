@@ -360,9 +360,9 @@ body {
   }
 }
 .welcome-container {
-    --client-height: 100vh;
-    --pos-y: calc(var(--client-height) * 0.37 - 92px);
-    transform: translateY(var(--pos-y));
+  --client-height: 100vh;
+  --pos-y: calc(var(--client-height) * 0.37 - 92px);
+  transform: translateY(var(--pos-y));
 }
 .logo-container {
   text-align: center;
