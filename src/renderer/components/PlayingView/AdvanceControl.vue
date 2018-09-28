@@ -20,7 +20,7 @@
 
 <script>
 import AdvanceControlMenuItem from './AdvanceControlMenuItem.vue';
-import Icon from '../IconContainer';
+import Icon from '../BaseIconContainer';
 export default {
   name: 'advance-control',
   components: {

@@ -75,7 +75,7 @@
   </div>
 </template>
 <script>
-import Icon from '../IconContainer';
+import Icon from '../BaseIconContainer';
 export default {
   name: 'subtitle-control',
   props: {

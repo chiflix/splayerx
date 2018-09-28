@@ -483,5 +483,9 @@ new Vue({
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
     });
+
+    this.$electron.ipcRenderer.on('open-file', (event, file) => {
+      this.openFile(file);
+    });
   },
 }).$mount('#app');
