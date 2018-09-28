@@ -53,9 +53,15 @@ new Vue({
                     name: 'Video Files',
                     extensions: [],
                   }],
-                }, (file) => {
-                  if (file !== undefined) {
-                    this.openFile(file[0]);
+                }, (files) => {
+                  if (files) {
+                    this.openFile(files[0]);
+                    if (files.length > 1) {
+                      this.$store.commit('PlayingList', files);
+                    } else {
+                      const similarVideos = this.findSimilarVideoByVidPath(files[0]);
+                      this.$store.commit('PlayingList', similarVideos);
+                    }
                   }
                 });
               },

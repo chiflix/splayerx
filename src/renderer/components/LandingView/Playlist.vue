@@ -179,10 +179,16 @@ export default {
           extensions: ['*'],
         }],
         properties: ['openFile'],
-      }, (item) => {
+      }, (items) => {
         self.showingPopupDialog = false;
-        if (item) {
-          self.openFile(item[0]);
+        if (items) {
+          self.openFile(items[0]);
+          if (items.length > 1) {
+            this.$store.commit('PlayingList', items);
+          } else {
+            const similarVideos = this.findSimilarVideoByVidPath(items[0]);
+            this.$store.commit('PlayingList', similarVideos);
+          }
         }
       });
     },
