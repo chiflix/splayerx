@@ -108,6 +108,7 @@ export default {
   mounted() {
     const lf = document.querySelector('.controller');
     window.onkeyup = (e) => {
+      this.tranFlag = true;
       if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
         !this.isFullScreen && e.keyCode === 39) {
         this.moveItem -= 1;
