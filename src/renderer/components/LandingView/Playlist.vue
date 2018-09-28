@@ -200,9 +200,9 @@ export default {
         this.$bus.$emit('moveItem', this.moveItem);
         this.$bus.$emit('move', this.move);
       } else if (this.windowWidth > 1355) {
-        this.open('./');
+        this.open();
       } else {
-        this.open('./');
+        this.open();
       }
     },
     backgroundUrl() {
