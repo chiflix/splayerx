@@ -228,10 +228,10 @@ export default {
         0, 0, 1920, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
-      [canvas.width, canvas.height] = [137.4, 79.7];
+      [canvas.width, canvas.height] = [211.3, 122.6];
       canvasCTX.drawImage(
         this.videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, 137.4, 79.7,
+        0, 0, 211.3, 122.6,
       );
       const smallImagePath = canvas.toDataURL('image/png');
       const data = {
