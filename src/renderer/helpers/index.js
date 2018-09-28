@@ -77,9 +77,9 @@ export default {
         const stat = fs.lstatSync(filename);
         if (!stat.isDirectory()) {
           if (filter.test(path.extname(files[i]))) {
-            const fileBaseName = path.basename(files[i], path.extname(files[i]));
+            const fileBaseName = path.basename(filename, path.extname(files[i]));
             if (isSimilar(baseName, fileBaseName)) {
-              similarVideos.push(files[i]);
+              similarVideos.push(filename);
             }
           }
         }
