@@ -476,7 +476,12 @@ new Vue({
       }
       if (videoFiles.length !== 0) {
         this.openFile(videoFiles[0]);
-        this.$store.commit('PlayingList', videoFiles);
+        if (videoFiles.length > 1) {
+          this.$store.commit('PlayingList', videoFiles);
+        } else {
+          const similarVideos = this.findSimilarVideoByVidPath(videoFiles[0]);
+          this.$store.commit('PlayingList', similarVideos);
+        }
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);
