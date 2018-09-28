@@ -1,7 +1,8 @@
 <template>
 <div
   :data-component-name="$options.name"
-  class="next-video">
+  class="next-video"
+  @mousedown.capture.stop="handleMouseDown">
   <div class="preview">
     <img
       :src="srcOfThumbnail">
@@ -42,6 +43,10 @@ export default {
     };
   },
   methods: {
+    handleMouseDown() {
+      console.log('mousedown');
+      this.$store.commit('NextVideo');
+    },
   },
 };
 </script>
