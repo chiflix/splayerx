@@ -50,17 +50,17 @@ export default {
         return [];
       }
 
+      // need more effective algorithm
       function isSimilar(primaryName, secondaryName) {
         // judget if the similarity is more than half of the primaryName's characters
         if (primaryName.length < secondaryName.length / 2) {
           return false;
         }
 
-        let similarPart;
+        let similarPart = 0;
         for (let i = 0; i < primaryName.length; i += 1) {
-          similarPart = i;
-          if (primaryName.charAt(i) !== secondaryName.charAt(i)) {
-            break;
+          if (primaryName.charAt(i) === secondaryName.charAt(i)) {
+            similarPart += 1;
           }
         }
 
