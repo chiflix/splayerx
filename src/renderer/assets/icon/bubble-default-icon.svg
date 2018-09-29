@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="27px" viewBox="0 0 24 27" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 51.2 (57519) - http://www.bohemiancoding.com/sketch -->
+    <title>icon-playlist</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <radialGradient cx="60.435757%" cy="38.5603041%" fx="60.435757%" fy="38.5603041%" r="100%" id="radialGradient-1">
+            <stop stop-color="#FFFFFF" stop-opacity="0.16479846" offset="1.95086705%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.42408288" offset="97.1030527%"></stop>
+        </radialGradient>
+        <radialGradient cx="84.2036702%" cy="81.3988863%" fx="84.2036702%" fy="81.3988863%" r="114.30679%" id="radialGradient-2">
+            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="icon-playlist" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icon-round_bg-white" transform="translate(0.000000, 2.000000)" fill="url(#radialGradient-1)" opacity="0.3">
+            <circle cx="12" cy="11.5" r="11.2002426"></circle>
+        </g>
+        <path d="M12.8,12.7 L16.5,12.7 C16.7761424,12.7 17,12.9238576 17,13.2 L17,13.8 C17,14.0761424 16.7761424,14.3 16.5,14.3 L12.8,14.3 L12.8,18 C12.8,18.2761424 12.5761424,18.5 12.3,18.5 L11.7,18.5 C11.4238576,18.5 11.2,18.2761424 11.2,18 L11.2,14.3 L7.5,14.3 C7.22385763,14.3 7,14.0761424 7,13.8 L7,13.2 C7,12.9238576 7.22385763,12.7 7.5,12.7 L11.2,12.7 L11.2,9 C11.2,8.72385763 11.4238576,8.5 11.7,8.5 L12.3,8.5 C12.5761424,8.5 12.8,8.72385763 12.8,9 L12.8,12.7 Z" id="Combined-Shape" stroke-opacity="0.168081975" stroke="#FFFFFF" stroke-width="0.5" fill="url(#radialGradient-2)" opacity="0.398325893" transform="translate(12.000000, 13.500000) rotate(45.000000) translate(-12.000000, -13.500000) "></path>
+    </g>
+</svg>

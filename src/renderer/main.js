@@ -16,6 +16,11 @@ import Path from 'path';
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
+Vue.config.errorHandler = function openFile(err, vm, info) {
+  console.log(err);
+  console.log(vm);
+  console.log(info);
+};
 
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
@@ -473,8 +478,12 @@ new Vue({
           potentialVidPath = tempFilePath;
         }
       }
-      if (potentialVidPath) {
+      const fileregex = '^(.3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc])$';
+      const filere = new RegExp(fileregex);
+      if (potentialVidPath && filere.test(Path.extname(tempFilePath)) && !tempFilePath.includes('\\')) {
         this.openFile(potentialVidPath.replace(/^file:\/\/\//, ''));
+      } else {
+        this.$bus.$emit('notification-bubble-appear');
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);

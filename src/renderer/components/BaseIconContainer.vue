@@ -164,4 +164,10 @@ export default {
   }
   display: block;
 }
+
+.bubble {
+  display: block;
+  width: 24px;
+  height: 27px;
+}
 </style>

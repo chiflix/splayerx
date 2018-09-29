@@ -7,6 +7,7 @@
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
+    <notification-bubble notificationTitle="文件错误" notificationContent="视频文件格式无法识别或文件已损坏。"></notification-bubble>
     <transition name="background-container-transition" mode="">
       <div class="background"
         v-if="showShortcutImage">
@@ -45,9 +46,11 @@
       </div>
   </transition>
       <playlist :lastPlayedFile="lastPlayedFile" :changeSize="changeSize" :showItemNum="showItemNum"
-                :isFullScreen="isFullScreen" :windowWidth="windowWidth"
-                :style="{marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
-                         left: this.isFullScreen ? '0px' : `${this.move}px`}"/>
+        :isFullScreen="isFullScreen" :windowWidth="windowWidth"
+        :style="{
+          marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
+          left: this.isFullScreen ? '0px' : `${this.move}px`,
+        }"/>
   </main>
 </div>
 </template>
@@ -57,7 +60,7 @@ import { mapState } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
-
+import NotificationBubble from './NotificationBubble.vue';
 export default {
   name: 'landing-view',
   data() {
@@ -92,6 +95,7 @@ export default {
   components: {
     Titlebar,
     Playlist,
+    'notification-bubble': NotificationBubble,
   },
   computed: {
     ...mapState({
