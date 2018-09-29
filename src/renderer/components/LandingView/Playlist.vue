@@ -419,7 +419,7 @@ export default {
                 position: relative;
                 box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;
             }
-            .shadow:before, .shadow:after {
+            .shadow:before {
                 content: "";
                 position: absolute;
                 z-index: -1;
