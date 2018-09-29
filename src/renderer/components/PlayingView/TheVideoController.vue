@@ -426,7 +426,17 @@ export default {
 }
 .next-video {
   position: absolute;
-  right: 0;
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    top: 40px;
+    right: 32px;
+  }
+  @media screen and (min-width: 1921px) {
+    top: 45px;
+    right: 49px;
+  }
 }
 .control-buttons {
   display: flex;
