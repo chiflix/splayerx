@@ -18,6 +18,13 @@ const getters = {
 
     return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
   },
+  nextVideo: (state) => {
+    const index = state.PlayingList.findIndex(value => value === state.OriginSrcOfVideo);
+    if (index !== -1 && index + 1 < state.PlayingList.length) {
+      return state.PlayingList[index + 1];
+    }
+    return false;
+  },
 };
 
 const mutations = {
@@ -29,12 +36,6 @@ const mutations = {
   },
   OriginSrcOfVideo(state, t) {
     state.OriginSrcOfVideo = t;
-  },
-  NextVideo(state) {
-    const index = state.PlayingList.findIndex(value => value === state.OriginSrcOfVideo);
-    if (index !== -1 && index + 1 < state.PlayingList.length) {
-      state.OriginSrcOfVideo = state.PlayingList[index + 1];
-    }
   },
   CurrentTime(state, t) {
     state.CurrentTime = t;
