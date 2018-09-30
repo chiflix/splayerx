@@ -165,8 +165,38 @@ export default {
   display: block;
 }
 
-.bubble {
-  display: block;
+.close {
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
   @media screen and (max-width: 512px) {
     width: 20px;
     height: 20px;

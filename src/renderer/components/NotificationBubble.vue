@@ -8,7 +8,7 @@
           <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
           <div class="content">{{ m.content }}</div>
         </div>
-        <Icon v-if="m.type === 'error'" type="bubble" class="bubbleClose" @mousedown.native.left="closeMessage(m.id)"></Icon>
+        <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id)"></Icon>
       </div>
     </transition-group>
   </div>
@@ -39,6 +39,7 @@ export default {
 <style lang="scss">
 
 .container {
+  -webkit-app-region: no-drag;
   position: absolute;
   .toast-enter, .toast-enter-active {
     transform: translateX(0px);
