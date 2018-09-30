@@ -224,6 +224,9 @@ export default {
       };
     },
     onRecentItemMouseover(item, index) {
+      /* this.$store.dispatch('addMessages', {
+        type: 'loading', title: '', content: '正在搜索翻译结果...', dismissAfter: 3000,
+      }); */
       if (((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
         this.isFullScreen) && this.mouseFlag) {
         this.tranFlag = true;

@@ -483,7 +483,9 @@ new Vue({
       if (potentialVidPath && filere.test(Path.extname(tempFilePath)) && !tempFilePath.includes('\\')) {
         this.openFile(potentialVidPath.replace(/^file:\/\/\//, ''));
       } else {
-        this.$bus.$emit('notification-bubble-appear');
+        this.$store.dispatch('addMessages', {
+          type: 'error', title: '文件错误', content: '视频文件格式无法识别或文件已损坏。', dismissAfter: 3000,
+        });
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);

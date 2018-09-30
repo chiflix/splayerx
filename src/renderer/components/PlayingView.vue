@@ -1,7 +1,7 @@
 <template>
   <div :data-component-name="$options.name" class="player">
     <the-video-canvas :src="uri" />
-    <notification-bubble notificationTitle="文件错误" notificationContent="视频文件格式无法识别或文件已损坏。"></notification-bubble>
+    <notification-bubble/>
     <the-video-controller :src="uri" />
   </div>
 </template>
