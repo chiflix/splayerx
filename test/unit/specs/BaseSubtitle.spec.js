@@ -66,6 +66,7 @@ describe('BaseSubtitle.vue', () => {
         src: 'file://./../../../../test/assets/test.avi',
       },
     });
+    store.state.PlaybackState.OriginSrcOfVideo = decodeURI('./test/assets/test.avi');
     const childWrapper = wrapper.find(BaseSubtitle);
     childWrapper.setData({ readingMkv: true });
     const stub = sinon.stub(childWrapper.vm, 'loadLocalTextTracks');
@@ -84,6 +85,7 @@ describe('BaseSubtitle.vue', () => {
         src: 'file://./../../../../test/assets/testServer.avi',
       },
     });
+    store.state.PlaybackState.OriginSrcOfVideo = decodeURI('./test/assets/testServer.avi');
     const childWrapper = wrapper.find(BaseSubtitle);
     const stub = sinon.stub(childWrapper.vm, 'loadServerTextTracks');
     await childWrapper.vm.subtitleInitialize();
@@ -99,6 +101,7 @@ describe('BaseSubtitle.vue', () => {
         src: 'file://./../../../../test/assets/testMkv.mkv',
       },
     });
+    store.state.PlaybackState.OriginSrcOfVideo = decodeURI('./test/assets/testMkv.mkv');
     const childWrapper = wrapper.find(BaseSubtitle);
     const stub = sinon.stub(childWrapper.vm, 'mkvProcess');
     await childWrapper.vm.subtitleInitialize();
