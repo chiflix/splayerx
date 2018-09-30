@@ -3,8 +3,7 @@
     <transition-group name="toast">
       <div v-for="m in messages" :key="m.id"
         :id="'item' + m.id"
-        :class="m.type === 'error' ? 'errorContainer bubble-appear' : 'loadingContainer bubble-appear'"
-        @animationend="animationEnd(m.id)">
+        :class="m.type === 'error' ? 'errorContainer' : 'loadingContainer'">
         <div class="bubbleContent">
           <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
           <div class="content">{{ m.content }}</div>
@@ -18,7 +17,7 @@
 <script>
 import Icon from './BaseIconContainer';
 export default {
-  name: 'NotificationBubble',
+  name: 'notification-bubble',
   components: {
     Icon,
   },
@@ -30,9 +29,6 @@ export default {
   mounted() {
   },
   methods: {
-    animationEnd(id) {
-      document.querySelector(`#item${id}`).classList.remove('bubble-appear');
-    },
     closeMessage(id) {
       this.$store.dispatch('removeMessages', id);
     },
@@ -44,6 +40,9 @@ export default {
 
 .container {
   position: absolute;
+  .toast-enter, .toast-enter-active {
+    transform: translateX(0px);
+  }
   .toast-enter, .toast-leave-active {
     transform: translateX(403px);
   }
@@ -277,25 +276,6 @@ export default {
     @media screen and (min-width: 1921px) {
       margin: 25.5px 28px auto auto;
     }
-  }
-}
-
-.bubble-appear {
-  animation: ytp-bezel-fadeout1 150ms linear 1 normal forwards;
-}
-
-@keyframes ytp-bezel-fadeout1 {
-  0% {
-    opacity: 0;
-    transform: translateX(60px)
-  }
-  50% {
-    opacity: 0.5;
-    transform: translateX(30px)
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0px)
   }
 }
 

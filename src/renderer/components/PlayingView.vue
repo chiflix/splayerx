@@ -1,7 +1,6 @@
 <template>
   <div :data-component-name="$options.name" class="player">
     <the-video-canvas :src="uri" />
-    <notification-bubble/>
     <the-video-controller :src="uri" />
   </div>
 </template>
@@ -9,14 +8,12 @@
 <script>
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheVideoController from './PlayingView/TheVideoController';
-import NotificationBubble from './NotificationBubble.vue';
 
 export default {
   name: 'playing-view',
   components: {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
-    'notification-bubble': NotificationBubble,
   },
   mounted() {
     this.$bus.$emit('play');

@@ -11,6 +11,7 @@
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
+    <notification-bubble/>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button />
     <div class="control-buttons">
@@ -31,6 +32,7 @@ import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TimeProgressBar from './TimeProgressBar.vue';
+import NotificationBubble from '../NotificationBubble.vue';
 export default {
   name: 'the-video-controller',
   components: {
@@ -41,6 +43,7 @@ export default {
     'advance-control': AdvanceControl,
     'the-time-codes': TheTimeCodes,
     'the-time-progress-bar': TimeProgressBar,
+    'notification-bubble': NotificationBubble,
   },
   directives: {
     hidden: {
