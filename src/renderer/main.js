@@ -391,7 +391,6 @@ new Vue({
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowUp':
-          this.$bus.$emit('volumeslider-appear');
           if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
             this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
           } else {
@@ -400,7 +399,6 @@ new Vue({
           break;
 
         case 'ArrowDown':
-          this.$bus.$emit('volumeslider-appear');
           if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
             this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
           } else {
@@ -409,9 +407,6 @@ new Vue({
           break;
 
         case 'ArrowLeft':
-          this.$bus.$emit('progressbar-appear-delay');
-          this.$bus.$emit('progressslider-appear');
-          this.$bus.$emit('timecode-appear-delay');
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
           } else {
@@ -420,9 +415,6 @@ new Vue({
           break;
 
         case 'ArrowRight':
-          this.$bus.$emit('progressbar-appear-delay');
-          this.$bus.$emit('progressslider-appear');
-          this.$bus.$emit('timecode-appear-delay');
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
           } else {
@@ -433,7 +425,6 @@ new Vue({
       }
     });
     window.addEventListener('wheel', (e) => {
-      this.$bus.$emit('volumeslider-appear');
       const up = e.deltaY < 0;
       if (up) {
         if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
