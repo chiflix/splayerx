@@ -367,12 +367,6 @@ export default {
     this.$bus.$on('horizental-down', (deltaX) => {
       this.helper360.rotateScene(-deltaX / 300, 0);
     });
-    this.$bus.$on('vertical-up', () => {
-      // console.log('up');
-    });
-    this.$bus.$on('horizental-up', () => {
-      // console.log('up');
-    });
     this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {
       this.$_saveScreenshot();

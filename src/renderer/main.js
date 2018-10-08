@@ -447,20 +447,6 @@ new Vue({
         default:
       }
     });
-    window.addEventListener('keyup', (e) => {
-      switch (e.key) {
-        case 'w':
-        case 's':
-          this.$bus.$emit('vertical-up');
-          break;
-
-        case 'a':
-        case 'd':
-          this.$bus.$emit('horizental-up');
-          break;
-        default:
-      }
-    });
     window.addEventListener('wheel', (e) => {
       this.$bus.$emit('volumeslider-appear');
       const up = e.deltaY < 0;
