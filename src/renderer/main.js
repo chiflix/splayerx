@@ -391,21 +391,14 @@ new Vue({
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowUp':
-          if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-            this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
-          } else {
-            this.$bus.$emit('volume', 1);
-          }
+          this.$store.commit('IncreaseVolume');
           break;
-
         case 'ArrowDown':
-          if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-            this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
-          } else {
-            this.$bus.$emit('volume', 0);
-          }
+          this.$store.commit('DecreaseVolume');
           break;
-
+        case 'm':
+          this.$store.commit('ToggleMute');
+          break;
         case 'ArrowLeft':
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
@@ -413,7 +406,6 @@ new Vue({
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
           }
           break;
-
         case 'ArrowRight':
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
@@ -422,23 +414,13 @@ new Vue({
           }
           break;
         default:
+          console.log(e.key);
+          break;
       }
     });
     window.addEventListener('wheel', (e) => {
       const up = e.deltaY < 0;
-      if (up) {
-        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
-        } else {
-          this.$bus.$emit('volume', 1);
-        }
-      } else if (!up) {
-        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
-        } else {
-          this.$bus.$emit('volume', 0);
-        }
-      }
+      this.$store.commit(up ? 'IncreaseVolume' : 'DecreaseVolume');
     });
 
     /**
