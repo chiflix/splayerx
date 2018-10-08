@@ -165,7 +165,15 @@ export default {
         display: block;
     }
     .close {
-        display: block;
+        .default {
+            display: block;
+        }
+        .hover {
+            display: none;
+        }
+        .active {
+            display: none;
+        }
         @media screen and (max-width: 512px) {
             width: 20px;
             height: 20px;
@@ -181,6 +189,29 @@ export default {
         @media screen and (min-width: 1921px) {
             width: 36px;
             height: 36px;
+        }
+        &:hover {
+            opacity: 1;
+            .default {
+                display: none;
+            }
+            .hover {
+                display: block;
+            }
+            .active {
+                display: none;
+            }
+        }
+        &:active {
+            .default {
+                display: none;
+            }
+            .hover {
+                display: none;
+            }
+            .active {
+                display: block;
+            }
         }
     }
 </style>
