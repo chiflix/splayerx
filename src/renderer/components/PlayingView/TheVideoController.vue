@@ -14,9 +14,9 @@
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button />
     <div class="control-buttons">
-      <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
+      <subtitle-control class="button subtitle"  v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
+      <volume-control class="button playlist" v-hidden="displayState['volume-control']" v-bind.sync="widgetsStatus['volume-control']" />
       <advance-control class="button advance" v-hidden="displayState['advance-control']" />
-      <volume-control class="button volume" v-hidden="displayState['volume-control']" v-bind.sync="widgetsStatus['volume-control']" />
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
     <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
@@ -430,14 +430,16 @@ export default {
     cursor: pointer;
     position: relative;
   }
-  .subtitle {
-    order: 1;
-  }
-  .volume {
-    order: 2;
-  }
-  .advance {
-    order: 3;
+  .subtitle, .playlist {
+    @media screen and (min-width: 513px) and (max-width: 854px){
+      margin-right: 17.6px;
+    }
+    @media screen and (min-width: 855px) and (max-width: 1920px){
+      margin-right: 25.6px;
+    }
+    @media screen and (min-width: 1921px){
+      margin-right: 40px;
+    }
   }
   img {
     width: 100%;
@@ -451,38 +453,26 @@ export default {
 }
 @media screen and (min-width: 513px) and (max-width: 854px) {
   .control-buttons {
-    width: 119px;
-    height: 18px;
+    width: 115px;
+    height: 22px;
     right: 27px;
     bottom: 20px;
-    .button {
-      width: 23px;
-      height: 18px;
-    }
   }
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
   .control-buttons {
-    width: 159px;
-    height: 24px;
+    width: 167px;
+    height: 32px;
     right: 32px;
     bottom: 24px;
-    .button {
-      width: 30.67px;
-      height: 24px;
-    }
   }
 }
 @media screen and (min-width: 1921px) {
   .control-buttons {
-    width: 238px;
-    height: 36px;
+    width: 260px;
+    height: 50px;
     right: 48px;
     bottom: 35px;
-    .button {
-      width: 46px;
-      height: 36px;
-    }
   }
 }
 .fade-in {
