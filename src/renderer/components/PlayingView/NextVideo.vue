@@ -1,16 +1,16 @@
 <template>
 <div
   :data-component-name="$options.name"
-  class="next-video">
-  <div class="preview"
-    @mousedown.stop="handleMouseDown">
-    <video ref="videoThumbnail"
-      :src="convertedSrcOfNextVideo"
-      @mouseover="mouseoverVideo"
-      @mouseout="mouseoutVideo"
-      @loadedmetadata="onMetaLoaded"></video>
-  </div>
+  class="next-video"
+  @animationed.native="animationEnd">
+  <div class="plane-background"></div>
   <div class="plane">
+    <div class="progress">
+      <div
+        class="progress-slider"
+        style="{ width: progress + '%' }">
+      </div>
+    </div>
     <div class="content">
       <div class="info">
         <div class="top">
@@ -20,6 +20,19 @@
         <div class="vid-name">{{ videoName }}</div>
       </div>
     </div>
+    <div class="close"
+      @mousedown="handleCloseMousedown">
+      <Icon type="close"/>
+    </div>
+  </div>
+  <div class="thumbnail-shadow"></div>
+  <div class="thumbnail"
+    @mousedown.stop="handleMouseDown">
+    <video ref="videoThumbnail"
+      :src="convertedSrcOfNextVideo"
+      @mouseover="mouseoverVideo"
+      @mouseout="mouseoutVideo"
+      @loadedmetadata="onMetaLoaded"></video>
   </div>
 </div>
 </template>
@@ -34,9 +47,15 @@ export default {
   data() {
     return {
       duration: '',
+      progress: 50,
+      animation: '',
     };
   },
   methods: {
+    animationEnd() {
+    },
+    handleCloseMousedown() {
+    },
     handleMouseDown() {
       if (this.nextVideo) {
         this.openFile(this.nextVideo);
@@ -73,76 +92,126 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.icon-appear {
+  animation: fade-in 500ms linear 1 normal;
+}
+.icon-disappear {
+  animation: fade-out 500ms linear 1 normal;
+  left: 14px;
+}
+@keyframes fade-in {
+  0% {opacity: 0; transform: translateX(0.25)};
+  50% {opacity: 0.5; transform: translateX(0.5)}
+  100% {opacity: 1; transform: translateX(1)};
+}
+@keyframes fade-out {
+  0% {opacity: 1; transform: translateX(0.25)};
+  50% {opacity: 0.5; transform: translateX(0.5)}
+  100% {opacity: 0; transform: translateX(1)};
+}
 .next-video {
-  .preview {
+  .thumbnail-shadow {
     position: absolute;
-    border: 0 solid rgba(0,0,0,0.12);
-    border-radius: 3.3px;
-    border-width: 0.77px;
+    top: 0px;
+    filter: blur(11.55px);
+    background-color: rgba(0,0,0,0.20);
+    border-radius: 21.6px;
+    @media screen and (min-width: 513px) and (max-width: 854px) {
+      height: 70px;
+      width: 123px;
+      left: 7px;
+    }
+    @media screen and (min-width: 855px) and (max-width: 1920px) {
+      height: 84px;
+      width: 140px;
+      left: 8.5px;
+    }
+    @media screen and (min-width: 1921px) {
+      height: 118px;
+      width: 207px;
+      left: 12px;
+    }
+  }
+  .thumbnail {
+    position: absolute;
+    top: 0;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;
+    display: flex;
+    justify-content: center;
+    align-item: center;
 
-    img {
-      height: 100%;
+    border: 1px solid rgba(0,0,0,0.10);
+
+    @media screen and (min-width: 513px) and (max-width: 854px) {
+      border-radius: 2px;
+      height: 70px;
+      width: 123px;
+    }
+    @media screen and (min-width: 855px) and (max-width: 1920px) {
+      border-radius: 2.4px;
+      height: 84px;
+      width: 148px;
+    }
+    @media screen and (min-width: 1921px) {
+      border-radius: 3.36px;
+      height: 118px;
+      width: 207px;
     }
     video {
       height: 100%;
     }
+  }
+  .plane-background {
+    position: absolute;
+    border-radius: 11px;
+
+    background-color: rgba(255,255,255,0.20);
     @media screen and (min-width: 513px) and (max-width: 854px) {
-      width: 124px;
+      width: 335px;
       height: 75px;
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
-      height: 112px;
-      width: 185px;
+      height: 84px;
+      width: 408px;
     }
     @media screen and (min-width: 1921px) {
       height: 167px;
-      width: 279px;
+      width: 753px;
     }
   }
-  .preview:before {
-      position: absolute;
-      z-index: -1;
-      left: 8.46px;
-      right: 315.47px;
-      width: 186px;
-      height: 112px;
-      opacity: 0.4;
-      filter: blur(10px);
-      border-radius: 18px;
-  }
-  .preview:after {
-      right: 10px;
-      left: auto;
-      transform: skew(8deg) rotate(3deg);
-  }
   .plane {
-    box-sizing: border-box;
     border-style: solid;
-    border-width: 0.5px;
+    border-width: 1px;
     border-color: rgba(255,255,255,0.1);
+
     background-color: rgba(0,0,0,0.20);
-    box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
+    border-radius: 11px;
 
     @media screen and (min-width: 513px) and (max-width: 854px) {
       width: 335px;
       height: 75px;
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
-      border-radius: 15px;
-      height: 112px;
-      width: 500px;
+      height: 84px;
+      width: 408px;
     }
     @media screen and (min-width: 1921px) {
       height: 167px;
       width: 753px;
     }
-    .content {
+    .progress{
       position: absolute;
-      left: 201px;
+      border-radius: 11px;
+      left: 148px;
       height: 100%;
-      padding-top: 21px;
+      width: 260px;
+      .progress-slider {
+        height: 100%;
+      }
+    }
+    .content {
+      padding-left: 164px;
+      padding-top: 15px;
       display: flex;
       .info {
         display: flex;
@@ -154,10 +223,15 @@ export default {
         }
         .vid-name {
           color: white;
-          padding-top: 10.5px;
+          padding-top: 5px;
           font-size: 16px;
         }
       }
+    }
+    .close {
+      position: absolute;
+      top: 29px;
+      right: 20px;
     }
   }
 }
