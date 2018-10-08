@@ -15,7 +15,7 @@
     </div>
     </transition>
     <div @mousedown.left="onVolumeButtonClick">
-      <Icon class="volume-icon" type="volume" :effect="srcOfVolumeButtonImage"></Icon>
+      <Icon class="volume-icon" type="playlist"></Icon>
     </div>
   </div>
 </template>;
