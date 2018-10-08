@@ -17,6 +17,7 @@
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
       <advance-control class="button advance" v-hidden="displayState['advance-control']" />
       <volume-control class="button volume" v-hidden="displayState['volume-control']" v-bind.sync="widgetsStatus['volume-control']" />
+      <vr360-control class="button vr360" v-hidden="displayState['vr360-control']" v-bind.sync="widgetsStatus['vr360-control']" />
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
     <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
@@ -29,6 +30,7 @@ import PlayButton from './PlayButton.vue';
 import VolumeControl from './VolumeControl.vue';
 import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
+import VR360Control from './VR360Control.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TimeProgressBar from './TimeProgressBar.vue';
 export default {
@@ -39,6 +41,7 @@ export default {
     'subtitle-control': SubtitleControl,
     'volume-control': VolumeControl,
     'advance-control': AdvanceControl,
+    'vr360-control': VR360Control,
     'the-time-codes': TheTimeCodes,
     'the-time-progress-bar': TimeProgressBar,
   },
@@ -120,6 +123,10 @@ export default {
         ArrowLeft: false,
         ArrowRight: false,
         Space: false,
+        w: false,
+        s: false,
+        a: false,
+        d: false,
       }],
     ]);
     // Use Object due to vue's lack support of reactive Map
@@ -436,8 +443,11 @@ export default {
   .volume {
     order: 2;
   }
-  .advance {
+   .vr360 {
     order: 3;
+  }
+  .advance {
+    order: 4;
   }
   img {
     width: 100%;
