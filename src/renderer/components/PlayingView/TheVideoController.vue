@@ -209,7 +209,7 @@ export default {
       Object.keys(this.timerState).forEach((uiName) => {
         this.timerState[uiName] = this.showAllWidgets;
       });
-      this.timerState['volume-control'] = !this.hideVolume;
+      this.timerState['volume-indicator'] = !this.hideVolume;
       this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
       return currentEventInfo;
     },
@@ -225,7 +225,7 @@ export default {
       this.hideVolume = timeoutTimers.includes('sleepingVolumeButton');
       this.hideProgressBar = timeoutTimers.includes('sleepingProgressBar');
 
-      this.timerState['volume-control'] = !this.hideVolume;
+      this.timerState['volume-indicator'] = !this.hideVolume;
       this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
     },
     // UILayerManager() {
