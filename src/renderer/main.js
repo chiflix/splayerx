@@ -16,11 +16,6 @@ import Path from 'path';
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
-Vue.config.errorHandler = function openFile(err, vm, info) {
-  console.log(err);
-  console.log(vm);
-  console.log(info);
-};
 
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
