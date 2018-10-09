@@ -320,6 +320,7 @@ export default {
       this.videoElement.pause();
     });
     this.$bus.$on('seek', (e) => {
+      if (e < 0) e = 0;
       this.videoElement.currentTime = e;
       this.$store.commit('CurrentTime', e);
 
