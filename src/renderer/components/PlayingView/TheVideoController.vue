@@ -11,6 +11,7 @@
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
+    <notification-bubble/>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button />
     <div class="control-buttons">
@@ -20,7 +21,7 @@
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
     <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
-    <next-video class="next-video"/>
+    <next-video @closebutton-mousedown="closemousedown" class="next-video"/>
   </div>
 </template>
 <script>
@@ -33,6 +34,8 @@ import SubtitleControl from './SubtitleControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TimeProgressBar from './TimeProgressBar.vue';
 import NextVideo from './NextVideo.vue';
+import NotificationBubble from '../NotificationBubble.vue';
+
 export default {
   name: 'the-video-controller',
   components: {
@@ -44,6 +47,7 @@ export default {
     'the-time-codes': TheTimeCodes,
     'the-time-progress-bar': TimeProgressBar,
     'next-video': NextVideo,
+    'notification-bubble': NotificationBubble,
   },
   directives: {
     hidden: {
@@ -148,6 +152,9 @@ export default {
     requestAnimationFrame(this.UIManager);
   },
   methods: {
+    closemousedown() {
+      console.log('closemousedown');
+    },
     // UIManagers
     UIManager(timestamp) {
       if (!this.start) {
