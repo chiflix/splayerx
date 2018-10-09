@@ -13,10 +13,10 @@
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button />
+    <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
       <advance-control class="button advance" v-hidden="displayState['advance-control']" />
-      <volume-control class="button volume" v-hidden="displayState['volume-control']" v-bind.sync="widgetsStatus['volume-control']" />
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
     <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
@@ -26,7 +26,7 @@
 import TimerManager from '@/helpers/timerManager.js';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
-import VolumeControl from './VolumeControl.vue';
+import VolumeIndicator from './VolumeIndicator.vue';
 import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
@@ -36,8 +36,8 @@ export default {
   components: {
     titlebar: Titlebar,
     'play-button': PlayButton,
+    'volume-indicator': VolumeIndicator,
     'subtitle-control': SubtitleControl,
-    'volume-control': VolumeControl,
     'advance-control': AdvanceControl,
     'the-time-codes': TheTimeCodes,
     'the-time-progress-bar': TimeProgressBar,
@@ -432,9 +432,6 @@ export default {
   }
   .subtitle {
     order: 1;
-  }
-  .volume {
-    order: 2;
   }
   .advance {
     order: 3;
