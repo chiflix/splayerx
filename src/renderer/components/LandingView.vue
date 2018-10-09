@@ -7,7 +7,7 @@
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
-    <notification-bubble notificationTitle="文件错误" notificationContent="视频文件格式无法识别或文件已损坏。"></notification-bubble>
+    <notification-bubble/>
     <transition name="background-container-transition" mode="">
       <div class="background"
         v-if="showShortcutImage">
