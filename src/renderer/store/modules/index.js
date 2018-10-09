@@ -9,22 +9,24 @@ const modules = {};
 files.keys().forEach((key) => {
   if (key === './index.js') return;
   modules[key.replace(/(\.\/|\.js)/g, '')] = files(key).default;
-  const { validators } = files(key);
-  const { state } = files(key).default;
-  const stateNames = Object.keys(state);
-  stateNames.forEach((stateName) => {
-    if (validators && validators[stateName]) {
-      const validator = validators[stateName];
-      Object.defineProperty(state, stateName, {
-        get: () => this[stateName],
-        set: (value) => {
-          if (validator(value)) {
-            this[stateName] = value;
-          }
-        },
-      });
-    }
-  });
+  if (process.env.BABEL_ENV !== 'test') {
+    const { validators } = files(key);
+    const { state } = files(key).default;
+    const stateNames = Object.keys(state);
+    stateNames.forEach((stateName) => {
+      if (validators && validators[stateName]) {
+        const validator = validators[stateName];
+        Object.defineProperty(state, stateName, {
+          get: () => this[stateName],
+          set: (value) => {
+            if (validator(value)) {
+              this[stateName] = value;
+            }
+          },
+        });
+      }
+    });
+  }
 });
 
 export default modules;
