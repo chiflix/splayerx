@@ -284,7 +284,7 @@ export default {
       });
     },
     mkvProcessInit(filePath, onlyEmbedded, cb) {
-      const accurateTime = this.$store.state.PlaybackState.AccurateTime;
+      const accurateTime = this.$store.state.PlaybackState.CurrentTime;
       const startTime = accurateTime * 1000;
       const endTime = this.mkvInitializingReadingEndTime * 1000;
       const processSubNames = true;
