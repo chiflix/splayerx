@@ -1,14 +1,14 @@
 <template>
 <div
   :data-component-name="$options.name"
-  class="next-video"
-  @animationed.native="animationEnd">
+  class="next-video">
   <div class="plane-background"></div>
   <div class="plane">
     <div class="progress">
-      <div
-        class="progress-slider"
-        style="{ width: progress + '%' }">
+      <div class="progress-color"
+        :style="{ width: progress + '%' }">
+        <div class="progress-gradient"></div>
+        <div class="progress-border-light"></div>
       </div>
     </div>
     <div class="content">
@@ -32,7 +32,8 @@
       :src="convertedSrcOfNextVideo"
       @mouseover="mouseoverVideo"
       @mouseout="mouseoutVideo"
-      @loadedmetadata="onMetaLoaded"></video>
+      @loadedmetadata="onMetaLoaded"
+      @timeupdate="onTimeupdate"></video>
   </div>
 </div>
 </template>
@@ -47,14 +48,17 @@ export default {
   data() {
     return {
       duration: '',
-      progress: 50,
+      progress: 0,
       animation: '',
     };
   },
   methods: {
-    animationEnd() {
-    },
     handleCloseMousedown() {
+    },
+    onTimeupdate() {
+      const fractionProgress = this.$store.state.PlaybackState.CurrentTime / this.finalPartTime;
+      this.progress = fractionProgress * 100;
+      requestAnimationFrame(this.onTimeupdate);
     },
     handleMouseDown() {
       if (this.nextVideo) {
@@ -86,8 +90,12 @@ export default {
 
       return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
     },
+    finalPartTime() {
+      return this.$store.state.PlaybackState.Duration * 0.01;
+    },
   },
   mounted() {
+    requestAnimationFrame(this.onTimeupdate);
   },
 };
 </script>
@@ -134,7 +142,9 @@ export default {
   }
   .thumbnail {
     position: absolute;
+    box-sizing: content-box;
     top: 0;
+    transform: translate(-1px, -1px);
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -148,7 +158,7 @@ export default {
       width: 123px;
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
-      border-radius: 2.4px;
+      border-radius:4px;
       height: 84px;
       width: 148px;
     }
@@ -163,9 +173,12 @@ export default {
   }
   .plane-background {
     position: absolute;
-    border-radius: 11px;
+    
+    background-color: rgba(0,0,0,0.20);
+    backdrop-filter: blur(9.6px);
+    clip-path: inset(0px round 10px);
 
-    background-color: rgba(255,255,255,0.20);
+    border-radius: 11px;
     @media screen and (min-width: 513px) and (max-width: 854px) {
       width: 335px;
       height: 75px;
@@ -184,7 +197,9 @@ export default {
     border-width: 1px;
     border-color: rgba(255,255,255,0.1);
 
-    background-color: rgba(0,0,0,0.20);
+    clip-path: inset(0px round 10px);
+
+    background-color: rgba(255,255,255,0.20);
     border-radius: 11px;
 
     @media screen and (min-width: 513px) and (max-width: 854px) {
@@ -205,8 +220,33 @@ export default {
       left: 148px;
       height: 100%;
       width: 260px;
-      .progress-slider {
+      .progress-color {
+        position: absolute;
+        transform: translateY(-1px);
+        opacity: 0.5;
+        background-image: linear-gradient(-90deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.27) 100%);
         height: 100%;
+        .progress-gradient {
+          position: absolute;
+          right: 0;
+          height: 100%;
+          background-image: linear-gradient(-90deg, rgba(238,238,238,0.29) 0%, rgba(255,255,255,0.00) 100%);
+          @media screen and (min-width: 513px) and (max-width: 854px) {
+          }
+          @media screen and (min-width: 855px) and (max-width: 1920px) {
+            width: 42px;
+          }
+          @media screen and (min-width: 1921px) {
+          }
+        }
+        .progress-border-light {
+          position: absolute;
+          right: 0;
+          opacity: 0.69;
+          background-image: linear-gradient(-180deg, rgba(255,255,255,0.00) 13%, rgba(255,255,255,0.84) 26%, rgba(255,255,255,0.17) 56%, rgba(255,255,255,0.00) 100%);
+          height: 100%;
+          width: 1px;
+        }
       }
     }
     .content {
@@ -216,15 +256,41 @@ export default {
       .info {
         display: flex;
         flex-direction: column;
+        width: 100%;
         .top {
           display: flex;
-          color: white;
-          font-size: 14px;
+          opacity: 0.7;
+          font-family: PingFangSC-Light;
+          font-size: 10px;
+          color: #FFFFFF;
+          letter-spacing: 0.52px;
+          line-height: 12px;
         }
         .vid-name {
           color: white;
           padding-top: 5px;
-          font-size: 16px;
+
+          font-family: PingFangSC-Semibold;
+          font-size: 12px;
+          color: #FFFFFF;
+          letter-spacing: 0.36px;
+          line-height: 19.2px;
+
+          word-break: break-all;
+          font-weight: bold;
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 2;
+          text-overflow: ellipsis;
+          font-weight: 700;
+          @media screen and (min-width: 513px) and (max-width: 854px) {
+          }
+          @media screen and (min-width: 855px) and (max-width: 1920px) {
+            width: 178px;
+          }
+          @media screen and (min-width: 1921px) {
+          }
         }
       }
     }

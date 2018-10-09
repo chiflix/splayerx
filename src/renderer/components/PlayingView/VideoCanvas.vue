@@ -8,9 +8,7 @@
       :styleObject="{objectFit: 'contain', width: '100%', height: '100%'}"
       @play="onPlay"
       @pause="onPause"
-      @playing="onPlaying"
       @canplay="onCanPlay"
-      @timeupdate="onTimeupdate"
       @loadedmetadata="onMetaLoaded"
       @durationchange="onDurationChange"
       :src="src" />
@@ -58,26 +56,11 @@ export default {
     },
   },
   methods: {
-    accurateTimeUpdate() {
-      const { currentTime, duration } = this.videoElement;
-      if (currentTime >= duration || this.videoElement.paused) {
-        clearInterval(this.timeUpdateIntervalID);
-      } else {
-        this.$store.commit('AccurateTime', currentTime);
-      }
-    },
     onPlay() {
       this.$store.commit('isPlaying', true);
     },
     onPause() {
       this.$store.commit('isPlaying', false);
-    },
-    onPlaying() {
-      // set interval to get update time
-      const { duration } = this.videoElement;
-      if (duration <= 240) {
-        this.timeUpdateIntervalID = setInterval(this.accurateTimeUpdate, 10);
-      }
     },
     onCanPlay() {
       // the video is ready to start playing
@@ -101,11 +84,10 @@ export default {
       this.windowSizeHelper.setNewWindowSize();
     },
     onTimeupdate() {
-      this.$store.commit('AccurateTime', this.videoElement.currentTime);
-      const t = Math.floor(this.videoElement.currentTime);
-      if (t !== this.$store.state.PlaybackState.CurrentTime) {
-        this.$store.commit('CurrentTime', t);
+      if (this.isPlaying) {
+        this.$store.commit('CurrentTime', this.videoElement.currentTime);
       }
+      requestAnimationFrame(this.onTimeupdate);
     },
     onDurationChange() {
       const t = Math.floor(this.$refs.videoCanvas.videoElement().duration);
@@ -280,6 +262,9 @@ export default {
     srcOfVideo() {
       return this.$store.state.PlaybackState.OriginSrcOfVideo;
     },
+    isPlaying() {
+      return this.$store.state.PlaybackState.isPlaying;
+    },
   },
   watch: {
     srcOfVideo(val, oldVal) {
@@ -296,6 +281,7 @@ export default {
     },
   },
   mounted() {
+    requestAnimationFrame(this.onTimeupdate);
     this.videoElement = this.$refs.videoCanvas.videoElement();
 
     this.$bus.$on('playback-rate', (newRate) => {
@@ -336,7 +322,6 @@ export default {
     this.$bus.$on('seek', (e) => {
       this.videoElement.currentTime = e;
       this.$store.commit('CurrentTime', e);
-      this.$store.commit('AccurateTime', e);
 
       const filePath = decodeURI(this.videoElement.src);
       const indexOfLastDot = filePath.lastIndexOf('.');
