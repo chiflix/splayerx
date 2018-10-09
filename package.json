@@ -2,7 +2,7 @@
   "name": "splayer",
   "productName": "splayer",
   "homepage": "https://splayer.org",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "tomasen <tomasen@gmail.com>",
   "description": "a media player",
   "license": null,
@@ -90,6 +90,7 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^0.2.0",
+    "ass-to-vtt": "^1.2.0",
     "axios": "^0.18.0",
     "electron-builder-http": "^19.27.5",
     "electron-json-storage": "^4.1.0",
@@ -98,6 +99,7 @@
     "electron-updater": "^3.0.3",
     "google-protobuf": "^3.6.0",
     "idb": "^2.1.3",
+    "languagedetect": "^1.1.1",
     "lodash": "^4.17.10",
     "matroska-subtitles": "^2.0.3",
     "module-alias": "^2.0.6",
@@ -116,10 +118,8 @@
     "vue-resource": "^1.5.1",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
-    "zero-fill": "^2.2.3",
-    "languagedetect": "^1.1.1",
-    "ass-to-vtt": "^1.2.0",
-    "worker-loader": "^2.0.0"
+    "worker-loader": "^2.0.0",
+    "zero-fill": "^2.2.3"
   },
   "devDependencies": {
     "@chiflix/electron": "^3.0.0",

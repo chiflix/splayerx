@@ -35,4 +35,3 @@ export default {
   filePathToUrl,
   fileUrlToPath,
 };
-
