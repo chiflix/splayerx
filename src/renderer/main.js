@@ -420,7 +420,7 @@ new Vue({
     });
     window.addEventListener('wheel', (e) => {
       const up = e.deltaY < 0;
-      this.$store.commit(up ? 'IncreaseVolume' : 'DecreaseVolume');
+      this.$store.commit(up ? 'IncreaseVolume' : 'DecreaseVolume', 6);
     });
 
     /**

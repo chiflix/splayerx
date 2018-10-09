@@ -38,12 +38,20 @@ const mutations = {
   Volume(state, t) {
     state.Volume = t;
   },
-  IncreaseVolume(state) {
-    const volume = state.Volume += 10;
+  IncreaseVolume(state, t) {
+    if (state.Muted) {
+      state.Muted = false;
+    }
+    const deltaVolume = t || 10;
+    const volume = state.Volume += deltaVolume;
     state.Volume = volume > 100 ? 100 : volume;
   },
-  DecreaseVolume(state) {
-    const volume = state.Volume -= 10;
+  DecreaseVolume(state, t) {
+    if (state.Muted) {
+      state.Muted = false;
+    }
+    const deltaVolume = t || 10;
+    const volume = state.Volume -= deltaVolume;
     state.Volume = volume < 0 ? 0 : volume;
   },
   ToggleMute(state) {
