@@ -23,7 +23,7 @@ const getters = {
     if (index !== -1 && index + 1 < state.PlayingList.length) {
       return state.PlayingList[index + 1];
     }
-    return false;
+    return '';
   },
 };
 
