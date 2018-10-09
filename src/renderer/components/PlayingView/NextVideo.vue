@@ -27,13 +27,15 @@
   </div>
   <div class="thumbnail-shadow"></div>
   <div class="thumbnail"
-    @mousedown.stop="handleMouseDown">
+    @mousedown.stop="handleMouseDown"
+    @mouseover="mouseoverVideo"
+    @mouseout="mouseoutVideo">
     <video ref="videoThumbnail"
       :src="convertedSrcOfNextVideo"
-      @mouseover="mouseoverVideo"
-      @mouseout="mouseoutVideo"
+      :class="{ blur: isBlur }"
       @loadedmetadata="onMetaLoaded"
       @timeupdate="onTimeupdate"></video>
+    <Icon class="notificationPlay" :type="notificationPlayIcon"/>
   </div>
 </div>
 </template>
@@ -50,10 +52,13 @@ export default {
       duration: '',
       progress: 0,
       animation: '',
+      notificationPlayIcon: 'notificationPlay',
+      isBlur: true,
     };
   },
   methods: {
     handleCloseMousedown() {
+      this.$emit('closebutton-mousedown');
     },
     onTimeupdate() {
       const fractionProgress = this.$store.state.PlaybackState.CurrentTime / this.finalPartTime;
@@ -67,9 +72,13 @@ export default {
     },
     mouseoverVideo() {
       this.$refs.videoThumbnail.play();
+      this.notificationPlayIcon = 'notificationPlayHover';
+      this.isBlur = false;
     },
     mouseoutVideo() {
       this.$refs.videoThumbnail.pause();
+      this.notificationPlayIcon = 'notificationPlay';
+      this.isBlur = true;
     },
     onMetaLoaded() {
       this.$refs.videoThumbnail.volume = 0;
@@ -85,13 +94,16 @@ export default {
       return this.$store.getters.nextVideo;
     },
     convertedSrcOfNextVideo() {
-      const originPath = this.nextVideo;
-      const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
+      if (this.nextVideo) {
+        const originPath = this.nextVideo;
+        const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
 
-      return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
+        return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
+      }
+      return '';
     },
     finalPartTime() {
-      return this.$store.state.PlaybackState.Duration * 0.01;
+      return 10;
     },
   },
   mounted() {
@@ -100,22 +112,17 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.icon-appear {
-  animation: fade-in 500ms linear 1 normal;
+.notification-enter-active {
+ transition: opacity 100ms;
 }
-.icon-disappear {
-  animation: fade-out 500ms linear 1 normal;
-  left: 14px;
+.notification-leave-active {
+ transition: opacity 200ms;
 }
-@keyframes fade-in {
-  0% {opacity: 0; transform: translateX(0.25)};
-  50% {opacity: 0.5; transform: translateX(0.5)}
-  100% {opacity: 1; transform: translateX(1)};
+.notification-enter-to, .notification-leave {
+ opacity: 1;
 }
-@keyframes fade-out {
-  0% {opacity: 1; transform: translateX(0.25)};
-  50% {opacity: 0.5; transform: translateX(0.5)}
-  100% {opacity: 0; transform: translateX(1)};
+.notification-enter, .notification-leave-to {
+ opacity: 0;
 }
 .next-video {
   .thumbnail-shadow {
@@ -169,6 +176,24 @@ export default {
     }
     video {
       height: 100%;
+    }
+    .blur {
+      filter: blur(2px);
+    }
+    .notificationPlay {
+      position: absolute;
+      @media screen and (min-width: 513px) and (max-width: 854px) {
+        top: 19px;
+        left: 45px;
+      }
+      @media screen and (min-width: 855px) and (max-width: 1920px) {
+        top: 23px;
+        left: 54px;
+      }
+      @media screen and (min-width: 1921px) {
+        top: 33px;
+        left: 76px;
+      }
     }
   }
   .plane-background {
