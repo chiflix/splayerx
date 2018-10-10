@@ -69,9 +69,6 @@ new Vue({
               },
               enabled: false,
             },
-            // this.updateRecentPlay().then((result) => {
-            //   template.splice(3, 0, result);
-            // }),
             {
               label: this.$t('msg.file.closeWindow'),
               role: 'Close',
