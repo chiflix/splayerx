@@ -23,8 +23,12 @@
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
+import { mapGetters, mapActions } from 'vuex';
+import { Video as videoActions } from '@/store/action-types';
 import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer';
+
+
 export default {
   name: 'video-canvas',
   components: {
@@ -58,6 +62,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      videoConfigInitialize: videoActions.INITIALIZE,
+    }),
     accurateTimeUpdate() {
       const { currentTime, duration } = this.videoElement;
       if (currentTime >= duration || this.videoElement.paused) {
@@ -268,6 +275,7 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['volume', 'mute', 'rate']),
     calculateHeightByWidth() {
       return this.newWidthOfWindow / (this.videoWidth / this.videoHeight);
     },
@@ -296,6 +304,11 @@ export default {
   },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
+    this.videoConfigInitialize({
+      volume: 100,
+      mute: false,
+      rate: 1,
+    });
 
     this.$bus.$on('playback-rate', (newRate) => {
       this.videoElement.playbackRate = newRate;
