@@ -2,7 +2,7 @@
   <div class="controller"
     :style="{
       bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px',
-      transition: tranFlag ? 'left 100ms linear' : '',
+      transition: tranFlag ? 'left 500ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
     }">
     <div class="playlist"
       :style="{marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'}">
@@ -194,6 +194,7 @@ export default {
     openOrMove() {
       const divLeft = document.querySelector('.controller');
       if (this.moveItem === -1) {
+        this.tranFlag = true;
         divLeft.style.left = '0px';
         this.move = 0;
         this.moveItem = 0;
@@ -329,15 +330,14 @@ export default {
       if (!this.isDragging) {
         this.tranFlag = true;
         if (index === this.showItemNum - this.moveItem - 1 && !this.isFullScreen) {
-          this.moveItem -= 1;
-          const ss = (this.move - 15) - (this.changeSize * (this.windowWidth / 100));
+          const ss = -((this.lastPlayedFile.length - this.showItemNum) + 1) * (this.itemWidth + 15);
           this.move = ss;
+          this.moveItem = this.showItemNum - this.lastPlayedFile.length - 1;
           lf.style.left = `${ss}px`;
         } else if (index + this.moveItem === -2 && !this.isFullScreen) {
-          this.moveItem += 1;
-          const ss = (this.move + 15) + (this.changeSize * (this.windowWidth / 100));
-          this.move = ss;
-          lf.style.left = `${ss}px`;
+          this.moveItem = 0;
+          this.move = 0;
+          lf.style.left = '';
         } else {
           this.openFile(item.path);
         }
