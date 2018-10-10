@@ -7,6 +7,9 @@ const getters = {
 
 const mutations = {
   addMessages(state, payload) {
+    if (state.messages.length === 3) {
+      state.messages.splice(0, 1);
+    }
     state.messages.push(payload);
   },
   removeMessages(state, id) {
