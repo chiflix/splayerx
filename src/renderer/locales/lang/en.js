@@ -65,4 +65,12 @@ export default {
   css: {
     titleFontSize: { fontSize: '3vw' },
   },
+  error: {
+    title: 'File error',
+    content: 'Failed to open file.',
+  },
+  loading: {
+    title: '',
+    content: '',
+  },
 };

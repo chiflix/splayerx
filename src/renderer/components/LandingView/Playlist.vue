@@ -191,10 +191,7 @@ export default {
             self.openFile(item[0]);
           } else {
             this.$store.dispatch('addMessages', {
-              type: 'error',
-              title: '文件错误',
-              content: '视频文件格式无法识别或文件已损坏。',
-              dismissAfter: 3000,
+              type: 'error', title: this.$t('error.title'), content: this.$t('error.content'), dismissAfter: 3000,
             });
           }
         }

@@ -66,4 +66,12 @@ export default {
     titleFontSize: { fontSize: '21px' },
     versionFontSize: { fontSize: '14px' },
   },
+  error: {
+    title: '文件错误',
+    content: '视频文件格式无法识别或文件已损坏。',
+  },
+  loading: {
+    title: '',
+    content: '',
+  },
 };
