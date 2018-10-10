@@ -50,7 +50,7 @@ export default {
     top: 1px;
     left: 1px;
     background-color: transparent;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
   }
 }
 </style>
