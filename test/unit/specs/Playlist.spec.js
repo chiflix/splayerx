@@ -57,6 +57,8 @@ describe('Playlist.vue', () => {
     wrapper.setData({ moveItem: -1 });
     wrapper.vm.openOrMove();
     expect(wrapper.vm.moveItem).equal(0);
+    wrapper.setProps({ windowWidth: 1920 });
+    wrapper.vm.openOrMove();
   });
   it('backgroundUrl method works fine', () => {
     const wrapper = mount(Playlist);
@@ -107,13 +109,14 @@ describe('Playlist.vue', () => {
     wrapper.setProps({
       isFullScreen: false, showItemNum: 5,
     });
-    const item = { path: 'file:////Users/tanyang/Desktop/test.mp4' };
-    const moveitem = wrapper.vm.moveItem;
+    const item = [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }];
+    wrapper.setProps({ lastPlayedFile: item });
     wrapper.vm.onRecentItemClick(item, 4);
-    expect(wrapper.vm.moveItem).equal(moveitem - 1);
+    expect(wrapper.vm.moveItem).equal(3);
     wrapper.setData({ moveItem: -4 });
     wrapper.vm.onRecentItemClick(item, 2);
-    expect(wrapper.vm.moveItem).equal(-3);
+    expect(wrapper.vm.moveItem).equal(0);
+    wrapper.setProps({ isFullScreen: true });
   });
   it('onRecentItemMousedown method works fine', () => {
     const wrapper = mount(Playlist, {
@@ -147,8 +150,6 @@ describe('Playlist.vue', () => {
     expect(wrapper.vm.moveItem).equal(-1);
     wrapper.setData({ moveItem: -2 });
     e.keyCode = 37;
-    window.onkeyup(e);
-    expect(wrapper.vm.moveItem).equal(-1);
     window.onkeyup(e);
     expect(wrapper.vm.moveItem).equal(0);
   });
