@@ -20,7 +20,7 @@ export default {
   computed: {
     ...mapGetters(['volume', 'mute', 'winWidth', 'winHeight']),
     backgroundHeight() {
-      return this.winWidth > 1920 ? Math.round(this.winWidth * 0.37)
+      return this.winWidth > 1920 ? Math.round(this.winHeight * 0.37)
         : Math.round(100 + ((this.winWidth - 320) / 5.33));
     },
     containerTop() {
