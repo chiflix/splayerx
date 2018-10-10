@@ -369,6 +369,7 @@ body {
   transform: translateY(var(--pos-y));
 }
 .logo-container {
+  -webkit-user-select: none;
   text-align: center;
   .logo {
     height: 136px;
