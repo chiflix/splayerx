@@ -72,6 +72,6 @@ export default {
   },
   loading: {
     title: '',
-    content: '',
+    content: '正在搜索翻譯結果...',
   },
 };

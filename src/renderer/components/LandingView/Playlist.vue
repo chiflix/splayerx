@@ -191,7 +191,7 @@ export default {
             self.openFile(item[0]);
           } else {
             this.$store.dispatch('addMessages', {
-              type: 'error', title: this.$t('error.title'), content: this.$t('error.content'), dismissAfter: 3000,
+              type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 3000,
             });
           }
         }
