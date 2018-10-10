@@ -393,7 +393,7 @@ new Vue({
       ]);
       for (let i = 1; i <= recentPlayData.length; i += 1) {
         menuRecentData.set(`recent-${i}`, {
-          label: this.pathProcess(recentPlayData[i - 1].path),
+          label: this.pathProcess(recentPlayData[i - 1].path.split('/').reverse()[0]),
           path: recentPlayData[i - 1].path,
           visible: true,
         });
