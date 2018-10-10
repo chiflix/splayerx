@@ -17,6 +17,9 @@ const mutations = {
   [mutationTypes.VOLUME_UPDATE](s, p) {
     s.volume = p;
   },
+  [mutationTypes.MUTE_UPDATE](s, p) {
+    s.mute = p;
+  },
   [mutationTypes.TOGGLE_MUTE](s) {
     s.mute = !s.mute;
   },
@@ -26,6 +29,12 @@ const mutations = {
 };
 
 const actions = {
+  [actionTypes.INITIALIZE]({ commit }, config) {
+    Object.keys(config).forEach((item) => {
+      const mutation = `${item.toUpperCase()}_UPDATE`;
+      if (mutationTypes[mutation]) commit(mutation, config[item]);
+    });
+  },
   [actionTypes.INCREASE_VOLUME]({ commit, state }, delta) {
     if (state.mute) commit(mutationTypes.TOGGLE_MUTE);
     const finalDelta = delta || 10;
