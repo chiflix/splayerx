@@ -12,6 +12,7 @@ import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
 import Path from 'path';
+import { Video as videoActions } from '@/store/action-types';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
@@ -391,13 +392,13 @@ new Vue({
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowUp':
-          this.$store.commit('IncreaseVolume');
+          this.$store.dispatch(videoActions.INCREASE_VOLUME);
           break;
         case 'ArrowDown':
-          this.$store.commit('DecreaseVolume');
+          this.$store.dispatch(videoActions.DECREASE_VOLUME);
           break;
         case 'm':
-          this.$store.commit('ToggleMute');
+          this.$store.dispatch(videoActions.TOGGLE_MUTE);
           break;
         case 'ArrowLeft':
           if (e.altKey === true) {
@@ -420,7 +421,7 @@ new Vue({
     });
     window.addEventListener('wheel', (e) => {
       const up = e.deltaY < 0;
-      this.$store.commit(up ? 'IncreaseVolume' : 'DecreaseVolume', 6);
+      this.$store.dispatch(up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME, 6);
     });
 
     /**

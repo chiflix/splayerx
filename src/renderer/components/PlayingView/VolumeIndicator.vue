@@ -1,14 +1,14 @@
 <template>
   <div class="indicator-container" :style="{ height: backgroundHeight + 24 + 'px', top: containerTop + 'px' }">
     <base-info-card :containerWidth="winWidth > 1920 ? 12 : 6" :containerHeight="backgroundHeight">
-      <div class="indicator" :style="{ height: volume + '%', opacity: muted ? 0.25 : 0.8 }"></div>
+      <div class="indicator" :style="{ height: volume * 100 + '%', opacity: mute ? 0.25 : 0.8 }"></div>
     </base-info-card>
-    <base-icon v-show="muted" class="mute" type="volume" :style="{ top: muteTop + 'px' }" effect="mute" />
+    <base-icon v-show="mute || volume <= 0" class="mute" type="volume" :style="{ top: muteTop + 'px' }" effect="mute" />
   </div>
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex';
+import { mapGetters } from 'vuex';
 import BaseInfoCard from './BaseInfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
 export default {
@@ -18,14 +18,7 @@ export default {
     'base-icon': BaseIcon,
   },
   computed: {
-    ...mapState({
-      muted: state => state.PlaybackState.Muted,
-      volume: state => state.PlaybackState.Volume,
-    }),
-    ...mapGetters([
-      'winWidth',
-      'winHeight',
-    ]),
+    ...mapGetters(['volume', 'mute', 'winWidth', 'winHeight']),
     backgroundHeight() {
       return this.winWidth > 1920 ? Math.round(this.winWidth * 0.37)
         : Math.round(100 + ((this.winWidth - 320) / 5.33));

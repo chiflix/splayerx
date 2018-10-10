@@ -301,6 +301,15 @@ export default {
           }
         });
     },
+    volume(newVal) {
+      this.videoElement.volume = newVal;
+    },
+    mute(newVal) {
+      this.videoElement.muted = newVal;
+    },
+    rate(newVal) {
+      this.videoElement.playbackRate = newVal;
+    },
   },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
@@ -310,14 +319,6 @@ export default {
       rate: 1,
     });
 
-    this.$bus.$on('playback-rate', (newRate) => {
-      this.videoElement.playbackRate = newRate;
-      this.$store.commit('PlaybackRate', newRate);
-    });
-    this.$bus.$on('volume', (newVolume) => {
-      this.videoElement.volume = newVolume;
-      this.$store.commit('Volume', newVolume);
-    });
     this.$bus.$on('toggle-fullscreen', () => {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       if (currentWindow.isFullScreen()) {
