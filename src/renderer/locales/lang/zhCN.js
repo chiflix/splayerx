@@ -23,6 +23,8 @@ export default {
       increaseAudioDelay: '增加音频延迟',
       decreaseAudioDelay: '减少音频延迟',
       switchAudioTrack: '切换音轨',
+      track1: '轨道1',
+      track2: '轨道2',
     },
     subtitle: {
       name: '字幕',
