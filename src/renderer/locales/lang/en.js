@@ -10,6 +10,7 @@ export default {
     },
     playback: {
       name: 'Playback',
+      stop: 'Stop',
       fullScreen: 'Full Screen',
       keepPlayingWindowFront: 'Keep Window On Top',
       increasePlaybackSpeed: 'Increase Playback Speed',

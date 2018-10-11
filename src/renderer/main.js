@@ -80,6 +80,13 @@ new Vue({
           label: this.$t('msg.playback.name'),
           submenu: [
             {
+              label: this.$t('msg.playback.stop'),
+              accelerator: 'Delete',
+              click: () => {
+                this.$router.push({ name: 'landing-view' });
+              },
+            },
+            {
               label: this.$t('msg.playback.fullScreen'),
               accelerator: 'CmdOrCtrl+F',
               enabled: false,
