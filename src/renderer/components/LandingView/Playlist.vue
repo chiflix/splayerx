@@ -75,6 +75,7 @@ export default {
       itemWidth: 112,
       itemHeight: 65,
       tranFlag: true,
+      validHover: true,
     };
   },
   props: {
@@ -110,6 +111,7 @@ export default {
     window.onkeyup = (e) => {
       if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
         !this.isFullScreen && e.keyCode === 39) {
+        this.validHover = false;
         this.tranFlag = true;
         const ss = -((this.lastPlayedFile.length + 1) - (this.showItemNum - this.moveItem)) *
           (this.itemWidth + 15);
@@ -117,6 +119,7 @@ export default {
         this.moveItem = this.showItemNum - this.lastPlayedFile.length - 1;
         lf.style.left = `${this.move}px`;
       } else if (this.moveItem !== 0 && !this.isFullScreen && e.keyCode === 37) {
+        this.validHover = false;
         this.tranFlag = true;
         this.moveItem = 0;
         this.move = 0;
@@ -153,6 +156,13 @@ export default {
           this.move = 0;
           this.moveItem = 0;
         }
+      }
+    },
+    validHover(val) {
+      if (!val) {
+        setTimeout(() => {
+          this.validHover = true;
+        }, 400);
       }
     },
   },
@@ -224,7 +234,7 @@ export default {
     },
     onRecentItemMouseover(item, index) {
       if (((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
-        this.isFullScreen) && this.mouseFlag) {
+        this.isFullScreen) && this.mouseFlag && this.validHover) {
         this.tranFlag = true;
         this.item = item;
         this.$set(this.lastPlayedFile[index], 'chosen', true);
@@ -326,6 +336,7 @@ export default {
     onRecentItemClick(item, index) {
       const lf = document.querySelector('.controller');
       if (!this.isDragging) {
+        this.validHover = false;
         this.tranFlag = true;
         if (index === this.showItemNum - this.moveItem - 1 && !this.isFullScreen) {
           const ss = -((this.lastPlayedFile.length + 1) - (this.showItemNum - this.moveItem)) *
