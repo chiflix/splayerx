@@ -31,7 +31,6 @@
           width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
           height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
         }"
-        @click.stop="onRecentItemClick(item, index)"
         @mouseover="onRecentItemMouseover(item, index)"
         @mouseout="onRecentItemMouseout(index)"
         @mousedown.stop="onRecentItemMousedown($event, index)">
@@ -263,6 +262,25 @@ export default {
         this.displayInfo.duration = this.itemInfo().duration;
         this.displayInfo.percentage = this.itemInfo().percentage;
         this.$bus.$emit('displayInfo', this.displayInfo);
+      } else {
+        const lf = document.querySelector('.controller');
+        if (!this.isDragging) {
+          this.validHover = false;
+          this.tranFlag = true;
+          if (index === this.showItemNum - this.moveItem - 1 && !this.isFullScreen) {
+            const ss = -((this.lastPlayedFile.length + 1) - (this.showItemNum - this.moveItem)) *
+              (this.itemWidth + 15);
+            this.move += ss;
+            this.moveItem = this.showItemNum - this.lastPlayedFile.length - 1;
+            lf.style.left = `${this.move}px`;
+          } else if (index + this.moveItem === -2 && !this.isFullScreen) {
+            this.moveItem = 0;
+            this.move = 0;
+            lf.style.left = '';
+          }
+          this.$bus.$emit('moveItem', this.moveItem);
+          this.$bus.$emit('move', this.move);
+        }
       }
     },
     onRecentItemMouseout(index) {
