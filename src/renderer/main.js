@@ -60,9 +60,7 @@ new Vue({
                       if (!file[0].includes('\\')) {
                         this.openFile(file[0]);
                       } else {
-                        this.$store.dispatch('addMessages', {
-                          type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-                        });
+                        this.addLog('error', `Failed to open file: ${file[0]}`);
                       }
                     }
                   }
@@ -487,9 +485,7 @@ new Vue({
       if (potentialVidPath && filere.test(Path.extname(tempFilePath)) && !tempFilePath.includes('\\')) {
         this.openFile(potentialVidPath.replace(/^file:\/\/\//, ''));
       } else {
-        this.$store.dispatch('addMessages', {
-          type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-        });
+        this.addLog('error', `Failed to open file: ${potentialVidPath.replace(/^file:\/\/\//, '')}`);
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);

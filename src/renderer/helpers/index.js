@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import winston from 'winston';
 import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
@@ -45,7 +46,7 @@ export default {
       const filter = /\.(srt|vtt|ass)$/;
 
       if (!fs.existsSync(dirPath)) {
-        console.log(`no dir ${dirPath}`);
+        this.addLog('error', `no dir ${dirPath}`);
         return;
       }
 
@@ -55,7 +56,7 @@ export default {
         const stat = fs.lstatSync(filename);
         if (!stat.isDirectory()) {
           if (files[i].startsWith(baseName) && filter.test(files[i])) {
-            console.log(`found subtitle file: ${files[i]}`);
+            this.addLog('info', `found subtitle file: ${files[i]}`);
             callback(filename);
           }
         }
@@ -108,6 +109,24 @@ export default {
       }
       fs.closeSync(fd);
       return res.join('-');
+    },
+    addLog(level, message) {
+      const logger = winston.createLogger({
+        transports: [
+          new winston.transports.Console(),
+          new winston.transports.File({ filename: 'record.log' }),
+        ],
+      });
+      logger.log({
+        time: Date(),
+        level,
+        message,
+      });
+      if (message.includes('Failed to open file')) {
+        this.$store.dispatch('addMessages', {
+          type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+        });
+      }
     },
   },
 };

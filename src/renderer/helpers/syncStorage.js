@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import _ from 'lodash';
+import addLog from './index';
 
 /* eslint-disable */
 const electron = require('electron');
@@ -65,7 +66,7 @@ function setSync(key, json) {
     fs.mkdirSync(path.dirname(filename));
   } catch (err) {
     if (err.code === 'EEXIST') {
-      console.log('directory already exist');
+      addLog.methods.addLog('error', 'directory already exist');
     }
   } finally {
     fs.writeFileSync(filename, data);

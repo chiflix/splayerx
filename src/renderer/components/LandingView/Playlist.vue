@@ -190,9 +190,7 @@ export default {
           if (!item[0].includes('\\')) {
             self.openFile(item[0]);
           } else {
-            this.$store.dispatch('addMessages', {
-              type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-            });
+            this.addLog('error', `Failed to open file: ${item[0]}`);
           }
         }
       });

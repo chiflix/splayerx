@@ -1,4 +1,3 @@
-import winston from 'winston';
 const state = {
   messages: [],
 };
@@ -8,20 +7,12 @@ const getters = {
 
 const mutations = {
   addMessages(state, payload) {
+    if (state.messages.length === 3) {
+      state.messages.splice(0, 1);
+    }
     state.messages.push(payload);
   },
   removeMessages(state, id) {
-    const logger = winston.createLogger({
-      transports: [
-        new winston.transports.Console(),
-        new winston.transports.File({ filename: 'combined.log' }),
-      ],
-    });
-    logger.log({
-      level: 'error',
-      title: state.messages.filter(m => m.id === id)[0].title,
-      content: state.messages.filter(m => m.id === id)[0].content,
-    });
     state.messages = state.messages.filter(m => m.id !== id);
   },
 };
