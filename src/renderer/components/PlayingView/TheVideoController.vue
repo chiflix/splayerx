@@ -13,6 +13,7 @@
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button />
+    <base-invisible-background v-show="!mute" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
@@ -32,6 +33,7 @@ import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TimeProgressBar from './TimeProgressBar.vue';
+import BaseInvisibleBackground from './BaseInvisibleBackground.vue';
 export default {
   name: 'the-video-controller',
   components: {
@@ -42,6 +44,7 @@ export default {
     'advance-control': AdvanceControl,
     'the-time-codes': TheTimeCodes,
     'the-time-progress-bar': TimeProgressBar,
+    'base-invisible-background': BaseInvisibleBackground,
   },
   directives: {
     hidden: {
@@ -96,7 +99,7 @@ export default {
         (!this.mouseLeftWindow && this.onOtherWidget);
     },
     onOtherWidget() {
-      return this.currentWidget !== this.$options.name;
+      return this.currentWidget !== this.$options.name && this.currentWidget !== 'base-invisible-background';
     },
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ? 'default' : 'none';
@@ -184,14 +187,20 @@ export default {
         this.mouseLeftWindow = false;
       }
       // hideVolume timer
-      const muteKeydown = currentEventInfo.get('keydown').KeyM;
-      const volumeKeydown = currentEventInfo.get('keydown').ArrowUp || currentEventInfo.get('keydown').ArrowDown;
+      const volumeKeydown = currentEventInfo.get('keydown').ArrowUp || currentEventInfo.get('keydown').ArrowDown || currentEventInfo.get('keydown').KeyM; // eslint-disable-line
       const mouseScrolling = currentEventInfo.get('wheel').time !== lastEventInfo.get('wheel').time;
-      const wakingupVolume = muteKeydown || volumeKeydown || mouseScrolling;
+      const lastWidget = this.getComponentName(lastEventInfo.get('mousemove').target); // eslint-disable-line
+      const mouseWakingUpVolume = (this.currentWidget === 'base-invisible-background' || this.currentWidget === 'volume-indicator') &&
+        (lastWidget !== 'base-invisible-background' && lastWidget !== 'volume-indicator'); // eslint-disable-line
+      const mouseLeavingVolume = (this.currentWidget !== 'base-invisible-background' && this.currentWidget !== 'volume-indicator') &&
+        (lastWidget === 'base-invisible-background' || lastWidget === 'volume-indicator'); // eslint-disable-line
+      const mouseInVolume = !this.mouseStopMoving && (this.currentWidget === 'base-invisible-background' || this.currentWidget === 'volume-indicator') &&
+        (lastWidget === 'base-invisible-background' || lastWidget === 'volume-indicator'); // eslint-disable-line
+      const wakingupVolume = volumeKeydown || mouseScrolling || (!this.mute && (mouseWakingUpVolume || mouseLeavingVolume || mouseInVolume)); // eslint-disable-line
       if (wakingupVolume) {
-        this.timerManager.updateTimer('sleepingVolumeButton', muteKeydown ? this.muteDelay : this.hideVolumeDelay, false);
+        this.timerManager.updateTimer('sleepingVolumeButton', mouseWakingUpVolume || mouseInVolume ? 3000 : 1000);
         // Prevent all widgets display before volume-control
-        if (this.showAllWidgets) {
+        if (this.showAllWidgets && mouseInVolume) {
           this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
         }
         this.hideVolume = false;
@@ -239,13 +248,10 @@ export default {
     UIDisplayManager() {
       const tempObject = {};
       Object.keys(this.displayState).forEach((index) => {
-        if (index === 'volume-indicator' && !this.mute) {
-          tempObject[index] = this.timerState[index];
-        } else {
-          tempObject[index] = this.showAllWidgets ||
-            (!this.showAllWidgets && this.timerState[index]);
-        }
+        tempObject[index] = this.showAllWidgets ||
+          (!this.showAllWidgets && this.timerState[index]);
       });
+      tempObject['volume-indicator'] = !this.mute ? this.timerState['volume-indicator'] : tempObject['volume-indicator'];
       this.displayState = tempObject;
     },
     UIStateManager() {
@@ -329,7 +335,6 @@ export default {
       }
     },
     handleKeydown(event) {
-      console.log(event.code);
       this.eventInfo.set('keydown', Object.assign(
         {},
         this.eventInfo.get('keydown'),
