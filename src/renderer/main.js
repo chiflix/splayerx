@@ -82,7 +82,9 @@ new Vue({
             {
               label: this.$t('msg.playback.stop'),
               accelerator: 'Delete',
-              enabled: false,
+              click: () => {
+                this.$router.push({ name: 'landing-view' });
+              },
             },
             {
               label: this.$t('msg.playback.fullScreen'),
