@@ -43,6 +43,7 @@ const actions = {
     const finalDelta = delta || 10;
     const finalVolume = state.volume - finalDelta;
     commit(mutationTypes.VOLUME_UPDATE, finalVolume < 0 ? 0 : finalVolume);
+    if (finalVolume <= 0) commit(mutationTypes.MUTE_UPDATE, true);
   },
   [actionTypes.TOGGLE_MUTE]({ commit, state }) {
     commit(mutationTypes.MUTE_UPDATE, !state.mute);
