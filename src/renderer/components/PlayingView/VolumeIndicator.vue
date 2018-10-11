@@ -1,10 +1,14 @@
 <template>
+<div class="indicator-wrapper" :style="{ 
+  height: indicatorWrapperHeight + 'px', width: indicatorWrapperWidth + 'px',
+  right: indicatorWrapperRight + 'px', top: indicatorWrapperTop + 'px' }">
   <div class="indicator-container" :style="{ height: backgroundHeight + 24 + 'px', top: containerTop + 'px' }">
     <base-info-card :containerWidth="winWidth > 1920 ? 12 : 6" :containerHeight="backgroundHeight">
       <div class="indicator" :style="{ height: volume * 100 + '%', opacity: mute ? 0.25 : 0.8 }"></div>
     </base-info-card>
     <base-icon v-show="mute || volume <= 0" class="mute" type="volume" :style="{ top: muteTop + 'px' }" effect="mute" />
   </div>
+</div>
 </template>
 
 <script>
@@ -19,12 +23,26 @@ export default {
   },
   computed: {
     ...mapGetters(['volume', 'mute', 'winWidth', 'winHeight']),
+    indicatorWrapperHeight() {
+      return this.winWidth > 1920 ? Math.round(this.winHeight * 0.61)
+        : Math.round(140 + ((this.winWidth - 320) / 3.55));
+    },
+    indicatorWrapperWidth() {
+      return this.winWidth > 1920 ? Math.round(this.winWidth * 0.07)
+        : Math.round(50 + ((this.winWidth - 320) / 32));
+    },
+    indicatorWrapperRight() {
+      return this.winWidth > 1920 ? 28 : Math.round(12 + ((this.winWidth - 320) / 160));
+    },
+    indicatorWrapperTop() {
+      return Math.round((this.winHeight - this.indicatorWrapperHeight) / 2);
+    },
     backgroundHeight() {
       return this.winWidth > 1920 ? Math.round(this.winHeight * 0.37)
         : Math.round(100 + ((this.winWidth - 320) / 5.33));
     },
     containerTop() {
-      return Math.round(this.winHeight - this.backgroundHeight) / 2;
+      return Math.round((this.indicatorWrapperHeight - this.backgroundHeight) / 2);
     },
     muteTop() {
       return this.backgroundHeight + (this.winWidth > 1920 ? 4 : 2);
@@ -34,6 +52,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.indicator-wrapper {
+  position: absolute;
+}
 .indicator-container {
   position: absolute;
   display: flex;
