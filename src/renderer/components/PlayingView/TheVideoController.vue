@@ -198,7 +198,7 @@ export default {
         (lastWidget === 'base-invisible-background' || lastWidget === 'volume-indicator'); // eslint-disable-line
       const wakingupVolume = volumeKeydown || mouseScrolling || (!this.mute && (mouseWakingUpVolume || mouseLeavingVolume || mouseInVolume)); // eslint-disable-line
       if (wakingupVolume) {
-        this.timerManager.updateTimer('sleepingVolumeButton', mouseWakingUpVolume || mouseInVolume ? 3000 : 1000);
+        this.timerManager.updateTimer('sleepingVolumeButton', mouseWakingUpVolume || mouseInVolume ? this.muteDelay : this.hideVolumeDelay);
         // Prevent all widgets display before volume-control
         if (this.showAllWidgets && mouseInVolume) {
           this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
