@@ -23,6 +23,7 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import TimerManager from '@/helpers/timerManager.js';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
@@ -71,6 +72,8 @@ export default {
       mouseLeftWindow: false,
       mouseleftDelay: 1000,
       hideVolume: false,
+      muteDelay: 3000,
+      hideVolumeDelay: 1000,
       hideProgressBar: false,
       popupShow: false,
       clicksTimer: 0,
@@ -87,6 +90,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['mute']),
     showAllWidgets() {
       return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget);
@@ -120,6 +124,7 @@ export default {
         ArrowLeft: false,
         ArrowRight: false,
         Space: false,
+        KeyM: false,
       }],
     ]);
     // Use Object due to vue's lack support of reactive Map
@@ -179,11 +184,12 @@ export default {
         this.mouseLeftWindow = false;
       }
       // hideVolume timer
+      const muteKeydown = currentEventInfo.get('keydown').KeyM;
       const volumeKeydown = currentEventInfo.get('keydown').ArrowUp || currentEventInfo.get('keydown').ArrowDown;
       const mouseScrolling = currentEventInfo.get('wheel').time !== lastEventInfo.get('wheel').time;
-      const wakingupVolume = volumeKeydown || mouseScrolling;
+      const wakingupVolume = muteKeydown || volumeKeydown || mouseScrolling;
       if (wakingupVolume) {
-        this.timerManager.updateTimer('sleepingVolumeButton', this.mousestopDelay);
+        this.timerManager.updateTimer('sleepingVolumeButton', muteKeydown ? this.muteDelay : this.hideVolumeDelay, false);
         // Prevent all widgets display before volume-control
         if (this.showAllWidgets) {
           this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
@@ -233,8 +239,12 @@ export default {
     UIDisplayManager() {
       const tempObject = {};
       Object.keys(this.displayState).forEach((index) => {
-        tempObject[index] = this.showAllWidgets ||
-          (!this.showAllWidgets && this.timerState[index]);
+        if (index === 'volume-indicator' && !this.mute) {
+          tempObject[index] = this.timerState[index];
+        } else {
+          tempObject[index] = this.showAllWidgets ||
+            (!this.showAllWidgets && this.timerState[index]);
+        }
       });
       this.displayState = tempObject;
     },
@@ -319,6 +329,7 @@ export default {
       }
     },
     handleKeydown(event) {
+      console.log(event.code);
       this.eventInfo.set('keydown', Object.assign(
         {},
         this.eventInfo.get('keydown'),
