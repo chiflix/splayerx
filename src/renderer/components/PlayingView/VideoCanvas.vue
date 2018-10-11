@@ -222,10 +222,10 @@ export default {
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       const { videoHeight, videoWidth } = this.videoElement;
-      [canvas.width, canvas.height] = [1920, 1080];
+      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
       canvasCTX.drawImage(
         this.videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, 1920, 1080,
+        0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
       const data = {
