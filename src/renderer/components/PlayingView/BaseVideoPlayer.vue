@@ -75,17 +75,13 @@ export default {
   },
   watch: {
     playbackRate(newValue) {
-      this.$refs.video.setAttribute('playbackrate', newValue);
+      this.$refs.video.playbackrate = newValue;
     },
     src(newValue) {
-      if (this.$options.props.src.validator(newValue)) {
-        this.$refs.video.setAttribute('src', newValue);
-      }
+      this.$refs.video.src = newValue;
     },
     volume(newValue) {
-      if (this.$options.props.volume.validator(newValue)) {
-        this.$refs.video.setAttribute('volume', newValue);
-      }
+      this.$refs.video.volume = newValue;
     },
   },
   mounted() {

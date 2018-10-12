@@ -9,11 +9,12 @@
       @play="onPlay"
       @pause="onPause"
       @playing="onPlaying"
-      @canplay="onCanPlay"
       @timeupdate="onTimeupdate"
       @loadedmetadata="onMetaLoaded"
       @durationchange="onDurationChange"
-      :src="src" />
+      :src="src"
+      :playbackRate="rate"
+      :volume="volume" />
     <BaseSubtitle/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
@@ -85,10 +86,6 @@ export default {
       if (duration <= 240) {
         this.timeUpdateIntervalID = setInterval(this.accurateTimeUpdate, 10);
       }
-    },
-    onCanPlay() {
-      // the video is ready to start playing
-      this.$store.commit('Volume', this.videoElement.volume);
     },
     onMetaLoaded() {
       this.$bus.$emit('play');
@@ -301,23 +298,19 @@ export default {
           }
         });
     },
-    volume(newVal) {
-      this.videoElement.volume = newVal;
-    },
     mute(newVal) {
       this.videoElement.muted = newVal;
     },
-    rate(newVal) {
-      this.videoElement.playbackRate = newVal;
-    },
   },
-  mounted() {
-    this.videoElement = this.$refs.videoCanvas.videoElement();
+  created() {
     this.videoConfigInitialize({
       volume: 100,
       mute: false,
       rate: 1,
     });
+  },
+  mounted() {
+    this.videoElement = this.$refs.videoCanvas.videoElement();
 
     this.$bus.$on('toggle-fullscreen', () => {
       const currentWindow = this.$electron.remote.getCurrentWindow();
