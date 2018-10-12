@@ -2,18 +2,61 @@ import { Video as mutationTypes } from '../mutation-types';
 import { Video as actionTypes } from '../action-types';
 
 const state = {
+  // error state
+  errorCode: 0,
+  errorMessage: '',
+  // network state
+  src: '',
+  currentSrc: '',
+  networkState: '',
+  buffered: '',
+  canPlayType: [],
+  crossOrigin: false,
+  preload: '',
+  // ready state
+  readyState: 0,
+  seeking: false,
+  // playback state
+  duration: 0,
+  rate: 1,
+  defaultPlaybackRate: 1,
+  paused: false,
+  ended: false,
+  played: '',
+  seekable: '',
+  currentTime: 0,
+  autoplay: false,
+  loop: false,
+  // controls
+  controls: false,
   volume: 100,
   mute: false,
-  rate: 1,
+  defaultMuted: false,
+  // tracks
+  AudioTrackList: [],
+  VideoTrackList: [],
+  TextTrackList: [],
 };
 
 const getters = {
+  src: state => `file://${state.src}`,
   volume: state => state.volume / 100,
   mute: state => state.mute,
   rate: state => state.rate,
 };
 
 const mutations = {
+  // error state
+  [mutationTypes.ERRORCODE_UPDATE](s, p) {
+    s.errorCode = p;
+  },
+  [mutationTypes.ERRORMESSAGE_UPDATE](s, p) {
+    s.errorMessage = p;
+  },
+  // network state
+  [mutationTypes.SRC_UPDATE](s, p) {
+    s.src = p;
+  },
   [mutationTypes.VOLUME_UPDATE](s, p) {
     s.volume = p;
   },
@@ -26,6 +69,17 @@ const mutations = {
 };
 
 const actions = {
+  [actionTypes.SRC_SET]({ commit }, src) {
+    const srcRegexes = {
+      unix: RegExp(/^[^\0]+$/),
+      windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
+    };
+    Object.keys(srcRegexes).forEach((type) => {
+      if (srcRegexes[type].test(src)) {
+        commit(mutationTypes.SRC_UPDATE, src);
+      }
+    });
+  },
   [actionTypes.INITIALIZE]({ commit }, config) {
     Object.keys(config).forEach((item) => {
       const mutation = `${item.toUpperCase()}_UPDATE`;
