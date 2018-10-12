@@ -433,16 +433,20 @@ export default {
 }
 .next-video {
   position: absolute;
+  @media screen and (max-width: 512px) {
+    display: none;
+  }
   @media screen and (min-width: 513px) and (max-width: 854px) {
-
+    top: 22px;
+    right: 28px;
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
-    top: 40px;
-    right: 32px;
+    top: 25px;
+    right: 34px;
   }
   @media screen and (min-width: 1921px) {
     top: 45px;
-    right: 49px;
+    right: 52px;
   }
 }
 .control-buttons {

@@ -133,7 +133,7 @@ export default {
     border-radius: 21.6px;
     @media screen and (min-width: 513px) and (max-width: 854px) {
       height: 70px;
-      width: 123px;
+      width: 116px;
       left: 7px;
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
@@ -143,7 +143,7 @@ export default {
     }
     @media screen and (min-width: 1921px) {
       height: 118px;
-      width: 207px;
+      width: 195px;
       left: 12px;
     }
   }
@@ -205,16 +205,16 @@ export default {
 
     border-radius: 11px;
     @media screen and (min-width: 513px) and (max-width: 854px) {
-      width: 335px;
-      height: 75px;
+      height: 70px;
+      width: 340px;
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
       height: 84px;
       width: 408px;
     }
     @media screen and (min-width: 1921px) {
-      height: 167px;
-      width: 753px;
+      height: 118px;
+      width: 571px;
     }
   }
   .plane {
@@ -228,23 +228,33 @@ export default {
     border-radius: 11px;
 
     @media screen and (min-width: 513px) and (max-width: 854px) {
-      width: 335px;
-      height: 75px;
+      height: 70px;
+      width: 340px;
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
       height: 84px;
       width: 408px;
     }
     @media screen and (min-width: 1921px) {
-      height: 167px;
-      width: 753px;
+      height: 118px;
+      width: 571px;
     }
     .progress{
       position: absolute;
       border-radius: 11px;
-      left: 148px;
       height: 100%;
-      width: 260px;
+      @media screen and (min-width: 513px) and (max-width: 854px) {
+        left: 123px;
+        width: 217px;
+      }
+      @media screen and (min-width: 855px) and (max-width: 1920px) {
+        left: 148px;
+        width: 260px;
+      }
+      @media screen and (min-width: 1921px) {
+        left: 207px;
+        width: 364px;
+      }
       .progress-color {
         position: absolute;
         transform: translateY(-1px);
@@ -257,11 +267,13 @@ export default {
           height: 100%;
           background-image: linear-gradient(-90deg, rgba(238,238,238,0.29) 0%, rgba(255,255,255,0.00) 100%);
           @media screen and (min-width: 513px) and (max-width: 854px) {
+            width: 34px;
           }
           @media screen and (min-width: 855px) and (max-width: 1920px) {
             width: 42px;
           }
           @media screen and (min-width: 1921px) {
+            width: 57.5px;
           }
         }
         .progress-border-light {
@@ -275,54 +287,117 @@ export default {
       }
     }
     .content {
-      padding-left: 164px;
-      padding-top: 15px;
       display: flex;
+      @media screen and (min-width: 513px) and (max-width: 854px) {
+        padding-left: 136px;
+        padding-top: 13px;
+      }
+      @media screen and (min-width: 855px) and (max-width: 1920px) {
+        padding-left: 164px;
+        padding-top: 15px;
+      }
+      @media screen and (min-width: 1921px) {
+        padding-left: 230px;
+        padding-top: 23px;
+      }
       .info {
         display: flex;
         flex-direction: column;
         width: 100%;
         .top {
           display: flex;
-          opacity: 0.7;
-          font-family: PingFangSC-Light;
-          font-size: 10px;
-          color: #FFFFFF;
-          letter-spacing: 0.52px;
-          line-height: 12px;
+          .duration {
+            opacity: 0.7;
+            font-family: Avenir-Light;
+            color: #FFFFFF;
+            @media screen and (min-width: 513px) and (max-width: 854px) {
+              font-size: 8px;
+              letter-spacing: 0.48px;
+              line-height: 10px;
+            }
+            @media screen and (min-width: 855px) and (max-width: 1920px) {
+              font-size: 10px;
+              letter-spacing: 0.6px;
+              line-height: 12px;
+            }
+            @media screen and (min-width: 1921px) {
+              font-size: 14px;
+              letter-spacing: 0.8px;
+              line-height: 14px;
+            }
+          }
+          .title {
+            opacity: 0.7;
+            font-family: PingFangSC-Light;
+            color: #FFFFFF;
+            @media screen and (min-width: 513px) and (max-width: 854px) {  
+              font-size: 8px;
+              letter-spacing: 0.42px;
+              line-height: 10px;
+            }
+            @media screen and (min-width: 855px) and (max-width: 1920px) {
+              font-size: 10px;
+              letter-spacing: 0.52px;
+              line-height: 12px;
+            }
+            @media screen and (min-width: 1921px) {
+              font-size: 14px;
+              letter-spacing: 0.73px;
+              line-height: 14px;
+            }
+          }
         }
         .vid-name {
-          color: white;
-          padding-top: 5px;
-
           font-family: PingFangSC-Semibold;
-          font-size: 12px;
           color: #FFFFFF;
-          letter-spacing: 0.36px;
-          line-height: 19.2px;
+
+          opacity: 0.9;
+          font-weight: 700;
 
           word-break: break-all;
-          font-weight: bold;
           overflow: hidden;
           display: -webkit-box;
           -webkit-box-orient: vertical;
           -webkit-line-clamp: 2;
           text-overflow: ellipsis;
-          font-weight: 700;
           @media screen and (min-width: 513px) and (max-width: 854px) {
+            padding-top: 4px;
+            width: 150px;
+            font-size: 10px;
+            letter-spacing: 0.3px;
+            line-height: 16px;
           }
           @media screen and (min-width: 855px) and (max-width: 1920px) {
+            padding-top: 5px;
             width: 178px;
+            font-size: 12px;
+            letter-spacing: 0.36px;
+            line-height: 19.2px;
           }
           @media screen and (min-width: 1921px) {
+            padding-top: 8px;
+            width: 249px;
+            font-size: 17px;
+            letter-spacing: 0.5px;
+            line-height: 28px;
           }
         }
       }
     }
     .close {
       position: absolute;
-      top: 29px;
-      right: 20px;
+      @media screen and (min-width: 513px) and (max-width: 854px) {
+        top: 24px;
+        right: 16px;
+      }
+      @media screen and (min-width: 855px) and (max-width: 1920px) {
+        top: 29px;
+        right: 20px;
+      }
+      @media screen and (min-width: 1921px) {
+        top: 41px;
+        right: 28px;
+      }    
     }
   }
 }
