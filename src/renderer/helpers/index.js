@@ -113,7 +113,6 @@ export default {
     addLog(level, message) {
       const logger = winston.createLogger({
         transports: [
-          new winston.transports.Console(),
           new winston.transports.File({ filename: 'record.log' }),
         ],
       });
