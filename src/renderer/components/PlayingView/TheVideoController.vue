@@ -20,7 +20,7 @@
       <advance-control class="button advance" v-hidden="displayState['advance-control']" />
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
-    <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
+    <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" />
   </div>
 </template>
 <script>
@@ -62,9 +62,6 @@ export default {
         }
       },
     },
-  },
-  props: {
-    src: String,
   },
   data() {
     return {

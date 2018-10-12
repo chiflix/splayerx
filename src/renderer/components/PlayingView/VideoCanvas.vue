@@ -49,19 +49,6 @@ export default {
       videoElement: null,
     };
   },
-  props: {
-    src: {
-      type: String,
-      required: true,
-      validator(value) {
-        // TODO: check if its a file or url
-        if (value.length <= 0) {
-          return false;
-        }
-        return true;
-      },
-    },
-  },
   methods: {
     ...mapActions({
       videoConfigInitialize: videoActions.INITIALIZE,
@@ -272,7 +259,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['volume', 'mute', 'rate']),
+    ...mapGetters(['src', 'volume', 'mute', 'rate']),
     calculateHeightByWidth() {
       return this.newWidthOfWindow / (this.videoWidth / this.videoHeight);
     },

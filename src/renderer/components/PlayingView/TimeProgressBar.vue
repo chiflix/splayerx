@@ -64,6 +64,7 @@
 
 <script>
 
+import { mapGetters } from 'vuex';
 import {
   PROGRESS_BAR_HEIGHT,
   PROGRESS_BAR_HIDE_HEIGHT,
@@ -76,19 +77,6 @@ export default {
   name: 'the-time-progress-bar',
   components: {
     'the-preview-thumbnail': ThePreviewThumbnail,
-  },
-  props: {
-    src: {
-      type: String,
-      required: true,
-      validator(value) {
-        // TODO: check if its a file or url
-        if (value.length <= 0) {
-          return false;
-        }
-        return true;
-      },
-    },
   },
   data() {
     return {
@@ -255,6 +243,7 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['src']),
     curProgressBarEdge() {
       if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
         return 0;
