@@ -74,8 +74,4 @@ export default {
     title: '',
     content: '正在搜索翻译结果...',
   },
-  noSuchFile: {
-    title: '文件错误',
-    content: '视频已经被删除或移动。',
-  },
 };
