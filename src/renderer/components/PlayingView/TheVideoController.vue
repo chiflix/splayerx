@@ -178,7 +178,7 @@ export default {
       if (!this.mouseStopMoving) { this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false); }
       // mouseenter timer
       const { mouseLeavingWindow } = currentEventInfo.get('mouseenter');
-      const changed = _.isEqual(mouseLeavingWindow, lastEventInfo.get('mouseenter').mouseLeavingWindow);
+      const changed = mouseLeavingWindow !== lastEventInfo.get('mouseenter').mouseLeavingWindow;
       if (this.andify(mouseLeavingWindow, changed)) {
         this.timerManager.addTimer('mouseLeavingWindow', this.mouseleftDelay);
       } else if (this.andify(!mouseLeavingWindow, changed)) {

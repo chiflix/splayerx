@@ -119,7 +119,7 @@ describe('Component - TheVideoController Unit Test', () => {
     });
     describe('mouseenter timer', () => {
       const mouseenterTimerName = 'mouseLeavingWindow';
-      it('should mouseenterTimer be added when mouseLeavingWindow', () => {
+      it.only('should mouseenterTimer be added when mouseLeavingWindow', () => {
         const mouseenterTimerTime = wrapper.vm.mouseleftDelay;
         currentEventInfo.set('mouseenter', { mouseLeavingWindow: true });
         lastEventInfo.set('mouseenter', { mouseLeavingWindow: false });
