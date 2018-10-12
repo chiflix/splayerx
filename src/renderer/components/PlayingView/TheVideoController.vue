@@ -24,6 +24,7 @@
   </div>
 </template>
 <script>
+import _ from 'lodash';
 import { mapGetters } from 'vuex';
 import TimerManager from '@/helpers/timerManager.js';
 import Titlebar from '../Titlebar.vue';
@@ -173,40 +174,35 @@ export default {
     inputProcess(currentEventInfo, lastEventInfo) {
       // mousemove timer
       this.currentWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
-      const currentPosition = currentEventInfo.get('mousemove').position;
-      const lastPosition = lastEventInfo.get('mousemove').position;
-      this.mouseStopMoving = currentPosition === lastPosition;
+      this.mouseStopMoving = _.isEqual(currentEventInfo.get('mousemove').position, lastEventInfo.get('mousemove').position);
       if (!this.mouseStopMoving) { this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false); }
       // mouseenter timer
       const { mouseLeavingWindow } = currentEventInfo.get('mouseenter');
-      const changed = mouseLeavingWindow !== lastEventInfo.get('mouseenter').mouseLeavingWindow;
-      if (mouseLeavingWindow && changed) {
+      const changed = _.isEqual(mouseLeavingWindow, lastEventInfo.get('mouseenter').mouseLeavingWindow);
+      if (this.andify(mouseLeavingWindow, changed)) {
         this.timerManager.addTimer('mouseLeavingWindow', this.mouseleftDelay);
-      } else if (!mouseLeavingWindow && changed) {
+      } else if (this.andify(!mouseLeavingWindow, changed)) {
         this.timerManager.removeTimer('mouseLeavingWindow');
         this.mouseLeftWindow = false;
       }
       // hideVolume timer
-      const volumeKeydown = currentEventInfo.get('keydown').ArrowUp || currentEventInfo.get('keydown').ArrowDown || currentEventInfo.get('keydown').KeyM; // eslint-disable-line
+      const volumeKeydown = this.orify(currentEventInfo.get('keydown').ArrowUp, currentEventInfo.get('keydown').ArrowDown, currentEventInfo.get('keydown').KeyM); // eslint-disable-line
       const mouseScrolling = currentEventInfo.get('wheel').time !== lastEventInfo.get('wheel').time;
-      const lastWidget = this.getComponentName(lastEventInfo.get('mousemove').target); // eslint-disable-line
-      const mouseWakingUpVolume = (this.currentWidget === 'base-invisible-background' || this.currentWidget === 'volume-indicator') &&
-        (lastWidget !== 'base-invisible-background' && lastWidget !== 'volume-indicator'); // eslint-disable-line
-      const mouseLeavingVolume = (this.currentWidget !== 'base-invisible-background' && this.currentWidget !== 'volume-indicator') &&
-        (lastWidget === 'base-invisible-background' || lastWidget === 'volume-indicator'); // eslint-disable-line
-      const mouseInVolume = !this.mouseStopMoving && (this.currentWidget === 'base-invisible-background' || this.currentWidget === 'volume-indicator') &&
-        (lastWidget === 'base-invisible-background' || lastWidget === 'volume-indicator'); // eslint-disable-line
-      const wakingupVolume = volumeKeydown || mouseScrolling || (!this.mute && (mouseWakingUpVolume || mouseLeavingVolume || mouseInVolume)); // eslint-disable-line
+      const lastWidget = this.getComponentName(lastEventInfo.get('mousemove').target);
+      const mouseWakingUpVolume = this.enterWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator');
+      const mouseLeavingVolume = this.leaveWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator');
+      const mouseMovingInVolume = this.andify(!this.mouseStopMoving, this.inWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator'));
+      const wakingupVolume = this.orify(volumeKeydown, mouseScrolling, this.andify(!this.mute, this.orify(mouseWakingUpVolume, mouseLeavingVolume, mouseMovingInVolume))); // eslint-disable-line
       if (wakingupVolume) {
-        this.timerManager.updateTimer('sleepingVolumeButton', mouseWakingUpVolume || mouseInVolume ? this.muteDelay : this.hideVolumeDelay);
+        this.timerManager.updateTimer('sleepingVolumeButton', this.orify(mouseWakingUpVolume, mouseMovingInVolume) ? this.muteDelay : this.hideVolumeDelay);
         // Prevent all widgets display before volume-control
-        if (this.showAllWidgets && mouseInVolume) {
+        if (this.andify(this.showAllWidgets, mouseMovingInVolume)) {
           this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
         }
         this.hideVolume = false;
       }
       // hideProgressBar timer
-      const progressKeydown = currentEventInfo.get('keydown').ArrowLeft || currentEventInfo.get('keydown').ArrowRight;
+      const progressKeydown = this.orify(currentEventInfo.get('keydown').ArrowLeft, currentEventInfo.get('keydown').ArrowRight);
       if (progressKeydown) {
         this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
         // Prevent all widgets display before the-time-progress-bar
@@ -408,6 +404,30 @@ export default {
     },
     togglePlayback() {
       this.$bus.$emit('toggle-playback');
+    },
+    orify(...args) {
+      return args.some(arg => arg == true); // eslint-disable-line
+    },
+    andify(...args) {
+      return args.every(arg => arg == true); // eslint-disable-line
+    },
+    enterWidgets(last, current, ...widgets) {
+      return this.andify(
+        widgets.some(widget => current === widget),
+        widgets.every(widget => last !== widget),
+      );
+    },
+    leaveWidgets(last, current, ...widgets) {
+      return this.andify(
+        widgets.every(widget => current !== widget),
+        widgets.some(widget => last === widget),
+      );
+    },
+    inWidgets(last, current, ...widgets) {
+      return this.andify(
+        widgets.some(widget => current === widget),
+        widgets.some(widget => last === widget),
+      );
     },
   },
 };
