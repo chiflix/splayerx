@@ -65,7 +65,7 @@ export default {
   css: {
     titleFontSize: { fontSize: '3vw' },
   },
-  error: {
+  errorFile: {
     title: 'File error',
     content: 'Failed to open file.',
   },
