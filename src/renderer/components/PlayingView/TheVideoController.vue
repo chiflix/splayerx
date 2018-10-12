@@ -21,7 +21,7 @@
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
     <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
-    <next-video @closebutton-mousedown="closemousedown" class="next-video"/>
+    <next-video @close-nextvideo="closemousedown" class="next-video"/>
   </div>
 </template>
 <script>

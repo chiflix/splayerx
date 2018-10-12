@@ -58,15 +58,25 @@ export default {
   },
   methods: {
     handleCloseMousedown() {
-      this.$emit('closebutton-mousedown');
+      this.$emit('close-nextvideo');
     },
     onTimeupdate() {
-      const fractionProgress = this.$store.state.PlaybackState.CurrentTime / this.finalPartTime;
-      this.progress = fractionProgress * 100;
+      const currentTime = this.$store.state.PlaybackState.CurrentTime;
+      if (currentTime <= this.finalPartStartTime) {
+        this.$emit('close-nextvideo');
+      } else if (currentTime >= this.finalPartEndTime) {
+        this.$emit('close-nextvideo');
+        // this.openFile(this.nextVideo);
+      } else {
+        console.log('start');
+        const fractionProgress = (currentTime - this.finalPartStartTime) / this.finalPartEndTime;
+        this.progress = fractionProgress * 100;
+      }
       requestAnimationFrame(this.onTimeupdate);
     },
     handleMouseDown() {
       if (this.nextVideo) {
+        this.$emit('close-nextvideo');
         this.openFile(this.nextVideo);
       }
     },
@@ -102,8 +112,11 @@ export default {
       }
       return '';
     },
-    finalPartTime() {
-      return 10;
+    finalPartStartTime() {
+      return this.$store.state.PlaybackState.Duration * 0.8;
+    },
+    finalPartEndTime() {
+      return this.$store.state.PlaybackState.Duration;
     },
   },
   mounted() {
