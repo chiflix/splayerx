@@ -68,6 +68,7 @@ describe('Component - TheVideoController Unit Test', () => {
           ArrowLeft: false,
           ArrowRight: false,
           Space: false,
+          KeyM: false,
         }],
       ]);
       lastEventInfo = new Map(currentEventInfo);
@@ -140,7 +141,7 @@ describe('Component - TheVideoController Unit Test', () => {
     });
     describe('hideVolume timer', () => {
       const hideVolumeTimerName = 'sleepingVolumeButton';
-      const hideVolumeTimerTime = 3000;
+      const hideVolumeTimerTime = 1000;
       it('should timer be updated when ArrowUp/ArrowDown keypressed', () => {
         currentEventInfo.set('keydown', { ArrowUp: true });
         lastEventInfo.set('keydown', { ArrowDown: true });

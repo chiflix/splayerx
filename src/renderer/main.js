@@ -12,6 +12,7 @@ import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
 import Path from 'path';
+import { Video as videoActions } from '@/store/action-types';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
@@ -48,15 +49,24 @@ new Vue({
               label: this.$t('msg.file.open'),
               accelerator: 'CmdOrCtrl+O',
               click: () => {
+                const VALID_EXTENSION = ['3g2', '3gp', '3gp2', '3gpp', 'amv', 'asf', 'avi', 'bik', 'bin', 'crf', 'divx', 'drc', 'dv', 'dvr-ms', 'evo', 'f4v', 'flv', 'gvi', 'gxf', 'iso', 'm1v', 'm2v', 'm2t', 'm2ts', 'm4v', 'mkv', 'mov', 'mp2', 'mp2v', 'mp4', 'mp4v', 'mpe', 'mpeg', 'mpeg1', 'mpeg2', 'mpeg4', 'mpg', 'mpv2', 'mts', 'mtv', 'mxf', 'mxg', 'nsv', 'nuv', 'ogg', 'ogm', 'ogv', 'ogx', 'ps', 'rec', 'rm', 'rmvb', 'rpl', 'thp', 'tod', 'tp', 'ts', 'tts', 'txd', 'vob', 'vro', 'webm', 'wm', 'wmv', 'wtv', 'xesc'];
                 dialog.showOpenDialog({
                   properties: ['openFile'],
                   filters: [{
                     name: 'Video Files',
-                    extensions: [],
+                    extensions: VALID_EXTENSION,
                   }],
                 }, (file) => {
                   if (file !== undefined) {
-                    this.openFile(file[0]);
+                    if (file !== undefined) {
+                      if (!file[0].includes('\\')) {
+                        this.openFile(file[0]);
+                      } else {
+                        this.$store.dispatch('addMessages', {
+                          type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+                        });
+                      }
+                    }
                   }
                 });
               },
@@ -82,6 +92,7 @@ new Vue({
             {
               label: this.$t('msg.playback.fullScreen'),
               accelerator: 'CmdOrCtrl+F',
+              enabled: false,
             },
             {
               label: this.$t('msg.playback.keepPlayingWindowFront'),
@@ -118,7 +129,14 @@ new Vue({
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
             { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
             { type: 'separator' },
-            { label: this.$t('msg.audio.switchAudioTrack'), enabled: false },
+            {
+              label: this.$t('msg.audio.switchAudioTrack'),
+              enabled: false,
+              submenu: [
+                { label: this.$t('msg.audio.track1'), enabled: false },
+                { label: this.$t('msg.audio.track2'), enabled: false },
+              ],
+            },
           ],
         },
         // menu.subtitle
@@ -170,8 +188,8 @@ new Vue({
               label: this.$t('msg.window_.minimize'),
               role: 'minimize',
             },
-            { label: this.$t('msg.window_.enterFullScreen'), accelerator: 'Ctrl+Cmd+F' },
-            { label: this.$t('msg.window_.bringAllToFront'), role: 'hideOthers', accelerator: '' },
+            { label: this.$t('msg.window_.enterFullScreen'), enabled: 'false', accelerator: 'Ctrl+Cmd+F' },
+            { label: this.$t('msg.window_.bringAllToFront'), accelerator: '' },
           ],
         },
         // menu.help
@@ -186,7 +204,9 @@ new Vue({
         },
       ];
       this.updateRecentPlay().then((result) => {
-        template.splice(2, 0, result);
+        // menu.file add "open recent"
+        template[0].submenu.splice(2, 0, result);
+        // menu.about
         if (process.platform === 'darwin') {
           template.unshift({
             label: app.getName(),
@@ -383,7 +403,7 @@ new Vue({
       ]);
       for (let i = 1; i <= recentPlayData.length; i += 1) {
         menuRecentData.set(`recent-${i}`, {
-          label: this.pathProcess(recentPlayData[i - 1].path),
+          label: this.pathProcess(recentPlayData[i - 1].path.split('/').reverse()[0]),
           path: recentPlayData[i - 1].path,
           visible: true,
         });
@@ -426,38 +446,22 @@ new Vue({
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowUp':
-          this.$bus.$emit('volumeslider-appear');
-          if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-            this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
-          } else {
-            this.$bus.$emit('volume', 1);
-          }
+          this.$store.dispatch(videoActions.INCREASE_VOLUME);
           break;
-
         case 'ArrowDown':
-          this.$bus.$emit('volumeslider-appear');
-          if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-            this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
-          } else {
-            this.$bus.$emit('volume', 0);
-          }
+          this.$store.dispatch(videoActions.DECREASE_VOLUME);
           break;
-
+        case 'm':
+          this.$store.dispatch(videoActions.TOGGLE_MUTE);
+          break;
         case 'ArrowLeft':
-          this.$bus.$emit('progressbar-appear-delay');
-          this.$bus.$emit('progressslider-appear');
-          this.$bus.$emit('timecode-appear-delay');
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
           } else {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
           }
           break;
-
         case 'ArrowRight':
-          this.$bus.$emit('progressbar-appear-delay');
-          this.$bus.$emit('progressslider-appear');
-          this.$bus.$emit('timecode-appear-delay');
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
           } else {
@@ -465,24 +469,13 @@ new Vue({
           }
           break;
         default:
+          console.log(e.key);
+          break;
       }
     });
     window.addEventListener('wheel', (e) => {
-      this.$bus.$emit('volumeslider-appear');
       const up = e.deltaY < 0;
-      if (up) {
-        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
-        } else {
-          this.$bus.$emit('volume', 1);
-        }
-      } else if (!up) {
-        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
-        } else {
-          this.$bus.$emit('volume', 0);
-        }
-      }
+      this.$store.dispatch(up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME, 6);
     });
 
     /**
@@ -508,8 +501,14 @@ new Vue({
           potentialVidPath = tempFilePath;
         }
       }
-      if (potentialVidPath) {
+      const fileregex = '^(.3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc])$';
+      const filere = new RegExp(fileregex);
+      if (potentialVidPath && filere.test(Path.extname(tempFilePath)) && !tempFilePath.includes('\\')) {
         this.openFile(potentialVidPath.replace(/^file:\/\/\//, ''));
+      } else {
+        this.$store.dispatch('addMessages', {
+          type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+        });
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);

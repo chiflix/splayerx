@@ -3,8 +3,8 @@ export default {
     titleName: 'SPlayerX',
     file: {
       name: 'File',
-      open: 'Open',
-      openURL: 'Open URL',
+      open: 'Open…',
+      openURL: 'Open URL…',
       openRecent: 'Open Recent',
       closeWindow: 'Close Window',
     },
@@ -23,16 +23,19 @@ export default {
       increaseAudioDelay: 'Increase Audio Delay',
       decreaseAudioDelay: 'Decrease Audio Delay',
       switchAudioTrack: 'Switch Audio Track',
+      track1: 'Track1',
+      track2: 'Track2',
     },
     subtitle: {
       name: 'Subtitle',
-      AITranslation: 'AI Translation',
-      loadSubtitleFile: 'Loading Subtitle File…',
+      AITranslation: 'Smart Translation',
+      loadSubtitleFile: 'Load Subtitle File…',
       mainSubtitle: 'Main Subtitle',
       langZhCN: 'Chinese',
       langEn: 'English',
       noSubtitle: 'No Subtitle',
       secondarySubtitle: 'Secondary Subtitle',
+      subtitleStyle: 'Style',
       style1: 'Style1',
       style2: 'Style2',
       style3: 'Style3',
@@ -52,7 +55,7 @@ export default {
       splayerxHelp: 'SPlayerX Help',
     },
     splayerx: {
-      about: 'About SPlayerX',
+      about: 'About SPlayerX…',
       preferences: 'Preferences',
       homepage: 'Homepage',
       feedback: 'Feedback',
@@ -71,6 +74,14 @@ export default {
   },
   css: {
     titleFontSize: { fontSize: '3vw' },
+  },
+  errorFile: {
+    title: 'File error',
+    content: 'Failed to open file.',
+  },
+  loading: {
+    title: '',
+    content: '',
   },
 };
 
