@@ -172,4 +172,54 @@ export default {
   }
   display: block;
 }
+
+.close {
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+  @media screen and (max-width: 512px) {
+    width: 20px;
+    height: 20px;
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    width: 22px;
+    height: 22px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 26px;
+    height: 26px;
+  }
+  @media screen and (min-width: 1921px) {
+    width: 36px;
+    height: 36px;
+  }
+}
 </style>

@@ -26,9 +26,16 @@ export default {
     },
     subtitle: {
       name: 'Subtitle',
+      AITranslation: 'AI Translation',
+      loadSubtitleFile: 'Loading Subtitle File…',
       mainSubtitle: 'Main Subtitle',
+      langZhCN: 'Chinese',
+      langEn: 'English',
+      noSubtitle: 'No Subtitle',
       secondarySubtitle: 'Secondary Subtitle',
-      subtitleStyle: 'Subtitle Style',
+      style1: 'Style1',
+      style2: 'Style2',
+      style3: 'Style3',
       increaseSubtitleSize: 'Increase Subtitle Size',
       decreaseSubtitleSize: 'Decrease Subtitle Size',
       increaseSubtitleDelay: 'Increase Subtitle Delay',
@@ -65,4 +72,13 @@ export default {
   css: {
     titleFontSize: { fontSize: '3vw' },
   },
+  errorFile: {
+    title: 'File error',
+    content: 'Failed to open file.',
+  },
+  loading: {
+    title: '',
+    content: '',
+  },
 };
+

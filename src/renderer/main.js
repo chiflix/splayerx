@@ -41,6 +41,7 @@ new Vue({
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
       const template = [
+        // menu.file
         {
           label: this.$t('msg.file.name'),
           submenu: [
@@ -48,15 +49,24 @@ new Vue({
               label: this.$t('msg.file.open'),
               accelerator: 'CmdOrCtrl+O',
               click: () => {
+                const VALID_EXTENSION = ['3g2', '3gp', '3gp2', '3gpp', 'amv', 'asf', 'avi', 'bik', 'bin', 'crf', 'divx', 'drc', 'dv', 'dvr-ms', 'evo', 'f4v', 'flv', 'gvi', 'gxf', 'iso', 'm1v', 'm2v', 'm2t', 'm2ts', 'm4v', 'mkv', 'mov', 'mp2', 'mp2v', 'mp4', 'mp4v', 'mpe', 'mpeg', 'mpeg1', 'mpeg2', 'mpeg4', 'mpg', 'mpv2', 'mts', 'mtv', 'mxf', 'mxg', 'nsv', 'nuv', 'ogg', 'ogm', 'ogv', 'ogx', 'ps', 'rec', 'rm', 'rmvb', 'rpl', 'thp', 'tod', 'tp', 'ts', 'tts', 'txd', 'vob', 'vro', 'webm', 'wm', 'wmv', 'wtv', 'xesc'];
                 dialog.showOpenDialog({
                   properties: ['openFile'],
                   filters: [{
                     name: 'Video Files',
-                    extensions: [],
+                    extensions: VALID_EXTENSION,
                   }],
                 }, (file) => {
                   if (file !== undefined) {
-                    this.openFile(file[0]);
+                    if (file !== undefined) {
+                      if (!file[0].includes('\\')) {
+                        this.openFile(file[0]);
+                      } else {
+                        this.$store.dispatch('addMessages', {
+                          type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+                        });
+                      }
+                    }
                   }
                 });
               },
@@ -64,6 +74,10 @@ new Vue({
             {
               label: this.$t('msg.file.openURL'),
               accelerator: 'CmdOrCtrl+U',
+              click: () => {
+                // TODO: openURL.click
+              },
+              enabled: false,
             },
             {
               label: this.$t('msg.file.closeWindow'),
@@ -71,6 +85,7 @@ new Vue({
             },
           ],
         },
+        // menu.playback
         {
           label: this.$t('msg.playback.name'),
           submenu: [
@@ -95,44 +110,69 @@ new Vue({
             // { label: 'Increase Size' },
             // { label: 'Decrease Size' },
             { type: 'separator' },
-            { label: this.$t('msg.playback.increasePlaybackSpeed') },
-            { label: this.$t('msg.playback.decreasePlaybackSpeed') },
+            { label: this.$t('msg.playback.increasePlaybackSpeed'), enabled: false },
+            { label: this.$t('msg.playback.decreasePlaybackSpeed'), enabled: false },
             /** */
             { type: 'separator' },
-            { label: this.$t('msg.playback.captureScreen') },
-            { label: this.$t('msg.playback.captureVideoClip') },
+            { label: this.$t('msg.playback.captureScreen'), enabled: false },
+            { label: this.$t('msg.playback.captureVideoClip'), enabled: false },
 
             { type: 'separator' },
-            { label: this.$t('msg.playback.mediaInfo') },
+            { label: this.$t('msg.playback.mediaInfo'), enabled: false },
           ],
         },
+        // menu.audio
         {
           label: this.$t('msg.audio.name'),
           submenu: [
-            { label: this.$t('msg.audio.increaseAudioDelay') },
-            { label: this.$t('msg.audio.decreaseAudioDelay') },
+            { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
+            { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
             { type: 'separator' },
-            { label: this.$t('msg.audio.switchAudioTrack') },
+            { label: this.$t('msg.audio.switchAudioTrack'), enabled: false },
           ],
         },
+        // menu.subtitle
         {
           label: this.$t('msg.subtitle.name'),
           submenu: [
-            { label: this.$t('msg.subtitle.mainSubtitle') },
-            { label: this.$t('msg.subtitle.secondarySubtitle') },
+            { label: this.$t('msg.subtitle.AITranslation'), enabled: false },
+            { label: this.$t('msg.subtitle.loadSubtitleFile'), enabled: false },
+            {
+              label: this.$t('msg.subtitle.mainSubtitle'),
+              enabled: false,
+              submenu: [
+                { label: this.$t('msg.subtitle.langZhCN'), enabled: false },
+                { label: this.$t('msg.subtitle.langEn'), enabled: false },
+                { label: this.$t('msg.subtitle.noSubtitle'), enabled: false },
+              ],
+            },
+            {
+              label: this.$t('msg.subtitle.secondarySubtitle'),
+              enabled: false,
+              submenu: [],
+            },
             { type: 'separator' },
-            { label: this.$t('msg.subtitle.subtitleStyle') },
+            {
+              label: this.$t('msg.subtitle.subtitleStyle'),
+              enabled: false,
+              submenu: [
+                { label: this.$t('msg.subtitle.style1'), enabled: false },
+                { label: this.$t('msg.subtitle.style2'), enabled: false },
+                { label: this.$t('msg.subtitle.style3'), enabled: false },
+              ],
+            },
             { type: 'separator' },
-            { label: this.$t('msg.subtitle.increaseSubtitleSize') },
-            { label: this.$t('msg.subtitle.decreaseSubtitleSize') },
+            { label: this.$t('msg.subtitle.increaseSubtitleSize'), enabled: false },
+            { label: this.$t('msg.subtitle.decreaseSubtitleSize'), enabled: false },
             { type: 'separator' },
-            { label: this.$t('msg.subtitle.increaseSubtitleDelay') },
-            { label: this.$t('msg.subtitle.decreaseSubtitleDelay') },
+            { label: this.$t('msg.subtitle.increaseSubtitleDelay'), enabled: false },
+            { label: this.$t('msg.subtitle.decreaseSubtitleDelay'), enabled: false },
             // { type: 'separator' },
             // { label: 'Smart Translating' },
             // { label: 'Search on Shooter.cn' },
           ],
         },
+        // menu.window
         {
           label: this.$t('msg.window_.name'),
           submenu: [
@@ -144,6 +184,7 @@ new Vue({
             { label: this.$t('msg.window_.bringAllToFront'), role: 'hideOthers', accelerator: '' },
           ],
         },
+        // menu.help
         {
           label: this.$t('msg.help.name'),
           role: 'help',
@@ -166,13 +207,16 @@ new Vue({
               },
               {
                 label: this.$t('msg.splayerx.preferences'),
+                enabled: false,
                 accelerator: 'Cmd+,',
               },
               {
                 label: this.$t('msg.splayerx.homepage'),
+                enabled: false,
               },
               {
                 label: this.$t('msg.splayerx.feedback'),
+                enabled: false,
               },
               { type: 'separator' },
               {
@@ -447,8 +491,14 @@ new Vue({
           potentialVidPath = tempFilePath;
         }
       }
-      if (potentialVidPath) {
+      const fileregex = '^(.3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc])$';
+      const filere = new RegExp(fileregex);
+      if (potentialVidPath && filere.test(Path.extname(tempFilePath)) && !tempFilePath.includes('\\')) {
         this.openFile(potentialVidPath.replace(/^file:\/\/\//, ''));
+      } else {
+        this.$store.dispatch('addMessages', {
+          type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+        });
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);
