@@ -426,7 +426,6 @@ new Vue({
       Vue.http.headers.common['X-Application-Token'] = userUUID;
       Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
     });
-
     window.addEventListener('keypress', (e) => {
       if (e.key === ' ') { // space
         this.$bus.$emit('toggle-playback');
@@ -472,6 +471,22 @@ new Vue({
           } else {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
           }
+          break;
+
+        case 'w':
+          this.$bus.$emit('vertical-down', this.$store.state.VR360State.RotateRate);
+          break;
+
+        case 's':
+          this.$bus.$emit('vertical-down', -this.$store.state.VR360State.RotateRate);
+          break;
+
+        case 'a':
+          this.$bus.$emit('horizental-down', this.$store.state.VR360State.RotateRate);
+          break;
+
+        case 'd':
+          this.$bus.$emit('horizental-down', -this.$store.state.VR360State.RotateRate);
           break;
         default:
       }

@@ -23,6 +23,7 @@
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
+import Helper360 from '@/helpers/helper360';
 import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer';
 export default {
@@ -40,6 +41,8 @@ export default {
       timeUpdateIntervalID: null,
       windowSizeHelper: null,
       videoElement: null,
+      canvasElement: null,
+      helper360: null,
     };
   },
   props: {
@@ -336,7 +339,7 @@ export default {
   },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
-
+    this.canvasElement = this.$refs.videoCanvas.canvasElement();
     this.$bus.$on('playback-rate', (newRate) => {
       this.videoElement.playbackRate = newRate;
       this.$store.commit('PlaybackRate', newRate);
@@ -375,6 +378,26 @@ export default {
       if (ext === 'mkv') {
         this.$bus.$emit('seek-subtitle', e);
       }
+    });
+    this.$bus.$on('vr360-on', () => {
+      this.canvasElement.style.display = 'block';
+      this.videoElement.style.display = 'none';
+      const options = { width: this.videoWidth, height: this.videoHeight, ratio: 16 / 9 };
+      this.helper360 = new Helper360(this.canvasElement, this.videoElement, options);
+      this.helper360.createScene();
+      this.helper360.renderLoop();
+    });
+    this.$bus.$on('vr360-off', () => {
+      this.canvasElement.style.display = 'none';
+      this.videoElement.style.display = 'block';
+      this.helper360.stopRenderLoop();
+      this.helper360 = null;
+    });
+    this.$bus.$on('vertical-down', (deltaY) => {
+      this.helper360.rotateScene(0, -deltaY / 300);
+    });
+    this.$bus.$on('horizental-down', (deltaX) => {
+      this.helper360.rotateScene(-deltaX / 300, 0);
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {

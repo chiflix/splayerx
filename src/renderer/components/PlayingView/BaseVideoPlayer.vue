@@ -2,6 +2,7 @@
   <div
     :data-component-name="$options.name"
     class="base-video-player">
+    <canvas class="canvas-element" ref="canvas"></canvas>
     <video class="video-element" ref="video"></video>
   </div>
 </template>
@@ -144,12 +145,16 @@ export default {
       if (style.length > 0) {
         style.forEach((styleName) => {
           this.$refs.video.style[styleName] = styleObject[styleName];
+          this.$refs.canvas.style[styleName] = styleObject[styleName];
         });
       }
     },
     // Video default methods
     videoElement() {
       return this.$refs.video;
+    },
+    canvasElement() {
+      return this.$refs.canvas;
     },
     pause() {
       this.$refs.video.pause();
@@ -167,6 +172,17 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.canvas-element {
+  display: none;
+  width: 100%;
+  /*
+  ** Note:
+  ** Adding the opacity properity to solve windows brightness when appling the backdrop-filter.
+  ** (This should be fixed in libcc.)
+  */
+  opacity: 0.9999;
+  object-fit: cover;
+}
 .video-element {
   width: 100%;
   /*
