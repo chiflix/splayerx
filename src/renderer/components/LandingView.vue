@@ -7,6 +7,7 @@
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
+    <notification-bubble/>
     <transition name="background-container-transition" mode="">
       <div class="background"
         v-if="showShortcutImage">
@@ -35,21 +36,21 @@
     </transition>
     <transition name="welcome-container-transition" mode="">
       <div class="welcome-container" v-if="langdingLogoAppear">
-          <div class="logo-container" :style="{
-             paddingTop: `${logoPos}vh`
-        }">
+          <div class="logo-container">
               <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
           </div>
           <div class="welcome">
-          <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-          <div class="version">v {{ this.version }}</div>
+          <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
+          <div class="version" :style="$t('css.versionFontSize')">v {{ this.version }}</div>
         </div>
       </div>
   </transition>
       <playlist :lastPlayedFile="lastPlayedFile" :changeSize="changeSize" :showItemNum="showItemNum"
-                :isFullScreen="isFullScreen" :windowWidth="windowWidth"
-                :style="{marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
-                         left: this.isFullScreen ? '0px' : `${this.move}px`}"/>
+        :isFullScreen="isFullScreen" :windowWidth="windowWidth"
+        :style="{
+          marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
+          left: this.isFullScreen ? '0px' : `${this.move}px`,
+        }"/>
   </main>
 </div>
 </template>
@@ -59,7 +60,7 @@ import { mapState } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
-
+import NotificationBubble from './NotificationBubble.vue';
 export default {
   name: 'landing-view',
   data() {
@@ -94,6 +95,7 @@ export default {
   components: {
     Titlebar,
     Playlist,
+    'notification-bubble': NotificationBubble,
   },
   computed: {
     ...mapState({
@@ -361,7 +363,13 @@ body {
     -webkit-user-drag: none;
   }
 }
+.welcome-container {
+  --client-height: 100vh;
+  --pos-y: calc(var(--client-height) * 0.37 - 92px);
+  transform: translateY(var(--pos-y));
+}
 .logo-container {
+  -webkit-user-select: none;
   text-align: center;
   .logo {
     height: 136px;
@@ -384,15 +392,9 @@ main {
   }
   .version {
     margin-top: 5px;
-    font-size: 2vw;
     color: #AAA;
     font-weight: 100;
     letter-spacing: 1px;
-  }
-  p {
-    font-size: 2vw;
-    color: gray;
-    margin-bottom: 10px;
   }
 }
 

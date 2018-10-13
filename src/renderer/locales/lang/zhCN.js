@@ -71,6 +71,15 @@ export default {
     },
   },
   css: {
-    titleFontSize: { fontSize: '4vw' },
+    titleFontSize: { fontSize: '21px' },
+    versionFontSize: { fontSize: '14px' },
+  },
+  errorFile: {
+    title: '文件错误',
+    content: '视频文件格式无法识别或文件已损坏。',
+  },
+  loading: {
+    title: '',
+    content: '正在搜索翻译结果...',
   },
 };
