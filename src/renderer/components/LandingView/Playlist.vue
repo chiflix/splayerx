@@ -2,7 +2,7 @@
   <div class="controller"
     :style="{
       bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px',
-      transition: tranFlag ? 'left 100ms linear' : '',
+      transition: tranFlag ? 'left 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
     }">
     <div class="playlist"
       :style="{marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'}">
@@ -75,6 +75,7 @@ export default {
       itemWidth: 112,
       itemHeight: 65,
       tranFlag: true,
+      validHover: true,
     };
   },
   props: {
@@ -111,19 +112,19 @@ export default {
       this.tranFlag = true;
       if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
         !this.isFullScreen && e.keyCode === 39) {
-        this.moveItem -= 1;
-        const ss = (this.move - 15) - (this.changeSize * (this.windowWidth / 100));
-        this.move = ss;
-        lf.style.left = `${ss}px`;
-      } else if (this.moveItem === -1 && !this.isFullScreen && e.keyCode === 37) {
-        this.move = 0;
-        this.moveItem = 0;
-        lf.style.left = '0px';
+        this.validHover = false;
+        this.tranFlag = true;
+        const ss = -((this.lastPlayedFile.length + 1) - (this.showItemNum - this.moveItem)) *
+          (this.itemWidth + 15);
+        this.move += ss;
+        this.moveItem = this.showItemNum - this.lastPlayedFile.length - 1;
+        lf.style.left = `${this.move}px`;
       } else if (this.moveItem !== 0 && !this.isFullScreen && e.keyCode === 37) {
-        this.moveItem += 1;
-        const ss = (this.move + 15) + (this.changeSize * (this.windowWidth / 100));
-        this.move = ss;
-        lf.style.left = `${ss}px`;
+        this.validHover = false;
+        this.tranFlag = true;
+        this.moveItem = 0;
+        this.move = 0;
+        lf.style.left = '';
       }
       this.$bus.$emit('moveItem', this.moveItem);
       this.$bus.$emit('move', this.move);
@@ -155,6 +156,13 @@ export default {
           this.move = 0;
           this.moveItem = 0;
         }
+      }
+    },
+    validHover(val) {
+      if (!val) {
+        setTimeout(() => {
+          this.validHover = true;
+        }, 400);
       }
     },
   },
@@ -200,6 +208,7 @@ export default {
     openOrMove() {
       const divLeft = document.querySelector('.controller');
       if (this.moveItem === -1) {
+        this.tranFlag = true;
         divLeft.style.left = '0px';
         this.move = 0;
         this.moveItem = 0;
@@ -231,7 +240,7 @@ export default {
     },
     onRecentItemMouseover(item, index) {
       if (((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
-        this.isFullScreen) && this.mouseFlag) {
+        this.isFullScreen) && this.mouseFlag && this.validHover) {
         this.tranFlag = true;
         this.item = item;
         this.$set(this.lastPlayedFile[index], 'chosen', true);
@@ -333,17 +342,18 @@ export default {
     onRecentItemClick(item, index) {
       const lf = document.querySelector('.controller');
       if (!this.isDragging) {
+        this.validHover = false;
         this.tranFlag = true;
         if (index === this.showItemNum - this.moveItem - 1 && !this.isFullScreen) {
-          this.moveItem -= 1;
-          const ss = (this.move - 15) - (this.changeSize * (this.windowWidth / 100));
-          this.move = ss;
-          lf.style.left = `${ss}px`;
+          const ss = -((this.lastPlayedFile.length + 1) - (this.showItemNum - this.moveItem)) *
+            (this.itemWidth + 15);
+          this.move += ss;
+          this.moveItem = this.showItemNum - this.lastPlayedFile.length - 1;
+          lf.style.left = `${this.move}px`;
         } else if (index + this.moveItem === -2 && !this.isFullScreen) {
-          this.moveItem += 1;
-          const ss = (this.move + 15) + (this.changeSize * (this.windowWidth / 100));
-          this.move = ss;
-          lf.style.left = `${ss}px`;
+          this.moveItem = 0;
+          this.move = 0;
+          lf.style.left = '';
         } else {
           this.openFile(item.path);
         }
