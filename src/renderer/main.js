@@ -92,6 +92,7 @@ new Vue({
             {
               label: this.$t('msg.playback.fullScreen'),
               accelerator: 'CmdOrCtrl+F',
+              enabled: false,
             },
             {
               label: this.$t('msg.playback.keepPlayingWindowFront'),
@@ -128,7 +129,14 @@ new Vue({
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
             { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
             { type: 'separator' },
-            { label: this.$t('msg.audio.switchAudioTrack'), enabled: false },
+            {
+              label: this.$t('msg.audio.switchAudioTrack'),
+              enabled: false,
+              submenu: [
+                { label: this.$t('msg.audio.track1'), enabled: false },
+                { label: this.$t('msg.audio.track2'), enabled: false },
+              ],
+            },
           ],
         },
         // menu.subtitle
@@ -180,8 +188,8 @@ new Vue({
               label: this.$t('msg.window_.minimize'),
               role: 'minimize',
             },
-            { label: this.$t('msg.window_.enterFullScreen'), accelerator: 'Ctrl+Cmd+F' },
-            { label: this.$t('msg.window_.bringAllToFront'), role: 'hideOthers', accelerator: '' },
+            { label: this.$t('msg.window_.enterFullScreen'), enabled: 'false', accelerator: 'Ctrl+Cmd+F' },
+            { label: this.$t('msg.window_.bringAllToFront'), accelerator: '' },
           ],
         },
         // menu.help
@@ -196,7 +204,9 @@ new Vue({
         },
       ];
       this.updateRecentPlay().then((result) => {
-        template.splice(2, 0, result);
+        // menu.file add "open recent"
+        template[0].submenu.splice(2, 0, result);
+        // menu.about
         if (process.platform === 'darwin') {
           template.unshift({
             label: app.getName(),
@@ -393,7 +403,7 @@ new Vue({
       ]);
       for (let i = 1; i <= recentPlayData.length; i += 1) {
         menuRecentData.set(`recent-${i}`, {
-          label: this.pathProcess(recentPlayData[i - 1].path),
+          label: this.pathProcess(recentPlayData[i - 1].path.split('/').reverse()[0]),
           path: recentPlayData[i - 1].path,
           visible: true,
         });
