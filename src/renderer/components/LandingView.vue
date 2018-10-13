@@ -13,9 +13,12 @@
         v-if="showShortcutImage">
         <div class="background background-image">
           <transition name="background-transition" mode="in-out">
-            <img
+            <div
+            class="img"
             :key="imageTurn"
-            :src="backgroundUrl">
+            :style="{
+              backgroundImage: background(backgroundUrl),
+            }"></div>
           </transition>
         </div>
        <div class="background background-mask"></div>
@@ -252,6 +255,9 @@ export default {
     });
   },
   methods: {
+    background(shortCut) {
+      return `url("${shortCut}")`;
+    },
     timeInValidForm(time) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);
     },
@@ -307,6 +313,16 @@ body {
                     rgba(0,0,0,0.43) 47%,
                     rgba(0,0,0,0.80) 100%);
   }
+  .img {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    -webkit-user-drag: none;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+  }
   .iteminfo {
     position: relative;
     top: 100px;
@@ -354,13 +370,6 @@ body {
       background-color: #fff;
       opacity: 0.7;
     }
-  }
-  img {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    -webkit-user-drag: none;
   }
 }
 .welcome-container {
