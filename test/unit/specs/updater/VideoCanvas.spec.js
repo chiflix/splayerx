@@ -48,11 +48,6 @@ describe('VideoCanvas.vue', () => {
     expect(store.state.PlaybackState.PlaybackRate).equal(1);
   });
 
-  it('volume event work fine', () => {
-    wrapper.vm.$bus.$emit('volume', 1);
-    expect(store.state.PlaybackState.Volume).equal(1);
-  });
-
   describe('calcNewWindowXY method', () => {
     let currentDisplay;
     beforeEach(() => {

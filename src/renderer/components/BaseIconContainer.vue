@@ -129,7 +129,7 @@ export default {
   display: block;
 }
 
-.advance, .subtitle, .volume{
+.advance, .subtitle{
   @media screen and (min-width: 513px) and (max-width: 854px) {
     width: 23px;
     height: 18px;
@@ -143,6 +143,14 @@ export default {
     height: 36px;
   }
   display: block;
+}
+.volume {
+  @media screen and (min-width: 1921px) {
+    width: 24px;
+    height: 24px;
+  }
+  width: 12px;
+  height: 12px;
 }
 
 .play, .pause {

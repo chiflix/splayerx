@@ -23,8 +23,12 @@
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
+import { mapGetters, mapActions } from 'vuex';
+import { Video as videoActions } from '@/store/action-types';
 import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer';
+
+
 export default {
   name: 'video-canvas',
   components: {
@@ -56,6 +60,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      videoConfigInitialize: videoActions.INITIALIZE,
+    }),
     accurateTimeUpdate() {
       const { currentTime, duration } = this.videoElement;
       if (currentTime >= duration || this.videoElement.paused) {
@@ -277,6 +284,7 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['volume', 'mute', 'rate']),
     calculateHeightByWidth() {
       return this.newWidthOfWindow / (this.videoWidth / this.videoHeight);
     },
@@ -330,21 +338,27 @@ export default {
           }
         });
     },
+    volume(newVal) {
+      this.videoElement.volume = newVal;
+    },
+    mute(newVal) {
+      this.videoElement.muted = newVal;
+    },
+    rate(newVal) {
+      this.videoElement.playbackRate = newVal;
+    },
     videoRatio() {
       this.onVideoSizeChange();
     },
   },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
+    this.videoConfigInitialize({
+      volume: 100,
+      mute: false,
+      rate: 1,
+    });
 
-    this.$bus.$on('playback-rate', (newRate) => {
-      this.videoElement.playbackRate = newRate;
-      this.$store.commit('PlaybackRate', newRate);
-    });
-    this.$bus.$on('volume', (newVolume) => {
-      this.videoElement.volume = newVolume;
-      this.$store.commit('Volume', newVolume);
-    });
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.newWidthOfWindow / this.newHeightOfWindow]);

@@ -12,6 +12,7 @@ import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
 import Path from 'path';
+import { Video as videoActions } from '@/store/action-types';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
@@ -435,38 +436,22 @@ new Vue({
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowUp':
-          this.$bus.$emit('volumeslider-appear');
-          if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-            this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
-          } else {
-            this.$bus.$emit('volume', 1);
-          }
+          this.$store.dispatch(videoActions.INCREASE_VOLUME);
           break;
-
         case 'ArrowDown':
-          this.$bus.$emit('volumeslider-appear');
-          if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-            this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
-          } else {
-            this.$bus.$emit('volume', 0);
-          }
+          this.$store.dispatch(videoActions.DECREASE_VOLUME);
           break;
-
+        case 'm':
+          this.$store.dispatch(videoActions.TOGGLE_MUTE);
+          break;
         case 'ArrowLeft':
-          this.$bus.$emit('progressbar-appear-delay');
-          this.$bus.$emit('progressslider-appear');
-          this.$bus.$emit('timecode-appear-delay');
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
           } else {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
           }
           break;
-
         case 'ArrowRight':
-          this.$bus.$emit('progressbar-appear-delay');
-          this.$bus.$emit('progressslider-appear');
-          this.$bus.$emit('timecode-appear-delay');
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
           } else {
@@ -474,24 +459,13 @@ new Vue({
           }
           break;
         default:
+          console.log(e.key);
+          break;
       }
     });
     window.addEventListener('wheel', (e) => {
-      this.$bus.$emit('volumeslider-appear');
       const up = e.deltaY < 0;
-      if (up) {
-        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
-        } else {
-          this.$bus.$emit('volume', 1);
-        }
-      } else if (!up) {
-        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
-        } else {
-          this.$bus.$emit('volume', 0);
-        }
-      }
+      this.$store.dispatch(up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME, 6);
     });
 
     /**
