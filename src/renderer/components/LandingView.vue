@@ -7,14 +7,18 @@
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
+    <notification-bubble/>
     <transition name="background-container-transition" mode="">
       <div class="background"
         v-if="showShortcutImage">
         <div class="background background-image">
           <transition name="background-transition" mode="in-out">
-            <img
+            <div
+            class="img"
             :key="imageTurn"
-            :src="backgroundUrl">
+            :style="{
+              backgroundImage: background(backgroundUrl),
+            }"></div>
           </transition>
         </div>
        <div class="background background-mask"></div>
@@ -35,21 +39,21 @@
     </transition>
     <transition name="welcome-container-transition" mode="">
       <div class="welcome-container" v-if="langdingLogoAppear">
-          <div class="logo-container" :style="{
-             paddingTop: `${logoPos}vh`
-        }">
+          <div class="logo-container">
               <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
           </div>
           <div class="welcome">
-          <div class="title" v-bind:style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-          <div class="version">v {{ this.version }}</div>
+          <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
+          <div class="version" :style="$t('css.versionFontSize')">v {{ this.version }}</div>
         </div>
       </div>
   </transition>
       <playlist :lastPlayedFile="lastPlayedFile" :changeSize="changeSize" :showItemNum="showItemNum"
-                :isFullScreen="isFullScreen" :windowWidth="windowWidth"
-                :style="{marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
-                         left: this.isFullScreen ? '0px' : `${this.move}px`}"/>
+        :isFullScreen="isFullScreen" :windowWidth="windowWidth"
+        :style="{
+          marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
+          left: this.isFullScreen ? '0px' : `${this.move}px`,
+        }"/>
   </main>
 </div>
 </template>
@@ -59,7 +63,7 @@ import { mapState } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
-
+import NotificationBubble from './NotificationBubble.vue';
 export default {
   name: 'landing-view',
   data() {
@@ -83,11 +87,18 @@ export default {
       moveItem: 0,
       move: 0,
       windowWidth: 720,
+      averageWidth: 112,
     };
+  },
+  watch: {
+    showItemNum(val) {
+      this.lastSize = (val * 127) + 212;
+    },
   },
   components: {
     Titlebar,
     Playlist,
+    'notification-bubble': NotificationBubble,
   },
   computed: {
     ...mapState({
@@ -149,6 +160,46 @@ export default {
         if (callNow) fn.apply(context, args);
       };
     }
+    const vm = this;
+    function expands() {
+      if (((vm.windowWidth - vm.lastSize) + 127) / 127 <= 10 - vm.showItemNum) {
+        if (vm.moveItem <= vm.showItemNum - (1 + vm.lastPlayedFile.length) &&
+          vm.showItemNum <= vm.lastPlayedFile.length) {
+          vm.move += (vm.averageWidth + 15) *
+            Math.floor(((vm.windowWidth - vm.lastSize) + 127) / 127);
+          vm.moveItem += Math.floor(((vm.windowWidth - vm.lastSize) + 127) / 127);
+        }
+        vm.showItemNum += Math.floor(((vm.windowWidth - vm.lastSize) + 127) / 127);
+        vm.averageWidth = (vm.windowWidth - 100 - ((vm.showItemNum - 1) * 15)) /
+          vm.showItemNum;
+        if (vm.showItemNum >= vm.lastPlayedFile.length + 1) {
+          vm.move = 0;
+          vm.moveItem = 0;
+        } else if (vm.showItemNum >= vm.moveItem + vm.lastPlayedFile
+          .length + 2) {
+          vm.move += (vm.averageWidth + 15) *
+            (vm.showItemNum - vm.moveItem - vm.lastPlayedFile.length - 1);
+          vm.moveItem += vm.showItemNum - vm.moveItem - vm.lastPlayedFile.length - 1;
+        }
+      } else {
+        vm.showItemNum = 10;
+        vm.averageWidth = (vm.windowWidth - 100 - ((vm.showItemNum - 1) * 15)) /
+          vm.showItemNum;
+        vm.move = 0;
+        vm.moveItem = 0;
+      }
+    }
+    function contracts() {
+      if ((vm.lastSize - vm.windowWidth) / 127 <= vm.showItemNum - 5) {
+        vm.showItemNum -= Math.floor((vm.lastSize - vm.windowWidth) / 127);
+        vm.averageWidth = (vm.windowWidth - 100 - ((vm.showItemNum - 1) * 15)) /
+          vm.showItemNum;
+      } else {
+        vm.showItemNum = 5;
+        vm.averageWidth = (vm.windowWidth - 100 - ((vm.showItemNum - 1) * 15)) /
+          vm.showItemNum;
+      }
+    }
     const resize = debounce(() => {
       this.windowWidth = document.body.clientWidth;
       if (this.isFullScreen) {
@@ -159,65 +210,27 @@ export default {
         this.windowFlag = true;
       }
       this.logoPos = 37 - (9200 / document.body.clientHeight);
-      const changingWidth = document.body.clientWidth;
-      const add = ((this.showItemNum + 1) * 112) + (this.showItemNum * 15);
-      const sup = ((this.showItemNum * 112) + ((this.showItemNum - 1) * 15));
-      let averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) / this.showItemNum;
-      if (changingWidth - (100 + add) >= 0 && this.showItemNum <= 9) {
-        if (((changingWidth - this.lastSize) + 127) / 127 <= 10 - this.showItemNum) {
-          if (this.moveItem <= this.showItemNum - (1 + this.lastPlayedFile.length) &&
-            this.showItemNum <= this.lastPlayedFile.length) {
-            this.move += (averageWidth + 15) *
-              Math.floor(((changingWidth - this.lastSize) + 127) / 127);
-            this.moveItem += Math.floor(((changingWidth - this.lastSize) + 127) / 127);
-          }
-          this.showItemNum += Math.floor(((changingWidth - this.lastSize) + 127) / 127);
-          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
-            this.showItemNum;
-          this.lastSize += 127 * Math.floor(((changingWidth - this.lastSize) + 127) / 127);
-          if (this.showItemNum >= this.lastPlayedFile.length + 1) {
-            this.move = 0;
-            this.moveItem = 0;
-          } else if (this.showItemNum >= this.moveItem + this.lastPlayedFile
-            .length + 2) {
-            this.move += (averageWidth + 15) *
-              (this.showItemNum - this.moveItem - this.lastPlayedFile.length - 1);
-            this.moveItem += this.showItemNum - this.moveItem - this.lastPlayedFile.length - 1;
-          }
-        } else {
-          this.showItemNum = 10;
-          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
-            this.showItemNum;
-          this.lastSize = 1482;
-          this.move = 0;
-          this.moveItem = 0;
-        }
-      } else if (changingWidth - (100 + sup) <= 0 && this.showItemNum >= 6) {
-        if ((this.lastSize - changingWidth) / 127 <= this.showItemNum - 5) {
-          this.showItemNum -= Math.floor((this.lastSize - changingWidth) / 127);
-          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
-            this.showItemNum;
-          this.lastSize -= 127 * Math.floor((this.lastSize - changingWidth) / 127);
-        } else {
-          this.showItemNum = 5;
-          averageWidth = (changingWidth - 100 - ((this.showItemNum - 1) * 15)) /
-            this.showItemNum;
-          this.lastSize = 847;
-        }
-      } else if (changingWidth > 1355) {
+      this.averageWidth = (this.windowWidth - 100 - ((this.showItemNum - 1) * 15)) /
+        this.showItemNum;
+      if (this.windowWidth >= this.lastSize && this.showItemNum <= 9) {
+        expands();
+      } else if (this.windowWidth <= this.lastSize - 127 && this.showItemNum >= 6) {
+        contracts();
+      } else if (this.windowWidth > 1355) {
         this.showItemNum = 10;
         this.move = 0;
         this.moveItem = 0;
       }
       this.playlistMl = this.moveItem === 0 ? 0 : ((this.moveItem * 127) - this.move) -
-        ((averageWidth - 112) * -this.moveItem);
-      this.changeSize = changingWidth > 1355 ? ((changingWidth - ((100 / 1355) *
-        changingWidth) - 135) * 10) / changingWidth : (averageWidth / changingWidth) * 100;
+        ((this.averageWidth - 112) * -this.moveItem);
+      this.changeSize = this.windowWidth > 1355 ? ((this.windowWidth - ((100 / 1355) *
+        this.windowWidth) - 135) * 10) /
+        this.windowWidth : (this.averageWidth / this.windowWidth) * 100;
     }, 0);
     window.onresize = resize;
     const { app } = this.$electron.remote;
-    this.$electron.remote.getCurrentWindow().setResizable(true);
-    this.$electron.remote.getCurrentWindow().setAspectRatio(720 / 405);
+    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setResizable', [true]);
+    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [720 / 405]);
 
     this.sagi().healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
@@ -242,6 +255,9 @@ export default {
     });
   },
   methods: {
+    background(shortCut) {
+      return `url("${shortCut}")`;
+    },
     timeInValidForm(time) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);
     },
@@ -297,6 +313,16 @@ body {
                     rgba(0,0,0,0.43) 47%,
                     rgba(0,0,0,0.80) 100%);
   }
+  .img {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    -webkit-user-drag: none;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+  }
   .iteminfo {
     position: relative;
     top: 100px;
@@ -345,15 +371,14 @@ body {
       opacity: 0.7;
     }
   }
-  img {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    -webkit-user-drag: none;
-  }
+}
+.welcome-container {
+  --client-height: 100vh;
+  --pos-y: calc(var(--client-height) * 0.37 - 92px);
+  transform: translateY(var(--pos-y));
 }
 .logo-container {
+  -webkit-user-select: none;
   text-align: center;
   .logo {
     height: 136px;
@@ -376,15 +401,9 @@ main {
   }
   .version {
     margin-top: 5px;
-    font-size: 2vw;
     color: #AAA;
     font-weight: 100;
     letter-spacing: 1px;
-  }
-  p {
-    font-size: 2vw;
-    color: gray;
-    margin-bottom: 10px;
   }
 }
 

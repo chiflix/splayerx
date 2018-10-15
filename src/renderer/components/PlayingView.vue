@@ -17,8 +17,8 @@ export default {
   },
   mounted() {
     this.$bus.$emit('play');
-    this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);
-    this.$electron.remote.getCurrentWindow().setResizable(true);
+    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [320, 180]);
+    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setResizable', [true]);
   },
   computed: {
     uri() {

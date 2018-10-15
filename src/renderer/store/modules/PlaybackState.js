@@ -3,7 +3,12 @@ const state = {
   CurrentTime: 0, // current position (in seconds) of the audio/video playback
   AccurateTime: 0.0, // current position (in ms) of the audio/video playback
   Duration: NaN,
-  Volume: 0.2,
+  Volume: 20,
+  Muted: false,
+  videoMeta: {
+    width: 0,
+    height: 0,
+  },
   PlaybackRate: 1.0,
   isPlaying: false,
   OriginSrcOfVideo: '',
@@ -25,6 +30,7 @@ const getters = {
     }
     return '';
   },
+  Volume: state => state.Volume / 100,
 };
 
 const mutations = {
@@ -37,6 +43,9 @@ const mutations = {
   OriginSrcOfVideo(state, t) {
     state.OriginSrcOfVideo = t;
   },
+  videoMeta(state, t) {
+    state.videoMeta = t;
+  },
   CurrentTime(state, t) {
     state.CurrentTime = t;
   },
@@ -46,8 +55,27 @@ const mutations = {
   Duration(state, t) {
     state.Duration = t;
   },
-  Volume(state, v) {
-    state.Volume = v;
+  Volume(state, t) {
+    state.Volume = t;
+  },
+  IncreaseVolume(state, t) {
+    if (state.Muted) {
+      state.Muted = false;
+    }
+    const deltaVolume = t || 10;
+    const volume = state.Volume += deltaVolume;
+    state.Volume = volume > 100 ? 100 : volume;
+  },
+  DecreaseVolume(state, t) {
+    if (state.Muted) {
+      state.Muted = false;
+    }
+    const deltaVolume = t || 10;
+    const volume = state.Volume -= deltaVolume;
+    state.Volume = volume < 0 ? 0 : volume;
+  },
+  ToggleMute(state) {
+    state.Muted = !state.Muted;
   },
   isPlaying(state, isPlaying) {
     state.isPlaying = isPlaying;
@@ -55,6 +83,15 @@ const mutations = {
 };
 
 const actions = {
+};
+
+export const validators = {
+  Volume(value) {
+    return typeof value === 'number'
+      && !Number.isNaN(value)
+      && value >= 0
+      && value <= 100;
+  },
 };
 
 export default {

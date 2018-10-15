@@ -7,6 +7,14 @@ import WindowResizer from './helpers/windowResizer.js';
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
 }
+// See https://github.com/electron/electron/issues/4690
+if (!process.defaultApp) {
+  process.argv.unshift(null);
+}
+const cliArgs = process.argv.slice(2);
+let startupOpenedFile = cliArgs.length ? cliArgs[0] : null;
+
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 let mainWindow;
 const winURL = process.env.NODE_ENV === 'development'
@@ -30,12 +38,14 @@ app.on('second-instance', () => {
 function registerMainWindowEvent() {
   mainWindow.on('resize', () => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
     mainWindow.webContents.send('main-resize');
   });
   mainWindow.on('move', () => {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
     mainWindow.webContents.send('main-move');
   });
   mainWindow.on('enter-full-screen', () => {
@@ -51,6 +61,12 @@ function registerMainWindowEvent() {
     mainWindow.webContents.send('mainCommit', 'isFocused', false);
   });
 
+  ipcMain.on('callCurrentWindowMethod', (evt, method, args = []) => {
+    const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow;
+    if (typeof (currentWindow[method]) === 'function') {
+      currentWindow[method](...args);
+    }
+  });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
     mainWindow.setSize(...args);
@@ -62,7 +78,9 @@ function registerMainWindowEvent() {
   });
   ipcMain.on('windowInit', () => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
@@ -72,7 +90,6 @@ function createWindow() {
   /**
    * Initial window options
    */
-
   const windowOptions = {
     useContentSize: true,
     frame: false,
@@ -105,11 +122,24 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+
+    // Open file by file association. Currently support 1 file only.
+    if (startupOpenedFile) {
+      mainWindow.webContents.send('open-file', startupOpenedFile);
+    }
   });
 
   const resizer = new WindowResizer(mainWindow);
   resizer.onStart(); // will only register listener for win
   registerMainWindowEvent();
+}
+
+if (process.platform === 'darwin') {
+  app.on('will-finish-launching', () => {
+    app.on('open-file', (event, file) => {
+      startupOpenedFile = file;
+    });
+  });
 }
 
 app.on('ready', () => {

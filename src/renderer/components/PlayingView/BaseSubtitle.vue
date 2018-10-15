@@ -24,7 +24,8 @@ import parallel from 'run-parallel';
 import MatroskaSubtitles from 'matroska-subtitles';
 import LanguageDetect from 'languagedetect';
 import z from 'zero-fill';
-import { fileUrlToPath } from '@/helpers/path';
+// 后期查找服务端字幕也许会用到
+// import { fileUrlToPath } from '@/helpers/path';
 
 export default {
   name: 'base-subtitle',
@@ -59,12 +60,10 @@ export default {
   },
   methods: {
     async subtitleInitialize() {
-      const vid = this.$parent.$refs.videoCanvas.videoElement();
-
       if (this.readingMkv) {
         this.$emit('stop-reading-mkv-subs', 'Stopped.');
         this.readingMkv = false;
-        // the following 3 lines may causes some bugs, need to consider the
+        // the following 3 lines may cause bugs, need to consider the
         // logic more carefully.
         this.currentParsedMkvTime = 0;
         this.mkvSubArray = [];
@@ -109,7 +108,7 @@ export default {
               type: 'Embedded',
               size: embeddedSubsStatus.size,
             });
-            this.mkvProcess(decodeURI(vid.src), onlyEmbedded, () => {
+            this.mkvProcess(this.originSrcOfVideo, onlyEmbedded, () => {
               this.toggleSutitleShow();
               this.$bus.$emit('subtitles-finished-loading', 'Embedded');
             });
@@ -132,9 +131,9 @@ export default {
       }
     },
     async subtitleInitializingStatus() {
+      const vidSrc = this.originSrcOfVideo;
       let subStatus = [];
-      const vid = this.$parent.$refs.videoCanvas.videoElement();
-      this.mediaHash = this.mediaQuickHash(fileUrlToPath(vid.src));
+      this.mediaHash = this.mediaQuickHash(vidSrc);
       this.Sagi = this.sagi();
 
       // serverSubsExist
@@ -153,7 +152,7 @@ export default {
       }
 
       const files = [];
-      this.findSubtitleFilesByVidPath(decodeURI(vid.src), (subPath) => {
+      this.findSubtitleFilesByVidPath(vidSrc, (subPath) => {
         files.push(subPath);
       });
       const localSubsStatus = {
@@ -164,8 +163,8 @@ export default {
 
       const re = new RegExp('^(.mkv)$');
       let embeddedSubsStatus;
-      if (re.test(path.extname(decodeURI(vid.src)))) {
-        embeddedSubsStatus = await this.hasEmbeddedSubs(decodeURI(vid.src));
+      if (re.test(path.extname(vidSrc))) {
+        embeddedSubsStatus = await this.hasEmbeddedSubs(vidSrc);
       } else {
         embeddedSubsStatus = {
           found: false,
@@ -272,8 +271,7 @@ export default {
             });
           }
         });
-        const realPath = filePath.substring(7);
-        fs.createReadStream(realPath).pipe(subs);
+        fs.createReadStream(filePath).pipe(subs);
       });
     },
     mkvProcess(vidPath, onlyEmbedded, cb) {
@@ -341,6 +339,7 @@ export default {
       parser.flush();
     },
     parseMkvSubs(filePath, startTime, endTime, onlyEmbedded, processSubNames) {
+      this.readingMkv = true;
       const self = this;
       return new Promise((resolve, reject) => {
         let tracks = [];
@@ -367,9 +366,8 @@ export default {
             parser.emit('finish');
           }
           // even currently we can not read subtitles from a specific time
-          // straightly, but this if condition does improves some performance
-          // avoiding doing the adding things stuff, manipulating
-          // data and data structures.
+          // straightly, but this if condition does improve some performance
+          // avoiding adding unnecessary subtitles
           if (startTime < sub.time && this.notParsedYet(sub.time)) {
             const currentIndex = tracks.findIndex(track => trackNumber === track.number);
             let currentContent = '';
@@ -404,8 +402,7 @@ export default {
             resolve(tracks);
           }
         });
-        const realPath = filePath.substring(7);
-        fs.createReadStream(realPath).pipe(parser);
+        fs.createReadStream(filePath).pipe(parser);
       });
     },
     /**
@@ -707,6 +704,9 @@ export default {
       const currentTime = this.$store.state.PlaybackState.CurrentTime;
       return duration > 3000 ? currentTime + 300 : currentTime + (duration / 10);
     },
+    originSrcOfVideo() {
+      return this.$store.state.PlaybackState.OriginSrcOfVideo;
+    },
   },
   watch: {
     firstSubState(newVal) {
@@ -740,8 +740,7 @@ export default {
         // if new value is true -- where should be called in the callback of initialize
         // stage, if new value is true, toggle the request idle
         // options can also be passed, [timeout] option
-        const vid = this.$parent.$refs.videoCanvas.videoElement();
-        const filePath = decodeURI(vid.src);
+        const filePath = this.originSrcOfVideo;
         this.idleCallbackID = window.requestIdleCallback(() => {
           this.parseMkvSubs(filePath, 0, null, false, false)
             .then((tracks) => {
@@ -758,8 +757,7 @@ export default {
         // if new value is true -- where should be called in the callback of seek sub
         // stage, if new value is true, toggle the request idle
         // options can also be passed, [timeout] option
-        const vid = this.$parent.$refs.videoCanvas.videoElement();
-        const filePath = decodeURI(vid.src);
+        const filePath = this.originSrcOfVideo;
         this.idleCallbackID = window.requestIdleCallback(() => {
           this.parseMkvSubs(filePath, 0, null, false, false)
             .then((tracks) => {
@@ -812,12 +810,12 @@ export default {
     });
     this.$bus.$on('seek-subtitle', (e) => {
       if (this.mkvSubsInitialized && !this.mkvSubsFullyParsed) {
-        if (this.idleCallbackID !== 0) {
+        this.mkvSubsSeekedParsed = false;
+        if (this.idleCallbackID !== 0 || this.readingMkv) {
           window.cancelIdleCallback(this.idleCallbackID);
           this.$emit('stop-reading-mkv-subs', 'stopped');
         }
-        const vid = this.$parent.$refs.videoCanvas.videoElement();
-        const filePath = decodeURI(vid.src);
+        const filePath = this.originSrcOfVideo;
         this.parseMkvSubs(filePath, (e * 1000), (e + 120) * 1000, false, false)
           .then((tracks) => {
             this.addMkvSubtitlesToVideoElement(tracks, false, false, () => {

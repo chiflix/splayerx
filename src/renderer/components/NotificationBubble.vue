@@ -1,8 +1,5 @@
 <template>
   <div class="container">
-    <transition>
-      
-    </transition>
     <transition-group name="toast">
       <div v-for="m in messages" :key="m.id"
         :id="'item' + m.id"
@@ -18,13 +15,11 @@
 </template>
 
 <script>
-import NextVideo from '@/components/PlayingView/NextVideo.vue';
-import Icon from './IconContainer';
+import Icon from './BaseIconContainer';
 export default {
   name: 'notification-bubble',
   components: {
     Icon,
-    NextVideo,
   },
   computed: {
     messages() {
@@ -90,6 +85,7 @@ export default {
     margin-left: 80px;
     margin-bottom: 8px;
     border-radius: 6px;
+    clip-path: inset(0 round 6px);
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
     width: 148px;
@@ -97,6 +93,7 @@ export default {
     margin-left: 92px;
     margin-bottom: 12px;
     border-radius: 7px;
+    clip-path: inset(0 round 7px);
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
     width: 182px;
@@ -104,6 +101,7 @@ export default {
     margin-left: 106px;
     margin-bottom: 15px;
     border-radius: 8px;
+    clip-path: inset(0 round 8px);
   }
   @media screen and (min-width: 1921px) {
     width: 256px;
@@ -111,6 +109,7 @@ export default {
     margin-left: 147px;
     margin-bottom: 18px;
     border-radius: 11px;
+    clip-path: inset(0 round 11px);
   }
 
   .bubbleContent {
@@ -175,24 +174,28 @@ export default {
     height: 47px;
     margin-bottom: 8px;
     border-radius: 6px;
+    clip-path: inset(0 round 6px);
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
     width: 240px;
     height: 52px;
     margin-bottom: 12px;
     border-radius: 7px;
+    clip-path: inset(0 round 7px);
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
     width: 288px;
     height: 62px;
     margin-bottom: 15px;
     border-radius: 8px;
+    clip-path: inset(0 round 8px);
   }
   @media screen and (min-width: 1921px) {
     width: 403px;
     height: 87px;
     margin-bottom: 18px;
     border-radius: 11px;
+    clip-path: inset(0 round 11px);
   }
 
   .bubbleContent {

@@ -1,6 +1,13 @@
 const state = {
   windowSize: [0, 0],
+  windowMinimumSize: [0, 0],
   windowPosition: [0, 0],
+  windowBounds: {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  },
   isFullScreen: false,
   isFocused: true,
   isMaximized: false,
@@ -22,8 +29,14 @@ const mutations = {
   windowSize(state, payload) {
     state.windowSize = payload;
   },
+  windowMinimumSize(state, payload) {
+    state.windowMinimumSize = payload;
+  },
   windowPosition(state, payload) {
     state.windowPosition = payload;
+  },
+  windowBounds(state, payload) {
+    state.windowBounds = payload;
   },
   isFullScreen(state, payload) {
     state.isFullScreen = payload;
@@ -36,42 +49,7 @@ const mutations = {
   },
 };
 
-const actions = {
-  mainWindowSizeSet(context, payload) {
-    context.commit('windowSize', payload);
-  },
-  rendererWindowSizeSet(context, payload) {
-    this.$electron.ipcRenderer.send('windowSizeChange', payload);
-    return new Promise((resolve, reject) => {
-      this.$electron.ipcRenderer.once('windowSizeChange-asyncReply', (actualSize) => {
-        if (actualSize === 'payload') {
-          context.commit('windowSize', actualSize);
-          resolve(actualSize);
-        } else {
-          console.error('Error: window size set failed.');
-          reject(actualSize);
-        }
-      });
-    });
-  },
-  mainWindowPosition(context, payload) {
-    context.commit('windowPosition', payload);
-  },
-  rendererWindowPositionSet(context, payload) {
-    this.$electron.ipcRenderer.send('windowPositionChange', payload);
-    return new Promise((resolve, reject) => {
-      this.$electron.ipcRenderer.once('windowPositionChange-asyncReply', (actualPos) => {
-        if (actualPos === 'payload') {
-          context.commit('windowPosition', actualPos);
-          resolve(actualPos);
-        } else {
-          console.error('Error: window position set failed.');
-          reject(actualPos);
-        }
-      });
-    });
-  },
-};
+const actions = {};
 
 export default {
   state,
