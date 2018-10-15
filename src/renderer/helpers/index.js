@@ -5,6 +5,7 @@ import winston from 'winston';
 import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
+const electron = require('electron');
 export default {
   methods: {
     infoDB() {
@@ -111,13 +112,32 @@ export default {
       return res.join('-');
     },
     addLog(level, message) {
+      const app = electron.remote.app || electron.app;
+      const defaultPath = path.join(app.getPath('userData'), 'log');
+      function fsExistsSync(path) {
+        try {
+          fs.accessSync(path, fs.F_OK);
+        } catch (e) {
+          return false;
+        }
+        return true;
+      }
+      if (!fsExistsSync(defaultPath)) {
+        try {
+          fs.mkdirSync(defaultPath);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+      const date = new Date();
+      const time = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
       const logger = winston.createLogger({
         transports: [
-          new winston.transports.File({ filename: 'record.log' }),
+          new winston.transports.File({ filename: `${defaultPath}/${time}.log` }),
         ],
       });
       logger.log({
-        time: Date(),
+        time: new Date().toISOString(),
         level,
         message,
       });

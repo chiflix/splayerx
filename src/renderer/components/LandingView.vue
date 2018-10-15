@@ -232,7 +232,7 @@ export default {
     this.sagi().healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
-        this.addLog('info', `${app.getName()} ${app.getVersion()}`);
+        this.addLog('info', `launching: ${app.getName()} ${app.getVersion()}`);
         this.addLog('info', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
