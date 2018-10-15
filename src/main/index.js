@@ -38,12 +38,14 @@ app.on('second-instance', () => {
 function registerMainWindowEvent() {
   mainWindow.on('resize', () => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
     mainWindow.webContents.send('main-resize');
   });
   mainWindow.on('move', () => {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
     mainWindow.webContents.send('main-move');
   });
   mainWindow.on('enter-full-screen', () => {
@@ -59,6 +61,12 @@ function registerMainWindowEvent() {
     mainWindow.webContents.send('mainCommit', 'isFocused', false);
   });
 
+  ipcMain.on('callCurrentWindowMethod', (evt, method, args = []) => {
+    const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow;
+    if (typeof (currentWindow[method]) === 'function') {
+      currentWindow[method](...args);
+    }
+  });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
     mainWindow.setSize(...args);
@@ -70,7 +78,9 @@ function registerMainWindowEvent() {
   });
   ipcMain.on('windowInit', () => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
@@ -80,7 +90,6 @@ function createWindow() {
   /**
    * Initial window options
    */
-
   const windowOptions = {
     useContentSize: true,
     frame: false,

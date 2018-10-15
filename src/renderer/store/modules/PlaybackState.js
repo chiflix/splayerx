@@ -7,6 +7,10 @@ const state = {
   Muted: false,
   SrcOfVideo: '',
   OriginSrcOfVideo: '',
+  videoMeta: {
+    width: 0,
+    height: 0,
+  },
   PlaybackRate: 1.0,
   isPlaying: false,
 };
@@ -25,6 +29,9 @@ const mutations = {
   },
   OriginSrcOfVideo(state, t) {
     state.OriginSrcOfVideo = t;
+  },
+  videoMeta(state, t) {
+    state.videoMeta = t;
   },
   CurrentTime(state, t) {
     state.CurrentTime = t;
