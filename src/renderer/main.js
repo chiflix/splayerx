@@ -57,9 +57,9 @@ new Vue({
                     extensions: VALID_EXTENSION,
                   }],
                 }, (files) => {
-                  if (files) {
+                  if (files !== undefined) {
                     if (!files[0].includes('\\')) {
-                      this.openFile(file[0]);
+                      this.openFile(files[0]);
                     } else {
                       this.$store.dispatch('addMessages', {
                         type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,

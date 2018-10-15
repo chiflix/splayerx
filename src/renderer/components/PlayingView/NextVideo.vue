@@ -41,7 +41,7 @@
 </template>
 <script>
 import path from 'path';
-import Icon from '../IconContainer';
+import Icon from '../BaseIconContainer';
 export default {
   name: 'next-video',
   components: {
@@ -68,7 +68,6 @@ export default {
         this.$emit('close-nextvideo');
         // this.openFile(this.nextVideo);
       } else {
-        console.log('start');
         const fractionProgress = (currentTime - this.finalPartStartTime) / this.finalPartEndTime;
         this.progress = fractionProgress * 100;
       }

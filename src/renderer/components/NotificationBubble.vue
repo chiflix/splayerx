@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <NextVideo v-if="showNextVideo" @close-nextvideo="closemousedown" class="next-video"/>
     <transition-group name="toast">
       <div v-for="m in messages" :key="m.id"
         :id="'item' + m.id"
@@ -15,11 +16,18 @@
 </template>
 
 <script>
+import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import Icon from './BaseIconContainer';
 export default {
   name: 'notification-bubble',
   components: {
     Icon,
+    NextVideo,
+  },
+  data() {
+    return {
+      showNextVideo: false,
+    };
   },
   computed: {
     messages() {
@@ -29,6 +37,9 @@ export default {
   mounted() {
   },
   methods: {
+    closemousedown() {
+      console.log('closemousedown');
+    },
     closeMessage(id) {
       this.$store.dispatch('removeMessages', id);
     },

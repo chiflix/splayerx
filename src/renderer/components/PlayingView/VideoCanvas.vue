@@ -281,6 +281,7 @@ export default {
     },
     isPlaying() {
       return this.$store.state.PlaybackState.isPlaying;
+    },
     videoMeta() {
       return this.$store.state.PlaybackState.videoMeta;
     },

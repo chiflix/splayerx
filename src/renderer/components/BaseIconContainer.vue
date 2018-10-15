@@ -183,28 +183,6 @@ export default {
   .active {
     display: none;
   }
-  &:hover {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: block;
-    }
-    .active {
-      display: none;
-    }
-  }
-  &:active {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: none;
-    }
-    .active {
-      display: block;
-    }
-  }
   @media screen and (max-width: 512px) {
     width: 20px;
     height: 20px;
@@ -220,6 +198,57 @@ export default {
   @media screen and (min-width: 1921px) {
     width: 36px;
     height: 36px;
+  }
+  &:hover {
+    opacity: 1;
+    .default {
+        display: none;
+    }
+    .hover {
+        display: block;
+    }
+    .active {
+        display: none;
+    }
+  }
+  &:active {
+    .default {
+        display: none;
+    }
+    .hover {
+        display: none;
+    }
+    .active {
+        display: block;
+    }
+  }
+}
+.notificationPlay {
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    width: 35px;
+    height: 32px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 42px;
+    height: 38px;
+  }
+  @media screen and (min-width: 1921px) {
+    width: 59px;
+    height: 53px;
+  }
+}
+.notificationPlayHover {
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    width: 35px;
+    height: 32px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 42px;
+    height: 38px;
+  }
+  @media screen and (min-width: 1921px) {
+    width: 59px;
+    height: 53px;
   }
 }
 </style>

@@ -22,7 +22,6 @@
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
     <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
-    <next-video @close-nextvideo="closemousedown" class="next-video"/>
   </div>
 </template>
 <script>
@@ -158,9 +157,6 @@ export default {
     requestAnimationFrame(this.UIManager);
   },
   methods: {
-    closemousedown() {
-      console.log('closemousedown');
-    },
     // UIManagers
     UIManager(timestamp) {
       if (!this.start) {
