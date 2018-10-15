@@ -134,13 +134,13 @@ export default {
       this.cursorStyle = 'default';
     },
     onProgressBarClick(e) {
-      if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
+      if (Number.isNaN(this.duration)) {
         return;
       }
       this.onProgressSliderMousedown = true;
       const sliderOffsetLeft = this.$refs.sliderContainer.getBoundingClientRect().left;
       const p = (e.clientX - sliderOffsetLeft) / this.$refs.sliderContainer.clientWidth;
-      this.$bus.$emit('seek', p * this.$store.state.PlaybackState.Duration);
+      this.$bus.$emit('seek', p * this.duration);
       this.$_documentProgressDragClear();
       this.$_documentProgressDragEvent();
     },
@@ -159,7 +159,7 @@ export default {
         clearTimeout(this.timeoutIdOfHideProgressSlider);
       }
 
-      if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
+      if (Number.isNaN(this.duration)) {
         return;
       }
       if (!this.onProgressSliderMousedown) {
@@ -191,7 +191,7 @@ export default {
       } else {
         this.percentageOfReadyToPlay = progress;
         this.thumbnailCurrentTime
-          = progress * this.$store.state.PlaybackState.Duration;
+          = progress * this.duration;
       }
       this.showScreenshot = true;
     },
@@ -223,7 +223,7 @@ export default {
         if (this.flagProgressBarDraged) {
           this.buttonRadius = 0;
           this.$bus.$emit('seek', this.percentageVideoDraged
-           * this.$store.state.PlaybackState.Duration);
+           * this.duration);
           this.flagProgressBarDraged = false;
         }
       };
@@ -243,14 +243,14 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['src']),
+    ...mapGetters(['src', 'duration', 'currentTime', 'winWidth']),
     curProgressBarEdge() {
-      if (Number.isNaN(this.$store.state.PlaybackState.Duration)) {
+      if (Number.isNaN(this.duration)) {
         return 0;
       }
       const progressBarWidth = this.winWidth - FOOL_PROOFING_BAR_WIDTH;
-      return (this.$store.state.PlaybackState.AccurateTime
-        / this.$store.state.PlaybackState.Duration) * progressBarWidth;
+      return (this.currentTime
+        / this.duration) * progressBarWidth;
     },
     /**
      * when cursor is not on progress bar, the cursor position
@@ -298,10 +298,7 @@ export default {
     },
     screenshotContent() {
       return this.timecodeFromSeconds(this.percentageOfReadyToPlay
-        * this.$store.state.PlaybackState.Duration);
-    },
-    winWidth() {
-      return this.$store.getters.winWidth;
+        * this.duration);
     },
   },
   watch: {

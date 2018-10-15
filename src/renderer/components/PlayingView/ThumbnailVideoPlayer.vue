@@ -6,8 +6,8 @@
       v-show="useFallback"
       ref="video"
       :src="videoSrc"
-      :defaultEvents="['loadedmetadata', 'seeked']"
-      :customOptions="{ pauseOnStart: true }"
+      :events="['loadedmetadata', 'seeked']"
+      :currentTime="seekTime"
       @loadedmetadata="updateGenerationParameters"
       @seeked="thumbnailGeneration"
       style="opacity: 0.99" />
@@ -21,6 +21,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
 import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay';
 import { THUMBNAIL_DB_NAME } from '@/constants';
@@ -73,7 +74,11 @@ export default {
       lastGenerationIndex: 0,
       tempImage: null,
       useFallback: false,
+      seekTime: 0,
     };
+  },
+  computed: {
+    ...mapGetters(['duration']),
   },
   watch: {
     outerThumbnailInfo(newValue) {
@@ -115,9 +120,8 @@ export default {
     },
     // Data regenerators
     updateGenerationParameters() {
-      this.videoDuration = this.$refs.video.duration();
-      this.generationInterval = Math.round(this.videoDuration / (this.screenWidth / 4)) || 1;
-      this.maxThumbnailCount = Math.floor(this.videoDuration / this.generationInterval);
+      this.generationInterval = Math.round(this.duration / (this.screenWidth / 4)) || 1;
+      this.maxThumbnailCount = Math.floor(this.duration / this.generationInterval);
       this.$emit('update-thumbnail-info', {
         index: this.autoGenerationIndex,
         interval: this.generationInterval,
@@ -168,7 +172,7 @@ export default {
         while (this.thumbnailSet.has(internalIndex)) {
           internalIndex += 1;
         }
-        this.videoElement.currentTime = internalIndex * this.generationInterval;
+        this.testTime = internalIndex * this.generationInterval;
         if (this.isAutoGeneration) {
           this.autoGenerationIndex = internalIndex;
         }

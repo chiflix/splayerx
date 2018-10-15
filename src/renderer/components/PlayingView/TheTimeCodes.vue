@@ -8,6 +8,7 @@
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 export default {
   name: 'the-time-codes',
   data() {
@@ -26,8 +27,9 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['currentTime', 'duration']),
     hasDuration() {
-      return !Number.isNaN(this.$store.state.PlaybackState.Duration);
+      return !Number.isNaN(this.duration);
     },
     isRemainTime() {
       return {
@@ -35,26 +37,26 @@ export default {
         second: this.contentState === this.ContentStateEnum.CURRENT_REMAIN,
       };
     },
-    duration() {
-      return this.timecodeFromSeconds(this.$store.state.PlaybackState.Duration);
+    convertedDuration() {
+      return this.timecodeFromSeconds(this.duration);
     },
-    currentTime() {
-      return this.timecodeFromSeconds(this.$store.state.PlaybackState.CurrentTime);
+    convertedCurrentTime() {
+      return this.timecodeFromSeconds(this.currentTime);
     },
     remainTime() {
       const remainTime
-        = -(this.$store.state.PlaybackState.Duration - this.$store.state.PlaybackState.CurrentTime);
+        = -(this.duration - this.currentTime);
       return this.timecodeFromSeconds(remainTime);
     },
     content() {
       switch (this.contentState) {
         case this.ContentStateEnum.DEFAULT:
-          return { first: this.currentTime, second: this.duration };
+          return { first: this.convertedCurrentTime, second: this.convertedDuration };
         case this.ContentStateEnum.CURRENT_REMAIN:
-          return { first: this.currentTime, second: this.remainTime };
+          return { first: this.convertedCurrentTime, second: this.remainTime };
         case this.ContentStateEnum.REMAIN_DURATION:
-          return { first: this.remainTime, second: this.duration };
-        default: return { first: this.currentTime, second: this.duration };
+          return { first: this.remainTime, second: this.convertedDuration };
+        default: return { first: this.convertedCurrentTime, second: this.convertedDuration };
       }
     },
   },
