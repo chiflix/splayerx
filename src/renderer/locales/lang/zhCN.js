@@ -23,6 +23,8 @@ export default {
       increaseAudioDelay: '增加音频延迟',
       decreaseAudioDelay: '减少音频延迟',
       switchAudioTrack: '切换音轨',
+      track1: '轨道1',
+      track2: '轨道2',
     },
     subtitle: {
       name: '字幕',
@@ -71,6 +73,15 @@ export default {
     },
   },
   css: {
-    titleFontSize: { fontSize: '4vw' },
+    titleFontSize: { fontSize: '21px' },
+    versionFontSize: { fontSize: '14px' },
+  },
+  errorFile: {
+    title: '文件错误',
+    content: '视频文件格式无法识别或文件已损坏。',
+  },
+  loading: {
+    title: '',
+    content: '正在搜索翻译结果...',
   },
 };

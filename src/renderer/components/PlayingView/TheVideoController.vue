@@ -11,8 +11,11 @@
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
+    <notification-bubble/>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button />
+    <base-invisible-background v-show="!mute" />
+    <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
       <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
@@ -23,24 +26,32 @@
   </div>
 </template>
 <script>
+import _ from 'lodash';
+import { mapGetters } from 'vuex';
 import TimerManager from '@/helpers/timerManager.js';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
+import VolumeIndicator from './VolumeIndicator.vue';
 import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
 import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TimeProgressBar from './TimeProgressBar.vue';
+import BaseInvisibleBackground from './BaseInvisibleBackground.vue';
+import NotificationBubble from '../NotificationBubble.vue';
 export default {
   name: 'the-video-controller',
   components: {
     titlebar: Titlebar,
     'play-button': PlayButton,
+    'volume-indicator': VolumeIndicator,
     'subtitle-control': SubtitleControl,
     'advance-control': AdvanceControl,
     'playlist-control': PlaylistControl,
     'the-time-codes': TheTimeCodes,
     'the-time-progress-bar': TimeProgressBar,
+    'base-invisible-background': BaseInvisibleBackground,
+    'notification-bubble': NotificationBubble,
   },
   directives: {
     hidden: {
@@ -71,6 +82,8 @@ export default {
       mouseLeftWindow: false,
       mouseleftDelay: 1000,
       hideVolume: false,
+      muteDelay: 3000,
+      hideVolumeDelay: 1000,
       hideProgressBar: false,
       popupShow: false,
       clicksTimer: 0,
@@ -87,12 +100,13 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['mute']),
     showAllWidgets() {
       return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget);
     },
     onOtherWidget() {
-      return this.currentWidget !== this.$options.name;
+      return this.currentWidget !== this.$options.name && this.currentWidget !== 'base-invisible-background';
     },
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ? 'default' : 'none';
@@ -120,6 +134,7 @@ export default {
         ArrowLeft: false,
         ArrowRight: false,
         Space: false,
+        KeyM: false,
       }],
     ]);
     // Use Object due to vue's lack support of reactive Map
@@ -165,33 +180,35 @@ export default {
     inputProcess(currentEventInfo, lastEventInfo) {
       // mousemove timer
       this.currentWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
-      const currentPosition = currentEventInfo.get('mousemove').position;
-      const lastPosition = lastEventInfo.get('mousemove').position;
-      this.mouseStopMoving = currentPosition === lastPosition;
+      this.mouseStopMoving = _.isEqual(currentEventInfo.get('mousemove').position, lastEventInfo.get('mousemove').position);
       if (!this.mouseStopMoving) { this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false); }
       // mouseenter timer
       const { mouseLeavingWindow } = currentEventInfo.get('mouseenter');
       const changed = mouseLeavingWindow !== lastEventInfo.get('mouseenter').mouseLeavingWindow;
-      if (mouseLeavingWindow && changed) {
+      if (this.andify(mouseLeavingWindow, changed)) {
         this.timerManager.addTimer('mouseLeavingWindow', this.mouseleftDelay);
-      } else if (!mouseLeavingWindow && changed) {
+      } else if (this.andify(!mouseLeavingWindow, changed)) {
         this.timerManager.removeTimer('mouseLeavingWindow');
         this.mouseLeftWindow = false;
       }
       // hideVolume timer
-      const volumeKeydown = currentEventInfo.get('keydown').ArrowUp || currentEventInfo.get('keydown').ArrowDown;
+      const volumeKeydown = this.orify(currentEventInfo.get('keydown').ArrowUp, currentEventInfo.get('keydown').ArrowDown, currentEventInfo.get('keydown').KeyM); // eslint-disable-line
       const mouseScrolling = currentEventInfo.get('wheel').time !== lastEventInfo.get('wheel').time;
-      const wakingupVolume = volumeKeydown || mouseScrolling;
+      const lastWidget = this.getComponentName(lastEventInfo.get('mousemove').target);
+      const mouseWakingUpVolume = this.enterWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator');
+      const mouseLeavingVolume = this.leaveWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator');
+      const mouseMovingInVolume = this.andify(!this.mouseStopMoving, this.inWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator'));
+      const wakingupVolume = this.orify(volumeKeydown, mouseScrolling, this.andify(!this.mute, this.orify(mouseWakingUpVolume, mouseLeavingVolume, mouseMovingInVolume))); // eslint-disable-line
       if (wakingupVolume) {
-        this.timerManager.updateTimer('sleepingVolumeButton', this.mousestopDelay);
+        this.timerManager.updateTimer('sleepingVolumeButton', this.orify(mouseWakingUpVolume, mouseMovingInVolume) ? this.muteDelay : this.hideVolumeDelay);
         // Prevent all widgets display before volume-control
-        if (this.showAllWidgets) {
+        if (this.andify(this.showAllWidgets, mouseMovingInVolume)) {
           this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
         }
         this.hideVolume = false;
       }
       // hideProgressBar timer
-      const progressKeydown = currentEventInfo.get('keydown').ArrowLeft || currentEventInfo.get('keydown').ArrowRight;
+      const progressKeydown = this.orify(currentEventInfo.get('keydown').ArrowLeft, currentEventInfo.get('keydown').ArrowRight);
       if (progressKeydown) {
         this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
         // Prevent all widgets display before the-time-progress-bar
@@ -209,7 +226,7 @@ export default {
       Object.keys(this.timerState).forEach((uiName) => {
         this.timerState[uiName] = this.showAllWidgets;
       });
-      this.timerState['volume-control'] = !this.hideVolume;
+      this.timerState['volume-indicator'] = !this.hideVolume;
       this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
       return currentEventInfo;
     },
@@ -225,7 +242,7 @@ export default {
       this.hideVolume = timeoutTimers.includes('sleepingVolumeButton');
       this.hideProgressBar = timeoutTimers.includes('sleepingProgressBar');
 
-      this.timerState['volume-control'] = !this.hideVolume;
+      this.timerState['volume-indicator'] = !this.hideVolume;
       this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
     },
     // UILayerManager() {
@@ -236,6 +253,7 @@ export default {
         tempObject[index] = this.showAllWidgets ||
           (!this.showAllWidgets && this.timerState[index]);
       });
+      tempObject['volume-indicator'] = !this.mute ? this.timerState['volume-indicator'] : tempObject['volume-indicator'];
       this.displayState = tempObject;
     },
     UIStateManager() {
@@ -392,6 +410,30 @@ export default {
     },
     togglePlayback() {
       this.$bus.$emit('toggle-playback');
+    },
+    orify(...args) {
+      return args.some(arg => arg == true); // eslint-disable-line
+    },
+    andify(...args) {
+      return args.every(arg => arg == true); // eslint-disable-line
+    },
+    enterWidgets(last, current, ...widgets) {
+      return this.andify(
+        widgets.some(widget => current === widget),
+        widgets.every(widget => last !== widget),
+      );
+    },
+    leaveWidgets(last, current, ...widgets) {
+      return this.andify(
+        widgets.every(widget => current !== widget),
+        widgets.some(widget => last === widget),
+      );
+    },
+    inWidgets(last, current, ...widgets) {
+      return this.andify(
+        widgets.some(widget => current === widget),
+        widgets.some(widget => last === widget),
+      );
     },
   },
 };
