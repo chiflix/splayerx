@@ -12,6 +12,7 @@ import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
 import Path from 'path';
+import { Video as videoActions } from '@/store/action-types';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
@@ -40,6 +41,7 @@ new Vue({
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
       const template = [
+        // menu.file
         {
           label: this.$t('msg.file.name'),
           submenu: [
@@ -70,6 +72,10 @@ new Vue({
             {
               label: this.$t('msg.file.openURL'),
               accelerator: 'CmdOrCtrl+U',
+              click: () => {
+                // TODO: openURL.click
+              },
+              enabled: false,
             },
             {
               label: this.$t('msg.file.closeWindow'),
@@ -77,12 +83,14 @@ new Vue({
             },
           ],
         },
+        // menu.playback
         {
           label: this.$t('msg.playback.name'),
           submenu: [
             {
               label: this.$t('msg.playback.fullScreen'),
               accelerator: 'CmdOrCtrl+F',
+              enabled: false,
             },
             {
               label: this.$t('msg.playback.keepPlayingWindowFront'),
@@ -101,44 +109,76 @@ new Vue({
             // { label: 'Increase Size' },
             // { label: 'Decrease Size' },
             { type: 'separator' },
-            { label: this.$t('msg.playback.increasePlaybackSpeed') },
-            { label: this.$t('msg.playback.decreasePlaybackSpeed') },
+            { label: this.$t('msg.playback.increasePlaybackSpeed'), enabled: false },
+            { label: this.$t('msg.playback.decreasePlaybackSpeed'), enabled: false },
             /** */
             { type: 'separator' },
-            { label: this.$t('msg.playback.captureScreen') },
-            { label: this.$t('msg.playback.captureVideoClip') },
+            { label: this.$t('msg.playback.captureScreen'), enabled: false },
+            { label: this.$t('msg.playback.captureVideoClip'), enabled: false },
 
             { type: 'separator' },
-            { label: this.$t('msg.playback.mediaInfo') },
+            { label: this.$t('msg.playback.mediaInfo'), enabled: false },
           ],
         },
+        // menu.audio
         {
           label: this.$t('msg.audio.name'),
           submenu: [
-            { label: this.$t('msg.audio.increaseAudioDelay') },
-            { label: this.$t('msg.audio.decreaseAudioDelay') },
+            { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
+            { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
             { type: 'separator' },
-            { label: this.$t('msg.audio.switchAudioTrack') },
+            {
+              label: this.$t('msg.audio.switchAudioTrack'),
+              enabled: false,
+              submenu: [
+                { label: this.$t('msg.audio.track1'), enabled: false },
+                { label: this.$t('msg.audio.track2'), enabled: false },
+              ],
+            },
           ],
         },
+        // menu.subtitle
         {
           label: this.$t('msg.subtitle.name'),
           submenu: [
-            { label: this.$t('msg.subtitle.mainSubtitle') },
-            { label: this.$t('msg.subtitle.secondarySubtitle') },
+            { label: this.$t('msg.subtitle.AITranslation'), enabled: false },
+            { label: this.$t('msg.subtitle.loadSubtitleFile'), enabled: false },
+            {
+              label: this.$t('msg.subtitle.mainSubtitle'),
+              enabled: false,
+              submenu: [
+                { label: this.$t('msg.subtitle.langZhCN'), enabled: false },
+                { label: this.$t('msg.subtitle.langEn'), enabled: false },
+                { label: this.$t('msg.subtitle.noSubtitle'), enabled: false },
+              ],
+            },
+            {
+              label: this.$t('msg.subtitle.secondarySubtitle'),
+              enabled: false,
+              submenu: [],
+            },
             { type: 'separator' },
-            { label: this.$t('msg.subtitle.subtitleStyle') },
+            {
+              label: this.$t('msg.subtitle.subtitleStyle'),
+              enabled: false,
+              submenu: [
+                { label: this.$t('msg.subtitle.style1'), enabled: false },
+                { label: this.$t('msg.subtitle.style2'), enabled: false },
+                { label: this.$t('msg.subtitle.style3'), enabled: false },
+              ],
+            },
             { type: 'separator' },
-            { label: this.$t('msg.subtitle.increaseSubtitleSize') },
-            { label: this.$t('msg.subtitle.decreaseSubtitleSize') },
+            { label: this.$t('msg.subtitle.increaseSubtitleSize'), enabled: false },
+            { label: this.$t('msg.subtitle.decreaseSubtitleSize'), enabled: false },
             { type: 'separator' },
-            { label: this.$t('msg.subtitle.increaseSubtitleDelay') },
-            { label: this.$t('msg.subtitle.decreaseSubtitleDelay') },
+            { label: this.$t('msg.subtitle.increaseSubtitleDelay'), enabled: false },
+            { label: this.$t('msg.subtitle.decreaseSubtitleDelay'), enabled: false },
             // { type: 'separator' },
             // { label: 'Smart Translating' },
             // { label: 'Search on Shooter.cn' },
           ],
         },
+        // menu.window
         {
           label: this.$t('msg.window_.name'),
           submenu: [
@@ -146,10 +186,11 @@ new Vue({
               label: this.$t('msg.window_.minimize'),
               role: 'minimize',
             },
-            { label: this.$t('msg.window_.enterFullScreen'), accelerator: 'Ctrl+Cmd+F' },
-            { label: this.$t('msg.window_.bringAllToFront'), role: 'hideOthers', accelerator: '' },
+            { label: this.$t('msg.window_.enterFullScreen'), enabled: 'false', accelerator: 'Ctrl+Cmd+F' },
+            { label: this.$t('msg.window_.bringAllToFront'), accelerator: '' },
           ],
         },
+        // menu.help
         {
           label: this.$t('msg.help.name'),
           role: 'help',
@@ -161,7 +202,9 @@ new Vue({
         },
       ];
       this.updateRecentPlay().then((result) => {
-        template.splice(2, 0, result);
+        // menu.file add "open recent"
+        template[0].submenu.splice(2, 0, result);
+        // menu.about
         if (process.platform === 'darwin') {
           template.unshift({
             label: app.getName(),
@@ -172,13 +215,16 @@ new Vue({
               },
               {
                 label: this.$t('msg.splayerx.preferences'),
+                enabled: false,
                 accelerator: 'Cmd+,',
               },
               {
                 label: this.$t('msg.splayerx.homepage'),
+                enabled: false,
               },
               {
                 label: this.$t('msg.splayerx.feedback'),
+                enabled: false,
               },
               { type: 'separator' },
               {
@@ -355,7 +401,7 @@ new Vue({
       ]);
       for (let i = 1; i <= recentPlayData.length; i += 1) {
         menuRecentData.set(`recent-${i}`, {
-          label: this.pathProcess(recentPlayData[i - 1].path),
+          label: this.pathProcess(recentPlayData[i - 1].path.split('/').reverse()[0]),
           path: recentPlayData[i - 1].path,
           visible: true,
         });
@@ -398,38 +444,22 @@ new Vue({
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowUp':
-          this.$bus.$emit('volumeslider-appear');
-          if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-            this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
-          } else {
-            this.$bus.$emit('volume', 1);
-          }
+          this.$store.dispatch(videoActions.INCREASE_VOLUME);
           break;
-
         case 'ArrowDown':
-          this.$bus.$emit('volumeslider-appear');
-          if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-            this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
-          } else {
-            this.$bus.$emit('volume', 0);
-          }
+          this.$store.dispatch(videoActions.DECREASE_VOLUME);
           break;
-
+        case 'm':
+          this.$store.dispatch(videoActions.TOGGLE_MUTE);
+          break;
         case 'ArrowLeft':
-          this.$bus.$emit('progressbar-appear-delay');
-          this.$bus.$emit('progressslider-appear');
-          this.$bus.$emit('timecode-appear-delay');
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
           } else {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
           }
           break;
-
         case 'ArrowRight':
-          this.$bus.$emit('progressbar-appear-delay');
-          this.$bus.$emit('progressslider-appear');
-          this.$bus.$emit('timecode-appear-delay');
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
           } else {
@@ -437,24 +467,13 @@ new Vue({
           }
           break;
         default:
+          console.log(e.key);
+          break;
       }
     });
     window.addEventListener('wheel', (e) => {
-      this.$bus.$emit('volumeslider-appear');
       const up = e.deltaY < 0;
-      if (up) {
-        if (this.$store.state.PlaybackState.Volume + 0.1 < 1) {
-          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume + 0.1);
-        } else {
-          this.$bus.$emit('volume', 1);
-        }
-      } else if (!up) {
-        if (this.$store.state.PlaybackState.Volume - 0.1 > 0) {
-          this.$bus.$emit('volume', this.$store.state.PlaybackState.Volume - 0.1);
-        } else {
-          this.$bus.$emit('volume', 0);
-        }
-      }
+      this.$store.dispatch(up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME, 6);
     });
 
     /**
