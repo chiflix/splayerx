@@ -40,9 +40,12 @@ const state = {
 
 const getters = {
   src: state => `file://${state.src}`,
+  duration: state => state.duration,
+  currentTime: state => Math.round(state.currentTime),
   volume: state => state.volume / 100,
   mute: state => state.mute,
   rate: state => state.rate,
+  paused: state => state.paused,
 };
 
 const mutations = {
@@ -52,6 +55,16 @@ const mutations = {
   },
   [mutationTypes.ERRORMESSAGE_UPDATE](s, p) {
     s.errorMessage = p;
+  },
+  // playback state
+  [mutationTypes.DURATION_UPDATE](s, p) {
+    s.duration = p;
+  },
+  [mutationTypes.CURRENTTIME_UPDATE](s, p) {
+    s.currentTime = p;
+  },
+  [mutationTypes.PAUSED_UPDATE](s, p) {
+    s.paused = p;
   },
   // network state
   [mutationTypes.SRC_UPDATE](s, p) {
@@ -111,6 +124,12 @@ const actions = {
     const finalDelta = delta || 0.1;
     const finalRate = state.rate - finalDelta;
     commit(mutationTypes.RATE_UPDATE, finalRate < 0 ? 0 : finalRate);
+  },
+  [actionTypes.PLAY_VIDEO]({ commit }) {
+    commit(mutationTypes.PAUSED_UPDATE, false);
+  },
+  [actionTypes.PAUSE_VIDEO]({ commit }) {
+    commit(mutationTypes.PAUSED_UPDATE, true);
   },
 };
 

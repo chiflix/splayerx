@@ -4,17 +4,17 @@
     class="video">
     <base-video-player
       ref="videoCanvas"
-      :defaultEvents="['play', 'pause', 'playing', 'canplay', 'timeupdate', 'loadedmetadata', 'durationchange']"
+      :events="['loadedmetadata']"
       :styleObject="{objectFit: 'contain', width: '100%', height: '100%'}"
-      @play="onPlay"
-      @pause="onPause"
-      @playing="onPlaying"
-      @timeupdate="onTimeupdate"
       @loadedmetadata="onMetaLoaded"
-      @durationchange="onDurationChange"
       :src="src"
       :playbackRate="rate"
-      :volume="volume" />
+      :volume="volume"
+      :muted="mute"
+      :paused="paused"
+      :updateCurrentTime="true"
+      :currentTime="seekTime"
+      @update:currentTime="updateCurrentTime" />
     <BaseSubtitle/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
@@ -24,7 +24,8 @@
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { Video as videoMutations } from '@/store/mutation-types';
 import { Video as videoActions } from '@/store/action-types';
 import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer';
@@ -42,43 +43,33 @@ export default {
       shownTextTrack: false,
       newWidthOfWindow: 0,
       newHeightOfWindow: 0,
+      duration: 0,
       videoWidth: 0,
       videoHeight: 0,
       timeUpdateIntervalID: null,
       windowSizeHelper: null,
       videoElement: null,
+      seekTime: 0,
     };
   },
   methods: {
     ...mapActions({
       videoConfigInitialize: videoActions.INITIALIZE,
+      play: videoActions.PLAY_VIDEO,
+      pause: videoActions.PAUSE_VIDEO,
     }),
-    accurateTimeUpdate() {
-      const { currentTime, duration } = this.videoElement;
-      if (currentTime >= duration || this.videoElement.paused) {
-        clearInterval(this.timeUpdateIntervalID);
-      } else {
-        this.$store.commit('AccurateTime', currentTime);
-      }
-    },
-    onPlay() {
-      this.$store.commit('isPlaying', true);
-    },
-    onPause() {
-      this.$store.commit('isPlaying', false);
-    },
-    onPlaying() {
-      // set interval to get update time
-      const { duration } = this.videoElement;
-      if (duration <= 240) {
-        this.timeUpdateIntervalID = setInterval(this.accurateTimeUpdate, 10);
-      }
-    },
-    onMetaLoaded() {
+    ...mapMutations({ updateCurrentTime: videoMutations.CURRENTTIME_UPDATE }),
+    onMetaLoaded(event) {
+      [this.duration, this.videoWidth, this.videoHeight] =
+        [event.target.duration, event.target.videoWidth, event.target.videoHeight];
+      this.videoConfigInitialize({
+        volume: 100,
+        mute: false,
+        rate: 1,
+        duration: this.duration,
+      });
       this.$bus.$emit('play');
       this.$bus.$emit('seek', this.currentTime);
-      this.videoWidth = this.videoElement.videoWidth;
-      this.videoHeight = this.videoElement.videoHeight;
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
       if (this.videoExisted) {
         this.$_calculateWindowSizeWhenVideoExisted();
@@ -90,19 +81,6 @@ export default {
       }
       this.$bus.$emit('video-loaded');
       this.windowSizeHelper.setNewWindowSize();
-    },
-    onTimeupdate() {
-      this.$store.commit('AccurateTime', this.videoElement.currentTime);
-      const t = Math.floor(this.videoElement.currentTime);
-      if (t !== this.$store.state.PlaybackState.CurrentTime) {
-        this.$store.commit('CurrentTime', t);
-      }
-    },
-    onDurationChange() {
-      const t = Math.floor(this.$refs.videoCanvas.videoElement().duration);
-      if (t !== this.$store.state.PlaybackState.duration) {
-        this.$store.commit('Duration', t);
-      }
     },
     $_controlWindowSize() {
       const currentWindow = this.$electron.remote.getCurrentWindow();
@@ -212,8 +190,10 @@ export default {
     $_saveScreenshot() {
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
-      const { videoHeight, videoWidth } = this.videoElement;
+      // todo: use metaloaded to get videoHeight and videoWidth
+      const { videoHeight, videoWidth } = this;
       [canvas.width, canvas.height] = [1920, 1080];
+      // cannot delete
       canvasCTX.drawImage(
         this.videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, 1920, 1080,
@@ -259,7 +239,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['src', 'volume', 'mute', 'rate']),
+    ...mapGetters(['src', 'volume', 'mute', 'rate', 'paused']),
     calculateHeightByWidth() {
       return this.newWidthOfWindow / (this.videoWidth / this.videoHeight);
     },
@@ -267,7 +247,7 @@ export default {
       return this.newHeightOfWindow * (this.videoWidth / this.videoHeight);
     },
     currentTime() {
-      return this.$store.state.PlaybackState.CurrentTime;
+      return this.$store.state.Video.currentTime;
     },
     originSrcOfVideo() {
       return this.$store.state.PlaybackState.OriginSrcOfVideo;
@@ -285,20 +265,8 @@ export default {
           }
         });
     },
-    mute(newVal) {
-      this.videoElement.muted = newVal;
-    },
-  },
-  created() {
-    this.videoConfigInitialize({
-      volume: 100,
-      mute: false,
-      rate: 1,
-    });
   },
   mounted() {
-    this.videoElement = this.$refs.videoCanvas.videoElement();
-
     this.$bus.$on('toggle-fullscreen', () => {
       const currentWindow = this.$electron.remote.getCurrentWindow();
       if (currentWindow.isFullScreen()) {
@@ -312,26 +280,12 @@ export default {
       currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
     });
     this.$bus.$on('toggle-playback', () => {
-      if (this.videoElement.paused) {
-        this.$bus.$emit('play');
-        this.$bus.$emit('twinkle-play-icon');
-      } else {
-        this.$bus.$emit('pause');
-        this.$bus.$emit('twinkle-pause-icon');
-      }
-    });
-    this.$bus.$on('play', () => {
-      this.videoElement.play();
-    });
-    this.$bus.$on('pause', () => {
-      this.videoElement.pause();
+      this[this.paused ? 'play' : 'pause']();
     });
     this.$bus.$on('seek', (e) => {
-      this.videoElement.currentTime = e;
-      this.$store.commit('CurrentTime', e);
-      this.$store.commit('AccurateTime', e);
-
-      const filePath = decodeURI(this.videoElement.src);
+      this.seekTime = e;
+      // todo: use vuex get video element src
+      const filePath = decodeURI(this.src);
       const indexOfLastDot = filePath.lastIndexOf('.');
       const ext = filePath.substring(indexOfLastDot + 1);
       if (ext === 'mkv') {

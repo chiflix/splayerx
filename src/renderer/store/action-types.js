@@ -6,6 +6,8 @@ export const Video = {
   TOGGLE_MUTE: 'TOGGLE_MUTE',
   INCREASE_RATE: 'INCREASE_RATE',
   DECREASE_RATE: 'DECREASE_RATE',
+  PLAY_VIDEO: 'PLAY_VIDEO',
+  PAUSE_VIDEO: 'PAUSE_VIDEO',
 };
 
 export const Subtitle = {
