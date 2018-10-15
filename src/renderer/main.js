@@ -503,6 +503,10 @@ new Vue({
           containsSubFiles = true;
         } else if (vidRegex.test(Path.extname(tempFilePath))) {
           videoFiles.push(tempFilePath);
+        } else {
+          this.$store.dispatch('addMessages', {
+            type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+          });
         }
       }
       if (videoFiles.length !== 0) {
