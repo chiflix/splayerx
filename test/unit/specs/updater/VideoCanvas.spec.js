@@ -18,6 +18,7 @@ describe('VideoCanvas.vue', () => {
           state: PlaybackState.state,
           mutations: PlaybackState.mutations,
         },
+        WindowState: {},
       },
     });
     wrapper = mount(VideoCanvas, {
@@ -45,11 +46,6 @@ describe('VideoCanvas.vue', () => {
   it('playback-rate event work fine', () => {
     wrapper.vm.$bus.$emit('playback-rate', 1);
     expect(store.state.PlaybackState.PlaybackRate).equal(1);
-  });
-
-  it('volume event work fine', () => {
-    wrapper.vm.$bus.$emit('volume', 1);
-    expect(store.state.PlaybackState.Volume).equal(1);
   });
 
   describe('calcNewWindowXY method', () => {
@@ -120,37 +116,23 @@ describe('VideoCanvas.vue', () => {
     });
   });
 
-  it('watch OriginSrcOfVideo work fine', () => {
-    const stub = sinon.stub(wrapper.vm.$electron.remote, 'getCurrentWindow').callsFake(() => ({
-      getBounds() {
-        return {
-          x: 10,
-          y: 10,
-          width: 10,
-          height: 10,
-        };
-      },
-    }));
-    wrapper.vm.$store.commit('OriginSrcOfVideo', 'abc');
-    stub.restore();
-  });
-
   it('onMetaLoaded method work fine if video not exist', () => {
     wrapper.vm.videoExisted = false;
-    wrapper.vm.videoWidth = 100;
-    wrapper.vm.videoHeight = 100;
+    wrapper.vm.$store.commit('videoMeta', { width: 100, height: 100 });
     store.state.PlaybackState.CurrentTime = 100;
 
     const emitStub = sinon.stub(wrapper.vm.$bus, '$emit');
+    const storeStub = sinon.stub(wrapper.vm.$store, 'commit');
     const stub = sinon.stub(wrapper.vm, '$_controlWindowSize').callsFake();
 
     wrapper.vm.onMetaLoaded();
     expect(emitStub.firstCall.calledWith('play')).equal(true);
     expect(emitStub.secondCall.calledWith('seek', 100)).equal(true);
-    expect(emitStub.thirdCall.calledWith('screenshot-sizeset')).equal(true);
-    expect(wrapper.vm.videoExisted).equal(true);
+    expect(emitStub.thirdCall.calledWith('video-loaded')).equal(true);
+    expect(storeStub.calledWith('videoMeta')).equal(true);
     stub.restore();
     emitStub.restore();
+    storeStub.restore();
   });
 
   it('onMetaLoaded method work fine if video exist', () => {
@@ -165,36 +147,29 @@ describe('VideoCanvas.vue', () => {
     describe('videoWidth or videoHeight is smaller than minWidth or minHeight', () => {
       let windowStub;
       beforeEach(() => {
-        windowStub = sinon.stub(wrapper.vm.$electron.remote, 'getCurrentWindow').callsFake(() => ({
-          getMinimumSize() {
-            return [427, 240];
-          },
-          getPosition() {
-            return [0, 0];
-          },
+        windowStub = sinon.stub(wrapper.vm.$store.state, 'WindowState').get(() => ({
+          windowMinimumSize: [427, 240],
+          windowPosition: [0, 0],
         }));
       });
       afterEach(() => {
         windowStub.restore();
       });
       it('videoRatio > minWindowRatio', () => {
-        wrapper.vm.videoWidth = 300;
-        wrapper.vm.videoHeight = 150;
+        wrapper.vm.$store.commit('videoMeta', { width: 300, height: 150 });
         wrapper.vm.$_calculateWindowSizeAtTheFirstTime();
         expect(wrapper.vm.newWidthOfWindow).equal(480);
         expect(wrapper.vm.newHeightOfWindow).equal(240);
         windowStub.restore();
       });
       it('videoRatio < minWindowRatio', () => {
-        wrapper.vm.videoWidth = 150;
-        wrapper.vm.videoHeight = 300;
+        wrapper.vm.$store.commit('videoMeta', { width: 150, height: 300 });
         wrapper.vm.$_calculateWindowSizeAtTheFirstTime();
         expect(wrapper.vm.newWidthOfWindow).equal(427);
         expect(wrapper.vm.newHeightOfWindow).equal(854);
       });
       it('videoRatio = minWindowRatio', () => {
-        wrapper.vm.videoWidth = 213.5;
-        wrapper.vm.videoHeight = 120;
+        wrapper.vm.$store.commit('videoMeta', { width: 213.5, height: 120 });
         wrapper.vm.$_calculateWindowSizeAtTheFirstTime();
         expect(wrapper.vm.newWidthOfWindow).equal(427);
         expect(wrapper.vm.newHeightOfWindow).equal(240);
@@ -203,16 +178,11 @@ describe('VideoCanvas.vue', () => {
 
     describe('videoSize is between minSize and screenSize', () => {
       it('work fine', () => {
-        const windowStub = sinon.stub(wrapper.vm.$electron.remote, 'getCurrentWindow').callsFake(() => ({
-          getMinimumSize() {
-            return [427, 240];
-          },
-          getPosition() {
-            return [0, 0];
-          },
+        const windowStub = sinon.stub(wrapper.vm.$store.state, 'WindowState').get(() => ({
+          windowMinimumSize: [427, 240],
+          windowPosition: [0, 0],
         }));
-        wrapper.vm.videoWidth = 450;
-        wrapper.vm.videoHeight = 250;
+        wrapper.vm.$store.commit('videoMeta', { width: 450, height: 250 });
         wrapper.vm.$_calculateWindowSizeAtTheFirstTime();
         expect(wrapper.vm.newWidthOfWindow).equal(450);
         expect(wrapper.vm.newHeightOfWindow).equal(250);
@@ -224,56 +194,46 @@ describe('VideoCanvas.vue', () => {
   describe('$_calculateWindowSizeWhenVideoExisted', () => {
     let windowStub;
     beforeEach(() => {
-      windowStub = sinon.stub(wrapper.vm.$electron.remote, 'getCurrentWindow').callsFake(() => ({
-        getMinimumSize() {
-          return [427, 240];
-        },
-        getSize() {
-          return [900, 600];
-        },
+      windowStub = sinon.stub(wrapper.vm.$store.state, 'WindowState').get(() => ({
+        windowMinimumSize: [427, 240],
+        windowSize: [900, 600],
       }));
     });
     afterEach(() => {
       windowStub.restore();
     });
     it('min-size window < new video < current window', () => {
-      wrapper.vm.videoWidth = 600;
-      wrapper.vm.videoHeight = 400;
+      wrapper.vm.$store.commit('videoMeta', { width: 600, height: 400 });
       wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
       expect(wrapper.vm.newWidthOfWindow).equal(600);
       expect(wrapper.vm.newHeightOfWindow).equal(400);
     });
     it('videoRatio = windowRatio', () => {
-      wrapper.vm.videoWidth = 1200;
-      wrapper.vm.videoHeight = 800;
+      wrapper.vm.$store.commit('videoMeta', { width: 1200, height: 800 });
       wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
       expect(wrapper.vm.newWidthOfWindow).equal(900);
       expect(wrapper.vm.newHeightOfWindow).equal(600);
     });
     it('videoRatio > windowRatio', () => {
-      wrapper.vm.videoWidth = 1200;
-      wrapper.vm.videoHeight = 400;
+      wrapper.vm.$store.commit('videoMeta', { width: 1200, height: 400 });
       wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
       expect(wrapper.vm.newWidthOfWindow).equal(900);
       expect(wrapper.vm.newHeightOfWindow).equal(300);
     });
     it('videoRatio < windowRatio', () => {
-      wrapper.vm.videoWidth = 600;
-      wrapper.vm.videoHeight = 800;
+      wrapper.vm.$store.commit('videoMeta', { width: 600, height: 800 });
       wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
       expect(wrapper.vm.newWidthOfWindow).equal(450);
       expect(wrapper.vm.newHeightOfWindow).equal(600);
     });
     it('videoRatio > minWindowRatio', () => {
-      wrapper.vm.videoWidth = 600;
-      wrapper.vm.videoHeight = 200;
+      wrapper.vm.$store.commit('videoMeta', { width: 600, height: 200 });
       wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
       expect(wrapper.vm.newWidthOfWindow).equal(720);
       expect(wrapper.vm.newHeightOfWindow).equal(240);
     });
     it('videoRatio < minWindowRatio', () => {
-      wrapper.vm.videoWidth = 300;
-      wrapper.vm.videoHeight = 400;
+      wrapper.vm.$store.commit('videoMeta', { width: 300, height: 400 });
       wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
       expect(wrapper.vm.newWidthOfWindow).equal(427);
       expect(wrapper.vm.newHeightOfWindow).equal(427 / 0.75);

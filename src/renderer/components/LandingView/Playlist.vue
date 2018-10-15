@@ -27,7 +27,7 @@
         :class="showShadow ? 'shadow' : '' "
         :style="{
           transition: tranFlag ? 'width 150ms ease-out, height 150ms ease-out, border 150ms ease-out' : '',
-          backgroundImage: itemShortcut(item.shortCut),
+          backgroundImage: itemShortcut(item.smallShortCut),
           width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
           height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
         }"
@@ -108,6 +108,7 @@ export default {
   mounted() {
     const lf = document.querySelector('.controller');
     window.onkeyup = (e) => {
+      this.tranFlag = true;
       if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
         !this.isFullScreen && e.keyCode === 39) {
         this.validHover = false;
@@ -128,7 +129,6 @@ export default {
       this.$bus.$emit('move', this.move);
     };
   },
-
   watch: {
     windowWidth(val) {
       this.itemWidth = (this.changeSize * val) / 100;
@@ -194,7 +194,13 @@ export default {
       }, (item) => {
         self.showingPopupDialog = false;
         if (item) {
-          self.openFile(item[0]);
+          if (!item[0].includes('\\')) {
+            self.openFile(item[0]);
+          } else {
+            this.$store.dispatch('addMessages', {
+              type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+            });
+          }
         }
       });
     },
@@ -208,9 +214,9 @@ export default {
         this.$bus.$emit('moveItem', this.moveItem);
         this.$bus.$emit('move', this.move);
       } else if (this.windowWidth > 1355) {
-        this.open('./');
+        this.open();
       } else {
-        this.open('./');
+        this.open();
       }
     },
     backgroundUrl() {

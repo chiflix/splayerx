@@ -23,8 +23,12 @@
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
+import { mapGetters, mapActions } from 'vuex';
+import { Video as videoActions } from '@/store/action-types';
 import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer';
+
+
 export default {
   name: 'video-canvas',
   components: {
@@ -37,8 +41,6 @@ export default {
       shownTextTrack: false,
       newWidthOfWindow: 0,
       newHeightOfWindow: 0,
-      videoWidth: 0,
-      videoHeight: 0,
       timeUpdateIntervalID: null,
       windowSizeHelper: null,
       videoElement: null,
@@ -58,6 +60,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      videoConfigInitialize: videoActions.INITIALIZE,
+    }),
     accurateTimeUpdate() {
       const { currentTime, duration } = this.videoElement;
       if (currentTime >= duration || this.videoElement.paused) {
@@ -86,19 +91,11 @@ export default {
     onMetaLoaded() {
       this.$bus.$emit('play');
       this.$bus.$emit('seek', this.currentTime);
-      this.videoWidth = this.videoElement.videoWidth;
-      this.videoHeight = this.videoElement.videoHeight;
-      this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
-      if (this.videoExisted) {
-        this.$_calculateWindowSizeWhenVideoExisted();
-        this.$_controlWindowSizeAtNewVideo();
-      } else {
-        this.$_calculateWindowSizeAtTheFirstTime();
-        this.$_controlWindowSize();
-        this.videoExisted = true;
-      }
+      this.$store.commit('videoMeta', {
+        width: this.videoElement.videoWidth,
+        height: this.videoElement.videoHeight,
+      });
       this.$bus.$emit('video-loaded');
-      this.windowSizeHelper.setNewWindowSize();
     },
     onTimeupdate() {
       this.$store.commit('AccurateTime', this.videoElement.currentTime);
@@ -113,70 +110,84 @@ export default {
         this.$store.commit('Duration', t);
       }
     },
+    onVideoSizeChange() {
+      if (this.videoExisted) {
+        this.$_calculateWindowSizeWhenVideoExisted();
+        this.$_controlWindowSizeAtNewVideo();
+      } else {
+        this.$_calculateWindowSizeAtTheFirstTime();
+        this.$_controlWindowSize();
+        this.videoExisted = true;
+      }
+      this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
+      this.windowSizeHelper.setNewWindowSize();
+    },
     $_controlWindowSize() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      const landingViewRectangle = currentWindow.getBounds();
+      const landingViewRectangle = this.windowBounds;
 
-      const [windowX, windowY] = currentWindow.getPosition();
+      const [windowX, windowY] = this.windowPosition;
       const windowPosition = { x: windowX, y: windowY };
       const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
 
       const windowXY = this.calcNewWindowXY(currentDisplay, landingViewRectangle);
 
-      currentWindow.setSize(
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', [
         parseInt(this.newWidthOfWindow, 10),
         parseInt(this.newHeightOfWindow, 10),
-      );
-      currentWindow.setPosition(
+      ]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', [
         windowXY.windowX,
         windowXY.windowY,
-      );
-      currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
+      ]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [
+        this.newWidthOfWindow / this.newHeightOfWindow,
+      ]);
     },
     $_controlWindowSizeAtNewVideo() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-
-      const [windowX, windowY] = currentWindow.getPosition();
+      const [windowX, windowY] = this.windowPosition;
       const windowPosition = { x: windowX, y: windowY };
       const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
 
       const windowXY = this.avoidBeyondDisplayBorder(currentDisplay, windowX, windowY);
 
-      currentWindow.setSize(
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', [
         parseInt(this.newWidthOfWindow, 10),
         parseInt(this.newHeightOfWindow, 10),
-      );
-      currentWindow.setPosition(windowXY.windowX, windowXY.windowY);
-      currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
+      ]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', [
+        windowXY.windowX,
+        windowXY.windowY,
+      ]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [
+        this.newWidthOfWindow / this.newHeightOfWindow,
+      ]);
     },
     $_calculateWindowSizeAtTheFirstTime() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      const [windowX, windowY] = currentWindow.getPosition();
+      const [windowX, windowY] = this.windowPosition;
       const windowPosition = { x: windowX, y: windowY };
       const currentScreen = this.$electron.screen.getDisplayNearestPoint(windowPosition);
       const { width: screenWidth, height: screenHeight } = currentScreen.workAreaSize;
-      const [minWidth, minHeight] = currentWindow.getMinimumSize();
+      const [minWidth, minHeight] = this.windowMinimumSize;
       const screenRatio = screenWidth / screenHeight;
       const minWindowRatio = minWidth / minHeight;
-      const videoRatio = this.videoWidth / this.videoHeight;
       if (this.videoWidth > screenWidth || this.videoHeight > screenHeight) {
-        if (videoRatio > screenRatio) {
+        if (this.videoRatio > screenRatio) {
           this.newWidthOfWindow = screenWidth;
           this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (videoRatio < screenRatio) {
+        } else if (this.videoRatio < screenRatio) {
           this.newHeightOfWindow = screenHeight;
           this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (videoRatio === screenRatio) {
+        } else if (this.videoRatio === screenRatio) {
           [this.newWidthOfWindow, this.newHeightOfWindow] = [screenWidth, screenHeight];
         }
       } else if (this.videoWidth < minWidth || this.videoHeight < minHeight) {
-        if (videoRatio > minWindowRatio) {
+        if (this.videoRatio > minWindowRatio) {
           this.newHeightOfWindow = minHeight;
           this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (videoRatio < minWindowRatio) {
+        } else if (this.videoRatio < minWindowRatio) {
           this.newWidthOfWindow = minWidth;
           this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (videoRatio === minWindowRatio) {
+        } else if (this.videoRatio === minWindowRatio) {
           [this.newWidthOfWindow, this.newHeightOfWindow]
             = [minWidth, minHeight];
         }
@@ -185,34 +196,32 @@ export default {
       }
     },
     $_calculateWindowSizeWhenVideoExisted() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      const [windowWidth, windowHeight] = currentWindow.getSize();
-      const [minWidth, minHeight] = currentWindow.getMinimumSize();
+      const [windowWidth, windowHeight] = this.windowSize;
+      const [minWidth, minHeight] = this.windowMinimumSize;
       const windowRatio = windowWidth / windowHeight;
       const minWindowRatio = minWidth / minHeight;
-      const videoRatio = this.videoWidth / this.videoHeight;
       if (this.videoWidth < windowWidth && this.videoHeight < windowHeight) {
         [this.newWidthOfWindow, this.newHeightOfWindow] = [this.videoWidth, this.videoHeight];
       } else if (this.videoWidth > windowWidth || this.videoHeight > windowHeight) {
-        if (videoRatio > windowRatio) {
+        if (this.videoRatio > windowRatio) {
           this.newWidthOfWindow = windowWidth;
           this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (videoRatio < windowRatio) {
+        } else if (this.videoRatio < windowRatio) {
           this.newHeightOfWindow = windowHeight;
           this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (videoRatio === windowRatio) {
+        } else if (this.videoRatio === windowRatio) {
           [this.newWidthOfWindow, this.newHeightOfWindow]
             = [windowWidth, windowHeight];
         }
       }
       if (this.newWidthOfWindow < minWidth || this.newHeightOfWindow < minHeight) {
-        if (videoRatio > minWindowRatio) {
+        if (this.videoRatio > minWindowRatio) {
           this.newHeightOfWindow = minHeight;
           this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (videoRatio < minWindowRatio) {
+        } else if (this.videoRatio < minWindowRatio) {
           this.newWidthOfWindow = minWidth;
           this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (videoRatio === minWindowRatio) {
+        } else if (this.videoRatio === minWindowRatio) {
           [this.newWidthOfWindow, this.newHeightOfWindow]
             = [this.videoWidth, this.videoHeight];
         }
@@ -222,14 +231,21 @@ export default {
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       const { videoHeight, videoWidth } = this.videoElement;
-      [canvas.width, canvas.height] = [1920, 1080];
+      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
       canvasCTX.drawImage(
         this.videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, 1920, 1080,
+        0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
+      [canvas.width, canvas.height] = [211.3, 122.6];
+      canvasCTX.drawImage(
+        this.videoElement, 0, 0, videoWidth, videoHeight,
+        0, 0, 211.3, 122.6,
+      );
+      const smallImagePath = canvas.toDataURL('image/png');
       const data = {
         shortCut: imagePath,
+        smallShortCut: smallImagePath,
         lastPlayedTime: this.currentTime,
         duration: this.$store.state.PlaybackState.Duration,
       };
@@ -268,6 +284,7 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['volume', 'mute', 'rate']),
     calculateHeightByWidth() {
       return this.newWidthOfWindow / (this.videoWidth / this.videoHeight);
     },
@@ -279,6 +296,34 @@ export default {
     },
     originSrcOfVideo() {
       return this.$store.state.PlaybackState.OriginSrcOfVideo;
+    },
+    videoMeta() {
+      return this.$store.state.PlaybackState.videoMeta;
+    },
+    videoWidth() {
+      return this.videoMeta.width;
+    },
+    videoHeight() {
+      return this.videoMeta.height;
+    },
+    videoRatio() {
+      if (!this.videoHeight) return 0;
+      return this.videoWidth / this.videoHeight;
+    },
+    isFullScreen() {
+      return this.$store.state.WindowState.isFullScreen;
+    },
+    windowSize() {
+      return this.$store.state.WindowState.windowSize;
+    },
+    windowMinimumSize() {
+      return this.$store.state.WindowState.windowMinimumSize;
+    },
+    windowPosition() {
+      return this.$store.state.WindowState.windowPosition;
+    },
+    windowBounds() {
+      return this.$store.state.WindowState.windowBounds;
     },
   },
   watch: {
@@ -293,29 +338,30 @@ export default {
           }
         });
     },
+    volume(newVal) {
+      this.videoElement.volume = newVal;
+    },
+    mute(newVal) {
+      this.videoElement.muted = newVal;
+    },
+    rate(newVal) {
+      this.videoElement.playbackRate = newVal;
+    },
+    videoRatio() {
+      this.onVideoSizeChange();
+    },
   },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
+    this.videoConfigInitialize({
+      volume: 100,
+      mute: false,
+      rate: 1,
+    });
 
-    this.$bus.$on('playback-rate', (newRate) => {
-      this.videoElement.playbackRate = newRate;
-      this.$store.commit('PlaybackRate', newRate);
-    });
-    this.$bus.$on('volume', (newVolume) => {
-      this.videoElement.volume = newVolume;
-      this.$store.commit('Volume', newVolume);
-    });
     this.$bus.$on('toggle-fullscreen', () => {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      if (currentWindow.isFullScreen()) {
-        currentWindow.setFullScreen(false);
-        currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
-        this.$bus.$emit('reset-windowsize');
-      } else {
-        currentWindow.setAspectRatio(0);
-        currentWindow.setFullScreen(true);
-      }
-      currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.newWidthOfWindow / this.newHeightOfWindow]);
     });
     this.$bus.$on('toggle-playback', () => {
       if (this.videoElement.paused) {
