@@ -21,7 +21,7 @@
       </div>
     </div>
     <div class="close"
-      @mousedown="handleCloseMousedown">
+      @mouseup.stop="handleCloseMouseup">
       <Icon type="close"/>
     </div>
   </div>
@@ -34,6 +34,7 @@
       :src="convertedSrcOfNextVideo"
       :class="{ blur: isBlur }"
       @loadedmetadata="onMetaLoaded"
+      @seeked="onSeeked"
       @timeupdate="onTimeupdate"></video>
     <Icon class="notificationPlay" :type="notificationPlayIcon"/>
   </div>
@@ -57,25 +58,26 @@ export default {
     };
   },
   methods: {
-    handleCloseMousedown() {
-      this.$emit('close-nextvideo');
+    handleCloseMouseup() {
+      this.$emit('manualclose-next-video');
     },
     onTimeupdate() {
       const currentTime = this.$store.state.PlaybackState.CurrentTime;
-      if (currentTime <= this.finalPartStartTime) {
-        this.$emit('close-nextvideo');
+      if (currentTime < this.finalPartStartTime) {
+        this.$emit('close-next-video');
       } else if (currentTime >= this.finalPartEndTime) {
-        this.$emit('close-nextvideo');
-        // this.openFile(this.nextVideo);
+        this.$emit('close-next-video');
+        this.openFile(this.nextVideo);
       } else {
-        const fractionProgress = (currentTime - this.finalPartStartTime) / this.finalPartEndTime;
+        const fractionProgress = (currentTime - this.finalPartStartTime)
+          / (this.finalPartEndTime - this.finalPartStartTime);
         this.progress = fractionProgress * 100;
       }
       requestAnimationFrame(this.onTimeupdate);
     },
     handleMouseDown() {
       if (this.nextVideo) {
-        this.$emit('close-nextvideo');
+        this.$emit('close-next-video');
         this.openFile(this.nextVideo);
       }
     },
@@ -90,9 +92,13 @@ export default {
       this.isBlur = true;
     },
     onMetaLoaded() {
-      this.$refs.videoThumbnail.volume = 0;
+      this.$refs.videoThumbnail.muted = true;
       this.$refs.videoThumbnail.currentTime = 100;
       this.duration = this.timecodeFromSeconds(this.$refs.videoThumbnail.duration);
+    },
+    onSeeked() {
+      this.$emit('ready-to-show');
+      console.log('readytoshow');
     },
   },
   computed: {
@@ -112,7 +118,7 @@ export default {
       return '';
     },
     finalPartStartTime() {
-      return this.$store.state.PlaybackState.Duration * 0.8;
+      return this.$store.getters.finalPartStartTime;
     },
     finalPartEndTime() {
       return this.$store.state.PlaybackState.Duration;

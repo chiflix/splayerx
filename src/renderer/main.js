@@ -473,7 +473,6 @@ new Vue({
           }
           break;
         default:
-          console.log(e.key);
           break;
       }
     });

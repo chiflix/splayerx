@@ -1,6 +1,16 @@
 <template>
   <div class="container">
-    <NextVideo v-if="showNextVideo" @close-nextvideo="closemousedown" class="next-video"/>
+    <div
+      v-if="showNextVideo">
+    <transition name="nextvideo">
+      <NextVideo class="next-video"
+        v-show="readyToShow"
+        @close-next-video="closeNextVideo"
+        @manualclose-next-video="manualClose"
+        @ready-to-show="readyToShow = true"/>
+    </transition>
+    </div>
+    <div class="messageContainer">
     <transition-group name="toast">
       <div v-for="m in messages" :key="m.id"
         :id="'item' + m.id"
@@ -12,6 +22,7 @@
         <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id)"></Icon>
       </div>
     </transition-group>
+    </div>
   </div>
 </template>
 
@@ -26,22 +37,44 @@ export default {
   },
   data() {
     return {
+      manualClosed: false, // if next-video was manually closed then it won't appear again
       showNextVideo: false,
+      readyToShow: false, // show after video element is loaded
     };
   },
   computed: {
     messages() {
-      return this.$store.getters.messageInfo;
+      const messages = this.$store.getters.messageInfo;
+      if (this.showNextVideo) return messages.slice(0, 2);
+      return messages;
+    },
+    nextVideo() {
+      return this.$store.getters.nextVideo;
+    },
+    currentTime() {
+      return this.$store.getters.currentTime;
     },
   },
-  mounted() {
-  },
   methods: {
-    closemousedown() {
-      console.log('closemousedown');
+    manualClose() {
+      this.manualClosed = true;
+      this.showNextVideo = false;
+    },
+    closeNextVideo() {
+      this.manualClosed = false;
+      this.showNextVideo = false;
     },
     closeMessage(id) {
       this.$store.dispatch('removeMessages', id);
+    },
+  },
+  watch: {
+    currentTime(val) {
+      if (val > this.$store.getters.finalPartStartTime) {
+        if (this.nextVideo !== '' && !this.manualClosed) {
+          this.showNextVideo = true;
+        }
+      }
     },
   },
 };
@@ -52,6 +85,34 @@ export default {
 .container {
   -webkit-app-region: no-drag;
   position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  .next-video {
+    transition: 200ms ease-out;
+    transition-property: opacity, transform;
+    @media screen and (min-width: 320px) and (max-width: 512px) {
+      display: none;
+      margin-bottom: 8px;
+    }
+    @media screen and (min-width: 513px) and (max-width: 854px) {
+      margin-bottom: 12px;
+    }
+    @media screen and (min-width: 855px) and (max-width: 1920px) {
+      margin-bottom: 15px;
+    }
+    @media screen and (min-width: 1921px){
+      margin-bottom: 18px;
+    }
+  }
+  .nextvideo-enter, .nextvideo-enter-active {
+    transform: translateX(0px);
+  }
+  .nextvideo-enter, .nextvideo-leave-active {
+    transform: translateX(403px);
+  }
+
   .toast-enter, .toast-enter-active {
     transform: translateX(0px);
   }
@@ -308,5 +369,15 @@ export default {
 .toast-leave-active {
   position: absolute;
 }
+.nextvideo-enter-active, .nextvideo-leave {
+  opacity: 1;
+}
+.nextvideo-enter, .nextvideo-leave-active {
+  opacity: 0;
+}
+.nextvideo-leave-active {
+  position: absolute;
+}
+
 
 </style>

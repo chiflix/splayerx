@@ -30,6 +30,8 @@ const getters = {
     }
     return '';
   },
+  finalPartStartTime: state => state.Duration * 0.7,
+  currentTime: state => state.CurrentTime,
   Volume: state => state.Volume / 100,
 };
 
