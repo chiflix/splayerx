@@ -72,15 +72,6 @@ const mutations = {
 const actions = {
 };
 
-export const validators = {
-  Volume(value) {
-    return typeof value === 'number'
-      && !Number.isNaN(value)
-      && value >= 0
-      && value <= 100;
-  },
-};
-
 export default {
   state,
   mutations,

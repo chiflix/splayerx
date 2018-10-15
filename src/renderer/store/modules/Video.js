@@ -133,24 +133,6 @@ const actions = {
   },
 };
 
-export const validators = {
-  volume(v) {
-    return typeof v === 'number'
-    && !Number.isNaN(v)
-    && v >= 0
-    && v <= 100;
-  },
-  mute(v) {
-    return typeof v === 'boolean';
-  },
-  rate(v) {
-    return typeof v === 'number'
-    && !Number.isNaN(v)
-    && v >= 0
-    && v <= 100;
-  },
-};
-
 export default {
   state,
   getters,
