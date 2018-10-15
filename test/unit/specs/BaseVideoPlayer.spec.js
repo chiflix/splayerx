@@ -1,10 +1,10 @@
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
-describe('Component - BaseVideoPlayer', () => {
+describe.only('Component - BaseVideoPlayer', () => {
   const propsData = {
     src: 'file:///',
-    defaultEvents: ['loadedmetadata'],
+    events: ['loadedmetadata'],
   };
 
   it('sanity - should render video element', () => {
@@ -33,13 +33,13 @@ describe('Component - BaseVideoPlayer', () => {
 
       playbackrates.forEach((testCase) => {
         wrapper.setProps({ playbackRate: testCase });
-        const currentPlaybackRate = wrapper.find('video').attributes().playbackrate;
+        const currentPlaybackRate = wrapper.find('video').attributes().playbackRate;
 
         expect(currentPlaybackRate).to.equal(testCase.toString());
       });
     });
 
-    it('should video src be set dynamically', () => {
+    it('should video src not be set dynamically', () => {
       const srcs = [
         'file:///Users/treve/Documents/Projects/splayerx/test/assets/mediaQuickHash_test.avi',
         'file://Z:/Documents/testVideoFiles/mediaQuickHash_test.avi',
@@ -51,7 +51,7 @@ describe('Component - BaseVideoPlayer', () => {
 
         const srcResult = wrapper.find('video').attributes().src;
 
-        expect(srcResult).to.equal(testCase);
+        expect(srcResult).to.equal(propsData.src);
       });
     });
     it('should invalid video src be ignored', () => {
@@ -94,10 +94,10 @@ describe('Component - BaseVideoPlayer', () => {
       });
     });
 
-    it('should defaultEvents be initialized', () => {
-      expect(wrapper.vm.onEdEvents).to.deep.equal(propsData.defaultEvents);
+    it('should events be initialized', () => {
+      expect(wrapper.vm.onEdEvents).to.deep.equal(propsData.events);
     });
-    it('should defaultEvents cannot change after initialized', () => {
+    it('should events cannot change after initialized', () => {
       const events = [
         ['loadedmetadata', 'canplay'],
         ['dataloaded', 'canplaythrough'],
@@ -126,22 +126,22 @@ describe('Component - BaseVideoPlayer', () => {
       ];
 
       events.forEach((testCase) => {
-        wrapper.setProps({ defaultEvents: testCase });
+        wrapper.setProps({ events: testCase });
 
-        expect(wrapper.vm.onEdEvents).to.deep.equal(propsData.defaultEvents);
+        expect(wrapper.vm.onEdEvents).to.deep.equal(propsData.events);
       });
     });
-    it('should empty defaultEvents clear events', () => {
+    it('should empty events clear events', () => {
       const privateWrapper = mount(BaseVideoPlayer, {
         propsData: {
           src: 'file:///',
-          defaultEvents: [],
+          events: [],
         },
       });
 
       expect(privateWrapper.vm.onEdEvents).to.deep.equal([]);
     });
-    it('should invalid defaultEvents items be ignored', () => {
+    it('should invalid events items be ignored', () => {
       const events = [
         [''],
         ['dataloaded', 'canplaythrough'],
@@ -157,52 +157,13 @@ describe('Component - BaseVideoPlayer', () => {
         const newPropsData = Object.assign(
           {},
           propsData,
-          { defaultEvents: testCase },
+          { events: testCase },
         );
 
         const privateWrapper = mount(BaseVideoPlayer, { propsData: newPropsData });
 
         expect(privateWrapper.vm.onEdEvents).to.deep.equal(expectedResults[index]);
         privateWrapper.destroy();
-      });
-    });
-
-    it('should default options be set on video element', () => {
-      const videoElementAttributes = wrapper.find('video').attributes();
-
-      Object.keys(wrapper.props().defaultOptions).forEach((testCase) => {
-        expect(videoElementAttributes[testCase.toLowerCase()])
-          .to.equal(wrapper.props().defaultOptions[testCase].toString());
-      });
-    });
-    it('should invalid attributes be ignored', () => {
-      const testOptions = {
-        autoplay: true,
-        mutedOrNot: false,
-        loop: false,
-        preloaded: true,
-        defaultMuted: false,
-      };
-      const expectedResults = {
-        autoplay: true,
-        loop: false,
-        defaultMuted: false,
-      };
-      const invalidOptions = ['mutedOrNot', 'preloaded'];
-
-      const privateWrapper = mount(BaseVideoPlayer, {
-        src: 'file:///',
-        defaultEvents: propsData.defaultEvents,
-        defaultOptions: testOptions,
-      });
-      const videoElementAttributes = privateWrapper.find('video').attributes();
-
-      Object.keys(expectedResults).forEach((testCase) => {
-        expect(videoElementAttributes[testCase.toLowerCase()])
-          .to.deep.equal(expectedResults[testCase].toString());
-      });
-      invalidOptions.forEach((testCase) => {
-        expect(videoElementAttributes[testCase.toLowerCase()]).to.equal(undefined);
       });
     });
   });
@@ -212,7 +173,7 @@ describe('Component - BaseVideoPlayer', () => {
     let wrapper;
     const propsData = {
       src: 'file:///',
-      defaultEvents: ['loadedmetadata'],
+      events: ['loadedmetadata'],
     };
 
     beforeEach(() => {
