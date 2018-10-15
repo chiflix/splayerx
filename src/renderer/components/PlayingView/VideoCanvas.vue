@@ -132,6 +132,7 @@ export default {
       const [minWidth, minHeight] = this.windowMinimumSize;
       const screenRatio = screenWidth / screenHeight;
       const minWindowRatio = minWidth / minHeight;
+
       if (this.videoWidth > screenWidth || this.videoHeight > screenHeight) {
         if (this.videoRatio > screenRatio) {
           this.newWidthOfWindow = screenWidth;
@@ -139,7 +140,7 @@ export default {
         } else if (this.videoRatio < screenRatio) {
           this.newHeightOfWindow = screenHeight;
           this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (this.videoRatio === screenRatio) {
+        } else {
           [this.newWidthOfWindow, this.newHeightOfWindow] = [screenWidth, screenHeight];
         }
       } else if (this.videoWidth < minWidth || this.videoHeight < minHeight) {
@@ -149,7 +150,7 @@ export default {
         } else if (this.videoRatio < minWindowRatio) {
           this.newWidthOfWindow = minWidth;
           this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (this.videoRatio === minWindowRatio) {
+        } else {
           [this.newWidthOfWindow, this.newHeightOfWindow]
             = [minWidth, minHeight];
         }
@@ -162,18 +163,14 @@ export default {
       const [minWidth, minHeight] = this.windowMinimumSize;
       const windowRatio = windowWidth / windowHeight;
       const minWindowRatio = minWidth / minHeight;
-      if (this.videoWidth < windowWidth && this.videoHeight < windowHeight) {
-        [this.newWidthOfWindow, this.newHeightOfWindow] = [this.videoWidth, this.videoHeight];
-      } else if (this.videoWidth > windowWidth || this.videoHeight > windowHeight) {
+      [this.newWidthOfWindow, this.newHeightOfWindow] = [this.videoWidth, this.videoHeight];
+      if (this.videoWidth > windowWidth || this.videoHeight > windowHeight) {
         if (this.videoRatio > windowRatio) {
           this.newWidthOfWindow = windowWidth;
           this.newHeightOfWindow = this.calculateHeightByWidth;
         } else if (this.videoRatio < windowRatio) {
           this.newHeightOfWindow = windowHeight;
           this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (this.videoRatio === windowRatio) {
-          [this.newWidthOfWindow, this.newHeightOfWindow]
-            = [windowWidth, windowHeight];
         }
       }
       if (this.newWidthOfWindow < minWidth || this.newHeightOfWindow < minHeight) {
@@ -183,7 +180,7 @@ export default {
         } else if (this.videoRatio < minWindowRatio) {
           this.newWidthOfWindow = minWidth;
           this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (this.videoRatio === minWindowRatio) {
+        } else {
           [this.newWidthOfWindow, this.newHeightOfWindow]
             = [this.videoWidth, this.videoHeight];
         }
