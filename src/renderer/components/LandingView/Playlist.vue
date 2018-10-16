@@ -361,7 +361,7 @@ export default {
     },
     onRecentItemClick(item, index) {
       if (((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
-        this.isFullScreen) && this.mouseFlag) {
+        this.isFullScreen) && this.mouseFlag && !this.isDragging) {
         this.openFile(item.path);
       }
     },

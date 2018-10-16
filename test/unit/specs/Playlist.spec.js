@@ -90,6 +90,12 @@ describe('Playlist.vue', () => {
     wrapper.find('.item').trigger('mouseover');
     expect(spy.calledThrice).equal(true);
     spy.restore();
+    wrapper.setData({ validHover: false, moveItem: 0, isDragging: false });
+    wrapper.setProps({ isFullScreen: false, showItemNum: 5 });
+    wrapper.vm.onRecentItemMouseover(wrapper.vm.lastPlayedFile, 4);
+    expect(wrapper.vm.moveItem).equal(3);
+    wrapper.vm.onRecentItemMouseover(wrapper.vm.lastPlayedFile, -5);
+    expect(wrapper.vm.moveItem).equal(0);
   });
   it('onRecentItemMouseout method works fine', () => {
     const wrapper = mount(Playlist);
@@ -99,24 +105,21 @@ describe('Playlist.vue', () => {
     expect(spy.calledOnce).equal(true);
     spy.restore();
   });
-  it('onRecentItemClick method works fine', () => {
+  it('onkeypress works fine', () => {
     const wrapper = mount(Playlist, {
       attachToDocument: true,
     });
-    wrapper.setData({
-      isDragging: false, moveItem: 0,
-    });
-    wrapper.setProps({
-      isFullScreen: false, showItemNum: 5,
-    });
-    const item = [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }];
-    wrapper.setProps({ lastPlayedFile: item });
-    wrapper.vm.onRecentItemClick(item, 4);
-    expect(wrapper.vm.moveItem).equal(3);
-    wrapper.setData({ moveItem: -4 });
-    wrapper.vm.onRecentItemClick(item, 2);
-    expect(wrapper.vm.moveItem).equal(0);
-    wrapper.setProps({ isFullScreen: true });
+    wrapper.setProps({ showItemNum: 1, isFullScreen: false });
+    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }] });
+    wrapper.setData({ moveItem: 0 });
+    const e = new window.Event('keyup');
+    e.keyCode = 39;
+    window.onkeyup(e);
+    expect(wrapper.vm.moveItem).equal(-1);
+    wrapper.setData({ moveItem: -2 });
+    e.keyCode = 37;
+    window.onkeyup(e);
+    expect(wrapper.vm.tranFlag).equal(true);
   });
   it('onRecentItemMousedown method works fine', () => {
     const wrapper = mount(Playlist, {
