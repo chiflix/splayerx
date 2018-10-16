@@ -362,6 +362,8 @@ export default {
           lf.style.left = '';
         } else {
           this.openFile(item.path);
+          const similarVideos = this.findSimilarVideoByVidPath(item.path);
+          this.$store.commit('PlayingList', similarVideos);
         }
         this.$bus.$emit('moveItem', this.moveItem);
         this.$bus.$emit('move', this.move);
