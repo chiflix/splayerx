@@ -225,30 +225,30 @@ export default {
 }
 .notificationPlay {
   @media screen and (min-width: 513px) and (max-width: 854px) {
-    width: 35px;
-    height: 32px;
+    width: 30.625px;
+    height: 24.5px;
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
-    width: 42px;
-    height: 38px;
+    width: 36.75px;
+    height: 33.25px;
   }
   @media screen and (min-width: 1921px) {
-    width: 59px;
-    height: 53px;
+    width: 51.625px;
+    height: 46.375px;
   }
 }
 .notificationPlayHover {
   @media screen and (min-width: 513px) and (max-width: 854px) {
-    width: 35px;
-    height: 32px;
+    width: 30.625px;
+    height: 24.5px;
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
-    width: 42px;
-    height: 38px;
+    width: 36.75px;
+    height: 33.25px;
   }
   @media screen and (min-width: 1921px) {
-    width: 59px;
-    height: 53px;
+    width: 51.625px;
+    height: 46.375px;
   }
 }
 </style>

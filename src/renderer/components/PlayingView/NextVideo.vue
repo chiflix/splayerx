@@ -197,21 +197,21 @@ export default {
       background-color: black;
     }
     .blur {
-      filter: blur(2px);
+      filter: blur(1px);
     }
     .notificationPlay {
       position: absolute;
       @media screen and (min-width: 513px) and (max-width: 854px) {
-        top: 19px;
-        left: 45px;
+        top: 20.1875px;
+        left: 47.8125px;
       }
       @media screen and (min-width: 855px) and (max-width: 1920px) {
-        top: 23px;
-        left: 54px;
+        top: 24.4375px;
+        left: 57.375px;
       }
       @media screen and (min-width: 1921px) {
-        top: 33px;
-        left: 76px;
+        top: 35.0625px;
+        left: 80.75px;
       }
     }
   }
