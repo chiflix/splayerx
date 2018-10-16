@@ -58,7 +58,7 @@ new Vue({
                   }],
                 }, (files) => {
                   if (files !== undefined) {
-                    if (!files[0].includes('\\')) {
+                    if (!files[0].includes('\\') || process.platform === 'win32') {
                       this.openFile(files[0]);
                     } else {
                       this.$store.dispatch('addMessages', {
@@ -509,7 +509,7 @@ new Vue({
         }
       }
       if (videoFiles.length !== 0) {
-        if (!videoFiles[0].includes('\\')) {
+        if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
           this.openFile(videoFiles[0]);
         } else {
           this.$store.dispatch('addMessages', {

@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div :class="container">
     <transition name="nextvideo">
       <NextVideo class="next-video"
         v-if="showNextVideo"
@@ -51,6 +51,11 @@ export default {
     currentTime() {
       return this.$store.getters.currentTime;
     },
+    container() {
+      return process.platform === 'win32' ? 'winContainer' : 'container';
+    },
+  },
+  mounted() {
   },
   methods: {
     manualClose() {
@@ -78,7 +83,32 @@ export default {
 </script>
 
 <style lang="scss">
-
+.winContainer {
+  -webkit-app-region: no-drag;
+  position: absolute;
+  .toast-enter, .toast-enter-active {
+    transform: translateX(0px);
+  }
+  .toast-enter, .toast-leave-active {
+    transform: translateX(403px);
+  }
+  @media screen and (min-width: 320px) and (max-width: 512px) {
+    top: 28px;
+    right: 19px;
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    top: 34px;
+    right: 28px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    top: 34px;
+    right: 34px;
+  }
+  @media screen and (min-width: 1921px){
+    top: 45px;
+    right: 52px;
+  }
+}
 .container {
   -webkit-app-region: no-drag;
   position: absolute;
