@@ -269,10 +269,20 @@ export default {
         this.displayInfo.duration = this.itemInfo().duration;
         this.displayInfo.percentage = this.itemInfo().percentage;
         this.$bus.$emit('displayInfo', this.displayInfo);
+      } else {
+        console.log(55);
+        const itemMask = document.querySelector(`#item${index} .mask`);
+        itemMask.style.display = 'flex';
+        setTimeout(() => {
+          itemMask.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        }, 5);
       }
     },
     onRecentItemMouseout(index) {
       if (this.mouseFlag) {
+        const itemMask = document.querySelector(`#item${index} .mask`);
+        itemMask.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+        itemMask.style.display = 'none';
         this.$set(this.lastPlayedFile[index], 'chosen', false);
       }
     },
@@ -423,7 +433,7 @@ export default {
       border-radius: 2px;
       display: none;
       box-shadow: 0 26px 39px rgba(0, 0, 0, 0.3), 0 5px 20px rgba(0, 0, 0, 0.14);
-      transition: background-color 150ms;
+      transition: background-color 150ms, box-shadow 1s ease-in-out;
     }
 
     .deleteUi {
