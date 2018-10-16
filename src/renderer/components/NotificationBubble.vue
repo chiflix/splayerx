@@ -76,6 +76,8 @@ export default {
         if (this.nextVideo !== '' && !this.manualClosed) {
           this.showNextVideo = true;
         }
+      } else {
+        this.manualClosed = false;
       }
     },
   },
