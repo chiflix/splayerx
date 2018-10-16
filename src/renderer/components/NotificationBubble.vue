@@ -1,15 +1,12 @@
 <template>
   <div class="container">
-    <div
-      v-if="showNextVideo">
     <transition name="nextvideo">
       <NextVideo class="next-video"
-        v-show="readyToShow"
+        v-if="showNextVideo"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"/>
     </transition>
-    </div>
     <div class="messageContainer">
     <transition-group name="toast">
       <div v-for="m in messages" :key="m.id"

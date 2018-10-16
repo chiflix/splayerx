@@ -119,7 +119,11 @@ export default {
       this.infoDB().get('recent-played', this.mediaQuickHash(originPath))
         .then((value) => {
           if (value) {
-            this.$bus.$emit('seek', value.lastPlayedTime);
+            if (value.duration - value.lastPlayedTime > 10) {
+              this.$bus.$emit('seek', value.lastPlayedTime);
+            } else {
+              this.$bus.$emit('seek', 0);
+            }
             this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date.now() }));
           } else {
             this.infoDB().add('recent-played', {

@@ -68,6 +68,7 @@ export default {
       } else if (currentTime >= this.finalPartEndTime) {
         this.$emit('close-next-video');
         this.openFile(this.nextVideo);
+        this.$bus.$emit('seek', 0); // avoid skipping the next video
       } else {
         const fractionProgress = (currentTime - this.finalPartStartTime)
           / (this.finalPartEndTime - this.finalPartStartTime);
@@ -98,7 +99,6 @@ export default {
     },
     onSeeked() {
       this.$emit('ready-to-show');
-      console.log('readytoshow');
     },
   },
   computed: {
@@ -194,6 +194,7 @@ export default {
     }
     video {
       height: 100%;
+      background-color: black;
     }
     .blur {
       filter: blur(2px);
