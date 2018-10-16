@@ -68,13 +68,15 @@
 
           </ul>
         </div>
-        <div @mousedown.left="toggleSubMenuDisplay">
-          <Icon type="subtitle" wmode="transparent" alt="Button"></Icon>
+        <div @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseover="handleOver" @mouseleave="handleLeave">
+          <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
         </div>
       </div>
   </div>
 </template>
 <script>
+import lottie from '@/components/lottie.vue';
+import * as animationData from '@/assets/data.json';
 import Icon from '../BaseIconContainer';
 export default {
   name: 'subtitle-control',
@@ -93,12 +95,50 @@ export default {
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
       currentSubIden: 0,
       clicks: 0,
+      defaultOptions: { animationData },
+      animationSpeed: 1,
+      anim: {},
+      animFlag: true,
     };
+  },
+  watch: {
+    showAttached(val) {
+      if (!val) {
+        this.anim.playSegments([79, 98], false);
+        this.animFlag = true;
+      } else {
+        this.anim.playSegments([46, 58], false);
+      }
+    },
   },
   components: {
     Icon,
+    lottie,
   },
   methods: {
+    handleAnimation(anim) {
+      this.anim = anim;
+      console.log(anim);
+    },
+    handleDown() {
+      if (!this.showAttached) {
+        this.anim.playSegments([28, 31], false);
+      } else {
+        this.anim.playSegments([61, 64], false);
+      }
+    },
+    handleOver() {
+      if (this.animFlag) {
+        this.anim.playSegments([4, 7], false);
+      }
+      this.animFlag = false;
+    },
+    handleLeave() {
+      if (!this.showAttached) {
+        this.anim.playSegments([0, 3], false);
+        this.animFlag = true;
+      }
+    },
     toggleSubMenuDisplay() {
       this.clicks = this.showAttached ? 1 : 0;
       this.clicks += 1;
