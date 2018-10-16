@@ -194,7 +194,7 @@ export default {
       }, (item) => {
         self.showingPopupDialog = false;
         if (item) {
-          if (!item[0].includes('\\')) {
+          if (!item[0].includes('\\') || process.platform === 'win32') {
             self.openFile(item[0]);
           } else {
             this.$store.dispatch('addMessages', {
