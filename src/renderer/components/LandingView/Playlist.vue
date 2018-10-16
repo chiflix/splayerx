@@ -239,8 +239,10 @@ export default {
     },
     onRecentItemMouseover(item, index) {
       this.tranFlag = true;
-      if (((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
-        this.isFullScreen) && this.mouseFlag && this.validHover) {
+      if (this.andify(this.orify(this.andify(
+        index !== this.showItemNum - this.moveItem - 1,
+        index + this.moveItem !== -2,
+      ), this.isFullScreen), this.mouseFlag, this.validHover)) {
         this.item = item;
         this.$set(this.lastPlayedFile[index], 'chosen', true);
         if (item.shortCut !== '') {
@@ -273,13 +275,13 @@ export default {
         lf.style.transition = 'left 400ms cubic-bezier(0.42, 0, 0.58, 1)';
         if (!this.isDragging) {
           this.validHover = false;
-          if (index === this.showItemNum - this.moveItem - 1 && !this.isFullScreen) {
+          if (this.andify(index === this.showItemNum - this.moveItem - 1, !this.isFullScreen)) {
             const ss = -((this.lastPlayedFile.length + 1) - (this.showItemNum - this.moveItem)) *
               (this.itemWidth + 15);
             this.move += ss;
             this.moveItem = this.showItemNum - this.lastPlayedFile.length - 1;
             lf.style.left = `${this.move}px`;
-          } else if (index + this.moveItem === -2 && !this.isFullScreen) {
+          } else if (this.andify(index + this.moveItem === -2, !this.isFullScreen)) {
             this.moveItem = 0;
             this.move = 0;
             lf.style.left = '';
@@ -362,6 +364,12 @@ export default {
         this.isFullScreen) && this.mouseFlag) {
         this.openFile(item.path);
       }
+    },
+    orify(...args) {
+      return args.some(arg => arg == true); // eslint-disable-line
+    },
+    andify(...args) {
+      return args.every(arg => arg == true); // eslint-disable-line
     },
   },
 };
