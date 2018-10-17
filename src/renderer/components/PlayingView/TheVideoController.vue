@@ -13,7 +13,7 @@
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <notification-bubble/>
     <div class="masking" v-hidden="showAllWidgets"></div>
-    <play-button />
+    <play-button :paused="paused" />
     <base-invisible-background v-show="!mute" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
@@ -94,7 +94,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['mute']),
+    ...mapGetters(['mute', 'paused']),
     showAllWidgets() {
       return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget);

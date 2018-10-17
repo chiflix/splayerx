@@ -9,10 +9,12 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import Icon from '../BaseIconContainer';
 export default {
   name: 'play-button',
+  props: {
+    paused: false,
+  },
   data() {
     return {
       iconAppear: false, // control whether the icon show up or not
@@ -21,9 +23,6 @@ export default {
   },
   components: {
     Icon,
-  },
-  computed: {
-    ...mapGetters(['paused']),
   },
   watch: {
     paused(newVal) {
