@@ -194,5 +194,31 @@ describe('Component - BaseVideoPlayer', () => {
 
       expect(wrapper.vm.currentTimeAnimationFrameId).to.not.equal(0);
     });
+
+    it('should emitEvents emit events', () => {
+      const testEvents = ['loadedmetadata', 'canplay', 'someotherevent'];
+
+      testEvents.forEach((event) => {
+        wrapper.vm.emitEvents(event);
+      });
+
+      expect(Object.keys(wrapper.emitted())).to.deep.equal(testEvents);
+    });
+
+    it('should emitEvents emit events with payloads', () => {
+      const testEvents = {
+        loadedmetadata: true,
+        canplaytype: ['mkv', 'mp3'],
+        someotherevent: () => 1 + 1,
+      };
+
+      Object.keys(testEvents).forEach((event) => {
+        wrapper.vm.emitEvents(event, testEvents[event]);
+      });
+
+      Object.keys(wrapper.emitted()).forEach((event) => {
+        expect(wrapper.emitted()[event][0][0]).to.equal(testEvents[event]);
+      });
+    });
   });
 });

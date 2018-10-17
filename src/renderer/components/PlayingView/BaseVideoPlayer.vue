@@ -181,10 +181,17 @@ export default {
       this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
     },
     // helper functions
+    emitEvents(event, value) {
+      if (event && !value) {
+        this.$emit(event);
+      } else if (value) {
+        this.$emit(event, value);
+      }
+    },
     addEvents(events) {
       events.forEach((event) => {
         if (!this.eventListeners.has(event)) {
-          const listener = _.partial(this.$emit, event);
+          const listener = _.partial(this.emitEvents, event);
           this.$refs.video.addEventListener(event, listener);
           this.eventListeners.set(event, listener);
         }
