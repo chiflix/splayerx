@@ -42,6 +42,7 @@ function getSync(key) {
   try {
     data = fs.readFileSync(filename);
   } catch (err) {
+    addLog.methods.addLog('error', err);
     if (err instanceof Error) {
       if (err.code === 'ENOENT') {
         data = JSON.stringify({});
@@ -65,6 +66,7 @@ function setSync(key, json) {
   try {
     fs.mkdirSync(path.dirname(filename));
   } catch (err) {
+    addLog.methods.addLog('error', err);
     if (err.code === 'EEXIST') {
       addLog.methods.addLog('error', 'directory already exist');
     }

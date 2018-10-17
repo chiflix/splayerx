@@ -119,7 +119,10 @@ export default {
             size: serverSubsStatus.size,
           });
           this.loadServerTextTracks((err) => {
-            if (err) throw err;
+            if (err) {
+              this.addLog('error', err);
+              throw err;
+            }
             this.toggleSutitleShow();
             this.$bus.$emit('subtitles-finished-loading', 'Server');
           });
@@ -236,13 +239,15 @@ export default {
                 cb();
               })
               .catch((err) => {
-                this.addLog('error', `-----Error: load all transcripts error  ${err}`);
+                this.addLog('error', '-----Error: load all transcripts error');
+                this.addLog('error', err);
                 cb(err);
               });
           }
         })
         .catch((err) => {
-          this.addLog('error', `-----Error: load textTrackList error  ${err}`);
+          this.addLog('error', '-----Error: load textTrackList error');
+          this.addLog('error', err);
           cb(err);
         });
     },
@@ -352,6 +357,7 @@ export default {
         });
 
         self.$on('stop-reading-mkv-subs', (error) => {
+          this.addLog('error', error);
           parser.emit('finish', error);
         });
 
@@ -387,6 +393,7 @@ export default {
 
         parser.on('finish', (err) => {
           if (err) {
+            this.addLog('error', err);
             reject(err);
           } else {
             const parsedMkvTimesObj = {
@@ -411,6 +418,7 @@ export default {
       const tasks = files.map((subPath) => (cb) => this.createSubtitleStream(subPath, cb));
       parallel(tasks, (err, results) => {
         if (err) {
+          this.addLog('error', err);
           throw err;
         }
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
@@ -565,6 +573,7 @@ export default {
         cb = null;
       });
       stream.once('error', (err) => {
+        this.addLog('error', err);
         if (cb) {
           cb(err);
         }
@@ -607,6 +616,7 @@ export default {
 
       this.concatStream(vttStream, (err, buf) => {
         if (err) {
+          this.addLog('error', err);
           throw err;
         }
         cb(null, buf);
@@ -794,7 +804,10 @@ export default {
 
     this.$bus.$on('load-server-transcripts', () => {
       this.loadServerTextTracks((err) => {
-        if (err) throw err;
+        if (err) {
+          this.addLog('error', err);
+          throw err;
+        }
         // handles when users want to load server subs after initializing stage;
         this.$bus.$emit('finished-loading-server-subs');
         this.clearSubtitle();

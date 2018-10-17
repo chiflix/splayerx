@@ -32,6 +32,7 @@ class Sagi {
       req.setMediaIdentity(mediaIdentity);
       client.translateMedia(req, (err, response) => {
         if (err) {
+          addLog.methods.addLog('error', err);
           reject(err);
         } else {
           // TODO: fetch real transcripts
@@ -48,6 +49,7 @@ class Sagi {
       req.setTranscriptIdentity(transcriptIdentity);
       client.transcript(req, (err, res) => {
         if (err) {
+          addLog.methods.addLog('error', err);
           reject(err);
         } else {
           console.log(res);

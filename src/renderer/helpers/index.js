@@ -126,13 +126,18 @@ export default {
         try {
           fs.mkdirSync(defaultPath);
         } catch (err) {
-          console.log(err);
+          this.addLog('error', err);
         }
       }
       const date = new Date();
       const time = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
       const logger = winston.createLogger({
-        format: winston.format.combine(winston.format.printf(info => `{"time":"${info.time}","level":"${info.level}","message":"${info.message}", "stack":"${info.stack}"}`)),
+        format: winston.format.combine(winston.format.printf((info) => {
+          if (info.stack) {
+            return `{"time":"${info.time}","level":"${info.level}","message":"${info.message}", "stack":"${info.stack}"}`;
+          }
+          return `{"time":"${info.time}","level":"${info.level}","message":"${info.message}"}`;
+        })),
         transports: [
           new winston.transports.File({ filename: `${defaultPath}/${time}.log` }),
         ],
@@ -141,7 +146,7 @@ export default {
         logger.log({
           time: new Date().toISOString(),
           level,
-          message,
+          message: message.message,
           stack: message.stack,
         });
       } else {

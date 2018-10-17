@@ -260,7 +260,7 @@ new Vue({
         const menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(menu);
       }).catch((err) => {
-        console.log(err);
+        this.addLog('error', err);
       });
     },
     getSystemLocale() {
@@ -425,6 +425,7 @@ new Vue({
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
       if (err) {
+        this.addLog('error', err);
         userUUID = uuidv4();
         this.$storage.set('user-uuid', userUUID);
       }
