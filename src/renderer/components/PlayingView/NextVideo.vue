@@ -165,15 +165,15 @@ export default {
   }
   .thumbnail {
     position: absolute;
-    box-sizing: content-box;
+    box-sizing: border-box;
     top: 0;
-    transform: translate(-1px, -1px);
+    transform: translate(0px, 0px);
     overflow: hidden;
     display: flex;
     justify-content: center;
     align-item: center;
 
-    border: 1px solid rgba(0,0,0,0.10);
+    border: 1px solid rgba(255,255,255,0.05);
 
     @media screen and (min-width: 513px) and (max-width: 854px) {
       border-radius: 2px;
@@ -218,9 +218,9 @@ export default {
     
     background-color: rgba(0,0,0,0.20);
     backdrop-filter: blur(9.6px);
-    clip-path: inset(0px round 10px);
+    clip-path: inset(0px round 3.36px);
 
-    border-radius: 11px;
+    border-radius: 3.36px 11px 11px 3.36px;
     @media screen and (min-width: 513px) and (max-width: 854px) {
       height: 70px;
       width: 340px;
@@ -239,10 +239,10 @@ export default {
     border-width: 1px;
     border-color: rgba(255,255,255,0.1);
 
-    clip-path: inset(0px round 10px);
+    clip-path: inset(0px round 3.36px);
 
     background-color: rgba(255,255,255,0.20);
-    border-radius: 11px;
+    border-radius: 3.36px 11px 11px 3.36px;
 
     @media screen and (min-width: 513px) and (max-width: 854px) {
       height: 70px;
@@ -261,15 +261,15 @@ export default {
       border-radius: 11px;
       height: 100%;
       @media screen and (min-width: 513px) and (max-width: 854px) {
-        left: 123px;
+        left: 121px;
         width: 217px;
       }
       @media screen and (min-width: 855px) and (max-width: 1920px) {
-        left: 148px;
+        left: 145px;
         width: 260px;
       }
       @media screen and (min-width: 1921px) {
-        left: 207px;
+        left: 205px;
         width: 364px;
       }
       .progress-color {
