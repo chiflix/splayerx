@@ -1,6 +1,6 @@
 <template>
   <div class="indicator-container" :style="{ height: backgroundHeight + 24 + 'px', top: containerTop + 'px' }">
-    <base-info-card class="card" :containerWidth="winWidth >= 1920 ? 12 : 6" :containerHeight="backgroundHeight">
+    <base-info-card class="card" :containerWidth="winWidth >= 1921 ? 12 : 6" :containerHeight="backgroundHeight">
       <div class="indicator" :style="{ height: volume * 100 + '%', opacity: mute ? 0.25 : 0.8 }"></div>
     </base-info-card>
     <base-icon v-show="mute || volume <= 0" class="mute" type="volume" :style="{ top: muteTop + 'px' }" effect="mute" />
@@ -20,14 +20,14 @@ export default {
   computed: {
     ...mapGetters(['volume', 'mute', 'winWidth', 'winHeight']),
     backgroundHeight() {
-      return this.winWidth >= 1920 ? Math.round(this.winHeight * 0.37)
+      return this.winWidth >= 1921 ? Math.round(this.winHeight * 0.37)
         : Math.round(100 + ((this.winWidth - 320) / 5.33));
     },
     containerTop() {
       return Math.round(this.winHeight - this.backgroundHeight) / 2;
     },
     muteTop() {
-      return this.backgroundHeight + (this.winWidth >= 1920 ? 4 : 2);
+      return this.backgroundHeight + (this.winWidth >= 1921 ? 4 : 2);
     },
   },
 };
@@ -49,6 +49,7 @@ export default {
     background: white;
     border-radius: 0 1px 1px 0;
     position: absolute;
+    bottom: 0px;
   }
   .mute {
     position: absolute;
@@ -66,7 +67,7 @@ export default {
     right: 57px;
     width: 24px;
     .card {
-      left: 0;
+      left: 6px;
     }
     .indicator {
       width: 10px;
