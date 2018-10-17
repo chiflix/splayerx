@@ -259,16 +259,21 @@ export default {
     .progress{
       position: absolute;
       border-radius: 11px;
-      height: 100%;
       @media screen and (min-width: 513px) and (max-width: 854px) {
+        top: 1.5px;
+        height: 68px;
         left: 121px;
         width: 217px;
       }
       @media screen and (min-width: 855px) and (max-width: 1920px) {
-        left: 145px;
+        top: 1.5px;
+        height: 82px;
+        left: 144px;
         width: 260px;
       }
       @media screen and (min-width: 1921px) {
+        top: 1.5px;
+        height: 116px;
         left: 205px;
         width: 364px;
       }
