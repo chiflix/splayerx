@@ -89,15 +89,13 @@ export default {
     events: {
       type: Array,
       required: true,
-      default: () => ([
-        'loadedmetadata',
-      ]),
+      default: () => ['loadedmetadata'],
       validator: value => (
         value.length === 0 ||
         value.every(element => DEFAULT_VIDEO_EVENTS.includes(element))),
     },
     // video style
-    styleObject: {
+    styles: {
       type: Object,
       default: () => ({}),
     },
@@ -135,11 +133,7 @@ export default {
     },
     // custom
     paused(newVal) {
-      if (!newVal) {
-        this.$refs.video.play();
-      } else {
-        this.$refs.video.pause();
-      }
+      this.$refs.video[newVal ? 'pause' : 'play']();
     },
     updateCurrentTime(newVal) {
       if (newVal) {
@@ -154,7 +148,7 @@ export default {
       this.removeEvents(oldVal.filter(event => !newVal.includes(event)));
     },
     // styles
-    styleObject(newVal) {
+    styles(newVal) {
       this.setStyle(newVal);
     },
   },
@@ -164,7 +158,7 @@ export default {
       this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
     }
     this.addEvents(this.events);
-    this.setStyle(this.styleObject);
+    this.setStyle(this.styles);
   },
   methods: {
     basicInfoInitialization(videoElement) {
@@ -176,13 +170,6 @@ export default {
       basicInfo.forEach((settingItem) => {
         videoElement[settingItem] = this[settingItem];
       });
-    },
-    emitPlayerState(event, value) {
-      if (event && !value) {
-        this.$emit(event);
-      } else if (value) {
-        this.$emit(event, value);
-      }
     },
     // Video default methods
     videoElement() {
@@ -197,7 +184,7 @@ export default {
     addEvents(events) {
       events.forEach((event) => {
         if (!this.eventListeners.has(event)) {
-          const listener = _.partial(this.emitPlayerState, event);
+          const listener = _.partial(this.$emit, event);
           this.$refs.video.addEventListener(event, listener);
           this.eventListeners.set(event, listener);
         }
@@ -208,6 +195,7 @@ export default {
         if (this.eventListeners.has(event)) {
           const listener = this.eventListeners.get(event);
           this.$refs.video.removeEventListener(event, listener);
+          this.eventListeners.delete(event);
         }
       });
     },

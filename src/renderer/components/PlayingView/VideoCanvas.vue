@@ -5,7 +5,7 @@
     <base-video-player
       ref="videoCanvas"
       :events="['loadedmetadata']"
-      :styleObject="{objectFit: 'contain', width: '100%', height: '100%'}"
+      :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
       :src="src"
       :playbackRate="rate"
