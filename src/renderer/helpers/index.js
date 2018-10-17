@@ -132,19 +132,29 @@ export default {
       const date = new Date();
       const time = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
       const logger = winston.createLogger({
+        format: winston.format.combine(winston.format.printf(info => `{"time":"${info.time}","level":"${info.level}","message":"${info.message}", "stack":"${info.stack}"}`)),
         transports: [
           new winston.transports.File({ filename: `${defaultPath}/${time}.log` }),
         ],
       });
-      logger.log({
-        time: new Date().toISOString(),
-        level,
-        message,
-      });
-      if (message.includes('Failed to open file')) {
-        this.$store.dispatch('addMessages', {
-          type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+      if (message.stack) {
+        logger.log({
+          time: new Date().toISOString(),
+          level,
+          message,
+          stack: message.stack,
         });
+      } else {
+        logger.log({
+          time: new Date().toISOString(),
+          level,
+          message,
+        });
+        if (message.includes('Failed to open file')) {
+          this.$store.dispatch('addMessages', {
+            type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+          });
+        }
       }
     },
   },
