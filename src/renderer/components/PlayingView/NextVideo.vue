@@ -173,7 +173,7 @@ export default {
     justify-content: center;
     align-item: center;
 
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid rgba(0,0,0,0.2);
 
     @media screen and (min-width: 513px) and (max-width: 854px) {
       border-radius: 2px;
