@@ -11,7 +11,7 @@
         </AdvanceControlMenuItem>
       </div>
     </div>
-    <div @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" @mouseover="handleOver">
+    <div ref="adv" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" @mouseover="handleOver">
       <!--<Icon type="advance"></Icon>-->
       <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
     </div>
@@ -100,7 +100,7 @@ export default {
       } else {
         this.anim.playSegments([37, 41], false);
       }
-      document.onmouseup = () => {
+      this.$refs.adv.onmouseup = () => {
         if (!this.showAttached) {
           if (this.validEnter) {
             this.anim.playSegments([23, 36], false);

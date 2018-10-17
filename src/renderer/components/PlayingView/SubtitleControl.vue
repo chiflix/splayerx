@@ -68,7 +68,7 @@
 
           </ul>
         </div>
-        <div @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" @mouseover="handleOver">
+        <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" @mouseover="handleOver">
           <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
         </div>
       </div>
@@ -119,7 +119,7 @@ export default {
       } else {
         this.anim.playSegments([62, 64], false);
       }
-      document.onmouseup = () => {
+      this.$refs.sub.onmouseup = () => {
         if (!this.showAttached) {
           if (this.validEnter) {
             this.anim.playSegments([46, 60], false);
