@@ -263,14 +263,23 @@ export default {
       this.displayState = tempObject;
     },
     UIStateManager() {
+      const currentMousedownWidget = this.getComponentName(this.eventInfo.get('mousedown').target);
+      const lastMousedownWidget = this.getComponentName(this.lastEventInfo.get('mousedown').target);
+      const mousedownChanged = currentMousedownWidget !== lastMousedownWidget;
+      const currentMouseupWidget = this.getComponentName(this.eventInfo.get('mouseup').target);
+      const lastMouseupWidget = this.getComponentName(this.lastEventInfo.get('mouseup').target);
+      const mouseupChanged = currentMouseupWidget !== lastMouseupWidget;
       Object.keys(this.widgetsStatus).forEach((name) => {
         this.widgetsStatus[name].selected = this.currentSelectedWidget === name;
+        if (mousedownChanged) {
+          this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name;
+        }
+        if (mouseupChanged) {
+          this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== name;
+          this.widgetsStatus[name].showAttached =
+            this.showAllWidgets && currentMousedownWidget === name;
+        }
       });
-      if (
-        (this.currentSelectedWidget !== 'subtitle-control' && this.widgetsStatus['subtitle-control'].showAttached) ||
-        !this.showAllWidgets) {
-        this.widgetsStatus['subtitle-control'].showAttached = false;
-      }
     },
     // Event listeners
     handleMousemove(event) {
