@@ -5,27 +5,42 @@ const state = {
   Duration: NaN,
   Volume: 20,
   Muted: false,
-  SrcOfVideo: '',
-  OriginSrcOfVideo: '',
   videoMeta: {
     width: 0,
     height: 0,
   },
   PlaybackRate: 1.0,
   isPlaying: false,
+  OriginSrcOfVideo: '',
+  PlayingList: [],
 };
 
 const getters = {
   isPlaying: state => state.isPlaying,
+  convertedSrcOfVideo: (state) => {
+    const originPath = state.OriginSrcOfVideo;
+    const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
+
+    return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
+  },
+  nextVideo: (state) => {
+    const index = state.PlayingList.findIndex(value => value === state.OriginSrcOfVideo);
+    if (index !== -1 && index + 1 < state.PlayingList.length) {
+      return state.PlayingList[index + 1];
+    }
+    return '';
+  },
+  finalPartStartTime: state => state.Duration * 0.7,
+  currentTime: state => state.CurrentTime,
   Volume: state => state.Volume / 100,
 };
 
 const mutations = {
+  PlayingList(state, t) {
+    state.PlayingList = t;
+  },
   PlaybackRate(state, t) {
     state.PlaybackRate = t;
-  },
-  SrcOfVideo(state, t) {
-    state.SrcOfVideo = t;
   },
   OriginSrcOfVideo(state, t) {
     state.OriginSrcOfVideo = t;
