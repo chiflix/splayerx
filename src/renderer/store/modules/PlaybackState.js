@@ -37,7 +37,7 @@ const getters = {
 
 const mutations = {
   PlayingList(state, t) {
-    state.PlayingList = t;
+    state.PlayingList.push(...t);
   },
   PlaybackRate(state, t) {
     state.PlaybackRate = t;

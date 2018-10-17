@@ -63,15 +63,16 @@ export default {
     },
     onTimeupdate() {
       const currentTime = this.$store.state.PlaybackState.CurrentTime;
+      const duration = this.$store.state.PlaybackState.Duration;
       if (currentTime < this.finalPartStartTime) {
         this.$emit('close-next-video');
-      } else if (currentTime >= this.finalPartEndTime) {
+      } else if (currentTime >= duration) {
         this.$emit('close-next-video');
         this.openFile(this.nextVideo);
         this.$bus.$emit('seek', 0); // avoid skipping the next video
       } else {
         const fractionProgress = (currentTime - this.finalPartStartTime)
-          / (this.finalPartEndTime - this.finalPartStartTime);
+          / (duration - this.finalPartStartTime);
         this.progress = fractionProgress * 100;
       }
       requestAnimationFrame(this.onTimeupdate);
@@ -119,9 +120,6 @@ export default {
     },
     finalPartStartTime() {
       return this.$store.getters.finalPartStartTime;
-    },
-    finalPartEndTime() {
-      return this.$store.state.PlaybackState.Duration;
     },
   },
   mounted() {
