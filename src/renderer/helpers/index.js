@@ -33,6 +33,59 @@ export default {
       }
       return `${minutes}:${seconds}`;
     },
+    findSimilarVideoByVidPath(vidPath) {
+      vidPath = decodeURI(vidPath);
+
+      if (process.platform === 'win32') {
+        vidPath = vidPath.replace(/^file:\/\/\//, '');
+      } else {
+        vidPath = vidPath.replace(/^file:\/\//, '');
+      }
+
+      const baseName = path.basename(vidPath, path.extname(vidPath));
+      const dirPath = path.dirname(vidPath);
+      const filter = /\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$/;
+
+      if (!fs.existsSync(dirPath)) {
+        return [];
+      }
+
+      // need more effective algorithm
+      function isSimilar(primaryName, secondaryName) {
+        // judget if the similarity is more than half of the primaryName's characters
+        if (primaryName.length < secondaryName.length / 2) {
+          return false;
+        }
+
+        let similarPart = 0;
+        for (let i = 0; i < primaryName.length; i += 1) {
+          if (primaryName.charAt(i) === secondaryName.charAt(i)) {
+            similarPart += 1;
+          }
+        }
+
+        if (similarPart >= primaryName.length / 2 && similarPart >= secondaryName.length / 2) {
+          return true;
+        }
+        return false;
+      }
+
+      const similarVideos = [];
+      const files = fs.readdirSync(dirPath);
+      for (let i = 0; i < files.length; i += 1) {
+        const filename = path.join(dirPath, files[i]);
+        const stat = fs.lstatSync(filename);
+        if (!stat.isDirectory()) {
+          if (filter.test(path.extname(files[i]))) {
+            const fileBaseName = path.basename(filename, path.extname(files[i]));
+            if (isSimilar(baseName, fileBaseName)) {
+              similarVideos.push(filename);
+            }
+          }
+        }
+      }
+      return similarVideos;
+    },
     findSubtitleFilesByVidPath(vidPath, callback) {
       if (process.platform === 'win32') {
         vidPath = vidPath.replace(/^file:\/\/\//, '');
@@ -63,11 +116,14 @@ export default {
     },
     openFile(path) {
       const originPath = path;
-      const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
       this.infoDB().get('recent-played', this.mediaQuickHash(originPath))
         .then((value) => {
           if (value) {
-            this.$bus.$emit('seek', value.lastPlayedTime);
+            if (value.duration - value.lastPlayedTime > 10) {
+              this.$bus.$emit('seek', value.lastPlayedTime);
+            } else {
+              this.$bus.$emit('seek', 0);
+            }
             this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date.now() }));
           } else {
             this.infoDB().add('recent-played', {
@@ -78,10 +134,6 @@ export default {
           }
           this.$bus.$emit('new-file-open');
         });
-      this.$store.commit(
-        'SrcOfVideo',
-        process.platform === 'win32' ? convertedPath : `file://${convertedPath}`,
-      );
       this.$store.commit('OriginSrcOfVideo', originPath);
       this.$store.dispatch('SRC_SET', originPath);
       this.$bus.$emit('new-video-opened');

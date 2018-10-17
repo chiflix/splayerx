@@ -237,18 +237,18 @@ describe('TimeProgressBar.vue', () => {
     });
 
     store.state.WindowState.windowSize = [600, 600];
-    store.state.PlaybackState.AccurateTime = 100;
+    store.state.PlaybackState.CurrentTime = 100;
     store.state.PlaybackState.Duration = 500;
     // (100/500)*580 = 116
     expect(wrapper.vm.curProgressBarEdge).equal(116);
 
     store.state.WindowState.windowSize = [1000, 600];
-    store.state.PlaybackState.AccurateTime = 1000;
+    store.state.PlaybackState.CurrentTime = 1000;
     store.state.PlaybackState.Duration = 500;
     expect(wrapper.vm.curProgressBarEdge).equal(1960);
 
     store.state.WindowState.windowSize = [1000, 600];
-    store.state.PlaybackState.AccurateTime = 500;
+    store.state.PlaybackState.CurrentTime = 500;
     store.state.PlaybackState.Duration = 500;
     expect(wrapper.vm.curProgressBarEdge).equal(980);
   });

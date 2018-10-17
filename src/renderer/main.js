@@ -56,16 +56,20 @@ new Vue({
                     name: 'Video Files',
                     extensions: VALID_EXTENSION,
                   }],
-                }, (file) => {
-                  if (file !== undefined) {
-                    if (file !== undefined) {
-                      if (!file[0].includes('\\')) {
-                        this.openFile(file[0]);
-                      } else {
-                        this.$store.dispatch('addMessages', {
-                          type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-                        });
-                      }
+                }, (files) => {
+                  if (files !== undefined) {
+                    if (!files[0].includes('\\') || process.platform === 'win32') {
+                      this.openFile(files[0]);
+                    } else {
+                      this.$store.dispatch('addMessages', {
+                        type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+                      });
+                    }
+                    if (files.length > 1) {
+                      this.$store.commit('PlayingList', files);
+                    } else {
+                      const similarVideos = this.findSimilarVideoByVidPath(files[0]);
+                      this.$store.commit('PlayingList', similarVideos);
                     }
                   }
                 });
@@ -469,7 +473,6 @@ new Vue({
           }
           break;
         default:
-          console.log(e.key);
           break;
       }
     });
@@ -484,31 +487,41 @@ new Vue({
      */
     window.addEventListener('drop', (e) => {
       e.preventDefault();
-      let potentialVidPath;
       let tempFilePath;
       let containsSubFiles = false;
       const { files } = e.dataTransfer;
       // TODO: play it if it's video file
       const subtitleFiles = [];
-      const regex = '^(.srt|.ass|.vtt)$';
-      const re = new RegExp(regex);
+      const subRegex = new RegExp('^(.srt|.ass|.vtt)$');
+      const videoFiles = [];
+      const vidRegex = new RegExp('^(3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc)$');
       for (let i = 0; i < files.length; i += 1) {
-        tempFilePath = `file:///${files[i].path}`;
-        if (re.test(Path.extname(tempFilePath))) {
-          subtitleFiles.push(files[i].path);
+        tempFilePath = files[i].path;
+        if (subRegex.test(Path.extname(tempFilePath))) {
+          subtitleFiles.push(tempFilePath);
           containsSubFiles = true;
+        } else if (vidRegex.test(Path.extname(tempFilePath))) {
+          videoFiles.push(tempFilePath);
         } else {
-          potentialVidPath = tempFilePath;
+          this.$store.dispatch('addMessages', {
+            type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+          });
         }
       }
-      const fileregex = '^(.3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc])$';
-      const filere = new RegExp(fileregex);
-      if (potentialVidPath && filere.test(Path.extname(tempFilePath)) && !tempFilePath.includes('\\')) {
-        this.openFile(potentialVidPath.replace(/^file:\/\/\//, ''));
-      } else {
-        this.$store.dispatch('addMessages', {
-          type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-        });
+      if (videoFiles.length !== 0) {
+        if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
+          this.openFile(videoFiles[0]);
+        } else {
+          this.$store.dispatch('addMessages', {
+            type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
+          });
+        }
+        if (videoFiles.length > 1) {
+          this.$store.commit('PlayingList', videoFiles);
+        } else {
+          const similarVideos = this.findSimilarVideoByVidPath(videoFiles[0]);
+          this.$store.commit('PlayingList', similarVideos);
+        }
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);

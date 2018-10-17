@@ -18,6 +18,7 @@
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
+      <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <advance-control class="button advance" v-hidden="displayState['advance-control']" />
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
@@ -33,6 +34,7 @@ import PlayButton from './PlayButton.vue';
 import VolumeIndicator from './VolumeIndicator.vue';
 import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
+import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TimeProgressBar from './TimeProgressBar.vue';
 import BaseInvisibleBackground from './BaseInvisibleBackground.vue';
@@ -45,6 +47,7 @@ export default {
     'volume-indicator': VolumeIndicator,
     'subtitle-control': SubtitleControl,
     'advance-control': AdvanceControl,
+    'playlist-control': PlaylistControl,
     'the-time-codes': TheTimeCodes,
     'the-time-progress-bar': TimeProgressBar,
     'base-invisible-background': BaseInvisibleBackground,
@@ -467,10 +470,26 @@ export default {
     position: relative;
   }
   .subtitle {
-    order: 1;
+    @media screen and (min-width: 513px) and (max-width: 854px) {
+      margin-right: 17.6px;
+    }
+    @media screen and (min-width: 855px) and (max-width: 1920px) {
+      margin-right: 25.6px;
+    }
+    @media screen and (min-width: 1921px) {
+      margin-right: 40px;
+    }
   }
-  .advance {
-    order: 3;
+  .playlist {
+    @media screen and (min-width: 513px) and (max-width: 854px) {
+      margin-right: 17.6px;
+    }
+    @media screen and (min-width: 855px) and (max-width: 1920px) {
+      margin-right: 25.6px;
+    }
+    @media screen and (min-width: 1921px) {
+      margin-right: 40px;
+    }
   }
   img {
     width: 100%;
@@ -484,37 +503,37 @@ export default {
 }
 @media screen and (min-width: 513px) and (max-width: 854px) {
   .control-buttons {
-    width: 119px;
-    height: 18px;
-    right: 27px;
+    width: 115px;
+    height: 22px;
+    right: 25px;
     bottom: 20px;
     .button {
-      width: 23px;
-      height: 18px;
+      width: 26.4px;
+      height: 22px;
     }
   }
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
   .control-buttons {
-    width: 159px;
-    height: 24px;
-    right: 32px;
+    width: 167px;
+    height: 32px;
+    right: 30px;
     bottom: 24px;
     .button {
-      width: 30.67px;
-      height: 24px;
+      width: 38.4px;
+      height: 32px;
     }
   }
 }
 @media screen and (min-width: 1921px) {
   .control-buttons {
-    width: 238px;
-    height: 36px;
-    right: 48px;
-    bottom: 35px;
+    width: 260px;
+    height: 50px;
+    right: 45px;
+    bottom: 32px;
     .button {
-      width: 46px;
-      height: 36px;
+      width: 60px;
+      height: 50px;
     }
   }
 }

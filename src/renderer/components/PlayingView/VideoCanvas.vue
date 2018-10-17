@@ -255,7 +255,7 @@ export default {
     currentTime() {
       return this.$store.state.Video.currentTime;
     },
-    originSrcOfVideo() {
+    srcOfVideo() {
       return this.$store.state.PlaybackState.OriginSrcOfVideo;
     },
     videoRatio() {
@@ -279,13 +279,14 @@ export default {
     },
   },
   watch: {
-    originSrcOfVideo(val, oldVal) {
+    srcOfVideo(val, oldVal) {
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
+            console.log(mergedData);
             this.infoDB().add('recent-played', mergedData);
           }
         });

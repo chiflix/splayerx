@@ -192,15 +192,21 @@ export default {
           extensions: ['*'],
         }],
         properties: ['openFile'],
-      }, (item) => {
+      }, (items) => {
         self.showingPopupDialog = false;
-        if (item) {
-          if (!item[0].includes('\\')) {
-            self.openFile(item[0]);
+        if (items) {
+          if (!items[0].includes('\\') || process.platform === 'win32') {
+            self.openFile(items[0]);
           } else {
             this.$store.dispatch('addMessages', {
               type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
             });
+          }
+          if (items.length > 1) {
+            this.$store.commit('PlayingList', items);
+          } else {
+            const similarVideos = this.findSimilarVideoByVidPath(items[0]);
+            this.$store.commit('PlayingList', similarVideos);
           }
         }
       });
@@ -356,6 +362,8 @@ export default {
           lf.style.left = '';
         } else {
           this.openFile(item.path);
+          const similarVideos = this.findSimilarVideoByVidPath(item.path);
+          this.$store.commit('PlayingList', similarVideos);
         }
         this.$bus.$emit('moveItem', this.moveItem);
         this.$bus.$emit('move', this.move);
