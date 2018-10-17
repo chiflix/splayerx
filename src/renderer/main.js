@@ -460,16 +460,16 @@ new Vue({
           break;
         case 'ArrowLeft':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
+            this.$bus.$emit('seek', this.$store.getters.currentTime - 60);
           } else {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
+            this.$bus.$emit('seek', this.$store.getters.currentTime - 5);
           }
           break;
         case 'ArrowRight':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
+            this.$bus.$emit('seek', this.$store.getters.currentTime + 60);
           } else {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
+            this.$bus.$emit('seek', this.$store.getters.currentTime + 5);
           }
           break;
         default:
