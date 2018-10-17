@@ -17,9 +17,9 @@
     <base-invisible-background v-show="!mute" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
-      <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
-      <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
-      <advance-control class="button advance" v-hidden="displayState['advance-control']" />
+      <subtitle-control class="button subtitle" v-bind.sync="widgetsStatus['subtitle-control']" />
+      <playlist-control class="button playlist" v-bind.sync="widgetsStatus['playlist-control']"/>
+      <advance-control class="button advance" />
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
     <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
@@ -326,6 +326,7 @@ export default {
         }
         this.preventSingleClick = false;
         this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached;
+        console.log(this.lastAttachedShowing);
         this.isDragging = false;
       }, this.clicksDelay);
     },

@@ -11,14 +11,16 @@
         </AdvanceControlMenuItem>
       </div>
     </div>
-    <div
-      @mousedown="1+1">
-      <Icon type="advance"></Icon>
+    <div @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" @mouseover="handleOver">
+      <!--<Icon type="advance"></Icon>-->
+      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
     </div>
   </div>
 </template>;
 
 <script>
+import lottie from '@/components/lottie.vue';
+import * as animationData from '@/assets/advance.json';
 import AdvanceControlMenuItem from './AdvanceControlMenuItem.vue';
 import Icon from '../BaseIconContainer';
 export default {
@@ -26,6 +28,7 @@ export default {
   components: {
     AdvanceControlMenuItem,
     Icon,
+    lottie,
   },
   data() {
     return {
@@ -77,9 +80,67 @@ export default {
         },
       ],
       isAcitve: false,
+      defaultOptions: { animationData },
+      animationSpeed: 1,
+      anim: {},
+      animFlag: true,
+      mouseDown: false,
+      validEnter: false,
     };
   },
   methods: {
+    handleAnimation(anim) {
+      this.anim = anim;
+      console.log(anim);
+    },
+    handleDown() {
+      this.mouseDown = true;
+      if (!this.showAttached) {
+        this.anim.playSegments([17, 21], false);
+      } else {
+        this.anim.playSegments([37, 41], false);
+      }
+      document.onmouseup = () => {
+        if (!this.showAttached) {
+          if (this.validEnter) {
+            this.anim.playSegments([23, 36], false);
+          } else {
+            this.anim.playSegments([100, 104], false);
+          }
+        } else if (this.validEnter) {
+          this.anim.playSegments([68, 83], false);
+        } else {
+          console.log(88);
+          this.anim.playSegments([43, 47], false);
+        }
+        this.mouseDown = false;
+      };
+    },
+    handleOver() {
+    },
+    handleEnter() {
+      if (this.animFlag) {
+        if (!this.mouseDown) {
+          this.anim.playSegments([3, 7], false);
+        } else {
+          console.log(55);
+          this.anim.playSegments([90, 94], false);
+        }
+      }
+      this.validEnter = true;
+      this.animFlag = false;
+    },
+    handleLeave() {
+      if (!this.showAttached) {
+        if (this.mouseDown) {
+          this.anim.playSegments([85, 89], false);
+        } else {
+          this.anim.playSegments([10, 14], false);
+        }
+        this.animFlag = true;
+      }
+      this.validEnter = false;
+    },
     onSecondItemClick() {
     },
     onMenuItemClick() {

@@ -68,7 +68,7 @@
 
           </ul>
         </div>
-        <div @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseover="handleOver" @mouseleave="handleLeave">
+        <div @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" @mouseover="handleOver">
           <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
         </div>
       </div>
@@ -76,7 +76,7 @@
 </template>
 <script>
 import lottie from '@/components/lottie.vue';
-import * as animationData from '@/assets/data.json';
+import * as animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer';
 export default {
   name: 'subtitle-control',
@@ -99,17 +99,9 @@ export default {
       animationSpeed: 1,
       anim: {},
       animFlag: true,
+      mouseDown: false,
+      validEnter: false,
     };
-  },
-  watch: {
-    showAttached(val) {
-      if (!val) {
-        this.anim.playSegments([79, 98], false);
-        this.animFlag = true;
-      } else {
-        this.anim.playSegments([46, 58], false);
-      }
-    },
   },
   components: {
     Icon,
@@ -121,23 +113,52 @@ export default {
       console.log(anim);
     },
     handleDown() {
+      this.mouseDown = true;
       if (!this.showAttached) {
-        this.anim.playSegments([28, 31], false);
+        this.anim.playSegments([28, 32], false);
       } else {
-        this.anim.playSegments([61, 64], false);
+        this.anim.playSegments([62, 64], false);
       }
+      document.onmouseup = () => {
+        if (!this.showAttached) {
+          if (this.validEnter) {
+            this.anim.playSegments([46, 60], false);
+          } else {
+            this.anim.playSegments([40, 43], false);
+          }
+        } else if (this.validEnter) {
+          this.anim.playSegments([79, 92], false);
+        } else {
+          console.log(88);
+          this.anim.playSegments([79, 82], false);
+        }
+        this.mouseDown = false;
+      };
     },
     handleOver() {
+    },
+    handleEnter() {
       if (this.animFlag) {
-        this.anim.playSegments([4, 7], false);
+        if (!this.mouseDown) {
+          this.anim.playSegments([4, 8], false);
+        } else {
+          console.log(55);
+          this.anim.playSegments([102, 105], false);
+        }
       }
+      this.validEnter = true;
       this.animFlag = false;
     },
     handleLeave() {
       if (!this.showAttached) {
-        this.anim.playSegments([0, 3], false);
+        if (this.mouseDown) {
+          this.anim.playSegments([35, 38], false);
+        } else {
+          this.anim.playSegments([95, 98], false);
+        }
         this.animFlag = true;
       }
+      this.validEnter = false;
     },
     toggleSubMenuDisplay() {
       this.clicks = this.showAttached ? 1 : 0;

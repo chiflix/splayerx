@@ -34,16 +34,16 @@ export default {
 <style lang="scss" scoped>
     .subtitle {
         @media screen and (min-width: 513px) and (max-width: 854px) {
-            width: 23px;
-            height: 18px;
+            /*width: 23px;*/
+            /*height: 18px;*/
         }
         @media screen and (min-width: 855px) and (max-width: 1920px) {
-            width: 30.67px;
-            height: 24px;
+            /*width: 30.67px;*/
+            /*height: 24px;*/
         }
         @media screen and (min-width: 1921px) {
-            width: 46px;
-            height: 36px;
+            /*width: 46px;*/
+            /*height: 36px;*/
         }
     }
 </style>
