@@ -18,6 +18,7 @@
 </template>;
 
 <script>
+import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
@@ -210,6 +211,7 @@ export default {
       }
     },
     $_saveScreenshot() {
+      console.log('cun tmd');
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       const { videoHeight, videoWidth } = this.videoElement;
@@ -219,6 +221,8 @@ export default {
         0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
+      const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
+      fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
       [canvas.width, canvas.height] = [211.3, 122.6];
       canvasCTX.drawImage(
         this.videoElement, 0, 0, videoWidth, videoHeight,
@@ -313,13 +317,14 @@ export default {
   },
   watch: {
     srcOfVideo(val, oldVal) {
+      console.log('bian tmd');
+      console.log(this.$store.state.PlaybackState.CurrentTime);
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
-            console.log(mergedData);
             this.infoDB().add('recent-played', mergedData);
           }
         });
