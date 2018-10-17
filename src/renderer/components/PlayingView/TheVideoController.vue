@@ -126,6 +126,7 @@ export default {
     this.eventInfo = new Map([
       ['mousemove', {}],
       ['mousedown', {}],
+      ['mouseup', {}],
       ['mouseenter', {}],
       ['wheel', {}],
       ['keydown', {
@@ -151,7 +152,12 @@ export default {
     this.UIElements.forEach((value) => {
       this.timerState[value.name] = true;
       this.displayState[value.name] = true;
-      this.widgetsStatus[value.name] = { selected: false, showAttached: false };
+      this.widgetsStatus[value.name] = {
+        selected: false,
+        showAttached: false,
+        mousedownOnOther: false,
+        mouseupOnOther: false,
+      };
     });
 
     document.addEventListener('keydown', this.handleKeydown);
@@ -218,9 +224,9 @@ export default {
         this.hideProgressBar = false;
       }
 
-      // mousedown status
-      if (lastEventInfo.get('mousedown').leftMousedown !== currentEventInfo.get('mousedown').leftMousedown) {
-        this.currentSelectedWidget = this.getComponentName(currentEventInfo.get('mousedown').target);
+      // mouseup status
+      if (lastEventInfo.get('mouseup').leftMouseup !== currentEventInfo.get('mouseup').leftMouseup) {
+        this.currentSelectedWidget = this.getComponentName(currentEventInfo.get('mouseup').target);
       }
 
       Object.keys(this.timerState).forEach((uiName) => {
@@ -290,6 +296,11 @@ export default {
         this.eventInfo.get('mousedown'),
         { rightMousedown: true },
       ));
+      this.eventInfo.set('mouseup', Object.assign(
+        {},
+        this.eventInfo.get('mouseup'),
+        { rightMouseup: false },
+      ));
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
         menu.popup(this.$electron.remote.getCurrentWindow());
@@ -304,6 +315,11 @@ export default {
         { leftMousedown: true },
         { target: event.target },
       ));
+      this.eventInfo.set('mouseup', Object.assign(
+        {},
+        this.eventInfo.get('mouseup'),
+        { leftMouseup: false },
+      ));
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
         if (this.popupShow === true) {
@@ -317,7 +333,12 @@ export default {
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
-        { leftMousedown: false, target: event.target },
+        { leftMousedown: false },
+      ));
+      this.eventInfo.set('mouseup', Object.assign(
+        {},
+        this.eventInfo.get('mousedown'),
+        { leftMouseup: true, target: event.target },
       ));
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
