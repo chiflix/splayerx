@@ -2,9 +2,9 @@
   <div class="timing"
     :data-component-name="$options.name"
     @mousedown="switchStateOfContent">
-        <span class="firstContent" :class="{ remainTime: isRemainTime.first }">{{ content.first }}</span>
+        <span class="firstContent" :class="{ remainTime: isRemainTime.first }" v-if="hasDuration">{{ firstContent }}</span>
         <span class="splitSign">/</span>
-        <span class="secondContent" :class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ content.second }}</span>
+        <span class="secondContent" :class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ secondContent }}</span>
   </div>
 </template>
 <script>
@@ -29,7 +29,7 @@ export default {
   computed: {
     ...mapGetters(['roundedCurrentTime', 'duration']),
     hasDuration() {
-      return !Number.isNaN(this.duration);
+      return !Number.isNaN(this.duration) && !Number.isNaN(this.roundedCurrentTime);
     },
     isRemainTime() {
       return {
@@ -48,16 +48,13 @@ export default {
         = -(this.duration - this.roundedCurrentTime);
       return this.timecodeFromSeconds(remainTime);
     },
-    content() {
-      switch (this.contentState) {
-        case this.ContentStateEnum.DEFAULT:
-          return { first: this.convertedCurrentTime, second: this.convertedDuration };
-        case this.ContentStateEnum.CURRENT_REMAIN:
-          return { first: this.convertedCurrentTime, second: this.remainTime };
-        case this.ContentStateEnum.REMAIN_DURATION:
-          return { first: this.remainTime, second: this.convertedDuration };
-        default: return { first: this.convertedCurrentTime, second: this.convertedDuration };
-      }
+    firstContent() {
+      return this.contentState === this.ContentStateEnum.REMAIN_DURATION ?
+        this.remainTime : this.convertedCurrentTime;
+    },
+    secondContent() {
+      return this.contentState === this.ContentStateEnum.CURRENT_REMAIN ?
+        this.remainTime : this.convertedDuration;
     },
   },
 };
