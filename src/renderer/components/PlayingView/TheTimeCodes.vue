@@ -27,7 +27,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['currentTime', 'duration']),
+    ...mapGetters(['roundedCurrentTime', 'duration']),
     hasDuration() {
       return !Number.isNaN(this.duration);
     },

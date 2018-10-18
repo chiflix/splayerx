@@ -39,9 +39,9 @@ const state = {
 };
 
 const getters = {
-  src: state => `file://${state.src}`,
+  convertedSrc: state => `file://${state.src}`,
   duration: state => state.duration,
-  currentTime: state => Math.round(state.currentTime),
+  roundedCurrentTime: state => Math.round(state.currentTime),
   volume: state => state.volume / 100,
   mute: state => state.mute,
   rate: state => state.rate,

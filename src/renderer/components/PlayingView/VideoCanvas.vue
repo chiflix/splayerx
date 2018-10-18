@@ -245,7 +245,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['src', 'volume', 'mute', 'rate', 'paused']),
+    ...mapGetters(['convertedSrc', 'volume', 'mute', 'rate', 'paused']),
     calculateHeightByWidth() {
       return this.newWidthOfWindow / (this.videoWidth / this.videoHeight);
     },

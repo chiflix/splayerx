@@ -243,7 +243,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['src', 'duration', 'currentTime', 'winWidth']),
+    ...mapGetters(['src', 'duration', 'roundedCurrentTime', 'winWidth']),
     curProgressBarEdge() {
       if (Number.isNaN(this.duration)) {
         return 0;
