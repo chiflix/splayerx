@@ -257,19 +257,19 @@ export default {
       return this.videoWidth / this.videoHeight;
     },
     isFullScreen() {
-      return this.$store.state.WindowState.isFullScreen;
+      return this.$store.state.Window.isFullScreen;
     },
     windowSize() {
-      return this.$store.state.WindowState.windowSize;
+      return this.$store.state.Window.windowSize;
     },
     windowMinimumSize() {
-      return this.$store.state.WindowState.windowMinimumSize;
+      return this.$store.state.Window.windowMinimumSize;
     },
     windowPosition() {
-      return this.$store.state.WindowState.windowPosition;
+      return this.$store.state.Window.windowPosition;
     },
     windowBounds() {
-      return this.$store.state.WindowState.windowBounds;
+      return this.$store.state.Window.windowBounds;
     },
   },
   watch: {

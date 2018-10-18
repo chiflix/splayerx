@@ -109,7 +109,7 @@ export default {
       return this.showAllWidgets || !this.isFocused ? 'default' : 'none';
     },
     isFocused() {
-      return this.$store.state.WindowState.isFocused;
+      return this.$store.state.Window.isFocused;
     },
   },
   watch: {

@@ -18,7 +18,7 @@ describe('VideoCanvas.vue', () => {
           state: Video.state,
           mutations: Video.mutations,
         },
-        WindowState: {},
+        Window: {},
       },
     });
     wrapper = mount(VideoCanvas, {
@@ -147,7 +147,7 @@ describe('VideoCanvas.vue', () => {
     describe('videoWidth or videoHeight is smaller than minWidth or minHeight', () => {
       let windowStub;
       beforeEach(() => {
-        windowStub = sinon.stub(wrapper.vm.$store.state, 'WindowState').get(() => ({
+        windowStub = sinon.stub(wrapper.vm.$store.state, 'Window').get(() => ({
           windowMinimumSize: [427, 240],
           windowPosition: [0, 0],
         }));
@@ -178,7 +178,7 @@ describe('VideoCanvas.vue', () => {
 
     describe('videoSize is between minSize and screenSize', () => {
       it('work fine', () => {
-        const windowStub = sinon.stub(wrapper.vm.$store.state, 'WindowState').get(() => ({
+        const windowStub = sinon.stub(wrapper.vm.$store.state, 'Window').get(() => ({
           windowMinimumSize: [427, 240],
           windowPosition: [0, 0],
         }));
@@ -194,7 +194,7 @@ describe('VideoCanvas.vue', () => {
   describe('$_calculateWindowSizeWhenVideoExisted', () => {
     let windowStub;
     beforeEach(() => {
-      windowStub = sinon.stub(wrapper.vm.$store.state, 'WindowState').get(() => ({
+      windowStub = sinon.stub(wrapper.vm.$store.state, 'Window').get(() => ({
         windowMinimumSize: [427, 240],
         windowSize: [900, 600],
       }));
