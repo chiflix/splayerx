@@ -41,11 +41,11 @@ export default {
       return this.timecodeFromSeconds(this.duration);
     },
     convertedCurrentTime() {
-      return this.timecodeFromSeconds(this.currentTime);
+      return this.timecodeFromSeconds(this.roundedCurrentTime);
     },
     remainTime() {
       const remainTime
-        = -(this.duration - this.currentTime);
+        = -(this.duration - this.roundedCurrentTime);
       return this.timecodeFromSeconds(remainTime);
     },
     content() {

@@ -134,7 +134,6 @@ export default {
           }
           this.$bus.$emit('new-file-open');
         });
-      this.$store.commit('OriginSrcOfVideo', originPath);
       this.$store.dispatch('SRC_SET', originPath);
       this.$bus.$emit('new-video-opened');
       this.$router.push({

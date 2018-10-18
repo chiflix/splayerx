@@ -39,8 +39,14 @@ const state = {
 };
 
 const getters = {
-  convertedSrc: state => `file://${state.src}`,
+  originSrc: state => state.src,
+  convertedSrc: (state) => {
+    const converted = encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
+    return process.platform === 'win32' ? converted : `file://${converted}`;
+  },
   duration: state => state.duration,
+  tempoaryFinalPartTime: state => state.duration * 0.7,
+  currentTime: state => state.currentTime,
   roundedCurrentTime: state => Math.round(state.currentTime),
   volume: state => state.volume / 100,
   mute: state => state.mute,

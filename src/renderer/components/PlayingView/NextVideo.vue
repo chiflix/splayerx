@@ -15,7 +15,7 @@
       <div class="info">
         <div class="top">
           <div class="duration">{{ duration }}</div>
-          <div class="title">&nbsp· Next in Playing List</div>
+          <div class="title">&nbsp;· Next in Playing List</div>
         </div>
         <div class="vid-name">{{ videoName }}</div>
       </div>
@@ -42,6 +42,7 @@
 </template>
 <script>
 import path from 'path';
+import { mapGetters } from 'vuex';
 import Icon from '../BaseIconContainer';
 export default {
   name: 'next-video',
@@ -50,7 +51,6 @@ export default {
   },
   data() {
     return {
-      duration: '',
       progress: 0,
       animation: '',
       notificationPlayIcon: 'notificationPlay',
@@ -62,16 +62,16 @@ export default {
       this.$emit('manualclose-next-video');
     },
     onTimeupdate() {
-      const currentTime = this.$store.state.PlaybackState.CurrentTime;
-      if (currentTime < this.finalPartStartTime) {
+      const { currentTime } = this;
+      if (currentTime < this.tempoaryFinalPartTime) {
         this.$emit('close-next-video');
       } else if (currentTime >= this.finalPartEndTime) {
         this.$emit('close-next-video');
         this.openFile(this.nextVideo);
         this.$bus.$emit('seek', 0); // avoid skipping the next video
       } else {
-        const fractionProgress = (currentTime - this.finalPartStartTime)
-          / (this.finalPartEndTime - this.finalPartStartTime);
+        const fractionProgress = (currentTime - this.tempoaryFinalPartTime)
+          / (this.finalPartEndTime - this.tempoaryFinalPartTime);
         this.progress = fractionProgress * 100;
       }
       requestAnimationFrame(this.onTimeupdate);
@@ -102,11 +102,9 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['currentTime', 'nextVideo', 'duration', 'tempoaryFinalPartTime']),
     videoName() {
       return path.basename(this.nextVideo, path.extname(this.nextVideo));
-    },
-    nextVideo() {
-      return this.$store.getters.nextVideo;
     },
     convertedSrcOfNextVideo() {
       if (this.nextVideo) {
@@ -117,11 +115,11 @@ export default {
       }
       return '';
     },
-    finalPartStartTime() {
-      return this.$store.getters.finalPartStartTime;
+    tempoaryFinalPartTime() {
+      return this.duration * 0.7;
     },
     finalPartEndTime() {
-      return this.$store.state.PlaybackState.Duration;
+      return this.duration;
     },
   },
   mounted() {

@@ -7,7 +7,7 @@
       :events="['loadedmetadata']"
       :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
-      :src="src"
+      :src="convertedSrc"
       :playbackRate="rate"
       :volume="volume"
       :muted="mute"
@@ -208,7 +208,7 @@ export default {
         shortCut: imagePath,
         smallShortCut: smallImagePath,
         lastPlayedTime: this.currentTime,
-        duration: this.$store.state.PlaybackState.Duration,
+        duration: this.$store.state.Video.duration,
       };
       syncStorage.setSync('recent-played', data);
     },
@@ -245,18 +245,12 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['convertedSrc', 'volume', 'mute', 'rate', 'paused']),
+    ...mapGetters(['originSrc', 'convertedSrc', 'volume', 'mute', 'rate', 'paused', 'currentTime']),
     calculateHeightByWidth() {
       return this.newWidthOfWindow / (this.videoWidth / this.videoHeight);
     },
     calculateWidthByHeight() {
       return this.newHeightOfWindow * (this.videoWidth / this.videoHeight);
-    },
-    currentTime() {
-      return this.$store.state.Video.currentTime;
-    },
-    srcOfVideo() {
-      return this.$store.state.PlaybackState.OriginSrcOfVideo;
     },
     videoRatio() {
       if (!this.videoHeight) return 0;
@@ -279,14 +273,14 @@ export default {
     },
   },
   watch: {
-    srcOfVideo(val, oldVal) {
+    originSrc(val, oldVal) {
+      this.$store.commit('currentPlaying', val);
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
-            console.log(mergedData);
             this.infoDB().add('recent-played', mergedData);
           }
         });
@@ -296,6 +290,8 @@ export default {
     },
   },
   mounted() {
+    this.$store.commit('currentPlaying', this.originSrc);
+    this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.newWidthOfWindow / this.newHeightOfWindow]);

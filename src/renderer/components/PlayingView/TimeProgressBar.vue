@@ -31,7 +31,7 @@
         <!-- translate优化 -->
       <the-preview-thumbnail
         v-show="showScreenshot"
-        :src="src"
+        :src="convertedSrc"
         :thumbnailWidth="widthOfThumbnail"
         :thumbnailHeight="heightOfThumbnail"
         :currentTime="thumbnailCurrentTime"
@@ -243,13 +243,13 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['src', 'duration', 'roundedCurrentTime', 'winWidth']),
+    ...mapGetters(['convertedSrc', 'duration', 'roundedCurrentTime', 'winWidth']),
     curProgressBarEdge() {
       if (Number.isNaN(this.duration)) {
         return 0;
       }
       const progressBarWidth = this.winWidth - FOOL_PROOFING_BAR_WIDTH;
-      return (this.currentTime
+      return (this.roundedCurrentTime
         / this.duration) * progressBarWidth;
     },
     /**

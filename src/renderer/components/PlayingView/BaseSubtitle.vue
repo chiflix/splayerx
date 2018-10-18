@@ -15,6 +15,7 @@
 
 <script>
 /* eslint-disable no-loop-func, no-use-before-define */
+import { mapGetters } from 'vuex';
 import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import ass2vtt from 'ass-to-vtt';
@@ -108,7 +109,7 @@ export default {
               type: 'Embedded',
               size: embeddedSubsStatus.size,
             });
-            this.mkvProcess(this.originSrcOfVideo, onlyEmbedded, () => {
+            this.mkvProcess(this.originSrc, onlyEmbedded, () => {
               this.toggleSutitleShow();
               this.$bus.$emit('subtitles-finished-loading', 'Embedded');
             });
@@ -131,7 +132,7 @@ export default {
       }
     },
     async subtitleInitializingStatus() {
-      const vidSrc = this.originSrcOfVideo;
+      const vidSrc = this.originSrc;
       let subStatus = [];
       this.mediaHash = this.mediaQuickHash(vidSrc);
       this.Sagi = this.sagi();
@@ -282,7 +283,7 @@ export default {
       });
     },
     mkvProcessInit(filePath, onlyEmbedded, cb) {
-      const accurateTime = this.$store.state.PlaybackState.CurrentTime;
+      const accurateTime = this.$store.state.Video.currentTime;
       const startTime = accurateTime * 1000;
       const endTime = this.mkvInitializingReadingEndTime * 1000;
       const processSubNames = true;
@@ -696,16 +697,13 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['duration', 'originSrc', 'currentTime']),
     firstSubState() { // lazy computed and lazy watched
       return this.$store.getters.firstSubtitleIndex !== -1;
     },
     mkvInitializingReadingEndTime() {
-      const duration = this.$store.state.PlaybackState.Duration;
-      const currentTime = this.$store.state.PlaybackState.CurrentTime;
+      const { duration, currentTime } = this;
       return duration > 3000 ? currentTime + 300 : currentTime + (duration / 10);
-    },
-    originSrcOfVideo() {
-      return this.$store.state.PlaybackState.OriginSrcOfVideo;
     },
   },
   watch: {
@@ -740,7 +738,7 @@ export default {
         // if new value is true -- where should be called in the callback of initialize
         // stage, if new value is true, toggle the request idle
         // options can also be passed, [timeout] option
-        const filePath = this.originSrcOfVideo;
+        const filePath = this.originSrc;
         this.idleCallbackID = window.requestIdleCallback(() => {
           this.parseMkvSubs(filePath, 0, null, false, false)
             .then((tracks) => {
@@ -757,7 +755,7 @@ export default {
         // if new value is true -- where should be called in the callback of seek sub
         // stage, if new value is true, toggle the request idle
         // options can also be passed, [timeout] option
-        const filePath = this.originSrcOfVideo;
+        const filePath = this.originSrc;
         this.idleCallbackID = window.requestIdleCallback(() => {
           this.parseMkvSubs(filePath, 0, null, false, false)
             .then((tracks) => {
@@ -815,7 +813,7 @@ export default {
           window.cancelIdleCallback(this.idleCallbackID);
           this.$emit('stop-reading-mkv-subs', 'stopped');
         }
-        const filePath = this.originSrcOfVideo;
+        const filePath = this.originSrc;
         this.parseMkvSubs(filePath, (e * 1000), (e + 120) * 1000, false, false)
           .then((tracks) => {
             this.addMkvSubtitlesToVideoElement(tracks, false, false, () => {
