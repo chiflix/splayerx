@@ -180,7 +180,6 @@ export default {
           store.createIndex('index', 'index', { unique: false });
         });
       }
-      /* eslint-disable newline-per-chained-call */
     });
     idb.open(INFO_DATABASE_NAME).then((db) => {
       this.quickHash = this.mediaQuickHash(this.originSrc);
@@ -194,7 +193,8 @@ export default {
       return idb.open(INFO_DATABASE_NAME);
     })
       .then(() => this.retrieveThumbnailInfo(this.quickHash))
-      .then(this.updateThumbnailData).catch((err) => {
+      .then(this.updateThumbnailData)
+      .catch((err) => {
         console.log(err);
       });
     this.$bus.$on('image-all-get', (e) => {

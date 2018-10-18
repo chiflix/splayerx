@@ -8,9 +8,10 @@
       :src="videoSrc"
       :events="['loadedmetadata', 'seeked']"
       :currentTime="seekTime"
+      :paused="true"
       @loadedmetadata="updateGenerationParameters"
       @seeked="thumbnailGeneration"
-      style="opacity: 0.99" />
+      :style="videoStyles" />
     <base-image-display
       v-if="!useFallback"
       :imgSrc="tempImage"
@@ -75,6 +76,9 @@ export default {
       tempImage: null,
       useFallback: false,
       seekTime: 0,
+      videoStyles: {
+        opacity: 0.99,
+      },
     };
   },
   computed: {
@@ -103,21 +107,6 @@ export default {
     },
   },
   methods: {
-    // Data validators
-    videoSrcValidator(src) {
-      let result = '';
-      const fileSrcRegexes = {
-        http: RegExp('^(http|https)://'),
-        notWindowsFile: RegExp('^file://'),
-        windowsFile: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
-      };
-      if (typeof src === 'string') {
-        Object.keys(fileSrcRegexes).forEach((filetype) => {
-          if (fileSrcRegexes[filetype].test(src)) result = filetype;
-        });
-      }
-      return result;
-    },
     // Data regenerators
     updateGenerationParameters() {
       this.generationInterval = Math.round(this.duration / (this.screenWidth / 4)) || 1;
@@ -172,7 +161,7 @@ export default {
         while (this.thumbnailSet.has(internalIndex)) {
           internalIndex += 1;
         }
-        this.testTime = internalIndex * this.generationInterval;
+        this.seekTime = internalIndex * this.generationInterval;
         if (this.isAutoGeneration) {
           this.autoGenerationIndex = internalIndex;
         }
@@ -210,18 +199,15 @@ export default {
       return Promise.all(promiseArray);
     },
     updateVideoInfo(outerThumbnailInfo) {
-      const { videoSrc } = outerThumbnailInfo;
-      if (this.videoSrcValidator(videoSrc)) {
-        this.videoSrc = videoSrc;
-        if (!outerThumbnailInfo.newVideo) {
-          this.screenWidth = outerThumbnailInfo.screenWidth;
-          this.generationInterval = outerThumbnailInfo.generationInterval <= 0 ?
-            this.generationInterval : outerThumbnailInfo.generationInterval;
-          this.autoGenerationIndex = outerThumbnailInfo.lastGenerationIndex || 0;
-        } else {
-          this.screenWidth = outerThumbnailInfo.screenWidth;
-          this.autoGenerationIndex = 0;
-        }
+      this.videoSrc = outerThumbnailInfo.videoSrc;
+      if (!outerThumbnailInfo.newVideo) {
+        this.screenWidth = outerThumbnailInfo.screenWidth;
+        this.generationInterval = outerThumbnailInfo.generationInterval <= 0 ?
+          this.generationInterval : outerThumbnailInfo.generationInterval;
+        this.autoGenerationIndex = outerThumbnailInfo.lastGenerationIndex || 0;
+      } else {
+        this.screenWidth = outerThumbnailInfo.screenWidth;
+        this.autoGenerationIndex = 0;
       }
     },
   },
@@ -245,9 +231,10 @@ export default {
     // Use document to pass unit test
     this.videoElement = this.$refs.video.videoElement ?
       this.$refs.video.videoElement() : document.querySelector('.base-video-player');
-    if (this.videoElement) {
-      this.videoElement.style.height = `${this.thumbnailHeight}px`;
-    }
+    this.videoStyles = Object.assign(
+      this.videoStyles,
+      { height: `${this.thumbnailHeight}px` },
+    );
   },
 };
 </script>
