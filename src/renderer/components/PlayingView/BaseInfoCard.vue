@@ -1,21 +1,11 @@
 <template>
-  <div class="container" :style="{ width: containerWidth + 'px', height: containerHeight + 'px' }">
+  <div class="container">
     <div class="element bottom"><div class="element middle"><div class="element content"><slot></slot></div></div></div>
   </div>
 </template>
 <script>
 export default {
   name: 'base-info-card',
-  props: {
-    containerWidth: {
-      type: Number,
-      default: 6,
-    },
-    containerHeight: {
-      type: Number,
-      default: 400,
-    },
-  },
 };
 </script>
 
