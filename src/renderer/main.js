@@ -12,6 +12,7 @@ import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
 import Path from 'path';
+import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/action-types';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
@@ -37,6 +38,9 @@ new Vue({
   router,
   store,
   template: '<App/>',
+  computed: {
+    ...mapGetters(['mute']),
+  },
   methods: {
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
@@ -130,6 +134,15 @@ new Vue({
         {
           label: this.$t('msg.audio.name'),
           submenu: [
+            {
+              label: this.$t('msg.audio.mute'),
+              type: 'checkbox',
+              accelerator: 'M',
+              click: (menuItem) => {
+                this.$bus.$emit('toggle-mute');
+                menuItem.checked = this.mute;
+              },
+            },
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
             { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
             { type: 'separator' },
