@@ -6,8 +6,8 @@ import VueElectronJSONStorage from 'vue-electron-json-storage';
 import LandingView from '@/components/LandingView';
 import messages from '@/locales';
 import helpers from '@/helpers';
-import AppState from '@/store/modules/AppState';
-import WindowState from '@/store/modules/WindowState';
+import App from '@/store/modules/App';
+import Window from '@/store/modules/Window';
 
 describe('LandingView.vue', () => {
   let store;
@@ -16,8 +16,8 @@ describe('LandingView.vue', () => {
     // state = PlaybackState.state;
     store = new Vuex.Store({
       modules: {
-        AppState,
-        WindowState,
+        App,
+        Window,
       },
     });
   });

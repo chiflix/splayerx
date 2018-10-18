@@ -1,5 +1,5 @@
 import Vuex from 'vuex';
-import PlaybackState from '@/store/modules/PlaybackState';
+import Video from '@/store/modules/Video';
 import Subtitle from '@/store/modules/Subtitle';
 import SubtitleControl from '@/components/PlayingView/SubtitleControl';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
@@ -14,10 +14,10 @@ describe('SubtitleControl.vue', () => {
   beforeEach(() => {
     store = new Vuex.Store({
       modules: {
-        PlaybackState: {
-          state: PlaybackState.state,
-          getters: PlaybackState.getters,
-          mutations: PlaybackState.mutations,
+        Video: {
+          state: Video.state,
+          getters: Video.getters,
+          mutations: Video.mutations,
         },
         Subtitle: {
           state: Subtitle.state,

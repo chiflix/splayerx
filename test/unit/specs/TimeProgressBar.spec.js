@@ -1,6 +1,6 @@
 import Vuex from 'vuex';
-import PlaybackState from '@/store/modules/PlaybackState';
-import WindowState from '@/store/modules/WindowState';
+import Video from '@/store/modules/Video';
+import Window from '@/store/modules/Window';
 import TimeProgressBar from '@/components/PlayingView/TimeProgressBar';
 import { mount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
@@ -23,13 +23,13 @@ describe('TimeProgressBar.vue', () => {
   beforeEach(() => {
     store = new Vuex.Store({
       modules: {
-        PlaybackState: {
-          state: PlaybackState.state,
-          mutations: PlaybackState.mutations,
+        Video: {
+          state: Video.state,
+          mutations: Video.mutations,
         },
-        WindowState: {
-          state: WindowState.state,
-          getters: WindowState.getters,
+        Window: {
+          state: Window.state,
+          getters: Window.getters,
         },
       },
     });
@@ -161,11 +161,11 @@ describe('TimeProgressBar.vue', () => {
         src: ' ',
       },
     });
-    store.state.PlaybackState.Duration = NaN;
+    store.state.Video.Duration = NaN;
     wrapper.setData({ onProgressSliderMousedown: false });
     const spy = sinon.spy(wrapper.vm, '$_effectProgressBarDraged');
     wrapper.vm.onProgressBarMove();
-    expect(Number.isNaN(store.state.PlaybackState.Duration)).equal(true);
+    expect(Number.isNaN(store.state.Video.Duration)).equal(true);
     expect(spy.calledOnce).equal(false);
     spy.restore();
   });
@@ -203,15 +203,15 @@ describe('TimeProgressBar.vue', () => {
         src: ' ',
       },
     });
-    store.state.WindowState.windowSize = [0, 0];
+    store.state.Window.windowSize = [0, 0];
     expect(wrapper.vm.winWidth).equal(0);
-    store.state.WindowState.windowSize = [1, 0];
+    store.state.Window.windowSize = [1, 0];
     expect(wrapper.vm.winWidth).equal(1);
-    store.state.WindowState.windowSize = [999, 0];
+    store.state.Window.windowSize = [999, 0];
     expect(wrapper.vm.winWidth).equal(999);
-    store.state.WindowState.windowSize = [NaN, 0];
+    store.state.Window.windowSize = [NaN, 0];
     expect(Number.isNaN(wrapper.vm.winWidth)).equal(true);
-    store.state.WindowState.windowSize = [Infinity, 0];
+    store.state.Window.windowSize = [Infinity, 0];
     expect(wrapper.vm.winWidth).equal(Infinity);
   });
 
@@ -223,7 +223,7 @@ describe('TimeProgressBar.vue', () => {
         src: ' ',
       },
     });
-    store.state.PlaybackState.Duration = NaN;
+    store.state.Video.Duration = NaN;
     expect(wrapper.vm.curProgressBarEdge).equal(0);
   });
 
@@ -236,20 +236,20 @@ describe('TimeProgressBar.vue', () => {
       },
     });
 
-    store.state.WindowState.windowSize = [600, 600];
-    store.state.PlaybackState.CurrentTime = 100;
-    store.state.PlaybackState.Duration = 500;
+    store.state.Window.windowSize = [600, 600];
+    store.state.Video.CurrentTime = 100;
+    store.state.Video.Duration = 500;
     // (100/500)*580 = 116
     expect(wrapper.vm.curProgressBarEdge).equal(116);
 
-    store.state.WindowState.windowSize = [1000, 600];
-    store.state.PlaybackState.CurrentTime = 1000;
-    store.state.PlaybackState.Duration = 500;
+    store.state.Window.windowSize = [1000, 600];
+    store.state.Video.CurrentTime = 1000;
+    store.state.Video.Duration = 500;
     expect(wrapper.vm.curProgressBarEdge).equal(1960);
 
-    store.state.WindowState.windowSize = [1000, 600];
-    store.state.PlaybackState.CurrentTime = 500;
-    store.state.PlaybackState.Duration = 500;
+    store.state.Window.windowSize = [1000, 600];
+    store.state.Video.CurrentTime = 500;
+    store.state.Video.Duration = 500;
     expect(wrapper.vm.curProgressBarEdge).equal(980);
   });
 
@@ -378,7 +378,7 @@ describe('TimeProgressBar.vue', () => {
         src: ' ',
       },
     });
-    store.state.WindowState.windowSize = [600, 600]; // const1 = 580
+    store.state.Window.windowSize = [600, 600]; // const1 = 580
     // const2  = 50, const3 = 66, const4 = 564
     wrapper.setData({ widthOfThumbnail: 100 });
     wrapper.setData({ cursorPosition: 49 });
@@ -399,10 +399,10 @@ describe('TimeProgressBar.vue', () => {
         src: ' ',
       },
     });
-    store.state.PlaybackState.Duration = 1000;
+    store.state.Video.Duration = 1000;
     wrapper.setData({ percentageOfReadyToPlay: 0.2 });
     expect(wrapper.vm.screenshotContent).equal('03:20');
-    store.state.PlaybackState.Duration = 1000;
+    store.state.Video.Duration = 1000;
     wrapper.setData({ percentageOfReadyToPlay: 0.65 });
     expect(wrapper.vm.screenshotContent).equal('10:50');
   });
@@ -478,7 +478,7 @@ describe('TimeProgressBar.vue', () => {
     所以触发了两个on之后的箭头函数，所以测试这个事件的方法待研究。
   it('the created hook works as expected, event $on - 1.1', () => {
     const wrapper = shallowMount(TimeProgressBar, { store, localVue });
-    store.state.WindowState.windowSize = [600, 600];
+    store.state.Window.windowSize = [600, 600];
     wrapper.vm.$electron.ipcRenderer.emit('main-resize');
     const stub = sinon.stub(wrapper.vm.$electron.ipcRenderer, 'on');
     stub.yields();

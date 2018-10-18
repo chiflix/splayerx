@@ -1,5 +1,5 @@
 import Vuex from 'vuex';
-import PlaybackState from '@/store/modules/PlaybackState';
+import Video from '@/store/modules/Video';
 import TheTimeCodes from '@/components/PlayingView/TheTimeCodes';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
@@ -13,9 +13,10 @@ describe('TheTimeCodes.vue', () => {
   beforeEach(() => {
     store = new Vuex.Store({
       modules: {
-        PlaybackState: {
-          state: PlaybackState.state,
-          mutations: PlaybackState.mutations,
+        Video: {
+          state: Video.state,
+          mutations: Video.mutations,
+          getters: Video.getters,
         },
       },
     });
@@ -47,9 +48,9 @@ describe('TheTimeCodes.vue', () => {
 
   it('has correct computed property - hasDuration', () => {
     const wrapper = shallowMount(TheTimeCodes, { store, localVue });
-    store.state.PlaybackState.Duration = NaN;
+    store.state.Video.Duration = NaN;
     expect(wrapper.vm.hasDuration).equal(false);
-    store.state.PlaybackState.Duration = 1;
+    store.state.Video.Duration = 1;
     expect(wrapper.vm.hasDuration).equal(true);
   });
 
@@ -68,27 +69,27 @@ describe('TheTimeCodes.vue', () => {
 
   it('has correct computed property - duration', () => {
     const wrapper = shallowMount(TheTimeCodes, { store, localVue });
-    store.state.PlaybackState.Duration = 3000;
+    store.state.Video.Duration = 3000;
     expect(wrapper.vm.duration).equal('50:00');
   });
 
   it('has correct computed property - currentTime', () => {
     const wrapper = shallowMount(TheTimeCodes, { store, localVue });
-    store.state.PlaybackState.CurrentTime = 1500;
+    store.state.Video.CurrentTime = 1500;
     expect(wrapper.vm.currentTime).equal('25:00');
   });
 
   it('has correct computed property - remainTime', () => {
     const wrapper = shallowMount(TheTimeCodes, { store, localVue });
-    store.state.PlaybackState.Duration = 3245;
-    store.state.PlaybackState.CurrentTime = 1799; // 3245 - 1799 = 1446
+    store.state.Video.Duration = 3245;
+    store.state.Video.CurrentTime = 1799; // 3245 - 1799 = 1446
     expect(wrapper.vm.remainTime).equal('24:06');
   });
 
   it('has correct computed property - content', () => {
     const wrapper = shallowMount(TheTimeCodes, { store, localVue });
-    store.state.PlaybackState.Duration = 3000;
-    store.state.PlaybackState.CurrentTime = 1500;
+    store.state.Video.Duration = 3000;
+    store.state.Video.CurrentTime = 1500;
     wrapper.setData({ contentState: 0 });
     expect(wrapper.vm.content.first).equal(wrapper.vm.currentTime);
     expect(wrapper.vm.content.second).equal(wrapper.vm.duration);

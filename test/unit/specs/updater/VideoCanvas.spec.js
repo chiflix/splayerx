@@ -2,7 +2,7 @@ import { createLocalVue, mount } from '@vue/test-utils';
 import VideoCanvas from '@/components/PlayingView/VideoCanvas';
 import Vuex from 'vuex';
 import sinon from 'sinon';
-import PlaybackState from '@/store/modules/PlaybackState';
+import Video from '@/store/modules/Video';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -14,9 +14,9 @@ describe('VideoCanvas.vue', () => {
   beforeEach(() => {
     store = new Vuex.Store({
       modules: {
-        PlaybackState: {
-          state: PlaybackState.state,
-          mutations: PlaybackState.mutations,
+        Video: {
+          state: Video.state,
+          mutations: Video.mutations,
         },
         WindowState: {},
       },
@@ -45,7 +45,7 @@ describe('VideoCanvas.vue', () => {
 
   it('playback-rate event work fine', () => {
     wrapper.vm.$bus.$emit('playback-rate', 1);
-    expect(store.state.PlaybackState.PlaybackRate).equal(1);
+    expect(store.state.Video.PlaybackRate).equal(1);
   });
 
   describe('calcNewWindowXY method', () => {
@@ -119,7 +119,7 @@ describe('VideoCanvas.vue', () => {
   it('onMetaLoaded method work fine if video not exist', () => {
     wrapper.vm.videoExisted = false;
     wrapper.vm.$store.commit('videoMeta', { width: 100, height: 100 });
-    store.state.PlaybackState.CurrentTime = 100;
+    store.state.Video.CurrentTime = 100;
 
     const emitStub = sinon.stub(wrapper.vm.$bus, '$emit');
     const storeStub = sinon.stub(wrapper.vm.$store, 'commit');

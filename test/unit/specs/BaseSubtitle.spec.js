@@ -1,7 +1,7 @@
 import Vuex from 'vuex';
-import PlaybackState from '@/store/modules/PlaybackState';
+import Video from '@/store/modules/Video';
 import Subtitle from '@/store/modules/Subtitle';
-import WindowState from '@/store/modules/WindowState';
+import Window from '@/store/modules/Window';
 import BaseSubtitle from '@/components/PlayingView/BaseSubtitle';
 import VideoCanvas from '@/components/PlayingView/VideoCanvas';
 import { mount, createLocalVue } from '@vue/test-utils';
@@ -20,20 +20,20 @@ describe('BaseSubtitle.vue', () => {
   beforeEach(() => {
     store = new Vuex.Store({
       modules: {
-        PlaybackState: {
-          state: PlaybackState.state,
-          mutations: PlaybackState.mutations,
-          getters: PlaybackState.getters,
+        Video: {
+          state: Video.state,
+          mutations: Video.mutations,
+          getters: Video.getters,
         },
         Subtitle: {
           state: Subtitle.state,
           mutations: Subtitle.mutations,
           getters: Subtitle.getters,
         },
-        WindowState: {
-          state: WindowState.state,
-          mutations: WindowState.mutations,
-          getters: WindowState.getters,
+        Window: {
+          state: Window.state,
+          mutations: Window.mutations,
+          getters: Window.getters,
         },
       },
     });
@@ -66,7 +66,7 @@ describe('BaseSubtitle.vue', () => {
         src: 'file://./../../../../test/assets/test.avi',
       },
     });
-    store.state.PlaybackState.OriginSrcOfVideo = decodeURI('./test/assets/test.avi');
+    store.state.Video.originSrc = decodeURI('./test/assets/test.avi');
     const childWrapper = wrapper.find(BaseSubtitle);
     childWrapper.setData({ readingMkv: true });
     const stub = sinon.stub(childWrapper.vm, 'loadLocalTextTracks');
@@ -85,7 +85,7 @@ describe('BaseSubtitle.vue', () => {
         src: 'file://./../../../../test/assets/testServer.avi',
       },
     });
-    store.state.PlaybackState.OriginSrcOfVideo = decodeURI('./test/assets/testServer.avi');
+    store.state.Video.originSrc = decodeURI('./test/assets/testServer.avi');
     const childWrapper = wrapper.find(BaseSubtitle);
     const stub = sinon.stub(childWrapper.vm, 'loadServerTextTracks');
     await childWrapper.vm.subtitleInitialize();
@@ -101,7 +101,7 @@ describe('BaseSubtitle.vue', () => {
         src: 'file://./../../../../test/assets/testMkv.mkv',
       },
     });
-    store.state.PlaybackState.OriginSrcOfVideo = decodeURI('./test/assets/testMkv.mkv');
+    store.state.Video.originSrc = decodeURI('./test/assets/testMkv.mkv');
     const childWrapper = wrapper.find(BaseSubtitle);
     const stub = sinon.stub(childWrapper.vm, 'mkvProcess');
     await childWrapper.vm.subtitleInitialize();
