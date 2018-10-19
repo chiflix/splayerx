@@ -13,7 +13,7 @@
       :muted="mute"
       :paused="paused"
       :updateCurrentTime="true"
-      :currentTime="seekTime"
+      :currentTime.sync="seekTime"
       @update:currentTime="updateCurrentTime" />
     <BaseSubtitle/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
@@ -25,8 +25,8 @@ import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
-import { Video as videoMutations } from '@/store/mutation-types';
-import { Video as videoActions } from '@/store/action-types';
+import { Video as videoMutations } from '@/store/mutationTypes';
+import { Video as videoActions } from '@/store/actionTypes';
 import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer';
 

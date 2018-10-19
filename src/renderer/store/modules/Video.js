@@ -1,5 +1,5 @@
-import { Video as mutationTypes } from '../mutation-types';
-import { Video as actionTypes } from '../action-types';
+import { Video as mutationTypes } from '../mutationTypes';
+import { Video as actionTypes } from '../actionTypes';
 
 const state = {
   // error state
@@ -36,6 +36,10 @@ const state = {
   AudioTrackList: [],
   VideoTrackList: [],
   TextTrackList: [],
+  // meta info
+  width: 0,
+  height: 0,
+  ratio: 0,
 };
 
 const getters = {

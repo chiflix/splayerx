@@ -12,7 +12,7 @@ import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
 import Path from 'path';
-import { Video as videoActions } from '@/store/action-types';
+import { Video as videoActions } from '@/store/actionTypes';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
