@@ -82,6 +82,8 @@ export default {
   name: 'subtitle-control',
   props: {
     showAttached: Boolean,
+    mousedownOnOther: Boolean,
+    mouseupOnOther: Boolean,
   },
   data() {
     return {
@@ -107,10 +109,31 @@ export default {
     Icon,
     lottie,
   },
+  watch: {
+    showAttached(val) {
+      if (!val) {
+        this.anim.playSegments([79, 92], false);
+      }
+    },
+    mousedownOnOther(val) {
+      if (val && this.showAttached) {
+        this.anim.playSegments([62, 64], false);
+        if (this.mouseupOnOther) {
+          this.anim.playSegments([79, 92], false);
+          this.$emit('update:showAttached', false);
+        }
+      }
+    },
+    mouseupOnOther(val) {
+      if (val && this.showAttached) {
+        this.anim.playSegments([79, 92], false);
+        this.$emit('update:showAttached', false);
+      }
+    },
+  },
   methods: {
     handleAnimation(anim) {
       this.anim = anim;
-      console.log(anim);
     },
     handleDown() {
       this.mouseDown = true;
@@ -119,18 +142,15 @@ export default {
       } else {
         this.anim.playSegments([62, 64], false);
       }
-      this.$refs.sub.onmouseup = () => {
+      document.onmouseup = () => {
         if (!this.showAttached) {
           if (this.validEnter) {
             this.anim.playSegments([46, 60], false);
-          } else {
+          } else if (!this.mousedownOnOther) {
             this.anim.playSegments([40, 43], false);
           }
         } else if (this.validEnter) {
           this.anim.playSegments([79, 92], false);
-        } else {
-          console.log(88);
-          this.anim.playSegments([79, 82], false);
         }
         this.mouseDown = false;
       };
@@ -142,7 +162,6 @@ export default {
         if (!this.mouseDown) {
           this.anim.playSegments([4, 8], false);
         } else {
-          console.log(55);
           this.anim.playSegments([102, 105], false);
         }
       }

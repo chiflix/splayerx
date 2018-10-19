@@ -11,7 +11,7 @@
         </AdvanceControlMenuItem>
       </div>
     </div>
-    <div ref="adv" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" @mouseover="handleOver">
+    <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" @mouseover="handleOver">
       <!--<Icon type="advance"></Icon>-->
       <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
     </div>
@@ -29,6 +29,11 @@ export default {
     AdvanceControlMenuItem,
     Icon,
     lottie,
+  },
+  props: {
+    showAttached: Boolean,
+    mousedownOnOther: Boolean,
+    mouseupOnOther: Boolean,
   },
   data() {
     return {
@@ -86,12 +91,34 @@ export default {
       animFlag: true,
       mouseDown: false,
       validEnter: false,
+      clicks: 0,
     };
+  },
+  watch: {
+    showAttached(val) {
+      if (!val) {
+        this.anim.playSegments([68, 83], false);
+      }
+    },
+    mousedownOnOther(val) {
+      if (val && this.showAttached) {
+        this.anim.playSegments([37, 41], false);
+        if (this.mouseupOnOther) {
+          this.anim.playSegments([68, 83], false);
+          this.$emit('update:showAttached', false);
+        }
+      }
+    },
+    mouseupOnOther(val) {
+      if (val && this.showAttached) {
+        this.anim.playSegments([68, 83], false);
+        this.$emit('update:showAttached', false);
+      }
+    },
   },
   methods: {
     handleAnimation(anim) {
       this.anim = anim;
-      console.log(anim);
     },
     handleDown() {
       this.mouseDown = true;
@@ -100,7 +127,7 @@ export default {
       } else {
         this.anim.playSegments([37, 41], false);
       }
-      this.$refs.adv.onmouseup = () => {
+      document.onmouseup = () => {
         if (!this.showAttached) {
           if (this.validEnter) {
             this.anim.playSegments([23, 36], false);
@@ -109,9 +136,6 @@ export default {
           }
         } else if (this.validEnter) {
           this.anim.playSegments([68, 83], false);
-        } else {
-          console.log(88);
-          this.anim.playSegments([43, 47], false);
         }
         this.mouseDown = false;
       };
@@ -123,7 +147,6 @@ export default {
         if (!this.mouseDown) {
           this.anim.playSegments([3, 7], false);
         } else {
-          console.log(55);
           this.anim.playSegments([90, 94], false);
         }
       }
@@ -140,6 +163,22 @@ export default {
         this.animFlag = true;
       }
       this.validEnter = false;
+    },
+    toggleAdvMenuDisplay() {
+      this.clicks = this.showAttached ? 1 : 0;
+      this.clicks += 1;
+      switch (this.clicks) {
+        case 1:
+          this.$emit('update:showAttached', true);
+          break;
+        case 2:
+          this.$emit('update:showAttached', false);
+          this.clicks = 0;
+          break;
+        default:
+          this.clicks = 0;
+          break;
+      }
     },
     onSecondItemClick() {
     },

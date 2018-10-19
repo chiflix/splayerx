@@ -19,7 +19,7 @@
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
       <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
-      <advance-control class="button advance" v-hidden="displayState['advance-control']" />
+      <advance-control class="button advance" v-hidden="displayState['advance-control']" v-bind.sync="widgetsStatus['advance-control']"/>
     </div>
     <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
     <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
@@ -276,8 +276,9 @@ export default {
         }
         if (mouseupChanged) {
           this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== name;
-          this.widgetsStatus[name].showAttached =
-            this.showAllWidgets && currentMousedownWidget === name;
+        }
+        if (!this.showAllWidgets) {
+          this.widgetsStatus[name].showAttached = false;
         }
       });
     },
