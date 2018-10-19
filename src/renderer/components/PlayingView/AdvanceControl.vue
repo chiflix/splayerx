@@ -131,7 +131,7 @@ export default {
         if (!this.showAttached) {
           if (this.validEnter) {
             this.anim.playSegments([23, 36], false);
-          } else {
+          } else if (!this.mousedownOnOther) {
             this.anim.playSegments([100, 104], false);
           }
         } else if (this.validEnter) {

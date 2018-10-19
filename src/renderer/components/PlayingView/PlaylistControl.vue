@@ -14,6 +14,11 @@ export default {
     Icon,
     lottie,
   },
+  props: {
+    showAttached: Boolean,
+    mousedownOnOther: Boolean,
+    mouseupOnOther: Boolean,
+  },
   data() {
     return {
       defaultOptions: { animationData },
@@ -32,7 +37,7 @@ export default {
       document.onmouseup = () => {
         if (this.validEnter) {
           this.anim.playSegments([47, 51], false);
-        } else {
+        } else if (!this.mousedownOnOther) {
           this.anim.playSegments([37, 41], false);
         }
         this.mouseDown = false;
