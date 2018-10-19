@@ -6,7 +6,7 @@ import { mount, createLocalVue } from '@vue/test-utils';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-describe.only('Component - TheTimeCodes', () => {
+describe('Component - TheTimeCodes', () => {
   let wrapper;
   const store = new Vuex.Store({
     modules: {

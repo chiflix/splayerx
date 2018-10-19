@@ -3,6 +3,8 @@ import VideoCanvas from '@/components/PlayingView/VideoCanvas';
 import Vuex from 'vuex';
 import sinon from 'sinon';
 import Video from '@/store/modules/Video';
+import Playlist from '@/store/modules/Playlist';
+import Window from '@/store/modules/Window';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -17,8 +19,18 @@ describe('VideoCanvas.vue', () => {
         Video: {
           state: Video.state,
           mutations: Video.mutations,
+          getters: Video.getters,
         },
-        Window: {},
+        Playlist: {
+          state: Playlist.state,
+          mutations: Playlist.mutations,
+          getters: Playlist.getters,
+        },
+        Window: {
+          state: Window.state,
+          mutations: Window.mutations,
+          getters: Window.getters,
+        },
       },
     });
     wrapper = mount(VideoCanvas, {
@@ -32,20 +44,6 @@ describe('VideoCanvas.vue', () => {
 
   afterEach(() => {
     wrapper.destroy();
-  });
-
-  it('should load correct data', () => {
-    expect(wrapper.vm.videoExisted).equal(false);
-    expect(wrapper.vm.shownTextTrack).equal(false);
-    expect(wrapper.vm.newWidthOfWindow).equal(0);
-    expect(wrapper.vm.newHeightOfWindow).equal(0);
-    expect(wrapper.vm.videoWidth).equal(0);
-    expect(wrapper.vm.videoHeight).equal(0);
-  });
-
-  it('playback-rate event work fine', () => {
-    wrapper.vm.$bus.$emit('playback-rate', 1);
-    expect(store.state.Video.PlaybackRate).equal(1);
   });
 
   describe('calcNewWindowXY method', () => {
@@ -114,33 +112,6 @@ describe('VideoCanvas.vue', () => {
       expect(spy.returnValues[0]).deep.equal({ windowX: 0, windowY: 0 });
       spy.restore();
     });
-  });
-
-  it('onMetaLoaded method work fine if video not exist', () => {
-    wrapper.vm.videoExisted = false;
-    wrapper.vm.$store.commit('videoMeta', { width: 100, height: 100 });
-    store.state.Video.CurrentTime = 100;
-
-    const emitStub = sinon.stub(wrapper.vm.$bus, '$emit');
-    const storeStub = sinon.stub(wrapper.vm.$store, 'commit');
-    const stub = sinon.stub(wrapper.vm, '$_controlWindowSize').callsFake();
-
-    wrapper.vm.onMetaLoaded();
-    expect(emitStub.firstCall.calledWith('play')).equal(true);
-    expect(emitStub.secondCall.calledWith('seek', 100)).equal(true);
-    expect(emitStub.thirdCall.calledWith('video-loaded')).equal(true);
-    expect(storeStub.calledWith('videoMeta')).equal(true);
-    stub.restore();
-    emitStub.restore();
-    storeStub.restore();
-  });
-
-  it('onMetaLoaded method work fine if video exist', () => {
-    wrapper.vm.videoExisted = true;
-    const stub = sinon.stub(wrapper.vm, '$_controlWindowSizeAtNewVideo').callsFake();
-    wrapper.vm.onMetaLoaded();
-    expect(wrapper.vm.videoExisted).equal(true);
-    stub.restore();
   });
 
   describe('$_calculateWindowSizeAtTheFirstTime', () => {
