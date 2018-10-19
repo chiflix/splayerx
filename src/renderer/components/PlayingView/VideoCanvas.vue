@@ -85,9 +85,9 @@ export default {
     $_controlWindowSize() {
       const landingViewRectangle = this.windowBounds;
 
-      const [windowX, windowY] = this.windowPosition;
-      const windowPosition = { x: windowX, y: windowY };
-      const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
+      const [windowX, windowY] = this.winPos;
+      const winPos = { x: windowX, y: windowY };
+      const currentDisplay = this.$electron.screen.getDisplayNearestPoint(winPos);
 
       const windowXY = this.calcNewWindowXY(currentDisplay, landingViewRectangle);
 
@@ -104,9 +104,9 @@ export default {
       ]);
     },
     $_controlWindowSizeAtNewVideo() {
-      const [windowX, windowY] = this.windowPosition;
-      const windowPosition = { x: windowX, y: windowY };
-      const currentDisplay = this.$electron.screen.getDisplayNearestPoint(windowPosition);
+      const [windowX, windowY] = this.winPos;
+      const winPos = { x: windowX, y: windowY };
+      const currentDisplay = this.$electron.screen.getDisplayNearestPoint(winPos);
 
       const windowXY = this.avoidBeyondDisplayBorder(currentDisplay, windowX, windowY);
 
@@ -123,9 +123,9 @@ export default {
       ]);
     },
     $_calculateWindowSizeAtTheFirstTime() {
-      const [windowX, windowY] = this.windowPosition;
-      const windowPosition = { x: windowX, y: windowY };
-      const currentScreen = this.$electron.screen.getDisplayNearestPoint(windowPosition);
+      const [windowX, windowY] = this.winPos;
+      const winPos = { x: windowX, y: windowY };
+      const currentScreen = this.$electron.screen.getDisplayNearestPoint(winPos);
       const { width: screenWidth, height: screenHeight } = currentScreen.workAreaSize;
       const [minWidth, minHeight] = this.windowMinimumSize;
       const screenRatio = screenWidth / screenHeight;
@@ -157,7 +157,7 @@ export default {
       }
     },
     $_calculateWindowSizeWhenVideoExisted() {
-      const [windowWidth, windowHeight] = this.windowSize;
+      const [windowWidth, windowHeight] = this.winSize;
       const [minWidth, minHeight] = this.windowMinimumSize;
       const windowRatio = windowWidth / windowHeight;
       const minWindowRatio = minWidth / minHeight;
@@ -243,10 +243,13 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['originSrc', 'convertedSrc', 'volume', 'mute', 'rate', 'paused', 'currentTime', 'duration']),
+    ...mapGetters([
+      'originSrc', 'convertedSrc', 'volume', 'mute', 'rate', 'paused', 'currentTime', 'duration',
+      'winSize', 'winPos', 'isFullscreen']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
+      videoRatio: 'ratio',
     }),
     calculateHeightByWidth() {
       return this.newWidthOfWindow / (this.videoWidth / this.videoHeight);
@@ -254,21 +257,8 @@ export default {
     calculateWidthByHeight() {
       return this.newHeightOfWindow * (this.videoWidth / this.videoHeight);
     },
-    videoRatio() {
-      if (!this.videoHeight) return 0;
-      return this.videoWidth / this.videoHeight;
-    },
-    isFullScreen() {
-      return this.$store.state.Window.isFullScreen;
-    },
-    windowSize() {
-      return this.$store.state.Window.windowSize;
-    },
     windowMinimumSize() {
       return this.$store.state.Window.windowMinimumSize;
-    },
-    windowPosition() {
-      return this.$store.state.Window.windowPosition;
     },
     windowBounds() {
       return this.$store.state.Window.windowBounds;
