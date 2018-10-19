@@ -42,9 +42,6 @@ export default {
       shownTextTrack: false,
       newWidthOfWindow: 0,
       newHeightOfWindow: 0,
-      duration: 0,
-      videoWidth: 0,
-      videoHeight: 0,
       timeUpdateIntervalID: null,
       windowSizeHelper: null,
       videoElement: null,
@@ -56,19 +53,22 @@ export default {
       videoConfigInitialize: videoActions.INITIALIZE,
       play: videoActions.PLAY_VIDEO,
       pause: videoActions.PAUSE_VIDEO,
+      updateMetaInfo: videoActions.META_INFO,
     }),
     ...mapMutations({ updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE }),
     onMetaLoaded(event) {
-      [this.duration, this.videoWidth, this.videoHeight] =
-        [event.target.duration, event.target.videoWidth, event.target.videoHeight];
       this.videoConfigInitialize({
         volume: 100,
         mute: false,
         rate: 1,
-        duration: this.duration,
+        duration: event.target.duration,
+      });
+      this.updateMetaInfo({
+        intrinsicWidth: event.target.videoWidth,
+        intrinsicHeight: event.target.videoHeight,
+        ratio: event.target.videoWidth / event.target.videoHeight,
       });
       this.$bus.$emit('seek', this.currentTime);
-      this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
       this.$bus.$emit('video-loaded');
     },
     onVideoSizeChange() {
@@ -80,7 +80,6 @@ export default {
         this.$_controlWindowSize();
         this.videoExisted = true;
       }
-      this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
       this.windowSizeHelper.setNewWindowSize();
     },
     $_controlWindowSize() {
@@ -244,7 +243,11 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['originSrc', 'convertedSrc', 'volume', 'mute', 'rate', 'paused', 'currentTime']),
+    ...mapGetters(['originSrc', 'convertedSrc', 'volume', 'mute', 'rate', 'paused', 'currentTime', 'duration']),
+    ...mapGetters({
+      videoWidth: 'intrinsicWidth',
+      videoHeight: 'intrinsicHeight',
+    }),
     calculateHeightByWidth() {
       return this.newWidthOfWindow / (this.videoWidth / this.videoHeight);
     },

@@ -36,7 +36,7 @@
         :thumbnailHeight="heightOfThumbnail"
         :currentTime="thumbnailCurrentTime"
         :maxThumbnailWidth="240"
-        :videoRatio="videoRatio"
+        :videoRatio="ratio"
         :positionOfThumbnail="positionOfScreenshot"
         :videoTime="screenshotContent" />
       <div class="progress-ready" ref="readySlider">
@@ -93,7 +93,7 @@ export default {
       timeoutIdOfHideAllWidgets: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
-      videoRatio: 1.78, // Default videoRatio incase of divide by zero error.
+      ratio: 1.78, // Default ratio incase of divide by zero error.
       percentageVideoDraged: 0,
       widthOfThumbnail: 0,
       thumbnailCurrentTime: 0,
@@ -243,7 +243,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['convertedSrc', 'duration', 'roundedCurrentTime', 'winWidth']),
+    ...mapGetters(['convertedSrc', 'duration', 'roundedCurrentTime', 'winWidth', 'ratio']),
     curProgressBarEdge() {
       if (Number.isNaN(this.duration)) {
         return 0;
@@ -282,7 +282,7 @@ export default {
       return 0.9;
     },
     heightOfThumbnail() {
-      return Math.floor(this.widthOfThumbnail / this.videoRatio);
+      return Math.floor(this.widthOfThumbnail / this.ratio);
     },
     positionOfScreenshot() {
       const progressBarWidth = this.winWidth - 20;
@@ -336,9 +336,6 @@ export default {
   },
   created() {
     Object.freeze(this.reactivePhases);
-    this.$bus.$on('screenshot-sizeset', (e) => {
-      this.videoRatio = e;
-    });
   },
 };
 
