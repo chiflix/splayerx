@@ -8,6 +8,7 @@ export const Video = {
   DECREASE_RATE: 'DECREASE_RATE',
   PLAY_VIDEO: 'PLAY_VIDEO',
   PAUSE_VIDEO: 'PAUSE_VIDEO',
+  META_INFO: 'META_INFO',
 };
 
 export const Subtitle = {

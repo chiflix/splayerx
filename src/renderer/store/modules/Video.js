@@ -69,18 +69,22 @@ const getters = {
   ratio: state => state.ratio,
 };
 
+function stateToMutation(stateType) {
+  return stateType.replace(/\.?([A-Z])/g, y => `_${y.toLowerCase()}`).replace(/^_/, '').toUpperCase().concat('_UPDATE');
+}
+
+function mutationToState(mutationType) {
+  return mutationType.toLowerCase().replace(/_UPDATE$/i, '').replace(/(_\w)/g, y => y[1].toUpperCase());
+}
+
 function mutationer(mutationType) {
-  const captialize = string => string[0].concat(string.substring(1).toLowerCase());
-  const stateType = mutationType.split('_').reduce((acum, current, index) => {
-    if (index === 1) acum = acum.toLowerCase();
-    return acum.concat(captialize(current));
-  }).replace('Update', '');
+  const stateType = mutationToState(mutationType);
   return (state, p) => {
     state[stateType] = p;
   };
 }
 
-function mutationGenerator(mutationTypes) {
+function mutationsGenerator(mutationTypes) {
   const mutations = {};
   Object.keys(mutationTypes).forEach((type) => {
     mutations[type] = mutationer(type);
@@ -88,7 +92,7 @@ function mutationGenerator(mutationTypes) {
   return mutations;
 }
 
-const mutations = mutationGenerator(mutationTypes);
+const mutations = mutationsGenerator(mutationTypes);
 
 const actions = {
   [actionTypes.SRC_SET]({ commit }, src) {
@@ -104,7 +108,7 @@ const actions = {
   },
   [actionTypes.INITIALIZE]({ commit }, config) {
     Object.keys(config).forEach((item) => {
-      const mutation = `${item.toUpperCase()}_UPDATE`;
+      const mutation = stateToMutation(item);
       if (mutationTypes[mutation]) commit(mutation, config[item]);
     });
   },
@@ -139,6 +143,19 @@ const actions = {
   },
   [actionTypes.PAUSE_VIDEO]({ commit }) {
     commit(mutationTypes.PAUSED_UPDATE, true);
+  },
+  [actionTypes.META_INFO]({ commit }, metaInfo) {
+    const validMetaInfo = [
+      'intrinsicWidth',
+      'intrinsicHeight',
+      'computedWidth',
+      'computedHeight',
+      'ratio',
+    ];
+    Object.keys(metaInfo).forEach((item) => {
+      const mutation = stateToMutation(item);
+      if (validMetaInfo.includes(item) && mutationTypes[mutation]) commit(mutation, metaInfo[item]);
+    });
   },
 };
 
