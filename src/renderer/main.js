@@ -12,6 +12,7 @@ import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
 import Path from 'path';
+import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/action-types';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
@@ -37,6 +38,9 @@ new Vue({
   router,
   store,
   template: '<App/>',
+  computed: {
+    ...mapGetters(['mute']),
+  },
   methods: {
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
@@ -56,14 +60,18 @@ new Vue({
                     name: 'Video Files',
                     extensions: VALID_EXTENSION,
                   }],
-                }, (file) => {
-                  if (file !== undefined) {
-                    if (file !== undefined) {
-                      if (!file[0].includes('\\')) {
-                        this.openFile(file[0]);
-                      } else {
-                        this.addLog('error', `Failed to open file: ${file[0]}`);
-                      }
+                }, (files) => {
+                  if (files !== undefined) {
+                    if (!files[0].includes('\\') || process.platform === 'win32') {
+                      this.openFile(files[0]);
+                    } else {
+                      this.addLog('error', `Failed to open file: ${files[0]}`);
+                    }
+                    if (files.length > 1) {
+                      this.$store.commit('PlayingList', files);
+                    } else {
+                      const similarVideos = this.findSimilarVideoByVidPath(files[0]);
+                      this.$store.commit('PlayingList', similarVideos);
                     }
                   }
                 });
@@ -124,6 +132,15 @@ new Vue({
         {
           label: this.$t('msg.audio.name'),
           submenu: [
+            {
+              label: this.$t('msg.audio.mute'),
+              type: 'checkbox',
+              accelerator: 'M',
+              click: (menuItem) => {
+                this.$bus.$emit('toggle-mute');
+                menuItem.checked = this.mute;
+              },
+            },
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
             { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
             { type: 'separator' },
@@ -468,7 +485,6 @@ new Vue({
           }
           break;
         default:
-          console.log(e.key);
           break;
       }
     });
@@ -483,29 +499,37 @@ new Vue({
      */
     window.addEventListener('drop', (e) => {
       e.preventDefault();
-      let potentialVidPath;
       let tempFilePath;
       let containsSubFiles = false;
       const { files } = e.dataTransfer;
       // TODO: play it if it's video file
       const subtitleFiles = [];
-      const regex = '^(.srt|.ass|.vtt)$';
-      const re = new RegExp(regex);
+      const subRegex = new RegExp('^(.srt|.ass|.vtt)$');
+      const videoFiles = [];
+      const vidRegex = new RegExp('^(3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc)$');
       for (let i = 0; i < files.length; i += 1) {
-        tempFilePath = `file:///${files[i].path}`;
-        if (re.test(Path.extname(tempFilePath))) {
-          subtitleFiles.push(files[i].path);
+        tempFilePath = files[i].path;
+        if (subRegex.test(Path.extname(tempFilePath))) {
+          subtitleFiles.push(tempFilePath);
           containsSubFiles = true;
+        } else if (vidRegex.test(Path.extname(tempFilePath))) {
+          videoFiles.push(tempFilePath);
         } else {
-          potentialVidPath = tempFilePath;
+          this.addLog('error', `Failed to open file : ${tempFilePath}`);
         }
       }
-      const fileregex = '^(.3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc])$';
-      const filere = new RegExp(fileregex);
-      if (potentialVidPath && filere.test(Path.extname(tempFilePath)) && !tempFilePath.includes('\\')) {
-        this.openFile(potentialVidPath.replace(/^file:\/\/\//, ''));
-      } else {
-        this.addLog('error', `Failed to open file: ${potentialVidPath.replace(/^file:\/\/\//, '')}`);
+      if (videoFiles.length !== 0) {
+        if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
+          if (this.$store.state.PlaybackState.OriginSrcOfVideo === '') this.openFile(videoFiles[0]);
+        } else {
+          this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
+        }
+        if (videoFiles.length > 1) {
+          this.$store.commit('PlayingList', videoFiles);
+        } else {
+          const similarVideos = this.findSimilarVideoByVidPath(videoFiles[0]);
+          this.$store.commit('PlayingList', similarVideos);
+        }
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitle', subtitleFiles);

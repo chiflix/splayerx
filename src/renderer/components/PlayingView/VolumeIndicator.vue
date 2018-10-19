@@ -1,9 +1,9 @@
 <template>
-  <div class="indicator-container" :style="{ height: backgroundHeight + 24 + 'px', top: containerTop + 'px' }">
-    <base-info-card :containerWidth="winWidth > 1920 ? 12 : 6" :containerHeight="backgroundHeight">
+  <div class="indicator-container">
+    <base-info-card class="card">
       <div class="indicator" :style="{ height: volume * 100 + '%', opacity: mute ? 0.25 : 0.8 }"></div>
     </base-info-card>
-    <base-icon v-show="mute || volume <= 0" class="mute" type="volume" :style="{ top: muteTop + 'px' }" effect="mute" />
+    <base-icon v-show="mute || volume <= 0" class="mute" type="volume" effect="mute" />
   </div>
 </template>
 
@@ -18,17 +18,7 @@ export default {
     'base-icon': BaseIcon,
   },
   computed: {
-    ...mapGetters(['volume', 'mute', 'winWidth', 'winHeight']),
-    backgroundHeight() {
-      return this.winWidth > 1920 ? Math.round(this.winHeight * 0.37)
-        : Math.round(100 + ((this.winWidth - 320) / 5.33));
-    },
-    containerTop() {
-      return Math.round(this.winHeight - this.backgroundHeight) / 2;
-    },
-    muteTop() {
-      return this.backgroundHeight + (this.winWidth > 1920 ? 4 : 2);
-    },
+    ...mapGetters(['volume', 'mute']),
   },
 };
 </script>
@@ -40,6 +30,33 @@ export default {
   flex-direction: column;
   align-items: center;
   width: 12px;
+  height: calc(var(--background-height) + 24px);
+  top: var(--container-top);
+  --window-height: 100vh;
+  --window-width: 100vw;
+  --extra-width: calc(var(--window-width) - 320px);
+  --extra-height: calc(var(--extra-width) / 5.53);
+  --background-height: calc(100px + var(--extra-height));
+  --remain-height: calc(var(--window-height) - var(--background-height));
+  --container-top: calc(var(--remain-height) / 2);
+  --mute-top: calc(var(--background-height) + 2px);
+  .card {
+    top: 0;
+    left: 3px;
+    width: 6px;
+    height: var(--background-height);
+  }
+  .indicator {
+    width: 4px;
+    background: white;
+    border-radius: 0 1px 1px 0;
+    position: absolute;
+    bottom: 0px;
+  }
+  .mute {
+    position: absolute;
+    top: var(--mute-top);
+  }
   @media screen and (max-width: 512px) {
     right: 23px;
   }
@@ -52,19 +69,15 @@ export default {
   @media screen and (min-width: 1921px) {
     right: 57px;
     width: 24px;
-    .indicator {
-      width: 8px;
+    --background-height: calc(var(--window-height) * 0.37);
+    --mute-top: calc(var(--background-height) + 4px);
+    .card {
+      left: 6px;
+      width: 12px;
     }
-  }
-  .indicator {
-    width: 4px;
-    background: white;
-    border-radius: 0 1px 1px 0;
-    position: absolute;
-    bottom: 0;
-  }
-  .mute {
-    position: absolute;
+    .indicator {
+      width: 10px;
+    }
   }
 }
 </style>

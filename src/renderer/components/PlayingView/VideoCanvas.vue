@@ -8,9 +8,7 @@
       :styleObject="{objectFit: 'contain', width: '100%', height: '100%'}"
       @play="onPlay"
       @pause="onPause"
-      @playing="onPlaying"
       @canplay="onCanPlay"
-      @timeupdate="onTimeupdate"
       @loadedmetadata="onMetaLoaded"
       @durationchange="onDurationChange"
       :src="src" />
@@ -62,27 +60,13 @@ export default {
   methods: {
     ...mapActions({
       videoConfigInitialize: videoActions.INITIALIZE,
+      toggleMute: videoActions.TOGGLE_MUTE,
     }),
-    accurateTimeUpdate() {
-      const { currentTime, duration } = this.videoElement;
-      if (currentTime >= duration || this.videoElement.paused) {
-        clearInterval(this.timeUpdateIntervalID);
-      } else {
-        this.$store.commit('AccurateTime', currentTime);
-      }
-    },
     onPlay() {
       this.$store.commit('isPlaying', true);
     },
     onPause() {
       this.$store.commit('isPlaying', false);
-    },
-    onPlaying() {
-      // set interval to get update time
-      const { duration } = this.videoElement;
-      if (duration <= 240) {
-        this.timeUpdateIntervalID = setInterval(this.accurateTimeUpdate, 10);
-      }
     },
     onCanPlay() {
       // the video is ready to start playing
@@ -98,11 +82,10 @@ export default {
       this.$bus.$emit('video-loaded');
     },
     onTimeupdate() {
-      this.$store.commit('AccurateTime', this.videoElement.currentTime);
-      const t = Math.floor(this.videoElement.currentTime);
-      if (t !== this.$store.state.PlaybackState.CurrentTime) {
-        this.$store.commit('CurrentTime', t);
+      if (this.isPlaying) {
+        this.$store.commit('CurrentTime', this.videoElement.currentTime);
       }
+      requestAnimationFrame(this.onTimeupdate);
     },
     onDurationChange() {
       const t = Math.floor(this.$refs.videoCanvas.videoElement().duration);
@@ -294,8 +277,11 @@ export default {
     currentTime() {
       return this.$store.state.PlaybackState.CurrentTime;
     },
-    originSrcOfVideo() {
+    srcOfVideo() {
       return this.$store.state.PlaybackState.OriginSrcOfVideo;
+    },
+    isPlaying() {
+      return this.$store.state.PlaybackState.isPlaying;
     },
     videoMeta() {
       return this.$store.state.PlaybackState.videoMeta;
@@ -327,13 +313,14 @@ export default {
     },
   },
   watch: {
-    originSrcOfVideo(val, oldVal) {
+    srcOfVideo(val, oldVal) {
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
+            console.log(mergedData);
             this.infoDB().add('recent-played', mergedData);
           }
         });
@@ -352,6 +339,7 @@ export default {
     },
   },
   mounted() {
+    requestAnimationFrame(this.onTimeupdate);
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.videoConfigInitialize({
       volume: 100,
@@ -372,6 +360,7 @@ export default {
         this.$bus.$emit('twinkle-pause-icon');
       }
     });
+    this.$bus.$on('toggle-mute', this.toggleMute);
     this.$bus.$on('play', () => {
       this.videoElement.play();
     });
@@ -379,9 +368,9 @@ export default {
       this.videoElement.pause();
     });
     this.$bus.$on('seek', (e) => {
+      if (e < 0) e = 0;
       this.videoElement.currentTime = e;
       this.$store.commit('CurrentTime', e);
-      this.$store.commit('AccurateTime', e);
 
       const filePath = decodeURI(this.videoElement.src);
       const indexOfLastDot = filePath.lastIndexOf('.');
