@@ -149,7 +149,6 @@ export default {
     },
     // styles
     styles(newVal) {
-      console.log(newVal);
       this.setStyle(newVal);
     },
   },
@@ -222,7 +221,7 @@ export default {
   beforeDestroy() {
     if (this.updateCurrentTime) {
       cancelAnimationFrame(this.currentTimeAnimationFrameId);
-      this.updateCurrentTime = false;
+      this.$emit('update:updateCurrentTime', false);
     }
     this.removeEvents(this.events);
   },

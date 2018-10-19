@@ -4,7 +4,7 @@
     class="video">
     <base-video-player
       ref="videoCanvas"
-      :events="['loadedmetadata']"
+      :events="['loadedmetadata', 'resize']"
       :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
       :src="convertedSrc"
@@ -13,7 +13,7 @@
       :muted="mute"
       :paused="paused"
       :updateCurrentTime="true"
-      :currentTime.sync="seekTime"
+      :currentTime="seekTime"
       @update:currentTime="updateCurrentTime" />
     <BaseSubtitle/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
@@ -57,7 +57,7 @@ export default {
       play: videoActions.PLAY_VIDEO,
       pause: videoActions.PAUSE_VIDEO,
     }),
-    ...mapMutations({ updateCurrentTime: videoMutations.CURRENTTIME_UPDATE }),
+    ...mapMutations({ updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE }),
     onMetaLoaded(event) {
       [this.duration, this.videoWidth, this.videoHeight] =
         [event.target.duration, event.target.videoWidth, event.target.videoHeight];
@@ -67,7 +67,6 @@ export default {
         rate: 1,
         duration: this.duration,
       });
-      this.$bus.$emit('play');
       this.$bus.$emit('seek', this.currentTime);
       this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
       this.$bus.$emit('video-loaded');

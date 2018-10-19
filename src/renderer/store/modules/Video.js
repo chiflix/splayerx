@@ -37,59 +37,58 @@ const state = {
   VideoTrackList: [],
   TextTrackList: [],
   // meta info
-  width: 0,
-  height: 0,
+  intrinsicWidth: 0,
+  intrinsicHeight: 0,
+  computedWidth: 0,
+  computedHeight: 0,
   ratio: 0,
 };
 
 const getters = {
+  // network state
   originSrc: state => state.src,
   convertedSrc: (state) => {
     const converted = encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
     return process.platform === 'win32' ? converted : `file://${converted}`;
   },
+  // playback state
   duration: state => state.duration,
   tempoaryFinalPartTime: state => state.duration * 0.7,
   currentTime: state => state.currentTime,
+  paused: state => state.paused,
   roundedCurrentTime: state => Math.round(state.currentTime),
+  // controls
   volume: state => state.volume / 100,
   mute: state => state.mute,
   rate: state => state.rate,
-  paused: state => state.paused,
+  // meta info
+  intrinsicWidth: state => state.intrinsicWidth,
+  intrinsicHeight: state => state.intrinsicHeight,
+  computedWidth: state => state.computedWidth,
+  computedHeight: state => state.computedHeight,
+  ratio: state => state.ratio,
 };
 
-const mutations = {
-  // error state
-  [mutationTypes.ERRORCODE_UPDATE](s, p) {
-    s.errorCode = p;
-  },
-  [mutationTypes.ERRORMESSAGE_UPDATE](s, p) {
-    s.errorMessage = p;
-  },
-  // playback state
-  [mutationTypes.DURATION_UPDATE](s, p) {
-    s.duration = p;
-  },
-  [mutationTypes.CURRENTTIME_UPDATE](s, p) {
-    s.currentTime = p;
-  },
-  [mutationTypes.PAUSED_UPDATE](s, p) {
-    s.paused = p;
-  },
-  // network state
-  [mutationTypes.SRC_UPDATE](s, p) {
-    s.src = p;
-  },
-  [mutationTypes.VOLUME_UPDATE](s, p) {
-    s.volume = p;
-  },
-  [mutationTypes.MUTE_UPDATE](s, p) {
-    s.mute = p;
-  },
-  [mutationTypes.RATE_UPDATE](s, p) {
-    s.rate = p;
-  },
-};
+function mutationer(mutationType) {
+  const captialize = string => string[0].concat(string.substring(1).toLowerCase());
+  const stateType = mutationType.split('_').reduce((acum, current, index) => {
+    if (index === 1) acum = acum.toLowerCase();
+    return acum.concat(captialize(current));
+  }).replace('Update', '');
+  return (state, p) => {
+    state[stateType] = p;
+  };
+}
+
+function mutationGenerator(mutationTypes) {
+  const mutations = {};
+  Object.keys(mutationTypes).forEach((type) => {
+    mutations[type] = mutationer(type);
+  });
+  return mutations;
+}
+
+const mutations = mutationGenerator(mutationTypes);
 
 const actions = {
   [actionTypes.SRC_SET]({ commit }, src) {
