@@ -61,6 +61,7 @@ export default {
   methods: {
     ...mapActions({
       videoConfigInitialize: videoActions.INITIALIZE,
+      toggleMute: videoActions.TOGGLE_MUTE,
     }),
     onPlay() {
       this.$store.commit('isPlaying', true);
@@ -361,6 +362,7 @@ export default {
         this.$bus.$emit('twinkle-pause-icon');
       }
     });
+    this.$bus.$on('toggle-mute', this.toggleMute);
     this.$bus.$on('play', () => {
       this.videoElement.play();
     });
