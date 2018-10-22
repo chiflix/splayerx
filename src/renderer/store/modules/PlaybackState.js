@@ -13,10 +13,12 @@ const state = {
   isPlaying: false,
   OriginSrcOfVideo: '',
   PlayingList: [],
+  FolderList: [],
 };
 
 const getters = {
   isPlaying: state => state.isPlaying,
+  isFolderList: state => state.PlayingList.length === 0,
   convertedSrcOfVideo: (state) => {
     const originPath = state.OriginSrcOfVideo;
     const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
@@ -24,9 +26,10 @@ const getters = {
     return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
   },
   nextVideo: (state) => {
-    const index = state.PlayingList.findIndex(value => value === state.OriginSrcOfVideo);
-    if (index !== -1 && index + 1 < state.PlayingList.length) {
-      return state.PlayingList[index + 1];
+    const list = state.PlayingList.length > 0 ? state.PlayingList : state.FolderList;
+    const index = list.findIndex(value => value === state.OriginSrcOfVideo);
+    if (index !== -1 && index + 1 < list.length) {
+      return list[index + 1];
     }
     return '';
   },
@@ -38,6 +41,9 @@ const getters = {
 const mutations = {
   PlayingList(state, t) {
     state.PlayingList.push(...t);
+  },
+  FolderList(state, t) {
+    state.FolderList.push(...t);
   },
   PlaybackRate(state, t) {
     state.PlaybackRate = t;

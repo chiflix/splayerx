@@ -15,7 +15,7 @@
       <div class="info">
         <div class="top">
           <div class="duration">{{ duration }}</div>
-          <div class="title">&nbsp· Next in Playing List</div>
+          <div class="title">&nbsp· {{ title }}</div>
         </div>
         <div class="vid-name">{{ videoName }}</div>
       </div>
@@ -41,6 +41,7 @@
 </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import path from 'path';
 import Icon from '../BaseIconContainer';
 export default {
@@ -105,11 +106,12 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['nextVideo', 'finalPartStartTime', 'isFolderList']),
     videoName() {
       return path.basename(this.nextVideo, path.extname(this.nextVideo));
     },
-    nextVideo() {
-      return this.$store.getters.nextVideo;
+    title() {
+      return this.isFolderList ? 'Next in Folder' : 'Next in Playlist';
     },
     convertedSrcOfNextVideo() {
       if (this.nextVideo) {
@@ -119,9 +121,6 @@ export default {
         return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
       }
       return '';
-    },
-    finalPartStartTime() {
-      return this.$store.getters.finalPartStartTime;
     },
   },
   mounted() {
@@ -359,11 +358,13 @@ export default {
               font-size: 8px;
               letter-spacing: 0.42px;
               line-height: 10px;
+              transform: translateY(-0.5px);
             }
             @media screen and (min-width: 855px) and (max-width: 1920px) {
               font-size: 10px;
               letter-spacing: 0.52px;
               line-height: 12px;
+              transform: translateY(-1px);
             }
             @media screen and (min-width: 1921px) {
               font-size: 14px;

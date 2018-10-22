@@ -207,7 +207,7 @@ export default {
             this.$store.commit('PlayingList', items);
           } else {
             const similarVideos = this.findSimilarVideoByVidPath(items[0]);
-            this.$store.commit('PlayingList', similarVideos);
+            this.$store.commit('FolderList', similarVideos);
           }
         }
       });
@@ -367,7 +367,7 @@ export default {
         } else {
           this.openFile(item.path);
           const similarVideos = this.findSimilarVideoByVidPath(item.path);
-          this.$store.commit('PlayingList', similarVideos);
+          this.$store.commit('FolderList', similarVideos);
         }
         this.$bus.$emit('moveItem', this.moveItem);
         this.$bus.$emit('move', this.move);
