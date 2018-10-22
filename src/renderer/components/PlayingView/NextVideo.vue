@@ -166,6 +166,7 @@ export default {
     }
   }
   .thumbnail {
+    cursor: pointer;
     position: absolute;
     box-sizing: border-box;
     top: 0;
