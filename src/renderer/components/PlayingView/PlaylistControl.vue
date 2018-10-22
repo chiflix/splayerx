@@ -1,6 +1,5 @@
 <template>
   <div @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
-    <!--<Icon type="listicon"></Icon>-->
     <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="playlist"></lottie>
   </div>
 </template>

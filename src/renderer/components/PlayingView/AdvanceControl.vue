@@ -11,8 +11,7 @@
         </AdvanceControlMenuItem>
       </div>
     </div>
-    <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" @mouseover="handleOver">
-      <!--<Icon type="advance"></Icon>-->
+    <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
       <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
     </div>
   </div>
@@ -92,26 +91,29 @@ export default {
       mouseDown: false,
       validEnter: false,
       clicks: 0,
+      showFlag: false,
     };
   },
   watch: {
     showAttached(val) {
       if (!val) {
-        this.anim.playSegments([68, 83], false);
+        this.showFlag = true;
+        this.animFlag = true;
+        this.anim.playSegments([68, 89], false);
       }
     },
     mousedownOnOther(val) {
       if (val && this.showAttached) {
         this.anim.playSegments([37, 41], false);
         if (this.mouseupOnOther) {
-          this.anim.playSegments([68, 83], false);
+          // this.anim.playSegments([68, 83], false);
           this.$emit('update:showAttached', false);
         }
       }
     },
     mouseupOnOther(val) {
       if (val && this.showAttached) {
-        this.anim.playSegments([68, 83], false);
+        // this.anim.playSegments([68, 83], false);
         this.$emit('update:showAttached', false);
       }
     },
@@ -132,7 +134,7 @@ export default {
           if (this.validEnter) {
             this.anim.playSegments([23, 36], false);
           } else if (!this.mousedownOnOther) {
-            this.anim.playSegments([100, 104], false);
+            this.anim.playSegments([105, 109], false);
           }
         } else if (this.validEnter) {
           this.anim.playSegments([68, 83], false);
@@ -140,23 +142,24 @@ export default {
         this.mouseDown = false;
       };
     },
-    handleOver() {
-    },
     handleEnter() {
       if (this.animFlag) {
         if (!this.mouseDown) {
           this.anim.playSegments([3, 7], false);
         } else {
-          this.anim.playSegments([90, 94], false);
+          this.anim.playSegments([95, 99], false);
         }
       }
+      this.showFlag = false;
       this.validEnter = true;
       this.animFlag = false;
     },
     handleLeave() {
       if (!this.showAttached) {
         if (this.mouseDown) {
-          this.anim.playSegments([85, 89], false);
+          this.anim.playSegments([90, 94], false);
+        } else if (this.showFlag) {
+          this.showFlag = false;
         } else {
           this.anim.playSegments([10, 14], false);
         }

@@ -68,7 +68,7 @@
 
           </ul>
         </div>
-        <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" @mouseover="handleOver">
+        <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
           <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
         </div>
       </div>
@@ -103,6 +103,7 @@ export default {
       animFlag: true,
       mouseDown: false,
       validEnter: false,
+      showFlag: false,
     };
   },
   components: {
@@ -112,21 +113,21 @@ export default {
   watch: {
     showAttached(val) {
       if (!val) {
-        this.anim.playSegments([79, 92], false);
+        this.showFlag = true;
+        this.animFlag = true;
+        this.anim.playSegments([79, 98], false);
       }
     },
     mousedownOnOther(val) {
       if (val && this.showAttached) {
         this.anim.playSegments([62, 64], false);
         if (this.mouseupOnOther) {
-          this.anim.playSegments([79, 92], false);
           this.$emit('update:showAttached', false);
         }
       }
     },
     mouseupOnOther(val) {
       if (val && this.showAttached) {
-        this.anim.playSegments([79, 92], false);
         this.$emit('update:showAttached', false);
       }
     },
@@ -155,8 +156,6 @@ export default {
         this.mouseDown = false;
       };
     },
-    handleOver() {
-    },
     handleEnter() {
       if (this.animFlag) {
         if (!this.mouseDown) {
@@ -165,6 +164,7 @@ export default {
           this.anim.playSegments([102, 105], false);
         }
       }
+      this.showFlag = false;
       this.validEnter = true;
       this.animFlag = false;
     },
@@ -172,6 +172,8 @@ export default {
       if (!this.showAttached) {
         if (this.mouseDown) {
           this.anim.playSegments([35, 38], false);
+        } else if (this.showFlag) {
+          this.showFlag = false;
         } else {
           this.anim.playSegments([95, 98], false);
         }
