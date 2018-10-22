@@ -211,7 +211,6 @@ export default {
       }
     },
     $_saveScreenshot() {
-      console.log('cun tmd');
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       const { videoHeight, videoWidth } = this.videoElement;
@@ -317,8 +316,6 @@ export default {
   },
   watch: {
     srcOfVideo(val, oldVal) {
-      console.log('bian tmd');
-      console.log(this.$store.state.PlaybackState.CurrentTime);
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
