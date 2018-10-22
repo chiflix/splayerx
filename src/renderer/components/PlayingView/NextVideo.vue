@@ -82,6 +82,7 @@ export default {
         this.$emit('close-next-video');
         this.$bus.$emit('seek', this.$store.state.PlaybackState.Duration);
         this.openFile(this.nextVideo);
+        this.$bus.$emit('seek', 0); // avoid skipping the next video
       }
     },
     mouseoverVideo() {
