@@ -80,6 +80,7 @@ export default {
     handleMouseDown() {
       if (this.nextVideo) {
         this.$emit('close-next-video');
+        this.$bus.$emit('seek', this.$store.state.PlaybackState.Duration);
         this.openFile(this.nextVideo);
       }
     },
