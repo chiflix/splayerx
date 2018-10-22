@@ -21,10 +21,11 @@
 </template>;
 
 <script>
+import _ from 'lodash';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
-import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseSubtitle from './BaseSubtitle.vue';
@@ -40,8 +41,8 @@ export default {
     return {
       videoExisted: false,
       shownTextTrack: false,
-      newWidthOfWindow: 0,
-      newHeightOfWindow: 0,
+      currentWindowWidth: 0,
+      currentWindowHeight: 0,
       timeUpdateIntervalID: null,
       windowSizeHelper: null,
       videoElement: null,
@@ -73,16 +74,27 @@ export default {
     },
     onVideoSizeChange() {
       if (this.videoExisted) {
-        this.$_calculateWindowSizeWhenVideoExisted();
-        this.$_controlWindowSizeAtNewVideo();
+        const newSize = this.$_calculateWindowSize(
+          [320, 180],
+          [this.currentWindowWidth, this.currentWindowHeight],
+          [this.videoWidth, this.videoHeight],
+        );
+        // tempoary code
+        [this.currentWindowWidth, this.currentWindowHeight] = newSize;
+        this.$_controlWindowSizeAtNewVideo(newSize);
       } else {
-        this.$_calculateWindowSizeAtTheFirstTime();
-        this.$_controlWindowSize();
+        const newSize = this.$_calculateWindowSizeAtTheFirstTime()([
+          this.videoWidth,
+          this.videoHeight,
+        ]);
+        // tempoary code
+        [this.currentWindowWidth, this.currentWindowHeight] = newSize;
+        this.$_controlWindowSize(newSize);
         this.videoExisted = true;
       }
       this.windowSizeHelper.setNewWindowSize();
     },
-    $_controlWindowSize() {
+    $_controlWindowSize(newWindowSize) {
       const landingViewRectangle = this.windowBounds;
 
       const [windowX, windowY] = this.winPos;
@@ -91,98 +103,53 @@ export default {
 
       const windowXY = this.calcNewWindowXY(currentDisplay, landingViewRectangle);
 
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', [
-        parseInt(this.newWidthOfWindow, 10),
-        parseInt(this.newHeightOfWindow, 10),
-      ]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', newWindowSize);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', [
         windowXY.windowX,
         windowXY.windowY,
       ]);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [
-        this.newWidthOfWindow / this.newHeightOfWindow,
+        newWindowSize[0] / newWindowSize[1],
       ]);
     },
-    $_controlWindowSizeAtNewVideo() {
+    $_controlWindowSizeAtNewVideo(newWindowSize) {
       const [windowX, windowY] = this.winPos;
       const winPos = { x: windowX, y: windowY };
       const currentDisplay = this.$electron.screen.getDisplayNearestPoint(winPos);
 
       const windowXY = this.avoidBeyondDisplayBorder(currentDisplay, windowX, windowY);
 
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', [
-        parseInt(this.newWidthOfWindow, 10),
-        parseInt(this.newHeightOfWindow, 10),
-      ]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', newWindowSize);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', [
         windowXY.windowX,
         windowXY.windowY,
       ]);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [
-        this.newWidthOfWindow / this.newHeightOfWindow,
+        newWindowSize[0] / newWindowSize[1],
       ]);
     },
-    $_calculateWindowSizeAtTheFirstTime() {
-      const [windowX, windowY] = this.winPos;
-      const winPos = { x: windowX, y: windowY };
-      const currentScreen = this.$electron.screen.getDisplayNearestPoint(winPos);
-      const { width: screenWidth, height: screenHeight } = currentScreen.workAreaSize;
-      const [minWidth, minHeight] = this.windowMinimumSize;
-      const screenRatio = screenWidth / screenHeight;
-      const minWindowRatio = minWidth / minHeight;
-
-      if (this.videoWidth > screenWidth || this.videoHeight > screenHeight) {
-        if (this.videoRatio > screenRatio) {
-          this.newWidthOfWindow = screenWidth;
-          this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (this.videoRatio < screenRatio) {
-          this.newHeightOfWindow = screenHeight;
-          this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else {
-          [this.newWidthOfWindow, this.newHeightOfWindow] = [screenWidth, screenHeight];
-        }
-      } else if (this.videoWidth < minWidth || this.videoHeight < minHeight) {
-        if (this.videoRatio > minWindowRatio) {
-          this.newHeightOfWindow = minHeight;
-          this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (this.videoRatio < minWindowRatio) {
-          this.newWidthOfWindow = minWidth;
-          this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else {
-          [this.newWidthOfWindow, this.newHeightOfWindow]
-            = [minWidth, minHeight];
-        }
-      } else {
-        [this.newWidthOfWindow, this.newHeightOfWindow] = [this.videoWidth, this.videoHeight];
+    $_calculateWindowSize(minSize, maxSize, videoSize) {
+      const getRatio = size => size[0] / size[1];
+      const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
+      const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
+      const diffSize = (overOrNot, size, diffedSize) => size.some((value, index) => // eslint-disable-line
+        overOrNot ? value >= diffedSize[index] : value < diffedSize[index]);
+      const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
+      if (diffSize(true, videoSize, maxSize)) {
+        return biggerRatio(videoSize, maxSize) ?
+          setHeightByWidth(maxSize) : setWidthByHeight(maxSize);
+      } else if (diffSize(false, videoSize, minSize)) {
+        return biggerRatio(minSize, videoSize) ?
+          setWidthByHeight(minSize) : setHeightByWidth(videoSize);
       }
+      return videoSize;
     },
-    $_calculateWindowSizeWhenVideoExisted() {
-      const [windowWidth, windowHeight] = this.winSize;
-      const [minWidth, minHeight] = this.windowMinimumSize;
-      const windowRatio = windowWidth / windowHeight;
-      const minWindowRatio = minWidth / minHeight;
-      [this.newWidthOfWindow, this.newHeightOfWindow] = [this.videoWidth, this.videoHeight];
-      if (this.videoWidth > windowWidth || this.videoHeight > windowHeight) {
-        if (this.videoRatio > windowRatio) {
-          this.newWidthOfWindow = windowWidth;
-          this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (this.videoRatio < windowRatio) {
-          this.newHeightOfWindow = windowHeight;
-          this.newWidthOfWindow = this.calculateWidthByHeight;
-        }
-      }
-      if (this.newWidthOfWindow < minWidth || this.newHeightOfWindow < minHeight) {
-        if (this.videoRatio > minWindowRatio) {
-          this.newHeightOfWindow = minHeight;
-          this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (this.videoRatio < minWindowRatio) {
-          this.newWidthOfWindow = minWidth;
-          this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else {
-          [this.newWidthOfWindow, this.newHeightOfWindow]
-            = [this.videoWidth, this.videoHeight];
-        }
-      }
+    $_calculateWindowSizeAtTheFirstTime() {
+      return _.partial(
+        this.$_calculateWindowSize,
+        [320, 180],
+        [window.screen.availWidth, window.screen.availHeight],
+      );
     },
     $_saveScreenshot() {
       const canvas = this.$refs.thumbnailCanvas;
@@ -214,8 +181,8 @@ export default {
     calcNewWindowXY(currentDisplay, landingViewRectangle) {
       let x = landingViewRectangle.x + (landingViewRectangle.width / 2);
       let y = landingViewRectangle.y + (landingViewRectangle.height / 2);
-      x = Math.round(x - (this.newWidthOfWindow / 2));
-      y = Math.round(y - (this.newHeightOfWindow / 2));
+      x = Math.round(x - (this.currentWindowWidth / 2));
+      y = Math.round(y - (this.currentWindowHeight / 2));
 
       return this.avoidBeyondDisplayBorder(currentDisplay, x, y);
     },
@@ -231,18 +198,22 @@ export default {
       if (x < displayX) x = displayX;
       if (y < displayY) y = displayY;
 
-      const right = x + this.newWidthOfWindow; // the x axis of window's right side
+      const right = x + this.currentWindowWidth; // the x axis of window's right side
       if (right > displayX + displayWidth) {
-        x = Math.round((displayX + displayWidth) - this.newWidthOfWindow);
+        x = Math.round((displayX + displayWidth) - this.currentWindowWidth);
       }
-      const bottom = y + this.newHeightOfWindow; // the y axis of window's bottom side
+      const bottom = y + this.currentWindowHeight; // the y axis of window's bottom side
       if (bottom > displayY + displayHeight) {
-        y = Math.round((displayY + displayHeight) - this.newHeightOfWindow);
+        y = Math.round((displayY + displayHeight) - this.currentWindowHeight);
       }
       return { windowX: x, windowY: y };
     },
   },
   computed: {
+    ...mapState({
+      windowMinimumSize: state => state.Window.windowMinimumSize,
+      windowBounds: state => state.Window.windowBounds,
+    }),
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'mute', 'rate', 'paused', 'currentTime', 'duration',
       'winSize', 'winPos', 'isFullscreen']),
@@ -252,16 +223,10 @@ export default {
       videoRatio: 'ratio',
     }),
     calculateHeightByWidth() {
-      return this.newWidthOfWindow / (this.videoWidth / this.videoHeight);
+      return this.currentWindowWidth / (this.videoWidth / this.videoHeight);
     },
     calculateWidthByHeight() {
-      return this.newHeightOfWindow * (this.videoWidth / this.videoHeight);
-    },
-    windowMinimumSize() {
-      return this.$store.state.Window.windowMinimumSize;
-    },
-    windowBounds() {
-      return this.$store.state.Window.windowBounds;
+      return this.currentWindowHeight * (this.videoWidth / this.videoHeight);
     },
   },
   watch: {
@@ -286,7 +251,7 @@ export default {
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.newWidthOfWindow / this.newHeightOfWindow]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.currentWindowWidth / this.currentWindowHeight]);
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
