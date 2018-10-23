@@ -14,10 +14,15 @@ import helpers from '@/helpers';
 import Path from 'path';
 import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/action-types';
+import addLog from '@/helpers/index';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
+Vue.config.errorHandler = (err) => {
+  console.log(err);
+  addLog.methods.addLog('error', err);
+};
 
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);

@@ -165,11 +165,12 @@ export default {
     },
     addLog(level, message) {
       const app = electron.remote.app || electron.app;
-      const defaultPath = path.join(app.getPath('userData'), 'log');
+      const defaultPath = path.join(app.getPath('userData'), 'logs');
       function fsExistsSync(path) {
         try {
           fs.accessSync(path, fs.F_OK);
         } catch (e) {
+          this.addLog('error', e);
           return false;
         }
         return true;
@@ -186,9 +187,9 @@ export default {
       const logger = winston.createLogger({
         format: winston.format.combine(winston.format.printf((info) => {
           if (info.stack) {
-            return `{"time":"${info.time}","level":"${info.level}","message":"${info.message}", "stack":"${info.stack}"}`;
+            return `${info.time} - ${info.level}: ${info.message}-${info.stack}`;
           }
-          return `{"time":"${info.time}","level":"${info.level}","message":"${info.message}"}`;
+          return `${info.time} - ${info.level}: ${info.message}`;
         })),
         transports: [
           new winston.transports.File({ filename: `${defaultPath}/${time}.log` }),
