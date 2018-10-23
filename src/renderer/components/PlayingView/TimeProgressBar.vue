@@ -260,7 +260,7 @@ export default {
         return 0;
       }
       const progressBarWidth = this.winWidth - FOOL_PROOFING_BAR_WIDTH;
-      return (this.$store.state.PlaybackState.AccurateTime
+      return (this.$store.state.PlaybackState.CurrentTime
         / this.$store.state.PlaybackState.Duration) * progressBarWidth;
     },
     /**

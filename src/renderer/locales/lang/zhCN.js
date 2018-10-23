@@ -22,6 +22,7 @@ export default {
       name: '音频',
       increaseAudioDelay: '增加音频延迟',
       decreaseAudioDelay: '减少音频延迟',
+      mute: '静音',
       switchAudioTrack: '切换音轨',
       track1: '轨道1',
       track2: '轨道2',
