@@ -12,6 +12,7 @@ import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
 import Path from 'path';
+import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/action-types';
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
@@ -37,6 +38,9 @@ new Vue({
   router,
   store,
   template: '<App/>',
+  computed: {
+    ...mapGetters(['mute']),
+  },
   methods: {
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
@@ -69,7 +73,7 @@ new Vue({
                       this.$store.commit('PlayingList', files);
                     } else {
                       const similarVideos = this.findSimilarVideoByVidPath(files[0]);
-                      this.$store.commit('PlayingList', similarVideos);
+                      this.$store.commit('FolderList', similarVideos);
                     }
                   }
                 });
@@ -130,6 +134,15 @@ new Vue({
         {
           label: this.$t('msg.audio.name'),
           submenu: [
+            {
+              label: this.$t('msg.audio.mute'),
+              type: 'checkbox',
+              accelerator: 'M',
+              click: (menuItem) => {
+                this.$bus.$emit('toggle-mute');
+                menuItem.checked = this.mute;
+              },
+            },
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
             { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
             { type: 'separator' },
@@ -510,7 +523,7 @@ new Vue({
       }
       if (videoFiles.length !== 0) {
         if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
-          this.openFile(videoFiles[0]);
+          if (this.$store.state.PlaybackState.OriginSrcOfVideo === '') this.openFile(videoFiles[0]);
         } else {
           this.$store.dispatch('addMessages', {
             type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
@@ -520,7 +533,7 @@ new Vue({
           this.$store.commit('PlayingList', videoFiles);
         } else {
           const similarVideos = this.findSimilarVideoByVidPath(videoFiles[0]);
-          this.$store.commit('PlayingList', similarVideos);
+          this.$store.commit('FolderList', similarVideos);
         }
       }
       if (containsSubFiles) {

@@ -60,6 +60,7 @@ export default {
   methods: {
     ...mapActions({
       videoConfigInitialize: videoActions.INITIALIZE,
+      toggleMute: videoActions.TOGGLE_MUTE,
     }),
     onPlay() {
       this.$store.commit('isPlaying', true);
@@ -219,6 +220,9 @@ export default {
         0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
+      // 用于测试截图的代码，以后可能还会用到
+      // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
+      // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
       [canvas.width, canvas.height] = [211.3, 122.6];
       canvasCTX.drawImage(
         this.videoElement, 0, 0, videoWidth, videoHeight,
@@ -319,7 +323,6 @@ export default {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
-            console.log(mergedData);
             this.infoDB().add('recent-played', mergedData);
           }
         });
@@ -359,6 +362,7 @@ export default {
         this.$bus.$emit('twinkle-pause-icon');
       }
     });
+    this.$bus.$on('toggle-mute', this.toggleMute);
     this.$bus.$on('play', () => {
       this.videoElement.play();
     });
