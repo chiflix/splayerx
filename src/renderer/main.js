@@ -73,7 +73,7 @@ new Vue({
                       this.$store.commit('PlayingList', files);
                     } else {
                       const similarVideos = this.findSimilarVideoByVidPath(files[0]);
-                      this.$store.commit('PlayingList', similarVideos);
+                      this.$store.commit('FolderList', similarVideos);
                     }
                   }
                 });
@@ -533,7 +533,7 @@ new Vue({
           this.$store.commit('PlayingList', videoFiles);
         } else {
           const similarVideos = this.findSimilarVideoByVidPath(videoFiles[0]);
-          this.$store.commit('PlayingList', similarVideos);
+          this.$store.commit('FolderList', similarVideos);
         }
       }
       if (containsSubFiles) {
