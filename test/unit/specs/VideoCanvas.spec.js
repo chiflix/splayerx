@@ -1,213 +1,317 @@
 import { createLocalVue, mount } from '@vue/test-utils';
 import VideoCanvas from '@/components/PlayingView/VideoCanvas';
-import Vuex from 'vuex';
 import sinon from 'sinon';
+import Vuex from 'vuex';
 import Video from '@/store/modules/Video';
 import Playlist from '@/store/modules/Playlist';
 import Window from '@/store/modules/Window';
+import { Video as videoActions } from '@/store/actionTypes';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 
-describe('VideoCanvas.vue', () => {
-  let store;
-  let wrapper;
-  beforeEach(() => {
-    store = new Vuex.Store({
-      modules: {
-        Video: {
-          state: Video.state,
-          mutations: Video.mutations,
-          getters: Video.getters,
-        },
-        Playlist: {
-          state: Playlist.state,
-          mutations: Playlist.mutations,
-          getters: Playlist.getters,
-        },
-        Window: {
-          state: Window.state,
-          mutations: Window.mutations,
-          getters: Window.getters,
-        },
+describe('Component - VideoCanvas', () => {
+  const store = new Vuex.Store({
+    modules: {
+      Video: {
+        state: Video.state,
+        mutations: Video.mutations,
+        getters: Video.getters,
       },
-    });
+      Playlist: {
+        state: Playlist.state,
+        mutations: Playlist.mutations,
+        getters: Playlist.getters,
+      },
+      Window: {
+        state: Window.state,
+        mutations: Window.mutations,
+        getters: Window.getters,
+      },
+    },
+  });
+  let wrapper;
+  let sandbox;
+  beforeEach(() => {
     wrapper = mount(VideoCanvas, {
       store,
       localVue,
-      propsData: {
-        src: 'file:///./../../../../test/assets/test.avi',
-      },
     });
+    sandbox = sinon.createSandbox();
   });
 
   afterEach(() => {
     wrapper.destroy();
+    sandbox.restore();
   });
 
-  describe('calcNewWindowXY method', () => {
-    let currentDisplay;
-    beforeEach(() => {
-      currentDisplay = {
-        workArea: {
-          width: 1920,
-          height: 1080,
-          x: 0,
-          y: 0,
+  it('Sanity - should VideoCanvas be properly rendered', () => {
+    expect(wrapper.contains(VideoCanvas)).to.equal(true);
+  });
+
+  describe('Methods', () => {
+    describe('Method - onMetaLoaded', () => {
+      const fakeEvent = {
+        target: {
+          duration: 1300,
+          videoWidth: 1920,
+          videoHeight: 1080,
         },
       };
-      wrapper.vm.newHeightOfWindow = 1080;
-      wrapper.vm.newWidthOfWindow = 1920;
-    });
-    it('landingview is on the upper-left', () => {
-      const landingViewRectangle = {
-        x: 20,
-        y: 20,
-        width: 500,
-        height: 500,
-      };
-      const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
-      wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
-      expect(spy.called).equal(true);
-      expect(spy.returnValues[0]).deep.equal({ windowX: 0, windowY: 0 });
-      spy.restore();
-    });
-    it('landingview is on the upper-right', () => {
-      const landingViewRectangle = {
-        x: 1800,
-        y: 20,
-        width: 500,
-        height: 500,
-      };
-      const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
-      wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
-      expect(spy.called).equal(true);
-      expect(spy.returnValues[0]).deep.equal({ windowX: 0, windowY: 0 });
-      spy.restore();
-    });
-    it('landingview is on the bottom-left', () => {
-      const landingViewRectangle = {
-        x: 20,
-        y: 1800,
-        width: 500,
-        height: 500,
-      };
-      const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
-      wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
-      expect(spy.called).equal(true);
-      expect(spy.returnValues[0]).deep.equal({ windowX: 0, windowY: 0 });
-      spy.restore();
-    });
-    it('landingview is on the bottom-left', () => {
-      const landingViewRectangle = {
-        x: 1800,
-        y: 1800,
-        width: 500,
-        height: 500,
-      };
-      const spy = sinon.spy(wrapper.vm, 'calcNewWindowXY');
-      wrapper.vm.calcNewWindowXY(currentDisplay, landingViewRectangle);
-      expect(spy.called).equal(true);
-      expect(spy.returnValues[0]).deep.equal({ windowX: 0, windowY: 0 });
-      spy.restore();
-    });
-  });
+      it(`should invoke Vuex action: ${videoActions.INITIALIZE}`, () => {
+        const fakeAction = sandbox.spy();
+        const store = new Vuex.Store({
+          modules: {
+            Video: {
+              state: Video.state,
+              mutations: Video.mutations,
+              getters: Video.getters,
+              actions: {
+                [videoActions.INITIALIZE]: fakeAction,
+                [videoActions.META_INFO]: sandbox.spy(),
+              },
+            },
+            Playlist: {
+              state: Playlist.state,
+              mutations: Playlist.mutations,
+              getters: Playlist.getters,
+            },
+            Window: {
+              state: Window.state,
+              mutations: Window.mutations,
+              getters: Window.getters,
+            },
+          },
+        });
+        const wrapperWithFakeActions = mount(VideoCanvas, {
+          store,
+          localVue,
+        });
 
-  describe('$_calculateWindowSizeAtTheFirstTime', () => {
-    describe('videoWidth or videoHeight is smaller than minWidth or minHeight', () => {
-      let windowStub;
-      beforeEach(() => {
-        windowStub = sinon.stub(wrapper.vm.$store.state, 'Window').get(() => ({
-          windowMinimumSize: [427, 240],
-          windowPosition: [0, 0],
-        }));
-      });
-      afterEach(() => {
-        windowStub.restore();
-      });
-      it('videoRatio > minWindowRatio', () => {
-        wrapper.vm.$store.commit('videoMeta', { width: 300, height: 150 });
-        wrapper.vm.$_calculateWindowSizeAtTheFirstTime();
-        expect(wrapper.vm.newWidthOfWindow).equal(480);
-        expect(wrapper.vm.newHeightOfWindow).equal(240);
-        windowStub.restore();
-      });
-      it('videoRatio < minWindowRatio', () => {
-        wrapper.vm.$store.commit('videoMeta', { width: 150, height: 300 });
-        wrapper.vm.$_calculateWindowSizeAtTheFirstTime();
-        expect(wrapper.vm.newWidthOfWindow).equal(427);
-        expect(wrapper.vm.newHeightOfWindow).equal(854);
-      });
-      it('videoRatio = minWindowRatio', () => {
-        wrapper.vm.$store.commit('videoMeta', { width: 213.5, height: 120 });
-        wrapper.vm.$_calculateWindowSizeAtTheFirstTime();
-        expect(wrapper.vm.newWidthOfWindow).equal(427);
-        expect(wrapper.vm.newHeightOfWindow).equal(240);
-      });
-    });
+        wrapperWithFakeActions.vm.onMetaLoaded(fakeEvent);
 
-    describe('videoSize is between minSize and screenSize', () => {
-      it('work fine', () => {
-        const windowStub = sinon.stub(wrapper.vm.$store.state, 'Window').get(() => ({
-          windowMinimumSize: [427, 240],
-          windowPosition: [0, 0],
-        }));
-        wrapper.vm.$store.commit('videoMeta', { width: 450, height: 250 });
-        wrapper.vm.$_calculateWindowSizeAtTheFirstTime();
-        expect(wrapper.vm.newWidthOfWindow).equal(450);
-        expect(wrapper.vm.newHeightOfWindow).equal(250);
-        windowStub.restore();
+        sinon.assert.calledOnce(fakeAction);
+      });
+
+      it(`should invoke Vuex action: ${videoActions.META_INFO}`, () => {
+        const fakeAction = sandbox.spy();
+        const store = new Vuex.Store({
+          modules: {
+            Video: {
+              state: Video.state,
+              mutations: Video.mutations,
+              getters: Video.getters,
+              actions: {
+                [videoActions.INITIALIZE]: sandbox.spy(),
+                [videoActions.META_INFO]: fakeAction,
+              },
+            },
+            Playlist: {
+              state: Playlist.state,
+              mutations: Playlist.mutations,
+              getters: Playlist.getters,
+            },
+            Window: {
+              state: Window.state,
+              mutations: Window.mutations,
+              getters: Window.getters,
+            },
+          },
+        });
+        const wrapperWithFakeActions = mount(VideoCanvas, {
+          store,
+          localVue,
+        });
+
+        wrapperWithFakeActions.vm.onMetaLoaded(fakeEvent);
+
+        sinon.assert.calledOnce(fakeAction);
+      });
+
+      it('should invoke function changeWindowSize', () => {
+        const store = new Vuex.Store({
+          modules: {
+            Video: {
+              state: Video.state,
+              mutations: Video.mutations,
+              getters: Video.getters,
+              actions: {
+                [videoActions.INITIALIZE]: sandbox.spy(),
+                [videoActions.META_INFO]: sandbox.spy(),
+              },
+            },
+            Playlist: {
+              state: Playlist.state,
+              mutations: Playlist.mutations,
+              getters: Playlist.getters,
+            },
+            Window: {
+              state: Window.state,
+              mutations: Window.mutations,
+              getters: Window.getters,
+            },
+          },
+        });
+        const wrapperWithFakeActions = mount(VideoCanvas, {
+          store,
+          localVue,
+        });
+
+        wrapperWithFakeActions.vm.onMetaLoaded(fakeEvent);
+        const fakeAction = sandbox.spy();
+        wrapperWithFakeActions.vm.changeWindowSize = fakeAction;
+
+        wrapperWithFakeActions.vm.onMetaLoaded(fakeEvent);
+
+        sinon.assert.calledOnce(fakeAction);
       });
     });
-  });
+    describe('Method - calculateWindowSize', () => {
+      const minSize = [320, 180];
+      const maxSize = [1920, 1200];
 
-  describe('$_calculateWindowSizeWhenVideoExisted', () => {
-    let windowStub;
-    beforeEach(() => {
-      windowStub = sinon.stub(wrapper.vm.$store.state, 'Window').get(() => ({
-        windowMinimumSize: [427, 240],
-        windowSize: [900, 600],
-      }));
+      it('should return origin video size when video is smaller than maxSize', () => {
+        const videoSize = [1920, 1080];
+
+        const result = wrapper.vm.calculateWindowSize(minSize, maxSize, videoSize);
+
+        expect(result).to.deep.equal(videoSize);
+      });
+
+      it('should return size by windowWidth and videoRatio when video > window && videoRatio > windowRatio', () => {
+        const videoSize = [2560, 1080];
+        const expectedResult = [1920, 810];
+
+        const result = wrapper.vm.calculateWindowSize(minSize, maxSize, videoSize);
+
+        expect(result).to.deep.equal(expectedResult);
+      });
+
+      it('should return size by windowHeight and videoRatio when video > window && videoRatio < windowRatio', () => {
+        const videoSize = [2560, 1920];
+        const expectedResult = [1600, 1200];
+
+        const result = wrapper.vm.calculateWindowSize(minSize, maxSize, videoSize);
+
+        expect(result).to.deep.equal(expectedResult);
+      });
+
+      it('should return size by windowWidth and videoRatio when video < window && videoRatio > windowRatio', () => {
+        const videoSize = [256, 108];
+        const expectedResult = [427, 180];
+
+        const result = wrapper.vm.calculateWindowSize(minSize, maxSize, videoSize);
+
+        expect(result).to.deep.equal(expectedResult);
+      });
+
+      it('should return size by windowHeight and videoRatio when video < window && videoRatio < windowRatio', () => {
+        const videoSize = [256, 192];
+        const expectedResult = [320, 240];
+
+        const result = wrapper.vm.calculateWindowSize(minSize, maxSize, videoSize);
+
+        expect(result).to.deep.equal(expectedResult);
+      });
     });
-    afterEach(() => {
-      windowStub.restore();
+    describe('Method - calculateWindowPosition', () => {
+      const windowRect = [0, 23, 1920, 1177];
+      const newSize = [427, 180];
+      it('should return new position based on center point', () => {
+        const getCenterPoint = rect => rect.slice(0, 2)
+          .map((value, index) => Math.round(value + (rect.slice(2, 4)[index] / 2)));
+        const currentRect = [0, 40, 800, 600];
+
+        const result = wrapper.vm.calculateWindowPosition(currentRect, windowRect, newSize);
+
+        expect(getCenterPoint(currentRect)).to.deep.equal(getCenterPoint(result.concat(newSize)));
+      });
+
+      it('should move to right when window is left out ot window', () => {
+        const currentRect = [-300, 23, 800, 600];
+        const expectedResult = [0, 23];
+        const newSize = [800, 600];
+
+        const result = wrapper.vm.calculateWindowPosition(currentRect, windowRect, newSize);
+
+        expect(result).to.deep.equal(expectedResult);
+      });
+
+      it('should move to left when window is right out ot window', () => {
+        const currentRect = [2220, 23, 800, 600];
+        const expectedResult = [1120, 23];
+        const newSize = [800, 600];
+
+        const result = wrapper.vm.calculateWindowPosition(currentRect, windowRect, newSize);
+
+        expect(result).to.deep.equal(expectedResult);
+      });
+
+      it('should move up when window is bottom out ot window', () => {
+        const currentRect = [0, 623, 800, 600];
+        const expectedResult = [0, 600];
+        const newSize = [800, 600];
+
+        const result = wrapper.vm.calculateWindowPosition(currentRect, windowRect, newSize);
+
+        expect(result).to.deep.equal(expectedResult);
+      });
+
+      it('should move down when window is top out ot window', () => {
+        const currentRect = [0, -277, 800, 600];
+        const expectedResult = [0, 23];
+        const newSize = [800, 600];
+
+        const result = wrapper.vm.calculateWindowPosition(currentRect, windowRect, newSize);
+
+        expect(result).to.deep.equal(expectedResult);
+      });
     });
-    it('min-size window < new video < current window', () => {
-      wrapper.vm.$store.commit('videoMeta', { width: 600, height: 400 });
-      wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
-      expect(wrapper.vm.newWidthOfWindow).equal(600);
-      expect(wrapper.vm.newHeightOfWindow).equal(400);
-    });
-    it('videoRatio = windowRatio', () => {
-      wrapper.vm.$store.commit('videoMeta', { width: 1200, height: 800 });
-      wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
-      expect(wrapper.vm.newWidthOfWindow).equal(900);
-      expect(wrapper.vm.newHeightOfWindow).equal(600);
-    });
-    it('videoRatio > windowRatio', () => {
-      wrapper.vm.$store.commit('videoMeta', { width: 1200, height: 400 });
-      wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
-      expect(wrapper.vm.newWidthOfWindow).equal(900);
-      expect(wrapper.vm.newHeightOfWindow).equal(300);
-    });
-    it('videoRatio < windowRatio', () => {
-      wrapper.vm.$store.commit('videoMeta', { width: 600, height: 800 });
-      wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
-      expect(wrapper.vm.newWidthOfWindow).equal(450);
-      expect(wrapper.vm.newHeightOfWindow).equal(600);
-    });
-    it('videoRatio > minWindowRatio', () => {
-      wrapper.vm.$store.commit('videoMeta', { width: 600, height: 200 });
-      wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
-      expect(wrapper.vm.newWidthOfWindow).equal(720);
-      expect(wrapper.vm.newHeightOfWindow).equal(240);
-    });
-    it('videoRatio < minWindowRatio', () => {
-      wrapper.vm.$store.commit('videoMeta', { width: 300, height: 400 });
-      wrapper.vm.$_calculateWindowSizeWhenVideoExisted();
-      expect(wrapper.vm.newWidthOfWindow).equal(427);
-      expect(wrapper.vm.newHeightOfWindow).equal(427 / 0.75);
+    describe('Method - changeWindowSize', () => {
+      it('should invoke function calculateWindowSize', () => {
+        const fakeFunction = sandbox.spy(wrapper.vm, 'calculateWindowSize');
+        wrapper.vm.calculateWindowSize = fakeFunction;
+        wrapper.vm.calculateWindowPosition = sandbox.spy(wrapper.vm, 'calculateWindowPosition');
+        wrapper.vm.controlWindowRect = sandbox.spy(wrapper.vm, 'controlWindowRect');
+
+        wrapper.vm.changeWindowSize();
+
+        sinon.assert.calledOnce(fakeFunction);
+      });
+
+      it('should invoke function calculateWindowPosition', () => {
+        const fakeFunction = sandbox.spy(wrapper.vm, 'calculateWindowPosition');
+        wrapper.vm.calculateWindowPosition = fakeFunction;
+        wrapper.vm.calculateWindowSize = sandbox.spy(wrapper.vm, 'calculateWindowSize');
+        wrapper.vm.controlWindowRect = sandbox.spy(wrapper.vm, 'controlWindowRect');
+
+        wrapper.vm.changeWindowSize();
+
+        sinon.assert.calledOnce(fakeFunction);
+      });
+
+      it('should invoke function controlWindowRect', () => {
+        const fakeFunction = sandbox.spy(wrapper.vm, 'controlWindowRect');
+        wrapper.vm.controlWindowRect = fakeFunction;
+        wrapper.vm.calculateWindowSize = sandbox.spy(wrapper.vm, 'calculateWindowSize');
+        wrapper.vm.calculateWindowPosition = sandbox.spy(wrapper.vm, 'calculateWindowPosition');
+
+        wrapper.vm.changeWindowSize();
+
+        sinon.assert.calledOnce(fakeFunction);
+      });
+
+      it('should videoExisted be changed after called changeWindowSize', () => {
+        wrapper.vm.calculateWindowSize = sandbox.spy(wrapper.vm, 'calculateWindowSize');
+        wrapper.vm.calculateWindowPosition = sandbox.spy(wrapper.vm, 'calculateWindowPosition');
+        wrapper.vm.controlWindowRect = sandbox.spy(wrapper.vm, 'controlWindowRect');
+        const previous = wrapper.vm.videoExisted;
+
+        wrapper.vm.changeWindowSize();
+
+        expect(wrapper.vm.videoExisted).to.not.equal(previous);
+      });
     });
   });
 });

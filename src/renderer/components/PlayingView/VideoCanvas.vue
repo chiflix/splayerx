@@ -72,6 +72,10 @@ export default {
     },
     changeWindowSize() {
       let newSize = [];
+      const getWindowRect = () => [
+        window.screen.availLeft, window.screen.availTop,
+        window.screen.availWidth, window.screen.availHeight,
+      ];
       if (this.videoExisted) {
         newSize = this.calculateWindowSize(
           [320, 180],
@@ -81,14 +85,14 @@ export default {
       } else {
         newSize = this.calculateWindowSize(
           [320, 180],
-          this.getWindowRect().slice(2, 4),
+          getWindowRect().slice(2, 4),
           [this.videoWidth, this.videoHeight],
         );
         this.videoExisted = true;
       }
       const newPosition = this.calculateWindowPosition(
         this.winPos.concat(this.winSize),
-        this.getWindowRect(),
+        getWindowRect(),
         newSize,
       );
       this.controlWindowRect(newPosition.concat(newSize));
@@ -107,14 +111,14 @@ export default {
           setHeightByWidth(maxSize) : setWidthByHeight(maxSize);
       } else if (diffSize(false, videoSize, minSize)) {
         result = biggerRatio(minSize, videoSize) ?
-          setWidthByHeight(minSize) : setHeightByWidth(videoSize);
+          setHeightByWidth(minSize) : setWidthByHeight(minSize);
       }
       return result.map(value => Math.round(value));
     },
     calculateWindowPosition(currentRect, windowRect, newSize) {
       const tempRect = currentRect.slice(0, 2)
-        .map((value, index) => Math.round(value + (currentRect.slice(2, 4)[index] / 2)))
-        .map((value, index) => Math.round(value - (newSize[index] / 2))).concat(newSize);
+        .map((value, index) => Math.floor(value + (currentRect.slice(2, 4)[index] / 2)))
+        .map((value, index) => Math.floor(value - (newSize[index] / 2))).concat(newSize);
       return ((windowRect, tempRect) => {
         const alterPos = (boundX, boundLength, videoX, videoLength) => {
           if (videoX < boundX) return boundX;
@@ -133,12 +137,6 @@ export default {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', rect.slice(2, 4));
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', rect.slice(0, 2));
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
-    },
-    getWindowRect() {
-      return [
-        window.screen.availLeft, window.screen.availTop,
-        window.screen.availWidth, window.screen.availHeight,
-      ];
     },
     $_saveScreenshot() {
       const canvas = this.$refs.thumbnailCanvas;
