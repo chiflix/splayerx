@@ -56,7 +56,9 @@ export default {
       pause: videoActions.PAUSE_VIDEO,
       updateMetaInfo: videoActions.META_INFO,
     }),
-    ...mapMutations({ updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE }),
+    ...mapMutations({
+      updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
+    }),
     onMetaLoaded(event) {
       this.videoConfigInitialize({
         volume: 100,
@@ -144,12 +146,36 @@ export default {
       }
       return videoSize;
     },
+    $_calculateWindowPosition(currentRect, windowRect, newSize) {
+      const tempRect = currentRect.slice(0, 2)
+        .map((value, index) => Math.round(value + (currentRect.slice(2, 4)[index] / 2)))
+        .map((value, index) => Math.round(value - (newSize[index] / 2))).concat(newSize);
+      return ((windowRect, tempRect) => {
+        const alterPos = (boundX, boundLength, videoX, videoLength) => {
+          if (videoX < boundX) return boundX;
+          if (videoX + videoLength > boundX + boundLength) {
+            return (boundX + boundLength) - videoLength;
+          }
+          return videoX;
+        };
+        return [
+          alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
+          alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
+        ];
+      })(windowRect, tempRect);
+    },
     $_calculateWindowSizeAtTheFirstTime() {
       return _.partial(
         this.$_calculateWindowSize,
         [320, 180],
         [window.screen.availWidth, window.screen.availHeight],
       );
+    },
+    getWindowRect() {
+      return [
+        window.screen.availLeft, window.screen.availTop,
+        window.screen.availWidth, window.screen.availHeight,
+      ];
     },
     $_saveScreenshot() {
       const canvas = this.$refs.thumbnailCanvas;
@@ -222,12 +248,6 @@ export default {
       videoHeight: 'intrinsicHeight',
       videoRatio: 'ratio',
     }),
-    calculateHeightByWidth() {
-      return this.currentWindowWidth / (this.videoWidth / this.videoHeight);
-    },
-    calculateWidthByHeight() {
-      return this.currentWindowHeight * (this.videoWidth / this.videoHeight);
-    },
   },
   watch: {
     originSrc(val, oldVal) {
