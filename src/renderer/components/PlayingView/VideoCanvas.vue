@@ -350,7 +350,18 @@ export default {
     });
 
     this.$bus.$on('toggle-fullscreen', () => {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+      if (this.isFullScreen) {
+        this.$bus.$emit('leave-fullscreen');
+      } else {
+        this.$bus.$emit('enter-fullscreen');
+      }
+    });
+    this.$bus.$on('enter-fullscreen', () => {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.newWidthOfWindow / this.newHeightOfWindow]);
+    });
+    this.$bus.$on('leave-fullscreen', () => {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.newWidthOfWindow / this.newHeightOfWindow]);
     });
     this.$bus.$on('toggle-playback', () => {
