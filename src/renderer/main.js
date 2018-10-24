@@ -523,7 +523,7 @@ new Vue({
       }
       if (videoFiles.length !== 0) {
         if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
-          if (this.$store.state.PlaybackState.OriginSrcOfVideo === '') this.openFile(videoFiles[0]);
+          this.openFile(videoFiles[0]);
         } else {
           this.$store.dispatch('addMessages', {
             type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
