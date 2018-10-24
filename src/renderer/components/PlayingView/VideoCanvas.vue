@@ -4,7 +4,7 @@
     class="video">
     <base-video-player
       ref="videoCanvas"
-      :events="['loadedmetadata', 'resize']"
+      :events="['loadedmetadata']"
       :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
       :src="convertedSrc"
@@ -21,7 +21,6 @@
 </template>;
 
 <script>
-import _ from 'lodash';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
@@ -40,10 +39,6 @@ export default {
   data() {
     return {
       videoExisted: false,
-      shownTextTrack: false,
-      currentWindowWidth: 0,
-      currentWindowHeight: 0,
-      timeUpdateIntervalID: null,
       windowSizeHelper: null,
       videoElement: null,
       seekTime: 0,
@@ -73,64 +68,34 @@ export default {
       });
       this.$bus.$emit('seek', this.currentTime);
       this.$bus.$emit('video-loaded');
+      this.changeWindowSize();
     },
-    onVideoSizeChange() {
+    changeWindowSize() {
+      let newSize = [];
       if (this.videoExisted) {
-        const newSize = this.$_calculateWindowSize(
+        newSize = this.calculateWindowSize(
           [320, 180],
-          [this.currentWindowWidth, this.currentWindowHeight],
+          this.winSize,
           [this.videoWidth, this.videoHeight],
         );
-        // tempoary code
-        [this.currentWindowWidth, this.currentWindowHeight] = newSize;
-        this.$_controlWindowSizeAtNewVideo(newSize);
       } else {
-        const newSize = this.$_calculateWindowSizeAtTheFirstTime()([
-          this.videoWidth,
-          this.videoHeight,
-        ]);
-        // tempoary code
-        [this.currentWindowWidth, this.currentWindowHeight] = newSize;
-        this.$_controlWindowSize(newSize);
+        newSize = this.calculateWindowSize(
+          [320, 180],
+          this.getWindowRect().slice(2, 4),
+          [this.videoWidth, this.videoHeight],
+        );
         this.videoExisted = true;
       }
+      const newPosition = this.calculateWindowPosition(
+        this.winPos.concat(this.winSize),
+        this.getWindowRect(),
+        newSize,
+      );
+      this.controlWindowRect(newPosition.concat(newSize));
       this.windowSizeHelper.setNewWindowSize();
     },
-    $_controlWindowSize(newWindowSize) {
-      const landingViewRectangle = this.windowBounds;
-
-      const [windowX, windowY] = this.winPos;
-      const winPos = { x: windowX, y: windowY };
-      const currentDisplay = this.$electron.screen.getDisplayNearestPoint(winPos);
-
-      const windowXY = this.calcNewWindowXY(currentDisplay, landingViewRectangle);
-
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', newWindowSize);
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', [
-        windowXY.windowX,
-        windowXY.windowY,
-      ]);
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [
-        newWindowSize[0] / newWindowSize[1],
-      ]);
-    },
-    $_controlWindowSizeAtNewVideo(newWindowSize) {
-      const [windowX, windowY] = this.winPos;
-      const winPos = { x: windowX, y: windowY };
-      const currentDisplay = this.$electron.screen.getDisplayNearestPoint(winPos);
-
-      const windowXY = this.avoidBeyondDisplayBorder(currentDisplay, windowX, windowY);
-
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', newWindowSize);
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', [
-        windowXY.windowX,
-        windowXY.windowY,
-      ]);
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [
-        newWindowSize[0] / newWindowSize[1],
-      ]);
-    },
-    $_calculateWindowSize(minSize, maxSize, videoSize) {
+    calculateWindowSize(minSize, maxSize, videoSize) {
+      let result = videoSize;
       const getRatio = size => size[0] / size[1];
       const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
       const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
@@ -138,15 +103,15 @@ export default {
         overOrNot ? value >= diffedSize[index] : value < diffedSize[index]);
       const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
       if (diffSize(true, videoSize, maxSize)) {
-        return biggerRatio(videoSize, maxSize) ?
+        result = biggerRatio(videoSize, maxSize) ?
           setHeightByWidth(maxSize) : setWidthByHeight(maxSize);
       } else if (diffSize(false, videoSize, minSize)) {
-        return biggerRatio(minSize, videoSize) ?
+        result = biggerRatio(minSize, videoSize) ?
           setWidthByHeight(minSize) : setHeightByWidth(videoSize);
       }
-      return videoSize;
+      return result.map(value => Math.round(value));
     },
-    $_calculateWindowPosition(currentRect, windowRect, newSize) {
+    calculateWindowPosition(currentRect, windowRect, newSize) {
       const tempRect = currentRect.slice(0, 2)
         .map((value, index) => Math.round(value + (currentRect.slice(2, 4)[index] / 2)))
         .map((value, index) => Math.round(value - (newSize[index] / 2))).concat(newSize);
@@ -164,12 +129,10 @@ export default {
         ];
       })(windowRect, tempRect);
     },
-    $_calculateWindowSizeAtTheFirstTime() {
-      return _.partial(
-        this.$_calculateWindowSize,
-        [320, 180],
-        [window.screen.availWidth, window.screen.availHeight],
-      );
+    controlWindowRect(rect) {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', rect.slice(2, 4));
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', rect.slice(0, 2));
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
     getWindowRect() {
       return [
@@ -203,37 +166,6 @@ export default {
       };
       syncStorage.setSync('recent-played', data);
     },
-    // responsible for calculating window position and size relative to LandingView's Center
-    calcNewWindowXY(currentDisplay, landingViewRectangle) {
-      let x = landingViewRectangle.x + (landingViewRectangle.width / 2);
-      let y = landingViewRectangle.y + (landingViewRectangle.height / 2);
-      x = Math.round(x - (this.currentWindowWidth / 2));
-      y = Math.round(y - (this.currentWindowHeight / 2));
-
-      return this.avoidBeyondDisplayBorder(currentDisplay, x, y);
-    },
-    // if the given (x, y) beyond the border of the given display, then adjust the x, y
-    avoidBeyondDisplayBorder(display, x, y) {
-      const {
-        width: displayWidth,
-        height: displayHeight,
-        x: displayX, // the x axis of display's upper-left
-        y: displayY, // the y axis of display's upper-left
-      } = display.workArea;
-
-      if (x < displayX) x = displayX;
-      if (y < displayY) y = displayY;
-
-      const right = x + this.currentWindowWidth; // the x axis of window's right side
-      if (right > displayX + displayWidth) {
-        x = Math.round((displayX + displayWidth) - this.currentWindowWidth);
-      }
-      const bottom = y + this.currentWindowHeight; // the y axis of window's bottom side
-      if (bottom > displayY + displayHeight) {
-        y = Math.round((displayY + displayHeight) - this.currentWindowHeight);
-      }
-      return { windowX: x, windowY: y };
-    },
   },
   computed: {
     ...mapState({
@@ -241,7 +173,7 @@ export default {
       windowBounds: state => state.Window.windowBounds,
     }),
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'mute', 'rate', 'paused', 'currentTime', 'duration',
+      'originSrc', 'convertedSrc', 'volume', 'mute', 'rate', 'paused', 'currentTime', 'duration', 'ratio',
       'winSize', 'winPos', 'isFullscreen']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -262,16 +194,13 @@ export default {
           }
         });
     },
-    videoRatio() {
-      this.onVideoSizeChange();
-    },
   },
   mounted() {
     this.$store.commit('currentPlaying', this.originSrc);
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.currentWindowWidth / this.currentWindowHeight]);
+      // this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.ratio]);
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
