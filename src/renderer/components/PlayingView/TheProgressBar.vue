@@ -3,6 +3,15 @@
     @mousemove="handleMousemove"
     @mouseleave="handleMouseleave"
     @mousedown="handleMousedown">
+    <the-preview-thumbnail class="the-preview-thumbnail" v-show="hovering"
+      :currentTime="hoveredCurrentTime"
+      :maxThumbnailWidth="240"
+      :videoRatio="ratio"
+      :videoTime="convertedHoveredCurrentTime"
+      :thumbnailWidth="thumbnailWidth"
+      :thumbnailHeight="thumbnailHeight"
+      :positionOfThumbnail="thumbnailPosition"
+     />
     <div class="fake-button left"
       :style="{ height: this.hovering ? '10px' : '4px' }"></div>
     <div class="progress"
@@ -16,22 +25,30 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
+import ThePreviewThumbnail from './ThePreviewThumbnail';
 export default {
   name: 'the-progress-bar',
+  components: {
+    'the-preview-thumbnail': ThePreviewThumbnail,
+  },
   data() {
     return {
       hoveredPageX: 0,
       hovering: false,
       mousedown: false,
+      thumbnailWidth: 272,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'duration', 'roundedCurrentTime']),
+    ...mapGetters(['winWidth', 'duration', 'roundedCurrentTime', 'ratio']),
     hoveredPercent() {
       return `${this.pageXToProportion(this.hoveredPageX) * 100}%`;
     },
     hoveredCurrentTime() {
       return Math.round(this.duration * this.pageXToProportion(this.hoveredPageX));
+    },
+    convertedHoveredCurrentTime() {
+      return this.timecodeFromSeconds(this.hoveredCurrentTime);
     },
     playedPercent() {
       return `${100 * (this.roundedCurrentTime / this.duration)}%`;
@@ -44,6 +61,17 @@ export default {
     },
     playedBackgroundOpacity() {
       return this.hoveredSmallerThanPlayed ? 0.3 : 0.9;
+    },
+    thumbnailHeight() {
+      return Math.round(this.thumbnailWidth / this.ratio);
+    },
+    thumbnailPosition() {
+      return this.pageXToThumbnailPosition(this.hoveredPageX);
+    },
+  },
+  watch: {
+    winWidth(newValue) {
+      this.thumbnailWidth = this.winWidthToThumbnailWidth(newValue);
     },
   },
   methods: {
@@ -73,10 +101,33 @@ export default {
       if (pageX >= this.winWidth - 20) return 1;
       return (pageX - 20) / (this.winWidth - 40);
     },
+    pageXToThumbnailPosition(pageX) {
+      if (pageX <= 20 + (this.thumbnailWidth / 2)) return 20;
+      if (pageX > this.winWidth - (20 + (this.thumbnailWidth / 2))) {
+        return this.winWidth - (20 + this.thumbnailWidth);
+      }
+      return pageX - (this.thumbnailWidth / 2);
+    },
+    winWidthToThumbnailWidth(winWidth) {
+      let thumbnailWidth = 0;
+      const reactivePhases = {
+        winWidth: [513, 846, 1921, 3841],
+        thumbnailWidth: [100, 136, 170, 272],
+      };
+      reactivePhases.winWidth.some((value, index) => {
+        if (winWidth < value) {
+          thumbnailWidth = reactivePhases.thumbnailWidth[index];
+          return true;
+        }
+        return false;
+      });
+      return thumbnailWidth;
+    },
   },
   created() {
     document.addEventListener('mousemove', this.handleDocumentMousemove);
     document.addEventListener('mouseup', this.handleDocumentMouseup);
+    this.thumbnailWidth = this.winWidthToThumbnailWidth(this.winWidth);
   },
   beforeDestroy() {
     document.removeEventListener('mousemove', this.handleDocumentMousemove);
@@ -90,7 +141,7 @@ export default {
   align-items: flex-end;
   position: absolute;
   width: 100%;
-  bottom: 60px;
+  bottom: 0;
   -webkit-app-region: no-drag;
   height: 20px;
   opacity: 0.9;
@@ -105,6 +156,10 @@ export default {
     .right {
       background-color: rgba(255, 255, 255, 0.1);
     }
+  }
+
+  .the-preview-thumbnail {
+    position: absolute;
   }
 
   .fake-button {
