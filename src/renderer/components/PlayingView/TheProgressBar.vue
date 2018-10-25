@@ -44,10 +44,11 @@ export default {
   computed: {
     ...mapGetters(['winWidth', 'duration', 'roundedCurrentTime', 'ratio']),
     hoveredPercent() {
-      return `${this.pageXToProportion(this.hoveredPageX) * 100}%`;
+      return `${this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100}%`;
     },
     hoveredCurrentTime() {
-      return Math.round(this.duration * this.pageXToProportion(this.hoveredPageX));
+      return Math.round(this.duration *
+        this.pageXToProportion(this.hoveredPageX, 20, this.winWidth));
     },
     convertedHoveredCurrentTime() {
       return this.timecodeFromSeconds(this.hoveredCurrentTime);
@@ -68,7 +69,10 @@ export default {
       return Math.round(this.thumbnailWidth / this.ratio);
     },
     thumbnailPosition() {
-      return this.pageXToThumbnailPosition(this.hoveredPageX);
+      return this.pageXToThumbnailPosition(
+        this.hoveredPageX, 20,
+        this.thumbnailWidth, this.winWidth,
+      );
     },
     fakeButtonHeight() {
       return `${this.thumbnailHeight + 20}px`;
@@ -101,17 +105,17 @@ export default {
         this.$bus.$emit('seek', this.hoveredCurrentTime);
       }
     },
-    pageXToProportion(pageX) {
-      if (pageX <= 20) return 0;
-      if (pageX >= this.winWidth - 20) return 1;
-      return (pageX - 20) / (this.winWidth - 40);
+    pageXToProportion(pageX, fakeButtonWidth, winWidth) {
+      if (pageX <= fakeButtonWidth) return 0;
+      if (pageX >= winWidth - fakeButtonWidth) return 1;
+      return (pageX - fakeButtonWidth) / (winWidth - (fakeButtonWidth * 2));
     },
-    pageXToThumbnailPosition(pageX) {
-      if (pageX <= 20 + (this.thumbnailWidth / 2)) return 20;
-      if (pageX > this.winWidth - (20 + (this.thumbnailWidth / 2))) {
-        return this.winWidth - (20 + this.thumbnailWidth);
+    pageXToThumbnailPosition(pageX, fakeButtonWidth, thumbnailWidth, winWidth) {
+      if (pageX <= fakeButtonWidth + (thumbnailWidth / 2)) return fakeButtonWidth;
+      if (pageX > winWidth - (fakeButtonWidth + (thumbnailWidth / 2))) {
+        return winWidth - (fakeButtonWidth + thumbnailWidth);
       }
-      return pageX - (this.thumbnailWidth / 2);
+      return pageX - (thumbnailWidth / 2);
     },
     winWidthToThumbnailWidth(winWidth) {
       let thumbnailWidth = 0;
