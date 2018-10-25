@@ -19,12 +19,16 @@ export default {
     return {
       hoveredPageX: 0,
       hovering: false,
+      mousedown: false,
     };
   },
   computed: {
     ...mapGetters(['winWidth', 'duration', 'roundedCurrentTime']),
     hoveredPercent() {
       return `${this.pageXToProportion(this.hoveredPageX) * 100}%`;
+    },
+    hoveredCurrentTime() {
+      return Math.round(this.duration * this.pageXToProportion(this.hoveredPageX));
     },
     playedPercent() {
       return `${100 * (this.roundedCurrentTime / this.duration)}%`;
@@ -44,15 +48,32 @@ export default {
       this.hoveredPageX = event.pageX;
       this.hovering = true;
     },
-    handleMousedown(event) {
-      const hoveredPart = this.pageXToProportion(event.pageX);
-      this.$bus.$emit('seek', Math.round(hoveredPart * this.duration));
+    handleDocumentMousemove(event) {
+      if (this.mousedown) this.hoveredPageX = event.pageX;
+    },
+    handleMousedown() {
+      this.mousedown = true;
+      this.$bus.$emit('seek', this.hoveredCurrentTime);
+    },
+    handleDocumentMouseup() {
+      if (this.mousedown) {
+        this.mousedown = false;
+        this.$bus.$emit('seek', this.hoveredCurrentTime);
+      }
     },
     pageXToProportion(pageX) {
       if (pageX <= 20) return 0;
       if (pageX >= this.winWidth - 20) return 1;
       return (pageX - 20) / (this.winWidth - 40);
     },
+  },
+  created() {
+    document.addEventListener('mousemove', this.handleDocumentMousemove);
+    document.addEventListener('mouseup', this.handleDocumentMouseup);
+  },
+  beforeDestroy() {
+    document.removeEventListener('mousemove', this.handleDocumentMousemove);
+    document.removeEventListener('mouseup', this.handleDocumentMouseup);
   },
 };
 </script>
