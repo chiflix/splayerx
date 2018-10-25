@@ -40,9 +40,15 @@ const getters = {
 
 const mutations = {
   PlayingList(state, t) {
+    state.PlayingList = t;
+  },
+  AddPlayingList(state, t) {
     state.PlayingList.push(...t);
   },
   FolderList(state, t) {
+    state.FolderList = t;
+  },
+  AddFolderList(state, t) {
     state.FolderList.push(...t);
   },
   PlaybackRate(state, t) {
