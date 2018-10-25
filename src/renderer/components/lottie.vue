@@ -27,6 +27,7 @@ export default {
       animationData: this.options.animationData,
       rendererSettings: this.options.rendererSettings,
     });
+    this.anim.setSpeed(1.5);
     this.$emit('animCreated', this.anim);
   },
 };

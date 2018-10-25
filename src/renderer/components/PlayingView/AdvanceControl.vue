@@ -99,21 +99,21 @@ export default {
       if (!val) {
         this.showFlag = true;
         this.animFlag = true;
-        this.anim.playSegments([68, 89], false);
+        if (!this.validEnter) {
+          this.anim.playSegments([68, 89], false);
+        }
       }
     },
     mousedownOnOther(val) {
       if (val && this.showAttached) {
         this.anim.playSegments([37, 41], false);
         if (this.mouseupOnOther) {
-          // this.anim.playSegments([68, 83], false);
           this.$emit('update:showAttached', false);
         }
       }
     },
     mouseupOnOther(val) {
       if (val && this.showAttached) {
-        // this.anim.playSegments([68, 83], false);
         this.$emit('update:showAttached', false);
       }
     },
@@ -143,7 +143,7 @@ export default {
       };
     },
     handleEnter() {
-      if (this.animFlag) {
+      if (this.animFlag && !this.showAttached) {
         if (!this.mouseDown) {
           this.anim.playSegments([3, 7], false);
         } else {
@@ -159,6 +159,7 @@ export default {
         if (this.mouseDown) {
           this.anim.playSegments([90, 94], false);
         } else if (this.showFlag) {
+          this.anim.playSegments([10, 14], false);
           this.showFlag = false;
         } else {
           this.anim.playSegments([10, 14], false);

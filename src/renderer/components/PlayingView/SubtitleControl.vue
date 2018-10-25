@@ -3,71 +3,75 @@
     :data-component-name="$options.name"
     class="sub-control">
       <div class="sub-btn-control">
-        <div class="sub-menu-wrapper"
-             v-show="showAttached">
-          <ul class="sub-menu">
+        <transition name="sub-trans-l">
+          <div class="sub-menu-wrapper"
+            v-show="showAttached"
+            :style="{ transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' }">
+            <div class="element bottom"><div class="element middle"><div class="element content"></div></div></div>
+            <ul class="sub-menu">
 
-            <li
-              v-if="foundSubtitles"
-              v-for="(item, index) in computedAvaliableItems"
-              @mouseup="toggleItemClick(index)"
-              @mouseover.self.stop="toggleItemsMouseOver"
-              @mouseleave.stop.self="toggleItemsMouseLeave"
-              :class="{ chosenText: itemHasBeenChosen(index) }">
-              <div class="menu-item-text-wrapper"
-                   :class="{ chineseChosen: itemTitleHasChineseChar(item.title) }">
-                {{ item.title }}
-              </div>
-              <div class="chosen-dot"
-                   v-if="itemHasBeenChosen(index)">
-              </div>
-            </li>
+              <li
+                v-if="foundSubtitles"
+                v-for="(item, index) in computedAvaliableItems"
+                @mouseup="toggleItemClick(index)"
+                @mouseover.stop.self="toggleItemsMouseOver(index)"
+                @mouseleave="toggleItemsMouseLeave(index)"
+                :class="{ chosenText: itemHasBeenChosen(index) }"
+                :id="'item' + index">
+                <div class="menu-item-text-wrapper"
+                  :class="{ chineseChosen: itemTitleHasChineseChar(item.title) }"
+                  :style="{ color: itemHasBeenChosen(index) ? 'rgba(255, 255, 255, 0.8)' : '' }">
+                  {{ item.title }}
+                </div>
+              </li>
 
-            <li v-if="loadingPlaceholderList.length > 0"
-              v-for="(item, index) in loadingPlaceholderList"
-              class="placeholders-wrapper">
-              <div class="placeholder-item-text-wrapper"
-                   :class="{ chineseChosen: itemTitleHasChineseChar(item.title) }">
-                {{ item }}
-              </div>
-            </li>
-
-
-            <li v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)"
-            @mouseup="toggleSubtitleOff"
-            @mouseover.stop.self="toggleItemsMouseOver"
-            @mouseleave.stop.self="toggleItemsMouseLeave"
-            :class="{ chosenText: itemHasBeenChosen(-1) }">
-              <div class="menu-item-text-wrapper">
-                无
-              </div>
-              <div class="chosen-dot"
-                   v-if="itemHasBeenChosen(-1)">
-              </div>
-            </li>
+              <li v-if="loadingPlaceholderList.length > 0"
+                v-for="(item, index) in loadingPlaceholderList"
+                class="placeholders-wrapper">
+                <div class="placeholder-item-text-wrapper"
+                  :class="{ chineseChosen: itemTitleHasChineseChar(item.title) }">
+                  {{ item }}
+                </div>
+              </li>
 
 
-            <li v-if="!foundSubtitles"
+              <li v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)"
+                @mouseup="toggleSubtitleOff"
+                @mouseover.stop.self="toggleItemsMouseOver(-1)"
+                @mouseleave="toggleItemsMouseLeave(-1)"
+                :class="{ chosenText: itemHasBeenChosen(-1) }"
+                id="item-1">
+                <div class="menu-item-text-wrapper"
+                  :style="{ color: itemHasBeenChosen(-1) ? 'rgba(255, 255, 255, 0.8)' : '' }">
+                  无
+                </div>
+              </li>
+
+
+              <li v-if="!foundSubtitles"
                 :class="{ chineseChosen: itemTitleHasChineseChar('加载翻译结果') }"
-                @mouseover.self.stop="toggleItemsMouseOver"
-                @mouseleave.stop.self="toggleItemsMouseLeave"
-                @mouseup="toggleLoadServerSubtitles">
+                @mouseover.stop="toggleItemsMouseOver(-2)"
+                @mouseleave.stop.self="toggleItemsMouseLeave(-2)"
+                @mouseup="toggleLoadServerSubtitles"
+                id="item-2">
                 <div class="menu-item-text-wrapper">
                   加载翻译结果
                 </div>
-            </li>
-            <li v-if="!foundSubtitles"
+              </li>
+              <li v-if="!foundSubtitles"
                 :class="{ chineseChosen: itemTitleHasChineseChar('导入本地字幕 ...') }"
-                @mouseover.self.stop="toggleItemsMouseOver"
-                @mouseleave.stop.self="toggleItemsMouseLeave"
-                @mouseup="toggleOpenFileDialog">
+                @mouseover.self.stop="toggleItemsMouseOver(-3)"
+                @mouseleave.stop.self="toggleItemsMouseLeave(-3)"
+                @mouseup="toggleOpenFileDialog"
+                id="item-3">
                 <div class="menu-item-text-wrapper">
                   导入本地字幕 ...
                 </div>
-            </li>
+              </li>
 
-          </ul>
-        </div>
+            </ul>
+          </div>
+        </transition>
         <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
           <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
         </div>
@@ -98,7 +102,6 @@ export default {
       currentSubIden: 0,
       clicks: 0,
       defaultOptions: { animationData },
-      animationSpeed: 1,
       anim: {},
       animFlag: true,
       mouseDown: false,
@@ -115,7 +118,9 @@ export default {
       if (!val) {
         this.showFlag = true;
         this.animFlag = true;
-        this.anim.playSegments([79, 98], false);
+        if (!this.validEnter) {
+          this.anim.playSegments([79, 98], false);
+        }
       }
     },
     mousedownOnOther(val) {
@@ -148,7 +153,7 @@ export default {
           if (this.validEnter) {
             this.anim.playSegments([46, 60], false);
           } else if (!this.mousedownOnOther) {
-            this.anim.playSegments([40, 43], false);
+            this.anim.playSegments([40, 44], false);
           }
         } else if (this.validEnter) {
           this.anim.playSegments([79, 92], false);
@@ -157,7 +162,7 @@ export default {
       };
     },
     handleEnter() {
-      if (this.animFlag) {
+      if (this.animFlag && !this.showAttached) {
         if (!this.mouseDown) {
           this.anim.playSegments([4, 8], false);
         } else {
@@ -173,6 +178,7 @@ export default {
         if (this.mouseDown) {
           this.anim.playSegments([35, 38], false);
         } else if (this.showFlag) {
+          this.anim.playSegments([95, 98], false);
           this.showFlag = false;
         } else {
           this.anim.playSegments([95, 98], false);
@@ -197,11 +203,17 @@ export default {
           break;
       }
     },
-    toggleItemsMouseOver(e) {
-      e.target.style.backgroundImage = this.preStyle;
+    toggleItemsMouseOver(index) {
+      document.querySelector(`#item${index}`).style.backgroundImage = this.preStyle;
+      if (this.currentSubIden !== index) {
+        document.querySelector(`#item${index} .menu-item-text-wrapper`).style.color = 'rgba(255, 255, 255, 0.7)';
+      }
     },
-    toggleItemsMouseLeave(e) {
-      e.target.style.backgroundImage = 'none';
+    toggleItemsMouseLeave(index) {
+      document.querySelector(`#item${index}`).style.backgroundImage = 'none';
+      if (this.currentSubIden !== index) {
+        document.querySelector(`#item${index} .menu-item-text-wrapper`).style.color = 'rgba(255, 255, 255, 0.6)';
+      }
     },
     toggleItemClick(index) {
       this.currentSubIden = index;
@@ -315,40 +327,64 @@ li {
   cursor: pointer;
 }
 
-button {
-  border: none;
-}
-button:focus {
-  outline: none;
-}
-button:hover {
-  cursor: pointer;
-}
-
 .sub-control {
   .btn:hover, .sub-item:hover{
     cursor: pointer;
   }
 
-  .sub-menu-wrapper {
-    border-radius: 10px;
+  .sub-trans-l-enter, .sub-trans-l-enter-active {
+    transform: translateY(0px);
   }
-  .sub-menu {
-    bottom: 0px;
-    position: absolute;
+  .sub-trans-l-enter, .sub-trans-l-leave-active {
+    transform: translateY(20px);
+  }
+
+  .sub-menu-wrapper {
+    /*transition: 80ms cubic-bezier(0.17, 0.67, 0.17, 0.98);*/
+    transition-property: opacity, transform;
+    border-radius: 10px;
+    .element {
+      border-radius: 7px;
+      position: absolute;
+      box-sizing: inherit;
+    }
+    .bottom {
+      width: 100%;
+      height: 100%;
+      top: 0;
+      background: rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(8px);
+      clip-path: inset(0 round 7px);
+    }
+    .middle {
+      width: 100%;
+      height: 100%;
+      top: 0;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .content {
+      width: calc(100% - 2px);
+      height: calc(100% - 2px);
+      top: 1px;
+      left: 1px;
+      background-color: transparent;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
   }
   .menu-item-text-wrapper {
     overflow: hidden; //超出的文本隐藏
     white-space: nowrap;
-    background: linear-gradient(to right, white 75%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%);
+    text-overflow: ellipsis;
+    /*background: linear-gradient(to right, white 75%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%);*/
     -webkit-background-clip: text;
-    color: transparent;
+    color: rgba(255, 255, 255, 0.6);
     text-transform: capitalize;
   }
   .placeholder-item-text-wrapper {
     overflow: hidden; //超出的文本隐藏
     white-space: nowrap;
-    background: linear-gradient(to right, white 75%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%);
+    text-overflow: ellipsis;
+    /*background: linear-gradient(to right, white 75%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%);*/
     -webkit-background-clip: text;
     color: grey;
   }
@@ -356,27 +392,12 @@ button:hover {
     cursor: default;
   }
   .chosenText{
-    font-style: bold;
-  }
-  .chosen-dot {
-    content: '';
-    display: inline-block;
-    position: absolute;
-    line-height: 18px;
-    background-color: white;
-    border-radius: 100%;
-  }
-  ul {
-    border-radius: 10px;
-    clip-path: inset(0px round 10px);
-    background-color: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(20px);
+    /*font-weight: bold;*/
   }
   li {
     position: relative;
     text-align: left;
   }
-
   @media screen and (min-width: 320px) and (max-width: 512px) {
     .sub-menu-wrapper {
       display: none;
@@ -385,114 +406,104 @@ button:hover {
   @media screen and (min-width: 513px) and (max-width: 854px) {
     .sub-menu-wrapper {
       position: absolute;
-      bottom: 30px;
-      left: -51px;
+      bottom: 32px;
+      left: -58px;
       width: 170px;
-      // height: 232px;
     }
     .sub-menu{
-      padding: 4px, 0px;
+      padding: 8px, 0px;
     }
     .menu-item-text-wrapper {
-      line-height: 18px;
+      line-height: 14px;
       width: 136px;
+      letter-spacing: 0.2px;
     }
     .placeholder-item-text-wrapper {
-      line-height: 18px;
+      line-height: 14px;
       width: 136px;
-    }
-    .chosen-dot {
-      width: 4px;
-      height: 4px;
-      right: 15px;
-      top: 50%;
-      margin-top: -2px;
+      letter-spacing: 0.2px;
     }
     .chineseChosen {
-      font-size: 12px;
+      font-size: 13px;
     }
     ul {
-      padding: 4px 0px;
+      padding: 8px 0px;
     }
     li {
-      padding: 7px 17px;
-      height: 32px;
-      font-size: 14px;
+      font-size: 13px;
+      padding: 12px 17px;
+      height: 37px;
     }
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
     .sub-menu-wrapper {
       position: absolute;
-      bottom: 40px;
-      left: -25px;
-      width: 184px;
-      // height: 260px;
+      bottom: 44px;
+      left: -42px;
+      width: 204px;
     }
     .sub-menu{
       padding-top: 4px;
       padding-bottom: 4px;
     }
     .menu-item-text-wrapper {
-      line-height: 20px;
-      width: 148px;
+      line-height: 16px;
+      width: 164px;
+      letter-spacing: 0.21px;
     }
     .placeholder-item-text-wrapper {
-      line-height: 20px;
-      width: 148px;
-    }
-    .chosen-dot {
-      line-height: 20px;
-      width: 4px;
-      height: 4px;
-      right: 15px;
-      top: 50%;
-      margin-top: -2px;
+      line-height: 16px;
+      width: 164px;
+      letter-spacing: 0.21px;
     }
     .chineseChosen {
-      font-size: 13px;
+      font-size: 15px;
     }
     li {
-      padding: 8px 18px;
-      height: 36px;
+      padding: 16px 20px;
+      height: 45px;
       font-size: 15px;
     }
   }
   @media screen and (min-width: 1921px) {
     .sub-menu-wrapper {
       position: absolute;
-      bottom: 100px;
-      left: -46px;
-      width: 284px;
-      // height: 260px;
+      bottom: 70px;
+      left: -71px;
+      width: 286px;
     }
     .sub-menu{
       padding-top: 4px;
       padding-bottom: 4px;
     }
     .menu-item-text-wrapper {
-      line-height: 30px;
-      width: 201px;
+      line-height: 20px;
+      width: 230px;
+      letter-spacing: 0.3px;
     }
     .placeholder-item-text-wrapper {
-      line-height: 30px;
-      width: 201px;
-    }
-    .chosen-dot {
-      line-height: 30px;
-      width: 6.2px;
-      height: 6.2px;
-      right: 28px;
-      top: 50%;
-      margin-top: -3.1px;
+      line-height: 20px;
+      width: 230px;
+      letter-spacing: 0.3px;
     }
     .chineseChosen {
-      font-size: 20px;
+      font-size: 19px;
     }
     li {
-      padding: 13px 27px;
-      height: 56px;
-      font-size: 23px;
+      padding: 22px 28px;
+      height: 63px;
+      font-size: 19px;
     }
   }
+}
+
+.sub-trans-l-enter-active, .sub-trans-l-leave {
+  opacity: 1;
+}
+.sub-trans-l-enter, .sub-trans-l-leave-active {
+  opacity: 0;
+}
+.sub-trans-l-leave-active {
+  position: absolute;
 }
 </style>
