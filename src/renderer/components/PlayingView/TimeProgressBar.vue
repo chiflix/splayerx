@@ -93,7 +93,6 @@ export default {
       timeoutIdOfHideAllWidgets: 0,
       percentageOfReadyToPlay: 0,
       cursorPosition: 0,
-      ratio: 1.78, // Default ratio incase of divide by zero error.
       percentageVideoDraged: 0,
       widthOfThumbnail: 0,
       thumbnailCurrentTime: 0,
