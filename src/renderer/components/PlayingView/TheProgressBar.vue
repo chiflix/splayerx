@@ -1,14 +1,17 @@
 <template>
   <div class="the-progress-bar"
     @mousemove="handleMousemove"
-    @mouseleave="hovering = false"
+    @mouseleave="handleMouseleave"
     @mousedown="handleMousedown">
-    <div class="fake-button left"></div>
-    <div class="progress">
+    <div class="fake-button left"
+      :style="{ height: this.hovering ? '10px' : '4px' }"></div>
+    <div class="progress"
+      :style="{ height: this.hovering ? '10px' : '4px' }">
       <div class="hovered" :style="{ width: this.hoveredPercent, opacity: this.hovering ? this.hoveredBackgroundOpacity : 0 }"></div>
       <div class="played" :style="{ width: this.playedPercent, opacity: this.hovering ? this.playedBackgroundOpacity : 0.9 }"></div>
     </div>
-    <div class="fake-button right"></div>
+    <div class="fake-button right"
+      :style="{ height: this.hovering ? '10px' : '4px' }"></div>
   </div>
 </template>
 <script>
@@ -51,6 +54,9 @@ export default {
     handleDocumentMousemove(event) {
       if (this.mousedown) this.hoveredPageX = event.pageX;
     },
+    handleMouseleave() {
+      if (!this.mousedown) this.hovering = false;
+    },
     handleMousedown() {
       this.mousedown = true;
       this.$bus.$emit('seek', this.hoveredCurrentTime);
@@ -58,6 +64,7 @@ export default {
     handleDocumentMouseup() {
       if (this.mousedown) {
         this.mousedown = false;
+        this.hovering = false;
         this.$bus.$emit('seek', this.hoveredCurrentTime);
       }
     },
@@ -89,13 +96,9 @@ export default {
   opacity: 0.9;
   background-color: transparent;
   & div {
-    height: 4px;
     transition: height 150ms;
   }
   &:hover {
-    & div {
-      height: 10px;
-    }
     .progress {
       background-color: rgba(255, 255, 255, 0.1);
     }
@@ -118,8 +121,8 @@ export default {
     & div {
       position: absolute;
       bottom: 0;
-      transition: opacity 150ms;
-      transition: height 150ms;
+      transition: opacity 300ms;
+      height: inherit;
     }
     .hovered {
       background-color: white;
