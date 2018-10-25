@@ -27,7 +27,8 @@
         :class="showShadow ? 'shadow' : '' "
         :style="{
           transition: tranFlag ? 'width 150ms ease-out, height 150ms ease-out, border 150ms ease-out' : '',
-          backgroundImage: itemShortcut(item.smallShortCut),
+          backgroundImage: itemShortcut(item.smallShortCut, item.lastPlayedTime),
+          backgroundColor: backgroundColor(item.lastPlayedTime),
           width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
           height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
         }"
@@ -204,7 +205,7 @@ export default {
             this.$store.commit('PlayingList', items);
           } else {
             const similarVideos = this.findSimilarVideoByVidPath(items[0]);
-            this.$store.commit('PlayingList', similarVideos);
+            this.$store.commit('FolderList', similarVideos);
           }
         }
       });
@@ -231,8 +232,11 @@ export default {
         default: return '';
       }
     },
-    itemShortcut(shortCut) {
-      return `url("${shortCut}")`;
+    backgroundColor(lastTime) {
+      return lastTime < 1 ? 'black' : '';
+    },
+    itemShortcut(shortCut, lastPlayedTime) {
+      return lastPlayedTime < 1 ? '' : `url("${shortCut}")`;
     },
     itemInfo() {
       return {
@@ -361,7 +365,7 @@ export default {
         } else {
           this.openFile(item.path);
           const similarVideos = this.findSimilarVideoByVidPath(item.path);
-          this.$store.commit('PlayingList', similarVideos);
+          this.$store.commit('FolderList', similarVideos);
         }
         this.$bus.$emit('moveItem', this.moveItem);
         this.$bus.$emit('move', this.move);

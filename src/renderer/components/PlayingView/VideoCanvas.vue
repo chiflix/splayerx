@@ -220,10 +220,13 @@ export default {
         0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
-      [canvas.width, canvas.height] = [211.3, 122.6];
+      // 用于测试截图的代码，以后可能还会用到
+      // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
+      // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
+      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
       canvasCTX.drawImage(
         this.videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, 211.3, 122.6,
+        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
       const smallImagePath = canvas.toDataURL('image/png');
       const data = {
@@ -320,7 +323,6 @@ export default {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
-            console.log(mergedData);
             this.infoDB().add('recent-played', mergedData);
           }
         });
@@ -348,7 +350,18 @@ export default {
     });
 
     this.$bus.$on('toggle-fullscreen', () => {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+      if (this.isFullScreen) {
+        this.$bus.$emit('leave-fullscreen');
+      } else {
+        this.$bus.$emit('enter-fullscreen');
+      }
+    });
+    this.$bus.$on('enter-fullscreen', () => {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.newWidthOfWindow / this.newHeightOfWindow]);
+    });
+    this.$bus.$on('leave-fullscreen', () => {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.newWidthOfWindow / this.newHeightOfWindow]);
     });
     this.$bus.$on('toggle-playback', () => {

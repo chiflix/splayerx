@@ -76,7 +76,7 @@ new Vue({
                       this.$store.commit('PlayingList', files);
                     } else {
                       const similarVideos = this.findSimilarVideoByVidPath(files[0]);
-                      this.$store.commit('PlayingList', similarVideos);
+                      this.$store.commit('FolderList', similarVideos);
                     }
                   }
                 });
@@ -100,11 +100,6 @@ new Vue({
         {
           label: this.$t('msg.playback.name'),
           submenu: [
-            {
-              label: this.$t('msg.playback.fullScreen'),
-              accelerator: 'CmdOrCtrl+F',
-              enabled: false,
-            },
             {
               label: this.$t('msg.playback.keepPlayingWindowFront'),
               type: 'checkbox',
@@ -208,7 +203,14 @@ new Vue({
               label: this.$t('msg.window_.minimize'),
               role: 'minimize',
             },
-            { label: this.$t('msg.window_.enterFullScreen'), enabled: 'false', accelerator: 'Ctrl+Cmd+F' },
+            {
+              label: this.$t('msg.window_.enterFullScreen'),
+              enabled: true,
+              accelerator: 'F',
+              click: () => {
+                this.$bus.$emit('enter-fullscreen');
+              },
+            },
             { label: this.$t('msg.window_.bringAllToFront'), accelerator: '' },
           ],
         },
@@ -472,9 +474,6 @@ new Vue({
         case 'ArrowDown':
           this.$store.dispatch(videoActions.DECREASE_VOLUME);
           break;
-        case 'm':
-          this.$store.dispatch(videoActions.TOGGLE_MUTE);
-          break;
         case 'ArrowLeft':
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
@@ -488,6 +487,9 @@ new Vue({
           } else {
             this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
           }
+          break;
+        case 'Escape':
+          this.$bus.$emit('leave-fullscreen');
           break;
         default:
           break;
@@ -525,7 +527,7 @@ new Vue({
       }
       if (videoFiles.length !== 0) {
         if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
-          if (this.$store.state.PlaybackState.OriginSrcOfVideo === '') this.openFile(videoFiles[0]);
+          this.openFile(videoFiles[0]);
         } else {
           this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
         }
@@ -533,7 +535,7 @@ new Vue({
           this.$store.commit('PlayingList', videoFiles);
         } else {
           const similarVideos = this.findSimilarVideoByVidPath(videoFiles[0]);
-          this.$store.commit('PlayingList', similarVideos);
+          this.$store.commit('FolderList', similarVideos);
         }
       }
       if (containsSubFiles) {
