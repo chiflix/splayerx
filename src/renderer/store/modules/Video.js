@@ -6,7 +6,7 @@ const state = {
   errorCode: 0,
   errorMessage: '',
   // network state
-  src: '',
+  src: process.env.NODE_ENV === 'testing' ? './test/assets/test.avi' : '',
   currentSrc: '',
   networkState: '',
   buffered: '',

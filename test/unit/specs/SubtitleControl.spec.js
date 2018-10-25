@@ -100,19 +100,6 @@ describe('SubtitleControl.vue', () => {
     expect(wrapper.vm.itemTitleHasChineseChar('旰')).equal(true);
   });
 
-  it('computedAvaliableItems computed property works fine', () => {
-    const testSubArr = [
-      { title: 'something index 0' },
-      { title: 'something index 1' },
-      { title: 'something index 2' },
-      { title: 'something index 3' },
-    ];
-    const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    store.commit('SubtitleNames', testSubArr);
-    expect(wrapper.vm.computedAvaliableItems.length).equal(4);
-    expect(wrapper.vm.computedAvaliableItems[2].title).equal('something index 2');
-  });
-
   it('toggleLoadServerSubtitles method work fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
     const spy = sinon.spy(wrapper.vm.$bus, '$emit');

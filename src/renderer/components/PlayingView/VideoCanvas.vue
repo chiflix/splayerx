@@ -66,6 +66,7 @@ export default {
         intrinsicHeight: event.target.videoHeight,
         ratio: event.target.videoWidth / event.target.videoHeight,
       });
+      this.$store.dispatch('currentPlaying', this.originSrc);
       this.$bus.$emit('seek', this.currentTime);
       this.$bus.$emit('video-loaded');
       this.changeWindowSize();
@@ -181,7 +182,6 @@ export default {
   },
   watch: {
     originSrc(val, oldVal) {
-      this.$store.commit('currentPlaying', val);
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
@@ -194,7 +194,6 @@ export default {
     },
   },
   mounted() {
-    this.$store.commit('currentPlaying', this.originSrc);
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);

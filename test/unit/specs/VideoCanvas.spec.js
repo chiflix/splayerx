@@ -70,6 +70,7 @@ describe('Component - VideoCanvas', () => {
               actions: {
                 [videoActions.INITIALIZE]: fakeAction,
                 [videoActions.META_INFO]: sandbox.spy(),
+                currentPlaying: sandbox.spy(),
               },
             },
             Playlist: {
@@ -105,6 +106,7 @@ describe('Component - VideoCanvas', () => {
               actions: {
                 [videoActions.INITIALIZE]: sandbox.spy(),
                 [videoActions.META_INFO]: fakeAction,
+                currentPlaying: sandbox.spy(),
               },
             },
             Playlist: {
@@ -139,6 +141,7 @@ describe('Component - VideoCanvas', () => {
               actions: {
                 [videoActions.INITIALIZE]: sandbox.spy(),
                 [videoActions.META_INFO]: sandbox.spy(),
+                currentPlaying: sandbox.spy(),
               },
             },
             Playlist: {

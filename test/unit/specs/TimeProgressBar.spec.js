@@ -26,6 +26,7 @@ describe('TimeProgressBar.vue', () => {
         Video: {
           state: Video.state,
           mutations: Video.mutations,
+          getters: Video.getters,
         },
         Window: {
           state: Window.state,
@@ -195,26 +196,6 @@ describe('TimeProgressBar.vue', () => {
   // so the following test cases will test all the computed properties first.
   // then will go for the rest of methods testing.
 
-  it('winWidth computed property works fine', () => {
-    const wrapper = mount(TimeProgressBar, {
-      store,
-      localVue,
-      propsData: {
-        src: ' ',
-      },
-    });
-    store.state.Window.windowSize = [0, 0];
-    expect(wrapper.vm.winWidth).equal(0);
-    store.state.Window.windowSize = [1, 0];
-    expect(wrapper.vm.winWidth).equal(1);
-    store.state.Window.windowSize = [999, 0];
-    expect(wrapper.vm.winWidth).equal(999);
-    store.state.Window.windowSize = [NaN, 0];
-    expect(Number.isNaN(wrapper.vm.winWidth)).equal(true);
-    store.state.Window.windowSize = [Infinity, 0];
-    expect(wrapper.vm.winWidth).equal(Infinity);
-  });
-
   it('curProgressBarEdge computed property works fine - 1', () => {
     const wrapper = mount(TimeProgressBar, {
       store,
@@ -236,18 +217,18 @@ describe('TimeProgressBar.vue', () => {
       },
     });
 
-    store.state.Window.windowSize = [600, 600];
+    wrapper.vm.winSize = [600, 600];
     store.state.Video.CurrentTime = 100;
     store.state.Video.Duration = 500;
     // (100/500)*580 = 116
     expect(wrapper.vm.curProgressBarEdge).equal(116);
 
-    store.state.Window.windowSize = [1000, 600];
+    wrapper.vm.winSize = [1000, 600];
     store.state.Video.CurrentTime = 1000;
     store.state.Video.Duration = 500;
     expect(wrapper.vm.curProgressBarEdge).equal(1960);
 
-    store.state.Window.windowSize = [1000, 600];
+    wrapper.vm.winSize = [1000, 600];
     store.state.Video.CurrentTime = 500;
     store.state.Video.Duration = 500;
     expect(wrapper.vm.curProgressBarEdge).equal(980);
@@ -378,7 +359,7 @@ describe('TimeProgressBar.vue', () => {
         src: ' ',
       },
     });
-    store.state.Window.windowSize = [600, 600]; // const1 = 580
+    wrapper.vm.winSize = [600, 600]; // const1 = 580
     // const2  = 50, const3 = 66, const4 = 564
     wrapper.setData({ widthOfThumbnail: 100 });
     wrapper.setData({ cursorPosition: 49 });
@@ -478,7 +459,7 @@ describe('TimeProgressBar.vue', () => {
     所以触发了两个on之后的箭头函数，所以测试这个事件的方法待研究。
   it('the created hook works as expected, event $on - 1.1', () => {
     const wrapper = shallowMount(TimeProgressBar, { store, localVue });
-    store.state.Window.windowSize = [600, 600];
+    wrapper.vm.winSize = [600, 600];
     wrapper.vm.$electron.ipcRenderer.emit('main-resize');
     const stub = sinon.stub(wrapper.vm.$electron.ipcRenderer, 'on');
     stub.yields();

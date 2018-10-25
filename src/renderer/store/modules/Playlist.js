@@ -24,6 +24,9 @@ const mutations = {
 };
 
 const actions = {
+  currentPlaying({ commit }, t) {
+    commit('currentPlaying', t);
+  },
 };
 
 export default {
