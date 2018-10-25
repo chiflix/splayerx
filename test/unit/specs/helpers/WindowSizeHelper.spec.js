@@ -61,6 +61,7 @@ describe('UpdaterNotification.vue', () => {
     renderer.setNewWindowSize({ width: 100, height: 100 });
   });
   afterEach(() => {
+    timer.restore();
     sinon.restore();
   });
   it('test correct loaded', () => {
