@@ -13,14 +13,16 @@
       :positionOfThumbnail="thumbnailPosition"
      />
     <div class="fake-button left"
-      :style="{ height: this.hovering ? '10px' : '4px' }"></div>
+      :style="{ height: fakeButtonHeight }">
+      <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px' }"></div></div>
     <div class="progress"
       :style="{ height: this.hovering ? '10px' : '4px' }">
       <div class="hovered" :style="{ width: this.hoveredPercent, opacity: this.hovering ? this.hoveredBackgroundOpacity : 0 }"></div>
       <div class="played" :style="{ width: this.playedPercent, opacity: this.hovering ? this.playedBackgroundOpacity : 0.9 }"></div>
     </div>
     <div class="fake-button right"
-      :style="{ height: this.hovering ? '10px' : '4px' }"></div>
+      :style="{ height: fakeButtonHeight }">
+      <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px' }"></div></div>
   </div>
 </template>
 <script>
@@ -67,6 +69,9 @@ export default {
     },
     thumbnailPosition() {
       return this.pageXToThumbnailPosition(this.hoveredPageX);
+    },
+    fakeButtonHeight() {
+      return `${this.thumbnailHeight + 20}px`;
     },
   },
   watch: {
@@ -153,7 +158,7 @@ export default {
     .progress {
       background-color: rgba(255, 255, 255, 0.1);
     }
-    .right {
+    .right .fake-progress{
       background-color: rgba(255, 255, 255, 0.1);
     }
   }
@@ -163,10 +168,17 @@ export default {
   }
 
   .fake-button {
+    position: relative;
     width: 20px;
     opacity: 0.9;
+    background-color: transparent;
+    .fake-progress {
+      width: inherit;
+      position: absolute;
+      bottom: 0;
+    }
   }
-  .left {
+  .left .fake-progress{
     background-color: white;
   }
 
