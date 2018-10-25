@@ -162,6 +162,7 @@ describe('Component - BaseVideoPlayer', () => {
 
   describe('Methods', () => {
     let sandbox;
+    let clock;
     let wrapper;
     const propsData = {
       src: 'file:///',
@@ -170,10 +171,12 @@ describe('Component - BaseVideoPlayer', () => {
 
     beforeEach(() => {
       sandbox = sinon.createSandbox();
+      clock = sinon.useFakeTimers();
       wrapper = mount(BaseVideoPlayer, { propsData });
     });
     afterEach(() => {
       sandbox.restore();
+      clock.restore();
       wrapper.destroy();
     });
 
