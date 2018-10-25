@@ -42,11 +42,6 @@ describe('Component - ThePreviewThumbnail', () => {
     expect(wrapper.contains(ThePreviewThumbnail)).to.equal(true);
   });
 
-  it('should switch src reload ThumbnailDisplay and ThumbnailVideoPlayer', () => {
-    wrapper.setProps({ src: 'http:///' });
-
-    expect(wrapper.vm.mountVideo && wrapper.vm.mountImage).to.equal(false);
-  });
   it('should switch currentTime update display and currentTimes', () => {
     wrapper.setProps({ currentTime: 90 });
   });

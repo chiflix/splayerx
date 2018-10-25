@@ -21,8 +21,8 @@
       <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <advance-control class="button advance" v-hidden="displayState['advance-control']" />
     </div>
-    <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
-    <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" />
+    <the-time-codes v-hidden="displayState['the-progress-bar']" />
+    <the-progress-bar v-hidden="displayState['the-progress-bar']"/>
   </div>
 </template>
 <script>
@@ -36,7 +36,7 @@ import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
 import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
-import TimeProgressBar from './TimeProgressBar.vue';
+import TheProgressBar from './TheProgressBar';
 import BaseInvisibleBackground from './BaseInvisibleBackground.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 export default {
@@ -49,7 +49,7 @@ export default {
     'advance-control': AdvanceControl,
     'playlist-control': PlaylistControl,
     'the-time-codes': TheTimeCodes,
-    'the-time-progress-bar': TimeProgressBar,
+    'the-progress-bar': TheProgressBar,
     'base-invisible-background': BaseInvisibleBackground,
     'notification-bubble': NotificationBubble,
   },

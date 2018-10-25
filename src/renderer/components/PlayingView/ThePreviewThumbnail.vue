@@ -43,7 +43,6 @@ export default {
     'thumbnail-display': ThumbnailDisplay,
   },
   props: {
-    src: String,
     currentTime: Number,
     maxThumbnailWidth: Number,
     videoRatio: Number,
@@ -56,7 +55,7 @@ export default {
     return {
       outerThumbnailInfo: {
         newVideo: true,
-        videoSrc: this.src,
+        videoSrc: this.convertedSrc,
         videoDuration: -1,
         generationInterval: -1,
         screenWidth: 1920,
@@ -79,7 +78,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['originSrc']),
+    ...mapGetters(['originSrc', 'convertedSrc']),
   },
   watch: {
     src() {
@@ -153,7 +152,7 @@ export default {
           {},
           this.outerThumbnailInfo,
           thumnailInfo,
-          { videoSrc: this.src },
+          { videoSrc: this.convertedSrc },
           { lastGenerationIndex: this.lastGenerationIndex },
           { maxThumbnailCount: this.maxThumbnailCount },
         );
