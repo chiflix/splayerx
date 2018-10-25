@@ -6,11 +6,9 @@
 <script>
 import lottie from '@/components/lottie.vue';
 import * as animationData from '@/assets/playlist.json';
-import Icon from '../BaseIconContainer';
 export default {
   name: 'playlist-control',
   components: {
-    Icon,
     lottie,
   },
   props: {

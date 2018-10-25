@@ -21,12 +21,10 @@
 import lottie from '@/components/lottie.vue';
 import * as animationData from '@/assets/advance.json';
 import AdvanceControlMenuItem from './AdvanceControlMenuItem.vue';
-import Icon from '../BaseIconContainer';
 export default {
   name: 'advance-control',
   components: {
     AdvanceControlMenuItem,
-    Icon,
     lottie,
   },
   props: {

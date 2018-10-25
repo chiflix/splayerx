@@ -81,7 +81,6 @@
 <script>
 import lottie from '@/components/lottie.vue';
 import * as animationData from '@/assets/subtitle.json';
-import Icon from '../BaseIconContainer';
 export default {
   name: 'subtitle-control',
   props: {
@@ -110,7 +109,6 @@ export default {
     };
   },
   components: {
-    Icon,
     lottie,
   },
   watch: {
@@ -375,7 +373,6 @@ li {
     overflow: hidden; //超出的文本隐藏
     white-space: nowrap;
     text-overflow: ellipsis;
-    /*background: linear-gradient(to right, white 75%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%);*/
     -webkit-background-clip: text;
     color: rgba(255, 255, 255, 0.6);
     text-transform: capitalize;
@@ -384,7 +381,6 @@ li {
     overflow: hidden; //超出的文本隐藏
     white-space: nowrap;
     text-overflow: ellipsis;
-    /*background: linear-gradient(to right, white 75%, rgba(0, 0, 0, 0) 95%, rgba(0, 0, 0, 0) 100%);*/
     -webkit-background-clip: text;
     color: grey;
   }
