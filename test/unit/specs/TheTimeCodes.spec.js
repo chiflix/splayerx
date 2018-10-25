@@ -11,8 +11,6 @@ describe('Component - TheTimeCodes', () => {
   const store = new Vuex.Store({
     modules: {
       Video: {
-        state: Video.state,
-        mutations: Video.mutations,
         getters: Video.getters,
       },
     },

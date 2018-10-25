@@ -1,5 +1,6 @@
 import Vuex from 'vuex';
 import Window from '@/store/modules/Window';
+import Video from '@/store/modules/Video';
 import TheVideoController from '@/components/PlayingView/TheVideoController';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
@@ -17,6 +18,9 @@ describe('Component - TheVideoController Unit Test', () => {
         Window: {
           state: Window.state,
           mutations: Window.mutations,
+        },
+        Video: {
+          getters: Video.getters,
         },
       },
     });

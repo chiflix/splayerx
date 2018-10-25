@@ -82,7 +82,7 @@ export default {
     lastPlayedFile: {
       type: Object.Array,
       require: true,
-      default: [],
+      default: () => [],
     },
     changeSize: {
       type: Number,

@@ -1,16 +1,21 @@
 import ThePreviewThumbnail from '@/components/PlayingView/ThePreviewThumbnail';
-import { shallowMount } from '@vue/test-utils';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Video from '@/store/modules/Video';
+import Vuex from 'vuex';
 import sinon from 'sinon';
 
 describe('Component - ThePreviewThumbnail', () => {
   let wrapper;
   let sandbox;
-
-  it('Sanity - should ThePreviewThumbnail be rendered', () => {
-    wrapper = shallowMount(ThePreviewThumbnail);
-
-    expect(wrapper.contains(ThePreviewThumbnail)).to.equal(true);
+  const store = new Vuex.Store({
+    modules: {
+      Video: {
+        getters: Video.getters,
+      },
+    },
   });
+  const localVue = createLocalVue();
+  localVue.use(Vuex);
 
   const propsData = {
     src: 'file:///',
@@ -22,7 +27,7 @@ describe('Component - ThePreviewThumbnail', () => {
   };
   beforeEach(() => {
     sandbox = sinon.createSandbox();
-    wrapper = shallowMount(ThePreviewThumbnail, { propsData });
+    wrapper = shallowMount(ThePreviewThumbnail, { propsData, store, localVue });
     wrapper.vm.quickHash = '84f0e9e5e05f04b58f53e2617cc9c866-'
                           + 'f54d6eb31bef84839c3ce4fc2f57991c-'
                           + 'b1f0696aec64577228d93eabcc8eb69b-'
@@ -31,6 +36,12 @@ describe('Component - ThePreviewThumbnail', () => {
   afterEach(() => {
     wrapper.destroy();
     sandbox.restore();
+  });
+
+  it('Sanity - should ThePreviewThumbnail be rendered', () => {
+    wrapper = shallowMount(ThePreviewThumbnail);
+
+    expect(wrapper.contains(ThePreviewThumbnail)).to.equal(true);
   });
 
   it('should switch src reload ThumbnailDisplay and ThumbnailVideoPlayer', () => {
