@@ -14,15 +14,15 @@
      />
     <div class="fake-button left"
       :style="{ height: fakeButtonHeight }">
-      <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px' }"></div></div>
+      <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.leftFakeProgressBackgroundColor }"></div></div>
     <div class="progress"
-      :style="{ height: this.hovering ? '10px' : '4px' }">
-      <div class="hovered" :style="{ width: this.hoveredPercent, opacity: this.hovering ? this.hoveredBackgroundOpacity : 0 }"></div>
-      <div class="played" :style="{ width: this.playedPercent, opacity: this.hovering ? this.playedBackgroundOpacity : 0.9 }"></div>
+      :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.progressBackgroundColor }">
+      <div class="hovered" :style="{ width: this.hoveredPercent, backgroundColor: this.hoveredBackgroundColor }"></div>
+      <div class="played" :style="{ width: this.playedPercent, backgroundColor: this.playedBackgroundColor }"></div>
     </div>
     <div class="fake-button right"
       :style="{ height: fakeButtonHeight }">
-      <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px' }"></div></div>
+      <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.rightFakeProgressBackgroundColor }"></div></div>
   </div>
 </template>
 <script>
@@ -60,12 +60,6 @@ export default {
     hoveredSmallerThanPlayed() {
       return Number.parseInt(this.hoveredPercent, 10) < Number.parseInt(this.playedPercent, 10);
     },
-    hoveredBackgroundOpacity() {
-      return this.hoveredSmallerThanPlayed ? 0.9 : 0.3;
-    },
-    playedBackgroundOpacity() {
-      return this.hoveredSmallerThanPlayed ? 0.3 : 0.9;
-    },
     thumbnailHeight() {
       return Math.round(this.thumbnailWidth / this.ratio);
     },
@@ -77,6 +71,39 @@ export default {
     },
     fakeButtonHeight() {
       return `${this.thumbnailHeight + 20}px`;
+    },
+    hoveredBackgroundColor() {
+      if (this.hovering) {
+        return this.hoveredSmallerThanPlayed ?
+          this.whiteWithOpacity(0.86) : this.whiteWithOpacity(0.3);
+      }
+      return this.whiteWithOpacity(0);
+    },
+    playedBackgroundColor() {
+      if (this.hovering) {
+        return this.hoveredSmallerThanPlayed ?
+          this.whiteWithOpacity(0.3) : this.whiteWithOpacity(0.9);
+      }
+      return this.whiteWithOpacity(0.9);
+    },
+    progressBackgroundColor() {
+      return this.hovering ? this.whiteWithOpacity(0.1) : this.whiteWithOpacity(0);
+    },
+    leftFakeProgressBackgroundColor() {
+      return this.whiteWithOpacity(0.9);
+    },
+    rightFakeProgressBackgroundColor() {
+      const hoveredNumber = Math.round((this.hoveredCurrentTime / this.duration) * 100);
+      const playedNumber = Math.round((this.currentTime / this.duration) * 100);
+      if (this.hovering) {
+        if (
+          (hoveredNumber === 100 && playedNumber < 100) ||
+          (hoveredNumber < 100 && playedNumber === 100)) return this.whiteWithOpacity(0.37);
+        if (hoveredNumber < 100 && playedNumber < 100) return this.whiteWithOpacity(0.1);
+        if (playedNumber === 100) return this.whiteWithOpacity(0.37);
+      }
+      if (playedNumber === 100) return this.whiteWithOpacity(0.9);
+      return this.whiteWithOpacity(0);
     },
   },
   watch: {
@@ -100,6 +127,7 @@ export default {
     handleMousedown() {
       this.mousedown = true;
       this.$bus.$emit('seek', this.hoveredCurrentTime);
+      if (this.hoveredCurrentTime === 0) this.$bus.$emit('play');
     },
     handleDocumentMouseup() {
       if (this.mousedown) {
@@ -135,6 +163,9 @@ export default {
       });
       return thumbnailWidth;
     },
+    whiteWithOpacity(opacity) {
+      return `rgba(255, 255, 255, ${opacity}`;
+    },
   },
   created() {
     document.addEventListener('mousemove', this.handleDocumentMousemove);
@@ -156,18 +187,14 @@ export default {
   bottom: 0;
   -webkit-app-region: no-drag;
   height: 20px;
-  background-color: transparent;
   & div {
+    transition: background-color 300ms;
+  }
+  & > div {
     transition: height 150ms;
   }
   &:hover {
     cursor: pointer;
-    .progress {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-    .right .fake-progress{
-      background-color: rgba(255, 255, 255, 0.1);
-    }
   }
 
   .the-preview-thumbnail {
@@ -177,16 +204,12 @@ export default {
   .fake-button {
     position: relative;
     width: 20px;
-    opacity: 0.9;
-    background-color: transparent;
     .fake-progress {
+      transition: background-color 300ms, height 150ms;
       width: inherit;
       position: absolute;
       bottom: 0;
     }
-  }
-  .left .fake-progress{
-    background-color: white;
   }
 
   .progress {
@@ -195,14 +218,7 @@ export default {
     & div {
       position: absolute;
       bottom: 0;
-      transition: opacity 300ms;
       height: inherit;
-    }
-    .hovered {
-      background-color: white;
-    }
-    .played {
-      background-color: white;
     }
   }
 }
