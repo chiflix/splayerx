@@ -15,7 +15,7 @@
       <div class="info">
         <div class="top">
           <div class="duration">{{ duration }}</div>
-          <div class="title">&nbsp;· Next in Playing List</div>
+          <div class="title">&nbsp;· {{ title }}</div>
         </div>
         <div class="vid-name">{{ videoName }}</div>
       </div>

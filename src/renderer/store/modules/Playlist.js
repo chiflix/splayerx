@@ -8,9 +8,10 @@ const state = {
 const getters = {
   isFolderList: state => state.PlayingList.length === 0,
   nextVideo: (state) => {
-    const index = state.PlayingList.findIndex(value => value === state.currentPlaying);
-    if (index !== -1 && index + 1 < state.PlayingList.length) {
-      return state.PlayingList[index + 1];
+    const list = state.PlayingList.length > 0 ? state.PlayingList : state.FolderList;
+    const index = list.findIndex(value => value === state.OriginSrcOfVideo);
+    if (index !== -1 && index + 1 < list.length) {
+      return list[index + 1];
     }
     return '';
   },
