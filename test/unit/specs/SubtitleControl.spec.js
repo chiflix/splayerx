@@ -28,22 +28,9 @@ describe('SubtitleControl.vue', () => {
     });
   });
 
-  it('should load with correct data', () => {
-    const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    expect(wrapper.vm.loadingSubsPlaceholders.local).equal('');
-    expect(wrapper.vm.loadingSubsPlaceholders.embedded).equal('');
-    expect(wrapper.vm.loadingSubsPlaceholders.server).equal('');
-    expect(wrapper.vm.showingPopupDialog).equal(false);
-    expect(wrapper.vm.preStyle).contains('linear-gradient');
-    expect(wrapper.vm.currentSubIden).equal(0);
-  });
-
   it('should render correct HTML elements', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    wrapper.setData({
-      isSubCtrlBtnAppear: true,
-      appearSubtitleMenu: true,
-    });
+
     expect(wrapper.html()).contains('ul');
     expect(wrapper.html()).contains('li');
     expect(wrapper.html()).contains('div');
@@ -55,8 +42,6 @@ describe('SubtitleControl.vue', () => {
       localVue,
       attachToDocument: true,
     });
-    wrapper.setData({ isSubCtrlBtnAppear: true });
-    wrapper.setData({ appearSubtitleMenu: true });
     const spy = sinon.spy(wrapper.vm.$bus, '$emit');
     wrapper.vm.toggleItemClick(1);
     expect(wrapper.vm.currentSubIden).equal(1);
@@ -68,8 +53,6 @@ describe('SubtitleControl.vue', () => {
 
   it('toggleSubtitleOff method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    wrapper.setData({ isSubCtrlBtnAppear: true });
-    wrapper.setData({ appearSubtitleMenu: true });
     const spy = sinon.spy(wrapper.vm.$bus, '$emit');
     wrapper.vm.toggleSubtitleOff();
     expect(wrapper.vm.currentSubIden).equal(-1);
@@ -82,8 +65,6 @@ describe('SubtitleControl.vue', () => {
   it('itemHasBeenChosen method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
     wrapper.setData({
-      isSubCtrlBtnAppear: true,
-      appearSubtitleMenu: true,
       currentSubIden: 0,
     });
     expect(wrapper.vm.itemHasBeenChosen()).equal(true);

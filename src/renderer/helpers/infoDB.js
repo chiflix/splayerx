@@ -55,7 +55,7 @@ class InfoDB {
         }
         cursor.continue();
       });
-      return tx.complete.then(() => { console.log('DB recent-played shortcut cleaned'); });
+      return tx.complete.then(() => 'DB recent-played shortcut cleaned');
     });
   }
   /**
@@ -65,11 +65,10 @@ class InfoDB {
    * Replace a record if the given quickHash existed
    */
   static add(schema, data) {
-    console.log('adding');
     return idb.open('Info').then((db) => {
       const tx = db.transaction(schema, 'readwrite');
       tx.objectStore(schema).put(data);
-      return tx.complete.then(() => console.log('added'));
+      return tx.complete.then(() => 'added');
     });
   }
   /**
@@ -78,11 +77,10 @@ class InfoDB {
    * Delete the record which Primary key equal to the given val
    */
   static delete(schema, val) {
-    console.log('deleting');
     return idb.open('Info').then((db) => {
       const tx = db.transaction(schema, 'readwrite');
       tx.objectStore(schema).delete(val);
-      return tx.complete.then(() => console.log('deleted'));
+      return tx.complete.then(() => 'deleted');
     });
   }
   /**

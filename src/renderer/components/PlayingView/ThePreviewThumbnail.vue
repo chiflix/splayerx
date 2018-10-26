@@ -81,7 +81,7 @@ export default {
     ...mapGetters(['originSrc', 'convertedSrc']),
   },
   watch: {
-    src() {
+    originSrc() {
       // Reload video and image components
       this.mountVideo = false;
       this.mountImage = false;

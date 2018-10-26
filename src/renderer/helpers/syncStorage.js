@@ -65,7 +65,7 @@ function setSync(key, json) {
     fs.mkdirSync(path.dirname(filename));
   } catch (err) {
     if (err.code === 'EEXIST') {
-      console.log('directory already exist');
+      // console.log('directory already exist');
     }
   } finally {
     fs.writeFileSync(filename, data);

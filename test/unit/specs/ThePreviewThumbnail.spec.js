@@ -37,8 +37,6 @@ describe('Component - ThePreviewThumbnail', () => {
   });
 
   it('Sanity - should ThePreviewThumbnail be rendered', () => {
-    wrapper = shallowMount(ThePreviewThumbnail);
-
     expect(wrapper.contains(ThePreviewThumbnail)).to.equal(true);
   });
 
