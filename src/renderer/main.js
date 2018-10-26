@@ -15,6 +15,7 @@ import Path from 'path';
 import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/action-types';
 import addLog from '@/helpers/index';
+require('source-map-support').install();
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
