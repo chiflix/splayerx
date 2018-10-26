@@ -187,11 +187,8 @@ export default {
   bottom: 0;
   -webkit-app-region: no-drag;
   height: 20px;
-  & div {
-    transition: background-color 300ms;
-  }
   & > div {
-    transition: height 150ms;
+    transition: background-color 300ms, height 150ms;
   }
   &:hover {
     cursor: pointer;
