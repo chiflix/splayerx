@@ -17,7 +17,8 @@
             class="img"
             :key="imageTurn"
             :style="{
-              backgroundImage: background(backgroundUrl),
+              backgroundImage: backgroundImage(backgroundUrl),
+              backgroundColor: backgroundColor(),
             }"></div>
           </transition>
         </div>
@@ -255,8 +256,11 @@ export default {
     });
   },
   methods: {
-    background(shortCut) {
-      return `url("${shortCut}")`;
+    backgroundImage(shortCut) {
+      return this.item.lastTime > 1 ? `url("${shortCut}")` : '';
+    },
+    backgroundColor() {
+      return this.item.lastTime < 1 ? 'black' : '';
     },
     timeInValidForm(time) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);

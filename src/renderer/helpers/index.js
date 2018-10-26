@@ -42,7 +42,6 @@ export default {
         vidPath = vidPath.replace(/^file:\/\//, '');
       }
 
-      const baseName = path.basename(vidPath, path.extname(vidPath));
       const dirPath = path.dirname(vidPath);
       const filter = /\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$/;
 
@@ -50,41 +49,24 @@ export default {
         return [];
       }
 
-      // need more effective algorithm
-      function isSimilar(primaryName, secondaryName) {
-        // judget if the similarity is more than half of the primaryName's characters
-        if (primaryName.length < secondaryName.length / 2) {
-          return false;
-        }
-
-        let similarPart = 0;
-        for (let i = 0; i < primaryName.length; i += 1) {
-          if (primaryName.charAt(i) === secondaryName.charAt(i)) {
-            similarPart += 1;
-          }
-        }
-
-        if (similarPart >= primaryName.length / 2 && similarPart >= secondaryName.length / 2) {
-          return true;
-        }
-        return false;
-      }
-
-      const similarVideos = [];
+      const videoFiles = [];
       const files = fs.readdirSync(dirPath);
       for (let i = 0; i < files.length; i += 1) {
         const filename = path.join(dirPath, files[i]);
         const stat = fs.lstatSync(filename);
         if (!stat.isDirectory()) {
           if (filter.test(path.extname(files[i]))) {
-            const fileBaseName = path.basename(filename, path.extname(files[i]));
-            if (isSimilar(baseName, fileBaseName)) {
-              similarVideos.push(filename);
-            }
+            const fileBaseName = path.basename(filename);
+            videoFiles.push(fileBaseName);
           }
         }
       }
-      return similarVideos;
+      videoFiles.sort();
+      for (let i = 0; i < videoFiles.length; i += 1) {
+        videoFiles[i] = path.join(dirPath, videoFiles[i]);
+      }
+
+      return videoFiles;
     },
     findSubtitleFilesByVidPath(vidPath, callback) {
       if (process.platform === 'win32') {

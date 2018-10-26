@@ -118,9 +118,8 @@ export default {
   .next-video {
     transition: 200ms ease-out;
     transition-property: opacity, transform;
-    @media screen and (min-width: 320px) and (max-width: 512px) {
+    @media screen and (max-width: 512px) {
       display: none;
-      margin-bottom: 8px;
     }
     @media screen and (min-width: 513px) and (max-width: 854px) {
       margin-bottom: 12px;

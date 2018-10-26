@@ -2,9 +2,11 @@
 const state = {
   currentPlaying: '',
   PlayingList: [],
+  FolderList: [],
 };
 
 const getters = {
+  isFolderList: state => state.PlayingList.length === 0,
   nextVideo: (state) => {
     const index = state.PlayingList.findIndex(value => value === state.currentPlaying);
     if (index !== -1 && index + 1 < state.PlayingList.length) {
@@ -15,11 +17,20 @@ const getters = {
 };
 
 const mutations = {
-  currentPlaying(state, t) {
-    state.currentPlaying = t;
-  },
   PlayingList(state, t) {
     state.PlayingList = t;
+  },
+  AddPlayingList(state, t) {
+    state.PlayingList.push(...t);
+  },
+  FolderList(state, t) {
+    state.FolderList = t;
+  },
+  AddFolderList(state, t) {
+    state.FolderList.push(...t);
+  },
+  currentPlaying(state, t) {
+    state.currentPlaying = t;
   },
 };
 

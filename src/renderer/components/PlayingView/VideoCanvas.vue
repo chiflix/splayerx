@@ -151,10 +151,13 @@ export default {
         0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
-      [canvas.width, canvas.height] = [211.3, 122.6];
+      // 用于测试截图的代码，以后可能还会用到
+      // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
+      // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
+      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
       canvasCTX.drawImage(
         this.videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, 211.3, 122.6,
+        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
       const smallImagePath = canvas.toDataURL('image/png');
       const data = {
