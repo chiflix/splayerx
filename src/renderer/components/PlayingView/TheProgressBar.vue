@@ -38,11 +38,12 @@ export default {
       hoveredPageX: 0,
       hovering: false,
       mousedown: false,
+      mouseleave: true,
       thumbnailWidth: 272,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'duration', 'roundedCurrentTime', 'ratio']),
+    ...mapGetters(['winWidth', 'duration', 'currentTime', 'ratio']),
     hoveredPercent() {
       return `${this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100}%`;
     },
@@ -54,7 +55,7 @@ export default {
       return this.timecodeFromSeconds(this.hoveredCurrentTime);
     },
     playedPercent() {
-      return `${100 * (this.roundedCurrentTime / this.duration)}%`;
+      return `${100 * (this.currentTime / this.duration)}%`;
     },
     hoveredSmallerThanPlayed() {
       return Number.parseInt(this.hoveredPercent, 10) < Number.parseInt(this.playedPercent, 10);
@@ -87,12 +88,14 @@ export default {
     handleMousemove(event) {
       this.hoveredPageX = event.pageX;
       this.hovering = true;
+      this.mouseleave = false;
     },
     handleDocumentMousemove(event) {
       if (this.mousedown) this.hoveredPageX = event.pageX;
     },
     handleMouseleave() {
       if (!this.mousedown) this.hovering = false;
+      this.mouseleave = true;
     },
     handleMousedown() {
       this.mousedown = true;
@@ -101,7 +104,7 @@ export default {
     handleDocumentMouseup() {
       if (this.mousedown) {
         this.mousedown = false;
-        this.hovering = false;
+        if (this.mouseleave) this.hovering = false;
         this.$bus.$emit('seek', this.hoveredCurrentTime);
       }
     },
@@ -153,12 +156,12 @@ export default {
   bottom: 0;
   -webkit-app-region: no-drag;
   height: 20px;
-  opacity: 0.9;
   background-color: transparent;
   & div {
     transition: height 150ms;
   }
   &:hover {
+    cursor: pointer;
     .progress {
       background-color: rgba(255, 255, 255, 0.1);
     }

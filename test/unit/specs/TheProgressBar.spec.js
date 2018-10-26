@@ -18,7 +18,7 @@ describe('Component - TheProgressBar', () => {
       Windos: {
         getters: {
           duration: () => 2000,
-          roundedCurrentTime: () => 1400,
+          currentTime: () => 1400,
           ratio: () => 1.78,
         },
       },
@@ -55,6 +55,12 @@ describe('Component - TheProgressBar', () => {
 
         expect(wrapper.vm.hovering).to.equal(true);
       });
+
+      it('should mousemove set mouseleave to false', () => {
+        wrapper.trigger('mousemove');
+
+        expect(wrapper.vm.mouseleave).to.equal(false);
+      });
     });
 
     describe('Event - mouseleave', () => {
@@ -66,13 +72,19 @@ describe('Component - TheProgressBar', () => {
         expect(wrapper.vm.hovering).to.equal(false);
       });
 
-      it('should mouseleave donot set hovering when mousedown', () => {
+      it('should mouseleave do not set hovering when mousedown', () => {
         wrapper.vm.mousedown = true;
         const oldHovering = wrapper.vm.hovering;
 
         wrapper.trigger('mouseleave');
 
         expect(wrapper.vm.hovering).to.equal(oldHovering);
+      });
+
+      it('should mouseleave set mouseleave to true', () => {
+        wrapper.trigger('mouseleave');
+
+        expect(wrapper.vm.mouseleave).to.equal(true);
       });
     });
 
