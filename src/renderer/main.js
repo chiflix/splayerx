@@ -20,8 +20,10 @@ require('source-map-support').install();
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
+Vue.config.warnHandler = (warn) => {
+  addLog.methods.addLog('warn', warn);
+};
 Vue.config.errorHandler = (err) => {
-  console.log(err);
   addLog.methods.addLog('error', err);
 };
 

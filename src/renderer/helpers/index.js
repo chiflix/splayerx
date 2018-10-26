@@ -152,7 +152,6 @@ export default {
         try {
           fs.accessSync(path, fs.F_OK);
         } catch (e) {
-          this.addLog('error', e);
           return false;
         }
         return true;
@@ -161,7 +160,7 @@ export default {
         try {
           fs.mkdirSync(defaultPath);
         } catch (err) {
-          this.addLog('error', err);
+          console.log(err);
         }
       }
       const date = new Date();
