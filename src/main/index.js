@@ -46,6 +46,7 @@ function registerMainWindowEvent() {
   mainWindow.on('move', () => {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
     mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
     mainWindow.webContents.send('main-move');
   });
   mainWindow.on('enter-full-screen', () => {
