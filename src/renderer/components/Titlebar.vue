@@ -1,16 +1,17 @@
 <template>
   <div
     :data-component-name="$options.name"
-    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }">
+    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
+    @dblclick.stop="handleDbClick">
     <div class="win-icons" v-if="!isDarwin">
       <Icon class="title-button"
         @click.native="handleMinimize"
-        type="titleBarWinMin">
+        type="titleBarWinExitFull">
       </Icon>
       <Icon class="title-button"
-        @click.native="handleMaximize"
+        @click.native="handleWinFull"
         v-show="middleButtonStatus === 'maximize'"
-        type="titleBarWinMax">
+        type="titleBarWinFull">
       </Icon>
       <Icon class="title-button"
         @click.native="handleRestore"
@@ -36,22 +37,23 @@
             @click.native="handleClose">
       </Icon>
       <Icon id="minimize" class="title-button"
-            type="titleBarMin"
+            type="titleBarExitFull"
             @click.native="handleMinimize"
             :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
             :state="state"
             :isFullScreen="middleButtonStatus">
       </Icon>
       <Icon id="maximize" class="title-button"
-            type="titleBarMax"
-            @click.native="handleMacMaximize"
+            :type="MaxOrFull"
+            @click.native="handleMacFull"
             v-show="middleButtonStatus !== 'exit-fullscreen'"
-            :state="state">
+            :state="state"
+            :style="{ transform: MaxOrFull === 'titleBarClose' ? 'rotate(45deg)' : ''}">
       </Icon>
       <Icon id="restore" class="title-button"
             @click.native="handleFullscreenExit"
             v-show="middleButtonStatus === 'exit-fullscreen'"
-            type="titleBarRecover"
+            type='titleBarRecover'
             :state="state">
       </Icon>
     </div>
@@ -67,6 +69,9 @@ export default {
     return {
       isDarwin: process.platform === 'darwin',
       state: 'default',
+      MaxOrFull: 'titleBarFull',
+      keyMax: false,
+      keyOver: false,
     };
   },
   props: {
@@ -75,18 +80,59 @@ export default {
   components: {
     Icon,
   },
+  mounted() {
+    window.addEventListener('keydown', (e) => {
+      if (e.keyCode === 18) {
+        this.keyMax = true;
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.keyCode === 18) {
+        this.keyMax = false;
+      }
+    });
+  },
+  watch: {
+    keyMax(val) {
+      if (val && this.keyOver) {
+        if (!this.isFullScreen) {
+          this.MaxOrFull = 'titleBarClose';
+        }
+      } else {
+        this.MaxOrFull = 'titleBarFull';
+      }
+    },
+    keyOver(val) {
+      if (val && this.keyMax) {
+        if (!this.isFullScreen) {
+          this.MaxOrFull = 'titleBarClose';
+        }
+      } else {
+        this.MaxOrFull = 'titleBarFull';
+      }
+    },
+  },
   methods: {
+    handleDbClick() {
+      if (!this.isMaximized) {
+        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'maximize');
+      } else {
+        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'unmaximize');
+      }
+    },
     handleMouseOver() {
+      this.keyOver = true;
       this.state = 'hover';
     },
     handleMouseOut() {
+      this.keyOver = false;
       this.state = 'default';
     },
     // Methods to handle window behavior
     handleMinimize() {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'minimize');
     },
-    handleMaximize() {
+    handleWinFull() {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'maximize');
     },
     handleClose() {
@@ -99,8 +145,14 @@ export default {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
     },
     // OS-specific methods
-    handleMacMaximize() {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
+    handleMacFull() {
+      if (this.MaxOrFull === 'titleBarFull') {
+        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
+      } else if (this.MaxOrFull === 'titleBarClose' && this.isMaximized) {
+        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'unmaximize');
+      } else if (this.MaxOrFull === 'titleBarClose' && !this.isMaximized) {
+        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'maximize');
+      }
     },
   },
   computed: {
@@ -149,10 +201,12 @@ export default {
   position: absolute;
   z-index: 6;
   box-sizing: content-box;
-  top: 12px;
-  left: 12px;
-  height: 20px;
+  height: 36px;
+  width: 100%;
   .mac-icons {
+    position: absolute;
+    top: 12px;
+    left: 12px;
     display: flex;
     flex-wrap: nowrap;
   }

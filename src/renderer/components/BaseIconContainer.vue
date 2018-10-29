@@ -45,7 +45,7 @@ export default {
 </script>
 
 <style lang="scss">
-.titleBarWinMin, .titleBarWinMax, .titleBarWinClose, .titleBarWinRestore, .titleBarWinResize {
+.titleBarWinExitFull, .titleBarWinFull, .titleBarWinClose, .titleBarWinRestore, .titleBarWinResize {
   display: flex;
   width: 45px;
   height: 28px;
@@ -80,7 +80,7 @@ export default {
     }
   }
 }
-.titleBarMax, .titleBarMin, .titleBarClose, .titleBarRecover {
+.titleBarFull, .titleBarExitFull, .titleBarClose, .titleBarRecover {
   display: flex;
   width: 12px;
   height: 12px;

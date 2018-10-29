@@ -53,6 +53,7 @@ function registerMainWindowEvent() {
   });
   mainWindow.on('leave-full-screen', () => {
     mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('focus', () => {
     mainWindow.webContents.send('mainCommit', 'isFocused', true);
