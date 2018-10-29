@@ -1,7 +1,7 @@
 
 import idb from 'idb';
 import { INFO_SCHEMA, INFODB_VERSION } from '@/constants';
-import addLog from './index';
+import log from './logger';
 
 
 /**
@@ -57,7 +57,8 @@ class InfoDB {
         cursor.continue();
       });
       return tx.complete.then(() => {
-        addLog.methods.addLog('info', 'DB recent-played shortcut cleaned');
+        console.log('DB recent-played shortcut cleaned');
+        log.add('info', 'DB recent-played shortcut cleaned');
       });
     });
   }
@@ -68,11 +69,15 @@ class InfoDB {
    * Replace a record if the given quickHash existed
    */
   static add(schema, data) {
-    addLog.methods.addLog('info', 'adding');
+    console.log('adding');
+    log.add('info', 'adding');
     return idb.open('Info').then((db) => {
       const tx = db.transaction(schema, 'readwrite');
       tx.objectStore(schema).put(data);
-      return tx.complete.then(() => addLog.methods.addLog('info', 'added'));
+      return tx.complete.then(() => {
+        console.log('added');
+        log.add('info', 'added');
+      });
     });
   }
   /**
@@ -81,11 +86,15 @@ class InfoDB {
    * Delete the record which Primary key equal to the given val
    */
   static delete(schema, val) {
-    addLog.methods.addLog('info', 'deleting');
+    console.log('deleting');
+    log.add('info', 'deleting');
     return idb.open('Info').then((db) => {
       const tx = db.transaction(schema, 'readwrite');
       tx.objectStore(schema).delete(val);
-      return tx.complete.then(() => addLog.methods.addLog('info', 'deleted'));
+      return tx.complete.then(() => {
+        console.log('deleted');
+        log.add('info', 'deleted');
+      });
     });
   }
   /**

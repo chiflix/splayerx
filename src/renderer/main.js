@@ -14,17 +14,17 @@ import helpers from '@/helpers';
 import Path from 'path';
 import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/action-types';
-import addLog from '@/helpers/index';
+import log from '@/helpers/logger';
 require('source-map-support').install();
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
-  addLog.methods.addLog('warn', warn);
+  log.add('warn', warn);
 };
 Vue.config.errorHandler = (err) => {
-  addLog.methods.addLog('error', err);
+  log.add('error', err);
 };
 
 Vue.use(VueI18n);
@@ -287,6 +287,7 @@ new Vue({
         const menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(menu);
       }).catch((err) => {
+        console.log(err);
         this.addLog('error', err);
       });
     },

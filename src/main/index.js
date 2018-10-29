@@ -30,7 +30,7 @@ app.on('second-instance', () => {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.focus();
     } catch (err) {
-      this.addLog('error', err);
+      this.log().add('error', err);
       // pass
     }
   }

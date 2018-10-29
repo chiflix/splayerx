@@ -232,12 +232,13 @@ export default {
     const { app } = this.$electron.remote;
     this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setResizable', [true]);
     this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [720 / 405]);
-
     this.sagi().healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
-        this.addLog('info', `launching: ${app.getName()} ${app.getVersion()}`);
-        this.addLog('info', `sagi API Status: ${this.sagiHealthStatus}`);
+        console.log(app.getName(), app.getVersion());
+        console.log(`sagi API Status: ${this.sagiHealthStatus}`);
+        this.log().add('info', `launching: ${app.getName()} ${app.getVersion()}`);
+        this.log().add('info', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
     if (process.platform !== 'darwin') {

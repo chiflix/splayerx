@@ -4,7 +4,7 @@ import healthMsg from 'sagi-api/health/v1/health_pb';
 import healthRpc from 'sagi-api/health/v1/health_grpc_pb';
 import translationMsg from 'sagi-api/translation/v1/translation_pb';
 import translationRpc from 'sagi-api/translation/v1/translation_grpc_pb';
-import addLog from './index';
+import log from './logger';
 /* eslint-disable */
 const grpc = require('grpc');
 /* eslint-enable */
@@ -32,7 +32,7 @@ class Sagi {
       req.setMediaIdentity(mediaIdentity);
       client.translateMedia(req, (err, response) => {
         if (err) {
-          addLog.methods.addLog('error', err);
+          log.add('error', err);
           reject(err);
         } else {
           // TODO: fetch real transcripts
@@ -49,11 +49,11 @@ class Sagi {
       req.setTranscriptIdentity(transcriptIdentity);
       client.transcript(req, (err, res) => {
         if (err) {
-          addLog.methods.addLog('error', err);
+          log.add('error', err);
           reject(err);
         } else {
           console.log(res);
-          // addLog.methods.addLog('info', res);
+          // log.add('info', res);
           resolve(res);
         }
       });
@@ -66,7 +66,8 @@ class Sagi {
       const client = new healthRpc.HealthClient(this.endpoint, this.creds);
       client.check(new healthMsg.HealthCheckRequest(), (err, response) => {
         if (err) {
-          addLog.methods.addLog('error', err);
+          console.log(err);
+          log.add('error', err);
           reject(err);
         } else {
           resolve(response.getStatus());

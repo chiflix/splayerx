@@ -167,7 +167,8 @@ export default {
       const obejctStoreName = `thumbnail-width-${this.maxThumbnailWidth}`;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
         idb.open(THUMBNAIL_DB_NAME, db.version + 1, (upgradeDB) => {
-          this.addLog('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
+          console.log('[IndexedDB]: Initial thumbnails storage objectStore.');
+          this.log().add('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
           const store = upgradeDB.createObjectStore(
             `thumbnail-width-${this.maxThumbnailWidth}`,
             { keyPath: 'id', autoIncrement: false, unique: true },
@@ -182,7 +183,8 @@ export default {
       this.quickHash = this.mediaQuickHash(this.$store.state.PlaybackState.OriginSrcOfVideo);
       const obejctStoreName = THUMBNAIL_OBJECT_STORE_NAME;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
-        this.addLog('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
+        console.log('[IndexedDB]: Initial preview thumbnail info objectStore.');
+        this.log().add('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
         return idb.open(INFO_DATABASE_NAME, db.version + 1, (upgradeDB) => {
           upgradeDB.createObjectStore(obejctStoreName, { keyPath: 'quickHash' }, { unique: true });
         });
@@ -191,7 +193,8 @@ export default {
     })
       .then(() => this.retrieveThumbnailInfo(this.quickHash))
       .then(this.updateThumbnailData).catch((err) => {
-        this.addLog('error', err);
+        console.log(err);
+        this.log().add('error', err);
       });
     this.$bus.$on('image-all-get', (e) => {
       this.generatedIndex = e;

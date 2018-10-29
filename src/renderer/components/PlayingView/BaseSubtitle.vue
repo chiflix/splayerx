@@ -120,7 +120,7 @@ export default {
           });
           this.loadServerTextTracks((err) => {
             if (err) {
-              this.addLog('error', err);
+              this.log().add('error', err);
               throw err;
             }
             this.toggleSutitleShow();
@@ -213,10 +213,13 @@ export default {
     loadServerTextTracks(cb) {
       this.Sagi.mediaTranslate(this.mediaHash)
         .then((res) => {
-          this.addLog('info', res.array);
+          console.log(res.array);
+          this.log().add('info', res.array);
           // handle 2 situations:
           if (res.array[0][1] && res.array[0][1] !== 'OK') {
-            this.addLog('warn', 'Warning: No server transcripts.  Please load stream translate.');
+            console.log('Warning: No server transcripts.');
+            console.log('Please load stream translate.');
+            this.log().add('warn', 'Warning: No server transcripts.  Please load stream translate.');
             cb('No server transcripts');
           } else {
             const textTrackList = res.array[1];
@@ -239,15 +242,21 @@ export default {
                 cb();
               })
               .catch((err) => {
-                this.addLog('error', '-----Error: load all transcripts error');
-                this.addLog('error', err);
+                console.log('-----');
+                console.log('Error: load all transcripts error');
+                console.log(err);
+                this.log().add('error', '-----Error: load all transcripts error');
+                this.log().add('error', err);
                 cb(err);
               });
           }
         })
         .catch((err) => {
-          this.addLog('error', '-----Error: load textTrackList error');
-          this.addLog('error', err);
+          console.log('------');
+          console.log('Error: load textTrackList error');
+          console.log(err);
+          this.log().add('error', '-----Error: load textTrackList error');
+          this.log().add('error', err);
           cb(err);
         });
     },
@@ -276,7 +285,8 @@ export default {
     },
     mkvProcess(vidPath, onlyEmbedded, cb) {
       this.mkvProcessInit(vidPath, onlyEmbedded, () => {
-        this.addLog('info', 'finished reading initial mkv subtitles');
+        console.log('finished reading initial mkv subtitles');
+        this.log().add('info', 'finished reading initial mkv subtitles');
         cb();
         this.mkvSubsInitialized = true;
       });
@@ -357,7 +367,7 @@ export default {
         });
 
         self.$on('stop-reading-mkv-subs', (error) => {
-          this.addLog('error', error);
+          this.log().add('error', error);
           parser.emit('finish', error);
         });
 
@@ -393,7 +403,7 @@ export default {
 
         parser.on('finish', (err) => {
           if (err) {
-            this.addLog('error', err);
+            this.log().add('error', err);
             reject(err);
           } else {
             const parsedMkvTimesObj = {
@@ -418,7 +428,7 @@ export default {
       const tasks = files.map((subPath) => (cb) => this.createSubtitleStream(subPath, cb));
       parallel(tasks, (err, results) => {
         if (err) {
-          this.addLog('error', err);
+          this.log().add('error', err);
           throw err;
         }
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
@@ -480,11 +490,13 @@ export default {
           this.$store.commit('SubtitleOn', { index: targetIndex, status: type });
           this.firstSubIndex = targetIndex;
         } else {
-          this.addLog('info', 'no subtitle');
+          console.log('no subtitle');
+          this.log().add('info', 'no subtitle');
         }
       }
       if (type === 'second') {
-        this.addLog('info', 'show second subtitle');
+        console.log('show second subtitle');
+        this.log().add('info', 'show second subtitle');
       }
     },
     /**
@@ -573,7 +585,7 @@ export default {
         cb = null;
       });
       stream.once('error', (err) => {
-        this.addLog('error', err);
+        this.log().add('error', err);
         if (cb) {
           cb(err);
         }
@@ -616,7 +628,7 @@ export default {
 
       this.concatStream(vttStream, (err, buf) => {
         if (err) {
-          this.addLog('error', err);
+          this.log().add('error', err);
           throw err;
         }
         cb(null, buf);
@@ -645,7 +657,9 @@ export default {
       if (textTrack[1]) {
         title += textTrack[1];
       } else {
-        this.addLog('error', 'Error: No language code  Use default subtitle name');
+        console.log('Error: No language code');
+        console.log('Use default subtitle name');
+        this.log().add('error', 'Error: No language code  Use default subtitle name');
         title = 'subtitle';
       }
       // process language code to subtitle name
@@ -690,7 +704,8 @@ export default {
           this.$store.commit('SubtitleOff');
           this.firstSubIndex = null;
         } else {
-          this.addLog('info', 'first subtitle not set');
+          console.log('first subtitle not set');
+          this.log().add('info', 'first subtitle not set');
         }
       }
     },
@@ -721,7 +736,8 @@ export default {
         this.firstActiveCues.pop();
         vid.textTracks[this.firstSubIndex].mode = 'disabled';
       } else {
-        this.addLog('error', 'Error: mode is not correct');
+        console.log('Error: mode is not correct');
+        this.log().add('error', 'Error: mode is not correct');
       }
     },
     // 需要对这一部分内容优化
@@ -749,7 +765,8 @@ export default {
           this.parseMkvSubs(filePath, 0, null, false, false)
             .then((tracks) => {
               this.addMkvSubtitlesToVideoElement(tracks, false, false, () => {
-                this.addLog('info', 'Rest of embedded subtitles have been added.');
+                console.log('Rest of embedded subtitles have been added.');
+                this.log().add('info', 'Rest of embedded subtitles have been added.');
                 this.mkvSubsFullyParsed = true;
               });
             });
@@ -766,7 +783,8 @@ export default {
           this.parseMkvSubs(filePath, 0, null, false, false)
             .then((tracks) => {
               this.addMkvSubtitlesToVideoElement(tracks, false, false, () => {
-                this.addLog('info', 'Rest of embedded subtitles have been added.');
+                console.log('Rest of embedded subtitles have been added.');
+                this.log().add('info', 'Rest of embedded subtitles have been added.');
                 this.mkvSubsFullyParsed = true;
               });
             });
@@ -805,7 +823,7 @@ export default {
     this.$bus.$on('load-server-transcripts', () => {
       this.loadServerTextTracks((err) => {
         if (err) {
-          this.addLog('error', err);
+          this.log().add('error', err);
           throw err;
         }
         // handles when users want to load server subs after initializing stage;
@@ -826,7 +844,8 @@ export default {
         this.parseMkvSubs(filePath, (e * 1000), (e + 120) * 1000, false, false)
           .then((tracks) => {
             this.addMkvSubtitlesToVideoElement(tracks, false, false, () => {
-              this.addLog('info', 'seeked subtitles have been added');
+              console.log('seeked subtitles have been added');
+              this.log().add('info', 'seeked subtitles have been added');
               this.mkvSubsSeekedParsed = true;
             });
           });
