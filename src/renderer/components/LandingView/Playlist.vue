@@ -199,9 +199,7 @@ export default {
           if (!items[0].includes('\\') || process.platform === 'win32') {
             self.openFile(items[0]);
           } else {
-            this.$store.dispatch('addMessages', {
-              type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-            });
+            this.addLog('error', `Failed to open file: ${items[0]}`);
           }
           if (items.length > 1) {
             this.$store.commit('PlayingList', items);
