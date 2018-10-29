@@ -84,7 +84,7 @@ export default {
 
       if (!fs.existsSync(dirPath)) {
         console.log(`no dir ${dirPath}`);
-        this.addLog('error', `no dir ${dirPath}`);
+        log.add('error', `no dir ${dirPath}`);
         return;
       }
 
@@ -95,7 +95,7 @@ export default {
         if (!stat.isDirectory()) {
           if (files[i].startsWith(baseName) && filter.test(files[i])) {
             console.log(`found subtitle file: ${files[i]}`);
-            this.addLog('info', `found subtitle file: ${files[i]}`);
+            log.add('info', `found subtitle file: ${files[i]}`);
             callback(filename);
           }
         }
