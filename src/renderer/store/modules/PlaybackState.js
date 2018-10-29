@@ -36,6 +36,12 @@ const getters = {
   finalPartStartTime: state => state.Duration - 140,
   currentTime: state => state.CurrentTime,
   Volume: state => state.Volume / 100,
+  playingList: (state, getters) => {
+    if (getters.isFolderList) {
+      return state.FolderList;
+    }
+    return state.PlayingList;
+  },
 };
 
 const mutations = {
