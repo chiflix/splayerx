@@ -338,9 +338,10 @@ li {
   }
 
   .sub-menu-wrapper {
-    /*transition: 80ms cubic-bezier(0.17, 0.67, 0.17, 0.98);*/
     transition-property: opacity, transform;
     border-radius: 10px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    box-sizing: content-box;
     .element {
       border-radius: 7px;
       position: absolute;
