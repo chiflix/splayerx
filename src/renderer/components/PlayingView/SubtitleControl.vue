@@ -114,10 +114,13 @@ export default {
   watch: {
     showAttached(val) {
       if (!val) {
-        this.showFlag = true;
         this.animFlag = true;
         if (!this.validEnter) {
           this.anim.playSegments([79, 98], false);
+        } else {
+          this.showFlag = true;
+          this.anim.playSegments([79, 92], false);
+          setTimeout(() => { this.showFlag = false; }, 250);
         }
       }
     },
@@ -146,18 +149,18 @@ export default {
       } else {
         this.anim.playSegments([62, 64], false);
       }
-      document.onmouseup = () => {
-        if (!this.showAttached) {
-          if (this.validEnter) {
-            this.anim.playSegments([46, 60], false);
-          } else if (!this.mousedownOnOther) {
-            this.anim.playSegments([40, 44], false);
+      document.addEventListener('mouseup', (e) => {
+        if (e.button === 0) {
+          if (!this.showAttached) {
+            if (this.validEnter) {
+              this.anim.playSegments([46, 60], false);
+            } else if (!this.mousedownOnOther) {
+              this.anim.playSegments([40, 44], false);
+            }
           }
-        } else if (this.validEnter) {
-          this.anim.playSegments([79, 92], false);
+          this.mouseDown = false;
         }
-        this.mouseDown = false;
-      };
+      });
     },
     handleEnter() {
       if (this.animFlag && !this.showAttached) {
@@ -176,8 +179,11 @@ export default {
         if (this.mouseDown) {
           this.anim.playSegments([35, 38], false);
         } else if (this.showFlag) {
-          this.anim.playSegments([95, 98], false);
-          this.showFlag = false;
+          this.anim.addEventListener('complete', () => {
+            this.anim.playSegments([95, 98], false);
+            this.showFlag = false;
+            this.anim.removeEventListener('complete');
+          });
         } else {
           this.anim.playSegments([95, 98], false);
         }
