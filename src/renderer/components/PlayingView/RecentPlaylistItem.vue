@@ -28,9 +28,9 @@ export default {
 </script>
 <style lang="scss" scoped>
 .container {
-  height: 78px;
-  width: 138px;
   margin-right: 15px;
+  min-height: 78px;
+  min-width: 138px;
 }
 .recent-playlist-item {
   .progress {
