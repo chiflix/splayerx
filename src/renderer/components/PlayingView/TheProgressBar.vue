@@ -93,17 +93,16 @@ export default {
       return this.whiteWithOpacity(0.9);
     },
     rightFakeProgressBackgroundColor() {
-      const hoveredNumber = Math.round((this.hoveredCurrentTime / this.duration) * 100);
-      const playedNumber = Math.round((this.currentTime / this.duration) * 100);
+      const hoveredEnd = !(Math.round(this.hoveredCurrentTime) < Math.round(this.duration));
+      const playedEnd = !(Math.round(this.currentTime) < Math.round(this.duration));
+      let opacity = playedEnd ? 0.9 : 0.1;
       if (this.hovering) {
-        if (
-          (hoveredNumber === 100 && playedNumber < 100) ||
-          (hoveredNumber < 100 && playedNumber === 100)) return this.whiteWithOpacity(0.37);
-        if (hoveredNumber < 100 && playedNumber < 100) return this.whiteWithOpacity(0.1);
-        if (playedNumber === 100) return this.whiteWithOpacity(0.37);
+        if ((hoveredEnd && !playedEnd) || (!hoveredEnd && playedEnd)) opacity = 0.37;
+        if (!hoveredEnd && !playedEnd) opacity = 0.1;
+      } else {
+        opacity = 0;
       }
-      if (playedNumber === 100) return this.whiteWithOpacity(0.9);
-      return this.whiteWithOpacity(0);
+      return this.whiteWithOpacity(opacity);
     },
   },
   watch: {
@@ -202,7 +201,7 @@ export default {
     position: relative;
     width: 20px;
     .fake-progress {
-      transition: background-color 300ms, height 150ms;
+      transition: background-color 300ms, height 150ms, border-radius 150ms;
       width: inherit;
       position: absolute;
       bottom: 0;
