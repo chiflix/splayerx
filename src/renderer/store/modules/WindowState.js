@@ -27,7 +27,9 @@ const getters = {
 
 const mutations = {
   windowSize(state, payload) {
-    state.windowSize = payload;
+    payload.forEach((value, index) => {
+      state.windowSize[index] = value;
+    });
   },
   windowMinimumSize(state, payload) {
     state.windowMinimumSize = payload;
