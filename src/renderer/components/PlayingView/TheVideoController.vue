@@ -13,7 +13,7 @@
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <notification-bubble/>
     <recent-playlist class="recent-playlist"
-    v-show="widgetsStatus['playlist-control']"></recent-playlist>
+    v-show="widgetsStatus['playlist-control'].showAttached"></recent-playlist>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button />
     <base-invisible-background v-show="!mute" />
@@ -94,7 +94,12 @@ export default {
       clicksDelay: 200,
       dragDelay: 200,
       displayState: {},
-      widgetsStatus: {},
+      widgetsStatus: {
+        'playlist-control': {
+          selected: false,
+          showAttached: false,
+        },
+      },
       currentSelectedWidget: 'the-video-controller',
       preventSingleClick: false,
       lastAttachedShowing: false,
@@ -269,9 +274,9 @@ export default {
         !this.showAllWidgets) {
         this.widgetsStatus['subtitle-control'].showAttached = false;
       }
-      if (
-        (this.currentSelectedWidget !== 'playlist-control' && this.widgetsStatus['playlist-control'].showAttached) ||
-        !this.showAllWidgets) {
+      if (this.currentSelectedWidget !== 'recent-playlist' &&
+        this.currentSelectedWidget !== 'playlist-control' &&
+        this.widgetsStatus['playlist-control'].showAttached) {
         this.widgetsStatus['playlist-control'].showAttached = false;
       }
     },
@@ -364,6 +369,7 @@ export default {
     },
     // Helper functions
     getAllUIComponents(rootElement) {
+      console.log(rootElement);
       const { children } = rootElement;
       const names = [];
       for (let i = 0; i < children.length; i += 1) {
