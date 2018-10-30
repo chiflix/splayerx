@@ -5,8 +5,10 @@
       <div class="file-name">{{filename}}</div>
     </div>
     <div class="playlist-items">
-      <RecentPlaylistItem v-for="(item, index) in playlist" class="item"
+      <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
         @mouseover="mouseoverItem(index)"
+        :thumbnailWidth="thumbnailWidth"
+        :winWidth="winWidth"
         :class="{ chosen: item.isChosen }"/>
     </div>
   </div>
@@ -36,9 +38,34 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['playingList', 'isFolderList']),
-    playlist() {
-      return this.playingList.slice(0, 5);
+    ...mapGetters(['playingList', 'isFolderList', 'winWidth']),
+    // if you wanna know the meanings of wABC, please look up the product doc
+    thumbnailNumber() {
+      let number = 0;
+      const w = 112;
+      const B = 15;
+      if (this.winWidth >= 512 && this.winWidth < 720) {
+        number = Math.floor(3 + ((this.winWidth - 512) / (w + B)));
+      } else if (this.winWidth === 720) {
+        number = 5;
+      } else if (this.winWidth > 720 && this.winWidth <= 1355) {
+        number = Math.floor(((this.winWidth - 720) / (w + B)) + 5);
+      } else if (this.winWidth > 1355) {
+        number = 10;
+      }
+      return number;
+    },
+    thumbnailWidth() {
+      let width = 0;
+      const A = 35;
+      const B = 15;
+      const C = 65;
+      if (this.winWidth > 512 && this.winWidth <= 1355) {
+        width = ((((this.winWidth - A) - C) + B) / this.thumbnailNumber) - B;
+      } else if (this.winWidth > 1355) {
+        width = (((this.winWidth - A) - C) - (B * 9)) / 10;
+      }
+      return width;
     },
   },
 };
@@ -47,15 +74,8 @@ export default {
 .recent-playlist {
   width: 100%;
   background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 0%, #000000 86%);
-
-  @media screen and (min-width: 512px) and (max-width: 720px) {
-    height: 220px;
-  }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
-    height: 238px;
-  }
-  @media screen and (min-width: 1921px) {
-    height: 345px;
+  @media screen and (max-width: 512px) {
+    display: none;
   }
   .info {
     margin: 53px 41px 31px 35px;
