@@ -70,7 +70,7 @@ export default {
       isDarwin: process.platform === 'darwin',
       state: 'default',
       MaxOrFull: 'titleBarFull',
-      keyMax: false,
+      keyAlt: false,
       keyOver: false,
     };
   },
@@ -83,17 +83,17 @@ export default {
   mounted() {
     window.addEventListener('keydown', (e) => {
       if (e.keyCode === 18) {
-        this.keyMax = true;
+        this.keyAlt = true;
       }
     });
     window.addEventListener('keyup', (e) => {
       if (e.keyCode === 18) {
-        this.keyMax = false;
+        this.keyAlt = false;
       }
     });
   },
   watch: {
-    keyMax(val) {
+    keyAlt(val) {
       if (val && this.keyOver) {
         if (!this.isFullScreen) {
           this.MaxOrFull = 'titleBarClose';
@@ -103,7 +103,7 @@ export default {
       }
     },
     keyOver(val) {
-      if (val && this.keyMax) {
+      if (val && this.keyAlt) {
         if (!this.isFullScreen) {
           this.MaxOrFull = 'titleBarClose';
         }
