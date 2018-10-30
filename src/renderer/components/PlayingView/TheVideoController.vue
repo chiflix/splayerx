@@ -369,7 +369,6 @@ export default {
     },
     // Helper functions
     getAllUIComponents(rootElement) {
-      console.log(rootElement);
       const { children } = rootElement;
       const names = [];
       for (let i = 0; i < children.length; i += 1) {
