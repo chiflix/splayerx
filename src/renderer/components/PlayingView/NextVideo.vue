@@ -14,7 +14,7 @@
     <div class="content">
       <div class="info">
         <div class="top">
-          <div class="duration">{{ duration }}</div>
+          <div class="duration">{{ timecode }}</div>
           <div class="title">&nbsp;· {{ title }}</div>
         </div>
         <div class="vid-name">{{ videoName }}</div>
@@ -80,7 +80,7 @@ export default {
     handleMouseDown() {
       if (this.nextVideo) {
         this.$emit('close-next-video');
-        this.$bus.$emit('seek', this.$store.state.PlaybackState.Duration);
+        this.$bus.$emit('seek', this.duration);
         this.openFile(this.nextVideo);
         this.$bus.$emit('seek', 0); // avoid skipping the next video
       }
@@ -98,7 +98,6 @@ export default {
     onMetaLoaded(event) {
       event.target.muted = true;
       event.target.currentTime = 100;
-      this.duration = this.timecodeFromSeconds(event.target.duration);
     },
     onSeeked() {
       this.$emit('ready-to-show');
@@ -120,6 +119,9 @@ export default {
         return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
       }
       return '';
+    },
+    timecode() {
+      return this.timecodeFromSeconds(this.duration);
     },
   },
   mounted() {
