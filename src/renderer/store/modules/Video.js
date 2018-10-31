@@ -53,7 +53,7 @@ const getters = {
   },
   // playback state
   duration: state => state.duration,
-  tempoaryFinalPartTime: state => state.duration * 0.7,
+  finalPartTime: state => state.duration - 140,
   currentTime: state => state.currentTime,
   paused: state => state.paused,
   roundedCurrentTime: state => Math.round(state.currentTime),

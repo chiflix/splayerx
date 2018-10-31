@@ -41,7 +41,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['roundedCurrentTime', 'nextVideo', 'tempoaryFinalPartTime']),
+    ...mapGetters(['roundedCurrentTime', 'nextVideo', 'finalPartTime']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo) return messages.slice(0, 2);
@@ -68,8 +68,7 @@ export default {
   },
   watch: {
     roundedCurrentTime(val) {
-      if (val > this.tempoaryFinalPartTime) {
-        console.log(this.nextVideo);
+      if (val > this.finalPartTime) {
         if (this.nextVideo !== '' && !this.manualClosed) {
           this.showNextVideo = true;
         }
