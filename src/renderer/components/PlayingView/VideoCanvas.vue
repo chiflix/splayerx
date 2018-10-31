@@ -41,7 +41,7 @@ export default {
       videoExisted: false,
       windowSizeHelper: null,
       videoElement: null,
-      seekTime: 0,
+      seekTime: [0],
     };
   },
   methods: {
@@ -206,7 +206,7 @@ export default {
       this[this.paused ? 'play' : 'pause']();
     });
     this.$bus.$on('seek', (e) => {
-      this.seekTime = e;
+      this.seekTime = [e];
       // todo: use vuex get video element src
       const filePath = decodeURI(this.src);
       const indexOfLastDot = filePath.lastIndexOf('.');

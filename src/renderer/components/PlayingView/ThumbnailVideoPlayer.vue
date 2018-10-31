@@ -75,7 +75,7 @@ export default {
       lastGenerationIndex: 0,
       tempImage: null,
       useFallback: false,
-      seekTime: 0,
+      seekTime: [0],
       videoStyles: {
         opacity: 0.99,
       },
@@ -161,7 +161,7 @@ export default {
         while (this.thumbnailSet.has(internalIndex)) {
           internalIndex += 1;
         }
-        this.seekTime = internalIndex * this.generationInterval;
+        this.seekTime = [internalIndex * this.generationInterval];
         if (this.isAutoGeneration) {
           this.autoGenerationIndex = internalIndex;
         }

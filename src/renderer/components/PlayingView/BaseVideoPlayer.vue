@@ -36,9 +36,9 @@ export default {
     },
     // playback state
     currentTime: {
-      type: Number,
-      default: 0,
-      validator: value => value >= 0,
+      type: Array,
+      default: () => [0],
+      validator: value => value[0] >= 0,
     },
     defaultPlaybackRate: {
       type: Number,
@@ -113,7 +113,7 @@ export default {
     },
     // playback state
     currentTime(newVal) {
-      this.$refs.video.currentTime = newVal;
+      [this.$refs.video.currentTime] = newVal;
     },
     playbackRate(newVal) {
       this.$refs.video.playbackRate = newVal;

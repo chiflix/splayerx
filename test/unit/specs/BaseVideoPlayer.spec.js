@@ -6,7 +6,7 @@ describe('Component - BaseVideoPlayer', () => {
     src: 'file:///',
     crossOrigin: 'anonymous',
     preload: 'auto',
-    currentTime: 20,
+    currentTime: [20],
     defaultPlaybackRate: 2,
     playbackRate: 1.5,
     autoplay: true,
@@ -54,7 +54,15 @@ describe('Component - BaseVideoPlayer', () => {
 
     describe('Mutable Props', () => {
       it('should currentTime be changed dynamically', () => {
-        assertVideoAttributes('currentTime', propsData.currentTime, [10, 30, 40, 50], true);
+        const currentTimes = [[10], [30], [40], [50]];
+
+        currentTimes.forEach((currentTime) => {
+          wrapper.setProps({ currentTime });
+
+          const changedCurrentTime = wrapper.element.childNodes[0].currentTime;
+
+          expect(changedCurrentTime).to.equal(currentTime[0]);
+        });
       });
 
       it('should playbackRate be changed dynamically', () => {
