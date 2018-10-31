@@ -44,16 +44,16 @@
             :isFullScreen="middleButtonStatus">
       </Icon>
       <Icon id="maximize" class="title-button"
-            :type="MaxOrFull"
+            :type="itemType"
             @click.native="handleMacFull"
             v-show="middleButtonStatus !== 'exit-fullscreen'"
             :state="state"
-            :style="{ transform: MaxOrFull === 'titleBarClose' ? 'rotate(45deg)' : ''}">
+            :style="{ transform: itemType === this.itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}">
       </Icon>
       <Icon id="restore" class="title-button"
             @click.native="handleFullscreenExit"
             v-show="middleButtonStatus === 'exit-fullscreen'"
-            type='titleBarRecover'
+            type="titleBarRecover"
             :state="state">
       </Icon>
     </div>
@@ -69,7 +69,11 @@ export default {
     return {
       isDarwin: process.platform === 'darwin',
       state: 'default',
-      MaxOrFull: 'titleBarFull',
+      itemTypeEnum: {
+        FULLSCREEN: 'titleBarFull',
+        MAXSCREEN: 'titleBarClose',
+      },
+      itemType: 'titleBarFull',
       keyAlt: false,
       keyOver: false,
     };
@@ -94,21 +98,17 @@ export default {
   },
   watch: {
     keyAlt(val) {
-      if (val && this.keyOver) {
-        if (!this.isFullScreen) {
-          this.MaxOrFull = 'titleBarClose';
-        }
-      } else {
-        this.MaxOrFull = 'titleBarFull';
+      if (!val || !this.keyOver) {
+        this.itemType = this.itemTypeEnum.FULLSCREEN;
+      } else if (!this.isFullScreen) {
+        this.itemType = this.itemTypeEnum.MAXSCREEN;
       }
     },
     keyOver(val) {
-      if (val && this.keyAlt) {
-        if (!this.isFullScreen) {
-          this.MaxOrFull = 'titleBarClose';
-        }
-      } else {
-        this.MaxOrFull = 'titleBarFull';
+      if (!val || !this.keyAlt) {
+        this.itemType = this.itemTypeEnum.FULLSCREEN;
+      } else if (!this.isFullScreen) {
+        this.itemType = this.itemTypeEnum.MAXSCREEN;
       }
     },
   },
@@ -146,7 +146,7 @@ export default {
     },
     // OS-specific methods
     handleMacFull() {
-      if (this.MaxOrFull === 'titleBarFull') {
+      if (this.itemType === this.itemTypeEnum.FULLSCREEN) {
         this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
       } else if (this.isMaximized) {
         this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'unmaximize');
