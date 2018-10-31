@@ -1,10 +1,13 @@
 <template>
-  <div class="recent-playlist">
-    <div class="info">
+  <div class="recent-playlist"
+    @mousedown="handleMousedown">
+    <div class="info"
+      @mousedown.stop="">
       <div class="top">{{lastPlayedTime}} / {{duration}} · {{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
       <div class="file-name">{{filename}}</div>
     </div>
-    <div class="playlist-items">
+    <div class="playlist-items"
+      @mousedown.stop="">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
         @mouseover="mouseoverItem(index)"
         :thumbnailWidth="thumbnailWidth"
@@ -35,6 +38,9 @@ export default {
     mouseoverItem(index) {
       this.playlist[index].isChosen = true;
       console.log(this.playlist[index]);
+    },
+    handleMousedown() {
+      console.log('you click me!');
     },
   },
   computed: {
@@ -78,8 +84,10 @@ export default {
     display: none;
   }
   .info {
-    margin: 53px 41px 31px 35px;
+    margin: 53px 41px 0px 0px;
+    padding-left: 35px;
     height: 41px;
+    width: fit-content;
     .top {
       margin-top: 0.81px;
       opacity: 0.4;
@@ -88,6 +96,7 @@ export default {
       color: #FFFFFF;
       letter-spacing: 0.64px;
       line-height: 13px;
+      width: fit-content;
     }
     .file-name {
       margin-top: 5.63px;
@@ -96,12 +105,14 @@ export default {
       color: rgba(255,255,255,0.70);
       letter-spacing: 1px;
       line-height: 20px;
+      width: fit-content;
     }
   }
   .playlist-items {
     display: flex;
-    margin-bottom: 35px;
-    margin-left: 35px;
+    padding-top: 31px;
+    padding-bottom: 35px;
+    padding-left: 35px;
     .chosen {
       transform: translateX(-1px);
     }
