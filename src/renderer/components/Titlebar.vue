@@ -148,9 +148,9 @@ export default {
     handleMacFull() {
       if (this.MaxOrFull === 'titleBarFull') {
         this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
-      } else if (this.MaxOrFull === 'titleBarClose' && this.isMaximized) {
+      } else if (this.isMaximized) {
         this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'unmaximize');
-      } else if (this.MaxOrFull === 'titleBarClose' && !this.isMaximized) {
+      } else {
         this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'maximize');
       }
     },
