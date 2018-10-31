@@ -61,6 +61,18 @@ describe('Component - TheProgressBar', () => {
 
         expect(wrapper.vm.mouseleave).to.equal(false);
       });
+
+      it('should mousemove not set showThumbnail to true when move on leftInvisible', () => {
+        wrapper.find({ ref: 'leftInvisible' }).trigger('mousemove');
+
+        expect(wrapper.vm.showThumbnail).to.equal(false);
+      });
+
+      it('should mousemove set showThumbnail to true when move to other area', () => {
+        wrapper.find('.progress').trigger('mousemove');
+
+        expect(wrapper.vm.showThumbnail).to.equal(true);
+      });
     });
 
     describe('Event - mouseleave', () => {
@@ -71,6 +83,15 @@ describe('Component - TheProgressBar', () => {
 
         expect(wrapper.vm.hovering).to.equal(false);
       });
+
+      it('should mouseleave set showThumbnail to false when not mousedown', () => {
+        wrapper.vm.mousedown = false;
+
+        wrapper.trigger('mouseleave');
+
+        expect(wrapper.vm.showThumbnail).to.equal(false);
+      });
+
 
       it('should mouseleave do not set hovering when mousedown', () => {
         wrapper.vm.mousedown = true;
@@ -93,6 +114,20 @@ describe('Component - TheProgressBar', () => {
         wrapper.trigger('mousedown');
 
         expect(wrapper.vm.mousedown).to.equal(true);
+      });
+
+      it('should mousedown set showThumbnail to false when down on leftInvisible', () => {
+        wrapper.find({ ref: 'leftInvisible' }).trigger('mousedown');
+
+        expect(wrapper.vm.showThumbnail).to.equal(false);
+      });
+
+      it('should mousedown not set showThumbnail to false when not down on leftInvisible', () => {
+        wrapper.vm.showThumbnail = true;
+
+        wrapper.find('.right').trigger('mousedown');
+
+        expect(wrapper.vm.showThumbnail).to.equal(true);
       });
 
       it('should mousedown emit seek event on event bus with hoveredCurrentTime', () => {

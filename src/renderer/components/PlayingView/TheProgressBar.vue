@@ -3,7 +3,7 @@
     @mousemove="handleMousemove"
     @mouseleave="handleMouseleave"
     @mousedown="handleMousedown">
-    <the-preview-thumbnail class="the-preview-thumbnail" v-show="hovering"
+    <the-preview-thumbnail class="the-preview-thumbnail" v-show="showThumbnail"
       :currentTime="hoveredCurrentTime"
       :maxThumbnailWidth="240"
       :videoRatio="ratio"
@@ -12,9 +12,12 @@
       :thumbnailHeight="thumbnailHeight"
       :positionOfThumbnail="thumbnailPosition"
      />
-    <div class="fake-button left"
+    <div class="fake-button left" ref="leftInvisible"
       :style="{ height: fakeButtonHeight }">
-      <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.leftFakeProgressBackgroundColor }"></div></div>
+      <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.leftFakeProgressBackgroundColor }">
+        <div class="radius" v-if="hoveredCurrentTime === 0"></div>
+      </div>
+    </div>
     <div class="progress"
       :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.progressBackgroundColor }">
       <div class="hovered" :style="{ width: this.hoveredPercent, backgroundColor: this.hoveredBackgroundColor }"></div>
@@ -37,6 +40,7 @@ export default {
     return {
       hoveredPageX: 0,
       hovering: false,
+      showThumbnail: false,
       mousedown: false,
       mouseleave: true,
       thumbnailWidth: 272,
@@ -48,8 +52,7 @@ export default {
       return `${this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100}%`;
     },
     hoveredCurrentTime() {
-      return Math.round(this.duration *
-        this.pageXToProportion(this.hoveredPageX, 20, this.winWidth));
+      return this.duration * this.pageXToProportion(this.hoveredPageX, 20, this.winWidth);
     },
     convertedHoveredCurrentTime() {
       return this.timecodeFromSeconds(this.hoveredCurrentTime);
@@ -58,7 +61,7 @@ export default {
       return `${100 * (this.currentTime / this.duration)}%`;
     },
     hoveredSmallerThanPlayed() {
-      return Number.parseInt(this.hoveredPercent, 10) < Number.parseInt(this.playedPercent, 10);
+      return this.hoveredPageX < (Number.parseInt(this.playedPercent, 10) / 100) * this.winWidth;
     },
     thumbnailHeight() {
       return Math.round(this.thumbnailWidth / this.ratio);
@@ -70,7 +73,7 @@ export default {
       );
     },
     fakeButtonHeight() {
-      return `${this.thumbnailHeight + 20}px`;
+      return this.hovering ? `${this.thumbnailHeight + 20}px` : '20px';
     },
     hoveredBackgroundColor() {
       if (this.hovering) {
@@ -90,7 +93,10 @@ export default {
       return this.hovering ? this.whiteWithOpacity(0.1) : this.whiteWithOpacity(0);
     },
     leftFakeProgressBackgroundColor() {
-      return this.whiteWithOpacity(0.9);
+      let opacity = 0.9;
+      if (this.hoveredCurrentTime === 0 && this.hoveredSmallerThanPlayed) opacity = 0.3;
+      if (this.hoveredCurrentTime > 0) opacity = 0.9;
+      return this.whiteWithOpacity(opacity);
     },
     rightFakeProgressBackgroundColor() {
       const hoveredEnd = !(Math.round(this.hoveredCurrentTime) < Math.round(this.duration));
@@ -99,7 +105,7 @@ export default {
       if (this.hovering) {
         if ((hoveredEnd && !playedEnd) || (!hoveredEnd && playedEnd)) opacity = 0.37;
         if (!hoveredEnd && !playedEnd) opacity = 0.1;
-      } else {
+      } else if (!playedEnd) {
         opacity = 0;
       }
       return this.whiteWithOpacity(opacity);
@@ -114,24 +120,34 @@ export default {
     handleMousemove(event) {
       this.hoveredPageX = event.pageX;
       this.hovering = true;
+      if (event.target !== this.$refs.leftInvisible) this.showThumbnail = true;
       this.mouseleave = false;
     },
     handleDocumentMousemove(event) {
       if (this.mousedown) this.hoveredPageX = event.pageX;
     },
     handleMouseleave() {
-      if (!this.mousedown) this.hovering = false;
+      if (!this.mousedown) {
+        this.hovering = false;
+        this.showThumbnail = false;
+      }
       this.mouseleave = true;
     },
-    handleMousedown() {
+    handleMousedown(event) {
       this.mousedown = true;
+      if (event.target === this.$refs.leftInvisible) this.showThumbnail = false;
       this.$bus.$emit('seek', this.hoveredCurrentTime);
-      if (this.hoveredCurrentTime === 0) this.$bus.$emit('play');
+      if (this.hoveredCurrentTime === 0) {
+        this.$bus.$emit('play');
+      }
     },
     handleDocumentMouseup() {
       if (this.mousedown) {
         this.mousedown = false;
-        if (this.mouseleave) this.hovering = false;
+        if (this.mouseleave) {
+          this.hovering = false;
+          this.showThumbnail = false;
+        }
         this.$bus.$emit('seek', this.hoveredCurrentTime);
       }
     },
@@ -191,6 +207,9 @@ export default {
   }
   &:hover {
     cursor: pointer;
+    & .left .radius {
+      border-radius: 0 20px 20px 0;
+    }
   }
 
   .the-preview-thumbnail {
@@ -201,10 +220,17 @@ export default {
     position: relative;
     width: 20px;
     .fake-progress {
-      transition: background-color 300ms, height 150ms, border-radius 150ms;
+      transition: height 150ms;
       width: inherit;
       position: absolute;
       bottom: 0;
+    }
+    &.left .radius{
+      content: '';
+      width: inherit;
+      height: inherit;
+      background-color: rgba(255, 255, 255, 0.9);
+      position: absolute;
     }
   }
 
