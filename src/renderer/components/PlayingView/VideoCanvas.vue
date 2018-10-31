@@ -42,6 +42,8 @@ export default {
       timeUpdateIntervalID: null,
       windowSizeHelper: null,
       videoElement: null,
+      coverFinded: false,
+      lastCoverDetectingTime: 0,
     };
   },
   props: {
@@ -80,10 +82,14 @@ export default {
         height: this.videoElement.videoHeight,
       });
       this.$bus.$emit('video-loaded');
+      this.getVideoCover();
     },
     onTimeupdate() {
       if (this.isPlaying) {
         this.$store.commit('CurrentTime', this.videoElement.currentTime);
+        if (!this.coverFinded && this.videoElement.currentTime - this.lastCoverDetectingTime > 1) {
+          this.getVideoCover();
+        }
       }
       requestAnimationFrame(this.onTimeupdate);
     },
@@ -236,6 +242,40 @@ export default {
         duration: this.$store.state.PlaybackState.Duration,
       };
       syncStorage.setSync('recent-played', data);
+    },
+    async getVideoCover() {
+      const canvas = this.$refs.thumbnailCanvas;
+      const canvasCTX = canvas.getContext('2d');
+      const { videoHeight, videoWidth } = this.videoElement;
+      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
+      canvasCTX.drawImage(
+        this.videoElement, 0, 0, videoWidth, videoHeight,
+        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
+      );
+      const { data } = canvasCTX.getImageData(0, 0, 100, 100);
+      for (let i = 0; i < data.length; i += 1) {
+        if (data[i] !== 0) {
+          this.coverFinded = true;
+          break;
+        }
+      }
+      if (this.coverFinded) {
+        const imagePath = canvas.toDataURL('image/png');
+        const val = await this.infoDB().get('recent-played', 'path', this.srcOfVideo);
+        if (val) {
+          const mergedData = Object.assign(val, { cover: imagePath });
+          this.infoDB().add('recent-played', mergedData);
+        } else {
+          const data = {
+            quickHash: this.mediaQuickHash(this.srcOfVideo),
+            path: this.srcOfVideo,
+            cover: imagePath,
+            duration: this.$store.state.PlaybackState.Duration,
+          };
+          this.infoDB().add('recent-played', data);
+        }
+      }
+      this.lastCoverDetectingTime = this.currentTime;
     },
     // responsible for calculating window position and size relative to LandingView's Center
     calcNewWindowXY(currentDisplay, landingViewRectangle) {
