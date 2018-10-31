@@ -14,7 +14,6 @@
     <notification-bubble/>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button />
-    <base-invisible-background v-show="!mute" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
@@ -37,7 +36,6 @@ import SubtitleControl from './SubtitleControl.vue';
 import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TimeProgressBar from './TimeProgressBar.vue';
-import BaseInvisibleBackground from './BaseInvisibleBackground.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 export default {
   name: 'the-video-controller',
@@ -50,7 +48,6 @@ export default {
     'playlist-control': PlaylistControl,
     'the-time-codes': TheTimeCodes,
     'the-time-progress-bar': TimeProgressBar,
-    'base-invisible-background': BaseInvisibleBackground,
     'notification-bubble': NotificationBubble,
   },
   directives: {
@@ -106,7 +103,7 @@ export default {
         (!this.mouseLeftWindow && this.onOtherWidget);
     },
     onOtherWidget() {
-      return this.currentWidget !== this.$options.name && this.currentWidget !== 'base-invisible-background';
+      return this.currentWidget !== this.$options.name;
     },
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ? 'default' : 'none';
@@ -195,9 +192,9 @@ export default {
       const volumeKeydown = this.orify(currentEventInfo.get('keydown').ArrowUp, currentEventInfo.get('keydown').ArrowDown, currentEventInfo.get('keydown').KeyM); // eslint-disable-line
       const mouseScrolling = currentEventInfo.get('wheel').time !== lastEventInfo.get('wheel').time;
       const lastWidget = this.getComponentName(lastEventInfo.get('mousemove').target);
-      const mouseWakingUpVolume = this.enterWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator');
-      const mouseLeavingVolume = this.leaveWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator');
-      const mouseMovingInVolume = this.andify(!this.mouseStopMoving, this.inWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator'));
+      const mouseWakingUpVolume = this.enterWidgets(lastWidget, this.currentWidget, 'volume-indicator');
+      const mouseLeavingVolume = this.leaveWidgets(lastWidget, this.currentWidget, 'volume-indicator');
+      const mouseMovingInVolume = this.andify(!this.mouseStopMoving, this.inWidgets(lastWidget, this.currentWidget, 'volume-indicator'));
       const wakingupVolume = this.orify(volumeKeydown, mouseScrolling, this.andify(!this.mute, this.orify(mouseWakingUpVolume, mouseLeavingVolume, mouseMovingInVolume))); // eslint-disable-line
       if (wakingupVolume) {
         this.timerManager.updateTimer('sleepingVolumeButton', this.orify(mouseWakingUpVolume, mouseMovingInVolume) ? this.muteDelay : this.hideVolumeDelay);
