@@ -17,8 +17,7 @@
             class="img"
             :key="imageTurn"
             :style="{
-              backgroundImage: backgroundImage(backgroundUrl),
-              backgroundColor: backgroundColor(),
+              backgroundImage: backgroundImage(backgroundUrl, cover),
             }"></div>
           </transition>
         </div>
@@ -77,6 +76,7 @@ export default {
       invalidTimeRepresentation: '--',
       langdingLogoAppear: true,
       backgroundUrl: '',
+      cover: '',
       item: [],
       isDragging: false,
       logoPos: 37 - (9200 / 405),
@@ -247,6 +247,7 @@ export default {
     this.$bus.$on('displayInfo', (displayInfo) => {
       this.imageTurn = displayInfo.imageTurn;
       this.backgroundUrl = displayInfo.backgroundUrl;
+      this.cover = displayInfo.cover;
       this.langdingLogoAppear = displayInfo.langdingLogoAppear;
       this.showShortcutImage = displayInfo.showShortcutImage;
       this.item.baseName = displayInfo.baseName;
@@ -256,11 +257,8 @@ export default {
     });
   },
   methods: {
-    backgroundImage(shortCut) {
-      return this.item.lastTime > 1 ? `url("${shortCut}")` : '';
-    },
-    backgroundColor() {
-      return this.item.lastTime < 1 ? 'black' : '';
+    backgroundImage(shortCut, cover) {
+      return this.item.lastTime > 1 ? `url("${shortCut}")` : `url(${cover}`;
     },
     timeInValidForm(time) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);

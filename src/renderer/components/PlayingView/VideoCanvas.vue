@@ -254,22 +254,30 @@ export default {
       );
       const { data } = canvasCTX.getImageData(0, 0, 100, 100);
       for (let i = 0; i < data.length; i += 1) {
-        if (data[i] !== 0) {
+        if ((i + 1) % 4 !== 0 && data[i] > 0) {
           this.coverFinded = true;
           break;
         }
       }
       if (this.coverFinded) {
+        const smallImagePath = canvas.toDataURL('image/png');
+        [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
+        canvasCTX.drawImage(
+          this.videoElement, 0, 0, videoWidth, videoHeight,
+          0, 0, (videoWidth / videoHeight) * 1080, 1080,
+        );
         const imagePath = canvas.toDataURL('image/png');
+
         const val = await this.infoDB().get('recent-played', 'path', this.srcOfVideo);
         if (val) {
-          const mergedData = Object.assign(val, { cover: imagePath });
+          const mergedData = Object.assign(val, { cover: imagePath, smallCover: imagePath });
           this.infoDB().add('recent-played', mergedData);
         } else {
           const data = {
             quickHash: this.mediaQuickHash(this.srcOfVideo),
             path: this.srcOfVideo,
             cover: imagePath,
+            smallCover: smallImagePath,
             duration: this.$store.state.PlaybackState.Duration,
           };
           this.infoDB().add('recent-played', data);
@@ -357,6 +365,7 @@ export default {
   },
   watch: {
     srcOfVideo(val, oldVal) {
+      this.coverFinded = false;
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
