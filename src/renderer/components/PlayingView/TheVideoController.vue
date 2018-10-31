@@ -208,7 +208,7 @@ export default {
       const progressKeydown = this.orify(currentEventInfo.get('keydown').ArrowLeft, currentEventInfo.get('keydown').ArrowRight);
       if (progressKeydown) {
         this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
-        // Prevent all widgets display before the-time-progress-bar
+        // Prevent all widgets display before the-progress-bar
         if (this.showAllWidgets) {
           this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
         }
@@ -224,7 +224,7 @@ export default {
         this.timerState[uiName] = this.showAllWidgets;
       });
       this.timerState['volume-indicator'] = !this.hideVolume;
-      this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
+      this.timerState['the-progress-bar'] = !this.hideProgressBar;
       return currentEventInfo;
     },
     UITimerManager(frameTime) {
@@ -240,7 +240,7 @@ export default {
       this.hideProgressBar = timeoutTimers.includes('sleepingProgressBar');
 
       this.timerState['volume-indicator'] = !this.hideVolume;
-      this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
+      this.timerState['the-progress-bar'] = !this.hideProgressBar;
     },
     // UILayerManager() {
     // },

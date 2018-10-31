@@ -176,7 +176,7 @@ export default {
     }),
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'mute', 'rate', 'paused', 'currentTime', 'duration', 'ratio',
-      'winSize', 'winPos', 'isFullscreen']),
+      'winSize', 'winPos', 'isFullScreen']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -200,7 +200,7 @@ export default {
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
-      // this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.ratio]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.ratio]);
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
