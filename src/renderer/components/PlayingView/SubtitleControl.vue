@@ -472,7 +472,7 @@ li {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 70px;
-      left: -71px;
+      left: -33px;
       width: 286px;
     }
     .sub-menu{
