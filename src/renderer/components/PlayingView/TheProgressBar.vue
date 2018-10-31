@@ -44,6 +44,7 @@ export default {
       mousedown: false,
       mouseleave: true,
       thumbnailWidth: 272,
+      hoveringId: 0,
     };
   },
   computed: {
@@ -120,6 +121,7 @@ export default {
     handleMousemove(event) {
       this.hoveredPageX = event.pageX;
       this.hovering = true;
+      if (this.hoveringId) clearTimeout(this.hoveringId);
       if (event.target !== this.$refs.leftInvisible) this.showThumbnail = true;
       this.mouseleave = false;
     },
@@ -135,7 +137,13 @@ export default {
     },
     handleMousedown(event) {
       this.mousedown = true;
-      if (event.target === this.$refs.leftInvisible) this.showThumbnail = false;
+      if (event.target === this.$refs.leftInvisible) {
+        this.showThumbnail = false;
+        this.hoveringId = setTimeout(() => {
+          this.hovering = false;
+          this.$bus.$emit('currentWidget', 'the-video-controller');
+        }, 3000);
+      }
       this.$bus.$emit('seek', this.hoveredCurrentTime);
       if (this.hoveredCurrentTime === 0) {
         this.$bus.$emit('play');

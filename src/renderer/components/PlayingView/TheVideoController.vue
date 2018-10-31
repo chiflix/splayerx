@@ -94,6 +94,7 @@ export default {
       isDragging: false,
       focusedTimestamp: 0,
       focusDelay: 500,
+      listenedWidget: 'the-video-controller',
     };
   },
   computed: {
@@ -155,6 +156,10 @@ export default {
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
     requestAnimationFrame(this.UIManager);
+    this.$bus.$on('currentWidget', (widget) => {
+      this.listenedWidget = widget;
+      this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false);
+    });
   },
   methods: {
     // UIManagers
@@ -174,9 +179,13 @@ export default {
       this.start = timestamp;
       requestAnimationFrame(this.UIManager);
     },
-    inputProcess(currentEventInfo, lastEventInfo) {
+    inputProcess(currentEventInfo, lastEventInfo) { // eslint-disable-line
       // mousemove timer
-      this.currentWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
+      const currentChanged = currentEventInfo.get('mousemove').target !== lastEventInfo.get('mousemove').target;
+      if (currentChanged) {
+        this.listenedWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
+      }
+      this.currentWidget = this.listenedWidget;
       this.mouseStopMoving = _.isEqual(currentEventInfo.get('mousemove').position, lastEventInfo.get('mousemove').position);
       if (!this.mouseStopMoving) { this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false); }
       // mouseenter timer
