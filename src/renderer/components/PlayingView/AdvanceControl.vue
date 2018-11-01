@@ -11,21 +11,26 @@
         </AdvanceControlMenuItem>
       </div>
     </div>
-    <div
-      @mousedown="1+1">
-      <Icon type="advance"></Icon>
+    <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
+      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
     </div>
   </div>
 </template>;
 
 <script>
+import lottie from '@/components/lottie.vue';
+import * as animationData from '@/assets/advance.json';
 import AdvanceControlMenuItem from './AdvanceControlMenuItem.vue';
-import Icon from '../BaseIconContainer';
 export default {
   name: 'advance-control',
   components: {
     AdvanceControlMenuItem,
-    Icon,
+    lottie,
+  },
+  props: {
+    showAttached: Boolean,
+    mousedownOnOther: Boolean,
+    mouseupOnOther: Boolean,
   },
   data() {
     return {
@@ -77,9 +82,112 @@ export default {
         },
       ],
       isAcitve: false,
+      defaultOptions: { animationData },
+      animationSpeed: 1,
+      anim: {},
+      animFlag: true,
+      mouseDown: false,
+      validEnter: false,
+      clicks: 0,
+      showFlag: false,
     };
   },
+  watch: {
+    showAttached(val) {
+      if (!val) {
+        this.animFlag = true;
+        if (!this.validEnter) {
+          this.anim.playSegments([68, 89], false);
+        } else {
+          this.showFlag = true;
+          this.anim.playSegments([68, 83], false);
+          setTimeout(() => { this.showFlag = false; }, 250);
+        }
+      }
+    },
+    mousedownOnOther(val) {
+      if (val && this.showAttached) {
+        this.anim.playSegments([37, 41], false);
+        if (this.mouseupOnOther) {
+          this.$emit('update:showAttached', false);
+        }
+      }
+    },
+    mouseupOnOther(val) {
+      if (val && this.showAttached) {
+        this.$emit('update:showAttached', false);
+      }
+    },
+  },
   methods: {
+    handleAnimation(anim) {
+      this.anim = anim;
+    },
+    handleDown() {
+      this.mouseDown = true;
+      if (!this.showAttached) {
+        this.anim.playSegments([17, 21], false);
+      } else {
+        this.anim.playSegments([37, 41], false);
+      }
+      document.addEventListener('mouseup', (e) => {
+        if (e.button === 0) {
+          if (!this.showAttached) {
+            if (this.validEnter) {
+              this.anim.playSegments([23, 36], false);
+            } else if (!this.mousedownOnOther) {
+              this.anim.playSegments([105, 109], false);
+            }
+          }
+          this.mouseDown = false;
+        }
+      });
+    },
+    handleEnter() {
+      if (this.animFlag && !this.showAttached) {
+        if (!this.mouseDown) {
+          this.anim.playSegments([3, 7], false);
+        } else {
+          this.anim.playSegments([95, 99], false);
+        }
+      }
+      this.showFlag = false;
+      this.validEnter = true;
+      this.animFlag = false;
+    },
+    handleLeave() {
+      if (!this.showAttached) {
+        if (this.mouseDown) {
+          this.anim.playSegments([90, 94], false);
+        } else if (this.showFlag) {
+          this.anim.addEventListener('complete', () => {
+            this.anim.playSegments([10, 14], false);
+            this.showFlag = false;
+            this.anim.removeEventListener('complete');
+          });
+        } else {
+          this.anim.playSegments([10, 14], false);
+        }
+        this.animFlag = true;
+      }
+      this.validEnter = false;
+    },
+    toggleAdvMenuDisplay() {
+      this.clicks = this.showAttached ? 1 : 0;
+      this.clicks += 1;
+      switch (this.clicks) {
+        case 1:
+          this.$emit('update:showAttached', true);
+          break;
+        case 2:
+          this.$emit('update:showAttached', false);
+          this.clicks = 0;
+          break;
+        default:
+          this.clicks = 0;
+          break;
+      }
+    },
     onSecondItemClick() {
     },
     onMenuItemClick() {

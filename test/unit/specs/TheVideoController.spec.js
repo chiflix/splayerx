@@ -64,6 +64,7 @@ describe('Component - TheVideoController Unit Test', () => {
       currentEventInfo = new Map([
         ['mousemove', {}],
         ['mousedown', {}],
+        ['mouseup', {}],
         ['mouseenter', {}],
         ['wheel', {}],
         ['keydown', {

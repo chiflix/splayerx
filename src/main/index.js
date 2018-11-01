@@ -47,6 +47,7 @@ function registerMainWindowEvent() {
   mainWindow.on('move', () => {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
     mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
     mainWindow.webContents.send('main-move');
   });
   mainWindow.on('enter-full-screen', () => {
@@ -54,6 +55,7 @@ function registerMainWindowEvent() {
   });
   mainWindow.on('leave-full-screen', () => {
     mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('focus', () => {
     mainWindow.webContents.send('mainCommit', 'isFocused', true);
