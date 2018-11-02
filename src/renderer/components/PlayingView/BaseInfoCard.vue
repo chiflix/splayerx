@@ -1,46 +1,50 @@
 <template>
-  <div class="container">
-    <div class="element bottom"><div class="element middle"><div class="element content"><slot></slot></div></div></div>
+  <div class="container"
+    :style="{
+      width: `${width}px`,
+      height: `${height}px`,
+    }">
+    <div class="element"
+      :style="{
+        borderRadius: `${borderRadius}px`,
+        width: `${width - borderWidth}px`,
+        height: `${height - borderWidth}px`,
+      }"></div>
+      <slot></slot>
   </div>
 </template>
 <script>
 export default {
   name: 'base-info-card',
+  props: {
+    height: {
+      type: Number,
+    },
+    width: {
+      type: Number,
+    },
+    borderWidth: {
+      type: Number,
+      default: 0.7,
+    },
+    borderRadius: {
+      type: Number,
+      default: 2,
+    },
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 .container {
-  border-radius: 1px;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
-  position: absolute;
   box-sizing: content-box;
   .element {
-    border-radius: 1px;
+    z-index: 500;
     position: absolute;
+    border: 0.7px solid rgba(255,255,255,0.2);
+    transform: translate(-0.35px, -0.35px);
     box-sizing: inherit;
-  }
-  .bottom {
-    width: 100%;
-    height: 100%;
-    top: 0;
-    background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(8px);
-    clip-path: inset(0 round 1px);
-  }
-  .middle {
-    width: 100%;
-    height: 100%;
-    top: 0;
-    background: rgba(255, 255, 255, 0.2);
-  }
-  .content {
-    width: calc(100% - 2px);
-    height: calc(100% - 2px);
-    top: 1px;
-    left: 1px;
-    background-color: transparent;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
   }
 }
 </style>
