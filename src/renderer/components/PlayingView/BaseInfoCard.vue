@@ -6,6 +6,7 @@
     }">
     <div class="element"
       :style="{
+        transform: `translate(-${borderWidth / 2}px, -${borderWidth / 2}px)`,
         borderRadius: `${borderRadius}px`,
         width: `${width - borderWidth}px`,
         height: `${height - borderWidth}px`,
@@ -34,7 +35,7 @@ export default {
     },
     borderColor: {
       type: String,
-      default: '255,255,255,0.2',
+      default: '255, 255, 255, 0.2',
     },
   },
 };
@@ -45,9 +46,7 @@ export default {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
   box-sizing: content-box;
   .element {
-    z-index: 500;
     position: absolute;
-    transform: translate(-0.35px, -0.35px);
     box-sizing: inherit;
   }
 }
