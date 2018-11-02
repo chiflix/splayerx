@@ -9,6 +9,7 @@
         borderRadius: `${borderRadius}px`,
         width: `${width - borderWidth}px`,
         height: `${height - borderWidth}px`,
+        border: `${borderWidth}px solid rgba(${borderColor})`,
       }"></div>
       <slot></slot>
   </div>
@@ -31,6 +32,10 @@ export default {
       type: Number,
       default: 2,
     },
+    borderColor: {
+      type: String,
+      default: '255,255,255,0.2',
+    },
   },
 };
 </script>
@@ -42,10 +47,8 @@ export default {
   .element {
     z-index: 500;
     position: absolute;
-    border: 0.7px solid rgba(255,255,255,0.2);
     transform: translate(-0.35px, -0.35px);
     box-sizing: inherit;
   }
 }
 </style>
-
