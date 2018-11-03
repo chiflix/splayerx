@@ -14,7 +14,6 @@
     <notification-bubble/>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button :paused="paused" />
-    <base-invisible-background v-show="!mute" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
@@ -37,7 +36,6 @@ import SubtitleControl from './SubtitleControl.vue';
 import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TheProgressBar from './TheProgressBar';
-import BaseInvisibleBackground from './BaseInvisibleBackground.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 export default {
   name: 'the-video-controller',
@@ -50,7 +48,6 @@ export default {
     'playlist-control': PlaylistControl,
     'the-time-codes': TheTimeCodes,
     'the-progress-bar': TheProgressBar,
-    'base-invisible-background': BaseInvisibleBackground,
     'notification-bubble': NotificationBubble,
   },
   directives: {

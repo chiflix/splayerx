@@ -5,7 +5,8 @@ import winston from 'winston';
 import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
-const electron = require('electron');
+import electron from 'electron'; // eslint-disable-line
+
 export default {
   methods: {
     infoDB() {
