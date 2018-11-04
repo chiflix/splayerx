@@ -13,7 +13,7 @@ import messages from '@/locales';
 import helpers from '@/helpers';
 import Path from 'path';
 import { mapGetters } from 'vuex';
-import { Video as videoActions } from '@/store/action-types';
+import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 require('source-map-support').install();
 
@@ -479,16 +479,16 @@ new Vue({
           break;
         case 'ArrowLeft':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
+            this.$bus.$emit('seek', this.$store.getters.currentTime - 60);
           } else {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
+            this.$bus.$emit('seek', this.$store.getters.currentTime - 5);
           }
           break;
         case 'ArrowRight':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
+            this.$bus.$emit('seek', this.$store.getters.currentTime + 60);
           } else {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
+            this.$bus.$emit('seek', this.$store.getters.currentTime + 5);
           }
           break;
         case 'Escape':

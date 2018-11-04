@@ -7,15 +7,12 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
 export default {
   name: 'base-video-player',
   props: {
-    playbackRate: {
-      type: Number,
-      default: 1,
-      validator: value => value > 0 && value <= 100,
-    },
+    // network state
     src: {
       type: String,
       required: true,
@@ -28,141 +25,205 @@ export default {
         return value.length > 0 && fileSrcRegexes.some(rule => rule.test(value));
       },
     },
+    crossOrigin: {
+      default: null,
+      validator: value => [null, 'anonymous', 'user-credentials'].includes(value),
+    },
+    preload: {
+      type: String,
+      default: 'metadata',
+      validator: value => ['none', 'metadata', 'auto', ''].includes(value),
+    },
+    // playback state
+    currentTime: {
+      type: Array,
+      default: () => [0],
+      validator: value => value[0] >= 0,
+    },
+    defaultPlaybackRate: {
+      type: Number,
+      default: 1,
+      validator: value => value >= 0 && value <= 16,
+    },
+    playbackRate: {
+      type: Number,
+      default: 1,
+      validator: value => value > 0 && value <= 16,
+    },
+    autoplay: {
+      type: Boolean,
+      default: true,
+    },
+    loop: {
+      type: Boolean,
+      default: true,
+    },
+    // controls
+    controls: {
+      type: Boolean,
+      default: false,
+    },
     volume: {
       type: Number,
       default: 0.7,
       validator: value => typeof value === 'number' && value >= 0 && value <= 1,
     },
-    defaultEvents: {
+    muted: {
+      type: Boolean,
+      default: false,
+    },
+    defaultMuted: {
+      type: Boolean,
+      default: false,
+    },
+    // custom
+    paused: {
+      type: Boolean,
+      default: false,
+    },
+    updateCurrentTime: {
+      type: Boolean,
+      default: false,
+    },
+    // video events
+    events: {
       type: Array,
       required: true,
-      default: () => ([
-        'loadedmetadata',
-      ]),
-      validator: value => Array.isArray(value) && (
+      default: () => ['loadedmetadata'],
+      validator: value => (
         value.length === 0 ||
-        value.every(element => DEFAULT_VIDEO_EVENTS.indexOf(element) !== -1)),
+        value.every(element => DEFAULT_VIDEO_EVENTS.includes(element))),
     },
-    defaultOptions: {
-      type: Object,
-      default: () => ({
-        autoplay: true,
-        crossOrigin: false,
-        defaultMuted: false,
-        defaultPlaybackRate: 1,
-        loop: false,
-        // mediaGroup: null,
-        muted: false,
-        preload: 'auto',
-      }),
-    },
-    customOptions: {
-      type: Object,
-      default: () => ({
-        pauseOnStart: false,
-        commitToVuex: false,
-      }),
-    },
-    styleObject: {
+    // video style
+    styles: {
       type: Object,
       default: () => ({}),
     },
   },
   data() {
     return {
-      onEdEvents: [],
+      eventListeners: new Map(),
+      currentTimeAnimationFrameId: 0,
     };
   },
   watch: {
-    playbackRate(newValue) {
-      this.$refs.video.setAttribute('playbackrate', newValue);
+    // network state
+    src(newVal) {
+      this.$refs.video.src = newVal;
     },
-    src(newValue) {
-      if (this.$options.props.src.validator(newValue)) {
-        this.$refs.video.setAttribute('src', newValue);
+    // playback state
+    currentTime(newVal) {
+      [this.$refs.video.currentTime] = newVal;
+    },
+    playbackRate(newVal) {
+      this.$refs.video.playbackRate = newVal;
+    },
+    loop(newVal) {
+      this.$refs.video.loop = newVal;
+    },
+    // controls
+    controls(newVal) {
+      this.$refs.video.controls = newVal;
+    },
+    volume(newVal) {
+      this.$refs.video.volume = newVal;
+    },
+    muted(newVal) {
+      this.$refs.video.muted = newVal;
+    },
+    // custom
+    paused(newVal) {
+      this.$refs.video[newVal ? 'pause' : 'play']();
+    },
+    updateCurrentTime(newVal) {
+      if (newVal) {
+        this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
+      } else {
+        cancelAnimationFrame(this.currentTimeAnimationFrameId);
       }
     },
-    volume(newValue) {
-      if (this.$options.props.volume.validator(newValue)) {
-        this.$refs.video.setAttribute('volume', newValue);
-      }
+    // events
+    events(newVal, oldVal) {
+      this.addEvents(newVal.filter(event => !oldVal.includes(event)));
+      this.removeEvents(oldVal.filter(event => !newVal.includes(event)));
+    },
+    // styles
+    styles(newVal) {
+      this.setStyle(newVal);
     },
   },
   mounted() {
-    this.initializeVideoPlayer();
+    this.basicInfoInitialization(this.$refs.video);
+    if (this.updateCurrentTime) {
+      this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
+    }
+    this.addEvents(this.events);
+    this.setStyle(this.styles);
   },
   methods: {
-    initializeVideoPlayer() {
-      this.basicInfoInitialization(this.$refs.video);
-      this.onEdEvents = this.defaultEventsInitialization(
-        this.defaultEvents,
-        this.$refs.video,
-      );
-      this.defaultOptionsInitialization(this.defaultOptions, this.$refs.video);
-      this.customOptionsInitialization(this.customOptions, this.$refs.video);
-      this.initializeStyleObject(this.styleObject);
-    },
     basicInfoInitialization(videoElement) {
-      videoElement.setAttribute('playbackRate', this.playbackRate);
-      videoElement.setAttribute('src', this.src);
-      videoElement.setAttribute('volume', this.volume);
-      return videoElement;
-    },
-    defaultEventsInitialization(eventsArray) {
-      // Watch default events
-      const onEdEvents = [];
-      eventsArray.forEach((event) => {
-        if (DEFAULT_VIDEO_EVENTS.indexOf(event) !== -1) {
-          // this.$on(event, this.emitPlayerState(event));
-          this.$refs.video.addEventListener(event, (value) => {
-            this.emitPlayerState(event, value);
-          });
-          onEdEvents.push(event);
-        }
+      const basicInfo = [
+        'src', 'crossOrigin', 'preload',
+        'defaultPlaybackRate', 'autoplay',
+        'defaultMuted',
+      ];
+      basicInfo.forEach((settingItem) => {
+        videoElement[settingItem] = this[settingItem];
       });
-      return onEdEvents;
-    },
-    emitPlayerState(event, value) {
-      if (event && !value) {
-        this.$emit(event);
-      } else if (value) {
-        this.$emit(event, { [event]: value });
-      }
-    },
-    defaultOptionsInitialization(optionsObject, videoElement) {
-      Object.keys(optionsObject).forEach((optionName) => {
-        videoElement.setAttribute(optionName, optionsObject[optionName]);
-      });
-    },
-    customOptionsInitialization(optionsObject, videoElement) {
-      if (optionsObject.pauseOnStart) {
-        videoElement.addEventListener('loadedmetadata', this.pause);
-      }
-    },
-    initializeStyleObject(styleObject) {
-      const style = Object.keys(styleObject);
-      if (style.length > 0) {
-        style.forEach((styleName) => {
-          this.$refs.video.style[styleName] = styleObject[styleName];
-        });
+      if (this.paused) {
+        videoElement.pause();
       }
     },
     // Video default methods
     videoElement() {
       return this.$refs.video;
     },
-    pause() {
-      this.$refs.video.pause();
+    currentTimeUpdate() {
+      const { currentTime } = this.$refs.video;
+      this.$emit('update:currentTime', currentTime);
+      this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
     },
-    currentTime(value) {
-      if (value) {
-        this.$refs.video.currentTime = value;
+    // helper functions
+    emitEvents(event, value) {
+      if (event && !value) {
+        this.$emit(event);
+      } else if (value) {
+        this.$emit(event, value);
       }
-      return this.$refs.video.currentTime;
     },
-    duration() {
-      return this.$refs.video.duration;
+    addEvents(events) {
+      events.forEach((event) => {
+        if (!this.eventListeners.has(event)) {
+          const listener = _.partial(this.emitEvents, event);
+          this.$refs.video.addEventListener(event, listener);
+          this.eventListeners.set(event, listener);
+        }
+      });
     },
+    removeEvents(events) {
+      events.forEach((event) => {
+        if (this.eventListeners.has(event)) {
+          const listener = this.eventListeners.get(event);
+          this.$refs.video.removeEventListener(event, listener);
+          this.eventListeners.delete(event);
+        }
+      });
+    },
+    setStyle(styles) {
+      const style = Object.keys(styles);
+      if (style.length > 0) {
+        style.forEach((styleName) => {
+          this.$refs.video.style[styleName] = styles[styleName];
+        });
+      }
+    },
+  },
+  beforeDestroy() {
+    if (this.updateCurrentTime) {
+      cancelAnimationFrame(this.currentTimeAnimationFrameId);
+      this.$emit('update:updateCurrentTime', false);
+    }
+    this.removeEvents(this.events);
   },
 };
 </script>

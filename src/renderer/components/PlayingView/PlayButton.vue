@@ -1,9 +1,9 @@
 <template>
   <div
     :data-component-name="$options.name">
-  <Icon :type="src" class="icon" :class="ani_mode"
+  <Icon :type="paused ? 'pause' : 'play'" class="icon" :class="ani_mode"
           v-if="iconAppear"
-          @animationend.native="animationEnd">
+          @animationend.native="iconAppear = false">
     </Icon>
   </div>
 </template>
@@ -12,32 +12,23 @@
 import Icon from '../BaseIconContainer';
 export default {
   name: 'play-button',
+  props: {
+    paused: false,
+  },
   data() {
     return {
       iconAppear: false, // control whether the icon show up or not
       ani_mode: '', // change the CSS
-      src: '',
     };
   },
   components: {
     Icon,
   },
-  methods: {
-    animationEnd() {
-      this.iconAppear = false; // after the animation ends, icon disappears
+  watch: {
+    paused(newVal) {
+      this.iconAppear = true;
+      this.ani_mode = newVal ? 'icon-ani-pause' : 'icon-ani-play';
     },
-  },
-  mounted() {
-    this.$bus.$on('twinkle-pause-icon', () => {
-      this.src = 'pause';
-      this.iconAppear = true;
-      this.ani_mode = 'icon-ani-pause';// css for pause button animation
-    });
-    this.$bus.$on('twinkle-play-icon', () => {
-      this.src = 'play';
-      this.iconAppear = true;
-      this.ani_mode = 'icon-ani-play';
-    });
   },
 };
 </script>

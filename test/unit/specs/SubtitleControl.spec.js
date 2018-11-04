@@ -1,5 +1,5 @@
 import Vuex from 'vuex';
-import PlaybackState from '@/store/modules/PlaybackState';
+import Video from '@/store/modules/Video';
 import Subtitle from '@/store/modules/Subtitle';
 import SubtitleControl from '@/components/PlayingView/SubtitleControl';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
@@ -14,10 +14,10 @@ describe('SubtitleControl.vue', () => {
   beforeEach(() => {
     store = new Vuex.Store({
       modules: {
-        PlaybackState: {
-          state: PlaybackState.state,
-          getters: PlaybackState.getters,
-          mutations: PlaybackState.mutations,
+        Video: {
+          state: Video.state,
+          getters: Video.getters,
+          mutations: Video.mutations,
         },
         Subtitle: {
           state: Subtitle.state,
@@ -28,22 +28,9 @@ describe('SubtitleControl.vue', () => {
     });
   });
 
-  it('should load with correct data', () => {
-    const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    expect(wrapper.vm.loadingSubsPlaceholders.local).equal('');
-    expect(wrapper.vm.loadingSubsPlaceholders.embedded).equal('');
-    expect(wrapper.vm.loadingSubsPlaceholders.server).equal('');
-    expect(wrapper.vm.showingPopupDialog).equal(false);
-    expect(wrapper.vm.preStyle).contains('linear-gradient');
-    expect(wrapper.vm.currentSubIden).equal(0);
-  });
-
   it('should render correct HTML elements', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    wrapper.setData({
-      isSubCtrlBtnAppear: true,
-      appearSubtitleMenu: true,
-    });
+
     expect(wrapper.html()).contains('ul');
     expect(wrapper.html()).contains('li');
     expect(wrapper.html()).contains('div');
@@ -55,8 +42,6 @@ describe('SubtitleControl.vue', () => {
       localVue,
       attachToDocument: true,
     });
-    wrapper.setData({ isSubCtrlBtnAppear: true });
-    wrapper.setData({ appearSubtitleMenu: true });
     const spy = sinon.spy(wrapper.vm.$bus, '$emit');
     wrapper.vm.toggleItemClick(1);
     expect(wrapper.vm.currentSubIden).equal(1);
@@ -68,8 +53,6 @@ describe('SubtitleControl.vue', () => {
 
   it('toggleSubtitleOff method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    wrapper.setData({ isSubCtrlBtnAppear: true });
-    wrapper.setData({ appearSubtitleMenu: true });
     const spy = sinon.spy(wrapper.vm.$bus, '$emit');
     wrapper.vm.toggleSubtitleOff();
     expect(wrapper.vm.currentSubIden).equal(-1);
@@ -82,8 +65,6 @@ describe('SubtitleControl.vue', () => {
   it('itemHasBeenChosen method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, { store, localVue });
     wrapper.setData({
-      isSubCtrlBtnAppear: true,
-      appearSubtitleMenu: true,
       currentSubIden: 0,
     });
     expect(wrapper.vm.itemHasBeenChosen()).equal(true);
@@ -98,19 +79,6 @@ describe('SubtitleControl.vue', () => {
     expect(wrapper.vm.itemTitleHasChineseChar('Hello')).equal(false);
     expect(wrapper.vm.itemTitleHasChineseChar('123')).equal(false);
     expect(wrapper.vm.itemTitleHasChineseChar('旰')).equal(true);
-  });
-
-  it('computedAvaliableItems computed property works fine', () => {
-    const testSubArr = [
-      { title: 'something index 0' },
-      { title: 'something index 1' },
-      { title: 'something index 2' },
-      { title: 'something index 3' },
-    ];
-    const wrapper = shallowMount(SubtitleControl, { store, localVue });
-    store.commit('SubtitleNames', testSubArr);
-    expect(wrapper.vm.computedAvaliableItems.length).equal(4);
-    expect(wrapper.vm.computedAvaliableItems[2].title).equal('something index 2');
   });
 
   it('toggleLoadServerSubtitles method work fine', () => {

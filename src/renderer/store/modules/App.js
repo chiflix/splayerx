@@ -1,4 +1,4 @@
-import electron from 'electron';
+import electron from 'electron'; // eslint-disable-line
 
 export default {
   state: {

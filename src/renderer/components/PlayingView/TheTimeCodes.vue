@@ -2,12 +2,13 @@
   <div class="timing"
     :data-component-name="$options.name"
     @mousedown="switchStateOfContent">
-        <span class="firstContent" :class="{ remainTime: isRemainTime.first }">{{ content.first }}</span>
+        <span class="firstContent" :class="{ remainTime: isRemainTime.first }" v-if="hasDuration">{{ firstContent }}</span>
         <span class="splitSign">/</span>
-        <span class="secondContent" :class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ content.second }}</span>
+        <span class="secondContent" :class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ secondContent }}</span>
   </div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 export default {
   name: 'the-time-codes',
   data() {
@@ -26,8 +27,9 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['roundedCurrentTime', 'duration']),
     hasDuration() {
-      return !Number.isNaN(this.$store.state.PlaybackState.Duration);
+      return !Number.isNaN(this.duration) && !Number.isNaN(this.roundedCurrentTime);
     },
     isRemainTime() {
       return {
@@ -35,27 +37,24 @@ export default {
         second: this.contentState === this.ContentStateEnum.CURRENT_REMAIN,
       };
     },
-    duration() {
-      return this.timecodeFromSeconds(this.$store.state.PlaybackState.Duration);
+    convertedDuration() {
+      return this.timecodeFromSeconds(this.duration);
     },
-    currentTime() {
-      return this.timecodeFromSeconds(this.$store.state.PlaybackState.CurrentTime);
+    convertedCurrentTime() {
+      return this.timecodeFromSeconds(this.roundedCurrentTime);
     },
     remainTime() {
       const remainTime
-        = -(this.$store.state.PlaybackState.Duration - this.$store.state.PlaybackState.CurrentTime);
+        = -(this.duration - this.roundedCurrentTime);
       return this.timecodeFromSeconds(remainTime);
     },
-    content() {
-      switch (this.contentState) {
-        case this.ContentStateEnum.DEFAULT:
-          return { first: this.currentTime, second: this.duration };
-        case this.ContentStateEnum.CURRENT_REMAIN:
-          return { first: this.currentTime, second: this.remainTime };
-        case this.ContentStateEnum.REMAIN_DURATION:
-          return { first: this.remainTime, second: this.duration };
-        default: return { first: this.currentTime, second: this.duration };
-      }
+    firstContent() {
+      return this.contentState === this.ContentStateEnum.REMAIN_DURATION ?
+        this.remainTime : this.convertedCurrentTime;
+    },
+    secondContent() {
+      return this.contentState === this.ContentStateEnum.CURRENT_REMAIN ?
+        this.remainTime : this.convertedDuration;
     },
   },
 };

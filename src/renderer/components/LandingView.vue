@@ -103,8 +103,8 @@ export default {
   },
   computed: {
     ...mapState({
-      version: state => state.AppState.version,
-      isFullScreen: state => state.WindowState.isFullScreen,
+      version: state => state.App.version,
+      isFullScreen: state => state.Window.isFullScreen,
     }),
   },
   created() {

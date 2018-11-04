@@ -5,7 +5,8 @@ import winston from 'winston';
 import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
-const electron = require('electron');
+import electron from 'electron'; // eslint-disable-line
+
 export default {
   methods: {
     infoDB() {
@@ -118,7 +119,7 @@ export default {
           }
           this.$bus.$emit('new-file-open');
         });
-      this.$store.commit('OriginSrcOfVideo', originPath);
+      this.$store.dispatch('SRC_SET', originPath);
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',

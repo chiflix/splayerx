@@ -83,7 +83,7 @@ export default {
     lastPlayedFile: {
       type: Object.Array,
       require: true,
-      default: [],
+      default: () => [],
     },
     changeSize: {
       type: Number,
@@ -182,7 +182,8 @@ export default {
 
       self.showingPopupDialog = true;
       // TODO: move openFile method to a single location
-      dialog.showOpenDialog(focusedWindow, {
+      // eslint-disable-next-line
+      process.env.NODE_ENV === 'testing' ? '' : dialog.showOpenDialog(focusedWindow, {
         title: 'Open Dialog',
         defaultPath: link,
         filters: [{
