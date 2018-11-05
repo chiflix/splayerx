@@ -17,7 +17,7 @@ const state = {
   readyState: 0,
   seeking: false,
   // playback state
-  duration: 0,
+  duration: NaN,
   rate: 1,
   defaultPlaybackRate: 1,
   paused: false,
