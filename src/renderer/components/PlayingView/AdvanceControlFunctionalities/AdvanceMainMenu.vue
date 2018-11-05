@@ -1,7 +1,8 @@
 <template>
 <base-info-card class="card"
   :style="{
-    height: speedChosen ? '164px' : '127px'
+    height: speedChosen ? '164px' : '127px',
+    transition: 'height 200ms linear',
   }">
   <div class="mainItems">
     <div class="playSpeed"
@@ -9,13 +10,16 @@
       @mouseenter="handleMouseenter($event, 1)"
       @mouseleave="handleMouseleave($event, 1)"
       :style="{
-        height: speedChosen ? '74px' : '37px'
+        height: speedChosen ? '74px' : '37px',
+        transition: 'height 200ms linear',
       }">
       <div class="item1" v-show="!speedChosen">
         <div>播放速度</div>
-        <div>{{ `${rateNum}x` }}</div>
+        <div>{{ `${rateNum} x` }}</div>
       </div>
-      <advance-row-items :lists="numList" :item="itemSpeedName" v-show="speedChosen"></advance-row-items>
+      <!--<transition name="speedTran">-->
+        <advance-row-items :lists="numList" :item="itemSpeedName" v-show="speedChosen" class="trans"></advance-row-items>
+      <!--</transition>-->
     </div>
     <div class="subtitleControl"
       @mouseenter="handleMouseenter($event, 2)"
@@ -70,7 +74,7 @@ export default {
   },
   methods: {
     handleClick() {
-      this.speedChosen = true;
+      this.speedChosen = !this.speedChosen;
     },
     handleSubClick() {
       this.$store.dispatch('updateState', 1);
@@ -79,7 +83,9 @@ export default {
       this.$store.dispatch('updateState', 2);
     },
     handleMouseenter(e, index) {
-      e.target.style.backgroundImage = this.preStyle;
+      if (!this.speedChosen || !e.target.classList[0].includes('playSpeed')) {
+        e.target.style.backgroundImage = this.preStyle;
+      }
       this.hoverIndex = index;
     },
     handleMouseleave(e) {
@@ -102,6 +108,7 @@ export default {
     display: flex;
     width: 170px;
     margin-top: 8px;
+    -webkit-transition: background-image 2s;
     .item1 {
       color: rgba(255, 255, 255, 0.6);
       font-size: 13px;
@@ -111,6 +118,9 @@ export default {
       height: 13px;
       display: flex;
       justify-content: space-between;
+    }
+    .trans {
+      transition: opacity 50ms;
     }
   }
   .subtitleControl {
@@ -144,5 +154,10 @@ export default {
     }
   }
 }
-
+.speedTran-trans-l-enter-active, .speedTran-trans-l-leave {
+  opacity: 1;
+}
+.speedTran-trans-l-enter, .speedTran-trans-l-leave-active {
+  opacity: 0;
+}
 </style>

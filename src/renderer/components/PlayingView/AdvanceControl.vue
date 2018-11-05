@@ -1,11 +1,16 @@
 <template>
   <div :data-component-name="$options.name">
     <div class="advanceControl">
-      <div class="advanced" v-show="showAttached">
-        <advance-main-menu class="mainMenu" v-show="stateMessage[0]"></advance-main-menu>
-        <advance-subtitle-setup class="subtitleSetup" v-show="stateMessage[1]"></advance-subtitle-setup>
-        <advance-audio-items class="audioItems" v-show="stateMessage[2]"></advance-audio-items>
+      <transition name="advance-trans-l">
+      <div class="advanced" v-show="showAttached"
+        :style="{
+          transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+        }">
+          <advance-main-menu class="mainMenu" v-show="stateMessage[0]"></advance-main-menu>
+          <advance-subtitle-setup class="subtitleSetup" v-show="stateMessage[1]"></advance-subtitle-setup>
+          <advance-audio-items class="audioItems" v-show="stateMessage[2]"></advance-audio-items>
       </div>
+      </transition>
       <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
         <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
       </div>
@@ -169,6 +174,20 @@ button:focus {
 button:hover {
   cursor: pointer;
 }
+.advance-trans-l-enter, .advance-trans-l-enter-active {
+  transform: translateY(0px);
+}
+.advance-trans-l-enter, .advance-trans-l-leave-active {
+  transform: translateY(20px);
+}
+
+.adTrans-enter, .adTrans-enter-active {
+  transform: translateX(0px);
+}
+.adTrans-enter, .adTrans-leave-active {
+  transform: translateX(50px);
+}
+
 .advanced {
   position: absolute;
   width: auto;
@@ -176,11 +195,33 @@ button:hover {
   bottom: 36px;
   right: -2px;
   z-index: 10;
+  transition-property: opacity, transform;
   .mainMenu, .subtitleSetup, .audioItems {
     position: relative;
     left: 0;
     top: 0;
+    transition-property: opacity, transform;
+    transition: 150ms cubic-bezier(0.17, 0.67, 0.17, 0.98), left 500ms;
   }
+}
+.advance-trans-l-enter-active, .advance-trans-l-leave {
+  opacity: 1;
+}
+.advance-trans-l-enter, .advance-trans-l-leave-active {
+  opacity: 0;
+}
+.advance-trans-l-leave-active {
+  position: absolute;
+}
+
+.adTrans-enter-active, .adTrans-leave {
+  opacity: 1;
+}
+.adTrans-enter, .adTrans-leave-active {
+  opacity: 0;
+}
+.adTrans-leave-active {
+  position: absolute;
 }
 
 </style>

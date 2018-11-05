@@ -2,6 +2,7 @@
   <base-info-card class="card"
     :style="{
       height: showDelay ? '156px' : showTrack ? `${containerHeight}px` : '119px',
+      transition: 'height 200ms linear',
     }">
     <div class="mainItems">
       <div class="topContainer" @click.left="handleQuitClick">
@@ -15,6 +16,7 @@
         @mouseleave="handleMouseleave($event)"
         :style="{
           height: showDelay ? '74px' : '37px',
+          transition: showDelay ? 'height 200ms linear' : '',
         }">
         <div class="item1" v-show="!showDelay">
           <div>音频延迟</div>
@@ -27,6 +29,7 @@
         @mouseleave="handleMouseleave($event)"
         :style="{
           height: showTrack ? `${trackHeight}px` : '37px',
+          transition: showTrack ? 'height 200ms linear' : '',
         }">
         <div class="item2" v-show="!showTrack || trackNum === 1">
           <div>切换轨道</div>
@@ -94,7 +97,9 @@ export default {
       this.showTrack = true;
     },
     handleMouseenter(e) {
-      e.target.style.backgroundImage = this.preStyle;
+      if ((!this.showDelay && e.target.classList[0].includes('audioDelay')) || (!this.showTrack && e.target.classList[0].includes('changeTrack'))) {
+        e.target.style.backgroundImage = this.preStyle;
+      }
     },
     handleMouseleave(e) {
       e.target.style.backgroundImage = null;

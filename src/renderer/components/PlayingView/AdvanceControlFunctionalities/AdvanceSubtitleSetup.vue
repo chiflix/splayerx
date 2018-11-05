@@ -2,6 +2,7 @@
 <base-info-card class="card"
   :style="{
     height: subColorChosen || subSizeChosen || subDelayChosen ? '193px' : '156px',
+    transition: 'height 200ms linear',
   }">
   <div class="mainItems">
     <div class="topContainer" @click.left="handleQuitClick">
@@ -14,7 +15,8 @@
       @mouseenter="handleMouseenter($event)"
       @mouseleave="handleMouseleave($event)"
       :style="{
-        height: subSizeChosen ? '74px' : '37px'
+        height: subSizeChosen ? '74px' : '37px',
+        transition: 'height 200ms linear',
       }">
       <div class="item1" v-show="!subSizeChosen">
         <div class="leftItem">字体大小</div>
@@ -26,7 +28,8 @@
       @mouseenter="handleMouseenter($event)"
       @mouseleave="handleMouseleave($event)"
       :style="{
-        height: subColorChosen ? '74px' : '37px'
+        height: subColorChosen ? '74px' : '37px',
+        transition: 'height 200ms linear',
       }">
       <div class="item2" v-show="!subColorChosen">
         <div class="leftItem">字幕样式</div>
@@ -38,7 +41,8 @@
       @mouseenter="handleMouseenter($event)"
       @mouseleave="handleMouseleave($event)"
       :style="{
-        height: subDelayChosen ? '74px' : '37px'
+        height: subDelayChosen ? '74px' : '37px',
+        transition: 'height 200ms linear',
       }">
       <div class="item3" v-show="!subDelayChosen">
         <div class="leftItem">字幕延迟</div>
@@ -140,7 +144,9 @@ export default {
       this.subColorChosen = false;
     },
     handleMouseenter(e) {
-      e.target.style.backgroundImage = this.preStyle;
+      if ((!this.subSizeChosen && e.target.classList[0].includes('itemSize')) || (!this.subColorChosen && e.target.classList[0].includes('subtitleStyle')) || (!this.subDelayChosen && e.target.classList[0].includes('subtitleDelay'))) {
+        e.target.style.backgroundImage = this.preStyle;
+      }
     },
     handleMouseleave(e) {
       e.target.style.backgroundImage = null;
