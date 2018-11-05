@@ -1,18 +1,14 @@
 <template>
-  <div
-    :data-component-name="$options.name">
-    <div :style="menuStyleObject" class="advanced"
-      v-if="isAcitve">
-      <div class="flex-container">
-        <AdvanceControlMenuItem
-          v-for="item in menuList"
-          :key="item.id"
-          :item="item">
-        </AdvanceControlMenuItem>
+  <div :data-component-name="$options.name">
+    <div class="advanceControl">
+      <div class="advanced" v-show="showAttached">
+        <advance-main-menu class="mainMenu" v-show="stateMessage[0]"></advance-main-menu>
+        <advance-subtitle-setup class="subtitleSetup" v-show="stateMessage[1]"></advance-subtitle-setup>
+        <advance-audio-items class="audioItems" v-show="stateMessage[2]"></advance-audio-items>
       </div>
-    </div>
-    <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
-      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
+      <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
+        <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
+      </div>
     </div>
   </div>
 </template>;
@@ -20,67 +16,29 @@
 <script>
 import lottie from '@/components/lottie.vue';
 import * as animationData from '@/assets/advance.json';
-import AdvanceControlMenuItem from './AdvanceControlMenuItem.vue';
+import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
+import AdvanceSubtitleSetup from './AdvanceControlFunctionalities/AdvanceSubtitleSetup';
+import AdvanceAudioItems from './AdvanceControlFunctionalities/AdvanceAudioItems';
 export default {
   name: 'advance-control',
   components: {
-    AdvanceControlMenuItem,
     lottie,
+    'advance-main-menu': AdvanceMainMenu,
+    'advance-subtitle-setup': AdvanceSubtitleSetup,
+    'advance-audio-items': AdvanceAudioItems,
   },
   props: {
     showAttached: Boolean,
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
   },
+  computed: {
+    stateMessage() {
+      return this.$store.getters.stateInfo;
+    },
+  },
   data() {
     return {
-      menuStyleObject: {
-        position: 'absolute',
-        bottom: '17px',
-        right: '27px',
-        width: '45px',
-        height: '40px',
-      },
-      menuList: [
-        {
-          id: 0,
-          title: 'Speed',
-          functionality: 'plusMinus',
-        },
-        {
-          id: 1,
-          title: 'Subtitle',
-          functionality: 'switch',
-        },
-        {
-          id: 2,
-          title: 'Audio',
-        },
-        {
-          id: 3,
-          title: 'Media Info',
-        },
-      ],
-      settingLevel: [
-        {
-          id: 0,
-          title: 'Speed',
-          functionality: 'plusMinus',
-        },
-        {
-          id: 1,
-          title: 'Subtitle',
-          functionality: 'switch',
-        },
-        {
-          id: 2,
-          title: 'Audio',
-        },
-        {
-          id: 3,
-          title: 'Media Info',
-        },
-      ],
       isAcitve: false,
       defaultOptions: { animationData },
       animationSpeed: 1,
@@ -90,6 +48,9 @@ export default {
       validEnter: false,
       clicks: 0,
       showFlag: false,
+      mainShow: true,
+      subShow: false,
+      audioShow: false,
     };
   },
   watch: {
@@ -188,32 +149,6 @@ export default {
           break;
       }
     },
-    onSecondItemClick() {
-    },
-    onMenuItemClick() {
-    },
-    switchSettingMenuState() {
-      if (this.isAcitve) {
-        this.menuList = this.settingLevel;
-        this.closeMenuSetting();
-      } else {
-        this.openMenuSetting();
-      }
-    },
-    closeMenuSetting() {
-      this.menuStyleObject.width = `${45}px`;
-      this.menuStyleObject.height = `${40}px`;
-      this.menuList = this.settingLevel;
-      this.isAcitve = false;
-    },
-    openMenuSetting() {
-      this.menuStyleObject.width = `${208}px`;
-      this.$_fitMenuSize();
-      this.isAcitve = true;
-    },
-    $_fitMenuSize() {
-      this.menuStyleObject.height = `${(this.menuList.length * 22) + 120}px`;
-    },
   },
   created() {
     this.$bus.$on('change-menu-list', (changedLevel) => {
@@ -236,22 +171,16 @@ button:hover {
 }
 .advanced {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  background-color: white;
-  opacity: 0.3;
-  backdrop-filter: blur(20px);
-  color: black;
-  border-radius: 4.8px;
-  z-index: 750;
+  width: auto;
+  height: auto;
+  bottom: 36px;
+  right: -2px;
+  z-index: 10;
+  .mainMenu {
+    position: relative;
+    left: 0;
+    top: 0;
+  }
 }
 
-.flex-container {
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-}
 </style>

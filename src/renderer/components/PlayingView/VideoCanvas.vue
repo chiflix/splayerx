@@ -13,6 +13,7 @@
       @durationchange="onDurationChange"
       :src="src" />
     <BaseSubtitle/>
+
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;

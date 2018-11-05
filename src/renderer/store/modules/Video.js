@@ -5,12 +5,14 @@ const state = {
   volume: 100,
   mute: false,
   rate: 1,
+  track: [['国语'], ['英语'], ['日语'], ['西班牙语'], ['韩语']],
 };
 
 const getters = {
   volume: state => state.volume / 100,
   mute: state => state.mute,
   rate: state => state.rate,
+  track: state => state.track,
 };
 
 const mutations = {
@@ -57,6 +59,10 @@ const actions = {
     const finalDelta = delta || 0.1;
     const finalRate = state.rate - finalDelta;
     commit(mutationTypes.RATE_UPDATE, finalRate < 0 ? 0 : finalRate);
+  },
+  [actionTypes.CHANGE_RATE]({ commit }, delta) {
+    console.log(delta);
+    commit(mutationTypes.RATE_UPDATE, delta);
   },
 };
 

@@ -236,4 +236,51 @@ export default {
     height: 46.375px;
   }
 }
+.minus, .plus {
+  -webkit-app-region: no-drag;
+  width: 11px;
+  height: 11px;
+  margin-bottom: 5px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.rightArrow {
+  display: block;
+  width: 13px;
+  height: 13px;
+}
+.leftArrow {
+  display: block;
+  width: 11px;
+  height: 11px;
+}
 </style>
