@@ -254,7 +254,7 @@ export default {
       );
       const { data } = canvasCTX.getImageData(0, 0, 100, 100);
       for (let i = 0; i < data.length; i += 1) {
-        if ((i + 1) % 4 !== 0 && data[i] > 0) {
+        if ((i + 1) % 4 !== 0 && data[i] > 10) {
           this.coverFinded = true;
           break;
         }
@@ -270,7 +270,7 @@ export default {
 
         const val = await this.infoDB().get('recent-played', 'path', this.srcOfVideo);
         if (val) {
-          const mergedData = Object.assign(val, { cover: imagePath, smallCover: imagePath });
+          const mergedData = Object.assign(val, { cover: imagePath, smallCover: smallImagePath });
           this.infoDB().add('recent-played', mergedData);
         } else {
           const data = {
@@ -397,7 +397,9 @@ export default {
       mute: false,
       rate: 1,
     });
-
+    this.infoDB().get('recent-played', 'path', this.srcOfVideo).then((val) => {
+      if (val && val.cover) this.coverFinded = true;
+    });
     this.$bus.$on('toggle-fullscreen', () => {
       if (this.isFullScreen) {
         this.$bus.$emit('leave-fullscreen');

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div @mousedown.left="togglePlaylistDisplay">
+    <div @mouseup.left="togglePlaylistDisplay">
       <Icon type="listicon"></Icon>
     </div>
   </div>

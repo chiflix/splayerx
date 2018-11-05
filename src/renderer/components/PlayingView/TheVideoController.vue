@@ -12,7 +12,7 @@
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <notification-bubble/>
-    <recent-playlist class="recent-playlist"
+    <recent-playlist class="recent-playlist" :showAttached="widgetsStatus['playlist-control'].showAttached"
     v-show="widgetsStatus['playlist-control'].showAttached"></recent-playlist>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button />
