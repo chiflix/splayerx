@@ -1,11 +1,20 @@
 const state = {
   SubtitleNames: [],
+  curStyle: {
+    fontSize: 5,
+    letterSpacing: 1,
+    opacity: 1,
+    color: '',
+    border: '',
+    background: '',
+  },
 };
 
 const getters = {
   subtitleNames: state => state.SubtitleNames,
   firstSubtitleIndex: state => state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first'),
   subtitleCount: state => state.SubtitleNames.length,
+  curStyle: state => state.curStyle,
 };
 
 const mutations = {
@@ -30,9 +39,22 @@ const mutations = {
       throw new Error('Error in Subtitle Vuex.');
     }
   },
+  UpdateFontSize(state, payload) {
+    state.curStyle.fontSize = payload;
+  },
+  UpdateColor(state, payload) {
+    state.curStyle.color = payload;
+  },
 };
 
-const actions = {};
+const actions = {
+  updateFontSize({ commit }, delta) {
+    commit('UpdateFontSize', delta);
+  },
+  updateColor({ commit }, delta) {
+    commit('UpdateColor', delta);
+  },
+};
 
 export default {
   state,

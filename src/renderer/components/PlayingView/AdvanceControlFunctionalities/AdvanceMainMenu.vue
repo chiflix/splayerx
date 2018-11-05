@@ -1,47 +1,42 @@
 <template>
-  <div class="mainContainer"
-   :style="{
-     height: speedChosen ? '164px' : '127px'
-   }">
-    <base-info-card class="card"
+<base-info-card class="card"
+  :style="{
+    height: speedChosen ? '164px' : '127px'
+  }">
+  <div class="mainItems">
+    <div class="playSpeed"
+      @click.left="handleClick"
+      @mouseenter="handleMouseenter($event, 1)"
+      @mouseleave="handleMouseleave($event, 1)"
       :style="{
-        height: speedChosen ? '164px' : '127px'
+        height: speedChosen ? '74px' : '37px'
       }">
-      <div class="mainItems">
-        <div class="playSpeed"
-          @click.left="handleClick"
-          @mouseenter="handleMouseenter($event, 1)"
-          @mouseleave="handleMouseleave($event, 1)"
-          :style="{
-            height: speedChosen ? '74px' : '37px'
-          }">
-          <div class="item1" v-show="!speedChosen">
-            <div>播放速度</div>
-            <div>{{ `${rateNum}x` }}</div>
-          </div>
-          <advance-row-items :lists="numList" :item="itemSpeedName" v-show="speedChosen"></advance-row-items>
-        </div>
-        <div class="subtitleControl"
-          @mouseenter="handleMouseenter($event, 2)"
-          @mouseleave="handleMouseleave($event, 2)"
-          @click.left="handleSubClick">
-          <div class="item2">
-            <div>字幕设置</div>
-            <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
-          </div>
-        </div>
-        <div class="audioItems"
-          @mouseenter="handleMouseenter($event, 3)"
-          @mouseleave="handleMouseleave($event, 3)"
-          @click.left="handleAudioClick">
-          <div class="item3">
-            <div>音频选项</div>
-            <Icon type="rightArrow" v-show="hoverIndex === 3"></Icon>
-          </div>
-        </div>
+      <div class="item1" v-show="!speedChosen">
+        <div>播放速度</div>
+        <div>{{ `${rateNum}x` }}</div>
       </div>
-    </base-info-card>
+      <advance-row-items :lists="numList" :item="itemSpeedName" v-show="speedChosen"></advance-row-items>
+    </div>
+    <div class="subtitleControl"
+      @mouseenter="handleMouseenter($event, 2)"
+      @mouseleave="handleMouseleave($event, 2)"
+      @click.left="handleSubClick">
+      <div class="item2">
+        <div>字幕设置</div>
+        <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
+      </div>
+    </div>
+    <div class="audioItems"
+      @mouseenter="handleMouseenter($event, 3)"
+      @mouseleave="handleMouseleave($event, 3)"
+      @click.left="handleAudioClick">
+      <div class="item3">
+        <div>音频选项</div>
+        <Icon type="rightArrow" v-show="hoverIndex === 3"></Icon>
+      </div>
+    </div>
   </div>
+</base-info-card>
 </template>
 
 <script>
@@ -96,64 +91,58 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .mainContainer {
-    min-width: 170px;
-    min-height: 127px;
-    z-index: 5;
-  }
-  .card {
-    min-width: 170px;
-    min-height: 127px;
-  }
-  .mainItems {
+.card {
+  min-width: 170px;
+  min-height: 127px;
+}
+.mainItems {
+  display: flex;
+  flex-direction: column;
+  .playSpeed {
     display: flex;
-    flex-direction: column;
-      .playSpeed {
-        display: flex;
-        width: 170px;
-        margin-top: 8px;
-        .item1 {
-          color: rgba(255, 255, 255, 0.6);
-          font-size: 13px;
-          line-height: 14px;
-          margin: auto;
-          width: 136px;
-          height: 13px;
-          display: flex;
-          justify-content: space-between;
-        }
-      }
-      .subtitleControl {
-        display: flex;
-        width: 170px;
-        height: 37px;
-        .item2 {
-          color: rgba(255, 255, 255, 0.6);
-          font-size: 13px;
-          line-height: 15px;
-          margin: auto;
-          width: 136px;
-          height: 13px;
-          display: flex;
-          justify-content: space-between;
-        }
-      }
-      .audioItems {
-        display: flex;
-        width: 170px;
-        height: 37px;
-        .item3 {
-          color: rgba(255, 255, 255, 0.6);
-          font-size: 13px;
-          line-height: 15px;
-          margin: auto;
-          width: 136px;
-          height: 13px;
-          display: flex;
-          justify-content: space-between;
-        }
-      }
-
+    width: 170px;
+    margin-top: 8px;
+    .item1 {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 13px;
+      line-height: 14px;
+      margin: auto;
+      width: 136px;
+      height: 13px;
+      display: flex;
+      justify-content: space-between;
+    }
   }
+  .subtitleControl {
+    display: flex;
+    width: 170px;
+    height: 37px;
+    .item2 {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 13px;
+      line-height: 15px;
+      margin: auto;
+      width: 136px;
+      height: 13px;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+  .audioItems {
+    display: flex;
+    width: 170px;
+    height: 37px;
+    .item3 {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 13px;
+      line-height: 15px;
+      margin: auto;
+      width: 136px;
+      height: 13px;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+}
 
 </style>

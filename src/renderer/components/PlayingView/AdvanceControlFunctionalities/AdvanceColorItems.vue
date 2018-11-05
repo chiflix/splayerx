@@ -60,6 +60,30 @@ export default {
           this.$set(this.imgs[ind], 'selected', true);
         }
       });
+      switch (index) {
+        case 0:
+          this.$store.dispatch('updateColor', 'white');
+          this.$bus.$emit('sub-style-change', { color: 'white' });
+          break;
+        case 1:
+          this.$store.dispatch('updateColor', 'gray');
+          this.$bus.$emit('sub-style-change', { color: 'gray' });
+          break;
+        case 2:
+          this.$store.dispatch('updateColor', 'yellow');
+          this.$bus.$emit('sub-style-change', { color: 'yellow' });
+          break;
+        case 3:
+          this.$store.dispatch('updateColor', 'blue');
+          this.$bus.$emit('sub-style-change', { color: 'blue' });
+          break;
+        case 4:
+          this.$store.dispatch('updateColor', 'black');
+          this.$bus.$emit('sub-style-change', { color: 'black' });
+          break;
+        default:
+          break;
+      }
     },
   },
 };

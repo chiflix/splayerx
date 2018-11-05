@@ -11,7 +11,7 @@
       </div>
     </div>
   </div>
-</template>;
+</template>
 
 <script>
 import lottie from '@/components/lottie.vue';
@@ -176,7 +176,7 @@ button:hover {
   bottom: 36px;
   right: -2px;
   z-index: 10;
-  .mainMenu {
+  .mainMenu, .subtitleSetup, .audioItems {
     position: relative;
     left: 0;
     top: 0;
