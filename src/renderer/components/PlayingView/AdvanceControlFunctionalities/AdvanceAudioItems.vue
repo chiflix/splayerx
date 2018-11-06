@@ -2,7 +2,7 @@
   <base-info-card class="card"
     :style="{
       height: showDelay ? '156px' : showTrack ? `${containerHeight}px` : '119px',
-      transition: 'height 200ms linear',
+      transition: 'height 80ms linear',
     }">
     <div class="mainItems">
       <div class="topContainer" @click.left="handleQuitClick">
@@ -16,26 +16,34 @@
         @mouseleave="handleMouseleave($event)"
         :style="{
           height: showDelay ? '74px' : '37px',
-          transition: showDelay ? 'height 200ms linear' : '',
+          transition: 'height 80ms linear',
         }">
+        <transition name="audioTransIn">
         <div class="item1" v-show="!showDelay">
           <div>音频延迟</div>
           <div>200ms</div>
         </div>
+        </transition>
+        <transition name="audioTransOut">
         <advance-selected-items :item="itemDelayName" v-show="showDelay"></advance-selected-items>
+        </transition>
       </div>
       <div class="changeTrack" @click.left="handleTrackClick"
         @mouseenter="handleMouseenter($event)"
         @mouseleave="handleMouseleave($event)"
         :style="{
           height: showTrack ? `${trackHeight}px` : '37px',
-          transition: showTrack ? 'height 200ms linear' : '',
+          transition: 'height 80ms linear',
         }">
+        <transition name="audioTransIn">
         <div class="item2" v-show="!showTrack || trackNum === 1">
           <div>切换轨道</div>
           <div>音轨 1</div>
         </div>
+        </transition>
+        <transition name="audioTransOut">
         <advance-column-items :lists="columnList" :item="itemTrack" v-show="showTrack && trackNum !== 1"></advance-column-items>
+        </transition>
       </div>
     </div>
   </base-info-card>
@@ -164,5 +172,17 @@ export default {
       margin: auto;
     }
   }
+}
+.audioTransOut-leave-active {
+  transition-delay: 50ms;
+}
+.audioTransOut-enter, .audioTrans-leave-to {
+  opacity: 0;
+}
+.audioTransIn-enter-active {
+  transition-delay: 50ms;
+}
+.audioTransIn-enter, .audioTransIn-leave-to {
+  opacity: 0;
 }
 </style>

@@ -2,7 +2,7 @@
 <base-info-card class="card"
   :style="{
     height: speedChosen ? '164px' : '127px',
-    transition: 'height 200ms linear',
+    transition: 'height 80ms linear',
   }">
   <div class="mainItems">
     <div class="playSpeed"
@@ -11,15 +11,13 @@
       @mouseleave="handleMouseleave($event, 1)"
       :style="{
         height: speedChosen ? '74px' : '37px',
-        transition: 'height 200ms linear',
+        transition: 'height 80ms linear',
       }">
       <div class="item1" v-show="!speedChosen">
         <div>播放速度</div>
         <div>{{ `${rateNum} x` }}</div>
       </div>
-      <!--<transition name="speedTran">-->
-        <advance-row-items :lists="numList" :item="itemSpeedName" v-show="speedChosen" class="trans"></advance-row-items>
-      <!--</transition>-->
+      <advance-row-items :lists="numList" :item="itemSpeedName" v-show="speedChosen"></advance-row-items>
     </div>
     <div class="subtitleControl"
       @mouseenter="handleMouseenter($event, 2)"
@@ -119,9 +117,6 @@ export default {
       display: flex;
       justify-content: space-between;
     }
-    .trans {
-      transition: opacity 50ms;
-    }
   }
   .subtitleControl {
     display: flex;
@@ -153,11 +148,5 @@ export default {
       justify-content: space-between;
     }
   }
-}
-.speedTran-trans-l-enter-active, .speedTran-trans-l-leave {
-  opacity: 1;
-}
-.speedTran-trans-l-enter, .speedTran-trans-l-leave-active {
-  opacity: 0;
 }
 </style>

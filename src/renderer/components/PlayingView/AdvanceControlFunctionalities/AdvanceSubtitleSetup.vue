@@ -2,7 +2,7 @@
 <base-info-card class="card"
   :style="{
     height: subColorChosen || subSizeChosen || subDelayChosen ? '193px' : '156px',
-    transition: 'height 200ms linear',
+    transition: 'height 80ms linear',
   }">
   <div class="mainItems">
     <div class="topContainer" @click.left="handleQuitClick">
@@ -16,39 +16,51 @@
       @mouseleave="handleMouseleave($event)"
       :style="{
         height: subSizeChosen ? '74px' : '37px',
-        transition: 'height 200ms linear',
+        transition: 'height 80ms linear',
       }">
+      <transition name="rowTransIn" mode="in-out">
       <div class="item1" v-show="!subSizeChosen">
         <div class="leftItem">字体大小</div>
         <div class="rightItem">{{ ChosenSize }}</div>
       </div>
+      </transition>
+      <transition name="rowTransOut" mode="in-out">
       <advance-row-items :lists="textList" :item="itemFontName" v-show="subSizeChosen"></advance-row-items>
+      </transition>
     </div>
     <div class="subtitleStyle" @click.left="handleColorClick"
       @mouseenter="handleMouseenter($event)"
       @mouseleave="handleMouseleave($event)"
       :style="{
         height: subColorChosen ? '74px' : '37px',
-        transition: 'height 200ms linear',
+        transition: 'height 80ms linear',
       }">
+      <transition name="rowTransIn" mode="in-out">
       <div class="item2" v-show="!subColorChosen">
         <div class="leftItem">字幕样式</div>
         <div class="rightItem"><img :src="ChosenColor" class="imgType"></div>
       </div>
+      </transition>
+      <transition name="rowTransOut" mode="in-out">
       <advance-color-items :item="itemColorName" v-show="subColorChosen"></advance-color-items>
+      </transition>
     </div>
     <div class="subtitleDelay" @click.left="handleDelayClick"
       @mouseenter="handleMouseenter($event)"
       @mouseleave="handleMouseleave($event)"
       :style="{
         height: subDelayChosen ? '74px' : '37px',
-        transition: 'height 200ms linear',
+        transition: 'height 80ms linear',
       }">
+      <transition name="rowTransIn" mode="in-out">
       <div class="item3" v-show="!subDelayChosen">
         <div class="leftItem">字幕延迟</div>
         <div class="rightItem">0 ms</div>
       </div>
+      </transition>
+      <transition name="rowTransOut" mode="in-out">
       <advance-selected-items :item="itemDelayName" v-show="subDelayChosen"></advance-selected-items>
+      </transition>
     </div>
   </div>
 </base-info-card>
@@ -234,5 +246,17 @@ export default {
       margin: auto;
     }
   }
+}
+.rowTransOut-leave-active {
+  transition-delay: 50ms;
+}
+.rowTransOut-enter, .rowTrans-leave-to {
+  opacity: 0;
+}
+.rowTransIn-enter-active {
+  transition-delay: 50ms;
+}
+.rowTransIn-enter, .rowTransIn-leave-to {
+  opacity: 0;
 }
 </style>

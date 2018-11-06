@@ -223,5 +223,4 @@ button:hover {
 .adTrans-leave-active {
   position: absolute;
 }
-
 </style>
