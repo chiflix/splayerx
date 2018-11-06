@@ -6,9 +6,15 @@
         :style="{
           transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
         }">
+        <transition name="setUp">
           <advance-main-menu class="mainMenu" v-show="stateMessage[0]"></advance-main-menu>
+        </transition>
+        <transition name="setUp">
           <advance-subtitle-setup class="subtitleSetup" v-show="stateMessage[1]"></advance-subtitle-setup>
+        </transition>
+        <transition name="setUp">
           <advance-audio-items class="audioItems" v-show="stateMessage[2]"></advance-audio-items>
+        </transition>
       </div>
       </transition>
       <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
@@ -180,28 +186,16 @@ button:hover {
 .advance-trans-l-enter, .advance-trans-l-leave-active {
   transform: translateY(20px);
 }
-
-.adTrans-enter, .adTrans-enter-active {
-  transform: translateX(0px);
-}
-.adTrans-enter, .adTrans-leave-active {
-  transform: translateX(50px);
-}
-
 .advanced {
   position: absolute;
-  width: auto;
-  height: auto;
   bottom: 36px;
   right: -2px;
   z-index: 10;
   transition-property: opacity, transform;
   .mainMenu, .subtitleSetup, .audioItems {
-    position: relative;
-    left: 0;
-    top: 0;
-    transition-property: opacity, transform;
-    transition: 150ms cubic-bezier(0.17, 0.67, 0.17, 0.98), left 500ms;
+    position: absolute;
+    right: 0;
+    bottom: 0;
   }
 }
 .advance-trans-l-enter-active, .advance-trans-l-leave {
@@ -214,13 +208,35 @@ button:hover {
   position: absolute;
 }
 
-.adTrans-enter-active, .adTrans-leave {
-  opacity: 1;
+.setUp-enter-active {
+  animation: show .5s;
 }
-.adTrans-enter, .adTrans-leave-active {
+.setUp-enter, .setUp-leave-to {
   opacity: 0;
 }
-.adTrans-leave-active {
-  position: absolute;
+.setUp-leave-active {
+  animation: hide .5s;
 }
+
+@keyframes show {
+  0% {
+    opacity: 0;
+    right: -170px;
+  }
+  100% {
+    opacity: 1;
+    right: 0;
+  }
+}
+@keyframes hide {
+  0% {
+    opacity: 1;
+    right: 0;
+  }
+  100% {
+    opacity: 0;
+    right: 170px;
+  }
+}
+
 </style>

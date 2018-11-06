@@ -278,7 +278,7 @@ export default {
   width: 13px;
   height: 13px;
 }
-.leftArrow {
+.leftArrow, .leftArrowHover {
   display: block;
   width: 11px;
   height: 11px;

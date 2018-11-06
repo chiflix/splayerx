@@ -10,7 +10,7 @@
         @mouseenter="handleBackEnter"
         @mouseleave="handleBackLeave">
         <div class="topContent">
-          <Icon type="leftArrow"></Icon>
+          <Icon :type="backHover ? 'leftArrowHover' : 'leftArrow'"></Icon>
           <div class="text"
             :style="{
               color: backHover ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)',
