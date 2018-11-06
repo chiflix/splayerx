@@ -1,5 +1,6 @@
 <template>
   <div class="recent-playlist"
+    v-show="showAttached"
     @mousedown="handleMousedown">
     <div class="info"
       @mousedown.stop="">
@@ -34,6 +35,8 @@ export default {
   },
   props: {
     showAttached: Boolean,
+    mousedownOnOther: Boolean,
+    mouseupOnOther: Boolean,
   },
   data() {
     return {
@@ -85,6 +88,15 @@ export default {
         this.lastIndex = this.maxIndex;
       }
     },
+    showAttached(val) {
+      console.log('showAttached', val);
+    },
+    mousedownOnOther(val) {
+      console.log('mousedownOnOther', val);
+    },
+    mouseupOnOther(val) {
+      console.log('mouseupOnOther', val);
+    },
   },
   computed: {
     ...mapGetters(['playingList', 'isFolderList', 'winWidth']),
@@ -102,7 +114,7 @@ export default {
       },
     },
     currentSrc() {
-      return this.$store.state.PlaybackState.OriginSrcOfVideo;
+      return this.$store.getters.originSrc;
     },
     distance() {
       return this.firstIndex * (this.thumbnailWidth + 15);

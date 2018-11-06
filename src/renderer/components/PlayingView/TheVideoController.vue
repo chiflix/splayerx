@@ -12,7 +12,7 @@
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <notification-bubble/>
-    <recent-playlist class="recent-playlist"/>
+    <recent-playlist class="recent-playlist" v-bind.sync="widgetsStatus['playlist-control']"></recent-playlist>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
@@ -157,7 +157,6 @@ export default {
         mouseupOnOther: false,
       };
     });
-    console.log(this.UIElements);
 
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
@@ -285,7 +284,9 @@ export default {
           this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== name;
         }
         if (!this.showAllWidgets) {
-          this.widgetsStatus[name].showAttached = false;
+          if (name !== 'playlist-control') {
+            this.widgetsStatus[name].showAttached = false;
+          }
         }
       });
     },
@@ -363,7 +364,7 @@ export default {
           this.togglePlayback();
         }
         this.preventSingleClick = false;
-        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached;
+        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['recent-playlist'];
         this.isDragging = false;
       }, this.clicksDelay);
     },
