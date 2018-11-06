@@ -5,10 +5,16 @@
     transition: 'height 80ms linear',
   }">
   <div class="mainItems">
-    <div class="topContainer" @click.left="handleQuitClick">
+    <div class="topContainer"
+      @click.left="handleBackClick"
+      @mouseenter="handleBackEnter"
+      @mouseleave="handleBackLeave">
       <div class="topContent">
         <Icon type="leftArrow"></Icon>
-        <div class="text">字幕设置</div>
+        <div class="text"
+          :style="{
+            color: backHover ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)',
+          }">字幕设置</div>
       </div>
     </div>
     <div class="itemSize" @click.left="handleSizeClick"
@@ -98,6 +104,7 @@ export default {
       itemColorName: '字幕样式',
       itemDelayName: '字幕延迟',
       hoverIndex: -1,
+      backHover: false,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
     };
   },
@@ -147,7 +154,13 @@ export default {
     Icon,
   },
   methods: {
-    handleQuitClick() {
+    handleBackEnter() {
+      this.backHover = true;
+    },
+    handleBackLeave() {
+      this.backHover = false;
+    },
+    handleBackClick() {
       this.$store.dispatch('updateState', 0);
     },
     handleSizeClick() {
@@ -208,7 +221,6 @@ export default {
       margin: auto 9px;
       .text {
         font-size: 11px;
-        color: rgba(255, 255, 255, 0.2);
         line-height: 13px;
         margin-left: 3px;
       }
