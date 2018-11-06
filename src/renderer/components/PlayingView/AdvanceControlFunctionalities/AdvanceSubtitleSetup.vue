@@ -190,6 +190,7 @@ export default {
   display: flex;
   flex-direction: column;
   .leftItem {
+    margin-top: 1px;
     font-size: 13px;
   }
   .rightItem {
@@ -222,7 +223,7 @@ export default {
       justify-content: space-between;
       height: 15px;
       width: 136px;
-      line-height: 14px;
+      line-height: 15px;
       margin: auto;
     }
   }
@@ -235,7 +236,7 @@ export default {
       justify-content: space-between;
       height: 15px;
       width: 136px;
-      line-height: 14px;
+      line-height: 15px;
       margin: auto;
       .imgType {
         width: 17px;
@@ -253,7 +254,7 @@ export default {
       justify-content: space-between;
       height: 15px;
       width: 136px;
-      line-height: 14px;
+      line-height: 15px;
       margin: auto;
     }
   }
