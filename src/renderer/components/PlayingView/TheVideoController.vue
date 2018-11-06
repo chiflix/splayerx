@@ -12,19 +12,17 @@
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <notification-bubble/>
-    <recent-playlist class="recent-playlist" :showAttached="widgetsStatus['playlist-control'].showAttached"
-    v-show="widgetsStatus['playlist-control'].showAttached"></recent-playlist>
+    <recent-playlist class="recent-playlist"/>
     <div class="masking" v-hidden="showAllWidgets"></div>
-    <play-button />
-    <base-invisible-background v-show="!mute" />
+    <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
       <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
-      <advance-control class="button advance" v-hidden="displayState['advance-control']" />
+      <advance-control class="button advance" v-hidden="displayState['advance-control']" v-bind.sync="widgetsStatus['advance-control']"/>
     </div>
-    <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
-    <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
+    <the-time-codes v-hidden="displayState['the-progress-bar']" />
+    <the-progress-bar v-hidden="displayState['the-progress-bar']"/>
   </div>
 </template>
 <script>
@@ -38,8 +36,7 @@ import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
 import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
-import TimeProgressBar from './TimeProgressBar.vue';
-import BaseInvisibleBackground from './BaseInvisibleBackground.vue';
+import TheProgressBar from './TheProgressBar';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
 export default {
@@ -52,8 +49,7 @@ export default {
     'advance-control': AdvanceControl,
     'playlist-control': PlaylistControl,
     'the-time-codes': TheTimeCodes,
-    'the-time-progress-bar': TimeProgressBar,
-    'base-invisible-background': BaseInvisibleBackground,
+    'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
     'recent-playlist': RecentPlaylist,
   },
@@ -73,9 +69,6 @@ export default {
       },
     },
   },
-  props: {
-    src: String,
-  },
   data() {
     return {
       start: null,
@@ -94,34 +87,30 @@ export default {
       clicksDelay: 200,
       dragDelay: 200,
       displayState: {},
-      widgetsStatus: {
-        'playlist-control': {
-          selected: false,
-          showAttached: false,
-        },
-      },
+      widgetsStatus: {},
       currentSelectedWidget: 'the-video-controller',
       preventSingleClick: false,
       lastAttachedShowing: false,
       isDragging: false,
       focusedTimestamp: 0,
       focusDelay: 500,
+      listenedWidget: 'the-video-controller',
     };
   },
   computed: {
-    ...mapGetters(['mute']),
+    ...mapGetters(['mute', 'paused']),
     showAllWidgets() {
       return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget);
     },
     onOtherWidget() {
-      return this.currentWidget !== this.$options.name && this.currentWidget !== 'base-invisible-background';
+      return this.currentWidget !== this.$options.name;
     },
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ? 'default' : 'none';
     },
     isFocused() {
-      return this.$store.state.WindowState.isFocused;
+      return this.$store.state.Window.isFocused;
     },
   },
   watch: {
@@ -135,6 +124,7 @@ export default {
     this.eventInfo = new Map([
       ['mousemove', {}],
       ['mousedown', {}],
+      ['mouseup', {}],
       ['mouseenter', {}],
       ['wheel', {}],
       ['keydown', {
@@ -160,13 +150,23 @@ export default {
     this.UIElements.forEach((value) => {
       this.timerState[value.name] = true;
       this.displayState[value.name] = true;
-      this.widgetsStatus[value.name] = { selected: false, showAttached: false };
+      this.widgetsStatus[value.name] = {
+        selected: false,
+        showAttached: false,
+        mousedownOnOther: false,
+        mouseupOnOther: false,
+      };
     });
+    console.log(this.UIElements);
 
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
     requestAnimationFrame(this.UIManager);
+    this.$bus.$on('currentWidget', (widget) => {
+      this.listenedWidget = widget;
+      this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false);
+    });
   },
   methods: {
     // UIManagers
@@ -186,9 +186,13 @@ export default {
       this.start = timestamp;
       requestAnimationFrame(this.UIManager);
     },
-    inputProcess(currentEventInfo, lastEventInfo) {
+    inputProcess(currentEventInfo, lastEventInfo) { // eslint-disable-line
       // mousemove timer
-      this.currentWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
+      const currentChanged = currentEventInfo.get('mousemove').target !== lastEventInfo.get('mousemove').target;
+      if (currentChanged) {
+        this.listenedWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
+      }
+      this.currentWidget = this.listenedWidget;
       this.mouseStopMoving = _.isEqual(currentEventInfo.get('mousemove').position, lastEventInfo.get('mousemove').position);
       if (!this.mouseStopMoving) { this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false); }
       // mouseenter timer
@@ -204,9 +208,9 @@ export default {
       const volumeKeydown = this.orify(currentEventInfo.get('keydown').ArrowUp, currentEventInfo.get('keydown').ArrowDown, currentEventInfo.get('keydown').KeyM); // eslint-disable-line
       const mouseScrolling = currentEventInfo.get('wheel').time !== lastEventInfo.get('wheel').time;
       const lastWidget = this.getComponentName(lastEventInfo.get('mousemove').target);
-      const mouseWakingUpVolume = this.enterWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator');
-      const mouseLeavingVolume = this.leaveWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator');
-      const mouseMovingInVolume = this.andify(!this.mouseStopMoving, this.inWidgets(lastWidget, this.currentWidget, 'base-invisible-background', 'volume-indicator'));
+      const mouseWakingUpVolume = this.enterWidgets(lastWidget, this.currentWidget, 'volume-indicator');
+      const mouseLeavingVolume = this.leaveWidgets(lastWidget, this.currentWidget, 'volume-indicator');
+      const mouseMovingInVolume = this.andify(!this.mouseStopMoving, this.inWidgets(lastWidget, this.currentWidget, 'volume-indicator'));
       const wakingupVolume = this.orify(volumeKeydown, mouseScrolling, this.andify(!this.mute, this.orify(mouseWakingUpVolume, mouseLeavingVolume, mouseMovingInVolume))); // eslint-disable-line
       if (wakingupVolume) {
         this.timerManager.updateTimer('sleepingVolumeButton', this.orify(mouseWakingUpVolume, mouseMovingInVolume) ? this.muteDelay : this.hideVolumeDelay);
@@ -220,23 +224,23 @@ export default {
       const progressKeydown = this.orify(currentEventInfo.get('keydown').ArrowLeft, currentEventInfo.get('keydown').ArrowRight);
       if (progressKeydown) {
         this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
-        // Prevent all widgets display before the-time-progress-bar
+        // Prevent all widgets display before the-progress-bar
         if (this.showAllWidgets) {
           this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
         }
         this.hideProgressBar = false;
       }
 
-      // mousedown status
-      if (lastEventInfo.get('mousedown').leftMousedown !== currentEventInfo.get('mousedown').leftMousedown) {
-        this.currentSelectedWidget = this.getComponentName(currentEventInfo.get('mousedown').target);
+      // mouseup status
+      if (lastEventInfo.get('mouseup').leftMouseup !== currentEventInfo.get('mouseup').leftMouseup) {
+        this.currentSelectedWidget = this.getComponentName(currentEventInfo.get('mouseup').target);
       }
 
       Object.keys(this.timerState).forEach((uiName) => {
         this.timerState[uiName] = this.showAllWidgets;
       });
       this.timerState['volume-indicator'] = !this.hideVolume;
-      this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
+      this.timerState['the-progress-bar'] = !this.hideProgressBar;
       return currentEventInfo;
     },
     UITimerManager(frameTime) {
@@ -252,7 +256,7 @@ export default {
       this.hideProgressBar = timeoutTimers.includes('sleepingProgressBar');
 
       this.timerState['volume-indicator'] = !this.hideVolume;
-      this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
+      this.timerState['the-progress-bar'] = !this.hideProgressBar;
     },
     // UILayerManager() {
     // },
@@ -266,19 +270,24 @@ export default {
       this.displayState = tempObject;
     },
     UIStateManager() {
+      const currentMousedownWidget = this.getComponentName(this.eventInfo.get('mousedown').target);
+      const lastMousedownWidget = this.getComponentName(this.lastEventInfo.get('mousedown').target);
+      const mousedownChanged = currentMousedownWidget !== lastMousedownWidget;
+      const currentMouseupWidget = this.getComponentName(this.eventInfo.get('mouseup').target);
+      const lastMouseupWidget = this.getComponentName(this.lastEventInfo.get('mouseup').target);
+      const mouseupChanged = currentMouseupWidget !== lastMouseupWidget;
       Object.keys(this.widgetsStatus).forEach((name) => {
         this.widgetsStatus[name].selected = this.currentSelectedWidget === name;
+        if (mousedownChanged) {
+          this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name;
+        }
+        if (mouseupChanged) {
+          this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== name;
+        }
+        if (!this.showAllWidgets) {
+          this.widgetsStatus[name].showAttached = false;
+        }
       });
-      if (
-        (this.currentSelectedWidget !== 'subtitle-control' && this.widgetsStatus['subtitle-control'].showAttached) ||
-        !this.showAllWidgets) {
-        this.widgetsStatus['subtitle-control'].showAttached = false;
-      }
-      if (this.currentSelectedWidget !== 'recent-playlist' &&
-        this.currentSelectedWidget !== 'playlist-control' &&
-        this.widgetsStatus['playlist-control'].showAttached) {
-        this.widgetsStatus['playlist-control'].showAttached = false;
-      }
     },
     // Event listeners
     handleMousemove(event) {
@@ -304,6 +313,11 @@ export default {
         this.eventInfo.get('mousedown'),
         { rightMousedown: true },
       ));
+      this.eventInfo.set('mouseup', Object.assign(
+        {},
+        this.eventInfo.get('mouseup'),
+        { rightMouseup: false },
+      ));
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
         menu.popup(this.$electron.remote.getCurrentWindow());
@@ -318,6 +332,11 @@ export default {
         { leftMousedown: true },
         { target: event.target },
       ));
+      this.eventInfo.set('mouseup', Object.assign(
+        {},
+        this.eventInfo.get('mouseup'),
+        { leftMouseup: false },
+      ));
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
         if (this.popupShow === true) {
@@ -331,7 +350,12 @@ export default {
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
-        { leftMousedown: false, target: event.target },
+        { leftMousedown: false },
+      ));
+      this.eventInfo.set('mouseup', Object.assign(
+        {},
+        this.eventInfo.get('mousedown'),
+        { leftMouseup: true, target: event.target },
       ));
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
@@ -339,7 +363,7 @@ export default {
           this.togglePlayback();
         }
         this.preventSingleClick = false;
-        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached;
+        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached;
         this.isDragging = false;
       }, this.clicksDelay);
     },
@@ -465,6 +489,7 @@ export default {
 }
 .recent-playlist {
   position: absolute;
+  width: 100%;
   bottom: 0;
   z-index: 1000; // in front of all widgets
 }

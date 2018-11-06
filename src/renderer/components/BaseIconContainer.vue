@@ -45,7 +45,7 @@ export default {
 </script>
 
 <style lang="scss">
-.titleBarWinMin, .titleBarWinMax, .titleBarWinClose, .titleBarWinRestore, .titleBarWinResize {
+.titleBarWinExitFull, .titleBarWinFull, .titleBarWinClose, .titleBarWinRestore, .titleBarWinResize {
   display: flex;
   width: 45px;
   height: 28px;
@@ -80,7 +80,7 @@ export default {
     }
   }
 }
-.titleBarMax, .titleBarMin, .titleBarClose, .titleBarRecover {
+.titleBarFull, .titleBarExitFull, .titleBarClose, .titleBarRecover {
   display: flex;
   width: 12px;
   height: 12px;
@@ -129,21 +129,6 @@ export default {
   display: block;
 }
 
-.advance, .subtitle, .listicon{
-  @media screen and (min-width: 513px) and (max-width: 854px) {
-    width: 26.4px;
-    height: 22px;
-  }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
-    width: 38.4px;
-    height: 32px;
-  }
-  @media screen and (min-width: 1921px) {
-    width: 60px;
-    height: 50px;
-  }
-  display: block;
-}
 .volume {
   @media screen and (min-width: 1921px) {
     width: 24px;

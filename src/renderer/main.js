@@ -13,11 +13,19 @@ import messages from '@/locales';
 import helpers from '@/helpers';
 import Path from 'path';
 import { mapGetters } from 'vuex';
-import { Video as videoActions } from '@/store/action-types';
+import { Video as videoActions } from '@/store/actionTypes';
+import addLog from '@/helpers/index';
+require('source-map-support').install();
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
+Vue.config.warnHandler = (warn) => {
+  addLog.methods.addLog('warn', warn);
+};
+Vue.config.errorHandler = (err) => {
+  addLog.methods.addLog('error', err);
+};
 
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
@@ -65,9 +73,7 @@ new Vue({
                     if (!files[0].includes('\\') || process.platform === 'win32') {
                       this.openFile(files[0]);
                     } else {
-                      this.$store.dispatch('addMessages', {
-                        type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-                      });
+                      this.addLog('error', `Failed to open file: ${files[0]}`);
                     }
                     if (files.length > 1) {
                       this.$store.commit('PlayingList', files);
@@ -281,7 +287,7 @@ new Vue({
         const menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(menu);
       }).catch((err) => {
-        console.log(err);
+        this.addLog('error', err);
       });
     },
     getSystemLocale() {
@@ -446,6 +452,7 @@ new Vue({
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
       if (err) {
+        this.addLog('error', err);
         userUUID = uuidv4();
         this.$storage.set('user-uuid', userUUID);
       }
@@ -472,16 +479,16 @@ new Vue({
           break;
         case 'ArrowLeft':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
+            this.$bus.$emit('seek', this.$store.getters.currentTime - 60);
           } else {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
+            this.$bus.$emit('seek', this.$store.getters.currentTime - 5);
           }
           break;
         case 'ArrowRight':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
+            this.$bus.$emit('seek', this.$store.getters.currentTime + 60);
           } else {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
+            this.$bus.$emit('seek', this.$store.getters.currentTime + 5);
           }
           break;
         case 'Escape':
@@ -518,18 +525,14 @@ new Vue({
         } else if (vidRegex.test(Path.extname(tempFilePath))) {
           videoFiles.push(tempFilePath);
         } else {
-          this.$store.dispatch('addMessages', {
-            type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-          });
+          this.addLog('error', `Failed to open file : ${tempFilePath}`);
         }
       }
       if (videoFiles.length !== 0) {
         if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
           this.openFile(videoFiles[0]);
         } else {
-          this.$store.dispatch('addMessages', {
-            type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-          });
+          this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
         }
         if (videoFiles.length > 1) {
           this.$store.commit('PlayingList', videoFiles);

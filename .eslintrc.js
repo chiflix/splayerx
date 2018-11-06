@@ -29,6 +29,6 @@ module.exports = {
     // force the use of unix linebreak-syle
     'linebreak-style': ['error', 'unix'],
     // limit the cyclomatic complexity to 10
-    'complexity': ['warn', { max: 10 }]
+    'complexity': ['error', { max: 10 }]
   }
 }

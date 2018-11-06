@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import idb from 'idb';
 import {
   THUMBNAIL_DB_NAME,
@@ -42,7 +43,6 @@ export default {
     'thumbnail-display': ThumbnailDisplay,
   },
   props: {
-    src: String,
     currentTime: Number,
     maxThumbnailWidth: Number,
     videoRatio: Number,
@@ -55,7 +55,7 @@ export default {
     return {
       outerThumbnailInfo: {
         newVideo: true,
-        videoSrc: this.src,
+        videoSrc: this.convertedSrc,
         videoDuration: -1,
         generationInterval: -1,
         screenWidth: 1920,
@@ -77,14 +77,17 @@ export default {
       generatedIndex: 0,
     };
   },
+  computed: {
+    ...mapGetters(['originSrc', 'convertedSrc']),
+  },
   watch: {
-    src() {
+    originSrc() {
       // Reload video and image components
       this.mountVideo = false;
       this.mountImage = false;
       this.generatedIndex = 0;
       this.currentIndex = 0;
-      this.quickHash = this.mediaQuickHash(this.$store.state.PlaybackState.OriginSrcOfVideo);
+      this.quickHash = this.mediaQuickHash(this.originSrc);
       this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
     },
     currentTime(newValue) {
@@ -149,7 +152,7 @@ export default {
           {},
           this.outerThumbnailInfo,
           thumnailInfo,
-          { videoSrc: this.src },
+          { videoSrc: this.convertedSrc },
           { lastGenerationIndex: this.lastGenerationIndex },
           { maxThumbnailCount: this.maxThumbnailCount },
         );
@@ -167,7 +170,7 @@ export default {
       const obejctStoreName = `thumbnail-width-${this.maxThumbnailWidth}`;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
         idb.open(THUMBNAIL_DB_NAME, db.version + 1, (upgradeDB) => {
-          console.log('[IndexedDB]: Initial thumbnails storage objectStore.');
+          this.addLog('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
           const store = upgradeDB.createObjectStore(
             `thumbnail-width-${this.maxThumbnailWidth}`,
             { keyPath: 'id', autoIncrement: false, unique: true },
@@ -176,13 +179,12 @@ export default {
           store.createIndex('index', 'index', { unique: false });
         });
       }
-      /* eslint-disable newline-per-chained-call */
     });
     idb.open(INFO_DATABASE_NAME).then((db) => {
-      this.quickHash = this.mediaQuickHash(this.$store.state.PlaybackState.OriginSrcOfVideo);
+      this.quickHash = this.mediaQuickHash(this.originSrc);
       const obejctStoreName = THUMBNAIL_OBJECT_STORE_NAME;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
-        console.log('[IndexedDB]: Initial preview thumbnail info objectStore.');
+        this.addLog('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
         return idb.open(INFO_DATABASE_NAME, db.version + 1, (upgradeDB) => {
           upgradeDB.createObjectStore(obejctStoreName, { keyPath: 'quickHash' }, { unique: true });
         });
@@ -190,8 +192,9 @@ export default {
       return idb.open(INFO_DATABASE_NAME);
     })
       .then(() => this.retrieveThumbnailInfo(this.quickHash))
-      .then(this.updateThumbnailData).catch((err) => {
-        console.log(err);
+      .then(this.updateThumbnailData)
+      .catch((err) => {
+        this.addLog('error', err);
       });
     this.$bus.$on('image-all-get', (e) => {
       this.generatedIndex = e;

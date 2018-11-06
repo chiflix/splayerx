@@ -82,7 +82,7 @@ export default {
     lastPlayedFile: {
       type: Object.Array,
       require: true,
-      default: [],
+      default: () => [],
     },
     changeSize: {
       type: Number,
@@ -181,7 +181,8 @@ export default {
 
       self.showingPopupDialog = true;
       // TODO: move openFile method to a single location
-      dialog.showOpenDialog(focusedWindow, {
+      // eslint-disable-next-line
+      process.env.NODE_ENV === 'testing' ? '' : dialog.showOpenDialog(focusedWindow, {
         title: 'Open Dialog',
         defaultPath: link,
         filters: [{
@@ -198,9 +199,7 @@ export default {
           if (!items[0].includes('\\') || process.platform === 'win32') {
             self.openFile(items[0]);
           } else {
-            this.$store.dispatch('addMessages', {
-              type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-            });
+            this.addLog('error', `Failed to open file: ${items[0]}`);
           }
           if (items.length > 1) {
             this.$store.commit('PlayingList', items);

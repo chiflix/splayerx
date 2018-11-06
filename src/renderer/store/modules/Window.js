@@ -20,6 +20,7 @@ const getters = {
   winPosX: state => state.windowPosition[0],
   winPosY: state => state.windowPosition[1],
   winPos: state => state.windowPosition,
+  winBounds: state => state.windowBounds,
   isFullScreen: state => state.isFullScreen,
   isFocused: state => state.isFocused,
   isMaximized: state => state.isMaximized,
