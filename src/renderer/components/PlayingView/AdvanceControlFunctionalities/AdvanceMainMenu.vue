@@ -13,7 +13,10 @@
         height: speedChosen ? '74px' : '37px',
         transition: 'height 80ms linear',
       }">
-      <div class="item1" v-show="!speedChosen">
+      <div class="item1" v-show="!speedChosen"
+        :style="{
+          color: hoverIndex === 1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+        }">
         <div>播放速度</div>
         <div>{{ `${rateNum} x` }}</div>
       </div>
@@ -23,7 +26,10 @@
       @mouseenter="handleMouseenter($event, 2)"
       @mouseleave="handleMouseleave($event, 2)"
       @click.left="handleSubClick">
-      <div class="item2">
+      <div class="item2"
+        :style="{
+          color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+        }">
         <div>字幕设置</div>
         <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
       </div>
@@ -32,7 +38,10 @@
       @mouseenter="handleMouseenter($event, 3)"
       @mouseleave="handleMouseleave($event, 3)"
       @click.left="handleAudioClick">
-      <div class="item3">
+      <div class="item3"
+        :style="{
+          color: hoverIndex === 3 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+        }">
         <div>音频选项</div>
         <Icon type="rightArrow" v-show="hoverIndex === 3"></Icon>
       </div>
@@ -72,7 +81,7 @@ export default {
   },
   methods: {
     handleClick() {
-      this.speedChosen = !this.speedChosen;
+      this.speedChosen = true;
     },
     handleSubClick() {
       this.$store.dispatch('updateState', 1);
@@ -108,7 +117,6 @@ export default {
     margin-top: 8px;
     -webkit-transition: background-image 2s;
     .item1 {
-      color: rgba(255, 255, 255, 0.6);
       font-size: 13px;
       line-height: 14px;
       margin: auto;
@@ -123,7 +131,6 @@ export default {
     width: 170px;
     height: 37px;
     .item2 {
-      color: rgba(255, 255, 255, 0.6);
       font-size: 13px;
       line-height: 15px;
       margin: auto;
@@ -138,7 +145,6 @@ export default {
     width: 170px;
     height: 37px;
     .item3 {
-      color: rgba(255, 255, 255, 0.6);
       font-size: 13px;
       line-height: 15px;
       margin: auto;

@@ -12,14 +12,17 @@
         </div>
       </div>
       <div class="audioDelay" @click.left="handleDelayClick"
-        @mouseenter="handleMouseenter($event)"
+        @mouseenter="handleMouseenter($event, 1)"
         @mouseleave="handleMouseleave($event)"
         :style="{
           height: showDelay ? '74px' : '37px',
           transition: 'height 80ms linear',
         }">
         <transition name="audioTransIn">
-        <div class="item1" v-show="!showDelay">
+        <div class="item1" v-show="!showDelay"
+          :style="{
+            color: hoverIndex === 1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+          }">
           <div>音频延迟</div>
           <div>200ms</div>
         </div>
@@ -29,14 +32,17 @@
         </transition>
       </div>
       <div class="changeTrack" @click.left="handleTrackClick"
-        @mouseenter="handleMouseenter($event)"
+        @mouseenter="handleMouseenter($event, 2)"
         @mouseleave="handleMouseleave($event)"
         :style="{
           height: showTrack ? `${trackHeight}px` : '37px',
           transition: 'height 80ms linear',
         }">
         <transition name="audioTransIn">
-        <div class="item2" v-show="!showTrack || trackNum === 1">
+        <div class="item2" v-show="!showTrack || trackNum === 1"
+          :style="{
+            color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+          }">
           <div>切换轨道</div>
           <div>音轨 1</div>
         </div>
@@ -62,6 +68,7 @@ export default {
       itemTrack: '切换轨道',
       showDelay: false,
       showTrack: false,
+      hoverIndex: -1,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
     };
   },
@@ -104,13 +111,16 @@ export default {
       this.showDelay = false;
       this.showTrack = true;
     },
-    handleMouseenter(e) {
-      if ((!this.showDelay && e.target.classList[0].includes('audioDelay')) || (!this.showTrack && e.target.classList[0].includes('changeTrack'))) {
+    handleMouseenter(e, index) {
+      if ((!this.showDelay && e.target.classList[0].includes('audioDelay')) ||
+        (!this.showTrack && e.target.classList[0].includes('changeTrack'))) {
         e.target.style.backgroundImage = this.preStyle;
+        this.hoverIndex = index;
       }
     },
     handleMouseleave(e) {
       e.target.style.backgroundImage = null;
+      this.hoverIndex = -1;
     },
   },
 };
@@ -153,7 +163,6 @@ export default {
       width: 136px;
       font-size: 13px;
       line-height: 14px;
-      color: rgba(255, 255, 255, 0.6);
       margin: auto;
     }
   }
@@ -168,7 +177,6 @@ export default {
       width: 136px;
       font-size: 13px;
       line-height: 14px;
-      color: rgba(255, 255, 255, 0.6);
       margin: auto;
     }
   }

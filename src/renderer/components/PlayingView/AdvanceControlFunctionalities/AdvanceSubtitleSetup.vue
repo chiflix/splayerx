@@ -12,14 +12,17 @@
       </div>
     </div>
     <div class="itemSize" @click.left="handleSizeClick"
-      @mouseenter="handleMouseenter($event)"
+      @mouseenter="handleMouseenter($event, 1)"
       @mouseleave="handleMouseleave($event)"
       :style="{
         height: subSizeChosen ? '74px' : '37px',
         transition: 'height 80ms linear',
       }">
       <transition name="rowTransIn" mode="in-out">
-      <div class="item1" v-show="!subSizeChosen">
+      <div class="item1" v-show="!subSizeChosen"
+        :style="{
+          color: hoverIndex === 1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+        }">
         <div class="leftItem">字体大小</div>
         <div class="rightItem">{{ ChosenSize }}</div>
       </div>
@@ -29,14 +32,17 @@
       </transition>
     </div>
     <div class="subtitleStyle" @click.left="handleColorClick"
-      @mouseenter="handleMouseenter($event)"
+      @mouseenter="handleMouseenter($event, 2)"
       @mouseleave="handleMouseleave($event)"
       :style="{
         height: subColorChosen ? '74px' : '37px',
         transition: 'height 80ms linear',
       }">
       <transition name="rowTransIn" mode="in-out">
-      <div class="item2" v-show="!subColorChosen">
+      <div class="item2" v-show="!subColorChosen"
+        :style="{
+          color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+        }">
         <div class="leftItem">字幕样式</div>
         <div class="rightItem"><img :src="ChosenColor" class="imgType"></div>
       </div>
@@ -46,14 +52,17 @@
       </transition>
     </div>
     <div class="subtitleDelay" @click.left="handleDelayClick"
-      @mouseenter="handleMouseenter($event)"
+      @mouseenter="handleMouseenter($event, 3)"
       @mouseleave="handleMouseleave($event)"
       :style="{
         height: subDelayChosen ? '74px' : '37px',
         transition: 'height 80ms linear',
       }">
       <transition name="rowTransIn" mode="in-out">
-      <div class="item3" v-show="!subDelayChosen">
+      <div class="item3" v-show="!subDelayChosen"
+        :style="{
+          color: hoverIndex === 3 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+        }">
         <div class="leftItem">字幕延迟</div>
         <div class="rightItem">0 ms</div>
       </div>
@@ -88,6 +97,7 @@ export default {
       subDelayChosen: false,
       itemColorName: '字幕样式',
       itemDelayName: '字幕延迟',
+      hoverIndex: -1,
       preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
     };
   },
@@ -155,13 +165,17 @@ export default {
       this.subSizeChosen = false;
       this.subColorChosen = false;
     },
-    handleMouseenter(e) {
-      if ((!this.subSizeChosen && e.target.classList[0].includes('itemSize')) || (!this.subColorChosen && e.target.classList[0].includes('subtitleStyle')) || (!this.subDelayChosen && e.target.classList[0].includes('subtitleDelay'))) {
+    handleMouseenter(e, index) {
+      if ((!this.subSizeChosen && e.target.classList[0].includes('itemSize')) ||
+        (!this.subColorChosen && e.target.classList[0].includes('subtitleStyle')) ||
+        (!this.subDelayChosen && e.target.classList[0].includes('subtitleDelay'))) {
         e.target.style.backgroundImage = this.preStyle;
+        this.hoverIndex = index;
       }
     },
     handleMouseleave(e) {
       e.target.style.backgroundImage = null;
+      this.hoverIndex = -1;
     },
   },
 };
@@ -209,7 +223,6 @@ export default {
       height: 15px;
       width: 136px;
       line-height: 14px;
-      color: rgba(255, 255, 255, 0.6);
       margin: auto;
     }
   }
@@ -223,7 +236,6 @@ export default {
       height: 15px;
       width: 136px;
       line-height: 14px;
-      color: rgba(255, 255, 255, 0.6);
       margin: auto;
       .imgType {
         width: 17px;
@@ -242,7 +254,6 @@ export default {
       height: 15px;
       width: 136px;
       line-height: 14px;
-      color: rgba(255, 255, 255, 0.6);
       margin: auto;
     }
   }
