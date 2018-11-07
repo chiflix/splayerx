@@ -11,18 +11,22 @@
     }">
     <div class="playSpeed"
       @click.left="handleClick"
-      @mouseenter="handleMouseenter($event, 1)"
-      @mouseleave="handleMouseleave($event, 1)"
+      @mouseenter="handleMouseenter(1)"
+      @mouseleave="handleMouseleave()"
       :style="{
         height: speedChosen ? '74px' : '37px',
         transition: 'height 100ms linear',
+         backgroundImage: speedChosen ? '' : hoverIndex === 1 ? preStyle : '',
       }">
-      <advance-row-items :lists="numList" :item="itemSpeedName" :height="speedChosen ? 74 : 37" :color="hoverIndex === 1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
+      <advance-row-items :lists="numList" :item="itemSpeedName" :height="speedChosen ? 74 : 37" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
     </div>
     <div class="subtitleControl"
-      @mouseenter="handleMouseenter($event, 2)"
-      @mouseleave="handleMouseleave($event, 2)"
-      @click.left="handleSubClick">
+      @mouseenter="handleMouseenter(2)"
+      @mouseleave="handleMouseleave()"
+      @click.left="handleSubClick"
+      :style="{
+        backgroundImage: hoverIndex === 2 ? preStyle : '',
+      }">
       <div class="item2"
         :style="{
           color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
@@ -32,9 +36,12 @@
       </div>
     </div>
     <div class="audioItems"
-      @mouseenter="handleMouseenter($event, 3)"
-      @mouseleave="handleMouseleave($event, 3)"
-      @click.left="handleAudioClick">
+      @mouseenter="handleMouseenter(3)"
+      @mouseleave="handleMouseleave()"
+      @click.left="handleAudioClick"
+      :style="{
+        backgroundImage: hoverIndex === 3 ? preStyle : '',
+      }">
       <div class="item3"
         :style="{
           color: hoverIndex === 3 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
@@ -65,8 +72,8 @@
     </div>
 
     <div class="itemSize" @click.left="handleSizeClick"
-         @mouseenter="handleSubMouseenter($event, 1)"
-         @mouseleave="handleSubMouseleave($event)"
+         @mouseenter="handleSubMouseenter(1)"
+         @mouseleave="handleSubMouseleave()"
          :style="{
         height: subSizeChosen ? '74px' : '37px',
         transition: 'height 100ms linear',
@@ -76,8 +83,8 @@
     </div>
 
     <div class="subtitleStyle" @click.left="handleColorClick"
-         @mouseenter="handleSubMouseenter($event, 2)"
-         @mouseleave="handleSubMouseleave($event)"
+         @mouseenter="handleSubMouseenter(2)"
+         @mouseleave="handleSubMouseleave()"
          :style="{
         height: subColorChosen ? '74px' : '37px',
         transition: 'height 100ms linear',
@@ -87,8 +94,8 @@
     </div>
 
     <div class="subtitleDelay" @click.left="handleDelayClick"
-         @mouseenter="handleSubMouseenter($event, 3)"
-         @mouseleave="handleSubMouseleave($event)"
+         @mouseenter="handleSubMouseenter(3)"
+         @mouseleave="handleSubMouseleave()"
          :style="{
         height: subDelayChosen ? '74px' : '37px',
         transition: 'height 100ms linear',
@@ -117,8 +124,8 @@
       </div>
     </div>
     <div class="audioDelay" @click.left="handleAudioDelayClick"
-         @mouseenter="handleAudioMouseenter($event, 1)"
-         @mouseleave="handleAudioMouseleave($event)"
+         @mouseenter="handleAudioMouseenter(1)"
+         @mouseleave="handleAudioMouseleave()"
          :style="{
           height: showDelay ? '74px' : '37px',
           transition: 'height 100ms linear',
@@ -127,8 +134,8 @@
         <advance-selected-items :item="audioDelayName" :height="showDelay ? 74 : 37" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
     </div>
     <div class="changeTrack" @click.left="handleTrackClick"
-         @mouseenter="handleAudioMouseenter($event, 2)"
-         @mouseleave="handleAudioMouseleave($event)"
+         @mouseenter="handleAudioMouseenter(2)"
+         @mouseleave="handleAudioMouseleave()"
          :style="{
           height: showTrack ? `${trackHeight}px` : '37px',
           transition: 'height 100ms linear',
@@ -153,18 +160,12 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import AdvanceRowItems from './AdvanceRowItems.vue';
 import BaseInfoCard from '../BaseInfoCard.vue';
 import Icon from '../../BaseIconContainer.vue';
 import AdvanceColorItems from './AdvanceColorItems.vue';
 import AdvanceSelectedItemts from './AdvanceSelectItems.vue';
 import AdvanceColumnItems from './AdvanceColumnItems.vue';
-import style0 from '../../../assets/subtitle-style1-normal.png';
-import style1 from '../../../assets/subtitle-style2-normal.png';
-import style2 from '../../../assets/subtitle-style3-normal.png';
-import style3 from '../../../assets/subtitle-style4-normal.png';
-import style4 from '../../../assets/subtitle-style5-normal.png';
 export default {
   name: 'AdvanceMainMenu',
   data() {
@@ -188,7 +189,6 @@ export default {
       itemDelayName: '字幕延迟',
       hoverSubIndex: -1,
 
-
       audioDelayName: '音频延迟',
       itemTrack: '切换轨道',
       showDelay: false,
@@ -199,7 +199,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['rate']),
     cardHeight() {
       if (this.readyShow === 'mainMenu' && this.speedChosen) {
         return '164px';
@@ -216,46 +215,6 @@ export default {
       }
       return '127px';
     },
-    rateNum() {
-      return this.rate;
-    },
-    subStyle() {
-      return this.$store.getters.curStyle;
-    },
-    /**
-     * @return {string}
-     */
-    ChosenSize() {
-      switch (this.subStyle.fontSize) {
-        case 3:
-          return '小';
-        case 5:
-          return '默认';
-        case 8:
-          return '大';
-        case 10:
-          return '超大';
-        default:
-          return '默认';
-      }
-    },
-    ChosenColor() {
-      switch (this.subStyle.color) {
-        case 'white':
-          return style0;
-        case 'gray':
-          return style1;
-        case 'yellow':
-          return style2;
-        case 'blue':
-          return style3;
-        case 'black':
-          return style4;
-        default:
-          return style0;
-      }
-    },
-
     trackNum() {
       return this.$store.getters.track.length;
     },
@@ -296,14 +255,10 @@ export default {
       this.readyShow = 'audioMenu';
       this.speedChosen = false;
     },
-    handleMouseenter(e, index) {
-      if (!this.speedChosen || !e.target.classList[0].includes('playSpeed')) {
-        e.target.style.backgroundImage = this.preStyle;
-      }
+    handleMouseenter(index) {
       this.hoverIndex = index;
     },
-    handleMouseleave(e) {
-      e.target.style.backgroundImage = null;
+    handleMouseleave() {
       this.hoverIndex = -1;
     },
 
@@ -320,11 +275,10 @@ export default {
     handleSubBackLeave() {
       this.backSubHover = false;
     },
-    handleSubMouseenter(e, index) {
+    handleSubMouseenter(index) {
       this.hoverSubIndex = index;
     },
-    handleSubMouseleave(e) {
-      e.target.style.backgroundImage = null;
+    handleSubMouseleave() {
       this.hoverSubIndex = -1;
     },
     handleSizeClick() {
@@ -358,11 +312,10 @@ export default {
       this.showDelay = false;
       this.showTrack = false;
     },
-    handleAudioMouseenter(e, index) {
+    handleAudioMouseenter(index) {
       this.hoverAudioIndex = index;
     },
-    handleAudioMouseleave(e) {
-      e.target.style.backgroundImage = null;
+    handleAudioMouseleave() {
       this.hoverAudioIndex = -1;
     },
     handleAudioDelayClick() {
@@ -380,7 +333,7 @@ export default {
 <style lang="scss" scoped>
 .card {
   min-width: 170px;
-  min-height: 127px;
+  min-height: 119px;
 }
 .mainItems {
   display: flex;
