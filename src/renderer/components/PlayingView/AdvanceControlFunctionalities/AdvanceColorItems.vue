@@ -1,9 +1,22 @@
 <template>
-  <div class="itemContainer">
-    <div class="textContainer">
+  <div class="itemContainer"
+       :style="{
+         height: heightSize,
+         backgroundColor: height === 37 ? '' : 'rgba(255, 255, 255, 0.12)',
+       }">
+      <div class="detail"
+           :style="{
+      height: heightSize,
+    }">
+    <div class="textContainer"
+      :style="{
+        color: color,
+      }">
       <div class="textItem">{{ item }}</div>
+      <div class="rightItem"><img :src="ChosenColor" class="imgType"></div>
     </div>
-    <div class="listContainer">
+        <transition name="detail">
+          <div class="listContainer" v-show="height === 74">
       <div class="rowContainer">
         <div class="imgContainer" v-for="(img, index) in imgs">
           <img :src="img.selected ? imgsSelected[index] : img" class="imgType" @mouseover="handleOver(index)" @mouseout="handleOut()"
@@ -12,6 +25,8 @@
         </div>
       </div>
     </div>
+        </transition>
+      </div>
   </div>
 </template>
 
@@ -40,6 +55,17 @@ export default {
   props: {
     item: {
       type: String,
+    },
+    height: {
+      type: Number,
+    },
+    color: {
+      type: String,
+    },
+  },
+  computed: {
+    heightSize() {
+      return `${this.height}px`;
     },
   },
   components: {
@@ -93,28 +119,31 @@ export default {
   .itemContainer {
     position: absolute;
     width: 170px;
-    height: 74px;
     display: flex;
-    flex-direction: column;
     border-radius: 7px;
     z-index: 10;
-    backdrop-filter: blur(8px);
-    background-color: rgba(255, 255, 255, 0.12);
     clip-path: inset(0 round 8px);
+    transition: height 100ms linear, background-color 100ms linear;
+    .detail {
+      width: 100%;
+      backdrop-filter: blur(8px);
+    }
     .textContainer {
       display: flex;
       flex: 1;
+      height: 37px;
       font-size: 13px;
       margin: auto auto auto 17px;
       color: rgba(255, 255, 255, 0.6);
       .textItem {
         letter-spacing: 0.2px;
-        margin: auto;
+        margin: auto auto auto 0;
       }
     }
     .listContainer {
       flex: 1;
       display: flex;
+      height: 37px;
       .rowContainer {
         display: flex;
         justify-content: space-around;
@@ -143,6 +172,39 @@ export default {
           z-index: -1;
         }
       }
+    }
+  }
+
+
+
+  .detail-enter-active {
+    animation: show 100ms;
+  }
+  .detail-enter, .detail-leave-to {
+    opacity: 0;
+  }
+  .detail-leave-active {
+    animation: hide 100ms;
+  }
+
+  @keyframes show {
+    0% {
+      opacity: 0;
+      height: 0px;
+    }
+    100% {
+      opacity: 1;
+      height: 37px;
+    }
+  }
+  @keyframes hide {
+    0% {
+      opacity: 1;
+      height: 37px;
+    }
+    100% {
+      opacity: 0;
+      height: 0px;
     }
   }
 </style>
