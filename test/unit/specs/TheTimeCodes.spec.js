@@ -27,17 +27,4 @@ describe('Component - TheTimeCodes', () => {
   it('sanity - should render correct component', () => {
     expect(wrapper.contains(TheTimeCodes)).to.equal(true);
   });
-
-  describe('Methods', () => {
-    it('should switchStateOfContent adjust contentState correctly', () => {
-      const states = [0, 1, 2, 3, 4, 5];
-      states.forEach((state) => {
-        wrapper.setData({ contentState: state });
-
-        wrapper.vm.switchStateOfContent();
-
-        expect(wrapper.vm.contentState).to.equal((state + 1) % 3);
-      });
-    });
-  });
 });
