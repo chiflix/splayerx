@@ -20,7 +20,8 @@
           }">{{ list[0] }}</div>
           <base-info-card :class="cardType" v-show="index === hoverIndex"
             :style="{
-              width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`}"></base-info-card>
+              width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`,
+            }"></base-info-card>
         </div>
       </div>
     </div>

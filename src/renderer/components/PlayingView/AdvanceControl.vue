@@ -7,13 +7,7 @@
           transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
         }">
         <transition name="setUp">
-          <advance-main-menu class="mainMenu" v-show="stateMessage[0]"></advance-main-menu>
-        </transition>
-        <transition name="setUp">
-          <advance-subtitle-setup class="subtitleSetup" v-show="stateMessage[1]"></advance-subtitle-setup>
-        </transition>
-        <transition name="setUp">
-          <advance-audio-items class="audioItems" v-show="stateMessage[2]"></advance-audio-items>
+          <advance-main-menu class="mainMenu"></advance-main-menu>
         </transition>
       </div>
       </transition>
@@ -207,36 +201,4 @@ button:hover {
 .advance-trans-l-leave-active {
   position: absolute;
 }
-
-.setUp-enter-active {
-  animation: show .5s;
-}
-.setUp-enter, .setUp-leave-to {
-  opacity: 0;
-}
-.setUp-leave-active {
-  animation: hide .5s;
-}
-
-@keyframes show {
-  0% {
-    opacity: 0;
-    right: -170px;
-  }
-  100% {
-    opacity: 1;
-    right: 0;
-  }
-}
-@keyframes hide {
-  0% {
-    opacity: 1;
-    right: 0;
-  }
-  100% {
-    opacity: 0;
-    right: 170px;
-  }
-}
-
 </style>
