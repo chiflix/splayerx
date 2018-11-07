@@ -13,7 +13,7 @@
         color: color,
       }">
       <div class="textItem">{{ item }}</div>
-      <div class="rightItem"><img :src="ChosenColor" class="imgType"></div>
+      <div class="rightItem" v-show="height === 37"><img :src="ChosenColor"></div>
     </div>
         <transition name="detail">
           <div class="listContainer" v-show="height === 74">
@@ -67,6 +67,26 @@ export default {
     heightSize() {
       return `${this.height}px`;
     },
+    subStyle() {
+      return this.$store.getters.curStyle;
+    },
+    ChosenColor() {
+      switch (this.subStyle.color) {
+        case 'white':
+          return style0;
+        case 'gray':
+          return style1;
+        case 'yellow':
+          return style2;
+        case 'blue':
+          return style3;
+        case 'black':
+          return style4;
+        default:
+          return style0;
+      }
+    },
+
   },
   components: {
     'base-info-card': BaseInfoCard,
@@ -132,12 +152,18 @@ export default {
       display: flex;
       flex: 1;
       height: 37px;
+      width: 136px;
       font-size: 13px;
       margin: auto auto auto 17px;
       color: rgba(255, 255, 255, 0.6);
       .textItem {
         letter-spacing: 0.2px;
         margin: auto auto auto 0;
+      }
+      .rightItem {
+        height: 17px;
+        width: 17px;
+        margin: auto 0 auto auto;
       }
     }
     .listContainer {

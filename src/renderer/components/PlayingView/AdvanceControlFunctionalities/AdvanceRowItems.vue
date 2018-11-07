@@ -13,7 +13,7 @@
         color: color,
       }">
       <div class="textItem">{{ item }}</div>
-      <div class="rightItem">{{ ChosenSize }}</div>
+      <div class="rightItem" v-show="height === 37">{{ showDetail }}</div>
     </div>
 
       <transition name="detail">
@@ -46,6 +46,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/action-types';
 import BaseInfoCard from '../BaseInfoCard';
 export default {
@@ -72,6 +73,15 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['rate']),
+    showDetail() {
+      if (this.item === '播放速度') {
+        return `${this.rate} x`;
+      } else if (this.item === '字体大小') {
+        return `${this.ChosenSize}`;
+      }
+      return null;
+    },
     heightSize() {
       return `${this.height}px`;
     },
@@ -86,6 +96,26 @@ export default {
     },
     difWidth() {
       return this.item === '字体大小' ? [29, 35] : [25, 29];
+    },
+    subStyle() {
+      return this.$store.getters.curStyle;
+    },
+    /**
+     * @return {string}
+     */
+    ChosenSize() {
+      switch (this.subStyle.fontSize) {
+        case 3:
+          return '小';
+        case 5:
+          return '默认';
+        case 8:
+          return '大';
+        case 10:
+          return '超大';
+        default:
+          return '默认';
+      }
     },
   },
   components: {
@@ -154,14 +184,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .leftItem {
-    letter-spacing: 0.2px;
-    margin-top: 1px;
-    font-size: 13px;
-  }
-  .rightItem {
-    font-size: 11px;
-  }
 .itemContainer {
   position: absolute;
   width: 170px;
@@ -175,6 +197,7 @@ export default {
     backdrop-filter: blur(8px);
   }
   .textContainer {
+    width: 136px;
     height: 37px;
     display: flex;
     flex: 1;
@@ -185,6 +208,11 @@ export default {
       letter-spacing: 0.2px;
       margin: auto auto auto 0;
     }
+    .rightItem {
+      font-size: 11px;
+      margin: auto 0 auto auto;
+    }
+
   }
   .listContainer {
     flex: 1;
