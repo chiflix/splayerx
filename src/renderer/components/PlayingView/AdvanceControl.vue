@@ -2,7 +2,7 @@
   <div :data-component-name="$options.name">
     <div class="advanceControl">
       <transition name="advance-trans-l">
-      <div class="advanced"
+      <div class="advanced" v-show="showAttached"
         :style="{
           transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
         }">

@@ -1,5 +1,8 @@
 <template>
 <base-info-card class="card"
+  :borderRadius="7"
+  :contentMinHeight="119"
+  :contentMinWidth="170"
   :style="{
     height: this.readyShow === 'mainMenu' ? menuCardHeight : this.readyShow === 'subMenu' ? subtitleCardHeight : audioCardHeight,
     transition: 'height 100ms linear',
@@ -325,10 +328,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.card {
-  min-width: 170px;
-  min-height: 119px;
-}
 .mainItems {
   display: flex;
   flex-direction: column;
