@@ -42,6 +42,11 @@ const getters = {
     }
     return state.PlayingList;
   },
+  duration: state => state.Duration,
+  playingIndex: (state) => {
+    const list = state.PlayingList.length > 0 ? state.PlayingList : state.FolderList;
+    return list.findIndex(value => value === state.OriginSrcOfVideo);
+  },
 };
 
 const mutations = {
