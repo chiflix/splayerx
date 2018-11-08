@@ -30,7 +30,7 @@
 
 <script>
 import Icon from '../../BaseIconContainer.vue';
-import BaseInfoCard from '../BaseInfoCard';
+import BaseInfoCard from '../InfoCard';
 export default {
   name: 'AdvanceSelectItems',
   data() {

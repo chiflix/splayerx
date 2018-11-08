@@ -1,7 +1,7 @@
 <template>
 <base-info-card class="card"
   :style="{
-    height: cardHeight,
+    height: this.readyShow === 'mainMenu' ? menuCardHeight : this.readyShow === 'subMenu' ? subtitleCardHeight : audioCardHeight,
     transition: 'height 100ms linear',
   }">
   <transition name="setUp">
@@ -161,7 +161,7 @@
 
 <script>
 import AdvanceRowItems from './AdvanceRowItems.vue';
-import BaseInfoCard from '../BaseInfoCard.vue';
+import BaseInfoCard from '../InfoCard.vue';
 import Icon from '../../BaseIconContainer.vue';
 import AdvanceColorItems from './AdvanceColorItems.vue';
 import AdvanceSelectedItemts from './AdvanceSelectItems.vue';
@@ -199,21 +199,22 @@ export default {
     };
   },
   computed: {
-    cardHeight() {
-      if (this.readyShow === 'mainMenu' && this.speedChosen) {
-        return '164px';
-      } else if (this.readyShow === 'subMenu' && !this.subColorChosen && !this.subSizeChosen && !this.subDelayChosen) {
+    menuCardHeight() {
+      return this.speedChosen ? '164px' : '127px';
+    },
+    subtitleCardHeight() {
+      if (!this.subColorChosen && !this.subSizeChosen && !this.subDelayChosen) {
         return '156px';
-      } else if (this.readyShow === 'subMenu' && (this.subColorChosen || this.subSizeChosen || this.subDelayChosen)) {
-        return '193px';
-      } else if (this.readyShow === 'audioMenu' && !this.showDelay && !this.showTrack) {
-        return '119px';
-      } else if (this.readyShow === 'audioMenu' && this.showDelay) {
-        return '156px';
-      } else if (this.readyShow === 'audioMenu' && this.showTrack) {
-        return `${this.containerHeight}px`;
       }
-      return '127px';
+      return '193px';
+    },
+    audioCardHeight() {
+      if (!this.showDelay && !this.showTrack) {
+        return '119px';
+      } else if (this.showDelay) {
+        return '156px';
+      }
+      return `${this.containerHeight}px`;
     },
     trackNum() {
       return this.$store.getters.track.length;

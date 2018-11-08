@@ -29,6 +29,7 @@ export const DEFAULT_VIDEO_EVENTS = [
   'play',
   'playing',
   'progress',
+  'resize',
   'ratechange',
   'seeked',
   'seeking',

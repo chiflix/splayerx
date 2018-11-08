@@ -13,15 +13,15 @@
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <notification-bubble/>
     <div class="masking" v-hidden="showAllWidgets"></div>
-    <play-button />
+    <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
       <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <advance-control class="button advance" v-hidden="displayState['advance-control']" v-bind.sync="widgetsStatus['advance-control']"/>
     </div>
-    <the-time-codes v-hidden="displayState['the-time-progress-bar']" />
-    <the-time-progress-bar v-hidden="displayState['the-time-progress-bar']" :src="src" />
+    <the-time-codes v-hidden="displayState['the-progress-bar']" />
+    <the-progress-bar v-hidden="displayState['the-progress-bar']"/>
   </div>
 </template>
 <script>
@@ -35,7 +35,7 @@ import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
 import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
-import TimeProgressBar from './TimeProgressBar.vue';
+import TheProgressBar from './TheProgressBar';
 import NotificationBubble from '../NotificationBubble.vue';
 export default {
   name: 'the-video-controller',
@@ -47,7 +47,7 @@ export default {
     'advance-control': AdvanceControl,
     'playlist-control': PlaylistControl,
     'the-time-codes': TheTimeCodes,
-    'the-time-progress-bar': TimeProgressBar,
+    'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
   },
   directives: {
@@ -65,9 +65,6 @@ export default {
         }
       },
     },
-  },
-  props: {
-    src: String,
   },
   data() {
     return {
@@ -94,10 +91,11 @@ export default {
       isDragging: false,
       focusedTimestamp: 0,
       focusDelay: 500,
+      listenedWidget: 'the-video-controller',
     };
   },
   computed: {
-    ...mapGetters(['mute']),
+    ...mapGetters(['mute', 'paused']),
     showAllWidgets() {
       return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget);
@@ -109,7 +107,7 @@ export default {
       return this.showAllWidgets || !this.isFocused ? 'default' : 'none';
     },
     isFocused() {
-      return this.$store.state.WindowState.isFocused;
+      return this.$store.state.Window.isFocused;
     },
   },
   watch: {
@@ -161,6 +159,10 @@ export default {
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
     requestAnimationFrame(this.UIManager);
+    this.$bus.$on('currentWidget', (widget) => {
+      this.listenedWidget = widget;
+      this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false);
+    });
   },
   methods: {
     // UIManagers
@@ -180,9 +182,13 @@ export default {
       this.start = timestamp;
       requestAnimationFrame(this.UIManager);
     },
-    inputProcess(currentEventInfo, lastEventInfo) {
+    inputProcess(currentEventInfo, lastEventInfo) { // eslint-disable-line
       // mousemove timer
-      this.currentWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
+      const currentChanged = currentEventInfo.get('mousemove').target !== lastEventInfo.get('mousemove').target;
+      if (currentChanged) {
+        this.listenedWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
+      }
+      this.currentWidget = this.listenedWidget;
       this.mouseStopMoving = _.isEqual(currentEventInfo.get('mousemove').position, lastEventInfo.get('mousemove').position);
       if (!this.mouseStopMoving) { this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false); }
       // mouseenter timer
@@ -214,7 +220,7 @@ export default {
       const progressKeydown = this.orify(currentEventInfo.get('keydown').ArrowLeft, currentEventInfo.get('keydown').ArrowRight);
       if (progressKeydown) {
         this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
-        // Prevent all widgets display before the-time-progress-bar
+        // Prevent all widgets display before the-progress-bar
         if (this.showAllWidgets) {
           this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
         }
@@ -230,7 +236,7 @@ export default {
         this.timerState[uiName] = this.showAllWidgets;
       });
       this.timerState['volume-indicator'] = !this.hideVolume;
-      this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
+      this.timerState['the-progress-bar'] = !this.hideProgressBar;
       return currentEventInfo;
     },
     UITimerManager(frameTime) {
@@ -246,7 +252,7 @@ export default {
       this.hideProgressBar = timeoutTimers.includes('sleepingProgressBar');
 
       this.timerState['volume-indicator'] = !this.hideVolume;
-      this.timerState['the-time-progress-bar'] = !this.hideProgressBar;
+      this.timerState['the-progress-bar'] = !this.hideProgressBar;
     },
     // UILayerManager() {
     // },

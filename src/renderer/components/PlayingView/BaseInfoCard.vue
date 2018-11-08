@@ -1,59 +1,53 @@
 <template>
-  <div class="container" ref="container">
-    <div class="element bottom"><div class="element middle"><div class="element content"><slot></slot></div></div></div>
+  <div class="container"
+    :style="{
+      width: `${width}px`,
+      height: `${height}px`,
+    }">
+    <div class="element"
+      :style="{
+        transform: `translate(-${borderWidth / 2}px, -${borderWidth / 2}px)`,
+        borderRadius: `${borderRadius}px`,
+        width: `${width - borderWidth}px`,
+        height: `${height - borderWidth}px`,
+        border: `${borderWidth}px solid rgba(${borderColor})`,
+      }"></div>
+      <slot></slot>
   </div>
 </template>
 <script>
 export default {
   name: 'base-info-card',
   props: {
+    height: {
+      type: Number,
+    },
+    width: {
+      type: Number,
+    },
+    borderWidth: {
+      type: Number,
+      default: 0.7,
+    },
     borderRadius: {
       type: Number,
-      default: 1,
-      validator: value => value >= 1 && !Number.isFinite(value),
+      default: 2,
     },
-  },
-  mounted() {
-    this.$refs.container.style.setProperty('--border-radius', `${this.borderRadius}px`);
+    borderColor: {
+      type: String,
+      default: '255, 255, 255, 0.2',
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .container {
-  --border-radius: 1px;
-  border-radius: var(--border-radius);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
-  position: absolute;
   box-sizing: content-box;
   .element {
-    border-radius: var(--border-radius);
     position: absolute;
     box-sizing: inherit;
   }
-  .bottom {
-    width: 100%;
-    height: 100%;
-    top: 0;
-    background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(8px);
-    clip-path: inset(0 round var(--border-radius));
-  }
-  .middle {
-    width: 100%;
-    height: 100%;
-    top: 0;
-    background: rgba(255, 255, 255, 0.2);
-  }
-  .content {
-    width: calc(100% - 2px);
-    height: calc(100% - 2px);
-    top: 1px;
-    left: 1px;
-    background-color: transparent;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
-    display: flex;
-  }
 }
 </style>
-

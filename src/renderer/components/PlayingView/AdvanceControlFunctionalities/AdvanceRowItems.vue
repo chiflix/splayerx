@@ -47,8 +47,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { Video as videoActions } from '@/store/action-types';
-import BaseInfoCard from '../BaseInfoCard';
+import { Video as videoActions } from '@/store/actionTypes';
+import BaseInfoCard from '../InfoCard';
 export default {
   name: 'AdvanceRowItems',
   data() {
@@ -137,25 +137,7 @@ export default {
         }
       });
       if (this.item === '播放速度') {
-        switch (index) {
-          case 0:
-            this.$store.dispatch(videoActions.CHANGE_RATE, 0.25);
-            break;
-          case 1:
-            this.$store.dispatch(videoActions.CHANGE_RATE, 1);
-            break;
-          case 2:
-            this.$store.dispatch(videoActions.CHANGE_RATE, 1.2);
-            break;
-          case 3:
-            this.$store.dispatch(videoActions.CHANGE_RATE, 1.5);
-            break;
-          case 4:
-            this.$store.dispatch(videoActions.CHANGE_RATE, 2);
-            break;
-          default:
-            break;
-        }
+        this.$store.dispatch(videoActions.CHANGE_RATE, this.lists[index][0]);
       } else if (this.item === '字体大小') {
         switch (index) {
           case 0:

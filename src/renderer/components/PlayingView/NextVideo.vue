@@ -14,8 +14,8 @@
     <div class="content">
       <div class="info">
         <div class="top">
-          <div class="duration">{{ duration }}</div>
-          <div class="title">&nbsp· {{ title }}</div>
+          <div class="duration">{{ timecode }}</div>
+          <div class="title">&nbsp;· {{ title }}</div>
         </div>
         <div class="vid-name">{{ videoName }}</div>
       </div>
@@ -51,7 +51,6 @@ export default {
   },
   data() {
     return {
-      duration: '',
       progress: 0,
       animation: '',
       notificationPlayIcon: 'notificationPlay',
@@ -63,17 +62,17 @@ export default {
       this.$emit('manualclose-next-video');
     },
     onTimeupdate() {
-      const currentTime = this.$store.state.PlaybackState.CurrentTime;
-      const duration = this.$store.state.PlaybackState.Duration;
-      if (currentTime < this.finalPartStartTime) {
+      const { duration } = this;
+      const currentTime = this.roundedCurrentTime;
+      if (currentTime < this.finalPartTime) {
         this.$emit('close-next-video');
       } else if (currentTime >= duration) {
         this.$emit('close-next-video');
         this.openFile(this.nextVideo);
         this.$bus.$emit('seek', 0); // avoid skipping the next video
       } else {
-        const fractionProgress = (currentTime - this.finalPartStartTime)
-          / (duration - this.finalPartStartTime);
+        const fractionProgress = (currentTime - this.finalPartTime)
+          / (duration - this.finalPartTime);
         this.progress = fractionProgress * 100;
       }
       requestAnimationFrame(this.onTimeupdate);
@@ -81,7 +80,7 @@ export default {
     handleMouseDown() {
       if (this.nextVideo) {
         this.$emit('close-next-video');
-        this.$bus.$emit('seek', this.$store.state.PlaybackState.Duration);
+        this.$bus.$emit('seek', this.duration);
         this.openFile(this.nextVideo);
         this.$bus.$emit('seek', 0); // avoid skipping the next video
       }
@@ -96,17 +95,16 @@ export default {
       this.notificationPlayIcon = 'notificationPlay';
       this.isBlur = true;
     },
-    onMetaLoaded() {
-      this.$refs.videoThumbnail.muted = true;
-      this.$refs.videoThumbnail.currentTime = 100;
-      this.duration = this.timecodeFromSeconds(this.$refs.videoThumbnail.duration);
+    onMetaLoaded(event) {
+      event.target.muted = true;
+      event.target.currentTime = 100;
     },
     onSeeked() {
       this.$emit('ready-to-show');
     },
   },
   computed: {
-    ...mapGetters(['nextVideo', 'finalPartStartTime', 'isFolderList']),
+    ...mapGetters(['nextVideo', 'finalPartTime', 'isFolderList', 'roundedCurrentTime', 'duration']),
     videoName() {
       return path.basename(this.nextVideo, path.extname(this.nextVideo));
     },
@@ -121,6 +119,9 @@ export default {
         return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
       }
       return '';
+    },
+    timecode() {
+      return this.timecodeFromSeconds(this.duration);
     },
   },
   mounted() {

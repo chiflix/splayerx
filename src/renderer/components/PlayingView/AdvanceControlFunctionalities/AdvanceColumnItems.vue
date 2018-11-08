@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import BaseInfoCard from '../BaseInfoCard';
+import BaseInfoCard from '../InfoCard';
 export default {
   name: 'AdvanceColumnItems',
   data() {

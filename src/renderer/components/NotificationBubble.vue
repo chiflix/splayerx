@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import Icon from './BaseIconContainer';
 export default {
@@ -40,16 +41,11 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['roundedCurrentTime', 'nextVideo', 'finalPartTime']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo) return messages.slice(0, 2);
       return messages;
-    },
-    nextVideo() {
-      return this.$store.getters.nextVideo;
-    },
-    currentTime() {
-      return this.$store.getters.currentTime;
     },
     container() {
       return process.platform === 'win32' ? 'winContainer' : 'container';
@@ -71,8 +67,8 @@ export default {
     },
   },
   watch: {
-    currentTime(val) {
-      if (val > this.$store.getters.finalPartStartTime) {
+    roundedCurrentTime(val) {
+      if (val > this.finalPartTime) {
         if (this.nextVideo !== '' && !this.manualClosed) {
           this.showNextVideo = true;
         }

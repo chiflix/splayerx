@@ -1,29 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="170px" height="171px" viewBox="0 0 170 171" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
-    <title>player/icon/pause</title>
+<svg width="84px" height="84px" viewBox="0 0 84 84" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.3 (67297) - http://www.bohemiancoding.com/sketch -->
+    <title>Play Button / Playing View Huge Button / Pause</title>
     <desc>Created with Sketch.</desc>
     <defs>
-        <filter x="-51.2%" y="-40.5%" width="202.3%" height="181.0%" filterUnits="objectBoundingBox" id="filter-1">
-            <feGaussianBlur stdDeviation="22 0" in="SourceGraphic"></feGaussianBlur>
+        <filter x="-105.0%" y="-30.0%" width="310.0%" height="160.0%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.122622283 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
         </filter>
-        <filter x="-7.0%" y="-5.5%" width="114.0%" height="111.0%" filterUnits="objectBoundingBox" id="filter-2">
-            <feGaussianBlur stdDeviation="3 0" in="SourceGraphic"></feGaussianBlur>
+        <radialGradient cx="50%" cy="64.5280792%" fx="50%" fy="64.5280792%" r="169.187388%" gradientTransform="translate(0.500000,0.645281),scale(1.000000,0.287741),rotate(90.000000),translate(-0.500000,-0.645281)" id="radialGradient-2">
+            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="2.09763367%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="50%" cy="63.3385735%" fx="50%" fy="63.3385735%" r="175.200408%" gradientTransform="translate(0.500000,0.633386),scale(1.000000,0.287741),rotate(90.000000),translate(-0.500000,-0.633386)" id="radialGradient-3">
+            <stop stop-color="#FFFFFF" stop-opacity="0.329398777" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.573822464" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.764124774" offset="100%"></stop>
+        </radialGradient>
+        <filter x="-105.0%" y="-30.0%" width="310.0%" height="160.0%" filterUnits="objectBoundingBox" id="filter-4">
+            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.122622283 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
         </filter>
-        <linearGradient x1="74.8286995%" y1="-9.88210257%" x2="0%" y2="100%" id="linearGradient-3">
-            <stop stop-color="#FFFFFF" offset="0%"></stop>
-            <stop stop-color="#C2C2C2" offset="65.0888871%"></stop>
-            <stop stop-color="#DBDBDB" stop-opacity="0.74535779" offset="80.8035714%"></stop>
-            <stop stop-color="#FFFFFF" stop-opacity="0" offset="100%"></stop>
-        </linearGradient>
+        <radialGradient cx="50%" cy="64.5280792%" fx="50%" fy="64.5280792%" r="169.134451%" gradientTransform="translate(0.500000,0.645281),scale(1.000000,0.287831),rotate(90.000000),translate(-0.500000,-0.645281)" id="radialGradient-5">
+            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="2.09763367%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="50%" cy="63.3385735%" fx="50%" fy="63.3385735%" r="175.145589%" gradientTransform="translate(0.500000,0.633386),scale(1.000000,0.287831),rotate(90.000000),translate(-0.500000,-0.633386)" id="radialGradient-6">
+            <stop stop-color="#FFFFFF" stop-opacity="0.329398777" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.573822464" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.764124774" offset="100%"></stop>
+        </radialGradient>
     </defs>
-    <g id="player/icon/pause" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.9">
-        <g id="icon-pause" transform="translate(21.000000, 4.000000)">
-            <path d="M2,0 L26,0 C27.1045695,-2.02906125e-16 28,0.8954305 28,2 L28,161 C28,162.104569 27.1045695,163 26,163 L2,163 C0.8954305,163 1.3527075e-16,162.104569 0,161 L0,2 C-1.3527075e-16,0.8954305 0.8954305,2.02906125e-16 2,0 Z M103,0 L127,0 C128.104569,-2.02906125e-16 129,0.8954305 129,2 L129,161 C129,162.104569 128.104569,163 127,163 L103,163 C101.895431,163 101,162.104569 101,161 L101,2 C101,0.8954305 101.895431,2.02906125e-16 103,0 Z" id="Combined-Shape" fill="#FFFFFF" opacity="0.37"></path>
-            <path d="M2,0 L26,0 C27.1045695,-2.02906125e-16 28,0.8954305 28,2 L28,161 C28,162.104569 27.1045695,163 26,163 L2,163 C0.8954305,163 1.3527075e-16,162.104569 0,161 L0,2 C-1.3527075e-16,0.8954305 0.8954305,2.02906125e-16 2,0 Z M103,0 L127,0 C128.104569,-2.02906125e-16 129,0.8954305 129,2 L129,161 C129,162.104569 128.104569,163 127,163 L103,163 C101.895431,163 101,162.104569 101,161 L101,2 C101,0.8954305 101.895431,2.02906125e-16 103,0 Z" id="Combined-Shape" fill="#000000" opacity="0.05" style="mix-blend-mode: overlay;" filter="url(#filter-1)"></path>
-            <path d="M2,0 L26,0 C27.1045695,-2.02906125e-16 28,0.8954305 28,2 L28,161 C28,162.104569 27.1045695,163 26,163 L2,163 C0.8954305,163 1.3527075e-16,162.104569 0,161 L0,2 C-1.3527075e-16,0.8954305 0.8954305,2.02906125e-16 2,0 Z M103,0 L127,0 C128.104569,-2.02906125e-16 129,0.8954305 129,2 L129,161 C129,162.104569 128.104569,163 127,163 L103,163 C101.895431,163 101,162.104569 101,161 L101,2 C101,0.8954305 101.895431,2.02906125e-16 103,0 Z" id="Combined-Shape" fill="#FFFFFF" opacity="0.5" style="mix-blend-mode: overlay;" filter="url(#filter-2)"></path>
-            <path d="M2,0 L26,0 C27.1045695,-2.02906125e-16 28,0.8954305 28,2 L28,161 C28,162.104569 27.1045695,163 26,163 L2,163 C0.8954305,163 1.3527075e-16,162.104569 0,161 L0,2 C-1.3527075e-16,0.8954305 0.8954305,2.02906125e-16 2,0 Z M103,0 L127,0 C128.104569,-2.02906125e-16 129,0.8954305 129,2 L129,161 C129,162.104569 128.104569,163 127,163 L103,163 C101.895431,163 101,162.104569 101,161 L101,2 C101,0.8954305 101.895431,2.02906125e-16 103,0 Z" id="Combined-Shape" fill-opacity="0.33" fill="#FFFFFF" opacity="0.55"></path>
-            <path d="M2,0 L26,0 C27.1045695,-2.02906125e-16 28,0.8954305 28,2 L28,161 C28,162.104569 27.1045695,163 26,163 L2,163 C0.8954305,163 1.3527075e-16,162.104569 0,161 L0,2 C-1.3527075e-16,0.8954305 0.8954305,2.02906125e-16 2,0 Z M103,0 L127,0 C128.104569,-2.02906125e-16 129,0.8954305 129,2 L129,161 C129,162.104569 128.104569,163 127,163 L103,163 C101.895431,163 101,162.104569 101,161 L101,2 C101,0.8954305 101.895431,2.02906125e-16 103,0 Z" id="Combined-Shape" stroke="url(#linearGradient-3)" opacity="0.28"></path>
+    <g id="Play-Button-/-Playing-View-Huge-Button-/-Pause" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" filter="url(#filter-1)" transform="translate(12.500000, 7.000000)">
+            <rect id="Rectangle" fill="url(#radialGradient-2)" x="0" y="0" width="20" height="69.5070423" rx="4"></rect>
+            <rect id="Rectangle" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="1.2" fill="url(#radialGradient-3)" x="0" y="0" width="20" height="69.5070423" rx="4"></rect>
+        </g>
+        <g id="Group" filter="url(#filter-4)" transform="translate(51.500000, 7.000000)">
+            <rect id="Rectangle" fill="url(#radialGradient-5)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
+            <rect id="Rectangle" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="1.2" fill="url(#radialGradient-6)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
         </g>
     </g>
 </svg>

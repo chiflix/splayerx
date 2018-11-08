@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import BaseInfoCard from '../BaseInfoCard';
+import BaseInfoCard from '../InfoCard';
 import style0 from '../../../assets/subtitle-style1-normal.png';
 import style1 from '../../../assets/subtitle-style2-normal.png';
 import style2 from '../../../assets/subtitle-style3-normal.png';
