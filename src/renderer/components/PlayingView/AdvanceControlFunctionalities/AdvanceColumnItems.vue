@@ -3,7 +3,11 @@
     <div class="textContainer">
       <div class="textItem">{{ item }}</div>
     </div>
-    <div class="listContainer">
+    <div class="listContainer"
+      :style="{
+        overflowY: tracks.length > 2 ? 'scroll' : '',
+        height: tracks.length <= 3 ? `${tracks.length * 37}px` : '111px',
+      }">
       <div class="columnContainer">
         <div v-for="(track, index) in tracks"
              class="columnNumDetail"
@@ -64,17 +68,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+::-webkit-scrollbar {
+  width: 3px;
+  height: 42+px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 1.2px;
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+}
   .itemContainer {
     position: absolute;
     width: 170px;
-    height: 148px;
     display: flex;
     flex-direction: column;
     border-radius: 7px;
     z-index: 10;
-    backdrop-filter: blur(8px);
-    background-color: rgba(255, 255, 255, 0.12);
+    background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%);
     clip-path: inset(0 round 8px);
     .textContainer {
       display: flex;
@@ -88,9 +98,7 @@ export default {
       }
     }
     .listContainer {
-      width: 170px;
-      height: 111px;
-      overflow-y: scroll;
+      width: 165px;
       .columnContainer {
         display: flex;
         flex-direction: column;
@@ -99,7 +107,7 @@ export default {
           display: flex;
           width: 136px;
           height: 27px;
-          margin: 0 auto 7px auto;
+          margin: 0 auto 7px 17px;
           .text {
             line-height: 12px;
             font-size: 11px;

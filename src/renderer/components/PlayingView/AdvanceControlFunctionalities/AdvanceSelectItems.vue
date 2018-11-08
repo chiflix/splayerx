@@ -2,7 +2,7 @@
   <div class="itemContainer"
        :style="{
        height: heightSize,
-       backgroundColor: height === 37 ? '' : 'rgba(255, 255, 255, 0.12)',
+       backgroundImage: height === 37 ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
        }">
 
     <div class="detail" :style="{
@@ -16,13 +16,13 @@
       <div class="rightItem"></div>
     </div>
       <transition name="detail">
-    <div class="listContainer" v-show="height === 74">
-      <div class="rowContainer">
-        <Icon type="minus" class="decrease" @click.left.native="handleDecrease"></Icon>
-        <base-info-card class="card"><div class="delay">{{ delayNum }}</div></base-info-card>
-        <Icon type="plus" class="increase" @click.left.native="handleIncrease"></Icon>
-      </div>
-    </div>
+        <div class="listContainer" v-show="height === 74">
+         <div class="rowContainer">
+           <Icon type="minus" class="decrease" @click.left.native="handleDecrease"></Icon>
+           <base-info-card class="card"><div class="delay">{{ delayNum }}</div></base-info-card>
+           <Icon type="plus" class="increase" @click.left.native="handleIncrease"></Icon>
+          </div>
+        </div>
       </transition>
     </div>
   </div>
@@ -84,11 +84,11 @@ export default {
   display: flex;
   border-radius: 7px;
   z-index: 10;
-  clip-path: inset(0 round 8px);
+  clip-path: inset(0 round 7px);
   transition: background-color 100ms linear;
   .detail {
     width: 100%;
-    backdrop-filter: blur(8px);
+    /*backdrop-filter: blur(0px);*/
   }
   .textContainer {
     display: flex;

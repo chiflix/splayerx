@@ -175,7 +175,7 @@ export default {
       speedChosen: false,
       rightArrowSub: false,
       rightArrowMed: false,
-      preStyle: 'linear-gradient(-90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 35%,rgba(255,255,255,0.00) 98%)',
+      preStyle: 'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%)',
       hoverIndex: -1,
       readyShow: 'mainMenu',
 

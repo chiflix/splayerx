@@ -2,7 +2,7 @@
   <div class="itemContainer"
        :style="{
          height: heightSize,
-         backgroundColor: height === 37 ? '' : 'rgba(255, 255, 255, 0.12)',
+         backgroundImage: height === 37 ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
        }">
       <div class="detail"
            :style="{
@@ -146,7 +146,6 @@ export default {
     transition: height 100ms linear, background-color 100ms linear;
     .detail {
       width: 100%;
-      backdrop-filter: blur(8px);
     }
     .textContainer {
       display: flex;
