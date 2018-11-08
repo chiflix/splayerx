@@ -1,13 +1,13 @@
 <template>
   <div class="itemContainer"
-       :style="{
-       height: heightSize,
-       backgroundImage: height === 37 ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
-       }">
-
-    <div class="detail" :style="{
+    :style="{
       height: heightSize,
+      backgroundImage: height === 37 ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
     }">
+    <div class="detail"
+      :style="{
+        height: heightSize,
+      }">
     <div class="textContainer"
       :style="{
         color: color,
@@ -71,14 +71,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .leftItem {
-    letter-spacing: 0.2px;
-    margin-top: 1px;
-    font-size: 13px;
-  }
-  .rightItem {
-    font-size: 11px;
-  }
 .itemContainer {
   position: absolute;
   width: 170px;
@@ -100,6 +92,9 @@ export default {
     .textItem {
       letter-spacing: 0.2px;
       margin: auto auto auto 0;
+    }
+    .rightItem {
+      font-size: 11px;
     }
   }
   .listContainer {
@@ -142,35 +137,33 @@ export default {
   }
 }
 
-
-  .detail-enter-active {
-    animation: show 100ms;
-  }
-  .detail-enter, .detail-leave-to {
+.detail-enter-active {
+  animation: show 100ms;
+}
+.detail-enter, .detail-leave-to {
+  opacity: 0;
+}
+.detail-leave-active {
+  animation: hide 100ms;
+}
+@keyframes show {
+  0% {
     opacity: 0;
+    height: 0px;
   }
-  .detail-leave-active {
-    animation: hide 100ms;
+  100% {
+    opacity: 1;
+    height: 37px;
+   }
+}
+@keyframes hide {
+  0% {
+    opacity: 1;
+    height: 37px;
   }
-
-  @keyframes show {
-    0% {
-      opacity: 0;
-      height: 0px;
-    }
-    100% {
-      opacity: 1;
-      height: 37px;
-    }
+  100% {
+    opacity: 0;
+    height: 0px;
   }
-  @keyframes hide {
-    0% {
-      opacity: 1;
-      height: 37px;
-    }
-    100% {
-      opacity: 0;
-      height: 0px;
-    }
-  }
+}
 </style>

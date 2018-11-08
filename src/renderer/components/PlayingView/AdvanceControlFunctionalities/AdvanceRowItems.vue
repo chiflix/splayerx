@@ -1,48 +1,47 @@
 <template>
   <div class="itemContainer"
-       :style="{
-       height: heightSize,
-       backgroundImage: height === 37 ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
-     }">
-    <div class="detail"
-         :style="{
+    :style="{
       height: heightSize,
+      backgroundImage: height === 37 ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
     }">
-    <div class="textContainer"
+    <div class="detail"
       :style="{
-        color: color,
-        transition: 'color 300ms',
+        height: heightSize,
       }">
-      <div class="textItem">{{ item }}</div>
-      <div class="rightItem" v-show="height === 37">{{ showDetail }}</div>
-    </div>
-
-      <transition name="detail">
-    <div class="listContainer" v-show="height === 74">
-      <div class="rowContainer">
-        <div v-for="(list, index) in lists"
-          :id="'list'+index"
-          :class="rowNumDetail"
-          @mouseover="handleOver(index)"
-          @mouseout="handleOut(index)"
-          @click="handleClick(index)"
-             :style="{
-              width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`}">
-          <div class="text"
-            :style="{
-              color: list.chosen || index === hoverIndex ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
-              margin: 'auto',
-          }">{{ list[0] }}</div>
-          <div :class="cardType" v-show="list.chosen"
-            :style="{
-              width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`,
-            }"></div>
-        </div>
+      <div class="textContainer"
+        :style="{
+          color: color,
+          transition: 'color 300ms',
+        }">
+        <div class="textItem">{{ item }}</div>
+        <div class="rightItem" v-show="height === 37">{{ showDetail }}</div>
       </div>
-    </div>
+      <transition name="detail">
+        <div class="listContainer" v-show="height === 74">
+          <div class="rowContainer">
+            <div v-for="(list, index) in lists"
+              :id="'list'+index"
+              :class="rowNumDetail"
+              @mouseover="handleOver(index)"
+              @mouseout="handleOut(index)"
+              @click="handleClick(index)"
+              :style="{
+                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`
+              }">
+              <div class="text"
+                :style="{
+                  color: list.chosen || index === hoverIndex ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
+                  margin: 'auto',
+                }">{{ list[0] }}</div>
+              <div :class="cardType" v-show="list.chosen"
+                :style="{
+                  width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`,
+                }"></div>
+            </div>
+          </div>
+        </div>
       </transition>
-  </div>
-
+    </div>
   </div>
 </template>
 
@@ -190,7 +189,6 @@ export default {
       font-size: 11px;
       margin: auto 0 auto auto;
     }
-
   }
   .listContainer {
     flex: 1;
@@ -237,35 +235,34 @@ export default {
     }
   }
 }
+.detail-enter-active {
+  animation: show 100ms;
+}
+.detail-enter, .detail-leave-to {
+  opacity: 0;
+}
+.detail-leave-active {
+  animation: hide 100ms;
+}
 
-  .detail-enter-active {
-    animation: show 100ms;
-  }
-  .detail-enter, .detail-leave-to {
+@keyframes show {
+  0% {
     opacity: 0;
+    height: 0px;
   }
-  .detail-leave-active {
-    animation: hide 100ms;
+  100% {
+    opacity: 1;
+    height: 37px;
   }
-
-  @keyframes show {
-    0% {
-      opacity: 0;
-      height: 0px;
-    }
-    100% {
-      opacity: 1;
-      height: 37px;
-    }
+}
+@keyframes hide {
+  0% {
+    opacity: 1;
+    height: 37px;
   }
-  @keyframes hide {
-    0% {
-      opacity: 1;
-      height: 37px;
-    }
-    100% {
-      opacity: 0;
-      height: 0px;
-    }
+  100% {
+    opacity: 0;
+    height: 0px;
   }
+}
 </style>

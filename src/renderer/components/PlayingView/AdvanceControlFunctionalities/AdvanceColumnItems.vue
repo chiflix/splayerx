@@ -68,64 +68,62 @@ export default {
 <style lang="scss" scoped>
 ::-webkit-scrollbar {
   width: 3px;
-  height: 42+px;
 }
 ::-webkit-scrollbar-thumb {
   border-radius: 1.2px;
   border: 0.5px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.15);
 }
-  .itemContainer {
-    position: absolute;
-    width: 170px;
+.itemContainer {
+  position: absolute;
+  width: 170px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 7px;
+  z-index: 10;
+  background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%);
+  clip-path: inset(0 round 8px);
+  .textContainer {
     display: flex;
-    flex-direction: column;
-    border-radius: 7px;
-    z-index: 10;
-    background-image: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%);
-    clip-path: inset(0 round 8px);
-    .textContainer {
-      display: flex;
-      height: 37px;
-      font-size: 13px;
-      margin: auto auto auto 17px;
-      color: rgba(255, 255, 255, 0.6);
-      .textItem {
-        letter-spacing: 0.2px;
-        margin: auto;
-      }
+    height: 37px;
+    font-size: 13px;
+    margin: auto auto auto 17px;
+    color: rgba(255, 255, 255, 0.6);
+    .textItem {
+      letter-spacing: 0.2px;
+      margin: auto;
     }
-    .listContainer {
-      width: 165px;
-      .columnContainer {
+  }
+  .listContainer {
+    width: 165px;
+    .columnContainer {
+      display: flex;
+      flex-direction: column;
+      .columnNumDetail {
+        position: relative;
         display: flex;
-        flex-direction: column;
-        .columnNumDetail {
-          position: relative;
-          display: flex;
-          width: 136px;
-          height: 27px;
-          margin: 0 auto 7px 17px;
-          .text {
-            line-height: 12px;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.4);
-            margin-top: 7.5px;
-            margin-left: 10px;
-          }
+        width: 136px;
+        height: 27px;
+        margin: 0 auto 7px 17px;
+        .text {
+          line-height: 12px;
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.4);
+          margin-top: 7.5px;
+          margin-left: 10px;
         }
-        .card {
-          position: absolute;
-          z-index: -1;
-          width: 136px;
-          height: 27px;
-          border-radius: 7px;
-          opacity: 0.4;
-          border: 0.5px solid rgba(255, 255, 255, 0.20);
-          background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
-        }
+      }
+      .card {
+        position: absolute;
+        z-index: -1;
+        width: 136px;
+        height: 27px;
+        border-radius: 7px;
+        opacity: 0.4;
+        border: 0.5px solid rgba(255, 255, 255, 0.20);
+        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
       }
     }
   }
-
+}
 </style>
