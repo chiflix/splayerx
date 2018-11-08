@@ -11,6 +11,7 @@
     <div class="textContainer"
       :style="{
         color: color,
+        transition: 'color 300ms',
       }">
       <div class="textItem">{{ item }}</div>
       <div class="rightItem" v-show="height === 37"><img :src="ChosenColor"></div>
@@ -19,7 +20,7 @@
           <div class="listContainer" v-show="height === 74">
       <div class="rowContainer">
         <div class="imgContainer" v-for="(img, index) in imgs">
-          <img :src="img.selected ? imgsSelected[index] : img" class="imgType" @mouseover="handleOver(index)" @mouseout="handleOut()"
+          <img :src="img.selected ? imgsSelected[index] : img" class="imgType" @mouseover="handleOver(index)" @mouseout="handleOut"
           @click.left="handleClick($event, index)">
           <div class="hoverShadow" v-show="index === hoverIndex"></div>
         </div>
@@ -31,7 +32,6 @@
 </template>
 
 <script>
-import BaseInfoCard from '../InfoCard';
 import style0 from '../../../assets/subtitle-style1-normal.png';
 import style1 from '../../../assets/subtitle-style2-normal.png';
 import style2 from '../../../assets/subtitle-style3-normal.png';
@@ -86,10 +86,9 @@ export default {
           return style0;
       }
     },
-
   },
-  components: {
-    'base-info-card': BaseInfoCard,
+  mounted() {
+    this.$set(this.imgs[0], 'selected', true);
   },
   methods: {
     handleOver(index) {

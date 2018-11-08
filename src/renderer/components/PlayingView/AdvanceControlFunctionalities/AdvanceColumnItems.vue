@@ -10,15 +10,17 @@
       }">
       <div class="columnContainer">
         <div v-for="(track, index) in tracks"
-             class="columnNumDetail"
-             @mouseover="handleOver(index)"
-             @mouseout="handleOut(index)"
-             @click="handleClick(index)">
+          class="columnNumDetail"
+          @mouseover="handleOver(index)"
+          @mouseout="handleOut(index)"
+          @click="handleClick(index)">
           <div class="text"
-               :style="{
-              color: index === hoverIndex || track.chosen === true ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
-          }">{{ `音轨 ${index+1} : ${track[0]}` }}</div>
-          <base-info-card class="card" v-show="index === hoverIndex"></base-info-card>
+            :style="{
+              color: index === hoverIndex || track.chosen  ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
+              transition: 'color 300ms',
+            }">{{ `音轨 ${index+1} : ${track[0]}` }}
+          </div>
+          <div class="card" v-show="track.chosen"></div>
         </div>
       </div>
     </div>
@@ -26,7 +28,6 @@
 </template>
 
 <script>
-import BaseInfoCard from '../InfoCard';
 export default {
   name: 'AdvanceColumnItems',
   data() {
@@ -43,9 +44,6 @@ export default {
     tracks() {
       return this.$store.getters.track;
     },
-  },
-  components: {
-    'base-info-card': BaseInfoCard,
   },
   methods: {
     handleOver(index) {
@@ -117,9 +115,14 @@ export default {
           }
         }
         .card {
+          position: absolute;
           z-index: -1;
           width: 136px;
           height: 27px;
+          border-radius: 7px;
+          opacity: 0.4;
+          border: 0.5px solid rgba(255, 255, 255, 0.20);
+          background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
         }
       }
     }

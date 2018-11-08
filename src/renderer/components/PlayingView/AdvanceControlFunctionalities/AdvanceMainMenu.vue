@@ -16,7 +16,7 @@
       :style="{
         height: speedChosen ? '74px' : '37px',
         transition: 'height 100ms linear',
-         backgroundImage: speedChosen ? '' : hoverIndex === 1 ? preStyle : '',
+        backgroundImage: speedChosen ? '' : hoverIndex === 1 ? preStyle : '',
       }">
       <advance-row-items :lists="numList" :item="itemSpeedName" :height="speedChosen ? 74 : 37" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
     </div>
@@ -30,6 +30,7 @@
       <div class="item2"
         :style="{
           color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+          transition: 'color 300ms',
         }">
         <div>字幕设置</div>
         <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
@@ -45,6 +46,7 @@
       <div class="item3"
         :style="{
           color: hoverIndex === 3 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+          transition: 'color 300ms',
         }">
         <div>音频选项</div>
         <Icon type="rightArrow" v-show="hoverIndex === 3"></Icon>
@@ -129,7 +131,7 @@
          :style="{
           height: showDelay ? '74px' : '37px',
           transition: 'height 100ms linear',
-           backgroundImage: showDelay ? '' : hoverAudioIndex === 1 ? preStyle : '',
+          backgroundImage: showDelay ? '' : hoverAudioIndex === 1 ? preStyle : '',
         }">
         <advance-selected-items :item="audioDelayName" :height="showDelay ? 74 : 37" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
     </div>
@@ -139,12 +141,13 @@
          :style="{
           height: showTrack ? `${trackHeight}px` : '37px',
           transition: 'height 100ms linear',
-           backgroundImage: showTrack ? '' : hoverAudioIndex === 2 ? preStyle : '',
+          backgroundImage: showTrack ? '' : hoverAudioIndex === 2 ? preStyle : '',
         }">
       <transition name="audioTransIn">
         <div class="item2" v-show="!showTrack || trackNum === 1"
              :style="{
             color: hoverAudioIndex === 2 && !showTrack ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+            transition: 'color 300ms',
           }">
           <div>切换轨道</div>
           <div>音轨 1</div>
@@ -344,16 +347,6 @@ export default {
     display: flex;
     width: 170px;
     margin-top: 8px;
-    -webkit-transition: background-image 2s;
-    .item1 {
-      font-size: 13px;
-      line-height: 14px;
-      margin: auto;
-      width: 136px;
-      height: 13px;
-      display: flex;
-      justify-content: space-between;
-    }
   }
   .subtitleControl {
     display: flex;

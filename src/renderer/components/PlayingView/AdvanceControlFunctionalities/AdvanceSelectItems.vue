@@ -11,6 +11,7 @@
     <div class="textContainer"
       :style="{
         color: color,
+        transition: 'color 300ms',
       }">
       <div class="textItem">{{ item }}</div>
       <div class="rightItem"></div>
@@ -19,7 +20,9 @@
         <div class="listContainer" v-show="height === 74">
          <div class="rowContainer">
            <Icon type="minus" class="decrease" @click.left.native="handleDecrease"></Icon>
-           <base-info-card class="card"><div class="delay">{{ delayNum }}</div></base-info-card>
+           <div class="card">
+             <div class="delay">{{ delayNum }}</div>
+           </div>
            <Icon type="plus" class="increase" @click.left.native="handleIncrease"></Icon>
           </div>
         </div>
@@ -30,7 +33,6 @@
 
 <script>
 import Icon from '../../BaseIconContainer.vue';
-import BaseInfoCard from '../InfoCard';
 export default {
   name: 'AdvanceSelectItems',
   data() {
@@ -56,7 +58,6 @@ export default {
   },
   components: {
     Icon,
-    'base-info-card': BaseInfoCard,
   },
   methods: {
     handleDecrease() {
@@ -107,14 +108,19 @@ export default {
     height: 37px;
     .rowContainer {
       display: flex;
-      justify-content: space-around;
+      justify-content: center;
       width: 137px;
       height: 27px;
       margin: -2px auto;
       .card {
+        display: flex;
         width: 41px;
         height: 27px;
         margin-right: 10px;
+        border-radius: 7px;
+        opacity: 0.4;
+        border: 0.5px solid rgba(255, 255, 255, 0.20);
+        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
         .delay{
           font-size: 11px;
           color: rgba(255, 255, 255, 0.6);

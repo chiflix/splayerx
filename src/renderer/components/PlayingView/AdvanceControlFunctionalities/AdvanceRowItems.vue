@@ -11,6 +11,7 @@
     <div class="textContainer"
       :style="{
         color: color,
+        transition: 'color 300ms',
       }">
       <div class="textItem">{{ item }}</div>
       <div class="rightItem" v-show="height === 37">{{ showDetail }}</div>
@@ -32,10 +33,10 @@
               color: list.chosen || index === hoverIndex ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
               margin: 'auto',
           }">{{ list[0] }}</div>
-          <base-info-card :class="cardType" v-show="index === hoverIndex"
+          <div :class="cardType" v-show="list.chosen"
             :style="{
               width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`,
-            }"></base-info-card>
+            }"></div>
         </div>
       </div>
     </div>
@@ -48,7 +49,6 @@
 <script>
 import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
-import BaseInfoCard from '../InfoCard';
 export default {
   name: 'AdvanceRowItems',
   data() {
@@ -118,9 +118,6 @@ export default {
       }
     },
   },
-  components: {
-    'base-info-card': BaseInfoCard,
-  },
   methods: {
     handleOver(index) {
       this.hoverIndex = index;
@@ -173,7 +170,7 @@ export default {
   border-radius: 7px;
   z-index: 10;
   clip-path: inset(0 round 8px);
-  transition: height 100ms linear, background-color 100ms linear;
+  transition: height 100ms linear, background-color 100ms linear, opacity 300ms;
   .detail {
     width: 100%;
   }
@@ -220,17 +217,26 @@ export default {
         margin-top: 7.5px;
       }
       .speedCard {
+        position: absolute;
         z-index: -1;
         height: 27px;
+        border-radius: 7px;
+        opacity: 0.4;
+        border: 0.5px solid rgba(255, 255, 255, 0.20);
+        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
       }
       .fontCard {
+        position: absolute;
         z-index: -1;
         height: 27px;
+        border-radius: 7px;
+        opacity: 0.4;
+        border: 0.5px solid rgba(255, 255, 255, 0.20);
+        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
       }
     }
   }
 }
-
 
   .detail-enter-active {
     animation: show 100ms;
