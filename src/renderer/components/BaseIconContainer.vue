@@ -153,6 +153,11 @@ export default {
   height: 12px;
 }
 
+.playlistplay {
+  width: 10px;
+  height: 10px;
+}
+
 .play, .pause {
   @media screen and (max-width: 512px) {
     width: 49px;
