@@ -8,12 +8,12 @@
       :style="{
         height: heightSize,
       }">
-      <div class="textContainer"
-        :style="{
-          color: color,
-          transition: 'color 300ms',
-        }">
-        <div class="textItem">{{ item }}</div>
+      <div class="textContainer">
+        <div class="textItem"
+          :style="{
+            color: color,
+            transition: 'color 300ms',
+          }">{{ item }}</div>
         <div class="rightItem" v-show="height === 37">{{ showDetail }}</div>
       </div>
       <transition name="detail">
@@ -116,6 +116,9 @@ export default {
           return '默认';
       }
     },
+  },
+  mounted() {
+    this.$set(this.lists[1], 'chosen', true);
   },
   methods: {
     handleOver(index) {

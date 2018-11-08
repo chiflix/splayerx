@@ -10,6 +10,7 @@ export const Video = {
   PLAY_VIDEO: 'PLAY_VIDEO',
   PAUSE_VIDEO: 'PAUSE_VIDEO',
   META_INFO: 'META_INFO',
+  UPDATE_DELAY: 'UPDATE_DELAY',
 };
 
 export const Subtitle = {

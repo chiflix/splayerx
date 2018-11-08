@@ -7,7 +7,7 @@
           transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
         }">
         <transition name="setUp">
-          <advance-main-menu class="mainMenu"></advance-main-menu>
+          <advance-main-menu class="mainMenu" :clearState="showAttached"></advance-main-menu>
         </transition>
       </div>
       </transition>

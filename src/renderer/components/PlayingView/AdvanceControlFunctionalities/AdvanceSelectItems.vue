@@ -8,13 +8,13 @@
       :style="{
         height: heightSize,
       }">
-    <div class="textContainer"
-      :style="{
-        color: color,
-        transition: 'color 300ms',
-      }">
-      <div class="textItem">{{ item }}</div>
-      <div class="rightItem"></div>
+    <div class="textContainer">
+      <div class="textItem"
+        :style="{
+          color: color,
+          transition: 'color 300ms',
+        }">{{ item }}</div>
+      <div class="rightItem" v-show="height === 37">{{ item === '字幕延迟' ? subtitleDelay : audioDelay }}</div>
     </div>
       <transition name="detail">
         <div class="listContainer" v-show="height === 74">
@@ -32,12 +32,13 @@
 </template>
 
 <script>
+import { Video as videoActions } from '@/store/actionTypes';
 import Icon from '../../BaseIconContainer.vue';
 export default {
   name: 'AdvanceSelectItems',
   data() {
     return {
-      delayNum: 200,
+      delayNum: 0,
     };
   },
   props: {
@@ -55,6 +56,12 @@ export default {
     heightSize() {
       return `${this.height}px`;
     },
+    subtitleDelay() {
+      return `${this.$store.getters.SubtitleDelay} ms`;
+    },
+    audioDelay() {
+      return `${this.$store.getters.AudioDelay} ms`;
+    },
   },
   components: {
     Icon,
@@ -62,9 +69,19 @@ export default {
   methods: {
     handleDecrease() {
       this.delayNum -= 50;
+      if (this.item === '字幕延迟') {
+        this.$store.dispatch('updateSubDelay', -50);
+      } else {
+        this.$store.dispatch(videoActions.UPDATE_DELAY, -50);
+      }
     },
     handleIncrease() {
       this.delayNum += 50;
+      if (this.item === '字幕延迟') {
+        this.$store.dispatch('updateSubDelay', 50);
+      } else {
+        this.$store.dispatch(videoActions.UPDATE_DELAY, 50);
+      }
     },
   },
 };
@@ -88,13 +105,16 @@ export default {
     flex: 1;
     font-size: 13px;
     height: 37px;
+    width: 136px;
     margin: auto auto auto 17px;
     .textItem {
       letter-spacing: 0.2px;
       margin: auto auto auto 0;
     }
     .rightItem {
+      color: rgba(255, 255, 255, 0.6);
       font-size: 11px;
+      margin: auto 0 auto auto;
     }
   }
   .listContainer {

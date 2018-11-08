@@ -42,6 +42,7 @@ const state = {
   computedWidth: 0,
   computedHeight: 0,
   ratio: 0,
+  AudioDelay: 0,
 };
 
 const getters = {
@@ -68,6 +69,7 @@ const getters = {
   computedWidth: state => state.computedWidth,
   computedHeight: state => state.computedHeight,
   ratio: state => state.ratio,
+  AudioDelay: state => state.AudioDelay,
 };
 
 function stateToMutation(stateType) {
@@ -90,6 +92,7 @@ function mutationsGenerator(mutationTypes) {
   Object.keys(mutationTypes).forEach((type) => {
     mutations[type] = mutationer(type);
   });
+  console.log(mutations);
   return mutations;
 }
 
@@ -140,7 +143,6 @@ const actions = {
     commit(mutationTypes.RATE_UPDATE, finalRate < 0 ? 0 : finalRate);
   },
   [actionTypes.CHANGE_RATE]({ commit }, delta) {
-    console.log(delta);
     commit(mutationTypes.RATE_UPDATE, delta);
   },
   [actionTypes.PLAY_VIDEO]({ commit }) {
@@ -161,6 +163,11 @@ const actions = {
       const mutation = stateToMutation(item);
       if (validMetaInfo.includes(item) && mutationTypes[mutation]) commit(mutation, metaInfo[item]);
     });
+  },
+  [actionTypes.UPDATE_DELAY]({ commit }, delta) {
+    const finalDelay = state.AudioDelay + delta;
+    console.log(finalDelay);
+    commit(mutationTypes.DELAY_UPDATE, finalDelay);
   },
 };
 

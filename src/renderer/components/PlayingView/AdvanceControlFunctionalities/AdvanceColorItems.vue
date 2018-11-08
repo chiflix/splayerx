@@ -20,11 +20,10 @@
         <div class="listContainer" v-show="height === 74">
           <div class="rowContainer">
             <div class="imgContainer" v-for="(img, index) in imgs">
-              <img :src="img.selected ? imgsSelected[index] : img" class="imgType"
+              <img :src="img.selected || index === hoverIndex ? imgsSelected[index] : img" class="imgType"
                 @mouseover="handleOver(index)"
                 @mouseout="handleOut"
                 @click.left="handleClick($event, index)">
-                  <div class="hoverShadow" v-show="index === hoverIndex"></div>
             </div>
           </div>
         </div>
@@ -185,17 +184,6 @@ export default {
         width: 100%;
         height: 100%;
         margin-right: 7px;
-      }
-      .hoverShadow {
-        position: relative;
-        width: 7px;
-        height: 7px;
-        left: 30%;
-        bottom: 9px;
-        background-color: rgba(0, 0, 0, 1);
-        border-radius: 3.5px;
-        filter: blur(5px);
-        z-index: -1;
       }
     }
   }

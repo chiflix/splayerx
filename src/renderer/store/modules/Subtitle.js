@@ -8,6 +8,7 @@ const state = {
     border: '',
     background: '',
   },
+  SubtitleDelay: 0,
 };
 
 const getters = {
@@ -15,6 +16,7 @@ const getters = {
   firstSubtitleIndex: state => state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first'),
   subtitleCount: state => state.SubtitleNames.length,
   curStyle: state => state.curStyle,
+  SubtitleDelay: state => state.SubtitleDelay,
 };
 
 const mutations = {
@@ -45,6 +47,9 @@ const mutations = {
   UpdateColor(state, payload) {
     state.curStyle.color = payload;
   },
+  UpdateDelay(state, payload) {
+    state.SubtitleDelay += payload;
+  },
 };
 
 const actions = {
@@ -53,6 +58,9 @@ const actions = {
   },
   updateColor({ commit }, delta) {
     commit('UpdateColor', delta);
+  },
+  updateSubDelay({ commit }, delta) {
+    commit('UpdateDelay', delta);
   },
 };
 

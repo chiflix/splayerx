@@ -5,22 +5,27 @@
     </div>
     <div class="listContainer"
       :style="{
-        overflowY: tracks.length > 2 ? 'scroll' : '',
-        height: tracks.length <= 3 ? `${tracks.length * 37}px` : '111px',
+        height: tracks.length <= 3 ? `${tracks.length * 27 + (tracks.length - 1) * 5 + 14}px` : '105px',
       }">
-      <div class="columnContainer">
-        <div v-for="(track, index) in tracks"
-          class="columnNumDetail"
-          @mouseover="handleOver(index)"
-          @mouseout="handleOut(index)"
-          @click="handleClick(index)">
-          <div class="text"
-            :style="{
-              color: index === hoverIndex || track.chosen  ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
-              transition: 'color 300ms',
-            }">{{ `音轨 ${index+1} : ${track[0]}` }}
+      <div class="scrollScope"
+        :style="{
+          overflowY: tracks.length > 2 ? 'scroll' : '',
+          height: tracks.length <= 3 ? `${tracks.length * 27 + (tracks.length - 1) * 5 + 5}px` : '96px',
+        }">
+        <div class="columnContainer">
+          <div v-for="(track, index) in tracks"
+            class="columnNumDetail"
+            @mouseover="handleOver(index)"
+            @mouseout="handleOut(index)"
+            @click="handleClick(index)">
+            <div class="text"
+              :style="{
+                color: index === hoverIndex || track.chosen  ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
+                transition: 'color 300ms',
+              }">{{ `音轨 ${index+1} : ${track[0]}` }}
+            </div>
+            <div class="card" v-show="track.chosen"></div>
           </div>
-          <div class="card" v-show="track.chosen"></div>
         </div>
       </div>
     </div>
@@ -105,20 +110,19 @@ export default {
         display: flex;
         width: 136px;
         height: 27px;
-        margin: 0 auto 7px 17px;
+        margin: 0 auto 5px 17px;
         .text {
-          line-height: 12px;
+          line-height: 11px;
           font-size: 11px;
           color: rgba(255, 255, 255, 0.4);
-          margin-top: 7.5px;
-          margin-left: 10px;
+          margin: auto auto auto 10px;
         }
       }
       .card {
         position: absolute;
         z-index: -1;
-        width: 136px;
-        height: 27px;
+        width: 135px;
+        height: 26px;
         border-radius: 7px;
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);

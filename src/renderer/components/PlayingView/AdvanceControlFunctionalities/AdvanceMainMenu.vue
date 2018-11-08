@@ -144,13 +144,15 @@
           backgroundImage: showTrack ? '' : hoverAudioIndex === 2 ? preStyle : '',
         }">
         <transition name="audioTransIn">
-          <div class="item2" v-show="!showTrack || trackNum === 1"
-            :style="{
+          <div class="item2" v-show="!showTrack || trackNum === 1">
+            <div :style="{
               color: hoverAudioIndex === 2 && !showTrack ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
-            }">
-            <div>切换轨道</div>
-            <div>音轨 1</div>
+            }">切换轨道</div>
+            <div :style="{
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontSize: '11px'
+            }">音轨 1</div>
           </div>
         </transition>
         <transition name="audioTransOut">
@@ -198,6 +200,24 @@ export default {
       backAudioHover: false,
     };
   },
+  props: {
+    clearState: {
+      type: Boolean,
+    },
+  },
+  watch: {
+    clearState(val) {
+      if (!val) {
+        this.readyShow = 'mainMenu';
+        this.speedChosen = false;
+        this.subSizeChosen = false;
+        this.subColorChosen = false;
+        this.subDelayChosen = false;
+        this.showDelay = false;
+        this.showTrack = false;
+      }
+    },
+  },
   computed: {
     menuCardHeight() {
       return this.speedChosen ? '164px' : '127px';
@@ -231,9 +251,9 @@ export default {
       if (this.trackNum === 1) {
         return 37;
       } else if (this.trackNum >= 2 && this.trackNum <= 3) {
-        return (this.trackNum * 37) + 37;
+        return (this.trackNum * 27) + 14 + ((this.trackNum - 1) * 5);
       }
-      return 148;
+      return 142;
     },
   },
   components: {
