@@ -43,7 +43,7 @@ export default {
 </script>
 
 
-<style>
+<style lang="scss" scoped>
 .icon {
   /* display: none; */
   position: absolute;
