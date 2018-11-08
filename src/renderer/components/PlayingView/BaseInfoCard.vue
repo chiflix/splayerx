@@ -1,22 +1,33 @@
 <template>
-  <div class="container">
+  <div class="container" ref="container">
     <div class="element bottom"><div class="element middle"><div class="element content"><slot></slot></div></div></div>
   </div>
 </template>
 <script>
 export default {
   name: 'base-info-card',
+  props: {
+    borderRadius: {
+      type: Number,
+      default: 1,
+      validator: value => value >= 1 && !Number.isFinite(value),
+    },
+  },
+  mounted() {
+    this.$refs.container.style.setProperty('--border-radius', `${this.borderRadius}px`);
+  },
 };
 </script>
 
 <style lang="scss" scoped>
 .container {
-  border-radius: 1px;
+  --border-radius: 1px;
+  border-radius: var(--border-radius);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
   position: absolute;
   box-sizing: content-box;
   .element {
-    border-radius: 1px;
+    border-radius: var(--border-radius);
     position: absolute;
     box-sizing: inherit;
   }
@@ -26,7 +37,7 @@ export default {
     top: 0;
     background: rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(8px);
-    clip-path: inset(0 round 1px);
+    clip-path: inset(0 round var(--border-radius));
   }
   .middle {
     width: 100%;
