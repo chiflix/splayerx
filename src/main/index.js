@@ -75,6 +75,22 @@ function registerMainWindowEvent() {
     mainWindow.setSize(...args);
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
+
+  function snapShot(path) {
+    return new Promise((resolve) => {
+      require('electron').splayerx.snapshotVideo(path, '00:00:05', () => {
+        resolve();
+      });
+    });
+  }
+
+  ipcMain.on('snapShot', async (event, paths) => {
+    for (let i = 0; i < paths.length; i += 1) {
+      const path = paths[i];
+      await snapShot(path);// eslint-disable-line 
+    }
+    event.sender.send('snapShot-reply', 'done');
+  });
   ipcMain.on('windowPositionChange', (event, args) => {
     mainWindow.setPosition(...args);
     event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());

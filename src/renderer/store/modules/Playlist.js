@@ -21,6 +21,10 @@ const getters = {
     }
     return state.PlayingList;
   },
+  playingIndex: (state, getters) => {
+    const list = state.PlayingList.length > 0 ? state.PlayingList : state.FolderList;
+    return list.findIndex(value => value === getters.originSrc);
+  },
 };
 
 const mutations = {
