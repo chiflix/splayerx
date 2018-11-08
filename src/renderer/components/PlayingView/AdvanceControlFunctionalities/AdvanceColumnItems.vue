@@ -42,7 +42,7 @@ export default {
   },
   computed: {
     tracks() {
-      return this.$store.getters.track;
+      return this.$store.getters.AudioTrackList;
     },
   },
   methods: {
@@ -58,6 +58,7 @@ export default {
           this.$set(this.tracks[ind], 'chosen', false);
         } else {
           this.$set(this.tracks[ind], 'chosen', true);
+          // this.$emit('updateAudioTrack', index);
         }
       });
     },

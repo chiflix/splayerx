@@ -217,7 +217,7 @@ export default {
       return `${this.containerHeight}px`;
     },
     trackNum() {
-      return this.$store.getters.track.length;
+      return this.$store.getters.AudioTrackList.length;
     },
     containerHeight() {
       if (this.trackNum === 1) {

@@ -31,10 +31,9 @@ const state = {
   controls: false,
   volume: 100,
   mute: false,
-  track: [['国语'], ['英语'], ['日语'], ['西班牙语'], ['韩语']],
   defaultMuted: false,
   // tracks
-  AudioTrackList: [],
+  AudioTrackList: [['国语'], ['英语'], ['日语'], ['西班牙语'], ['韩语']],
   VideoTrackList: [],
   TextTrackList: [],
   // meta info
@@ -62,7 +61,7 @@ const getters = {
   volume: state => state.volume / 100,
   mute: state => state.mute,
   rate: state => state.rate,
-  track: state => state.track,
+  AudioTrackList: state => state.AudioTrackList,
   // meta info
   intrinsicWidth: state => state.intrinsicWidth,
   intrinsicHeight: state => state.intrinsicHeight,

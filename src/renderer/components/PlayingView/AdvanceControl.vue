@@ -22,15 +22,11 @@
 import lottie from '@/components/lottie.vue';
 import * as animationData from '@/assets/advance.json';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
-import AdvanceSubtitleSetup from './AdvanceControlFunctionalities/AdvanceSubtitleSetup';
-import AdvanceAudioItems from './AdvanceControlFunctionalities/AdvanceAudioItems';
 export default {
   name: 'advance-control',
   components: {
     lottie,
     'advance-main-menu': AdvanceMainMenu,
-    'advance-subtitle-setup': AdvanceSubtitleSetup,
-    'advance-audio-items': AdvanceAudioItems,
   },
   props: {
     showAttached: Boolean,
