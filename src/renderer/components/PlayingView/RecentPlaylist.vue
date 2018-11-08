@@ -3,7 +3,8 @@
     @mousedown="handleMousedown">
     <div class="info"
       @mousedown.stop="">
-      <div class="top">{{lastPlayedTime}} / {{duration}} · {{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+      <div class="top">{{lastPlayedTime}} / 
+      <span>{{timecodeFromSeconds(duration)}}</span>&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
       <div class="file-name">{{filename}}</div>
     </div>
     <div class="playlist-items"
@@ -14,13 +15,17 @@
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
         :index="index"
         :path="item"
-        :isPlaying="item === currentSrc"
+        :isInRange="index >= firstIndex && index <= lastIndex"
+        :isPlaying="index === playingIndex"
         :winWidth="winWidth"
+        :isShifting="shifting"
         :DBInfo="itemInfos[index]"
+        :DBloaded="DBloaded"
+        :snapShoted="snapShoted"
         :showVideo="showAttached"
         :thumbnailWidth="thumbnailWidth"
-        @mousedownItem="itemMousedown(index)"
-        @mouseoverItem="itemMouseover(index)"/>
+        @mouseupItem="itemMouseup"
+        @mouseoverItem="itemMouseover"/>
     </div>
   </div>
 </template>
@@ -37,36 +42,51 @@ export default {
   },
   data() {
     return {
-      lastPlayedTime: '44:34',
-      duration: '1:02:33',
-      inWhichSource: '播放列表',
-      indexInPlaylist: 1,
-      numberOfPlaylistItem: 24,
-      filename: '[h龙].Red.Dragon.2002.BluRay.720p.x264.AC3-CMCT',
       itemInfos: [],
+      filename: '',
       firstIndex: 0, // first index of current page
       chosenIndex: 0,
+      shifting: false,
+      snapShoted: false,
+      DBloaded: false,
     };
   },
   mounted() {
     this.searchInfoDB();
+    this.snapshot();
   },
   methods: {
+    snapshot() {
+      this.$electron.ipcRenderer.send('snapShot', this.playingList);
+      this.$electron.ipcRenderer.once('snapShot-reply', () => {
+        this.snapShoted = true;
+      });
+    },
     handleMousedown() {
       console.log('you click me!');
     },
     itemMouseleave() {
-      this.chosenIndex = -1;
     },
-    itemMouseover(index) {
-      this.chosenIndex = index;
+    itemMouseover(payload) {
+      this.chosenIndex = payload.index;
+      this.filename = payload.filename;
     },
-    itemMousedown(index) {
+    itemMouseup(index) {
       // last page
       if (index === this.firstIndex - 1) {
         this.lastIndex = index;
+        this.shifting = true;
+        setTimeout(() => {
+          this.shifting = false;
+        }, 400);
       } else if (index === this.lastIndex + 1) { // next page
         this.firstIndex = index;
+        this.shifting = true;
+        setTimeout(() => {
+          this.shifting = false;
+        }, 400);
+      } else if (index !== this.playingIndex) {
+        this.openFile(this.playingList[index]);
       }
     },
     async searchInfoDB() {
@@ -77,6 +97,7 @@ export default {
       }
       const resArray = await Promise.all(waitArray);
       this.itemInfos = resArray;
+      this.DBloaded = true;
     },
   },
   watch: {
@@ -85,9 +106,44 @@ export default {
         this.lastIndex = this.maxIndex;
       }
     },
+    playingIndex(val) {
+      if (val > this.lastIndex) {
+        this.firstIndex = val;
+      } else if (val < this.firstIndex) {
+        this.lastIndex = val;
+      }
+    },
   },
   computed: {
-    ...mapGetters(['playingList', 'isFolderList', 'winWidth']),
+    ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex']),
+    inWhichSource() {
+      if (this.isFolderList) {
+        return '文件夹';
+      }
+      return '播放列表';
+    },
+    lastPlayedTime() {
+      if (this.itemInfos[this.chosenIndex]) {
+        if (this.itemInfos[this.chosenIndex].lastPlayedTime) {
+          return this.timecodeFromSeconds(this.itemInfos[this.chosenIndex].lastPlayedTime);
+        }
+      }
+      return '00:00';
+    },
+    duration() {
+      if (this.itemInfos[this.chosenIndex]) {
+        if (this.itemInfos[this.chosenIndex].duration) {
+          return this.itemInfos[this.chosenIndex].duration;
+        }
+      }
+      return 0;
+    },
+    indexInPlaylist() {
+      return this.chosenIndex + 1;
+    },
+    numberOfPlaylistItem() {
+      return this.playingList.length;
+    },
     // last index of current page
     lastIndex: {
       get() {
@@ -155,7 +211,7 @@ export default {
     margin: 53px 41px 0px 0px;
     padding-left: 40px;
     height: 44px;
-    width: fit-content;
+    width: 90%;
     .top {
       margin-top: 1px;
       opacity: 0.4;
@@ -164,16 +220,20 @@ export default {
       color: #FFFFFF;
       letter-spacing: 0.64px;
       line-height: 13px;
-      width: fit-content;
+      width: max-content;
     }
     .file-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
       margin-top: 9px;
       font-family: Avenir-Heavy;
       font-size: 18px;
       color: rgba(255,255,255,0.70);
       letter-spacing: 1px;
       line-height: 20px;
-      width: fit-content;
+      width: 100%;
     }
   }
   .playlist-items {
