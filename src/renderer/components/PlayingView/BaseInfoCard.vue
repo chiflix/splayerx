@@ -12,9 +12,15 @@ export default {
       default: 1,
       validator: value => value >= 1 && !Number.isFinite(value),
     },
+    contentMinWidth: {
+      type: Number,
+      default: 1,
+      validator: value => value >= 1 && !Number.isFinite(value),
+    },
   },
   mounted() {
     this.$refs.container.style.setProperty('--border-radius', `${this.borderRadius}px`);
+    this.$refs.container.style.setProperty('--content-min-width', `${this.contentMinWidth}px`);
   },
 };
 </script>
@@ -22,6 +28,8 @@ export default {
 <style lang="scss" scoped>
 .container {
   --border-radius: 1px;
+  --content-min-width: 20px;
+  min-width: calc(var(--content-min-width) + 2px);
   border-radius: var(--border-radius);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
   position: absolute;
@@ -32,6 +40,7 @@ export default {
     box-sizing: inherit;
   }
   .bottom {
+    min-width: calc(var(--content-min-width) + 2px);
     width: 100%;
     height: 100%;
     top: 0;
@@ -40,12 +49,14 @@ export default {
     clip-path: inset(0 round var(--border-radius));
   }
   .middle {
+    min-width: calc(var(--content-min-width) + 2px);
     width: 100%;
     height: 100%;
     top: 0;
     background: rgba(255, 255, 255, 0.2);
   }
   .content {
+    min-width: var(--content-min-width);
     width: calc(100% - 2px);
     height: calc(100% - 2px);
     top: 1px;
