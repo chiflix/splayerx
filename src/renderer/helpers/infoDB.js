@@ -65,7 +65,7 @@ class InfoDB {
    * Replace a record if the given quickHash existed
    */
   static add(schema, data) {
-    console.log('adding');
+    console.log(`adding ${data.path} to ${schema}`);
     return idb.open('Info').then((db) => {
       const tx = db.transaction(schema, 'readwrite');
       tx.objectStore(schema).put(data);
