@@ -33,8 +33,8 @@
                 }">
                 <Icon type="playlistplay" class="playlist-play"
                 :style="{
-                  width: winWidth > 1355 ? '0.73vw' : '10px;',
-                  width: winWidth > 1355 ? '0.73vw' : '10px;',
+                  width: winWidth > 1355 ? '0.73vw' : '10px',
+                  width: winWidth > 1355 ? '0.73vw' : '10px',
                 }"/>
                 <div class="playing"
                 :style="{
