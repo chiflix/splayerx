@@ -40,6 +40,11 @@ app.on('second-instance', () => {
 function handleBossKey() {
   if (mainWindow !== null) {
     if (mainWindow.isVisible()) {
+      if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
+        mainWindow.once('leave-full-screen', handleBossKey);
+        mainWindow.setFullScreen(false);
+        return;
+      }
       mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
       mainWindow.hide();
       if (process.platform === 'win32') {
