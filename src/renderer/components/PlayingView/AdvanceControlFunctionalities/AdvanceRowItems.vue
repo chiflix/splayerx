@@ -32,12 +32,14 @@
                 :style="{
                   color: list.chosen || index === hoverIndex ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
                   margin: 'auto',
+                  transition: 'color 300ms',
                 }">{{ list[0] }}</div>
-              <div :class="cardType" v-show="list.chosen"
-                :style="{
-                  width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`,
-                }"></div>
             </div>
+            <div :class="cardType" :style="{
+              width: `${cardWidth}px`,
+              left: `${moveLength}px`,
+              transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
+            }"></div>
           </div>
         </div>
       </transition>
@@ -53,6 +55,8 @@ export default {
   data() {
     return {
       hoverIndex: -1,
+      moveLength: this.item === '播放速度' ? 46 : 49,
+      cardWidth: this.item === '播放速度' ? 24 : 34,
     };
   },
   props: {
@@ -128,6 +132,12 @@ export default {
       this.hoverIndex = -1;
     },
     handleClick(index) {
+      this.calculateWidth(index);
+      if (this.item === '播放速度') {
+        this.calculateSpeedLength(index);
+      } else {
+        this.calculateFontLength(index);
+      }
       this.lists.forEach((i, ind) => {
         if (ind !== index) {
           this.$set(this.lists[ind], 'chosen', false);
@@ -138,26 +148,81 @@ export default {
       if (this.item === '播放速度') {
         this.$store.dispatch(videoActions.CHANGE_RATE, this.lists[index][0]);
       } else if (this.item === '字体大小') {
-        switch (index) {
-          case 0:
-            this.$store.dispatch('updateFontSize', 3);
-            this.$bus.$emit('sub-style-change', { fontSize: 3 });
-            break;
-          case 1:
-            this.$store.dispatch('updateFontSize', 5);
-            this.$bus.$emit('sub-style-change', { fontSize: 5 });
-            break;
-          case 2:
-            this.$store.dispatch('updateFontSize', 8);
-            this.$bus.$emit('sub-style-change', { fontSize: 8 });
-            break;
-          case 3:
-            this.$store.dispatch('updateFontSize', 10);
-            this.$bus.$emit('sub-style-change', { fontSize: 10 });
-            break;
-          default:
-            break;
+        this.changeFontSize(index);
+      }
+    },
+    calculateWidth(index) {
+      if (this.item === '播放速度') {
+        if (index === 1 || index === 4) {
+          this.cardWidth = 24;
+        } else {
+          this.cardWidth = 28;
         }
+      } else if (index === 1 || index === 3) {
+        this.cardWidth = 34;
+      } else {
+        this.cardWidth = 28;
+      }
+    },
+    calculateSpeedLength(index) {
+      switch (index) {
+        case 0:
+          this.moveLength = 17;
+          break;
+        case 1:
+          this.moveLength = 46;
+          break;
+        case 2:
+          this.moveLength = 71;
+          break;
+        case 3:
+          this.moveLength = 100;
+          break;
+        case 4:
+          this.moveLength = 129;
+          break;
+        default:
+          break;
+      }
+    },
+    calculateFontLength(index) {
+      switch (index) {
+        case 0:
+          this.moveLength = 17;
+          break;
+        case 1:
+          this.moveLength = 49;
+          break;
+        case 2:
+          this.moveLength = 86;
+          break;
+        case 3:
+          this.moveLength = 117;
+          break;
+        default:
+          break;
+      }
+    },
+    changeFontSize(index) {
+      switch (index) {
+        case 0:
+          this.$store.dispatch('updateFontSize', 3);
+          this.$bus.$emit('sub-style-change', { fontSize: 3 });
+          break;
+        case 1:
+          this.$store.dispatch('updateFontSize', 5);
+          this.$bus.$emit('sub-style-change', { fontSize: 5 });
+          break;
+        case 2:
+          this.$store.dispatch('updateFontSize', 8);
+          this.$bus.$emit('sub-style-change', { fontSize: 8 });
+          break;
+        case 3:
+          this.$store.dispatch('updateFontSize', 10);
+          this.$bus.$emit('sub-style-change', { fontSize: 10 });
+          break;
+        default:
+          break;
       }
     },
   },
