@@ -173,11 +173,17 @@ if (process.platform === 'darwin') {
 
 app.on('ready', () => {
   app.setName('SPlayerX');
-  globalShortcut.register('CommandOrControl+Shift+I+O+P', () => {
+  globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
     if (mainWindow !== null) {
       mainWindow.openDevTools();
     }
   });
+
+  if (process.platform === 'win32') {
+    globalShortcut.register('CmdOrCtrl+`', () => {
+      handleBossKey();
+    });
+  }
 
   createWindow();
 });
