@@ -1,29 +1,28 @@
 <template>
   <div class="thumbnail-wrapper"
     :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', left: positionOfThumbnail + 'px'}">
-    <div class="thumbnail-background" :style="{width: thumbnailWidth + 2 +'px'}">
-      <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
-        <thumbnail-video-player
-          v-if="mountVideo"
-          v-show="displayVideo"
-          :quickHash="quickHash"
-          :currentTime="videoCurrentTime"
-          :thumbnailWidth="thumbnailWidth"
-          :thumbnailHeight="thumbnailHeight"
-          :outerThumbnailInfo="outerThumbnailInfo"
-          @update-thumbnail-info="updateThumbnailInfo" />
-        <thumbnail-display
-          v-if="mountImage"
-          v-show="!displayVideo"
-          :quickHash="quickHash"
-          :autoGenerationIndex="autoGenerationIndex"
-          :maxThumbnailWidth="maxThumbnailWidth"
-          :currentIndex="currentIndex"
-          :thumbnailWidth="thumbnailWidth"
-          :thumbnailHeight="thumbnailHeight" />
-        <span class="time">{{ videoTime }}</span>
-      </div>
+    <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
+      <thumbnail-video-player
+        v-if="mountVideo"
+        v-show="displayVideo"
+        :quickHash="quickHash"
+        :currentTime="videoCurrentTime"
+        :thumbnailWidth="thumbnailWidth"
+        :thumbnailHeight="thumbnailHeight"
+        :outerThumbnailInfo="outerThumbnailInfo"
+        @update-thumbnail-info="updateThumbnailInfo" />
+      <thumbnail-display
+        v-if="mountImage"
+        v-show="!displayVideo"
+        :quickHash="quickHash"
+        :autoGenerationIndex="autoGenerationIndex"
+        :maxThumbnailWidth="maxThumbnailWidth"
+        :currentIndex="currentIndex"
+        :thumbnailWidth="thumbnailWidth"
+        :thumbnailHeight="thumbnailHeight" />
     </div>
+    <div class="thumbnail-gradient"></div>
+    <span class="time">{{ videoTime }}</span>
   </div>
 </template>
 
@@ -208,25 +207,30 @@ export default {
   bottom: 20px;
   -webkit-app-region: no-drag;
   box-sizing: content-box;
-}
-.thumbnail-background {
-  background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5));
-  border-radius: 1px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 4px;
 }
 .the-preview-thumbnail {
-  position: relative;
-  border: 1px solid transparent;
-  border-radius: 1px;
-  background-clip: padding-box;
-  background-color: #000;
+  position: absolute;
 }
+
+.thumbnail-gradient {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 26%, rgba(0,0,0,0.73) 98%);
+}
+
+
 .time {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 0.2px;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.8px;
+  font-weight: 600;
   @media screen and (max-width: 854px) {
     font-size: 20px;
   }
