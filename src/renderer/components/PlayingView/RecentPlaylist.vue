@@ -1,6 +1,5 @@
 <template>
   <div class="recent-playlist"
-    v-show="showAttached"
     @mousedown.stop="handleMousedown">
     <div class="content">
       <div class="info"

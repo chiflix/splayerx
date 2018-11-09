@@ -29,20 +29,9 @@
                   left: `${side}px`,
                 }">
               <div class="icon-container"
-                v-if="isPlaying"
-                :style="{
-                  bottom: winWidth > 1355 ? '1.03vw' : '14px',
-                }">
-                <Icon type="playlistplay" class="playlist-play"
-                :style="{
-                  width: winWidth > 1355 ? '0.73vw' : '10px',
-                  width: winWidth > 1355 ? '0.73vw' : '10px',
-                }"/>
-                <div class="playing"
-                :style="{
-                  fontSize: winWidth > 1355 ? '0.88vw' : '12px',
-                  lineHeight: winWidth > 1355 ? '0.88vw' : '12px', 
-                }">正在播放</div>
+                v-if="isPlaying">
+                <Icon type="playlistplay" class="playlist-play"/>
+                <div class="playing">正在播放</div>
               </div>
               <transition name="fade">
               <div class="progress"
@@ -243,10 +232,19 @@ export default {
       display: flex;
       flex-direction: row;
       z-index: 100;
+      bottom: 14px;
 
+      @media screen and (min-width: 1355px) {
+        bottom: 1.03vw;
+      }
       .playlist-play {
         height: 22px;
+        width: 10px;
         margin-right: 2px;
+
+        @media screen and (min-width: 1355px) {
+          width: 0.73vw;
+        }
       }
       .playing {
         padding-top: 5px;
@@ -254,6 +252,13 @@ export default {
         font-family: PingFangSC-Semibold;
         color: #FFFFFF;
         letter-spacing: 0.5px;
+        font-size: 12px;
+        line-height: 12px;
+        
+        @media screen and (min-width: 1355px) {
+          font-size: 0.88vw;
+          line-height: 0.88vw;
+        } 
       }
     }
   }
