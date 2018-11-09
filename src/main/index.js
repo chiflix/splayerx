@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, globalShortcut } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, Tray, ipcMain, globalShortcut } from 'electron' // eslint-disable-line
 import WindowResizer from './helpers/windowResizer.js';
 /**
  * Set `__static` path to static files in production
@@ -16,7 +16,8 @@ let startupOpenedFile = cliArgs.length ? cliArgs[0] : null;
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
-let mainWindow;
+let mainWindow = null;
+let tray = null;
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -35,6 +36,28 @@ app.on('second-instance', () => {
     }
   }
 });
+
+function handleBossKey() {
+  if (mainWindow !== null) {
+    if (mainWindow.isVisible()) {
+      if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
+        mainWindow.once('leave-full-screen', handleBossKey);
+        mainWindow.setFullScreen(false);
+        return;
+      }
+      mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
+      mainWindow.hide();
+      if (process.platform === 'win32') {
+        tray = new Tray('build/icons/icon.ico');
+        tray.on('click', () => {
+          mainWindow.show();
+          tray.destroy();
+          tray = null;
+        });
+      }
+    }
+  }
+}
 
 function registerMainWindowEvent() {
   mainWindow.on('resize', () => {
@@ -103,6 +126,9 @@ function registerMainWindowEvent() {
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
+  ipcMain.on('bossKey', () => {
+    handleBossKey();
+  });
 }
 
 function createWindow() {
@@ -163,11 +189,18 @@ if (process.platform === 'darwin') {
 
 app.on('ready', () => {
   app.setName('SPlayerX');
-  globalShortcut.register('CommandOrControl+Shift+I+O+P', () => {
+  globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
     if (mainWindow !== null) {
       mainWindow.openDevTools();
     }
   });
+
+  if (process.platform === 'win32') {
+    globalShortcut.register('CmdOrCtrl+`', () => {
+      handleBossKey();
+    });
+  }
+
   createWindow();
 });
 
@@ -180,5 +213,7 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
+  } else if (!mainWindow.isVisible()) {
+    mainWindow.show();
   }
 });

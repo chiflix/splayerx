@@ -1,10 +1,8 @@
 <template>
   <div class="timing"
     :data-component-name="$options.name"
-    @mousedown="switchStateOfContent">
-        <span class="firstContent" :class="{ remainTime: isRemainTime.first }" v-if="hasDuration">{{ firstContent }}</span>
-        <span class="splitSign">/</span>
-        <span class="secondContent" :class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ secondContent }}</span>
+    @mousedown="switchTimeContent">
+        <span class="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration">{{ timeContent }}</span>
   </div>
 </template>
 <script>
@@ -13,32 +11,18 @@ export default {
   name: 'the-time-codes',
   data() {
     return {
-      contentState: 0,
-      ContentStateEnum: {
-        DEFAULT: 0,
-        CURRENT_REMAIN: 1,
-        REMAIN_DURATION: 2,
-      },
+      isRemainTime: false,
     };
   },
   methods: {
-    switchStateOfContent() {
-      this.contentState = (this.contentState + 1) % 3;
+    switchTimeContent() {
+      this.isRemainTime = !this.isRemainTime;
     },
   },
   computed: {
     ...mapGetters(['roundedCurrentTime', 'duration']),
     hasDuration() {
       return !Number.isNaN(this.duration) && !Number.isNaN(this.roundedCurrentTime);
-    },
-    isRemainTime() {
-      return {
-        first: this.contentState === this.ContentStateEnum.REMAIN_DURATION,
-        second: this.contentState === this.ContentStateEnum.CURRENT_REMAIN,
-      };
-    },
-    convertedDuration() {
-      return this.timecodeFromSeconds(this.duration);
     },
     convertedCurrentTime() {
       return this.timecodeFromSeconds(this.roundedCurrentTime);
@@ -48,13 +32,9 @@ export default {
         = -(this.duration - this.roundedCurrentTime);
       return this.timecodeFromSeconds(remainTime);
     },
-    firstContent() {
-      return this.contentState === this.ContentStateEnum.REMAIN_DURATION ?
+    timeContent() {
+      return this.isRemainTime ?
         this.remainTime : this.convertedCurrentTime;
-    },
-    secondContent() {
-      return this.contentState === this.ContentStateEnum.CURRENT_REMAIN ?
-        this.remainTime : this.convertedDuration;
     },
   },
 };
@@ -66,24 +46,21 @@ export default {
   position: absolute;
   width: auto;
 
-  .firstContent {
+  .timeContent {
     display: inline-block;
     color: rgba(255, 255, 255, 1);
     text-shadow:  0 1px 0 rgba(0,0,0,.1),
                   1px 1px 0 rgba(0,0,0,.1);
-    font-weight: 500;
-    letter-spacing: 0.2px;
+    font-weight: 600;
+    letter-spacing: 0.9px;
     user-select: none;
-  }
-
-  .secondContent {
-    color: rgba(255, 255, 255, 0.5);
   }
 
   .remainTime {
     &::before {
       content: '-';
-      padding-right: 2px;
+      padding-right: 4px;
+      font-weight: 600;
       display: inline-block;
     }
   }
@@ -92,8 +69,8 @@ export default {
     color: rgba(255, 255, 255, 0.5);
   }
 
-  @media screen and (max-width: 854px) {
-    bottom: 17px;
+  @media screen and (max-width: 512px) {
+    bottom: 20px;
     left: 20px;
     height: 18px;
     font-size: 18px;
@@ -105,8 +82,8 @@ export default {
     }
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
-    bottom: 20px;
-    left: 20px;
+    bottom: 24px;
+    left: 28px;
     height: 20px;
     font-size: 18px;
     .secondContent {
@@ -117,8 +94,8 @@ export default {
     }
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
-    bottom: 24px;
-    left: 27px;
+    bottom: 31px;
+    left: 33px;
     height: 24px;
     font-size: 24px;
     .secondContent {
@@ -129,8 +106,8 @@ export default {
     }
   }
   @media screen and (min-width: 1921px) {
-    bottom: 35px;
-    left: 37px;
+    bottom: 44px;
+    left: 51px;
     height: 36px;
     font-size: 36px;
     .secondContent {

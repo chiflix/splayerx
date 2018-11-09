@@ -51,7 +51,6 @@ export default {
 }
 .icon-ani-play {
   animation: ytp-bezel-fadeout2 500ms linear 1 normal forwards;
-  left: 14px;
 }
 @keyframes ytp-bezel-fadeout1 {
   0% {opacity: 1; transform: scale(0.25)};
@@ -66,26 +65,26 @@ export default {
 
 @media screen and (max-width: 512px) {
   .icon {
-    width: 49px;
-    height: 49px;
+    width: 54px;
+    height: 54px;
   }
 }
 @media screen and (min-width: 513px) and (max-width: 854px) {
   .icon {
-    width: 59px;
-    height: 59px;
+    width: 67px;
+    height: 67px;
   }
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
   .icon {
-    width: 79px;
-    height: 79px;
+    width: 93px;
+    height: 93px;
   }
 }
 @media screen and (min-width: 1921px) {
   .icon {
-    width: 109px;
-    height: 108px;
+    width: 129px;
+    height: 129px;
   }
 }
 </style>
