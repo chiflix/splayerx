@@ -50,6 +50,7 @@ export default {
       minimize: '最小化',
       enterFullScreen: '進入全屏',
       bringAllToFront: '前置全部窗口',
+      bossKey: '老板鍵',
     },
     help: {
       name: '幫助',
