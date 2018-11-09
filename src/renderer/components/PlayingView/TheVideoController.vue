@@ -359,7 +359,7 @@ export default {
           this.togglePlayback();
         }
         this.preventSingleClick = false;
-        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['recent-playlist'];
+        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached;
         this.isDragging = false;
       }, this.clicksDelay);
     },
