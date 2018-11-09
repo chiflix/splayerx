@@ -12,6 +12,12 @@
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <notification-bubble/>
+    <transition name="translate">
+    <recent-playlist class="recent-playlist"
+    v-show="displayState['recent-playlist']"
+    v-bind.sync="widgetsStatus['recent-playlist']"
+    @update:showattached="widgetsStatus['playlist-control'].showAttached = $event"/>
+    </transition>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
@@ -37,6 +43,8 @@ import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TheProgressBar from './TheProgressBar';
 import NotificationBubble from '../NotificationBubble.vue';
+import RecentPlaylist from './RecentPlaylist.vue';
+
 export default {
   name: 'the-video-controller',
   components: {
@@ -49,6 +57,7 @@ export default {
     'the-time-codes': TheTimeCodes,
     'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
+    'recent-playlist': RecentPlaylist,
   },
   directives: {
     hidden: {
@@ -262,6 +271,7 @@ export default {
         tempObject[index] = this.showAllWidgets ||
           (!this.showAllWidgets && this.timerState[index]);
       });
+      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
       tempObject['volume-indicator'] = !this.mute ? this.timerState['volume-indicator'] : tempObject['volume-indicator'];
       this.displayState = tempObject;
     },
@@ -276,9 +286,17 @@ export default {
         this.widgetsStatus[name].selected = this.currentSelectedWidget === name;
         if (mousedownChanged) {
           this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name;
+          if (name === 'recent-playlist') {
+            this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name
+              && currentMousedownWidget !== 'playlist-control';
+          }
         }
         if (mouseupChanged) {
           this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== name;
+          if (name === 'recent-playlist') {
+            this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== name
+              && currentMousedownWidget !== 'playlist-control';
+          }
         }
         if (!this.showAllWidgets) {
           this.widgetsStatus[name].showAttached = false;
@@ -299,9 +317,7 @@ export default {
       this.eventInfo.set('mouseenter', { mouseLeavingWindow: false });
     },
     handleMouseleave() {
-      this.eventInfo.set('mouseenter', {
-        mouseLeavingWindow: true,
-      });
+      this.eventInfo.set('mouseenter', { mouseLeavingWindow: true });
     },
     handleMousedownRight() {
       this.eventInfo.set('mousedown', Object.assign(
@@ -359,7 +375,7 @@ export default {
           this.togglePlayback();
         }
         this.preventSingleClick = false;
-        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached;
+        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
         this.isDragging = false;
       }, this.clicksDelay);
     },
@@ -496,6 +512,20 @@ export default {
     rgba(0, 0, 0, 0.19) 62%,
     rgba(0, 0, 0, 0.29) 100%
   );
+}
+.recent-playlist {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000; // in front of all widgets
+}
+
+.translate-enter-active, .translate-leave-active {
+  transition: opacity 300ms cubic-bezier(0.2, 0.3, 0.01, 1), transform 300ms cubic-bezier(0.2, 0.3, 0.01, 1);
+}
+.translate-enter, .translate-leave-to {
+  opacity: 0;
+  transform: translateY(100px);
 }
 .control-buttons {
   display: flex;

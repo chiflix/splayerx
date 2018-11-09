@@ -1,5 +1,5 @@
 <template>
-  <div @mousedown.left="handleDown" @mouseup="handleMouseup" @mouseenter="handleEnter" @mouseleave="handleLeave">
+  <div @mousedown.left="handleDown" @mouseup.left="togglePlaylistDisplay" @mouseenter="handleEnter" @mouseleave="handleLeave">
     <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="playlist"></lottie>
   </div>
 </template>
@@ -29,17 +29,7 @@ export default {
     handleAnimation(anim) {
       this.anim = anim;
     },
-    handleDown() {
-      this.mouseDown = true;
-      this.anim.playSegments([15, 19], false);
-      document.onmouseup = () => {
-        if (this.validEnter) {
-          this.anim.playSegments([47, 51], false);
-        } else if (!this.mousedownOnOther) {
-          this.anim.playSegments([37, 41], false);
-        }
-        this.mouseDown = false;
-      };
+    togglePlaylistDisplay() {
       this.clicks = this.showAttached ? 1 : 0;
       this.clicks += 1;
       switch (this.clicks) {
@@ -55,8 +45,17 @@ export default {
           break;
       }
     },
-    handleMouseup() {
-      this.$bus.$emit('show-recent-playlist');
+    handleDown() {
+      this.mouseDown = true;
+      this.anim.playSegments([15, 19], false);
+      document.onmouseup = () => {
+        if (this.validEnter) {
+          this.anim.playSegments([47, 51], false);
+        } else if (!this.mousedownOnOther) {
+          this.anim.playSegments([37, 41], false);
+        }
+        this.mouseDown = false;
+      };
     },
     handleEnter() {
       if (this.animFlag) {

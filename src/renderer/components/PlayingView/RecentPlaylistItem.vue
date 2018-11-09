@@ -11,8 +11,6 @@
     minHeight: `${thumbnailHeight}px`,
   }">
       <div class="item">
-      <img :src="imageSrc"
-        v-if="!isPlaying"/>
         <div class="blur"
           v-show="!isChosen && !isPlaying"></div>
         <div class="content"
