@@ -12,7 +12,6 @@
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <notification-bubble/>
-    <recent-playlist class="recent-playlist" v-bind.sync="widgetsStatus['playlist-control']"></recent-playlist>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
@@ -38,7 +37,6 @@ import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TheProgressBar from './TheProgressBar';
 import NotificationBubble from '../NotificationBubble.vue';
-import RecentPlaylist from './RecentPlaylist.vue';
 export default {
   name: 'the-video-controller',
   components: {
@@ -51,7 +49,6 @@ export default {
     'the-time-codes': TheTimeCodes,
     'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
-    'recent-playlist': RecentPlaylist,
   },
   directives: {
     hidden: {
@@ -284,9 +281,7 @@ export default {
           this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== name;
         }
         if (!this.showAllWidgets) {
-          if (name !== 'playlist-control') {
-            this.widgetsStatus[name].showAttached = false;
-          }
+          this.widgetsStatus[name].showAttached = false;
         }
       });
     },
@@ -487,12 +482,6 @@ export default {
   border-radius: 4px;
   opacity: 1;
   transition: opacity 400ms;
-}
-.recent-playlist {
-  position: absolute;
-  width: 100%;
-  bottom: 0;
-  z-index: 1000; // in front of all widgets
 }
 .masking {
   position: absolute;

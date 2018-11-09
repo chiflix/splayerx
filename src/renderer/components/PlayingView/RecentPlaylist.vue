@@ -1,32 +1,34 @@
 <template>
   <div class="recent-playlist"
     v-show="showAttached"
-    @mousedown="handleMousedown">
-    <div class="info"
-      @mousedown.stop="">
-      <div class="top">{{lastPlayedTime}} / 
-      <span>{{timecodeFromSeconds(duration)}}</span>&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
-      <div class="file-name">{{filename}}</div>
-    </div>
-    <div class="playlist-items"
-      @mousedown.stop=""
-      :style="{
-        right: `${distance}px`,
-      }">
-      <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
-        :index="index"
-        :path="item"
-        :isInRange="index >= firstIndex && index <= lastIndex"
-        :isPlaying="index === playingIndex"
-        :winWidth="winWidth"
-        :isShifting="shifting"
-        :DBInfo="itemInfos[index]"
-        :DBloaded="DBloaded"
-        :snapShoted="snapShoted"
-        :showVideo="showAttached"
-        :thumbnailWidth="thumbnailWidth"
-        @mouseupItem="itemMouseup"
-        @mouseoverItem="itemMouseover"/>
+    @mousedown.stop="handleMousedown">
+    <div class="content">
+      <div class="info"
+        @mousedown.stop="">
+        <div class="top">{{lastPlayedTime}} / 
+        <span>{{timecodeFromSeconds(duration)}}</span>&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+        <div class="file-name">{{filename}}</div>
+      </div>
+      <div class="playlist-items"
+        @mousedown.stop=""
+        :style="{
+          right: `${distance}px`,
+        }">
+        <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
+          :index="index"
+          :path="item"
+          :isInRange="index >= firstIndex && index <= lastIndex"
+          :isPlaying="index === playingIndex"
+          :winWidth="winWidth"
+          :isShifting="shifting"
+          :DBInfo="itemInfos[index]"
+          :DBloaded="DBloaded"
+          :snapShoted="snapShoted"
+          :showVideo="showAttached"
+          :thumbnailWidth="thumbnailWidth"
+          @mouseupItem="itemMouseup"
+          @mouseoverItem="itemMouseover"/>
+      </div>
     </div>
   </div>
 </template>
@@ -39,9 +41,9 @@ export default {
     RecentPlaylistItem,
   },
   props: {
-    showAttached: Boolean,
-    mousedownOnOther: Boolean,
-    mouseupOnOther: Boolean,
+    showRecentPlaylist: {
+      type: Boolean,
+    },
   },
   data() {
     return {
@@ -66,7 +68,7 @@ export default {
       });
     },
     handleMousedown() {
-      console.log('you click me!');
+      this.$emit('update:showRecentPlaylist', false);
     },
     itemMouseleave() {
     },
@@ -218,6 +220,9 @@ export default {
   background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 0%, #000000 86%);
   @media screen and (max-width: 512px) {
     display: none;
+  }
+  @media screen and (min-width: 512px) {
+    height: fit-content;
   }
   .info {
     margin: 53px 41px 0px 0px;

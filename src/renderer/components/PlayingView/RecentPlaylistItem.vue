@@ -2,11 +2,11 @@
 <BaseInfoCard class="recent-playlist-item"
   :height="thumbnailHeight"
   :width="thumbnailWidth"
-  :borderRadius="3"
+  :borderRadius="4"
   :borderColor="isChosen ? '255,255,255,0.7' : '255,255,255,0.2'"
+  :class="{ chosen: isChosen }"
   :style="{
     cursor: isChosen && !isPlaying ? 'pointer' : '',
-    bottom: isChosen ? '9px' : '0px',
     minWidth: `${thumbnailWidth}px`,
     minHeight: `${thumbnailHeight}px`,
   }">
@@ -18,13 +18,15 @@
         <div class="content"
           @mouseover="mouseoverVideo"
           @mouseout="mouseoutVideo"
-          @mouseup="mouseupVideo">
+          @mouseup="mouseupVideo"
+          :style="{
+            height: isChosen ? `${thumbnailHeight + 9}px` : '100%',
+          }">
             <div class="info"
               :style="{
                   height: `${thumbnailHeight - bottom}px`,
                   width: `${thumbnailWidth - 2 * side}px`,
                   left: `${side}px`,
-                  bottom: `${bottom}px`,
                 }">
               <div class="icon-container"
                 v-if="isPlaying"
@@ -208,21 +210,20 @@ export default {
 <style lang="scss" scoped>
 .recent-playlist-item {
   margin-right: 15px;
-  transition: bottom 100ms ease-out;
+  transition: transform 100ms ease-out;
+}
+.chosen {
+  transform: translateY(-9px);
 }
 .item {
   position: relative;
-  border-radius: 3px;
+  border-radius: 4px;
   width: 100%;
   height: 100%;
   background-color: rgba(255,255,255,0.2);
-  video {
-    position: absolute;
-    border-radius: 3px;
-  }
   img {
     position: absolute;
-    border-radius: 3px;
+    border-radius: 4px;
     width: 100%;
     height: 100%;
     transform: translate(-0.2px, 0px);
@@ -235,6 +236,7 @@ export default {
 
     .info {
       position: absolute;
+      top: 0;
     }
     .icon-container {
       position: absolute;
@@ -288,8 +290,8 @@ export default {
   position: absolute;
   left: 0.35px;
   top: 0.35px;
-  width: calc(100% - 0.7px);
-  height: calc(100% - 0.7px);
+  width: calc(100% - 0.35px);
+  height: calc(100% - 0.35px);
   clip-path: inset(0px round 2px);
   backdrop-filter: blur(1px);
   background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
