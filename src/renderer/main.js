@@ -215,6 +215,13 @@ new Vue({
               },
             },
             { label: this.$t('msg.window_.bringAllToFront'), accelerator: '' },
+            {
+              label: this.$t('msg.window_.bossKey'),
+              accelerator: 'CmdOrCtrl+`',
+              click: () => {
+                this.$electron.ipcRenderer.send('bossKey');
+              },
+            },
           ],
         },
         // menu.help
