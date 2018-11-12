@@ -92,7 +92,6 @@ function mutationsGenerator(mutationTypes) {
   Object.keys(mutationTypes).forEach((type) => {
     mutations[type] = mutationer(type);
   });
-  console.log(mutations);
   return mutations;
 }
 
@@ -166,7 +165,6 @@ const actions = {
   },
   [actionTypes.UPDATE_DELAY]({ commit }, delta) {
     const finalDelay = state.AudioDelay + delta;
-    console.log(finalDelay);
     commit(mutationTypes.DELAY_UPDATE, finalDelay);
   },
 };

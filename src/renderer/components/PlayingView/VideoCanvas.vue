@@ -16,7 +16,6 @@
       :currentTime="seekTime"
       @update:currentTime="updateCurrentTime" />
     <BaseSubtitle/>
-
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
