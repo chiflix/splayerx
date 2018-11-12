@@ -6,7 +6,7 @@
     }">
     <div class="playlist"
       :style="{marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'}">
-      <div class="button"
+      <div class="button no-drag"
         :style="{
           height:`${itemHeight}px`,
           width:`${itemWidth}px`,
