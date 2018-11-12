@@ -299,7 +299,9 @@ export default {
           }
         }
         if (!this.showAllWidgets) {
-          this.widgetsStatus[name].showAttached = false;
+          if (name !== 'playlist-control') {
+            this.widgetsStatus[name].showAttached = false;
+          }
         }
       });
     },
