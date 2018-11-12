@@ -238,8 +238,18 @@ export default {
 }
 .minus, .plus {
   -webkit-app-region: no-drag;
-  width: 11px;
-  height: 11px;
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    width: 11px;
+    height: 11px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 13.2px;
+    height: 13.2px;
+  }
+  @media screen and (min-width: 1921px) {
+    width: 18.48px;
+    height: 18.48px;
+  }
   margin-bottom: 5px;
   .default {
     display: block;
@@ -273,14 +283,41 @@ export default {
     }
   }
 }
-.rightArrow {
-  display: block;
-  width: 13px;
-  height: 13px;
+
+@media screen and (min-width: 513px) and (max-width: 854px) {
+  .rightArrow {
+    display: block;
+    width: 13px;
+    height: 13px;
+  }
+  .leftArrow, .leftArrowHover {
+    display: block;
+    width: 11px;
+    height: 11px;
+  }
 }
-.leftArrow, .leftArrowHover {
-  display: block;
-  width: 11px;
-  height: 11px;
+@media screen and (min-width: 855px) and (max-width: 1920px) {
+  .rightArrow {
+    display: block;
+    width: 15.6px;
+    height: 15.6px;
+  }
+  .leftArrow, .leftArrowHover {
+    display: block;
+    width: 13.2px;
+    height: 13.2px;
+  }
+}
+@media screen and (min-width: 1921px) {
+  .rightArrow {
+    display: block;
+    width: 21.84px;
+    height: 21.84px;
+  }
+  .leftArrow, .leftArrowHover {
+    display: block;
+    width: 18.48px;
+    height: 18.48px;
+  }
 }
 </style>

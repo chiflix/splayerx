@@ -17,11 +17,11 @@
         @mouseenter="handleMouseenter(1)"
         @mouseleave="handleMouseleave()"
         :style="{
-          height: speedChosen ? '74px' : '37px',
+          height: speedHeight,
           transition: 'height 100ms linear',
           backgroundImage: speedChosen ? '' : hoverIndex === 1 ? preStyle : '',
         }">
-        <advance-row-items :lists="numList" :item="itemSpeedName" :height="speedChosen ? 74 : 37" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
+        <advance-row-items :lists="numList" :item="itemSpeedName" :winWidth="winWidth" :isChosen="speedChosen" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleControl"
         @mouseenter="handleMouseenter(2)"
@@ -79,31 +79,31 @@
         @mouseenter="handleSubMouseenter(1)"
         @mouseleave="handleSubMouseleave()"
         :style="{
-          height: subSizeChosen ? '74px' : '37px',
+          height: subSizeHeight,
           transition: 'height 100ms linear',
           backgroundImage: subSizeChosen ? '' : hoverSubIndex === 1 ? preStyle : '',
         }">
-        <advance-row-items :lists="textList" :item="itemFontName" :height="subSizeChosen ? 74 : 37" :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
+        <advance-row-items :lists="textList" :item="itemFontName" :winWidth="winWidth" :isChosen="subSizeChosen" :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleStyle" @click.left="handleColorClick"
         @mouseenter="handleSubMouseenter(2)"
         @mouseleave="handleSubMouseleave()"
         :style="{
-          height: subColorChosen ? '74px' : '37px',
+          height: subColorHeight,
           transition: 'height 100ms linear',
           backgroundImage: subColorChosen ? '' : hoverSubIndex === 2 ? preStyle : '',
         }">
-        <advance-color-items :item="itemColorName" :height="subColorChosen ? 74 : 37" :color="hoverSubIndex === 2 && !subColorChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-color-items>
+        <advance-color-items :item="itemColorName" :winWidth="winWidth" :isChosen="subColorChosen" :color="hoverSubIndex === 2 && !subColorChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-color-items>
       </div>
       <div class="subtitleDelay" @click.left="handleDelayClick"
         @mouseenter="handleSubMouseenter(3)"
         @mouseleave="handleSubMouseleave()"
         :style="{
-          height: subDelayChosen ? '74px' : '37px',
+          height: subDelayHeight,
           transition: 'height 100ms linear',
           backgroundImage: subDelayChosen ? '' : hoverSubIndex === 3 ? preStyle : '',
         }">
-        <advance-selected-items :item="itemDelayName" :height="subDelayChosen ? 74 : 37" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
+        <advance-selected-items :item="itemDelayName" :winWidth="winWidth" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
       </div>
     </div>
   </transition>
@@ -129,17 +129,17 @@
         @mouseenter="handleAudioMouseenter(1)"
         @mouseleave="handleAudioMouseleave()"
         :style="{
-          height: showDelay ? '74px' : '37px',
+          height: audioDelayHeight,
           transition: 'height 100ms linear',
           backgroundImage: showDelay ? '' : hoverAudioIndex === 1 ? preStyle : '',
         }">
-        <advance-selected-items :item="audioDelayName" :height="showDelay ? 74 : 37" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
+        <advance-selected-items :item="audioDelayName" :winWidth="winWidth" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
       </div>
       <div class="changeTrack" @click.left="handleTrackClick"
         @mouseenter="handleAudioMouseenter(2)"
         @mouseleave="handleAudioMouseleave()"
         :style="{
-          height: showTrack ? `${trackHeight}px` : '37px',
+          height: changeTrackHeight,
           transition: 'height 100ms linear',
           backgroundImage: showTrack ? '' : hoverAudioIndex === 2 ? preStyle : '',
         }">
@@ -149,14 +149,15 @@
               color: hoverAudioIndex === 2 && !showTrack ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">切换轨道</div>
-            <div :style="{
+            <div
+              class="trackDetail"
+              :style="{
               color: 'rgba(255, 255, 255, 0.6)',
-              fontSize: '11px'
             }">音轨 1</div>
           </div>
         </transition>
         <transition name="audioTransOut">
-          <advance-column-items :item="itemTrack" v-show="showTrack && trackNum !== 1"></advance-column-items>
+          <advance-column-items :item="itemTrack" :winWidth="winWidth" v-show="showTrack && trackNum !== 1"></advance-column-items>
         </transition>
       </div>
     </div>
@@ -219,22 +220,95 @@ export default {
     },
   },
   computed: {
+    winWidth() {
+      return this.$store.getters.winWidth;
+    },
+    speedHeight() {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return this.speedChosen ? '74px' : '37px';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.speedChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
+      }
+      return this.speedChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+    },
+    subSizeHeight() {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return this.subSizeChosen ? '74px' : '37px';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.subSizeChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
+      }
+      return this.subSizeChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+    },
+    subColorHeight() {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return this.subColorChosen ? '74px' : '37px';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.subColorChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
+      }
+      return this.subColorChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+    },
+    subDelayHeight() {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return this.subDelayChosen ? '74px' : '37px';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.subDelayChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
+      }
+      return this.subDelayChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+    },
+    audioDelayHeight() {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return this.showDelay ? '74px' : '37px';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.showDelay ? `${74 * 1.2}px` : `${37 * 1.2}px`;
+      }
+      return this.showDelay ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+    },
+    changeTrackHeight() {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return this.showTrack ? `${this.trackHeight}px` : '37px';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.showTrack ? `${this.trackHeight * 1.2}px` : `${37 * 1.2}px`;
+      }
+      return this.showTrack ? `${this.trackHeight * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+    },
     menuCardHeight() {
-      return this.speedChosen ? '164px' : '127px';
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return this.speedChosen ? '164px' : '127px';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.speedChosen ? `${164 * 1.2}px` : `${127 * 1.2}px`;
+      }
+      return this.speedChosen ? `${164 * 1.2 * 1.4}px` : `${127 * 1.2 * 1.4}px`;
     },
     subtitleCardHeight() {
-      if (!this.subColorChosen && !this.subSizeChosen && !this.subDelayChosen) {
-        return '156px';
+      if (this.andify(this.winWidth > 514, this.winWidth <= 854)) {
+        return this.andify(this.andify(!this.subColorChosen, !this.subSizeChosen), !this.subDelayChosen) ? '156px' : '193px';
+      } else if (this.andify(this.winWidth > 854, this.winWidth <= 1920)) {
+        return this.andify(this.andify(!this.subColorChosen, !this.subSizeChosen), !this.subDelayChosen) ? `${156 * 1.2}px` : `${193 * 1.2}px`;
       }
-      return '193px';
+      return this.andify(this.andify(!this.subColorChosen, !this.subSizeChosen), !this.subDelayChosen) ? `${156 * 1.2 * 1.4}px` : `${193 * 1.2 * 1.4}px`;
     },
     audioCardHeight() {
-      if (!this.showDelay && !this.showTrack) {
+      if (this.andify(this.winWidth > 514, this.winWidth <= 854)) {
+        if (this.showDelay) {
+          return '156px';
+        } else if (this.showTrack) {
+          return `${this.containerHeight}px`;
+        }
         return '119px';
-      } else if (this.showDelay) {
-        return '156px';
+      } else if (this.andify(this.winWidth > 854, this.winWidth <= 1920)) {
+        if (this.showDelay) {
+          return `${156 * 1.2}px`;
+        } else if (this.showTrack) {
+          return `${this.containerHeight * 1.2}px`;
+        }
+        return `${119 * 1.2}px`;
       }
-      return `${this.containerHeight}px`;
+      if (this.showDelay) {
+        return `${156 * 1.2 * 1.4}px`;
+      } else if (this.showTrack) {
+        return `${this.containerHeight * 1.2 * 1.4}px`;
+      }
+      return `${119 * 1.2 * 1.4}px`;
     },
     trackNum() {
       return this.$store.getters.AudioTrackList.length;
@@ -343,44 +417,161 @@ export default {
       this.showDelay = false;
       this.showTrack = true;
     },
+    orify(...args) {
+      return args.some(arg => arg == true); // eslint-disable-line
+    },
+    andify(...args) {
+      return args.every(arg => arg == true); // eslint-disable-line
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
+@media screen and (min-width: 513px) and (max-width: 854px) {
+  .card {
+    width: 170px;
+  }
+  .playSpeed {
+    width: 170px;
+  }
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .changeTrack {
+    width: 170px;
+    height: 37px;
+  }
+  .item2, .item3 {
+    font-size: 13px;
+    line-height: 15px;
+    width: 136px;
+    height: 13px;
+  }
+  .topContent {
+    width: 133px;
+    height: 12px;
+    margin: auto 9px;
+  }
+  .text {
+    font-size: 11px;
+    line-height: 13px;
+    margin-left: 3px;
+  }
+  .trackDetail {
+    font-size: 11px;
+  }
+  .setUp-enter-active {
+    animation: showP1 .2s;
+  }
+  .setUp-enter, .setUp-leave-to {
+    opacity: 0;
+  }
+  .setUp-leave-active {
+    animation: hideP1 .2s;
+  }
+}
+@media screen and (min-width: 855px) and (max-width: 1920px) {
+  .card {
+    width: 204px;
+  }
+  .playSpeed {
+    width: 204px;
+  }
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .changeTrack {
+    width: 204px;
+    height: 44.4px;
+  }
+  .item2, .item3 {
+    font-size: 15.6px;
+    line-height: 18px;
+    width: 163.2px;
+    height: 15.6px;
+  }
+  .topContent {
+    width: 159.6px;
+    height: 14.4px;
+    margin: auto 10.8px;
+  }
+  .text {
+    font-size: 13.2px;
+    line-height: 15.6px;
+    margin-left: 3.6px;
+  }
+  .trackDetail {
+    font-size: 13.2px;
+  }
+  .setUp-enter-active {
+    animation: showP2 .2s;
+  }
+  .setUp-enter, .setUp-leave-to {
+    opacity: 0;
+  }
+  .setUp-leave-active {
+    animation: hideP2 .2s;
+  }
+}
+@media screen and (min-width: 1921px) {
+  .card {
+    width: 285.6px;
+  }
+  .playSpeed {
+    width: 285.6px;
+  }
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .changeTrack {
+    width: 285.6px;
+    height: 62.16px;
+  }
+  .item2, .item3 {
+    font-size: 21.84px;
+    line-height: 25.2px;
+    width: 228.48px;
+    height: 21.84px;
+  }
+  .topContent {
+    width: 223.44px;
+    height: 20.16px;
+    margin: auto 15.12px;
+  }
+  .text {
+    font-size: 18.48px;
+    line-height: 21.84px;
+    margin-left: 5.04px;
+  }
+  .trackDetail {
+    font-size: 18.48px;
+  }
+  .setUp-enter-active {
+    animation: showP3 .2s;
+  }
+  .setUp-enter, .setUp-leave-to {
+    opacity: 0;
+  }
+  .setUp-leave-active {
+    animation: hideP3 .2s;
+  }
+}
+
 .mainItems {
   display: flex;
   flex-direction: column;
   position: absolute;
+  .rightArrow {
+    margin: auto 0;
+  }
   .playSpeed {
     display: flex;
-    width: 170px;
     margin-top: 8px;
   }
   .subtitleControl {
     display: flex;
-    width: 170px;
-    height: 37px;
     .item2 {
-      font-size: 13px;
-      line-height: 15px;
       margin: auto;
-      width: 136px;
-      height: 13px;
       display: flex;
       justify-content: space-between;
     }
   }
   .audioItems {
     display: flex;
-    width: 170px;
-    height: 37px;
     .item3 {
-      font-size: 13px;
-      line-height: 15px;
       margin: auto;
-      width: 136px;
-      height: 13px;
       display: flex;
       justify-content: space-between;
     }
@@ -401,35 +592,19 @@ export default {
   }
   .topContainer {
     display: flex;
-    width: 170px;
-    height: 37px;
     .topContent {
       display: flex;
-      width: 133px;
-      height: 12px;
       justify-content: flex-start;
-      margin: auto 9px;
-      .text {
-        font-size: 11px;
-        line-height: 13px;
-        margin-left: 3px;
-      }
     }
   }
   .itemSize {
     display: flex;
-    width: 170px;
-    height: 37px;
   }
   .subtitleStyle {
     display: flex;
-    width: 170px;
-    height: 37px;
   }
   .subtitleDelay {
     display: flex;
-    width: 170px;
-    height: 37px;
   }
 }
 
@@ -439,37 +614,19 @@ export default {
   position: absolute;
   .topContainer {
     display: flex;
-    width: 170px;
-    height: 37px;
     .topContent {
       display: flex;
-      width: 133px;
-      height: 12px;
       justify-content: flex-start;
-      margin: auto 9px;
-      .text {
-        font-size: 11px;
-        line-height: 13px;
-        margin-left: 3px;
-      }
     }
   }
   .audioDelay {
     display: flex;
-    width: 170px;
-    height: 37px;
   }
   .changeTrack {
     display: flex;
-    width: 170px;
-    height: 37px;
     .item2 {
       display: flex;
       justify-content: space-between;
-      height: 15px;
-      width: 136px;
-      font-size: 13px;
-      line-height: 14px;
       margin: auto;
     }
   }
@@ -488,17 +645,7 @@ export default {
   opacity: 0;
 }
 
-.setUp-enter-active {
-  animation: show .2s;
-}
-.setUp-enter, .setUp-leave-to {
-  opacity: 0;
-}
-.setUp-leave-active {
-  animation: hide .2s;
-}
-
-@keyframes show {
+@keyframes showP1 {
   0% {
     opacity: 0;
     right: 170px;
@@ -508,7 +655,7 @@ export default {
     right: 0;
   }
 }
-@keyframes hide {
+@keyframes hideP1 {
   0% {
     opacity: 1;
     right: 0;
@@ -516,6 +663,46 @@ export default {
   100% {
     opacity: 0;
     right: -170px;
+  }
+}
+@keyframes showP2 {
+  0% {
+    opacity: 0;
+    right: 204px;
+  }
+  100% {
+    opacity: 1;
+    right: 0;
+  }
+}
+@keyframes hideP2 {
+  0% {
+    opacity: 1;
+    right: 0;
+  }
+  100% {
+    opacity: 0;
+    right: -204px;
+  }
+}
+@keyframes showP3 {
+  0% {
+    opacity: 0;
+    right: 285.6px;
+  }
+  100% {
+    opacity: 1;
+    right: 0;
+  }
+}
+@keyframes hideP3 {
+  0% {
+    opacity: 1;
+    right: 0;
+  }
+  100% {
+    opacity: 0;
+    right: -285.6px;
   }
 }
 </style>

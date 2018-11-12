@@ -5,13 +5,12 @@
     </div>
     <div class="listContainer"
       :style="{
-        height: tracks.length <= 3 ? `${tracks.length * 27 + (tracks.length - 1) * 5 + 14}px` : '105px',
+        height: heightSize,
       }">
       <div class="scrollScope"
         :style="{
-          width: '165px',
           overflowY: tracks.length > 2 ? 'scroll' : '',
-          height: tracks.length <= 3 ? `${tracks.length * 27 + (tracks.length - 1) * 5 + 5}px` : '96px',
+          height: scopeHeight,
         }">
         <div class="columnContainer">
           <div v-for="(track, index) in tracks"
@@ -28,7 +27,7 @@
           </div>
           <div class="card"
             :style="{
-              marginTop: `${moveLength-tracks.length * 32}px`,
+              marginTop: cardPos,
               transition: 'all 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98'
             }"></div>
         </div>
@@ -50,8 +49,35 @@ export default {
     item: {
       type: String,
     },
+    winWidth: {
+      type: Number,
+    },
   },
   computed: {
+    cardPos() {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return `${this.moveLength - (this.tracks.length * 32)}px`;
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return `${(this.moveLength - (this.tracks.length * 32)) * 1.2}px`;
+      }
+      return `${(this.moveLength - (this.tracks.length * 32)) * 1.2 * 1.4}px`;
+    },
+    heightSize() {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return this.tracks.length <= 3 ? `${(this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 14)}px` : '105px';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.tracks.length <= 3 ? `${((this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 14)) * 1.2}px` : `${105 * 1.2}px`;
+      }
+      return this.tracks.length <= 3 ? `${((this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 14)) * 1.2 * 1.4}px` : `${105 * 1.2 * 1.4}px`;
+    },
+    scopeHeight() {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return this.tracks.length <= 3 ? `${(this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 5)}px` : '96px';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.tracks.length <= 3 ? `${((this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 5)) * 1.2}px` : `${96 * 1.2}px`;
+      }
+      return this.tracks.length <= 3 ? `${((this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 5)) * 1.2 * 1.4}px` : `${96 * 1.2 * 1.4}px`;
+    },
     tracks() {
       return this.$store.getters.AudioTrackList;
     },
@@ -82,6 +108,99 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@media screen and (min-width: 513px) and (max-width: 854px) {
+  .itemContainer {
+    width: 170px;
+    .textContainer {
+      width: 136px;
+      height: 37px;
+      font-size: 13px;
+      margin: auto auto auto 17px;
+    }
+    .listContainer {
+      height: 37px;
+      .scrollScope {
+        width: 165px;
+        .columnNumDetail {
+          width: 136px;
+          height: 27px;
+          margin: 0 auto 5px 17px;
+          .text {
+            font-size: 11px;
+            margin: auto auto auto 10px;
+          }
+        }
+        .card {
+          width: 136px;
+          height: 27px;
+          margin-left: 17px;
+        }
+      }
+    }
+  }
+}
+@media screen and (min-width: 855px) and (max-width: 1920px) {
+  .itemContainer {
+    width: 204px;
+    .textContainer {
+      width: 163.2px;
+      height: 44.4px;
+      font-size: 15.6px;
+      margin: auto auto auto 20.4px;
+    }
+    .listContainer {
+      height: 44.4px;
+      .scrollScope {
+        width: 198px;
+        .columnNumDetail {
+          width: 163.2px;
+          height: 32.4px;
+          margin: 0 auto 6px 20.4px;
+          .text {
+            font-size: 13.2px;
+            margin: auto auto auto 12px;
+          }
+        }
+        .card {
+          width: 163.2px;
+          height: 32.4px;
+          margin-left: 20.4px;
+        }
+      }
+    }
+  }
+}
+@media screen and (min-width: 1921px) {
+  .itemContainer {
+    width: 285.6px;
+    .textContainer {
+      width: 228.48px;
+      height: 62.16px;
+      font-size: 21.84px;
+      margin: auto auto auto 28.56px;
+    }
+    .listContainer {
+      height: 62.16px;
+      .scrollScope {
+        width: 277.2px;
+        .columnNumDetail {
+          width: 228.48px;
+          height: 45.36px;
+          margin: 0 auto 8.4px 28.56px;
+          .text {
+            font-size: 18.48px;
+            margin: auto auto auto 16.8px;
+          }
+        }
+        .card {
+          width: 228.48px;
+          height: 45.36px;
+          margin-left: 28.56px;
+        }
+      }
+    }
+  }
+}
 ::-webkit-scrollbar {
   width: 2px;
 }
@@ -92,7 +211,6 @@ export default {
 }
 .itemContainer {
   position: absolute;
-  width: 170px;
   display: flex;
   flex-direction: column;
   border-radius: 7px;
@@ -101,38 +219,25 @@ export default {
   clip-path: inset(0 round 8px);
   .textContainer {
     display: flex;
-    height: 37px;
-    font-size: 13px;
-    margin: auto auto auto 17px;
     color: rgba(255, 255, 255, 0.6);
     .textItem {
       letter-spacing: 0.2px;
-      margin: auto;
+      margin: auto 0;
     }
   }
   .listContainer {
-    width: 170px;
     .columnContainer {
       display: flex;
       flex-direction: column;
       .columnNumDetail {
         position: relative;
         display: flex;
-        width: 136px;
-        height: 27px;
-        margin: 0 auto 5px 17px;
         .text {
-          line-height: 11px;
-          font-size: 11px;
           color: rgba(255, 255, 255, 0.4);
-          margin: auto auto auto 10px;
         }
       }
       .card {
         z-index: -1;
-        width: 135px;
-        height: 26px;
-        margin-left: 17px;
         border-radius: 7px;
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);

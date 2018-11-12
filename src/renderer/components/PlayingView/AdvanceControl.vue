@@ -59,7 +59,7 @@ export default {
       if (!val) {
         this.animFlag = true;
         if (!this.validEnter) {
-          this.anim.playSegments([68, 89], false);
+          this.anim.playSegments([68, 90], false);
         } else {
           this.showFlag = true;
           this.anim.playSegments([68, 83], false);
@@ -178,10 +178,23 @@ button:hover {
 }
 .advanced {
   position: absolute;
-  bottom: 36px;
-  right: -2px;
   z-index: 10;
   transition-property: opacity, transform;
+  @media screen and (min-width: 320px) and (max-width: 512px) {
+    display: none;
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    bottom: 32px;
+    right: 3px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    bottom: 44px;
+    right: 3px;
+  }
+  @media screen and (min-width: 1920px) {
+    bottom: 70px;
+    right: 7px;
+  }
   .mainMenu, .subtitleSetup, .audioItems {
     position: absolute;
     right: 0;

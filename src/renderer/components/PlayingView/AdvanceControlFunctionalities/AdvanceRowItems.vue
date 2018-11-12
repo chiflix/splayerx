@@ -2,7 +2,7 @@
   <div class="itemContainer"
     :style="{
       height: heightSize,
-      backgroundImage: height === 37 ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
+      backgroundImage: !isChosen ? '' : 'linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 24%, rgba(255,255,255,0.03) 100%)',
     }">
     <div class="detail"
       :style="{
@@ -14,10 +14,10 @@
             color: color,
             transition: 'color 300ms',
           }">{{ item }}</div>
-        <div class="rightItem" v-show="height === 37">{{ showDetail }}</div>
+        <div class="rightItem" v-show="!isChosen">{{ showDetail }}</div>
       </div>
       <transition name="detail">
-        <div class="listContainer" v-show="height === 74">
+        <div class="listContainer" v-show="isChosen">
           <div class="rowContainer">
             <div v-for="(list, index) in lists"
               :id="'list'+index"
@@ -33,11 +33,11 @@
                   color: list.chosen || index === hoverIndex ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
                   margin: 'auto',
                   transition: 'color 300ms',
-                }">{{ list[0] }}</div>
+                }">{{ list[0] }}
+              </div>
             </div>
             <div :class="cardType" :style="{
-              width: `${cardWidth}px`,
-              left: `${moveLength}px`,
+              left: cardPos,
               transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
             }"></div>
           </div>
@@ -55,8 +55,8 @@ export default {
   data() {
     return {
       hoverIndex: -1,
-      moveLength: this.item === '播放速度' ? 46 : 49,
-      cardWidth: this.item === '播放速度' ? 24 : 34,
+      selectedIndex: 1,
+      moveLength: '',
     };
   },
   props: {
@@ -68,15 +68,29 @@ export default {
     item: {
       type: String,
     },
-    height: {
-      type: Number,
-    },
     color: {
       type: String,
+    },
+    isChosen: {
+      type: String,
+    },
+    winWidth: {
+      type: Number,
     },
   },
   computed: {
     ...mapGetters(['rate']),
+    cardPos() {
+      if (this.moveLength) {
+        if (this.winWidth > 514 && this.winWidth <= 854) {
+          return `${this.moveLength}px`;
+        } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+          return `${this.moveLength * 1.2}px`;
+        }
+        return `${this.moveLength * 1.2 * 1.4}px`;
+      }
+      return '';
+    },
     showDetail() {
       if (this.item === '播放速度') {
         return `${this.rate} x`;
@@ -85,20 +99,39 @@ export default {
       }
       return null;
     },
+    cardType() {
+      if (this.selectedIndex === this.difIndex[0] || this.selectedIndex === this.difIndex[1]) {
+        if (this.item === '播放速度') {
+          return 'speedCard smallSpeedCard';
+        }
+        return 'fontCard smallFontCard';
+      }
+      if (this.item === '播放速度') {
+        return 'speedCard bigSpeedCard';
+      }
+      return 'fontCard bigFontCard';
+    },
     heightSize() {
-      return `${this.height}px`;
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return this.isChosen ? '74px' : '37px';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
+      }
+      return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
     },
     rowNumDetail() {
       return this.item === '字体大小' ? 'fontRowNumDetail' : 'speedRowNumDetail';
-    },
-    cardType() {
-      return this.item === '字体大小' ? 'fontCard' : 'speedCard';
     },
     difIndex() {
       return this.item === '字体大小' ? [0, 2] : [1, 4];
     },
     difWidth() {
-      return this.item === '字体大小' ? [29, 35] : [25, 29];
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return this.item === '字体大小' ? [29, 35] : [25, 29];
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.item === '字体大小' ? [29 * 1.2, 35 * 1.2] : [25 * 1.2, 29 * 1.2];
+      }
+      return this.item === '字体大小' ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
     },
     subStyle() {
       return this.$store.getters.curStyle;
@@ -132,7 +165,7 @@ export default {
       this.hoverIndex = -1;
     },
     handleClick(index) {
-      this.calculateWidth(index);
+      this.selectedIndex = index;
       if (this.item === '播放速度') {
         this.calculateSpeedLength(index);
       } else {
@@ -149,19 +182,6 @@ export default {
         this.$store.dispatch(videoActions.CHANGE_RATE, this.lists[index][0]);
       } else if (this.item === '字体大小') {
         this.changeFontSize(index);
-      }
-    },
-    calculateWidth(index) {
-      if (this.item === '播放速度') {
-        if (index === 1 || index === 4) {
-          this.cardWidth = 24;
-        } else {
-          this.cardWidth = 28;
-        }
-      } else if (index === 1 || index === 3) {
-        this.cardWidth = 34;
-      } else {
-        this.cardWidth = 28;
       }
     },
     calculateSpeedLength(index) {
@@ -230,9 +250,170 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@media screen and (min-width: 513px) and (max-width: 854px) {
+  .itemContainer {
+    width: 170px;
+    .textContainer {
+      width: 136px;
+      height: 37px;
+      font-size: 13px;
+      margin: auto auto auto 17px;
+      .rightItem {
+        font-size: 11px;
+      }
+    }
+    .listContainer {
+      height: 37px;
+      .rowContainer {
+        width: 137px;
+        height: 27px;
+        .text {
+          line-height: 12px;
+          font-size: 10px;
+        }
+        .speedCard {
+          left: 46px;
+          height: 27px;
+        }
+        .fontCard {
+          left: 49px;
+          height: 27px;
+        }
+        .smallSpeedCard {
+          width: 25px;
+        }
+        .smallFontCard {
+          width: 29px;
+        }
+        .bigSpeedCard {
+          width: 29px;
+        }
+        .bigFontCard {
+          width: 35px;
+        }
+      }
+    }
+  }
+  .detail-enter-active {
+    animation: showP1 100ms;
+  }
+  .detail-enter, .detail-leave-to {
+    opacity: 0;
+  }
+  .detail-leave-active {
+    animation: hideP1 100ms;
+  }
+}
+@media screen and (min-width: 855px) and (max-width: 1920px) {
+  .itemContainer {
+    width: 204px;
+    .textContainer {
+      width: 163.2px;
+      height: 44.4px;
+      font-size: 15.6px;
+      margin: auto auto auto 20.4px;
+      .rightItem {
+        font-size: 13.2px;
+      }
+    }
+    .listContainer {
+      height: 44.4px;
+      .rowContainer {
+        width: 164.4px;
+        height: 32.4px;
+        .text {
+          line-height: 14.4px;
+          font-size: 12px;
+        }
+        .speedCard {
+          left: 55.2px;
+          height: 32.4px;
+        }
+        .fontCard {
+          left: 58.8px;
+          height: 32.4px;
+        }
+        .smallSpeedCard {
+          width: 30px;
+        }
+        .smallFontCard {
+          width: 34.8px;
+        }
+        .bigSpeedCard {
+          width: 34.8px;
+        }
+        .bigFontCard {
+          width: 42px;
+        }
+      }
+    }
+  }
+  .detail-enter-active {
+    animation: showP2 100ms;
+  }
+  .detail-enter, .detail-leave-to {
+    opacity: 0;
+  }
+  .detail-leave-active {
+    animation: hideP2 100ms;
+  }
+}
+@media screen and (min-width: 1921px) {
+  .itemContainer {
+    width: 285.6px;
+    .textContainer {
+      width: 228.48px;
+      height: 62.16px;
+      font-size: 21.84px;
+      margin: auto auto auto 28.56px;
+      .rightItem {
+        font-size: 18.48px;
+      }
+    }
+    .listContainer {
+      height: 62.16px;
+      .rowContainer {
+        width: 230.16px;
+        height: 45.36px;
+        .text {
+          line-height: 20.16px;
+          font-size: 16.8px;
+        }
+        .speedCard {
+          left: 77.28px;
+          height: 45.36px;
+        }
+        .fontCard {
+          left: 82.32px;
+          height: 45.36px;
+        }
+        .smallSpeedCard {
+          width: 42px;
+        }
+        .smallFontCard {
+          width: 48.72px;
+        }
+        .bigSpeedCard {
+          width: 48.72px;
+        }
+        .bigFontCard {
+          width: 58.8px;
+        }
+      }
+    }
+  }
+  .detail-enter-active {
+    animation: showP3 100ms;
+  }
+  .detail-enter, .detail-leave-to {
+    opacity: 0;
+  }
+  .detail-leave-active {
+    animation: hideP3 100ms;
+  }
+}
 .itemContainer {
   position: absolute;
-  width: 170px;
   display: flex;
   border-radius: 7px;
   z-index: 10;
@@ -242,31 +423,23 @@ export default {
     width: 100%;
   }
   .textContainer {
-    width: 136px;
-    height: 37px;
     display: flex;
     flex: 1;
-    font-size: 13px;
-    margin: auto auto auto 17px;
     color: rgba(255, 255, 255, 0.6);
     .textItem {
       letter-spacing: 0.2px;
       margin: auto auto auto 0;
     }
     .rightItem {
-      font-size: 11px;
       margin: auto 0 auto auto;
     }
   }
   .listContainer {
     flex: 1;
     display: flex;
-    height: 37px;
     .rowContainer {
       display: flex;
       justify-content: space-around;
-      width: 137px;
-      height: 27px;
       margin: -2px auto;
       .speedRowNumDetail {
         position: relative;
@@ -276,16 +449,9 @@ export default {
         position: relative;
         display: flex;
       }
-      .text {
-        line-height: 12px;
-        font-size: 10px;
-        color: rgba(255, 255, 255, 0.4);
-        margin-top: 7.5px;
-      }
       .speedCard {
         position: absolute;
         z-index: -1;
-        height: 27px;
         border-radius: 7px;
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
@@ -294,7 +460,6 @@ export default {
       .fontCard {
         position: absolute;
         z-index: -1;
-        height: 27px;
         border-radius: 7px;
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
@@ -303,34 +468,65 @@ export default {
     }
   }
 }
-.detail-enter-active {
-  animation: show 100ms;
-}
-.detail-enter, .detail-leave-to {
-  opacity: 0;
-}
-.detail-leave-active {
-  animation: hide 100ms;
-}
 
-@keyframes show {
+@keyframes showP1 {
   0% {
     opacity: 0;
-    height: 0px;
+    height: 0;
   }
   100% {
     opacity: 1;
     height: 37px;
   }
 }
-@keyframes hide {
+@keyframes hideP1 {
   0% {
     opacity: 1;
     height: 37px;
   }
   100% {
     opacity: 0;
-    height: 0px;
+    height: 0;
+  }
+}
+@keyframes showP2 {
+  0% {
+    opacity: 0;
+    height: 0;
+  }
+  100% {
+    opacity: 1;
+    height: 44.4px;
+  }
+}
+@keyframes hideP2 {
+  0% {
+    opacity: 1;
+    height: 44.4px;
+  }
+  100% {
+    opacity: 0;
+    height: 0;
+  }
+}
+@keyframes showP3 {
+  0% {
+    opacity: 0;
+    height: 0;
+  }
+  100% {
+    opacity: 1;
+    height: 62.16px;
+  }
+}
+@keyframes hideP3 {
+  0% {
+    opacity: 1;
+    height: 62.16px;
+  }
+  100% {
+    opacity: 0;
+    height: 0;
   }
 }
 </style>
