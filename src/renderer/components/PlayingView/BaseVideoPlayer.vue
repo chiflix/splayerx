@@ -58,6 +58,11 @@ export default {
       type: Boolean,
       default: true,
     },
+    // tracks
+    currentAudioTrackId: {
+      type: String,
+      default: '1',
+    },
     // controls
     controls: {
       type: Boolean,
@@ -104,6 +109,7 @@ export default {
     return {
       eventListeners: new Map(),
       currentTimeAnimationFrameId: 0,
+      currentAudioTrack: null,
     };
   },
   watch: {
@@ -120,6 +126,28 @@ export default {
     },
     loop(newVal) {
       this.$refs.video.loop = newVal;
+    },
+    // tracks
+    currentAudioTrackId(newVal) {
+      const { id } = this.currentAudioTrack;
+      if (newVal !== id) {
+        this.$refs.audioTracks.forEach((track) => {
+          if (track.id === newVal) {
+            track.enabled = true;
+            const {
+              id, kind, label, language, enabled,
+            } = track;
+            this.$emit('audiotrack', {
+              type: 'switch',
+              track: {
+                id, kind, label, language, enabled,
+              },
+            });
+          } else {
+            track.enabled = false;
+          }
+        });
+      }
     },
     // controls
     controls(newVal) {
@@ -194,9 +222,28 @@ export default {
     addEvents(events) {
       events.forEach((event) => {
         if (!this.eventListeners.has(event)) {
-          const listener = _.partial(this.emitEvents, event);
-          this.$refs.video.addEventListener(event, listener);
-          this.eventListeners.set(event, listener);
+          if (event !== 'audiotrack') {
+            const listener = _.partial(this.emitEvents, event);
+            this.$refs.video.addEventListener(event, listener);
+            this.eventListeners.set(event, listener);
+          } else {
+            const generateAudioEvent = type => (trackEvent) => {
+              const {
+                id, kind, label, language, enabled,
+              } = trackEvent.track;
+              if (type === 'add' && enabled) {
+                this.currentAudioTrack = trackEvent.track;
+              }
+              this.$emit('audiotrack', {
+                type,
+                track: {
+                  id, kind, label, language, enabled,
+                },
+              });
+            };
+            this.$refs.video.audioTracks.onaddtrack = generateAudioEvent('add');
+            this.$refs.video.audioTracks.onremovetrack = generateAudioEvent('remove');
+          }
         }
       });
     },

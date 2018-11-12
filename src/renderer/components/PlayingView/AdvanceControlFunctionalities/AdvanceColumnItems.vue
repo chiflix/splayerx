@@ -22,7 +22,7 @@
               :style="{
                 color: index === hoverIndex || track.chosen  ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
                 transition: 'color 300ms',
-              }">{{ `音轨 ${index+1} : ${track[0]}` }}
+              }">{{ `音轨 ${index+1} : ${track.id}` }}
             </div>
           </div>
           <div class="card"
@@ -64,25 +64,26 @@ export default {
     },
     heightSize() {
       if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.tracks.length <= 3 ? `${(this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 14)}px` : '105px';
+        return this.tracks.length === 2 ? '73px' : '105px';
       } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.tracks.length <= 3 ? `${((this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 14)) * 1.2}px` : `${105 * 1.2}px`;
+        return this.tracks.length === 2 ? `${73 * 1.2}px` : `${105 * 1.2}px`;
       }
-      return this.tracks.length <= 3 ? `${((this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 14)) * 1.2 * 1.4}px` : `${105 * 1.2 * 1.4}px`;
+      return this.tracks.length === 2 ? `${73 * 1.2 * 1.4}px` : `${105 * 1.2 * 1.4}px`;
     },
     scopeHeight() {
       if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.tracks.length <= 3 ? `${(this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 5)}px` : '96px';
+        return this.tracks.length === 2 ? '64px' : '96px';
       } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.tracks.length <= 3 ? `${((this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 5)) * 1.2}px` : `${96 * 1.2}px`;
+        return this.tracks.length === 2 ? `${64 * 1.2}px` : `${96 * 1.2}px`;
       }
-      return this.tracks.length <= 3 ? `${((this.tracks.length * 27) + (((this.tracks.length - 1) * 5) + 5)) * 1.2 * 1.4}px` : `${96 * 1.2 * 1.4}px`;
+      return this.tracks.length === 2 ? `${64 * 1.2 * 1.4}px` : `${96 * 1.2 * 1.4}px`;
     },
     tracks() {
-      return this.$store.getters.AudioTrackList;
+      return this.$store.getters.audioTrackList;
     },
   },
   mounted() {
+    console.log(this.tracks[0]);
     this.$set(this.tracks[0], 'chosen', true);
   },
   methods: {

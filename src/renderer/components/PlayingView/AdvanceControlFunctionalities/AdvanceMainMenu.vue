@@ -144,7 +144,7 @@
           backgroundImage: showTrack ? '' : hoverAudioIndex === 2 ? preStyle : '',
         }">
         <transition name="audioTransIn">
-          <div class="item2" v-show="!showTrack || trackNum === 1">
+          <div class="item2" v-show="!showTrack || trackNum <= 1">
             <div :style="{
               color: hoverAudioIndex === 2 && !showTrack ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
@@ -157,7 +157,7 @@
           </div>
         </transition>
         <transition name="audioTransOut">
-          <advance-column-items :item="itemTrack" :winWidth="winWidth" v-show="showTrack && trackNum !== 1"></advance-column-items>
+          <advance-column-items :item="itemTrack" :winWidth="winWidth" v-show="showTrack && 2 <= trackNum"></advance-column-items>
         </transition>
       </div>
     </div>
@@ -311,21 +311,21 @@ export default {
       return `${119 * 1.2 * 1.4}px`;
     },
     trackNum() {
-      return this.$store.getters.AudioTrackList.length;
+      return this.$store.getters.audioTrackList.length;
     },
     containerHeight() {
-      if (this.trackNum === 1) {
+      if (this.trackNum === 1 || this.trackNum === 0) {
         return 119;
-      } else if (this.trackNum >= 2 && this.trackNum <= 3) {
-        return (this.trackNum * 37) + 119;
+      } else if (this.trackNum === 2) {
+        return 193;
       }
       return 230;
     },
     trackHeight() {
-      if (this.trackNum === 1) {
+      if (this.trackNum === 1 || this.trackNum === 0) {
         return 37;
-      } else if (this.trackNum >= 2 && this.trackNum <= 3) {
-        return (this.trackNum * 27) + 14 + ((this.trackNum - 1) * 5);
+      } else if (this.trackNum === 2) {
+        return 110;
       }
       return 142;
     },
@@ -435,7 +435,7 @@ export default {
   .playSpeed {
     width: 170px;
   }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .changeTrack {
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay {
     width: 170px;
     height: 37px;
   }
@@ -475,7 +475,7 @@ export default {
   .playSpeed {
     width: 204px;
   }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .changeTrack {
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay {
     width: 204px;
     height: 44.4px;
   }
@@ -515,7 +515,7 @@ export default {
   .playSpeed {
     width: 285.6px;
   }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .changeTrack {
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay {
     width: 285.6px;
     height: 62.16px;
   }

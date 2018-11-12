@@ -1,3 +1,5 @@
+import Vue from 'vue';
+
 import { Video as mutationTypes } from '../mutationTypes';
 import { Video as actionTypes } from '../actionTypes';
 
@@ -33,9 +35,9 @@ const state = {
   mute: false,
   defaultMuted: false,
   // tracks
-  AudioTrackList: [['国语'], ['英语'], ['日语'], ['西班牙语'], ['韩语']],
-  VideoTrackList: [],
-  TextTrackList: [],
+  audioTrackList: [],
+  videoTrackList: [],
+  textTrackList: [],
   // meta info
   intrinsicWidth: 0,
   intrinsicHeight: 0,
@@ -62,7 +64,13 @@ const getters = {
   volume: state => state.volume / 100,
   mute: state => state.mute,
   rate: state => state.rate,
-  AudioTrackList: state => state.AudioTrackList,
+  // tracks
+  audioTrackList: state => state.audioTrackList,
+  currentAudioTrackId: (state) => {
+    const track = state.audioTrackList.filter(track => track.enabled)[0];
+    if (track && track.id) return track.id;
+    return -1;
+  },
   // meta info
   intrinsicWidth: state => state.intrinsicWidth,
   intrinsicHeight: state => state.intrinsicHeight,
@@ -82,8 +90,13 @@ function mutationToState(mutationType) {
 
 function mutationer(mutationType) {
   const stateType = mutationToState(mutationType);
+  if (typeof state[stateType] !== 'object') {
+    return (state, p) => {
+      state[stateType] = p;
+    };
+  }
   return (state, p) => {
-    state[stateType] = p;
+    Vue.set(state, stateType, p);
   };
 }
 
@@ -95,6 +108,29 @@ function mutationsGenerator(mutationTypes) {
   return mutations;
 }
 
+function generateTracks(actionType, newTrack, oldTracks) {
+  const newTracks = oldTracks;
+  switch (actionType) {
+    case 'add':
+      if (!newTracks.includes(newTrack)) {
+        newTracks.push(newTrack);
+      }
+      break;
+    case 'remove':
+      if (newTracks.includes(newTrack)) {
+        newTracks.splice(newTracks.indexOf(newTrack), 1);
+      }
+      break;
+    case 'switch':
+      if (newTracks.includes(newTrack)) {
+        newTracks.splice(newTracks.indexOf(newTrack), 1, newTrack);
+      }
+      break;
+    default:
+      break;
+  }
+  return newTracks;
+}
 const mutations = mutationsGenerator(mutationTypes);
 
 const actions = {
@@ -166,6 +202,18 @@ const actions = {
   [actionTypes.UPDATE_DELAY]({ commit }, delta) {
     const finalDelay = state.AudioDelay + delta;
     commit(mutationTypes.DELAY_UPDATE, finalDelay);
+  },
+  [actionTypes.ADD_AUDIO_TRACK]({ commit, state }, trackToAdd) {
+    const newAudioTracks = generateTracks('add', trackToAdd, state.audioTrackList);
+    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+  },
+  [actionTypes.REMOVE_AUDIO_TRACK]({ commit, state }, trackToRemove) {
+    const newAudioTracks = generateTracks('remove', trackToRemove, state.audioTrackList);
+    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+  },
+  [actionTypes.SWITCH_AUDIO_TRACK]({ commit, state }, trackToSwitch) {
+    const newAudioTracks = generateTracks('switch', trackToSwitch, state.audioTrackList);
+    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
 };
 
