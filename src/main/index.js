@@ -1,4 +1,5 @@
 import { app, BrowserWindow, Tray, ipcMain, globalShortcut } from 'electron' // eslint-disable-line
+import path from 'path';
 import WindowResizer from './helpers/windowResizer.js';
 /**
  * Set `__static` path to static files in production
@@ -99,20 +100,31 @@ function registerMainWindowEvent() {
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
 
-  function snapShot(path) {
-    return new Promise((resolve) => {
-      require('electron').splayerx.snapshotVideo(path, '00:00:05', () => {
-        resolve();
-      });
+  function snapShot(videoPath, callback) {
+    const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
+    require('electron').splayerx.snapshotVideo(videoPath, `${imgPath}.png`, '00:00:05', (err) => {
+      console.log(err, videoPath);
+      callback(err, imgPath);
     });
   }
 
-  ipcMain.on('snapShot', async (event, paths) => {
-    for (let i = 0; i < paths.length; i += 1) {
-      const path = paths[i];
-      await snapShot(path);// eslint-disable-line 
-    }
-    event.sender.send('snapShot-reply', 'done');
+  ipcMain.on('snapShot', (event, paths) => {
+    let i = 0;
+    const imgPaths = [];
+    const callback = (err, imgPath) => {
+      if (err !== '0') {
+        snapShot(paths[i], callback);
+      } else {
+        imgPaths.push(imgPath);
+        i += 1;
+        if (i < paths.length) {
+          snapShot(paths[i], callback);
+        } else {
+          event.sender.send('snapShot-reply', imgPaths);
+        }
+      }
+    };
+    snapShot(paths[i], callback);
   });
   ipcMain.on('windowPositionChange', (event, args) => {
     mainWindow.setPosition(...args);

@@ -21,7 +21,6 @@
         :isShifting="shifting"
         :DBInfo="itemInfos[index]"
         :DBloaded="DBloaded"
-        :snapShoted="snapShoted"
         :showVideo="showAttached"
         :thumbnailWidth="thumbnailWidth"
         @mouseupItem="itemMouseup"
@@ -50,6 +49,7 @@ export default {
       shifting: false,
       snapShoted: false,
       DBloaded: false,
+      imgPaths: [],
     };
   },
   mounted() {
@@ -59,9 +59,6 @@ export default {
   methods: {
     snapshot() {
       this.$electron.ipcRenderer.send('snapShot', this.playingList);
-      this.$electron.ipcRenderer.once('snapShot-reply', () => {
-        this.snapShoted = true;
-      });
     },
     handleMousedown() {
       this.$emit('update:showRecentPlaylist', false);

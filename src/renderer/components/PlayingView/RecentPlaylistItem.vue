@@ -92,19 +92,12 @@ export default {
     path: {
       type: String,
     },
-    // showVideo: {
-    //   type: Boolean,
-    //   default: false,
-    // },
     DBInfo: {
       type: Object,
     },
     DBloaded: {
       type: Boolean,
       default: false,
-    },
-    snapShoted: {
-      type: Boolean,
     },
   },
   data() {
@@ -137,17 +130,15 @@ export default {
     },
   },
   mounted() {
+    this.$electron.ipcRenderer.once('snapShot-reply', (event, imgPaths) => {
+      fs.readFile(`${imgPaths[this.index]}.png`, 'base64', (err, data) => {
+        if (!err && this.imageSrc === '') {
+          this.imageSrc = `data:image/png;base64, ${data}`;
+        }
+      });
+    });
   },
   watch: {
-    snapShoted(val) {
-      if (val) {
-        fs.readFile(`${this.path}.png`, 'base64', (err, data) => {
-          if (!err && this.imageSrc === '') {
-            this.imageSrc = `data:image/png;base64, ${data}`;
-          }
-        });
-      }
-    },
     DBloaded(val) {
       if (val) {
         if (this.DBInfo) {
