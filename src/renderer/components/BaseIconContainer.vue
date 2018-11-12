@@ -320,4 +320,19 @@ export default {
     height: 18.48px;
   }
 }
+.speed {
+  display: block;
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    width: 8px;
+    height: 6px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 12px;
+    height: 8.25px;
+  }
+  @media screen and (min-width: 1921px) {
+    width: 14px;
+    height: 11px;
+  }
+}
 </style>

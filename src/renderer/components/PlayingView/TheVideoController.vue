@@ -21,6 +21,7 @@
       <advance-control class="button advance" v-hidden="displayState['advance-control']" v-bind.sync="widgetsStatus['advance-control']"/>
     </div>
     <the-time-codes v-hidden="displayState['the-progress-bar']" />
+    <SpeedLabel v-hidden="displayState['the-progress-bar']"/>
     <the-progress-bar v-hidden="displayState['the-progress-bar']"/>
   </div>
 </template>
@@ -37,6 +38,7 @@ import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TheProgressBar from './TheProgressBar';
 import NotificationBubble from '../NotificationBubble.vue';
+import SpeedLabel from './speedLabel.vue';
 export default {
   name: 'the-video-controller',
   components: {
@@ -49,6 +51,7 @@ export default {
     'the-time-codes': TheTimeCodes,
     'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
+    SpeedLabel,
   },
   directives: {
     hidden: {
