@@ -130,12 +130,18 @@ export default {
     },
   },
   mounted() {
-    this.$electron.ipcRenderer.once('snapShot-reply', (event, imgPaths) => {
-      fs.readFile(`${imgPaths[this.index]}.png`, 'base64', (err, data) => {
+    this.$electron.ipcRenderer.send('snapShot', this.path);
+    this.$electron.ipcRenderer.send('mediaInfo', this.path);
+    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
+      fs.readFile(`${imgPath}.png`, 'base64', (err, data) => {
         if (!err && this.imageSrc === '') {
           this.imageSrc = `data:image/png;base64, ${data}`;
         }
       });
+    });
+    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
+      const mediaInfo = JSON.parse(info);
+      console.log(mediaInfo.format);
     });
   },
   watch: {

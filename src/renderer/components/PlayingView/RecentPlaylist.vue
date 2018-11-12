@@ -13,6 +13,7 @@
         right: `${distance}px`,
       }">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
+        :key="index"
         :index="index"
         :path="item"
         :isInRange="index >= firstIndex && index <= lastIndex"
@@ -45,7 +46,7 @@ export default {
       itemInfos: [],
       filename: '',
       firstIndex: 0, // first index of current page
-      chosenIndex: 0,
+      hoverIndex: 0,
       shifting: false,
       snapShoted: false,
       DBloaded: false,
@@ -54,19 +55,15 @@ export default {
   },
   mounted() {
     this.searchInfoDB();
-    this.snapshot();
   },
   methods: {
-    snapshot() {
-      this.$electron.ipcRenderer.send('snapShot', this.playingList);
-    },
     handleMousedown() {
       this.$emit('update:showRecentPlaylist', false);
     },
     itemMouseleave() {
     },
     itemMouseover(payload) {
-      this.chosenIndex = payload.index;
+      this.hoverIndex = payload.index;
       this.filename = payload.filename;
     },
     itemMouseup(index) {
@@ -131,23 +128,23 @@ export default {
       return '播放列表';
     },
     lastPlayedTime() {
-      if (this.itemInfos[this.chosenIndex]) {
-        if (this.itemInfos[this.chosenIndex].lastPlayedTime) {
-          return this.timecodeFromSeconds(this.itemInfos[this.chosenIndex].lastPlayedTime);
+      if (this.itemInfos[this.hoverIndex]) {
+        if (this.itemInfos[this.hoverIndex].lastPlayedTime) {
+          return `${this.timecodeFromSeconds(this.itemInfos[this.hoverIndex].lastPlayedTime)} /`;
         }
       }
-      return '00:00';
+      return '';
     },
     duration() {
-      if (this.itemInfos[this.chosenIndex]) {
-        if (this.itemInfos[this.chosenIndex].duration) {
-          return this.itemInfos[this.chosenIndex].duration;
+      if (this.itemInfos[this.hoverIndex]) {
+        if (this.itemInfos[this.hoverIndex].duration) {
+          return this.itemInfos[this.hoverIndex].duration;
         }
       }
       return 0;
     },
     indexInPlaylist() {
-      return this.chosenIndex + 1;
+      return this.hoverIndex + 1;
     },
     numberOfPlaylistItem() {
       return this.playingList.length;
