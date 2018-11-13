@@ -261,7 +261,10 @@ new Vue({
               },
               {
                 label: this.$t('msg.splayerx.feedback'),
-                enabled: false,
+                click: () => {
+                  const { shell } = require('electron');
+                  shell.openExternal('https://feedback.splayer.org');
+                },
               },
               { type: 'separator' },
               {

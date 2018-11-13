@@ -59,7 +59,7 @@ export default {
       about: '关于 射手影音…',
       preferences: '偏好设置…',
       homepage: '主页',
-      feedback: '反馈',
+      feedback: '意见反馈',
       services: '服务',
       hide: '隐藏 射手影音',
       hideOthers: '隐藏 其他',
