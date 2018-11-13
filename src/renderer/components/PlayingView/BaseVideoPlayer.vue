@@ -116,6 +116,7 @@ export default {
     // network state
     src(newVal) {
       this.$refs.video.src = newVal;
+      this.$emit('audiotrack', { type: 'removeAll', track: '' });
     },
     // playback state
     currentTime(newVal) {

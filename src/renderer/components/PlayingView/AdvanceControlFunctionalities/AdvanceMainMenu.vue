@@ -141,12 +141,12 @@
         :style="{
           height: changeTrackHeight,
           transition: 'height 100ms linear',
-          backgroundImage: showTrack ? '' : hoverAudioIndex === 2 ? preStyle : '',
+          backgroundImage: showTrack ? '' : hoverAudioIndex === 2 && 2 <= trackNum ? preStyle : '',
         }">
         <transition name="audioTransIn">
-          <div class="item2" v-show="!showTrack || trackNum <= 1">
+          <div class="item2" v-show="!showTrack">
             <div :style="{
-              color: hoverAudioIndex === 2 && !showTrack ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              color: hoverAudioIndex === 2 && !showTrack && 2 <= trackNum ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">切换轨道</div>
             <div
@@ -157,7 +157,7 @@
           </div>
         </transition>
         <transition name="audioTransOut">
-          <advance-column-items :item="itemTrack" :winWidth="winWidth" v-show="showTrack && 2 <= trackNum"></advance-column-items>
+          <advance-column-items :item="itemTrack" :winWidth="winWidth" v-show="showTrack"></advance-column-items>
         </transition>
       </div>
     </div>
@@ -414,8 +414,10 @@ export default {
       this.showTrack = false;
     },
     handleTrackClick() {
-      this.showDelay = false;
-      this.showTrack = true;
+      if (this.trackNum >= 2) {
+        this.showDelay = false;
+        this.showTrack = true;
+      }
     },
     orify(...args) {
       return args.some(arg => arg == true); // eslint-disable-line

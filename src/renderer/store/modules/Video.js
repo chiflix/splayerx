@@ -126,6 +126,9 @@ function generateTracks(actionType, newTrack, oldTracks) {
         newTracks.splice(newTracks.indexOf(newTrack), 1, newTrack);
       }
       break;
+    case 'removeAll':
+      newTracks.splice(0, newTracks.length);
+      break;
     default:
       break;
   }
@@ -213,6 +216,10 @@ const actions = {
   },
   [actionTypes.SWITCH_AUDIO_TRACK]({ commit, state }, trackToSwitch) {
     const newAudioTracks = generateTracks('switch', trackToSwitch, state.audioTrackList);
+    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+  },
+  [actionTypes.REMOVE_ALL_AUDIO_TRACK]({ commit, state }, trackToRemoveAll) {
+    const newAudioTracks = generateTracks('removeAll', trackToRemoveAll, state.audioTrackList);
     commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
 };

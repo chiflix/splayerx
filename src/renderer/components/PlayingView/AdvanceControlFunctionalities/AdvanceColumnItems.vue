@@ -20,7 +20,7 @@
             @click="handleClick(index)">
             <div class="text"
               :style="{
-                color: index === hoverIndex || track.chosen  ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
+                color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
                 transition: 'color 300ms',
               }">{{ `音轨 ${index+1} : ${track.id}` }}
             </div>
@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import { Video as videoActions } from '@/store/actionTypes';
 export default {
   name: 'AdvanceColumnItems',
   data() {
@@ -82,10 +83,6 @@ export default {
       return this.$store.getters.audioTrackList;
     },
   },
-  mounted() {
-    console.log(this.tracks[0]);
-    this.$set(this.tracks[0], 'chosen', true);
-  },
   methods: {
     handleOver(index) {
       this.hoverIndex = index;
@@ -97,12 +94,12 @@ export default {
       this.moveLength = index * 32;
       this.tracks.forEach((i, ind) => {
         if (ind !== index) {
-          this.$set(this.tracks[ind], 'chosen', false);
+          this.tracks[ind].enabled = false;
         } else {
-          this.$set(this.tracks[ind], 'chosen', true);
-          // this.$emit('updateAudioTrack', index);
+          this.tracks[ind].enabled = true;
         }
       });
+      this.$store.dispatch(videoActions.SWITCH_AUDIO_TRACK, this.tracks[index]);
     },
   },
 };

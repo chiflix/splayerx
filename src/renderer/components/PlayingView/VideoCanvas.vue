@@ -55,6 +55,7 @@ export default {
       addAudioTrack: videoActions.ADD_AUDIO_TRACK,
       removeAudioTrack: videoActions.REMOVE_AUDIO_TRACK,
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
+      removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
     }),
     ...mapMutations({
       updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
