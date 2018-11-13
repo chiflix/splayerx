@@ -12,12 +12,10 @@
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <notification-bubble/>
-    <transition name="translate">
     <recent-playlist class="recent-playlist"
-    v-show="displayState['recent-playlist']"
+    :displayState="displayState['recent-playlist']"
     v-bind.sync="widgetsStatus['recent-playlist']"
-    @update:showattached="widgetsStatus['playlist-control'].showAttached = $event"/>
-    </transition>
+    @update:playlistcontrol-showattached="widgetsStatus['playlist-control'].showAttached = $event"/>
     <div class="masking" v-hidden="showAllWidgets"></div>
     <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>

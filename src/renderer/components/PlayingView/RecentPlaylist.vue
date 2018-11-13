@@ -1,14 +1,23 @@
 <template>
-  <div class="recent-playlist"
-    @mousedown="handleMousedown">
+<div class="recent-playlist"
+  v-show="backgroundDisplayState"
+  @mousedown="handleMousedown">
+  <transition name="fade2">
+  <div class="background-gradient"
+    v-show="displayState"/>
+  </transition>
+  <transition name="translate"
+    @after-leave="afterLeave">
+  <div class="content"
+    v-show="displayState">
     <transition name="fade" mode="out-in">
-      <div class="info"
-        :key="hoverIndex"
-        @mousedown.stop="">
-        <div class="top">{{lastPlayedTime}} 
-        <span>{{timecodeFromSeconds(videoDuration)}}</span>&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
-        <div class="file-name">{{filename}}</div>
-      </div>
+    <div class="info"
+      :key="hoverIndex"
+      @mousedown.stop="">
+      <div class="top">{{lastPlayedTime}} 
+      <span>{{timecodeFromSeconds(videoDuration)}}</span>&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+      <div class="file-name">{{filename}}</div>
+    </div>
     </transition>
     <div class="playlist-items"
       @mousedown.stop=""
@@ -29,6 +38,8 @@
         @mouseoverItem="itemMouseover"/>
     </div>
   </div>
+  </transition>
+</div>
 </template>
 <script>
 import path from 'path';
@@ -40,6 +51,7 @@ export default {
     RecentPlaylistItem,
   },
   props: {
+    displayState: Boolean,
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
   },
@@ -51,13 +63,17 @@ export default {
       shifting: false,
       snapShoted: false,
       hoveredMediaInfo: {}, // the hovered video's media info
+      backgroundDisplayState: this.displayState,
     };
   },
   mounted() {
   },
   methods: {
+    afterLeave() {
+      this.backgroundDisplayState = false;
+    },
     handleMousedown() {
-      this.$emit('update:showattached', false);
+      this.$emit('update:playlistcontrol-showattached', false);
     },
     itemMouseover(payload) {
       this.hoverIndex = payload.index;
@@ -98,12 +114,12 @@ export default {
     },
     mousedownOnOther(val) {
       if (val && this.mouseupOnOther) {
-        this.$emit('update:showattached', false);
+        this.$emit('update:playlistcontrol-showattached', false);
       }
     },
     mouseupOnOther(val) {
       if (val) {
-        this.$emit('update:showattached', false);
+        this.$emit('update:playlistcontrol-showattached', false);
       }
     },
     playingIndex(val) {
@@ -111,6 +127,11 @@ export default {
         this.firstIndex = val;
       } else if (val < this.firstIndex) {
         this.lastIndex = val;
+      }
+    },
+    displayState(val) {
+      if (val) {
+        this.backgroundDisplayState = val;
       }
     },
   },
@@ -198,12 +219,18 @@ export default {
 <style lang="scss" scoped>
 .recent-playlist {
   width: 100%;
-  background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 0%, #000000 86%);
   @media screen and (max-width: 512px) {
     display: none;
   }
   @media screen and (min-width: 512px) {
     height: fit-content;
+  }
+  .background-gradient {
+    position: absolute;
+    z-index: -1;
+    background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 0%, #000000 86%);
+    width: 100%;
+    height: 100%;
   }
   .info {
     margin: 53px 41px 0px 0px;
@@ -247,6 +274,19 @@ export default {
   transition: opacity 150ms ease-in;
 }
 .fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+.translate-enter-active, .translate-leave-active {
+  transition: transform 350ms cubic-bezier(0.2, 0.3, 0.01, 1), opacity 350ms cubic-bezier(0.2, 0.3, 0.01, 1);
+}
+.translate-enter, .translate-leave-to {
+  transform: translateY(100px);
+  opacity: 0;
+}
+.fade2-enter-active, .fade2-leave-active {
+  transition: opacity 350ms cubic-bezier(0.2, 0.3, 0.01, 1);
+}
+.fade2-enter, .fade2-leave-to {
   opacity: 0;
 }
 </style>
