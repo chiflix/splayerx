@@ -2,7 +2,7 @@
 <div class="recent-playlist"
   v-show="backgroundDisplayState"
   @mousedown="handleMousedown">
-  <transition name="fade2">
+  <transition name="background-fade">
   <div class="background-gradient"
     v-show="displayState"/>
   </transition>
@@ -283,10 +283,10 @@ export default {
   transform: translateY(100px);
   opacity: 0;
 }
-.fade2-enter-active, .fade2-leave-active {
+.background-fade-enter-active, .background-fade-leave-active {
   transition: opacity 350ms cubic-bezier(0.2, 0.3, 0.01, 1);
 }
-.fade2-enter, .fade2-leave-to {
+.background-fade-enter, .background-fade-leave-to {
   opacity: 0;
 }
 </style>
