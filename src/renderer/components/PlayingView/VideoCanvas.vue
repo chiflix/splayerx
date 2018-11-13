@@ -10,7 +10,7 @@
       :src="convertedSrc"
       :playbackRate="rate"
       :volume="volume"
-      :muted="mute"
+      :muted="muted"
       :paused="paused"
       :updateCurrentTime="true"
       :currentTime="seekTime"
@@ -50,6 +50,7 @@ export default {
       play: videoActions.PLAY_VIDEO,
       pause: videoActions.PAUSE_VIDEO,
       updateMetaInfo: videoActions.META_INFO,
+      toggleMute: videoActions.TOGGLE_MUTED,
     }),
     ...mapMutations({
       updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
@@ -175,7 +176,7 @@ export default {
       windowBounds: state => state.Window.windowBounds,
     }),
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'mute', 'rate', 'paused', 'currentTime', 'duration', 'ratio',
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio',
       'winSize', 'winPos', 'isFullScreen']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -201,6 +202,9 @@ export default {
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.ratio]);
+    });
+    this.$bus.$on('toggle-muted', () => {
+      this.toggleMute();
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
