@@ -2,8 +2,10 @@
   <div
     :data-component-name="$options.name"
     class="video">
+    <transition name="fade" mode="out-in">
     <base-video-player
       ref="videoCanvas"
+      :key="originSrc"
       :events="['loadedmetadata']"
       :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
@@ -15,6 +17,7 @@
       :updateCurrentTime="true"
       :currentTime="seekTime"
       @update:currentTime="updateCurrentTime" />
+    </transition>
     <BaseSubtitle/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
@@ -268,5 +271,11 @@ export default {
 }
 .canvas {
   visibility: hidden;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 200ms ease-in;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>
