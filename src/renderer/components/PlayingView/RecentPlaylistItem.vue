@@ -14,7 +14,10 @@
         v-if="!isPlaying"
         v-show="imageLoaded"/>
         <div class="blur"
-          v-show="!isChosen && !isPlaying"></div>
+          v-show="!isChosen && !isPlaying"/>
+        <div class="white-hover"
+          v-show="isChosen && !isPlaying"/>
+        <div class="black-gradient"/>  
         <div class="content"
           @mouseover="mouseoverVideo"
           @mouseout="mouseoutVideo"
@@ -284,10 +287,21 @@ export default {
   position: absolute;
   left: 0.35px;
   top: 0.35px;
-  width: calc(100% - 0.35px);
-  height: calc(100% - 0.35px);
-  clip-path: inset(0px round 2px);
+  width: calc(100% - 0.7px);
+  height: calc(100% - 0.7px);
+  clip-path: inset(0px round 4px);
   backdrop-filter: blur(1px);
+}
+.white-hover {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255,255,255,0.3);
+}
+.black-gradient {
+  position: absolute;
+  width: 100%;
+  height: 100%;
   background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
 }
 .middleChosen {
