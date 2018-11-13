@@ -170,15 +170,15 @@ const actions = {
   [actionTypes.TOGGLE_MUTE]({ commit, state }) {
     commit(mutationTypes.MUTE_UPDATE, !state.mute);
   },
-  [actionTypes.INCREASE_RATE]({ commit, state }, delta) {
-    const finalDelta = delta || 0.1;
-    const finalRate = state.rate + finalDelta;
-    commit(mutationTypes.RATE_UPDATE, finalRate > 100 ? 1 : finalRate);
+  [actionTypes.INCREASE_RATE]({ commit, state }) {
+    const rateArr = [0.5, 1, 1.2, 1.5, 2];
+    const finalRate = rateArr[rateArr.indexOf(state.rate) + 1];
+    commit(mutationTypes.RATE_UPDATE, finalRate || state.rate);
   },
-  [actionTypes.DECREASE_RATE]({ commit, state }, delta) {
-    const finalDelta = delta || 0.1;
-    const finalRate = state.rate - finalDelta;
-    commit(mutationTypes.RATE_UPDATE, finalRate < 0 ? 0 : finalRate);
+  [actionTypes.DECREASE_RATE]({ commit, state }) {
+    const rateArr = [0.5, 1, 1.2, 1.5, 2];
+    const finalRate = rateArr[rateArr.indexOf(state.rate) - 1];
+    commit(mutationTypes.RATE_UPDATE, finalRate || state.rate);
   },
   [actionTypes.CHANGE_RATE]({ commit }, delta) {
     commit(mutationTypes.RATE_UPDATE, delta);
