@@ -243,7 +243,9 @@ export default {
   },
   computed: {
     currentAudioTrack() {
-      return this.$store.getters.currentAudioTrackId;
+      const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
+      if (track && track.id) return track.language;
+      return 'null';
     },
     winWidth() {
       return this.$store.getters.winWidth;

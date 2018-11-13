@@ -22,7 +22,7 @@
               :style="{
                 color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
                 transition: 'color 300ms',
-              }">{{ `音轨 ${index+1} : ${track.id}` }}
+              }">{{ `音轨 ${index+1} : ${track.language}` }}
             </div>
           </div>
           <div class="card"
