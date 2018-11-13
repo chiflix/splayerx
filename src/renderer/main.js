@@ -34,6 +34,7 @@ Vue.use(VueResource);
 
 Vue.use(VueAnalytics, {
   id: 'UA-2468227-6',
+  router,
 });
 
 Vue.mixin(helpers);

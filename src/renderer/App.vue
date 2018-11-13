@@ -26,9 +26,6 @@
       mainDispatchProxy(actionType, actionPayload) {
         this.$store.dispatch(actionType, actionPayload);
       },
-      track() {
-        this.$ga.page('/');
-      },
     },
     mounted() {
       /* eslint-disable no-unused-vars */
