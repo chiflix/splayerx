@@ -322,6 +322,10 @@ export default {
 }
 .speed {
   display: block;
+  @media screen and (max-width: 512px) {
+    width: 8px;
+    height: 6px;
+  }
   @media screen and (min-width: 513px) and (max-width: 854px) {
     width: 8px;
     height: 6px;

@@ -40,7 +40,17 @@ export default {
 }
 @media screen and (max-width: 512px) {
   .speedLabel {
-    display: none;
+    left: 76px;
+    bottom: 19px;
+    height: 15px;
+    .speedIcon {
+      margin: auto 0 auto 7.5px;
+    }
+    .rateNum {
+      line-height: 10px;
+      font-size: 10px;
+      margin: auto 7px auto 2.5px;
+    }
   }
 }
 @media screen and (min-width: 513px) and (max-width: 854px) {
@@ -76,15 +86,15 @@ export default {
 @media screen and (min-width: 1921px) {
   .speedLabel {
     left: 160px;
-    bottom: 43.6px;
-    height: 25px;
+    bottom: 43.5px;
+    height: 28px;
     .speedIcon {
-      margin: auto 0 auto 12px;
+      margin: 9px 0 0 12px;
     }
     .rateNum {
-      line-height: 17px;
-      font-size: 17px;
-      margin: auto 10px auto 4px;
+      line-height: 16px;
+      font-size: 16px;
+      margin: 7px 10px 0 4px;
     }
   }
 }
