@@ -117,10 +117,6 @@ export default {
         this.isChosen = true;
         this.mouseoverRecently = true;
       }
-      console.log(this.sliderPercentage);
-      console.log('duration', this.mediaInfo.duration);
-      console.log('lastPlayedTime', this.mediaInfo.lastPlayedTime);
-      console.log('/', (this.mediaInfo.lastPlayedTime / this.mediaInfo.duration) * 100);
       this.$emit('mouseoverItem', {
         index: this.index,
         mediaInfo: this.mediaInfo,
