@@ -1,12 +1,15 @@
 <template>
   <div class="recent-playlist"
     @mousedown="handleMousedown">
-    <div class="info"
-      @mousedown.stop="">
-      <div class="top">{{lastPlayedTime}} 
-      <span>{{timecodeFromSeconds(videoDuration)}}</span>&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
-      <div class="file-name">{{filename}}</div>
-    </div>
+    <transition name="fade" mode="out-in">
+      <div class="info"
+        :key="hoverIndex"
+        @mousedown.stop="">
+        <div class="top">{{lastPlayedTime}} 
+        <span>{{timecodeFromSeconds(videoDuration)}}</span>&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+        <div class="file-name">{{filename}}</div>
+      </div>
+    </transition>
     <div class="playlist-items"
       @mousedown.stop=""
       :style="{
@@ -215,7 +218,7 @@ export default {
       color: #FFFFFF;
       letter-spacing: 0.64px;
       line-height: 13px;
-      width: max-content;
+      width: fit-content;
     }
     .file-name {
       overflow: hidden;
@@ -239,5 +242,11 @@ export default {
     padding-bottom: 40px;
     padding-left: 40px;
   }
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 150ms ease-in;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>
