@@ -142,7 +142,7 @@ export default {
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
     });
     this.infoDB().get('recent-played', 'path', this.path).then((val) => {
-      if (val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
+      if (val && val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
       this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
   },

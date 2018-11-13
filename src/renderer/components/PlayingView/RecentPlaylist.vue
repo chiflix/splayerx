@@ -1,5 +1,6 @@
 <template>
-  <div class="recent-playlist">
+  <div class="recent-playlist"
+    @mousedown="handleMousedown">
     <div class="info"
       @mousedown.stop="">
       <div class="top">{{lastPlayedTime}} 
@@ -52,6 +53,9 @@ export default {
   mounted() {
   },
   methods: {
+    handleMousedown() {
+      this.$emit('update:showattached', false);
+    },
     itemMouseover(payload) {
       this.hoverIndex = payload.index;
       this.hoveredMediaInfo = payload.mediaInfo;
