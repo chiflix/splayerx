@@ -6,7 +6,6 @@
   :borderColor="isChosen ? '255,255,255,0.7' : '255,255,255,0.2'"
   :class="{ chosen: isChosen }"
   :style="{
-    cursor: isChosen && !isPlaying ? 'pointer' : '',
     minWidth: `${thumbnailWidth}px`,
     minHeight: `${thumbnailHeight}px`,
   }">
@@ -57,6 +56,7 @@
 </BaseInfoCard>
 </template>
 <script>
+import { mapGetters } from 'vuex';
 import fs from 'fs';
 import path from 'path';
 import BaseInfoCard from '@/components/PlayingView/BaseInfoCard.vue';
@@ -92,13 +92,6 @@ export default {
     path: {
       type: String,
     },
-    DBInfo: {
-      type: Object,
-    },
-    DBloaded: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
@@ -106,7 +99,9 @@ export default {
       showVideo: false,
       isChosen: false,
       duration: NaN,
-      imageSrc: '',
+      coverSrc: '',
+      mediaInfo: {},
+      DBInfo: {},
     };
   },
   methods: {
@@ -121,57 +116,53 @@ export default {
       }
       this.$emit('mouseoverItem', {
         index: this.index,
-        filename: this.baseName,
+        mediaInfo: this.mediaInfo,
       });
     },
     mouseoutVideo() {
       this.isBlur = true;
       this.isChosen = false;
+      this.$emit('mouseoutItem');
     },
   },
   mounted() {
     this.$electron.ipcRenderer.send('snapShot', this.path);
-    this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
       fs.readFile(`${imgPath}.png`, 'base64', (err, data) => {
-        if (!err && this.imageSrc === '') {
-          this.imageSrc = `data:image/png;base64, ${data}`;
+        if (!err) {
+          this.coverSrc = `data:image/png;base64, ${data}`;
         }
       });
     });
+    this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
-      const mediaInfo = JSON.parse(info);
-      console.log(mediaInfo.format);
+      this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
+    });
+    this.infoDB().get('recent-played', 'path', this.path).then((val) => {
+      this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
   },
   watch: {
-    DBloaded(val) {
-      if (val) {
-        if (this.DBInfo) {
-          if (this.DBInfo.smallShortCut) {
-            this.imageSrc = this.DBInfo.smallShortCut;
-          }
-        }
-      }
+    originSrc() {
+      this.infoDB().get('recent-played', 'path', this.path).then((val) => {
+        this.mediaInfo = Object.assign(this.mediaInfo, val);
+      });
     },
   },
   computed: {
+    ...mapGetters(['originSrc']),
+    imageSrc() {
+      if (this.mediaInfo.smallShortCut) {
+        return this.mediaInfo.smallShortCut;
+      }
+      return this.coverSrc; // need a placeholder
+    },
     thumbnailHeight() {
       return this.thumbnailWidth / (112 / 63);
     },
-    lastPlayedTime() {
-      if (this.DBInfo) {
-        if (this.DBInfo.lastPlayedTime && this.DBInfo.duration) {
-          return this.DBInfo.lastPlayedTime / this.DBInfo.duration;
-        }
-      }
-      return 0;
-    },
     sliderPercentage() {
-      if (this.DBInfo) {
-        if (this.DBInfo.duration && this.DBInfo.lastPlayedTime) {
-          return (this.DBInfo.lastPlayedTime / this.DBInfo.duration) * 100;
-        }
+      if (this.mediaInfo.duration && this.mediaInfo.lastPlayedTime) {
+        return (this.mediaInfo.lastPlayedTime / this.mediaInfo.duration) * 100;
       }
       return 0;
     },
@@ -180,12 +171,6 @@ export default {
     },
     bottom() {
       return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
-    },
-    srcOfVideo() {
-      const originPath = this.path;
-      const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
-
-      return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
     },
     baseName() {
       return path.basename(this.path, path.extname(this.path));
@@ -197,6 +182,9 @@ export default {
 .recent-playlist-item {
   margin-right: 15px;
   transition: transform 100ms ease-out;
+}
+.recent-playlist-item:hover {
+  cursor: pointer;
 }
 .chosen {
   transform: translateY(-9px);

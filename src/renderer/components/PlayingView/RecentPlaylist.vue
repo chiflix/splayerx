@@ -1,9 +1,8 @@
 <template>
-  <div class="recent-playlist"
-    @mousedown="handleMousedown">
+  <div class="recent-playlist">
     <div class="info"
       @mousedown.stop="">
-      <div class="top">{{lastPlayedTime}} / 
+      <div class="top">{{lastPlayedTime}} 
       <span>{{timecodeFromSeconds(duration)}}</span>&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
       <div class="file-name">{{filename}}</div>
     </div>
@@ -20,16 +19,16 @@
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
         :isShifting="shifting"
-        :DBInfo="itemInfos[index]"
-        :DBloaded="DBloaded"
         :showVideo="showAttached"
         :thumbnailWidth="thumbnailWidth"
         @mouseupItem="itemMouseup"
+        @mouseoutItem="itemMouseout"
         @mouseoverItem="itemMouseover"/>
     </div>
   </div>
 </template>
 <script>
+// import path from 'path';
 import { mapGetters } from 'vuex';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 export default {
@@ -43,28 +42,24 @@ export default {
   },
   data() {
     return {
-      itemInfos: [],
       filename: '',
       firstIndex: 0, // first index of current page
-      hoverIndex: 0,
+      hoverIndex: 0, // only for display
       shifting: false,
       snapShoted: false,
-      DBloaded: false,
-      imgPaths: [],
+      hoveredMediaInfo: {}, // the hovered video's media info
     };
   },
   mounted() {
     this.searchInfoDB();
   },
   methods: {
-    handleMousedown() {
-      this.$emit('update:showRecentPlaylist', false);
-    },
-    itemMouseleave() {
-    },
     itemMouseover(payload) {
       this.hoverIndex = payload.index;
-      this.filename = payload.filename;
+      this.hoveredMediaInfo = payload.mediaInfo;
+    },
+    itemMouseout() {
+      this.hoverIndex = this.playingIndex;
     },
     itemMouseup(index) {
       // last page
@@ -83,16 +78,6 @@ export default {
       } else if (index !== this.playingIndex) {
         this.openFile(this.playingList[index]);
       }
-    },
-    async searchInfoDB() {
-      const waitArray = [];
-      for (let i = 0; i < this.playingList.length; i += 1) {
-        const res = this.infoDB().get('recent-played', 'path', this.playingList[i]);
-        waitArray.push(res);
-      }
-      const resArray = await Promise.all(waitArray);
-      this.itemInfos = resArray;
-      this.DBloaded = true;
     },
   },
   watch: {
@@ -120,7 +105,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex']),
+    ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'roundedCurrentTime', 'originSrc']),
     inWhichSource() {
       if (this.isFolderList) {
         return '文件夹';
@@ -128,20 +113,24 @@ export default {
       return '播放列表';
     },
     lastPlayedTime() {
-      if (this.itemInfos[this.hoverIndex]) {
-        if (this.itemInfos[this.hoverIndex].lastPlayedTime) {
-          return `${this.timecodeFromSeconds(this.itemInfos[this.hoverIndex].lastPlayedTime)} /`;
-        }
+      if (this.hoverIndex === this.playingIndex) {
+        return `${this.timecodeFromSeconds(this.$store.getters.roundedCurrentTime)} /`;
+      } else if (this.hoveredMediaInfo.lastPlayedTime) {
+        return `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
       }
       return '';
     },
     duration() {
-      if (this.itemInfos[this.hoverIndex]) {
-        if (this.itemInfos[this.hoverIndex].duration) {
-          return this.itemInfos[this.hoverIndex].duration;
-        }
+      if (this.hoverIndex !== this.playingIndex) {
+        return this.hoveredMediaInfo.duration;
       }
-      return 0;
+      return this.duration;
+    },
+    filename() {
+      if (this.hoverIndex !== this.playingIndex) {
+        return this.hoveredMediaInfo.filename;
+      }
+      return this.originSrc;
     },
     indexInPlaylist() {
       return this.hoverIndex + 1;
@@ -161,9 +150,6 @@ export default {
           this.firstIndex = (val - this.thumbnailNumber) + 1;
         }
       },
-    },
-    currentSrc() {
-      return this.$store.getters.originSrc;
     },
     distance() {
       return this.firstIndex * (this.thumbnailWidth + 15);
