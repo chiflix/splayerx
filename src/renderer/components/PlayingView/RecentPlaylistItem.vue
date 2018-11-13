@@ -101,8 +101,8 @@ export default {
       isBlur: true,
       showVideo: false,
       isChosen: false,
-      duration: NaN,
       coverSrc: '',
+      lastPlayedTime: 0,
       mediaInfo: {},
       DBInfo: {},
     };
@@ -117,6 +117,10 @@ export default {
         this.isChosen = true;
         this.mouseoverRecently = true;
       }
+      console.log(this.sliderPercentage);
+      console.log('duration', this.mediaInfo.duration);
+      console.log('lastPlayedTime', this.mediaInfo.lastPlayedTime);
+      console.log('/', (this.mediaInfo.lastPlayedTime / this.mediaInfo.duration) * 100);
       this.$emit('mouseoverItem', {
         index: this.index,
         mediaInfo: this.mediaInfo,
@@ -142,12 +146,14 @@ export default {
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
     });
     this.infoDB().get('recent-played', 'path', this.path).then((val) => {
+      if (val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
       this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
   },
   watch: {
     originSrc() {
       this.infoDB().get('recent-played', 'path', this.path).then((val) => {
+        if (val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
     },
@@ -167,8 +173,10 @@ export default {
       return this.thumbnailWidth / (112 / 63);
     },
     sliderPercentage() {
-      if (this.mediaInfo.duration && this.mediaInfo.lastPlayedTime) {
-        return (this.mediaInfo.lastPlayedTime / this.mediaInfo.duration) * 100;
+      if (this.lastPlayedTime) {
+        if (this.mediaInfo.duration) {
+          return (this.lastPlayedTime / this.mediaInfo.duration) * 100;
+        }
       }
       return 0;
     },
