@@ -27,7 +27,7 @@
         :class="showShadow ? 'shadow' : '' "
         :style="{
           transition: tranFlag ? 'width 150ms ease-out, height 150ms ease-out, border 150ms ease-out' : '',
-          backgroundImage: itemShortcut(item.smallShortCut, item.smallCover, item.lastPlayedTime),
+          backgroundImage: itemShortcut(item.smallShortCut, item.cover, item.lastPlayedTime),
           width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
           height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
         }"
