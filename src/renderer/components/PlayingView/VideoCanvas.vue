@@ -146,6 +146,7 @@ export default {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
     $_saveScreenshot() {
+      const videoElement = this.$refs.videoCanvas.videoElement();
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       // todo: use metaloaded to get videoHeight and videoWidth
@@ -153,7 +154,7 @@ export default {
       // cannot delete
       [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
       canvasCTX.drawImage(
-        this.videoElement, 0, 0, videoWidth, videoHeight,
+        videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
@@ -162,7 +163,7 @@ export default {
       // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
       [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
       canvasCTX.drawImage(
-        this.videoElement, 0, 0, videoWidth, videoHeight,
+        videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
       const smallImagePath = canvas.toDataURL('image/png');
@@ -218,6 +219,7 @@ export default {
   watch: {
     originSrc(val, oldVal) {
       this.coverFinded = false;
+      this.videoElement = this.$refs.videoCanvas.videoElement();
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
