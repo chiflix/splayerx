@@ -41,6 +41,7 @@ export default {
   },
   data() {
     return {
+      filename: '',
       firstIndex: 0, // first index of current page
       hoverIndex: 0, // only for display
       shifting: false,
@@ -54,9 +55,14 @@ export default {
     itemMouseover(payload) {
       this.hoverIndex = payload.index;
       this.hoveredMediaInfo = payload.mediaInfo;
+      this.filename = path.basename(
+        payload.mediaInfo.filename,
+        path.extname(payload.mediaInfo.filename),
+      );
     },
     itemMouseout() {
       this.hoverIndex = this.playingIndex;
+      this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
     itemMouseup(index) {
       // last page
@@ -122,18 +128,6 @@ export default {
         return this.hoveredMediaInfo.duration;
       }
       return this.duration;
-    },
-    filename() {
-      if (this.hoverIndex !== this.playingIndex) {
-        return path.basename(
-          this.hoveredMediaInfo.filename,
-          path.extname(this.hoveredMediaInfo.filename),
-        );
-      }
-      return path.basename(
-        this.originSrc,
-        path.extname(this.originSrc),
-      );
     },
     indexInPlaylist() {
       return this.hoverIndex + 1;

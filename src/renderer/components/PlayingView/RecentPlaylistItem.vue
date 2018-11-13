@@ -11,8 +11,7 @@
   }">
       <div class="item">
        <img :src="imageSrc"
-        v-if="!isPlaying"
-        v-show="imageLoaded"/>
+        v-if="!isPlaying && imageLoaded"/>
         <div class="blur"
           v-show="!isChosen && !isPlaying"/>
         <div class="white-hover"
@@ -294,6 +293,7 @@ export default {
 }
 .white-hover {
   position: absolute;
+  border-radius: 4px;
   width: 100%;
   height: 100%;
   background-color: rgba(255,255,255,0.3);
