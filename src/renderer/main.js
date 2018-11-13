@@ -5,6 +5,7 @@ import axios from 'axios';
 import uuidv4 from 'uuid/v4';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
+import VueAnalytics from 'vue-analytics';
 
 import App from '@/App';
 import router from '@/router';
@@ -30,6 +31,11 @@ Vue.config.errorHandler = (err) => {
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
+
+Vue.use(VueAnalytics, {
+  id: 'UA-2468227-6',
+  router,
+});
 
 Vue.mixin(helpers);
 Vue.prototype.$bus = new Vue(); // Global event bus

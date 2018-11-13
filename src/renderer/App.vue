@@ -37,6 +37,8 @@
       });
       this.$electron.ipcRenderer.send('windowInit');
       this.$el.style.fontFamily = process.platform;
+
+      this.$ga.event('app', 'mounted');
     },
   };
 </script>
