@@ -302,6 +302,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
+  border-radius: 4px;
   background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
 }
 .middleChosen {
