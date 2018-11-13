@@ -19,40 +19,50 @@
         :style="{
           height: speedHeight,
           transition: 'height 100ms linear',
-          backgroundImage: speedChosen ? '' : hoverIndex === 1 ? preStyle : '',
         }">
+        <transition name="arrow">
+          <div class="hoverBack" v-show="!speedChosen && hoverIndex === 1" :style="{ height: speedHeight }"></div>
+        </transition>
         <advance-row-items :lists="numList" :item="itemSpeedName" :winWidth="winWidth" :isChosen="speedChosen" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleControl"
         @mouseenter="handleMouseenter(2)"
         @mouseleave="handleMouseleave()"
-        @click.left="handleSubClick"
-        :style="{
-          backgroundImage: hoverIndex === 2 ? preStyle : '',
-        }">
-        <div class="item2"
-          :style="{
-            color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-            transition: 'color 300ms',
-          }">
-          <div>字幕设置</div>
-          <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
+        @click.left="handleSubClick">
+        <transition name="arrow">
+          <div class="hoverSubBack" v-show="hoverIndex === 2"></div>
+        </transition>
+        <div class="subContainer">
+          <div class="item2"
+            :style="{
+              color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              transition: 'color 300ms',
+            }">
+            <div>字幕设置</div>
+            <transition name="arrow">
+              <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
+            </transition>
+          </div>
         </div>
       </div>
       <div class="audioItems"
         @mouseenter="handleMouseenter(3)"
         @mouseleave="handleMouseleave()"
-        @click.left="handleAudioClick"
-        :style="{
-          backgroundImage: hoverIndex === 3 ? preStyle : '',
-        }">
-        <div class="item3"
-          :style="{
-            color: hoverIndex === 3 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-            transition: 'color 300ms',
-          }">
-          <div>音频选项</div>
-          <Icon type="rightArrow" v-show="hoverIndex === 3"></Icon>
+        @click.left="handleAudioClick">
+        <transition name="arrow">
+          <div class="hoverAudioBack" v-show="hoverIndex === 3"></div>
+        </transition>
+        <div class="audioContainer">
+          <div class="item3"
+            :style="{
+              color: hoverIndex === 3 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              transition: 'color 300ms',
+            }">
+            <div>音频选项</div>
+            <transition name="arrow">
+              <Icon type="rightArrow" v-show="hoverIndex === 3"></Icon>
+            </transition>
+          </div>
         </div>
       </div>
     </div>
@@ -81,8 +91,10 @@
         :style="{
           height: subSizeHeight,
           transition: 'height 100ms linear',
-          backgroundImage: subSizeChosen ? '' : hoverSubIndex === 1 ? preStyle : '',
         }">
+        <transition name="arrow">
+          <div class="hoverBack" v-show="!subSizeChosen && hoverSubIndex === 1" :style="{ height: subSizeHeight }"></div>
+        </transition>
         <advance-row-items :lists="textList" :item="itemFontName" :winWidth="winWidth" :isChosen="subSizeChosen" :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleStyle" @click.left="handleColorClick"
@@ -91,8 +103,10 @@
         :style="{
           height: subColorHeight,
           transition: 'height 100ms linear',
-          backgroundImage: subColorChosen ? '' : hoverSubIndex === 2 ? preStyle : '',
         }">
+        <transition name="arrow">
+          <div class="hoverBack" v-show="!subColorChosen && hoverSubIndex === 2" :style="{ height: subColorHeight }"></div>
+        </transition>
         <advance-color-items :item="itemColorName" :winWidth="winWidth" :isChosen="subColorChosen" :color="hoverSubIndex === 2 && !subColorChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-color-items>
       </div>
       <div class="subtitleDelay" @click.left="handleDelayClick"
@@ -101,8 +115,10 @@
         :style="{
           height: subDelayHeight,
           transition: 'height 100ms linear',
-          backgroundImage: subDelayChosen ? '' : hoverSubIndex === 3 ? preStyle : '',
         }">
+        <transition name="arrow">
+          <div class="hoverBack" v-show="!subDelayChosen && hoverSubIndex === 3" :style="{ height: subDelayHeight }"></div>
+        </transition>
         <advance-selected-items :item="itemDelayName" :winWidth="winWidth" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
       </div>
     </div>
@@ -131,8 +147,10 @@
         :style="{
           height: audioDelayHeight,
           transition: 'height 100ms linear',
-          backgroundImage: showDelay ? '' : hoverAudioIndex === 1 ? preStyle : '',
         }">
+        <transition name="arrow">
+          <div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1" :style="{ height: audioDelayHeight }"></div>
+        </transition>
         <advance-selected-items :item="audioDelayName" :winWidth="winWidth" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
       </div>
       <div class="changeTrack" @click.left="handleTrackClick"
@@ -141,8 +159,11 @@
         :style="{
           height: changeTrackHeight,
           transition: 'height 100ms linear',
-          backgroundImage: showTrack ? '' : hoverAudioIndex === 2 && 2 <= trackNum ? preStyle : '',
         }">
+        <transition name="arrow">
+          <div class="hoverBack" v-show="!showTrack && hoverAudioIndex === 2" :style="{ height: changeTrackHeight }"></div>
+        </transition>
+        <div class="trackContainer">
         <transition name="audioTransIn">
           <div class="item2" v-show="!showTrack">
             <div :style="{
@@ -156,6 +177,7 @@
             }">{{ currentAudioTrack }}</div>
           </div>
         </transition>
+        </div>
         <transition name="audioTransOut">
           <advance-column-items :item="itemTrack" :winWidth="winWidth" v-show="showTrack"></advance-column-items>
         </transition>
@@ -437,10 +459,10 @@ export default {
   .card {
     width: 170px;
   }
-  .playSpeed {
+  .playSpeed, .hoverBack {
     width: 170px;
   }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay {
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
     width: 170px;
     height: 37px;
   }
@@ -477,10 +499,10 @@ export default {
   .card {
     width: 204px;
   }
-  .playSpeed {
+  .playSpeed, .hoverBack {
     width: 204px;
   }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay {
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
     width: 204px;
     height: 44.4px;
   }
@@ -517,10 +539,10 @@ export default {
   .card {
     width: 285.6px;
   }
-  .playSpeed {
+  .playSpeed, .hoverBack {
     width: 285.6px;
   }
-  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay {
+  .subtitleControl, .audioItems, .topContainer, .itemSize, .subtitleStyle, .subtitleDelay, .audioDelay, .hoverSubBack, .subContainer, .hoverAudioBack, .audioContainer, .trackContainer {
     width: 285.6px;
     height: 62.16px;
   }
@@ -554,6 +576,12 @@ export default {
   }
 }
 
+.card {
+  -webkit-app-region: no-drag;
+}
+.hoverBack {
+  background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
+}
 .mainItems {
   display: flex;
   flex-direction: column;
@@ -567,6 +595,13 @@ export default {
   }
   .subtitleControl {
     display: flex;
+    .hoverSubBack {
+      background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
+    }
+    .subContainer {
+      position: absolute;
+      display: flex;
+    }
     .item2 {
       margin: auto;
       display: flex;
@@ -575,6 +610,13 @@ export default {
   }
   .audioItems {
     display: flex;
+    .audioContainer {
+      position: absolute;
+      display: flex;
+    }
+    .hoverAudioBack {
+      background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.045) 20%, rgba(255,255,255,0.00) 78%, rgba(255,255,255,0.00) 100%);
+    }
     .item3 {
       margin: auto;
       display: flex;
@@ -624,6 +666,10 @@ export default {
       justify-content: flex-start;
     }
   }
+  .trackContainer {
+    display: flex;
+    position: absolute;
+  }
   .audioDelay {
     display: flex;
   }
@@ -635,6 +681,13 @@ export default {
       margin: auto;
     }
   }
+}
+
+.arrow-enter-active, .arrow-leave-active {
+  transition: opacity .2s;
+}
+.arrow-enter, .arrow-leave-to {
+  opacity: 0;
 }
 
 .audioTransOut-leave-active {

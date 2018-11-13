@@ -34,6 +34,8 @@ export default {
     line-height: 9px;
     font-size: 10px;
     margin: 3px 7px auto 2.5px;
+    font-family: Avenir;
+    font-weight: 600;
   }
 }
 @media screen and (max-width: 512px) {
@@ -43,7 +45,7 @@ export default {
 }
 @media screen and (min-width: 513px) and (max-width: 854px) {
   .speedLabel {
-    left: 84px;
+    left: 85px;
     bottom: 24px;
     height: 15px;
     .speedIcon {
@@ -58,8 +60,8 @@ export default {
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
   .speedLabel {
-    left: 103px;
-    bottom: 31px;
+    left: 106px;
+    bottom: 30px;
     height: 18px;
     .speedIcon {
       margin: auto 0 auto 8px;

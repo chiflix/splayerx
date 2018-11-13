@@ -30,7 +30,7 @@
               }">
               <div class="text"
                 :style="{
-                  color: list.chosen || index === hoverIndex ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
+                  color: list.chosen || index === hoverIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.4)',
                   margin: 'auto',
                   transition: 'color 300ms',
                 }">{{ list[0] }}

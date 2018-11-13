@@ -20,9 +20,8 @@
         <div class="listContainer" v-show="isChosen">
          <div class="rowContainer">
            <Icon type="minus" class="decrease" @click.left.native="handleDecrease"></Icon>
-           <div class="card">
-             <div class="delay">{{ delayNum }}</div>
-           </div>
+           <div class="card"></div>
+           <div class="delay">{{ delayNum }}</div>
            <Icon type="plus" class="increase" @click.left.native="handleIncrease"></Icon>
           </div>
         </div>
@@ -131,9 +130,10 @@ export default {
           width: 41px;
           height: 27px;
           margin-right: 10px;
-          .delay {
-            font-size: 11px;
-          }
+        }
+        .delay {
+          font-size: 11px;
+          margin-top: 6.5px;
         }
       }
     }
@@ -179,9 +179,10 @@ export default {
           width: 49.2px;
           height: 32.4px;
           margin-right: 12px;
-          .delay {
-            font-size: 13.2px;
-          }
+        }
+        .delay {
+          font-size: 13.2px;
+          margin-top: 7.8px;
         }
       }
     }
@@ -228,9 +229,10 @@ export default {
           width: 68.88px;
           height: 45.36px;
           margin-right: 16.8px;
-          .delay {
-            font-size: 18.48px;
-          }
+        }
+        .delay {
+          font-size: 18.48px;
+          margin-top: 10.92px;
         }
       }
     }
@@ -276,15 +278,14 @@ export default {
       justify-content: center;
       margin: -2px auto;
       .card {
-        display: flex;
         border-radius: 7px;
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
         background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
-        .delay{
-          color: rgba(255, 255, 255, 0.6);
-          margin: auto;
-        }
+      }
+      .delay{
+        position: absolute;
+        color: rgba(255, 255, 255, 0.9);
       }
     }
   }
