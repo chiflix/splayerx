@@ -27,7 +27,7 @@
   </div>
   <div class="thumbnail-shadow"></div>
   <div class="thumbnail"
-    @mousedown.stop="handleMouseDown"
+    @mousedown="handleMouseDown"
     @mouseover="mouseoverVideo"
     @mouseout="mouseoutVideo">
     <video ref="videoThumbnail"
