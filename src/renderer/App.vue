@@ -38,8 +38,8 @@
       });
       this.$electron.ipcRenderer.send('windowInit');
       this.$el.style.fontFamily = process.platform;
-
       drag(this.$el);
+      this.$ga.event('app', 'mounted');
     },
   };
 </script>
