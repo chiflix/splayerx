@@ -1,8 +1,10 @@
 <template>
-  <div class="speedLabel">
-    <Icon type="speed" class="speedIcon"></Icon>
-    <div class="rateNum">{{ rate }}</div>
-  </div>
+  <transition name="label">
+    <div class="speedLabel" v-show="showLabel">
+      <Icon type="speed" class="speedIcon"></Icon>
+      <div class="rateNum">{{ rate }}</div>
+    </div>
+  </transition>
 </template>
 
 <script>
@@ -10,11 +12,32 @@ import { mapGetters } from 'vuex';
 import Icon from '../BaseIconContainer.vue';
 export default {
   name: 'speedLabel',
+  data() {
+    return {
+      showLabel: false,
+      changeSrc: false,
+    };
+  },
   components: {
     Icon,
   },
   computed: {
     ...mapGetters(['rate']),
+  },
+  watch: {
+    rate(val) {
+      if (val === 1 && !this.changeSrc) {
+        setTimeout(() => {
+          this.showLabel = false;
+        }, 3000);
+      } else this.showLabel = !(val === 1 && this.changeSrc);
+      this.changeSrc = false;
+    },
+  },
+  mounted() {
+    this.$bus.$on('showlabel', () => {
+      this.changeSrc = true;
+    });
   },
 };
 </script>
@@ -97,5 +120,11 @@ export default {
       margin: 7px 10px 0 4px;
     }
   }
+}
+.label-enter-active, .label-leave-active {
+  transition: opacity .3s;
+}
+.label-enter, .label-leave-to {
+  opacity: 0;
 }
 </style>

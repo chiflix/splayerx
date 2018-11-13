@@ -78,6 +78,20 @@ export default {
       type: Number,
     },
   },
+  watch: {
+    rate(val) {
+      if (val === 1) {
+        this.moveLength = '';
+        this.lists.forEach((i, ind) => {
+          if (ind !== 1) {
+            this.$set(this.lists[ind], 'chosen', false);
+          } else {
+            this.$set(this.lists[ind], 'chosen', true);
+          }
+        });
+      }
+    },
+  },
   computed: {
     ...mapGetters(['rate']),
     cardPos() {
