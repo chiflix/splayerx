@@ -153,7 +153,7 @@
               class="trackDetail"
               :style="{
               color: 'rgba(255, 255, 255, 0.6)',
-            }">音轨 1</div>
+            }">{{ currentAudioTrack }}</div>
           </div>
         </transition>
         <transition name="audioTransOut">
@@ -220,6 +220,9 @@ export default {
     },
   },
   computed: {
+    currentAudioTrack() {
+      return this.$store.getters.currentAudioTrackId;
+    },
     winWidth() {
       return this.$store.getters.winWidth;
     },
