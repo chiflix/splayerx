@@ -3,7 +3,7 @@
     <div class="info"
       @mousedown.stop="">
       <div class="top">{{lastPlayedTime}} 
-      <span>{{timecodeFromSeconds(duration)}}</span>&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+      <span>{{timecodeFromSeconds(videoDuration)}}</span>&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
       <div class="file-name">{{filename}}</div>
     </div>
     <div class="playlist-items"
@@ -19,7 +19,6 @@
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
         :isShifting="shifting"
-        :showVideo="showAttached"
         :thumbnailWidth="thumbnailWidth"
         @mouseupItem="itemMouseup"
         @mouseoutItem="itemMouseout"
@@ -28,7 +27,7 @@
   </div>
 </template>
 <script>
-// import path from 'path';
+import path from 'path';
 import { mapGetters } from 'vuex';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 export default {
@@ -42,7 +41,6 @@ export default {
   },
   data() {
     return {
-      filename: '',
       firstIndex: 0, // first index of current page
       hoverIndex: 0, // only for display
       shifting: false,
@@ -51,7 +49,6 @@ export default {
     };
   },
   mounted() {
-    this.searchInfoDB();
   },
   methods: {
     itemMouseover(payload) {
@@ -120,7 +117,7 @@ export default {
       }
       return '';
     },
-    duration() {
+    videoDuration() {
       if (this.hoverIndex !== this.playingIndex) {
         return this.hoveredMediaInfo.duration;
       }
@@ -128,9 +125,15 @@ export default {
     },
     filename() {
       if (this.hoverIndex !== this.playingIndex) {
-        return this.hoveredMediaInfo.filename;
+        return path.basename(
+          this.hoveredMediaInfo.filename,
+          path.extname(this.hoveredMediaInfo.filename),
+        );
       }
-      return this.originSrc;
+      return path.basename(
+        this.originSrc,
+        path.extname(this.originSrc),
+      );
     },
     indexInPlaylist() {
       return this.hoverIndex + 1;
