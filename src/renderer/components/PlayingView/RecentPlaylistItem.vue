@@ -11,7 +11,8 @@
   }">
       <div class="item">
        <img :src="imageSrc"
-        v-if="!isPlaying"/>
+        v-if="!isPlaying"
+        v-show="imageLoaded"/>
         <div class="blur"
           v-show="!isChosen && !isPlaying"></div>
         <div class="content"
@@ -155,7 +156,10 @@ export default {
       if (this.mediaInfo.smallShortCut) {
         return this.mediaInfo.smallShortCut;
       }
-      return this.coverSrc; // need a placeholder
+      return this.coverSrc;
+    },
+    imageLoaded() {
+      return this.mediaInfo.smallShortCut || this.coverSrc !== '';
     },
     thumbnailHeight() {
       return this.thumbnailWidth / (112 / 63);
@@ -194,7 +198,7 @@ export default {
   border-radius: 4px;
   width: 100%;
   height: 100%;
-  background-color: rgba(255,255,255,0.2);
+  background-color: rgba(255,255,255,0.1);
   img {
     position: absolute;
     border-radius: 4px;
