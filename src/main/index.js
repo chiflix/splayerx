@@ -1,5 +1,7 @@
 import { app, BrowserWindow, Tray, ipcMain, globalShortcut } from 'electron' // eslint-disable-line
-import WindowResizer from './helpers/windowResizer.js';
+import { throttle } from 'lodash';
+import writeLog from './helpers/writeLog';
+import WindowResizer from './helpers/windowResizer';
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -60,25 +62,26 @@ function handleBossKey() {
 
 function registerMainWindowEvent() {
   if (!mainWindow) return;
-  mainWindow.on('resize', () => {
+  // TODO: should be able to use window.outerWidth/outerHeight directly
+  mainWindow.on('resize', throttle(() => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-    mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
-    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
-    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
-    mainWindow.webContents.send('main-resize');
-  });
-  mainWindow.on('move', () => {
+  }, 100));
+  mainWindow.on('move', throttle(() => {
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
-    mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
-    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
-    mainWindow.webContents.send('main-move');
-  });
+  }, 100));
   mainWindow.on('enter-full-screen', () => {
     mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
+    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('leave-full-screen', () => {
     mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
     mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
+  });
+  mainWindow.on('maximize', () => {
+    mainWindow.webContents.send('mainCommit', 'isMaximized', true);
+  });
+  mainWindow.on('unmaximize', () => {
+    mainWindow.webContents.send('mainCommit', 'isMaximized', false);
   });
   mainWindow.on('focus', () => {
     mainWindow.webContents.send('mainCommit', 'isFocused', true);
@@ -106,12 +109,18 @@ function registerMainWindowEvent() {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
     mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
     mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
-    mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
     mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
     mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
   ipcMain.on('bossKey', () => {
     handleBossKey();
+  });
+  ipcMain.on('writeLog', (event, level, info) => {
+    writeLog(level, info);
+    const message = typeof info === 'string' ? info : info.message;
+    if (mainWindow && message && message.indexOf('Failed to open file') !== -1) {
+      mainWindow.webContents.send('addMessages');
+    }
   });
 }
 
