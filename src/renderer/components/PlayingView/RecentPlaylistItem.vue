@@ -2,7 +2,7 @@
 <BaseInfoCard class="recent-playlist-item"
   :height="thumbnailHeight"
   :width="thumbnailWidth"
-  :borderRadius="4"
+  :borderRadius="0"
   :borderColor="isChosen ? '255,255,255,0.7' : '255,255,255,0.2'"
   :class="{ chosen: isChosen }"
   :style="{
@@ -204,13 +204,13 @@ export default {
 }
 .item {
   position: relative;
-  border-radius: 4px;
+  border-radius: 0px;
   width: 100%;
   height: 100%;
   background-color: rgba(255,255,255,0.1);
   img {
     position: absolute;
-    border-radius: 4px;
+    border-radius: 0px;
     width: 100%;
     height: 100%;
     transform: translate(-0.2px, 0px);
@@ -302,12 +302,11 @@ export default {
   top: 0.35px;
   width: calc(100% - 0.7px);
   height: calc(100% - 0.7px);
-  clip-path: inset(0px round 4px);
   backdrop-filter: blur(1px);
 }
 .white-hover {
   position: absolute;
-  border-radius: 4px;
+  border-radius: 0px;
   width: 100%;
   height: 100%;
   background-color: rgba(255,255,255,0.3);
@@ -316,7 +315,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 4px;
+  border-radius: 0px;
   background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
 }
 .middleChosen {
