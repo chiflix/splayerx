@@ -53,7 +53,7 @@ new Vue({
   store,
   template: '<App/>',
   computed: {
-    ...mapGetters(['mute']),
+    ...mapGetters(['muted']),
   },
   methods: {
     createMenu() {
@@ -156,8 +156,8 @@ new Vue({
               type: 'checkbox',
               accelerator: 'M',
               click: (menuItem) => {
-                this.$bus.$emit('toggle-mute');
-                menuItem.checked = this.mute;
+                this.$bus.$emit('toggle-muted');
+                menuItem.checked = this.muted;
               },
             },
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
@@ -518,7 +518,7 @@ new Vue({
           }
           break;
         case 'Escape':
-          this.$bus.$emit('leave-fullscreen');
+          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
           break;
         default:
           break;

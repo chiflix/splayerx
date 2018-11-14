@@ -32,7 +32,7 @@ const state = {
   // controls
   controls: false,
   volume: 100,
-  mute: false,
+  muted: false,
   defaultMuted: false,
   // tracks
   audioTrackList: [],
@@ -62,7 +62,7 @@ const getters = {
   roundedCurrentTime: state => Math.round(state.currentTime),
   // controls
   volume: state => state.volume / 100,
-  mute: state => state.mute,
+  muted: state => state.muted,
   rate: state => state.rate,
   // tracks
   audioTrackList: state => state.audioTrackList,
@@ -155,20 +155,20 @@ const actions = {
     });
   },
   [actionTypes.INCREASE_VOLUME]({ dispatch, commit, state }, delta) {
-    if (state.mute) dispatch(actionTypes.TOGGLE_MUTE);
+    if (state.muted) dispatch(actionTypes.TOGGLE_MUTED);
     const finalDelta = delta || 10;
     const finalVolume = state.volume + finalDelta;
     commit(mutationTypes.VOLUME_UPDATE, finalVolume > 100 ? 100 : finalVolume);
   },
   [actionTypes.DECREASE_VOLUME]({ dispatch, commit, state }, delta) {
-    if (state.mute) dispatch(actionTypes.TOGGLE_MUTE);
+    if (state.muted) dispatch(actionTypes.TOGGLE_MUTED);
     const finalDelta = delta || 10;
     const finalVolume = state.volume - finalDelta;
     commit(mutationTypes.VOLUME_UPDATE, finalVolume < 0 ? 0 : finalVolume);
-    if (finalVolume <= 0) commit(mutationTypes.MUTE_UPDATE, true);
+    if (finalVolume <= 0) commit(mutationTypes.MUTED_UPDATE, true);
   },
-  [actionTypes.TOGGLE_MUTE]({ commit, state }) {
-    commit(mutationTypes.MUTE_UPDATE, !state.mute);
+  [actionTypes.TOGGLE_MUTED]({ commit, state }) {
+    commit(mutationTypes.MUTED_UPDATE, !state.muted);
   },
   [actionTypes.INCREASE_RATE]({ commit, state }) {
     const rateArr = [0.5, 1, 1.2, 1.5, 2];
