@@ -4,9 +4,10 @@
     class="video">
     <base-video-player
       ref="videoCanvas"
-      :events="['loadedmetadata']"
+      :events="['loadedmetadata', 'audiotrack']"
       :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
+      @audiotrack="onAudioTrack"
       :src="convertedSrc"
       :playbackRate="rate"
       :volume="volume"
@@ -14,6 +15,7 @@
       :paused="paused"
       :updateCurrentTime="true"
       :currentTime="seekTime"
+      :currentAudioTrackId="currentAudioTrackId"
       @update:currentTime="updateCurrentTime" />
     <BaseSubtitle/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
@@ -51,6 +53,10 @@ export default {
       pause: videoActions.PAUSE_VIDEO,
       updateMetaInfo: videoActions.META_INFO,
       toggleMute: videoActions.TOGGLE_MUTED,
+      addAudioTrack: videoActions.ADD_AUDIO_TRACK,
+      removeAudioTrack: videoActions.REMOVE_AUDIO_TRACK,
+      switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
+      removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
     }),
     ...mapMutations({
       updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
@@ -71,6 +77,10 @@ export default {
       this.$bus.$emit('seek', this.currentTime);
       this.$bus.$emit('video-loaded');
       this.changeWindowSize();
+    },
+    onAudioTrack(event) {
+      const { type, track } = event;
+      this[`${type}AudioTrack`](track);
     },
     changeWindowSize() {
       let newSize = [];
@@ -177,6 +187,7 @@ export default {
     }),
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio',
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
       'winSize', 'winPos', 'isFullScreen']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',

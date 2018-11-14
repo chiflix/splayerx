@@ -12,7 +12,7 @@
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <notification-bubble/>
-    <div class="masking" v-hidden="showAllWidgets"></div>
+    <div class="masking" v-hidden="displayState['the-progress-bar']"></div>
     <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
@@ -21,6 +21,7 @@
       <advance-control class="button advance" v-hidden="displayState['advance-control']" v-bind.sync="widgetsStatus['advance-control']"/>
     </div>
     <the-time-codes v-hidden="displayState['the-progress-bar']" />
+    <SpeedLabel v-hidden="displayState['the-progress-bar']"/>
     <the-progress-bar v-hidden="displayState['the-progress-bar']"/>
   </div>
 </template>
@@ -37,6 +38,7 @@ import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
 import TheProgressBar from './TheProgressBar';
 import NotificationBubble from '../NotificationBubble.vue';
+import SpeedLabel from './RateLabel.vue';
 export default {
   name: 'the-video-controller',
   components: {
@@ -49,6 +51,7 @@ export default {
     'the-time-codes': TheTimeCodes,
     'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
+    SpeedLabel,
   },
   directives: {
     hidden: {
@@ -131,6 +134,8 @@ export default {
         ArrowRight: false,
         Space: false,
         KeyM: false,
+        BracketLeft: false,
+        BracketRight: false,
       }],
     ]);
     // Use Object due to vue's lack support of reactive Map
@@ -217,7 +222,7 @@ export default {
         this.hideVolume = false;
       }
       // hideProgressBar timer
-      const progressKeydown = this.orify(currentEventInfo.get('keydown').ArrowLeft, currentEventInfo.get('keydown').ArrowRight);
+      const progressKeydown = this.orify(currentEventInfo.get('keydown').ArrowLeft, currentEventInfo.get('keydown').ArrowRight, currentEventInfo.get('keydown').BracketLeft, currentEventInfo.get('keydown').BracketRight);
       if (progressKeydown) {
         this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
         // Prevent all widgets display before the-progress-bar
