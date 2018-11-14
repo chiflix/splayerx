@@ -62,17 +62,14 @@ export default {
       this.$emit('manualclose-next-video');
     },
     onTimeupdate() {
-      const { duration } = this;
-      const currentTime = this.roundedCurrentTime;
-      if (currentTime < this.finalPartTime) {
+      if (this.currentTime < this.finalPartTime) {
         this.$emit('close-next-video');
-      } else if (currentTime >= duration) {
+      } else if (this.currentTime === this.duration) {
         this.$emit('close-next-video');
         this.openFile(this.nextVideo);
-        this.$bus.$emit('seek', 0); // avoid skipping the next video
       } else {
-        const fractionProgress = (currentTime - this.finalPartTime)
-          / (duration - this.finalPartTime);
+        const fractionProgress = (this.currentTime - this.finalPartTime)
+          / (this.duration - this.finalPartTime);
         this.progress = fractionProgress * 100;
       }
       requestAnimationFrame(this.onTimeupdate);
@@ -82,7 +79,6 @@ export default {
         this.$emit('close-next-video');
         this.$bus.$emit('seek', this.duration);
         this.openFile(this.nextVideo);
-        this.$bus.$emit('seek', 0); // avoid skipping the next video
       }
     },
     mouseoverVideo() {
@@ -104,7 +100,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['nextVideo', 'finalPartTime', 'isFolderList', 'roundedCurrentTime', 'duration']),
+    ...mapGetters(['nextVideo', 'finalPartTime', 'isFolderList', 'currentTime', 'duration']),
     videoName() {
       return path.basename(this.nextVideo, path.extname(this.nextVideo));
     },
