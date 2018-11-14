@@ -16,6 +16,7 @@ export default {
     return {
       showLabel: false,
       changeSrc: false,
+      changeState: false,
     };
   },
   components: {
@@ -27,10 +28,18 @@ export default {
   watch: {
     rate(val) {
       if (val === 1 && !this.changeSrc) {
+        this.changeState = true;
         setTimeout(() => {
-          this.showLabel = false;
+          if (this.changeState) {
+            this.showLabel = false;
+          }
         }, 3000);
-      } else this.showLabel = !(val === 1 && this.changeSrc);
+      } else if (val === 1 && this.changeSrc) {
+        this.showLabel = false;
+      } else {
+        this.changeState = false;
+        this.showLabel = true;
+      }
       this.changeSrc = false;
     },
   },
