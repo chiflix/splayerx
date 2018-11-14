@@ -9,6 +9,7 @@
 </template>
 
 <script>
+  import drag from '@/helpers/drag';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
   export default {
@@ -37,7 +38,7 @@
       });
       this.$electron.ipcRenderer.send('windowInit');
       this.$el.style.fontFamily = process.platform;
-
+      drag(this.$el);
       this.$ga.event('app', 'mounted');
     },
   };

@@ -89,7 +89,7 @@ function registerMainWindowEvent() {
 
   ipcMain.on('callCurrentWindowMethod', (evt, method, args = []) => {
     const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow;
-    if (typeof (currentWindow[method]) === 'function') {
+    if (currentWindow && typeof (currentWindow[method]) === 'function') {
       currentWindow[method](...args);
     }
   });
