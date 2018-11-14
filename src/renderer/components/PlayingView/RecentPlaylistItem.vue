@@ -30,10 +30,14 @@
                   width: `${thumbnailWidth - 2 * side}px`,
                   left: `${side}px`,
                 }">
+              <div class="overflow-container">
+              <transition name="icon">
               <div class="icon-container"
                 v-if="isPlaying">
                 <Icon type="playlistplay" class="playlist-play"/>
                 <div class="playing">正在播放</div>
+              </div>
+              </transition>
               </div>
               <transition name="fade">
               <div class="progress"
@@ -223,19 +227,27 @@ export default {
       position: absolute;
       top: 0;
     }
-    .icon-container {
+    .overflow-container {
       position: absolute;
-      display: flex;
-      flex-direction: row;
-      z-index: 100;
+      width: 100%;
+      height: 22px;
+      overflow: hidden;
       bottom: 14px;
 
       @media screen and (min-width: 1355px) {
         bottom: 1.03vw;
       }
+    }
+    .icon-container {
+      position: absolute;
+      display: flex;
+      flex-direction: row;
+      z-index: 100;
+      height: fit-content;
+
       .playlist-play {
-        height: 22px;
         width: 10px;
+        height: 22px;
         margin-right: 2px;
 
         @media screen and (min-width: 1355px) {
@@ -318,5 +330,11 @@ export default {
 }
 .fade-enter, .fade-leave-to {
   opacity: 0;
+}
+.icon-enter-active, .icon-leave-active {
+  transition: transform 80ms linear;
+}
+.icon-enter, .icon-leave-to {
+  transform: translateY(12px);
 }
 </style>
