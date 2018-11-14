@@ -239,10 +239,9 @@ export default {
     width: 90%;
     .top {
       margin-top: 1px;
-      opacity: 0.4;
       font-family: Avenir-Heavy;
       font-size: 14px;
-      color: #FFFFFF;
+      color: rgba(235,235,235,0.6);
       letter-spacing: 0.64px;
       line-height: 13px;
       width: fit-content;

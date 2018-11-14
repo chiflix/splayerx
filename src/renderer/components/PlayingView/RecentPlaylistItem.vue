@@ -50,6 +50,7 @@
               </transition>
               <div class="title"
                 :style="{
+                  color: isChosen ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.40)',
                   fontSize: winWidth > 1355 ? '1.03vw' : '14px',
                   lineHeight: winWidth > 1355 ? '1.03vw' : '14px',
                 }">{{ baseName }}</div>
@@ -278,7 +279,6 @@ export default {
 
     z-index: 100;
     font-family: Avenir-Heavy;
-    color: rgba(255,255,255,0.40);
     letter-spacing: 0.58px;
 
     width: 100%;
