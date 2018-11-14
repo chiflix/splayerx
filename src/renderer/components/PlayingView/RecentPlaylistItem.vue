@@ -6,6 +6,7 @@
   :borderColor="isChosen ? '255,255,255,0.7' : '255,255,255,0.2'"
   :class="{ chosen: isChosen }"
   :style="{
+    cursor: isPlaying ? '' : 'pointer',
     minWidth: `${thumbnailWidth}px`,
     minHeight: `${thumbnailHeight}px`,
   }">
@@ -197,9 +198,6 @@ export default {
 .recent-playlist-item {
   margin-right: 15px;
   transition: transform 100ms ease-out;
-}
-.recent-playlist-item:hover {
-  cursor: pointer;
 }
 .chosen {
   transform: translateY(-9px);
