@@ -43,6 +43,7 @@
 </template>
 <script>
 import path from 'path';
+import { Video as videoAction } from '@/store/actionTypes.js';
 import { mapGetters } from 'vuex';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 export default {
@@ -103,6 +104,7 @@ export default {
         }, 400);
       } else if (index !== this.playingIndex) {
         this.openFile(this.playingList[index]);
+        this.$store.dispatch(videoAction.PLAY_VIDEO);
       }
     },
   },
