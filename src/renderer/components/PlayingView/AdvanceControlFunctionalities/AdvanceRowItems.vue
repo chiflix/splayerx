@@ -80,16 +80,18 @@ export default {
   },
   watch: {
     rate(val) {
-      const numList = [0.5, 1, 1.2, 1.5, 2];
-      this.lists.forEach((i, ind) => {
-        if (ind !== numList.indexOf(val)) {
-          this.$set(this.lists[ind], 'chosen', false);
-        } else {
-          this.$set(this.lists[ind], 'chosen', true);
-        }
-      });
-      this.selectedIndex = numList.indexOf(val);
-      this.calculateSpeedLength(numList.indexOf(val));
+      if (this.item === '播放速度') {
+        const numList = [0.5, 1, 1.2, 1.5, 2];
+        this.lists.forEach((i, ind) => {
+          if (ind !== numList.indexOf(val)) {
+            this.$set(this.lists[ind], 'chosen', false);
+          } else {
+            this.$set(this.lists[ind], 'chosen', true);
+          }
+        });
+        this.selectedIndex = numList.indexOf(val);
+        this.calculateSpeedLength(numList.indexOf(val));
+      }
     },
   },
   computed: {

@@ -161,7 +161,7 @@
           transition: 'height 100ms linear',
         }">
         <transition name="arrow">
-          <div class="hoverBack" v-show="!showTrack && hoverAudioIndex === 2" :style="{ height: changeTrackHeight }"></div>
+          <div class="hoverBack" v-show="!showTrack && hoverAudioIndex === 2 && 2 <= trackNum" :style="{ height: changeTrackHeight }"></div>
         </transition>
         <div class="trackContainer">
         <transition name="audioTransIn">
@@ -243,9 +243,12 @@ export default {
   },
   computed: {
     currentAudioTrack() {
+      if (this.trackNum === 1) {
+        return '默认';
+      }
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
       if (track && track.id) return track.language;
-      return 'null';
+      return '默认';
     },
     winWidth() {
       return this.$store.getters.winWidth;

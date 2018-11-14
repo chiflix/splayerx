@@ -33,11 +33,6 @@ export default {
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
   },
-  computed: {
-    stateMessage() {
-      return this.$store.getters.stateInfo;
-    },
-  },
   data() {
     return {
       isAcitve: false,
