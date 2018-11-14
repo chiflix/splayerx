@@ -25,7 +25,7 @@
         right: `${distance}px`,
       }">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
-        :key="index"
+        :key="item"
         :index="index"
         :path="item"
         :isInRange="index >= firstIndex && index <= lastIndex"
