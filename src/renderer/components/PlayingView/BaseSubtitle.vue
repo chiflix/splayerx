@@ -49,14 +49,6 @@ export default {
       firstCueHTML: [],
       secondCueHTML: [],
       subStyle: {},
-      curStyle: {
-        fontSize: 5,
-        letterSpacing: 1,
-        opacity: 1,
-        color: '',
-        border: '',
-        background: '',
-      },
     };
   },
   methods: {
@@ -701,6 +693,9 @@ export default {
     },
   },
   computed: {
+    curStyle() {
+      return this.$store.getters.curStyle;
+    },
     ...mapGetters(['duration', 'originSrc', 'currentTime']),
     firstSubState() { // lazy computed and lazy watched
       return this.$store.getters.firstSubtitleIndex !== -1;

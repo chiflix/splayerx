@@ -4,7 +4,7 @@
       bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px',
       transition: tranFlag ? 'left 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
     }">
-    <div class="playlist"
+    <div class="playlist no-drag"
       :style="{marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'}">
       <div class="button"
         :style="{
@@ -381,7 +381,6 @@ export default {
   z-index: 4;
 
   .playlist {
-    -webkit-app-region: no-drag;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;

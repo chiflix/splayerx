@@ -1,3 +1,5 @@
+import Vue from 'vue';
+
 import { Video as mutationTypes } from '../mutationTypes';
 import { Video as actionTypes } from '../actionTypes';
 
@@ -30,18 +32,19 @@ const state = {
   // controls
   controls: false,
   volume: 100,
-  mute: false,
+  muted: false,
   defaultMuted: false,
   // tracks
-  AudioTrackList: [],
-  VideoTrackList: [],
-  TextTrackList: [],
+  audioTrackList: [],
+  videoTrackList: [],
+  textTrackList: [],
   // meta info
   intrinsicWidth: 0,
   intrinsicHeight: 0,
   computedWidth: 0,
   computedHeight: 0,
   ratio: 0,
+  AudioDelay: 0,
 };
 
 const getters = {
@@ -59,14 +62,22 @@ const getters = {
   roundedCurrentTime: state => Math.round(state.currentTime),
   // controls
   volume: state => state.volume / 100,
-  mute: state => state.mute,
+  muted: state => state.muted,
   rate: state => state.rate,
+  // tracks
+  audioTrackList: state => state.audioTrackList,
+  currentAudioTrackId: (state) => {
+    const track = state.audioTrackList.filter(track => track.enabled)[0];
+    if (track && track.id) return track.id;
+    return -1;
+  },
   // meta info
   intrinsicWidth: state => state.intrinsicWidth,
   intrinsicHeight: state => state.intrinsicHeight,
   computedWidth: state => state.computedWidth,
   computedHeight: state => state.computedHeight,
   ratio: state => state.ratio,
+  AudioDelay: state => state.AudioDelay,
 };
 
 function stateToMutation(stateType) {
@@ -79,8 +90,13 @@ function mutationToState(mutationType) {
 
 function mutationer(mutationType) {
   const stateType = mutationToState(mutationType);
+  if (typeof state[stateType] !== 'object') {
+    return (state, p) => {
+      state[stateType] = p;
+    };
+  }
   return (state, p) => {
-    state[stateType] = p;
+    Vue.set(state, stateType, p);
   };
 }
 
@@ -92,6 +108,32 @@ function mutationsGenerator(mutationTypes) {
   return mutations;
 }
 
+function generateTracks(actionType, newTrack, oldTracks) {
+  const newTracks = oldTracks;
+  switch (actionType) {
+    case 'add':
+      if (!newTracks.includes(newTrack)) {
+        newTracks.push(newTrack);
+      }
+      break;
+    case 'remove':
+      if (newTracks.includes(newTrack)) {
+        newTracks.splice(newTracks.indexOf(newTrack), 1);
+      }
+      break;
+    case 'switch':
+      if (newTracks.includes(newTrack)) {
+        newTracks.splice(newTracks.indexOf(newTrack), 1, newTrack);
+      }
+      break;
+    case 'removeAll':
+      newTracks.splice(0, newTracks.length);
+      break;
+    default:
+      break;
+  }
+  return newTracks;
+}
 const mutations = mutationsGenerator(mutationTypes);
 
 const actions = {
@@ -113,30 +155,33 @@ const actions = {
     });
   },
   [actionTypes.INCREASE_VOLUME]({ dispatch, commit, state }, delta) {
-    if (state.mute) dispatch(actionTypes.TOGGLE_MUTE);
+    if (state.muted) dispatch(actionTypes.TOGGLE_MUTED);
     const finalDelta = delta || 10;
     const finalVolume = state.volume + finalDelta;
     commit(mutationTypes.VOLUME_UPDATE, finalVolume > 100 ? 100 : finalVolume);
   },
   [actionTypes.DECREASE_VOLUME]({ dispatch, commit, state }, delta) {
-    if (state.mute) dispatch(actionTypes.TOGGLE_MUTE);
+    if (state.muted) dispatch(actionTypes.TOGGLE_MUTED);
     const finalDelta = delta || 10;
     const finalVolume = state.volume - finalDelta;
     commit(mutationTypes.VOLUME_UPDATE, finalVolume < 0 ? 0 : finalVolume);
-    if (finalVolume <= 0) commit(mutationTypes.MUTE_UPDATE, true);
+    if (finalVolume <= 0) commit(mutationTypes.MUTED_UPDATE, true);
   },
-  [actionTypes.TOGGLE_MUTE]({ commit, state }) {
-    commit(mutationTypes.MUTE_UPDATE, !state.mute);
+  [actionTypes.TOGGLE_MUTED]({ commit, state }) {
+    commit(mutationTypes.MUTED_UPDATE, !state.muted);
   },
-  [actionTypes.INCREASE_RATE]({ commit, state }, delta) {
-    const finalDelta = delta || 0.1;
-    const finalRate = state.rate + finalDelta;
-    commit(mutationTypes.RATE_UPDATE, finalRate > 100 ? 1 : finalRate);
+  [actionTypes.INCREASE_RATE]({ commit, state }) {
+    const rateArr = [0.5, 1, 1.2, 1.5, 2];
+    const finalRate = rateArr[rateArr.indexOf(state.rate) + 1];
+    commit(mutationTypes.RATE_UPDATE, finalRate || state.rate);
   },
-  [actionTypes.DECREASE_RATE]({ commit, state }, delta) {
-    const finalDelta = delta || 0.1;
-    const finalRate = state.rate - finalDelta;
-    commit(mutationTypes.RATE_UPDATE, finalRate < 0 ? 0 : finalRate);
+  [actionTypes.DECREASE_RATE]({ commit, state }) {
+    const rateArr = [0.5, 1, 1.2, 1.5, 2];
+    const finalRate = rateArr[rateArr.indexOf(state.rate) - 1];
+    commit(mutationTypes.RATE_UPDATE, finalRate || state.rate);
+  },
+  [actionTypes.CHANGE_RATE]({ commit }, delta) {
+    commit(mutationTypes.RATE_UPDATE, delta);
   },
   [actionTypes.PLAY_VIDEO]({ commit }) {
     commit(mutationTypes.PAUSED_UPDATE, false);
@@ -156,6 +201,26 @@ const actions = {
       const mutation = stateToMutation(item);
       if (validMetaInfo.includes(item) && mutationTypes[mutation]) commit(mutation, metaInfo[item]);
     });
+  },
+  [actionTypes.UPDATE_DELAY]({ commit }, delta) {
+    const finalDelay = state.AudioDelay + delta;
+    commit(mutationTypes.DELAY_UPDATE, finalDelay);
+  },
+  [actionTypes.ADD_AUDIO_TRACK]({ commit, state }, trackToAdd) {
+    const newAudioTracks = generateTracks('add', trackToAdd, state.audioTrackList);
+    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+  },
+  [actionTypes.REMOVE_AUDIO_TRACK]({ commit, state }, trackToRemove) {
+    const newAudioTracks = generateTracks('remove', trackToRemove, state.audioTrackList);
+    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+  },
+  [actionTypes.SWITCH_AUDIO_TRACK]({ commit, state }, trackToSwitch) {
+    const newAudioTracks = generateTracks('switch', trackToSwitch, state.audioTrackList);
+    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+  },
+  [actionTypes.REMOVE_ALL_AUDIO_TRACK]({ commit, state }, trackToRemoveAll) {
+    const newAudioTracks = generateTracks('removeAll', trackToRemoveAll, state.audioTrackList);
+    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
 };
 

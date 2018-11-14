@@ -240,10 +240,6 @@ export default {
         this.addLog('info', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
-    if (process.platform !== 'darwin') {
-      document.querySelector('.application').style.webkitAppRegion = 'no-drag';
-      document.querySelector('.application').style.borderRadius = 0;
-    }
     this.$bus.$on('displayInfo', (displayInfo) => {
       this.imageTurn = displayInfo.imageTurn;
       this.backgroundUrl = displayInfo.backgroundUrl;
