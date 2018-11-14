@@ -104,7 +104,8 @@ function registerMainWindowEvent() {
 
   function snapShot(videoPath, callback) {
     const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
-    splayerx.snapshotVideo(videoPath, `${imgPath}.png`, '00:00:05', (err) => {
+    const randomNumber = Math.round((Math.random() * 3) + 5);
+    splayerx.snapshotVideo(videoPath, `${imgPath}.png`, `00:00:0${randomNumber}`, (err) => {
       console.log(err, videoPath);
       callback(err, imgPath);
     });
