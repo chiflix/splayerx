@@ -275,8 +275,7 @@ new Vue({
               {
                 label: this.$t('msg.splayerx.feedback'),
                 click: () => {
-                  const { shell } = require('electron');
-                  shell.openExternal('https://feedback.splayer.org');
+                  this.$electron.shell.openExternal('https://feedback.splayer.org');
                 },
               },
               { type: 'separator' },
