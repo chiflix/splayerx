@@ -266,8 +266,9 @@ export default {
     UIDisplayManager() {
       const tempObject = {};
       Object.keys(this.displayState).forEach((index) => {
-        tempObject[index] = this.showAllWidgets ||
-          (!this.showAllWidgets && this.timerState[index]);
+        tempObject[index] = (this.showAllWidgets ||
+          (!this.showAllWidgets && this.timerState[index])) &&
+          !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
       tempObject['volume-indicator'] = !this.mute ? this.timerState['volume-indicator'] : tempObject['volume-indicator'];
