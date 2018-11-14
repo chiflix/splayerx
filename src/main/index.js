@@ -38,28 +38,28 @@ app.on('second-instance', () => {
 });
 
 function handleBossKey() {
-  if (mainWindow !== null) {
-    if (mainWindow.isVisible()) {
-      if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
-        mainWindow.once('leave-full-screen', handleBossKey);
-        mainWindow.setFullScreen(false);
-        return;
-      }
-      mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
-      mainWindow.hide();
-      if (process.platform === 'win32') {
-        tray = new Tray('build/icons/icon.ico');
-        tray.on('click', () => {
-          mainWindow.show();
-          tray.destroy();
-          tray = null;
-        });
-      }
+  if (!mainWindow) return;
+  if (mainWindow.isVisible()) {
+    if (process.platform === 'darwin' && mainWindow.isFullScreen()) {
+      mainWindow.once('leave-full-screen', handleBossKey);
+      mainWindow.setFullScreen(false);
+      return;
+    }
+    mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
+    mainWindow.hide();
+    if (process.platform === 'win32') {
+      tray = new Tray('build/icons/icon.ico');
+      tray.on('click', () => {
+        mainWindow.show();
+        tray.destroy();
+        tray = null;
+      });
     }
   }
 }
 
 function registerMainWindowEvent() {
+  if (!mainWindow) return;
   mainWindow.on('resize', () => {
     mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
     mainWindow.webContents.send('mainCommit', 'windowBounds', mainWindow.getBounds());
@@ -174,7 +174,7 @@ if (process.platform === 'darwin') {
 app.on('ready', () => {
   app.setName('SPlayerX');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
-    if (mainWindow !== null) {
+    if (mainWindow) {
       mainWindow.openDevTools();
     }
   });
@@ -195,7 +195,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  if (mainWindow === null) {
+  if (!mainWindow) {
     createWindow();
   } else if (!mainWindow.isVisible()) {
     mainWindow.show();
