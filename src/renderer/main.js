@@ -126,8 +126,18 @@ new Vue({
             // { label: 'Increase Size' },
             // { label: 'Decrease Size' },
             { type: 'separator' },
-            { label: this.$t('msg.playback.increasePlaybackSpeed'), enabled: false },
-            { label: this.$t('msg.playback.decreasePlaybackSpeed'), enabled: false },
+            {
+              label: this.$t('msg.playback.increasePlaybackSpeed'),
+              click: () => {
+                this.$store.dispatch(videoActions.INCREASE_RATE);
+              },
+            },
+            {
+              label: this.$t('msg.playback.decreasePlaybackSpeed'),
+              click: () => {
+                this.$store.dispatch(videoActions.DECREASE_RATE);
+              },
+            },
             /** */
             { type: 'separator' },
             { label: this.$t('msg.playback.captureScreen'), enabled: false },
@@ -264,7 +274,10 @@ new Vue({
               },
               {
                 label: this.$t('msg.splayerx.feedback'),
-                enabled: false,
+                click: () => {
+                  const { shell } = require('electron');
+                  shell.openExternal('https://feedback.splayer.org');
+                },
               },
               { type: 'separator' },
               {
@@ -506,6 +519,16 @@ new Vue({
           break;
         case 'Escape':
           this.$bus.$emit('leave-fullscreen');
+          break;
+        default:
+          break;
+      }
+      switch (e.keyCode) {
+        case 219:
+          this.$store.dispatch(videoActions.DECREASE_RATE);
+          break;
+        case 221:
+          this.$store.dispatch(videoActions.INCREASE_RATE);
           break;
         default:
           break;

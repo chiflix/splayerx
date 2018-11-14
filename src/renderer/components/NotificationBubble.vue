@@ -80,7 +80,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .winContainer {
   -webkit-app-region: no-drag;
   position: absolute;
