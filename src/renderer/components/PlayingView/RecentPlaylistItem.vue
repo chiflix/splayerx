@@ -46,7 +46,9 @@
                 v-if="!isPlaying"
                 v-show="isChosen && sliderPercentage > 0"
                 :style="{
+                  height: winWidth > 1355 ? `${(winWidth / 1355) * 2}px` : '2px',
                   bottom: winWidth > 1355 ? `${(winWidth / 1355) * 14}px` : '14px',
+                  marginBottom: winWidth > 1355 ? `${(winWidth / 1355) * 7}px` : '7px',
                 }">
                 <div class="slider"
                 :style="{
@@ -275,8 +277,6 @@ export default {
     position: absolute;
     z-index: 100;
     width: 65%;
-    height: 2px;
-    margin-bottom: 7px;
     border-radius: 2px;
     background-color: rgba(216,216,216,0.40);
     .slider {
