@@ -9,6 +9,11 @@
           v-for="(html, key) in firstCueHTML"
           :key="key"
           v-html="html"></div>
+        <div class='subtitle-border-content'
+          :style="subBorderStyle"
+          v-for="(html, key) in firstCueHTML"
+          :key="key"
+          v-html="html"></div>
       </div>
     </div>
 </template>
@@ -49,6 +54,7 @@ export default {
       firstCueHTML: [],
       secondCueHTML: [],
       subStyle: {},
+      subBorderStyle: {},
     };
   },
   methods: {
@@ -486,29 +492,38 @@ export default {
      * the css style of the subtitle. Each unset
      * property will use default value.
      */
-    subStyleChange(obj = {}) {
+    subStyleChange(obj = {}) { // eslint-disable-line
+      const fontFamily = obj.fontFamily ? obj.fontFamily : this.curStyle.fontFamily;
       const fontSize = obj.fontSize ? obj.fontSize : this.curStyle.fontSize;
       const letterSpacing = obj.letterSpacing ? obj.letterSpacing : this.curStyle.letterSpacing;
+      const padding = obj.padding ? obj.padding : this.curStyle.padding;
       const opacity = obj.opacity ? obj.opacity : this.curStyle.opacity;
       const color = obj.color ? obj.color : this.curStyle.color;
-      const border = obj.border ? obj.border : this.curStyle.border;
-      const background = obj.background ? obj.background : this.curStyle.background;
+      const textFillColor = obj.textFillColor ? obj.textFillColor : this.curStyle.textFillColor;
+      const textStroke = obj.textStroke ? obj.textStroke : this.curStyle.textStroke;
+      const fontWeight = obj.fontWeight ? obj.fontWeight : this.curStyle.fontWeight;
+      const textShadow = obj.textShadow ? obj.textShadow : this.curStyle.textShadow;
+      const backgroundColor = obj.backgroundColor ?
+        obj.backgroundColor : this.curStyle.backgroundColor;
 
       this.subStyle = {
+        fontFamily,
         fontSize: `${fontSize}vh`,
         letterSpacing: `${letterSpacing}px`,
         opacity,
         color,
-        border,
-        background,
+        fontWeight,
       };
-      this.curStyle = {
-        fontSize,
-        letterSpacing,
-        opacity,
-        color,
-        border,
-        background,
+      this.subBorderStyle = {
+        fontFamily,
+        fontSize: `${fontSize}vh`,
+        letterSpacing: `${letterSpacing}px`,
+        padding,
+        textFillColor,
+        textStroke,
+        fontWeight,
+        textShadow,
+        backgroundColor,
       };
     },
     notParsedYet(subStartTime) {
@@ -838,9 +853,17 @@ export default {
     width: 100%;
   }
   .subtitle-content {
+    z-index: 11;
     white-space: pre;
     text-align: center;
   }
+  .subtitle-border-content {
+    position: absolute;
+    z-index: 10;
+    white-space: pre;
+    text-align: center;
+  }
+
   .flex-box {
     display: flex;
     flex-direction: column;

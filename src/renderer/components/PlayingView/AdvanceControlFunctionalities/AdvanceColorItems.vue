@@ -120,23 +120,44 @@ export default {
       switch (index) {
         case 0:
           this.$store.dispatch('updateColor', 'white');
-          this.$bus.$emit('sub-style-change', { color: 'white' });
+          this.$bus.$emit('sub-style-change', {
+            color: 'white',
+            textShadow: '-1px -1px 0 rgba(0,0,0,.1), 0 -1px 0 rgba(0,0,0,.1), 1px -1px 0 rgba(0,0,0,.1), 1px 0 0 rgba(0,0,0,.1), 1px 1px 0 rgba(0,0,0,.1), 0 1px 0 rgba(0,0,0,.1), 0 2px 2px rgba(0,0,0,.4), -1px 1px 0 rgba(0,0,0,.1), -0.5px 0 0 rgba(0,0,0,.1)',
+            textStroke: '0px #fff',
+          });
           break;
         case 1:
           this.$store.dispatch('updateColor', 'gray');
-          this.$bus.$emit('sub-style-change', { color: 'gray' });
+          this.$bus.$emit('sub-style-change', {
+            color: 'white',
+            textShadow: '0px 3px 1px #333',
+            textStroke: '3px #222',
+          });
           break;
         case 2:
           this.$store.dispatch('updateColor', 'yellow');
-          this.$bus.$emit('sub-style-change', { color: 'yellow' });
+          this.$bus.$emit('sub-style-change', {
+            color: '#fffc00',
+            textShadow: '0px 1px 1px #222',
+          });
           break;
         case 3:
           this.$store.dispatch('updateColor', 'blue');
-          this.$bus.$emit('sub-style-change', { color: 'blue' });
+          this.$bus.$emit('sub-style-change', {
+            color: '#fff',
+            textShadow: '0px 2px 0px #0476AD, -1px 2px 0px #0476AD, 1px 2px 0px #0476AD',
+            textStroke: '3px #009be6',
+            fontWeight: '700',
+          });
           break;
         case 4:
           this.$store.dispatch('updateColor', 'black');
-          this.$bus.$emit('sub-style-change', { color: 'black' });
+          this.$bus.$emit('sub-style-change', {
+            fontSize: '4',
+            color: '#fff',
+            backgroundColor: 'rgba(0,0,0,.5)',
+            padding: '5px 20px',
+          });
           break;
         default:
           break;

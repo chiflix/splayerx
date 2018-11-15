@@ -243,19 +243,19 @@ export default {
       switch (index) {
         case 0:
           this.$store.dispatch('updateFontSize', 3);
-          this.$bus.$emit('sub-style-change', { fontSize: 3 });
+          this.$bus.$emit('sub-style-change');
           break;
         case 1:
           this.$store.dispatch('updateFontSize', 5);
-          this.$bus.$emit('sub-style-change', { fontSize: 5 });
+          this.$bus.$emit('sub-style-change');
           break;
         case 2:
           this.$store.dispatch('updateFontSize', 8);
-          this.$bus.$emit('sub-style-change', { fontSize: 8 });
+          this.$bus.$emit('sub-style-change');
           break;
         case 3:
           this.$store.dispatch('updateFontSize', 10);
-          this.$bus.$emit('sub-style-change', { fontSize: 10 });
+          this.$bus.$emit('sub-style-change');
           break;
         default:
           break;

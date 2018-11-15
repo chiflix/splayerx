@@ -1,12 +1,17 @@
 const state = {
   SubtitleNames: [],
   curStyle: {
+    fontFamily: 'PingFang SC',
     fontSize: 5,
     letterSpacing: 1,
+    padding: '0px',
     opacity: 1,
-    color: '',
-    border: '',
-    background: '',
+    color: 'white',
+    textFillColor: 'transparent',
+    textStroke: '0px #fff',
+    fontWeight: '400',
+    backgroundColor: 'transparent',
+    textShadow: '-1px -1px 0 rgba(0,0,0,.1), 0 -1px 0 rgba(0,0,0,.1), 1px -1px 0 rgba(0,0,0,.1), 1px 0 0 rgba(0,0,0,.1), 1px 1px 0 rgba(0,0,0,.1), 0 1px 0 rgba(0,0,0,.1), 0 2px 2px rgba(0,0,0,.4), -1px 1px 0 rgba(0,0,0,.1), -0.5px 0 0 rgba(0,0,0,.1)',
   },
   SubtitleDelay: 0,
 };
