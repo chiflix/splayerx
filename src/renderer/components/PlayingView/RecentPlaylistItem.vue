@@ -86,6 +86,9 @@ export default {
     isShifting: {
       type: Boolean,
     },
+    canHoverItem: {
+      type: Boolean,
+    },
     // sizing related
     thumbnailWidth: {
       type: Number,
@@ -119,7 +122,7 @@ export default {
       this.$emit('mouseupItem', this.index);
     },
     mouseoverVideo() {
-      if (!this.isPlaying && this.isInRange && !this.isShifting) {
+      if (!this.isPlaying && this.isInRange && !this.isShifting && this.canHoverItem) {
         this.isBlur = false;
         this.isChosen = true;
         this.mouseoverRecently = true;

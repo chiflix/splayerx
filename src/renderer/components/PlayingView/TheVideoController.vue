@@ -14,6 +14,7 @@
     <notification-bubble/>
     <recent-playlist class="recent-playlist"
     :displayState="displayState['recent-playlist']"
+    :mousemove="eventInfo.get('mousemove')"
     v-bind.sync="widgetsStatus['recent-playlist']"
     @update:playlistcontrol-showattached="widgetsStatus['playlist-control'].showAttached = $event"/>
     <div class="masking" v-hidden="displayState['the-progress-bar']"></div>

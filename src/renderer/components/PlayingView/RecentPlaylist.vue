@@ -43,6 +43,7 @@
         :key="item"
         :index="index"
         :path="item"
+        :canHoverItem="canHoverItem"
         :isInRange="index >= firstIndex && index <= lastIndex"
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
@@ -67,6 +68,7 @@ export default {
     RecentPlaylistItem,
   },
   props: {
+    mousemove: {},
     displayState: Boolean,
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
@@ -80,6 +82,8 @@ export default {
       snapShoted: false,
       hoveredMediaInfo: {}, // the hovered video's media info
       backgroundDisplayState: this.displayState,
+      mousePosition: [],
+      canHoverItem: false,
     };
   },
   mounted() {
@@ -147,8 +151,19 @@ export default {
       }
     },
     displayState(val) {
+      this.canHoverItem = false;
       if (val) {
         this.backgroundDisplayState = val;
+        this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
+          * this.thumbnailNumber;
+        this.mousePosition = this.mousemove.position;
+      }
+    },
+    mousemove(val) {
+      const distance = this.winWidth > 1355 ? 20 : 10;
+      if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
+      Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
+        this.canHoverItem = true;
       }
     },
   },
