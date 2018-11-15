@@ -10,8 +10,8 @@
         left: `-${borderWidth / 2}px`,
         top: `-${borderWidth / 2}px`,
         borderRadius: `${borderRadius}px`,
-        width: `${width - borderWidth}px`,
-        height: `${height - borderWidth}px`,
+        width: `${width + borderWidth}px`,
+        height: `${height + borderWidth}px`,
         border: `${borderWidth}px solid rgba(${borderColor})`,
       }"></div>
   </div>
@@ -48,6 +48,6 @@ export default {
 }
 .element {
   position: absolute;
-  box-sizing: inherit;
+  box-sizing: border-box;
 }
 </style>

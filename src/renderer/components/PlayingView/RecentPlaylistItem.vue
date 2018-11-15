@@ -11,9 +11,9 @@
     minWidth: `${thumbnailWidth}px`,
     minHeight: `${thumbnailHeight}px`,
   }">
-      <div class="item">
-       <img :src="imageSrc"
-        v-if="!isPlaying && imageLoaded"/>
+      <div class="child-item">
+        <img :src="imageSrc"
+          v-if="!isPlaying && imageLoaded"/>
         <div class="blur"
           v-show="!isChosen && !isPlaying"/>
         <div class="white-hover"
@@ -222,7 +222,7 @@ $border-radius: 3px;
 .chosen {
   transform: translateY(-9px);
 }
-.item {
+.child-item {
   position: relative;
   border-radius: $border-radius;
   width: 100%;
@@ -233,7 +233,7 @@ $border-radius: 3px;
     border-radius: $border-radius;
     width: 100%;
     height: 100%;
-    transform: translate(-0.2px, 0px);
+    transform: translate(0px, 0px);
   }
   .content {
     position: absolute;
@@ -312,7 +312,7 @@ $border-radius: 3px;
 .black-gradient {
   position: absolute;
   width: 100%;
-  height: 100%;
+  height: 105%;
   border-radius: $border-radius;
   background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
 }

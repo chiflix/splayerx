@@ -288,6 +288,10 @@ export default {
     position: relative;
     transition: right 400ms ease-in;
     display: flex;
+    .item {
+      position: relative;
+      background-color: rgba(255,255,255,0.1);
+    }
   }
 }
 .fade-enter-active, .fade-leave-active {
