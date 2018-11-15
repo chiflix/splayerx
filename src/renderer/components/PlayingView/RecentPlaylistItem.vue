@@ -3,9 +3,10 @@
   :height="thumbnailHeight"
   :width="thumbnailWidth"
   :borderRadius="0"
-  :borderColor="isChosen ? '255,255,255,0.7' : '255,255,255,0.2'"
+  :borderColor="isChosen ? '255,255,255,0.6' : '255,255,255,0.2'"
   :class="{ chosen: isChosen }"
   :style="{
+    marginRight: winWidth > 1355 ?  `${(winWidth / 1355) * 15}px` : '15px',
     cursor: isPlaying ? '' : 'pointer',
     minWidth: `${thumbnailWidth}px`,
     minHeight: `${thumbnailHeight}px`,
@@ -45,7 +46,7 @@
                 v-if="!isPlaying"
                 v-show="isChosen && sliderPercentage > 0"
                 :style="{
-                  bottom: winWidth > 1355 ? '1.03vw' : '14px',
+                  bottom: winWidth > 1355 ? `${(winWidth / 1355) * 14}px` : '14px',
                 }">
                 <div class="slider"
                 :style="{
@@ -56,8 +57,8 @@
               <div class="title"
                 :style="{
                   color: isChosen ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.40)',
-                  fontSize: winWidth > 1355 ? '1.03vw' : '14px',
-                  lineHeight: winWidth > 1355 ? '1.03vw' : '14px',
+                  fontSize: winWidth > 1355 ? `${(winWidth / 1355) * 14}px` : '14px',
+                  lineHeight: winWidth > 1355 ? `${(winWidth / 1355) * 14}px` : '14px',
                 }">{{ baseName }}</div>
             </div>
         </div>
@@ -196,7 +197,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .recent-playlist-item {
-  margin-right: 15px;
   transition: transform 100ms ease-out;
 }
 .chosen {
@@ -309,7 +309,7 @@ export default {
   border-radius: 0px;
   width: 100%;
   height: 100%;
-  background-color: rgba(255,255,255,0.3);
+  background-color: rgba(255,255,255,0.2);
 }
 .black-gradient {
   position: absolute;

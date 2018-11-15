@@ -13,16 +13,31 @@
     <transition name="fade" mode="out-in">
     <div class="info"
       :key="hoverIndex"
+      :style="{
+        marginTop: winWidth > 1355 ?  `${(winWidth / 1355) * 53}px` : '53px',
+        paddingLeft: winWidth > 1355 ?  `${(winWidth / 1355) * 40}px` : '40px',
+      }"
       @mousedown.stop="">
-      <div class="top">{{lastPlayedTime}} 
-      <span>{{timecodeFromSeconds(videoDuration)}}</span>&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
-      <div class="file-name">{{filename}}</div>
+      <div class="top"
+      :style="{
+        fontSize: winWidth > 1355 ?  `${(winWidth / 1355) * 14}px` : '14px',
+        lineHeight: winWidth > 1355 ?  `${(winWidth / 1355) * 13}px` : '13px',
+      }">{{lastPlayedTime}} {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+      <div class="file-name"
+        :style="{
+          marginTop: winWidth > 1355 ?  `${(winWidth / 1355) * 9}px` : '9px',
+          fontSize: winWidth > 1355 ?  `${(winWidth / 1355) * 18}px` : '18px',
+          lineHeight: winWidth > 1355 ?  `${(winWidth / 1355) * 20}px` : '20px',
+        }">{{filename}}</div>
     </div>
     </transition>
     <div class="playlist-items"
       @mousedown.stop=""
       :style="{
         right: `${distance}px`,
+        paddingTop: winWidth > 1355 ?  `${(winWidth / 1355) * 20}px` : '20px',
+        paddingBottom: winWidth > 1355 ?  `${(winWidth / 1355) * 40}px` : '40px',
+        paddingLeft: winWidth > 1355 ?  `${(winWidth / 1355) * 40}px` : '40px',
       }">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
         :key="item"
@@ -205,13 +220,13 @@ export default {
     },
     thumbnailWidth() {
       let width = 0;
-      const A = 35;
+      const A = 40;
       const B = 15;
-      const C = 65;
+      const C = 60;
       if (this.winWidth > 512 && this.winWidth <= 1355) {
         width = ((((this.winWidth - A) - C) + B) / this.thumbnailNumber) - B;
       } else if (this.winWidth > 1355) {
-        width = (((this.winWidth - A) - C) - (B * 9)) / 10;
+        width = this.winWidth * (112 / 1355);
       }
       return Math.floor(width);
     },
@@ -235,17 +250,12 @@ export default {
     height: 100%;
   }
   .info {
-    margin: 53px 41px 0px 0px;
-    padding-left: 40px;
-    height: 44px;
     width: 90%;
     .top {
       margin-top: 1px;
       font-family: Avenir-Heavy;
-      font-size: 14px;
       color: rgba(235,235,235,0.6);
       letter-spacing: 0.64px;
-      line-height: 13px;
       width: fit-content;
     }
     .file-name {
@@ -253,12 +263,9 @@ export default {
       text-overflow: ellipsis;
       white-space: nowrap;
 
-      margin-top: 9px;
       font-family: Avenir-Heavy;
-      font-size: 18px;
       color: rgba(255,255,255,0.70);
       letter-spacing: 1px;
-      line-height: 20px;
       width: 100%;
     }
   }
@@ -266,9 +273,6 @@ export default {
     position: relative;
     transition: right 400ms ease-in;
     display: flex;
-    padding-top: 20px;
-    padding-bottom: 40px;
-    padding-left: 40px;
   }
 }
 .fade-enter-active, .fade-leave-active {
