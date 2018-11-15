@@ -49,6 +49,7 @@ export default {
       videoElement: null,
       coverFinded: false,
       seekTime: [0],
+      lastPlayedTime: 0,
     };
   },
   methods: {
@@ -79,7 +80,7 @@ export default {
         ratio: event.target.videoWidth / event.target.videoHeight,
       });
       this.$store.dispatch('currentPlaying', this.originSrc);
-      this.$bus.$emit('seek', this.currentTime);
+      this.$bus.$emit('seek', this.lastPlayedTime);
       this.$bus.$emit('video-loaded');
       this.getVideoCover();
       this.changeWindowSize();
@@ -215,7 +216,6 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio',
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
       'winSize', 'winPos', 'isFullScreen']),
     ...mapGetters({
@@ -252,6 +252,9 @@ export default {
     });
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
+    });
+    this.$bus.$on('send-lastplayedtime', (e) => {
+      this.lastPlayedTime = e;
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
