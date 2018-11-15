@@ -220,11 +220,12 @@ export default {
     maxDistance() {
       return (this.maxIndex - (this.thumbnailNumber - 1)) * this.thumbnailWidth;
     },
-    // if you wanna know the meanings of wABC, please look up the product doc
+    // if you wanna know the meanings of wABC, please look up the product doc:
+    // https://www.notion.so/splayer/Playlist-685b398ac7ce45508a4283af00f76534
     thumbnailNumber() {
       let number = 0;
-      const w = 112;
-      const B = 15;
+      const w = 112; // default width of playlist item
+      const B = 15; // space between each playlist item
       if (this.winWidth >= 512 && this.winWidth < 720) {
         number = Math.floor(3 + ((this.winWidth - 512) / (w + B)));
       } else if (this.winWidth >= 720 && this.winWidth <= 1355) {
@@ -236,9 +237,9 @@ export default {
     },
     thumbnailWidth() {
       let width = 0;
-      const A = 40;
-      const B = 15;
-      const C = 60;
+      const A = 40; // playlist left margin
+      const B = 15; // space between each playlist item
+      const C = 60; // the space between last playlist item and right edge of the screen
       if (this.winWidth > 512 && this.winWidth <= 1355) {
         width = ((((this.winWidth - A) - C) + B) / this.thumbnailNumber) - B;
       } else if (this.winWidth > 1355) {
