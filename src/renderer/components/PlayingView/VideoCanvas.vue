@@ -85,6 +85,7 @@ export default {
       } else {
         this.$bus.$emit('seek', 0);
       }
+      this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
       this.getVideoCover();
       this.changeWindowSize();
