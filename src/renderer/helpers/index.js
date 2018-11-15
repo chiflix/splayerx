@@ -1,11 +1,10 @@
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
-import winston from 'winston';
 import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
-import electron from 'electron'; // eslint-disable-line
+import { ipcRenderer } from 'electron'; // eslint-disable-line
 
 export default {
   methods: {
@@ -146,56 +145,29 @@ export default {
       fs.closeSync(fd);
       return res.join('-');
     },
-    addLog(level, message) {
-      const app = electron.remote.app || electron.app;
-      const defaultPath = path.join(app.getPath('userData'), 'logs');
-      function fsExistsSync(path) {
-        try {
-          fs.accessSync(path, fs.F_OK);
-        } catch (e) {
-          return false;
-        }
-        return true;
-      }
-      if (!fsExistsSync(defaultPath)) {
-        try {
-          fs.mkdirSync(defaultPath);
-        } catch (err) {
-          console.log(err);
-        }
-      }
-      const date = new Date();
-      const time = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-      const logger = winston.createLogger({
-        format: winston.format.combine(winston.format.printf((info) => {
-          if (info.stack) {
-            return `${info.time} - ${info.level}: ${info.message}-${info.stack}`;
+    addLog(level, log) {
+      switch (level) {
+        case 'error':
+          console.error(log);
+          if (this.$ga && log) {
+            this.$ga.exception(log.message || log);
           }
-          return `${info.time} - ${info.level}: ${info.message}`;
-        })),
-        transports: [
-          new winston.transports.File({ filename: `${defaultPath}/${time}.log` }),
-        ],
-      });
-      if (message.stack) {
-        logger.log({
-          time: new Date().toISOString(),
-          level,
-          message: message.message,
-          stack: message.stack,
-        });
-      } else {
-        logger.log({
-          time: new Date().toISOString(),
-          level,
-          message,
-        });
-        if (message.includes('Failed to open file')) {
-          this.$store.dispatch('addMessages', {
-            type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-          });
-        }
+          break;
+        case 'warn':
+          console.warn(log);
+          break;
+        default:
+          console.log(log);
       }
+
+      let normalizedLog;
+      if (!log || typeof log === 'string') {
+        normalizedLog = { message: log };
+      } else {
+        const { message, stack } = log;
+        normalizedLog = { message, stack };
+      }
+      ipcRenderer.send('writeLog', level, normalizedLog);
     },
   },
 };
