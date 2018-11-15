@@ -16,7 +16,7 @@
           color: color,
           transition: 'color 300ms',
         }">{{ item }}</div>
-      <div class="rightItem" v-show="!isChosen">{{ item === '字幕延迟' ? subtitleDelay : audioDelay }}</div>
+      <div class="rightItem">{{ isChosen ? timeUnits : item === '字幕延迟' ? subtitleDelay : audioDelay }}</div>
     </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { Video as videoActions } from '@/store/actionTypes';
+import { mapGetters } from 'vuex';
 import Icon from '../../BaseIconContainer.vue';
 export default {
   name: 'AdvanceSelectItems',
@@ -70,6 +70,7 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['SubtitleDelay', 'AudioDelay']),
     heightSize() {
       if (this.winWidth > 514 && this.winWidth <= 854) {
         return this.isChosen ? '74px' : '37px';
@@ -78,74 +79,96 @@ export default {
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
     },
+    timeUnits() {
+      if (this.item === '字幕延迟') {
+        if (Math.abs(this.SubtitleDelay) >= 10000) {
+          return 's';
+        }
+      } else if (Math.abs(this.AudioDelay) >= 10000) {
+        return 's';
+      }
+      return 'ms';
+    },
     subtitleDelay() {
-      return `${this.$store.getters.SubtitleDelay} ms`;
+      if (Math.abs(this.SubtitleDelay) >= 10000) {
+        return `${this.SubtitleDelay / 1000} s`;
+      }
+      return `${this.SubtitleDelay} ms`;
     },
     audioDelay() {
-      return `${this.$store.getters.AudioDelay} ms`;
+      if (Math.abs(this.AudioDelay) >= 10000) {
+        return `${this.AudioDelay / 1000} s`;
+      }
+      return `${this.AudioDelay} ms`;
     },
     delayNum() {
       if (this.item === '字幕延迟') {
-        return this.$store.getters.SubtitleDelay;
+        if (Math.abs(this.SubtitleDelay) >= 10000) {
+          return `${this.SubtitleDelay / 1000}`;
+        }
+        return this.SubtitleDelay;
       }
-      return this.$store.getters.AudioDelay;
+      if (Math.abs(this.AudioDelay) >= 10000) {
+        return `${this.AudioDelay / 1000}`;
+      }
+      return this.AudioDelay;
+    },
+    changeDelay() {
+      if (Math.abs(this.SubtitleDelay) >= 10000 || Math.abs(this.AudioDelay) >= 10000) {
+        return 100;
+      }
+      return 50;
     },
   },
   components: {
     Icon,
   },
   methods: {
-    handleDecrease() {
-      if (this.item === '字幕延迟') {
-        this.$store.dispatch('updateSubDelay', -50);
-      } else {
-        this.$store.dispatch(videoActions.UPDATE_DELAY, -50);
-      }
-    },
-    handleIncrease() {
-      if (this.item === '字幕延迟') {
-        this.$store.dispatch('updateSubDelay', 50);
-      } else {
-        this.$store.dispatch(videoActions.UPDATE_DELAY, 50);
-      }
-    },
     handleDeMousedown() {
-      const myFunction = () => {
-        clearInterval(this.timeDeInt);
-        if (this.changeSpeed >= 20) {
-          this.changeSpeed -= 2;
-        }
-        this.$store.dispatch('updateSubDelay', -50);
-        this.timeDeInt = setInterval(myFunction, this.changeSpeed);
-      };
-      this.$store.dispatch('updateSubDelay', -50);
-      this.timeDeSet = setTimeout(() => {
-        myFunction(myFunction, this.changeSpeed);
-      }, 500);
+      if (this.item === '字幕延迟') {
+        const myFunction = () => {
+          clearInterval(this.timeDeInt);
+          if (this.changeSpeed >= 20) {
+            this.changeSpeed -= 2;
+          }
+          this.$store.dispatch('updateSubDelay', -this.changeDelay);
+          this.timeDeInt = setInterval(myFunction, this.changeSpeed);
+        };
+        this.$store.dispatch('updateSubDelay', -this.changeDelay);
+        this.timeDeSet = setTimeout(() => {
+          myFunction(myFunction, this.changeSpeed);
+        }, 500);
+      }
     },
     handleDeMouseup() {
-      this.changeSpeed = 120;
-      clearTimeout(this.timeDeSet);
-      clearInterval(this.timeDeInt);
+      if (this.item === '字幕延迟') {
+        this.changeSpeed = 120;
+        clearTimeout(this.timeDeSet);
+        clearInterval(this.timeDeInt);
+      }
     },
     handleInMousedown() {
-      const myFunction = () => {
-        clearInterval(this.timeInInt);
-        if (this.changeSpeed >= 20) {
-          this.changeSpeed -= 2;
-        }
-        this.$store.dispatch('updateSubDelay', 50);
-        this.timeInInt = setInterval(myFunction, this.changeSpeed);
-      };
-      this.$store.dispatch('updateSubDelay', 50);
-      this.timeInSet = setTimeout(() => {
-        myFunction(myFunction, this.changeSpeed);
-      }, 500);
+      if (this.item === '字幕延迟') {
+        const myFunction = () => {
+          clearInterval(this.timeInInt);
+          if (this.changeSpeed >= 20) {
+            this.changeSpeed -= 2;
+          }
+          this.$store.dispatch('updateSubDelay', this.changeDelay);
+          this.timeInInt = setInterval(myFunction, this.changeSpeed);
+        };
+        this.$store.dispatch('updateSubDelay', this.changeDelay);
+        this.timeInSet = setTimeout(() => {
+          myFunction(myFunction, this.changeSpeed);
+        }, 500);
+      }
     },
     handleInMouseup() {
-      this.changeSpeed = 120;
-      clearTimeout(this.timeInSet);
-      clearInterval(this.timeInInt);
+      if (this.item === '字幕延迟') {
+        this.changeSpeed = 120;
+        clearTimeout(this.timeInSet);
+        clearInterval(this.timeInInt);
+      }
     },
   },
 };
