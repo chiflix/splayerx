@@ -115,10 +115,10 @@ function registerMainWindowEvent() {
   ipcMain.on('bossKey', () => {
     handleBossKey();
   });
-  ipcMain.on('writeLog', (event, level, info) => {
-    writeLog(level, info);
-    const message = typeof info === 'string' ? info : info.message;
-    if (mainWindow && message && message.indexOf('Failed to open file') !== -1) {
+  ipcMain.on('writeLog', (event, level, log) => {
+    if (!log) return;
+    writeLog(level, log);
+    if (mainWindow && log.message && log.message.indexOf('Failed to open file') !== -1) {
       mainWindow.webContents.send('addMessages');
     }
   });

@@ -35,7 +35,7 @@ function getLogger(filename) {
   return loggers[filename];
 }
 
-export default function writeLog(level, info) {
+export default function writeLog(level, log) {
   if (!fsExistsSync(defaultPath)) {
     try {
       fs.mkdirSync(defaultPath);
@@ -47,12 +47,10 @@ export default function writeLog(level, info) {
   const time = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
   const logger = getLogger(time);
 
-  const message = typeof info === 'string' ? info : info.message;
-  const stack = info && info.stack;
   logger.log({
     time: new Date().toISOString(),
     level,
-    message,
-    stack,
+    message: log.message,
+    stack: log.stack,
   });
 }

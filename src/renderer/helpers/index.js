@@ -145,18 +145,29 @@ export default {
       fs.closeSync(fd);
       return res.join('-');
     },
-    addLog(level, message) {
+    addLog(level, log) {
       switch (level) {
         case 'error':
-          console.error(message);
+          console.error(log);
+          if (this.$ga && log) {
+            this.$ga.exception(log.message || log);
+          }
           break;
         case 'warn':
-          console.warn(message);
+          console.warn(log);
           break;
         default:
-          console.log(message);
+          console.log(log);
       }
-      ipcRenderer.send('writeLog', level, message);
+
+      let normalizedLog;
+      if (!log || typeof log === 'string') {
+        normalizedLog = { message: log };
+      } else {
+        const { message, stack } = log;
+        normalizedLog = { message, stack };
+      }
+      ipcRenderer.send('writeLog', level, normalizedLog);
     },
   },
 };
