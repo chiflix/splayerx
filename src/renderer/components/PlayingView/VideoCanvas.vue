@@ -80,7 +80,11 @@ export default {
         ratio: event.target.videoWidth / event.target.videoHeight,
       });
       this.$store.dispatch('currentPlaying', this.originSrc);
-      this.$bus.$emit('seek', this.lastPlayedTime);
+      if (event.target.duration - this.lastPlayedTime > 10) {
+        this.$bus.$emit('seek', this.lastPlayedTime);
+      } else {
+        this.$bus.$emit('seek', 0);
+      }
       this.$bus.$emit('video-loaded');
       this.getVideoCover();
       this.changeWindowSize();
