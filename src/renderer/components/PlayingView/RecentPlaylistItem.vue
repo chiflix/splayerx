@@ -2,7 +2,7 @@
 <BaseInfoCard class="recent-playlist-item"
   :height="thumbnailHeight"
   :width="thumbnailWidth"
-  :borderRadius="0"
+  :borderRadius="3"
   :borderColor="isChosen ? '255,255,255,0.6' : '255,255,255,0.2'"
   :class="{ chosen: isChosen }"
   :style="{
@@ -215,6 +215,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+$border-radius: 3px;
 .recent-playlist-item {
   transition: transform 100ms ease-out;
 }
@@ -223,13 +224,13 @@ export default {
 }
 .item {
   position: relative;
-  border-radius: 0px;
+  border-radius: $border-radius;
   width: 100%;
   height: 100%;
   background-color: rgba(255,255,255,0.1);
   img {
     position: absolute;
-    border-radius: 0px;
+    border-radius: $border-radius;
     width: 100%;
     height: 100%;
     transform: translate(-0.2px, 0px);
@@ -249,10 +250,6 @@ export default {
       width: 100%;
       height: 22px;
       overflow: hidden;
-
-      @media screen and (min-width: 1355px) {
-        bottom: 1.03vw;
-      }
     }
     .icon-container {
       position: absolute;
@@ -307,7 +304,7 @@ export default {
 }
 .white-hover {
   position: absolute;
-  border-radius: 0px;
+  border-radius: $border-radius;
   width: 100%;
   height: 100%;
   background-color: rgba(255,255,255,0.2);
@@ -316,7 +313,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 0px;
+  border-radius: $border-radius;
   background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
 }
 .middleChosen {
