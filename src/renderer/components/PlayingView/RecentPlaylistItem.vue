@@ -83,7 +83,6 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import fs from 'fs';
 import path from 'path';
 import BaseInfoCard from '@/components/PlayingView/BaseInfoCard.vue';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -160,11 +159,7 @@ export default {
   mounted() {
     this.$electron.ipcRenderer.send('snapShot', this.path);
     this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-      fs.readFile(`${imgPath}.png`, 'base64', (err, data) => {
-        if (!err) {
-          this.coverSrc = `data:image/png;base64, ${data}`;
-        }
-      });
+      this.coverSrc = `file://${imgPath}.png`;
     });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
