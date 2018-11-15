@@ -50,6 +50,7 @@ export default {
       minimize: 'Minimize',
       enterFullScreen: 'Enter Full Screen',
       bringAllToFront: 'Bring All To Front',
+      bossKey: 'Boss Key',
     },
     help: {
       name: 'Help',

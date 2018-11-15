@@ -11,7 +11,7 @@
       :src="convertedSrc"
       :playbackRate="rate"
       :volume="volume"
-      :muted="mute"
+      :muted="muted"
       :paused="paused"
       :updateCurrentTime="true"
       :currentTime="seekTime"
@@ -26,7 +26,7 @@
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
-import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
+import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseSubtitle from './BaseSubtitle.vue';
@@ -52,6 +52,7 @@ export default {
       play: videoActions.PLAY_VIDEO,
       pause: videoActions.PAUSE_VIDEO,
       updateMetaInfo: videoActions.META_INFO,
+      toggleMute: videoActions.TOGGLE_MUTED,
       addAudioTrack: videoActions.ADD_AUDIO_TRACK,
       removeAudioTrack: videoActions.REMOVE_AUDIO_TRACK,
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
@@ -180,12 +181,9 @@ export default {
     },
   },
   computed: {
-    ...mapState({
-      windowMinimumSize: state => state.Window.windowMinimumSize,
-      windowBounds: state => state.Window.windowBounds,
-    }),
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'mute', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio',
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
       'winSize', 'winPos', 'isFullScreen']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -211,6 +209,9 @@ export default {
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.ratio]);
+    });
+    this.$bus.$on('toggle-muted', () => {
+      this.toggleMute();
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
