@@ -32,12 +32,26 @@
                   width: `${thumbnailWidth - 2 * side}px`,
                   left: `${side}px`,
                 }">
-              <div class="overflow-container">
+              <div class="overflow-container"
+                :style="{
+                  height: winWidth > 1355 ? `${(winWidth / 1355) * 22}px` : '22px',
+                  bottom: winWidth > 1355 ? `${(winWidth / 1355) * 14}px` : '14px',
+                }">
               <transition name="icon">
               <div class="icon-container"
                 v-if="isPlaying">
-                <Icon type="playlistplay" class="playlist-play"/>
-                <div class="playing">正在播放</div>
+                <Icon type="playlistplay" class="playlist-play"
+                  :style="{
+                    width: winWidth > 1355 ? `${(winWidth / 1355) * 10}px` : '10px',
+                    height: winWidth > 1355 ? `${(winWidth / 1355) * 22}px` : '22px',
+                    marginRight: winWidth > 1355 ? `${(winWidth / 1355) * 2}px` : '2px',
+                  }"/>
+                <div class="playing"
+                  :style="{
+                    paddingTop: winWidth > 1355 ? `${(winWidth / 1355) * 5}px` : '5px',
+                    fontSize: winWidth > 1355 ? `${(winWidth / 1355) * 12}px` : '12px',
+                    lineHeight: winWidth > 1355 ? `${(winWidth / 1355) * 12}px` : '12px',
+                  }">正在播放</div>
               </div>
               </transition>
               </div>
@@ -235,7 +249,6 @@ export default {
       width: 100%;
       height: 22px;
       overflow: hidden;
-      bottom: 14px;
 
       @media screen and (min-width: 1355px) {
         bottom: 1.03vw;
@@ -249,27 +262,12 @@ export default {
       height: fit-content;
 
       .playlist-play {
-        width: 10px;
-        height: 22px;
-        margin-right: 2px;
-
-        @media screen and (min-width: 1355px) {
-          width: 0.73vw;
-        }
       }
       .playing {
-        padding-top: 5px;
         opacity: 0.7;
         font-family: PingFangSC-Semibold;
         color: #FFFFFF;
         letter-spacing: 0.5px;
-        font-size: 12px;
-        line-height: 12px;
-        
-        @media screen and (min-width: 1355px) {
-          font-size: 0.88vw;
-          line-height: 0.88vw;
-        } 
       }
     }
   }
