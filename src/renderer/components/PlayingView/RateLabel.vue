@@ -66,7 +66,6 @@ export default {
     line-height: 9px;
     font-size: 10px;
     margin: 3px 7px auto 2.5px;
-    font-family: Avenir;
     font-weight: 600;
   }
 }

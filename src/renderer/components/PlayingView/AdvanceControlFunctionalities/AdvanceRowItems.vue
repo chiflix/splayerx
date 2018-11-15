@@ -8,7 +8,10 @@
       :style="{
         height: heightSize,
       }">
-      <div class="textContainer">
+      <div class="textContainer"
+        :style="{
+           cursor: isChosen ? 'default' : 'pointer',
+        }">
         <div class="textItem"
           :style="{
             color: color,

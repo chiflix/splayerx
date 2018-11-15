@@ -49,6 +49,7 @@ export default {
       firstCueHTML: [],
       secondCueHTML: [],
       subStyle: {},
+      subIndex: 0,
     };
   },
   methods: {
@@ -696,7 +697,7 @@ export default {
     curStyle() {
       return this.$store.getters.curStyle;
     },
-    ...mapGetters(['duration', 'originSrc', 'currentTime']),
+    ...mapGetters(['duration', 'originSrc', 'currentTime', 'SubtitleDelay']),
     firstSubState() { // lazy computed and lazy watched
       return this.$store.getters.firstSubtitleIndex !== -1;
     },
@@ -706,6 +707,21 @@ export default {
     },
   },
   watch: {
+    SubtitleDelay(val, oldval) {
+      if (this.subIndex !== -1) {
+        const vid = this.$parent.$refs.videoCanvas.videoElement();
+        const trackLength = vid.textTracks[this.subIndex].cues.length;
+        for (let i = 0; i < trackLength; i += 1) {
+          if (val > oldval) {
+            vid.textTracks[this.subIndex].cues[i].startTime += 0.05;
+            vid.textTracks[this.subIndex].cues[i].endTime += 0.05;
+          } else {
+            vid.textTracks[this.subIndex].cues[i].startTime -= 0.05;
+            vid.textTracks[this.subIndex].cues[i].endTime -= 0.05;
+          }
+        }
+      }
+    },
     firstSubState(newVal) {
       const vid = this.$parent.$refs.videoCanvas.videoElement();
       if (newVal && vid.textTracks[this.firstSubIndex].mode === 'disabled') {
@@ -771,6 +787,7 @@ export default {
     this.$bus.$on('video-loaded', this.subtitleInitialize);
 
     this.$bus.$on('sub-first-change', (targetIndex) => {
+      this.subIndex = targetIndex;
       this.clearSubtitle();
       this.subtitleShow(targetIndex);
     });
@@ -779,6 +796,7 @@ export default {
       this.$store.commit('SubtitleOn', { index: this.firstSubIndex, status: 'first' });
     });
     this.$bus.$on('first-subtitle-off', () => {
+      this.subIndex = -1;
       this.$store.commit('SubtitleOff');
     });
 

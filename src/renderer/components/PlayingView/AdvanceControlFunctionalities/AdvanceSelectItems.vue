@@ -8,7 +8,9 @@
       :style="{
         height: heightSize,
       }">
-    <div class="textContainer">
+    <div class="textContainer" :style="{
+      cursor: isChosen ? 'default' : 'pointer',
+    }">
       <div class="textItem"
         :style="{
           color: color,
@@ -35,11 +37,6 @@ import { Video as videoActions } from '@/store/actionTypes';
 import Icon from '../../BaseIconContainer.vue';
 export default {
   name: 'AdvanceSelectItems',
-  data() {
-    return {
-      delayNum: 0,
-    };
-  },
   props: {
     item: {
       type: String,
@@ -72,13 +69,18 @@ export default {
     audioDelay() {
       return `${this.$store.getters.AudioDelay} ms`;
     },
+    delayNum() {
+      if (this.item === '字幕延迟') {
+        return this.$store.getters.SubtitleDelay;
+      }
+      return this.$store.getters.AudioDelay;
+    },
   },
   components: {
     Icon,
   },
   methods: {
     handleDecrease() {
-      this.delayNum -= 50;
       if (this.item === '字幕延迟') {
         this.$store.dispatch('updateSubDelay', -50);
       } else {
@@ -86,7 +88,6 @@ export default {
       }
     },
     handleIncrease() {
-      this.delayNum += 50;
       if (this.item === '字幕延迟') {
         this.$store.dispatch('updateSubDelay', 50);
       } else {
@@ -278,12 +279,14 @@ export default {
       justify-content: center;
       margin: -2px auto;
       .card {
+        cursor: default;
         border-radius: 7px;
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
         background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
       }
       .delay{
+        cursor: default;
         position: absolute;
         color: rgba(255, 255, 255, 0.9);
       }

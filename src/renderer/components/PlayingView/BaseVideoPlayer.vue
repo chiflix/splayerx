@@ -120,6 +120,7 @@ export default {
       this.$emit('audiotrack', { type: 'removeAll', track: '' });
       this.$bus.$emit('showlabel');
       this.$store.dispatch(videoActions.CHANGE_RATE, 1);
+      this.$store.dispatch('updateSubDelay', 0);
     },
     // playback state
     currentTime(newVal) {

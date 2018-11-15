@@ -48,7 +48,11 @@ const mutations = {
     state.curStyle.color = payload;
   },
   UpdateDelay(state, payload) {
-    state.SubtitleDelay += payload;
+    if (payload === 0) {
+      state.SubtitleDelay = 0;
+    } else {
+      state.SubtitleDelay += payload;
+    }
   },
 };
 
