@@ -12,6 +12,7 @@
         :style="{
           color: color,
           transition: 'color 300ms',
+          cursor: isChosen ? 'default' : 'pointer',
         }">
         <div class="textItem">{{ item }}</div>
         <div class="rightItem" v-show="!isChosen"><img :src="ChosenColor"></div>

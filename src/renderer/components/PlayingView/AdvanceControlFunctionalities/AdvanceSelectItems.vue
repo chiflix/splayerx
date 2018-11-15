@@ -21,10 +21,16 @@
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
          <div class="rowContainer">
-           <Icon type="minus" class="decrease" @click.left.native="handleDecrease"></Icon>
+           <Icon type="minus" class="decrease"
+             @mousedown.native="handleDeMousedown"
+             @mouseup.native="handleDeMouseup"
+             @mouseleave.native="handleDeMouseup"></Icon>
            <div class="card"></div>
            <div class="delay">{{ delayNum }}</div>
-           <Icon type="plus" class="increase" @click.left.native="handleIncrease"></Icon>
+           <Icon type="plus" class="increase"
+             @mousedown.native="handleInMousedown"
+             @mouseup.native="handleInMouseup"
+             @mouseleave.native="handleInMouseup"></Icon>
           </div>
         </div>
       </transition>
@@ -37,6 +43,15 @@ import { Video as videoActions } from '@/store/actionTypes';
 import Icon from '../../BaseIconContainer.vue';
 export default {
   name: 'AdvanceSelectItems',
+  data() {
+    return {
+      timeDeSet: null,
+      timeDeInt: null,
+      changeSpeed: 120,
+      timeInset: null,
+      timeInInt: null,
+    };
+  },
   props: {
     item: {
       type: String,
@@ -93,6 +108,44 @@ export default {
       } else {
         this.$store.dispatch(videoActions.UPDATE_DELAY, 50);
       }
+    },
+    handleDeMousedown() {
+      const myFunction = () => {
+        clearInterval(this.timeDeInt);
+        if (this.changeSpeed >= 20) {
+          this.changeSpeed -= 2;
+        }
+        this.$store.dispatch('updateSubDelay', -50);
+        this.timeDeInt = setInterval(myFunction, this.changeSpeed);
+      };
+      this.$store.dispatch('updateSubDelay', -50);
+      this.timeDeSet = setTimeout(() => {
+        myFunction(myFunction, this.changeSpeed);
+      }, 500);
+    },
+    handleDeMouseup() {
+      this.changeSpeed = 120;
+      clearTimeout(this.timeDeSet);
+      clearInterval(this.timeDeInt);
+    },
+    handleInMousedown() {
+      const myFunction = () => {
+        clearInterval(this.timeInInt);
+        if (this.changeSpeed >= 20) {
+          this.changeSpeed -= 2;
+        }
+        this.$store.dispatch('updateSubDelay', 50);
+        this.timeInInt = setInterval(myFunction, this.changeSpeed);
+      };
+      this.$store.dispatch('updateSubDelay', 50);
+      this.timeInSet = setTimeout(() => {
+        myFunction(myFunction, this.changeSpeed);
+      }, 500);
+    },
+    handleInMouseup() {
+      this.changeSpeed = 120;
+      clearTimeout(this.timeInSet);
+      clearInterval(this.timeInInt);
     },
   },
 };
@@ -255,6 +308,7 @@ export default {
   z-index: 10;
   clip-path: inset(0 round 7px);
   transition: background-color 100ms linear;
+  cursor: default;
   .detail {
     width: 100%;
     /*backdrop-filter: blur(0px);*/
@@ -289,6 +343,12 @@ export default {
         cursor: default;
         position: absolute;
         color: rgba(255, 255, 255, 0.9);
+      }
+      .decrease {
+        cursor: pointer;
+      }
+      .increase {
+        cursor: pointer;
       }
     }
   }
