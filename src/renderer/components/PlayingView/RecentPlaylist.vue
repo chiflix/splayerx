@@ -14,20 +14,20 @@
     <div class="info"
       :key="hoverIndex"
       :style="{
-        marginTop: winWidth > 1355 ?  `${(winWidth / 1355) * 53}px` : '53px',
-        paddingLeft: winWidth > 1355 ?  `${(winWidth / 1355) * 40}px` : '40px',
+        marginTop: sizeAdaption(53),
+        paddingLeft: sizeAdaption(40),
       }"
       @mousedown.stop="">
       <div class="top"
       :style="{
-        fontSize: winWidth > 1355 ?  `${(winWidth / 1355) * 14}px` : '14px',
-        lineHeight: winWidth > 1355 ?  `${(winWidth / 1355) * 13}px` : '13px',
+        fontSize: sizeAdaption(14),
+        lineHeight: sizeAdaption(13),
       }">{{lastPlayedTime}} {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
       <div class="file-name"
         :style="{
-          marginTop: winWidth > 1355 ?  `${(winWidth / 1355) * 9}px` : '9px',
-          fontSize: winWidth > 1355 ?  `${(winWidth / 1355) * 18}px` : '18px',
-          lineHeight: winWidth > 1355 ?  `${(winWidth / 1355) * 20}px` : '20px',
+          marginTop: sizeAdaption(9),
+          fontSize: sizeAdaption(18),
+          lineHeight: sizeAdaption(20),
         }">{{filename}}</div>
     </div>
     </transition>
@@ -35,9 +35,9 @@
       @mousedown.stop=""
       :style="{
         right: `${distance}px`,
-        paddingTop: winWidth > 1355 ?  `${(winWidth / 1355) * 20}px` : '20px',
-        paddingBottom: winWidth > 1355 ?  `${(winWidth / 1355) * 40}px` : '40px',
-        paddingLeft: winWidth > 1355 ?  `${(winWidth / 1355) * 40}px` : '40px',
+        paddingTop: sizeAdaption(20),
+        paddingBottom: sizeAdaption(40),
+        paddingLeft: sizeAdaption(40),
       }">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
         :key="item"
@@ -59,7 +59,7 @@
 </template>
 <script>
 import path from 'path';
-import { Video as videoAction } from '@/store/actionTypes.js';
+import { Video as videoAction } from '@/store/actionTypes';
 import { mapGetters } from 'vuex';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 export default {
@@ -91,6 +91,9 @@ export default {
   methods: {
     afterLeave() {
       this.backgroundDisplayState = false;
+    },
+    sizeAdaption(size) {
+      return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
     },
     handleMousedown() {
       this.$emit('update:playlistcontrol-showattached', false);

@@ -6,7 +6,7 @@
   :borderColor="isChosen ? '255,255,255,0.6' : '255,255,255,0.2'"
   :class="{ chosen: isChosen }"
   :style="{
-    marginRight: winWidth > 1355 ?  `${(winWidth / 1355) * 15}px` : '15px',
+    marginRight: sizeAdaption(15),
     cursor: isPlaying ? '' : 'pointer',
     minWidth: `${thumbnailWidth}px`,
     minHeight: `${thumbnailHeight}px`,
@@ -34,23 +34,23 @@
                 }">
               <div class="overflow-container"
                 :style="{
-                  height: winWidth > 1355 ? `${(winWidth / 1355) * 22}px` : '22px',
-                  bottom: winWidth > 1355 ? `${(winWidth / 1355) * 14}px` : '14px',
+                  height: sizeAdaption(22),
+                  bottom: sizeAdaption(14),
                 }">
               <transition name="icon">
               <div class="icon-container"
                 v-if="isPlaying">
                 <Icon type="playlistplay" class="playlist-play"
                   :style="{
-                    width: winWidth > 1355 ? `${(winWidth / 1355) * 10}px` : '10px',
-                    height: winWidth > 1355 ? `${(winWidth / 1355) * 22}px` : '22px',
-                    marginRight: winWidth > 1355 ? `${(winWidth / 1355) * 2}px` : '2px',
+                    width: sizeAdaption(10),
+                    height: sizeAdaption(22),
+                    marginRight: sizeAdaption(2),
                   }"/>
                 <div class="playing"
                   :style="{
-                    paddingTop: winWidth > 1355 ? `${(winWidth / 1355) * 5}px` : '5px',
-                    fontSize: winWidth > 1355 ? `${(winWidth / 1355) * 12}px` : '12px',
-                    lineHeight: winWidth > 1355 ? `${(winWidth / 1355) * 12}px` : '12px',
+                    paddingTop: sizeAdaption(5),
+                    fontSize: sizeAdaption(12),
+                    lineHeight: sizeAdaption(12),
                   }">正在播放</div>
               </div>
               </transition>
@@ -60,9 +60,9 @@
                 v-if="!isPlaying"
                 v-show="isChosen && sliderPercentage > 0"
                 :style="{
-                  height: winWidth > 1355 ? `${(winWidth / 1355) * 2}px` : '2px',
-                  bottom: winWidth > 1355 ? `${(winWidth / 1355) * 14}px` : '14px',
-                  marginBottom: winWidth > 1355 ? `${(winWidth / 1355) * 7}px` : '7px',
+                  height: sizeAdaption(2),
+                  bottom: sizeAdaption(14),
+                  marginBottom: sizeAdaption(7),
                 }">
                 <div class="slider"
                 :style="{
@@ -73,8 +73,8 @@
               <div class="title"
                 :style="{
                   color: isChosen ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.40)',
-                  fontSize: winWidth > 1355 ? `${(winWidth / 1355) * 14}px` : '14px',
-                  lineHeight: winWidth > 1355 ? `${(winWidth / 1355) * 14}px` : '14px',
+                  fontSize: sizeAdaption(14),
+                  lineHeight: sizeAdaption(14),
                 }">{{ baseName }}</div>
             </div>
         </div>
@@ -134,6 +134,9 @@ export default {
     };
   },
   methods: {
+    sizeAdaption(size) {
+      return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
+    },
     mouseupVideo() {
       this.$emit('mouseupItem', this.index);
     },
