@@ -360,7 +360,9 @@ export default {
       ));
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
-        if (this.currentSelectedWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
+        if (
+          this.getComponentName(this.eventInfo.get('mousedown').target) === 'the-video-controller' &&
+          this.currentSelectedWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
           this.togglePlayback();
         }
         this.preventSingleClick = false;
