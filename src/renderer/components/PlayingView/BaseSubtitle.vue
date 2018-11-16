@@ -492,38 +492,25 @@ export default {
      * the css style of the subtitle. Each unset
      * property will use default value.
      */
-    subStyleChange(obj = {}) { // eslint-disable-line
-      const fontFamily = obj.fontFamily ? obj.fontFamily : this.curStyle.fontFamily;
-      const fontSize = obj.fontSize ? obj.fontSize : this.curStyle.fontSize;
-      const letterSpacing = obj.letterSpacing ? obj.letterSpacing : this.curStyle.letterSpacing;
-      const padding = obj.padding ? obj.padding : this.curStyle.padding;
-      const opacity = obj.opacity ? obj.opacity : this.curStyle.opacity;
-      const color = obj.color ? obj.color : this.curStyle.color;
-      const textFillColor = obj.textFillColor ? obj.textFillColor : this.curStyle.textFillColor;
-      const textStroke = obj.textStroke ? obj.textStroke : this.curStyle.textStroke;
-      const fontWeight = obj.fontWeight ? obj.fontWeight : this.curStyle.fontWeight;
-      const textShadow = obj.textShadow ? obj.textShadow : this.curStyle.textShadow;
-      const backgroundColor = obj.backgroundColor ?
-        obj.backgroundColor : this.curStyle.backgroundColor;
-
+    subStyleChange() {
       this.subStyle = {
-        fontFamily,
-        fontSize: `${fontSize}vh`,
-        letterSpacing: `${letterSpacing}px`,
-        opacity,
-        color,
-        fontWeight,
+        fontFamily: this.curStyle.fontFamily,
+        fontSize: this.curStyle.fontSize,
+        letterSpacing: `${this.curStyle.letterSpacing}px`,
+        opacity: this.curStyle.opacity,
+        color: this.curStyle.color,
+        fontWeight: this.curStyle.fontWeight,
       };
       this.subBorderStyle = {
-        fontFamily,
-        fontSize: `${fontSize}vh`,
-        letterSpacing: `${letterSpacing}px`,
-        padding,
-        textFillColor,
-        textStroke,
-        fontWeight,
-        textShadow,
-        backgroundColor,
+        fontFamily: this.curBorderStyle.fontFamily,
+        fontSize: this.curBorderStyle.fontSize,
+        letterSpacing: `${this.curBorderStyle.letterSpacing}px`,
+        padding: this.curBorderStyle.padding,
+        textFillColor: this.curBorderStyle.textFillColor,
+        textStroke: this.curBorderStyle.textStroke,
+        fontWeight: this.curBorderStyle.fontWeight,
+        textShadow: this.curBorderStyle.textShadow,
+        backgroundColor: this.curBorderStyle.backgroundColor,
       };
     },
     notParsedYet(subStartTime) {
@@ -708,10 +695,7 @@ export default {
     },
   },
   computed: {
-    curStyle() {
-      return this.$store.getters.curStyle;
-    },
-    ...mapGetters(['duration', 'originSrc', 'currentTime']),
+    ...mapGetters(['duration', 'originSrc', 'currentTime', 'curStyle', 'curBorderStyle']),
     firstSubState() { // lazy computed and lazy watched
       return this.$store.getters.firstSubtitleIndex !== -1;
     },
@@ -851,6 +835,7 @@ export default {
     left: 0;
     bottom: 20px;
     width: 100%;
+    z-index: 0;
   }
   .subtitle-content {
     z-index: 11;

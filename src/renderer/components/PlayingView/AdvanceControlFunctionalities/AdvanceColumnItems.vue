@@ -1,5 +1,5 @@
 <template>
-  <div class="itemContainer">
+  <div class="itemContainer advance-column-items">
     <div class="textContainer">
       <div class="textItem">{{ item }}</div>
     </div>

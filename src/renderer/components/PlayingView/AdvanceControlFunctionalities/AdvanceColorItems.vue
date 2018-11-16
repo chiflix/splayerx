@@ -99,6 +99,13 @@ export default {
       }
     },
   },
+  watch: {
+    winWidth(val) {
+      this.$store.dispatch('updateBorderStyle', {
+        textStroke: `${((9 / 1600) * val) + (6 / 5)}px #009be6`,
+      });
+    },
+  },
   mounted() {
     this.$set(this.imgs[0], 'selected', true);
   },
@@ -119,45 +126,73 @@ export default {
       });
       switch (index) {
         case 0:
-          this.$store.dispatch('updateColor', 'white');
-          this.$bus.$emit('sub-style-change', {
+          this.$store.dispatch('updateStyle', {
             color: 'white',
+            fontWeight: '400',
+          });
+          this.$store.dispatch('updateBorderStyle', {
             textShadow: '-1px -1px 0 rgba(0,0,0,.1), 0 -1px 0 rgba(0,0,0,.1), 1px -1px 0 rgba(0,0,0,.1), 1px 0 0 rgba(0,0,0,.1), 1px 1px 0 rgba(0,0,0,.1), 0 1px 0 rgba(0,0,0,.1), 0 2px 2px rgba(0,0,0,.4), -1px 1px 0 rgba(0,0,0,.1), -0.5px 0 0 rgba(0,0,0,.1)',
             textStroke: '0px #fff',
+            backgroundColor: '',
+            fontWeight: '400',
           });
+          this.$bus.$emit('sub-style-change');
           break;
         case 1:
-          this.$store.dispatch('updateColor', 'gray');
-          this.$bus.$emit('sub-style-change', {
+          this.$store.dispatch('updateStyle', {
             color: 'white',
+            fontWeight: '400',
+          });
+          this.$store.dispatch('updateBorderStyle', {
             textShadow: '0px 3px 1px #333',
             textStroke: '3px #222',
+            backgroundColor: '',
+            fontWeight: '400',
+            padding: '0',
           });
+          this.$bus.$emit('sub-style-change');
           break;
         case 2:
-          this.$store.dispatch('updateColor', 'yellow');
-          this.$bus.$emit('sub-style-change', {
+          this.$store.dispatch('updateStyle', {
             color: '#fffc00',
-            textShadow: '0px 1px 1px #222',
+            fontWeight: '400',
           });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '0px 1px 1px #222',
+            textStroke: '',
+            backgroundColor: '',
+            fontWeight: '400',
+            padding: '0',
+          });
+          this.$bus.$emit('sub-style-change');
           break;
         case 3:
-          this.$store.dispatch('updateColor', 'blue');
-          this.$bus.$emit('sub-style-change', {
+          this.$store.dispatch('updateStyle', {
             color: '#fff',
-            textShadow: '0px 2px 0px #0476AD, -1px 2px 0px #0476AD, 1px 2px 0px #0476AD',
-            textStroke: '3px #009be6',
             fontWeight: '700',
           });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '0px 2px 0px #0476AD, -1px 2px 0px #0476AD, 1px 2px 0px #0476AD',
+            textStroke: '3px #009be6',
+            backgroundColor: '',
+            fontWeight: '700',
+            padding: '0',
+          });
+          this.$bus.$emit('sub-style-change');
           break;
         case 4:
-          this.$store.dispatch('updateColor', 'black');
-          this.$bus.$emit('sub-style-change', {
-            fontSize: '4',
+          this.$store.dispatch('updateStyle', {
             color: '#fff',
+            fontWeight: '400',
+          });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '',
+            textStroke: '',
             backgroundColor: 'rgba(0,0,0,.5)',
+            fontWeight: '400',
             padding: '5px 20px',
           });
+          this.$bus.$emit('sub-style-change');
           break;
         default:
           break;

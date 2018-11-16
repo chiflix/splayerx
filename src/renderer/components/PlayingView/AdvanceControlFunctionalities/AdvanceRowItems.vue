@@ -57,6 +57,7 @@ export default {
       hoverIndex: -1,
       selectedIndex: 1,
       moveLength: '',
+      StyleNum: 0,
     };
   },
   props: {
@@ -92,6 +93,36 @@ export default {
         this.selectedIndex = numList.indexOf(val);
         this.calculateSpeedLength(numList.indexOf(val));
       }
+    },
+    winWidth(val) {
+      if (val > 1920) {
+        if (this.styleNum === 0) {
+          this.$store.dispatch('updateFontSize', `${600 / 108}vh`);
+        }
+        if (this.styleNum === 1) {
+          this.$store.dispatch('updateFontSize', `${500 / 108}vh`);
+        }
+        if (this.styleNum === 2) {
+          this.$store.dispatch('updateFontSize', `${400 / 108}vh`);
+        }
+        if (this.styleNum === 3) {
+          this.$store.dispatch('updateFontSize', `${300 / 108}vh`);
+        }
+      } else {
+        if (this.styleNum === 0) {
+          this.$store.dispatch('updateFontSize', `${((21 / 1600) * val) + 4.8}px`);
+        }
+        if (this.styleNum === 1) {
+          this.$store.dispatch('updateFontSize', `${((29 / 1600) * val) + 5.2}px`);
+        }
+        if (this.styleNum === 2) {
+          this.$store.dispatch('updateFontSize', `${((37 / 1600) * val) + 5.6}px`);
+        }
+        if (this.styleNum === 3) {
+          this.$store.dispatch('updateFontSize', `${((9 / 320) * val) + 6}px`);
+        }
+      }
+      this.$bus.$emit('sub-style-change');
     },
   },
   computed: {
@@ -172,6 +203,9 @@ export default {
   },
   mounted() {
     this.$set(this.lists[1], 'chosen', true);
+    this.styleNum = 1;
+    this.$store.dispatch('updateFontSize', ((29 / 1600) * this.winWidth) + 5.2);
+    this.$bus.$emit('sub-style-change');
   },
   methods: {
     handleOver(index) {
@@ -242,24 +276,25 @@ export default {
     changeFontSize(index) {
       switch (index) {
         case 0:
-          this.$store.dispatch('updateFontSize', 3);
-          this.$bus.$emit('sub-style-change');
+          this.styleNum = 0;
+          this.$store.dispatch('updateFontSize', `${((21 / 1600) * this.winWidth) + 4.8}px`);
           break;
         case 1:
-          this.$store.dispatch('updateFontSize', 5);
-          this.$bus.$emit('sub-style-change');
+          this.styleNum = 1;
+          this.$store.dispatch('updateFontSize', `${((29 / 1600) * this.winWidth) + 5.2}px`);
           break;
         case 2:
-          this.$store.dispatch('updateFontSize', 8);
-          this.$bus.$emit('sub-style-change');
+          this.styleNum = 2;
+          this.$store.dispatch('updateFontSize', `${((37 / 1600) * this.winWidth) + 5.6}px`);
           break;
         case 3:
-          this.$store.dispatch('updateFontSize', 10);
-          this.$bus.$emit('sub-style-change');
+          this.styleNum = 3;
+          this.$store.dispatch('updateFontSize', `${((9 / 320) * this.winWidth) + 6}px`);
           break;
         default:
           break;
       }
+      this.$bus.$emit('sub-style-change');
     },
   },
 };
