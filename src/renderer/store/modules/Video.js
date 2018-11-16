@@ -19,7 +19,7 @@ const state = {
   readyState: 0,
   seeking: false,
   // playback state
-  duration: 0,
+  duration: NaN,
   rate: 1,
   defaultPlaybackRate: 1,
   paused: false,
@@ -56,7 +56,7 @@ const getters = {
   },
   // playback state
   duration: state => state.duration,
-  finalPartTime: state => state.duration - 140,
+  finalPartTime: state => state.duration - 30,
   currentTime: state => state.currentTime,
   paused: state => state.paused,
   roundedCurrentTime: state => Math.round(state.currentTime),
