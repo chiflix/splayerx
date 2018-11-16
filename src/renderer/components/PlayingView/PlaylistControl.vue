@@ -1,5 +1,5 @@
 <template>
-  <div @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
+  <div @mousedown.left="handleDown" @mouseup.left="togglePlaylistDisplay" @mouseenter="handleEnter" @mouseleave="handleLeave">
     <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="playlist"></lottie>
   </div>
 </template>
@@ -22,11 +22,28 @@ export default {
       animationSpeed: 1,
       anim: {},
       validEnter: false,
+      clicks: 0,
     };
   },
   methods: {
     handleAnimation(anim) {
       this.anim = anim;
+    },
+    togglePlaylistDisplay() {
+      this.clicks = this.showAttached ? 1 : 0;
+      this.clicks += 1;
+      switch (this.clicks) {
+        case 1:
+          this.$emit('update:showAttached', true);
+          break;
+        case 2:
+          this.$emit('update:showAttached', false);
+          this.clicks = 0;
+          break;
+        default:
+          this.clicks = 0;
+          break;
+      }
     },
     handleDown() {
       this.mouseDown = true;

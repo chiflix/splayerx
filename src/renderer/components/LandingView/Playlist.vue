@@ -27,8 +27,7 @@
         :class="showShadow ? 'shadow' : '' "
         :style="{
           transition: tranFlag ? 'width 150ms ease-out, height 150ms ease-out, border 150ms ease-out' : '',
-          backgroundImage: itemShortcut(item.smallShortCut, item.lastPlayedTime),
-          backgroundColor: backgroundColor(item.lastPlayedTime),
+          backgroundImage: itemShortcut(item.smallShortCut, item.cover, item.lastPlayedTime),
           width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
           height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
         }"
@@ -233,11 +232,8 @@ export default {
         default: return '';
       }
     },
-    backgroundColor(lastTime) {
-      return lastTime < 1 ? 'black' : '';
-    },
-    itemShortcut(shortCut, lastPlayedTime) {
-      return lastPlayedTime < 1 ? '' : `url("${shortCut}")`;
+    itemShortcut(shortCut, cover, lastPlayedTime) {
+      return lastPlayedTime < 1 ? `url(${cover})` : `url("${shortCut}")`;
     },
     itemInfo() {
       return {
@@ -277,6 +273,7 @@ export default {
         this.displayInfo.lastTime = this.itemInfo().lastTime;
         this.displayInfo.duration = this.itemInfo().duration;
         this.displayInfo.percentage = this.itemInfo().percentage;
+        this.displayInfo.cover = item.cover;
         this.$bus.$emit('displayInfo', this.displayInfo);
       }
     },

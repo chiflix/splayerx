@@ -1,5 +1,6 @@
-import { app, BrowserWindow, Tray, ipcMain, globalShortcut } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, Tray, ipcMain, globalShortcut, splayerx } from 'electron' // eslint-disable-line
 import { throttle } from 'lodash';
+import path from 'path';
 import writeLog from './helpers/writeLog';
 import WindowResizer from './helpers/windowResizer';
 /**
@@ -20,6 +21,8 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 let mainWindow = null;
 let tray = null;
+const snapShotQueue = [];
+const mediaInfoQueue = [];
 const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -100,6 +103,66 @@ function registerMainWindowEvent() {
   ipcMain.on('windowSizeChange', (event, args) => {
     mainWindow.setSize(...args);
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
+  });
+
+  function snapShot(videoPath, callback) {
+    const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
+    const randomNumber = Math.round((Math.random() * 20) + 5);
+    const numberString = randomNumber < 9 ? `0${randomNumber}` : `${randomNumber}`;
+    splayerx.snapshotVideo(videoPath, `${imgPath}.png`, `00:00:${numberString}`, (err) => {
+      console.log(err, videoPath);
+      callback(err, imgPath);
+    });
+  }
+
+  function snapShotQueueProcess(event) {
+    const callback = (err, imgPath) => {
+      if (err !== '0') {
+        snapShot(snapShotQueue[0], callback);
+      } else {
+        event.sender.send(`snapShot-${snapShotQueue[0]}-reply`, imgPath);
+        snapShotQueue.shift();
+        if (snapShotQueue.length > 0) {
+          snapShot(snapShotQueue[0], callback);
+        }
+      }
+    };
+    snapShot(snapShotQueue[0], callback);
+  }
+
+  ipcMain.on('snapShot', (event, path) => {
+    if (snapShotQueue.length === 0) {
+      snapShotQueue.push(path);
+      snapShotQueueProcess(event);
+    } else {
+      snapShotQueue.push(path);
+    }
+  });
+
+  function mediaInfo(videoPath, callback) {
+    splayerx.getMediaInfo(videoPath, (info) => {
+      callback(info);
+    });
+  }
+
+  function mediaInfoQueueProcess(event) {
+    const callback = (info) => {
+      event.sender.send(`mediaInfo-${mediaInfoQueue[0]}-reply`, info);
+      mediaInfoQueue.shift();
+      if (mediaInfoQueue.length > 0) {
+        mediaInfo(mediaInfoQueue[0], callback);
+      }
+    };
+    mediaInfo(mediaInfoQueue[0], callback);
+  }
+
+  ipcMain.on('mediaInfo', (event, path) => {
+    if (mediaInfoQueue.length === 0) {
+      mediaInfoQueue.push(path);
+      mediaInfoQueueProcess(event);
+    } else {
+      mediaInfoQueue.push(path);
+    }
   });
   ipcMain.on('windowPositionChange', (event, args) => {
     mainWindow.setPosition(...args);

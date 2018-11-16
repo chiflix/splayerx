@@ -209,7 +209,7 @@ export default {
   box-sizing: content-box;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .2);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 .the-preview-thumbnail {
   position: absolute;
