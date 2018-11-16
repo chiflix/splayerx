@@ -2,22 +2,28 @@ const state = {
   SubtitleNames: [],
   curStyle: {
     fontFamily: 'PingFang SC',
-    fontSize: '0px',
+    fontSize: '11px',
     letterSpacing: 1,
     opacity: 1,
     color: 'white',
     fontWeight: '400',
+    transform: 'scale(1)',
+    transformOrigin: 'bottom',
+    webkitFontSmoothing: 'antialiased',
   },
   curBorderStyle: {
     fontFamily: 'PingFang SC',
-    fontSize: '0px',
+    fontSize: '11px',
     letterSpacing: 1,
     padding: '0px',
     textFillColor: 'transparent',
-    textStroke: '0px #fff',
+    textStroke: '0.5px #777',
     fontWeight: '400',
     backgroundColor: 'transparent',
-    textShadow: '-1px -1px 0 rgba(0,0,0,.1), 0 -1px 0 rgba(0,0,0,.1), 1px -1px 0 rgba(0,0,0,.1), 1px 0 0 rgba(0,0,0,.1), 1px 1px 0 rgba(0,0,0,.1), 0 1px 0 rgba(0,0,0,.1), 0 2px 2px rgba(0,0,0,.4), -1px 1px 0 rgba(0,0,0,.1), -0.5px 0 0 rgba(0,0,0,.1)',
+    transform: 'scale(1)',
+    transformOrigin: 'bottom',
+    textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
+    webkitFontSmoothing: 'antialiased',
   },
   SubtitleDelay: 0,
 };
@@ -53,10 +59,6 @@ const mutations = {
       throw new Error('Error in Subtitle Vuex.');
     }
   },
-  UpdateFontSize(state, payload) {
-    state.curBorderStyle.fontSize = payload;
-    state.curStyle.fontSize = payload;
-  },
   UpdateStyle(state, payload) {
     Object.assign(state.curStyle, payload);
   },
@@ -66,12 +68,13 @@ const mutations = {
   UpdateDelay(state, payload) {
     state.SubtitleDelay += payload;
   },
+  UpdateScale(state, payload) {
+    state.curStyle.transform = `scale(${payload})`;
+    state.curBorderStyle.transform = `scale(${payload})`;
+  },
 };
 
 const actions = {
-  updateFontSize({ commit }, delta) {
-    commit('UpdateFontSize', delta);
-  },
   updateStyle({ commit }, delta) {
     commit('UpdateStyle', delta);
   },
@@ -80,6 +83,9 @@ const actions = {
   },
   updateSubDelay({ commit }, delta) {
     commit('UpdateDelay', delta);
+  },
+  updateScale({ commit }, delta) {
+    commit('UpdateScale', delta);
   },
 };
 

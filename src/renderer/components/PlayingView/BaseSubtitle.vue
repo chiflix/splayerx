@@ -500,6 +500,9 @@ export default {
         opacity: this.curStyle.opacity,
         color: this.curStyle.color,
         fontWeight: this.curStyle.fontWeight,
+        transform: this.curStyle.transform,
+        transformOrigin: this.curStyle.transformOrigin,
+        webkitFontSmoothing: this.curStyle.webkitFontSmoothing,
       };
       this.subBorderStyle = {
         fontFamily: this.curBorderStyle.fontFamily,
@@ -511,6 +514,9 @@ export default {
         fontWeight: this.curBorderStyle.fontWeight,
         textShadow: this.curBorderStyle.textShadow,
         backgroundColor: this.curBorderStyle.backgroundColor,
+        transform: this.curBorderStyle.transform,
+        transformOrigin: this.curBorderStyle.transformOrigin,
+        webkitFontSmoothing: this.curStyle.webkitFontSmoothing,
       };
     },
     notParsedYet(subStartTime) {
@@ -705,6 +711,18 @@ export default {
     },
   },
   watch: {
+    curBorderStyle: {
+      handler() {
+        this.subStyleChange();
+      },
+      deep: true,
+    },
+    curStyle: {
+      handler() {
+        this.subStyleChange();
+      },
+      deep: true,
+    },
     firstSubState(newVal) {
       const vid = this.$parent.$refs.videoCanvas.videoElement();
       if (newVal && vid.textTracks[this.firstSubIndex].mode === 'disabled') {
@@ -780,8 +798,6 @@ export default {
     this.$bus.$on('first-subtitle-off', () => {
       this.$store.commit('SubtitleOff');
     });
-
-    this.$bus.$on('sub-style-change', this.subStyleChange);
 
     this.$bus.$on('add-subtitle', (files) => {
       const size = this.$store.getters.subtitleCount;

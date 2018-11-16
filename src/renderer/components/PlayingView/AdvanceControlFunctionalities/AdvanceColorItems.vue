@@ -84,15 +84,6 @@ export default {
       return this.$store.getters.curStyle;
     },
   },
-  watch: {
-    winWidth(val) {
-      if (this.ChosenStyle === 3) {
-        this.$store.dispatch('updateBorderStyle', {
-          textStroke: `${((9 / 1600) * val) + (6 / 5)}px #009be6`,
-        });
-      }
-    },
-  },
   mounted() {
     this.$set(this.imgs[0], 'selected', true);
   },
@@ -119,12 +110,11 @@ export default {
             fontWeight: '400',
           });
           this.$store.dispatch('updateBorderStyle', {
-            textShadow: '-1px -1px 0 rgba(0,0,0,.1), 0 -1px 0 rgba(0,0,0,.1), 1px -1px 0 rgba(0,0,0,.1), 1px 0 0 rgba(0,0,0,.1), 1px 1px 0 rgba(0,0,0,.1), 0 1px 0 rgba(0,0,0,.1), 0 2px 2px rgba(0,0,0,.4), -1px 1px 0 rgba(0,0,0,.1), -0.5px 0 0 rgba(0,0,0,.1)',
-            textStroke: '0px #fff',
+            textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
+            textStroke: '0.5px #777',
             backgroundColor: '',
             fontWeight: '400',
           });
-          this.$bus.$emit('sub-style-change');
           break;
         case 1:
           this.ChosenStyle = style1;
@@ -133,13 +123,12 @@ export default {
             fontWeight: '400',
           });
           this.$store.dispatch('updateBorderStyle', {
-            textShadow: '0px 3px 1px #333',
-            textStroke: '3px #222',
+            textShadow: '0px 1px 1px #333',
+            textStroke: '1.3px #222',
             backgroundColor: '',
             fontWeight: '400',
             padding: '0',
           });
-          this.$bus.$emit('sub-style-change');
           break;
         case 2:
           this.ChosenStyle = style2;
@@ -148,28 +137,26 @@ export default {
             fontWeight: '400',
           });
           this.$store.dispatch('updateBorderStyle', {
-            textShadow: '0px 1px 1px #222',
+            textShadow: '0px 0.5px 0.5px #555',
             textStroke: '',
             backgroundColor: '',
             fontWeight: '400',
             padding: '0',
           });
-          this.$bus.$emit('sub-style-change');
           break;
         case 3:
           this.ChosenStyle = style3;
           this.$store.dispatch('updateStyle', {
             color: '#fff',
-            fontWeight: '700',
+            fontWeight: '800',
           });
           this.$store.dispatch('updateBorderStyle', {
-            textShadow: '0px 2px 0px #0476AD, -1px 2px 0px #0476AD, 1px 2px 0px #0476AD',
-            textStroke: `${((9 / 1600) * this.winWidth) + (6 / 5)}px #009be6`,
+            textShadow: '',
+            textStroke: '1.6px #009be6',
             backgroundColor: '',
-            fontWeight: '700',
+            fontWeight: '800',
             padding: '0',
           });
-          this.$bus.$emit('sub-style-change');
           break;
         case 4:
           this.ChosenStyle = style4;
@@ -182,9 +169,8 @@ export default {
             textStroke: '',
             backgroundColor: 'rgba(0,0,0,.5)',
             fontWeight: '400',
-            padding: '5px 20px',
+            padding: '0px 5px',
           });
-          this.$bus.$emit('sub-style-change');
           break;
         default:
           break;

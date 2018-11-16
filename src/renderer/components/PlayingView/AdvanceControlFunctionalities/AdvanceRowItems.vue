@@ -57,7 +57,7 @@ export default {
       hoverIndex: -1,
       selectedIndex: 1,
       moveLength: '',
-      StyleNum: 1,
+      styleNum: 1,
       ChosenSize: '默认',
     };
   },
@@ -98,32 +98,31 @@ export default {
     winWidth(val) {
       if (val > 1920) {
         if (this.styleNum === 0) {
-          this.$store.dispatch('updateFontSize', `${600 / 108}vh`);
+          this.$store.dispatch('updateScale', `${(30 / 11) * (val / 1920)}`);
         }
         if (this.styleNum === 1) {
-          this.$store.dispatch('updateFontSize', `${500 / 108}vh`);
+          this.$store.dispatch('updateScale', `${(40 / 11) * (val / 1920)}`);
         }
         if (this.styleNum === 2) {
-          this.$store.dispatch('updateFontSize', `${400 / 108}vh`);
+          this.$store.dispatch('updateScale', `${(50 / 11) * (val / 1920)}`);
         }
         if (this.styleNum === 3) {
-          this.$store.dispatch('updateFontSize', `${300 / 108}vh`);
+          this.$store.dispatch('updateScale', `${(60 / 11) * (val / 1920)}`);
         }
       } else {
         if (this.styleNum === 0) {
-          this.$store.dispatch('updateFontSize', `${((21 / 1600) * val) + 4.8}px`);
+          this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * val) + (24 / 55)}`);
         }
         if (this.styleNum === 1) {
-          this.$store.dispatch('updateFontSize', `${((29 / 1600) * val) + 5.2}px`);
+          this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * val) + (26 / 55)}`);
         }
         if (this.styleNum === 2) {
-          this.$store.dispatch('updateFontSize', `${((37 / 1600) * val) + 5.6}px`);
+          this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * val) + (28 / 55)}`);
         }
         if (this.styleNum === 3) {
-          this.$store.dispatch('updateFontSize', `${((9 / 320) * val) + 6}px`);
+          this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * val) + (30 / 55)}`);
         }
       }
-      this.$bus.$emit('sub-style-change');
     },
   },
   computed: {
@@ -184,14 +183,9 @@ export default {
     subStyle() {
       return this.$store.getters.curStyle;
     },
-    /**
-     * @return {string}
-     */
   },
   mounted() {
     this.$set(this.lists[1], 'chosen', true);
-    this.$store.dispatch('updateFontSize', ((29 / 1600) * this.winWidth) + 5.2);
-    this.$bus.$emit('sub-style-change');
   },
   methods: {
     handleOver(index) {
@@ -264,27 +258,26 @@ export default {
         case 0:
           this.styleNum = 0;
           this.ChosenSize = '小';
-          this.$store.dispatch('updateFontSize', `${((21 / 1600) * this.winWidth) + 4.8}px`);
+          this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
           break;
         case 1:
           this.styleNum = 1;
           this.ChosenSize = '默认';
-          this.$store.dispatch('updateFontSize', `${((29 / 1600) * this.winWidth) + 5.2}px`);
+          this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
           break;
         case 2:
           this.styleNum = 2;
           this.ChosenSize = '大';
-          this.$store.dispatch('updateFontSize', `${((37 / 1600) * this.winWidth) + 5.6}px`);
+          this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
           break;
         case 3:
           this.styleNum = 3;
           this.ChosenSize = '超大';
-          this.$store.dispatch('updateFontSize', `${((9 / 320) * this.winWidth) + 6}px`);
+          this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
           break;
         default:
           break;
       }
-      this.$bus.$emit('sub-style-change');
     },
   },
 };
