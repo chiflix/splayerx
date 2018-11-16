@@ -15,6 +15,16 @@ const getters = {
     }
     return '';
   },
+  playingList: (state, getters) => {
+    if (getters.isFolderList) {
+      return state.FolderList;
+    }
+    return state.PlayingList;
+  },
+  playingIndex: (state, getters) => {
+    const list = state.PlayingList.length > 0 ? state.PlayingList : state.FolderList;
+    return list.findIndex(value => value === getters.originSrc);
+  },
 };
 
 const mutations = {

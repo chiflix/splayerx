@@ -4,15 +4,16 @@
       width: `${width}px`,
       height: `${height}px`,
     }">
+    <slot></slot>
     <div class="element"
       :style="{
-        transform: `translate(-${borderWidth / 2}px, -${borderWidth / 2}px)`,
+        left: `-${borderWidth / 2}px`,
+        top: `-${borderWidth / 2}px`,
         borderRadius: `${borderRadius}px`,
-        width: `${width - borderWidth}px`,
-        height: `${height - borderWidth}px`,
+        width: `${width + borderWidth}px`,
+        height: `${height + borderWidth}px`,
         border: `${borderWidth}px solid rgba(${borderColor})`,
       }"></div>
-      <slot></slot>
   </div>
 </template>
 <script>
@@ -43,11 +44,10 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
   box-sizing: content-box;
-  .element {
-    position: absolute;
-    box-sizing: inherit;
-  }
+}
+.element {
+  position: absolute;
+  box-sizing: border-box;
 }
 </style>
