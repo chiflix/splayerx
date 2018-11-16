@@ -57,7 +57,8 @@ export default {
       hoverIndex: -1,
       selectedIndex: 1,
       moveLength: '',
-      StyleNum: 0,
+      StyleNum: 1,
+      ChosenSize: '默认',
     };
   },
   props: {
@@ -186,24 +187,9 @@ export default {
     /**
      * @return {string}
      */
-    ChosenSize() {
-      switch (this.subStyle.fontSize) {
-        case 3:
-          return '小';
-        case 5:
-          return '默认';
-        case 8:
-          return '大';
-        case 10:
-          return '超大';
-        default:
-          return '默认';
-      }
-    },
   },
   mounted() {
     this.$set(this.lists[1], 'chosen', true);
-    this.styleNum = 1;
     this.$store.dispatch('updateFontSize', ((29 / 1600) * this.winWidth) + 5.2);
     this.$bus.$emit('sub-style-change');
   },
@@ -277,18 +263,22 @@ export default {
       switch (index) {
         case 0:
           this.styleNum = 0;
+          this.ChosenSize = '小';
           this.$store.dispatch('updateFontSize', `${((21 / 1600) * this.winWidth) + 4.8}px`);
           break;
         case 1:
           this.styleNum = 1;
+          this.ChosenSize = '默认';
           this.$store.dispatch('updateFontSize', `${((29 / 1600) * this.winWidth) + 5.2}px`);
           break;
         case 2:
           this.styleNum = 2;
+          this.ChosenSize = '大';
           this.$store.dispatch('updateFontSize', `${((37 / 1600) * this.winWidth) + 5.6}px`);
           break;
         case 3:
           this.styleNum = 3;
+          this.ChosenSize = '超大';
           this.$store.dispatch('updateFontSize', `${((9 / 320) * this.winWidth) + 6}px`);
           break;
         default:

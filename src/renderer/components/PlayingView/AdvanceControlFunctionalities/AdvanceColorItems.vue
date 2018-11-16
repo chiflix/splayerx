@@ -14,7 +14,7 @@
           transition: 'color 300ms',
         }">
         <div class="textItem">{{ item }}</div>
-        <div class="rightItem" v-show="!isChosen"><img :src="ChosenColor"></div>
+        <div class="rightItem" v-show="!isChosen"><img :src="ChosenStyle"></div>
       </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -51,6 +51,7 @@ export default {
       imgs: [[style0], [style1], [style2], [style3], [style4]],
       imgsSelected: [styleSelected0, styleSelected1, styleSelected2,
         styleSelected3, styleSelected4],
+      ChosenStyle: style0,
     };
   },
   props: {
@@ -82,28 +83,14 @@ export default {
     subStyle() {
       return this.$store.getters.curStyle;
     },
-    ChosenColor() {
-      switch (this.subStyle.color) {
-        case 'white':
-          return style0;
-        case 'gray':
-          return style1;
-        case 'yellow':
-          return style2;
-        case 'blue':
-          return style3;
-        case 'black':
-          return style4;
-        default:
-          return style0;
-      }
-    },
   },
   watch: {
     winWidth(val) {
-      this.$store.dispatch('updateBorderStyle', {
-        textStroke: `${((9 / 1600) * val) + (6 / 5)}px #009be6`,
-      });
+      if (this.ChosenStyle === 3) {
+        this.$store.dispatch('updateBorderStyle', {
+          textStroke: `${((9 / 1600) * val) + (6 / 5)}px #009be6`,
+        });
+      }
     },
   },
   mounted() {
@@ -126,6 +113,7 @@ export default {
       });
       switch (index) {
         case 0:
+          this.ChosenStyle = style0;
           this.$store.dispatch('updateStyle', {
             color: 'white',
             fontWeight: '400',
@@ -139,6 +127,7 @@ export default {
           this.$bus.$emit('sub-style-change');
           break;
         case 1:
+          this.ChosenStyle = style1;
           this.$store.dispatch('updateStyle', {
             color: 'white',
             fontWeight: '400',
@@ -153,6 +142,7 @@ export default {
           this.$bus.$emit('sub-style-change');
           break;
         case 2:
+          this.ChosenStyle = style2;
           this.$store.dispatch('updateStyle', {
             color: '#fffc00',
             fontWeight: '400',
@@ -167,13 +157,14 @@ export default {
           this.$bus.$emit('sub-style-change');
           break;
         case 3:
+          this.ChosenStyle = style3;
           this.$store.dispatch('updateStyle', {
             color: '#fff',
             fontWeight: '700',
           });
           this.$store.dispatch('updateBorderStyle', {
             textShadow: '0px 2px 0px #0476AD, -1px 2px 0px #0476AD, 1px 2px 0px #0476AD',
-            textStroke: '3px #009be6',
+            textStroke: `${((9 / 1600) * this.winWidth) + (6 / 5)}px #009be6`,
             backgroundColor: '',
             fontWeight: '700',
             padding: '0',
@@ -181,6 +172,7 @@ export default {
           this.$bus.$emit('sub-style-change');
           break;
         case 4:
+          this.ChosenStyle = style4;
           this.$store.dispatch('updateStyle', {
             color: '#fff',
             fontWeight: '400',

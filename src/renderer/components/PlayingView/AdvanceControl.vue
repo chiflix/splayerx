@@ -186,7 +186,7 @@ button:hover {
     bottom: 44px;
     right: 3px;
   }
-  @media screen and (min-width: 1920px) {
+  @media screen and (min-width: 1921px) {
     bottom: 70px;
     right: 7px;
   }
