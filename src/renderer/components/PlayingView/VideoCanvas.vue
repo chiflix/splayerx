@@ -70,16 +70,16 @@ export default {
     onMetaLoaded(event) {
       this.videoConfigInitialize({
         volume: 100,
-        mute: false,
+        muted: false,
         rate: 1,
         duration: event.target.duration,
+        currentTime: this.lastPlayedTime || 0,
       });
       this.updateMetaInfo({
         intrinsicWidth: event.target.videoWidth,
         intrinsicHeight: event.target.videoHeight,
         ratio: event.target.videoWidth / event.target.videoHeight,
       });
-      this.$store.dispatch('currentPlaying', this.originSrc);
       if (event.target.duration - this.lastPlayedTime > 10) {
         this.$bus.$emit('seek', this.lastPlayedTime);
       } else {
