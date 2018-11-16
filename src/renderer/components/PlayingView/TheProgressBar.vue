@@ -94,13 +94,13 @@ export default {
       return this.hovering ? this.whiteWithOpacity(0.1) : this.whiteWithOpacity(0);
     },
     leftFakeProgressBackgroundColor() {
-      let opacity = 0.908;
+      let opacity;
       if (this.hoveredCurrentTime === 0 && this.hoveredSmallerThanPlayed) opacity = 0.3;
       if (this.hoveredCurrentTime > 0) opacity = 0.908;
       return this.whiteWithOpacity(opacity);
     },
     rightFakeProgressBackgroundColor() {
-      const hoveredEnd = !(Math.round(this.hoveredCurrentTime) < Math.round(this.duration));
+      const hoveredEnd = this.hoveredPercent === '100%';
       const playedEnd = !(Math.round(this.currentTime) < Math.round(this.duration));
       let opacity = playedEnd ? 0.9 : 0.1;
       if (this.hovering) {
@@ -161,7 +161,7 @@ export default {
     },
     pageXToProportion(pageX, fakeButtonWidth, winWidth) {
       if (pageX <= fakeButtonWidth) return 0;
-      if (pageX >= winWidth - (fakeButtonWidth * 2)) return 1;
+      if (pageX >= winWidth - fakeButtonWidth) return 1;
       return (pageX - fakeButtonWidth) / (winWidth - (fakeButtonWidth * 2));
     },
     pageXToThumbnailPosition(pageX, fakeButtonWidth, thumbnailWidth, winWidth) {
