@@ -2,8 +2,10 @@
   <div
     :data-component-name="$options.name"
     class="video">
+    <transition name="fade" mode="out-in">
     <base-video-player
       ref="videoCanvas"
+      :key="originSrc"
       :events="['loadedmetadata', 'audiotrack']"
       :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
@@ -17,12 +19,14 @@
       :currentTime="seekTime"
       :currentAudioTrackId="currentAudioTrackId"
       @update:currentTime="updateCurrentTime" />
+    </transition>
     <BaseSubtitle/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
 
 <script>
+import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
@@ -43,7 +47,9 @@ export default {
       videoExisted: false,
       windowSizeHelper: null,
       videoElement: null,
+      coverFinded: false,
       seekTime: [0],
+      lastPlayedTime: 0,
     };
   },
   methods: {
@@ -74,8 +80,14 @@ export default {
         ratio: event.target.videoWidth / event.target.videoHeight,
       });
       this.$store.dispatch('currentPlaying', this.originSrc);
-      this.$bus.$emit('seek', this.currentTime);
+      if (event.target.duration - this.lastPlayedTime > 10) {
+        this.$bus.$emit('seek', this.lastPlayedTime);
+      } else {
+        this.$bus.$emit('seek', 0);
+      }
+      this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
+      this.getVideoCover();
       this.changeWindowSize();
     },
     onAudioTrack(event) {
@@ -151,6 +163,7 @@ export default {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
     $_saveScreenshot() {
+      const videoElement = this.$refs.videoCanvas.videoElement();
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       // todo: use metaloaded to get videoHeight and videoWidth
@@ -158,7 +171,7 @@ export default {
       // cannot delete
       [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
       canvasCTX.drawImage(
-        this.videoElement, 0, 0, videoWidth, videoHeight,
+        videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
@@ -167,7 +180,7 @@ export default {
       // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
       [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
       canvasCTX.drawImage(
-        this.videoElement, 0, 0, videoWidth, videoHeight,
+        videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
       const smallImagePath = canvas.toDataURL('image/png');
@@ -179,10 +192,35 @@ export default {
       };
       syncStorage.setSync('recent-played', data);
     },
+    getVideoCover() {
+      if (!this.coverFinded) {
+        this.$electron.ipcRenderer.send('snapShot', this.originSrc);
+        this.$electron.ipcRenderer.once(`snapShot-${this.originSrc}-reply`, (event, imgPath) => {
+          fs.readFile(`${imgPath}.png`, 'base64', (err, data) => {
+            if (!err) {
+              const imageSrc = `data:image/png;base64, ${data}`;
+              this.infoDB().get('recent-played', 'path', this.originSrc).then((val) => {
+                if (val) {
+                  const mergedData = Object.assign(val, { cover: imageSrc });
+                  this.infoDB().add('recent-played', mergedData);
+                } else {
+                  const data = {
+                    quickHash: this.mediaQuickHash(this.originSrc),
+                    path: this.originSrc,
+                    cover: imageSrc,
+                    duration: this.duration,
+                  };
+                  this.infoDB().add('recent-played', data);
+                }
+              });
+            }
+          });
+        });
+      }
+    },
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio',
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
       'winSize', 'winPos', 'isFullScreen']),
     ...mapGetters({
@@ -193,6 +231,8 @@ export default {
   },
   watch: {
     originSrc(val, oldVal) {
+      this.coverFinded = false;
+      this.videoElement = this.$refs.videoCanvas.videoElement();
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
@@ -206,12 +246,20 @@ export default {
   },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
+    this.infoDB().get('recent-played', 'path', this.originSrc).then((val) => {
+      if (val && val.cover) {
+        this.coverFinded = true;
+      }
+    });
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.ratio]);
     });
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
+    });
+    this.$bus.$on('send-lastplayedtime', (e) => {
+      this.lastPlayedTime = e;
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
@@ -244,5 +292,11 @@ export default {
 }
 .canvas {
   visibility: hidden;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 200ms ease-in;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>
