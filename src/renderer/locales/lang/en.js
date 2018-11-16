@@ -1,6 +1,6 @@
 export default {
   msg: {
-    titleName: 'SPlayerX',
+    titleName: 'SPlayer',
     file: {
       name: 'File',
       open: 'Open…',
@@ -12,8 +12,8 @@ export default {
       name: 'Playback',
       fullScreen: 'Full Screen',
       keepPlayingWindowFront: 'Keep Window On Top',
-      increasePlaybackSpeed: 'Increase Playback Speed',
-      decreasePlaybackSpeed: 'Decrease Playback Speed',
+      increasePlaybackSpeed: 'Increase Playback Speed   ]',
+      decreasePlaybackSpeed: 'Decrease Playback Speed   [',
       captureScreen: 'Capture Screen',
       captureVideoClip: 'Capture Video Clip',
       mediaInfo: 'Media Info',
@@ -50,13 +50,14 @@ export default {
       minimize: 'Minimize',
       enterFullScreen: 'Enter Full Screen',
       bringAllToFront: 'Bring All To Front',
+      bossKey: 'Boss Key',
     },
     help: {
       name: 'Help',
-      splayerxHelp: 'SPlayerX Help',
+      splayerxHelp: 'SPlayer Help',
     },
     splayerx: {
-      about: 'About SPlayerX…',
+      about: 'About SPlayer…',
       preferences: 'Preferences',
       homepage: 'Homepage',
       feedback: 'Feedback',

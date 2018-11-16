@@ -5,6 +5,7 @@ import axios from 'axios';
 import uuidv4 from 'uuid/v4';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
+import VueAnalytics from 'vue-analytics';
 
 import App from '@/App';
 import router from '@/router';
@@ -31,6 +32,11 @@ Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
 
+Vue.use(VueAnalytics, {
+  id: 'UA-2468227-6',
+  router,
+});
+
 Vue.mixin(helpers);
 Vue.prototype.$bus = new Vue(); // Global event bus
 
@@ -47,7 +53,7 @@ new Vue({
   store,
   template: '<App/>',
   computed: {
-    ...mapGetters(['mute']),
+    ...mapGetters(['muted']),
   },
   methods: {
     createMenu() {
@@ -120,8 +126,18 @@ new Vue({
             // { label: 'Increase Size' },
             // { label: 'Decrease Size' },
             { type: 'separator' },
-            { label: this.$t('msg.playback.increasePlaybackSpeed'), enabled: false },
-            { label: this.$t('msg.playback.decreasePlaybackSpeed'), enabled: false },
+            {
+              label: this.$t('msg.playback.increasePlaybackSpeed'),
+              click: () => {
+                this.$store.dispatch(videoActions.INCREASE_RATE);
+              },
+            },
+            {
+              label: this.$t('msg.playback.decreasePlaybackSpeed'),
+              click: () => {
+                this.$store.dispatch(videoActions.DECREASE_RATE);
+              },
+            },
             /** */
             { type: 'separator' },
             { label: this.$t('msg.playback.captureScreen'), enabled: false },
@@ -140,8 +156,8 @@ new Vue({
               type: 'checkbox',
               accelerator: 'M',
               click: (menuItem) => {
-                this.$bus.$emit('toggle-mute');
-                menuItem.checked = this.mute;
+                this.$bus.$emit('toggle-muted');
+                menuItem.checked = this.muted;
               },
             },
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
@@ -215,6 +231,13 @@ new Vue({
               },
             },
             { label: this.$t('msg.window_.bringAllToFront'), accelerator: '' },
+            {
+              label: this.$t('msg.window_.bossKey'),
+              accelerator: 'CmdOrCtrl+`',
+              click: () => {
+                this.$electron.ipcRenderer.send('bossKey');
+              },
+            },
           ],
         },
         // menu.help
@@ -251,7 +274,9 @@ new Vue({
               },
               {
                 label: this.$t('msg.splayerx.feedback'),
-                enabled: false,
+                click: () => {
+                  this.$electron.shell.openExternal('https://feedback.splayer.org');
+                },
               },
               { type: 'separator' },
               {
@@ -492,7 +517,17 @@ new Vue({
           }
           break;
         case 'Escape':
-          this.$bus.$emit('leave-fullscreen');
+          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
+          break;
+        default:
+          break;
+      }
+      switch (e.keyCode) {
+        case 219:
+          this.$store.dispatch(videoActions.DECREASE_RATE);
+          break;
+        case 221:
+          this.$store.dispatch(videoActions.INCREASE_RATE);
           break;
         default:
           break;
