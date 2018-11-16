@@ -15,6 +15,9 @@ export default {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
   },
+
+  methods: {
+  },
   mounted() {
     this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);
   },
