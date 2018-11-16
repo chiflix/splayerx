@@ -36,10 +36,15 @@ export default {
   components: {
     'the-preview-thumbnail': ThePreviewThumbnail,
   },
+  props: {
+    hovering: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       hoveredPageX: 0,
-      hovering: false,
       showThumbnail: false,
       mousedown: false,
       mouseleave: true,
@@ -116,14 +121,11 @@ export default {
     winWidth(newValue) {
       this.thumbnailWidth = this.winWidthToThumbnailWidth(newValue);
     },
-    mouseleave(newValue) {
-      console.log(newValue);
-    },
   },
   methods: {
     handleMousemove(event) {
       this.hoveredPageX = event.pageX;
-      this.hovering = true;
+      this.$emit('update:hovering', true);
       if (this.hoveringId) clearTimeout(this.hoveringId);
       if (event.target !== this.$refs.leftInvisible) this.showThumbnail = true;
       this.mouseleave = false;
@@ -195,7 +197,7 @@ export default {
         clearTimeout(this.hoveringId);
       }
       this.hoveringId = setTimeout(() => {
-        this.hovering = false;
+        this.$emit('update:hovering', false);
       }, 3000);
     },
   },

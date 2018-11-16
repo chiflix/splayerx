@@ -50,12 +50,6 @@ describe('Component - TheProgressBar', () => {
         expect(wrapper.vm.hoveredPageX).to.not.equal(oldHoveredPageX);
       });
 
-      it('should mousemove set hovering to true', () => {
-        wrapper.trigger('mousemove');
-
-        expect(wrapper.vm.hovering).to.equal(true);
-      });
-
       it('should mousemove set mouseleave to false', () => {
         wrapper.trigger('mousemove');
 
