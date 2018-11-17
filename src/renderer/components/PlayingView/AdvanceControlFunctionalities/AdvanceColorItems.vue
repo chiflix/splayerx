@@ -15,7 +15,7 @@
           cursor: isChosen ? 'default' : 'pointer',
         }">
         <div class="textItem">{{ item }}</div>
-        <div class="rightItem" v-show="!isChosen"><img :src="ChosenColor"></div>
+        <div class="rightItem" v-show="!isChosen"><img :src="ChosenStyle"></div>
       </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -52,6 +52,7 @@ export default {
       imgs: [[style0], [style1], [style2], [style3], [style4]],
       imgsSelected: [styleSelected0, styleSelected1, styleSelected2,
         styleSelected3, styleSelected4],
+      ChosenStyle: style0,
     };
   },
   props: {
@@ -83,22 +84,6 @@ export default {
     subStyle() {
       return this.$store.getters.curStyle;
     },
-    ChosenColor() {
-      switch (this.subStyle.color) {
-        case 'white':
-          return style0;
-        case 'gray':
-          return style1;
-        case 'yellow':
-          return style2;
-        case 'blue':
-          return style3;
-        case 'black':
-          return style4;
-        default:
-          return style0;
-      }
-    },
   },
   mounted() {
     this.$set(this.imgs[0], 'selected', true);
@@ -120,24 +105,73 @@ export default {
       });
       switch (index) {
         case 0:
-          this.$store.dispatch('updateColor', 'white');
-          this.$bus.$emit('sub-style-change', { color: 'white' });
+          this.ChosenStyle = style0;
+          this.$store.dispatch('updateStyle', {
+            color: 'white',
+            fontWeight: '400',
+          });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
+            textStroke: '0.5px #777',
+            backgroundColor: '',
+            fontWeight: '400',
+          });
           break;
         case 1:
-          this.$store.dispatch('updateColor', 'gray');
-          this.$bus.$emit('sub-style-change', { color: 'gray' });
+          this.ChosenStyle = style1;
+          this.$store.dispatch('updateStyle', {
+            color: 'white',
+            fontWeight: '400',
+          });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '0px 1px 1px #333',
+            textStroke: '1.3px #222',
+            backgroundColor: '',
+            fontWeight: '400',
+            padding: '0',
+          });
           break;
         case 2:
-          this.$store.dispatch('updateColor', 'yellow');
-          this.$bus.$emit('sub-style-change', { color: 'yellow' });
+          this.ChosenStyle = style2;
+          this.$store.dispatch('updateStyle', {
+            color: '#fffc00',
+            fontWeight: '400',
+          });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '0px 0.5px 0.5px #555',
+            textStroke: '',
+            backgroundColor: '',
+            fontWeight: '400',
+            padding: '0',
+          });
           break;
         case 3:
-          this.$store.dispatch('updateColor', 'blue');
-          this.$bus.$emit('sub-style-change', { color: 'blue' });
+          this.ChosenStyle = style3;
+          this.$store.dispatch('updateStyle', {
+            color: '#fff',
+            fontWeight: '800',
+          });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '',
+            textStroke: '1.6px #009be6',
+            backgroundColor: '',
+            fontWeight: '800',
+            padding: '0',
+          });
           break;
         case 4:
-          this.$store.dispatch('updateColor', 'black');
-          this.$bus.$emit('sub-style-change', { color: 'black' });
+          this.ChosenStyle = style4;
+          this.$store.dispatch('updateStyle', {
+            color: '#fff',
+            fontWeight: '400',
+          });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '',
+            textStroke: '',
+            backgroundColor: 'rgba(0,0,0,.5)',
+            fontWeight: '400',
+            padding: '0px 5px',
+          });
           break;
         default:
           break;

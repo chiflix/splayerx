@@ -9,6 +9,11 @@
           v-for="(html, key) in firstCueHTML"
           :key="key"
           v-html="html"></div>
+        <div class='subtitle-border-content'
+          :style="subBorderStyle"
+          v-for="(html, key) in firstCueHTML"
+          :key="key"
+          v-html="html"></div>
       </div>
     </div>
 </template>
@@ -50,6 +55,7 @@ export default {
       secondCueHTML: [],
       subStyle: {},
       subIndex: 0,
+      subBorderStyle: {},
     };
   },
   methods: {
@@ -487,29 +493,31 @@ export default {
      * the css style of the subtitle. Each unset
      * property will use default value.
      */
-    subStyleChange(obj = {}) {
-      const fontSize = obj.fontSize ? obj.fontSize : this.curStyle.fontSize;
-      const letterSpacing = obj.letterSpacing ? obj.letterSpacing : this.curStyle.letterSpacing;
-      const opacity = obj.opacity ? obj.opacity : this.curStyle.opacity;
-      const color = obj.color ? obj.color : this.curStyle.color;
-      const border = obj.border ? obj.border : this.curStyle.border;
-      const background = obj.background ? obj.background : this.curStyle.background;
-
+    subStyleChange() {
       this.subStyle = {
-        fontSize: `${fontSize}vh`,
-        letterSpacing: `${letterSpacing}px`,
-        opacity,
-        color,
-        border,
-        background,
+        fontFamily: this.curStyle.fontFamily,
+        fontSize: this.curStyle.fontSize,
+        letterSpacing: `${this.curStyle.letterSpacing}px`,
+        opacity: this.curStyle.opacity,
+        color: this.curStyle.color,
+        fontWeight: this.curStyle.fontWeight,
+        transform: this.curStyle.transform,
+        transformOrigin: this.curStyle.transformOrigin,
+        webkitFontSmoothing: this.curStyle.webkitFontSmoothing,
       };
-      this.curStyle = {
-        fontSize,
-        letterSpacing,
-        opacity,
-        color,
-        border,
-        background,
+      this.subBorderStyle = {
+        fontFamily: this.curBorderStyle.fontFamily,
+        fontSize: this.curBorderStyle.fontSize,
+        letterSpacing: `${this.curBorderStyle.letterSpacing}px`,
+        padding: this.curBorderStyle.padding,
+        textFillColor: this.curBorderStyle.textFillColor,
+        textStroke: this.curBorderStyle.textStroke,
+        fontWeight: this.curBorderStyle.fontWeight,
+        textShadow: this.curBorderStyle.textShadow,
+        backgroundColor: this.curBorderStyle.backgroundColor,
+        transform: this.curBorderStyle.transform,
+        transformOrigin: this.curBorderStyle.transformOrigin,
+        webkitFontSmoothing: this.curStyle.webkitFontSmoothing,
       };
     },
     notParsedYet(subStartTime) {
@@ -694,10 +702,10 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['duration', 'originSrc', 'currentTime', 'SubtitleDelay', 'curStyle', 'curBorderStyle']),
     curStyle() {
       return this.$store.getters.curStyle;
     },
-    ...mapGetters(['duration', 'originSrc', 'currentTime', 'SubtitleDelay']),
     firstSubState() { // lazy computed and lazy watched
       return this.$store.getters.firstSubtitleIndex !== -1;
     },
@@ -721,6 +729,18 @@ export default {
           }
         }
       }
+    },
+    curBorderStyle: {
+      handler() {
+        this.subStyleChange();
+      },
+      deep: true,
+    },
+    curStyle: {
+      handler() {
+        this.subStyleChange();
+      },
+      deep: true,
     },
     firstSubState(newVal) {
       const vid = this.$parent.$refs.videoCanvas.videoElement();
@@ -800,8 +820,6 @@ export default {
       this.$store.commit('SubtitleOff');
     });
 
-    this.$bus.$on('sub-style-change', this.subStyleChange);
-
     this.$bus.$on('add-subtitle', (files) => {
       const size = this.$store.getters.subtitleCount;
       const subtitleName = files.map(file => this.subNameFromLocalProcess(file));
@@ -854,11 +872,20 @@ export default {
     left: 0;
     bottom: 20px;
     width: 100%;
+    z-index: 0;
   }
   .subtitle-content {
+    z-index: 11;
     white-space: pre;
     text-align: center;
   }
+  .subtitle-border-content {
+    position: absolute;
+    z-index: 10;
+    white-space: pre;
+    text-align: center;
+  }
+
   .flex-box {
     display: flex;
     flex-direction: column;

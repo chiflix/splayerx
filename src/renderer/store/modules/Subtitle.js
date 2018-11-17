@@ -1,12 +1,29 @@
 const state = {
   SubtitleNames: [],
   curStyle: {
-    fontSize: 5,
+    fontFamily: 'PingFang SC',
+    fontSize: '11px',
     letterSpacing: 1,
     opacity: 1,
-    color: '',
-    border: '',
-    background: '',
+    color: 'white',
+    fontWeight: '400',
+    transform: 'scale(1)',
+    transformOrigin: 'bottom',
+    webkitFontSmoothing: 'antialiased',
+  },
+  curBorderStyle: {
+    fontFamily: 'PingFang SC',
+    fontSize: '11px',
+    letterSpacing: 1,
+    padding: '0px',
+    textFillColor: 'transparent',
+    textStroke: '0.5px #777',
+    fontWeight: '400',
+    backgroundColor: 'transparent',
+    transform: 'scale(1)',
+    transformOrigin: 'bottom',
+    textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
+    webkitFontSmoothing: 'antialiased',
   },
   SubtitleDelay: 0,
 };
@@ -17,6 +34,7 @@ const getters = {
   subtitleCount: state => state.SubtitleNames.length,
   curStyle: state => state.curStyle,
   SubtitleDelay: state => state.SubtitleDelay,
+  curBorderStyle: state => state.curBorderStyle,
 };
 
 const mutations = {
@@ -41,11 +59,11 @@ const mutations = {
       throw new Error('Error in Subtitle Vuex.');
     }
   },
-  UpdateFontSize(state, payload) {
-    state.curStyle.fontSize = payload;
+  UpdateStyle(state, payload) {
+    Object.assign(state.curStyle, payload);
   },
-  UpdateColor(state, payload) {
-    state.curStyle.color = payload;
+  UpdateBorderStyle(state, payload) {
+    Object.assign(state.curBorderStyle, payload);
   },
   UpdateDelay(state, payload) {
     if (payload === 0) {
@@ -54,17 +72,24 @@ const mutations = {
       state.SubtitleDelay += payload;
     }
   },
+  UpdateScale(state, payload) {
+    state.curStyle.transform = `scale(${payload})`;
+    state.curBorderStyle.transform = `scale(${payload})`;
+  },
 };
 
 const actions = {
-  updateFontSize({ commit }, delta) {
-    commit('UpdateFontSize', delta);
+  updateStyle({ commit }, delta) {
+    commit('UpdateStyle', delta);
   },
-  updateColor({ commit }, delta) {
-    commit('UpdateColor', delta);
+  updateBorderStyle({ commit }, delta) {
+    commit('UpdateBorderStyle', delta);
   },
   updateSubDelay({ commit }, delta) {
     commit('UpdateDelay', delta);
+  },
+  updateScale({ commit }, delta) {
+    commit('UpdateScale', delta);
   },
 };
 
