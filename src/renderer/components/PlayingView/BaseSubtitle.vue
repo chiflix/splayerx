@@ -54,6 +54,7 @@ export default {
       firstCueHTML: [],
       secondCueHTML: [],
       subStyle: {},
+      subIndex: 0,
       subBorderStyle: {},
     };
   },
@@ -701,7 +702,10 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['duration', 'originSrc', 'currentTime', 'curStyle', 'curBorderStyle']),
+    ...mapGetters(['duration', 'originSrc', 'currentTime', 'SubtitleDelay', 'curStyle', 'curBorderStyle']),
+    curStyle() {
+      return this.$store.getters.curStyle;
+    },
     firstSubState() { // lazy computed and lazy watched
       return this.$store.getters.firstSubtitleIndex !== -1;
     },
@@ -711,6 +715,21 @@ export default {
     },
   },
   watch: {
+    SubtitleDelay(val, oldval) {
+      if (this.subIndex !== -1) {
+        const vid = this.$parent.$refs.videoCanvas.videoElement();
+        const trackLength = vid.textTracks[this.subIndex].cues.length;
+        for (let i = 0; i < trackLength; i += 1) {
+          if (val > oldval) {
+            vid.textTracks[this.subIndex].cues[i].startTime += 0.05;
+            vid.textTracks[this.subIndex].cues[i].endTime += 0.05;
+          } else {
+            vid.textTracks[this.subIndex].cues[i].startTime -= 0.05;
+            vid.textTracks[this.subIndex].cues[i].endTime -= 0.05;
+          }
+        }
+      }
+    },
     curBorderStyle: {
       handler() {
         this.subStyleChange();
@@ -788,6 +807,7 @@ export default {
     this.$bus.$on('video-loaded', this.subtitleInitialize);
 
     this.$bus.$on('sub-first-change', (targetIndex) => {
+      this.subIndex = targetIndex;
       this.clearSubtitle();
       this.subtitleShow(targetIndex);
     });
@@ -796,6 +816,7 @@ export default {
       this.$store.commit('SubtitleOn', { index: this.firstSubIndex, status: 'first' });
     });
     this.$bus.$on('first-subtitle-off', () => {
+      this.subIndex = -1;
       this.$store.commit('SubtitleOff');
     });
 

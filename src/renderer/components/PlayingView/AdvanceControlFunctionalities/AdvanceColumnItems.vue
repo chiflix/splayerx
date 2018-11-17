@@ -1,6 +1,8 @@
 <template>
   <div class="itemContainer advance-column-items">
-    <div class="textContainer">
+    <div class="textContainer" :style="{
+      cursor: isChosen ? 'default' : 'pointer',
+    }">
       <div class="textItem">{{ item }}</div>
     </div>
     <div class="listContainer"

@@ -66,7 +66,11 @@ const mutations = {
     Object.assign(state.curBorderStyle, payload);
   },
   UpdateDelay(state, payload) {
-    state.SubtitleDelay += payload;
+    if (payload === 0) {
+      state.SubtitleDelay = 0;
+    } else {
+      state.SubtitleDelay += payload;
+    }
   },
   UpdateScale(state, payload) {
     state.curStyle.transform = `scale(${payload})`;

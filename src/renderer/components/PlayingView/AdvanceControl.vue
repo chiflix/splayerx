@@ -54,7 +54,7 @@ export default {
       if (!val) {
         this.animFlag = true;
         if (!this.validEnter) {
-          this.anim.playSegments([68, 90], false);
+          this.anim.playSegments([68, 89], false);
         } else {
           this.showFlag = true;
           this.anim.playSegments([68, 83], false);
