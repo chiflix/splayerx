@@ -173,7 +173,7 @@ button:hover {
 }
 .advanced {
   position: absolute;
-  z-index: 10;
+  z-index: 100;
   transition-property: opacity, transform;
   @media screen and (min-width: 320px) and (max-width: 512px) {
     display: none;
@@ -186,7 +186,7 @@ button:hover {
     bottom: 44px;
     right: 3px;
   }
-  @media screen and (min-width: 1920px) {
+  @media screen and (min-width: 1921px) {
     bottom: 70px;
     right: 7px;
   }

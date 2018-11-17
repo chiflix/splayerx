@@ -408,7 +408,14 @@ export default {
       ));
     },
     handleWheel(event) {
-      this.eventInfo.set('wheel', { time: event.timeStamp });
+      let isAdvanceColumeItem;
+      const nodeList = document.querySelector('.advance-column-items').childNodes;
+      for (let i = 0; i < nodeList.length; i += 1) {
+        isAdvanceColumeItem = nodeList[i].contains(event.target);
+      }
+      if (!isAdvanceColumeItem) {
+        this.eventInfo.set('wheel', { time: event.timeStamp });
+      }
     },
     // Helper functions
     getAllUIComponents(rootElement) {

@@ -57,6 +57,8 @@ export default {
       hoverIndex: -1,
       selectedIndex: 1,
       moveLength: '',
+      styleNum: 1,
+      ChosenSize: '默认',
     };
   },
   props: {
@@ -91,6 +93,35 @@ export default {
         });
         this.selectedIndex = numList.indexOf(val);
         this.calculateSpeedLength(numList.indexOf(val));
+      }
+    },
+    winWidth(val) {
+      if (val > 1920) {
+        if (this.styleNum === 0) {
+          this.$store.dispatch('updateScale', `${(30 / 11) * (val / 1920)}`);
+        }
+        if (this.styleNum === 1) {
+          this.$store.dispatch('updateScale', `${(40 / 11) * (val / 1920)}`);
+        }
+        if (this.styleNum === 2) {
+          this.$store.dispatch('updateScale', `${(50 / 11) * (val / 1920)}`);
+        }
+        if (this.styleNum === 3) {
+          this.$store.dispatch('updateScale', `${(60 / 11) * (val / 1920)}`);
+        }
+      } else {
+        if (this.styleNum === 0) {
+          this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * val) + (24 / 55)}`);
+        }
+        if (this.styleNum === 1) {
+          this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * val) + (26 / 55)}`);
+        }
+        if (this.styleNum === 2) {
+          this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * val) + (28 / 55)}`);
+        }
+        if (this.styleNum === 3) {
+          this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * val) + (30 / 55)}`);
+        }
       }
     },
   },
@@ -151,23 +182,6 @@ export default {
     },
     subStyle() {
       return this.$store.getters.curStyle;
-    },
-    /**
-     * @return {string}
-     */
-    ChosenSize() {
-      switch (this.subStyle.fontSize) {
-        case 3:
-          return '小';
-        case 5:
-          return '默认';
-        case 8:
-          return '大';
-        case 10:
-          return '超大';
-        default:
-          return '默认';
-      }
     },
   },
   mounted() {
@@ -242,20 +256,24 @@ export default {
     changeFontSize(index) {
       switch (index) {
         case 0:
-          this.$store.dispatch('updateFontSize', 3);
-          this.$bus.$emit('sub-style-change', { fontSize: 3 });
+          this.styleNum = 0;
+          this.ChosenSize = '小';
+          this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
           break;
         case 1:
-          this.$store.dispatch('updateFontSize', 5);
-          this.$bus.$emit('sub-style-change', { fontSize: 5 });
+          this.styleNum = 1;
+          this.ChosenSize = '默认';
+          this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
           break;
         case 2:
-          this.$store.dispatch('updateFontSize', 8);
-          this.$bus.$emit('sub-style-change', { fontSize: 8 });
+          this.styleNum = 2;
+          this.ChosenSize = '大';
+          this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
           break;
         case 3:
-          this.$store.dispatch('updateFontSize', 10);
-          this.$bus.$emit('sub-style-change', { fontSize: 10 });
+          this.styleNum = 3;
+          this.ChosenSize = '超大';
+          this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
           break;
         default:
           break;

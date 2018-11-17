@@ -535,7 +535,14 @@ new Vue({
     });
     window.addEventListener('wheel', (e) => {
       const up = e.deltaY < 0;
-      this.$store.dispatch(up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME, 6);
+      let isAdvanceColumeItem;
+      const nodeList = document.querySelector('.advance-column-items').childNodes;
+      for (let i = 0; i < nodeList.length; i += 1) {
+        isAdvanceColumeItem = nodeList[i].contains(e.target);
+      }
+      if (!isAdvanceColumeItem) {
+        this.$store.dispatch(up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME, 6);
+      }
     });
 
     /**
