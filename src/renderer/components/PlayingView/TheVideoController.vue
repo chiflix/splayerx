@@ -16,7 +16,7 @@
     :displayState="displayState['recent-playlist']"
     :mousemove="eventInfo.get('mousemove')"
     v-bind.sync="widgetsStatus['recent-playlist']"
-    @update:playlistcontrol-showattached="widgetsStatus['playlist-control'].showAttached = $event"/>
+    @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-hidden="displayState['the-progress-bar']"></div>
     <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
@@ -177,6 +177,10 @@ export default {
     });
   },
   methods: {
+    updatePlaylistShowAttached(event) {
+      this.widgetsStatus['playlist-control'].showAttached = event;
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [320, 180]);
+    },
     // UIManagers
     UIManager(timestamp) {
       if (!this.start) {

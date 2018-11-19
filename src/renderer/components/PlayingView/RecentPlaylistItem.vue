@@ -7,7 +7,7 @@
   :class="{ chosen: isChosen }"
   :style="{
     marginRight: sizeAdaption(15),
-    cursor: isPlaying ? '' : 'pointer',
+    cursor: isPlaying && isInRange ? '' : 'pointer',
     minWidth: `${thumbnailWidth}px`,
     minHeight: `${thumbnailHeight}px`,
   }">
@@ -120,6 +120,9 @@ export default {
     path: {
       type: String,
     },
+    transferedTime: {
+      type: Number,
+    },
   },
   data() {
     return {
@@ -171,9 +174,14 @@ export default {
     });
   },
   watch: {
-    originSrc() {
+    originSrc(val, oldVal) {
       this.infoDB().get('recent-played', 'path', this.path).then((val) => {
-        if (val && val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
+        if (val && val.lastPlayedTime) {
+          this.lastPlayedTime = val.lastPlayedTime;
+        }
+        if (oldVal === this.path) {
+          val.lastPlayedTime = this.transferedTime;
+        }
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
     },
