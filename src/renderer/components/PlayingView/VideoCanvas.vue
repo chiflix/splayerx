@@ -68,6 +68,7 @@ export default {
       updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
     }),
     onMetaLoaded(event) {
+      this.videoElement = event.target;
       this.videoConfigInitialize({
         volume: 100,
         muted: false,
@@ -163,7 +164,7 @@ export default {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
     $_saveScreenshot() {
-      const videoElement = this.$refs.videoCanvas.videoElement();
+      const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       // todo: use metaloaded to get videoHeight and videoWidth
@@ -222,7 +223,8 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen']),
+      'winSize', 'winPos', 'isFullScreen',
+      'nextVideo']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -232,7 +234,6 @@ export default {
   watch: {
     originSrc(val, oldVal) {
       this.coverFinded = false;
-      this.videoElement = this.$refs.videoCanvas.videoElement();
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
@@ -270,13 +271,17 @@ export default {
     });
     this.$bus.$on('toggle-mute', this.toggleMute);
     this.$bus.$on('seek', (e) => {
-      this.seekTime = [e];
-      // todo: use vuex get video element src
-      const filePath = decodeURI(this.src);
-      const indexOfLastDot = filePath.lastIndexOf('.');
-      const ext = filePath.substring(indexOfLastDot + 1);
-      if (ext === 'mkv') {
-        this.$bus.$emit('seek-subtitle', e);
+      if (e === this.duration && this.nextVideo) {
+        this.openFile(this.nextVideo);
+      } else {
+        this.seekTime = [e];
+        // todo: use vuex get video element src
+        const filePath = decodeURI(this.src);
+        const indexOfLastDot = filePath.lastIndexOf('.');
+        const ext = filePath.substring(indexOfLastDot + 1);
+        if (ext === 'mkv') {
+          this.$bus.$emit('seek-subtitle', e);
+        }
       }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
