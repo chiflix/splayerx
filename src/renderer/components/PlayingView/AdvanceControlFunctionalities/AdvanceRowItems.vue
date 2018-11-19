@@ -33,7 +33,7 @@
               }">
               <div class="text"
                 :style="{
-                  color: list.chosen || index === hoverIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.4)',
+                  color: list.chosen || index === hoverIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                   margin: 'auto',
                   transition: 'color 300ms',
                 }">{{ list[0] }}
@@ -61,7 +61,7 @@ export default {
       selectedIndex: 1,
       moveLength: '',
       styleNum: 1,
-      ChosenSize: '默认',
+      ChosenSize: this.$t('advance.fontItems[1]'),
     };
   },
   props: {
@@ -77,7 +77,7 @@ export default {
       type: String,
     },
     isChosen: {
-      type: String,
+      type: Boolean,
     },
     winWidth: {
       type: Number,
@@ -260,22 +260,22 @@ export default {
       switch (index) {
         case 0:
           this.styleNum = 0;
-          this.ChosenSize = '小';
+          this.ChosenSize = this.$t('advance.fontItems[0]');
           this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
           break;
         case 1:
           this.styleNum = 1;
-          this.ChosenSize = '默认';
+          this.ChosenSize = this.$t('advance.fontItems[1]');
           this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
           break;
         case 2:
           this.styleNum = 2;
-          this.ChosenSize = '大';
+          this.ChosenSize = this.$t('advance.fontItems[2]');
           this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
           break;
         case 3:
           this.styleNum = 3;
-          this.ChosenSize = '超大';
+          this.ChosenSize = this.$t('advance.fontItems[3]');
           this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
           break;
         default:
@@ -478,6 +478,9 @@ export default {
       display: flex;
       justify-content: space-around;
       margin: -2px auto;
+      .text {
+        text-shadow: 0px 1px 1px rgba(0, 0, 0, .1);
+      }
       .speedRowNumDetail {
         position: relative;
         display: flex;
@@ -493,6 +496,7 @@ export default {
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
         background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
       }
       .fontCard {
         position: absolute;
@@ -500,6 +504,7 @@ export default {
         border-radius: 7px;
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
         background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
       }
     }

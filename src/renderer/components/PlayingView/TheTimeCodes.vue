@@ -130,6 +130,7 @@ export default {
   height: auto;
   display: flex;
   flex-direction: row;
+  z-index: 5;
 }
 .timing {
   position: relative;

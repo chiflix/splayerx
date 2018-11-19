@@ -53,7 +53,7 @@ new Vue({
   store,
   template: '<App/>',
   computed: {
-    ...mapGetters(['muted']),
+    ...mapGetters(['muted', 'winWidth']),
   },
   methods: {
     createMenu() {
@@ -196,16 +196,118 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.subtitleStyle'),
-              enabled: false,
               submenu: [
-                { label: this.$t('msg.subtitle.style1'), enabled: false },
-                { label: this.$t('msg.subtitle.style2'), enabled: false },
-                { label: this.$t('msg.subtitle.style3'), enabled: false },
+                {
+                  label: this.$t('msg.subtitle.style1'),
+                  click: () => {
+                    this.$store.dispatch('updateStyle', {
+                      color: 'white',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
+                      textStroke: '0.5px #777',
+                      backgroundColor: '',
+                      fontWeight: '400',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style2'),
+                  click: () => {
+                    this.$store.dispatch('updateStyle', {
+                      color: 'white',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '0px 1px 1px #333',
+                      textStroke: '1.3px #222',
+                      backgroundColor: '',
+                      fontWeight: '400',
+                      padding: '0',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style3'),
+                  click: () => {
+                    this.$store.dispatch('updateStyle', {
+                      color: '#fffc00',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '0px 0.5px 0.5px #555',
+                      textStroke: '',
+                      backgroundColor: '',
+                      fontWeight: '400',
+                      padding: '0',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style4'),
+                  click: () => {
+                    this.$store.dispatch('updateStyle', {
+                      color: '#fff',
+                      fontWeight: '800',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '',
+                      textStroke: '1.6px #009be6',
+                      backgroundColor: '',
+                      fontWeight: '800',
+                      padding: '0',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style5'),
+                  click: () => {
+                    this.$store.dispatch('updateStyle', {
+                      color: '#fff',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '',
+                      textStroke: '',
+                      backgroundColor: 'rgba(0,0,0,.5)',
+                      fontWeight: '400',
+                      padding: '0px 5px',
+                    });
+                  },
+                },
               ],
             },
             { type: 'separator' },
-            { label: this.$t('msg.subtitle.increaseSubtitleSize'), enabled: false },
-            { label: this.$t('msg.subtitle.decreaseSubtitleSize'), enabled: false },
+            {
+              label: this.$t('msg.subtitle.subtitleSize'),
+              submenu: [
+                {
+                  label: this.$t('msg.subtitle.size1'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size2'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size3'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size4'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
+                  },
+                },
+              ],
+            },
             { type: 'separator' },
             { label: this.$t('msg.subtitle.increaseSubtitleDelay'), enabled: false },
             { label: this.$t('msg.subtitle.decreaseSubtitleDelay'), enabled: false },
