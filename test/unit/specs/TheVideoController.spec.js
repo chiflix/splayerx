@@ -183,7 +183,7 @@ describe('Component - TheVideoController Unit Test', () => {
       });
     });
     describe('hideProgressBar timer', () => {
-      const hideProgressBarTimerName = 'hoveringProgresBar';
+      const hideProgressBarTimerName = 'sleepingProgressBar';
       const hideProgressBarTimerTime = 3000;
       it('should timer be updated when ArrowLeft/ArrowRight keypressed', () => {
         currentEventInfo.set('keydown', { ArrowLeft: true });
