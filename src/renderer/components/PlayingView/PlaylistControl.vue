@@ -40,7 +40,7 @@ export default {
       switch (this.clicks) {
         case 1:
           this.$emit('update:showAttached', true);
-          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [512, Math.floor(512 / this.videoRatio)]);
+          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [512, Math.round(512 / this.videoRatio)]);
           break;
         case 2:
           this.$emit('update:showAttached', false);
