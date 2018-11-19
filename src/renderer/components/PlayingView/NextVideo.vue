@@ -34,8 +34,7 @@
       :src="convertedSrcOfNextVideo"
       :class="{ blur: isBlur }"
       @loadedmetadata="onMetaLoaded"
-      @seeked="onSeeked"
-      @timeupdate="onTimeupdate"></video>
+      @seeked="onSeeked"></video>
     <Icon class="notificationPlay" :type="notificationPlayIcon"/>
   </div>
 </div>
@@ -60,19 +59,6 @@ export default {
   methods: {
     handleCloseMouseup() {
       this.$emit('manualclose-next-video');
-    },
-    onTimeupdate() {
-      if (this.currentTime < this.finalPartTime) {
-        this.$emit('close-next-video');
-      } else if (this.currentTime === this.duration) {
-        this.$emit('close-next-video');
-        this.openFile(this.nextVideo);
-      } else {
-        const fractionProgress = (this.currentTime - this.finalPartTime)
-          / (this.duration - this.finalPartTime);
-        this.progress = fractionProgress * 100;
-      }
-      requestAnimationFrame(this.onTimeupdate);
     },
     handleMouseDown() {
       if (this.nextVideo) {
@@ -99,6 +85,20 @@ export default {
       this.$emit('ready-to-show');
     },
   },
+  watch: {
+    currentTime(val) {
+      if (val < this.finalPartTime) {
+        this.$emit('close-next-video');
+      } else if (val === this.duration) {
+        this.openFile(this.nextVideo);
+        this.$emit('close-next-video');
+      } else {
+        const fractionProgress = (val - this.finalPartTime)
+          / (this.duration - this.finalPartTime);
+        this.progress = fractionProgress * 100;
+      }
+    },
+  },
   computed: {
     ...mapGetters(['nextVideo', 'finalPartTime', 'isFolderList', 'currentTime', 'duration']),
     videoName() {
@@ -119,9 +119,6 @@ export default {
     timecode() {
       return this.timecodeFromSeconds(this.duration);
     },
-  },
-  mounted() {
-    requestAnimationFrame(this.onTimeupdate);
   },
 };
 </script>

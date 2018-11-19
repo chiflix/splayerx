@@ -38,6 +38,7 @@ export const DEFAULT_VIDEO_EVENTS = [
   'timeupdate',
   'volumechange',
   'waiting',
+  'audiotrack',
 ];
 export const DEFAULT_VIDEO_OPTIONS = [
   'autoplay',

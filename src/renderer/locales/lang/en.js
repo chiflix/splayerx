@@ -76,6 +76,7 @@ export default {
   },
   css: {
     titleFontSize: { fontSize: '3vw' },
+    versionFontSize: { fontSize: '14px' },
   },
   errorFile: {
     title: 'File error',

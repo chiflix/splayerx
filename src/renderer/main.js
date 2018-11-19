@@ -351,44 +351,11 @@ new Vue({
       const recentMenuTemplate = {
         label: this.$t('msg.file.openRecent'),
         id: 'recent-play',
-        submenu: [
-          {
-            id: 'recent-1',
-            visible: false,
-          },
-          {
-            id: 'recent-2',
-            visible: false,
-          },
-          {
-            id: 'recent-3',
-            visible: false,
-          },
-          {
-            id: 'recent-4',
-            visible: false,
-          },
-          {
-            id: 'recent-5',
-            visible: false,
-          },
-          {
-            id: 'recent-6',
-            visible: false,
-          },
-          {
-            id: 'recent-7',
-            visible: false,
-          },
-          {
-            id: 'recent-8',
-            visible: false,
-          },
-          {
-            id: 'recent-9',
-            visible: false,
-          },
-        ],
+        submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
+          id: `recent-${index}`,
+          visible: false,
+          label: '',
+        })),
       };
       return this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
         let menuRecentData = null;
@@ -551,7 +518,7 @@ new Vue({
       const subtitleFiles = [];
       const subRegex = new RegExp('^(.srt|.ass|.vtt)$');
       const videoFiles = [];
-      const vidRegex = new RegExp('^(3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc)$');
+      const vidRegex = new RegExp('^(.3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc)$');
       for (let i = 0; i < files.length; i += 1) {
         tempFilePath = files[i].path;
         if (subRegex.test(Path.extname(tempFilePath))) {

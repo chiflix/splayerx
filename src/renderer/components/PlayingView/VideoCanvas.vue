@@ -17,7 +17,7 @@
       :paused="paused"
       :updateCurrentTime="true"
       :currentTime="seekTime"
-      :currentAudioTrackId="currentAudioTrackId"
+      :currentAudioTrackId="currentAudioTrackId.toString()"
       @update:currentTime="updateCurrentTime" />
     </transition>
     <BaseSubtitle/>
@@ -242,6 +242,10 @@ export default {
             this.infoDB().add('recent-played', mergedData);
           }
         });
+      this.$bus.$emit('showlabel');
+      this.videoConfigInitialize({
+        audioTrackList: [],
+      });
     },
   },
   mounted() {
