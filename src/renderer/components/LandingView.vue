@@ -254,7 +254,7 @@ export default {
   },
   methods: {
     backgroundImage(shortCut, cover) {
-      return this.item.lastTime > 1 ? `url("${shortCut}")` : `url(${cover}`;
+      return this.item.duration - this.item.lastTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
     },
     timeInValidForm(time) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);

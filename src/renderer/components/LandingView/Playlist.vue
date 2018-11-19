@@ -27,7 +27,7 @@
         :class="showShadow ? 'shadow' : '' "
         :style="{
           transition: tranFlag ? 'width 150ms ease-out, height 150ms ease-out, border 150ms ease-out' : '',
-          backgroundImage: itemShortcut(item.smallShortCut, item.cover, item.lastPlayedTime),
+          backgroundImage: itemShortcut(item.smallShortCut, item.cover, item.lastPlayedTime, item.duration),
           width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
           height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
         }"
@@ -232,8 +232,8 @@ export default {
         default: return '';
       }
     },
-    itemShortcut(shortCut, cover, lastPlayedTime) {
-      return lastPlayedTime < 1 ? `url(${cover})` : `url("${shortCut}")`;
+    itemShortcut(shortCut, cover, lastPlayedTime, duration) {
+      return duration - lastPlayedTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
     },
     itemInfo() {
       return {
