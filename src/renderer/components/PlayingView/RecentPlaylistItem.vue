@@ -120,6 +120,9 @@ export default {
     path: {
       type: String,
     },
+    transferedTime: {
+      type: Number,
+    },
   },
   data() {
     return {
@@ -171,9 +174,14 @@ export default {
     });
   },
   watch: {
-    originSrc() {
+    originSrc(val, oldVal) {
       this.infoDB().get('recent-played', 'path', this.path).then((val) => {
-        if (val && val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
+        if (val && val.lastPlayedTime) {
+          this.lastPlayedTime = val.lastPlayedTime;
+        }
+        if (oldVal === this.path) {
+          val.lastPlayedTime = this.transferedTime;
+        }
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
     },
