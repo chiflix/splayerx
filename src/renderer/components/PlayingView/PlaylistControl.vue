@@ -25,6 +25,11 @@ export default {
       clicks: 0,
     };
   },
+  computed: {
+    videoRatio() {
+      return this.$store.getters.ratio;
+    },
+  },
   methods: {
     handleAnimation(anim) {
       this.anim = anim;
@@ -35,6 +40,7 @@ export default {
       switch (this.clicks) {
         case 1:
           this.$emit('update:showAttached', true);
+          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [512, 512 / this.videoRatio]);
           break;
         case 2:
           this.$emit('update:showAttached', false);

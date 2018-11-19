@@ -7,7 +7,7 @@
   :class="{ chosen: isChosen }"
   :style="{
     marginRight: sizeAdaption(15),
-    cursor: isPlaying ? '' : 'pointer',
+    cursor: isPlaying && isInRange ? '' : 'pointer',
     minWidth: `${thumbnailWidth}px`,
     minHeight: `${thumbnailHeight}px`,
   }">
