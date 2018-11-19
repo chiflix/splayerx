@@ -11,6 +11,7 @@
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
       :positionOfThumbnail="thumbnailPosition"
+      :hoveredEnd="hoveredPercent === '100%' && !!nextVideo"
      />
     <div class="fake-button left" ref="leftInvisible"
       :style="{ height: fakeButtonHeight }">
@@ -53,7 +54,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'duration', 'currentTime', 'ratio']),
+    ...mapGetters(['winWidth', 'duration', 'currentTime', 'ratio', 'nextVideo']),
     hoveredPercent() {
       return `${this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100}%`;
     },
@@ -107,11 +108,10 @@ export default {
     rightFakeProgressBackgroundColor() {
       const hoveredEnd = this.hoveredPercent === '100%';
       const playedEnd = Math.round(this.currentTime) >= Math.round(this.duration);
-      let opacity = playedEnd ? 0.9 : 0.1;
-      opacity = this.mouseleave ? // eslint-disable-line no-nested-ternary
+      const opacity = this.mouseleave ? // eslint-disable-line no-nested-ternary
         (playedEnd ? 0.9 : 0) :
         (((hoveredEnd && !playedEnd) || (!hoveredEnd && playedEnd)) ? 0.37 : 0.1);
-      return this.whiteWithOpacity(opacity);
+      return this.whiteWithOpacity(hoveredEnd && playedEnd ? 0.9 : opacity);
     },
   },
   watch: {
@@ -132,7 +132,7 @@ export default {
     },
     handleMouseleave() {
       if (!this.mousedown) {
-        this.setHoveringToFalse();
+        this.setHoveringToFalse(true);
         this.showThumbnail = false;
       }
       this.mouseleave = true;
@@ -142,7 +142,7 @@ export default {
       if (event.target === this.$refs.leftInvisible) {
         this.showThumbnail = false;
         this.$bus.$emit('currentWidget', 'the-video-controller');
-        this.setHoveringToFalse();
+        this.setHoveringToFalse(false);
       }
       this.$bus.$emit('seek', this.hoveredCurrentTime);
       if (this.hoveredCurrentTime === 0) {
@@ -153,7 +153,7 @@ export default {
       if (this.mousedown) {
         this.mousedown = false;
         if (this.mouseleave) {
-          this.setHoveringToFalse();
+          this.setHoveringToFalse(false);
           this.showThumbnail = false;
         }
         this.$bus.$emit('seek', this.hoveredCurrentTime);
@@ -189,13 +189,18 @@ export default {
     whiteWithOpacity(opacity) {
       return `rgba(255, 255, 255, ${opacity}`;
     },
-    setHoveringToFalse() {
-      if (this.hoveringId) {
-        clearTimeout(this.hoveringId);
-      }
-      this.hoveringId = setTimeout(() => {
+    setHoveringToFalse(direct) {
+      if (!direct) {
+        if (this.hoveringId) {
+          clearTimeout(this.hoveringId);
+        }
+        this.hoveringId = setTimeout(() => {
+          this.$emit('update:hovering', false);
+        }, 3000);
+      } else {
+        console.log('2333');
         this.$emit('update:hovering', false);
-      }, 3000);
+      }
     },
   },
   created() {

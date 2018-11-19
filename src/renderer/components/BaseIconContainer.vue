@@ -288,7 +288,26 @@ export default {
     }
   }
 }
-
+.hoveredEnd {
+  display: block;
+  z-index: 20;
+  @media screen and (max-width: 512px) {
+    width: 6px;
+    height: 6px;
+  }
+  @media screen and (min-width: 513px) and(max-width: 854px) {
+    width: 8px;
+    height: 8px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 10px;
+    height: 10px;
+  }
+  @media screen and (min-width: 1921px) {
+    width: 16px;
+    height: 16px;
+  }
+}
 @media screen and (min-width: 513px) and (max-width: 854px) {
   .rightArrow {
     display: block;
