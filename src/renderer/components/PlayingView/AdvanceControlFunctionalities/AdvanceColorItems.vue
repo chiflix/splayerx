@@ -15,13 +15,13 @@
           cursor: isChosen ? 'default' : 'pointer',
         }">
         <div class="textItem">{{ item }}</div>
-        <div class="rightItem" v-show="!isChosen"><img :src="ChosenStyle"></div>
+        <div class="rightItem" v-show="!isChosen"><img :src="chosenStyle"></div>
       </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
           <div class="rowContainer">
             <div class="imgContainer" v-for="(img, index) in imgs">
-              <img :src="img.selected || index === hoverIndex ? imgsSelected[index] : img" class="imgType"
+              <img :src="img === chosenStyle || index === hoverIndex ? imgsSelected[index] : img" class="imgType"
                 @mouseover="handleOver(index)"
                 @mouseout="handleOut"
                 @click.left="handleClick($event, index)">
@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import asyncStorage from '@/helpers/asyncStorage';
 import style0 from '../../../assets/subtitle-style1-normal.png';
 import style1 from '../../../assets/subtitle-style2-normal.png';
 import style2 from '../../../assets/subtitle-style3-normal.png';
@@ -49,10 +50,9 @@ export default {
   data() {
     return {
       hoverIndex: -1,
-      imgs: [[style0], [style1], [style2], [style3], [style4]],
+      imgs: [style0, style1, style2, style3, style4],
       imgsSelected: [styleSelected0, styleSelected1, styleSelected2,
         styleSelected3, styleSelected4],
-      ChosenStyle: style0,
     };
   },
   props: {
@@ -84,9 +84,19 @@ export default {
     subStyle() {
       return this.$store.getters.curStyle;
     },
+    chosenStyle() {
+      if (this.$store.getters.chosenStyle) {
+        return this.$store.getters.chosenStyle;
+      }
+      return style0;
+    },
   },
-  mounted() {
-    this.$set(this.imgs[0], 'selected', true);
+  created() {
+    asyncStorage.get('subtitle-style').then((data) => {
+      if (data.chosenStyle) {
+        this.$store.dispatch('updateChosenStyle', data.chosenStyle);
+      }
+    });
   },
   methods: {
     handleOver(index) {
@@ -96,16 +106,9 @@ export default {
       this.hoverIndex = -1;
     },
     handleClick(e, index) {
-      this.imgs.forEach((i, ind) => {
-        if (ind !== index) {
-          this.$set(this.imgs[ind], 'selected', false);
-        } else {
-          this.$set(this.imgs[ind], 'selected', true);
-        }
-      });
       switch (index) {
         case 0:
-          this.ChosenStyle = style0;
+          this.$store.dispatch('updateChosenStyle', style0);
           this.$store.dispatch('updateStyle', {
             color: 'white',
             fontWeight: '400',
@@ -118,7 +121,7 @@ export default {
           });
           break;
         case 1:
-          this.ChosenStyle = style1;
+          this.$store.dispatch('updateChosenStyle', style1);
           this.$store.dispatch('updateStyle', {
             color: 'white',
             fontWeight: '400',
@@ -132,7 +135,7 @@ export default {
           });
           break;
         case 2:
-          this.ChosenStyle = style2;
+          this.$store.dispatch('updateChosenStyle', style2);
           this.$store.dispatch('updateStyle', {
             color: '#fffc00',
             fontWeight: '400',
@@ -146,7 +149,7 @@ export default {
           });
           break;
         case 3:
-          this.ChosenStyle = style3;
+          this.$store.dispatch('updateChosenStyle', style3);
           this.$store.dispatch('updateStyle', {
             color: '#fff',
             fontWeight: '800',
@@ -160,7 +163,7 @@ export default {
           });
           break;
         case 4:
-          this.ChosenStyle = style4;
+          this.$store.dispatch('updateChosenStyle', style4);
           this.$store.dispatch('updateStyle', {
             color: '#fff',
             fontWeight: '400',

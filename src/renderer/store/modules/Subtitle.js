@@ -25,6 +25,7 @@ const state = {
     textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
     webkitFontSmoothing: 'antialiased',
   },
+  chosenStyle: '',
   SubtitleDelay: 0,
 };
 
@@ -35,6 +36,7 @@ const getters = {
   curStyle: state => state.curStyle,
   SubtitleDelay: state => state.SubtitleDelay,
   curBorderStyle: state => state.curBorderStyle,
+  chosenStyle: state => state.chosenStyle,
 };
 
 const mutations = {
@@ -76,6 +78,9 @@ const mutations = {
     state.curStyle.transform = `scale(${payload})`;
     state.curBorderStyle.transform = `scale(${payload})`;
   },
+  UpdateChosenStyle(state, payload) {
+    state.chosenStyle = payload;
+  },
 };
 
 const actions = {
@@ -90,6 +95,9 @@ const actions = {
   },
   updateScale({ commit }, delta) {
     commit('UpdateScale', delta);
+  },
+  updateChosenStyle({ commit }, delta) {
+    commit('UpdateChosenStyle', delta);
   },
 };
 
