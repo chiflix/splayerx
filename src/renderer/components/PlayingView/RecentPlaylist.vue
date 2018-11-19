@@ -256,7 +256,7 @@ export default {
 <style lang="scss" scoped>
 .recent-playlist {
   width: 100%;
-  @media screen and (max-width: 511px) {
+  @media screen and (max-width: 510px) {
     display: none;
   }
   @media screen and (min-width: 512px) {
