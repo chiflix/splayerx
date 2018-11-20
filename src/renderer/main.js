@@ -195,6 +195,35 @@ new Vue({
             },
             { type: 'separator' },
             {
+              label: this.$t('msg.subtitle.subtitleSize'),
+              submenu: [
+                {
+                  label: this.$t('msg.subtitle.size1'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size2'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size3'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size4'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
+                  },
+                },
+              ],
+            },
+            {
               label: this.$t('msg.subtitle.subtitleStyle'),
               submenu: [
                 {
@@ -274,36 +303,6 @@ new Vue({
                       fontWeight: '400',
                       padding: '0px 5px',
                     });
-                  },
-                },
-              ],
-            },
-            { type: 'separator' },
-            {
-              label: this.$t('msg.subtitle.subtitleSize'),
-              submenu: [
-                {
-                  label: this.$t('msg.subtitle.size1'),
-                  click: () => {
-                    this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size2'),
-                  click: () => {
-                    this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size3'),
-                  click: () => {
-                    this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size4'),
-                  click: () => {
-                    this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
                   },
                 },
               ],
