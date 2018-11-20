@@ -20,7 +20,7 @@
       :currentAudioTrackId="currentAudioTrackId"
       @update:currentTime="updateCurrentTime" />
     </transition>
-    <BaseSubtitle/>
+    <BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -192,6 +192,9 @@ export default {
       };
       syncStorage.setSync('recent-played', data);
     },
+    saveSubtitleStyle() {
+      syncStorage.setSync('subtitle-style', { curStyle: this.curStyle, curBorderStyle: this.curBorderStyle, chosenStyle: this.chosenStyle });
+    },
     getVideoCover() {
       if (!this.coverFinded) {
         this.$electron.ipcRenderer.send('snapShot', this.originSrc);
@@ -222,7 +225,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen']),
+      'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -277,13 +280,16 @@ export default {
     this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {
       this.$_saveScreenshot();
+      this.saveSubtitleStyle();
     };
   },
 };
 </script>
 <style lang="scss" scoped>
 .video {
+  position: relative;
   height: 0;
+  z-index: auto;
 }
 .base-video-player {
   width: 100%;

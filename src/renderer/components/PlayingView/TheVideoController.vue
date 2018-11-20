@@ -507,7 +507,7 @@ export default {
 </script>
 <style lang="scss">
 .the-video-controller {
-  position: fixed;
+  position: relative;
   top: 0;
   left: 0;
   width: 100%;
@@ -515,6 +515,7 @@ export default {
   border-radius: 4px;
   opacity: 1;
   transition: opacity 400ms;
+  z-index: auto;
 }
 .masking {
   position: absolute;
@@ -523,6 +524,7 @@ export default {
   width: 100%;
   height: 50%;
   opacity: 0.3;
+  z-index: 1;
   background-image: linear-gradient(
     -180deg,
     rgba(0, 0, 0, 0) 0%,
@@ -548,6 +550,7 @@ export default {
   display: flex;
   justify-content: space-between;
   position: fixed;
+  z-index: 10;
   .button {
     -webkit-app-region: no-drag;
     cursor: pointer;
