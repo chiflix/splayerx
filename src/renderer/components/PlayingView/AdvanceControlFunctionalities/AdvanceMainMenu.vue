@@ -38,7 +38,7 @@
               color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">
-            <div>字幕设置</div>
+            <div>{{ this.$t('advance.subMenu') }}</div>
             <transition name="arrow">
               <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
             </transition>
@@ -58,7 +58,7 @@
               color: hoverIndex === 3 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">
-            <div>音频选项</div>
+            <div>{{ this.$t('advance.audioMenu') }}</div>
             <transition name="arrow">
               <Icon type="rightArrow" v-show="hoverIndex === 3"></Icon>
             </transition>
@@ -82,7 +82,7 @@
           <div class="text"
             :style="{
               color: backSubHover ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)',
-            }">字幕设置</div>
+            }">{{ this.$t('advance.subMenu') }}</div>
         </div>
       </div>
       <div class="itemSize" @click.left="handleSizeClick"
@@ -138,7 +138,7 @@
           <div class="text"
             :style="{
               color: backAudioHover ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)',
-            }">音频选项</div>
+            }">{{ this.$t('advance.audioMenu') }}</div>
         </div>
       </div>
       <div class="audioDelay" @click.left="handleAudioDelayClick"
@@ -169,7 +169,7 @@
             <div :style="{
               color: hoverAudioIndex === 2 && !showTrack && 2 <= trackNum ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
-            }">切换轨道</div>
+            }">{{ this.$t('advance.changeTrack') }}</div>
             <div
               class="trackDetail"
               :style="{
@@ -199,7 +199,7 @@ export default {
   data() {
     return {
       numList: [[0.5], [1], [1.2], [1.5], [2]],
-      itemSpeedName: '播放速度',
+      itemSpeedName: this.$t('advance.rateTitle'),
       speedChosen: false,
       rightArrowSub: false,
       rightArrowMed: false,
@@ -207,16 +207,16 @@ export default {
       hoverIndex: -1,
       readyShow: 'mainMenu',
       backSubHover: false,
-      textList: [['小'], ['默认'], ['大'], ['超大']],
-      itemFontName: '字体大小',
+      textList: this.$t('advance.fontItems'),
+      itemFontName: this.$t('advance.fontSize'),
       subSizeChosen: false,
       subColorChosen: false,
       subDelayChosen: false,
-      itemColorName: '字幕样式',
-      itemDelayName: '字幕延迟',
+      itemColorName: this.$t('advance.fontStyle'),
+      itemDelayName: this.$t('advance.subDelay'),
       hoverSubIndex: -1,
-      audioDelayName: '音频延迟',
-      itemTrack: '切换轨道',
+      audioDelayName: this.$t('advance.audioDelay'),
+      itemTrack: this.$t('advance.changeTrack'),
       showDelay: false,
       showTrack: false,
       hoverAudioIndex: -1,
@@ -231,24 +231,26 @@ export default {
   watch: {
     clearState(val) {
       if (!val) {
-        this.readyShow = 'mainMenu';
-        this.speedChosen = false;
-        this.subSizeChosen = false;
-        this.subColorChosen = false;
-        this.subDelayChosen = false;
-        this.showDelay = false;
-        this.showTrack = false;
+        setTimeout(() => {
+          this.readyShow = 'mainMenu';
+          this.speedChosen = false;
+          this.subSizeChosen = false;
+          this.subColorChosen = false;
+          this.subDelayChosen = false;
+          this.showDelay = false;
+          this.showTrack = false;
+        }, 150);
       }
     },
   },
   computed: {
     currentAudioTrack() {
       if (this.trackNum === 1) {
-        return '默认';
+        return this.$t('advance.chosenTrack');
       }
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
       if (track && track.id) return track.language;
-      return '默认';
+      return this.$t('advance.chosenTrack');
     },
     winWidth() {
       return this.$store.getters.winWidth;

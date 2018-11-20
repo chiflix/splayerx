@@ -48,6 +48,7 @@
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
         :isShifting="shifting"
+        :transferedTime="transferedTime"
         :thumbnailWidth="thumbnailWidth"
         @mouseupItem="itemMouseup"
         @mouseoutItem="itemMouseout"
@@ -84,6 +85,7 @@ export default {
       backgroundDisplayState: this.displayState,
       mousePosition: [],
       canHoverItem: false,
+      transferedTime: 0,
     };
   },
   mounted() {
@@ -125,6 +127,7 @@ export default {
           this.shifting = false;
         }, 400);
       } else if (index !== this.playingIndex) {
+        this.transferedTime = this.roundedCurrentTime;
         this.openFile(this.playingList[index]);
         this.$store.dispatch(videoAction.PLAY_VIDEO);
       }
@@ -240,7 +243,7 @@ export default {
       const A = 40; // playlist left margin
       const B = 15; // space between each playlist item
       const C = 60; // the space between last playlist item and right edge of the screen
-      if (this.winWidth > 512 && this.winWidth <= 1355) {
+      if (this.winWidth >= 512 && this.winWidth <= 1355) {
         width = ((((this.winWidth - A) - C) + B) / this.thumbnailNumber) - B;
       } else if (this.winWidth > 1355) {
         width = this.winWidth * (112 / 1355);
@@ -253,7 +256,7 @@ export default {
 <style lang="scss" scoped>
 .recent-playlist {
   width: 100%;
-  @media screen and (max-width: 512px) {
+  @media screen and (max-width: 510px) {
     display: none;
   }
   @media screen and (min-width: 512px) {

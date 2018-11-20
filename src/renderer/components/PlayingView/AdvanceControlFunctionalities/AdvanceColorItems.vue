@@ -12,15 +12,16 @@
         :style="{
           color: color,
           transition: 'color 300ms',
+          cursor: isChosen ? 'default' : 'pointer',
         }">
         <div class="textItem">{{ item }}</div>
-        <div class="rightItem" v-show="!isChosen"><img :src="ChosenColor"></div>
+        <div class="rightItem" v-show="!isChosen"><img :src="chosenStyle"></div>
       </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
           <div class="rowContainer">
             <div class="imgContainer" v-for="(img, index) in imgs">
-              <img :src="img.selected || index === hoverIndex ? imgsSelected[index] : img" class="imgType"
+              <img :src="img === chosenStyle || index === hoverIndex ? imgsSelected[index] : img" class="imgType"
                 @mouseover="handleOver(index)"
                 @mouseout="handleOut"
                 @click.left="handleClick($event, index)">
@@ -33,6 +34,7 @@
 </template>
 
 <script>
+import asyncStorage from '@/helpers/asyncStorage';
 import style0 from '../../../assets/subtitle-style1-normal.png';
 import style1 from '../../../assets/subtitle-style2-normal.png';
 import style2 from '../../../assets/subtitle-style3-normal.png';
@@ -48,7 +50,7 @@ export default {
   data() {
     return {
       hoverIndex: -1,
-      imgs: [[style0], [style1], [style2], [style3], [style4]],
+      imgs: [style0, style1, style2, style3, style4],
       imgsSelected: [styleSelected0, styleSelected1, styleSelected2,
         styleSelected3, styleSelected4],
     };
@@ -82,25 +84,19 @@ export default {
     subStyle() {
       return this.$store.getters.curStyle;
     },
-    ChosenColor() {
-      switch (this.subStyle.color) {
-        case 'white':
-          return style0;
-        case 'gray':
-          return style1;
-        case 'yellow':
-          return style2;
-        case 'blue':
-          return style3;
-        case 'black':
-          return style4;
-        default:
-          return style0;
+    chosenStyle() {
+      if (this.$store.getters.chosenStyle) {
+        return this.$store.getters.chosenStyle;
       }
+      return style0;
     },
   },
-  mounted() {
-    this.$set(this.imgs[0], 'selected', true);
+  created() {
+    asyncStorage.get('subtitle-style').then((data) => {
+      if (data.chosenStyle) {
+        this.$store.dispatch('updateChosenStyle', data.chosenStyle);
+      }
+    });
   },
   methods: {
     handleOver(index) {
@@ -110,33 +106,75 @@ export default {
       this.hoverIndex = -1;
     },
     handleClick(e, index) {
-      this.imgs.forEach((i, ind) => {
-        if (ind !== index) {
-          this.$set(this.imgs[ind], 'selected', false);
-        } else {
-          this.$set(this.imgs[ind], 'selected', true);
-        }
-      });
       switch (index) {
         case 0:
-          this.$store.dispatch('updateColor', 'white');
-          this.$bus.$emit('sub-style-change', { color: 'white' });
+          this.$store.dispatch('updateChosenStyle', style0);
+          this.$store.dispatch('updateStyle', {
+            color: 'white',
+            fontWeight: '400',
+          });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
+            textStroke: '0.5px #777',
+            backgroundColor: '',
+            fontWeight: '400',
+          });
           break;
         case 1:
-          this.$store.dispatch('updateColor', 'gray');
-          this.$bus.$emit('sub-style-change', { color: 'gray' });
+          this.$store.dispatch('updateChosenStyle', style1);
+          this.$store.dispatch('updateStyle', {
+            color: 'white',
+            fontWeight: '400',
+          });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '0px 1px 1px #333',
+            textStroke: '1.3px #222',
+            backgroundColor: '',
+            fontWeight: '400',
+            padding: '0',
+          });
           break;
         case 2:
-          this.$store.dispatch('updateColor', 'yellow');
-          this.$bus.$emit('sub-style-change', { color: 'yellow' });
+          this.$store.dispatch('updateChosenStyle', style2);
+          this.$store.dispatch('updateStyle', {
+            color: '#fffc00',
+            fontWeight: '400',
+          });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '0px 0.5px 0.5px #555',
+            textStroke: '',
+            backgroundColor: '',
+            fontWeight: '400',
+            padding: '0',
+          });
           break;
         case 3:
-          this.$store.dispatch('updateColor', 'blue');
-          this.$bus.$emit('sub-style-change', { color: 'blue' });
+          this.$store.dispatch('updateChosenStyle', style3);
+          this.$store.dispatch('updateStyle', {
+            color: '#fff',
+            fontWeight: '800',
+          });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '',
+            textStroke: '1.6px #009be6',
+            backgroundColor: '',
+            fontWeight: '800',
+            padding: '0',
+          });
           break;
         case 4:
-          this.$store.dispatch('updateColor', 'black');
-          this.$bus.$emit('sub-style-change', { color: 'black' });
+          this.$store.dispatch('updateChosenStyle', style4);
+          this.$store.dispatch('updateStyle', {
+            color: '#fff',
+            fontWeight: '400',
+          });
+          this.$store.dispatch('updateBorderStyle', {
+            textShadow: '',
+            textStroke: '',
+            backgroundColor: 'rgba(0,0,0,.5)',
+            fontWeight: '400',
+            padding: '0px 5px',
+          });
           break;
         default:
           break;

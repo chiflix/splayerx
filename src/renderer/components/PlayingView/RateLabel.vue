@@ -53,8 +53,6 @@ export default {
 
 <style lang="scss" scoped>
 .speedLabel {
-  position: absolute;
-  width: auto;
   background-color: rgba(255, 255, 255, 0.22);
   border: 0.5px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(3px);
@@ -63,17 +61,11 @@ export default {
   flex-direction: row;
   .rateNum {
     color: rgba(255, 255, 255, 0.36);
-    line-height: 9px;
-    font-size: 10px;
-    margin: 3px 7px auto 2.5px;
-    font-family: Avenir;
     font-weight: 600;
   }
 }
 @media screen and (max-width: 512px) {
   .speedLabel {
-    left: 76px;
-    bottom: 19px;
     height: 15px;
     .speedIcon {
       margin: auto 0 auto 7.5px;
@@ -87,8 +79,6 @@ export default {
 }
 @media screen and (min-width: 513px) and (max-width: 854px) {
   .speedLabel {
-    left: 85px;
-    bottom: 24px;
     height: 15px;
     .speedIcon {
       margin: auto 0 auto 7.5px;
@@ -102,8 +92,6 @@ export default {
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
   .speedLabel {
-    left: 106px;
-    bottom: 30px;
     height: 18px;
     .speedIcon {
       margin: auto 0 auto 8px;
@@ -111,22 +99,20 @@ export default {
     .rateNum {
       line-height: 12px;
       font-size: 12px;
-      margin: auto 7.7px auto 3px;
+      margin: auto 8px auto 3px;
     }
   }
 }
 @media screen and (min-width: 1921px) {
   .speedLabel {
-    left: 160px;
-    bottom: 43.5px;
     height: 28px;
     .speedIcon {
-      margin: 9px 0 0 12px;
+      margin: 8px 0 0 12px;
     }
     .rateNum {
       line-height: 16px;
       font-size: 16px;
-      margin: 7px 10px 0 4px;
+      margin: 6px 10px 0 4px;
     }
   }
 }

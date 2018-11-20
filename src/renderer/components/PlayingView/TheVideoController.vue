@@ -16,7 +16,7 @@
     :displayState="displayState['recent-playlist']"
     :mousemove="eventInfo.get('mousemove')"
     v-bind.sync="widgetsStatus['recent-playlist']"
-    @update:playlistcontrol-showattached="widgetsStatus['playlist-control'].showAttached = $event"/>
+    @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-hidden="displayState['the-progress-bar']"></div>
     <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
@@ -191,6 +191,10 @@ export default {
     });
   },
   methods: {
+    updatePlaylistShowAttached(event) {
+      this.widgetsStatus['playlist-control'].showAttached = event;
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [320, 180]);
+    },
     // UIManagers
     UIManager(timestamp) {
       if (!this.start) {
@@ -428,7 +432,14 @@ export default {
       ));
     },
     handleWheel(event) {
-      this.eventInfo.set('wheel', { time: event.timeStamp });
+      let isAdvanceColumeItem;
+      const nodeList = document.querySelector('.advance-column-items').childNodes;
+      for (let i = 0; i < nodeList.length; i += 1) {
+        isAdvanceColumeItem = nodeList[i].contains(event.target);
+      }
+      if (!isAdvanceColumeItem) {
+        this.eventInfo.set('wheel', { time: event.timeStamp });
+      }
     },
     // Helper functions
     getAllUIComponents(rootElement) {
@@ -517,7 +528,7 @@ export default {
 </script>
 <style lang="scss">
 .the-video-controller {
-  position: fixed;
+  position: relative;
   top: 0;
   left: 0;
   width: 100%;
@@ -525,6 +536,7 @@ export default {
   border-radius: 4px;
   opacity: 1;
   transition: opacity 400ms;
+  z-index: auto;
 }
 .masking {
   position: absolute;
@@ -533,6 +545,7 @@ export default {
   width: 100%;
   height: 50%;
   opacity: 0.3;
+  z-index: 1;
   background-image: linear-gradient(
     -180deg,
     rgba(0, 0, 0, 0) 0%,
@@ -558,6 +571,7 @@ export default {
   display: flex;
   justify-content: space-between;
   position: fixed;
+  z-index: 10;
   .button {
     -webkit-app-region: no-drag;
     cursor: pointer;

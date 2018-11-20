@@ -54,7 +54,7 @@ export default {
       if (!val) {
         this.animFlag = true;
         if (!this.validEnter) {
-          this.anim.playSegments([68, 90], false);
+          this.anim.playSegments([68, 89], false);
         } else {
           this.showFlag = true;
           this.anim.playSegments([68, 83], false);
@@ -173,7 +173,7 @@ button:hover {
 }
 .advanced {
   position: absolute;
-  z-index: 10;
+  z-index: 100;
   transition-property: opacity, transform;
   @media screen and (min-width: 320px) and (max-width: 512px) {
     display: none;
@@ -186,7 +186,7 @@ button:hover {
     bottom: 44px;
     right: 3px;
   }
-  @media screen and (min-width: 1920px) {
+  @media screen and (min-width: 1921px) {
     bottom: 70px;
     right: 7px;
   }
