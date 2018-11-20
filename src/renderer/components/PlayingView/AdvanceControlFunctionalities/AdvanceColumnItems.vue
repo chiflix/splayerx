@@ -97,13 +97,6 @@ export default {
     },
     handleClick(index) {
       this.moveLength = index * 32;
-      this.tracks.forEach((i, ind) => {
-        if (ind !== index) {
-          this.tracks[ind].enabled = false;
-        } else {
-          this.tracks[ind].enabled = true;
-        }
-      });
       this.$store.dispatch(videoActions.SWITCH_AUDIO_TRACK, this.tracks[index]);
     },
   },

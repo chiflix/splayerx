@@ -10,17 +10,17 @@ export default {
     borderRadius: {
       type: Number,
       default: 1,
-      validator: value => value >= 1 && !Number.isFinite(value),
+      validator: value => value > 0,
     },
     contentMinWidth: {
       type: Number,
       default: 1,
-      validator: value => value >= 1 && !Number.isFinite(value),
+      validator: value => value > 0,
     },
     contentMinHeight: {
       type: Number,
       default: 1,
-      validator: value => value >= 1 && !Number.isFinite(value),
+      validator: value => value > 0,
     },
   },
   mounted() {

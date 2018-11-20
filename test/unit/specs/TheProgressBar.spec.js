@@ -50,22 +50,10 @@ describe('Component - TheProgressBar', () => {
         expect(wrapper.vm.hoveredPageX).to.not.equal(oldHoveredPageX);
       });
 
-      it('should mousemove set hovering to true', () => {
-        wrapper.trigger('mousemove');
-
-        expect(wrapper.vm.hovering).to.equal(true);
-      });
-
       it('should mousemove set mouseleave to false', () => {
         wrapper.trigger('mousemove');
 
         expect(wrapper.vm.mouseleave).to.equal(false);
-      });
-
-      it('should mousemove not set showThumbnail to true when move on leftInvisible', () => {
-        wrapper.find({ ref: 'leftInvisible' }).trigger('mousemove');
-
-        expect(wrapper.vm.showThumbnail).to.equal(false);
       });
 
       it('should mousemove set showThumbnail to true when move to other area', () => {
@@ -125,7 +113,7 @@ describe('Component - TheProgressBar', () => {
       it('should mousedown not set showThumbnail to false when not down on leftInvisible', () => {
         wrapper.vm.showThumbnail = true;
 
-        wrapper.find('.right').trigger('mousedown');
+        wrapper.find('.progress').trigger('mousedown');
 
         expect(wrapper.vm.showThumbnail).to.equal(true);
       });

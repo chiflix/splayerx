@@ -83,6 +83,7 @@ export default {
   },
   css: {
     titleFontSize: { fontSize: '3vw' },
+    versionFontSize: { fontSize: '14px' },
   },
   advance: {
     rateTitle: '播放速度',

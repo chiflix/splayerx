@@ -56,7 +56,7 @@ const getters = {
   },
   // playback state
   duration: state => state.duration,
-  finalPartTime: state => state.duration - 140,
+  finalPartTime: state => state.duration - 30,
   currentTime: state => state.currentTime,
   paused: state => state.paused,
   roundedCurrentTime: state => Math.round(state.currentTime),
@@ -109,21 +109,24 @@ function mutationsGenerator(mutationTypes) {
 }
 
 function generateTracks(actionType, newTrack, oldTracks) {
-  const newTracks = oldTracks;
+  const newTracks = [...oldTracks];
   switch (actionType) {
     case 'add':
       if (!newTracks.includes(newTrack)) {
         newTracks.push(newTrack);
       }
       break;
-    case 'remove':
-      if (newTracks.includes(newTrack)) {
-        newTracks.splice(newTracks.indexOf(newTrack), 1);
-      }
-      break;
     case 'switch':
       if (newTracks.includes(newTrack)) {
-        newTracks.splice(newTracks.indexOf(newTrack), 1, newTrack);
+        newTracks.splice(0, newTracks.length, ...newTracks.map((track) => {
+          const tempTrack = Object.assign({}, track);
+          if (tempTrack.id === newTrack.id) {
+            tempTrack.enabled = true;
+          } else {
+            tempTrack.enabled = false;
+          }
+          return tempTrack;
+        }));
       }
       break;
     case 'removeAll':
@@ -210,16 +213,12 @@ const actions = {
     const newAudioTracks = generateTracks('add', trackToAdd, state.audioTrackList);
     commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
-  [actionTypes.REMOVE_AUDIO_TRACK]({ commit, state }, trackToRemove) {
-    const newAudioTracks = generateTracks('remove', trackToRemove, state.audioTrackList);
-    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
-  },
   [actionTypes.SWITCH_AUDIO_TRACK]({ commit, state }, trackToSwitch) {
     const newAudioTracks = generateTracks('switch', trackToSwitch, state.audioTrackList);
     commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
-  [actionTypes.REMOVE_ALL_AUDIO_TRACK]({ commit, state }, trackToRemoveAll) {
-    const newAudioTracks = generateTracks('removeAll', trackToRemoveAll, state.audioTrackList);
+  [actionTypes.REMOVE_ALL_AUDIO_TRACK]({ commit, state }) {
+    const newAudioTracks = generateTracks('removeAll', null, state.audioTrackList);
     commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
 };
