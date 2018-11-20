@@ -100,7 +100,7 @@ export default {
       return this.hovering ? this.whiteWithOpacity(0.1) : this.whiteWithOpacity(0);
     },
     leftFakeProgressBackgroundColor() {
-      let opacity;
+      let opacity = 0.908;
       if (this.hoveredCurrentTime === 0 && this.hoveredSmallerThanPlayed) opacity = 0.3;
       if (this.hoveredCurrentTime > 0) opacity = 0.908;
       return this.whiteWithOpacity(opacity);
