@@ -129,7 +129,6 @@ export default {
       }
     },
     progressBarHovering(newValue) {
-      console.log(newValue);
       if (!newValue) {
         this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
         // Prevent all widgets display before the-progress-bar
@@ -342,6 +341,7 @@ export default {
       this.eventInfo.set('mouseenter', { mouseLeavingWindow: false });
     },
     handleMouseleave() {
+      this.eventInfo.set('mousemove', { target: null });
       this.eventInfo.set('mouseenter', { mouseLeavingWindow: true });
     },
     handleMousedownRight() {

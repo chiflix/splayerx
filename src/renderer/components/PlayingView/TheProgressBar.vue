@@ -24,7 +24,7 @@
       <div class="hovered" :style="{ width: this.hoveredPercent, backgroundColor: this.hoveredBackgroundColor }"></div>
       <div class="played" :style="{ width: this.playedPercent, backgroundColor: this.playedBackgroundColor }"></div>
     </div>
-    <div class="fake-button right"
+    <div class="fake-button right" ref="rightInvisible"
       :style="{ height: fakeButtonHeight }">
       <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.rightFakeProgressBackgroundColor }"></div></div>
   </div>
@@ -139,7 +139,7 @@ export default {
     },
     handleMousedown(event) {
       this.mousedown = true;
-      if (event.target === this.$refs.leftInvisible) {
+      if (event.target === this.$refs.leftInvisible || event.target === this.$refs.rightInvisible) {
         this.showThumbnail = false;
         this.$bus.$emit('currentWidget', 'the-video-controller');
         this.setHoveringToFalse(false);
@@ -223,7 +223,7 @@ export default {
   -webkit-app-region: no-drag;
   height: 20px;
   & > div {
-    transition: background-color 300ms, height 150ms;
+    transition: background-color 150ms, height 150ms;
   }
   &:hover {
     cursor: pointer;
@@ -240,7 +240,7 @@ export default {
     position: relative;
     width: 20px;
     .fake-progress {
-      transition: height 150ms;
+      transition: background-color 150ms, height 150ms;
       width: inherit;
       position: absolute;
       bottom: 0;
