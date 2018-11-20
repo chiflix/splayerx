@@ -801,8 +801,6 @@ export default {
       if (data.curStyle) {
         this.$store.dispatch('updateStyle', data.curStyle);
       }
-    });
-    asyncStorage.get('subtitle-style').then((data) => {
       if (data.curBorderStyle) {
         this.$store.dispatch('updateBorderStyle', data.curBorderStyle);
       }
