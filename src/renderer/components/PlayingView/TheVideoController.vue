@@ -129,6 +129,7 @@ export default {
       }
     },
     progressBarHovering(newValue) {
+      console.log(newValue);
       if (!newValue) {
         this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
         // Prevent all widgets display before the-progress-bar
@@ -250,6 +251,10 @@ export default {
       if (this.currentWidget === 'the-progress-bar') {
         this.timerManager.updateTimer('hoveringProgressBar', this.mousestopDelay);
         this.widgetsStatus['the-progress-bar'].hovering = this.progressBarHovering = true;
+      }
+      if (this.currentWidget === 'the-video-controller' &&
+        this.getComponentName(lastEventInfo.get('mousemove').target) === 'the-progress-bar') {
+        this.timerManager.updateTimer('hoveringProgressBar', 0);
       }
       // mouseup status
       if (lastEventInfo.get('mouseup').leftMouseup !== currentEventInfo.get('mouseup').leftMouseup) {

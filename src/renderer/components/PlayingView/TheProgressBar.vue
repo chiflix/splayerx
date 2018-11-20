@@ -198,7 +198,6 @@ export default {
           this.$emit('update:hovering', false);
         }, 3000);
       } else {
-        console.log('2333');
         this.$emit('update:hovering', false);
       }
     },
