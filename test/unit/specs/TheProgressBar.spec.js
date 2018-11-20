@@ -56,12 +56,6 @@ describe('Component - TheProgressBar', () => {
         expect(wrapper.vm.mouseleave).to.equal(false);
       });
 
-      it('should mousemove not set showThumbnail to true when move on leftInvisible', () => {
-        wrapper.find({ ref: 'leftInvisible' }).trigger('mousemove');
-
-        expect(wrapper.vm.showThumbnail).to.equal(false);
-      });
-
       it('should mousemove set showThumbnail to true when move to other area', () => {
         wrapper.find('.progress').trigger('mousemove');
 
@@ -119,7 +113,7 @@ describe('Component - TheProgressBar', () => {
       it('should mousedown not set showThumbnail to false when not down on leftInvisible', () => {
         wrapper.vm.showThumbnail = true;
 
-        wrapper.find('.right').trigger('mousedown');
+        wrapper.find('.progress').trigger('mousedown');
 
         expect(wrapper.vm.showThumbnail).to.equal(true);
       });
