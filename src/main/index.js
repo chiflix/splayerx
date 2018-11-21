@@ -119,11 +119,15 @@ function registerMainWindowEvent() {
     const callback = (err, imgPath) => {
       if (err !== '0') {
         snapShot(snapShotQueue[0], callback);
-      } else {
-        event.sender.send(`snapShot-${snapShotQueue[0]}-reply`, imgPath);
+      } else if (err === '0') {
         snapShotQueue.shift();
-        if (snapShotQueue.length > 0) {
-          snapShot(snapShotQueue[0], callback);
+        if (event.sender.isDestroyed()) {
+          snapShotQueue.splice(0, snapShotQueue.length);
+        } else {
+          event.sender.send(`snapShot-${snapShotQueue[0]}-reply`, imgPath);
+          if (snapShotQueue.length > 0) {
+            snapShot(snapShotQueue[0], callback);
+          }
         }
       }
     };

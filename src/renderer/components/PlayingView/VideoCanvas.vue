@@ -26,7 +26,6 @@
 </template>;
 
 <script>
-import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
@@ -50,6 +49,7 @@ export default {
       coverFinded: false,
       seekTime: [0],
       lastPlayedTime: 0,
+      lastCoverDetectingTime: 0,
     };
   },
   methods: {
@@ -196,31 +196,47 @@ export default {
     saveSubtitleStyle() {
       syncStorage.setSync('subtitle-style', { curStyle: this.curStyle, curBorderStyle: this.curBorderStyle, chosenStyle: this.chosenStyle });
     },
-    getVideoCover() {
-      if (!this.coverFinded) {
-        this.$electron.ipcRenderer.send('snapShot', this.originSrc);
-        this.$electron.ipcRenderer.once(`snapShot-${this.originSrc}-reply`, (event, imgPath) => {
-          fs.readFile(`${imgPath}.png`, 'base64', (err, data) => {
-            if (!err) {
-              const imageSrc = `data:image/png;base64, ${data}`;
-              this.infoDB().get('recent-played', 'path', this.originSrc).then((val) => {
-                if (val) {
-                  const mergedData = Object.assign(val, { cover: imageSrc });
-                  this.infoDB().add('recent-played', mergedData);
-                } else {
-                  const data = {
-                    quickHash: this.mediaQuickHash(this.originSrc),
-                    path: this.originSrc,
-                    cover: imageSrc,
-                    duration: this.duration,
-                  };
-                  this.infoDB().add('recent-played', data);
-                }
-              });
-            }
-          });
-        });
+    async getVideoCover() {
+      const videoElement = this.$refs.videoCanvas.videoElement();
+      const canvas = this.$refs.thumbnailCanvas;
+      const canvasCTX = canvas.getContext('2d');
+      const { videoHeight, videoWidth } = videoElement;
+      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
+      canvasCTX.drawImage(
+        videoElement, 0, 0, videoWidth, videoHeight,
+        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
+      );
+      const { data } = canvasCTX.getImageData(0, 0, 100, 100);
+      for (let i = 0; i < data.length; i += 1) {
+        if ((i + 1) % 4 !== 0 && data[i] > 20) {
+          this.coverFinded = true;
+          break;
+        }
       }
+      if (this.coverFinded) {
+        const smallImagePath = canvas.toDataURL('image/png');
+        [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
+        canvasCTX.drawImage(
+          videoElement, 0, 0, videoWidth, videoHeight,
+          0, 0, (videoWidth / videoHeight) * 1080, 1080,
+        );
+        const imagePath = canvas.toDataURL('image/png');
+        const val = await this.infoDB().get('recent-played', 'path', this.originSrc);
+        if (val) {
+          const mergedData = Object.assign(val, { cover: imagePath, smallCover: smallImagePath });
+          this.infoDB().add('recent-played', mergedData);
+        } else {
+          const data = {
+            quickHash: this.mediaQuickHash(this.originSrc),
+            path: this.originSrc,
+            cover: imagePath,
+            smallCover: smallImagePath,
+            duration: this.$store.getters.duration,
+          };
+          this.infoDB().add('recent-played', data);
+        }
+      }
+      this.lastCoverDetectingTime = this.currentTime;
     },
   },
   computed: {
@@ -252,14 +268,14 @@ export default {
         audioTrackList: [],
       });
     },
+    currentTime(val) {
+      if (!this.coverFinded && val - this.lastCoverDetectingTime > 1) {
+        this.getVideoCover();
+      }
+    },
   },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
-    this.infoDB().get('recent-played', 'path', this.originSrc).then((val) => {
-      if (val && val.cover) {
-        this.coverFinded = true;
-      }
-    });
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.ratio]);

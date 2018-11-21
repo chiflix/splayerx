@@ -147,11 +147,11 @@ export default {
         this.isBlur = false;
         this.isChosen = true;
         this.mouseoverRecently = true;
+        this.$emit('mouseoverItem', {
+          index: this.index,
+          mediaInfo: this.mediaInfo,
+        });
       }
-      this.$emit('mouseoverItem', {
-        index: this.index,
-        mediaInfo: this.mediaInfo,
-      });
     },
     mouseoutVideo() {
       this.isBlur = true;
