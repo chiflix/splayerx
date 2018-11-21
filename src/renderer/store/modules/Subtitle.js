@@ -1,7 +1,7 @@
 const state = {
   SubtitleNames: [],
   curStyle: {
-    fontFamily: 'PingFang SC',
+    fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
     fontSize: '11px',
     letterSpacing: 1,
     opacity: 1,
@@ -12,7 +12,7 @@ const state = {
     webkitFontSmoothing: 'antialiased',
   },
   curBorderStyle: {
-    fontFamily: 'PingFang SC',
+    fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
     fontSize: '11px',
     letterSpacing: 1,
     padding: '0px',

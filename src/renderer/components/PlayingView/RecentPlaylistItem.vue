@@ -44,7 +44,7 @@
                   :style="{
                     width: sizeAdaption(10),
                     height: sizeAdaption(22),
-                    marginRight: sizeAdaption(2),
+                    marginRight: sizeAdaption(4),
                   }"/>
                 <div class="playing"
                   :style="{
@@ -292,7 +292,7 @@ $border-radius: 3px;
     white-space: nowrap;
 
     z-index: 100;
-    font-family: Avenir-Heavy;
+    font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
     letter-spacing: 0.58px;
 
     width: 100%;
