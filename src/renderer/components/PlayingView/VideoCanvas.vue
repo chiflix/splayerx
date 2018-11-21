@@ -26,7 +26,6 @@
 </template>;
 
 <script>
-import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
@@ -216,8 +215,6 @@ export default {
       }
       if (this.coverFinded) {
         const smallImagePath = canvas.toDataURL('image/png');
-        const img = smallImagePath.replace(/^data:image\/\w+;base64,/, '');
-        fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
         [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
         canvasCTX.drawImage(
           videoElement, 0, 0, videoWidth, videoHeight,
