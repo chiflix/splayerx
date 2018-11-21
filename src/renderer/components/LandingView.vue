@@ -44,7 +44,6 @@
           </div>
           <div class="welcome">
           <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-          <div class="version" :style="$t('css.versionFontSize')">{{ version }}</div>
         </div>
       </div>
   </transition>
