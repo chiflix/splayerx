@@ -13,11 +13,7 @@
           marginRight: `${marginRight}px`,
         }"
         @click="openOrMove">
-        <div class="btnMask"
-          :style="{
-            height:`${thumbnailHeight}px`,
-            width:`${thumbnailWidth}px`,
-          }">
+        <div class="btnMask">
           <Icon class="addUi" type="add"></Icon>
         </div>
       </div>
@@ -50,7 +46,7 @@
               top: `-${0.7 / 2}px`,
               width: `${thumbnailWidth - 0.7}px`,
               height: `${thumbnailHeight - 0.7}px`,
-              border: item.chosen ? '0.7px solid rgba(255,255,255,0.8)' : '0.7px solid rgba(255,255,255,0.4)'              
+              border: item.chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.3)'              
             }"/>
           <div class="mask">
             <Icon class="deleteUi" type="delete"></Icon>
@@ -433,8 +429,14 @@ $border-radius: 2px;
 
     .btnMask {
       border-radius: 2px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
       display: flex;
+    }
+
+    .btnMask:hover {
+      border: 1px solid rgba(255, 255, 255, 0.6);
     }
 
     .addUi {
