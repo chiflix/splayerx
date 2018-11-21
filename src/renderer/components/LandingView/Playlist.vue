@@ -30,6 +30,7 @@
         }">
         <div class="white-hover"
             v-show="item.chosen"/>
+        <div class="black-gradient"/>
         <div class="content"
           @click.stop="onRecentItemClick(item, index)"
           @mouseout="onRecentItemMouseout(index)"
@@ -478,6 +479,15 @@ $border-radius: 2px;
   width: 100%;
   height: 100%;
   background-color: rgba(255,255,255,0.2);
+}
+.black-gradient {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: $border-radius;
+  background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
 }
 .border {
   position: absolute;
