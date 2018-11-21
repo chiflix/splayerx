@@ -30,7 +30,6 @@
         }">
         <div class="white-hover"
             v-show="item.chosen"/>
-        <div class="black-gradient"/>
         <div class="content"
           @click.stop="onRecentItemClick(item, index)"
           @mouseout="onRecentItemMouseout(index)"
@@ -457,13 +456,33 @@ $border-radius: 2px;
       border-radius: $border-radius;
       display: none;
       width: 100%;
-      height: 100%;
+      height: calc(100% - 9px);
       transition: background-color 150ms;
     }
 
     .deleteUi {
       margin: auto;
       display: none;
+    }
+    .shadow {
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 0, 0, 0.1) inset;
+    }
+    .shadow:before, .shadow:after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      top: 50%;
+      bottom: 0;
+      left: 10px;
+      right: 10px;
+      border-radius: 50px;
+    }
+    .shadow:after {
+      right: 10px;
+      left: auto;
+      transform: skew(8deg) rotate(3deg);
     }
   }
 }
@@ -479,15 +498,6 @@ $border-radius: 2px;
   width: 100%;
   height: 100%;
   background-color: rgba(255,255,255,0.2);
-}
-.black-gradient {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  border-radius: $border-radius;
-  background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
 }
 .border {
   position: absolute;
