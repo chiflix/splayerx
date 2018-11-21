@@ -30,7 +30,6 @@
         }">
         <div class="white-hover"
             v-show="item.chosen"/>
-        <div class="black-gradient"/>
         <div class="content"
           @click.stop="onRecentItemClick(item, index)"
           @mouseout="onRecentItemMouseout(index)"
@@ -46,7 +45,7 @@
               top: `-${0.7 / 2}px`,
               width: `${thumbnailWidth - 0.7}px`,
               height: `${thumbnailHeight - 0.7}px`,
-              border: item.chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.3)'              
+              border: item.chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)'              
             }"/>
           <div class="mask">
             <Icon class="deleteUi" type="delete"></Icon>
@@ -431,7 +430,7 @@ $border-radius: 2px;
       border-radius: 2px;
       width: 100%;
       height: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       display: flex;
     }
 
@@ -479,15 +478,6 @@ $border-radius: 2px;
   width: 100%;
   height: 100%;
   background-color: rgba(255,255,255,0.2);
-}
-.black-gradient {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  border-radius: $border-radius;
-  background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
 }
 .border {
   position: absolute;
