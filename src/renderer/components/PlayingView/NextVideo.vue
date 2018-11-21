@@ -109,7 +109,7 @@ export default {
       if (this.nextVideo) {
         const originPath = this.nextVideo;
         const convertedPath = encodeURIComponent(originPath).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
-        
+
         return process.platform === 'win32' ? convertedPath : `file://${convertedPath}`;
       }
       return '';
