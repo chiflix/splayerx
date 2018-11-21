@@ -22,9 +22,9 @@
             @click="handleClick(index)">
             <div class="text"
               :style="{
-                color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
+                color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
-              }">{{ `音轨 ${index+1} : ${track.language}` }}
+              }">{{ `${$t('advance.track')} ${index+1} : ${track.language}` }}
             </div>
           </div>
           <div class="card"
@@ -54,6 +54,9 @@ export default {
     },
     winWidth: {
       type: Number,
+    },
+    isChosen: {
+      type: Boolean,
     },
   },
   computed: {
@@ -94,13 +97,6 @@ export default {
     },
     handleClick(index) {
       this.moveLength = index * 32;
-      this.tracks.forEach((i, ind) => {
-        if (ind !== index) {
-          this.tracks[ind].enabled = false;
-        } else {
-          this.tracks[ind].enabled = true;
-        }
-      });
       this.$store.dispatch(videoActions.SWITCH_AUDIO_TRACK, this.tracks[index]);
     },
   },
@@ -233,7 +229,7 @@ export default {
         position: relative;
         display: flex;
         .text {
-          color: rgba(255, 255, 255, 0.4);
+          text-shadow: 0px 1px 1px rgba(0, 0, 0, .1);
         }
       }
       .card {
@@ -241,6 +237,7 @@ export default {
         border-radius: 7px;
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
         background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
       }
     }

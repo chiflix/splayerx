@@ -1,6 +1,5 @@
 
 const state = {
-  currentPlaying: '',
   PlayingList: [],
   FolderList: [],
 };
@@ -40,16 +39,9 @@ const mutations = {
   AddFolderList(state, t) {
     state.FolderList.push(...t);
   },
-  currentPlaying(state, t) {
-    state.currentPlaying = t;
-  },
 };
 
-const actions = {
-  currentPlaying({ commit }, t) {
-    commit('currentPlaying', t);
-  },
-};
+const actions = {};
 
 export default {
   state,

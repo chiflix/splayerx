@@ -22,7 +22,12 @@
         :thumbnailHeight="thumbnailHeight" />
     </div>
     <div class="thumbnail-gradient"></div>
-    <span class="time">{{ videoTime }}</span>
+    <div class="time">
+      <span class="flex-items">{{ videoTime }}</span>
+      <transition name="hovered-end">
+        <base-icon class="flex-items hovered-end" type="hoveredEnd" v-if="hoveredEnd" />
+      </transition>
+    </div>
   </div>
 </template>
 
@@ -34,12 +39,14 @@ import {
   INFO_DATABASE_NAME,
   THUMBNAIL_OBJECT_STORE_NAME,
 } from '@/constants';
+import Icon from '../BaseIconContainer';
 import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
 import ThumbnailDisplay from './ThumbnailDisplay';
 export default {
   components: {
     'thumbnail-video-player': ThumbnailVideoPlayer,
     'thumbnail-display': ThumbnailDisplay,
+    'base-icon': Icon,
   },
   props: {
     currentTime: Number,
@@ -49,6 +56,10 @@ export default {
     thumbnailHeight: Number,
     positionOfThumbnail: Number,
     videoTime: String,
+    hoveredEnd: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -214,24 +225,24 @@ export default {
 .the-preview-thumbnail {
   position: absolute;
 }
-
 .thumbnail-gradient {
   position: absolute;
   width: 100%;
   height: 100%;
   background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 26%, rgba(0,0,0,0.73) 98%);
 }
-
-
 .time {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: rgba(255, 255, 255, 0.5);
-  letter-spacing: 0.8px;
-  font-weight: 600;
-  @media screen and (max-width: 854px) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: 100%;
+  position: relative;
+
+  @media screen and (max-width: 512px) {
+    font-size: 20px;
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
     font-size: 20px;
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
@@ -239,6 +250,18 @@ export default {
   }
   @media screen and (min-width: 1921px) {
     font-size: 40px;
+  }
+  span {
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    margin-right: 3px;
+  }
+  .hovered-end-enter-active {
+    transition: all 5s;
+  }
+  .hovered-end-enter-leave {
+    transition: all 8s;
   }
 }
 </style>

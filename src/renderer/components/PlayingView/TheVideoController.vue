@@ -26,7 +26,8 @@
       <advance-control class="button advance" v-hidden="displayState['advance-control']" v-bind.sync="widgetsStatus['advance-control']"/>
     </div>
     <the-time-codes v-hidden="displayState['the-progress-bar']" />
-    <the-progress-bar v-hidden="displayState['the-progress-bar']"/>
+    <SpeedLabel v-hidden="displayState['the-progress-bar']"/>
+    <the-progress-bar v-hidden="displayState['the-progress-bar']" v-bind.sync="widgetsStatus['the-progress-bar']"/>
   </div>
 </template>
 <script>
@@ -102,6 +103,7 @@ export default {
       focusedTimestamp: 0,
       focusDelay: 500,
       listenedWidget: 'the-video-controller',
+      progressBarHovering: false,
     };
   },
   computed: {
@@ -124,6 +126,16 @@ export default {
     isFocused(newValue) {
       if (newValue) {
         this.focusedTimestamp = Date.now();
+      }
+    },
+    progressBarHovering(newValue) {
+      if (!newValue) {
+        this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
+        // Prevent all widgets display before the-progress-bar
+        if (this.showAllWidgets) {
+          this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
+        }
+        this.hideProgressBar = false;
       }
     },
   },
@@ -153,6 +165,7 @@ export default {
     this.timerManager.addTimer('mouseStopMoving', this.mousestopDelay);
     this.timerManager.addTimer('sleepingVolumeButton', this.mousestopDelay);
     this.timerManager.addTimer('sleepingProgressBar', this.mousestopDelay);
+    this.timerManager.addTimer('hoveringProgressBar', this.mousestopDelay);
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
@@ -164,6 +177,7 @@ export default {
         showAttached: false,
         mousedownOnOther: false,
         mouseupOnOther: false,
+        hovering: false,
       };
     });
 
@@ -234,15 +248,17 @@ export default {
       }
       // hideProgressBar timer
       const progressKeydown = this.orify(currentEventInfo.get('keydown').ArrowLeft, currentEventInfo.get('keydown').ArrowRight, currentEventInfo.get('keydown').BracketLeft, currentEventInfo.get('keydown').BracketRight);
-      if (progressKeydown) {
+      if (progressKeydown || this.showAllWidgets) {
         this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
-        // Prevent all widgets display before the-progress-bar
-        if (this.showAllWidgets) {
-          this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
-        }
-        this.hideProgressBar = false;
       }
-
+      if (this.currentWidget === 'the-progress-bar') {
+        this.timerManager.updateTimer('hoveringProgressBar', this.mousestopDelay);
+        this.widgetsStatus['the-progress-bar'].hovering = this.progressBarHovering = true;
+      }
+      if (this.currentWidget === 'the-video-controller' &&
+        this.getComponentName(lastEventInfo.get('mousemove').target) === 'the-progress-bar') {
+        this.timerManager.updateTimer('hoveringProgressBar', 0);
+      }
       // mouseup status
       if (lastEventInfo.get('mouseup').leftMouseup !== currentEventInfo.get('mouseup').leftMouseup) {
         this.currentSelectedWidget = this.getComponentName(currentEventInfo.get('mouseup').target);
@@ -252,23 +268,25 @@ export default {
         this.timerState[uiName] = this.showAllWidgets;
       });
       this.timerState['volume-indicator'] = !this.hideVolume;
-      this.timerState['the-progress-bar'] = !this.hideProgressBar;
+      this.timerState['the-progress-bar'] = this.progressBarHovering || !this.hideProgressBar;
       return currentEventInfo;
     },
     UITimerManager(frameTime) {
       this.timerManager.tickTimer('mouseStopMoving', frameTime);
       this.timerManager.tickTimer('mouseLeavingWindow', frameTime);
       this.timerManager.tickTimer('sleepingVolumeButton', frameTime);
+      this.timerManager.tickTimer('hoveringProgressBar', frameTime);
       this.timerManager.tickTimer('sleepingProgressBar', frameTime);
 
       const timeoutTimers = this.timerManager.timeoutTimers();
       this.mouseStopMoving = timeoutTimers.includes('mouseStopMoving');
       this.mouseLeftWindow = timeoutTimers.includes('mouseLeavingWindow');
       this.hideVolume = timeoutTimers.includes('sleepingVolumeButton');
+      this.widgetsStatus['the-progress-bar'].hovering = this.progressBarHovering = !timeoutTimers.includes('hoveringProgressBar');
       this.hideProgressBar = timeoutTimers.includes('sleepingProgressBar');
 
       this.timerState['volume-indicator'] = !this.hideVolume;
-      this.timerState['the-progress-bar'] = !this.hideProgressBar;
+      this.timerState['the-progress-bar'] = this.progressBarHovering || !this.hideProgressBar;
     },
     // UILayerManager() {
     // },
@@ -327,6 +345,7 @@ export default {
       this.eventInfo.set('mouseenter', { mouseLeavingWindow: false });
     },
     handleMouseleave() {
+      this.eventInfo.set('mousemove', { target: null });
       this.eventInfo.set('mouseenter', { mouseLeavingWindow: true });
     },
     handleMousedownRight() {
@@ -381,7 +400,9 @@ export default {
       ));
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
-        if (this.currentSelectedWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
+        if (
+          this.getComponentName(this.eventInfo.get('mousedown').target) === 'the-video-controller' &&
+          this.currentSelectedWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
           this.togglePlayback();
         }
         this.preventSingleClick = false;
@@ -507,7 +528,7 @@ export default {
 </script>
 <style lang="scss">
 .the-video-controller {
-  position: fixed;
+  position: relative;
   top: 0;
   left: 0;
   width: 100%;
@@ -515,6 +536,7 @@ export default {
   border-radius: 4px;
   opacity: 1;
   transition: opacity 400ms;
+  z-index: auto;
 }
 .masking {
   position: absolute;
@@ -523,6 +545,7 @@ export default {
   width: 100%;
   height: 50%;
   opacity: 0.3;
+  z-index: 1;
   background-image: linear-gradient(
     -180deg,
     rgba(0, 0, 0, 0) 0%,
@@ -548,6 +571,7 @@ export default {
   display: flex;
   justify-content: space-between;
   position: fixed;
+  z-index: 10;
   .button {
     -webkit-app-region: no-drag;
     cursor: pointer;

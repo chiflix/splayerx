@@ -17,10 +17,10 @@
       :paused="paused"
       :updateCurrentTime="true"
       :currentTime="seekTime"
-      :currentAudioTrackId="currentAudioTrackId"
+      :currentAudioTrackId="currentAudioTrackId.toString()"
       @update:currentTime="updateCurrentTime" />
     </transition>
-    <BaseSubtitle/>
+    <BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -69,18 +69,19 @@ export default {
       updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
     }),
     onMetaLoaded(event) {
+      this.videoElement = event.target;
       this.videoConfigInitialize({
         volume: 100,
-        mute: false,
+        muted: false,
         rate: 1,
         duration: event.target.duration,
+        currentTime: this.lastPlayedTime || 0,
       });
       this.updateMetaInfo({
         intrinsicWidth: event.target.videoWidth,
         intrinsicHeight: event.target.videoHeight,
         ratio: event.target.videoWidth / event.target.videoHeight,
       });
-      this.$store.dispatch('currentPlaying', this.originSrc);
       if (event.target.duration - this.lastPlayedTime > 10) {
         this.$bus.$emit('seek', this.lastPlayedTime);
       } else {
@@ -164,7 +165,7 @@ export default {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
     $_saveScreenshot() {
-      const videoElement = this.$refs.videoCanvas.videoElement();
+      const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
       // todo: use metaloaded to get videoHeight and videoWidth
@@ -192,6 +193,9 @@ export default {
         duration: this.$store.state.Video.duration,
       };
       syncStorage.setSync('recent-played', data);
+    },
+    saveSubtitleStyle() {
+      syncStorage.setSync('subtitle-style', { curStyle: this.curStyle, curBorderStyle: this.curBorderStyle, chosenStyle: this.chosenStyle });
     },
     async getVideoCover() {
       const videoElement = this.$refs.videoCanvas.videoElement();
@@ -241,7 +245,9 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen']),
+      'winSize', 'winPos', 'isFullScreen',
+      'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle',
+      'nextVideo']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -251,7 +257,6 @@ export default {
   watch: {
     originSrc(val, oldVal) {
       this.coverFinded = false;
-      this.videoElement = this.$refs.videoCanvas.videoElement();
       this.$_saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
@@ -261,6 +266,10 @@ export default {
             this.infoDB().add('recent-played', mergedData);
           }
         });
+      this.$bus.$emit('showlabel');
+      this.videoConfigInitialize({
+        audioTrackList: [],
+      });
     },
     currentTime(val) {
       if (!this.coverFinded && val - this.lastCoverDetectingTime > 1) {
@@ -283,26 +292,34 @@ export default {
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
     });
+    this.$bus.$on('toggle-mute', this.toggleMute);
     this.$bus.$on('seek', (e) => {
-      this.seekTime = [e];
-      // todo: use vuex get video element src
-      const filePath = decodeURI(this.src);
-      const indexOfLastDot = filePath.lastIndexOf('.');
-      const ext = filePath.substring(indexOfLastDot + 1);
-      if (ext === 'mkv') {
-        this.$bus.$emit('seek-subtitle', e);
+      if (e === this.duration && this.nextVideo) {
+        this.openFile(this.nextVideo);
+      } else {
+        this.seekTime = [e];
+        // todo: use vuex get video element src
+        const filePath = decodeURI(this.src);
+        const indexOfLastDot = filePath.lastIndexOf('.');
+        const ext = filePath.substring(indexOfLastDot + 1);
+        if (ext === 'mkv') {
+          this.$bus.$emit('seek-subtitle', e);
+        }
       }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {
       this.$_saveScreenshot();
+      this.saveSubtitleStyle();
     };
   },
 };
 </script>
 <style lang="scss" scoped>
 .video {
+  position: relative;
   height: 0;
+  z-index: auto;
 }
 .base-video-player {
   width: 100%;

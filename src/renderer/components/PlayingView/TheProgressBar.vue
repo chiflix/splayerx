@@ -11,6 +11,7 @@
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
       :positionOfThumbnail="thumbnailPosition"
+      :hoveredEnd="hoveredPercent === '100%' && !!nextVideo"
      />
     <div class="fake-button left" ref="leftInvisible"
       :style="{ height: fakeButtonHeight }">
@@ -23,7 +24,7 @@
       <div class="hovered" :style="{ width: this.hoveredPercent, backgroundColor: this.hoveredBackgroundColor }"></div>
       <div class="played" :style="{ width: this.playedPercent, backgroundColor: this.playedBackgroundColor }"></div>
     </div>
-    <div class="fake-button right"
+    <div class="fake-button right" ref="rightInvisible"
       :style="{ height: fakeButtonHeight }">
       <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.rightFakeProgressBackgroundColor }"></div></div>
   </div>
@@ -36,10 +37,15 @@ export default {
   components: {
     'the-preview-thumbnail': ThePreviewThumbnail,
   },
+  props: {
+    hovering: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       hoveredPageX: 0,
-      hovering: false,
       showThumbnail: false,
       mousedown: false,
       mouseleave: true,
@@ -48,7 +54,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'duration', 'currentTime', 'ratio']),
+    ...mapGetters(['winWidth', 'duration', 'currentTime', 'ratio', 'nextVideo']),
     hoveredPercent() {
       return `${this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100}%`;
     },
@@ -62,7 +68,7 @@ export default {
       return `${100 * (this.currentTime / this.duration)}%`;
     },
     hoveredSmallerThanPlayed() {
-      return this.hoveredCurrentTime < this.currentTime;
+      return !this.mouseleave && this.hoveredCurrentTime < this.currentTime;
     },
     thumbnailHeight() {
       return Math.round(this.thumbnailWidth / this.ratio);
@@ -74,10 +80,10 @@ export default {
       );
     },
     fakeButtonHeight() {
-      return this.hovering ? `${this.thumbnailHeight + 20}px` : '20px';
+      return this.showThumbnail ? `${this.thumbnailHeight + 20}px` : '20px';
     },
     hoveredBackgroundColor() {
-      if (this.hovering) {
+      if (!this.mouseleave) {
         return this.hoveredSmallerThanPlayed ?
           this.whiteWithOpacity(0.86) : this.whiteWithOpacity(0.3);
       }
@@ -100,16 +106,12 @@ export default {
       return this.whiteWithOpacity(opacity);
     },
     rightFakeProgressBackgroundColor() {
-      const hoveredEnd = !(Math.round(this.hoveredCurrentTime) < Math.round(this.duration));
-      const playedEnd = !(Math.round(this.currentTime) < Math.round(this.duration));
-      let opacity = playedEnd ? 0.9 : 0.1;
-      if (this.hovering) {
-        if ((hoveredEnd && !playedEnd) || (!hoveredEnd && playedEnd)) opacity = 0.37;
-        if (!hoveredEnd && !playedEnd) opacity = 0.1;
-      } else if (!playedEnd) {
-        opacity = 0;
-      }
-      return this.whiteWithOpacity(opacity);
+      const hoveredEnd = this.hoveredPercent === '100%';
+      const playedEnd = Math.round(this.currentTime) >= Math.round(this.duration);
+      const opacity = this.mouseleave ? // eslint-disable-line no-nested-ternary
+        (playedEnd ? 0.9 : 0) :
+        (((hoveredEnd && !playedEnd) || (!hoveredEnd && playedEnd)) ? 0.37 : 0.1);
+      return this.whiteWithOpacity(hoveredEnd && playedEnd ? 0.9 : opacity);
     },
   },
   watch: {
@@ -120,7 +122,7 @@ export default {
   methods: {
     handleMousemove(event) {
       this.hoveredPageX = event.pageX;
-      this.hovering = true;
+      this.$emit('update:hovering', true);
       if (this.hoveringId) clearTimeout(this.hoveringId);
       if (event.target !== this.$refs.leftInvisible) this.showThumbnail = true;
       this.mouseleave = false;
@@ -130,19 +132,17 @@ export default {
     },
     handleMouseleave() {
       if (!this.mousedown) {
-        this.hovering = false;
+        this.setHoveringToFalse(true);
         this.showThumbnail = false;
       }
       this.mouseleave = true;
     },
     handleMousedown(event) {
       this.mousedown = true;
-      if (event.target === this.$refs.leftInvisible) {
+      if (event.target === this.$refs.leftInvisible || event.target === this.$refs.rightInvisible) {
         this.showThumbnail = false;
-        this.hoveringId = setTimeout(() => {
-          this.hovering = false;
-          this.$bus.$emit('currentWidget', 'the-video-controller');
-        }, 3000);
+        this.$bus.$emit('currentWidget', 'the-video-controller');
+        this.setHoveringToFalse(false);
       }
       this.$bus.$emit('seek', this.hoveredCurrentTime);
       if (this.hoveredCurrentTime === 0) {
@@ -153,7 +153,7 @@ export default {
       if (this.mousedown) {
         this.mousedown = false;
         if (this.mouseleave) {
-          this.hovering = false;
+          this.setHoveringToFalse(false);
           this.showThumbnail = false;
         }
         this.$bus.$emit('seek', this.hoveredCurrentTime);
@@ -161,7 +161,7 @@ export default {
     },
     pageXToProportion(pageX, fakeButtonWidth, winWidth) {
       if (pageX <= fakeButtonWidth) return 0;
-      if (pageX >= winWidth - (fakeButtonWidth * 2)) return 1;
+      if (pageX >= winWidth - fakeButtonWidth) return 1;
       return (pageX - fakeButtonWidth) / (winWidth - (fakeButtonWidth * 2));
     },
     pageXToThumbnailPosition(pageX, fakeButtonWidth, thumbnailWidth, winWidth) {
@@ -189,6 +189,18 @@ export default {
     whiteWithOpacity(opacity) {
       return `rgba(255, 255, 255, ${opacity}`;
     },
+    setHoveringToFalse(direct) {
+      if (!direct) {
+        if (this.hoveringId) {
+          clearTimeout(this.hoveringId);
+        }
+        this.hoveringId = setTimeout(() => {
+          this.$emit('update:hovering', false);
+        }, 3000);
+      } else {
+        this.$emit('update:hovering', false);
+      }
+    },
   },
   created() {
     document.addEventListener('mousemove', this.handleDocumentMousemove);
@@ -210,8 +222,9 @@ export default {
   bottom: 0;
   -webkit-app-region: no-drag;
   height: 20px;
+  z-index: 12;
   & > div {
-    transition: background-color 300ms, height 150ms;
+    transition: background-color 150ms, height 150ms;
   }
   &:hover {
     cursor: pointer;
@@ -228,7 +241,7 @@ export default {
     position: relative;
     width: 20px;
     .fake-progress {
-      transition: height 150ms;
+      transition: background-color 150ms, height 150ms;
       width: inherit;
       position: absolute;
       bottom: 0;

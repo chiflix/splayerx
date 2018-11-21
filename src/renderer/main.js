@@ -53,7 +53,7 @@ new Vue({
   store,
   template: '<App/>',
   computed: {
-    ...mapGetters(['muted']),
+    ...mapGetters(['muted', 'winWidth']),
   },
   methods: {
     createMenu() {
@@ -195,17 +195,118 @@ new Vue({
             },
             { type: 'separator' },
             {
-              label: this.$t('msg.subtitle.subtitleStyle'),
-              enabled: false,
+              label: this.$t('msg.subtitle.subtitleSize'),
               submenu: [
-                { label: this.$t('msg.subtitle.style1'), enabled: false },
-                { label: this.$t('msg.subtitle.style2'), enabled: false },
-                { label: this.$t('msg.subtitle.style3'), enabled: false },
+                {
+                  label: this.$t('msg.subtitle.size1'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size2'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size3'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size4'),
+                  click: () => {
+                    this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
+                  },
+                },
               ],
             },
-            { type: 'separator' },
-            { label: this.$t('msg.subtitle.increaseSubtitleSize'), enabled: false },
-            { label: this.$t('msg.subtitle.decreaseSubtitleSize'), enabled: false },
+            {
+              label: this.$t('msg.subtitle.subtitleStyle'),
+              submenu: [
+                {
+                  label: this.$t('msg.subtitle.style1'),
+                  click: () => {
+                    this.$store.dispatch('updateStyle', {
+                      color: 'white',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
+                      textStroke: '0.5px #777',
+                      backgroundColor: '',
+                      fontWeight: '400',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style2'),
+                  click: () => {
+                    this.$store.dispatch('updateStyle', {
+                      color: 'white',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '0px 1px 1px #333',
+                      textStroke: '1.3px #222',
+                      backgroundColor: '',
+                      fontWeight: '400',
+                      padding: '0',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style3'),
+                  click: () => {
+                    this.$store.dispatch('updateStyle', {
+                      color: '#fffc00',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '0px 0.5px 0.5px #555',
+                      textStroke: '',
+                      backgroundColor: '',
+                      fontWeight: '400',
+                      padding: '0',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style4'),
+                  click: () => {
+                    this.$store.dispatch('updateStyle', {
+                      color: '#fff',
+                      fontWeight: '800',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '',
+                      textStroke: '1.6px #009be6',
+                      backgroundColor: '',
+                      fontWeight: '800',
+                      padding: '0',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style5'),
+                  click: () => {
+                    this.$store.dispatch('updateStyle', {
+                      color: '#fff',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '',
+                      textStroke: '',
+                      backgroundColor: 'rgba(0,0,0,.5)',
+                      fontWeight: '400',
+                      padding: '0px 5px',
+                    });
+                  },
+                },
+              ],
+            },
             { type: 'separator' },
             { label: this.$t('msg.subtitle.increaseSubtitleDelay'), enabled: false },
             { label: this.$t('msg.subtitle.decreaseSubtitleDelay'), enabled: false },
@@ -351,44 +452,11 @@ new Vue({
       const recentMenuTemplate = {
         label: this.$t('msg.file.openRecent'),
         id: 'recent-play',
-        submenu: [
-          {
-            id: 'recent-1',
-            visible: false,
-          },
-          {
-            id: 'recent-2',
-            visible: false,
-          },
-          {
-            id: 'recent-3',
-            visible: false,
-          },
-          {
-            id: 'recent-4',
-            visible: false,
-          },
-          {
-            id: 'recent-5',
-            visible: false,
-          },
-          {
-            id: 'recent-6',
-            visible: false,
-          },
-          {
-            id: 'recent-7',
-            visible: false,
-          },
-          {
-            id: 'recent-8',
-            visible: false,
-          },
-          {
-            id: 'recent-9',
-            visible: false,
-          },
-        ],
+        submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
+          id: `recent-${index}`,
+          visible: false,
+          label: '',
+        })),
       };
       return this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
         let menuRecentData = null;
@@ -556,9 +624,9 @@ new Vue({
       const { files } = e.dataTransfer;
       // TODO: play it if it's video file
       const subtitleFiles = [];
-      const subRegex = new RegExp('^(.srt|.ass|.vtt)$');
+      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
       const videoFiles = [];
-      const vidRegex = new RegExp('^(3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc)$');
+      const vidRegex = new RegExp('^\\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$');
       for (let i = 0; i < files.length; i += 1) {
         tempFilePath = files[i].path;
         if (subRegex.test(Path.extname(tempFilePath))) {

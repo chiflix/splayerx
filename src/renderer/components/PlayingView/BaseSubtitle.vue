@@ -30,6 +30,7 @@ import parallel from 'run-parallel';
 import MatroskaSubtitles from 'matroska-subtitles';
 import LanguageDetect from 'languagedetect';
 import z from 'zero-fill';
+import asyncStorage from '@/helpers/asyncStorage';
 // 后期查找服务端字幕也许会用到
 // import { fileUrlToPath } from '@/helpers/path';
 
@@ -703,9 +704,6 @@ export default {
   },
   computed: {
     ...mapGetters(['duration', 'originSrc', 'currentTime', 'SubtitleDelay', 'curStyle', 'curBorderStyle']),
-    curStyle() {
-      return this.$store.getters.curStyle;
-    },
     firstSubState() { // lazy computed and lazy watched
       return this.$store.getters.firstSubtitleIndex !== -1;
     },
@@ -720,13 +718,8 @@ export default {
         const vid = this.$parent.$refs.videoCanvas.videoElement();
         const trackLength = vid.textTracks[this.subIndex].cues.length;
         for (let i = 0; i < trackLength; i += 1) {
-          if (val > oldval) {
-            vid.textTracks[this.subIndex].cues[i].startTime += 0.05;
-            vid.textTracks[this.subIndex].cues[i].endTime += 0.05;
-          } else {
-            vid.textTracks[this.subIndex].cues[i].startTime -= 0.05;
-            vid.textTracks[this.subIndex].cues[i].endTime -= 0.05;
-          }
+          vid.textTracks[this.subIndex].cues[i].startTime += (val - oldval) / 1000;
+          vid.textTracks[this.subIndex].cues[i].endTime += (val - oldval) / 1000;
         }
       }
     },
@@ -804,6 +797,14 @@ export default {
     },
   },
   created() {
+    asyncStorage.get('subtitle-style').then((data) => {
+      if (data.curStyle) {
+        this.$store.dispatch('updateStyle', data.curStyle);
+      }
+      if (data.curBorderStyle) {
+        this.$store.dispatch('updateBorderStyle', data.curBorderStyle);
+      }
+    });
     this.$bus.$on('video-loaded', this.subtitleInitialize);
 
     this.$bus.$on('sub-first-change', (targetIndex) => {
@@ -870,18 +871,17 @@ export default {
   .subtitle-wrapper {
     position: absolute;
     left: 0;
-    bottom: 20px;
     width: 100%;
-    z-index: 0;
+    z-index: 5;
   }
   .subtitle-content {
-    z-index: 11;
+    z-index: 1;
     white-space: pre;
     text-align: center;
   }
   .subtitle-border-content {
     position: absolute;
-    z-index: 10;
+    z-index: 0;
     white-space: pre;
     text-align: center;
   }

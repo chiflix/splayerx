@@ -8,7 +8,6 @@
 
 <script>
 import _ from 'lodash';
-import { Video as videoActions } from '@/store/actionTypes';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
 export default {
   name: 'base-video-player',
@@ -115,13 +114,6 @@ export default {
   },
   watch: {
     // network state
-    src(newVal) {
-      this.$refs.video.src = newVal;
-      this.$emit('audiotrack', { type: 'removeAll', track: '' });
-      this.$bus.$emit('showlabel');
-      this.$store.dispatch(videoActions.CHANGE_RATE, 1);
-      this.$store.dispatch('updateSubDelay', 0);
-    },
     // playback state
     currentTime(newVal) {
       [this.$refs.video.currentTime] = newVal;
