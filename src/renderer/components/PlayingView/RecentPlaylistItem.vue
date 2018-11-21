@@ -292,7 +292,7 @@ $border-radius: 3px;
     white-space: nowrap;
 
     z-index: 100;
-    font-family: Avenir-Heavy,Arial,"Microsoft YaHei";
+    font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
     letter-spacing: 0.58px;
 
     width: 100%;
