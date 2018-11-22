@@ -189,7 +189,7 @@ export default {
         shortCut: imagePath,
         smallShortCut: smallImagePath,
         lastPlayedTime: this.currentTime,
-        duration: this.$store.state.Video.duration,
+        duration: this.duration,
       };
       syncStorage.setSync('recent-played', data);
     },
@@ -242,7 +242,6 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen',
       'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle',
       'nextVideo']),
     ...mapGetters({

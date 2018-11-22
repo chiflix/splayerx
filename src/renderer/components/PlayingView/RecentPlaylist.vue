@@ -167,9 +167,11 @@ export default {
     },
     mousemove(val) {
       const distance = this.winWidth > 1355 ? 20 : 10;
-      if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
-      Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
-        this.canHoverItem = true;
+      if (!this.canHoverItem) {
+        if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
+        Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
+          this.canHoverItem = true;
+        }
       }
     },
   },
