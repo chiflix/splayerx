@@ -259,7 +259,9 @@ export default {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
-            this.infoDB().add('recent-played', mergedData);
+            this.infoDB().add('recent-played', mergedData).then(() => {
+              this.$bus.$emit('database-saved');
+            });
           }
         });
       this.$bus.$emit('showlabel');

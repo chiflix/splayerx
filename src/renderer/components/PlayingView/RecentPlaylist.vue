@@ -48,7 +48,6 @@
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
         :isShifting="shifting"
-        :transferedTime="transferedTime"
         :thumbnailWidth="thumbnailWidth"
         @mouseupItem="itemMouseup"
         @mouseoutItem="itemMouseout"
@@ -85,7 +84,6 @@ export default {
       backgroundDisplayState: this.displayState,
       mousePosition: [],
       canHoverItem: false,
-      transferedTime: 0,
     };
   },
   mounted() {
@@ -127,7 +125,6 @@ export default {
           this.shifting = false;
         }, 400);
       } else if (index !== this.playingIndex) {
-        this.transferedTime = this.roundedCurrentTime;
         this.openFile(this.playingList[index]);
         this.$store.dispatch(videoAction.PLAY_VIDEO);
       }

@@ -120,9 +120,6 @@ export default {
     path: {
       type: String,
     },
-    transferedTime: {
-      type: Number,
-    },
   },
   data() {
     return {
@@ -132,7 +129,7 @@ export default {
       coverSrc: '',
       lastPlayedTime: 0,
       mediaInfo: {},
-      DBInfo: {},
+      smallShortCut: '',
     };
   },
   methods: {
@@ -170,27 +167,22 @@ export default {
     });
     this.infoDB().get('recent-played', 'path', this.path).then((val) => {
       if (val && val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
+      if (val && val.smallShortCut) this.smallShortCut = val.smallShortCut;
       this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
-  },
-  watch: {
-    originSrc(val, oldVal) {
+    this.$bus.$on('database-saved', () => {
       this.infoDB().get('recent-played', 'path', this.path).then((val) => {
-        if (val && val.lastPlayedTime) {
-          this.lastPlayedTime = val.lastPlayedTime;
-        }
-        if (oldVal === this.path) {
-          val.lastPlayedTime = this.transferedTime;
-        }
+        if (val && val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
+        if (val && val.smallShortCut) this.smallShortCut = val.smallShortCut;
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
-    },
+    });
   },
   computed: {
     ...mapGetters(['originSrc']),
     imageSrc() {
-      if (this.mediaInfo.smallShortCut) {
-        return this.mediaInfo.smallShortCut;
+      if (this.smallShortCut) {
+        return this.smallShortCut;
       }
       return this.coverSrc;
     },
