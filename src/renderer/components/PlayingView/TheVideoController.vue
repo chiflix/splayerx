@@ -26,7 +26,6 @@
       <advance-control class="button advance" v-hidden="displayState['advance-control']" v-bind.sync="widgetsStatus['advance-control']"/>
     </div>
     <the-time-codes v-hidden="displayState['the-progress-bar']" />
-    <SpeedLabel v-hidden="displayState['the-progress-bar']"/>
     <the-progress-bar v-hidden="displayState['the-progress-bar']" v-bind.sync="widgetsStatus['the-progress-bar']"/>
   </div>
 </template>
