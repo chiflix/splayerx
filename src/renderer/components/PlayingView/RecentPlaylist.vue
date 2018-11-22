@@ -48,7 +48,6 @@
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
         :isShifting="shifting"
-        :transferedTime="transferedTime"
         :thumbnailWidth="thumbnailWidth"
         @mouseupItem="itemMouseup"
         @mouseoutItem="itemMouseout"
@@ -85,7 +84,6 @@ export default {
       backgroundDisplayState: this.displayState,
       mousePosition: [],
       canHoverItem: false,
-      transferedTime: 0,
     };
   },
   mounted() {
@@ -127,7 +125,6 @@ export default {
           this.shifting = false;
         }, 400);
       } else if (index !== this.playingIndex) {
-        this.transferedTime = this.roundedCurrentTime;
         this.openFile(this.playingList[index]);
         this.$store.dispatch(videoAction.PLAY_VIDEO);
       }
@@ -167,9 +164,11 @@ export default {
     },
     mousemove(val) {
       const distance = this.winWidth > 1355 ? 20 : 10;
-      if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
-      Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
-        this.canHoverItem = true;
+      if (!this.canHoverItem) {
+        if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
+        Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
+          this.canHoverItem = true;
+        }
       }
     },
   },
