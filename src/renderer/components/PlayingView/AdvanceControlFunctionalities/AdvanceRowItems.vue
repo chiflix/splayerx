@@ -60,8 +60,6 @@ export default {
       hoverIndex: -1,
       selectedIndex: 1,
       moveLength: '',
-      styleNum: 1,
-      ChosenSize: this.$t('advance.fontItems[1]'),
     };
   },
   props: {
@@ -98,38 +96,63 @@ export default {
         this.calculateSpeedLength(numList.indexOf(val));
       }
     },
+    chosenSize(val) {
+      this.lists.forEach((i, ind) => {
+        if (ind !== val) {
+          this.$set(this.lists[ind], 'chosen', false);
+        } else {
+          this.$set(this.lists[ind], 'chosen', true);
+        }
+      });
+      this.selectedIndex = val;
+      this.calculateFontLength(val);
+    },
     winWidth(val) {
       if (val > 1920) {
-        if (this.styleNum === 0) {
+        if (this.chosenSize === 0) {
           this.$store.dispatch('updateScale', `${(30 / 11) * (val / 1920)}`);
         }
-        if (this.styleNum === 1) {
+        if (this.chosenSize === 1) {
           this.$store.dispatch('updateScale', `${(40 / 11) * (val / 1920)}`);
         }
-        if (this.styleNum === 2) {
+        if (this.chosenSize === 2) {
           this.$store.dispatch('updateScale', `${(50 / 11) * (val / 1920)}`);
         }
-        if (this.styleNum === 3) {
+        if (this.chosenSize === 3) {
           this.$store.dispatch('updateScale', `${(60 / 11) * (val / 1920)}`);
         }
       } else {
-        if (this.styleNum === 0) {
+        if (this.chosenSize === 0) {
           this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * val) + (24 / 55)}`);
         }
-        if (this.styleNum === 1) {
+        if (this.chosenSize === 1) {
           this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * val) + (26 / 55)}`);
         }
-        if (this.styleNum === 2) {
+        if (this.chosenSize === 2) {
           this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * val) + (28 / 55)}`);
         }
-        if (this.styleNum === 3) {
+        if (this.chosenSize === 3) {
           this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * val) + (30 / 55)}`);
         }
       }
     },
   },
   computed: {
-    ...mapGetters(['rate']),
+    ...mapGetters(['rate', 'chosenSize']),
+    ChosenSize() {
+      switch (this.chosenSize) {
+        case 0:
+          return this.$t('advance.fontItems[0]');
+        case 1:
+          return this.$t('advance.fontItems[1]');
+        case 2:
+          return this.$t('advance.fontItems[2]');
+        case 3:
+          return this.$t('advance.fontItems[3]');
+        default:
+          return this.$t('advance.fontItems[1]');
+      }
+    },
     cardPos() {
       if (this.moveLength) {
         if (this.winWidth > 514 && this.winWidth <= 854) {
@@ -259,23 +282,19 @@ export default {
     changeFontSize(index) {
       switch (index) {
         case 0:
-          this.styleNum = 0;
-          this.ChosenSize = this.$t('advance.fontItems[0]');
+          this.$store.dispatch('updateChosenSize', 0);
           this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
           break;
         case 1:
-          this.styleNum = 1;
-          this.ChosenSize = this.$t('advance.fontItems[1]');
+          this.$store.dispatch('updateChosenSize', 1);
           this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
           break;
         case 2:
-          this.styleNum = 2;
-          this.ChosenSize = this.$t('advance.fontItems[2]');
+          this.$store.dispatch('updateChosenSize', 2);
           this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
           break;
         case 3:
-          this.styleNum = 3;
-          this.ChosenSize = this.$t('advance.fontItems[3]');
+          this.$store.dispatch('updateChosenSize', 3);
           this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
           break;
         default:
