@@ -189,7 +189,7 @@ export default {
         shortCut: imagePath,
         smallShortCut: smallImagePath,
         lastPlayedTime: this.currentTime,
-        duration: this.$store.state.Video.duration,
+        duration: this.duration,
       };
       syncStorage.setSync('recent-played', data);
     },
@@ -242,7 +242,6 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen',
       'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle',
       'nextVideo']),
     ...mapGetters({
@@ -260,7 +259,9 @@ export default {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
-            this.infoDB().add('recent-played', mergedData);
+            this.infoDB().add('recent-played', mergedData).then(() => {
+              this.$bus.$emit('database-saved');
+            });
           }
         });
       this.$bus.$emit('showlabel');
