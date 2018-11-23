@@ -1,5 +1,6 @@
 import Vue from 'vue';
 
+import Helpers from '@/helpers';
 import { Video as mutationTypes } from '../mutationTypes';
 import { Video as actionTypes } from '../actionTypes';
 
@@ -78,6 +79,7 @@ const getters = {
   computedHeight: state => state.computedHeight,
   ratio: state => state.ratio,
   AudioDelay: state => state.AudioDelay,
+  mediaHash: state => Helpers.methods.mediaQuickHash(state.src),
 };
 
 function stateToMutation(stateType) {

@@ -1,4 +1,8 @@
+import Sagi from '@/helpers/sagi';
+import { Subtitle as subtitleMutations } from '../mutationTypes';
+import { Subtitle as subtitleActions } from '../actionTypes';
 const state = {
+  subtitleList: [],
   SubtitleNames: [],
   curStyle: {
     fontFamily: 'PingFang SC',
@@ -30,6 +34,7 @@ const state = {
 };
 
 const getters = {
+  subtitleList: state => state.subtitleList,
   subtitleNames: state => state.SubtitleNames,
   firstSubtitleIndex: state => state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first'),
   subtitleCount: state => state.SubtitleNames.length,
@@ -40,6 +45,9 @@ const getters = {
 };
 
 const mutations = {
+  [subtitleMutations.ADD_SUBTITLE](state, subtitle) {
+    state.subtitleList = [...state.subtitleList, subtitle];
+  },
   SubtitleNames(state, subtitles) {
     state.SubtitleNames = subtitles;
   },
@@ -98,6 +106,14 @@ const actions = {
   },
   updateChosenStyle({ commit }, delta) {
     commit('UpdateChosenStyle', delta);
+  },
+  [subtitleActions.ADD_SUBTITLES]({ commit }, subtitles) {
+    subtitles.forEach((subtitle) => {
+      commit(subtitleMutations.ADD_SUBTITLE, subtitle);
+    });
+  },
+  [subtitleActions.HAS_ONLINE_SUBTITLES]({ getters }) {
+    return Sagi.mediaTranslate(getters.mediaHash);
   },
 };
 

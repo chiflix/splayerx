@@ -18,5 +18,7 @@ export const Video = {
 };
 
 export const Subtitle = {
-  ADD_SUBTITLE: 'ADD_SUBTITLE',
+  ADD_SUBTITLES: 'ADD_SUBTITLES',
+  HAS_ONLINE_SUBTITLES: 'HAS_ONLINE_SUBTITLES',
+  GET_TRANSCRIPT: 'GET_TRANSCRIPT',
 };
