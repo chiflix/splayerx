@@ -212,23 +212,26 @@ export default {
     
     background-color: rgba(0,0,0,0.20);
     backdrop-filter: blur(9.6px);
-    clip-path: inset(0px round 3.36px);
 
     border-radius: 3.36px 7px 7px 3.36px;
+    clip-path: inset(0px round 7px);
     @media screen and (min-width: 513px) and (max-width: 854px) {
       height: 70px;
       width: 340px;
       border-radius: 3.36px 7px 7px 3.36px;
+      clip-path: inset(0px round 7px);
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
       height: 84px;
       width: 408px;
       border-radius: 3.36px 9px 9px 3.36px;
+      clip-path: inset(0px round 9px);
     }
     @media screen and (min-width: 1921px) {
       height: 118px;
       width: 571px;
       border-radius: 3.36px 11px 11px 3.36px;
+      clip-path: inset(0px round 11px);
     }
   }
   .plane {
