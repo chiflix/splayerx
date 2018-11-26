@@ -111,7 +111,7 @@ export default {
       partOne: '射手影音使用匿名信息以提供更好服务体验，',
       partTwo: '匿名信息会导致翻译功能无法使用。',
       underlinedContent: '禁用',
-      button: '确认',
+      button: '确定',
     },
     confirmDisable: {
       partOne: '确认',
