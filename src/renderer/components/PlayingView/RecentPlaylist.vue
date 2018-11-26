@@ -155,11 +155,11 @@ export default {
     },
     displayState(val) {
       this.canHoverItem = false;
+      this.mousePosition = this.mousemove.position;
       if (val) {
         this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;
-        this.mousePosition = this.mousemove.position;
       }
     },
     mousemove(val) {
