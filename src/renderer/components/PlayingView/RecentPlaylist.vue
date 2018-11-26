@@ -34,7 +34,8 @@
     <div class="playlist-items"
       @mousedown.stop=""
       :style="{
-        right: `${distance}px`,
+        transition: tranFlag ? 'transform 400ms ease-in' : '',
+        transform: `translateX(-${distance}px)`,
         paddingTop: sizeAdaption(20),
         paddingBottom: sizeAdaption(40),
         paddingLeft: sizeAdaption(40),
@@ -84,6 +85,7 @@ export default {
       backgroundDisplayState: this.displayState,
       mousePosition: [],
       canHoverItem: false,
+      tranFlag: false,
     };
   },
   mounted() {
@@ -115,14 +117,18 @@ export default {
       if (index === this.firstIndex - 1) {
         this.lastIndex = index;
         this.shifting = true;
+        this.tranFlag = true;
         setTimeout(() => {
           this.shifting = false;
+          this.tranFlag = false;
         }, 400);
       } else if (index === this.lastIndex + 1) { // next page
         this.firstIndex = index;
         this.shifting = true;
+        this.tranFlag = true;
         setTimeout(() => {
           this.shifting = false;
+          this.tranFlag = false;
         }, 400);
       } else if (index !== this.playingIndex) {
         this.openFile(this.playingList[index]);
@@ -134,6 +140,11 @@ export default {
     firstIndex() {
       if (this.lastIndex > this.maxIndex) {
         this.lastIndex = this.maxIndex;
+      }
+    },
+    lastIndex(val) {
+      if (this.firstIndex > 0 && this.maxIndex > this.firstIndex && this.maxIndex <= val) {
+        this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
     mousedownOnOther(val) {
@@ -290,7 +301,6 @@ export default {
   }
   .playlist-items {
     position: relative;
-    transition: right 400ms ease-in;
     display: flex;
     .item {
       position: relative;
