@@ -26,6 +26,7 @@ const state = {
     webkitFontSmoothing: 'antialiased',
   },
   chosenStyle: '',
+  chosenSize: 1,
   SubtitleDelay: 0,
 };
 
@@ -37,6 +38,7 @@ const getters = {
   SubtitleDelay: state => state.SubtitleDelay,
   curBorderStyle: state => state.curBorderStyle,
   chosenStyle: state => state.chosenStyle,
+  chosenSize: state => state.chosenSize,
 };
 
 const mutations = {
@@ -81,6 +83,9 @@ const mutations = {
   UpdateChosenStyle(state, payload) {
     state.chosenStyle = payload;
   },
+  UpdateChosenSize(state, payload) {
+    state.chosenSize = payload;
+  },
 };
 
 const actions = {
@@ -98,6 +103,9 @@ const actions = {
   },
   updateChosenStyle({ commit }, delta) {
     commit('UpdateChosenStyle', delta);
+  },
+  updateChosenSize({ commit }, delta) {
+    commit('UpdateChosenSize', delta);
   },
 };
 
