@@ -2,11 +2,14 @@
   <div :class="container">
     <transition name="nextvideo">
       <NextVideo class="next-video"
+        v-if="showNextVideo"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"/>
     </transition>
-    <ConfirmBubble class="confirm-bubble"/>
+    <ConfirmBubble class="privacy-bubble"
+      v-if="showPrivacyBubble"
+      @close-privacy-bubble="closePrivacyBubble"/>
     <div class="messageContainer">
     <transition-group name="toast">
       <div v-for="m in messages" :key="m.id"
@@ -25,6 +28,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import asyncStorage from '@/helpers/asyncStorage';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import ConfirmBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
 import Icon from './BaseIconContainer';
@@ -40,22 +44,37 @@ export default {
       manualClosed: false, // if next-video was manually closed then it won't appear again
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
+      showPrivacyBubble: false,
     };
   },
   computed: {
     ...mapGetters(['roundedCurrentTime', 'nextVideo', 'finalPartTime']),
     messages() {
       const messages = this.$store.getters.messageInfo;
-      if (this.showNextVideo) return messages.slice(0, 2);
+      if (this.showNextVideo && this.showPrivacyBubble) {
+        return messages.slice(0, 1);
+      } else if (this.showNextVideo || this.showPrivacyBubble) {
+        return messages.slice(0, 2);
+      }
       return messages;
     },
     container() {
       return process.platform === 'win32' ? 'winContainer' : 'container';
     },
   },
-  mounted() {
+  created() {
+    asyncStorage.get('privacy-preference').then((data) => {
+      if (Object.keys(data).length === 0) {
+        this.showPrivacyBubble = true;
+      } else {
+        this.showPrivacyBubble = false;
+      }
+    });
   },
   methods: {
+    closePrivacyBubble() {
+      this.showPrivacyBubble = false;
+    },
     manualClose() {
       this.manualClosed = true;
       this.showNextVideo = false;
@@ -138,7 +157,7 @@ export default {
   .nextvideo-enter, .nextvideo-leave-active {
     transform: translateX(403px);
   }
-  .confirm-bubble {
+  .privacy-bubble {
     @media screen and (max-width: 512px) {
       display: none;
     }

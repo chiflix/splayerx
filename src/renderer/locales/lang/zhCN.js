@@ -106,4 +106,18 @@ export default {
     title: '',
     content: '正在搜索翻译结果...',
   },
+  privacyBubble: {
+    tryToDisable: {
+      partOne: '射手影音使用匿名信息以提供更好服务体验，',
+      partTwo: '匿名信息会导致翻译功能无法使用。',
+      underlinedContent: '禁用',
+      button: '确认',
+    },
+    confirmDisable: {
+      partOne: '确认',
+      partTwo: '匿名信息和翻译功能。',
+      underlinedContent: '禁用',
+      button: '取消',
+    },
+  },
 };

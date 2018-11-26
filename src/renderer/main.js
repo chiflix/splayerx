@@ -431,6 +431,7 @@ new Vue({
       const { app } = this.$electron.remote;
       const locale = app.getLocale();
       this.$i18n.locale = localeMap[locale] || this.$i18n.locale;
+      // this.$i18n.locale = 'zhCN';
     },
     updateRecentItem(key, value) {
       return {
