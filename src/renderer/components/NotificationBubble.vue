@@ -2,11 +2,11 @@
   <div :class="container">
     <transition name="nextvideo">
       <NextVideo class="next-video"
-        v-if="showNextVideo"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"/>
     </transition>
+    <ConfirmBubble class="confirm-bubble"/>
     <div class="messageContainer">
     <transition-group name="toast">
       <div v-for="m in messages" :key="m.id"
@@ -26,12 +26,14 @@
 <script>
 import { mapGetters } from 'vuex';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
+import ConfirmBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
 import Icon from './BaseIconContainer';
 export default {
   name: 'notification-bubble',
   components: {
     Icon,
     NextVideo,
+    ConfirmBubble,
   },
   data() {
     return {
@@ -136,7 +138,20 @@ export default {
   .nextvideo-enter, .nextvideo-leave-active {
     transform: translateX(403px);
   }
-
+  .confirm-bubble {
+    @media screen and (max-width: 512px) {
+      display: none;
+    }
+    @media screen and (min-width: 513px) and (max-width: 854px) {
+      margin-bottom: 12px;
+    }
+    @media screen and (min-width: 855px) and (max-width: 1920px) {
+      margin-bottom: 15px;
+    }
+    @media screen and (min-width: 1921px){
+      margin-bottom: 18px;
+    }
+  }
   .toast-enter, .toast-enter-active {
     transform: translateX(0px);
   }
