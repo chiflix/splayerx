@@ -5,9 +5,9 @@
   :key="state">
   <div class="plane-background">
     <div class="plane">
-      <div class="content">
-        <div class="info"
-          :class="{ 'info-en': $i18n.locale === 'en' }">{{ partOne }}
+      <div :class="{ 'content-en': $i18n.locale === 'en', 'content': $i18n.locale !== 'en' }">
+        <div class="info">
+          {{ partOne }}
           <span class="underline"
             @mouseup.stop="underlineMouseup"
           >{{ underlinedContent }}</span>
@@ -112,8 +112,8 @@ export default {
 
     @media screen and (min-width: 513px) and (max-width: 854px) {
       width: 296px;
-      border-radius: 8px;
-      clip-path: inset(0px round 8px);
+      border-radius: 7px;
+      clip-path: inset(0px round 7px);
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
       width: 355px;
@@ -134,8 +134,8 @@ export default {
     background-color: rgba(255,255,255,0.20);
 
     @media screen and (min-width: 513px) and (max-width: 854px) {
-      border-radius: 8px;
-      clip-path: inset(0px round 8px);
+      border-radius: 7px;
+      clip-path: inset(0px round 7px);
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
       border-radius: 8.4px;
@@ -195,95 +195,157 @@ export default {
           }
         }
       }
-      .info-en {
+      .button-info {
+        color: rgba(255,255,255,0.5);
+        font-weight: 700;
+        letter-spacing: 0.2px;
         @media screen and (min-width: 513px) and (max-width: 854px) {
-        }
-        @media screen and (min-width: 855px) and (max-width: 1920px) {
-          margin-left: 18px;
-          width: 206px;
-          line-height: 15px;
-          letter-spacing: 0;
-          font-weight: 600;
-          font-size: 11px;
-        }
-        @media screen and (min-width: 1921px) {
-          margin-left: 19px;
-          width: 350px;
-          line-height: 18px;
-          font-size: 11px;
-        }
-      }
-      .hover {
-        background-image: none;
-        background-color: rgba(255,255,255,0.2);
-      }
-      .button {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        @media screen and (min-width: 513px) and (max-width: 854px) {
-          height: 24px;
-          margin-right: 16px;
-          border-radius: 11px;
-          background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
+          padding-left: 12px;
+          padding-right: 12px;
 
-          backdrop-filter: blur(3px);
-          clip-path: inset(0px round 11px);
-        }
-        @media screen and (min-width: 855px) and (max-width: 1920px) {
-          height: 28px;
-          margin-right: 20px;
-          border-radius: 13.2px;
-          background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
-
-          backdrop-filter: blur(3px);
-          clip-path: inset(0px round 13.2px);
-        }
-        @media screen and (min-width: 1921px) {
-          height: 39px;
-          margin-right: 28px;
-          border-radius: 18.5px;
-          background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
-
-          backdrop-filter: blur(5px);
-          clip-path: inset(0px round 18.5px);
-        }
-        &:active {
-          background-image: none;
-          background-color: rgba(0,0,0,0.2);
-        }
-        .button-info {
-          color: rgba(255,255,255,0.5);
-          font-weight: 700;
+          font-size: 10px;
           letter-spacing: 0.2px;
-          @media screen and (min-width: 513px) and (max-width: 854px) {
-            padding-left: 12px;
-            padding-right: 12px;
+          line-height: 10px;
+        }
+        @media screen and (min-width: 855px) and (max-width: 1920px) {
+          padding-left: 14px;
+          padding-right: 14px;
 
-            font-size: 10px;
-            letter-spacing: 0.2px;
-            line-height: 10px;
-          }
-          @media screen and (min-width: 855px) and (max-width: 1920px) {
-            padding-left: 14px;
-            padding-right: 14px;
+          font-size: 12px;
+          letter-spacing: 0.24px;
+          text-align: center;
+          line-height: 12px;          
+        }
+        @media screen and (min-width: 1921px) {
+          padding-left: 20px;
+          padding-right: 20px;
 
-            font-size: 12px;
-            letter-spacing: 0.24px;
-            text-align: center;
-            line-height: 12px;          
-          }
-          @media screen and (min-width: 1921px) {
-            padding-left: 20px;
-            padding-right: 20px;
-
-            font-size: 17px;
-            letter-spacing: 0.34px;
-            text-align: center;
-            line-height: 17px;
-          }
+          font-size: 17px;
+          letter-spacing: 0.34px;
+          text-align: center;
+          line-height: 17px;
         }
       }
+    }
+  }
+}
+.hover {
+  background-image: none;
+  background-color: rgba(255,255,255,0.2);
+}
+.button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    height: 24px;
+    margin-right: 16px;
+    border-radius: 11px;
+    background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
+
+    backdrop-filter: blur(3px);
+    clip-path: inset(0px round 11px);
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    height: 28px;
+    margin-right: 20px;
+    border-radius: 13.2px;
+    background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
+
+    backdrop-filter: blur(3px);
+    clip-path: inset(0px round 13.2px);
+  }
+  @media screen and (min-width: 1921px) {
+    height: 39px;
+    margin-right: 28px;
+    border-radius: 18.5px;
+    background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
+
+    backdrop-filter: blur(5px);
+    clip-path: inset(0px round 18.5px);
+  }
+  &:active {
+    background-image: none;
+    background-color: rgba(0,0,0,0.2);
+  }
+}
+.content-en {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    min-height: 67px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    min-height: 80px;
+  }
+  @media screen and (min-width: 1921px) {
+    min-height: 112px;
+  }
+  .info {
+    color: rgba(255,255,255,0.7);
+    height: min-content;
+    font-weight: 500;
+    @media screen and (min-width: 513px) and (max-width: 854px) {
+      margin-left: 18px;
+      width: 206px;
+
+      font-size: 11px;
+      line-height: 15px;
+    }
+    @media screen and (min-width: 855px) and (max-width: 1920px) {
+      margin-left: 19px;
+      width: 247px;
+
+      font-size: 13.2px;
+      line-height: 18px;
+    }
+    @media screen and (min-width: 1921px) {
+      margin-left: 26px;
+      margin-right: 25px;
+      width: 345px;
+
+      font-size: 18.48px;
+      line-height: 25.2px;
+    }
+    .underline {
+      text-decoration: underline;
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+  .button-info {
+    color: rgba(255,255,255,0.5);
+    font-weight: 700;
+    @media screen and (min-width: 513px) and (max-width: 854px) {
+      padding-left: 12px;
+      padding-right: 12px;
+
+      font-size: 11px;
+      letter-spacing: 0.2px;
+      text-align: center;
+      line-height: 10px;
+    }
+    @media screen and (min-width: 855px) and (max-width: 1920px) {
+      padding-left: 14px;
+      padding-right: 14px;
+
+      font-size: 13.2px;
+      letter-spacing: 0.26px;
+      text-align: center;
+      line-height: 12px;          
+    }
+    @media screen and (min-width: 1921px) {
+      padding-left: 20px;
+      padding-right: 20px;
+
+      font-size: 17px;
+      letter-spacing: 1px;
+      text-align: center;
+      line-height: 17px;
     }
   }
 }
