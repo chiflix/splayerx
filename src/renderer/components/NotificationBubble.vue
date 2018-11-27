@@ -158,6 +158,8 @@ export default {
     transform: translateX(403px);
   }
   .privacy-bubble {
+    position: relative;
+    z-index: 8;
     @media screen and (max-width: 512px) {
       display: none;
     }
