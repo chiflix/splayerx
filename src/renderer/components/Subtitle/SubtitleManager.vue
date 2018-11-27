@@ -1,5 +1,5 @@
 <template>
-  <div class="subtitle-manager"></div>
+  <div class="subtitle-manager"><subtitle-loader v-if="currentSubtitleId" :subtitleSrc="currentSubtitleSrc" /></div>
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
@@ -24,6 +24,11 @@ export default {
   },
   computed: {
     ...mapGetters(['originSrc', 'subtitleList', 'currentSubtitleId']),
+    currentSubtitleSrc() {
+      const result = this.subtitleList
+        .filter(subtitle => subtitle.id === this.currentSubtitleId)[0];
+      return result.type === 'online' ? result.hash : result.path;
+    },
   },
   data() {
     return {
