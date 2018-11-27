@@ -61,7 +61,7 @@ let rendererConfig = {
         // 匹配 *.worker.js
         test: /\.worker\.js$/,
         use: {
-          loader: 'worker-loader',
+          loader: 'workerize-loader',
         }
       },
       {
