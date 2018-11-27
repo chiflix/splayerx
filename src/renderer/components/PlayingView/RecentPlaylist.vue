@@ -34,7 +34,8 @@
     <div class="playlist-items"
       @mousedown.stop=""
       :style="{
-        right: `${distance}px`,
+        transition: tranFlag ? 'transform 400ms ease-in' : '',
+        transform: `translateX(-${distance}px)`,
         paddingTop: sizeAdaption(20),
         paddingBottom: sizeAdaption(40),
         paddingLeft: sizeAdaption(40),
@@ -48,7 +49,6 @@
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
         :isShifting="shifting"
-        :transferedTime="transferedTime"
         :thumbnailWidth="thumbnailWidth"
         @mouseupItem="itemMouseup"
         @mouseoutItem="itemMouseout"
@@ -85,7 +85,7 @@ export default {
       backgroundDisplayState: this.displayState,
       mousePosition: [],
       canHoverItem: false,
-      transferedTime: 0,
+      tranFlag: false,
     };
   },
   mounted() {
@@ -117,17 +117,20 @@ export default {
       if (index === this.firstIndex - 1) {
         this.lastIndex = index;
         this.shifting = true;
+        this.tranFlag = true;
         setTimeout(() => {
           this.shifting = false;
+          this.tranFlag = false;
         }, 400);
       } else if (index === this.lastIndex + 1) { // next page
         this.firstIndex = index;
         this.shifting = true;
+        this.tranFlag = true;
         setTimeout(() => {
           this.shifting = false;
+          this.tranFlag = false;
         }, 400);
       } else if (index !== this.playingIndex) {
-        this.transferedTime = this.roundedCurrentTime;
         this.openFile(this.playingList[index]);
         this.$store.dispatch(videoAction.PLAY_VIDEO);
       }
@@ -137,6 +140,11 @@ export default {
     firstIndex() {
       if (this.lastIndex > this.maxIndex) {
         this.lastIndex = this.maxIndex;
+      }
+    },
+    lastIndex(val) {
+      if (this.firstIndex > 0 && this.maxIndex > this.firstIndex && this.maxIndex <= val) {
+        this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
     mousedownOnOther(val) {
@@ -167,9 +175,11 @@ export default {
     },
     mousemove(val) {
       const distance = this.winWidth > 1355 ? 20 : 10;
-      if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
-      Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
-        this.canHoverItem = true;
+      if (!this.canHoverItem) {
+        if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
+        Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
+          this.canHoverItem = true;
+        }
       }
     },
   },
@@ -273,7 +283,7 @@ export default {
     width: 90%;
     .top {
       margin-top: 1px;
-      font-family: Avenir-Heavy;
+      font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
       color: rgba(235,235,235,0.6);
       letter-spacing: 0.64px;
       width: fit-content;
@@ -283,7 +293,7 @@ export default {
       text-overflow: ellipsis;
       white-space: nowrap;
 
-      font-family: Avenir-Heavy;
+      font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
       color: rgba(255,255,255,0.70);
       letter-spacing: 1px;
       width: 100%;
@@ -291,7 +301,6 @@ export default {
   }
   .playlist-items {
     position: relative;
-    transition: right 400ms ease-in;
     display: flex;
     .item {
       position: relative;

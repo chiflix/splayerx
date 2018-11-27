@@ -16,6 +16,7 @@ import Path from 'path';
 import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
+import asyncStorage from '@/helpers/asyncStorage';
 require('source-map-support').install();
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
@@ -52,8 +53,32 @@ new Vue({
   router,
   store,
   template: '<App/>',
+  data() {
+    return {
+      menu: null,
+    };
+  },
   computed: {
-    ...mapGetters(['muted', 'winWidth']),
+    ...mapGetters(['muted', 'winWidth', 'chosenStyle', 'chosenSize']),
+  },
+  created() {
+    asyncStorage.get('subtitle-style').then((data) => {
+      if (data.chosenStyle) {
+        this.$store.dispatch('updateChosenStyle', data.chosenStyle);
+      }
+    });
+  },
+  watch: {
+    chosenStyle(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById(`style${val}`).checked = true;
+      }
+    },
+    chosenSize(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById(`size${val}`).checked = true;
+      }
+    },
   },
   methods: {
     createMenu() {
@@ -195,11 +220,56 @@ new Vue({
             },
             { type: 'separator' },
             {
+              label: this.$t('msg.subtitle.subtitleSize'),
+              submenu: [
+                {
+                  label: this.$t('msg.subtitle.size1'),
+                  type: 'radio',
+                  id: 'size0',
+                  click: () => {
+                    this.$store.dispatch('updateChosenSize', 0);
+                    this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size2'),
+                  type: 'radio',
+                  id: 'size1',
+                  checked: true,
+                  click: () => {
+                    this.$store.dispatch('updateChosenSize', 1);
+                    this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size3'),
+                  type: 'radio',
+                  id: 'size2',
+                  click: () => {
+                    this.$store.dispatch('updateChosenSize', 2);
+                    this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size4'),
+                  type: 'radio',
+                  id: 'size3',
+                  click: () => {
+                    this.$store.dispatch('updateChosenSize', 3);
+                    this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
+                  },
+                },
+              ],
+            },
+            {
               label: this.$t('msg.subtitle.subtitleStyle'),
               submenu: [
                 {
                   label: this.$t('msg.subtitle.style1'),
+                  type: 'radio',
+                  id: 'style0',
                   click: () => {
+                    this.$store.dispatch('updateChosenStyle', 0);
                     this.$store.dispatch('updateStyle', {
                       color: 'white',
                       fontWeight: '400',
@@ -214,7 +284,10 @@ new Vue({
                 },
                 {
                   label: this.$t('msg.subtitle.style2'),
+                  type: 'radio',
+                  id: 'style1',
                   click: () => {
+                    this.$store.dispatch('updateChosenStyle', 1);
                     this.$store.dispatch('updateStyle', {
                       color: 'white',
                       fontWeight: '400',
@@ -230,7 +303,10 @@ new Vue({
                 },
                 {
                   label: this.$t('msg.subtitle.style3'),
+                  type: 'radio',
+                  id: 'style2',
                   click: () => {
+                    this.$store.dispatch('updateChosenStyle', 2);
                     this.$store.dispatch('updateStyle', {
                       color: '#fffc00',
                       fontWeight: '400',
@@ -246,7 +322,10 @@ new Vue({
                 },
                 {
                   label: this.$t('msg.subtitle.style4'),
+                  type: 'radio',
+                  id: 'style3',
                   click: () => {
+                    this.$store.dispatch('updateChosenStyle', 3);
                     this.$store.dispatch('updateStyle', {
                       color: '#fff',
                       fontWeight: '800',
@@ -262,7 +341,10 @@ new Vue({
                 },
                 {
                   label: this.$t('msg.subtitle.style5'),
+                  type: 'radio',
+                  id: 'style4',
                   click: () => {
+                    this.$store.dispatch('updateChosenStyle', 4);
                     this.$store.dispatch('updateStyle', {
                       color: '#fff',
                       fontWeight: '400',
@@ -274,36 +356,6 @@ new Vue({
                       fontWeight: '400',
                       padding: '0px 5px',
                     });
-                  },
-                },
-              ],
-            },
-            { type: 'separator' },
-            {
-              label: this.$t('msg.subtitle.subtitleSize'),
-              submenu: [
-                {
-                  label: this.$t('msg.subtitle.size1'),
-                  click: () => {
-                    this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size2'),
-                  click: () => {
-                    this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size3'),
-                  click: () => {
-                    this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
-                  },
-                },
-                {
-                  label: this.$t('msg.subtitle.size4'),
-                  click: () => {
-                    this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
                   },
                 },
               ],
@@ -411,11 +463,14 @@ new Vue({
         }
         return template;
       }).then((result) => {
-        const menu = Menu.buildFromTemplate(result);
-        Menu.setApplicationMenu(menu);
-      }).catch((err) => {
-        this.addLog('error', err);
-      });
+        this.menu = Menu.buildFromTemplate(result);
+        Menu.setApplicationMenu(this.menu);
+      }).then(() => {
+        this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
+      })
+        .catch((err) => {
+          this.addLog('error', err);
+        });
     },
     getSystemLocale() {
       const localeMap = {

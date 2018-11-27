@@ -44,7 +44,6 @@
           </div>
           <div class="welcome">
           <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-          <div class="version" :style="$t('css.versionFontSize')">v {{ this.version }}</div>
         </div>
       </div>
   </transition>
@@ -254,7 +253,7 @@ export default {
   },
   methods: {
     backgroundImage(shortCut, cover) {
-      return this.item.lastTime > 1 ? `url("${shortCut}")` : `url(${cover}`;
+      return this.item.duration - this.item.lastTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
     },
     timeInValidForm(time) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);
@@ -326,6 +325,10 @@ body {
     top: 100px;
     left: 45px;
     z-index: 4;
+    @media screen and (min-width: 1355px) {
+      top: 7.38vw;
+      left: 3.32vw;
+    }
   }
   .item-name {
     width: 70%;
@@ -339,11 +342,18 @@ body {
     text-overflow: ellipsis;
     font-weight: 600;
     letter-spacing: 1px;
+    @media screen and (min-width: 1355px) {
+      font-size: 2.21vw;
+      line-height: 2.21vw;
+    }
   }
   .item-description {
     opacity: 0.4;
     font-size: 14px;
     font-weight: lighter;
+    @media screen and (min-width: 1355px) {
+      font-size: 1.03vw;
+    }
   }
   .item-timing {
     color: rgba(255, 255, 255, .4);
@@ -353,6 +363,9 @@ body {
     margin-top: 10px;
     span.timing-played {
       color: rgba(255, 255, 255, .9);
+    }
+    @media screen and (min-width: 1355px) {
+      font-size: 1.10vw;
     }
   }
   .item-progress {
@@ -364,23 +377,27 @@ body {
     overflow: hidden;
     .progress-played {
       height: 100%;
-      width: 70px;
       background-color: #fff;
       opacity: 0.7;
+    }
+    @media screen and (min-width: 1355px) {
+      width: 7.38vw;
+      height: 0.3vw;
+      margin-top: 0.66vw;
     }
   }
 }
 .welcome-container {
   --client-height: 100vh;
-  --pos-y: calc(var(--client-height) * 0.37 - 92px);
+  --pos-y: calc(var(--client-height) * 0.37 - 82px);
   transform: translateY(var(--pos-y));
 }
 .logo-container {
   -webkit-user-select: none;
   text-align: center;
   .logo {
-    height: 136px;
-    width: 136px;
+    height: 120px;
+    width: 120px;
   }
 }
 
@@ -394,12 +411,13 @@ main {
   z-index: 1;
 
   .title {
-    font-weight: 500;
+    font-weight: 700;
+    color: rgba(0,0,0,0.13);
     letter-spacing: 1.5px;
   }
   .version {
-    margin-top: 5px;
-    color: #AAA;
+    margin-top: 3px;
+    color: rgba(0,0,0,0.2);
     font-weight: 100;
     letter-spacing: 1px;
   }

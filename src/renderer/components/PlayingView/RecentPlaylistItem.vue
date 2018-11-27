@@ -44,7 +44,7 @@
                   :style="{
                     width: sizeAdaption(10),
                     height: sizeAdaption(22),
-                    marginRight: sizeAdaption(2),
+                    marginRight: sizeAdaption(4),
                   }"/>
                 <div class="playing"
                   :style="{
@@ -120,9 +120,6 @@ export default {
     path: {
       type: String,
     },
-    transferedTime: {
-      type: Number,
-    },
   },
   data() {
     return {
@@ -132,7 +129,7 @@ export default {
       coverSrc: '',
       lastPlayedTime: 0,
       mediaInfo: {},
-      DBInfo: {},
+      smallShortCut: '',
     };
   },
   methods: {
@@ -147,11 +144,11 @@ export default {
         this.isBlur = false;
         this.isChosen = true;
         this.mouseoverRecently = true;
+        this.$emit('mouseoverItem', {
+          index: this.index,
+          mediaInfo: this.mediaInfo,
+        });
       }
-      this.$emit('mouseoverItem', {
-        index: this.index,
-        mediaInfo: this.mediaInfo,
-      });
     },
     mouseoutVideo() {
       this.isBlur = true;
@@ -170,27 +167,22 @@ export default {
     });
     this.infoDB().get('recent-played', 'path', this.path).then((val) => {
       if (val && val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
+      if (val && val.smallShortCut) this.smallShortCut = val.smallShortCut;
       this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
-  },
-  watch: {
-    originSrc(val, oldVal) {
+    this.$bus.$on('database-saved', () => {
       this.infoDB().get('recent-played', 'path', this.path).then((val) => {
-        if (val && val.lastPlayedTime) {
-          this.lastPlayedTime = val.lastPlayedTime;
-        }
-        if (oldVal === this.path) {
-          val.lastPlayedTime = this.transferedTime;
-        }
+        if (val && val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
+        if (val && val.smallShortCut) this.smallShortCut = val.smallShortCut;
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
-    },
+    });
   },
   computed: {
     ...mapGetters(['originSrc']),
     imageSrc() {
-      if (this.mediaInfo.smallShortCut) {
-        return this.mediaInfo.smallShortCut;
+      if (this.smallShortCut) {
+        return this.smallShortCut;
       }
       return this.coverSrc;
     },
@@ -292,7 +284,7 @@ $border-radius: 3px;
     white-space: nowrap;
 
     z-index: 100;
-    font-family: Avenir-Heavy;
+    font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
     letter-spacing: 0.58px;
 
     width: 100%;

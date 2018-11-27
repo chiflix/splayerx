@@ -34,7 +34,6 @@
 </template>
 
 <script>
-import asyncStorage from '@/helpers/asyncStorage';
 import style0 from '../../../assets/subtitle-style1-normal.png';
 import style1 from '../../../assets/subtitle-style2-normal.png';
 import style2 from '../../../assets/subtitle-style3-normal.png';
@@ -86,17 +85,10 @@ export default {
     },
     chosenStyle() {
       if (this.$store.getters.chosenStyle) {
-        return this.$store.getters.chosenStyle;
+        return this.imgs[this.$store.getters.chosenStyle];
       }
       return style0;
     },
-  },
-  created() {
-    asyncStorage.get('subtitle-style').then((data) => {
-      if (data.chosenStyle) {
-        this.$store.dispatch('updateChosenStyle', data.chosenStyle);
-      }
-    });
   },
   methods: {
     handleOver(index) {
@@ -108,7 +100,7 @@ export default {
     handleClick(e, index) {
       switch (index) {
         case 0:
-          this.$store.dispatch('updateChosenStyle', style0);
+          this.$store.dispatch('updateChosenStyle', 0);
           this.$store.dispatch('updateStyle', {
             color: 'white',
             fontWeight: '400',
@@ -121,7 +113,7 @@ export default {
           });
           break;
         case 1:
-          this.$store.dispatch('updateChosenStyle', style1);
+          this.$store.dispatch('updateChosenStyle', 1);
           this.$store.dispatch('updateStyle', {
             color: 'white',
             fontWeight: '400',
@@ -135,7 +127,7 @@ export default {
           });
           break;
         case 2:
-          this.$store.dispatch('updateChosenStyle', style2);
+          this.$store.dispatch('updateChosenStyle', 2);
           this.$store.dispatch('updateStyle', {
             color: '#fffc00',
             fontWeight: '400',
@@ -149,7 +141,7 @@ export default {
           });
           break;
         case 3:
-          this.$store.dispatch('updateChosenStyle', style3);
+          this.$store.dispatch('updateChosenStyle', 3);
           this.$store.dispatch('updateStyle', {
             color: '#fff',
             fontWeight: '800',
@@ -163,7 +155,7 @@ export default {
           });
           break;
         case 4:
-          this.$store.dispatch('updateChosenStyle', style4);
+          this.$store.dispatch('updateChosenStyle', 4);
           this.$store.dispatch('updateStyle', {
             color: '#fff',
             fontWeight: '400',

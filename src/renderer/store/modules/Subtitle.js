@@ -5,7 +5,7 @@ const state = {
   subtitleList: [],
   SubtitleNames: [],
   curStyle: {
-    fontFamily: 'PingFang SC',
+    fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
     fontSize: '11px',
     letterSpacing: 1,
     opacity: 1,
@@ -16,7 +16,7 @@ const state = {
     webkitFontSmoothing: 'antialiased',
   },
   curBorderStyle: {
-    fontFamily: 'PingFang SC',
+    fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
     fontSize: '11px',
     letterSpacing: 1,
     padding: '0px',
@@ -30,6 +30,7 @@ const state = {
     webkitFontSmoothing: 'antialiased',
   },
   chosenStyle: '',
+  chosenSize: 1,
   SubtitleDelay: 0,
 };
 
@@ -42,6 +43,7 @@ const getters = {
   SubtitleDelay: state => state.SubtitleDelay,
   curBorderStyle: state => state.curBorderStyle,
   chosenStyle: state => state.chosenStyle,
+  chosenSize: state => state.chosenSize,
 };
 
 const mutations = {
@@ -89,6 +91,9 @@ const mutations = {
   UpdateChosenStyle(state, payload) {
     state.chosenStyle = payload;
   },
+  UpdateChosenSize(state, payload) {
+    state.chosenSize = payload;
+  },
 };
 
 const actions = {
@@ -114,6 +119,9 @@ const actions = {
   },
   [subtitleActions.HAS_ONLINE_SUBTITLES]({ getters }) {
     return Sagi.mediaTranslate(getters.mediaHash);
+  },
+  updateChosenSize({ commit }, delta) {
+    commit('UpdateChosenSize', delta);
   },
 };
 
