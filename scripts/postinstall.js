@@ -1,6 +1,7 @@
 const { exec } = require('child_process');
 
 const commands = [
+  'npm run install-app-deps',
   'npm run lint:fix',
 ];
 
