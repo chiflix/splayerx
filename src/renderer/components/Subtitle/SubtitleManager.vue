@@ -60,8 +60,17 @@ export default {
       };
 
       const onlineNeeded = local.length === 0;
-      const online = onlineNeeded ? await this.getOnlineSubtitlesList() : [];
-      return onlineNeeded ? online : [
+      const online = onlineNeeded ? await this.getOnlineSubtitlesList(videoSrc) : [];
+      const onlineNormalizer = subtitles => (
+        subtitles.array[1][0]
+          .filter(hash => typeof hash === 'string' && hash.length)
+          .map(hash => ({
+            type: 'online',
+            hash,
+            id: uuidv4(),
+          }))
+      );
+      return onlineNeeded ? onlineNormalizer(online) : [
         ...(await Promise.all(local.map(localNormalizer))),
       ];
     },
