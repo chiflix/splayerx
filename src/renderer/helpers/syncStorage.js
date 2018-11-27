@@ -66,7 +66,11 @@ function setSync(key, json) {
   try {
     fs.mkdirSync(path.dirname(filename));
   } catch (err) {
-    addLog.methods.addLog('error', err);
+    if (err instanceof Error) {
+      if (err.code !== 'EEXIST') {
+        addLog.methods.addLog('error', err);
+      }
+    }
   } finally {
     fs.writeFileSync(filename, data);
   }
