@@ -70,6 +70,9 @@ export default {
         this.showPrivacyBubble = false;
       }
     });
+    this.$bus.$on('privacy-confirm', () => {
+      this.showPrivacyBubble = true;
+    });
   },
   methods: {
     closePrivacyBubble() {
