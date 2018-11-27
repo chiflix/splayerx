@@ -7,7 +7,7 @@
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"/>
     </transition>
-    <ConfirmBubble class="privacy-bubble"
+    <PrivacyBubble class="privacy-bubble"
       v-if="showPrivacyBubble"
       @close-privacy-bubble="closePrivacyBubble"/>
     <div class="messageContainer">
@@ -30,14 +30,14 @@
 import { mapGetters } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
-import ConfirmBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
+import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
 import Icon from './BaseIconContainer';
 export default {
   name: 'notification-bubble',
   components: {
     Icon,
     NextVideo,
-    ConfirmBubble,
+    PrivacyBubble,
   },
   data() {
     return {
