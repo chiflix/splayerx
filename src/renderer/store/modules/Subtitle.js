@@ -1,4 +1,3 @@
-import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
 const state = {
@@ -49,6 +48,12 @@ const getters = {
 const mutations = {
   [subtitleMutations.ADD_SUBTITLE](state, subtitle) {
     state.subtitleList = [...state.subtitleList, subtitle];
+  },
+  [subtitleMutations.REMOVE_SUBTITLE](state, subtitle) {
+    state.subtitleList = state.subtitleList.slice().splice(state.subtitleList.indexOf(subtitle), 1);
+  },
+  [subtitleMutations.SUBTITLE_UPDATE](state, subtitleList) {
+    state.subtitleList = subtitleList;
   },
   SubtitleNames(state, subtitles) {
     state.SubtitleNames = subtitles;
@@ -117,8 +122,8 @@ const actions = {
       commit(subtitleMutations.ADD_SUBTITLE, subtitle);
     });
   },
-  [subtitleActions.HAS_ONLINE_SUBTITLES]({ getters }) {
-    return Sagi.mediaTranslate(getters.mediaHash);
+  [subtitleActions.RESET_SUBTITLES]({ commit }) {
+    commit(subtitleMutations.SUBTITLE_UPDATE, []);
   },
   updateChosenSize({ commit }, delta) {
     commit('UpdateChosenSize', delta);

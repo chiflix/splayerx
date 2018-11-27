@@ -44,4 +44,6 @@ export const Video = {
 
 export const Subtitle = {
   ADD_SUBTITLE: 'ADD_SUBTITLE',
+  REMOVE_SUBTITLE: 'REMOVE_SUBTITLE',
+  SUBTITLE_UPDATE: 'SUBTITLE_UPDATE',
 };
