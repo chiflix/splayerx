@@ -4,15 +4,19 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { dirname, extname, basename, join } from 'path';
-import { createReadStream, readdir, readFile } from 'fs';
-import MatroskaSubtitles from 'matroska-subtitles';
+import { open, readSync, statSync, readdir, close } from 'fs';
+import franc from 'franc';
+import osLocale from 'os-locale';
+import convert3To1 from 'iso-639-3-to-1';
 import chardet from 'chardet';
 import iconv from 'iconv-lite';
 import uuidv4 from 'uuid/v4';
-
+import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
-
+import helpers from '@/helpers';
 import SubtitleLoader from './SubtitleLoader';
+import SubtitleWorker from './Subtitle.worker';
+
 export default {
   name: 'subtitle-manager',
   components: {
@@ -25,40 +29,40 @@ export default {
     return {
       subtitleTypes: ['local', 'embedded', 'online'],
       currentSubtitleId: '',
+      locale: '',
     };
   },
   watch: {
     originSrc(newVal) {
+      this.resetSubtitles();
       this.getSubtitlesList(newVal).then((result) => {
-        this.subtitleList = result;
-        this.addSubtitles(this.subtitleList);
+        this.addSubtitles(result);
       });
     },
   },
   methods: {
+    ...mapActions({
+      addSubtitles: subtitleActions.ADD_SUBTITLES,
+      resetSubtitles: subtitleActions.RESET_SUBTITLES,
+    }),
     async getSubtitlesList(videoSrc) {
-      const embedded = await this.getEmbededSubtitlesList(videoSrc);
       const local = await this.getLocalSubtitlesList(videoSrc);
-      const embeddedNormalizer = track => ({
-        language: track.language,
-        ext: track.type,
-        type: 'embedded',
-        name: track.number,
-        id: uuidv4(),
-      });
-      const localNormalizer = track => ({
-        path: track.path,
-        ext: track.ext,
-        type: 'local',
-        name: track.name,
-        id: uuidv4(),
-      });
+      const localNormalizer = async (track) => {
+        const lang = await this.getSubtitleLocale(track.path, this.getSubtitleCallback(track.ext));
+        return ({
+          path: track.path,
+          ext: track.ext,
+          type: 'local',
+          name: track.name,
+          lang,
+          id: uuidv4(),
+        });
+      };
 
-      const onlineNeeded = local.length === 0 && !embedded.tracks.length;
+      const onlineNeeded = local.length === 0;
       const online = onlineNeeded ? await this.getOnlineSubtitlesList() : [];
       return onlineNeeded ? online : [
-        ...embedded.tracks.map(embeddedNormalizer),
-        ...local.map(localNormalizer),
+        ...(await Promise.all(local.map(localNormalizer))),
       ];
     },
     getLocalSubtitlesList(videoSrc) {
@@ -82,48 +86,58 @@ export default {
         });
       });
     },
-    getEmbededSubtitlesList(videoSrc) {
-      const loadEmbedded = new Promise((resolve) => {
-        const parser = new MatroskaSubtitles();
-        parser.once('tracks', (tracks) => {
-          resolve({
-            parser,
-            tracks,
-          });
-        });
-        createReadStream(videoSrc).pipe(parser);
-      });
-      const timeoutPromise = new Promise((resolve) => {
-        const id = setTimeout(() => {
-          clearTimeout(id);
-          resolve({
-            parser: null,
-            tracks: [],
-          });
-        }, 1000);
-      });
-
-      return Promise.race([loadEmbedded, timeoutPromise]);
+    getOnlineSubtitlesList(videoSrc) {
+      return Sagi.mediaTranslate(helpers.methods.mediaQuickHash(videoSrc));
     },
-    ...mapActions({
-      addSubtitles: subtitleActions.ADD_SUBTITLES,
-      getOnlineSubtitlesList: subtitleActions.HAS_ONLINE_SUBTITLES,
-    }),
-    getLocalSubtitle(path) {
+    getSubtitleCallback(type) {
+      switch (type) {
+        case 'ass':
+        case 'ssa':
+          return str => str.replace(/^(Dialogue:)(.*\d,)(((\d{0,2}:){2}\d{0,2}\d{0,2}([.]\d{0,3})?,)){2}(.*,)(\w*,)(\d+,){3}(\w*,)|(\\[nN])|([\\{\\]\\.*[\\}].*)/gm, '');
+        case 'srt':
+        case 'vtt':
+          return str => str.replace(/^\d+.*/gm, '').replace(/\n.*\s{1,}/gm, '');
+        default:
+          return str => str.replace(/\d/gm, '');
+      }
+    },
+    getSubtitleLocale(path, stringCallback) {
+      /* eslint-disable */
       return new Promise((resolve, reject) => {
-        readFile(path, (err, data) => {
+        open(path, 'r', async (err, fd) => {
           if (err) reject(err);
-          const encoding = chardet.detect(data.slice(0, 100));
-          if (iconv.encodingExists(encoding)) {
-            resolve(iconv.decode(data, encoding));
-          }
-          reject(new Error(`Unsupported encoding: ${encoding}.`));
+          const pos = Math.round(statSync(path).size / 2);
+          const buf = Buffer.alloc(4096);
+          readSync(fd, buf, 0, 4096, pos);
+          close(fd, (err) => {
+            if (err) reject(err);
+          });
+          const sampleStringEncoding = chardet.detect(buf);
+          const sampleString = stringCallback ?
+            stringCallback(iconv.decode(buf, sampleStringEncoding)) :
+            iconv.decode(buf, sampleStringEncoding);
+          resolve(await new SubtitleWorker().findISO6393Locale(franc(sampleString)));
         });
       });
+    },
+    chooseInitialSubtitle(subtitleList, iso6391SystemLocale) {
+      if (subtitleList.length === 1) {
+        return subtitleList[0];
+      } else {
+        const fitSystemLocaleSubtitles = subtitleList.filter(subtitle => convert3To1(subtitle.lang) === iso6391SystemLocale);
+        return fitSystemLocaleSubtitles.length ? fitSystemLocaleSubtitles[0] : subtitleList[0];
+      }
     },
   },
   created() {
-    this.getSubtitlesList(this.originSrc);
+    this.resetSubtitles();
+    osLocale().then((locale) => {
+      this.locale = locale.slice(0, 2);
+      this.getSubtitlesList(this.originSrc).then((result) => {
+        this.addSubtitles(result);
+        this.currentSubtitleId = (this.chooseInitialSubtitle(this.subtitleList, this.locale)).id;
+      });
+    });
   },
 };
 </script>

@@ -167,15 +167,19 @@
     "electron-log": "^1.3.0",
     "electron-mocha": "^6.0.4",
     "electron-updater": "^4.0.0",
+    "franc": "^4.0.0",
     "google-protobuf": "^3.6.0",
     "iconv-lite": "^0.4.24",
     "idb": "^2.1.3",
+    "iso-639-3": "^1.1.0",
+    "iso-639-3-to-1": "^1.0.0",
     "languagedetect": "^1.1.1",
     "lodash": "^4.17.10",
     "lottie-web": "^5.3.4",
     "matroska-subtitles": "^2.0.3",
     "module-alias": "^2.0.6",
     "npm": "^6.1.0",
+    "os-locale": "^3.0.1",
     "run-parallel": "^1.1.9",
     "sagi-api": "^0.0.5",
     "sinon": "^6.1.3",
@@ -265,7 +269,8 @@
     "webpack": "^3.12.0",
     "webpack-dev-server": "^2.11.3",
     "webpack-hot-middleware": "^2.22.2",
-    "webpack-merge": "^4.1.0"
+    "webpack-merge": "^4.1.0",
+    "workerize-loader": "^1.0.4"
   },
   "config": {
     "commitizen": {
