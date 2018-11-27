@@ -32,6 +32,7 @@ const state = {
   chosenStyle: '',
   chosenSize: 1,
   SubtitleDelay: 0,
+  scaleNum: 1,
 };
 
 const getters = {
@@ -44,6 +45,7 @@ const getters = {
   curBorderStyle: state => state.curBorderStyle,
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,
+  scaleNum: state => state.scaleNum,
 };
 
 const mutations = {
@@ -85,6 +87,7 @@ const mutations = {
     }
   },
   UpdateScale(state, payload) {
+    state.scaleNum = payload;
     state.curStyle.transform = `scale(${payload})`;
     state.curBorderStyle.transform = `scale(${payload})`;
   },
