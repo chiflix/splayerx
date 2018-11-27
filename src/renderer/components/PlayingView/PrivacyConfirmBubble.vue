@@ -230,6 +230,7 @@ export default {
   }
 }
 .hover {
+  cursor: pointer;
   background-image: none;
   background-color: rgba(255,255,255,0.2);
 }
