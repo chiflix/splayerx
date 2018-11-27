@@ -16,8 +16,10 @@
           v-if="!isPlaying && imageLoaded"/>
         <div class="blur"
           v-show="!isChosen && !isPlaying"/>
+        <transition name="fade2">
         <div class="white-hover"
-          v-show="isChosen && !isPlaying"/>
+          v-show="hoverIndex === index"/>
+        </transition>
         <div class="black-gradient"/>  
         <div class="content"
           @mouseover="mouseoverVideo"
@@ -93,6 +95,9 @@ export default {
   },
   props: {
     index: {
+      type: Number,
+    },
+    hoverIndex: {
       type: Number,
     },
     isInRange: {
@@ -221,7 +226,7 @@ $border-radius: 3px;
   transform: translateY(-9px);
 }
 .child-item {
-  position: relative;
+  position: absolute;
   border-radius: $border-radius;
   width: 100%;
   height: 100%;
@@ -229,15 +234,20 @@ $border-radius: 3px;
   img {
     position: absolute;
     border-radius: $border-radius;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     width: 100%;
-    height: 100%;
     transform: translate(0px, 0px);
   }
   .content {
     position: absolute;
     z-index: 100;
-    width: 100%;
-    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 
     .info {
       position: absolute;
@@ -294,23 +304,27 @@ $border-radius: 3px;
 }
 .blur {
   position: absolute;
-  left: 0.35px;
-  top: 0.35px;
-  width: calc(100% - 0.7px);
-  height: calc(100% - 0.7px);
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   backdrop-filter: blur(1px);
 }
 .white-hover {
   position: absolute;
   border-radius: $border-radius;
-  width: 100%;
-  height: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background-color: rgba(255,255,255,0.2);
 }
 .black-gradient {
   position: absolute;
-  width: 100%;
-  height: 105%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   border-radius: $border-radius;
   background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
 }
@@ -322,6 +336,12 @@ $border-radius: 3px;
   transition: opacity 100ms ease-out;
 }
 .fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+.fade2-enter-active, .fade2-leave-active {
+  transition: opacity 300ms ease-out;
+}
+.fade2-enter, .fade2-leave-to {
   opacity: 0;
 }
 .icon-enter-active, .icon-leave-active {
