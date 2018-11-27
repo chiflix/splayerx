@@ -23,13 +23,12 @@ export default {
     'subtitle-loader': SubtitleLoader,
   },
   computed: {
-    ...mapGetters(['originSrc', 'subtitleList']),
+    ...mapGetters(['originSrc', 'subtitleList', 'currentSubtitleId']),
   },
   data() {
     return {
       subtitleTypes: ['local', 'embedded', 'online'],
-      currentSubtitleId: '',
-      locale: '',
+      systemLocale: '',
     };
   },
   watch: {
@@ -37,6 +36,10 @@ export default {
       this.resetSubtitles();
       this.getSubtitlesList(newVal).then((result) => {
         this.addSubtitles(result);
+        this.changeCurrentSubtitle((this.chooseInitialSubtitle(
+          this.subtitleList,
+          this.systemLocale,
+        )).id);
       });
     },
   },
@@ -44,6 +47,7 @@ export default {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
+      changeCurrentSubtitle: subtitleActions.SWITCH_CURRENT_SUBTITLE,
     }),
     async getSubtitlesList(videoSrc) {
       const local = await this.getLocalSubtitlesList(videoSrc);
@@ -141,10 +145,10 @@ export default {
   created() {
     this.resetSubtitles();
     osLocale().then((locale) => {
-      this.locale = locale.slice(0, 2);
+      this.systemLocale = locale.slice(0, 2);
       this.getSubtitlesList(this.originSrc).then((result) => {
         this.addSubtitles(result);
-        this.currentSubtitleId = (this.chooseInitialSubtitle(this.subtitleList, this.locale)).id;
+        this.changeCurrentSubtitle((this.chooseInitialSubtitle(this.subtitleList, this.systemLocale)).id);
       });
     });
   },
