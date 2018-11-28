@@ -276,8 +276,11 @@ export default {
   @media screen and (max-width: 510px) {
     display: none;
   }
-  @media screen and (min-width: 512px) {
+  @media screen and (min-width: 512px) and (max-width: 1355px) {
     height: 282px;
+  }
+  @media screen and (min-width: 1356px) {
+    height: 20.81vw;
   }
   .background-gradient {
     position: absolute;
