@@ -87,11 +87,9 @@
 <script>
 import { mapGetters } from 'vuex';
 import path from 'path';
-import BaseInfoCard from '@/components/PlayingView/BaseInfoCard.vue';
 import Icon from '@/components/BaseIconContainer.vue';
 export default {
   components: {
-    BaseInfoCard,
     Icon,
   },
   props: {
