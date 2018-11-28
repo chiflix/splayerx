@@ -73,6 +73,10 @@ export default {
       hideOthers: '隐藏 其他',
       quit: '退出',
     },
+    preferences: {
+      clearHistory: '退出时自动清空播放记录',
+      privacyConfirm: '匿名信息使用许可',
+    },
     update: {
       title: '更新就绪',
       message: '更新已就绪，是否现在重启?',

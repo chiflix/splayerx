@@ -73,6 +73,10 @@ export default {
       hideOthers: 'Hide Others',
       quit: 'Quit',
     },
+    preferences: {
+      clearHistory: 'Always clear playback history on exit',
+      privacyConfirm: 'Privacy',
+    },
     update: {
       title: 'update dialog',
       message: 'Restart the app now to install update?',
