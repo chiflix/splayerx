@@ -4,7 +4,7 @@
   @mousedown="handleMousedown">
   <transition name="background-fade">
   <div class="background-gradient"
-    v-show="false"
+    v-show="displayState"
     :style="{
       height: sizeAdaption(282),
     }"/>
