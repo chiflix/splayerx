@@ -4,7 +4,7 @@
   @mousedown="handleMousedown">
   <transition name="background-fade">
   <div class="background-gradient"
-    v-show="displayState"
+    v-show="false"
     :style="{
       height: sizeAdaption(282),
     }"/>
@@ -270,11 +270,14 @@ export default {
 <style lang="scss" scoped>
 .recent-playlist {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   @media screen and (max-width: 510px) {
     display: none;
   }
   @media screen and (min-width: 512px) {
-    height: fit-content;
+    height: 282px;
   }
   .background-gradient {
     position: absolute;
@@ -283,32 +286,32 @@ export default {
     width: 100%;
     bottom: 0;
   }
-  .info {
-    width: 90%;
-    .top {
-      margin-top: 1px;
-      font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
-      color: rgba(235,235,235,0.6);
-      letter-spacing: 0.64px;
-      width: fit-content;
-    }
-    .file-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+  .content {
+    .info {
+      width: 90%;
+      .top {
+        font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+        color: rgba(235,235,235,0.6);
+        letter-spacing: 0.64px;
+        width: fit-content;
+      }
+      .file-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
 
-      font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
-      color: rgba(255,255,255,0.70);
-      letter-spacing: 1px;
-      width: 100%;
+        font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+        color: rgba(255,255,255,0.70);
+        letter-spacing: 1px;
+        width: 100%;
+      }
     }
-  }
-  .playlist-items {
-    position: relative;
-    display: flex;
-    .item {
-      position: relative;
-      background-color: rgba(255,255,255,0.1);
+    .playlist-items {
+      display: flex;
+      .item {
+        position: relative;
+        background-color: rgba(255,255,255,0.1);
+      }
     }
   }
 }

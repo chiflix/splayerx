@@ -1,9 +1,5 @@
 <template>
-<BaseInfoCard class="recent-playlist-item"
-  :height="thumbnailHeight"
-  :width="thumbnailWidth"
-  :borderRadius="3"
-  :borderColor="isChosen ? '255,255,255,0.6' : '255,255,255,0.2'"
+<div class="recent-playlist-item"
   :class="{ chosen: isChosen }"
   :style="{
     marginRight: sizeAdaption(15),
@@ -81,7 +77,7 @@
             </div>
         </div>
       </div>
-</BaseInfoCard>
+</div>
 </template>
 <script>
 import { mapGetters } from 'vuex';
@@ -219,114 +215,114 @@ export default {
 </script>
 <style lang="scss" scoped>
 $border-radius: 3px;
-.recent-playlist-item {
-  transition: transform 100ms ease-out;
-}
 .chosen {
   transform: translateY(-9px);
 }
-.child-item {
-  position: absolute;
-  border-radius: $border-radius;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(255,255,255,0.1);
-  img {
+.recent-playlist-item {
+  transition: transform 100ms ease-out;
+  .child-item {
     position: absolute;
     border-radius: $border-radius;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
     width: 100%;
-    transform: translate(0px, 0px);
-  }
-  .content {
-    position: absolute;
-    z-index: 100;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-
-    .info {
+    height: 100%;
+    background-color: rgba(255,255,255,0.1);
+    .blur {
       position: absolute;
       top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      backdrop-filter: blur(1px);
     }
-    .overflow-container {
+    .white-hover {
       position: absolute;
+      border-radius: $border-radius;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(255,255,255,0.2);
+    }
+    .black-gradient {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      border-radius: $border-radius;
+      background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
+    }
+    img {
+      position: absolute;
+      border-radius: $border-radius;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
       width: 100%;
-      height: 22px;
-      overflow: hidden;
+      transform: translate(0px, 0px);
     }
-    .icon-container {
+    .content {
       position: absolute;
-      display: flex;
-      flex-direction: row;
       z-index: 100;
-      height: fit-content;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
 
-      .playlist-play {
+      .info {
+        position: absolute;
+        top: 0;
       }
-      .playing {
-        opacity: 0.7;
-        font-family: PingFangSC-Semibold;
-        color: #FFFFFF;
-        letter-spacing: 0.5px;
+      .overflow-container {
+        position: absolute;
+        width: 100%;
+        height: 22px;
+        overflow: hidden;
+      }
+      .icon-container {
+        position: absolute;
+        display: flex;
+        flex-direction: row;
+        z-index: 100;
+        height: fit-content;
+
+        .playlist-play {
+        }
+        .playing {
+          opacity: 0.7;
+          font-family: PingFangSC-Semibold;
+          color: #FFFFFF;
+          letter-spacing: 0.5px;
+        }
       }
     }
-  }
-  .progress {
-    position: absolute;
-    z-index: 100;
-    width: 65%;
-    border-radius: 2px;
-    background-color: rgba(216,216,216,0.40);
-    .slider {
-      height: 100%;
+    .progress {
+      position: absolute;
+      z-index: 100;
+      width: 65%;
       border-radius: 2px;
-      background-color: #D8D8D8;
+      background-color: rgba(216,216,216,0.40);
+      .slider {
+        height: 100%;
+        border-radius: 2px;
+        background-color: #D8D8D8;
+      }
+    }
+    .title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      z-index: 100;
+      font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+      letter-spacing: 0.58px;
+
+      width: 100%;
+      position: absolute;
+      bottom: 0;
     }
   }
-  .title {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    z-index: 100;
-    font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
-    letter-spacing: 0.58px;
-
-    width: 100%;
-    position: absolute;
-    bottom: 0;
-  }
-}
-.blur {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  backdrop-filter: blur(1px);
-}
-.white-hover {
-  position: absolute;
-  border-radius: $border-radius;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: rgba(255,255,255,0.2);
-}
-.black-gradient {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  border-radius: $border-radius;
-  background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
 }
 .middleChosen {
   background-color: rgba(255, 255, 255, 0.7);
