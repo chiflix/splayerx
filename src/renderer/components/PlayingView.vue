@@ -1,7 +1,7 @@
 <template>
   <div :data-component-name="$options.name" class="player">
-    <the-video-canvas />
-    <the-video-controller />
+    <!--<the-video-canvas />-->
+    <!--<the-video-controller />-->
     <subtitle-manager />
   </div>
 </template>

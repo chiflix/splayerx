@@ -159,3 +159,10 @@ export default {
   },
 };
 </script>
+<style scoped lang="scss">
+  .subtitle-manager {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+</style>

@@ -1,11 +1,9 @@
 <template>
   <div class="subtitle-wrapper">
-    <div class="flex-box">
-      <p class="subtitle-border-content"
-         :class="'subtitle-border-style'+ChosenIndex" v-html="finalText"></p>
-      <p class="subtitle-content"
-         :class="'subtitle-style'+ChosenIndex" v-html="finalText"></p>
-    </div>
+    <span class="subtitle-border-content"
+       :class="'subtitle-border-style'+ChosenIndex" v-html="finalText"></span>
+    <span class="subtitle-content"
+       :class="'subtitle-style'+ChosenIndex" v-html="finalText"></span>
   </div>
 </template>
 
@@ -21,24 +19,25 @@ export default {
   props: {
     text: String,
     settings: Object,
+    index: Number,
   },
   computed: {
-    ...mapGetters(['chosenStyle', 'scale']),
+    ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth']),
     ChosenIndex() {
       return this.chosenStyle ? this.chosenStyle : 0;
     },
     finalText() {
       let tmp = this.text;
-      if (this.settings.i) {
+      if (this.settings[this.index].i) {
         tmp = `<i>${tmp}`;
       }
-      if (this.settings.b) {
+      if (this.settings[this.index].b) {
         tmp = `<b>${tmp}`;
       }
-      if (this.settings.u) {
+      if (this.settings[this.index].u) {
         tmp = `<u>${tmp}`;
       }
-      if (this.settings.s) {
+      if (this.settings[this.index].s) {
         tmp = `<s>${tmp}`;
       }
       return tmp;
@@ -57,8 +56,6 @@ export default {
 <style scoped>
 .subtitle-wrapper {
   position: relative;
-  width: 100%;
-  height: auto;
   z-index: 5;
   display: flex;
 }
@@ -72,9 +69,5 @@ export default {
   z-index: 0;
   white-space: pre;
   text-align: center;
-}
-.flex-box {
-  margin: auto;
-  display: flex;
 }
 </style>

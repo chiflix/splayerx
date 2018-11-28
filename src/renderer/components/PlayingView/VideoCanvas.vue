@@ -21,9 +21,6 @@
       @update:currentTime="updateCurrentTime" />
     </transition>
     <!--<BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>-->
-    <div class="subContainer" :style="{ bottom: `${-winHeight + 20}px`, transform: `scale(${scaleNum})`}" @click="handleClick">
-    <CueRenderer class="cueRender" v-for="(sub, index) in subs" :text="sub" :settings="set"></CueRenderer>
-    </div>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -37,14 +34,12 @@ import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer';
-import CueRenderer from '../Subtitle/CueRenderer.vue';
 
 export default {
   name: 'video-canvas',
   components: {
     BaseSubtitle,
     'base-video-player': BaseVideoPlayer,
-    CueRenderer,
   },
   data() {
     return {
@@ -55,16 +50,9 @@ export default {
       seekTime: [0],
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
-      subs: ['在线测试'],
-      set: { i: 1, alignment: 1 },
-      leftPos: [1, 4, 7],
-      rightPos: [3, 6, 9],
     };
   },
   methods: {
-    handleClick() {
-      this.subs.splice(0, 1);
-    },
     ...mapActions({
       videoConfigInitialize: videoActions.INITIALIZE,
       play: videoActions.PLAY_VIDEO,
@@ -338,18 +326,6 @@ export default {
 }
 .canvas {
   visibility: hidden;
-}
-.cueRender {
-  margin: auto;
-}
-.subContainer {
-  position: absolute;
-  width: 100%;
-  height: auto;
-  display: flex;
-  flex-wrap: wrap-reverse;
-  transform-origin: bottom;
-  z-index: 5;
 }
 .fade-enter-active, .fade-leave-active {
   transition: opacity 200ms ease-in;
