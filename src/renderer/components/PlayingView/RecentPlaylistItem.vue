@@ -8,8 +8,11 @@
     minHeight: `${thumbnailHeight}px`,
   }">
       <div class="child-item">
-        <img :src="imageSrc"
-          v-if="!isPlaying && imageLoaded"/>
+        <div class="img"
+          v-if="!isPlaying && imageLoaded"
+          :style="{
+            backgroundImage: `url('${imageSrc}')`,
+          }"/>
         <div class="blur"
           v-show="!isChosen && !isPlaying"/>
         <transition name="fade2">
@@ -163,7 +166,7 @@ export default {
   mounted() {
     this.$electron.ipcRenderer.send('snapShot', this.path);
     this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-      this.coverSrc = `file://${imgPath}.png`;
+      this.coverSrc = `${imgPath}.png`;
     });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
@@ -249,9 +252,12 @@ $border-radius: 3px;
       height: 100%;
       background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
     }
-    img {
+    .img {
       position: absolute;
       border-radius: $border-radius;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center center;
       top: 0;
       bottom: 0;
       left: 0;
