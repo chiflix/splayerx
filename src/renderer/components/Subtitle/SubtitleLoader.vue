@@ -1,44 +1,26 @@
 <template>
-  <div class="subtitle-laoder"></div>
+  <div class="subtitle-loader"></div>
 </template>
 <script>
-import srtVttCompiler from 'subtitle';
-import assCompiler from 'ass-compiler';
+import Subtitle from './Subtitle';
 export default {
   name: 'subtitle-loader',
   props: {
-    subtitle: String,
-    type: String,
-    currentTime: Number,
+    subtitleSrc: String,
   },
   data() {
     return {
-      parsedSubtitle: null,
+      subtitle: null,
+      parsedData: null,
     };
   },
-  methods: {
-    getParser(type) {
-      let parser = String.prototype.toString;
-      switch (type) {
-        default:
-          break;
-        case 'ass':
-        case 'ssa':
-          parser = assCompiler.parse;
-          break;
-        case 'srt':
-        case 'vtt':
-          parser = srtVttCompiler.parse;
-      }
-      return parser;
-    },
-  },
   created() {
-    const { subtitle, type } = this;
-    this.parsedSubtitle = this.getParser(type)(subtitle);
-    Object.freeze(this.parsedSubtitle);
-    console.log(this.parsedSubtitle);
+    const { subtitleSrc } = this;
+    this.subtitle = new Subtitle(subtitleSrc);
+    this.subtitle.load();
+    this.subtitle.once('parse', (parsed) => {
+      this.parsedData = parsed;
+    });
   },
 };
 </script>
-

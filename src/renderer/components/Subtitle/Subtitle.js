@@ -11,7 +11,7 @@ import Sagi from '@/helpers/sagi';
 const getSubtitleType = (src) => {
   if (existsSync(src)) {
     return 'local';
-  } else if (/^[a-f0-9]{32}/i.test(src)) {
+  } else if (/^[a-f0-9]*/i.test(src)) { // need to know subtitle hash pattern
     return 'online';
   }
   return 'unknown';
@@ -44,23 +44,23 @@ class Subtitle extends EventEmitter {
   }
 
   load() {
-    const { type } = this.metaInfo;
-    let subtitleGetter = new Promise((resolve, reject) => {
-      reject(new Error('No getter found.'));
-    });
+    const { type, src } = this.metaInfo;
+    let subtitleGetter;
     if (type === 'local') {
       subtitleGetter = localSubtitleGetter;
     } else if (type === 'online') {
       subtitleGetter = onlineSubtitleGetter;
     }
 
-    subtitleGetter.then((subtitle) => {
-      this.rawData = subtitle;
-      this.emit('data', this.rawData);
-      this.parse();
-    }).catch((error) => {
-      this.emit('error', error);
-    });
+    if (subtitleGetter) {
+      subtitleGetter(src).then((subtitle) => {
+        this.rawData = subtitle;
+        this.emit('data', this.rawData);
+        this.parse();
+      }).catch((error) => {
+        this.emit('error', error);
+      });
+    }
   }
 
   parse() {

@@ -2,6 +2,8 @@ import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
 const state = {
   subtitleList: [],
+  currentSubtitleId: '',
+  // legacy subtitle state
   SubtitleNames: [],
   curStyle: {
     fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
@@ -35,7 +37,9 @@ const state = {
 };
 
 const getters = {
+  currentSubtitleId: state => state.currentSubtitleId,
   subtitleList: state => state.subtitleList,
+  // legacy subtitle getters
   subtitleNames: state => state.SubtitleNames,
   firstSubtitleIndex: state => state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first'),
   subtitleCount: state => state.SubtitleNames.length,
@@ -48,6 +52,9 @@ const getters = {
 };
 
 const mutations = {
+  [subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE](state, subtitleId) {
+    state.currentSubtitleId = subtitleId;
+  },
   [subtitleMutations.ADD_SUBTITLE](state, subtitle) {
     state.subtitleList = [...state.subtitleList, subtitle];
   },
@@ -130,6 +137,15 @@ const actions = {
   },
   updateChosenSize({ commit }, delta) {
     commit('UpdateChosenSize', delta);
+  },
+  [subtitleActions.SWITCH_CURRENT_SUBTITLE]({ commit, state }, subtitleId) {
+    const { currentSubtitleId, subtitleList } = state;
+    if (
+      subtitleId !== currentSubtitleId &&
+      subtitleList.filter(subtitle => subtitle.id === subtitleId).length
+    ) {
+      commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, subtitleId);
+    }
   },
 };
 
