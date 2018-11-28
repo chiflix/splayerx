@@ -64,11 +64,7 @@ export default {
   },
   created() {
     asyncStorage.get('privacy-preference').then((data) => {
-      if (Object.keys(data).length === 0) {
-        this.showPrivacyBubble = true;
-      } else {
-        this.showPrivacyBubble = false;
-      }
+      this.showPrivacyBubble = Object.keys(data).length === 0;
     });
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;

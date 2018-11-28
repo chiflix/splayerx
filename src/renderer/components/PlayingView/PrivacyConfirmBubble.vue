@@ -324,6 +324,7 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: background-color 80ms linear;
       @media screen and (min-width: 513px) and (max-width: 854px) {
         height: 24px;
         margin-right: 16px;
