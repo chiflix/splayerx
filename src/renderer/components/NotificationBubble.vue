@@ -440,14 +440,13 @@ export default {
 
 .toast-leave-active {
   position: absolute;
-  transition: transform 500ms cubic-bezier(0.17, 0.67, 0.17, 0.98), opacity 100ms linear;
+  transition: transform 500ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
 }
 .toast-enter-active {
   transition: transform 250ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
 }
 .toast-enter, .toast-leave-to {
   transform: translateX(350px);
-  opacity: 0;
 }
 .nextvideo-enter-active, .nextvideo-leave {
   opacity: 1;
