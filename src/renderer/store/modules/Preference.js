@@ -22,24 +22,20 @@ const mutations = {
 };
 const actions = {
   agreeOnPrivacyPolicy({ commit, state }) {
-    asyncStorage.set('preferences', state).then(() => {
-      commit('privacyAgreement', true);
-    });
+    commit('privacyAgreement', true);
+    asyncStorage.set('preferences', state);
   },
   disagreeOnPrivacyPolicy({ commit, state }) {
-    asyncStorage.set('preferences', state).then(() => {
-      commit('privacyAgreement', false);
-    });
+    commit('privacyAgreement', false);
+    asyncStorage.set('preferences', state);
   },
   deleteVideoHistoryOnExit({ commit, state }) {
-    asyncStorage.set('preferences', state).then(() => {
-      commit('deleteVideoHistoryOnExit', true);
-    });
+    commit('deleteVideoHistoryOnExit', true);
+    asyncStorage.set('preferences', state);
   },
   notDeleteVideoHistoryOnExit({ commit, state }) {
-    asyncStorage.set('preferences', state).then(() => {
-      commit('deleteVideoHistoryOnExit', false);
-    });
+    commit('deleteVideoHistoryOnExit', false);
+    asyncStorage.set('preferences', state);
   },
   getLocalPreference({ commit }) {
     asyncStorage.get('preferences').then((data) => {
