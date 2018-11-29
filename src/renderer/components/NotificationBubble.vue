@@ -62,9 +62,9 @@ export default {
       return process.platform === 'win32' ? 'winContainer' : 'container';
     },
   },
-  created() {
-    asyncStorage.get('privacy-preference').then((data) => {
-      this.showPrivacyBubble = Object.keys(data).length === 0;
+  mounted() {
+    asyncStorage.get('preferences').then((data) => {
+      this.showPrivacyBubble = data.privacyAgreement === undefined;
     });
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;

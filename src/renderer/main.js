@@ -59,7 +59,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['muted', 'winWidth', 'chosenStyle', 'chosenSize']),
+    ...mapGetters(['muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement']),
   },
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
@@ -67,6 +67,7 @@ new Vue({
         this.$store.dispatch('updateChosenStyle', data.chosenStyle);
       }
     });
+    this.$store.dispatch('getLocalPreference');
   },
   watch: {
     chosenStyle(val) {
@@ -77,6 +78,16 @@ new Vue({
     chosenSize(val) {
       if (this.menu) {
         this.menu.getMenuItemById(`size${val}`).checked = true;
+      }
+    },
+    deleteVideoHistoryOnExit(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('deleteHistory').checked = val;
+      }
+    },
+    privacyAgreement(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('privacy').checked = val;
       }
     },
   },
@@ -419,8 +430,35 @@ new Vue({
               },
               {
                 label: this.$t('msg.splayerx.preferences'),
-                enabled: false,
-                accelerator: 'Cmd+,',
+                enabled: true,
+                submenu: [
+                  {
+                    label: this.$t('msg.preferences.clearHistory'),
+                    id: 'deleteHistory',
+                    type: 'checkbox',
+                    checked: this.$store.getters.deleteVideoHistoryOnExit,
+                    click: () => {
+                      if (this.$store.getters.deleteVideoHistoryOnExit) {
+                        this.$store.dispatch('notDeleteVideoHistoryOnExit');
+                      } else {
+                        this.$store.dispatch('deleteVideoHistoryOnExit');
+                      }
+                    },
+                  },
+                  {
+                    label: this.$t('msg.preferences.privacyConfirm'),
+                    id: 'privacy',
+                    type: 'checkbox',
+                    checked: this.$store.getters.privacyAgreement,
+                    click: () => {
+                      if (this.$store.getters.privacyAgreement) {
+                        this.$store.dispatch('disagreeOnPrivacyPolicy');
+                      } else {
+                        this.$store.dispatch('agreeOnPrivacyPolicy');
+                      }
+                    },
+                  },
+                ],
               },
               {
                 label: this.$t('msg.splayerx.homepage'),

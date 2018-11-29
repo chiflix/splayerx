@@ -119,7 +119,9 @@ export default {
           const mergedData = Object.assign(val, data);
           asyncStorage.set('recent-played', {});
           await this.infoDB().add('recent-played', mergedData);
-          await this.infoDB().cleanData();
+          if (this.$store.getters.deleteVideoHistoryOnExit) {
+            await this.infoDB().cleanData();
+          }
         }
       })
 

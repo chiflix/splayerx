@@ -73,6 +73,10 @@ export default {
       hideOthers: '隐藏 其他',
       quit: '退出',
     },
+    preferences: {
+      clearHistory: '退出时自动清空播放记录',
+      privacyConfirm: '启用匿名信息和智能翻译',
+    },
     update: {
       title: '更新就绪',
       message: '更新已就绪，是否现在重启?',
@@ -109,13 +113,13 @@ export default {
   privacyBubble: {
     tryToDisable: {
       partOne: '射手影音使用匿名信息以提供更好服务，',
-      partTwo: '匿名信息会导致翻译功能无法使用。',
+      partTwo: '匿名信息会导致智能翻译无法使用。',
       underlinedContent: '禁用',
       button: '确定',
     },
     confirmDisable: {
       partOne: '确认',
-      partTwo: '匿名信息和翻译功能。',
+      partTwo: '匿名信息和智能翻译。',
       underlinedContent: '禁用',
       button: '取消',
     },

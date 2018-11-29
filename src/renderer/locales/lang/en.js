@@ -73,6 +73,10 @@ export default {
       hideOthers: 'Hide Others',
       quit: 'Quit',
     },
+    preferences: {
+      clearHistory: 'Always clear playback history on exit',
+      privacyConfirm: 'Allow anonymous data / Smart Translation',
+    },
     update: {
       title: 'update dialog',
       message: 'Restart the app now to install update?',
@@ -108,14 +112,14 @@ export default {
   },
   privacyBubble: {
     tryToDisable: {
-      partOne: 'SPlayer uses anonymous data to enhance user experience. Advanced features will be disabled if you ',
+      partOne: 'SPlayer uses anonymous data to enhance user experience. Smart Translation will be disabled if you ',
       partTwo: '.',
       underlinedContent: 'disagree',
       button: 'OK',
     },
     confirmDisable: {
       partOne: 'Confirm to ',
-      partTwo: ' anonymous data and advanced features.',
+      partTwo: ' anonymous data and Smart Translation.',
       underlinedContent: 'disable',
       button: 'CANCEL',
     },
