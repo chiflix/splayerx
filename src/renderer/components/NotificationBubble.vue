@@ -10,16 +10,21 @@
     <PrivacyBubble class="privacy-bubble"
       v-if="showPrivacyBubble"
       @close-privacy-bubble="closePrivacyBubble"/>
-    <div class="messageContainer">
+    <div>
     <transition-group name="toast">
       <div v-for="m in messages" :key="m.id"
-        :id="'item' + m.id"
-        :class="m.type === 'error' ? 'errorContainer' : 'loadingContainer'">
-        <div class="bubbleContent">
-          <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
-          <div class="content">{{ m.content }}</div>
+        class="messageContainer"
+        :id="'item' + m.id">
+        <div class="black-gradient">
+          <div
+          :class="m.type === 'error' ? 'errorContainer' : 'loadingContainer'">
+            <div class="bubbleContent">
+              <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
+              <div class="content">{{ m.content }}</div>
+            </div>
+            <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id)"></Icon>
+          </div>
         </div>
-        <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id)"></Icon>
       </div>
     </transition-group>
     </div>
@@ -104,12 +109,6 @@ export default {
 .winContainer {
   -webkit-app-region: no-drag;
   position: absolute;
-  .toast-enter, .toast-enter-active {
-    transform: translateX(0px);
-  }
-  .toast-enter, .toast-leave-active {
-    transform: translateX(403px);
-  }
   @media screen and (min-width: 320px) and (max-width: 512px) {
     top: 28px;
     right: 19px;
@@ -208,8 +207,6 @@ export default {
   backdrop-filter: blur(8px);
   z-index: 8;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: 400ms cubic-bezier(0.17, 0.67, 0.17, 0.98), left 150ms linear;
-  transition-property: opacity, transform;
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 136px;
     height: 32px;
@@ -289,17 +286,38 @@ export default {
     }
   }
 }
-
+.messageContainer {
+  position: relative;
+  z-index: 8;
+  transition: 400ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
+  transition-property: opacity, transform;
+}
+.black-gradient {
+  background-color: rgba(0,0,0,0.20);
+  backdrop-filter: blur(9.6px);
+  box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
+  @media screen and (max-width: 512px) {
+    display: none;
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    border-radius: 7px;
+    clip-path: inset(0px round 7px);
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    border-radius: 8.4px;
+    clip-path: inset(0px round 8.4px);
+  }
+  @media screen and (min-width: 1921px) {
+    border-radius: 11.76px;
+    clip-path: inset(0px round 11.76px);
+  }
+}
 
 .errorContainer {
-  position: relative;
   display: flex;
   background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
-  z-index: 8;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: 400ms cubic-bezier(0.17, 0.67, 0.17, 0.98), left 150ms linear;
-  transition-property: opacity, transform;
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 216px;
     height: 47px;
@@ -419,14 +437,17 @@ export default {
   }
 }
 
-.toast-enter-active, .toast-leave {
-  opacity: 1;
-}
-.toast-enter, .toast-leave-active {
-  opacity: 0;
-}
+
 .toast-leave-active {
   position: absolute;
+  transition: transform 500ms cubic-bezier(0.17, 0.67, 0.17, 0.98), opacity 100ms linear;
+}
+.toast-enter-active {
+  transition: transform 250ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
+}
+.toast-enter, .toast-leave-to {
+  transform: translateX(350px);
+  opacity: 0;
 }
 .nextvideo-enter-active, .nextvideo-leave {
   opacity: 1;
