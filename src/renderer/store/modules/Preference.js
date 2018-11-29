@@ -1,7 +1,7 @@
 import asyncStorage from '@/helpers/asyncStorage.js';
 const state = {
   deleteVideoHistoryOnExit: false,
-  privacyAgreement: true,
+  privacyAgreement: false,
 };
 const getters = {
   preferenceData: state => state,
