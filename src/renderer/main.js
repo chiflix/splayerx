@@ -59,7 +59,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['muted', 'winWidth', 'chosenStyle', 'chosenSize']),
+    ...mapGetters(['muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement']),
   },
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
@@ -78,6 +78,16 @@ new Vue({
     chosenSize(val) {
       if (this.menu) {
         this.menu.getMenuItemById(`size${val}`).checked = true;
+      }
+    },
+    deleteVideoHistoryOnExit(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('deleteHistory').checked = val;
+      }
+    },
+    privacyAgreement(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('privacy').checked = val;
       }
     },
   },
@@ -427,13 +437,11 @@ new Vue({
                     id: 'deleteHistory',
                     type: 'checkbox',
                     checked: this.$store.getters.deleteVideoHistoryOnExit,
-                    click: (menuItem) => {
+                    click: () => {
                       if (this.$store.getters.deleteVideoHistoryOnExit) {
                         this.$store.dispatch('notDeleteVideoHistoryOnExit');
-                        menuItem.checked = false;
                       } else {
                         this.$store.dispatch('deleteVideoHistoryOnExit');
-                        menuItem.checked = true;
                       }
                     },
                   },
@@ -442,13 +450,11 @@ new Vue({
                     id: 'privacy',
                     type: 'checkbox',
                     checked: this.$store.getters.privacyAgreement,
-                    click: (menuItem) => {
+                    click: () => {
                       if (this.$store.getters.privacyAgreement) {
                         this.$store.dispatch('disagreeOnPrivacyPolicy');
-                        menuItem.checked = false;
                       } else {
                         this.$store.dispatch('agreeOnPrivacyPolicy');
-                        menuItem.checked = true;
                       }
                     },
                   },
