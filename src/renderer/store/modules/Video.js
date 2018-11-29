@@ -42,8 +42,6 @@ const state = {
   // meta info
   intrinsicWidth: 0,
   intrinsicHeight: 0,
-  computedWidth: 0,
-  computedHeight: 0,
   ratio: 0,
   AudioDelay: 0,
 };
@@ -75,8 +73,10 @@ const getters = {
   // meta info
   intrinsicWidth: state => state.intrinsicWidth,
   intrinsicHeight: state => state.intrinsicHeight,
-  computedWidth: state => state.computedWidth,
-  computedHeight: state => state.computedHeight,
+  computedWidth: (state, getters) => Math
+    .round(getters.winRatio > getters.ratio ? getters.winHeight * getters.ratio : getters.winWidth),
+  computedHeight: (state, getters) => Math
+    .round(getters.winRatio < getters.ratio ? getters.winWidth / getters.ratio : getters.winHeight),
   ratio: state => state.ratio,
   AudioDelay: state => state.AudioDelay,
   mediaHash: state => Helpers.methods.mediaQuickHash(state.src),
@@ -198,8 +198,6 @@ const actions = {
     const validMetaInfo = [
       'intrinsicWidth',
       'intrinsicHeight',
-      'computedWidth',
-      'computedHeight',
       'ratio',
     ];
     Object.keys(metaInfo).forEach((item) => {
