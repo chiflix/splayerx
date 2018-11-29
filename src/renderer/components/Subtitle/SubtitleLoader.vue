@@ -33,9 +33,6 @@ export default {
   components: {
     CueRenderer,
   },
-  computed: {
-    ...mapGetters(['scaleNum']),
-  },
   data() {
     return {
       subtitle: null,
@@ -49,7 +46,23 @@ export default {
         alignment: 8, position: '40%', line: '-0.2', vertical: 'lr',
       }],
       type: 'ass',
+      currentCues: [],
     };
+  },
+  computed: {
+    ...mapGetters(['currentTime', 'scaleNum']),
+  },
+  watch: {
+    currentTime(newVal) {
+      const { parsedData } = this.subtitle;
+      if (parsedData) {
+        const cues = parsedData
+          .filter(subtitle => subtitle.start <= newVal && subtitle.end >= newVal);
+        if (!isEqual(cues, this.currentCues) && cues.length) {
+          this.currentCues = cues;
+        }
+      }
+    },
   },
   created() {
     const { subtitleSrc } = this;
