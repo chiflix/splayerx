@@ -10,16 +10,20 @@
     <PrivacyBubble class="privacy-bubble"
       v-if="showPrivacyBubble"
       @close-privacy-bubble="closePrivacyBubble"/>
-    <div class="messageContainer">
+    <div>
     <transition-group name="toast">
       <div v-for="m in messages" :key="m.id"
-        :id="'item' + m.id"
+        class="messageContainer"
+        :id="'item' + m.id">
+        <div :class="m.type === 'error' ? 'black-gradient-error' : 'black-gradient-loading'"/>
+        <div
         :class="m.type === 'error' ? 'errorContainer' : 'loadingContainer'">
-        <div class="bubbleContent">
-          <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
-          <div class="content">{{ m.content }}</div>
+          <div class="bubbleContent">
+            <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
+            <div class="content">{{ m.content }}</div>
+          </div>
+          <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id)"></Icon>
         </div>
-        <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id)"></Icon>
       </div>
     </transition-group>
     </div>
@@ -104,12 +108,6 @@ export default {
 .winContainer {
   -webkit-app-region: no-drag;
   position: absolute;
-  .toast-enter, .toast-enter-active {
-    transform: translateX(0px);
-  }
-  .toast-enter, .toast-leave-active {
-    transform: translateX(403px);
-  }
   @media screen and (min-width: 320px) and (max-width: 512px) {
     top: 28px;
     right: 19px;
@@ -208,8 +206,6 @@ export default {
   backdrop-filter: blur(8px);
   z-index: 8;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: 400ms cubic-bezier(0.17, 0.67, 0.17, 0.98), left 150ms linear;
-  transition-property: opacity, transform;
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 136px;
     height: 32px;
@@ -289,17 +285,90 @@ export default {
     }
   }
 }
-
+.messageContainer {
+  position: relative;
+  z-index: 8;
+  transition: 400ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
+  transition-property: opacity, transform;
+}
+.black-gradient-error {
+  position: absolute;
+  background-color: rgba(0,0,0,0.20);
+  backdrop-filter: blur(9.6px);
+  box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
+  @media screen and (min-width: 320px) and (max-width: 512px) {
+    width: 216px;
+    height: 47px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    clip-path: inset(0 round 6px);
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    width: 240px;
+    height: 52px;
+    margin-bottom: 12px;
+    border-radius: 7px;
+    clip-path: inset(0 round 7px);
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 288px;
+    height: 62px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    clip-path: inset(0 round 8px);
+  }
+  @media screen and (min-width: 1921px) {
+    width: 403px;
+    height: 87px;
+    margin-bottom: 18px;
+    border-radius: 11px;
+    clip-path: inset(0 round 11px);
+  }
+}
+.black-gradient-loading {
+  position: absolute;
+  background-color: rgba(0,0,0,0.20);
+  backdrop-filter: blur(9.6px);
+  box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
+  @media screen and (min-width: 320px) and (max-width: 512px) {
+    width: 136px;
+    height: 32px;
+    margin-left: 80px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    clip-path: inset(0 round 6px);
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    width: 148px;
+    height: 36px;
+    margin-left: 92px;
+    margin-bottom: 12px;
+    border-radius: 7px;
+    clip-path: inset(0 round 7px);
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 182px;
+    height: 43px;
+    margin-left: 106px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    clip-path: inset(0 round 8px);
+  }
+  @media screen and (min-width: 1921px) {
+    width: 256px;
+    height: 60px;
+    margin-left: 147px;
+    margin-bottom: 18px;
+    border-radius: 11px;
+    clip-path: inset(0 round 11px);
+  }
+}
 
 .errorContainer {
-  position: relative;
   display: flex;
   background-color: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
-  z-index: 8;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: 400ms cubic-bezier(0.17, 0.67, 0.17, 0.98), left 150ms linear;
-  transition-property: opacity, transform;
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 216px;
     height: 47px;
@@ -419,14 +488,16 @@ export default {
   }
 }
 
-.toast-enter-active, .toast-leave {
-  opacity: 1;
-}
-.toast-enter, .toast-leave-active {
-  opacity: 0;
-}
+
 .toast-leave-active {
   position: absolute;
+  transition: transform 500ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
+}
+.toast-enter-active {
+  transition: transform 250ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
+}
+.toast-enter, .toast-leave-to {
+  transform: translateX(350px);
 }
 .nextvideo-enter-active, .nextvideo-leave {
   opacity: 1;
