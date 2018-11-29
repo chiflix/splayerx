@@ -292,17 +292,13 @@ export default {
     });
     this.$bus.$on('toggle-mute', this.toggleMute);
     this.$bus.$on('seek', (e) => {
-      if (e === this.duration && this.nextVideo) {
-        this.openFile(this.nextVideo);
-      } else {
-        this.seekTime = [e];
-        // todo: use vuex get video element src
-        const filePath = decodeURI(this.src);
-        const indexOfLastDot = filePath.lastIndexOf('.');
-        const ext = filePath.substring(indexOfLastDot + 1);
-        if (ext === 'mkv') {
-          this.$bus.$emit('seek-subtitle', e);
-        }
+      this.seekTime = [e];
+      // todo: use vuex get video element src
+      const filePath = decodeURI(this.src);
+      const indexOfLastDot = filePath.lastIndexOf('.');
+      const ext = filePath.substring(indexOfLastDot + 1);
+      if (ext === 'mkv') {
+        this.$bus.$emit('seek-subtitle', e);
       }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);

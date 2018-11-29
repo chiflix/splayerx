@@ -11,6 +11,7 @@ const getters = {
   winWidth: state => state.windowSize[0],
   winHeight: state => state.windowSize[1],
   winSize: state => state.windowSize,
+  winRatio: state => state.windowSize[0] / state.windowSize[1],
   winPosX: state => state.windowPosition[0],
   winPosY: state => state.windowPosition[1],
   winPos: state => state.windowPosition,

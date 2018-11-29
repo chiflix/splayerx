@@ -168,11 +168,16 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-  .subContainer {
-    position: absolute;
-    display: flex;
-    flex-direction: column-reverse;
-    transform-origin: bottom left;
-    z-index: 5;
-  }
+.subtitle-loader {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.subContainer {
+  position: absolute;
+  display: flex;
+  flex-direction: column-reverse;
+  transform-origin: bottom left;
+  z-index: 5;
+}
 </style>
