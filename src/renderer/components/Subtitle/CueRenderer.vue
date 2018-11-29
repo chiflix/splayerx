@@ -19,7 +19,6 @@ export default {
   props: {
     text: String,
     settings: Object,
-    index: Number,
   },
   computed: {
     ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth']),
@@ -28,17 +27,19 @@ export default {
     },
     finalText() {
       let tmp = this.text;
-      if (this.settings[this.index].i) {
-        tmp = `<i>${tmp}`;
-      }
-      if (this.settings[this.index].b) {
-        tmp = `<b>${tmp}`;
-      }
-      if (this.settings[this.index].u) {
-        tmp = `<u>${tmp}`;
-      }
-      if (this.settings[this.index].s) {
-        tmp = `<s>${tmp}`;
+      if (this.settings) {
+        if (this.settings.i) {
+          tmp = `<i>${tmp}`;
+        }
+        if (this.settings.b) {
+          tmp = `<b>${tmp}`;
+        }
+        if (this.settings.u) {
+          tmp = `<u>${tmp}`;
+        }
+        if (this.settings.s) {
+          tmp = `<s>${tmp}`;
+        }
       }
       return tmp;
     },

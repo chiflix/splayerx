@@ -1,18 +1,18 @@
 <template>
   <div class="subtitle-loader">
     <div class="subContainer"
-      :class="type === 'ass' && !set[index].pos ? 'subtitle-alignment'+set[index].alignment : ''"
-      v-for="(sub, index) in subs"
+      v-for="(cue, index) in currentCues"
+      :key="index"
       :style="{
-        writingMode: type === 'vtt' ? `vertical-${set[index].vertical}` : '',
+        writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
         left: subLeft(index),
         top: subTop(index),
         transform: transPos(index),
-      }">
+      }"
+      :class="!isVtt && !cue.tags.pos ? `subtitle-alignment${cue.tags.alignment}` : ''">
       <CueRenderer class="cueRender"
-        :index="index"
-        :text="sub"
-        :settings="set"
+        :text="cue.text"
+        :settings="cue.tags"
         :style="{
           zoom: `${scaleNum}`,
           transform: subLine(index),
@@ -36,21 +36,23 @@ export default {
   data() {
     return {
       subtitle: null,
-      parsedData: null,
-      subs: ['在线\n测试在\n线测试在\n线测试\n在线测试', 'h\nap\npy', 'en\ndi\nng'],
-      set: [{
-        alignment: 8, position: '40%', line: '-0.2', vertical: 'lr',
-      }, {
-        alignment: 8, position: '40%', line: '-0.2', vertical: 'lr',
-      }, {
-        alignment: 8, position: '40%', line: '-0.2', vertical: 'lr',
-      }],
-      type: 'ass',
       currentCues: [],
     };
   },
   computed: {
     ...mapGetters(['currentTime', 'scaleNum']),
+    type() {
+      return this.subtitle.metaInfo.type;
+    },
+    currentTags() {
+      return this.currentCues.map(cue => cue.tags);
+    },
+    currentTexts() {
+      return this.currentCues.map(cue => cue.text);
+    },
+    isVtt() {
+      return this.type === 'vtt';
+    },
   },
   watch: {
     currentTime(newVal) {
@@ -69,35 +71,39 @@ export default {
     this.subtitle = new Subtitle(subtitleSrc);
     this.subtitle.load();
     this.subtitle.once('parse', (parsed) => {
+      Object.freeze(parsed);
       this.parsedData = parsed;
     });
   },
   methods: {
     lineNum(index) {
       const lastNum = index;
+      const { currentTexts: texts } = this;
       let tmp = 0;
-      while (this.subs[index - 1]) {
-        tmp += this.subs[index - 1].split('\n').length;
+      while (texts[index - 1]) {
+        tmp += texts[index - 1].split('\n').length;
         index -= 1;
       }
-      return tmp / this.subs[lastNum].split('\n').length;
+      return tmp / texts[lastNum].split('\n').length;
     },
     assLine(index) {
-      if (this.set[index].pos) {
+      const { currentTags: tags } = this;
+      if (tags[index].pos) {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
       const arr = [1, 2, 3];
-      if (arr.includes(this.set[index].alignment)) {
+      if (arr.includes(tags[index].alignment)) {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
       return `translateY(${100 * this.lineNum(index)}%)`;
     },
     vttLine(index) { //eslint-disable-line
-      let tmp = this.set[index].line;
-      if (this.set[index].line.includes('%')) {
-        tmp = parseInt(this.set[index].line, 10) / 100;
+      const { currentTags: tags } = this;
+      let tmp = tags[index].line;
+      if (tags[index].line.includes('%')) {
+        tmp = parseInt(tags[index].line, 10) / 100;
       }
-      if (this.set[index].vertical) {
+      if (tags[index].vertical) {
         if ((tmp >= -1 && tmp < -0.5) || (tmp > 0.5 && tmp <= 1)) {
           return `translateX(${-100 * this.lineNum(index)}%)`;
         }
@@ -109,8 +115,9 @@ export default {
       return `translateY(${100 * this.lineNum(index)}%)`;
     },
     subLine(index) {
-      if (isEqual(this.set[index], this.set[index - 1])) {
-        if (this.type === 'ass') {
+      const { currentTags: tags, isVtt } = this;
+      if (isEqual(tags[index], tags[index - 1])) {
+        if (!isVtt) {
           return this.assLine(index);
         }
         return this.vttLine(index);
@@ -118,38 +125,41 @@ export default {
       return '';
     },
     transPos(index) {
-      if (this.type === 'ass' && this.set[index].pos) {
-        return `translate(${this.translateNum(this.set[index].alignment)[0]}%, ${this.translateNum(this.set[index].alignment)[1]}%)`;
+      const { currentTags: tags, isVtt } = this;
+      if (!isVtt && tags[index].pos) {
+        return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.translateNum(tags[index].alignment)[1]}%)`;
       }
       return '';
     },
     subLeft(index) {
-      if (this.type === 'ass' && this.set[index].pos) {
-        return `${this.set[index].pos[0]}px`;
-      } else if (this.type === 'vtt') {
-        if (this.set[index].vertical) {
-          if (!this.set[index].line.includes('%')) {
-            this.set[index].line = Math.abs(this.set[index].line) * 100;
-            this.set[index].line += '%';
+      const { currentTags: tags, type, isVtt } = this;
+      if (!isVtt && tags[index].pos) {
+        return `${tags[index].pos.x}px`;
+      } else if (type === 'vtt') {
+        if (tags[index].vertical) {
+          if (!tags[index].line.includes('%')) {
+            tags[index].line = Math.abs(tags[index].line) * 100;
+            tags[index].line += '%';
           }
-          return this.set[index].line;
+          return tags[index].line;
         }
-        return this.set[index].position;
+        return tags[index].position;
       }
       return '';
     },
     subTop(index) {
-      if (this.type === 'ass' && this.set[index].pos) {
-        return `${this.set[index].pos[1]}px`;
-      } else if (this.type === 'vtt') {
-        if (this.set[index].vertical) {
-          return this.set[index].position;
+      const { currentTags: tags, type, isVtt } = this;
+      if (!isVtt && tags[index].pos) {
+        return `${tags[index].pos.y}px`;
+      } else if (type === 'vtt') {
+        if (tags[index].vertical) {
+          return tags[index].position;
         }
-        if (!this.set[index].line.includes('%')) {
-          this.set[index].line = Math.abs(this.set[index].line) * 100;
-          this.set[index].line += '%';
+        if (!tags[index].line.includes('%')) {
+          tags[index].line = Math.abs(tags[index].line) * 100;
+          tags[index].line += '%';
         }
-        return this.set[index].line;
+        return tags[index].line;
       }
       return '';
     },
