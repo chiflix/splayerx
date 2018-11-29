@@ -7,21 +7,22 @@
         writingMode: type === 'vtt' ? `vertical-${set[index].vertical}` : '',
         left: subLeft(index),
         top: subTop(index),
-        transform: `${transPos(index)} ${subLine(index)}`,
+        transform: transPos(index),
       }">
       <CueRenderer class="cueRender"
         :index="index"
         :text="sub"
         :settings="set"
         :style="{
-          zoom: `${2}`,
+          zoom: `${scaleNum}`,
+          transform: subLine(index),
         }"></CueRenderer>
     </div>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
 import Subtitle from './Subtitle';
 import CueRenderer from './CueRenderer.vue';
 export default {
@@ -33,19 +34,19 @@ export default {
     CueRenderer,
   },
   computed: {
-    ...mapGetters(['scaleNum', 'winWidth', 'winHeight']),
+    ...mapGetters(['scaleNum']),
   },
   data() {
     return {
       subtitle: null,
       parsedData: null,
-      subs: ['在线测试', 'happy', 'ending'],
+      subs: ['在线\n测试在\n线测试在\n线测试\n在线测试', 'h\nap\npy', 'en\ndi\nng'],
       set: [{
-        alignment: 5, position: '40%', line: '-0.2', pos: [100, 100],
+        alignment: 8, position: '40%', line: '-0.2', vertical: 'lr',
       }, {
-        alignment: 5, position: '40%', line: '-0.2', pos: [100, 100],
+        alignment: 8, position: '40%', line: '-0.2', vertical: 'lr',
       }, {
-        alignment: 5, position: '40%', line: '-0.2', pos: [100, 100],
+        alignment: 8, position: '40%', line: '-0.2', vertical: 'lr',
       }],
       type: 'ass',
     };
@@ -59,15 +60,24 @@ export default {
     });
   },
   methods: {
+    lineNum(index) {
+      const lastNum = index;
+      let tmp = 0;
+      while (this.subs[index - 1]) {
+        tmp += this.subs[index - 1].split('\n').length;
+        index -= 1;
+      }
+      return tmp / this.subs[lastNum].split('\n').length;
+    },
     assLine(index) {
       if (this.set[index].pos) {
-        return `translateY(${-100 * index}%)`;
+        return `translateY(${-100 * this.lineNum(index)}%)`;
       }
       const arr = [1, 2, 3];
       if (arr.includes(this.set[index].alignment)) {
-        return `translateY(${-100 * index}%)`;
+        return `translateY(${-100 * this.lineNum(index)}%)`;
       }
-      return `translateY(${100 * index}%)`;
+      return `translateY(${100 * this.lineNum(index)}%)`;
     },
     vttLine(index) { //eslint-disable-line
       let tmp = this.set[index].line;
@@ -76,17 +86,17 @@ export default {
       }
       if (this.set[index].vertical) {
         if ((tmp >= -1 && tmp < -0.5) || (tmp > 0.5 && tmp <= 1)) {
-          return `translateX(${-100 * index}%)`;
+          return `translateX(${-100 * this.lineNum(index)}%)`;
         }
-        return `translateX(${100 * index}%)`;
+        return `translateX(${100 * this.lineNum(index)}%)`;
       }
       if ((tmp >= -1 && tmp < -0.5) || (tmp > 0.5 && tmp <= 1)) {
-        return `translateY(${-100 * index}%)`;
+        return `translateY(${-100 * this.lineNum(index)}%)`;
       }
-      return `translateY(${100 * index}%)`;
+      return `translateY(${100 * this.lineNum(index)}%)`;
     },
     subLine(index) {
-      if (_.isEqual(this.set[index], this.set[index - 1])) {
+      if (isEqual(this.set[index], this.set[index - 1])) {
         if (this.type === 'ass') {
           return this.assLine(index);
         }
@@ -158,11 +168,6 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-  .subtitle-loader {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
   .subContainer {
     position: absolute;
     display: flex;
