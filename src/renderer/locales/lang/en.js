@@ -112,7 +112,7 @@ export default {
   },
   privacyBubble: {
     tryToDisable: {
-      partOne: 'SPlayer uses anonymous data to enhance user experience. Smart Translation will be disabled if you',
+      partOne: 'SPlayer uses anonymous data to enhance user experience. Smart Translation will be disabled if you ',
       partTwo: '.',
       underlinedContent: 'disagree',
       button: 'OK',
