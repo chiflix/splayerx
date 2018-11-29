@@ -67,6 +67,7 @@ new Vue({
         this.$store.dispatch('updateChosenStyle', data.chosenStyle);
       }
     });
+    this.$store.dispatch('getLocalPreference');
   },
   watch: {
     chosenStyle(val) {
@@ -419,8 +420,39 @@ new Vue({
               },
               {
                 label: this.$t('msg.splayerx.preferences'),
-                enabled: false,
-                accelerator: 'Cmd+,',
+                enabled: true,
+                submenu: [
+                  {
+                    label: this.$t('msg.preferences.clearHistory'),
+                    id: 'deleteHistory',
+                    type: 'checkbox',
+                    checked: this.$store.getters.deleteVideoHistoryOnExit,
+                    click: (menuItem) => {
+                      if (this.$store.getters.deleteVideoHistoryOnExit) {
+                        this.$store.dispatch('notDeleteVideoHistoryOnExit');
+                        menuItem.checked = false;
+                      } else {
+                        this.$store.dispatch('deleteVideoHistoryOnExit');
+                        menuItem.checked = true;
+                      }
+                    },
+                  },
+                  {
+                    label: this.$t('msg.preferences.privacyConfirm'),
+                    id: 'privacy',
+                    type: 'checkbox',
+                    checked: this.$store.getters.privacyAgreement,
+                    click: (menuItem) => {
+                      if (this.$store.getters.privacyAgreement) {
+                        this.$store.dispatch('disagreeOnPrivacyPolicy');
+                        menuItem.checked = false;
+                      } else {
+                        this.$store.dispatch('agreeOnPrivacyPolicy');
+                        menuItem.checked = true;
+                      }
+                    },
+                  },
+                ],
               },
               {
                 label: this.$t('msg.splayerx.homepage'),

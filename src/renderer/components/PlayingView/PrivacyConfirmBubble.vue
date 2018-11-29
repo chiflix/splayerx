@@ -28,7 +28,6 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import asyncStorage from '@/helpers/asyncStorage';
 export default {
   name: 'privacy-bubble',
   data() {
@@ -40,7 +39,7 @@ export default {
   methods: {
     handleCloseMouseup() {
       if (this.state === 1) {
-        asyncStorage.set('privacy-preference', { privacyAgreement: true });
+        this.$store.dispatch('agreeOnPrivacyPolicy');
         this.$emit('close-privacy-bubble');
       } else {
         this.state = 1;
@@ -50,7 +49,7 @@ export default {
       if (this.state === 1) {
         this.state = 2;
       } else {
-        asyncStorage.set('privacy-preference', { privacyAgreement: false });
+        this.$store.dispatch('disagreeOnPrivacyPolicy');
         this.$emit('close-privacy-bubble');
       }
     },
