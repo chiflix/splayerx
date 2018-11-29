@@ -1,8 +1,9 @@
 <template>
-  <div
-    class="subtitle-loader"></div>
+  <div class="subtitle-loader"></div>
 </template>
 <script>
+import { mapGetters } from 'vuex';
+import isEqual from 'lodash/isEqual';
 import Subtitle from './Subtitle';
 export default {
   name: 'subtitle-loader',
@@ -12,7 +13,23 @@ export default {
   data() {
     return {
       subtitle: null,
+      currentCues: [],
     };
+  },
+  computed: {
+    ...mapGetters(['currentTime']),
+  },
+  watch: {
+    currentTime(newVal) {
+      const { parsedData } = this.subtitle;
+      if (parsedData) {
+        const cues = parsedData
+          .filter(subtitle => subtitle.start <= newVal && subtitle.end >= newVal);
+        if (!isEqual(cues, this.currentCues) && cues.length) {
+          this.currentCues = cues;
+        }
+      }
+    },
   },
   created() {
     const { subtitleSrc } = this;
