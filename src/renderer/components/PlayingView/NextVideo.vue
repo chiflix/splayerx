@@ -27,7 +27,7 @@
   </div>
   <div class="thumbnail-shadow"></div>
   <div class="thumbnail"
-    @mousedown="handleMouseDown"
+    @mouseup="handleMouseup"
     @mouseover="mouseoverVideo"
     @mouseout="mouseoutVideo">
     <video ref="videoThumbnail"
@@ -60,7 +60,7 @@ export default {
     handleCloseMouseup() {
       this.$emit('manualclose-next-video');
     },
-    handleMouseDown() {
+    handleMouseup() {
       if (this.nextVideo) {
         this.$bus.$emit('seek', this.duration);
       }
