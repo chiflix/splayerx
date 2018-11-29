@@ -113,13 +113,13 @@ export default {
   privacyBubble: {
     tryToDisable: {
       partOne: '射手影音使用匿名信息以提供更好的服務，',
-      partTwo: '匿名信息會導致翻譯功能無法使用。',
+      partTwo: '匿名信息會導致智能翻譯無法使用。',
       underlinedContent: '禁用',
       button: '確定',
     },
     confirmDisable: {
       partOne: '確認',
-      partTwo: '匿名信息和翻譯功能。',
+      partTwo: '匿名信息和智能翻譯。',
       underlinedContent: '禁用',
       button: '取消',
     },
