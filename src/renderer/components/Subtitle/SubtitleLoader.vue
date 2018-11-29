@@ -1,20 +1,27 @@
 <template>
   <div class="subtitle-loader">
     <div class="subContainer"
-      :class="set[index].pos ? '' : 'subtitle-alignment'+set[index].alignment"
+      :class="type === 'ass' && !set[index].pos ? 'subtitle-alignment'+set[index].alignment : ''"
       v-for="(sub, index) in subs"
       :style="{
         writingMode: type === 'vtt' ? `vertical-${set[index].vertical}` : '',
         left: subLeft(index),
         top: subTop(index),
-        transform: transPos(index),
+        transform: `${transPos(index)} ${subLine(index)}`,
       }">
-      <CueRenderer class="cueRender" :index="index" :text="sub" :settings="set"  :style="{ zoom: `${2}`, transform: `translateY(${100*index}%)`}"></CueRenderer>
+      <CueRenderer class="cueRender"
+        :index="index"
+        :text="sub"
+        :settings="set"
+        :style="{
+          zoom: `${2}`,
+        }"></CueRenderer>
     </div>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex';
+import _ from 'lodash';
 import Subtitle from './Subtitle';
 import CueRenderer from './CueRenderer.vue';
 export default {
@@ -32,9 +39,13 @@ export default {
     return {
       subtitle: null,
       parsedData: null,
-      subs: ['在线测试'],
+      subs: ['在线测试', 'happy', 'ending'],
       set: [{
-        alignment: 3, position: '40%', vertical: 'lr', line: '20%',
+        alignment: 5, position: '40%', line: '-0.2', pos: [100, 100],
+      }, {
+        alignment: 5, position: '40%', line: '-0.2', pos: [100, 100],
+      }, {
+        alignment: 5, position: '40%', line: '-0.2', pos: [100, 100],
       }],
       type: 'ass',
     };
@@ -48,6 +59,41 @@ export default {
     });
   },
   methods: {
+    assLine(index) {
+      if (this.set[index].pos) {
+        return `translateY(${-100 * index}%)`;
+      }
+      const arr = [1, 2, 3];
+      if (arr.includes(this.set[index].alignment)) {
+        return `translateY(${-100 * index}%)`;
+      }
+      return `translateY(${100 * index}%)`;
+    },
+    vttLine(index) { //eslint-disable-line
+      let tmp = this.set[index].line;
+      if (this.set[index].line.includes('%')) {
+        tmp = parseInt(this.set[index].line, 10) / 100;
+      }
+      if (this.set[index].vertical) {
+        if ((tmp >= -1 && tmp < -0.5) || (tmp > 0.5 && tmp <= 1)) {
+          return `translateX(${-100 * index}%)`;
+        }
+        return `translateX(${100 * index}%)`;
+      }
+      if ((tmp >= -1 && tmp < -0.5) || (tmp > 0.5 && tmp <= 1)) {
+        return `translateY(${-100 * index}%)`;
+      }
+      return `translateY(${100 * index}%)`;
+    },
+    subLine(index) {
+      if (_.isEqual(this.set[index], this.set[index - 1])) {
+        if (this.type === 'ass') {
+          return this.assLine(index);
+        }
+        return this.vttLine(index);
+      }
+      return '';
+    },
     transPos(index) {
       if (this.type === 'ass' && this.set[index].pos) {
         return `translate(${this.translateNum(this.set[index].alignment)[0]}%, ${this.translateNum(this.set[index].alignment)[1]}%)`;
