@@ -4,7 +4,10 @@
   @mousedown="handleMousedown">
   <transition name="background-fade">
   <div class="background-gradient"
-    v-show="displayState"/>
+    v-show="displayState"
+    :style="{
+      height: sizeAdaption(282),
+    }"/>
   </transition>
   <transition name="translate"
     @after-leave="afterLeave">
@@ -49,6 +52,7 @@
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
         :isShifting="shifting"
+        :hoverIndex="hoverIndex"
         :thumbnailWidth="thumbnailWidth"
         @mouseupItem="itemMouseup"
         @mouseoutItem="itemMouseout"
@@ -166,16 +170,16 @@ export default {
     },
     displayState(val) {
       this.canHoverItem = false;
+      this.mousePosition = this.mousemove.position;
       if (val) {
         this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;
-        this.mousePosition = this.mousemove.position;
       }
     },
     mousemove(val) {
       const distance = this.winWidth > 1355 ? 20 : 10;
-      if (!this.canHoverItem) {
+      if (!this.canHoverItem && this.displayState) {
         if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
         Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
           this.canHoverItem = true;
@@ -266,45 +270,51 @@ export default {
 <style lang="scss" scoped>
 .recent-playlist {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   @media screen and (max-width: 510px) {
     display: none;
   }
-  @media screen and (min-width: 512px) {
-    height: fit-content;
+  @media screen and (min-width: 512px) and (max-width: 1355px) {
+    height: 282px;
+  }
+  @media screen and (min-width: 1356px) {
+    height: 20.81vw;
   }
   .background-gradient {
     position: absolute;
     z-index: -1;
-    background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 0%, #000000 86%);
+    background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.00) 2%, rgba(0,0,0,0.01) 5%, rgba(0,0,0,0.02) 8%, rgba(0,0,0,0.05) 13%, rgba(0,0,0,0.11) 21%, rgba(0,0,0,0.15) 26%, rgba(0,0,0,0.22) 33%, rgba(0,0,0,0.34) 42%, #000000 86%);
     width: 100%;
-    height: 100%;
+    bottom: 0;
   }
-  .info {
-    width: 90%;
-    .top {
-      margin-top: 1px;
-      font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
-      color: rgba(235,235,235,0.6);
-      letter-spacing: 0.64px;
-      width: fit-content;
-    }
-    .file-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+  .content {
+    .info {
+      width: 90%;
+      .top {
+        font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+        color: rgba(235,235,235,0.6);
+        letter-spacing: 0.64px;
+        width: fit-content;
+      }
+      .file-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
 
-      font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
-      color: rgba(255,255,255,0.70);
-      letter-spacing: 1px;
-      width: 100%;
+        font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+        color: rgba(255,255,255,0.70);
+        letter-spacing: 1px;
+        width: 100%;
+      }
     }
-  }
-  .playlist-items {
-    position: relative;
-    display: flex;
-    .item {
-      position: relative;
-      background-color: rgba(255,255,255,0.1);
+    .playlist-items {
+      display: flex;
+      .item {
+        position: relative;
+        background-color: rgba(255,255,255,0.1);
+      }
     }
   }
 }
