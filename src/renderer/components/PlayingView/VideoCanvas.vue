@@ -163,7 +163,7 @@ export default {
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', rect.slice(0, 2));
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
-    $_saveScreenshot() {
+    saveScreenshot() {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -253,7 +253,7 @@ export default {
   watch: {
     originSrc(val, oldVal) {
       this.coverFinded = false;
-      this.$_saveScreenshot();
+      this.saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
@@ -303,7 +303,7 @@ export default {
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {
-      this.$_saveScreenshot();
+      this.saveScreenshot();
       this.saveSubtitleStyle();
     };
   },
