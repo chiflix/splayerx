@@ -1,5 +1,6 @@
 <template>
-  <div class="subtitle-manager"><subtitle-loader v-if="currentSubtitleId" :subtitleSrc="currentSubtitleSrc" /></div>
+  <div class="subtitle-manager"
+    :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }"><subtitle-loader v-if="currentSubtitleId" :subtitleSrc="currentSubtitleSrc" /></div>
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
@@ -23,7 +24,7 @@ export default {
     'subtitle-loader': SubtitleLoader,
   },
   computed: {
-    ...mapGetters(['originSrc', 'subtitleList', 'currentSubtitleId']),
+    ...mapGetters(['originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight']),
     currentSubtitleSrc() {
       const result = this.subtitleList
         .filter(subtitle => subtitle.id === this.currentSubtitleId)[0];
@@ -159,3 +160,12 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.subtitle-manager {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+</style>

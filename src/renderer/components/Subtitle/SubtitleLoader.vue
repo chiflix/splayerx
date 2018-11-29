@@ -1,5 +1,6 @@
 <template>
-  <div class="subtitle-loader"></div>
+  <div
+    class="subtitle-loader"></div>
 </template>
 <script>
 import Subtitle from './Subtitle';
@@ -11,7 +12,6 @@ export default {
   data() {
     return {
       subtitle: null,
-      parsedData: null,
     };
   },
   created() {
@@ -24,3 +24,10 @@ export default {
   },
 };
 </script>
+<style lang="scss" scoped>
+.subtitle-loader {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+</style>
