@@ -75,7 +75,7 @@ export default {
     },
     preferences: {
       clearHistory: 'Always clear playback history on exit',
-      privacyConfirm: 'Privacy',
+      privacyConfirm: 'Allow anonymous data & Smart Translation',
     },
     update: {
       title: 'update dialog',

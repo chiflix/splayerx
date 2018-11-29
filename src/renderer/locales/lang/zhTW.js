@@ -75,7 +75,7 @@ export default {
     },
     preferences: {
       clearHistory: '退出時自動清空播放紀錄',
-      privacyConfirm: '匿名信息使用許可',
+      privacyConfirm: '啟用匿名信息和智能翻譯',
     },
     update: {
       title: '更新就緒',
