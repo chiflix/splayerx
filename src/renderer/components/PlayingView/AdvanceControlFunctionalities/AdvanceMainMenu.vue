@@ -30,17 +30,18 @@
         @mouseleave="handleMouseleave()"
         @click.left="handleSubClick">
         <transition name="arrow">
-          <div class="hoverSubBack" v-show="hoverIndex === 2"></div>
+          <div class="hoverSubBack" v-show="hoverIndex === 2 && currentSubtitleId !== ''"></div>
         </transition>
-        <div class="subContainer">
+        <div class="subContainer"
+          :style="{ cursor: currentSubtitleId === '' ? 'default' : 'pointer'}">
           <div class="item2"
             :style="{
-              color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              color: currentSubtitleId === '' ? 'rgba(255, 255, 255, 0.4)' : hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">
             <div>{{ this.$t('advance.subMenu') }}</div>
             <transition name="arrow">
-              <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
+              <Icon type="rightArrow" v-show="hoverIndex === 2 && currentSubtitleId !== ''"></Icon>
             </transition>
           </div>
         </div>
@@ -188,6 +189,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import AdvanceRowItems from './AdvanceRowItems.vue';
 import BaseInfoCard from '../InfoCard.vue';
 import Icon from '../../BaseIconContainer.vue';
@@ -244,6 +246,7 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['winWidth', 'currentSubtitleId']),
     currentAudioTrack() {
       if (this.trackNum === 1) {
         return this.$t('advance.chosenTrack');
@@ -251,9 +254,6 @@ export default {
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
       if (track && track.id) return track.language;
       return this.$t('advance.chosenTrack');
-    },
-    winWidth() {
-      return this.$store.getters.winWidth;
     },
     speedHeight() {
       if (this.winWidth > 514 && this.winWidth <= 854) {
@@ -375,8 +375,10 @@ export default {
       this.speedChosen = true;
     },
     handleSubClick() {
-      this.readyShow = 'subMenu';
-      this.speedChosen = false;
+      if (this.currentSubtitleId !== '') {
+        this.readyShow = 'subMenu';
+        this.speedChosen = false;
+      }
     },
     handleAudioClick() {
       this.readyShow = 'audioMenu';
