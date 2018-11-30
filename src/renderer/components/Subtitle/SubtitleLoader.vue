@@ -59,9 +59,9 @@ export default {
       const { parsedData } = this.subtitle;
       if (parsedData) {
         const cues = parsedData
-          .filter(subtitle => subtitle.start <= newVal && subtitle.end >= newVal);
+          .filter(subtitle => subtitle.start <= newVal && subtitle.end >= newVal && subtitle.text !== '');
         if (!isEqual(cues, this.currentCues) && cues.length) {
-          this.currentCues = cues;
+          this.currentCues = cues.reverse();
         }
       }
     },
@@ -95,7 +95,7 @@ export default {
       if (arr.includes(tags[index].alignment)) {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
-      return `translateY(${100 * this.lineNum(index)}%)`;
+      return `translateY(${-100 * this.lineNum(index)}%)`;
     },
     vttLine(index) { //eslint-disable-line
       const { currentTags: tags } = this;
