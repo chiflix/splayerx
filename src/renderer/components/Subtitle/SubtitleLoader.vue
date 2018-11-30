@@ -68,13 +68,11 @@ export default {
   },
   created() {
     const { subtitleSrc } = this;
-    console.log(subtitleSrc);
     this.subtitle = new Subtitle(subtitleSrc);
     this.subtitle.load();
     this.subtitle.once('parse', (parsed) => {
       Object.freeze(parsed);
       this.parsedData = parsed;
-      console.log(this.subtitle.metaInfo.type);
       this.$bus.$emit('finish-loading', this.subtitle.metaInfo.type);
     });
   },

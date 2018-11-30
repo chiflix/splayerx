@@ -67,6 +67,16 @@ const mutations = {
   [subtitleMutations.OFF_SUBTITLE](state, subtitle) {
     state.currentSubtitleId = subtitle;
   },
+  [subtitleMutations.REFRESH_SUBTITLE](state, subtitle) {
+    let num = 0;
+    state.subtitleList.forEach((sub, index) => {
+      if (sub.type === 'local') {
+        num = index + 1;
+      }
+    });
+    state.subtitleList.slice(0, num);
+    state.subtitleList = state.subtitleList.slice(0, num).concat(...subtitle);
+  },
   SubtitleNames(state, subtitles) {
     state.SubtitleNames = subtitles;
   },
@@ -153,6 +163,9 @@ const actions = {
   },
   [subtitleActions.OFF_SUBTITLES]({ commit }) {
     commit(subtitleMutations.OFF_SUBTITLE, '');
+  },
+  [subtitleActions.REFRESH_SUBTITLES]({ commit }, subtitles) {
+    commit(subtitleMutations.REFRESH_SUBTITLE, subtitles);
   },
 };
 

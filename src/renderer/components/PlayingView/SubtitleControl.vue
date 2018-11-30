@@ -109,7 +109,7 @@
   </div>
 </template>
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import difference from 'lodash/difference';
 import path from 'path';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
@@ -189,10 +189,6 @@ export default {
       if (difference(val, oldval).length > 0) {
         this.loadingType = difference(val, oldval)[0].type;
       }
-      if (val.length > 0) {
-        clearInterval(this.timer);
-        this.count = this.rotateTime * 100;
-      }
     },
     loadingType(val) {
       if (val === 'local') {
@@ -209,6 +205,10 @@ export default {
       this.currentSubIden = 0;
       document.querySelector('.scrollScope').scrollTop = 0;
       this.$bus.$emit('sub-first-change', 0);
+    });
+    this.$bus.$on('finish-refresh', () => {
+      clearInterval(this.timer);
+      this.count = this.rotateTime * 100;
     });
   },
   methods: {
@@ -227,8 +227,8 @@ export default {
         this.rotateTime = Math.ceil(this.count / 100);
       }, 10);
       this.currentSubIden = 0;
-      this.$store.dispatch('removeSubtitleNames');
-      this.$bus.$emit('refresh-subtitle');
+      this.$bus.$emit('refresh-subtitle', this.mediaHash);
+      this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
     },
     orify(...args) {
       return args.some(arg => arg == true); // eslint-disable-line
@@ -332,7 +332,6 @@ export default {
     },
     toggleSubtitleOff() {
       this.currentSubIden = -1;
-      // this.$bus.$emit('first-subtitle-off');
       this.offCurrentSubtitle();
     },
     toggleLoadServerSubtitles() {
@@ -374,6 +373,7 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['winWidth', 'mediaHash']),
     textHeight() {
       if (this.winWidth > 512 && this.winWidth <= 854) {
         return 13;
@@ -449,9 +449,6 @@ export default {
           - this.currentSubIden) * 51 :
         this.scopeHeight + 7;
     },
-    winWidth() {
-      return this.$store.getters.winWidth;
-    },
     computedAvaliableItems() {
       return this.$store.getters.subtitleList;
     },
@@ -482,16 +479,6 @@ export default {
         this.loadingSubsPlaceholders.online = '';
       }
     });
-    // this.$bus.$on('toggle-no-subtitle-menu', () => {
-    //   this.foundSubtitles = false;
-    //   this.$store.commit('SubtitleOff');
-    // });
-    // this.$bus.$on('finished-loading-server-subs', () => {
-    //   this.foundSubtitles = true;
-    // });
-    // this.$bus.$on('added-local-subtitles', () => {
-    //   this.foundSubtitles = true;
-    // });
     this.$bus.$on('new-video-opened', () => {
       this.currentSubIden = 0;
     });
