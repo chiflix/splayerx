@@ -70,8 +70,8 @@ export default {
     onMetaLoaded(event) {
       this.videoElement = event.target;
       this.videoConfigInitialize({
-        volume: 100,
-        muted: false,
+        volume: this.volume * 100,
+        muted: this.muted,
         rate: 1,
         duration: event.target.duration,
         currentTime: this.lastPlayedTime || 0,
@@ -251,6 +251,9 @@ export default {
     }),
   },
   watch: {
+    muted(val) {
+      console.log('muted', val);
+    },
     originSrc(val, oldVal) {
       this.coverFinded = false;
       this.saveScreenshot();
