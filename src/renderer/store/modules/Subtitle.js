@@ -39,6 +39,9 @@ const state = {
 const getters = {
   currentSubtitleId: state => state.currentSubtitleId,
   subtitleList: state => state.subtitleList,
+  premiumSubtitles: (state, getters) => state.subtitleList
+    .filter(subtitle => subtitle.duration && subtitle.duration >= 0.6 * getters.duration)
+    .map(subtitle => ({ id: subtitle.id, path: subtitle.path })),
   // legacy subtitle getters
   subtitleNames: state => state.SubtitleNames,
   firstSubtitleIndex: state => state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first'),
@@ -57,6 +60,15 @@ const mutations = {
   },
   [subtitleMutations.ADD_SUBTITLE](state, subtitle) {
     state.subtitleList = [...state.subtitleList, subtitle];
+  },
+  [subtitleMutations.UPDATE_SUBTITLE](state, subtitle) {
+    const { id } = subtitle;
+    const subtitleList = [...state.subtitleList];
+    const index = state.subtitleList.findIndex(subtitle => subtitle.id === id);
+    if (index >= 0) {
+      subtitleList.splice(index, 1);
+      state.subtitleList = [...subtitleList, subtitle];
+    }
   },
   [subtitleMutations.REMOVE_SUBTITLE](state, subtitle) {
     state.subtitleList = state.subtitleList.slice().splice(state.subtitleList.indexOf(subtitle), 1);
@@ -146,6 +158,14 @@ const actions = {
       subtitleList.filter(subtitle => subtitle.id === subtitleId).length
     ) {
       commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, subtitleId);
+    }
+  },
+  [subtitleActions.SUBTITLE_DURATION_UPDATE]({ commit, state }, subtitleInfo) {
+    const [subtitleId, duration] = subtitleInfo;
+    const { subtitleList } = state;
+    const subtitle = subtitleList.filter(subtitle => subtitle.id === subtitleId)[0];
+    if (subtitle) {
+      commit(subtitleMutations.UPDATE_SUBTITLE, { ...subtitle, duration });
     }
   },
 };
