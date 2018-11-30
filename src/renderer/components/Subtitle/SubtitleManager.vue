@@ -1,6 +1,12 @@
 <template>
   <div class="subtitle-manager"
-    :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }"><subtitle-loader v-if="currentSubtitleId" :subtitleSrc="currentSubtitleSrc" /></div>
+    :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
+    <subtitle-loader
+      v-if="currentSubtitleId"
+      :subtitleSrc="currentSubtitleSrc"
+      :key="currentSubtitleId"
+    />
+  </div>
 </template>
 <script>
 import { mapGetters, mapActions } from 'vuex';
@@ -12,6 +18,7 @@ import convert3To1 from 'iso-639-3-to-1';
 import chardet from 'chardet';
 import iconv from 'iconv-lite';
 import uuidv4 from 'uuid/v4';
+import compose from 'lodash/fp/compose';
 import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
@@ -35,6 +42,7 @@ export default {
     return {
       subtitleTypes: ['local', 'embedded', 'online'],
       systemLocale: '',
+      tempUUID: '',
     };
   },
   watch: {
@@ -48,6 +56,12 @@ export default {
         )).id);
       });
     },
+    // subtitleList(newVal) {
+    //   console.log(newVal);
+    // },
+    // currentSubtitleId(newValue) {
+    //   console.log(newValue);
+    // },
   },
   methods: {
     ...mapActions({
@@ -156,6 +170,20 @@ export default {
         this.addSubtitles(result);
         this.changeCurrentSubtitle((this.chooseInitialSubtitle(this.subtitleList, this.systemLocale)).id);
       });
+    });
+    this.$bus.$on('add-subtitles', (subtitleList) => {
+      const currentUuids = subtitleList.map(() => uuidv4());
+      compose(
+        this.addSubtitles,
+        subtitleList => subtitleList.map((subtitle, index) => ({
+          id: currentUuids[index],
+          name: basename(subtitle),
+          path: subtitle,
+          ext: extname(subtitle).slice(1),
+          type: 'local',
+        })),
+      )(subtitleList);
+      this.changeCurrentSubtitle(currentUuids[currentUuids.length - 1]);
     });
   },
 };

@@ -708,7 +708,7 @@ new Vue({
         }
       }
       if (containsSubFiles) {
-        this.$bus.$emit('add-subtitle', subtitleFiles);
+        this.$bus.$emit('add-subtitles', subtitleFiles);
       }
     });
     window.addEventListener('dragover', (e) => {
