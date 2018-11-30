@@ -28,14 +28,6 @@ describe('SubtitleControl.vue', () => {
     });
   });
 
-  it('should render correct HTML elements', () => {
-    const wrapper = shallowMount(SubtitleControl, { store, localVue });
-
-    expect(wrapper.html()).contains('ul');
-    expect(wrapper.html()).contains('li');
-    expect(wrapper.html()).contains('div');
-  });
-
   it('toggleItemClick method works fine', () => {
     const wrapper = shallowMount(SubtitleControl, {
       store,
