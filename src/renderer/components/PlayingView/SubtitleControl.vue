@@ -201,10 +201,9 @@ export default {
     },
   },
   mounted() {
-    this.$bus.$on('add-subtitle', () => {
+    this.$bus.$on('add-subtitles', () => {
       this.currentSubIden = 0;
       document.querySelector('.scrollScope').scrollTop = 0;
-      this.$bus.$emit('sub-first-change', 0);
     });
     this.$bus.$on('finish-refresh', () => {
       clearInterval(this.timer);

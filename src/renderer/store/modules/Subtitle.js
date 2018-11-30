@@ -56,7 +56,11 @@ const mutations = {
     state.currentSubtitleId = subtitleId;
   },
   [subtitleMutations.ADD_SUBTITLE](state, subtitle) {
-    state.subtitleList = [...state.subtitleList, subtitle];
+    if (subtitle.type === 'local') {
+      state.subtitleList = [subtitle, ...state.subtitleList];
+    } else {
+      state.subtitleList = [...state.subtitleList, subtitle];
+    }
   },
   [subtitleMutations.REMOVE_SUBTITLE](state, subtitle) {
     state.subtitleList = state.subtitleList.slice().splice(state.subtitleList.indexOf(subtitle), 1);
