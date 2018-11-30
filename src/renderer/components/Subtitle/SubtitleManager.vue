@@ -42,7 +42,6 @@ export default {
     return {
       subtitleTypes: ['local', 'embedded', 'online'],
       systemLocale: '',
-      tempUUID: '',
     };
   },
   watch: {
@@ -56,12 +55,6 @@ export default {
         )).id);
       });
     },
-    // subtitleList(newVal) {
-    //   console.log(newVal);
-    // },
-    // currentSubtitleId(newValue) {
-    //   console.log(newValue);
-    // },
   },
   methods: {
     ...mapActions({
