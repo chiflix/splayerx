@@ -69,25 +69,6 @@
                     </div>
                   </div>
 
-
-                  <!--<div v-if="!foundSubtitles"-->
-                       <!--@mouseover.stop="toggleItemsMouseOver(-2)"-->
-                       <!--@mouseleave.stop.self="toggleItemsMouseLeave(-2)"-->
-                       <!--@mouseup="toggleLoadServerSubtitles"-->
-                       <!--id="item-2">-->
-                    <!--<div class="menu-item-text-wrapper defaultWrapper">-->
-                      <!--<div class="text">加载翻译结果</div>-->
-                    <!--</div>-->
-                  <!--</div>-->
-                  <!--<div v-if="!foundSubtitles"-->
-                       <!--@mouseover.self.stop="toggleItemsMouseOver(-3)"-->
-                       <!--@mouseleave.stop.self="toggleItemsMouseLeave(-3)"-->
-                       <!--@mouseup="toggleOpenFileDialog"-->
-                       <!--id="item-3">-->
-                    <!--<div class="menu-item-text-wrapper lastWrapper">-->
-                      <!--<div class="text">导入本地字幕 ...</div>-->
-                    <!--</div>-->
-                  <!--</div>-->
                   <div class="card" v-if="0 <= computedAvaliableItems.length"
                        :style="{
                     height: hiddenText && currentSubIden === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
