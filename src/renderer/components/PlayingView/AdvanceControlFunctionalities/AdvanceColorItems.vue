@@ -222,8 +222,8 @@ export default {
       font-size: 15.6px;
       margin: auto auto auto 20.4px;
       .rightItem {
-        width: 20.4px;
-        height: 20.4px;
+        width: 21px;
+        height: 21px;
       }
     }
     .listContainer {
@@ -232,8 +232,8 @@ export default {
         width: 164.4px;
         height: 32.4px;
         .imgContainer {
-          width: 20.4px;
-          height: 20.4px;
+          width: 21px;
+          height: 21px;
           margin-top: 6.6px;
         }
       }
@@ -258,8 +258,8 @@ export default {
       font-size: 21.84px;
       margin: auto auto auto 28.56px;
       .rightItem {
-        width: 28.56px;
-        height: 28.56px;
+        width: 29px;
+        height: 29px;
       }
     }
     .listContainer {
@@ -268,8 +268,8 @@ export default {
         width: 230.16px;
         height: 45.36px;
         .imgContainer {
-          width: 28.56px;
-          height: 28.56px;
+          width: 29px;
+          height: 29px;
           margin-top: 9.24px;
         }
       }
