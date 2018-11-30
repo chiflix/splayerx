@@ -21,7 +21,7 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import isEqual from 'lodash/isEqual';
 import Subtitle from './Subtitle';
 import CueRenderer from './CueRenderer.vue';
@@ -29,6 +29,7 @@ export default {
   name: 'subtitle-loader',
   props: {
     subtitleSrc: String,
+    id: String,
   },
   components: {
     CueRenderer,
@@ -37,10 +38,13 @@ export default {
     return {
       subtitle: null,
       currentCues: [],
+      videoSegments: [],
+      currentSegment: [0, 0, false],
+      elapsedSegmentTime: 0,
     };
   },
   computed: {
-    ...mapGetters(['currentTime', 'scaleNum']),
+    ...mapGetters(['currentTime', 'duration', 'scaleNum']),
     type() {
       return this.subtitle.metaInfo.type;
     },
@@ -55,7 +59,7 @@ export default {
     },
   },
   watch: {
-    currentTime(newVal) {
+    currentTime(newVal, oldValue) {
       const { parsedData } = this.subtitle;
       if (parsedData) {
         const cues = parsedData
@@ -64,19 +68,45 @@ export default {
           this.currentCues = cues.reverse();
         }
       }
+
+      const { videoSegments, currentSegment, elapsedSegmentTime } = this;
+      const segment = videoSegments
+        .filter(segment => segment[0] <= newVal && segment[1] > newVal)[0];
+      if (segment && !segment[2]) {
+        if (isEqual(segment, currentSegment)) {
+          this.elapsedSegmentTime += newVal - oldValue;
+        } else {
+          const segmentTime = currentSegment[1] - currentSegment[0];
+          if (elapsedSegmentTime / segmentTime >= 0.9) {
+            const index = videoSegments.findIndex(segment => segment[0] === currentSegment[0]);
+            this.$set(videoSegments, index, [...videoSegments[index].slice(0, 2), true]);
+          }
+          this.elapsedSegmentTime = 0;
+        }
+        this.currentSegment = segment;
+      }
+    },
+    videoSegments(newVal) {
+      const duration = newVal
+        .filter(segment => segment[2])
+        .map(segment => segment[1] - segment[0])
+        .reduce((prev, curr) => prev + curr, 0);
+      this.updateDuration([this.id, duration]);
     },
   },
   created() {
     const { subtitleSrc } = this;
-    console.log(subtitleSrc);
     this.subtitle = new Subtitle(subtitleSrc);
     this.subtitle.load();
     this.subtitle.once('parse', (parsed) => {
-      Object.freeze(parsed);
       this.parsedData = parsed;
+      this.videoSegments = this.getVideoSegments(parsed, this.duration);
     });
   },
   methods: {
+    ...mapActions({
+      updateDuration: 'SUBTITLE_DURATION_UPDATE',
+    }),
     lineNum(index) {
       const lastNum = index;
       const { currentTexts: texts } = this;
@@ -187,6 +217,29 @@ export default {
         default:
           return [0, 0];
       }
+    },
+    getVideoSegments(parsedSubtitle, duration) {
+      const subtitleSegments = parsedSubtitle
+        .filter(subtitle => subtitle.text !== '')
+        .map(subtitle => [subtitle.start || 0, subtitle.end || duration])
+        .sort((a, b) => a[0] - b[0]);
+      const result = [[0, 0]];
+      let currentIndex = 0;
+      while (result[result.length - 1][1] !== duration) {
+        const lastElement = result[result.length - 1];
+        if (currentIndex < subtitleSegments.length) {
+          if (lastElement[1] <= subtitleSegments[currentIndex][0]) {
+            [lastElement[1]] = [subtitleSegments[currentIndex][0]];
+            result.push(subtitleSegments[currentIndex]);
+            currentIndex += 1;
+          } else {
+            currentIndex += 1;
+          }
+        } else {
+          lastElement[1] = duration;
+        }
+      }
+      return result.map(segment => [...segment, false]);
     },
   },
 };

@@ -5,6 +5,7 @@
       v-if="currentSubtitleId"
       :subtitleSrc="currentSubtitleSrc"
       :key="currentSubtitleId"
+      :id="currentSubtitleId"
     />
   </div>
 </template>
@@ -31,7 +32,10 @@ export default {
     'subtitle-loader': SubtitleLoader,
   },
   computed: {
-    ...mapGetters(['originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight']),
+    ...mapGetters([
+      'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
+      'currentTime', 'duration', 'paused', 'premiumSubtitles',
+    ]),
     currentSubtitleSrc() {
       const result = this.subtitleList
         .filter(subtitle => subtitle.id === this.currentSubtitleId)[0];
@@ -42,6 +46,7 @@ export default {
     return {
       subtitleTypes: ['local', 'embedded', 'online'],
       systemLocale: '',
+      subtitleTime: {},
     };
   },
   watch: {
@@ -54,6 +59,9 @@ export default {
           this.systemLocale,
         )).id);
       });
+    },
+    premiumSubtitles(newVal) {
+      if (newVal.length) console.log('Premium Found!', ...newVal);
     },
   },
   methods: {
