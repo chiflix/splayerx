@@ -4,7 +4,9 @@ import healthMsg from 'sagi-api/health/v1/health_pb';
 import healthRpc from 'sagi-api/health/v1/health_grpc_pb';
 import translationMsg from 'sagi-api/translation/v1/translation_pb';
 import translationRpc from 'sagi-api/translation/v1/translation_grpc_pb';
-import addLog from './index';
+import { TrainingData } from 'sagi-api/training/v1/training_pb';
+import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
+// TODO: refactor all logs
 /* eslint-disable */
 const grpc = require('grpc');
 /* eslint-enable */
@@ -32,7 +34,6 @@ class Sagi {
       req.setMediaIdentity(mediaIdentity);
       client.translateMedia(req, (err, response) => {
         if (err) {
-          addLog.methods.addLog('error', err);
           reject(err);
         } else {
           // TODO: fetch real transcripts
@@ -49,13 +50,26 @@ class Sagi {
       req.setTranscriptIdentity(transcriptIdentity);
       client.transcript(req, (err, res) => {
         if (err) {
-          addLog.methods.addLog('error', err);
           reject(err);
         } else {
-          console.log(res);
-          // addLog.methods.addLog('info', res);
           resolve(res);
         }
+      });
+    });
+  }
+
+  /* eslint-disable */
+  pushTranscript(subtitlePayload) {
+    return new Promise((resolve, reject) => {
+      const client = new TrainngClient(this.endpoint, this.creds);
+      const req = new TrainingData();
+      const toPascalCase = field => field.replace(/(^.)|(_.)/g, match => match[match.startsWith('_') ? 1 : 0].toUpperCase());
+      Object.keys(subtitlePayload).forEach((field) => {
+        if (req[`set${toPascalCase(field)}`]) req[`set${toPascalCase(field)}`](subtitlePayload[field]);
+      });
+      client.pushData(req, (err, res) => {
+        if (err) reject(err);
+        resolve(res);
       });
     });
   }
@@ -66,7 +80,6 @@ class Sagi {
       const client = new healthRpc.HealthClient(this.endpoint, this.creds);
       client.check(new healthMsg.HealthCheckRequest(), (err, response) => {
         if (err) {
-          addLog.methods.addLog('error', err);
           reject(err);
         } else {
           resolve(response.getStatus());
