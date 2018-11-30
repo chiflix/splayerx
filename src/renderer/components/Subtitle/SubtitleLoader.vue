@@ -101,6 +101,7 @@ export default {
     this.subtitle.once('parse', (parsed) => {
       this.parsedData = parsed;
       this.videoSegments = this.getVideoSegments(parsed, this.duration);
+      this.$bus.$emit('finish-loading', this.subtitle.metaInfo.type);
     });
   },
   methods: {

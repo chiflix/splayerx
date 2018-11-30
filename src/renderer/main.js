@@ -660,11 +660,22 @@ new Vue({
     window.addEventListener('wheel', (e) => {
       const up = e.deltaY < 0;
       let isAdvanceColumeItem;
-      const nodeList = document.querySelector('.advance-column-items').childNodes;
-      for (let i = 0; i < nodeList.length; i += 1) {
-        isAdvanceColumeItem = nodeList[i].contains(e.target);
+      let isSubtitleScrollItem;
+      const advance = document.querySelector('.advance-column-items');
+      const subtitle = document.querySelector('.subtitle-scroll-items');
+      if (advance) {
+        const nodeList = advance.childNodes;
+        for (let i = 0; i < nodeList.length; i += 1) {
+          isAdvanceColumeItem = nodeList[i].contains(e.target);
+        }
       }
-      if (!isAdvanceColumeItem) {
+      if (subtitle) {
+        const subList = subtitle.childNodes;
+        for (let i = 0; i < subList.length; i += 1) {
+          isSubtitleScrollItem = subList[i].contains(e.target);
+        }
+      }
+      if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
         this.$store.dispatch(up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME, 6);
       }
     });

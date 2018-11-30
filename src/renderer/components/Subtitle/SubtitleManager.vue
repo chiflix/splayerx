@@ -63,12 +63,16 @@ export default {
     premiumSubtitles(newVal) {
       if (newVal.length) console.log('Premium Found!', ...newVal);
     },
+    subtitleList() {
+      this.$bus.$emit('finish-loading', 'online');
+    },
   },
   methods: {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
       changeCurrentSubtitle: subtitleActions.SWITCH_CURRENT_SUBTITLE,
+      refreshSubtitle: subtitleActions.REFRESH_SUBTITLES,
     }),
     async getSubtitlesList(videoSrc) {
       const local = await this.getLocalSubtitlesList(videoSrc);
@@ -83,19 +87,21 @@ export default {
           id: uuidv4(),
         });
       };
-
+      const onlineNormalizer = [];
       const onlineNeeded = local.length === 0;
       const online = onlineNeeded ? await this.getOnlineSubtitlesList(videoSrc) : [];
-      const onlineNormalizer = subtitles => (
-        subtitles.array[1][0]
-          .filter(hash => typeof hash === 'string' && hash.length)
-          .map(hash => ({
-            type: 'online',
-            hash,
-            id: uuidv4(),
-          }))
-      );
-      return onlineNeeded ? onlineNormalizer(online) : [
+      if (onlineNeeded) {
+        online.array[1].forEach((sub) => {
+          if (typeof sub[0] === 'string' && sub[0].length) {
+            onlineNormalizer.push({
+              type: 'online',
+              hash: sub[0],
+              id: uuidv4(),
+            });
+          }
+        });
+      }
+      return onlineNeeded ? onlineNormalizer : [
         ...(await Promise.all(local.map(localNormalizer))),
       ];
     },
@@ -155,7 +161,7 @@ export default {
       });
     },
     chooseInitialSubtitle(subtitleList, iso6391SystemLocale) {
-      if (subtitleList.length === 1) {
+      if (subtitleList.length >= 1) {
         return subtitleList[0];
       } else {
         const fitSystemLocaleSubtitles = subtitleList.filter(subtitle => convert3To1(subtitle.lang) === iso6391SystemLocale);
@@ -169,7 +175,7 @@ export default {
       this.systemLocale = locale.slice(0, 2);
       this.getSubtitlesList(this.originSrc).then((result) => {
         this.addSubtitles(result);
-        this.changeCurrentSubtitle((this.chooseInitialSubtitle(this.subtitleList, this.systemLocale)).id);
+        this.changeCurrentSubtitle(this.chooseInitialSubtitle(this.subtitleList, this.systemLocale).id);
       });
     });
     this.$bus.$on('add-subtitles', (subtitleList) => {
@@ -185,6 +191,22 @@ export default {
         })),
       )(subtitleList);
       this.changeCurrentSubtitle(currentUuids[currentUuids.length - 1]);
+    });
+    this.$bus.$on('refresh-subtitle', async (hash) => {
+      const online = await Sagi.mediaTranslate(hash);
+      let onlineNormalizer = [];
+      online.array[1].forEach((sub) => {
+        onlineNormalizer.push(
+          sub
+            .filter(hash => typeof hash === 'string' && hash.length)
+            .map(hash => ({
+              type: 'online',
+              hash,
+              id: uuidv4(),
+            })));
+      });
+      this.refreshSubtitle(onlineNormalizer);
+      this.$bus.$emit('finish-refresh');
     });
   },
 };

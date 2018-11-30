@@ -361,6 +361,7 @@ export default {
         opacity: 0.4;
         border: 0.5px solid rgba(255, 255, 255, 0.20);
         background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+        box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
       }
       .delay{
         cursor: default;

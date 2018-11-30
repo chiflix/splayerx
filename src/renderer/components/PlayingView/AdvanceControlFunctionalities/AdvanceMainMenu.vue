@@ -7,7 +7,7 @@
     height: this.readyShow === 'mainMenu' ? menuCardHeight : this.readyShow === 'subMenu' ? subtitleCardHeight : audioCardHeight,
     transition: 'height 100ms linear',
   }">
-  <transition name="setUp">
+  <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
     <div class="mainItems" v-show="readyShow === 'mainMenu'"
       :style="{
         bottom: readyShow === 'mainMenu' ? '' : '0px',
@@ -30,17 +30,18 @@
         @mouseleave="handleMouseleave()"
         @click.left="handleSubClick">
         <transition name="arrow">
-          <div class="hoverSubBack" v-show="hoverIndex === 2"></div>
+          <div class="hoverSubBack" v-show="hoverIndex === 2 && currentSubtitleId !== ''"></div>
         </transition>
-        <div class="subContainer">
+        <div class="subContainer"
+          :style="{ cursor: currentSubtitleId === '' ? 'default' : 'pointer'}">
           <div class="item2"
             :style="{
-              color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              color: currentSubtitleId === '' ? 'rgba(255, 255, 255, 0.4)' : hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">
             <div>{{ this.$t('advance.subMenu') }}</div>
             <transition name="arrow">
-              <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
+              <Icon type="rightArrow" v-show="hoverIndex === 2 && currentSubtitleId !== ''"></Icon>
             </transition>
           </div>
         </div>
@@ -68,7 +69,7 @@
     </div>
   </transition>
 
-  <transition name="setUp">
+  <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
     <div class="mainItems1" v-show="readyShow === 'subMenu'"
       :style="{
         bottom: readyShow === 'subMenu' ? '' : '0px',
@@ -124,7 +125,7 @@
     </div>
   </transition>
 
-  <transition name="setUp">
+  <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
     <div class="mainItems2" v-show="readyShow === 'audioMenu'"
       :style="{
         bottom: readyShow === 'audioMenu' ? '' : '0px',
@@ -165,16 +166,16 @@
         </transition>
         <div class="trackContainer">
         <transition name="audioTransIn">
-          <div class="item2" v-show="!showTrack">
+          <div class="item2" v-show="!showTrack"
+            :style="{ cursor: 2 <= trackNum ? 'pointer' : 'default' }">
             <div :style="{
-              color: hoverAudioIndex === 2 && !showTrack && 2 <= trackNum ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              color: trackNum < 2 ? 'rgba(255, 255, 255, 0.4)' : hoverAudioIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">{{ this.$t('advance.changeTrack') }}</div>
-            <div
-              class="trackDetail"
+            <div class="trackDetail"
               :style="{
-              color: 'rgba(255, 255, 255, 0.6)',
-            }">{{ currentAudioTrack }}</div>
+                color: 2 <= trackNum ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
+              }">{{ currentAudioTrack }}</div>
           </div>
         </transition>
         </div>
@@ -188,6 +189,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import AdvanceRowItems from './AdvanceRowItems.vue';
 import BaseInfoCard from '../InfoCard.vue';
 import Icon from '../../BaseIconContainer.vue';
@@ -244,6 +246,7 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['winWidth', 'currentSubtitleId']),
     currentAudioTrack() {
       if (this.trackNum === 1) {
         return this.$t('advance.chosenTrack');
@@ -251,9 +254,6 @@ export default {
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
       if (track && track.id) return track.language;
       return this.$t('advance.chosenTrack');
-    },
-    winWidth() {
-      return this.$store.getters.winWidth;
     },
     speedHeight() {
       if (this.winWidth > 514 && this.winWidth <= 854) {
@@ -375,8 +375,10 @@ export default {
       this.speedChosen = true;
     },
     handleSubClick() {
-      this.readyShow = 'subMenu';
-      this.speedChosen = false;
+      if (this.currentSubtitleId !== '') {
+        this.readyShow = 'subMenu';
+        this.speedChosen = false;
+      }
     },
     handleAudioClick() {
       this.readyShow = 'audioMenu';
@@ -501,6 +503,16 @@ export default {
   .setUp-leave-active {
     animation: hideP1 .2s;
   }
+
+  .setUpLeft-enter-active {
+    animation: showLeftP1 .2s;
+  }
+  .setUpLeft-enter, .setUpLeft-leave-to {
+    opacity: 0;
+  }
+  .setUpLeft-leave-active {
+    animation: hideLeftP1 .2s;
+  }
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
   .card {
@@ -540,6 +552,15 @@ export default {
   }
   .setUp-leave-active {
     animation: hideP2 .2s;
+  }
+  .setUpLeft-enter-active {
+    animation: showLeftP2 .2s;
+  }
+  .setUpLeft-enter, .setUpLeft-leave-to {
+    opacity: 0;
+  }
+  .setUpLeft-leave-active {
+    animation: hideLeftP2 .2s;
   }
 }
 @media screen and (min-width: 1921px) {
@@ -581,6 +602,16 @@ export default {
   .setUp-leave-active {
     animation: hideP3 .2s;
   }
+  .setUpLeft-enter-active {
+    animation: showLeftP3 .2s;
+  }
+  .setUpLeft-enter, .setUpLeft-leave-to {
+    opacity: 0;
+  }
+  .setUpLeft-leave-active {
+    animation: hideLeftP3 .2s;
+  }
+
 }
 
 .card {
@@ -768,6 +799,66 @@ export default {
   100% {
     opacity: 0;
     right: -285.6px;
+  }
+}
+@keyframes showLeftP1 {
+  0% {
+    opacity: 0;
+    right: -170px;
+  }
+  100% {
+    opacity: 1;
+    right: 0;
+  }
+}
+@keyframes hideLeftP1 {
+  0% {
+    opacity: 1;
+    right: 0;
+  }
+  100% {
+    opacity: 0;
+    right: 170px;
+  }
+}
+@keyframes showLeftP2 {
+  0% {
+    opacity: 0;
+    right: -204px;
+  }
+  100% {
+    opacity: 1;
+    right: 0;
+  }
+}
+@keyframes hideLeftP2 {
+  0% {
+    opacity: 1;
+    right: 0;
+  }
+  100% {
+    opacity: 0;
+    right: 204px;
+  }
+}
+@keyframes showLeftP3 {
+  0% {
+    opacity: 0;
+    right: -285.6px;
+  }
+  100% {
+    opacity: 1;
+    right: 0;
+  }
+}
+@keyframes hideLeftP3 {
+  0% {
+    opacity: 1;
+    right: 0;
+  }
+  100% {
+    opacity: 0;
+    right: 285.6px;
   }
 }
 </style>
