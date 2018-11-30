@@ -2,6 +2,7 @@
   <div class="subtitle-manager"
     :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
     <subtitle-loader
+      ref="currentSubtitle"
       v-if="currentSubtitleId"
       :subtitleSrc="currentSubtitleSrc"
       :key="currentSubtitleId"
@@ -34,7 +35,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
-      'currentTime', 'duration', 'paused', 'premiumSubtitles',
+      'currentTime', 'duration', 'paused', 'premiumSubtitles', 'mediaHash', 'duration',
     ]),
     currentSubtitleSrc() {
       const result = this.subtitleList
@@ -47,6 +48,7 @@ export default {
       subtitleTypes: ['local', 'embedded', 'online'],
       systemLocale: '',
       subtitleTime: {},
+      localPremiumSubtitles: {},
     };
   },
   watch: {
@@ -61,7 +63,26 @@ export default {
       });
     },
     premiumSubtitles(newVal) {
-      if (newVal.length) console.log('Premium Found!', ...newVal);
+      newVal.forEach((subtitle) => {
+        const { id, played } = subtitle;
+        if (id && !this.localPremiumSubtitles[id]) {
+          const subtitleInfo = this.subtitleList.filter(subtitle => subtitle.id === id)[0];
+          const { subtitle } = this.$refs.currentSubtitle;
+          const payload = {
+            media_identity: this.mediaHash,
+            language_code: subtitleInfo.langCode,
+            format: `.${subtitleInfo.ext}`,
+            played_time: played,
+            total_time: this.duration,
+            delay: 0,
+            payload: Buffer.from(subtitle.rawData),
+          };
+          Sagi.pushTranscript(payload).then((res) => {
+            console.log(res);
+          });
+          this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
+        }
+      });
     },
     subtitleList() {
       this.$bus.$emit('finish-loading', 'online');
@@ -83,7 +104,8 @@ export default {
           ext: track.ext,
           type: 'local',
           name: track.name,
-          lang,
+          lang: lang.name,
+          langCode: lang.iso6393,
           id: uuidv4(),
         });
       };
