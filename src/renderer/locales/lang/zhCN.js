@@ -6,6 +6,7 @@ export default {
       open: '打开文件…',
       openURL: '打开URL…',
       openRecent: '最近播放',
+      clearHistory: '清空播放记录',
       closeWindow: '关闭',
     },
     playback: {

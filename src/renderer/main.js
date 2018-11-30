@@ -59,7 +59,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement']),
   },
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
@@ -88,6 +88,18 @@ new Vue({
     privacyAgreement(val) {
       if (this.menu) {
         this.menu.getMenuItemById('privacy').checked = val;
+      }
+    },
+    volume(val) {
+      if (val <= 0) {
+        this.menu.getMenuItemById('mute').checked = true;
+      } else {
+        this.menu.getMenuItemById('mute').checked = false;
+      }
+    },
+    muted(val) {
+      if (val) {
+        this.menu.getMenuItemById('mute').checked = val;
       }
     },
   },
@@ -134,6 +146,12 @@ new Vue({
                 // TODO: openURL.click
               },
               enabled: false,
+            },
+            {
+              label: this.$t('msg.file.clearHistory'),
+              click: () => {
+                this.$bus.$emit('clean-lastPlayedFile');
+              },
             },
             {
               label: this.$t('msg.file.closeWindow'),
@@ -191,9 +209,9 @@ new Vue({
               label: this.$t('msg.audio.mute'),
               type: 'checkbox',
               accelerator: 'M',
-              click: (menuItem) => {
+              id: 'mute',
+              click: () => {
                 this.$bus.$emit('toggle-muted');
-                menuItem.checked = this.muted;
               },
             },
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
@@ -697,14 +715,17 @@ new Vue({
     });
     window.addEventListener('wheel', (e) => {
       if (!e.ctrlKey) {
-        const up = e.deltaY < 0;
+        const up = e.deltaY > 0;
         let isAdvanceColumeItem;
         const nodeList = document.querySelector('.advance-column-items').childNodes;
         for (let i = 0; i < nodeList.length; i += 1) {
           isAdvanceColumeItem = nodeList[i].contains(e.target);
         }
         if (!isAdvanceColumeItem) {
-          this.$store.dispatch(up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME, 6);
+          this.$store.dispatch(
+            up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+            Math.abs(e.deltaY) * 0.2,
+          );
         }
       }
     });

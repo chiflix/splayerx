@@ -11,7 +11,7 @@
         <div class="img"
           v-if="!isPlaying && imageLoaded"
           :style="{
-            backgroundImage: `url('${imageSrc}')`,
+            backgroundImage: backgroundImage,
           }"/>
         <div class="blur"
           v-show="!isChosen && !isPlaying"/>
@@ -166,7 +166,7 @@ export default {
   mounted() {
     this.$electron.ipcRenderer.send('snapShot', this.path);
     this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-      this.coverSrc = `${imgPath}.png`;
+      this.coverSrc = `file://${imgPath}.png`;
     });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
@@ -187,6 +187,9 @@ export default {
   },
   computed: {
     ...mapGetters(['originSrc']),
+    backgroundImage() {
+      return `url(${this.imageSrc})`;
+    },
     imageSrc() {
       if (this.smallShortCut) {
         return this.smallShortCut;
@@ -194,7 +197,7 @@ export default {
       return this.coverSrc;
     },
     imageLoaded() {
-      return this.mediaInfo.smallShortCut || this.coverSrc !== '';
+      return this.smallShortCut || this.coverSrc !== '';
     },
     thumbnailHeight() {
       return this.thumbnailWidth / (112 / 63);

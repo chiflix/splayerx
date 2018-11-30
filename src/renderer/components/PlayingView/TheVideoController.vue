@@ -103,13 +103,15 @@ export default {
       focusDelay: 500,
       listenedWidget: 'the-video-controller',
       progressBarHovering: false,
+      attachedShown: false,
     };
   },
   computed: {
     ...mapGetters(['muted', 'paused']),
     showAllWidgets() {
       return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
-        (!this.mouseLeftWindow && this.onOtherWidget);
+        (!this.mouseLeftWindow && this.onOtherWidget) ||
+        this.attachedShown;
     },
     onOtherWidget() {
       return this.currentWidget !== this.$options.name;
@@ -329,6 +331,8 @@ export default {
           }
         }
       });
+      this.attachedShown = Object.keys(this.widgetsStatus)
+        .some(key => this.widgetsStatus[key].showAttached === true);
     },
     // Event listeners
     handleMousemove(event) {

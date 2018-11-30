@@ -6,6 +6,7 @@ export default {
       open: 'Open…',
       openURL: 'Open URL…',
       openRecent: 'Open Recent',
+      clearHistory: 'Clear Playback History',
       closeWindow: 'Close Window',
     },
     playback: {
