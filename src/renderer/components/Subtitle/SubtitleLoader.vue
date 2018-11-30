@@ -68,6 +68,7 @@ export default {
   },
   created() {
     const { subtitleSrc } = this;
+    console.log(subtitleSrc);
     this.subtitle = new Subtitle(subtitleSrc);
     this.subtitle.load();
     this.subtitle.once('parse', (parsed) => {
