@@ -41,7 +41,7 @@ const getters = {
   subtitleList: state => state.subtitleList,
   premiumSubtitles: (state, getters) => state.subtitleList
     .filter(subtitle => subtitle.duration && subtitle.duration >= 0.6 * getters.duration)
-    .map(subtitle => ({ id: subtitle.id, path: subtitle.path })),
+    .map(subtitle => ({ id: subtitle.id, played: subtitle.duration })),
   // legacy subtitle getters
   subtitleNames: state => state.SubtitleNames,
   firstSubtitleIndex: state => state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first'),
