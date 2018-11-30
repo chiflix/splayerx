@@ -41,23 +41,13 @@ class InfoDB {
       }
     });
   }
+  // clean All records in recent-played
   static cleanData() {
     return idb.open('Info').then((db) => {
       const tx = db.transaction('recent-played', 'readwrite');
-      let shortCutCount = 0;
-      tx.objectStore('recent-played').index('lastOpened').iterateCursor(null, 'prev', (cursor) => {
-        if (!cursor) return;
-        if (shortCutCount > 10) {
-          const oldVal = cursor.value;
-          delete oldVal.shortCut;
-          cursor.update(oldVal);
-        } else {
-          shortCutCount += 1;
-        }
-        cursor.continue();
-      });
+      tx.objectStore('recent-played').clear();
       return tx.complete.then(() => {
-        addLog.methods.addLog('info', 'DB recent-played shortcut cleaned');
+        addLog.methods.addLog('info', 'DB recent-played records all deleted');
       });
     });
   }

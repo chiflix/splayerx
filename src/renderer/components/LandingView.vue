@@ -119,7 +119,9 @@ export default {
           const mergedData = Object.assign(val, data);
           asyncStorage.set('recent-played', {});
           await this.infoDB().add('recent-played', mergedData);
-          await this.infoDB().cleanData();
+          if (this.$store.getters.deleteVideoHistoryOnExit) {
+            await this.infoDB().cleanData();
+          }
         }
       })
 
@@ -129,6 +131,12 @@ export default {
           this.lastPlayedFile = data.slice(0, 9);
         });
       });
+    this.$bus.$on('clean-lastPlayedFile', () => {
+      this.lastPlayedFile = [];
+      this.langdingLogoAppear = true;
+      this.showShortcutImage = false;
+      this.infoDB().cleanData();
+    });
   },
   beforeDestroy() {
     window.onresize = null;

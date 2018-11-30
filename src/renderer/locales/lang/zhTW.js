@@ -6,6 +6,7 @@ export default {
       open: '打開文件…',
       openURL: '打開URL…',
       openRecent: '最近播放',
+      clearHistory: '清空播放紀錄',
       closeWindow: '關閉',
     },
     playback: {
@@ -73,6 +74,10 @@ export default {
       hideOthers: '隱藏 其他',
       quit: '退出',
     },
+    preferences: {
+      clearHistory: '退出時自動清空播放紀錄',
+      privacyConfirm: '啟用匿名信息和智能翻譯',
+    },
     update: {
       title: '更新就緒',
       message: '更新已就緒，是否現在重啟?',
@@ -105,5 +110,19 @@ export default {
   loading: {
     title: '',
     content: '正在搜索翻譯結果...',
+  },
+  privacyBubble: {
+    tryToDisable: {
+      partOne: '射手影音使用匿名信息以提供更好的服務，',
+      partTwo: '匿名信息會導致智能翻譯無法使用。',
+      underlinedContent: '禁用',
+      button: '確定',
+    },
+    confirmDisable: {
+      partOne: '確認',
+      partTwo: '匿名信息和智能翻譯。',
+      underlinedContent: '禁用',
+      button: '取消',
+    },
   },
 };

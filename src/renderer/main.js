@@ -59,7 +59,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['muted', 'winWidth', 'chosenStyle', 'chosenSize']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement']),
   },
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
@@ -67,6 +67,7 @@ new Vue({
         this.$store.dispatch('updateChosenStyle', data.chosenStyle);
       }
     });
+    this.$store.dispatch('getLocalPreference');
   },
   watch: {
     chosenStyle(val) {
@@ -77,6 +78,28 @@ new Vue({
     chosenSize(val) {
       if (this.menu) {
         this.menu.getMenuItemById(`size${val}`).checked = true;
+      }
+    },
+    deleteVideoHistoryOnExit(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('deleteHistory').checked = val;
+      }
+    },
+    privacyAgreement(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('privacy').checked = val;
+      }
+    },
+    volume(val) {
+      if (val <= 0) {
+        this.menu.getMenuItemById('mute').checked = true;
+      } else {
+        this.menu.getMenuItemById('mute').checked = false;
+      }
+    },
+    muted(val) {
+      if (val) {
+        this.menu.getMenuItemById('mute').checked = val;
       }
     },
   },
@@ -123,6 +146,12 @@ new Vue({
                 // TODO: openURL.click
               },
               enabled: false,
+            },
+            {
+              label: this.$t('msg.file.clearHistory'),
+              click: () => {
+                this.$bus.$emit('clean-lastPlayedFile');
+              },
             },
             {
               label: this.$t('msg.file.closeWindow'),
@@ -180,9 +209,9 @@ new Vue({
               label: this.$t('msg.audio.mute'),
               type: 'checkbox',
               accelerator: 'M',
-              click: (menuItem) => {
+              id: 'mute',
+              click: () => {
                 this.$bus.$emit('toggle-muted');
-                menuItem.checked = this.muted;
               },
             },
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
@@ -419,8 +448,35 @@ new Vue({
               },
               {
                 label: this.$t('msg.splayerx.preferences'),
-                enabled: false,
-                accelerator: 'Cmd+,',
+                enabled: true,
+                submenu: [
+                  {
+                    label: this.$t('msg.preferences.clearHistory'),
+                    id: 'deleteHistory',
+                    type: 'checkbox',
+                    checked: this.$store.getters.deleteVideoHistoryOnExit,
+                    click: () => {
+                      if (this.$store.getters.deleteVideoHistoryOnExit) {
+                        this.$store.dispatch('notDeleteVideoHistoryOnExit');
+                      } else {
+                        this.$store.dispatch('deleteVideoHistoryOnExit');
+                      }
+                    },
+                  },
+                  {
+                    label: this.$t('msg.preferences.privacyConfirm'),
+                    id: 'privacy',
+                    type: 'checkbox',
+                    checked: this.$store.getters.privacyAgreement,
+                    click: () => {
+                      if (this.$store.getters.privacyAgreement) {
+                        this.$store.dispatch('disagreeOnPrivacyPolicy');
+                      } else {
+                        this.$store.dispatch('agreeOnPrivacyPolicy');
+                      }
+                    },
+                  },
+                ],
               },
               {
                 label: this.$t('msg.splayerx.homepage'),
@@ -657,6 +713,7 @@ new Vue({
           break;
       }
     });
+    /* eslint-disable */
     window.addEventListener('wheel', (e) => {
       const up = e.deltaY < 0;
       let isAdvanceColumeItem;
@@ -678,7 +735,22 @@ new Vue({
       if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
         this.$store.dispatch(up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME, 6);
       }
+      if (!e.ctrlKey) {
+        const up = e.deltaY > 0;
+        let isAdvanceColumeItem;
+        const nodeList = document.querySelector('.advance-column-items').childNodes;
+        for (let i = 0; i < nodeList.length; i += 1) {
+          isAdvanceColumeItem = nodeList[i].contains(e.target);
+        }
+        if (!isAdvanceColumeItem) {
+          this.$store.dispatch(
+            up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+            Math.abs(e.deltaY) * 0.2,
+          );
+        }
+      }
     });
+    /* eslint-disable */
 
     /**
      * Todo:
