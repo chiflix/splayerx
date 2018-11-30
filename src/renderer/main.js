@@ -148,6 +148,12 @@ new Vue({
               enabled: false,
             },
             {
+              label: this.$t('msg.file.clearHistory'),
+              click: () => {
+                this.$bus.$emit('clean-lastPlayedFile');
+              },
+            },
+            {
               label: this.$t('msg.file.closeWindow'),
               role: 'Close',
             },
