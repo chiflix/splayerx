@@ -64,6 +64,9 @@ const mutations = {
   [subtitleMutations.SUBTITLE_UPDATE](state, subtitleList) {
     state.subtitleList = subtitleList;
   },
+  [subtitleMutations.OFF_SUBTITLE](state, subtitle) {
+    state.currentSubtitleId = subtitle;
+  },
   SubtitleNames(state, subtitles) {
     state.SubtitleNames = subtitles;
   },
@@ -146,6 +149,9 @@ const actions = {
     ) {
       commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, subtitleId);
     }
+  },
+  [subtitleActions.OFF_SUBTITLES]({ commit }) {
+    commit(subtitleMutations.OFF_SUBTITLE, '');
   },
 };
 
