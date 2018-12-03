@@ -23,7 +23,7 @@ export default {
       name: 'Audio',
       increaseAudioDelay: 'Increase Audio Delay',
       decreaseAudioDelay: 'Decrease Audio Delay',
-      mute: 'Toggle Mute',
+      mute: 'Mute',
       switchAudioTrack: 'Switch Audio Track',
       track1: 'Track1',
       track2: 'Track2',
