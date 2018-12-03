@@ -251,9 +251,6 @@ export default {
     }),
   },
   watch: {
-    muted(val) {
-      console.log('muted', val);
-    },
     originSrc(val, oldVal) {
       this.coverFinded = false;
       this.saveScreenshot();
