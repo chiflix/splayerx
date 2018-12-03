@@ -1,7 +1,7 @@
 <template>
   <div class="itemContainer advance-column-items">
     <div class="textContainer" :style="{
-      cursor: isChosen ? 'default' : 'pointer',
+      cursor: 'default',
     }">
       <div class="textItem">{{ item }}</div>
     </div>
@@ -223,6 +223,7 @@ export default {
     }
   }
   .listContainer {
+    cursor: default;
     .columnContainer {
       display: flex;
       flex-direction: column;

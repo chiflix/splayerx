@@ -4,6 +4,7 @@
   :contentMinHeight="119"
   :contentMinWidth="170"
   :style="{
+    cursor: 'default',
     height: this.readyShow === 'mainMenu' ? menuCardHeight : this.readyShow === 'subMenu' ? subtitleCardHeight : audioCardHeight,
     transition: 'height 100ms linear',
   }">
@@ -677,6 +678,7 @@ export default {
   }
   .topContainer {
     display: flex;
+    cursor: pointer;
     .topContent {
       display: flex;
       justify-content: flex-start;
@@ -699,6 +701,7 @@ export default {
   position: absolute;
   .topContainer {
     display: flex;
+    cursor: pointer;
     .topContent {
       display: flex;
       justify-content: flex-start;

@@ -351,6 +351,7 @@ export default {
   .listContainer {
     flex: 1;
     display: flex;
+    cursor: default;
     .rowContainer {
       display: flex;
       justify-content: center;
