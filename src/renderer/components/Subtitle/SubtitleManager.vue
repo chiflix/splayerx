@@ -217,14 +217,13 @@ export default {
       const online = await Sagi.mediaTranslate(hash);
       let onlineNormalizer = [];
       online.array[1].forEach((sub) => {
-        onlineNormalizer.push(
-          sub
-            .filter(hash => typeof hash === 'string' && hash.length)
-            .map(hash => ({
-              type: 'online',
-              hash,
-              id: uuidv4(),
-            })));
+        if (typeof sub[0] === 'string' && sub[0].length) {
+          onlineNormalizer.push({
+            type: 'online',
+            hash: sub[0],
+            id: uuidv4(),
+          });
+        }
       });
       this.refreshSubtitle(onlineNormalizer);
       this.$bus.$emit('finish-refresh');

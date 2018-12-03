@@ -61,7 +61,7 @@ const mutations = {
   [subtitleMutations.ADD_SUBTITLE](state, subtitle) {
     let isExit = false;
     state.subtitleList.forEach((item, index) => {
-      if (item.path === subtitle.path) {
+      if (item.path && item.path === subtitle.path) {
         state.subtitleList.splice(index, 1);
         state.subtitleList.unshift(item);
         isExit = true;
