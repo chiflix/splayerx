@@ -128,11 +128,11 @@ export default {
       hoverIndex: -5,
       hiddenText: false,
       hoverHeight: 0,
-      shouldHidden: false,
       timer: null,
       count: 0,
       rotateTime: 0,
       loadingType: '',
+      detailTimer: null,
     };
   },
   components: {
@@ -301,22 +301,21 @@ export default {
     },
     toggleItemsMouseOver(index) {
       if (index >= 0) {
+        clearTimeout(this.detailTimer);
         const hoverItem = document.querySelector(`#item${index} .text`);
         if (hoverItem.clientWidth < hoverItem.scrollWidth) {
           this.shouldHidden = true;
           this.hoverHeight = this.textHeight *
             (Math.ceil(hoverItem.scrollWidth / hoverItem.clientWidth) - 1);
-          setTimeout(() => {
-            if (this.shouldHidden) {
-              this.hiddenText = true;
-            }
+          this.detailTimer = setTimeout(() => {
+            this.hiddenText = true;
           }, 1500);
         }
       }
       this.hoverIndex = index;
     },
     toggleItemsMouseLeave() {
-      this.shouldHidden = false;
+      clearTimeout(this.detailTimer);
       this.hoverHeight = 0;
       this.hiddenText = false;
       this.hoverIndex = -5;
