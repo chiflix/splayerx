@@ -19,7 +19,8 @@
             class="columnNumDetail"
             @mouseover="handleOver(index)"
             @mouseout="handleOut(index)"
-            @click="handleClick(index)">
+            @click="handleClick(index)"
+            :style="{ cursor: track.enabled ? 'default' : 'pointer' }">
             <div class="text"
               :style="{
                 color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',

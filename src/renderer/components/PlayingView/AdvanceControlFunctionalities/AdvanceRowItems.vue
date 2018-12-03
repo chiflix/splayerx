@@ -29,7 +29,8 @@
               @mouseout="handleOut(index)"
               @click="handleClick(index)"
               :style="{
-                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`
+                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`,
+                cursor: list.chosen ? 'default' : 'pointer',
               }">
               <div class="text"
                 :style="{

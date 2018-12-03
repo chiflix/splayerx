@@ -59,7 +59,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement', 'mediaHash']),
   },
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
@@ -91,11 +91,7 @@ new Vue({
       }
     },
     volume(val) {
-      if (val <= 0) {
-        this.menu.getMenuItemById('mute').checked = true;
-      } else {
-        this.menu.getMenuItemById('mute').checked = false;
-      }
+      this.menu.getMenuItemById('mute').checked = val <= 0;
     },
     muted(val) {
       if (val) {
@@ -231,8 +227,36 @@ new Vue({
         {
           label: this.$t('msg.subtitle.name'),
           submenu: [
-            { label: this.$t('msg.subtitle.AITranslation'), enabled: false },
-            { label: this.$t('msg.subtitle.loadSubtitleFile'), enabled: false },
+            {
+              label: this.$t('msg.subtitle.AITranslation'),
+              click: () => {
+                this.$bus.$emit('menu-sub-refresh');
+              },
+            },
+            {
+              label: this.$t('msg.subtitle.loadSubtitleFile'),
+              click: () => {
+                const { remote } = this.$electron;
+                const browserWindow = remote.BrowserWindow;
+                const focusWindow = browserWindow.getFocusedWindow();
+                console.log(focusWindow);
+                const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
+
+                dialog.showOpenDialog(focusWindow, {
+                  title: 'Open Dialog',
+                  defaultPath: './',
+                  filters: [{
+                    name: 'Subtitle Files',
+                    extensions: VALID_EXTENSION,
+                  }],
+                  properties: ['openFile'],
+                }, (item) => {
+                  if (item) {
+                    this.$bus.$emit('add-subtitles', item);
+                  }
+                });
+              },
+            },
             {
               label: this.$t('msg.subtitle.mainSubtitle'),
               enabled: false,
@@ -715,34 +739,25 @@ new Vue({
     });
     /* eslint-disable */
     window.addEventListener('wheel', (e) => {
-      const up = e.deltaY < 0;
-      let isAdvanceColumeItem;
-      let isSubtitleScrollItem;
-      const advance = document.querySelector('.advance-column-items');
-      const subtitle = document.querySelector('.subtitle-scroll-items');
-      if (advance) {
-        const nodeList = advance.childNodes;
-        for (let i = 0; i < nodeList.length; i += 1) {
-          isAdvanceColumeItem = nodeList[i].contains(e.target);
-        }
-      }
-      if (subtitle) {
-        const subList = subtitle.childNodes;
-        for (let i = 0; i < subList.length; i += 1) {
-          isSubtitleScrollItem = subList[i].contains(e.target);
-        }
-      }
-      if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
-        this.$store.dispatch(up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME, 6);
-      }
       if (!e.ctrlKey) {
         const up = e.deltaY > 0;
         let isAdvanceColumeItem;
-        const nodeList = document.querySelector('.advance-column-items').childNodes;
-        for (let i = 0; i < nodeList.length; i += 1) {
-          isAdvanceColumeItem = nodeList[i].contains(e.target);
+        let isSubtitleScrollItem;
+        const advance = document.querySelector('.advance-column-items');
+        const subtitle = document.querySelector('.subtitle-scroll-items');
+        if (advance) {
+          const nodeList = advance.childNodes;
+          for (let i = 0; i < nodeList.length; i += 1) {
+            isAdvanceColumeItem = nodeList[i].contains(e.target);
+          }
         }
-        if (!isAdvanceColumeItem) {
+        if (subtitle) {
+          const subList = subtitle.childNodes;
+          for (let i = 0; i < subList.length; i += 1) {
+            isSubtitleScrollItem = subList[i].contains(e.target);
+          }
+        }
+        if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
           this.$store.dispatch(
             up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
             Math.abs(e.deltaY) * 0.2,

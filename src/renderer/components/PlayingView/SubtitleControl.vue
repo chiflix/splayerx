@@ -5,8 +5,8 @@
     <div class="sub-btn-control">
       <transition name="sub-trans-l">
         <div class="sub-menu-wrapper subtitle-scroll-items"
-             v-show="showAttached"
-             :style="{
+          v-show="showAttached"
+          :style="{
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
             height: hiddenText ? `${contHeight + hoverHeight}px` : `${contHeight}px`,
           }">
@@ -15,67 +15,69 @@
             <div class="topContainer">
               <div class="title">字幕选择</div>
               <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
-                    :style="{
-                transform: `rotate(${rotateTime * 360}deg)`,
-                transition: 'transform 1s linear'
-              }"/>
+                :style="{
+                  transform: `rotate(${rotateTime * 360}deg)`,
+                  transition: 'transform 1s linear'
+                }"/>
             </div>
 
             <div class="sub-menu">
               <div class="scrollScope"
-                   :style="{
-                transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
-                overflowY: isOverFlow,
-              }">
+                :style="{
+                  transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                  height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
+                  overflowY: isOverFlow,
+                 }">
                 <div class="itemContainer">
                   <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)">
                     <div class="menu-item-text-wrapper"
-                         @mouseup="toggleSubtitleOff"
-                         @mouseover="toggleItemsMouseOver(-1)"
-                         @mouseleave="toggleItemsMouseLeave(-1)"
-                         :style="{
-                      color: hoverIndex === -1 || currentSubIden === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                      height: `${itemHeight}px`
-                    }">
+                      @mouseup="toggleSubtitleOff"
+                      @mouseover="toggleItemsMouseOver(-1)"
+                      @mouseleave="toggleItemsMouseLeave(-1)"
+                      :style="{
+                        color: hoverIndex === -1 || currentSubIden === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                        height: `${itemHeight}px`,
+                        cursor: currentSubIden === -1 ? 'default' : 'pointer',
+                      }">
                       <div class="text">无字幕</div>
                     </div>
                   </div>
 
                   <div v-if="foundSubtitles"
-                       v-for="(item, index) in computedAvaliableItems">
+                    v-for="(item, index) in computedAvaliableItems">
                     <div class="menu-item-text-wrapper"
-                         @mouseup="toggleItemClick(index)"
-                         @mouseover="toggleItemsMouseOver(index)"
-                         @mouseleave="toggleItemsMouseLeave(index)"
-                         :id="'item'+index"
-                         :style="{
+                      @mouseup="toggleItemClick(index)"
+                      @mouseover="toggleItemsMouseOver(index)"
+                      @mouseleave="toggleItemsMouseLeave(index)"
+                      :id="'item'+index"
+                      :style="{
                         transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                         color: hoverIndex === index || currentSubIden === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                         height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                        cursor: currentSubIden === index ? 'default' : 'pointer',
                       }">
                       <div class="text"
-                           :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
-                        whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                      }">{{ item.path ? getSubName(item.path) : 'subtitle' }}</div>
-                    </div>
+                        :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
+                          whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                        }">{{ item.path ? getSubName(item.path) : 'subtitle' }}</div>
+                      </div>
                   </div>
 
                   <div v-if="loadingPlaceholderList.length > 0"
-                       v-for="(item, index) in loadingPlaceholderList"
-                       class="placeholders-wrapper">
+                    v-for="item in loadingPlaceholderList"
+                    class="placeholders-wrapper">
                     <div class="placeholder-item-text-wrapper">
                       <div class="text">{{ item }}</div>
                     </div>
                   </div>
 
                   <div class="card" v-if="0 <= computedAvaliableItems.length"
-                       :style="{
-                    height: hiddenText && currentSubIden === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                    top: hiddenText && currentSubIden <= hoverIndex ? `${-hoverHeight}px` : '',
-                    marginTop: `${-cardPos}px`,
-                    transition: 'all 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
-                  }">
+                    :style="{
+                      height: hiddenText && currentSubIden === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                      top: hiddenText && currentSubIden <= hoverIndex ? `${-hoverHeight}px` : '',
+                      marginTop: `${-cardPos}px`,
+                      transition: 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+                    }">
                   </div>
                 </div>
               </div>
@@ -167,7 +169,7 @@ export default {
       }
     },
     computedAvaliableItems(val, oldval) {
-      if (difference(val, oldval).length > 0) {
+      if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
       }
     },
@@ -184,11 +186,15 @@ export default {
   mounted() {
     this.$bus.$on('add-subtitles', () => {
       this.currentSubIden = 0;
+      this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
       document.querySelector('.scrollScope').scrollTop = 0;
     });
     this.$bus.$on('finish-refresh', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
+    });
+    this.$bus.$on('menu-sub-refresh', () => {
+      this.handleRefresh();
     });
   },
   methods: {
@@ -206,7 +212,14 @@ export default {
         this.count += 1;
         this.rotateTime = Math.ceil(this.count / 100);
       }, 10);
+      setTimeout(() => {
+        if (this.timer) {
+          clearInterval(this.timer);
+          this.count = this.rotateTime * 100;
+        }
+      }, 20000);
       this.currentSubIden = 0;
+      document.querySelector('.scrollScope').scrollTop = 0;
       this.$bus.$emit('refresh-subtitle', this.mediaHash);
       this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
     },
@@ -478,7 +491,6 @@ export default {
   .btn:hover, .sub-item:hover{
     cursor: pointer;
   }
-
   .sub-trans-l-enter, .sub-trans-l-enter-active {
     transform: translateY(0px);
   }
@@ -520,7 +532,9 @@ export default {
       box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
     }
   }
-
+  .title {
+    color: rgba(255, 255, 255, 0.6);
+  }
   .menu-item-text-wrapper {
     .text {
       overflow: hidden; //超出的文本隐藏
@@ -562,7 +576,6 @@ export default {
       .title {
         font-size: 13px;
         margin: 15px auto auto 16px;
-        color: rgba(255, 255, 255, 0.3);
         letter-spacing: 0.2px;
         line-height: 15px;
       }
@@ -622,7 +635,6 @@ export default {
       .title {
         font-size: 15px;
         margin: 18px auto auto 19px;
-        color: rgba(255, 255, 255, 0.3);
         letter-spacing: 0.23px;
         line-height: 17px;
       }
@@ -682,7 +694,6 @@ export default {
       .title {
         font-size: 21px;
         margin: 24px auto auto 26px;
-        color: rgba(255, 255, 255, 0.3);
         letter-spacing: 0.32px;
         line-height: 23px;
       }
@@ -698,7 +709,7 @@ export default {
     }
     .sub-menu-wrapper {
       position: absolute;
-      bottom: 500px;
+      bottom: 70px;
       left: -33px;
       width: 286px;
       max-height: 433px;

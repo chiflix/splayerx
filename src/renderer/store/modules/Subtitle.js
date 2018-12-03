@@ -59,10 +59,20 @@ const mutations = {
     state.currentSubtitleId = subtitleId;
   },
   [subtitleMutations.ADD_SUBTITLE](state, subtitle) {
-    if (subtitle.type === 'local') {
-      state.subtitleList = [subtitle, ...state.subtitleList];
-    } else {
-      state.subtitleList = [...state.subtitleList, subtitle];
+    let isExit = false;
+    state.subtitleList.forEach((item, index) => {
+      if (item.path === subtitle.path) {
+        state.subtitleList.splice(index, 1);
+        state.subtitleList.unshift(item);
+        isExit = true;
+      }
+    });
+    if (!isExit) {
+      if (subtitle.type === 'local') {
+        state.subtitleList = [subtitle, ...state.subtitleList];
+      } else {
+        state.subtitleList = [...state.subtitleList, subtitle];
+      }
     }
   },
   [subtitleMutations.UPDATE_SUBTITLE](state, subtitle) {
@@ -70,8 +80,8 @@ const mutations = {
     const subtitleList = [...state.subtitleList];
     const index = state.subtitleList.findIndex(subtitle => subtitle.id === id);
     if (index >= 0) {
-      subtitleList.splice(index, 1);
-      state.subtitleList = [...subtitleList, subtitle];
+      subtitleList[index] = subtitle;
+      state.subtitleList = subtitleList;
     }
   },
   [subtitleMutations.REMOVE_SUBTITLE](state, subtitle) {
@@ -90,7 +100,6 @@ const mutations = {
         num = index + 1;
       }
     });
-    state.subtitleList.slice(0, num);
     state.subtitleList = state.subtitleList.slice(0, num).concat(...subtitle);
   },
   SubtitleNames(state, subtitles) {

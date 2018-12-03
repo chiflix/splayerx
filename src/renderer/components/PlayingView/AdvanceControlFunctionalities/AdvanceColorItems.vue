@@ -22,6 +22,7 @@
           <div class="rowContainer">
             <div class="imgContainer" v-for="(img, index) in imgs">
               <img :src="img === chosenStyle || index === hoverIndex ? imgsSelected[index] : img" class="imgType"
+                :style="{ cursor: img === chosenStyle ? 'default' : 'pointer'}"
                 @mouseover="handleOver(index)"
                 @mouseout="handleOut"
                 @click.left="handleClick($event, index)">

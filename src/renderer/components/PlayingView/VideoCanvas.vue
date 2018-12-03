@@ -293,7 +293,6 @@ export default {
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
     });
-    this.$bus.$on('toggle-mute', this.toggleMute);
     this.$bus.$on('seek', (e) => {
       this.seekTime = [e];
       // todo: use vuex get video element src

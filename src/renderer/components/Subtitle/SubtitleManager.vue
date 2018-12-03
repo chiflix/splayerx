@@ -212,7 +212,6 @@ export default {
           type: 'local',
         })),
       )(subtitleList);
-      this.changeCurrentSubtitle(currentUuids[currentUuids.length - 1]);
     });
     this.$bus.$on('refresh-subtitle', async (hash) => {
       const online = await Sagi.mediaTranslate(hash);
@@ -240,5 +239,6 @@ export default {
   top: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  z-index: 5;
 }
 </style>
