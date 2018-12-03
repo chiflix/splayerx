@@ -310,6 +310,7 @@ export default {
       }
     }
     .playlist-items {
+      -webkit-app-region: no-drag;
       display: flex;
       .item {
         position: relative;
