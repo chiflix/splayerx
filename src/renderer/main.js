@@ -714,18 +714,20 @@ new Vue({
       }
     });
     window.addEventListener('wheel', (e) => {
-      if (!e.ctrlKey) {
-        const up = e.deltaY > 0;
-        let isAdvanceColumeItem;
-        const nodeList = document.querySelector('.advance-column-items').childNodes;
-        for (let i = 0; i < nodeList.length; i += 1) {
-          isAdvanceColumeItem = nodeList[i].contains(e.target);
-        }
-        if (!isAdvanceColumeItem) {
-          this.$store.dispatch(
-            up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-            Math.abs(e.deltaY) * 0.2,
-          );
+      if (process.platform !== 'darwin') {
+        if (!e.ctrlKey) {
+          const up = e.deltaY > 0;
+          let isAdvanceColumeItem;
+          const nodeList = document.querySelector('.advance-column-items').childNodes;
+          for (let i = 0; i < nodeList.length; i += 1) {
+            isAdvanceColumeItem = nodeList[i].contains(e.target);
+          }
+          if (!isAdvanceColumeItem) {
+            this.$store.dispatch(
+              up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+              Math.abs(e.deltaY) * 0.2,
+            );
+          }
         }
       }
     });
