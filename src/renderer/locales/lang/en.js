@@ -125,5 +125,9 @@ export default {
       button: 'CANCEL',
     },
   },
+  recentPlaylist: {
+    folderSource: 'Folder',
+    playlistSource: 'Playlist',
+  },
 };
 
