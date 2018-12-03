@@ -128,6 +128,7 @@ export default {
   recentPlaylist: {
     folderSource: 'Folder',
     playlistSource: 'Playlist',
+    playing: 'Playing',
   },
 };
 

@@ -128,5 +128,6 @@ export default {
   recentPlaylist: {
     folderSource: '文件夾',
     playlistSource: '播放列表',
+    playing: '正在播放',
   },
 };
