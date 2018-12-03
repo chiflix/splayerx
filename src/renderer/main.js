@@ -546,7 +546,9 @@ new Vue({
         this.menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(this.menu);
       }).then(() => {
-        this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
+        if (this.chosenStyle !== '') {
+          this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
+        }
       })
         .catch((err) => {
           this.addLog('error', err);

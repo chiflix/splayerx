@@ -7,6 +7,7 @@
         <div class="sub-menu-wrapper subtitle-scroll-items"
           v-show="showAttached"
           :style="{
+            cursor: 'default',
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
             height: hiddenText ? `${contHeight + hoverHeight}px` : `${contHeight}px`,
           }">
@@ -16,6 +17,7 @@
               <div class="title">字幕选择</div>
               <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
                 :style="{
+                  cursor: 'pointer',
                   transform: `rotate(${rotateTime * 360}deg)`,
                   transition: 'transform 1s linear'
                 }"/>
