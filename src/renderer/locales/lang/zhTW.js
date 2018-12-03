@@ -125,4 +125,8 @@ export default {
       button: '取消',
     },
   },
+  recentPlaylist: {
+    folderSource: '文件夾',
+    playlistSource: '播放列表',
+  },
 };

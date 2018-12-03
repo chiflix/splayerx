@@ -760,10 +760,12 @@ new Vue({
           }
         }
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
-          this.$store.dispatch(
-            up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-            Math.abs(e.deltaY) * 0.2,
-          );
+          if (process.platform !== 'darwin') {
+            this.$store.dispatch(
+              up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+              Math.abs(e.deltaY) * 0.2,
+            );
+          }
         }
       }
     });
