@@ -103,7 +103,7 @@ export default {
       return path.basename(this.nextVideo, path.extname(this.nextVideo));
     },
     title() {
-      return this.isFolderList ? 'Next in Folder' : 'Next in Playlist';
+      return this.isFolderList ? this.$t('nextVideo.nextInFolder') : this.$t('nextVideo.nextInPlaylist');
     },
     convertedSrcOfNextVideo() {
       if (this.nextVideo) {
