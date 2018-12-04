@@ -198,6 +198,12 @@ export default {
     this.$bus.$on('menu-sub-refresh', () => {
       this.handleRefresh();
     });
+    this.$bus.$on('menu-sub-change', (index) => {
+      this.toggleItemClick(index);
+    });
+    this.$bus.$on('subtitle-off', () => {
+      this.toggleSubtitleOff();
+    });
   },
   methods: {
     ...mapActions({

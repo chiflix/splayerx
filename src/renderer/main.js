@@ -59,7 +59,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement', 'mediaHash']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement', 'mediaHash', 'subtitleList', 'currentSubtitleId']),
   },
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
@@ -96,6 +96,24 @@ new Vue({
     muted(val) {
       if (val) {
         this.menu.getMenuItemById('mute').checked = val;
+      }
+    },
+    subtitleList(val, oldval) {
+      if (val.length !== oldval.length) {
+        this.refreshMenu();
+      }
+    },
+    currentSubtitleId(val) {
+      if (this.menu) {
+        if (val !== '') {
+          this.subtitleList.forEach((item, index) => {
+            if (item.id === val) {
+              this.menu.getMenuItemById(`sub${index}`).checked = true;
+            }
+          });
+        } else {
+          this.menu.getMenuItemById('sub-1').checked = true;
+        }
       }
     },
   },
@@ -239,7 +257,6 @@ new Vue({
                 const { remote } = this.$electron;
                 const browserWindow = remote.BrowserWindow;
                 const focusWindow = browserWindow.getFocusedWindow();
-                console.log(focusWindow);
                 const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
 
                 dialog.showOpenDialog(focusWindow, {
@@ -258,18 +275,8 @@ new Vue({
               },
             },
             {
-              label: this.$t('msg.subtitle.mainSubtitle'),
-              enabled: false,
-              submenu: [
-                { label: this.$t('msg.subtitle.langZhCN'), enabled: false },
-                { label: this.$t('msg.subtitle.langEn'), enabled: false },
-                { label: this.$t('msg.subtitle.noSubtitle'), enabled: false },
-              ],
-            },
-            {
               label: this.$t('msg.subtitle.secondarySubtitle'),
               enabled: false,
-              submenu: [],
             },
             { type: 'separator' },
             {
@@ -460,6 +467,7 @@ new Vue({
       ];
       this.updateRecentPlay().then((result) => {
         // menu.file add "open recent"
+        template[3].submenu.splice(2, 0, this.recentSubMenu());
         template[0].submenu.splice(2, 0, result);
         // menu.about
         if (process.platform === 'darwin') {
@@ -549,6 +557,15 @@ new Vue({
         if (this.chosenStyle !== '') {
           this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
         }
+        if (this.currentSubtitleId !== '') {
+          this.subtitleList.forEach((item, index) => {
+            if (item.id === this.currentSubtitleId) {
+              this.menu.getMenuItemById(`sub${index}`).checked = true;
+            }
+          });
+        } else {
+          this.menu.getMenuItemById('sub-1').checked = true;
+        }
       })
         .catch((err) => {
           this.addLog('error', err);
@@ -574,11 +591,47 @@ new Vue({
       return {
         id: key,
         visible: true,
+        type: 'radio',
         label: value.label,
         click: () => {
           this.openFile(value.path);
         },
       };
+    },
+    recentSubTmp(key, value) {
+      return {
+        id: `sub${key}`,
+        visible: true,
+        type: 'radio',
+        label: value.path ? Path.basename(value.path) : 'subtitle',
+        click: () => {
+          this.$bus.$emit('menu-sub-change', key);
+        },
+      };
+    },
+    recentSubMenu() {
+      const tmp = {
+        label: this.$t('msg.subtitle.mainSubtitle'),
+        id: 'main-subtitle',
+        submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
+          id: `sub${index - 2}`,
+          visible: false,
+          label: '',
+        })),
+      };
+      tmp.submenu.splice(0, 1, {
+        id: 'sub-1',
+        visible: true,
+        type: 'radio',
+        label: '无字幕',
+        click: () => {
+          this.$bus.$emit('subtitle-off');
+        },
+      });
+      this.subtitleList.forEach((item, index) => {
+        tmp.submenu.splice(index + 1, 1, this.recentSubTmp(index, item));
+      });
+      return tmp;
     },
     pathProcess(path) {
       if (process.platform === 'win32') {
