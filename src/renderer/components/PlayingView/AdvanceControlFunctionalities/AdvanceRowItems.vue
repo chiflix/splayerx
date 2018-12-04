@@ -84,7 +84,7 @@ export default {
   },
   watch: {
     rate(val) {
-      if (this.item === '播放速度') {
+      if (this.item === this.$t('advance.rateTitle')) {
         const numList = [0.5, 1, 1.2, 1.5, 2];
         this.lists.forEach((i, ind) => {
           if (ind !== numList.indexOf(val)) {
@@ -140,16 +140,19 @@ export default {
   },
   computed: {
     ...mapGetters(['rate', 'chosenSize']),
+    /**
+     * @return {string}
+     */
     ChosenSize() {
       switch (this.chosenSize) {
         case 0:
-          return this.$t('advance.fontItems[0]');
+          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'S' ? 'Small' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
         case 1:
-          return this.$t('advance.fontItems[1]');
+          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'M' ? 'Normal' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
         case 2:
-          return this.$t('advance.fontItems[2]');
+          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'L' ? 'Large' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
         case 3:
-          return this.$t('advance.fontItems[3]');
+          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'XL' ? 'Extra Large' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
         default:
           return this.$t('advance.fontItems[1]');
       }
@@ -166,21 +169,21 @@ export default {
       return '';
     },
     showDetail() {
-      if (this.item === '播放速度') {
+      if (this.item === this.$t('advance.rateTitle')) {
         return `${this.rate} x`;
-      } else if (this.item === '字体大小') {
+      } else if (this.item === this.$t('advance.fontSize')) {
         return `${this.ChosenSize}`;
       }
       return null;
     },
     cardType() {
       if (this.selectedIndex === this.difIndex[0] || this.selectedIndex === this.difIndex[1]) {
-        if (this.item === '播放速度') {
+        if (this.item === this.$t('advance.rateTitle')) {
           return 'speedCard smallSpeedCard';
         }
         return 'fontCard smallFontCard';
       }
-      if (this.item === '播放速度') {
+      if (this.item === this.$t('advance.rateTitle')) {
         return 'speedCard bigSpeedCard';
       }
       return 'fontCard bigFontCard';
@@ -194,18 +197,18 @@ export default {
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
     },
     rowNumDetail() {
-      return this.item === '字体大小' ? 'fontRowNumDetail' : 'speedRowNumDetail';
+      return this.item === this.$t('advance.fontSize') ? 'fontRowNumDetail' : 'speedRowNumDetail';
     },
     difIndex() {
-      return this.item === '字体大小' ? [0, 2] : [1, 4];
+      return this.item === this.$t('advance.fontSize') ? [0, 2] : [1, 4];
     },
     difWidth() {
       if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.item === '字体大小' ? [29, 35] : [25, 29];
+        return this.item === this.$t('advance.fontSize') ? [29, 35] : [25, 29];
       } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.item === '字体大小' ? [29 * 1.2, 35 * 1.2] : [25 * 1.2, 29 * 1.2];
+        return this.item === this.$t('advance.fontSize') ? [29 * 1.2, 35 * 1.2] : [25 * 1.2, 29 * 1.2];
       }
-      return this.item === '字体大小' ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
+      return this.item === this.$t('advance.fontSize') ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
     },
     subStyle() {
       return this.$store.getters.curStyle;
@@ -223,7 +226,7 @@ export default {
     },
     handleClick(index) {
       this.selectedIndex = index;
-      if (this.item === '播放速度') {
+      if (this.item === this.$t('advance.rateTitle')) {
         this.calculateSpeedLength(index);
       } else {
         this.calculateFontLength(index);
@@ -235,9 +238,9 @@ export default {
           this.$set(this.lists[ind], 'chosen', true);
         }
       });
-      if (this.item === '播放速度') {
+      if (this.item === this.$t('advance.rateTitle')) {
         this.$store.dispatch(videoActions.CHANGE_RATE, this.lists[index][0]);
-      } else if (this.item === '字体大小') {
+      } else if (this.item === this.$t('advance.fontSize')) {
         this.changeFontSize(index);
       }
     },

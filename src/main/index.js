@@ -120,11 +120,11 @@ function registerMainWindowEvent() {
       if (err !== '0') {
         snapShot(snapShotQueue[0], callback);
       } else if (err === '0') {
-        snapShotQueue.shift();
+        const lastRecord = snapShotQueue.shift();
         if (event.sender.isDestroyed()) {
           snapShotQueue.splice(0, snapShotQueue.length);
         } else {
-          event.sender.send(`snapShot-${snapShotQueue[0]}-reply`, imgPath);
+          event.sender.send(`snapShot-${lastRecord}-reply`, imgPath);
           if (snapShotQueue.length > 0) {
             snapShot(snapShotQueue[0], callback);
           }
