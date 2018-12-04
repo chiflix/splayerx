@@ -21,8 +21,9 @@
         v-for="(item, index) in lastPlayedFile"
         :id="'item'+index"
         :key="item.path"
-        :class="{ shadow: showShadow, chosen: item.chosen }"
+        :class="{ shadow: showShadow || !item.chosen }"
         :style="{
+          bottom: item.chosen ? '9px' : '0',
           width: `${thumbnailWidth}px`,
           height: `${thumbnailHeight}px`,
           marginRight: `${marginRight}px`,
@@ -45,7 +46,7 @@
               top: `-${0.7 / 2}px`,
               width: `${thumbnailWidth - 0.7}px`,
               height: `${thumbnailHeight - 0.7}px`,
-              border: item.chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)'              
+              border: item.chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)'
             }"/>
           <div class="mask">
             <Icon class="deleteUi" type="delete"></Icon>
@@ -347,6 +348,7 @@ export default {
       function mouseup() {
         vm.mouseFlag = true;
         vm.mouseDown = false;
+        vm.showShadow = true;
         if (vm.recentFileDel) {
           vm.displayInfo.langdingLogoAppear = true;
           vm.displayInfo.showShortcutImage = false;
@@ -355,7 +357,6 @@ export default {
           vm.infoDB().delete('recent-played', deletData[0].quickHash);
           vm.recentFileDel = false;
         } else {
-          this.showShadow = true;
           item.style.zIndex = '';
           item.style.left = '';
           item.style.top = '';
@@ -443,13 +444,14 @@ $border-radius: 2px;
     }
 
     .item {
-      transition: transform 100ms ease-in;
+      transition: bottom 100ms ease-in;
       position: relative;
       border-radius: $border-radius;
       cursor: pointer;
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center center;
+      background-color: rgb(60, 60, 60);
     }
 
     .mask {
@@ -503,8 +505,5 @@ $border-radius: 2px;
   position: absolute;
   box-sizing: content-box;
   border-radius: $border-radius;
-}
-.chosen {
-  transform: translateY(-9px);
 }
 </style>
