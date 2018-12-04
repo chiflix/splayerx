@@ -613,7 +613,7 @@ new Vue({
         id: 'sub-1',
         visible: true,
         type: 'radio',
-        label: '无字幕',
+        label: this.$t('msg.subtitle.noSubtitle'),
         click: () => {
           this.$bus.$emit('subtitle-off');
         },

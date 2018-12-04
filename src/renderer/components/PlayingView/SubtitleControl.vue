@@ -14,7 +14,7 @@
           <div class="element bottom"><div class="element middle"><div class="element content">
 
             <div class="topContainer">
-              <div class="title">字幕选择</div>
+              <div class="title">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
               <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
                 :style="{
                   cursor: 'pointer',
@@ -41,7 +41,7 @@
                         height: `${itemHeight}px`,
                         cursor: currentSubIden === -1 ? 'default' : 'pointer',
                       }">
-                      <div class="text">无字幕</div>
+                      <div class="text">{{ this.$t('msg.subtitle.noSubtitle') }}</div>
                     </div>
                   </div>
 
