@@ -4,19 +4,16 @@
       bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px',
       transition: tranFlag ? 'left 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
     }">
-    <div class="playlist"
+    <div class="playlist no-drag"
       :style="{marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'}">
       <div class="button"
         :style="{
-          height:`${itemHeight}px`,
-          width:`${itemWidth}px`,
+          height:`${thumbnailHeight}px`,
+          width:`${thumbnailWidth}px`,
+          marginRight: `${marginRight}px`,
         }"
         @click="openOrMove">
-        <div class="btnMask"
-          :style="{
-            height:`${itemHeight}px`,
-            width:`${itemWidth}px`,
-          }">
+        <div class="btnMask">
           <Icon class="addUi" type="add"></Icon>
         </div>
       </div>
@@ -24,24 +21,35 @@
         v-for="(item, index) in lastPlayedFile"
         :id="'item'+index"
         :key="item.path"
-        :class="showShadow ? 'shadow' : '' "
+        :class="{ shadow: showShadow, chosen: item.chosen }"
         :style="{
-          transition: tranFlag ? 'width 150ms ease-out, height 150ms ease-out, border 150ms ease-out' : '',
-          backgroundImage: itemShortcut(item.smallShortCut, item.lastPlayedTime),
-          backgroundColor: backgroundColor(item.lastPlayedTime),
-          width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
-          height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
-        }"
-        @click.stop="onRecentItemClick(item, index)"
-        @mouseover="onRecentItemMouseover(item, index)"
-        @mouseout="onRecentItemMouseout(index)"
-        @mousedown.stop="onRecentItemMousedown($event, index)">
-        <div class="mask"
+          width: `${thumbnailWidth}px`,
+          height: `${thumbnailHeight}px`,
+          marginRight: `${marginRight}px`,
+          backgroundImage: itemShortcut(item.smallShortCut, item.cover, item.lastPlayedTime, item.duration),
+        }">
+        <div class="white-hover"
+            v-show="item.chosen"/>
+        <div class="content"
+          @click.stop="onRecentItemClick(item, index)"
+          @mouseout="onRecentItemMouseout(index)"
+          @mouseover="onRecentItemMouseover(item, index)"
+          @mousedown.stop="onRecentItemMousedown($event, index)"
           :style="{
-            width: item.chosen ? `${itemWidth * 9 / 7}px` : `${itemWidth}px`,
-            height: item.chosen ? `${itemHeight * 9 / 7}px` : `${itemHeight}px`,
+            width: `${thumbnailWidth}px`,
+            height: item.chosen ? `${thumbnailHeight + 9}px` : `${thumbnailHeight}px`,
           }">
-          <Icon class="deleteUi" type="delete"></Icon>
+          <div class="border"
+            :style="{
+              left: `-${0.7 / 2}px`,
+              top: `-${0.7 / 2}px`,
+              width: `${thumbnailWidth - 0.7}px`,
+              height: `${thumbnailHeight - 0.7}px`,
+              border: item.chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)'              
+            }"/>
+          <div class="mask">
+            <Icon class="deleteUi" type="delete"></Icon>
+          </div>
         </div>
       </div>
     </div>
@@ -83,7 +91,7 @@ export default {
     lastPlayedFile: {
       type: Object.Array,
       require: true,
-      default: [],
+      default: () => [],
     },
     changeSize: {
       type: Number,
@@ -116,7 +124,7 @@ export default {
         this.validHover = false;
         this.tranFlag = true;
         const ss = -((this.lastPlayedFile.length + 1) - (this.showItemNum - this.moveItem)) *
-          (this.itemWidth + 15);
+          (this.thumbnailWidth + 15);
         this.move += ss;
         this.moveItem = this.showItemNum - this.lastPlayedFile.length - 1;
         lf.style.left = `${this.move}px`;
@@ -131,10 +139,28 @@ export default {
       this.$bus.$emit('move', this.move);
     };
   },
+  computed: {
+    thumbnailWidth() {
+      let width = 0;
+      const A = 50; // playlist left margin
+      const B = 15; // space between each playlist item
+      const C = 50; // the space between last playlist item and right edge of the screen
+      if (this.windowWidth > 512 && this.windowWidth <= 1355) {
+        width = ((((this.windowWidth - A) - C) + B) / this.showItemNum) - B;
+      } else if (this.windowWidth > 1355) {
+        width = this.windowWidth * (112 / 1355);
+      }
+      return Math.round(width);
+    },
+    thumbnailHeight() {
+      return Math.round((this.thumbnailWidth * 63) / 112);
+    },
+    marginRight() {
+      return this.windowWidth > 1355 ? (this.windowWidth / 1355) * 15 : 15;
+    },
+  },
   watch: {
-    windowWidth(val) {
-      this.itemWidth = (this.changeSize * val) / 100;
-      this.itemHeight = (this.changeSize * val * 405) / 100 / 720;
+    windowWidth() {
       this.tranFlag = false;
     },
     showItemNum(val, oldval) {
@@ -143,13 +169,13 @@ export default {
           oldval <= this.lastPlayedFile.length) {
           const averageWidth = ((this.windowWidth - 100) - ((oldval - 1) * 15)) /
             oldval;
-          this.move += (averageWidth + 15) * (val - oldval);
+          this.move += (averageWidth + this.marginRight) * (val - oldval);
           this.moveItem += val - oldval;
         } else if (val >= this.moveItem + this.lastPlayedFile
           .length + 2) {
           const averageWidth = ((this.windowWidth - 100) - ((val - 1) * 15)) /
             val;
-          this.move += (averageWidth + 15) *
+          this.move += (averageWidth + this.marginRight) *
             (val - this.moveItem - this.lastPlayedFile.length - 1);
           this.moveItem += val - this.moveItem - this.lastPlayedFile.length - 1;
         }
@@ -182,7 +208,8 @@ export default {
 
       self.showingPopupDialog = true;
       // TODO: move openFile method to a single location
-      dialog.showOpenDialog(focusedWindow, {
+      // eslint-disable-next-line
+      process.env.NODE_ENV === 'testing' ? '' : dialog.showOpenDialog(focusedWindow, {
         title: 'Open Dialog',
         defaultPath: link,
         filters: [{
@@ -199,9 +226,7 @@ export default {
           if (!items[0].includes('\\') || process.platform === 'win32') {
             self.openFile(items[0]);
           } else {
-            this.$store.dispatch('addMessages', {
-              type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-            });
+            this.addLog('error', `Failed to open file: ${items[0]}`);
           }
           if (items.length > 1) {
             this.$store.commit('PlayingList', items);
@@ -234,11 +259,8 @@ export default {
         default: return '';
       }
     },
-    backgroundColor(lastTime) {
-      return lastTime < 1 ? 'black' : '';
-    },
-    itemShortcut(shortCut, lastPlayedTime) {
-      return lastPlayedTime < 1 ? '' : `url("${shortCut}")`;
+    itemShortcut(shortCut, cover, lastPlayedTime, duration) {
+      return duration - lastPlayedTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
     },
     itemInfo() {
       return {
@@ -278,21 +300,12 @@ export default {
         this.displayInfo.lastTime = this.itemInfo().lastTime;
         this.displayInfo.duration = this.itemInfo().duration;
         this.displayInfo.percentage = this.itemInfo().percentage;
+        this.displayInfo.cover = item.cover;
         this.$bus.$emit('displayInfo', this.displayInfo);
-      } else {
-        console.log(55);
-        const itemMask = document.querySelector(`#item${index} .mask`);
-        itemMask.style.display = 'flex';
-        setTimeout(() => {
-          itemMask.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-        }, 5);
       }
     },
     onRecentItemMouseout(index) {
       if (this.mouseFlag) {
-        const itemMask = document.querySelector(`#item${index} .mask`);
-        itemMask.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-        itemMask.style.display = 'none';
         this.$set(this.lastPlayedFile[index], 'chosen', false);
       }
     },
@@ -366,7 +379,7 @@ export default {
         this.tranFlag = true;
         if (index === this.showItemNum - this.moveItem - 1 && !this.isFullScreen) {
           const ss = -((this.lastPlayedFile.length + 1) - (this.showItemNum - this.moveItem)) *
-            (this.itemWidth + 15);
+            (this.thumbnailWidth + 15);
           this.move += ss;
           this.moveItem = this.showItemNum - this.lastPlayedFile.length - 1;
           lf.style.left = `${this.move}px`;
@@ -387,7 +400,8 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
+$border-radius: 2px;
 .controller {
   position: absolute;
   left: 0;
@@ -395,7 +409,6 @@ export default {
   z-index: 4;
 
   .playlist {
-    -webkit-app-region: no-drag;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -405,7 +418,6 @@ export default {
       background-color: rgba(0, 0, 0, 0.12);
       transition: background-color 150ms ease-out;
       backdrop-filter: blur(9.8px);
-      margin-right: 15px;
       cursor: pointer;
     }
 
@@ -416,8 +428,14 @@ export default {
 
     .btnMask {
       border-radius: 2px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
       display: flex;
+    }
+
+    .btnMask:hover {
+      border: 1px solid rgba(255, 255, 255, 0.6);
     }
 
     .addUi {
@@ -425,27 +443,21 @@ export default {
     }
 
     .item {
+      transition: transform 100ms ease-in;
       position: relative;
-      color: #e4e4c4;
-      border-radius: 2px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      min-height: 63px;
-      min-width: 112px;
-      color: gray;
+      border-radius: $border-radius;
       cursor: pointer;
-      margin-right: 15px;
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center center;
-      display: flex;
-      box-shadow: 0 20px 29px rgba(0, 0, 0, 0.3);
     }
 
     .mask {
-      border-radius: 2px;
+      border-radius: $border-radius;
       display: none;
-      box-shadow: 0 26px 39px rgba(0, 0, 0, 0.3), 0 5px 20px rgba(0, 0, 0, 0.14);
-      transition: background-color 150ms, box-shadow 1s ease-in-out;
+      width: 100%;
+      height: calc(100% - 9px);
+      transition: background-color 150ms;
     }
 
     .deleteUi {
@@ -473,5 +485,26 @@ export default {
       transform: skew(8deg) rotate(3deg);
     }
   }
+}
+.content {
+  position: absolute;
+  top: 0;
+  border-radius: $border-radius;
+}
+.white-hover {
+  position: absolute;
+  border-radius: $border-radius;
+  bottom: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255,255,255,0.2);
+}
+.border {
+  position: absolute;
+  box-sizing: content-box;
+  border-radius: $border-radius;
+}
+.chosen {
+  transform: translateY(-9px);
 }
 </style>

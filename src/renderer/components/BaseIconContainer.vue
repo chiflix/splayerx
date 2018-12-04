@@ -45,7 +45,7 @@ export default {
 </script>
 
 <style lang="scss">
-.titleBarWinMin, .titleBarWinMax, .titleBarWinClose, .titleBarWinRestore, .titleBarWinResize {
+.titleBarWinExitFull, .titleBarWinFull, .titleBarWinClose, .titleBarWinRestore, .titleBarWinResize {
   display: flex;
   width: 45px;
   height: 28px;
@@ -80,7 +80,7 @@ export default {
     }
   }
 }
-.titleBarMax, .titleBarMin, .titleBarClose, .titleBarRecover {
+.titleBarFull, .titleBarExitFull, .titleBarClose, .titleBarRecover {
   display: flex;
   width: 12px;
   height: 12px;
@@ -129,21 +129,6 @@ export default {
   display: block;
 }
 
-.advance, .subtitle, .listicon{
-  @media screen and (min-width: 513px) and (max-width: 854px) {
-    width: 26.4px;
-    height: 22px;
-  }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
-    width: 38.4px;
-    height: 32px;
-  }
-  @media screen and (min-width: 1921px) {
-    width: 60px;
-    height: 50px;
-  }
-  display: block;
-}
 .volume {
   @media screen and (min-width: 1921px) {
     width: 24px;
@@ -151,6 +136,11 @@ export default {
   }
   width: 12px;
   height: 12px;
+}
+
+.playlistplay {
+  width: 100%;
+  height: 100%;
 }
 
 .play, .pause {
@@ -249,6 +239,128 @@ export default {
   @media screen and (min-width: 1921px) {
     width: 51.625px;
     height: 46.375px;
+  }
+}
+.minus, .plus {
+  -webkit-app-region: no-drag;
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    width: 11px;
+    height: 11px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 13.2px;
+    height: 13.2px;
+  }
+  @media screen and (min-width: 1921px) {
+    width: 18.48px;
+    height: 18.48px;
+  }
+  margin-bottom: 5px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.hoveredEnd {
+  display: block;
+  z-index: 20;
+  @media screen and (max-width: 512px) {
+    width: 6px;
+    height: 6px;
+  }
+  @media screen and (min-width: 513px) and(max-width: 854px) {
+    width: 8px;
+    height: 8px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 10px;
+    height: 10px;
+  }
+  @media screen and (min-width: 1921px) {
+    width: 16px;
+    height: 16px;
+  }
+}
+@media screen and (min-width: 513px) and (max-width: 854px) {
+  .rightArrow {
+    display: block;
+    width: 13px;
+    height: 13px;
+  }
+  .leftArrow, .leftArrowHover {
+    display: block;
+    width: 11px;
+    height: 11px;
+  }
+}
+@media screen and (min-width: 855px) and (max-width: 1920px) {
+  .rightArrow {
+    display: block;
+    width: 15.6px;
+    height: 15.6px;
+  }
+  .leftArrow, .leftArrowHover {
+    display: block;
+    width: 13.2px;
+    height: 13.2px;
+  }
+}
+@media screen and (min-width: 1921px) {
+  .rightArrow {
+    display: block;
+    width: 21.84px;
+    height: 21.84px;
+  }
+  .leftArrow, .leftArrowHover {
+    display: block;
+    width: 18.48px;
+    height: 18.48px;
+  }
+}
+.speed {
+  display: block;
+  @media screen and (max-width: 512px) {
+    width: 8px;
+    height: 6px;
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    width: 8px;
+    height: 6px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 12px;
+    height: 8.25px;
+  }
+  @media screen and (min-width: 1921px) {
+    width: 14px;
+    height: 11px;
   }
 }
 </style>

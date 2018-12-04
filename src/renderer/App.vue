@@ -9,6 +9,8 @@
 </template>
 
 <script>
+  // import { throttle } from 'lodash';
+  import drag from '@/helpers/drag';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
   export default {
@@ -26,9 +28,19 @@
       mainDispatchProxy(actionType, actionPayload) {
         this.$store.dispatch(actionType, actionPayload);
       },
+      handleWindowSizeChange(windowSize) {
+        this.$store.commit('windowSize', windowSize);
+      },
     },
     mounted() {
-      /* eslint-disable no-unused-vars */
+      this.$electron.ipcRenderer.on('addMessages', () => {
+        this.$store.dispatch('addMessages', {
+          type: 'error',
+          title: this.$t('errorFile.title'),
+          content: this.$t('errorFile.content'),
+          dismissAfter: 10000,
+        });
+      });
       this.$electron.ipcRenderer.on('mainCommit', (event, commitType, commitPayload) => {
         this.mainCommitProxy(commitType, commitPayload);
       });
@@ -37,12 +49,13 @@
       });
       this.$electron.ipcRenderer.send('windowInit');
       this.$el.style.fontFamily = process.platform;
+      drag(this.$el);
+      this.$ga.event('app', 'mounted');
     },
   };
 </script>
 
 <style lang="scss">
 // global scss
-@import url('~@/css/style.scss');
-
+@import url("~@/css/style.scss");
 </style>

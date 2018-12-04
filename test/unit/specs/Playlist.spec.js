@@ -1,6 +1,5 @@
 import Playlist from '@/components/LandingView/Playlist';
 import { mount } from '@vue/test-utils';
-import sinon from 'sinon';
 
 describe('Playlist.vue', () => {
   it('correct data when mounted', () => {
@@ -29,15 +28,6 @@ describe('Playlist.vue', () => {
     wrapper.setProps({ showItemNum: -1 });
     wrapper.setProps({ showItemNum: 0 });
     expect(wrapper.vm.moveItem).equal(-1);
-  });
-  it('windowWidth watcher works fine', () => {
-    const wrapper = mount(Playlist, {
-      attachToDocument: true,
-    });
-    wrapper.setProps({ changeSize: 100 });
-    wrapper.setProps({ windowWidth: 720 });
-    wrapper.setProps({ windowWidth: 1355 });
-    expect(wrapper.vm.itemWidth).equal(1355);
   });
   it('open method works fine', () => {
     const wrapper = mount(Playlist);
@@ -75,29 +65,6 @@ describe('Playlist.vue', () => {
     const link = 'link';
     wrapper.vm.itemShortcut(link);
     expect(wrapper.vm.itemShortcut(link)).equal(`url("${link}")`);
-  });
-  it('onRecentItemMouseover method works fine', () => {
-    const wrapper = mount(Playlist, {
-      attachToDocument: true,
-    });
-    const spy = sinon.spy(wrapper.vm, 'onRecentItemMouseover');
-    wrapper.setProps({ isFullScreen: true });
-    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }] });
-    wrapper.find('.item').trigger('mouseover');
-    wrapper.setData({ isTurnToOdd: true });
-    wrapper.find('.item').trigger('mouseover');
-    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4', shortCut: '' }] });
-    wrapper.find('.item').trigger('mouseover');
-    expect(spy.calledThrice).equal(true);
-    spy.restore();
-  });
-  it('onRecentItemMouseout method works fine', () => {
-    const wrapper = mount(Playlist);
-    const spy = sinon.spy(wrapper.vm, 'onRecentItemMouseout');
-    wrapper.setProps({ lastPlayedFile: [{ path: 'file:////Users/tanyang/Desktop/test.mp4' }] });
-    wrapper.find('.item').trigger('mouseout');
-    expect(spy.calledOnce).equal(true);
-    spy.restore();
   });
   it('onRecentItemClick method works fine', () => {
     const wrapper = mount(Playlist, {

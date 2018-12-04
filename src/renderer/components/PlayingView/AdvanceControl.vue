@@ -1,110 +1,149 @@
 <template>
-  <div
-    :data-component-name="$options.name">
-    <div :style="menuStyleObject" class="advanced"
-      v-if="isAcitve">
-      <div class="flex-container">
-        <AdvanceControlMenuItem
-          v-for="item in menuList"
-          :key="item.id"
-          :item="item">
-        </AdvanceControlMenuItem>
+  <div :data-component-name="$options.name">
+    <div class="advanceControl">
+      <transition name="advance-trans-l">
+      <div class="advanced" v-show="showAttached"
+        :style="{
+          transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+        }">
+        <transition name="setUp">
+          <advance-main-menu class="mainMenu" :clearState="showAttached"></advance-main-menu>
+        </transition>
+      </div>
+      </transition>
+      <div ref="adv" @mouseup.left="toggleAdvMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave">
+        <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="advance"></lottie>
       </div>
     </div>
-    <div
-      @mousedown="1+1">
-      <Icon type="advance"></Icon>
-    </div>
   </div>
-</template>;
+</template>
 
 <script>
-import AdvanceControlMenuItem from './AdvanceControlMenuItem.vue';
-import Icon from '../BaseIconContainer';
+import lottie from '@/components/lottie.vue';
+import * as animationData from '@/assets/advance.json';
+import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
 export default {
   name: 'advance-control',
   components: {
-    AdvanceControlMenuItem,
-    Icon,
+    lottie,
+    'advance-main-menu': AdvanceMainMenu,
+  },
+  props: {
+    showAttached: Boolean,
+    mousedownOnOther: Boolean,
+    mouseupOnOther: Boolean,
   },
   data() {
     return {
-      menuStyleObject: {
-        position: 'absolute',
-        bottom: '17px',
-        right: '27px',
-        width: '45px',
-        height: '40px',
-      },
-      menuList: [
-        {
-          id: 0,
-          title: 'Speed',
-          functionality: 'plusMinus',
-        },
-        {
-          id: 1,
-          title: 'Subtitle',
-          functionality: 'switch',
-        },
-        {
-          id: 2,
-          title: 'Audio',
-        },
-        {
-          id: 3,
-          title: 'Media Info',
-        },
-      ],
-      settingLevel: [
-        {
-          id: 0,
-          title: 'Speed',
-          functionality: 'plusMinus',
-        },
-        {
-          id: 1,
-          title: 'Subtitle',
-          functionality: 'switch',
-        },
-        {
-          id: 2,
-          title: 'Audio',
-        },
-        {
-          id: 3,
-          title: 'Media Info',
-        },
-      ],
       isAcitve: false,
+      defaultOptions: { animationData },
+      animationSpeed: 1,
+      anim: {},
+      animFlag: true,
+      mouseDown: false,
+      validEnter: false,
+      clicks: 0,
+      showFlag: false,
+      mainShow: true,
+      subShow: false,
+      audioShow: false,
     };
   },
-  methods: {
-    onSecondItemClick() {
-    },
-    onMenuItemClick() {
-    },
-    switchSettingMenuState() {
-      if (this.isAcitve) {
-        this.menuList = this.settingLevel;
-        this.closeMenuSetting();
-      } else {
-        this.openMenuSetting();
+  watch: {
+    showAttached(val) {
+      if (!val) {
+        this.animFlag = true;
+        if (!this.validEnter) {
+          this.anim.playSegments([68, 89], false);
+        } else {
+          this.showFlag = true;
+          this.anim.playSegments([68, 83], false);
+          setTimeout(() => { this.showFlag = false; }, 250);
+        }
       }
     },
-    closeMenuSetting() {
-      this.menuStyleObject.width = `${45}px`;
-      this.menuStyleObject.height = `${40}px`;
-      this.menuList = this.settingLevel;
-      this.isAcitve = false;
+    mousedownOnOther(val) {
+      if (val && this.showAttached) {
+        this.anim.playSegments([37, 41], false);
+        if (this.mouseupOnOther) {
+          this.$emit('update:showAttached', false);
+        }
+      }
     },
-    openMenuSetting() {
-      this.menuStyleObject.width = `${208}px`;
-      this.$_fitMenuSize();
-      this.isAcitve = true;
+    mouseupOnOther(val) {
+      if (val && this.showAttached) {
+        this.$emit('update:showAttached', false);
+      }
     },
-    $_fitMenuSize() {
-      this.menuStyleObject.height = `${(this.menuList.length * 22) + 120}px`;
+  },
+  methods: {
+    handleAnimation(anim) {
+      this.anim = anim;
+    },
+    handleDown() {
+      this.mouseDown = true;
+      if (!this.showAttached) {
+        this.anim.playSegments([17, 21], false);
+      } else {
+        this.anim.playSegments([37, 41], false);
+      }
+      document.addEventListener('mouseup', (e) => {
+        if (e.button === 0) {
+          if (!this.showAttached) {
+            if (this.validEnter) {
+              this.anim.playSegments([23, 36], false);
+            } else if (!this.mousedownOnOther) {
+              this.anim.playSegments([105, 109], false);
+            }
+          }
+          this.mouseDown = false;
+        }
+      });
+    },
+    handleEnter() {
+      if (this.animFlag && !this.showAttached) {
+        if (!this.mouseDown) {
+          this.anim.playSegments([3, 7], false);
+        } else {
+          this.anim.playSegments([95, 99], false);
+        }
+      }
+      this.showFlag = false;
+      this.validEnter = true;
+      this.animFlag = false;
+    },
+    handleLeave() {
+      if (!this.showAttached) {
+        if (this.mouseDown) {
+          this.anim.playSegments([90, 94], false);
+        } else if (this.showFlag) {
+          this.anim.addEventListener('complete', () => {
+            this.anim.playSegments([10, 14], false);
+            this.showFlag = false;
+            this.anim.removeEventListener('complete');
+          });
+        } else {
+          this.anim.playSegments([10, 14], false);
+        }
+        this.animFlag = true;
+      }
+      this.validEnter = false;
+    },
+    toggleAdvMenuDisplay() {
+      this.clicks = this.showAttached ? 1 : 0;
+      this.clicks += 1;
+      switch (this.clicks) {
+        case 1:
+          this.$emit('update:showAttached', true);
+          break;
+        case 2:
+          this.$emit('update:showAttached', false);
+          this.clicks = 0;
+          break;
+        default:
+          this.clicks = 0;
+          break;
+      }
     },
   },
   created() {
@@ -126,24 +165,44 @@ button:focus {
 button:hover {
   cursor: pointer;
 }
+.advance-trans-l-enter, .advance-trans-l-enter-active {
+  transform: translateY(0px);
+}
+.advance-trans-l-enter, .advance-trans-l-leave-active {
+  transform: translateY(20px);
+}
 .advanced {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  background-color: white;
-  opacity: 0.3;
-  backdrop-filter: blur(20px);
-  color: black;
-  border-radius: 4.8px;
-  z-index: 750;
+  z-index: 100;
+  transition-property: opacity, transform;
+  @media screen and (min-width: 320px) and (max-width: 512px) {
+    display: none;
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    bottom: 32px;
+    right: 3px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    bottom: 44px;
+    right: 3px;
+  }
+  @media screen and (min-width: 1921px) {
+    bottom: 70px;
+    right: 7px;
+  }
+  .mainMenu, .subtitleSetup, .audioItems {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+  }
 }
-
-.flex-container {
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
+.advance-trans-l-enter-active, .advance-trans-l-leave {
+  opacity: 1;
+}
+.advance-trans-l-enter, .advance-trans-l-leave-active {
+  opacity: 0;
+}
+.advance-trans-l-leave-active {
+  position: absolute;
 }
 </style>

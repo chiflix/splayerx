@@ -5,6 +5,7 @@ import axios from 'axios';
 import uuidv4 from 'uuid/v4';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
+import VueAnalytics from 'vue-analytics';
 
 import App from '@/App';
 import router from '@/router';
@@ -13,15 +14,29 @@ import messages from '@/locales';
 import helpers from '@/helpers';
 import Path from 'path';
 import { mapGetters } from 'vuex';
-import { Video as videoActions } from '@/store/action-types';
+import { Video as videoActions } from '@/store/actionTypes';
+import addLog from '@/helpers/index';
+import asyncStorage from '@/helpers/asyncStorage';
+require('source-map-support').install();
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
+Vue.config.warnHandler = (warn) => {
+  addLog.methods.addLog('warn', warn);
+};
+Vue.config.errorHandler = (err) => {
+  addLog.methods.addLog('error', err);
+};
 
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
+
+Vue.use(VueAnalytics, {
+  id: 'UA-2468227-6',
+  router,
+});
 
 Vue.mixin(helpers);
 Vue.prototype.$bus = new Vue(); // Global event bus
@@ -38,8 +53,55 @@ new Vue({
   router,
   store,
   template: '<App/>',
+  data() {
+    return {
+      menu: null,
+    };
+  },
   computed: {
-    ...mapGetters(['mute']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement']),
+  },
+  created() {
+    asyncStorage.get('subtitle-style').then((data) => {
+      if (data.chosenStyle) {
+        this.$store.dispatch('updateChosenStyle', data.chosenStyle);
+      }
+    });
+    this.$store.dispatch('getLocalPreference');
+  },
+  watch: {
+    chosenStyle(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById(`style${val}`).checked = true;
+      }
+    },
+    chosenSize(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById(`size${val}`).checked = true;
+      }
+    },
+    deleteVideoHistoryOnExit(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('deleteHistory').checked = val;
+      }
+    },
+    privacyAgreement(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('privacy').checked = val;
+      }
+    },
+    volume(val) {
+      if (val <= 0) {
+        this.menu.getMenuItemById('mute').checked = true;
+      } else {
+        this.menu.getMenuItemById('mute').checked = false;
+      }
+    },
+    muted(val) {
+      if (val) {
+        this.menu.getMenuItemById('mute').checked = val;
+      }
+    },
   },
   methods: {
     createMenu() {
@@ -65,9 +127,7 @@ new Vue({
                     if (!files[0].includes('\\') || process.platform === 'win32') {
                       this.openFile(files[0]);
                     } else {
-                      this.$store.dispatch('addMessages', {
-                        type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-                      });
+                      this.addLog('error', `Failed to open file: ${files[0]}`);
                     }
                     if (files.length > 1) {
                       this.$store.commit('PlayingList', files);
@@ -87,6 +147,14 @@ new Vue({
               },
               enabled: false,
             },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.file.clearHistory'),
+              click: () => {
+                this.$bus.$emit('clean-lastPlayedFile');
+              },
+            },
+            { type: 'separator' },
             {
               label: this.$t('msg.file.closeWindow'),
               role: 'Close',
@@ -98,10 +166,19 @@ new Vue({
           label: this.$t('msg.playback.name'),
           submenu: [
             {
-              label: this.$t('msg.playback.fullScreen'),
-              accelerator: 'CmdOrCtrl+F',
-              enabled: false,
+              label: this.$t('msg.playback.increasePlaybackSpeed'),
+              click: () => {
+                this.$store.dispatch(videoActions.INCREASE_RATE);
+              },
             },
+            {
+              label: this.$t('msg.playback.decreasePlaybackSpeed'),
+              click: () => {
+                this.$store.dispatch(videoActions.DECREASE_RATE);
+              },
+            },
+            /** */
+            { type: 'separator' },
             {
               label: this.$t('msg.playback.keepPlayingWindowFront'),
               type: 'checkbox',
@@ -115,19 +192,9 @@ new Vue({
                 }
               },
             },
-            // { label: 'Play from last stopped place' },
-            // { label: 'Increase Size' },
-            // { label: 'Decrease Size' },
-            { type: 'separator' },
-            { label: this.$t('msg.playback.increasePlaybackSpeed'), enabled: false },
-            { label: this.$t('msg.playback.decreasePlaybackSpeed'), enabled: false },
-            /** */
             { type: 'separator' },
             { label: this.$t('msg.playback.captureScreen'), enabled: false },
             { label: this.$t('msg.playback.captureVideoClip'), enabled: false },
-
-            { type: 'separator' },
-            { label: this.$t('msg.playback.mediaInfo'), enabled: false },
           ],
         },
         // menu.audio
@@ -138,11 +205,12 @@ new Vue({
               label: this.$t('msg.audio.mute'),
               type: 'checkbox',
               accelerator: 'M',
-              click: (menuItem) => {
-                this.$bus.$emit('toggle-mute');
-                menuItem.checked = this.mute;
+              id: 'mute',
+              click: () => {
+                this.$bus.$emit('toggle-muted');
               },
             },
+            { type: 'separator' },
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
             { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
             { type: 'separator' },
@@ -150,8 +218,7 @@ new Vue({
               label: this.$t('msg.audio.switchAudioTrack'),
               enabled: false,
               submenu: [
-                { label: this.$t('msg.audio.track1'), enabled: false },
-                { label: this.$t('msg.audio.track2'), enabled: false },
+                { label: this.$t('msg.audio.defaultAudioTrack'), enabled: true },
               ],
             },
           ],
@@ -161,6 +228,7 @@ new Vue({
           label: this.$t('msg.subtitle.name'),
           submenu: [
             { label: this.$t('msg.subtitle.AITranslation'), enabled: false },
+            { type: 'separator' },
             { label: this.$t('msg.subtitle.loadSubtitleFile'), enabled: false },
             {
               label: this.$t('msg.subtitle.mainSubtitle'),
@@ -174,21 +242,149 @@ new Vue({
             {
               label: this.$t('msg.subtitle.secondarySubtitle'),
               enabled: false,
-              submenu: [],
             },
             { type: 'separator' },
             {
-              label: this.$t('msg.subtitle.subtitleStyle'),
-              enabled: false,
+              label: this.$t('msg.subtitle.subtitleSize'),
               submenu: [
-                { label: this.$t('msg.subtitle.style1'), enabled: false },
-                { label: this.$t('msg.subtitle.style2'), enabled: false },
-                { label: this.$t('msg.subtitle.style3'), enabled: false },
+                {
+                  label: this.$t('msg.subtitle.size1'),
+                  type: 'radio',
+                  id: 'size0',
+                  click: () => {
+                    this.$store.dispatch('updateChosenSize', 0);
+                    this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size2'),
+                  type: 'radio',
+                  id: 'size1',
+                  checked: true,
+                  click: () => {
+                    this.$store.dispatch('updateChosenSize', 1);
+                    this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size3'),
+                  type: 'radio',
+                  id: 'size2',
+                  click: () => {
+                    this.$store.dispatch('updateChosenSize', 2);
+                    this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.size4'),
+                  type: 'radio',
+                  id: 'size3',
+                  click: () => {
+                    this.$store.dispatch('updateChosenSize', 3);
+                    this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
+                  },
+                },
               ],
             },
-            { type: 'separator' },
-            { label: this.$t('msg.subtitle.increaseSubtitleSize'), enabled: false },
-            { label: this.$t('msg.subtitle.decreaseSubtitleSize'), enabled: false },
+            {
+              label: this.$t('msg.subtitle.subtitleStyle'),
+              submenu: [
+                {
+                  label: this.$t('msg.subtitle.style1'),
+                  type: 'radio',
+                  id: 'style0',
+                  click: () => {
+                    this.$store.dispatch('updateChosenStyle', 0);
+                    this.$store.dispatch('updateStyle', {
+                      color: 'white',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
+                      textStroke: '0.5px #777',
+                      backgroundColor: '',
+                      fontWeight: '400',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style2'),
+                  type: 'radio',
+                  id: 'style1',
+                  click: () => {
+                    this.$store.dispatch('updateChosenStyle', 1);
+                    this.$store.dispatch('updateStyle', {
+                      color: 'white',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '0px 1px 1px #333',
+                      textStroke: '1.3px #222',
+                      backgroundColor: '',
+                      fontWeight: '400',
+                      padding: '0',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style3'),
+                  type: 'radio',
+                  id: 'style2',
+                  click: () => {
+                    this.$store.dispatch('updateChosenStyle', 2);
+                    this.$store.dispatch('updateStyle', {
+                      color: '#fffc00',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '0px 0.5px 0.5px #555',
+                      textStroke: '',
+                      backgroundColor: '',
+                      fontWeight: '400',
+                      padding: '0',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style4'),
+                  type: 'radio',
+                  id: 'style3',
+                  click: () => {
+                    this.$store.dispatch('updateChosenStyle', 3);
+                    this.$store.dispatch('updateStyle', {
+                      color: '#fff',
+                      fontWeight: '800',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '',
+                      textStroke: '1.6px #009be6',
+                      backgroundColor: '',
+                      fontWeight: '800',
+                      padding: '0',
+                    });
+                  },
+                },
+                {
+                  label: this.$t('msg.subtitle.style5'),
+                  type: 'radio',
+                  id: 'style4',
+                  click: () => {
+                    this.$store.dispatch('updateChosenStyle', 4);
+                    this.$store.dispatch('updateStyle', {
+                      color: '#fff',
+                      fontWeight: '400',
+                    });
+                    this.$store.dispatch('updateBorderStyle', {
+                      textShadow: '',
+                      textStroke: '',
+                      backgroundColor: 'rgba(0,0,0,.5)',
+                      fontWeight: '400',
+                      padding: '0px 5px',
+                    });
+                  },
+                },
+              ],
+            },
             { type: 'separator' },
             { label: this.$t('msg.subtitle.increaseSubtitleDelay'), enabled: false },
             { label: this.$t('msg.subtitle.decreaseSubtitleDelay'), enabled: false },
@@ -205,8 +401,21 @@ new Vue({
               label: this.$t('msg.window_.minimize'),
               role: 'minimize',
             },
-            { label: this.$t('msg.window_.enterFullScreen'), enabled: 'false', accelerator: 'Ctrl+Cmd+F' },
-            { label: this.$t('msg.window_.bringAllToFront'), accelerator: '' },
+            // {
+            //   label: this.$t('msg.window_.enterFullScreen'),
+            //   enabled: false,
+            //   click: () => {
+            //     this.$bus.$emit('enter-fullscreen');
+            //   },
+            // },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.window_.bossKey'),
+              accelerator: 'CmdOrCtrl+`',
+              click: () => {
+                this.$electron.ipcRenderer.send('bossKey');
+              },
+            },
           ],
         },
         // menu.help
@@ -216,6 +425,10 @@ new Vue({
           submenu: [
             {
               label: this.$t('msg.help.splayerxHelp'),
+            },
+            {
+              label: this.$t('msg.splayerx.homepage'),
+              enabled: false,
             },
           ],
         },
@@ -233,23 +446,42 @@ new Vue({
                 role: 'about',
               },
               {
-                label: this.$t('msg.splayerx.preferences'),
-                enabled: false,
-                accelerator: 'Cmd+,',
-              },
-              {
-                label: this.$t('msg.splayerx.homepage'),
-                enabled: false,
-              },
-              {
                 label: this.$t('msg.splayerx.feedback'),
-                enabled: false,
+                click: () => {
+                  this.$electron.shell.openExternal('https://feedback.splayer.org');
+                },
               },
-              { type: 'separator' },
               {
-                label: this.$t('msg.splayerx.services'),
-                role: 'services',
-                submenu: [],
+                label: this.$t('msg.splayerx.preferences'),
+                enabled: true,
+                submenu: [
+                  {
+                    label: this.$t('msg.preferences.clearHistory'),
+                    id: 'deleteHistory',
+                    type: 'checkbox',
+                    checked: this.$store.getters.deleteVideoHistoryOnExit,
+                    click: () => {
+                      if (this.$store.getters.deleteVideoHistoryOnExit) {
+                        this.$store.dispatch('notDeleteVideoHistoryOnExit');
+                      } else {
+                        this.$store.dispatch('deleteVideoHistoryOnExit');
+                      }
+                    },
+                  },
+                  {
+                    label: this.$t('msg.preferences.privacyConfirm'),
+                    id: 'privacy',
+                    type: 'checkbox',
+                    checked: this.$store.getters.privacyAgreement,
+                    click: () => {
+                      if (this.$store.getters.privacyAgreement) {
+                        this.$store.dispatch('disagreeOnPrivacyPolicy');
+                      } else {
+                        this.$store.dispatch('agreeOnPrivacyPolicy');
+                      }
+                    },
+                  },
+                ],
               },
               { type: 'separator' },
               {
@@ -276,11 +508,14 @@ new Vue({
         }
         return template;
       }).then((result) => {
-        const menu = Menu.buildFromTemplate(result);
-        Menu.setApplicationMenu(menu);
-      }).catch((err) => {
-        console.log(err);
-      });
+        this.menu = Menu.buildFromTemplate(result);
+        Menu.setApplicationMenu(this.menu);
+      }).then(() => {
+        this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
+      })
+        .catch((err) => {
+          this.addLog('error', err);
+        });
     },
     getSystemLocale() {
       const localeMap = {
@@ -318,44 +553,11 @@ new Vue({
       const recentMenuTemplate = {
         label: this.$t('msg.file.openRecent'),
         id: 'recent-play',
-        submenu: [
-          {
-            id: 'recent-1',
-            visible: false,
-          },
-          {
-            id: 'recent-2',
-            visible: false,
-          },
-          {
-            id: 'recent-3',
-            visible: false,
-          },
-          {
-            id: 'recent-4',
-            visible: false,
-          },
-          {
-            id: 'recent-5',
-            visible: false,
-          },
-          {
-            id: 'recent-6',
-            visible: false,
-          },
-          {
-            id: 'recent-7',
-            visible: false,
-          },
-          {
-            id: 'recent-8',
-            visible: false,
-          },
-          {
-            id: 'recent-9',
-            visible: false,
-          },
-        ],
+        submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
+          id: `recent-${index}`,
+          visible: false,
+          label: '',
+        })),
       };
       return this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
         let menuRecentData = null;
@@ -444,6 +646,7 @@ new Vue({
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
       if (err) {
+        this.addLog('error', err);
         userUUID = uuidv4();
         this.$storage.set('user-uuid', userUUID);
       }
@@ -468,30 +671,54 @@ new Vue({
         case 'ArrowDown':
           this.$store.dispatch(videoActions.DECREASE_VOLUME);
           break;
-        case 'm':
-          this.$store.dispatch(videoActions.TOGGLE_MUTE);
-          break;
         case 'ArrowLeft':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 60);
+            this.$bus.$emit('seek', this.$store.getters.currentTime - 60);
           } else {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime - 5);
+            this.$bus.$emit('seek', this.$store.getters.currentTime - 5);
           }
           break;
         case 'ArrowRight':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 60);
+            this.$bus.$emit('seek', this.$store.getters.currentTime + 60);
           } else {
-            this.$bus.$emit('seek', this.$store.state.PlaybackState.CurrentTime + 5);
+            this.$bus.$emit('seek', this.$store.getters.currentTime + 5);
           }
+          break;
+        case 'Escape':
+          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
+          break;
+        default:
+          break;
+      }
+      switch (e.keyCode) {
+        case 219:
+          this.$store.dispatch(videoActions.DECREASE_RATE);
+          break;
+        case 221:
+          this.$store.dispatch(videoActions.INCREASE_RATE);
           break;
         default:
           break;
       }
     });
     window.addEventListener('wheel', (e) => {
-      const up = e.deltaY < 0;
-      this.$store.dispatch(up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME, 6);
+      if (process.platform !== 'darwin') {
+        if (!e.ctrlKey) {
+          const up = e.deltaY > 0;
+          let isAdvanceColumeItem;
+          const nodeList = document.querySelector('.advance-column-items').childNodes;
+          for (let i = 0; i < nodeList.length; i += 1) {
+            isAdvanceColumeItem = nodeList[i].contains(e.target);
+          }
+          if (!isAdvanceColumeItem) {
+            this.$store.dispatch(
+              up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+              Math.abs(e.deltaY) * 0.2,
+            );
+          }
+        }
+      }
     });
 
     /**
@@ -505,9 +732,9 @@ new Vue({
       const { files } = e.dataTransfer;
       // TODO: play it if it's video file
       const subtitleFiles = [];
-      const subRegex = new RegExp('^(.srt|.ass|.vtt)$');
+      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
       const videoFiles = [];
-      const vidRegex = new RegExp('^(3g2|.3gp|.3gp2|.3gpp|.amv|.asf|.avi|.bik|.bin|.crf|.divx|.drc|.dv|.dvr-ms|.evo|.f4v|.flv|.gvi|.gxf|.iso|.m1v|.m2v|.m2t|.m2ts|.m4v|.mkv|.mov|.mp2|.mp2v|.mp4|.mp4v|.mpe|.mpeg|.mpeg1|.mpeg2|.mpeg4|.mpg|.mpv2|.mts|.mtv|.mxf|.mxg|.nsv|.nuv|.ogg|.ogm|.ogv|.ogx|.ps|.rec|.rm|.rmvb|.rpl|.thp|.tod|.tp|.ts|.tts|.txd|.vob|.vro|.webm|.wm|.wmv|.wtv|.xesc)$');
+      const vidRegex = new RegExp('^\\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$');
       for (let i = 0; i < files.length; i += 1) {
         tempFilePath = files[i].path;
         if (subRegex.test(Path.extname(tempFilePath))) {
@@ -516,18 +743,14 @@ new Vue({
         } else if (vidRegex.test(Path.extname(tempFilePath))) {
           videoFiles.push(tempFilePath);
         } else {
-          this.$store.dispatch('addMessages', {
-            type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-          });
+          this.addLog('error', `Failed to open file : ${tempFilePath}`);
         }
       }
       if (videoFiles.length !== 0) {
         if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
-          if (this.$store.state.PlaybackState.OriginSrcOfVideo === '') this.openFile(videoFiles[0]);
+          this.openFile(videoFiles[0]);
         } else {
-          this.$store.dispatch('addMessages', {
-            type: 'error', title: this.$t('errorFile.title'), content: this.$t('errorFile.content'), dismissAfter: 10000,
-          });
+          this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
         }
         if (videoFiles.length > 1) {
           this.$store.commit('PlayingList', videoFiles);

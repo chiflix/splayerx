@@ -4,6 +4,8 @@ import crypto from 'crypto';
 import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
+import { ipcRenderer } from 'electron'; // eslint-disable-line
+
 export default {
   methods: {
     infoDB() {
@@ -80,7 +82,7 @@ export default {
       const filter = /\.(srt|vtt|ass)$/;
 
       if (!fs.existsSync(dirPath)) {
-        console.log(`no dir ${dirPath}`);
+        this.addLog('error', `no dir ${dirPath}`);
         return;
       }
 
@@ -90,7 +92,7 @@ export default {
         const stat = fs.lstatSync(filename);
         if (!stat.isDirectory()) {
           if (files[i].startsWith(baseName) && filter.test(files[i])) {
-            console.log(`found subtitle file: ${files[i]}`);
+            this.addLog('info', `found subtitle file: ${files[i]}`);
             callback(filename);
           }
         }
@@ -101,11 +103,7 @@ export default {
       this.infoDB().get('recent-played', this.mediaQuickHash(originPath))
         .then((value) => {
           if (value) {
-            if (value.duration - value.lastPlayedTime > 10) {
-              this.$bus.$emit('seek', value.lastPlayedTime);
-            } else {
-              this.$bus.$emit('seek', 0);
-            }
+            this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
             this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date.now() }));
           } else {
             this.infoDB().add('recent-played', {
@@ -116,7 +114,7 @@ export default {
           }
           this.$bus.$emit('new-file-open');
         });
-      this.$store.commit('OriginSrcOfVideo', originPath);
+      this.$store.dispatch('SRC_SET', originPath);
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
@@ -142,6 +140,30 @@ export default {
       }
       fs.closeSync(fd);
       return res.join('-');
+    },
+    addLog(level, log) {
+      switch (level) {
+        case 'error':
+          console.error(log);
+          if (this.$ga && log) {
+            this.$ga.exception(log.message || log);
+          }
+          break;
+        case 'warn':
+          console.warn(log);
+          break;
+        default:
+          console.log(log);
+      }
+
+      let normalizedLog;
+      if (!log || typeof log === 'string') {
+        normalizedLog = { message: log };
+      } else {
+        const { message, stack } = log;
+        normalizedLog = { message, stack };
+      }
+      ipcRenderer.send('writeLog', level, normalizedLog);
     },
   },
 };

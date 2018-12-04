@@ -1,15 +1,15 @@
 <template>
   <div class="indicator-container">
     <base-info-card class="card">
-      <div class="indicator" :style="{ height: volume * 100 + '%', opacity: mute ? 0.25 : 0.8 }"></div>
+      <div class="indicator" :style="{ height: volume * 100 + '%', opacity: muted ? 0.25 : 0.8 }"></div>
     </base-info-card>
-    <base-icon v-show="mute || volume <= 0" class="mute" type="volume" effect="mute" />
+    <base-icon v-show="muted || volume <= 0" class="mute" type="volume" effect="mute" />
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import BaseInfoCard from './BaseInfoCard.vue';
+import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
 export default {
   name: 'volume-indicator',
@@ -18,7 +18,7 @@ export default {
     'base-icon': BaseIcon,
   },
   computed: {
-    ...mapGetters(['volume', 'mute']),
+    ...mapGetters(['volume', 'muted']),
   },
 };
 </script>

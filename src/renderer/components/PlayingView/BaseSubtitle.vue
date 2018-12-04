@@ -9,12 +9,18 @@
           v-for="(html, key) in firstCueHTML"
           :key="key"
           v-html="html"></div>
+        <div class='subtitle-border-content'
+          :style="subBorderStyle"
+          v-for="(html, key) in firstCueHTML"
+          :key="key"
+          v-html="html"></div>
       </div>
     </div>
 </template>
 
 <script>
 /* eslint-disable no-loop-func, no-use-before-define */
+import { mapGetters } from 'vuex';
 import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import ass2vtt from 'ass-to-vtt';
@@ -24,6 +30,7 @@ import parallel from 'run-parallel';
 import MatroskaSubtitles from 'matroska-subtitles';
 import LanguageDetect from 'languagedetect';
 import z from 'zero-fill';
+import asyncStorage from '@/helpers/asyncStorage';
 // 后期查找服务端字幕也许会用到
 // import { fileUrlToPath } from '@/helpers/path';
 
@@ -48,14 +55,8 @@ export default {
       firstCueHTML: [],
       secondCueHTML: [],
       subStyle: {},
-      curStyle: {
-        fontSize: 5,
-        letterSpacing: 1,
-        opacity: 1,
-        color: '',
-        border: '',
-        background: '',
-      },
+      subIndex: 0,
+      subBorderStyle: {},
     };
   },
   methods: {
@@ -108,7 +109,7 @@ export default {
               type: 'Embedded',
               size: embeddedSubsStatus.size,
             });
-            this.mkvProcess(this.originSrcOfVideo, onlyEmbedded, () => {
+            this.mkvProcess(this.originSrc, onlyEmbedded, () => {
               this.toggleSutitleShow();
               this.$bus.$emit('subtitles-finished-loading', 'Embedded');
             });
@@ -119,7 +120,10 @@ export default {
             size: serverSubsStatus.size,
           });
           this.loadServerTextTracks((err) => {
-            if (err) throw err;
+            if (err) {
+              this.addLog('error', err);
+              throw err;
+            }
             this.toggleSutitleShow();
             this.$bus.$emit('subtitles-finished-loading', 'Server');
           });
@@ -131,7 +135,7 @@ export default {
       }
     },
     async subtitleInitializingStatus() {
-      const vidSrc = this.originSrcOfVideo;
+      const vidSrc = this.originSrc;
       let subStatus = [];
       this.mediaHash = this.mediaQuickHash(vidSrc);
       this.Sagi = this.sagi();
@@ -210,11 +214,10 @@ export default {
     loadServerTextTracks(cb) {
       this.Sagi.mediaTranslate(this.mediaHash)
         .then((res) => {
-          console.log(res.array);
+          this.addLog('info', res.array);
           // handle 2 situations:
           if (res.array[0][1] && res.array[0][1] !== 'OK') {
-            console.log('Warning: No server transcripts.');
-            console.log('Please load stream translate.');
+            this.addLog('warn', 'Warning: No server transcripts.  Please load stream translate.');
             cb('No server transcripts');
           } else {
             const textTrackList = res.array[1];
@@ -237,17 +240,15 @@ export default {
                 cb();
               })
               .catch((err) => {
-                console.log('-----');
-                console.log('Error: load all transcripts error');
-                console.log(err);
+                this.addLog('error', '-----Error: load all transcripts error');
+                this.addLog('error', err);
                 cb(err);
               });
           }
         })
         .catch((err) => {
-          console.log('------');
-          console.log('Error: load textTrackList error');
-          console.log(err);
+          this.addLog('error', '-----Error: load textTrackList error');
+          this.addLog('error', err);
           cb(err);
         });
     },
@@ -276,13 +277,13 @@ export default {
     },
     mkvProcess(vidPath, onlyEmbedded, cb) {
       this.mkvProcessInit(vidPath, onlyEmbedded, () => {
-        console.log('finished reading initial mkv subtitles');
+        this.addLog('info', 'finished reading initial mkv subtitles');
         cb();
         this.mkvSubsInitialized = true;
       });
     },
     mkvProcessInit(filePath, onlyEmbedded, cb) {
-      const accurateTime = this.$store.state.PlaybackState.CurrentTime;
+      const accurateTime = this.$store.state.Video.currentTime;
       const startTime = accurateTime * 1000;
       const endTime = this.mkvInitializingReadingEndTime * 1000;
       const processSubNames = true;
@@ -357,6 +358,7 @@ export default {
         });
 
         self.$on('stop-reading-mkv-subs', (error) => {
+          this.addLog('error', error);
           parser.emit('finish', error);
         });
 
@@ -392,6 +394,7 @@ export default {
 
         parser.on('finish', (err) => {
           if (err) {
+            this.addLog('error', err);
             reject(err);
           } else {
             const parsedMkvTimesObj = {
@@ -416,6 +419,7 @@ export default {
       const tasks = files.map((subPath) => (cb) => this.createSubtitleStream(subPath, cb));
       parallel(tasks, (err, results) => {
         if (err) {
+          this.addLog('error', err);
           throw err;
         }
         const parser = new WebVTT.Parser(window, WebVTT.StringDecoder());
@@ -477,11 +481,11 @@ export default {
           this.$store.commit('SubtitleOn', { index: targetIndex, status: type });
           this.firstSubIndex = targetIndex;
         } else {
-          console.log('no subtitle');
+          this.addLog('info', 'no subtitle');
         }
       }
       if (type === 'second') {
-        console.log('show second subtitle');
+        this.addLog('info', 'show second subtitle');
       }
     },
     /**
@@ -490,29 +494,31 @@ export default {
      * the css style of the subtitle. Each unset
      * property will use default value.
      */
-    subStyleChange(obj = {}) {
-      const fontSize = obj.fontSize ? obj.fontSize : this.curStyle.fontSize;
-      const letterSpacing = obj.letterSpacing ? obj.letterSpacing : this.curStyle.letterSpacing;
-      const opacity = obj.opacity ? obj.opacity : this.curStyle.opacity;
-      const color = obj.color ? obj.color : this.curStyle.color;
-      const border = obj.border ? obj.border : this.curStyle.border;
-      const background = obj.background ? obj.background : this.curStyle.background;
-
+    subStyleChange() {
       this.subStyle = {
-        fontSize: `${fontSize}vh`,
-        letterSpacing: `${letterSpacing}px`,
-        opacity,
-        color,
-        border,
-        background,
+        fontFamily: this.curStyle.fontFamily,
+        fontSize: this.curStyle.fontSize,
+        letterSpacing: `${this.curStyle.letterSpacing}px`,
+        opacity: this.curStyle.opacity,
+        color: this.curStyle.color,
+        fontWeight: this.curStyle.fontWeight,
+        transform: this.curStyle.transform,
+        transformOrigin: this.curStyle.transformOrigin,
+        webkitFontSmoothing: this.curStyle.webkitFontSmoothing,
       };
-      this.curStyle = {
-        fontSize,
-        letterSpacing,
-        opacity,
-        color,
-        border,
-        background,
+      this.subBorderStyle = {
+        fontFamily: this.curBorderStyle.fontFamily,
+        fontSize: this.curBorderStyle.fontSize,
+        letterSpacing: `${this.curBorderStyle.letterSpacing}px`,
+        padding: this.curBorderStyle.padding,
+        textFillColor: this.curBorderStyle.textFillColor,
+        textStroke: this.curBorderStyle.textStroke,
+        fontWeight: this.curBorderStyle.fontWeight,
+        textShadow: this.curBorderStyle.textShadow,
+        backgroundColor: this.curBorderStyle.backgroundColor,
+        transform: this.curBorderStyle.transform,
+        transformOrigin: this.curBorderStyle.transformOrigin,
+        webkitFontSmoothing: this.curStyle.webkitFontSmoothing,
       };
     },
     notParsedYet(subStartTime) {
@@ -570,6 +576,7 @@ export default {
         cb = null;
       });
       stream.once('error', (err) => {
+        this.addLog('error', err);
         if (cb) {
           cb(err);
         }
@@ -612,6 +619,7 @@ export default {
 
       this.concatStream(vttStream, (err, buf) => {
         if (err) {
+          this.addLog('error', err);
           throw err;
         }
         cb(null, buf);
@@ -640,8 +648,7 @@ export default {
       if (textTrack[1]) {
         title += textTrack[1];
       } else {
-        console.log('Error: No language code');
-        console.log('Use default subtitle name');
+        this.addLog('error', 'Error: No language code  Use default subtitle name');
         title = 'subtitle';
       }
       // process language code to subtitle name
@@ -686,7 +693,7 @@ export default {
           this.$store.commit('SubtitleOff');
           this.firstSubIndex = null;
         } else {
-          console.log('first subtitle not set');
+          this.addLog('info', 'first subtitle not set');
         }
       }
     },
@@ -696,19 +703,38 @@ export default {
     },
   },
   computed: {
+    ...mapGetters(['duration', 'originSrc', 'currentTime', 'SubtitleDelay', 'curStyle', 'curBorderStyle']),
     firstSubState() { // lazy computed and lazy watched
       return this.$store.getters.firstSubtitleIndex !== -1;
     },
     mkvInitializingReadingEndTime() {
-      const duration = this.$store.state.PlaybackState.Duration;
-      const currentTime = this.$store.state.PlaybackState.CurrentTime;
+      const { duration, currentTime } = this;
       return duration > 3000 ? currentTime + 300 : currentTime + (duration / 10);
-    },
-    originSrcOfVideo() {
-      return this.$store.state.PlaybackState.OriginSrcOfVideo;
     },
   },
   watch: {
+    SubtitleDelay(val, oldval) {
+      if (this.subIndex !== -1) {
+        const vid = this.$parent.$refs.videoCanvas.videoElement();
+        const trackLength = vid.textTracks[this.subIndex].cues.length;
+        for (let i = 0; i < trackLength; i += 1) {
+          vid.textTracks[this.subIndex].cues[i].startTime += (val - oldval) / 1000;
+          vid.textTracks[this.subIndex].cues[i].endTime += (val - oldval) / 1000;
+        }
+      }
+    },
+    curBorderStyle: {
+      handler() {
+        this.subStyleChange();
+      },
+      deep: true,
+    },
+    curStyle: {
+      handler() {
+        this.subStyleChange();
+      },
+      deep: true,
+    },
     firstSubState(newVal) {
       const vid = this.$parent.$refs.videoCanvas.videoElement();
       if (newVal && vid.textTracks[this.firstSubIndex].mode === 'disabled') {
@@ -717,7 +743,7 @@ export default {
         this.firstActiveCues.pop();
         vid.textTracks[this.firstSubIndex].mode = 'disabled';
       } else {
-        console.log('Error: mode is not correct');
+        this.addLog('error', 'Error: mode is not correct');
       }
     },
     // 需要对这一部分内容优化
@@ -740,12 +766,12 @@ export default {
         // if new value is true -- where should be called in the callback of initialize
         // stage, if new value is true, toggle the request idle
         // options can also be passed, [timeout] option
-        const filePath = this.originSrcOfVideo;
+        const filePath = this.originSrc;
         this.idleCallbackID = window.requestIdleCallback(() => {
           this.parseMkvSubs(filePath, 0, null, false, false)
             .then((tracks) => {
               this.addMkvSubtitlesToVideoElement(tracks, false, false, () => {
-                console.log('Rest of embedded subtitles have been added.');
+                this.addLog('info', 'Rest of embedded subtitles have been added.');
                 this.mkvSubsFullyParsed = true;
               });
             });
@@ -757,12 +783,12 @@ export default {
         // if new value is true -- where should be called in the callback of seek sub
         // stage, if new value is true, toggle the request idle
         // options can also be passed, [timeout] option
-        const filePath = this.originSrcOfVideo;
+        const filePath = this.originSrc;
         this.idleCallbackID = window.requestIdleCallback(() => {
           this.parseMkvSubs(filePath, 0, null, false, false)
             .then((tracks) => {
               this.addMkvSubtitlesToVideoElement(tracks, false, false, () => {
-                console.log('Rest of embedded subtitles have been added.');
+                this.addLog('info', 'Rest of embedded subtitles have been added.');
                 this.mkvSubsFullyParsed = true;
               });
             });
@@ -771,9 +797,18 @@ export default {
     },
   },
   created() {
+    asyncStorage.get('subtitle-style').then((data) => {
+      if (data.curStyle) {
+        this.$store.dispatch('updateStyle', data.curStyle);
+      }
+      if (data.curBorderStyle) {
+        this.$store.dispatch('updateBorderStyle', data.curBorderStyle);
+      }
+    });
     this.$bus.$on('video-loaded', this.subtitleInitialize);
 
     this.$bus.$on('sub-first-change', (targetIndex) => {
+      this.subIndex = targetIndex;
       this.clearSubtitle();
       this.subtitleShow(targetIndex);
     });
@@ -782,10 +817,9 @@ export default {
       this.$store.commit('SubtitleOn', { index: this.firstSubIndex, status: 'first' });
     });
     this.$bus.$on('first-subtitle-off', () => {
+      this.subIndex = -1;
       this.$store.commit('SubtitleOff');
     });
-
-    this.$bus.$on('sub-style-change', this.subStyleChange);
 
     this.$bus.$on('add-subtitle', (files) => {
       const size = this.$store.getters.subtitleCount;
@@ -800,7 +834,10 @@ export default {
 
     this.$bus.$on('load-server-transcripts', () => {
       this.loadServerTextTracks((err) => {
-        if (err) throw err;
+        if (err) {
+          this.addLog('error', err);
+          throw err;
+        }
         // handles when users want to load server subs after initializing stage;
         this.$bus.$emit('finished-loading-server-subs');
         this.clearSubtitle();
@@ -815,11 +852,11 @@ export default {
           window.cancelIdleCallback(this.idleCallbackID);
           this.$emit('stop-reading-mkv-subs', 'stopped');
         }
-        const filePath = this.originSrcOfVideo;
+        const filePath = this.originSrc;
         this.parseMkvSubs(filePath, (e * 1000), (e + 120) * 1000, false, false)
           .then((tracks) => {
             this.addMkvSubtitlesToVideoElement(tracks, false, false, () => {
-              console.log('seeked subtitles have been added');
+              this.addLog('info', 'seeked subtitles have been added');
               this.mkvSubsSeekedParsed = true;
             });
           });
@@ -834,13 +871,21 @@ export default {
   .subtitle-wrapper {
     position: absolute;
     left: 0;
-    bottom: 20px;
     width: 100%;
+    z-index: 5;
   }
   .subtitle-content {
+    z-index: 1;
     white-space: pre;
     text-align: center;
   }
+  .subtitle-border-content {
+    position: absolute;
+    z-index: 0;
+    white-space: pre;
+    text-align: center;
+  }
+
   .flex-box {
     display: flex;
     flex-direction: column;

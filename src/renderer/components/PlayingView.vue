@@ -1,7 +1,7 @@
 <template>
   <div :data-component-name="$options.name" class="player">
-    <the-video-canvas :src="uri" />
-    <the-video-controller :src="uri" />
+    <the-video-canvas />
+    <the-video-controller />
   </div>
 </template>
 
@@ -15,15 +15,11 @@ export default {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
   },
-  mounted() {
-    this.$bus.$emit('play');
-    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [320, 180]);
-    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setResizable', [true]);
+
+  methods: {
   },
-  computed: {
-    uri() {
-      return this.$store.getters.convertedSrcOfVideo;
-    },
+  mounted() {
+    this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);
   },
 };
 </script>

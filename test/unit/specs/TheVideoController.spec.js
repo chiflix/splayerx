@@ -1,5 +1,6 @@
 import Vuex from 'vuex';
-import WindowState from '@/store/modules/WindowState';
+import Window from '@/store/modules/Window';
+import Video from '@/store/modules/Video';
 import TheVideoController from '@/components/PlayingView/TheVideoController';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
@@ -14,9 +15,12 @@ describe('Component - TheVideoController Unit Test', () => {
   beforeEach(() => {
     store = new Vuex.Store({
       modules: {
-        WindowState: {
-          state: WindowState.state,
-          mutations: WindowState.mutations,
+        Window: {
+          state: Window.state,
+          mutations: Window.mutations,
+        },
+        Video: {
+          getters: Video.getters,
         },
       },
     });
@@ -60,6 +64,7 @@ describe('Component - TheVideoController Unit Test', () => {
       currentEventInfo = new Map([
         ['mousemove', {}],
         ['mousedown', {}],
+        ['mouseup', {}],
         ['mouseenter', {}],
         ['wheel', {}],
         ['keydown', {
@@ -159,8 +164,10 @@ describe('Component - TheVideoController Unit Test', () => {
         wrapper.vm.UITimerManager(17);
         wrapper.vm.inputProcess(currentEventInfo, lastEventInfo);
 
-        expect(wrapper.vm.timerManager.getTimer(hideVolumeTimerName))
-          .to.deep.equal({ name: hideVolumeTimerName, timeLeft: hideVolumeTimerTime });
+        if (process.platform !== 'darwin') {
+          expect(wrapper.vm.timerManager.getTimer(hideVolumeTimerName))
+            .to.deep.equal({ name: hideVolumeTimerName, timeLeft: hideVolumeTimerTime });
+        }
       });
       it('should mousemove timer be reset when hideProgressBar event happened', () => {
         const mousemoveTimerName = 'mouseStopMoving';

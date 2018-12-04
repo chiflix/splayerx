@@ -14,8 +14,8 @@
     <div class="content">
       <div class="info">
         <div class="top">
-          <div class="duration">{{ duration }}</div>
-          <div class="title">&nbsp· {{ title }}</div>
+          <div class="duration">{{ timecode }}</div>
+          <div class="title">&nbsp;· {{ title }}</div>
         </div>
         <div class="vid-name">{{ videoName }}</div>
       </div>
@@ -27,15 +27,14 @@
   </div>
   <div class="thumbnail-shadow"></div>
   <div class="thumbnail"
-    @mousedown.stop="handleMouseDown"
+    @mouseup="handleMouseup"
     @mouseover="mouseoverVideo"
     @mouseout="mouseoutVideo">
     <video ref="videoThumbnail"
       :src="convertedSrcOfNextVideo"
       :class="{ blur: isBlur }"
       @loadedmetadata="onMetaLoaded"
-      @seeked="onSeeked"
-      @timeupdate="onTimeupdate"></video>
+      @seeked="onSeeked"></video>
     <Icon class="notificationPlay" :type="notificationPlayIcon"/>
   </div>
 </div>
@@ -51,7 +50,6 @@ export default {
   },
   data() {
     return {
-      duration: '',
       progress: 0,
       animation: '',
       notificationPlayIcon: 'notificationPlay',
@@ -62,28 +60,9 @@ export default {
     handleCloseMouseup() {
       this.$emit('manualclose-next-video');
     },
-    onTimeupdate() {
-      const currentTime = this.$store.state.PlaybackState.CurrentTime;
-      const duration = this.$store.state.PlaybackState.Duration;
-      if (currentTime < this.finalPartStartTime) {
-        this.$emit('close-next-video');
-      } else if (currentTime >= duration) {
-        this.$emit('close-next-video');
-        this.openFile(this.nextVideo);
-        this.$bus.$emit('seek', 0); // avoid skipping the next video
-      } else {
-        const fractionProgress = (currentTime - this.finalPartStartTime)
-          / (duration - this.finalPartStartTime);
-        this.progress = fractionProgress * 100;
-      }
-      requestAnimationFrame(this.onTimeupdate);
-    },
-    handleMouseDown() {
+    handleMouseup() {
       if (this.nextVideo) {
-        this.$emit('close-next-video');
-        this.$bus.$emit('seek', this.$store.state.PlaybackState.Duration);
-        this.openFile(this.nextVideo);
-        this.$bus.$emit('seek', 0); // avoid skipping the next video
+        this.$bus.$emit('seek', this.duration);
       }
     },
     mouseoverVideo() {
@@ -96,17 +75,30 @@ export default {
       this.notificationPlayIcon = 'notificationPlay';
       this.isBlur = true;
     },
-    onMetaLoaded() {
-      this.$refs.videoThumbnail.muted = true;
-      this.$refs.videoThumbnail.currentTime = 100;
-      this.duration = this.timecodeFromSeconds(this.$refs.videoThumbnail.duration);
+    onMetaLoaded(event) {
+      event.target.muted = true;
+      event.target.currentTime = 100;
     },
     onSeeked() {
       this.$emit('ready-to-show');
     },
   },
+  watch: {
+    currentTime(val) {
+      if (val < this.finalPartTime) {
+        this.$emit('close-next-video');
+      } else if (val >= this.duration && this.nextVideo) {
+        this.openFile(this.nextVideo);
+        this.$emit('close-next-video');
+      } else {
+        const fractionProgress = (val - this.finalPartTime)
+          / (this.duration - this.finalPartTime);
+        this.progress = fractionProgress * 100;
+      }
+    },
+  },
   computed: {
-    ...mapGetters(['nextVideo', 'finalPartStartTime', 'isFolderList']),
+    ...mapGetters(['nextVideo', 'finalPartTime', 'isFolderList', 'currentTime', 'duration']),
     videoName() {
       return path.basename(this.nextVideo, path.extname(this.nextVideo));
     },
@@ -122,9 +114,9 @@ export default {
       }
       return '';
     },
-  },
-  mounted() {
-    requestAnimationFrame(this.onTimeupdate);
+    timecode() {
+      return this.timecodeFromSeconds(this.duration);
+    },
   },
 };
 </script>
@@ -220,20 +212,26 @@ export default {
     
     background-color: rgba(0,0,0,0.20);
     backdrop-filter: blur(9.6px);
-    clip-path: inset(0px round 3.36px);
 
-    border-radius: 3.36px 11px 11px 3.36px;
+    border-radius: 3.36px 7px 7px 3.36px;
+    clip-path: inset(0px round 7px);
     @media screen and (min-width: 513px) and (max-width: 854px) {
       height: 70px;
       width: 340px;
+      border-radius: 3.36px 7px 7px 3.36px;
+      clip-path: inset(0px round 7px);
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
       height: 84px;
       width: 408px;
+      border-radius: 3.36px 9px 9px 3.36px;
+      clip-path: inset(0px round 9px);
     }
     @media screen and (min-width: 1921px) {
       height: 118px;
       width: 571px;
+      border-radius: 3.36px 11px 11px 3.36px;
+      clip-path: inset(0px round 11px);
     }
   }
   .plane {
@@ -244,19 +242,22 @@ export default {
     clip-path: inset(0px round 3.36px);
 
     background-color: rgba(255,255,255,0.20);
-    border-radius: 3.36px 11px 11px 3.36px;
+    border-radius: 3.36px 7px 7px 3.36px;
 
     @media screen and (min-width: 513px) and (max-width: 854px) {
       height: 70px;
       width: 340px;
+      border-radius: 3.36px 7px 7px 3.36px;
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
       height: 84px;
       width: 408px;
+      border-radius: 3.36px 9px 9px 3.36px;
     }
     @media screen and (min-width: 1921px) {
       height: 118px;
       width: 571px;
+      border-radius: 3.36px 11px 11px 3.36px;
     }
     .progress{
       position: absolute;

@@ -1,48 +1,54 @@
 <template>
   <div class="thumbnail-wrapper"
     :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', left: positionOfThumbnail + 'px'}">
-    <div class="thumbnail-background" :style="{width: thumbnailWidth + 2 +'px'}">
-      <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
-        <thumbnail-video-player
-          v-if="mountVideo"
-          v-show="displayVideo"
-          :quickHash="quickHash"
-          :currentTime="videoCurrentTime"
-          :thumbnailWidth="thumbnailWidth"
-          :thumbnailHeight="thumbnailHeight"
-          :outerThumbnailInfo="outerThumbnailInfo"
-          @update-thumbnail-info="updateThumbnailInfo" />
-        <thumbnail-display
-          v-if="mountImage"
-          v-show="!displayVideo"
-          :quickHash="quickHash"
-          :autoGenerationIndex="autoGenerationIndex"
-          :maxThumbnailWidth="maxThumbnailWidth"
-          :currentIndex="currentIndex"
-          :thumbnailWidth="thumbnailWidth"
-          :thumbnailHeight="thumbnailHeight" />
-        <span class="time">{{ videoTime }}</span>
-      </div>
+    <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
+      <thumbnail-video-player
+        v-if="mountVideo"
+        v-show="displayVideo"
+        :quickHash="quickHash"
+        :currentTime="videoCurrentTime"
+        :thumbnailWidth="thumbnailWidth"
+        :thumbnailHeight="thumbnailHeight"
+        :outerThumbnailInfo="outerThumbnailInfo"
+        @update-thumbnail-info="updateThumbnailInfo" />
+      <thumbnail-display
+        v-if="mountImage"
+        v-show="!displayVideo"
+        :quickHash="quickHash"
+        :autoGenerationIndex="autoGenerationIndex"
+        :maxThumbnailWidth="maxThumbnailWidth"
+        :currentIndex="currentIndex"
+        :thumbnailWidth="thumbnailWidth"
+        :thumbnailHeight="thumbnailHeight" />
+    </div>
+    <div class="thumbnail-gradient"></div>
+    <div class="time">
+      <span class="flex-items">{{ videoTime }}</span>
+      <transition name="hovered-end">
+        <base-icon class="flex-items hovered-end" type="hoveredEnd" v-if="hoveredEnd" />
+      </transition>
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import idb from 'idb';
 import {
   THUMBNAIL_DB_NAME,
   INFO_DATABASE_NAME,
   THUMBNAIL_OBJECT_STORE_NAME,
 } from '@/constants';
+import Icon from '../BaseIconContainer';
 import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
 import ThumbnailDisplay from './ThumbnailDisplay';
 export default {
   components: {
     'thumbnail-video-player': ThumbnailVideoPlayer,
     'thumbnail-display': ThumbnailDisplay,
+    'base-icon': Icon,
   },
   props: {
-    src: String,
     currentTime: Number,
     maxThumbnailWidth: Number,
     videoRatio: Number,
@@ -50,12 +56,16 @@ export default {
     thumbnailHeight: Number,
     positionOfThumbnail: Number,
     videoTime: String,
+    hoveredEnd: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       outerThumbnailInfo: {
         newVideo: true,
-        videoSrc: this.src,
+        videoSrc: this.convertedSrc,
         videoDuration: -1,
         generationInterval: -1,
         screenWidth: 1920,
@@ -77,14 +87,17 @@ export default {
       generatedIndex: 0,
     };
   },
+  computed: {
+    ...mapGetters(['originSrc', 'convertedSrc']),
+  },
   watch: {
-    src() {
+    originSrc() {
       // Reload video and image components
       this.mountVideo = false;
       this.mountImage = false;
       this.generatedIndex = 0;
       this.currentIndex = 0;
-      this.quickHash = this.mediaQuickHash(this.$store.state.PlaybackState.OriginSrcOfVideo);
+      this.quickHash = this.mediaQuickHash(this.originSrc);
       this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
     },
     currentTime(newValue) {
@@ -149,7 +162,7 @@ export default {
           {},
           this.outerThumbnailInfo,
           thumnailInfo,
-          { videoSrc: this.src },
+          { videoSrc: this.convertedSrc },
           { lastGenerationIndex: this.lastGenerationIndex },
           { maxThumbnailCount: this.maxThumbnailCount },
         );
@@ -167,7 +180,7 @@ export default {
       const obejctStoreName = `thumbnail-width-${this.maxThumbnailWidth}`;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
         idb.open(THUMBNAIL_DB_NAME, db.version + 1, (upgradeDB) => {
-          console.log('[IndexedDB]: Initial thumbnails storage objectStore.');
+          this.addLog('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
           const store = upgradeDB.createObjectStore(
             `thumbnail-width-${this.maxThumbnailWidth}`,
             { keyPath: 'id', autoIncrement: false, unique: true },
@@ -176,13 +189,12 @@ export default {
           store.createIndex('index', 'index', { unique: false });
         });
       }
-      /* eslint-disable newline-per-chained-call */
     });
     idb.open(INFO_DATABASE_NAME).then((db) => {
-      this.quickHash = this.mediaQuickHash(this.$store.state.PlaybackState.OriginSrcOfVideo);
+      this.quickHash = this.mediaQuickHash(this.originSrc);
       const obejctStoreName = THUMBNAIL_OBJECT_STORE_NAME;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
-        console.log('[IndexedDB]: Initial preview thumbnail info objectStore.');
+        this.addLog('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
         return idb.open(INFO_DATABASE_NAME, db.version + 1, (upgradeDB) => {
           upgradeDB.createObjectStore(obejctStoreName, { keyPath: 'quickHash' }, { unique: true });
         });
@@ -190,8 +202,9 @@ export default {
       return idb.open(INFO_DATABASE_NAME);
     })
       .then(() => this.retrieveThumbnailInfo(this.quickHash))
-      .then(this.updateThumbnailData).catch((err) => {
-        console.log(err);
+      .then(this.updateThumbnailData)
+      .catch((err) => {
+        this.addLog('error', err);
       });
     this.$bus.$on('image-all-get', (e) => {
       this.generatedIndex = e;
@@ -205,26 +218,31 @@ export default {
   bottom: 20px;
   -webkit-app-region: no-drag;
   box-sizing: content-box;
-}
-.thumbnail-background {
-  background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5));
-  border-radius: 1px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 3px;
 }
 .the-preview-thumbnail {
-  position: relative;
-  border: 1px solid transparent;
-  border-radius: 1px;
-  background-clip: padding-box;
-  background-color: #000;
+  position: absolute;
+}
+.thumbnail-gradient {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 26%, rgba(0,0,0,0.73) 98%);
 }
 .time {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 0.2px;
-  @media screen and (max-width: 854px) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: 100%;
+  position: relative;
+
+  @media screen and (max-width: 512px) {
+    font-size: 20px;
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
     font-size: 20px;
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
@@ -232,6 +250,18 @@ export default {
   }
   @media screen and (min-width: 1921px) {
     font-size: 40px;
+  }
+  span {
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    margin-right: 3px;
+  }
+  .hovered-end-enter-active {
+    transition: all 5s;
+  }
+  .hovered-end-enter-leave {
+    transition: all 8s;
   }
 }
 </style>
