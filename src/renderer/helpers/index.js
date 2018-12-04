@@ -104,7 +104,7 @@ export default {
         .then((value) => {
           if (value) {
             this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
-            this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date.now() }));
+            this.infoDB().add('recent-played', Object.assign(value, { path: originPath, lastOpened: Date.now() }));
           } else {
             this.infoDB().add('recent-played', {
               quickHash: this.mediaQuickHash(originPath),
