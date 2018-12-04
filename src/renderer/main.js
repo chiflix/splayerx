@@ -147,12 +147,14 @@ new Vue({
               },
               enabled: false,
             },
+            { type: 'separator' },
             {
               label: this.$t('msg.file.clearHistory'),
               click: () => {
                 this.$bus.$emit('clean-lastPlayedFile');
               },
             },
+            { type: 'separator' },
             {
               label: this.$t('msg.file.closeWindow'),
               role: 'Close',
@@ -163,23 +165,6 @@ new Vue({
         {
           label: this.$t('msg.playback.name'),
           submenu: [
-            {
-              label: this.$t('msg.playback.keepPlayingWindowFront'),
-              type: 'checkbox',
-              click: (menuItem, browserWindow) => {
-                if (browserWindow.isAlwaysOnTop()) {
-                  browserWindow.setAlwaysOnTop(false);
-                  menuItem.checked = false;
-                } else {
-                  browserWindow.setAlwaysOnTop(true);
-                  menuItem.checked = true;
-                }
-              },
-            },
-            // { label: 'Play from last stopped place' },
-            // { label: 'Increase Size' },
-            // { label: 'Decrease Size' },
-            { type: 'separator' },
             {
               label: this.$t('msg.playback.increasePlaybackSpeed'),
               click: () => {
@@ -194,11 +179,22 @@ new Vue({
             },
             /** */
             { type: 'separator' },
+            {
+              label: this.$t('msg.playback.keepPlayingWindowFront'),
+              type: 'checkbox',
+              click: (menuItem, browserWindow) => {
+                if (browserWindow.isAlwaysOnTop()) {
+                  browserWindow.setAlwaysOnTop(false);
+                  menuItem.checked = false;
+                } else {
+                  browserWindow.setAlwaysOnTop(true);
+                  menuItem.checked = true;
+                }
+              },
+            },
+            { type: 'separator' },
             { label: this.$t('msg.playback.captureScreen'), enabled: false },
             { label: this.$t('msg.playback.captureVideoClip'), enabled: false },
-
-            { type: 'separator' },
-            { label: this.$t('msg.playback.mediaInfo'), enabled: false },
           ],
         },
         // menu.audio
@@ -214,6 +210,7 @@ new Vue({
                 this.$bus.$emit('toggle-muted');
               },
             },
+            { type: 'separator' },
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
             { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
             { type: 'separator' },
@@ -221,8 +218,7 @@ new Vue({
               label: this.$t('msg.audio.switchAudioTrack'),
               enabled: false,
               submenu: [
-                { label: this.$t('msg.audio.track1'), enabled: false },
-                { label: this.$t('msg.audio.track2'), enabled: false },
+                { label: this.$t('msg.audio.defaultAudioTrack'), enabled: true },
               ],
             },
           ],
@@ -232,6 +228,7 @@ new Vue({
           label: this.$t('msg.subtitle.name'),
           submenu: [
             { label: this.$t('msg.subtitle.AITranslation'), enabled: false },
+            { type: 'separator' },
             { label: this.$t('msg.subtitle.loadSubtitleFile'), enabled: false },
             {
               label: this.$t('msg.subtitle.mainSubtitle'),
@@ -245,7 +242,6 @@ new Vue({
             {
               label: this.$t('msg.subtitle.secondarySubtitle'),
               enabled: false,
-              submenu: [],
             },
             { type: 'separator' },
             {
@@ -405,15 +401,14 @@ new Vue({
               label: this.$t('msg.window_.minimize'),
               role: 'minimize',
             },
-            {
-              label: this.$t('msg.window_.enterFullScreen'),
-              enabled: true,
-              accelerator: 'F',
-              click: () => {
-                this.$bus.$emit('enter-fullscreen');
-              },
-            },
-            { label: this.$t('msg.window_.bringAllToFront'), accelerator: '' },
+            // {
+            //   label: this.$t('msg.window_.enterFullScreen'),
+            //   enabled: false,
+            //   click: () => {
+            //     this.$bus.$emit('enter-fullscreen');
+            //   },
+            // },
+            { type: 'separator' },
             {
               label: this.$t('msg.window_.bossKey'),
               accelerator: 'CmdOrCtrl+`',
@@ -431,6 +426,10 @@ new Vue({
             {
               label: this.$t('msg.help.splayerxHelp'),
             },
+            {
+              label: this.$t('msg.splayerx.homepage'),
+              enabled: false,
+            },
           ],
         },
       ];
@@ -445,6 +444,12 @@ new Vue({
               {
                 label: this.$t('msg.splayerx.about'),
                 role: 'about',
+              },
+              {
+                label: this.$t('msg.splayerx.feedback'),
+                click: () => {
+                  this.$electron.shell.openExternal('https://feedback.splayer.org');
+                },
               },
               {
                 label: this.$t('msg.splayerx.preferences'),
@@ -477,22 +482,6 @@ new Vue({
                     },
                   },
                 ],
-              },
-              {
-                label: this.$t('msg.splayerx.homepage'),
-                enabled: false,
-              },
-              {
-                label: this.$t('msg.splayerx.feedback'),
-                click: () => {
-                  this.$electron.shell.openExternal('https://feedback.splayer.org');
-                },
-              },
-              { type: 'separator' },
-              {
-                label: this.$t('msg.splayerx.services'),
-                role: 'services',
-                submenu: [],
               },
               { type: 'separator' },
               {
