@@ -127,5 +127,9 @@ export default {
     playlistSource: 'Playlist',
     playing: 'Playing',
   },
+  nextVideo: {
+    nextInFolder: 'Next in Folder',
+    nextInPlaylist: 'Next in Playlist',
+  },
 };
 

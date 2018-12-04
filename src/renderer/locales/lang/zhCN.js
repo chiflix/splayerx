@@ -126,4 +126,8 @@ export default {
     playlistSource: '播放列表',
     playing: '正在播放',
   },
+  nextVideo: {
+    nextInFolder: '文件夹中下一视频',
+    nextInPlaylist: '播放列表中下一视频',
+  },
 };
