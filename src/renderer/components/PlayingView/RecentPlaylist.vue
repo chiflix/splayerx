@@ -25,7 +25,7 @@
       :style="{
         fontSize: sizeAdaption(14),
         lineHeight: sizeAdaption(13),
-      }">{{lastPlayedTime}} {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}} {{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+      }">{{lastPlayedTime}} {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
       <div class="file-name"
         :style="{
           marginTop: sizeAdaption(9),
@@ -191,9 +191,9 @@ export default {
     ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'roundedCurrentTime', 'originSrc']),
     inWhichSource() {
       if (this.isFolderList) {
-        return '文件夹';
+        return this.$t('recentPlaylist.folderSource');
       }
-      return '播放列表';
+      return this.$t('recentPlaylist.playlistSource');
     },
     lastPlayedTime() {
       if (this.hoverIndex === this.playingIndex) {
@@ -310,6 +310,7 @@ export default {
       }
     }
     .playlist-items {
+      -webkit-app-region: no-drag;
       display: flex;
       .item {
         position: relative;
