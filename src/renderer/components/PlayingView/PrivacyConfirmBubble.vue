@@ -55,7 +55,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['nextVideo', 'finalPartTime', 'isFolderList', 'currentTime', 'duration']),
+    ...mapGetters(['nextVideo', 'finalPartTime', 'currentTime', 'duration']),
     infoCSS() {
       if (this.$i18n.locale === 'en') {
         if (this.state === 1) {

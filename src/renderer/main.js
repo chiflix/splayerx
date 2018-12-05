@@ -130,10 +130,10 @@ new Vue({
                       this.addLog('error', `Failed to open file: ${files[0]}`);
                     }
                     if (files.length > 1) {
-                      this.$store.commit('PlayingList', files);
+                      this.$store.dispatch('PlayingList', files);
                     } else {
                       const similarVideos = this.findSimilarVideoByVidPath(files[0]);
-                      this.$store.commit('FolderList', similarVideos);
+                      this.$store.dispatch('FolderList', similarVideos);
                     }
                   }
                 });
@@ -753,10 +753,10 @@ new Vue({
           this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
         }
         if (videoFiles.length > 1) {
-          this.$store.commit('PlayingList', videoFiles);
+          this.$store.dispatch('PlayingList', videoFiles);
         } else {
           const similarVideos = this.findSimilarVideoByVidPath(videoFiles[0]);
-          this.$store.commit('FolderList', similarVideos);
+          this.$store.dispatch('FolderList', similarVideos);
         }
       }
       if (containsSubFiles) {

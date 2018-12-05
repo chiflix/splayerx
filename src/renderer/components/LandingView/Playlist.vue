@@ -229,10 +229,10 @@ export default {
             this.addLog('error', `Failed to open file: ${items[0]}`);
           }
           if (items.length > 1) {
-            this.$store.commit('PlayingList', items);
+            this.$store.dispatch('PlayingList', items);
           } else {
             const similarVideos = this.findSimilarVideoByVidPath(items[0]);
-            this.$store.commit('FolderList', similarVideos);
+            this.$store.dispatch('FolderList', similarVideos);
           }
         }
       });
@@ -390,7 +390,7 @@ export default {
         } else {
           this.openFile(item.path);
           const similarVideos = this.findSimilarVideoByVidPath(item.path);
-          this.$store.commit('FolderList', similarVideos);
+          this.$store.dispatch('FolderList', similarVideos);
         }
         this.$bus.$emit('moveItem', this.moveItem);
         this.$bus.$emit('move', this.move);
