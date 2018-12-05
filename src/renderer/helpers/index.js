@@ -100,34 +100,35 @@ export default {
     },
     openFile(path) {
       const originPath = path;
-      const mediaQuickHash = this.mediaQuickHash(originPath);
-      if (mediaQuickHash instanceof Error) {
-        if (mediaQuickHash.code === 'ENOENT') {
-          this.addLog('error', `Failed to open file : ${path}`);
-        }
-      } else {
-        this.infoDB().get('recent-played', mediaQuickHash)
-          .then((value) => {
-            if (value) {
-              this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
-              this.infoDB().add('recent-played', Object.assign(value, { path: originPath, lastOpened: Date.now() }));
-            } else {
-              this.infoDB().add('recent-played', {
-                quickHash: mediaQuickHash,
-                path: originPath,
-                lastOpened: Date.now(),
-              });
-            }
-            this.$bus.$emit('new-file-open');
+      this.mediaQuickHash(originPath, (err, mediaQuickHash) => {
+        if (err instanceof Error) {
+          if (err.code === 'ENOENT') {
+            this.addLog('error', `Failed to open file : ${path}`);
+          }
+        } else {
+          this.infoDB().get('recent-played', mediaQuickHash)
+            .then((value) => {
+              if (value) {
+                this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
+                this.infoDB().add('recent-played', Object.assign(value, { path: originPath, lastOpened: Date.now() }));
+              } else {
+                this.infoDB().add('recent-played', {
+                  quickHash: mediaQuickHash,
+                  path: originPath,
+                  lastOpened: Date.now(),
+                });
+              }
+              this.$bus.$emit('new-file-open');
+            });
+          this.$store.dispatch('SRC_SET', originPath);
+          this.$bus.$emit('new-video-opened');
+          this.$router.push({
+            name: 'playing-view',
           });
-        this.$store.dispatch('SRC_SET', originPath);
-        this.$bus.$emit('new-video-opened');
-        this.$router.push({
-          name: 'playing-view',
-        });
-      }
+        }
+      });
     },
-    mediaQuickHash(filePath) {
+    mediaQuickHash(filePath, cb) {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');
       }
@@ -135,7 +136,7 @@ export default {
       try {
         fd = fs.openSync(filePath, 'r');
       } catch (error) {
-        return error;
+        return cb(error);
       }
       const len = fs.statSync(filePath).size;
       const position = [
@@ -151,7 +152,7 @@ export default {
         res[i] = md5Hex(buf.slice(0, bufLen));
       }
       fs.closeSync(fd);
-      return res.join('-');
+      return cb(undefined, res.join('-'));
     },
     addLog(level, log) {
       switch (level) {
