@@ -103,7 +103,8 @@ export default {
       this.mediaQuickHash(originPath, (err, mediaQuickHash) => {
         if (err instanceof Error) {
           if (err.code === 'ENOENT') {
-            this.addLog('error', `Failed to open file : ${path}`);
+            this.addLog('error', 'Failed to open file, it will be removed from list.');
+            this.$bus.$emit('file-not-existed', originPath);
           }
         } else {
           this.infoDB().get('recent-played', mediaQuickHash)

@@ -101,7 +101,10 @@ export default {
   },
   errorFile: {
     title: '文件错误',
-    content: '视频文件格式无法识别或文件已损坏。',
+    content: {
+      default: '视频文件格式无法识别或文件已损坏。',
+      fileNonExist: '打开文件失败，将从列表中移除。',
+    },
   },
   loading: {
     title: '',

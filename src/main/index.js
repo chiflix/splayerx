@@ -186,7 +186,11 @@ function registerMainWindowEvent() {
     if (!log) return;
     writeLog(level, log);
     if (mainWindow && log.message && log.message.indexOf('Failed to open file') !== -1) {
-      mainWindow.webContents.send('addMessages');
+      if (log.message.indexOf('it will be removed from list.') !== -1) {
+        mainWindow.webContents.send('addMessages', 'remove-file');
+      } else {
+        mainWindow.webContents.send('addMessages');
+      }
     }
   });
 }

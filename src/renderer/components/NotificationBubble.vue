@@ -88,6 +88,7 @@ export default {
     },
     closeMessage(id) {
       this.$store.dispatch('removeMessages', id);
+      this.$bus.$emit('delete-file');
     },
   },
   watch: {

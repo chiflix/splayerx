@@ -102,7 +102,10 @@ export default {
   },
   errorFile: {
     title: 'File error',
-    content: 'Failed to open file.',
+    content: {
+      default: 'Failed to open file.',
+      fileNonExist: 'Failed to open file, it will be removed from list.',
+    },
   },
   loading: {
     title: '',

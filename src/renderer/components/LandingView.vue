@@ -88,6 +88,7 @@ export default {
       move: 0,
       windowWidth: 720,
       averageWidth: 112,
+      filePathNeedToDelete: '',
     };
   },
   watch: {
@@ -136,6 +137,24 @@ export default {
       this.langdingLogoAppear = true;
       this.showShortcutImage = false;
       this.infoDB().cleanData();
+    });
+    this.$bus.$on('file-not-existed', (filePath) => {
+      this.filePathNeedToDelete = filePath;
+      this.lastPlayedFile.forEach((file) => {
+        if (file.path === filePath) {
+          this.infoDB().delete('recent-played', file.quickHash);
+        }
+      });
+    });
+    this.$bus.$on('delete-file', () => {
+      if (this.filePathNeedToDelete) {
+        for (let i = 0; i < this.lastPlayedFile.length; i += 1) {
+          if (this.lastPlayedFile[i].path === this.filePathNeedToDelete) {
+            this.lastPlayedFile.splice(i, 1);
+            break;
+          }
+        }
+      }
     });
   },
   beforeDestroy() {
