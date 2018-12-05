@@ -92,7 +92,10 @@ export default {
       tranFlag: false,
     };
   },
-  mounted() {
+  created() {
+    this.$bus.$on('file-not-existed', (path) => {
+      this.$store.dispatch('RemovePlayingList', path);
+    });
   },
   methods: {
     afterLeave() {
