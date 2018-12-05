@@ -112,7 +112,7 @@ export default {
     showAllWidgets() {
       return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
-        this.attachedShown;
+        this.attachedShown || this.isDragging;
     },
     onOtherWidget() {
       return this.currentWidget !== this.$options.name;
