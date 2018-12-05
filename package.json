@@ -206,7 +206,7 @@
     "win-mouse": "^1.2.0"
   },
   "devDependencies": {
-    "@chiflix/electron": "^4.0.0-beta.7",
+    "@chiflix/electron": "^4.0.0-beta.8",
     "@vue/test-utils": "^1.0.0-beta.24",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.3",

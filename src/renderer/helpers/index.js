@@ -100,31 +100,43 @@ export default {
     },
     openFile(path) {
       const originPath = path;
-      this.infoDB().get('recent-played', this.mediaQuickHash(originPath))
-        .then((value) => {
-          if (value) {
-            this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
-            this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date.now() }));
-          } else {
-            this.infoDB().add('recent-played', {
-              quickHash: this.mediaQuickHash(originPath),
-              path: originPath,
-              lastOpened: Date.now(),
-            });
-          }
-          this.$bus.$emit('new-file-open');
+      const mediaQuickHash = this.mediaQuickHash(originPath);
+      if (mediaQuickHash instanceof Error) {
+        if (mediaQuickHash.code === 'ENOENT') {
+          this.addLog('error', `Failed to open file : ${path}`);
+        }
+      } else {
+        this.infoDB().get('recent-played', mediaQuickHash)
+          .then((value) => {
+            if (value) {
+              this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
+              this.infoDB().add('recent-played', Object.assign(value, { path: originPath, lastOpened: Date.now() }));
+            } else {
+              this.infoDB().add('recent-played', {
+                quickHash: mediaQuickHash,
+                path: originPath,
+                lastOpened: Date.now(),
+              });
+            }
+            this.$bus.$emit('new-file-open');
+          });
+        this.$store.dispatch('SRC_SET', originPath);
+        this.$bus.$emit('new-video-opened');
+        this.$router.push({
+          name: 'playing-view',
         });
-      this.$store.dispatch('SRC_SET', originPath);
-      this.$bus.$emit('new-video-opened');
-      this.$router.push({
-        name: 'playing-view',
-      });
+      }
     },
     mediaQuickHash(filePath) {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');
       }
-      const fd = fs.openSync(filePath, 'r');
+      let fd;
+      try {
+        fd = fs.openSync(filePath, 'r');
+      } catch (error) {
+        return error;
+      }
       const len = fs.statSync(filePath).size;
       const position = [
         4096,
