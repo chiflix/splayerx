@@ -113,7 +113,7 @@ export default {
       const onlineNeeded = local.length === 0;
       const online = onlineNeeded ? await this.getOnlineSubtitlesList(videoSrc) : [];
       if (onlineNeeded) {
-        online.array[1].forEach((sub) => {
+        online.forEach((sub) => {
           if (typeof sub[0] === 'string' && sub[0].length) {
             onlineNormalizer.push({
               type: 'online',

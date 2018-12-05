@@ -1,5 +1,7 @@
 import path from 'path';
 import fs from 'fs';
+import { get, partialRight } from 'lodash';
+
 import healthMsg from 'sagi-api/health/v1/health_pb';
 import healthRpc from 'sagi-api/health/v1/health_grpc_pb';
 import translationMsg from 'sagi-api/translation/v1/translation_pb';
@@ -10,6 +12,8 @@ import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 /* eslint-disable */
 const grpc = require('grpc');
 /* eslint-enable */
+
+const getResponseArray = partialRight(get, 'array');
 
 class Sagi {
   constructor() {
@@ -25,6 +29,7 @@ class Sagi {
     } else {
       this.endpoint = 'apis.stage.sagittarius.ai:8443';
     }
+    this.transcripts = [];
   }
 
   mediaTranslate(mediaIdentity) {
@@ -33,11 +38,18 @@ class Sagi {
       const req = new translationMsg.MediaTranslationRequest();
       req.setMediaIdentity(mediaIdentity);
       client.translateMedia(req, (err, response) => {
+        const transcriptInfo = array => ({
+          transcript_identity: array[0],
+          language_code: array[1] || 'unknown',
+          ranking: array[2] || -1,
+          tags: array[3] || [],
+          delay: array[4] || 0,
+        });
         if (err) {
           reject(err);
         } else {
           // TODO: fetch real transcripts
-          resolve(response);
+          resolve(getResponseArray(response).map(transcriptInfo));
         }
       });
     });
@@ -56,6 +68,12 @@ class Sagi {
         }
       });
     });
+  }
+
+  async getTranscriptInfo(mediaIdentity, transcriptIdentity) {
+    const transcripts = await this.mediaTranslate(mediaIdentity);
+    console.log(transcripts);
+    return transcripts.find(transcript => transcript.transcript_identity === transcriptIdentity);
   }
 
   /* eslint-disable */
