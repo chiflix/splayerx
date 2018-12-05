@@ -98,15 +98,17 @@ export default {
       }
     },
     chosenSize(val) {
-      this.lists.forEach((i, ind) => {
-        if (ind !== val) {
-          this.$set(this.lists[ind], 'chosen', false);
-        } else {
-          this.$set(this.lists[ind], 'chosen', true);
-        }
-      });
-      this.selectedIndex = val;
-      this.calculateFontLength(val);
+      if (this.item === this.$t('advance.fontSize')) {
+        this.lists.forEach((i, ind) => {
+          if (ind !== val) {
+            this.$set(this.lists[ind], 'chosen', false);
+          } else {
+            this.$set(this.lists[ind], 'chosen', true);
+          }
+        });
+        this.selectedIndex = val;
+        this.calculateFontLength(val);
+      }
     },
     winWidth(val) {
       if (val > 1920) {

@@ -40,7 +40,10 @@ export default {
     currentSubtitleSrc() {
       const result = this.subtitleList
         .filter(subtitle => subtitle.id === this.currentSubtitleId)[0];
-      return result.type === 'online' ? result.hash : result.path;
+      if (result) {
+        return result.type === 'online' ? result.hash : result.path;
+      }
+      return this.subtitleList[0].hash;
     },
   },
   data() {

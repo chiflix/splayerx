@@ -9,7 +9,7 @@
         top: subTop(index),
         transform: transPos(index),
       }"
-      :class="!isVtt && !cue.tags.pos ? `subtitle-alignment${cue.tags.alignment}` : ''">
+      :class="!isVtt && !cue.tags.pos ? `subtitle-alignment${cue.tags.alignment}` : isVtt && cue.tags.line !=='' && cue.tags.position !== '' ? '' : 'subtitle-alignment2'">
       <CueRenderer class="cueRender"
         :text="cue.text"
         :settings="cue.tags"

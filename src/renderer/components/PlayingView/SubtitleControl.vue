@@ -14,7 +14,7 @@
           <div class="element bottom"><div class="element middle"><div class="element content">
 
             <div class="topContainer">
-              <div class="title">字幕选择</div>
+              <div class="title">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
               <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
                 :style="{
                   cursor: 'pointer',
@@ -41,7 +41,7 @@
                         height: `${itemHeight}px`,
                         cursor: currentSubIden === -1 ? 'default' : 'pointer',
                       }">
-                      <div class="text">无字幕</div>
+                      <div class="text">{{ this.$t('msg.subtitle.noSubtitle') }}</div>
                     </div>
                   </div>
 
@@ -128,11 +128,11 @@ export default {
       hoverIndex: -5,
       hiddenText: false,
       hoverHeight: 0,
-      shouldHidden: false,
       timer: null,
       count: 0,
       rotateTime: 0,
       loadingType: '',
+      detailTimer: null,
     };
   },
   components: {
@@ -197,6 +197,12 @@ export default {
     });
     this.$bus.$on('menu-sub-refresh', () => {
       this.handleRefresh();
+    });
+    this.$bus.$on('menu-sub-change', (index) => {
+      this.toggleItemClick(index);
+    });
+    this.$bus.$on('subtitle-off', () => {
+      this.toggleSubtitleOff();
     });
   },
   methods: {
@@ -301,22 +307,21 @@ export default {
     },
     toggleItemsMouseOver(index) {
       if (index >= 0) {
+        clearTimeout(this.detailTimer);
         const hoverItem = document.querySelector(`#item${index} .text`);
         if (hoverItem.clientWidth < hoverItem.scrollWidth) {
           this.shouldHidden = true;
           this.hoverHeight = this.textHeight *
             (Math.ceil(hoverItem.scrollWidth / hoverItem.clientWidth) - 1);
-          setTimeout(() => {
-            if (this.shouldHidden) {
-              this.hiddenText = true;
-            }
+          this.detailTimer = setTimeout(() => {
+            this.hiddenText = true;
           }, 1500);
         }
       }
       this.hoverIndex = index;
     },
     toggleItemsMouseLeave() {
-      this.shouldHidden = false;
+      clearTimeout(this.detailTimer);
       this.hoverHeight = 0;
       this.hiddenText = false;
       this.hoverIndex = -5;
@@ -328,43 +333,6 @@ export default {
     toggleSubtitleOff() {
       this.currentSubIden = -1;
       this.offCurrentSubtitle();
-    },
-    toggleLoadServerSubtitles() {
-      this.$bus.$emit('load-server-transcripts');
-    },
-    toggleOpenFileDialog() {
-      if (this.showingPopupDialog) {
-        return;
-      }
-      const self = this;
-      const { remote } = this.$electron;
-      const { dialog } = remote;
-      const browserWindow = remote.BrowserWindow;
-      const focusWindow = browserWindow.getFocusedWindow();
-      const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
-
-      self.showingPopupDialog = true;
-      dialog.showOpenDialog(focusWindow, {
-        title: 'Open Dialog',
-        defaultPath: './',
-        filters: [{
-          name: 'Subtitle Files',
-          extensions: VALID_EXTENSION,
-        }],
-        properties: ['openFile'],
-      }, (item) => {
-        self.showingPopupDialog = false;
-        if (item) {
-          self.$bus.$emit('add-subtitle', item);
-        }
-      });
-    },
-    itemHasBeenChosen(index = 0) {
-      return index === this.currentSubIden;
-    },
-    itemTitleHasChineseChar(str) {
-      const REGEX_CHINESE = /[\u4e00-\u9fff]|[\u3400-\u4dbf]|[\u{20000}-\u{2a6df}]|[\u{2a700}-\u{2b73f}]|[\u{2b740}-\u{2b81f}]|[\u{2b820}-\u{2ceaf}]|[\uf900-\ufaff]|[\u3300-\u33ff]|[\ufe30-\ufe4f]|[\uf900-\ufaff]|[\u{2f800}-\u{2fa1f}]/u;
-      return (REGEX_CHINESE.test(str));
     },
   },
   computed: {
