@@ -59,7 +59,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement', 'audioTrackList']),
   },
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
@@ -100,6 +100,18 @@ new Vue({
     muted(val) {
       if (val) {
         this.menu.getMenuItemById('mute').checked = val;
+      }
+    },
+    audioTrackList(val, oldval) {
+      if (val.length !== oldval.length) {
+        this.refreshMenu();
+      }
+      if (this.menu) {
+        this.audioTrackList.forEach((item, index) => {
+          if (item.enabled === true && this.menu.getMenuItemById(`track${index}`)) {
+            this.menu.getMenuItemById(`track${index}`).checked = true;
+          }
+        });
       }
     },
   },
@@ -214,13 +226,6 @@ new Vue({
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
             { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
             { type: 'separator' },
-            {
-              label: this.$t('msg.audio.switchAudioTrack'),
-              enabled: false,
-              submenu: [
-                { label: this.$t('msg.audio.defaultAudioTrack'), enabled: true },
-              ],
-            },
           ],
         },
         // menu.subtitle
@@ -401,13 +406,12 @@ new Vue({
               label: this.$t('msg.window_.minimize'),
               role: 'minimize',
             },
-            // {
-            //   label: this.$t('msg.window_.enterFullScreen'),
-            //   enabled: false,
-            //   click: () => {
-            //     this.$bus.$emit('enter-fullscreen');
-            //   },
-            // },
+            {
+              label: this.$t('msg.window_.enterFullScreen'),
+              click: () => {
+                this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
+              },
+            },
             { type: 'separator' },
             {
               label: this.$t('msg.window_.bossKey'),
@@ -425,16 +429,20 @@ new Vue({
           submenu: [
             {
               label: this.$t('msg.help.splayerxHelp'),
+              enabled: false,
             },
             {
               label: this.$t('msg.splayerx.homepage'),
-              enabled: false,
+              click: () => {
+                this.$electron.shell.openExternal('https://beta.splayer.org');
+              },
             },
           ],
         },
       ];
       this.updateRecentPlay().then((result) => {
         // menu.file add "open recent"
+        template[2].submenu.splice(4, 0, this.updateAudioTrack());
         template[0].submenu.splice(2, 0, result);
         // menu.about
         if (process.platform === 'darwin') {
@@ -511,7 +519,14 @@ new Vue({
         this.menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(this.menu);
       }).then(() => {
-        this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
+        if (this.chosenStyle !== '') {
+          this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
+        }
+        this.audioTrackList.forEach((item, index) => {
+          if (item.enabled === true) {
+            this.menu.getMenuItemById(`track${index}`).checked = true;
+          }
+        });
       })
         .catch((err) => {
           this.addLog('error', err);
@@ -542,6 +557,32 @@ new Vue({
           this.openFile(value.path);
         },
       };
+    },
+    updateAudioTrackItem(key, value) {
+      return {
+        id: `track${key}`,
+        visible: true,
+        type: 'radio',
+        label: value.language,
+        click: () => {
+          this.$bus.$emit('switch-audio-track', key);
+        },
+      };
+    },
+    updateAudioTrack() {
+      const tmp = {
+        label: this.$t('msg.audio.switchAudioTrack'),
+        id: 'audio-track',
+        submenu: [],
+      };
+      if (this.audioTrackList.length <= 1) {
+        tmp.submenu.splice(0, 1, this.updateAudioTrackItem(0, { language: '默认' }));
+      } else {
+        this.audioTrackList.forEach((item, index) => {
+          tmp.submenu.splice(index, 1, this.updateAudioTrackItem(index, item));
+        });
+      }
+      return tmp;
     },
     pathProcess(path) {
       if (process.platform === 'win32') {

@@ -100,6 +100,11 @@ export default {
       this.$store.dispatch(videoActions.SWITCH_AUDIO_TRACK, this.tracks[index]);
     },
   },
+  mounted() {
+    this.$bus.$on('switch-audio-track', (index) => {
+      this.handleClick(index);
+    });
+  },
 };
 </script>
 
