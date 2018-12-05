@@ -22,6 +22,9 @@ const getters = {
 };
 
 const mutations = {
+  isFolderList(state, t) {
+    state.isFolderList = t;
+  },
   PlayingList(state, t) {
     state.PlayingList = t;
   },
