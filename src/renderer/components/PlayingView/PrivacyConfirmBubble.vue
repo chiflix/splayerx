@@ -27,7 +27,6 @@
 </transition>
 </template>
 <script>
-import { mapGetters } from 'vuex';
 export default {
   name: 'privacy-bubble',
   data() {
@@ -55,7 +54,6 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['nextVideo', 'finalPartTime', 'currentTime', 'duration']),
     infoCSS() {
       if (this.$i18n.locale === 'en') {
         if (this.state === 1) {
