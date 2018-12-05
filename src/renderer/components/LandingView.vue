@@ -138,6 +138,7 @@ export default {
       this.showShortcutImage = false;
       this.infoDB().cleanData();
     });
+    // trigger by openFile function when opened file not existed
     this.$bus.$on('file-not-existed', (filePath) => {
       this.filePathNeedToDelete = filePath;
       this.lastPlayedFile.forEach((file) => {
@@ -146,6 +147,7 @@ export default {
         }
       });
     });
+    // responsible for delete the thumbnail on display which had already deleted in DB
     this.$bus.$on('delete-file', () => {
       if (this.filePathNeedToDelete) {
         for (let i = 0; i < this.lastPlayedFile.length; i += 1) {
