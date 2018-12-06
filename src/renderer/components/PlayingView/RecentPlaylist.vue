@@ -90,11 +90,15 @@ export default {
       mousePosition: [],
       canHoverItem: false,
       tranFlag: false,
+      filePathNeedToDelete: '',
     };
   },
   created() {
     this.$bus.$on('file-not-existed', (path) => {
-      this.$store.dispatch('RemovePlayingList', path);
+      this.filePathNeedToDelete = path;
+    });
+    this.$bus.$on('delete-file', () => {
+      this.$store.dispatch('RemovePlayingList', this.filePathNeedToDelete);
     });
   },
   methods: {
