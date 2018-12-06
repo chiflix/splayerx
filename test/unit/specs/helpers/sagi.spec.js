@@ -10,7 +10,7 @@ describe('helper.sagi api', () => {
       // fail the test
       done(reason);
     });
-  });
+  }).timeout(20000);
 
   it('sagi.mediaTranslate should return OK', (done) => {
     helpers.methods.sagi().mediaTranslate('11-22-33-44').then((resp) => {
@@ -29,7 +29,7 @@ describe('helper.sagi api', () => {
       // fail the test
       done(reason);
     });
-  }).timeout(15000);
+  }).timeout(20000);
 
   it('sagi.training should able to push transcripts', (done) => {
     function randstr() {
