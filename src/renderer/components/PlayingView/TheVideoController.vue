@@ -105,6 +105,9 @@ export default {
       progressBarHovering: false,
       attachedShown: false,
       volumeChange: false,
+      isTwiceUp: false,
+      upTime1: 0,
+      upTime2: 0,
     };
   },
   computed: {
@@ -142,6 +145,18 @@ export default {
     },
     volume() {
       this.volumeChange = true;
+    },
+    upTime1(val) {
+      if (val !== 0) {
+        this.isTwiceUp = val - this.upTime2 < this.clicksDelay;
+        val = 0;
+      }
+    },
+    upTime2(val) {
+      if (val !== 0) {
+        this.isTwiceUp = val - this.upTime1 < this.clicksDelay;
+        this.upTime1 = 0;
+      }
     },
   },
   created() {
@@ -395,7 +410,11 @@ export default {
       }
     },
     handleMouseupLeft(event) {
-      if (!this.isValidClick()) { return; }
+      if (this.upTime1 === 0) {
+        this.upTime1 = Date.now();
+      } else {
+        this.upTime2 = Date.now();
+      }
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
@@ -406,11 +425,12 @@ export default {
         this.eventInfo.get('mousedown'),
         { leftMouseup: true, target: event.target },
       ));
+      if (!this.isValidClick()) { return; }
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
         if (
           this.getComponentName(this.eventInfo.get('mousedown').target) === 'the-video-controller' &&
-          this.currentSelectedWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
+          this.currentSelectedWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging && !this.isTwiceUp) {
           this.togglePlayback();
         }
         this.preventSingleClick = false;
