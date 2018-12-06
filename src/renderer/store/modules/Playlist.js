@@ -33,7 +33,9 @@ const mutations = {
     state.PlayingList.push(...t);
   },
   RemovePlayingList(state, pos) {
-    state.PlayingList.splice(pos, 1);
+    if (pos >= 0) {
+      state.PlayingList.splice(pos, 1);
+    }
   },
 };
 

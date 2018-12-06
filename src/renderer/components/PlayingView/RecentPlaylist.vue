@@ -99,6 +99,7 @@ export default {
     });
     this.$bus.$on('delete-file', () => {
       this.$store.dispatch('RemovePlayingList', this.filePathNeedToDelete);
+      this.filePathNeedToDelete = '';
     });
   },
   methods: {
@@ -141,7 +142,8 @@ export default {
           this.shifting = false;
           this.tranFlag = false;
         }, 400);
-      } else if (index !== this.playingIndex) {
+      } else if (index !== this.playingIndex
+        && this.filePathNeedToDelete !== this.playingList[index]) {
         this.openFile(this.playingList[index]);
         this.$store.dispatch(videoAction.PLAY_VIDEO);
       }
