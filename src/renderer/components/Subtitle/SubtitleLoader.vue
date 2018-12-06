@@ -129,19 +129,19 @@ export default {
       }
       return `translateY(${-100 * this.lineNum(index)}%)`;
     },
-    vttLine(index) { //eslint-disable-line
+    vttLine(index) {
       const { currentTags: tags } = this;
       let tmp = tags[index].line;
       if (tags[index].line.includes('%')) {
-        tmp = parseInt(tags[index].line, 10) / 100;
+        tmp = -parseInt(tags[index].line, 10) / 100;
       }
       if (tags[index].vertical) {
-        if ((tmp >= -1 && tmp < -0.5) || (tmp > 0.5 && tmp <= 1)) {
+        if (tmp >= -1 && tmp < -0.5) {
           return `translateX(${-100 * this.lineNum(index)}%)`;
         }
         return `translateX(${100 * this.lineNum(index)}%)`;
       }
-      if ((tmp >= -1 && tmp < -0.5) || (tmp > 0.5 && tmp <= 1)) {
+      if (tmp >= -1 && tmp < -0.5) {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
       return `translateY(${100 * this.lineNum(index)}%)`;
