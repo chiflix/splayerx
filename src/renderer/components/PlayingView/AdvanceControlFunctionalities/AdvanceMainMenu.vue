@@ -245,6 +245,11 @@ export default {
         }, 150);
       }
     },
+    trackNum(val) {
+      if (val <= 1) {
+        this.showTrack = false;
+      }
+    },
   },
   computed: {
     ...mapGetters(['winWidth', 'currentSubtitleId']),

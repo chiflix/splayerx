@@ -1,6 +1,6 @@
 export default {
   msg: {
-    titleName: '射手影音',
+    titleName: 'SPlayer',
     file: {
       name: '文件',
       open: '打開文件…',
@@ -17,6 +17,10 @@ export default {
       decreasePlaybackSpeed: '減緩播放速度         ]',
       captureScreen: '截圖',
       captureVideoClip: '截取視頻片段',
+      play: '播放',
+      pause: '暫停',
+      forward: '前進',
+      backward: '後退',
     },
     audio: {
       name: '音頻',
@@ -25,6 +29,8 @@ export default {
       mute: '靜音',
       switchAudioTrack: '切換音軌',
       defaultAudioTrack: '默認',
+      increaseVolume: '提高音量',
+      decreaseVolume: '降低音量',
     },
     subtitle: {
       name: '字幕',
@@ -56,6 +62,7 @@ export default {
       name: '窗口',
       minimize: '最小化',
       enterFullScreen: '進入全屏',
+      exitFullScreen: '退出全屏',
       bossKey: '老板鍵',
     },
     help: {
@@ -126,5 +133,9 @@ export default {
     folderSource: '文件夾',
     playlistSource: '播放列表',
     playing: '正在播放',
+  },
+  nextVideo: {
+    nextInFolder: '文件夹中下一視頻',
+    nextInPlaylist: '播放列表中下一視頻',
   },
 };

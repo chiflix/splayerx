@@ -104,10 +104,11 @@ export default {
       listenedWidget: 'the-video-controller',
       progressBarHovering: false,
       attachedShown: false,
+      volumeChange: false,
     };
   },
   computed: {
-    ...mapGetters(['muted', 'paused']),
+    ...mapGetters(['muted', 'paused', 'volume']),
     showAllWidgets() {
       return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
@@ -138,6 +139,9 @@ export default {
         }
         this.hideProgressBar = false;
       }
+    },
+    volume() {
+      this.volumeChange = true;
     },
   },
   created() {
@@ -238,7 +242,7 @@ export default {
       const mouseWakingUpVolume = this.enterWidgets(lastWidget, this.currentWidget, 'volume-indicator');
       const mouseLeavingVolume = this.leaveWidgets(lastWidget, this.currentWidget, 'volume-indicator');
       const mouseMovingInVolume = this.andify(!this.mouseStopMoving, this.inWidgets(lastWidget, this.currentWidget, 'volume-indicator'));
-      const wakingupVolume = this.orify(volumeKeydown, this.andify(mouseScrolling, process.platform !== 'darwin'), this.andify(!this.muted, this.orify(mouseWakingUpVolume, mouseLeavingVolume, mouseMovingInVolume))); // eslint-disable-line
+      const wakingupVolume = this.orify(this.volumeChange, volumeKeydown, this.andify(mouseScrolling, process.platform !== 'darwin'), this.andify(!this.muted, this.orify(mouseWakingUpVolume, mouseLeavingVolume, mouseMovingInVolume))); // eslint-disable-line
       if (wakingupVolume) {
         this.timerManager.updateTimer('sleepingVolumeButton', this.orify(mouseWakingUpVolume, mouseMovingInVolume) ? this.muteDelay : this.hideVolumeDelay);
         // Prevent all widgets display before volume-control
@@ -246,6 +250,7 @@ export default {
           this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
         }
         this.hideVolume = false;
+        this.volumeChange = false;
       }
       // hideProgressBar timer
       const progressKeydown = this.orify(currentEventInfo.get('keydown').ArrowLeft, currentEventInfo.get('keydown').ArrowRight, currentEventInfo.get('keydown').BracketLeft, currentEventInfo.get('keydown').BracketRight);
