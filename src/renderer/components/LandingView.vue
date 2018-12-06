@@ -58,6 +58,7 @@
 </template>
 
 <script>
+import fs from 'fs';
 import { mapState } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
@@ -127,10 +128,33 @@ export default {
       })
 
     // Get all data and show
-      .then(() => {
-        this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
-          this.lastPlayedFile = data.slice(0, 9);
-        });
+      .then(() => this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev'))
+      .then((data) => {
+        console.log(data);
+        const waitArray = [];
+        for (let i = 0; i < data.length; i += 1) {
+          const accessPromise = new Promise((resolve) => {
+            fs.access(data[i].path, fs.constants.F_OK, (err) => {
+              if (err) {
+                this.infoDB().delete('recent-played', data[i].quickHash);
+                resolve();
+              } else {
+                resolve(data[i]);
+              }
+            });
+          });
+          waitArray.push(accessPromise);
+        }
+        console.log(Promise.all(waitArray));
+        return Promise.all(waitArray);
+      })
+      .then((data) => {
+        for (let i = 0; i < data.length; i += 1) {
+          if (data[i] === undefined) {
+            data.splice(i, 1);
+          }
+        }
+        this.lastPlayedFile = data.slice(0, 9);
       });
     this.$bus.$on('clean-lastPlayedFile', () => {
       this.lastPlayedFile = [];
