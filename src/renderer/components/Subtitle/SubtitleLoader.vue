@@ -64,7 +64,7 @@ export default {
       if (parsedData) {
         const cues = parsedData
           .filter(subtitle => subtitle.start <= newVal && subtitle.end >= newVal && subtitle.text !== '');
-        if (!isEqual(cues, this.currentCues) && cues.length) {
+        if (!isEqual(cues, this.currentCues)) {
           this.currentCues = cues.reverse();
         }
       }
