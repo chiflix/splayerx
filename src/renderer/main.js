@@ -321,7 +321,6 @@ new Vue({
                 this.$bus.$emit('menu-sub-refresh');
               },
             },
-            { type: 'separator' },
             {
               label: this.$t('msg.subtitle.loadSubtitleFile'),
               click: () => {
@@ -345,6 +344,7 @@ new Vue({
                 });
               },
             },
+            { type: 'separator' },
             {
               label: this.$t('msg.subtitle.secondarySubtitle'),
               enabled: false,
@@ -553,7 +553,7 @@ new Vue({
       ];
       this.updateRecentPlay().then((result) => {
         // menu.file add "open recent"
-        template[3].submenu.splice(2, 0, this.recentSubMenu());
+        template[3].submenu.splice(3, 0, this.recentSubMenu());
         template[1].submenu.splice(0, 0, this.updatePlayOrPause);
         template[4].submenu.splice(2, 0, this.updateFullScreen);
         template[2].submenu.splice(7, 0, this.updateAudioTrack());
