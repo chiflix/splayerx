@@ -1,7 +1,7 @@
 <template>
   <div class="itemContainer advance-column-items">
     <div class="textContainer" :style="{
-      cursor: isChosen ? 'default' : 'pointer',
+      cursor: 'default',
     }">
       <div class="textItem">{{ item }}</div>
     </div>
@@ -19,7 +19,8 @@
             class="columnNumDetail"
             @mouseover="handleOver(index)"
             @mouseout="handleOut(index)"
-            @click="handleClick(index)">
+            @click="handleClick(index)"
+            :style="{ cursor: track.enabled ? 'default' : 'pointer' }">
             <div class="text"
               :style="{
                 color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
@@ -222,6 +223,7 @@ export default {
     }
   }
   .listContainer {
+    cursor: default;
     .columnContainer {
       display: flex;
       flex-direction: column;

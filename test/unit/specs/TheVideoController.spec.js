@@ -164,8 +164,10 @@ describe('Component - TheVideoController Unit Test', () => {
         wrapper.vm.UITimerManager(17);
         wrapper.vm.inputProcess(currentEventInfo, lastEventInfo);
 
-        expect(wrapper.vm.timerManager.getTimer(hideVolumeTimerName))
-          .to.deep.equal({ name: hideVolumeTimerName, timeLeft: hideVolumeTimerTime });
+        if (process.platform !== 'darwin') {
+          expect(wrapper.vm.timerManager.getTimer(hideVolumeTimerName))
+            .to.deep.equal({ name: hideVolumeTimerName, timeLeft: hideVolumeTimerTime });
+        }
       });
       it('should mousemove timer be reset when hideProgressBar event happened', () => {
         const mousemoveTimerName = 'mouseStopMoving';

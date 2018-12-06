@@ -40,7 +40,10 @@ export default {
     currentSubtitleSrc() {
       const result = this.subtitleList
         .filter(subtitle => subtitle.id === this.currentSubtitleId)[0];
-      return result.type === 'online' ? result.hash : result.path;
+      if (result) {
+        return result.type === 'online' ? result.hash : result.path;
+      }
+      return this.subtitleList[0].hash;
     },
   },
   data() {
@@ -215,20 +218,18 @@ export default {
           type: 'local',
         })),
       )(subtitleList);
-      this.changeCurrentSubtitle(currentUuids[currentUuids.length - 1]);
     });
     this.$bus.$on('refresh-subtitle', async (hash) => {
       const online = await Sagi.mediaTranslate(hash);
       let onlineNormalizer = [];
       online.array[1].forEach((sub) => {
-        onlineNormalizer.push(
-          sub
-            .filter(hash => typeof hash === 'string' && hash.length)
-            .map(hash => ({
-              type: 'online',
-              hash,
-              id: uuidv4(),
-            })));
+        if (typeof sub[0] === 'string' && sub[0].length) {
+          onlineNormalizer.push({
+            type: 'online',
+            hash: sub[0],
+            id: uuidv4(),
+          });
+        }
       });
       this.refreshSubtitle(onlineNormalizer);
       this.$bus.$emit('finish-refresh');
@@ -243,5 +244,6 @@ export default {
   top: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  z-index: 5;
 }
 </style>

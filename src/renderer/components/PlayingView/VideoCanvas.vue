@@ -251,9 +251,6 @@ export default {
     }),
   },
   watch: {
-    muted(val) {
-      console.log('muted', val);
-    },
     originSrc(val, oldVal) {
       this.coverFinded = false;
       this.saveScreenshot();
@@ -293,7 +290,6 @@ export default {
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
     });
-    this.$bus.$on('toggle-mute', this.toggleMute);
     this.$bus.$on('seek', (e) => {
       this.seekTime = [e];
       // todo: use vuex get video element src

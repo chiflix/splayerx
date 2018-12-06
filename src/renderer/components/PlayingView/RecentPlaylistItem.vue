@@ -52,7 +52,7 @@
                       paddingTop: sizeAdaption(5),
                       fontSize: sizeAdaption(12),
                       lineHeight: sizeAdaption(12),
-                    }">正在播放</div>
+                    }">{{ $t('recentPlaylist.playing') }}</div>
                 </div>
                 </transition>
                 </div>
