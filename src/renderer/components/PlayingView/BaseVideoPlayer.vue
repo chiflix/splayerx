@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
 export default {
@@ -105,6 +106,9 @@ export default {
       default: () => ({}),
     },
   },
+  computed: {
+    ...mapGetters(['audioTrackList']),
+  },
   data() {
     return {
       eventListeners: new Map(),
@@ -128,7 +132,7 @@ export default {
     currentAudioTrackId(newVal) {
       const { id } = this.currentAudioTrack;
       if (newVal !== id) {
-        this.$refs.audioTracks.forEach((track) => {
+        this.audioTrackList.forEach((track) => {
           if (track.id === newVal) {
             track.enabled = true;
             const {

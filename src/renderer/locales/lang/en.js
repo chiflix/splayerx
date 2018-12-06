@@ -18,6 +18,10 @@ export default {
       captureScreen: 'Capture Screen',
       captureVideoClip: 'Capture Video Clip',
       mediaInfo: 'Media Info',
+      play: 'Play',
+      pause: 'Pause',
+      forward: 'Step Forward',
+      backward: 'Step Backward',
     },
     audio: {
       name: 'Audio',
@@ -26,6 +30,8 @@ export default {
       mute: 'Mute',
       switchAudioTrack: 'Switch Audio Track',
       defaultAudioTrack: 'Default',
+      increaseVolume: 'Increase Volume',
+      decreaseVolume: 'Decrease Volume',
     },
     subtitle: {
       name: 'Subtitle',
@@ -56,6 +62,7 @@ export default {
       name: 'Window',
       minimize: 'Minimize',
       enterFullScreen: 'Enter Full Screen',
+      exitFullScreen: 'Exit Full Screen',
       bossKey: 'Boss Key',
     },
     help: {
