@@ -130,7 +130,6 @@ export default {
     // Get all data and show
       .then(() => this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev'))
       .then((data) => {
-        console.log(data);
         const waitArray = [];
         for (let i = 0; i < data.length; i += 1) {
           const accessPromise = new Promise((resolve) => {
@@ -145,7 +144,6 @@ export default {
           });
           waitArray.push(accessPromise);
         }
-        console.log(Promise.all(waitArray));
         return Promise.all(waitArray);
       })
       .then((data) => {
