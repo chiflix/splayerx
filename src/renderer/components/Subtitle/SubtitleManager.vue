@@ -35,7 +35,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
-      'currentTime', 'duration', 'paused', 'premiumSubtitles', 'mediaHash', 'duration',
+      'currentTime', 'duration', 'paused', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
     ]),
     currentSubtitleSrc() {
       const result = this.subtitleList
@@ -63,26 +63,28 @@ export default {
       });
     },
     premiumSubtitles(newVal) {
-      newVal.forEach((subtitle) => {
-        const { id, played } = subtitle;
-        if (id && !this.localPremiumSubtitles[id]) {
-          const subtitleInfo = this.subtitleList.filter(subtitle => subtitle.id === id)[0];
-          const { subtitle } = this.$refs.currentSubtitle;
-          const payload = {
-            media_identity: this.mediaHash,
-            language_code: subtitleInfo.langCode,
-            format: `.${subtitleInfo.ext}`,
-            played_time: played,
-            total_time: this.duration,
-            delay: 0,
-            payload: Buffer.from(subtitle.rawData),
-          };
-          Sagi.pushTranscript(payload).then((res) => {
-            console.log(res);
-          });
-          this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
-        }
-      });
+      if (this.privacyAgreement) {
+        newVal.forEach((subtitle) => {
+          const { id, played } = subtitle;
+          if (id && !this.localPremiumSubtitles[id]) {
+            const subtitleInfo = this.subtitleList.filter(subtitle => subtitle.id === id)[0];
+            const { subtitle } = this.$refs.currentSubtitle;
+            const payload = {
+              media_identity: this.mediaHash,
+              language_code: subtitleInfo.langCode,
+              format: `.${subtitleInfo.ext}`,
+              played_time: played,
+              total_time: this.duration,
+              delay: 0,
+              payload: Buffer.from(subtitle.rawData),
+            };
+            Sagi.pushTranscript(payload).then((res) => {
+              console.log(res);
+            });
+            this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
+          }
+        });
+      }
     },
     subtitleList() {
       this.$bus.$emit('finish-loading', 'online');
@@ -111,7 +113,8 @@ export default {
       };
       const onlineNormalizer = [];
       const onlineNeeded = local.length === 0;
-      const online = onlineNeeded ? await this.getOnlineSubtitlesList(videoSrc) : [];
+      const online = onlineNeeded && this.privacyAgreement
+        ? await this.getOnlineSubtitlesList(videoSrc) : [];
       if (onlineNeeded) {
         online.array[1].forEach((sub) => {
           if (typeof sub[0] === 'string' && sub[0].length) {
