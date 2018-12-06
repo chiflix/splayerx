@@ -110,6 +110,9 @@ export default {
       type: Number,
       require: true,
     },
+    filePathNeedToDelete: {
+      type: String,
+    },
   },
   destroyed() {
     document.onmousemove = null;
@@ -388,7 +391,7 @@ export default {
           this.moveItem = 0;
           this.move = 0;
           lf.style.left = '';
-        } else {
+        } else if (!this.filePathNeedToDelete) {
           this.openFile(item.path);
           const similarVideos = this.findSimilarVideoByVidPath(item.path);
           this.$store.dispatch('FolderList', similarVideos);

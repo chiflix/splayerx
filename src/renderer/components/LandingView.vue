@@ -48,7 +48,7 @@
       </div>
   </transition>
       <playlist :lastPlayedFile="lastPlayedFile" :changeSize="changeSize" :showItemNum="showItemNum"
-        :isFullScreen="isFullScreen" :windowWidth="windowWidth"
+        :isFullScreen="isFullScreen" :windowWidth="windowWidth" :filePathNeedToDelete="filePathNeedToDelete"
         :style="{
           marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
           left: this.isFullScreen ? '0px' : `${this.move}px`,
