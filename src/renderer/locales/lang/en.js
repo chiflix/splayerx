@@ -108,10 +108,13 @@ export default {
     track: 'Track',
   },
   errorFile: {
-    title: 'File error',
+    title: {
+      default: 'File error',
+      fileNonExist: 'Cannot find the file',
+    },
     content: {
       default: 'Failed to open file.',
-      fileNonExist: 'Failed to open file, it will be removed from list.',
+      fileNonExist: 'Will be removed from the list.',
     },
   },
   loading: {

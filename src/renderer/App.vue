@@ -38,7 +38,7 @@
           if (messageType === 'remove-file') {
             this.$store.dispatch('addMessages', {
               type: 'error',
-              title: this.$t('errorFile.title'),
+              title: this.$t('errorFile.title.fileNonExist'),
               content: this.$t('errorFile.content.fileNonExist'),
               dismissAfter: 5000,
               cb: () => {
@@ -49,7 +49,7 @@
         } else {
           this.$store.dispatch('addMessages', {
             type: 'error',
-            title: this.$t('errorFile.title'),
+            title: this.$t('errorFile.title.default'),
             content: this.$t('errorFile.content.default'),
             dismissAfter: 5000,
           });
