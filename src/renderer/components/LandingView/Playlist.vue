@@ -223,7 +223,7 @@ export default {
           name: 'All Files',
           extensions: ['*'],
         }],
-        properties: ['openFile'],
+        properties: ['openFile', 'multiSelections'],
       }, (items) => {
         self.showingPopupDialog = false;
         if (items) {
