@@ -395,7 +395,9 @@ export default {
       }
     },
     handleMouseupLeft(event) {
-      if (!this.isValidClick()) { return; }
+      if (this.clicksTimer) {
+        clearTimeout(this.clicksTimer);
+      }
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
@@ -406,6 +408,7 @@ export default {
         this.eventInfo.get('mousedown'),
         { leftMouseup: true, target: event.target },
       ));
+      if (!this.isValidClick()) { return; }
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
         if (
