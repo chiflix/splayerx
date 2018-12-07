@@ -637,7 +637,7 @@ export default {
     width: 115px;
     height: 22px;
     right: 25px;
-    bottom: 20px;
+    bottom: 25px;
     .button {
       width: 26.4px;
       height: 22px;
@@ -649,7 +649,7 @@ export default {
     width: 167px;
     height: 32px;
     right: 30px;
-    bottom: 24px;
+    bottom: 29px;
     .button {
       width: 38.4px;
       height: 32px;
@@ -661,7 +661,7 @@ export default {
     width: 260px;
     height: 50px;
     right: 45px;
-    bottom: 32px;
+    bottom: 37px;
     .button {
       width: 60px;
       height: 50px;
