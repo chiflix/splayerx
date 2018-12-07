@@ -395,6 +395,7 @@ export default {
       }
     },
     handleMouseupLeft(event) {
+      if (this.isDragging && this.lastAttachedShowing) { return; }
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
       }
