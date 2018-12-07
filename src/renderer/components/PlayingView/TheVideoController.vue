@@ -15,6 +15,7 @@
     <recent-playlist class="recent-playlist"
     :displayState="displayState['recent-playlist']"
     :mousemove="eventInfo.get('mousemove')"
+    :isDragging.sync="isDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-hidden="displayState['the-progress-bar']"></div>
@@ -345,7 +346,7 @@ export default {
         target: event.target,
         position: [event.clientX, event.clientY],
       });
-      if (this.eventInfo.get('mousedown').leftMousedown) {
+      if (this.eventInfo.get('mousedown').leftMousedown && this.currentWidget === 'the-video-controller') {
         this.isDragging = true;
       }
     },
@@ -374,7 +375,10 @@ export default {
       }
     },
     handleMousedownLeft(event) {
-      if (!this.isValidClick()) { return; }
+      if (this.isDragging && this.lastAttachedShowing) {
+        this.isDragging = false;
+        return;
+      }
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
@@ -386,6 +390,7 @@ export default {
         this.eventInfo.get('mouseup'),
         { leftMouseup: false },
       ));
+      if (!this.isValidClick()) { return; }
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
         if (this.popupShow === true) {
@@ -395,6 +400,10 @@ export default {
       }
     },
     handleMouseupLeft(event) {
+      if (this.isDragging && this.lastAttachedShowing) {
+        this.isDragging = false;
+        return;
+      }
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
       }
@@ -408,7 +417,10 @@ export default {
         this.eventInfo.get('mousedown'),
         { leftMouseup: true, target: event.target },
       ));
-      if (!this.isValidClick()) { return; }
+      if (!this.isValidClick() || (this.isDragging && this.lastAttachedShowing)) {
+        if (this.isDragging) this.isDragging = false;
+        return;
+      }
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
         if (
