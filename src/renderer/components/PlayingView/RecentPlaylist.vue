@@ -1,7 +1,7 @@
 <template>
 <div class="recent-playlist"
   v-show="backgroundDisplayState"
-  @mousedown="handleMousedown">
+  @mouseup="handleMouseup">
   <transition name="background-fade">
   <div class="background-gradient"
     v-show="displayState"
@@ -20,7 +20,7 @@
         marginTop: sizeAdaption(53),
         paddingLeft: sizeAdaption(40),
       }"
-      @mousedown.stop="">
+      @mouseup.stop="">
       <div class="top"
       :style="{
         fontSize: sizeAdaption(14),
@@ -35,7 +35,7 @@
     </div>
     </transition>
     <div class="playlist-items"
-      @mousedown.stop=""
+      @mouseup.stop=""
       :style="{
         transition: tranFlag ? 'transform 400ms ease-in' : '',
         transform: `translateX(-${distance}px)`,
@@ -77,6 +77,7 @@ export default {
     displayState: Boolean,
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
+    isDragging: Boolean,
   },
   data() {
     return {
@@ -109,8 +110,11 @@ export default {
     sizeAdaption(size) {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
     },
-    handleMousedown() {
-      this.$emit('update:playlistcontrol-showattached', false);
+    handleMouseup() {
+      if (!this.isDragging) {
+        this.$emit('update:playlistcontrol-showattached', false);
+        this.$emit('update:isDragging', false);
+      }
     },
     itemMouseover(payload) {
       this.hoverIndex = payload.index;
