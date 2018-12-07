@@ -346,7 +346,7 @@ export default {
         target: event.target,
         position: [event.clientX, event.clientY],
       });
-      if (this.eventInfo.get('mousedown').leftMousedown) {
+      if (this.eventInfo.get('mousedown').leftMousedown && this.currentWidget === 'the-video-controller') {
         this.isDragging = true;
       }
     },
