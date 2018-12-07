@@ -448,9 +448,15 @@ export default {
       const nodeList = document.querySelector('.advance-column-items').childNodes;
       const subList = document.querySelector('.subtitle-scroll-items').childNodes;
       for (let i = 0; i < nodeList.length; i += 1) {
+        if (isAdvanceColumeItem) {
+          break;
+        }
         isAdvanceColumeItem = nodeList[i].contains(event.target);
       }
       for (let i = 0; i < subList.length; i += 1) {
+        if (isSubtitleScrollItem) {
+          break;
+        }
         isSubtitleScrollItem = subList[i].contains(event.target);
       }
       if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
