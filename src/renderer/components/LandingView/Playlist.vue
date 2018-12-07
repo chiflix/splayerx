@@ -110,6 +110,9 @@ export default {
       type: Number,
       require: true,
     },
+    filePathNeedToDelete: {
+      type: String,
+    },
   },
   destroyed() {
     document.onmousemove = null;
@@ -220,7 +223,7 @@ export default {
           name: 'All Files',
           extensions: ['*'],
         }],
-        properties: ['openFile'],
+        properties: ['openFile', 'multiSelections'],
       }, (items) => {
         self.showingPopupDialog = false;
         if (items) {
@@ -230,10 +233,10 @@ export default {
             this.addLog('error', `Failed to open file: ${items[0]}`);
           }
           if (items.length > 1) {
-            this.$store.commit('PlayingList', items);
+            this.$store.dispatch('PlayingList', items);
           } else {
             const similarVideos = this.findSimilarVideoByVidPath(items[0]);
-            this.$store.commit('FolderList', similarVideos);
+            this.$store.dispatch('FolderList', similarVideos);
           }
         }
       });
@@ -388,10 +391,10 @@ export default {
           this.moveItem = 0;
           this.move = 0;
           lf.style.left = '';
-        } else {
+        } else if (!this.filePathNeedToDelete) {
           this.openFile(item.path);
           const similarVideos = this.findSimilarVideoByVidPath(item.path);
-          this.$store.commit('FolderList', similarVideos);
+          this.$store.dispatch('FolderList', similarVideos);
         }
         this.$bus.$emit('moveItem', this.moveItem);
         this.$bus.$emit('move', this.move);

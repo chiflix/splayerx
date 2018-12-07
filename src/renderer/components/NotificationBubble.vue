@@ -49,6 +49,7 @@ export default {
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
+      checkIfNextVideoExist: false,
     };
   },
   computed: {
@@ -88,15 +89,23 @@ export default {
     },
     closeMessage(id) {
       this.$store.dispatch('removeMessages', id);
+      this.$bus.$emit('delete-file');
     },
   },
   watch: {
+    checkIfNextVideoExist(val) {
+      if (val) {
+        this.$store.dispatch('UpdatePlayingList');
+        this.showNextVideo = true;
+      }
+    },
     roundedCurrentTime(val) {
       if (val > this.finalPartTime) {
         if (this.nextVideo !== '' && !this.manualClosed) {
-          this.showNextVideo = true;
+          this.checkIfNextVideoExist = true;
         }
       } else {
+        this.checkIfNextVideoExist = false;
         this.manualClosed = false;
       }
     },

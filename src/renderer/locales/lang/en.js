@@ -109,8 +109,14 @@ export default {
     track: 'Track',
   },
   errorFile: {
-    title: 'File error',
-    content: 'Failed to open file.',
+    title: {
+      default: 'File error',
+      fileNonExist: 'Cannot find the file',
+    },
+    content: {
+      default: 'Failed to open file.',
+      fileNonExist: 'Will be removed from the list.',
+    },
   },
   loading: {
     title: '',

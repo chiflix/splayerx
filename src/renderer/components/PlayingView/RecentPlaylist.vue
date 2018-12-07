@@ -90,9 +90,17 @@ export default {
       mousePosition: [],
       canHoverItem: false,
       tranFlag: false,
+      filePathNeedToDelete: '',
     };
   },
-  mounted() {
+  created() {
+    this.$bus.$on('file-not-existed', (path) => {
+      this.filePathNeedToDelete = path;
+    });
+    this.$bus.$on('delete-file', () => {
+      this.$store.dispatch('RemovePlayingList', this.filePathNeedToDelete);
+      this.filePathNeedToDelete = '';
+    });
   },
   methods: {
     afterLeave() {
@@ -134,7 +142,8 @@ export default {
           this.shifting = false;
           this.tranFlag = false;
         }, 400);
-      } else if (index !== this.playingIndex) {
+      } else if (index !== this.playingIndex
+        && this.filePathNeedToDelete !== this.playingList[index]) {
         this.openFile(this.playingList[index]);
         this.$store.dispatch(videoAction.PLAY_VIDEO);
       }
@@ -172,6 +181,7 @@ export default {
       this.canHoverItem = false;
       this.mousePosition = this.mousemove.position;
       if (val) {
+        this.$store.dispatch('UpdatePlayingList');
         this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;

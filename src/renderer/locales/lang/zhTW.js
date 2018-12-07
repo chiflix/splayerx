@@ -108,8 +108,14 @@ export default {
     track: '音軌',
   },
   errorFile: {
-    title: '文件錯誤',
-    content: '視頻文件格式無法識別或文件已損壞。',
+    title: {
+      default: '文件錯誤',
+      fileNonExist: '無法找到相應文件',
+    },
+    content: {
+      default: '視頻文件格式無法識別或文件已損壞。',
+      fileNonExist: '將從列表中移除此項目。',
+    },
   },
   loading: {
     title: '',

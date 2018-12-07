@@ -48,7 +48,7 @@
       </div>
   </transition>
       <playlist :lastPlayedFile="lastPlayedFile" :changeSize="changeSize" :showItemNum="showItemNum"
-        :isFullScreen="isFullScreen" :windowWidth="windowWidth"
+        :isFullScreen="isFullScreen" :windowWidth="windowWidth" :filePathNeedToDelete="filePathNeedToDelete"
         :style="{
           marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
           left: this.isFullScreen ? '0px' : `${this.move}px`,
@@ -58,6 +58,7 @@
 </template>
 
 <script>
+import fs from 'fs';
 import { mapState } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
@@ -88,6 +89,7 @@ export default {
       move: 0,
       windowWidth: 720,
       averageWidth: 112,
+      filePathNeedToDelete: '',
     };
   },
   watch: {
@@ -126,16 +128,58 @@ export default {
       })
 
     // Get all data and show
-      .then(() => {
-        this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
-          this.lastPlayedFile = data.slice(0, 9);
-        });
+      .then(() => this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev'))
+      .then((data) => {
+        const waitArray = [];
+        for (let i = 0; i < data.length; i += 1) {
+          const accessPromise = new Promise((resolve) => {
+            fs.access(data[i].path, fs.constants.F_OK, (err) => {
+              if (err) {
+                this.infoDB().delete('recent-played', data[i].quickHash);
+                resolve();
+              } else {
+                resolve(data[i]);
+              }
+            });
+          });
+          waitArray.push(accessPromise);
+        }
+        return Promise.all(waitArray);
+      })
+      .then((data) => {
+        for (let i = 0; i < data.length; i += 1) {
+          if (data[i] === undefined) {
+            data.splice(i, 1);
+          }
+        }
+        this.lastPlayedFile = data.slice(0, 9);
       });
     this.$bus.$on('clean-lastPlayedFile', () => {
       this.lastPlayedFile = [];
       this.langdingLogoAppear = true;
       this.showShortcutImage = false;
       this.infoDB().cleanData();
+    });
+    // trigger by openFile function when opened file not existed
+    this.$bus.$on('file-not-existed', (filePath) => {
+      this.filePathNeedToDelete = filePath;
+      this.lastPlayedFile.forEach((file) => {
+        if (file.path === filePath) {
+          this.infoDB().delete('recent-played', file.quickHash);
+        }
+      });
+    });
+    // responsible for delete the thumbnail on display which had already deleted in DB
+    this.$bus.$on('delete-file', () => {
+      if (this.filePathNeedToDelete) {
+        for (let i = 0; i < this.lastPlayedFile.length; i += 1) {
+          if (this.lastPlayedFile[i].path === this.filePathNeedToDelete) {
+            this.lastPlayedFile.splice(i, 1);
+            this.filePathNeedToDelete = '';
+            break;
+          }
+        }
+      }
     });
   },
   beforeDestroy() {
