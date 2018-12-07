@@ -221,7 +221,7 @@ export default {
   width: 100%;
   bottom: 0;
   -webkit-app-region: no-drag;
-  height: 20px;
+  height: 15px;
   z-index: 12;
   & > div {
     transition: background-color 150ms, height 150ms;

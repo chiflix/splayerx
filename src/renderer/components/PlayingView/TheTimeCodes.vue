@@ -50,7 +50,7 @@ export default {
 <style lang="scss">
 @media screen and (max-width: 512px) {
   .cont {
-    bottom: 20px;
+    bottom: 23px;
     left: 20px;
   }
   .timing {
@@ -69,7 +69,7 @@ export default {
 }
 @media screen and (min-width: 513px) and (max-width: 854px) {
   .cont {
-    bottom: 24px;
+    bottom: 27px;
     left: 28px;
   }
   .timing {
@@ -88,7 +88,7 @@ export default {
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
   .cont {
-    bottom: 31px;
+    bottom: 34px;
     left: 33px;
   }
   .timing {

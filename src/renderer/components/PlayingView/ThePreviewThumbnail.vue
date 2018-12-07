@@ -215,7 +215,7 @@ export default {
 <style lang="scss" scoped>
 .thumbnail-wrapper {
   position: absolute;
-  bottom: 20px;
+  bottom: 15px;
   -webkit-app-region: no-drag;
   box-sizing: content-box;
   overflow: hidden;
