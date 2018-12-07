@@ -374,7 +374,10 @@ export default {
       }
     },
     handleMousedownLeft(event) {
-      if (!this.isValidClick()) { return; }
+      if (this.isDragging && this.lastAttachedShowing) {
+        this.isDragging = false;
+        return;
+      }
       this.eventInfo.set('mousedown', Object.assign(
         {},
         this.eventInfo.get('mousedown'),
@@ -386,6 +389,7 @@ export default {
         this.eventInfo.get('mouseup'),
         { leftMouseup: false },
       ));
+      if (!this.isValidClick()) { return; }
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
         if (this.popupShow === true) {
@@ -395,7 +399,10 @@ export default {
       }
     },
     handleMouseupLeft(event) {
-      if (this.isDragging && this.lastAttachedShowing) { return; }
+      if (this.isDragging && this.lastAttachedShowing) {
+        this.isDragging = false;
+        return;
+      }
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
       }
@@ -409,7 +416,10 @@ export default {
         this.eventInfo.get('mousedown'),
         { leftMouseup: true, target: event.target },
       ));
-      if (!this.isValidClick()) { return; }
+      if (!this.isValidClick() || (this.isDragging && this.lastAttachedShowing)) {
+        if (this.isDragging) this.isDragging = false;
+        return;
+      }
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
         if (
