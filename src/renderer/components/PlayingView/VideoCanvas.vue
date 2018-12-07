@@ -293,6 +293,10 @@ export default {
     this.$bus.$on('toggle-mute', this.toggleMute);
     this.$bus.$on('seek', (e) => {
       this.seekTime = [e];
+      if (e === this.duration && this.nextVideo) {
+        this.openFile(this.nextVideo);
+        return;
+      }
       // todo: use vuex get video element src
       const filePath = decodeURI(this.src);
       const indexOfLastDot = filePath.lastIndexOf('.');
