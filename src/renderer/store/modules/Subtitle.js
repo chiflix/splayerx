@@ -1,4 +1,9 @@
+import { Subtitle as subtitleMutations } from '../mutationTypes';
+import { Subtitle as subtitleActions } from '../actionTypes';
 const state = {
+  subtitleList: [],
+  currentSubtitleId: '',
+  // legacy subtitle state
   SubtitleNames: [],
   curStyle: {
     fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
@@ -28,9 +33,16 @@ const state = {
   chosenStyle: '',
   chosenSize: 1,
   SubtitleDelay: 0,
+  scaleNum: 1,
 };
 
 const getters = {
+  currentSubtitleId: state => state.currentSubtitleId,
+  subtitleList: state => state.subtitleList,
+  premiumSubtitles: (state, getters) => state.subtitleList
+    .filter(subtitle => subtitle.duration && subtitle.duration >= 0.6 * getters.duration)
+    .map(subtitle => ({ id: subtitle.id, played: subtitle.duration })),
+  // legacy subtitle getters
   subtitleNames: state => state.SubtitleNames,
   firstSubtitleIndex: state => state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first'),
   subtitleCount: state => state.SubtitleNames.length,
@@ -39,9 +51,57 @@ const getters = {
   curBorderStyle: state => state.curBorderStyle,
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,
+  scaleNum: state => state.scaleNum,
 };
 
 const mutations = {
+  [subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE](state, subtitleId) {
+    state.currentSubtitleId = subtitleId;
+  },
+  [subtitleMutations.ADD_SUBTITLE](state, subtitle) {
+    let isExit = false;
+    state.subtitleList.forEach((item, index) => {
+      if (item.path && item.path === subtitle.path) {
+        state.subtitleList.splice(index, 1);
+        state.subtitleList.unshift(item);
+        isExit = true;
+      }
+    });
+    if (!isExit) {
+      if (subtitle.type === 'local') {
+        state.subtitleList = [subtitle, ...state.subtitleList];
+      } else {
+        state.subtitleList = [...state.subtitleList, subtitle];
+      }
+    }
+  },
+  [subtitleMutations.UPDATE_SUBTITLE](state, subtitle) {
+    const { id } = subtitle;
+    const subtitleList = [...state.subtitleList];
+    const index = state.subtitleList.findIndex(subtitle => subtitle.id === id);
+    if (index >= 0) {
+      subtitleList[index] = subtitle;
+      state.subtitleList = subtitleList;
+    }
+  },
+  [subtitleMutations.REMOVE_SUBTITLE](state, subtitle) {
+    state.subtitleList = state.subtitleList.slice().splice(state.subtitleList.indexOf(subtitle), 1);
+  },
+  [subtitleMutations.SUBTITLE_UPDATE](state, subtitleList) {
+    state.subtitleList = subtitleList;
+  },
+  [subtitleMutations.OFF_SUBTITLE](state, subtitle) {
+    state.currentSubtitleId = subtitle;
+  },
+  [subtitleMutations.REFRESH_SUBTITLE](state, subtitle) {
+    let num = 0;
+    state.subtitleList.forEach((sub, index) => {
+      if (sub.type === 'local') {
+        num = index + 1;
+      }
+    });
+    state.subtitleList = state.subtitleList.slice(0, num).concat(...subtitle);
+  },
   SubtitleNames(state, subtitles) {
     state.SubtitleNames = subtitles;
   },
@@ -77,6 +137,7 @@ const mutations = {
     }
   },
   UpdateScale(state, payload) {
+    state.scaleNum = payload;
     state.curStyle.transform = `scale(${payload})`;
     state.curBorderStyle.transform = `scale(${payload})`;
   },
@@ -104,8 +165,40 @@ const actions = {
   updateChosenStyle({ commit }, delta) {
     commit('UpdateChosenStyle', delta);
   },
+  [subtitleActions.ADD_SUBTITLES]({ commit }, subtitles) {
+    subtitles.forEach((subtitle) => {
+      commit(subtitleMutations.ADD_SUBTITLE, subtitle);
+    });
+  },
+  [subtitleActions.RESET_SUBTITLES]({ commit }) {
+    commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
+    commit(subtitleMutations.SUBTITLE_UPDATE, []);
+  },
   updateChosenSize({ commit }, delta) {
     commit('UpdateChosenSize', delta);
+  },
+  [subtitleActions.SWITCH_CURRENT_SUBTITLE]({ commit, state }, subtitleId) {
+    const { currentSubtitleId, subtitleList } = state;
+    if (
+      subtitleId !== currentSubtitleId &&
+      subtitleList.filter(subtitle => subtitle.id === subtitleId).length
+    ) {
+      commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, subtitleId);
+    }
+  },
+  [subtitleActions.SUBTITLE_DURATION_UPDATE]({ commit, state }, subtitleInfo) {
+    const [subtitleId, duration] = subtitleInfo;
+    const { subtitleList } = state;
+    const subtitle = subtitleList.filter(subtitle => subtitle.id === subtitleId)[0];
+    if (subtitle) {
+      commit(subtitleMutations.UPDATE_SUBTITLE, { ...subtitle, duration });
+    }
+  },
+  [subtitleActions.OFF_SUBTITLES]({ commit }) {
+    commit(subtitleMutations.OFF_SUBTITLE, '');
+  },
+  [subtitleActions.REFRESH_SUBTITLES]({ commit }, subtitles) {
+    commit(subtitleMutations.REFRESH_SUBTITLE, subtitles);
   },
 };
 

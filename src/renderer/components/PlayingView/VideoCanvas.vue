@@ -20,7 +20,7 @@
       :currentAudioTrackId="currentAudioTrackId.toString()"
       @update:currentTime="updateCurrentTime" />
     </transition>
-    <BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>
+    <!--<BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>-->
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -194,7 +194,7 @@ export default {
       syncStorage.setSync('recent-played', data);
     },
     saveSubtitleStyle() {
-      syncStorage.setSync('subtitle-style', { curStyle: this.curStyle, curBorderStyle: this.curBorderStyle, chosenStyle: this.chosenStyle });
+      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle });
     },
     async getVideoCover() {
       const videoElement = this.$refs.videoCanvas.videoElement();
@@ -242,7 +242,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle',
+      'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle', 'scaleNum',
       'nextVideo']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -290,7 +290,6 @@ export default {
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
     });
-    this.$bus.$on('toggle-mute', this.toggleMute);
     this.$bus.$on('seek', (e) => {
       this.seekTime = [e];
       if (e === this.duration && this.nextVideo) {

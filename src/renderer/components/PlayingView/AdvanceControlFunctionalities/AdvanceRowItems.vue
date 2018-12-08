@@ -29,7 +29,8 @@
               @mouseout="handleOut(index)"
               @click="handleClick(index)"
               :style="{
-                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`
+                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`,
+                cursor: list.chosen ? 'default' : 'pointer',
               }">
               <div class="text"
                 :style="{
@@ -97,15 +98,17 @@ export default {
       }
     },
     chosenSize(val) {
-      this.lists.forEach((i, ind) => {
-        if (ind !== val) {
-          this.$set(this.lists[ind], 'chosen', false);
-        } else {
-          this.$set(this.lists[ind], 'chosen', true);
-        }
-      });
-      this.selectedIndex = val;
-      this.calculateFontLength(val);
+      if (this.item === this.$t('advance.fontSize')) {
+        this.lists.forEach((i, ind) => {
+          if (ind !== val) {
+            this.$set(this.lists[ind], 'chosen', false);
+          } else {
+            this.$set(this.lists[ind], 'chosen', true);
+          }
+        });
+        this.selectedIndex = val;
+        this.calculateFontLength(val);
+      }
     },
     winWidth(val) {
       if (val > 1920) {
@@ -496,6 +499,7 @@ export default {
   .listContainer {
     flex: 1;
     display: flex;
+    cursor: default;
     .rowContainer {
       display: flex;
       justify-content: space-around;

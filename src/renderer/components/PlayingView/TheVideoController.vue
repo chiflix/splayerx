@@ -456,11 +456,18 @@ export default {
     },
     handleWheel(event) {
       let isAdvanceColumeItem;
+      let isSubtitleScrollItem;
       const nodeList = document.querySelector('.advance-column-items').childNodes;
+      const subList = document.querySelector('.subtitle-scroll-items').childNodes;
       for (let i = 0; i < nodeList.length; i += 1) {
         isAdvanceColumeItem = nodeList[i].contains(event.target);
+        if (isAdvanceColumeItem) break;
       }
-      if (!isAdvanceColumeItem) {
+      for (let i = 0; i < subList.length; i += 1) {
+        isSubtitleScrollItem = subList[i].contains(event.target);
+        if (isSubtitleScrollItem) break;
+      }
+      if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
         this.eventInfo.set('wheel', { time: event.timeStamp });
       }
     },
