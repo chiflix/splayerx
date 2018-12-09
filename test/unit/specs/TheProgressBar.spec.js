@@ -26,7 +26,7 @@ describe('Component - TheProgressBar', () => {
   });
 
   beforeEach(() => {
-    wrapper = shallowMount(TheProgressBar, { store, localVue });
+    wrapper = shallowMount(TheProgressBar, { store, localVue, attachToDocument: true });
     sandbox = sinon.createSandbox();
   });
 
@@ -47,7 +47,10 @@ describe('Component - TheProgressBar', () => {
 
         wrapper.trigger('mousemove');
 
-        expect(wrapper.vm.hoveredPageX).to.not.equal(oldHoveredPageX);
+        wrapper.vm.$nextTick((done) => {
+          expect(wrapper.vm.hoveredPageX).to.not.equal(oldHoveredPageX);
+          done();
+        });
       });
 
       it('should mousemove set mouseleave to false', () => {

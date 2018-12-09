@@ -1,5 +1,7 @@
 const { exec } = require('child_process');
 
+require('events').EventEmitter.prototype._maxListeners = 10000;
+
 const commands = [
   'npm run lint:fix',
 ];
@@ -14,3 +16,4 @@ exec(commands.join('&&'), (error) => {
     throw error;
   }
 });
+
