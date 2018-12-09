@@ -98,9 +98,11 @@ describe('Component - TheVideoController Unit Test', () => {
 
         wrapper.vm.UITimerManager(17);
         wrapper.vm.inputProcess(currentEventInfo, lastEventInfo);
-        const currentMousemoveTimer = wrapper.vm.timerManager.getTimer(mousemoveTimerName);
-
-        expect(lastMousemoveTimer).to.deep.equal(currentMousemoveTimer);
+        wrapper.vm.$nextTick((done) => {
+          const currentMousemoveTimer = wrapper.vm.timerManager.getTimer(mousemoveTimerName);
+          expect(lastMousemoveTimer).to.deep.equal(currentMousemoveTimer);
+          done();
+        });
       });
       it('should same mousemove position set mouseStopMoving to true', () => {
         currentEventInfo.set('mousemove', { position });

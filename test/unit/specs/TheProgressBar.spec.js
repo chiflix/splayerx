@@ -47,7 +47,10 @@ describe('Component - TheProgressBar', () => {
 
         wrapper.trigger('mousemove');
 
-        expect(wrapper.vm.hoveredPageX).to.not.equal(oldHoveredPageX);
+        wrapper.vm.$nextTick((done) => {
+          expect(wrapper.vm.hoveredPageX).to.not.equal(oldHoveredPageX);
+          done();
+        });
       });
 
       it('should mousemove set mouseleave to false', () => {
