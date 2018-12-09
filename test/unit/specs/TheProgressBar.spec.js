@@ -26,7 +26,7 @@ describe('Component - TheProgressBar', () => {
   });
 
   beforeEach(() => {
-    wrapper = shallowMount(TheProgressBar, { store, localVue });
+    wrapper = shallowMount(TheProgressBar, { store, localVue, attachToDocument: true });
     sandbox = sinon.createSandbox();
   });
 

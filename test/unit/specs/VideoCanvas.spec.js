@@ -37,6 +37,7 @@ describe('Component - VideoCanvas', () => {
     wrapper = mount(VideoCanvas, {
       store,
       localVue,
+      attachToDocument: true,
     });
     sandbox = sinon.createSandbox();
   });
