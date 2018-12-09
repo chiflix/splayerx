@@ -38,16 +38,17 @@
       }
     ],
     "productName": "SPlayer",
-    "appId": "org.splayer.x",
+    "appId": "org.splayer.splayerx",
+    "compression": "maximum",
     "directories": {
       "output": "build"
     },
-    "electronVersion": "4.0.0-beta.7",
+    "electronVersion": "4.0.0-beta.8",
     "electronDist": "node_modules/@chiflix/electron/dist",
     "electronDownload": {
       "mirror": "https://github.com/chiflix/electron/releases/download/v",
       "isVerifyChecksum": false,
-      "version": "4.0.0-beta.7"
+      "version": "4.0.0-beta.8"
     },
     "files": [
       "dist/electron/**/*"
@@ -143,8 +144,7 @@
     "mac": {
       "icon": "icons/icon.icns",
       "target": [
-        "dmg",
-        "zip"
+        "dmg"
       ]
     },
     "win": {
