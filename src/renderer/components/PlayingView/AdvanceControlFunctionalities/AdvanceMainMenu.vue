@@ -50,7 +50,8 @@
       <div class="audioItems"
         @mouseenter="handleMouseenter(3)"
         @mouseleave="handleMouseleave()"
-        @click.left="handleAudioClick">
+        @click.left="handleAudioClick"
+        :style="{ cursor: 'pointer' }">
         <transition name="arrow">
           <div class="hoverAudioBack" v-show="hoverIndex === 3"></div>
         </transition>

@@ -216,20 +216,24 @@ export default {
       return path.basename(subPath);
     },
     handleRefresh() {
-      this.timer = setInterval(() => {
-        this.count += 1;
-        this.rotateTime = Math.ceil(this.count / 100);
-      }, 10);
-      setTimeout(() => {
-        if (this.timer) {
-          clearInterval(this.timer);
-          this.count = this.rotateTime * 100;
-        }
-      }, 20000);
-      this.currentSubIden = 0;
-      document.querySelector('.scrollScope').scrollTop = 0;
-      this.$bus.$emit('refresh-subtitle', this.mediaHash);
-      this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
+      if (this.privacyAgreement) {
+        this.timer = setInterval(() => {
+          this.count += 1;
+          this.rotateTime = Math.ceil(this.count / 100);
+        }, 10);
+        setTimeout(() => {
+          if (this.timer) {
+            clearInterval(this.timer);
+            this.count = this.rotateTime * 100;
+          }
+        }, 20000);
+        this.currentSubIden = 0;
+        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$bus.$emit('refresh-subtitle', this.mediaHash);
+        this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
+      } else {
+        this.$bus.$emit('privacy-confirm');
+      }
     },
     orify(...args) {
       return args.some(arg => arg == true); // eslint-disable-line
@@ -336,7 +340,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'mediaHash']),
+    ...mapGetters(['winWidth', 'mediaHash', 'privacyAgreement']),
     textHeight() {
       if (this.winWidth > 512 && this.winWidth <= 854) {
         return 13;
@@ -603,7 +607,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        font-size: 15px;
+        font-size: 15.6px;
         margin: 18px auto auto 19px;
         letter-spacing: 0.23px;
         line-height: 17px;
@@ -662,7 +666,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        font-size: 21px;
+        font-size: 21.84px;
         margin: 24px auto auto 26px;
         letter-spacing: 0.32px;
         line-height: 23px;

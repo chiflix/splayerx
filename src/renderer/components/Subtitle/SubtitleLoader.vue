@@ -44,7 +44,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['currentTime', 'duration', 'scaleNum']),
+    ...mapGetters(['currentTime', 'duration', 'scaleNum', 'SubtitleDelay', 'intrinsicHeight', 'intrinsicWidth']),
     type() {
       return this.subtitle.metaInfo.type;
     },
@@ -57,9 +57,12 @@ export default {
     isVtt() {
       return this.type === 'vtt';
     },
+    subtitleCurrentTime() {
+      return this.currentTime - (this.SubtitleDelay / 1000);
+    },
   },
   watch: {
-    currentTime(newVal, oldValue) {
+    subtitleCurrentTime(newVal) {
       const { parsedData } = this.subtitle;
       if (parsedData) {
         const cues = parsedData
@@ -68,7 +71,8 @@ export default {
           this.currentCues = cues.reverse();
         }
       }
-
+    },
+    currentTime(newVal, oldValue) {
       const { videoSegments, currentSegment, elapsedSegmentTime } = this;
       const segment = videoSegments
         .filter(segment => segment[0] <= newVal && segment[1] > newVal)[0];
@@ -102,6 +106,13 @@ export default {
       this.parsedData = parsed;
       this.videoSegments = this.getVideoSegments(parsed, this.duration);
       this.$bus.$emit('finish-loading', this.subtitle.metaInfo.type);
+      if (parsed) {
+        const cues = parsed
+          .filter(subtitle => subtitle.start <= this.subtitleCurrentTime && subtitle.end >= this.subtitleCurrentTime && subtitle.text !== '');
+        if (!isEqual(cues, this.currentCues)) {
+          this.currentCues = cues;
+        }
+      }
     });
   },
   methods: {
@@ -127,7 +138,7 @@ export default {
       if (arr.includes(tags[index].alignment)) {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
-      return `translateY(${-100 * this.lineNum(index)}%)`;
+      return `translateY(${100 * this.lineNum(index)}%)`;
     },
     vttLine(index) {
       const { currentTags: tags } = this;
@@ -166,7 +177,7 @@ export default {
     subLeft(index) {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
-        return `${tags[index].pos.x}px`;
+        return `${(tags[index].pos.x / this.intrinsicWidth) * 100}vw`;
       } else if (type === 'vtt') {
         if (tags[index].vertical) {
           if (!tags[index].line.includes('%')) {
@@ -182,7 +193,7 @@ export default {
     subTop(index) {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
-        return `${tags[index].pos.y}px`;
+        return `${(tags[index].pos.y / this.intrinsicHeight) * 100}vh`;
       } else if (type === 'vtt') {
         if (tags[index].vertical) {
           return tags[index].position;
