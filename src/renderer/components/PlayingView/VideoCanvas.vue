@@ -295,6 +295,8 @@ export default {
       if (e === this.duration && this.nextVideo) {
         this.openFile(this.nextVideo);
         return;
+      } else if (e === this.duration) {
+        this.pause();
       }
       // todo: use vuex get video element src
       const filePath = decodeURI(this.src);
