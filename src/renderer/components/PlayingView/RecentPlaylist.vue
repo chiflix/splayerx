@@ -102,6 +102,7 @@ export default {
       this.$store.dispatch('RemovePlayingList', this.filePathNeedToDelete);
       this.filePathNeedToDelete = '';
     });
+    this.hoverIndex = this.playingIndex;
   },
   methods: {
     afterLeave() {

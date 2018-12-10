@@ -226,6 +226,7 @@ function createWindow() {
 
   mainWindow.loadURL(winURL);
   mainWindow.on('closed', () => {
+    ipcMain.removeAllListeners();
     mainWindow = null;
   });
 
