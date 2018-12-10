@@ -17,14 +17,19 @@
     :mousemove="eventInfo.get('mousemove')"
     :isDragging.sync="isDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
+    @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-hidden="displayState['the-progress-bar']"></div>
     <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
-      <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" v-bind.sync="widgetsStatus['subtitle-control']" />
+      <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" 
+      v-bind.sync="widgetsStatus['subtitle-control']" 
+      @conflict-resolve="conflictResolve"/>
       <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
-      <advance-control class="button advance" v-hidden="displayState['advance-control']" v-bind.sync="widgetsStatus['advance-control']"/>
+      <advance-control class="button advance" v-hidden="displayState['advance-control']"
+      v-bind.sync="widgetsStatus['advance-control']"
+      @conflict-resolve="conflictResolve"/>
     </div>
     <the-time-codes v-hidden="displayState['the-progress-bar']" />
     <the-progress-bar v-hidden="displayState['the-progress-bar']" v-bind.sync="widgetsStatus['the-progress-bar']"/>
@@ -197,6 +202,13 @@ export default {
     });
   },
   methods: {
+    conflictResolve(name) {
+      Object.keys(this.widgetsStatus).forEach((item) => {
+        if (item !== name) {
+          this.widgetsStatus[item].showAttached = false;
+        }
+      });
+    },
     updatePlaylistShowAttached(event) {
       this.widgetsStatus['playlist-control'].showAttached = event;
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [320, 180]);
@@ -346,7 +358,7 @@ export default {
         target: event.target,
         position: [event.clientX, event.clientY],
       });
-      if (this.eventInfo.get('mousedown').leftMousedown && this.currentWidget === 'the-video-controller') {
+      if (this.eventInfo.get('mousedown').leftMousedown) {
         this.isDragging = true;
       }
     },
@@ -377,6 +389,7 @@ export default {
     handleMousedownLeft(event) {
       if (this.isDragging && this.lastAttachedShowing) {
         this.isDragging = false;
+        this.$bus.$emit('isdragging-mousedown');
         return;
       }
       this.eventInfo.set('mousedown', Object.assign(
@@ -402,6 +415,7 @@ export default {
     handleMouseupLeft(event) {
       if (this.isDragging && this.lastAttachedShowing) {
         this.isDragging = false;
+        this.$bus.$emit('isdragging-mouseup');
         return;
       }
       if (this.clicksTimer) {
