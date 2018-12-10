@@ -23,6 +23,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import isEqual from 'lodash/isEqual';
+import toArray from 'lodash/toArray';
 import Subtitle from './Subtitle';
 import CueRenderer from './CueRenderer.vue';
 export default {
@@ -68,7 +69,26 @@ export default {
         const cues = parsedData
           .filter(subtitle => subtitle.start <= newVal && subtitle.end >= newVal && subtitle.text !== '');
         if (!isEqual(cues, this.currentCues)) {
-          this.currentCues = cues.reverse();
+          let rev = false;
+          const tmp = cues;
+          if (cues.length >= 2) {
+            for (let i = 0; i < tmp.length; i += 1) {
+              const pre = toArray(tmp[i]);
+              const next = toArray(tmp[i + 1]);
+              if (next) {
+                pre.splice(2, 1);
+                next.splice(2, 1);
+                if (isEqual(pre, next)) {
+                  rev = true;
+                }
+              }
+            }
+          }
+          if (rev) {
+            this.currentCues = cues.reverse();
+          } else {
+            this.currentCues = cues;
+          }
         }
       }
     },
