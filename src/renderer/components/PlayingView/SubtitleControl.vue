@@ -230,7 +230,6 @@ export default {
         this.currentSubIden = 0;
         document.querySelector('.scrollScope').scrollTop = 0;
         this.$bus.$emit('refresh-subtitle', this.mediaHash);
-        this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
       } else {
         this.$bus.$emit('privacy-confirm');
       }
@@ -448,6 +447,9 @@ export default {
     });
     this.$bus.$on('new-video-opened', () => {
       this.currentSubIden = 0;
+    });
+    this.$bus.$on('find-no-subtitle', () => {
+      this.currentSubIden = -1;
     });
   },
 };

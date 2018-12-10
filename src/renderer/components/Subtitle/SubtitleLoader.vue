@@ -141,9 +141,12 @@ export default {
     }),
     lineNum(index) {
       const lastNum = index;
-      const { currentTexts: texts } = this;
+      const { currentTexts: texts, currentTags: tags } = this;
       let tmp = 0;
       while (texts[index - 1]) {
+        if (!isEqual(tags[index], tags[index - 1])) {
+          break;
+        }
         tmp += texts[index - 1].split('\n').length;
         index -= 1;
       }
