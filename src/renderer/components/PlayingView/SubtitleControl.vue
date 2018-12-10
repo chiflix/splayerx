@@ -299,6 +299,7 @@ export default {
       switch (this.clicks) {
         case 1:
           this.$emit('update:showAttached', true);
+          this.$emit('conflict-resolve', this.$options.name);
           break;
         case 2:
           this.$emit('update:showAttached', false);
@@ -434,6 +435,16 @@ export default {
     },
   },
   created() {
+    this.$bus.$on('isdragging-mouseup', () => {
+      if (this.showAttached) {
+        this.anim.playSegments([79, 85]);
+      }
+    });
+    this.$bus.$on('isdragging-mousedown', () => {
+      if (this.showAttached) {
+        this.anim.playSegments([62, 64], false);
+      }
+    });
     this.$bus.$on('finish-loading', (type) => {
       const subType = ['ass', 'vtt', 'srt'];
       if (subType.includes(type)) {
