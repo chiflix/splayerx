@@ -1,13 +1,19 @@
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
+import lolex from 'lolex';
 import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
 import { ipcRenderer } from 'electron'; // eslint-disable-line
 
+const clock = lolex.createClock();
+
 export default {
   methods: {
+    clock() {
+      return clock;
+    },
     infoDB() {
       return InfoDB;
     },

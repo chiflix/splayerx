@@ -207,6 +207,7 @@ export default {
 
       // Use Map constructor to shallow-copy eventInfo
       const lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
+      this.clock().tick(timestamp - this.start);
       this.UITimerManager(timestamp - this.start);
       // this.UILayerManager();
       this.UIDisplayManager();

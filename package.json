@@ -176,6 +176,7 @@
     "iso-639-3-to-1": "^1.0.0",
     "languagedetect": "^1.2.0",
     "lodash": "^4.17.10",
+    "lolex": "^3.0.0",
     "lottie-web": "^5.4.2",
     "matroska-subtitles": "^2.0.3",
     "module-alias": "^2.0.6",
