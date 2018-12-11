@@ -90,6 +90,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import path from 'path';
+import { filePathToUrl } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
 export default {
   components: {
@@ -166,7 +167,7 @@ export default {
   mounted() {
     this.$electron.ipcRenderer.send('snapShot', this.path);
     this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-      this.coverSrc = `file://${imgPath}.png`;
+      this.coverSrc = filePathToUrl(`${imgPath}.png`);
     });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
