@@ -31,8 +31,8 @@
       v-bind.sync="widgetsStatus['advance-control']"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes />
-    <the-progress-bar />
+    <the-time-codes v-hidden="displayState['the-time-codes']"/>
+    <the-progress-bar v-hidden="displayState['the-progress-bar']"/>
   </div>
 </template>
 <script>
