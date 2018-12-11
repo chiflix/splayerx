@@ -36,7 +36,6 @@
   </div>
 </template>
 <script>
-import _ from 'lodash';
 import { mapGetters, mapActions } from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
 import TimerManager from '@/helpers/timerManager.js';
@@ -72,7 +71,7 @@ export default {
       start: null,
       UIElements: [],
       currentWidget: this.$options.name,
-      mouseStopMoving: false,
+      mouseStopped: false,
       mousestopDelay: 3000,
       mouseLeftWindow: false,
       mouseleftDelay: 1000,
@@ -99,7 +98,7 @@ export default {
   computed: {
     ...mapGetters(['muted', 'paused', 'volume']),
     showAllWidgets() {
-      return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
+      return (!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
         this.attachedShown;
     },
@@ -146,7 +145,6 @@ export default {
     // Use Map constructor to shallow-copy eventInfo
     this.lastEventInfo = new Map(this.eventInfo);
     this.timerManager = new TimerManager();
-    this.timerManager.addTimer('mouseStopMoving', this.mousestopDelay);
     this.timerManager.addTimer('sleepingVolumeButton', this.mousestopDelay);
   },
   mounted() {
@@ -169,7 +167,6 @@ export default {
     requestAnimationFrame(this.UIManager);
     this.$bus.$on('currentWidget', (widget) => {
       this.listenedWidget = widget;
-      this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false);
     });
   },
   methods: {
@@ -206,14 +203,6 @@ export default {
       requestAnimationFrame(this.UIManager);
     },
     inputProcess(currentEventInfo, lastEventInfo) { // eslint-disable-line
-      // mousemove timer
-      const currentChanged = currentEventInfo.get('mousemove').target !== lastEventInfo.get('mousemove').target;
-      if (currentChanged) {
-        this.listenedWidget = this.getComponentName(currentEventInfo.get('mousemove').target);
-      }
-      this.currentWidget = this.listenedWidget;
-      this.mouseStopMoving = _.isEqual(currentEventInfo.get('mousemove').position, lastEventInfo.get('mousemove').position);
-      if (!this.mouseStopMoving) { this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay, false); }
       // mouseenter timer
       const { mouseLeavingWindow } = currentEventInfo.get('mouseenter');
       const changed = mouseLeavingWindow !== lastEventInfo.get('mouseenter').mouseLeavingWindow;
@@ -229,14 +218,11 @@ export default {
       const lastWidget = this.getComponentName(lastEventInfo.get('mousemove').target);
       const mouseWakingUpVolume = this.enterWidgets(lastWidget, this.currentWidget, 'volume-indicator');
       const mouseLeavingVolume = this.leaveWidgets(lastWidget, this.currentWidget, 'volume-indicator');
-      const mouseMovingInVolume = this.andify(!this.mouseStopMoving, this.inWidgets(lastWidget, this.currentWidget, 'volume-indicator'));
+      const mouseMovingInVolume = this.andify(!this.mouseStopped, this.inWidgets(lastWidget, this.currentWidget, 'volume-indicator'));
       const wakingupVolume = this.orify(this.volumeChange, volumeKeydown, this.andify(mouseScrolling, process.platform !== 'darwin'), this.andify(!this.muted, this.orify(mouseWakingUpVolume, mouseLeavingVolume, mouseMovingInVolume))); // eslint-disable-line
       if (wakingupVolume) {
         this.timerManager.updateTimer('sleepingVolumeButton', this.orify(mouseWakingUpVolume, mouseMovingInVolume) ? this.muteDelay : this.hideVolumeDelay);
         // Prevent all widgets display before volume-control
-        if (this.andify(this.showAllWidgets, mouseMovingInVolume)) {
-          this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
-        }
         this.hideVolume = false;
         this.volumeChange = false;
       }
@@ -252,12 +238,10 @@ export default {
       return currentEventInfo;
     },
     UITimerManager(frameTime) {
-      this.timerManager.tickTimer('mouseStopMoving', frameTime);
       this.timerManager.tickTimer('mouseLeavingWindow', frameTime);
       this.timerManager.tickTimer('sleepingVolumeButton', frameTime);
 
       const timeoutTimers = this.timerManager.timeoutTimers();
-      this.mouseStopMoving = timeoutTimers.includes('mouseStopMoving');
       this.mouseLeftWindow = timeoutTimers.includes('mouseLeavingWindow');
       this.hideVolume = timeoutTimers.includes('sleepingVolumeButton');
 
@@ -310,6 +294,13 @@ export default {
     },
     // Event listeners
     handleMousemove(event) {
+      this.mouseStopped = false;
+      if (this.mouseStatusId) {
+        this.clock().clearTimeout(this.mouseStatusId);
+      }
+      this.mouseStatusId = this.clock().setTimeout(() => {
+        this.mouseStopped = true;
+      }, 3000);
       this.eventInfo.set('mousemove', {
         target: event.target,
         position: [event.clientX, event.clientY],
