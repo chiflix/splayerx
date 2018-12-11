@@ -19,7 +19,8 @@
                 :style="{
                   cursor: 'pointer',
                   transform: `rotate(${rotateTime * 360}deg)`,
-                  transition: 'transform 1s linear'
+                  transition: 'transform 1s linear',
+                  transformOrigin: 'center',
                 }"/>
             </div>
 
@@ -194,6 +195,9 @@ export default {
     this.$bus.$on('finish-refresh', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
+      setTimeout(() => {
+        this.timer = null;
+      }, 1000);
     });
     this.$bus.$on('menu-sub-refresh', () => {
       this.handleRefresh();
@@ -217,6 +221,9 @@ export default {
     },
     handleRefresh() {
       if (this.privacyAgreement) {
+        if (this.timer) {
+          return;
+        }
         this.timer = setInterval(() => {
           this.count += 1;
           this.rotateTime = Math.ceil(this.count / 100);
@@ -230,7 +237,6 @@ export default {
         this.currentSubIden = 0;
         document.querySelector('.scrollScope').scrollTop = 0;
         this.$bus.$emit('refresh-subtitle', this.mediaHash);
-        this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
       } else {
         this.$bus.$emit('privacy-confirm');
       }
@@ -460,6 +466,9 @@ export default {
     this.$bus.$on('new-video-opened', () => {
       this.currentSubIden = 0;
     });
+    this.$bus.$on('find-no-subtitle', () => {
+      this.currentSubIden = -1;
+    });
   },
 };
 </script>
@@ -566,7 +575,8 @@ export default {
         line-height: 15px;
       }
       .refresh {
-        font-size: 13px;
+        width: 13px;
+        height: 13px;
         margin: 14px 15px auto auto;
       }
     }
@@ -625,7 +635,8 @@ export default {
         line-height: 17px;
       }
       .refresh {
-        font-size: 13px;
+        width: 17px;
+        height: 17px;
         margin: 17px 19px auto auto;
       }
     }
@@ -684,7 +695,8 @@ export default {
         line-height: 23px;
       }
       .refresh {
-        font-size: 13px;
+        width: 21px;
+        height: 21px;
         margin: 23px 26px auto auto;
       }
     }
