@@ -31,8 +31,8 @@
       v-bind.sync="widgetsStatus['advance-control']"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes v-hidden="displayState['the-time-codes']"/>
-    <the-progress-bar v-hidden="displayState['the-progress-bar']"/>
+    <the-time-codes v-hidden="displayState['the-time-codes'] || showProgress"/>
+    <the-progress-bar v-hidden="displayState['the-progress-bar'] || showProgress"/>
   </div>
 </template>
 <script>
@@ -95,10 +95,12 @@ export default {
       listenedWidget: 'the-video-controller',
       attachedShown: false,
       volumeChange: false,
+      showProgress: false,
+      showProgressId: 0,
     };
   },
   computed: {
-    ...mapGetters(['muted', 'paused', 'volume']),
+    ...mapGetters(['muted', 'paused', 'volume', 'progressKeydown']),
     showAllWidgets() {
       return (!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
@@ -122,6 +124,16 @@ export default {
     },
     volume() {
       this.volumeChange = true;
+    },
+    progressKeydown(newValue) {
+      if (newValue) {
+        this.showProgress = true;
+        this.clock().clearTimeout(this.showProgressId);
+      } else {
+        this.showProgressId = this.clock().setTimeout(() => {
+          this.showProgress = false;
+        }, 1000);
+      }
     },
   },
   created() {
@@ -294,6 +306,7 @@ export default {
       this.mouseStoppedId = this.clock().setTimeout(() => {
         this.mouseStopped = true;
       }, this.mousestopDelay);
+      this.currentWidget = this.getComponentName(event.target);
       this.eventInfo.set('mousemove', {
         target: event.target,
         position: [event.clientX, event.clientY],
