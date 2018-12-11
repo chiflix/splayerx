@@ -8,7 +8,7 @@ import sinon from 'sinon';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-describe.only('Component - TheVideoController Unit Test', () => {
+describe('Component - TheVideoController Unit Test', () => {
   let wrapper;
   let sandbox;
   let store;
@@ -39,8 +39,6 @@ describe.only('Component - TheVideoController Unit Test', () => {
   it('should event handlers be properly invoked', () => {
     const events = [
       'mousemove',
-      'mouseenter',
-      'mouseleave',
       'mousedown.left',
       'mousedown.right',
       'mouseup.left',

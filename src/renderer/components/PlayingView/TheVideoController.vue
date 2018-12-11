@@ -19,7 +19,7 @@
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking"></div>
+    <div class="masking" v-hidden="displayState['the-time-codes'] || showProgress"/>
     <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
@@ -326,7 +326,6 @@ export default {
       this.mouseLeftId = this.clock().setTimeout(() => {
         this.mouseLeftWindow = true;
       }, this.mouseleftDelay);
-      this.eventInfo.set('mousemove', { target: null });
     },
     handleMousedownRight() {
       this.eventInfo.set('mousedown', Object.assign(
