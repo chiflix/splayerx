@@ -66,22 +66,6 @@ export default {
     'recent-playlist': RecentPlaylist,
     SpeedLabel,
   },
-  directives: {
-    hidden: {
-      update(el, binding) {
-        const { oldValue, value } = binding;
-        if (oldValue !== value) {
-          if (value) {
-            el.classList.add('fade-in');
-            el.classList.remove('fade-out');
-          } else {
-            el.classList.add('fade-out');
-            el.classList.remove('fade-in');
-          }
-        }
-      },
-    },
-  },
   data() {
     return {
       start: null,

@@ -28,6 +28,20 @@ Vue.config.warnHandler = (warn) => {
 Vue.config.errorHandler = (err) => {
   addLog.methods.addLog('error', err);
 };
+Vue.directive('hidden', {
+  update(el, binding) {
+    const { oldValue, value } = binding;
+    if (oldValue !== value) {
+      if (value) {
+        el.classList.add('fade-in');
+        el.classList.remove('fade-out');
+      } else {
+        el.classList.add('fade-out');
+        el.classList.remove('fade-in');
+      }
+    }
+  },
+});
 
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
