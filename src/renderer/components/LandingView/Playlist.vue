@@ -262,9 +262,6 @@ export default {
       };
     },
     onRecentItemMouseover(item, index) {
-      console.log('index+1', index + 1);
-      console.log('firstIndex', this.firstIndex);
-      console.log('lastIndex', this.lastIndex);
       if (((index + 1 >= this.firstIndex && index + 1 <= this.lastIndex)
         || this.isFullScreen) && this.mouseFlag && this.validHover) {
         this.tranFlag = true;
