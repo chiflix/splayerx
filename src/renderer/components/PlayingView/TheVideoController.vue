@@ -23,8 +23,8 @@
     <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
-      <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']" 
-      v-bind.sync="widgetsStatus['subtitle-control']" 
+      <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']"
+      v-bind.sync="widgetsStatus['subtitle-control']"
       @conflict-resolve="conflictResolve"/>
       <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <advance-control class="button advance" v-hidden="displayState['advance-control']"
@@ -339,7 +339,7 @@ export default {
         if (mouseupChanged) {
           this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== name;
           if (name === 'recent-playlist') {
-            this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== name
+            this.widgetsStatus[name].mouseupOnOther = currentMouseupWidget !== 'playlist-control'
               && currentMousedownWidget !== 'playlist-control';
           }
         }
