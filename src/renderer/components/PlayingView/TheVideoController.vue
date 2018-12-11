@@ -19,7 +19,7 @@
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-hidden="displayState['the-progress-bar']"></div>
+    <div class="masking"></div>
     <play-button :paused="paused" />
     <volume-indicator v-hidden="displayState['volume-indicator']"/>
     <div class="control-buttons">
@@ -31,8 +31,8 @@
       v-bind.sync="widgetsStatus['advance-control']"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes v-hidden="displayState['the-progress-bar']" />
-    <the-progress-bar v-hidden="displayState['the-progress-bar']" v-bind.sync="widgetsStatus['the-progress-bar']"/>
+    <the-time-codes />
+    <the-progress-bar />
   </div>
 </template>
 <script>
@@ -94,7 +94,6 @@ export default {
       hideVolume: false,
       muteDelay: 3000,
       hideVolumeDelay: 1000,
-      hideProgressBar: false,
       popupShow: false,
       clicksTimer: 0,
       clicksDelay: 200,
@@ -108,7 +107,6 @@ export default {
       focusedTimestamp: 0,
       focusDelay: 500,
       listenedWidget: 'the-video-controller',
-      progressBarHovering: false,
       attachedShown: false,
       volumeChange: false,
     };
@@ -134,16 +132,6 @@ export default {
     isFocused(newValue) {
       if (newValue) {
         this.focusedTimestamp = Date.now();
-      }
-    },
-    progressBarHovering(newValue) {
-      if (!newValue) {
-        this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
-        // Prevent all widgets display before the-progress-bar
-        if (this.showAllWidgets) {
-          this.timerManager.updateTimer('mouseStopMoving', this.mousestopDelay);
-        }
-        this.hideProgressBar = false;
       }
     },
     volume() {
@@ -175,8 +163,6 @@ export default {
     this.timerManager = new TimerManager();
     this.timerManager.addTimer('mouseStopMoving', this.mousestopDelay);
     this.timerManager.addTimer('sleepingVolumeButton', this.mousestopDelay);
-    this.timerManager.addTimer('sleepingProgressBar', this.mousestopDelay);
-    this.timerManager.addTimer('hoveringProgressBar', this.mousestopDelay);
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
@@ -265,19 +251,6 @@ export default {
         this.hideVolume = false;
         this.volumeChange = false;
       }
-      // hideProgressBar timer
-      const progressKeydown = this.orify(currentEventInfo.get('keydown').ArrowLeft, currentEventInfo.get('keydown').ArrowRight, currentEventInfo.get('keydown').BracketLeft, currentEventInfo.get('keydown').BracketRight);
-      if (progressKeydown || this.showAllWidgets) {
-        this.timerManager.updateTimer('sleepingProgressBar', this.mousestopDelay);
-      }
-      if (this.currentWidget === 'the-progress-bar') {
-        this.timerManager.updateTimer('hoveringProgressBar', this.mousestopDelay);
-        this.widgetsStatus['the-progress-bar'].hovering = this.progressBarHovering = true;
-      }
-      if (this.currentWidget === 'the-video-controller' &&
-        this.getComponentName(lastEventInfo.get('mousemove').target) === 'the-progress-bar') {
-        this.timerManager.updateTimer('hoveringProgressBar', 0);
-      }
       // mouseup status
       if (lastEventInfo.get('mouseup').leftMouseup !== currentEventInfo.get('mouseup').leftMouseup) {
         this.currentSelectedWidget = this.getComponentName(currentEventInfo.get('mouseup').target);
@@ -287,25 +260,19 @@ export default {
         this.timerState[uiName] = this.showAllWidgets;
       });
       this.timerState['volume-indicator'] = !this.hideVolume;
-      this.timerState['the-progress-bar'] = this.progressBarHovering || !this.hideProgressBar;
       return currentEventInfo;
     },
     UITimerManager(frameTime) {
       this.timerManager.tickTimer('mouseStopMoving', frameTime);
       this.timerManager.tickTimer('mouseLeavingWindow', frameTime);
       this.timerManager.tickTimer('sleepingVolumeButton', frameTime);
-      this.timerManager.tickTimer('hoveringProgressBar', frameTime);
-      this.timerManager.tickTimer('sleepingProgressBar', frameTime);
 
       const timeoutTimers = this.timerManager.timeoutTimers();
       this.mouseStopMoving = timeoutTimers.includes('mouseStopMoving');
       this.mouseLeftWindow = timeoutTimers.includes('mouseLeavingWindow');
       this.hideVolume = timeoutTimers.includes('sleepingVolumeButton');
-      this.widgetsStatus['the-progress-bar'].hovering = this.progressBarHovering = !timeoutTimers.includes('hoveringProgressBar');
-      this.hideProgressBar = timeoutTimers.includes('sleepingProgressBar');
 
       this.timerState['volume-indicator'] = !this.hideVolume;
-      this.timerState['the-progress-bar'] = this.progressBarHovering || !this.hideProgressBar;
     },
     // UILayerManager() {
     // },
