@@ -22,7 +22,7 @@
     <div class="progress"
       :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.progressBackgroundColor }">
       <div class="hovered" :style="{ width: this.hoveredPercent, backgroundColor: this.hoveredBackgroundColor }"></div>
-      <div class="played" :style="{ width: this.playedPercent, backgroundColor: this.playedBackgroundColor }"></div>
+      <div class="played" ref="progressTimebar" :style="{ width: this.playedPercent, backgroundColor: this.playedBackgroundColor }"></div>
     </div>
     <div class="fake-button right" ref="rightInvisible"
       :style="{ height: fakeButtonHeight }">

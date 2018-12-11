@@ -60,30 +60,32 @@ export default {
   },
   watch: {
     currentTime(newVal, oldValue) {
-      const { parsedData } = this.subtitle;
-      if (parsedData) {
-        const cues = parsedData
-          .filter(subtitle => subtitle.start <= newVal && subtitle.end >= newVal && subtitle.text !== '');
-        if (!isEqual(cues, this.currentCues)) {
-          this.currentCues = cues.reverse();
-        }
-      }
-
-      const { videoSegments, currentSegment, elapsedSegmentTime } = this;
-      const segment = videoSegments
-        .filter(segment => segment[0] <= newVal && segment[1] > newVal)[0];
-      if (segment && !segment[2]) {
-        if (isEqual(segment, currentSegment)) {
-          this.elapsedSegmentTime += newVal - oldValue;
-        } else {
-          const segmentTime = currentSegment[1] - currentSegment[0];
-          if (elapsedSegmentTime / segmentTime >= 0.9) {
-            const index = videoSegments.findIndex(segment => segment[0] === currentSegment[0]);
-            this.$set(videoSegments, index, [...videoSegments[index].slice(0, 2), true]);
+      if (this.subtitle) {
+        const { parsedData } = this.subtitle;
+        if (parsedData) {
+          const cues = parsedData
+            .filter(subtitle => subtitle.start <= newVal && subtitle.end >= newVal && subtitle.text !== '');
+          if (!isEqual(cues, this.currentCues)) {
+            this.currentCues = cues.reverse();
           }
-          this.elapsedSegmentTime = 0;
         }
-        this.currentSegment = segment;
+
+        const { videoSegments, currentSegment, elapsedSegmentTime } = this;
+        const segment = videoSegments
+          .filter(segment => segment[0] <= newVal && segment[1] > newVal)[0];
+        if (segment && !segment[2]) {
+          if (isEqual(segment, currentSegment)) {
+            this.elapsedSegmentTime += newVal - oldValue;
+          } else {
+            const segmentTime = currentSegment[1] - currentSegment[0];
+            if (elapsedSegmentTime / segmentTime >= 0.9) {
+              const index = videoSegments.findIndex(segment => segment[0] === currentSegment[0]);
+              this.$set(videoSegments, index, [...videoSegments[index].slice(0, 2), true]);
+            }
+            this.elapsedSegmentTime = 0;
+          }
+          this.currentSegment = segment;
+        }
       }
     },
     videoSegments(newVal) {

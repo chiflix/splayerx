@@ -27,7 +27,7 @@
       <advance-control class="button advance" v-hidden="displayState['advance-control']" v-bind.sync="widgetsStatus['advance-control']"/>
     </div>
     <the-time-codes v-hidden="displayState['the-progress-bar']" />
-    <the-progress-bar v-hidden="displayState['the-progress-bar']" v-bind.sync="widgetsStatus['the-progress-bar']"/>
+    <the-progress-bar ref="progressbar" v-hidden="displayState['the-progress-bar']" v-bind.sync="widgetsStatus['the-progress-bar']"/>
   </div>
 </template>
 <script>
@@ -45,6 +45,7 @@ import TheProgressBar from './TheProgressBar';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
 import SpeedLabel from './RateLabel.vue';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'the-video-controller',
@@ -106,10 +107,11 @@ export default {
       progressBarHovering: false,
       attachedShown: false,
       volumeChange: false,
+      progressTimebar: null,
     };
   },
   computed: {
-    ...mapGetters(['muted', 'paused', 'volume']),
+    ...mapGetters(['muted', 'paused', 'duration', 'volume']),
     showAllWidgets() {
       return (!this.mouseStopMoving && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
@@ -190,6 +192,8 @@ export default {
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
+
+    this.progressTimebar = this.$refs.progressbar.$refs.progressTimebar;
     requestAnimationFrame(this.UIManager);
     this.$bus.$on('currentWidget', (widget) => {
       this.listenedWidget = widget;
@@ -206,6 +210,8 @@ export default {
       if (!this.start) {
         this.start = timestamp;
       }
+
+      this.progressTimebar.style.width = `${100 * (videodata.time / this.duration)}%`;
 
       // Use Map constructor to shallow-copy eventInfo
       const lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
@@ -298,15 +304,13 @@ export default {
     // UILayerManager() {
     // },
     UIDisplayManager() {
-      const tempObject = {};
       Object.keys(this.displayState).forEach((index) => {
-        tempObject[index] = (this.showAllWidgets ||
+        this.displayState[index] = (this.showAllWidgets ||
           (!this.showAllWidgets && this.timerState[index])) &&
           !this.widgetsStatus['playlist-control'].showAttached;
       });
-      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
-      tempObject['volume-indicator'] = !this.muted ? this.timerState['volume-indicator'] : tempObject['volume-indicator'];
-      this.displayState = tempObject;
+      this.displayState['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
+      this.displayState['volume-indicator'] = !this.muted ? this.timerState['volume-indicator'] : this.displayState['volume-indicator'];
     },
     UIStateManager() {
       const currentMousedownWidget = this.getComponentName(this.eventInfo.get('mousedown').target);
