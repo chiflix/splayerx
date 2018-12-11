@@ -1,6 +1,7 @@
 import { app, BrowserWindow, Tray, ipcMain, globalShortcut, splayerx } from 'electron' // eslint-disable-line
 import { throttle } from 'lodash';
 import path from 'path';
+import fs from 'fs';
 import writeLog from './helpers/writeLog';
 import WindowResizer from './helpers/windowResizer';
 /**
@@ -109,6 +110,13 @@ function registerMainWindowEvent() {
     const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
+    if (fs.existsSync(`${imgPath}.png`)) {
+      snapShotQueue.shift();
+      if (snapShotQueue.length > 0) {
+        snapShot(snapShotQueue[0], callback);
+      }
+      return;
+    }
     splayerx.snapshotVideo(videoPath, `${imgPath}.png`, `00:00:${numberString}`, (err) => {
       console.log(err, videoPath);
       callback(err, imgPath);
