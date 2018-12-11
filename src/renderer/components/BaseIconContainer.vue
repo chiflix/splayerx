@@ -322,7 +322,7 @@ export default {
   .refresh {
     display: block;
     width: 13px;
-    height: 14px;
+    height: 13px;
   }
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
@@ -338,7 +338,7 @@ export default {
   }
   .refresh {
     display: block;
-    width: 15px;
+    width: 17px;
     height: 17px;
   }
 }
@@ -356,7 +356,7 @@ export default {
   .refresh {
     display: block;
     width: 21px;
-    height: 24px;
+    height: 21px;
   }
 }
 .speed {
