@@ -8,50 +8,49 @@
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
     <notification-bubble/>
-    <transition name="background-container-transition" mode="">
-      <div class="background"
-        v-if="showShortcutImage">
-        <div class="background background-image">
-          <transition name="background-transition" mode="in-out">
-            <div
-            class="img"
-            :key="imageTurn"
-            :style="{
-              backgroundImage: backgroundImage(backgroundUrl, cover),
-            }"></div>
-          </transition>
-        </div>
-       <div class="background background-mask"/>
-         <div class="iteminfo item-name">
-          {{ item.baseName }}
-        </div>
-        <div class="iteminfo item-description">
-        </div>
-        <div class="iteminfo item-timing">
-          <span class="timing-played">
-            {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}</span>
-          / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
-        </div>
-        <div class="iteminfo item-progress">
-          <div class="progress-played" v-bind:style="{ width: item.percentage + '%' }"></div>
-        </div>
+    <transition name="background-container-transition">
+    <div class="background"
+      v-if="showShortcutImage">
+      <div class="background background-image">
+        <transition name="background-transition" mode="in-out">
+        <div
+          class="img"
+          :key="backgroundUrl"
+          :style="{
+            backgroundImage: backgroundImage(backgroundUrl, cover),
+          }"></div>
+        </transition>
       </div>
+      <div class="background background-mask"/>
+      <div class="iteminfo item-name">
+        {{ item.baseName }}
+      </div>
+      <div class="iteminfo item-description"/>
+      <div class="iteminfo item-timing">
+        <span class="timing-played">
+          {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}</span>
+        / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
+      </div>
+      <div class="iteminfo item-progress">
+        <div class="progress-played" :style="{ width: item.percentage + '%' }"></div>
+      </div>
+    </div>
     </transition>
-    <transition name="welcome-container-transition" mode="">
-      <div class="welcome-container" v-if="langdingLogoAppear">
-          <div class="logo-container">
-              <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
-          </div>
-          <div class="welcome">
-          <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-        </div>
+    <transition name="welcome-container-transition">
+    <div class="welcome-container" v-if="langdingLogoAppear">
+      <div class="logo-container">
+        <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
       </div>
-  </transition>
-      <playlist 
-        :lastPlayedFile="lastPlayedFile"
-        :isFullScreen="isFullScreen"
-        :winWidth="winWidth"
-        :filePathNeedToDelete="filePathNeedToDelete"/>
+      <div class="welcome">
+        <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
+      </div>
+    </div>
+    </transition>
+    <playlist
+      :lastPlayedFile="lastPlayedFile"
+      :isFullScreen="isFullScreen"
+      :winWidth="winWidth"
+      :filePathNeedToDelete="filePathNeedToDelete"/>
   </main>
 </div>
 </template>
@@ -69,7 +68,6 @@ export default {
     return {
       lastPlayedFile: [],
       sagiHealthStatus: 'UNSET',
-      imageTurn: '',
       showShortcutImage: false,
       mouseDown: false,
       invalidTimeRepresentation: '--',
@@ -162,15 +160,14 @@ export default {
         for (let i = 0; i < this.lastPlayedFile.length; i += 1) {
           if (this.lastPlayedFile[i].path === this.filePathNeedToDelete) {
             this.lastPlayedFile.splice(i, 1);
+            this.langdingLogoAppear = true;
+            this.showShortcutImage = false;
             this.filePathNeedToDelete = '';
             break;
           }
         }
       }
     });
-  },
-  beforeDestroy() {
-    window.onresize = null;
   },
   mounted() {
     this.$store.dispatch('refreshVersion');
@@ -187,7 +184,6 @@ export default {
       }
     });
     this.$bus.$on('displayInfo', (displayInfo) => {
-      this.imageTurn = displayInfo.imageTurn;
       this.backgroundUrl = displayInfo.backgroundUrl;
       this.cover = displayInfo.cover;
       this.langdingLogoAppear = displayInfo.langdingLogoAppear;
@@ -371,8 +367,8 @@ main {
 }
 
 .background-transition-enter-active, .background-transition-leave-active {
-  transition: opacity .3s ease-in;
-  transition-delay: .2s;
+  transition: opacity 300ms ease-in;
+  // transition-delay: 100ms;
 }
 .background-transition-enter, .background-transition-leave-to {
   opacity: 0;

@@ -66,10 +66,8 @@ export default {
   components: { Icon },
   data() {
     return {
-      imageTurn: '',
       isTurnToOdd: false,
-      backgroundUrlOdd: '',
-      backgroundUrlEven: '',
+      backgroundUrl: '',
       showShortcutImage: false,
       langdingLogoAppear: true,
       displayInfo: [],
@@ -243,13 +241,6 @@ export default {
         this.open();
       }
     },
-    backgroundUrl() {
-      switch (this.imageTurn) {
-        case 'odd': return this.backgroundUrlOdd;
-        case 'even': return this.backgroundUrlEven;
-        default: return '';
-      }
-    },
     itemShortcut(shortCut, cover, lastPlayedTime, duration) {
       return duration - lastPlayedTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
     },
@@ -269,14 +260,7 @@ export default {
         this.$set(this.lastPlayedFile[index], 'chosen', true);
         if (item.shortCut !== '') {
           this.isChanging = true;
-          this.isTurnToOdd = !this.isTurnToOdd;
-          if (this.isTurnToOdd) {
-            this.imageTurn = 'odd';
-            this.backgroundUrlOdd = item.shortCut;
-          } else {
-            this.imageTurn = 'even';
-            this.backgroundUrlEven = item.shortCut;
-          }
+          this.backgroundUrl = item.shortCut;
           this.langdingLogoAppear = false;
           this.showShortcutImage = true;
         } else {
@@ -285,8 +269,7 @@ export default {
         }
         this.displayInfo.langdingLogoAppear = this.langdingLogoAppear;
         this.displayInfo.showShortcutImage = this.showShortcutImage;
-        this.displayInfo.imageTurn = this.imageTurn;
-        this.displayInfo.backgroundUrl = this.backgroundUrl();
+        this.displayInfo.backgroundUrl = this.backgroundUrl;
         this.displayInfo.baseName = this.itemInfo().baseName;
         this.displayInfo.lastTime = this.itemInfo().lastTime;
         this.displayInfo.duration = this.itemInfo().duration;
