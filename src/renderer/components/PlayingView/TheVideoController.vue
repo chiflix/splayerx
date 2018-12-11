@@ -72,8 +72,10 @@ export default {
       UIElements: [],
       currentWidget: this.$options.name,
       mouseStopped: false,
+      mouseStoppedId: 0,
       mousestopDelay: 3000,
       mouseLeftWindow: false,
+      mouseLeftId: 0,
       mouseleftDelay: 1000,
       hideVolume: false,
       muteDelay: 3000,
@@ -203,15 +205,6 @@ export default {
       requestAnimationFrame(this.UIManager);
     },
     inputProcess(currentEventInfo, lastEventInfo) { // eslint-disable-line
-      // mouseenter timer
-      const { mouseLeavingWindow } = currentEventInfo.get('mouseenter');
-      const changed = mouseLeavingWindow !== lastEventInfo.get('mouseenter').mouseLeavingWindow;
-      if (this.andify(mouseLeavingWindow, changed)) {
-        this.timerManager.addTimer('mouseLeavingWindow', this.mouseleftDelay);
-      } else if (this.andify(!mouseLeavingWindow, changed)) {
-        this.timerManager.removeTimer('mouseLeavingWindow');
-        this.mouseLeftWindow = false;
-      }
       // hideVolume timer
       const volumeKeydown = this.orify(currentEventInfo.get('keydown').ArrowUp, currentEventInfo.get('keydown').ArrowDown, currentEventInfo.get('keydown').KeyM); // eslint-disable-line
       const mouseScrolling = currentEventInfo.get('wheel').time !== lastEventInfo.get('wheel').time;
@@ -238,11 +231,9 @@ export default {
       return currentEventInfo;
     },
     UITimerManager(frameTime) {
-      this.timerManager.tickTimer('mouseLeavingWindow', frameTime);
       this.timerManager.tickTimer('sleepingVolumeButton', frameTime);
 
       const timeoutTimers = this.timerManager.timeoutTimers();
-      this.mouseLeftWindow = timeoutTimers.includes('mouseLeavingWindow');
       this.hideVolume = timeoutTimers.includes('sleepingVolumeButton');
 
       this.timerState['volume-indicator'] = !this.hideVolume;
@@ -295,12 +286,12 @@ export default {
     // Event listeners
     handleMousemove(event) {
       this.mouseStopped = false;
-      if (this.mouseStatusId) {
-        this.clock().clearTimeout(this.mouseStatusId);
+      if (this.mouseStoppedId) {
+        this.clock().clearTimeout(this.mouseStoppedId);
       }
-      this.mouseStatusId = this.clock().setTimeout(() => {
+      this.mouseStoppedId = this.clock().setTimeout(() => {
         this.mouseStopped = true;
-      }, 3000);
+      }, this.mousestopDelay);
       this.eventInfo.set('mousemove', {
         target: event.target,
         position: [event.clientX, event.clientY],
@@ -311,11 +302,16 @@ export default {
       }
     },
     handleMouseenter() {
-      this.eventInfo.set('mouseenter', { mouseLeavingWindow: false });
+      this.mouseLeftWindow = false;
+      if (this.mouseLeftId) {
+        this.clock().clearTimeout(this.mouseLeftId);
+      }
     },
     handleMouseleave() {
+      this.mouseLeftId = this.clock().setTimeout(() => {
+        this.mouseLeftWindow = true;
+      }, this.mouseleftDelay);
       this.eventInfo.set('mousemove', { target: null });
-      this.eventInfo.set('mouseenter', { mouseLeavingWindow: true });
     },
     handleMousedownRight() {
       this.eventInfo.set('mousedown', Object.assign(
