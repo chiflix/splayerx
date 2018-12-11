@@ -37,7 +37,8 @@
 </template>
 <script>
 import _ from 'lodash';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
+import { Input as inputActions } from '@/store/actionTypes';
 import TimerManager from '@/helpers/timerManager.js';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
@@ -172,6 +173,9 @@ export default {
     });
   },
   methods: {
+    ...mapActions({
+      updateMousemovePosition: inputActions.MOUSEMOVE_POSITION,
+    }),
     conflictResolve(name) {
       Object.keys(this.widgetsStatus).forEach((item) => {
         if (item !== name) {
@@ -310,6 +314,7 @@ export default {
         target: event.target,
         position: [event.clientX, event.clientY],
       });
+      this.updateMousemovePosition([event.clientX, event.clientY]);
       if (this.eventInfo.get('mousedown').leftMousedown) {
         this.isDragging = true;
       }

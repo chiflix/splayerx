@@ -27,3 +27,7 @@ export const Subtitle = {
   OFF_SUBTITLES: 'OFF_SUBTITLES',
   REFRESH_SUBTITLES: 'REFRESH_SUBTITLES',
 };
+
+export const Input = {
+  MOUSEMOVE_POSITION: 'MOUSEMOVE_POSITION',
+};
