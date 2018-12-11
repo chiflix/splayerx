@@ -107,16 +107,13 @@ function registerMainWindowEvent() {
   });
 
   function snapShot(videoPath, callback) {
+    /*
+      TODO:
+        img name should be more unique
+     */
     const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
-    if (fs.existsSync(`${imgPath}.png`)) {
-      snapShotQueue.shift();
-      if (snapShotQueue.length > 0) {
-        snapShot(snapShotQueue[0], callback);
-      }
-      return;
-    }
     splayerx.snapshotVideo(videoPath, `${imgPath}.png`, `00:00:${numberString}`, (err) => {
       console.log(err, videoPath);
       callback(err, imgPath);
@@ -142,12 +139,19 @@ function registerMainWindowEvent() {
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, path) => {
-    if (snapShotQueue.length === 0) {
-      snapShotQueue.push(path);
-      snapShotQueueProcess(event);
+  ipcMain.on('snapShot', (event, videoPath) => {
+    const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
+
+    if (!fs.existsSync(`${imgPath}.png`)) {
+      if (snapShotQueue.length === 0) {
+        snapShotQueue.push(videoPath);
+        snapShotQueueProcess(event);
+      } else {
+        snapShotQueue.push(videoPath);
+      }
     } else {
-      snapShotQueue.push(path);
+      console.log('pass', videoPath);
+      event.sender.send(`snapShot-${videoPath}-reply`, imgPath);
     }
   });
 
