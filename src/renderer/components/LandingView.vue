@@ -162,6 +162,8 @@ export default {
         for (let i = 0; i < this.lastPlayedFile.length; i += 1) {
           if (this.lastPlayedFile[i].path === this.filePathNeedToDelete) {
             this.lastPlayedFile.splice(i, 1);
+            this.langdingLogoAppear = true;
+            this.showShortcutImage = false;
             this.filePathNeedToDelete = '';
             break;
           }
