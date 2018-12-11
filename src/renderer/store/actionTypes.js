@@ -30,4 +30,6 @@ export const Subtitle = {
 
 export const Input = {
   MOUSEMOVE_POSITION: 'MOUSEMOVE_POSITION',
+  KEYDOWN_UPDATE: 'KEYDOWN_UPDATE',
+  KEYUP_UPDATE: 'KEYUP_UPDATE',
 };

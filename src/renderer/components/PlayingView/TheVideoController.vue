@@ -174,6 +174,8 @@ export default {
   methods: {
     ...mapActions({
       updateMousemovePosition: inputActions.MOUSEMOVE_POSITION,
+      updateKeydown: inputActions.KEYDOWN_UPDATE,
+      updateKeyup: inputActions.KEYUP_UPDATE,
     }),
     conflictResolve(name) {
       Object.keys(this.widgetsStatus).forEach((item) => {
@@ -399,6 +401,7 @@ export default {
       }
     },
     handleKeydown(event) {
+      this.updateKeydown(event.code);
       this.eventInfo.set('keydown', Object.assign(
         {},
         this.eventInfo.get('keydown'),
@@ -406,6 +409,7 @@ export default {
       ));
     },
     handleKeyup(event) {
+      this.updateKeyup(event.code);
       this.eventInfo.set('keydown', Object.assign(
         {},
         this.eventInfo.get('keydown'),

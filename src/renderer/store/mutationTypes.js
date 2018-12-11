@@ -54,4 +54,5 @@ export const Subtitle = {
 
 export const Input = {
   MOUSE_UPDATE: 'MOUSE_UPDATE',
+  KEYBOARD_UPDATE: 'KEYBOARD_UPDATE',
 };
