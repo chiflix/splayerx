@@ -265,13 +265,15 @@ export default {
     // UILayerManager() {
     // },
     UIDisplayManager() {
+      const tempObject = {};
       Object.keys(this.displayState).forEach((index) => {
-        this.displayState[index] = (this.showAllWidgets ||
+        tempObject[index] = (this.showAllWidgets ||
           (!this.showAllWidgets && this.timerState[index])) &&
           !this.widgetsStatus['playlist-control'].showAttached;
       });
-      this.displayState['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
-      this.displayState['volume-indicator'] = !this.muted ? this.timerState['volume-indicator'] : this.displayState['volume-indicator'];
+      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
+      tempObject['volume-indicator'] = !this.muted ? this.timerState['volume-indicator'] : tempObject['volume-indicator'];
+      this.displayState = tempObject;
     },
     UIStateManager() {
       const currentMousedownWidget = this.getComponentName(this.eventInfo.get('mousedown').target);
