@@ -64,7 +64,6 @@
 </template>
 <script>
 import path from 'path';
-import { Video as videoAction } from '@/store/actionTypes';
 import { mapGetters } from 'vuex';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 export default {
@@ -151,7 +150,6 @@ export default {
       } else if (index !== this.playingIndex
         && this.filePathNeedToDelete !== this.playingList[index]) {
         this.openFile(this.playingList[index]);
-        this.$store.dispatch(videoAction.PLAY_VIDEO);
       }
     },
   },

@@ -199,9 +199,6 @@ export default {
       basicInfo.forEach((settingItem) => {
         videoElement[settingItem] = this[settingItem];
       });
-      if (this.paused) {
-        videoElement.pause();
-      }
     },
     // Video default methods
     videoElement() {
