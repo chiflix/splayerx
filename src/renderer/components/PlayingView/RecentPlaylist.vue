@@ -19,8 +19,7 @@
       :style="{
         marginTop: sizeAdaption(53),
         paddingLeft: sizeAdaption(40),
-      }"
-      @mouseup.stop="">
+      }">
       <div class="top"
       :style="{
         fontSize: sizeAdaption(14),
@@ -39,9 +38,9 @@
       :style="{
         transition: tranFlag ? 'transform 400ms ease-in' : '',
         transform: `translateX(-${distance}px)`,
-        paddingTop: sizeAdaption(20),
-        paddingBottom: sizeAdaption(40),
-        paddingLeft: sizeAdaption(40),
+        marginTop: sizeAdaption(20),
+        marginBottom: sizeAdaption(40),
+        marginLeft: sizeAdaption(40),
       }">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
         :key="item"
@@ -326,6 +325,7 @@ export default {
     .playlist-items {
       -webkit-app-region: no-drag;
       display: flex;
+      width: fit-content;
       .item {
         position: relative;
         background-color: rgba(255,255,255,0.1);
