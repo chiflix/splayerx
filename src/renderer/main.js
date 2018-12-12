@@ -247,6 +247,7 @@ new Vue({
               label: this.$t('msg.file.clearHistory'),
               click: () => {
                 this.$bus.$emit('clean-lastPlayedFile');
+                this.refreshMenu();
               },
             },
             { type: 'separator' },
