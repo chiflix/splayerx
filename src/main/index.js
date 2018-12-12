@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, ipcMain, globalShortcut, splayerx } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle } from 'lodash';
 import path from 'path';
 import fs from 'fs';
@@ -54,7 +54,7 @@ function handleBossKey() {
     mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
     mainWindow.hide();
     if (process.platform === 'win32') {
-      tray = new Tray('build/icons/icon.ico');
+      tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
       tray.on('click', () => {
         mainWindow.show();
         tray.destroy();
@@ -150,7 +150,7 @@ function registerMainWindowEvent() {
         snapShotQueue.push(videoPath);
       }
     } else {
-      console.log('pass', videoPath);
+      console.log('pass', imgPath);
       event.sender.send(`snapShot-${videoPath}-reply`, imgPath);
     }
   });

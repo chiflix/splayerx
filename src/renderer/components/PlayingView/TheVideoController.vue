@@ -355,7 +355,9 @@ export default {
     handleMousedownLeft(event) {
       if (this.isDragging && this.lastAttachedShowing) {
         this.isDragging = false;
-        this.$bus.$emit('isdragging-mousedown');
+        if (this.currentWidget !== 'subtitle-control' && this.currentWidget !== 'advance-control') {
+          this.$bus.$emit('isdragging-mousedown');
+        }
         return;
       }
       this.eventInfo.set('mousedown', Object.assign(
@@ -381,7 +383,9 @@ export default {
     handleMouseupLeft(event) {
       if (this.isDragging && this.lastAttachedShowing) {
         this.isDragging = false;
-        this.$bus.$emit('isdragging-mouseup');
+        if (this.currentWidget !== 'subtitle-control' && this.currentWidget !== 'advance-control') {
+          this.$bus.$emit('isdragging-mouseup');
+        }
         return;
       }
       if (this.clicksTimer) {

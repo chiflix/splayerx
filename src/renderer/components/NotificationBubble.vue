@@ -22,7 +22,7 @@
             <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
             <div class="content">{{ m.content }}</div>
           </div>
-          <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id)"></Icon>
+          <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id, m.title)"></Icon>
         </div>
       </div>
     </transition-group>
@@ -86,9 +86,11 @@ export default {
       this.manualClosed = false;
       this.showNextVideo = false;
     },
-    closeMessage(id) {
+    closeMessage(id, title) {
       this.$store.dispatch('removeMessages', id);
-      this.$bus.$emit('delete-file');
+      if (title === this.$t('errorFile.title.fileNonExist')) {
+        this.$bus.$emit('delete-file');
+      }
     },
     checkNextVideoUI(time) {
       if (time > this.nextVideoPreviewTime &&

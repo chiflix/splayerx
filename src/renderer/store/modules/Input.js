@@ -17,7 +17,7 @@ const state = {
 const getters = {
   mousemovePosition: state => [...state.mouse.move.position],
   downKeys: state => [...state.keyboard.down.keys],
-  progressKeydown: (state, getters) => getters.downKeys.includes('ArrowLeft') || getters.downKeys.includes('ArrowRight'),
+  progressKeydown: (state, getters) => getters.downKeys.includes('ArrowLeft') || getters.downKeys.includes('ArrowRight') || getters.downKeys.includes('BracketLeft') || getters.downKeys.includes('BracketRight'),
 };
 
 const mutations = {

@@ -36,6 +36,15 @@ let mainConfig = {
       {
         test: /\.node$/,
         use: 'node-loader'
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg|ico|icns)(\?.*)?$/,
+        use: {
+          loader: 'url-loader',
+          options: {
+            limit: 1000000
+          }
+        }
       }
     ]
   },
