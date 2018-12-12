@@ -194,12 +194,6 @@ describe('Component - BaseVideoPlayer', () => {
       expect(videoElement).to.equal(wrapper.vm.$refs.video);
     });
 
-    it('should currentTimeUpdate emit events', () => {
-      wrapper.vm.currentTimeUpdate();
-
-      expect(wrapper.emitted()).to.contain.keys('update:currentTime');
-    });
-
     it('should currentTimeUpdate update currentTimeAnimationFrameId', () => {
       wrapper.vm.currentTimeUpdate();
 
