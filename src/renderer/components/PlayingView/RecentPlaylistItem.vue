@@ -207,7 +207,7 @@ export default {
       return this.coverSrc;
     },
     imageLoaded() {
-      return this.smallShortCut || this.coverSrc !== '';
+      return this.cover || this.smallShortCut || this.coverSrc !== '';
     },
     thumbnailHeight() {
       return this.thumbnailWidth / (112 / 63);
