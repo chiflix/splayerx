@@ -53,7 +53,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['roundedCurrentTime', 'nextVideo', 'finalPartTime']),
+    ...mapGetters(['roundedCurrentTime', 'nextVideo', 'duration', 'finalPartTime']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -102,7 +102,7 @@ export default {
       }
     },
     roundedCurrentTime(val) {
-      if (val > this.finalPartTime) {
+      if (val > this.finalPartTime && val < this.duration - 5) {
         if (this.nextVideo !== '' && !this.manualClosed) {
           this.checkIfNextVideoExist = true;
         }

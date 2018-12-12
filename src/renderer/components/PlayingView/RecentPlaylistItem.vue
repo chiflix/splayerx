@@ -174,14 +174,20 @@ export default {
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
     });
     this.infoDB().get('recent-played', 'path', this.path).then((val) => {
-      if (val && val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
-      if (val && val.smallShortCut) this.smallShortCut = val.smallShortCut;
+      if (val && val.lastPlayedTime) {
+        this.lastPlayedTime = val.lastPlayedTime;
+        this.smallShortCut = val.smallShortCut;
+        this.cover = val.cover;
+      }
       this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
     this.$bus.$on('database-saved', () => {
       this.infoDB().get('recent-played', 'path', this.path).then((val) => {
-        if (val && val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
-        if (val && val.smallShortCut) this.smallShortCut = val.smallShortCut;
+        if (val && val.lastPlayedTime) {
+          this.lastPlayedTime = val.lastPlayedTime;
+          this.smallShortCut = val.smallShortCut;
+          this.cover = val.cover;
+        }
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
     });
@@ -192,7 +198,10 @@ export default {
       return `url(${this.imageSrc})`;
     },
     imageSrc() {
-      if (this.smallShortCut) {
+      if (this.lastPlayedTime) {
+        if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
+          return this.cover;
+        }
         return this.smallShortCut;
       }
       return this.coverSrc;
