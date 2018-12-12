@@ -1,57 +1,56 @@
 <template>
 <div
+  class="wrapper"
   :data-component-name="$options.name"
-  class="wrapper">
-  <main
-    @mousedown.left.stop="handleLeftClick"
-    @mouseup.left.stop="handleMouseUp"
-    @mousemove="handleMouseMove">
-    <titlebar currentView="LandingView"></titlebar>
-    <notification-bubble/>
-    <transition name="background-container-transition">
-    <div class="background"
-      v-if="showShortcutImage">
-      <div class="background background-image">
-        <transition name="background-transition" mode="in-out">
-        <div
-          class="img"
-          :key="backgroundUrl"
-          :style="{
-            backgroundImage: backgroundImage(backgroundUrl, cover),
-          }"></div>
-        </transition>
-      </div>
-      <div class="background background-mask"/>
-      <div class="iteminfo item-name">
+  @mousedown.left.stop="handleLeftClick"
+  @mouseup.left.stop="handleMouseUp"
+  @mousemove="handleMouseMove">
+  <titlebar currentView="LandingView"></titlebar>
+  <notification-bubble/>
+  <transition name="background-container-transition">
+  <div class="background"
+    v-if="showShortcutImage">
+    <transition name="background-transition" mode="in-out">
+    <div class="background-image"
+    :key="item.path"
+    :style="{
+      backgroundImage: backgroundImage(backgroundUrl, cover),
+    }">
+      <div class="background-mask"/>
+    </div>
+    </transition>
+    <div class="item-info">
+      <div class="item-name">
         {{ item.baseName }}
       </div>
-      <div class="iteminfo item-description"/>
-      <div class="iteminfo item-timing">
+      <div class="item-description"/>
+      <div class="item-timing">
         <span class="timing-played">
           {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}</span>
         / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
       </div>
-      <div class="iteminfo item-progress">
-        <div class="progress-played" :style="{ width: item.percentage + '%' }"></div>
+      <div class="item-progress">
+        <div class="progress-played" :style="{ width: item.percentage + '%' }"/>
       </div>
     </div>
-    </transition>
-    <transition name="welcome-container-transition">
-    <div class="welcome-container" v-if="langdingLogoAppear">
-      <div class="logo-container">
-        <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
-      </div>
-      <div class="welcome">
-        <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-      </div>
+  </div>
+  </transition>
+  <transition name="welcome-container-transition">
+  <div class="welcome-container" v-if="landingLogoAppear">
+    <div class="logo-container">
+      <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
     </div>
-    </transition>
-    <playlist
-      :lastPlayedFile="lastPlayedFile"
-      :isFullScreen="isFullScreen"
-      :winWidth="winWidth"
-      :filePathNeedToDelete="filePathNeedToDelete"/>
-  </main>
+    <div class="welcome">
+      <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
+    </div>
+  </div>
+  </transition>
+  <playlist
+    :lastPlayedFile="lastPlayedFile"
+    :isFullScreen="isFullScreen"
+    :winWidth="winWidth"
+    :filePathNeedToDelete="filePathNeedToDelete"
+    @displayInfo="displayInfoUpdate"/>
 </div>
 </template>
 
@@ -71,7 +70,7 @@ export default {
       showShortcutImage: false,
       mouseDown: false,
       invalidTimeRepresentation: '--',
-      langdingLogoAppear: true,
+      landingLogoAppear: true,
       backgroundUrl: '',
       cover: '',
       item: [],
@@ -141,7 +140,7 @@ export default {
       });
     this.$bus.$on('clean-lastPlayedFile', () => {
       this.lastPlayedFile = [];
-      this.langdingLogoAppear = true;
+      this.landingLogoAppear = true;
       this.showShortcutImage = false;
       this.infoDB().cleanData();
     });
@@ -160,7 +159,7 @@ export default {
         for (let i = 0; i < this.lastPlayedFile.length; i += 1) {
           if (this.lastPlayedFile[i].path === this.filePathNeedToDelete) {
             this.lastPlayedFile.splice(i, 1);
-            this.langdingLogoAppear = true;
+            this.landingLogoAppear = true;
             this.showShortcutImage = false;
             this.filePathNeedToDelete = '';
             break;
@@ -183,18 +182,19 @@ export default {
         this.addLog('info', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
-    this.$bus.$on('displayInfo', (displayInfo) => {
+  },
+  methods: {
+    displayInfoUpdate(displayInfo) {
       this.backgroundUrl = displayInfo.backgroundUrl;
       this.cover = displayInfo.cover;
-      this.langdingLogoAppear = displayInfo.langdingLogoAppear;
+      this.landingLogoAppear = displayInfo.landingLogoAppear;
       this.showShortcutImage = displayInfo.showShortcutImage;
       this.item.baseName = displayInfo.baseName;
       this.item.lastTime = displayInfo.lastTime;
       this.item.duration = displayInfo.duration;
       this.item.percentage = displayInfo.percentage;
-    });
-  },
-  methods: {
+      this.item.path = displayInfo.path;
+    },
     backgroundImage(shortCut, cover) {
       return this.item.duration - this.item.lastTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
     },
@@ -241,29 +241,27 @@ body {
   z-index: -1;
 }
 .background {
-  position: absolute;
   width: 100%;
   height: 100%;
-  z-index: 2;
 
-  .background-mask {
-    z-index: 3;
-    background-image: radial-gradient(circle at 37% 35%,
-                    rgba(0,0,0,0.00) 13%,
-                    rgba(0,0,0,0.43) 47%,
-                    rgba(0,0,0,0.80) 100%);
-  }
-  .img {
+  .background-image {
     position: absolute;
+    top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    right: 0;
+    bottom: 0;
     -webkit-user-drag: none;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
+
+    .background-mask {
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(circle at 37% 35%, rgba(0,0,0,0.00) 13%, rgba(0,0,0,0.43) 47%, rgba(0,0,0,0.80) 100%);
+    }
   }
-  .iteminfo {
+  .item-info {
     position: relative;
     top: 100px;
     left: 45px;
