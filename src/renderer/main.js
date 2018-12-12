@@ -696,6 +696,8 @@ new Vue({
         label: value.label,
         click: () => {
           this.openFile(value.path);
+          const similarVideos = this.findSimilarVideoByVidPath(value.path);
+          this.$store.dispatch('FolderList', similarVideos);
         },
       };
     },
