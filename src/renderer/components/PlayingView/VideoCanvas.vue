@@ -275,7 +275,7 @@ export default {
       }
       if (val >= this.duration && this.nextVideo) {
         this.openFile(this.nextVideo);
-      } else if (!this.nextVideo) {
+      } else if (val >= this.duration) {
         this.pause();
       }
     },
