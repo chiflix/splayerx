@@ -118,7 +118,7 @@ export default {
       const onlineNeeded = local.length === 0;
       const online = onlineNeeded && this.privacyAgreement
         ? await this.getOnlineSubtitlesList(videoSrc) : [];
-      if (onlineNeeded) {
+      if (onlineNeeded && this.privacyAgreement) {
         online.array[1].forEach((sub) => {
           if (typeof sub[0] === 'string' && sub[0].length) {
             onlineNormalizer.push({
@@ -202,8 +202,12 @@ export default {
     osLocale().then((locale) => {
       this.systemLocale = locale.slice(0, 2);
       this.getSubtitlesList(this.originSrc).then((result) => {
-        this.addSubtitles(result);
-        this.changeCurrentSubtitle(this.chooseInitialSubtitle(this.subtitleList, this.systemLocale).id);
+        if (result.length > 0) {
+          this.addSubtitles(result);
+          this.changeCurrentSubtitle(this.chooseInitialSubtitle(this.subtitleList, this.systemLocale).id);
+        } else {
+          this.$bus.$emit('find-no-subtitle');
+        }
       });
     });
     this.$bus.$on('add-subtitles', (subtitleList) => {
@@ -232,6 +236,7 @@ export default {
         }
       });
       this.refreshSubtitle(onlineNormalizer);
+      this.changeCurrentSubtitle(this.subtitleList[0].id);
       this.$bus.$emit('finish-refresh');
     });
   },

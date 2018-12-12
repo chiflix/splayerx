@@ -1,6 +1,7 @@
 import { app, BrowserWindow, Tray, ipcMain, globalShortcut, splayerx } from 'electron' // eslint-disable-line
 import { throttle } from 'lodash';
 import path from 'path';
+import fs from 'fs';
 import writeLog from './helpers/writeLog';
 import WindowResizer from './helpers/windowResizer';
 /**
@@ -106,6 +107,10 @@ function registerMainWindowEvent() {
   });
 
   function snapShot(videoPath, callback) {
+    /*
+      TODO:
+        img name should be more unique
+     */
     const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
@@ -134,12 +139,19 @@ function registerMainWindowEvent() {
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, path) => {
-    if (snapShotQueue.length === 0) {
-      snapShotQueue.push(path);
-      snapShotQueueProcess(event);
+  ipcMain.on('snapShot', (event, videoPath) => {
+    const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
+
+    if (!fs.existsSync(`${imgPath}.png`)) {
+      if (snapShotQueue.length === 0) {
+        snapShotQueue.push(videoPath);
+        snapShotQueueProcess(event);
+      } else {
+        snapShotQueue.push(videoPath);
+      }
     } else {
-      snapShotQueue.push(path);
+      console.log('pass', videoPath);
+      event.sender.send(`snapShot-${videoPath}-reply`, imgPath);
     }
   });
 
@@ -226,6 +238,7 @@ function createWindow() {
 
   mainWindow.loadURL(winURL);
   mainWindow.on('closed', () => {
+    ipcMain.removeAllListeners();
     mainWindow = null;
   });
 

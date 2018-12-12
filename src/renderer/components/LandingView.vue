@@ -8,58 +8,56 @@
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
     <notification-bubble/>
-    <transition name="background-container-transition" mode="">
-      <div class="background"
-        v-if="showShortcutImage">
-        <div class="background background-image">
-          <transition name="background-transition" mode="in-out">
-            <div
-            class="img"
-            :key="imageTurn"
-            :style="{
-              backgroundImage: backgroundImage(backgroundUrl, cover),
-            }"></div>
-          </transition>
-        </div>
-       <div class="background background-mask"></div>
-         <div class="iteminfo item-name">
-          {{ item.baseName }}
-        </div>
-        <div class="iteminfo item-description">
-        </div>
-        <div class="iteminfo item-timing">
-          <span class="timing-played">
-            {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}</span>
-          / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
-        </div>
-        <div class="iteminfo item-progress">
-          <div class="progress-played" v-bind:style="{ width: item.percentage + '%' }"></div>
-        </div>
+    <transition name="background-container-transition">
+    <div class="background"
+      v-if="showShortcutImage">
+      <div class="background background-image">
+        <transition name="background-transition" mode="in-out">
+        <div
+          class="img"
+          :key="backgroundUrl"
+          :style="{
+            backgroundImage: backgroundImage(backgroundUrl, cover),
+          }"></div>
+        </transition>
       </div>
+      <div class="background background-mask"/>
+      <div class="iteminfo item-name">
+        {{ item.baseName }}
+      </div>
+      <div class="iteminfo item-description"/>
+      <div class="iteminfo item-timing">
+        <span class="timing-played">
+          {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}</span>
+        / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
+      </div>
+      <div class="iteminfo item-progress">
+        <div class="progress-played" :style="{ width: item.percentage + '%' }"></div>
+      </div>
+    </div>
     </transition>
-    <transition name="welcome-container-transition" mode="">
-      <div class="welcome-container" v-if="langdingLogoAppear">
-          <div class="logo-container">
-              <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
-          </div>
-          <div class="welcome">
-          <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-        </div>
+    <transition name="welcome-container-transition">
+    <div class="welcome-container" v-if="langdingLogoAppear">
+      <div class="logo-container">
+        <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
       </div>
-  </transition>
-      <playlist :lastPlayedFile="lastPlayedFile" :changeSize="changeSize" :showItemNum="showItemNum"
-        :isFullScreen="isFullScreen" :windowWidth="windowWidth" :filePathNeedToDelete="filePathNeedToDelete"
-        :style="{
-          marginLeft: this.windowFlag ? `${this.playlistMl}px` : '0px',
-          left: this.isFullScreen ? '0px' : `${this.move}px`,
-        }"/>
+      <div class="welcome">
+        <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
+      </div>
+    </div>
+    </transition>
+    <playlist
+      :lastPlayedFile="lastPlayedFile"
+      :isFullScreen="isFullScreen"
+      :winWidth="winWidth"
+      :filePathNeedToDelete="filePathNeedToDelete"/>
   </main>
 </div>
 </template>
 
 <script>
 import fs from 'fs';
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
@@ -70,7 +68,6 @@ export default {
     return {
       lastPlayedFile: [],
       sagiHealthStatus: 'UNSET',
-      imageTurn: '',
       showShortcutImage: false,
       mouseDown: false,
       invalidTimeRepresentation: '--',
@@ -79,23 +76,10 @@ export default {
       cover: '',
       item: [],
       isDragging: false,
-      logoPos: 37 - (9200 / 405),
-      showItemNum: 5,
-      changeSize: (112 / 720) * 100,
-      lastSize: 847,
-      playlistMl: 0,
-      windowFlag: false,
-      moveItem: 0,
-      move: 0,
-      windowWidth: 720,
-      averageWidth: 112,
       filePathNeedToDelete: '',
     };
   },
   watch: {
-    showItemNum(val) {
-      this.lastSize = (val * 127) + 212;
-    },
   },
   components: {
     Titlebar,
@@ -107,6 +91,7 @@ export default {
       version: state => state.App.version,
       isFullScreen: state => state.Window.isFullScreen,
     }),
+    ...mapGetters(['winWidth']),
   },
   created() {
     /*
@@ -175,6 +160,8 @@ export default {
         for (let i = 0; i < this.lastPlayedFile.length; i += 1) {
           if (this.lastPlayedFile[i].path === this.filePathNeedToDelete) {
             this.lastPlayedFile.splice(i, 1);
+            this.langdingLogoAppear = true;
+            this.showShortcutImage = false;
             this.filePathNeedToDelete = '';
             break;
           }
@@ -182,104 +169,9 @@ export default {
       }
     });
   },
-  beforeDestroy() {
-    window.onresize = null;
-  },
   mounted() {
     this.$store.dispatch('refreshVersion');
 
-    this.$bus.$on('moveItem', (moveItem) => {
-      this.moveItem = moveItem;
-      if (this.moveItem === 0) {
-        this.windowFlag = false;
-      }
-    });
-    this.$bus.$on('move', (move) => {
-      this.move = move;
-    });
-    function debounce(fn, interval, immediate) {
-      let timeout;
-      return () => {
-        const context = this;
-        const args = { 0: fn, 1: interval, 2: immediate };
-        const later = () => {
-          timeout = null;
-          if (!immediate) fn.apply(context, args);
-        };
-        const callNow = immediate && !timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(later, interval);
-        if (callNow) fn.apply(context, args);
-      };
-    }
-    const vm = this;
-    function expands() {
-      if (((vm.windowWidth - vm.lastSize) + 127) / 127 <= 10 - vm.showItemNum) {
-        if (vm.moveItem <= vm.showItemNum - (1 + vm.lastPlayedFile.length) &&
-          vm.showItemNum <= vm.lastPlayedFile.length) {
-          vm.move += (vm.averageWidth + 15) *
-            Math.floor(((vm.windowWidth - vm.lastSize) + 127) / 127);
-          vm.moveItem += Math.floor(((vm.windowWidth - vm.lastSize) + 127) / 127);
-        }
-        vm.showItemNum += Math.floor(((vm.windowWidth - vm.lastSize) + 127) / 127);
-        vm.averageWidth = (vm.windowWidth - 100 - ((vm.showItemNum - 1) * 15)) /
-          vm.showItemNum;
-        if (vm.showItemNum >= vm.lastPlayedFile.length + 1) {
-          vm.move = 0;
-          vm.moveItem = 0;
-        } else if (vm.showItemNum >= vm.moveItem + vm.lastPlayedFile
-          .length + 2) {
-          vm.move += (vm.averageWidth + 15) *
-            (vm.showItemNum - vm.moveItem - vm.lastPlayedFile.length - 1);
-          vm.moveItem += vm.showItemNum - vm.moveItem - vm.lastPlayedFile.length - 1;
-        }
-      } else {
-        vm.showItemNum = 10;
-        vm.averageWidth = (vm.windowWidth - 100 - ((vm.showItemNum - 1) * 15)) /
-          vm.showItemNum;
-        vm.move = 0;
-        vm.moveItem = 0;
-      }
-    }
-    function contracts() {
-      if ((vm.lastSize - vm.windowWidth) / 127 <= vm.showItemNum - 5) {
-        vm.showItemNum -= Math.floor((vm.lastSize - vm.windowWidth) / 127);
-        vm.averageWidth = (vm.windowWidth - 100 - ((vm.showItemNum - 1) * 15)) /
-          vm.showItemNum;
-      } else {
-        vm.showItemNum = 5;
-        vm.averageWidth = (vm.windowWidth - 100 - ((vm.showItemNum - 1) * 15)) /
-          vm.showItemNum;
-      }
-    }
-    const resize = debounce(() => {
-      this.windowWidth = document.body.clientWidth;
-      if (this.isFullScreen) {
-        this.windowFlag = false;
-      } else if (this.moveItem === 0) {
-        this.move = 0;
-      } else {
-        this.windowFlag = true;
-      }
-      this.logoPos = 37 - (9200 / document.body.clientHeight);
-      this.averageWidth = (this.windowWidth - 100 - ((this.showItemNum - 1) * 15)) /
-        this.showItemNum;
-      if (this.windowWidth >= this.lastSize && this.showItemNum <= 9) {
-        expands();
-      } else if (this.windowWidth <= this.lastSize - 127 && this.showItemNum >= 6) {
-        contracts();
-      } else if (this.windowWidth > 1355) {
-        this.showItemNum = 10;
-        this.move = 0;
-        this.moveItem = 0;
-      }
-      this.playlistMl = this.moveItem === 0 ? 0 : ((this.moveItem * 127) - this.move) -
-        ((this.averageWidth - 112) * -this.moveItem);
-      this.changeSize = this.windowWidth > 1355 ? ((this.windowWidth - ((100 / 1355) *
-        this.windowWidth) - 135) * 10) /
-        this.windowWidth : (this.averageWidth / this.windowWidth) * 100;
-    }, 0);
-    window.onresize = resize;
     const { app } = this.$electron.remote;
     this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setResizable', [true]);
     this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [720 / 405]);
@@ -292,7 +184,6 @@ export default {
       }
     });
     this.$bus.$on('displayInfo', (displayInfo) => {
-      this.imageTurn = displayInfo.imageTurn;
       this.backgroundUrl = displayInfo.backgroundUrl;
       this.cover = displayInfo.cover;
       this.langdingLogoAppear = displayInfo.langdingLogoAppear;
@@ -476,8 +367,8 @@ main {
 }
 
 .background-transition-enter-active, .background-transition-leave-active {
-  transition: opacity .3s ease-in;
-  transition-delay: .2s;
+  transition: opacity 300ms ease-in;
+  // transition-delay: 100ms;
 }
 .background-transition-enter, .background-transition-leave-to {
   opacity: 0;

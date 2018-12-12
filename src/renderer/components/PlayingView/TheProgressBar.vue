@@ -38,10 +38,6 @@ export default {
     'the-preview-thumbnail': ThePreviewThumbnail,
   },
   props: {
-    hovering: {
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
@@ -50,6 +46,7 @@ export default {
       mousedown: false,
       mouseleave: true,
       thumbnailWidth: 272,
+      hovering: false,
       hoveringId: 0,
     };
   },
@@ -122,7 +119,7 @@ export default {
   methods: {
     handleMousemove(event) {
       this.hoveredPageX = event.pageX;
-      this.$emit('update:hovering', true);
+      this.hovering = true;
       if (this.hoveringId) clearTimeout(this.hoveringId);
       if (event.target !== this.$refs.leftInvisible) this.showThumbnail = true;
       this.mouseleave = false;
@@ -195,10 +192,10 @@ export default {
           clearTimeout(this.hoveringId);
         }
         this.hoveringId = setTimeout(() => {
-          this.$emit('update:hovering', false);
+          this.hovering = false;
         }, 3000);
       } else {
-        this.$emit('update:hovering', false);
+        this.hovering = false;
       }
     },
   },

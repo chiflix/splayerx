@@ -102,6 +102,7 @@ export default {
       this.$store.dispatch('RemovePlayingList', this.filePathNeedToDelete);
       this.filePathNeedToDelete = '';
     });
+    this.hoverIndex = this.playingIndex;
   },
   methods: {
     afterLeave() {
@@ -113,6 +114,7 @@ export default {
     handleMouseup() {
       if (!this.isDragging) {
         this.$emit('update:playlistcontrol-showattached', false);
+        this.$emit('conflict-resolve', this.$options.name);
         this.$emit('update:isDragging', false);
       }
     },

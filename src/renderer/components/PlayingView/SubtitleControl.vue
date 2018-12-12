@@ -19,7 +19,8 @@
                 :style="{
                   cursor: 'pointer',
                   transform: `rotate(${rotateTime * 360}deg)`,
-                  transition: 'transform 1s linear'
+                  transition: 'transform 1s linear',
+                  transformOrigin: 'center',
                 }"/>
             </div>
 
@@ -194,6 +195,9 @@ export default {
     this.$bus.$on('finish-refresh', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
+      setTimeout(() => {
+        this.timer = null;
+      }, 1000);
     });
     this.$bus.$on('menu-sub-refresh', () => {
       this.handleRefresh();
@@ -216,20 +220,26 @@ export default {
       return path.basename(subPath);
     },
     handleRefresh() {
-      this.timer = setInterval(() => {
-        this.count += 1;
-        this.rotateTime = Math.ceil(this.count / 100);
-      }, 10);
-      setTimeout(() => {
+      if (this.privacyAgreement) {
         if (this.timer) {
-          clearInterval(this.timer);
-          this.count = this.rotateTime * 100;
+          return;
         }
-      }, 20000);
-      this.currentSubIden = 0;
-      document.querySelector('.scrollScope').scrollTop = 0;
-      this.$bus.$emit('refresh-subtitle', this.mediaHash);
-      this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
+        this.timer = setInterval(() => {
+          this.count += 1;
+          this.rotateTime = Math.ceil(this.count / 100);
+        }, 10);
+        setTimeout(() => {
+          if (this.timer) {
+            clearInterval(this.timer);
+            this.count = this.rotateTime * 100;
+          }
+        }, 20000);
+        this.currentSubIden = 0;
+        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$bus.$emit('refresh-subtitle', this.mediaHash);
+      } else {
+        this.$bus.$emit('privacy-confirm');
+      }
     },
     orify(...args) {
       return args.some(arg => arg == true); // eslint-disable-line
@@ -295,6 +305,7 @@ export default {
       switch (this.clicks) {
         case 1:
           this.$emit('update:showAttached', true);
+          this.$emit('conflict-resolve', this.$options.name);
           break;
         case 2:
           this.$emit('update:showAttached', false);
@@ -336,7 +347,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'mediaHash']),
+    ...mapGetters(['winWidth', 'mediaHash', 'privacyAgreement']),
     textHeight() {
       if (this.winWidth > 512 && this.winWidth <= 854) {
         return 13;
@@ -430,6 +441,16 @@ export default {
     },
   },
   created() {
+    this.$bus.$on('isdragging-mouseup', () => {
+      if (this.showAttached) {
+        this.anim.playSegments([79, 85]);
+      }
+    });
+    this.$bus.$on('isdragging-mousedown', () => {
+      if (this.showAttached) {
+        this.anim.playSegments([62, 64], false);
+      }
+    });
     this.$bus.$on('finish-loading', (type) => {
       const subType = ['ass', 'vtt', 'srt'];
       if (subType.includes(type)) {
@@ -444,6 +465,9 @@ export default {
     });
     this.$bus.$on('new-video-opened', () => {
       this.currentSubIden = 0;
+    });
+    this.$bus.$on('find-no-subtitle', () => {
+      this.currentSubIden = -1;
     });
   },
 };
@@ -529,6 +553,7 @@ export default {
     border-radius: 7px;
     opacity: 0.4;
     border: 0.5px solid rgba(255, 255, 255, 0.20);
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
     background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
   }
   @media screen and (min-width: 320px) and (max-width: 512px) {
@@ -550,7 +575,8 @@ export default {
         line-height: 15px;
       }
       .refresh {
-        font-size: 13px;
+        width: 13px;
+        height: 13px;
         margin: 14px 15px auto auto;
       }
     }
@@ -603,13 +629,14 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        font-size: 15px;
+        font-size: 15.6px;
         margin: 18px auto auto 19px;
         letter-spacing: 0.23px;
         line-height: 17px;
       }
       .refresh {
-        font-size: 13px;
+        width: 17px;
+        height: 17px;
         margin: 17px 19px auto auto;
       }
     }
@@ -662,13 +689,14 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        font-size: 21px;
+        font-size: 21.84px;
         margin: 24px auto auto 26px;
         letter-spacing: 0.32px;
         line-height: 23px;
       }
       .refresh {
-        font-size: 13px;
+        width: 21px;
+        height: 21px;
         margin: 23px 26px auto auto;
       }
     }

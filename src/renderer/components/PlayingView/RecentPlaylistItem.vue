@@ -90,6 +90,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import path from 'path';
+import { filePathToUrl } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
 export default {
   components: {
@@ -166,7 +167,7 @@ export default {
   mounted() {
     this.$electron.ipcRenderer.send('snapShot', this.path);
     this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-      this.coverSrc = `file://${imgPath}.png`;
+      this.coverSrc = filePathToUrl(`${imgPath}.png`);
     });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
@@ -250,6 +251,7 @@ $border-radius: 3px;
       background-color: rgba(255,255,255,0.2);
     }
     .black-gradient {
+      position: absolute;
       border-radius: $border-radius;
       width: 100%;
       height: 100%;
@@ -265,8 +267,6 @@ $border-radius: 3px;
       bottom: 0;
       left: 0;
       right: 0;
-      width: 100%;
-      transform: translate(0px, 0px);
     }
     .content {
       position: absolute;

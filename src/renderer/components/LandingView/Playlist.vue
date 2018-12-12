@@ -1,11 +1,12 @@
 <template>
   <div class="controller"
     :style="{
-      bottom : this.windowWidth > 1355 ? `${40 / 1355 * this.windowWidth}px` : '40px',
+      left: this.isFullScreen ? '0px' : `${this.move}px`,
+      bottom : this.winWidth > 1355 ? `${40 / 1355 * this.winWidth}px` : '40px',
       transition: tranFlag ? 'left 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
     }">
     <div class="playlist no-drag"
-      :style="{marginLeft: this.windowWidth > 1355 ? `${50 / 1355 * this.windowWidth}px` : '50px'}">
+      :style="{marginLeft: this.winWidth > 1355 ? `${50 / 1355 * this.winWidth}px` : '50px'}">
       <div class="button"
         :style="{
           height:`${thumbnailHeight}px`,
@@ -65,10 +66,8 @@ export default {
   components: { Icon },
   data() {
     return {
-      imageTurn: '',
       isTurnToOdd: false,
-      backgroundUrlOdd: '',
-      backgroundUrlEven: '',
+      backgroundUrl: '',
       showShortcutImage: false,
       langdingLogoAppear: true,
       displayInfo: [],
@@ -78,14 +77,13 @@ export default {
       disY: '',
       recentFileDel: false,
       showingPopupDialog: false,
-      move: 0,
-      moveItem: 0,
       mouseFlag: true,
       showShadow: true,
       itemWidth: 112,
       itemHeight: 65,
       tranFlag: true,
       validHover: true,
+      firstIndex: 0,
     };
   },
   props: {
@@ -94,19 +92,11 @@ export default {
       require: true,
       default: () => [],
     },
-    changeSize: {
-      type: Number,
-      require: true,
-    },
-    showItemNum: {
-      type: Number,
-      require: true,
-    },
     isFullScreen: {
       type: Boolean,
       require: true,
     },
-    windowWidth: {
+    winWidth: {
       type: Number,
       require: true,
     },
@@ -120,73 +110,73 @@ export default {
     window.onkeyup = null;
   },
   mounted() {
-    const lf = document.querySelector('.controller');
     window.onkeyup = (e) => {
       this.tranFlag = true;
-      if (this.showItemNum - this.moveItem <= this.lastPlayedFile.length &&
-        !this.isFullScreen && e.keyCode === 39) {
+      if (e.keyCode === 39) {
         this.validHover = false;
         this.tranFlag = true;
-        const ss = -((this.lastPlayedFile.length + 1) - (this.showItemNum - this.moveItem)) *
-          (this.thumbnailWidth + 15);
-        this.move += ss;
-        this.moveItem = this.showItemNum - this.lastPlayedFile.length - 1;
-        lf.style.left = `${this.move}px`;
-      } else if (this.moveItem !== 0 && !this.isFullScreen && e.keyCode === 37) {
+        this.lastIndex = this.lastPlayedFile.length;
+      } else if (e.keyCode === 37) {
         this.validHover = false;
         this.tranFlag = true;
-        this.moveItem = 0;
-        this.move = 0;
-        lf.style.left = '';
+        this.firstIndex = 0;
       }
-      this.$bus.$emit('moveItem', this.moveItem);
-      this.$bus.$emit('move', this.move);
     };
   },
   computed: {
+    lastIndex: {
+      get() {
+        return (this.firstIndex + this.showItemNum) - 1;
+      },
+      set(val) {
+        if (val < this.showItemNum - 1) {
+          this.firstIndex = 0;
+        } else {
+          this.firstIndex = (val - this.showItemNum) + 1;
+        }
+      },
+    },
+    move() {
+      return -(this.firstIndex * (this.thumbnailWidth + this.marginRight));
+    },
+    marginRight() {
+      return this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+    },
     thumbnailWidth() {
       let width = 0;
       const A = 50; // playlist left margin
       const B = 15; // space between each playlist item
       const C = 50; // the space between last playlist item and right edge of the screen
-      if (this.windowWidth > 512 && this.windowWidth <= 1355) {
-        width = ((((this.windowWidth - A) - C) + B) / this.showItemNum) - B;
-      } else if (this.windowWidth > 1355) {
-        width = this.windowWidth * (112 / 1355);
+      if (this.winWidth > 512 && this.winWidth <= 1355) {
+        width = ((((this.winWidth - A) - C) + B) / this.showItemNum) - B;
+      } else if (this.winWidth > 1355) {
+        width = this.winWidth * (112 / 1355);
       }
       return Math.round(width);
     },
     thumbnailHeight() {
       return Math.round((this.thumbnailWidth * 63) / 112);
     },
-    marginRight() {
-      return this.windowWidth > 1355 ? (this.windowWidth / 1355) * 15 : 15;
+    showItemNum() {
+      let number;
+      if (this.winWidth < 720) {
+        number = 5;
+      } else if (this.winWidth >= 720 && this.winWidth <= 1355) {
+        number = Math.floor(((this.winWidth - 720) / (112 + 15)) + 5);
+      } else if (this.winWidth > 1355) {
+        number = 10;
+      }
+      return number;
     },
   },
   watch: {
-    windowWidth() {
+    winWidth() {
       this.tranFlag = false;
-    },
-    showItemNum(val, oldval) {
-      if (val > oldval) {
-        if (this.moveItem <= oldval - (1 + this.lastPlayedFile.length) &&
-          oldval <= this.lastPlayedFile.length) {
-          const averageWidth = ((this.windowWidth - 100) - ((oldval - 1) * 15)) /
-            oldval;
-          this.move += (averageWidth + this.marginRight) * (val - oldval);
-          this.moveItem += val - oldval;
-        } else if (val >= this.moveItem + this.lastPlayedFile
-          .length + 2) {
-          const averageWidth = ((this.windowWidth - 100) - ((val - 1) * 15)) /
-            val;
-          this.move += (averageWidth + this.marginRight) *
-            (val - this.moveItem - this.lastPlayedFile.length - 1);
-          this.moveItem += val - this.moveItem - this.lastPlayedFile.length - 1;
-        }
-        if (val >= 10 || val >= this.lastPlayedFile.length + 1) {
-          this.move = 0;
-          this.moveItem = 0;
-        }
+      if (this.isFullScreen) {
+        this.windowFlag = false;
+      } else if (this.firstIndex !== 0) {
+        this.lastIndex = this.lastPlayedFile.length;
+        this.windowFlag = true;
       }
     },
     validHover(val) {
@@ -242,25 +232,13 @@ export default {
       });
     },
     openOrMove() {
-      const divLeft = document.querySelector('.controller');
-      if (this.moveItem === -1) {
+      if (this.firstIndex === 1) {
         this.tranFlag = true;
-        divLeft.style.left = '0px';
-        this.move = 0;
-        this.moveItem = 0;
-        this.$bus.$emit('moveItem', this.moveItem);
-        this.$bus.$emit('move', this.move);
-      } else if (this.windowWidth > 1355) {
+        this.firstIndex = 0;
+      } else if (this.winWidth > 1355) {
         this.open();
       } else {
         this.open();
-      }
-    },
-    backgroundUrl() {
-      switch (this.imageTurn) {
-        case 'odd': return this.backgroundUrlOdd;
-        case 'even': return this.backgroundUrlEven;
-        default: return '';
       }
     },
     itemShortcut(shortCut, cover, lastPlayedTime, duration) {
@@ -275,21 +253,14 @@ export default {
       };
     },
     onRecentItemMouseover(item, index) {
-      if (((index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) ||
-        this.isFullScreen) && this.mouseFlag && this.validHover) {
+      if (((index + 1 >= this.firstIndex && index + 1 <= this.lastIndex)
+        || this.isFullScreen) && this.mouseFlag && this.validHover) {
         this.tranFlag = true;
         this.item = item;
         this.$set(this.lastPlayedFile[index], 'chosen', true);
         if (item.shortCut !== '') {
           this.isChanging = true;
-          this.isTurnToOdd = !this.isTurnToOdd;
-          if (this.isTurnToOdd) {
-            this.imageTurn = 'odd';
-            this.backgroundUrlOdd = item.shortCut;
-          } else {
-            this.imageTurn = 'even';
-            this.backgroundUrlEven = item.shortCut;
-          }
+          this.backgroundUrl = item.shortCut;
           this.langdingLogoAppear = false;
           this.showShortcutImage = true;
         } else {
@@ -298,8 +269,7 @@ export default {
         }
         this.displayInfo.langdingLogoAppear = this.langdingLogoAppear;
         this.displayInfo.showShortcutImage = this.showShortcutImage;
-        this.displayInfo.imageTurn = this.imageTurn;
-        this.displayInfo.backgroundUrl = this.backgroundUrl();
+        this.displayInfo.backgroundUrl = this.backgroundUrl;
         this.displayInfo.baseName = this.itemInfo().baseName;
         this.displayInfo.lastTime = this.itemInfo().lastTime;
         this.displayInfo.duration = this.itemInfo().duration;
@@ -325,10 +295,8 @@ export default {
           const t = ev.clientY - vm.disY;
           item.style.left = `${l}px`;
           item.style.top = `${t}px`;
-          const limitWidth = (vm.changeSize / 100) *
-            vm.windowWidth;
-          const limitHeight = (vm.changeSize / 100) *
-            document.body.clientHeight;
+          const limitWidth = vm.thumbnailWidth;
+          const limitHeight = vm.thumbnailHeight;
           const itemMask = document.querySelector(`#item${index} .mask`);
           const itemDelete = document.querySelector(`#item${index} .deleteUi`);
           if (l <= -limitWidth || l >= limitWidth || t >= limitHeight || t <= -limitHeight) {
@@ -364,9 +332,12 @@ export default {
           item.style.left = '';
           item.style.top = '';
         }
+        if (vm.firstIndex !== 0) {
+          vm.lastIndex = vm.lastPlayedFile.length;
+        }
       }
       this.isDragging = false;
-      if (index !== this.showItemNum - this.moveItem - 1 && index + this.moveItem !== -2) {
+      if (index + 1 >= this.firstIndex && index + 1 <= this.lastIndex) {
         this.mouseFlag = false;
         this.mouseDown = true;
         document.onmousemove = mousemove;
@@ -377,27 +348,18 @@ export default {
       }
     },
     onRecentItemClick(item, index) {
-      const lf = document.querySelector('.controller');
       if (!this.isDragging) {
         this.validHover = false;
         this.tranFlag = true;
-        if (index === this.showItemNum - this.moveItem - 1 && !this.isFullScreen) {
-          const ss = -((this.lastPlayedFile.length + 1) - (this.showItemNum - this.moveItem)) *
-            (this.thumbnailWidth + 15);
-          this.move += ss;
-          this.moveItem = this.showItemNum - this.lastPlayedFile.length - 1;
-          lf.style.left = `${this.move}px`;
-        } else if (index + this.moveItem === -2 && !this.isFullScreen) {
-          this.moveItem = 0;
-          this.move = 0;
-          lf.style.left = '';
+        if (index === this.lastIndex && !this.isFullScreen) {
+          this.lastIndex = this.lastPlayedFile.length;
+        } else if (index + 1 < this.firstIndex && !this.isFullScreen) {
+          this.firstIndex = 0;
         } else if (!this.filePathNeedToDelete) {
           this.openFile(item.path);
           const similarVideos = this.findSimilarVideoByVidPath(item.path);
           this.$store.dispatch('FolderList', similarVideos);
         }
-        this.$bus.$emit('moveItem', this.moveItem);
-        this.$bus.$emit('move', this.move);
       }
     },
   },
