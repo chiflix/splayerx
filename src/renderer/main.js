@@ -118,6 +118,9 @@ new Vue({
       }
     });
     this.$store.dispatch('getLocalPreference');
+    this.$bus.$on('delete-file', () => {
+      this.refreshMenu();
+    });
   },
   watch: {
     chosenStyle(val) {
