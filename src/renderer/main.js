@@ -118,6 +118,9 @@ new Vue({
       }
     });
     this.$store.dispatch('getLocalPreference');
+    this.$bus.$on('delete-file', () => {
+      this.refreshMenu();
+    });
   },
   watch: {
     chosenStyle(val) {
@@ -244,6 +247,7 @@ new Vue({
               label: this.$t('msg.file.clearHistory'),
               click: () => {
                 this.$bus.$emit('clean-lastPlayedFile');
+                this.refreshMenu();
               },
             },
             { type: 'separator' },
@@ -692,6 +696,8 @@ new Vue({
         label: value.label,
         click: () => {
           this.openFile(value.path);
+          const similarVideos = this.findSimilarVideoByVidPath(value.path);
+          this.$store.dispatch('FolderList', similarVideos);
         },
       };
     },

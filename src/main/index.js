@@ -150,7 +150,7 @@ function registerMainWindowEvent() {
         snapShotQueue.push(videoPath);
       }
     } else {
-      console.log('pass', videoPath);
+      console.log('pass', imgPath);
       event.sender.send(`snapShot-${videoPath}-reply`, imgPath);
     }
   });
