@@ -87,7 +87,7 @@ export default {
     currentTime(val) {
       if (val < this.finalPartTime) {
         this.$emit('close-next-video');
-      } else if (val >= this.duration && this.nextVideo) {
+      } else if (val >= this.duration) {
         this.$emit('close-next-video');
       } else {
         const fractionProgress = (val - this.finalPartTime)
