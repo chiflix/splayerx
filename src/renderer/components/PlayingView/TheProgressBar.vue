@@ -141,7 +141,9 @@ export default {
         this.$bus.$emit('currentWidget', 'the-video-controller');
         this.setHoveringToFalse(false);
       }
-      this.$bus.$emit('seek', this.hoveredCurrentTime);
+      if (this.hoveredCurrentTime !== this.duration) {
+        this.$bus.$emit('seek', this.hoveredCurrentTime);
+      }
       if (this.hoveredCurrentTime === 0) {
         this.$bus.$emit('play');
       }
