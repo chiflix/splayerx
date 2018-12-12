@@ -20,8 +20,9 @@
 
 <script>
 import lottie from '@/components/lottie.vue';
-import * as animationData from '@/assets/advance.json';
+import animationData from '@/assets/advance.json';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
+
 export default {
   name: 'advance-control',
   components: {

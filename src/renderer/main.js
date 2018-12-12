@@ -631,7 +631,7 @@ new Vue({
         }
         if (process.platform === 'win32') {
           const file = template.shift();
-          file.submenu = Array.reverse(file.submenu);
+          file.submenu = file.submenu.reverse();
           file.submenu.forEach((menuItem) => {
             template.unshift(menuItem);
           });

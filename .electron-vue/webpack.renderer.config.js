@@ -5,8 +5,8 @@ process.env.BABEL_ENV = 'renderer'
 const path = require('path')
 const { dependencies, optionalDependencies } = require('../package.json')
 const webpack = require('webpack')
+const { VueLoaderPlugin } = require('vue-loader')
 
-const BabiliWebpackPlugin = require('babili-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -21,6 +21,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 let whiteListedModules = ['vue']
 
 let rendererConfig = {
+  mode: 'development',
   devtool: '#cheap-module-eval-source-map',
   entry: {
     renderer: path.join(__dirname, '../src/renderer/main.js')
@@ -75,19 +76,27 @@ let rendererConfig = {
           options: {
             extractCSS: process.env.NODE_ENV === 'production',
             loaders: {
-              sass: 'vue-style-loader!css-loader!sass-loader?indentedSyntax=1',
-              scss: 'vue-style-loader!css-loader!sass-loader',
               i18n: 'vue-i18n-loader'
             }
           }
         }
       },
       {
+        test: /\.sass$/,
+        use: ['vue-style-loader', 'css-loader', { loader: 'sass-loader', options: { indentedSyntax: 1 }}]
+      },
+      {
+        test: /\.scss$/,
+        use: ['vue-style-loader', 'css-loader', 'sass-loader']
+      },
+      {
         test: /\.svg$/,
-        loader: 'svg-sprite-loader',
         include: [path.resolve(__dirname, '../src/renderer/assets/icon')],
-        options: {
-          symbolId: '[name]'
+        use: {
+          loader: 'svg-sprite-loader',
+          options: {
+            symbolId: '[name]'
+          }
         }
       },
       {
@@ -103,10 +112,12 @@ let rendererConfig = {
       },
       {
         test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-        loader: 'url-loader',
-        options: {
-          limit: 10000,
-          name: 'media/[name]--[folder].[ext]'
+        use: {
+          loader: 'url-loader',
+          options: {
+            limit: 10000,
+            name: 'media/[name]--[folder].[ext]'
+          }
         }
       },
       {
@@ -126,6 +137,7 @@ let rendererConfig = {
     __filename: process.env.NODE_ENV !== 'production'
   },
   plugins: [
+    new VueLoaderPlugin(),
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin({
       filename: 'index.html',
@@ -139,8 +151,7 @@ let rendererConfig = {
         ? path.resolve(__dirname, '../node_modules')
         : false
     }),
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.HotModuleReplacementPlugin()
   ],
   output: {
     filename: '[name].js',
@@ -174,10 +185,10 @@ if (process.env.NODE_ENV !== 'production') {
  * Adjust rendererConfig for production settings
  */
 if (process.env.NODE_ENV === 'production') {
+  rendererConfig.mode = 'production';
   rendererConfig.devtool = '#source-map'
 
   rendererConfig.plugins.push(
-    new BabiliWebpackPlugin(),
     new CopyWebpackPlugin([
       {
         from: path.join(__dirname, '../static'),
