@@ -74,7 +74,7 @@ export default {
         muted: this.muted,
         rate: 1,
         duration: event.target.duration,
-        currentTime: this.lastPlayedTime || 0,
+        currentTime: 0,
       });
       this.updateMetaInfo({
         intrinsicWidth: event.target.videoWidth,
@@ -273,6 +273,11 @@ export default {
       if (!this.coverFinded && val - this.lastCoverDetectingTime > 1) {
         this.getVideoCover();
       }
+      if (val >= this.duration && this.nextVideo) {
+        this.openFile(this.nextVideo);
+      } else if (!this.nextVideo) {
+        this.pause();
+      }
     },
   },
   mounted() {
@@ -292,12 +297,6 @@ export default {
     });
     this.$bus.$on('seek', (e) => {
       this.seekTime = [e];
-      if (e === this.duration && this.nextVideo) {
-        this.openFile(this.nextVideo);
-        return;
-      } else if (e === this.duration) {
-        this.pause();
-      }
       // todo: use vuex get video element src
       const filePath = decodeURI(this.src);
       const indexOfLastDot = filePath.lastIndexOf('.');

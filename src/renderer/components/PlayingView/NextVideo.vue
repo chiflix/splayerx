@@ -88,7 +88,6 @@ export default {
       if (val < this.finalPartTime) {
         this.$emit('close-next-video');
       } else if (val >= this.duration && this.nextVideo) {
-        this.openFile(this.nextVideo);
         this.$emit('close-next-video');
       } else {
         const fractionProgress = (val - this.finalPartTime)
