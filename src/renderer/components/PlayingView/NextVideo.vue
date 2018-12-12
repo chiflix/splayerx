@@ -82,23 +82,21 @@ export default {
     onSeeked() {
       this.$emit('ready-to-show');
     },
-  },
-  watch: {
-    currentTime(val) {
-      if (val < this.finalPartTime) {
+    updatePlayingTime(time) {
+      if (time < this.nextVideoPreviewTime) {
         this.$emit('close-next-video');
-      } else if (val >= this.duration && this.nextVideo) {
+      } else if (time >= this.duration && this.nextVideo) {
         this.openFile(this.nextVideo);
         this.$emit('close-next-video');
       } else {
-        const fractionProgress = (val - this.finalPartTime)
-          / (this.duration - this.finalPartTime);
+        const fractionProgress = (time - this.nextVideoPreviewTime)
+          / (this.duration - this.nextVideoPreviewTime);
         this.progress = fractionProgress * 100;
       }
     },
   },
   computed: {
-    ...mapGetters(['nextVideo', 'finalPartTime', 'isFolderList', 'currentTime', 'duration']),
+    ...mapGetters(['nextVideo', 'isFolderList', 'nextVideoPreviewTime', 'duration']),
     videoName() {
       return path.basename(this.nextVideo, path.extname(this.nextVideo));
     },
@@ -209,7 +207,7 @@ export default {
   }
   .plane-background {
     position: absolute;
-    
+
     background-color: rgba(0,0,0,0.20);
     backdrop-filter: blur(9.6px);
 
@@ -355,7 +353,7 @@ export default {
             opacity: 0.7;
             font-family: PingFangSC-Light;
             color: #FFFFFF;
-            @media screen and (min-width: 513px) and (max-width: 854px) {  
+            @media screen and (min-width: 513px) and (max-width: 854px) {
               font-size: 8px;
               letter-spacing: 0.42px;
               line-height: 10px;
@@ -424,7 +422,7 @@ export default {
       @media screen and (min-width: 1921px) {
         top: 41px;
         right: 28px;
-      }    
+      }
     }
   }
 }

@@ -22,7 +22,7 @@
     <div class="progress"
       :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.progressBackgroundColor }">
       <div class="hovered" :style="{ width: this.hoveredPercent, backgroundColor: this.hoveredBackgroundColor }"></div>
-      <div class="played" ref="progressTimebar" :style="{ width: this.playedPercent, backgroundColor: this.playedBackgroundColor }"></div>
+      <div class="played" ref="progressTimebar" :style="{ width: 0, backgroundColor: this.playedBackgroundColor }"></div>
     </div>
     <div class="fake-button right" ref="rightInvisible"
       :style="{ height: fakeButtonHeight }">
@@ -32,6 +32,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import ThePreviewThumbnail from './ThePreviewThumbnail';
+import { videodata } from '../../store/video';
 export default {
   name: 'the-progress-bar',
   components: {
@@ -51,7 +52,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'duration', 'currentTime', 'ratio', 'nextVideo']),
+    ...mapGetters(['winWidth', 'duration', 'ratio', 'nextVideo']),
     hoveredPercent() {
       return `${this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100}%`;
     },
@@ -61,11 +62,8 @@ export default {
     convertedHoveredCurrentTime() {
       return this.timecodeFromSeconds(this.hoveredCurrentTime);
     },
-    playedPercent() {
-      return `${100 * (this.currentTime / this.duration)}%`;
-    },
     hoveredSmallerThanPlayed() {
-      return !this.mouseleave && this.hoveredCurrentTime < this.currentTime;
+      return !this.mouseleave && this.hoveredCurrentTime < videodata.time;
     },
     thumbnailHeight() {
       return Math.round(this.thumbnailWidth / this.ratio);
@@ -104,7 +102,7 @@ export default {
     },
     rightFakeProgressBackgroundColor() {
       const hoveredEnd = this.hoveredPercent === '100%';
-      const playedEnd = Math.round(this.currentTime) >= Math.round(this.duration);
+      const playedEnd = Math.round(videodata.time) >= Math.round(this.duration);
       const opacity = this.mouseleave ? // eslint-disable-line no-nested-ternary
         (playedEnd ? 0.9 : 0) :
         (((hoveredEnd && !playedEnd) || (!hoveredEnd && playedEnd)) ? 0.37 : 0.1);
