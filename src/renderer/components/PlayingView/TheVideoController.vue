@@ -14,7 +14,7 @@
     <notification-bubble/>
     <recent-playlist class="recent-playlist"
     :displayState="displayState['recent-playlist']"
-    :mousemove="eventInfo.get('mousemove')"
+    :mousemovePosition="mousemovePosition"
     :isDragging.sync="isDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
@@ -102,6 +102,7 @@ export default {
   computed: {
     ...mapState({
       currentWidget: state => state.Input.mousemoveTarget,
+      mousemovePosition: state => state.Input.mousemovePosition,
     }),
     ...mapGetters(['muted', 'paused', 'volume', 'progressKeydown']),
     showAllWidgets() {

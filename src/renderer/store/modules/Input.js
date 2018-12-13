@@ -8,7 +8,6 @@ const state = {
 };
 
 const getters = {
-  mousemovePosition: state => state.mousemovePosition,
   progressKeydown: state => state.downKeys.includes('ArrowLeft') || state.downKeys.includes('ArrowRight') || state.downKeys.includes('BracketLeft') || state.downKeys.includes('BracketRight'),
 };
 
