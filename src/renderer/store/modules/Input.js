@@ -8,6 +8,8 @@ const state = {
   mousedownTarget: 'the-video-controller',
   mouseupTarget: 'the-video-controller',
   downKeys: [],
+  wheelTarget: 'the-video-controller',
+  wheelTimestamp: 0,
 };
 
 const getters = {
@@ -32,6 +34,12 @@ const mutations = {
   },
   [mutationTypes.DOWN_KEYS_UPDATE](state, payload) {
     state.downKeys = payload;
+  },
+  [mutationTypes.WHEEL_TARGET_UPDATE](state, payload) {
+    state.wheelTarget = payload;
+  },
+  [mutationTypes.WHEEL_TIMESTAMP_UPDATE](state, payload) {
+    state.wheelTimestamp = payload;
   },
 };
 
@@ -66,6 +74,11 @@ const actions = {
     const tempKeys = [...state.downKeys];
     if (tempKeys.includes(upKey)) tempKeys.splice(tempKeys.indexOf(upKey), 1);
     commit(mutationTypes.DOWN_KEYS_UPDATE, tempKeys);
+  },
+  [actionTypes.WHEEL_UPDATE]({ commit }, wheelEvent) {
+    const { target, timestamp } = wheelEvent;
+    commit(mutationTypes.WHEEL_TARGET_UPDATE, target);
+    commit(mutationTypes.WHEEL_TIMESTAMP_UPDATE, timestamp);
   },
 };
 
