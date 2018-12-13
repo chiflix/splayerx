@@ -176,6 +176,12 @@ new Vue({
           });
         } else {
           this.menu.getMenuItemById('sub-1').checked = true;
+          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
+          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
         }
       }
     },
@@ -370,6 +376,7 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.subtitleSize'),
+              id: 'subSize',
               submenu: [
                 {
                   label: this.$t('msg.subtitle.size1'),
@@ -412,6 +419,7 @@ new Vue({
             },
             {
               label: this.$t('msg.subtitle.subtitleStyle'),
+              id: 'subStyle',
               submenu: [
                 {
                   label: this.$t('msg.subtitle.style1'),
@@ -656,6 +664,12 @@ new Vue({
           });
         } else {
           this.menu.getMenuItemById('sub-1').checked = true;
+          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
+          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
         }
         this.audioTrackList.forEach((item, index) => {
           if (item.enabled === true) {
