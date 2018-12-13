@@ -156,27 +156,8 @@ export default {
     },
   },
   created() {
-    this.eventInfo = new Map([
-      ['mousemove', {}],
-      ['mousedown', {}],
-      ['mouseup', {}],
-      ['mouseenter', {}],
-      ['wheel', {}],
-      ['keydown', {
-        ArrowUp: false,
-        ArrowDown: false,
-        ArrowLeft: false,
-        ArrowRight: false,
-        Space: false,
-        KeyM: false,
-        BracketLeft: false,
-        BracketRight: false,
-      }],
-    ]);
     // Use Object due to vue's lack support of reactive Map
     this.timerState = {};
-    // Use Map constructor to shallow-copy eventInfo
-    this.lastEventInfo = new Map(this.eventInfo);
     this.timerManager = new TimerManager();
     this.timerManager.addTimer('sleepingVolumeButton', this.mousestopDelay);
   },
@@ -228,8 +209,7 @@ export default {
         this.start = timestamp;
       }
 
-      // Use Map constructor to shallow-copy eventInfo
-      this.inputProcess(this.eventInfo, this.lastEventInfo);
+      this.inputProcess();
       this.clock().tick(timestamp - this.start);
       this.UITimerManager(timestamp - this.start);
       // this.UILayerManager();
@@ -332,10 +312,6 @@ export default {
       this.mouseStoppedId = this.clock().setTimeout(() => {
         this.mouseStopped = true;
       }, this.mousestopDelay);
-      this.eventInfo.set('mousemove', {
-        target: event.target,
-        position: [event.clientX, event.clientY],
-      });
       this.updateMousemovePosition([event.clientX, event.clientY]);
       this.updateMousemoveTarget(this.getComponentName(event.target));
     },
@@ -359,16 +335,6 @@ export default {
       }, this.mouseleftDelay);
     },
     handleMousedownRight() {
-      this.eventInfo.set('mousedown', Object.assign(
-        {},
-        this.eventInfo.get('mousedown'),
-        { rightMousedown: true },
-      ));
-      this.eventInfo.set('mouseup', Object.assign(
-        {},
-        this.eventInfo.get('mouseup'),
-        { rightMouseup: false },
-      ));
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
         menu.popup(this.$electron.remote.getCurrentWindow());
@@ -382,17 +348,6 @@ export default {
         }
         return;
       }
-      this.eventInfo.set('mousedown', Object.assign(
-        {},
-        this.eventInfo.get('mousedown'),
-        { leftMousedown: true },
-        { target: event.target },
-      ));
-      this.eventInfo.set('mouseup', Object.assign(
-        {},
-        this.eventInfo.get('mouseup'),
-        { leftMouseup: false },
-      ));
       if (!this.isValidClick()) { return; }
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
@@ -412,23 +367,13 @@ export default {
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
       }
-      this.eventInfo.set('mousedown', Object.assign(
-        {},
-        this.eventInfo.get('mousedown'),
-        { leftMousedown: false },
-      ));
-      this.eventInfo.set('mouseup', Object.assign(
-        {},
-        this.eventInfo.get('mousedown'),
-        { leftMouseup: true, target: event.target },
-      ));
       if (!this.isValidClick() || (this.isDragging && this.lastAttachedShowing)) {
         return;
       }
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
         if (
-          this.getComponentName(this.eventInfo.get('mousedown').target) === 'the-video-controller' &&
+          this.currentMousedownWidget === 'the-video-controller' &&
           this.currentMouseupWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
           this.togglePlayback();
         }
@@ -445,40 +390,15 @@ export default {
     },
     handleKeydown(event) {
       this.updateKeydown(event.code);
-      this.eventInfo.set('keydown', Object.assign(
-        {},
-        this.eventInfo.get('keydown'),
-        { [event.code]: true },
-      ));
     },
     handleKeyup(event) {
       this.updateKeyup(event.code);
-      this.eventInfo.set('keydown', Object.assign(
-        {},
-        this.eventInfo.get('keydown'),
-        { [event.code]: false },
-      ));
     },
     handleWheel(event) {
       this.updateWheel({
         target: this.getComponentName(event.target),
         timestamp: event.timeStamp,
       });
-      let isAdvanceColumeItem;
-      let isSubtitleScrollItem;
-      const nodeList = document.querySelector('.advance-column-items').childNodes;
-      const subList = document.querySelector('.subtitle-scroll-items').childNodes;
-      for (let i = 0; i < nodeList.length; i += 1) {
-        isAdvanceColumeItem = nodeList[i].contains(event.target);
-        if (isAdvanceColumeItem) break;
-      }
-      for (let i = 0; i < subList.length; i += 1) {
-        isSubtitleScrollItem = subList[i].contains(event.target);
-        if (isSubtitleScrollItem) break;
-      }
-      if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
-        this.eventInfo.set('wheel', { time: event.timeStamp });
-      }
     },
     // Helper functions
     getAllUIComponents(rootElement) {
