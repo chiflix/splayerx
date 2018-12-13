@@ -4,6 +4,9 @@ import { Input as actionTypes } from '../actionTypes';
 const state = {
   mousemovePosition: { x: 0, y: 0 },
   mousemoveTarget: 'the-video-controller',
+  mousedownButtons: [],
+  mousedownTarget: 'the-video-controller',
+  mouseupTarget: 'the-video-controller',
   downKeys: [],
 };
 
@@ -18,14 +21,41 @@ const mutations = {
   [mutationTypes.MOUSEMOVE_TARGET_UPDATE](state, payload) {
     state.mousemoveTarget = payload;
   },
+  [mutationTypes.MOUSEDOWN_BUTTONS_UPDATE](state, payload) {
+    state.mousedownButtons = payload;
+  },
+  [mutationTypes.MOUSEDOWN_TARGET_UPDATE](state, payload) {
+    state.mousedownTarget = payload;
+  },
+  [mutationTypes.MOUSEUP_TARGET_UPDATE](state, payload) {
+    state.mouseupTarget = payload;
+  },
   [mutationTypes.DOWN_KEYS_UPDATE](state, payload) {
     state.downKeys = payload;
   },
 };
 
+const getButtonNames = (buttons) => {
+  // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
+  const buttonsMap = ['left', 'right', 'middle', 'back', 'forward'];
+  return buttons.toString(2).split('').reverse()
+    .map((number, index) => (number === '1' ? buttonsMap[index] : ''))
+    .filter(button => button !== '');
+};
+
 const actions = {
   [actionTypes.MOUSEMOVE_POSITION]({ commit }, position) {
     commit(mutationTypes.MOUSEMOVE_POSITION_UPDATE, { x: position[0], y: position[1] });
+  },
+  [actionTypes.MOUSEDOWN_UPDATE]({ commit }, mousedownEvent) {
+    const { buttons, target } = mousedownEvent;
+    commit(mutationTypes.MOUSEDOWN_BUTTONS_UPDATE, getButtonNames(buttons));
+    commit(mutationTypes.MOUSEDOWN_TARGET_UPDATE, target);
+  },
+  [actionTypes.MOUSEUP_UPDATE]({ commit }, mouseupEvent) {
+    const { buttons, target } = mouseupEvent;
+    commit(mutationTypes.MOUSEDOWN_BUTTONS_UPDATE, getButtonNames(buttons));
+    commit(mutationTypes.MOUSEUP_TARGET_UPDATE, target);
   },
   [actionTypes.KEYDOWN_UPDATE]({ commit, state }, downKey) {
     const tempKeys = [...state.downKeys];
