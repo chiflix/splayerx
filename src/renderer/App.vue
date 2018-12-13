@@ -13,6 +13,7 @@
   import drag from '@/helpers/drag';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
+
   export default {
     name: 'splayer',
     // -> for test todo need delete lyctest

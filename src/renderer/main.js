@@ -7,7 +7,7 @@ import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
 
-import App from '@/App';
+import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
@@ -17,9 +17,11 @@ import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
+
 require('source-map-support').install();
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
+
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
@@ -227,8 +229,9 @@ new Vue({
                     if (files.length > 1) {
                       this.$store.dispatch('PlayingList', files);
                     } else {
-                      const similarVideos = this.findSimilarVideoByVidPath(files[0]);
-                      this.$store.dispatch('FolderList', similarVideos);
+                      this.findSimilarVideoByVidPath(files[0]).then((similarVideos) => {
+                        this.$store.dispatch('FolderList', similarVideos);
+                      });
                     }
                   }
                 });
@@ -635,7 +638,7 @@ new Vue({
         }
         if (process.platform === 'win32') {
           const file = template.shift();
-          file.submenu = Array.reverse(file.submenu);
+          file.submenu = file.submenu.reverse();
           file.submenu.forEach((menuItem) => {
             template.unshift(menuItem);
           });
@@ -696,8 +699,9 @@ new Vue({
         label: value.label,
         click: () => {
           this.openFile(value.path);
-          const similarVideos = this.findSimilarVideoByVidPath(value.path);
-          this.$store.dispatch('FolderList', similarVideos);
+          this.findSimilarVideoByVidPath(value.path).then((similarVideos) => {
+            this.$store.dispatch('FolderList', similarVideos);
+          });
         },
       };
     },
@@ -970,8 +974,9 @@ new Vue({
         if (videoFiles.length > 1) {
           this.$store.dispatch('PlayingList', videoFiles);
         } else {
-          const similarVideos = this.findSimilarVideoByVidPath(videoFiles[0]);
-          this.$store.dispatch('FolderList', similarVideos);
+          this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
+            this.$store.dispatch('FolderList', similarVideos);
+          });
         }
       }
       if (containsSubFiles) {

@@ -1,6 +1,6 @@
 /* TOOD: fix these tests after npm update and under travis
 import { createLocalVue, mount } from '@vue/test-utils';
-import VideoCanvas from '@/components/PlayingView/VideoCanvas';
+import VideoCanvas from '@/components/PlayingView/VideoCanvas.vue';
 import sinon from 'sinon';
 import Vuex from 'vuex';
 import Video from '@/store/modules/Video';

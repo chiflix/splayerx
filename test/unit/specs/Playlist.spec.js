@@ -1,11 +1,11 @@
-import Playlist from '@/components/LandingView/Playlist';
+import Playlist from '@/components/LandingView/Playlist.vue';
 import { mount } from '@vue/test-utils';
 
 describe('Playlist.vue', () => {
   it('correct data when mounted', () => {
     const wrapper = mount(Playlist);
     expect(wrapper.vm.showShortcutImage).equal(false);
-    expect(wrapper.vm.langdingLogoAppear).equal(true);
+    expect(wrapper.vm.landingLogoAppear).equal(true);
     expect(wrapper.vm.mouseDown).equal(false);
     expect(wrapper.vm.isDragging).equal(false);
     expect(wrapper.vm.disX).equal('');

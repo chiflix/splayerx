@@ -56,6 +56,14 @@
         @mouseupItem="itemMouseup"
         @mouseoutItem="itemMouseout"
         @mouseoverItem="itemMouseover"/>
+      <div class="next-page"
+        v-if="thumbnailNumber < numberOfPlaylistItem"
+        @mouseup.stop=""
+        :style="{
+          marginRight: sizeAdaption(15),
+          width: `${thumbnailWidth}px`,
+          height: `${thumbnailWidth / (112 / 63)}px`,
+        }"/>
     </div>
   </div>
   </transition>
@@ -65,6 +73,7 @@
 import path from 'path';
 import { mapGetters } from 'vuex';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
+
 export default {
   name: 'recent-playlist',
   components: {
@@ -242,6 +251,9 @@ export default {
       },
     },
     distance() {
+      if (this.winWidth > 1355) {
+        return this.firstIndex * (this.thumbnailWidth + ((this.winWidth / 1355) * 15));
+      }
       return this.firstIndex * (this.thumbnailWidth + 15);
     },
     maxIndex() {

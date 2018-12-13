@@ -54,6 +54,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
+
 export default {
   name: 'AdvanceRowItems',
   data() {

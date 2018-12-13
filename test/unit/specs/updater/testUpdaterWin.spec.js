@@ -1,12 +1,13 @@
 import Vue from 'vue';
 import messages from '@/locales';
-import UpdaterNotification from '@/components/UpdaterView/UpdaterNotification';
+import UpdaterNotification from '@/components/UpdaterView/UpdaterNotification.vue';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import VueI18n from 'vue-i18n';
-import ipcs from './ipcMock.js';
-import { RendererHelperForWin } from '../../../../src/main/update/RendererHelper.js';
-import MainHelper from './mainSimulator.js';
-import Storage from '../../../../src/main/update/Updatestorage.js';
+import ipcs from './ipcMock';
+import { RendererHelperForWin } from '../../../../src/main/update/RendererHelper';
+import MainHelper from './mainSimulator';
+import Storage from '../../../../src/main/update/Updatestorage';
+
 const storage = new Storage();
 Vue.use(VueI18n);
 const $i18n = new VueI18n({

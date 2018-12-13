@@ -10,6 +10,7 @@
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
 import { mapGetters } from 'vuex';
+
 export default {
   name: 'CueRender',
   data() {
