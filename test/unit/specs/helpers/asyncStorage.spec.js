@@ -1,4 +1,4 @@
-import asyncStorage from '@/helpers/asyncStorage.js';
+import asyncStorage from '@/helpers/asyncStorage';
 
 describe('helper asyncStorage', () => {
   const randomValue = Math.floor(Math.random() * 10000);

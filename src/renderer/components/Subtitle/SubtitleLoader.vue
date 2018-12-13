@@ -26,6 +26,7 @@ import isEqual from 'lodash/isEqual';
 import toArray from 'lodash/toArray';
 import Subtitle from './Subtitle';
 import CueRenderer from './CueRenderer.vue';
+
 export default {
   name: 'subtitle-loader',
   props: {

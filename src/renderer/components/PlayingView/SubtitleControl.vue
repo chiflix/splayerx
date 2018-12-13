@@ -100,8 +100,9 @@ import difference from 'lodash/difference';
 import path from 'path';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
-import * as animationData from '@/assets/subtitle.json';
+import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
+
 export default {
   name: 'subtitle-control',
   props: {

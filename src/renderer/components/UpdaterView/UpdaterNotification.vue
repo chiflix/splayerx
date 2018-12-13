@@ -17,7 +17,8 @@
 </template>
 
 <script>
-  import GetHelper from '../../../main/update/RendererHelper.js';
+  import GetHelper from '../../../main/update/RendererHelper';
+
   export default {
     name: 'UpdaterNotification',
     components: {

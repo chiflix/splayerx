@@ -7,9 +7,9 @@
 </template>
 
 <script>
-import SubtitleManager from '@/components/Subtitle/SubtitleManager';
+import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
-import TheVideoController from './PlayingView/TheVideoController';
+import TheVideoController from './PlayingView/TheVideoController.vue';
 
 export default {
   name: 'playing-view',

@@ -60,7 +60,8 @@
 
 <script>
 import path from 'path';
-import Icon from '../BaseIconContainer';
+import Icon from '../BaseIconContainer.vue';
+
 export default {
   name: 'playlist',
   components: { Icon },
@@ -69,7 +70,7 @@ export default {
       isTurnToOdd: false,
       backgroundUrl: '',
       showShortcutImage: false,
-      langdingLogoAppear: true,
+      landingLogoAppear: true,
       displayInfo: [],
       mouseDown: false,
       isDragging: false,
@@ -261,21 +262,27 @@ export default {
         if (item.shortCut !== '') {
           this.isChanging = true;
           this.backgroundUrl = item.shortCut;
-          this.langdingLogoAppear = false;
+          this.landingLogoAppear = false;
           this.showShortcutImage = true;
         } else {
-          this.langdingLogoAppear = true;
+          this.landingLogoAppear = true;
           this.showShortcutImage = false;
         }
-        this.displayInfo.langdingLogoAppear = this.langdingLogoAppear;
+        this.displayInfo.landingLogoAppear = this.landingLogoAppear;
         this.displayInfo.showShortcutImage = this.showShortcutImage;
-        this.displayInfo.backgroundUrl = this.backgroundUrl;
+        this.displayInfo.backgroundUrl = this.itemShortcut(
+          this.backgroundUrl,
+          item.cover,
+          this.itemInfo().lastTime,
+          this.itemInfo().duration,
+        );
         this.displayInfo.baseName = this.itemInfo().baseName;
         this.displayInfo.lastTime = this.itemInfo().lastTime;
         this.displayInfo.duration = this.itemInfo().duration;
         this.displayInfo.percentage = this.itemInfo().percentage;
+        this.displayInfo.path = item.path;
         this.displayInfo.cover = item.cover;
-        this.$bus.$emit('displayInfo', this.displayInfo);
+        this.$emit('displayInfo', this.displayInfo);
       }
     },
     onRecentItemMouseout(index) {
@@ -321,9 +328,9 @@ export default {
         vm.mouseDown = false;
         vm.showShadow = true;
         if (vm.recentFileDel) {
-          vm.displayInfo.langdingLogoAppear = true;
+          vm.displayInfo.landingLogoAppear = true;
           vm.displayInfo.showShortcutImage = false;
-          vm.$bus.$emit('displayInfo', vm.displayInfo);
+          vm.$emit('displayInfo', vm.displayInfo);
           const deletData = vm.lastPlayedFile.splice(index, 1);
           vm.infoDB().delete('recent-played', deletData[0].quickHash);
           vm.recentFileDel = false;

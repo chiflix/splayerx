@@ -198,6 +198,7 @@ import Icon from '../../BaseIconContainer.vue';
 import AdvanceColorItems from './AdvanceColorItems.vue';
 import AdvanceSelectedItemts from './AdvanceSelectItems.vue';
 import AdvanceColumnItems from './AdvanceColumnItems.vue';
+
 export default {
   name: 'AdvanceMainMenu',
   data() {

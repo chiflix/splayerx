@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+
 const state = {
   PlayingList: [],
   isFolderList: undefined,

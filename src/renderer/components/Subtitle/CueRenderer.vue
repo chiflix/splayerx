@@ -9,6 +9,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+
 export default {
   name: 'CueRender',
   data() {
