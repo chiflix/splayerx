@@ -53,6 +53,7 @@
     "files": [
       "dist/electron/**/*"
     ],
+      "icon": "build/icons/file.icns",
     "fileAssociations": {
       "name": "Video",
       "ext": [
@@ -145,10 +146,16 @@
       "icon": "icons/icon.icns",
       "target": [
         "dmg"
-      ]
+      ],
+      "fileAssociations": {
+        "icon": "build/icons/file.icns"
+      }
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/icon.ico",
+      "fileAssociations": {
+        "icon": "build/icons/file.ico"
+      }
     },
     "linux": {
       "icon": "build/icons",
