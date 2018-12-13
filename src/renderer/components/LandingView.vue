@@ -14,7 +14,7 @@
     <div class="background-image"
     :key="item.path"
     :style="{
-      backgroundImage: backgroundImage(backgroundUrl, cover),
+      backgroundImage: backgroundUrl,
     }">
       <div class="background-mask"/>
     </div>
@@ -195,9 +195,6 @@ export default {
       this.item.percentage = displayInfo.percentage;
       this.item.path = displayInfo.path;
     },
-    backgroundImage(shortCut, cover) {
-      return this.item.duration - this.item.lastTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
-    },
     timeInValidForm(time) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);
     },
@@ -365,11 +362,13 @@ main {
 }
 
 .background-transition-enter-active, .background-transition-leave-active {
-  transition: opacity 300ms ease-in;
-  // transition-delay: 100ms;
+  transition: opacity 300ms linear;
 }
 .background-transition-enter, .background-transition-leave-to {
   opacity: 0;
+}
+.background-transition-enter-to, .background-transition-leave {
+  opacity: 1;
 }
 
 .welcome-container-transition-enter-active, .welcome-container-transition-leave-active{

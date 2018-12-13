@@ -269,7 +269,12 @@ export default {
         }
         this.displayInfo.landingLogoAppear = this.landingLogoAppear;
         this.displayInfo.showShortcutImage = this.showShortcutImage;
-        this.displayInfo.backgroundUrl = this.backgroundUrl;
+        this.displayInfo.backgroundUrl = this.itemShortcut(
+          this.backgroundUrl,
+          item.cover,
+          this.itemInfo().lastTime,
+          this.itemInfo().duration,
+        );
         this.displayInfo.baseName = this.itemInfo().baseName;
         this.displayInfo.lastTime = this.itemInfo().lastTime;
         this.displayInfo.duration = this.itemInfo().duration;
