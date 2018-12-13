@@ -88,7 +88,6 @@ export default {
       dragDelay: 200,
       displayState: {},
       widgetsStatus: {},
-      currentSelectedWidget: 'the-video-controller',
       preventSingleClick: false,
       lastAttachedShowing: false,
       isDragging: false,
@@ -104,9 +103,11 @@ export default {
   computed: {
     ...mapState({
       currentWidget: state => state.Input.mousemoveTarget,
+      currentSelectedWidget: state => state.Input.mouseupWidget,
       mousemovePosition: state => state.Input.mousemovePosition,
+      wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['muted', 'paused', 'volume', 'progressKeydown']),
+    ...mapGetters(['muted', 'paused', 'volume', 'progressKeydown', 'volumeKeydown']),
     showAllWidgets() {
       return (!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
@@ -140,6 +141,9 @@ export default {
           this.showProgress = false;
         }, 1000);
       }
+    },
+    currentWidget(newVal, oldVal) {
+      this.lastWidget = oldVal;
     },
   },
   created() {
@@ -216,42 +220,41 @@ export default {
       }
 
       // Use Map constructor to shallow-copy eventInfo
-      const lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
+      this.inputProcess(this.eventInfo, this.lastEventInfo);
       this.clock().tick(timestamp - this.start);
       this.UITimerManager(timestamp - this.start);
       // this.UILayerManager();
       this.UIDisplayManager();
       this.UIStateManager();
-      this.lastEventInfo = lastEventInfo;
 
       this.start = timestamp;
       requestAnimationFrame(this.UIManager);
     },
-    inputProcess(currentEventInfo, lastEventInfo) { // eslint-disable-line
+    inputProcess() { // eslint-disable-line
       // hideVolume timer
-      const volumeKeydown = this.orify(currentEventInfo.get('keydown').ArrowUp, currentEventInfo.get('keydown').ArrowDown, currentEventInfo.get('keydown').KeyM); // eslint-disable-line
-      const mouseScrolling = currentEventInfo.get('wheel').time !== lastEventInfo.get('wheel').time;
-      const lastWidget = this.getComponentName(lastEventInfo.get('mousemove').target);
-      const mouseWakingUpVolume = this.enterWidgets(lastWidget, this.currentWidget, 'volume-indicator');
-      const mouseLeavingVolume = this.leaveWidgets(lastWidget, this.currentWidget, 'volume-indicator');
-      const mouseMovingInVolume = this.andify(!this.mouseStopped, this.inWidgets(lastWidget, this.currentWidget, 'volume-indicator'));
-      const wakingupVolume = this.orify(this.volumeChange, volumeKeydown, this.andify(mouseScrolling, process.platform !== 'darwin'), this.andify(!this.muted, this.orify(mouseWakingUpVolume, mouseLeavingVolume, mouseMovingInVolume))); // eslint-disable-line
+      if (!this.lastWheelTime) this.lastWheelTime = this.wheelTime;
+      const {
+        volumeKeydown,
+        wheelTime,
+        lastWheelTime,
+      } = this;
+      let mouseScrolling = false;
+      if (lastWheelTime !== wheelTime) {
+        mouseScrolling = true;
+        this.lastWheelTime = wheelTime;
+      }
+      const wakingupVolume = this.volumeChange || volumeKeydown || (mouseScrolling && process.platform !== 'darwin');
       if (wakingupVolume) {
-        this.timerManager.updateTimer('sleepingVolumeButton', this.orify(mouseWakingUpVolume, mouseMovingInVolume) ? this.muteDelay : this.hideVolumeDelay);
+        this.timerManager.updateTimer('sleepingVolumeButton', this.hideVolumeDelay);
         // Prevent all widgets display before volume-control
         this.hideVolume = false;
         this.volumeChange = false;
-      }
-      // mouseup status
-      if (lastEventInfo.get('mouseup').leftMouseup !== currentEventInfo.get('mouseup').leftMouseup) {
-        this.currentSelectedWidget = this.getComponentName(currentEventInfo.get('mouseup').target);
       }
 
       Object.keys(this.timerState).forEach((uiName) => {
         this.timerState[uiName] = this.showAllWidgets;
       });
       this.timerState['volume-indicator'] = !this.hideVolume;
-      return currentEventInfo;
     },
     UITimerManager(frameTime) {
       this.timerManager.tickTimer('sleepingVolumeButton', frameTime);
@@ -282,7 +285,7 @@ export default {
       const lastMouseupWidget = this.getComponentName(this.lastEventInfo.get('mouseup').target);
       const mouseupChanged = currentMouseupWidget !== lastMouseupWidget;
       Object.keys(this.widgetsStatus).forEach((name) => {
-        this.widgetsStatus[name].selected = this.currentSelectedWidget === name;
+        this.widgetsStatus[name].selected = name;
         if (mousedownChanged) {
           this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name;
           // 播放列表与控制它的按钮在实现并不是父子组件，然而在逻辑上是附属关系
@@ -530,30 +533,6 @@ export default {
     },
     togglePlayback() {
       this.$bus.$emit('toggle-playback');
-    },
-    orify(...args) {
-      return args.some(arg => arg == true); // eslint-disable-line
-    },
-    andify(...args) {
-      return args.every(arg => arg == true); // eslint-disable-line
-    },
-    enterWidgets(last, current, ...widgets) {
-      return this.andify(
-        widgets.some(widget => current === widget),
-        widgets.every(widget => last !== widget),
-      );
-    },
-    leaveWidgets(last, current, ...widgets) {
-      return this.andify(
-        widgets.every(widget => current !== widget),
-        widgets.some(widget => last === widget),
-      );
-    },
-    inWidgets(last, current, ...widgets) {
-      return this.andify(
-        widgets.some(widget => current === widget),
-        widgets.some(widget => last === widget),
-      );
     },
   },
 };

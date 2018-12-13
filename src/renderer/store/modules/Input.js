@@ -14,6 +14,7 @@ const state = {
 
 const getters = {
   progressKeydown: state => state.downKeys.includes('ArrowLeft') || state.downKeys.includes('ArrowRight') || state.downKeys.includes('BracketLeft') || state.downKeys.includes('BracketRight'),
+  volumeKeydown: state => state.downKeys.includes('ArrowUp') || state.downKeys.includes('ArrowDown') || state.downKeys.includes('KeyM'),
 };
 
 const mutations = {
