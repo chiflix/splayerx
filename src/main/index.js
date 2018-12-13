@@ -234,7 +234,8 @@ function createWindow() {
 
   mainWindow = new BrowserWindow(windowOptions);
 
-  mainWindow.loadURL(winURL);
+  mainWindow.loadURL(startupOpenedFile ? `${winURL}#/play` : winURL);
+
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
     mainWindow = null;
