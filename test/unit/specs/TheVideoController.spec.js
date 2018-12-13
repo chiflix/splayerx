@@ -1,6 +1,7 @@
 import Vuex from 'vuex';
 import Window from '@/store/modules/Window';
 import Video from '@/store/modules/Video';
+import Input from '@/store/modules/Input';
 import TheVideoController from '@/components/PlayingView/TheVideoController';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
@@ -22,6 +23,12 @@ describe('Component - TheVideoController Unit Test', () => {
         Video: {
           getters: Video.getters,
         },
+        Input: {
+          state: Input.state,
+          mutations: Input.mutations,
+          actions: Input.actions,
+          getters: Input.getters,
+        },
       },
     });
     wrapper = shallowMount(TheVideoController, { store, localVue });
@@ -34,25 +41,6 @@ describe('Component - TheVideoController Unit Test', () => {
 
   it('Sanity - should component be properly mounted', () => {
     expect(wrapper.contains(TheVideoController)).to.equal(true);
-  });
-
-  it('should event handlers be properly invoked', () => {
-    const events = [
-      'mousemove',
-      'mousedown.left',
-      'mousedown.right',
-      'mouseup.left',
-      'dblclick',
-    ];
-
-    events.forEach((event) => {
-      const oldEventInfo = wrapper.vm.eventInfo.get(event.split('.')[0]);
-
-      wrapper.trigger(event);
-      const newInfo = wrapper.vm.eventInfo.get(event.split('.')[0]);
-
-      if (newInfo) { expect(oldEventInfo).to.not.equal(newInfo); }
-    });
   });
 
   describe('should inputProcess function normally', () => {
