@@ -242,6 +242,9 @@ export default {
       },
     },
     distance() {
+      if (this.winWidth > 1355) {
+        return this.firstIndex * (this.thumbnailWidth + ((this.winWidth / 1355) * 15));
+      }
       return this.firstIndex * (this.thumbnailWidth + 15);
     },
     maxIndex() {
