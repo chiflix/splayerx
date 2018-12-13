@@ -200,6 +200,7 @@ export default {
       basicInfo.forEach((settingItem) => {
         videoElement[settingItem] = this[settingItem];
       });
+      // following code is to make preview-thumbnail pause
       if (this.paused) {
         videoElement.pause();
       }
