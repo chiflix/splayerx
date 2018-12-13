@@ -7,7 +7,7 @@ import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
 
-import App from '@/App';
+import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';

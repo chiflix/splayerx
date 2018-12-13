@@ -35,7 +35,7 @@ import { mapGetters } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
-import Icon from './BaseIconContainer';
+import Icon from './BaseIconContainer.vue';
 
 export default {
   name: 'notification-bubble',

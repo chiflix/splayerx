@@ -165,7 +165,7 @@ let rendererConfig = {
       "electron"  : "@chiflix/electron",
       "grpc": "@grpc/grpc-js"
     },
-    extensions: ['.js', '.node']
+    extensions: ['.js', '.json', '.node']
   },
   target: 'electron-renderer'
 }

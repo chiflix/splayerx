@@ -24,7 +24,7 @@ import { mapGetters } from 'vuex';
 import fs from 'fs';
 import srt2vtt from 'srt-to-vtt';
 import ass2vtt from 'ass-to-vtt';
-import { WebVTT } from 'vtt';
+import { WebVTT } from 'vtt.js';
 import path from 'path';
 import parallel from 'run-parallel';
 import MatroskaSubtitles from 'matroska-subtitles';

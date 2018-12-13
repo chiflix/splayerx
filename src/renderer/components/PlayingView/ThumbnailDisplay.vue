@@ -12,7 +12,7 @@
 <script>
 import { THUMBNAIL_DB_NAME } from '@/constants';
 import idb from 'idb';
-import BaseImageDisplay from './BaseImageDisplay';
+import BaseImageDisplay from './BaseImageDisplay.vue';
 
 export default {
   name: 'thumbnail-display',

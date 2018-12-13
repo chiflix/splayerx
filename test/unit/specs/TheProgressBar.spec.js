@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils.vue';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import TheProgressBar from '@/components/PlayingView/TheProgressBar.vue';
 import sinon from 'sinon';
