@@ -276,6 +276,8 @@ export default {
         this.widgetsStatus[name].selected = this.currentSelectedWidget === name;
         if (mousedownChanged) {
           this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name;
+          // 播放列表与控制它的按钮在实现并不是父子组件，然而在逻辑上是附属关系
+          // 因此对于mousedown与mouseup对两者都做了判断
           if (name === 'recent-playlist') {
             this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name
               && currentMousedownWidget !== 'playlist-control';
@@ -289,6 +291,7 @@ export default {
           }
         }
         if (!this.showAllWidgets) {
+          // 播放列表不受showAllwidgets变量的影响而关闭
           if (name !== 'playlist-control') {
             this.widgetsStatus[name].showAttached = false;
           }
