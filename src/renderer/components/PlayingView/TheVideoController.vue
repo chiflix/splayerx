@@ -90,7 +90,6 @@ export default {
       widgetsStatus: {},
       preventSingleClick: false,
       lastAttachedShowing: false,
-      isDragging: false,
       focusedTimestamp: 0,
       focusDelay: 500,
       listenedWidget: 'the-video-controller',
@@ -108,7 +107,7 @@ export default {
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['muted', 'paused', 'volume', 'progressKeydown', 'volumeKeydown']),
+    ...mapGetters(['muted', 'paused', 'volume', 'progressKeydown', 'volumeKeydown', 'leftMousedown']),
     showAllWidgets() {
       return (!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
@@ -122,6 +121,9 @@ export default {
     },
     isFocused() {
       return this.$store.state.Window.isFocused;
+    },
+    isDragging() {
+      return !this.mouseStopped && this.leftMousedown;
     },
   },
   watch: {
@@ -336,9 +338,6 @@ export default {
       });
       this.updateMousemovePosition([event.clientX, event.clientY]);
       this.updateMousemoveTarget(this.getComponentName(event.target));
-      if (this.eventInfo.get('mousedown').leftMousedown) {
-        this.isDragging = true;
-      }
     },
     handleMouseenter() {
       this.mouseLeftWindow = false;
@@ -378,7 +377,6 @@ export default {
     },
     handleMousedownLeft(event) {
       if (this.isDragging && this.lastAttachedShowing) {
-        this.isDragging = false;
         if (this.currentWidget !== 'subtitle-control' && this.currentWidget !== 'advance-control') {
           this.$bus.$emit('isdragging-mousedown');
         }
@@ -406,7 +404,6 @@ export default {
     },
     handleMouseupLeft(event) {
       if (this.isDragging && this.lastAttachedShowing) {
-        this.isDragging = false;
         if (this.currentWidget !== 'subtitle-control' && this.currentWidget !== 'advance-control') {
           this.$bus.$emit('isdragging-mouseup');
         }
@@ -426,7 +423,6 @@ export default {
         { leftMouseup: true, target: event.target },
       ));
       if (!this.isValidClick() || (this.isDragging && this.lastAttachedShowing)) {
-        if (this.isDragging) this.isDragging = false;
         return;
       }
       this.clicksTimer = setTimeout(() => {
@@ -438,7 +434,6 @@ export default {
         }
         this.preventSingleClick = false;
         this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
-        this.isDragging = false;
       }, this.clicksDelay);
     },
     handleDblclick() {
