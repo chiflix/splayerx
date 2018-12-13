@@ -41,6 +41,7 @@
 
 <script>
 import { Video as videoActions } from '@/store/actionTypes';
+
 export default {
   name: 'AdvanceColumnItems',
   data() {

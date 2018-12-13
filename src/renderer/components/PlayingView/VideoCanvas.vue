@@ -28,12 +28,12 @@
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
-import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
+import WindowSizeHelper from '@/helpers/WindowSizeHelper';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseSubtitle from './BaseSubtitle.vue';
-import BaseVideoPlayer from './BaseVideoPlayer';
+import BaseVideoPlayer from './BaseVideoPlayer.vue';
 
 export default {
   name: 'video-canvas',

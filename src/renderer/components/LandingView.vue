@@ -61,6 +61,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
 import NotificationBubble from './NotificationBubble.vue';
+
 export default {
   name: 'landing-view',
   data() {

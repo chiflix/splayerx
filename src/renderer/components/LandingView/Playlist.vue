@@ -60,7 +60,8 @@
 
 <script>
 import path from 'path';
-import Icon from '../BaseIconContainer';
+import Icon from '../BaseIconContainer.vue';
+
 export default {
   name: 'playlist',
   components: { Icon },

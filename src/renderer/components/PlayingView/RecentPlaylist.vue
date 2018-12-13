@@ -73,6 +73,7 @@
 import path from 'path';
 import { mapGetters } from 'vuex';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
+
 export default {
   name: 'recent-playlist',
   components: {

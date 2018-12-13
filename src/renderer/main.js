@@ -7,7 +7,7 @@ import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
 
-import App from '@/App';
+import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
@@ -17,9 +17,11 @@ import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
+
 require('source-map-support').install();
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
+
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
@@ -635,7 +637,7 @@ new Vue({
         }
         if (process.platform === 'win32') {
           const file = template.shift();
-          file.submenu = Array.reverse(file.submenu);
+          file.submenu = file.submenu.reverse();
           file.submenu.forEach((menuItem) => {
             template.unshift(menuItem);
           });

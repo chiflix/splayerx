@@ -38,7 +38,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
-import TimerManager from '@/helpers/timerManager.js';
+import TimerManager from '@/helpers/timerManager';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
 import VolumeIndicator from './VolumeIndicator.vue';
@@ -46,7 +46,7 @@ import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
 import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
-import TheProgressBar from './TheProgressBar';
+import TheProgressBar from './TheProgressBar.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
 import SpeedLabel from './RateLabel.vue';
