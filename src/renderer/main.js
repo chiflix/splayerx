@@ -166,7 +166,7 @@ new Vue({
         this.refreshMenu();
       }
     },
-    currentSubtitleId(val) {
+    currentSubtitleId(val, oldval) {
       if (this.menu) {
         if (val !== '') {
           this.subtitleList.forEach((item, index) => {
@@ -174,6 +174,20 @@ new Vue({
               this.menu.getMenuItemById(`sub${index}`).checked = true;
             }
           });
+          if (oldval === '') {
+            this.menu.getMenuItemById('subSize')
+              .submenu
+              .items
+              .forEach((item) => {
+                item.enabled = true;
+              });
+            this.menu.getMenuItemById('subStyle')
+              .submenu
+              .items
+              .forEach((item) => {
+                item.enabled = true;
+              });
+          }
         } else {
           this.menu.getMenuItemById('sub-1').checked = true;
           this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
