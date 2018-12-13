@@ -34,6 +34,7 @@ import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'video-canvas',
@@ -188,7 +189,7 @@ export default {
       const data = {
         shortCut: imagePath,
         smallShortCut: smallImagePath,
-        lastPlayedTime: this.currentTime,
+        lastPlayedTime: videodata.time,
         duration: this.duration,
       };
       syncStorage.setSync('recent-played', data);
@@ -236,12 +237,12 @@ export default {
           this.infoDB().add('recent-played', data);
         }
       }
-      this.lastCoverDetectingTime = this.currentTime;
+      this.lastCoverDetectingTime = videodata.time;
     },
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
       'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle', 'scaleNum',
       'nextVideo']),
     ...mapGetters({

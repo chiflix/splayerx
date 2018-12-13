@@ -10,6 +10,7 @@
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
+import { videodata } from '../../store/video';
 export default {
   name: 'base-video-player',
   props: {
@@ -206,7 +207,7 @@ export default {
     },
     currentTimeUpdate() {
       const { currentTime } = this.$refs.video;
-      this.$emit('update:currentTime', currentTime);
+      videodata.time = currentTime;
       this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
     },
     // helper functions

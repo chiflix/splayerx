@@ -64,6 +64,7 @@ export default {
   },
   watch: {
     subtitleCurrentTime(newVal) {
+      if (!this.subtitle) return;
       const { parsedData } = this.subtitle;
       if (parsedData) {
         const cues = parsedData
@@ -105,9 +106,8 @@ export default {
             const index = videoSegments.findIndex(segment => segment[0] === currentSegment[0]);
             this.$set(videoSegments, index, [...videoSegments[index].slice(0, 2), true]);
           }
-          this.elapsedSegmentTime = 0;
+          this.currentSegment = segment;
         }
-        this.currentSegment = segment;
       }
     },
     videoSegments(newVal) {

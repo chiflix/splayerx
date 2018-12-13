@@ -11,7 +11,7 @@
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
-    <notification-bubble/>
+    <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist"
     :displayState="displayState['recent-playlist']"
     :mousemove="eventInfo.get('mousemove')"
@@ -31,8 +31,8 @@
       v-bind.sync="widgetsStatus['advance-control']"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes v-hidden="displayState['the-time-codes'] || showProgress"/>
-    <the-progress-bar v-hidden="displayState['the-progress-bar'] || showProgress"/>
+    <the-time-codes ref="theTimeCodes" v-hidden="displayState['the-time-codes'] || showProgress"/>
+    <the-progress-bar ref="progressbar" v-hidden="displayState['the-progress-bar'] || showProgress"/>
   </div>
 </template>
 <script>
@@ -50,6 +50,7 @@ import TheProgressBar from './TheProgressBar';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
 import SpeedLabel from './RateLabel.vue';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'the-video-controller',
@@ -95,12 +96,14 @@ export default {
       listenedWidget: 'the-video-controller',
       attachedShown: false,
       volumeChange: false,
+      progressTimebar: null,
       showProgress: false,
       showProgressId: 0,
     };
   },
   computed: {
-    ...mapGetters(['muted', 'paused', 'volume', 'progressKeydown']),
+    ...mapGetters(['muted', 'paused', 'volume', 'progressKeydown', 'duration']),
+
     showAllWidgets() {
       return (!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
@@ -178,6 +181,9 @@ export default {
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
+
+    this.progressTimebar = this.$refs.progressbar.$refs.progressTimebar;
+
     requestAnimationFrame(this.UIManager);
     this.$bus.$on('currentWidget', (widget) => {
       this.listenedWidget = widget;
@@ -205,6 +211,10 @@ export default {
       if (!this.start) {
         this.start = timestamp;
       }
+
+      this.progressTimebar.style.width = `${100 * (videodata.time / this.duration)}%`;
+      this.$refs.theTimeCodes.updateTimeContent(videodata.time);
+      this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
 
       // Use Map constructor to shallow-copy eventInfo
       const lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));

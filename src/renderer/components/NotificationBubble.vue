@@ -1,7 +1,7 @@
 <template>
   <div :class="container">
     <transition name="nextvideo">
-      <NextVideo class="next-video"
+      <NextVideo class="next-video" ref="nextVideo"
         v-if="showNextVideo"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
@@ -49,11 +49,10 @@ export default {
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
-      checkIfNextVideoExist: false,
     };
   },
   computed: {
-    ...mapGetters(['roundedCurrentTime', 'nextVideo', 'duration', 'finalPartTime']),
+    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -93,22 +92,18 @@ export default {
         this.$bus.$emit('delete-file');
       }
     },
-  },
-  watch: {
-    checkIfNextVideoExist(val) {
-      if (val) {
+    checkNextVideoUI(time) {
+      if (time > this.nextVideoPreviewTime &&
+        !this.showNextVideo &&
+        this.nextVideo !== '' &&
+        !this.manualClosed) {
         this.$store.dispatch('UpdatePlayingList');
         this.showNextVideo = true;
-      }
-    },
-    roundedCurrentTime(val) {
-      if (val > this.finalPartTime && val < this.duration - 5) {
-        if (this.nextVideo !== '' && !this.manualClosed) {
-          this.checkIfNextVideoExist = true;
-        }
       } else {
-        this.checkIfNextVideoExist = false;
         this.manualClosed = false;
+      }
+      if (this.$refs.nextVideo) {
+        this.$refs.nextVideo.updatePlayingTime(time);
       }
     },
   },
