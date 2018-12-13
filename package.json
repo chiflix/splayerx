@@ -53,8 +53,7 @@
     "files": [
       "dist/electron/**/*"
     ],
-      "icon": "build/icons/file.icns",
-    
+
     "dmg": {
       "contents": [
         {
