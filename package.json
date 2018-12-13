@@ -5,7 +5,7 @@
   "version": "4.0.2",
   "author": "tomasen <tomasen@gmail.com>",
   "description": "a media player",
-  "license": null,
+  "license": "GPLv3",
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && cross-env ELECTRON_BUILDER_ALLOW_UNRESOLVED_DEPENDENCIES=true  electron-builder --p never",
