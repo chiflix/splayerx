@@ -190,6 +190,7 @@ export default {
       }
     },
     displayState(val) {
+      this.$bus.$emit('subtitle-to-top', val);
       this.canHoverItem = false;
       this.mousePosition = this.mousemove.position;
       if (val) {

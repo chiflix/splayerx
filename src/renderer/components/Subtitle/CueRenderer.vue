@@ -8,7 +8,6 @@
 </template>
 
 <script>
-import asyncStorage from '@/helpers/asyncStorage';
 import { mapGetters } from 'vuex';
 
 export default {
@@ -44,13 +43,6 @@ export default {
       }
       return tmp;
     },
-  },
-  created() {
-    asyncStorage.get('subtitle-style').then((data) => {
-      if (data.chosenStyle) {
-        this.$store.dispatch('updateChosenStyle', data.chosenStyle);
-      }
-    });
   },
 };
 </script>
