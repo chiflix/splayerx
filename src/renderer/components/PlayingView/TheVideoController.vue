@@ -6,6 +6,8 @@
     @mousemove="handleMousemove"
     @mouseenter="handleMouseenter"
     @mouseleave="handleMouseleave"
+    @mousedown="handleMousedown"
+    @mouseup="handleMouseup"
     @mousedown.right="handleMousedownRight"
     @mousedown.left="handleMousedownLeft"
     @mouseup.left="handleMouseupLeft"
@@ -190,8 +192,11 @@ export default {
     }),
     ...mapActions({
       updateMousemovePosition: inputActions.MOUSEMOVE_POSITION,
+      updateMousedown: inputActions.MOUSEDOWN_UPDATE,
+      updateMouseup: inputActions.MOUSEUP_UPDATE,
       updateKeydown: inputActions.KEYDOWN_UPDATE,
       updateKeyup: inputActions.KEYUP_UPDATE,
+      updateWheel: inputActions.WHEEL_UPDATE,
     }),
     conflictResolve(name) {
       Object.keys(this.widgetsStatus).forEach((item) => {
@@ -326,6 +331,14 @@ export default {
         this.clock().clearTimeout(this.mouseLeftId);
       }
     },
+    handleMousedown(event) {
+      const { target, buttons } = event;
+      this.updateMousedown({ target: this.getComponentName(target), buttons });
+    },
+    handleMouseup(event) {
+      const { target, buttons } = event;
+      this.updateMouseup({ target: this.getComponentName(target), buttons });
+    },
     handleMouseleave() {
       this.mouseLeftId = this.clock().setTimeout(() => {
         this.mouseLeftWindow = true;
@@ -437,6 +450,10 @@ export default {
       ));
     },
     handleWheel(event) {
+      this.updateWheel({
+        target: this.getComponentName(event.target),
+        timestamp: event.timeStamp,
+      });
       let isAdvanceColumeItem;
       let isSubtitleScrollItem;
       const nodeList = document.querySelector('.advance-column-items').childNodes;
