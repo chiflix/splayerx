@@ -1,6 +1,6 @@
-import en from './lang/en.js';
-import zhCN from './lang/zhCN.js';
-import zhTW from './lang/zhTW.js';
+import en from './lang/en';
+import zhCN from './lang/zhCN';
+import zhTW from './lang/zhTW';
 
 // Ready translated locale messages
 const messages = { en, zhCN, zhTW };

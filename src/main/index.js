@@ -32,14 +32,12 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
 }
 app.on('second-instance', () => {
-  if (mainWindow) {
-    try {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.focus();
-    } catch (err) {
-      this.addLog('error', err);
-      // pass
-    }
+  try {
+    if (mainWindow?.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  } catch (err) {
+    this.addLog('error', err);
+    // pass
   }
 });
 
@@ -68,40 +66,39 @@ function registerMainWindowEvent() {
   if (!mainWindow) return;
   // TODO: should be able to use window.outerWidth/outerHeight directly
   mainWindow.on('resize', throttle(() => {
-    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow?.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
   }, 100));
   mainWindow.on('move', throttle(() => {
-    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow?.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   }, 100));
   mainWindow.on('enter-full-screen', () => {
-    mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
-    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
+    mainWindow?.webContents.send('mainCommit', 'isFullScreen', true);
+    mainWindow?.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('leave-full-screen', () => {
-    mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
-    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
+    mainWindow?.webContents.send('mainCommit', 'isFullScreen', false);
+    mainWindow?.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('maximize', () => {
-    mainWindow.webContents.send('mainCommit', 'isMaximized', true);
+    mainWindow?.webContents.send('mainCommit', 'isMaximized', true);
   });
   mainWindow.on('unmaximize', () => {
-    mainWindow.webContents.send('mainCommit', 'isMaximized', false);
+    mainWindow?.webContents.send('mainCommit', 'isMaximized', false);
   });
   mainWindow.on('focus', () => {
-    mainWindow.webContents.send('mainCommit', 'isFocused', true);
+    mainWindow?.webContents.send('mainCommit', 'isFocused', true);
   });
   mainWindow.on('blur', () => {
-    mainWindow.webContents.send('mainCommit', 'isFocused', false);
+    mainWindow?.webContents.send('mainCommit', 'isFocused', false);
   });
 
   ipcMain.on('callCurrentWindowMethod', (evt, method, args = []) => {
     const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow;
-    if (currentWindow && typeof (currentWindow[method]) === 'function') {
-      currentWindow[method](...args);
-    }
+    currentWindow?.[method]?.(...args);
   });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
+    if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.setSize(...args);
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
@@ -181,15 +178,16 @@ function registerMainWindowEvent() {
     }
   });
   ipcMain.on('windowPositionChange', (event, args) => {
+    if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.setPosition(...args);
     event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
   });
   ipcMain.on('windowInit', () => {
-    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-    mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
-    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
-    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
-    mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
+    mainWindow?.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow?.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
+    mainWindow?.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow?.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
+    mainWindow?.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
   ipcMain.on('bossKey', () => {
     handleBossKey();
@@ -268,9 +266,7 @@ if (process.platform === 'darwin') {
 app.on('ready', () => {
   app.setName('SPlayerX');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
-    if (mainWindow) {
-      mainWindow.openDevTools();
-    }
+    mainWindow?.openDevTools();
   });
 
   if (process.platform === 'win32') {

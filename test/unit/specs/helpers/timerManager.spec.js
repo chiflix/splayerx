@@ -1,4 +1,4 @@
-import TimerManager from '@/helpers/timerManager.js';
+import TimerManager from '@/helpers/timerManager';
 import sinon from 'sinon';
 
 describe('Helper - TimerManager Unit Tests', () => {

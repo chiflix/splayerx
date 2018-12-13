@@ -1,5 +1,6 @@
 import { ipcRenderer } from 'electron'; // eslint-disable-line
-import { UpdaterMessage as Message } from './Message.js';
+import { UpdaterMessage as Message } from './Message';
+
 class RendererHelper {
   constructor(vueObject) {
     this.ipc = ipcRenderer;

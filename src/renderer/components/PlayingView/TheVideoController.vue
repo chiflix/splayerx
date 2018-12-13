@@ -38,7 +38,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
-import TimerManager from '@/helpers/timerManager.js';
+import TimerManager from '@/helpers/timerManager';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
 import VolumeIndicator from './VolumeIndicator.vue';
@@ -46,7 +46,7 @@ import AdvanceControl from './AdvanceControl.vue';
 import SubtitleControl from './SubtitleControl.vue';
 import PlaylistControl from './PlaylistControl.vue';
 import TheTimeCodes from './TheTimeCodes.vue';
-import TheProgressBar from './TheProgressBar';
+import TheProgressBar from './TheProgressBar.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
 import SpeedLabel from './RateLabel.vue';
@@ -276,6 +276,8 @@ export default {
         this.widgetsStatus[name].selected = this.currentSelectedWidget === name;
         if (mousedownChanged) {
           this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name;
+          // 播放列表与控制它的按钮在实现并不是父子组件，然而在逻辑上是附属关系
+          // 因此对于mousedown与mouseup对两者都做了判断
           if (name === 'recent-playlist') {
             this.widgetsStatus[name].mousedownOnOther = currentMousedownWidget !== name
               && currentMousedownWidget !== 'playlist-control';
@@ -289,6 +291,7 @@ export default {
           }
         }
         if (!this.showAllWidgets) {
+          // 播放列表不受showAllwidgets变量的影响而关闭
           if (name !== 'playlist-control') {
             this.widgetsStatus[name].showAttached = false;
           }

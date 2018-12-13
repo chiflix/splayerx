@@ -11,6 +11,7 @@
 import { mapGetters } from 'vuex';
 import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
+
 export default {
   name: 'volume-indicator',
   components: {

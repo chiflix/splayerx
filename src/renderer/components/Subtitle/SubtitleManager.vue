@@ -24,7 +24,7 @@ import compose from 'lodash/fp/compose';
 import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
-import SubtitleLoader from './SubtitleLoader';
+import SubtitleLoader from './SubtitleLoader.vue';
 import SubtitleWorker from './Subtitle.worker';
 
 export default {
