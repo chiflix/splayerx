@@ -329,7 +329,7 @@ export default {
         if (vm.recentFileDel) {
           vm.displayInfo.landingLogoAppear = true;
           vm.displayInfo.showShortcutImage = false;
-          vm.$bus.$emit('displayInfo', vm.displayInfo);
+          vm.$emit('displayInfo', vm.displayInfo);
           const deletData = vm.lastPlayedFile.splice(index, 1);
           vm.infoDB().delete('recent-played', deletData[0].quickHash);
           vm.recentFileDel = false;
