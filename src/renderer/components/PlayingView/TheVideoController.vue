@@ -38,7 +38,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
-import TimerManager from '@/helpers/timerManager.js';
+import TimerManager from '@/helpers/timerManager';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
 import VolumeIndicator from './VolumeIndicator.vue';

@@ -10,6 +10,7 @@
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
+
 export default {
   name: 'base-video-player',
   props: {

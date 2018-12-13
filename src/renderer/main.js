@@ -17,9 +17,11 @@ import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
+
 require('source-map-support').install();
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
+
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {

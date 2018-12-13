@@ -1,4 +1,4 @@
-import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay';
+import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay.vue';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
 

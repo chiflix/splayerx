@@ -63,6 +63,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import Icon from './BaseIconContainer';
+
 export default {
   name: 'titlebar',
   data() {

@@ -11,6 +11,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import rateLabel from './RateLabel.vue';
+
 export default {
   name: 'the-time-codes',
   data() {

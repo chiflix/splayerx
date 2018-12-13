@@ -102,6 +102,7 @@ import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
+
 export default {
   name: 'subtitle-control',
   props: {

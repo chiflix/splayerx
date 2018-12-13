@@ -1,4 +1,4 @@
-import Playlist from '@/components/LandingView/Playlist';
+import Playlist from '@/components/LandingView/Playlist.vue';
 import { mount } from '@vue/test-utils';
 
 describe('Playlist.vue', () => {

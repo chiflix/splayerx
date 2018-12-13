@@ -36,6 +36,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
 import Icon from './BaseIconContainer';
+
 export default {
   name: 'notification-bubble',
   components: {

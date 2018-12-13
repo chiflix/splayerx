@@ -42,6 +42,7 @@ import {
 import Icon from '../BaseIconContainer';
 import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
 import ThumbnailDisplay from './ThumbnailDisplay';
+
 export default {
   components: {
     'thumbnail-video-player': ThumbnailVideoPlayer,

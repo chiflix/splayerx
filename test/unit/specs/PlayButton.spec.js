@@ -1,4 +1,4 @@
-import PlayButton from '@/components/PlayingView/PlayButton';
+import PlayButton from '@/components/PlayingView/PlayButton.vue';
 import { mount } from '@vue/test-utils';
 
 describe('PlayButton.vue', () => {

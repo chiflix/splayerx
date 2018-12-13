@@ -43,6 +43,7 @@
 import { mapGetters } from 'vuex';
 import path from 'path';
 import Icon from '../BaseIconContainer';
+
 export default {
   name: 'next-video',
   components: {

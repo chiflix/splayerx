@@ -13,6 +13,7 @@
 import { THUMBNAIL_DB_NAME } from '@/constants';
 import idb from 'idb';
 import BaseImageDisplay from './BaseImageDisplay';
+
 export default {
   name: 'thumbnail-display',
   components: {

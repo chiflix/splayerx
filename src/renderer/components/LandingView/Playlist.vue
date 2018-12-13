@@ -61,6 +61,7 @@
 <script>
 import path from 'path';
 import Icon from '../BaseIconContainer';
+
 export default {
   name: 'playlist',
   components: { Icon },

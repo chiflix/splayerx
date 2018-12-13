@@ -1,8 +1,9 @@
 import EventEmitter from 'events';
 import sinon from 'sinon';
-import WindowResizeHelperM from '../../../../src/main/helpers/windowResizer.js';
+import WindowResizeHelperM from '../../../../src/main/helpers/windowResizer';
 import WindowResizeHelperR from '../../../../src/renderer/helpers/WindowSizeHelper';
-import ipcs from '../updater/ipcMock.js';
+import ipcs from '../updater/ipcMock';
+
 class VueSimulator {
   constructor(ipcRenderer) {
     this.$electron = {};

@@ -67,6 +67,7 @@ import path from 'path';
 import { Video as videoAction } from '@/store/actionTypes';
 import { mapGetters } from 'vuex';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
+
 export default {
   name: 'recent-playlist',
   components: {

@@ -92,6 +92,7 @@ import { mapGetters } from 'vuex';
 import path from 'path';
 import { filePathToUrl } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
+
 export default {
   components: {
     Icon,

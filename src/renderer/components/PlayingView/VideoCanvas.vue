@@ -28,7 +28,7 @@
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
-import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
+import WindowSizeHelper from '@/helpers/WindowSizeHelper';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions } from '@/store/actionTypes';

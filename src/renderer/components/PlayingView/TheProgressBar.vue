@@ -32,6 +32,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import ThePreviewThumbnail from './ThePreviewThumbnail';
+
 export default {
   name: 'the-progress-bar',
   components: {

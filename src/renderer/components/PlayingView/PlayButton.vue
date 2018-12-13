@@ -10,6 +10,7 @@
 
 <script>
 import Icon from '../BaseIconContainer';
+
 export default {
   name: 'play-button',
   props: {
