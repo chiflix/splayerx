@@ -225,8 +225,9 @@ export default {
           if (items.length > 1) {
             this.$store.dispatch('PlayingList', items);
           } else {
-            const similarVideos = this.findSimilarVideoByVidPath(items[0]);
-            this.$store.dispatch('FolderList', similarVideos);
+            this.findSimilarVideoByVidPath(items[0]).then((similarVideos) => {
+              this.$store.dispatch('FolderList', similarVideos);
+            });
           }
         }
       });
@@ -363,8 +364,9 @@ export default {
           this.firstIndex = 0;
         } else if (!this.filePathNeedToDelete) {
           this.openFile(item.path);
-          const similarVideos = this.findSimilarVideoByVidPath(item.path);
-          this.$store.dispatch('FolderList', similarVideos);
+          this.findSimilarVideoByVidPath(item.path).then((similarVideos) => {
+            this.$store.dispatch('FolderList', similarVideos);
+          });
         }
       }
     },
