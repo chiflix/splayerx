@@ -103,7 +103,8 @@ export default {
   computed: {
     ...mapState({
       currentWidget: state => state.Input.mousemoveTarget,
-      currentSelectedWidget: state => state.Input.mouseupWidget,
+      currentMouseupWidget: state => state.Input.mouseupTarget,
+      currentMousedownWidget: state => state.Input.mousedownTarget,
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
@@ -144,6 +145,12 @@ export default {
     },
     currentWidget(newVal, oldVal) {
       this.lastWidget = oldVal;
+    },
+    currentMousedownWidget(newVal, oldVal) {
+      this.lastMousedownWidget = oldVal;
+    },
+    currentMouseupWidget(newVal, oldVal) {
+      this.lastMouseupWidget = oldVal;
     },
   },
   created() {
@@ -278,11 +285,13 @@ export default {
       this.displayState = tempObject;
     },
     UIStateManager() {
-      const currentMousedownWidget = this.getComponentName(this.eventInfo.get('mousedown').target);
-      const lastMousedownWidget = this.getComponentName(this.lastEventInfo.get('mousedown').target);
+      const {
+        currentMousedownWidget,
+        lastMousedownWidget,
+        currentMouseupWidget,
+        lastMouseupWidget,
+      } = this;
       const mousedownChanged = currentMousedownWidget !== lastMousedownWidget;
-      const currentMouseupWidget = this.getComponentName(this.eventInfo.get('mouseup').target);
-      const lastMouseupWidget = this.getComponentName(this.lastEventInfo.get('mouseup').target);
       const mouseupChanged = currentMouseupWidget !== lastMouseupWidget;
       Object.keys(this.widgetsStatus).forEach((name) => {
         this.widgetsStatus[name].selected = name;
@@ -424,7 +433,7 @@ export default {
         const attachedShowing = this.lastAttachedShowing;
         if (
           this.getComponentName(this.eventInfo.get('mousedown').target) === 'the-video-controller' &&
-          this.currentSelectedWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
+          this.currentMouseupWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
           this.togglePlayback();
         }
         this.preventSingleClick = false;
@@ -435,7 +444,7 @@ export default {
     handleDblclick() {
       clearTimeout(this.clicksTimer); // cancel the time out
       this.preventSingleClick = true;
-      if (this.currentSelectedWidget === 'the-video-controller') {
+      if (this.currentMouseupWidget === 'the-video-controller') {
         this.toggleFullScreenState();
       }
     },
