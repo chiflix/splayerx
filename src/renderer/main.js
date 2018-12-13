@@ -229,8 +229,9 @@ new Vue({
                     if (files.length > 1) {
                       this.$store.dispatch('PlayingList', files);
                     } else {
-                      const similarVideos = this.findSimilarVideoByVidPath(files[0]);
-                      this.$store.dispatch('FolderList', similarVideos);
+                      this.findSimilarVideoByVidPath(files[0]).then((similarVideos) => {
+                        this.$store.dispatch('FolderList', similarVideos);
+                      });
                     }
                   }
                 });
@@ -698,8 +699,9 @@ new Vue({
         label: value.label,
         click: () => {
           this.openFile(value.path);
-          const similarVideos = this.findSimilarVideoByVidPath(value.path);
-          this.$store.dispatch('FolderList', similarVideos);
+          this.findSimilarVideoByVidPath(value.path).then((similarVideos) => {
+            this.$store.dispatch('FolderList', similarVideos);
+          });
         },
       };
     },
@@ -972,8 +974,9 @@ new Vue({
         if (videoFiles.length > 1) {
           this.$store.dispatch('PlayingList', videoFiles);
         } else {
-          const similarVideos = this.findSimilarVideoByVidPath(videoFiles[0]);
-          this.$store.dispatch('FolderList', similarVideos);
+          this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
+            this.$store.dispatch('FolderList', similarVideos);
+          });
         }
       }
       if (containsSubFiles) {
