@@ -56,6 +56,14 @@
         @mouseupItem="itemMouseup"
         @mouseoutItem="itemMouseout"
         @mouseoverItem="itemMouseover"/>
+      <div class="next-page"
+        v-if="thumbnailNumber < numberOfPlaylistItem"
+        @mouseup.stop=""
+        :style="{
+          marginRight: sizeAdaption(15),
+          width: `${thumbnailWidth}px`,
+          height: `${thumbnailWidth / (112 / 63)}px`,
+        }"/>
     </div>
   </div>
   </transition>
@@ -332,6 +340,8 @@ export default {
       .item {
         position: relative;
         background-color: rgba(255,255,255,0.1);
+      }
+      .next-page {
       }
     }
   }
