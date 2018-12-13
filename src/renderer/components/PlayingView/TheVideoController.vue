@@ -36,7 +36,8 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
+import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as inputActions } from '@/store/actionTypes';
 import TimerManager from '@/helpers/timerManager.js';
 import Titlebar from '../Titlebar.vue';
@@ -70,7 +71,6 @@ export default {
     return {
       start: null,
       UIElements: [],
-      currentWidget: this.$options.name,
       mouseStopped: false,
       mouseStoppedId: 0,
       mousestopDelay: 3000,
@@ -100,6 +100,9 @@ export default {
     };
   },
   computed: {
+    ...mapState({
+      currentWidget: state => state.Input.mousemoveTarget,
+    }),
     ...mapGetters(['muted', 'paused', 'volume', 'progressKeydown']),
     showAllWidgets() {
       return (!this.mouseStopped && !this.mouseLeftWindow) ||
@@ -179,11 +182,11 @@ export default {
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
     requestAnimationFrame(this.UIManager);
-    this.$bus.$on('currentWidget', (widget) => {
-      this.listenedWidget = widget;
-    });
   },
   methods: {
+    ...mapMutations({
+      updateMousemoveTarget: inputMutations.MOUSEMOVE_TARGET_UPDATE,
+    }),
     ...mapActions({
       updateMousemovePosition: inputActions.MOUSEMOVE_POSITION,
       updateKeydown: inputActions.KEYDOWN_UPDATE,
@@ -306,12 +309,12 @@ export default {
       this.mouseStoppedId = this.clock().setTimeout(() => {
         this.mouseStopped = true;
       }, this.mousestopDelay);
-      this.currentWidget = this.getComponentName(event.target);
       this.eventInfo.set('mousemove', {
         target: event.target,
         position: [event.clientX, event.clientY],
       });
       this.updateMousemovePosition([event.clientX, event.clientY]);
+      this.updateMousemoveTarget(this.getComponentName(event.target));
       if (this.eventInfo.get('mousedown').leftMousedown) {
         this.isDragging = true;
       }
