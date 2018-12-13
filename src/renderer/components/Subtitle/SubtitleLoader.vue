@@ -24,6 +24,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import isEqual from 'lodash/isEqual';
 import toArray from 'lodash/toArray';
+import { videodata } from '@/store/video';
 import Subtitle from './Subtitle';
 import CueRenderer from './CueRenderer.vue';
 export default {
@@ -45,7 +46,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['currentTime', 'duration', 'scaleNum', 'SubtitleDelay', 'intrinsicHeight', 'intrinsicWidth']),
+    ...mapGetters(['duration', 'scaleNum', 'SubtitleDelay', 'intrinsicHeight', 'intrinsicWidth']),
     type() {
       return this.subtitle.metaInfo.type;
     },
@@ -58,58 +59,8 @@ export default {
     isVtt() {
       return this.type === 'vtt';
     },
-    subtitleCurrentTime() {
-      return this.currentTime - (this.SubtitleDelay / 1000);
-    },
   },
   watch: {
-    subtitleCurrentTime(newVal) {
-      if (!this.subtitle) return;
-      const { parsedData } = this.subtitle;
-      if (parsedData) {
-        const cues = parsedData
-          .filter(subtitle => subtitle.start <= newVal && subtitle.end >= newVal && subtitle.text !== '');
-        if (!isEqual(cues, this.currentCues)) {
-          let rev = false;
-          const tmp = cues;
-          if (cues.length >= 2) {
-            for (let i = 0; i < tmp.length; i += 1) {
-              const pre = toArray(tmp[i]);
-              const next = toArray(tmp[i + 1]);
-              if (next) {
-                pre.splice(2, 1);
-                next.splice(2, 1);
-                if (isEqual(pre, next)) {
-                  rev = true;
-                }
-              }
-            }
-          }
-          if (rev) {
-            this.currentCues = cues.reverse();
-          } else {
-            this.currentCues = cues;
-          }
-        }
-      }
-    },
-    currentTime(newVal, oldValue) {
-      const { videoSegments, currentSegment, elapsedSegmentTime } = this;
-      const segment = videoSegments
-        .filter(segment => segment[0] <= newVal && segment[1] > newVal)[0];
-      if (segment && !segment[2]) {
-        if (isEqual(segment, currentSegment)) {
-          this.elapsedSegmentTime += newVal - oldValue;
-        } else {
-          const segmentTime = currentSegment[1] - currentSegment[0];
-          if (elapsedSegmentTime / segmentTime >= 0.9) {
-            const index = videoSegments.findIndex(segment => segment[0] === currentSegment[0]);
-            this.$set(videoSegments, index, [...videoSegments[index].slice(0, 2), true]);
-          }
-          this.currentSegment = segment;
-        }
-      }
-    },
     videoSegments(newVal) {
       const duration = newVal
         .filter(segment => segment[2])
@@ -135,10 +86,71 @@ export default {
       }
     });
   },
+  mounted() {
+    requestAnimationFrame(this.currentTimeUpdate);
+  },
   methods: {
     ...mapActions({
       updateDuration: 'SUBTITLE_DURATION_UPDATE',
     }),
+    currentTimeUpdate() {
+      const { time: currentTime } = videodata;
+      if (!this.lastCurrentTime) {
+        this.lastCurrentTime = currentTime;
+      }
+      const { lastCurrentTime } = this;
+      this.setCurrentCues(currentTime);
+      this.updateVideoSegments(lastCurrentTime, currentTime);
+
+      requestAnimationFrame(this.currentTimeUpdate);
+    },
+    setCurrentCues(currentTime) {
+      if (!this.subtitle) return;
+      const { parsedData } = this.subtitle;
+      if (parsedData) {
+        const cues = parsedData
+          .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');
+        if (!isEqual(cues, this.currentCues)) {
+          let rev = false;
+          const tmp = cues;
+          if (cues.length >= 2) {
+            for (let i = 0; i < tmp.length; i += 1) {
+              const pre = toArray(tmp[i]);
+              const next = toArray(tmp[i + 1]);
+              if (next) {
+                pre.splice(2, 1);
+                next.splice(2, 1);
+                if (isEqual(pre, next)) {
+                  rev = true;
+                }
+              }
+            }
+          }
+          if (rev) {
+            this.currentCues = cues.reverse();
+          } else {
+            this.currentCues = cues;
+          }
+        }
+      }
+    },
+    updateVideoSegments(lastCurrentTime, currentTime) {
+      const { videoSegments, currentSegment, elapsedSegmentTime } = this;
+      const segment = videoSegments
+        .filter(segment => segment[0] <= currentTime && segment[1] > currentTime)[0];
+      if (segment && !segment[2]) {
+        if (isEqual(segment, currentSegment)) {
+          this.elapsedSegmentTime += currentTime - lastCurrentTime;
+        } else {
+          const segmentTime = currentSegment[1] - currentSegment[0];
+          if (elapsedSegmentTime / segmentTime >= 0.9) {
+            const index = videoSegments.findIndex(segment => segment[0] === currentSegment[0]);
+            this.$set(videoSegments, index, [...videoSegments[index].slice(0, 2), true]);
+          }
+          this.currentSegment = segment;
+        }
+      }
+    },
     lineNum(index) {
       const lastNum = index;
       const { currentTexts: texts, currentTags: tags } = this;
