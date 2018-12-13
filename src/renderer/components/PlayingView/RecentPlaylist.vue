@@ -341,8 +341,6 @@ export default {
         position: relative;
         background-color: rgba(255,255,255,0.1);
       }
-      .next-page {
-      }
     }
   }
 }
