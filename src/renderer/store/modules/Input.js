@@ -2,55 +2,37 @@ import { Input as mutationTypes } from '../mutationTypes';
 import { Input as actionTypes } from '../actionTypes';
 
 const state = {
-  mouse: {
-    move: {
-      position: [],
-    },
-  },
-  keyboard: {
-    down: {
-      keys: [],
-    },
-  },
+  mousemovePosition: { x: 0, y: 0 },
+  downKeys: [],
 };
 
 const getters = {
-  mousemovePosition: state => [...state.mouse.move.position],
-  downKeys: state => [...state.keyboard.down.keys],
-  progressKeydown: (state, getters) => getters.downKeys.includes('ArrowLeft') || getters.downKeys.includes('ArrowRight') || getters.downKeys.includes('BracketLeft') || getters.downKeys.includes('BracketRight'),
+  mousemovePosition: state => state.mousemovePosition,
+  progressKeydown: state => state.downKeys.includes('ArrowLeft') || state.downKeys.includes('ArrowRight') || state.downKeys.includes('BracketLeft') || state.downKeys.includes('BracketRight'),
 };
 
 const mutations = {
-  [mutationTypes.MOUSE_UPDATE](state, payload) {
-    state.mouse = payload;
+  [mutationTypes.MOUSEMOVE_POSITION_UPDATE](state, payload) {
+    state.mousemovePosition = payload;
   },
-  [mutationTypes.KEYBOARD_UPDATE](state, payload) {
-    state.keyboard = payload;
+  [mutationTypes.DOWN_KEYS_UPDATE](state, payload) {
+    state.downKeys = payload;
   },
 };
 
 const actions = {
-  [actionTypes.MOUSEMOVE_POSITION]({ commit, state }, position) {
-    const { mouse } = state;
-    commit(mutationTypes.MOUSE_UPDATE, Object.assign({}, mouse, { move: { position } }));
+  [actionTypes.MOUSEMOVE_POSITION]({ commit }, position) {
+    commit(mutationTypes.MOUSEMOVE_POSITION_UPDATE, { x: position[0], y: position[1] });
   },
   [actionTypes.KEYDOWN_UPDATE]({ commit, state }, downKey) {
-    const { keyboard } = state;
-    const tempKeys = [...keyboard.down.keys];
+    const tempKeys = [...state.downKeys];
     if (!tempKeys.includes(downKey)) tempKeys.push(downKey);
-    commit(
-      mutationTypes.KEYBOARD_UPDATE,
-      Object.assign({}, keyboard, { down: { keys: tempKeys } }),
-    );
+    commit(mutationTypes.DOWN_KEYS_UPDATE, tempKeys);
   },
   [actionTypes.KEYUP_UPDATE]({ commit, state }, upKey) {
-    const { keyboard } = state;
-    const tempKeys = [...keyboard.down.keys];
+    const tempKeys = [...state.downKeys];
     if (tempKeys.includes(upKey)) tempKeys.splice(tempKeys.indexOf(upKey), 1);
-    commit(
-      mutationTypes.KEYBOARD_UPDATE,
-      Object.assign({}, keyboard, { down: { keys: tempKeys } }),
-    );
+    commit(mutationTypes.DOWN_KEYS_UPDATE, tempKeys);
   },
 };
 
