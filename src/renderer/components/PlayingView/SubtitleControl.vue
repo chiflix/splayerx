@@ -469,6 +469,7 @@ export default {
     });
     this.$bus.$on('find-no-subtitle', () => {
       this.currentSubIden = -1;
+      this.offCurrentSubtitle();
     });
   },
 };
