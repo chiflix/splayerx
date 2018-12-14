@@ -59,6 +59,9 @@ export default {
   },
   watch: {
     originSrc(newVal) {
+      this.zhIndex = -1;
+      this.twIndex = -1;
+      this.enIndex = -1;
       this.resetSubtitles();
       this.getSubtitlesList(newVal).then((result) => {
         if (result.length > 0) {
