@@ -12,7 +12,7 @@
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
     <notification-bubble ref="nextVideoUI"/>
-    <recent-playlist class="recent-playlist"
+    <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
     :mousemove="eventInfo.get('mousemove')"
     :isDragging.sync="isDragging"
@@ -215,6 +215,9 @@ export default {
       this.progressTimebar.style.width = `${100 * (videodata.time / this.duration)}%`;
       this.$refs.theTimeCodes.updateTimeContent(videodata.time);
       this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
+      if (this.displayState['recent-playlist']) {
+        this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
+      }
 
       // Use Map constructor to shallow-copy eventInfo
       const lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
