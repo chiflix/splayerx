@@ -246,7 +246,6 @@ export default {
       if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
         this.getVideoCover();
       }
-      console.log('hhh');
       // TODO: This part move to TheVideoController.vue is better.
       if (videodata.time >= this.duration && this.nextVideo) {
         this.openFile(this.nextVideo);
