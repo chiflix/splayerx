@@ -144,4 +144,12 @@ export default {
     nextInFolder: '文件夹中下一視頻',
     nextInPlaylist: '播放列表中下一視頻',
   },
+  subtitle: {
+    language: {
+      zh: '中文 (簡體)',
+      'zh-CN': '中文 (簡體)',
+      'zh-TW': '中文 (繁體)',
+      en: '英文',
+    },
+  },
 };

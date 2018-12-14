@@ -145,5 +145,13 @@ export default {
     nextInFolder: 'Next in Folder',
     nextInPlaylist: 'Next in Playlist',
   },
+  subtitle: {
+    language: {
+      zh: 'Chinese (Simplified)',
+      'zh-CN': 'Chinese (Simplified)',
+      'zh-TW': 'Chinese (Traditional)',
+      en: 'English',
+    },
+  },
 };
 
