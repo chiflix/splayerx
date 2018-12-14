@@ -162,17 +162,13 @@ export default {
         id: subtitle[0],
         name: this.getOnlineSubName(subtitle[1]),
       }));
-      try {
-        return (await Promise.all([
-          Sagi.mediaTranslate(hash, 'zh'),
-          Sagi.mediaTranslate(hash, 'en'),
-        ]))
-          .filter(result => !(result instanceof Error))
-          .map(result => getSubtitle(result))
-          .reduce((prev, curr) => prev.concat(curr), []);
-      } catch (err) {
-        return err;
-      }
+      return (await Promise.all([
+        Sagi.mediaTranslate(hash, 'zh'),
+        Sagi.mediaTranslate(hash, 'en'),
+      ].map(promise => promise.catch(err => err))))
+        .filter(result => !(result instanceof Error))
+        .map(result => getSubtitle(result))
+        .reduce((prev, curr) => prev.concat(curr), []);
     },
     getOnlineSubName(code) {
       const romanNum = ['I', 'II', 'III']; // may use package romanize in the future
