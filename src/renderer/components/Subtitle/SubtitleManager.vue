@@ -52,6 +52,9 @@ export default {
       systemLocale: '',
       subtitleTime: {},
       localPremiumSubtitles: {},
+      zhIndex: -1,
+      enIndex: -1,
+      twIndex: -1,
     };
   },
   watch: {
@@ -138,7 +141,8 @@ export default {
             (file.includes(filename) && extensionRegex.test(file)));
           result = subtitles.map(subtitle => ({
             path: join(dirname(videoSrc), subtitle),
-            name: filename, // subtitle.replace(filename, '').replace(extensionRegex, '').replace('.', '')
+            name: filename,
+            // subtitle.replace(filename, '').replace(extensionRegex, '').replace('.', '')
             ext: extname(subtitle).slice(1),
           }));
           resolve(result);
@@ -152,11 +156,24 @@ export default {
         language_code: subtitle[1],
         type: 'online',
         id: subtitle[0],
+        name: this.getOnlineSubName(subtitle[1]),
       }));
       const zhCNList = getSubtitle(await Sagi.mediaTranslate(hash, 'zh-CN'));
       const zhTWList = getSubtitle(await Sagi.mediaTranslate(hash, 'zh-TW'));
       const enList = getSubtitle(await Sagi.mediaTranslate(hash, 'en'));
       return [].concat(...zhCNList, ...zhTWList, ...enList);
+    },
+    getOnlineSubName(code) {
+      const romanNum = ['I', 'II', 'III'];
+      if (code === 'en') {
+        this.enIndex += 1;
+        return `${this.$t(`subtitle.language.${code}`)} ${romanNum[this.enIndex]}`;
+      } else if (code === 'zh-TW') {
+        this.twIndex += 1;
+        return `${this.$t(`subtitle.language.${code}`)} ${romanNum[this.twIndex]}`;
+      }
+      this.zhIndex += 1;
+      return `${this.$t(`subtitle.language.${code}`)} ${romanNum[this.zhIndex]}`;
     },
     getSubtitleCallback(type) {
       switch (type) {
@@ -224,19 +241,12 @@ export default {
         })),
       )(subtitleList);
     });
-    this.$bus.$on('refresh-subtitle', async (hash) => {
-      const online = await Sagi.mediaTranslate(hash);
-      let onlineNormalizer = [];
-      online.array[1].forEach((sub) => {
-        if (typeof sub[0] === 'string' && sub[0].length) {
-          onlineNormalizer.push({
-            type: 'online',
-            hash: sub[0],
-            id: uuidv4(),
-          });
-        }
-      });
-      this.refreshSubtitle(onlineNormalizer);
+    this.$bus.$on('refresh-subtitle', async (src) => {
+      this.zhIndex = -1;
+      this.twIndex = -1;
+      this.enIndex = -1;
+      const online2 = await this.getOnlineSubtitlesList(src);
+      this.refreshSubtitle(online2);
       this.changeCurrentSubtitle(this.subtitleList[0].id);
       this.$bus.$emit('finish-refresh');
     });

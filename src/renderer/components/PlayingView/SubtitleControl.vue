@@ -62,7 +62,7 @@
                       <div class="text"
                         :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
                           whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                        }">{{ item.path ? getSubName(item.path) : 'subtitle' }}</div>
+                        }">{{ item.path ? getSubName(item.path) : item.name }}</div>
                       </div>
                   </div>
 
@@ -237,7 +237,7 @@ export default {
         }, 20000);
         this.currentSubIden = 0;
         document.querySelector('.scrollScope').scrollTop = 0;
-        this.$bus.$emit('refresh-subtitle', this.mediaHash);
+        this.$bus.$emit('refresh-subtitle', this.originSrc);
       } else {
         this.$bus.$emit('privacy-confirm');
       }
@@ -348,7 +348,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'mediaHash', 'privacyAgreement']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement']),
     textHeight() {
       if (this.winWidth > 512 && this.winWidth <= 854) {
         return 13;

@@ -146,9 +146,9 @@ export default {
   },
   subtitle: {
     language: {
-      zh: '中文（简体）',
-      'zh-CN': '中文（简体）',
-      'zh-TW': '中文（繁体）',
+      zh: '中文(简体)',
+      'zh-CN': '中文(简体)',
+      'zh-TW': '中文(繁体)',
       en: '英语',
     },
   },
