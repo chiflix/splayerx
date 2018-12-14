@@ -115,10 +115,21 @@ export default {
     },
     rightFakeProgressBackgroundColor() {
       const hoveredEnd = this.hoveredPercent >= 100;
-      const playedEnd = Math.round(this.currentTime) >= Math.round(this.duration);
-      const opacity = this.mouseleave ? // eslint-disable-line no-nested-ternary
-        (playedEnd ? 0.9 : this.hovering ? 0.3 : 0) : // eslint-disable-line no-nested-ternary
-        (((hoveredEnd && !playedEnd) || (!hoveredEnd && playedEnd)) ? 0.3 : 0.1);
+      const playedEnd = this.currentTime >= this.duration;
+      let opacity = 0;
+      if (this.mouseleave) {
+        if (playedEnd) {
+          opacity = 0.9;
+        } else if (this.hovering && hoveredEnd) {
+          opacity = 0.3;
+        } else if (this.hovering && !hoveredEnd) {
+          opacity = 0.1;
+        } else {
+          opacity = 0;
+        }
+      } else {
+        opacity = hoveredEnd !== playedEnd ? 0.3 : 0.1;
+      }
       return this.whiteWithOpacity(hoveredEnd && playedEnd ? 0.9 : opacity);
     },
   },
