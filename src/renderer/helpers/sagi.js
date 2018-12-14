@@ -28,11 +28,16 @@ class Sagi {
     }
   }
 
-  mediaTranslate(mediaIdentity) {
+  mediaTranslate(mediaIdentity, languageCode) {
     return new Promise((resolve, reject) => {
       const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
       const req = new translationMsg.MediaTranslationRequest();
       req.setMediaIdentity(mediaIdentity);
+      if (!languageCode || languageCode.length === 0) {
+        console.log('warning: empty languageCode in mediaTranslate, fail back to "zh"');
+        languageCode = 'zh';
+      }
+      req.setLanguageCode(languageCode);
       client.translateMedia(req, (err, response) => {
         if (err) {
           reject(err);
