@@ -9,7 +9,7 @@
         top: subTop(index),
         transform: transPos(index),
       }"
-      :class="!isVtt && !cue.tags.pos ? `subtitle-alignment${cue.tags.alignment}` : isVtt && cue.tags.line !=='' && cue.tags.position !== '' ? '' : 'subtitle-alignment2'">
+      :class="avaliableClass(index)">
       <CueRenderer class="cueRender"
         :text="cue.text"
         :settings="cue.tags"
@@ -43,6 +43,9 @@ export default {
       videoSegments: [],
       currentSegment: [0, 0, false],
       elapsedSegmentTime: 0,
+      subToTop: false,
+      lastIndex: [],
+      lastAlignment: [],
     };
   },
   computed: {
@@ -135,11 +138,35 @@ export default {
         }
       }
     });
+    this.$bus.$on('subtitle-to-top', (val) => {
+      this.subToTop = val;
+      if (!val) {
+        this.lastIndex.forEach((index) => {
+          this.currentTags[index].alignment = this.lastAlignment[index];
+        });
+      }
+      this.lastIndex = [];
+      this.lastAlignment = [];
+    });
   },
   methods: {
     ...mapActions({
       updateDuration: 'SUBTITLE_DURATION_UPDATE',
     }),
+    avaliableClass(index) {
+      if (!this.isVtt && !this.currentTags[index].pos) {
+        if (this.subToTop && this.currentTags[index].alignment !== 8) {
+          this.lastIndex.push(index);
+          this.lastAlignment.push(this.currentTags[index].alignment);
+          this.currentTags[index].alignment = 8;
+          return 'subtitle-alignment8';
+        }
+        return `subtitle-alignment${this.currentTags[index].alignment}`;
+      } else if (this.isVtt && this.currentTags[index].line !== '' && this.currentTags[index].position !== '') {
+        return '';
+      }
+      return 'subtitle-alignment2';
+    },
     lineNum(index) {
       const lastNum = index;
       const { currentTexts: texts, currentTags: tags } = this;
@@ -159,7 +186,7 @@ export default {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
       const arr = [1, 2, 3];
-      if (arr.includes(tags[index].alignment)) {
+      if (arr.includes(tags[index].alignment) && !this.subToTop) {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
       return `translateY(${100 * this.lineNum(index)}%)`;
