@@ -138,8 +138,7 @@ export default {
             (file.includes(filename) && extensionRegex.test(file)));
           result = subtitles.map(subtitle => ({
             path: join(dirname(videoSrc), subtitle),
-            name: subtitle
-              .replace(filename, '').replace(extensionRegex, '').replace('.', '') || filename,
+            name: filename, // subtitle.replace(filename, '').replace(extensionRegex, '').replace('.', '')
             ext: extname(subtitle).slice(1),
           }));
           resolve(result);
