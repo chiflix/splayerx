@@ -99,7 +99,6 @@
             "m2v",
             "m2t",
             "m2ts",
-            "m4v",
             "mp2",
             "mp2v",
             "mp4v",
@@ -157,12 +156,12 @@
           "icon": "build/icons/flv.icns"
         },
         {
-          "name": "M4A",
+          "name": "M4V",
           "ext": [
-            "m4a"
+            "m4v"
           ],
           "role": "Viewer",
-          "icon": "build/icons/m4a.icns"
+          "icon": "build/icons/m4v.icns"
         },
         {
           "name": "MKV",
@@ -235,7 +234,6 @@
             "m2v",
             "m2t",
             "m2ts",
-            "m4v",
             "mp2",
             "mp2v",
             "mp4v",
@@ -293,12 +291,12 @@
           "icon": "build/icons/flv.ico"
         },
         {
-          "name": "M4A",
+          "name": "M4V",
           "ext": [
-            "m4a"
+            "m4v"
           ],
           "role": "Viewer",
-          "icon": "build/icons/m4a.ico"
+          "icon": "build/icons/m4v.ico"
         },
         {
           "name": "MKV",
