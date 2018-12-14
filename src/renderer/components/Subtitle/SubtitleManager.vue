@@ -167,7 +167,7 @@ export default {
       return [].concat(...zhCNList, ...zhTWList, ...enList);
     },
     getOnlineSubName(code) {
-      const romanNum = ['I', 'II', 'III'];
+      const romanNum = ['I', 'II', 'III']; // may use package romanize in the future
       if (code === 'en') {
         this.enIndex += 1;
         return `${this.$t(`subtitle.language.${code}`)} ${romanNum[this.enIndex]}`;
