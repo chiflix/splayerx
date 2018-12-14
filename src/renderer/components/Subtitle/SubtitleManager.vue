@@ -162,9 +162,13 @@ export default {
         id: subtitle[0],
         name: this.getOnlineSubName(subtitle[1]),
       }));
-      const zhCNList = getSubtitle(await Sagi.mediaTranslate(hash, 'zh'));
-      const enList = getSubtitle(await Sagi.mediaTranslate(hash, 'en'));
-      return [].concat(...zhCNList, ...enList);
+      return (await Promise.all([
+        Sagi.mediaTranslate(hash, 'zh'),
+        Sagi.mediaTranslate(hash, 'en'),
+      ]))
+        .filter(result => !(result instanceof Error))
+        .map(result => getSubtitle(result))
+        .reduce((prev, curr) => prev.concat(curr), []);
     },
     getOnlineSubName(code) {
       const romanNum = ['I', 'II', 'III']; // may use package romanize in the future
