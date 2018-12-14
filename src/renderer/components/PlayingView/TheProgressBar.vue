@@ -11,7 +11,7 @@
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
       :positionOfThumbnail="thumbnailPosition"
-      :hoveredEnd="hoveredPercent === '100%' && !!nextVideo"
+      :hoveredEnd="hoveredPercent === 100 && !!nextVideo"
      />
     <div class="fake-button left" ref="leftInvisible"
       :style="{ height: fakeButtonHeight }">
