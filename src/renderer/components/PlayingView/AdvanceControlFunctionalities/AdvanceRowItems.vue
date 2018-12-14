@@ -62,6 +62,7 @@ export default {
       hoverIndex: -1,
       selectedIndex: 1,
       moveLength: '',
+      lastSize: 1,
     };
   },
   props: {
@@ -219,6 +220,16 @@ export default {
   },
   mounted() {
     this.$set(this.lists[1], 'chosen', true);
+    this.$bus.$on('subtitle-to-top', (val) => {
+      if (this.item === this.$t('advance.fontSize')) {
+        if (val) {
+          this.lastSize = this.chosenSize;
+          this.handleClick(0);
+        } else {
+          this.handleClick(this.lastSize);
+        }
+      }
+    });
   },
   methods: {
     handleOver(index) {

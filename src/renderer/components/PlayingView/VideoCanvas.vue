@@ -269,6 +269,7 @@ export default {
       this.videoConfigInitialize({
         audioTrackList: [],
       });
+      this.play();
     },
     currentTime(val) {
       if (!this.coverFinded && val - this.lastCoverDetectingTime > 1) {

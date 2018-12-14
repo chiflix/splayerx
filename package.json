@@ -72,157 +72,273 @@
       "target": [
         "dmg"
       ],
-      "fileAssociations": {
-        "name": "Video",
-        "ext": [
-          "3g2",
-          "3gp",
-          "3gp2",
-          "3gpp",
-          "amv",
-          "asf",
-          "avi",
-          "bik",
-          "bin",
-          "crf",
-          "divx",
-          "drc",
-          "dv",
-          "dvr-ms",
-          "evo",
-          "f4v",
-          "flv",
-          "gvi",
-          "gxf",
-          "iso",
-          "m1v",
-          "m2v",
-          "m2t",
-          "m2ts",
-          "m4v",
-          "mkv",
-          "mov",
-          "mp2",
-          "mp2v",
-          "mp4",
-          "mp4v",
-          "mpe",
-          "mpeg",
-          "mpeg1",
-          "mpeg2",
-          "mpeg4",
-          "mpg",
-          "mpv2",
-          "mts",
-          "mtv",
-          "mxf",
-          "mxg",
-          "nsv",
-          "nuv",
-          "ogg",
-          "ogm",
-          "ogv",
-          "ogx",
-          "ps",
-          "rec",
-          "rm",
-          "rmvb",
-          "rpl",
-          "thp",
-          "tod",
-          "tp",
-          "ts",
-          "tts",
-          "txd",
-          "vob",
-          "vro",
-          "webm",
-          "wm",
-          "wmv",
-          "wtv",
-          "xesc"
-        ],
-        "mimeType": "video/avi;video/msvideo;video/x-msvideo;video/mp4;video/x-matroska;video/mpeg;video/ogg;video/webm;video/3gpp;video/3gpp2;",
-        "role": "Viewer",
-        "icon": "build/icons/file.icns"
-      }
+      "fileAssociations": 
+      [
+        {
+          "name": "Video",
+          "ext": [
+            "3g2",
+            "3gp",
+            "3gp2",
+            "3gpp",
+            "amv",
+            "asf",
+            "bik",
+            "bin",
+            "crf",
+            "divx",
+            "drc",
+            "dv",
+            "dvr-ms",
+            "evo",
+            "f4v",
+            "gvi",
+            "gxf",
+            "iso",
+            "m1v",
+            "m2v",
+            "m2t",
+            "m2ts",
+            "mp2",
+            "mp2v",
+            "mp4v",
+            "mpe",
+            "mpeg",
+            "mpeg1",
+            "mpeg2",
+            "mpeg4",
+            "mpg",
+            "mpv2",
+            "mts",
+            "mtv",
+            "mxf",
+            "mxg",
+            "nsv",
+            "nuv",
+            "ogg",
+            "ogm",
+            "ogv",
+            "ogx",
+            "ps",
+            "rec",
+            "rm",
+            "rpl",
+            "thp",
+            "tod",
+            "tp",
+            "ts",
+            "tts",
+            "txd",
+            "vob",
+            "vro",
+            "webm",
+            "wm",
+            "wtv",
+            "xesc"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/others.icns"
+        },
+        {
+          "name": "AVI",
+          "ext": [
+            "avi"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/avi.icns"
+        },
+        {
+          "name": "FLV",
+          "ext": [
+            "flv"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/flv.icns"
+        },
+        {
+          "name": "M4V",
+          "ext": [
+            "m4v"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/m4v.icns"
+        },
+        {
+          "name": "MKV",
+          "ext": [
+            "mkv"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/mkv.icns"
+        },
+        {
+          "name": "MOV",
+          "ext": [
+            "mov"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/mov.icns"
+        },
+        {
+          "name": "MP4",
+          "ext": [
+            "mp4"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/mp4.icns"
+        },
+        {
+          "name": "RMVB",
+          "ext": [
+            "rmvb"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/rmvb.icns"
+        },
+        {
+          "name": "WMV",
+          "ext": [
+            "wmv"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/wmv.icns"
+        }
+      ]
     },
     "win": {
       "icon": "build/icons/icon.ico",
-      "fileAssociations": {
-        "name": "Video",
-        "ext": [
-          "3g2",
-          "3gp",
-          "3gp2",
-          "3gpp",
-          "amv",
-          "asf",
-          "avi",
-          "bik",
-          "bin",
-          "crf",
-          "divx",
-          "drc",
-          "dv",
-          "dvr-ms",
-          "evo",
-          "f4v",
-          "flv",
-          "gvi",
-          "gxf",
-          "iso",
-          "m1v",
-          "m2v",
-          "m2t",
-          "m2ts",
-          "m4v",
-          "mkv",
-          "mov",
-          "mp2",
-          "mp2v",
-          "mp4",
-          "mp4v",
-          "mpe",
-          "mpeg",
-          "mpeg1",
-          "mpeg2",
-          "mpeg4",
-          "mpg",
-          "mpv2",
-          "mts",
-          "mtv",
-          "mxf",
-          "mxg",
-          "nsv",
-          "nuv",
-          "ogg",
-          "ogm",
-          "ogv",
-          "ogx",
-          "ps",
-          "rec",
-          "rm",
-          "rmvb",
-          "rpl",
-          "thp",
-          "tod",
-          "tp",
-          "ts",
-          "tts",
-          "txd",
-          "vob",
-          "vro",
-          "webm",
-          "wm",
-          "wmv",
-          "wtv",
-          "xesc"
-        ],
-        "mimeType": "video/avi;video/msvideo;video/x-msvideo;video/mp4;video/x-matroska;video/mpeg;video/ogg;video/webm;video/3gpp;video/3gpp2;",
-        "role": "Viewer",
-        "icon": "build/icons/file.ico"
-      }
+      "fileAssociations": 
+      [
+        {
+          "name": "Video",
+          "ext": [
+            "3g2",
+            "3gp",
+            "3gp2",
+            "3gpp",
+            "amv",
+            "asf",
+            "bik",
+            "bin",
+            "crf",
+            "divx",
+            "drc",
+            "dv",
+            "dvr-ms",
+            "evo",
+            "f4v",
+            "gvi",
+            "gxf",
+            "iso",
+            "m1v",
+            "m2v",
+            "m2t",
+            "m2ts",
+            "mp2",
+            "mp2v",
+            "mp4v",
+            "mpe",
+            "mpeg",
+            "mpeg1",
+            "mpeg2",
+            "mpeg4",
+            "mpg",
+            "mpv2",
+            "mts",
+            "mtv",
+            "mxf",
+            "mxg",
+            "nsv",
+            "nuv",
+            "ogg",
+            "ogm",
+            "ogv",
+            "ogx",
+            "ps",
+            "rec",
+            "rm",
+            "rpl",
+            "thp",
+            "tod",
+            "tp",
+            "ts",
+            "tts",
+            "txd",
+            "vob",
+            "vro",
+            "webm",
+            "wm",
+            "wtv",
+            "xesc"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/others.ico"
+        },
+        {
+          "name": "AVI",
+          "ext": [
+            "avi"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/avi.ico"
+        },
+        {
+          "name": "FLV",
+          "ext": [
+            "flv"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/flv.ico"
+        },
+        {
+          "name": "M4V",
+          "ext": [
+            "m4v"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/m4v.ico"
+        },
+        {
+          "name": "MKV",
+          "ext": [
+            "mkv"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/mkv.ico"
+        },
+        {
+          "name": "MOV",
+          "ext": [
+            "mov"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/mov.ico"
+        },
+        {
+          "name": "MP4",
+          "ext": [
+            "mp4"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/mp4.ico"
+        },
+        {
+          "name": "RMVB",
+          "ext": [
+            "rmvb"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/rmvb.ico"
+        },
+        {
+          "name": "WMV",
+          "ext": [
+            "wmv"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/wmv.ico"
+        }
+      ]
     },
     "linux": {
       "icon": "build/icons",
