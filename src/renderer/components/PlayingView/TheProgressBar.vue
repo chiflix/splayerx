@@ -46,13 +46,14 @@
     </div>
     <div class="fake-button right" ref="rightInvisible"
       :style="{ height: fakeButtonHeight }">
-      <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.rightFakeProgressBackgroundColor }"></div></div>
+      <div class="fake-progress" ref="fakeProgress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.rightFakeProgressBackgroundColor }"></div></div>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex';
 import ThePreviewThumbnail from './ThePreviewThumbnail.vue';
 import { videodata } from '../../store/video';
+
 export default {
   name: 'the-progress-bar',
   components: {
@@ -103,9 +104,36 @@ export default {
       if (this.hoveredCurrentTime > 0) opacity = 0.9;
       return this.whiteWithOpacity(opacity);
     },
-    rightFakeProgressBackgroundColor() {
+  },
+  watch: {
+    winWidth(newValue) {
+      this.thumbnailWidth = this.winWidthToThumbnailWidth(newValue);
+    },
+  },
+  methods: {
+    updateProgressBar(time) {
+      const playedPercent = 100 * (time / this.duration);
+
+      const {
+        hoveredProgress, playedProgress, defaultProgress, fakeProgress,
+      } = this.$refs;
+
+      hoveredProgress.style.width = this.hoveredPercent <= playedPercent ? `${this.hoveredPercent}%` : `${this.hoveredPercent - playedPercent}%`;
+      hoveredProgress.style.backgroundColor = this.hoveredPercent <= playedPercent ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
+      hoveredProgress.style.order = this.hoveredPercent <= playedPercent ? '0' : '1';
+
+      playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
+      playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
+      playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
+
+      defaultProgress.style.backgroundColor = this.hovering ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0)';
+
+      fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(time);
+    },
+
+    rightFakeProgressBackgroundColor(time) {
       const hoveredEnd = this.hoveredPercent >= 100;
-      const playedEnd = Math.round(videodata.time) >= Math.round(this.duration);
+      const playedEnd = Math.round(time) >= Math.round(this.duration);
       let opacity = 0;
       if (this.mouseleave) {
         if (playedEnd) {
@@ -121,30 +149,6 @@ export default {
         opacity = hoveredEnd !== playedEnd ? 0.3 : 0.1;
       }
       return this.whiteWithOpacity(hoveredEnd && playedEnd ? 0.9 : opacity);
-    },
-  },
-  watch: {
-    winWidth(newValue) {
-      this.thumbnailWidth = this.winWidthToThumbnailWidth(newValue);
-    },
-  },
-  methods: {
-    updateProgressBar(time) {
-      const playedPercent = 100 * (time / this.duration);
-
-      const hoveredProgress = this.$refs.hoveredProgress;
-      const playedProgress = this.$refs.playedProgress;
-      const defaultProgress = this.$refs.defaultProgress;
-
-      hoveredProgress.style.width = this.hoveredPercent <= playedPercent ? `${this.hoveredPercent}%` : `${this.hoveredPercent - playedPercent}%`;
-      hoveredProgress.style.backgroundColor = this.hoveredPercent <= playedPercent ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
-      hoveredProgress.style.order = this.hoveredPercent <= playedPercent ? '0' : '1';
-
-      playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
-      playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
-      playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
-
-      defaultProgress.style.backgroundColor: this.hovering ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0)';
     },
     handleMousemove(event) {
       this.hoveredPageX = event.pageX;
