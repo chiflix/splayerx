@@ -92,6 +92,7 @@ export default {
       this.$bus.$emit('video-loaded');
       this.getVideoCover();
       this.changeWindowSize();
+      requestAnimationFrame(this.checkPresentTime);
     },
     onAudioTrack(event) {
       const { type, track } = event;
@@ -245,15 +246,15 @@ export default {
       if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
         this.getVideoCover();
       }
-
+      console.log('hhh');
       // TODO: This part move to TheVideoController.vue is better.
       if (videodata.time >= this.duration && this.nextVideo) {
         this.openFile(this.nextVideo);
       } else if (videodata.time >= this.duration) {
         this.pause();
+      } else {
+        requestAnimationFrame(this.checkPresentTime);
       }
-
-      requestAnimationFrame(this.checkPresentTime);
     },
   },
   computed: {
