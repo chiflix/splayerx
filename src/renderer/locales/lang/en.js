@@ -40,7 +40,7 @@ export default {
       loadSubtitleFile: 'Load Subtitle File…',
       langZhCN: 'Chinese',
       langEn: 'English',
-      noSubtitle: 'No Subtitle',
+      noSubtitle: 'None',
       mainSubtitle: 'Primary Subtitle',
       secondarySubtitle: 'Secondary Subtitle',
       subtitleStyle: 'Font Style',

@@ -40,7 +40,7 @@ export default {
       mainSubtitle: '第一字幕',
       langZhCN: '中文',
       langEn: '英文',
-      noSubtitle: '無字幕',
+      noSubtitle: '無',
       secondarySubtitle: '第二字幕',
       subtitleStyle: '字幕樣式',
       style1: '電影風格',
