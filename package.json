@@ -52,7 +52,6 @@
     "files": [
       "dist/electron/**/*"
     ],
-
     "dmg": {
       "contents": [
         {
