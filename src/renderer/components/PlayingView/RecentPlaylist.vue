@@ -24,7 +24,7 @@
       :style="{
         fontSize: sizeAdaption(14),
         lineHeight: sizeAdaption(13),
-      }"><span ref="lastPlayedTime">{{lastPlayedTime}}</span> {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+      }"><span ref="lastPlayedTime"></span> {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
       <div class="file-name"
         :style="{
           marginTop: sizeAdaption(9),

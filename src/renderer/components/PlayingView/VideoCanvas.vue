@@ -51,6 +51,7 @@ export default {
       seekTime: [0],
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
+      checkPresentTimeID: null,
     };
   },
   methods: {
@@ -240,6 +241,20 @@ export default {
       }
       this.lastCoverDetectingTime = videodata.time;
     },
+    checkPresentTime() {
+      if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
+        this.getVideoCover();
+      }
+
+      // TODO: This part move to TheVideoController.vue is better.
+      if (videodata.time >= this.duration && this.nextVideo) {
+        this.openFile(this.nextVideo);
+      } else if (videodata.time >= this.duration) {
+        this.pause();
+      }
+
+      requestAnimationFrame(this.checkPresentTime);
+    },
   },
   computed: {
     ...mapGetters([
@@ -272,16 +287,11 @@ export default {
       });
       this.play();
     },
-    currentTime(val) {
-      if (!this.coverFinded && val - this.lastCoverDetectingTime > 1) {
-        this.getVideoCover();
-      }
-      if (val >= this.duration && this.nextVideo) {
-        this.openFile(this.nextVideo);
-      } else if (val >= this.duration) {
-        this.pause();
-      }
-    },
+  },
+  beforeDestroy() {
+    if (this.checkPresentTimeID) {
+      cancelAnimationFrame(this.checkPresentTimeID);
+    }
   },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
@@ -313,6 +323,7 @@ export default {
       this.saveScreenshot();
       this.saveSubtitleStyle();
     };
+    this.checkPresentTimeID = requestAnimationFrame(this.checkPresentTime);
   },
 };
 </script>
