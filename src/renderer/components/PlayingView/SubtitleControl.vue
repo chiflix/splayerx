@@ -14,12 +14,13 @@
           <div class="element bottom"><div class="element middle"><div class="element content">
 
             <div class="topContainer">
-              <div class="title">字幕选择</div>
+              <div class="title">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
               <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
                 :style="{
                   cursor: 'pointer',
                   transform: `rotate(${rotateTime * 360}deg)`,
-                  transition: 'transform 1s linear'
+                  transition: 'transform 1s linear',
+                  transformOrigin: 'center',
                 }"/>
             </div>
 
@@ -41,7 +42,7 @@
                         height: `${itemHeight}px`,
                         cursor: currentSubIden === -1 ? 'default' : 'pointer',
                       }">
-                      <div class="text">无字幕</div>
+                      <div class="text">{{ this.$t('msg.subtitle.noSubtitle') }}</div>
                     </div>
                   </div>
 
@@ -99,8 +100,9 @@ import difference from 'lodash/difference';
 import path from 'path';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
-import * as animationData from '@/assets/subtitle.json';
+import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
+
 export default {
   name: 'subtitle-control',
   props: {
@@ -128,11 +130,11 @@ export default {
       hoverIndex: -5,
       hiddenText: false,
       hoverHeight: 0,
-      shouldHidden: false,
       timer: null,
       count: 0,
       rotateTime: 0,
       loadingType: '',
+      detailTimer: null,
     };
   },
   components: {
@@ -194,9 +196,18 @@ export default {
     this.$bus.$on('finish-refresh', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
+      setTimeout(() => {
+        this.timer = null;
+      }, 1000);
     });
     this.$bus.$on('menu-sub-refresh', () => {
       this.handleRefresh();
+    });
+    this.$bus.$on('menu-sub-change', (index) => {
+      this.toggleItemClick(index);
+    });
+    this.$bus.$on('subtitle-off', () => {
+      this.toggleSubtitleOff();
     });
   },
   methods: {
@@ -210,20 +221,26 @@ export default {
       return path.basename(subPath);
     },
     handleRefresh() {
-      this.timer = setInterval(() => {
-        this.count += 1;
-        this.rotateTime = Math.ceil(this.count / 100);
-      }, 10);
-      setTimeout(() => {
+      if (this.privacyAgreement) {
         if (this.timer) {
-          clearInterval(this.timer);
-          this.count = this.rotateTime * 100;
+          return;
         }
-      }, 20000);
-      this.currentSubIden = 0;
-      document.querySelector('.scrollScope').scrollTop = 0;
-      this.$bus.$emit('refresh-subtitle', this.mediaHash);
-      this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
+        this.timer = setInterval(() => {
+          this.count += 1;
+          this.rotateTime = Math.ceil(this.count / 100);
+        }, 10);
+        setTimeout(() => {
+          if (this.timer) {
+            clearInterval(this.timer);
+            this.count = this.rotateTime * 100;
+          }
+        }, 20000);
+        this.currentSubIden = 0;
+        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$bus.$emit('refresh-subtitle', this.mediaHash);
+      } else {
+        this.$bus.$emit('privacy-confirm');
+      }
     },
     orify(...args) {
       return args.some(arg => arg == true); // eslint-disable-line
@@ -289,6 +306,7 @@ export default {
       switch (this.clicks) {
         case 1:
           this.$emit('update:showAttached', true);
+          this.$emit('conflict-resolve', this.$options.name);
           break;
         case 2:
           this.$emit('update:showAttached', false);
@@ -301,22 +319,21 @@ export default {
     },
     toggleItemsMouseOver(index) {
       if (index >= 0) {
+        clearTimeout(this.detailTimer);
         const hoverItem = document.querySelector(`#item${index} .text`);
         if (hoverItem.clientWidth < hoverItem.scrollWidth) {
           this.shouldHidden = true;
           this.hoverHeight = this.textHeight *
             (Math.ceil(hoverItem.scrollWidth / hoverItem.clientWidth) - 1);
-          setTimeout(() => {
-            if (this.shouldHidden) {
-              this.hiddenText = true;
-            }
+          this.detailTimer = setTimeout(() => {
+            this.hiddenText = true;
           }, 1500);
         }
       }
       this.hoverIndex = index;
     },
     toggleItemsMouseLeave() {
-      this.shouldHidden = false;
+      clearTimeout(this.detailTimer);
       this.hoverHeight = 0;
       this.hiddenText = false;
       this.hoverIndex = -5;
@@ -329,46 +346,9 @@ export default {
       this.currentSubIden = -1;
       this.offCurrentSubtitle();
     },
-    toggleLoadServerSubtitles() {
-      this.$bus.$emit('load-server-transcripts');
-    },
-    toggleOpenFileDialog() {
-      if (this.showingPopupDialog) {
-        return;
-      }
-      const self = this;
-      const { remote } = this.$electron;
-      const { dialog } = remote;
-      const browserWindow = remote.BrowserWindow;
-      const focusWindow = browserWindow.getFocusedWindow();
-      const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
-
-      self.showingPopupDialog = true;
-      dialog.showOpenDialog(focusWindow, {
-        title: 'Open Dialog',
-        defaultPath: './',
-        filters: [{
-          name: 'Subtitle Files',
-          extensions: VALID_EXTENSION,
-        }],
-        properties: ['openFile'],
-      }, (item) => {
-        self.showingPopupDialog = false;
-        if (item) {
-          self.$bus.$emit('add-subtitle', item);
-        }
-      });
-    },
-    itemHasBeenChosen(index = 0) {
-      return index === this.currentSubIden;
-    },
-    itemTitleHasChineseChar(str) {
-      const REGEX_CHINESE = /[\u4e00-\u9fff]|[\u3400-\u4dbf]|[\u{20000}-\u{2a6df}]|[\u{2a700}-\u{2b73f}]|[\u{2b740}-\u{2b81f}]|[\u{2b820}-\u{2ceaf}]|[\uf900-\ufaff]|[\u3300-\u33ff]|[\ufe30-\ufe4f]|[\uf900-\ufaff]|[\u{2f800}-\u{2fa1f}]/u;
-      return (REGEX_CHINESE.test(str));
-    },
   },
   computed: {
-    ...mapGetters(['winWidth', 'mediaHash']),
+    ...mapGetters(['winWidth', 'mediaHash', 'privacyAgreement']),
     textHeight() {
       if (this.winWidth > 512 && this.winWidth <= 854) {
         return 13;
@@ -462,6 +442,16 @@ export default {
     },
   },
   created() {
+    this.$bus.$on('isdragging-mouseup', () => {
+      if (this.showAttached) {
+        this.anim.playSegments([79, 85]);
+      }
+    });
+    this.$bus.$on('isdragging-mousedown', () => {
+      if (this.showAttached) {
+        this.anim.playSegments([62, 64], false);
+      }
+    });
     this.$bus.$on('finish-loading', (type) => {
       const subType = ['ass', 'vtt', 'srt'];
       if (subType.includes(type)) {
@@ -476,6 +466,10 @@ export default {
     });
     this.$bus.$on('new-video-opened', () => {
       this.currentSubIden = 0;
+    });
+    this.$bus.$on('find-no-subtitle', () => {
+      this.currentSubIden = -1;
+      this.offCurrentSubtitle();
     });
   },
 };
@@ -561,6 +555,7 @@ export default {
     border-radius: 7px;
     opacity: 0.4;
     border: 0.5px solid rgba(255, 255, 255, 0.20);
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
     background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
   }
   @media screen and (min-width: 320px) and (max-width: 512px) {
@@ -582,7 +577,8 @@ export default {
         line-height: 15px;
       }
       .refresh {
-        font-size: 13px;
+        width: 13px;
+        height: 13px;
         margin: 14px 15px auto auto;
       }
     }
@@ -635,13 +631,14 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        font-size: 15px;
+        font-size: 15.6px;
         margin: 18px auto auto 19px;
         letter-spacing: 0.23px;
         line-height: 17px;
       }
       .refresh {
-        font-size: 13px;
+        width: 17px;
+        height: 17px;
         margin: 17px 19px auto auto;
       }
     }
@@ -694,13 +691,14 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        font-size: 21px;
+        font-size: 21.84px;
         margin: 24px auto auto 26px;
         letter-spacing: 0.32px;
         line-height: 23px;
       }
       .refresh {
-        font-size: 13px;
+        width: 21px;
+        height: 21px;
         margin: 23px 26px auto auto;
       }
     }

@@ -39,9 +39,10 @@ import {
   INFO_DATABASE_NAME,
   THUMBNAIL_OBJECT_STORE_NAME,
 } from '@/constants';
-import Icon from '../BaseIconContainer';
-import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
-import ThumbnailDisplay from './ThumbnailDisplay';
+import Icon from '../BaseIconContainer.vue';
+import ThumbnailVideoPlayer from './ThumbnailVideoPlayer.vue';
+import ThumbnailDisplay from './ThumbnailDisplay.vue';
+
 export default {
   components: {
     'thumbnail-video-player': ThumbnailVideoPlayer,
@@ -215,7 +216,7 @@ export default {
 <style lang="scss" scoped>
 .thumbnail-wrapper {
   position: absolute;
-  bottom: 20px;
+  bottom: 15px;
   -webkit-app-region: no-drag;
   box-sizing: content-box;
   overflow: hidden;

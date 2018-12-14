@@ -51,3 +51,8 @@ export const Subtitle = {
   OFF_SUBTITLE: 'OFF_SUBTITLE',
   REFRESH_SUBTITLE: 'REFRESH_SUBTITLE',
 };
+
+export const Input = {
+  MOUSE_UPDATE: 'MOUSE_UPDATE',
+  KEYBOARD_UPDATE: 'KEYBOARD_UPDATE',
+};

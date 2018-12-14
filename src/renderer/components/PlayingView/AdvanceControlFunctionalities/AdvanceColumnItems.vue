@@ -41,6 +41,7 @@
 
 <script>
 import { Video as videoActions } from '@/store/actionTypes';
+
 export default {
   name: 'AdvanceColumnItems',
   data() {
@@ -100,6 +101,11 @@ export default {
       this.moveLength = index * 32;
       this.$store.dispatch(videoActions.SWITCH_AUDIO_TRACK, this.tracks[index]);
     },
+  },
+  mounted() {
+    this.$bus.$on('switch-audio-track', (index) => {
+      this.handleClick(index);
+    });
   },
 };
 </script>

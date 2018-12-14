@@ -37,7 +37,7 @@
           :style="{ cursor: currentSubtitleId === '' ? 'default' : 'pointer'}">
           <div class="item2"
             :style="{
-              color: currentSubtitleId === '' ? 'rgba(255, 255, 255, 0.4)' : hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              color: currentSubtitleId === '' ? 'rgba(255, 255, 255, 0.2)' : hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">
             <div>{{ this.$t('advance.subMenu') }}</div>
@@ -50,7 +50,8 @@
       <div class="audioItems"
         @mouseenter="handleMouseenter(3)"
         @mouseleave="handleMouseleave()"
-        @click.left="handleAudioClick">
+        @click.left="handleAudioClick"
+        :style="{ cursor: 'pointer' }">
         <transition name="arrow">
           <div class="hoverAudioBack" v-show="hoverIndex === 3"></div>
         </transition>
@@ -170,12 +171,12 @@
           <div class="item2" v-show="!showTrack"
             :style="{ cursor: 2 <= trackNum ? 'pointer' : 'default' }">
             <div :style="{
-              color: trackNum < 2 ? 'rgba(255, 255, 255, 0.4)' : hoverAudioIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              color: trackNum < 2 ? 'rgba(255, 255, 255, 0.2)' : hoverAudioIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">{{ this.$t('advance.changeTrack') }}</div>
             <div class="trackDetail"
               :style="{
-                color: 2 <= trackNum ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.4)',
+                color: 2 <= trackNum ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)',
               }">{{ currentAudioTrack }}</div>
           </div>
         </transition>
@@ -197,6 +198,7 @@ import Icon from '../../BaseIconContainer.vue';
 import AdvanceColorItems from './AdvanceColorItems.vue';
 import AdvanceSelectedItemts from './AdvanceSelectItems.vue';
 import AdvanceColumnItems from './AdvanceColumnItems.vue';
+
 export default {
   name: 'AdvanceMainMenu',
   data() {
@@ -243,6 +245,11 @@ export default {
           this.showDelay = false;
           this.showTrack = false;
         }, 150);
+      }
+    },
+    trackNum(val) {
+      if (val <= 1) {
+        this.showTrack = false;
       }
     },
   },

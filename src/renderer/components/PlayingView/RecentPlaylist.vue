@@ -1,7 +1,7 @@
 <template>
 <div class="recent-playlist"
   v-show="backgroundDisplayState"
-  @mousedown="handleMousedown">
+  @mouseup="handleMouseup">
   <transition name="background-fade">
   <div class="background-gradient"
     v-show="displayState"
@@ -19,8 +19,7 @@
       :style="{
         marginTop: sizeAdaption(53),
         paddingLeft: sizeAdaption(40),
-      }"
-      @mousedown.stop="">
+      }">
       <div class="top"
       :style="{
         fontSize: sizeAdaption(14),
@@ -35,13 +34,13 @@
     </div>
     </transition>
     <div class="playlist-items"
-      @mousedown.stop=""
+      @mouseup.stop=""
       :style="{
         transition: tranFlag ? 'transform 400ms ease-in' : '',
         transform: `translateX(-${distance}px)`,
-        paddingTop: sizeAdaption(20),
-        paddingBottom: sizeAdaption(40),
-        paddingLeft: sizeAdaption(40),
+        marginTop: sizeAdaption(20),
+        marginBottom: sizeAdaption(40),
+        marginLeft: sizeAdaption(40),
       }">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
         :key="item"
@@ -57,6 +56,14 @@
         @mouseupItem="itemMouseup"
         @mouseoutItem="itemMouseout"
         @mouseoverItem="itemMouseover"/>
+      <div class="next-page"
+        v-if="thumbnailNumber < numberOfPlaylistItem"
+        @mouseup.stop=""
+        :style="{
+          marginRight: sizeAdaption(15),
+          width: `${thumbnailWidth}px`,
+          height: `${thumbnailWidth / (112 / 63)}px`,
+        }"/>
     </div>
   </div>
   </transition>
@@ -64,9 +71,9 @@
 </template>
 <script>
 import path from 'path';
-import { Video as videoAction } from '@/store/actionTypes';
 import { mapGetters } from 'vuex';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
+
 export default {
   name: 'recent-playlist',
   components: {
@@ -77,6 +84,7 @@ export default {
     displayState: Boolean,
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
+    isDragging: Boolean,
   },
   data() {
     return {
@@ -90,9 +98,18 @@ export default {
       mousePosition: [],
       canHoverItem: false,
       tranFlag: false,
+      filePathNeedToDelete: '',
     };
   },
-  mounted() {
+  created() {
+    this.$bus.$on('file-not-existed', (path) => {
+      this.filePathNeedToDelete = path;
+    });
+    this.$bus.$on('delete-file', () => {
+      this.$store.dispatch('RemovePlayingList', this.filePathNeedToDelete);
+      this.filePathNeedToDelete = '';
+    });
+    this.hoverIndex = this.playingIndex;
   },
   methods: {
     afterLeave() {
@@ -101,8 +118,12 @@ export default {
     sizeAdaption(size) {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
     },
-    handleMousedown() {
-      this.$emit('update:playlistcontrol-showattached', false);
+    handleMouseup() {
+      if (!this.isDragging) {
+        this.$emit('update:playlistcontrol-showattached', false);
+        this.$emit('conflict-resolve', this.$options.name);
+        this.$emit('update:isDragging', false);
+      }
     },
     itemMouseover(payload) {
       this.hoverIndex = payload.index;
@@ -134,9 +155,9 @@ export default {
           this.shifting = false;
           this.tranFlag = false;
         }, 400);
-      } else if (index !== this.playingIndex) {
+      } else if (index !== this.playingIndex
+        && this.filePathNeedToDelete !== this.playingList[index]) {
         this.openFile(this.playingList[index]);
-        this.$store.dispatch(videoAction.PLAY_VIDEO);
       }
     },
   },
@@ -169,9 +190,11 @@ export default {
       }
     },
     displayState(val) {
+      this.$bus.$emit('subtitle-to-top', val);
       this.canHoverItem = false;
       this.mousePosition = this.mousemove.position;
       if (val) {
+        this.$store.dispatch('UpdatePlayingList');
         this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;
@@ -229,6 +252,9 @@ export default {
       },
     },
     distance() {
+      if (this.winWidth > 1355) {
+        return this.firstIndex * (this.thumbnailWidth + ((this.winWidth / 1355) * 15));
+      }
       return this.firstIndex * (this.thumbnailWidth + 15);
     },
     maxIndex() {
@@ -312,6 +338,7 @@ export default {
     .playlist-items {
       -webkit-app-region: no-drag;
       display: flex;
+      width: fit-content;
       .item {
         position: relative;
         background-color: rgba(255,255,255,0.1);

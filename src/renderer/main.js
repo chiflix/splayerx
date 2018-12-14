@@ -7,7 +7,7 @@ import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
 
-import App from '@/App';
+import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
@@ -17,9 +17,11 @@ import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
+
 require('source-map-support').install();
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
+
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
@@ -28,6 +30,20 @@ Vue.config.warnHandler = (warn) => {
 Vue.config.errorHandler = (err) => {
   addLog.methods.addLog('error', err);
 };
+Vue.directive('hidden', {
+  update(el, binding) {
+    const { oldValue, value } = binding;
+    if (oldValue !== value) {
+      if (value) {
+        el.classList.add('fade-in');
+        el.classList.remove('fade-out');
+      } else {
+        el.classList.add('fade-out');
+        el.classList.remove('fade-in');
+      }
+    }
+  },
+});
 
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
@@ -59,7 +75,43 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement', 'mediaHash']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused']),
+    updateFullScreen() {
+      if (this.isFullScreen) {
+        return {
+          label: this.$t('msg.window_.exitFullScreen'),
+          accelerator: 'Esc',
+          click: () => {
+            this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
+          },
+        };
+      }
+      return {
+        label: this.$t('msg.window_.enterFullScreen'),
+        accelerator: 'F',
+        click: () => {
+          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
+        },
+      };
+    },
+    updatePlayOrPause() {
+      if (!this.paused) {
+        return {
+          label: `${this.$t('msg.playback.pause')}`,
+          accelerator: 'Space',
+          click: () => {
+            this.$bus.$emit('toggle-playback');
+          },
+        };
+      }
+      return {
+        label: `${this.$t('msg.playback.play')}`,
+        accelerator: 'Space',
+        click: () => {
+          this.$bus.$emit('toggle-playback');
+        },
+      };
+    },
   },
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
@@ -68,6 +120,9 @@ new Vue({
       }
     });
     this.$store.dispatch('getLocalPreference');
+    this.$bus.$on('delete-file', () => {
+      this.refreshMenu();
+    });
   },
   watch: {
     chosenStyle(val) {
@@ -91,12 +146,78 @@ new Vue({
       }
     },
     volume(val) {
-      this.menu.getMenuItemById('mute').checked = val <= 0;
+      if (val <= 0) {
+        this.menu.getMenuItemById('mute').checked = true;
+        this.menu.getMenuItemById('deVolume').enabled = false;
+      } else if (val >= 1) {
+        this.menu.getMenuItemById('mute').checked = false;
+        this.menu.getMenuItemById('inVolume').enabled = false;
+      } else {
+        this.menu.getMenuItemById('inVolume').enabled = true;
+        this.menu.getMenuItemById('deVolume').enabled = true;
+        this.menu.getMenuItemById('mute').checked = false;
+      }
     },
     muted(val) {
       if (val) {
         this.menu.getMenuItemById('mute').checked = val;
       }
+    },
+    subtitleList(val, oldval) {
+      if (val.length !== oldval.length) {
+        this.refreshMenu();
+      }
+    },
+    currentSubtitleId(val, oldval) {
+      if (this.menu) {
+        if (val !== '') {
+          this.subtitleList.forEach((item, index) => {
+            if (item.id === val) {
+              this.menu.getMenuItemById(`sub${index}`).checked = true;
+            }
+          });
+          if (oldval === '') {
+            this.menu.getMenuItemById('subSize')
+              .submenu
+              .items
+              .forEach((item) => {
+                item.enabled = true;
+              });
+            this.menu.getMenuItemById('subStyle')
+              .submenu
+              .items
+              .forEach((item) => {
+                item.enabled = true;
+              });
+          }
+        } else {
+          this.menu.getMenuItemById('sub-1').checked = true;
+          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
+          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
+        }
+      }
+    },
+    audioTrackList(val, oldval) {
+      if (val.length !== oldval.length) {
+        this.refreshMenu();
+      }
+      if (this.menu) {
+        this.audioTrackList.forEach((item, index) => {
+          if (item.enabled === true && this.menu.getMenuItemById(`track${index}`)) {
+            this.menu.getMenuItemById(`track${index}`).checked = true;
+          }
+        });
+      }
+    },
+    isFullScreen() {
+      this.refreshMenu();
+    },
+    paused() {
+      this.refreshMenu();
     },
   },
   methods: {
@@ -113,7 +234,7 @@ new Vue({
               click: () => {
                 const VALID_EXTENSION = ['3g2', '3gp', '3gp2', '3gpp', 'amv', 'asf', 'avi', 'bik', 'bin', 'crf', 'divx', 'drc', 'dv', 'dvr-ms', 'evo', 'f4v', 'flv', 'gvi', 'gxf', 'iso', 'm1v', 'm2v', 'm2t', 'm2ts', 'm4v', 'mkv', 'mov', 'mp2', 'mp2v', 'mp4', 'mp4v', 'mpe', 'mpeg', 'mpeg1', 'mpeg2', 'mpeg4', 'mpg', 'mpv2', 'mts', 'mtv', 'mxf', 'mxg', 'nsv', 'nuv', 'ogg', 'ogm', 'ogv', 'ogx', 'ps', 'rec', 'rm', 'rmvb', 'rpl', 'thp', 'tod', 'tp', 'ts', 'tts', 'txd', 'vob', 'vro', 'webm', 'wm', 'wmv', 'wtv', 'xesc'];
                 dialog.showOpenDialog({
-                  properties: ['openFile'],
+                  properties: ['openFile', 'multiSelections'],
                   filters: [{
                     name: 'Video Files',
                     extensions: VALID_EXTENSION,
@@ -126,10 +247,11 @@ new Vue({
                       this.addLog('error', `Failed to open file: ${files[0]}`);
                     }
                     if (files.length > 1) {
-                      this.$store.commit('PlayingList', files);
+                      this.$store.dispatch('PlayingList', files);
                     } else {
-                      const similarVideos = this.findSimilarVideoByVidPath(files[0]);
-                      this.$store.commit('FolderList', similarVideos);
+                      this.findSimilarVideoByVidPath(files[0]).then((similarVideos) => {
+                        this.$store.dispatch('FolderList', similarVideos);
+                      });
                     }
                   }
                 });
@@ -148,6 +270,7 @@ new Vue({
               label: this.$t('msg.file.clearHistory'),
               click: () => {
                 this.$bus.$emit('clean-lastPlayedFile');
+                this.refreshMenu();
               },
             },
             { type: 'separator' },
@@ -162,6 +285,21 @@ new Vue({
           label: this.$t('msg.playback.name'),
           submenu: [
             {
+              label: this.$t('msg.playback.forward'),
+              accelerator: 'Right',
+              click: () => {
+                this.$bus.$emit('seek', this.$store.getters.currentTime + 5);
+              },
+            },
+            {
+              label: this.$t('msg.playback.backward'),
+              accelerator: 'Left',
+              click: () => {
+                this.$bus.$emit('seek', this.$store.getters.currentTime - 5);
+              },
+            },
+            { type: 'separator' },
+            {
               label: this.$t('msg.playback.increasePlaybackSpeed'),
               click: () => {
                 this.$store.dispatch(videoActions.INCREASE_RATE);
@@ -175,20 +313,6 @@ new Vue({
             },
             /** */
             { type: 'separator' },
-            {
-              label: this.$t('msg.playback.keepPlayingWindowFront'),
-              type: 'checkbox',
-              click: (menuItem, browserWindow) => {
-                if (browserWindow.isAlwaysOnTop()) {
-                  browserWindow.setAlwaysOnTop(false);
-                  menuItem.checked = false;
-                } else {
-                  browserWindow.setAlwaysOnTop(true);
-                  menuItem.checked = true;
-                }
-              },
-            },
-            { type: 'separator' },
             { label: this.$t('msg.playback.captureScreen'), enabled: false },
             { label: this.$t('msg.playback.captureVideoClip'), enabled: false },
           ],
@@ -197,6 +321,22 @@ new Vue({
         {
           label: this.$t('msg.audio.name'),
           submenu: [
+            {
+              label: this.$t('msg.audio.increaseVolume'),
+              accelerator: 'Up',
+              id: 'inVolume',
+              click: () => {
+                this.$store.dispatch(videoActions.INCREASE_VOLUME);
+              },
+            },
+            {
+              label: this.$t('msg.audio.decreaseVolume'),
+              accelerator: 'Down',
+              id: 'deVolume',
+              click: () => {
+                this.$store.dispatch(videoActions.DECREASE_VOLUME);
+              },
+            },
             {
               label: this.$t('msg.audio.mute'),
               type: 'checkbox',
@@ -210,13 +350,6 @@ new Vue({
             { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
             { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
             { type: 'separator' },
-            {
-              label: this.$t('msg.audio.switchAudioTrack'),
-              enabled: false,
-              submenu: [
-                { label: this.$t('msg.audio.defaultAudioTrack'), enabled: true },
-              ],
-            },
           ],
         },
         // menu.subtitle
@@ -229,14 +362,12 @@ new Vue({
                 this.$bus.$emit('menu-sub-refresh');
               },
             },
-            { type: 'separator' },
             {
               label: this.$t('msg.subtitle.loadSubtitleFile'),
               click: () => {
                 const { remote } = this.$electron;
                 const browserWindow = remote.BrowserWindow;
                 const focusWindow = browserWindow.getFocusedWindow();
-                console.log(focusWindow);
                 const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
 
                 dialog.showOpenDialog(focusWindow, {
@@ -254,15 +385,7 @@ new Vue({
                 });
               },
             },
-            {
-              label: this.$t('msg.subtitle.mainSubtitle'),
-              enabled: false,
-              submenu: [
-                { label: this.$t('msg.subtitle.langZhCN'), enabled: false },
-                { label: this.$t('msg.subtitle.langEn'), enabled: false },
-                { label: this.$t('msg.subtitle.noSubtitle'), enabled: false },
-              ],
-            },
+            { type: 'separator' },
             {
               label: this.$t('msg.subtitle.secondarySubtitle'),
               enabled: false,
@@ -270,6 +393,7 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.subtitleSize'),
+              id: 'subSize',
               submenu: [
                 {
                   label: this.$t('msg.subtitle.size1'),
@@ -312,6 +436,7 @@ new Vue({
             },
             {
               label: this.$t('msg.subtitle.subtitleStyle'),
+              id: 'subStyle',
               submenu: [
                 {
                   label: this.$t('msg.subtitle.style1'),
@@ -422,16 +547,23 @@ new Vue({
           label: this.$t('msg.window_.name'),
           submenu: [
             {
+              label: this.$t('msg.playback.keepPlayingWindowFront'),
+              type: 'checkbox',
+              click: (menuItem, browserWindow) => {
+                if (browserWindow.isAlwaysOnTop()) {
+                  browserWindow.setAlwaysOnTop(false);
+                  menuItem.checked = false;
+                } else {
+                  browserWindow.setAlwaysOnTop(true);
+                  menuItem.checked = true;
+                }
+              },
+            },
+            { type: 'separator' },
+            {
               label: this.$t('msg.window_.minimize'),
               role: 'minimize',
             },
-            // {
-            //   label: this.$t('msg.window_.enterFullScreen'),
-            //   enabled: false,
-            //   click: () => {
-            //     this.$bus.$emit('enter-fullscreen');
-            //   },
-            // },
             { type: 'separator' },
             {
               label: this.$t('msg.window_.bossKey'),
@@ -448,17 +580,26 @@ new Vue({
           role: 'help',
           submenu: [
             {
-              label: this.$t('msg.help.splayerxHelp'),
+              label: this.$t('msg.splayerx.feedback'),
+              click: () => {
+                this.$electron.shell.openExternal('https://feedback.splayer.org');
+              },
             },
             {
               label: this.$t('msg.splayerx.homepage'),
-              enabled: false,
+              click: () => {
+                this.$electron.shell.openExternal('https://beta.splayer.org');
+              },
             },
           ],
         },
       ];
       this.updateRecentPlay().then((result) => {
         // menu.file add "open recent"
+        template[3].submenu.splice(3, 0, this.recentSubMenu());
+        template[1].submenu.splice(0, 0, this.updatePlayOrPause);
+        template[4].submenu.splice(2, 0, this.updateFullScreen);
+        template[2].submenu.splice(7, 0, this.updateAudioTrack());
         template[0].submenu.splice(2, 0, result);
         // menu.about
         if (process.platform === 'darwin') {
@@ -468,12 +609,6 @@ new Vue({
               {
                 label: this.$t('msg.splayerx.about'),
                 role: 'about',
-              },
-              {
-                label: this.$t('msg.splayerx.feedback'),
-                click: () => {
-                  this.$electron.shell.openExternal('https://feedback.splayer.org');
-                },
               },
               {
                 label: this.$t('msg.splayerx.preferences'),
@@ -525,7 +660,7 @@ new Vue({
         }
         if (process.platform === 'win32') {
           const file = template.shift();
-          file.submenu = Array.reverse(file.submenu);
+          file.submenu = file.submenu.reverse();
           file.submenu.forEach((menuItem) => {
             template.unshift(menuItem);
           });
@@ -537,6 +672,31 @@ new Vue({
       }).then(() => {
         if (this.chosenStyle !== '') {
           this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
+        }
+        if (this.currentSubtitleId !== '') {
+          this.subtitleList.forEach((item, index) => {
+            if (item.id === this.currentSubtitleId) {
+              this.menu.getMenuItemById(`sub${index}`).checked = true;
+            }
+          });
+        } else {
+          this.menu.getMenuItemById('sub-1').checked = true;
+          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
+          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
+        }
+        this.audioTrackList.forEach((item, index) => {
+          if (item.enabled === true) {
+            this.menu.getMenuItemById(`track${index}`).checked = true;
+          }
+        });
+        if (this.volume >= 1) {
+          this.menu.getMenuItemById('inVolume').enabled = false;
+        } else if (this.volume <= 0) {
+          this.menu.getMenuItemById('deVolume').enabled = false;
         }
       })
         .catch((err) => {
@@ -563,11 +723,77 @@ new Vue({
       return {
         id: key,
         visible: true,
+        type: 'radio',
         label: value.label,
         click: () => {
           this.openFile(value.path);
+          this.findSimilarVideoByVidPath(value.path).then((similarVideos) => {
+            this.$store.dispatch('FolderList', similarVideos);
+          });
         },
       };
+    },
+    recentSubTmp(key, value) {
+      return {
+        id: `sub${key}`,
+        visible: true,
+        type: 'radio',
+        label: value.path ? Path.basename(value.path) : 'subtitle',
+        click: () => {
+          this.$bus.$emit('menu-sub-change', key);
+        },
+      };
+    },
+    recentSubMenu() {
+      const tmp = {
+        label: this.$t('msg.subtitle.mainSubtitle'),
+        id: 'main-subtitle',
+        submenu: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(index => ({
+          id: `sub${index - 2}`,
+          visible: false,
+          label: '',
+        })),
+      };
+      tmp.submenu.splice(0, 1, {
+        id: 'sub-1',
+        visible: true,
+        type: 'radio',
+        label: this.$t('msg.subtitle.noSubtitle'),
+        click: () => {
+          this.$bus.$emit('subtitle-off');
+        },
+      });
+      this.subtitleList.forEach((item, index) => {
+        tmp.submenu.splice(index + 1, 1, this.recentSubTmp(index, item));
+      });
+      return tmp;
+    },
+    updateAudioTrackItem(key, value) {
+      return {
+        id: `track${key}`,
+        visible: true,
+        type: 'radio',
+        label: value,
+        click: () => {
+          this.$bus.$emit('switch-audio-track', key);
+        },
+      };
+    },
+    updateAudioTrack() {
+      const tmp = {
+        label: this.$t('msg.audio.switchAudioTrack'),
+        id: 'audio-track',
+        submenu: [],
+      };
+      if (this.audioTrackList.length <= 1) {
+        tmp.submenu.splice(0, 1, this.updateAudioTrackItem(0, this.$t('advance.chosenTrack')));
+      } else {
+        this.audioTrackList.forEach((item, index) => {
+          const detail = item.language === 'und' ? `音轨${index + 1}` : `音轨${index + 1}: ${item.language}`;
+          tmp.submenu.splice(index, 1, this.updateAudioTrackItem(index, detail));
+        });
+      }
+      return tmp;
     },
     pathProcess(path) {
       if (process.platform === 'win32') {
@@ -684,35 +910,17 @@ new Vue({
       Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
     });
 
-    window.addEventListener('keypress', (e) => {
-      if (e.key === ' ') { // space
-        this.$bus.$emit('toggle-playback');
-      }
-    });
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
-        case 'ArrowUp':
-          this.$store.dispatch(videoActions.INCREASE_VOLUME);
-          break;
-        case 'ArrowDown':
-          this.$store.dispatch(videoActions.DECREASE_VOLUME);
-          break;
         case 'ArrowLeft':
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.getters.currentTime - 60);
-          } else {
-            this.$bus.$emit('seek', this.$store.getters.currentTime - 5);
           }
           break;
         case 'ArrowRight':
           if (e.altKey === true) {
             this.$bus.$emit('seek', this.$store.getters.currentTime + 60);
-          } else {
-            this.$bus.$emit('seek', this.$store.getters.currentTime + 5);
           }
-          break;
-        case 'Escape':
-          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
           break;
         default:
           break;
@@ -792,10 +1000,11 @@ new Vue({
           this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
         }
         if (videoFiles.length > 1) {
-          this.$store.commit('PlayingList', videoFiles);
+          this.$store.dispatch('PlayingList', videoFiles);
         } else {
-          const similarVideos = this.findSimilarVideoByVidPath(videoFiles[0]);
-          this.$store.commit('FolderList', similarVideos);
+          this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
+            this.$store.dispatch('FolderList', similarVideos);
+          });
         }
       }
       if (containsSubFiles) {

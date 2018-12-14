@@ -1,6 +1,6 @@
 export default {
   msg: {
-    titleName: '射手影音',
+    titleName: 'SPlayer',
     file: {
       name: '文件',
       open: '打開文件…',
@@ -17,6 +17,10 @@ export default {
       decreasePlaybackSpeed: '減緩播放速度         ]',
       captureScreen: '截圖',
       captureVideoClip: '截取視頻片段',
+      play: '播放',
+      pause: '暫停',
+      forward: '前進',
+      backward: '後退',
     },
     audio: {
       name: '音頻',
@@ -25,15 +29,18 @@ export default {
       mute: '靜音',
       switchAudioTrack: '切換音軌',
       defaultAudioTrack: '默認',
+      increaseVolume: '提高音量',
+      decreaseVolume: '降低音量',
     },
     subtitle: {
       name: '字幕',
+      subtitleSelect: '字幕選擇',
       AITranslation: '重新加載翻譯結果',
       loadSubtitleFile: '加載字幕文件…',
       mainSubtitle: '第一字幕',
       langZhCN: '中文',
       langEn: '英文',
-      noSubtitle: '無',
+      noSubtitle: '無字幕',
       secondarySubtitle: '第二字幕',
       subtitleStyle: '字幕樣式',
       style1: '電影風格',
@@ -55,6 +62,7 @@ export default {
       name: '窗口',
       minimize: '最小化',
       enterFullScreen: '進入全屏',
+      exitFullScreen: '退出全屏',
       bossKey: '老板鍵',
     },
     help: {
@@ -100,8 +108,14 @@ export default {
     track: '音軌',
   },
   errorFile: {
-    title: '文件錯誤',
-    content: '視頻文件格式無法識別或文件已損壞。',
+    title: {
+      default: '文件錯誤',
+      fileNonExist: '無法找到相應文件',
+    },
+    content: {
+      default: '視頻文件格式無法識別或文件已損壞。',
+      fileNonExist: '將從列表中移除此項目。',
+    },
   },
   loading: {
     title: '',
@@ -125,5 +139,9 @@ export default {
     folderSource: '文件夾',
     playlistSource: '播放列表',
     playing: '正在播放',
+  },
+  nextVideo: {
+    nextInFolder: '文件夹中下一視頻',
+    nextInPlaylist: '播放列表中下一視頻',
   },
 };

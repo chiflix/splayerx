@@ -1,6 +1,7 @@
-import { app, BrowserWindow, Tray, ipcMain, globalShortcut, splayerx } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle } from 'lodash';
 import path from 'path';
+import fs from 'fs';
 import writeLog from './helpers/writeLog';
 import WindowResizer from './helpers/windowResizer';
 /**
@@ -16,6 +17,7 @@ if (!process.defaultApp) {
 }
 const cliArgs = process.argv.slice(2);
 let startupOpenedFile = cliArgs.length ? cliArgs[0] : null;
+const vidRegex = new RegExp('\\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$');
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
@@ -31,14 +33,12 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
 }
 app.on('second-instance', () => {
-  if (mainWindow) {
-    try {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.focus();
-    } catch (err) {
-      this.addLog('error', err);
-      // pass
-    }
+  try {
+    if (mainWindow?.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  } catch (err) {
+    this.addLog('error', err);
+    // pass
   }
 });
 
@@ -53,7 +53,7 @@ function handleBossKey() {
     mainWindow.webContents.send('mainDispatch', 'PAUSE_VIDEO');
     mainWindow.hide();
     if (process.platform === 'win32') {
-      tray = new Tray('build/icons/icon.ico');
+      tray = new Tray(nativeImage.createFromDataURL(require('../../build/icons/1024x1024.png')));
       tray.on('click', () => {
         mainWindow.show();
         tray.destroy();
@@ -67,45 +67,48 @@ function registerMainWindowEvent() {
   if (!mainWindow) return;
   // TODO: should be able to use window.outerWidth/outerHeight directly
   mainWindow.on('resize', throttle(() => {
-    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow?.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
   }, 100));
   mainWindow.on('move', throttle(() => {
-    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow?.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
   }, 100));
   mainWindow.on('enter-full-screen', () => {
-    mainWindow.webContents.send('mainCommit', 'isFullScreen', true);
-    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
+    mainWindow?.webContents.send('mainCommit', 'isFullScreen', true);
+    mainWindow?.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('leave-full-screen', () => {
-    mainWindow.webContents.send('mainCommit', 'isFullScreen', false);
-    mainWindow.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
+    mainWindow?.webContents.send('mainCommit', 'isFullScreen', false);
+    mainWindow?.webContents.send('mainCommit', 'isMaximized', mainWindow.isMaximized());
   });
   mainWindow.on('maximize', () => {
-    mainWindow.webContents.send('mainCommit', 'isMaximized', true);
+    mainWindow?.webContents.send('mainCommit', 'isMaximized', true);
   });
   mainWindow.on('unmaximize', () => {
-    mainWindow.webContents.send('mainCommit', 'isMaximized', false);
+    mainWindow?.webContents.send('mainCommit', 'isMaximized', false);
   });
   mainWindow.on('focus', () => {
-    mainWindow.webContents.send('mainCommit', 'isFocused', true);
+    mainWindow?.webContents.send('mainCommit', 'isFocused', true);
   });
   mainWindow.on('blur', () => {
-    mainWindow.webContents.send('mainCommit', 'isFocused', false);
+    mainWindow?.webContents.send('mainCommit', 'isFocused', false);
   });
 
   ipcMain.on('callCurrentWindowMethod', (evt, method, args = []) => {
     const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow;
-    if (currentWindow && typeof (currentWindow[method]) === 'function') {
-      currentWindow[method](...args);
-    }
+    currentWindow?.[method]?.(...args);
   });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
+    if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.setSize(...args);
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
 
   function snapShot(videoPath, callback) {
+    /*
+      TODO:
+        img name should be more unique
+     */
     const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
@@ -134,12 +137,19 @@ function registerMainWindowEvent() {
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, path) => {
-    if (snapShotQueue.length === 0) {
-      snapShotQueue.push(path);
-      snapShotQueueProcess(event);
+  ipcMain.on('snapShot', (event, videoPath) => {
+    const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
+
+    if (!fs.existsSync(`${imgPath}.png`)) {
+      if (snapShotQueue.length === 0) {
+        snapShotQueue.push(videoPath);
+        snapShotQueueProcess(event);
+      } else {
+        snapShotQueue.push(videoPath);
+      }
     } else {
-      snapShotQueue.push(path);
+      console.log('pass', imgPath);
+      event.sender.send(`snapShot-${videoPath}-reply`, imgPath);
     }
   });
 
@@ -169,15 +179,16 @@ function registerMainWindowEvent() {
     }
   });
   ipcMain.on('windowPositionChange', (event, args) => {
+    if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.setPosition(...args);
     event.sender.send('windowPositionChange-asyncReply', mainWindow.getPosition());
   });
   ipcMain.on('windowInit', () => {
-    mainWindow.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
-    mainWindow.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
-    mainWindow.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
-    mainWindow.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
-    mainWindow.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
+    mainWindow?.webContents.send('mainCommit', 'windowSize', mainWindow.getSize());
+    mainWindow?.webContents.send('mainCommit', 'windowMinimumSize', mainWindow.getMinimumSize());
+    mainWindow?.webContents.send('mainCommit', 'windowPosition', mainWindow.getPosition());
+    mainWindow?.webContents.send('mainCommit', 'isFullScreen', mainWindow.isFullScreen());
+    mainWindow?.webContents.send('mainCommit', 'isFocused', mainWindow.isFocused());
   });
   ipcMain.on('bossKey', () => {
     handleBossKey();
@@ -186,7 +197,11 @@ function registerMainWindowEvent() {
     if (!log) return;
     writeLog(level, log);
     if (mainWindow && log.message && log.message.indexOf('Failed to open file') !== -1) {
-      mainWindow.webContents.send('addMessages');
+      if (log.message.indexOf('it will be removed from list.') !== -1) {
+        mainWindow.webContents.send('addMessages', 'remove-file');
+      } else {
+        mainWindow.webContents.send('addMessages');
+      }
     }
   });
 }
@@ -220,14 +235,15 @@ function createWindow() {
 
   mainWindow = new BrowserWindow(windowOptions);
 
-  mainWindow.loadURL(winURL);
+  mainWindow.loadURL(startupOpenedFile && vidRegex.test(startupOpenedFile) ? `${winURL}#/play` : winURL);
+
   mainWindow.on('closed', () => {
+    ipcMain.removeAllListeners();
     mainWindow = null;
   });
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
-    const vidRegex = new RegExp('\\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$');
 
     // Open file by file association. Currently support 1 file only.
     if (startupOpenedFile && vidRegex.test(startupOpenedFile)) {
@@ -251,9 +267,7 @@ if (process.platform === 'darwin') {
 app.on('ready', () => {
   app.setName('SPlayerX');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
-    if (mainWindow) {
-      mainWindow.openDevTools();
-    }
+    mainWindow?.openDevTools();
   });
 
   if (process.platform === 'win32') {

@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron' // eslint-disable-line
-import Storage from './Updatestorage.js';
-import { UpdaterMessage as Message, UpdateInfo } from './Message.js';
+import Storage from './Updatestorage';
+import { UpdaterMessage as Message, UpdateInfo } from './Message';
+
 export class MainHelper {
   constructor(updater) {
     this.rendererReady = false;

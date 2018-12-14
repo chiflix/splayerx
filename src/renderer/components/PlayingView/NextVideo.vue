@@ -42,7 +42,8 @@
 <script>
 import { mapGetters } from 'vuex';
 import path from 'path';
-import Icon from '../BaseIconContainer';
+import Icon from '../BaseIconContainer.vue';
+
 export default {
   name: 'next-video',
   components: {
@@ -87,8 +88,7 @@ export default {
     currentTime(val) {
       if (val < this.finalPartTime) {
         this.$emit('close-next-video');
-      } else if (val >= this.duration && this.nextVideo) {
-        this.openFile(this.nextVideo);
+      } else if (val >= this.duration) {
         this.$emit('close-next-video');
       } else {
         const fractionProgress = (val - this.finalPartTime)
@@ -103,7 +103,7 @@ export default {
       return path.basename(this.nextVideo, path.extname(this.nextVideo));
     },
     title() {
-      return this.isFolderList ? 'Next in Folder' : 'Next in Playlist';
+      return this.isFolderList ? this.$t('nextVideo.nextInFolder') : this.$t('nextVideo.nextInPlaylist');
     },
     convertedSrcOfNextVideo() {
       if (this.nextVideo) {

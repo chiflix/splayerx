@@ -41,6 +41,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import Icon from '../../BaseIconContainer.vue';
+
 export default {
   name: 'AdvanceSelectItems',
   data() {

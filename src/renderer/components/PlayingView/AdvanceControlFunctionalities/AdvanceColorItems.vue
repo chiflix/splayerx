@@ -45,6 +45,7 @@ import styleSelected1 from '../../../assets/subtitle-style2-selected.png';
 import styleSelected2 from '../../../assets/subtitle-style3-selected.png';
 import styleSelected3 from '../../../assets/subtitle-style4-selected.png';
 import styleSelected4 from '../../../assets/subtitle-style5-selected.png';
+
 export default {
   name: 'AdvanceColorItems',
   data() {

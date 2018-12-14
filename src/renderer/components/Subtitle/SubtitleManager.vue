@@ -24,7 +24,7 @@ import compose from 'lodash/fp/compose';
 import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
-import SubtitleLoader from './SubtitleLoader';
+import SubtitleLoader from './SubtitleLoader.vue';
 import SubtitleWorker from './Subtitle.worker';
 
 export default {
@@ -35,12 +35,15 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
-      'currentTime', 'duration', 'paused', 'premiumSubtitles', 'mediaHash', 'duration',
+      'currentTime', 'duration', 'paused', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
     ]),
     currentSubtitleSrc() {
       const result = this.subtitleList
         .filter(subtitle => subtitle.id === this.currentSubtitleId)[0];
-      return result.type === 'online' ? result.hash : result.path;
+      if (result) {
+        return result.type === 'online' ? result.hash : result.path;
+      }
+      return this.subtitleList[0].hash;
     },
   },
   data() {
@@ -55,34 +58,40 @@ export default {
     originSrc(newVal) {
       this.resetSubtitles();
       this.getSubtitlesList(newVal).then((result) => {
-        this.addSubtitles(result);
-        this.changeCurrentSubtitle((this.chooseInitialSubtitle(
-          this.subtitleList,
-          this.systemLocale,
-        )).id);
+        if (result.length > 0) {
+          this.addSubtitles(result);
+          this.changeCurrentSubtitle((this.chooseInitialSubtitle(
+            this.subtitleList,
+            this.systemLocale,
+          )).id);
+        } else {
+          this.$bus.$emit('find-no-subtitle');
+        }
       });
     },
     premiumSubtitles(newVal) {
-      newVal.forEach((subtitle) => {
-        const { id, played } = subtitle;
-        if (id && !this.localPremiumSubtitles[id]) {
-          const subtitleInfo = this.subtitleList.filter(subtitle => subtitle.id === id)[0];
-          const { subtitle } = this.$refs.currentSubtitle;
-          const payload = {
-            media_identity: this.mediaHash,
-            language_code: subtitleInfo.langCode,
-            format: `.${subtitleInfo.ext}`,
-            played_time: played,
-            total_time: this.duration,
-            delay: 0,
-            payload: Buffer.from(subtitle.rawData),
-          };
-          Sagi.pushTranscript(payload).then((res) => {
-            console.log(res);
-          });
-          this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
-        }
-      });
+      if (this.privacyAgreement) {
+        newVal.forEach((subtitle) => {
+          const { id, played } = subtitle;
+          if (id && !this.localPremiumSubtitles[id]) {
+            const subtitleInfo = this.subtitleList.filter(subtitle => subtitle.id === id)[0];
+            const { subtitle } = this.$refs.currentSubtitle;
+            const payload = {
+              media_identity: this.mediaHash,
+              language_code: subtitleInfo.langCode,
+              format: `.${subtitleInfo.ext}`,
+              played_time: played,
+              total_time: this.duration,
+              delay: 0,
+              payload: Buffer.from(subtitle.rawData),
+            };
+            Sagi.pushTranscript(payload).then((res) => {
+              console.log(res);
+            });
+            this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
+          }
+        });
+      }
     },
     subtitleList() {
       this.$bus.$emit('finish-loading', 'online');
@@ -109,21 +118,8 @@ export default {
           id: uuidv4(),
         });
       };
-      const onlineNormalizer = [];
-      const onlineNeeded = local.length === 0;
       const online = onlineNeeded ? await this.getOnlineSubtitlesList(videoSrc) : [];
-      if (onlineNeeded) {
-        online.forEach((sub) => {
-          if (typeof sub[0] === 'string' && sub[0].length) {
-            onlineNormalizer.push({
-              type: 'online',
-              hash: sub[0],
-              id: uuidv4(),
-            });
-          }
-        });
-      }
-      return onlineNeeded ? onlineNormalizer : [
+      return onlineNeeded ? online : [
         ...(await Promise.all(local.map(localNormalizer))),
       ];
     },
@@ -196,8 +192,12 @@ export default {
     osLocale().then((locale) => {
       this.systemLocale = locale.slice(0, 2);
       this.getSubtitlesList(this.originSrc).then((result) => {
-        this.addSubtitles(result);
-        this.changeCurrentSubtitle(this.chooseInitialSubtitle(this.subtitleList, this.systemLocale).id);
+        if (result.length > 0) {
+          this.addSubtitles(result);
+          this.changeCurrentSubtitle(this.chooseInitialSubtitle(this.subtitleList, this.systemLocale).id);
+        } else {
+          this.$bus.$emit('find-no-subtitle');
+        }
       });
     });
     this.$bus.$on('add-subtitles', (subtitleList) => {
@@ -226,6 +226,7 @@ export default {
         }
       });
       this.refreshSubtitle(onlineNormalizer);
+      this.changeCurrentSubtitle(this.subtitleList[0].id);
       this.$bus.$emit('finish-refresh');
     });
   },

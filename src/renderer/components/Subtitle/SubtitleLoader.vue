@@ -9,7 +9,7 @@
         top: subTop(index),
         transform: transPos(index),
       }"
-      :class="!isVtt && !cue.tags.pos ? `subtitle-alignment${cue.tags.alignment}` : ''">
+      :class="avaliableClass(index)">
       <CueRenderer class="cueRender"
         :text="cue.text"
         :settings="cue.tags"
@@ -23,8 +23,10 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import isEqual from 'lodash/isEqual';
+import toArray from 'lodash/toArray';
 import Subtitle from './Subtitle';
 import CueRenderer from './CueRenderer.vue';
+
 export default {
   name: 'subtitle-loader',
   props: {
@@ -41,10 +43,13 @@ export default {
       videoSegments: [],
       currentSegment: [0, 0, false],
       elapsedSegmentTime: 0,
+      subToTop: false,
+      lastIndex: [],
+      lastAlignment: [],
     };
   },
   computed: {
-    ...mapGetters(['currentTime', 'duration', 'scaleNum']),
+    ...mapGetters(['currentTime', 'duration', 'scaleNum', 'SubtitleDelay', 'intrinsicHeight', 'intrinsicWidth']),
     type() {
       return this.subtitle.metaInfo.type;
     },
@@ -57,18 +62,41 @@ export default {
     isVtt() {
       return this.type === 'vtt';
     },
+    subtitleCurrentTime() {
+      return this.currentTime - (this.SubtitleDelay / 1000);
+    },
   },
   watch: {
-    currentTime(newVal, oldValue) {
+    subtitleCurrentTime(newVal) {
       const { parsedData } = this.subtitle;
       if (parsedData) {
         const cues = parsedData
           .filter(subtitle => subtitle.start <= newVal && subtitle.end >= newVal && subtitle.text !== '');
-        if (!isEqual(cues, this.currentCues) && cues.length) {
-          this.currentCues = cues.reverse();
+        if (!isEqual(cues, this.currentCues)) {
+          let rev = false;
+          const tmp = cues;
+          if (cues.length >= 2) {
+            for (let i = 0; i < tmp.length; i += 1) {
+              const pre = toArray(tmp[i]);
+              const next = toArray(tmp[i + 1]);
+              if (next) {
+                pre.splice(2, 1);
+                next.splice(2, 1);
+                if (isEqual(pre, next)) {
+                  rev = true;
+                }
+              }
+            }
+          }
+          if (rev) {
+            this.currentCues = cues.reverse();
+          } else {
+            this.currentCues = cues;
+          }
         }
       }
-
+    },
+    currentTime(newVal, oldValue) {
       const { videoSegments, currentSegment, elapsedSegmentTime } = this;
       const segment = videoSegments
         .filter(segment => segment[0] <= newVal && segment[1] > newVal)[0];
@@ -102,17 +130,51 @@ export default {
       this.parsedData = parsed;
       this.videoSegments = this.getVideoSegments(parsed, this.duration);
       this.$bus.$emit('finish-loading', this.subtitle.metaInfo.type);
+      if (parsed) {
+        const cues = parsed
+          .filter(subtitle => subtitle.start <= this.subtitleCurrentTime && subtitle.end >= this.subtitleCurrentTime && subtitle.text !== '');
+        if (!isEqual(cues, this.currentCues)) {
+          this.currentCues = cues;
+        }
+      }
+    });
+    this.$bus.$on('subtitle-to-top', (val) => {
+      this.subToTop = val;
+      if (!val) {
+        this.lastIndex.forEach((index) => {
+          this.currentTags[index].alignment = this.lastAlignment[index];
+        });
+      }
+      this.lastIndex = [];
+      this.lastAlignment = [];
     });
   },
   methods: {
     ...mapActions({
       updateDuration: 'SUBTITLE_DURATION_UPDATE',
     }),
+    avaliableClass(index) {
+      if (!this.isVtt && !this.currentTags[index].pos) {
+        if (this.subToTop && this.currentTags[index].alignment !== 8) {
+          this.lastIndex.push(index);
+          this.lastAlignment.push(this.currentTags[index].alignment);
+          this.currentTags[index].alignment = 8;
+          return 'subtitle-alignment8';
+        }
+        return `subtitle-alignment${this.currentTags[index].alignment}`;
+      } else if (this.isVtt && this.currentTags[index].line !== '' && this.currentTags[index].position !== '') {
+        return '';
+      }
+      return 'subtitle-alignment2';
+    },
     lineNum(index) {
       const lastNum = index;
-      const { currentTexts: texts } = this;
+      const { currentTexts: texts, currentTags: tags } = this;
       let tmp = 0;
       while (texts[index - 1]) {
+        if (!isEqual(tags[index], tags[index - 1])) {
+          break;
+        }
         tmp += texts[index - 1].split('\n').length;
         index -= 1;
       }
@@ -124,24 +186,24 @@ export default {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
       const arr = [1, 2, 3];
-      if (arr.includes(tags[index].alignment)) {
+      if (arr.includes(tags[index].alignment) && !this.subToTop) {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
-      return `translateY(${-100 * this.lineNum(index)}%)`;
+      return `translateY(${100 * this.lineNum(index)}%)`;
     },
-    vttLine(index) { //eslint-disable-line
+    vttLine(index) {
       const { currentTags: tags } = this;
       let tmp = tags[index].line;
       if (tags[index].line.includes('%')) {
-        tmp = parseInt(tags[index].line, 10) / 100;
+        tmp = -parseInt(tags[index].line, 10) / 100;
       }
       if (tags[index].vertical) {
-        if ((tmp >= -1 && tmp < -0.5) || (tmp > 0.5 && tmp <= 1)) {
+        if (tmp >= -1 && tmp < -0.5) {
           return `translateX(${-100 * this.lineNum(index)}%)`;
         }
         return `translateX(${100 * this.lineNum(index)}%)`;
       }
-      if ((tmp >= -1 && tmp < -0.5) || (tmp > 0.5 && tmp <= 1)) {
+      if (tmp >= -1 && tmp < -0.5) {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
       return `translateY(${100 * this.lineNum(index)}%)`;
@@ -166,7 +228,7 @@ export default {
     subLeft(index) {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
-        return `${tags[index].pos.x}px`;
+        return `${(tags[index].pos.x / this.intrinsicWidth) * 100}vw`;
       } else if (type === 'vtt') {
         if (tags[index].vertical) {
           if (!tags[index].line.includes('%')) {
@@ -182,7 +244,7 @@ export default {
     subTop(index) {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
-        return `${tags[index].pos.y}px`;
+        return `${(tags[index].pos.y / this.intrinsicHeight) * 100}vh`;
       } else if (type === 'vtt') {
         if (tags[index].vertical) {
           return tags[index].position;

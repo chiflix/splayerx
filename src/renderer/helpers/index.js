@@ -1,13 +1,20 @@
 import path from 'path';
 import fs from 'fs';
+import util from 'util';
 import crypto from 'crypto';
+import lolex from 'lolex';
 import InfoDB from '@/helpers/infoDB';
 import Sagi from './sagi';
 
 import { ipcRenderer } from 'electron'; // eslint-disable-line
 
+const clock = lolex.createClock();
+
 export default {
   methods: {
+    clock() {
+      return clock;
+    },
     infoDB() {
       return InfoDB;
     },
@@ -35,7 +42,7 @@ export default {
       }
       return `${minutes}:${seconds}`;
     },
-    findSimilarVideoByVidPath(vidPath) {
+    async findSimilarVideoByVidPath(vidPath) {
       vidPath = decodeURI(vidPath);
 
       if (process.platform === 'win32') {
@@ -47,22 +54,24 @@ export default {
       const dirPath = path.dirname(vidPath);
       const filter = /\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$/;
 
-      if (!fs.existsSync(dirPath)) {
-        return [];
-      }
-
       const videoFiles = [];
-      const files = fs.readdirSync(dirPath);
+      const readdir = util.promisify(fs.readdir);
+      const lstat = util.promisify(fs.lstat);
+
+      const files = await readdir(dirPath);
+      const tasks = [];
       for (let i = 0; i < files.length; i += 1) {
         const filename = path.join(dirPath, files[i]);
-        const stat = fs.lstatSync(filename);
-        if (!stat.isDirectory()) {
-          if (filter.test(path.extname(files[i]))) {
-            const fileBaseName = path.basename(filename);
-            videoFiles.push(fileBaseName);
+        tasks.push(lstat(filename).then((stat) => {
+          if (!stat.isDirectory()) {
+            if (filter.test(path.extname(files[i]))) {
+              const fileBaseName = path.basename(filename);
+              videoFiles.push(fileBaseName);
+            }
           }
-        }
+        }));
       }
+      await Promise.all(tasks);
       videoFiles.sort();
       for (let i = 0; i < videoFiles.length; i += 1) {
         videoFiles[i] = path.join(dirPath, videoFiles[i]);
@@ -100,31 +109,44 @@ export default {
     },
     openFile(path) {
       const originPath = path;
-      this.infoDB().get('recent-played', this.mediaQuickHash(originPath))
-        .then((value) => {
-          if (value) {
-            this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
-            this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date.now() }));
-          } else {
-            this.infoDB().add('recent-played', {
-              quickHash: this.mediaQuickHash(originPath),
-              path: originPath,
-              lastOpened: Date.now(),
-            });
-          }
-          this.$bus.$emit('new-file-open');
+      const mediaQuickHash = this.mediaQuickHash(originPath);
+      if (mediaQuickHash instanceof Error) {
+        if (mediaQuickHash.code === 'ENOENT') {
+          this.addLog('error', 'Failed to open file, it will be removed from list.');
+          this.$bus.$emit('file-not-existed', originPath);
+        }
+      } else {
+        this.infoDB().get('recent-played', mediaQuickHash)
+          .then((value) => {
+            if (value) {
+              this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
+              this.infoDB().add('recent-played', Object.assign(value, { path: originPath, lastOpened: Date.now() }));
+            } else {
+              this.infoDB().add('recent-played', {
+                quickHash: mediaQuickHash,
+                path: originPath,
+                lastOpened: Date.now(),
+              });
+            }
+            this.$bus.$emit('new-file-open');
+          });
+        this.$store.dispatch('SRC_SET', originPath);
+        this.$bus.$emit('new-video-opened');
+        this.$router.push({
+          name: 'playing-view',
         });
-      this.$store.dispatch('SRC_SET', originPath);
-      this.$bus.$emit('new-video-opened');
-      this.$router.push({
-        name: 'playing-view',
-      });
+      }
     },
     mediaQuickHash(filePath) {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');
       }
-      const fd = fs.openSync(filePath, 'r');
+      let fd;
+      try {
+        fd = fs.openSync(filePath, 'r');
+      } catch (error) {
+        return error;
+      }
       const len = fs.statSync(filePath).size;
       const position = [
         4096,

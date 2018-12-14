@@ -9,7 +9,8 @@
 </template>
 
 <script>
-import Icon from '../BaseIconContainer';
+import Icon from '../BaseIconContainer.vue';
+
 export default {
   name: 'play-button',
   props: {

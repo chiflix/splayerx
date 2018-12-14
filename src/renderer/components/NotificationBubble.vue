@@ -22,7 +22,7 @@
             <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
             <div class="content">{{ m.content }}</div>
           </div>
-          <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id)"></Icon>
+          <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id, m.title)"></Icon>
         </div>
       </div>
     </transition-group>
@@ -35,7 +35,8 @@ import { mapGetters } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
-import Icon from './BaseIconContainer';
+import Icon from './BaseIconContainer.vue';
+
 export default {
   name: 'notification-bubble',
   components: {
@@ -49,10 +50,11 @@ export default {
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
+      checkIfNextVideoExist: false,
     };
   },
   computed: {
-    ...mapGetters(['roundedCurrentTime', 'nextVideo', 'finalPartTime']),
+    ...mapGetters(['roundedCurrentTime', 'nextVideo', 'duration', 'finalPartTime']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -86,17 +88,27 @@ export default {
       this.manualClosed = false;
       this.showNextVideo = false;
     },
-    closeMessage(id) {
+    closeMessage(id, title) {
       this.$store.dispatch('removeMessages', id);
+      if (title === this.$t('errorFile.title.fileNonExist')) {
+        this.$bus.$emit('delete-file');
+      }
     },
   },
   watch: {
+    checkIfNextVideoExist(val) {
+      if (val) {
+        this.$store.dispatch('UpdatePlayingList');
+        this.showNextVideo = true;
+      }
+    },
     roundedCurrentTime(val) {
-      if (val > this.finalPartTime) {
+      if (val > this.finalPartTime && val < this.duration - 5) {
         if (this.nextVideo !== '' && !this.manualClosed) {
-          this.showNextVideo = true;
+          this.checkIfNextVideoExist = true;
         }
       } else {
+        this.checkIfNextVideoExist = false;
         this.manualClosed = false;
       }
     },
@@ -178,7 +190,7 @@ export default {
   }
   @media screen and (min-width: 320px) and (max-width: 512px) {
     top: 13px;
-    right: 34px;
+    right: 14px;
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
     top: 22px;

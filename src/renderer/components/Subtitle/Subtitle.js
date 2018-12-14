@@ -14,7 +14,7 @@ import Sagi from '@/helpers/sagi';
 const getSubtitleType = (src) => {
   if (existsSync(src)) {
     return 'local';
-  } else if (/^[a-f0-9]*/i.test(src)) { // need to know subtitle hash pattern
+  } else if (/^[a-z0-9]+$/i.test(src)) { // need to know subtitle hash pattern
     return 'online';
   }
   return 'unknown';

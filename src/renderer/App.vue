@@ -13,6 +13,7 @@
   import drag from '@/helpers/drag';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
+
   export default {
     name: 'splayer',
     // -> for test todo need delete lyctest
@@ -33,13 +34,27 @@
       },
     },
     mounted() {
-      this.$electron.ipcRenderer.on('addMessages', () => {
-        this.$store.dispatch('addMessages', {
-          type: 'error',
-          title: this.$t('errorFile.title'),
-          content: this.$t('errorFile.content'),
-          dismissAfter: 10000,
-        });
+      this.$electron.ipcRenderer.on('addMessages', (event, messageType) => {
+        if (messageType) {
+          if (messageType === 'remove-file') {
+            this.$store.dispatch('addMessages', {
+              type: 'error',
+              title: this.$t('errorFile.title.fileNonExist'),
+              content: this.$t('errorFile.content.fileNonExist'),
+              dismissAfter: 5000,
+              cb: () => {
+                this.$bus.$emit('delete-file');
+              },
+            });
+          }
+        } else {
+          this.$store.dispatch('addMessages', {
+            type: 'error',
+            title: this.$t('errorFile.title.default'),
+            content: this.$t('errorFile.content.default'),
+            dismissAfter: 5000,
+          });
+        }
       });
       this.$electron.ipcRenderer.on('mainCommit', (event, commitType, commitPayload) => {
         this.mainCommitProxy(commitType, commitPayload);

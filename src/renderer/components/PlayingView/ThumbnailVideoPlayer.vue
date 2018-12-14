@@ -23,10 +23,11 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
-import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay';
+import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
+import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay.vue';
 import { THUMBNAIL_DB_NAME } from '@/constants';
 import idb from 'idb';
+
 export default {
   name: 'thumbnail-video-player',
   components: {
