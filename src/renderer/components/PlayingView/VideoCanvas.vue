@@ -92,7 +92,7 @@ export default {
       this.$bus.$emit('video-loaded');
       this.getVideoCover();
       this.changeWindowSize();
-      requestAnimationFrame(this.checkPresentTime);
+      this.checkPresentTimeID = requestAnimationFrame(this.checkPresentTime);
     },
     onAudioTrack(event) {
       const { type, track } = event;
@@ -324,7 +324,6 @@ export default {
       this.saveScreenshot();
       this.saveSubtitleStyle();
     };
-    this.checkPresentTimeID = requestAnimationFrame(this.checkPresentTime);
   },
 };
 </script>
