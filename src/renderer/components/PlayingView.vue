@@ -18,9 +18,6 @@ export default {
     'the-video-canvas': VideoCanvas,
     'subtitle-manager': SubtitleManager,
   },
-
-  methods: {
-  },
   mounted() {
     this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);
   },
