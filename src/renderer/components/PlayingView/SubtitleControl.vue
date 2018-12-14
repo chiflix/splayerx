@@ -62,7 +62,7 @@
                       <div class="text"
                         :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
                           whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                        }">{{ item.path ? getSubName(item.path) : 'subtitle' }}</div>
+                        }">{{ item.path ? getSubName(item.path) : item.name }}</div>
                       </div>
                   </div>
 
@@ -188,12 +188,12 @@ export default {
     },
   },
   mounted() {
-    this.$bus.$on('add-subtitles', () => {
-      this.currentSubIden = 0;
-      this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
-      document.querySelector('.scrollScope').scrollTop = 0;
-    });
     this.$bus.$on('finish-refresh', () => {
+      for (let i = 0; i < this.computedAvaliableItems.length; i += 1) {
+        if (this.computedAvaliableItems[i].id === this.currentSubtitleId) {
+          this.currentSubIden = i;
+        }
+      }
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
       setTimeout(() => {
@@ -237,7 +237,7 @@ export default {
         }, 20000);
         this.currentSubIden = 0;
         document.querySelector('.scrollScope').scrollTop = 0;
-        this.$bus.$emit('refresh-subtitle', this.mediaHash);
+        this.$bus.$emit('refresh-subtitle', this.originSrc);
       } else {
         this.$bus.$emit('privacy-confirm');
       }
@@ -348,7 +348,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'mediaHash', 'privacyAgreement']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId']),
     textHeight() {
       if (this.winWidth > 512 && this.winWidth <= 854) {
         return 13;
@@ -442,6 +442,13 @@ export default {
     },
   },
   created() {
+    this.$bus.$on('change-current', () => {
+      for (let i = 0; i < this.computedAvaliableItems.length; i += 1) {
+        if (this.computedAvaliableItems[i].id === this.currentSubtitleId) {
+          this.currentSubIden = i;
+        }
+      }
+    });
     this.$bus.$on('isdragging-mouseup', () => {
       if (this.showAttached) {
         this.anim.playSegments([79, 85]);
@@ -679,7 +686,7 @@ export default {
       }
     }
     .card {
-      width: 174px;
+      width: 172px;
       margin-left: 9.5px;
     }
   }
