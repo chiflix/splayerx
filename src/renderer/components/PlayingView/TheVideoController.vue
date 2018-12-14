@@ -32,7 +32,7 @@
       @conflict-resolve="conflictResolve"/>
     </div>
     <the-time-codes v-hidden="displayState['the-time-codes'] || showProgress"/>
-    <the-progress-bar v-hidden="displayState['the-progress-bar'] || showProgress"/>
+    <the-progress-bar/>
   </div>
 </template>
 <script>
