@@ -35,7 +35,7 @@ export default {
     },
     subtitle: {
       name: 'Subtitle',
-      subtitleSelect: 'Subtitle',
+      subtitleSelect: 'Translation',
       AITranslation: 'Reload Smart Translation',
       loadSubtitleFile: 'Load Subtitle File…',
       langZhCN: 'Chinese',

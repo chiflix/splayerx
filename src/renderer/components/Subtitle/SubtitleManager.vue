@@ -156,15 +156,15 @@ export default {
       const hash = helpers.methods.mediaQuickHash(videoSrc);
       const getSubtitle = res => res.array[1].map(subtitle => ({
         hash: subtitle[0],
+        lang: subtitle[1],
         language_code: subtitle[1],
         type: 'online',
         id: subtitle[0],
         name: this.getOnlineSubName(subtitle[1]),
       }));
-      const zhCNList = getSubtitle(await Sagi.mediaTranslate(hash, 'zh-CN'));
-      const zhTWList = getSubtitle(await Sagi.mediaTranslate(hash, 'zh-TW'));
+      const zhCNList = getSubtitle(await Sagi.mediaTranslate(hash, 'zh'));
       const enList = getSubtitle(await Sagi.mediaTranslate(hash, 'en'));
-      return [].concat(...zhCNList, ...zhTWList, ...enList);
+      return [].concat(...zhCNList, ...enList);
     },
     getOnlineSubName(code) {
       const romanNum = ['I', 'II', 'III']; // may use package romanize in the future
@@ -210,12 +210,9 @@ export default {
       });
     },
     chooseInitialSubtitle(subtitleList, iso6391SystemLocale) {
-      if (subtitleList.length >= 1) {
-        return subtitleList[0];
-      } else {
-        const fitSystemLocaleSubtitles = subtitleList.filter(subtitle => convert3To1(subtitle.lang) === iso6391SystemLocale);
-        return fitSystemLocaleSubtitles.length ? fitSystemLocaleSubtitles[0] : subtitleList[0];
-      }
+      const fitSystemLocaleSubtitles = subtitleList.filter(subtitle => (subtitle.lang.length === 2 ?
+        subtitle.lang : convert3To1(subtitle.lang)) === iso6391SystemLocale);
+      return fitSystemLocaleSubtitles.length ? fitSystemLocaleSubtitles[0] : subtitleList[0];
     },
   },
   created() {
@@ -226,6 +223,7 @@ export default {
         if (result.length > 0) {
           this.addSubtitles(result);
           this.changeCurrentSubtitle(this.chooseInitialSubtitle(this.subtitleList, this.systemLocale).id);
+          this.$bus.$emit('change-current');
         } else {
           this.$bus.$emit('find-no-subtitle');
         }
@@ -250,7 +248,7 @@ export default {
       this.enIndex = -1;
       const online2 = await this.getOnlineSubtitlesList(src);
       this.refreshSubtitle(online2);
-      this.changeCurrentSubtitle(this.subtitleList[0].id);
+      this.changeCurrentSubtitle(this.chooseInitialSubtitle(this.subtitleList, this.systemLocale).id);
       this.$bus.$emit('finish-refresh');
     });
   },

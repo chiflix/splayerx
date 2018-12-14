@@ -34,7 +34,7 @@ export default {
     },
     subtitle: {
       name: '字幕',
-      subtitleSelect: '字幕選擇',
+      subtitleSelect: '翻譯結果',
       AITranslation: '重新加載翻譯結果',
       loadSubtitleFile: '加載字幕文件…',
       mainSubtitle: '第一字幕',
