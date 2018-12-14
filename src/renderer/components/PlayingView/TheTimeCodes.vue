@@ -3,7 +3,7 @@
     <div class="timing"
       :data-component-name="$options.name"
       @mousedown="switchTimeContent">
-          <span class="timeContent" ref="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration">{{ timeContent }}</span>
+          <span class="timeContent" ref="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration"></span>
     </div>
     <rateLabel class="rate"></rateLabel>
   </div>

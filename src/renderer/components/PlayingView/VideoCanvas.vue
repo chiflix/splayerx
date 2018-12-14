@@ -248,8 +248,10 @@ export default {
       }
       // TODO: This part move to TheVideoController.vue is better.
       if (videodata.time >= this.duration && this.nextVideo) {
+        videodata.time = 0;
         this.openFile(this.nextVideo);
       } else if (videodata.time >= this.duration) {
+        videodata.time = 0;
         this.pause();
       } else {
         requestAnimationFrame(this.checkPresentTime);
