@@ -118,22 +118,10 @@ export default {
           id: uuidv4(),
         });
       };
-      const onlineNormalizer = [];
       const onlineNeeded = local.length === 0;
       const online = onlineNeeded && this.privacyAgreement
         ? await this.getOnlineSubtitlesList(videoSrc) : [];
-      if (onlineNeeded && this.privacyAgreement) {
-        online.array[1].forEach((sub) => {
-          if (typeof sub[0] === 'string' && sub[0].length) {
-            onlineNormalizer.push({
-              type: 'online',
-              hash: sub[0],
-              id: uuidv4(),
-            });
-          }
-        });
-      }
-      return onlineNeeded ? onlineNormalizer : [
+      return onlineNeeded ? online : [
         ...(await Promise.all(local.map(localNormalizer))),
       ];
     },
@@ -158,8 +146,18 @@ export default {
         });
       });
     },
-    getOnlineSubtitlesList(videoSrc) {
-      return Sagi.mediaTranslate(helpers.methods.mediaQuickHash(videoSrc));
+    async getOnlineSubtitlesList(videoSrc) {
+      const hash = helpers.methods.mediaQuickHash(videoSrc);
+      const getSubtitle = res => res.array[1].map(subtitle => ({
+        hash: subtitle[0],
+        language_code: subtitle[1],
+        type: 'online',
+        id: subtitle[0],
+      }));
+      const zhCNList = getSubtitle(await Sagi.mediaTranslate(hash, 'zh-CN'));
+      const zhTWList = getSubtitle(await Sagi.mediaTranslate(hash, 'zh-TW'));
+      const enList = getSubtitle(await Sagi.mediaTranslate(hash, 'en'));
+      return [].concat(...zhCNList, ...zhTWList, ...enList);
     },
     getSubtitleCallback(type) {
       switch (type) {
