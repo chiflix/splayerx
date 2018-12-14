@@ -92,6 +92,7 @@ import { mapGetters } from 'vuex';
 import path from 'path';
 import { filePathToUrl } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
+
 export default {
   components: {
     Icon,
@@ -263,7 +264,7 @@ $border-radius: 3px;
       position: absolute;
       border-radius: $border-radius;
       width: 100%;
-      height: 100%;
+      height: calc(100% + 0.08vw);
       background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
     }
     .img {
@@ -273,9 +274,9 @@ $border-radius: 3px;
       background-repeat: no-repeat;
       background-position: center center;
       top: 0;
-      bottom: 0;
       left: 0;
       right: 0;
+      bottom: 0;
     }
     .content {
       position: absolute;

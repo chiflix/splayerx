@@ -28,12 +28,12 @@
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
-import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
+import WindowSizeHelper from '@/helpers/WindowSizeHelper';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseSubtitle from './BaseSubtitle.vue';
-import BaseVideoPlayer from './BaseVideoPlayer';
+import BaseVideoPlayer from './BaseVideoPlayer.vue';
 import { videodata } from '../../store/video';
 
 export default {
@@ -129,14 +129,15 @@ export default {
       const getRatio = size => size[0] / size[1];
       const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
       const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
-      const diffSize = (overOrNot, size, diffedSize) => size.some((value, index) => // eslint-disable-line
-        overOrNot ? value >= diffedSize[index] : value < diffedSize[index]);
+      const biggerSize = (size, diffedSize) =>
+        size.some((value, index) => value >= diffedSize[index]);
       const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
-      if (diffSize(true, videoSize, maxSize)) {
-        result = biggerRatio(videoSize, maxSize) ?
+      if (biggerSize(result, maxSize)) {
+        result = biggerRatio(result, maxSize) ?
           setHeightByWidth(maxSize) : setWidthByHeight(maxSize);
-      } else if (diffSize(false, videoSize, minSize)) {
-        result = biggerRatio(minSize, videoSize) ?
+      }
+      if (biggerSize(minSize, result)) {
+        result = biggerRatio(minSize, result) ?
           setHeightByWidth(minSize) : setWidthByHeight(minSize);
       }
       return result.map(value => Math.round(value));
@@ -269,6 +270,7 @@ export default {
       this.videoConfigInitialize({
         audioTrackList: [],
       });
+      this.play();
     },
     currentTime(val) {
       if (!this.coverFinded && val - this.lastCoverDetectingTime > 1) {

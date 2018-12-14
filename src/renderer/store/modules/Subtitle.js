@@ -1,5 +1,6 @@
 import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
+
 const state = {
   subtitleList: [],
   currentSubtitleId: '',

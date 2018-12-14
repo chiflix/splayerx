@@ -35,7 +35,8 @@ import { mapGetters } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
-import Icon from './BaseIconContainer';
+import Icon from './BaseIconContainer.vue';
+
 export default {
   name: 'notification-bubble',
   components: {
@@ -184,7 +185,7 @@ export default {
   }
   @media screen and (min-width: 320px) and (max-width: 512px) {
     top: 13px;
-    right: 34px;
+    right: 14px;
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
     top: 22px;

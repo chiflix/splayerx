@@ -1,4 +1,4 @@
-import syncStorage from '@/helpers/syncStorage.js';
+import syncStorage from '@/helpers/syncStorage';
 
 describe('helper syncStorage', () => {
   const randomValue = Math.floor(Math.random() * 10000);

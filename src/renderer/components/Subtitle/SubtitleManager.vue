@@ -24,7 +24,7 @@ import compose from 'lodash/fp/compose';
 import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
-import SubtitleLoader from './SubtitleLoader';
+import SubtitleLoader from './SubtitleLoader.vue';
 import SubtitleWorker from './Subtitle.worker';
 
 export default {
@@ -58,11 +58,15 @@ export default {
     originSrc(newVal) {
       this.resetSubtitles();
       this.getSubtitlesList(newVal).then((result) => {
-        this.addSubtitles(result);
-        this.changeCurrentSubtitle((this.chooseInitialSubtitle(
-          this.subtitleList,
-          this.systemLocale,
-        )).id);
+        if (result.length > 0) {
+          this.addSubtitles(result);
+          this.changeCurrentSubtitle((this.chooseInitialSubtitle(
+            this.subtitleList,
+            this.systemLocale,
+          )).id);
+        } else {
+          this.$bus.$emit('find-no-subtitle');
+        }
       });
     },
     premiumSubtitles(newVal) {

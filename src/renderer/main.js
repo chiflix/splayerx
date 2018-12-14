@@ -7,7 +7,7 @@ import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
 
-import App from '@/App';
+import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
@@ -17,9 +17,11 @@ import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
+
 require('source-map-support').install();
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
+
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 Vue.config.warnHandler = (warn) => {
@@ -166,7 +168,7 @@ new Vue({
         this.refreshMenu();
       }
     },
-    currentSubtitleId(val) {
+    currentSubtitleId(val, oldval) {
       if (this.menu) {
         if (val !== '') {
           this.subtitleList.forEach((item, index) => {
@@ -174,8 +176,28 @@ new Vue({
               this.menu.getMenuItemById(`sub${index}`).checked = true;
             }
           });
+          if (oldval === '') {
+            this.menu.getMenuItemById('subSize')
+              .submenu
+              .items
+              .forEach((item) => {
+                item.enabled = true;
+              });
+            this.menu.getMenuItemById('subStyle')
+              .submenu
+              .items
+              .forEach((item) => {
+                item.enabled = true;
+              });
+          }
         } else {
           this.menu.getMenuItemById('sub-1').checked = true;
+          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
+          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
         }
       }
     },
@@ -227,8 +249,9 @@ new Vue({
                     if (files.length > 1) {
                       this.$store.dispatch('PlayingList', files);
                     } else {
-                      const similarVideos = this.findSimilarVideoByVidPath(files[0]);
-                      this.$store.dispatch('FolderList', similarVideos);
+                      this.findSimilarVideoByVidPath(files[0]).then((similarVideos) => {
+                        this.$store.dispatch('FolderList', similarVideos);
+                      });
                     }
                   }
                 });
@@ -370,6 +393,7 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.subtitleSize'),
+              id: 'subSize',
               submenu: [
                 {
                   label: this.$t('msg.subtitle.size1'),
@@ -412,6 +436,7 @@ new Vue({
             },
             {
               label: this.$t('msg.subtitle.subtitleStyle'),
+              id: 'subStyle',
               submenu: [
                 {
                   label: this.$t('msg.subtitle.style1'),
@@ -635,7 +660,7 @@ new Vue({
         }
         if (process.platform === 'win32') {
           const file = template.shift();
-          file.submenu = Array.reverse(file.submenu);
+          file.submenu = file.submenu.reverse();
           file.submenu.forEach((menuItem) => {
             template.unshift(menuItem);
           });
@@ -656,6 +681,12 @@ new Vue({
           });
         } else {
           this.menu.getMenuItemById('sub-1').checked = true;
+          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
+          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
         }
         this.audioTrackList.forEach((item, index) => {
           if (item.enabled === true) {
@@ -696,8 +727,9 @@ new Vue({
         label: value.label,
         click: () => {
           this.openFile(value.path);
-          const similarVideos = this.findSimilarVideoByVidPath(value.path);
-          this.$store.dispatch('FolderList', similarVideos);
+          this.findSimilarVideoByVidPath(value.path).then((similarVideos) => {
+            this.$store.dispatch('FolderList', similarVideos);
+          });
         },
       };
     },
@@ -970,8 +1002,9 @@ new Vue({
         if (videoFiles.length > 1) {
           this.$store.dispatch('PlayingList', videoFiles);
         } else {
-          const similarVideos = this.findSimilarVideoByVidPath(videoFiles[0]);
-          this.$store.dispatch('FolderList', similarVideos);
+          this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
+            this.$store.dispatch('FolderList', similarVideos);
+          });
         }
       }
       if (containsSubFiles) {

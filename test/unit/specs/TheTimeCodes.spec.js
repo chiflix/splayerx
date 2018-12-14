@@ -1,6 +1,6 @@
 import Vuex from 'vuex';
 import Video from '@/store/modules/Video';
-import TheTimeCodes from '@/components/PlayingView/TheTimeCodes';
+import TheTimeCodes from '@/components/PlayingView/TheTimeCodes.vue';
 import { mount, createLocalVue } from '@vue/test-utils';
 
 const localVue = createLocalVue();

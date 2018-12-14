@@ -1,4 +1,5 @@
-import asyncStorage from '@/helpers/asyncStorage.js';
+import asyncStorage from '@/helpers/asyncStorage';
+
 const state = {
   deleteVideoHistoryOnExit: false,
   privacyAgreement: false,

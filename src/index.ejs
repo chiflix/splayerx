@@ -10,12 +10,11 @@
       </script>
     <% } %>
   </head>
-  <body>
+  <body class="platform-<%= process.platform %>">
     <div id="app"></div>
     <!-- Set `__static` path to static files in production -->
     <script>
       if (process.env.NODE_ENV !== 'development') window.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
-      document.body.classList.add(`platform-${process.platform}`);
     </script>
 
     <!-- webpack builds are automatically injected -->

@@ -1,4 +1,4 @@
-import infoDB from '@/helpers/infoDB.js';
+import infoDB from '@/helpers/infoDB';
 // import idb from 'idb';
 
 describe('helper infoDB', () => {

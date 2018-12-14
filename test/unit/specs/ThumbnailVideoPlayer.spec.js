@@ -1,5 +1,5 @@
-import ThumbnailVideoPlayer from '@/components/PlayingView/ThumbnailVideoPlayer';
-import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
+import ThumbnailVideoPlayer from '@/components/PlayingView/ThumbnailVideoPlayer.vue';
+import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import { shallowMount } from '@vue/test-utils';
 import sinon from 'sinon';
 

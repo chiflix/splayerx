@@ -7,9 +7,9 @@
 </template>
 
 <script>
-import SubtitleManager from '@/components/Subtitle/SubtitleManager';
+import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
-import TheVideoController from './PlayingView/TheVideoController';
+import TheVideoController from './PlayingView/TheVideoController.vue';
 
 export default {
   name: 'playing-view',
@@ -17,9 +17,6 @@ export default {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
     'subtitle-manager': SubtitleManager,
-  },
-
-  methods: {
   },
   mounted() {
     this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);

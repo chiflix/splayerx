@@ -1,6 +1,7 @@
-import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
+import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
+
 describe('Component - BaseVideoPlayer', () => {
   const propsData = {
     src: 'file:///',
