@@ -884,7 +884,7 @@ new Vue({
       return menuRecentData;
     },
     refreshMenu() {
-      this.$electron.remote.Menu.getApplicationMenu().clear();
+      this.$electron.remote.Menu.getApplicationMenu()?.clear();
       this.createMenu();
     },
   },
