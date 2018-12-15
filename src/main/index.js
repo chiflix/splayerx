@@ -39,7 +39,7 @@ if (process.platform === 'darwin') {
     app.on('open-file', (event, file) => {
       if (!getValidVideoRegex().test(file)) return;
       if (mainWindow) { // sencond instance
-        mainWindow.webContents.send('open-file', startupOpenedFile);
+        mainWindow.webContents.send('open-file', file);
       } else {
         startupOpenedFile = file;
       }
