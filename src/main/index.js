@@ -126,7 +126,7 @@ function registerMainWindowEvent() {
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
     splayerx.snapshotVideo(videoPath, `${imgPath}.png`, `00:00:${numberString}`, (err) => {
-      console.log(err, videoPath);
+      console[err ? 'error' : 'log'](err, videoPath);
       callback(err, imgPath);
     });
   }
