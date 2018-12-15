@@ -1017,6 +1017,7 @@ new Vue({
 
     this.$electron.ipcRenderer.on('open-file', (event, file) => {
       this.openFile(file);
+      this.$store.dispatch('PlayingList', [file]); // TODO: PlayingList logic should be placed in openFile
     });
   },
 }).$mount('#app');
