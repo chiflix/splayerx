@@ -5,7 +5,7 @@ import fs from 'fs';
 import writeLog from './helpers/writeLog';
 import WindowResizer from './helpers/windowResizer';
 import { getOpenedFile } from './helpers/argv';
-import { getValidVideoExtensions } from '../shared/utils';
+import { getValidVideoRegex } from '../shared/utils';
 
 /**
  * Set `__static` path to static files in production
@@ -37,7 +37,7 @@ app.on('second-instance', () => {
 if (process.platform === 'darwin') {
   app.on('will-finish-launching', () => {
     app.on('open-file', (event, file) => {
-      if (!getValidVideoExtensions().test(file)) return;
+      if (!getValidVideoRegex().test(file)) return;
       if (mainWindow) { // sencond instance
         mainWindow.webContents.send('open-file', startupOpenedFile);
       } else {
