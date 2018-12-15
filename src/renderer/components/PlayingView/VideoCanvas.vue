@@ -34,6 +34,7 @@ import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'video-canvas',
@@ -50,6 +51,7 @@ export default {
       seekTime: [0],
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
+      checkPresentTimeID: null,
     };
   },
   methods: {
@@ -90,6 +92,7 @@ export default {
       this.$bus.$emit('video-loaded');
       this.getVideoCover();
       this.changeWindowSize();
+      this.checkPresentTimeID = requestAnimationFrame(this.checkPresentTime);
     },
     onAudioTrack(event) {
       const { type, track } = event;
@@ -189,7 +192,7 @@ export default {
       const data = {
         shortCut: imagePath,
         smallShortCut: smallImagePath,
-        lastPlayedTime: this.currentTime,
+        lastPlayedTime: videodata.time,
         duration: this.duration,
       };
       syncStorage.setSync('recent-played', data);
@@ -237,12 +240,27 @@ export default {
           this.infoDB().add('recent-played', data);
         }
       }
-      this.lastCoverDetectingTime = this.currentTime;
+      this.lastCoverDetectingTime = videodata.time;
+    },
+    checkPresentTime() {
+      if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
+        this.getVideoCover();
+      }
+      // TODO: This part move to TheVideoController.vue is better.
+      if (videodata.time >= this.duration && this.nextVideo) {
+        videodata.time = 0;
+        this.openFile(this.nextVideo);
+      } else if (videodata.time >= this.duration) {
+        videodata.time = 0;
+        this.pause();
+      } else {
+        requestAnimationFrame(this.checkPresentTime);
+      }
     },
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
       'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle', 'scaleNum',
       'nextVideo']),
     ...mapGetters({
@@ -271,16 +289,11 @@ export default {
       });
       this.play();
     },
-    currentTime(val) {
-      if (!this.coverFinded && val - this.lastCoverDetectingTime > 1) {
-        this.getVideoCover();
-      }
-      if (val >= this.duration && this.nextVideo) {
-        this.openFile(this.nextVideo);
-      } else if (val >= this.duration) {
-        this.pause();
-      }
-    },
+  },
+  beforeDestroy() {
+    if (this.checkPresentTimeID) {
+      cancelAnimationFrame(this.checkPresentTimeID);
+    }
   },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
@@ -298,13 +311,18 @@ export default {
       this[this.paused ? 'play' : 'pause']();
     });
     this.$bus.$on('seek', (e) => {
-      this.seekTime = [e];
-      // todo: use vuex get video element src
-      const filePath = decodeURI(this.src);
-      const indexOfLastDot = filePath.lastIndexOf('.');
-      const ext = filePath.substring(indexOfLastDot + 1);
-      if (ext === 'mkv') {
-        this.$bus.$emit('seek-subtitle', e);
+      // to check whether trigger ‘直捣黄龙’
+      if (e === this.duration && this.nextVideo) {
+        this.openFile(this.nextVideo);
+      } else {
+        this.seekTime = [e];
+        // todo: use vuex get video element src
+        const filePath = decodeURI(this.src);
+        const indexOfLastDot = filePath.lastIndexOf('.');
+        const ext = filePath.substring(indexOfLastDot + 1);
+        if (ext === 'mkv') {
+          this.$bus.$emit('seek-subtitle', e);
+        }
       }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);

@@ -18,6 +18,7 @@ import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
 import { getValidVideoRegex } from '@/../shared/utils';
+import { videodata } from '@/store/video';
 
 require('source-map-support').install();
 
@@ -289,14 +290,14 @@ new Vue({
               label: this.$t('msg.playback.forward'),
               accelerator: 'Right',
               click: () => {
-                this.$bus.$emit('seek', this.$store.getters.currentTime + 5);
+                this.$bus.$emit('seek', videodata.time + 5);
               },
             },
             {
               label: this.$t('msg.playback.backward'),
               accelerator: 'Left',
               click: () => {
-                this.$bus.$emit('seek', this.$store.getters.currentTime - 5);
+                this.$bus.$emit('seek', videodata.time - 5);
               },
             },
             { type: 'separator' },
@@ -915,12 +916,12 @@ new Vue({
       switch (e.key) {
         case 'ArrowLeft':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.getters.currentTime - 60);
+            this.$bus.$emit('seek', videodata.time - 60);
           }
           break;
         case 'ArrowRight':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.getters.currentTime + 60);
+            this.$bus.$emit('seek', videodata.time + 60);
           }
           break;
         default:
