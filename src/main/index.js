@@ -125,17 +125,20 @@ function registerMainWindowEvent() {
     const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
-    splayerx.snapshotVideo(videoPath, `${imgPath}.png`, `00:00:${numberString}`, (err) => {
-      console[err ? 'error' : 'log'](err, videoPath);
-      callback(err, imgPath);
+    splayerx.snapshotVideo(videoPath, `${imgPath}.png`, `00:00:${numberString}`, (resultCode) => {
+      console[resultCode === '0' ? 'log' : 'error'](resultCode, videoPath);
+      callback(resultCode, imgPath);
     });
   }
 
   function snapShotQueueProcess(event) {
-    const callback = (err, imgPath) => {
-      if (err !== '0') {
-        snapShot(snapShotQueue[0], callback);
-      } else if (err === '0') {
+    const callback = (resultCode, imgPath) => {
+      if (resultCode !== '0') { // TODO: retry
+        snapShotQueue.shift();
+        if (snapShotQueue.length) {
+          snapShot(snapShotQueue[0], callback);
+        }
+      } else {
         const lastRecord = snapShotQueue.shift();
         if (event.sender.isDestroyed()) {
           snapShotQueue.splice(0, snapShotQueue.length);
@@ -154,11 +157,9 @@ function registerMainWindowEvent() {
     const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
 
     if (!fs.existsSync(`${imgPath}.png`)) {
-      if (snapShotQueue.length === 0) {
-        snapShotQueue.push(videoPath);
+      snapShotQueue.push(videoPath);
+      if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
-      } else {
-        snapShotQueue.push(videoPath);
       }
     } else {
       console.log('pass', imgPath);
