@@ -6,6 +6,7 @@ import uuidv4 from 'uuid/v4';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
+import { remote } from 'electron';
 
 import App from '@/App.vue';
 import router from '@/router';
@@ -59,8 +60,18 @@ Vue.use(VueAnalytics, {
 Vue.mixin(helpers);
 Vue.prototype.$bus = new Vue(); // Global event bus
 
+function getSystemLocale() {
+  const locale = remote.app.getLocale();
+  if (locale === 'zh-TW') {
+    return 'zhTW';
+  } else if (locale.startsWith('zh')) {
+    return 'zhCN';
+  }
+  return 'en';
+}
+
 const i18n = new VueI18n({
-  locale: 'zhCN', // set locale
+  locale: getSystemLocale(), // set locale
   messages, // set locale messages
 });
 
@@ -705,22 +716,6 @@ new Vue({
           this.addLog('error', err);
         });
     },
-    getSystemLocale() {
-      const localeMap = {
-        'en': 'en',   // eslint-disable-line
-        'en-AU': 'en',
-        'en-CA': 'en',
-        'en-GB': 'en',
-        'en-NZ': 'en',
-        'en-US': 'en',
-        'en-ZA': 'en',
-        'zh-CN': 'zhCN',
-        'zh-TW': 'zhTW',
-      };
-      const { app } = this.$electron.remote;
-      const locale = app.getLocale();
-      this.$i18n.locale = localeMap[locale] || this.$i18n.locale;
-    },
     updateRecentItem(key, value) {
       return {
         id: key,
@@ -892,7 +887,6 @@ new Vue({
     // https://github.com/electron/electron/issues/3609
     // Disable Zooming
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
-    this.getSystemLocale();
     this.infoDB().init().then(() => {
       this.createMenu();
       this.$bus.$on('new-file-open', this.refreshMenu);
