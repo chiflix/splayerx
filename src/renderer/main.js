@@ -17,6 +17,7 @@ import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
+import { getValidVideoRegex } from '@/../shared/utils';
 import { videodata } from '@/store/video';
 
 require('source-map-support').install();
@@ -982,13 +983,12 @@ new Vue({
       const subtitleFiles = [];
       const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
       const videoFiles = [];
-      const vidRegex = new RegExp('^\\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$');
       for (let i = 0; i < files.length; i += 1) {
         tempFilePath = files[i].path;
         if (subRegex.test(Path.extname(tempFilePath))) {
           subtitleFiles.push(tempFilePath);
           containsSubFiles = true;
-        } else if (vidRegex.test(Path.extname(tempFilePath))) {
+        } else if (getValidVideoRegex().test(Path.extname(tempFilePath))) {
           videoFiles.push(tempFilePath);
         } else {
           this.addLog('error', `Failed to open file : ${tempFilePath}`);
@@ -1018,6 +1018,7 @@ new Vue({
 
     this.$electron.ipcRenderer.on('open-file', (event, file) => {
       this.openFile(file);
+      this.$store.dispatch('PlayingList', [file]); // TODO: PlayingList logic should be placed in openFile
     });
   },
 }).$mount('#app');
