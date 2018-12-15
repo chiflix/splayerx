@@ -311,13 +311,18 @@ export default {
       this[this.paused ? 'play' : 'pause']();
     });
     this.$bus.$on('seek', (e) => {
-      this.seekTime = [e];
-      // todo: use vuex get video element src
-      const filePath = decodeURI(this.src);
-      const indexOfLastDot = filePath.lastIndexOf('.');
-      const ext = filePath.substring(indexOfLastDot + 1);
-      if (ext === 'mkv') {
-        this.$bus.$emit('seek-subtitle', e);
+      // to check whether trigger ‘直捣黄龙’
+      if (e === this.duration && this.nextVideo) {
+        this.openFile(this.nextVideo);
+      } else {
+        this.seekTime = [e];
+        // todo: use vuex get video element src
+        const filePath = decodeURI(this.src);
+        const indexOfLastDot = filePath.lastIndexOf('.');
+        const ext = filePath.substring(indexOfLastDot + 1);
+        if (ext === 'mkv') {
+          this.$bus.$emit('seek-subtitle', e);
+        }
       }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
