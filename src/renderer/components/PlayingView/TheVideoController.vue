@@ -212,16 +212,14 @@ export default {
       // TODO: There is a probability that the properties are undefined and causing test failure.
       // It's not a best practice to use refs frequently.
       // There should be a better way to handle timeline.
-      this.$refs.progressbar && this.$refs.progressbar.updateProgressBar
-        &&  this.$refs.progressbar.updateProgressBar(videodata.time);
-      this.$refs.theTimeCodes && this.$refs.theTimeCodes.updateTimeContent
-        &&  this.$refs.theTimeCodes.updateTimeContent(videodata.time);
-      this.$refs.nextVideoUI && this.$refs.nextVideoUI.checkNextVideoUI
-        &&  this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
-      if (this.displayState['recent-playlist']) {
-        this.$refs.recentPlaylist && this.$refs.recentPlaylist.updatelastPlayedTime
-          && this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
-      }
+      try {
+        this.$refs.progressbar.updateProgressBar(videodata.time);
+        this.$refs.theTimeCodes.updateTimeContent(videodata.time);
+        this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
+        if (this.displayState['recent-playlist']) {
+          this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
+        }
+      } catch(ex) {}
 
       // Use Map constructor to shallow-copy eventInfo
       const lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
