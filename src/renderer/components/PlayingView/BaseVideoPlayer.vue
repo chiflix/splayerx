@@ -122,7 +122,7 @@ export default {
     // network state
     // playback state
     currentTime(newVal) {
-      [this.$refs.video.currentTime] = newVal;
+      [this.$refs.video.currentTime] = newVal || 0;
     },
     playbackRate(newVal) {
       this.$refs.video.playbackRate = newVal;

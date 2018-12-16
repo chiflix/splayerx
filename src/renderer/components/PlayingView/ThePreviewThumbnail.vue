@@ -87,16 +87,17 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['originSrc', 'convertedSrc', 'mediaHash']),
+    ...mapGetters(['convertedSrc', 'mediaHash']),
   },
   watch: {
-    async originSrc() {
+    async mediaHash(newValue) {
       // Reload video and image components
       this.mountVideo = false;
       this.mountImage = false;
       this.generatedIndex = 0;
       this.currentIndex = 0;
-      this.retrieveThumbnailInfo(this.mediaHash).then(this.updateThumbnailData);
+      const thumbnailInfo = await this.retrieveThumbnailInfo(newValue);
+      this.updateThumbnailData(thumbnailInfo);
     },
     currentTime(newValue) {
       const index = Math.abs(Math.floor(newValue / this.generationInterval));
@@ -150,7 +151,7 @@ export default {
     updateThumbnailData(dataResult) {
       const result = dataResult;
       if (result) {
-        const thumnailInfo = result;
+        const thumbnailInfo = result;
         // Update Generation Parameters
         this.lastGenerationIndex = result.lastGenerationIndex || 0;
         this.maxThumbnailCount = result.maxThumbnailCount || 0;
@@ -159,10 +160,10 @@ export default {
         this.outerThumbnailInfo = Object.assign(
           {},
           this.outerThumbnailInfo,
-          thumnailInfo,
+          thumbnailInfo,
           { videoSrc: this.convertedSrc },
-          { lastGenerationIndex: this.lastGenerationIndex },
-          { maxThumbnailCount: this.maxThumbnailCount },
+          { lastGenerationIndex: this.lastGenerationIndex || 0 },
+          { maxThumbnailCount: this.maxThumbnailCount || 0 },
         );
         // Update mountVideo
         this.mountVideo = !result.lastGenerationIndex ||
