@@ -219,7 +219,9 @@ export default {
         if (this.displayState['recent-playlist']) {
           this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
         }
-      } catch(ex) {}
+      } catch (ex) {
+        // do nothing
+      }
 
       // Use Map constructor to shallow-copy eventInfo
       const lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
