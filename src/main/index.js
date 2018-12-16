@@ -17,9 +17,9 @@ if (process.env.NODE_ENV !== 'development') {
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
-let startupOpenedFile;
 let mainWindow = null;
 let tray = null;
+let startupOpenedFile;
 const snapShotQueue = [];
 const mediaInfoQueue = [];
 const winURL = process.env.NODE_ENV === 'development'
@@ -28,31 +28,6 @@ const winURL = process.env.NODE_ENV === 'development'
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
-}
-app.on('second-instance', () => {
-  if (mainWindow?.isMinimized()) mainWindow.restore();
-  mainWindow?.focus();
-});
-
-if (process.platform === 'darwin') {
-  app.on('will-finish-launching', () => {
-    app.on('open-file', (event, file) => {
-      if (!getValidVideoRegex().test(file)) return;
-      if (mainWindow) { // sencond instance
-        mainWindow.webContents.send('open-file', file);
-      } else {
-        startupOpenedFile = file;
-      }
-    });
-  });
-} else {
-  startupOpenedFile = getOpenedFile(process.argv);
-  app.on('second-instance', (event, argv) => {
-    const opendFile = getOpenedFile(argv);
-    if (opendFile) {
-      mainWindow?.webContents.send('open-file', opendFile);
-    }
-  });
 }
 
 function handleBossKey() {
@@ -274,6 +249,38 @@ function createWindow() {
       mainWindow?.openDevTools();
     }, 1000);
   }
+}
+
+app.on('second-instance', () => {
+  if (mainWindow?.isMinimized()) mainWindow.restore();
+  mainWindow?.focus();
+});
+
+if (process.platform === 'darwin') {
+  app.on('will-finish-launching', () => {
+    app.on('open-file', (event, file) => {
+      if (!getValidVideoRegex().test(file)) return;
+      if (mainWindow) { // sencond instance
+        if (!mainWindow.isVisible()) mainWindow.show();
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+        mainWindow.webContents.send('open-file', file);
+      } else {
+        startupOpenedFile = file;
+        if (app.isReady()) {
+          createWindow();
+        }
+      }
+    });
+  });
+} else {
+  startupOpenedFile = getOpenedFile(process.argv);
+  app.on('second-instance', (event, argv) => {
+    const opendFile = getOpenedFile(argv);
+    if (opendFile) {
+      mainWindow?.webContents.send('open-file', opendFile);
+    }
+  });
 }
 
 app.on('ready', () => {
