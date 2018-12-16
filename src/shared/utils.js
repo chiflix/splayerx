@@ -5,7 +5,6 @@ export function getValidVideoExtensions() {
   if (validVideoExtensions) return validVideoExtensions;
   validVideoExtensions = manifest.build[process.platform === 'darwin' ? 'mac' : 'win']
     .fileAssociations.reduce((exts, fa) => exts.concat(fa.ext), []);
-  console.log('validVideoExtensions', validVideoExtensions);
   return validVideoExtensions;
 }
 

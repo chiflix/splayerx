@@ -268,6 +268,12 @@ function createWindow() {
   const resizer = new WindowResizer(mainWindow);
   resizer.onStart(); // will only register listener for win
   registerMainWindowEvent();
+
+  if (process.env.NODE_ENV === 'development') {
+    setTimeout(() => { // wait some time to prevent `Object not found` error
+      mainWindow?.openDevTools();
+    }, 1000);
+  }
 }
 
 app.on('ready', () => {

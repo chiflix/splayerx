@@ -21,7 +21,8 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { getValidVideoRegex } from '@/../shared/utils';
 import { videodata } from '@/store/video';
 
-require('source-map-support').install();
+// causing callbacks-registry.js 404 error. disable temporarily
+// require('source-map-support').install();
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 
@@ -1013,6 +1014,7 @@ new Vue({
     this.$electron.ipcRenderer.on('open-file', (event, file) => {
       this.openFile(file);
       this.$store.dispatch('PlayingList', [file]); // TODO: PlayingList logic should be placed in openFile
+      // TODO: find similar files
     });
   },
 }).$mount('#app');
