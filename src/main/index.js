@@ -4,6 +4,9 @@ import path from 'path';
 import fs from 'fs';
 import writeLog from './helpers/writeLog';
 import WindowResizer from './helpers/windowResizer';
+import { getOpenedFile } from './helpers/argv';
+import { getValidVideoRegex } from '../shared/utils';
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -11,16 +14,10 @@ import WindowResizer from './helpers/windowResizer';
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
 }
-// See https://github.com/electron/electron/issues/4690
-if (!process.defaultApp) {
-  process.argv.unshift(null);
-}
-const cliArgs = process.argv.slice(2);
-let startupOpenedFile = cliArgs.length ? cliArgs[0] : null;
-const vidRegex = new RegExp('\\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$');
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
+let startupOpenedFile;
 let mainWindow = null;
 let tray = null;
 const snapShotQueue = [];
@@ -33,14 +30,30 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
 }
 app.on('second-instance', () => {
-  try {
-    if (mainWindow?.isMinimized()) mainWindow.restore();
-    mainWindow.focus();
-  } catch (err) {
-    this.addLog('error', err);
-    // pass
-  }
+  if (mainWindow?.isMinimized()) mainWindow.restore();
+  mainWindow?.focus();
 });
+
+if (process.platform === 'darwin') {
+  app.on('will-finish-launching', () => {
+    app.on('open-file', (event, file) => {
+      if (!getValidVideoRegex().test(file)) return;
+      if (mainWindow) { // sencond instance
+        mainWindow.webContents.send('open-file', file);
+      } else {
+        startupOpenedFile = file;
+      }
+    });
+  });
+} else {
+  startupOpenedFile = getOpenedFile(process.argv);
+  app.on('second-instance', (event, argv) => {
+    const opendFile = getOpenedFile(argv);
+    if (opendFile) {
+      mainWindow?.webContents.send('open-file', opendFile);
+    }
+  });
+}
 
 function handleBossKey() {
   if (!mainWindow) return;
@@ -235,7 +248,7 @@ function createWindow() {
 
   mainWindow = new BrowserWindow(windowOptions);
 
-  mainWindow.loadURL(startupOpenedFile && vidRegex.test(startupOpenedFile) ? `${winURL}#/play` : winURL);
+  mainWindow.loadURL(startupOpenedFile ? `${winURL}#/play` : winURL);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
@@ -246,7 +259,7 @@ function createWindow() {
     mainWindow.show();
 
     // Open file by file association. Currently support 1 file only.
-    if (startupOpenedFile && vidRegex.test(startupOpenedFile)) {
+    if (startupOpenedFile) {
       mainWindow.webContents.send('open-file', startupOpenedFile);
     }
   });
@@ -254,14 +267,6 @@ function createWindow() {
   const resizer = new WindowResizer(mainWindow);
   resizer.onStart(); // will only register listener for win
   registerMainWindowEvent();
-}
-
-if (process.platform === 'darwin') {
-  app.on('will-finish-launching', () => {
-    app.on('open-file', (event, file) => {
-      startupOpenedFile = file;
-    });
-  });
 }
 
 app.on('ready', () => {
