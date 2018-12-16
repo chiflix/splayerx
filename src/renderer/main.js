@@ -17,6 +17,8 @@ import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
+import { getValidVideoRegex } from '@/../shared/utils';
+import { videodata } from '@/store/video';
 
 require('source-map-support').install();
 
@@ -168,7 +170,7 @@ new Vue({
         this.refreshMenu();
       }
     },
-    currentSubtitleId(val) {
+    currentSubtitleId(val, oldval) {
       if (this.menu) {
         if (val !== '') {
           this.subtitleList.forEach((item, index) => {
@@ -176,8 +178,28 @@ new Vue({
               this.menu.getMenuItemById(`sub${index}`).checked = true;
             }
           });
+          if (oldval === '') {
+            this.menu.getMenuItemById('subSize')
+              .submenu
+              .items
+              .forEach((item) => {
+                item.enabled = true;
+              });
+            this.menu.getMenuItemById('subStyle')
+              .submenu
+              .items
+              .forEach((item) => {
+                item.enabled = true;
+              });
+          }
         } else {
           this.menu.getMenuItemById('sub-1').checked = true;
+          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
+          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
         }
       }
     },
@@ -268,14 +290,14 @@ new Vue({
               label: this.$t('msg.playback.forward'),
               accelerator: 'Right',
               click: () => {
-                this.$bus.$emit('seek', this.$store.getters.currentTime + 5);
+                this.$bus.$emit('seek', videodata.time + 5);
               },
             },
             {
               label: this.$t('msg.playback.backward'),
               accelerator: 'Left',
               click: () => {
-                this.$bus.$emit('seek', this.$store.getters.currentTime - 5);
+                this.$bus.$emit('seek', videodata.time - 5);
               },
             },
             { type: 'separator' },
@@ -373,6 +395,7 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.subtitleSize'),
+              id: 'subSize',
               submenu: [
                 {
                   label: this.$t('msg.subtitle.size1'),
@@ -415,6 +438,7 @@ new Vue({
             },
             {
               label: this.$t('msg.subtitle.subtitleStyle'),
+              id: 'subStyle',
               submenu: [
                 {
                   label: this.$t('msg.subtitle.style1'),
@@ -659,6 +683,12 @@ new Vue({
           });
         } else {
           this.menu.getMenuItemById('sub-1').checked = true;
+          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
+          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
+            item.enabled = false;
+          });
         }
         this.audioTrackList.forEach((item, index) => {
           if (item.enabled === true) {
@@ -886,12 +916,12 @@ new Vue({
       switch (e.key) {
         case 'ArrowLeft':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.getters.currentTime - 60);
+            this.$bus.$emit('seek', videodata.time - 60);
           }
           break;
         case 'ArrowRight':
           if (e.altKey === true) {
-            this.$bus.$emit('seek', this.$store.getters.currentTime + 60);
+            this.$bus.$emit('seek', videodata.time + 60);
           }
           break;
         default:
@@ -953,13 +983,12 @@ new Vue({
       const subtitleFiles = [];
       const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
       const videoFiles = [];
-      const vidRegex = new RegExp('^\\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$');
       for (let i = 0; i < files.length; i += 1) {
         tempFilePath = files[i].path;
         if (subRegex.test(Path.extname(tempFilePath))) {
           subtitleFiles.push(tempFilePath);
           containsSubFiles = true;
-        } else if (vidRegex.test(Path.extname(tempFilePath))) {
+        } else if (getValidVideoRegex().test(Path.extname(tempFilePath))) {
           videoFiles.push(tempFilePath);
         } else {
           this.addLog('error', `Failed to open file : ${tempFilePath}`);
@@ -989,6 +1018,7 @@ new Vue({
 
     this.$electron.ipcRenderer.on('open-file', (event, file) => {
       this.openFile(file);
+      this.$store.dispatch('PlayingList', [file]); // TODO: PlayingList logic should be placed in openFile
     });
   },
 }).$mount('#app');

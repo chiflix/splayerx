@@ -13,8 +13,8 @@
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
-    <notification-bubble/>
-    <recent-playlist class="recent-playlist"
+    <notification-bubble ref="nextVideoUI"/>
+    <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
     :mousemovePosition="mousemovePosition"
     :isDragging.sync="isDragging"
@@ -33,8 +33,8 @@
       v-bind.sync="widgetsStatus['advance-control']"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes v-hidden="displayState['the-time-codes'] || showProgress"/>
-    <the-progress-bar v-hidden="displayState['the-progress-bar'] || showProgress"/>
+    <the-time-codes ref="theTimeCodes" v-hidden="displayState['the-time-codes'] || showProgress"/>
+    <the-progress-bar ref="progressbar" v-hidden="displayState['the-progress-bar'] || showProgress"/>
   </div>
 </template>
 <script>
@@ -53,6 +53,7 @@ import TheProgressBar from './TheProgressBar.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
 import SpeedLabel from './RateLabel.vue';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'the-video-controller',
@@ -178,6 +179,7 @@ export default {
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
+
     requestAnimationFrame(this.UIManager);
   },
   methods: {
@@ -210,6 +212,15 @@ export default {
       }
 
       this.inputProcess();
+      this.$refs.progressbar.updateProgressBar(videodata.time);
+      this.$refs.theTimeCodes.updateTimeContent(videodata.time);
+      this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
+      if (this.displayState['recent-playlist']) {
+        this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
+      }
+
+      // Use Map constructor to shallow-copy eventInfo
+      const lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
       this.clock().tick(timestamp - this.start);
       this.UITimerManager(timestamp - this.start);
       // this.UILayerManager();

@@ -10,6 +10,7 @@
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'base-video-player',
@@ -200,6 +201,10 @@ export default {
       basicInfo.forEach((settingItem) => {
         videoElement[settingItem] = this[settingItem];
       });
+      // following code is to make preview-thumbnail pause
+      if (this.paused) {
+        videoElement.pause();
+      }
     },
     // Video default methods
     videoElement() {
@@ -207,7 +212,7 @@ export default {
     },
     currentTimeUpdate() {
       const { currentTime } = this.$refs.video;
-      this.$emit('update:currentTime', currentTime);
+      videodata.time = currentTime;
       this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
     },
     // helper functions

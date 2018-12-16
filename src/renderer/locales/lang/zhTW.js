@@ -34,13 +34,13 @@ export default {
     },
     subtitle: {
       name: '字幕',
-      subtitleSelect: '字幕選擇',
+      subtitleSelect: '翻譯結果',
       AITranslation: '重新加載翻譯結果',
       loadSubtitleFile: '加載字幕文件…',
       mainSubtitle: '第一字幕',
       langZhCN: '中文',
       langEn: '英文',
-      noSubtitle: '無字幕',
+      noSubtitle: '無',
       secondarySubtitle: '第二字幕',
       subtitleStyle: '字幕樣式',
       style1: '電影風格',
@@ -143,5 +143,13 @@ export default {
   nextVideo: {
     nextInFolder: '文件夹中下一視頻',
     nextInPlaylist: '播放列表中下一視頻',
+  },
+  subtitle: {
+    language: {
+      zh: '中文 (簡體)',
+      'zh-CN': '中文 (簡體)',
+      'zh-TW': '中文 (繁體)',
+      en: '英文',
+    },
   },
 };
