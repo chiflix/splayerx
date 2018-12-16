@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
-import { throttle } from 'lodash';
+import { throttle, debounce } from 'lodash';
 import path from 'path';
 import fs from 'fs';
 import writeLog from './helpers/writeLog';
@@ -19,7 +19,8 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 let mainWindow = null;
 let tray = null;
-let startupOpenedFile;
+let inited = false;
+const filesToOpen = [];
 const snapShotQueue = [];
 const mediaInfoQueue = [];
 const winURL = process.env.NODE_ENV === 'development'
@@ -224,7 +225,7 @@ function createWindow() {
 
   mainWindow = new BrowserWindow(windowOptions);
 
-  mainWindow.loadURL(startupOpenedFile ? `${winURL}#/play` : winURL);
+  mainWindow.loadURL(filesToOpen.length ? `${winURL}#/play` : winURL);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
@@ -235,9 +236,11 @@ function createWindow() {
     mainWindow.show();
 
     // Open file by file association. Currently support 1 file only.
-    if (startupOpenedFile) {
-      mainWindow.webContents.send('open-file', startupOpenedFile);
+    if (filesToOpen.length) {
+      mainWindow.webContents.send('open-file', ...filesToOpen);
+      filesToOpen.splice(0, filesToOpen.length);
     }
+    inited = true;
   });
 
   const resizer = new WindowResizer(mainWindow);
@@ -256,27 +259,32 @@ app.on('second-instance', () => {
   mainWindow?.focus();
 });
 
+
+function darwinOpenFilesToStart() {
+  if (mainWindow) { // sencond instance
+    if (!inited) return;
+    if (!mainWindow.isVisible()) mainWindow.show();
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+    mainWindow.webContents.send('open-file', ...filesToOpen);
+    filesToOpen.splice(0, filesToOpen.length);
+  } else {
+    createWindow();
+  }
+}
+const darwinOpenFilesToStartDebounced = debounce(darwinOpenFilesToStart, 100);
 if (process.platform === 'darwin') {
   app.on('will-finish-launching', () => {
     app.on('open-file', (event, file) => {
       if (!getValidVideoRegex().test(file)) return;
-      if (mainWindow) { // sencond instance
-        if (!mainWindow.isVisible()) mainWindow.show();
-        if (mainWindow.isMinimized()) mainWindow.restore();
-        mainWindow.focus();
-        mainWindow.webContents.send('open-file', file);
-      } else {
-        startupOpenedFile = file;
-        if (app.isReady()) {
-          createWindow();
-        }
-      }
+      filesToOpen.push(file);
+      darwinOpenFilesToStartDebounced();
     });
   });
 } else {
-  startupOpenedFile = getOpenedFile(process.argv);
+  filesToOpen.push(getOpenedFile(process.argv));
   app.on('second-instance', (event, argv) => {
-    const opendFile = getOpenedFile(argv);
+    const opendFile = getOpenedFile(argv); // TODO: multiple files
     if (opendFile) {
       mainWindow?.webContents.send('open-file', opendFile);
     }
