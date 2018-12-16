@@ -118,7 +118,6 @@ export default {
         online: '',
       },
       foundSubtitles: true,
-      showingPopupDialog: false,
       currentSubIden: 0,
       clicks: 0,
       defaultOptions: { animationData },

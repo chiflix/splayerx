@@ -60,7 +60,6 @@
 
 <script>
 import path from 'path';
-import { getValidVideoExtensions } from '@/../shared/utils';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -78,7 +77,6 @@ export default {
       disX: '',
       disY: '',
       recentFileDel: false,
-      showingPopupDialog: false,
       mouseFlag: true,
       showShadow: true,
       itemWidth: 112,
@@ -191,47 +189,7 @@ export default {
   },
   methods: {
     open(link) {
-      if (this.showingPopupDialog) {
-        // skip if there is already a popup dialog
-        return;
-      }
-      const self = this;
-      const { remote } = this.$electron;
-      const { dialog } = remote;
-      const browserWindow = remote.BrowserWindow;
-      const focusedWindow = browserWindow.getFocusedWindow();
-
-      self.showingPopupDialog = true;
-      // TODO: move openFile method to a single location
-      // eslint-disable-next-line
-      process.env.NODE_ENV === 'testing' ? '' : dialog.showOpenDialog(focusedWindow, {
-        title: 'Open Dialog',
-        defaultPath: link,
-        filters: [{
-          name: 'Video Files',
-          extensions: getValidVideoExtensions(),
-        }, {
-          name: 'All Files',
-          extensions: ['*'],
-        }],
-        properties: ['openFile', 'multiSelections'],
-      }, (items) => {
-        self.showingPopupDialog = false;
-        if (items) {
-          if (!items[0].includes('\\') || process.platform === 'win32') {
-            self.openFile(items[0]);
-          } else {
-            this.addLog('error', `Failed to open file: ${items[0]}`);
-          }
-          if (items.length > 1) {
-            this.$store.dispatch('PlayingList', items);
-          } else {
-            this.findSimilarVideoByVidPath(items[0]).then((similarVideos) => {
-              this.$store.dispatch('FolderList', similarVideos);
-            });
-          }
-        }
-      });
+      this.openFilesByDialog({ defaultPath: link });
     },
     openOrMove() {
       if (this.firstIndex === 1) {
@@ -364,10 +322,7 @@ export default {
         } else if (index + 1 < this.firstIndex && !this.isFullScreen) {
           this.firstIndex = 0;
         } else if (!this.filePathNeedToDelete) {
-          this.openFile(item.path);
-          this.findSimilarVideoByVidPath(item.path).then((similarVideos) => {
-            this.$store.dispatch('FolderList', similarVideos);
-          });
+          this.openVideoFile(item.path);
         }
       }
     },

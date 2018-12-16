@@ -145,7 +145,7 @@ export default {
       this.showShortcutImage = false;
       this.infoDB().cleanData();
     });
-    // trigger by openFile function when opened file not existed
+    // trigger by playFile function when opened file not existed
     this.$bus.$on('file-not-existed', (filePath) => {
       this.filePathNeedToDelete = filePath;
       this.lastPlayedFile.forEach((file) => {

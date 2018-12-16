@@ -249,7 +249,7 @@ export default {
       // TODO: This part move to TheVideoController.vue is better.
       if (videodata.time >= this.duration && this.nextVideo) {
         videodata.time = 0;
-        this.openFile(this.nextVideo);
+        this.playFile(this.nextVideo);
       } else if (videodata.time >= this.duration) {
         videodata.time = 0;
         this.pause();
@@ -313,7 +313,7 @@ export default {
     this.$bus.$on('seek', (e) => {
       // to check whether trigger ‘直捣黄龙’
       if (e === this.duration && this.nextVideo) {
-        this.openFile(this.nextVideo);
+        this.playFile(this.nextVideo);
       } else {
         this.seekTime = [e];
         // todo: use vuex get video element src

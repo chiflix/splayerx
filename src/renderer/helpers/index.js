@@ -4,9 +4,10 @@ import util from 'util';
 import crypto from 'crypto';
 import lolex from 'lolex';
 import InfoDB from '@/helpers/infoDB';
+import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import Sagi from './sagi';
 
-import { ipcRenderer } from 'electron'; // eslint-disable-line
+import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 
 const clock = lolex.createClock();
 
@@ -107,7 +108,70 @@ export default {
         }
       }
     },
-    openFile(path) {
+    openFilesByDialog({ defaultPath } = {}) {
+      if (this.showingPopupDialog) return;
+      this.showingPopupDialog = true;
+      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+        title: 'Open Dialog',
+        defaultPath,
+        filters: [{
+          name: 'Video Files',
+          extensions: getValidVideoExtensions(),
+        }, {
+          name: 'All Files',
+          extensions: ['*'],
+        }],
+        properties: ['openFile', 'multiSelections'],
+      }, (files) => {
+        this.showingPopupDialog = false;
+        if (files) {
+          if (!files[0].includes('\\') || process.platform === 'win32') {
+            this.openFile(...files);
+          } else {
+            this.addLog('error', `Failed to open file: ${files[0]}`);
+          }
+        }
+      });
+    },
+    openFile(...files) {
+      let tempFilePath;
+      let containsSubFiles = false;
+      const subtitleFiles = [];
+      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
+      const videoFiles = [];
+      for (let i = 0; i < files.length; i += 1) {
+        tempFilePath = files[i];
+        if (subRegex.test(path.extname(tempFilePath))) {
+          subtitleFiles.push(tempFilePath);
+          containsSubFiles = true;
+        } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
+          videoFiles.push(tempFilePath);
+        } else {
+          this.addLog('error', `Failed to open file : ${tempFilePath}`);
+        }
+      }
+      if (videoFiles.length !== 0) {
+        if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
+          this.openVideoFile(...videoFiles);
+        } else {
+          this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
+        }
+      }
+      if (containsSubFiles) {
+        this.$bus.$emit('add-subtitles', subtitleFiles);
+      }
+    },
+    openVideoFile(...videoFiles) {
+      this.playFile(videoFiles[0]);
+      if (videoFiles.length > 1) {
+        this.$store.dispatch('PlayingList', videoFiles);
+      } else {
+        this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
+          this.$store.dispatch('FolderList', similarVideos);
+        });
+      }
+    },
+    playFile(path) {
       const originPath = path;
       const mediaQuickHash = this.mediaQuickHash(originPath);
       if (mediaQuickHash instanceof Error) {

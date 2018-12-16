@@ -18,7 +18,6 @@ import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
-import { getValidVideoRegex } from '@/../shared/utils';
 import { videodata } from '@/store/video';
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -246,29 +245,7 @@ new Vue({
               label: this.$t('msg.file.open'),
               accelerator: 'CmdOrCtrl+O',
               click: () => {
-                const VALID_EXTENSION = ['3g2', '3gp', '3gp2', '3gpp', 'amv', 'asf', 'avi', 'bik', 'bin', 'crf', 'divx', 'drc', 'dv', 'dvr-ms', 'evo', 'f4v', 'flv', 'gvi', 'gxf', 'iso', 'm1v', 'm2v', 'm2t', 'm2ts', 'm4v', 'mkv', 'mov', 'mp2', 'mp2v', 'mp4', 'mp4v', 'mpe', 'mpeg', 'mpeg1', 'mpeg2', 'mpeg4', 'mpg', 'mpv2', 'mts', 'mtv', 'mxf', 'mxg', 'nsv', 'nuv', 'ogg', 'ogm', 'ogv', 'ogx', 'ps', 'rec', 'rm', 'rmvb', 'rpl', 'thp', 'tod', 'tp', 'ts', 'tts', 'txd', 'vob', 'vro', 'webm', 'wm', 'wmv', 'wtv', 'xesc'];
-                dialog.showOpenDialog({
-                  properties: ['openFile', 'multiSelections'],
-                  filters: [{
-                    name: 'Video Files',
-                    extensions: VALID_EXTENSION,
-                  }],
-                }, (files) => {
-                  if (files !== undefined) {
-                    if (!files[0].includes('\\') || process.platform === 'win32') {
-                      this.openFile(files[0]);
-                    } else {
-                      this.addLog('error', `Failed to open file: ${files[0]}`);
-                    }
-                    if (files.length > 1) {
-                      this.$store.dispatch('PlayingList', files);
-                    } else {
-                      this.findSimilarVideoByVidPath(files[0]).then((similarVideos) => {
-                        this.$store.dispatch('FolderList', similarVideos);
-                      });
-                    }
-                  }
-                });
+                this.openFilesByDialog();
               },
             },
             {
@@ -724,10 +701,7 @@ new Vue({
         type: 'radio',
         label: value.label,
         click: () => {
-          this.openFile(value.path);
-          this.findSimilarVideoByVidPath(value.path).then((similarVideos) => {
-            this.$store.dispatch('FolderList', similarVideos);
-          });
+          this.openVideoFile(value.path);
         },
       };
     },
@@ -971,50 +945,14 @@ new Vue({
      */
     window.addEventListener('drop', (e) => {
       e.preventDefault();
-      let tempFilePath;
-      let containsSubFiles = false;
-      const { files } = e.dataTransfer;
-      // TODO: play it if it's video file
-      const subtitleFiles = [];
-      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
-      const videoFiles = [];
-      for (let i = 0; i < files.length; i += 1) {
-        tempFilePath = files[i].path;
-        if (subRegex.test(Path.extname(tempFilePath))) {
-          subtitleFiles.push(tempFilePath);
-          containsSubFiles = true;
-        } else if (getValidVideoRegex().test(Path.extname(tempFilePath))) {
-          videoFiles.push(tempFilePath);
-        } else {
-          this.addLog('error', `Failed to open file : ${tempFilePath}`);
-        }
-      }
-      if (videoFiles.length !== 0) {
-        if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
-          this.openFile(videoFiles[0]);
-        } else {
-          this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
-        }
-        if (videoFiles.length > 1) {
-          this.$store.dispatch('PlayingList', videoFiles);
-        } else {
-          this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
-            this.$store.dispatch('FolderList', similarVideos);
-          });
-        }
-      }
-      if (containsSubFiles) {
-        this.$bus.$emit('add-subtitles', subtitleFiles);
-      }
+      this.openFile(...Array.prototype.map.call(e.dataTransfer.files, f => f.path));
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
     });
 
-    this.$electron.ipcRenderer.on('open-file', (event, file) => {
-      this.openFile(file);
-      this.$store.dispatch('PlayingList', [file]); // TODO: PlayingList logic should be placed in openFile
-      // TODO: find similar files
+    this.$electron.ipcRenderer.on('open-file', (event, ...files) => {
+      this.openFile(...files);
     });
   },
 }).$mount('#app');

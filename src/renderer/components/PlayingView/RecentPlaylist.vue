@@ -166,7 +166,7 @@ export default {
         }, 400);
       } else if (index !== this.playingIndex
         && this.filePathNeedToDelete !== this.playingList[index]) {
-        this.openFile(this.playingList[index]);
+        this.playFile(this.playingList[index]);
       }
     },
   },
