@@ -201,6 +201,7 @@ export default {
       syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle });
     },
     async getVideoCover() {
+      if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
       const videoElement = this.$refs.videoCanvas.videoElement();
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
