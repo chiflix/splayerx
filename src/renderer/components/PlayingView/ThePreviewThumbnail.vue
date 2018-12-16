@@ -5,7 +5,7 @@
       <thumbnail-video-player
         v-if="mountVideo"
         v-show="displayVideo"
-        :quickHash="quickHash"
+        :quickHash="mediaHash"
         :currentTime="videoCurrentTime"
         :thumbnailWidth="thumbnailWidth"
         :thumbnailHeight="thumbnailHeight"
@@ -14,7 +14,7 @@
       <thumbnail-display
         v-if="mountImage"
         v-show="!displayVideo"
-        :quickHash="quickHash"
+        :quickHash="mediaHash"
         :autoGenerationIndex="autoGenerationIndex"
         :maxThumbnailWidth="maxThumbnailWidth"
         :currentIndex="currentIndex"
@@ -36,7 +36,6 @@ import { mapGetters } from 'vuex';
 import idb from 'idb';
 import {
   THUMBNAIL_DB_NAME,
-  INFO_DATABASE_NAME,
   THUMBNAIL_OBJECT_STORE_NAME,
 } from '@/constants';
 import Icon from '../BaseIconContainer.vue';
@@ -74,7 +73,6 @@ export default {
         videoRatio: this.videoRatio,
         lastGenerationIndex: 0,
       },
-      quickHash: null,
       displayVideo: true,
       videoCurrentTime: 0,
       canvasCurrentTime: 0,
@@ -180,7 +178,7 @@ export default {
       const obejctStoreName = `thumbnail-width-${this.maxThumbnailWidth}`;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
         idb.open(THUMBNAIL_DB_NAME, db.version + 1, (upgradeDB) => {
-          this.addLog('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
+          this.addLog('info', `[IndexedDB]: Initial thumbnails storage objectStore of width: ${this.maxThumbnailWidth} `);
           const store = upgradeDB.createObjectStore(
             `thumbnail-width-${this.maxThumbnailWidth}`,
             { keyPath: 'id', autoIncrement: false, unique: true },
@@ -190,21 +188,13 @@ export default {
         });
       }
     });
-    idb.open(INFO_DATABASE_NAME).then(async (db) => {
-      const obejctStoreName = THUMBNAIL_OBJECT_STORE_NAME;
-      if (!db.objectStoreNames.contains(obejctStoreName)) {
-        this.addLog('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
-        return idb.open(INFO_DATABASE_NAME, db.version + 1, (upgradeDB) => {
-          upgradeDB.createObjectStore(obejctStoreName, { keyPath: 'quickHash' }, { unique: true });
-        });
-      }
-      return idb.open(INFO_DATABASE_NAME);
-    })
-      .then(() => this.retrieveThumbnailInfo(this.mediaHash))
+
+    this.retrieveThumbnailInfo(this.mediaHash)
       .then(this.updateThumbnailData)
       .catch((err) => {
         this.addLog('error', err);
       });
+
     this.$bus.$on('image-all-get', (e) => {
       this.generatedIndex = e;
     });

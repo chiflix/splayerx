@@ -88,7 +88,6 @@
 </div>
 </template>
 <script>
-import { mapGetters } from 'vuex';
 import path from 'path';
 import { filePathToUrl } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -137,7 +136,7 @@ export default {
       isChosen: false,
       coverSrc: '',
       lastPlayedTime: 0,
-      mediaInfo: {},
+      mediaInfo: { path: this.path },
       smallShortCut: '',
     };
   },
@@ -194,7 +193,6 @@ export default {
     });
   },
   computed: {
-    ...mapGetters(['originSrc']),
     backgroundImage() {
       return `url(${this.imageSrc})`;
     },

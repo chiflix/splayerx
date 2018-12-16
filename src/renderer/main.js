@@ -6,6 +6,9 @@ import uuidv4 from 'uuid/v4';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
+import VueElectron from 'vue-electron';
+import Path from 'path';
+import { mapGetters } from 'vuex';
 import { remote } from 'electron';
 
 import App from '@/App.vue';
@@ -13,8 +16,6 @@ import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
-import Path from 'path';
-import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
@@ -23,7 +24,15 @@ import { videodata } from '@/store/video';
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
 
-if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
+function getSystemLocale() {
+  const locale = remote.app.getLocale();
+  if (locale === 'zh-TW') {
+    return 'zhTW';
+  } else if (locale.startsWith('zh')) {
+    return 'zhCN';
+  }
+  return 'en';
+}
 
 Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
@@ -48,6 +57,7 @@ Vue.directive('hidden', {
   },
 });
 
+Vue.use(VueElectron);
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
@@ -59,16 +69,6 @@ Vue.use(VueAnalytics, {
 
 Vue.mixin(helpers);
 Vue.prototype.$bus = new Vue(); // Global event bus
-
-function getSystemLocale() {
-  const locale = remote.app.getLocale();
-  if (locale === 'zh-TW') {
-    return 'zhTW';
-  } else if (locale.startsWith('zh')) {
-    return 'zhCN';
-  }
-  return 'en';
-}
 
 const i18n = new VueI18n({
   locale: getSystemLocale(), // set locale
@@ -862,10 +862,8 @@ new Vue({
     // https://github.com/electron/electron/issues/3609
     // Disable Zooming
     this.$electron.webFrame.setVisualZoomLevelLimits(1, 1);
-    this.infoDB().init().then(() => {
-      this.createMenu();
-      this.$bus.$on('new-file-open', this.refreshMenu);
-    });
+    this.createMenu();
+    this.$bus.$on('new-file-open', this.refreshMenu);
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
       if (err) {

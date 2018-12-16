@@ -129,8 +129,8 @@ export default {
       this.hoverIndex = payload.index;
       this.hoveredMediaInfo = payload.mediaInfo;
       this.filename = path.basename(
-        payload.mediaInfo.filename,
-        path.extname(payload.mediaInfo.filename),
+        payload.mediaInfo.path,
+        path.extname(payload.mediaInfo.path),
       );
     },
     itemMouseout() {

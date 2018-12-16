@@ -10,6 +10,7 @@ import Sagi from './sagi';
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 
 const clock = lolex.createClock();
+let infoDB = null;
 
 export default {
   methods: {
@@ -17,7 +18,8 @@ export default {
       return clock;
     },
     infoDB() {
-      return InfoDB;
+      if (!infoDB) infoDB = new InfoDB();
+      return infoDB;
     },
     sagi() { return Sagi; },
 
