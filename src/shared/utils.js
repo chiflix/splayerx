@@ -1,77 +1,18 @@
-const VALID_VIDEO_EXTENSIONS = [
-  '3g2',
-  '3gp',
-  '3gp2',
-  '3gpp',
-  'amv',
-  'asf',
-  'avi',
-  'bik',
-  'bin',
-  'crf',
-  'divx',
-  'drc',
-  'dv',
-  'dvr-ms',
-  'evo',
-  'f4v',
-  'flv',
-  'gvi',
-  'gxf',
-  'iso',
-  'm1v',
-  'm2v',
-  'm2t',
-  'm2ts',
-  'm4v',
-  'mkv',
-  'mov',
-  'mp2',
-  'mp2v',
-  'mp4',
-  'mp4v',
-  'mpe',
-  'mpeg',
-  'mpeg1',
-  'mpeg2',
-  'mpeg4',
-  'mpg',
-  'mpv2',
-  'mts',
-  'mtv',
-  'mxf',
-  'mxg',
-  'nsv',
-  'nuv',
-  'ogg',
-  'ogm',
-  'ogv',
-  'ogx',
-  'ps',
-  'rec',
-  'rm',
-  'rmvb',
-  'rpl',
-  'thp',
-  'tod',
-  'tp',
-  'ts',
-  'tts',
-  'txd',
-  'vob',
-  'vro',
-  'webm',
-  'wm',
-  'wmv',
-  'wtv',
-  'xesc',
-];
-const VALID_VIDEO_REGEX = new RegExp(`\\.(${VALID_VIDEO_EXTENSIONS.join('|')})$`, 'i');
+import manifest from '../../package.json';
+
+let validVideoExtensions;
 export function getValidVideoExtensions() {
-  return VALID_VIDEO_EXTENSIONS;
+  if (validVideoExtensions) return validVideoExtensions;
+  validVideoExtensions = manifest.build[process.platform === 'darwin' ? 'mac' : 'win']
+    .fileAssociations.reduce((exts, fa) => exts.concat(fa.ext), []);
+  return validVideoExtensions;
 }
+
+let validVideoRegex;
 export function getValidVideoRegex() {
-  return VALID_VIDEO_REGEX;
+  if (validVideoRegex) return validVideoRegex;
+  validVideoRegex = new RegExp(`\\.(${getValidVideoExtensions().join('|')})$`, 'i');
+  return validVideoRegex;
 }
 
 export default {

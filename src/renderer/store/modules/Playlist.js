@@ -80,7 +80,7 @@ const actions = {
     } else {
       for (let i = 0; i < state.PlayingList.length; i += 1) {
         fs.access(state.PlayingList[i], fs.constants.F_OK, (err) => {
-          if (err.code === 'ENOENT') dispatch('RemovePlayingList', state.PlayingList[i]);
+          if (err?.code === 'ENOENT') dispatch('RemovePlayingList', state.PlayingList[i]);
         });
       }
     }

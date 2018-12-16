@@ -201,6 +201,7 @@ export default {
       syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle });
     },
     async getVideoCover() {
+      if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
       const videoElement = this.$refs.videoCanvas.videoElement();
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -231,7 +232,7 @@ export default {
           this.infoDB().add('recent-played', mergedData);
         } else {
           const data = {
-            quickHash: this.mediaQuickHash(this.originSrc),
+            quickHash: await this.mediaQuickHash(this.originSrc),
             path: this.originSrc,
             cover: imagePath,
             smallCover: smallImagePath,
@@ -249,7 +250,7 @@ export default {
       // TODO: This part move to TheVideoController.vue is better.
       if (videodata.time >= this.duration && this.nextVideo) {
         videodata.time = 0;
-        this.openFile(this.nextVideo);
+        this.playFile(this.nextVideo);
       } else if (videodata.time >= this.duration) {
         videodata.time = 0;
         this.pause();
@@ -313,7 +314,7 @@ export default {
     this.$bus.$on('seek', (e) => {
       // to check whether trigger ‘直捣黄龙’
       if (e === this.duration && this.nextVideo) {
-        this.openFile(this.nextVideo);
+        this.playFile(this.nextVideo);
       } else {
         this.seekTime = [e];
         // todo: use vuex get video element src

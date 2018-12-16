@@ -129,8 +129,8 @@ export default {
       this.hoverIndex = payload.index;
       this.hoveredMediaInfo = payload.mediaInfo;
       this.filename = path.basename(
-        payload.mediaInfo.filename,
-        path.extname(payload.mediaInfo.filename),
+        payload.mediaInfo.path,
+        path.extname(payload.mediaInfo.path),
       );
     },
     itemMouseout() {
@@ -166,7 +166,7 @@ export default {
         }, 400);
       } else if (index !== this.playingIndex
         && this.filePathNeedToDelete !== this.playingList[index]) {
-        this.openFile(this.playingList[index]);
+        this.playFile(this.playingList[index]);
       }
     },
   },

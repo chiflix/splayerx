@@ -2,7 +2,7 @@
   "name": "splayer",
   "productName": "splayer",
   "homepage": "https://splayer.org",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "author": "tomasen <tomasen@gmail.com>",
   "description": "a media player",
   "license": "GPLv3",
@@ -72,8 +72,7 @@
       "target": [
         "dmg"
       ],
-      "fileAssociations": 
-      [
+      "fileAssociations": [
         {
           "name": "Video",
           "ext": [
@@ -207,8 +206,7 @@
     },
     "win": {
       "icon": "build/icons/icon.ico",
-      "fileAssociations": 
-      [
+      "fileAssociations": [
         {
           "name": "Video",
           "ext": [

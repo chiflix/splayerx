@@ -153,7 +153,7 @@ export default {
       });
     },
     async getOnlineSubtitlesList(videoSrc) {
-      const hash = helpers.methods.mediaQuickHash(videoSrc);
+      const hash = await helpers.methods.mediaQuickHash(videoSrc);
       const getSubtitle = res => res.array[1].map(subtitle => ({
         hash: subtitle[0],
         lang: subtitle[1],
