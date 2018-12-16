@@ -89,17 +89,16 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['originSrc', 'convertedSrc']),
+    ...mapGetters(['originSrc', 'convertedSrc', 'mediaHash']),
   },
   watch: {
-    originSrc() {
+    async originSrc() {
       // Reload video and image components
       this.mountVideo = false;
       this.mountImage = false;
       this.generatedIndex = 0;
       this.currentIndex = 0;
-      this.quickHash = this.mediaQuickHash(this.originSrc);
-      this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
+      this.retrieveThumbnailInfo(this.mediaHash).then(this.updateThumbnailData);
     },
     currentTime(newValue) {
       const index = Math.abs(Math.floor(newValue / this.generationInterval));
@@ -118,7 +117,7 @@ export default {
       this.autoGenerationIndex = event.index;
       this.generationInterval = event.interval;
       this.infoDB().add(THUMBNAIL_OBJECT_STORE_NAME, {
-        quickHash: this.quickHash,
+        quickHash: this.mediaHash,
         lastGenerationIndex: event.index,
         generationInterval: event.interval,
         maxThumbnailCount: event.count,
@@ -191,8 +190,7 @@ export default {
         });
       }
     });
-    idb.open(INFO_DATABASE_NAME).then((db) => {
-      this.quickHash = this.mediaQuickHash(this.originSrc);
+    idb.open(INFO_DATABASE_NAME).then(async (db) => {
       const obejctStoreName = THUMBNAIL_OBJECT_STORE_NAME;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
         this.addLog('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
@@ -202,7 +200,7 @@ export default {
       }
       return idb.open(INFO_DATABASE_NAME);
     })
-      .then(() => this.retrieveThumbnailInfo(this.quickHash))
+      .then(() => this.retrieveThumbnailInfo(this.mediaHash))
       .then(this.updateThumbnailData)
       .catch((err) => {
         this.addLog('error', err);

@@ -231,7 +231,7 @@ export default {
           this.infoDB().add('recent-played', mergedData);
         } else {
           const data = {
-            quickHash: this.mediaQuickHash(this.originSrc),
+            quickHash: await this.mediaQuickHash(this.originSrc),
             path: this.originSrc,
             cover: imagePath,
             smallCover: smallImagePath,

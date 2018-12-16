@@ -137,7 +137,7 @@ export default {
     async subtitleInitializingStatus() {
       const vidSrc = this.originSrc;
       let subStatus = [];
-      this.mediaHash = this.mediaQuickHash(vidSrc);
+      this.mediaHash = await this.mediaQuickHash(vidSrc);
       this.Sagi = this.sagi();
 
       // serverSubsExist

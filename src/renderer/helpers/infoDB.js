@@ -1,6 +1,6 @@
 
 import idb from 'idb';
-import { INFO_SCHEMA, INFODB_VERSION } from '@/constants';
+import { INFO_DATABASE_NAME, INFO_SCHEMA, INFODB_VERSION } from '@/constants';
 import addLog from './index';
 
 
@@ -13,44 +13,34 @@ class InfoDB {
    * Update InfoDB if new schema or new index has added
    */
   static init() {
-    return idb.open('Info', INFODB_VERSION, (upgradeDB) => {
-      if (upgradeDB.oldVersion === 0) {
-        INFO_SCHEMA.forEach((schema) => {
-          const store = upgradeDB.createObjectStore(schema.name, { keyPath: 'quickHash' });
-          if (schema.indexes) {
-            schema.indexes.forEach((val) => {
-              if (!store.indexNames.contains(val)) store.createIndex(val, val);
-            });
-          }
-        });
-      } else {
-        for (let i = 0; i < INFO_SCHEMA.length; i += 1) {
-          const schema = INFO_SCHEMA[i];
-          let store;
-          if (!upgradeDB.objectStoreNames.contains(schema.name)) {
-            store = upgradeDB.createObjectStore(schema.name, { keyPath: 'quickHash' });
-          } else {
-            store = upgradeDB.transaction.objectStore(schema.name);
-          }
-          if (schema.indexes) {
-            schema.indexes.forEach((val) => {
-              if (!store.indexNames.contains(val)) store.createIndex(val, val);
-            });
-          }
+    return idb.open(INFO_DATABASE_NAME, INFODB_VERSION, (upgradeDB) => {
+      INFO_SCHEMA.forEach((schema) => {
+        let store;
+        if (!upgradeDB.objectStoreNames.contains(schema.name)) {
+          store = upgradeDB.createObjectStore(schema.name, { keyPath: 'quickHash' });
+        } else {
+          store = upgradeDB.transaction.objectStore(schema.name);
         }
-      }
-    });
-  }
-  // clean All records in recent-played
-  static cleanData() {
-    return idb.open('Info').then((db) => {
-      const tx = db.transaction('recent-played', 'readwrite');
-      tx.objectStore('recent-played').clear();
-      return tx.complete.then(() => {
-        addLog.methods.addLog('info', 'DB recent-played records all deleted');
+        if (schema.indexes) {
+          schema.indexes.forEach((val) => {
+            if (!store.indexNames.contains(val)) store.createIndex(val, val);
+          });
+        }
       });
     });
   }
+
+  // clean All records in `storeName`, default to 'recent-played'
+  static cleanData(storeName = 'recent-played') {
+    return idb.open(INFO_DATABASE_NAME).then((db) => {
+      const tx = db.transaction(storeName, 'readwrite');
+      tx.objectStore(storeName).clear();
+      return tx.complete.then(() => {
+        addLog.methods.addLog('info', `DB ${storeName} records all deleted`);
+      });
+    });
+  }
+
   /**
    * @param  {String} schema
    * @param  {Object} data Must contain quickHash property
@@ -58,31 +48,38 @@ class InfoDB {
    * Replace a record if the given quickHash existed
    */
   static add(schema, data) {
-    addLog.methods.addLog('info', `adding ${data.path} to ${schema}`);
-    return idb.open('Info').then((db) => {
+    if (!data || !data.quickHash) throw new Error(`Invalid data: ${JSON.stringify(data)}`);
+    addLog.methods.addLog('info', `adding ${data.path || JSON.stringify(data)} to ${schema}`);
+    return idb.open(INFO_DATABASE_NAME).then((db) => {
       const tx = db.transaction(schema, 'readwrite');
       tx.objectStore(schema).put(data);
-      return tx.complete.then(() => addLog.methods.addLog('info', 'added'));
+      return tx.complete.then(() => {
+        addLog.methods.addLog('info', `added ${data.path || JSON.stringify(data)} to ${schema}`);
+      });
     });
   }
+
   /**
    * @param  {String} schema
-   * @param  {String} val
-   * Delete the record which Primary key equal to the given val
+   * @param  {String} quickHash
+   * Delete the record which match the given quickHash
    */
-  static delete(schema, val) {
-    addLog.methods.addLog('info', 'deleting');
-    return idb.open('Info').then((db) => {
+  static delete(schema, quickHash) {
+    addLog.methods.addLog('info', `deleting ${quickHash} from ${schema}`);
+    return idb.open(INFO_DATABASE_NAME).then((db) => {
       const tx = db.transaction(schema, 'readwrite');
-      tx.objectStore(schema).delete(val);
-      return tx.complete.then(() => addLog.methods.addLog('info', 'deleted'));
+      tx.objectStore(schema).delete(quickHash);
+      return tx.complete.then(() => {
+        addLog.methods.addLog('info', `deleted ${quickHash} from ${schema}`);
+      });
     });
   }
+
   /**
    * Retrieve data of last played video from 'recent-played' schema
    */
   static lastPlayed() {
-    return idb.open('Info').then((db) => {
+    return idb.open(INFO_DATABASE_NAME).then((db) => {
       const tx = db.transaction('recent-played');
       let val;
       tx.objectStore('recent-played').index('lastOpened').iterateCursor(null, 'prev', (cursor) => {
@@ -92,6 +89,7 @@ class InfoDB {
       return tx.complete.then(() => Promise.resolve(val));
     });
   }
+
   /**
    * @param  {String} schema
    * @param  {String} key
@@ -103,7 +101,7 @@ class InfoDB {
    *  Return a sorted result with the given key and schema
    */
   static sortedResult(schema, key, direction) {
-    return idb.open('Info').then((db) => {
+    return idb.open(INFO_DATABASE_NAME).then((db) => {
       const tx = db.transaction(schema);
       const res = [];
       tx.objectStore(schema).index(key).iterateCursor(null, direction, (cursor) => {
@@ -114,6 +112,7 @@ class InfoDB {
       return tx.complete.then(() => Promise.resolve(res));
     });
   }
+
   /**
    * @param  {String} schema
    * @param  {String} key Optional
@@ -123,17 +122,18 @@ class InfoDB {
    */
   static get(schema, key, val) {
     if (val) {
-      return idb.open('Info').then(async (db) => {
+      return idb.open(INFO_DATABASE_NAME).then(async (db) => {
         const value = await db.transaction(schema).objectStore(schema).index(key).get(val);
         return value;
       });
     }
     val = key;
-    return idb.open('Info').then(async (db) => {
+    return idb.open(INFO_DATABASE_NAME).then(async (db) => {
       const value = await db.transaction(schema).objectStore(schema).get(val);
       return value;
     });
   }
+
   /**
    * @param  {String} schema
    * @param  {IDBKeyRange} keyRange Optional
@@ -141,7 +141,7 @@ class InfoDB {
    * Return all records from the given schema if no range specified
    */
   static getAll(schema, keyRange) {
-    return idb.open('Info').then(async (db) => {
+    return idb.open(INFO_DATABASE_NAME).then(async (db) => {
       const tx = db.transaction(schema);
       let val;
       if (keyRange) {
