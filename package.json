@@ -53,19 +53,23 @@
       "dist/electron/**/*"
     ],
     "dmg": {
-      "background": "build/icons/dmg/bg.png",
-      "icon": "build/icons/dmg/logo.png",
+      "background": "build/icons/dmg/bg.tiff",
+      "icon": "build/icons/dmg/logo.tiff",
       "iconSize": 95,
+      "window": {
+        "width": 540,
+        "height": 344
+      },
       "contents": [
         {
-          "x": 320,
-          "y": 94,
+          "x": 400,
+          "y": 148,
           "type": "link",
           "path": "/Applications"
         },
         {
-          "x": 74,
-          "y": 94,
+          "x": 131,
+          "y": 150,
           "type": "file"
         }
       ]
