@@ -249,11 +249,11 @@ export default {
     });
     this.$bus.$on('refresh-subtitle', async (src) => {
       const online2 = await this.getOnlineSubtitlesList(src);
-      this.$bus.$emit('finish-refresh');
       if (online2.length > 0) {
         this.refreshSubtitle(online2);
         this.changeCurrentSubtitle(this.chooseInitialSubtitle(this.subtitleList, this.systemLocale).id);
       }
+      this.$bus.$emit('finish-refresh');
     });
   },
 };
