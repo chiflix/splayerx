@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import writeLog from './helpers/writeLog';
 import WindowResizer from './helpers/windowResizer';
-import { getOpenedFile } from './helpers/argv';
+import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
 
 /**
@@ -282,11 +282,11 @@ if (process.platform === 'darwin') {
     });
   });
 } else {
-  filesToOpen.push(getOpenedFile(process.argv));
+  filesToOpen.push(...getOpenedFiles(process.argv));
   app.on('second-instance', (event, argv) => {
-    const opendFile = getOpenedFile(argv); // TODO: multiple files
-    if (opendFile) {
-      mainWindow?.webContents.send('open-file', opendFile);
+    const opendFiles = getOpenedFiles(argv); // TODO: multiple files
+    if (opendFiles.length) {
+      mainWindow?.webContents.send('open-file', ...opendFiles);
     }
   });
 }
