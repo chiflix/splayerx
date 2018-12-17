@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { localFormatLoader, toPromise, toArray, objectTo } from './utils';
+import { localFormatLoader, toArray, mediaHash, promisify } from './utils';
 
 const files = require.context('.', false, /\.loader\.js$/);
 const loaders = {};
@@ -13,54 +13,61 @@ export default class SubtitleLoader extends EventEmitter {
     super();
     this.src = src;
     this.type = type;
-    this.metaInfo = {
-      format: type === 'online' ? 'online' : localFormatLoader(src),
-    };
+    this.format = type === 'online' ? 'online' : localFormatLoader(src);
+    this.options = options || {};
     const loader = Object.keys(loaders)
-      .find(format => toArray(loaders[format].supportedFormats).includes(this.metaInfo.format));
+      .find(format => toArray(loaders[format].supportedFormats).includes(this.format));
     if (loaders[loader]) {
       this.loader = loaders[loader];
     } else {
       throw new Error('Unreconginzed format');
     }
-
-    if (options) {
-      this.options = options;
-    }
   }
 
   async meta() {
-    const { src, options } = this;
+    const {
+      src, type, format, options,
+    } = this;
+    this.mediaHash = type !== 'online' ? await mediaHash(src) : src;
     const { infoLoaders: meta } = this.loader;
-    let info;
+    let info = {
+      src,
+      type,
+      format,
+      id: type === 'online' ? src : this.mediaHash,
+    };
     if (typeof meta === 'function') {
-      info = await toPromise(meta, src);
-    } else if (objectTo(meta) === 'option') {
-      this.metaInfo.language = await toPromise(meta.language, src);
-      this.metaInfo.name = await toPromise(meta.name, src);
-    } else if (objectTo(meta) === 'function') {
-      const { params, func } = meta;
-      const realParams = [];
-      params.forEach((param) => {
-        realParams.push(this[param] || options[param] || undefined);
+      info = await Promise.resolve(meta.bind(src)());
+    } else {
+      const getParams = (params, info) => params.map(param => (
+        this[param] || options[param] || info[param]
+      ));
+      const infoTypes = Object.keys(meta);
+      const infoResults = await Promise.all(infoTypes
+        .map((infoType) => {
+          const infoLoader = meta[infoType];
+          if (typeof infoLoader === 'function') return promisify(infoLoader.bind(null, src));
+          return promisify(infoLoader.func.bind(null, ...getParams(infoLoader.params)));
+        }).map(promise => promise.catch(err => err)));
+      infoTypes.forEach((infoType, index) => {
+        info[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
       });
-      await toPromise(func, ...realParams);
     }
-    this.metaInfo = info;
+    this.metaInfo = { ...info, format, id: type === 'online' ? src : this.mediaHash };
     this.emit('ready', this.metaInfo);
   }
 
   async load() {
     const { src } = this;
     const { load } = this.loader;
-    this.data = load instanceof Promise ? await load(src) : load(src);
-    if (this.data) this.emit('data');
+    this.data = await promisify(load.bind(null, src));
+    this.emit('data', this.data);
   }
 
   async parse() {
     const { data } = this;
     const { parse } = this.loader;
-    this.parsed = parse instanceof Promise ? await parse(data) : parse(data);
-    if (this.parsed) this.$emit('parse');
+    this.parsed = await promisify(parse.bind(null, data));
+    this.$emit('parse', this.parsed);
   }
 }
