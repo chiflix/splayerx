@@ -1,16 +1,20 @@
 import { getValidVideoRegex } from '../../shared/utils';
 
-export function getOpenedFile(argv) {
+
+/**
+ * 从命令行参数里过滤出视频文件
+ *
+ * @export
+ * @param {*} argv
+ * @returns 数组
+ */
+export function getOpenedFiles(argv) {
   let args = [...argv];
-  if (!process.isPackaged) { // See https://github.com/electron/electron/issues/4690
-    args = args.slice(1);
-  }
-  if (args.length && getValidVideoRegex().test(args[args.length - 1])) {
-    return args[args.length - 1];
-  }
-  return null;
+  args = args.slice(process.isPackaged ? 2 : 1);
+  const videos = args.filter(arg => getValidVideoRegex().test(arg));
+  return videos;
 }
 
 export default {
-  getOpenedFile,
+  getOpenedFiles,
 };
