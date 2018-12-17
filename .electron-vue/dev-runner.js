@@ -133,6 +133,12 @@ function startElectron () {
     electronLog(data, 'blue')
   })
   electronProcess.stderr.on('data', data => {
+    // suppress the currently useless ERROR:CONSOLE error
+    if (data.includes('Could not instantiate: ProductRegistryImpl.Registry')
+    || data.includes('product_registry_impl_module.js')
+    ) {
+      return;
+    }
     electronLog(data, 'red')
   })
 

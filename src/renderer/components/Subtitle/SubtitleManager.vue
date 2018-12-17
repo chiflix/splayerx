@@ -35,7 +35,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
-      'currentTime', 'duration', 'paused', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
+      'duration', 'paused', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
     ]),
     currentSubtitleSrc() {
       const result = this.subtitleList
@@ -52,10 +52,16 @@ export default {
       systemLocale: '',
       subtitleTime: {},
       localPremiumSubtitles: {},
+      zhIndex: -1,
+      enIndex: -1,
+      twIndex: -1,
     };
   },
   watch: {
     originSrc(newVal) {
+      this.zhIndex = -1;
+      this.twIndex = -1;
+      this.enIndex = -1;
       this.resetSubtitles();
       this.getSubtitlesList(newVal).then((result) => {
         if (result.length > 0) {
@@ -136,16 +142,43 @@ export default {
             (file.includes(filename) && extensionRegex.test(file)));
           result = subtitles.map(subtitle => ({
             path: join(dirname(videoSrc), subtitle),
-            name: subtitle
-              .replace(filename, '').replace(extensionRegex, '').replace('.', '') || filename,
+            name: filename,
+            // subtitle.replace(filename, '').replace(extensionRegex, '').replace('.', '')
             ext: extname(subtitle).slice(1),
           }));
           resolve(result);
         });
       });
     },
-    getOnlineSubtitlesList(videoSrc) {
-      return Sagi.mediaTranslate(helpers.methods.mediaQuickHash(videoSrc));
+    async getOnlineSubtitlesList(videoSrc) {
+      const hash = await helpers.methods.mediaQuickHash(videoSrc);
+      const getSubtitle = res => res.array[1].map(subtitle => ({
+        hash: subtitle[0],
+        lang: subtitle[1],
+        language_code: subtitle[1],
+        type: 'online',
+        id: subtitle[0],
+        name: this.getOnlineSubName(subtitle[1]),
+      }));
+      return (await Promise.all([
+        Sagi.mediaTranslate(hash, 'zh'),
+        Sagi.mediaTranslate(hash, 'en'),
+      ].map(promise => promise.catch(err => err))))
+        .filter(result => !(result instanceof Error))
+        .map(result => getSubtitle(result))
+        .reduce((prev, curr) => prev.concat(curr), []);
+    },
+    getOnlineSubName(code) {
+      const romanNum = ['I', 'II', 'III']; // may use package romanize in the future
+      if (code === 'en') {
+        this.enIndex += 1;
+        return `${this.$t(`subtitle.language.${code}`)} ${romanNum[this.enIndex]}`;
+      } else if (code === 'zh-TW') {
+        this.twIndex += 1;
+        return `${this.$t(`subtitle.language.${code}`)} ${romanNum[this.twIndex]}`;
+      }
+      this.zhIndex += 1;
+      return `${this.$t(`subtitle.language.${code}`)} ${romanNum[this.zhIndex]}`;
     },
     getSubtitleCallback(type) {
       switch (type) {
@@ -179,12 +212,9 @@ export default {
       });
     },
     chooseInitialSubtitle(subtitleList, iso6391SystemLocale) {
-      if (subtitleList.length >= 1) {
-        return subtitleList[0];
-      } else {
-        const fitSystemLocaleSubtitles = subtitleList.filter(subtitle => convert3To1(subtitle.lang) === iso6391SystemLocale);
-        return fitSystemLocaleSubtitles.length ? fitSystemLocaleSubtitles[0] : subtitleList[0];
-      }
+      const fitSystemLocaleSubtitles = subtitleList.filter(subtitle => (subtitle.lang.length === 2 ?
+        subtitle.lang : convert3To1(subtitle.lang)) === iso6391SystemLocale);
+      return fitSystemLocaleSubtitles.length ? fitSystemLocaleSubtitles[0] : subtitleList[0];
     },
   },
   created() {
@@ -195,6 +225,7 @@ export default {
         if (result.length > 0) {
           this.addSubtitles(result);
           this.changeCurrentSubtitle(this.chooseInitialSubtitle(this.subtitleList, this.systemLocale).id);
+          this.$bus.$emit('change-current');
         } else {
           this.$bus.$emit('find-no-subtitle');
         }
@@ -213,20 +244,13 @@ export default {
         })),
       )(subtitleList);
     });
-    this.$bus.$on('refresh-subtitle', async (hash) => {
-      const online = await Sagi.mediaTranslate(hash);
-      let onlineNormalizer = [];
-      online.array[1].forEach((sub) => {
-        if (typeof sub[0] === 'string' && sub[0].length) {
-          onlineNormalizer.push({
-            type: 'online',
-            hash: sub[0],
-            id: uuidv4(),
-          });
-        }
-      });
-      this.refreshSubtitle(onlineNormalizer);
-      this.changeCurrentSubtitle(this.subtitleList[0].id);
+    this.$bus.$on('refresh-subtitle', async (src) => {
+      this.zhIndex = -1;
+      this.twIndex = -1;
+      this.enIndex = -1;
+      const online2 = await this.getOnlineSubtitlesList(src);
+      this.refreshSubtitle(online2);
+      this.changeCurrentSubtitle(this.chooseInitialSubtitle(this.subtitleList, this.systemLocale).id);
       this.$bus.$emit('finish-refresh');
     });
   },

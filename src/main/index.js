@@ -1,9 +1,12 @@
 import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
-import { throttle } from 'lodash';
+import { throttle, debounce } from 'lodash';
 import path from 'path';
 import fs from 'fs';
 import writeLog from './helpers/writeLog';
 import WindowResizer from './helpers/windowResizer';
+import { getOpenedFiles } from './helpers/argv';
+import { getValidVideoRegex } from '../shared/utils';
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -11,18 +14,13 @@ import WindowResizer from './helpers/windowResizer';
 if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
 }
-// See https://github.com/electron/electron/issues/4690
-if (!process.defaultApp) {
-  process.argv.unshift(null);
-}
-const cliArgs = process.argv.slice(2);
-let startupOpenedFile = cliArgs.length ? cliArgs[0] : null;
-const vidRegex = new RegExp('\\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$');
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 let mainWindow = null;
 let tray = null;
+let inited = false;
+const filesToOpen = [];
 const snapShotQueue = [];
 const mediaInfoQueue = [];
 const winURL = process.env.NODE_ENV === 'development'
@@ -32,15 +30,6 @@ const winURL = process.env.NODE_ENV === 'development'
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 }
-app.on('second-instance', () => {
-  try {
-    if (mainWindow?.isMinimized()) mainWindow.restore();
-    mainWindow.focus();
-  } catch (err) {
-    this.addLog('error', err);
-    // pass
-  }
-});
 
 function handleBossKey() {
   if (!mainWindow) return;
@@ -112,17 +101,20 @@ function registerMainWindowEvent() {
     const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
-    splayerx.snapshotVideo(videoPath, `${imgPath}.png`, `00:00:${numberString}`, (err) => {
-      console.log(err, videoPath);
-      callback(err, imgPath);
+    splayerx.snapshotVideo(videoPath, `${imgPath}.png`, `00:00:${numberString}`, (resultCode) => {
+      console[resultCode === '0' ? 'log' : 'error'](resultCode, videoPath);
+      callback(resultCode, imgPath);
     });
   }
 
   function snapShotQueueProcess(event) {
-    const callback = (err, imgPath) => {
-      if (err !== '0') {
-        snapShot(snapShotQueue[0], callback);
-      } else if (err === '0') {
+    const callback = (resultCode, imgPath) => {
+      if (resultCode !== '0') { // TODO: retry
+        snapShotQueue.shift();
+        if (snapShotQueue.length) {
+          snapShot(snapShotQueue[0], callback);
+        }
+      } else {
         const lastRecord = snapShotQueue.shift();
         if (event.sender.isDestroyed()) {
           snapShotQueue.splice(0, snapShotQueue.length);
@@ -141,11 +133,9 @@ function registerMainWindowEvent() {
     const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
 
     if (!fs.existsSync(`${imgPath}.png`)) {
-      if (snapShotQueue.length === 0) {
-        snapShotQueue.push(videoPath);
+      snapShotQueue.push(videoPath);
+      if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
-      } else {
-        snapShotQueue.push(videoPath);
       }
     } else {
       console.log('pass', imgPath);
@@ -235,7 +225,7 @@ function createWindow() {
 
   mainWindow = new BrowserWindow(windowOptions);
 
-  mainWindow.loadURL(startupOpenedFile && vidRegex.test(startupOpenedFile) ? `${winURL}#/play` : winURL);
+  mainWindow.loadURL(filesToOpen.length ? `${winURL}#/play` : winURL);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
@@ -246,21 +236,58 @@ function createWindow() {
     mainWindow.show();
 
     // Open file by file association. Currently support 1 file only.
-    if (startupOpenedFile && vidRegex.test(startupOpenedFile)) {
-      mainWindow.webContents.send('open-file', startupOpenedFile);
+    if (filesToOpen.length) {
+      mainWindow.webContents.send('open-file', ...filesToOpen);
+      filesToOpen.splice(0, filesToOpen.length);
     }
+    inited = true;
   });
 
   const resizer = new WindowResizer(mainWindow);
   resizer.onStart(); // will only register listener for win
   registerMainWindowEvent();
+
+  if (process.env.NODE_ENV === 'development') {
+    setTimeout(() => { // wait some time to prevent `Object not found` error
+      mainWindow?.openDevTools();
+    }, 1000);
+  }
 }
 
+app.on('second-instance', () => {
+  if (mainWindow?.isMinimized()) mainWindow.restore();
+  mainWindow?.focus();
+});
+
+
+function darwinOpenFilesToStart() {
+  if (mainWindow) { // sencond instance
+    if (!inited) return;
+    if (!mainWindow.isVisible()) mainWindow.show();
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+    mainWindow.webContents.send('open-file', ...filesToOpen);
+    filesToOpen.splice(0, filesToOpen.length);
+  } else {
+    createWindow();
+  }
+}
+const darwinOpenFilesToStartDebounced = debounce(darwinOpenFilesToStart, 100);
 if (process.platform === 'darwin') {
   app.on('will-finish-launching', () => {
     app.on('open-file', (event, file) => {
-      startupOpenedFile = file;
+      if (!getValidVideoRegex().test(file)) return;
+      filesToOpen.push(file);
+      darwinOpenFilesToStartDebounced();
     });
+  });
+} else {
+  filesToOpen.push(...getOpenedFiles(process.argv));
+  app.on('second-instance', (event, argv) => {
+    const opendFiles = getOpenedFiles(argv); // TODO: multiple files
+    if (opendFiles.length) {
+      mainWindow?.webContents.send('open-file', ...opendFiles);
+    }
   });
 }
 

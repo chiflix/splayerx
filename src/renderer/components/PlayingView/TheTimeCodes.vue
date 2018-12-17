@@ -3,7 +3,7 @@
     <div class="timing"
       :data-component-name="$options.name"
       @mousedown="switchTimeContent">
-          <span class="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration">{{ timeContent }}</span>
+          <span class="timeContent" ref="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration"></span>
     </div>
     <rateLabel class="rate"></rateLabel>
   </div>
@@ -23,26 +23,20 @@ export default {
     switchTimeContent() {
       this.isRemainTime = !this.isRemainTime;
     },
+    updateTimeContent(time) {
+      if (this.$refs.timeContent) {
+        this.$refs.timeContent.textContent =
+        this.timecodeFromSeconds(this.isRemainTime ? this.duration - time : time);
+      }
+    },
   },
   components: {
     rateLabel,
   },
   computed: {
-    ...mapGetters(['roundedCurrentTime', 'duration']),
+    ...mapGetters(['duration']),
     hasDuration() {
-      return !Number.isNaN(this.duration) && !Number.isNaN(this.roundedCurrentTime);
-    },
-    convertedCurrentTime() {
-      return this.timecodeFromSeconds(this.roundedCurrentTime);
-    },
-    remainTime() {
-      const remainTime
-        = -(this.duration - this.roundedCurrentTime);
-      return this.timecodeFromSeconds(remainTime);
-    },
-    timeContent() {
-      return this.isRemainTime ?
-        this.remainTime : this.convertedCurrentTime;
+      return !Number.isNaN(this.duration);
     },
   },
 };

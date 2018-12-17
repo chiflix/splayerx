@@ -10,6 +10,7 @@
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'base-video-player',
@@ -121,7 +122,7 @@ export default {
     // network state
     // playback state
     currentTime(newVal) {
-      [this.$refs.video.currentTime] = newVal;
+      [this.$refs.video.currentTime] = newVal || 0;
     },
     playbackRate(newVal) {
       this.$refs.video.playbackRate = newVal;
@@ -211,7 +212,7 @@ export default {
     },
     currentTimeUpdate() {
       const { currentTime } = this.$refs.video;
-      this.$emit('update:currentTime', currentTime);
+      videodata.time = currentTime;
       this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
     },
     // helper functions

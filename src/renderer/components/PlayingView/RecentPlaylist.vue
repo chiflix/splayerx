@@ -24,7 +24,7 @@
       :style="{
         fontSize: sizeAdaption(14),
         lineHeight: sizeAdaption(13),
-      }">{{lastPlayedTime}} {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+      }"><span ref="lastPlayedTime"></span> {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
       <div class="file-name"
         :style="{
           marginTop: sizeAdaption(9),
@@ -129,13 +129,22 @@ export default {
       this.hoverIndex = payload.index;
       this.hoveredMediaInfo = payload.mediaInfo;
       this.filename = path.basename(
-        payload.mediaInfo.filename,
-        path.extname(payload.mediaInfo.filename),
+        payload.mediaInfo.path,
+        path.extname(payload.mediaInfo.path),
       );
     },
     itemMouseout() {
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+    },
+    updatelastPlayedTime(time) {
+      if (this.$refs.lastPlayedTime) {
+        if (this.hoverIndex === this.playingIndex) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
+        } else if (this.hoveredMediaInfo.lastPlayedTime) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
+        }
+      }
     },
     itemMouseup(index) {
       // last page
@@ -157,7 +166,7 @@ export default {
         }, 400);
       } else if (index !== this.playingIndex
         && this.filePathNeedToDelete !== this.playingList[index]) {
-        this.openFile(this.playingList[index]);
+        this.playFile(this.playingList[index]);
       }
     },
   },
@@ -211,20 +220,12 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'roundedCurrentTime', 'originSrc']),
+    ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
     inWhichSource() {
       if (this.isFolderList) {
         return this.$t('recentPlaylist.folderSource');
       }
       return this.$t('recentPlaylist.playlistSource');
-    },
-    lastPlayedTime() {
-      if (this.hoverIndex === this.playingIndex) {
-        return `${this.timecodeFromSeconds(this.$store.getters.roundedCurrentTime)} /`;
-      } else if (this.hoveredMediaInfo.lastPlayedTime) {
-        return `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
-      }
-      return '';
     },
     videoDuration() {
       if (this.hoverIndex !== this.playingIndex) {
