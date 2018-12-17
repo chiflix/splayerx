@@ -239,7 +239,6 @@ export default {
 
     clip-path: inset(0px round 3.36px);
 
-    background-color: rgba(255,255,255,0.20);
     border-radius: 3.36px 7px 7px 3.36px;
 
     @media screen and (min-width: 513px) and (max-width: 854px) {
