@@ -23,7 +23,7 @@
     </div>
     <div class="thumbnail-gradient"></div>
     <div class="time">
-      <span class="flex-items">{{ videoTime }}</span>
+      <span class="flex-items" :style="{ color: hoveredEnd ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)'}">{{ videoTime }}</span>
       <transition name="hovered-end">
         <base-icon class="flex-items hovered-end" type="hoveredEnd" v-if="hoveredEnd" />
       </transition>

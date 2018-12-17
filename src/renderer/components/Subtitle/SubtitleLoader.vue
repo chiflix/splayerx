@@ -93,7 +93,10 @@ export default {
       this.subToTop = val;
       if (!val) {
         this.lastIndex.forEach((index) => {
-          this.currentTags[index].alignment = this.lastAlignment[index];
+          if (this.currentTags[index]) {
+            this.currentTags[index].alignment = this.lastAlignment[index]
+              ? this.lastAlignment[index] : 2;
+          }
         });
       }
       this.lastIndex = [];
@@ -154,11 +157,7 @@ export default {
               }
             }
           }
-          if (rev) {
-            this.currentCues = cues.reverse();
-          } else {
-            this.currentCues = cues;
-          }
+          this.currentCues = rev ? cues.reverse() : cues;
         }
       }
     },
