@@ -70,6 +70,7 @@ export default {
             this.subtitleList,
             this.systemLocale,
           )).id);
+          this.$bus.$emit('change-current');
         } else {
           this.$bus.$emit('find-no-subtitle');
         }
@@ -245,6 +246,7 @@ export default {
           type: 'local',
         })),
       )(subtitleList);
+      this.changeCurrentSubtitle(currentUuids[0]);
     });
     this.$bus.$on('refresh-subtitle', async (src) => {
       this.zhIndex = -1;

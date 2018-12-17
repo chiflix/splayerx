@@ -469,7 +469,7 @@ export default {
         this.loadingSubsPlaceholders.online = '';
       }
     });
-    this.$bus.$on('new-video-opened', () => {
+    this.$bus.$on('add-subtitles', () => {
       this.currentSubIden = 0;
     });
     this.$bus.$on('find-no-subtitle', () => {
