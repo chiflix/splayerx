@@ -234,7 +234,6 @@ export default {
             this.count = this.rotateTime * 100;
           }
         }, 20000);
-        this.currentSubIden = 0;
         document.querySelector('.scrollScope').scrollTop = 0;
         this.$bus.$emit('refresh-subtitle', this.originSrc);
       } else {
