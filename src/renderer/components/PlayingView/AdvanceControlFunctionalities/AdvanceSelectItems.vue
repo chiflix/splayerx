@@ -9,14 +9,14 @@
         height: heightSize,
       }">
     <div class="textContainer" :style="{
-      cursor: isChosen ? 'default' : 'pointer',
+      cursor: isChosen || item === this.$t('advance.audioDelay') ? 'default' : 'pointer',
     }">
       <div class="textItem"
         :style="{
           color: color,
           transition: 'color 300ms',
         }">{{ item }}</div>
-      <div class="rightItem">{{ isChosen ? timeUnits : item === this.$t('advance.subDelay') ? subtitleDelay : audioDelay }}</div>
+      <div class="rightItem" :style="{ color: color }">{{ isChosen ? timeUnits : item === this.$t('advance.subDelay') ? subtitleDelay : audioDelay }}</div>
     </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
