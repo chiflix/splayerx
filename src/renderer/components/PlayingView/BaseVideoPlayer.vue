@@ -211,7 +211,8 @@ export default {
       return this.$refs.video;
     },
     currentTimeUpdate() {
-      const { currentTime } = this.$refs.video;
+      const { currentTime, duration } = this.$refs.video;
+      if (currentTime + 1 >= duration) this.$bus.$emit('next-video');
       videodata.time = currentTime;
       this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
     },
