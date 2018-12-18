@@ -10,6 +10,7 @@
             cursor: 'default',
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
             height: hiddenText ? `${contHeight + hoverHeight}px` : `${contHeight}px`,
+            fontWeight: '900',
           }">
           <div class="element bottom"><div class="element content">
 
@@ -515,7 +516,7 @@ export default {
       height: 100%;
       top: 0;
       background: rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       clip-path: inset(0 round 7px);
     }
     .middle {

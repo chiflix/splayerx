@@ -47,6 +47,7 @@ export default {
       subToTop: false,
       lastIndex: [],
       lastAlignment: [],
+      lastText: [],
     };
   },
   computed: {
@@ -71,6 +72,15 @@ export default {
         .map(segment => segment[1] - segment[0])
         .reduce((prev, curr) => prev + curr, 0);
       this.updateDuration([this.id, duration]);
+    },
+    currentTexts(val) {
+      this.lastText.forEach((item, ind) => {
+        val.forEach((de, index) => {
+          if (item === de) {
+            this.currentCues[index].tags.alignment = this.lastAlignment[ind];
+          }
+        });
+      });
     },
   },
   created() {
@@ -99,8 +109,6 @@ export default {
           }
         });
       }
-      this.lastIndex = [];
-      this.lastAlignment = [];
     });
   },
   mounted() {
@@ -115,6 +123,7 @@ export default {
         if (this.subToTop && this.currentTags[index].alignment !== 8) {
           this.lastIndex.push(index);
           this.lastAlignment.push(this.currentTags[index].alignment);
+          this.lastText.push(this.currentTexts[index]);
           this.currentTags[index].alignment = 8;
           return 'subtitle-alignment8';
         }

@@ -7,6 +7,7 @@
     cursor: 'default',
     height: this.readyShow === 'mainMenu' ? menuCardHeight : this.readyShow === 'subMenu' ? subtitleCardHeight : audioCardHeight,
     transition: 'height 100ms linear',
+    fontWeight: '900',
   }">
   <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
     <div class="mainItems" v-show="readyShow === 'mainMenu'"
