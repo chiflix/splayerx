@@ -74,12 +74,11 @@ export default {
       this.updateDuration([this.id, duration]);
     },
     currentTexts(val) {
-      this.lastText.forEach((item, ind) => {
-        val.forEach((de, index) => {
-          if (item === de) {
-            this.currentCues[index].tags.alignment = this.lastAlignment[ind];
-          }
-        });
+      val.forEach((de, index) => {
+        const ind = this.lastText.indexOf(de);
+        if (ind !== -1) {
+          this.currentCues[index].tags.alignment = this.lastAlignment[ind];
+        }
       });
     },
   },
@@ -113,6 +112,11 @@ export default {
   },
   mounted() {
     requestAnimationFrame(this.currentTimeUpdate);
+    this.$bus.$on('clear-last-cue', () => {
+      this.lastIndex = [];
+      this.lastAlignment = [];
+      this.lastText = [];
+    });
   },
   methods: {
     ...mapActions({

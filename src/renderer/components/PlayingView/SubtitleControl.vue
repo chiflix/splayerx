@@ -143,6 +143,7 @@ export default {
   },
   watch: {
     currentSubIden(val) {
+      this.$bus.$emit('clear-last-cue');
       if (val === 0) {
         document.querySelector('.scrollScope').scrollTop = 0;
       }
