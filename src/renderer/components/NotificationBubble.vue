@@ -300,8 +300,6 @@ export default {
 }
 .black-gradient-error {
   position: absolute;
-  background-color: rgba(0,0,0,0.20);
-  backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 216px;
@@ -334,8 +332,6 @@ export default {
 }
 .black-gradient-loading {
   position: absolute;
-  background-color: rgba(0,0,0,0.20);
-  backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 136px;
@@ -373,7 +369,7 @@ export default {
 
 .errorContainer {
   display: flex;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (min-width: 320px) and (max-width: 512px) {

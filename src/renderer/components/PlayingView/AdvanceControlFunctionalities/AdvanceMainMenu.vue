@@ -144,17 +144,18 @@
             }">{{ this.$t('advance.audioMenu') }}</div>
         </div>
       </div>
-      <div class="audioDelay" @click.left="handleAudioDelayClick"
+      <div class="audioDelay"
+        @click.left="1"
         @mouseenter="handleAudioMouseenter(1)"
         @mouseleave="handleAudioMouseleave()"
         :style="{
           height: audioDelayHeight,
           transition: 'height 100ms linear',
-        }">
+        }"><!--disable temporarily-->
         <transition name="arrow">
-          <div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1" :style="{ height: audioDelayHeight }"></div>
+          <!--<div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1" :style="{ height: audioDelayHeight }"></div>-->
         </transition>
-        <advance-selected-items :item="audioDelayName" :winWidth="winWidth" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
+        <advance-selected-items :item="audioDelayName" :winWidth="winWidth" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"></advance-selected-items>
       </div>
       <div class="changeTrack" @click.left="handleTrackClick"
         @mouseenter="handleAudioMouseenter(2)"

@@ -11,7 +11,7 @@
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
             height: hiddenText ? `${contHeight + hoverHeight}px` : `${contHeight}px`,
           }">
-          <div class="element bottom"><div class="element middle"><div class="element content">
+          <div class="element bottom"><div class="element content">
 
             <div class="topContainer">
               <div class="title">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
@@ -85,7 +85,7 @@
                 </div>
               </div>
             </div>
-          </div></div></div>
+          </div></div>
         </div>
       </transition>
       <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
@@ -234,7 +234,6 @@ export default {
             this.count = this.rotateTime * 100;
           }
         }, 20000);
-        this.currentSubIden = 0;
         document.querySelector('.scrollScope').scrollTop = 0;
         this.$bus.$emit('refresh-subtitle', this.originSrc);
       } else {
@@ -470,7 +469,7 @@ export default {
         this.loadingSubsPlaceholders.online = '';
       }
     });
-    this.$bus.$on('new-video-opened', () => {
+    this.$bus.$on('add-subtitles', () => {
       this.currentSubIden = 0;
     });
     this.$bus.$on('find-no-subtitle', () => {

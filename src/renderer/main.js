@@ -711,7 +711,7 @@ new Vue({
         id: `sub${key}`,
         visible: true,
         type: 'radio',
-        label: value.path ? Path.basename(value.path) : 'subtitle',
+        label: value.path ? Path.basename(value.path) : value.name,
         click: () => {
           this.$bus.$emit('menu-sub-change', key);
         },
@@ -762,7 +762,7 @@ new Vue({
         tmp.submenu.splice(0, 1, this.updateAudioTrackItem(0, this.$t('advance.chosenTrack')));
       } else {
         this.audioTrackList.forEach((item, index) => {
-          const detail = item.language === 'und' ? `音轨${index + 1}` : `音轨${index + 1}: ${item.language}`;
+          const detail = item.language === 'und' ? `${this.$t('advance.track')} ${index + 1}` : `${this.$t('advance.track')} ${index + 1}: ${item.language}`;
           tmp.submenu.splice(index, 1, this.updateAudioTrackItem(index, detail));
         });
       }
