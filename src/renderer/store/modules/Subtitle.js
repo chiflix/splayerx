@@ -1,36 +1,11 @@
+import Vue from 'vue';
 import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
 
 const state = {
+  subtitles: {},
   subtitleList: [],
   currentSubtitleId: '',
-  // legacy subtitle state
-  SubtitleNames: [],
-  curStyle: {
-    fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
-    fontSize: '11px',
-    letterSpacing: 1,
-    opacity: 1,
-    color: 'white',
-    fontWeight: '400',
-    transform: 'scale(1)',
-    transformOrigin: 'bottom',
-    webkitFontSmoothing: 'antialiased',
-  },
-  curBorderStyle: {
-    fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
-    fontSize: '11px',
-    letterSpacing: 1,
-    padding: '0px',
-    textFillColor: 'transparent',
-    textStroke: '0.5px #777',
-    fontWeight: '400',
-    backgroundColor: 'transparent',
-    transform: 'scale(1)',
-    transformOrigin: 'bottom',
-    textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
-    webkitFontSmoothing: 'antialiased',
-  },
   chosenStyle: '',
   chosenSize: 1,
   SubtitleDelay: 0,
@@ -43,13 +18,7 @@ const getters = {
   premiumSubtitles: (state, getters) => state.subtitleList
     .filter(subtitle => subtitle.duration && subtitle.duration >= 0.6 * getters.duration)
     .map(subtitle => ({ id: subtitle.id, played: subtitle.duration })),
-  // legacy subtitle getters
-  subtitleNames: state => state.SubtitleNames,
-  firstSubtitleIndex: state => state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first'),
-  subtitleCount: state => state.SubtitleNames.length,
-  curStyle: state => state.curStyle,
   SubtitleDelay: state => state.SubtitleDelay,
-  curBorderStyle: state => state.curBorderStyle,
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,
   scaleNum: state => state.scaleNum,
@@ -58,6 +27,9 @@ const getters = {
 const mutations = {
   [subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE](state, subtitleId) {
     state.currentSubtitleId = subtitleId;
+  },
+  tempoaryUpdateSubtite(state, payload) {
+    Vue.set(state.subtitles, payload.id, payload.state);
   },
   [subtitleMutations.ADD_SUBTITLE](state, subtitle) {
     let isExit = false;
@@ -103,33 +75,6 @@ const mutations = {
     });
     state.subtitleList = state.subtitleList.slice(0, num).concat(...subtitle);
   },
-  SubtitleNames(state, subtitles) {
-    state.SubtitleNames = subtitles;
-  },
-  AddSubtitle(state, subtitles) {
-    state.SubtitleNames.push(...subtitles);
-  },
-  AddServerSubtitle(state, subtitles) {
-    state.SubtitleNames.push(...subtitles);
-  },
-  SubtitleOn(state, obj) {
-    const index = state.SubtitleNames.findIndex(subtitle => subtitle.textTrackID === obj.index);
-    state.SubtitleNames[index].status = obj.status === 'first' ? 'first' : 'second';
-  },
-  SubtitleOff(state) {
-    const index = state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first');
-    if (index !== -1) {
-      state.SubtitleNames[index].status = null;
-    } else {
-      throw new Error('Error in Subtitle Vuex.');
-    }
-  },
-  UpdateStyle(state, payload) {
-    Object.assign(state.curStyle, payload);
-  },
-  UpdateBorderStyle(state, payload) {
-    Object.assign(state.curBorderStyle, payload);
-  },
   UpdateDelay(state, payload) {
     if (payload === 0) {
       state.SubtitleDelay = 0;
@@ -170,6 +115,9 @@ const actions = {
     subtitles.forEach((subtitle) => {
       commit(subtitleMutations.ADD_SUBTITLE, subtitle);
     });
+  },
+  [subtitleActions.UPDATE_SUBTITLE]({ commit }, subtitle) {
+    commit('tempoaryUpdateSubtite', subtitle);
   },
   [subtitleActions.RESET_SUBTITLES]({ commit }) {
     commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');

@@ -8,6 +8,10 @@ files.keys().forEach((key) => {
   loaders[key.replace(/(\.\/|\.loader|\.js)/g, '')] = files(key).default;
 });
 
+const supportedFormats = Object.keys(loaders)
+  .map(loaderType => loaders[loaderType].supportedFormats)
+  .reduce((prev, curr) => prev.concat(curr), []);
+
 export default class SubtitleLoader extends EventEmitter {
   constructor(src, type, options) {
     super();
@@ -24,17 +28,20 @@ export default class SubtitleLoader extends EventEmitter {
     }
   }
 
+  static supportedFormats = supportedFormats;
+
   async meta() {
     const {
       src, type, format, options,
     } = this;
     this.mediaHash = type !== 'online' ? await mediaHash(src) : src;
+    this.id = type === 'online' ? src : this.mediaHash;
     const { infoLoaders: meta } = this.loader;
     let info = {
       src,
       type,
       format,
-      id: type === 'online' ? src : this.mediaHash,
+      id: this.id,
     };
     if (typeof meta === 'function') {
       info = await Promise.resolve(meta.call(null, src));
@@ -54,7 +61,7 @@ export default class SubtitleLoader extends EventEmitter {
         info[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
       });
     }
-    this.metaInfo = { ...info, format, id: type === 'online' ? src : this.mediaHash };
+    this.metaInfo = { ...info, format };
     this.emit('ready', this.metaInfo);
   }
 
