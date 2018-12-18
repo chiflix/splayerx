@@ -289,12 +289,13 @@ export default {
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
     });
-    this.$bus.$on('seek', (e) => {
-      this.seekTime = [e];
-      // jump to next video by '直捣黄龙' & next video card
-      if (e === this.duration && this.nextVideo) {
+    this.$bus.$on('next-video', () => {
+      if (this.nextVideo) {
         this.playFile(this.nextVideo);
       }
+    });
+    this.$bus.$on('seek', (e) => {
+      this.seekTime = [e];
       // todo: use vuex get video element src
       const filePath = decodeURI(this.src);
       const indexOfLastDot = filePath.lastIndexOf('.');
