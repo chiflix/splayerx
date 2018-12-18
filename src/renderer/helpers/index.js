@@ -181,6 +181,12 @@ export default {
         }
         return;
       }
+      this.$bus.$emit('new-file-open');
+      this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
+      this.$bus.$emit('new-video-opened');
+      this.$router.push({
+        name: 'playing-view',
+      });
       const value = await this.infoDB().get('recent-played', mediaQuickHash);
       if (value) {
         this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
@@ -192,12 +198,6 @@ export default {
           lastOpened: Date.now(),
         });
       }
-      this.$bus.$emit('new-file-open');
-      this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
-      this.$bus.$emit('new-video-opened');
-      this.$router.push({
-        name: 'playing-view',
-      });
     },
     async mediaQuickHash(filePath) {
       function md5Hex(text) {

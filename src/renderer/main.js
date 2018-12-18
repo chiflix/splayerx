@@ -9,7 +9,7 @@ import VueAnalytics from 'vue-analytics';
 import VueElectron from 'vue-electron';
 import Path from 'path';
 import { mapGetters } from 'vuex';
-import { remote } from 'electron';
+import osLocale from 'os-locale';
 
 import App from '@/App.vue';
 import router from '@/router';
@@ -25,7 +25,7 @@ import { videodata } from '@/store/video';
 // require('source-map-support').install();
 
 function getSystemLocale() {
-  const locale = remote.app.getLocale();
+  const locale = osLocale.sync();
   if (locale === 'zh-TW') {
     return 'zhTW';
   } else if (locale.startsWith('zh')) {
