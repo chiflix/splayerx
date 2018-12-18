@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { get, partialRight } from 'lodash';
+import { get, partialRight, flow, nth } from 'lodash';
 
 import healthMsg from 'sagi-api/health/v1/health_pb';
 import healthRpc from 'sagi-api/health/v1/health_grpc_pb';
@@ -13,7 +13,7 @@ import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 const grpc = require('grpc');
 /* eslint-enable */
 
-const getResponseArray = partialRight(get, 'array');
+const getResponseArray = flow(partialRight(get, 'array'), partialRight(nth, 1));
 
 class Sagi {
   constructor() {
@@ -70,7 +70,7 @@ class Sagi {
         if (err) {
           reject(err);
         } else {
-          resolve(res);
+          resolve(getResponseArray(res));
         }
       });
     });
@@ -93,15 +93,12 @@ class Sagi {
         req.setTranscriptIdentity(transcriptData.transcript_identity);
       } else {
         const err = new Error('missing transcript payload and transcript_identity');
-        console.log(err);
         reject(err);
       }
       client.pushData(req, (err, res) => {
         if (err) {
-          console.log(err);
           reject(err);
         }
-        console.log(res);
         resolve(res);
       });
     });

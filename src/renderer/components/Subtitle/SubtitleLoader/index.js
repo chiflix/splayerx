@@ -37,8 +37,8 @@ export default class SubtitleLoader extends EventEmitter {
       id: type === 'online' ? src : this.mediaHash,
     };
     if (typeof meta === 'function') {
-      info = await Promise.resolve(meta.bind(src)());
-    } else {
+      info = await Promise.resolve(meta.call(null, src));
+    } else if (typeof meta === 'object') {
       const getParams = (params, info) => params.map(param => (
         this[param] || options[param] || info[param]
       ));
@@ -47,7 +47,8 @@ export default class SubtitleLoader extends EventEmitter {
         .map((infoType) => {
           const infoLoader = meta[infoType];
           if (typeof infoLoader === 'function') return promisify(infoLoader.bind(null, src));
-          return promisify(infoLoader.func.bind(null, ...getParams(infoLoader.params)));
+          if (typeof infoLoader === 'string') return promisify(() => getParams(toArray(infoLoader))[0]);
+          return promisify(infoLoader.func.bind(null, ...getParams(toArray(infoLoader.params))));
         }).map(promise => promise.catch(err => err)));
       infoTypes.forEach((infoType, index) => {
         info[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
@@ -68,6 +69,6 @@ export default class SubtitleLoader extends EventEmitter {
     const { data } = this;
     const { parse } = this.loader;
     this.parsed = await promisify(parse.bind(null, data));
-    this.$emit('parse', this.parsed);
+    this.emit('parse', this.parsed);
   }
 }

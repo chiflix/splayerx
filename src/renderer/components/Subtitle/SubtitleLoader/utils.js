@@ -3,7 +3,6 @@ import { open, readSync, readFile, closeSync, statSync } from 'fs';
 import chardet from 'chardet';
 import iconv from 'iconv-lite';
 import franc from 'franc';
-import get from 'lodash/get';
 import helpers from '@/helpers';
 import Sagi from '@/helpers/sagi';
 
@@ -115,12 +114,8 @@ export function loadLocalFile(path) {
   });
 }
 
-export function loadOnlineTranscriptInfo(mediaHash, transctiptHash) {
-  return Sagi.getTranscriptInfo(mediaHash, transctiptHash);
-}
-
-export async function loadOnlineTranscript(hash) {
-  return get(await Sagi.getTranscript(hash), 'array')[0];
+export function loadOnlineTranscript(hash) {
+  return Sagi.getTranscript(hash);
 }
 
 export function promisify(func) {
