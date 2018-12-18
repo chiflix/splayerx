@@ -1,4 +1,4 @@
-import compose from 'lodash/fp/compose';
+import flow from 'lodash/flow';
 import { parse, toMS } from 'subtitle';
 
 import { localLanguageLoader, localNameLoader, loadLocalFile } from './utils';
@@ -33,5 +33,5 @@ export default {
     name: localNameLoader,
   },
   loader: loadLocalFile,
-  parser: compose(normalizer, parse),
+  parser: flow(parse, normalizer),
 };

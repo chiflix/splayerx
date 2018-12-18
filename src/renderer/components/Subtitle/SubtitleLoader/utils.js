@@ -107,7 +107,7 @@ export function loadLocalFile(path) {
       if (err) reject(err);
       const encoding = chardet.detect(data.slice(0, 100));
       if (iconv.encodingExists(encoding)) {
-        resolve([iconv.decode(data, encoding), extname(path).slice(1)]);
+        resolve(iconv.decode(data, encoding));
       }
       reject(new Error(`Unsupported encoding: ${encoding}.`));
     });

@@ -1,4 +1,4 @@
-import compose from 'lodash/fp/compose';
+import flow from 'lodash/flow';
 import pick from 'lodash/pick';
 import { compile } from 'ass-compiler';
 
@@ -75,5 +75,5 @@ export default {
     name: localNameLoader,
   },
   loader: loadLocalFile,
-  parser: compose(normalizer, compile),
+  parser: flow(compile, normalizer),
 };

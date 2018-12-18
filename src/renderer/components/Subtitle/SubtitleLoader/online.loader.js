@@ -15,6 +15,6 @@ export default {
     language: 'language',
     name: 'name',
   },
-  load: loadOnlineTranscript,
-  parse: normalizer,
+  loader: loadOnlineTranscript,
+  parser: normalizer,
 };

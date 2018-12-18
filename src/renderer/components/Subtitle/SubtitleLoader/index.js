@@ -60,15 +60,15 @@ export default class SubtitleLoader extends EventEmitter {
 
   async load() {
     const { src } = this;
-    const { load } = this.loader;
-    this.data = await promisify(load.bind(null, src));
+    const { loader } = this.loader;
+    this.data = await promisify(loader.bind(null, src));
     this.emit('data', this.data);
   }
 
   async parse() {
     const { data } = this;
-    const { parse } = this.loader;
-    this.parsed = await promisify(parse.bind(null, data));
+    const { parser } = this.loader;
+    this.parsed = await promisify(parser.bind(null, data));
     this.emit('parse', this.parsed);
   }
 }
