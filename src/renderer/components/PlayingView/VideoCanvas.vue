@@ -216,6 +216,7 @@ export default {
           break;
         }
       }
+      this.lastCoverDetectingTime = videodata.time;
       if (this.coverFinded) {
         const smallImagePath = canvas.toDataURL('image/png');
         [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
@@ -238,8 +239,16 @@ export default {
           };
           this.infoDB().add('recent-played', data);
         }
+      } else {
+        requestAnimationFrame(this.checkedPresentTime);
       }
-      this.lastCoverDetectingTime = videodata.time;
+    },
+    checkedPresentTime() {
+      if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
+        this.getVideoCover();
+      } else if (videodata.time - this.lastCoverDetectingTime > 1) {
+        requestAnimationFrame(this.checkedPresentTime);
+      }
     },
   },
   computed: {
