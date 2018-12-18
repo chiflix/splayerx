@@ -1,30 +1,30 @@
-import Promise from 'bluebird';
+import util from 'util';
 import storage from 'electron-json-storage';
-import { UpdateInfo } from './Message.js';
-Promise.promisifyAll(storage);
+import { UpdateInfo } from './Message';
+
 const updateInstalledString = 'updateInstalled#loloxdnkd';
 const updateDownloadString = 'updateInstalled#loloxdnkdddksk';
 
-
 export default class Storage {
   constructor() {
-    this.storage = storage;
+    this.setAsync = util.promisify(storage.set);
+    this.getAsync = util.promisify(storage.get);
   }
   willInstall(info) {
     return new Promise((resolve) => {
-      resolve(this.storage.setAsync(updateInstalledString, info.toString()));
+      resolve(this.setAsync(updateInstalledString, info.toString()));
     });
   }
   // info need be the type of UpdateInfo
   updateDownLoaded(info) {
     return new Promise((resolve) => {
-      resolve(this.storage.setAsync(updateDownloadString, info.toString()));
+      resolve(this.setAsync(updateDownloadString, info.toString()));
     });
   }
 
   getPreviousDownload() {
     return new Promise((resolve) => {
-      this.storage.getAsync(updateDownloadString).then((data) => {
+      this.getAsync(updateDownloadString).then((data) => {
         if (data && Object.keys(data).length !== 0) {
           resolve(UpdateInfo.getFromStorageString(data));
         } else {
@@ -36,19 +36,19 @@ export default class Storage {
 
   clearUpdateInstalled() {
     return new Promise((resolve) => {
-      resolve(this.storage.setAsync(updateInstalledString, null));
+      resolve(this.setAsync(updateInstalledString, null));
     });
   }
 
   clearPreviousDownload() {
     return new Promise((resolve) => {
-      resolve(this.storage.setAsync(updateDownloadString, null));
+      resolve(this.setAsync(updateDownloadString, null));
     });
   }
 
   needToNotifyUpdateInstalledOrNot() {
     return new Promise((resolve) => {
-      this.storage.getAsync(updateInstalledString).then((data) => {
+      this.getAsync(updateInstalledString).then((data) => {
         if (data && Object.keys(data).length !== 0) {
           resolve(UpdateInfo.getFromStorageString(data));
         } else {

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <path d="M7.3,4.7 L9.55,4.7 C9.79852814,4.7 10,4.90147186 10,5.15 L10,6.85 C10,7.09852814 9.79852814,7.3 9.55,7.3 L7.3,7.3 L7.3,9.55 C7.3,9.79852814 7.09852814,10 6.85,10 L5.15,10 C4.90147186,10 4.7,9.79852814 4.7,9.55 L4.7,7.3 L2.45,7.3 C2.20147186,7.3 2,7.09852814 2,6.85 L2,5.15 C2,4.90147186 2.20147186,4.7 2.45,4.7 L4.7,4.7 L4.7,2.45 C4.7,2.20147186 4.90147186,2 5.15,2 L6.85,2 C7.09852814,2 7.3,2.20147186 7.3,2.45 L7.3,4.7 Z" id="path-1"></path>
+        <filter x="-43.8%" y="-31.3%" width="187.5%" height="187.5%" filterUnits="objectBoundingBox" id="filter-2">
+            <feOffset dx="0" dy="1" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.1 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="Playing-View-Icon-/-Mute" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Icon---Mute" transform="translate(6.000000, 6.000000) rotate(45.000000) translate(-6.000000, -6.000000) ">
+            <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+            <use fill-opacity="0.3" fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+        </g>
+    </g>
+</svg>

@@ -29,6 +29,7 @@ export const DEFAULT_VIDEO_EVENTS = [
   'play',
   'playing',
   'progress',
+  'resize',
   'ratechange',
   'seeked',
   'seeking',
@@ -37,6 +38,7 @@ export const DEFAULT_VIDEO_EVENTS = [
   'timeupdate',
   'volumechange',
   'waiting',
+  'audiotrack',
 ];
 export const DEFAULT_VIDEO_OPTIONS = [
   'autoplay',
@@ -56,6 +58,10 @@ export const DEFAULT_VIDEO_OPTIONS = [
 export const THUMBNAIL_DB_NAME = 'splayerx-preview-thumbnails';
 export const INFO_DATABASE_NAME = 'Info';
 export const THUMBNAIL_OBJECT_STORE_NAME = 'the-preview-thumbnail';
+export const INFODB_VERSION = 1;
+/**
+ * Remember to increment the INFODB_VERSION after updating the following INFO_SCHEMA
+ */
 export const INFO_SCHEMA = [
   {
     name: 'recent-played',

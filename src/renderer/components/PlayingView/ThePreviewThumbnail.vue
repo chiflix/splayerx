@@ -1,48 +1,54 @@
 <template>
   <div class="thumbnail-wrapper"
     :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', left: positionOfThumbnail + 'px'}">
-    <div class="thumbnail-background" :style="{width: thumbnailWidth + 2 +'px'}">
-      <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
-        <thumbnail-video-player
-          v-if="mountVideo"
-          v-show="displayVideo"
-          :quickHash="quickHash"
-          :currentTime="videoCurrentTime"
-          :thumbnailWidth="thumbnailWidth"
-          :thumbnailHeight="thumbnailHeight"
-          :outerThumbnailInfo="outerThumbnailInfo"
-          @update-thumbnail-info="updateThumbnailInfo" />
-        <thumbnail-display
-          v-if="mountImage"
-          v-show="!displayVideo"
-          :quickHash="quickHash"
-          :autoGenerationIndex="autoGenerationIndex"
-          :maxThumbnailWidth="maxThumbnailWidth"
-          :currentIndex="currentIndex"
-          :thumbnailWidth="thumbnailWidth"
-          :thumbnailHeight="thumbnailHeight" />
-        <span class="time">{{ videoTime }}</span>
-      </div>
+    <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
+      <thumbnail-video-player
+        v-if="mountVideo"
+        v-show="displayVideo"
+        :quickHash="mediaHash"
+        :currentTime="videoCurrentTime"
+        :thumbnailWidth="thumbnailWidth"
+        :thumbnailHeight="thumbnailHeight"
+        :outerThumbnailInfo="outerThumbnailInfo"
+        @update-thumbnail-info="updateThumbnailInfo" />
+      <thumbnail-display
+        v-if="mountImage"
+        v-show="!displayVideo"
+        :quickHash="mediaHash"
+        :autoGenerationIndex="autoGenerationIndex"
+        :maxThumbnailWidth="maxThumbnailWidth"
+        :currentIndex="currentIndex"
+        :thumbnailWidth="thumbnailWidth"
+        :thumbnailHeight="thumbnailHeight" />
+    </div>
+    <div class="thumbnail-gradient"></div>
+    <div class="time">
+      <span class="flex-items" :style="{ color: hoveredEnd ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)'}">{{ videoTime }}</span>
+      <transition name="hovered-end">
+        <base-icon class="flex-items hovered-end" type="hoveredEnd" v-if="hoveredEnd" />
+      </transition>
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import idb from 'idb';
 import {
   THUMBNAIL_DB_NAME,
-  INFO_DATABASE_NAME,
   THUMBNAIL_OBJECT_STORE_NAME,
 } from '@/constants';
-import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
-import ThumbnailDisplay from './ThumbnailDisplay';
+import Icon from '../BaseIconContainer.vue';
+import ThumbnailVideoPlayer from './ThumbnailVideoPlayer.vue';
+import ThumbnailDisplay from './ThumbnailDisplay.vue';
+
 export default {
   components: {
     'thumbnail-video-player': ThumbnailVideoPlayer,
     'thumbnail-display': ThumbnailDisplay,
+    'base-icon': Icon,
   },
   props: {
-    src: String,
     currentTime: Number,
     maxThumbnailWidth: Number,
     videoRatio: Number,
@@ -50,12 +56,16 @@ export default {
     thumbnailHeight: Number,
     positionOfThumbnail: Number,
     videoTime: String,
+    hoveredEnd: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       outerThumbnailInfo: {
         newVideo: true,
-        videoSrc: this.src,
+        videoSrc: this.convertedSrc,
         videoDuration: -1,
         generationInterval: -1,
         screenWidth: 1920,
@@ -63,7 +73,6 @@ export default {
         videoRatio: this.videoRatio,
         lastGenerationIndex: 0,
       },
-      quickHash: null,
       displayVideo: true,
       videoCurrentTime: 0,
       canvasCurrentTime: 0,
@@ -77,15 +86,18 @@ export default {
       generatedIndex: 0,
     };
   },
+  computed: {
+    ...mapGetters(['convertedSrc', 'mediaHash']),
+  },
   watch: {
-    src(newValue) {
+    async mediaHash(newValue) {
       // Reload video and image components
       this.mountVideo = false;
       this.mountImage = false;
       this.generatedIndex = 0;
       this.currentIndex = 0;
-      this.updateMediaQuickHash(newValue);
-      this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
+      const thumbnailInfo = await this.retrieveThumbnailInfo(newValue);
+      this.updateThumbnailData(thumbnailInfo);
     },
     currentTime(newValue) {
       const index = Math.abs(Math.floor(newValue / this.generationInterval));
@@ -100,25 +112,11 @@ export default {
     },
   },
   methods: {
-    updateMediaQuickHash(src) {
-      const regexes = {
-        file: new RegExp('^file:///?'),
-        http: new RegExp('^(http|https)://'),
-      };
-
-      let filePath = src;
-      Object.keys(regexes).forEach((fileType) => {
-        if (regexes[fileType].test(src)) {
-          filePath = src.replace(regexes[fileType], '');
-        }
-      });
-      this.quickHash = this.mediaQuickHash(filePath);
-    },
     updateThumbnailInfo(event) {
       this.autoGenerationIndex = event.index;
       this.generationInterval = event.interval;
       this.infoDB().add(THUMBNAIL_OBJECT_STORE_NAME, {
-        quickHash: this.quickHash,
+        quickHash: this.mediaHash,
         lastGenerationIndex: event.index,
         generationInterval: event.interval,
         maxThumbnailCount: event.count,
@@ -153,7 +151,7 @@ export default {
     updateThumbnailData(dataResult) {
       const result = dataResult;
       if (result) {
-        const thumnailInfo = result;
+        const thumbnailInfo = result;
         // Update Generation Parameters
         this.lastGenerationIndex = result.lastGenerationIndex || 0;
         this.maxThumbnailCount = result.maxThumbnailCount || 0;
@@ -162,10 +160,10 @@ export default {
         this.outerThumbnailInfo = Object.assign(
           {},
           this.outerThumbnailInfo,
-          thumnailInfo,
-          { videoSrc: this.src },
-          { lastGenerationIndex: this.lastGenerationIndex },
-          { maxThumbnailCount: this.maxThumbnailCount },
+          thumbnailInfo,
+          { videoSrc: this.convertedSrc },
+          { lastGenerationIndex: this.lastGenerationIndex || 0 },
+          { maxThumbnailCount: this.maxThumbnailCount || 0 },
         );
         // Update mountVideo
         this.mountVideo = !result.lastGenerationIndex ||
@@ -181,7 +179,7 @@ export default {
       const obejctStoreName = `thumbnail-width-${this.maxThumbnailWidth}`;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
         idb.open(THUMBNAIL_DB_NAME, db.version + 1, (upgradeDB) => {
-          console.log('[IndexedDB]: Initial thumbnails storage objectStore.');
+          this.addLog('info', `[IndexedDB]: Initial thumbnails storage objectStore of width: ${this.maxThumbnailWidth} `);
           const store = upgradeDB.createObjectStore(
             `thumbnail-width-${this.maxThumbnailWidth}`,
             { keyPath: 'id', autoIncrement: false, unique: true },
@@ -190,23 +188,14 @@ export default {
           store.createIndex('index', 'index', { unique: false });
         });
       }
-      /* eslint-disable newline-per-chained-call */
     });
-    idb.open(INFO_DATABASE_NAME).then((db) => {
-      this.updateMediaQuickHash(this.src);
-      const obejctStoreName = THUMBNAIL_OBJECT_STORE_NAME;
-      if (!db.objectStoreNames.contains(obejctStoreName)) {
-        console.log('[IndexedDB]: Initial preview thumbnail info objectStore.');
-        return idb.open(INFO_DATABASE_NAME, db.version + 1, (upgradeDB) => {
-          upgradeDB.createObjectStore(obejctStoreName, { keyPath: 'quickHash' }, { unique: true });
-        });
-      }
-      return idb.open(INFO_DATABASE_NAME);
-    })
-      .then(() => this.retrieveThumbnailInfo(this.quickHash))
-      .then(this.updateThumbnailData).catch((err) => {
-        console.log(err);
+
+    this.retrieveThumbnailInfo(this.mediaHash)
+      .then(this.updateThumbnailData)
+      .catch((err) => {
+        this.addLog('error', err);
       });
+
     this.$bus.$on('image-all-get', (e) => {
       this.generatedIndex = e;
     });
@@ -216,36 +205,53 @@ export default {
 <style lang="scss" scoped>
 .thumbnail-wrapper {
   position: absolute;
-  bottom: 20px;
+  bottom: 15px;
   -webkit-app-region: no-drag;
   box-sizing: content-box;
-}
-.thumbnail-background {
-  background-image: linear-gradient(-165deg, rgba(231, 231, 231, 0.5), rgba(84, 84, 84, 0.5));
-  border-radius: 1px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 3px;
 }
 .the-preview-thumbnail {
-  position: relative;
-  border: 1px solid transparent;
-  border-radius: 1px;
-  background-clip: padding-box;
-  background-color: #000;
+  position: absolute;
+}
+.thumbnail-gradient {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(-180deg, rgba(0,0,0,0.00) 26%, rgba(0,0,0,0.73) 98%);
 }
 .time {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 0.2px;
-  @media screen and (max-width: 854px) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: 100%;
+  position: relative;
+
+  @media screen and (max-width: 512px) {
     font-size: 20px;
   }
-  @media screen and (min-width: 854px) and (max-width: 1920px) {
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    font-size: 20px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
     font-size: 24px;
   }
-  @media screen and (min-width: 1920px) {
+  @media screen and (min-width: 1921px) {
     font-size: 40px;
+  }
+  span {
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    margin-right: 3px;
+  }
+  .hovered-end-enter-active {
+    transition: all 5s;
+  }
+  .hovered-end-enter-leave {
+    transition: all 8s;
   }
 }
 </style>

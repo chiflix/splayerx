@@ -1,14 +1,17 @@
 <template>
-  <div class="thumbnail-video-player">
+  <div
+    :data-component-name="$options.name"
+    class="thumbnail-video-player">
     <base-video-player
       v-show="useFallback"
       ref="video"
       :src="videoSrc"
-      :defaultEvents="['loadedmetadata', 'seeked']"
-      :customOptions="{ pauseOnStart: true }"
+      :events="['loadedmetadata', 'seeked']"
+      :currentTime="seekTime"
+      :paused="true"
       @loadedmetadata="updateGenerationParameters"
       @seeked="thumbnailGeneration"
-      style="opacity: 0.99" />
+      :style="videoStyles" />
     <base-image-display
       v-if="!useFallback"
       :imgSrc="tempImage"
@@ -19,10 +22,11 @@
 </template>
 
 <script>
-import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
-import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay';
+import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
+import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay.vue';
 import { THUMBNAIL_DB_NAME } from '@/constants';
 import idb from 'idb';
+
 export default {
   name: 'thumbnail-video-player',
   components: {
@@ -71,6 +75,10 @@ export default {
       lastGenerationIndex: 0,
       tempImage: null,
       useFallback: false,
+      seekTime: [0],
+      videoStyles: {
+        opacity: 0.99,
+      },
     };
   },
   watch: {
@@ -96,27 +104,11 @@ export default {
     },
   },
   methods: {
-    // Data validators
-    videoSrcValidator(src) {
-      const fileSrcRegexes = {
-        http: RegExp('^(http|https)://'),
-        file: RegExp('^file:///?'),
-      };
-      if (typeof src === 'string') {
-        if (fileSrcRegexes.http.test(src)) {
-          return 'http';
-        }
-        if (fileSrcRegexes.file.test(src)) {
-          return 'file';
-        }
-      }
-      throw new TypeError('invalid src value.');
-    },
     // Data regenerators
-    updateGenerationParameters() {
-      this.videoDuration = this.$refs.video.duration();
-      this.generationInterval = Math.round(this.videoDuration / (this.screenWidth / 4)) || 1;
-      this.maxThumbnailCount = Math.floor(this.videoDuration / this.generationInterval);
+    updateGenerationParameters(event) {
+      if (!event.target.duration) return;
+      this.generationInterval = Math.round(event.target.duration / (this.screenWidth / 4)) || 1;
+      this.maxThumbnailCount = Math.floor(event.target.duration / this.generationInterval);
       this.$emit('update-thumbnail-info', {
         index: this.autoGenerationIndex,
         interval: this.generationInterval,
@@ -147,7 +139,6 @@ export default {
             this.tempBlobArray.length === 30) {
             const array = this.tempBlobArray;
             this.thumbnailArrayHandler(array).then(() => {
-              console.log(`${array.length} thumbnails added.`);
               this.$emit('update-thumbnail-info', {
                 index: this.autoGenerationIndex,
                 interval: this.generationInterval,
@@ -168,7 +159,7 @@ export default {
         while (this.thumbnailSet.has(internalIndex)) {
           internalIndex += 1;
         }
-        this.videoElement.currentTime = internalIndex * this.generationInterval;
+        this.seekTime = [internalIndex * this.generationInterval];
         if (this.isAutoGeneration) {
           this.autoGenerationIndex = internalIndex;
         }
@@ -206,18 +197,15 @@ export default {
       return Promise.all(promiseArray);
     },
     updateVideoInfo(outerThumbnailInfo) {
-      const { videoSrc } = outerThumbnailInfo;
-      if (this.videoSrcValidator(videoSrc)) {
-        this.videoSrc = videoSrc;
-        if (!outerThumbnailInfo.newVideo) {
-          this.screenWidth = outerThumbnailInfo.screenWidth;
-          this.generationInterval = outerThumbnailInfo.generationInterval <= 0 ?
-            this.generationInterval : outerThumbnailInfo.generationInterval;
-          this.autoGenerationIndex = outerThumbnailInfo.lastGenerationIndex || 0;
-        } else {
-          this.screenWidth = outerThumbnailInfo.screenWidth;
-          this.autoGenerationIndex = 0;
-        }
+      this.videoSrc = outerThumbnailInfo.videoSrc;
+      if (!outerThumbnailInfo.newVideo) {
+        this.screenWidth = outerThumbnailInfo.screenWidth;
+        this.generationInterval = outerThumbnailInfo.generationInterval <= 0 ?
+          this.generationInterval : outerThumbnailInfo.generationInterval;
+        this.autoGenerationIndex = outerThumbnailInfo.lastGenerationIndex || 0;
+      } else {
+        this.screenWidth = outerThumbnailInfo.screenWidth;
+        this.autoGenerationIndex = 0;
       }
     },
   },
@@ -241,9 +229,10 @@ export default {
     // Use document to pass unit test
     this.videoElement = this.$refs.video.videoElement ?
       this.$refs.video.videoElement() : document.querySelector('.base-video-player');
-    if (this.videoElement) {
-      this.videoElement.style.height = `${this.thumbnailHeight}px`;
-    }
+    this.videoStyles = Object.assign(
+      this.videoStyles,
+      { height: `${this.thumbnailHeight}px` },
+    );
   },
 };
 </script>

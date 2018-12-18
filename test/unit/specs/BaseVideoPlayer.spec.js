@@ -1,10 +1,25 @@
-import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
+import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
+
 describe('Component - BaseVideoPlayer', () => {
   const propsData = {
     src: 'file:///',
-    defaultEvents: ['loadedmetadata'],
+    crossOrigin: 'anonymous',
+    preload: 'auto',
+    currentTime: [20],
+    defaultPlaybackRate: 2,
+    playbackRate: 1.5,
+    autoplay: true,
+    loop: false,
+    controls: false,
+    volume: 0.5,
+    muted: false,
+    defaultMuted: false,
+    paused: false,
+    updateCurrentTime: false,
+    events: ['loadedmetadata'],
+    styles: {},
   };
 
   it('sanity - should render video element', () => {
@@ -28,248 +43,188 @@ describe('Component - BaseVideoPlayer', () => {
       wrapper.destroy();
     });
 
-    it('should video playbackrate be set dynamically', () => {
-      const playbackrates = [0.8, 1.0, 5.4];
+    function assertVideoAttributes(attribute, rawValue, changedValues, changeOrNot) {
+      changedValues.forEach((testCase) => {
+        wrapper.setProps({ [attribute]: testCase });
 
-      playbackrates.forEach((testCase) => {
-        wrapper.setProps({ playbackRate: testCase });
-        const currentPlaybackRate = wrapper.find('video').attributes().playbackrate;
+        const changedValue = wrapper.element.childNodes[0][attribute];
 
-        expect(currentPlaybackRate).to.equal(testCase.toString());
+        expect(changedValue).to.equal(changeOrNot ? testCase : rawValue);
       });
-    });
+    }
 
-    it('should video src be set dynamically', () => {
-      const srcs = [
-        'file:///Users/treve/Documents/Projects/splayerx/test/assets/mediaQuickHash_test.avi',
-        'file://Z:/Documents/testVideoFiles/mediaQuickHash_test.avi',
-        'http://youtube.com/s/sjdfhsjkdfhsk/',
-      ];
+    describe('Mutable Props', () => {
+      it('should currentTime be changed dynamically', () => {
+        const currentTimes = [[10], [30], [40], [50]];
 
-      srcs.forEach((testCase) => {
-        wrapper.setProps({ src: testCase });
+        currentTimes.forEach((currentTime) => {
+          wrapper.setProps({ currentTime });
 
-        const srcResult = wrapper.find('video').attributes().src;
+          const changedCurrentTime = wrapper.element.childNodes[0].currentTime;
 
-        expect(srcResult).to.equal(testCase);
-      });
-    });
-    it('should invalid video src be ignored', () => {
-      const invalidSrcs = [
-        '',
-        'thunder://hahahaha',
-        'it is an invalid url',
-        'htps',
-      ];
-
-      invalidSrcs.forEach((testCase) => {
-        wrapper.setProps({ src: testCase });
-
-        const srcResult = wrapper.find('video').attributes().src;
-
-        expect(srcResult).to.equal(propsData.src);
-      });
-    });
-
-    it('should video volume be set dynamically', () => {
-      const volumes = [0, 0.4, 0.7, 0.999, 1];
-
-      volumes.forEach((testCase) => {
-        wrapper.setProps({ volume: testCase });
-
-        const volumeResult = wrapper.find('video').attributes().volume;
-
-        expect(volumeResult).to.equal(testCase.toString());
-      });
-    });
-    it('should invalid video volume be ignored', () => {
-      const invalidVolumes = [-1, -9, NaN, Infinity, 3];
-
-      invalidVolumes.forEach((testCase) => {
-        wrapper.setProps({ volume: testCase });
-
-        const volumeResult = wrapper.find('video').attributes().volume;
-
-        expect(volumeResult).to.equal(wrapper.vm.$options.props.volume.default.toString());
-      });
-    });
-
-    it('should defaultEvents be initialized', () => {
-      expect(wrapper.vm.onEdEvents).to.deep.equal(propsData.defaultEvents);
-    });
-    it('should defaultEvents cannot change after initialized', () => {
-      const events = [
-        ['loadedmetadata', 'canplay'],
-        ['dataloaded', 'canplaythrough'],
-        [
-          'abort',
-          'canplay',
-          'canplaythrough',
-          'durationchange',
-          'ended',
-          'loadeddata',
-          'loadedmetadata',
-          'loadstart',
-          'pause',
-          'play',
-          'playing',
-          'progress',
-          'ratechange',
-          'seeked',
-          'seeking',
-          'stalled',
-          'suspend',
-          'timeupdate',
-          'volumechange',
-          'waiting',
-        ],
-      ];
-
-      events.forEach((testCase) => {
-        wrapper.setProps({ defaultEvents: testCase });
-
-        expect(wrapper.vm.onEdEvents).to.deep.equal(propsData.defaultEvents);
-      });
-    });
-    it('should empty defaultEvents clear events', () => {
-      const privateWrapper = mount(BaseVideoPlayer, {
-        propsData: {
-          src: 'file:///',
-          defaultEvents: [],
-        },
+          expect(changedCurrentTime).to.equal(currentTime[0]);
+        });
       });
 
-      expect(privateWrapper.vm.onEdEvents).to.deep.equal([]);
-    });
-    it('should invalid defaultEvents items be ignored', () => {
-      const events = [
-        [''],
-        ['dataloaded', 'canplaythrough'],
-        ['ondataloaded'],
-      ];
-      const expectedResults = [
-        [],
-        ['canplaythrough'],
-        [],
-      ];
+      it('should playbackRate be changed dynamically', () => {
+        assertVideoAttributes('playbackRate', propsData.playbackRate, [3, 4, 5, 8], true);
+      });
 
-      events.forEach((testCase, index) => {
+      it('should loop be changed dynamically', () => {
+        assertVideoAttributes('loop', propsData.loop, [true], true);
+      });
+
+      it('should controls be changed dynamically', () => {
+        assertVideoAttributes('controls', propsData.controls, [true], true);
+      });
+
+      it('should volume be changed dynamically', () => {
+        assertVideoAttributes('volume', propsData.volume, [0.9, 0.3, 0.2, 1], true);
+      });
+
+      it('should muted be changed dynamically', () => {
+        assertVideoAttributes('muted', propsData.muted, [true], true);
+      });
+
+      it('should video be dynamically paused', () => {
+        assertVideoAttributes('paused', propsData.paused, [true], true);
+      });
+
+      it('should updateCurrentTime be changed dynamically', () => {
+        expect(wrapper.vm.currentTimeAnimationFrameId).to.equal(0);
+
+        wrapper.setProps({ updateCurrentTime: true });
+
+        expect(wrapper.vm.currentTimeAnimationFrameId).to.not.equal(0);
+      });
+
+      it('should events be dynamically added', () => {
+        const finalEvents = ['loadedmetadata', 'canplay'];
+        wrapper.setProps({
+          events: finalEvents,
+        });
+
+        finalEvents.forEach((event) => {
+          expect(wrapper.vm.eventListeners.get(event)).to.not.equal(undefined);
+        });
+      });
+
+      it('should events be dynamically removed', () => {
+        wrapper.setProps({ events: [] });
+
+        propsData.events.forEach((event) => {
+          expect(wrapper.vm.eventListeners.get(event)).to.equal(undefined);
+        });
+      });
+
+      it('should styles be dynamically changed', () => {
+        const testStyle = {
+          objectFit: 'cover',
+          width: '100%',
+        };
+
+        wrapper.setProps({ styles: testStyle });
+
+        Object.keys(testStyle).forEach((style) => {
+          expect(wrapper.element.childNodes[0].style[style]).to.equal(testStyle[style]);
+        });
+      });
+
+      it('should updateCurrentTime update currentTime when mounted', () => {
         const newPropsData = Object.assign(
           {},
           propsData,
-          { defaultEvents: testCase },
+          {
+            updateCurrentTime: true,
+            events: [],
+            styles: {},
+          },
         );
+        const newWrapper = mount(BaseVideoPlayer, { propsData: newPropsData });
 
-        const privateWrapper = mount(BaseVideoPlayer, { propsData: newPropsData });
-
-        expect(privateWrapper.vm.onEdEvents).to.deep.equal(expectedResults[index]);
-        privateWrapper.destroy();
+        expect(newWrapper.vm.currentTimeAnimationFrameId).to.not.equal(0);
       });
     });
 
-    it('should default options be set on video element', () => {
-      const videoElementAttributes = wrapper.find('video').attributes();
-
-      Object.keys(wrapper.props().defaultOptions).forEach((testCase) => {
-        expect(videoElementAttributes[testCase.toLowerCase()])
-          .to.equal(wrapper.props().defaultOptions[testCase].toString());
+    describe('Immutable Props', () => {
+      it('should crossOrigin not be changed dynamically', () => {
+        assertVideoAttributes('crossOrigin', propsData.crossOrigin, [!propsData.crossOrigin], false);
       });
-    });
-    it('should invalid attributes be ignored', () => {
-      const testOptions = {
-        autoplay: true,
-        mutedOrNot: false,
-        loop: false,
-        preloaded: true,
-        defaultMuted: false,
-      };
-      const expectedResults = {
-        autoplay: true,
-        loop: false,
-        defaultMuted: false,
-      };
-      const invalidOptions = ['mutedOrNot', 'preloaded'];
 
-      const privateWrapper = mount(BaseVideoPlayer, {
-        src: 'file:///',
-        defaultEvents: propsData.defaultEvents,
-        defaultOptions: testOptions,
+      it('should preload not be changed dynamically', () => {
+        assertVideoAttributes('preload', propsData.preload, [!propsData.preload], false);
       });
-      const videoElementAttributes = privateWrapper.find('video').attributes();
 
-      Object.keys(expectedResults).forEach((testCase) => {
-        expect(videoElementAttributes[testCase.toLowerCase()])
-          .to.deep.equal(expectedResults[testCase].toString());
+      it('should autoplay not be changed dynamically', () => {
+        assertVideoAttributes('autoplay', propsData.autoplay, [!propsData.autoplay], false);
       });
-      invalidOptions.forEach((testCase) => {
-        expect(videoElementAttributes[testCase.toLowerCase()]).to.equal(undefined);
+
+      it('should defaultPlaybackRate not be changed dynamically', () => {
+        assertVideoAttributes('defaultPlaybackRate', propsData.defaultPlaybackRate, [!propsData.defaultPlaybackRate], false);
+      });
+
+      it('should defaultMuted not be changed dynamically', () => {
+        assertVideoAttributes('defaultMuted', propsData.defaultMuted, [!propsData.defaultMuted], false);
       });
     });
   });
 
   describe('Methods', () => {
     let sandbox;
+    let clock;
     let wrapper;
     const propsData = {
       src: 'file:///',
-      defaultEvents: ['loadedmetadata'],
+      events: ['loadedmetadata'],
     };
 
     beforeEach(() => {
       sandbox = sinon.createSandbox();
+      clock = sinon.useFakeTimers();
       wrapper = mount(BaseVideoPlayer, { propsData });
     });
     afterEach(() => {
       sandbox.restore();
+      clock.restore();
       wrapper.destroy();
     });
-
-    const { calledOnce } = sinon.assert;
 
     it('should videoElement return actual videoElement', () => {
       const videoElement = wrapper.vm.videoElement();
 
       expect(videoElement).to.equal(wrapper.vm.$refs.video);
     });
-    it('should invoke the pause function when pause', () => {
-      const videoStub = {
-        pause: sandbox.spy(),
-      };
-      wrapper.vm.$refs.video = videoStub;
 
-      wrapper.vm.pause();
+    it('should currentTimeUpdate update currentTimeAnimationFrameId', () => {
+      wrapper.vm.currentTimeUpdate();
 
-      calledOnce(videoStub.pause);
+      expect(wrapper.vm.currentTimeAnimationFrameId).to.not.equal(0);
     });
-    it('should currentTime update video.currentTime when passed new value', () => {
-      const videoStub = {
-        currentTime: 0,
-      };
-      wrapper.vm.$refs.video = videoStub;
 
-      wrapper.vm.currentTime(5);
+    it('should emitEvents emit events', () => {
+      const testEvents = ['loadedmetadata', 'canplay', 'someotherevent'];
 
-      expect(wrapper.vm.$refs.video.currentTime).to.equal(5);
+      testEvents.forEach((event) => {
+        wrapper.vm.emitEvents(event);
+      });
+
+      expect(Object.keys(wrapper.emitted())).to.deep.equal(testEvents);
     });
-    it('should return currentTime when passed no value', () => {
-      const videoStub = {
-        currentTime: 20,
+
+    it('should emitEvents emit events with payloads', () => {
+      const testEvents = {
+        loadedmetadata: true,
+        canplaytype: ['mkv', 'mp3'],
+        someotherevent: () => 1 + 1,
       };
-      wrapper.vm.$refs.video = videoStub;
 
-      const timeResult = wrapper.vm.currentTime();
+      Object.keys(testEvents).forEach((event) => {
+        wrapper.vm.emitEvents(event, testEvents[event]);
+      });
 
-      expect(timeResult).to.equal(20);
-    });
-    it('should return duration when invoke duraton', () => {
-      const videoStub = {
-        duration: 20,
-      };
-      wrapper.vm.$refs.video = videoStub;
-
-      const durationResult = wrapper.vm.duration();
-
-      expect(durationResult).to.equal(20);
+      Object.keys(wrapper.emitted()).forEach((event) => {
+        expect(wrapper.emitted()[event][0][0]).to.equal(testEvents[event]);
+      });
     });
   });
 });

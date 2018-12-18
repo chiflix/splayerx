@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="84px" height="84px" viewBox="0 0 84 84" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.3 (67297) - http://www.bohemiancoding.com/sketch -->
+    <title>Play Button / Playing View Huge Button / Pause</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <filter x="-105.0%" y="-30.0%" width="310.0%" height="160.0%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.122622283 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <radialGradient cx="50%" cy="64.5280792%" fx="50%" fy="64.5280792%" r="169.187388%" gradientTransform="translate(0.500000,0.645281),scale(1.000000,0.287741),rotate(90.000000),translate(-0.500000,-0.645281)" id="radialGradient-2">
+            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="2.09763367%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="50%" cy="63.3385735%" fx="50%" fy="63.3385735%" r="175.200408%" gradientTransform="translate(0.500000,0.633386),scale(1.000000,0.287741),rotate(90.000000),translate(-0.500000,-0.633386)" id="radialGradient-3">
+            <stop stop-color="#FFFFFF" stop-opacity="0.329398777" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.573822464" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.764124774" offset="100%"></stop>
+        </radialGradient>
+        <filter x="-105.0%" y="-30.0%" width="310.0%" height="160.0%" filterUnits="objectBoundingBox" id="filter-4">
+            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.122622283 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <radialGradient cx="50%" cy="64.5280792%" fx="50%" fy="64.5280792%" r="169.134451%" gradientTransform="translate(0.500000,0.645281),scale(1.000000,0.287831),rotate(90.000000),translate(-0.500000,-0.645281)" id="radialGradient-5">
+            <stop stop-color="#FFFFFF" stop-opacity="0.109884511" offset="2.09763367%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.227553216" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.540194746" offset="100%"></stop>
+        </radialGradient>
+        <radialGradient cx="50%" cy="63.3385735%" fx="50%" fy="63.3385735%" r="175.145589%" gradientTransform="translate(0.500000,0.633386),scale(1.000000,0.287831),rotate(90.000000),translate(-0.500000,-0.633386)" id="radialGradient-6">
+            <stop stop-color="#FFFFFF" stop-opacity="0.329398777" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.573822464" offset="53.8768967%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.764124774" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="Play-Button-/-Playing-View-Huge-Button-/-Pause" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group" filter="url(#filter-1)" transform="translate(12.500000, 7.000000)">
+            <rect id="Rectangle" fill="url(#radialGradient-2)" x="0" y="0" width="20" height="69.5070423" rx="4"></rect>
+            <rect id="Rectangle" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="1.2" fill="url(#radialGradient-3)" x="0" y="0" width="20" height="69.5070423" rx="4"></rect>
+        </g>
+        <g id="Group" filter="url(#filter-4)" transform="translate(51.500000, 7.000000)">
+            <rect id="Rectangle" fill="url(#radialGradient-5)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
+            <rect id="Rectangle" stroke-opacity="0.437273551" stroke="#FFFFFF" stroke-width="1.2" fill="url(#radialGradient-6)" x="0" y="0" width="20" height="69.4852941" rx="4"></rect>
+        </g>
+    </g>
+</svg>

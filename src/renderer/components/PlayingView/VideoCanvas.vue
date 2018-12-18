@@ -1,18 +1,26 @@
 <template>
-
-  <div class="video">
+  <div
+    :data-component-name="$options.name"
+    class="video">
+    <transition name="fade" mode="out-in">
     <base-video-player
       ref="videoCanvas"
-      :defaultEvents="['playing', 'canplay', 'timeupdate', 'loadedmetadata', 'durationchange']"
-      :styleObject="{objectFit: 'contain', width: '100%', height: '100%'}"
-
-      @playing="onPlaying"
-      @canplay="onCanPlay"
-      @timeupdate="onTimeupdate"
+      :key="originSrc"
+      :events="['loadedmetadata', 'audiotrack']"
+      :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
-      @durationchange="onDurationChange"
-      :src="src" />
-    <BaseSubtitle/>
+      @audiotrack="onAudioTrack"
+      :src="convertedSrc"
+      :playbackRate="rate"
+      :volume="volume"
+      :muted="muted"
+      :paused="paused"
+      :updateCurrentTime="true"
+      :currentTime="seekTime"
+      :currentAudioTrackId="currentAudioTrackId.toString()"
+      @update:currentTime="updateCurrentTime" />
+    </transition>
+    <!--<BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>-->
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -20,281 +28,317 @@
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
-import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
+import WindowSizeHelper from '@/helpers/WindowSizeHelper';
+import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { Video as videoMutations } from '@/store/mutationTypes';
+import { Video as videoActions } from '@/store/actionTypes';
 import BaseSubtitle from './BaseSubtitle.vue';
-import BaseVideoPlayer from './BaseVideoPlayer';
+import BaseVideoPlayer from './BaseVideoPlayer.vue';
+import { videodata } from '../../store/video';
+
 export default {
+  name: 'video-canvas',
   components: {
     BaseSubtitle,
     'base-video-player': BaseVideoPlayer,
   },
   data() {
     return {
-      windowRectangleOld: {},
       videoExisted: false,
-      shownTextTrack: false,
-      newWidthOfWindow: 0,
-      newHeightOfWindow: 0,
-      videoWidth: 0,
-      videoHeight: 0,
-      timeUpdateIntervalID: null,
       windowSizeHelper: null,
       videoElement: null,
+      coverFinded: false,
+      seekTime: [0],
+      lastPlayedTime: 0,
+      lastCoverDetectingTime: 0,
+      checkPresentTimeID: null,
     };
   },
-  props: {
-    src: {
-      type: String,
-      required: true,
-      validator(value) {
-        // TODO: check if its a file or url
-        if (value.length <= 0) {
-          return false;
-        }
-        return true;
-      },
-    },
-  },
   methods: {
-    accurateTimeUpdate() {
-      const { currentTime, duration } = this.videoElement;
-      if (currentTime >= duration || this.videoElement.paused) {
-        clearInterval(this.timeUpdateIntervalID);
+    ...mapActions({
+      videoConfigInitialize: videoActions.INITIALIZE,
+      play: videoActions.PLAY_VIDEO,
+      pause: videoActions.PAUSE_VIDEO,
+      updateMetaInfo: videoActions.META_INFO,
+      toggleMute: videoActions.TOGGLE_MUTED,
+      addAudioTrack: videoActions.ADD_AUDIO_TRACK,
+      removeAudioTrack: videoActions.REMOVE_AUDIO_TRACK,
+      switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
+      removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
+    }),
+    ...mapMutations({
+      updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
+    }),
+    onMetaLoaded(event) {
+      this.videoElement = event.target;
+      this.videoConfigInitialize({
+        volume: this.volume * 100,
+        muted: this.muted,
+        rate: 1,
+        duration: event.target.duration,
+        currentTime: 0,
+      });
+      this.updateMetaInfo({
+        intrinsicWidth: event.target.videoWidth,
+        intrinsicHeight: event.target.videoHeight,
+        ratio: event.target.videoWidth / event.target.videoHeight,
+      });
+      if (event.target.duration - this.lastPlayedTime > 10) {
+        this.$bus.$emit('seek', this.lastPlayedTime);
       } else {
-        this.$store.commit('AccurateTime', currentTime);
+        this.$bus.$emit('seek', 0);
       }
+      this.lastPlayedTime = 0;
+      this.$bus.$emit('video-loaded');
+      this.getVideoCover();
+      this.changeWindowSize();
+      this.checkPresentTimeID = requestAnimationFrame(this.checkPresentTime);
     },
-    onPlaying() {
-      // set interval to get update time
-      const { duration } = this.videoElement;
-      if (duration <= 240) {
-        this.timeUpdateIntervalID = setInterval(this.accurateTimeUpdate, 10);
-      }
+    onAudioTrack(event) {
+      const { type, track } = event;
+      this[`${type}AudioTrack`](track);
     },
-    onCanPlay() {
-      // the video is ready to start playing
-      this.$store.commit('Volume', this.videoElement.volume);
-    },
-    onMetaLoaded() {
-      this.$bus.$emit('play');
-      this.$bus.$emit('seek', this.currentTime);
-      this.videoWidth = this.videoElement.videoWidth;
-      this.videoHeight = this.videoElement.videoHeight;
-      this.$bus.$emit('screenshot-sizeset', this.videoWidth / this.videoHeight);
+    changeWindowSize() {
+      let newSize = [];
+      const getWindowRect = () => [
+        window.screen.availLeft, window.screen.availTop,
+        window.screen.availWidth, window.screen.availHeight,
+      ];
       if (this.videoExisted) {
-        this.$_calculateWindowSizeWhenVideoExisted();
-        this.$_controlWindowSizeAtNewVideo();
+        newSize = this.calculateWindowSize(
+          [320, 180],
+          this.winSize,
+          [this.videoWidth, this.videoHeight],
+        );
       } else {
-        this.$_calculateWindowSizeAtTheFirstTime();
-        this.$_controlWindowSize();
+        newSize = this.calculateWindowSize(
+          [320, 180],
+          getWindowRect().slice(2, 4),
+          [this.videoWidth, this.videoHeight],
+        );
         this.videoExisted = true;
       }
-      this.$bus.$emit('video-loaded');
+      const newPosition = this.calculateWindowPosition(
+        this.winPos.concat(this.winSize),
+        getWindowRect(),
+        newSize,
+      );
+      this.controlWindowRect(newPosition.concat(newSize));
       this.windowSizeHelper.setNewWindowSize();
-      // this.loadTextTracks();
     },
-    onTimeupdate() {
-      this.$store.commit('AccurateTime', this.videoElement.currentTime);
-      const t = Math.floor(this.videoElement.currentTime);
-      if (t !== this.$store.state.PlaybackState.CurrentTime) {
-        this.$store.commit('CurrentTime', t);
+    calculateWindowSize(minSize, maxSize, videoSize) {
+      let result = videoSize;
+      const getRatio = size => size[0] / size[1];
+      const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
+      const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
+      const biggerSize = (size, diffedSize) =>
+        size.some((value, index) => value >= diffedSize[index]);
+      const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
+      if (biggerSize(result, maxSize)) {
+        result = biggerRatio(result, maxSize) ?
+          setHeightByWidth(maxSize) : setWidthByHeight(maxSize);
       }
-    },
-    onDurationChange() {
-      const t = Math.floor(this.$refs.videoCanvas.videoElement().duration);
-      if (t !== this.$store.state.PlaybackState.duration) {
-        this.$store.commit('Duration', t);
+      if (biggerSize(minSize, result)) {
+        result = biggerRatio(minSize, result) ?
+          setHeightByWidth(minSize) : setWidthByHeight(minSize);
       }
+      return result.map(value => Math.round(value));
     },
-    $_controlWindowSize() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      currentWindow.setBounds({
-        x: 0,
-        y: 0,
-        width: parseInt(this.newWidthOfWindow, 10),
-        height: parseInt(this.newHeightOfWindow, 10),
-      });
-      currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
+    calculateWindowPosition(currentRect, windowRect, newSize) {
+      const tempRect = currentRect.slice(0, 2)
+        .map((value, index) => Math.floor(value + (currentRect.slice(2, 4)[index] / 2)))
+        .map((value, index) => Math.floor(value - (newSize[index] / 2))).concat(newSize);
+      return ((windowRect, tempRect) => {
+        const alterPos = (boundX, boundLength, videoX, videoLength) => {
+          if (videoX < boundX) return boundX;
+          if (videoX + videoLength > boundX + boundLength) {
+            return (boundX + boundLength) - videoLength;
+          }
+          return videoX;
+        };
+        return [
+          alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
+          alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
+        ];
+      })(windowRect, tempRect);
     },
-    $_controlWindowSizeAtNewVideo() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      const windowXY = this.calcNewWindowXY();
-      currentWindow.setBounds({
-        x: windowXY.windowX,
-        y: windowXY.windowY,
-        width: parseInt(this.newWidthOfWindow, 10),
-        height: parseInt(this.newHeightOfWindow, 10),
-      });
-      currentWindow.setAspectRatio(this.newWidthOfWindow / this.newHeightOfWindow);
+    controlWindowRect(rect) {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', rect.slice(2, 4));
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', rect.slice(0, 2));
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
-    $_calculateWindowSizeAtTheFirstTime() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      const currentScreen = this.$electron.screen.getPrimaryDisplay();
-      const { width: screenWidth, height: screenHeight } = currentScreen.workAreaSize;
-      const [minWidth, minHeight] = currentWindow.getMinimumSize();
-      const screenRatio = screenWidth / screenHeight;
-      const minWindowRatio = minWidth / minHeight;
-      const videoRatio = this.videoWidth / this.videoHeight;
-      if (this.videoWidth > screenWidth || this.videoHeight > screenHeight) {
-        if (videoRatio > screenRatio) {
-          this.newWidthOfWindow = screenWidth;
-          this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (videoRatio < screenRatio) {
-          this.newHeightOfWindow = screenHeight;
-          this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (videoRatio === screenRatio) {
-          [this.newWidthOfWindow, this.newHeightOfWindow] = [screenWidth, screenHeight];
-        }
-      } else if (this.videoWidth < minWidth || this.videoHeight < minHeight) {
-        if (videoRatio > minWindowRatio) {
-          this.newHeightOfWindow = minHeight;
-          this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (videoRatio < minWindowRatio) {
-          this.newWidthOfWindow = minWidth;
-          this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (videoRatio === minWindowRatio) {
-          [this.newWidthOfWindow, this.newHeightOfWindow]
-            = [minWidth, minHeight];
-        }
-      } else {
-        [this.newWidthOfWindow, this.newHeightOfWindow] = [this.videoWidth, this.videoHeight];
-      }
-    },
-    $_calculateWindowSizeWhenVideoExisted() {
-      const currentWindow = this.$electron.remote.getCurrentWindow();
-      const [windowWidth, windowHeight] = currentWindow.getSize();
-      const [minWidth, minHeight] = currentWindow.getMinimumSize();
-      const windowRatio = windowWidth / windowHeight;
-      const minWindowRatio = minWidth / minHeight;
-      const videoRatio = this.videoWidth / this.videoHeight;
-      if (this.videoWidth < windowWidth && this.videoHeight < windowHeight) {
-        [this.newWidthOfWindow, this.newHeightOfWindow] = [this.videoWidth, this.videoHeight];
-      } else if (this.videoWidth > windowWidth || this.videoHeight > windowHeight) {
-        if (videoRatio > windowRatio) {
-          this.newWidthOfWindow = windowWidth;
-          this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (videoRatio < windowRatio) {
-          this.newHeightOfWindow = windowHeight;
-          this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (videoRatio === windowRatio) {
-          [this.newWidthOfWindow, this.newHeightOfWindow]
-            = [windowWidth, windowHeight];
-        }
-      }
-      if (this.newWidthOfWindow < minWidth || this.newHeightOfWindow < minHeight) {
-        if (videoRatio > minWindowRatio) {
-          this.newHeightOfWindow = minHeight;
-          this.newWidthOfWindow = this.calculateWidthByHeight;
-        } else if (videoRatio < minWindowRatio) {
-          this.newWidthOfWindow = minWidth;
-          this.newHeightOfWindow = this.calculateHeightByWidth;
-        } else if (videoRatio === minWindowRatio) {
-          [this.newWidthOfWindow, this.newHeightOfWindow]
-            = [this.videoWidth, this.videoHeight];
-        }
-      }
-    },
-    $_saveScreenshot() {
+    saveScreenshot() {
+      const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
-      const { videoHeight, videoWidth } = this.videoElement;
-      [canvas.width, canvas.height] = [videoWidth, videoHeight];
+      // todo: use metaloaded to get videoHeight and videoWidth
+      const { videoHeight, videoWidth } = this;
+      // cannot delete
+      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
       canvasCTX.drawImage(
-        this.videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, videoWidth, videoHeight,
+        videoElement, 0, 0, videoWidth, videoHeight,
+        0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
       const imagePath = canvas.toDataURL('image/png');
+      // 用于测试截图的代码，以后可能还会用到
+      // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
+      // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
+      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
+      canvasCTX.drawImage(
+        videoElement, 0, 0, videoWidth, videoHeight,
+        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
+      );
+      const smallImagePath = canvas.toDataURL('image/png');
       const data = {
         shortCut: imagePath,
-        lastPlayedTime: this.currentTime,
-        duration: this.$store.state.PlaybackState.Duration,
+        smallShortCut: smallImagePath,
+        lastPlayedTime: videodata.time,
+        duration: this.duration,
       };
       syncStorage.setSync('recent-played', data);
     },
-    calcNewWindowXY() {
-      if (Object.keys(this.windowRectangleOld).length === 0) {
-        return { windowX: 0, windowY: 0 };
+    saveSubtitleStyle() {
+      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle });
+    },
+    async getVideoCover() {
+      if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
+      const videoElement = this.$refs.videoCanvas.videoElement();
+      const canvas = this.$refs.thumbnailCanvas;
+      const canvasCTX = canvas.getContext('2d');
+      const { videoHeight, videoWidth } = videoElement;
+      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
+      canvasCTX.drawImage(
+        videoElement, 0, 0, videoWidth, videoHeight,
+        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
+      );
+      const { data } = canvasCTX.getImageData(0, 0, 100, 100);
+      for (let i = 0; i < data.length; i += 1) {
+        if ((i + 1) % 4 !== 0 && data[i] > 20) {
+          this.coverFinded = true;
+          break;
+        }
       }
-      let x = this.windowRectangleOld.x + (this.windowRectangleOld.width / 2);
-      let y = this.windowRectangleOld.y + (this.windowRectangleOld.height / 2);
-      x = Math.round(x - (this.newWidthOfWindow / 2));
-      y = Math.round(y - (this.newHeightOfWindow / 2));
-      return { windowX: x, windowY: y };
+      if (this.coverFinded) {
+        const smallImagePath = canvas.toDataURL('image/png');
+        [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
+        canvasCTX.drawImage(
+          videoElement, 0, 0, videoWidth, videoHeight,
+          0, 0, (videoWidth / videoHeight) * 1080, 1080,
+        );
+        const imagePath = canvas.toDataURL('image/png');
+        const val = await this.infoDB().get('recent-played', 'path', this.originSrc);
+        if (val) {
+          const mergedData = Object.assign(val, { cover: imagePath, smallCover: smallImagePath });
+          this.infoDB().add('recent-played', mergedData);
+        } else {
+          const data = {
+            quickHash: await this.mediaQuickHash(this.originSrc),
+            path: this.originSrc,
+            cover: imagePath,
+            smallCover: smallImagePath,
+            duration: this.$store.getters.duration,
+          };
+          this.infoDB().add('recent-played', data);
+        }
+      }
+      this.lastCoverDetectingTime = videodata.time;
+    },
+    checkPresentTime() {
+      if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
+        this.getVideoCover();
+      }
+      // TODO: This part move to TheVideoController.vue is better.
+      if (videodata.time >= this.duration && this.nextVideo) {
+        videodata.time = 0;
+        this.playFile(this.nextVideo);
+      } else if (videodata.time >= this.duration) {
+        videodata.time = 0;
+        this.pause();
+      } else {
+        requestAnimationFrame(this.checkPresentTime);
+      }
     },
   },
   computed: {
-    calculateHeightByWidth() {
-      return this.newWidthOfWindow / (this.videoWidth / this.videoHeight);
-    },
-    calculateWidthByHeight() {
-      return this.newHeightOfWindow * (this.videoWidth / this.videoHeight);
-    },
-    currentTime() {
-      return this.$store.state.PlaybackState.CurrentTime;
-    },
+    ...mapGetters([
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
+      'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle', 'scaleNum',
+      'nextVideo']),
+    ...mapGetters({
+      videoWidth: 'intrinsicWidth',
+      videoHeight: 'intrinsicHeight',
+      videoRatio: 'ratio',
+    }),
   },
   watch: {
-    src(val, oldVal) {
-      const window = this.$electron.remote.getCurrentWindow();
-      this.windowRectangleOld.x = window.getBounds().x;
-      this.windowRectangleOld.y = window.getBounds().y;
-      this.windowRectangleOld.height = window.getBounds().height;
-      this.windowRectangleOld.width = window.getBounds().width;
-      this.$_saveScreenshot();
+    originSrc(val, oldVal) {
+      this.coverFinded = false;
+      this.saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
           const val = await this.infoDB().get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
-            this.infoDB().add('recent-played', mergedData);
+            this.infoDB().add('recent-played', mergedData).then(() => {
+              this.$bus.$emit('database-saved');
+            });
           }
         });
+      this.$bus.$emit('showlabel');
+      this.videoConfigInitialize({
+        audioTrackList: [],
+      });
+      this.play();
     },
+  },
+  beforeDestroy() {
+    if (this.checkPresentTimeID) {
+      cancelAnimationFrame(this.checkPresentTimeID);
+    }
   },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
-
-    this.$bus.$on('playback-rate', (newRate) => {
-      this.videoElement.playbackRate = newRate;
-      this.$store.commit('PlaybackRate', newRate);
+    this.$bus.$on('toggle-fullscreen', () => {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.ratio]);
     });
-    this.$bus.$on('volume', (newVolume) => {
-      this.videoElement.volume = newVolume;
-      this.$store.commit('Volume', newVolume);
+    this.$bus.$on('toggle-muted', () => {
+      this.toggleMute();
     });
-    this.$bus.$on('reset-windowsize', () => {
-      this.$_controlWindowSize(this.newWidthOfWindow, this.newHeightOfWindow);
+    this.$bus.$on('send-lastplayedtime', (e) => {
+      this.lastPlayedTime = e;
     });
     this.$bus.$on('toggle-playback', () => {
-      if (this.videoElement.paused) {
-        this.$bus.$emit('play');
-        this.$bus.$emit('twinkle-play-icon');
-      } else {
-        this.$bus.$emit('pause');
-        this.$bus.$emit('twinkle-pause-icon');
-      }
-    });
-    this.$bus.$on('play', () => {
-      this.videoElement.play();
-    });
-    this.$bus.$on('pause', () => {
-      this.videoElement.pause();
+      this[this.paused ? 'play' : 'pause']();
     });
     this.$bus.$on('seek', (e) => {
-      this.videoElement.currentTime = e;
-      this.$store.commit('CurrentTime', e);
-      this.$store.commit('AccurateTime', e);
+      // to check whether trigger ‘直捣黄龙’
+      if (e === this.duration && this.nextVideo) {
+        this.playFile(this.nextVideo);
+      } else {
+        this.seekTime = [e];
+        // todo: use vuex get video element src
+        const filePath = decodeURI(this.src);
+        const indexOfLastDot = filePath.lastIndexOf('.');
+        const ext = filePath.substring(indexOfLastDot + 1);
+        if (ext === 'mkv') {
+          this.$bus.$emit('seek-subtitle', e);
+        }
+      }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {
-      this.$_saveScreenshot();
+      this.saveScreenshot();
+      this.saveSubtitleStyle();
     };
   },
 };
 </script>
 <style lang="scss" scoped>
 .video {
+  position: relative;
   height: 0;
+  z-index: auto;
 }
 .base-video-player {
   width: 100%;
@@ -303,5 +347,11 @@ export default {
 }
 .canvas {
   visibility: hidden;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 200ms ease-in;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>

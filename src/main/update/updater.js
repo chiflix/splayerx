@@ -1,7 +1,6 @@
-import Promise from 'bluebird';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
-import GetMainHelper from './MainHelper.js';
+import GetMainHelper from './MainHelper';
 
 const waitTime = 5 * 1000; // todo need to set it
 

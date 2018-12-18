@@ -1,182 +1,168 @@
 <template>
-  <div :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
-    v-show="showTitlebar">
+  <div
+    :data-component-name="$options.name"
+    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
+    @dblclick.stop="handleDbClick">
     <div class="win-icons" v-if="!isDarwin">
-      <div id="minimize" class="title-button"
-        @click="handleMinimize">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="maximize" class="title-button"
-        @click="handleMaximize"
-        v-show="middleButtonStatus === 'maximize'">
-        <img :class="{ disabled: currentView === 'LandingView' }" src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="restore" class="title-button"
-        @click="handleRestore"
+      <Icon class="title-button no-drag"
+        @click.native="handleMinimize"
+        type="titleBarWinExitFull">
+      </Icon>
+      <Icon class="title-button no-drag"
+        @click.native="handleWinFull"
+        v-show="middleButtonStatus === 'maximize'"
+        type="titleBarWinFull">
+      </Icon>
+      <Icon class="title-button no-drag"
+        @click.native="handleRestore"
+        type="titleBarWinRestore"
         v-show="middleButtonStatus === 'restore'">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="exit-fullscreen" class="title-button"
-        @click="handleFullscreenExit"
-        v-show="middleButtonStatus === 'exit-fullscreen'">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
-      <div id="close" class="title-button"
-        @click="handleClose">
-        <img src="~@/assets/windows-titlebar-icons.png" />
-      </div>
+      </Icon>
+      <Icon class="title-button no-drag"
+        @click.native="handleFullscreenExit"
+        v-show="middleButtonStatus === 'exit-fullscreen'"
+        type="titleBarWinResize">
+      </Icon>
+      <Icon class="title-button no-drag"
+        @click.native="handleClose"
+        type="titleBarWinClose">
+      </Icon>
     </div>
-    <div class="mac-icons" v-if="isDarwin">
-      <div id="close" class="title-button"
-        @click="handleClose">
-      </div>
-      <div id="minimize" class="title-button"
-        @click="handleMinimize"
-        :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }">
-      </div>
-      <div id="maximize" class="title-button"
-        @click="handleMacMaximize"
-        v-show="middleButtonStatus !== 'exit-fullscreen'"
-        :class="{ disabled: currentView === 'LandingView' }">
-      </div>
-      <div id="restore" class="title-button"
-        @click="handleFullscreenExit"
-        v-show="middleButtonStatus === 'exit-fullscreen'">
-      </div>
+    <div class="mac-icons" v-if="isDarwin"
+         @mouseover="handleMouseOver"
+         @mouseout="handleMouseOut">
+      <Icon id="close" class="title-button no-drag"
+            type="titleBarClose"
+            :state="state"
+            @click.native="handleClose">
+      </Icon>
+      <Icon id="minimize" class="title-button no-drag"
+            type="titleBarExitFull"
+            @click.native="handleMinimize"
+            :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
+            :state="state"
+            :isFullScreen="middleButtonStatus">
+      </Icon>
+      <Icon id="maximize" class="title-button no-drag"
+            :type="itemType"
+            @click.native="handleMacFull"
+            v-show="middleButtonStatus !== 'exit-fullscreen'"
+            :state="state"
+            :style="{ transform: itemType === this.itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}">
+      </Icon>
+      <Icon id="restore" class="title-button no-drag"
+            @click.native="handleFullscreenExit"
+            v-show="middleButtonStatus === 'exit-fullscreen'"
+            type="titleBarRecover"
+            :state="state">
+      </Icon>
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+import Icon from './BaseIconContainer.vue';
+
 export default {
   name: 'titlebar',
   data() {
     return {
-      showTitlebar: true,
-      middleButtonStatus: 'maximize',
-      windowInfo: {
-        screenWidth: null,
-        windowWidth: null,
-        windowPosition: null,
-      },
-      maximize: false,
       isDarwin: process.platform === 'darwin',
-      titlebarDelay: 0,
-      screenWidth: this.$electron.screen.getPrimaryDisplay().workAreaSize.width,
+      state: 'default',
+      itemTypeEnum: {
+        FULLSCREEN: 'titleBarFull',
+        MAXSCREEN: 'titleBarClose',
+      },
+      itemType: 'titleBarFull',
+      keyAlt: false,
+      keyOver: false,
     };
   },
   props: {
     currentView: String,
   },
-  methods: {
-    // Methods to handle window behavior
-    handleMinimize() {
-      this.$electron.remote.getCurrentWindow().minimize();
-    },
-    handleMaximize() {
-      this.$electron.remote.getCurrentWindow().maximize();
-    },
-    handleClose(e) {
-      console.log(e);
-      this.$electron.remote.getCurrentWindow().close();
-    },
-    handleRestore() {
-      this.$electron.remote.getCurrentWindow().unmaximize();
-    },
-    handleFullscreenExit() {
-      this.$electron.remote.getCurrentWindow().setFullScreen(false);
-    },
-    // OS-specific methods
-    handleMacMaximize() {
-      if (this.currentView !== 'LandingView') {
-        this.$electron.remote.getCurrentWindow().setFullScreen(true);
-      }
-    },
-    handleResize() {
-      this.setWindowInfo();
-      this.statusChange();
-      this.titlebarWidth = this.winWidth;
-      this.originalSize = this.winSize;
-    },
-    statusChange() {
-      if (this.$store.getters.fullscreen) {
-        this.middleButtonStatus = 'exit-fullscreen';
-      } else if (this.maximize) {
-        this.middleButtonStatus = 'restore';
-      } else {
-        this.middleButtonStatus = 'maximize';
-      }
-    },
-    setWindowInfo() {
-      [this.windowInfo.screenWidth, this.windowInfo.windowWidth] = [
-        this.screenWidth,
-        this.winWidth,
-      ];
-      this.windowInfo.windowPosition = this.winPos;
-      this.updateMaximize(this.windowInfo);
-    },
-    updateMaximize(val) {
-      const sizeOffset = Math.abs(val.screenWidth - val.windowWidth);
-      const positionOffset = Math.sqrt((this.windowInfo.windowPosition[0] ** 2) +
-        (this.windowInfo.windowPosition[1] ** 2));
-      if (sizeOffset <= 5 && positionOffset <= 5) {
-        this.maximize = true;
-      } else {
-        this.maximize = false;
-      }
-    },
-    appearTitlebar() {
-      if (this.titlebarDelay !== 0) {
-        clearTimeout(this.titlebarDelay);
-      }
-      this.showTitlebar = true;
-    },
-    hideTitlebar() {
-      this.showTitlebar = false;
-    },
-  },
-  beforeMount() {
-    this.setWindowInfo();
-    this.statusChange();
+  components: {
+    Icon,
   },
   mounted() {
-    this.$electron.ipcRenderer.on('main-resize', this.handleResize);
-    this.$electron.ipcRenderer.on('main-move', this.setWindowInfo);
-    this.$bus.$on('titlebar-appear-delay', () => {
-      this.appearTitlebar();
-      if (this.showTitlebar !== 0) {
-        clearTimeout(this.titlebarDelay);
-        this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
-      } else {
-        this.titlebarDelay = setTimeout(this.hideTitlebar, 3000);
+    window.addEventListener('keydown', (e) => {
+      if (e.keyCode === 18) {
+        this.keyAlt = true;
       }
     });
-    this.$bus.$on('titlebar-appear', this.appearTitlebar);
-    this.$bus.$on('titlebar-hide', this.hideTitlebar);
+    window.addEventListener('keyup', (e) => {
+      if (e.keyCode === 18) {
+        this.keyAlt = false;
+      }
+    });
+  },
+  watch: {
+    keyAlt(val) {
+      if (!val || !this.keyOver) {
+        this.itemType = this.itemTypeEnum.FULLSCREEN;
+      } else if (!this.isFullScreen) {
+        this.itemType = this.itemTypeEnum.MAXSCREEN;
+      }
+    },
+    keyOver(val) {
+      if (!val || !this.keyAlt) {
+        this.itemType = this.itemTypeEnum.FULLSCREEN;
+      } else if (!this.isFullScreen) {
+        this.itemType = this.itemTypeEnum.MAXSCREEN;
+      }
+    },
+  },
+  methods: {
+    handleDbClick() {
+      if (!this.isMaximized) {
+        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'maximize');
+      } else {
+        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'unmaximize');
+      }
+    },
+    handleMouseOver() {
+      this.keyOver = true;
+      this.state = 'hover';
+    },
+    handleMouseOut() {
+      this.keyOver = false;
+      this.state = 'default';
+    },
+    // Methods to handle window behavior
+    handleMinimize() {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'minimize');
+    },
+    handleWinFull() {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'maximize');
+    },
+    handleClose() {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'close');
+    },
+    handleRestore() {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'unmaximize');
+    },
+    handleFullscreenExit() {
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
+    },
+    // OS-specific methods
+    handleMacFull() {
+      if (this.itemType === this.itemTypeEnum.FULLSCREEN) {
+        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
+      } else if (this.isMaximized) {
+        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'unmaximize');
+      } else {
+        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'maximize');
+      }
+    },
   },
   computed: {
-    show() {
-      if (this.showTitlebar === false) {
-        return {
-          Maximize: false,
-          Restore: false,
-          FullscreenExit: false,
-        };
-      }
-      return {
-        Maximize: this.middleButtonStatus === 'maximize',
-        Restore: this.middleButtonStatus === 'restore',
-        FullscreenExit: this.middleButtonStatus === 'exit-fullscreen',
-      };
-    },
-    winSize() {
-      return this.$store.getters.winSize;
-    },
-    winWidth() {
-      return this.$store.getters.winWidth;
-    },
-    winPos() {
-      return this.$store.getters.winPos;
+    ...mapGetters([
+      'isMaximized',
+      'isFullScreen',
+    ]),
+    middleButtonStatus() {
+      return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
     },
   },
 };
@@ -200,7 +186,6 @@ export default {
       margin: 0px 2px 2px 0px;
       width: 45px;
       height: 28px;
-      -webkit-app-region: no-drag;
       background-color: rgba(255,255,255,0);
       transition: background-color 200ms;
     }
@@ -211,41 +196,17 @@ export default {
       background-color: rgba(221, 221, 221, 0.5);
     }
   }
-  img {
-    object-fit: none;
-    width: 45px;
-    height: 28px;
-    -webkit-user-drag: none;
-    -webkit-app-region: no-drag;
-  }
-  #minimize img {
-    object-position: 0 0
-  }
-  #maximize img {
-    object-position: 0 -28px;
-    &.disabled {
-      object-position: 0 -140px;
-      -webkit-app-region: drag;
-    }
-  }
-  #restore img {
-    object-position: 0 -56px;
-  }
-  #exit-fullscreen img {
-    object-position: 0 -84px;
-  }
-  #close img {
-    object-position: 0 -112px;
-  }
 }
 .darwin-titlebar {
   position: absolute;
   z-index: 6;
   box-sizing: content-box;
-  top: 12px;
-  left: 12px;
-  height: 20px;
+  height: 36px;
+  width: 100%;
   .mac-icons {
+    position: absolute;
+    top: 12px;
+    left: 12px;
     display: flex;
     flex-wrap: nowrap;
   }
@@ -253,79 +214,20 @@ export default {
     width: 12px;
     height: 12px;
     margin-right: 8px;
-    background-image: url('../assets/mac-titlebar-icons.png');
     background-repeat: no-repeat;
     -webkit-app-region: no-drag;
-    opacity: 0.5;
     border-radius: 100%;
-  }
-  .mac-icons {
-    &:hover {
-      #close {
-        background-position-y: 0;
-        opacity: 1;
-        &:active {
-          background-position-y: -12px;
-        }
-      }
-      #minimize {
-        background-position-y: -24px;
-        opacity: 1;
-        &.disabled {
-          background-position-y: -108px;
-          opacity: 0.25;
-        }
-        &:active {
-          background-position-y: -36px;
-        }
-      }
-      #maximize {
-        background-position-y: -48px;
-        opacity: 1;
-        &.disabled {
-          background-position-y: -108px;
-          opacity: 0.25;
-        }
-        &:active {
-          background-position-y: -60px;
-        }
-      }
-      #restore {
-        background-position-y: -72px;
-        opacity: 1;
-        &:active {
-          background-position-y: -84px;
-        }
-      }
-    }
-  }
-  .title-button {
-    background-position-y: -96px;
   }
   #minimize {
     &.disabled {
-      background-position-y: -108px;
       pointer-events: none;
       opacity: 0.25;
     }
   }
   #maximize {
     &.disabled {
-      background-position-y: -108px;
       pointer-events: none;
       opacity: 0.25;
-    }
-  }
-  @media screen and (-webkit-min-device-pixel-ratio: 1) and (-webkit-max-device-pixel-ratio: 2) {
-    .title-button {
-      background-size: 36px 240px;
-      background-position-x: 0;
-    }
-  }
-  @media screen and (-webkit-min-device-pixel-ratio: 2) {
-    .title-button {
-      background-size: 18px 120px;
-      background-position-x: -6px;
     }
   }
 }

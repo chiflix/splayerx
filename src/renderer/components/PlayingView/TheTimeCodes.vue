@@ -1,146 +1,54 @@
 <template>
-  <transition name="fade">
-  <div class="timing" id="timing"
-    @mousedown.stop="switchStateOfContent"
-    @mouseover.stop="appearTimeCode"
-    @mousemove.stop="throttledCall"
-    v-show="showTimeCode">
-        <span class="firstContent" :class="{ remainTime: isRemainTime.first }">{{ content.first }}</span>
-        <span class="splitSign">/</span>
-        <span class="secondContent" :class="{ remainTime: isRemainTime.second }" v-if="hasDuration">{{ content.second }}</span>
+  <div class="cont">
+    <div class="timing"
+      :data-component-name="$options.name"
+      @mousedown="switchTimeContent">
+          <span class="timeContent" ref="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration"></span>
+    </div>
+    <rateLabel class="rate"></rateLabel>
   </div>
-</transition>
-</template>;
-
+</template>
 <script>
-import _ from 'lodash';
+import { mapGetters } from 'vuex';
+import rateLabel from './RateLabel.vue';
 
 export default {
-  name: 'TimeCodes',
+  name: 'the-time-codes',
   data() {
     return {
-      showTimeCode: false,
-      timeoutIdOftimeCodeDisappearDelay: 0,
-      contentState: 0,
-      ContentStateEnum: {
-        DEFAULT: 0,
-        CURRENT_REMAIN: 1,
-        REMAIN_DURATION: 2,
-      },
-      throttledCall: null,
+      isRemainTime: false,
     };
   },
   methods: {
-    switchStateOfContent() {
-      this.$_clearTimeoutDelay();
-      this.contentState = (this.contentState + 1) % 3;
+    switchTimeContent() {
+      this.isRemainTime = !this.isRemainTime;
     },
-    appearTimeCode() {
-      this.$_clearTimeoutDelay();
-      this.showTimeCode = true;
-    },
-    hideTimeCode() {
-      this.showTimeCode = false;
-    },
-    clearAllWidgetsTimeout() {
-      this.$bus.$emit('clearAllWidgetDisappearDelay');
-    },
-    $_clearTimeoutDelay() {
-      if (this.timeoutIdOftimeCodeDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOftimeCodeDisappearDelay);
+    updateTimeContent(time) {
+      if (this.$refs.timeContent) {
+        this.$refs.timeContent.textContent =
+        this.timecodeFromSeconds(this.isRemainTime ? this.duration - time : time);
       }
     },
+  },
+  components: {
+    rateLabel,
   },
   computed: {
+    ...mapGetters(['duration']),
     hasDuration() {
-      return !Number.isNaN(this.$store.state.PlaybackState.Duration);
+      return !Number.isNaN(this.duration);
     },
-    isRemainTime() {
-      return {
-        first: this.contentState === this.ContentStateEnum.REMAIN_DURATION,
-        second: this.contentState === this.ContentStateEnum.CURRENT_REMAIN,
-      };
-    },
-    duration() {
-      return this.timecodeFromSeconds(this.$store.state.PlaybackState.Duration);
-    },
-    currentTime() {
-      return this.timecodeFromSeconds(this.$store.state.PlaybackState.CurrentTime);
-    },
-    remainTime() {
-      const remainTime
-        = -(this.$store.state.PlaybackState.Duration - this.$store.state.PlaybackState.CurrentTime);
-      return this.timecodeFromSeconds(remainTime);
-    },
-    content() {
-      switch (this.contentState) {
-        case this.ContentStateEnum.DEFAULT:
-          return { first: this.currentTime, second: this.duration };
-        case this.ContentStateEnum.CURRENT_REMAIN:
-          return { first: this.currentTime, second: this.remainTime };
-        case this.ContentStateEnum.REMAIN_DURATION:
-          return { first: this.remainTime, second: this.duration };
-        default: return { first: this.currentTime, second: this.duration };
-      }
-    },
-  },
-  created() {
-    this.$bus.$on('timecode-appear-delay', () => {
-      this.appearTimeCode();
-      if (this.timeoutIdOftimeCodeDisappearDelay !== 0) {
-        clearTimeout(this.timeoutIdOftimeCodeDisappearDelay);
-        this.timeoutIdOftimeCodeDisappearDelay
-          = setTimeout(this.hideTimeCode, 3000);
-      } else {
-        this.timeoutIdOftimeCodeDisappearDelay
-          = setTimeout(this.hideTimeCode, 3000);
-      }
-    });
-    this.$bus.$on('timecode-appear', this.appearTimeCode);
-    this.$bus.$on('timecode-hide', this.hideTimeCode);
-  },
-  beforeMount() {
-    this.throttledCall = _.throttle(this.clearAllWidgetsTimeout, 500);
   },
 };
 </script>
 
 <style lang="scss">
-
-.video-controller .timing {
-  position: absolute;
-  width: auto;
-
-  .firstContent {
-    display: inline-block;
-    color: rgba(255, 255, 255, 1);
-    text-shadow:  0 1px 0 rgba(0,0,0,.1),
-                  1px 1px 0 rgba(0,0,0,.1);
-    font-weight: 500;
-    letter-spacing: 0.2px;
-    user-select: none;
-  }
-
-  .secondContent {
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  .remainTime {
-    &::before {
-      content: '-';
-      padding-right: 2px;
-      font-family: sans-serif;
-      display: inline-block;
-    }
-  }
-
-  .splitSign {
-    color: rgba(255, 255, 255, 0.5);
-  }
-
-  @media screen and (max-width: 854px) {
-    bottom: 17px;
+@media screen and (max-width: 512px) {
+  .cont {
+    bottom: 23px;
     left: 20px;
+  }
+  .timing {
     height: 18px;
     font-size: 18px;
     .secondContent {
@@ -150,21 +58,35 @@ export default {
       font-size: 13px;
     }
   }
-  @media screen and (min-width: 513px) and (max-width: 854px) {
-    bottom: 20px;
-    left: 20px;
-    height: 20px;
-    font-size: 18px;
-    .secondContent {
-      font-size: 14px;
-    }
-    .splitSign {
-      font-size: 14px;
-    }
+  .rate {
+    margin: 4px 1px auto 7px;
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
-    bottom: 24px;
-    left: 27px;
+}
+@media screen and (min-width: 513px) and (max-width: 854px) {
+  .cont {
+    bottom: 27px;
+    left: 28px;
+  }
+  .timing {
+     height: 20px;
+     font-size: 18px;
+     .secondContent {
+       font-size: 14px;
+     }
+     .splitSign {
+       font-size: 14px;
+     }
+   }
+  .rate {
+    margin: auto 2px 0 9px;
+  }
+}
+@media screen and (min-width: 855px) and (max-width: 1920px) {
+  .cont {
+    bottom: 34px;
+    left: 33px;
+  }
+  .timing {
     height: 24px;
     font-size: 24px;
     .secondContent {
@@ -174,9 +96,16 @@ export default {
       font-size: 18px;
     }
   }
-  @media screen and (min-width: 1921px) {
-    bottom: 35px;
-    left: 37px;
+  .rate {
+    margin: auto 3px 0 11px;
+  }
+}
+@media screen and (min-width: 1921px) {
+  .cont {
+    bottom: 44px;
+    left: 51px;
+  }
+  .timing {
     height: 36px;
     font-size: 36px;
     .secondContent {
@@ -186,28 +115,50 @@ export default {
       font-size: 26px;
     }
   }
+  .rate {
+    margin: 9px 4px auto 13px;
+  }
+}
+.cont {
+  position: absolute;
+  width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: row;
+  z-index: 5;
+}
+.timing {
+  position: relative;
+  width: auto;
+  .timeContent {
+    display: inline-block;
+    color: rgba(255, 255, 255, 1);
+    text-shadow:  0 1px 0 rgba(0,0,0,.1),
+                  1px 1px 0 rgba(0,0,0,.1);
+    font-weight: 600;
+    letter-spacing: 0.9px;
+    user-select: none;
+  }
+
+  .remainTime {
+    &::before {
+      content: '-';
+      padding-right: 4px;
+      font-weight: 600;
+      display: inline-block;
+    }
+  }
+
+  .splitSign {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
 }
 .timing:hover {
   cursor: pointer;
 }
 
-.video-controller .timing .timing--current {
+.timing .timing--current {
   opacity: 1;
-}
-
-.fade-enter-active {
- transition: opacity 100ms;
-}
-
-.fade-leave-active {
- transition: opacity 400ms;
-}
-
-.fade-enter-to, .fade-leave {
- opacity: 1;
-}
-
-.fade-enter, .fade-leave-to {
- opacity: 0;
 }
 </style>

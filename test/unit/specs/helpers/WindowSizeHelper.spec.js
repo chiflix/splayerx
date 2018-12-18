@@ -1,8 +1,9 @@
 import EventEmitter from 'events';
 import sinon from 'sinon';
-import WindowResizeHelperM from '../../../../src/main/helpers/windowResizer.js';
+import WindowResizeHelperM from '../../../../src/main/helpers/windowResizer';
 import WindowResizeHelperR from '../../../../src/renderer/helpers/WindowSizeHelper';
-import ipcs from '../updater/ipcMock.js';
+import ipcs from '../updater/ipcMock';
+
 class VueSimulator {
   constructor(ipcRenderer) {
     this.$electron = {};
@@ -61,6 +62,7 @@ describe('UpdaterNotification.vue', () => {
     renderer.setNewWindowSize({ width: 100, height: 100 });
   });
   afterEach(() => {
+    timer.restore();
     sinon.restore();
   });
   it('test correct loaded', () => {

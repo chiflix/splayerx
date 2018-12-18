@@ -1,43 +1,41 @@
 <template>
-  <div>
-  <img type="image/svg+xml"  :src="src" class="icon"
-        :class="ani_mode"
-        @animationend="animationEnd"
-        v-if="iconAppear">
+  <div
+    :data-component-name="$options.name">
+  <Icon :type="paused ? 'pause' : 'play'" class="icon" :class="ani_mode"
+          v-if="iconAppear"
+          @animationend.native="iconAppear = false">
+    </Icon>
   </div>
 </template>
 
 <script>
+import Icon from '../BaseIconContainer.vue';
+
 export default {
+  name: 'play-button',
+  props: {
+    paused: false,
+  },
   data() {
     return {
       iconAppear: false, // control whether the icon show up or not
       ani_mode: '', // change the CSS
-      src: '',
     };
   },
-  methods: {
-    animationEnd() {
-      this.iconAppear = false; // after the animation ends, icon disappears
-    },
+  components: {
+    Icon,
   },
-  mounted() {
-    this.$bus.$on('twinkle-pause-icon', () => {
-      this.src = require('../../assets/icon-pause.svg'); // set path of icon
+  watch: {
+    paused(newVal) {
       this.iconAppear = true;
-      this.ani_mode = 'icon-ani-pause';// css for pause button animation
-    });
-    this.$bus.$on('twinkle-play-icon', () => {
-      this.src = require('../../assets/icon-play.svg');
-      this.iconAppear = true;
-      this.ani_mode = 'icon-ani-play';
-    });
+      this.ani_mode = newVal ? 'icon-ani-pause' : 'icon-ani-play';
+    },
   },
 };
 </script>
 
 
-<style>
+<style lang="scss" scoped>
 .icon {
   /* display: none; */
   position: absolute;
@@ -54,7 +52,6 @@ export default {
 }
 .icon-ani-play {
   animation: ytp-bezel-fadeout2 500ms linear 1 normal forwards;
-  left: 14px;
 }
 @keyframes ytp-bezel-fadeout1 {
   0% {opacity: 1; transform: scale(0.25)};
@@ -69,26 +66,26 @@ export default {
 
 @media screen and (max-width: 512px) {
   .icon {
-    width: 49px;
-    height: 49px;
+    width: 54px;
+    height: 54px;
   }
 }
 @media screen and (min-width: 513px) and (max-width: 854px) {
   .icon {
-    width: 59px;
-    height: 59px;
+    width: 67px;
+    height: 67px;
   }
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
   .icon {
-    width: 79px;
-    height: 79px;
+    width: 93px;
+    height: 93px;
   }
 }
 @media screen and (min-width: 1921px) {
   .icon {
-    width: 109px;
-    height: 108px;
+    width: 129px;
+    height: 129px;
   }
 }
 </style>

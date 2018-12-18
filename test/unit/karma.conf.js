@@ -29,12 +29,23 @@ delete webpackConfig.output.libraryTarget
 // apply vue option to apply isparta-loader on js
 webpackConfig.module.rules
   .find(rule => rule.use.loader === 'vue-loader').use.options.loaders.js = 'babel-loader'
+webpackConfig.module.rules =
+  webpackConfig.module.rules.filter(rule => rule.use.loader !== 'eslint-loader')
+webpackConfig.module.rules.push({
+  test: /node_modules[\/\\](iconv-lite)[\/\\].+/,
+  resolve: {
+    aliasFields: ['main']
+  }
+})
 
 module.exports = config => {
   config.set({
     browsers: ['invisibleElectron'],
     client: {
-      useIframe: false
+      useIframe: false,
+      mocha: {
+        timeout: '10000'
+      }
     },
     coverageReporter: {
       dir: './coverage',

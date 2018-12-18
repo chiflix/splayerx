@@ -9,6 +9,7 @@ function get(key) {
   return new Promise((resolve, reject) => {
     storage.get(key, (err, data) => {
       if (err) {
+        this.addLog('error', err);
         reject(err);
       } else {
         resolve(data);
@@ -20,8 +21,10 @@ function set(key, json) {
   return new Promise((resolve, reject) => {
     storage.set(key, json, (err) => {
       if (err) {
+        this.addLog('error', err);
         reject(err);
       }
+      resolve();
     });
   });
 }

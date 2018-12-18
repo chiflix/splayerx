@@ -17,7 +17,8 @@
 </template>
 
 <script>
-  import GetHelper from '../../../main/update/RendererHelper.js';
+  import GetHelper from '../../../main/update/RendererHelper';
+
   export default {
     name: 'UpdaterNotification',
     components: {
@@ -168,7 +169,6 @@
             // -webkit-filter: blur(10px);
         }
             .overInner {
-                // font-family: "PingFang SC";
                 @media screen and (max-width: 511px) {
                   padding-right: 10px;
                   padding-left: 10px;
@@ -188,7 +188,6 @@
                 position: relative;
                 height: inherit;
                 z-index: 3;
-                // font-family: PingFang-SC-Medium;
                 color: #FFFFFF;
                 font-weight: lighter;
                 margin-left: 25px;
