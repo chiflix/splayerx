@@ -434,6 +434,7 @@ export default {
       this.preventSingleClick = true;
       if (this.currentSelectedWidget === 'the-video-controller') {
         this.toggleFullScreenState();
+        this.preventSingleClick = false;
       }
     },
     handleKeydown(event) {
