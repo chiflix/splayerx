@@ -26,7 +26,6 @@
 </template>;
 
 <script>
-import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper';
