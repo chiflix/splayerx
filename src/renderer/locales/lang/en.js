@@ -12,7 +12,7 @@ export default {
     playback: {
       name: 'Playback',
       fullScreen: 'Full Screen',
-      keepPlayingWindowFront: 'Keep Window On Top',
+      keepPlayingWindowFront: 'Float on Top',
       increasePlaybackSpeed: 'Increase Playback Speed     ]',
       decreasePlaybackSpeed: 'Decrease Playback Speed   [',
       captureScreen: 'Capture Screen',
