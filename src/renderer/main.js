@@ -26,7 +26,6 @@ import { videodata } from '@/store/video';
 
 function getSystemLocale() {
   const locale = osLocale.sync();
-  console.log('locale', locale);
   if (locale === 'zh-TW') {
     return 'zhTW';
   } else if (locale.startsWith('zh')) {
