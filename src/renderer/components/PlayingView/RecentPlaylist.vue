@@ -171,6 +171,9 @@ export default {
     },
   },
   watch: {
+    originSrc() {
+      this.hoverIndex = this.playingIndex;
+    },
     firstIndex() {
       if (this.lastIndex > this.maxIndex) {
         this.lastIndex = this.maxIndex;
