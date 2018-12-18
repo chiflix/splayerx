@@ -169,8 +169,8 @@ export default {
         subtitle.lang : convert3To1(subtitle.lang)) === iso6391SystemLocale);
       return fitSystemLocaleSubtitles.length ? fitSystemLocaleSubtitles[0] : subtitleList[0];
     },
-    addSubtitle(subtitle, type) {
-      const sub = new SubtitleLoader2(subtitle, type);
+    addSubtitle(subtitle, type, options) {
+      const sub = new SubtitleLoader2(subtitle, type, options);
       sub.on('ready', () => {
         this.updateSubtitle({
           id: sub.src,
