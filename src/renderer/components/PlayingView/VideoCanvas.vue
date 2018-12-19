@@ -51,7 +51,6 @@ export default {
       seekTime: [0],
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
-      checkPresentTimeID: null,
     };
   },
   methods: {
@@ -92,7 +91,6 @@ export default {
       this.$bus.$emit('video-loaded');
       this.getVideoCover();
       this.changeWindowSize();
-      this.checkPresentTimeID = requestAnimationFrame(this.checkPresentTime);
     },
     onAudioTrack(event) {
       const { type, track } = event;
@@ -218,6 +216,7 @@ export default {
           break;
         }
       }
+      this.lastCoverDetectingTime = videodata.time;
       if (this.coverFinded) {
         const smallImagePath = canvas.toDataURL('image/png');
         [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
@@ -240,22 +239,16 @@ export default {
           };
           this.infoDB().add('recent-played', data);
         }
-      }
-      this.lastCoverDetectingTime = videodata.time;
-    },
-    checkPresentTime() {
-      if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
-        this.getVideoCover();
-      }
-      // TODO: This part move to TheVideoController.vue is better.
-      if (videodata.time >= this.duration && this.nextVideo) {
-        videodata.time = 0;
-        this.playFile(this.nextVideo);
-      } else if (videodata.time >= this.duration) {
-        videodata.time = 0;
-        this.pause();
       } else {
-        requestAnimationFrame(this.checkPresentTime);
+        requestAnimationFrame(this.checkedPresentTime);
+      }
+    },
+    checkedPresentTime() {
+      if (!this.coverFinded) {
+        if (videodata.time - this.lastCoverDetectingTime > 1) {
+          this.getVideoCover();
+        }
+        requestAnimationFrame(this.checkedPresentTime);
       }
     },
   },
@@ -291,11 +284,6 @@ export default {
       this.play();
     },
   },
-  beforeDestroy() {
-    if (this.checkPresentTimeID) {
-      cancelAnimationFrame(this.checkPresentTimeID);
-    }
-  },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
@@ -311,19 +299,19 @@ export default {
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
     });
-    this.$bus.$on('seek', (e) => {
-      // to check whether trigger ‘直捣黄龙’
-      if (e === this.duration && this.nextVideo) {
+    this.$bus.$on('next-video', () => {
+      if (this.nextVideo) {
         this.playFile(this.nextVideo);
-      } else {
-        this.seekTime = [e];
-        // todo: use vuex get video element src
-        const filePath = decodeURI(this.src);
-        const indexOfLastDot = filePath.lastIndexOf('.');
-        const ext = filePath.substring(indexOfLastDot + 1);
-        if (ext === 'mkv') {
-          this.$bus.$emit('seek-subtitle', e);
-        }
+      }
+    });
+    this.$bus.$on('seek', (e) => {
+      this.seekTime = [e];
+      // todo: use vuex get video element src
+      const filePath = decodeURI(this.src);
+      const indexOfLastDot = filePath.lastIndexOf('.');
+      const ext = filePath.substring(indexOfLastDot + 1);
+      if (ext === 'mkv') {
+        this.$bus.$emit('seek-subtitle', e);
       }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);

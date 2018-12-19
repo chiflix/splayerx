@@ -110,6 +110,7 @@ export default {
       this.filePathNeedToDelete = '';
     });
     this.hoverIndex = this.playingIndex;
+    this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
     afterLeave() {
@@ -171,6 +172,10 @@ export default {
     },
   },
   watch: {
+    originSrc() {
+      this.hoverIndex = this.playingIndex;
+      this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+    },
     firstIndex() {
       if (this.lastIndex > this.maxIndex) {
         this.lastIndex = this.maxIndex;

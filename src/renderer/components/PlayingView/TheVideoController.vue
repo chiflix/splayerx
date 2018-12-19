@@ -279,7 +279,8 @@ export default {
           !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
-      tempObject['volume-indicator'] = !this.muted ? this.timerState['volume-indicator'] : tempObject['volume-indicator'];
+      tempObject['volume-indicator'] = !this.muted ? this.timerState['volume-indicator']
+        : this.showAllWidgets || (!this.showAllWidgets && this.timerState['volume-indicator']);
       this.displayState = tempObject;
     },
     UIStateManager() {

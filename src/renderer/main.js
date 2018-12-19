@@ -9,7 +9,7 @@ import VueAnalytics from 'vue-analytics';
 import VueElectron from 'vue-electron';
 import Path from 'path';
 import { mapGetters } from 'vuex';
-import { remote } from 'electron';
+import osLocale from 'os-locale';
 
 import App from '@/App.vue';
 import router from '@/router';
@@ -25,7 +25,7 @@ import { videodata } from '@/store/video';
 // require('source-map-support').install();
 
 function getSystemLocale() {
-  const locale = remote.app.getLocale();
+  const locale = osLocale.sync();
   if (locale === 'zh-TW') {
     return 'zhTW';
   } else if (locale.startsWith('zh')) {
@@ -85,6 +85,7 @@ new Vue({
   data() {
     return {
       menu: null,
+      topOnWindow: false,
     };
   },
   computed: {
@@ -540,13 +541,16 @@ new Vue({
             {
               label: this.$t('msg.playback.keepPlayingWindowFront'),
               type: 'checkbox',
+              id: 'windowFront',
               click: (menuItem, browserWindow) => {
                 if (browserWindow.isAlwaysOnTop()) {
                   browserWindow.setAlwaysOnTop(false);
                   menuItem.checked = false;
+                  this.topOnWindow = false;
                 } else {
                   browserWindow.setAlwaysOnTop(true);
                   menuItem.checked = true;
+                  this.topOnWindow = true;
                 }
               },
             },
@@ -689,6 +693,7 @@ new Vue({
         } else if (this.volume <= 0) {
           this.menu.getMenuItemById('deVolume').enabled = false;
         }
+        this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
       })
         .catch((err) => {
           this.addLog('error', err);
