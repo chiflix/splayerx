@@ -140,10 +140,10 @@ export default {
         this.lastPlayedFile = data.slice(0, 9);
       });
     this.$bus.$on('clean-lastPlayedFile', () => {
+      // just for delete thumbnail display
       this.lastPlayedFile = [];
       this.landingLogoAppear = true;
       this.showShortcutImage = false;
-      this.infoDB().cleanData();
     });
     // trigger by playFile function when opened file not existed
     this.$bus.$on('file-not-existed', (filePath) => {

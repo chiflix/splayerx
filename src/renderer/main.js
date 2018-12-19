@@ -261,6 +261,7 @@ new Vue({
             {
               label: this.$t('msg.file.clearHistory'),
               click: () => {
+                this.infoDB().cleanData();
                 this.$bus.$emit('clean-lastPlayedFile');
                 this.refreshMenu();
               },
