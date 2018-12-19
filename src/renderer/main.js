@@ -132,6 +132,9 @@ new Vue({
       if (data.chosenStyle) {
         this.$store.dispatch('updateChosenStyle', data.chosenStyle);
       }
+      if (data.chosenSize) {
+        this.$store.dispatch('updateChosenSize', data.chosenSize);
+      }
     });
     this.$store.dispatch('getLocalPreference');
     this.$bus.$on('delete-file', () => {
@@ -190,28 +193,8 @@ new Vue({
               this.menu.getMenuItemById(`sub${index}`).checked = true;
             }
           });
-          if (oldval === '') {
-            this.menu.getMenuItemById('subSize')
-              .submenu
-              .items
-              .forEach((item) => {
-                item.enabled = true;
-              });
-            this.menu.getMenuItemById('subStyle')
-              .submenu
-              .items
-              .forEach((item) => {
-                item.enabled = true;
-              });
-          }
         } else {
           this.menu.getMenuItemById('sub-1').checked = true;
-          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
-            item.enabled = false;
-          });
-          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
-            item.enabled = false;
-          });
         }
       }
     },
@@ -386,7 +369,6 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.subtitleSize'),
-              id: 'subSize',
               submenu: [
                 {
                   label: this.$t('msg.subtitle.size1'),
@@ -669,6 +651,9 @@ new Vue({
         if (this.chosenStyle !== '') {
           this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
         }
+        if (this.chosenSize !== '') {
+          this.menu.getMenuItemById(`size${this.chosenSize}`).checked = true;
+        }
         if (this.currentSubtitleId !== '') {
           this.subtitleList.forEach((item, index) => {
             if (item.id === this.currentSubtitleId) {
@@ -677,12 +662,6 @@ new Vue({
           });
         } else {
           this.menu.getMenuItemById('sub-1').checked = true;
-          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
-            item.enabled = false;
-          });
-          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
-            item.enabled = false;
-          });
         }
         this.audioTrackList.forEach((item, index) => {
           if (item.enabled === true) {

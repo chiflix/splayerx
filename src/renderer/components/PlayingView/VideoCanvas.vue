@@ -196,7 +196,7 @@ export default {
       syncStorage.setSync('recent-played', data);
     },
     saveSubtitleStyle() {
-      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle });
+      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
     async getVideoCover() {
       if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
@@ -255,8 +255,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle', 'scaleNum',
-      'nextVideo']),
+      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
