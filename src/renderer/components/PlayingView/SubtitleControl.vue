@@ -61,7 +61,7 @@
                         cursor: currentSubIden === index ? 'default' : 'pointer',
                       }">
                       <div class="text"
-                        :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
+                        :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
                           whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
                         }">{{ item.path ? getSubName(item.path) : item.name }}</div>
                       </div>
@@ -322,7 +322,6 @@ export default {
         clearTimeout(this.detailTimer);
         const hoverItem = document.querySelector(`#item${index} .text`);
         if (hoverItem.clientWidth < hoverItem.scrollWidth) {
-          this.shouldHidden = true;
           this.hoverHeight = this.textHeight *
             (Math.ceil(hoverItem.scrollWidth / hoverItem.clientWidth) - 1);
           this.detailTimer = setTimeout(() => {
