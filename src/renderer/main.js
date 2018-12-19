@@ -132,6 +132,9 @@ new Vue({
       if (data.chosenStyle) {
         this.$store.dispatch('updateChosenStyle', data.chosenStyle);
       }
+      if (data.chosenSize) {
+        this.$store.dispatch('updateChosenSize', data.chosenSize);
+      }
     });
     this.$store.dispatch('getLocalPreference');
     this.$bus.$on('delete-file', () => {
@@ -646,6 +649,9 @@ new Vue({
       }).then(() => {
         if (this.chosenStyle !== '') {
           this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
+        }
+        if (this.chosenSize !== '') {
+          this.menu.getMenuItemById(`size${this.chosenSize}`).checked = true;
         }
         if (this.currentSubtitleId !== '') {
           this.subtitleList.forEach((item, index) => {
