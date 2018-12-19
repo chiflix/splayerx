@@ -1,18 +1,16 @@
 <template>
 <div class="recent-playlist"
-  v-show="backgroundDisplayState"
+  v-show="displayState"
   @mouseup="handleMouseup">
   <transition name="background-fade">
   <div class="background-gradient"
-    v-show="displayState"
     :style="{
       height: sizeAdaption(282),
     }"/>
   </transition>
   <transition name="translate"
     @after-leave="afterLeave">
-  <div class="content"
-    v-show="displayState">
+  <div class="content">
     <transition name="fade" mode="out-in">
     <div class="info"
       :key="hoverIndex"
@@ -46,16 +44,13 @@
         :key="item"
         :index="index"
         :path="item"
-        :canHoverItem="canHoverItem"
         :isInRange="index >= firstIndex && index <= lastIndex"
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
         :isShifting="shifting"
         :hoverIndex="hoverIndex"
         :thumbnailWidth="thumbnailWidth"
-        @mouseupItem="itemMouseup"
-        @mouseoutItem="itemMouseout"
-        @mouseoverItem="itemMouseover"/>
+        :eventTarget="eventTarget" />
       <div class="next-page"
         v-if="thumbnailNumber < numberOfPlaylistItem"
         @mouseup.stop=""
@@ -80,7 +75,6 @@ export default {
     RecentPlaylistItem,
   },
   props: {
-    mousemove: {},
     displayState: Boolean,
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
@@ -94,11 +88,11 @@ export default {
       shifting: false,
       snapShoted: false,
       hoveredMediaInfo: {}, // the hovered video's media info
-      backgroundDisplayState: this.displayState,
       mousePosition: [],
       canHoverItem: false,
       tranFlag: false,
       filePathNeedToDelete: '',
+      eventTarget: {},
     };
   },
   created() {
@@ -110,10 +104,13 @@ export default {
       this.filePathNeedToDelete = '';
     });
     this.hoverIndex = this.playingIndex;
+    this.eventTarget.onItemMouseover = this.onItemMouseover;
+    this.eventTarget.onItemMouseout = this.onItemMouseout;
+    this.eventTarget.onItemMouseup = this.onItemMouseup;
   },
   methods: {
     afterLeave() {
-      this.backgroundDisplayState = false;
+      this.displayState = false;
     },
     sizeAdaption(size) {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
@@ -125,15 +122,15 @@ export default {
         this.$emit('update:isDragging', false);
       }
     },
-    itemMouseover(payload) {
-      this.hoverIndex = payload.index;
-      this.hoveredMediaInfo = payload.mediaInfo;
+    onItemMouseover(index, media) {
+      this.hoverIndex = index;
+      this.hoveredMediaInfo = media;
       this.filename = path.basename(
-        payload.mediaInfo.path,
-        path.extname(payload.mediaInfo.path),
+        media.path,
+        path.extname(media.path),
       );
     },
-    itemMouseout() {
+    onItemMouseout() {
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
@@ -146,7 +143,7 @@ export default {
         }
       }
     },
-    itemMouseup(index) {
+    onItemMouseup(index) {
       // last page
       if (index === this.firstIndex - 1) {
         this.lastIndex = index;
@@ -200,22 +197,10 @@ export default {
     },
     displayState(val) {
       this.$bus.$emit('subtitle-to-top', val);
-      this.canHoverItem = false;
-      this.mousePosition = this.mousemove.position;
       if (val) {
         this.$store.dispatch('UpdatePlayingList');
-        this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;
-      }
-    },
-    mousemove(val) {
-      const distance = this.winWidth > 1355 ? 20 : 10;
-      if (!this.canHoverItem && this.displayState) {
-        if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
-        Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
-          this.canHoverItem = true;
-        }
       }
     },
   },

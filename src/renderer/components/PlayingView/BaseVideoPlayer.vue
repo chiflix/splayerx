@@ -89,10 +89,6 @@ export default {
       type: Boolean,
       default: false,
     },
-    updateCurrentTime: {
-      type: Boolean,
-      default: false,
-    },
     // video events
     events: {
       type: Array,
@@ -164,14 +160,9 @@ export default {
     },
     // custom
     paused(newVal) {
+      // update the play state
+      videodata.paused = newVal;
       this.$refs.video[newVal ? 'pause' : 'play']();
-    },
-    updateCurrentTime(newVal) {
-      if (newVal) {
-        this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
-      } else {
-        cancelAnimationFrame(this.currentTimeAnimationFrameId);
-      }
     },
     // events
     events(newVal, oldVal) {
@@ -185,9 +176,7 @@ export default {
   },
   mounted() {
     this.basicInfoInitialization(this.$refs.video);
-    if (this.updateCurrentTime) {
-      this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
-    }
+    this.$refs.video.ontimeupdate = this.currentTimeUpdate;
     this.addEvents(this.events);
     this.setStyle(this.styles);
   },
@@ -211,9 +200,7 @@ export default {
       return this.$refs.video;
     },
     currentTimeUpdate() {
-      const { currentTime } = this.$refs.video;
-      videodata.time = currentTime;
-      this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
+      videodata.time = this.$refs.video.currentTime;
     },
     // helper functions
     emitEvents(event, value) {
@@ -270,10 +257,6 @@ export default {
     },
   },
   beforeDestroy() {
-    if (this.updateCurrentTime) {
-      cancelAnimationFrame(this.currentTimeAnimationFrameId);
-      this.$emit('update:updateCurrentTime', false);
-    }
     this.removeEvents(this.events);
   },
 };

@@ -14,7 +14,6 @@
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
-    :mousemove="eventInfo.get('mousemove')"
     :isDragging.sync="isDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
@@ -181,10 +180,12 @@ export default {
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
 
-    requestAnimationFrame(this.UIManager);
     this.$bus.$on('currentWidget', (widget) => {
       this.listenedWidget = widget;
     });
+
+    // requestAnimationFrame临时用于处理clock和event事件
+    requestAnimationFrame(this.clockTrigger);
   },
   methods: {
     ...mapActions({
@@ -203,38 +204,53 @@ export default {
       this.widgetsStatus['playlist-control'].showAttached = event;
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [320, 180]);
     },
-    // UIManagers
-    UIManager(timestamp) {
+
+    clockTrigger(timestamp) {
       if (!this.start) {
         this.start = timestamp;
       }
 
-      // TODO: There is a probability that the properties are undefined and causing test failure.
-      // It's not a best practice to use refs frequently.
-      // There should be a better way to handle timeline.
-      try {
-        this.$refs.progressbar.updateProgressBar(videodata.time);
-        this.$refs.theTimeCodes.updateTimeContent(videodata.time);
-        this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
-        if (this.displayState['recent-playlist']) {
-          this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
-        }
-      } catch (ex) {
-        // do nothing
-      }
-
-      // Use Map constructor to shallow-copy eventInfo
-      const lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
+      // 不能依赖播放中的时间更新，所以临时放入requestAnimationFrame, 放在下一阶段处理
+      // 这部分处理应该只是状态更新计算 不涉及UI动画的处理
       this.clock().tick(timestamp - this.start);
       this.UITimerManager(timestamp - this.start);
-      // this.UILayerManager();
-      this.UIDisplayManager();
+      requestAnimationFrame(this.clockTrigger);
+
+      this.start = timestamp;
+    },
+
+    onTickUpdate() {
+      // Use Map constructor to shallow-copy eventInfo
+      const lastEventInfo = new Map(this.inputProcess(this.eventInfo, this.lastEventInfo));
       this.UIStateManager();
       this.lastEventInfo = lastEventInfo;
 
-      this.start = timestamp;
-      requestAnimationFrame(this.UIManager);
+      /*
+      /* Rendering
+      /*
+      /* UI绘制/动画更新部分应该使用requestAnimationFrame
+      /* 当前 UIManager() 的内部实现还需要继续整理和细分 特别像 clock、事件处理、UI状态更新
+      /* 如果涉及到播放中的状态更新 可以依赖该UIManager，因为它本身是由video的ontimeupdate触发
+      /*                                                                                  */
+      requestAnimationFrame(() => {
+      // TODO: There is a probability that the properties are undefined and causing test failure.
+      // It's not a best practice to use refs frequently.
+      // There should be a better way to handle timeline.
+        try {
+          this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
+          if (this.displayState['recent-playlist']) {
+            this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
+          } else {
+            this.$refs.progressbar.updateProgressBar(videodata.time);
+            this.$refs.theTimeCodes.updateTimeContent(videodata.time);
+          }
+          this.UIDisplayManager();
+        } catch (exception) {
+          // do nothing
+        }
+      });
     },
+
     inputProcess(currentEventInfo, lastEventInfo) { // eslint-disable-line
       // hideVolume timer
       const volumeKeydown = this.orify(currentEventInfo.get('keydown').ArrowUp, currentEventInfo.get('keydown').ArrowDown, currentEventInfo.get('keydown').KeyM); // eslint-disable-line

@@ -15,10 +15,8 @@
       :volume="volume"
       :muted="muted"
       :paused="paused"
-      :updateCurrentTime="true"
       :currentTime="seekTime"
-      :currentAudioTrackId="currentAudioTrackId.toString()"
-      @update:currentTime="updateCurrentTime" />
+      :currentAudioTrackId="currentAudioTrackId.toString()" />
     </transition>
     <!--<BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>-->
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
@@ -29,8 +27,7 @@
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper';
-import { mapGetters, mapActions, mapMutations } from 'vuex';
-import { Video as videoMutations } from '@/store/mutationTypes';
+import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
@@ -51,7 +48,6 @@ export default {
       seekTime: [0],
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
-      checkPresentTimeID: null,
     };
   },
   methods: {
@@ -65,9 +61,6 @@ export default {
       removeAudioTrack: videoActions.REMOVE_AUDIO_TRACK,
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
-    }),
-    ...mapMutations({
-      updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
     }),
     onMetaLoaded(event) {
       this.videoElement = event.target;
@@ -92,7 +85,6 @@ export default {
       this.$bus.$emit('video-loaded');
       this.getVideoCover();
       this.changeWindowSize();
-      this.checkPresentTimeID = requestAnimationFrame(this.checkPresentTime);
     },
     onAudioTrack(event) {
       const { type, track } = event;
@@ -254,8 +246,6 @@ export default {
       } else if (videodata.time >= this.duration) {
         videodata.time = 0;
         this.pause();
-      } else {
-        requestAnimationFrame(this.checkPresentTime);
       }
     },
   },
@@ -290,11 +280,6 @@ export default {
       });
       this.play();
     },
-  },
-  beforeDestroy() {
-    if (this.checkPresentTimeID) {
-      cancelAnimationFrame(this.checkPresentTimeID);
-    }
   },
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
