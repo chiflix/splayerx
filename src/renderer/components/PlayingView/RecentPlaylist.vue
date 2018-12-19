@@ -204,7 +204,7 @@ export default {
       }
     },
     displayState(val, oldval) {
-      if (oldval) {
+      if (oldval !== undefined) {
         this.$bus.$emit('subtitle-to-top', val);
       }
       this.canHoverItem = false;
