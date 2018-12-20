@@ -132,9 +132,7 @@ export default {
     // with requestAnimationFrame, when receiving the mouse leave event stop the renderer.
     renderProgressBar() {
       const playedPercent = 100 * (videodata.time / this.duration);
-      const {
-        hoveredProgress, defaultProgress, fakeProgress,
-      } = this.$refs;
+      const { hoveredProgress, defaultProgress } = this.$refs;
 
       // We call updatePlayProgressBar here because of
       // the hover-bar and played-bar use flexbox layout
@@ -147,7 +145,6 @@ export default {
       hoveredProgress.style.order = this.hoveredPercent <= playedPercent ? '0' : '1';
       defaultProgress.style.backgroundColor = this.hovering ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0)';
 
-      fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(videodata.time);
       if (!this.mouseleave) {
         requestAnimationFrame(this.renderProgressBar);
       }

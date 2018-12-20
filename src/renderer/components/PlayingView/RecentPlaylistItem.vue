@@ -6,17 +6,12 @@
     minWidth: `${thumbnailWidth}px`,
     minHeight: `${thumbnailHeight}px`,
   }">
-      <div class="child-item">
-        <div class="img"
+      <div class="child-item" style="will-change: transform;">
+        <div class="img" ref="blur"
           v-if="!isPlaying && imageLoaded"
           :style="{
             backgroundImage: backgroundImage,
           }"/>
-        <div class="blur"
-        ref="blur"
-        :style="{
-          display: '',
-        }"/>
         <transition name="fade2">
         <div class="white-hover"
           ref="whiteHover"
@@ -159,9 +154,7 @@ export default {
     },
     updateAnimationIn() {
       if (!this.isPlaying) {
-        // use transform instead of display property,
-        // the -1000px just make the blur block to disappear
-        this.$refs.blur.style.setProperty('transform', 'translateX(-1000px)');
+        this.$refs.blur.classList.remove('blur');
       }
       this.$refs.whiteHover.style.setProperty('opacity', '1');
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
@@ -174,7 +167,7 @@ export default {
     },
     updateAnimationOut() {
       if (!this.isPlaying) {
-        this.$refs.blur.style.setProperty('transform', 'translateX(0px)');
+        this.$refs.blur.classList.add('blur');
       }
       this.$refs.whiteHover.style.setProperty('opacity', '0');
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
@@ -289,11 +282,7 @@ $border-radius: 3px;
       background-color: rgba(255, 255, 255, 0.2);
     }
     .blur {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backdrop-filter: blur(1px);
-      border-radius: $border-radius;
+      filter: blur(1.5px);
       clip-path: inset(0 round $border-radius);
     }
     .img {
