@@ -103,6 +103,14 @@ export default {
       type: Object,
       default: () => ({}),
     },
+    // VideoCanvas and ThumbnailVideoPlayer both use the the BaseVideoPlayer.
+    // The VideoCanvas provides the main video as a player, it needs to
+    // care the ontimeupdate callback to render the time-bar, so need
+    // the needtimeupdate tag.
+    needtimeupdate: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     ...mapGetters(['audioTrackList']),
@@ -176,9 +184,11 @@ export default {
   },
   mounted() {
     this.basicInfoInitialization(this.$refs.video);
-    this.$refs.video.ontimeupdate = this.currentTimeUpdate;
     this.addEvents(this.events);
     this.setStyle(this.styles);
+    if (this.needtimeupdate) {
+      this.$refs.video.ontimeupdate = this.currentTimeUpdate;
+    }
   },
   methods: {
     basicInfoInitialization(videoElement) {
@@ -259,6 +269,7 @@ export default {
     },
   },
   beforeDestroy() {
+    this.$refs.video.ontimeupdate = null;
     this.removeEvents(this.events);
   },
 };

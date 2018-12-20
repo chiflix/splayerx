@@ -6,6 +6,7 @@
     <base-video-player
       ref="videoCanvas"
       :key="originSrc"
+      :needtimeupdate=true
       :events="['loadedmetadata', 'audiotrack']"
       :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
