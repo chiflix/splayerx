@@ -159,7 +159,9 @@ export default {
     },
     updateAnimationIn() {
       if (!this.isPlaying) {
-        this.$refs.blur.style.setProperty('display', 'none');
+        // use transform instead of display property,
+        // the -1000px just make the blur block to disappear
+        this.$refs.blur.style.setProperty('transform', 'translateX(-1000px)');
       }
       this.$refs.whiteHover.style.setProperty('opacity', '1');
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
@@ -172,7 +174,7 @@ export default {
     },
     updateAnimationOut() {
       if (!this.isPlaying) {
-        this.$refs.blur.style.setProperty('display', '');
+        this.$refs.blur.style.setProperty('transform', 'translateX(0px)');
       }
       this.$refs.whiteHover.style.setProperty('opacity', '0');
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
