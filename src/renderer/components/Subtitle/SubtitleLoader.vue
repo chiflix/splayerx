@@ -31,9 +31,9 @@ import SubtitleInstance from './SubtitleLoader/index';
 
 export default {
   name: 'subtitle-loader',
-  props: [{
+  props: {
     subtitleInstance: SubtitleInstance,
-  }],
+  },
   components: {
     CueRenderer,
   },
@@ -53,7 +53,7 @@ export default {
   computed: {
     ...mapGetters(['duration', 'scaleNum', 'intrinsicHeight', 'intrinsicWidth']),
     type() {
-      return this.subtitle.metaInfo.type;
+      return this.subtitleInstance.metaInfo.type;
     },
     currentTags() {
       return this.currentCues.map(cue => cue.tags);
@@ -71,7 +71,7 @@ export default {
         .filter(segment => segment[2])
         .map(segment => segment[1] - segment[0])
         .reduce((prev, curr) => prev + curr, 0);
-      this.updateDuration([this.subtitleInstance.src, duration]);
+      this.updateDuration({ id: this.subtitleInstance.src, duration });
     },
     currentTexts(val) {
       val.forEach((de, index) => {
@@ -121,7 +121,7 @@ export default {
   },
   methods: {
     ...mapMutations({
-      updateDuration: subtitleMutations.SUBTITLE_DURATION_UPDATE,
+      updateDuration: subtitleMutations.DURATIONS_UPDATE,
     }),
     avaliableClass(index) {
       if (!this.isVtt && !this.currentTags[index].pos) {
@@ -150,10 +150,10 @@ export default {
       requestAnimationFrame(this.currentTimeUpdate);
     },
     setCurrentCues(currentTime) {
-      if (!this.subtitle) return;
-      const { parsedData } = this.subtitle;
-      if (parsedData) {
-        const cues = parsedData
+      if (!this.subtitleInstance) return;
+      const { parsed } = this.subtitleInstance;
+      if (parsed) {
+        const cues = parsed
           .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');
         if (!isEqual(cues, this.currentCues)) {
           let rev = false;

@@ -30,7 +30,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
-      'duration', 'paused', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
+      'duration', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
     ]),
     currentSubtitle() {
       return this.subtitleInstances[this.currentSubtitleId];
