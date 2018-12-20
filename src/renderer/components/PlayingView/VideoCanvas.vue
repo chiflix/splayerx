@@ -239,14 +239,6 @@ export default {
       if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
         this.getVideoCover();
       }
-      // TODO: This part move to TheVideoController.vue is better.
-      if (videodata.time >= this.duration && this.nextVideo) {
-        videodata.time = 0;
-        this.playFile(this.nextVideo);
-      } else if (videodata.time >= this.duration) {
-        videodata.time = 0;
-        this.pause();
-      }
     },
   },
   computed: {
@@ -296,19 +288,19 @@ export default {
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
     });
-    this.$bus.$on('seek', (e) => {
-      // to check whether trigger ‘直捣黄龙’
-      if (e === this.duration && this.nextVideo) {
+    this.$bus.$on('next-video', () => {
+      if (this.nextVideo) {
         this.playFile(this.nextVideo);
-      } else {
-        this.seekTime = [e];
-        // todo: use vuex get video element src
-        const filePath = decodeURI(this.src);
-        const indexOfLastDot = filePath.lastIndexOf('.');
-        const ext = filePath.substring(indexOfLastDot + 1);
-        if (ext === 'mkv') {
-          this.$bus.$emit('seek-subtitle', e);
-        }
+      }
+    });
+    this.$bus.$on('seek', (e) => {
+      this.seekTime = [e];
+      // todo: use vuex get video element src
+      const filePath = decodeURI(this.src);
+      const indexOfLastDot = filePath.lastIndexOf('.');
+      const ext = filePath.substring(indexOfLastDot + 1);
+      if (ext === 'mkv') {
+        this.$bus.$emit('seek-subtitle', e);
       }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);
