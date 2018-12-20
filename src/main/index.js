@@ -109,12 +109,9 @@ function registerMainWindowEvent() {
 
   function snapShotQueueProcess(event) {
     const callback = (resultCode, imgPath) => {
-      if (resultCode !== '0') { // TODO: retry
-        snapShotQueue.shift();
-        if (snapShotQueue.length) {
-          snapShot(snapShotQueue[0], callback);
-        }
-      } else {
+      if (resultCode === 'Waiting for task completion.') {
+        snapShot(snapShotQueue[0], callback);
+      } else if (resultCode === '0') {
         const lastRecord = snapShotQueue.shift();
         if (event.sender.isDestroyed()) {
           snapShotQueue.splice(0, snapShotQueue.length);
@@ -123,6 +120,11 @@ function registerMainWindowEvent() {
           if (snapShotQueue.length > 0) {
             snapShot(snapShotQueue[0], callback);
           }
+        }
+      } else {
+        snapShotQueue.shift();
+        if (snapShotQueue.length) {
+          snapShot(snapShotQueue[0], callback);
         }
       }
     };
