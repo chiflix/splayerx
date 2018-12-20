@@ -120,10 +120,11 @@ export default {
     // it is a difference with the hover-bar effect.
     updatePlayProgressBar(time) {
       const playedPercent = 100 * (time / this.duration);
-      const { playedProgress } = this.$refs;
+      const { playedProgress, fakeProgress } = this.$refs;
       playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
       playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
       playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
+      fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(videodata.time);
     },
     // We need high fps to render hovering of the progress-bar for
     // smooth animation, We use requestAnimationFrame to make it.
@@ -153,7 +154,7 @@ export default {
     },
     rightFakeProgressBackgroundColor(time) {
       const hoveredEnd = this.hoveredPercent >= 100;
-      const playedEnd = Math.round(time) >= Math.round(this.duration);
+      const playedEnd = time >= this.duration;
       let opacity = 0;
       if (this.mouseleave) {
         if (playedEnd) {
