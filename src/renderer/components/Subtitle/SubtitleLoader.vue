@@ -21,19 +21,19 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapMutations } from 'vuex';
 import isEqual from 'lodash/isEqual';
 import toArray from 'lodash/toArray';
+import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
-import Subtitle from './Subtitle';
 import CueRenderer from './CueRenderer.vue';
+import SubtitleInstance from './SubtitleLoader/index';
 
 export default {
   name: 'subtitle-loader',
-  props: {
-    subtitleSrc: String,
-    id: String,
-  },
+  props: [{
+    subtitleInstance: SubtitleInstance,
+  }],
   components: {
     CueRenderer,
   },
@@ -51,7 +51,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'scaleNum', 'SubtitleDelay', 'intrinsicHeight', 'intrinsicWidth']),
+    ...mapGetters(['duration', 'scaleNum', 'intrinsicHeight', 'intrinsicWidth']),
     type() {
       return this.subtitle.metaInfo.type;
     },
@@ -71,7 +71,7 @@ export default {
         .filter(segment => segment[2])
         .map(segment => segment[1] - segment[0])
         .reduce((prev, curr) => prev + curr, 0);
-      this.updateDuration([this.id, duration]);
+      this.updateDuration([this.subtitleInstance.src, duration]);
     },
     currentTexts(val) {
       val.forEach((de, index) => {
@@ -83,13 +83,13 @@ export default {
     },
   },
   created() {
-    const { subtitleSrc } = this;
-    this.subtitle = new Subtitle(subtitleSrc);
-    this.subtitle.load();
-    this.subtitle.once('parse', (parsed) => {
+    const { subtitleInstance } = this;
+    subtitleInstance.on('ready', subtitleInstance.load);
+    subtitleInstance.on('data', subtitleInstance.parse);
+    subtitleInstance.on('parse', (parsed) => {
       this.parsedData = parsed;
       this.videoSegments = this.getVideoSegments(parsed, this.duration);
-      this.$bus.$emit('finish-loading', this.subtitle.metaInfo.type);
+      this.$bus.$emit('finish-loading', subtitleInstance.type);
       if (parsed) {
         const cues = parsed
           .filter(subtitle => subtitle.start <= this.subtitleCurrentTime && subtitle.end >= this.subtitleCurrentTime && subtitle.text !== '');
@@ -98,6 +98,7 @@ export default {
         }
       }
     });
+    subtitleInstance.meta();
     this.$bus.$on('subtitle-to-top', (val) => {
       this.subToTop = val;
       if (!val) {
@@ -119,8 +120,8 @@ export default {
     });
   },
   methods: {
-    ...mapActions({
-      updateDuration: 'SUBTITLE_DURATION_UPDATE',
+    ...mapMutations({
+      updateDuration: subtitleMutations.SUBTITLE_DURATION_UPDATE,
     }),
     avaliableClass(index) {
       if (!this.isVtt && !this.currentTags[index].pos) {
