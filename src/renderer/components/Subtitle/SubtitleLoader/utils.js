@@ -1,6 +1,7 @@
 import { extname, basename } from 'path';
 import { open, readSync, readFile, closeSync, statSync } from 'fs';
 import chardet from 'chardet';
+import convert3To1 from 'iso-639-3-to-1';
 import iconv from 'iconv-lite';
 import franc from 'franc';
 import helpers from '@/helpers';
@@ -63,7 +64,7 @@ function getSubtitleCallback(subtitleFormat) {
 export async function localLanguageLoader(path, format) {
   const buffer = await getFragmentBuffer(path);
   const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
-  return franc(stringCallback(bufferToString(buffer)));
+  return convert3To1(franc(stringCallback(bufferToString(buffer))));
 }
 
 export function localNameLoader(path) {
