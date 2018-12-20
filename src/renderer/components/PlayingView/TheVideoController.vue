@@ -241,7 +241,6 @@ export default {
           if (this.displayState['recent-playlist']) {
             this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
           } else {
-            this.$refs.progressbar.updateProgressBar(videodata.time);
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
           }
           this.UIDisplayManager();

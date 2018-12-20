@@ -1,6 +1,7 @@
 <template>
   <div class="the-progress-bar"
     @mousemove="handleMousemove"
+    @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
     @mousedown="handleMousedown">
     <the-preview-thumbnail class="the-preview-thumbnail" v-show="showThumbnail"
@@ -111,26 +112,33 @@ export default {
     },
   },
   methods: {
-    updateProgressBar(time) {
-      const playedPercent = 100 * (time / this.duration);
-
+    hoveredmouseenter() {
+      this.mouseleave = false;
+      requestAnimationFrame(this.renderProgressBar);
+    },
+    // We need high fps to render hovering of the progress-bar for
+    // smooth animation, We use requestAnimationFrame to make it.
+    // Listening for mouse enter event and starting the renderProgressBar
+    // with requestAnimationFrame, when receiving the mouse leave event stop the renderer.
+    renderProgressBar() {
+      const playedPercent = 100 * (videodata.time / this.duration);
       const {
         hoveredProgress, playedProgress, defaultProgress, fakeProgress,
       } = this.$refs;
-
       hoveredProgress.style.width = this.hoveredPercent <= playedPercent ? `${this.hoveredPercent}%` : `${this.hoveredPercent - playedPercent}%`;
       hoveredProgress.style.backgroundColor = this.hoveredPercent <= playedPercent ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
       hoveredProgress.style.order = this.hoveredPercent <= playedPercent ? '0' : '1';
-
       playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
       playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
       playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
 
       defaultProgress.style.backgroundColor = this.hovering ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0)';
 
-      fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(time);
+      fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(videodata.time);
+      if (!this.mouseleave) {
+        requestAnimationFrame(this.renderProgressBar);
+      }
     },
-
     rightFakeProgressBackgroundColor(time) {
       const hoveredEnd = this.hoveredPercent >= 100;
       const playedEnd = Math.round(time) >= Math.round(this.duration);
@@ -174,7 +182,7 @@ export default {
         this.$bus.$emit('currentWidget', 'the-video-controller');
         this.setHoveringToFalse(false);
       }
-      if (this.hoveredCurrentTime !== this.duration) {
+      if (this.hoveredCurrentTime < this.duration) {
         this.$bus.$emit('seek', this.hoveredCurrentTime);
       }
       if (this.hoveredCurrentTime === 0) {
