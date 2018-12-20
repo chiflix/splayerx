@@ -1,6 +1,6 @@
 <template>
   <div class="thumbnail-wrapper"
-    :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', left: positionOfThumbnail + 'px'}">
+    :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', transform: `translateX(${positionOfThumbnail}px)`}">
     <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
       <thumbnail-video-player
         v-if="mountVideo"

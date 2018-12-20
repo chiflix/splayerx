@@ -116,6 +116,15 @@ export default {
       this.mouseleave = false;
       requestAnimationFrame(this.renderProgressBar);
     },
+    // To render the playedProgress when video is playing,
+    // it is a difference with the hover-bar effect.
+    updatePlayProgressBar(time) {
+      const playedPercent = 100 * (time / this.duration);
+      const { playedProgress } = this.$refs;
+      playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
+      playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
+      playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
+    },
     // We need high fps to render hovering of the progress-bar for
     // smooth animation, We use requestAnimationFrame to make it.
     // Listening for mouse enter event and starting the renderProgressBar
@@ -123,15 +132,18 @@ export default {
     renderProgressBar() {
       const playedPercent = 100 * (videodata.time / this.duration);
       const {
-        hoveredProgress, playedProgress, defaultProgress, fakeProgress,
+        hoveredProgress, defaultProgress, fakeProgress,
       } = this.$refs;
+
+      // We call updatePlayProgressBar here because of
+      // the hover-bar and played-bar use flexbox layout
+      // and related with the `order` property. if not do
+      // this, the layout will be broken.
+      this.updatePlayProgressBar(videodata.time);
+
       hoveredProgress.style.width = this.hoveredPercent <= playedPercent ? `${this.hoveredPercent}%` : `${this.hoveredPercent - playedPercent}%`;
       hoveredProgress.style.backgroundColor = this.hoveredPercent <= playedPercent ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
       hoveredProgress.style.order = this.hoveredPercent <= playedPercent ? '0' : '1';
-      playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
-      playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
-      playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
-
       defaultProgress.style.backgroundColor = this.hovering ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0)';
 
       fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(videodata.time);
@@ -182,7 +194,7 @@ export default {
         this.$bus.$emit('currentWidget', 'the-video-controller');
         this.setHoveringToFalse(false);
       }
-      if (this.hoveredCurrentTime < this.duration) {
+      if (this.hoveredCurrentTime !== this.duration) {
         this.$bus.$emit('seek', this.hoveredCurrentTime);
       }
       if (this.hoveredCurrentTime === 0) {

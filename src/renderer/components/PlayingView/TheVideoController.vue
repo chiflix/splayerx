@@ -14,7 +14,7 @@
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
-    :mousemove="eventInfo.get('mousemove')"	
+    :mousemove="eventInfo.get('mousemove')"
     :isDragging.sync="isDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
@@ -243,6 +243,7 @@ export default {
             this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
           } else {
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
+            this.$refs.progressbar.updatePlayProgressBar(videodata.time);
           }
           this.UIDisplayManager();
         } catch (exception) {
