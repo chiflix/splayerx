@@ -1,7 +1,5 @@
 <template>
-  <div
-    :data-component-name="$options.name"
-    class="sub-control">
+  <div data-component-name="$options.name" class="sub-control">
     <div class="sub-btn-control">
       <transition name="sub-trans-l">
         <div class="sub-menu-wrapper subtitle-scroll-items"
@@ -12,86 +10,87 @@
             height: hiddenText ? `${contHeight + hoverHeight}px` : `${contHeight}px`,
             fontWeight: '900',
           }">
-          <div class="element bottom"><div class="element content">
+          <div class="element bottom">
+            <div class="element content">
 
-            <div class="topContainer">
-              <div class="title">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
-              <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
-                :style="{
-                  cursor: 'pointer',
-                  transform: `rotate(${rotateTime * 360}deg)`,
-                  transition: 'transform 1s linear',
-                  transformOrigin: 'center',
-                }"/>
-            </div>
+              <div class="topContainer">
+                <div class="title">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
+                <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
+                  :style="{
+                    cursor: 'pointer',
+                    transform: `rotate(${rotateTime * 360}deg)`,
+                    transition: 'transform 1s linear',
+                    transformOrigin: 'center',
+                  }"/>
+              </div>
 
-            <div class="sub-menu">
-              <div class="scrollScope"
-                :style="{
-                  transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                  height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
-                  overflowY: isOverFlow,
-                 }">
-                <div class="itemContainer">
-                  <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)">
-                    <div class="menu-item-text-wrapper"
-                      @mouseup="toggleSubtitleOff"
-                      @mouseover="toggleItemsMouseOver(-1)"
-                      @mouseleave="toggleItemsMouseLeave(-1)"
-                      :style="{
-                        color: hoverIndex === -1 || currentSubIden === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                        height: `${itemHeight}px`,
-                        cursor: currentSubIden === -1 ? 'default' : 'pointer',
-                      }">
-                      <div class="text">{{ this.$t('msg.subtitle.noSubtitle') }}</div>
-                    </div>
-                  </div>
-
-                  <div v-if="foundSubtitles"
-                    v-for="(item, index) in computedAvaliableItems">
-                    <div class="menu-item-text-wrapper"
-                      @mouseup="toggleItemClick(index)"
-                      @mouseover="toggleItemsMouseOver(index)"
-                      @mouseleave="toggleItemsMouseLeave(index)"
-                      :id="'item'+index"
-                      :style="{
-                        transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                        color: hoverIndex === index || currentSubIden === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                        height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                        cursor: currentSubIden === index ? 'default' : 'pointer',
-                      }">
-                      <div class="text"
-                        :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
-                          whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                        }">{{ item.path ? getSubName(item.path) : item.name }}</div>
+              <div class="sub-menu">
+                <div class="scrollScope"
+                  :style="{
+                    transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                    height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
+                    overflowY: isOverFlow,
+                  }">
+                  <div class="itemContainer">
+                    <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)">
+                      <div class="menu-item-text-wrapper"
+                        @mouseup="toggleSubtitleOff"
+                        @mouseover="toggleItemsMouseOver(-1)"
+                        @mouseleave="toggleItemsMouseLeave(-1)"
+                        :style="{
+                          color: hoverIndex === -1 || currentSubIden === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          height: `${itemHeight}px`,
+                          cursor: currentSubIden === -1 ? 'default' : 'pointer',
+                        }">
+                        <div class="text">{{ this.$t('msg.subtitle.noSubtitle') }}</div>
                       </div>
-                  </div>
-
-                  <div v-if="loadingPlaceholderList.length > 0"
-                    v-for="item in loadingPlaceholderList"
-                    class="placeholders-wrapper">
-                    <div class="placeholder-item-text-wrapper">
-                      <div class="text">{{ item }}</div>
                     </div>
-                  </div>
 
-                  <div class="card" v-if="0 <= computedAvaliableItems.length"
-                    :style="{
-                      height: hiddenText && currentSubIden === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                      top: hiddenText && currentSubIden <= hoverIndex ? `${-hoverHeight}px` : '',
-                      marginTop: `${-cardPos}px`,
-                      transition: 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
-                    }">
+                    <div v-if="foundSubtitles"
+                      v-for="(item, index) in computedAvaliableItems">
+                      <div class="menu-item-text-wrapper"
+                        @mouseup="toggleItemClick(index)"
+                        @mouseover="toggleItemsMouseOver(index)"
+                        @mouseleave="toggleItemsMouseLeave(index)"
+                        :id="'item'+index"
+                        :style="{
+                          transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                          color: hoverIndex === index || currentSubIden === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                          cursor: currentSubIden === index ? 'default' : 'pointer',
+                        }">
+                        <div class="text"
+                          :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
+                            whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                          }">{{ item.path ? getSubName(item.path) : item.name }}</div>
+                      </div>
+                    </div>
+
+                    <div v-if="loadingPlaceholderList.length > 0"
+                      v-for="item in loadingPlaceholderList"
+                      class="placeholders-wrapper">
+                      <div class="placeholder-item-text-wrapper">
+                        <div class="text">{{ item }}</div>
+                      </div>
+                    </div>
+
+                    <div class="card" v-if="0 <= computedAvaliableItems.length"
+                      :style="{
+                        height: hiddenText && currentSubIden === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                        top: hiddenText && currentSubIden <= hoverIndex ? `${-hoverHeight}px` : '',
+                        marginTop: `${-cardPos}px`,
+                        transition: 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+                      }"/>
                   </div>
                 </div>
               </div>
             </div>
-          </div></div>
+          </div>
         </div>
       </transition>
-      <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
-        <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
-      </div>
+    </div>
+    <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
+      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
     </div>
   </div>
 </template>
