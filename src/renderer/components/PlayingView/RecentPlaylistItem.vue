@@ -12,17 +12,24 @@
           :style="{
             backgroundImage: backgroundImage,
           }"/>
+        <div class="blur"
+          ref="blur"
+          :style="{
+            opacity: '1',
+          }"/>
+        <transition name="fade2">
+        <div class="white-hover"
+          ref="whiteHover"
+          :style="{
+            opacity: '0',
+            minWidth: `${thumbnailWidth}px`,
+            minHeight: `${thumbnailHeight}px`,
+          }"/>
+        </transition>
         <div class="black-gradient"
           @mouseenter="mouseoverVideo"
           @mouseleave="mouseoutVideo"
           @mouseup="mouseupVideo">
-          <transition name="fade2">
-            <div class="white-hover" ref="whiteHover" :style="{
-              opacity: '0',
-              minWidth: `${thumbnailWidth}px`,
-              minHeight: `${thumbnailWidth / (112 / 63)}px`,
-            }"><div class="blur"/></div>
-          </transition>
           <div class="content" ref="content"
             :style="{
               height: '100%',
@@ -151,22 +158,28 @@ export default {
       this.eventTarget.onItemMouseup(this.index);
     },
     updateAnimationIn() {
+      if (!this.isPlaying) {
+        this.$refs.blur.style.setProperty('opacity', '1');
+      }
       this.$refs.whiteHover.style.setProperty('opacity', '1');
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
       this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 9}px`);
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
-      this.$refs.border.style.setProperty('color', 'rgba(255,255,255,0.6)');
+      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
       if (!this.isPlaying && this.sliderPercentage > 0) {
         this.$refs.progress.style.setProperty('opacity', '1');
       }
     },
     updateAnimationOut() {
-      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
-      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.40)');
-      this.$refs.border.style.setProperty('color', 'rgba(255,255,255,0.15)');
-      this.$refs.progress.style.setProperty('opacity', '0');
+      if (!this.isPlaying) {
+        this.$refs.blur.style.setProperty('opacity', '0');
+      }
       this.$refs.whiteHover.style.setProperty('opacity', '0');
+      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
       this.$refs.content.style.setProperty('height', '100%');
+      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.40)');
+      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.15)');
+      this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
       if (!this.isPlaying && this.isInRange && !this.isShifting) {
@@ -269,29 +282,28 @@ $border-radius: 3px;
     }
     .white-hover {
       pointer-events:none;
-      z-index: 0;
       position: absolute;
       border-radius: $border-radius;
       background-color: rgba(255, 255, 255, 0.2);
-      .blur {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        backdrop-filter: blur(1px);
-        border-radius: $border-radius;
-        clip-path: inset(0 round $border-radius);
-      }
+    }
+    .blur {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(1px);
+      border-radius: $border-radius;
+      clip-path: inset(0 round $border-radius);
     }
     .img {
       position: absolute;
-      border-radius: $border-radius;
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center center;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
+      border-radius: $border-radius;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center center;
     }
     .content {
       position: absolute;

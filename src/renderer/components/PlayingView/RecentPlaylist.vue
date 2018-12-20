@@ -4,13 +4,15 @@
   @mouseup="handleMouseup">
   <transition name="background-fade">
   <div class="background-gradient"
+    v-show="displayState"
     :style="{
       height: sizeAdaption(282),
     }"/>
   </transition>
   <transition name="translate"
     @after-leave="afterLeave">
-  <div class="content" v-show="displayState">
+  <div class="content"
+    v-show="displayState">
     <transition name="fade" mode="out-in">
     <div class="info"
       :key="hoverIndex"
@@ -44,6 +46,7 @@
         :key="item"
         :index="index"
         :path="item"
+        :canHoverItem="canHoverItem"
         :isInRange="index >= firstIndex && index <= lastIndex"
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
@@ -75,6 +78,7 @@ export default {
     RecentPlaylistItem,
   },
   props: {
+    mousemove: {},
     displayState: Boolean,
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
@@ -88,8 +92,8 @@ export default {
       shifting: false,
       snapShoted: false,
       hoveredMediaInfo: {}, // the hovered video's media info
-      backgroundDisplayState: this.displayState,
       mousePosition: [],
+      backgroundDisplayState: this.displayState, // it's weird but DON'T DELETE IT!!
       canHoverItem: false,
       tranFlag: false,
       filePathNeedToDelete: '',
@@ -162,7 +166,7 @@ export default {
           this.shifting = false;
           this.tranFlag = false;
         }, 400);
-      } else if (index !== this.playingIndex
+      } else if (index !== this.playingIndex && !this.shifting
         && this.filePathNeedToDelete !== this.playingList[index]) {
         this.playFile(this.playingList[index]);
       }
@@ -198,11 +202,23 @@ export default {
     },
     displayState(val) {
       this.$bus.$emit('subtitle-to-top', val);
+      this.canHoverItem = false;
+      this.mousePosition = this.mousemove.position;
       if (val) {
         this.$store.dispatch('UpdatePlayingList');
         this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;
+      }
+    },
+    // can hover on items only after mouse move some distance
+    mousemove(val) {
+      const distance = this.winWidth > 1355 ? 20 : 10;
+      if (!this.canHoverItem && this.displayState) {
+        if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
+        Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
+          this.canHoverItem = true;
+        }
       }
     },
   },
