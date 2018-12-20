@@ -176,8 +176,13 @@ export default {
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.15)');
       this.$refs.progress.style.setProperty('opacity', '0');
     },
+    updateAnimationInPlayingCard() {
+      this.$refs.whiteHover.style.setProperty('opacity', '1');
+    },
     mouseoverVideo() {
-      if (!this.isPlaying && this.isInRange && !this.isShifting) {
+      if (this.hoverIndex === this.index) {
+        requestAnimationFrame(this.updateAnimationInPlayingCard);
+      } else if (!this.isPlaying && this.isInRange && !this.isShifting && this.canHoverItem) {
         this.isBlur = false;
         this.isChosen = true;
         this.mouseoverRecently = true;
