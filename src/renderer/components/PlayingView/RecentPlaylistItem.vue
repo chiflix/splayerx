@@ -13,10 +13,10 @@
             backgroundImage: backgroundImage,
           }"/>
         <div class="blur"
-          ref="blur"
-          :style="{
-            opacity: '1',
-          }"/>
+        ref="blur"
+        :style="{
+          display: '',
+        }"/>
         <transition name="fade2">
         <div class="white-hover"
           ref="whiteHover"
@@ -159,7 +159,7 @@ export default {
     },
     updateAnimationIn() {
       if (!this.isPlaying) {
-        this.$refs.blur.style.setProperty('opacity', '1');
+        this.$refs.blur.style.setProperty('display', 'none');
       }
       this.$refs.whiteHover.style.setProperty('opacity', '1');
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
@@ -172,7 +172,7 @@ export default {
     },
     updateAnimationOut() {
       if (!this.isPlaying) {
-        this.$refs.blur.style.setProperty('opacity', '0');
+        this.$refs.blur.style.setProperty('display', '');
       }
       this.$refs.whiteHover.style.setProperty('opacity', '0');
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
