@@ -25,7 +25,7 @@
               :style="{
                 color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
-              }">{{ `${$t('advance.track')} ${index+1} : ${track.language}` }}
+              }">{{ track.language === 'und' ? `${$t('advance.track')} ${index+1}` : `${$t('advance.track')} ${index+1} : ${track.language}` }}
             </div>
           </div>
           <div class="card"
