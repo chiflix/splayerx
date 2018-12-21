@@ -279,6 +279,7 @@ $border-radius: 3px;
       position: absolute;
       border-radius: $border-radius;
       background-color: rgba(255, 255, 255, 0.2);
+      transition: opacity 150ms 50ms linear;
     }
     .blur {
       filter: blur(1.5px);
