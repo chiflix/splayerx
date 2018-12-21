@@ -8,6 +8,7 @@ const state = {
   names: {},
   languages: {},
   formats: {},
+  types: {},
   currentSubtitleId: '',
   chosenStyle: '',
   chosenSize: 1,
@@ -59,6 +60,9 @@ const mutations = {
   [subtitleMutations.FORMATS_UPDATE]({ formats }, { id, format }) {
     Vue.set(formats, id, format);
   },
+  [subtitleMutations.TYPES_UPDATE]({ types }, { id, type }) {
+    Vue.set(types, id, type);
+  },
   [subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE](state, subtitleId) {
     state.currentSubtitleId = subtitleId;
   },
@@ -81,8 +85,9 @@ const mutations = {
 };
 
 const actions = {
-  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit }, { id }) {
+  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit }, { id, type }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loading' });
+    commit(subtitleMutations.TYPES_UPDATE, { id, type });
   },
   [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit }, {
     id, name, language, format,
