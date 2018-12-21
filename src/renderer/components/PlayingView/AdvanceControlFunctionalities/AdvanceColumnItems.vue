@@ -31,7 +31,7 @@
           <div class="card"
             :style="{
               marginTop: cardPos,
-              transition: 'all 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98'
+              transition: 'all 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
             }"></div>
         </div>
       </div>
@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 
 export default {
@@ -61,36 +62,39 @@ export default {
       type: Boolean,
     },
   },
+  watch: {
+    audioTrackList(val) {
+      val.forEach((item, index) => {
+        if (item.id === this.currentAudioTrackId) {
+          this.moveLength = index * 32;
+        }
+      });
+    },
+  },
   computed: {
+    ...mapGetters(['audioTrackList', 'currentAudioTrackId']),
     cardPos() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return `${this.moveLength - (this.tracks.length * 32)}px`;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return `${(this.moveLength - (this.tracks.length * 32)) * 1.2}px`;
-      }
-      return `${(this.moveLength - (this.tracks.length * 32)) * 1.2 * 1.4}px`;
+      return `${this.initialSize(this.moveLength - (this.tracks.length * 32))}px`;
     },
     heightSize() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.tracks.length === 2 ? '73px' : '105px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.tracks.length === 2 ? `${73 * 1.2}px` : `${105 * 1.2}px`;
-      }
-      return this.tracks.length === 2 ? `${73 * 1.2 * 1.4}px` : `${105 * 1.2 * 1.4}px`;
+      return this.tracks.length <= 2 ? `${this.initialSize(41 + (32 * (this.tracks.length - 1)))}px` : `${this.initialSize(105)}px`;
     },
     scopeHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.tracks.length === 2 ? '64px' : '96px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.tracks.length === 2 ? `${64 * 1.2}px` : `${96 * 1.2}px`;
-      }
-      return this.tracks.length === 2 ? `${64 * 1.2 * 1.4}px` : `${96 * 1.2 * 1.4}px`;
+      return this.tracks.length <= 2 ? `${this.initialSize(32 * this.tracks.length)}px` : `${this.initialSize(96)}px`;
     },
     tracks() {
       return this.$store.getters.audioTrackList;
     },
   },
   methods: {
+    initialSize(size) {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return size;
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return size * 1.2;
+      }
+      return size * 1.2 * 1.4;
+    },
     handleOver(index) {
       this.hoverIndex = index;
     },

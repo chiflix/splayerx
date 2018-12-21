@@ -133,7 +133,7 @@ export default {
 
     rightFakeProgressBackgroundColor(time) {
       const hoveredEnd = this.hoveredPercent >= 100;
-      const playedEnd = Math.round(time) >= Math.round(this.duration);
+      const playedEnd = time >= this.duration;
       let opacity = 0;
       if (this.mouseleave) {
         if (playedEnd) {

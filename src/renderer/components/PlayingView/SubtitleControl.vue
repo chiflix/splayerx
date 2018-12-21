@@ -382,7 +382,6 @@ export default {
         clearTimeout(this.detailTimer);
         const hoverItem = document.querySelector(`#item${index} .text`);
         if (hoverItem.clientWidth < hoverItem.scrollWidth) {
-          this.shouldHidden = true;
           this.hoverHeight = this.textHeight *
             (Math.ceil(hoverItem.scrollWidth / hoverItem.clientWidth) - 1);
           this.detailTimer = setTimeout(() => {

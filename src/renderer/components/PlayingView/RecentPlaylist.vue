@@ -203,8 +203,10 @@ export default {
         this.lastIndex = val;
       }
     },
-    displayState(val) {
-      this.$bus.$emit('subtitle-to-top', val);
+    displayState(val, oldval) {
+      if (oldval !== undefined) {
+        this.$bus.$emit('subtitle-to-top', val);
+      }
       this.canHoverItem = false;
       this.mousePosition = this.mousemove.position;
       if (val) {
