@@ -103,11 +103,8 @@ const actions = {
   [subtitleActions.ADD_SUBTITLE_WHEN_FAILED]({ commit }, { id }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'failed' });
   },
-  [subtitleActions.CHANGE_CURRENT_SUBTITLE]({ commit, state, getters }, id) {
-    commit(
-      subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE,
-      getters.subtitleIds.includes(id) ? id : state.currentSubtitleId,
-    );
+  [subtitleActions.CHANGE_CURRENT_SUBTITLE]({ commit, getters }, id) {
+    if (getters.subtitleIds.includes(id)) commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, id);
   },
   [subtitleActions.OFF_SUBTITLES]({ commit }) {
     commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');

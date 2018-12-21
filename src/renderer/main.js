@@ -351,7 +351,7 @@ new Vue({
             {
               label: this.$t('msg.subtitle.AITranslation'),
               click: () => {
-                this.$bus.$emit('menu-sub-refresh');
+                this.$bus.$emit('refresh-subtitles');
               },
             },
             {
@@ -717,7 +717,7 @@ new Vue({
         type: 'radio',
         label: value.path ? Path.basename(value.path) : value.name,
         click: () => {
-          this.$bus.$emit('menu-sub-change', key);
+          this.$bus.$emit('change-subtitle', value.id || value.src);
         },
       };
     },
@@ -737,7 +737,7 @@ new Vue({
         type: 'radio',
         label: this.$t('msg.subtitle.noSubtitle'),
         click: () => {
-          this.$bus.$emit('subtitle-off');
+          this.$bus.$emit('off-subtitle');
         },
       });
       this.subtitleList.forEach((item, index) => {

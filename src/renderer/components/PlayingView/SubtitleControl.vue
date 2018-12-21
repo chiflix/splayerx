@@ -34,13 +34,13 @@
                   <div class="itemContainer">
                     <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)">
                       <div class="menu-item-text-wrapper"
-                        @mouseup="toggleSubtitleOff"
+                        @mouseup="$bus.$emit('off-subtitle')"
                         @mouseover="toggleItemsMouseOver(-1)"
                         @mouseleave="toggleItemsMouseLeave(-1)"
                         :style="{
-                          color: hoverIndex === -1 || currentSubIden === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          color: hoverIndex === -1 || currentSubtitleIndex === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                           height: `${itemHeight}px`,
-                          cursor: currentSubIden === -1 ? 'default' : 'pointer',
+                          cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
                         }">
                         <div class="text">{{ this.$t('msg.subtitle.noSubtitle') }}</div>
                       </div>
@@ -55,9 +55,9 @@
                         :id="'item'+index"
                         :style="{
                           transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                          color: hoverIndex === index || currentSubIden === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                           height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                          cursor: currentSubIden === index ? 'default' : 'pointer',
+                          cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
                         }">
                         <div class="text"
                           :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
@@ -66,9 +66,10 @@
                       </div>
                     </div>
 
-                    <div v-if="loadingPlaceholderList.length > 0"
-                      v-for="item in loadingPlaceholderList"
-                      class="placeholders-wrapper">
+                    <div v-if="loadingTypes.length > 0"
+                      v-for="(item, index) in loadingTypes"
+                      class="placeholders-wrapper"
+                      :key="`${item}-${index}`">
                       <div class="placeholder-item-text-wrapper">
                         <div class="text">{{ item }}</div>
                       </div>
@@ -76,8 +77,8 @@
 
                     <div class="card" v-if="0 <= computedAvaliableItems.length"
                       :style="{
-                        height: hiddenText && currentSubIden === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                        top: hiddenText && currentSubIden <= hoverIndex ? `${-hoverHeight}px` : '',
+                        height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                        top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
                         marginTop: `${-cardPos}px`,
                         transition: 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
                       }"/>
@@ -122,7 +123,6 @@ export default {
         online: '',
       },
       foundSubtitles: true,
-      currentSubIden: 0,
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
@@ -151,6 +151,15 @@ export default {
           type: types[id],
           name: names[id],
         })).filter(subtitle => subtitle.loading !== 'failed' && subtitle.type && subtitle.name);
+      },
+      loadingTypes: ({ Subtitle }) => {
+        const { loadingStates, types } = Subtitle;
+        const loadingSubtitles = Object.keys(loadingStates).filter(id => loadingStates[id] === 'loading');
+        const result = [];
+        loadingSubtitles.forEach((id) => {
+          if (!result.includes(types[id])) result.push(types[id]);
+        });
+        return result;
       },
     }),
     textHeight() {
@@ -215,17 +224,17 @@ export default {
       if (this.winWidth > 512 && this.winWidth <= 854) {
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
-            - this.currentSubIden) * 31 :
+            - this.currentSubtitleIndex) * 31 :
           this.scopeHeight + 4;
       } else if (this.winWidth > 854 && this.winWidth <= 1920) {
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
-            - this.currentSubIden) * 37 :
+            - this.currentSubtitleIndex) * 37 :
           this.scopeHeight + 5;
       }
       return this.computedAvaliableItems.length > 0 ?
         ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
-          - this.currentSubIden) * 51 :
+          - this.currentSubtitleIndex) * 51 :
         this.scopeHeight + 7;
     },
     loadingPlaceholderList() {
@@ -241,9 +250,13 @@ export default {
       }
       return res;
     },
+    currentSubtitleIndex() {
+      return this.computedAvaliableItems.findIndex(subtitle =>
+        subtitle.id === this.currentSubtitleId);
+    },
   },
   watch: {
-    currentSubIden(val) {
+    currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
       if (val === 0) {
         document.querySelector('.scrollScope').scrollTop = 0;
@@ -300,25 +313,8 @@ export default {
       return path.basename(subPath);
     },
     handleRefresh() {
-      if (this.privacyAgreement) {
-        if (this.timer) {
-          return;
-        }
-        this.timer = setInterval(() => {
-          this.count += 1;
-          this.rotateTime = Math.ceil(this.count / 100);
-        }, 10);
-        setTimeout(() => {
-          if (this.timer) {
-            clearInterval(this.timer);
-            this.count = this.rotateTime * 100;
-          }
-        }, 20000);
-        document.querySelector('.scrollScope').scrollTop = 0;
-        this.$bus.$emit('refresh-subtitle', this.originSrc);
-      } else {
-        this.$bus.$emit('privacy-confirm');
-      }
+      document.querySelector('.scrollScope').scrollTop = 0;
+      this.$bus.$emit('refresh-subtitles');
     },
     orify(...args) {
       return args.some(arg => arg == true); // eslint-disable-line
@@ -336,18 +332,6 @@ export default {
       } else {
         this.anim.playSegments([62, 64], false);
       }
-      document.addEventListener('mouseup', (e) => {
-        if (e.button === 0) {
-          if (!this.showAttached) {
-            if (this.validEnter) {
-              this.anim.playSegments([46, 60], false);
-            } else if (!this.mousedownOnOther) {
-              this.anim.playSegments([40, 44], false);
-            }
-          }
-          this.mouseDown = false;
-        }
-      });
     },
     handleEnter() {
       if (this.animFlag && !this.showAttached) {
@@ -418,22 +402,10 @@ export default {
     },
     toggleItemClick(index) {
       const { computedAvaliableItems } = this;
-      this.currentSubIden = index;
-      this.changeCurrentSubtitle(computedAvaliableItems[index].id);
-    },
-    toggleSubtitleOff() {
-      this.currentSubIden = -1;
-      this.offCurrentSubtitle();
+      this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
     },
   },
   created() {
-    this.$bus.$on('change-current', () => {
-      for (let i = 0; i < this.computedAvaliableItems.length; i += 1) {
-        if (this.computedAvaliableItems[i].id === this.currentSubtitleId) {
-          this.currentSubIden = i;
-        }
-      }
-    });
     this.$bus.$on('isdragging-mouseup', () => {
       if (this.showAttached) {
         this.anim.playSegments([79, 85]);
@@ -444,47 +416,26 @@ export default {
         this.anim.playSegments([62, 64], false);
       }
     });
-    this.$bus.$on('finish-loading', (type) => {
-      const subType = ['ass', 'vtt', 'srt'];
-      if (subType.includes(type)) {
-        this.loadingSubsPlaceholders.local = '';
-      }
-      if (type === 'embedded') {
-        this.loadingSubsPlaceholders.embedded = '';
-      }
-      if (type === 'online') {
-        this.loadingSubsPlaceholders.online = '';
-      }
-    });
-    this.$bus.$on('add-subtitles', () => {
-      this.currentSubIden = 0;
-    });
-    this.$bus.$on('find-no-subtitle', () => {
-      this.currentSubIden = -1;
-      this.offCurrentSubtitle();
-    });
-  },
-  mounted() {
-    this.$bus.$on('finish-refresh', () => {
-      for (let i = 0; i < this.computedAvaliableItems.length; i += 1) {
-        if (this.computedAvaliableItems[i].id === this.currentSubtitleId) {
-          this.currentSubIden = i;
-        }
-      }
+    this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
       setTimeout(() => {
         this.timer = null;
       }, 1000);
     });
-    this.$bus.$on('menu-sub-refresh', () => {
-      this.handleRefresh();
-    });
-    this.$bus.$on('menu-sub-change', (index) => {
-      this.toggleItemClick(index);
-    });
-    this.$bus.$on('subtitle-off', () => {
-      this.toggleSubtitleOff();
+  },
+  mounted() {
+    document.addEventListener('mouseup', (e) => {
+      if (e.button === 0) {
+        if (!this.showAttached) {
+          if (this.validEnter) {
+            this.anim.playSegments([46, 60], false);
+          } else if (!this.mousedownOnOther) {
+            this.anim.playSegments([40, 44], false);
+          }
+        }
+        this.mouseDown = false;
+      }
     });
   },
 };

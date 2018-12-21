@@ -10,7 +10,7 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapState } from 'vuex';
 import { dirname, extname, basename, join } from 'path';
 import { readdir } from 'fs';
 import osLocale from 'os-locale';
@@ -27,37 +27,35 @@ export default {
   components: {
     'subtitle-loader': SubtitleRenderer,
   },
-  computed: {
-    ...mapGetters([
-      'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
-      'duration', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
-    ]),
-    currentSubtitle() {
-      return this.subtitleInstances[this.currentSubtitleId];
-    },
-  },
   data() {
     return {
       systemLanguageCode: '',
       subtitleInstances: {},
       localPremiumSubtitles: {},
+      onlineRefreshingSubtitles: [],
+      onlineRefreshingTimerId: 0,
+      onlineRefreshingMaxTime: 20000,
     };
+  },
+  computed: {
+    ...mapGetters([
+      'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
+      'duration', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
+    ]),
+    ...mapState({
+      loadingOnlineSubtitleIds: ({ Subtitle }) => {
+        const { loadingStates, types } = Subtitle;
+        return Object.keys(loadingStates).filter(id => types[id] === 'online' && loadingStates[id] === 'loading');
+      },
+    }),
+    currentSubtitle() {
+      return this.subtitleInstances[this.currentSubtitleId];
+    },
   },
   watch: {
     originSrc(newVal) {
       this.resetSubtitles();
-      this.addInitialSubtitles(newVal).then((result) => {
-        if (result.length > 0) {
-          this.addSubtitles(result);
-          this.changeCurrentSubtitle((this.chooseInitialSubtitle(
-            this.subtitleList,
-            this.systemLocale,
-          )).id);
-          this.$bus.$emit('change-current');
-        } else {
-          this.$bus.$emit('find-no-subtitle');
-        }
-      });
+      this.addInitialSubtitles(newVal);
     },
     premiumSubtitles(newVal) {
       if (this.privacyAgreement) {
@@ -83,12 +81,21 @@ export default {
         });
       }
     },
+    loadingOnlineSubtitleIds(newVal) {
+      const { onlineRefreshingTimerId } = this;
+      if (!newVal.length && onlineRefreshingTimerId) {
+        clearTimeout(onlineRefreshingTimerId);
+        this.onlineRefreshingTimerId = 0;
+        this.$bus.$emit('refresh-finished');
+      }
+    },
   },
   methods: {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
       changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_SUBTITLE,
+      offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       refreshSubtitle: subtitleActions.REFRESH_SUBTITLES,
       addSubtitleWhenLoading: subtitleActions.ADD_SUBTITLE_WHEN_LOADING,
       addSubtitleWhenReady: subtitleActions.ADD_SUBTITLE_WHEN_READY,
@@ -151,6 +158,10 @@ export default {
         }
         return { src, type: 'online', options: { language: code, name: subName } };
       };
+      this.onlineRefreshingTimerId = setTimeout(() => {
+        this.onlineRefreshingTimerId = 0;
+        this.$bus.$emit('refresh-finished');
+      }, this.onlineRefreshingMaxTime);
       return (await Promise.all([
         Sagi.mediaTranslate(hash, 'zh'),
         Sagi.mediaTranslate(hash, 'en'),
@@ -165,6 +176,7 @@ export default {
       return false;
     },
     getFirstSubtitle(subtitleList, subtitleCallback) {
+      if (!subtitleList.length) return '';
       const validatedCallback = subtitleCallback && typeof subtitleCallback === 'function' ?
         subtitleCallback : (subtitle, index) => index === 0;
       const result = subtitleList.map(subtitle => subtitle.src).filter(validatedCallback);
@@ -210,7 +222,7 @@ export default {
       ).src);
     },
     async refreshOnlineSubtitles() {
-      const { getOnlineSubtitlesList, videoSrc, addSubtitles } = this;
+      const { getOnlineSubtitlesList, originSrc: videoSrc, addSubtitles } = this;
       const newOnlineSubtitles = await getOnlineSubtitlesList(videoSrc);
       addSubtitles(newOnlineSubtitles);
     },
@@ -220,6 +232,8 @@ export default {
     this.systemLanguageCode = osLocale.sync().slice(0, 2);
     this.$bus.$on('add-subtitles', this.addSubtitles);
     this.$bus.$on('refresh-subtitles', this.refreshOnlineSubtitles);
+    this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
+    this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
     this.addInitialSubtitles(this.originSrc);
   },
 };
