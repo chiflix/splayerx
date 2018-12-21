@@ -95,7 +95,7 @@
   </div>
 </template>
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import difference from 'lodash/difference';
 import path from 'path';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
@@ -142,6 +142,17 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId']),
+    ...mapState({
+      computedAvaliableItems: ({ Subtitle }) => {
+        const { loadingStates, types, names } = Subtitle;
+        return Object.keys(loadingStates).map(id => ({
+          id,
+          loading: loadingStates[id],
+          type: types[id],
+          name: names[id],
+        })).filter(subtitle => subtitle.loading !== 'failed' && subtitle.type && subtitle.name);
+      },
+    }),
     textHeight() {
       if (this.winWidth > 512 && this.winWidth <= 854) {
         return 13;
@@ -216,9 +227,6 @@ export default {
         ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
           - this.currentSubIden) * 51 :
         this.scopeHeight + 7;
-    },
-    computedAvaliableItems() {
-      return this.$store.getters.subtitleList;
     },
     loadingPlaceholderList() {
       const res = [];
