@@ -98,6 +98,7 @@ export default {
       volumeChange: false,
       showProgress: false,
       showProgressId: 0,
+      needResetHoverProgressBar: false,
     };
   },
   computed: {
@@ -226,6 +227,15 @@ export default {
       this.UIStateManager();
       this.lastEventInfo = lastEventInfo;
 
+      if (!videodata.paused && videodata.time + 1 >= this.duration) {
+        // we need set the paused state to go to next video
+        // this state will be reset on mounted of BaseVideoPlayer
+        videodata.paused = true;
+        // we need to reset the hoverProgressBar for play next video
+        this.needResetHoverProgressBar = true;
+        this.$bus.$emit('next-video');
+      }
+
       /*
       /* Rendering
       /*
@@ -233,8 +243,6 @@ export default {
       /* 当前 UIManager() 的内部实现还需要继续整理和细分 特别像 clock、事件处理、UI状态更新
       /* 如果涉及到播放中的状态更新 可以依赖该UIManager，因为它本身是由video的ontimeupdate触发
       /*                                                                                  */
-      if (videodata.time + 1 >= this.duration) this.$bus.$emit('next-video');
-
       requestAnimationFrame(() => {
       // TODO: There is a probability that the properties are undefined and causing test failure.
       // It's not a best practice to use refs frequently.
@@ -245,6 +253,10 @@ export default {
             this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
           } else {
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
+            if (this.needResetHoverProgressBar) {
+              this.needResetHoverProgressBar = false;
+              this.$refs.progressbar.updateHoveredProgressBar(videodata.time, 0);
+            }
             this.$refs.progressbar.updatePlayProgressBar(videodata.time);
           }
           this.UIDisplayManager();

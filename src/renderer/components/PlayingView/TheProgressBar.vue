@@ -124,26 +124,30 @@ export default {
       playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
       playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
       playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
-      fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(videodata.time);
+      fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(time);
+    },
+    updateHoveredProgressBar(time, hoveredPercent) {
+      const playedPercent = 100 * (time / this.duration);
+      const { hoveredProgress, defaultProgress } = this.$refs;
+      hoveredProgress.style.width = hoveredPercent <= playedPercent ? `${hoveredPercent}%` : `${hoveredPercent - playedPercent}%`;
+      hoveredProgress.style.backgroundColor = hoveredPercent <= playedPercent ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
+      hoveredProgress.style.order = hoveredPercent <= playedPercent ? '0' : '1';
+      defaultProgress.style.backgroundColor = this.hovering ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0)';
+      // the hoveredPercent = 0 means we need to hide it
+      hoveredPercent === 0 && this.setHoveringToFalse(true);
     },
     // We need high fps to render hovering of the progress-bar for
     // smooth animation, We use requestAnimationFrame to make it.
     // Listening for mouse enter event and starting the renderProgressBar
     // with requestAnimationFrame, when receiving the mouse leave event stop the renderer.
     renderProgressBar() {
-      const playedPercent = 100 * (videodata.time / this.duration);
-      const { hoveredProgress, defaultProgress } = this.$refs;
-
       // We call updatePlayProgressBar here because of
       // the hover-bar and played-bar use flexbox layout
       // and related with the `order` property. if not do
       // this, the layout will be broken.
       this.updatePlayProgressBar(videodata.time);
 
-      hoveredProgress.style.width = this.hoveredPercent <= playedPercent ? `${this.hoveredPercent}%` : `${this.hoveredPercent - playedPercent}%`;
-      hoveredProgress.style.backgroundColor = this.hoveredPercent <= playedPercent ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
-      hoveredProgress.style.order = this.hoveredPercent <= playedPercent ? '0' : '1';
-      defaultProgress.style.backgroundColor = this.hovering ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0)';
+      this.updateHoveredProgressBar(videodata.time, this.hoveredPercent);
 
       if (!this.mouseleave) {
         requestAnimationFrame(this.renderProgressBar);

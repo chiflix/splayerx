@@ -7,7 +7,7 @@
     minHeight: `${thumbnailHeight}px`,
   }">
       <div class="child-item" style="will-change: transform;">
-        <div class="img" ref="blur"
+        <div class="img blur" ref="blur"
           v-if="!isPlaying && imageLoaded"
           :style="{
             backgroundImage: backgroundImage,

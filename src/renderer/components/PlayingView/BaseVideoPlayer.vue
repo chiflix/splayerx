@@ -127,6 +127,11 @@ export default {
     // playback state
     currentTime(newVal) {
       [this.$refs.video.currentTime] = newVal || 0;
+
+      // update the seek time
+      if (this.needtimeupdate) {
+        videodata.time = this.$refs.video.currentTime;
+      }
     },
     playbackRate(newVal) {
       this.$refs.video.playbackRate = newVal;
@@ -187,6 +192,8 @@ export default {
     this.addEvents(this.events);
     this.setStyle(this.styles);
     if (this.needtimeupdate) {
+      // reset paused state to play a new video
+      videodata.paused = false;
       this.$refs.video.ontimeupdate = this.currentTimeUpdate;
     }
   },
