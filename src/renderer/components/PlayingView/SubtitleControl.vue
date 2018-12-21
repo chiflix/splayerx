@@ -10,6 +10,7 @@
             cursor: 'default',
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
             height: hiddenText ? `${contHeight + hoverHeight}px` : `${contHeight}px`,
+            fontWeight: '900',
           }">
           <div class="element bottom"><div class="element content">
 
@@ -60,7 +61,7 @@
                         cursor: currentSubIden === index ? 'default' : 'pointer',
                       }">
                       <div class="text"
-                        :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
+                        :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
                           whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
                         }">{{ item.path ? getSubName(item.path) : item.name }}</div>
                       </div>
@@ -142,6 +143,7 @@ export default {
   },
   watch: {
     currentSubIden(val) {
+      this.$bus.$emit('clear-last-cue');
       if (val === 0) {
         document.querySelector('.scrollScope').scrollTop = 0;
       }
@@ -320,7 +322,6 @@ export default {
         clearTimeout(this.detailTimer);
         const hoverItem = document.querySelector(`#item${index} .text`);
         if (hoverItem.clientWidth < hoverItem.scrollWidth) {
-          this.shouldHidden = true;
           this.hoverHeight = this.textHeight *
             (Math.ceil(hoverItem.scrollWidth / hoverItem.clientWidth) - 1);
           this.detailTimer = setTimeout(() => {
@@ -515,7 +516,7 @@ export default {
       height: 100%;
       top: 0;
       background: rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       clip-path: inset(0 round 7px);
     }
     .middle {

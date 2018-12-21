@@ -191,7 +191,7 @@ export default {
       syncStorage.setSync('recent-played', data);
     },
     saveSubtitleStyle() {
-      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle });
+      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
     async getVideoCover() {
       if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
@@ -211,6 +211,7 @@ export default {
           break;
         }
       }
+      this.lastCoverDetectingTime = videodata.time;
       if (this.coverFinded) {
         const smallImagePath = canvas.toDataURL('image/png');
         [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
@@ -233,8 +234,9 @@ export default {
           };
           this.infoDB().add('recent-played', data);
         }
+      } else {
+        requestAnimationFrame(this.checkedPresentTime);
       }
-      this.lastCoverDetectingTime = videodata.time;
     },
     checkPresentTime() {
       if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
@@ -245,8 +247,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle', 'scaleNum',
-      'nextVideo']),
+      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',

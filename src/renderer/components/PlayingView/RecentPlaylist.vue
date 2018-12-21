@@ -112,6 +112,8 @@ export default {
     this.eventTarget.onItemMouseover = this.onItemMouseover;
     this.eventTarget.onItemMouseout = this.onItemMouseout;
     this.eventTarget.onItemMouseup = this.onItemMouseup;
+
+    this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
     afterLeave() {
@@ -173,6 +175,10 @@ export default {
     },
   },
   watch: {
+    originSrc() {
+      this.hoverIndex = this.playingIndex;
+      this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+    },
     firstIndex() {
       if (this.lastIndex > this.maxIndex) {
         this.lastIndex = this.maxIndex;
@@ -200,8 +206,10 @@ export default {
         this.lastIndex = val;
       }
     },
-    displayState(val) {
-      this.$bus.$emit('subtitle-to-top', val);
+    displayState(val, oldval) {
+      if (oldval !== undefined) {
+        this.$bus.$emit('subtitle-to-top', val);
+      }
       this.canHoverItem = false;
       this.mousePosition = this.mousemove.position;
       if (val) {
