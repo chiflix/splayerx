@@ -84,13 +84,10 @@ export default {
   },
   created() {
     const { subtitleInstance } = this;
-    subtitleInstance.on('ready', subtitleInstance.load);
     subtitleInstance.on('data', subtitleInstance.parse);
     subtitleInstance.on('parse', (parsed) => {
-      this.parsedData = parsed;
       this.videoSegments = this.getVideoSegments(parsed, this.duration);
-      this.$bus.$emit('finish-loading', subtitleInstance.type);
-      if (parsed) {
+      if (parsed.length) {
         const cues = parsed
           .filter(subtitle => subtitle.start <= this.subtitleCurrentTime && subtitle.end >= this.subtitleCurrentTime && subtitle.text !== '');
         if (!isEqual(cues, this.currentCues)) {
@@ -98,7 +95,7 @@ export default {
         }
       }
     });
-    subtitleInstance.meta();
+    subtitleInstance.load();
     this.$bus.$on('subtitle-to-top', (val) => {
       this.subToTop = val;
       if (!val) {
@@ -313,7 +310,7 @@ export default {
         .sort((a, b) => a[0] - b[0]);
       const result = [[0, 0]];
       let currentIndex = 0;
-      while (result[result.length - 1][1] !== duration) {
+      while (duration && result[result.length - 1][1] !== duration) {
         const lastElement = result[result.length - 1];
         if (currentIndex < subtitleSegments.length) {
           if (lastElement[1] <= subtitleSegments[currentIndex][0]) {

@@ -3,7 +3,7 @@
     :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
     <subtitle-loader
       ref="currentSubtitle"
-      v-if="currentSubtitleId"
+      v-if="currentSubtitleId && duration"
       :subtitle-instance="currentSubtitle"
       :key="currentSubtitleId"
     />
@@ -184,7 +184,7 @@ export default {
         });
       });
       sub.on('parse', () => addSubtitleWhenLoaded({ id }));
-      addSubtitleWhenLoading({ id });
+      addSubtitleWhenLoading({ id, type });
       sub.meta();
     },
     addSubtitles(subtitleList, firstSubtitleCallback) {
