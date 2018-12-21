@@ -105,6 +105,10 @@ import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'subtitle-control',
+  components: {
+    lottie,
+    Icon,
+  },
   props: {
     showAttached: Boolean,
     mousedownOnOther: Boolean,
@@ -136,9 +140,99 @@ export default {
       detailTimer: null,
     };
   },
-  components: {
-    lottie,
-    Icon,
+  computed: {
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId']),
+    textHeight() {
+      if (this.winWidth > 512 && this.winWidth <= 854) {
+        return 13;
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return 14;
+      }
+      return 18;
+    },
+    itemHeight() {
+      if (this.winWidth > 512 && this.winWidth <= 854) {
+        return 27;
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return 32;
+      }
+      return 44;
+    },
+    isOverFlow() {
+      if (this.andify(this.winWidth > 512, this.winWidth <= 854)) {
+        return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 2) ? 'scroll' : '';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 4) ? 'scroll' : '';
+      }
+      return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 6) ? ' scroll' : '';
+    },
+    scopeHeight() {
+      if (this.winWidth > 512 && this.winWidth <= 854) {
+        return this.computedAvaliableItems.length > 2 ?
+          (this.loadingPlaceholderList.length * 31) + 89 :
+          (((this.computedAvaliableItems.length + 1) * 31) - 4) +
+          (this.loadingPlaceholderList.length * 31);
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.computedAvaliableItems.length > 4 ?
+          (this.loadingPlaceholderList.length * 37) + 180 :
+          (((this.computedAvaliableItems.length + 1) * 37) - 5) +
+          (this.loadingPlaceholderList.length * 37);
+      }
+      return this.computedAvaliableItems.length > 6 ?
+        (this.loadingPlaceholderList.length * 51) + 350 :
+        (((this.computedAvaliableItems.length + 1) * 51) - 7) +
+        (this.loadingPlaceholderList.length * 51);
+    },
+    contHeight() {
+      if (this.winWidth > 512 && this.winWidth <= 854) {
+        return this.computedAvaliableItems.length > 2 ?
+          (this.loadingPlaceholderList.length * 31) + 138 :
+          45 + ((this.computedAvaliableItems.length + 1) * 31) +
+          (this.loadingPlaceholderList.length * 31);
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.computedAvaliableItems.length > 4 ?
+          (this.loadingPlaceholderList.length * 37) + 239 :
+          54 + ((this.computedAvaliableItems.length + 1) * 37) +
+          (this.loadingPlaceholderList.length * 37);
+      }
+      return this.computedAvaliableItems.length > 6 ?
+        (this.loadingPlaceholderList.length * 51) + 433 :
+        76 + ((this.computedAvaliableItems.length + 1) * 51) +
+        (this.loadingPlaceholderList.length * 51);
+    },
+    cardPos() {
+      if (this.winWidth > 512 && this.winWidth <= 854) {
+        return this.computedAvaliableItems.length > 0 ?
+          ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
+            - this.currentSubIden) * 31 :
+          this.scopeHeight + 4;
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.computedAvaliableItems.length > 0 ?
+          ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
+            - this.currentSubIden) * 37 :
+          this.scopeHeight + 5;
+      }
+      return this.computedAvaliableItems.length > 0 ?
+        ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
+          - this.currentSubIden) * 51 :
+        this.scopeHeight + 7;
+    },
+    computedAvaliableItems() {
+      return this.$store.getters.subtitleList;
+    },
+    loadingPlaceholderList() {
+      const res = [];
+      if (this.loadingSubsPlaceholders.local !== '') {
+        res.push('Local loading');
+      }
+      if (this.loadingSubsPlaceholders.embedded !== '') {
+        res.push('Embedded loading');
+      }
+      if (this.loadingSubsPlaceholders.online !== '') {
+        res.push('Online loading');
+      }
+      return res;
+    },
   },
   watch: {
     currentSubIden(val) {
@@ -186,29 +280,6 @@ export default {
         this.loadingSubsPlaceholders.embedded = 'loading';
       }
     },
-  },
-  mounted() {
-    this.$bus.$on('finish-refresh', () => {
-      for (let i = 0; i < this.computedAvaliableItems.length; i += 1) {
-        if (this.computedAvaliableItems[i].id === this.currentSubtitleId) {
-          this.currentSubIden = i;
-        }
-      }
-      clearInterval(this.timer);
-      this.count = this.rotateTime * 100;
-      setTimeout(() => {
-        this.timer = null;
-      }, 1000);
-    });
-    this.$bus.$on('menu-sub-refresh', () => {
-      this.handleRefresh();
-    });
-    this.$bus.$on('menu-sub-change', (index) => {
-      this.toggleItemClick(index);
-    });
-    this.$bus.$on('subtitle-off', () => {
-      this.toggleSubtitleOff();
-    });
   },
   methods: {
     ...mapActions({
@@ -346,100 +417,6 @@ export default {
       this.offCurrentSubtitle();
     },
   },
-  computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId']),
-    textHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
-        return 13;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return 14;
-      }
-      return 18;
-    },
-    itemHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
-        return 27;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return 32;
-      }
-      return 44;
-    },
-    isOverFlow() {
-      if (this.andify(this.winWidth > 512, this.winWidth <= 854)) {
-        return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 2) ? 'scroll' : '';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 4) ? 'scroll' : '';
-      }
-      return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 6) ? ' scroll' : '';
-    },
-    scopeHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
-        return this.computedAvaliableItems.length > 2 ?
-          (this.loadingPlaceholderList.length * 31) + 89 :
-          (((this.computedAvaliableItems.length + 1) * 31) - 4) +
-          (this.loadingPlaceholderList.length * 31);
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.computedAvaliableItems.length > 4 ?
-          (this.loadingPlaceholderList.length * 37) + 180 :
-          (((this.computedAvaliableItems.length + 1) * 37) - 5) +
-          (this.loadingPlaceholderList.length * 37);
-      }
-      return this.computedAvaliableItems.length > 6 ?
-        (this.loadingPlaceholderList.length * 51) + 350 :
-        (((this.computedAvaliableItems.length + 1) * 51) - 7) +
-        (this.loadingPlaceholderList.length * 51);
-    },
-    contHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
-        return this.computedAvaliableItems.length > 2 ?
-          (this.loadingPlaceholderList.length * 31) + 138 :
-          45 + ((this.computedAvaliableItems.length + 1) * 31) +
-          (this.loadingPlaceholderList.length * 31);
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.computedAvaliableItems.length > 4 ?
-          (this.loadingPlaceholderList.length * 37) + 239 :
-          54 + ((this.computedAvaliableItems.length + 1) * 37) +
-          (this.loadingPlaceholderList.length * 37);
-      }
-      return this.computedAvaliableItems.length > 6 ?
-        (this.loadingPlaceholderList.length * 51) + 433 :
-        76 + ((this.computedAvaliableItems.length + 1) * 51) +
-        (this.loadingPlaceholderList.length * 51);
-    },
-    cardPos() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
-        return this.computedAvaliableItems.length > 0 ?
-          ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
-            - this.currentSubIden) * 31 :
-          this.scopeHeight + 4;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.computedAvaliableItems.length > 0 ?
-          ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
-            - this.currentSubIden) * 37 :
-          this.scopeHeight + 5;
-      }
-      return this.computedAvaliableItems.length > 0 ?
-        ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
-          - this.currentSubIden) * 51 :
-        this.scopeHeight + 7;
-    },
-    computedAvaliableItems() {
-      return this.$store.getters.subtitleList;
-    },
-    loadingPlaceholderList() {
-      const res = [];
-      if (this.loadingSubsPlaceholders.local !== '') {
-        res.push('Local loading');
-      }
-      if (this.loadingSubsPlaceholders.embedded !== '') {
-        res.push('Embedded loading');
-      }
-      if (this.loadingSubsPlaceholders.online !== '') {
-        res.push('Online loading');
-      }
-      return res;
-    },
-  },
   created() {
     this.$bus.$on('change-current', () => {
       for (let i = 0; i < this.computedAvaliableItems.length; i += 1) {
@@ -476,6 +453,29 @@ export default {
     this.$bus.$on('find-no-subtitle', () => {
       this.currentSubIden = -1;
       this.offCurrentSubtitle();
+    });
+  },
+  mounted() {
+    this.$bus.$on('finish-refresh', () => {
+      for (let i = 0; i < this.computedAvaliableItems.length; i += 1) {
+        if (this.computedAvaliableItems[i].id === this.currentSubtitleId) {
+          this.currentSubIden = i;
+        }
+      }
+      clearInterval(this.timer);
+      this.count = this.rotateTime * 100;
+      setTimeout(() => {
+        this.timer = null;
+      }, 1000);
+    });
+    this.$bus.$on('menu-sub-refresh', () => {
+      this.handleRefresh();
+    });
+    this.$bus.$on('menu-sub-change', (index) => {
+      this.toggleItemClick(index);
+    });
+    this.$bus.$on('subtitle-off', () => {
+      this.toggleSubtitleOff();
     });
   },
 };
