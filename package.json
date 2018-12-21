@@ -377,6 +377,7 @@
     "module-alias": "^2.0.6",
     "npm": "^6.1.0",
     "os-locale": "^3.0.1",
+    "romanize": "^1.1.1",
     "run-parallel": "^1.1.9",
     "sagi-api": "^0.0.7",
     "sinon": "^6.1.3",

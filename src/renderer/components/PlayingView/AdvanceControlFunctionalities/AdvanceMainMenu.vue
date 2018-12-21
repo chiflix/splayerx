@@ -262,7 +262,7 @@ export default {
         return this.$t('advance.chosenTrack');
       }
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
-      if (track && track.id) return track.language;
+      if (track && track.id) return track.name;
       return this.$t('advance.chosenTrack');
     },
     speedHeight() {
