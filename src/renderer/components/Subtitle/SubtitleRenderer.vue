@@ -30,7 +30,7 @@ import CueRenderer from './CueRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
 
 export default {
-  name: 'subtitle-loader',
+  name: 'subtitle-renderer',
   props: {
     subtitleInstance: SubtitleInstance,
   },

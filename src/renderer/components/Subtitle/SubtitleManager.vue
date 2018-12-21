@@ -1,7 +1,7 @@
 <template>
   <div class="subtitle-manager"
     :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
-    <subtitle-loader
+    <subtitle-render
       ref="currentSubtitle"
       v-if="currentSubtitleId && duration"
       :subtitle-instance="currentSubtitle"
@@ -18,14 +18,14 @@ import partialRight from 'lodash/partialRight';
 import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
-import SubtitleRenderer from './SubtitleLoader.vue';
-import SubtitleLoader from './SubtitleLoader/index';
+import SubtitleRenderer from './SubtitleRenderer.vue';
+import SubtitleLoader from './SubtitleLoader';
 import { promisify } from './SubtitleLoader/utils';
 
 export default {
   name: 'subtitle-manager',
   components: {
-    'subtitle-loader': SubtitleRenderer,
+    'subtitle-render': SubtitleRenderer,
   },
   data() {
     return {
