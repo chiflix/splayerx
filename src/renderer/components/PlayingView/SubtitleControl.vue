@@ -293,7 +293,7 @@ export default {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
-      changeCurrentSubtitle: subtitleActions.SWITCH_CURRENT_SUBTITLE,
+      changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_SUBTITLE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
     }),
     getSubName(subPath) {
@@ -417,8 +417,9 @@ export default {
       this.hoverIndex = -5;
     },
     toggleItemClick(index) {
+      const { computedAvaliableItems } = this;
       this.currentSubIden = index;
-      this.changeCurrentSubtitle(this.computedAvaliableItems[index].id);
+      this.changeCurrentSubtitle(computedAvaliableItems[index].id);
     },
     toggleSubtitleOff() {
       this.currentSubIden = -1;
