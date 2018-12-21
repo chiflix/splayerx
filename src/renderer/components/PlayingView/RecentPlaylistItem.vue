@@ -151,6 +151,7 @@ export default {
     },
     mouseupVideo() {
       this.eventTarget.onItemMouseup(this.index);
+      this.$refs.progress.style.setProperty('opacity', '0');
     },
     updateAnimationIn() {
       if (!this.isPlaying) {
