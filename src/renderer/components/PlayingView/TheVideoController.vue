@@ -233,6 +233,8 @@ export default {
       /* 当前 UIManager() 的内部实现还需要继续整理和细分 特别像 clock、事件处理、UI状态更新
       /* 如果涉及到播放中的状态更新 可以依赖该UIManager，因为它本身是由video的ontimeupdate触发
       /*                                                                                  */
+      if (videodata.time + 1 >= this.duration) this.$bus.$emit('next-video');
+
       requestAnimationFrame(() => {
       // TODO: There is a probability that the properties are undefined and causing test failure.
       // It's not a best practice to use refs frequently.

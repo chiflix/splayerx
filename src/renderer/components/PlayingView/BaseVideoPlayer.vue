@@ -210,8 +210,6 @@ export default {
       return this.$refs.video;
     },
     currentTimeUpdate() {
-      const { currentTime, duration } = this.$refs.video;
-      if (currentTime + 1 >= duration) this.$bus.$emit('next-video');
       videodata.time = this.$refs.video.currentTime;
     },
     // helper functions
