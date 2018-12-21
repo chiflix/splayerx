@@ -258,10 +258,10 @@ export default {
   computed: {
     ...mapGetters(['winWidth', 'currentSubtitleId']),
     currentAudioTrack() {
-      if (this.trackNum === 1) {
+      const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
+      if (this.trackNum === 1 && track.language === 'und') {
         return this.$t('advance.chosenTrack');
       }
-      const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
       if (track && track.id) return track.name;
       return this.$t('advance.chosenTrack');
     },

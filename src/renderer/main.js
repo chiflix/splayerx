@@ -185,7 +185,7 @@ new Vue({
         this.refreshMenu();
       }
     },
-    currentSubtitleId(val, oldval) {
+    currentSubtitleId(val) {
       if (this.menu) {
         if (val !== '') {
           this.subtitleList.forEach((item, index) => {
@@ -742,11 +742,11 @@ new Vue({
         id: 'audio-track',
         submenu: [],
       };
-      if (this.audioTrackList.length <= 1) {
+      if (this.audioTrackList.length === 1 && this.audioTrackList[0].language === 'und') {
         tmp.submenu.splice(0, 1, this.updateAudioTrackItem(0, this.$t('advance.chosenTrack')));
       } else {
         this.audioTrackList.forEach((item, index) => {
-          const detail = item.language === 'und' ? `${this.$t('advance.track')} ${index + 1}` : `${this.$t('advance.track')} ${index + 1}: ${item.language}`;
+          const detail = item.language === 'und' ? `${this.$t('advance.track')} ${index + 1}` : `${this.$t('advance.track')} ${index + 1}: ${item.name}`;
           tmp.submenu.splice(index, 1, this.updateAudioTrackItem(index, detail));
         });
       }
