@@ -30,7 +30,7 @@ import CueRenderer from './CueRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
 
 export default {
-  name: 'subtitle-loader',
+  name: 'subtitle-renderer',
   props: {
     subtitleInstance: SubtitleInstance,
   },
@@ -51,7 +51,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'scaleNum', 'intrinsicHeight', 'intrinsicWidth']),
+    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth']),
     type() {
       return this.subtitleInstance.metaInfo.format;
     },
@@ -137,11 +137,12 @@ export default {
     },
     currentTimeUpdate() {
       const { time: currentTime } = videodata;
+      const { subtitleDelay } = this;
       if (!this.lastCurrentTime) {
         this.lastCurrentTime = currentTime;
       }
       const { lastCurrentTime } = this;
-      this.setCurrentCues(currentTime);
+      this.setCurrentCues(currentTime - (subtitleDelay / 1000));
       this.updateVideoSegments(lastCurrentTime, currentTime);
 
       requestAnimationFrame(this.currentTimeUpdate);
