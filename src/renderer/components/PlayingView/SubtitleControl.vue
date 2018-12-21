@@ -227,11 +227,6 @@ export default {
             - this.currentSubtitleIndex) * 31 :
           this.scopeHeight + 4;
       } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        console.log(
-          this.computedAvaliableItems.length,
-          this.loadingTypes.length,
-          this.currentSubtitleIndex,
-        );
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 37 :

@@ -1,4 +1,6 @@
 import Vue from 'vue';
+import pick from 'lodash/pick';
+import partialRight from 'lodash/partialRight';
 import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
 
@@ -38,12 +40,21 @@ const getters = {
 };
 
 const mutations = {
-  [subtitleMutations.RESET_SUBTITLES](state) {
-    Vue.set(state, 'loadingStates', {});
-    Vue.set(state, 'durations', {});
-    Vue.set(state, 'names', {});
-    Vue.set(state, 'languages', {});
-    Vue.set(state, 'formats', {});
+  [subtitleMutations.RESET_SUBTITLES](state, resetFields) {
+    if (!resetFields) {
+      Vue.set(state, 'loadingStates', {});
+      Vue.set(state, 'durations', {});
+      Vue.set(state, 'names', {});
+      Vue.set(state, 'languages', {});
+      Vue.set(state, 'formats', {});
+    } else {
+      const supportedFields = ['loadingStates', 'durations', 'names', 'languages', 'formats', 'types'];
+      const changingFields = Object.keys(resetFields)
+        .filter(field => supportedFields.includes(field));
+      changingFields.forEach((field) => {
+        Vue.set(state, field, resetFields[field]);
+      });
+    }
   },
   [subtitleMutations.LOADING_STATES_UPDATE]({ loadingStates }, { id, state }) {
     Vue.set(loadingStates, id, state);
@@ -112,6 +123,21 @@ const actions = {
   [subtitleActions.RESET_SUBTITLES]({ commit }) {
     commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
     commit(subtitleMutations.RESET_SUBTITLES);
+  },
+  [subtitleActions.RESET_ONLINE_SUBTITLES]({ commit, state }) {
+    const {
+      loadingStates, durations, names, languages, formats, types,
+    } = state;
+    const notOnlineIds = Object.keys(types).filter(id => types[id] !== 'online');
+    const takeSupportedFields = partialRight(pick, notOnlineIds);
+    commit(subtitleMutations.RESET_SUBTITLES, {
+      loadingStates: takeSupportedFields(loadingStates),
+      durations: takeSupportedFields(durations),
+      names: takeSupportedFields(names),
+      languages: takeSupportedFields(languages),
+      formats: takeSupportedFields(formats),
+      types: takeSupportedFields(types),
+    });
   },
   updateStyle({ commit }, delta) {
     commit('UpdateStyle', delta);

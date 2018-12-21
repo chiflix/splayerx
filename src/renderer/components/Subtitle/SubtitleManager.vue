@@ -94,6 +94,7 @@ export default {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
+      resetOnlineSubtitles: subtitleActions.RESET_ONLINE_SUBTITLES,
       changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_SUBTITLE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       refreshSubtitle: subtitleActions.REFRESH_SUBTITLES,
@@ -222,6 +223,7 @@ export default {
       ).src);
     },
     async refreshOnlineSubtitles() {
+      this.resetOnlineSubtitles();
       const { getOnlineSubtitlesList, originSrc: videoSrc, addSubtitles } = this;
       const newOnlineSubtitles = await getOnlineSubtitlesList(videoSrc);
       addSubtitles(newOnlineSubtitles);
