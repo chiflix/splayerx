@@ -234,8 +234,6 @@ export default {
           };
           this.infoDB().add('recent-played', data);
         }
-      } else {
-        requestAnimationFrame(this.checkedPresentTime);
       }
     },
     checkPresentTime() {
