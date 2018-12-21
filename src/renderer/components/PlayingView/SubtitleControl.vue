@@ -180,75 +180,67 @@ export default {
     },
     isOverFlow() {
       if (this.andify(this.winWidth > 512, this.winWidth <= 854)) {
-        return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 2) ? 'scroll' : '';
+        return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 2) ? 'scroll' : '';
       } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 4) ? 'scroll' : '';
+        return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 4) ? 'scroll' : '';
       }
-      return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 6) ? ' scroll' : '';
+      return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 6) ? ' scroll' : '';
     },
     scopeHeight() {
       if (this.winWidth > 512 && this.winWidth <= 854) {
         return this.computedAvaliableItems.length > 2 ?
-          (this.loadingPlaceholderList.length * 31) + 89 :
+          (this.loadingTypes.length * 31) + 89 :
           (((this.computedAvaliableItems.length + 1) * 31) - 4) +
-          (this.loadingPlaceholderList.length * 31);
+          (this.loadingTypes.length * 31);
       } else if (this.winWidth > 854 && this.winWidth <= 1920) {
         return this.computedAvaliableItems.length > 4 ?
-          (this.loadingPlaceholderList.length * 37) + 180 :
+          (this.loadingTypes.length * 37) + 180 :
           (((this.computedAvaliableItems.length + 1) * 37) - 5) +
-          (this.loadingPlaceholderList.length * 37);
+          (this.loadingTypes.length * 37);
       }
       return this.computedAvaliableItems.length > 6 ?
-        (this.loadingPlaceholderList.length * 51) + 350 :
+        (this.loadingTypes.length * 51) + 350 :
         (((this.computedAvaliableItems.length + 1) * 51) - 7) +
-        (this.loadingPlaceholderList.length * 51);
+        (this.loadingTypes.length * 51);
     },
     contHeight() {
       if (this.winWidth > 512 && this.winWidth <= 854) {
         return this.computedAvaliableItems.length > 2 ?
-          (this.loadingPlaceholderList.length * 31) + 138 :
+          (this.loadingTypes.length * 31) + 138 :
           45 + ((this.computedAvaliableItems.length + 1) * 31) +
-          (this.loadingPlaceholderList.length * 31);
+          (this.loadingTypes.length * 31);
       } else if (this.winWidth > 854 && this.winWidth <= 1920) {
         return this.computedAvaliableItems.length > 4 ?
-          (this.loadingPlaceholderList.length * 37) + 239 :
+          (this.loadingTypes.length * 37) + 239 :
           54 + ((this.computedAvaliableItems.length + 1) * 37) +
-          (this.loadingPlaceholderList.length * 37);
+          (this.loadingTypes.length * 37);
       }
       return this.computedAvaliableItems.length > 6 ?
-        (this.loadingPlaceholderList.length * 51) + 433 :
+        (this.loadingTypes.length * 51) + 433 :
         76 + ((this.computedAvaliableItems.length + 1) * 51) +
-        (this.loadingPlaceholderList.length * 51);
+        (this.loadingTypes.length * 51);
     },
     cardPos() {
       if (this.winWidth > 512 && this.winWidth <= 854) {
         return this.computedAvaliableItems.length > 0 ?
-          ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
+          ((this.computedAvaliableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 31 :
           this.scopeHeight + 4;
       } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        console.log(
+          this.computedAvaliableItems.length,
+          this.loadingTypes.length,
+          this.currentSubtitleIndex,
+        );
         return this.computedAvaliableItems.length > 0 ?
-          ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
+          ((this.computedAvaliableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 37 :
           this.scopeHeight + 5;
       }
       return this.computedAvaliableItems.length > 0 ?
-        ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
+        ((this.computedAvaliableItems.length + this.loadingTypes.length)
           - this.currentSubtitleIndex) * 51 :
         this.scopeHeight + 7;
-    },
-    loadingPlaceholderList() {
-      const res = [];
-      if (this.loadingSubsPlaceholders.local !== '') {
-        res.push('Local loading');
-      }
-      if (this.loadingSubsPlaceholders.embedded !== '') {
-        res.push('Embedded loading');
-      }
-      if (this.loadingSubsPlaceholders.online !== '') {
-        res.push('Online loading');
-      }
-      return res;
     },
     currentSubtitleIndex() {
       return this.computedAvaliableItems.findIndex(subtitle =>
@@ -313,8 +305,19 @@ export default {
       return path.basename(subPath);
     },
     handleRefresh() {
-      document.querySelector('.scrollScope').scrollTop = 0;
-      this.$bus.$emit('refresh-subtitles');
+      if (this.privacyAgreement) {
+        if (this.timer) {
+          return;
+        }
+        this.timer = setInterval(() => {
+          this.count += 1;
+          this.rotateTime = Math.ceil(this.count / 100);
+        }, 10);
+        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$bus.$emit('refresh-subtitles');
+      } else {
+        this.$bus.$emit('privacy-confirm');
+      }
     },
     orify(...args) {
       return args.some(arg => arg == true); // eslint-disable-line
@@ -425,6 +428,13 @@ export default {
     });
   },
   mounted() {
+    this.$bus.$on('finish-refresh', () => {
+      clearInterval(this.timer);
+      this.count = this.rotateTime * 100;
+      setTimeout(() => {
+        this.timer = null;
+      }, 1000);
+    });
     document.addEventListener('mouseup', (e) => {
       if (e.button === 0) {
         if (!this.showAttached) {

@@ -53,7 +53,7 @@ export default {
   computed: {
     ...mapGetters(['duration', 'scaleNum', 'intrinsicHeight', 'intrinsicWidth']),
     type() {
-      return this.subtitleInstance.metaInfo.type;
+      return this.subtitleInstance.metaInfo.format;
     },
     currentTags() {
       return this.currentCues.map(cue => cue.tags);
