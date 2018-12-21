@@ -94,12 +94,11 @@ export default {
       }
     },
     checkNextVideoUI(time) {
-      if (time > this.nextVideoPreviewTime &&
-        !this.showNextVideo &&
-        this.nextVideo !== '' &&
-        !this.manualClosed) {
-        this.$store.dispatch('UpdatePlayingList');
-        this.showNextVideo = true;
+      if (time > this.nextVideoPreviewTime && time < this.duration) {
+        if (this.nextVideo && !this.manualClosed) {
+          this.$store.dispatch('UpdatePlayingList');
+          this.showNextVideo = true;
+        }
       } else {
         this.manualClosed = false;
       }
