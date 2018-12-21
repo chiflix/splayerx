@@ -16,7 +16,7 @@
         <div class="white-hover"
           ref="whiteHover"
           :style="{
-            opacity: '0',
+            opacity: hoverIndex === index ? '1' : '0',
             minWidth: `${thumbnailWidth}px`,
             minHeight: `${thumbnailHeight}px`,
           }"/>
@@ -156,7 +156,6 @@ export default {
       if (!this.isPlaying) {
         this.$refs.blur.classList.remove('blur');
       }
-      this.$refs.whiteHover.style.setProperty('opacity', '1');
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
       this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 9}px`);
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
@@ -169,20 +168,14 @@ export default {
       if (!this.isPlaying) {
         this.$refs.blur.classList.add('blur');
       }
-      this.$refs.whiteHover.style.setProperty('opacity', '0');
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
       this.$refs.content.style.setProperty('height', '100%');
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.40)');
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.15)');
       this.$refs.progress.style.setProperty('opacity', '0');
     },
-    updateAnimationInPlayingCard() {
-      this.$refs.whiteHover.style.setProperty('opacity', '1');
-    },
     mouseoverVideo() {
-      if (this.hoverIndex === this.index) {
-        requestAnimationFrame(this.updateAnimationInPlayingCard);
-      } else if (!this.isPlaying && this.isInRange && !this.isShifting && this.canHoverItem) {
+      if (!this.isPlaying && this.isInRange && !this.isShifting && this.canHoverItem) {
         this.isBlur = false;
         this.isChosen = true;
         this.mouseoverRecently = true;
