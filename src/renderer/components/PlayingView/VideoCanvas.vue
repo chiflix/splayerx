@@ -77,14 +77,16 @@ export default {
         intrinsicHeight: event.target.videoHeight,
         ratio: event.target.videoWidth / event.target.videoHeight,
       });
+      let grabCoverTime = 0;
       if (event.target.duration - this.lastPlayedTime > 10) {
         this.$bus.$emit('seek', this.lastPlayedTime);
+        grabCoverTime = this.lastPlayedTime;
       } else {
         this.$bus.$emit('seek', 0);
       }
       this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
-      this.getVideoCover();
+      this.getVideoCover(grabCoverTime);
       this.changeWindowSize();
     },
     onAudioTrack(event) {
@@ -193,8 +195,13 @@ export default {
     saveSubtitleStyle() {
       syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
-    async getVideoCover() {
+    async getVideoCover(grabCoverTime) {
       if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
+      // Because we are execution in async, we do double check.
+      if (this.coverFinded) {
+        return;
+      }
+
       const videoElement = this.$refs.videoCanvas.videoElement();
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -204,15 +211,17 @@ export default {
         videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
+
+      let grabcoverdone = false;
       const { data } = canvasCTX.getImageData(0, 0, 100, 100);
+      // check the cover is it right.
       for (let i = 0; i < data.length; i += 1) {
         if ((i + 1) % 4 !== 0 && data[i] > 20) {
-          this.coverFinded = true;
+          grabcoverdone = true;
           break;
         }
       }
-      this.lastCoverDetectingTime = videodata.time;
-      if (this.coverFinded) {
+      if (grabcoverdone) {
         const smallImagePath = canvas.toDataURL('image/png');
         [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
         canvasCTX.drawImage(
@@ -235,10 +244,17 @@ export default {
           this.infoDB().add('recent-played', data);
         }
       }
+
+      this.coverFinded = grabcoverdone;
+      this.lastCoverDetectingTime = grabCoverTime;
     },
     checkPresentTime() {
       if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
-        this.getVideoCover();
+        // Assume to grab the cover can be the success and to keep
+        // it doesn't execution multiple times. if grab failed,
+        // we set it back to false.
+        this.coverFinded = true;
+        this.getVideoCover(videodata.time);
       }
     },
   },
