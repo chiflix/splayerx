@@ -53,9 +53,7 @@
         :isShifting="shifting"
         :hoverIndex="hoverIndex"
         :thumbnailWidth="thumbnailWidth"
-        @mouseupItem="itemMouseup"
-        @mouseoutItem="itemMouseout"
-        @mouseoverItem="itemMouseover"/>
+        :eventTarget="eventTarget" />
       <div class="next-page"
         v-if="thumbnailNumber < numberOfPlaylistItem"
         @mouseup.stop=""
@@ -94,11 +92,12 @@ export default {
       shifting: false,
       snapShoted: false,
       hoveredMediaInfo: {}, // the hovered video's media info
-      backgroundDisplayState: this.displayState,
       mousePosition: [],
+      backgroundDisplayState: this.displayState, // it's weird but DON'T DELETE IT!!
       canHoverItem: false,
       tranFlag: false,
       filePathNeedToDelete: '',
+      eventTarget: {},
     };
   },
   created() {
@@ -110,6 +109,10 @@ export default {
       this.filePathNeedToDelete = '';
     });
     this.hoverIndex = this.playingIndex;
+    this.eventTarget.onItemMouseover = this.onItemMouseover;
+    this.eventTarget.onItemMouseout = this.onItemMouseout;
+    this.eventTarget.onItemMouseup = this.onItemMouseup;
+
     this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
@@ -126,15 +129,15 @@ export default {
         this.$emit('update:isDragging', false);
       }
     },
-    itemMouseover(payload) {
-      this.hoverIndex = payload.index;
-      this.hoveredMediaInfo = payload.mediaInfo;
+    onItemMouseover(index, media) {
+      this.hoverIndex = index;
+      this.hoveredMediaInfo = media;
       this.filename = path.basename(
-        payload.mediaInfo.path,
-        path.extname(payload.mediaInfo.path),
+        media.path,
+        path.extname(media.path),
       );
     },
-    itemMouseout() {
+    onItemMouseout() {
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
@@ -147,7 +150,7 @@ export default {
         }
       }
     },
-    itemMouseup(index) {
+    onItemMouseup(index) {
       // last page
       if (index === this.firstIndex - 1) {
         this.lastIndex = index;
@@ -165,7 +168,7 @@ export default {
           this.shifting = false;
           this.tranFlag = false;
         }, 400);
-      } else if (index !== this.playingIndex
+      } else if (index !== this.playingIndex && !this.shifting
         && this.filePathNeedToDelete !== this.playingList[index]) {
         this.playFile(this.playingList[index]);
       }
@@ -216,6 +219,7 @@ export default {
           * this.thumbnailNumber;
       }
     },
+    // can hover on items only after mouse move some distance
     mousemove(val) {
       const distance = this.winWidth > 1355 ? 20 : 10;
       if (!this.canHoverItem && this.displayState) {
