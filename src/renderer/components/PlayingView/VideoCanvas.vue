@@ -19,7 +19,6 @@
       :currentTime="seekTime"
       :currentAudioTrackId="currentAudioTrackId.toString()" />
     </transition>
-    <!--<BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>-->
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -30,14 +29,12 @@ import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper';
 import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
-import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
 import { videodata } from '../../store/video';
 
 export default {
   name: 'video-canvas',
   components: {
-    BaseSubtitle,
     'base-video-player': BaseVideoPlayer,
   },
   data() {
