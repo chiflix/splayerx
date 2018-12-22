@@ -184,7 +184,9 @@ export default {
           const segmentTime = currentSegment[1] - currentSegment[0];
           if (elapsedSegmentTime / segmentTime >= 0.9) {
             const index = videoSegments.findIndex(segment => segment[0] === currentSegment[0]);
-            this.$set(videoSegments, index, [...videoSegments[index].slice(0, 2), true]);
+            if (index !== -1) {
+              this.$set(videoSegments, index, [...videoSegments[index].slice(0, 2), true]);
+            }
           }
           this.currentSegment = segment;
         }

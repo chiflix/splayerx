@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import flatten from 'lodash/flatten';
 import { localFormatLoader, toArray, mediaHash, promisify } from './utils';
 
 const files = require.context('.', false, /\.loader\.js$/);
@@ -8,11 +9,17 @@ files.keys().forEach((key) => {
   loaders[key.replace(/(\.\/|\.loader|\.js)/g, '')] = files(key).default;
 });
 
-const supportedFormats = Object.keys(loaders)
-  .map(loaderType => loaders[loaderType].supportedFormats)
-  .reduce((prev, curr) => prev.concat(curr), []);
+const supportedFormats = flatten(Object.keys(loaders)
+  .map(loaderType => loaders[loaderType].supportedFormats));
 
 export default class SubtitleLoader extends EventEmitter {
+  /**
+   * Create a SubtitleLoader
+   * @param {string} src - path for a local/embedded online or hash for an online subtitle
+   * @param {string} type - 'local', 'embedded' or 'online'
+   * @param {object} options - (optional)other info about subtitle,
+   * like language or name(for online subtitle)
+   */
   constructor(src, type, options) {
     super();
     this.src = src;

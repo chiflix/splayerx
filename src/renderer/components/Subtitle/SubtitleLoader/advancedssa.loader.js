@@ -41,10 +41,9 @@ const normalizer = (parsedSubtitle) => {
     const baseDiagolue = {
       start, end,
     };
-    /* eslint-disable no-restricted-syntax */
-    for (const slice of slices) {
+    Object.values(slices).forEach((slice) => {
       const { tag: sliceTag, fragments } = slice;
-      for (const fragment of fragments) {
+      fragments.forEach((fragment) => {
         const { tag: fragmentTag, text } = fragment;
         const finalTags = {
           ...baseTags,
@@ -58,8 +57,8 @@ const normalizer = (parsedSubtitle) => {
           { text: text.replace(/[\\/][Nn]/g, ''), tags: finalTags },
         );
         finalSubtitles.push(finalDiagolue);
-      }
-    }
+      });
+    });
   });
   return finalSubtitles;
 };
