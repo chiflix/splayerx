@@ -2,7 +2,7 @@ import partial from 'lodash/partial';
 import compose from 'lodash/fp/compose';
 import { parse, toMS } from 'subtitle';
 
-import { localLanguageLoder, localNameLoader, loadLocalFile } from './utils';
+import { localLanguageLoader, localNameLoader, loadLocalFile } from './utils';
 
 const baseTags = {
   // https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API#Cue_settings
@@ -27,7 +27,7 @@ export default {
   name: 'WebVTT',
   supportedFormats: ['vtt'],
   infoLoaders: {
-    language: partial(localLanguageLoder, 'vtt'),
+    language: partial(localLanguageLoader, 'vtt'),
     name: localNameLoader,
   },
   loader: loadLocalFile,

@@ -3,7 +3,7 @@ import compose from 'lodash/fp/compose';
 import pick from 'lodash/pick';
 import { compile } from 'ass-compiler';
 
-import { localLanguageLoder, localNameLoader, loadLocalFile } from './utils';
+import { localLanguageLoader, localNameLoader, loadLocalFile } from './utils';
 
 const baseTags = {
   // fn: '',
@@ -69,7 +69,7 @@ export default {
   name: 'Advanced SubStation Alpha',
   supportedFormats: ['ass', 'ssa'],
   infoLoaders: {
-    language: partial(localLanguageLoder, 'ass'),
+    language: partial(localLanguageLoader, 'ass'),
     name: localNameLoader,
   },
   loader: loadLocalFile,

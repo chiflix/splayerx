@@ -16,18 +16,40 @@ export function toArray(element) {
   return element instanceof Array ? element : [element];
 }
 
+/**
+ * Whether an object is a collection of methods or
+ * an object with func and params attributes(i.e. SubtitleLoader version of a function).
+ *
+ * @export
+ * @param {object} object - object to be evaluated
+ * @returns {string} 'option' for methods or 'function' for a function
+ */
 export function objectTo(object) {
   const keys = Object.keys(object);
-  if (keys.includes('func') && keys.inclides('params')) {
+  if (keys.includes('func') && keys.includes('params')) {
     return 'function';
   }
   return 'option';
 }
 
-export function localFormatLoader(src) {
-  return extname(src).slice(1);
+/**
+ * Get the extension of a local subtitle file.
+ *
+ * @export
+ * @param {string} path - absolute path of the local subtitle file
+ * @returns {string} an extension without '.'
+ */
+export function localFormatLoader(path) {
+  return extname(path).slice(1);
 }
 
+/**
+ * Get sample text from a local subtitle file.
+ *
+ * @async
+ * @param {string} path - absolute path of the local subtitle file
+ * @returns {Promise<Buffer>} buffer of the sample text
+ */
 function getFragmentBuffer(path) {
   return new Promise((resolve, reject) => {
     open(path, 'r', async (err, fd) => {
@@ -46,11 +68,23 @@ function getFragmentBuffer(path) {
   });
 }
 
+/**
+ * Turn a buffer to string with proper enconding with chardet and iconv-lite.
+ *
+ * @param {Buffer} buffer - buffer of string
+ * @returns {string} string with proper encoding
+ */
 function bufferToString(buffer) {
   const sampleStringEncoding = chardet.detect(buffer);
   return iconv.decode(buffer, sampleStringEncoding);
 }
 
+/**
+ * Get callback for turn subtitle into plain text without second line.
+ *
+ * @param {string} subtitleFormat - Formal subtitle format name, e.g. 'SubStation Alpha', 'WebVtt'.
+ * @returns {fucntion} Callback for removing tags and other lines for each cue text.
+ */
 function getSubtitleCallback(subtitleFormat) {
   switch (subtitleFormat) {
     case 'SubStation Alpha':
@@ -63,12 +97,31 @@ function getSubtitleCallback(subtitleFormat) {
   }
 }
 
-export async function localLanguageLoder(path, format) {
+/**
+ * Get the language code for a local subtitle file
+ *
+ * @async
+ * @export
+ * @param {string} path - path of a local subtitle file
+ * @param {string} format - Formal subtitle format name, e.g. 'SubStation Alpha', 'WebVtt'.
+ * @returns {string} language code(ISO-639-3) of the subtitle
+ */
+export async function localLanguageLoader(path, format) {
   const buffer = await getFragmentBuffer(path);
   const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
   return franc(stringCallback(bufferToString(buffer)));
 }
 
+/**
+ * Get the name for a local subtitle file
+ *
+ * @export
+ * @param {*} path - path of a local subtitle file
+ * @param {*} videoName - (optional) name of the video matched with the subtitle
+ * @param {*} language - (optional) language of the subtitle
+ * @returns {string} filename or filename without videoname(with videoName param)
+ * or language code for the file(with language param)
+ */
 export function localNameLoader(path, videoName, language) {
   const filename = basename(path).replace(/.(?!.*[.].+)/g, '');
   if (language) {
@@ -79,6 +132,14 @@ export function localNameLoader(path, videoName, language) {
   return filename;
 }
 
+/**
+ * Cue tags getter for SubRip, SubStation Alpha and Online Transcript subtitles.
+ *
+ * @export
+ * @param {string} text - cue text to evaluate.
+ * @param {object} baseTags - default tags for the cue.
+ * @returns {object} tags object for the cue
+ */
 export function tagsGetter(text, baseTags) {
   const tagRegex = /\{[^{}]*\}/g;
   const matchTags = text.match(tagRegex);
@@ -109,6 +170,13 @@ export function tagsGetter(text, baseTags) {
   return finalTags;
 }
 
+/**
+ * Load string content from path
+ *
+ * @export
+ * @param {string} path - path of a local file
+ * @returns {Promise<string|Error>} string content or err when read/decoding file
+ */
 export function loadLocalFile(path) {
   return new Promise((resolve, reject) => {
     readFile(path, (err, data) => {

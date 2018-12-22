@@ -2,7 +2,7 @@ import partial from 'lodash/partial';
 import compose from 'lodash/fp/compose';
 import { parse, toMS } from 'subtitle';
 
-import { localLanguageLoder, localNameLoader, tagsGetter, loadLocalFile } from './utils';
+import { localLanguageLoader, localNameLoader, tagsGetter, loadLocalFile } from './utils';
 
 const baseTags = { alignment: 2, pos: null };
 const normalizer = parsedSubtitle => parsedSubtitle.map(subtitle => ({
@@ -17,7 +17,7 @@ export default {
   name: 'SubRip',
   supportedFormats: ['srt'],
   infoLoaders: {
-    language: partial(localLanguageLoder, 'srt'),
+    language: partial(localLanguageLoader, 'srt'),
     name: {
       func: localNameLoader,
       params: ['src', 'videoName', 'language'],
