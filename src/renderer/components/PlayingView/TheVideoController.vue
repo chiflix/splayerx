@@ -255,7 +255,8 @@ export default {
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
             if (this.needResetHoverProgressBar) {
               this.needResetHoverProgressBar = false;
-              this.$refs.progressbar.updateHoveredProgressBar(videodata.time, 0);
+              // reset hover-progressbar state
+              this.$refs.progressbar.updateHoveredProgressBar(videodata.time, -1);
             }
             this.$refs.progressbar.updatePlayProgressBar(videodata.time);
           }

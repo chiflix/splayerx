@@ -132,9 +132,9 @@ export default {
       hoveredProgress.style.width = hoveredPercent <= playedPercent ? `${hoveredPercent}%` : `${hoveredPercent - playedPercent}%`;
       hoveredProgress.style.backgroundColor = hoveredPercent <= playedPercent ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
       hoveredProgress.style.order = hoveredPercent <= playedPercent ? '0' : '1';
+      // the hoveredPercent = -1 means we need to hide it
+      hoveredPercent === -1 && this.setHoveringToFalse(true);
       defaultProgress.style.backgroundColor = this.hovering ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0)';
-      // the hoveredPercent = 0 means we need to hide it
-      hoveredPercent === 0 && this.setHoveringToFalse(true);
     },
     // We need high fps to render hovering of the progress-bar for
     // smooth animation, We use requestAnimationFrame to make it.
