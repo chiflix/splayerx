@@ -12,8 +12,8 @@ describe('helper.sagi api', () => {
     });
   }).timeout(20000);
 
-  it('sagi.mediaTranslate should return OK', (done) => {
-    helpers.methods.sagi().mediaTranslate('11-22-33-44').then((resp) => {
+  it('sagi.mediaTranslateRaw should return OK', (done) => {
+    helpers.methods.sagi().mediaTranslateRaw('11-22-33-44').then((resp) => {
       if (process.env.NODE_ENV === 'production') {
         expect(resp.getError().toObject().code, 'error').to.equal(5); // no result
         done();
@@ -59,14 +59,14 @@ describe('helper.sagi api', () => {
       expect(resp.toObject().code, 'error').to.equal(0);
 
       // try to fetch the transcript that we just pushed
-      helpers.methods.sagi().mediaTranslate(randomMediahash).then((resp) => {
+      helpers.methods.sagi().mediaTranslateRaw(randomMediahash).then((resp) => {
         expect(resp.getError().toObject().code, 'error').to.equal(0);
         const res = resp.getResultsList();
         expect(res.length, 'results list length').to.be.above(0);
         console.log(`results list length ${res.length}`);
 
         res.forEach((tr) => {
-          helpers.methods.sagi().getTranscript(tr.getTranscriptIdentity()).then((resp) => {
+          helpers.methods.sagi().getTranscriptRaw(tr.getTranscriptIdentity()).then((resp) => {
             expect(resp.hasError()).to.be.equal(false);
 
             const cue0 = resp.getTranscriptsList()[0];
