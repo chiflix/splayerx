@@ -1,6 +1,7 @@
 import util from 'util';
 import storage from 'electron-json-storage';
-import { UpdateInfo } from './Message.js';
+import { UpdateInfo } from './Message';
+
 const updateInstalledString = 'updateInstalled#loloxdnkd';
 const updateDownloadString = 'updateInstalled#loloxdnkdddksk';
 

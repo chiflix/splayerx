@@ -9,14 +9,14 @@
         height: heightSize,
       }">
     <div class="textContainer" :style="{
-      cursor: isChosen ? 'default' : 'pointer',
+      cursor: isChosen || item === this.$t('advance.audioDelay') ? 'default' : 'pointer',
     }">
       <div class="textItem"
         :style="{
           color: color,
           transition: 'color 300ms',
         }">{{ item }}</div>
-      <div class="rightItem">{{ isChosen ? timeUnits : item === '字幕延迟' ? subtitleDelay : audioDelay }}</div>
+      <div class="rightItem" :style="{ color: color }">{{ isChosen ? timeUnits : item === this.$t('advance.subDelay') ? screenSubtitleDelay : audioDelay }}</div>
     </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -41,6 +41,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import Icon from '../../BaseIconContainer.vue';
+
 export default {
   name: 'AdvanceSelectItems',
   data() {
@@ -70,7 +71,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['SubtitleDelay', 'AudioDelay']),
+    ...mapGetters(['subtitleDelay', 'AudioDelay']),
     heightSize() {
       if (this.winWidth > 514 && this.winWidth <= 854) {
         return this.isChosen ? '74px' : '37px';
@@ -80,8 +81,8 @@ export default {
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
     },
     timeUnits() {
-      if (this.item === '字幕延迟') {
-        if (Math.abs(this.SubtitleDelay) >= 10000) {
+      if (this.item === this.$t('advance.subDelay')) {
+        if (Math.abs(this.subtitleDelay) >= 10000) {
           return 's';
         }
       } else if (Math.abs(this.AudioDelay) >= 10000) {
@@ -89,11 +90,11 @@ export default {
       }
       return 'ms';
     },
-    subtitleDelay() {
-      if (Math.abs(this.SubtitleDelay) >= 10000) {
-        return `${this.SubtitleDelay / 1000} s`;
+    screenSubtitleDelay() {
+      if (Math.abs(this.subtitleDelay) >= 10000) {
+        return `${this.subtitleDelay / 1000} s`;
       }
-      return `${this.SubtitleDelay} ms`;
+      return `${this.subtitleDelay} ms`;
     },
     audioDelay() {
       if (Math.abs(this.AudioDelay) >= 10000) {
@@ -102,11 +103,11 @@ export default {
       return `${this.AudioDelay} ms`;
     },
     delayNum() {
-      if (this.item === '字幕延迟') {
-        if (Math.abs(this.SubtitleDelay) >= 10000) {
-          return `${this.SubtitleDelay / 1000}`;
+      if (this.item === this.$t('advance.subDelay')) {
+        if (Math.abs(this.subtitleDelay) >= 10000) {
+          return `${this.subtitleDelay / 1000}`;
         }
-        return this.SubtitleDelay;
+        return this.subtitleDelay;
       }
       if (Math.abs(this.AudioDelay) >= 10000) {
         return `${this.AudioDelay / 1000}`;
@@ -114,7 +115,7 @@ export default {
       return this.AudioDelay;
     },
     changeDelay() {
-      if (Math.abs(this.SubtitleDelay) >= 10000 || Math.abs(this.AudioDelay) >= 10000) {
+      if (Math.abs(this.subtitleDelay) >= 10000 || Math.abs(this.AudioDelay) >= 10000) {
         return 100;
       }
       return 50;
@@ -125,7 +126,7 @@ export default {
   },
   methods: {
     handleDeMousedown() {
-      if (this.item === '字幕延迟') {
+      if (this.item === this.$t('advance.subDelay')) {
         const myFunction = () => {
           clearInterval(this.timeDeInt);
           if (this.changeSpeed >= 20) {
@@ -141,14 +142,14 @@ export default {
       }
     },
     handleDeMouseup() {
-      if (this.item === '字幕延迟') {
+      if (this.item === this.$t('advance.subDelay')) {
         this.changeSpeed = 120;
         clearTimeout(this.timeDeSet);
         clearInterval(this.timeDeInt);
       }
     },
     handleInMousedown() {
-      if (this.item === '字幕延迟') {
+      if (this.item === this.$t('advance.subDelay')) {
         const myFunction = () => {
           clearInterval(this.timeInInt);
           if (this.changeSpeed >= 20) {
@@ -164,7 +165,7 @@ export default {
       }
     },
     handleInMouseup() {
-      if (this.item === '字幕延迟') {
+      if (this.item === this.$t('advance.subDelay')) {
         this.changeSpeed = 120;
         clearTimeout(this.timeInSet);
         clearInterval(this.timeInInt);

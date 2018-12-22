@@ -20,7 +20,6 @@
       :currentAudioTrackId="currentAudioTrackId.toString()"
       @update:currentTime="updateCurrentTime" />
     </transition>
-    <!--<BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>-->
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -28,17 +27,16 @@
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
-import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
+import WindowSizeHelper from '@/helpers/WindowSizeHelper';
 import { mapGetters, mapActions, mapMutations } from 'vuex';
 import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions } from '@/store/actionTypes';
-import BaseSubtitle from './BaseSubtitle.vue';
-import BaseVideoPlayer from './BaseVideoPlayer';
+import BaseVideoPlayer from './BaseVideoPlayer.vue';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'video-canvas',
   components: {
-    BaseSubtitle,
     'base-video-player': BaseVideoPlayer,
   },
   data() {
@@ -74,7 +72,7 @@ export default {
         muted: this.muted,
         rate: 1,
         duration: event.target.duration,
-        currentTime: this.lastPlayedTime || 0,
+        currentTime: 0,
       });
       this.updateMetaInfo({
         intrinsicWidth: event.target.videoWidth,
@@ -128,14 +126,15 @@ export default {
       const getRatio = size => size[0] / size[1];
       const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
       const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
-      const diffSize = (overOrNot, size, diffedSize) => size.some((value, index) => // eslint-disable-line
-        overOrNot ? value >= diffedSize[index] : value < diffedSize[index]);
+      const biggerSize = (size, diffedSize) =>
+        size.some((value, index) => value >= diffedSize[index]);
       const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
-      if (diffSize(true, videoSize, maxSize)) {
-        result = biggerRatio(videoSize, maxSize) ?
+      if (biggerSize(result, maxSize)) {
+        result = biggerRatio(result, maxSize) ?
           setHeightByWidth(maxSize) : setWidthByHeight(maxSize);
-      } else if (diffSize(false, videoSize, minSize)) {
-        result = biggerRatio(minSize, videoSize) ?
+      }
+      if (biggerSize(minSize, result)) {
+        result = biggerRatio(minSize, result) ?
           setHeightByWidth(minSize) : setWidthByHeight(minSize);
       }
       return result.map(value => Math.round(value));
@@ -188,15 +187,16 @@ export default {
       const data = {
         shortCut: imagePath,
         smallShortCut: smallImagePath,
-        lastPlayedTime: this.currentTime,
+        lastPlayedTime: videodata.time,
         duration: this.duration,
       };
       syncStorage.setSync('recent-played', data);
     },
     saveSubtitleStyle() {
-      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle });
+      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
     async getVideoCover() {
+      if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
       const videoElement = this.$refs.videoCanvas.videoElement();
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -213,6 +213,7 @@ export default {
           break;
         }
       }
+      this.lastCoverDetectingTime = videodata.time;
       if (this.coverFinded) {
         const smallImagePath = canvas.toDataURL('image/png');
         [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
@@ -227,7 +228,7 @@ export default {
           this.infoDB().add('recent-played', mergedData);
         } else {
           const data = {
-            quickHash: this.mediaQuickHash(this.originSrc),
+            quickHash: await this.mediaQuickHash(this.originSrc),
             path: this.originSrc,
             cover: imagePath,
             smallCover: smallImagePath,
@@ -235,15 +236,23 @@ export default {
           };
           this.infoDB().add('recent-played', data);
         }
+      } else {
+        requestAnimationFrame(this.checkedPresentTime);
       }
-      this.lastCoverDetectingTime = this.currentTime;
+    },
+    checkedPresentTime() {
+      if (!this.coverFinded) {
+        if (videodata.time - this.lastCoverDetectingTime > 1) {
+          this.getVideoCover();
+        }
+        requestAnimationFrame(this.checkedPresentTime);
+      }
     },
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle', 'scaleNum',
-      'nextVideo']),
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
+      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -268,11 +277,7 @@ export default {
       this.videoConfigInitialize({
         audioTrackList: [],
       });
-    },
-    currentTime(val) {
-      if (!this.coverFinded && val - this.lastCoverDetectingTime > 1) {
-        this.getVideoCover();
-      }
+      this.play();
     },
   },
   mounted() {
@@ -289,6 +294,11 @@ export default {
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
+    });
+    this.$bus.$on('next-video', () => {
+      if (this.nextVideo) {
+        this.playFile(this.nextVideo);
+      }
     });
     this.$bus.$on('seek', (e) => {
       this.seekTime = [e];

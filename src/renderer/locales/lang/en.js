@@ -12,12 +12,16 @@ export default {
     playback: {
       name: 'Playback',
       fullScreen: 'Full Screen',
-      keepPlayingWindowFront: 'Keep Window On Top',
+      keepPlayingWindowFront: 'Float on Top',
       increasePlaybackSpeed: 'Increase Playback Speed     ]',
       decreasePlaybackSpeed: 'Decrease Playback Speed   [',
       captureScreen: 'Capture Screen',
       captureVideoClip: 'Capture Video Clip',
       mediaInfo: 'Media Info',
+      play: 'Play',
+      pause: 'Pause',
+      forward: 'Step Forward',
+      backward: 'Step Backward',
     },
     audio: {
       name: 'Audio',
@@ -26,14 +30,17 @@ export default {
       mute: 'Mute',
       switchAudioTrack: 'Switch Audio Track',
       defaultAudioTrack: 'Default',
+      increaseVolume: 'Increase Volume',
+      decreaseVolume: 'Decrease Volume',
     },
     subtitle: {
       name: 'Subtitle',
+      subtitleSelect: 'Translation',
       AITranslation: 'Reload Smart Translation',
       loadSubtitleFile: 'Load Subtitle File…',
       langZhCN: 'Chinese',
       langEn: 'English',
-      noSubtitle: 'No Subtitle',
+      noSubtitle: 'None',
       mainSubtitle: 'Primary Subtitle',
       secondarySubtitle: 'Secondary Subtitle',
       subtitleStyle: 'Font Style',
@@ -56,6 +63,7 @@ export default {
       name: 'Window',
       minimize: 'Minimize',
       enterFullScreen: 'Enter Full Screen',
+      exitFullScreen: 'Exit Full Screen',
       bossKey: 'Boss Key',
     },
     help: {
@@ -101,8 +109,14 @@ export default {
     track: 'Track',
   },
   errorFile: {
-    title: 'File error',
-    content: 'Failed to open file.',
+    title: {
+      default: 'File error',
+      fileNonExist: 'Cannot find the file',
+    },
+    content: {
+      default: 'Failed to open file.',
+      fileNonExist: 'Will be removed from the list.',
+    },
   },
   loading: {
     title: '',
@@ -126,6 +140,18 @@ export default {
     folderSource: 'Folder',
     playlistSource: 'Playlist',
     playing: 'Playing',
+  },
+  nextVideo: {
+    nextInFolder: 'Next in Folder',
+    nextInPlaylist: 'Next in Playlist',
+  },
+  subtitle: {
+    language: {
+      zh: 'Chinese (Simplified)',
+      'zh-CN': 'Chinese (Simplified)',
+      'zh-TW': 'Chinese (Traditional)',
+      en: 'English',
+    },
   },
 };
 

@@ -1,5 +1,4 @@
-import partial from 'lodash/partial';
-import compose from 'lodash/fp/compose';
+import flow from 'lodash/flow';
 import pick from 'lodash/pick';
 import { compile } from 'ass-compiler';
 
@@ -69,9 +68,12 @@ export default {
   name: 'Advanced SubStation Alpha',
   supportedFormats: ['ass', 'ssa'],
   infoLoaders: {
-    language: partial(localLanguageLoader, 'ass'),
+    language: {
+      func: localLanguageLoader,
+      params: ['src', 'format'],
+    },
     name: localNameLoader,
   },
   loader: loadLocalFile,
-  parser: compose(normalizer, compile),
+  parser: flow(compile, normalizer),
 };

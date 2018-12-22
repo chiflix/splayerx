@@ -1,5 +1,4 @@
-import partial from 'lodash/partial';
-import compose from 'lodash/fp/compose';
+import flow from 'lodash/flow';
 import { parse, toMS } from 'subtitle';
 
 import { localLanguageLoader, localNameLoader, tagsGetter, loadLocalFile } from './utils';
@@ -17,12 +16,12 @@ export default {
   name: 'SubRip',
   supportedFormats: ['srt'],
   infoLoaders: {
-    language: partial(localLanguageLoader, 'srt'),
-    name: {
-      func: localNameLoader,
-      params: ['src', 'videoName', 'language'],
+    language: {
+      func: localLanguageLoader,
+      params: ['src', 'format'],
     },
+    name: localNameLoader,
   },
   loader: loadLocalFile,
-  parser: compose(normalizer, parse),
+  parser: flow(parse, normalizer),
 };

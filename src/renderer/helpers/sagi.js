@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import { get, partialRight } from 'lodash';
+import { get, partialRight, flow, nth } from 'lodash';
 
 import healthMsg from 'sagi-api/health/v1/health_pb';
 import healthRpc from 'sagi-api/health/v1/health_grpc_pb';
@@ -8,12 +8,12 @@ import translationMsg from 'sagi-api/translation/v1/translation_pb';
 import translationRpc from 'sagi-api/translation/v1/translation_grpc_pb';
 import { TrainingData } from 'sagi-api/training/v1/training_pb';
 import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
-// TODO: refactor all logs
+
 /* eslint-disable */
 const grpc = require('grpc');
 /* eslint-enable */
 
-const getResponseArray = partialRight(get, 'array');
+const getResponseArray = flow(partialRight(get, 'array'), partialRight(nth, 1));
 
 class Sagi {
   constructor() {
@@ -27,16 +27,22 @@ class Sagi {
     if (process.env.NODE_ENV === 'production') {
       this.endpoint = 'apis.sagittarius.ai:8443';
     } else {
+      // this.endpoint = '127.0.0.1:8443'; // use this when debuging server
       this.endpoint = 'apis.stage.sagittarius.ai:8443';
     }
     this.transcripts = [];
   }
 
-  mediaTranslate(mediaIdentity) {
+  mediaTranslate(mediaIdentity, languageCode) {
     return new Promise((resolve, reject) => {
       const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
       const req = new translationMsg.MediaTranslationRequest();
       req.setMediaIdentity(mediaIdentity);
+      if (!languageCode || languageCode.length === 0) {
+        console.log('warning: empty languageCode in mediaTranslate, fail back to "zh"');
+        languageCode = 'zh';
+      }
+      req.setLanguageCode(languageCode);
       client.translateMedia(req, (err, response) => {
         const transcriptInfo = array => ({
           transcript_identity: array[0],
@@ -64,29 +70,35 @@ class Sagi {
         if (err) {
           reject(err);
         } else {
-          resolve(res);
+          resolve(getResponseArray(res));
         }
       });
     });
   }
 
-  async getTranscriptInfo(mediaIdentity, transcriptIdentity) {
-    const transcripts = await this.mediaTranslate(mediaIdentity);
-    console.log(transcripts);
-    return transcripts.find(transcript => transcript.transcript_identity === transcriptIdentity);
-  }
-
-  /* eslint-disable */
-  pushTranscript(subtitlePayload) {
+  pushTranscript(transcriptData) {
     return new Promise((resolve, reject) => {
       const client = new TrainngClient(this.endpoint, this.creds);
       const req = new TrainingData();
-      const toPascalCase = field => field.replace(/(^.)|(_.)/g, match => match[match.startsWith('_') ? 1 : 0].toUpperCase());
-      Object.keys(subtitlePayload).forEach((field) => {
-        if (req[`set${toPascalCase(field)}`]) req[`set${toPascalCase(field)}`](subtitlePayload[field]);
-      });
+      req.setMediaIdentity(transcriptData.media_identity);
+      req.setLanguageCode(transcriptData.language_code);
+      req.setFormat(transcriptData.format);
+      req.setPlayedTime(transcriptData.played_time);
+      req.setTotalTime(transcriptData.total_time);
+      req.setDelay(transcriptData.delay);
+      if (transcriptData.payload !== undefined && transcriptData.payload !== null) {
+        req.setPayload(transcriptData.payload);
+      } else if (transcriptData.transcript_identity !== undefined
+          && transcriptData.transcript_identity !== null) {
+        req.setTranscriptIdentity(transcriptData.transcript_identity);
+      } else {
+        const err = new Error('missing transcript payload and transcript_identity');
+        reject(err);
+      }
       client.pushData(req, (err, res) => {
-        if (err) reject(err);
+        if (err) {
+          reject(err);
+        }
         resolve(res);
       });
     });
@@ -100,6 +112,7 @@ class Sagi {
         if (err) {
           reject(err);
         } else {
+          console.log(`sagi version ${response.getVersion()}`);
           resolve(response.getStatus());
         }
       });

@@ -9,7 +9,7 @@
         top: subTop(index),
         transform: transPos(index),
       }"
-      :class="!isVtt && !cue.tags.pos ? `subtitle-alignment${cue.tags.alignment}` : ''">
+      :class="avaliableClass(index)">
       <CueRenderer class="cueRender"
         :text="cue.text"
         :settings="cue.tags"
@@ -21,15 +21,18 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapMutations } from 'vuex';
 import isEqual from 'lodash/isEqual';
-import Subtitle from './Subtitle';
+import toArray from 'lodash/toArray';
+import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
+import { videodata } from '@/store/video';
 import CueRenderer from './CueRenderer.vue';
+import SubtitleInstance from './SubtitleLoader/index';
+
 export default {
-  name: 'subtitle-loader',
+  name: 'subtitle-renderer',
   props: {
-    subtitleSrc: String,
-    id: String,
+    subtitleInstance: SubtitleInstance,
   },
   components: {
     CueRenderer,
@@ -41,12 +44,16 @@ export default {
       videoSegments: [],
       currentSegment: [0, 0, false],
       elapsedSegmentTime: 0,
+      subToTop: false,
+      lastIndex: [],
+      lastAlignment: [],
+      lastText: [],
     };
   },
   computed: {
-    ...mapGetters(['currentTime', 'duration', 'scaleNum']),
+    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth']),
     type() {
-      return this.subtitle.metaInfo.type;
+      return this.subtitleInstance.metaInfo.format;
     },
     currentTags() {
       return this.currentCues.map(cue => cue.tags);
@@ -59,60 +66,138 @@ export default {
     },
   },
   watch: {
-    currentTime(newVal, oldValue) {
-      const { parsedData } = this.subtitle;
-      if (parsedData) {
-        const cues = parsedData
-          .filter(subtitle => subtitle.start <= newVal && subtitle.end >= newVal && subtitle.text !== '');
-        if (!isEqual(cues, this.currentCues) && cues.length) {
-          this.currentCues = cues.reverse();
+    videoSegments(newVal) {
+      const duration = newVal
+        .filter(segment => segment[2])
+        .map(segment => segment[1] - segment[0])
+        .reduce((prev, curr) => prev + curr, 0);
+      this.updateDuration({ id: this.subtitleInstance.src, duration });
+    },
+    currentTexts(val) {
+      val.forEach((de, index) => {
+        const ind = this.lastText.indexOf(de);
+        if (ind !== -1) {
+          this.currentCues[index].tags.alignment = this.lastAlignment[ind];
+        }
+      });
+    },
+  },
+  created() {
+    const { subtitleInstance } = this;
+    subtitleInstance.on('data', subtitleInstance.parse);
+    subtitleInstance.on('parse', (parsed) => {
+      this.videoSegments = this.getVideoSegments(parsed, this.duration);
+      if (parsed.length) {
+        const cues = parsed
+          .filter(subtitle => subtitle.start <= this.subtitleCurrentTime && subtitle.end >= this.subtitleCurrentTime && subtitle.text !== '');
+        if (!isEqual(cues, this.currentCues)) {
+          this.currentCues = cues;
         }
       }
+    });
+    subtitleInstance.load();
+    this.$bus.$on('subtitle-to-top', (val) => {
+      this.subToTop = val;
+      if (!val) {
+        this.lastIndex.forEach((index) => {
+          if (this.currentTags[index]) {
+            this.currentTags[index].alignment = this.lastAlignment[index]
+              ? this.lastAlignment[index] : 2;
+          }
+        });
+      }
+    });
+  },
+  mounted() {
+    requestAnimationFrame(this.currentTimeUpdate);
+    this.$bus.$on('clear-last-cue', () => {
+      this.lastIndex = [];
+      this.lastAlignment = [];
+      this.lastText = [];
+    });
+  },
+  methods: {
+    ...mapMutations({
+      updateDuration: subtitleMutations.DURATIONS_UPDATE,
+    }),
+    avaliableClass(index) {
+      if (!this.isVtt && !this.currentTags[index].pos) {
+        if (this.subToTop && this.currentTags[index].alignment !== 8) {
+          this.lastIndex.push(index);
+          this.lastAlignment.push(this.currentTags[index].alignment);
+          this.lastText.push(this.currentTexts[index]);
+          this.currentTags[index].alignment = 8;
+          return 'subtitle-alignment8';
+        }
+        return `subtitle-alignment${this.currentTags[index].alignment}`;
+      } else if (this.isVtt && this.currentTags[index].line !== '' && this.currentTags[index].position !== '') {
+        return '';
+      }
+      return 'subtitle-alignment2';
+    },
+    currentTimeUpdate() {
+      const { time: currentTime } = videodata;
+      const { subtitleDelay } = this;
+      if (!this.lastCurrentTime) {
+        this.lastCurrentTime = currentTime;
+      }
+      const { lastCurrentTime } = this;
+      this.setCurrentCues(currentTime - (subtitleDelay / 1000));
+      this.updateVideoSegments(lastCurrentTime, currentTime);
 
+      requestAnimationFrame(this.currentTimeUpdate);
+    },
+    setCurrentCues(currentTime) {
+      if (!this.subtitleInstance) return;
+      const { parsed } = this.subtitleInstance;
+      if (parsed) {
+        const cues = parsed
+          .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');
+        if (!isEqual(cues, this.currentCues)) {
+          let rev = false;
+          const tmp = cues;
+          if (cues.length >= 2) {
+            for (let i = 0; i < tmp.length; i += 1) {
+              const pre = toArray(tmp[i]);
+              const next = toArray(tmp[i + 1]);
+              if (next) {
+                pre.splice(2, 1);
+                next.splice(2, 1);
+                if (isEqual(pre, next)) {
+                  rev = true;
+                }
+              }
+            }
+          }
+          this.currentCues = rev ? cues.reverse() : cues;
+        }
+      }
+    },
+    updateVideoSegments(lastCurrentTime, currentTime) {
       const { videoSegments, currentSegment, elapsedSegmentTime } = this;
       const segment = videoSegments
-        .filter(segment => segment[0] <= newVal && segment[1] > newVal)[0];
+        .filter(segment => segment[0] <= currentTime && segment[1] > currentTime)[0];
       if (segment && !segment[2]) {
         if (isEqual(segment, currentSegment)) {
-          this.elapsedSegmentTime += newVal - oldValue;
+          this.elapsedSegmentTime += currentTime - lastCurrentTime;
         } else {
           const segmentTime = currentSegment[1] - currentSegment[0];
           if (elapsedSegmentTime / segmentTime >= 0.9) {
             const index = videoSegments.findIndex(segment => segment[0] === currentSegment[0]);
             this.$set(videoSegments, index, [...videoSegments[index].slice(0, 2), true]);
           }
-          this.elapsedSegmentTime = 0;
+          this.currentSegment = segment;
         }
-        this.currentSegment = segment;
       }
     },
-    videoSegments(newVal) {
-      const duration = newVal
-        .filter(segment => segment[2])
-        .map(segment => segment[1] - segment[0])
-        .reduce((prev, curr) => prev + curr, 0);
-      this.updateDuration([this.id, duration]);
-    },
-  },
-  created() {
-    const { subtitleSrc } = this;
-    this.subtitle = new Subtitle(subtitleSrc);
-    this.subtitle.load();
-    this.subtitle.once('parse', (parsed) => {
-      this.parsedData = parsed;
-      this.videoSegments = this.getVideoSegments(parsed, this.duration);
-      this.$bus.$emit('finish-loading', this.subtitle.metaInfo.type);
-    });
-  },
-  methods: {
-    ...mapActions({
-      updateDuration: 'SUBTITLE_DURATION_UPDATE',
-    }),
     lineNum(index) {
       const lastNum = index;
-      const { currentTexts: texts } = this;
+      const { currentTexts: texts, currentTags: tags } = this;
       let tmp = 0;
       while (texts[index - 1]) {
+        if (!isEqual(tags[index], tags[index - 1])) {
+          break;
+        }
         tmp += texts[index - 1].split('\n').length;
         index -= 1;
       }
@@ -124,24 +209,24 @@ export default {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
       const arr = [1, 2, 3];
-      if (arr.includes(tags[index].alignment)) {
+      if (arr.includes(tags[index].alignment) && !this.subToTop) {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
-      return `translateY(${-100 * this.lineNum(index)}%)`;
+      return `translateY(${100 * this.lineNum(index)}%)`;
     },
-    vttLine(index) { //eslint-disable-line
+    vttLine(index) {
       const { currentTags: tags } = this;
       let tmp = tags[index].line;
       if (tags[index].line.includes('%')) {
-        tmp = parseInt(tags[index].line, 10) / 100;
+        tmp = -parseInt(tags[index].line, 10) / 100;
       }
       if (tags[index].vertical) {
-        if ((tmp >= -1 && tmp < -0.5) || (tmp > 0.5 && tmp <= 1)) {
+        if (tmp >= -1 && tmp < -0.5) {
           return `translateX(${-100 * this.lineNum(index)}%)`;
         }
         return `translateX(${100 * this.lineNum(index)}%)`;
       }
-      if ((tmp >= -1 && tmp < -0.5) || (tmp > 0.5 && tmp <= 1)) {
+      if (tmp >= -1 && tmp < -0.5) {
         return `translateY(${-100 * this.lineNum(index)}%)`;
       }
       return `translateY(${100 * this.lineNum(index)}%)`;
@@ -166,7 +251,7 @@ export default {
     subLeft(index) {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
-        return `${tags[index].pos.x}px`;
+        return `${(tags[index].pos.x / this.intrinsicWidth) * 100}vw`;
       } else if (type === 'vtt') {
         if (tags[index].vertical) {
           if (!tags[index].line.includes('%')) {
@@ -182,7 +267,7 @@ export default {
     subTop(index) {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
-        return `${tags[index].pos.y}px`;
+        return `${(tags[index].pos.y / this.intrinsicHeight) * 100}vh`;
       } else if (type === 'vtt') {
         if (tags[index].vertical) {
           return tags[index].position;
@@ -226,7 +311,7 @@ export default {
         .sort((a, b) => a[0] - b[0]);
       const result = [[0, 0]];
       let currentIndex = 0;
-      while (result[result.length - 1][1] !== duration) {
+      while (duration && result[result.length - 1][1] !== duration) {
         const lastElement = result[result.length - 1];
         if (currentIndex < subtitleSegments.length) {
           if (lastElement[1] <= subtitleSegments[currentIndex][0]) {

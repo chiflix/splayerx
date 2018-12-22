@@ -20,8 +20,9 @@
 
 <script>
 import lottie from '@/components/lottie.vue';
-import * as animationData from '@/assets/advance.json';
+import animationData from '@/assets/advance.json';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
+
 export default {
   name: 'advance-control',
   components: {
@@ -135,6 +136,7 @@ export default {
       switch (this.clicks) {
         case 1:
           this.$emit('update:showAttached', true);
+          this.$emit('conflict-resolve', this.$options.name);
           break;
         case 2:
           this.$emit('update:showAttached', false);
@@ -147,6 +149,16 @@ export default {
     },
   },
   created() {
+    this.$bus.$on('isdragging-mouseup', () => {
+      if (this.showAttached) {
+        this.anim.playSegments([68, 73]);
+      }
+    });
+    this.$bus.$on('isdragging-mousedown', () => {
+      if (this.showAttached) {
+        this.anim.playSegments([37, 41], false);
+      }
+    });
     this.$bus.$on('change-menu-list', (changedLevel) => {
       this.menuList = changedLevel;
       this.$_fitMenuSize();

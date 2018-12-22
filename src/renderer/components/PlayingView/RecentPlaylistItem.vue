@@ -88,9 +88,10 @@
 </div>
 </template>
 <script>
-import { mapGetters } from 'vuex';
 import path from 'path';
+import { filePathToUrl } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
+
 export default {
   components: {
     Icon,
@@ -135,7 +136,7 @@ export default {
       isChosen: false,
       coverSrc: '',
       lastPlayedTime: 0,
-      mediaInfo: {},
+      mediaInfo: { path: this.path },
       smallShortCut: '',
     };
   },
@@ -166,38 +167,46 @@ export default {
   mounted() {
     this.$electron.ipcRenderer.send('snapShot', this.path);
     this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-      this.coverSrc = `file://${imgPath}.png`;
+      this.coverSrc = filePathToUrl(`${imgPath}.png`);
     });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
     });
     this.infoDB().get('recent-played', 'path', this.path).then((val) => {
-      if (val && val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
-      if (val && val.smallShortCut) this.smallShortCut = val.smallShortCut;
+      if (val && val.lastPlayedTime) {
+        this.lastPlayedTime = val.lastPlayedTime;
+        this.smallShortCut = val.smallShortCut;
+        this.cover = val.cover;
+      }
       this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
     this.$bus.$on('database-saved', () => {
       this.infoDB().get('recent-played', 'path', this.path).then((val) => {
-        if (val && val.lastPlayedTime) this.lastPlayedTime = val.lastPlayedTime;
-        if (val && val.smallShortCut) this.smallShortCut = val.smallShortCut;
+        if (val && val.lastPlayedTime) {
+          this.lastPlayedTime = val.lastPlayedTime;
+          this.smallShortCut = val.smallShortCut;
+          this.cover = val.cover;
+        }
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
     });
   },
   computed: {
-    ...mapGetters(['originSrc']),
     backgroundImage() {
       return `url(${this.imageSrc})`;
     },
     imageSrc() {
-      if (this.smallShortCut) {
+      if (this.lastPlayedTime) {
+        if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
+          return this.cover;
+        }
         return this.smallShortCut;
       }
       return this.coverSrc;
     },
     imageLoaded() {
-      return this.smallShortCut || this.coverSrc !== '';
+      return this.cover || this.smallShortCut || this.coverSrc !== '';
     },
     thumbnailHeight() {
       return this.thumbnailWidth / (112 / 63);
@@ -250,9 +259,10 @@ $border-radius: 3px;
       background-color: rgba(255,255,255,0.2);
     }
     .black-gradient {
+      position: absolute;
       border-radius: $border-radius;
       width: 100%;
-      height: 100%;
+      height: calc(100% + 0.08vw);
       background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
     }
     .img {
@@ -262,11 +272,9 @@ $border-radius: 3px;
       background-repeat: no-repeat;
       background-position: center center;
       top: 0;
-      bottom: 0;
       left: 0;
       right: 0;
-      width: 100%;
-      transform: translate(0px, 0px);
+      bottom: 0;
     }
     .content {
       position: absolute;

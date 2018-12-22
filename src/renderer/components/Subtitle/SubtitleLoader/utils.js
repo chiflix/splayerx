@@ -1,9 +1,10 @@
 import { extname, basename } from 'path';
-import { open, read, readFile, close, statSync } from 'fs';
+import { open, readSync, readFile, closeSync, statSync } from 'fs';
 import chardet from 'chardet';
+import convert3To1 from 'iso-639-3-to-1';
 import iconv from 'iconv-lite';
 import franc from 'franc';
-import get from 'lodash/get';
+import helpers from '@/helpers';
 import Sagi from '@/helpers/sagi';
 
 export async function toPromise(func) {
@@ -32,6 +33,8 @@ export function objectTo(object) {
   return 'option';
 }
 
+export const mediaHash = helpers.methods.mediaQuickHash;
+
 /**
  * Get the extension of a local subtitle file.
  *
@@ -39,8 +42,8 @@ export function objectTo(object) {
  * @param {string} path - absolute path of the local subtitle file
  * @returns {string} an extension without '.'
  */
-export function localFormatLoader(path) {
-  return extname(path).slice(1);
+export function localFormatLoader(src) {
+  return extname(src).slice(1);
 }
 
 /**
@@ -52,18 +55,13 @@ export function localFormatLoader(path) {
  */
 function getFragmentBuffer(path) {
   return new Promise((resolve, reject) => {
-    open(path, 'r', async (err, fd) => {
+    open(path, 'r', (err, fd) => {
       if (err) reject(err);
       const pos = Math.round(statSync(path).size / 2);
       const buf = Buffer.alloc(4096);
-      read(fd, buf, 0, 4096, pos, (err, buf) => {
-        if (err) {
-          close(fd);
-          reject(err);
-        }
-        resolve(buf);
-        close(fd);
-      });
+      readSync(fd, buf, 0, 4096, pos);
+      resolve(buf);
+      closeSync(fd);
     });
   });
 }
@@ -109,26 +107,11 @@ function getSubtitleCallback(subtitleFormat) {
 export async function localLanguageLoader(path, format) {
   const buffer = await getFragmentBuffer(path);
   const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
-  return franc(stringCallback(bufferToString(buffer)));
+  return convert3To1(franc(stringCallback(bufferToString(buffer))));
 }
 
-/**
- * Get the name for a local subtitle file
- *
- * @export
- * @param {*} path - path of a local subtitle file
- * @param {*} videoName - (optional) name of the video matched with the subtitle
- * @param {*} language - (optional) language of the subtitle
- * @returns {string} filename or filename without videoname(with videoName param)
- * or language code for the file(with language param)
- */
-export function localNameLoader(path, videoName, language) {
-  const filename = basename(path).replace(/.(?!.*[.].+)/g, '');
-  if (language) {
-    return language;
-  } else if (videoName) {
-    return filename.replace(videoName);
-  }
+export function localNameLoader(path) {
+  const filename = basename(path);
   return filename;
 }
 
@@ -183,17 +166,23 @@ export function loadLocalFile(path) {
       if (err) reject(err);
       const encoding = chardet.detect(data.slice(0, 100));
       if (iconv.encodingExists(encoding)) {
-        resolve([iconv.decode(data, encoding), extname(path).slice(1)]);
+        resolve(iconv.decode(data, encoding));
       }
       reject(new Error(`Unsupported encoding: ${encoding}.`));
     });
   });
 }
 
-export function loadOnlineTranscriptInfo(mediaHash, transctiptHash) {
-  return Sagi.getTranscriptInfo(mediaHash, transctiptHash);
+export function loadOnlineTranscript(hash) {
+  return Sagi.getTranscript(hash);
 }
 
-export async function loadOnlineTranscript(hash) {
-  return get(await Sagi.getTranscript(hash), 'array')[0];
+export function promisify(func) {
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(func());
+    } catch (err) {
+      reject(err);
+    }
+  });
 }

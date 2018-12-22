@@ -1,6 +1,7 @@
-import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
+import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
+
 describe('Component - BaseVideoPlayer', () => {
   const propsData = {
     src: 'file:///',
@@ -192,12 +193,6 @@ describe('Component - BaseVideoPlayer', () => {
       const videoElement = wrapper.vm.videoElement();
 
       expect(videoElement).to.equal(wrapper.vm.$refs.video);
-    });
-
-    it('should currentTimeUpdate emit events', () => {
-      wrapper.vm.currentTimeUpdate();
-
-      expect(wrapper.emitted()).to.contain.keys('update:currentTime');
     });
 
     it('should currentTimeUpdate update currentTimeAnimationFrameId', () => {

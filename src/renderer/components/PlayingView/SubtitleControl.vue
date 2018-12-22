@@ -1,7 +1,5 @@
 <template>
-  <div
-    :data-component-name="$options.name"
-    class="sub-control">
+  <div data-component-name="$options.name" class="sub-control">
     <div class="sub-btn-control">
       <transition name="sub-trans-l">
         <div class="sub-menu-wrapper subtitle-scroll-items"
@@ -10,99 +8,108 @@
             cursor: 'default',
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
             height: hiddenText ? `${contHeight + hoverHeight}px` : `${contHeight}px`,
+            fontWeight: '900',
           }">
-          <div class="element bottom"><div class="element middle"><div class="element content">
+          <div class="element bottom">
+            <div class="element content">
 
-            <div class="topContainer">
-              <div class="title">字幕选择</div>
-              <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
-                :style="{
-                  cursor: 'pointer',
-                  transform: `rotate(${rotateTime * 360}deg)`,
-                  transition: 'transform 1s linear'
-                }"/>
-            </div>
+              <div class="topContainer">
+                <div class="title">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
+                <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
+                  :style="{
+                    cursor: 'pointer',
+                    transform: `rotate(${rotateTime * 360}deg)`,
+                    transition: 'transform 1s linear',
+                    transformOrigin: 'center',
+                  }"/>
+              </div>
 
-            <div class="sub-menu">
-              <div class="scrollScope"
-                :style="{
-                  transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                  height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
-                  overflowY: isOverFlow,
-                 }">
-                <div class="itemContainer">
-                  <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)">
-                    <div class="menu-item-text-wrapper"
-                      @mouseup="toggleSubtitleOff"
-                      @mouseover="toggleItemsMouseOver(-1)"
-                      @mouseleave="toggleItemsMouseLeave(-1)"
-                      :style="{
-                        color: hoverIndex === -1 || currentSubIden === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                        height: `${itemHeight}px`,
-                        cursor: currentSubIden === -1 ? 'default' : 'pointer',
-                      }">
-                      <div class="text">无字幕</div>
-                    </div>
-                  </div>
-
-                  <div v-if="foundSubtitles"
-                    v-for="(item, index) in computedAvaliableItems">
-                    <div class="menu-item-text-wrapper"
-                      @mouseup="toggleItemClick(index)"
-                      @mouseover="toggleItemsMouseOver(index)"
-                      @mouseleave="toggleItemsMouseLeave(index)"
-                      :id="'item'+index"
-                      :style="{
-                        transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                        color: hoverIndex === index || currentSubIden === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                        height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                        cursor: currentSubIden === index ? 'default' : 'pointer',
-                      }">
-                      <div class="text"
-                        :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
-                          whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                        }">{{ item.path ? getSubName(item.path) : 'subtitle' }}</div>
+              <div class="sub-menu">
+                <div class="scrollScope"
+                  :style="{
+                    transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                    height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
+                    overflowY: isOverFlow,
+                  }">
+                  <div class="itemContainer">
+                    <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)">
+                      <div class="menu-item-text-wrapper"
+                        @mouseup="$bus.$emit('off-subtitle')"
+                        @mouseover="toggleItemsMouseOver(-1)"
+                        @mouseleave="toggleItemsMouseLeave(-1)"
+                        :style="{
+                          color: hoverIndex === -1 || currentSubtitleIndex === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          height: `${itemHeight}px`,
+                          cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
+                        }">
+                        <div class="text">{{ this.$t('msg.subtitle.noSubtitle') }}</div>
                       </div>
-                  </div>
-
-                  <div v-if="loadingPlaceholderList.length > 0"
-                    v-for="item in loadingPlaceholderList"
-                    class="placeholders-wrapper">
-                    <div class="placeholder-item-text-wrapper">
-                      <div class="text">{{ item }}</div>
                     </div>
-                  </div>
 
-                  <div class="card" v-if="0 <= computedAvaliableItems.length"
-                    :style="{
-                      height: hiddenText && currentSubIden === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                      top: hiddenText && currentSubIden <= hoverIndex ? `${-hoverHeight}px` : '',
-                      marginTop: `${-cardPos}px`,
-                      transition: 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
-                    }">
+                    <div v-if="foundSubtitles"
+                      v-for="(item, index) in computedAvaliableItems">
+                      <div class="menu-item-text-wrapper"
+                        @mouseup="toggleItemClick(index)"
+                        @mouseover="toggleItemsMouseOver(index)"
+                        @mouseleave="toggleItemsMouseLeave(index)"
+                        :id="'item'+index"
+                        :style="{
+                          transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                          color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                          cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                        }">
+                        <div class="text"
+                          :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
+                            whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                          }">{{ item.path ? getSubName(item.path) : item.name }}</div>
+                      </div>
+                    </div>
+
+                    <div v-if="loadingTypes.length > 0"
+                      v-for="(item, index) in loadingTypes"
+                      class="placeholders-wrapper"
+                      :key="`${item}-${index}`">
+                      <div class="placeholder-item-text-wrapper">
+                        <div class="text">{{ item }}</div>
+                      </div>
+                    </div>
+
+                    <div class="card" v-if="0 <= computedAvaliableItems.length"
+                      :style="{
+                        height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                        top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
+                        marginTop: `${-cardPos}px`,
+                        transition: 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+                      }"/>
                   </div>
                 </div>
               </div>
             </div>
-          </div></div></div>
+          </div>
         </div>
       </transition>
-      <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
-        <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
-      </div>
+    </div>
+    <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
+      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
     </div>
   </div>
 </template>
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import difference from 'lodash/difference';
 import path from 'path';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
-import * as animationData from '@/assets/subtitle.json';
+import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
+
 export default {
   name: 'subtitle-control',
+  components: {
+    lottie,
+    Icon,
+  },
   props: {
     showAttached: Boolean,
     mousedownOnOther: Boolean,
@@ -116,8 +123,6 @@ export default {
         online: '',
       },
       foundSubtitles: true,
-      showingPopupDialog: false,
-      currentSubIden: 0,
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
@@ -128,19 +133,118 @@ export default {
       hoverIndex: -5,
       hiddenText: false,
       hoverHeight: 0,
-      shouldHidden: false,
       timer: null,
       count: 0,
       rotateTime: 0,
       loadingType: '',
+      detailTimer: null,
     };
   },
-  components: {
-    lottie,
-    Icon,
+  computed: {
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId']),
+    ...mapState({
+      computedAvaliableItems: ({ Subtitle }) => {
+        const { loadingStates, types, names } = Subtitle;
+        return Object.keys(loadingStates).map(id => ({
+          id,
+          loading: loadingStates[id],
+          type: types[id],
+          name: names[id],
+        })).filter(subtitle => subtitle.loading !== 'failed' && subtitle.type && subtitle.name);
+      },
+      loadingTypes: ({ Subtitle }) => {
+        const { loadingStates, types } = Subtitle;
+        const loadingSubtitles = Object.keys(loadingStates).filter(id => loadingStates[id] === 'loading');
+        const result = [];
+        loadingSubtitles.forEach((id) => {
+          if (!result.includes(types[id])) result.push(types[id]);
+        });
+        return result;
+      },
+    }),
+    textHeight() {
+      if (this.winWidth > 512 && this.winWidth <= 854) {
+        return 13;
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return 14;
+      }
+      return 18;
+    },
+    itemHeight() {
+      if (this.winWidth > 512 && this.winWidth <= 854) {
+        return 27;
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return 32;
+      }
+      return 44;
+    },
+    isOverFlow() {
+      if (this.andify(this.winWidth > 512, this.winWidth <= 854)) {
+        return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 2) ? 'scroll' : '';
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 4) ? 'scroll' : '';
+      }
+      return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 6) ? ' scroll' : '';
+    },
+    scopeHeight() {
+      if (this.winWidth > 512 && this.winWidth <= 854) {
+        return this.computedAvaliableItems.length > 2 ?
+          (this.loadingTypes.length * 31) + 89 :
+          (((this.computedAvaliableItems.length + 1) * 31) - 4) +
+          (this.loadingTypes.length * 31);
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.computedAvaliableItems.length > 4 ?
+          (this.loadingTypes.length * 37) + 180 :
+          (((this.computedAvaliableItems.length + 1) * 37) - 5) +
+          (this.loadingTypes.length * 37);
+      }
+      return this.computedAvaliableItems.length > 6 ?
+        (this.loadingTypes.length * 51) + 350 :
+        (((this.computedAvaliableItems.length + 1) * 51) - 7) +
+        (this.loadingTypes.length * 51);
+    },
+    contHeight() {
+      if (this.winWidth > 512 && this.winWidth <= 854) {
+        return this.computedAvaliableItems.length > 2 ?
+          (this.loadingTypes.length * 31) + 138 :
+          45 + ((this.computedAvaliableItems.length + 1) * 31) +
+          (this.loadingTypes.length * 31);
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.computedAvaliableItems.length > 4 ?
+          (this.loadingTypes.length * 37) + 239 :
+          54 + ((this.computedAvaliableItems.length + 1) * 37) +
+          (this.loadingTypes.length * 37);
+      }
+      return this.computedAvaliableItems.length > 6 ?
+        (this.loadingTypes.length * 51) + 433 :
+        76 + ((this.computedAvaliableItems.length + 1) * 51) +
+        (this.loadingTypes.length * 51);
+    },
+    cardPos() {
+      if (this.winWidth > 512 && this.winWidth <= 854) {
+        return this.computedAvaliableItems.length > 0 ?
+          ((this.computedAvaliableItems.length + this.loadingTypes.length)
+            - this.currentSubtitleIndex) * 31 :
+          this.scopeHeight + 4;
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return this.computedAvaliableItems.length > 0 ?
+          ((this.computedAvaliableItems.length + this.loadingTypes.length)
+            - this.currentSubtitleIndex) * 37 :
+          this.scopeHeight + 5;
+      }
+      return this.computedAvaliableItems.length > 0 ?
+        ((this.computedAvaliableItems.length + this.loadingTypes.length)
+          - this.currentSubtitleIndex) * 51 :
+        this.scopeHeight + 7;
+    },
+    currentSubtitleIndex() {
+      return this.computedAvaliableItems.findIndex(subtitle =>
+        subtitle.id === this.currentSubtitleId);
+    },
   },
   watch: {
-    currentSubIden(val) {
+    currentSubtitleIndex(val) {
+      this.$bus.$emit('clear-last-cue');
       if (val === 0) {
         document.querySelector('.scrollScope').scrollTop = 0;
       }
@@ -185,45 +289,30 @@ export default {
       }
     },
   },
-  mounted() {
-    this.$bus.$on('add-subtitles', () => {
-      this.currentSubIden = 0;
-      this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
-      document.querySelector('.scrollScope').scrollTop = 0;
-    });
-    this.$bus.$on('finish-refresh', () => {
-      clearInterval(this.timer);
-      this.count = this.rotateTime * 100;
-    });
-    this.$bus.$on('menu-sub-refresh', () => {
-      this.handleRefresh();
-    });
-  },
   methods: {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
-      changeCurrentSubtitle: subtitleActions.SWITCH_CURRENT_SUBTITLE,
+      changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_SUBTITLE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
     }),
     getSubName(subPath) {
       return path.basename(subPath);
     },
     handleRefresh() {
-      this.timer = setInterval(() => {
-        this.count += 1;
-        this.rotateTime = Math.ceil(this.count / 100);
-      }, 10);
-      setTimeout(() => {
+      if (this.privacyAgreement) {
         if (this.timer) {
-          clearInterval(this.timer);
-          this.count = this.rotateTime * 100;
+          return;
         }
-      }, 20000);
-      this.currentSubIden = 0;
-      document.querySelector('.scrollScope').scrollTop = 0;
-      this.$bus.$emit('refresh-subtitle', this.mediaHash);
-      this.changeCurrentSubtitle(this.computedAvaliableItems[0].id);
+        this.timer = setInterval(() => {
+          this.count += 1;
+          this.rotateTime = Math.ceil(this.count / 100);
+        }, 10);
+        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$bus.$emit('refresh-subtitles');
+      } else {
+        this.$bus.$emit('privacy-confirm');
+      }
     },
     orify(...args) {
       return args.some(arg => arg == true); // eslint-disable-line
@@ -241,18 +330,6 @@ export default {
       } else {
         this.anim.playSegments([62, 64], false);
       }
-      document.addEventListener('mouseup', (e) => {
-        if (e.button === 0) {
-          if (!this.showAttached) {
-            if (this.validEnter) {
-              this.anim.playSegments([46, 60], false);
-            } else if (!this.mousedownOnOther) {
-              this.anim.playSegments([40, 44], false);
-            }
-          }
-          this.mouseDown = false;
-        }
-      });
     },
     handleEnter() {
       if (this.animFlag && !this.showAttached) {
@@ -289,6 +366,7 @@ export default {
       switch (this.clicks) {
         case 1:
           this.$emit('update:showAttached', true);
+          this.$emit('conflict-resolve', this.$options.name);
           break;
         case 2:
           this.$emit('update:showAttached', false);
@@ -301,181 +379,67 @@ export default {
     },
     toggleItemsMouseOver(index) {
       if (index >= 0) {
+        clearTimeout(this.detailTimer);
         const hoverItem = document.querySelector(`#item${index} .text`);
         if (hoverItem.clientWidth < hoverItem.scrollWidth) {
-          this.shouldHidden = true;
           this.hoverHeight = this.textHeight *
             (Math.ceil(hoverItem.scrollWidth / hoverItem.clientWidth) - 1);
-          setTimeout(() => {
-            if (this.shouldHidden) {
-              this.hiddenText = true;
-            }
+          this.detailTimer = setTimeout(() => {
+            this.hiddenText = true;
           }, 1500);
         }
       }
       this.hoverIndex = index;
     },
     toggleItemsMouseLeave() {
-      this.shouldHidden = false;
+      clearTimeout(this.detailTimer);
       this.hoverHeight = 0;
       this.hiddenText = false;
       this.hoverIndex = -5;
     },
     toggleItemClick(index) {
-      this.currentSubIden = index;
-      this.changeCurrentSubtitle(this.computedAvaliableItems[index].id);
-    },
-    toggleSubtitleOff() {
-      this.currentSubIden = -1;
-      this.offCurrentSubtitle();
-    },
-    toggleLoadServerSubtitles() {
-      this.$bus.$emit('load-server-transcripts');
-    },
-    toggleOpenFileDialog() {
-      if (this.showingPopupDialog) {
-        return;
-      }
-      const self = this;
-      const { remote } = this.$electron;
-      const { dialog } = remote;
-      const browserWindow = remote.BrowserWindow;
-      const focusWindow = browserWindow.getFocusedWindow();
-      const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
-
-      self.showingPopupDialog = true;
-      dialog.showOpenDialog(focusWindow, {
-        title: 'Open Dialog',
-        defaultPath: './',
-        filters: [{
-          name: 'Subtitle Files',
-          extensions: VALID_EXTENSION,
-        }],
-        properties: ['openFile'],
-      }, (item) => {
-        self.showingPopupDialog = false;
-        if (item) {
-          self.$bus.$emit('add-subtitle', item);
-        }
-      });
-    },
-    itemHasBeenChosen(index = 0) {
-      return index === this.currentSubIden;
-    },
-    itemTitleHasChineseChar(str) {
-      const REGEX_CHINESE = /[\u4e00-\u9fff]|[\u3400-\u4dbf]|[\u{20000}-\u{2a6df}]|[\u{2a700}-\u{2b73f}]|[\u{2b740}-\u{2b81f}]|[\u{2b820}-\u{2ceaf}]|[\uf900-\ufaff]|[\u3300-\u33ff]|[\ufe30-\ufe4f]|[\uf900-\ufaff]|[\u{2f800}-\u{2fa1f}]/u;
-      return (REGEX_CHINESE.test(str));
-    },
-  },
-  computed: {
-    ...mapGetters(['winWidth', 'mediaHash']),
-    textHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
-        return 13;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return 14;
-      }
-      return 18;
-    },
-    itemHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
-        return 27;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return 32;
-      }
-      return 44;
-    },
-    isOverFlow() {
-      if (this.andify(this.winWidth > 512, this.winWidth <= 854)) {
-        return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 2) ? 'scroll' : '';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 4) ? 'scroll' : '';
-      }
-      return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingPlaceholderList.length > 6) ? ' scroll' : '';
-    },
-    scopeHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
-        return this.computedAvaliableItems.length > 2 ?
-          (this.loadingPlaceholderList.length * 31) + 89 :
-          (((this.computedAvaliableItems.length + 1) * 31) - 4) +
-          (this.loadingPlaceholderList.length * 31);
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.computedAvaliableItems.length > 4 ?
-          (this.loadingPlaceholderList.length * 37) + 180 :
-          (((this.computedAvaliableItems.length + 1) * 37) - 5) +
-          (this.loadingPlaceholderList.length * 37);
-      }
-      return this.computedAvaliableItems.length > 6 ?
-        (this.loadingPlaceholderList.length * 51) + 350 :
-        (((this.computedAvaliableItems.length + 1) * 51) - 7) +
-        (this.loadingPlaceholderList.length * 51);
-    },
-    contHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
-        return this.computedAvaliableItems.length > 2 ?
-          (this.loadingPlaceholderList.length * 31) + 138 :
-          45 + ((this.computedAvaliableItems.length + 1) * 31) +
-          (this.loadingPlaceholderList.length * 31);
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.computedAvaliableItems.length > 4 ?
-          (this.loadingPlaceholderList.length * 37) + 239 :
-          54 + ((this.computedAvaliableItems.length + 1) * 37) +
-          (this.loadingPlaceholderList.length * 37);
-      }
-      return this.computedAvaliableItems.length > 6 ?
-        (this.loadingPlaceholderList.length * 51) + 433 :
-        76 + ((this.computedAvaliableItems.length + 1) * 51) +
-        (this.loadingPlaceholderList.length * 51);
-    },
-    cardPos() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
-        return this.computedAvaliableItems.length > 0 ?
-          ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
-            - this.currentSubIden) * 31 :
-          this.scopeHeight + 4;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.computedAvaliableItems.length > 0 ?
-          ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
-            - this.currentSubIden) * 37 :
-          this.scopeHeight + 5;
-      }
-      return this.computedAvaliableItems.length > 0 ?
-        ((this.computedAvaliableItems.length + this.loadingPlaceholderList.length)
-          - this.currentSubIden) * 51 :
-        this.scopeHeight + 7;
-    },
-    computedAvaliableItems() {
-      return this.$store.getters.subtitleList;
-    },
-    loadingPlaceholderList() {
-      const res = [];
-      if (this.loadingSubsPlaceholders.local !== '') {
-        res.push('Local loading');
-      }
-      if (this.loadingSubsPlaceholders.embedded !== '') {
-        res.push('Embedded loading');
-      }
-      if (this.loadingSubsPlaceholders.online !== '') {
-        res.push('Online loading');
-      }
-      return res;
+      const { computedAvaliableItems } = this;
+      this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
     },
   },
   created() {
-    this.$bus.$on('finish-loading', (type) => {
-      const subType = ['ass', 'vtt', 'srt'];
-      if (subType.includes(type)) {
-        this.loadingSubsPlaceholders.local = '';
-      }
-      if (type === 'embedded') {
-        this.loadingSubsPlaceholders.embedded = '';
-      }
-      if (type === 'online') {
-        this.loadingSubsPlaceholders.online = '';
+    this.$bus.$on('isdragging-mouseup', () => {
+      if (this.showAttached) {
+        this.anim.playSegments([79, 85]);
       }
     });
-    this.$bus.$on('new-video-opened', () => {
-      this.currentSubIden = 0;
+    this.$bus.$on('isdragging-mousedown', () => {
+      if (this.showAttached) {
+        this.anim.playSegments([62, 64], false);
+      }
+    });
+    this.$bus.$on('refresh-finished', () => {
+      clearInterval(this.timer);
+      this.count = this.rotateTime * 100;
+      setTimeout(() => {
+        this.timer = null;
+      }, 1000);
+    });
+  },
+  mounted() {
+    this.$bus.$on('finish-refresh', () => {
+      clearInterval(this.timer);
+      this.count = this.rotateTime * 100;
+      setTimeout(() => {
+        this.timer = null;
+      }, 1000);
+    });
+    document.addEventListener('mouseup', (e) => {
+      if (e.button === 0) {
+        if (!this.showAttached) {
+          if (this.validEnter) {
+            this.anim.playSegments([46, 60], false);
+          } else if (!this.mousedownOnOther) {
+            this.anim.playSegments([40, 44], false);
+          }
+        }
+        this.mouseDown = false;
+      }
     });
   },
 };
@@ -516,7 +480,7 @@ export default {
       height: 100%;
       top: 0;
       background: rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       clip-path: inset(0 round 7px);
     }
     .middle {
@@ -561,6 +525,7 @@ export default {
     border-radius: 7px;
     opacity: 0.4;
     border: 0.5px solid rgba(255, 255, 255, 0.20);
+    box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
     background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
   }
   @media screen and (min-width: 320px) and (max-width: 512px) {
@@ -582,7 +547,8 @@ export default {
         line-height: 15px;
       }
       .refresh {
-        font-size: 13px;
+        width: 13px;
+        height: 13px;
         margin: 14px 15px auto auto;
       }
     }
@@ -635,13 +601,14 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        font-size: 15px;
+        font-size: 15.6px;
         margin: 18px auto auto 19px;
         letter-spacing: 0.23px;
         line-height: 17px;
       }
       .refresh {
-        font-size: 13px;
+        width: 17px;
+        height: 17px;
         margin: 17px 19px auto auto;
       }
     }
@@ -682,7 +649,7 @@ export default {
       }
     }
     .card {
-      width: 174px;
+      width: 172px;
       margin-left: 9.5px;
     }
   }
@@ -694,13 +661,14 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        font-size: 21px;
+        font-size: 21.84px;
         margin: 24px auto auto 26px;
         letter-spacing: 0.32px;
         line-height: 23px;
       }
       .refresh {
-        font-size: 13px;
+        width: 21px;
+        height: 21px;
         margin: 23px 26px auto auto;
       }
     }

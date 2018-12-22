@@ -22,11 +22,11 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer';
-import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay';
+import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
+import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay.vue';
 import { THUMBNAIL_DB_NAME } from '@/constants';
 import idb from 'idb';
+
 export default {
   name: 'thumbnail-video-player',
   components: {
@@ -81,9 +81,6 @@ export default {
       },
     };
   },
-  computed: {
-    ...mapGetters(['duration']),
-  },
   watch: {
     outerThumbnailInfo(newValue) {
       this.updateVideoInfo(newValue);
@@ -108,9 +105,10 @@ export default {
   },
   methods: {
     // Data regenerators
-    updateGenerationParameters() {
-      this.generationInterval = Math.round(this.duration / (this.screenWidth / 4)) || 1;
-      this.maxThumbnailCount = Math.floor(this.duration / this.generationInterval);
+    updateGenerationParameters(event) {
+      if (!event.target.duration) return;
+      this.generationInterval = Math.round(event.target.duration / (this.screenWidth / 4)) || 1;
+      this.maxThumbnailCount = Math.floor(event.target.duration / this.generationInterval);
       this.$emit('update-thumbnail-info', {
         index: this.autoGenerationIndex,
         interval: this.generationInterval,

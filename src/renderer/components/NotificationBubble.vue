@@ -1,7 +1,7 @@
 <template>
   <div :class="container">
     <transition name="nextvideo">
-      <NextVideo class="next-video"
+      <NextVideo class="next-video" ref="nextVideo"
         v-if="showNextVideo"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
@@ -22,7 +22,7 @@
             <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
             <div class="content">{{ m.content }}</div>
           </div>
-          <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id)"></Icon>
+          <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id, m.title)"></Icon>
         </div>
       </div>
     </transition-group>
@@ -35,7 +35,8 @@ import { mapGetters } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
-import Icon from './BaseIconContainer';
+import Icon from './BaseIconContainer.vue';
+
 export default {
   name: 'notification-bubble',
   components: {
@@ -52,7 +53,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['roundedCurrentTime', 'nextVideo', 'finalPartTime']),
+    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -86,18 +87,23 @@ export default {
       this.manualClosed = false;
       this.showNextVideo = false;
     },
-    closeMessage(id) {
+    closeMessage(id, title) {
       this.$store.dispatch('removeMessages', id);
+      if (title === this.$t('errorFile.title.fileNonExist')) {
+        this.$bus.$emit('delete-file');
+      }
     },
-  },
-  watch: {
-    roundedCurrentTime(val) {
-      if (val > this.finalPartTime) {
-        if (this.nextVideo !== '' && !this.manualClosed) {
+    checkNextVideoUI(time) {
+      if (time > this.nextVideoPreviewTime && time < this.duration - 5) {
+        if (this.nextVideo && !this.manualClosed) {
+          this.$store.dispatch('UpdatePlayingList');
           this.showNextVideo = true;
         }
       } else {
         this.manualClosed = false;
+      }
+      if (this.$refs.nextVideo) {
+        this.$refs.nextVideo.updatePlayingTime(time);
       }
     },
   },
@@ -178,7 +184,7 @@ export default {
   }
   @media screen and (min-width: 320px) and (max-width: 512px) {
     top: 13px;
-    right: 34px;
+    right: 14px;
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
     top: 22px;
@@ -293,8 +299,6 @@ export default {
 }
 .black-gradient-error {
   position: absolute;
-  background-color: rgba(0,0,0,0.20);
-  backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 216px;
@@ -327,8 +331,6 @@ export default {
 }
 .black-gradient-loading {
   position: absolute;
-  background-color: rgba(0,0,0,0.20);
-  backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 136px;
@@ -366,7 +368,7 @@ export default {
 
 .errorContainer {
   display: flex;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (min-width: 320px) and (max-width: 512px) {

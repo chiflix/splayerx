@@ -1,5 +1,4 @@
-import partial from 'lodash/partial';
-import compose from 'lodash/fp/compose';
+import flow from 'lodash/flow';
 import { parse, toMS } from 'subtitle';
 
 import { localLanguageLoader, localNameLoader, loadLocalFile } from './utils';
@@ -27,9 +26,12 @@ export default {
   name: 'WebVTT',
   supportedFormats: ['vtt'],
   infoLoaders: {
-    language: partial(localLanguageLoader, 'vtt'),
+    language: {
+      func: localLanguageLoader,
+      params: ['src', 'format'],
+    },
     name: localNameLoader,
   },
   loader: loadLocalFile,
-  parser: compose(normalizer, parse),
+  parser: flow(parse, normalizer),
 };

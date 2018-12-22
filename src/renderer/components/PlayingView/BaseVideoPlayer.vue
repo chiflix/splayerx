@@ -7,8 +7,11 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
+import { videodata } from '../../store/video';
+
 export default {
   name: 'base-video-player',
   props: {
@@ -105,6 +108,9 @@ export default {
       default: () => ({}),
     },
   },
+  computed: {
+    ...mapGetters(['audioTrackList']),
+  },
   data() {
     return {
       eventListeners: new Map(),
@@ -116,7 +122,7 @@ export default {
     // network state
     // playback state
     currentTime(newVal) {
-      [this.$refs.video.currentTime] = newVal;
+      [this.$refs.video.currentTime] = newVal || 0;
     },
     playbackRate(newVal) {
       this.$refs.video.playbackRate = newVal;
@@ -128,7 +134,7 @@ export default {
     currentAudioTrackId(newVal) {
       const { id } = this.currentAudioTrack;
       if (newVal !== id) {
-        this.$refs.audioTracks.forEach((track) => {
+        this.audioTrackList.forEach((track) => {
           if (track.id === newVal) {
             track.enabled = true;
             const {
@@ -195,6 +201,7 @@ export default {
       basicInfo.forEach((settingItem) => {
         videoElement[settingItem] = this[settingItem];
       });
+      // following code is to make preview-thumbnail pause
       if (this.paused) {
         videoElement.pause();
       }
@@ -204,8 +211,9 @@ export default {
       return this.$refs.video;
     },
     currentTimeUpdate() {
-      const { currentTime } = this.$refs.video;
-      this.$emit('update:currentTime', currentTime);
+      const { currentTime, duration } = this.$refs.video;
+      if (currentTime + 1 >= duration) this.$bus.$emit('next-video');
+      videodata.time = currentTime;
       this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
     },
     // helper functions
