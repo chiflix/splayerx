@@ -5,7 +5,7 @@
   "version": "4.0.6",
   "author": "tomasen <tomasen@gmail.com>",
   "description": "a media player",
-  "license": "GPLv3",
+  "license": "GPL-3.0-or-later",
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",
