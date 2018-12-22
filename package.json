@@ -9,7 +9,8 @@
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",
-    "build:dir": "node .electron-vue/build.js && electron-builder --dir",
+    "build:mas": "scripts/masbuild.sh mas",
+    "build:mas-dev": "scripts/masbuild.sh mas-dev",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "dev": "node .electron-vue/dev-runner.js",
     "e2e": "npm run pack && electron-mocha test/e2e",
