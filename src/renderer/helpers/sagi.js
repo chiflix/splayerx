@@ -33,7 +33,7 @@ class Sagi {
     this.transcripts = [];
   }
 
-  mediaTranslate(mediaIdentity, languageCode) {
+  mediaTranslateRaw(mediaIdentity, languageCode) {
     return new Promise((resolve, reject) => {
       const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
       const req = new translationMsg.MediaTranslationRequest();
@@ -44,6 +44,18 @@ class Sagi {
       }
       req.setLanguageCode(languageCode);
       client.translateMedia(req, (err, response) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(response);
+        }
+      });
+    });
+  }
+
+  mediaTranslate(mediaIdentity, languageCode) {
+    return new Promise((resolve, reject) => {
+      this.mediaTranslateRaw(mediaIdentity, languageCode).then((response) => {
         const transcriptInfo = array => ({
           transcript_identity: array[0],
           language_code: array[1] || 'unknown',
@@ -51,17 +63,12 @@ class Sagi {
           tags: array[3] || [],
           delay: array[4] || 0,
         });
-        if (err) {
-          reject(err);
-        } else {
-          // TODO: fetch real transcripts
-          resolve(getResponseArray(response).map(transcriptInfo));
-        }
-      });
+        resolve(getResponseArray(response).map(transcriptInfo));
+      }, reject);
     });
   }
 
-  getTranscript(transcriptIdentity) {
+  getTranscriptRaw(transcriptIdentity) {
     return new Promise((resolve, reject) => {
       const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
       const req = new translationMsg.TranscriptRequest();
@@ -70,9 +77,17 @@ class Sagi {
         if (err) {
           reject(err);
         } else {
-          resolve(getResponseArray(res));
+          resolve(res);
         }
       });
+    });
+  }
+
+  getTranscript(transcriptIdentity) {
+    return new Promise((resolve, reject) => {
+      this.getTranscriptRaw(transcriptIdentity).then((response) => {
+        resolve(getResponseArray(response));
+      }, reject);
     });
   }
 
