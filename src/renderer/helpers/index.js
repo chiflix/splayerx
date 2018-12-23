@@ -109,6 +109,11 @@ export default {
     openFilesByDialog({ defaultPath } = {}) {
       if (this.showingPopupDialog) return;
       this.showingPopupDialog = true;
+      const opts = ['openFile', 'multiSelections'];
+      if (process.platform === 'darwin') {
+        // TODO: support open directory in macos
+        // opts.push('openDirectory');
+      }
       process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
         title: 'Open Dialog',
         defaultPath,
@@ -119,9 +124,14 @@ export default {
           name: 'All Files',
           extensions: ['*'],
         }],
-        properties: ['openFile', 'multiSelections'],
-      }, (files) => {
+        properties: opts,
+        securityScopedBookmarks: process.mas,
+      }, (files, bookmarks) => {
         this.showingPopupDialog = false;
+        if (process.mas && bookmarks?.length > 0) {
+          // TODO: put bookmarks to database
+          console.log(bookmarks);
+        }
         if (files) {
           if (!files[0].includes('\\') || process.platform === 'win32') {
             this.openFile(...files);
@@ -166,11 +176,15 @@ export default {
       } else {
         this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
           this.$store.dispatch('FolderList', similarVideos);
+        }, (err) => {
+          if (process.mas && err?.code === 'EPERM') {
+            // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+          }
         });
       }
     },
-    async playFile(path) {
-      const originPath = path;
+    async playFile(vidPath) {
+      const originPath = vidPath;
       let mediaQuickHash;
       try {
         mediaQuickHash = await this.mediaQuickHash(originPath);
@@ -179,6 +193,10 @@ export default {
           this.addLog('error', 'Failed to open file, it will be removed from list.');
           this.$bus.$emit('file-not-existed', originPath);
         }
+        if (process.mas && err?.code === 'EPERM') {
+          this.openFilesByDialog({ defaultPath: originPath });
+        }
+
         return;
       }
       this.$bus.$emit('new-file-open');
