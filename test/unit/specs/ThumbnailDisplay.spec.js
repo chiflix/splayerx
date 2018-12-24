@@ -24,8 +24,8 @@ describe('Component - ThumbnailDisplay', () => {
   };
 
   beforeEach(() => {
-    wrapper = mount(ThumbnailDisplay, { propsData });
     sandbox = sinon.createSandbox();
+    wrapper = mount(ThumbnailDisplay, { propsData });
   });
   afterEach(() => {
     wrapper.destroy();
