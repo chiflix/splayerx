@@ -133,14 +133,7 @@ export default {
           console.log(bookmarks);
         }
         if (files) {
-          if (fs.statSync(files[0]).isDirectory()) {
-            const dirPath = files[0];
-            const dirfiles = fs.readdirSync(dirPath);
-            for (let i = 0; i < dirfiles.length; i += 1) {
-              dirfiles[i] = path.join(dirPath, dirfiles[i]);
-            }
-            this.openFile(...dirfiles);
-          } else if (!files[0].includes('\\') || process.platform === 'win32') {
+          if (!files[0].includes('\\') || process.platform === 'win32') {
             this.openFile(...files);
           } else {
             this.addLog('error', `Failed to open file: ${files[0]}`);
@@ -148,12 +141,28 @@ export default {
         }
       });
     },
+    /* eslint-disable */
     openFile(...files) {
       let tempFilePath;
       let containsSubFiles = false;
       const subtitleFiles = [];
       const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
       const videoFiles = [];
+      const dirFiles = files;
+      console.log(dirFiles);
+      for (let i = 0; i < dirFiles.length; i += 1) {
+        if (fs.statSync(dirFiles[i]).isDirectory()) {
+          const dirPath = dirFiles[i];
+          console.log(dirPath);
+          // dirFiles.splice(i, 1);
+          const files = fs.readdirSync(dirPath);
+          for (let i = 0; i < files.length; i += 1) {
+            files[i] = path.join(dirPath, files[i]);
+          }
+          dirFiles.push(...files);
+        }
+      }
+      console.log(dirFiles);
       for (let i = 0; i < files.length; i += 1) {
         tempFilePath = files[i];
         if (subRegex.test(path.extname(tempFilePath))) {
@@ -165,8 +174,6 @@ export default {
           this.addLog('error', `Failed to open file : ${tempFilePath}`);
         }
       }
-      console.log(1);
-      console.log(videoFiles);
       if (videoFiles.length !== 0) {
         if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
           this.openVideoFile(...videoFiles);
@@ -178,9 +185,8 @@ export default {
         this.$bus.$emit('add-subtitles', subtitleFiles);
       }
     },
+    /* eslint-disable */
     openVideoFile(...videoFiles) {
-      console.log(2);
-      console.log(videoFiles);
       this.playFile(videoFiles[0]);
       if (videoFiles.length > 1) {
         this.$store.dispatch('PlayingList', videoFiles);
