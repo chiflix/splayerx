@@ -1,9 +1,9 @@
 
-import helpers from '@/helpers';
+import Sagi from '@/helpers/sagi';
 
 describe('helper.sagi api', () => {
   it('sagi.healthCheck should be 1', (done) => {
-    helpers.methods.sagi().healthCheck().then((status) => {
+    Sagi.healthCheck().then((status) => {
       expect(status).to.equal(1);
       done();
     }).catch((reason) => {
@@ -13,7 +13,7 @@ describe('helper.sagi api', () => {
   }).timeout(20000);
 
   it('sagi.mediaTranslateRaw should return OK', (done) => {
-    helpers.methods.sagi().mediaTranslateRaw('11-22-33-44').then((resp) => {
+    Sagi.mediaTranslateRaw('11-22-33-44').then((resp) => {
       if (process.env.NODE_ENV === 'production') {
         expect(resp.getError().toObject().code, 'error').to.equal(5); // no result
         done();
@@ -50,7 +50,7 @@ describe('helper.sagi api', () => {
       delay: 0,
       payload: Buffer.from(payloadSample),
     };
-    helpers.methods.sagi().pushTranscript(transcriptData).then((resp) => {
+    Sagi.pushTranscript(transcriptData).then((resp) => {
       if (process.env.NODE_ENV === 'production') {
         expect(resp.getError().toObject().code, 'error').to.equal(5); // no result
         done();
@@ -59,14 +59,14 @@ describe('helper.sagi api', () => {
       expect(resp.toObject().code, 'error').to.equal(0);
 
       // try to fetch the transcript that we just pushed
-      helpers.methods.sagi().mediaTranslateRaw(randomMediahash).then((resp) => {
+      Sagi.mediaTranslateRaw(randomMediahash).then((resp) => {
         expect(resp.getError().toObject().code, 'error').to.equal(0);
         const res = resp.getResultsList();
         expect(res.length, 'results list length').to.be.above(0);
         console.log(`results list length ${res.length}`);
 
         res.forEach((tr) => {
-          helpers.methods.sagi().getTranscriptRaw(tr.getTranscriptIdentity()).then((resp) => {
+          Sagi.getTranscriptRaw(tr.getTranscriptIdentity()).then((resp) => {
             expect(resp.hasError()).to.be.equal(false);
 
             const cue0 = resp.getTranscriptsList()[0];
