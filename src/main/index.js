@@ -95,16 +95,16 @@ function registerMainWindowEvent() {
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
 
-  function snapShot(videoPath, callback) {
+  function snapShot(video, callback) {
     /*
       TODO:
         img name should be more unique
      */
-    const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
+    const imgPath = path.join(app.getPath('temp'), video.quickHash);
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
-    splayerx.snapshotVideo(videoPath, `${imgPath}.png`, `00:00:${numberString}`, (resultCode) => {
-      console[resultCode === '0' ? 'log' : 'error'](resultCode, videoPath);
+    splayerx.snapshotVideo(video.videoPath, `${imgPath}.png`, `00:00:${numberString}`, (resultCode) => {
+      console[resultCode === '0' ? 'log' : 'error'](resultCode, video.videoPath);
       callback(resultCode, imgPath);
     });
   }
@@ -118,7 +118,7 @@ function registerMainWindowEvent() {
         if (event.sender.isDestroyed()) {
           snapShotQueue.splice(0, snapShotQueue.length);
         } else {
-          event.sender.send(`snapShot-${lastRecord}-reply`, imgPath);
+          event.sender.send(`snapShot-${lastRecord.videoPath}-reply`, imgPath);
           if (snapShotQueue.length > 0) {
             snapShot(snapShotQueue[0], callback);
           }
@@ -133,11 +133,11 @@ function registerMainWindowEvent() {
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, videoPath) => {
-    const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
+  ipcMain.on('snapShot', (event, videoPath, quickHash) => {
+    const imgPath = path.join(app.getPath('temp'), quickHash);
 
     if (!fs.existsSync(`${imgPath}.png`)) {
-      snapShotQueue.push(videoPath);
+      snapShotQueue.push({ videoPath, quickHash });
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
       }

@@ -192,9 +192,11 @@ export default {
     },
   },
   mounted() {
-    this.$electron.ipcRenderer.send('snapShot', this.path);
-    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-      this.coverSrc = filePathToUrl(`${imgPath}.png`);
+    this.mediaQuickHash(this.path).then((quickHash) => {
+      this.$electron.ipcRenderer.send('snapShot', this.path, quickHash);
+      this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
+        this.coverSrc = filePathToUrl(`${imgPath}.png`);
+      });
     });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
