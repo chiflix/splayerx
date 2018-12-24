@@ -24,7 +24,6 @@
 </template>;
 
 <script>
-import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper';
@@ -227,8 +226,6 @@ export default {
           0, 0, (videoWidth / videoHeight) * 1080, 1080,
         );
         const imagePath = canvas.toDataURL('image/png');
-        const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
-        fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
         const val = await this.infoDB().get('recent-played', 'path', this.originSrc);
         if (val) {
           const mergedData = Object.assign(val, { cover: imagePath, smallCover: smallImagePath });
