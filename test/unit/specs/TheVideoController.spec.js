@@ -68,16 +68,6 @@ describe('Component - TheVideoController Unit Test', () => {
     describe('hideVolume timer', () => {
       const hideVolumeTimerName = 'sleepingVolumeButton';
       const hideVolumeTimerTime = 1000;
-      it('should timer be updated when ArrowUp/ArrowDown keypressed', () => {
-        currentEventInfo.set('keydown', { ArrowUp: true });
-        lastEventInfo.set('keydown', { ArrowDown: true });
-
-        wrapper.vm.UITimerManager(17);
-        wrapper.vm.inputProcess(currentEventInfo, lastEventInfo);
-
-        expect(wrapper.vm.timerManager.getTimer(hideVolumeTimerName))
-          .to.deep.equal({ name: hideVolumeTimerName, timeLeft: hideVolumeTimerTime });
-      });
       it('should timer be updated when mouse scrolls', () => {
         currentEventInfo.set('wheel', { time: Date.now() });
         lastEventInfo.set('wheel', { time: Date.now() - 20 });
