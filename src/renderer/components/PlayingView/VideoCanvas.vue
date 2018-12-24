@@ -250,7 +250,6 @@ export default {
         // Assume to grab the cover can be the success and to keep
         // it doesn't execution multiple times. if grab failed,
         // we set it back to false.
-        // this.coverFinded = true;
         this.getVideoCover(videodata.time);
       }
     },
