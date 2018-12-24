@@ -10,19 +10,13 @@ import Sagi from './sagi';
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 
 const clock = lolex.createClock();
-let infoDB = null;
+const infoDB = new InfoDB();
 
 export default {
+  data() {
+    return { clock, infoDB, sagi: Sagi };
+  },
   methods: {
-    clock() {
-      return clock;
-    },
-    infoDB() {
-      if (!infoDB) infoDB = new InfoDB();
-      return infoDB;
-    },
-    sagi() { return Sagi; },
-
     timecodeFromSeconds(s) {
       const dt = new Date(Math.abs(s) * 1000);
       let hours = dt.getUTCHours();
@@ -205,12 +199,12 @@ export default {
       this.$router.push({
         name: 'playing-view',
       });
-      const value = await this.infoDB().get('recent-played', mediaQuickHash);
+      const value = await this.infoDB.get('recent-played', mediaQuickHash);
       if (value) {
         this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
-        this.infoDB().add('recent-played', Object.assign(value, { path: originPath, lastOpened: Date.now() }));
+        this.infoDB.add('recent-played', Object.assign(value, { path: originPath, lastOpened: Date.now() }));
       } else {
-        this.infoDB().add('recent-played', {
+        this.infoDB.add('recent-played', {
           quickHash: mediaQuickHash,
           path: originPath,
           lastOpened: Date.now(),

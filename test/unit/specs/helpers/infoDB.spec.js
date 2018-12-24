@@ -1,6 +1,6 @@
 import InfoDB from '@/helpers/infoDB';
 
-const infoDB = new InfoDB();
+const infoDB = new infoDB;
 
 describe('helper infoDB', () => {
   const quickHash1 = '11-22-33-44';

@@ -115,7 +115,7 @@ export default {
     updateThumbnailInfo(event) {
       this.autoGenerationIndex = event.index;
       this.generationInterval = event.interval;
-      this.infoDB().add(THUMBNAIL_OBJECT_STORE_NAME, {
+      this.infoDB.add(THUMBNAIL_OBJECT_STORE_NAME, {
         quickHash: this.mediaHash,
         lastGenerationIndex: event.index,
         generationInterval: event.interval,
@@ -130,7 +130,7 @@ export default {
     },
     retrieveThumbnailInfo(quickHash) {
       return new Promise((resolve) => {
-        this.infoDB().get(THUMBNAIL_OBJECT_STORE_NAME, quickHash).then((result) => {
+        this.infoDB.get(THUMBNAIL_OBJECT_STORE_NAME, quickHash).then((result) => {
           if (result) {
             const { lastGenerationIndex, maxThumbnailCount, generationInterval } = result;
             this.autoGenerationIndex = lastGenerationIndex;

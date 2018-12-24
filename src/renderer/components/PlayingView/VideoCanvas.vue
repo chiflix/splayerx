@@ -226,10 +226,10 @@ export default {
           0, 0, (videoWidth / videoHeight) * 1080, 1080,
         );
         const imagePath = canvas.toDataURL('image/png');
-        const val = await this.infoDB().get('recent-played', 'path', this.originSrc);
+        const val = await this.infoDB.get('recent-played', 'path', this.originSrc);
         if (val) {
           const mergedData = Object.assign(val, { cover: imagePath, smallCover: smallImagePath });
-          this.infoDB().add('recent-played', mergedData);
+          this.infoDB.add('recent-played', mergedData);
         } else {
           const data = {
             quickHash: await this.mediaQuickHash(this.originSrc),
@@ -238,7 +238,7 @@ export default {
             smallCover: smallImagePath,
             duration: this.$store.getters.duration,
           };
-          this.infoDB().add('recent-played', data);
+          this.infoDB.add('recent-played', data);
         }
       }
 
@@ -271,10 +271,10 @@ export default {
       this.saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
-          const val = await this.infoDB().get('recent-played', 'path', oldVal);
+          const val = await this.infoDB.get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
-            this.infoDB().add('recent-played', mergedData).then(() => {
+            this.infoDB.add('recent-played', mergedData).then(() => {
               this.$bus.$emit('database-saved');
             });
           }

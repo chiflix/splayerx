@@ -140,9 +140,9 @@ export default {
     progressKeydown(newValue) {
       if (newValue) {
         this.showProgress = true;
-        this.clock().clearTimeout(this.showProgressId);
+        this.clock.clearTimeout(this.showProgressId);
       } else {
-        this.showProgressId = this.clock().setTimeout(() => {
+        this.showProgressId = this.clock.setTimeout(() => {
           this.showProgress = false;
         }, 1000);
       }
@@ -221,7 +221,7 @@ export default {
         this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
       }
 
-      this.clock().tick(timestamp - this.start);
+      this.clock.tick(timestamp - this.start);
       this.UITimerManager(timestamp - this.start);
       requestAnimationFrame(this.clockTrigger);
 
@@ -360,9 +360,9 @@ export default {
       const { clientX, clientY, target } = event;
       this.mouseStopped = false;
       if (this.mouseStoppedId) {
-        this.clock().clearTimeout(this.mouseStoppedId);
+        this.clock.clearTimeout(this.mouseStoppedId);
       }
-      this.mouseStoppedId = this.clock().setTimeout(() => {
+      this.mouseStoppedId = this.clock.setTimeout(() => {
         this.mouseStopped = true;
       }, this.mousestopDelay);
       this.updateMousemovePosition([clientX, clientY]);
@@ -371,7 +371,7 @@ export default {
     handleMouseenter() {
       this.mouseLeftWindow = false;
       if (this.mouseLeftId) {
-        this.clock().clearTimeout(this.mouseLeftId);
+        this.clock.clearTimeout(this.mouseLeftId);
       }
     },
     handleMousedown(event) {
@@ -383,7 +383,7 @@ export default {
       this.updateMouseup({ target: this.getComponentName(target), buttons });
     },
     handleMouseleave() {
-      this.mouseLeftId = this.clock().setTimeout(() => {
+      this.mouseLeftId = this.clock.setTimeout(() => {
         this.mouseLeftWindow = true;
       }, this.mouseleftDelay);
     },
