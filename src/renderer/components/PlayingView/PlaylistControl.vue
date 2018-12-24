@@ -14,8 +14,6 @@ export default {
   },
   props: {
     showAttached: Boolean,
-    mousedownOnOther: Boolean,
-    mouseupOnOther: Boolean,
   },
   data() {
     return {
@@ -29,6 +27,9 @@ export default {
   computed: {
     videoRatio() {
       return this.$store.getters.ratio;
+    },
+    mousedownOnOther() {
+      return this.$store.state.Input.mousedownTarget;
     },
   },
   methods: {
@@ -58,7 +59,7 @@ export default {
       document.onmouseup = () => {
         if (this.validEnter) {
           this.anim.playSegments([47, 51], false);
-        } else if (!this.mousedownOnOther) {
+        } else if (this.mousedownOnOther === this.$options.name) {
           this.anim.playSegments([37, 41], false);
         }
         this.mouseDown = false;
