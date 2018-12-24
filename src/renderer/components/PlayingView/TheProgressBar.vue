@@ -1,6 +1,7 @@
 <template>
   <div class="the-progress-bar"
     @mousemove="handleMousemove"
+    @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
     @mousedown="handleMousedown">
     <the-preview-thumbnail class="the-preview-thumbnail" v-show="showThumbnail"
@@ -11,27 +12,48 @@
       :thumbnailWidth="thumbnailWidth"
       :thumbnailHeight="thumbnailHeight"
       :positionOfThumbnail="thumbnailPosition"
-      :hoveredEnd="hoveredPercent === '100%' && !!nextVideo"
+      :hoveredEnd="hoveredPercent === 100 && !!nextVideo"
      />
     <div class="fake-button left" ref="leftInvisible"
       :style="{ height: fakeButtonHeight }">
-      <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.leftFakeProgressBackgroundColor }">
-        <div class="radius" v-if="hoveredCurrentTime === 0"></div>
+      <div class="fake-progress"
+        :style="{
+          height: this.hovering ? '10px' : '4px',
+          backgroundColor: this.leftFakeProgressBackgroundColor,
+        }">
+        <div class="radius" v-if="hoveredCurrentTime === 0 && hovering"
+          :style="{
+            width: '20px',
+            height: '10px',
+            borderTopRightRadius: '20px',
+            borderBottomRightRadius: '20px',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            transition: 'background-color 150ms, height 150ms',
+          }"></div>
       </div>
     </div>
     <div class="progress"
-      :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.progressBackgroundColor }">
-      <div class="hovered" :style="{ width: this.hoveredPercent, backgroundColor: this.hoveredBackgroundColor }"></div>
-      <div class="played" :style="{ width: this.playedPercent, backgroundColor: this.playedBackgroundColor }"></div>
+      :style="{ height: this.hovering ? '10px' : '4px' }">
+      <div class="hovered" ref="hoveredProgress"
+        :style="{
+        }"></div>
+      <div class="played" ref="playedProgress"
+        :style="{
+        }" ></div>
+      <div class="default" ref="defaultProgress"
+        :style="{
+          order: '2',
+        }"></div>
     </div>
     <div class="fake-button right" ref="rightInvisible"
       :style="{ height: fakeButtonHeight }">
-      <div class="fake-progress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.rightFakeProgressBackgroundColor }"></div></div>
+      <div class="fake-progress" ref="fakeProgress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.rightFakeProgressBackgroundColor }"></div></div>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex';
 import ThePreviewThumbnail from './ThePreviewThumbnail.vue';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'the-progress-bar',
@@ -52,9 +74,9 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'duration', 'currentTime', 'ratio', 'nextVideo']),
+    ...mapGetters(['winWidth', 'duration', 'ratio', 'nextVideo']),
     hoveredPercent() {
-      return `${this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100}%`;
+      return this.hovering ? this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100 : 0;
     },
     hoveredCurrentTime() {
       return this.duration * this.pageXToProportion(this.hoveredPageX, 20, this.winWidth);
@@ -62,11 +84,8 @@ export default {
     convertedHoveredCurrentTime() {
       return this.timecodeFromSeconds(this.hoveredCurrentTime);
     },
-    playedPercent() {
-      return `${100 * (this.currentTime / this.duration)}%`;
-    },
     hoveredSmallerThanPlayed() {
-      return !this.mouseleave && this.hoveredCurrentTime < this.currentTime;
+      return !this.mouseleave && this.hoveredCurrentTime < videodata.time;
     },
     thumbnailHeight() {
       return Math.round(this.thumbnailWidth / this.ratio);
@@ -80,36 +99,11 @@ export default {
     fakeButtonHeight() {
       return this.showThumbnail ? `${this.thumbnailHeight + 20}px` : '20px';
     },
-    hoveredBackgroundColor() {
-      if (!this.mouseleave) {
-        return this.hoveredSmallerThanPlayed ?
-          this.whiteWithOpacity(0.86) : this.whiteWithOpacity(0.3);
-      }
-      return this.whiteWithOpacity(0);
-    },
-    playedBackgroundColor() {
-      if (this.hovering) {
-        return this.hoveredSmallerThanPlayed ?
-          this.whiteWithOpacity(0.3) : this.whiteWithOpacity(0.9);
-      }
-      return this.whiteWithOpacity(0.9);
-    },
-    progressBackgroundColor() {
-      return this.hovering ? this.whiteWithOpacity(0.1) : this.whiteWithOpacity(0);
-    },
     leftFakeProgressBackgroundColor() {
-      let opacity = 0.908;
+      let opacity = 0.9;
       if (this.hoveredCurrentTime === 0 && this.hoveredSmallerThanPlayed) opacity = 0.3;
-      if (this.hoveredCurrentTime > 0) opacity = 0.908;
+      if (this.hoveredCurrentTime > 0) opacity = 0.9;
       return this.whiteWithOpacity(opacity);
-    },
-    rightFakeProgressBackgroundColor() {
-      const hoveredEnd = this.hoveredPercent === '100%';
-      const playedEnd = Math.round(this.currentTime) >= Math.round(this.duration);
-      const opacity = this.mouseleave ? // eslint-disable-line no-nested-ternary
-        (playedEnd ? 0.9 : 0) :
-        (((hoveredEnd && !playedEnd) || (!hoveredEnd && playedEnd)) ? 0.37 : 0.1);
-      return this.whiteWithOpacity(hoveredEnd && playedEnd ? 0.9 : opacity);
     },
   },
   watch: {
@@ -118,6 +112,69 @@ export default {
     },
   },
   methods: {
+    hoveredmouseenter() {
+      this.mouseleave = false;
+      requestAnimationFrame(this.renderProgressBar);
+    },
+    // To render the playedProgress when video is playing,
+    // it is a difference with the hover-bar effect.
+    updatePlayProgressBar(time) {
+      const playedPercent = 100 * (time / this.duration);
+      const { playedProgress, fakeProgress } = this.$refs;
+      playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
+      playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
+      playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
+      fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(time);
+    },
+    updateHoveredProgressBar(time, hoveredPercent) {
+      const playedPercent = 100 * (time / this.duration);
+      const { hoveredProgress, defaultProgress } = this.$refs;
+      hoveredProgress.style.width = hoveredPercent <= playedPercent ? `${hoveredPercent}%` : `${hoveredPercent - playedPercent}%`;
+      hoveredProgress.style.backgroundColor = hoveredPercent <= playedPercent ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
+      hoveredProgress.style.order = hoveredPercent <= playedPercent ? '0' : '1';
+      // the hoveredPercent = -1 means we need to hide it and reset
+      if (hoveredPercent === -1) {
+        this.setHoveringToFalse(true);
+        hoveredProgress.style.width = '0';
+      }
+      defaultProgress.style.backgroundColor = this.hovering ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0)';
+    },
+    // We need high fps to render hovering of the progress-bar for
+    // smooth animation, We use requestAnimationFrame to make it.
+    // Listening for mouse enter event and starting the renderProgressBar
+    // with requestAnimationFrame, when receiving the mouse leave event stop the renderer.
+    renderProgressBar() {
+      // We call updatePlayProgressBar here because of
+      // the hover-bar and played-bar use flexbox layout
+      // and related with the `order` property. if not do
+      // this, the layout will be broken.
+      this.updatePlayProgressBar(videodata.time);
+
+      this.updateHoveredProgressBar(videodata.time, this.hoveredPercent);
+
+      if (!this.mouseleave) {
+        requestAnimationFrame(this.renderProgressBar);
+      }
+    },
+    rightFakeProgressBackgroundColor(time) {
+      const hoveredEnd = this.hoveredPercent >= 100;
+      const playedEnd = time >= this.duration;
+      let opacity = 0;
+      if (this.mouseleave) {
+        if (playedEnd) {
+          opacity = 0.9;
+        } else if (this.hovering && hoveredEnd) {
+          opacity = 0.3;
+        } else if (this.hovering && !hoveredEnd) {
+          opacity = 0.1;
+        } else {
+          opacity = 0;
+        }
+      } else {
+        opacity = hoveredEnd !== playedEnd ? 0.3 : 0.1;
+      }
+      return this.whiteWithOpacity(hoveredEnd && playedEnd ? 0.9 : opacity);
+    },
     handleMousemove(event) {
       this.hoveredPageX = event.pageX;
       this.hovering = true;
@@ -241,7 +298,7 @@ export default {
     position: relative;
     width: 20px;
     .fake-progress {
-      transition: background-color 150ms, height 150ms;
+      transition: height 150ms;
       width: inherit;
       position: absolute;
       bottom: 0;
@@ -250,14 +307,25 @@ export default {
       content: '';
       width: inherit;
       height: inherit;
-      background-color: rgba(255, 255, 255, 0.9);
       position: absolute;
     }
   }
 
   .progress {
+    display: flex;
+    flex-direction: row;
     position: relative;
     width: calc(100% - 40px);
+    .hovered {
+      position: relative;
+    }
+    .played {
+      position: relative;
+    }
+    .default {
+      flex: 1;
+      position: relative;
+    }
     & div {
       position: absolute;
       bottom: 0;

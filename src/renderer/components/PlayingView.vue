@@ -1,7 +1,7 @@
 <template>
   <div :data-component-name="$options.name" class="player">
-    <the-video-canvas />
-    <the-video-controller />
+    <the-video-canvas ref="videoCanvas" />
+    <the-video-controller ref="videoctrl" />
     <subtitle-manager />
   </div>
 </template>
@@ -10,6 +10,7 @@
 import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheVideoController from './PlayingView/TheVideoController.vue';
+import { videodata } from '../store/video';
 
 export default {
   name: 'playing-view',
@@ -18,11 +19,22 @@ export default {
     'the-video-canvas': VideoCanvas,
     'subtitle-manager': SubtitleManager,
   },
-
   methods: {
+    // Compute UI states
+    // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
+    // else it is triggered by setInterval.
+    onUpdateTick() {
+      this.$refs.videoCanvas.checkPresentTime();
+      this.$refs.videoctrl.onTickUpdate();
+    },
   },
   mounted() {
     this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);
+    videodata.checkTick();
+    videodata.onTick = this.onUpdateTick;
+  },
+  beforeDestroy() {
+    videodata.stopCheckTick();
   },
 };
 </script>

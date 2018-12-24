@@ -1,13 +1,11 @@
-import infoDB from '@/helpers/infoDB';
-// import idb from 'idb';
+import InfoDB from '@/helpers/infoDB';
+
+const infoDB = new InfoDB();
 
 describe('helper infoDB', () => {
   const quickHash1 = '11-22-33-44';
   const quickHash2 = '22-33-44-55';
   const quickHash3 = '33-44-55-66';
-  before(async () => {
-    await infoDB.init();
-  });
   it('add method', async () => {
     const value = { quickHash: quickHash1 };
     await infoDB.add('recent-played', value);

@@ -1,7 +1,7 @@
 <template>
   <div :class="container">
     <transition name="nextvideo">
-      <NextVideo class="next-video"
+      <NextVideo class="next-video" ref="nextVideo"
         v-if="showNextVideo"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
@@ -50,11 +50,10 @@ export default {
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
-      checkIfNextVideoExist: false,
     };
   },
   computed: {
-    ...mapGetters(['roundedCurrentTime', 'nextVideo', 'duration', 'finalPartTime']),
+    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -94,22 +93,17 @@ export default {
         this.$bus.$emit('delete-file');
       }
     },
-  },
-  watch: {
-    checkIfNextVideoExist(val) {
-      if (val) {
-        this.$store.dispatch('UpdatePlayingList');
-        this.showNextVideo = true;
-      }
-    },
-    roundedCurrentTime(val) {
-      if (val > this.finalPartTime && val < this.duration - 5) {
-        if (this.nextVideo !== '' && !this.manualClosed) {
-          this.checkIfNextVideoExist = true;
+    checkNextVideoUI(time) {
+      if (time > this.nextVideoPreviewTime && time < this.duration) {
+        if (this.nextVideo && !this.manualClosed) {
+          this.$store.dispatch('UpdatePlayingList');
+          this.showNextVideo = true;
         }
       } else {
-        this.checkIfNextVideoExist = false;
         this.manualClosed = false;
+      }
+      if (this.$refs.nextVideo) {
+        this.$refs.nextVideo.updatePlayingTime(time);
       }
     },
   },
@@ -190,7 +184,7 @@ export default {
   }
   @media screen and (min-width: 320px) and (max-width: 512px) {
     top: 13px;
-    right: 34px;
+    right: 14px;
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
     top: 22px;
@@ -305,8 +299,6 @@ export default {
 }
 .black-gradient-error {
   position: absolute;
-  background-color: rgba(0,0,0,0.20);
-  backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 216px;
@@ -339,8 +331,6 @@ export default {
 }
 .black-gradient-loading {
   position: absolute;
-  background-color: rgba(0,0,0,0.20);
-  backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 136px;
@@ -378,7 +368,7 @@ export default {
 
 .errorContainer {
   display: flex;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (min-width: 320px) and (max-width: 512px) {

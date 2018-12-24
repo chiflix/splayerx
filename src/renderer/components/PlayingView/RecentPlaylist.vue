@@ -24,7 +24,7 @@
       :style="{
         fontSize: sizeAdaption(14),
         lineHeight: sizeAdaption(13),
-      }">{{lastPlayedTime}} {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+      }"><span ref="lastPlayedTime"></span> {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
       <div class="file-name"
         :style="{
           marginTop: sizeAdaption(9),
@@ -53,9 +53,7 @@
         :isShifting="shifting"
         :hoverIndex="hoverIndex"
         :thumbnailWidth="thumbnailWidth"
-        @mouseupItem="itemMouseup"
-        @mouseoutItem="itemMouseout"
-        @mouseoverItem="itemMouseover"/>
+        :eventTarget="eventTarget" />
       <div class="next-page"
         v-if="thumbnailNumber < numberOfPlaylistItem"
         @mouseup.stop=""
@@ -94,11 +92,12 @@ export default {
       shifting: false,
       snapShoted: false,
       hoveredMediaInfo: {}, // the hovered video's media info
-      backgroundDisplayState: this.displayState,
       mousePosition: [],
+      backgroundDisplayState: this.displayState, // it's weird but DON'T DELETE IT!!
       canHoverItem: false,
       tranFlag: false,
       filePathNeedToDelete: '',
+      eventTarget: {},
     };
   },
   created() {
@@ -110,6 +109,11 @@ export default {
       this.filePathNeedToDelete = '';
     });
     this.hoverIndex = this.playingIndex;
+    this.eventTarget.onItemMouseover = this.onItemMouseover;
+    this.eventTarget.onItemMouseout = this.onItemMouseout;
+    this.eventTarget.onItemMouseup = this.onItemMouseup;
+
+    this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
     afterLeave() {
@@ -125,19 +129,28 @@ export default {
         this.$emit('update:isDragging', false);
       }
     },
-    itemMouseover(payload) {
-      this.hoverIndex = payload.index;
-      this.hoveredMediaInfo = payload.mediaInfo;
+    onItemMouseover(index, media) {
+      this.hoverIndex = index;
+      this.hoveredMediaInfo = media;
       this.filename = path.basename(
-        payload.mediaInfo.filename,
-        path.extname(payload.mediaInfo.filename),
+        media.path,
+        path.extname(media.path),
       );
     },
-    itemMouseout() {
+    onItemMouseout() {
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
-    itemMouseup(index) {
+    updatelastPlayedTime(time) {
+      if (this.$refs.lastPlayedTime) {
+        if (this.hoverIndex === this.playingIndex) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
+        } else if (this.hoveredMediaInfo.lastPlayedTime) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
+        }
+      }
+    },
+    onItemMouseup(index) {
       // last page
       if (index === this.firstIndex - 1) {
         this.lastIndex = index;
@@ -155,13 +168,17 @@ export default {
           this.shifting = false;
           this.tranFlag = false;
         }, 400);
-      } else if (index !== this.playingIndex
+      } else if (index !== this.playingIndex && !this.shifting
         && this.filePathNeedToDelete !== this.playingList[index]) {
-        this.openFile(this.playingList[index]);
+        this.playFile(this.playingList[index]);
       }
     },
   },
   watch: {
+    originSrc() {
+      this.hoverIndex = this.playingIndex;
+      this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+    },
     firstIndex() {
       if (this.lastIndex > this.maxIndex) {
         this.lastIndex = this.maxIndex;
@@ -189,7 +206,10 @@ export default {
         this.lastIndex = val;
       }
     },
-    displayState(val) {
+    displayState(val, oldval) {
+      if (oldval !== undefined) {
+        this.$bus.$emit('subtitle-to-top', val);
+      }
       this.canHoverItem = false;
       this.mousePosition = this.mousemovePosition;
       if (val) {
@@ -210,20 +230,12 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'roundedCurrentTime', 'originSrc']),
+    ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
     inWhichSource() {
       if (this.isFolderList) {
         return this.$t('recentPlaylist.folderSource');
       }
       return this.$t('recentPlaylist.playlistSource');
-    },
-    lastPlayedTime() {
-      if (this.hoverIndex === this.playingIndex) {
-        return `${this.timecodeFromSeconds(this.$store.getters.roundedCurrentTime)} /`;
-      } else if (this.hoveredMediaInfo.lastPlayedTime) {
-        return `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
-      }
-      return '';
     },
     videoDuration() {
       if (this.hoverIndex !== this.playingIndex) {

@@ -11,7 +11,6 @@ describe('Playlist.vue', () => {
     expect(wrapper.vm.disX).equal('');
     expect(wrapper.vm.disY).equal('');
     expect(wrapper.vm.recentFileDel).equal(false);
-    expect(wrapper.vm.showingPopupDialog).equal(false);
   });
   it('open method works fine', () => {
     const wrapper = mount(Playlist);

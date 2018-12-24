@@ -1,6 +1,7 @@
 import Vue from 'vue';
 
 import Helpers from '@/helpers';
+import romanize from 'romanize';
 import { Video as mutationTypes } from '../mutationTypes';
 import { Video as actionTypes } from '../actionTypes';
 
@@ -10,6 +11,12 @@ const state = {
   errorMessage: '',
   // network state
   src: process.env.NODE_ENV === 'testing' ? './test/assets/test.avi' : '',
+  mediaHash: process.env.NODE_ENV === 'testing'
+    ? '84f0e9e5e05f04b58f53e2617cc9c866-'
+      + 'f54d6eb31bef84839c3ce4fc2f57991c-'
+      + 'b1f0696aec64577228d93eabcc8eb69b-'
+      + 'f497c6684c4c6e50d0856b5328a4bedc'
+    : '',
   currentSrc: '',
   networkState: '',
   buffered: '',
@@ -55,7 +62,7 @@ const getters = {
   },
   // playback state
   duration: state => state.duration,
-  finalPartTime: state => state.duration - 30,
+  nextVideoPreviewTime: state => state.duration - 30,
   currentTime: state => state.currentTime,
   paused: state => state.paused,
   roundedCurrentTime: state => Math.round(state.currentTime),
@@ -79,7 +86,7 @@ const getters = {
     .round(getters.winRatio < getters.ratio ? getters.winWidth / getters.ratio : getters.winHeight),
   ratio: state => state.ratio,
   AudioDelay: state => state.AudioDelay,
-  mediaHash: state => Helpers.methods.mediaQuickHash(state.src),
+  mediaHash: state => state.mediaHash,
 };
 
 function stateToMutation(stateType) {
@@ -142,14 +149,18 @@ function generateTracks(actionType, newTrack, oldTracks) {
 const mutations = mutationsGenerator(mutationTypes);
 
 const actions = {
-  [actionTypes.SRC_SET]({ commit }, src) {
+  [actionTypes.SRC_SET]({ commit }, { src, mediaHash }) {
     const srcRegexes = {
       unix: RegExp(/^[^\0]+$/),
       windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
     };
-    Object.keys(srcRegexes).forEach((type) => {
+    Object.keys(srcRegexes).forEach(async (type) => {
       if (srcRegexes[type].test(src)) {
         commit(mutationTypes.SRC_UPDATE, src);
+        commit(
+          mutationTypes.MEDIA_HASH_UPDATE,
+          mediaHash || await Helpers.methods.mediaQuickHash(src),
+        );
       }
     });
   },
@@ -210,6 +221,13 @@ const actions = {
     commit(mutationTypes.DELAY_UPDATE, finalDelay);
   },
   [actionTypes.ADD_AUDIO_TRACK]({ commit, state }, trackToAdd) {
+    let times = 1;
+    state.audioTrackList.forEach((item) => {
+      if (item.language === trackToAdd.language) {
+        times += 1;
+      }
+    });
+    trackToAdd = Object.assign(trackToAdd, { name: `${trackToAdd.language} ${romanize(times)}` });
     const newAudioTracks = generateTracks('add', trackToAdd, state.audioTrackList);
     commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },

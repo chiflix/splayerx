@@ -31,6 +31,8 @@ module.exports = {
     // force the use of unix linebreak-syle
     'linebreak-style': ['error', 'unix'],
     // limit the cyclomatic complexity to 10
-    'complexity': ['error', { max: 10 }]
+    'complexity': ['error', { max: 10 }],
+    // allow dangling after this and super
+    'no-underscore-dangle': ['error', { allowAfterThis: true, allowAfterSuper: true }]
   }
 }

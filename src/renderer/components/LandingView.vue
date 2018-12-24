@@ -1,57 +1,55 @@
 <template>
-<div
-  class="wrapper"
-  :data-component-name="$options.name"
-  @mousedown.left.stop="handleLeftClick"
-  @mouseup.left.stop="handleMouseUp"
-  @mousemove="handleMouseMove">
-  <titlebar currentView="LandingView"></titlebar>
-  <notification-bubble/>
-  <transition name="background-container-transition">
-  <div class="background"
-    v-if="showShortcutImage">
-    <transition name="background-transition" mode="in-out">
-    <div class="background-image"
-    :key="item.path"
-    :style="{
-      backgroundImage: backgroundUrl,
-    }">
-      <div class="background-mask"/>
-    </div>
+  <div class="wrapper"
+    :data-component-name="$options.name"
+    @mousedown.left.stop="handleLeftClick"
+    @mouseup.left.stop="handleMouseUp"
+    @mousemove="handleMouseMove">
+    <titlebar currentView="LandingView"></titlebar>
+    <notification-bubble/>
+    <transition name="background-container-transition">
+      <div class="background" v-if="showShortcutImage">
+        <transition name="background-transition" mode="in-out">
+          <div class="background-image"
+          :key="item.path"
+          :style="{
+            backgroundImage: backgroundUrl,
+          }">
+            <div class="background-mask"/>
+          </div>
+        </transition>
+        <div class="item-info">
+          <div class="item-name">
+            {{ item.baseName }}
+          </div>
+          <div class="item-description"/>
+          <div class="item-timing">
+            <span class="timing-played">
+              {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}</span>
+            / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
+          </div>
+          <div class="item-progress">
+            <div class="progress-played" :style="{ width: item.percentage + '%' }"/>
+          </div>
+        </div>
+      </div>
     </transition>
-    <div class="item-info">
-      <div class="item-name">
-        {{ item.baseName }}
+    <transition name="welcome-container-transition">
+      <div class="welcome-container" v-if="landingLogoAppear">
+        <div class="logo-container">
+          <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
+        </div>
+        <div class="welcome">
+          <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
+        </div>
       </div>
-      <div class="item-description"/>
-      <div class="item-timing">
-        <span class="timing-played">
-          {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}</span>
-        / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
-      </div>
-      <div class="item-progress">
-        <div class="progress-played" :style="{ width: item.percentage + '%' }"/>
-      </div>
-    </div>
+    </transition>
+    <playlist
+      :lastPlayedFile="lastPlayedFile"
+      :isFullScreen="isFullScreen"
+      :winWidth="winWidth"
+      :filePathNeedToDelete="filePathNeedToDelete"
+      @displayInfo="displayInfoUpdate"/>
   </div>
-  </transition>
-  <transition name="welcome-container-transition">
-  <div class="welcome-container" v-if="landingLogoAppear">
-    <div class="logo-container">
-      <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
-    </div>
-    <div class="welcome">
-      <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-    </div>
-  </div>
-  </transition>
-  <playlist
-    :lastPlayedFile="lastPlayedFile"
-    :isFullScreen="isFullScreen"
-    :winWidth="winWidth"
-    :filePathNeedToDelete="filePathNeedToDelete"
-    @displayInfo="displayInfoUpdate"/>
-</div>
 </template>
 
 <script>
@@ -140,12 +138,12 @@ export default {
         this.lastPlayedFile = data.slice(0, 9);
       });
     this.$bus.$on('clean-lastPlayedFile', () => {
+      // just for delete thumbnail display
       this.lastPlayedFile = [];
       this.landingLogoAppear = true;
       this.showShortcutImage = false;
-      this.infoDB().cleanData();
     });
-    // trigger by openFile function when opened file not existed
+    // trigger by playFile function when opened file not existed
     this.$bus.$on('file-not-existed', (filePath) => {
       this.filePathNeedToDelete = filePath;
       this.lastPlayedFile.forEach((file) => {
@@ -239,6 +237,7 @@ body {
   z-index: -1;
 }
 .background {
+  position: absolute;
   width: 100%;
   height: 100%;
 

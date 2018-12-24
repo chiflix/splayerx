@@ -6,6 +6,7 @@
     <base-video-player
       ref="videoCanvas"
       :key="originSrc"
+      :needtimeupdate=true
       :events="['loadedmetadata', 'audiotrack']"
       :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
@@ -15,12 +16,9 @@
       :volume="volume"
       :muted="muted"
       :paused="paused"
-      :updateCurrentTime="true"
       :currentTime="seekTime"
-      :currentAudioTrackId="currentAudioTrackId.toString()"
-      @update:currentTime="updateCurrentTime" />
+      :currentAudioTrackId="currentAudioTrackId.toString()" />
     </transition>
-    <!--<BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>-->
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -29,16 +27,14 @@
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper';
-import { mapGetters, mapActions, mapMutations } from 'vuex';
-import { Video as videoMutations } from '@/store/mutationTypes';
+import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
-import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'video-canvas',
   components: {
-    BaseSubtitle,
     'base-video-player': BaseVideoPlayer,
   },
   data() {
@@ -64,9 +60,6 @@ export default {
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
     }),
-    ...mapMutations({
-      updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
-    }),
     onMetaLoaded(event) {
       this.videoElement = event.target;
       this.videoConfigInitialize({
@@ -81,14 +74,16 @@ export default {
         intrinsicHeight: event.target.videoHeight,
         ratio: event.target.videoWidth / event.target.videoHeight,
       });
+      let grabCoverTime = 0;
       if (event.target.duration - this.lastPlayedTime > 10) {
         this.$bus.$emit('seek', this.lastPlayedTime);
+        grabCoverTime = this.lastPlayedTime;
       } else {
         this.$bus.$emit('seek', 0);
       }
       this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
-      this.getVideoCover();
+      this.getVideoCover(grabCoverTime);
       this.changeWindowSize();
     },
     onAudioTrack(event) {
@@ -189,15 +184,21 @@ export default {
       const data = {
         shortCut: imagePath,
         smallShortCut: smallImagePath,
-        lastPlayedTime: this.currentTime,
+        lastPlayedTime: videodata.time,
         duration: this.duration,
       };
       syncStorage.setSync('recent-played', data);
     },
     saveSubtitleStyle() {
-      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle });
+      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
-    async getVideoCover() {
+    async getVideoCover(grabCoverTime) {
+      if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
+      // Because we are execution in async, we do double check.
+      if (this.coverFinded) {
+        return;
+      }
+
       const videoElement = this.$refs.videoCanvas.videoElement();
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -207,14 +208,17 @@ export default {
         videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
+
+      let grabcoverdone = false;
       const { data } = canvasCTX.getImageData(0, 0, 100, 100);
+      // check the cover is it right.
       for (let i = 0; i < data.length; i += 1) {
         if ((i + 1) % 4 !== 0 && data[i] > 20) {
-          this.coverFinded = true;
+          grabcoverdone = true;
           break;
         }
       }
-      if (this.coverFinded) {
+      if (grabcoverdone) {
         const smallImagePath = canvas.toDataURL('image/png');
         [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
         canvasCTX.drawImage(
@@ -228,7 +232,7 @@ export default {
           this.infoDB().add('recent-played', mergedData);
         } else {
           const data = {
-            quickHash: this.mediaQuickHash(this.originSrc),
+            quickHash: await this.mediaQuickHash(this.originSrc),
             path: this.originSrc,
             cover: imagePath,
             smallCover: smallImagePath,
@@ -237,14 +241,24 @@ export default {
           this.infoDB().add('recent-played', data);
         }
       }
-      this.lastCoverDetectingTime = this.currentTime;
+
+      this.coverFinded = grabcoverdone;
+      this.lastCoverDetectingTime = grabCoverTime;
+    },
+    checkPresentTime() {
+      if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
+        // Assume to grab the cover can be the success and to keep
+        // it doesn't execution multiple times. if grab failed,
+        // we set it back to false.
+        this.coverFinded = true;
+        this.getVideoCover(videodata.time);
+      }
     },
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle', 'scaleNum',
-      'nextVideo']),
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
+      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -269,16 +283,7 @@ export default {
       this.videoConfigInitialize({
         audioTrackList: [],
       });
-    },
-    currentTime(val) {
-      if (!this.coverFinded && val - this.lastCoverDetectingTime > 1) {
-        this.getVideoCover();
-      }
-      if (val >= this.duration && this.nextVideo) {
-        this.openFile(this.nextVideo);
-      } else if (val >= this.duration) {
-        this.pause();
-      }
+      this.play();
     },
   },
   mounted() {
@@ -295,6 +300,11 @@ export default {
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
+    });
+    this.$bus.$on('next-video', () => {
+      if (this.nextVideo) {
+        this.playFile(this.nextVideo);
+      }
     });
     this.$bus.$on('seek', (e) => {
       this.seekTime = [e];

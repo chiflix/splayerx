@@ -52,6 +52,7 @@
 </template>
 
 <script>
+import asyncStorage from '@/helpers/asyncStorage';
 import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 
@@ -62,6 +63,7 @@ export default {
       hoverIndex: -1,
       selectedIndex: 1,
       moveLength: '',
+      lastSize: 1,
     };
   },
   props: {
@@ -213,12 +215,27 @@ export default {
       }
       return this.item === this.$t('advance.fontSize') ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
     },
-    subStyle() {
-      return this.$store.getters.curStyle;
-    },
+  },
+  created() {
+    asyncStorage.get('subtitle-style').then((data) => {
+      if (data.chosenSize) {
+        if (this.item === this.$t('advance.fontSize')) {
+          this.handleClick(data.chosenSize);
+        }
+      }
+    });
   },
   mounted() {
-    this.$set(this.lists[1], 'chosen', true);
+    this.$bus.$on('subtitle-to-top', (val) => {
+      if (this.item === this.$t('advance.fontSize')) {
+        if (val) {
+          this.lastSize = this.chosenSize;
+          this.handleClick(0);
+        } else {
+          this.handleClick(this.lastSize);
+        }
+      }
+    });
   },
   methods: {
     handleOver(index) {

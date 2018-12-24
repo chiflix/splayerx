@@ -17,7 +17,6 @@ describe('Component - BaseVideoPlayer', () => {
     muted: false,
     defaultMuted: false,
     paused: false,
-    updateCurrentTime: false,
     events: ['loadedmetadata'],
     styles: {},
   };
@@ -90,14 +89,6 @@ describe('Component - BaseVideoPlayer', () => {
         assertVideoAttributes('paused', propsData.paused, [true], true);
       });
 
-      it('should updateCurrentTime be changed dynamically', () => {
-        expect(wrapper.vm.currentTimeAnimationFrameId).to.equal(0);
-
-        wrapper.setProps({ updateCurrentTime: true });
-
-        expect(wrapper.vm.currentTimeAnimationFrameId).to.not.equal(0);
-      });
-
       it('should events be dynamically added', () => {
         const finalEvents = ['loadedmetadata', 'canplay'];
         wrapper.setProps({
@@ -128,21 +119,6 @@ describe('Component - BaseVideoPlayer', () => {
         Object.keys(testStyle).forEach((style) => {
           expect(wrapper.element.childNodes[0].style[style]).to.equal(testStyle[style]);
         });
-      });
-
-      it('should updateCurrentTime update currentTime when mounted', () => {
-        const newPropsData = Object.assign(
-          {},
-          propsData,
-          {
-            updateCurrentTime: true,
-            events: [],
-            styles: {},
-          },
-        );
-        const newWrapper = mount(BaseVideoPlayer, { propsData: newPropsData });
-
-        expect(newWrapper.vm.currentTimeAnimationFrameId).to.not.equal(0);
       });
     });
 
@@ -193,18 +169,6 @@ describe('Component - BaseVideoPlayer', () => {
       const videoElement = wrapper.vm.videoElement();
 
       expect(videoElement).to.equal(wrapper.vm.$refs.video);
-    });
-
-    it('should currentTimeUpdate emit events', () => {
-      wrapper.vm.currentTimeUpdate();
-
-      expect(wrapper.emitted()).to.contain.keys('update:currentTime');
-    });
-
-    it('should currentTimeUpdate update currentTimeAnimationFrameId', () => {
-      wrapper.vm.currentTimeUpdate();
-
-      expect(wrapper.vm.currentTimeAnimationFrameId).to.not.equal(0);
     });
 
     it('should emitEvents emit events', () => {

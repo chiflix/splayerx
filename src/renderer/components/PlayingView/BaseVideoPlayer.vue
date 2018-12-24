@@ -10,6 +10,7 @@
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
 import { DEFAULT_VIDEO_EVENTS } from '@/constants';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'base-video-player',
@@ -88,10 +89,6 @@ export default {
       type: Boolean,
       default: false,
     },
-    updateCurrentTime: {
-      type: Boolean,
-      default: false,
-    },
     // video events
     events: {
       type: Array,
@@ -105,6 +102,14 @@ export default {
     styles: {
       type: Object,
       default: () => ({}),
+    },
+    // VideoCanvas and ThumbnailVideoPlayer both use the the BaseVideoPlayer.
+    // The VideoCanvas provides the main video as a player, it needs to
+    // care the ontimeupdate callback to render the time-bar, so need
+    // the needtimeupdate tag.
+    needtimeupdate: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
@@ -121,7 +126,12 @@ export default {
     // network state
     // playback state
     currentTime(newVal) {
-      [this.$refs.video.currentTime] = newVal;
+      [this.$refs.video.currentTime] = newVal || 0;
+
+      // update the seek time
+      if (this.needtimeupdate) {
+        videodata.time = this.$refs.video.currentTime;
+      }
     },
     playbackRate(newVal) {
       this.$refs.video.playbackRate = newVal;
@@ -163,14 +173,9 @@ export default {
     },
     // custom
     paused(newVal) {
+      // update the play state
+      videodata.paused = newVal;
       this.$refs.video[newVal ? 'pause' : 'play']();
-    },
-    updateCurrentTime(newVal) {
-      if (newVal) {
-        this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
-      } else {
-        cancelAnimationFrame(this.currentTimeAnimationFrameId);
-      }
     },
     // events
     events(newVal, oldVal) {
@@ -184,11 +189,13 @@ export default {
   },
   mounted() {
     this.basicInfoInitialization(this.$refs.video);
-    if (this.updateCurrentTime) {
-      this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
-    }
     this.addEvents(this.events);
     this.setStyle(this.styles);
+    if (this.needtimeupdate) {
+      // reset paused state to play a new video
+      videodata.paused = false;
+      this.$refs.video.ontimeupdate = this.currentTimeUpdate;
+    }
   },
   methods: {
     basicInfoInitialization(videoElement) {
@@ -200,15 +207,17 @@ export default {
       basicInfo.forEach((settingItem) => {
         videoElement[settingItem] = this[settingItem];
       });
+      // following code is to make preview-thumbnail pause
+      if (this.paused) {
+        videoElement.pause();
+      }
     },
     // Video default methods
     videoElement() {
       return this.$refs.video;
     },
     currentTimeUpdate() {
-      const { currentTime } = this.$refs.video;
-      this.$emit('update:currentTime', currentTime);
-      this.currentTimeAnimationFrameId = requestAnimationFrame(this.currentTimeUpdate);
+      videodata.time = this.$refs.video.currentTime;
     },
     // helper functions
     emitEvents(event, value) {
@@ -265,10 +274,7 @@ export default {
     },
   },
   beforeDestroy() {
-    if (this.updateCurrentTime) {
-      cancelAnimationFrame(this.currentTimeAnimationFrameId);
-      this.$emit('update:updateCurrentTime', false);
-    }
+    this.$refs.video.ontimeupdate = null;
     this.removeEvents(this.events);
   },
 };

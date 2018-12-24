@@ -13,8 +13,8 @@
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
-    <notification-bubble/>
-    <recent-playlist class="recent-playlist"
+    <notification-bubble ref="nextVideoUI"/>
+    <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
     :mousemovePosition="mousemovePosition"
     :isDragging.sync="isDragging"
@@ -33,8 +33,8 @@
       v-bind.sync="widgetsStatus['advance-control']"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes v-hidden="displayState['the-time-codes'] || showProgress"/>
-    <the-progress-bar v-hidden="displayState['the-progress-bar'] || showProgress"/>
+    <the-time-codes ref="theTimeCodes" v-hidden="displayState['the-time-codes'] || showProgress"/>
+    <the-progress-bar ref="progressbar" v-hidden="displayState['the-progress-bar'] || showProgress"/>
   </div>
 </template>
 <script>
@@ -53,6 +53,7 @@ import TheProgressBar from './TheProgressBar.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
 import SpeedLabel from './RateLabel.vue';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'the-video-controller',
@@ -97,6 +98,7 @@ export default {
       volumeChange: false,
       showProgress: false,
       showProgressId: 0,
+      needResetHoverProgressBar: false,
     };
   },
   computed: {
@@ -107,7 +109,7 @@ export default {
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['muted', 'paused', 'volume', 'progressKeydown', 'volumeKeydown', 'leftMousedown']),
+    ...mapGetters(['muted', 'paused', 'duration', 'volume', 'progressKeydown', 'volumeKeydown', 'leftMousedown']),
     showAllWidgets() {
       return (!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
@@ -178,7 +180,7 @@ export default {
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
-    requestAnimationFrame(this.UIManager);
+    requestAnimationFrame(this.clockTrigger);
   },
   methods: {
     ...mapMutations({
@@ -203,21 +205,64 @@ export default {
       this.widgetsStatus['playlist-control'].showAttached = event;
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [320, 180]);
     },
-    // UIManagers
-    UIManager(timestamp) {
+
+    clockTrigger(timestamp) {
       if (!this.start) {
         this.start = timestamp;
       }
 
       this.inputProcess();
+      // 不能依赖播放中的时间更新，所以临时放入requestAnimationFrame, 放在下一阶段处理
+      // 这部分处理应该只是状态更新计算 不涉及UI动画的处理
       this.clock().tick(timestamp - this.start);
       this.UITimerManager(timestamp - this.start);
-      // this.UILayerManager();
-      this.UIDisplayManager();
-      this.UIStateManager();
+      requestAnimationFrame(this.clockTrigger);
 
       this.start = timestamp;
-      requestAnimationFrame(this.UIManager);
+    },
+
+    onTickUpdate() {
+      // Use Map constructor to shallow-copy eventInfo
+      this.UIStateManager();
+
+      if (!videodata.paused && videodata.time + 1 >= this.duration) {
+        // we need set the paused state to go to next video
+        // this state will be reset on mounted of BaseVideoPlayer
+        videodata.paused = true;
+        // we need to reset the hoverProgressBar for play next video
+        this.needResetHoverProgressBar = true;
+        this.$bus.$emit('next-video');
+      }
+
+      /*
+      /* Rendering
+      /*
+      /* UI绘制/动画更新部分应该使用requestAnimationFrame
+      /* 当前 UIManager() 的内部实现还需要继续整理和细分 特别像 clock、事件处理、UI状态更新
+      /* 如果涉及到播放中的状态更新 可以依赖该UIManager，因为它本身是由video的ontimeupdate触发
+      /*                                                                                  */
+      requestAnimationFrame(() => {
+      // TODO: There is a probability that the properties are undefined and causing test failure.
+      // It's not a best practice to use refs frequently.
+      // There should be a better way to handle timeline.
+        try {
+          this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
+          if (this.displayState['recent-playlist']) {
+            this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
+          } else {
+            this.$refs.theTimeCodes.updateTimeContent(videodata.time);
+            if (this.needResetHoverProgressBar) {
+              this.needResetHoverProgressBar = false;
+              // reset hover-progressbar state
+              this.$refs.progressbar.updateHoveredProgressBar(videodata.time, -1);
+            }
+            this.$refs.progressbar.updatePlayProgressBar(videodata.time);
+          }
+          this.UIDisplayManager();
+        } catch (exception) {
+          // do nothing
+        }
+      });
     },
     inputProcess() { // eslint-disable-line
       // hideVolume timer
@@ -263,7 +308,8 @@ export default {
           !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
-      tempObject['volume-indicator'] = !this.muted ? this.timerState['volume-indicator'] : tempObject['volume-indicator'];
+      tempObject['volume-indicator'] = !this.muted ? this.timerState['volume-indicator']
+        : this.showAllWidgets || (!this.showAllWidgets && this.timerState['volume-indicator']);
       this.displayState = tempObject;
     },
     UIStateManager() {
@@ -341,7 +387,7 @@ export default {
         this.popupShow = true;
       }
     },
-    handleMousedownLeft(event) {
+    handleMousedownLeft() {
       if (this.isDragging && this.lastAttachedShowing) {
         if (this.currentWidget !== 'subtitle-control' && this.currentWidget !== 'advance-control') {
           this.$bus.$emit('isdragging-mousedown');
@@ -357,7 +403,7 @@ export default {
         }
       }
     },
-    handleMouseupLeft(event) {
+    handleMouseupLeft() {
       if (this.isDragging && this.lastAttachedShowing) {
         if (this.currentWidget !== 'subtitle-control' && this.currentWidget !== 'advance-control') {
           this.$bus.$emit('isdragging-mouseup');
@@ -386,6 +432,7 @@ export default {
       this.preventSingleClick = true;
       if (this.currentMouseupWidget === 'the-video-controller') {
         this.toggleFullScreenState();
+        this.preventSingleClick = false;
       }
     },
     handleKeydown(event) {

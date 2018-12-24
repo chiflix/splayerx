@@ -1,5 +1,7 @@
 import path from 'path';
 import fs from 'fs';
+import { get, partialRight, flow, nth } from 'lodash';
+
 import healthMsg from 'sagi-api/health/v1/health_pb';
 import healthRpc from 'sagi-api/health/v1/health_grpc_pb';
 import translationMsg from 'sagi-api/translation/v1/translation_pb';
@@ -10,6 +12,8 @@ import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 /* eslint-disable */
 const grpc = require('grpc');
 /* eslint-enable */
+
+const getResponseArray = flow(partialRight(get, 'array'), partialRight(nth, 1));
 
 class Sagi {
   constructor() {
@@ -26,25 +30,45 @@ class Sagi {
       // this.endpoint = '127.0.0.1:8443'; // use this when debuging server
       this.endpoint = 'apis.stage.sagittarius.ai:8443';
     }
+    this.transcripts = [];
   }
 
-  mediaTranslate(mediaIdentity) {
+  mediaTranslateRaw(mediaIdentity, languageCode) {
     return new Promise((resolve, reject) => {
       const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
       const req = new translationMsg.MediaTranslationRequest();
       req.setMediaIdentity(mediaIdentity);
+      if (!languageCode || languageCode.length === 0) {
+        console.log('warning: empty languageCode in mediaTranslate, fail back to "zh"');
+        languageCode = 'zh';
+      }
+      req.setLanguageCode(languageCode);
       client.translateMedia(req, (err, response) => {
         if (err) {
           reject(err);
         } else {
-          // TODO: fetch real transcripts
           resolve(response);
         }
       });
     });
   }
 
-  getTranscript(transcriptIdentity) {
+  mediaTranslate(mediaIdentity, languageCode) {
+    return new Promise((resolve, reject) => {
+      this.mediaTranslateRaw(mediaIdentity, languageCode).then((response) => {
+        const transcriptInfo = array => ({
+          transcript_identity: array[0],
+          language_code: array[1] || 'unknown',
+          ranking: array[2] || -1,
+          tags: array[3] || [],
+          delay: array[4] || 0,
+        });
+        resolve(getResponseArray(response).map(transcriptInfo));
+      }, reject);
+    });
+  }
+
+  getTranscriptRaw(transcriptIdentity) {
     return new Promise((resolve, reject) => {
       const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
       const req = new translationMsg.TranscriptRequest();
@@ -56,6 +80,14 @@ class Sagi {
           resolve(res);
         }
       });
+    });
+  }
+
+  getTranscript(transcriptIdentity) {
+    return new Promise((resolve, reject) => {
+      this.getTranscriptRaw(transcriptIdentity).then((response) => {
+        resolve(getResponseArray(response));
+      }, reject);
     });
   }
 
@@ -76,15 +108,12 @@ class Sagi {
         req.setTranscriptIdentity(transcriptData.transcript_identity);
       } else {
         const err = new Error('missing transcript payload and transcript_identity');
-        console.log(err);
         reject(err);
       }
       client.pushData(req, (err, res) => {
         if (err) {
-          console.log(err);
           reject(err);
         }
-        console.log(res);
         resolve(res);
       });
     });

@@ -1,14 +1,16 @@
 import path from 'path';
-import fs from 'fs';
-import util from 'util';
+import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
+import { times } from 'lodash';
 import InfoDB from '@/helpers/infoDB';
+import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import Sagi from './sagi';
 
-import { ipcRenderer } from 'electron'; // eslint-disable-line
+import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 
 const clock = lolex.createClock();
+let infoDB = null;
 
 export default {
   methods: {
@@ -16,7 +18,8 @@ export default {
       return clock;
     },
     infoDB() {
-      return InfoDB;
+      if (!infoDB) infoDB = new InfoDB();
+      return infoDB;
     },
     sagi() { return Sagi; },
 
@@ -52,19 +55,15 @@ export default {
       }
 
       const dirPath = path.dirname(vidPath);
-      const filter = /\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$/;
 
       const videoFiles = [];
-      const readdir = util.promisify(fs.readdir);
-      const lstat = util.promisify(fs.lstat);
-
-      const files = await readdir(dirPath);
+      const files = await fsPromises.readdir(dirPath);
       const tasks = [];
       for (let i = 0; i < files.length; i += 1) {
         const filename = path.join(dirPath, files[i]);
-        tasks.push(lstat(filename).then((stat) => {
+        tasks.push(fsPromises.lstat(filename).then((stat) => {
           if (!stat.isDirectory()) {
-            if (filter.test(path.extname(files[i]))) {
+            if (getValidVideoRegex().test(path.extname(files[i]))) {
               const fileBaseName = path.basename(filename);
               videoFiles.push(fileBaseName);
             }
@@ -107,60 +106,135 @@ export default {
         }
       }
     },
-    openFile(path) {
-      const originPath = path;
-      const mediaQuickHash = this.mediaQuickHash(originPath);
-      if (mediaQuickHash instanceof Error) {
-        if (mediaQuickHash.code === 'ENOENT') {
-          this.addLog('error', 'Failed to open file, it will be removed from list.');
-          this.$bus.$emit('file-not-existed', originPath);
+    openFilesByDialog({ defaultPath } = {}) {
+      if (this.showingPopupDialog) return;
+      this.showingPopupDialog = true;
+      const opts = ['openFile', 'multiSelections'];
+      if (process.platform === 'darwin') {
+        // TODO: support open directory in macos
+        // opts.push('openDirectory');
+      }
+      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+        title: 'Open Dialog',
+        defaultPath,
+        filters: [{
+          name: 'Video Files',
+          extensions: getValidVideoExtensions(),
+        }, {
+          name: 'All Files',
+          extensions: ['*'],
+        }],
+        properties: opts,
+        securityScopedBookmarks: process.mas,
+      }, (files, bookmarks) => {
+        this.showingPopupDialog = false;
+        if (process.mas && bookmarks?.length > 0) {
+          // TODO: put bookmarks to database
+          console.log(bookmarks);
         }
+        if (files) {
+          if (!files[0].includes('\\') || process.platform === 'win32') {
+            this.openFile(...files);
+          } else {
+            this.addLog('error', `Failed to open file: ${files[0]}`);
+          }
+        }
+      });
+    },
+    openFile(...files) {
+      let tempFilePath;
+      let containsSubFiles = false;
+      const subtitleFiles = [];
+      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
+      const videoFiles = [];
+      for (let i = 0; i < files.length; i += 1) {
+        tempFilePath = files[i];
+        if (subRegex.test(path.extname(tempFilePath))) {
+          subtitleFiles.push(tempFilePath);
+          containsSubFiles = true;
+        } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
+          videoFiles.push(tempFilePath);
+        } else {
+          this.addLog('error', `Failed to open file : ${tempFilePath}`);
+        }
+      }
+      if (videoFiles.length !== 0) {
+        if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
+          this.openVideoFile(...videoFiles);
+        } else {
+          this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
+        }
+      }
+      if (containsSubFiles) {
+        this.$bus.$emit('add-subtitles', subtitleFiles);
+      }
+    },
+    openVideoFile(...videoFiles) {
+      this.playFile(videoFiles[0]);
+      if (videoFiles.length > 1) {
+        this.$store.dispatch('PlayingList', videoFiles);
       } else {
-        this.infoDB().get('recent-played', mediaQuickHash)
-          .then((value) => {
-            if (value) {
-              this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
-              this.infoDB().add('recent-played', Object.assign(value, { path: originPath, lastOpened: Date.now() }));
-            } else {
-              this.infoDB().add('recent-played', {
-                quickHash: mediaQuickHash,
-                path: originPath,
-                lastOpened: Date.now(),
-              });
-            }
-            this.$bus.$emit('new-file-open');
-          });
-        this.$store.dispatch('SRC_SET', originPath);
-        this.$bus.$emit('new-video-opened');
-        this.$router.push({
-          name: 'playing-view',
+        this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
+          this.$store.dispatch('FolderList', similarVideos);
+        }, (err) => {
+          if (process.mas && err?.code === 'EPERM') {
+            // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+          }
         });
       }
     },
-    mediaQuickHash(filePath) {
+    async playFile(vidPath) {
+      const originPath = vidPath;
+      let mediaQuickHash;
+      try {
+        mediaQuickHash = await this.mediaQuickHash(originPath);
+      } catch (err) {
+        if (err?.code === 'ENOENT') {
+          this.addLog('error', 'Failed to open file, it will be removed from list.');
+          this.$bus.$emit('file-not-existed', originPath);
+        }
+        if (process.mas && err?.code === 'EPERM') {
+          this.openFilesByDialog({ defaultPath: originPath });
+        }
+
+        return;
+      }
+      this.$bus.$emit('new-file-open');
+      this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
+      this.$bus.$emit('new-video-opened');
+      this.$router.push({
+        name: 'playing-view',
+      });
+      const value = await this.infoDB().get('recent-played', mediaQuickHash);
+      if (value) {
+        this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
+        this.infoDB().add('recent-played', Object.assign(value, { path: originPath, lastOpened: Date.now() }));
+      } else {
+        this.infoDB().add('recent-played', {
+          quickHash: mediaQuickHash,
+          path: originPath,
+          lastOpened: Date.now(),
+        });
+      }
+    },
+    async mediaQuickHash(filePath) {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');
       }
-      let fd;
-      try {
-        fd = fs.openSync(filePath, 'r');
-      } catch (error) {
-        return error;
-      }
-      const len = fs.statSync(filePath).size;
+      const fileHandler = await fsPromises.open(filePath, 'r');
+      const len = (await fsPromises.stat(filePath)).size;
       const position = [
         4096,
         Math.floor(len / 3),
         Math.floor(len / 3) * 2,
         len - 8192,
       ];
-      const res = [];
-      const buf = Buffer.alloc(4096);
-      for (let i = 0; i < 4; i += 1) {
-        const bufLen = fs.readSync(fd, buf, 0, 4096, position[i]);
-        res[i] = md5Hex(buf.slice(0, bufLen));
-      }
-      fs.closeSync(fd);
+      const res = await Promise.all(times(4).map(async (i) => {
+        const buf = Buffer.alloc(4096);
+        const { bytesRead } = await fileHandler.read(buf, 0, 4096, position[i]);
+        return md5Hex(buf.slice(0, bytesRead));
+      }));
+      fileHandler.close();
       return res.join('-');
     },
     addLog(level, log) {

@@ -77,7 +77,6 @@ export default {
       disX: '',
       disY: '',
       recentFileDel: false,
-      showingPopupDialog: false,
       mouseFlag: true,
       showShadow: true,
       itemWidth: 112,
@@ -190,48 +189,7 @@ export default {
   },
   methods: {
     open(link) {
-      if (this.showingPopupDialog) {
-        // skip if there is already a popup dialog
-        return;
-      }
-      const self = this;
-      const { remote } = this.$electron;
-      const { dialog } = remote;
-      const browserWindow = remote.BrowserWindow;
-      const focusedWindow = browserWindow.getFocusedWindow();
-      const VALID_EXTENSION = ['3g2', '3gp', '3gp2', '3gpp', 'amv', 'asf', 'avi', 'bik', 'bin', 'crf', 'divx', 'drc', 'dv', 'dvr-ms', 'evo', 'f4v', 'flv', 'gvi', 'gxf', 'iso', 'm1v', 'm2v', 'm2t', 'm2ts', 'm4v', 'mkv', 'mov', 'mp2', 'mp2v', 'mp4', 'mp4v', 'mpe', 'mpeg', 'mpeg1', 'mpeg2', 'mpeg4', 'mpg', 'mpv2', 'mts', 'mtv', 'mxf', 'mxg', 'nsv', 'nuv', 'ogg', 'ogm', 'ogv', 'ogx', 'ps', 'rec', 'rm', 'rmvb', 'rpl', 'thp', 'tod', 'tp', 'ts', 'tts', 'txd', 'vob', 'vro', 'webm', 'wm', 'wmv', 'wtv', 'xesc'];
-
-      self.showingPopupDialog = true;
-      // TODO: move openFile method to a single location
-      // eslint-disable-next-line
-      process.env.NODE_ENV === 'testing' ? '' : dialog.showOpenDialog(focusedWindow, {
-        title: 'Open Dialog',
-        defaultPath: link,
-        filters: [{
-          name: 'Video Files',
-          extensions: VALID_EXTENSION,
-        }, {
-          name: 'All Files',
-          extensions: ['*'],
-        }],
-        properties: ['openFile', 'multiSelections'],
-      }, (items) => {
-        self.showingPopupDialog = false;
-        if (items) {
-          if (!items[0].includes('\\') || process.platform === 'win32') {
-            self.openFile(items[0]);
-          } else {
-            this.addLog('error', `Failed to open file: ${items[0]}`);
-          }
-          if (items.length > 1) {
-            this.$store.dispatch('PlayingList', items);
-          } else {
-            this.findSimilarVideoByVidPath(items[0]).then((similarVideos) => {
-              this.$store.dispatch('FolderList', similarVideos);
-            });
-          }
-        }
-      });
+      this.openFilesByDialog({ defaultPath: link });
     },
     openOrMove() {
       if (this.firstIndex === 1) {
@@ -364,10 +322,7 @@ export default {
         } else if (index + 1 < this.firstIndex && !this.isFullScreen) {
           this.firstIndex = 0;
         } else if (!this.filePathNeedToDelete) {
-          this.openFile(item.path);
-          this.findSimilarVideoByVidPath(item.path).then((similarVideos) => {
-            this.$store.dispatch('FolderList', similarVideos);
-          });
+          this.openVideoFile(item.path);
         }
       }
     },
