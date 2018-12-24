@@ -214,6 +214,14 @@ export default {
       this.inputProcess();
       // 不能依赖播放中的时间更新，所以临时放入requestAnimationFrame, 放在下一阶段处理
       // 这部分处理应该只是状态更新计算 不涉及UI动画的处理
+      this.$refs.progressbar.updateProgressBar(videodata.time);
+      this.$refs.theTimeCodes.updateTimeContent(videodata.time);
+      this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
+      if (this.displayState['recent-playlist']) {
+        this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
+      }
+
+      // Use Map constructor to shallow-copy eventInfo
       this.clock().tick(timestamp - this.start);
       this.UITimerManager(timestamp - this.start);
       requestAnimationFrame(this.clockTrigger);
