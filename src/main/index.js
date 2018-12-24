@@ -27,7 +27,9 @@ const winURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
 
-if (!app.requestSingleInstanceLock()) {
+// requestSingleInstanceLock is not going to work for mas
+// https://github.com/electron-userland/electron-packager/issues/923
+if (!process.mas && !app.requestSingleInstanceLock()) {
   app.quit();
 }
 
@@ -309,9 +311,7 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  app.quit();
 });
 
 app.on('activate', () => {

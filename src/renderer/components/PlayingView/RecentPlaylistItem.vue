@@ -1,31 +1,33 @@
 <template>
-<div class="recent-playlist-item"
-  :class="{ chosen: isChosen }"
+<div class="recent-playlist-item" ref="recentPlaylistItem"
   :style="{
     marginRight: sizeAdaption(15),
     cursor: isPlaying && isInRange ? '' : 'pointer',
     minWidth: `${thumbnailWidth}px`,
     minHeight: `${thumbnailHeight}px`,
   }">
-      <div class="child-item">
-        <div class="img"
+      <div class="child-item" style="will-change: transform;">
+        <div class="img blur" ref="blur"
           v-if="!isPlaying && imageLoaded"
           :style="{
             backgroundImage: backgroundImage,
           }"/>
-        <div class="blur"
-          v-show="!isChosen && !isPlaying"/>
         <transition name="fade2">
         <div class="white-hover"
-          v-show="hoverIndex === index"/>
+          ref="whiteHover"
+          :style="{
+            opacity: hoverIndex === index ? '1' : '0',
+            minWidth: `${thumbnailWidth}px`,
+            minHeight: `${thumbnailHeight}px`,
+          }"/>
         </transition>
-        <div class="black-gradient">
-          <div class="content"
-            @mouseover="mouseoverVideo"
-            @mouseout="mouseoutVideo"
-            @mouseup="mouseupVideo"
+        <div class="black-gradient"
+          @mouseenter="mouseoverVideo"
+          @mouseleave="mouseoutVideo"
+          @mouseup="mouseupVideo">
+          <div class="content" ref="content"
             :style="{
-              height: isChosen ? `${thumbnailHeight + 9}px` : '100%',
+              height: '100%',
             }">
               <div class="info"
                 :style="{
@@ -57,10 +59,9 @@
                 </transition>
                 </div>
                 <transition name="fade">
-                <div class="progress"
-                  v-if="!isPlaying"
-                  v-show="isChosen && sliderPercentage > 0"
+                <div class="progress" ref="progress"
                   :style="{
+                    opacity: '0',
                     height: sizeAdaption(2),
                     bottom: sizeAdaption(14),
                     marginBottom: sizeAdaption(7),
@@ -71,17 +72,17 @@
                   }"></div>
                 </div>
                 </transition>
-                <div class="title"
+                <div class="title" ref="title"
                   :style="{
-                    color: isChosen ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.40)',
+                    color: 'rgba(255,255,255,0.40)',
                     fontSize: sizeAdaption(14),
                     lineHeight: sizeAdaption(14),
                   }">{{ baseName }}</div>
               </div>
           </div>
-          <div class="border"
+          <div class="border" ref="border"
             :style="{
-              borderColor: isChosen ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.15)',
+              borderColor: 'rgba(255,255,255,0.15)',
             }"/>
         </div>
       </div>
@@ -128,6 +129,10 @@ export default {
     path: {
       type: String,
     },
+    eventTarget: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
@@ -145,23 +150,45 @@ export default {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
     },
     mouseupVideo() {
-      this.$emit('mouseupItem', this.index);
+      this.eventTarget.onItemMouseup(this.index);
+      this.$refs.progress.style.setProperty('opacity', '0');
+    },
+    updateAnimationIn() {
+      if (!this.isPlaying) {
+        this.$refs.blur.classList.remove('blur');
+      }
+      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
+      this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 9}px`);
+      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
+      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
+      if (!this.isPlaying && this.sliderPercentage > 0) {
+        this.$refs.progress.style.setProperty('opacity', '1');
+      }
+    },
+    updateAnimationOut() {
+      if (!this.isPlaying) {
+        this.$refs.blur.classList.add('blur');
+      }
+      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
+      this.$refs.content.style.setProperty('height', '100%');
+      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.40)');
+      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.15)');
+      this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
       if (!this.isPlaying && this.isInRange && !this.isShifting && this.canHoverItem) {
         this.isBlur = false;
         this.isChosen = true;
         this.mouseoverRecently = true;
-        this.$emit('mouseoverItem', {
-          index: this.index,
-          mediaInfo: this.mediaInfo,
-        });
+        this.eventTarget.onItemMouseover(this.index, this.mediaInfo);
+        requestAnimationFrame(this.updateAnimationIn);
       }
     },
     mouseoutVideo() {
       this.isBlur = true;
       this.isChosen = false;
-      this.$emit('mouseoutItem');
+      this.eventTarget.onItemMouseout();
+      requestAnimationFrame(this.updateAnimationOut);
     },
   },
   mounted() {
@@ -233,9 +260,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 $border-radius: 3px;
-.chosen {
-  transform: translateY(-9px);
-}
 .recent-playlist-item {
   transition: transform 100ms ease-out;
   .child-item {
@@ -243,21 +267,6 @@ $border-radius: 3px;
     width: 100%;
     height: 100%;
     background-color: rgba(255,255,255,0.1);
-    .blur {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backdrop-filter: blur(1px);
-      border-radius: $border-radius;
-      clip-path: inset(0 round $border-radius);
-    }
-    .white-hover {
-      position: absolute;
-      border-radius: $border-radius;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(255,255,255,0.2);
-    }
     .black-gradient {
       position: absolute;
       border-radius: $border-radius;
@@ -265,16 +274,27 @@ $border-radius: 3px;
       height: calc(100% + 0.08vw);
       background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
     }
-    .img {
+    .white-hover {
+      pointer-events:none;
       position: absolute;
       border-radius: $border-radius;
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center center;
+      background-color: rgba(255, 255, 255, 0.2);
+      transition: opacity 150ms 50ms linear;
+    }
+    .blur {
+      filter: blur(1.5px);
+      clip-path: inset(0 round $border-radius);
+    }
+    .img {
+      position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
+      border-radius: $border-radius;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center center;
     }
     .content {
       position: absolute;

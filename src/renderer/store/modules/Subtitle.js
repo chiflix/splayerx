@@ -1,146 +1,91 @@
+import Vue from 'vue';
+import pick from 'lodash/pick';
+import partialRight from 'lodash/partialRight';
 import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
 
 const state = {
-  subtitleList: [],
+  loadingStates: {},
+  durations: {},
+  names: {},
+  languages: {},
+  formats: {},
+  types: {},
   currentSubtitleId: '',
-  // legacy subtitle state
-  SubtitleNames: [],
-  curStyle: {
-    fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
-    fontSize: '11px',
-    letterSpacing: 1,
-    opacity: 1,
-    color: 'white',
-    fontWeight: '400',
-    transform: 'scale(1)',
-    transformOrigin: 'bottom',
-    webkitFontSmoothing: 'antialiased',
-  },
-  curBorderStyle: {
-    fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
-    fontSize: '11px',
-    letterSpacing: 1,
-    padding: '0px',
-    textFillColor: 'transparent',
-    textStroke: '0.5px #777',
-    fontWeight: '400',
-    backgroundColor: 'transparent',
-    transform: 'scale(1)',
-    transformOrigin: 'bottom',
-    textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
-    webkitFontSmoothing: 'antialiased',
-  },
   chosenStyle: '',
   chosenSize: 1,
-  SubtitleDelay: 0,
+  subtitleDelay: 0,
   scaleNum: 1,
 };
 
 const getters = {
   currentSubtitleId: state => state.currentSubtitleId,
-  subtitleList: state => state.subtitleList,
-  premiumSubtitles: (state, getters) => state.subtitleList
-    .filter(subtitle => subtitle.duration && subtitle.duration >= 0.6 * getters.duration)
-    .map(subtitle => ({ id: subtitle.id, played: subtitle.duration })),
-  // legacy subtitle getters
-  subtitleNames: state => state.SubtitleNames,
-  firstSubtitleIndex: state => state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first'),
-  subtitleCount: state => state.SubtitleNames.length,
-  curStyle: state => state.curStyle,
-  SubtitleDelay: state => state.SubtitleDelay,
-  curBorderStyle: state => state.curBorderStyle,
+  subtitleIds: ({ loadingStates }) => Object.keys(loadingStates),
+  subtitleList: ({
+    loadingStates, names, languages, formats,
+  }) =>
+    Object.keys(loadingStates).map(id => ({
+      id,
+      name: names[id],
+      language: languages[id],
+      format: formats[id],
+    })),
+  premiumSubtitles: ({ durations }, getters) => Object.keys(durations)
+    .filter(id => durations[id] >= 0.6 * getters.duration)
+    .map(id => ({ id, played: durations[id] })),
+  subtitleDelay: state => state.subtitleDelay,
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,
   scaleNum: state => state.scaleNum,
 };
 
 const mutations = {
+  [subtitleMutations.RESET_SUBTITLES](state, resetFields) {
+    if (!resetFields) {
+      Vue.set(state, 'loadingStates', {});
+      Vue.set(state, 'durations', {});
+      Vue.set(state, 'names', {});
+      Vue.set(state, 'languages', {});
+      Vue.set(state, 'formats', {});
+    } else {
+      const supportedFields = ['loadingStates', 'durations', 'names', 'languages', 'formats', 'types'];
+      const changingFields = Object.keys(resetFields)
+        .filter(field => supportedFields.includes(field));
+      changingFields.forEach((field) => {
+        Vue.set(state, field, resetFields[field]);
+      });
+    }
+  },
+  [subtitleMutations.LOADING_STATES_UPDATE]({ loadingStates }, { id, state }) {
+    Vue.set(loadingStates, id, state);
+  },
+  [subtitleMutations.DURATIONS_UPDATE]({ durations }, { id, duration }) {
+    Vue.set(durations, id, duration);
+  },
+  [subtitleMutations.NAMES_UPDATE]({ names }, { id, name }) {
+    Vue.set(names, id, name);
+  },
+  [subtitleMutations.LANGUAGES_UPDATE]({ languages }, { id, language }) {
+    Vue.set(languages, id, language);
+  },
+  [subtitleMutations.FORMATS_UPDATE]({ formats }, { id, format }) {
+    Vue.set(formats, id, format);
+  },
+  [subtitleMutations.TYPES_UPDATE]({ types }, { id, type }) {
+    Vue.set(types, id, type);
+  },
   [subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE](state, subtitleId) {
     state.currentSubtitleId = subtitleId;
   },
-  [subtitleMutations.ADD_SUBTITLE](state, subtitle) {
-    let isExit = false;
-    state.subtitleList.forEach((item, index) => {
-      if (item.path && item.path === subtitle.path) {
-        state.subtitleList.splice(index, 1);
-        state.subtitleList.unshift(item);
-        isExit = true;
-      }
-    });
-    if (!isExit) {
-      if (subtitle.type === 'local') {
-        state.subtitleList = [subtitle, ...state.subtitleList];
-      } else {
-        state.subtitleList = [...state.subtitleList, subtitle];
-      }
-    }
-  },
-  [subtitleMutations.UPDATE_SUBTITLE](state, subtitle) {
-    const { id } = subtitle;
-    const subtitleList = [...state.subtitleList];
-    const index = state.subtitleList.findIndex(subtitle => subtitle.id === id);
-    if (index >= 0) {
-      subtitleList[index] = subtitle;
-      state.subtitleList = subtitleList;
-    }
-  },
-  [subtitleMutations.REMOVE_SUBTITLE](state, subtitle) {
-    state.subtitleList = state.subtitleList.slice().splice(state.subtitleList.indexOf(subtitle), 1);
-  },
-  [subtitleMutations.SUBTITLE_UPDATE](state, subtitleList) {
-    state.subtitleList = subtitleList;
-  },
-  [subtitleMutations.OFF_SUBTITLE](state, subtitle) {
-    state.currentSubtitleId = subtitle;
-  },
-  [subtitleMutations.REFRESH_SUBTITLE](state, subtitle) {
-    let num = 0;
-    state.subtitleList.forEach((sub, index) => {
-      if (sub.type === 'local') {
-        num = index + 1;
-      }
-    });
-    state.subtitleList = state.subtitleList.slice(0, num).concat(...subtitle);
-  },
-  SubtitleNames(state, subtitles) {
-    state.SubtitleNames = subtitles;
-  },
-  AddSubtitle(state, subtitles) {
-    state.SubtitleNames.push(...subtitles);
-  },
-  AddServerSubtitle(state, subtitles) {
-    state.SubtitleNames.push(...subtitles);
-  },
-  SubtitleOn(state, obj) {
-    const index = state.SubtitleNames.findIndex(subtitle => subtitle.textTrackID === obj.index);
-    state.SubtitleNames[index].status = obj.status === 'first' ? 'first' : 'second';
-  },
-  SubtitleOff(state) {
-    const index = state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first');
-    if (index !== -1) {
-      state.SubtitleNames[index].status = null;
-    } else {
-      throw new Error('Error in Subtitle Vuex.');
-    }
-  },
-  UpdateStyle(state, payload) {
-    Object.assign(state.curStyle, payload);
-  },
-  UpdateBorderStyle(state, payload) {
-    Object.assign(state.curBorderStyle, payload);
-  },
   UpdateDelay(state, payload) {
     if (payload === 0) {
-      state.SubtitleDelay = 0;
+      state.subtitleDelay = 0;
     } else {
-      state.SubtitleDelay += payload;
+      state.subtitleDelay += payload;
     }
   },
   UpdateScale(state, payload) {
     state.scaleNum = payload;
-    state.curStyle.transform = `scale(${payload})`;
-    state.curBorderStyle.transform = `scale(${payload})`;
   },
   UpdateChosenStyle(state, payload) {
     state.chosenStyle = payload;
@@ -151,6 +96,49 @@ const mutations = {
 };
 
 const actions = {
+  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit }, { id, type }) {
+    commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loading' });
+    commit(subtitleMutations.TYPES_UPDATE, { id, type });
+  },
+  [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit }, {
+    id, name, language, format,
+  }) {
+    commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'ready' });
+    commit(subtitleMutations.NAMES_UPDATE, { id, name });
+    commit(subtitleMutations.LANGUAGES_UPDATE, { id, language });
+    commit(subtitleMutations.FORMATS_UPDATE, { id, format });
+  },
+  [subtitleActions.ADD_SUBTITLE_WHEN_LOADED]({ commit }, { id }) {
+    commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loaded' });
+  },
+  [subtitleActions.ADD_SUBTITLE_WHEN_FAILED]({ commit }, { id }) {
+    commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'failed' });
+  },
+  [subtitleActions.CHANGE_CURRENT_SUBTITLE]({ commit, getters }, id) {
+    if (getters.subtitleIds.includes(id)) commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, id);
+  },
+  [subtitleActions.OFF_SUBTITLES]({ commit }) {
+    commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
+  },
+  [subtitleActions.RESET_SUBTITLES]({ commit }) {
+    commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
+    commit(subtitleMutations.RESET_SUBTITLES);
+  },
+  [subtitleActions.RESET_ONLINE_SUBTITLES]({ commit, state }) {
+    const {
+      loadingStates, durations, names, languages, formats, types,
+    } = state;
+    const notOnlineIds = Object.keys(types).filter(id => types[id] !== 'online');
+    const takeSupportedFields = partialRight(pick, notOnlineIds);
+    commit(subtitleMutations.RESET_SUBTITLES, {
+      loadingStates: takeSupportedFields(loadingStates),
+      durations: takeSupportedFields(durations),
+      names: takeSupportedFields(names),
+      languages: takeSupportedFields(languages),
+      formats: takeSupportedFields(formats),
+      types: takeSupportedFields(types),
+    });
+  },
   updateStyle({ commit }, delta) {
     commit('UpdateStyle', delta);
   },
@@ -166,40 +154,8 @@ const actions = {
   updateChosenStyle({ commit }, delta) {
     commit('UpdateChosenStyle', delta);
   },
-  [subtitleActions.ADD_SUBTITLES]({ commit }, subtitles) {
-    subtitles.forEach((subtitle) => {
-      commit(subtitleMutations.ADD_SUBTITLE, subtitle);
-    });
-  },
-  [subtitleActions.RESET_SUBTITLES]({ commit }) {
-    commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
-    commit(subtitleMutations.SUBTITLE_UPDATE, []);
-  },
   updateChosenSize({ commit }, delta) {
     commit('UpdateChosenSize', delta);
-  },
-  [subtitleActions.SWITCH_CURRENT_SUBTITLE]({ commit, state }, subtitleId) {
-    const { currentSubtitleId, subtitleList } = state;
-    if (
-      subtitleId !== currentSubtitleId &&
-      subtitleList.filter(subtitle => subtitle.id === subtitleId).length
-    ) {
-      commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, subtitleId);
-    }
-  },
-  [subtitleActions.SUBTITLE_DURATION_UPDATE]({ commit, state }, subtitleInfo) {
-    const [subtitleId, duration] = subtitleInfo;
-    const { subtitleList } = state;
-    const subtitle = subtitleList.filter(subtitle => subtitle.id === subtitleId)[0];
-    if (subtitle) {
-      commit(subtitleMutations.UPDATE_SUBTITLE, { ...subtitle, duration });
-    }
-  },
-  [subtitleActions.OFF_SUBTITLES]({ commit }) {
-    commit(subtitleMutations.OFF_SUBTITLE, '');
-  },
-  [subtitleActions.REFRESH_SUBTITLES]({ commit }, subtitles) {
-    commit(subtitleMutations.REFRESH_SUBTITLE, subtitles);
   },
 };
 

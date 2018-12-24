@@ -16,7 +16,7 @@
           color: color,
           transition: 'color 300ms',
         }">{{ item }}</div>
-      <div class="rightItem" :style="{ color: color }">{{ isChosen ? timeUnits : item === this.$t('advance.subDelay') ? subtitleDelay : audioDelay }}</div>
+      <div class="rightItem" :style="{ color: color }">{{ isChosen ? timeUnits : item === this.$t('advance.subDelay') ? screenSubtitleDelay : audioDelay }}</div>
     </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -71,7 +71,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['SubtitleDelay', 'AudioDelay']),
+    ...mapGetters(['subtitleDelay', 'AudioDelay']),
     heightSize() {
       if (this.winWidth > 514 && this.winWidth <= 854) {
         return this.isChosen ? '74px' : '37px';
@@ -82,7 +82,7 @@ export default {
     },
     timeUnits() {
       if (this.item === this.$t('advance.subDelay')) {
-        if (Math.abs(this.SubtitleDelay) >= 10000) {
+        if (Math.abs(this.subtitleDelay) >= 10000) {
           return 's';
         }
       } else if (Math.abs(this.AudioDelay) >= 10000) {
@@ -90,11 +90,11 @@ export default {
       }
       return 'ms';
     },
-    subtitleDelay() {
-      if (Math.abs(this.SubtitleDelay) >= 10000) {
-        return `${this.SubtitleDelay / 1000} s`;
+    screenSubtitleDelay() {
+      if (Math.abs(this.subtitleDelay) >= 10000) {
+        return `${this.subtitleDelay / 1000} s`;
       }
-      return `${this.SubtitleDelay} ms`;
+      return `${this.subtitleDelay} ms`;
     },
     audioDelay() {
       if (Math.abs(this.AudioDelay) >= 10000) {
@@ -104,10 +104,10 @@ export default {
     },
     delayNum() {
       if (this.item === this.$t('advance.subDelay')) {
-        if (Math.abs(this.SubtitleDelay) >= 10000) {
-          return `${this.SubtitleDelay / 1000}`;
+        if (Math.abs(this.subtitleDelay) >= 10000) {
+          return `${this.subtitleDelay / 1000}`;
         }
-        return this.SubtitleDelay;
+        return this.subtitleDelay;
       }
       if (Math.abs(this.AudioDelay) >= 10000) {
         return `${this.AudioDelay / 1000}`;
@@ -115,7 +115,7 @@ export default {
       return this.AudioDelay;
     },
     changeDelay() {
-      if (Math.abs(this.SubtitleDelay) >= 10000 || Math.abs(this.AudioDelay) >= 10000) {
+      if (Math.abs(this.subtitleDelay) >= 10000 || Math.abs(this.AudioDelay) >= 10000) {
         return 100;
       }
       return 50;

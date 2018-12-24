@@ -132,6 +132,9 @@ new Vue({
       if (data.chosenStyle) {
         this.$store.dispatch('updateChosenStyle', data.chosenStyle);
       }
+      if (data.chosenSize) {
+        this.$store.dispatch('updateChosenSize', data.chosenSize);
+      }
     });
     this.$store.dispatch('getLocalPreference');
     this.$bus.$on('delete-file', () => {
@@ -182,7 +185,7 @@ new Vue({
         this.refreshMenu();
       }
     },
-    currentSubtitleId(val, oldval) {
+    currentSubtitleId(val) {
       if (this.menu) {
         if (val !== '') {
           this.subtitleList.forEach((item, index) => {
@@ -190,28 +193,8 @@ new Vue({
               this.menu.getMenuItemById(`sub${index}`).checked = true;
             }
           });
-          if (oldval === '') {
-            this.menu.getMenuItemById('subSize')
-              .submenu
-              .items
-              .forEach((item) => {
-                item.enabled = true;
-              });
-            this.menu.getMenuItemById('subStyle')
-              .submenu
-              .items
-              .forEach((item) => {
-                item.enabled = true;
-              });
-          }
         } else {
           this.menu.getMenuItemById('sub-1').checked = true;
-          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
-            item.enabled = false;
-          });
-          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
-            item.enabled = false;
-          });
         }
       }
     },
@@ -352,7 +335,7 @@ new Vue({
             {
               label: this.$t('msg.subtitle.AITranslation'),
               click: () => {
-                this.$bus.$emit('menu-sub-refresh');
+                this.$bus.$emit('refresh-subtitles');
               },
             },
             {
@@ -386,7 +369,6 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.subtitleSize'),
-              id: 'subSize',
               submenu: [
                 {
                   label: this.$t('msg.subtitle.size1'),
@@ -669,6 +651,9 @@ new Vue({
         if (this.chosenStyle !== '') {
           this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
         }
+        if (this.chosenSize !== '') {
+          this.menu.getMenuItemById(`size${this.chosenSize}`).checked = true;
+        }
         if (this.currentSubtitleId !== '') {
           this.subtitleList.forEach((item, index) => {
             if (item.id === this.currentSubtitleId) {
@@ -677,12 +662,6 @@ new Vue({
           });
         } else {
           this.menu.getMenuItemById('sub-1').checked = true;
-          this.menu.getMenuItemById('subSize').submenu.items.forEach((item) => {
-            item.enabled = false;
-          });
-          this.menu.getMenuItemById('subStyle').submenu.items.forEach((item) => {
-            item.enabled = false;
-          });
         }
         this.audioTrackList.forEach((item, index) => {
           if (item.enabled === true) {
@@ -718,7 +697,7 @@ new Vue({
         type: 'radio',
         label: value.path ? Path.basename(value.path) : value.name,
         click: () => {
-          this.$bus.$emit('menu-sub-change', key);
+          this.$bus.$emit('change-subtitle', value.id || value.src);
         },
       };
     },
@@ -738,7 +717,7 @@ new Vue({
         type: 'radio',
         label: this.$t('msg.subtitle.noSubtitle'),
         click: () => {
-          this.$bus.$emit('subtitle-off');
+          this.$bus.$emit('off-subtitle');
         },
       });
       this.subtitleList.forEach((item, index) => {
@@ -763,11 +742,11 @@ new Vue({
         id: 'audio-track',
         submenu: [],
       };
-      if (this.audioTrackList.length <= 1) {
+      if (this.audioTrackList.length === 1 && this.audioTrackList[0].language === 'und') {
         tmp.submenu.splice(0, 1, this.updateAudioTrackItem(0, this.$t('advance.chosenTrack')));
       } else {
         this.audioTrackList.forEach((item, index) => {
-          const detail = item.language === 'und' ? `${this.$t('advance.track')} ${index + 1}` : `${this.$t('advance.track')} ${index + 1}: ${item.language}`;
+          const detail = item.language === 'und' ? `${this.$t('advance.track')} ${index + 1}` : `${this.$t('advance.track')} ${index + 1}: ${item.name}`;
           tmp.submenu.splice(index, 1, this.updateAudioTrackItem(index, detail));
         });
       }
