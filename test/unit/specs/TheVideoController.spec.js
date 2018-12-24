@@ -2,7 +2,7 @@ import Vuex from 'vuex';
 import Window from '@/store/modules/Window';
 import Video from '@/store/modules/Video';
 import Input from '@/store/modules/Input';
-import TheVideoController from '@/components/PlayingView/TheVideoController';
+import TheVideoController from '@/components/PlayingView/TheVideoController.vue';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
 
