@@ -28,7 +28,7 @@ export default {
     videoRatio() {
       return this.$store.getters.ratio;
     },
-    mousedownOnOther() {
+    mousedownCurrentTarget() {
       return this.$store.state.Input.mousedownTarget;
     },
   },
@@ -59,7 +59,7 @@ export default {
       document.onmouseup = () => {
         if (this.validEnter) {
           this.anim.playSegments([47, 51], false);
-        } else if (this.mousedownOnOther === this.$options.name) {
+        } else if (this.mousedownCurrentTarget === this.$options.name) {
           this.anim.playSegments([37, 41], false);
         }
         this.mouseDown = false;

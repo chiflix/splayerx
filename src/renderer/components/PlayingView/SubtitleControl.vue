@@ -161,10 +161,10 @@ export default {
         return result;
       },
     }),
-    mousedownOnOther() {
+    mousedownCurrentTarget() {
       return this.$store.state.Input.mousedownTarget;
     },
-    mouseupOnOther() {
+    mouseupCurrentTarget() {
       return this.$store.state.Input.mouseupTarget;
     },
     textHeight() {
@@ -266,15 +266,15 @@ export default {
         }
       }
     },
-    mousedownOnOther(val) {
+    mousedownCurrentTarget(val) {
       if (val !== this.$options.name && this.showAttached) {
         this.anim.playSegments([62, 64], false);
-        if (this.mouseupOnOther !== this.$options.name) {
+        if (this.mouseupCurrentTarget !== this.$options.name) {
           this.$emit('update:showAttached', false);
         }
       }
     },
-    mouseupOnOther(val) {
+    mouseupCurrentTarget(val) {
       if (val !== this.$options.name && this.showAttached) {
         this.$emit('update:showAttached', false);
       }
@@ -439,7 +439,7 @@ export default {
         if (!this.showAttached) {
           if (this.validEnter) {
             this.anim.playSegments([46, 60], false);
-          } else if (this.mouseDownOnOther === this.$options.name) {
+          } else if (this.mousedownCurrentTarget === this.$options.name) {
             this.anim.playSegments([40, 44], false);
           }
         }

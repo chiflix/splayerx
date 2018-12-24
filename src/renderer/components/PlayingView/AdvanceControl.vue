@@ -49,10 +49,10 @@ export default {
     };
   },
   computed: {
-    mousedownOnOther() {
+    mousedownCurrentTarget() {
       return this.$store.state.Input.mousedownTarget;
     },
-    mouseupOnOther() {
+    mouseupCurrentTarget() {
       return this.$store.state.Input.mouseupTarget;
     },
   },
@@ -69,15 +69,15 @@ export default {
         }
       }
     },
-    mousedownOnOther(val) {
+    mousedownCurrentTarget(val) {
       if (val !== this.$options.name && this.showAttached) {
         this.anim.playSegments([37, 41], false);
-        if (this.mouseupOnOther !== this.$options.name) {
+        if (this.mouseupCurrentTarget !== this.$options.name) {
           this.$emit('update:showAttached', false);
         }
       }
     },
-    mouseupOnOther(val) {
+    mouseupCurrentTarget(val) {
       if (val !== this.$options.name && this.showAttached) {
         this.$emit('update:showAttached', false);
       }
@@ -99,7 +99,7 @@ export default {
           if (!this.showAttached) {
             if (this.validEnter) {
               this.anim.playSegments([23, 36], false);
-            } else if (this.mousedownOnOther === this.$options.name) {
+            } else if (this.mousedownCurrentTarget === this.$options.name) {
               this.anim.playSegments([105, 109], false);
             }
           }
