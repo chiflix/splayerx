@@ -101,6 +101,8 @@ export default {
           [320, 180],
           this.winSize,
           [this.videoWidth, this.videoHeight],
+          true,
+          getWindowRect().slice(2, 4),
         );
       } else {
         newSize = this.calculateWindowSize(
@@ -118,23 +120,28 @@ export default {
       this.controlWindowRect(newPosition.concat(newSize));
       this.windowSizeHelper.setNewWindowSize();
     },
-    calculateWindowSize(minSize, maxSize, videoSize) {
+    calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
       let result = videoSize;
       const getRatio = size => size[0] / size[1];
       const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
       const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
       const biggerSize = (size, diffedSize) =>
         size.some((value, index) => value >= diffedSize[index]);
+      const biggerWidth = (size, diffedSize) => size[0] >= diffedSize[0];
       const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
-      if (biggerSize(result, maxSize)) {
-        result = biggerRatio(result, maxSize) ?
-          setHeightByWidth(maxSize) : setWidthByHeight(maxSize);
+      if (videoExisted && biggerWidth(result, maxSize)) {
+        result = setHeightByWidth(maxSize);
+      }
+      const realMaxSize = videoExisted ? screenSize : maxSize;
+      if (biggerSize(result, realMaxSize)) {
+        result = biggerRatio(result, realMaxSize) ?
+          setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
       }
       if (biggerSize(minSize, result)) {
         result = biggerRatio(minSize, result) ?
           setHeightByWidth(minSize) : setWidthByHeight(minSize);
       }
-      return result.map(value => Math.round(value));
+      return result.map(Math.round);
     },
     calculateWindowPosition(currentRect, windowRect, newSize) {
       const tempRect = currentRect.slice(0, 2)
