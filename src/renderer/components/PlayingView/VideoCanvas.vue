@@ -6,6 +6,7 @@
     <base-video-player
       ref="videoCanvas"
       :key="originSrc"
+      :needtimeupdate=true
       :events="['loadedmetadata', 'audiotrack']"
       :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
@@ -18,7 +19,6 @@
       :currentTime="seekTime"
       :currentAudioTrackId="currentAudioTrackId.toString()" />
     </transition>
-    <!--<BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>-->
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -29,14 +29,12 @@ import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper';
 import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
-import BaseSubtitle from './BaseSubtitle.vue';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
 import { videodata } from '../../store/video';
 
 export default {
   name: 'video-canvas',
   components: {
-    BaseSubtitle,
     'base-video-player': BaseVideoPlayer,
   },
   data() {
@@ -76,14 +74,16 @@ export default {
         intrinsicHeight: event.target.videoHeight,
         ratio: event.target.videoWidth / event.target.videoHeight,
       });
+      let grabCoverTime = 0;
       if (event.target.duration - this.lastPlayedTime > 10) {
         this.$bus.$emit('seek', this.lastPlayedTime);
+        grabCoverTime = this.lastPlayedTime;
       } else {
         this.$bus.$emit('seek', 0);
       }
       this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
-      this.getVideoCover();
+      this.getVideoCover(grabCoverTime);
       this.changeWindowSize();
     },
     onAudioTrack(event) {
@@ -190,10 +190,15 @@ export default {
       syncStorage.setSync('recent-played', data);
     },
     saveSubtitleStyle() {
-      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle });
+      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
-    async getVideoCover() {
+    async getVideoCover(grabCoverTime) {
       if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
+      // Because we are execution in async, we do double check.
+      if (this.coverFinded) {
+        return;
+      }
+
       const videoElement = this.$refs.videoCanvas.videoElement();
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -203,14 +208,17 @@ export default {
         videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
+
+      let grabcoverdone = false;
       const { data } = canvasCTX.getImageData(0, 0, 100, 100);
+      // check the cover is it right.
       for (let i = 0; i < data.length; i += 1) {
         if ((i + 1) % 4 !== 0 && data[i] > 20) {
-          this.coverFinded = true;
+          grabcoverdone = true;
           break;
         }
       }
-      if (this.coverFinded) {
+      if (grabcoverdone) {
         const smallImagePath = canvas.toDataURL('image/png');
         [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
         canvasCTX.drawImage(
@@ -233,27 +241,24 @@ export default {
           this.infoDB().add('recent-played', data);
         }
       }
-      this.lastCoverDetectingTime = videodata.time;
+
+      this.coverFinded = grabcoverdone;
+      this.lastCoverDetectingTime = grabCoverTime;
     },
     checkPresentTime() {
       if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
-        this.getVideoCover();
-      }
-      // TODO: This part move to TheVideoController.vue is better.
-      if (videodata.time >= this.duration && this.nextVideo) {
-        videodata.time = 0;
-        this.playFile(this.nextVideo);
-      } else if (videodata.time >= this.duration) {
-        videodata.time = 0;
-        this.pause();
+        // Assume to grab the cover can be the success and to keep
+        // it doesn't execution multiple times. if grab failed,
+        // we set it back to false.
+        this.coverFinded = true;
+        this.getVideoCover(videodata.time);
       }
     },
   },
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle', 'scaleNum',
-      'nextVideo']),
+      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -296,19 +301,19 @@ export default {
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
     });
-    this.$bus.$on('seek', (e) => {
-      // to check whether trigger ‘直捣黄龙’
-      if (e === this.duration && this.nextVideo) {
+    this.$bus.$on('next-video', () => {
+      if (this.nextVideo) {
         this.playFile(this.nextVideo);
-      } else {
-        this.seekTime = [e];
-        // todo: use vuex get video element src
-        const filePath = decodeURI(this.src);
-        const indexOfLastDot = filePath.lastIndexOf('.');
-        const ext = filePath.substring(indexOfLastDot + 1);
-        if (ext === 'mkv') {
-          this.$bus.$emit('seek-subtitle', e);
-        }
+      }
+    });
+    this.$bus.$on('seek', (e) => {
+      this.seekTime = [e];
+      // todo: use vuex get video element src
+      const filePath = decodeURI(this.src);
+      const indexOfLastDot = filePath.lastIndexOf('.');
+      const ext = filePath.substring(indexOfLastDot + 1);
+      if (ext === 'mkv') {
+        this.$bus.$emit('seek-subtitle', e);
       }
     });
     this.windowSizeHelper = new WindowSizeHelper(this);

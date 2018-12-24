@@ -1,6 +1,7 @@
 import Vue from 'vue';
 
 import Helpers from '@/helpers';
+import romanize from 'romanize';
 import { Video as mutationTypes } from '../mutationTypes';
 import { Video as actionTypes } from '../actionTypes';
 
@@ -220,6 +221,13 @@ const actions = {
     commit(mutationTypes.DELAY_UPDATE, finalDelay);
   },
   [actionTypes.ADD_AUDIO_TRACK]({ commit, state }, trackToAdd) {
+    let times = 1;
+    state.audioTrackList.forEach((item) => {
+      if (item.language === trackToAdd.language) {
+        times += 1;
+      }
+    });
+    trackToAdd = Object.assign(trackToAdd, { name: `${trackToAdd.language} ${romanize(times)}` });
     const newAudioTracks = generateTracks('add', trackToAdd, state.audioTrackList);
     commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },

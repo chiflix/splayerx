@@ -62,7 +62,7 @@ export default {
     height: 100%;
     top: 0;
     background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(10px);
     clip-path: inset(0 round var(--border-radius));
   }
   .middle {

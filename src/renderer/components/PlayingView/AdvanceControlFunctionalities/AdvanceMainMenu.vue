@@ -7,6 +7,7 @@
     cursor: 'default',
     height: this.readyShow === 'mainMenu' ? menuCardHeight : this.readyShow === 'subMenu' ? subtitleCardHeight : audioCardHeight,
     transition: 'height 100ms linear',
+    fontWeight: '900',
   }">
   <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
     <div class="mainItems" v-show="readyShow === 'mainMenu'"
@@ -31,18 +32,18 @@
         @mouseleave="handleMouseleave()"
         @click.left="handleSubClick">
         <transition name="arrow">
-          <div class="hoverSubBack" v-show="hoverIndex === 2 && currentSubtitleId !== ''"></div>
+          <div class="hoverSubBack" v-show="hoverIndex === 2"></div>
         </transition>
         <div class="subContainer"
-          :style="{ cursor: currentSubtitleId === '' ? 'default' : 'pointer'}">
+          :style="{ cursor: 'pointer'}">
           <div class="item2"
             :style="{
-              color: currentSubtitleId === '' ? 'rgba(255, 255, 255, 0.2)' : hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">
             <div>{{ this.$t('advance.subMenu') }}</div>
             <transition name="arrow">
-              <Icon type="rightArrow" v-show="hoverIndex === 2 && currentSubtitleId !== ''"></Icon>
+              <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
             </transition>
           </div>
         </div>
@@ -165,19 +166,19 @@
           transition: 'height 100ms linear',
         }">
         <transition name="arrow">
-          <div class="hoverBack" v-show="!showTrack && hoverAudioIndex === 2 && 2 <= trackNum" :style="{ height: changeTrackHeight }"></div>
+          <div class="hoverBack" v-show="!showTrack && hoverAudioIndex === 2" :style="{ height: changeTrackHeight }"></div>
         </transition>
         <div class="trackContainer">
         <transition name="audioTransIn">
           <div class="item2" v-show="!showTrack"
-            :style="{ cursor: 2 <= trackNum ? 'pointer' : 'default' }">
+            :style="{ cursor: 'pointer' }">
             <div :style="{
-              color: trackNum < 2 ? 'rgba(255, 255, 255, 0.2)' : hoverAudioIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              color: hoverAudioIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">{{ this.$t('advance.changeTrack') }}</div>
             <div class="trackDetail"
               :style="{
-                color: 2 <= trackNum ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)',
+                color: 'rgba(255, 255, 255, 0.6)',
               }">{{ currentAudioTrack }}</div>
           </div>
         </transition>
@@ -249,7 +250,7 @@ export default {
       }
     },
     trackNum(val) {
-      if (val <= 1) {
+      if (val < 1) {
         this.showTrack = false;
       }
     },
@@ -257,116 +258,57 @@ export default {
   computed: {
     ...mapGetters(['winWidth', 'currentSubtitleId']),
     currentAudioTrack() {
-      if (this.trackNum === 1) {
+      const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
+      if (this.trackNum === 1 && track.language === 'und') {
         return this.$t('advance.chosenTrack');
       }
-      const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
-      if (track && track.id) return track.language;
+      if (track && track.id) return track.name;
       return this.$t('advance.chosenTrack');
     },
     speedHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.speedChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.speedChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.speedChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.speedChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     subSizeHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.subSizeChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.subSizeChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.subSizeChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.subSizeChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     subColorHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.subColorChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.subColorChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.subColorChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.subColorChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     subDelayHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.subDelayChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.subDelayChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.subDelayChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.subDelayChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     audioDelayHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.showDelay ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.showDelay ? `${74 * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.showDelay ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.showDelay ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     changeTrackHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.showTrack ? `${this.trackHeight}px` : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.showTrack ? `${this.trackHeight * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.showTrack ? `${this.trackHeight * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.showTrack ? `${this.initialSize(this.trackHeight)}px` : `${this.initialSize(37)}px`;
     },
     menuCardHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.speedChosen ? '164px' : '127px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.speedChosen ? `${164 * 1.2}px` : `${127 * 1.2}px`;
-      }
-      return this.speedChosen ? `${164 * 1.2 * 1.4}px` : `${127 * 1.2 * 1.4}px`;
+      return this.speedChosen ? `${this.initialSize(164)}px` : `${this.initialSize(127)}px`;
     },
     subtitleCardHeight() {
-      if (this.andify(this.winWidth > 514, this.winWidth <= 854)) {
-        return this.andify(this.andify(!this.subColorChosen, !this.subSizeChosen), !this.subDelayChosen) ? '156px' : '193px';
-      } else if (this.andify(this.winWidth > 854, this.winWidth <= 1920)) {
-        return this.andify(this.andify(!this.subColorChosen, !this.subSizeChosen), !this.subDelayChosen) ? `${156 * 1.2}px` : `${193 * 1.2}px`;
-      }
-      return this.andify(this.andify(!this.subColorChosen, !this.subSizeChosen), !this.subDelayChosen) ? `${156 * 1.2 * 1.4}px` : `${193 * 1.2 * 1.4}px`;
+      return !this.subColorChosen && !this.subSizeChosen && !this.subDelayChosen ? `${this.initialSize(156)}px` : `${this.initialSize(193)}px`;
     },
     audioCardHeight() {
-      if (this.andify(this.winWidth > 514, this.winWidth <= 854)) {
-        if (this.showDelay) {
-          return '156px';
-        } else if (this.showTrack) {
-          return `${this.containerHeight}px`;
-        }
-        return '119px';
-      } else if (this.andify(this.winWidth > 854, this.winWidth <= 1920)) {
-        if (this.showDelay) {
-          return `${156 * 1.2}px`;
-        } else if (this.showTrack) {
-          return `${this.containerHeight * 1.2}px`;
-        }
-        return `${119 * 1.2}px`;
-      }
       if (this.showDelay) {
-        return `${156 * 1.2 * 1.4}px`;
+        return `${this.initialSize(156)}px`;
       } else if (this.showTrack) {
-        return `${this.containerHeight * 1.2 * 1.4}px`;
+        return `${this.initialSize(this.containerHeight)}px`;
       }
-      return `${119 * 1.2 * 1.4}px`;
+      return `${this.initialSize(119)}px`;
     },
     trackNum() {
       return this.$store.getters.audioTrackList.length;
     },
     containerHeight() {
-      if (this.trackNum === 1 || this.trackNum === 0) {
-        return 119;
-      } else if (this.trackNum === 2) {
-        return 193;
+      if (this.trackNum <= 2) {
+        return 133 + (this.trackNum * 27) + ((this.trackNum - 1) * 5);
       }
       return 230;
     },
     trackHeight() {
-      if (this.trackNum === 1 || this.trackNum === 0) {
-        return 37;
-      } else if (this.trackNum === 2) {
-        return 110;
+      if (this.trackNum <= 2) {
+        return (51 + (this.trackNum * 27)) + ((this.trackNum - 1) * 5);
       }
       return 142;
     },
@@ -380,14 +322,20 @@ export default {
     Icon,
   },
   methods: {
+    initialSize(size) {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return size;
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return size * 1.2;
+      }
+      return size * 1.2 * 1.4;
+    },
     handleClick() {
       this.speedChosen = true;
     },
     handleSubClick() {
-      if (this.currentSubtitleId !== '') {
-        this.readyShow = 'subMenu';
-        this.speedChosen = false;
-      }
+      this.readyShow = 'subMenu';
+      this.speedChosen = false;
     },
     handleAudioClick() {
       this.readyShow = 'audioMenu';
@@ -457,16 +405,10 @@ export default {
       this.showTrack = false;
     },
     handleTrackClick() {
-      if (this.trackNum >= 2) {
+      if (this.trackNum > 0) {
         this.showDelay = false;
         this.showTrack = true;
       }
-    },
-    orify(...args) {
-      return args.some(arg => arg == true); // eslint-disable-line
-    },
-    andify(...args) {
-      return args.every(arg => arg == true); // eslint-disable-line
     },
   },
 };

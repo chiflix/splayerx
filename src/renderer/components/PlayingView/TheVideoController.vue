@@ -14,6 +14,7 @@
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
+    :mousemove="eventInfo.get('mousemove')"
     :isDragging.sync="isDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
@@ -97,6 +98,7 @@ export default {
       volumeChange: false,
       showProgress: false,
       showProgressId: 0,
+      needResetHoverProgressBar: false,
     };
   },
   computed: {
@@ -225,6 +227,15 @@ export default {
       this.UIStateManager();
       this.lastEventInfo = lastEventInfo;
 
+      if (!videodata.paused && videodata.time + 1 >= this.duration) {
+        // we need set the paused state to go to next video
+        // this state will be reset on mounted of BaseVideoPlayer
+        videodata.paused = true;
+        // we need to reset the hoverProgressBar for play next video
+        this.needResetHoverProgressBar = true;
+        this.$bus.$emit('next-video');
+      }
+
       /*
       /* Rendering
       /*
@@ -241,8 +252,13 @@ export default {
           if (this.displayState['recent-playlist']) {
             this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
           } else {
-            this.$refs.progressbar.updateProgressBar(videodata.time);
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
+            if (this.needResetHoverProgressBar) {
+              this.needResetHoverProgressBar = false;
+              // reset hover-progressbar state
+              this.$refs.progressbar.updateHoveredProgressBar(videodata.time, -1);
+            }
+            this.$refs.progressbar.updatePlayProgressBar(videodata.time);
           }
           this.UIDisplayManager();
         } catch (exception) {
@@ -295,7 +311,8 @@ export default {
           !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
-      tempObject['volume-indicator'] = !this.muted ? this.timerState['volume-indicator'] : tempObject['volume-indicator'];
+      tempObject['volume-indicator'] = !this.muted ? this.timerState['volume-indicator']
+        : this.showAllWidgets || (!this.showAllWidgets && this.timerState['volume-indicator']);
       this.displayState = tempObject;
     },
     UIStateManager() {

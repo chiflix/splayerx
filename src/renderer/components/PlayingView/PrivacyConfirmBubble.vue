@@ -19,7 +19,7 @@
           @mouseout.stop="hovered = false"
           @mouseup.stop="handleCloseMouseup">
           <div class="button-info">{{ button }}</div>
-        </div> 
+        </div>
       </div>
     </div>
   </div>
@@ -109,7 +109,7 @@ export default {
   }
 }
 .plane-background {
-  background-color: rgba(0,0,0,0.20);
+  background-color: rgba(0,0,0,0.1);
   backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (max-width: 512px) {
@@ -132,7 +132,6 @@ export default {
   border-style: solid;
   border-width: 0.5px;
   border-color: rgba(255,255,255,0.1);
-  background-color: rgba(255,255,255,0.20);
 
   @media screen and (min-width: 513px) and (max-width: 854px) {
     border-radius: 7px;
@@ -285,7 +284,7 @@ export default {
         margin-left: 18px;
         margin-right: 14px;
         margin-top: 12px;
-        margin-bottom: 12px;        
+        margin-bottom: 12px;
         width: 153px;
 
         font-size: 11px;
@@ -373,7 +372,7 @@ export default {
         font-size: 12px;
         letter-spacing: 0.24px;
         text-align: center;
-        line-height: 12px;          
+        line-height: 12px;
       }
       @media screen and (min-width: 1921px) {
         padding-left: 20px;
