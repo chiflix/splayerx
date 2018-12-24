@@ -149,12 +149,10 @@ export default {
       const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
       const videoFiles = [];
       const dirFiles = files;
-      console.log(dirFiles);
+
       for (let i = 0; i < dirFiles.length; i += 1) {
         if (fs.statSync(dirFiles[i]).isDirectory()) {
           const dirPath = dirFiles[i];
-          console.log(dirPath);
-          // dirFiles.splice(i, 1);
           const files = fs.readdirSync(dirPath);
           for (let i = 0; i < files.length; i += 1) {
             files[i] = path.join(dirPath, files[i]);
@@ -162,7 +160,7 @@ export default {
           dirFiles.push(...files);
         }
       }
-      console.log(dirFiles);
+
       for (let i = 0; i < files.length; i += 1) {
         tempFilePath = files[i];
         if (subRegex.test(path.extname(tempFilePath))) {
