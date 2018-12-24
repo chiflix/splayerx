@@ -39,7 +39,7 @@
           @mousedown.stop="onRecentItemMousedown($event, index)"
           :style="{
             width: `${thumbnailWidth}px`,
-            height: item.chosen ? `${thumbnailHeight + 9}px` : `${thumbnailHeight}px`,
+            height: item.chosen ? `${thumbnailHeight + 10}px` : `${thumbnailHeight}px`,
           }">
           <div class="border"
             :style="{

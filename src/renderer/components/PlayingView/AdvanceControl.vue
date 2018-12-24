@@ -31,8 +31,6 @@ export default {
   },
   props: {
     showAttached: Boolean,
-    mousedownOnOther: Boolean,
-    mouseupOnOther: Boolean,
   },
   data() {
     return {
@@ -50,6 +48,14 @@ export default {
       audioShow: false,
     };
   },
+  computed: {
+    mousedownCurrentTarget() {
+      return this.$store.state.Input.mousedownTarget;
+    },
+    mouseupCurrentTarget() {
+      return this.$store.state.Input.mouseupTarget;
+    },
+  },
   watch: {
     showAttached(val) {
       if (!val) {
@@ -63,16 +69,16 @@ export default {
         }
       }
     },
-    mousedownOnOther(val) {
-      if (val && this.showAttached) {
+    mousedownCurrentTarget(val) {
+      if (val !== this.$options.name && this.showAttached) {
         this.anim.playSegments([37, 41], false);
-        if (this.mouseupOnOther) {
+        if (this.mouseupCurrentTarget !== this.$options.name) {
           this.$emit('update:showAttached', false);
         }
       }
     },
-    mouseupOnOther(val) {
-      if (val && this.showAttached) {
+    mouseupCurrentTarget(val) {
+      if (val !== this.$options.name && this.showAttached) {
         this.$emit('update:showAttached', false);
       }
     },
@@ -93,7 +99,7 @@ export default {
           if (!this.showAttached) {
             if (this.validEnter) {
               this.anim.playSegments([23, 36], false);
-            } else if (!this.mousedownOnOther) {
+            } else if (this.mousedownCurrentTarget === this.$options.name) {
               this.anim.playSegments([105, 109], false);
             }
           }

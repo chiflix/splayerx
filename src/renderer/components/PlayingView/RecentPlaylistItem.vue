@@ -158,7 +158,7 @@ export default {
         this.$refs.blur.classList.remove('blur');
       }
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
-      this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 9}px`);
+      this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
       if (!this.isPlaying && this.sliderPercentage > 0) {
