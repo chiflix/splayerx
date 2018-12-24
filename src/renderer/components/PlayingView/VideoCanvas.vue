@@ -24,6 +24,7 @@
 </template>;
 
 <script>
+import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import WindowSizeHelper from '@/helpers/WindowSizeHelper';
@@ -209,16 +210,16 @@ export default {
         0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
 
-      let grabcoverdone = false;
+      let grabCoverDone = false;
       const { data } = canvasCTX.getImageData(0, 0, 100, 100);
       // check the cover is it right.
       for (let i = 0; i < data.length; i += 1) {
         if ((i + 1) % 4 !== 0 && data[i] > 20) {
-          grabcoverdone = true;
+          grabCoverDone = true;
           break;
         }
       }
-      if (grabcoverdone) {
+      if (grabCoverDone) {
         const smallImagePath = canvas.toDataURL('image/png');
         [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
         canvasCTX.drawImage(
@@ -226,6 +227,8 @@ export default {
           0, 0, (videoWidth / videoHeight) * 1080, 1080,
         );
         const imagePath = canvas.toDataURL('image/png');
+        const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
+        fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
         const val = await this.infoDB().get('recent-played', 'path', this.originSrc);
         if (val) {
           const mergedData = Object.assign(val, { cover: imagePath, smallCover: smallImagePath });
@@ -242,7 +245,7 @@ export default {
         }
       }
 
-      this.coverFinded = grabcoverdone;
+      this.coverFinded = grabCoverDone;
       this.lastCoverDetectingTime = grabCoverTime;
     },
     checkPresentTime() {
@@ -250,7 +253,7 @@ export default {
         // Assume to grab the cover can be the success and to keep
         // it doesn't execution multiple times. if grab failed,
         // we set it back to false.
-        this.coverFinded = true;
+        // this.coverFinded = true;
         this.getVideoCover(videodata.time);
       }
     },
