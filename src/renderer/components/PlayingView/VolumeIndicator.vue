@@ -1,5 +1,5 @@
 <template>
-  <div class="indicator-container">
+  <div v-hidden="showAllWidgets || showVolume" class="indicator-container">
     <base-info-card class="card">
       <div class="indicator" :style="{ height: volume * 100 + '%', opacity: muted ? 0.25 : 0.8 }"></div>
     </base-info-card>
@@ -18,8 +18,27 @@ export default {
     'base-info-card': BaseInfoCard,
     'base-icon': BaseIcon,
   },
+  data() {
+    return {
+      showVolume: false,
+      showVolumeTimerId: 0,
+    };
+  },
+  props: ['showAllWidgets'],
   computed: {
-    ...mapGetters(['volume', 'muted']),
+    ...mapGetters(['volume', 'muted', 'volumeKeydown']),
+  },
+  watch: {
+    volumeKeydown(newVal) {
+      const { clock, showVolumeTimerId } = this;
+      if (newVal) {
+        this.showVolume = true;
+        clock().clearTimeout(showVolumeTimerId);
+        this.showVolumeTimerId = clock().setTimeout(() => {
+          this.showVolume = false;
+        }, 1000);
+      }
+    },
   },
 };
 </script>

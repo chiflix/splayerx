@@ -78,7 +78,7 @@ export default {
     RecentPlaylistItem,
   },
   props: {
-    mousemove: {},
+    mousemovePosition: {},
     displayState: Boolean,
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
@@ -211,7 +211,7 @@ export default {
         this.$bus.$emit('subtitle-to-top', val);
       }
       this.canHoverItem = false;
-      this.mousePosition = this.mousemove.position;
+      this.mousePosition = this.mousemovePosition;
       if (val) {
         this.$store.dispatch('UpdatePlayingList');
         this.backgroundDisplayState = val;
@@ -219,12 +219,11 @@ export default {
           * this.thumbnailNumber;
       }
     },
-    // can hover on items only after mouse move some distance
-    mousemove(val) {
+    mousemovePosition(val) {
       const distance = this.winWidth > 1355 ? 20 : 10;
       if (!this.canHoverItem && this.displayState) {
-        if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
-        Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
+        if (Math.abs(this.mousePosition.x - val.x) > distance ||
+        Math.abs(this.mousePosition.y - val.y) > distance) {
           this.canHoverItem = true;
         }
       }
