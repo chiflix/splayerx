@@ -202,7 +202,7 @@ export default {
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
     });
-    this.infoDB().get('recent-played', 'path', this.path).then((val) => {
+    this.infoDB.get('recent-played', 'path', this.path).then((val) => {
       if (val && val.lastPlayedTime) {
         this.lastPlayedTime = val.lastPlayedTime;
         this.smallShortCut = val.smallShortCut;
@@ -211,7 +211,7 @@ export default {
       this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
     this.$bus.$on('database-saved', () => {
-      this.infoDB().get('recent-played', 'path', this.path).then((val) => {
+      this.infoDB.get('recent-played', 'path', this.path).then((val) => {
         if (val && val.lastPlayedTime) {
           this.lastPlayedTime = val.lastPlayedTime;
           this.smallShortCut = val.smallShortCut;

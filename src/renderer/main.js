@@ -769,7 +769,7 @@ new Vue({
           label: '',
         })),
       };
-      return this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
+      return this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
         let menuRecentData = null;
         menuRecentData = this.processRecentPlay(data);
         recentMenuTemplate.submenu.forEach((element, index) => {
