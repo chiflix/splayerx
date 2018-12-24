@@ -112,7 +112,7 @@ export default {
       const opts = ['openFile', 'multiSelections'];
       if (process.platform === 'darwin') {
         // TODO: support open directory in macos
-        // opts.push('openDirectory');
+        opts.push('openDirectory');
       }
       process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
         title: 'Open Dialog',
@@ -133,7 +133,14 @@ export default {
           console.log(bookmarks);
         }
         if (files) {
-          if (!files[0].includes('\\') || process.platform === 'win32') {
+          if (fs.statSync(files[0]).isDirectory()) {
+            const dirPath = files[0];
+            const dirfiles = fs.readdirSync(dirPath);
+            for (let i = 0; i < dirfiles.length; i += 1) {
+              dirfiles[i] = path.join(dirPath, dirfiles[i]);
+            }
+            this.openFile(...dirfiles);
+          } else if (!files[0].includes('\\') || process.platform === 'win32') {
             this.openFile(...files);
           } else {
             this.addLog('error', `Failed to open file: ${files[0]}`);
@@ -158,6 +165,8 @@ export default {
           this.addLog('error', `Failed to open file : ${tempFilePath}`);
         }
       }
+      console.log(1);
+      console.log(videoFiles);
       if (videoFiles.length !== 0) {
         if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
           this.openVideoFile(...videoFiles);
@@ -170,6 +179,8 @@ export default {
       }
     },
     openVideoFile(...videoFiles) {
+      console.log(2);
+      console.log(videoFiles);
       this.playFile(videoFiles[0]);
       if (videoFiles.length > 1) {
         this.$store.dispatch('PlayingList', videoFiles);
