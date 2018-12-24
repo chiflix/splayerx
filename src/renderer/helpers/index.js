@@ -111,7 +111,6 @@ export default {
       this.showingPopupDialog = true;
       const opts = ['openFile', 'multiSelections'];
       if (process.platform === 'darwin') {
-        // TODO: support open directory in macos
         opts.push('openDirectory');
       }
       process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
