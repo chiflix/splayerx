@@ -206,7 +206,6 @@ export default {
       if (val && val.lastPlayedTime) {
         this.lastPlayedTime = val.lastPlayedTime;
         this.smallShortCut = val.smallShortCut;
-        this.cover = val.cover;
       }
       this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
@@ -215,7 +214,6 @@ export default {
         if (val && val.lastPlayedTime) {
           this.lastPlayedTime = val.lastPlayedTime;
           this.smallShortCut = val.smallShortCut;
-          this.cover = val.cover;
         }
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
@@ -228,14 +226,14 @@ export default {
     imageSrc() {
       if (this.lastPlayedTime) {
         if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
-          return this.cover;
+          return this.coverSrc;
         }
         return this.smallShortCut;
       }
       return this.coverSrc;
     },
     imageLoaded() {
-      return this.cover || this.smallShortCut || this.coverSrc !== '';
+      return this.smallShortCut || this.coverSrc !== '';
     },
     thumbnailHeight() {
       return this.thumbnailWidth / (112 / 63);
