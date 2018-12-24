@@ -244,7 +244,7 @@ new Vue({
             {
               label: this.$t('msg.file.clearHistory'),
               click: () => {
-                this.infoDB().cleanData();
+                this.infoDB.cleanData();
                 this.$bus.$emit('clean-lastPlayedFile');
                 this.refreshMenu();
               },
@@ -768,7 +768,7 @@ new Vue({
           label: '',
         })),
       };
-      return this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
+      return this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
         let menuRecentData = null;
         menuRecentData = this.processRecentPlay(data);
         recentMenuTemplate.submenu.forEach((element, index) => {

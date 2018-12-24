@@ -33,8 +33,8 @@ export default {
       const { clock, showVolumeTimerId } = this;
       if (newVal) {
         this.showVolume = true;
-        clock().clearTimeout(showVolumeTimerId);
-        this.showVolumeTimerId = clock().setTimeout(() => {
+        clock.clearTimeout(showVolumeTimerId);
+        this.showVolumeTimerId = clock.setTimeout(() => {
           this.showVolume = false;
         }, 1000);
       }
