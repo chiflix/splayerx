@@ -95,47 +95,49 @@ function registerMainWindowEvent() {
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
 
-  function snapShot(videoPath, callback) {
+  function snapShot(video, callback) {
     /*
       TODO:
         img name should be more unique
      */
-    const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
+    const imgPath = path.join(app.getPath('temp'), video.quickHash);
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
-    splayerx.snapshotVideo(videoPath, `${imgPath}.png`, `00:00:${numberString}`, (resultCode) => {
-      console[resultCode === '0' ? 'log' : 'error'](resultCode, videoPath);
+    splayerx.snapshotVideo(video.videoPath, `${imgPath}.png`, `00:00:${numberString}`, (resultCode) => {
+      console[resultCode === '0' ? 'log' : 'error'](resultCode, video.videoPath);
       callback(resultCode, imgPath);
     });
   }
 
   function snapShotQueueProcess(event) {
     const callback = (resultCode, imgPath) => {
-      if (resultCode !== '0') { // TODO: retry
-        snapShotQueue.shift();
-        if (snapShotQueue.length) {
-          snapShot(snapShotQueue[0], callback);
-        }
-      } else {
+      if (resultCode === 'Waiting for task completion.') {
+        snapShot(snapShotQueue[0], callback);
+      } else if (resultCode === '0') {
         const lastRecord = snapShotQueue.shift();
         if (event.sender.isDestroyed()) {
           snapShotQueue.splice(0, snapShotQueue.length);
         } else {
-          event.sender.send(`snapShot-${lastRecord}-reply`, imgPath);
+          event.sender.send(`snapShot-${lastRecord.videoPath}-reply`, imgPath);
           if (snapShotQueue.length > 0) {
             snapShot(snapShotQueue[0], callback);
           }
+        }
+      } else {
+        snapShotQueue.shift();
+        if (snapShotQueue.length) {
+          snapShot(snapShotQueue[0], callback);
         }
       }
     };
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, videoPath) => {
-    const imgPath = path.join(app.getPath('temp'), path.basename(videoPath, path.extname(videoPath)));
+  ipcMain.on('snapShot', (event, videoPath, quickHash) => {
+    const imgPath = path.join(app.getPath('temp'), quickHash);
 
     if (!fs.existsSync(`${imgPath}.png`)) {
-      snapShotQueue.push(videoPath);
+      snapShotQueue.push({ videoPath, quickHash });
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
       }

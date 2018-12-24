@@ -105,8 +105,7 @@ export default {
       this.showingPopupDialog = true;
       const opts = ['openFile', 'multiSelections'];
       if (process.platform === 'darwin') {
-        // TODO: support open directory in macos
-        // opts.push('openDirectory');
+        opts.push('openDirectory');
       }
       process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
         title: 'Open Dialog',
@@ -135,12 +134,26 @@ export default {
         }
       });
     },
+    /* eslint-disable */
     openFile(...files) {
       let tempFilePath;
       let containsSubFiles = false;
       const subtitleFiles = [];
       const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
       const videoFiles = [];
+      const dirFiles = files;
+
+      for (let i = 0; i < dirFiles.length; i += 1) {
+        if (fs.statSync(dirFiles[i]).isDirectory()) {
+          const dirPath = dirFiles[i];
+          const files = fs.readdirSync(dirPath);
+          for (let i = 0; i < files.length; i += 1) {
+            files[i] = path.join(dirPath, files[i]);
+          }
+          dirFiles.push(...files);
+        }
+      }
+
       for (let i = 0; i < files.length; i += 1) {
         tempFilePath = files[i];
         if (subRegex.test(path.extname(tempFilePath))) {
@@ -163,6 +176,7 @@ export default {
         this.$bus.$emit('add-subtitles', subtitleFiles);
       }
     },
+    /* eslint-disable */
     openVideoFile(...videoFiles) {
       this.playFile(videoFiles[0]);
       if (videoFiles.length > 1) {
@@ -195,6 +209,7 @@ export default {
       }
       this.$bus.$emit('new-file-open');
       this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
+      remote.app.addRecentDocument(originPath);
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
