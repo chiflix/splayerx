@@ -12,7 +12,7 @@
     @mousedown.left="handleMousedownLeft"
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
-    <titlebar currentView="Playingview" v-hidden="displayState['titlebar']" ></titlebar>
+    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
@@ -21,9 +21,9 @@
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-hidden="displayState['the-time-codes'] || showProgress"/>
+    <div class="masking" v-hidden="showAllWidgets || showProgress"/>
     <play-button :paused="paused" />
-    <volume-indicator v-hidden="displayState['volume-indicator']"/>
+    <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']"
       v-bind.sync="widgetsStatus['subtitle-control']"
@@ -214,14 +214,13 @@ export default {
       this.inputProcess();
       // 不能依赖播放中的时间更新，所以临时放入requestAnimationFrame, 放在下一阶段处理
       // 这部分处理应该只是状态更新计算 不涉及UI动画的处理
-      this.$refs.progressbar.updateProgressBar(videodata.time);
+      this.$refs.progressbar.updatePlayProgressBar(videodata.time);
       this.$refs.theTimeCodes.updateTimeContent(videodata.time);
       this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
       if (this.displayState['recent-playlist']) {
         this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
       }
 
-      // Use Map constructor to shallow-copy eventInfo
       this.clock().tick(timestamp - this.start);
       this.UITimerManager(timestamp - this.start);
       requestAnimationFrame(this.clockTrigger);
@@ -230,7 +229,6 @@ export default {
     },
 
     onTickUpdate() {
-      // Use Map constructor to shallow-copy eventInfo
       this.UIStateManager();
 
       if (!videodata.paused && videodata.time + 1 >= this.duration) {
@@ -359,6 +357,7 @@ export default {
     },
     // Event listeners
     handleMousemove(event) {
+      const { clientX, clientY, target } = event;
       this.mouseStopped = false;
       if (this.mouseStoppedId) {
         this.clock().clearTimeout(this.mouseStoppedId);
@@ -366,8 +365,8 @@ export default {
       this.mouseStoppedId = this.clock().setTimeout(() => {
         this.mouseStopped = true;
       }, this.mousestopDelay);
-      this.updateMousemovePosition([event.clientX, event.clientY]);
-      this.updateMousemoveTarget(this.getComponentName(event.target));
+      this.updateMousemovePosition([clientX, clientY]);
+      this.updateMousemoveTarget(this.getComponentName(target));
     },
     handleMouseenter() {
       this.mouseLeftWindow = false;
@@ -443,11 +442,11 @@ export default {
         this.preventSingleClick = false;
       }
     },
-    handleKeydown(event) {
-      this.updateKeydown(event.code);
+    handleKeydown({ code }) {
+      this.updateKeydown(code);
     },
-    handleKeyup(event) {
-      this.updateKeyup(event.code);
+    handleKeyup({ code }) {
+      this.updateKeyup(code);
     },
     handleWheel(event) {
       this.updateWheel({
