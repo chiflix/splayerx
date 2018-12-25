@@ -123,6 +123,11 @@ export default {
     content: '',
   },
   privacyBubble: {
+    masVersion: {
+      content: 'Smart Translation will upload anonymous data to our server. By clicking \'Agree\' you are giving your consent for enabling Smart Translation to improve your user experience.',
+      agree: 'AGREE',
+      disagree: 'DISAGREE',
+    },
     tryToDisable: {
       partOne: 'SPlayer uses anonymous data to enhance user experience. Smart Translation will be disabled if you ',
       partTwo: '.',
