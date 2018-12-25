@@ -83,7 +83,6 @@ export default {
       }
       this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
-      this.getVideoCover(grabCoverTime);
       this.changeWindowSize();
     },
     onAudioTrack(event) {
