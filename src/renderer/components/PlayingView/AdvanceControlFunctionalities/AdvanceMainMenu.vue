@@ -259,10 +259,16 @@ export default {
     ...mapGetters(['winWidth', 'currentSubtitleId']),
     currentAudioTrack() {
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
-      if (this.trackNum === 1 && track.language === 'und') {
+      if (track) {
+        if (this.trackNum === 1 && track.language === 'und') {
+          return this.$t('advance.chosenTrack');
+        }
+        if (track.language === '' || track.language === 'und') {
+          return `${this.$t('advance.track')} ${this.$store.getters.audioTrackList.indexOf(track) + 1}`;
+        }
+        if (track && track.id) return track.name;
         return this.$t('advance.chosenTrack');
       }
-      if (track && track.id) return track.name;
       return this.$t('advance.chosenTrack');
     },
     speedHeight() {
