@@ -140,13 +140,12 @@ export default {
       this.$refs.video.loop = newVal;
     },
     // tracks
-    currentAudioTrackId(newVal, oldVal) {
-      if (parseInt(oldVal, 10) !== -1) {
-        for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
-          this.$refs.video.audioTracks[i].enabled =
-            this.$refs.video.audioTracks[i].id === newVal;
-        }
+    currentAudioTrackId(newVal) {
+      for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
+        this.$refs.video.audioTracks[i].enabled =
+          this.$refs.video.audioTracks[i].id === newVal;
       }
+      this.$bus.$emit('seek', videodata.time);
     },
     // controls
     controls(newVal) {
