@@ -21,7 +21,7 @@
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-hidden="showAllWidgets || showProgress"/>
+    <div class="masking" v-hidden="showAllWidgets"/>
     <play-button :paused="paused" />
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons">
@@ -33,8 +33,8 @@
       v-bind.sync="widgetsStatus['advance-control']"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes ref="theTimeCodes" v-hidden="displayState['the-time-codes'] || showProgress"/>
-    <the-progress-bar ref="progressbar" v-hidden="displayState['the-progress-bar'] || showProgress"/>
+    <the-time-codes ref="theTimeCodes" v-hidden="displayState['the-time-codes']"/>
+    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" />
   </div>
 </template>
 <script>
@@ -92,8 +92,6 @@ export default {
       focusDelay: 500,
       listenedWidget: 'the-video-controller',
       attachedShown: false,
-      showProgress: false,
-      showProgressId: 0,
       needResetHoverProgressBar: false,
     };
   },
@@ -105,7 +103,7 @@ export default {
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'progressKeydown', 'leftMousedown']),
+    ...mapGetters(['paused', 'duration', 'leftMousedown']),
     showAllWidgets() {
       return (!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
@@ -128,16 +126,6 @@ export default {
     isFocused(newValue) {
       if (newValue) {
         this.focusedTimestamp = Date.now();
-      }
-    },
-    progressKeydown(newValue) {
-      if (newValue) {
-        this.showProgress = true;
-        this.clock.clearTimeout(this.showProgressId);
-      } else {
-        this.showProgressId = this.clock.setTimeout(() => {
-          this.showProgress = false;
-        }, 1000);
       }
     },
     currentWidget(newVal, oldVal) {

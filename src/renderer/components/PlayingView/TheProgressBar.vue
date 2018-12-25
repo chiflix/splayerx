@@ -1,5 +1,7 @@
 <template>
-  <div class="the-progress-bar"
+  <div
+    v-hidden="showAllWidgets || progressTriggerStopped"
+    class="the-progress-bar"
     @mousemove="handleMousemove"
     @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
@@ -60,8 +62,7 @@ export default {
   components: {
     'the-preview-thumbnail': ThePreviewThumbnail,
   },
-  props: {
-  },
+  props: ['showAllWidgets'],
   data() {
     return {
       hoveredPageX: 0,
@@ -71,10 +72,13 @@ export default {
       thumbnailWidth: 272,
       hovering: false,
       hoveringId: 0,
+      progressTriggerStopped: false,
+      progressTriggerId: 0,
+      progressDisappearDelay: 1000,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'duration', 'ratio', 'nextVideo']),
+    ...mapGetters(['winWidth', 'duration', 'ratio', 'nextVideo', 'progressKeydown']),
     hoveredPercent() {
       return this.hovering ? this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100 : 0;
     },
@@ -109,6 +113,16 @@ export default {
   watch: {
     winWidth(newValue) {
       this.thumbnailWidth = this.winWidthToThumbnailWidth(newValue);
+    },
+    progressKeydown(newValue) {
+      if (newValue) {
+        this.progressTriggerStopped = true;
+        this.clock.clearTimeout(this.progressTriggerId);
+      } else {
+        this.progressTriggerId = this.clock.setTimeout(() => {
+          this.progressTriggerStopped = false;
+        }, this.progressDisappearDelay);
+      }
     },
   },
   methods: {
