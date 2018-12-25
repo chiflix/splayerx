@@ -107,12 +107,11 @@ export default {
     async addInitialSubtitles(videoSrc) {
       const {
         addSubtitles,
-        getLocalSubtitlesList, getEmbeddedSubtitleList, getOnlineSubtitlesList,
+        getLocalSubtitlesList, getOnlineSubtitlesList,
         privacyAgreement,
       } = this;
       const localEmbeddedSubtitles = (await Promise.all([
         promisify(getLocalSubtitlesList.bind(null, videoSrc, SubtitleLoader.supportedFormats)),
-        promisify(getEmbeddedSubtitleList.bind(null)),
       ]))
         .map((subtitles, index) => subtitles.map(subtitle => ({ src: subtitle, type: index ? 'embedded' : 'local' })))
         .reduce((prev, curr) => prev.concat(curr));
@@ -135,9 +134,6 @@ export default {
           resolve(subtitles.map(subtitle => join(dirname(videoSrc), subtitle)));
         });
       });
-    },
-    async getEmbeddedSubtitleList() {
-      return [];
     },
     async getOnlineSubtitlesList(videoSrc) {
       const hash = await helpers.methods.mediaQuickHash(videoSrc);
@@ -240,14 +236,27 @@ export default {
     this.addInitialSubtitles(this.originSrc);
 
     const { ipcRenderer } = this.$electron;
-    ipcRenderer.on(`mediaInfo-${this.originSrc}-reply`, (event, info) => {
+    const { embeddedSubtitles, mediaHash, originSrc } = this;
+    const { supportedCodecs, codecToFormat } = SubtitleLoader;
+    ipcRenderer.on(`mediaInfo-${originSrc}-reply`, (event, info) => {
       const { streams } = JSON.parse(info);
-      this.embeddedSubtitles.push(...streams
-        ?.filter(stream => stream?.codec_type === 'subtitle' && SubtitleLoader.supportedCodecs.includes(stream?.codec_name)) // eslint-disable-line camelcase
+      embeddedSubtitles.push(...streams
+        ?.filter(stream => stream?.codec_type === 'subtitle' && supportedCodecs.includes(stream?.codec_name)) // eslint-disable-line camelcase
         .map(subtitle => ({
-          subtitle: subtitle.index,
+          index: subtitle.index,
           codec: subtitle.codec_name, // eslint-disable-line camelcase
+          default: subtitle.disposition.default === 1,
+          name: subtitle.tags.title,
+          language: subtitle.tags.language,
         })));
+      embeddedSubtitles.forEach(({ index, codec }) => {
+        ipcRenderer.send('extract-subtitle-request', originSrc, index, codecToFormat(codec), mediaHash);
+      });
+    });
+    ipcRenderer.on('extract-subtitle-response', (event, { error, index, path }) => {
+      const subtitleToUpdate = embeddedSubtitles.find(subtitle => subtitle.index === index);
+      const subtitleIndex = embeddedSubtitles.findIndex(subtitle => subtitle.index === index);
+      this.$set(embeddedSubtitles, subtitleIndex, { ...subtitleToUpdate, path: error ? 'error' : path });
     });
   },
 };

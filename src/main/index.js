@@ -109,6 +109,15 @@ function registerMainWindowEvent() {
     });
   }
 
+  function extractSubtitle(videoPath, subtitlePath, index) {
+    return new Promise((resolve, reject) => {
+      splayerx.extractSubtitles(videoPath, subtitlePath, `0:${index}:0`, (err) => {
+        if (err === 0) reject(index);
+        resolve(index);
+      });
+    });
+  }
+
   function snapShotQueueProcess(event) {
     const callback = (resultCode, imgPath) => {
       if (resultCode === 'Waiting for task completion.') {
@@ -144,6 +153,16 @@ function registerMainWindowEvent() {
     } else {
       console.log('pass', imgPath);
       event.sender.send(`snapShot-${videoPath}-reply`, imgPath);
+    }
+  });
+
+  ipcMain.on('extract-subtitle-request', (event, videoPath, index, format, hash) => {
+    const subtitlePath = path.join(app.getPath('temp'), `${hash}-${index}.${format}`);
+    if (fs.existsSync(subtitlePath)) event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath });
+    else {
+      extractSubtitle(videoPath, subtitlePath, index)
+        .then(index => event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath }))
+        .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index }));
     }
   });
 
