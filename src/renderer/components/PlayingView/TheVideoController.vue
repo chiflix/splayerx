@@ -21,7 +21,7 @@
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-hidden="showAllWidgets || showProgress"/>
+    <div class="masking" v-hidden="showAllWidgets"/>
     <play-button :paused="paused" />
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons">
@@ -33,15 +33,14 @@
       v-bind.sync="widgetsStatus['advance-control']"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes ref="theTimeCodes" v-hidden="displayState['the-time-codes'] || showProgress"/>
-    <the-progress-bar ref="progressbar" v-hidden="displayState['the-progress-bar'] || showProgress"/>
+    <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" />
+    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" />
   </div>
 </template>
 <script>
 import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as inputActions } from '@/store/actionTypes';
-import TimerManager from '@/helpers/timerManager';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
 import VolumeIndicator from './VolumeIndicator.vue';
@@ -80,9 +79,6 @@ export default {
       mouseLeftWindow: false,
       mouseLeftId: 0,
       mouseleftDelay: 1000,
-      hideVolume: false,
-      muteDelay: 3000,
-      hideVolumeDelay: 1000,
       popupShow: false,
       clicksTimer: 0,
       clicksDelay: 200,
@@ -95,9 +91,6 @@ export default {
       focusDelay: 500,
       listenedWidget: 'the-video-controller',
       attachedShown: false,
-      volumeChange: false,
-      showProgress: false,
-      showProgressId: 0,
       needResetHoverProgressBar: false,
     };
   },
@@ -109,7 +102,7 @@ export default {
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['muted', 'paused', 'duration', 'volume', 'progressKeydown', 'volumeKeydown', 'leftMousedown']),
+    ...mapGetters(['paused', 'duration', 'leftMousedown']),
     showAllWidgets() {
       return (!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
@@ -134,19 +127,6 @@ export default {
         this.focusedTimestamp = Date.now();
       }
     },
-    volume() {
-      this.volumeChange = true;
-    },
-    progressKeydown(newValue) {
-      if (newValue) {
-        this.showProgress = true;
-        this.clock.clearTimeout(this.showProgressId);
-      } else {
-        this.showProgressId = this.clock.setTimeout(() => {
-          this.showProgress = false;
-        }, 1000);
-      }
-    },
     currentWidget(newVal, oldVal) {
       this.lastWidget = oldVal;
     },
@@ -157,16 +137,9 @@ export default {
       this.lastMouseupWidget = oldVal;
     },
   },
-  created() {
-    // Use Object due to vue's lack support of reactive Map
-    this.timerState = {};
-    this.timerManager = new TimerManager();
-    this.timerManager.addTimer('sleepingVolumeButton', this.mousestopDelay);
-  },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
-      this.timerState[value.name] = true;
       this.displayState[value.name] = true;
       this.widgetsStatus[value.name] = {
         selected: false,
@@ -205,13 +178,11 @@ export default {
       this.widgetsStatus['playlist-control'].showAttached = event;
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [320, 180]);
     },
-
     clockTrigger(timestamp) {
       if (!this.start) {
         this.start = timestamp;
       }
 
-      this.inputProcess();
       // 不能依赖播放中的时间更新，所以临时放入requestAnimationFrame, 放在下一阶段处理
       // 这部分处理应该只是状态更新计算 不涉及UI动画的处理
       this.$refs.progressbar.updatePlayProgressBar(videodata.time);
@@ -222,12 +193,10 @@ export default {
       }
 
       this.clock.tick(timestamp - this.start);
-      this.UITimerManager(timestamp - this.start);
       requestAnimationFrame(this.clockTrigger);
 
       this.start = timestamp;
     },
-
     onTickUpdate() {
       this.UIStateManager();
 
@@ -270,52 +239,12 @@ export default {
         }
       });
     },
-    inputProcess() { // eslint-disable-line
-      // hideVolume timer
-      if (!this.lastWheelTime) this.lastWheelTime = this.wheelTime;
-      const {
-        volumeKeydown,
-        wheelTime,
-        lastWheelTime,
-      } = this;
-      let mouseScrolling = false;
-      if (lastWheelTime !== wheelTime) {
-        mouseScrolling = true;
-        this.lastWheelTime = wheelTime;
-      }
-      const wakingupVolume = this.volumeChange || volumeKeydown || (mouseScrolling && process.platform !== 'darwin');
-      if (wakingupVolume) {
-        this.timerManager.updateTimer('sleepingVolumeButton', this.hideVolumeDelay);
-        // Prevent all widgets display before volume-control
-        this.hideVolume = false;
-        this.volumeChange = false;
-      }
-
-      Object.keys(this.timerState).forEach((uiName) => {
-        this.timerState[uiName] = this.showAllWidgets;
-      });
-      this.timerState['volume-indicator'] = !this.hideVolume;
-    },
-    UITimerManager(frameTime) {
-      this.timerManager.tickTimer('sleepingVolumeButton', frameTime);
-
-      const timeoutTimers = this.timerManager.timeoutTimers();
-      this.hideVolume = timeoutTimers.includes('sleepingVolumeButton');
-
-      this.timerState['volume-indicator'] = !this.hideVolume;
-    },
-    // UILayerManager() {
-    // },
     UIDisplayManager() {
       const tempObject = {};
       Object.keys(this.displayState).forEach((index) => {
-        tempObject[index] = (this.showAllWidgets ||
-          (!this.showAllWidgets && this.timerState[index])) &&
-          !this.widgetsStatus['playlist-control'].showAttached;
+        tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
-      tempObject['volume-indicator'] = !this.muted ? this.timerState['volume-indicator']
-        : this.showAllWidgets || (!this.showAllWidgets && this.timerState['volume-indicator']);
       this.displayState = tempObject;
     },
     UIStateManager() {
