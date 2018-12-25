@@ -80,9 +80,6 @@ export default {
       mouseLeftWindow: false,
       mouseLeftId: 0,
       mouseleftDelay: 1000,
-      hideVolume: false,
-      muteDelay: 3000,
-      hideVolumeDelay: 1000,
       popupShow: false,
       clicksTimer: 0,
       clicksDelay: 200,
@@ -95,7 +92,6 @@ export default {
       focusDelay: 500,
       listenedWidget: 'the-video-controller',
       attachedShown: false,
-      volumeChange: false,
       showProgress: false,
       showProgressId: 0,
       needResetHoverProgressBar: false,
@@ -109,7 +105,7 @@ export default {
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['muted', 'paused', 'duration', 'volume', 'progressKeydown', 'volumeKeydown', 'leftMousedown']),
+    ...mapGetters(['paused', 'duration', 'progressKeydown', 'leftMousedown']),
     showAllWidgets() {
       return (!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
@@ -133,9 +129,6 @@ export default {
       if (newValue) {
         this.focusedTimestamp = Date.now();
       }
-    },
-    volume() {
-      this.volumeChange = true;
     },
     progressKeydown(newValue) {
       if (newValue) {
@@ -161,7 +154,6 @@ export default {
     // Use Object due to vue's lack support of reactive Map
     this.timerState = {};
     this.timerManager = new TimerManager();
-    this.timerManager.addTimer('sleepingVolumeButton', this.mousestopDelay);
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
@@ -271,38 +263,11 @@ export default {
       });
     },
     inputProcess() { // eslint-disable-line
-      // hideVolume timer
-      if (!this.lastWheelTime) this.lastWheelTime = this.wheelTime;
-      const {
-        volumeKeydown,
-        wheelTime,
-        lastWheelTime,
-      } = this;
-      let mouseScrolling = false;
-      if (lastWheelTime !== wheelTime) {
-        mouseScrolling = true;
-        this.lastWheelTime = wheelTime;
-      }
-      const wakingupVolume = this.volumeChange || volumeKeydown || (mouseScrolling && process.platform !== 'darwin');
-      if (wakingupVolume) {
-        this.timerManager.updateTimer('sleepingVolumeButton', this.hideVolumeDelay);
-        // Prevent all widgets display before volume-control
-        this.hideVolume = false;
-        this.volumeChange = false;
-      }
-
       Object.keys(this.timerState).forEach((uiName) => {
         this.timerState[uiName] = this.showAllWidgets;
       });
-      this.timerState['volume-indicator'] = !this.hideVolume;
     },
-    UITimerManager(frameTime) {
-      this.timerManager.tickTimer('sleepingVolumeButton', frameTime);
-
-      const timeoutTimers = this.timerManager.timeoutTimers();
-      this.hideVolume = timeoutTimers.includes('sleepingVolumeButton');
-
-      this.timerState['volume-indicator'] = !this.hideVolume;
+    UITimerManager() {
     },
     // UILayerManager() {
     // },
@@ -314,8 +279,6 @@ export default {
           !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
-      tempObject['volume-indicator'] = !this.muted ? this.timerState['volume-indicator']
-        : this.showAllWidgets || (!this.showAllWidgets && this.timerState['volume-indicator']);
       this.displayState = tempObject;
     },
     UIStateManager() {
