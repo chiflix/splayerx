@@ -367,7 +367,7 @@ new Vue({
                   properties: ['openFile'],
                 }, (item) => {
                   if (item) {
-                    this.$bus.$emit('add-subtitles', item);
+                    this.$bus.$emit('add-subtitles', [{ src: item[0], type: 'local' }]);
                   }
                 });
               },
