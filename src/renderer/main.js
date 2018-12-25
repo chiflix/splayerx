@@ -43,6 +43,16 @@ Vue.config.errorHandler = (err) => {
   addLog.methods.addLog('error', err);
 };
 Vue.directive('hidden', {
+  bind(el, binding) {
+    const { value } = binding;
+    if (value) {
+      el.classList.add('fade-in');
+      el.classList.remove('fade-out');
+    } else {
+      el.classList.add('fade-out');
+      el.classList.remove('fade-in');
+    }
+  },
   update(el, binding) {
     const { oldValue, value } = binding;
     if (oldValue !== value) {
