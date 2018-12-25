@@ -2,7 +2,6 @@ sudo: required
 os:
 - osx
 dist: trusty
-osx_image: xcode9.2
 language: node_js
 node_js:
 - node
@@ -45,6 +44,7 @@ deploy:
     tags: true
 after_success:
 - codecov
+- bash scripts/trigermasdev.sh
 addons:
   apt:
     packages:

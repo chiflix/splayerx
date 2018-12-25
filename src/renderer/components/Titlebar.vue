@@ -82,7 +82,10 @@ export default {
   },
   props: {
     currentView: String,
-    showAllWidgets: Boolean,
+    showAllWidgets: {
+      type: Boolean,
+      default: true,
+    },
   },
   components: {
     Icon,
