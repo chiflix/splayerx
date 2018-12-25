@@ -33,7 +33,7 @@
       v-bind.sync="widgetsStatus['advance-control']"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes ref="theTimeCodes" v-hidden="displayState['the-time-codes']"/>
+    <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" />
     <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" />
   </div>
 </template>
