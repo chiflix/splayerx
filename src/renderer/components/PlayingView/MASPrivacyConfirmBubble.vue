@@ -183,7 +183,7 @@ export default {
         margin-left: 20px;
         margin-right: 10px;
         margin-bottom: 15px;
-        width: 245px;
+        width: 300px;
 
         font-size: 11px;
         line-height: 15px;
@@ -193,7 +193,7 @@ export default {
         margin-left: 22px;
         margin-right: 8px;
         margin-bottom: 17px;
-        width: 300px;
+        width: 360px;
 
         font-size: 13.2px;
         line-height: 18px;
@@ -203,7 +203,7 @@ export default {
         margin-left: 32px;
         margin-right: 15px;
         margin-bottom: 25px;
-        width: 430px;
+        width: 500px;
 
         font-size: 18.48px;
         line-height: 25.2px;

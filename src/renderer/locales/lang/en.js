@@ -124,7 +124,7 @@ export default {
   },
   privacyBubble: {
     masVersion: {
-      content: 'Smart Translation will upload anonymous data to our server. By clicking \'Agree\' you are giving your consent for enabling Smart Translation to improve your user experience.',
+      content: 'Smart Translation function needs your consent for uploading anonymous media info to the server  side, and you will not receive translation results if you disagree. There is no privacy information will be collected.',
       agree: 'AGREE',
       disagree: 'DISAGREE',
     },
