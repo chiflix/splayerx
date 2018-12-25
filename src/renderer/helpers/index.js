@@ -157,7 +157,7 @@ export default {
       for (let i = 0; i < files.length; i += 1) {
         tempFilePath = files[i];
         if (subRegex.test(path.extname(tempFilePath))) {
-          subtitleFiles.push(tempFilePath);
+          subtitleFiles.push({ src: tempFilePath, type: 'local' });
           containsSubFiles = true;
         } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
           videoFiles.push(tempFilePath);
