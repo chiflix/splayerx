@@ -199,7 +199,7 @@ export default {
       this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
         this.coverSrc = filePathToUrl(`${imgPath}.png`);
         this.imgPath = imgPath;
-        if (this.isPlaying) {
+        if (this.isPlaying || this.lastPlayedTime) {
           fs.readFile(`${imgPath}.png`, 'base64', (err, data) => {
             if (!err) {
               const cover = `data:image/png;base64, ${data}`;
