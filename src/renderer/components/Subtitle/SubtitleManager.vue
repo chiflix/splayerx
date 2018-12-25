@@ -93,12 +93,10 @@ export default {
   },
   methods: {
     ...mapActions({
-      addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
       resetOnlineSubtitles: subtitleActions.RESET_ONLINE_SUBTITLES,
       changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_SUBTITLE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
-      refreshSubtitle: subtitleActions.REFRESH_SUBTITLES,
       addSubtitleWhenLoading: subtitleActions.ADD_SUBTITLE_WHEN_LOADING,
       addSubtitleWhenReady: subtitleActions.ADD_SUBTITLE_WHEN_READY,
       addSubtitleWhenLoaded: subtitleActions.ADD_SUBTITLE_WHEN_LOADED,
