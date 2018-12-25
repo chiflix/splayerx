@@ -18,6 +18,7 @@ import partialRight from 'lodash/partialRight';
 import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
+import romanize from 'romanize';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { promisify } from './SubtitleLoader/utils';
@@ -140,22 +141,21 @@ export default {
     },
     async getOnlineSubtitlesList(videoSrc) {
       const hash = await helpers.methods.mediaQuickHash(videoSrc);
-      let enIndex = -1;
-      let twIndex = -1;
-      let zhIndex = -1;
-      const romanNum = ['I', 'II', 'III']; // may use package romanize in the future
+      let enIndex = 0;
+      let twIndex = 0;
+      let zhIndex = 0;
       let subName;
       const onlineMetaInfo = (subtitle) => {
         const { language_code: code, transcript_identity: src } = subtitle;
         if (code === 'en') {
           enIndex += 1;
-          subName = `${this.$t(`subtitle.language.${code}`)} ${romanNum[enIndex]}`;
+          subName = `${this.$t(`subtitle.language.${code}`)} ${romanize(enIndex)}`;
         } else if (code === 'zh-TW') {
           twIndex += 1;
-          subName = `${this.$t(`subtitle.language.${code}`)} ${romanNum[twIndex]}`;
+          subName = `${this.$t(`subtitle.language.${code}`)} ${romanize(twIndex)}`;
         } else {
           zhIndex += 1;
-          subName = `${this.$t(`subtitle.language.${code}`)} ${romanNum[zhIndex]}`;
+          subName = `${this.$t(`subtitle.language.${code}`)} ${romanize(zhIndex)}`;
         }
         return { src, type: 'online', options: { language: code, name: subName } };
       };
