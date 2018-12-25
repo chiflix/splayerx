@@ -260,14 +260,12 @@ export default {
     currentAudioTrack() {
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
       if (track) {
-        if (this.trackNum === 1 && track.language === 'und') {
-          return this.$t('advance.chosenTrack');
-        }
         if (track.language === '' || track.language === 'und') {
           return `${this.$t('advance.track')} ${this.$store.getters.audioTrackList.indexOf(track) + 1}`;
+        } else if (this.$store.getters.audioTrackList.length === 1) {
+          return `${track.language}`;
         }
-        if (track && track.id) return track.name;
-        return this.$t('advance.chosenTrack');
+        return `${track.name}`;
       }
       return this.$t('advance.chosenTrack');
     },

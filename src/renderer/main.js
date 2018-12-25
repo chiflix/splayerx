@@ -757,7 +757,14 @@ new Vue({
         tmp.submenu.splice(0, 1, this.updateAudioTrackItem(0, this.$t('advance.chosenTrack')));
       } else {
         this.audioTrackList.forEach((item, index) => {
-          const detail = item.language === 'und' ? `${this.$t('advance.track')} ${index + 1}` : `${this.$t('advance.track')} ${index + 1}: ${item.name}`;
+          let detail;
+          if (item.language === 'und' || item.language === '') {
+            detail = `${this.$t('advance.track')} ${index + 1}`;
+          } else if (this.audioTrackList.length === 1) {
+            detail = `${this.$t('advance.track')} ${index + 1} : ${item.language}`;
+          } else {
+            detail = `${this.$t('advance.track')} ${index + 1}: ${item.name}`;
+          }
           tmp.submenu.splice(index, 1, this.updateAudioTrackItem(index, detail));
         });
       }
