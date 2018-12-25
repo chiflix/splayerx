@@ -41,7 +41,6 @@
 import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as inputActions } from '@/store/actionTypes';
-import TimerManager from '@/helpers/timerManager';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
 import VolumeIndicator from './VolumeIndicator.vue';
@@ -138,15 +137,9 @@ export default {
       this.lastMouseupWidget = oldVal;
     },
   },
-  created() {
-    // Use Object due to vue's lack support of reactive Map
-    this.timerState = {};
-    this.timerManager = new TimerManager();
-  },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
-      this.timerState[value.name] = true;
       this.displayState[value.name] = true;
       this.widgetsStatus[value.name] = {
         selected: false,
@@ -185,13 +178,11 @@ export default {
       this.widgetsStatus['playlist-control'].showAttached = event;
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [320, 180]);
     },
-
     clockTrigger(timestamp) {
       if (!this.start) {
         this.start = timestamp;
       }
 
-      this.inputProcess();
       // 不能依赖播放中的时间更新，所以临时放入requestAnimationFrame, 放在下一阶段处理
       // 这部分处理应该只是状态更新计算 不涉及UI动画的处理
       this.$refs.progressbar.updatePlayProgressBar(videodata.time);
@@ -202,12 +193,10 @@ export default {
       }
 
       this.clock.tick(timestamp - this.start);
-      this.UITimerManager(timestamp - this.start);
       requestAnimationFrame(this.clockTrigger);
 
       this.start = timestamp;
     },
-
     onTickUpdate() {
       this.UIStateManager();
 
@@ -250,21 +239,10 @@ export default {
         }
       });
     },
-    inputProcess() { // eslint-disable-line
-      Object.keys(this.timerState).forEach((uiName) => {
-        this.timerState[uiName] = this.showAllWidgets;
-      });
-    },
-    UITimerManager() {
-    },
-    // UILayerManager() {
-    // },
     UIDisplayManager() {
       const tempObject = {};
       Object.keys(this.displayState).forEach((index) => {
-        tempObject[index] = (this.showAllWidgets ||
-          (!this.showAllWidgets && this.timerState[index])) &&
-          !this.widgetsStatus['playlist-control'].showAttached;
+        tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
       this.displayState = tempObject;
