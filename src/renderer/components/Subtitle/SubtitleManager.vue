@@ -180,12 +180,12 @@ export default {
       const result = subtitleList.map(subtitle => subtitle.src).filter(validatedCallback);
       return result[0] || subtitleList[0];
     },
-    addSubtitle(subtitle, type, options) {
+    addSubtitle(subtitle, type, options, externalId) {
       const {
         addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded, subtitleInstances,
       } = this;
       const sub = new SubtitleLoader(subtitle, type, options);
-      const { src: id } = sub;
+      const id = externalId || sub.src;
       this.$set(subtitleInstances, id, sub);
       sub.on('ready', (metaInfo) => {
         const { name, language, format } = metaInfo;
@@ -236,7 +236,9 @@ export default {
     this.addInitialSubtitles(this.originSrc);
 
     const { ipcRenderer } = this.$electron;
-    const { embeddedSubtitles, mediaHash, originSrc } = this;
+    const {
+      embeddedSubtitles, mediaHash, originSrc, addSubtitle, addSubtitleWhenLoading,
+    } = this;
     const { supportedCodecs, codecToFormat } = SubtitleLoader;
     ipcRenderer.on(`mediaInfo-${originSrc}-reply`, (event, info) => {
       const { streams } = JSON.parse(info);
@@ -250,6 +252,7 @@ export default {
           language: subtitle.tags.language,
         })));
       embeddedSubtitles.forEach(({ index, codec }) => {
+        addSubtitleWhenLoading({ id: `${mediaHash}-${index}`, type: 'embedded' });
         ipcRenderer.send('extract-subtitle-request', originSrc, index, codecToFormat(codec), mediaHash);
       });
     });
@@ -257,6 +260,14 @@ export default {
       const subtitleToUpdate = embeddedSubtitles.find(subtitle => subtitle.index === index);
       const subtitleIndex = embeddedSubtitles.findIndex(subtitle => subtitle.index === index);
       this.$set(embeddedSubtitles, subtitleIndex, { ...subtitleToUpdate, path: error ? 'error' : path });
+      if (!error) {
+        addSubtitle(
+          path,
+          'embedded',
+          { name: subtitleToUpdate.name || `embedded-${index}` },
+          `${mediaHash}-${index}`,
+        );
+      }
     });
   },
 };
