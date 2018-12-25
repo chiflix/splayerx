@@ -35,6 +35,7 @@ export default {
       onlineRefreshingSubtitles: [],
       onlineRefreshingTimerId: 0,
       onlineRefreshingMaxTime: 20000,
+      embeddedSubtitles: [],
     };
   },
   computed: {
@@ -237,6 +238,17 @@ export default {
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
     this.addInitialSubtitles(this.originSrc);
+
+    const { ipcRenderer } = this.$electron;
+    ipcRenderer.on(`mediaInfo-${this.originSrc}-reply`, (event, info) => {
+      const { streams } = JSON.parse(info);
+      this.embeddedSubtitles.push(...streams
+        ?.filter(stream => stream?.codec_type === 'subtitle' && SubtitleLoader.supportedCodecs.includes(stream?.codec_name)) // eslint-disable-line camelcase
+        .map(subtitle => ({
+          subtitle: subtitle.index,
+          codec: subtitle.codec_name, // eslint-disable-line camelcase
+        })));
+    });
   },
 };
 </script>
