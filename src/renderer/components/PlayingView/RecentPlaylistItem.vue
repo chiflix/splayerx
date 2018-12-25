@@ -89,6 +89,7 @@
 </div>
 </template>
 <script>
+import fs from 'fs';
 import path from 'path';
 import { filePathToUrl } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -143,6 +144,7 @@ export default {
       lastPlayedTime: 0,
       mediaInfo: { path: this.path },
       smallShortCut: '',
+      imgPath: '',
     };
   },
   methods: {
@@ -196,6 +198,20 @@ export default {
       this.$electron.ipcRenderer.send('snapShot', this.path, quickHash);
       this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
         this.coverSrc = filePathToUrl(`${imgPath}.png`);
+        this.imgPath = imgPath;
+        if (this.isPlaying) {
+          fs.readFile(`${imgPath}.png`, 'base64', (err, data) => {
+            if (!err) {
+              const cover = `data:image/png;base64, ${data}`;
+              this.infoDB.get('recent-played', 'path', this.path).then((data) => {
+                if (data) {
+                  const mergedData = Object.assign(data, { cover });
+                  this.infoDB.add('recent-played', mergedData);
+                }
+              });
+            }
+          });
+        }
       });
     });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
@@ -218,6 +234,23 @@ export default {
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
     });
+  },
+  watch: {
+    isPlaying(val) {
+      if (val) {
+        fs.readFile(`${this.imgPath}.png`, 'base64', (err, data) => {
+          if (!err) {
+            const cover = `data:image/png;base64, ${data}`;
+            this.infoDB.get('recent-played', 'path', this.path).then((data) => {
+              if (data) {
+                const mergedData = Object.assign(data, { cover });
+                this.infoDB.add('recent-played', mergedData);
+              }
+            });
+          }
+        });
+      }
+    },
   },
   computed: {
     backgroundImage() {
