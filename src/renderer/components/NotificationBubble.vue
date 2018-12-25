@@ -8,10 +8,10 @@
         @ready-to-show="readyToShow = true"/>
     </transition>
     <PrivacyBubble class="privacy-bubble"
-      v-if="showPrivacyBubble && !process.mas"
+      v-if="showPrivacyBubble && !isMas"
       @close-privacy-bubble="closePrivacyBubble"/>
     <MASPrivacyBubble class="mas-privacy-bubble"
-      v-if="showPrivacyBubble && process.mas"
+      v-if="showPrivacyBubble && isMas"
       @close-privacy-bubble="closePrivacyBubble"/>
     <div>
     <transition-group name="toast">
@@ -67,6 +67,12 @@ export default {
         return messages.slice(0, 2);
       }
       return messages;
+    },
+    isMas() {
+      if (process.platform === 'darwin' && process.mas) {
+        return true;
+      }
+      return false;
     },
     container() {
       return process.platform === 'win32' ? 'winContainer' : 'container';
