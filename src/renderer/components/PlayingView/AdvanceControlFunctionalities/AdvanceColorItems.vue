@@ -103,72 +103,18 @@ export default {
       switch (index) {
         case 0:
           this.$store.dispatch('updateChosenStyle', 0);
-          this.$store.dispatch('updateStyle', {
-            color: 'white',
-            fontWeight: '400',
-          });
-          this.$store.dispatch('updateBorderStyle', {
-            textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
-            textStroke: '0.5px #777',
-            backgroundColor: '',
-            fontWeight: '400',
-          });
           break;
         case 1:
           this.$store.dispatch('updateChosenStyle', 1);
-          this.$store.dispatch('updateStyle', {
-            color: 'white',
-            fontWeight: '400',
-          });
-          this.$store.dispatch('updateBorderStyle', {
-            textShadow: '0px 1px 1px #333',
-            textStroke: '1.3px #222',
-            backgroundColor: '',
-            fontWeight: '400',
-            padding: '0',
-          });
           break;
         case 2:
           this.$store.dispatch('updateChosenStyle', 2);
-          this.$store.dispatch('updateStyle', {
-            color: '#fffc00',
-            fontWeight: '400',
-          });
-          this.$store.dispatch('updateBorderStyle', {
-            textShadow: '0px 0.5px 0.5px #555',
-            textStroke: '',
-            backgroundColor: '',
-            fontWeight: '400',
-            padding: '0',
-          });
           break;
         case 3:
           this.$store.dispatch('updateChosenStyle', 3);
-          this.$store.dispatch('updateStyle', {
-            color: '#fff',
-            fontWeight: '800',
-          });
-          this.$store.dispatch('updateBorderStyle', {
-            textShadow: '',
-            textStroke: '1.6px #009be6',
-            backgroundColor: '',
-            fontWeight: '800',
-            padding: '0',
-          });
           break;
         case 4:
           this.$store.dispatch('updateChosenStyle', 4);
-          this.$store.dispatch('updateStyle', {
-            color: '#fff',
-            fontWeight: '400',
-          });
-          this.$store.dispatch('updateBorderStyle', {
-            textShadow: '',
-            textStroke: '',
-            backgroundColor: 'rgba(0,0,0,.5)',
-            fontWeight: '400',
-            padding: '0px 5px',
-          });
           break;
         default:
           break;
