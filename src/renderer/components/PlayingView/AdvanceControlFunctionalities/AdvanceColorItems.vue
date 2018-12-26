@@ -100,25 +100,7 @@ export default {
       this.hoverIndex = -1;
     },
     handleClick(e, index) {
-      switch (index) {
-        case 0:
-          this.$store.dispatch('updateChosenStyle', 0);
-          break;
-        case 1:
-          this.$store.dispatch('updateChosenStyle', 1);
-          break;
-        case 2:
-          this.$store.dispatch('updateChosenStyle', 2);
-          break;
-        case 3:
-          this.$store.dispatch('updateChosenStyle', 3);
-          break;
-        case 4:
-          this.$store.dispatch('updateChosenStyle', 4);
-          break;
-        default:
-          break;
-      }
+      this.$store.dispatch('updateChosenStyle', index);
     },
   },
 };
