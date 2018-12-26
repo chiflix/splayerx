@@ -155,10 +155,7 @@ export default {
 
       folders.forEach((dirPath) => {
         if (fs.statSync(dirPath).isDirectory()) {
-          const dirFiles = fs.readdirSync(dirPath);
-          for (let i = 0; i < dirFiles.length; i += 1) {
-            dirFiles[i] = path.join(dirPath, dirFiles[i]);
-          }
+          const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
           files.push(...dirFiles);
         }
       });
