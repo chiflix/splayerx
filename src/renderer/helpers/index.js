@@ -126,18 +126,8 @@ export default {
           console.log(bookmarks);
         }
         if (files) {
-          // if selected files just contain folders, then call openFolder()
-          let onlyFolders = false;
-          for (let i = 0; i < files.length; i += 1) {
-            const file = files[i];
-            if (fs.statSync(file).isDirectory()) {
-              onlyFolders = true;
-            } else if (onlyFolders === true) {
-              // if seleted files is a combination of files and folders, then call openFile()
-              onlyFolders = false;
-              break;
-            }
-          }
+          // if selected files contain folders only, then call openFolder()
+          const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
           if (onlyFolders) {
             this.openFolder(...files);
           } else {
