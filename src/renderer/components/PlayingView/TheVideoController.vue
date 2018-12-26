@@ -92,6 +92,7 @@ export default {
       listenedWidget: 'the-video-controller',
       attachedShown: false,
       needResetHoverProgressBar: false,
+      mainWinPos: [0, 0],
     };
   },
   computed: {
@@ -328,6 +329,8 @@ export default {
           this.popupShow = false;
         }
       }
+      // use for check the window whether moved
+      this.mainWinPos = this.$electron.remote.getCurrentWindow().getPosition();
     },
     handleMouseupLeft() {
       if (this.isDragging && this.lastAttachedShowing) {
@@ -344,8 +347,10 @@ export default {
       }
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
+        const winPos = this.$electron.remote.getCurrentWindow().getPosition();
         if (
           this.currentMousedownWidget === 'the-video-controller' &&
+          winPos[0] === this.mainWinPos[0] && winPos[1] === this.mainWinPos[1] &&
           this.currentMouseupWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
           this.togglePlayback();
         }
