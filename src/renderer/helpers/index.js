@@ -187,6 +187,7 @@ export default {
         }, (err) => {
           if (process.mas && err?.code === 'EPERM') {
             // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+            this.$store.dispatch('FolderList', [videoFiles[0]]);
           }
         });
       }
