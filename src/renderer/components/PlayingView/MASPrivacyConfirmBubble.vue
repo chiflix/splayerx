@@ -179,30 +179,30 @@ export default {
       height: min-content;
       font-weight: 500;
       @media screen and (min-width: 513px) and (max-width: 854px) {
-        margin-top: 15px;
-        margin-left: 20px;
-        margin-right: 10px;
-        margin-bottom: 15px;
-        width: 300px;
+        margin-top: 12px;
+        margin-left: 18px;
+        margin-right: 12px;
+        margin-bottom: 12px;
+        width: 317px;
 
         font-size: 11px;
         line-height: 15px;
       }
       @media screen and (min-width: 855px) and (max-width: 1920px) {
-        margin-top: 17px;
-        margin-left: 22px;
-        margin-right: 8px;
-        margin-bottom: 17px;
-        width: 360px;
+        margin-top: 14px;
+        margin-left: 19px;
+        margin-right: 15px;
+        margin-bottom: 14px;
+        width: 367px;
 
         font-size: 13.2px;
         line-height: 18px;
       }
       @media screen and (min-width: 1921px) {
-        margin-top: 25px;
-        margin-left: 32px;
-        margin-right: 15px;
-        margin-bottom: 25px;
+        margin-top: 20px;
+        margin-left: 29px;
+        margin-right: 16px;
+        margin-bottom: 20px;
         width: 500px;
 
         font-size: 18.48px;
@@ -213,16 +213,16 @@ export default {
       display: flex;
       flex-direction: column;
       @media screen and (min-width: 513px) and (max-width: 854px) {
-        margin-right: 5px;
-        margin-bottom: 16px;
+        margin-right: 16px;
+        margin-bottom: 21px;
       }
       @media screen and (min-width: 855px) and (max-width: 1920px) {
-        margin-right: 5px;
-        margin-bottom: 18px;
+        margin-right: 20px;
+        margin-bottom: 25px;
       }
       @media screen and (min-width: 1921px) {
-        margin-right: 5px;
-        margin-bottom: 28px;
+        margin-right: 26px;
+        margin-bottom: 37px;
       }
       .disagree-button {
         display: flex;
@@ -233,26 +233,23 @@ export default {
         font-weight: 700;
         letter-spacing: 0.2px;
         @media screen and (min-width: 513px) and (max-width: 854px) {
-          height: 24px;
           font-size: 10px;
           letter-spacing: 0.2px;
-          margin-top: 4px;
-          padding-left: 4px;
+          margin-top: 8px;
+          padding-left: 10px;
           line-height: 10px;
         }
         @media screen and (min-width: 855px) and (max-width: 1920px) {
-          height: 28px;
           font-size: 12px;
-          margin-top: 8px;
-          padding-left: 4px;
+          margin-top: 9px;
+          padding-left: 13px;
           letter-spacing: 0.24px;
           line-height: 12px;
         }
         @media screen and (min-width: 1921px) {
-          height: 39px;
           font-size: 17px;
-          margin-top: 10px;
-          padding-left: 6px;
+          margin-top: 12px;
+          padding-left: 18px;
           letter-spacing: 0.34px;
           line-height: 17px;
         }
@@ -269,16 +266,53 @@ export default {
       display: flex;
       flex-direction: column;
       @media screen and (min-width: 513px) and (max-width: 854px) {
-        margin-right: 5px;
+        margin-right: 12px;
         margin-bottom: 10px;
       }
       @media screen and (min-width: 855px) and (max-width: 1920px) {
-        margin-right: 5px;
+        margin-right: 14px;
         margin-bottom: 12px;
       }
       @media screen and (min-width: 1921px) {
-        margin-right: 5px;
+        margin-right: 28px;
         margin-bottom: 20px;
+      }
+      .disagree-button {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: color 80ms linear;
+        color: rgba(255,255,255,0.18);
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        @media screen and (min-width: 513px) and (max-width: 854px) {
+          height: 24px;
+          font-size: 10px;
+          letter-spacing: 0.2px;
+          padding-left: 12px;
+          line-height: 10px;
+        }
+        @media screen and (min-width: 855px) and (max-width: 1920px) {
+          height: 28px;
+          font-size: 12px;
+          padding-left: 14px;
+          letter-spacing: 0.24px;
+          line-height: 12px;
+        }
+        @media screen and (min-width: 1921px) {
+          height: 39px;
+          font-size: 17px;
+          padding-left: 20px;
+          letter-spacing: 0.34px;
+          line-height: 17px;
+        }
+        &:hover {
+          cursor: pointer;
+          color: rgba(255,255,255,0.5);
+        }
+        &:active {
+          color: rgba(0,0,0,0.2);
+        }
       }
     }
     .hover {
@@ -293,7 +327,6 @@ export default {
       transition: background-color 100ms linear;
       @media screen and (min-width: 513px) and (max-width: 854px) {
         height: 24px;
-        margin-right: 12px;
         border-radius: 11px;
         background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
 
@@ -302,7 +335,6 @@ export default {
       }
       @media screen and (min-width: 855px) and (max-width: 1920px) {
         height: 28px;
-        margin-right: 14px;
         border-radius: 13.2px;
         background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
 
@@ -311,7 +343,6 @@ export default {
       }
       @media screen and (min-width: 1921px) {
         height: 39px;
-        margin-right: 28px;
         border-radius: 18.5px;
         background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
 
@@ -321,43 +352,6 @@ export default {
       &:active {
         background-image: none;
         background-color: rgba(0,0,0,0.2);
-      }
-    }
-    .disagree-button {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: color 80ms linear;
-      color: rgba(255,255,255,0.18);
-      font-weight: 700;
-      letter-spacing: 0.2px;
-      @media screen and (min-width: 513px) and (max-width: 854px) {
-        height: 24px;
-        font-size: 10px;
-        letter-spacing: 0.2px;
-        padding-left: 12px;
-        line-height: 10px;
-      }
-      @media screen and (min-width: 855px) and (max-width: 1920px) {
-        height: 28px;
-        font-size: 12px;
-        padding-left: 14px;
-        letter-spacing: 0.24px;
-        line-height: 12px;
-      }
-      @media screen and (min-width: 1921px) {
-        height: 39px;
-        font-size: 17px;
-        padding-left: 20px;
-        letter-spacing: 0.34px;
-        line-height: 17px;
-      }
-      &:hover {
-        cursor: pointer;
-        color: rgba(255,255,255,0.5);
-      }
-      &:active {
-        color: rgba(0,0,0,0.2);
       }
     }
     .button-info {

@@ -126,14 +126,54 @@ export default {
           console.log(bookmarks);
         }
         if (files) {
-          this.openFile(...files);
+          // if selected files contain folders only, then call openFolder()
+          const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+          if (onlyFolders) {
+            this.openFolder(...files);
+          } else {
+            this.openFile(...files);
+          }
         }
       });
+    },
+    openFolder(...folders) {
+      const files = [];
+      let containsSubFiles = false;
+      const subtitleFiles = [];
+      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
+      const videoFiles = [];
+
+      folders.forEach((dirPath) => {
+        if (fs.statSync(dirPath).isDirectory()) {
+          const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+          files.push(...dirFiles);
+        }
+      });
+
+      for (let i = 0; i < files.length; i += 1) {
+        const file = files[i];
+        if (subRegex.test(path.extname(file))) {
+          subtitleFiles.push({ src: file, type: 'local' });
+          containsSubFiles = true;
+        } else if (getValidVideoRegex().test(path.extname(file))) {
+          videoFiles.push(file);
+        }
+      }
+      if (videoFiles.length !== 0) {
+        if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
+          this.openVideoFile(...videoFiles);
+        }
+      } else {
+        // TODO: no videoFiles in folders error catch
+        // this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
+      }
+      if (containsSubFiles) {
+        this.$bus.$emit('add-subtitles', subtitleFiles);
+      }
     },
     /* eslint-disable */
     // filter video and sub files
     openFile(...files) {
-      let tempFilePath;
       let containsSubFiles = false;
       const subtitleFiles = [];
       const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
@@ -152,7 +192,7 @@ export default {
       }
 
       for (let i = 0; i < files.length; i += 1) {
-        tempFilePath = files[i];
+        let tempFilePath = files[i];
         if (subRegex.test(path.extname(tempFilePath))) {
           subtitleFiles.push({ src: tempFilePath, type: 'local' });
           containsSubFiles = true;
