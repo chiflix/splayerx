@@ -64,8 +64,9 @@ const normalizer = (parsedSubtitle) => {
 };
 
 export default {
-  name: 'Advanced SubStation Alpha',
-  supportedFormats: ['ass', 'ssa'],
+  longName: 'ASS (Advanced SSA) subtitle',
+  name: 'ass',
+  supportedFormats: ['ass'],
   infoLoaders: {
     language: {
       func: localLanguageLoader,

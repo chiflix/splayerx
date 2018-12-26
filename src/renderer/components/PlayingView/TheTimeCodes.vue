@@ -1,5 +1,5 @@
 <template>
-  <div class="cont">
+  <div class="cont" v-hidden="showAllWidgets || progressTriggerStopped">
     <div class="timing"
       :data-component-name="$options.name"
       @mousedown="switchTimeContent">
@@ -14,10 +14,35 @@ import rateLabel from './RateLabel.vue';
 
 export default {
   name: 'the-time-codes',
+  components: {
+    rateLabel,
+  },
+  props: ['showAllWidgets'],
   data() {
     return {
       isRemainTime: false,
+      progressTriggerStopped: false,
+      progressTriggerId: 0,
+      progressDisappearDelay: 1000,
     };
+  },
+  computed: {
+    ...mapGetters(['duration', 'progressKeydown']),
+    hasDuration() {
+      return !Number.isNaN(this.duration);
+    },
+  },
+  watch: {
+    progressKeydown(newValue) {
+      if (newValue) {
+        this.progressTriggerStopped = true;
+        this.clock.clearTimeout(this.progressTriggerId);
+      } else {
+        this.progressTriggerId = this.clock.setTimeout(() => {
+          this.progressTriggerStopped = false;
+        }, this.progressDisappearDelay);
+      }
+    },
   },
   methods: {
     switchTimeContent() {
@@ -28,15 +53,6 @@ export default {
         this.$refs.timeContent.textContent =
         this.timecodeFromSeconds(this.isRemainTime ? this.duration - time : time);
       }
-    },
-  },
-  components: {
-    rateLabel,
-  },
-  computed: {
-    ...mapGetters(['duration']),
-    hasDuration() {
-      return !Number.isNaN(this.duration);
     },
   },
 };

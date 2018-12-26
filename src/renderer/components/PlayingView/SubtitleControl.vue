@@ -60,7 +60,7 @@
                           cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
                         }">
                         <div class="text"
-                          :style="{ wordWrap: hoverIndex === index && hiddenText ? 'break-word' : '',
+                          :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
                             whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
                           }">{{ item.path ? getSubName(item.path) : item.name }}</div>
                       </div>

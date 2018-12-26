@@ -13,7 +13,8 @@ const normalizer = parsedSubtitle => parsedSubtitle.map(subtitle => ({
 }));
 
 export default {
-  name: 'SubRip',
+  longName: 'SubRip subtitle',
+  name: 'subrip',
   supportedFormats: ['srt'],
   infoLoaders: {
     language: {

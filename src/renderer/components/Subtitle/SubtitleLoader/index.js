@@ -12,6 +12,9 @@ files.keys().forEach((key) => {
 const supportedFormats = flatten(Object.keys(loaders)
   .map(loaderType => loaders[loaderType].supportedFormats));
 
+const supportedCodecs = flatten(Object.keys(loaders)
+  .map(loaderType => [loaders[loaderType].name, loaders[loaderType].longName]));
+
 export default class SubtitleLoader extends EventEmitter {
   /**
    * Create a SubtitleLoader
@@ -36,6 +39,11 @@ export default class SubtitleLoader extends EventEmitter {
   }
 
   static supportedFormats = supportedFormats;
+  static supportedCodecs = supportedCodecs;
+
+  static codecToFormat(codec) {
+    return Object.values(loaders).filter(loader => new RegExp(`${codec}`).test(loader.name))[0].supportedFormats[0];
+  }
 
   async meta() {
     const {

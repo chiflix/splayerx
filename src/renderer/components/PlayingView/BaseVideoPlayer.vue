@@ -146,6 +146,7 @@ export default {
           this.$refs.video.audioTracks[i].enabled =
             this.$refs.video.audioTracks[i].id === newVal;
         }
+        this.$bus.$emit('seek', videodata.time);
       }
     },
     // controls

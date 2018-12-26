@@ -83,7 +83,6 @@ export default {
       }
       this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
-      this.getVideoCover(grabCoverTime);
       this.changeWindowSize();
     },
     onAudioTrack(event) {
@@ -206,6 +205,11 @@ export default {
         return;
       }
 
+      // Assume to grab the cover can be the success and to keep
+      // it doesn't execution multiple times. if grab failed,
+      // we set it back to false.
+      this.coverFinded = true;
+
       const videoElement = this.$refs.videoCanvas.videoElement();
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -254,9 +258,6 @@ export default {
     },
     checkPresentTime() {
       if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
-        // Assume to grab the cover can be the success and to keep
-        // it doesn't execution multiple times. if grab failed,
-        // we set it back to false.
         this.getVideoCover(videodata.time);
       }
     },

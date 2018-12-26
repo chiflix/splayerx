@@ -9,7 +9,8 @@ const normalizer = parsedSubtitle => parsedSubtitle.map(subtitle => ({
 }));
 
 export default {
-  name: 'Online Transcript',
+  longName: 'Online Transcript',
+  name: 'online',
   supportedFormats: ['online'],
   infoLoaders: {
     language: 'language',
