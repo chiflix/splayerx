@@ -23,7 +23,8 @@ const normalizer = parsedSubtitle => parsedSubtitle.map(subtitle => ({
 }));
 
 export default {
-  name: 'WebVTT',
+  longName: 'WebVTT subtitle',
+  name: 'webvtt',
   supportedFormats: ['vtt'],
   infoLoaders: {
     language: {
