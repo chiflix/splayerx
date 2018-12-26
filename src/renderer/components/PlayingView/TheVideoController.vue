@@ -179,9 +179,9 @@ export default {
     },
     onTickUpdate() {
       if (!this.start) {
-        this.start = new Date().getTime();
+        this.start = Date.now();
       }
-      const timestamp = new Date().getTime();
+      const timestamp = Date.now();
 
       this.clock.tick(timestamp - this.start);
       this.UIStateManager();
