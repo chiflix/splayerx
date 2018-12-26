@@ -126,11 +126,7 @@ export default {
           console.log(bookmarks);
         }
         if (files) {
-          if (!files[0].includes('\\') || process.platform === 'win32') {
-            this.openFile(...files);
-          } else {
-            this.addLog('error', `Failed to open file: ${files[0]}`);
-          }
+          this.openFile(...files);
         }
       });
     },
@@ -166,11 +162,7 @@ export default {
         }
       }
       if (videoFiles.length !== 0) {
-        if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
-          this.openVideoFile(...videoFiles);
-        } else {
-          this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
-        }
+        this.openVideoFile(...videoFiles);
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitles', subtitleFiles);
