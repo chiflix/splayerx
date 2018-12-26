@@ -330,7 +330,9 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  app.quit();
+  if (process.env.NODE_ENV !== 'development' && process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 
 app.on('activate', () => {

@@ -135,6 +135,7 @@ export default {
       });
     },
     /* eslint-disable */
+    // filter video and sub files
     openFile(...files) {
       let tempFilePath;
       let containsSubFiles = false;
@@ -177,6 +178,7 @@ export default {
       }
     },
     /* eslint-disable */
+    // generate playlist
     openVideoFile(...videoFiles) {
       this.playFile(videoFiles[0]);
       if (videoFiles.length > 1) {
@@ -192,6 +194,7 @@ export default {
         });
       }
     },
+    // openFile and db operation
     async playFile(vidPath) {
       const originPath = vidPath;
       let mediaQuickHash;
