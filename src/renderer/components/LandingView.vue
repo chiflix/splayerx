@@ -5,7 +5,6 @@
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
-    <notification-bubble/>
     <transition name="background-container-transition">
       <div class="background" v-if="showShortcutImage">
         <transition name="background-transition" mode="in-out">
@@ -49,6 +48,7 @@
       :winWidth="winWidth"
       :filePathNeedToDelete="filePathNeedToDelete"
       @displayInfo="displayInfoUpdate"/>
+    <notification-bubble/>
   </div>
 </template>
 
