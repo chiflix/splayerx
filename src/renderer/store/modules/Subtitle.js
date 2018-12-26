@@ -139,12 +139,6 @@ const actions = {
       types: takeSupportedFields(types),
     });
   },
-  updateStyle({ commit }, delta) {
-    commit('UpdateStyle', delta);
-  },
-  updateBorderStyle({ commit }, delta) {
-    commit('UpdateBorderStyle', delta);
-  },
   updateSubDelay({ commit }, delta) {
     commit('UpdateDelay', delta);
   },
