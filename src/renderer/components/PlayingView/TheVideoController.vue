@@ -141,6 +141,7 @@ export default {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
       this.displayState[value.name] = true;
+      if (value.name === 'recent-playlist') this.displayState[value.name] = false;
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
