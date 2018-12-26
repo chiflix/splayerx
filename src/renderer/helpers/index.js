@@ -131,6 +131,7 @@ export default {
       });
     },
     /* eslint-disable */
+    // filter video and sub files
     openFile(...files) {
       let tempFilePath;
       let containsSubFiles = false;
@@ -169,6 +170,7 @@ export default {
       }
     },
     /* eslint-disable */
+    // generate playlist
     openVideoFile(...videoFiles) {
       this.playFile(videoFiles[0]);
       if (videoFiles.length > 1) {
@@ -179,10 +181,12 @@ export default {
         }, (err) => {
           if (process.mas && err?.code === 'EPERM') {
             // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+            this.$store.dispatch('FolderList', [videoFiles[0]]);
           }
         });
       }
     },
+    // openFile and db operation
     async playFile(vidPath) {
       const originPath = vidPath;
       let mediaQuickHash;
