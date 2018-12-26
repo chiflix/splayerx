@@ -1,5 +1,6 @@
 <template>
   <div
+    v-hidden="showAllWidgets"
     :data-component-name="$options.name"
     :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
     @dblclick.stop="handleDbClick">
@@ -81,6 +82,10 @@ export default {
   },
   props: {
     currentView: String,
+    showAllWidgets: {
+      type: Boolean,
+      default: true,
+    },
   },
   components: {
     Icon,

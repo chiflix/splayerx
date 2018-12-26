@@ -1,5 +1,5 @@
 <template>
-  <div class="indicator-container">
+  <div v-hidden="showVolume" class="indicator-container">
     <base-info-card class="card">
       <div class="indicator" :style="{ height: volume * 100 + '%', opacity: muted ? 0.25 : 0.8 }"></div>
     </base-info-card>
@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
 
@@ -18,8 +18,47 @@ export default {
     'base-info-card': BaseInfoCard,
     'base-icon': BaseIcon,
   },
+  data() {
+    return {
+      volumeTriggerStopped: false,
+      volumeTriggerTimerId: 0,
+    };
+  },
+  props: ['showAllWidgets'],
   computed: {
-    ...mapGetters(['volume', 'muted']),
+    ...mapGetters(['volume', 'muted', 'volumeKeydown']),
+    ...mapState({
+      validWheelTarget: ({ Input }) => Input.wheelTarget === 'the-video-controller',
+      wheelTimestamp: ({ Input }) => Input.wheelTimestamp,
+    }),
+    showVolume() {
+      const { muted, showAllWidgets, volumeTriggerStopped } = this;
+      return muted ? showAllWidgets : volumeTriggerStopped;
+    },
+  },
+  watch: {
+    volumeKeydown(newVal) {
+      const { clock, volumeTriggerTimerId } = this;
+      if (newVal) {
+        this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
+      }
+    },
+    wheelTimestamp(newVal) {
+      const { validWheelTarget, clock, volumeTriggerTimerId } = this;
+      if (process.platform !== 'darwin' && validWheelTarget) {
+        if (newVal) {
+          this.volumeTriggerStopped = true;
+          clock.clearTimeout(volumeTriggerTimerId);
+          this.volumeTriggerTimerId = clock.setTimeout(() => {
+            this.volumeTriggerStopped = false;
+          }, 1000);
+        }
+      }
+    },
   },
 };
 </script>

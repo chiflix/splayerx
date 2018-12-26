@@ -8,7 +8,10 @@
         @ready-to-show="readyToShow = true"/>
     </transition>
     <PrivacyBubble class="privacy-bubble"
-      v-if="showPrivacyBubble"
+      v-if="showPrivacyBubble && !isMas"
+      @close-privacy-bubble="closePrivacyBubble"/>
+    <MASPrivacyBubble class="mas-privacy-bubble"
+      v-if="showPrivacyBubble && isMas"
       @close-privacy-bubble="closePrivacyBubble"/>
     <div>
     <transition-group name="toast">
@@ -35,6 +38,7 @@ import { mapGetters } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
+import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
 import Icon from './BaseIconContainer.vue';
 
 export default {
@@ -43,6 +47,7 @@ export default {
     Icon,
     NextVideo,
     PrivacyBubble,
+    MASPrivacyBubble,
   },
   data() {
     return {
@@ -62,6 +67,12 @@ export default {
         return messages.slice(0, 2);
       }
       return messages;
+    },
+    isMas() {
+      if (process.platform === 'darwin' && process.mas) {
+        return true;
+      }
+      return false;
     },
     container() {
       return process.platform === 'win32' ? 'winContainer' : 'container';
@@ -161,6 +172,22 @@ export default {
     transform: translateX(403px);
   }
   .privacy-bubble {
+    position: relative;
+    z-index: 8;
+    @media screen and (max-width: 512px) {
+      display: none;
+    }
+    @media screen and (min-width: 513px) and (max-width: 854px) {
+      margin-bottom: 12px;
+    }
+    @media screen and (min-width: 855px) and (max-width: 1920px) {
+      margin-bottom: 15px;
+    }
+    @media screen and (min-width: 1921px){
+      margin-bottom: 18px;
+    }
+  }
+  .mas-privacy-bubble {
     position: relative;
     z-index: 8;
     @media screen and (max-width: 512px) {

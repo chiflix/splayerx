@@ -123,6 +123,11 @@ export default {
     content: '',
   },
   privacyBubble: {
+    masVersion: {
+      content: 'Smart Translation function needs your consent for uploading anonymous media info to the server  side, and you will not receive translation results if you disagree. There is no privacy information will be collected.',
+      agree: 'AGREE',
+      disagree: 'DISAGREE',
+    },
     tryToDisable: {
       partOne: 'SPlayer uses anonymous data to enhance user experience. Smart Translation will be disabled if you ',
       partTwo: '.',

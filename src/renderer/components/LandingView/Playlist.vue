@@ -39,7 +39,7 @@
           @mousedown.stop="onRecentItemMousedown($event, index)"
           :style="{
             width: `${thumbnailWidth}px`,
-            height: item.chosen ? `${thumbnailHeight + 9}px` : `${thumbnailHeight}px`,
+            height: item.chosen ? `${thumbnailHeight + 10}px` : `${thumbnailHeight}px`,
           }">
           <div class="border"
             :style="{
@@ -291,7 +291,7 @@ export default {
           vm.displayInfo.showShortcutImage = false;
           vm.$emit('displayInfo', vm.displayInfo);
           const deletData = vm.lastPlayedFile.splice(index, 1);
-          vm.infoDB().delete('recent-played', deletData[0].quickHash);
+          vm.infoDB.delete('recent-played', deletData[0].quickHash);
           vm.recentFileDel = false;
         } else {
           item.style.zIndex = '';

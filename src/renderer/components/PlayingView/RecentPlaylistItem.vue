@@ -89,6 +89,7 @@
 </div>
 </template>
 <script>
+import fs from 'fs';
 import path from 'path';
 import { filePathToUrl } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
@@ -143,6 +144,7 @@ export default {
       lastPlayedTime: 0,
       mediaInfo: { path: this.path },
       smallShortCut: '',
+      imgPath: '',
     };
   },
   methods: {
@@ -158,7 +160,7 @@ export default {
         this.$refs.blur.classList.remove('blur');
       }
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
-      this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 9}px`);
+      this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
       if (!this.isPlaying && this.sliderPercentage > 0) {
@@ -192,32 +194,63 @@ export default {
     },
   },
   mounted() {
-    this.$electron.ipcRenderer.send('snapShot', this.path);
-    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-      this.coverSrc = filePathToUrl(`${imgPath}.png`);
+    this.mediaQuickHash(this.path).then((quickHash) => {
+      this.$electron.ipcRenderer.send('snapShot', this.path, quickHash);
+      this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
+        this.coverSrc = filePathToUrl(`${imgPath}.png`);
+        this.imgPath = imgPath;
+        if (this.isPlaying || this.lastPlayedTime) {
+          fs.readFile(`${imgPath}.png`, 'base64', (err, data) => {
+            if (!err) {
+              const cover = `data:image/png;base64, ${data}`;
+              this.infoDB.get('recent-played', 'path', this.path).then((data) => {
+                if (data) {
+                  const mergedData = Object.assign(data, { cover });
+                  this.infoDB.add('recent-played', mergedData);
+                }
+              });
+            }
+          });
+        }
+      });
     });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
     });
-    this.infoDB().get('recent-played', 'path', this.path).then((val) => {
+    this.infoDB.get('recent-played', 'path', this.path).then((val) => {
       if (val && val.lastPlayedTime) {
         this.lastPlayedTime = val.lastPlayedTime;
         this.smallShortCut = val.smallShortCut;
-        this.cover = val.cover;
       }
       this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
     this.$bus.$on('database-saved', () => {
-      this.infoDB().get('recent-played', 'path', this.path).then((val) => {
+      this.infoDB.get('recent-played', 'path', this.path).then((val) => {
         if (val && val.lastPlayedTime) {
           this.lastPlayedTime = val.lastPlayedTime;
           this.smallShortCut = val.smallShortCut;
-          this.cover = val.cover;
         }
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
     });
+  },
+  watch: {
+    isPlaying(val) {
+      if (val) {
+        fs.readFile(`${this.imgPath}.png`, 'base64', (err, data) => {
+          if (!err) {
+            const cover = `data:image/png;base64, ${data}`;
+            this.infoDB.get('recent-played', 'path', this.path).then((data) => {
+              if (data) {
+                const mergedData = Object.assign(data, { cover });
+                this.infoDB.add('recent-played', mergedData);
+              }
+            });
+          }
+        });
+      }
+    },
   },
   computed: {
     backgroundImage() {
@@ -226,14 +259,14 @@ export default {
     imageSrc() {
       if (this.lastPlayedTime) {
         if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
-          return this.cover;
+          return this.coverSrc;
         }
         return this.smallShortCut;
       }
       return this.coverSrc;
     },
     imageLoaded() {
-      return this.cover || this.smallShortCut || this.coverSrc !== '';
+      return this.smallShortCut || this.coverSrc !== '';
     },
     thumbnailHeight() {
       return this.thumbnailWidth / (112 / 63);

@@ -83,7 +83,6 @@ export default {
       }
       this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
-      this.getVideoCover(grabCoverTime);
       this.changeWindowSize();
     },
     onAudioTrack(event) {
@@ -101,6 +100,8 @@ export default {
           [320, 180],
           this.winSize,
           [this.videoWidth, this.videoHeight],
+          true,
+          getWindowRect().slice(2, 4),
         );
       } else {
         newSize = this.calculateWindowSize(
@@ -118,23 +119,28 @@ export default {
       this.controlWindowRect(newPosition.concat(newSize));
       this.windowSizeHelper.setNewWindowSize();
     },
-    calculateWindowSize(minSize, maxSize, videoSize) {
+    calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
       let result = videoSize;
       const getRatio = size => size[0] / size[1];
       const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
       const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
       const biggerSize = (size, diffedSize) =>
         size.some((value, index) => value >= diffedSize[index]);
+      const biggerWidth = (size, diffedSize) => size[0] >= diffedSize[0];
       const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
-      if (biggerSize(result, maxSize)) {
-        result = biggerRatio(result, maxSize) ?
-          setHeightByWidth(maxSize) : setWidthByHeight(maxSize);
+      if (videoExisted && biggerWidth(result, maxSize)) {
+        result = setHeightByWidth(maxSize);
+      }
+      const realMaxSize = videoExisted ? screenSize : maxSize;
+      if (biggerSize(result, realMaxSize)) {
+        result = biggerRatio(result, realMaxSize) ?
+          setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
       }
       if (biggerSize(minSize, result)) {
         result = biggerRatio(minSize, result) ?
           setHeightByWidth(minSize) : setWidthByHeight(minSize);
       }
-      return result.map(value => Math.round(value));
+      return result.map(Math.round);
     },
     calculateWindowPosition(currentRect, windowRect, newSize) {
       const tempRect = currentRect.slice(0, 2)
@@ -209,16 +215,16 @@ export default {
         0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
 
-      let grabcoverdone = false;
+      let grabCoverDone = false;
       const { data } = canvasCTX.getImageData(0, 0, 100, 100);
       // check the cover is it right.
       for (let i = 0; i < data.length; i += 1) {
         if ((i + 1) % 4 !== 0 && data[i] > 20) {
-          grabcoverdone = true;
+          grabCoverDone = true;
           break;
         }
       }
-      if (grabcoverdone) {
+      if (grabCoverDone) {
         const smallImagePath = canvas.toDataURL('image/png');
         [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
         canvasCTX.drawImage(
@@ -226,10 +232,10 @@ export default {
           0, 0, (videoWidth / videoHeight) * 1080, 1080,
         );
         const imagePath = canvas.toDataURL('image/png');
-        const val = await this.infoDB().get('recent-played', 'path', this.originSrc);
+        const val = await this.infoDB.get('recent-played', 'path', this.originSrc);
         if (val) {
           const mergedData = Object.assign(val, { cover: imagePath, smallCover: smallImagePath });
-          this.infoDB().add('recent-played', mergedData);
+          this.infoDB.add('recent-played', mergedData);
         } else {
           const data = {
             quickHash: await this.mediaQuickHash(this.originSrc),
@@ -238,11 +244,11 @@ export default {
             smallCover: smallImagePath,
             duration: this.$store.getters.duration,
           };
-          this.infoDB().add('recent-played', data);
+          this.infoDB.add('recent-played', data);
         }
       }
 
-      this.coverFinded = grabcoverdone;
+      this.coverFinded = grabCoverDone;
       this.lastCoverDetectingTime = grabCoverTime;
     },
     checkPresentTime() {
@@ -250,7 +256,6 @@ export default {
         // Assume to grab the cover can be the success and to keep
         // it doesn't execution multiple times. if grab failed,
         // we set it back to false.
-        this.coverFinded = true;
         this.getVideoCover(videodata.time);
       }
     },
@@ -271,10 +276,10 @@ export default {
       this.saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
-          const val = await this.infoDB().get('recent-played', 'path', oldVal);
+          const val = await this.infoDB.get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
-            this.infoDB().add('recent-played', mergedData).then(() => {
+            this.infoDB.add('recent-played', mergedData).then(() => {
               this.$bus.$emit('database-saved');
             });
           }

@@ -140,25 +140,13 @@ export default {
       this.$refs.video.loop = newVal;
     },
     // tracks
-    currentAudioTrackId(newVal) {
-      const { id } = this.currentAudioTrack;
-      if (newVal !== id) {
-        this.audioTrackList.forEach((track) => {
-          if (track.id === newVal) {
-            track.enabled = true;
-            const {
-              id, kind, label, language, enabled,
-            } = track;
-            this.$emit('audiotrack', {
-              type: 'switch',
-              track: {
-                id, kind, label, language, enabled,
-              },
-            });
-          } else {
-            track.enabled = false;
-          }
-        });
+    currentAudioTrackId(newVal, oldVal) {
+      if (parseInt(oldVal, 10) !== -1) {
+        for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
+          this.$refs.video.audioTracks[i].enabled =
+            this.$refs.video.audioTracks[i].id === newVal;
+        }
+        this.$bus.$emit('seek', videodata.time);
       }
     },
     // controls

@@ -5,7 +5,6 @@
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
-    <notification-bubble/>
     <transition name="background-container-transition">
       <div class="background" v-if="showShortcutImage">
         <transition name="background-transition" mode="in-out">
@@ -49,6 +48,7 @@
       :winWidth="winWidth"
       :filePathNeedToDelete="filePathNeedToDelete"
       @displayInfo="displayInfoUpdate"/>
+    <notification-bubble/>
   </div>
 </template>
 
@@ -99,26 +99,26 @@ export default {
     */
     asyncStorage.get('recent-played')
       .then(async (data) => {
-        const val = await this.infoDB().lastPlayed();
+        const val = await this.infoDB.lastPlayed();
         if (val && data) {
           const mergedData = Object.assign(val, data);
           asyncStorage.set('recent-played', {});
-          await this.infoDB().add('recent-played', mergedData);
+          await this.infoDB.add('recent-played', mergedData);
           if (this.$store.getters.deleteVideoHistoryOnExit) {
-            await this.infoDB().cleanData();
+            await this.infoDB.cleanData();
           }
         }
       })
 
     // Get all data and show
-      .then(() => this.infoDB().sortedResult('recent-played', 'lastOpened', 'prev'))
+      .then(() => this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev'))
       .then((data) => {
         const waitArray = [];
         for (let i = 0; i < data.length; i += 1) {
           const accessPromise = new Promise((resolve) => {
             fs.access(data[i].path, fs.constants.F_OK, (err) => {
               if (err) {
-                this.infoDB().delete('recent-played', data[i].quickHash);
+                this.infoDB.delete('recent-played', data[i].quickHash);
                 resolve();
               } else {
                 resolve(data[i]);
@@ -148,7 +148,7 @@ export default {
       this.filePathNeedToDelete = filePath;
       this.lastPlayedFile.forEach((file) => {
         if (file.path === filePath) {
-          this.infoDB().delete('recent-played', file.quickHash);
+          this.infoDB.delete('recent-played', file.quickHash);
         }
       });
     });
@@ -174,7 +174,7 @@ export default {
     this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setResizable', [true]);
     this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [720 / 405]);
 
-    this.sagi().healthCheck().then((status) => {
+    this.sagi.healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
         this.sagiHealthStatus = status;
         this.addLog('info', `launching: ${app.getName()} ${app.getVersion()}`);
