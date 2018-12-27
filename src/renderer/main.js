@@ -136,6 +136,9 @@ new Vue({
         },
       };
     },
+    currentRouteName() {
+      return this.$route.name;
+    },
   },
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
@@ -152,6 +155,13 @@ new Vue({
     });
   },
   watch: {
+    currentRouteName(val) {
+      if (val === 'landing-view') {
+        this.menuStateControl(false);
+      } else {
+        this.menuStateControl(true);
+      }
+    },
     chosenStyle(val) {
       if (this.menu) {
         this.menu.getMenuItemById(`style${val}`).checked = true;
@@ -270,6 +280,7 @@ new Vue({
         // menu.playback
         {
           label: this.$t('msg.playback.name'),
+          id: 'playback',
           submenu: [
             {
               label: this.$t('msg.playback.forward'),
@@ -307,6 +318,7 @@ new Vue({
         // menu.audio
         {
           label: this.$t('msg.audio.name'),
+          id: 'audio',
           submenu: [
             {
               label: this.$t('msg.audio.increaseVolume'),
@@ -342,11 +354,12 @@ new Vue({
         // menu.subtitle
         {
           label: this.$t('msg.subtitle.name'),
+          id: 'subtitle',
           submenu: [
             {
               label: this.$t('msg.subtitle.AITranslation'),
               click: () => {
-                this.$bus.$emit('refresh-subtitles');
+                this.$bus.$emit('menu-subtitle-refresh');
               },
             },
             {
@@ -605,6 +618,9 @@ new Vue({
         this.menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(this.menu);
       }).then(() => {
+        if (this.currentRouteName === 'landing-view') {
+          this.menuStateControl(false);
+        }
         if (this.chosenStyle !== '') {
           this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
         }
@@ -743,6 +759,20 @@ new Vue({
           }
         });
         return recentMenuTemplate;
+      });
+    },
+    menuStateControl(flag) {
+      this.menu.getMenuItemById('playback').submenu.items.forEach((item) => {
+        item.enabled = flag;
+      });
+      this.menu.getMenuItemById('audio').submenu.items.forEach((item) => {
+        item.enabled = flag;
+      });
+      this.menu.getMenuItemById('subtitle').submenu.items.forEach((item) => {
+        item.submenu?.items.forEach((item) => {
+          item.enabled = flag;
+        });
+        item.enabled = flag;
       });
     },
     processRecentPlay(recentPlayData) {
