@@ -427,6 +427,7 @@ export default {
     });
   },
   mounted() {
+    this.$bus.$on('menu-subtitle-refresh', this.handleRefresh);
     this.$bus.$on('finish-refresh', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;

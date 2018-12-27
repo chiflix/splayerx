@@ -137,6 +137,9 @@ new Vue({
         },
       };
     },
+    currentRouteName() {
+      return this.$route.name;
+    },
   },
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
@@ -153,6 +156,13 @@ new Vue({
     });
   },
   watch: {
+    currentRouteName(val) {
+      if (val === 'landing-view') {
+        this.menuStateControl(false);
+      } else {
+        this.menuStateControl(true);
+      }
+    },
     chosenStyle(val) {
       if (this.menu) {
         this.menu.getMenuItemById(`style${val}`).checked = true;
@@ -271,6 +281,7 @@ new Vue({
         // menu.playback
         {
           label: this.$t('msg.playback.name'),
+          id: 'playback',
           submenu: [
             {
               label: this.$t('msg.playback.forward'),
@@ -308,6 +319,7 @@ new Vue({
         // menu.audio
         {
           label: this.$t('msg.audio.name'),
+          id: 'audio',
           submenu: [
             {
               label: this.$t('msg.audio.increaseVolume'),
@@ -343,11 +355,12 @@ new Vue({
         // menu.subtitle
         {
           label: this.$t('msg.subtitle.name'),
+          id: 'subtitle',
           submenu: [
             {
               label: this.$t('msg.subtitle.AITranslation'),
               click: () => {
-                this.$bus.$emit('refresh-subtitles');
+                this.$bus.$emit('menu-subtitle-refresh');
               },
             },
             {
@@ -596,9 +609,46 @@ new Vue({
         }
         if (process.platform === 'win32') {
           const file = template.shift();
-          file.submenu = file.submenu.reverse();
-          file.submenu.forEach((menuItem) => {
+          const winFile = file.submenu.slice(0, 3);
+          winFile[2].submenu.unshift(file.submenu[4], file.submenu[3]);
+          winFile.push(file.submenu[6], file.submenu[5]);
+          winFile.reverse().forEach((menuItem) => {
             template.unshift(menuItem);
+          });
+          template.splice(5, 0, {
+            label: this.$t('msg.preferences.settings'),
+            submenu: [
+              {
+                label: this.$t('msg.preferences.clearHistory'),
+                id: 'deleteHistory',
+                type: 'checkbox',
+                checked: this.$store.getters.deleteVideoHistoryOnExit,
+                click: () => {
+                  if (this.$store.getters.deleteVideoHistoryOnExit) {
+                    this.$store.dispatch('notDeleteVideoHistoryOnExit');
+                  } else {
+                    this.$store.dispatch('deleteVideoHistoryOnExit');
+                  }
+                },
+              },
+              {
+                label: this.$t('msg.preferences.privacyConfirm'),
+                id: 'privacy',
+                type: 'checkbox',
+                checked: this.$store.getters.privacyAgreement,
+                click: () => {
+                  if (this.$store.getters.privacyAgreement) {
+                    this.$store.dispatch('disagreeOnPrivacyPolicy');
+                  } else {
+                    this.$store.dispatch('agreeOnPrivacyPolicy');
+                  }
+                },
+              },
+            ],
+          });
+          template[10].submenu.unshift({
+            label: this.$t('msg.splayerx.about'),
+            role: 'about',
           });
         }
         return template;
@@ -606,6 +656,9 @@ new Vue({
         this.menu = Menu.buildFromTemplate(result);
         Menu.setApplicationMenu(this.menu);
       }).then(() => {
+        if (this.currentRouteName === 'landing-view') {
+          this.menuStateControl(false);
+        }
         if (this.chosenStyle !== '') {
           this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
         }
@@ -746,6 +799,20 @@ new Vue({
         return recentMenuTemplate;
       });
     },
+    menuStateControl(flag) {
+      this.menu.getMenuItemById('playback').submenu.items.forEach((item) => {
+        item.enabled = flag;
+      });
+      this.menu.getMenuItemById('audio').submenu.items.forEach((item) => {
+        item.enabled = flag;
+      });
+      this.menu.getMenuItemById('subtitle').submenu.items.forEach((item) => {
+        item.submenu?.items.forEach((item) => {
+          item.enabled = flag;
+        });
+        item.enabled = flag;
+      });
+    },
     processRecentPlay(recentPlayData) {
       const menuRecentData = new Map([
         ['recent-1', {
@@ -829,6 +896,11 @@ new Vue({
       Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
     });
 
+    window.addEventListener('mousedown', (e) => {
+      if (e.button === 2 && process.platform === 'win32') {
+        this.menu.popup(this.$electron.remote.getCurrentWindow());
+      }
+    });
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowLeft':
