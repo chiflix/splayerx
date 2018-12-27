@@ -608,9 +608,46 @@ new Vue({
         }
         if (process.platform === 'win32') {
           const file = template.shift();
-          file.submenu = file.submenu.reverse();
-          file.submenu.forEach((menuItem) => {
+          const winFile = file.submenu.slice(0, 3);
+          winFile[2].submenu.unshift(file.submenu[4], file.submenu[3]);
+          winFile.push(file.submenu[6], file.submenu[5]);
+          winFile.reverse().forEach((menuItem) => {
             template.unshift(menuItem);
+          });
+          template.splice(5, 0, {
+            label: this.$t('msg.preferences.settings'),
+            submenu: [
+              {
+                label: this.$t('msg.preferences.clearHistory'),
+                id: 'deleteHistory',
+                type: 'checkbox',
+                checked: this.$store.getters.deleteVideoHistoryOnExit,
+                click: () => {
+                  if (this.$store.getters.deleteVideoHistoryOnExit) {
+                    this.$store.dispatch('notDeleteVideoHistoryOnExit');
+                  } else {
+                    this.$store.dispatch('deleteVideoHistoryOnExit');
+                  }
+                },
+              },
+              {
+                label: this.$t('msg.preferences.privacyConfirm'),
+                id: 'privacy',
+                type: 'checkbox',
+                checked: this.$store.getters.privacyAgreement,
+                click: () => {
+                  if (this.$store.getters.privacyAgreement) {
+                    this.$store.dispatch('disagreeOnPrivacyPolicy');
+                  } else {
+                    this.$store.dispatch('agreeOnPrivacyPolicy');
+                  }
+                },
+              },
+            ],
+          });
+          template[10].submenu.unshift({
+            label: this.$t('msg.splayerx.about'),
+            role: 'about',
           });
         }
         return template;
@@ -858,6 +895,11 @@ new Vue({
       Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
     });
 
+    window.addEventListener('mousedown', (e) => {
+      if (e.button === 2 && process.platform === 'win32') {
+        this.menu.popup(this.$electron.remote.getCurrentWindow());
+      }
+    });
     window.addEventListener('keydown', (e) => {
       switch (e.key) {
         case 'ArrowLeft':

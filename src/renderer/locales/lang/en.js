@@ -80,6 +80,7 @@ export default {
       quit: 'Quit',
     },
     preferences: {
+      settings: 'Settings',
       clearHistory: 'Always clear playback history on exit',
       privacyConfirm: 'Allow anonymous data / Smart Translation',
     },
