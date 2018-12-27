@@ -56,7 +56,7 @@ export default {
       for (let i = 0; i < files.length; i += 1) {
         const filename = path.join(dirPath, files[i]);
         tasks.push(fsPromises.lstat(filename).then((stat) => {
-          if (!stat.isDirectory()) {
+          if (!stat.isDirectory() || !files[i].startsWith('.')) {
             if (getValidVideoRegex().test(path.extname(files[i]))) {
               const fileBaseName = path.basename(filename);
               videoFiles.push(fileBaseName);
