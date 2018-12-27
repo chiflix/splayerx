@@ -8,6 +8,7 @@ import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
 import VueElectron from 'vue-electron';
 import Path from 'path';
+import fs from 'fs';
 import { mapGetters } from 'vuex';
 import osLocale from 'os-locale';
 
@@ -892,14 +893,25 @@ new Vue({
      */
     window.addEventListener('drop', (e) => {
       e.preventDefault();
-      this.openFile(...Array.prototype.map.call(e.dataTransfer.files, f => f.path));
+      const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
+      const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+      if (onlyFolders) {
+        this.openFolder(...files);
+      } else {
+        this.openFile(...files);
+      }
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
     });
 
     this.$electron.ipcRenderer.on('open-file', (event, ...files) => {
-      this.openFile(...files);
+      const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+      if (onlyFolders) {
+        this.openFolder(...files);
+      } else {
+        this.openFile(...files);
+      }
     });
   },
 }).$mount('#app');
