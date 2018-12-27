@@ -57,7 +57,8 @@ const getters = {
   // network state
   originSrc: state => state.src,
   convertedSrc: (state) => {
-    const converted = encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/');
+    const converted = process.platform === 'win32' ? encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/(%5C)|(%2F)/g, '/') :
+      encodeURIComponent(state.src).replace(/%3A/g, ':').replace(/%2F/g, '/');
     return process.platform === 'win32' ? converted : `file://${converted}`;
   },
   // playback state

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { getValidVideoRegex } from '@/../shared/utils';
+import helpers from '@/helpers/index';
 
 const state = {
   PlayingList: [],
@@ -31,10 +31,10 @@ const mutations = {
   PlayingList(state, t) {
     state.PlayingList = t;
   },
-  AddPlayingList(state, t) {
+  AddItemsToPlayingList(state, t) {
     state.PlayingList.push(...t);
   },
-  RemovePlayingList(state, pos) {
+  RemoveItemFromPlayingListByPos(state, pos) {
     if (pos >= 0) {
       state.PlayingList.splice(pos, 1);
     }
@@ -52,7 +52,7 @@ const actions = {
   },
   RemovePlayingList({ state, commit }, t) {
     const pos = state.PlayingList.indexOf(t);
-    commit('RemovePlayingList', pos);
+    commit('RemoveItemFromPlayingListByPos', pos);
   },
   UpdatePlayingList({ dispatch, commit, state }) {
     const dirPath = path.dirname(state.PlayingList[0]);
@@ -60,23 +60,19 @@ const actions = {
     if (!fs.existsSync(dirPath)) {
       commit('PlayingList', []);
     } else if (state.isFolderList) {
-      const videoFiles = [];
-      const files = fs.readdirSync(dirPath);
-      for (let i = 0; i < files.length; i += 1) {
-        const filename = path.join(dirPath, files[i]);
-        const stat = fs.lstatSync(filename);
-        if (!stat.isDirectory()) {
-          if (getValidVideoRegex().test(path.extname(files[i]))) {
-            const fileBaseName = path.basename(filename);
-            videoFiles.push(fileBaseName);
-          }
+      /*
+        Currently not judging whether app is mas version
+        Until the decision which auto search same directory functionality
+        will be abandon on mas version has been confirmed.
+       */
+      helpers.methods.findSimilarVideoByVidPath(state.PlayingList[0]).then((videoFiles) => {
+        commit('PlayingList', videoFiles);
+      }, (err) => {
+        if (process.mas && err?.code === 'EPERM') {
+          // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+          this.$store.dispatch('FolderList', state.PlayingList);
         }
-      }
-      videoFiles.sort();
-      for (let i = 0; i < videoFiles.length; i += 1) {
-        videoFiles[i] = path.join(dirPath, videoFiles[i]);
-      }
-      commit('PlayingList', videoFiles);
+      });
     } else {
       for (let i = 0; i < state.PlayingList.length; i += 1) {
         fs.access(state.PlayingList[i], fs.constants.F_OK, (err) => {

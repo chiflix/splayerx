@@ -92,6 +92,7 @@ export default {
       listenedWidget: 'the-video-controller',
       attachedShown: false,
       needResetHoverProgressBar: false,
+      mainWinPos: [0, 0],
     };
   },
   computed: {
@@ -141,6 +142,7 @@ export default {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
       this.displayState[value.name] = true;
+      if (value.name === 'recent-playlist') this.displayState[value.name] = false;
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
@@ -153,7 +155,6 @@ export default {
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
-    requestAnimationFrame(this.clockTrigger);
   },
   methods: {
     ...mapMutations({
@@ -178,26 +179,13 @@ export default {
       this.widgetsStatus['playlist-control'].showAttached = event;
       this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [320, 180]);
     },
-    clockTrigger(timestamp) {
+    onTickUpdate() {
       if (!this.start) {
-        this.start = timestamp;
+        this.start = Date.now();
       }
-
-      // 不能依赖播放中的时间更新，所以临时放入requestAnimationFrame, 放在下一阶段处理
-      // 这部分处理应该只是状态更新计算 不涉及UI动画的处理
-      this.$refs.progressbar.updatePlayProgressBar(videodata.time);
-      this.$refs.theTimeCodes.updateTimeContent(videodata.time);
-      this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
-      if (this.displayState['recent-playlist']) {
-        this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
-      }
+      const timestamp = Date.now();
 
       this.clock.tick(timestamp - this.start);
-      requestAnimationFrame(this.clockTrigger);
-
-      this.start = timestamp;
-    },
-    onTickUpdate() {
       this.UIStateManager();
 
       if (!videodata.paused && videodata.time + 1 >= this.duration) {
@@ -208,6 +196,9 @@ export default {
         this.needResetHoverProgressBar = true;
         this.$bus.$emit('next-video');
       }
+
+      this.start = timestamp;
+
 
       /*
       /* Rendering
@@ -338,6 +329,8 @@ export default {
           this.popupShow = false;
         }
       }
+      // use for check the window whether moved
+      this.mainWinPos = this.$electron.remote.getCurrentWindow().getPosition();
     },
     handleMouseupLeft() {
       if (this.isDragging && this.lastAttachedShowing) {
@@ -354,8 +347,10 @@ export default {
       }
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
+        const winPos = this.$electron.remote.getCurrentWindow().getPosition();
         if (
           this.currentMousedownWidget === 'the-video-controller' &&
+          winPos[0] === this.mainWinPos[0] && winPos[1] === this.mainWinPos[1] &&
           this.currentMouseupWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
           this.togglePlayback();
         }
