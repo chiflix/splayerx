@@ -178,21 +178,21 @@ export default {
       const subtitleFiles = [];
       const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
       const videoFiles = [];
-      const dirFiles = files;
 
-      for (let i = 0; i < dirFiles.length; i += 1) {
-        if (fs.statSync(dirFiles[i]).isDirectory()) {
-          const dirPath = dirFiles[i];
-          const files = fs.readdirSync(dirPath);
-          for (let i = 0; i < files.length; i += 1) {
-            files[i] = path.join(dirPath, files[i]);
-          }
-          dirFiles.push(...files);
+      for (let i = 0; i < files.length; i += 1) {
+        if (fs.statSync(files[i]).isDirectory()) {
+          const dirPath = files[i];
+          const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+          files.push(...dirFiles);
         }
       }
 
       for (let i = 0; i < files.length; i += 1) {
         let tempFilePath = files[i];
+        let baseName = path.basename(tempFilePath);
+        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) {
+          continue;
+        }
         if (subRegex.test(path.extname(tempFilePath))) {
           subtitleFiles.push({ src: tempFilePath, type: 'local' });
           containsSubFiles = true;
