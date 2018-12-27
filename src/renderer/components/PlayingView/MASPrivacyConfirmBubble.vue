@@ -139,7 +139,7 @@ export default {
     .info-state-1 {
       color: rgba(255,255,255,0.7);
       height: fit-content;
-      font-weight: 500;
+      font-weight: 900;
       @media screen and (min-width: 513px) and (max-width: 854px) {
         margin-top: 15px;
         margin-left: 18px;
@@ -177,7 +177,7 @@ export default {
     .info-en-state-1 {
       color: rgba(255,255,255,0.7);
       height: min-content;
-      font-weight: 500;
+      font-weight: 900;
       @media screen and (min-width: 513px) and (max-width: 854px) {
         margin-top: 12px;
         margin-left: 18px;
@@ -230,7 +230,7 @@ export default {
         align-items: center;
         transition: color 80ms linear;
         color: rgba(255,255,255,0.18);
-        font-weight: 700;
+        font-weight: 900;
         letter-spacing: 0.2px;
         @media screen and (min-width: 513px) and (max-width: 854px) {
           font-size: 10px;
@@ -283,7 +283,7 @@ export default {
         align-items: center;
         transition: color 80ms linear;
         color: rgba(255,255,255,0.18);
-        font-weight: 700;
+        font-weight: 900;
         letter-spacing: 0.2px;
         @media screen and (min-width: 513px) and (max-width: 854px) {
           height: 24px;
@@ -356,7 +356,7 @@ export default {
     }
     .button-info {
       color: rgba(255,255,255,0.5);
-      font-weight: 700;
+      font-weight: 900;
       letter-spacing: 0.2px;
       @media screen and (min-width: 513px) and (max-width: 854px) {
         padding-left: 12px;
