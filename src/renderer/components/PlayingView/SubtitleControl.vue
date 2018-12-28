@@ -418,16 +418,6 @@ export default {
     },
   },
   created() {
-    // this.$bus.$on('isdragging-mouseup', () => {
-    //   if (this.showAttached) {
-    //     this.anim.playSegments([79, 85]);
-    //   }
-    // });
-    // this.$bus.$on('isdragging-mousedown', () => {
-    //   if (this.showAttached) {
-    //     this.anim.playSegments([62, 64], false);
-    //   }
-    // });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
