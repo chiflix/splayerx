@@ -113,6 +113,7 @@ export default {
   props: {
     showAllWidgets: Boolean,
     showAttached: Boolean,
+    lastDragging: Boolean,
   },
   data() {
     return {
@@ -269,13 +270,20 @@ export default {
     mousedownCurrentTarget(val) {
       if (val !== this.$options.name && this.showAttached) {
         this.anim.playSegments([62, 64], false);
-        if (this.mouseupCurrentTarget !== this.$options.name) {
+        if (this.lastDragging) {
+          this.$store.dispatch('clearMouseup');
+        } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
           this.$emit('update:showAttached', false);
         }
       }
     },
     mouseupCurrentTarget(val) {
-      if (val !== this.$options.name && this.showAttached) {
+      if (this.lastDragging) {
+        if (this.showAttached) {
+          this.anim.playSegments([79, 85]);
+        }
+        this.$store.dispatch('clearMousedown');
+      } else if (val !== this.$options.name && this.showAttached) {
         this.$emit('update:showAttached', false);
       }
     },
@@ -408,16 +416,16 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('isdragging-mouseup', () => {
-      if (this.showAttached) {
-        this.anim.playSegments([79, 85]);
-      }
-    });
-    this.$bus.$on('isdragging-mousedown', () => {
-      if (this.showAttached) {
-        this.anim.playSegments([62, 64], false);
-      }
-    });
+    // this.$bus.$on('isdragging-mouseup', () => {
+    //   if (this.showAttached) {
+    //     this.anim.playSegments([79, 85]);
+    //   }
+    // });
+    // this.$bus.$on('isdragging-mousedown', () => {
+    //   if (this.showAttached) {
+    //     this.anim.playSegments([62, 64], false);
+    //   }
+    // });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;

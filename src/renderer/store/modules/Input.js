@@ -43,6 +43,12 @@ const mutations = {
   [mutationTypes.WHEEL_TIMESTAMP_UPDATE](state, payload) {
     state.wheelTimestamp = payload;
   },
+  ClearMousedown(state) {
+    state.mousedownTarget = '';
+  },
+  ClearMouseup(state) {
+    state.mouseupTarget = '';
+  },
 };
 
 const getButtonNames = (buttons) => {
@@ -81,6 +87,12 @@ const actions = {
     const { target, timestamp } = wheelEvent;
     commit(mutationTypes.WHEEL_TARGET_UPDATE, target);
     commit(mutationTypes.WHEEL_TIMESTAMP_UPDATE, timestamp);
+  },
+  clearMousedown({ commit }) {
+    commit('ClearMousedown');
+  },
+  clearMouseup({ commit }) {
+    commit('ClearMouseup');
   },
 };
 
