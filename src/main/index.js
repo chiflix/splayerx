@@ -29,7 +29,7 @@ const winURL = process.env.NODE_ENV === 'development'
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
-if (!process.mas && !app.requestSingleInstanceLock()) {
+if (process.mas === undefined && !app.requestSingleInstanceLock()) {
   app.quit();
 }
 
