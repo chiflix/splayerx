@@ -51,14 +51,15 @@ export function localFormatLoader(src) {
  *
  * @async
  * @param {string} path - absolute path of the local subtitle file
+ * @param {boolean} detectEncoding - to encoding detection or subtitle format detection
  * @returns {Promise<Buffer>} buffer of the sample text
  */
-function getFragmentBuffer(path) {
+function getFragmentBuffer(path, detectEncoding) {
   return new Promise((resolve, reject) => {
     open(path, 'r', (err, fd) => {
       if (err) reject(err);
-      const pos = Math.round(statSync(path).size / 2);
-      const buf = Buffer.alloc(4096);
+      const pos = detectEncoding ? 0 : Math.round(statSync(path).size / 2);
+      const buf = Buffer.alloc(4096); // https://github.com/Microsoft/vscode/blob/f886dd4fb84bb82478bfab4a68cd3f31b32f5eb5/src/vs/base/node/encoding.ts#L268
       readSync(fd, buf, 0, 4096, pos);
       resolve(buf);
       closeSync(fd);
@@ -67,28 +68,22 @@ function getFragmentBuffer(path) {
 }
 
 /**
- * Turn a buffer to string with proper enconding with chardet and iconv-lite.
- *
- * @param {Buffer} buffer - buffer of string
- * @returns {string} string with proper encoding
- */
-function bufferToString(buffer) {
-  const sampleStringEncoding = chardet.detect(buffer);
-  return iconv.decode(buffer, sampleStringEncoding);
-}
-
-/**
  * Get callback for turn subtitle into plain text without second line.
  *
- * @param {string} subtitleFormat - Formal subtitle format name, e.g. 'SubStation Alpha', 'WebVtt'.
+ * @param {string} subtitleFormat - Subtitle format name, e.g. 'ass', 'SubStation Alpha', 'WebVtt'.
  * @returns {fucntion} Callback for removing tags and other lines for each cue text.
  */
 function getSubtitleCallback(subtitleFormat) {
-  switch (subtitleFormat) {
-    case 'SubStation Alpha':
+  switch (subtitleFormat.toLowerCase()) {
+    case 'ssa':
+    case 'ass':
+    case 'advanced substation alpha':
+    case 'substation alpha':
       return str => str.replace(/^(Dialogue:)(.*\d,)(((\d{0,2}:){2}\d{0,2}\d{0,2}([.]\d{0,3})?,)){2}(.*,)(\w*,)(\d+,){3}(\w*,)|(\\[nN])|([\\{\\]\\.*[\\}].*)/gm, '');
-    case 'SubRip':
-    case 'WebVTT':
+    case 'srt':
+    case 'subrip':
+    case 'vtt':
+    case 'webvtt':
       return str => str.replace(/^\d+.*/gm, '').replace(/\n.*\s{1,}/gm, '');
     default:
       return str => str.replace(/\d/gm, '');
@@ -105,9 +100,11 @@ function getSubtitleCallback(subtitleFormat) {
  * @returns {string} language code(ISO-639-3) of the subtitle
  */
 export async function localLanguageLoader(path, format) {
-  const buffer = await getFragmentBuffer(path);
+  const encodingBuffer = await getFragmentBuffer(path, true);
+  const fileEncoding = chardet.detect(encodingBuffer);
+  const string = iconv.decode(await getFragmentBuffer(path), fileEncoding);
   const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
-  return convert3To1(franc(stringCallback(bufferToString(buffer))));
+  return convert3To1(franc(stringCallback(string)));
 }
 
 export function localNameLoader(path) {
