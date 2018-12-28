@@ -91,6 +91,16 @@ function getSubtitleCallback(subtitleFormat) {
 }
 
 /**
+ * Return the autoGuess encoding of the local subtitle file
+ * @param {string} path - path of the local subtitle file
+ * @returns chardet format encoding
+ */
+export async function localEncodingLoader(path) {
+  const encodingBuffer = await getFragmentBuffer(path, true);
+  return chardet.detect(encodingBuffer);
+}
+
+/**
  * Get the language code for a local subtitle file
  *
  * @async
@@ -100,8 +110,7 @@ function getSubtitleCallback(subtitleFormat) {
  * @returns {string} language code(ISO-639-3) of the subtitle
  */
 export async function localLanguageLoader(path, format) {
-  const encodingBuffer = await getFragmentBuffer(path, true);
-  const fileEncoding = chardet.detect(encodingBuffer);
+  const fileEncoding = await localEncodingLoader(path);
   const string = iconv.decode(await getFragmentBuffer(path), fileEncoding);
   const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
   return convert3To1(franc(stringCallback(string)));
@@ -159,9 +168,9 @@ export function tagsGetter(text, baseTags) {
  */
 export function loadLocalFile(path) {
   return new Promise((resolve, reject) => {
-    readFile(path, (err, data) => {
+    readFile(path, async (err, data) => {
       if (err) reject(err);
-      const encoding = chardet.detect(data.slice(0, 100));
+      const encoding = await localEncodingLoader(path);
       if (iconv.encodingExists(encoding)) {
         resolve(iconv.decode(data, encoding));
       }
