@@ -59,12 +59,16 @@ const actions = {
   },
   [actionTypes.MOUSEDOWN_UPDATE]({ commit }, mousedownEvent) {
     const { buttons, target } = mousedownEvent;
-    commit(mutationTypes.MOUSEDOWN_BUTTONS_UPDATE, getButtonNames(buttons));
+    if (buttons) {
+      commit(mutationTypes.MOUSEDOWN_BUTTONS_UPDATE, getButtonNames(buttons));
+    }
     commit(mutationTypes.MOUSEDOWN_TARGET_UPDATE, target);
   },
   [actionTypes.MOUSEUP_UPDATE]({ commit }, mouseupEvent) {
     const { buttons, target } = mouseupEvent;
-    commit(mutationTypes.MOUSEDOWN_BUTTONS_UPDATE, getButtonNames(buttons));
+    if (buttons) {
+      commit(mutationTypes.MOUSEDOWN_BUTTONS_UPDATE, getButtonNames(buttons));
+    }
     commit(mutationTypes.MOUSEUP_TARGET_UPDATE, target);
   },
   [actionTypes.KEYDOWN_UPDATE]({ commit, state }, downKey) {

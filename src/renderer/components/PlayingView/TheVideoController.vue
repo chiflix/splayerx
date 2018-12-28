@@ -18,6 +18,7 @@
     :displayState="displayState['recent-playlist']"
     :mousemovePosition="mousemovePosition"
     :isDragging.sync="isDragging"
+    :lastDragging="lastDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
@@ -26,11 +27,11 @@
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons">
       <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']"
-      v-bind.sync="widgetsStatus['subtitle-control']"
+      v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging="lastDragging"
       @conflict-resolve="conflictResolve"/>
       <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <advance-control class="button advance" v-hidden="displayState['advance-control']"
-      v-bind.sync="widgetsStatus['advance-control']"
+      v-bind.sync="widgetsStatus['advance-control']" :lastDragging="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
     <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" />
@@ -92,7 +93,9 @@ export default {
       listenedWidget: 'the-video-controller',
       attachedShown: false,
       needResetHoverProgressBar: false,
-      mainWinPos: [0, 0],
+      isMousedown: false,
+      isMousemove: false,
+      lastDragging: false,
     };
   },
   computed: {
@@ -119,10 +122,15 @@ export default {
       return this.$store.state.Window.isFocused;
     },
     isDragging() {
-      return !this.mouseStopped && this.leftMousedown;
+      return this.isMousemove && this.leftMousedown;
     },
   },
   watch: {
+    isDragging(val, oldval) {
+      if (!val && oldval) {
+        this.lastDragging = true;
+      }
+    },
     isFocused(newValue) {
       if (newValue) {
         this.focusedTimestamp = Date.now();
@@ -279,6 +287,9 @@ export default {
     handleMousemove(event) {
       const { clientX, clientY, target } = event;
       this.mouseStopped = false;
+      if (this.isMousedown) {
+        this.isMousemove = true;
+      }
       if (this.mouseStoppedId) {
         this.clock.clearTimeout(this.mouseStoppedId);
       }
@@ -315,12 +326,7 @@ export default {
       }
     },
     handleMousedownLeft() {
-      if (this.isDragging && this.lastAttachedShowing) {
-        if (this.currentWidget !== 'subtitle-control' && this.currentWidget !== 'advance-control') {
-          this.$bus.$emit('isdragging-mousedown');
-        }
-        return;
-      }
+      this.isMousedown = true;
       if (!this.isValidClick()) { return; }
       if (process.platform !== 'darwin') {
         const menu = this.$electron.remote.Menu.getApplicationMenu();
@@ -329,31 +335,24 @@ export default {
           this.popupShow = false;
         }
       }
-      // use for check the window whether moved
-      this.mainWinPos = this.$electron.remote.getCurrentWindow().getPosition();
     },
     handleMouseupLeft() {
-      if (this.isDragging && this.lastAttachedShowing) {
-        if (this.currentWidget !== 'subtitle-control' && this.currentWidget !== 'advance-control') {
-          this.$bus.$emit('isdragging-mouseup');
-        }
-        return;
-      }
+      this.isMousemove = false;
+      this.isMousedown = false;
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
       }
-      if (!this.isValidClick() || (this.isDragging && this.lastAttachedShowing)) {
+      if (!this.isValidClick() || (this.lastDragging && this.lastAttachedShowing)) {
         return;
       }
       this.clicksTimer = setTimeout(() => {
         const attachedShowing = this.lastAttachedShowing;
-        const winPos = this.$electron.remote.getCurrentWindow().getPosition();
         if (
           this.currentMousedownWidget === 'the-video-controller' &&
-          winPos[0] === this.mainWinPos[0] && winPos[1] === this.mainWinPos[1] &&
-          this.currentMouseupWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.isDragging) {
+          this.currentMouseupWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.lastDragging) {
           this.togglePlayback();
         }
+        this.lastDragging = false;
         this.preventSingleClick = false;
         this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
       }, this.clicksDelay);
