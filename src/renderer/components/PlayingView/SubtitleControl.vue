@@ -99,7 +99,7 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import difference from 'lodash/difference';
 import path from 'path';
-import { Subtitle as subtitleActions } from '@/store/actionTypes';
+import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
@@ -271,7 +271,7 @@ export default {
       if (val !== this.$options.name && this.showAttached) {
         this.anim.playSegments([62, 64], false);
         if (this.lastDragging) {
-          this.$store.dispatch('clearMouseup');
+          this.clearMouseup({ target: '' });
         } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
           this.$emit('update:showAttached', false);
         }
@@ -282,7 +282,7 @@ export default {
         if (this.showAttached) {
           this.anim.playSegments([79, 85]);
         }
-        this.$store.dispatch('clearMousedown');
+        this.clearMousedown({ target: '' });
       } else if (val !== this.$options.name && this.showAttached) {
         this.$emit('update:showAttached', false);
       }
@@ -308,6 +308,8 @@ export default {
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
       changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_SUBTITLE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
+      clearMousedown: InputActions.MOUSEDOWN_UPDATE,
+      clearMouseup: InputActions.MOUSEUP_UPDATE,
     }),
     getSubName(subPath) {
       return path.basename(subPath);

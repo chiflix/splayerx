@@ -43,12 +43,6 @@ const mutations = {
   [mutationTypes.WHEEL_TIMESTAMP_UPDATE](state, payload) {
     state.wheelTimestamp = payload;
   },
-  ClearMousedown(state) {
-    state.mousedownTarget = '';
-  },
-  ClearMouseup(state) {
-    state.mouseupTarget = '';
-  },
 };
 
 const getButtonNames = (buttons) => {
@@ -65,12 +59,16 @@ const actions = {
   },
   [actionTypes.MOUSEDOWN_UPDATE]({ commit }, mousedownEvent) {
     const { buttons, target } = mousedownEvent;
-    commit(mutationTypes.MOUSEDOWN_BUTTONS_UPDATE, getButtonNames(buttons));
+    if (buttons) {
+      commit(mutationTypes.MOUSEDOWN_BUTTONS_UPDATE, getButtonNames(buttons));
+    }
     commit(mutationTypes.MOUSEDOWN_TARGET_UPDATE, target);
   },
   [actionTypes.MOUSEUP_UPDATE]({ commit }, mouseupEvent) {
     const { buttons, target } = mouseupEvent;
-    commit(mutationTypes.MOUSEDOWN_BUTTONS_UPDATE, getButtonNames(buttons));
+    if (buttons) {
+      commit(mutationTypes.MOUSEDOWN_BUTTONS_UPDATE, getButtonNames(buttons));
+    }
     commit(mutationTypes.MOUSEUP_TARGET_UPDATE, target);
   },
   [actionTypes.KEYDOWN_UPDATE]({ commit, state }, downKey) {
@@ -87,12 +85,6 @@ const actions = {
     const { target, timestamp } = wheelEvent;
     commit(mutationTypes.WHEEL_TARGET_UPDATE, target);
     commit(mutationTypes.WHEEL_TIMESTAMP_UPDATE, timestamp);
-  },
-  clearMousedown({ commit }) {
-    commit('ClearMousedown');
-  },
-  clearMouseup({ commit }) {
-    commit('ClearMouseup');
   },
 };
 
