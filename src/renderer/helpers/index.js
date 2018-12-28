@@ -152,11 +152,13 @@ export default {
 
       for (let i = 0; i < files.length; i += 1) {
         const file = files[i];
-        if (subRegex.test(path.extname(file))) {
-          subtitleFiles.push({ src: file, type: 'local' });
-          containsSubFiles = true;
-        } else if (getValidVideoRegex().test(path.extname(file))) {
-          videoFiles.push(file);
+        if (!path.basename(file).startsWith('.')) {
+          if (subRegex.test(path.extname(file))) {
+            subtitleFiles.push({ src: file, type: 'local' });
+            containsSubFiles = true;
+          } else if (getValidVideoRegex().test(path.extname(file))) {
+            videoFiles.push(file);
+          }
         }
       }
       if (videoFiles.length !== 0) {
