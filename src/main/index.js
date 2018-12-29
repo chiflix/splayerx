@@ -213,11 +213,7 @@ function registerMainWindowEvent() {
     if (mainWindow && log.message && log.errcode) {
       switch (log.errcode) {
         case FILE_NON_EXIST:
-          mainWindow.webContents.send('addMessages', log.errcode);
-          break;
         case EMPTY_FOLDER:
-          mainWindow.webContents.send('addMessages', log.errcode);
-          break;
         case OPEN_FAILED:
           mainWindow.webContents.send('addMessages', log.errcode);
           break;
