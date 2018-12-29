@@ -32,11 +32,16 @@ export default {
       wheelTimestamp: ({ Input }) => Input.wheelTimestamp,
     }),
     showVolume() {
-      const { muted, showAllWidgets, volumeTriggerStopped } = this;
-      return muted ? showAllWidgets : volumeTriggerStopped;
+      return this.volumeTriggerStopped;
     },
   },
   watch: {
+    showAllWidgets(newVal) {
+      const { clock, muted, volumeTriggerTimerId } = this;
+      if (muted) {
+        this.volumeTriggerStopped = newVal;
+      }
+    },
     muted() {
       const { clock, volumeTriggerTimerId } = this;
       if (!this.volumeKeydown && this.volume !== 0) {
