@@ -138,6 +138,7 @@ export default {
       rotateTime: 0,
       loadingType: '',
       detailTimer: null,
+      breakTimer: null,
     };
   },
   computed: {
@@ -315,18 +316,21 @@ export default {
       return path.basename(subPath);
     },
     handleRefresh() {
-      if (this.privacyAgreement) {
-        if (this.timer) {
-          return;
-        }
+      if (!this.privacyAgreement) {
+        this.$bus.$emit('privacy-confirm');
+      } else if (this.privacyAgreement && !this.timer) {
         this.timer = setInterval(() => {
           this.count += 1;
           this.rotateTime = Math.ceil(this.count / 100);
         }, 10);
         document.querySelector('.scrollScope').scrollTop = 0;
         this.$bus.$emit('refresh-subtitles');
-      } else {
-        this.$bus.$emit('privacy-confirm');
+        clearTimeout(this.breakTimer);
+        this.breakTimer = setTimeout(() => {
+          if (this.timer) {
+            this.$bus.$emit('refresh-finished');
+          }
+        }, 20000);
       }
     },
     orify(...args) {
@@ -428,13 +432,6 @@ export default {
   },
   mounted() {
     this.$bus.$on('menu-subtitle-refresh', this.handleRefresh);
-    this.$bus.$on('finish-refresh', () => {
-      clearInterval(this.timer);
-      this.count = this.rotateTime * 100;
-      setTimeout(() => {
-        this.timer = null;
-      }, 1000);
-    });
     document.addEventListener('mouseup', (e) => {
       if (e.button === 0) {
         if (!this.showAttached) {

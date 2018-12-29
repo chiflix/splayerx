@@ -33,9 +33,6 @@ export default {
       systemLanguageCode: '',
       subtitleInstances: {},
       localPremiumSubtitles: {},
-      onlineRefreshingSubtitles: [],
-      onlineRefreshingTimerId: 0,
-      onlineRefreshingMaxTime: 20000,
       embeddedSubtitles: [],
     };
   },
@@ -81,14 +78,6 @@ export default {
             this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
           }
         });
-      }
-    },
-    loadingOnlineSubtitleIds(newVal) {
-      const { onlineRefreshingTimerId } = this;
-      if (!newVal.length && onlineRefreshingTimerId) {
-        clearTimeout(onlineRefreshingTimerId);
-        this.onlineRefreshingTimerId = 0;
-        this.$bus.$emit('refresh-finished');
       }
     },
   },
@@ -154,10 +143,6 @@ export default {
         }
         return { src, type: 'online', options: { language: code, name: subName } };
       };
-      this.onlineRefreshingTimerId = setTimeout(() => {
-        this.onlineRefreshingTimerId = 0;
-        this.$bus.$emit('refresh-finished');
-      }, this.onlineRefreshingMaxTime);
       return (await Promise.all([
         Sagi.mediaTranslate(hash, 'zh'),
         Sagi.mediaTranslate(hash, 'en'),
@@ -212,6 +197,7 @@ export default {
 
       processedSubtitleList
         .forEach(subtitle => addSubtitle(subtitle.src, subtitle.type, subtitle.options || null));
+      this.$bus.$emit('refresh-finished');
       changeCurrentSubtitle(getFirstSubtitle(
         subtitleList,
         firstSubtitleCallback || partialRight(languageCallback, systemLanguageCode),
