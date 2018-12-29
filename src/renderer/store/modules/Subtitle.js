@@ -4,6 +4,21 @@ import partialRight from 'lodash/partialRight';
 import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
 
+function rankCalculation(type) {
+  switch (type.toLowerCase()) {
+    case 'custom':
+      return parseFloat(`1000.${performance.now()}`);
+    case 'local':
+      return parseFloat(`100.${performance.now()}`);
+    case 'embedded':
+      return parseFloat(`10.${performance.now()}`);
+    case 'online':
+      return parseFloat(`1.${performance.now()}`);
+    default:
+      return parseFloat(`0.${performance.now()}`);
+  }
+}
+
 const state = {
   loadingStates: {},
   durations: {},
@@ -11,6 +26,7 @@ const state = {
   languages: {},
   formats: {},
   types: {},
+  ranks: {},
   currentSubtitleId: '',
   chosenStyle: '',
   chosenSize: 1,
@@ -74,6 +90,9 @@ const mutations = {
   [subtitleMutations.TYPES_UPDATE]({ types }, { id, type }) {
     Vue.set(types, id, type);
   },
+  [subtitleMutations.RANKS_UPDATE]({ ranks }, { id, rank }) {
+    Vue.set(ranks, id, rank);
+  },
   [subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE](state, subtitleId) {
     state.currentSubtitleId = subtitleId;
   },
@@ -101,12 +120,13 @@ const actions = {
     commit(subtitleMutations.TYPES_UPDATE, { id, type });
   },
   [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit }, {
-    id, name, language, format,
+    id, name, language, format, type,
   }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'ready' });
     commit(subtitleMutations.NAMES_UPDATE, { id, name });
     commit(subtitleMutations.LANGUAGES_UPDATE, { id, language });
     commit(subtitleMutations.FORMATS_UPDATE, { id, format });
+    commit(subtitleMutations.RANKS_UPDATE, { id, rank: rankCalculation(type) });
   },
   [subtitleActions.ADD_SUBTITLE_WHEN_LOADED]({ commit }, { id }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loaded' });

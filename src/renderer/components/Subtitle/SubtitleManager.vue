@@ -188,7 +188,7 @@ export default {
       sub.on('ready', (metaInfo) => {
         const { name, language, format } = metaInfo;
         addSubtitleWhenReady({
-          id, name, language, format,
+          id, name, language, format, type,
         });
       });
       sub.on('parse', () => addSubtitleWhenLoaded({ id }));
