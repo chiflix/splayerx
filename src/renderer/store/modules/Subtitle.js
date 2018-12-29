@@ -1,22 +1,108 @@
 import Vue from 'vue';
 import pick from 'lodash/pick';
 import partialRight from 'lodash/partialRight';
+import osLocale from 'os-locale';
 import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
 
-function rankCalculation(type) {
+function getFormattedSystemLocale() {
+  const locale = osLocale.sync();
+  return locale.slice(0, locale.indexOf('_'));
+}
+
+function generateRankOptions(type, subtitle, subtitleList) {
+  const systemLocale = getFormattedSystemLocale();
   switch (type.toLowerCase()) {
-    case 'custom':
-      return parseFloat(`1000.${performance.now()}`);
-    case 'local':
-      return parseFloat(`100.${performance.now()}`);
-    case 'embedded':
-      return parseFloat(`10.${performance.now()}`);
-    case 'online':
-      return parseFloat(`1.${performance.now()}`);
     default:
-      return parseFloat(`0.${performance.now()}`);
+    case 'custom': {
+      return { existed: subtitleList.length };
+    }
+    case 'local': {
+      const { language } = subtitle;
+      return ({
+        matchSystemLocale: language === systemLocale,
+        existedLanguage: subtitleList
+          .filter(({ language: existedLanguage }) => existedLanguage === language).length,
+        existed: subtitleList.length,
+      });
+    }
+    case 'embedded': {
+      const { isDefault, streamIndex } = subtitle;
+      return ({
+        matchDefault: isDefault,
+        streamIndex,
+        existed: subtitleList,
+      });
+    }
+    case 'online': {
+      const { language, ranking } = subtitle;
+      return ({
+        matchSystemLocale: language === systemLocale,
+        existedLanguage: subtitleList
+          .filter(({ language: existedLanguage }) => existedLanguage === language).length,
+        ranking,
+        existed: subtitleList.length,
+      });
+    }
   }
+}
+
+function rankCalculation(type, options) {
+  let result;
+  const baseRank = {
+    custom: 1e16,
+    local: 1e12,
+    embedded: 1e8,
+    online: 1e4,
+  };
+  const rankEnums = {
+    MATCH_SYSTEM_LOCALE: 1e3,
+    MATCH_DEFAULT: 1e3,
+    EXISTED_LANGUAGE: -1e2,
+    STREAM_INDEX: -1e2,
+    RANKING: 1e1,
+    EXISTED: -1e0,
+  };
+  switch (type.toLowerCase()) {
+    case 'custom': {
+      const { existed } = options;
+      result = baseRank.custom + (existed * rankEnums.EXISTED);
+      break;
+    }
+    case 'local': {
+      const { matchSystemLocale, existedLanguage, existed } = options;
+      result = baseRank.local +
+        (matchSystemLocale * rankEnums.MATCH_SYSTEM_LOCALE) +
+        (existedLanguage * rankEnums.EXISTED_LANGUAGE) +
+        (existed * rankEnums.EXISTED);
+      break;
+    }
+    case 'embedded': {
+      const { matchDefault, streamIndex, existed } = options;
+      result = baseRank.embedded +
+        (matchDefault * rankEnums.MATCH_DEFAULT) +
+        (streamIndex * rankEnums.STREAM_INDEX) +
+        (existed * rankEnums.EXISTED);
+      break;
+    }
+    case 'online': {
+      const {
+        matchSystemLocale, existedLanguage, ranking, existed,
+      } = options;
+      result = baseRank.online +
+        (matchSystemLocale * rankEnums.MATCH_SYSTEM_LOCALE) +
+        (existedLanguage * rankEnums.EXISTED_LANGUAGE) +
+        (ranking * rankEnums.RANKING) +
+        (existed * rankEnums.EXISTED);
+      break;
+    }
+    default:
+      break;
+  }
+
+  console.log(result);
+
+  return result;
 }
 
 const state = {
@@ -119,14 +205,17 @@ const actions = {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loading' });
     commit(subtitleMutations.TYPES_UPDATE, { id, type });
   },
-  [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit }, {
-    id, name, language, format, type,
+  [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit, getters }, {
+    id, name, language, format, type, streamIndex, ranking, isDefault,
   }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'ready' });
     commit(subtitleMutations.NAMES_UPDATE, { id, name });
     commit(subtitleMutations.LANGUAGES_UPDATE, { id, language });
     commit(subtitleMutations.FORMATS_UPDATE, { id, format });
-    commit(subtitleMutations.RANKS_UPDATE, { id, rank: rankCalculation(type) });
+    const options = generateRankOptions(type, {
+      language, streamIndex, ranking, isDefault,
+    }, getters.subtitleList);
+    commit(subtitleMutations.RANKS_UPDATE, { id, rank: rankCalculation(type, options) });
   },
   [subtitleActions.ADD_SUBTITLE_WHEN_LOADED]({ commit }, { id }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loaded' });
