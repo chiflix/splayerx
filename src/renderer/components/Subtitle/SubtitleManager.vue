@@ -33,10 +33,8 @@ export default {
       systemLanguageCode: '',
       subtitleInstances: {},
       localPremiumSubtitles: {},
-      onlineRefreshingSubtitles: [],
-      onlineRefreshingTimerId: 0,
-      onlineRefreshingMaxTime: 20000,
       embeddedSubtitles: [],
+      newOnlineSubtitles: [],
     };
   },
   computed: {
@@ -81,14 +79,6 @@ export default {
             this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
           }
         });
-      }
-    },
-    loadingOnlineSubtitleIds(newVal) {
-      const { onlineRefreshingTimerId } = this;
-      if (!newVal.length && onlineRefreshingTimerId) {
-        clearTimeout(onlineRefreshingTimerId);
-        this.onlineRefreshingTimerId = 0;
-        this.$bus.$emit('refresh-finished');
       }
     },
   },
@@ -154,10 +144,6 @@ export default {
         }
         return { src, type: 'online', options: { language: code, name: subName } };
       };
-      this.onlineRefreshingTimerId = setTimeout(() => {
-        this.onlineRefreshingTimerId = 0;
-        this.$bus.$emit('refresh-finished');
-      }, this.onlineRefreshingMaxTime);
       return (await Promise.all([
         Sagi.mediaTranslate(hash, 'zh'),
         Sagi.mediaTranslate(hash, 'en'),
@@ -220,8 +206,8 @@ export default {
     async refreshOnlineSubtitles() {
       this.resetOnlineSubtitles();
       const { getOnlineSubtitlesList, originSrc: videoSrc, addSubtitles } = this;
-      const newOnlineSubtitles = await getOnlineSubtitlesList(videoSrc);
-      addSubtitles(newOnlineSubtitles);
+      this.newOnlineSubtitles = await getOnlineSubtitlesList(videoSrc);
+      this.$bus.$emit('refresh-finished');
     },
   },
   created() {
@@ -231,6 +217,9 @@ export default {
     this.$bus.$on('refresh-subtitles', this.refreshOnlineSubtitles);
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
+    this.$bus.$on('finished-add-subtitles', () => {
+      this.addSubtitles(this.newOnlineSubtitles);
+    });
     this.addInitialSubtitles(this.originSrc);
 
     const { ipcRenderer } = this.$electron;
