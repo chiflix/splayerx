@@ -68,9 +68,14 @@ export default class SubtitleLoader extends EventEmitter {
       const infoResults = await Promise.all(infoTypes
         .map((infoType) => {
           const infoLoader = meta[infoType];
+          if (getParams([infoType], info)[0] || typeof infoLoader === 'string') {
+            return promisify(() => getParams([infoType], info)[0]);
+          }
           if (typeof infoLoader === 'function') return promisify(infoLoader.bind(null, src));
-          if (typeof infoLoader === 'string') return promisify(() => getParams(toArray(infoLoader))[0]);
-          return promisify(infoLoader.func.bind(null, ...getParams(toArray(infoLoader.params))));
+          return promisify(infoLoader.func.bind(
+            null,
+            ...getParams(toArray(infoLoader.params), info),
+          ));
         }).map(promise => promise.catch(err => err)));
       infoTypes.forEach((infoType, index) => {
         info[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
