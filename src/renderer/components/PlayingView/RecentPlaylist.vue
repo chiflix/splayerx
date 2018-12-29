@@ -69,7 +69,8 @@
 </template>
 <script>
 import path from 'path';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
+import { Input as InputActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 
 export default {
@@ -83,6 +84,7 @@ export default {
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
     isDragging: Boolean,
+    lastDragging: Boolean,
   },
   data() {
     return {
@@ -116,6 +118,10 @@ export default {
     this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
+    ...mapActions({
+      clearMousedown: InputActions.MOUSEDOWN_UPDATE,
+      clearMouseup: InputActions.MOUSEUP_UPDATE,
+    }),
     afterLeave() {
       this.backgroundDisplayState = false;
     },
@@ -189,13 +195,19 @@ export default {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
-    mousedownOnOther(val) {
-      if (val && this.mouseupOnOther) {
-        this.$emit('update:playlistcontrol-showattached', false);
+    mousedownCurrentTarget(val) {
+      if (val !== this.$options.name && this.backgroundDisplayState) {
+        if (this.lastDragging) {
+          this.clearMouseup({ target: '' });
+        } else if (this.mouseupCurrentTarget !== 'playlist-control' && this.mouseupCurrentTarget !== '') {
+          this.$emit('update:playlistcontrol-showattached', false);
+        }
       }
     },
-    mouseupOnOther(val) {
-      if (val) {
+    mouseupCurrentTarget(val) {
+      if (this.lastDragging) {
+        this.clearMousedown({ target: '' });
+      } else if (val !== this.$options.name && this.backgroundDisplayState) {
         this.$emit('update:playlistcontrol-showattached', false);
       }
     },
@@ -231,6 +243,12 @@ export default {
   },
   computed: {
     ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
+    mousedownCurrentTarget() {
+      return this.$store.state.Input.mousedownTarget;
+    },
+    mouseupCurrentTarget() {
+      return this.$store.state.Input.mouseupTarget;
+    },
     inWhichSource() {
       if (this.isFolderList) {
         return this.$t('recentPlaylist.folderSource');

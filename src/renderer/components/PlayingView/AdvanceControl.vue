@@ -21,6 +21,8 @@
 <script>
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
+import { mapActions } from 'vuex';
+import { Input as InputActions } from '@/store/actionTypes';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
 
 export default {
@@ -31,6 +33,7 @@ export default {
   },
   props: {
     showAttached: Boolean,
+    lastDragging: Boolean,
   },
   data() {
     return {
@@ -72,18 +75,29 @@ export default {
     mousedownCurrentTarget(val) {
       if (val !== this.$options.name && this.showAttached) {
         this.anim.playSegments([37, 41], false);
-        if (this.mouseupCurrentTarget !== this.$options.name) {
+        if (this.lastDragging) {
+          this.clearMouseup({ target: '' });
+        } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
           this.$emit('update:showAttached', false);
         }
       }
     },
     mouseupCurrentTarget(val) {
-      if (val !== this.$options.name && this.showAttached) {
+      if (this.lastDragging) {
+        if (this.showAttached) {
+          this.anim.playSegments([68, 73]);
+        }
+        this.clearMousedown({ target: '' });
+      } else if (val !== this.$options.name && this.showAttached) {
         this.$emit('update:showAttached', false);
       }
     },
   },
   methods: {
+    ...mapActions({
+      clearMousedown: InputActions.MOUSEDOWN_UPDATE,
+      clearMouseup: InputActions.MOUSEUP_UPDATE,
+    }),
     handleAnimation(anim) {
       this.anim = anim;
     },
@@ -153,22 +167,6 @@ export default {
           break;
       }
     },
-  },
-  created() {
-    this.$bus.$on('isdragging-mouseup', () => {
-      if (this.showAttached) {
-        this.anim.playSegments([68, 73]);
-      }
-    });
-    this.$bus.$on('isdragging-mousedown', () => {
-      if (this.showAttached) {
-        this.anim.playSegments([37, 41], false);
-      }
-    });
-    this.$bus.$on('change-menu-list', (changedLevel) => {
-      this.menuList = changedLevel;
-      this.$_fitMenuSize();
-    });
   },
 };
 </script>

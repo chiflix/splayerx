@@ -79,6 +79,7 @@ export default {
       quit: '退出',
     },
     preferences: {
+      settings: '設置',
       clearHistory: '退出時自動清空播放記錄',
       privacyConfirm: '啟用匿名信息和智能翻譯',
     },

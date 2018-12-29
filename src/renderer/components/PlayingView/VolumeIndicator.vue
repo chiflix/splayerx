@@ -37,6 +37,26 @@ export default {
     },
   },
   watch: {
+    muted() {
+      const { clock, volumeTriggerTimerId } = this;
+      if (!this.volumeKeydown && this.volume !== 0) {
+        this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
+      }
+    },
+    volume() {
+      const { clock, volumeTriggerTimerId } = this;
+      if (!this.volumeKeydown) {
+        this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
+      }
+    },
     volumeKeydown(newVal) {
       const { clock, volumeTriggerTimerId } = this;
       if (newVal) {

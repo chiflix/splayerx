@@ -27,12 +27,21 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'progressKeydown']),
+    ...mapGetters(['duration', 'progressKeydown', 'rate']),
     hasDuration() {
       return !Number.isNaN(this.duration);
     },
   },
   watch: {
+    rate() {
+      if (!this.progressKeydown) {
+        this.progressTriggerStopped = true;
+        this.clock.clearTimeout(this.progressTriggerId);
+        this.progressTriggerId = this.clock.setTimeout(() => {
+          this.progressTriggerStopped = false;
+        }, this.progressDisappearDelay);
+      }
+    },
     progressKeydown(newValue) {
       if (newValue) {
         this.progressTriggerStopped = true;
