@@ -5,6 +5,7 @@ import lolex from 'lolex';
 import { times } from 'lodash';
 import InfoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '@/../shared/errorcodes';
 import Sagi from './sagi';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
@@ -167,7 +168,10 @@ export default {
         }
       } else {
         // TODO: no videoFiles in folders error catch
-        // this.addLog('error', `Failed to open file : ${videoFiles[0]}`);
+        this.addLog('error', {
+          errcode: EMPTY_FOLDER,
+          message: 'There is no playable file in this folder.',
+        });
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitles', subtitleFiles);
@@ -201,7 +205,10 @@ export default {
         } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
           videoFiles.push(tempFilePath);
         } else {
-          this.addLog('error', `Failed to open file : ${tempFilePath}`);
+          this.addLog('error', {
+            errcode: OPEN_FAILED,
+            message: `Failed to open file : ${tempFilePath}`,
+          });
         }
       }
       if (videoFiles.length !== 0) {
@@ -236,7 +243,10 @@ export default {
         mediaQuickHash = await this.mediaQuickHash(originPath);
       } catch (err) {
         if (err?.code === 'ENOENT') {
-          this.addLog('error', 'Failed to open file, it will be removed from list.');
+          this.addLog('error', {
+            errcode: FILE_NON_EXIST,
+            message: 'Failed to open file, it will be removed from list.'
+          });
           this.$bus.$emit('file-not-existed', originPath);
         }
         if (process.mas && err?.code === 'EPERM') {
@@ -303,8 +313,8 @@ export default {
       if (!log || typeof log === 'string') {
         normalizedLog = { message: log };
       } else {
-        const { message, stack } = log;
-        normalizedLog = { message, stack };
+        const { errcode, message, stack } = log;
+        normalizedLog = { errcode, message, stack };
       }
       ipcRenderer.send('writeLog', level, normalizedLog);
     },

@@ -74,10 +74,8 @@ export default {
         intrinsicHeight: event.target.videoHeight,
         ratio: event.target.videoWidth / event.target.videoHeight,
       });
-      let grabCoverTime = 0;
       if (event.target.duration - this.lastPlayedTime > 10) {
         this.$bus.$emit('seek', this.lastPlayedTime);
-        grabCoverTime = this.lastPlayedTime;
       } else {
         this.$bus.$emit('seek', 0);
       }

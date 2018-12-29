@@ -11,6 +11,7 @@
 <script>
   // import { throttle } from 'lodash';
   import drag from '@/helpers/drag';
+  import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '../shared/errorcodes';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
 
@@ -34,26 +35,37 @@
       },
     },
     mounted() {
-      this.$electron.ipcRenderer.on('addMessages', (event, messageType) => {
-        if (messageType) {
-          if (messageType === 'remove-file') {
+      this.$electron.ipcRenderer.on('addMessages', (event, errcode) => {
+        switch (errcode) {
+          case FILE_NON_EXIST:
             this.$store.dispatch('addMessages', {
               type: 'error',
-              title: this.$t('errorFile.title.fileNonExist'),
-              content: this.$t('errorFile.content.fileNonExist'),
+              title: this.$t('errorFile.fileNonExist.title'),
+              content: this.$t('errorFile.fileNonExist.content'),
               dismissAfter: 5000,
               cb: () => {
                 this.$bus.$emit('delete-file');
               },
             });
-          }
-        } else {
-          this.$store.dispatch('addMessages', {
-            type: 'error',
-            title: this.$t('errorFile.title.default'),
-            content: this.$t('errorFile.content.default'),
-            dismissAfter: 5000,
-          });
+            break;
+          case EMPTY_FOLDER:
+            this.$store.dispatch('addMessages', {
+              type: 'error',
+              title: this.$t('errorFile.emptyFolder.title'),
+              content: this.$t('errorFile.emptyFolder.content'),
+              dismissAfter: 5000,
+            });
+            break;
+          case OPEN_FAILED:
+            this.$store.dispatch('addMessages', {
+              type: 'error',
+              title: this.$t('errorFile.default.title'),
+              content: this.$t('errorFile.default.content'),
+              dismissAfter: 5000,
+            });
+            break;
+          default:
+            break;
         }
       });
       this.$electron.ipcRenderer.on('mainCommit', (event, commitType, commitPayload) => {

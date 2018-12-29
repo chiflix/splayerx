@@ -110,13 +110,17 @@ export default {
     track: 'Track',
   },
   errorFile: {
-    title: {
-      default: 'File error',
-      fileNonExist: 'Cannot find the file',
+    fileNonExist: {
+      title: 'Cannot find the file',
+      content: 'Will be removed from the list.',
     },
-    content: {
-      default: 'Failed to open file.',
-      fileNonExist: 'Will be removed from the list.',
+    emptyFolder: {
+      title: 'Open Failed',
+      content: 'Cannot find playable file',
+    },
+    default: {
+      title: 'File error',
+      content: 'Failed to open file.',
     },
   },
   loading: {
