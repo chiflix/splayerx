@@ -60,7 +60,8 @@ export default {
     updateTimeContent(time) {
       if (this.$refs.timeContent) {
         this.$refs.timeContent.textContent =
-        this.timecodeFromSeconds(this.isRemainTime ? this.duration - time : time);
+        this.timecodeFromSeconds(this.isRemainTime ?
+          Math.floor(this.duration) - Math.floor(time) : Math.floor(time));
       }
     },
   },
