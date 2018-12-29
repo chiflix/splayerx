@@ -26,11 +26,11 @@
     <play-button :paused="paused" />
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons">
-      <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']"
+      <subtitle-control class="button subtitle" :showAllWidgets="showAllWidgets"
       v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging="lastDragging"
       @conflict-resolve="conflictResolve"/>
-      <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
-      <advance-control class="button advance" v-hidden="displayState['advance-control']"
+      <playlist-control class="button playlist" :showAllWidgets="showAllWidgets" v-bind.sync="widgetsStatus['playlist-control']"/>
+      <advance-control class="button advance" :showAllWidgets="showAllWidgets"
       v-bind.sync="widgetsStatus['advance-control']" :lastDragging="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
