@@ -34,6 +34,7 @@ export default {
       subtitleInstances: {},
       localPremiumSubtitles: {},
       embeddedSubtitles: [],
+      newOnlineSubtitles: [],
     };
   },
   computed: {
@@ -197,7 +198,6 @@ export default {
 
       processedSubtitleList
         .forEach(subtitle => addSubtitle(subtitle.src, subtitle.type, subtitle.options || null));
-      this.$bus.$emit('refresh-finished');
       changeCurrentSubtitle(getFirstSubtitle(
         subtitleList,
         firstSubtitleCallback || partialRight(languageCallback, systemLanguageCode),
@@ -206,8 +206,8 @@ export default {
     async refreshOnlineSubtitles() {
       this.resetOnlineSubtitles();
       const { getOnlineSubtitlesList, originSrc: videoSrc, addSubtitles } = this;
-      const newOnlineSubtitles = await getOnlineSubtitlesList(videoSrc);
-      addSubtitles(newOnlineSubtitles);
+      this.newOnlineSubtitles = await getOnlineSubtitlesList(videoSrc);
+      this.$bus.$emit('refresh-finished');
     },
   },
   created() {
@@ -217,6 +217,9 @@ export default {
     this.$bus.$on('refresh-subtitles', this.refreshOnlineSubtitles);
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
+    this.$bus.$on('finished-add-subtitles', () => {
+      this.addSubtitles(this.newOnlineSubtitles);
+    });
     this.addInitialSubtitles(this.originSrc);
 
     const { ipcRenderer } = this.$electron;

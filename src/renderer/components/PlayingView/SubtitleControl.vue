@@ -426,6 +426,7 @@ export default {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
       setTimeout(() => {
+        this.$bus.$emit('finished-add-subtitles');
         this.timer = null;
       }, 1000);
     });
