@@ -121,14 +121,16 @@ const getters = {
   currentSubtitleId: state => state.currentSubtitleId,
   subtitleIds: ({ loadingStates }) => Object.keys(loadingStates),
   subtitleList: ({
-    loadingStates, names, languages, formats,
+    loadingStates, names, languages, formats, ranks,
   }) =>
     Object.keys(loadingStates).map(id => ({
       id,
       name: names[id],
       language: languages[id],
       format: formats[id],
-    })),
+      rank: ranks[id],
+      loading: loadingStates[id],
+    })).sort((a, b) => b.rank - a.rank),
   premiumSubtitles: ({ durations }, getters) => Object.keys(durations)
     .filter(id => durations[id] >= 0.6 * getters.duration)
     .map(id => ({ id, played: durations[id] })),

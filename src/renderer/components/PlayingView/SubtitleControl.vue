@@ -142,20 +142,10 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId']),
+    ...mapGetters({
+      computedAvaliableItems: 'subtitleList',
+    }),
     ...mapState({
-      computedAvaliableItems: ({ Subtitle }) => {
-        const {
-          loadingStates, types, names, ranks,
-        } = Subtitle;
-        return Object.keys(loadingStates).map(id => ({
-          id,
-          loading: loadingStates[id],
-          type: types[id],
-          name: names[id],
-          rank: ranks[id],
-        })).filter(subtitle => subtitle.loading !== 'failed' && subtitle.type && subtitle.name)
-          .sort((a, b) => b.rank - a.rank);
-      },
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
         const loadingSubtitles = Object.keys(loadingStates).filter(id => loadingStates[id] === 'loading');
