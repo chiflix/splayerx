@@ -141,7 +141,7 @@ export default {
       let zhIndex = 0;
       let subName;
       const onlineMetaInfo = (subtitle) => {
-        const { language_code: code, transcript_identity: src } = subtitle;
+        const { language_code: code, transcript_identity: src, ranking } = subtitle;
         if (code === 'en') {
           enIndex += 1;
           subName = `${this.$t(`subtitle.language.${code}`)} ${romanize(enIndex)}`;
@@ -152,7 +152,17 @@ export default {
           zhIndex += 1;
           subName = `${this.$t(`subtitle.language.${code}`)} ${romanize(zhIndex)}`;
         }
-        return { src, type: 'online', options: { language: code, name: subName } };
+        return ({
+          src,
+          type: 'online',
+          options: {
+            language: code,
+            name: subName,
+            ranking,
+            isDefault: null,
+            streamIndex: null,
+          },
+        });
       };
       this.onlineRefreshingTimerId = setTimeout(() => {
         this.onlineRefreshingTimerId = 0;
@@ -196,6 +206,7 @@ export default {
       sub.meta();
     },
     addSubtitles(subtitleList, firstSubtitleCallback) {
+      console.log(subtitleList);
       const {
         addSubtitle, getFirstSubtitle, languageCallback, systemLanguageCode, changeCurrentSubtitle,
       } = this;
@@ -243,20 +254,21 @@ export default {
       embeddedSubtitles.push(...streams
         ?.filter(stream => stream?.codec_type === 'subtitle' && supportedCodecs.includes(stream?.codec_name)) // eslint-disable-line camelcase
         .map(subtitle => ({
-          index: subtitle.index,
+          streamIndex: subtitle.index,
           codec: subtitle.codec_name, // eslint-disable-line camelcase
-          default: subtitle.disposition.default === 1,
+          isDefault: subtitle.disposition.default === 1,
           name: subtitle.tags.title,
           language: subtitle.tags.language,
+          ranking: null,
         })));
-      embeddedSubtitles.forEach(({ index, codec }) => {
+      embeddedSubtitles.forEach(({ streamIndex: index, codec }) => {
         addSubtitleWhenLoading({ id: `${mediaHash}-${index}`, type: 'embedded' });
         ipcRenderer.send('extract-subtitle-request', originSrc, index, codecToFormat(codec), mediaHash);
       });
     });
     ipcRenderer.on('extract-subtitle-response', (event, { error, index, path }) => {
-      const subtitleToUpdate = embeddedSubtitles.find(subtitle => subtitle.index === index);
-      const subtitleIndex = embeddedSubtitles.findIndex(subtitle => subtitle.index === index);
+      const subtitleToUpdate = embeddedSubtitles.find(subtitle => subtitle.streamIndex === index);
+      const subtitleIndex = embeddedSubtitles.findIndex(subtitle => subtitle.streamIndex === index);
       this.$set(embeddedSubtitles, subtitleIndex, { ...subtitleToUpdate, path: error ? 'error' : path });
       if (!error) {
         addSubtitle(
