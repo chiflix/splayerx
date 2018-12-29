@@ -31,7 +31,7 @@ function generateRankOptions(type, subtitle, subtitleList) {
       return ({
         matchDefault: isDefault,
         streamIndex,
-        existed: subtitleList,
+        existed: subtitleList.length,
       });
     }
     case 'online': {
@@ -99,9 +99,6 @@ function rankCalculation(type, options) {
     default:
       break;
   }
-
-  console.log(result);
-
   return result;
 }
 
@@ -201,21 +198,31 @@ const mutations = {
 };
 
 const actions = {
-  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit }, { id, type }) {
+  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit, state, getters }, {
+    id, type, language, streamIndex, ranking, isDefault,
+  }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loading' });
     commit(subtitleMutations.TYPES_UPDATE, { id, type });
+    if (!state.ranks[id]) {
+      const options = generateRankOptions(type, {
+        language, streamIndex, ranking, isDefault,
+      }, getters.subtitleList);
+      commit(subtitleMutations.RANKS_UPDATE, { id, rank: rankCalculation(type, options) });
+    }
   },
-  [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit, getters }, {
-    id, name, language, format, type, streamIndex, ranking, isDefault,
+  [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit, state, getters }, {
+    id, name, format, type, language, streamIndex, ranking, isDefault,
   }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'ready' });
     commit(subtitleMutations.NAMES_UPDATE, { id, name });
     commit(subtitleMutations.LANGUAGES_UPDATE, { id, language });
     commit(subtitleMutations.FORMATS_UPDATE, { id, format });
-    const options = generateRankOptions(type, {
-      language, streamIndex, ranking, isDefault,
-    }, getters.subtitleList);
-    commit(subtitleMutations.RANKS_UPDATE, { id, rank: rankCalculation(type, options) });
+    if (!state.ranks[id]) {
+      const options = generateRankOptions(type, {
+        language, streamIndex, ranking, isDefault,
+      }, getters.subtitleList);
+      commit(subtitleMutations.RANKS_UPDATE, { id, rank: rankCalculation(type, options) });
+    }
   },
   [subtitleActions.ADD_SUBTITLE_WHEN_LOADED]({ commit }, { id }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loaded' });

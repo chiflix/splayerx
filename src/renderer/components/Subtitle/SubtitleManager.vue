@@ -192,24 +192,33 @@ export default {
       const {
         addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded, subtitleInstances,
       } = this;
+      const {
+        language, isDefault, ranking, streamIndex,
+      } = options;
       const sub = new SubtitleLoader(subtitle, type, options);
       const id = externalId || sub.src;
       this.$set(subtitleInstances, id, sub);
       sub.on('ready', (metaInfo) => {
-        const { name, language, format } = metaInfo;
+        const {
+          name, format, language, isDefault, ranking, streamIndex,
+        } = metaInfo;
         addSubtitleWhenReady({
-          id, name, language, format, type,
+          id, name, format, type, language, isDefault, ranking, streamIndex,
         });
       });
       sub.on('parse', () => addSubtitleWhenLoaded({ id }));
-      addSubtitleWhenLoading({ id, type });
+      addSubtitleWhenLoading({
+        id, type, language, isDefault, ranking, streamIndex,
+      });
       sub.meta();
     },
     addSubtitles(subtitleList, firstSubtitleCallback) {
-      console.log(subtitleList);
       const {
         addSubtitle, getFirstSubtitle, languageCallback, systemLanguageCode, changeCurrentSubtitle,
       } = this;
+      const defaultOptions = {
+        language: null, isDefault: null, ranking: null, streamIndex: null,
+      };
       const processedSubtitleList = [];
       if (subtitleList instanceof Array) {
         processedSubtitleList
@@ -222,7 +231,11 @@ export default {
       }
 
       processedSubtitleList
-        .forEach(subtitle => addSubtitle(subtitle.src, subtitle.type, subtitle.options || null));
+        .forEach(subtitle => addSubtitle(
+          subtitle.src,
+          subtitle.type,
+          subtitle.options || defaultOptions,
+        ));
       changeCurrentSubtitle(getFirstSubtitle(
         subtitleList,
         firstSubtitleCallback || partialRight(languageCallback, systemLanguageCode),
@@ -261,9 +274,13 @@ export default {
           language: subtitle.tags.language,
           ranking: null,
         })));
-      embeddedSubtitles.forEach(({ streamIndex: index, codec }) => {
-        addSubtitleWhenLoading({ id: `${mediaHash}-${index}`, type: 'embedded' });
-        ipcRenderer.send('extract-subtitle-request', originSrc, index, codecToFormat(codec), mediaHash);
+      embeddedSubtitles.forEach(({
+        codec, language, isDefault, ranking, streamIndex,
+      }) => {
+        addSubtitleWhenLoading({
+          id: `${mediaHash}-${streamIndex}`, type: 'embedded', language, isDefault, ranking, streamIndex,
+        });
+        ipcRenderer.send('extract-subtitle-request', originSrc, streamIndex, codecToFormat(codec), mediaHash);
       });
     });
     ipcRenderer.on('extract-subtitle-response', (event, { error, index, path }) => {
