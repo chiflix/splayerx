@@ -1,5 +1,5 @@
 <template>
-  <div v-hidden="showVolume" class="indicator-container">
+  <div v-fade-in="showVolume" class="indicator-container">
     <base-info-card class="card">
       <div class="indicator" :style="{ height: volume * 100 + '%', opacity: muted ? 0.25 : 0.8 }"></div>
     </base-info-card>

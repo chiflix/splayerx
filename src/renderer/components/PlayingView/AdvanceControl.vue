@@ -1,5 +1,5 @@
 <template>
-  <div :data-component-name="$options.name" v-hidden="showAllWidgets">
+  <div :data-component-name="$options.name" v-fade-in="showAllWidgets">
     <div class="advanceControl">
       <transition name="advance-trans-l">
       <div class="advanced" v-show="showAttached"

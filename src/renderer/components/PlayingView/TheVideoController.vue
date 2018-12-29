@@ -22,7 +22,7 @@
     v-bind.sync="tempRecentPlaylistDisplayState"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-hidden="showAllWidgets"/>
+    <div class="masking" v-fade-in="showAllWidgets"/>
     <play-button :paused="paused" />
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons">

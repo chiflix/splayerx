@@ -1,6 +1,6 @@
 <template>
   <div
-    v-hidden="showAllWidgets || progressTriggerStopped"
+    v-fade-in="showAllWidgets || progressTriggerStopped"
     class="the-progress-bar"
     @mousemove="handleMousemove"
     @mouseenter="hoveredmouseenter"
