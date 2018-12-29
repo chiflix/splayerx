@@ -124,8 +124,8 @@ export default {
   privacyBubble: {
     masVersion: {
       content: '智能翻译功能需要您同意通过匿名方式上传媒体信息至服务端，否则将无法使用该功能获取翻译结果，我们不会收集关于您个人的隐私信息。',
-      agree: '同意',
-      disagree: '拒绝',
+      agree: '启用',
+      disagree: '禁用',
     },
     tryToDisable: {
       partOne: '射手影音使用匿名信息以提供更好服务，',
