@@ -47,7 +47,7 @@
                     </div>
 
                     <div v-if="foundSubtitles"
-                      v-for="(item, index) in computedAvaliableItems">
+                      v-for="(item, index) in computedAvaliableItems" :key="item.rank">
                       <div class="menu-item-text-wrapper"
                         @mouseup="toggleItemClick(index)"
                         @mouseover="toggleItemsMouseOver(index)"
@@ -144,13 +144,17 @@ export default {
     ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId']),
     ...mapState({
       computedAvaliableItems: ({ Subtitle }) => {
-        const { loadingStates, types, names } = Subtitle;
+        const {
+          loadingStates, types, names, ranks,
+        } = Subtitle;
         return Object.keys(loadingStates).map(id => ({
           id,
           loading: loadingStates[id],
           type: types[id],
           name: names[id],
-        })).filter(subtitle => subtitle.loading !== 'failed' && subtitle.type && subtitle.name);
+          rank: ranks[id],
+        })).filter(subtitle => subtitle.loading !== 'failed' && subtitle.type && subtitle.name)
+          .sort((a, b) => b.rank - a.rank);
       },
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
