@@ -355,6 +355,7 @@
   },
   "dependencies": {
     "@grpc/grpc-js": "^0.2.0",
+    "@sentry/electron": "^0.14.0",
     "ass-compiler": "0.0.10",
     "ass-to-vtt": "^1.2.0",
     "axios": "^0.18.0",
