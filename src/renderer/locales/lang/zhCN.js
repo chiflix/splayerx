@@ -114,7 +114,7 @@ export default {
       content: '将从列表中移除此项目。',
     },
     emptyFolder: {
-      title: '空文件夹',
+      title: '打开错误',
       content: '未找到可播放文件。',
     },
     default: {

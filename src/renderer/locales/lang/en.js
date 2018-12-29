@@ -115,7 +115,7 @@ export default {
       content: 'Will be removed from the list.',
     },
     emptyFolder: {
-      title: 'Empty Folder',
+      title: 'Open Failed',
       content: 'Cannot find playable file',
     },
     default: {
