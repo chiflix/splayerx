@@ -6,6 +6,7 @@ import writeLog from './helpers/writeLog';
 import WindowResizer from './helpers/windowResizer';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '../shared/errorcodes';
 
 /**
  * Set `__static` path to static files in production
@@ -209,11 +210,19 @@ function registerMainWindowEvent() {
   ipcMain.on('writeLog', (event, level, log) => {
     if (!log) return;
     writeLog(level, log);
-    if (mainWindow && log.message && log.message.indexOf('Failed to open file') !== -1) {
-      if (log.message.indexOf('it will be removed from list.') !== -1) {
-        mainWindow.webContents.send('addMessages', 'remove-file');
-      } else {
-        mainWindow.webContents.send('addMessages');
+    if (mainWindow && log.message && log.errcode) {
+      switch (log.errcode) {
+        case FILE_NON_EXIST:
+          mainWindow.webContents.send('addMessages', log.errcode);
+          break;
+        case EMPTY_FOLDER:
+          mainWindow.webContents.send('addMessages', log.errcode);
+          break;
+        case OPEN_FAILED:
+          mainWindow.webContents.send('addMessages', log.errcode);
+          break;
+        default:
+          break;
       }
     }
   });

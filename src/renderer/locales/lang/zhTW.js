@@ -109,13 +109,17 @@ export default {
     track: '音軌',
   },
   errorFile: {
-    title: {
-      default: '文件錯誤',
-      fileNonExist: '無法找到相應文件',
+    fileNonExist: {
+      title: '無法找到相應文件',
+      content: '將從列表中移除此項目。',
     },
-    content: {
-      default: '視頻文件格式無法識別或文件已損壞。',
-      fileNonExist: '將從列表中移除此項目。',
+    emptyFolder: {
+      title: '空文件夹',
+      content: '未找到可播放文件。',
+    },
+    default: {
+      title: '文件錯誤',
+      content: '無法找到相應文件',
     },
   },
   loading: {

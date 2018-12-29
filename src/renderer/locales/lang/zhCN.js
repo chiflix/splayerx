@@ -109,13 +109,17 @@ export default {
     track: '音轨',
   },
   errorFile: {
-    title: {
-      default: '文件错误',
-      fileNonExist: '无法找到相应文件',
+    fileNonExist: {
+      title: '无法找到相应文件',
+      content: '将从列表中移除此项目。',
     },
-    content: {
-      default: '视频文件格式无法识别或文件已损坏。',
-      fileNonExist: '将从列表中移除此项目。',
+    emptyFolder: {
+      title: '空文件夹',
+      content: '未找到可播放文件。',
+    },
+    default: {
+      title: '文件错误',
+      content: '无法找到相应文件',
     },
   },
   loading: {
