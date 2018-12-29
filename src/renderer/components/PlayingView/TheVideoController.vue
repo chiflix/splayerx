@@ -15,22 +15,22 @@
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
-    :displayState="displayState['recent-playlist']"
+    :displayState="tempRecentPlaylistDisplayState"
     :mousemovePosition="mousemovePosition"
     :isDragging.sync="isDragging"
     :lastDragging="lastDragging"
-    v-bind.sync="widgetsStatus['recent-playlist']"
+    v-bind.sync="tempRecentPlaylistDisplayState"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-hidden="showAllWidgets"/>
+    <div class="masking" v-fade-in="showAllWidgets"/>
     <play-button :paused="paused" />
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons">
-      <subtitle-control class="button subtitle" v-hidden="displayState['subtitle-control']"
+      <subtitle-control class="button subtitle" :showAllWidgets="showAllWidgets"
       v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging="lastDragging"
       @conflict-resolve="conflictResolve"/>
-      <playlist-control class="button playlist" v-hidden="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
-      <advance-control class="button advance" v-hidden="displayState['advance-control']"
+      <playlist-control class="button playlist" :showAllWidgets="showAllWidgets" v-bind.sync="widgetsStatus['playlist-control']"/>
+      <advance-control class="button advance" :showAllWidgets="showAllWidgets"
       v-bind.sync="widgetsStatus['advance-control']" :lastDragging="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
@@ -84,7 +84,6 @@ export default {
       clicksTimer: 0,
       clicksDelay: 200,
       dragDelay: 200,
-      displayState: {},
       widgetsStatus: {},
       preventSingleClick: false,
       lastAttachedShowing: false,
@@ -96,6 +95,7 @@ export default {
       isMousedown: false,
       isMousemove: false,
       lastDragging: false,
+      tempRecentPlaylistDisplayState: false,
     };
   },
   computed: {
@@ -108,15 +108,17 @@ export default {
     }),
     ...mapGetters(['paused', 'duration', 'leftMousedown']),
     showAllWidgets() {
-      return (!this.mouseStopped && !this.mouseLeftWindow) ||
+      return !this.tempRecentPlaylistDisplayState &&
+        ((!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
-        this.attachedShown;
+        this.attachedShown);
     },
     onOtherWidget() {
       return this.currentWidget !== this.$options.name;
     },
     cursorStyle() {
-      return this.showAllWidgets || !this.isFocused ? 'default' : 'none';
+      return this.showAllWidgets || !this.isFocused ||
+        this.tempRecentPlaylistDisplayState ? 'default' : 'none';
     },
     isFocused() {
       return this.$store.state.Window.isFocused;
@@ -149,8 +151,6 @@ export default {
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
-      this.displayState[value.name] = true;
-      if (value.name === 'recent-playlist') this.displayState[value.name] = false;
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
@@ -221,7 +221,7 @@ export default {
       // There should be a better way to handle timeline.
         try {
           this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
-          if (this.displayState['recent-playlist']) {
+          if (this.tempRecentPlaylistDisplayState) {
             this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
           } else {
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
@@ -239,12 +239,7 @@ export default {
       });
     },
     UIDisplayManager() {
-      const tempObject = {};
-      Object.keys(this.displayState).forEach((index) => {
-        tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
-      });
-      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
-      this.displayState = tempObject;
+      this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
     UIStateManager() {
       const {

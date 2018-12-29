@@ -1,5 +1,5 @@
 <template>
-  <div data-component-name="$options.name" class="sub-control" v-hidden="showAllWidgets">
+  <div data-component-name="$options.name" class="sub-control" v-fade-in="showAllWidgets">
     <div class="sub-btn-control">
       <transition name="sub-trans-l">
         <div class="sub-menu-wrapper subtitle-scroll-items"

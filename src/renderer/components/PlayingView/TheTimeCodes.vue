@@ -1,5 +1,5 @@
 <template>
-  <div class="cont" v-hidden="showAllWidgets || progressTriggerStopped">
+  <div class="cont" v-fade-in="showAllWidgets || progressTriggerStopped">
     <div class="timing"
       :data-component-name="$options.name"
       @mousedown="switchTimeContent">

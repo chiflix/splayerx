@@ -1,6 +1,6 @@
 <template>
   <div
-    v-hidden="showAllWidgets"
+    v-fade-in="showAllWidgets"
     :data-component-name="$options.name"
     :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
     @dblclick.stop="handleDbClick">

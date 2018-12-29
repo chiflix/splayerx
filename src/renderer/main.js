@@ -43,7 +43,7 @@ Vue.config.warnHandler = (warn) => {
 Vue.config.errorHandler = (err) => {
   addLog.methods.addLog('error', err);
 };
-Vue.directive('hidden', {
+Vue.directive('fade-in', {
   bind(el, binding) {
     const { value } = binding;
     if (value) {
