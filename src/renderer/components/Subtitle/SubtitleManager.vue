@@ -14,7 +14,6 @@ import { mapGetters, mapActions, mapState } from 'vuex';
 import { dirname, extname, basename, join } from 'path';
 import { readdir } from 'fs';
 import osLocale from 'os-locale';
-import partialRight from 'lodash/partialRight';
 import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
@@ -213,9 +212,7 @@ export default {
       sub.meta();
     },
     addSubtitles(subtitleList, firstSubtitleCallback) {
-      const {
-        addSubtitle, getFirstSubtitle, languageCallback, systemLanguageCode, changeCurrentSubtitle,
-      } = this;
+      const { addSubtitle } = this;
       const defaultOptions = {
         language: null, isDefault: null, ranking: null, streamIndex: null,
       };
@@ -236,10 +233,6 @@ export default {
           subtitle.type,
           subtitle.options || defaultOptions,
         ));
-      changeCurrentSubtitle(getFirstSubtitle(
-        subtitleList,
-        firstSubtitleCallback || partialRight(languageCallback, systemLanguageCode),
-      ).src);
     },
     async refreshOnlineSubtitles() {
       this.resetOnlineSubtitles();
@@ -291,7 +284,7 @@ export default {
         addSubtitle(
           path,
           'embedded',
-          { name: subtitleToUpdate.name || `embedded-${index}` },
+          { name: `embedded ${romanize(index - 1)}` },
           `${mediaHash}-${index}`,
         );
       }
