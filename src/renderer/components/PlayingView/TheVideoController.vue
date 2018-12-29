@@ -15,11 +15,11 @@
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
-    :displayState="displayState['recent-playlist']"
+    :displayState="tempRecentPlaylistDisplayState"
     :mousemovePosition="mousemovePosition"
     :isDragging.sync="isDragging"
     :lastDragging="lastDragging"
-    v-bind.sync="widgetsStatus['recent-playlist']"
+    v-bind.sync="tempRecentPlaylistDisplayState"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-hidden="showAllWidgets"/>
@@ -84,7 +84,6 @@ export default {
       clicksTimer: 0,
       clicksDelay: 200,
       dragDelay: 200,
-      displayState: {},
       widgetsStatus: {},
       preventSingleClick: false,
       lastAttachedShowing: false,
@@ -96,6 +95,7 @@ export default {
       isMousedown: false,
       isMousemove: false,
       lastDragging: false,
+      tempRecentPlaylistDisplayState: false,
     };
   },
   computed: {
@@ -149,8 +149,6 @@ export default {
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
-      this.displayState[value.name] = true;
-      if (value.name === 'recent-playlist') this.displayState[value.name] = false;
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
@@ -221,7 +219,7 @@ export default {
       // There should be a better way to handle timeline.
         try {
           this.$refs.nextVideoUI.checkNextVideoUI(videodata.time);
-          if (this.displayState['recent-playlist']) {
+          if (this.tempRecentPlaylistDisplayState) {
             this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
           } else {
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
@@ -239,12 +237,7 @@ export default {
       });
     },
     UIDisplayManager() {
-      const tempObject = {};
-      Object.keys(this.displayState).forEach((index) => {
-        tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
-      });
-      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
-      this.displayState = tempObject;
+      this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
     UIStateManager() {
       const {
