@@ -100,7 +100,7 @@ export default {
     },
     closeMessage(id, title) {
       this.$store.dispatch('removeMessages', id);
-      if (title === this.$t('errorFile.title.fileNonExist')) {
+      if (title === this.$t('errorFile.fileNonExist.title')) {
         this.$bus.$emit('delete-file');
       }
     },
