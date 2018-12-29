@@ -108,15 +108,17 @@ export default {
     }),
     ...mapGetters(['paused', 'duration', 'leftMousedown']),
     showAllWidgets() {
-      return (!this.mouseStopped && !this.mouseLeftWindow) ||
+      return !this.tempRecentPlaylistDisplayState &&
+        ((!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
-        this.attachedShown;
+        this.attachedShown);
     },
     onOtherWidget() {
       return this.currentWidget !== this.$options.name;
     },
     cursorStyle() {
-      return this.showAllWidgets || !this.isFocused ? 'default' : 'none';
+      return this.showAllWidgets || !this.isFocused ||
+        this.tempRecentPlaylistDisplayState ? 'default' : 'none';
     },
     isFocused() {
       return this.$store.state.Window.isFocused;
