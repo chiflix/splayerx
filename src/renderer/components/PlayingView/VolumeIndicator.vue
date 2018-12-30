@@ -37,7 +37,7 @@ export default {
   },
   watch: {
     showAllWidgets(newVal) {
-      const { clock, muted, volumeTriggerTimerId } = this;
+      const { muted } = this;
       if (muted) {
         this.volumeTriggerStopped = newVal;
       }

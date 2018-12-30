@@ -197,7 +197,7 @@ export default {
       });
       sub.meta();
     },
-    addSubtitles(subtitleList, firstSubtitleCallback) {
+    addSubtitles(subtitleList) {
       const { addSubtitle } = this;
       const defaultOptions = {
         language: null, isDefault: null, ranking: null, streamIndex: null,
@@ -222,7 +222,7 @@ export default {
     },
     async refreshOnlineSubtitles() {
       this.resetOnlineSubtitles();
-      const { getOnlineSubtitlesList, originSrc: videoSrc, addSubtitles } = this;
+      const { getOnlineSubtitlesList, originSrc: videoSrc } = this;
       this.newOnlineSubtitles = await getOnlineSubtitlesList(videoSrc);
       this.$bus.$emit('refresh-finished');
     },
