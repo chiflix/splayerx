@@ -1,3 +1,11 @@
+/* eslint-disable import/first */
+// Be sure to call Sentry function as early as possible in the main process
+import * as Sentry from '@sentry/electron';
+
+if (process.env.NODE_ENV !== 'development') {
+  Sentry.init({ dsn: 'https://a1b878df5a7a49678a75ec59e8be564d@sentry.io/1361815' });
+}
+
 import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
 import path from 'path';
@@ -241,6 +249,7 @@ function createWindow() {
     webPreferences: {
       webSecurity: false,
       experimentalFeatures: true,
+      preload: path.resolve(__dirname, './helpers/sentry.js'),
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
     backgroundColor: '#802e2c29',
