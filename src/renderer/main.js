@@ -1,3 +1,7 @@
+/* eslint-disable import/first */
+// Be sure to call Sentry function as early as possible in the main process
+import '../shared/sentry';
+
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import os from 'os';
