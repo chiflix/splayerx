@@ -6,8 +6,8 @@ import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayer
 import { throttle, debounce } from 'lodash';
 import path from 'path';
 import fs from 'fs';
+import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
-import WindowResizer from './helpers/windowResizer';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
 import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '../shared/errorcodes';
@@ -101,10 +101,6 @@ function registerMainWindowEvent() {
   });
 
   function snapShot(video, callback) {
-    /*
-      TODO:
-        img name should be more unique
-     */
     const imgPath = path.join(app.getPath('temp'), video.quickHash);
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
@@ -275,8 +271,6 @@ function createWindow() {
     inited = true;
   });
 
-  const resizer = new WindowResizer(mainWindow);
-  resizer.onStart(); // will only register listener for win
   registerMainWindowEvent();
 
   if (process.env.NODE_ENV === 'development') {
