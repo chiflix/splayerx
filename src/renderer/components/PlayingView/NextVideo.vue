@@ -89,8 +89,8 @@ export default {
       } else if (time >= this.duration && this.nextVideo) {
         this.$emit('close-next-video');
       } else {
-        const fractionProgress = (time - this.nextVideoPreviewTime)
-          / (this.duration - this.nextVideoPreviewTime);
+        const fractionProgress = (time - this.nextVideoPreviewTime) /
+          (this.duration - this.nextVideoPreviewTime);
         this.progress = fractionProgress * 100;
       }
     },
@@ -132,6 +132,11 @@ export default {
  opacity: 0;
 }
 .next-video {
+  @media screen and (max-width: 512px) {
+    & {
+      display: none;
+    }
+  }
   .thumbnail-shadow {
     position: absolute;
     top: 0px;
@@ -163,7 +168,7 @@ export default {
     overflow: hidden;
     display: flex;
     justify-content: center;
-    align-item: center;
+    align-items: center;
 
     border: 1px solid rgba(0,0,0,0.2);
 
