@@ -26,7 +26,6 @@
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
-import WindowSizeHelper from '@/helpers/WindowSizeHelper';
 import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
@@ -40,7 +39,6 @@ export default {
   data() {
     return {
       videoExisted: false,
-      windowSizeHelper: null,
       videoElement: null,
       coverFinded: false,
       seekTime: [0],
@@ -115,7 +113,6 @@ export default {
         newSize,
       );
       this.controlWindowRect(newPosition.concat(newSize));
-      this.windowSizeHelper.setNewWindowSize();
     },
     calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
       let result = videoSize;
@@ -321,7 +318,6 @@ export default {
         this.$bus.$emit('seek-subtitle', e);
       }
     });
-    this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {
       this.saveScreenshot();
       this.saveSubtitleStyle();
