@@ -653,6 +653,9 @@ new Vue({
           template[10].submenu.unshift({
             label: this.$t('msg.splayerx.about'),
             role: 'about',
+            click: () => {
+              this.$electron.shell.openExternal('https://beta.splayer.org');
+            },
           });
         }
         return template;
