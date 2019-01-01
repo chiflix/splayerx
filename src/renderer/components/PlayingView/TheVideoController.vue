@@ -15,11 +15,10 @@
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
-    :displayState="tempRecentPlaylistDisplayState"
+    :displayState.sync="tempRecentPlaylistDisplayState"
     :mousemovePosition="mousemovePosition"
-    :isDragging.sync="isDragging"
+    :isDragging="isDragging"
     :lastDragging="lastDragging"
-    v-bind.sync="tempRecentPlaylistDisplayState"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets"/>
