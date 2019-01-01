@@ -172,6 +172,7 @@ export default {
 
     const { app } = this.$electron.remote;
     this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setResizable', [true]);
+    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [720 / 405]);
 
     this.sagi.healthCheck().then((status) => {
