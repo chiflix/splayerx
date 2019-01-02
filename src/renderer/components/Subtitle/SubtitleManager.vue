@@ -95,13 +95,13 @@ export default {
     async addInitialSubtitles(videoSrc) {
       const {
         addSubtitles,
-        getLocalSubtitlesList, getOnlineSubtitlesList,
+        getLocalSubtitlesList, getOnlineSubtitlesList, getEmbeddedSubtitlesList,
         privacyAgreement,
       } = this;
       const localEmbeddedSubtitles = (await Promise.all([
         promisify(getLocalSubtitlesList.bind(null, videoSrc, SubtitleLoader.supportedFormats)),
+        promisify(getEmbeddedSubtitlesList.bind(null, videoSrc, SubtitleLoader.supportedCodecs)),
       ]))
-        .map((subtitles, index) => subtitles.map(subtitle => ({ src: subtitle, type: index ? 'embedded' : 'local' })))
         .reduce((prev, curr) => prev.concat(curr));
       if (localEmbeddedSubtitles.length) addSubtitles(localEmbeddedSubtitles);
       else if (privacyAgreement) {
@@ -119,7 +119,10 @@ export default {
           if (err) reject(err);
           const subtitles = files.filter(file =>
             (file.includes(filename) && extensionRegex.test(file)));
-          resolve(subtitles.map(subtitle => join(dirname(videoSrc), subtitle)));
+          resolve(subtitles.map(subtitle => ({
+            src: join(dirname(videoSrc), subtitle),
+            type: 'local',
+          })));
         });
       });
     },
@@ -171,12 +174,9 @@ export default {
             resolve(...JSON.parse(info).streams
               ?.filter(stream => stream?.codec_type === 'subtitle' && supportedCodecs.includes(stream?.codec_name)) // eslint-disable-line camelcase
               .map(subtitle => ({
-                streamIndex: subtitle.index,
-                codec: subtitle.codec_name, // eslint-disable-line camelcase
-                isDefault: subtitle.disposition.default === 1,
-                name: subtitle.tags.title,
-                language: subtitle.tags.language,
-                ranking: null,
+                src: subtitle.index,
+                type: 'embedded',
+                options: { videoSrc, codec: subtitle.codec_name }, // eslint-disable-line camelcase
               })));
           } catch (error) {
             reject(error);
@@ -249,46 +249,6 @@ export default {
       this.addSubtitles(this.newOnlineSubtitles);
     });
     this.addInitialSubtitles(this.originSrc);
-
-    const { ipcRenderer } = this.$electron;
-    const {
-      embeddedSubtitles, mediaHash, originSrc, addSubtitle, addSubtitleWhenLoading,
-    } = this;
-    const { supportedCodecs, codecToFormat } = SubtitleLoader;
-    ipcRenderer.on(`mediaInfo-${originSrc}-reply`, (event, info) => {
-      const { streams } = JSON.parse(info);
-      embeddedSubtitles.push(...streams
-        ?.filter(stream => stream?.codec_type === 'subtitle' && supportedCodecs.includes(stream?.codec_name)) // eslint-disable-line camelcase
-        .map(subtitle => ({
-          streamIndex: subtitle.index,
-          codec: subtitle.codec_name, // eslint-disable-line camelcase
-          isDefault: subtitle.disposition.default === 1,
-          name: subtitle.tags.title,
-          language: subtitle.tags.language,
-          ranking: null,
-        })));
-      embeddedSubtitles.forEach(({
-        codec, language, isDefault, ranking, streamIndex,
-      }) => {
-        addSubtitleWhenLoading({
-          id: `${mediaHash}-${streamIndex}`, type: 'embedded', language, isDefault, ranking, streamIndex,
-        });
-        ipcRenderer.send('extract-subtitle-request', originSrc, streamIndex, codecToFormat(codec), mediaHash);
-      });
-    });
-    ipcRenderer.on('extract-subtitle-response', (event, { error, index, path }) => {
-      const subtitleToUpdate = embeddedSubtitles.find(subtitle => subtitle.streamIndex === index);
-      const subtitleIndex = embeddedSubtitles.findIndex(subtitle => subtitle.streamIndex === index);
-      this.$set(embeddedSubtitles, subtitleIndex, { ...subtitleToUpdate, path: error ? 'error' : path });
-      if (!error) {
-        addSubtitle(
-          path,
-          'embedded',
-          { name: `embedded ${romanize(index - 1)}` },
-          `${mediaHash}-${index}`,
-        );
-      }
-    });
   },
 };
 </script>
