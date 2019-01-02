@@ -215,3 +215,33 @@ export function promisify(func) {
     }
   });
 }
+
+export function functionExtraction(funcOrObj, funcType) {
+  if (typeof funcOrObj === 'function') return { func: funcOrObj, params: 'src' };
+  const keys = Object.keys(funcOrObj);
+  const result = {};
+  keys.some((key) => {
+    if (key === 'func' || key === 'params') {
+      result.func = funcOrObj.func;
+      result.params = funcOrObj.params || 'src';
+      return true;
+    } else if (typeof funcOrObj[key] === 'function') {
+      result[key] = {
+        func: funcOrObj[key],
+        params: 'src',
+      };
+    } else if (typeof funcOrObj[key] === 'string') {
+      result[key] = {
+        func: result => result,
+        params: funcOrObj[key],
+      };
+    } else if (typeof funcOrObj[key] === 'object') {
+      result[key] = {
+        func: funcOrObj[key].func,
+        params: funcOrObj[key].params || 'src',
+      };
+    }
+    return false;
+  });
+  return result;
+}
