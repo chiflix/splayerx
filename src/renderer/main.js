@@ -1,3 +1,7 @@
+/* eslint-disable import/first */
+// Be sure to call Sentry function as early as possible in the main process
+import '../shared/sentry';
+
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import os from 'os';
@@ -649,6 +653,9 @@ new Vue({
           template[10].submenu.unshift({
             label: this.$t('msg.splayerx.about'),
             role: 'about',
+            click: () => {
+              this.$electron.shell.openExternal('https://beta.splayer.org');
+            },
           });
         }
         return template;

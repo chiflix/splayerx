@@ -46,6 +46,9 @@ module.exports = function babelConfig(api) {
             },
           ],
         ],
+        plugins: [
+          'istanbul',
+        ],
       },
       main: {
         presets: [

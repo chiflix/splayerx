@@ -25,9 +25,6 @@ export default {
     };
   },
   computed: {
-    videoRatio() {
-      return this.$store.getters.ratio;
-    },
     mousedownCurrentTarget() {
       return this.$store.state.Input.mousedownTarget;
     },
@@ -42,7 +39,6 @@ export default {
       switch (this.clicks) {
         case 1:
           this.$emit('update:showAttached', true);
-          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [512, Math.round(512 / this.videoRatio)]);
           break;
         case 2:
           this.$emit('update:showAttached', false);

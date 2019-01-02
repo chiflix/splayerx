@@ -17,7 +17,7 @@
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
     :mousemovePosition="mousemovePosition"
-    :isDragging.sync="isDragging"
+    :isDragging="isDragging"
     :lastDragging="lastDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
@@ -107,7 +107,7 @@ export default {
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'leftMousedown']),
+    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio']),
     showAllWidgets() {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
@@ -148,6 +148,12 @@ export default {
     currentMouseupWidget(newVal, oldVal) {
       this.lastMouseupWidget = oldVal;
     },
+    tempRecentPlaylistDisplayState() {
+      this.updateMinimumSize();
+    },
+    ratio() {
+      this.updateMinimumSize();
+    },
   },
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
@@ -179,6 +185,12 @@ export default {
       updateKeyup: inputActions.KEYUP_UPDATE,
       updateWheel: inputActions.WHEEL_UPDATE,
     }),
+    updateMinimumSize() {
+      const minimumSize = this.tempRecentPlaylistDisplayState
+        ? [512, Math.round(512 / this.ratio)]
+        : [320, 180];
+      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', minimumSize);
+    },
     conflictResolve(name) {
       Object.keys(this.widgetsStatus).forEach((item) => {
         if (item !== name) {
@@ -188,7 +200,6 @@ export default {
     },
     updatePlaylistShowAttached(event) {
       this.widgetsStatus['playlist-control'].showAttached = event;
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [320, 180]);
     },
     onTickUpdate() {
       if (!this.start) {
