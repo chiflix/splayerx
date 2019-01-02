@@ -563,6 +563,7 @@ new Vue({
                 label: this.$t('msg.splayerx.about'),
                 role: 'about',
               },
+              { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.preferences'),
                 enabled: true,
@@ -604,6 +605,7 @@ new Vue({
                 label: this.$t('msg.splayerx.hideOthers'),
                 role: 'hideothers',
               },
+              { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.quit'),
                 role: 'quit',
@@ -650,13 +652,16 @@ new Vue({
               },
             ],
           });
-          template[10].submenu.unshift({
-            label: this.$t('msg.splayerx.about'),
-            role: 'about',
-            click: () => {
-              this.$electron.shell.openExternal('https://beta.splayer.org');
+          template[10].submenu.unshift(
+            {
+              label: this.$t('msg.splayerx.about'),
+              role: 'about',
+              click: () => {
+                this.$electron.shell.openExternal('https://beta.splayer.org');
+              },
             },
-          });
+            { type: 'separator' },
+          );
         }
         return template;
       }).then((result) => {
