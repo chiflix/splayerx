@@ -119,7 +119,7 @@ export default {
     },
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ||
-      this.tempRecentPlaylistDisplayState ? 'default' : 'none';
+        this.tempRecentPlaylistDisplayState ? 'default' : 'none';
     },
     isFocused() {
       return this.$store.state.Window.isFocused;
