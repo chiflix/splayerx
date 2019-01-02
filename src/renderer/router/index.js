@@ -8,12 +8,12 @@ export default new Router({
     {
       path: '/',
       name: 'landing-view',
-      component: require('@/components/LandingView').default,
+      component: require('@/components/LandingView.vue').default,
     },
     {
       path: '/play',
       name: 'playing-view',
-      component: require('@/components/PlayingView').default,
+      component: require('@/components/PlayingView.vue').default,
     },
     {
       path: '*',

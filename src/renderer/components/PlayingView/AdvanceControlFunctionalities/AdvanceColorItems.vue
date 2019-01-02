@@ -22,6 +22,7 @@
           <div class="rowContainer">
             <div class="imgContainer" v-for="(img, index) in imgs">
               <img :src="img === chosenStyle || index === hoverIndex ? imgsSelected[index] : img" class="imgType"
+                :style="{ cursor: img === chosenStyle ? 'default' : 'pointer'}"
                 @mouseover="handleOver(index)"
                 @mouseout="handleOut"
                 @click.left="handleClick($event, index)">
@@ -44,6 +45,7 @@ import styleSelected1 from '../../../assets/subtitle-style2-selected.png';
 import styleSelected2 from '../../../assets/subtitle-style3-selected.png';
 import styleSelected3 from '../../../assets/subtitle-style4-selected.png';
 import styleSelected4 from '../../../assets/subtitle-style5-selected.png';
+
 export default {
   name: 'AdvanceColorItems',
   data() {
@@ -98,79 +100,7 @@ export default {
       this.hoverIndex = -1;
     },
     handleClick(e, index) {
-      switch (index) {
-        case 0:
-          this.$store.dispatch('updateChosenStyle', 0);
-          this.$store.dispatch('updateStyle', {
-            color: 'white',
-            fontWeight: '400',
-          });
-          this.$store.dispatch('updateBorderStyle', {
-            textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
-            textStroke: '0.5px #777',
-            backgroundColor: '',
-            fontWeight: '400',
-          });
-          break;
-        case 1:
-          this.$store.dispatch('updateChosenStyle', 1);
-          this.$store.dispatch('updateStyle', {
-            color: 'white',
-            fontWeight: '400',
-          });
-          this.$store.dispatch('updateBorderStyle', {
-            textShadow: '0px 1px 1px #333',
-            textStroke: '1.3px #222',
-            backgroundColor: '',
-            fontWeight: '400',
-            padding: '0',
-          });
-          break;
-        case 2:
-          this.$store.dispatch('updateChosenStyle', 2);
-          this.$store.dispatch('updateStyle', {
-            color: '#fffc00',
-            fontWeight: '400',
-          });
-          this.$store.dispatch('updateBorderStyle', {
-            textShadow: '0px 0.5px 0.5px #555',
-            textStroke: '',
-            backgroundColor: '',
-            fontWeight: '400',
-            padding: '0',
-          });
-          break;
-        case 3:
-          this.$store.dispatch('updateChosenStyle', 3);
-          this.$store.dispatch('updateStyle', {
-            color: '#fff',
-            fontWeight: '800',
-          });
-          this.$store.dispatch('updateBorderStyle', {
-            textShadow: '',
-            textStroke: '1.6px #009be6',
-            backgroundColor: '',
-            fontWeight: '800',
-            padding: '0',
-          });
-          break;
-        case 4:
-          this.$store.dispatch('updateChosenStyle', 4);
-          this.$store.dispatch('updateStyle', {
-            color: '#fff',
-            fontWeight: '400',
-          });
-          this.$store.dispatch('updateBorderStyle', {
-            textShadow: '',
-            textStroke: '',
-            backgroundColor: 'rgba(0,0,0,.5)',
-            fontWeight: '400',
-            padding: '0px 5px',
-          });
-          break;
-        default:
-          break;
-      }
+      this.$store.dispatch('updateChosenStyle', index);
     },
   },
 };
@@ -222,8 +152,8 @@ export default {
       font-size: 15.6px;
       margin: auto auto auto 20.4px;
       .rightItem {
-        width: 20.4px;
-        height: 20.4px;
+        width: 21px;
+        height: 21px;
       }
     }
     .listContainer {
@@ -232,8 +162,8 @@ export default {
         width: 164.4px;
         height: 32.4px;
         .imgContainer {
-          width: 20.4px;
-          height: 20.4px;
+          width: 21px;
+          height: 21px;
           margin-top: 6.6px;
         }
       }
@@ -258,8 +188,8 @@ export default {
       font-size: 21.84px;
       margin: auto auto auto 28.56px;
       .rightItem {
-        width: 28.56px;
-        height: 28.56px;
+        width: 29px;
+        height: 29px;
       }
     }
     .listContainer {
@@ -268,8 +198,8 @@ export default {
         width: 230.16px;
         height: 45.36px;
         .imgContainer {
-          width: 28.56px;
-          height: 28.56px;
+          width: 29px;
+          height: 29px;
           margin-top: 9.24px;
         }
       }
@@ -310,6 +240,7 @@ export default {
   .listContainer {
     flex: 1;
     display: flex;
+    cursor: default;
     .rowContainer {
       display: flex;
       justify-content: space-around;

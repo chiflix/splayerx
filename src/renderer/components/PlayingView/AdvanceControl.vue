@@ -20,8 +20,11 @@
 
 <script>
 import lottie from '@/components/lottie.vue';
-import * as animationData from '@/assets/advance.json';
+import animationData from '@/assets/advance.json';
+import { mapActions } from 'vuex';
+import { Input as InputActions } from '@/store/actionTypes';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
+
 export default {
   name: 'advance-control',
   components: {
@@ -30,8 +33,7 @@ export default {
   },
   props: {
     showAttached: Boolean,
-    mousedownOnOther: Boolean,
-    mouseupOnOther: Boolean,
+    lastDragging: Boolean,
   },
   data() {
     return {
@@ -49,6 +51,14 @@ export default {
       audioShow: false,
     };
   },
+  computed: {
+    mousedownCurrentTarget() {
+      return this.$store.state.Input.mousedownTarget;
+    },
+    mouseupCurrentTarget() {
+      return this.$store.state.Input.mouseupTarget;
+    },
+  },
   watch: {
     showAttached(val) {
       if (!val) {
@@ -62,21 +72,32 @@ export default {
         }
       }
     },
-    mousedownOnOther(val) {
-      if (val && this.showAttached) {
+    mousedownCurrentTarget(val) {
+      if (val !== this.$options.name && this.showAttached) {
         this.anim.playSegments([37, 41], false);
-        if (this.mouseupOnOther) {
+        if (this.lastDragging) {
+          this.clearMouseup({ target: '' });
+        } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
           this.$emit('update:showAttached', false);
         }
       }
     },
-    mouseupOnOther(val) {
-      if (val && this.showAttached) {
+    mouseupCurrentTarget(val) {
+      if (this.lastDragging) {
+        if (this.showAttached) {
+          this.anim.playSegments([68, 73]);
+        }
+        this.clearMousedown({ target: '' });
+      } else if (val !== this.$options.name && this.showAttached) {
         this.$emit('update:showAttached', false);
       }
     },
   },
   methods: {
+    ...mapActions({
+      clearMousedown: InputActions.MOUSEDOWN_UPDATE,
+      clearMouseup: InputActions.MOUSEUP_UPDATE,
+    }),
     handleAnimation(anim) {
       this.anim = anim;
     },
@@ -92,7 +113,7 @@ export default {
           if (!this.showAttached) {
             if (this.validEnter) {
               this.anim.playSegments([23, 36], false);
-            } else if (!this.mousedownOnOther) {
+            } else if (this.mousedownCurrentTarget === this.$options.name) {
               this.anim.playSegments([105, 109], false);
             }
           }
@@ -135,6 +156,7 @@ export default {
       switch (this.clicks) {
         case 1:
           this.$emit('update:showAttached', true);
+          this.$emit('conflict-resolve', this.$options.name);
           break;
         case 2:
           this.$emit('update:showAttached', false);
@@ -145,12 +167,6 @@ export default {
           break;
       }
     },
-  },
-  created() {
-    this.$bus.$on('change-menu-list', (changedLevel) => {
-      this.menuList = changedLevel;
-      this.$_fitMenuSize();
-    });
   },
 };
 </script>

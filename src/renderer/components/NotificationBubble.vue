@@ -1,14 +1,17 @@
 <template>
   <div :class="container">
     <transition name="nextvideo">
-      <NextVideo class="next-video"
+      <NextVideo class="next-video" ref="nextVideo"
         v-if="showNextVideo"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"/>
     </transition>
     <PrivacyBubble class="privacy-bubble"
-      v-if="showPrivacyBubble"
+      v-if="showPrivacyBubble && !isMas"
+      @close-privacy-bubble="closePrivacyBubble"/>
+    <MASPrivacyBubble class="mas-privacy-bubble"
+      v-if="showPrivacyBubble && isMas"
       @close-privacy-bubble="closePrivacyBubble"/>
     <div>
     <transition-group name="toast">
@@ -22,7 +25,7 @@
             <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
             <div class="content">{{ m.content }}</div>
           </div>
-          <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id)"></Icon>
+          <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id, m.title)"></Icon>
         </div>
       </div>
     </transition-group>
@@ -35,13 +38,16 @@ import { mapGetters } from 'vuex';
 import asyncStorage from '@/helpers/asyncStorage';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
-import Icon from './BaseIconContainer';
+import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
+import Icon from './BaseIconContainer.vue';
+
 export default {
   name: 'notification-bubble',
   components: {
     Icon,
     NextVideo,
     PrivacyBubble,
+    MASPrivacyBubble,
   },
   data() {
     return {
@@ -52,7 +58,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['roundedCurrentTime', 'nextVideo', 'finalPartTime']),
+    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -61,6 +67,12 @@ export default {
         return messages.slice(0, 2);
       }
       return messages;
+    },
+    isMas() {
+      if (process.platform === 'darwin' && process.mas) {
+        return true;
+      }
+      return false;
     },
     container() {
       return process.platform === 'win32' ? 'winContainer' : 'container';
@@ -86,18 +98,23 @@ export default {
       this.manualClosed = false;
       this.showNextVideo = false;
     },
-    closeMessage(id) {
+    closeMessage(id, title) {
       this.$store.dispatch('removeMessages', id);
+      if (title === this.$t('errorFile.fileNonExist.title')) {
+        this.$bus.$emit('delete-file');
+      }
     },
-  },
-  watch: {
-    roundedCurrentTime(val) {
-      if (val > this.finalPartTime) {
-        if (this.nextVideo !== '' && !this.manualClosed) {
+    checkNextVideoUI(time) {
+      if (time > this.nextVideoPreviewTime && time < this.duration) {
+        if (this.nextVideo && !this.manualClosed) {
+          this.$store.dispatch('UpdatePlayingList');
           this.showNextVideo = true;
         }
       } else {
         this.manualClosed = false;
+      }
+      if (this.$refs.nextVideo) {
+        this.$refs.nextVideo.updatePlayingTime(time);
       }
     },
   },
@@ -170,6 +187,22 @@ export default {
       margin-bottom: 18px;
     }
   }
+  .mas-privacy-bubble {
+    position: relative;
+    z-index: 8;
+    @media screen and (max-width: 512px) {
+      display: none;
+    }
+    @media screen and (min-width: 513px) and (max-width: 854px) {
+      margin-bottom: 12px;
+    }
+    @media screen and (min-width: 855px) and (max-width: 1920px) {
+      margin-bottom: 15px;
+    }
+    @media screen and (min-width: 1921px){
+      margin-bottom: 18px;
+    }
+  }
   .toast-enter, .toast-enter-active {
     transform: translateX(0px);
   }
@@ -178,7 +211,7 @@ export default {
   }
   @media screen and (min-width: 320px) and (max-width: 512px) {
     top: 13px;
-    right: 34px;
+    right: 14px;
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
     top: 22px;
@@ -293,8 +326,6 @@ export default {
 }
 .black-gradient-error {
   position: absolute;
-  background-color: rgba(0,0,0,0.20);
-  backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 216px;
@@ -327,8 +358,6 @@ export default {
 }
 .black-gradient-loading {
   position: absolute;
-  background-color: rgba(0,0,0,0.20);
-  backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 136px;
@@ -366,7 +395,7 @@ export default {
 
 .errorContainer {
   display: flex;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (min-width: 320px) and (max-width: 512px) {

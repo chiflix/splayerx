@@ -12,7 +12,8 @@
 <script>
 import { THUMBNAIL_DB_NAME } from '@/constants';
 import idb from 'idb';
-import BaseImageDisplay from './BaseImageDisplay';
+import BaseImageDisplay from './BaseImageDisplay.vue';
+
 export default {
   name: 'thumbnail-display',
   components: {
@@ -68,11 +69,15 @@ export default {
           const tx = db.transaction(objectStoreName, 'readonly');
           return tx.objectStore(objectStoreName).get(`${startIndex}-${this.quickHash}`);
         });
-        result.push(Object.assign(
-          {},
-          { index: object.index },
-          { image: object.imageBitmap },
-        ));
+        // Sometimes the Object.index is undefined, dont know why.
+        // just to void the error.
+        if (Object.index !== undefined) {
+          result.push(Object.assign(
+            {},
+            { index: object.index },
+            { image: object.imageBitmap },
+          ));
+        }
       } else {
         result = [];
         idb.open(THUMBNAIL_DB_NAME).then((db) => {

@@ -1,5 +1,5 @@
 <template>
-  <div class="indicator-container">
+  <div v-fade-in="showVolume" class="indicator-container">
     <base-info-card class="card">
       <div class="indicator" :style="{ height: volume * 100 + '%', opacity: muted ? 0.25 : 0.8 }"></div>
     </base-info-card>
@@ -8,17 +8,82 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
+
 export default {
   name: 'volume-indicator',
   components: {
     'base-info-card': BaseInfoCard,
     'base-icon': BaseIcon,
   },
+  data() {
+    return {
+      volumeTriggerStopped: false,
+      volumeTriggerTimerId: 0,
+    };
+  },
+  props: ['showAllWidgets'],
   computed: {
-    ...mapGetters(['volume', 'muted']),
+    ...mapGetters(['volume', 'muted', 'volumeKeydown']),
+    ...mapState({
+      validWheelTarget: ({ Input }) => Input.wheelTarget === 'the-video-controller',
+      wheelTimestamp: ({ Input }) => Input.wheelTimestamp,
+    }),
+    showVolume() {
+      return this.volumeTriggerStopped;
+    },
+  },
+  watch: {
+    showAllWidgets(newVal) {
+      const { muted } = this;
+      if (muted) {
+        this.volumeTriggerStopped = newVal;
+      }
+    },
+    muted() {
+      const { clock, volumeTriggerTimerId } = this;
+      if (!this.volumeKeydown && this.volume !== 0) {
+        this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
+      }
+    },
+    volume() {
+      const { clock, volumeTriggerTimerId } = this;
+      if (!this.volumeKeydown) {
+        this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
+      }
+    },
+    volumeKeydown(newVal) {
+      const { clock, volumeTriggerTimerId } = this;
+      if (newVal) {
+        this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
+      }
+    },
+    wheelTimestamp(newVal) {
+      const { validWheelTarget, clock, volumeTriggerTimerId } = this;
+      if (process.platform !== 'darwin' && validWheelTarget) {
+        if (newVal) {
+          this.volumeTriggerStopped = true;
+          clock.clearTimeout(volumeTriggerTimerId);
+          this.volumeTriggerTimerId = clock.setTimeout(() => {
+            this.volumeTriggerStopped = false;
+          }, 1000);
+        }
+      }
+    },
   },
 };
 </script>

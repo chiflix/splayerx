@@ -1,18 +1,24 @@
 import path from 'path';
-import fs from 'fs';
+import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
+import lolex from 'lolex';
+import { times } from 'lodash';
 import InfoDB from '@/helpers/infoDB';
+import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '@/../shared/errorcodes';
+import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
 
-import { ipcRenderer } from 'electron'; // eslint-disable-line
+import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
+
+const clock = lolex.createClock();
+const infoDB = new InfoDB();
 
 export default {
+  data() {
+    return { clock, infoDB, sagi: Sagi };
+  },
   methods: {
-    infoDB() {
-      return InfoDB;
-    },
-    sagi() { return Sagi; },
-
     timecodeFromSeconds(s) {
       const dt = new Date(Math.abs(s) * 1000);
       let hours = dt.getUTCHours();
@@ -35,7 +41,7 @@ export default {
       }
       return `${minutes}:${seconds}`;
     },
-    findSimilarVideoByVidPath(vidPath) {
+    async findSimilarVideoByVidPath(vidPath) {
       vidPath = decodeURI(vidPath);
 
       if (process.platform === 'win32') {
@@ -45,24 +51,22 @@ export default {
       }
 
       const dirPath = path.dirname(vidPath);
-      const filter = /\.(3g2|3gp|3gp2|3gpp|amv|asf|avi|bik|bin|crf|divx|drc|dv|dvr-ms|evo|f4v|flv|gvi|gxf|iso|m1v|m2v|m2t|m2ts|m4v|mkv|mov|mp2|mp2v|mp4|mp4v|mpe|mpeg|mpeg1|mpeg2|mpeg4|mpg|mpv2|mts|mtv|mxf|mxg|nsv|nuv|ogg|ogm|ogv|ogx|ps|rec|rm|rmvb|rpl|thp|tod|tp|ts|tts|txd|vob|vro|webm|wm|wmv|wtv|xesc)$/;
-
-      if (!fs.existsSync(dirPath)) {
-        return [];
-      }
 
       const videoFiles = [];
-      const files = fs.readdirSync(dirPath);
+      const files = await fsPromises.readdir(dirPath);
+      const tasks = [];
       for (let i = 0; i < files.length; i += 1) {
         const filename = path.join(dirPath, files[i]);
-        const stat = fs.lstatSync(filename);
-        if (!stat.isDirectory()) {
-          if (filter.test(path.extname(files[i]))) {
-            const fileBaseName = path.basename(filename);
-            videoFiles.push(fileBaseName);
+        tasks.push(fsPromises.lstat(filename).then((stat) => {
+          const fileBaseName = path.basename(filename);
+          if (!stat.isDirectory() && !fileBaseName.startsWith('.')) {
+            if (getValidVideoRegex().test(path.extname(fileBaseName))) {
+              videoFiles.push(fileBaseName);
+            }
           }
-        }
+        }));
       }
+      await Promise.all(tasks);
       videoFiles.sort();
       for (let i = 0; i < videoFiles.length; i += 1) {
         videoFiles[i] = path.join(dirPath, videoFiles[i]);
@@ -98,55 +102,206 @@ export default {
         }
       }
     },
-    openFile(path) {
-      const originPath = path;
-      this.infoDB().get('recent-played', this.mediaQuickHash(originPath))
-        .then((value) => {
-          if (value) {
-            this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
-            this.infoDB().add('recent-played', Object.assign(value, { lastOpened: Date.now() }));
+    openFilesByDialog({ defaultPath } = {}) {
+      if (this.showingPopupDialog) return;
+      this.showingPopupDialog = true;
+      const opts = ['openFile', 'multiSelections'];
+      if (process.platform === 'darwin') {
+        opts.push('openDirectory');
+      }
+      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+        title: 'Open Dialog',
+        defaultPath,
+        filters: [{
+          name: 'Video Files',
+          extensions: getValidVideoExtensions(),
+        }, {
+          name: 'All Files',
+          extensions: ['*'],
+        }],
+        properties: opts,
+        securityScopedBookmarks: process.mas,
+      }, (files, bookmarks) => {
+        this.showingPopupDialog = false;
+        if (process.mas && bookmarks?.length > 0) {
+          // TODO: put bookmarks to database
+          console.log(bookmarks);
+        }
+        if (files) {
+          // if selected files contain folders only, then call openFolder()
+          const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+          if (onlyFolders) {
+            this.openFolder(...files);
           } else {
-            this.infoDB().add('recent-played', {
-              quickHash: this.mediaQuickHash(originPath),
-              path: originPath,
-              lastOpened: Date.now(),
-            });
+            this.openFile(...files);
           }
-          this.$bus.$emit('new-file-open');
+        }
+      });
+    },
+    openFolder(...folders) {
+      const files = [];
+      let containsSubFiles = false;
+      const subtitleFiles = [];
+      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
+      const videoFiles = [];
+
+      folders.forEach((dirPath) => {
+        if (fs.statSync(dirPath).isDirectory()) {
+          const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+          files.push(...dirFiles);
+        }
+      });
+
+      for (let i = 0; i < files.length; i += 1) {
+        const file = files[i];
+        if (!path.basename(file).startsWith('.')) {
+          if (subRegex.test(path.extname(file))) {
+            subtitleFiles.push({ src: file, type: 'local' });
+            containsSubFiles = true;
+          } else if (getValidVideoRegex().test(path.extname(file))) {
+            videoFiles.push(file);
+          }
+        }
+      }
+      if (videoFiles.length !== 0) {
+        if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
+          this.openVideoFile(...videoFiles);
+        }
+      } else {
+        // TODO: no videoFiles in folders error catch
+        this.addLog('error', {
+          errcode: EMPTY_FOLDER,
+          message: 'There is no playable file in this folder.',
         });
-      this.$store.dispatch('SRC_SET', originPath);
+      }
+      if (containsSubFiles) {
+        this.$bus.$emit('add-subtitles', subtitleFiles);
+      }
+    },
+    /* eslint-disable */
+    // filter video and sub files
+    openFile(...files) {
+      let containsSubFiles = false;
+      const subtitleFiles = [];
+      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
+      const videoFiles = [];
+
+      for (let i = 0; i < files.length; i += 1) {
+        if (fs.statSync(files[i]).isDirectory()) {
+          const dirPath = files[i];
+          const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+          files.push(...dirFiles);
+        }
+      }
+
+      for (let i = 0; i < files.length; i += 1) {
+        let tempFilePath = files[i];
+        let baseName = path.basename(tempFilePath);
+        if (baseName.startsWith('.') || fs.statSync(tempFilePath).isDirectory()) {
+          continue;
+        }
+        if (subRegex.test(path.extname(tempFilePath))) {
+          subtitleFiles.push({ src: tempFilePath, type: 'local' });
+          containsSubFiles = true;
+        } else if (getValidVideoRegex().test(path.extname(tempFilePath))) {
+          videoFiles.push(tempFilePath);
+        } else {
+          this.addLog('error', {
+            errcode: OPEN_FAILED,
+            message: `Failed to open file : ${tempFilePath}`,
+          });
+        }
+      }
+      if (videoFiles.length !== 0) {
+        this.openVideoFile(...videoFiles);
+      }
+      if (containsSubFiles) {
+        this.$bus.$emit('add-subtitles', subtitleFiles);
+      }
+    },
+    /* eslint-disable */
+    // generate playlist
+    openVideoFile(...videoFiles) {
+      this.playFile(videoFiles[0]);
+      if (videoFiles.length > 1) {
+        this.$store.dispatch('PlayingList', videoFiles);
+      } else {
+        this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
+          this.$store.dispatch('FolderList', similarVideos);
+        }, (err) => {
+          if (process.mas && err?.code === 'EPERM') {
+            // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+            this.$store.dispatch('FolderList', [videoFiles[0]]);
+          }
+        });
+      }
+    },
+    // openFile and db operation
+    async playFile(vidPath) {
+      const originPath = vidPath;
+      let mediaQuickHash;
+      try {
+        mediaQuickHash = await this.mediaQuickHash(originPath);
+      } catch (err) {
+        if (err?.code === 'ENOENT') {
+          this.addLog('error', {
+            errcode: FILE_NON_EXIST,
+            message: 'Failed to open file, it will be removed from list.'
+          });
+          this.$bus.$emit('file-not-existed', originPath);
+        }
+        if (process.mas && err?.code === 'EPERM') {
+          this.openFilesByDialog({ defaultPath: originPath });
+        }
+
+        return;
+      }
+      this.$bus.$emit('new-file-open');
+      this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
+      remote.app.addRecentDocument(originPath);
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
       });
+      const value = await this.infoDB.get('recent-played', mediaQuickHash);
+      if (value) {
+        this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
+        this.infoDB.add('recent-played', Object.assign(value, { path: originPath, lastOpened: Date.now() }));
+      } else {
+        this.infoDB.add('recent-played', {
+          quickHash: mediaQuickHash,
+          path: originPath,
+          lastOpened: Date.now(),
+        });
+      }
     },
-    mediaQuickHash(filePath) {
+    async mediaQuickHash(filePath) {
       function md5Hex(text) {
         return crypto.createHash('md5').update(text).digest('hex');
       }
-      const fd = fs.openSync(filePath, 'r');
-      const len = fs.statSync(filePath).size;
+      const fileHandler = await fsPromises.open(filePath, 'r');
+      const len = (await fsPromises.stat(filePath)).size;
       const position = [
         4096,
         Math.floor(len / 3),
         Math.floor(len / 3) * 2,
         len - 8192,
       ];
-      const res = [];
-      const buf = Buffer.alloc(4096);
-      for (let i = 0; i < 4; i += 1) {
-        const bufLen = fs.readSync(fd, buf, 0, 4096, position[i]);
-        res[i] = md5Hex(buf.slice(0, bufLen));
-      }
-      fs.closeSync(fd);
+      const res = await Promise.all(times(4).map(async (i) => {
+        const buf = Buffer.alloc(4096);
+        const { bytesRead } = await fileHandler.read(buf, 0, 4096, position[i]);
+        return md5Hex(buf.slice(0, bytesRead));
+      }));
+      fileHandler.close();
       return res.join('-');
     },
     addLog(level, log) {
       switch (level) {
         case 'error':
           console.error(log);
-          if (this.$ga && log) {
-            this.$ga.exception(log.message || log);
+          if (log && process.env.NODE_ENV !== 'development') {
+            this.$ga && this.$ga.exception(log.message || log);
+            Sentry.captureException(log);
           }
           break;
         case 'warn':
@@ -160,8 +315,8 @@ export default {
       if (!log || typeof log === 'string') {
         normalizedLog = { message: log };
       } else {
-        const { message, stack } = log;
-        normalizedLog = { message, stack };
+        const { errcode, message, stack } = log;
+        normalizedLog = { errcode, message, stack };
       }
       ipcRenderer.send('writeLog', level, normalizedLog);
     },

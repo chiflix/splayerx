@@ -1,29 +1,30 @@
 <template>
   <div
+    v-fade-in="showAllWidgets"
     :data-component-name="$options.name"
     :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
     @dblclick.stop="handleDbClick">
     <div class="win-icons" v-if="!isDarwin">
-      <Icon class="title-button"
+      <Icon class="title-button no-drag"
         @click.native="handleMinimize"
         type="titleBarWinExitFull">
       </Icon>
-      <Icon class="title-button"
+      <Icon class="title-button no-drag"
         @click.native="handleWinFull"
         v-show="middleButtonStatus === 'maximize'"
         type="titleBarWinFull">
       </Icon>
-      <Icon class="title-button"
+      <Icon class="title-button no-drag"
         @click.native="handleRestore"
         type="titleBarWinRestore"
         v-show="middleButtonStatus === 'restore'">
       </Icon>
-      <Icon class="title-button"
+      <Icon class="title-button no-drag"
         @click.native="handleFullscreenExit"
         v-show="middleButtonStatus === 'exit-fullscreen'"
         type="titleBarWinResize">
       </Icon>
-      <Icon class="title-button"
+      <Icon class="title-button no-drag"
         @click.native="handleClose"
         type="titleBarWinClose">
       </Icon>
@@ -31,26 +32,26 @@
     <div class="mac-icons" v-if="isDarwin"
          @mouseover="handleMouseOver"
          @mouseout="handleMouseOut">
-      <Icon id="close" class="title-button"
+      <Icon id="close" class="title-button no-drag"
             type="titleBarClose"
             :state="state"
             @click.native="handleClose">
       </Icon>
-      <Icon id="minimize" class="title-button"
+      <Icon id="minimize" class="title-button no-drag"
             type="titleBarExitFull"
             @click.native="handleMinimize"
             :class="{ disabled: middleButtonStatus === 'exit-fullscreen' }"
             :state="state"
             :isFullScreen="middleButtonStatus">
       </Icon>
-      <Icon id="maximize" class="title-button"
+      <Icon id="maximize" class="title-button no-drag"
             :type="itemType"
             @click.native="handleMacFull"
             v-show="middleButtonStatus !== 'exit-fullscreen'"
             :state="state"
             :style="{ transform: itemType === this.itemTypeEnum.MAXSCREEN ? 'rotate(45deg)' : ''}">
       </Icon>
-      <Icon id="restore" class="title-button"
+      <Icon id="restore" class="title-button no-drag"
             @click.native="handleFullscreenExit"
             v-show="middleButtonStatus === 'exit-fullscreen'"
             type="titleBarRecover"
@@ -62,7 +63,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Icon from './BaseIconContainer';
+import Icon from './BaseIconContainer.vue';
+
 export default {
   name: 'titlebar',
   data() {
@@ -80,6 +82,10 @@ export default {
   },
   props: {
     currentView: String,
+    showAllWidgets: {
+      type: Boolean,
+      default: true,
+    },
   },
   components: {
     Icon,
@@ -185,7 +191,6 @@ export default {
       margin: 0px 2px 2px 0px;
       width: 45px;
       height: 28px;
-      -webkit-app-region: no-drag;
       background-color: rgba(255,255,255,0);
       transition: background-color 200ms;
     }

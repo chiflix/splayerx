@@ -1,84 +1,195 @@
+import Vue from 'vue';
+import pick from 'lodash/pick';
+import partialRight from 'lodash/partialRight';
+import osLocale from 'os-locale';
+import { Subtitle as subtitleMutations } from '../mutationTypes';
+import { Subtitle as subtitleActions } from '../actionTypes';
+
+function getFormattedSystemLocale() {
+  const locale = osLocale.sync();
+  return locale.slice(0, locale.indexOf('_'));
+}
+
+function generateRankOptions(type, subtitle, subtitleList) {
+  const systemLocale = getFormattedSystemLocale();
+  switch (type.toLowerCase()) {
+    default:
+    case 'custom': {
+      return { existed: subtitleList.length };
+    }
+    case 'local': {
+      const { language } = subtitle;
+      return ({
+        matchSystemLocale: language === systemLocale,
+        existedLanguage: subtitleList
+          .filter(({ language: existedLanguage }) => existedLanguage === language).length,
+        existed: subtitleList.length,
+      });
+    }
+    case 'embedded': {
+      const { isDefault, streamIndex } = subtitle;
+      return ({
+        matchDefault: isDefault,
+        streamIndex,
+        existed: subtitleList.length,
+      });
+    }
+    case 'online': {
+      const { language, ranking } = subtitle;
+      return ({
+        matchSystemLocale: language === systemLocale,
+        existedLanguage: subtitleList
+          .filter(({ language: existedLanguage }) => existedLanguage === language).length,
+        ranking,
+        existed: subtitleList.length,
+      });
+    }
+  }
+}
+
+function rankCalculation(type, options) {
+  let result;
+  const baseRank = {
+    custom: 1e16,
+    local: 1e12,
+    embedded: 1e8,
+    online: 1e4,
+  };
+  const rankEnums = {
+    MATCH_SYSTEM_LOCALE: 1e3,
+    MATCH_DEFAULT: 1e3,
+    EXISTED_LANGUAGE: -1e2,
+    STREAM_INDEX: -1e2,
+    RANKING: 1e1,
+    EXISTED: -1e0,
+  };
+  switch (type.toLowerCase()) {
+    case 'custom': {
+      const { existed } = options;
+      result = baseRank.custom + (existed * rankEnums.EXISTED);
+      break;
+    }
+    case 'local': {
+      const { matchSystemLocale, existedLanguage, existed } = options;
+      result = baseRank.local +
+        (matchSystemLocale * rankEnums.MATCH_SYSTEM_LOCALE) +
+        (existedLanguage * rankEnums.EXISTED_LANGUAGE) +
+        (existed * rankEnums.EXISTED);
+      break;
+    }
+    case 'embedded': {
+      const { matchDefault, streamIndex, existed } = options;
+      result = baseRank.embedded +
+        (matchDefault * rankEnums.MATCH_DEFAULT) +
+        (streamIndex * rankEnums.STREAM_INDEX) +
+        (existed * rankEnums.EXISTED);
+      break;
+    }
+    case 'online': {
+      const {
+        matchSystemLocale, existedLanguage, ranking, existed,
+      } = options;
+      result = baseRank.online +
+        (matchSystemLocale * rankEnums.MATCH_SYSTEM_LOCALE) +
+        (existedLanguage * rankEnums.EXISTED_LANGUAGE) +
+        (ranking * rankEnums.RANKING) +
+        (existed * rankEnums.EXISTED);
+      break;
+    }
+    default:
+      break;
+  }
+  return result;
+}
+
 const state = {
-  SubtitleNames: [],
-  curStyle: {
-    fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
-    fontSize: '11px',
-    letterSpacing: 1,
-    opacity: 1,
-    color: 'white',
-    fontWeight: '400',
-    transform: 'scale(1)',
-    transformOrigin: 'bottom',
-    webkitFontSmoothing: 'antialiased',
-  },
-  curBorderStyle: {
-    fontFamily: process.platform === 'win32' ? 'Microsoft YaHei' : 'PingFang SC',
-    fontSize: '11px',
-    letterSpacing: 1,
-    padding: '0px',
-    textFillColor: 'transparent',
-    textStroke: '0.5px #777',
-    fontWeight: '400',
-    backgroundColor: 'transparent',
-    transform: 'scale(1)',
-    transformOrigin: 'bottom',
-    textShadow: '0px 0.7px 0.5px rgba(0,0,0,.5)',
-    webkitFontSmoothing: 'antialiased',
-  },
+  loadingStates: {},
+  durations: {},
+  names: {},
+  languages: {},
+  formats: {},
+  types: {},
+  ranks: {},
+  currentSubtitleId: '',
   chosenStyle: '',
   chosenSize: 1,
-  SubtitleDelay: 0,
+  subtitleDelay: 0,
+  scaleNum: 1,
 };
 
 const getters = {
-  subtitleNames: state => state.SubtitleNames,
-  firstSubtitleIndex: state => state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first'),
-  subtitleCount: state => state.SubtitleNames.length,
-  curStyle: state => state.curStyle,
-  SubtitleDelay: state => state.SubtitleDelay,
-  curBorderStyle: state => state.curBorderStyle,
+  currentSubtitleId: state => state.currentSubtitleId,
+  subtitleIds: ({ loadingStates }) => Object.keys(loadingStates),
+  subtitleList: ({
+    loadingStates, names, languages, formats, ranks,
+  }) =>
+    Object.keys(loadingStates).map(id => ({
+      id,
+      name: names[id],
+      language: languages[id],
+      format: formats[id],
+      rank: ranks[id],
+      loading: loadingStates[id],
+    })).sort((a, b) => b.rank - a.rank),
+  premiumSubtitles: ({ durations }, getters) => Object.keys(durations)
+    .filter(id => durations[id] >= 0.6 * getters.duration)
+    .map(id => ({ id, played: durations[id] })),
+  subtitleDelay: state => state.subtitleDelay,
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,
+  scaleNum: state => state.scaleNum,
 };
 
 const mutations = {
-  SubtitleNames(state, subtitles) {
-    state.SubtitleNames = subtitles;
-  },
-  AddSubtitle(state, subtitles) {
-    state.SubtitleNames.push(...subtitles);
-  },
-  AddServerSubtitle(state, subtitles) {
-    state.SubtitleNames.push(...subtitles);
-  },
-  SubtitleOn(state, obj) {
-    const index = state.SubtitleNames.findIndex(subtitle => subtitle.textTrackID === obj.index);
-    state.SubtitleNames[index].status = obj.status === 'first' ? 'first' : 'second';
-  },
-  SubtitleOff(state) {
-    const index = state.SubtitleNames.findIndex(subtitle => subtitle.status === 'first');
-    if (index !== -1) {
-      state.SubtitleNames[index].status = null;
+  [subtitleMutations.RESET_SUBTITLES](state, resetFields) {
+    if (!resetFields) {
+      Vue.set(state, 'loadingStates', {});
+      Vue.set(state, 'durations', {});
+      Vue.set(state, 'names', {});
+      Vue.set(state, 'languages', {});
+      Vue.set(state, 'formats', {});
     } else {
-      throw new Error('Error in Subtitle Vuex.');
+      const supportedFields = ['loadingStates', 'durations', 'names', 'languages', 'formats', 'types'];
+      const changingFields = Object.keys(resetFields)
+        .filter(field => supportedFields.includes(field));
+      changingFields.forEach((field) => {
+        Vue.set(state, field, resetFields[field]);
+      });
     }
   },
-  UpdateStyle(state, payload) {
-    Object.assign(state.curStyle, payload);
+  [subtitleMutations.LOADING_STATES_UPDATE]({ loadingStates }, { id, state }) {
+    Vue.set(loadingStates, id, state);
   },
-  UpdateBorderStyle(state, payload) {
-    Object.assign(state.curBorderStyle, payload);
+  [subtitleMutations.DURATIONS_UPDATE]({ durations }, { id, duration }) {
+    Vue.set(durations, id, duration);
+  },
+  [subtitleMutations.NAMES_UPDATE]({ names }, { id, name }) {
+    Vue.set(names, id, name);
+  },
+  [subtitleMutations.LANGUAGES_UPDATE]({ languages }, { id, language }) {
+    Vue.set(languages, id, language);
+  },
+  [subtitleMutations.FORMATS_UPDATE]({ formats }, { id, format }) {
+    Vue.set(formats, id, format);
+  },
+  [subtitleMutations.TYPES_UPDATE]({ types }, { id, type }) {
+    Vue.set(types, id, type);
+  },
+  [subtitleMutations.RANKS_UPDATE]({ ranks }, { id, rank }) {
+    Vue.set(ranks, id, rank);
+  },
+  [subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE](state, subtitleId) {
+    state.currentSubtitleId = subtitleId;
   },
   UpdateDelay(state, payload) {
     if (payload === 0) {
-      state.SubtitleDelay = 0;
+      state.subtitleDelay = 0;
     } else {
-      state.SubtitleDelay += payload;
+      state.subtitleDelay += payload;
     }
   },
   UpdateScale(state, payload) {
-    state.curStyle.transform = `scale(${payload})`;
-    state.curBorderStyle.transform = `scale(${payload})`;
+    state.scaleNum = payload;
   },
   UpdateChosenStyle(state, payload) {
     state.chosenStyle = payload;
@@ -89,11 +200,62 @@ const mutations = {
 };
 
 const actions = {
-  updateStyle({ commit }, delta) {
-    commit('UpdateStyle', delta);
+  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit, state, getters }, {
+    id, type, language, streamIndex, ranking, isDefault,
+  }) {
+    commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loading' });
+    commit(subtitleMutations.TYPES_UPDATE, { id, type });
+    if (!state.ranks[id]) {
+      const options = generateRankOptions(type, {
+        language, streamIndex, ranking, isDefault,
+      }, getters.subtitleList);
+      commit(subtitleMutations.RANKS_UPDATE, { id, rank: rankCalculation(type, options) });
+    }
   },
-  updateBorderStyle({ commit }, delta) {
-    commit('UpdateBorderStyle', delta);
+  [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit, state, getters }, {
+    id, name, format, type, language, streamIndex, ranking, isDefault,
+  }) {
+    commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'ready' });
+    commit(subtitleMutations.NAMES_UPDATE, { id, name });
+    commit(subtitleMutations.LANGUAGES_UPDATE, { id, language });
+    commit(subtitleMutations.FORMATS_UPDATE, { id, format });
+    if (!state.ranks[id]) {
+      const options = generateRankOptions(type, {
+        language, streamIndex, ranking, isDefault,
+      }, getters.subtitleList);
+      commit(subtitleMutations.RANKS_UPDATE, { id, rank: rankCalculation(type, options) });
+    }
+  },
+  [subtitleActions.ADD_SUBTITLE_WHEN_LOADED]({ commit }, { id }) {
+    commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loaded' });
+  },
+  [subtitleActions.ADD_SUBTITLE_WHEN_FAILED]({ commit }, { id }) {
+    commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'failed' });
+  },
+  [subtitleActions.CHANGE_CURRENT_SUBTITLE]({ commit, getters }, id) {
+    if (getters.subtitleIds.includes(id)) commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, id);
+  },
+  [subtitleActions.OFF_SUBTITLES]({ commit }) {
+    commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
+  },
+  [subtitleActions.RESET_SUBTITLES]({ commit }) {
+    commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
+    commit(subtitleMutations.RESET_SUBTITLES);
+  },
+  [subtitleActions.RESET_ONLINE_SUBTITLES]({ commit, state }) {
+    const {
+      loadingStates, durations, names, languages, formats, types,
+    } = state;
+    const notOnlineIds = Object.keys(types).filter(id => types[id] !== 'online');
+    const takeSupportedFields = partialRight(pick, notOnlineIds);
+    commit(subtitleMutations.RESET_SUBTITLES, {
+      loadingStates: takeSupportedFields(loadingStates),
+      durations: takeSupportedFields(durations),
+      names: takeSupportedFields(names),
+      languages: takeSupportedFields(languages),
+      formats: takeSupportedFields(formats),
+      types: takeSupportedFields(types),
+    });
   },
   updateSubDelay({ commit }, delta) {
     commit('UpdateDelay', delta);

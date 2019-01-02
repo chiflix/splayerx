@@ -1,6 +1,6 @@
 export default {
   msg: {
-    titleName: '射手影音',
+    titleName: 'SPlayer',
     file: {
       name: '文件',
       open: '打開文件…',
@@ -17,6 +17,10 @@ export default {
       decreasePlaybackSpeed: '減緩播放速度         ]',
       captureScreen: '截圖',
       captureVideoClip: '截取視頻片段',
+      play: '播放',
+      pause: '暫停',
+      forward: '前進',
+      backward: '後退',
     },
     audio: {
       name: '音頻',
@@ -25,9 +29,12 @@ export default {
       mute: '靜音',
       switchAudioTrack: '切換音軌',
       defaultAudioTrack: '默認',
+      increaseVolume: '提高音量',
+      decreaseVolume: '降低音量',
     },
     subtitle: {
       name: '字幕',
+      subtitleSelect: '翻譯結果',
       AITranslation: '重新加載翻譯結果',
       loadSubtitleFile: '加載字幕文件…',
       mainSubtitle: '第一字幕',
@@ -55,6 +62,7 @@ export default {
       name: '窗口',
       minimize: '最小化',
       enterFullScreen: '進入全屏',
+      exitFullScreen: '退出全屏',
       bossKey: '老板鍵',
     },
     help: {
@@ -71,6 +79,7 @@ export default {
       quit: '退出',
     },
     preferences: {
+      settings: '設置',
       clearHistory: '退出時自動清空播放記錄',
       privacyConfirm: '啟用匿名信息和智能翻譯',
     },
@@ -100,14 +109,29 @@ export default {
     track: '音軌',
   },
   errorFile: {
-    title: '文件錯誤',
-    content: '視頻文件格式無法識別或文件已損壞。',
+    fileNonExist: {
+      title: '無法找到相應文件',
+      content: '將從列表中移除此項目。',
+    },
+    emptyFolder: {
+      title: '打開錯誤',
+      content: '未找到可播放文件。',
+    },
+    default: {
+      title: '文件錯誤',
+      content: '無法找到相應文件',
+    },
   },
   loading: {
     title: '',
     content: '正在搜索翻譯結果...',
   },
   privacyBubble: {
+    masVersion: {
+      content: '智能翻譯功能需要您同意通過匿名方式上傳媒體信息至服務端，否則將無法使用該功能獲取翻譯結果，我們不會收集關於您個人的隱私信息。',
+      agree: '啟用',
+      disagree: '禁用',
+    },
     tryToDisable: {
       partOne: '射手影音使用匿名信息以提供更好服務，',
       partTwo: '匿名信息會導致智能翻譯無法使用。',
@@ -125,5 +149,17 @@ export default {
     folderSource: '文件夾',
     playlistSource: '播放列表',
     playing: '正在播放',
+  },
+  nextVideo: {
+    nextInFolder: '文件夹中下一視頻',
+    nextInPlaylist: '播放列表中下一視頻',
+  },
+  subtitle: {
+    language: {
+      zh: '中文 (簡體)',
+      'zh-CN': '中文 (簡體)',
+      'zh-TW': '中文 (繁體)',
+      en: '英文',
+    },
   },
 };

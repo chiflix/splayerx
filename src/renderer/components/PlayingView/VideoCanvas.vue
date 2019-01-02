@@ -6,6 +6,7 @@
     <base-video-player
       ref="videoCanvas"
       :key="originSrc"
+      :needtimeupdate=true
       :events="['loadedmetadata', 'audiotrack']"
       :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
@@ -15,12 +16,9 @@
       :volume="volume"
       :muted="muted"
       :paused="paused"
-      :updateCurrentTime="true"
       :currentTime="seekTime"
-      :currentAudioTrackId="currentAudioTrackId.toString()"
-      @update:currentTime="updateCurrentTime" />
+      :currentAudioTrackId="currentAudioTrackId.toString()" />
     </transition>
-    <BaseSubtitle :style="{ bottom: `${-winHeight + 20}px` }"/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -28,23 +26,19 @@
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
-import WindowSizeHelper from '@/helpers/WindowSizeHelper.js';
-import { mapGetters, mapActions, mapMutations } from 'vuex';
-import { Video as videoMutations } from '@/store/mutationTypes';
+import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
-import BaseSubtitle from './BaseSubtitle.vue';
-import BaseVideoPlayer from './BaseVideoPlayer';
+import BaseVideoPlayer from './BaseVideoPlayer.vue';
+import { videodata } from '../../store/video';
 
 export default {
   name: 'video-canvas',
   components: {
-    BaseSubtitle,
     'base-video-player': BaseVideoPlayer,
   },
   data() {
     return {
       videoExisted: false,
-      windowSizeHelper: null,
       videoElement: null,
       coverFinded: false,
       seekTime: [0],
@@ -64,9 +58,6 @@ export default {
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
     }),
-    ...mapMutations({
-      updateCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
-    }),
     onMetaLoaded(event) {
       this.videoElement = event.target;
       this.videoConfigInitialize({
@@ -74,7 +65,7 @@ export default {
         muted: this.muted,
         rate: 1,
         duration: event.target.duration,
-        currentTime: this.lastPlayedTime || 0,
+        currentTime: 0,
       });
       this.updateMetaInfo({
         intrinsicWidth: event.target.videoWidth,
@@ -88,7 +79,6 @@ export default {
       }
       this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
-      this.getVideoCover();
       this.changeWindowSize();
     },
     onAudioTrack(event) {
@@ -106,6 +96,8 @@ export default {
           [320, 180],
           this.winSize,
           [this.videoWidth, this.videoHeight],
+          true,
+          getWindowRect().slice(2, 4),
         );
       } else {
         newSize = this.calculateWindowSize(
@@ -121,24 +113,29 @@ export default {
         newSize,
       );
       this.controlWindowRect(newPosition.concat(newSize));
-      this.windowSizeHelper.setNewWindowSize();
     },
-    calculateWindowSize(minSize, maxSize, videoSize) {
+    calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
       let result = videoSize;
       const getRatio = size => size[0] / size[1];
       const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
       const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
-      const diffSize = (overOrNot, size, diffedSize) => size.some((value, index) => // eslint-disable-line
-        overOrNot ? value >= diffedSize[index] : value < diffedSize[index]);
+      const biggerSize = (size, diffedSize) =>
+        size.some((value, index) => value >= diffedSize[index]);
+      const biggerWidth = (size, diffedSize) => size[0] >= diffedSize[0];
       const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
-      if (diffSize(true, videoSize, maxSize)) {
-        result = biggerRatio(videoSize, maxSize) ?
-          setHeightByWidth(maxSize) : setWidthByHeight(maxSize);
-      } else if (diffSize(false, videoSize, minSize)) {
-        result = biggerRatio(minSize, videoSize) ?
+      if (videoExisted && biggerWidth(result, maxSize)) {
+        result = setHeightByWidth(maxSize);
+      }
+      const realMaxSize = videoExisted ? screenSize : maxSize;
+      if (biggerSize(result, realMaxSize)) {
+        result = biggerRatio(result, realMaxSize) ?
+          setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
+      }
+      if (biggerSize(minSize, result)) {
+        result = biggerRatio(minSize, result) ?
           setHeightByWidth(minSize) : setWidthByHeight(minSize);
       }
-      return result.map(value => Math.round(value));
+      return result.map(Math.round);
     },
     calculateWindowPosition(currentRect, windowRect, newSize) {
       const tempRect = currentRect.slice(0, 2)
@@ -188,15 +185,26 @@ export default {
       const data = {
         shortCut: imagePath,
         smallShortCut: smallImagePath,
-        lastPlayedTime: this.currentTime,
+        lastPlayedTime: videodata.time,
         duration: this.duration,
       };
       syncStorage.setSync('recent-played', data);
     },
     saveSubtitleStyle() {
-      syncStorage.setSync('subtitle-style', { curStyle: this.curStyle, curBorderStyle: this.curBorderStyle, chosenStyle: this.chosenStyle });
+      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
-    async getVideoCover() {
+    async getVideoCover(grabCoverTime) {
+      if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
+      // Because we are execution in async, we do double check.
+      if (this.coverFinded) {
+        return;
+      }
+
+      // Assume to grab the cover can be the success and to keep
+      // it doesn't execution multiple times. if grab failed,
+      // we set it back to false.
+      this.coverFinded = true;
+
       const videoElement = this.$refs.videoCanvas.videoElement();
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -206,14 +214,17 @@ export default {
         videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
+
+      let grabCoverDone = false;
       const { data } = canvasCTX.getImageData(0, 0, 100, 100);
+      // check the cover is it right.
       for (let i = 0; i < data.length; i += 1) {
         if ((i + 1) % 4 !== 0 && data[i] > 20) {
-          this.coverFinded = true;
+          grabCoverDone = true;
           break;
         }
       }
-      if (this.coverFinded) {
+      if (grabCoverDone) {
         const smallImagePath = canvas.toDataURL('image/png');
         [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
         canvasCTX.drawImage(
@@ -221,29 +232,35 @@ export default {
           0, 0, (videoWidth / videoHeight) * 1080, 1080,
         );
         const imagePath = canvas.toDataURL('image/png');
-        const val = await this.infoDB().get('recent-played', 'path', this.originSrc);
+        const val = await this.infoDB.get('recent-played', 'path', this.originSrc);
         if (val) {
           const mergedData = Object.assign(val, { cover: imagePath, smallCover: smallImagePath });
-          this.infoDB().add('recent-played', mergedData);
+          this.infoDB.add('recent-played', mergedData);
         } else {
           const data = {
-            quickHash: this.mediaQuickHash(this.originSrc),
+            quickHash: await this.mediaQuickHash(this.originSrc),
             path: this.originSrc,
             cover: imagePath,
             smallCover: smallImagePath,
             duration: this.$store.getters.duration,
           };
-          this.infoDB().add('recent-played', data);
+          this.infoDB.add('recent-played', data);
         }
       }
-      this.lastCoverDetectingTime = this.currentTime;
+
+      this.coverFinded = grabCoverDone;
+      this.lastCoverDetectingTime = grabCoverTime;
+    },
+    checkPresentTime() {
+      if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
+        this.getVideoCover(videodata.time);
+      }
     },
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'currentTime', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen', 'curStyle', 'curBorderStyle', 'winHeight', 'chosenStyle',
-      'nextVideo']),
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
+      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -256,10 +273,10 @@ export default {
       this.saveScreenshot();
       asyncStorage.get('recent-played')
         .then(async (data) => {
-          const val = await this.infoDB().get('recent-played', 'path', oldVal);
+          const val = await this.infoDB.get('recent-played', 'path', oldVal);
           if (val && data) {
             const mergedData = Object.assign(val, data);
-            this.infoDB().add('recent-played', mergedData).then(() => {
+            this.infoDB.add('recent-played', mergedData).then(() => {
               this.$bus.$emit('database-saved');
             });
           }
@@ -268,11 +285,7 @@ export default {
       this.videoConfigInitialize({
         audioTrackList: [],
       });
-    },
-    currentTime(val) {
-      if (!this.coverFinded && val - this.lastCoverDetectingTime > 1) {
-        this.getVideoCover();
-      }
+      this.play();
     },
   },
   mounted() {
@@ -290,7 +303,11 @@ export default {
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
     });
-    this.$bus.$on('toggle-mute', this.toggleMute);
+    this.$bus.$on('next-video', () => {
+      if (this.nextVideo) {
+        this.playFile(this.nextVideo);
+      }
+    });
     this.$bus.$on('seek', (e) => {
       this.seekTime = [e];
       // todo: use vuex get video element src
@@ -301,7 +318,6 @@ export default {
         this.$bus.$emit('seek-subtitle', e);
       }
     });
-    this.windowSizeHelper = new WindowSizeHelper(this);
     window.onbeforeunload = () => {
       this.saveScreenshot();
       this.saveSubtitleStyle();

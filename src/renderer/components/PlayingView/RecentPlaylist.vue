@@ -1,7 +1,7 @@
 <template>
 <div class="recent-playlist"
   v-show="backgroundDisplayState"
-  @mousedown="handleMousedown">
+  @mouseup="handleMouseup">
   <transition name="background-fade">
   <div class="background-gradient"
     v-show="displayState"
@@ -19,13 +19,12 @@
       :style="{
         marginTop: sizeAdaption(53),
         paddingLeft: sizeAdaption(40),
-      }"
-      @mousedown.stop="">
+      }">
       <div class="top"
       :style="{
         fontSize: sizeAdaption(14),
         lineHeight: sizeAdaption(13),
-      }">{{lastPlayedTime}} {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+      }"><span ref="lastPlayedTime"></span> {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
       <div class="file-name"
         :style="{
           marginTop: sizeAdaption(9),
@@ -35,13 +34,13 @@
     </div>
     </transition>
     <div class="playlist-items"
-      @mousedown.stop=""
+      @mouseup.stop=""
       :style="{
         transition: tranFlag ? 'transform 400ms ease-in' : '',
         transform: `translateX(-${distance}px)`,
-        paddingTop: sizeAdaption(20),
-        paddingBottom: sizeAdaption(40),
-        paddingLeft: sizeAdaption(40),
+        marginTop: sizeAdaption(20),
+        marginBottom: sizeAdaption(40),
+        marginLeft: sizeAdaption(40),
       }">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
         :key="item"
@@ -54,9 +53,15 @@
         :isShifting="shifting"
         :hoverIndex="hoverIndex"
         :thumbnailWidth="thumbnailWidth"
-        @mouseupItem="itemMouseup"
-        @mouseoutItem="itemMouseout"
-        @mouseoverItem="itemMouseover"/>
+        :eventTarget="eventTarget" />
+      <div class="next-page"
+        v-if="thumbnailNumber < numberOfPlaylistItem"
+        @mouseup.stop=""
+        :style="{
+          marginRight: sizeAdaption(15),
+          width: `${thumbnailWidth}px`,
+          height: `${thumbnailWidth / (112 / 63)}px`,
+        }"/>
     </div>
   </div>
   </transition>
@@ -64,19 +69,22 @@
 </template>
 <script>
 import path from 'path';
-import { Video as videoAction } from '@/store/actionTypes';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
+import { Input as InputActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
+
 export default {
   name: 'recent-playlist',
   components: {
     RecentPlaylistItem,
   },
   props: {
-    mousemove: {},
+    mousemovePosition: {},
     displayState: Boolean,
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
+    isDragging: Boolean,
+    lastDragging: Boolean,
   },
   data() {
     return {
@@ -86,37 +94,69 @@ export default {
       shifting: false,
       snapShoted: false,
       hoveredMediaInfo: {}, // the hovered video's media info
-      backgroundDisplayState: this.displayState,
       mousePosition: [],
+      backgroundDisplayState: this.displayState, // it's weird but DON'T DELETE IT!!
       canHoverItem: false,
       tranFlag: false,
+      filePathNeedToDelete: '',
+      eventTarget: {},
     };
   },
-  mounted() {
+  created() {
+    this.$bus.$on('file-not-existed', (path) => {
+      this.filePathNeedToDelete = path;
+    });
+    this.$bus.$on('delete-file', () => {
+      this.$store.dispatch('RemovePlayingList', this.filePathNeedToDelete);
+      this.filePathNeedToDelete = '';
+    });
+    this.hoverIndex = this.playingIndex;
+    this.eventTarget.onItemMouseover = this.onItemMouseover;
+    this.eventTarget.onItemMouseout = this.onItemMouseout;
+    this.eventTarget.onItemMouseup = this.onItemMouseup;
+
+    this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
+    ...mapActions({
+      clearMousedown: InputActions.MOUSEDOWN_UPDATE,
+      clearMouseup: InputActions.MOUSEUP_UPDATE,
+    }),
     afterLeave() {
       this.backgroundDisplayState = false;
     },
     sizeAdaption(size) {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
     },
-    handleMousedown() {
-      this.$emit('update:playlistcontrol-showattached', false);
+    handleMouseup() {
+      if (!this.isDragging) {
+        this.$emit('update:playlistcontrol-showattached', false);
+        this.$emit('conflict-resolve', this.$options.name);
+        this.$emit('update:isDragging', false);
+      }
     },
-    itemMouseover(payload) {
-      this.hoverIndex = payload.index;
-      this.hoveredMediaInfo = payload.mediaInfo;
+    onItemMouseover(index, media) {
+      this.hoverIndex = index;
+      this.hoveredMediaInfo = media;
       this.filename = path.basename(
-        payload.mediaInfo.filename,
-        path.extname(payload.mediaInfo.filename),
+        media.path,
+        path.extname(media.path),
       );
     },
-    itemMouseout() {
+    onItemMouseout() {
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
-    itemMouseup(index) {
+    updatelastPlayedTime(time) {
+      if (this.$refs.lastPlayedTime) {
+        if (this.hoverIndex === this.playingIndex) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
+        } else if (this.hoveredMediaInfo.lastPlayedTime) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
+        }
+      }
+    },
+    onItemMouseup(index) {
       // last page
       if (index === this.firstIndex - 1) {
         this.lastIndex = index;
@@ -134,13 +174,17 @@ export default {
           this.shifting = false;
           this.tranFlag = false;
         }, 400);
-      } else if (index !== this.playingIndex) {
-        this.openFile(this.playingList[index]);
-        this.$store.dispatch(videoAction.PLAY_VIDEO);
+      } else if (index !== this.playingIndex && !this.shifting
+        && this.filePathNeedToDelete !== this.playingList[index]) {
+        this.playFile(this.playingList[index]);
       }
     },
   },
   watch: {
+    originSrc() {
+      this.hoverIndex = this.playingIndex;
+      this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+    },
     firstIndex() {
       if (this.lastIndex > this.maxIndex) {
         this.lastIndex = this.maxIndex;
@@ -151,13 +195,19 @@ export default {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
-    mousedownOnOther(val) {
-      if (val && this.mouseupOnOther) {
-        this.$emit('update:playlistcontrol-showattached', false);
+    mousedownCurrentTarget(val) {
+      if (val !== this.$options.name && this.backgroundDisplayState) {
+        if (this.lastDragging) {
+          this.clearMouseup({ target: '' });
+        } else if (this.mouseupCurrentTarget !== 'playlist-control' && this.mouseupCurrentTarget !== '') {
+          this.$emit('update:playlistcontrol-showattached', false);
+        }
       }
     },
-    mouseupOnOther(val) {
-      if (val) {
+    mouseupCurrentTarget(val) {
+      if (this.lastDragging) {
+        this.clearMousedown({ target: '' });
+      } else if (val !== this.$options.name && this.backgroundDisplayState) {
         this.$emit('update:playlistcontrol-showattached', false);
       }
     },
@@ -168,40 +218,42 @@ export default {
         this.lastIndex = val;
       }
     },
-    displayState(val) {
+    displayState(val, oldval) {
+      if (oldval !== undefined) {
+        this.$bus.$emit('subtitle-to-top', val);
+      }
       this.canHoverItem = false;
-      this.mousePosition = this.mousemove.position;
+      this.mousePosition = this.mousemovePosition;
       if (val) {
+        this.$store.dispatch('UpdatePlayingList');
         this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;
       }
     },
-    mousemove(val) {
+    mousemovePosition(val) {
       const distance = this.winWidth > 1355 ? 20 : 10;
       if (!this.canHoverItem && this.displayState) {
-        if (Math.abs(this.mousePosition[0] - val.position[0]) > distance ||
-        Math.abs(this.mousePosition[1] - val.position[1]) > distance) {
+        if (Math.abs(this.mousePosition.x - val.x) > distance ||
+        Math.abs(this.mousePosition.y - val.y) > distance) {
           this.canHoverItem = true;
         }
       }
     },
   },
   computed: {
-    ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'roundedCurrentTime', 'originSrc']),
+    ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
+    mousedownCurrentTarget() {
+      return this.$store.state.Input.mousedownTarget;
+    },
+    mouseupCurrentTarget() {
+      return this.$store.state.Input.mouseupTarget;
+    },
     inWhichSource() {
       if (this.isFolderList) {
         return this.$t('recentPlaylist.folderSource');
       }
       return this.$t('recentPlaylist.playlistSource');
-    },
-    lastPlayedTime() {
-      if (this.hoverIndex === this.playingIndex) {
-        return `${this.timecodeFromSeconds(this.$store.getters.roundedCurrentTime)} /`;
-      } else if (this.hoveredMediaInfo.lastPlayedTime) {
-        return `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
-      }
-      return '';
     },
     videoDuration() {
       if (this.hoverIndex !== this.playingIndex) {
@@ -229,6 +281,9 @@ export default {
       },
     },
     distance() {
+      if (this.winWidth > 1355) {
+        return this.firstIndex * (this.thumbnailWidth + ((this.winWidth / 1355) * 15));
+      }
       return this.firstIndex * (this.thumbnailWidth + 15);
     },
     maxIndex() {
@@ -312,6 +367,7 @@ export default {
     .playlist-items {
       -webkit-app-region: no-drag;
       display: flex;
+      width: fit-content;
       .item {
         position: relative;
         background-color: rgba(255,255,255,0.1);

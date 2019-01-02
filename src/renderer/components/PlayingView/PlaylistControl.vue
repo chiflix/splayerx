@@ -5,7 +5,8 @@
 </template>
 <script>
 import lottie from '@/components/lottie.vue';
-import * as animationData from '@/assets/playlist.json';
+import animationData from '@/assets/playlist.json';
+
 export default {
   name: 'playlist-control',
   components: {
@@ -13,8 +14,6 @@ export default {
   },
   props: {
     showAttached: Boolean,
-    mousedownOnOther: Boolean,
-    mouseupOnOther: Boolean,
   },
   data() {
     return {
@@ -26,8 +25,8 @@ export default {
     };
   },
   computed: {
-    videoRatio() {
-      return this.$store.getters.ratio;
+    mousedownCurrentTarget() {
+      return this.$store.state.Input.mousedownTarget;
     },
   },
   methods: {
@@ -40,7 +39,6 @@ export default {
       switch (this.clicks) {
         case 1:
           this.$emit('update:showAttached', true);
-          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [512, Math.round(512 / this.videoRatio)]);
           break;
         case 2:
           this.$emit('update:showAttached', false);
@@ -57,7 +55,7 @@ export default {
       document.onmouseup = () => {
         if (this.validEnter) {
           this.anim.playSegments([47, 51], false);
-        } else if (!this.mousedownOnOther) {
+        } else if (this.mousedownCurrentTarget === this.$options.name) {
           this.anim.playSegments([37, 41], false);
         }
         this.mouseDown = false;

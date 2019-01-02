@@ -1,9 +1,9 @@
 <template>
-  <div class="cont">
+  <div class="cont" v-fade-in="showAllWidgets || progressTriggerStopped">
     <div class="timing"
       :data-component-name="$options.name"
       @mousedown="switchTimeContent">
-          <span class="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration">{{ timeContent }}</span>
+          <span class="timeContent" ref="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration"></span>
     </div>
     <rateLabel class="rate"></rateLabel>
   </div>
@@ -11,37 +11,58 @@
 <script>
 import { mapGetters } from 'vuex';
 import rateLabel from './RateLabel.vue';
+
 export default {
   name: 'the-time-codes',
+  components: {
+    rateLabel,
+  },
+  props: ['showAllWidgets'],
   data() {
     return {
       isRemainTime: false,
+      progressTriggerStopped: false,
+      progressTriggerId: 0,
+      progressDisappearDelay: 1000,
     };
+  },
+  computed: {
+    ...mapGetters(['duration', 'progressKeydown', 'rate']),
+    hasDuration() {
+      return !Number.isNaN(this.duration);
+    },
+  },
+  watch: {
+    rate() {
+      if (!this.progressKeydown) {
+        this.progressTriggerStopped = true;
+        this.clock.clearTimeout(this.progressTriggerId);
+        this.progressTriggerId = this.clock.setTimeout(() => {
+          this.progressTriggerStopped = false;
+        }, this.progressDisappearDelay);
+      }
+    },
+    progressKeydown(newValue) {
+      if (newValue) {
+        this.progressTriggerStopped = true;
+        this.clock.clearTimeout(this.progressTriggerId);
+      } else {
+        this.progressTriggerId = this.clock.setTimeout(() => {
+          this.progressTriggerStopped = false;
+        }, this.progressDisappearDelay);
+      }
+    },
   },
   methods: {
     switchTimeContent() {
       this.isRemainTime = !this.isRemainTime;
     },
-  },
-  components: {
-    rateLabel,
-  },
-  computed: {
-    ...mapGetters(['roundedCurrentTime', 'duration']),
-    hasDuration() {
-      return !Number.isNaN(this.duration) && !Number.isNaN(this.roundedCurrentTime);
-    },
-    convertedCurrentTime() {
-      return this.timecodeFromSeconds(this.roundedCurrentTime);
-    },
-    remainTime() {
-      const remainTime
-        = -(this.duration - this.roundedCurrentTime);
-      return this.timecodeFromSeconds(remainTime);
-    },
-    timeContent() {
-      return this.isRemainTime ?
-        this.remainTime : this.convertedCurrentTime;
+    updateTimeContent(time) {
+      if (this.$refs.timeContent) {
+        this.$refs.timeContent.textContent =
+        this.timecodeFromSeconds(this.isRemainTime ?
+          Math.floor(this.duration) - Math.floor(time) : Math.floor(time));
+      }
     },
   },
 };
@@ -50,7 +71,7 @@ export default {
 <style lang="scss">
 @media screen and (max-width: 512px) {
   .cont {
-    bottom: 20px;
+    bottom: 23px;
     left: 20px;
   }
   .timing {
@@ -69,7 +90,7 @@ export default {
 }
 @media screen and (min-width: 513px) and (max-width: 854px) {
   .cont {
-    bottom: 24px;
+    bottom: 27px;
     left: 28px;
   }
   .timing {
@@ -88,7 +109,7 @@ export default {
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
   .cont {
-    bottom: 31px;
+    bottom: 34px;
     left: 33px;
   }
   .timing {

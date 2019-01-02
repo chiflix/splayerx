@@ -4,10 +4,12 @@
   :contentMinHeight="119"
   :contentMinWidth="170"
   :style="{
+    cursor: 'default',
     height: this.readyShow === 'mainMenu' ? menuCardHeight : this.readyShow === 'subMenu' ? subtitleCardHeight : audioCardHeight,
     transition: 'height 100ms linear',
+    fontWeight: '900',
   }">
-  <transition name="setUp">
+  <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
     <div class="mainItems" v-show="readyShow === 'mainMenu'"
       :style="{
         bottom: readyShow === 'mainMenu' ? '' : '0px',
@@ -32,7 +34,8 @@
         <transition name="arrow">
           <div class="hoverSubBack" v-show="hoverIndex === 2"></div>
         </transition>
-        <div class="subContainer">
+        <div class="subContainer"
+          :style="{ cursor: 'pointer'}">
           <div class="item2"
             :style="{
               color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
@@ -48,7 +51,8 @@
       <div class="audioItems"
         @mouseenter="handleMouseenter(3)"
         @mouseleave="handleMouseleave()"
-        @click.left="handleAudioClick">
+        @click.left="handleAudioClick"
+        :style="{ cursor: 'pointer' }">
         <transition name="arrow">
           <div class="hoverAudioBack" v-show="hoverIndex === 3"></div>
         </transition>
@@ -68,7 +72,7 @@
     </div>
   </transition>
 
-  <transition name="setUp">
+  <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
     <div class="mainItems1" v-show="readyShow === 'subMenu'"
       :style="{
         bottom: readyShow === 'subMenu' ? '' : '0px',
@@ -124,7 +128,7 @@
     </div>
   </transition>
 
-  <transition name="setUp">
+  <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
     <div class="mainItems2" v-show="readyShow === 'audioMenu'"
       :style="{
         bottom: readyShow === 'audioMenu' ? '' : '0px',
@@ -141,17 +145,18 @@
             }">{{ this.$t('advance.audioMenu') }}</div>
         </div>
       </div>
-      <div class="audioDelay" @click.left="handleAudioDelayClick"
+      <div class="audioDelay"
+        @click.left="1"
         @mouseenter="handleAudioMouseenter(1)"
         @mouseleave="handleAudioMouseleave()"
         :style="{
           height: audioDelayHeight,
           transition: 'height 100ms linear',
-        }">
+        }"><!--disable temporarily-->
         <transition name="arrow">
-          <div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1" :style="{ height: audioDelayHeight }"></div>
+          <!--<div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1" :style="{ height: audioDelayHeight }"></div>-->
         </transition>
-        <advance-selected-items :item="audioDelayName" :winWidth="winWidth" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
+        <advance-selected-items :item="audioDelayName" :winWidth="winWidth" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"></advance-selected-items>
       </div>
       <div class="changeTrack" @click.left="handleTrackClick"
         @mouseenter="handleAudioMouseenter(2)"
@@ -161,20 +166,20 @@
           transition: 'height 100ms linear',
         }">
         <transition name="arrow">
-          <div class="hoverBack" v-show="!showTrack && hoverAudioIndex === 2 && 2 <= trackNum" :style="{ height: changeTrackHeight }"></div>
+          <div class="hoverBack" v-show="!showTrack && hoverAudioIndex === 2" :style="{ height: changeTrackHeight }"></div>
         </transition>
         <div class="trackContainer">
         <transition name="audioTransIn">
-          <div class="item2" v-show="!showTrack">
+          <div class="item2" v-show="!showTrack"
+            :style="{ cursor: 'pointer' }">
             <div :style="{
-              color: hoverAudioIndex === 2 && !showTrack && 2 <= trackNum ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+              color: hoverAudioIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">{{ this.$t('advance.changeTrack') }}</div>
-            <div
-              class="trackDetail"
+            <div class="trackDetail"
               :style="{
-              color: 'rgba(255, 255, 255, 0.6)',
-            }">{{ currentAudioTrack }}</div>
+                color: 'rgba(255, 255, 255, 0.6)',
+              }">{{ currentAudioTrack }}</div>
           </div>
         </transition>
         </div>
@@ -188,12 +193,14 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import AdvanceRowItems from './AdvanceRowItems.vue';
 import BaseInfoCard from '../InfoCard.vue';
 import Icon from '../../BaseIconContainer.vue';
 import AdvanceColorItems from './AdvanceColorItems.vue';
 import AdvanceSelectedItemts from './AdvanceSelectItems.vue';
 import AdvanceColumnItems from './AdvanceColumnItems.vue';
+
 export default {
   name: 'AdvanceMainMenu',
   data() {
@@ -242,122 +249,70 @@ export default {
         }, 150);
       }
     },
+    trackNum(val) {
+      if (val < 1) {
+        this.showTrack = false;
+      }
+    },
   },
   computed: {
+    ...mapGetters(['winWidth', 'currentSubtitleId']),
     currentAudioTrack() {
-      if (this.trackNum === 1) {
-        return this.$t('advance.chosenTrack');
-      }
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
-      if (track && track.id) return track.language;
+      if (track) {
+        if (track.language === '' || track.language === 'und') {
+          return `${this.$t('advance.track')} ${this.$store.getters.audioTrackList.indexOf(track) + 1}`;
+        } else if (this.$store.getters.audioTrackList.length === 1) {
+          return `${track.language}`;
+        }
+        return `${track.name}`;
+      }
       return this.$t('advance.chosenTrack');
     },
-    winWidth() {
-      return this.$store.getters.winWidth;
-    },
     speedHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.speedChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.speedChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.speedChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.speedChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     subSizeHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.subSizeChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.subSizeChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.subSizeChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.subSizeChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     subColorHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.subColorChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.subColorChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.subColorChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.subColorChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     subDelayHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.subDelayChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.subDelayChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.subDelayChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.subDelayChosen ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     audioDelayHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.showDelay ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.showDelay ? `${74 * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.showDelay ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.showDelay ? `${this.initialSize(74)}px` : `${this.initialSize(37)}px`;
     },
     changeTrackHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.showTrack ? `${this.trackHeight}px` : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.showTrack ? `${this.trackHeight * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.showTrack ? `${this.trackHeight * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+      return this.showTrack ? `${this.initialSize(this.trackHeight)}px` : `${this.initialSize(37)}px`;
     },
     menuCardHeight() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.speedChosen ? '164px' : '127px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.speedChosen ? `${164 * 1.2}px` : `${127 * 1.2}px`;
-      }
-      return this.speedChosen ? `${164 * 1.2 * 1.4}px` : `${127 * 1.2 * 1.4}px`;
+      return this.speedChosen ? `${this.initialSize(164)}px` : `${this.initialSize(127)}px`;
     },
     subtitleCardHeight() {
-      if (this.andify(this.winWidth > 514, this.winWidth <= 854)) {
-        return this.andify(this.andify(!this.subColorChosen, !this.subSizeChosen), !this.subDelayChosen) ? '156px' : '193px';
-      } else if (this.andify(this.winWidth > 854, this.winWidth <= 1920)) {
-        return this.andify(this.andify(!this.subColorChosen, !this.subSizeChosen), !this.subDelayChosen) ? `${156 * 1.2}px` : `${193 * 1.2}px`;
-      }
-      return this.andify(this.andify(!this.subColorChosen, !this.subSizeChosen), !this.subDelayChosen) ? `${156 * 1.2 * 1.4}px` : `${193 * 1.2 * 1.4}px`;
+      return !this.subColorChosen && !this.subSizeChosen && !this.subDelayChosen ? `${this.initialSize(156)}px` : `${this.initialSize(193)}px`;
     },
     audioCardHeight() {
-      if (this.andify(this.winWidth > 514, this.winWidth <= 854)) {
-        if (this.showDelay) {
-          return '156px';
-        } else if (this.showTrack) {
-          return `${this.containerHeight}px`;
-        }
-        return '119px';
-      } else if (this.andify(this.winWidth > 854, this.winWidth <= 1920)) {
-        if (this.showDelay) {
-          return `${156 * 1.2}px`;
-        } else if (this.showTrack) {
-          return `${this.containerHeight * 1.2}px`;
-        }
-        return `${119 * 1.2}px`;
-      }
       if (this.showDelay) {
-        return `${156 * 1.2 * 1.4}px`;
+        return `${this.initialSize(156)}px`;
       } else if (this.showTrack) {
-        return `${this.containerHeight * 1.2 * 1.4}px`;
+        return `${this.initialSize(this.containerHeight)}px`;
       }
-      return `${119 * 1.2 * 1.4}px`;
+      return `${this.initialSize(119)}px`;
     },
     trackNum() {
       return this.$store.getters.audioTrackList.length;
     },
     containerHeight() {
-      if (this.trackNum === 1 || this.trackNum === 0) {
-        return 119;
-      } else if (this.trackNum === 2) {
-        return 193;
+      if (this.trackNum <= 2) {
+        return 133 + (this.trackNum * 27) + ((this.trackNum - 1) * 5);
       }
       return 230;
     },
     trackHeight() {
-      if (this.trackNum === 1 || this.trackNum === 0) {
-        return 37;
-      } else if (this.trackNum === 2) {
-        return 110;
+      if (this.trackNum <= 2) {
+        return (51 + (this.trackNum * 27)) + ((this.trackNum - 1) * 5);
       }
       return 142;
     },
@@ -371,6 +326,14 @@ export default {
     Icon,
   },
   methods: {
+    initialSize(size) {
+      if (this.winWidth > 514 && this.winWidth <= 854) {
+        return size;
+      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        return size * 1.2;
+      }
+      return size * 1.2 * 1.4;
+    },
     handleClick() {
       this.speedChosen = true;
     },
@@ -446,16 +409,10 @@ export default {
       this.showTrack = false;
     },
     handleTrackClick() {
-      if (this.trackNum >= 2) {
+      if (this.trackNum > 0) {
         this.showDelay = false;
         this.showTrack = true;
       }
-    },
-    orify(...args) {
-      return args.some(arg => arg == true); // eslint-disable-line
-    },
-    andify(...args) {
-      return args.every(arg => arg == true); // eslint-disable-line
     },
   },
 };
@@ -501,6 +458,16 @@ export default {
   .setUp-leave-active {
     animation: hideP1 .2s;
   }
+
+  .setUpLeft-enter-active {
+    animation: showLeftP1 .2s;
+  }
+  .setUpLeft-enter, .setUpLeft-leave-to {
+    opacity: 0;
+  }
+  .setUpLeft-leave-active {
+    animation: hideLeftP1 .2s;
+  }
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
   .card {
@@ -540,6 +507,15 @@ export default {
   }
   .setUp-leave-active {
     animation: hideP2 .2s;
+  }
+  .setUpLeft-enter-active {
+    animation: showLeftP2 .2s;
+  }
+  .setUpLeft-enter, .setUpLeft-leave-to {
+    opacity: 0;
+  }
+  .setUpLeft-leave-active {
+    animation: hideLeftP2 .2s;
   }
 }
 @media screen and (min-width: 1921px) {
@@ -581,6 +557,16 @@ export default {
   .setUp-leave-active {
     animation: hideP3 .2s;
   }
+  .setUpLeft-enter-active {
+    animation: showLeftP3 .2s;
+  }
+  .setUpLeft-enter, .setUpLeft-leave-to {
+    opacity: 0;
+  }
+  .setUpLeft-leave-active {
+    animation: hideLeftP3 .2s;
+  }
+
 }
 
 .card {
@@ -646,6 +632,7 @@ export default {
   }
   .topContainer {
     display: flex;
+    cursor: pointer;
     .topContent {
       display: flex;
       justify-content: flex-start;
@@ -668,6 +655,7 @@ export default {
   position: absolute;
   .topContainer {
     display: flex;
+    cursor: pointer;
     .topContent {
       display: flex;
       justify-content: flex-start;
@@ -768,6 +756,66 @@ export default {
   100% {
     opacity: 0;
     right: -285.6px;
+  }
+}
+@keyframes showLeftP1 {
+  0% {
+    opacity: 0;
+    right: -170px;
+  }
+  100% {
+    opacity: 1;
+    right: 0;
+  }
+}
+@keyframes hideLeftP1 {
+  0% {
+    opacity: 1;
+    right: 0;
+  }
+  100% {
+    opacity: 0;
+    right: 170px;
+  }
+}
+@keyframes showLeftP2 {
+  0% {
+    opacity: 0;
+    right: -204px;
+  }
+  100% {
+    opacity: 1;
+    right: 0;
+  }
+}
+@keyframes hideLeftP2 {
+  0% {
+    opacity: 1;
+    right: 0;
+  }
+  100% {
+    opacity: 0;
+    right: 204px;
+  }
+}
+@keyframes showLeftP3 {
+  0% {
+    opacity: 0;
+    right: -285.6px;
+  }
+  100% {
+    opacity: 1;
+    right: 0;
+  }
+}
+@keyframes hideLeftP3 {
+  0% {
+    opacity: 1;
+    right: 0;
+  }
+  100% {
+    opacity: 0;
+    right: 285.6px;
   }
 }
 </style>

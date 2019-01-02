@@ -1,11 +1,11 @@
 <template>
   <div class="thumbnail-wrapper"
-    :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', left: positionOfThumbnail + 'px'}">
+    :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', transform: `translateX(${positionOfThumbnail}px)`}">
     <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
       <thumbnail-video-player
         v-if="mountVideo"
         v-show="displayVideo"
-        :quickHash="quickHash"
+        :quickHash="mediaHash"
         :currentTime="videoCurrentTime"
         :thumbnailWidth="thumbnailWidth"
         :thumbnailHeight="thumbnailHeight"
@@ -14,7 +14,7 @@
       <thumbnail-display
         v-if="mountImage"
         v-show="!displayVideo"
-        :quickHash="quickHash"
+        :quickHash="mediaHash"
         :autoGenerationIndex="autoGenerationIndex"
         :maxThumbnailWidth="maxThumbnailWidth"
         :currentIndex="currentIndex"
@@ -23,7 +23,7 @@
     </div>
     <div class="thumbnail-gradient"></div>
     <div class="time">
-      <span class="flex-items">{{ videoTime }}</span>
+      <span class="flex-items" :style="{ color: hoveredEnd ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)'}">{{ videoTime }}</span>
       <transition name="hovered-end">
         <base-icon class="flex-items hovered-end" type="hoveredEnd" v-if="hoveredEnd" />
       </transition>
@@ -36,12 +36,12 @@ import { mapGetters } from 'vuex';
 import idb from 'idb';
 import {
   THUMBNAIL_DB_NAME,
-  INFO_DATABASE_NAME,
   THUMBNAIL_OBJECT_STORE_NAME,
 } from '@/constants';
-import Icon from '../BaseIconContainer';
-import ThumbnailVideoPlayer from './ThumbnailVideoPlayer';
-import ThumbnailDisplay from './ThumbnailDisplay';
+import Icon from '../BaseIconContainer.vue';
+import ThumbnailVideoPlayer from './ThumbnailVideoPlayer.vue';
+import ThumbnailDisplay from './ThumbnailDisplay.vue';
+
 export default {
   components: {
     'thumbnail-video-player': ThumbnailVideoPlayer,
@@ -73,7 +73,6 @@ export default {
         videoRatio: this.videoRatio,
         lastGenerationIndex: 0,
       },
-      quickHash: null,
       displayVideo: true,
       videoCurrentTime: 0,
       canvasCurrentTime: 0,
@@ -88,17 +87,17 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['originSrc', 'convertedSrc']),
+    ...mapGetters(['convertedSrc', 'mediaHash']),
   },
   watch: {
-    originSrc() {
+    async mediaHash(newValue) {
       // Reload video and image components
       this.mountVideo = false;
       this.mountImage = false;
       this.generatedIndex = 0;
       this.currentIndex = 0;
-      this.quickHash = this.mediaQuickHash(this.originSrc);
-      this.retrieveThumbnailInfo(this.quickHash).then(this.updateThumbnailData);
+      const thumbnailInfo = await this.retrieveThumbnailInfo(newValue);
+      this.updateThumbnailData(thumbnailInfo);
     },
     currentTime(newValue) {
       const index = Math.abs(Math.floor(newValue / this.generationInterval));
@@ -116,8 +115,8 @@ export default {
     updateThumbnailInfo(event) {
       this.autoGenerationIndex = event.index;
       this.generationInterval = event.interval;
-      this.infoDB().add(THUMBNAIL_OBJECT_STORE_NAME, {
-        quickHash: this.quickHash,
+      this.infoDB.add(THUMBNAIL_OBJECT_STORE_NAME, {
+        quickHash: this.mediaHash,
         lastGenerationIndex: event.index,
         generationInterval: event.interval,
         maxThumbnailCount: event.count,
@@ -131,7 +130,7 @@ export default {
     },
     retrieveThumbnailInfo(quickHash) {
       return new Promise((resolve) => {
-        this.infoDB().get(THUMBNAIL_OBJECT_STORE_NAME, quickHash).then((result) => {
+        this.infoDB.get(THUMBNAIL_OBJECT_STORE_NAME, quickHash).then((result) => {
           if (result) {
             const { lastGenerationIndex, maxThumbnailCount, generationInterval } = result;
             this.autoGenerationIndex = lastGenerationIndex;
@@ -152,7 +151,7 @@ export default {
     updateThumbnailData(dataResult) {
       const result = dataResult;
       if (result) {
-        const thumnailInfo = result;
+        const thumbnailInfo = result;
         // Update Generation Parameters
         this.lastGenerationIndex = result.lastGenerationIndex || 0;
         this.maxThumbnailCount = result.maxThumbnailCount || 0;
@@ -161,10 +160,10 @@ export default {
         this.outerThumbnailInfo = Object.assign(
           {},
           this.outerThumbnailInfo,
-          thumnailInfo,
+          thumbnailInfo,
           { videoSrc: this.convertedSrc },
-          { lastGenerationIndex: this.lastGenerationIndex },
-          { maxThumbnailCount: this.maxThumbnailCount },
+          { lastGenerationIndex: this.lastGenerationIndex || 0 },
+          { maxThumbnailCount: this.maxThumbnailCount || 0 },
         );
         // Update mountVideo
         this.mountVideo = !result.lastGenerationIndex ||
@@ -180,7 +179,7 @@ export default {
       const obejctStoreName = `thumbnail-width-${this.maxThumbnailWidth}`;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
         idb.open(THUMBNAIL_DB_NAME, db.version + 1, (upgradeDB) => {
-          this.addLog('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
+          this.addLog('info', `[IndexedDB]: Initial thumbnails storage objectStore of width: ${this.maxThumbnailWidth} `);
           const store = upgradeDB.createObjectStore(
             `thumbnail-width-${this.maxThumbnailWidth}`,
             { keyPath: 'id', autoIncrement: false, unique: true },
@@ -190,22 +189,13 @@ export default {
         });
       }
     });
-    idb.open(INFO_DATABASE_NAME).then((db) => {
-      this.quickHash = this.mediaQuickHash(this.originSrc);
-      const obejctStoreName = THUMBNAIL_OBJECT_STORE_NAME;
-      if (!db.objectStoreNames.contains(obejctStoreName)) {
-        this.addLog('info', '[IndexedDB]: Initial thumbnails storage objectStore.');
-        return idb.open(INFO_DATABASE_NAME, db.version + 1, (upgradeDB) => {
-          upgradeDB.createObjectStore(obejctStoreName, { keyPath: 'quickHash' }, { unique: true });
-        });
-      }
-      return idb.open(INFO_DATABASE_NAME);
-    })
-      .then(() => this.retrieveThumbnailInfo(this.quickHash))
+
+    this.retrieveThumbnailInfo(this.mediaHash)
       .then(this.updateThumbnailData)
       .catch((err) => {
         this.addLog('error', err);
       });
+
     this.$bus.$on('image-all-get', (e) => {
       this.generatedIndex = e;
     });
@@ -215,7 +205,7 @@ export default {
 <style lang="scss" scoped>
 .thumbnail-wrapper {
   position: absolute;
-  bottom: 20px;
+  bottom: 15px;
   -webkit-app-region: no-drag;
   box-sizing: content-box;
   overflow: hidden;

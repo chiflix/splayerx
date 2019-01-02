@@ -319,6 +319,11 @@ export default {
     width: 11px;
     height: 11px;
   }
+  .refresh {
+    display: block;
+    width: 13px;
+    height: 13px;
+  }
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
   .rightArrow {
@@ -331,6 +336,11 @@ export default {
     width: 13.2px;
     height: 13.2px;
   }
+  .refresh {
+    display: block;
+    width: 17px;
+    height: 17px;
+  }
 }
 @media screen and (min-width: 1921px) {
   .rightArrow {
@@ -342,6 +352,11 @@ export default {
     display: block;
     width: 18.48px;
     height: 18.48px;
+  }
+  .refresh {
+    display: block;
+    width: 21px;
+    height: 21px;
   }
 }
 .speed {
@@ -361,6 +376,28 @@ export default {
   @media screen and (min-width: 1921px) {
     width: 14px;
     height: 11px;
+  }
+}
+.refresh {
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
   }
 }
 </style>

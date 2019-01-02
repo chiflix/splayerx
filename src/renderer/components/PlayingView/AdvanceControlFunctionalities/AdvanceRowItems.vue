@@ -29,7 +29,8 @@
               @mouseout="handleOut(index)"
               @click="handleClick(index)"
               :style="{
-                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`
+                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`,
+                cursor: list.chosen ? 'default' : 'pointer',
               }">
               <div class="text"
                 :style="{
@@ -51,8 +52,10 @@
 </template>
 
 <script>
+import asyncStorage from '@/helpers/asyncStorage';
 import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
+
 export default {
   name: 'AdvanceRowItems',
   data() {
@@ -60,6 +63,7 @@ export default {
       hoverIndex: -1,
       selectedIndex: 1,
       moveLength: '',
+      lastSize: 1,
     };
   },
   props: {
@@ -97,15 +101,17 @@ export default {
       }
     },
     chosenSize(val) {
-      this.lists.forEach((i, ind) => {
-        if (ind !== val) {
-          this.$set(this.lists[ind], 'chosen', false);
-        } else {
-          this.$set(this.lists[ind], 'chosen', true);
-        }
-      });
-      this.selectedIndex = val;
-      this.calculateFontLength(val);
+      if (this.item === this.$t('advance.fontSize')) {
+        this.lists.forEach((i, ind) => {
+          if (ind !== val) {
+            this.$set(this.lists[ind], 'chosen', false);
+          } else {
+            this.$set(this.lists[ind], 'chosen', true);
+          }
+        });
+        this.selectedIndex = val;
+        this.calculateFontLength(val);
+      }
     },
     winWidth(val) {
       if (val > 1920) {
@@ -209,12 +215,27 @@ export default {
       }
       return this.item === this.$t('advance.fontSize') ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
     },
-    subStyle() {
-      return this.$store.getters.curStyle;
-    },
+  },
+  created() {
+    asyncStorage.get('subtitle-style').then((data) => {
+      if (data.chosenSize) {
+        if (this.item === this.$t('advance.fontSize')) {
+          this.handleClick(data.chosenSize);
+        }
+      }
+    });
   },
   mounted() {
-    this.$set(this.lists[1], 'chosen', true);
+    this.$bus.$on('subtitle-to-top', (val) => {
+      if (this.item === this.$t('advance.fontSize')) {
+        if (val) {
+          this.lastSize = this.chosenSize;
+          this.handleClick(0);
+        } else {
+          this.handleClick(this.lastSize);
+        }
+      }
+    });
   },
   methods: {
     handleOver(index) {
@@ -496,6 +517,7 @@ export default {
   .listContainer {
     flex: 1;
     display: flex;
+    cursor: default;
     .rowContainer {
       display: flex;
       justify-content: space-around;

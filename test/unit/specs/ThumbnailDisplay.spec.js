@@ -1,4 +1,4 @@
-import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay';
+import ThumbnailDisplay from '@/components/PlayingView/ThumbnailDisplay.vue';
 import { mount } from '@vue/test-utils';
 import sinon from 'sinon';
 
@@ -24,8 +24,8 @@ describe('Component - ThumbnailDisplay', () => {
   };
 
   beforeEach(() => {
-    wrapper = mount(ThumbnailDisplay, { propsData });
     sandbox = sinon.createSandbox();
+    wrapper = mount(ThumbnailDisplay, { propsData });
   });
   afterEach(() => {
     wrapper.destroy();

@@ -1,6 +1,6 @@
 export default {
   msg: {
-    titleName: '射手影音',
+    titleName: 'SPlayer',
     file: {
       name: '文件',
       open: '打开文件…',
@@ -17,6 +17,10 @@ export default {
       decreasePlaybackSpeed: '减缓播放速度         ]',
       captureScreen: '截图',
       captureVideoClip: '截取视频片段',
+      play: '播放',
+      pause: '暂停',
+      forward: '前进',
+      backward: '后退',
     },
     audio: {
       name: '音频',
@@ -25,9 +29,12 @@ export default {
       mute: '静音',
       switchAudioTrack: '切换音轨',
       defaultAudioTrack: '默认',
+      increaseVolume: '提高音量',
+      decreaseVolume: '降低音量',
     },
     subtitle: {
       name: '字幕',
+      subtitleSelect: '翻译结果',
       AITranslation: '重新加载翻译结果',
       loadSubtitleFile: '加载字幕文件…',
       mainSubtitle: '第一字幕',
@@ -55,6 +62,7 @@ export default {
       name: '窗口',
       minimize: '最小化',
       enterFullScreen: '进入全屏',
+      exitFullScreen: '退出全屏',
       bossKey: '老板键',
     },
     help: {
@@ -64,13 +72,14 @@ export default {
     splayerx: {
       about: '关于 射手影音…',
       preferences: '偏好设置…',
-      homepage: '射手影音 主页',
-      feedback: '意见反馈',
+      homepage: '射手影音 主页…',
+      feedback: '意见反馈…',
       hide: '隐藏 射手影音',
       hideOthers: '隐藏 其他',
       quit: '退出',
     },
     preferences: {
+      settings: '设置',
       clearHistory: '退出时自动清空播放记录',
       privacyConfirm: '启用匿名信息和智能翻译',
     },
@@ -100,14 +109,29 @@ export default {
     track: '音轨',
   },
   errorFile: {
-    title: '文件错误',
-    content: '视频文件格式无法识别或文件已损坏。',
+    fileNonExist: {
+      title: '无法找到相应文件',
+      content: '将从列表中移除此项目。',
+    },
+    emptyFolder: {
+      title: '打开错误',
+      content: '未找到可播放文件。',
+    },
+    default: {
+      title: '文件错误',
+      content: '无法找到相应文件',
+    },
   },
   loading: {
     title: '',
     content: '正在搜索翻译结果...',
   },
   privacyBubble: {
+    masVersion: {
+      content: '智能翻译功能需要您同意通过匿名方式上传媒体信息至服务端，否则将无法使用该功能获取翻译结果，我们不会收集关于您个人的隐私信息。',
+      agree: '启用',
+      disagree: '禁用',
+    },
     tryToDisable: {
       partOne: '射手影音使用匿名信息以提供更好服务，',
       partTwo: '匿名信息会导致智能翻译无法使用。',
@@ -125,5 +149,17 @@ export default {
     folderSource: '文件夹',
     playlistSource: '播放列表',
     playing: '正在播放',
+  },
+  nextVideo: {
+    nextInFolder: '文件夹中下一视频',
+    nextInPlaylist: '播放列表中下一视频',
+  },
+  subtitle: {
+    language: {
+      zh: '中文（简体）',
+      'zh-CN': '中文（简体）',
+      'zh-TW': '中文（繁体）',
+      en: '英语',
+    },
   },
 };
