@@ -1,5 +1,5 @@
 <template>
-  <div v-fade-in="showAllWidgets" @mousedown.left="handleDown" @mouseup.left="togglePlaylistDisplay" @mouseenter="handleEnter" @mouseleave="handleLeave">
+  <div @mousedown.left="handleDown" @mouseup.left="togglePlaylistDisplay" @mouseenter="handleEnter" @mouseleave="handleLeave">
     <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="playlist"></lottie>
   </div>
 </template>
@@ -13,7 +13,6 @@ export default {
     lottie,
   },
   props: {
-    showAllWidgets: Boolean,
     showAttached: Boolean,
   },
   data() {

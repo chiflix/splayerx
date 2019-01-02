@@ -1,5 +1,5 @@
 <template>
-  <div :data-component-name="$options.name" v-fade-in="showAllWidgets">
+  <div :data-component-name="$options.name">
     <div class="advanceControl">
       <transition name="advance-trans-l">
       <div class="advanced" v-show="showAttached"
@@ -32,7 +32,6 @@ export default {
     'advance-main-menu': AdvanceMainMenu,
   },
   props: {
-    showAllWidgets: Boolean,
     showAttached: Boolean,
     lastDragging: Boolean,
   },
