@@ -4,8 +4,11 @@ import chardet from 'chardet';
 import convert3To1 from 'iso-639-3-to-1';
 import iconv from 'iconv-lite';
 import franc from 'franc';
+import { ipcRenderer } from 'electron';
 import helpers from '@/helpers';
 import Sagi from '@/helpers/sagi';
+import SubtitleLoader from './index';
+import { SubtitleError, ErrorCodes } from './errors';
 
 export async function toPromise(func) {
   func.bind(null, arguments.slice(1));
@@ -175,6 +178,26 @@ export function loadLocalFile(path) {
         resolve(iconv.decode(data, encoding));
       }
       reject(new Error(`Unsupported encoding: ${encoding}.`));
+    });
+  });
+}
+
+export function embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec) {
+  ipcRenderer.send('extract-subtitle-request', videoSrc, subtitleStreamIndex, SubtitleLoader.codecToFormat(subtitleCodec), mediaHash);
+  return new Promise((resolve, reject) => {
+    ipcRenderer.once('extract-subtitle-response', (event, { error, index, path }) => {
+      if (error) reject(new SubtitleError(ErrorCodes.SUBTITLE_RETRIEVE_FAILED, `${videoSrc}'s No.${index} extraction failed with ${error}.`));
+      resolve(path);
+    });
+  });
+}
+
+export function loadEmbeddedSubtitle(videoSrc, subtitleStreamIndex, subtitleCodec) {
+  return new Promise((resolve, reject) => {
+    embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec).then((path) => {
+      resolve(loadLocalFile(path));
+    }).catch((err) => {
+      reject(err);
     });
   });
 }

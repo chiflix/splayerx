@@ -161,17 +161,28 @@ export default {
         .reduce((prev, curr) => prev.concat(curr), [])
         .map(onlineMetaInfo);
     },
-    languageCallback(subtitleId, systemLanguageCode) {
-      const subtitle = this.subtitleList.find(subtitle => subtitle.id === subtitleId);
-      if (new RegExp(`${systemLanguageCode}`).test(subtitle ? subtitle.language : '')) return true;
-      return false;
-    },
-    getFirstSubtitle(subtitleList, subtitleCallback) {
-      if (!subtitleList.length) return '';
-      const validatedCallback = subtitleCallback && typeof subtitleCallback === 'function' ?
-        subtitleCallback : (subtitle, index) => index === 0;
-      const result = subtitleList.map(subtitle => subtitle.src).filter(validatedCallback);
-      return result[0] || subtitleList[0];
+    getEmbeddedSubtitlesList(videoSrc, supportedCodecs) {
+      const { ipcRenderer } = this.$electron;
+      ipcRenderer.send('mediaInfo', videoSrc);
+      return new Promise((resolve, reject) => {
+        setTimeout(() => { reject(new Error('Embedded Subtitles Retrieve Timeout!')); }, 20000);
+        ipcRenderer.once(`mediaInfo-${videoSrc}-reply`, (event, info) => {
+          try {
+            resolve(...JSON.parse(info).streams
+              ?.filter(stream => stream?.codec_type === 'subtitle' && supportedCodecs.includes(stream?.codec_name)) // eslint-disable-line camelcase
+              .map(subtitle => ({
+                streamIndex: subtitle.index,
+                codec: subtitle.codec_name, // eslint-disable-line camelcase
+                isDefault: subtitle.disposition.default === 1,
+                name: subtitle.tags.title,
+                language: subtitle.tags.language,
+                ranking: null,
+              })));
+          } catch (error) {
+            reject(error);
+          }
+        });
+      });
     },
     addSubtitle(subtitle, type, options, externalId) {
       const {
