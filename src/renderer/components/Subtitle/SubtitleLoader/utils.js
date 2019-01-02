@@ -174,10 +174,8 @@ export function loadLocalFile(path) {
     readFile(path, async (err, data) => {
       if (err) reject(err);
       const encoding = await localEncodingLoader(path);
-      if (iconv.encodingExists(encoding)) {
-        resolve(iconv.decode(data, encoding));
-      }
-      reject(new Error(`Unsupported encoding: ${encoding}.`));
+      if (iconv.encodingExists(encoding)) resolve(iconv.decode(data, encoding));
+      reject(new SubtitleError(ErrorCodes.ENCODING_UNSUPPORTED_ENCODING, `Unsupported encoding: ${encoding}.`));
     });
   });
 }

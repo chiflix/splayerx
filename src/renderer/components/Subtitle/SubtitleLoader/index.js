@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import flatten from 'lodash/flatten';
 import { localFormatLoader, toArray, mediaHash, promisify, functionExtraction } from './utils';
+import { SubtitleError, ErrorCodes } from './errors';
 
 const files = require.context('.', false, /\.loader\.js$/);
 const loaders = {};
@@ -18,7 +19,8 @@ const supportedCodecs = flatten(Object.keys(loaders)
 export default class SubtitleLoader extends EventEmitter {
   /**
    * Create a SubtitleLoader
-   * @param {string} src - path for a local/embedded online or hash for an online subtitle
+   * @param {string} src - path for a local subtitle
+   * , an embedded stream index or hash for an online subtitle
    * @param {string} type - 'local', 'embedded' or 'online'
    * @param {object} options - (optional)other info about subtitle,
    * like language or name(for online subtitle)
@@ -45,7 +47,7 @@ export default class SubtitleLoader extends EventEmitter {
         break;
       }
       default:
-        throw new Error('Invalid Subtitle Type');
+        throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE, `Unknown subtitle type ${type}.`);
     }
 
     this.options = options || {};
@@ -54,7 +56,7 @@ export default class SubtitleLoader extends EventEmitter {
     if (loaders[loader]) {
       this.loader = loaders[loader];
     } else {
-      throw new Error('Unreconginzed format');
+      throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_FORMAT, `Unknown subtitle format for subtitle ${src}.`);
     }
   }
 
