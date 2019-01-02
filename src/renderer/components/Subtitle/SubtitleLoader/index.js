@@ -69,7 +69,7 @@ export default class SubtitleLoader extends EventEmitter {
     const {
       src, type, format, options,
     } = this;
-    this.mediaHash = type !== 'online' ? await mediaHash(src) : src;
+    this.mediaHash = type === 'local' ? await mediaHash(src) : src;
     this.id = type === 'online' ? src : this.mediaHash;
     const { infoLoaders: rawInfoLoader } = this.loader;
     const info = {
@@ -104,9 +104,12 @@ export default class SubtitleLoader extends EventEmitter {
   }
 
   async parse() {
-    const { data } = this;
-    const { parser } = this.loader;
-    this.parsed = await promisify(parser.bind(null, data));
+    const { parser: rawParser } = this.loader;
+    const getParams = params => params.map(param => (
+      this[param] || this.metaInfo[param] || this.options[param]
+    ));
+    const parser = functionExtraction(rawParser, 'data');
+    this.parsed = await promisify(parser.func.bind(null, ...getParams(toArray(parser.params))));
     this.emit('parse', this.parsed);
   }
 }

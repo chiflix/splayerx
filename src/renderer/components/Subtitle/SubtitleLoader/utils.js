@@ -181,7 +181,15 @@ export function loadLocalFile(path) {
     });
   });
 }
-
+/**
+ * Get extracted embedded subtitles's local src
+ *
+ * @export
+ * @param {string} videoSrc - path of the video file
+ * @param {number} subtitleStreamIndex - the number of the subtitle stream index
+ * @param {string} subtitleCodec - the codec of the embedded subtitle
+ * @returns {Promise<string|SubtitleError>} the subtitle path string or SubtitleError
+ */
 export function embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec) {
   ipcRenderer.send('extract-subtitle-request', videoSrc, subtitleStreamIndex, SubtitleLoader.codecToFormat(subtitleCodec), mediaHash);
   return new Promise((resolve, reject) => {
@@ -192,6 +200,15 @@ export function embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec) 
   });
 }
 
+/**
+ * Load embedded subtitls from streamIndex with embeddedSrcLoader
+ *
+ * @export
+ * @param {string} videoSrc - path of the video file
+ * @param {number} subtitleStreamIndex - the number of the subtitle stream index
+ * @param {string} subtitleCodec - the codec of the embedded subtitle
+ * @returns {Promise<string|SubtitleError>} the subtitles string or SubtitleError
+ */
 export function loadEmbeddedSubtitle(videoSrc, subtitleStreamIndex, subtitleCodec) {
   return new Promise((resolve, reject) => {
     embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec).then((path) => {
@@ -215,9 +232,17 @@ export function promisify(func) {
     }
   });
 }
-
-export function functionExtraction(funcOrObj, funcType) {
-  if (typeof funcOrObj === 'function') return { func: funcOrObj, params: 'src' };
+/**
+ * Normalize function and parameters from an object, a string or a function
+ *
+ * @export
+ * @param {function|string|object} funcOrObj - function, string
+ * or object to extract function(s) from
+ * @param {string|array} defaultParams - default params field when no params found
+ * @returns function object with func and params or functions object with keys
+ */
+export function functionExtraction(funcOrObj, defaultParams) {
+  if (typeof funcOrObj === 'function') return { func: funcOrObj, params: defaultParams || 'src' };
   const keys = Object.keys(funcOrObj);
   const result = {};
   keys.some((key) => {
@@ -228,7 +253,7 @@ export function functionExtraction(funcOrObj, funcType) {
     } else if (typeof funcOrObj[key] === 'function') {
       result[key] = {
         func: funcOrObj[key],
-        params: 'src',
+        params: defaultParams || 'src',
       };
     } else if (typeof funcOrObj[key] === 'string') {
       result[key] = {
@@ -238,7 +263,7 @@ export function functionExtraction(funcOrObj, funcType) {
     } else if (typeof funcOrObj[key] === 'object') {
       result[key] = {
         func: funcOrObj[key].func,
-        params: funcOrObj[key].params || 'src',
+        params: funcOrObj[key].params || defaultParams || 'src',
       };
     }
     return false;
