@@ -35,7 +35,7 @@
     <transition name="welcome-container-transition">
       <div class="welcome-container" v-if="landingLogoAppear">
         <div class="logo-container">
-          <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
+          <img class="logo" src="~@/assets/logo.png" alt="electron-vue" draggable="false">
         </div>
         <div class="welcome">
           <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
