@@ -942,7 +942,6 @@ new Vue({
     /* eslint-disable */
     window.addEventListener('wheel', (e) => {
       if (!e.ctrlKey) {
-        const up = e.deltaY > 0;
         let isAdvanceColumeItem;
         let isSubtitleScrollItem;
         const advance = document.querySelector('.advance-column-items');
@@ -962,7 +961,7 @@ new Vue({
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
           if (process.platform !== 'darwin') {
             this.$store.dispatch(
-              up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+              e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
               Math.abs(e.deltaY) * 0.2,
             );
           }
