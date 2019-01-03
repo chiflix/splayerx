@@ -809,7 +809,7 @@ new Vue({
           }
         });
         return recentMenuTemplate;
-      });
+      }).catch(() => recentMenuTemplate);
     },
     menuStateControl(flag) {
       this.menu.getMenuItemById('playback').submenu.items.forEach((item) => {
