@@ -129,6 +129,7 @@ export default {
         if (files) {
           // if selected files contain folders only, then call openFolder()
           const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+          files.forEach(file => remote.app.addRecentDocument(file));
           if (onlyFolders) {
             this.openFolder(...files);
           } else {
@@ -163,9 +164,7 @@ export default {
         }
       }
       if (videoFiles.length !== 0) {
-        if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
-          this.openVideoFile(...videoFiles);
-        }
+        this.openVideoFile(...videoFiles);
       } else {
         // TODO: no videoFiles in folders error catch
         this.addLog('error', {
@@ -257,7 +256,6 @@ export default {
       }
       this.$bus.$emit('new-file-open');
       this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
-      remote.app.addRecentDocument(originPath);
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
