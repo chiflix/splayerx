@@ -941,7 +941,7 @@ new Vue({
     });
     /* eslint-disable */
     window.addEventListener('wheel', (e) => {
-      // ctrlKey is an official way of detecting pinch zoom on mac for chrome
+      // ctrlKey is the official way of detecting pinch zoom on mac for chrome
       if (!e.ctrlKey) {
         let isAdvanceColumeItem;
         let isSubtitleScrollItem;
