@@ -21,7 +21,7 @@
     </transition>
     <div class="mask"
       :style="{
-        backgroundColor: onDragging ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0)'
+        backgroundColor: maskBackground
       }"/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
@@ -48,7 +48,7 @@ export default {
       seekTime: [0],
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
-      onDragging: false, // drag and drop related var
+      maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
     };
   },
   methods: {
@@ -324,13 +324,13 @@ export default {
       }
     });
     this.$bus.$on('drag-over', () => {
-      this.onDragging = true;
+      this.maskBackground = 'rgba(255, 255, 255, 0.18)';
     });
     this.$bus.$on('drag-leave', () => {
-      this.onDragging = false;
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
     });
     this.$bus.$on('drop', () => {
-      this.onDragging = false;
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
     });
     window.onbeforeunload = () => {
       this.saveScreenshot();
