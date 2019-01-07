@@ -42,7 +42,10 @@
         </div>
       </div>
     </transition>
-    <div class="mask" ref="mask"/>
+    <div class="mask"
+      :style="{
+        backgroundColor: onDragging ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0)'
+      }"/>
     <playlist
       :lastPlayedFile="lastPlayedFile"
       :isFullScreen="isFullScreen"
@@ -77,6 +80,7 @@ export default {
       item: [],
       isDragging: false,
       filePathNeedToDelete: '',
+      onDragging: false, // drag and drop related var
     };
   },
   watch: {
@@ -169,13 +173,13 @@ export default {
       }
     });
     this.$bus.$on('drag-over', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
+      this.onDragging = true;
     });
     this.$bus.$on('drag-leave', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      this.onDragging = false;
     });
     this.$bus.$on('drop', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      this.onDragging = false;
     });
   },
   mounted() {
