@@ -194,6 +194,9 @@ export default {
       const sub = new SubtitleLoader(subtitle, type, options);
       const id = externalId || sub.src;
       this.$set(subtitleInstances, id, sub);
+      sub.on('meta-change', ({ field, value }) => {
+        console.log(id, field, value);
+      });
       sub.on('ready', (metaInfo) => {
         const {
           name, format, language, isDefault, ranking, streamIndex,
