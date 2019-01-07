@@ -234,15 +234,20 @@ function registerMainWindowEvent() {
       minHeight: 290,
       transparent: true,
       resizable: false,
+      parent: mainWindow,
       webPreferences: {
         webSecurity: false,
         experimentalFeatures: true,
       },
       acceptFirstMouse: true,
     };
-    aboutWindow = new BrowserWindow(aboutWindowOptions);
-    aboutWindow.loadURL(`${winURL}#/winAbout`);
-    aboutWindow.on('closed', () => { aboutWindow = null; });
+    if (!aboutWindow) {
+      aboutWindow = new BrowserWindow(aboutWindowOptions);
+      aboutWindow.loadURL(`${winURL}#/winAbout`);
+      aboutWindow.on('closed', () => {
+        aboutWindow = null;
+      });
+    }
   });
 }
 

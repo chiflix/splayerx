@@ -909,7 +909,7 @@ new Vue({
     });
 
     window.addEventListener('mousedown', (e) => {
-      if (e.button === 2 && process.platform === 'win32') {
+      if (e.button === 2 && process.platform === 'win32' && this.$route.name !== 'windows-about-view') {
         this.menu.popup(this.$electron.remote.getCurrentWindow());
       }
     });

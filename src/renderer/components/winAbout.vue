@@ -4,7 +4,7 @@
       @click.native="handleClose"
       type="titleBarWinClose">
     </Icon>
-    <img class="winLogo" src="../assets/win-about-logo.png">
+    <img class="winLogo" src="../assets/win-about-logo.png" draggable="false">
     <div class="name">{{ name }}</div>
     <div class="version">{{ `Version ${version} (${version})` }}</div>
     <div class="copyright">Copyright © 2018 tomasen</div>
