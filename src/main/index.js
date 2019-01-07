@@ -340,7 +340,7 @@ if (process.platform === 'darwin') {
 }
 
 app.on('ready', () => {
-  app.setName('SPlayerX');
+  app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
     mainWindow?.openDevTools();
   });
