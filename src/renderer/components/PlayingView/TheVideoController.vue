@@ -8,7 +8,6 @@
     @mouseleave="handleMouseleave"
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
-    @mousedown.right="handleMousedownRight"
     @mousedown.left="handleMousedownLeft"
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
@@ -333,23 +332,8 @@ export default {
         this.mouseLeftWindow = true;
       }, this.mouseleftDelay);
     },
-    handleMousedownRight() {
-      if (process.platform !== 'darwin') {
-        const menu = this.$electron.remote.Menu.getApplicationMenu();
-        menu.popup(this.$electron.remote.getCurrentWindow());
-        this.popupShow = true;
-      }
-    },
     handleMousedownLeft() {
       this.isMousedown = true;
-      if (!this.isValidClick()) { return; }
-      if (process.platform !== 'darwin') {
-        const menu = this.$electron.remote.Menu.getApplicationMenu();
-        if (this.popupShow === true) {
-          menu.closePopup();
-          this.popupShow = false;
-        }
-      }
     },
     handleMouseupLeft() {
       this.isMousemove = false;
