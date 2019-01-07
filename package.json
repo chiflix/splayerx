@@ -212,9 +212,11 @@
         }
       ]
     },
+    "nsis": {
+      "allowToChangeInstallationDirectory": true
+    },
     "win": {
       "icon": "build/icons/icon.ico",
-      "allowToChangeInstallationDirectory": true,
       "fileAssociations": [
         {
           "name": "Video",
