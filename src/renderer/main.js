@@ -941,6 +941,7 @@ new Vue({
     });
     /* eslint-disable */
     window.addEventListener('wheel', (e) => {
+      // ctrlKey is an official way of detecting pinch zoom on mac for chrome
       if (!e.ctrlKey) {
         let isAdvanceColumeItem;
         let isSubtitleScrollItem;
@@ -970,10 +971,6 @@ new Vue({
     });
     /* eslint-disable */
 
-    /**
-     * Todo:
-     * Handle multiple files
-     */
     window.addEventListener('drop', (e) => {
       e.preventDefault();
       const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
@@ -987,6 +984,11 @@ new Vue({
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
+      this.$bus.$emit('drag-over');
+    });
+    window.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      this.$bus.$emit('drag-leave');
     });
 
     this.$electron.ipcRenderer.on('open-file', (event, ...files) => {

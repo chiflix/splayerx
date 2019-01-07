@@ -4,6 +4,7 @@
     @mousedown.left.stop="handleLeftClick"
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
+    <div class="mask" ref="mask"/>
     <titlebar currentView="LandingView"></titlebar>
     <transition name="background-container-transition">
       <div class="background" v-if="showShortcutImage">
@@ -166,6 +167,12 @@ export default {
         }
       }
     });
+    this.$bus.$on('drag-over', () => {
+      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
+    });
+    this.$bus.$on('drag-leave', () => {
+      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+    });
   },
   mounted() {
     this.$store.dispatch('refreshVersion');
@@ -236,6 +243,12 @@ body {
   height: 100vh;
   width: 100vw;
   z-index: -1;
+  .mask {
+    position: absolute;
+    transition: background-color 120ms linear;
+    width: 100%;
+    height: 100%;
+  }
 }
 .background {
   position: absolute;
