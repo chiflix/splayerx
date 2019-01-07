@@ -9,7 +9,6 @@ const state = {
 
 const getters = {
   isFolderList: state => state.isFolderList,
-  onlyOneVideo: state => state.PlayingList.length === 1,
   nextVideo: (state, getters) => {
     const list = state.PlayingList;
     const index = list.findIndex(value => value === getters.originSrc);
