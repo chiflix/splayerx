@@ -105,13 +105,14 @@ export default {
       }
     },
     checkNextVideoUI(time) {
-      if (time > this.nextVideoPreviewTime && time < this.duration && this.duration > 240) {
+      if (time > this.nextVideoPreviewTime && time < this.duration - 1 && this.duration > 240) {
         if (this.nextVideo && !this.manualClosed) {
           this.$store.dispatch('UpdatePlayingList');
           this.showNextVideo = true;
         }
       } else {
         this.manualClosed = false;
+        this.showNextVideo = false;
       }
       if (this.$refs.nextVideo) {
         this.$refs.nextVideo.updatePlayingTime(time);

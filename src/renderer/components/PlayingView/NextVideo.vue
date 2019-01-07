@@ -84,15 +84,9 @@ export default {
       this.$emit('ready-to-show');
     },
     updatePlayingTime(time) {
-      if (time < this.nextVideoPreviewTime) {
-        this.$emit('close-next-video');
-      } else if (time >= this.duration && this.nextVideo) {
-        this.$emit('close-next-video');
-      } else {
-        const fractionProgress = (time - this.nextVideoPreviewTime) /
-          (this.duration - this.nextVideoPreviewTime);
-        this.progress = fractionProgress * 100;
-      }
+      const fractionProgress = (time - this.nextVideoPreviewTime) /
+        (this.duration - this.nextVideoPreviewTime);
+      this.progress = fractionProgress * 100;
     },
   },
   computed: {
@@ -243,6 +237,7 @@ export default {
     border-color: rgba(255,255,255,0.1);
 
     clip-path: inset(0px round 3.36px);
+    overflow: hidden;
 
     border-radius: 3.36px 7px 7px 3.36px;
 
@@ -267,19 +262,19 @@ export default {
       @media screen and (min-width: 513px) and (max-width: 854px) {
         top: 1.5px;
         height: 68px;
-        left: 121px;
+        left: 122px;
         width: 217px;
       }
       @media screen and (min-width: 855px) and (max-width: 1920px) {
         top: 1.5px;
         height: 82px;
-        left: 144px;
+        left: 147px;
         width: 260px;
       }
       @media screen and (min-width: 1921px) {
         top: 1.5px;
         height: 116px;
-        left: 205px;
+        left: 206px;
         width: 364px;
       }
       .progress-color {
