@@ -4,7 +4,6 @@
     @mousedown.left.stop="handleLeftClick"
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
-    <div class="mask" ref="mask"/>
     <titlebar currentView="LandingView"></titlebar>
     <transition name="background-container-transition">
       <div class="background" v-if="showShortcutImage">
@@ -43,6 +42,7 @@
         </div>
       </div>
     </transition>
+    <div class="mask" ref="mask"/>
     <playlist
       :lastPlayedFile="lastPlayedFile"
       :isFullScreen="isFullScreen"
@@ -50,6 +50,7 @@
       :filePathNeedToDelete="filePathNeedToDelete"
       @displayInfo="displayInfoUpdate"/>
     <notification-bubble/>
+    
   </div>
 </template>
 
