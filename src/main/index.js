@@ -233,6 +233,7 @@ function registerMainWindowEvent() {
       minWidth: 390,
       minHeight: 290,
       transparent: true,
+      resizable: false,
       webPreferences: {
         webSecurity: false,
         experimentalFeatures: true,
