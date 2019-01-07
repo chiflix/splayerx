@@ -561,7 +561,10 @@ new Vue({
             submenu: [
               {
                 label: this.$t('msg.splayerx.about'),
-                role: 'about',
+                // role: 'about',
+                click: () => {
+                  this.$electron.ipcRenderer.send('add-windows-about');
+                },
               },
               { type: 'separator' },
               {
@@ -657,7 +660,8 @@ new Vue({
               label: this.$t('msg.splayerx.about'),
               role: 'about',
               click: () => {
-                this.$electron.ipcRenderer.send('add-windows-about');
+                // this.$electron.ipcRenderer.send('add-windows-about');
+                // this.$electron.shell.openExternal('https://beta.splayer.org');
               },
             },
             { type: 'separator' },
