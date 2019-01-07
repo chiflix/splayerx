@@ -978,6 +978,7 @@ new Vue({
       e.preventDefault();
       const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
       const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+      files.forEach(file => this.$electron.remote.app.addRecentDocument(file));
       if (onlyFolders) {
         this.openFolder(...files);
       } else {

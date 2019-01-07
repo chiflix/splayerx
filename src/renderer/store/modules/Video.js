@@ -63,7 +63,10 @@ const getters = {
   },
   // playback state
   duration: state => state.duration,
-  nextVideoPreviewTime: state => state.duration - 30,
+  nextVideoPreviewTime: (state) => {
+    const time = state.duration > 3000 ? 60 : state.duration * 0.02;
+    return state.duration - time;
+  },
   currentTime: state => state.currentTime,
   paused: state => state.paused,
   roundedCurrentTime: state => Math.round(state.currentTime),
