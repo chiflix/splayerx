@@ -657,7 +657,7 @@ new Vue({
               label: this.$t('msg.splayerx.about'),
               role: 'about',
               click: () => {
-                this.$electron.shell.openExternal('https://beta.splayer.org');
+                this.$electron.ipcRenderer.send('add-windows-about');
               },
             },
             { type: 'separator' },

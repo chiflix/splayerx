@@ -23,6 +23,7 @@ if (process.env.NODE_ENV !== 'development') {
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 let mainWindow = null;
+let aboutWindow= null;
 let tray = null;
 let inited = false;
 const filesToOpen = [];
@@ -221,6 +222,27 @@ function registerMainWindowEvent() {
           break;
       }
     }
+  });
+  ipcMain.on('add-windows-about', () => {
+    const aboutWindowOptions = {
+      useContentSize: true,
+      frame: false,
+      titleBarStyle: 'none',
+      width: 390,
+      height: 290,
+      minWidth: 390,
+      minHeight: 290,
+      transparent: false,
+      webPreferences: {
+        webSecurity: false,
+        experimentalFeatures: true,
+      },
+      acceptFirstMouse: true,
+      // parent: mainWindow,
+    };
+    aboutWindow = new BrowserWindow(aboutWindowOptions);
+    aboutWindow.loadURL(`${winURL}#/winAbout`);
+    aboutWindow.on('closed', () => { aboutWindow = null; });
   });
 }
 
