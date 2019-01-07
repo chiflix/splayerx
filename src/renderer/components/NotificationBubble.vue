@@ -105,7 +105,7 @@ export default {
       }
     },
     checkNextVideoUI(time) {
-      if (time > this.nextVideoPreviewTime && time < this.duration) {
+      if (time > this.nextVideoPreviewTime && time < this.duration && this.duration > 240) {
         if (this.nextVideo && !this.manualClosed) {
           this.$store.dispatch('UpdatePlayingList');
           this.showNextVideo = true;

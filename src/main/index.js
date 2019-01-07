@@ -121,7 +121,7 @@ function registerMainWindowEvent() {
 
   function snapShotQueueProcess(event) {
     const callback = (resultCode, imgPath) => {
-      if (resultCode === 'Waiting for task completion.') {
+      if (resultCode === 'Waiting for the task completion.') {
         snapShot(snapShotQueue[0], callback);
       } else if (resultCode === '0') {
         const lastRecord = snapShotQueue.shift();
