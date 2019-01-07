@@ -49,7 +49,7 @@
       :winWidth="winWidth"
       :filePathNeedToDelete="filePathNeedToDelete"
       @displayInfo="displayInfoUpdate"/>
-    <notification-bubble/>
+    <NotificationBubble/>
     
   </div>
 </template>
@@ -84,7 +84,7 @@ export default {
   components: {
     Titlebar,
     Playlist,
-    'notification-bubble': NotificationBubble,
+    NotificationBubble,
   },
   computed: {
     ...mapState({
@@ -172,6 +172,9 @@ export default {
       this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
     });
     this.$bus.$on('drag-leave', () => {
+      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+    });
+    this.$bus.$on('drop', () => {
       this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
   },
