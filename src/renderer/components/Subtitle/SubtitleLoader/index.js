@@ -21,7 +21,7 @@ export default class SubtitleLoader extends EventEmitter {
    * Create a SubtitleLoader
    * @param {string} src - path for a local subtitle
    * , an embedded stream index or hash for an online subtitle
-   * @param {string} type - 'local', 'embedded' or 'online'
+   * @param {string} type - 'local', 'embedded' or 'online' or 'test'
    * @param {object} options - (optional)other info about subtitle,
    * like language or name(for online subtitle)
    */
@@ -50,6 +50,17 @@ export default class SubtitleLoader extends EventEmitter {
         throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE, `Unknown subtitle type ${type}.`);
     }
 
+
+    this.metaInfo = new Proxy({}, {
+      set: (target, field, value) => {
+        const oldVal = Reflect.get(target, field);
+        const success = Reflect.set(target, field, value);
+        const newVal = Reflect.get(target, field);
+        if (newVal !== value) return false;
+        if (success && oldVal !== newVal) this.emit('meta-change', { field, value });
+        return true;
+      },
+    });
     this.options = options || {};
     const loader = Object.keys(loaders)
       .find(format => toArray(loaders[format].supportedFormats).includes(this.format));
@@ -69,19 +80,13 @@ export default class SubtitleLoader extends EventEmitter {
 
   async meta() {
     const {
-      src, type, format, options,
+      src, type, options, metaInfo,
     } = this;
     this.mediaHash = type === 'local' ? await mediaHash(src) : src;
     this.id = type === 'online' ? src : this.mediaHash;
     const { infoLoaders: rawInfoLoader } = this.loader;
-    const info = {
-      src,
-      type,
-      format,
-      id: this.id,
-    };
     const getParams = params => params.map(param => (
-      this[param] || options[param] || info[param]
+      this[param] || options[param]
     ));
     const infoLoaders = functionExtraction(rawInfoLoader); // normalize all info loaders
     const infoTypes = Object.keys(infoLoaders); // get all info types
@@ -89,9 +94,8 @@ export default class SubtitleLoader extends EventEmitter {
       .map(infoType => promisify(infoLoaders[infoType].func
         .bind(null, ...getParams(toArray(infoLoaders[infoType].params))))));
     infoTypes.forEach((infoType, index) => { // normalize all info
-      info[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
+      metaInfo[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
     });
-    this.metaInfo = { ...info, format };
     this.emit('ready', this.metaInfo);
   }
 

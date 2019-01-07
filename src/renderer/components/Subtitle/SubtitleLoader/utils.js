@@ -10,30 +10,8 @@ import Sagi from '@/helpers/sagi';
 import SubtitleLoader from './index';
 import { SubtitleError, ErrorCodes } from './errors';
 
-export async function toPromise(func) {
-  func.bind(null, arguments.slice(1));
-  const result = func instanceof Promise ? await func() : func();
-  return result;
-}
-
 export function toArray(element) {
   return element instanceof Array ? element : [element];
-}
-
-/**
- * Whether an object is a collection of methods or
- * an object with func and params attributes(i.e. SubtitleLoader version of a function).
- *
- * @export
- * @param {object} object - object to be evaluated
- * @returns {string} 'option' for methods or 'function' for a function
- */
-export function objectTo(object) {
-  const keys = Object.keys(object);
-  if (keys.includes('func') && keys.includes('params')) {
-    return 'function';
-  }
-  return 'option';
 }
 
 export const mediaHash = helpers.methods.mediaQuickHash;
