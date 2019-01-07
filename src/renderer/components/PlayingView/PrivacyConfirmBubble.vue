@@ -39,6 +39,7 @@ export default {
     handleCloseMouseup() {
       if (this.state === 1) {
         this.$store.dispatch('agreeOnPrivacyPolicy');
+        this.$bus.$emit('subtitle-refresh-continue');
         this.$emit('close-privacy-bubble');
       } else {
         this.state = 1;

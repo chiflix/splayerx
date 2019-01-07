@@ -139,6 +139,7 @@ export default {
       loadingType: '',
       detailTimer: null,
       breakTimer: null,
+      continueRefresh: false,
     };
   },
   computed: {
@@ -312,6 +313,7 @@ export default {
     handleRefresh() {
       if (!this.privacyAgreement) {
         this.$bus.$emit('privacy-confirm');
+        this.continueRefresh = true;
       } else if (this.privacyAgreement && !this.timer) {
         this.timer = setInterval(() => {
           this.count += 1;
@@ -427,6 +429,12 @@ export default {
   },
   mounted() {
     this.$bus.$on('menu-subtitle-refresh', this.handleRefresh);
+    this.$bus.$on('subtitle-refresh-continue', () => {
+      if (this.continueRefresh) {
+        this.continueRefresh = false;
+        this.handleRefresh();
+      }
+    });
     document.addEventListener('mouseup', (e) => {
       if (e.button === 0) {
         if (!this.showAttached) {
