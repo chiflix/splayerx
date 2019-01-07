@@ -1,3 +1,7 @@
+/* eslint-disable import/first */
+// Be sure to call Sentry function as early as possible in the main process
+import '../shared/sentry';
+
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import os from 'os';
@@ -559,6 +563,7 @@ new Vue({
                 label: this.$t('msg.splayerx.about'),
                 role: 'about',
               },
+              { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.preferences'),
                 enabled: true,
@@ -600,6 +605,7 @@ new Vue({
                 label: this.$t('msg.splayerx.hideOthers'),
                 role: 'hideothers',
               },
+              { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.quit'),
                 role: 'quit',
@@ -646,10 +652,16 @@ new Vue({
               },
             ],
           });
-          template[10].submenu.unshift({
-            label: this.$t('msg.splayerx.about'),
-            role: 'about',
-          });
+          template[10].submenu.unshift(
+            {
+              label: this.$t('msg.splayerx.about'),
+              role: 'about',
+              click: () => {
+                this.$electron.shell.openExternal('https://beta.splayer.org');
+              },
+            },
+            { type: 'separator' },
+          );
         }
         return template;
       }).then((result) => {
@@ -797,7 +809,7 @@ new Vue({
           }
         });
         return recentMenuTemplate;
-      });
+      }).catch(() => recentMenuTemplate);
     },
     menuStateControl(flag) {
       this.menu.getMenuItemById('playback').submenu.items.forEach((item) => {
@@ -930,7 +942,6 @@ new Vue({
     /* eslint-disable */
     window.addEventListener('wheel', (e) => {
       if (!e.ctrlKey) {
-        const up = e.deltaY > 0;
         let isAdvanceColumeItem;
         let isSubtitleScrollItem;
         const advance = document.querySelector('.advance-column-items');
@@ -950,7 +961,7 @@ new Vue({
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
           if (process.platform !== 'darwin') {
             this.$store.dispatch(
-              up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+              e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
               Math.abs(e.deltaY) * 0.2,
             );
           }

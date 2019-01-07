@@ -34,7 +34,7 @@ export default {
       decreaseVolume: 'Decrease Volume',
     },
     subtitle: {
-      name: 'Subtitle',
+      name: 'Subtitles',
       subtitleSelect: 'Translation',
       AITranslation: 'Reload Smart Translation',
       loadSubtitleFile: 'Load Subtitle File…',
@@ -68,16 +68,16 @@ export default {
     },
     help: {
       name: 'Help',
-      splayerxHelp: 'SPlayer Help…',
+      splayerxHelp: 'Help',
     },
     splayerx: {
-      about: 'About SPlayer…',
+      about: 'About SPlayer',
       preferences: 'Preferences',
-      homepage: 'SPlayer Website…',
-      feedback: 'Feedback…',
+      homepage: 'Website',
+      feedback: 'Feedback',
       hide: 'Hide',
       hideOthers: 'Hide Others',
-      quit: 'Quit',
+      quit: 'Quit SPlayer',
     },
     preferences: {
       settings: 'Settings',

@@ -179,7 +179,6 @@ export default {
   top: 0;
   border-radius: 10px;
   width: 100%;
-  -webkit-app-region: drag;
   height: 28px;
   z-index: 6;
   .win-icons {

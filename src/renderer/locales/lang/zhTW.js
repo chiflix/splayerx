@@ -12,7 +12,7 @@ export default {
     playback: {
       name: '播放',
       fullScreen: '全屏/退出全屏',
-      keepPlayingWindowFront: '保持播放窗口在前',
+      keepPlayingWindowFront: '保持窗口在前',
       increasePlaybackSpeed: '加快播放速度         [',
       decreasePlaybackSpeed: '減緩播放速度         ]',
       captureScreen: '截圖',
@@ -67,16 +67,16 @@ export default {
     },
     help: {
       name: '幫助',
-      splayerxHelp: '射手影音 幫助',
+      splayerxHelp: '幫助',
     },
     splayerx: {
-      about: '關於 射手影音…',
-      preferences: '偏好設置…',
-      homepage: '射手影音 主頁',
-      feedback: '意見反饋',
-      hide: '隱藏 射手影音',
-      hideOthers: '隱藏 其他',
-      quit: '退出',
+      about: '關於射手影音',
+      preferences: '偏好設置',
+      homepage: '網站',
+      feedback: '反饋',
+      hide: '隱藏射手影音',
+      hideOthers: '隱藏其他',
+      quit: '退出射手影音',
     },
     preferences: {
       settings: '設置',
@@ -151,7 +151,7 @@ export default {
     playing: '正在播放',
   },
   nextVideo: {
-    nextInFolder: '文件夹中下一視頻',
+    nextInFolder: '文件夾中下一視頻',
     nextInPlaylist: '播放列表中下一視頻',
   },
   subtitle: {

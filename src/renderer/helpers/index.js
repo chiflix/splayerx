@@ -6,6 +6,7 @@ import { times } from 'lodash';
 import InfoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '@/../shared/errorcodes';
+import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
@@ -296,8 +297,9 @@ export default {
       switch (level) {
         case 'error':
           console.error(log);
-          if (this.$ga && log) {
-            this.$ga.exception(log.message || log);
+          if (log && process.env.NODE_ENV !== 'development') {
+            this.$ga && this.$ga.exception(log.message || log);
+            Sentry.captureException(log);
           }
           break;
         case 'warn':
