@@ -19,6 +19,10 @@
       :currentTime="seekTime"
       :currentAudioTrackId="currentAudioTrackId.toString()" />
     </transition>
+    <div class="mask"
+      :style="{
+        backgroundColor: maskBackground
+      }"/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
@@ -44,6 +48,7 @@ export default {
       seekTime: [0],
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
+      maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
     };
   },
   methods: {
@@ -318,6 +323,15 @@ export default {
         this.$bus.$emit('seek-subtitle', e);
       }
     });
+    this.$bus.$on('drag-over', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0.18)';
+    });
+    this.$bus.$on('drag-leave', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
+    });
+    this.$bus.$on('drop', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
+    });
     window.onbeforeunload = () => {
       this.saveScreenshot();
       this.saveSubtitleStyle();
@@ -330,6 +344,12 @@ export default {
   position: relative;
   height: 0;
   z-index: auto;
+}
+.mask {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  transition: background-color 120ms linear;
 }
 .base-video-player {
   width: 100%;
