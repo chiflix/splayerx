@@ -12,24 +12,25 @@
 </template>
 
 <script>
-import Icon from './BaseIconContainer.vue';
+import electron from 'electron';
+import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
-  name: 'winAbout',
+  name: 'About',
   components: {
     Icon,
   },
   computed: {
     name() {
-      return this.$electron.remote.app.getName();
+      return electron.remote.app.getName();
     },
     version() {
-      return this.$electron.remote.app.getVersion();
+      return electron.remote.app.getVersion();
     },
   },
   methods: {
     handleClose() {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'close');
+      electron.ipcRenderer.send('callCurrentWindowMethod', 'close');
     },
   },
 };

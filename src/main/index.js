@@ -29,9 +29,12 @@ let inited = false;
 const filesToOpen = [];
 const snapShotQueue = [];
 const mediaInfoQueue = [];
-const winURL = process.env.NODE_ENV === 'development'
+const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
+const aboutURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/about.html'
+  : `file://${__dirname}/about.html`;
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -245,7 +248,7 @@ function registerMainWindowEvent() {
     };
     if (!aboutWindow) {
       aboutWindow = new BrowserWindow(aboutWindowOptions);
-      aboutWindow.loadURL(`${winURL}#/winAbout`);
+      aboutWindow.loadURL(`${aboutURL}`);
       aboutWindow.on('closed', () => {
         aboutWindow = null;
       });
@@ -285,7 +288,7 @@ function createWindow() {
 
   mainWindow = new BrowserWindow(windowOptions);
 
-  mainWindow.loadURL(filesToOpen.length ? `${winURL}#/play` : winURL);
+  mainWindow.loadURL(filesToOpen.length ? `${mainURL}#/play` : mainURL);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
