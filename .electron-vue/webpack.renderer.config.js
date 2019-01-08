@@ -11,6 +11,22 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
+function generateHtmlWebpackPluginConfig(name) {
+  return {
+    chunks: [name],
+    filename: `${name}.html`,
+    template: path.resolve(__dirname, `../src/${name}.ejs`),
+    minify: {
+      collapseWhitespace: true,
+      removeAttributeQuotes: true,
+      removeComments: true
+    },
+    nodeModules: process.env.NODE_ENV !== 'production'
+      ? path.resolve(__dirname, '../node_modules')
+      : false
+  };
+}
+
 /**
  * List of node_modules to include in webpack bundle
  *
@@ -24,7 +40,8 @@ let rendererConfig = {
   mode: 'development',
   devtool: '#cheap-module-eval-source-map',
   entry: {
-    renderer: path.join(__dirname, '../src/renderer/main.js')
+    about: path.join(__dirname, '../src/renderer/about.js'),
+    index: path.join(__dirname, '../src/renderer/main.js')
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(d => !whiteListedModules.includes(d))
@@ -139,18 +156,8 @@ let rendererConfig = {
   plugins: [
     new VueLoaderPlugin(),
     new ExtractTextPlugin('styles.css'),
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: path.resolve(__dirname, '../src/index.ejs'),
-      minify: {
-        collapseWhitespace: true,
-        removeAttributeQuotes: true,
-        removeComments: true
-      },
-      nodeModules: process.env.NODE_ENV !== 'production'
-        ? path.resolve(__dirname, '../node_modules')
-        : false
-    }),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
     new webpack.HotModuleReplacementPlugin()
   ],
   output: {

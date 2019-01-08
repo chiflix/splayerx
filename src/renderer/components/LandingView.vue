@@ -186,9 +186,9 @@ export default {
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
-    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setResizable', [true]);
-    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [720, 405]);
-    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [720 / 405]);
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [true]);
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
     this.sagi.healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {

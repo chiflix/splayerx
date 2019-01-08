@@ -16,11 +16,6 @@ export default new Router({
       component: require('@/components/PlayingView.vue').default,
     },
     {
-      path: '/winAbout',
-      name: 'windows-about-view',
-      component: require('@/components/winAbout.vue').default,
-    },
-    {
       path: '*',
       redirect: '/',
     },
