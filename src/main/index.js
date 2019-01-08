@@ -23,6 +23,7 @@ if (process.env.NODE_ENV !== 'development') {
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 let mainWindow = null;
+let aboutWindow = null;
 let tray = null;
 let inited = false;
 const filesToOpen = [];
@@ -222,6 +223,37 @@ function registerMainWindowEvent() {
       }
     }
   });
+  ipcMain.on('add-windows-about', () => {
+    const aboutWindowOptions = {
+      useContentSize: true,
+      frame: false,
+      titleBarStyle: 'none',
+      width: 390,
+      height: 290,
+      minWidth: 390,
+      minHeight: 290,
+      transparent: true,
+      resizable: false,
+      parent: mainWindow,
+      show: false,
+      webPreferences: {
+        webSecurity: false,
+        experimentalFeatures: true,
+      },
+      acceptFirstMouse: true,
+      fullscreenable: false,
+    };
+    if (!aboutWindow) {
+      aboutWindow = new BrowserWindow(aboutWindowOptions);
+      aboutWindow.loadURL(`${winURL}#/winAbout`);
+      aboutWindow.on('closed', () => {
+        aboutWindow = null;
+      });
+    }
+    aboutWindow.once('ready-to-show', () => {
+      aboutWindow.show();
+    });
+  });
 }
 
 function createWindow() {
@@ -318,7 +350,7 @@ if (process.platform === 'darwin') {
 }
 
 app.on('ready', () => {
-  app.setName('SPlayerX');
+  app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
     mainWindow?.openDevTools();
   });
