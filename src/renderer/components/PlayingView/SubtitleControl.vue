@@ -139,13 +139,11 @@ export default {
       loadingType: '',
       detailTimer: null,
       breakTimer: null,
+      computedAvaliableItems: [],
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId']),
-    ...mapGetters({
-      computedAvaliableItems: 'subtitleList',
-    }),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -282,9 +280,12 @@ export default {
         this.$emit('update:showAttached', false);
       }
     },
-    computedAvaliableItems(val, oldval) {
+    subtitleList(val, oldval) {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
+      }
+      if (val.length >= oldval.length) {
+        this.computedAvaliableItems = val;
       }
     },
     loadingType(val) {
