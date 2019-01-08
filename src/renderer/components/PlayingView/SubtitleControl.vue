@@ -313,6 +313,10 @@ export default {
       if (!this.privacyAgreement) {
         this.$bus.$emit('privacy-confirm');
       } else if (this.privacyAgreement && !this.timer) {
+        this.addLog('error', {
+          message: 'Online subtitles loading .',
+          code: 'ONLINE_LOADING',
+        });
         this.timer = setInterval(() => {
           this.count += 1;
           this.rotateTime = Math.ceil(this.count / 100);
@@ -421,6 +425,7 @@ export default {
       this.count = this.rotateTime * 100;
       setTimeout(() => {
         this.$bus.$emit('finished-add-subtitles');
+        this.$store.dispatch('removeMessagesByContent', this.$t('loading.content'));
         this.timer = null;
       }, 1000);
     });

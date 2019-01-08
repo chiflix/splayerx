@@ -11,7 +11,7 @@
 <script>
   // import { throttle } from 'lodash';
   import drag from '@/helpers/drag';
-  import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '../shared/errorcodes';
+  import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ONLINE_LOADING } from '../shared/notificationcodes';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
 
@@ -35,8 +35,8 @@
       },
     },
     mounted() {
-      this.$electron.ipcRenderer.on('addMessages', (event, errcode) => {
-        switch (errcode) {
+      this.$electron.ipcRenderer.on('addMessages', (event, code) => {
+        switch (code) {
           case FILE_NON_EXIST:
             this.$store.dispatch('addMessages', {
               type: 'error',
@@ -62,6 +62,13 @@
               title: this.$t('errorFile.default.title'),
               content: this.$t('errorFile.default.content'),
               dismissAfter: 5000,
+            });
+            break;
+          case ONLINE_LOADING:
+            this.$store.dispatch('addMessages', {
+              type: 'loading',
+              title: this.$t('loading.title'),
+              content: this.$t('loading.content'),
             });
             break;
           default:

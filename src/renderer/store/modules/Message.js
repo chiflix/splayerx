@@ -12,14 +12,19 @@ const mutations = {
     }
     state.messages.push(payload);
   },
-  removeMessages(state, id) {
-    state.messages = state.messages.filter(m => m.id !== id);
+  removeMessages(state, payload) {
+    state.messages = payload;
   },
 };
 let i = 0;
 const actions = {
-  removeMessages({ commit }, id) {
-    commit('removeMessages', id);
+  removeMessages({ state, commit }, id) {
+    const mess = state.messages.filter(m => m.id !== id);
+    commit('removeMessages', mess);
+  },
+  removeMessagesByContent({ commit }, content) {
+    const mess = state.messages.filter(m => m.content !== content);
+    commit('removeMessages', mess);
   },
   addMessages({ commit }, {
     type, title, content, dismissAfter, cb,
@@ -29,12 +34,14 @@ const actions = {
     commit('addMessages', {
       id, type, title, content, dismissAfter,
     });
-    setTimeout(() => {
-      commit('removeMessages', id);
-      if (cb) {
-        cb();
-      }
-    }, dismissAfter);
+    if (dismissAfter) {
+      setTimeout(() => {
+        commit('removeMessages', id);
+        if (cb) {
+          cb();
+        }
+      }, dismissAfter);
+    }
   },
 };
 export default {

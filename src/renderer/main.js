@@ -925,6 +925,8 @@ new Vue({
             this.$bus.$emit('seek', videodata.time + 60);
           }
           break;
+        case ' ':
+          break;
         default:
           break;
       }

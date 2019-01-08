@@ -125,7 +125,7 @@ export default {
   },
   loading: {
     title: '',
-    content: '',
+    content: 'Loading translation results...',
   },
   privacyBubble: {
     masVersion: {

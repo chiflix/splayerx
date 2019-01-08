@@ -10,7 +10,7 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '../shared/errorcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ONLINE_LOADING } from '../shared/notificationcodes';
 
 /**
  * Set `__static` path to static files in production
@@ -210,15 +210,25 @@ function registerMainWindowEvent() {
   ipcMain.on('writeLog', (event, level, log) => {
     if (!log) return;
     writeLog(level, log);
-    if (mainWindow && log.message && log.errcode) {
-      switch (log.errcode) {
-        case FILE_NON_EXIST:
-        case EMPTY_FOLDER:
-        case OPEN_FAILED:
-          mainWindow.webContents.send('addMessages', log.errcode);
-          break;
-        default:
-          break;
+    if (mainWindow && log.message) {
+      if (log.errcode) {
+        switch (log.errcode) {
+          case FILE_NON_EXIST:
+          case EMPTY_FOLDER:
+          case OPEN_FAILED:
+            mainWindow.webContents.send('addMessages', log.errcode);
+            break;
+          default:
+            break;
+        }
+      } else if (log.code) {
+        switch (log.code) {
+          case ONLINE_LOADING:
+            mainWindow.webContents.send('addMessages', log.code);
+            break;
+          default:
+            break;
+        }
       }
     }
   });

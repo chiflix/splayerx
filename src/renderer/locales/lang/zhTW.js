@@ -124,7 +124,7 @@ export default {
   },
   loading: {
     title: '',
-    content: '正在搜索翻譯結果...',
+    content: '正在加載翻譯結果...',
   },
   privacyBubble: {
     masVersion: {

@@ -236,7 +236,7 @@ export default {
   position: relative;
   display: flex;
   justify-content: flex-start;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
   z-index: 8;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -282,17 +282,17 @@ export default {
     @media screen and (min-width: 513px) and (max-width: 854px) {
       width: 116px;
       height: 12px;
-      margin: 12.5px 16px auto 16px;
+      margin: auto 16px auto 16px;
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
       width: 144px;
       height: 15px;
-      margin: 14.5px 19px auto 19px;
+      margin: auto 19px auto 19px;
     }
     @media screen and (min-width: 1921px) {
       width: 204px;
       height: 21px;
-      margin: 20px 26px auto 26px;
+      margin: auto 26px auto 26px;
     }
     .content {
       color: rgba(255, 255, 255, 0.8);
