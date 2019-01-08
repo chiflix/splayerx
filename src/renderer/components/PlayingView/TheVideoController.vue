@@ -188,7 +188,7 @@ export default {
       const minimumSize = this.tempRecentPlaylistDisplayState
         ? [512, Math.round(512 / this.ratio)]
         : [320, 180];
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', minimumSize);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
     },
     conflictResolve(name) {
       Object.keys(this.widgetsStatus).forEach((item) => {

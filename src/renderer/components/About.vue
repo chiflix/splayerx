@@ -30,7 +30,7 @@ export default {
   },
   methods: {
     handleClose() {
-      electron.ipcRenderer.send('callCurrentWindowMethod', 'close');
+      electron.remote.BrowserWindow.getFocusedWindow().close();
     },
   },
 };

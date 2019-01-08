@@ -93,9 +93,8 @@ function registerMainWindowEvent() {
     mainWindow?.webContents.send('mainCommit', 'isFocused', false);
   });
 
-  ipcMain.on('callCurrentWindowMethod', (evt, method, args = []) => {
-    const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow;
-    currentWindow?.[method]?.(...args);
+  ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
+    mainWindow?.[method]?.(...args);
   });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
