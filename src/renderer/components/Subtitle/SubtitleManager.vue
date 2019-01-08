@@ -91,6 +91,7 @@ export default {
       addSubtitleWhenReady: subtitleActions.ADD_SUBTITLE_WHEN_READY,
       addSubtitleWhenLoaded: subtitleActions.ADD_SUBTITLE_WHEN_LOADED,
       addSubtitleWhenFailed: subtitleActions.ADD_SUBTITLE_WHEN_FAILED,
+      updateMetaInfo: subtitleActions.UPDATE_METAINFO,
     }),
     async addInitialSubtitles(videoSrc) {
       const {
@@ -151,8 +152,6 @@ export default {
             language: code,
             name: subName,
             ranking,
-            isDefault: null,
-            streamIndex: null,
           },
         });
       };
@@ -188,27 +187,20 @@ export default {
       const {
         addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded, subtitleInstances,
       } = this;
-      const {
-        language, isDefault, ranking, streamIndex,
-      } = options;
       const sub = new SubtitleLoader(subtitle, type, options);
       const id = externalId || sub.src;
       this.$set(subtitleInstances, id, sub);
       sub.on('meta-change', ({ field, value }) => {
-        console.log(id, field, value);
+        this.metaInfoUpdate(id, field, value);
       });
       sub.on('ready', (metaInfo) => {
-        const {
-          name, format, language, isDefault, ranking, streamIndex,
-        } = metaInfo;
+        const { name, format, language } = metaInfo;
         addSubtitleWhenReady({
-          id, name, format, type, language, isDefault, ranking, streamIndex,
+          id, name, format, language,
         });
       });
       sub.on('parse', () => addSubtitleWhenLoaded({ id }));
-      addSubtitleWhenLoading({
-        id, type, language, isDefault, ranking, streamIndex,
-      });
+      addSubtitleWhenLoading({ id, type });
       sub.meta();
     },
     addSubtitles(subtitleList) {
@@ -239,6 +231,9 @@ export default {
       const { getOnlineSubtitlesList, originSrc: videoSrc } = this;
       this.newOnlineSubtitles = await getOnlineSubtitlesList(videoSrc);
       this.$bus.$emit('refresh-finished');
+    },
+    metaInfoUpdate(id, field, value) {
+      this.updateMetaInfo({ id, type: field, value });
     },
   },
   created() {
