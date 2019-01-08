@@ -235,11 +235,13 @@ function registerMainWindowEvent() {
       transparent: true,
       resizable: false,
       parent: mainWindow,
+      show: false,
       webPreferences: {
         webSecurity: false,
         experimentalFeatures: true,
       },
       acceptFirstMouse: true,
+      fullscreenable: false,
     };
     if (!aboutWindow) {
       aboutWindow = new BrowserWindow(aboutWindowOptions);
@@ -248,6 +250,9 @@ function registerMainWindowEvent() {
         aboutWindow = null;
       });
     }
+    aboutWindow.once('ready-to-show', () => {
+      aboutWindow.show();
+    });
   });
 }
 
