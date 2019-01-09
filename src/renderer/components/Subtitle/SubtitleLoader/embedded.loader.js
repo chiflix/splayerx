@@ -1,6 +1,10 @@
-import { loadEmbeddedSubtitle, toArray } from './utils';
+import { loadEmbeddedSubtitle, toArray, mediaHash } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
 import SubtitleLoader from './index';
+
+async function embeddedIdLoader(videoSrc, streamIndex) {
+  return `${videoSrc}-${(await mediaHash(videoSrc))}-${streamIndex}`;
+}
 
 function embeddedSubtitleParser(subtitleCodec, subtitleData) {
   const subtitleFormat = SubtitleLoader.codecToFormat(subtitleCodec);
@@ -17,6 +21,10 @@ export default {
   longName: 'Embedded Subtitle',
   name: 'embedded',
   supportedFormats: 'embedded',
+  id: {
+    func: embeddedIdLoader,
+    params: ['videoSrc', 'streamIndex'],
+  },
   infoLoaders: {
     language: 'language',
     name: 'name',

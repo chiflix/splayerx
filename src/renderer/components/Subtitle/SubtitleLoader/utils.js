@@ -97,6 +97,10 @@ export async function localLanguageLoader(path, format) {
   return convert3To1(franc(stringCallback(string)));
 }
 
+export async function localIdLoader(path) {
+  return `${path}-${(await mediaHash(path))}`;
+}
+
 export function localNameLoader(path) {
   const filename = basename(path);
   return filename;
