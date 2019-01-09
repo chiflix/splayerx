@@ -17,7 +17,6 @@ import osLocale from 'os-locale';
 import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
-import romanize from 'romanize';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { promisify } from './SubtitleLoader/utils';
@@ -129,28 +128,13 @@ export default {
     },
     async getOnlineSubtitlesList(videoSrc) {
       const hash = await helpers.methods.mediaQuickHash(videoSrc);
-      let enIndex = 0;
-      let twIndex = 0;
-      let zhIndex = 0;
-      let subName;
       const onlineMetaInfo = (subtitle) => {
         const { language_code: code, transcript_identity: src, ranking } = subtitle;
-        if (code === 'en') {
-          enIndex += 1;
-          subName = `${this.$t(`subtitle.language.${code}`)} ${romanize(enIndex)}`;
-        } else if (code === 'zh-TW') {
-          twIndex += 1;
-          subName = `${this.$t(`subtitle.language.${code}`)} ${romanize(twIndex)}`;
-        } else {
-          zhIndex += 1;
-          subName = `${this.$t(`subtitle.language.${code}`)} ${romanize(zhIndex)}`;
-        }
         return ({
           src,
           type: 'online',
           options: {
             language: code,
-            name: subName,
             ranking,
           },
         });
@@ -175,7 +159,14 @@ export default {
               .map(subtitle => ({
                 src: subtitle.index,
                 type: 'embedded',
-                options: { videoSrc, codec: subtitle.codec_name }, // eslint-disable-line camelcase
+                options: {
+                  videoSrc,
+                  streamIndex: subtitle.index,
+                  codec: subtitle.codec_name,
+                  language: subtitle.tags.language,
+                  name: subtitle.tags.name,
+                  isDefault: !!subtitle.disposition.default,
+                }, // eslint-disable-line camelcase
               })));
           } catch (error) {
             reject(error);
@@ -183,25 +174,29 @@ export default {
         });
       });
     },
-    addSubtitle(subtitle, type, options, externalId) {
+    addSubtitle(subtitle, type, options) {
       const {
-        addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded, subtitleInstances,
+        metaInfoUpdate,
+        addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded,
+        subtitleInstances,
       } = this;
       const sub = new SubtitleLoader(subtitle, type, options);
-      const id = externalId || sub.src;
-      this.$set(subtitleInstances, id, sub);
-      sub.on('meta-change', ({ field, value }) => {
-        this.metaInfoUpdate(id, field, value);
-      });
-      sub.on('ready', (metaInfo) => {
-        const { name, format, language } = metaInfo;
-        addSubtitleWhenReady({
-          id, name, format, language,
+      sub.once('loading', (id) => {
+        this.$set(subtitleInstances, id, sub);
+        addSubtitleWhenLoading({ id, type });
+        sub.meta();
+
+        sub.on('meta-change', ({ field, value }) => {
+          metaInfoUpdate(id, field, value);
         });
+        sub.once('ready', (metaInfo) => {
+          const { name, format, language } = metaInfo;
+          addSubtitleWhenReady({
+            id, name, format, language,
+          });
+        });
+        sub.once('parse', () => addSubtitleWhenLoaded({ id }));
       });
-      sub.on('parse', () => addSubtitleWhenLoaded({ id }));
-      addSubtitleWhenLoading({ id, type });
-      sub.meta();
     },
     addSubtitles(subtitleList) {
       const { addSubtitle } = this;
