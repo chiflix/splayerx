@@ -14,6 +14,7 @@ import { mapGetters, mapActions, mapState } from 'vuex';
 import { dirname, extname, basename, join } from 'path';
 import { readdir } from 'fs';
 import osLocale from 'os-locale';
+import romanize from 'romanize';
 import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
@@ -69,7 +70,7 @@ export default {
               played_time: played,
               total_time: this.duration,
               delay: 0,
-              payload: Buffer.from(subtitle.rawData),
+              payload: Buffer.from(subtitle.data),
             };
             Sagi.pushTranscript(payload).then((res) => {
               console.log(res);
@@ -189,11 +190,16 @@ export default {
         sub.on('meta-change', ({ field, value }) => {
           metaInfoUpdate(id, field, value);
         });
-        sub.once('ready', (metaInfo) => {
-          const { name, format, language } = metaInfo;
-          addSubtitleWhenReady({
-            id, name, format, language,
-          });
+        sub.once('ready', ({ name, format, language }) => {
+          if (!name) {
+            if (language) {
+              const subtitleRankIndex = this.subtitleList
+                .filter(subtitle => subtitle.type === type && subtitle.language === language)
+                .findIndex(subtitle => subtitle.id === id) + 1;
+              sub.metaInfo.name = `${this.$t(`subtitle.language.${language}`)} ${romanize(subtitleRankIndex)}`;
+            }
+          }
+          addSubtitleWhenReady({ id, format });
         });
         sub.once('parse', () => addSubtitleWhenLoaded({ id }));
       });

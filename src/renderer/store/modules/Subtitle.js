@@ -107,7 +107,7 @@ const getters = {
   currentSubtitleId: state => state.currentSubtitleId,
   subtitleIds: ({ loadingStates }) => Object.keys(loadingStates),
   subtitleList: ({
-    loadingStates, names, languages, formats, ranks,
+    loadingStates, names, languages, formats, ranks, types,
   }) =>
     Object.keys(loadingStates).map(id => ({
       id,
@@ -116,6 +116,7 @@ const getters = {
       format: formats[id],
       rank: ranks[id],
       loading: loadingStates[id],
+      type: types[id],
     })).sort((a, b) => b.rank - a.rank),
   premiumSubtitles: ({ durations }, getters) => Object.keys(durations)
     .filter(id => durations[id] >= 0.6 * getters.duration)
@@ -191,11 +192,9 @@ const actions = {
     commit(subtitleMutations.TYPES_UPDATE, { id, type });
   },
   [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit }, {
-    id, name, format, language,
+    id, format,
   }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'ready' });
-    commit(subtitleMutations.NAMES_UPDATE, { id, name });
-    commit(subtitleMutations.LANGUAGES_UPDATE, { id, language });
     commit(subtitleMutations.FORMATS_UPDATE, { id, format });
   },
   [subtitleActions.ADD_SUBTITLE_WHEN_LOADED]({ commit }, { id }) {
