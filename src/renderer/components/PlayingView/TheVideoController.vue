@@ -8,7 +8,6 @@
     @mouseleave="handleMouseleave"
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
-    @mousedown.right="handleMousedownRight"
     @mousedown.left="handleMousedownLeft"
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
@@ -189,7 +188,7 @@ export default {
       const minimumSize = this.tempRecentPlaylistDisplayState
         ? [512, Math.round(512 / this.ratio)]
         : [320, 180];
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', minimumSize);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
     },
     conflictResolve(name) {
       Object.keys(this.widgetsStatus).forEach((item) => {
@@ -333,23 +332,8 @@ export default {
         this.mouseLeftWindow = true;
       }, this.mouseleftDelay);
     },
-    handleMousedownRight() {
-      if (process.platform !== 'darwin') {
-        const menu = this.$electron.remote.Menu.getApplicationMenu();
-        menu.popup(this.$electron.remote.getCurrentWindow());
-        this.popupShow = true;
-      }
-    },
     handleMousedownLeft() {
       this.isMousedown = true;
-      if (!this.isValidClick()) { return; }
-      if (process.platform !== 'darwin') {
-        const menu = this.$electron.remote.Menu.getApplicationMenu();
-        if (this.popupShow === true) {
-          menu.closePopup();
-          this.popupShow = false;
-        }
-      }
     },
     handleMouseupLeft() {
       this.isMousemove = false;

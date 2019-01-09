@@ -111,7 +111,7 @@ new Vue({
           label: this.$t('msg.window_.exitFullScreen'),
           accelerator: 'Esc',
           click: () => {
-            this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
           },
         };
       }
@@ -119,7 +119,7 @@ new Vue({
         label: this.$t('msg.window_.enterFullScreen'),
         accelerator: 'F',
         click: () => {
-          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
         },
       };
     },
@@ -657,7 +657,7 @@ new Vue({
               label: this.$t('msg.splayerx.about'),
               role: 'about',
               click: () => {
-                this.$electron.shell.openExternal('https://beta.splayer.org');
+                this.$electron.ipcRenderer.send('add-windows-about');
               },
             },
             { type: 'separator' },
@@ -909,7 +909,7 @@ new Vue({
     });
 
     window.addEventListener('mousedown', (e) => {
-      if (e.button === 2 && process.platform === 'win32') {
+      if (e.button === 2 && process.platform === 'win32' && this.$route.name !== 'windows-about-view') {
         this.menu.popup(this.$electron.remote.getCurrentWindow());
       }
     });

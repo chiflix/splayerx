@@ -161,9 +161,9 @@ export default {
       })(windowRect, tempRect);
     },
     controlWindowRect(rect) {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', rect.slice(2, 4));
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', rect.slice(0, 2));
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
     saveScreenshot() {
       const { videoElement } = this;
@@ -296,8 +296,8 @@ export default {
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.ratio]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [this.ratio]);
     });
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
