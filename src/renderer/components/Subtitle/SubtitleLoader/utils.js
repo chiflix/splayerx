@@ -222,6 +222,7 @@ export function promisify(func) {
  * @returns function object with func and params or functions object with keys
  */
 export function functionExtraction(funcOrObj, defaultParams) {
+  if (typeof funcOrObj === 'string') return { func: args => args, params: funcOrObj };
   if (typeof funcOrObj === 'function') return { func: funcOrObj, params: defaultParams || 'src' };
   const keys = Object.keys(funcOrObj);
   const result = {};
