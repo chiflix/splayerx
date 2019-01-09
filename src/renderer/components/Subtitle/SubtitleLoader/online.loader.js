@@ -15,7 +15,6 @@ export default {
   id: 'src',
   infoLoaders: {
     language: 'language',
-    name: 'name',
   },
   loader: loadOnlineTranscript,
   parser: normalizer,
