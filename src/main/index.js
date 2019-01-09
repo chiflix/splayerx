@@ -244,6 +244,7 @@ function registerMainWindowEvent() {
       },
       acceptFirstMouse: true,
       fullscreenable: false,
+      maximizable: false,
     };
     if (!aboutWindow) {
       aboutWindow = new BrowserWindow(aboutWindowOptions);

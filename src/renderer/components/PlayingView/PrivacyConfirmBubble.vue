@@ -8,7 +8,7 @@
       <div class="content">
         <div :class="infoCSS">
           {{ partOne }}<span class="underline"
-            @mouseup.stop="underlineMouseup"
+            @mouseup="underlineMouseup"
           >{{ underlinedContent }}</span>{{ partTwo }}
         </div>
         <div class="button"
@@ -17,7 +17,7 @@
           }"
           @mouseover.stop="hovered = true"
           @mouseout.stop="hovered = false"
-          @mouseup.stop="handleCloseMouseup">
+          @mouseup="handleCloseMouseup">
           <div class="button-info">{{ button }}</div>
         </div>
       </div>
