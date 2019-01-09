@@ -34,6 +34,7 @@ export default {
       localPremiumSubtitles: {},
       embeddedSubtitles: [],
       newOnlineSubtitles: [],
+      lastSubtitleInfo: {},
     };
   },
   computed: {
@@ -55,6 +56,7 @@ export default {
     originSrc(newVal) {
       this.resetSubtitles();
       this.addInitialSubtitles(newVal);
+      this.lastSubtitleInfo = {};
     },
     premiumSubtitles(newVal) {
       if (this.privacyAgreement) {
@@ -79,6 +81,9 @@ export default {
           }
         });
       }
+    },
+    currentSubtitleId(newVal) {
+      this.lastSubtitleInfo = this.subtitleList.find(({ id }) => id === newVal);
     },
   },
   methods: {
@@ -176,8 +181,9 @@ export default {
         });
       });
     },
-    addSubtitle(subtitle, type, options) {
+    addSubtitle(subtitle, type, options, chooseWhenReady) {
       const {
+        changeCurrentSubtitle,
         metaInfoUpdate,
         addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded,
         subtitleInstances,
@@ -206,12 +212,14 @@ export default {
             }
           }
           addSubtitleWhenReady({ id, format });
+          if (chooseWhenReady) changeCurrentSubtitle(id);
         });
         sub.once('parse', () => addSubtitleWhenLoaded({ id }));
       });
     },
     addSubtitles(subtitleList) {
       const processedSubtitleList = [];
+      let chooseFirstSubtitle = false;
       if (subtitleList instanceof Array) {
         processedSubtitleList
           .push(...subtitleList.filter(subtitle => !!subtitle.src && !!subtitle.type));
@@ -222,12 +230,12 @@ export default {
         processedSubtitleList.push({ src: subtitleList, type: 'local' });
       }
 
-      processedSubtitleList
-        .forEach(subtitle => this.addSubtitle(
-          subtitle.src,
-          subtitle.type,
-          subtitle.options,
-        ));
+      if (!Object.keys(this.lastSubtitleInfo).length) chooseFirstSubtitle = true;
+
+      processedSubtitleList.forEach(({ src, type, options }, index) => this.addSubtitle(
+        src, type, options,
+        chooseFirstSubtitle && index === 0,
+      ));
     },
     async refreshOnlineSubtitles() {
       this.resetOnlineSubtitles();
