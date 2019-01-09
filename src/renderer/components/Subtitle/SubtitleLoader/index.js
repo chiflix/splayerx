@@ -27,49 +27,35 @@ export default class SubtitleLoader extends EventEmitter {
    */
   constructor(src, type, options) {
     super();
-    switch (type.toLowerCase()) {
-      case 'local': {
-        this.src = src;
-        this.type = type.toLowerCase();
-        this.format = localFormatLoader(src);
-        break;
-      }
-      case 'embedded': {
-        this.src = src;
-        this.type = type.toLowerCase();
-        this.format = 'embedded';
-        break;
-      }
-      case 'online': {
-        this.src = src;
-        this.type = type.toLowerCase();
-        this.format = 'online';
-        break;
-      }
-      default:
-        throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE, `Unknown subtitle type ${type}.`);
+    this.src = src; // to-do: src validator
+
+    if (!type || ['local', 'embedded', 'online'].indexOf(type) === -1) {
+      throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE, `Unknown subtitle type ${type}.`);
     }
+    this.type = type;
 
-
-    this.metaInfo = new Proxy({}, {
-      set: (target, field, value) => {
-        const oldVal = Reflect.get(target, field);
-        const success = Reflect.set(target, field, value);
-        const newVal = Reflect.get(target, field);
-        if (newVal !== value) return false;
-        if (success && oldVal !== newVal) this.emit('meta-change', { field, value });
-        return true;
-      },
-    });
-    this.options = options || {};
-    const loader = Object.keys(loaders)
-      .find(format => toArray(loaders[format].supportedFormats).includes(this.format));
-    if (loaders[loader]) {
-      this.loader = loaders[loader];
+    const format = type === 'local' ? localFormatLoader(src) : type;
+    if (supportedFormats.includes(format)) {
+      this.mataInfo.format = format;
+      this.loader = Object.values(loaders)
+        .find(loader => toArray(loader.supportedFormats).includes(format));
     } else {
       throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_FORMAT, `Unknown subtitle format for subtitle ${src}.`);
     }
+
+    this.options = options || {};
   }
+
+  metaInfo = new Proxy({}, {
+    set: (target, field, value) => {
+      const oldVal = Reflect.get(target, field);
+      const success = Reflect.set(target, field, value);
+      const newVal = Reflect.get(target, field);
+      if (newVal !== value) return false;
+      if (success && oldVal !== newVal) this.emit('meta-change', { field, value });
+      return true;
+    },
+  })
 
   static supportedFormats = supportedFormats;
   static supportedCodecs = supportedCodecs;
