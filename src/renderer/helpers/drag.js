@@ -25,7 +25,7 @@ function parentsHasClass(element, className) {
   return parentsHasClass(element.parentNode, className);
 }
 
-export default function drag(element) {
+export default function drag(element, window) {
   const mouseConstructor = getMouseConstructor();
   if (!mouseConstructor) return () => {};
   const mouse = mouseConstructor();
@@ -48,9 +48,9 @@ export default function drag(element) {
     if (!offset) return;
     x = Math.round((x / getRatio()) - offset[0]);
     y = Math.round((y / getRatio()) - offset[1]);
-    ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
+    ipcRenderer.send(`call${window}WindowMethod`, 'setPosition', [x, y]);
     if (windowSize) {
-      ipcRenderer.send('callMainWindowMethod', 'setSize', windowSize);
+      ipcRenderer.send(`call${window}WindowMethod`, 'setSize', windowSize);
     }
   });
 

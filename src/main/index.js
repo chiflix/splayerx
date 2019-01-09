@@ -96,6 +96,9 @@ function registerMainWindowEvent() {
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     mainWindow?.[method]?.(...args);
   });
+  ipcMain.on('callAboutWindowMethod', (evt, method, args = []) => {
+    aboutWindow?.[method]?.(...args);
+  });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
     if (!mainWindow || event.sender.isDestroyed()) return;

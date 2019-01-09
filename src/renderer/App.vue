@@ -76,7 +76,7 @@
       });
       this.$electron.ipcRenderer.send('windowInit');
       this.$el.style.fontFamily = process.platform;
-      drag(this.$el);
+      drag(this.$el, 'Main');
       this.$ga.event('app', 'mounted');
     },
   };

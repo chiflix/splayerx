@@ -14,7 +14,7 @@
 <script>
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
-
+import drag from '@/helpers/drag';
 export default {
   name: 'About',
   components: {
@@ -32,6 +32,9 @@ export default {
     handleClose() {
       electron.remote.BrowserWindow.getFocusedWindow().close();
     },
+  },
+  mounted() {
+    drag(this.$el, 'About');
   },
 };
 </script>
