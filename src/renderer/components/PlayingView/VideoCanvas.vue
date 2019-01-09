@@ -28,7 +28,7 @@
 </template>;
 
 <script>
-import syncStorage from '@/helpers/syncStorage';
+import asyncStorage from '@/helpers/asyncStorage';
 import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
@@ -197,13 +197,12 @@ export default {
       const val = await this.infoDB.get('recent-played', 'path', videoPath);
       if (val) {
         const mergedData = Object.assign(val, data);
-        await this.infoDB.add('recent-played', mergedData).then(() => {
-          this.$bus.$emit('database-saved');
-        });
+        await this.infoDB.add('recent-played', mergedData);
+        this.$bus.$emit('database-saved');
       }
     },
     saveSubtitleStyle() {
-      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
+      return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
     async getVideoCover(grabCoverTime) {
       if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
