@@ -62,15 +62,13 @@ const actions = {
     } else if (state.isFolderList) {
       /*
         Currently not judging whether app is mas version
-        Until the decision which auto search same directory functionality
-        will be abandon on mas version has been confirmed.
+        Until detecting same directory be abandoned on mas version
        */
       helpers.methods.findSimilarVideoByVidPath(state.PlayingList[0]).then((videoFiles) => {
         commit('PlayingList', videoFiles);
       }, (err) => {
         if (process.mas && err?.code === 'EPERM') {
-          // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
-          this.$store.dispatch('FolderList', state.PlayingList);
+          dispatch('FolderList', state.PlayingList);
         }
       });
     } else {

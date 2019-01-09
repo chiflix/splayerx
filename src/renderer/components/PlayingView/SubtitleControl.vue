@@ -140,6 +140,7 @@ export default {
       detailTimer: null,
       breakTimer: null,
       computedAvaliableItems: [],
+      continueRefresh: false,
     };
   },
   computed: {
@@ -264,23 +265,27 @@ export default {
       }
     },
     mousedownCurrentTarget(val) {
-      if (val !== this.$options.name && this.showAttached) {
-        this.anim.playSegments([62, 64], false);
-        if (this.lastDragging) {
-          this.clearMouseup({ target: '' });
-        } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
-          this.$emit('update:showAttached', false);
+      if (val !== 'notification-bubble') {
+        if (val !== this.$options.name && this.showAttached) {
+          this.anim.playSegments([62, 64], false);
+          if (this.lastDragging) {
+            this.clearMouseup({ target: '' });
+          } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
+            this.$emit('update:showAttached', false);
+          }
         }
       }
     },
     mouseupCurrentTarget(val) {
-      if (this.lastDragging) {
-        if (this.showAttached) {
-          this.anim.playSegments([79, 85]);
+      if (this.mousedownCurrentTarget !== 'notification-bubble') {
+        if (this.lastDragging) {
+          if (this.showAttached) {
+            this.anim.playSegments([79, 85]);
+          }
+          this.clearMousedown({ target: '' });
+        } else if (val !== this.$options.name && this.showAttached) {
+          this.$emit('update:showAttached', false);
         }
-        this.clearMousedown({ target: '' });
-      } else if (val !== this.$options.name && this.showAttached) {
-        this.$emit('update:showAttached', false);
       }
     },
     subtitleList(val, oldval) {
@@ -316,6 +321,7 @@ export default {
     handleRefresh() {
       if (!this.privacyAgreement) {
         this.$bus.$emit('privacy-confirm');
+        this.continueRefresh = true;
       } else if (this.privacyAgreement && !this.timer) {
         this.timer = setInterval(() => {
           this.count += 1;
@@ -431,6 +437,12 @@ export default {
   },
   mounted() {
     this.$bus.$on('menu-subtitle-refresh', this.handleRefresh);
+    this.$bus.$on('subtitle-refresh-continue', () => {
+      if (this.continueRefresh) {
+        this.continueRefresh = false;
+        this.handleRefresh();
+      }
+    });
     document.addEventListener('mouseup', (e) => {
       if (e.button === 0) {
         if (!this.showAttached) {

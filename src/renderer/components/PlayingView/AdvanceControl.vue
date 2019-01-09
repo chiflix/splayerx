@@ -1,5 +1,5 @@
 <template>
-  <div :data-component-name="$options.name" v-fade-in="showAllWidgets">
+  <div :data-component-name="$options.name">
     <div class="advanceControl">
       <transition name="advance-trans-l">
       <div class="advanced" v-show="showAttached"
@@ -32,7 +32,6 @@ export default {
     'advance-main-menu': AdvanceMainMenu,
   },
   props: {
-    showAllWidgets: Boolean,
     showAttached: Boolean,
     lastDragging: Boolean,
   },
@@ -74,23 +73,27 @@ export default {
       }
     },
     mousedownCurrentTarget(val) {
-      if (val !== this.$options.name && this.showAttached) {
-        this.anim.playSegments([37, 41], false);
-        if (this.lastDragging) {
-          this.clearMouseup({ target: '' });
-        } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
-          this.$emit('update:showAttached', false);
+      if (val !== 'notification-bubble') {
+        if (val !== this.$options.name && this.showAttached) {
+          this.anim.playSegments([37, 41], false);
+          if (this.lastDragging) {
+            this.clearMouseup({ target: '' });
+          } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
+            this.$emit('update:showAttached', false);
+          }
         }
       }
     },
     mouseupCurrentTarget(val) {
-      if (this.lastDragging) {
-        if (this.showAttached) {
-          this.anim.playSegments([68, 73]);
+      if (this.mousedownCurrentTarget !== 'notification-bubble') {
+        if (this.lastDragging) {
+          if (this.showAttached) {
+            this.anim.playSegments([68, 73]);
+          }
+          this.clearMousedown({ target: '' });
+        } else if (val !== this.$options.name && this.showAttached) {
+          this.$emit('update:showAttached', false);
         }
-        this.clearMousedown({ target: '' });
-      } else if (val !== this.$options.name && this.showAttached) {
-        this.$emit('update:showAttached', false);
       }
     },
   },

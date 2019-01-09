@@ -121,9 +121,9 @@ export default {
   methods: {
     handleDbClick() {
       if (!this.isMaximized) {
-        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'maximize');
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
       } else {
-        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'unmaximize');
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
       }
     },
     handleMouseOver() {
@@ -136,28 +136,28 @@ export default {
     },
     // Methods to handle window behavior
     handleMinimize() {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'minimize');
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'minimize');
     },
     handleWinFull() {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'maximize');
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
     },
     handleClose() {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'close');
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'close');
     },
     handleRestore() {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'unmaximize');
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
     },
     handleFullscreenExit() {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
     },
     // OS-specific methods
     handleMacFull() {
       if (this.itemType === this.itemTypeEnum.FULLSCREEN) {
-        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
       } else if (this.isMaximized) {
-        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'unmaximize');
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
       } else {
-        this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'maximize');
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
       }
     },
   },
@@ -179,7 +179,6 @@ export default {
   top: 0;
   border-radius: 10px;
   width: 100%;
-  -webkit-app-region: drag;
   height: 28px;
   z-index: 6;
   .win-icons {

@@ -111,7 +111,7 @@ new Vue({
           label: this.$t('msg.window_.exitFullScreen'),
           accelerator: 'Esc',
           click: () => {
-            this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
           },
         };
       }
@@ -119,7 +119,7 @@ new Vue({
         label: this.$t('msg.window_.enterFullScreen'),
         accelerator: 'F',
         click: () => {
-          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
         },
       };
     },
@@ -563,6 +563,7 @@ new Vue({
                 label: this.$t('msg.splayerx.about'),
                 role: 'about',
               },
+              { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.preferences'),
                 enabled: true,
@@ -604,6 +605,7 @@ new Vue({
                 label: this.$t('msg.splayerx.hideOthers'),
                 role: 'hideothers',
               },
+              { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.quit'),
                 role: 'quit',
@@ -650,13 +652,16 @@ new Vue({
               },
             ],
           });
-          template[10].submenu.unshift({
-            label: this.$t('msg.splayerx.about'),
-            role: 'about',
-            click: () => {
-              this.$electron.shell.openExternal('https://beta.splayer.org');
+          template[10].submenu.unshift(
+            {
+              label: this.$t('msg.splayerx.about'),
+              role: 'about',
+              click: () => {
+                this.$electron.ipcRenderer.send('add-windows-about');
+              },
             },
-          });
+            { type: 'separator' },
+          );
         }
         return template;
       }).then((result) => {
@@ -804,7 +809,7 @@ new Vue({
           }
         });
         return recentMenuTemplate;
-      });
+      }).catch(() => recentMenuTemplate);
     },
     menuStateControl(flag) {
       this.menu.getMenuItemById('playback').submenu.items.forEach((item) => {
@@ -936,8 +941,8 @@ new Vue({
     });
     /* eslint-disable */
     window.addEventListener('wheel', (e) => {
+      // ctrlKey is the official way of detecting pinch zoom on mac for chrome
       if (!e.ctrlKey) {
-        const up = e.deltaY > 0;
         let isAdvanceColumeItem;
         let isSubtitleScrollItem;
         const advance = document.querySelector('.advance-column-items');
@@ -957,7 +962,7 @@ new Vue({
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
           if (process.platform !== 'darwin') {
             this.$store.dispatch(
-              up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+              e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
               Math.abs(e.deltaY) * 0.2,
             );
           }
@@ -966,14 +971,12 @@ new Vue({
     });
     /* eslint-disable */
 
-    /**
-     * Todo:
-     * Handle multiple files
-     */
     window.addEventListener('drop', (e) => {
       e.preventDefault();
+      this.$bus.$emit('drop');
       const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
       const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+      files.forEach(file => this.$electron.remote.app.addRecentDocument(file));
       if (onlyFolders) {
         this.openFolder(...files);
       } else {
@@ -982,6 +985,12 @@ new Vue({
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      this.$bus.$emit('drag-over');
+    });
+    window.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      this.$bus.$emit('drag-leave');
     });
 
     this.$electron.ipcRenderer.on('open-file', (event, ...files) => {

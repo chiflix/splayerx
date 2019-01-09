@@ -35,20 +35,25 @@
     <transition name="welcome-container-transition">
       <div class="welcome-container" v-if="landingLogoAppear">
         <div class="logo-container">
-          <img class="logo" src="~@/assets/logo.png" alt="electron-vue">
+          <img class="logo" src="~@/assets/logo.png" alt="electron-vue" draggable="false">
         </div>
         <div class="welcome">
           <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
         </div>
       </div>
     </transition>
+    <div class="mask"
+      :style="{
+        backgroundColor: maskBackground
+      }"/>
     <playlist
       :lastPlayedFile="lastPlayedFile"
       :isFullScreen="isFullScreen"
       :winWidth="winWidth"
       :filePathNeedToDelete="filePathNeedToDelete"
       @displayInfo="displayInfoUpdate"/>
-    <notification-bubble/>
+    <NotificationBubble/>
+    
   </div>
 </template>
 
@@ -75,6 +80,7 @@ export default {
       item: [],
       isDragging: false,
       filePathNeedToDelete: '',
+      maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
     };
   },
   watch: {
@@ -82,7 +88,7 @@ export default {
   components: {
     Titlebar,
     Playlist,
-    'notification-bubble': NotificationBubble,
+    NotificationBubble,
   },
   computed: {
     ...mapState({
@@ -166,14 +172,23 @@ export default {
         }
       }
     });
+    this.$bus.$on('drag-over', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0.18)';
+    });
+    this.$bus.$on('drag-leave', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
+    });
+    this.$bus.$on('drop', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
+    });
   },
   mounted() {
     this.$store.dispatch('refreshVersion');
 
     const { app } = this.$electron.remote;
-    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setResizable', [true]);
-    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', [720, 405]);
-    this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [720 / 405]);
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setResizable', [true]);
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [720 / 405]);
 
     this.sagi.healthCheck().then((status) => {
       if (process.env.NODE_ENV !== 'production') {
@@ -236,6 +251,14 @@ body {
   height: 100vh;
   width: 100vw;
   z-index: -1;
+  .mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: background-color 120ms linear;
+  }
 }
 .background {
   position: absolute;

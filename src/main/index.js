@@ -23,14 +23,18 @@ if (process.env.NODE_ENV !== 'development') {
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 let mainWindow = null;
+let aboutWindow = null;
 let tray = null;
 let inited = false;
 const filesToOpen = [];
 const snapShotQueue = [];
 const mediaInfoQueue = [];
-const winURL = process.env.NODE_ENV === 'development'
+const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
+const aboutURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/about.html'
+  : `file://${__dirname}/about.html`;
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -89,9 +93,8 @@ function registerMainWindowEvent() {
     mainWindow?.webContents.send('mainCommit', 'isFocused', false);
   });
 
-  ipcMain.on('callCurrentWindowMethod', (evt, method, args = []) => {
-    const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow;
-    currentWindow?.[method]?.(...args);
+  ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
+    mainWindow?.[method]?.(...args);
   });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
@@ -121,7 +124,7 @@ function registerMainWindowEvent() {
 
   function snapShotQueueProcess(event) {
     const callback = (resultCode, imgPath) => {
-      if (resultCode === 'Waiting for task completion.') {
+      if (resultCode === 'Waiting for the task completion.') {
         snapShot(snapShotQueue[0], callback);
       } else if (resultCode === '0') {
         const lastRecord = snapShotQueue.shift();
@@ -222,6 +225,38 @@ function registerMainWindowEvent() {
       }
     }
   });
+  ipcMain.on('add-windows-about', () => {
+    const aboutWindowOptions = {
+      useContentSize: true,
+      frame: false,
+      titleBarStyle: 'none',
+      width: 390,
+      height: 290,
+      minWidth: 390,
+      minHeight: 290,
+      transparent: true,
+      resizable: false,
+      parent: mainWindow,
+      show: false,
+      webPreferences: {
+        webSecurity: false,
+        experimentalFeatures: true,
+      },
+      acceptFirstMouse: true,
+      fullscreenable: false,
+      maximizable: false,
+    };
+    if (!aboutWindow) {
+      aboutWindow = new BrowserWindow(aboutWindowOptions);
+      aboutWindow.loadURL(`${aboutURL}`);
+      aboutWindow.on('closed', () => {
+        aboutWindow = null;
+      });
+    }
+    aboutWindow.once('ready-to-show', () => {
+      aboutWindow.show();
+    });
+  });
 }
 
 function createWindow() {
@@ -253,7 +288,7 @@ function createWindow() {
 
   mainWindow = new BrowserWindow(windowOptions);
 
-  mainWindow.loadURL(filesToOpen.length ? `${winURL}#/play` : winURL);
+  mainWindow.loadURL(filesToOpen.length ? `${mainURL}#/play` : mainURL);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
@@ -318,7 +353,7 @@ if (process.platform === 'darwin') {
 }
 
 app.on('ready', () => {
-  app.setName('SPlayerX');
+  app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
     mainWindow?.openDevTools();
   });

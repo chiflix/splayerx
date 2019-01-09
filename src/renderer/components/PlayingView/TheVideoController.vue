@@ -8,28 +8,28 @@
     @mouseleave="handleMouseleave"
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
-    @mousedown.right="handleMousedownRight"
     @mousedown.left="handleMousedownLeft"
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
-    :displayState.sync="tempRecentPlaylistDisplayState"
+    :displayState="displayState['recent-playlist']"
     :mousemovePosition="mousemovePosition"
     :isDragging="isDragging"
     :lastDragging="lastDragging"
+    v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets"/>
     <play-button :paused="paused" />
     <volume-indicator :showAllWidgets="showAllWidgets" />
-    <div class="control-buttons">
-      <subtitle-control class="button subtitle" :showAllWidgets="showAllWidgets"
+    <div class="control-buttons" v-fade-in="showAllWidgets">
+      <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
       v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging="lastDragging"
       @conflict-resolve="conflictResolve"/>
-      <playlist-control class="button playlist" :showAllWidgets="showAllWidgets" v-bind.sync="widgetsStatus['playlist-control']"/>
-      <advance-control class="button advance" :showAllWidgets="showAllWidgets"
+      <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
+      <advance-control class="button advance" v-fade-in="displayState['advance-control']"
       v-bind.sync="widgetsStatus['advance-control']" :lastDragging="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
@@ -94,6 +94,7 @@ export default {
       isMousedown: false,
       isMousemove: false,
       lastDragging: false,
+      displayState: {},
       tempRecentPlaylistDisplayState: false,
     };
   },
@@ -156,6 +157,8 @@ export default {
   mounted() {
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
+      this.displayState[value.name] = true;
+      if (value.name === 'recent-playlist') this.displayState[value.name] = false;
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
@@ -185,7 +188,7 @@ export default {
       const minimumSize = this.tempRecentPlaylistDisplayState
         ? [512, Math.round(512 / this.ratio)]
         : [320, 180];
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', minimumSize);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
     },
     conflictResolve(name) {
       Object.keys(this.widgetsStatus).forEach((item) => {
@@ -249,6 +252,12 @@ export default {
       });
     },
     UIDisplayManager() {
+      const tempObject = {};
+      Object.keys(this.displayState).forEach((index) => {
+        tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
+      });
+      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
+      this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
     UIStateManager() {
@@ -323,23 +332,8 @@ export default {
         this.mouseLeftWindow = true;
       }, this.mouseleftDelay);
     },
-    handleMousedownRight() {
-      if (process.platform !== 'darwin') {
-        const menu = this.$electron.remote.Menu.getApplicationMenu();
-        menu.popup(this.$electron.remote.getCurrentWindow());
-        this.popupShow = true;
-      }
-    },
     handleMousedownLeft() {
       this.isMousedown = true;
-      if (!this.isValidClick()) { return; }
-      if (process.platform !== 'darwin') {
-        const menu = this.$electron.remote.Menu.getApplicationMenu();
-        if (this.popupShow === true) {
-          menu.closePopup();
-          this.popupShow = false;
-        }
-      }
     },
     handleMouseupLeft() {
       this.isMousemove = false;
