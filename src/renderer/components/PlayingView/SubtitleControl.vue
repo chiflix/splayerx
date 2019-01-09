@@ -242,6 +242,9 @@ export default {
     },
   },
   watch: {
+    originSrc() {
+      this.computedAvaliableItems = [];
+    },
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
       if (val === 0) {
