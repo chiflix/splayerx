@@ -83,7 +83,15 @@ export default {
       }
     },
     currentSubtitleId(newVal) {
-      this.lastSubtitleInfo = this.subtitleList.find(({ id }) => id === newVal);
+      if (newVal) {
+        this.lastSubtitleInfo = this.subtitleList.find(({ id }) => id === newVal);
+        const { type, language } = this.lastSubtitleInfo;
+        this.lastSubtitleInfo.rankIndex = this.subtitleList
+          .filter(subtitle => subtitle.type === type && subtitle.language === language)
+          .findIndex(subtitle => subtitle.id === newVal);
+      } else {
+        this.lastSubtitleInfo = {};
+      }
     },
   },
   methods: {
@@ -171,7 +179,7 @@ export default {
                 streamIndex: subtitle.index,
                 codec: subtitle.codec_name,
                 language: subtitle.tags.language,
-                name: subtitle.tags.name,
+                name: subtitle.tags.title,
                 isDefault: !!subtitle.disposition.default,
               }, // eslint-disable-line camelcase
             })));
@@ -217,24 +225,36 @@ export default {
         sub.once('parse', () => addSubtitleWhenLoaded({ id }));
       });
     },
-    addSubtitles(subtitleList) {
+    addSubtitles(subtitleList) { // eslint-disable-line complexity
       const processedSubtitleList = [];
-      let chooseFirstSubtitle = false;
+      let subtitleIndexToChoose = this.lastSubtitleInfo.rankIndex || 0;
       if (subtitleList instanceof Array) {
         processedSubtitleList
-          .push(...subtitleList.filter(subtitle => !!subtitle.src && !!subtitle.type));
+          .push(...subtitleList
+            .filter(subtitle => !!subtitle.src && !!subtitle.type)
+            .map(subtitle => ({ ...subtitle, options: subtitle.options || {} })));
       } else if (typeof subtitleList === 'object') {
         const { src, type, options } = subtitleList;
-        if (src && type) processedSubtitleList.push({ src, type, options: options || null });
+        if (src && type) processedSubtitleList.push({ src, type, options: options || {} });
       } else if (typeof subtitleList === 'string') {
-        processedSubtitleList.push({ src: subtitleList, type: 'local' });
+        processedSubtitleList.push({ src: subtitleList, type: 'local', options: {} });
       }
 
-      if (!Object.keys(this.lastSubtitleInfo).length) chooseFirstSubtitle = true;
+      const { type: oldType } = this.lastSubtitleInfo;
+      const { type: newType } = processedSubtitleList[0];
+      if (oldType !== newType) {
+        if (oldType && newType === 'online') subtitleIndexToChoose = -1;
+      } else {
+        const { language } = this.lastSubtitleInfo;
+        const subtitleToChoose = processedSubtitleList
+          .filter(subtitle => subtitle.options.language === language)[subtitleIndexToChoose];
+        subtitleIndexToChoose = processedSubtitleList
+          .findIndex(subtitle => subtitle === subtitleToChoose);
+      }
 
       processedSubtitleList.forEach(({ src, type, options }, index) => this.addSubtitle(
         src, type, options,
-        chooseFirstSubtitle && index === 0,
+        index === subtitleIndexToChoose,
       ));
     },
     async refreshOnlineSubtitles() {
