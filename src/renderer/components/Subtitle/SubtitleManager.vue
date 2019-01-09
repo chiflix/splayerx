@@ -34,7 +34,7 @@ export default {
       localPremiumSubtitles: {},
       embeddedSubtitles: [],
       newOnlineSubtitles: [],
-      lastSubtitleInfo: {},
+      lastSubtitleInfo: { rankIndex: -1 },
     };
   },
   computed: {
@@ -56,7 +56,7 @@ export default {
     originSrc(newVal) {
       this.resetSubtitles();
       this.addInitialSubtitles(newVal);
-      this.lastSubtitleInfo = {};
+      this.lastSubtitleInfo = { rankIndex: -1 };
     },
     premiumSubtitles(newVal) {
       if (this.privacyAgreement) {
@@ -90,7 +90,7 @@ export default {
           .filter(subtitle => subtitle.type === type && subtitle.language === language)
           .findIndex(subtitle => subtitle.id === newVal);
       } else {
-        this.lastSubtitleInfo = {};
+        this.lastSubtitleInfo = { rankIndex: -1 };
       }
     },
   },
@@ -225,9 +225,8 @@ export default {
         sub.once('parse', () => addSubtitleWhenLoaded({ id }));
       });
     },
-    addSubtitles(subtitleList) { // eslint-disable-line complexity
+    addSubtitles(subtitleList) {
       const processedSubtitleList = [];
-      let subtitleIndexToChoose = this.lastSubtitleInfo.rankIndex || 0;
       if (subtitleList instanceof Array) {
         processedSubtitleList
           .push(...subtitleList
@@ -239,19 +238,11 @@ export default {
       } else if (typeof subtitleList === 'string') {
         processedSubtitleList.push({ src: subtitleList, type: 'local', options: {} });
       }
-
-      const { type: oldType } = this.lastSubtitleInfo;
-      const { type: newType } = processedSubtitleList[0];
-      if (oldType !== newType) {
-        if (oldType && newType === 'online') subtitleIndexToChoose = -1;
-      } else {
-        const { language } = this.lastSubtitleInfo;
-        const subtitleToChoose = processedSubtitleList
-          .filter(subtitle => subtitle.options.language === language)[subtitleIndexToChoose];
-        subtitleIndexToChoose = processedSubtitleList
-          .findIndex(subtitle => subtitle === subtitleToChoose);
-      }
-
+      const subtitleIndexToChoose = this.choosePrimarySubtitle(
+        this.lastSubtitleInfo,
+        processedSubtitleList,
+        this.systemLanguageCode,
+      );
       processedSubtitleList.forEach(({ src, type, options }, index) => this.addSubtitle(
         src, type, options,
         index === subtitleIndexToChoose,
@@ -265,6 +256,19 @@ export default {
     },
     metaInfoUpdate(id, field, value) {
       this.updateMetaInfo({ id, type: field, value });
+    },
+    choosePrimarySubtitle(lastSubtitleInfo, newSubtitleList, systemLocale) {
+      const newType = newSubtitleList[0].type;
+      const lastType = lastSubtitleInfo.type;
+      const lastSubtitleIndex = lastSubtitleInfo.rankIndex;
+      if (lastSubtitleIndex === -1) {
+        const index = newSubtitleList.findIndex(({ options }) => options.language === systemLocale);
+        return index === -1 ? 0 : index;
+      } else if (lastType !== 'online' && newType === 'online') return -1;
+      const matchedSubtitleList = newSubtitleList
+        .filter(({ options }) => options.language === lastSubtitleInfo.language);
+      if (lastSubtitleIndex >= matchedSubtitleList.length) return 0;
+      return newSubtitleList.indexOf(matchedSubtitleList[lastSubtitleIndex]);
     },
   },
   created() {
