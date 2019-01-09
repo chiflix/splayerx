@@ -26,7 +26,7 @@ export default {
     params: ['videoSrc', 'streamIndex'],
   },
   infoLoaders: {
-    language: 'language',
+    // language: 'language', tempoarily disable language and use localLanguageLoader instead
     name: 'name',
   },
   loader: {

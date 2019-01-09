@@ -197,6 +197,11 @@ export default {
                 .filter(subtitle => subtitle.type === type && subtitle.language === language)
                 .findIndex(subtitle => subtitle.id === id) + 1;
               sub.metaInfo.name = `${this.$t(`subtitle.language.${language}`)} ${romanize(subtitleRankIndex)}`;
+            } else {
+              const subtitleRankIndex = this.subtitleList
+                .filter(subtitle => subtitle.type === type)
+                .findIndex(subtitle => subtitle.id === id) + 1;
+              sub.metaInfo.name = `${{ zh: '内嵌', en: 'embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)}`;
             }
           }
           addSubtitleWhenReady({ id, format });
