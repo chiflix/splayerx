@@ -155,20 +155,21 @@ export default {
         setTimeout(() => { reject(new Error('Embedded Subtitles Retrieve Timeout!')); }, 20000);
         ipcRenderer.once(`mediaInfo-${videoSrc}-reply`, (event, info) => {
           try {
-            resolve(...JSON.parse(info).streams
-              ?.filter(stream => stream?.codec_type === 'subtitle' && supportedCodecs.includes(stream?.codec_name)) // eslint-disable-line camelcase
-              .map(subtitle => ({
-                src: subtitle.index,
-                type: 'embedded',
-                options: {
-                  videoSrc,
-                  streamIndex: subtitle.index,
-                  codec: subtitle.codec_name,
-                  language: subtitle.tags.language,
-                  name: subtitle.tags.name,
-                  isDefault: !!subtitle.disposition.default,
-                }, // eslint-disable-line camelcase
-              })));
+            const subtitleStreams = JSON.parse(info).streams
+              .filter(stream => stream.codec_type === 'subtitle' && supportedCodecs.includes(stream.codec_name)); // eslint-disable-line camelcase;
+            if (!subtitleStreams.length) resolve([]);
+            resolve(...subtitleStreams.map(subtitle => ({
+              src: subtitle.index,
+              type: 'embedded',
+              options: {
+                videoSrc,
+                streamIndex: subtitle.index,
+                codec: subtitle.codec_name,
+                language: subtitle.tags.language,
+                name: subtitle.tags.name,
+                isDefault: !!subtitle.disposition.default,
+              }, // eslint-disable-line camelcase
+            })));
           } catch (error) {
             reject(error);
           }
@@ -210,10 +211,6 @@ export default {
       });
     },
     addSubtitles(subtitleList) {
-      const { addSubtitle } = this;
-      const defaultOptions = {
-        language: null, isDefault: null, ranking: null, streamIndex: null,
-      };
       const processedSubtitleList = [];
       if (subtitleList instanceof Array) {
         processedSubtitleList
@@ -226,10 +223,10 @@ export default {
       }
 
       processedSubtitleList
-        .forEach(subtitle => addSubtitle(
+        .forEach(subtitle => this.addSubtitle(
           subtitle.src,
           subtitle.type,
-          subtitle.options || defaultOptions,
+          subtitle.options,
         ));
     },
     async refreshOnlineSubtitles() {
