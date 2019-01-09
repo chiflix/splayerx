@@ -28,7 +28,6 @@
 </template>;
 
 <script>
-import asyncStorage from '@/helpers/asyncStorage';
 import syncStorage from '@/helpers/syncStorage';
 import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
@@ -49,6 +48,7 @@ export default {
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
+      asyncTasksDone: false,
     };
   },
   methods: {
@@ -165,7 +165,7 @@ export default {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
-    saveScreenshot() {
+    async saveScreenshot(videoPath) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -193,7 +193,14 @@ export default {
         lastPlayedTime: videodata.time,
         duration: this.duration,
       };
-      syncStorage.setSync('recent-played', data);
+
+      const val = await this.infoDB.get('recent-played', 'path', videoPath);
+      if (val) {
+        const mergedData = Object.assign(val, data);
+        await this.infoDB.add('recent-played', mergedData).then(() => {
+          this.$bus.$emit('database-saved');
+        });
+      }
     },
     saveSubtitleStyle() {
       syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
@@ -275,17 +282,7 @@ export default {
   watch: {
     originSrc(val, oldVal) {
       this.coverFinded = false;
-      this.saveScreenshot();
-      asyncStorage.get('recent-played')
-        .then(async (data) => {
-          const val = await this.infoDB.get('recent-played', 'path', oldVal);
-          if (val && data) {
-            const mergedData = Object.assign(val, data);
-            this.infoDB.add('recent-played', mergedData).then(() => {
-              this.$bus.$emit('database-saved');
-            });
-          }
-        });
+      this.saveScreenshot(oldVal);
       this.$bus.$emit('showlabel');
       this.videoConfigInitialize({
         audioTrackList: [],
@@ -332,9 +329,14 @@ export default {
     this.$bus.$on('drop', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0)';
     });
-    window.onbeforeunload = () => {
-      this.saveScreenshot();
-      this.saveSubtitleStyle();
+    window.onbeforeunload = (e) => {
+      if (!this.asyncTasksDone) {
+        this.saveScreenshot(this.originSrc).then(this.saveSubtitleStyle()).then(() => {
+          this.asyncTasksDone = true;
+          window.close();
+        });
+        e.returnValue = false;
+      }
     };
   },
 };
