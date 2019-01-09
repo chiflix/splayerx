@@ -121,6 +121,14 @@ export default {
       title: '文件错误',
       content: '无法找到相应文件',
     },
+    loadError: {
+      title: '未能加载字幕',
+      content: '暂不支持该字幕类型',
+    },
+    networkError: {
+      title: '未找到翻译结果',
+      content: '网络异常或缺少翻译结果',
+    },
   },
   loading: {
     title: '',
