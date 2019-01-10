@@ -154,33 +154,29 @@ export default {
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     updateAnimationIn() {
-      if (!this.isPlaying && this.isInRange) {
+      if (!this.isPlaying) {
         this.$refs.blur.classList.remove('blur');
       }
-      if (this.isInRange) {
-        this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
-        this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
-        this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
-      }
+      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
+      this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
+      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
       if (!this.isPlaying && this.sliderPercentage > 0) {
         this.$refs.progress.style.setProperty('opacity', '1');
       }
     },
     updateAnimationOut() {
-      if (!this.isPlaying && this.isInRange) {
+      if (!this.isPlaying) {
         this.$refs.blur.classList.add('blur');
       }
-      if (this.isInRange) {
-        this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
-        this.$refs.content.style.setProperty('height', '100%');
-      }
+      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
+      this.$refs.content.style.setProperty('height', '100%');
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.15)');
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.40)');
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
-      if (!this.isPlaying && !this.isShifting && this.canHoverItem) {
+      if (!this.isPlaying && this.isInRange && !this.isShifting && this.canHoverItem) {
         this.eventTarget.onItemMouseover(this.index, this.mediaInfo);
         requestAnimationFrame(this.updateAnimationIn);
       }
