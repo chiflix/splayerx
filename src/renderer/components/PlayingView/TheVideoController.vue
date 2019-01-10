@@ -14,7 +14,6 @@
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
-    v-if="!onlyOneVideo"
     :displayState="displayState['recent-playlist']"
     :mousemovePosition="mousemovePosition"
     :isDragging="isDragging"
@@ -26,7 +25,7 @@
     <play-button :paused="paused" />
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons" v-fade-in="showAllWidgets">
-      <playlist-control class="button playlist" v-if="!onlyOneVideo" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
+      <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
       v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging="lastDragging"
       @conflict-resolve="conflictResolve"/>
@@ -163,6 +162,9 @@ export default {
     this.UIElements.forEach((value) => {
       this.displayState[value.name] = true;
       if (value.name === 'recent-playlist') this.displayState[value.name] = false;
+      if (value.name === 'playlist-control' && this.onlyOneVideo) {
+        this.displayState['playlist-control'] = false;
+      }
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
@@ -261,6 +263,7 @@ export default {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
+      tempObject['playlist-control'] = !this.onlyOneVideo;
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
