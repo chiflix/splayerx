@@ -333,11 +333,10 @@ export default {
         this.saveScreenshot(this.originSrc).then(this.saveSubtitleStyle()).then(() => {
           this.asyncTasksDone = true;
           window.close();
-        });
-        .catch(() => {
+        }).catch(() => {
           this.asyncTasksDone = true;
           window.close();
-        })
+        });
         e.returnValue = false;
       }
     };
