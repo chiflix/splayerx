@@ -438,16 +438,6 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('no-translation-result', () => {
-      setTimeout(() => {
-        if (!this.subtitleList.length) {
-          this.addLog('error', {
-            message: 'No Translation Result .',
-            errcode: NO_TRANSLATION_RESULT,
-          });
-        }
-      }, 500);
-    });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;

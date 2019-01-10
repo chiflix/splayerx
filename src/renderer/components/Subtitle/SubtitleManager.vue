@@ -127,7 +127,9 @@ export default {
         const onlineSubtitles = await getOnlineSubtitlesList(videoSrc);
         setTimeout(() => {
           this.$store.dispatch('removeMessagesByType');
-          this.$bus.$emit('no-translation-result');
+          if (!onlineSubtitles.length) {
+            this.$bus.$emit('no-translation-result');
+          }
         }, 1000);
         addSubtitles(onlineSubtitles);
       }
@@ -289,6 +291,16 @@ export default {
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
     this.$bus.$on('finished-add-subtitles', () => {
       this.addSubtitles(this.newOnlineSubtitles);
+    });
+    this.$bus.$on('no-translation-result', () => {
+      setTimeout(() => {
+        if (!this.newOnlineSubtitles.length) {
+          this.addLog('error', {
+            message: 'No Translation Result .',
+            errcode: NO_TRANSLATION_RESULT,
+          });
+        }
+      }, 500);
     });
     this.addInitialSubtitles(this.originSrc);
   },
