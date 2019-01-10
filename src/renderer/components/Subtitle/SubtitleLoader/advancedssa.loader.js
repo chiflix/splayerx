@@ -2,7 +2,7 @@ import flow from 'lodash/flow';
 import pick from 'lodash/pick';
 import { compile } from 'ass-compiler';
 
-import { localLanguageLoader, localNameLoader, loadLocalFile } from './utils';
+import { localLanguageLoader, localNameLoader, loadLocalFile, localIdLoader } from './utils';
 
 const baseTags = {
   // fn: '',
@@ -67,6 +67,7 @@ export default {
   longName: 'ASS (Advanced SSA) subtitle',
   name: 'ass',
   supportedFormats: ['ass'],
+  id: localIdLoader,
   infoLoaders: {
     language: {
       func: localLanguageLoader,

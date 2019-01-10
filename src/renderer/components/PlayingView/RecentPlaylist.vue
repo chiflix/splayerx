@@ -196,19 +196,23 @@ export default {
       }
     },
     mousedownCurrentTarget(val) {
-      if (val !== this.$options.name && this.backgroundDisplayState) {
-        if (this.lastDragging) {
-          this.clearMouseup({ target: '' });
-        } else if (this.mouseupCurrentTarget !== 'playlist-control' && this.mouseupCurrentTarget !== '') {
-          this.$emit('update:playlistcontrol-showattached', false);
+      if (val !== 'notification-bubble') {
+        if (val !== this.$options.name && this.backgroundDisplayState) {
+          if (this.lastDragging) {
+            this.clearMouseup({ target: '' });
+          } else if (this.mouseupCurrentTarget !== 'playlist-control' && this.mouseupCurrentTarget !== '') {
+            this.$emit('update:playlistcontrol-showattached', false);
+          }
         }
       }
     },
     mouseupCurrentTarget(val) {
-      if (this.lastDragging) {
-        this.clearMousedown({ target: '' });
-      } else if (val !== this.$options.name && this.backgroundDisplayState) {
-        this.$emit('update:playlistcontrol-showattached', false);
+      if (this.mousedownCurrentTarget !== 'notification-bubble') {
+        if (this.lastDragging) {
+          this.clearMousedown({ target: '' });
+        } else if (val !== this.$options.name && this.backgroundDisplayState) {
+          this.$emit('update:playlistcontrol-showattached', false);
+        }
       }
     },
     playingIndex(val) {

@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import flatten from 'lodash/flatten';
-import { localFormatLoader, toArray, mediaHash, promisify } from './utils';
+import { localFormatLoader, toArray, promisify, functionExtraction } from './utils';
+import { SubtitleError, ErrorCodes } from './errors';
 
 const files = require.context('.', false, /\.loader\.js$/);
 const loaders = {};
@@ -16,86 +17,84 @@ const supportedCodecs = flatten(Object.keys(loaders)
   .map(loaderType => [loaders[loaderType].name, loaders[loaderType].longName]));
 
 export default class SubtitleLoader extends EventEmitter {
+  static supportedFormats = supportedFormats;
+  static supportedCodecs = supportedCodecs;
+  static codecToFormat(codec) {
+    return Object.values(loaders).filter(loader => new RegExp(`${codec}`).test(loader.name))[0].supportedFormats[0];
+  }
+  metaInfo = new Proxy({}, {
+    set: (target, field, value) => {
+      const oldVal = Reflect.get(target, field);
+      const success = Reflect.set(target, field, value);
+      const newVal = Reflect.get(target, field);
+      if (newVal !== value) return false;
+      if (success && oldVal !== newVal) this.emit('meta-change', { field, value });
+      return true;
+    },
+  })
+
+  _getParams(params) {
+    return toArray(params).map(param => this[param] || this.metaInfo[param] || this.options[param]);
+  }
+
   /**
    * Create a SubtitleLoader
-   * @param {string} src - path for a local/embedded online or hash for an online subtitle
-   * @param {string} type - 'local', 'embedded' or 'online'
+   * @param {string} src - path for a local subtitle
+   * , an embedded stream index or hash for an online subtitle
+   * @param {string} type - 'local', 'embedded' or 'online' or 'test'
    * @param {object} options - (optional)other info about subtitle,
    * like language or name(for online subtitle)
    */
   constructor(src, type, options) {
     super();
-    this.src = src;
-    this.type = type;
-    this.format = type === 'online' ? 'online' : localFormatLoader(src);
-    this.options = options || {};
-    const loader = Object.keys(loaders)
-      .find(format => toArray(loaders[format].supportedFormats).includes(this.format));
-    if (loaders[loader]) {
-      this.loader = loaders[loader];
-    } else {
-      throw new Error('Unreconginzed format');
+    this.src = src; // to-do: src validator
+
+    if (!type || ['local', 'embedded', 'online'].indexOf(type) === -1) {
+      throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE, `Unknown subtitle type ${type}.`);
     }
-  }
+    this.type = type;
 
-  static supportedFormats = supportedFormats;
-  static supportedCodecs = supportedCodecs;
+    const format = type === 'local' ? localFormatLoader(src) : type;
+    if (supportedFormats.includes(format)) {
+      this.metaInfo.format = format;
+      this.loader = Object.values(loaders)
+        .find(loader => toArray(loader.supportedFormats).includes(format));
+    } else {
+      throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_FORMAT, `Unknown subtitle format for subtitle ${src}.`);
+    }
 
-  static codecToFormat(codec) {
-    return Object.values(loaders).filter(loader => new RegExp(`${codec}`).test(loader.name))[0].supportedFormats[0];
+    this.options = options || {};
+
+    const { func: idLoader, params: idParams } = functionExtraction(this.loader.id);
+    promisify(idLoader.bind(null, ...this._getParams(idParams))).then((id) => {
+      this.metaInfo.id = id;
+      this.emit('loading', id);
+    });
   }
 
   async meta() {
-    const {
-      src, type, format, options,
-    } = this;
-    this.mediaHash = type !== 'online' ? await mediaHash(src) : src;
-    this.id = type === 'online' ? src : this.mediaHash;
-    const { infoLoaders: meta } = this.loader;
-    let info = {
-      src,
-      type,
-      format,
-      id: this.id,
-    };
-    if (typeof meta === 'function') {
-      info = await Promise.resolve(meta.call(null, src));
-    } else if (typeof meta === 'object') {
-      const getParams = (params, info) => params.map(param => (
-        this[param] || options[param] || info[param]
-      ));
-      const infoTypes = Object.keys(meta);
-      const infoResults = await Promise.all(infoTypes
-        .map((infoType) => {
-          const infoLoader = meta[infoType];
-          if (getParams([infoType], info)[0] || typeof infoLoader === 'string') {
-            return promisify(() => getParams([infoType], info)[0]);
-          }
-          if (typeof infoLoader === 'function') return promisify(infoLoader.bind(null, src));
-          return promisify(infoLoader.func.bind(
-            null,
-            ...getParams(toArray(infoLoader.params), info),
-          ));
-        }).map(promise => promise.catch(err => err)));
-      infoTypes.forEach((infoType, index) => {
-        info[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
-      });
-    }
-    this.metaInfo = { ...info, format };
-    this.emit('ready', this.metaInfo);
+    const { metaInfo } = this;
+    const infoLoaders = functionExtraction(this.loader.infoLoaders); // normalize all info loaders
+    const infoTypes = Object.keys(infoLoaders); // get all info types
+    const infoResults = await Promise.all(infoTypes // make all infoLoaders promises and Promise.all
+      .map(infoType => promisify(infoLoaders[infoType].func
+        .bind(null, ...this._getParams(infoLoaders[infoType].params)))));
+    infoTypes.forEach((infoType, index) => { // normalize all info
+      metaInfo[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
+    });
+    this.emit('ready', metaInfo);
   }
 
   async load() {
-    const { src } = this;
-    const { loader } = this.loader;
-    this.data = await promisify(loader.bind(null, src));
+    const loader = functionExtraction(this.loader.loader);
+    this.data = await promisify(loader.func.bind(null, ...this._getParams(toArray(loader.params))));
     this.emit('data', this.data);
   }
 
   async parse() {
-    const { data } = this;
-    const { parser } = this.loader;
-    this.parsed = await promisify(parser.bind(null, data));
+    const parser = functionExtraction(this.loader.parser, 'data');
+    this.parsed =
+      await promisify(parser.func.bind(null, ...this._getParams(toArray(parser.params))));
     this.emit('parse', this.parsed);
   }
 }

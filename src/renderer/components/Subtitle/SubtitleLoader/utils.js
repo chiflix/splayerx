@@ -4,33 +4,14 @@ import chardet from 'chardet';
 import convert3To1 from 'iso-639-3-to-1';
 import iconv from 'iconv-lite';
 import franc from 'franc';
+import { ipcRenderer } from 'electron';
 import helpers from '@/helpers';
 import Sagi from '@/helpers/sagi';
-
-export async function toPromise(func) {
-  func.bind(null, arguments.slice(1));
-  const result = func instanceof Promise ? await func() : func();
-  return result;
-}
+import SubtitleLoader from './index';
+import { SubtitleError, ErrorCodes } from './errors';
 
 export function toArray(element) {
   return element instanceof Array ? element : [element];
-}
-
-/**
- * Whether an object is a collection of methods or
- * an object with func and params attributes(i.e. SubtitleLoader version of a function).
- *
- * @export
- * @param {object} object - object to be evaluated
- * @returns {string} 'option' for methods or 'function' for a function
- */
-export function objectTo(object) {
-  const keys = Object.keys(object);
-  if (keys.includes('func') && keys.includes('params')) {
-    return 'function';
-  }
-  return 'option';
 }
 
 export const mediaHash = helpers.methods.mediaQuickHash;
@@ -116,6 +97,10 @@ export async function localLanguageLoader(path, format) {
   return convert3To1(franc(stringCallback(string)));
 }
 
+export async function localIdLoader(path) {
+  return `${path}-${(await mediaHash(path))}`;
+}
+
 export function localNameLoader(path) {
   const filename = basename(path);
   return filename;
@@ -171,10 +156,45 @@ export function loadLocalFile(path) {
     readFile(path, async (err, data) => {
       if (err) reject(err);
       const encoding = await localEncodingLoader(path);
-      if (iconv.encodingExists(encoding)) {
-        resolve(iconv.decode(data, encoding));
-      }
-      reject(new Error(`Unsupported encoding: ${encoding}.`));
+      if (iconv.encodingExists(encoding)) resolve(iconv.decode(data, encoding));
+      reject(new SubtitleError(ErrorCodes.ENCODING_UNSUPPORTED_ENCODING, `Unsupported encoding: ${encoding}.`));
+    });
+  });
+}
+/**
+ * Get extracted embedded subtitles's local src
+ *
+ * @export
+ * @param {string} videoSrc - path of the video file
+ * @param {number} subtitleStreamIndex - the number of the subtitle stream index
+ * @param {string} subtitleCodec - the codec of the embedded subtitle
+ * @returns {Promise<string|SubtitleError>} the subtitle path string or SubtitleError
+ */
+export function embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec) {
+  ipcRenderer.send('extract-subtitle-request', videoSrc, subtitleStreamIndex, SubtitleLoader.codecToFormat(subtitleCodec), mediaHash);
+  return new Promise((resolve, reject) => {
+    ipcRenderer.once('extract-subtitle-response', (event, { error, index, path }) => {
+      if (error) reject(new SubtitleError(ErrorCodes.SUBTITLE_RETRIEVE_FAILED, `${videoSrc}'s No.${index} extraction failed with ${error}.`));
+      resolve(path);
+    });
+  });
+}
+
+/**
+ * Load embedded subtitls from streamIndex with embeddedSrcLoader
+ *
+ * @export
+ * @param {string} videoSrc - path of the video file
+ * @param {number} subtitleStreamIndex - the number of the subtitle stream index
+ * @param {string} subtitleCodec - the codec of the embedded subtitle
+ * @returns {Promise<string|SubtitleError>} the subtitles string or SubtitleError
+ */
+export function loadEmbeddedSubtitle(videoSrc, subtitleStreamIndex, subtitleCodec) {
+  return new Promise((resolve, reject) => {
+    embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec).then((path) => {
+      resolve(loadLocalFile(path));
+    }).catch((err) => {
+      reject(err);
     });
   });
 }
@@ -191,4 +211,43 @@ export function promisify(func) {
       reject(err);
     }
   });
+}
+/**
+ * Normalize function and parameters from an object, a string or a function
+ *
+ * @export
+ * @param {function|string|object} funcOrObj - function, string
+ * or object to extract function(s) from
+ * @param {string|array} defaultParams - default params field when no params found
+ * @returns function object with func and params or functions object with keys
+ */
+export function functionExtraction(funcOrObj, defaultParams) {
+  if (typeof funcOrObj === 'string') return { func: args => args, params: funcOrObj };
+  if (typeof funcOrObj === 'function') return { func: funcOrObj, params: defaultParams || 'src' };
+  const keys = Object.keys(funcOrObj);
+  const result = {};
+  keys.some((key) => {
+    if (key === 'func' || key === 'params') {
+      result.func = funcOrObj.func;
+      result.params = funcOrObj.params || 'src';
+      return true;
+    } else if (typeof funcOrObj[key] === 'function') {
+      result[key] = {
+        func: funcOrObj[key],
+        params: defaultParams || 'src',
+      };
+    } else if (typeof funcOrObj[key] === 'string') {
+      result[key] = {
+        func: result => result,
+        params: funcOrObj[key],
+      };
+    } else if (typeof funcOrObj[key] === 'object') {
+      result[key] = {
+        func: funcOrObj[key].func,
+        params: funcOrObj[key].params || defaultParams || 'src',
+      };
+    }
+    return false;
+  });
+  return result;
 }
