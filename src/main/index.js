@@ -245,6 +245,7 @@ function registerMainWindowEvent() {
       acceptFirstMouse: true,
       fullscreenable: false,
       maximizable: false,
+      minimizable: false,
     };
     if (!aboutWindow) {
       aboutWindow = new BrowserWindow(aboutWindowOptions);
