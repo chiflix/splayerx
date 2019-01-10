@@ -334,9 +334,16 @@ export default {
           this.asyncTasksDone = true;
           window.close();
         });
+        .catch(() => {
+          this.asyncTasksDone = true;
+          window.close();
+        })
         e.returnValue = false;
       }
     };
+  },
+  beforeDestroy() {
+    window.onbeforeunload = null;
   },
 };
 </script>
