@@ -330,7 +330,7 @@ export default {
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
-        this.saveScreenshot(this.originSrc).then(this.saveSubtitleStyle()).then(() => {
+        this.saveScreenshot(this.originSrc).then(this.saveSubtitleStyle）.then(() => {
           this.asyncTasksDone = true;
           window.close();
         }).catch(() => {
