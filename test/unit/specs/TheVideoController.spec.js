@@ -2,6 +2,7 @@ import Vuex from 'vuex';
 import Window from '@/store/modules/Window';
 import Video from '@/store/modules/Video';
 import Input from '@/store/modules/Input';
+import Playlist from '@/store/modules/Playlist';
 import TheVideoController from '@/components/PlayingView/TheVideoController.vue';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import sinon from 'sinon';
@@ -22,6 +23,10 @@ describe('Component - TheVideoController Unit Test', () => {
         },
         Video: {
           getters: Video.getters,
+        },
+        Playlist: {
+          state: Playlist.state,
+          getters: Playlist.getters,
         },
         Input: {
           state: Input.state,
