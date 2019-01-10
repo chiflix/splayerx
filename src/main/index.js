@@ -10,7 +10,7 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ONLINE_LOADING } from '../shared/notificationcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, NO_TRANSLATION_RESULT } from '../shared/notificationcodes';
 
 /**
  * Set `__static` path to static files in production
@@ -219,19 +219,14 @@ function registerMainWindowEvent() {
           case FILE_NON_EXIST:
           case EMPTY_FOLDER:
           case OPEN_FAILED:
+          case NO_TRANSLATION_RESULT:
             mainWindow.webContents.send('addMessages', log.errcode);
             break;
           default:
             break;
         }
       } else if (log.code) {
-        switch (log.code) {
-          case ONLINE_LOADING:
-            mainWindow.webContents.send('addMessages', log.code);
-            break;
-          default:
-            break;
-        }
+        mainWindow.webContents.send('addMessages', log.code);
       }
     }
   });

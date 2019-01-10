@@ -13,18 +13,18 @@ const mutations = {
     state.messages.push(payload);
   },
   removeMessages(state, payload) {
-    state.messages = payload;
+    state.messages = state.messages.filter(m => m.id !== payload);
   },
 };
 let i = 0;
 const actions = {
-  removeMessages({ state, commit }, id) {
-    const mess = state.messages.filter(m => m.id !== id);
-    commit('removeMessages', mess);
+  removeMessages({ commit }, id) {
+    commit('removeMessages', id);
   },
-  removeMessagesByContent({ commit }, content) {
-    const mess = state.messages.filter(m => m.content !== content);
-    commit('removeMessages', mess);
+  removeMessagesByType({ commit }) {
+    state.messages.filter(m => m.type === 'loading').forEach((item) => {
+      commit('removeMessages', item.id);
+    });
   },
   addMessages({ commit }, {
     type, title, content, dismissAfter, cb,

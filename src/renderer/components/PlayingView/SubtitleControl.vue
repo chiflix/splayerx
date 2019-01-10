@@ -103,6 +103,7 @@ import { Subtitle as subtitleActions, Input as InputActions } from '@/store/acti
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
+import { ONLINE_LOADING, NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-control',
@@ -319,26 +320,33 @@ export default {
       return path.basename(subPath);
     },
     handleRefresh() {
-      if (!this.privacyAgreement) {
-        this.$bus.$emit('privacy-confirm');
-        this.continueRefresh = true;
-      } else if (this.privacyAgreement && !this.timer) {
-        this.timer = setInterval(() => {
-          this.count += 1;
-          this.rotateTime = Math.ceil(this.count / 100);
-        }, 10);
-        document.querySelector('.scrollScope').scrollTop = 0;
-        this.$bus.$emit('refresh-subtitles');
-        this.addLog('info', {
-          message: 'Online subtitles loading .',
-          code: 'ONLINE_LOADING',
+      if (navigator.onLine) {
+        if (!this.privacyAgreement) {
+          this.$bus.$emit('privacy-confirm');
+          this.continueRefresh = true;
+        } else if (this.privacyAgreement && !this.timer) {
+          this.timer = setInterval(() => {
+            this.count += 1;
+            this.rotateTime = Math.ceil(this.count / 100);
+          }, 10);
+          document.querySelector('.scrollScope').scrollTop = 0;
+          this.$bus.$emit('refresh-subtitles');
+          this.addLog('info', {
+            message: 'Online subtitles loading .',
+            code: ONLINE_LOADING,
+          });
+          clearTimeout(this.breakTimer);
+          this.breakTimer = setTimeout(() => {
+            if (this.timer) {
+              this.$bus.$emit('refresh-finished');
+            }
+          }, 10000);
+        }
+      } else {
+        this.addLog('error', {
+          message: 'No Translation Result .',
+          errcode: NO_TRANSLATION_RESULT,
         });
-        clearTimeout(this.breakTimer);
-        this.breakTimer = setTimeout(() => {
-          if (this.timer) {
-            this.$bus.$emit('refresh-finished');
-          }
-        }, 20000);
       }
     },
     orify(...args) {
@@ -430,12 +438,23 @@ export default {
     },
   },
   created() {
+    this.$bus.$on('no-translation-result', () => {
+      setTimeout(() => {
+        if (!this.subtitleList.length) {
+          this.addLog('error', {
+            message: 'No Translation Result .',
+            errcode: NO_TRANSLATION_RESULT,
+          });
+        }
+      }, 500);
+    });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
+      this.$store.dispatch('removeMessagesByType');
+      this.$bus.$emit('no-translation-result');
       setTimeout(() => {
         this.$bus.$emit('finished-add-subtitles');
-        this.$store.dispatch('removeMessagesByContent', this.$t('loading.content'));
         this.timer = null;
       }, 1000);
     });

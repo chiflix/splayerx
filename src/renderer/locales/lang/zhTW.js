@@ -121,11 +121,11 @@ export default {
       title: '文件錯誤',
       content: '無法找到相應文件',
     },
-    loadError: {
+    loadFailed: {
       title: '未能加載字幕',
       content: '暫不支持該字幕類型',
     },
-    networkError: {
+    noResult: {
       title: '未找到翻譯結果',
       content: '網絡異常或缺少翻譯結果',
     },

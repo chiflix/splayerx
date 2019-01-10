@@ -122,11 +122,11 @@ export default {
       title: 'File error',
       content: 'Failed to open file.',
     },
-    loadError: {
+    loadFailed: {
       title: 'Load subtitle failed',
       content: 'Subtitle type unsupported.',
     },
-    networkError: {
+    noResult: {
       title: 'No result found',
       content: 'Network error or lack of results.',
     },

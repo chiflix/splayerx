@@ -21,6 +21,7 @@ import helpers from '@/helpers';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { promisify } from './SubtitleLoader/utils';
+import { ONLINE_LOADING, NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-manager',
@@ -121,11 +122,12 @@ export default {
       else if (privacyAgreement) {
         this.addLog('info', {
           message: 'Online subtitles loading .',
-          code: 'ONLINE_LOADING',
+          code: ONLINE_LOADING,
         });
         const onlineSubtitles = await getOnlineSubtitlesList(videoSrc);
         setTimeout(() => {
-          this.$store.dispatch('removeMessagesByContent', this.$t('loading.content'));
+          this.$store.dispatch('removeMessagesByType');
+          this.$bus.$emit('no-translation-result');
         }, 1000);
         addSubtitles(onlineSubtitles);
       }

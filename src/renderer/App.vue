@@ -11,7 +11,13 @@
 <script>
   // import { throttle } from 'lodash';
   import drag from '@/helpers/drag';
-  import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ONLINE_LOADING } from '../shared/notificationcodes';
+  import {
+    FILE_NON_EXIST,
+    EMPTY_FOLDER,
+    OPEN_FAILED,
+    ONLINE_LOADING,
+    NO_TRANSLATION_RESULT,
+  } from '../shared/notificationcodes';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
 
@@ -69,6 +75,14 @@
               type: 'loading',
               title: this.$t('loading.title'),
               content: this.$t('loading.content'),
+            });
+            break;
+          case NO_TRANSLATION_RESULT:
+            this.$store.dispatch('addMessages', {
+              type: 'error',
+              title: this.$t('errorFile.noResult.title'),
+              content: this.$t('errorFile.noResult.content'),
+              dismissAfter: 5000,
             });
             break;
           default:
