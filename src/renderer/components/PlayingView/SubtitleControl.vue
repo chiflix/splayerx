@@ -323,16 +323,16 @@ export default {
         this.$bus.$emit('privacy-confirm');
         this.continueRefresh = true;
       } else if (this.privacyAgreement && !this.timer) {
-        this.addLog('error', {
-          message: 'Online subtitles loading .',
-          code: 'ONLINE_LOADING',
-        });
         this.timer = setInterval(() => {
           this.count += 1;
           this.rotateTime = Math.ceil(this.count / 100);
         }, 10);
         document.querySelector('.scrollScope').scrollTop = 0;
         this.$bus.$emit('refresh-subtitles');
+        this.addLog('info', {
+          message: 'Online subtitles loading .',
+          code: 'ONLINE_LOADING',
+        });
         clearTimeout(this.breakTimer);
         this.breakTimer = setTimeout(() => {
           if (this.timer) {

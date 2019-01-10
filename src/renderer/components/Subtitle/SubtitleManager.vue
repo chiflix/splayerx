@@ -119,7 +119,14 @@ export default {
         .reduce((prev, curr) => prev.concat(curr));
       if (localEmbeddedSubtitles.length) addSubtitles(localEmbeddedSubtitles);
       else if (privacyAgreement) {
+        this.addLog('info', {
+          message: 'Online subtitles loading .',
+          code: 'ONLINE_LOADING',
+        });
         const onlineSubtitles = await getOnlineSubtitlesList(videoSrc);
+        setTimeout(() => {
+          this.$store.dispatch('removeMessagesByContent', this.$t('loading.content'));
+        }, 1000);
         addSubtitles(onlineSubtitles);
       }
     },
