@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import pick from 'lodash/pick';
 import partialRight from 'lodash/partialRight';
+import camelCase from 'lodash/camelCase';
 import osLocale from 'os-locale';
 import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
@@ -10,96 +11,81 @@ function getFormattedSystemLocale() {
   return locale.slice(0, locale.indexOf('_'));
 }
 
-function generateRankOptions(type, subtitle, subtitleList) {
-  const systemLocale = getFormattedSystemLocale();
-  switch (type.toLowerCase()) {
+function metaInfoToWeight(type, value, subtitleList) {
+  const result = { existed: subtitleList.filter(({ rank }) => !!rank).length };
+  switch (type) {
+    case 'language': {
+      const systemLocale = getFormattedSystemLocale();
+      result.matchSystemLocale = systemLocale === value ? 1 : 0;
+      result.existedLanguage = subtitleList
+        .filter(({ language: existedLanguage }) => existedLanguage === value).length;
+      break;
+    }
+    case 'isDefault':
+      result.matchDefault = value ? 1 : 0;
+      break;
+    case 'streamIndex':
+      result.streamIndex = value || 0;
+      break;
+    case 'ranking':
+      result.ranking = value || 0;
+      break;
     default:
-    case 'custom': {
-      return { existed: subtitleList.length };
-    }
-    case 'local': {
-      const { language } = subtitle;
-      return ({
-        matchSystemLocale: language === systemLocale,
-        existedLanguage: subtitleList
-          .filter(({ language: existedLanguage }) => existedLanguage === language).length,
-        existed: subtitleList.length,
-      });
-    }
-    case 'embedded': {
-      const { isDefault, streamIndex } = subtitle;
-      return ({
-        matchDefault: isDefault,
-        streamIndex,
-        existed: subtitleList.length,
-      });
-    }
-    case 'online': {
-      const { language, ranking } = subtitle;
-      return ({
-        matchSystemLocale: language === systemLocale,
-        existedLanguage: subtitleList
-          .filter(({ language: existedLanguage }) => existedLanguage === language).length,
-        ranking,
-        existed: subtitleList.length,
-      });
-    }
+      break;
   }
+
+  return result;
 }
 
-function rankCalculation(type, options) {
-  let result;
-  const baseRank = {
+function rankCalculation(type, options, lastRank) {
+  const baseRanks = {
     custom: 1e16,
     local: 1e12,
     embedded: 1e8,
     online: 1e4,
   };
-  const rankEnums = {
-    MATCH_SYSTEM_LOCALE: 1e3,
-    MATCH_DEFAULT: 1e3,
-    EXISTED_LANGUAGE: -1e2,
-    STREAM_INDEX: -1e2,
-    RANKING: 1e1,
-    EXISTED: -1e0,
-  };
-  switch (type.toLowerCase()) {
-    case 'custom': {
-      const { existed } = options;
-      result = baseRank.custom + (existed * rankEnums.EXISTED);
-      break;
-    }
-    case 'local': {
-      const { matchSystemLocale, existedLanguage, existed } = options;
-      result = baseRank.local +
-        (matchSystemLocale * rankEnums.MATCH_SYSTEM_LOCALE) +
-        (existedLanguage * rankEnums.EXISTED_LANGUAGE) +
-        (existed * rankEnums.EXISTED);
-      break;
-    }
-    case 'embedded': {
-      const { matchDefault, streamIndex, existed } = options;
-      result = baseRank.embedded +
-        (matchDefault * rankEnums.MATCH_DEFAULT) +
-        (streamIndex * rankEnums.STREAM_INDEX) +
-        (existed * rankEnums.EXISTED);
-      break;
-    }
-    case 'online': {
-      const {
-        matchSystemLocale, existedLanguage, ranking, existed,
-      } = options;
-      result = baseRank.online +
-        (matchSystemLocale * rankEnums.MATCH_SYSTEM_LOCALE) +
-        (existedLanguage * rankEnums.EXISTED_LANGUAGE) +
-        (ranking * rankEnums.RANKING) +
-        (existed * rankEnums.EXISTED);
-      break;
-    }
-    default:
-      break;
-  }
-  return result;
+  const rankTypes = [
+    {
+      name: 'MATCH_SYSTEM_LOCALE',
+      value: 1e3,
+      types: ['local', 'online'],
+    },
+    {
+      name: 'MATCH_DEFAULT',
+      value: 1e3,
+      types: ['embedded'],
+    },
+    {
+      name: 'EXISTED_LANGUAGE',
+      value: -1e2,
+      types: ['local', 'online'],
+    },
+    {
+      name: 'STREAM_INDEX',
+      value: -1e2,
+      types: ['embedded'],
+    },
+    {
+      name: 'RANKING',
+      value: 1e1,
+      types: ['online'],
+    },
+    {
+      name: 'EXISTED',
+      value: -1e0,
+      types: ['custom', 'local', 'embedded', 'online'],
+    },
+  ];
+  const baseRank = lastRank || baseRanks[type] || 0;
+  return rankTypes
+    .filter(({ name, types }) => options[camelCase(name)] && types.includes(type))
+    .reduce((prev, { name, value }) => prev + (value * options[camelCase(name)]), baseRank);
+}
+
+function metaInfoUpdate(subtitleType, subtitleList, infoType, infoValue, lastRank) {
+  const weightOptions = metaInfoToWeight(infoType, infoValue, subtitleList);
+  if (lastRank) Reflect.deleteProperty(weightOptions, 'existed');
+  return rankCalculation(subtitleType, weightOptions, lastRank);
 }
 
 const state = {
@@ -121,7 +107,7 @@ const getters = {
   currentSubtitleId: state => state.currentSubtitleId,
   subtitleIds: ({ loadingStates }) => Object.keys(loadingStates),
   subtitleList: ({
-    loadingStates, names, languages, formats, ranks,
+    loadingStates, names, languages, formats, ranks, types,
   }) =>
     Object.keys(loadingStates).map(id => ({
       id,
@@ -130,6 +116,7 @@ const getters = {
       format: formats[id],
       rank: ranks[id],
       loading: loadingStates[id],
+      type: types[id],
     })).sort((a, b) => b.rank - a.rank),
   premiumSubtitles: ({ durations }, getters) => Object.keys(durations)
     .filter(id => durations[id] >= 0.6 * getters.duration)
@@ -200,31 +187,15 @@ const mutations = {
 };
 
 const actions = {
-  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit, state, getters }, {
-    id, type, language, streamIndex, ranking, isDefault,
-  }) {
+  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit }, { id, type }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loading' });
     commit(subtitleMutations.TYPES_UPDATE, { id, type });
-    if (!state.ranks[id]) {
-      const options = generateRankOptions(type, {
-        language, streamIndex, ranking, isDefault,
-      }, getters.subtitleList);
-      commit(subtitleMutations.RANKS_UPDATE, { id, rank: rankCalculation(type, options) });
-    }
   },
-  [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit, state, getters }, {
-    id, name, format, type, language, streamIndex, ranking, isDefault,
+  [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit }, {
+    id, format,
   }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'ready' });
-    commit(subtitleMutations.NAMES_UPDATE, { id, name });
-    commit(subtitleMutations.LANGUAGES_UPDATE, { id, language });
     commit(subtitleMutations.FORMATS_UPDATE, { id, format });
-    if (!state.ranks[id]) {
-      const options = generateRankOptions(type, {
-        language, streamIndex, ranking, isDefault,
-      }, getters.subtitleList);
-      commit(subtitleMutations.RANKS_UPDATE, { id, rank: rankCalculation(type, options) });
-    }
   },
   [subtitleActions.ADD_SUBTITLE_WHEN_LOADED]({ commit }, { id }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loaded' });
@@ -256,6 +227,12 @@ const actions = {
       formats: takeSupportedFields(formats),
       types: takeSupportedFields(types),
     });
+  },
+  [subtitleActions.UPDATE_METAINFO]({ commit, state, getters }, { id, type, value }) {
+    if (state[`${type}s`]) commit(`${type.toUpperCase()}S_UPDATE`, { id, [type]: value });
+    const { types, ranks } = state;
+    const rank = metaInfoUpdate(types[id], getters.subtitleList, type, value, ranks[id]);
+    commit(subtitleMutations.RANKS_UPDATE, { id, rank });
   },
   updateSubDelay({ commit }, delta) {
     commit('UpdateDelay', delta);
