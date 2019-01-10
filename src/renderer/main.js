@@ -304,12 +304,14 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.playback.increasePlaybackSpeed'),
+              accelerator: ']',
               click: () => {
                 this.$store.dispatch(videoActions.INCREASE_RATE);
               },
             },
             {
               label: this.$t('msg.playback.decreasePlaybackSpeed'),
+              accelerator: '[',
               click: () => {
                 this.$store.dispatch(videoActions.DECREASE_RATE);
               },
@@ -930,10 +932,16 @@ new Vue({
       }
       switch (e.keyCode) {
         case 219:
+          e.preventDefault();
           this.$store.dispatch(videoActions.DECREASE_RATE);
           break;
         case 221:
+          e.preventDefault();
           this.$store.dispatch(videoActions.INCREASE_RATE);
+          break;
+        case 32:
+          e.preventDefault();
+          this.$bus.$emit('toggle-playback');
           break;
         default:
           break;
