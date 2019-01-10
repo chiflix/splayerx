@@ -451,10 +451,10 @@ export default {
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
-      this.$store.dispatch('removeMessagesByType');
-      this.$bus.$emit('no-translation-result');
       setTimeout(() => {
         this.$bus.$emit('finished-add-subtitles');
+        this.$store.dispatch('removeMessagesByType');
+        this.$bus.$emit('no-translation-result');
         this.timer = null;
       }, 1000);
     });
