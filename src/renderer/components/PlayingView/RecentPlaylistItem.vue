@@ -137,9 +137,7 @@ export default {
   },
   data() {
     return {
-      isBlur: true,
       showVideo: false,
-      isChosen: false,
       coverSrc: '',
       lastPlayedTime: 0,
       mediaInfo: { path: this.path },
@@ -156,39 +154,38 @@ export default {
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     updateAnimationIn() {
-      if (!this.isPlaying) {
+      if (!this.isPlaying && this.isInRange) {
         this.$refs.blur.classList.remove('blur');
       }
-      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
-      this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
+      if (this.isInRange) {
+        this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
+        this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
+        this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
+      }
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
-      this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
       if (!this.isPlaying && this.sliderPercentage > 0) {
         this.$refs.progress.style.setProperty('opacity', '1');
       }
     },
     updateAnimationOut() {
-      if (!this.isPlaying) {
+      if (!this.isPlaying && this.isInRange) {
         this.$refs.blur.classList.add('blur');
       }
-      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
-      this.$refs.content.style.setProperty('height', '100%');
-      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.40)');
+      if (this.isInRange) {
+        this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
+        this.$refs.content.style.setProperty('height', '100%');
+      }
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.15)');
+      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.40)');
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
-      if (!this.isPlaying && this.isInRange && !this.isShifting && this.canHoverItem) {
-        this.isBlur = false;
-        this.isChosen = true;
-        this.mouseoverRecently = true;
+      if (!this.isPlaying && !this.isShifting && this.canHoverItem) {
         this.eventTarget.onItemMouseover(this.index, this.mediaInfo);
         requestAnimationFrame(this.updateAnimationIn);
       }
     },
     mouseoutVideo() {
-      this.isBlur = true;
-      this.isChosen = false;
       this.eventTarget.onItemMouseout();
       requestAnimationFrame(this.updateAnimationOut);
     },
@@ -312,7 +309,7 @@ $border-radius: 3px;
       position: absolute;
       border-radius: $border-radius;
       background-color: rgba(255, 255, 255, 0.2);
-      transition: opacity 150ms 50ms linear;
+      transition: opacity 80ms 80ms ease-out;
     }
     .blur {
       filter: blur(1.5px);
@@ -378,6 +375,7 @@ $border-radius: 3px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      transition: color 80ms 80ms ease-out;
 
       font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
       letter-spacing: 0.58px;
@@ -390,6 +388,7 @@ $border-radius: 3px;
   .border {
     position: absolute;
     box-sizing: border-box;
+    transition: border-color 20ms ease-out;
 
     width: 100%;
     height: 100%;

@@ -14,6 +14,7 @@
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
+    v-if="!onlyOneVideo"
     :displayState="displayState['recent-playlist']"
     :mousemovePosition="mousemovePosition"
     :isDragging="isDragging"
@@ -25,10 +26,10 @@
     <play-button :paused="paused" />
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons" v-fade-in="showAllWidgets">
+      <playlist-control class="button playlist" v-if="!onlyOneVideo" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
       v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging="lastDragging"
       @conflict-resolve="conflictResolve"/>
-      <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <advance-control class="button advance" v-fade-in="displayState['advance-control']"
       v-bind.sync="widgetsStatus['advance-control']" :lastDragging="lastDragging"
       @conflict-resolve="conflictResolve"/>
@@ -106,7 +107,10 @@ export default {
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio']),
+    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList']),
+    onlyOneVideo() {
+      return this.playingList.length === 1;
+    },
     showAllWidgets() {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
@@ -480,7 +484,7 @@ export default {
 }
 .control-buttons {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   position: fixed;
   z-index: 10;
   .button {
