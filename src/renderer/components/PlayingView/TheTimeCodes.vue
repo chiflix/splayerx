@@ -27,7 +27,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'progressKeydown', 'rate']),
+    ...mapGetters(['duration', 'rate']),
     hasDuration() {
       return !Number.isNaN(this.duration);
     },
@@ -37,16 +37,6 @@ export default {
       if (!this.progressKeydown) {
         this.progressTriggerStopped = true;
         this.clock.clearTimeout(this.progressTriggerId);
-        this.progressTriggerId = this.clock.setTimeout(() => {
-          this.progressTriggerStopped = false;
-        }, this.progressDisappearDelay);
-      }
-    },
-    progressKeydown(newValue) {
-      if (newValue) {
-        this.progressTriggerStopped = true;
-        this.clock.clearTimeout(this.progressTriggerId);
-      } else {
         this.progressTriggerId = this.clock.setTimeout(() => {
           this.progressTriggerStopped = false;
         }, this.progressDisappearDelay);
@@ -64,6 +54,15 @@ export default {
           Math.floor(this.duration) - Math.floor(time) : Math.floor(time));
       }
     },
+  },
+  created() {
+    this.$bus.$on('seek', () => {
+      this.progressTriggerStopped = true;
+      this.clock.clearTimeout(this.progressTriggerId);
+      this.progressTriggerId = this.clock.setTimeout(() => {
+        this.progressTriggerStopped = false;
+      }, this.progressDisappearDelay);
+    });
   },
 };
 </script>
