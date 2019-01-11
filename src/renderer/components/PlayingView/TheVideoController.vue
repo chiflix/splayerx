@@ -106,7 +106,7 @@ export default {
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList']),
+    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc']),
     onlyOneVideo() {
       return this.playingList.length === 1;
     },
@@ -127,10 +127,16 @@ export default {
       return this.$store.state.Window.isFocused;
     },
     isDragging() {
-      return this.isMousemove && this.leftMousedown;
+      if (this.isMousedown) {
+        return this.isMousemove;
+      }
+      return false;
     },
   },
   watch: {
+    originSrc() {
+      this.isMousedown = false;
+    },
     isDragging(val, oldval) {
       if (!val && oldval) {
         this.lastDragging = true;
