@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import flatten from 'lodash/flatten';
+import helpers from '@/helpers';
 import { localFormatLoader, toArray, promisify, functionExtraction } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
 
@@ -106,9 +107,17 @@ export default class SubtitleLoader extends EventEmitter {
   }
 
   async parse() {
-    const parser = functionExtraction(this.loader.parser, 'data');
-    this.parsed =
-      await promisify(parser.func.bind(null, ...this._getParams(toArray(parser.params))));
-    this.emit('parse', this.parsed);
+    try {
+      const parser = functionExtraction(this.loader.parser, 'data');
+      this.parsed =
+        await promisify(parser.func.bind(null, ...this._getParams(toArray(parser.params))));
+      this.emit('parse', this.parsed);
+    } catch (e) {
+      helpers.methods.addLog('error', {
+        message: 'Unsupported Subtitle .',
+        errcode: 'NOT_SUPPORTED_SUBTITLE',
+      });
+      throw e;
+    }
   }
 }

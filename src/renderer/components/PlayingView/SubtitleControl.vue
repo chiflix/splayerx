@@ -294,7 +294,7 @@ export default {
         this.loadingType = difference(val, oldval)[0].type;
       }
       if (val.length >= oldval.length) {
-        this.computedAvaliableItems = val;
+        this.computedAvaliableItems = val.filter(sub => sub.name);
       }
     },
     loadingType(val) {

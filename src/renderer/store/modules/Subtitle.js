@@ -117,7 +117,7 @@ const getters = {
       rank: ranks[id],
       loading: loadingStates[id],
       type: types[id],
-    })).filter(sub => sub.name).sort((a, b) => b.rank - a.rank),
+    })).sort((a, b) => b.rank - a.rank),
   premiumSubtitles: ({ durations }, getters) => Object.keys(durations)
     .filter(id => durations[id] >= 0.6 * getters.duration)
     .map(id => ({ id, played: durations[id] })),
