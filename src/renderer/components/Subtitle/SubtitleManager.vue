@@ -131,7 +131,7 @@ export default {
             if (!onlineSubtitles.length) {
               this.$bus.$emit('no-translation-result');
             }
-          }, 1000);
+          }, 2000);
           addSubtitles(onlineSubtitles);
         }
       } else {
