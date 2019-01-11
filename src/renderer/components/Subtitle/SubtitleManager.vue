@@ -21,6 +21,7 @@ import helpers from '@/helpers';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { promisify } from './SubtitleLoader/utils';
+import { ONLINE_LOADING, NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-manager',
@@ -118,9 +119,26 @@ export default {
       ]))
         .reduce((prev, curr) => prev.concat(curr));
       if (localEmbeddedSubtitles.length) addSubtitles(localEmbeddedSubtitles);
-      else if (privacyAgreement) {
-        const onlineSubtitles = await getOnlineSubtitlesList(videoSrc);
-        addSubtitles(onlineSubtitles);
+      else if (navigator.onLine) {
+        if (privacyAgreement) {
+          this.addLog('info', {
+            message: 'Online subtitles loading .',
+            code: ONLINE_LOADING,
+          });
+          const onlineSubtitles = await getOnlineSubtitlesList(videoSrc);
+          setTimeout(() => {
+            this.$store.dispatch('removeMessagesByType');
+            if (!onlineSubtitles.length) {
+              this.$bus.$emit('no-translation-result');
+            }
+          }, 2000);
+          addSubtitles(onlineSubtitles);
+        }
+      } else {
+        this.addLog('error', {
+          message: 'No Translation Result .',
+          errcode: NO_TRANSLATION_RESULT,
+        });
       }
     },
     // different subtitle getters
@@ -193,7 +211,7 @@ export default {
       const {
         changeCurrentSubtitle,
         metaInfoUpdate,
-        addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded,
+        addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded, addSubtitleWhenFailed,
         subtitleInstances,
       } = this;
       const sub = new SubtitleLoader(subtitle, type, options);
@@ -204,6 +222,9 @@ export default {
 
         sub.on('meta-change', ({ field, value }) => {
           metaInfoUpdate(id, field, value);
+        });
+        sub.on('failed', (id) => {
+          addSubtitleWhenFailed({ id });
         });
         sub.once('ready', ({ name, format, language }) => {
           if (!name) {
@@ -280,6 +301,16 @@ export default {
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
     this.$bus.$on('finished-add-subtitles', () => {
       this.addSubtitles(this.newOnlineSubtitles);
+    });
+    this.$bus.$on('no-translation-result', () => {
+      setTimeout(() => {
+        if (!this.newOnlineSubtitles.length) {
+          this.addLog('error', {
+            message: 'No Translation Result .',
+            errcode: NO_TRANSLATION_RESULT,
+          });
+        }
+      }, 500);
     });
     this.addInitialSubtitles(this.originSrc);
   },

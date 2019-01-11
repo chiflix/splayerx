@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import flatten from 'lodash/flatten';
+import helpers from '@/helpers';
 import { localFormatLoader, toArray, promisify, functionExtraction } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
 
@@ -50,6 +51,10 @@ export default class SubtitleLoader extends EventEmitter {
     this.src = src; // to-do: src validator
 
     if (!type || ['local', 'embedded', 'online'].indexOf(type) === -1) {
+      helpers.methods.addLog('error', {
+        message: 'Unsupported Subtitle .',
+        errcode: 'NOT_SUPPORTED_SUBTITLE',
+      });
       throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE, `Unknown subtitle type ${type}.`);
     }
     this.type = type;
@@ -60,6 +65,10 @@ export default class SubtitleLoader extends EventEmitter {
       this.loader = Object.values(loaders)
         .find(loader => toArray(loader.supportedFormats).includes(format));
     } else {
+      helpers.methods.addLog('error', {
+        message: 'Unsupported Subtitle .',
+        errcode: 'NOT_SUPPORTED_SUBTITLE',
+      });
       throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_FORMAT, `Unknown subtitle format for subtitle ${src}.`);
     }
 
@@ -73,16 +82,22 @@ export default class SubtitleLoader extends EventEmitter {
   }
 
   async meta() {
-    const { metaInfo } = this;
-    const infoLoaders = functionExtraction(this.loader.infoLoaders); // normalize all info loaders
-    const infoTypes = Object.keys(infoLoaders); // get all info types
-    const infoResults = await Promise.all(infoTypes // make all infoLoaders promises and Promise.all
-      .map(infoType => promisify(infoLoaders[infoType].func
-        .bind(null, ...this._getParams(infoLoaders[infoType].params)))));
-    infoTypes.forEach((infoType, index) => { // normalize all info
-      metaInfo[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
-    });
-    this.emit('ready', metaInfo);
+    try {
+      const { metaInfo } = this;
+      const infoLoaders = functionExtraction(this.loader.infoLoaders); // normalize all info loaders
+      const infoTypes = Object.keys(infoLoaders); // get all info types
+      const infoResults = await
+      Promise.all(infoTypes // make all infoLoaders promises and Promise.all
+        .map(infoType => promisify(infoLoaders[infoType].func
+          .bind(null, ...this._getParams(infoLoaders[infoType].params)))));
+      infoTypes.forEach((infoType, index) => { // normalize all info
+        metaInfo[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
+      });
+      this.emit('ready', metaInfo);
+    } catch (e) {
+      this.emit('failed', this.metaInfo.id);
+      throw e;
+    }
   }
 
   async load() {
@@ -92,9 +107,17 @@ export default class SubtitleLoader extends EventEmitter {
   }
 
   async parse() {
-    const parser = functionExtraction(this.loader.parser, 'data');
-    this.parsed =
-      await promisify(parser.func.bind(null, ...this._getParams(toArray(parser.params))));
-    this.emit('parse', this.parsed);
+    try {
+      const parser = functionExtraction(this.loader.parser, 'data');
+      this.parsed =
+        await promisify(parser.func.bind(null, ...this._getParams(toArray(parser.params))));
+      this.emit('parse', this.parsed);
+    } catch (e) {
+      helpers.methods.addLog('error', {
+        message: 'Unsupported Subtitle .',
+        errcode: 'NOT_SUPPORTED_SUBTITLE',
+      });
+      throw e;
+    }
   }
 }

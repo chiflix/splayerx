@@ -11,7 +11,14 @@
 <script>
   // import { throttle } from 'lodash';
   import drag from '@/helpers/drag';
-  import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '../shared/errorcodes';
+  import {
+    FILE_NON_EXIST,
+    EMPTY_FOLDER,
+    OPEN_FAILED,
+    ONLINE_LOADING,
+    NO_TRANSLATION_RESULT,
+    NOT_SUPPORTED_SUBTITLE,
+  } from '../shared/notificationcodes';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
 
@@ -35,8 +42,8 @@
       },
     },
     mounted() {
-      this.$electron.ipcRenderer.on('addMessages', (event, errcode) => {
-        switch (errcode) {
+      this.$electron.ipcRenderer.on('addMessages', (event, code) => {
+        switch (code) {
           case FILE_NON_EXIST:
             this.$store.dispatch('addMessages', {
               type: 'error',
@@ -61,6 +68,29 @@
               type: 'error',
               title: this.$t('errorFile.default.title'),
               content: this.$t('errorFile.default.content'),
+              dismissAfter: 5000,
+            });
+            break;
+          case ONLINE_LOADING:
+            this.$store.dispatch('addMessages', {
+              type: 'loading',
+              title: this.$t('loading.title'),
+              content: this.$t('loading.content'),
+            });
+            break;
+          case NO_TRANSLATION_RESULT:
+            this.$store.dispatch('addMessages', {
+              type: 'error',
+              title: this.$t('errorFile.noResult.title'),
+              content: this.$t('errorFile.noResult.content'),
+              dismissAfter: 5000,
+            });
+            break;
+          case NOT_SUPPORTED_SUBTITLE:
+            this.$store.dispatch('addMessages', {
+              type: 'error',
+              title: this.$t('errorFile.loadFailed.title'),
+              content: this.$t('errorFile.loadFailed.content'),
               dismissAfter: 5000,
             });
             break;
