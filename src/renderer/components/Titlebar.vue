@@ -90,6 +90,7 @@ export default {
       type: Boolean,
       default: true,
     },
+    recentPlaylist: Boolean,
   },
   components: {
     Icon,
@@ -107,11 +108,11 @@ export default {
     });
   },
   watch: {
-    showTitleBar(val) {
-      console.log('val', val);
+    recentPlaylist(val) {
+      if (!val) this.showTitleBar = this.showAllWidgets;
     },
     showAllWidgets(val) {
-      this.showTitleBar = val;
+      this.showTitleBar = this.recentPlaylist || val;
     },
     keyAlt(val) {
       if (!val || !this.keyOver) {
