@@ -569,7 +569,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 32px;
-      left: -58px;
+      left: -102px;
       width: 170px;
       max-height: 138px;
     }
@@ -634,7 +634,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 44px;
-      left: -42px;
+      left: -106px;
       width: 204px;
       max-height: 239px;
     }
@@ -694,7 +694,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 70px;
-      left: -33px;
+      left: -133px;
       width: 286px;
       max-height: 433px;
     }
