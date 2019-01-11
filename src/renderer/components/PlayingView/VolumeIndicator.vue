@@ -37,8 +37,7 @@ export default {
   },
   watch: {
     showAllWidgets(newVal) {
-      const { muted } = this;
-      if (muted) {
+      if (this.muted) {
         this.volumeTriggerStopped = newVal;
       }
     },
