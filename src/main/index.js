@@ -10,7 +10,7 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '../shared/errorcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, NO_TRANSLATION_RESULT, NOT_SUPPORTED_SUBTITLE  } from '../shared/notificationcodes';
 
 /**
  * Set `__static` path to static files in production
@@ -210,18 +210,24 @@ function registerMainWindowEvent() {
   ipcMain.on('bossKey', () => {
     handleBossKey();
   });
-  ipcMain.on('writeLog', (event, level, log) => {
+  ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
     if (!log) return;
     writeLog(level, log);
-    if (mainWindow && log.message && log.errcode) {
-      switch (log.errcode) {
-        case FILE_NON_EXIST:
-        case EMPTY_FOLDER:
-        case OPEN_FAILED:
-          mainWindow.webContents.send('addMessages', log.errcode);
-          break;
-        default:
-          break;
+    if (mainWindow && log.message) {
+      if (log.errcode) {
+        switch (log.errcode) {
+          case FILE_NON_EXIST:
+          case EMPTY_FOLDER:
+          case OPEN_FAILED:
+          case NO_TRANSLATION_RESULT:
+          case NOT_SUPPORTED_SUBTITLE:
+            mainWindow.webContents.send('addMessages', log.errcode);
+            break;
+          default:
+            break;
+        }
+      } else if (log.code) {
+        mainWindow.webContents.send('addMessages', log.code);
       }
     }
   });

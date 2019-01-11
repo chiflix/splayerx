@@ -21,6 +21,11 @@ const actions = {
   removeMessages({ commit }, id) {
     commit('removeMessages', id);
   },
+  removeMessagesByType({ commit }) {
+    state.messages.filter(m => m.type === 'loading').forEach((item) => {
+      commit('removeMessages', item.id);
+    });
+  },
   addMessages({ commit }, {
     type, title, content, dismissAfter, cb,
   }) {
@@ -29,12 +34,14 @@ const actions = {
     commit('addMessages', {
       id, type, title, content, dismissAfter,
     });
-    setTimeout(() => {
-      commit('removeMessages', id);
-      if (cb) {
-        cb();
-      }
-    }, dismissAfter);
+    if (dismissAfter) {
+      setTimeout(() => {
+        commit('removeMessages', id);
+        if (cb) {
+          cb();
+        }
+      }, dismissAfter);
+    }
   },
 };
 export default {
