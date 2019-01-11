@@ -2,8 +2,6 @@
   <div
     :data-component-name="$options.name"
     :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
-    @mouseover="titleMouseover"
-    @mouseout="titleMouseout"
     @dblclick.stop="handleDbClick">
     <div class="win-icons" v-if="!isDarwin" v-fade-in="showTitleBar">
       <Icon class="title-button no-drag"
@@ -130,12 +128,6 @@ export default {
     },
   },
   methods: {
-    titleMouseover() {
-      this.showTitleBar = true;
-    },
-    titleMouseout() {
-      this.showTitleBar = this.showAllWidgets || false;
-    },
     handleDbClick() {
       if (!this.isMaximized) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
