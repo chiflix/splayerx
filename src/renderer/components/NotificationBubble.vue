@@ -243,7 +243,7 @@ export default {
   @media screen and (min-width: 320px) and (max-width: 512px) {
     width: 186px;
     height: 32px;
-    margin-left: 80px;
+    margin-left: 30px;
     margin-bottom: 8px;
     border-radius: 6px;
     clip-path: inset(0 round 6px);
@@ -251,7 +251,7 @@ export default {
   @media screen and (min-width: 513px) and (max-width: 854px) {
     width: 204px;
     height: 36px;
-    margin-left: 92px;
+    margin-left: 36px;
     margin-bottom: 12px;
     border-radius: 7px;
     clip-path: inset(0 round 7px);
@@ -259,7 +259,7 @@ export default {
   @media screen and (min-width: 855px) and (max-width: 1920px) {
     width: 248px;
     height: 43px;
-    margin-left: 106px;
+    margin-left: 40px;
     margin-bottom: 15px;
     border-radius: 8px;
     clip-path: inset(0 round 8px);
@@ -267,7 +267,7 @@ export default {
   @media screen and (min-width: 1921px) {
     width: 348px;
     height: 60px;
-    margin-left: 147px;
+    margin-left: 55px;
     margin-bottom: 18px;
     border-radius: 11px;
     clip-path: inset(0 round 11px);
@@ -361,33 +361,33 @@ export default {
   position: absolute;
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (min-width: 320px) and (max-width: 512px) {
-    width: 136px;
+    width: 186px;
     height: 32px;
-    margin-left: 80px;
+    margin-left: 30px;
     margin-bottom: 8px;
     border-radius: 6px;
     clip-path: inset(0 round 6px);
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
-    width: 148px;
+    width: 204px;
     height: 36px;
-    margin-left: 92px;
+    margin-left: 36px;
     margin-bottom: 12px;
     border-radius: 7px;
     clip-path: inset(0 round 7px);
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
-    width: 182px;
+    width: 248px;
     height: 43px;
-    margin-left: 106px;
+    margin-left: 40px;
     margin-bottom: 15px;
     border-radius: 8px;
     clip-path: inset(0 round 8px);
   }
   @media screen and (min-width: 1921px) {
-    width: 256px;
+    width: 348px;
     height: 60px;
-    margin-left: 147px;
+    margin-left: 55px;
     margin-bottom: 18px;
     border-radius: 11px;
     clip-path: inset(0 round 11px);
