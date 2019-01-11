@@ -92,9 +92,17 @@ export async function localEncodingLoader(path) {
  */
 export async function localLanguageLoader(path, format) {
   const fileEncoding = await localEncodingLoader(path);
-  const string = iconv.decode(await getFragmentBuffer(path), fileEncoding);
-  const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
-  return convert3To1(franc(stringCallback(string)));
+  if (!iconv.encodingExists(fileEncoding)) {
+    helpers.methods.addLog('error', {
+      message: 'Unsupported Subtitle .',
+      errcode: 'NOT_SUPPORTED_SUBTITLE',
+    });
+    throw new SubtitleError(ErrorCodes.ENCODING_UNSUPPORTED_ENCODING, `Unsupported encoding: ${fileEncoding}.`);
+  } else {
+    const string = iconv.decode(await getFragmentBuffer(path), fileEncoding);
+    const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
+    return convert3To1(franc(stringCallback(string)));
+  }
 }
 
 export async function localIdLoader(path) {
@@ -156,8 +164,15 @@ export function loadLocalFile(path) {
     readFile(path, async (err, data) => {
       if (err) reject(err);
       const encoding = await localEncodingLoader(path);
-      if (iconv.encodingExists(encoding)) resolve(iconv.decode(data, encoding));
-      reject(new SubtitleError(ErrorCodes.ENCODING_UNSUPPORTED_ENCODING, `Unsupported encoding: ${encoding}.`));
+      if (iconv.encodingExists(encoding)) {
+        resolve(iconv.decode(data, encoding));
+      } else {
+        helpers.methods.addLog('error', {
+          message: 'Unsupported Subtitle .',
+          errcode: 'NOT_SUPPORTED_SUBTITLE',
+        });
+        reject(new SubtitleError(ErrorCodes.ENCODING_UNSUPPORTED_ENCODING, `Unsupported encoding: ${encoding}.`));
+      }
     });
   });
 }

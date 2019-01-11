@@ -10,7 +10,7 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, NO_TRANSLATION_RESULT } from '../shared/notificationcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, NO_TRANSLATION_RESULT, NOT_SUPPORTED_SUBTITLE  } from '../shared/notificationcodes';
 
 /**
  * Set `__static` path to static files in production
@@ -210,7 +210,7 @@ function registerMainWindowEvent() {
   ipcMain.on('bossKey', () => {
     handleBossKey();
   });
-  ipcMain.on('writeLog', (event, level, log) => {
+  ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
     if (!log) return;
     writeLog(level, log);
     if (mainWindow && log.message) {
@@ -220,6 +220,7 @@ function registerMainWindowEvent() {
           case EMPTY_FOLDER:
           case OPEN_FAILED:
           case NO_TRANSLATION_RESULT:
+          case NOT_SUPPORTED_SUBTITLE:
             mainWindow.webContents.send('addMessages', log.errcode);
             break;
           default:

@@ -50,6 +50,10 @@ export default class SubtitleLoader extends EventEmitter {
     this.src = src; // to-do: src validator
 
     if (!type || ['local', 'embedded', 'online'].indexOf(type) === -1) {
+      this.addLog('error', {
+        message: 'Unsupported Subtitle .',
+        errcode: 'NOT_SUPPORTED_SUBTITLE',
+      });
       throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE, `Unknown subtitle type ${type}.`);
     }
     this.type = type;
@@ -60,6 +64,10 @@ export default class SubtitleLoader extends EventEmitter {
       this.loader = Object.values(loaders)
         .find(loader => toArray(loader.supportedFormats).includes(format));
     } else {
+      this.addLog('error', {
+        message: 'Unsupported Subtitle .',
+        errcode: 'NOT_SUPPORTED_SUBTITLE',
+      });
       throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_FORMAT, `Unknown subtitle format for subtitle ${src}.`);
     }
 

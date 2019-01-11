@@ -17,6 +17,7 @@
     OPEN_FAILED,
     ONLINE_LOADING,
     NO_TRANSLATION_RESULT,
+    NOT_SUPPORTED_SUBTITLE,
   } from '../shared/notificationcodes';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
@@ -82,6 +83,14 @@
               type: 'error',
               title: this.$t('errorFile.noResult.title'),
               content: this.$t('errorFile.noResult.content'),
+              dismissAfter: 5000,
+            });
+            break;
+          case NOT_SUPPORTED_SUBTITLE:
+            this.$store.dispatch('addMessages', {
+              type: 'error',
+              title: this.$t('errorFile.loadFailed.title'),
+              content: this.$t('errorFile.loadFailed.content'),
               dismissAfter: 5000,
             });
             break;
