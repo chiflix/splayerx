@@ -51,7 +51,7 @@ export default class SubtitleLoader extends EventEmitter {
     this.src = src; // to-do: src validator
 
     if (!type || ['local', 'embedded', 'online'].indexOf(type) === -1) {
-      this.addLog('error', {
+      helpers.methods.addLog('error', {
         message: 'Unsupported Subtitle .',
         errcode: 'NOT_SUPPORTED_SUBTITLE',
       });
@@ -65,7 +65,7 @@ export default class SubtitleLoader extends EventEmitter {
       this.loader = Object.values(loaders)
         .find(loader => toArray(loader.supportedFormats).includes(format));
     } else {
-      this.addLog('error', {
+      helpers.methods.addLog('error', {
         message: 'Unsupported Subtitle .',
         errcode: 'NOT_SUPPORTED_SUBTITLE',
       });

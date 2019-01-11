@@ -12,8 +12,8 @@ const mutations = {
     }
     state.messages.push(payload);
   },
-  removeMessages(state, payload) {
-    state.messages = state.messages.filter(m => m.id !== payload);
+  removeMessages(state, id) {
+    state.messages = state.messages.filter(m => m.id !== id);
   },
 };
 let i = 0;
