@@ -241,7 +241,7 @@ export default {
   z-index: 8;
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (min-width: 320px) and (max-width: 512px) {
-    width: 136px;
+    width: 186px;
     height: 32px;
     margin-left: 80px;
     margin-bottom: 8px;
@@ -249,7 +249,7 @@ export default {
     clip-path: inset(0 round 6px);
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
-    width: 148px;
+    width: 204px;
     height: 36px;
     margin-left: 92px;
     margin-bottom: 12px;
@@ -257,7 +257,7 @@ export default {
     clip-path: inset(0 round 7px);
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
-    width: 182px;
+    width: 248px;
     height: 43px;
     margin-left: 106px;
     margin-bottom: 15px;
@@ -265,7 +265,7 @@ export default {
     clip-path: inset(0 round 8px);
   }
   @media screen and (min-width: 1921px) {
-    width: 256px;
+    width: 348px;
     height: 60px;
     margin-left: 147px;
     margin-bottom: 18px;
@@ -275,22 +275,22 @@ export default {
 
   .bubbleContent {
     @media screen and (min-width: 320px) and (max-width: 512px) {
-      width: 108px;
+      width: 156px;
       height: 11px;
       margin: 11px 14px auto 14px;
     }
     @media screen and (min-width: 513px) and (max-width: 854px) {
-      width: 116px;
+      width: 174px;
       height: 12px;
       margin: auto 16px auto 16px;
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
-      width: 144px;
+      width: 212px;
       height: 15px;
       margin: auto 19px auto 19px;
     }
     @media screen and (min-width: 1921px) {
-      width: 204px;
+      width: 294px;
       height: 21px;
       margin: auto 26px auto 26px;
     }

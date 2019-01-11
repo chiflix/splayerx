@@ -123,17 +123,17 @@ export default {
       content: 'Failed to open file.',
     },
     loadFailed: {
-      title: 'Load subtitle failed',
+      title: 'Load Subtitle Failed',
       content: 'Subtitle type unsupported.',
     },
     noResult: {
-      title: 'No result found',
+      title: 'No Result Found',
       content: 'Network error or lack of results.',
     },
   },
   loading: {
     title: '',
-    content: 'Loading translation results...',
+    content: 'Loading Translation Results...',
   },
   privacyBubble: {
     masVersion: {
