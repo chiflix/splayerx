@@ -40,6 +40,7 @@ let rendererConfig = {
   mode: 'development',
   devtool: '#cheap-module-eval-source-map',
   entry: {
+    preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
     index: path.join(__dirname, '../src/renderer/main.js')
   },
@@ -158,6 +159,7 @@ let rendererConfig = {
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
     new webpack.HotModuleReplacementPlugin()
   ],
   output: {
