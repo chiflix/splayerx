@@ -11,7 +11,7 @@
     @mousedown.left="handleMousedownLeft"
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
-    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets"></titlebar>
+    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
