@@ -81,16 +81,22 @@ export default class SubtitleLoader extends EventEmitter {
   }
 
   async meta() {
-    const { metaInfo } = this;
-    const infoLoaders = functionExtraction(this.loader.infoLoaders); // normalize all info loaders
-    const infoTypes = Object.keys(infoLoaders); // get all info types
-    const infoResults = await Promise.all(infoTypes // make all infoLoaders promises and Promise.all
-      .map(infoType => promisify(infoLoaders[infoType].func
-        .bind(null, ...this._getParams(infoLoaders[infoType].params)))));
-    infoTypes.forEach((infoType, index) => { // normalize all info
-      metaInfo[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
-    });
-    this.emit('ready', metaInfo);
+    try {
+      const { metaInfo } = this;
+      const infoLoaders = functionExtraction(this.loader.infoLoaders); // normalize all info loaders
+      const infoTypes = Object.keys(infoLoaders); // get all info types
+      const infoResults = await
+      Promise.all(infoTypes // make all infoLoaders promises and Promise.all
+        .map(infoType => promisify(infoLoaders[infoType].func
+          .bind(null, ...this._getParams(infoLoaders[infoType].params)))));
+      infoTypes.forEach((infoType, index) => { // normalize all info
+        metaInfo[infoTypes[index]] = infoResults[index] instanceof Error ? '' : infoResults[index];
+      });
+      this.emit('ready', metaInfo);
+    } catch (e) {
+      this.emit('failed', this.metaInfo.id);
+      throw e;
+    }
   }
 
   async load() {

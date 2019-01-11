@@ -92,16 +92,16 @@ export async function localEncodingLoader(path) {
  */
 export async function localLanguageLoader(path, format) {
   const fileEncoding = await localEncodingLoader(path);
-  if (!iconv.encodingExists(fileEncoding)) {
+  try {
+    const string = iconv.decode(await getFragmentBuffer(path), fileEncoding);
+    const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
+    return convert3To1(franc(stringCallback(string)));
+  } catch (e) {
     helpers.methods.addLog('error', {
       message: 'Unsupported Subtitle .',
       errcode: 'NOT_SUPPORTED_SUBTITLE',
     });
     throw new SubtitleError(ErrorCodes.ENCODING_UNSUPPORTED_ENCODING, `Unsupported encoding: ${fileEncoding}.`);
-  } else {
-    const string = iconv.decode(await getFragmentBuffer(path), fileEncoding);
-    const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
-    return convert3To1(franc(stringCallback(string)));
   }
 }
 

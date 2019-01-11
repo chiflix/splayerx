@@ -204,7 +204,7 @@ export default {
       const {
         changeCurrentSubtitle,
         metaInfoUpdate,
-        addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded,
+        addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded, addSubtitleWhenFailed,
         subtitleInstances,
       } = this;
       const sub = new SubtitleLoader(subtitle, type, options);
@@ -215,6 +215,9 @@ export default {
 
         sub.on('meta-change', ({ field, value }) => {
           metaInfoUpdate(id, field, value);
+        });
+        sub.on('failed', (id) => {
+          addSubtitleWhenFailed({ id });
         });
         sub.once('ready', ({ name, format, language }) => {
           if (!name) {
