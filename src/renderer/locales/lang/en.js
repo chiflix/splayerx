@@ -79,11 +79,6 @@ export default {
       hideOthers: 'Hide Others',
       quit: 'Quit SPlayer',
     },
-    preferences: {
-      settings: 'Settings',
-      clearHistory: 'Always clear playback history on exit',
-      privacyConfirm: 'Allow anonymous data / Smart Translation',
-    },
     update: {
       title: 'update dialog',
       message: 'Restart the app now to install update?',
@@ -95,6 +90,12 @@ export default {
   css: {
     titleFontSize: { fontSize: '21px' },
     versionFontSize: { fontSize: '14px' },
+  },
+  preferences: {
+    settings: 'Settings',
+    generalSetting: 'Gerneral',
+    clearHistory: 'Always clear playback history on exit',
+    privacyConfirm: 'Allow anonymous data / Smart Translation',
   },
   advance: {
     rateTitle: 'Play Speed',

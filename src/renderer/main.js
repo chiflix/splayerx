@@ -569,6 +569,7 @@ new Vue({
               {
                 label: this.$t('msg.splayerx.preferences'),
                 enabled: true,
+                accelerator: 'Cmd+,',
                 click: () => {
                   this.$electron.ipcRenderer.send('add-preference');
                 },

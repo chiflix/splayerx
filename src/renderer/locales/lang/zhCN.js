@@ -78,11 +78,6 @@ export default {
       hideOthers: '隐藏其他',
       quit: '退出射手影音',
     },
-    preferences: {
-      settings: '设置',
-      clearHistory: '退出时自动清空播放记录',
-      privacyConfirm: '启用匿名信息和智能翻译',
-    },
     update: {
       title: '更新就绪',
       message: '更新已就绪，是否现在重启?',
@@ -94,6 +89,12 @@ export default {
   css: {
     titleFontSize: { fontSize: '21px' },
     versionFontSize: { fontSize: '14px' },
+  },
+  preferences: {
+    settings: '设置',
+    generalSetting: '通用设置',
+    clearHistory: '退出时自动清空播放记录',
+    privacyConfirm: '启用匿名信息和智能翻译',
   },
   advance: {
     rateTitle: '播放速度',

@@ -70,7 +70,6 @@ export default {
   name: 'titlebar',
   data() {
     return {
-      isDarwin: process.platform === 'darwin',
       state: 'default',
       itemTypeEnum: {
         FULLSCREEN: 'titleBarFull',
@@ -175,6 +174,9 @@ export default {
       'isMaximized',
       'isFullScreen',
     ]),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     middleButtonStatus() {
       return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
     },
