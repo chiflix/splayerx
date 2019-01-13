@@ -10,7 +10,7 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, NO_TRANSLATION_RESULT, NOT_SUPPORTED_SUBTITLE  } from '../shared/notificationcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, NO_TRANSLATION_RESULT, NOT_SUPPORTED_SUBTITLE } from '../shared/notificationcodes';
 
 /**
  * Set `__static` path to static files in production
