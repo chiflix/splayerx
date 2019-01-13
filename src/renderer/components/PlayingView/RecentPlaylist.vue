@@ -352,7 +352,7 @@ export default {
     .info {
       width: 90%;
       .top {
-        font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+        font-family: splayer-heavy;
         color: rgba(235,235,235,0.6);
         letter-spacing: 0.64px;
         width: fit-content;
@@ -362,7 +362,7 @@ export default {
         text-overflow: ellipsis;
         white-space: nowrap;
 
-        font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+        font-family: splayer-heavy;
         color: rgba(255,255,255,0.70);
         letter-spacing: 1px;
         width: 100%;

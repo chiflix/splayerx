@@ -1,39 +1,40 @@
-/* CJK fonts */
+/* Normal */
 @font-face {
-  font-family: 'win32';
-  src: local(Microsoft Yahei);
-  unicode-range:
-    U+3000–303F, // CJK Symbols and Punctuation.
-    U+3040–309F, // Hiragana.
-    U+30A0–30FF, // Katakana.
-    U+3400–4DB5, // CJK Unified Ideographs Extension A.
-    U+4E00–9FD5, // CJK Unified Ideographs
-    U+A5, U+4E00-9FFF, U+FF00-FF9F;
-}
-@font-face {
-  font-family: 'darwin';
-  src: local(PingFang SC);
-  unicode-range:
-    U+3000–303F, // CJK Symbols and Punctuation.
-    U+3040–309F, // Hiragana.
-    U+30A0–30FF, // Katakana.
-    U+3400–4DB5, // CJK Unified Ideographs Extension A.
-    U+4E00–9FD5, // CJK Unified Ideographs
-    U+A5, U+4E00-9FFF, U+FF00-FF9F;
-}
-
-/* latin fonts */
-@font-face {
-  font-family: 'win32';
-  src:
-    local(roboto),
-    url('../assets/fonts/Roboto-Medium.ttf') format('truetype');
-  unicode-range: U+00-52F, U+1E00-1FFF, U+2200–22FF;
-}
-@font-face {
-  font-family: 'darwin';
+  font-family: 'splayer';
   src:
     local(Avenir),
-    url('../assets/fonts/Avenir LT 65 Medium.ttf') format('truetype');
-  unicode-range: U+00-52F, U+1E00-1FFF, U+2200–22FF;
+    local(roboto),
+    url('../assets/fonts/Lato/Lato-Medium.woff2') format('woff2'),
+    local(PingFang SC),
+    local(Microsoft Yahei);
+}
+
+/* Heavy */
+@font-face {
+  font-family: 'splayer-heavy';
+  src:
+    local(Avenir-Heavy),
+    url('../assets/fonts/Lato/Lato-Heavy.woff2') format('woff2'),
+    local(PingFang SC),
+    local(Microsoft Yahei);
+}
+
+/* Light */
+@font-face {
+  font-family: 'splayer-light';
+  src:
+    local(Avenir-Light),
+    url('../assets/fonts/Lato/Lato-Light.woff2') format('woff2'),
+    local(PingFang SC),
+    local(Microsoft Yahei);
+}
+
+/* Semibold */
+@font-face {
+  font-family: 'splayer-semibold';
+  src:
+    local(PingFangSC-Semibold),
+    url('../assets/fonts/Lato/Lato-Semibold.woff2') format('woff2'),
+    local(PingFang SC),
+    local(Microsoft Yahei);
 }
