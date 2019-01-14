@@ -103,10 +103,10 @@ export default {
       itemType: 'titleBarFull',
       showFirstSelection: false,
       showSecondSelection: false,
-      firstLanguage: '无',
-      secondLanguage: '无',
+      firstLanguage: this.$t('preferences.none'),
+      secondLanguage: this.$t('preferences.none'),
       languages: [
-        '无',
+        this.$t('preferences.none'),
         '影片源语言',
         '简体中文',
         '繁體中文',

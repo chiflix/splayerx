@@ -91,6 +91,7 @@ export default {
     versionFontSize: { fontSize: '14px' },
   },
   preferences: {
+    none: '无',
     settings: '设置',
     generalSetting: '通用设置',
     clearHistory: '退出时自动清空播放记录',

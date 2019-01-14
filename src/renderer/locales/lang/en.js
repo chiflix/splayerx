@@ -92,10 +92,16 @@ export default {
     versionFontSize: { fontSize: '14px' },
   },
   preferences: {
+    none: 'None',
     settings: 'Settings',
     generalSetting: 'Gerneral',
     clearHistory: 'Always clear playback history on exit',
     privacyConfirm: 'Allow anonymous data / Smart Translation',
+    setAsDefault: 'Set SPlayer as the Default Application',
+    languagePriority: 'Language Priority',
+    languageDescription: 'SPlayer will push translation results in the following language for you when the video is being played.',
+    firstLanguage: 'Primary Language',
+    secondLanguage: 'Secondary Language',
   },
   advance: {
     rateTitle: 'Play Speed',
