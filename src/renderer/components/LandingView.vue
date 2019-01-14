@@ -53,7 +53,7 @@
       :filePathNeedToDelete="filePathNeedToDelete"
       @displayInfo="displayInfoUpdate"/>
     <NotificationBubble/>
-    
+
   </div>
 </template>
 
@@ -277,7 +277,7 @@ body {
     width: 70%;
     word-break: break-all;
     font-size: 30px;
-    line-height: 30px;
+    line-height: 36px;
     font-weight: bold;
     z-index: 4;
     overflow: hidden;
@@ -287,7 +287,7 @@ body {
     letter-spacing: 1px;
     @media screen and (min-width: 1355px) {
       font-size: 2.21vw;
-      line-height: 2.21vw;
+      line-height: 2.66vw;
     }
   }
   .item-description {
