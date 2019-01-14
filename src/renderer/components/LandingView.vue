@@ -98,26 +98,8 @@ export default {
     ...mapGetters(['winWidth']),
   },
   created() {
-    /*
-    * Currently use electron-json-storage as buffer for saving the last screenshot
-    * and any info needed to be saved before window closed.
-    * Following code is to merge the buffer into DataBase.
-    */
-    asyncStorage.get('recent-played')
-      .then(async (data) => {
-        const val = await this.infoDB.lastPlayed();
-        if (val && data) {
-          const mergedData = Object.assign(val, data);
-          asyncStorage.set('recent-played', {});
-          await this.infoDB.add('recent-played', mergedData);
-          if (this.$store.getters.deleteVideoHistoryOnExit) {
-            await this.infoDB.cleanData();
-          }
-        }
-      })
-
     // Get all data and show
-      .then(() => this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev'))
+    this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
       .then((data) => {
         const waitArray = [];
         for (let i = 0; i < data.length; i += 1) {

@@ -5,7 +5,7 @@ import lolex from 'lolex';
 import { times } from 'lodash';
 import InfoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '@/../shared/errorcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
 
@@ -313,8 +313,8 @@ export default {
       if (!log || typeof log === 'string') {
         normalizedLog = { message: log };
       } else {
-        const { errcode, message, stack } = log;
-        normalizedLog = { errcode, message, stack };
+        const { errcode, code, message, stack } = log;
+        normalizedLog = { errcode, code, message, stack };
       }
       ipcRenderer.send('writeLog', level, normalizedLog);
     },

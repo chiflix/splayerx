@@ -121,10 +121,18 @@ export default {
       title: '文件错误',
       content: '无法找到相应文件',
     },
+    loadFailed: {
+      title: '未能加载字幕',
+      content: '暂不支持该字幕类型',
+    },
+    noResult: {
+      title: '未找到翻译结果',
+      content: '网络异常或缺少翻译结果',
+    },
   },
   loading: {
     title: '',
-    content: '正在搜索翻译结果...',
+    content: '正在加载翻译结果...',
   },
   privacyBubble: {
     masVersion: {

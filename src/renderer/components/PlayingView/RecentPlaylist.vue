@@ -129,10 +129,10 @@ export default {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
     },
     handleMouseup() {
-      if (!this.isDragging) {
+      if (this.isDragging) {
+        this.clearMousedown({ target: '' });
+      } else if (this.backgroundDisplayState) {
         this.$emit('update:playlistcontrol-showattached', false);
-        this.$emit('conflict-resolve', this.$options.name);
-        this.$emit('update:isDragging', false);
       }
     },
     onItemMouseover(index, media) {

@@ -103,6 +103,7 @@ import { Subtitle as subtitleActions, Input as InputActions } from '@/store/acti
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
+import { ONLINE_LOADING, NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-control',
@@ -139,14 +140,12 @@ export default {
       loadingType: '',
       detailTimer: null,
       breakTimer: null,
+      computedAvaliableItems: [],
       continueRefresh: false,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId']),
-    ...mapGetters({
-      computedAvaliableItems: 'subtitleList',
-    }),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -245,6 +244,9 @@ export default {
     },
   },
   watch: {
+    originSrc() {
+      this.computedAvaliableItems = [];
+    },
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
       if (val === 0) {
@@ -287,9 +289,12 @@ export default {
         }
       }
     },
-    computedAvaliableItems(val, oldval) {
+    subtitleList(val, oldval) {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
+      }
+      if (val.length >= oldval.length) {
+        this.computedAvaliableItems = val.filter(sub => sub.name);
       }
     },
     loadingType(val) {
@@ -315,22 +320,33 @@ export default {
       return path.basename(subPath);
     },
     handleRefresh() {
-      if (!this.privacyAgreement) {
-        this.$bus.$emit('privacy-confirm');
-        this.continueRefresh = true;
-      } else if (this.privacyAgreement && !this.timer) {
-        this.timer = setInterval(() => {
-          this.count += 1;
-          this.rotateTime = Math.ceil(this.count / 100);
-        }, 10);
-        document.querySelector('.scrollScope').scrollTop = 0;
-        this.$bus.$emit('refresh-subtitles');
-        clearTimeout(this.breakTimer);
-        this.breakTimer = setTimeout(() => {
-          if (this.timer) {
-            this.$bus.$emit('refresh-finished');
-          }
-        }, 20000);
+      if (navigator.onLine) {
+        if (!this.privacyAgreement) {
+          this.$bus.$emit('privacy-confirm');
+          this.continueRefresh = true;
+        } else if (this.privacyAgreement && !this.timer) {
+          this.timer = setInterval(() => {
+            this.count += 1;
+            this.rotateTime = Math.ceil(this.count / 100);
+          }, 10);
+          document.querySelector('.scrollScope').scrollTop = 0;
+          this.$bus.$emit('refresh-subtitles');
+          this.addLog('info', {
+            message: 'Online subtitles loading .',
+            code: ONLINE_LOADING,
+          });
+          clearTimeout(this.breakTimer);
+          this.breakTimer = setTimeout(() => {
+            if (this.timer) {
+              this.$bus.$emit('refresh-finished');
+            }
+          }, 10000);
+        }
+      } else {
+        this.addLog('error', {
+          message: 'No Translation Result .',
+          errcode: NO_TRANSLATION_RESULT,
+        });
       }
     },
     orify(...args) {
@@ -427,6 +443,8 @@ export default {
       this.count = this.rotateTime * 100;
       setTimeout(() => {
         this.$bus.$emit('finished-add-subtitles');
+        this.$store.dispatch('removeMessagesByType');
+        this.$bus.$emit('no-translation-result');
         this.timer = null;
       }, 1000);
     });
@@ -565,7 +583,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 32px;
-      left: -58px;
+      left: -102px;
       width: 170px;
       max-height: 138px;
     }
@@ -630,7 +648,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 44px;
-      left: -42px;
+      left: -106px;
       width: 204px;
       max-height: 239px;
     }
@@ -690,7 +708,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 70px;
-      left: -33px;
+      left: -133px;
       width: 286px;
       max-height: 433px;
     }
