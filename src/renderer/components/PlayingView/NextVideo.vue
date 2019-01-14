@@ -330,7 +330,7 @@ export default {
           display: flex;
           .duration {
             opacity: 0.7;
-            font-family: splayer-light;
+            font-family: Avenir-Light;
             color: #FFFFFF;
             @media screen and (min-width: 513px) and (max-width: 854px) {
               font-size: 8px;
@@ -350,7 +350,7 @@ export default {
           }
           .title {
             opacity: 0.7;
-            font-family: splayer-light;
+            font-family: PingFangSC-Light;
             color: #FFFFFF;
             @media screen and (min-width: 513px) and (max-width: 854px) {
               font-size: 8px;
@@ -372,7 +372,7 @@ export default {
           }
         }
         .vid-name {
-          font-family: splayer-semibold;
+          font-family: PingFangSC-Semibold;
           color: #FFFFFF;
 
           opacity: 0.9;

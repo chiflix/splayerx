@@ -350,7 +350,7 @@ $border-radius: 3px;
         }
         .playing {
           opacity: 0.7;
-          font-family: splayer-semibold;
+          font-family: PingFangSC-Semibold;
           color: #FFFFFF;
           letter-spacing: 0.5px;
         }
@@ -373,7 +373,7 @@ $border-radius: 3px;
       white-space: nowrap;
       transition: color 80ms 80ms ease-out;
 
-      font-family: splayer-heavy;
+      font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
       letter-spacing: 0.58px;
 
       width: 100%;
