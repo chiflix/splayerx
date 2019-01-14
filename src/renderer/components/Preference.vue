@@ -26,26 +26,34 @@
           <input type="checkbox" checked="checked" v-model="checked">
           <span class="checkmark"></span>
         </label>
-        <div class="languages-select" v-show="checked">
+        <div class="languages-select">
           <div class="select-content">
             <div class="title">{{ $t('preferences.languagePriority')}}</div>
             <div class="description">{{ $t('preferences.languageDescription')}}</div>
             <div class="first-selection">
               <div class="title">{{ $t('preferences.firstLanguage')}}</div>
               <div class="drop-down"
-                @click="showFirstSelection = !showFirstSelection"></div>
+                @click="showFirstSelection = !showFirstSelection">{{ firstLanguage }}</div>
               <div class="drop-down-content"
                 v-show="showFirstSelection">
-                <div class="selection"/>
+                <div class="content">
+                  <div class="selection" v-for="(language, index) in languages">
+                    {{ language }}
+                  </div>
+                </div>
               </div>
             </div>
             <div class="second-selection">
-              <div class="title">{{ $t('preferences.secondLanguage')}}</div>
+             <div class="title">{{ $t('preferences.secondLanguage')}}</div>
               <div class="drop-down"
-                @click="showSecondSelection = !showSecondSelection"></div>
+                @click="showSecondSelection = !showSecondSelection">{{ secondLanguage }}</div>
               <div class="drop-down-content"
                 v-show="showSecondSelection">
-                <div class="selection"/>
+                <div class="content">
+                  <div class="selection" v-for="(language, index) in languages">
+                    {{ language }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -77,7 +85,25 @@ export default {
       itemType: 'titleBarFull',
       showFirstSelection: false,
       showSecondSelection: false,
-      languages: [],
+      firstLanguage: '简体中文',
+      secondLanguage: '简体中文',
+      languages: [
+        '无',
+        '影片源语言',
+        '简体中文',
+        '繁體中文',
+        'English',
+        'Español',
+        '日本語',
+        'Français',
+        '한국어',
+        'Português',
+        'العربية',
+        'Deutsch',
+        'Русский',
+        'हिन्दी',
+        'Italiano',
+      ],
       checked: true,
     };
   },
@@ -164,6 +190,7 @@ export default {
           padding-left: 29px;
           padding-top: 2px;
           margin-bottom: 18px;
+          width: fit-content;
           cursor: pointer;
           opacity: 0.7;
           font-family: PingFangSC-Medium;
@@ -248,25 +275,50 @@ export default {
                 position: relative;
                 z-index: 100;
                 width: 228px;
-                height: 26px;
+                height: 22px;
+                padding-top: 4px;
                 background-color: rgba(255,255,255,0.04);
                 border: 1px solid rgba(255,255,255,0.07);
                 border-radius: 2px;
+                font-family: PingFangSC-Semibold;
+                font-size: 12px;
+                color: #FFFFFF;
+                letter-spacing: 0;
+                text-align: center;
               }
               .drop-down-content {
                 position: absolute;
                 z-index: 50;
                 top: 0;
                 left: 60px;
-                height: 200px;
                 width: 228px;
+                height: 182px;
                 opacity: 0.95;
                 background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
                 border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
                 border-width: 1px 1px 1px 1px;
                 border-style: solid;
                 border-radius: 2px;
-                overflow-y: scroll;
+                .content {
+                  position: absolute;
+                  left: 8px;
+                  right: 4px;
+                  bottom: 2px;
+                  height: 150px;
+                  overflow-y: scroll;
+                  .selection {
+                    padding-top: 5px;
+                    height: 21px;
+                    font-family: PingFangSC-Semibold;
+                    font-size: 12px;
+                    color: #FFFFFF;
+                    letter-spacing: 0;
+                    text-align: center;
+                  }
+                  .selection:hover {
+                    background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
+                  }
+                }
               }
             }
             .second-selection {
@@ -287,25 +339,50 @@ export default {
                 position: relative;
                 z-index: 40;
                 width: 228px;
-                height: 26px;
+                height: 22px;
+                padding-top: 4px;
                 background-color: rgba(255,255,255,0.04);
                 border: 1px solid rgba(255,255,255,0.07);
                 border-radius: 2px;
+                font-family: PingFangSC-Semibold;
+                font-size: 12px;
+                color: #FFFFFF;
+                letter-spacing: 0;
+                text-align: center;
               }
               .drop-down-content {
                 position: absolute;
                 z-index: 10;
                 top: 0;
                 left: 60px;
-                height: 200px;
                 width: 228px;
+                height: 152px;
                 opacity: 0.95;
                 background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
                 border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
                 border-width: 1px 1px 1px 1px;
                 border-style: solid;
                 border-radius: 2px;
-                overflow-y: scroll;
+                .content {
+                  position: absolute;
+                  left: 8px;
+                  right: 4px;
+                  bottom: 2px;
+                  height: 120px;
+                  overflow-y: scroll;
+                  .selection {
+                    padding-top: 5px;
+                    height: 21px;
+                    font-family: PingFangSC-Semibold;
+                    font-size: 12px;
+                    color: #FFFFFF;
+                    letter-spacing: 0;
+                    text-align: center;
+                  }
+                  .selection:hover {
+                    background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
+                  }
+                }
               }
             }
           }
@@ -313,4 +390,18 @@ export default {
       }
     }
   }
+::-webkit-scrollbar {
+  width: 3px;
+  user-select: none;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1); 
+  border-radius: 1.5px;
+}
+::-webkit-scrollbar-track {
+  border-radius: 2px;
+  width: 10px;
+  user-select: none;
+}
 </style>
