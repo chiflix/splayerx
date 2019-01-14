@@ -4,8 +4,18 @@ import osLocale from 'os-locale';
 import '@/css/style.scss';
 import messages from '@/locales';
 import Preference from '@/components/Preference.vue';
+import Vuex from 'vuex';
+import preference from '@/store/modules/Preference';
 
 Vue.use(VueI18n);
+Vue.use(Vuex);
+
+const store = new Vuex.Store({
+  modules: {
+    preference,
+  },
+  strict: process.env.NODE_ENV !== 'production',
+});
 
 function getSystemLocale() {
   const locale = osLocale.sync();
@@ -26,5 +36,9 @@ new Vue({
   i18n,
   components: { Preference },
   data: {},
+  store,
   template: '<Preference/>',
+  mounted() {
+    this.$store.dispatch('getLocalPreference');
+  },
 }).$mount('#app');

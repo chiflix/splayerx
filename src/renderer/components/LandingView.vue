@@ -99,32 +99,36 @@ export default {
   },
   created() {
     // Get all data and show
-    this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
-      .then((data) => {
-        const waitArray = [];
-        for (let i = 0; i < data.length; i += 1) {
-          const accessPromise = new Promise((resolve) => {
-            fs.access(data[i].path, fs.constants.F_OK, (err) => {
-              if (err) {
-                this.infoDB.delete('recent-played', data[i].quickHash);
-                resolve();
-              } else {
-                resolve(data[i]);
-              }
+    if (!this.$store.getters.deleteVideoHistoryOnExit) {
+      this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
+        .then((data) => {
+          const waitArray = [];
+          for (let i = 0; i < data.length; i += 1) {
+            const accessPromise = new Promise((resolve) => {
+              fs.access(data[i].path, fs.constants.F_OK, (err) => {
+                if (err) {
+                  this.infoDB.delete('recent-played', data[i].quickHash);
+                  resolve();
+                } else {
+                  resolve(data[i]);
+                }
+              });
             });
-          });
-          waitArray.push(accessPromise);
-        }
-        return Promise.all(waitArray);
-      })
-      .then((data) => {
-        for (let i = 0; i < data.length; i += 1) {
-          if (data[i] === undefined) {
-            data.splice(i, 1);
+            waitArray.push(accessPromise);
           }
-        }
-        this.lastPlayedFile = data.slice(0, 9);
-      });
+          return Promise.all(waitArray);
+        })
+        .then((data) => {
+          for (let i = 0; i < data.length; i += 1) {
+            if (data[i] === undefined) {
+              data.splice(i, 1);
+            }
+          }
+          this.lastPlayedFile = data.slice(0, 9);
+        });
+    } else {
+      this.infoDB().cleanData();
+    }
     this.$bus.$on('clean-lastPlayedFile', () => {
       // just for delete thumbnail display
       this.lastPlayedFile = [];

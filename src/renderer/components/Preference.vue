@@ -21,10 +21,12 @@
       <div class="general">{{ $t('preferences.generalSetting') }}</div>
     </div>
     <div class="right">
-      <div class="right-content">
+      <div class="right-content"
+        @click="showFirstSelection = showSecondSelection = false">
         <label class="container">{{ $t('preferences.privacyConfirm') }}
-          <input type="checkbox" checked="checked" v-model="checked">
+          <input type="checkbox" checked="privacyAgreement" v-model="privacyAgreement">
           <span class="checkmark"></span>
+          <Icon type="nike" class="nike"/>
         </label>
         <div class="languages-select">
           <div class="select-content">
@@ -33,12 +35,18 @@
             <div class="first-selection">
               <div class="title">{{ $t('preferences.firstLanguage')}}</div>
               <div class="drop-down"
-                @click="showFirstSelection = !showFirstSelection">{{ firstLanguage }}</div>
+                @click.stop="openFirstDropdown">{{ firstLanguage }}
+                <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
+              </div>
               <div class="drop-down-content"
                 v-show="showFirstSelection">
                 <div class="content">
-                  <div class="selection" v-for="(language, index) in languages">
+                  <div class="selection"
+                    v-for="(language, index) in firstLanguages"
+                    @click="handleFirstSelection(language)">
                     {{ language }}
+                    <span v-if="language === secondLanguage && language !== '无'"
+                      style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.secondLanguage') }}</span>
                   </div>
                 </div>
               </div>
@@ -46,12 +54,18 @@
             <div class="second-selection">
              <div class="title">{{ $t('preferences.secondLanguage')}}</div>
               <div class="drop-down"
-                @click="showSecondSelection = !showSecondSelection">{{ secondLanguage }}</div>
+                @click.stop="openSecondDropdown">{{ secondLanguage }}
+                  <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>                
+                </div>
               <div class="drop-down-content"
                 v-show="showSecondSelection">
                 <div class="content">
-                  <div class="selection" v-for="(language, index) in languages">
+                  <div class="selection"
+                    v-for="(language, index) in secondLanguages"
+                    @click="handleSecondSelection(language)">
                     {{ language }}
+                    <span v-if="language === firstLanguage && language !== '无'"
+                      style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.firstLanguage') }}</span>
                   </div>
                 </div>
               </div>
@@ -59,11 +73,14 @@
           </div>
         </div>
         <label class="container">{{ $t('preferences.clearHistory') }}
+          <input type="checkbox" checked="deleteVideoHistoryOnExit" v-model="deleteVideoHistoryOnExit">
+          <span class="checkmark"></span>
+          <Icon type="nike" class="nike"/>
+        </label>
+        <label class="container">{{ $t('preferences.setAsDefault') }}
           <input type="checkbox" checked="checked">
           <span class="checkmark"></span>
-        </label><label class="container">{{ $t('preferences.setAsDefault') }}
-          <input type="checkbox" checked="checked">
-          <span class="checkmark"></span>
+          <Icon type="nike" class="nike"/>
         </label>
       </div>
     </div>
@@ -71,6 +88,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 
@@ -85,8 +103,8 @@ export default {
       itemType: 'titleBarFull',
       showFirstSelection: false,
       showSecondSelection: false,
-      firstLanguage: '简体中文',
-      secondLanguage: '简体中文',
+      firstLanguage: '无',
+      secondLanguage: '无',
       languages: [
         '无',
         '影片源语言',
@@ -108,6 +126,37 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['deleteVideoHistoryOnExit', 'privacyAgreement']),
+    firstLanguages() {
+      return this.languages.filter(language => language !== this.firstLanguage);
+    },
+    secondLanguages() {
+      return this.languages.filter(language => language !== this.secondLanguage);
+    },
+    privacyAgreement: {
+      get() {
+        return this.$store.getters.privacyAgreement;
+      },
+      set(val) {
+        if (val) {
+          this.$store.dispatch('agreeOnPrivacyPolicy');
+        } else {
+          this.$store.dispatch('disagreeOnPrivacyPolicy');
+        }
+      },
+    },
+    deleteVideoHistoryOnExit: {
+      get() {
+        return this.$store.getters.deleteVideoHistoryOnExit;
+      },
+      set(val) {
+        if (val) {
+          this.$store.dispatch('deleteVideoHistoryOnExit');
+        } else {
+          this.$store.dispatch('notDeleteVideoHistoryOnExit');
+        }
+      },
+    },
     name() {
       return electron.remote.app.getName();
     },
@@ -119,6 +168,30 @@ export default {
     },
   },
   methods: {
+    handleFirstSelection(selection) {
+      if (selection === this.secondLanguage) this.secondLanguage = '无';
+      this.firstLanguage = selection;
+    },
+    handleSecondSelection(selection) {
+      if (selection === this.firstLanguage) this.firstLanguage = '无';
+      this.secondLanguage = selection;
+    },
+    openFirstDropdown() {
+      if (this.showFirstSelection) {
+        this.showFirstSelection = false;
+      } else {
+        this.showFirstSelection = true;
+        this.showSecondSelection = false;
+      }
+    },
+    openSecondDropdown() {
+      if (this.showSecondSelection) {
+        this.showSecondSelection = false;
+      } else {
+        this.showSecondSelection = true;
+        this.showFirstSelection = false;
+      }
+    },
     handleMouseOver() {
       this.state = 'hover';
     },
@@ -182,8 +255,8 @@ export default {
       height: 100%;
       background-image: linear-gradient(-28deg, rgba(65,65,65,0.95) 0%, rgba(84,84,84,0.95) 47%, rgba(123,123,123,0.95) 100%);
       .right-content {
-        margin-top: 37px;
-        margin-left: 26px;
+        padding-top: 37px;
+        padding-left: 26px;
         .container {
           display: block;
           position: relative;
@@ -214,23 +287,14 @@ export default {
             border: 0.5px solid rgba(255,255,255,0.20);
             background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
           }
-          .checkmark:after {
-            position: absolute;
-            display: none;
-            content: "";
-          }
-          input:checked ~ .checkmark:after {
+          input:checked ~ .nike {
             display: block;
           }
-          .checkmark:after {
-            left: 5px;
-            top: 5px;
-            width: 7px;
-            height: 4px;
-            border: solid white;
-            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.20);
-            border-width: 0 0 1.41px 1.41px;
-            transform: matrix(1,-1,1,1,0,0);
+          .nike {
+            position: absolute;
+            display: none;
+            top: 3px;
+            left: 1.5px;
           }
         }
         .languages-select {
@@ -285,6 +349,21 @@ export default {
                 color: #FFFFFF;
                 letter-spacing: 0;
                 text-align: center;
+
+                .down-arrow {
+                  position: absolute;
+                  top: 7px;
+                  right: 10px;
+                  bottom: 7px;
+                  transform: rotate(90deg);
+                }
+                .up-arrow {
+                  position: absolute;
+                  top: 7px;
+                  right: 10px;
+                  bottom: 7px;
+                  transform: rotate(-90deg);
+                }
               }
               .drop-down-content {
                 position: absolute;
@@ -349,6 +428,20 @@ export default {
                 color: #FFFFFF;
                 letter-spacing: 0;
                 text-align: center;
+                .down-arrow {
+                  position: absolute;
+                  top: 7px;
+                  right: 10px;
+                  bottom: 7px;
+                  transform: rotate(90deg);
+                }
+                .up-arrow {
+                  position: absolute;
+                  top: 7px;
+                  right: 10px;
+                  bottom: 7px;
+                  transform: rotate(-90deg);
+                }
               }
               .drop-down-content {
                 position: absolute;
