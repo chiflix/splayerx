@@ -7,13 +7,15 @@
     {{ $t('preferences.privacyConfirm') }}
   </BaseCheckBox>
   <div class="languages-select">
-    <div class="select-content">
+    <div class="select-content" :style="{opacity: privacyAgreement ? 1 : 0.3}">
       <div class="title">{{ $t('preferences.languagePriority')}}</div>
       <div class="description">{{ $t('preferences.languageDescription')}}</div>
       <div class="first-selection">
         <div class="title">{{ $t('preferences.firstLanguage')}}</div>
         <div class="drop-down"
-          @click.stop="openFirstDropdown">{{ firstLanguage }}
+          :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
+          @click.stop="openFirstDropdown">
+          {{ firstLanguage }}
           <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
         </div>
         <div class="drop-down-content"
@@ -32,9 +34,11 @@
       <div class="second-selection">
         <div class="title">{{ $t('preferences.secondLanguage')}}</div>
         <div class="drop-down"
-          @click.stop="openSecondDropdown">{{ secondLanguage }}
-            <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>                
-          </div>
+          :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
+          @click.stop="openSecondDropdown">
+          {{ secondLanguage }}
+          <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>                
+        </div>
         <div class="drop-down-content"
           v-show="showSecondSelection">
           <div class="content">
@@ -100,7 +104,9 @@ export default {
   },
   watch: {
     privacyAgreement(val) {
-      console.log(val);
+      if (!val) {
+        this.showFirstSelection = this.showSecondSelection = false;
+      }
     },
   },
   computed: {
@@ -137,9 +143,6 @@ export default {
     },
   },
   methods: {
-    handle(dd) {
-      console.log(dd);
-    },
     handleFirstSelection(selection) {
       if (selection === this.secondLanguage) this.secondLanguage = '无';
       this.firstLanguage = selection;
@@ -149,19 +152,23 @@ export default {
       this.secondLanguage = selection;
     },
     openFirstDropdown() {
-      if (this.showFirstSelection) {
-        this.showFirstSelection = false;
-      } else {
-        this.showFirstSelection = true;
-        this.showSecondSelection = false;
+      if (this.privacyAgreement) {
+        if (this.showFirstSelection) {
+          this.showFirstSelection = false;
+        } else {
+          this.showFirstSelection = true;
+          this.showSecondSelection = false;
+        }
       }
     },
     openSecondDropdown() {
-      if (this.showSecondSelection) {
-        this.showSecondSelection = false;
-      } else {
-        this.showSecondSelection = true;
-        this.showFirstSelection = false;
+      if (this.privacyAgreement) {
+        if (this.showSecondSelection) {
+          this.showSecondSelection = false;
+        } else {
+          this.showSecondSelection = true;
+          this.showFirstSelection = false;
+        }
       }
     },
   },
