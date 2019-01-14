@@ -1,11 +1,11 @@
 <template>
 <div class="general-setting"
   @click="showFirstSelection = showSecondSelection = false">
-  <label class="container">{{ $t('preferences.privacyConfirm') }}
-    <input type="checkbox" checked="privacyAgreement" v-model="privacyAgreement">
-    <span class="checkmark"></span>
-    <Icon type="nike" class="nike"/>
-  </label>
+  <BaseCheckBox
+    :checkboxValue="privacyAgreement"
+    @update:checkbox-value="privacyAgreement = $event">
+    {{ $t('preferences.privacyConfirm') }}
+  </BaseCheckBox>
   <div class="languages-select">
     <div class="select-content">
       <div class="title">{{ $t('preferences.languagePriority')}}</div>
@@ -50,27 +50,28 @@
       </div>
     </div>
   </div>
-  <label class="container">{{ $t('preferences.clearHistory') }}
-    <input type="checkbox" checked="deleteVideoHistoryOnExit" v-model="deleteVideoHistoryOnExit">
-    <span class="checkmark"></span>
-    <Icon type="nike" class="nike"/>
-  </label>
-  <label class="container">{{ $t('preferences.setAsDefault') }}
-    <input type="checkbox" checked="checked">
-    <span class="checkmark"></span>
-    <Icon type="nike" class="nike"/>
-  </label>
+  <BaseCheckBox
+    :checkboxValue="deleteVideoHistoryOnExit"
+    @update:checkbox-value="deleteVideoHistoryOnExit = $event">
+    {{ $t('preferences.clearHistory') }}
+  </BaseCheckBox>
+  <BaseCheckBox
+    @update:checkbox-value="">
+    {{ $t('preferences.setAsDefault') }}
+  </BaseCheckBox>
 </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
+import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
   name: 'General',
   components: {
     Icon,
+    BaseCheckBox,
   },
   data() {
     return {
@@ -96,6 +97,11 @@ export default {
         'Italiano',
       ],
     };
+  },
+  watch: {
+    privacyAgreement(val) {
+      console.log(val);
+    },
   },
   computed: {
     ...mapGetters(['deleteVideoHistoryOnExit', 'privacyAgreement']),
@@ -131,6 +137,9 @@ export default {
     },
   },
   methods: {
+    handle(dd) {
+      console.log(dd);
+    },
     handleFirstSelection(selection) {
       if (selection === this.secondLanguage) this.secondLanguage = '无';
       this.firstLanguage = selection;
@@ -163,46 +172,6 @@ export default {
 .general-setting {
   padding-top: 37px;
   padding-left: 26px;
-  .container {
-    display: block;
-    position: relative;
-    padding-left: 29px;
-    padding-top: 2px;
-    margin-bottom: 18px;
-    width: fit-content;
-    cursor: pointer;
-    opacity: 0.7;
-    font-family: PingFangSC-Medium;
-    font-size: 13px;
-    color: #FFFFFF;
-    letter-spacing: 0.32px;
-    line-height: 13px;
-    user-select: none;
-    input {
-      position: absolute;
-      display: none;
-      cursor: pointer;
-    }
-    .checkmark {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 17px;
-      height: 17px;
-      border-radius: 4px;
-      border: 0.5px solid rgba(255,255,255,0.20);
-      background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
-    }
-    input:checked ~ .nike {
-      display: block;
-    }
-    .nike {
-      position: absolute;
-      display: none;
-      top: 3px;
-      left: 1.5px;
-    }
-  }
   .languages-select {
     background-color: rgba(0,0,0,0.05);
     width: 348px;
@@ -226,22 +195,37 @@ export default {
         letter-spacing: 0;
         margin-bottom: 16px;
       }
+      .title {
+        position: relative;
+        top: 6px;
+        margin-right: 12px;
+        font-family: PingFangSC-Medium;
+        font-size: 12px;
+        color: rgba(255,255,255,0.7);
+        letter-spacing: 0;
+        line-height: 13px;
+      }
+      .down-arrow {
+        position: absolute;
+        top: 7px;
+        right: 10px;
+        bottom: 7px;
+        transform: rotate(90deg);
+      }
+      .up-arrow {
+        position: absolute;
+        top: 7px;
+        right: 10px;
+        bottom: 7px;
+        transform: rotate(-90deg);
+      }
       .first-selection {
         display: flex;
         flex-direction: row;
         margin-bottom: 14px;
         position: relative;
-        .title {
-          position: relative;
-          top: 6px;
-          margin-right: 12px;
-          font-family: PingFangSC-Medium;
-          font-size: 12px;
-          color: rgba(255,255,255,0.7);
-          letter-spacing: 0;
-          line-height: 13px;
-        }
         .drop-down {
+          cursor: pointer;
           position: relative;
           z-index: 100;
           width: 228px;
@@ -255,23 +239,9 @@ export default {
           color: #FFFFFF;
           letter-spacing: 0;
           text-align: center;
-
-          .down-arrow {
-            position: absolute;
-            top: 7px;
-            right: 10px;
-            bottom: 7px;
-            transform: rotate(90deg);
-          }
-          .up-arrow {
-            position: absolute;
-            top: 7px;
-            right: 10px;
-            bottom: 7px;
-            transform: rotate(-90deg);
-          }
         }
         .drop-down-content {
+          cursor: pointer;
           position: absolute;
           z-index: 50;
           top: 0;
@@ -310,17 +280,8 @@ export default {
         display: flex;
         flex-direction: row;
         position: relative;
-        .title {
-          position: relative;
-          top: 6px;
-          margin-right: 12px;
-          font-family: PingFangSC-Medium;
-          font-size: 12px;
-          color: rgba(255,255,255,0.7);
-          letter-spacing: 0;
-          line-height: 13px;
-        }
         .drop-down {
+          cursor: pointer;
           position: relative;
           z-index: 40;
           width: 228px;
@@ -334,22 +295,9 @@ export default {
           color: #FFFFFF;
           letter-spacing: 0;
           text-align: center;
-          .down-arrow {
-            position: absolute;
-            top: 7px;
-            right: 10px;
-            bottom: 7px;
-            transform: rotate(90deg);
-          }
-          .up-arrow {
-            position: absolute;
-            top: 7px;
-            right: 10px;
-            bottom: 7px;
-            transform: rotate(-90deg);
-          }
         }
         .drop-down-content {
+          cursor: pointer;
           position: absolute;
           z-index: 10;
           top: 0;
