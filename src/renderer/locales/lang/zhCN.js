@@ -95,6 +95,11 @@ export default {
     generalSetting: '通用设置',
     clearHistory: '退出时自动清空播放记录',
     privacyConfirm: '启用匿名信息和智能翻译',
+    setAsDefault: '将SPlayer设为默认播放器',
+    languagePriority: '语言优先级',
+    languageDescription: '在您观赏影片时，射手影音会为您推送以下语言的翻译结果。',
+    firstLanguage: '首要语言',
+    secondLanguage: '次要语言',
   },
   advance: {
     rateTitle: '播放速度',
