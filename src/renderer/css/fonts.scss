@@ -1,39 +1,4 @@
-/* CJK fonts */
 @font-face {
-  font-family: 'win32';
-  src: local(Microsoft Yahei);
-  unicode-range:
-    U+3000–303F, // CJK Symbols and Punctuation.
-    U+3040–309F, // Hiragana.
-    U+30A0–30FF, // Katakana.
-    U+3400–4DB5, // CJK Unified Ideographs Extension A.
-    U+4E00–9FD5, // CJK Unified Ideographs
-    U+A5, U+4E00-9FFF, U+FF00-FF9F;
-}
-@font-face {
-  font-family: 'darwin';
-  src: local(PingFang SC);
-  unicode-range:
-    U+3000–303F, // CJK Symbols and Punctuation.
-    U+3040–309F, // Hiragana.
-    U+30A0–30FF, // Katakana.
-    U+3400–4DB5, // CJK Unified Ideographs Extension A.
-    U+4E00–9FD5, // CJK Unified Ideographs
-    U+A5, U+4E00-9FFF, U+FF00-FF9F;
-}
-
-/* latin fonts */
-@font-face {
-  font-family: 'win32';
-  src:
-    local(roboto),
-    url('../assets/fonts/Roboto-Medium.ttf') format('truetype');
-  unicode-range: U+00-52F, U+1E00-1FFF, U+2200–22FF;
-}
-@font-face {
-  font-family: 'darwin';
-  src:
-    local(Avenir),
-    url('../assets/fonts/Avenir LT 65 Medium.ttf') format('truetype');
-  unicode-range: U+00-52F, U+1E00-1FFF, U+2200–22FF;
+  font-family: 'Roboto-Medium';
+  src: url('../assets/fonts/Roboto-Medium.ttf') format('truetype');
 }
