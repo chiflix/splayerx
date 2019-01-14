@@ -2,7 +2,7 @@
   <label class="container">
     <slot></slot>
     <input type="checkbox"
-      :value="checkboxValue"
+      :checked="checkboxValue"
       @input="$emit('update:checkbox-value', $event.target.checked)">
     <span class="checkmark"></span>
     <Icon type="nike" class="nike"/>
