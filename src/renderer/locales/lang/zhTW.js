@@ -132,7 +132,7 @@ export default {
   },
   loading: {
     title: '',
-    content: '正在加載翻譯結果 ...',
+    content: '正在加載智能翻譯結果 ...',
   },
   privacyBubble: {
     masVersion: {

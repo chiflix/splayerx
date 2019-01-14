@@ -133,7 +133,7 @@ export default {
   },
   loading: {
     title: '',
-    content: 'Loading Translation Results ...',
+    content: 'Loading Translation ...',
   },
   privacyBubble: {
     masVersion: {
