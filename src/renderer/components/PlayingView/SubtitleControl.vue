@@ -146,7 +146,7 @@ export default {
       computedAvaliableItems: [],
       continueRefresh: false,
       isShowingHovered: false,
-      isInitail: false,
+      isInitial: false,
       onAnimation: false,
     };
   },
@@ -341,7 +341,7 @@ export default {
           }, 10);
           document.querySelector('.scrollScope').scrollTop = 0;
           this.$bus.$emit('refresh-subtitles');
-          if (!this.isInitail) {
+          if (!this.isInitial) {
             this.addLog('info', {
               message: 'Online subtitles loading .',
               code: ONLINE_LOADING,
@@ -388,7 +388,7 @@ export default {
           this.anim.setSpeed(1.5);
         });
         this.anim.loop = false;
-        this.isInitail = false;
+        this.isInitial = false;
       }
       if (!this.showAttached) {
         this.isShowingHovered = true;
@@ -460,7 +460,7 @@ export default {
           });
           this.onAnimation = false;
           this.anim.loop = false;
-          this.isInitail = false;
+          this.isInitial = false;
         } else {
           this.$store.dispatch('removeMessagesByType');
         }
@@ -471,7 +471,7 @@ export default {
   },
   mounted() {
     this.$bus.$on('menu-subtitle-refresh', (initial) => {
-      this.isInitail = !!initial;
+      this.isInitial = !!initial;
       this.handleRefresh();
     });
     this.$bus.$on('subtitle-refresh-continue', () => {
