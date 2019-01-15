@@ -101,6 +101,7 @@ const state = {
   chosenSize: 1,
   subtitleDelay: 0,
   scaleNum: 1,
+  calculatedNoSub: true,
 };
 
 const getters = {
@@ -125,6 +126,7 @@ const getters = {
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,
   scaleNum: state => state.scaleNum,
+  calculatedNoSub: state => state.calculatedNoSub,
 };
 
 const mutations = {
@@ -183,6 +185,9 @@ const mutations = {
   },
   UpdateChosenSize(state, payload) {
     state.chosenSize = payload;
+  },
+  IfNoSubtitle(state, payload) {
+    state.calculatedNoSub = payload;
   },
 };
 
@@ -245,6 +250,9 @@ const actions = {
   },
   updateChosenSize({ commit }, delta) {
     commit('UpdateChosenSize', delta);
+  },
+  ifNoSubtitle({ commit }, delta) {
+    commit('IfNoSubtitle', delta);
   },
 };
 

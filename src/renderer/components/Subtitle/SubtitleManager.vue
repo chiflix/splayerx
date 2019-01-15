@@ -36,6 +36,7 @@ export default {
       embeddedSubtitles: [],
       newOnlineSubtitles: [],
       lastSubtitleInfo: { rankIndex: -1 },
+      initial: false,
     };
   },
   computed: {
@@ -110,8 +111,7 @@ export default {
     async addInitialSubtitles(videoSrc) {
       const {
         addSubtitles,
-        getLocalSubtitlesList, getOnlineSubtitlesList, getEmbeddedSubtitlesList,
-        privacyAgreement,
+        getLocalSubtitlesList, getEmbeddedSubtitlesList,
       } = this;
       const localEmbeddedSubtitles = (await Promise.all([
         promisify(getLocalSubtitlesList.bind(null, videoSrc, SubtitleLoader.supportedFormats)),
@@ -119,26 +119,9 @@ export default {
       ]))
         .reduce((prev, curr) => prev.concat(curr));
       if (localEmbeddedSubtitles.length) addSubtitles(localEmbeddedSubtitles);
-      else if (navigator.onLine) {
-        if (privacyAgreement) {
-          this.addLog('info', {
-            message: 'Online subtitles loading .',
-            code: ONLINE_LOADING,
-          });
-          const onlineSubtitles = await getOnlineSubtitlesList(videoSrc);
-          setTimeout(() => {
-            this.$store.dispatch('removeMessagesByType');
-            if (!onlineSubtitles.length) {
-              this.$bus.$emit('no-translation-result');
-            }
-          }, 2000);
-          addSubtitles(onlineSubtitles);
-        }
-      } else {
-        this.addLog('error', {
-          message: 'No Translation Result .',
-          errcode: NO_TRANSLATION_RESULT,
-        });
+      else {
+        this.initial = true;
+        this.$bus.$emit('menu-subtitle-refresh', true);
       }
     },
     // different subtitle getters
@@ -264,6 +247,11 @@ export default {
         processedSubtitleList,
         this.systemLanguageCode,
       );
+      if (processedSubtitleList.length) {
+        this.$store.dispatch('ifNoSubtitle', false);
+      } else {
+        this.$store.dispatch('ifNoSubtitle', true);
+      }
       processedSubtitleList.forEach(({ src, type, options }, index) => this.addSubtitle(
         src, type, options,
         index === subtitleIndexToChoose,
@@ -304,11 +292,17 @@ export default {
     });
     this.$bus.$on('no-translation-result', () => {
       setTimeout(() => {
-        if (!this.newOnlineSubtitles.length) {
-          this.addLog('error', {
-            message: 'No Translation Result .',
-            errcode: NO_TRANSLATION_RESULT,
-          });
+        if (!this.subtitleList.length) {
+          if (!this.initial) {
+            this.addLog('error', {
+              message: 'No Translation Result .',
+              errcode: NO_TRANSLATION_RESULT,
+            });
+          }
+          this.initial = false;
+          this.$store.dispatch('ifNoSubtitle', true);
+        } else {
+          this.$store.dispatch('ifNoSubtitle', false);
         }
       }, 500);
     });

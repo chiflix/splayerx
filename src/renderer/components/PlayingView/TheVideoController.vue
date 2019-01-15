@@ -135,6 +135,11 @@ export default {
   },
   watch: {
     originSrc() {
+      Object.keys(this.widgetsStatus).forEach((item) => {
+        if (item !== 'playlist-control') {
+          this.widgetsStatus[item].showAttached = false;
+        }
+      });
       this.isMousedown = false;
     },
     isDragging(val, oldval) {

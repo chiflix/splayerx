@@ -40,7 +40,8 @@ export default {
       mainSubtitle: '第一字幕',
       langZhCN: '中文',
       langEn: '英文',
-      noSubtitle: '无',
+      notToShowSubtitle: '无',
+      noSubtitle: '暂无可用翻译结果',
       secondarySubtitle: '第二字幕',
       subtitleStyle: '字幕样式',
       style1: '电影风格',
@@ -139,7 +140,7 @@ export default {
   },
   loading: {
     title: '',
-    content: '正在加载智能翻译结果 ...',
+    content: '正在智能匹配翻译结果 ...',
   },
   privacyBubble: {
     masVersion: {
