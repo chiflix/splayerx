@@ -302,6 +302,9 @@ function registerMainWindowEvent() {
     ipcMain.on('preference-to-main', (e, args) => {
       mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
     });
+    ipcMain.on('main-to-preference', (e, args) => {
+      preferenceWindow?.webContents.send('preferenceDispatch', 'setPreference', args);
+    });
   });
 }
 

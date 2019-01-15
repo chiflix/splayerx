@@ -43,11 +43,15 @@ export default {
   },
   methods: {
     handleAgreeMouseup() {
-      this.$store.dispatch('agreeOnPrivacyPolicy');
+      this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
       this.$emit('close-privacy-bubble');
     },
     handleDisagreeMouseup() {
-      this.$store.dispatch('disagreeOnPrivacyPolicy');
+      this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
       this.$emit('close-privacy-bubble');
     },
   },

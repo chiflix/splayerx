@@ -58,6 +58,15 @@ export default {
     handleClose() {
       electron.remote.getCurrentWindow().close();
     },
+    mainDispatchProxy(actionType, actionPayload) {
+      console.log('sss');
+      this.$store.dispatch(actionType, actionPayload);
+    },
+  },
+  created() {
+    electron.ipcRenderer.on('preferenceDispatch', (event, actionType, actionPayload) => {
+      this.mainDispatchProxy(actionType, actionPayload);
+    });
   },
 };
 </script>
