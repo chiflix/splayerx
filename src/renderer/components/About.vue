@@ -1,6 +1,19 @@
 <template>
   <div class="content">
-    <Icon class="title-button no-drag"
+    <div class="mac-icons no-drag"
+      v-if="isDarwin"
+      @mouseover="state = 'hover'"
+      @mouseout="state = 'default'">
+      <Icon class="title-button"
+            type="titleBarClose"
+            :state="state"
+            @click.native="handleClose"/>
+      <Icon class="title-button-disable" type="titleBarExitFull"/>
+      <Icon class="title-button-disable" type="titleBarFull"/>
+      </Icon>
+    </div>
+    <Icon class="win-title-button no-drag"
+      v-if="!isDarwin"
       @click.native="handleClose"
       type="titleBarWinClose">
     </Icon>
@@ -20,12 +33,20 @@ export default {
   components: {
     Icon,
   },
+  data() {
+    return {
+      state: 'default',
+    };
+  },
   computed: {
     name() {
       return electron.remote.app.getName();
     },
     version() {
       return electron.remote.app.getVersion();
+    },
+    isDarwin() {
+      return process.platform === 'darwin';
     },
   },
   methods: {
@@ -45,21 +66,40 @@ export default {
     border-radius: 4px;
     display: flex;
     flex-direction: column;
-    .title-button {
+    .mac-icons {
       position: absolute;
-      right: 5px;
-      top: 8px;
-      margin: 0px 2px 2px 0px;
+      top: 12px;
+      left: 12px;
+      width: fit-content;
+      display: flex;
+      flex-wrap: nowrap;
+      .title-button {
+        width: 12px;
+        height: 12px;
+        margin-right: 8px;
+        background-repeat: no-repeat;
+        -webkit-app-region: no-drag;
+        border-radius: 100%;
+      }
+      .title-button-disable {
+        pointer-events: none;
+        opacity: 0.25;
+      }
+    }
+    .win-title-button {
+      position: absolute;
+      top: 0;
+      right: 0;
       width: 45px;
       height: 28px;
       background-color: rgba(255,255,255,0);
       transition: background-color 200ms;
-    }
-    .title-button:hover {
-      background-color: rgba(221, 221, 221, 0.2);
-    }
-    .title-button:active {
-      background-color: rgba(221, 221, 221, 0.5);
+      &:hover {
+        background-color: rgba(221, 221, 221, 0.2);
+      }
+      &:active {
+        background-color: rgba(221, 221, 221, 0.5);
+      }
     }
     .winLogo {
       width: 96px;

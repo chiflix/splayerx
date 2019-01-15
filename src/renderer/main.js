@@ -553,7 +553,9 @@ new Vue({
             submenu: [
               {
                 label: this.$t('msg.splayerx.about'),
-                role: 'about',
+                click: () => {
+                  this.$electron.ipcRenderer.send('add-windows-about');
+                },
               },
               { type: 'separator' },
               {
