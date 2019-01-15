@@ -16,6 +16,16 @@
       <div class="general">{{ $t('preferences.generalSetting') }}</div>
     </div>
     <div class="right">
+      <div class="win-icons no-drag"
+        v-if="!isDarwin"
+        @mouseover="state = 'hover'"
+        @mouseout="state = 'default'">
+        <Icon class="title-button-disable"
+              type="titleBarWinExitFull"/>
+        <Icon class="title-button-disable" type="titleBarWinFull"/>
+        <Icon class="title-button" type="titleBarWinClose" @click.native="handleClose"/>
+        </Icon>
+      </div>
       <component :is="currentPreference"></component>
     </div>
   </div>
@@ -58,24 +68,48 @@ export default {
   flex-direction: row;
   width: 100%;
   height: 100%;
+  .win-icons {
+    display: flex;
+    flex-wrap: nowrap;
+    position: fixed;
+    top: 0;
+    right: 0;
+    .title-button {
+      margin: 0px 2px 2px 0px;
+      width: 45px;
+      height: 28px;
+      background-color: rgba(255,255,255,0);
+      transition: background-color 200ms;
+      &:hover {
+        background-color: rgba(221, 221, 221, 0.2);
+      }
+      &:active {
+        background-color: rgba(221, 221, 221, 0.5);
+      }
+    }
+    .title-button-disable {
+      pointer-events: none;
+      opacity: 0.25;
+    }
+  }
   .mac-icons {
     margin-top: 12px;
     margin-left: 12px;
     width: fit-content;
     display: flex;
     flex-wrap: nowrap;
-  }
-  .title-button {
-    width: 12px;
-    height: 12px;
-    margin-right: 8px;
-    background-repeat: no-repeat;
-    -webkit-app-region: no-drag;
-    border-radius: 100%;
-  }
-  .title-button-disable {
-    pointer-events: none;
-    opacity: 0.25;
+    .title-button {
+      width: 12px;
+      height: 12px;
+      margin-right: 8px;
+      background-repeat: no-repeat;
+      -webkit-app-region: no-drag;
+      border-radius: 100%;
+    }
+    .title-button-disable {
+      pointer-events: none;
+      opacity: 0.25;
+    }
   }
   .left {
     flex-basis: 110px;
