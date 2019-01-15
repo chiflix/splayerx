@@ -10,6 +10,7 @@
 
 <script>
   // import { throttle } from 'lodash';
+  import '@/css/style.scss';
   import drag from '@/helpers/drag';
   import {
     FILE_NON_EXIST,
@@ -105,7 +106,6 @@
         this.mainDispatchProxy(actionType, actionPayload);
       });
       this.$electron.ipcRenderer.send('windowInit');
-      this.$el.style.fontFamily = process.platform;
       drag(this.$el);
       this.$ga.event('app', 'mounted');
     },
@@ -114,5 +114,5 @@
 
 <style lang="scss">
 // global scss
-@import url("~@/css/style.scss");
+// @import "@/css/style.scss";
 </style>

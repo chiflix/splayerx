@@ -14,6 +14,7 @@
 <script>
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
+
 export default {
   name: 'About',
   components: {

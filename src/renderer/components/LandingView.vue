@@ -53,14 +53,13 @@
       :filePathNeedToDelete="filePathNeedToDelete"
       @displayInfo="displayInfoUpdate"/>
     <NotificationBubble/>
-    
+
   </div>
 </template>
 
 <script>
 import fs from 'fs';
 import { mapState, mapGetters } from 'vuex';
-import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
 import NotificationBubble from './NotificationBubble.vue';
@@ -284,7 +283,7 @@ body {
     width: 70%;
     word-break: break-all;
     font-size: 30px;
-    line-height: 30px;
+    line-height: 36px;
     font-weight: bold;
     z-index: 4;
     overflow: hidden;
@@ -294,7 +293,7 @@ body {
     letter-spacing: 1px;
     @media screen and (min-width: 1355px) {
       font-size: 2.21vw;
-      line-height: 2.21vw;
+      line-height: 2.66vw;
     }
   }
   .item-description {

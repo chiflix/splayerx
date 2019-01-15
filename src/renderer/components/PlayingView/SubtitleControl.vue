@@ -284,6 +284,7 @@ export default {
             this.anim.playSegments([79, 85]);
           }
           this.clearMousedown({ target: '' });
+          this.$emit('update:lastDragging', false);
         } else if (val !== this.$options.name && this.showAttached) {
           this.$emit('update:showAttached', false);
         }
