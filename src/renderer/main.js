@@ -600,35 +600,12 @@ new Vue({
             template.unshift(menuItem);
           });
           template.splice(5, 0, {
-            label: this.$t('msg.preferences.settings'),
-            submenu: [
-              {
-                label: this.$t('msg.preferences.clearHistory'),
-                id: 'deleteHistory',
-                type: 'checkbox',
-                checked: this.$store.getters.deleteVideoHistoryOnExit,
-                click: () => {
-                  if (this.$store.getters.deleteVideoHistoryOnExit) {
-                    this.$store.dispatch('notDeleteVideoHistoryOnExit');
-                  } else {
-                    this.$store.dispatch('deleteVideoHistoryOnExit');
-                  }
-                },
-              },
-              {
-                label: this.$t('msg.preferences.privacyConfirm'),
-                id: 'privacy',
-                type: 'checkbox',
-                checked: this.$store.getters.privacyAgreement,
-                click: () => {
-                  if (this.$store.getters.privacyAgreement) {
-                    this.$store.dispatch('disagreeOnPrivacyPolicy');
-                  } else {
-                    this.$store.dispatch('agreeOnPrivacyPolicy');
-                  }
-                },
-              },
-            ],
+            label: this.$t('msg.splayerx.preferences'),
+            enabled: true,
+            accelerator: 'Cmd+,',
+            click: () => {
+              this.$electron.ipcRenderer.send('add-preference');
+            },
           });
           template[10].submenu.unshift(
             {
