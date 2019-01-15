@@ -60,6 +60,7 @@
 <script>
 import fs from 'fs';
 import { mapState, mapGetters } from 'vuex';
+import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
 import NotificationBubble from './NotificationBubble.vue';

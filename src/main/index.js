@@ -275,7 +275,6 @@ function registerMainWindowEvent() {
       titleBarStyle: 'none',
       width: 510,
       height: 360,
-      parent: mainWindow,
       transparent: true,
       resizable: false,
       show: false,

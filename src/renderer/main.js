@@ -573,34 +573,6 @@ new Vue({
                 click: () => {
                   this.$electron.ipcRenderer.send('add-preference');
                 },
-                // submenu: [
-                //   {
-                //     label: this.$t('msg.preferences.clearHistory'),
-                //     id: 'deleteHistory',
-                //     type: 'checkbox',
-                //     checked: this.$store.getters.deleteVideoHistoryOnExit,
-                //     click: () => {
-                //       if (this.$store.getters.deleteVideoHistoryOnExit) {
-                //         this.$store.dispatch('notDeleteVideoHistoryOnExit');
-                //       } else {
-                //         this.$store.dispatch('deleteVideoHistoryOnExit');
-                //       }
-                //     },
-                //   },
-                //   {
-                //     label: this.$t('msg.preferences.privacyConfirm'),
-                //     id: 'privacy',
-                //     type: 'checkbox',
-                //     checked: this.$store.getters.privacyAgreement,
-                //     click: () => {
-                //       if (this.$store.getters.privacyAgreement) {
-                //         this.$store.dispatch('disagreeOnPrivacyPolicy');
-                //       } else {
-                //         this.$store.dispatch('agreeOnPrivacyPolicy');
-                //       }
-                //     },
-                //   },
-                // ],
               },
               { type: 'separator' },
               {
