@@ -22,7 +22,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 import General from './Preferences/General.vue';

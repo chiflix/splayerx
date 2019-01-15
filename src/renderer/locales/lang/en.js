@@ -94,7 +94,7 @@ export default {
   preferences: {
     none: 'None',
     settings: 'Settings',
-    generalSetting: 'Gerneral',
+    generalSetting: 'General',
     clearHistory: 'Always clear playback history on exit',
     privacyConfirm: 'Allow anonymous data / Smart Translation',
     setAsDefault: 'Set SPlayer as the Default Application',

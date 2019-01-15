@@ -11,7 +11,7 @@
       <div class="title">{{ $t('preferences.languagePriority')}}</div>
       <div class="description">{{ $t('preferences.languageDescription')}}</div>
       <div class="first-selection">
-        <div class="title">{{ $t('preferences.primaryLanguage')}}</div>
+        <div class="selection-title">{{ $t('preferences.primaryLanguage')}}</div>
         <div class="drop-down"
           :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
           @click.stop="openFirstDropdown">
@@ -25,14 +25,12 @@
               v-for="(language, index) in primaryLanguages"
               @click="handleFirstSelection(language)">
               {{ language }}
-              <span v-if="language === secondaryLanguage && language !== '无'"
-                style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.secondaryLanguage') }}</span>
             </div>
           </div>
         </div>
       </div>
       <div class="second-selection">
-        <div class="title">{{ $t('preferences.secondaryLanguage')}}</div>
+        <div class="selection-title">{{ $t('preferences.secondaryLanguage')}}</div>
         <div class="drop-down"
           :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
           @click.stop="openSecondDropdown">
@@ -42,8 +40,10 @@
         <div class="drop-down-content"
           v-show="showSecondSelection">
           <div class="content">
-            <div class="selection"
+            <div class="selection" ref="secondarySelection"
               v-for="(language, index) in secondaryLanguages"
+              @mouseover="mouseover(index)"
+              @mouseout="mouseout(index)"
               @click="handleSecondSelection(language)">
               {{ language }}
               <span v-if="language === primaryLanguage && language !== '无'"
@@ -63,8 +63,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
+import asyncStorage from '@/helpers/asyncStorage';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
@@ -77,11 +77,8 @@ export default {
     return {
       showFirstSelection: false,
       showSecondSelection: false,
-      primaryLanguage: this.$t('preferences.none'),
-      secondaryLanguage: this.$t('preferences.none'),
       languages: [
         this.$t('preferences.none'),
-        '影片源语言',
         '简体中文',
         '繁體中文',
         'English',
@@ -98,6 +95,28 @@ export default {
       ],
     };
   },
+  created() {
+    asyncStorage.get('preferences').then((data) => {
+      if (data.primaryLanguage === undefined) {
+        switch (this.$i18n.locale) {
+          case 'zhCN':
+            this.primaryLanguage = '简体中文';
+            break;
+          case 'zhTW':
+            this.primaryLanguage = '繁體中文';
+            break;
+          case 'en':
+            this.primaryLanguage = 'English';
+            break;
+          default:
+            break;
+        }
+      }
+      if (data.secondaryLanguage === undefined) {
+        this.secondaryLanguage = this.$t('preferences.none');
+      }
+    });
+  },
   watch: {
     privacyAgreement(val) {
       if (!val) {
@@ -106,12 +125,27 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['deleteVideoHistoryOnExit', 'privacyAgreement']),
     primaryLanguages() {
-      return this.languages.filter(language => language !== this.primaryLanguage);
+      return this.languages.filter(language => language !== this.primaryLanguage && language !== this.$t('preferences.none'));
     },
     secondaryLanguages() {
       return this.languages.filter(language => language !== this.secondaryLanguage);
+    },
+    primaryLanguage: {
+      get() {
+        return this.$store.getters.primaryLanguage;
+      },
+      set(val) {
+        this.$store.dispatch('primaryLanguage', val);
+      },
+    },
+    secondaryLanguage: {
+      get() {
+        return this.$store.getters.secondaryLanguage;
+      },
+      set(val) {
+        this.$store.dispatch('secondaryLanguage', val);
+      },
     },
     privacyAgreement: {
       get() {
@@ -139,15 +173,26 @@ export default {
     },
   },
   methods: {
+    mouseover(index) {
+      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
+        this.$refs.secondarySelection[index].classList.add('selection-hover');
+      }
+    },
+    mouseout(index) {
+      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
+        this.$refs.secondarySelection[index].classList.remove('selection-hover');
+      }
+    },
     handleFirstSelection(selection) {
       if (selection === this.secondaryLanguage) this.secondaryLanguage = '无';
       this.primaryLanguage = selection;
-      this.$store.dispatch('primaryLanguage', selection);
+      // this.$store.dispatch('primaryLanguage', selection);
     },
     handleSecondSelection(selection) {
-      if (selection === this.primaryLanguage) this.primaryLanguage = '无';
-      this.secondaryLanguage = selection;
-      this.$store.dispatch('secondaryLanguage', selection);
+      if (selection !== this.primaryLanguage) {
+        this.secondaryLanguage = selection;
+        // this.$store.dispatch('secondaryLanguage', selection);
+      }
     },
     openFirstDropdown() {
       if (this.privacyAgreement) {
@@ -191,7 +236,6 @@ export default {
         margin-bottom: 7px;
         color: rgba(255,255,255,0.9);
         letter-spacing: 0;
-        line-height: 13px;
       }
       .description {
         font-family: PingFangSC-Medium;
@@ -200,7 +244,7 @@ export default {
         letter-spacing: 0;
         margin-bottom: 16px;
       }
-      .title {
+      .selection-title {
         position: relative;
         top: 6px;
         margin-right: 12px;
@@ -252,7 +296,7 @@ export default {
           top: 0;
           left: 60px;
           width: 228px;
-          height: 182px;
+          height: 156px;
           opacity: 0.95;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
           border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
@@ -264,7 +308,7 @@ export default {
             left: 8px;
             right: 4px;
             bottom: 2px;
-            height: 150px;
+            height: 124px;
             overflow-y: scroll;
             .selection {
               padding-top: 5px;
@@ -302,13 +346,12 @@ export default {
           text-align: center;
         }
         .drop-down-content {
-          cursor: pointer;
           position: absolute;
           z-index: 10;
           top: 0;
           left: 60px;
           width: 228px;
-          height: 152px;
+          height: 156px;
           opacity: 0.95;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
           border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
@@ -320,7 +363,7 @@ export default {
             left: 8px;
             right: 4px;
             bottom: 2px;
-            height: 120px;
+            height: 124px;
             overflow-y: scroll;
             .selection {
               padding-top: 5px;
@@ -331,7 +374,8 @@ export default {
               letter-spacing: 0;
               text-align: center;
             }
-            .selection:hover {
+            .selection-hover {
+              cursor: pointer;
               background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
             }
           }

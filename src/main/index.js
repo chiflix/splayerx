@@ -293,6 +293,8 @@ function registerMainWindowEvent() {
       preferenceWindow.on('closed', () => {
         preferenceWindow = null;
       });
+    } else {
+      preferenceWindow.focus();
     }
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
