@@ -69,7 +69,8 @@
 </template>
 <script>
 import path from 'path';
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 
@@ -118,6 +119,9 @@ export default {
     this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
+    ...mapMutations({
+      updateMousemoveTarget: inputMutations.MOUSEMOVE_TARGET_UPDATE,
+    }),
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
@@ -133,6 +137,7 @@ export default {
         this.clearMousedown({ target: '' });
       } else if (this.backgroundDisplayState) {
         this.$emit('update:playlistcontrol-showattached', false);
+        this.updateMousemoveTarget('the-video-controller');
       }
     },
     onItemMouseover(index, media) {
@@ -210,6 +215,7 @@ export default {
       if (this.mousedownCurrentTarget !== 'notification-bubble') {
         if (this.lastDragging) {
           this.clearMousedown({ target: '' });
+          this.$emit('update:lastDragging', false);
         } else if (val !== this.$options.name && this.backgroundDisplayState) {
           this.$emit('update:playlistcontrol-showattached', false);
         }
@@ -352,7 +358,7 @@ export default {
     .info {
       width: 90%;
       .top {
-        font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+        font-family: $font-heavy;
         color: rgba(235,235,235,0.6);
         letter-spacing: 0.64px;
         width: fit-content;
@@ -362,7 +368,7 @@ export default {
         text-overflow: ellipsis;
         white-space: nowrap;
 
-        font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+        font-family: $font-heavy;
         color: rgba(255,255,255,0.70);
         letter-spacing: 1px;
         width: 100%;
