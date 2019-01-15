@@ -101,6 +101,7 @@ export default {
       tranFlag: false,
       filePathNeedToDelete: '',
       eventTarget: {},
+      changeByRecent: false,
     };
   },
   created() {
@@ -181,13 +182,18 @@ export default {
         }, 400);
       } else if (index !== this.playingIndex && !this.shifting
         && this.filePathNeedToDelete !== this.playingList[index]) {
+        this.changeByRecent = true;
         this.playFile(this.playingList[index]);
       }
     },
   },
   watch: {
     originSrc() {
-      this.displayState = false;
+      if (!this.changeByRecent) {
+        this.displayState = false;
+        this.$emit('update:playlistcontrol-showattached', false);
+      }
+      this.changeByRecent = false;
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },

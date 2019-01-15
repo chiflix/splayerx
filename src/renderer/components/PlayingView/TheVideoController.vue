@@ -136,7 +136,9 @@ export default {
   watch: {
     originSrc() {
       Object.keys(this.widgetsStatus).forEach((item) => {
-        this.widgetsStatus[item].showAttached = false;
+        if (item !== 'playlist-control') {
+          this.widgetsStatus[item].showAttached = false;
+        }
       });
       this.isMousedown = false;
     },
