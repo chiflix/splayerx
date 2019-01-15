@@ -296,6 +296,7 @@ export default {
         margin-bottom: 14px;
         position: relative;
         .drop-down {
+          -webkit-app-region: no-drag;
           cursor: pointer;
           position: relative;
           z-index: 100;
@@ -351,6 +352,7 @@ export default {
         flex-direction: row;
         position: relative;
         .drop-down {
+          -webkit-app-region: no-drag;
           cursor: pointer;
           position: relative;
           z-index: 40;

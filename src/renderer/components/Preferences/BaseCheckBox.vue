@@ -23,6 +23,7 @@ export default {
 
 <style scoped lang="scss">
 .container {
+  -webkit-app-region: no-drag;
   display: block;
   position: relative;
   padding-left: 29px;
