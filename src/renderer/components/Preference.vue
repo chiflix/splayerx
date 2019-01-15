@@ -59,7 +59,6 @@ export default {
       electron.remote.getCurrentWindow().close();
     },
     mainDispatchProxy(actionType, actionPayload) {
-      console.log('sss');
       this.$store.dispatch(actionType, actionPayload);
     },
   },
