@@ -99,7 +99,6 @@ export default {
   }
   .right {
     flex-basis: 400px;
-    height: 100%;
     background-image: linear-gradient(-28deg, rgba(65,65,65,0.95) 0%, rgba(84,84,84,0.95) 47%, rgba(123,123,123,0.95) 100%);
   }
 }

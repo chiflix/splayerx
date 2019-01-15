@@ -13,16 +13,16 @@
         <div class="selection-title">{{ $t('preferences.primaryLanguage')}}</div>
         <div class="drop-down"
           :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-          @click.stop="openFirstDropdown">
+          @mouseup.stop="openFirstDropdown">
           {{ primaryLanguage }}
           <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
         </div>
-        <div class="drop-down-content"
+        <div class="drop-down-content no-drag"
           v-show="showFirstSelection">
           <div class="content">
             <div class="selection"
               v-for="(language, index) in primaryLanguages"
-              @click.stop="handleFirstSelection(language)">
+              @mouseup.stop="handleFirstSelection(language)">
               {{ language }}
             </div>
           </div>
@@ -32,18 +32,18 @@
         <div class="selection-title">{{ $t('preferences.secondaryLanguage')}}</div>
         <div class="drop-down"
           :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-          @click.stop="openSecondDropdown">
+          @mouseup.stop="openSecondDropdown">
           {{ secondaryLanguage }}
           <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>                
         </div>
-        <div class="drop-down-content"
+        <div class="drop-down-content no-drag"
           v-show="showSecondSelection">
           <div class="content">
             <div class="selection" ref="secondarySelection"
               v-for="(language, index) in secondaryLanguages"
               @mouseover="mouseover(index)"
               @mouseout="mouseout(index)"
-              @click.stop="handleSecondSelection(language)">
+              @mouseup.stop="handleSecondSelection(language)">
               {{ language }}
               <span v-if="language === primaryLanguage && language !== '无'"
                 style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.primaryLanguage') }}</span>
@@ -63,7 +63,6 @@
 
 <script>
 import Icon from '@/components/BaseIconContainer.vue';
-import asyncStorage from '@/helpers/asyncStorage';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
@@ -100,18 +99,17 @@ export default {
     window.onmousedown = () => {
       this.mouseDown = true;
       this.isMoved = false;
-      
-    }
+    };
     window.onmousemove = () => {
       if (this.mouseDown) this.isMoved = true;
-    }
+    };
     window.onmouseup = () => {
       if (!this.isMoved) {
         this.showFirstSelection = this.showSecondSelection = false;
       }
       this.mouseDown = false;
       this.isMoved = false;
-    }
+    };
   },
   beforeDestroy() {
     window.onmousedown = null;
@@ -192,7 +190,7 @@ export default {
     handleSecondSelection(selection) {
       if (selection !== this.primaryLanguage) {
         this.secondaryLanguage = selection;
-        this.showSecondSelection = false
+        this.showSecondSelection = false;
       }
     },
     openFirstDropdown() {
@@ -218,9 +216,9 @@ export default {
   },
 };
 </script>
-
 <style scoped lang="scss">
 .general-setting {
+  box-sizing: border-box;
   padding-top: 37px;
   padding-left: 26px;
   width: 100%;
