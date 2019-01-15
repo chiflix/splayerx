@@ -285,11 +285,14 @@ export default {
     });
     this.$bus.$on('no-translation-result', () => {
       setTimeout(() => {
-        if (!this.newOnlineSubtitles.length) {
+        if (!this.subtitleList.length) {
           this.addLog('error', {
             message: 'No Translation Result .',
             errcode: NO_TRANSLATION_RESULT,
           });
+          this.$store.dispatch('ifNoSubtitle', true);
+        } else {
+          this.$store.dispatch('ifNoSubtitle', false);
         }
       }, 500);
     });

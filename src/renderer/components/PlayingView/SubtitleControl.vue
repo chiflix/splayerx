@@ -46,25 +46,27 @@
                       </div>
                     </div>
 
-                    <div v-if="foundSubtitles"
-                      v-for="(item, index) in computedAvaliableItems" :key="item.rank">
-                      <div class="menu-item-text-wrapper"
-                        @mouseup="toggleItemClick(index)"
-                        @mouseover="toggleItemsMouseOver(index)"
-                        @mouseleave="toggleItemsMouseLeave(index)"
-                        :id="'item'+index"
-                        :style="{
-                          transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                          color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                          height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                          cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
-                        }">
-                        <div class="text"
-                          :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                            whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                          }">{{ item.path ? getSubName(item.path) : item.name }}</div>
+                    <transition-group name="subtitle-group">
+                      <div v-if="foundSubtitles"
+                        v-for="(item, index) in computedAvaliableItems" :key="item.rank">
+                        <div class="menu-item-text-wrapper"
+                          @mouseup="toggleItemClick(index)"
+                          @mouseover="toggleItemsMouseOver(index)"
+                          @mouseleave="toggleItemsMouseLeave(index)"
+                          :id="'item'+index"
+                          :style="{
+                            transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                            color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                            height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                            cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                          }">
+                          <div class="text"
+                            :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                              whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                            }">{{ item.path ? getSubName(item.path) : item.name }}</div>
+                        </div>
                       </div>
-                    </div>
+                    </transition-group>
 
                     <div v-if="loadingTypes.length > 0"
                       v-for="(item, index) in loadingTypes"
@@ -149,7 +151,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -162,7 +164,7 @@ export default {
       },
     }),
     noSubtitle() {
-      return this.subtitleList.length ? this.$t('msg.subtitle.notToShowSubtitle') : this.$t('msg.subtitle.noSubtitle');
+      return this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
     },
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.75;
@@ -771,5 +773,15 @@ export default {
 }
 .sub-trans-l-leave-active {
   position: absolute;
+}
+.subtitle-group-enter-active, .subtitle-group-leave-active {
+  transition: opacity 300ms linear;
+  transition-delay: 100ms;
+}
+.subtitle-group-enter, .subtitle-group-leave-to {
+  opacity: 0;
+}
+.subtitle-group-enter-to, .subtitle-group-leave {
+  opacity: 1;
 }
 </style>
