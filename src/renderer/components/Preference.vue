@@ -131,7 +131,7 @@ export default {
       padding-top: 13px;
       padding-bottom: 13px;
 
-      font-family: PingFangSC-Semibold;
+      font-family: $font-semibold;
       font-size: 14px;
       color: #FFFFFF;
       letter-spacing: 0;

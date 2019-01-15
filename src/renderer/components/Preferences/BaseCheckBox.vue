@@ -32,7 +32,7 @@ export default {
   width: fit-content;
   cursor: pointer;
   opacity: 0.7;
-  font-family: PingFangSC-Medium;
+  font-family: $font-medium;
   font-size: 13px;
   color: #FFFFFF;
   letter-spacing: 0.32px;

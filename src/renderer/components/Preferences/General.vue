@@ -253,14 +253,14 @@ export default {
       padding-top: 20px;
       padding-left: 28px;
       .title {
-        font-family: PingFangSC-Medium;
+        font-family: $font-medium;
         font-size: 13px;
         margin-bottom: 7px;
         color: rgba(255,255,255,0.9);
         letter-spacing: 0;
       }
       .description {
-        font-family: PingFangSC-Medium;
+        font-family: $font-medium;
         font-size: 11px;
         color: rgba(255,255,255,0.5);
         letter-spacing: 0;
@@ -270,7 +270,7 @@ export default {
         position: relative;
         top: 6px;
         margin-right: 12px;
-        font-family: PingFangSC-Medium;
+        font-family: $font-medium;
         font-size: 12px;
         color: rgba(255,255,255,0.7);
         letter-spacing: 0;
@@ -306,7 +306,7 @@ export default {
           background-color: rgba(255,255,255,0.04);
           border: 1px solid rgba(255,255,255,0.07);
           border-radius: 2px;
-          font-family: PingFangSC-Semibold;
+          font-family: $font-semibold;
           font-size: 12px;
           color: #FFFFFF;
           letter-spacing: 0;
@@ -335,7 +335,7 @@ export default {
             .selection {
               padding-top: 5px;
               height: 21px;
-              font-family: PingFangSC-Semibold;
+              font-family: $font-semibold;
               font-size: 12px;
               color: #FFFFFF;
               letter-spacing: 0;
@@ -362,7 +362,7 @@ export default {
           background-color: rgba(255,255,255,0.04);
           border: 1px solid rgba(255,255,255,0.07);
           border-radius: 2px;
-          font-family: PingFangSC-Semibold;
+          font-family: $font-semibold;
           font-size: 12px;
           color: #FFFFFF;
           letter-spacing: 0;
@@ -390,7 +390,7 @@ export default {
             .selection {
               padding-top: 5px;
               height: 21px;
-              font-family: PingFangSC-Semibold;
+              font-family: $font-semibold;
               font-size: 12px;
               letter-spacing: 0;
               text-align: center;
