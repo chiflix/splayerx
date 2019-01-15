@@ -18,7 +18,7 @@
           <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
         </div>
         <div class="drop-down-content no-drag"
-          v-show="showFirstSelection">
+          v-if="showFirstSelection">
           <div class="content">
             <div class="selection"
               v-for="(language, index) in primaryLanguages"
@@ -37,7 +37,7 @@
           <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>                
         </div>
         <div class="drop-down-content no-drag"
-          v-show="showSecondSelection">
+          v-if="showSecondSelection">
           <div class="content">
             <div class="selection" ref="secondarySelection"
               v-for="(language, index) in secondaryLanguages"
