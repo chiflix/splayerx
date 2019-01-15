@@ -24,6 +24,7 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 let mainWindow = null;
 let aboutWindow = null;
+let preferenceWindow = null;
 let tray = null;
 let inited = false;
 const filesToOpen = [];
@@ -35,6 +36,9 @@ const mainURL = process.env.NODE_ENV === 'development'
 const aboutURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/about.html'
   : `file://${__dirname}/about.html`;
+const preferenceURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/preference.html'
+  : `file://${__dirname}/preference.html`;
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -263,6 +267,44 @@ function registerMainWindowEvent() {
     aboutWindow.once('ready-to-show', () => {
       aboutWindow.show();
     });
+  });
+  ipcMain.on('add-preference', () => {
+    const preferenceWindowOptions = {
+      useContentSize: true,
+      frame: false,
+      titleBarStyle: 'none',
+      width: 510,
+      height: 360,
+      transparent: true,
+      resizable: false,
+      show: false,
+      webPreferences: {
+        webSecurity: false,
+        experimentalFeatures: true,
+      },
+      acceptFirstMouse: true,
+      fullscreenable: false,
+      maximizable: false,
+      minimizable: false,
+    };
+    if (!preferenceWindow) {
+      preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+      preferenceWindow.loadURL(`${preferenceURL}`);
+      preferenceWindow.on('closed', () => {
+        preferenceWindow = null;
+      });
+    } else {
+      preferenceWindow.focus();
+    }
+    preferenceWindow.once('ready-to-show', () => {
+      preferenceWindow.show();
+    });
+  });
+  ipcMain.on('preference-to-main', (e, args) => {
+    mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
+  });
+  ipcMain.on('main-to-preference', (e, args) => {
+    preferenceWindow?.webContents.send('preferenceDispatch', 'setPreference', args);
   });
 }
 

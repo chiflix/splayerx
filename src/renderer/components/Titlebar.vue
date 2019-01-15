@@ -2,8 +2,6 @@
   <div
     :data-component-name="$options.name"
     :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
-    @mouseover="titleMouseover"
-    @mouseout="titleMouseout"
     @dblclick.stop="handleDbClick">
     <div class="win-icons" v-if="!isDarwin" v-fade-in="showTitleBar">
       <Icon class="title-button no-drag"
@@ -72,7 +70,6 @@ export default {
   name: 'titlebar',
   data() {
     return {
-      isDarwin: process.platform === 'darwin',
       state: 'default',
       itemTypeEnum: {
         FULLSCREEN: 'titleBarFull',
@@ -130,12 +127,6 @@ export default {
     },
   },
   methods: {
-    titleMouseover() {
-      this.showTitleBar = true;
-    },
-    titleMouseout() {
-      this.showTitleBar = this.showAllWidgets || false;
-    },
     handleDbClick() {
       if (!this.isMaximized) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
@@ -183,6 +174,9 @@ export default {
       'isMaximized',
       'isFullScreen',
     ]),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     middleButtonStatus() {
       return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
     },

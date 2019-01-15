@@ -81,6 +81,24 @@ export default {
   mounted() {
     asyncStorage.get('preferences').then((data) => {
       this.showPrivacyBubble = data.privacyAgreement === undefined;
+      if (!data.primaryLanguage) {
+        switch (this.$i18n.locale) {
+          case 'zhCN':
+            this.$store.dispatch('primaryLanguage', '简体中文');
+            break;
+          case 'zhTW':
+            this.$store.dispatch('primaryLanguage', '繁體中文');
+            break;
+          case 'en':
+            this.$store.dispatch('primaryLanguage', 'English');
+            break;
+          default:
+            break;
+        }
+      }
+      if (!data.secondaryLanguage) {
+        this.$store.dispatch('secondaryLanguage', this.$t('preferences.none'));
+      }
     });
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
