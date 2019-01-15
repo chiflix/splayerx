@@ -36,6 +36,7 @@ export default {
       embeddedSubtitles: [],
       newOnlineSubtitles: [],
       lastSubtitleInfo: { rankIndex: -1 },
+      initial: false,
     };
   },
   computed: {
@@ -119,6 +120,7 @@ export default {
         .reduce((prev, curr) => prev.concat(curr));
       if (localEmbeddedSubtitles.length) addSubtitles(localEmbeddedSubtitles);
       else {
+        this.initial = true;
         this.$bus.$emit('menu-subtitle-refresh', true);
       }
     },
@@ -291,10 +293,13 @@ export default {
     this.$bus.$on('no-translation-result', () => {
       setTimeout(() => {
         if (!this.subtitleList.length) {
-          this.addLog('error', {
-            message: 'No Translation Result .',
-            errcode: NO_TRANSLATION_RESULT,
-          });
+          if (!this.initial) {
+            this.addLog('error', {
+              message: 'No Translation Result .',
+              errcode: NO_TRANSLATION_RESULT,
+            });
+          }
+          this.initial = false;
           this.$store.dispatch('ifNoSubtitle', true);
         } else {
           this.$store.dispatch('ifNoSubtitle', false);
