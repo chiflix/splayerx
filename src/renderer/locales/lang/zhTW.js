@@ -99,8 +99,8 @@ export default {
     setAsDefault: '將SPlayer設為默認播放器',
     languagePriority: '語言優先級',
     languageDescription: '在您觀賞影片時，射手影音會為您推送以下語言的翻譯結果。',
-    firstLanguage: '首要語言',
-    secondLanguage: '次要語言',
+    primaryLanguage: '首要語言',
+    secondaryLanguage: '次要語言',
   },
   advance: {
     rateTitle: '播放速度',

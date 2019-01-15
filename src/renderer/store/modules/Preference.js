@@ -3,11 +3,15 @@ import asyncStorage from '@/helpers/asyncStorage';
 const state = {
   deleteVideoHistoryOnExit: false,
   privacyAgreement: false,
+  primaryLanguage: '',
+  secondaryLanguage: '',
 };
 const getters = {
   preferenceData: state => state,
   deleteVideoHistoryOnExit: state => state.deleteVideoHistoryOnExit,
   privacyAgreement: state => state.privacyAgreement,
+  primaryLanguage: state => state.primaryLanguage,
+  secondaryLanguage: state => state.secondaryLanguage,
 };
 
 const mutations = {
@@ -16,6 +20,12 @@ const mutations = {
   },
   privacyAgreement(state, payload) {
     state.privacyAgreement = payload;
+  },
+  primaryLanguage(state, payload) {
+    state.primaryLanguage = payload;
+  },
+  secondaryLanguage(state, payload) {
+    state.secondaryLanguage = payload;
   },
   setPreference(state, payload) {
     Object.assign(state, payload);
@@ -36,6 +46,14 @@ const actions = {
   },
   notDeleteVideoHistoryOnExit({ commit, state }) {
     commit('deleteVideoHistoryOnExit', false);
+    asyncStorage.set('preferences', state);
+  },
+  primaryLanguage({ commit }, payload) {
+    commit('primaryLanguage', payload);
+    asyncStorage.set('preferences', state);
+  },
+  secondaryLanguage({ commit }, payload) {
+    commit('secondaryLanguage', payload);
     asyncStorage.set('preferences', state);
   },
   getLocalPreference({ commit }) {
