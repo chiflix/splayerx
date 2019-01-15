@@ -216,7 +216,9 @@ export default {
       if (this.mousedownCurrentTarget !== 'notification-bubble') {
         if (this.lastDragging) {
           this.clearMousedown({ target: '' });
-          this.$emit('update:lastDragging', false);
+          if (this.displayState) {
+            this.$emit('update:lastDragging', false);
+          }
         } else if (val !== this.$options.name && this.backgroundDisplayState) {
           this.$emit('update:playlistcontrol-showattached', false);
         }
