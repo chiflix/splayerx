@@ -42,7 +42,7 @@
                           height: `${itemHeight}px`,
                           cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
                         }">
-                        <div class="text">{{ this.$t('msg.subtitle.noSubtitle') }}</div>
+                        <div class="text">{{ noSubtitle }}</div>
                       </div>
                     </div>
 
@@ -161,6 +161,9 @@ export default {
         return result;
       },
     }),
+    noSubtitle() {
+      return this.subtitleList.length ? this.$t('msg.subtitle.notToShowSubtitle') : this.$t('msg.subtitle.noSubtitle');
+    },
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.75;
     },
