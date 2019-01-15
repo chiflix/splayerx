@@ -104,7 +104,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -175,16 +175,6 @@ new Vue({
     chosenSize(val) {
       if (this.menu) {
         this.menu.getMenuItemById(`size${val}`).checked = true;
-      }
-    },
-    deleteVideoHistoryOnExit(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById('deleteHistory').checked = val;
-      }
-    },
-    privacyAgreement(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById('privacy').checked = val;
       }
     },
     volume(val) {

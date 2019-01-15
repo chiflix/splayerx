@@ -48,11 +48,11 @@ const actions = {
     commit('deleteVideoHistoryOnExit', false);
     asyncStorage.set('preferences', state);
   },
-  primaryLanguage({ commit }, payload) {
+  primaryLanguage({ commit, state }, payload) {
     commit('primaryLanguage', payload);
     asyncStorage.set('preferences', state);
   },
-  secondaryLanguage({ commit }, payload) {
+  secondaryLanguage({ commit, state }, payload) {
     commit('secondaryLanguage', payload);
     asyncStorage.set('preferences', state);
   },
@@ -60,6 +60,10 @@ const actions = {
     asyncStorage.get('preferences').then((data) => {
       commit('setPreference', data);
     });
+  },
+  setPreference({ commit, state }, payload) {
+    commit('setPreference', payload);
+    asyncStorage.set('preferences', state);
   },
 };
 export default {

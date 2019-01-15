@@ -299,6 +299,9 @@ function registerMainWindowEvent() {
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
     });
+    ipcMain.on('preference-to-main', (e, args) => {
+      mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
+    });
   });
 }
 

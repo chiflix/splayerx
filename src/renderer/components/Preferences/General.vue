@@ -65,6 +65,7 @@
 </template>
 
 <script>
+import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 import BaseCheckBox from './BaseCheckBox.vue';
 
@@ -133,12 +134,17 @@ export default {
     secondaryLanguages() {
       return this.languages.filter(language => language !== this.secondaryLanguage);
     },
+    preferenceData() {
+      return this.$store.getters.preferenceData;
+    },
     primaryLanguage: {
       get() {
         return this.$store.getters.primaryLanguage;
       },
       set(val) {
-        this.$store.dispatch('primaryLanguage', val);
+        this.$store.dispatch('primaryLanguage', val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
       },
     },
     secondaryLanguage: {
@@ -146,7 +152,9 @@ export default {
         return this.$store.getters.secondaryLanguage;
       },
       set(val) {
-        this.$store.dispatch('secondaryLanguage', val);
+        this.$store.dispatch('secondaryLanguage', val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
       },
     },
     privacyAgreement: {
@@ -155,9 +163,14 @@ export default {
       },
       set(val) {
         if (val) {
-          this.$store.dispatch('agreeOnPrivacyPolicy');
+          this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
+            console.log('ddd');
+            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+          });
         } else {
-          this.$store.dispatch('disagreeOnPrivacyPolicy');
+          this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+          });
         }
       },
     },
@@ -167,9 +180,13 @@ export default {
       },
       set(val) {
         if (val) {
-          this.$store.dispatch('deleteVideoHistoryOnExit');
+          this.$store.dispatch('deleteVideoHistoryOnExit').then(() => {
+            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+          });
         } else {
-          this.$store.dispatch('notDeleteVideoHistoryOnExit');
+          this.$store.dispatch('notDeleteVideoHistoryOnExit').then(() => {
+            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+          });
         }
       },
     },

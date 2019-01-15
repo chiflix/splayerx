@@ -36,6 +36,7 @@
         this.$store.commit(commitType, commitPayload);
       },
       mainDispatchProxy(actionType, actionPayload) {
+        console.log('asd');
         this.$store.dispatch(actionType, actionPayload);
       },
       handleWindowSizeChange(windowSize) {
