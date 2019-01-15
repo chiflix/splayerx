@@ -318,7 +318,7 @@ export default {
           top: 0;
           left: 60px;
           width: 228px;
-          height: 160px;
+          height: 164px;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
           border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
           border-width: 1px 1px 1px 1px;
@@ -329,7 +329,7 @@ export default {
             top: 30px;
             left: 8px;
             right: 4px;
-            bottom: 0px;
+            bottom: 3px;
             overflow-y: scroll;
             .selection {
               padding-top: 5px;
@@ -372,7 +372,7 @@ export default {
           top: 0;
           left: 60px;
           width: 228px;
-          height: 160px;
+          height: 164px;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
           border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
           border-width: 1px 1px 1px 1px;
@@ -383,7 +383,7 @@ export default {
             top: 30px;
             left: 8px;
             right: 4px;
-            bottom: 0px;
+            bottom: 3px;
             overflow-y: scroll;
             .selection {
               padding-top: 5px;
