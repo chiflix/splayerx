@@ -56,6 +56,9 @@ export default {
     },
   },
   computed: {
+    preferenceData() {
+      return this.$store.getters.preferenceData;
+    },
     infoCSS() {
       if (this.$i18n.locale === 'en') {
         return 'info-en-state-1';
