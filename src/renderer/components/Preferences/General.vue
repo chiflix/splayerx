@@ -95,28 +95,6 @@ export default {
       ],
     };
   },
-  created() {
-    asyncStorage.get('preferences').then((data) => {
-      if (data.primaryLanguage === undefined) {
-        switch (this.$i18n.locale) {
-          case 'zhCN':
-            this.primaryLanguage = '简体中文';
-            break;
-          case 'zhTW':
-            this.primaryLanguage = '繁體中文';
-            break;
-          case 'en':
-            this.primaryLanguage = 'English';
-            break;
-          default:
-            break;
-        }
-      }
-      if (data.secondaryLanguage === undefined) {
-        this.secondaryLanguage = this.$t('preferences.none');
-      }
-    });
-  },
   watch: {
     privacyAgreement(val) {
       if (!val) {
