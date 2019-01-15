@@ -1,6 +1,5 @@
 <template>
-<div class="general-setting"
-  @click="showFirstSelection = showSecondSelection = false">
+<div class="general-setting">
   <BaseCheckBox
     :checkboxValue="privacyAgreement"
     @update:checkbox-value="privacyAgreement = $event">
@@ -23,7 +22,7 @@
           <div class="content">
             <div class="selection"
               v-for="(language, index) in primaryLanguages"
-              @click="handleFirstSelection(language)">
+              @click.stop="handleFirstSelection(language)">
               {{ language }}
             </div>
           </div>
@@ -44,7 +43,7 @@
               v-for="(language, index) in secondaryLanguages"
               @mouseover="mouseover(index)"
               @mouseout="mouseout(index)"
-              @click="handleSecondSelection(language)">
+              @click.stop="handleSecondSelection(language)">
               {{ language }}
               <span v-if="language === primaryLanguage && language !== '无'"
                 style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.primaryLanguage') }}</span>
@@ -93,7 +92,31 @@ export default {
         'हिन्दी',
         'Italiano',
       ],
+      mouseDown: false,
+      isMoved: false,
     };
+  },
+  created() {
+    window.onmousedown = () => {
+      this.mouseDown = true;
+      this.isMoved = false;
+      
+    }
+    window.onmousemove = () => {
+      if (this.mouseDown) this.isMoved = true;
+    }
+    window.onmouseup = () => {
+      if (!this.isMoved) {
+        this.showFirstSelection = this.showSecondSelection = false;
+      }
+      this.mouseDown = false;
+      this.isMoved = false;
+    }
+  },
+  beforeDestroy() {
+    window.onmousedown = null;
+    window.onmousemove = null;
+    window.onmouseup = null;
   },
   watch: {
     privacyAgreement(val) {
@@ -162,14 +185,14 @@ export default {
       }
     },
     handleFirstSelection(selection) {
-      if (selection === this.secondaryLanguage) this.secondaryLanguage = '无';
+      if (selection === this.secondaryLanguage) this.secondaryLanguage = this.$t('preferences.none');
       this.primaryLanguage = selection;
-      // this.$store.dispatch('primaryLanguage', selection);
+      this.showFirstSelection = false;
     },
     handleSecondSelection(selection) {
       if (selection !== this.primaryLanguage) {
         this.secondaryLanguage = selection;
-        // this.$store.dispatch('secondaryLanguage', selection);
+        this.showSecondSelection = false
       }
     },
     openFirstDropdown() {
@@ -200,13 +223,15 @@ export default {
 .general-setting {
   padding-top: 37px;
   padding-left: 26px;
+  width: 100%;
+  height: 100%;
   .languages-select {
     background-color: rgba(0,0,0,0.05);
     width: 348px;
     height: 170px;
     margin-bottom: 24px;
     .select-content {
-      padding-top: 26px;
+      padding-top: 20px;
       padding-left: 28px;
       .title {
         font-family: PingFangSC-Medium;
@@ -274,7 +299,7 @@ export default {
           top: 0;
           left: 60px;
           width: 228px;
-          height: 156px;
+          height: 160px;
           opacity: 0.95;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
           border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
@@ -283,10 +308,10 @@ export default {
           border-radius: 2px;
           .content {
             position: absolute;
+            top: 30px;
             left: 8px;
             right: 4px;
-            bottom: 2px;
-            height: 124px;
+            bottom: 0px;
             overflow-y: scroll;
             .selection {
               padding-top: 5px;
@@ -329,7 +354,7 @@ export default {
           top: 0;
           left: 60px;
           width: 228px;
-          height: 156px;
+          height: 160px;
           opacity: 0.95;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
           border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
@@ -338,10 +363,10 @@ export default {
           border-radius: 2px;
           .content {
             position: absolute;
+            top: 30px;
             left: 8px;
             right: 4px;
-            bottom: 2px;
-            height: 124px;
+            bottom: 0px;
             overflow-y: scroll;
             .selection {
               padding-top: 5px;
