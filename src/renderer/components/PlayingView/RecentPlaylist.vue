@@ -201,7 +201,7 @@ export default {
       }
     },
     mousedownCurrentTarget(val) {
-      if (val !== 'notification-bubble') {
+      if (val !== 'notification-bubble' && val !== 'titlebar') {
         if (val !== this.$options.name && this.backgroundDisplayState) {
           if (this.lastDragging) {
             this.clearMouseup({ target: '' });
@@ -212,7 +212,7 @@ export default {
       }
     },
     mouseupCurrentTarget(val) {
-      if (this.mousedownCurrentTarget !== 'notification-bubble') {
+      if (this.mousedownCurrentTarget !== 'notification-bubble' && this.mousedownCurrentTarget !== 'titlebar') {
         if (this.lastDragging) {
           this.clearMousedown({ target: '' });
           this.$emit('update:lastDragging', false);

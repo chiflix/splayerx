@@ -80,7 +80,7 @@ export default {
   .left {
     flex-basis: 110px;
     height: 100%;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.75) 0%, rgba(84,84,84,0.75) 47%, rgba(123,123,123,0.75) 100%);
+    background-image: linear-gradient(-28deg, rgba(65,65,65,0.85) 0%, rgba(84,84,84,0.85) 47%, rgba(123,123,123,0.85) 100%);
     .general {
       border-left: 1px solid white;
       margin-top: 18px;
@@ -99,7 +99,7 @@ export default {
   }
   .right {
     flex-basis: 400px;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.95) 0%, rgba(84,84,84,0.95) 47%, rgba(123,123,123,0.95) 100%);
+    background-image: linear-gradient(-28deg, rgba(65,65,65,0.97) 0%, rgba(84,84,84,0.97) 47%, rgba(123,123,123,0.97) 100%);
   }
 }
 </style>

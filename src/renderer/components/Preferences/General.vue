@@ -41,9 +41,12 @@
           <div class="content">
             <div class="selection" ref="secondarySelection"
               v-for="(language, index) in secondaryLanguages"
+              :style="{
+                color: (language === primaryLanguage && language !== '无') ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
+              }"
               @mouseover="mouseover(index)"
               @mouseout="mouseout(index)"
-              @mouseup.stop="handleSecondSelection(language)">
+              @mouseup.stop="handleSecondSelection(language, index)">
               {{ language }}
               <span v-if="language === primaryLanguage && language !== '无'"
                 style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.primaryLanguage') }}</span>
@@ -187,10 +190,11 @@ export default {
       this.primaryLanguage = selection;
       this.showFirstSelection = false;
     },
-    handleSecondSelection(selection) {
+    handleSecondSelection(selection, index) {
       if (selection !== this.primaryLanguage) {
         this.secondaryLanguage = selection;
         this.showSecondSelection = false;
+        this.$refs.secondarySelection[index].classList.remove('selection-hover');
       }
     },
     openFirstDropdown() {
@@ -298,7 +302,6 @@ export default {
           left: 60px;
           width: 228px;
           height: 160px;
-          opacity: 0.95;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
           border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
           border-width: 1px 1px 1px 1px;
@@ -353,7 +356,6 @@ export default {
           left: 60px;
           width: 228px;
           height: 160px;
-          opacity: 0.95;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
           border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
           border-width: 1px 1px 1px 1px;
@@ -371,7 +373,6 @@ export default {
               height: 21px;
               font-family: PingFangSC-Semibold;
               font-size: 12px;
-              color: #FFFFFF;
               letter-spacing: 0;
               text-align: center;
             }
