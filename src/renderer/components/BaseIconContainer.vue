@@ -363,6 +363,7 @@ export default {
   display: block;
   width: 12px;
   height: 12px;
+  opacity: 0.5;
 }
 .nike {
   display: block;
