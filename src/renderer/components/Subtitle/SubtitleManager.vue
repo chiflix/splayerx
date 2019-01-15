@@ -245,6 +245,11 @@ export default {
         processedSubtitleList,
         this.systemLanguageCode,
       );
+      if (processedSubtitleList.length) {
+        this.$store.dispatch('ifNoSubtitle', false);
+      } else {
+        this.$store.dispatch('ifNoSubtitle', true);
+      }
       processedSubtitleList.forEach(({ src, type, options }, index) => this.addSubtitle(
         src, type, options,
         index === subtitleIndexToChoose,
