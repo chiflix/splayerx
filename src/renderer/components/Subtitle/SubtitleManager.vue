@@ -110,8 +110,7 @@ export default {
     async addInitialSubtitles(videoSrc) {
       const {
         addSubtitles,
-        getLocalSubtitlesList, getOnlineSubtitlesList, getEmbeddedSubtitlesList,
-        privacyAgreement,
+        getLocalSubtitlesList, getEmbeddedSubtitlesList,
       } = this;
       const localEmbeddedSubtitles = (await Promise.all([
         promisify(getLocalSubtitlesList.bind(null, videoSrc, SubtitleLoader.supportedFormats)),
@@ -119,26 +118,8 @@ export default {
       ]))
         .reduce((prev, curr) => prev.concat(curr));
       if (localEmbeddedSubtitles.length) addSubtitles(localEmbeddedSubtitles);
-      else if (navigator.onLine) {
-        if (privacyAgreement) {
-          this.addLog('info', {
-            message: 'Online subtitles loading .',
-            code: ONLINE_LOADING,
-          });
-          const onlineSubtitles = await getOnlineSubtitlesList(videoSrc);
-          setTimeout(() => {
-            this.$store.dispatch('removeMessagesByType');
-            if (!onlineSubtitles.length) {
-              this.$bus.$emit('no-translation-result');
-            }
-          }, 2000);
-          addSubtitles(onlineSubtitles);
-        }
-      } else {
-        this.addLog('error', {
-          message: 'No Translation Result .',
-          errcode: NO_TRANSLATION_RESULT,
-        });
+      else {
+        this.$bus.$emit('menu-subtitle-refresh', true);
       }
     },
     // different subtitle getters

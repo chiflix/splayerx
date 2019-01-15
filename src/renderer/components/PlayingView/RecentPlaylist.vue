@@ -187,6 +187,7 @@ export default {
   },
   watch: {
     originSrc() {
+      this.displayState = false;
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },

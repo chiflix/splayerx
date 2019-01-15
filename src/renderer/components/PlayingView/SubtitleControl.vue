@@ -91,7 +91,11 @@
       </transition>
     </div>
     <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
-      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
+      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"
+        :style="{
+          opacity: iconOpacity,
+          transition: 'opacity 150ms',
+        }"></lottie>
     </div>
   </div>
 </template>
@@ -127,10 +131,7 @@ export default {
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
-      animFlag: true,
-      mouseDown: false,
       validEnter: false,
-      showFlag: false,
       hoverIndex: -5,
       hiddenText: false,
       hoverHeight: 0,
@@ -142,6 +143,9 @@ export default {
       breakTimer: null,
       computedAvaliableItems: [],
       continueRefresh: false,
+      isShowingHovered: false,
+      isInitail: false,
+      onAnimation: false,
     };
   },
   computed: {
@@ -157,6 +161,9 @@ export default {
         return result;
       },
     }),
+    iconOpacity() {
+      return this.isShowingHovered ? 0.9 : 0.75;
+    },
     mousedownCurrentTarget() {
       return this.$store.state.Input.mousedownTarget;
     },
@@ -245,6 +252,7 @@ export default {
   },
   watch: {
     originSrc() {
+      this.showAttached = false;
       this.computedAvaliableItems = [];
     },
     currentSubtitleIndex(val) {
@@ -255,13 +263,9 @@ export default {
     },
     showAttached(val) {
       if (!val) {
-        this.animFlag = true;
+        this.anim.playSegments([79, 92], false);
         if (!this.validEnter) {
-          this.anim.playSegments([79, 98], false);
-        } else {
-          this.showFlag = true;
-          this.anim.playSegments([79, 92], false);
-          setTimeout(() => { this.showFlag = false; }, 250);
+          this.isShowingHovered = false;
         }
       }
     },
@@ -332,10 +336,17 @@ export default {
           }, 10);
           document.querySelector('.scrollScope').scrollTop = 0;
           this.$bus.$emit('refresh-subtitles');
-          this.addLog('info', {
-            message: 'Online subtitles loading .',
-            code: ONLINE_LOADING,
-          });
+          if (!this.isInitail) {
+            this.addLog('info', {
+              message: 'Online subtitles loading .',
+              code: ONLINE_LOADING,
+            });
+          } else {
+            this.onAnimation = true;
+            this.anim.loop = true;
+            this.anim.setSpeed(0.6);
+            this.anim.playSegments([115, 146], false);
+          }
           clearTimeout(this.breakTimer);
           this.breakTimer = setTimeout(() => {
             if (this.timer) {
@@ -360,7 +371,6 @@ export default {
       this.anim = anim;
     },
     handleDown() {
-      this.mouseDown = true;
       if (!this.showAttached) {
         this.anim.playSegments([28, 32], false);
       } else {
@@ -368,31 +378,26 @@ export default {
       }
     },
     handleEnter() {
-      if (this.animFlag && !this.showAttached) {
-        if (!this.mouseDown) {
-          this.anim.playSegments([4, 8], false);
-        } else {
-          this.anim.playSegments([102, 105], false);
-        }
+      if (this.onAnimation) {
+        this.anim.addEventListener('complete', () => {
+          this.anim.setSpeed(1.5);
+        });
+        this.anim.loop = false;
+        this.isInitail = false;
       }
-      this.showFlag = false;
+      if (!this.showAttached) {
+        this.isShowingHovered = true;
+      }
       this.validEnter = true;
-      this.animFlag = false;
     },
     handleLeave() {
+      if (this.onAnimation) {
+        this.anim.loop = true;
+        this.anim.setSpeed(0.6);
+        this.anim.playSegments([115, 146], false);
+      }
       if (!this.showAttached) {
-        if (this.mouseDown) {
-          this.anim.playSegments([35, 38], false);
-        } else if (this.showFlag) {
-          this.anim.addEventListener('complete', () => {
-            this.anim.playSegments([95, 98], false);
-            this.showFlag = false;
-            this.anim.removeEventListener('complete');
-          });
-        } else {
-          this.anim.playSegments([95, 98], false);
-        }
-        this.animFlag = true;
+        this.isShowingHovered = false;
       }
       this.validEnter = false;
     },
@@ -444,14 +449,26 @@ export default {
       this.count = this.rotateTime * 100;
       setTimeout(() => {
         this.$bus.$emit('finished-add-subtitles');
-        this.$store.dispatch('removeMessagesByType');
+        if (this.onAnimation) {
+          this.anim.addEventListener('complete', () => {
+            this.anim.setSpeed(1.5);
+          });
+          this.onAnimation = false;
+          this.anim.loop = false;
+          this.isInitail = false;
+        } else {
+          this.$store.dispatch('removeMessagesByType');
+        }
         this.$bus.$emit('no-translation-result');
         this.timer = null;
       }, 1000);
     });
   },
   mounted() {
-    this.$bus.$on('menu-subtitle-refresh', this.handleRefresh);
+    this.$bus.$on('menu-subtitle-refresh', (initial) => {
+      this.isInitail = !!initial;
+      this.handleRefresh();
+    });
     this.$bus.$on('subtitle-refresh-continue', () => {
       if (this.continueRefresh) {
         this.continueRefresh = false;
@@ -467,7 +484,6 @@ export default {
             this.anim.playSegments([40, 44], false);
           }
         }
-        this.mouseDown = false;
       }
     });
   },

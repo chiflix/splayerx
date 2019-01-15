@@ -135,6 +135,9 @@ export default {
   },
   watch: {
     originSrc() {
+      Object.keys(this.widgetsStatus).forEach((item) => {
+        this.widgetsStatus[item].showAttached = false;
+      });
       this.isMousedown = false;
     },
     isDragging(val, oldval) {
