@@ -141,6 +141,13 @@ export default {
         }
       });
       this.isMousedown = false;
+      this.mouseStopped = false;
+      if (this.mouseStoppedId) {
+        this.clock.clearTimeout(this.mouseStoppedId);
+      }
+      this.mouseStoppedId = this.clock.setTimeout(() => {
+        this.mouseStopped = true;
+      }, this.mousestopDelay);
     },
     isDragging(val, oldval) {
       if (!val && oldval) {
