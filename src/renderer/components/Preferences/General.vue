@@ -10,14 +10,16 @@
       <div class="title">{{ $t('preferences.languagePriority')}}</div>
       <div class="description">{{ $t('preferences.languageDescription')}}</div>
       <div class="first-selection">
-        <div class="selection-title">{{ $t('preferences.primaryLanguage')}}</div>
+        <div class="selection-title">{{ $t('preferences.primary')}}</div>
         <div class="drop-down"
+          :class="{ 'drop-down-en': $i18n.locale === 'en' }"
           :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
           @mouseup.stop="openFirstDropdown">
           {{ primaryLanguage }}
           <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
         </div>
         <div class="drop-down-content no-drag"
+          :class="{ 'drop-down-content-en': $i18n.locale === 'en' }"
           v-if="showFirstSelection">
           <div class="content">
             <div class="selection"
@@ -29,27 +31,29 @@
         </div>
       </div>
       <div class="second-selection">
-        <div class="selection-title">{{ $t('preferences.secondaryLanguage')}}</div>
+        <div class="selection-title">{{ $t('preferences.secondary')}}</div>
         <div class="drop-down"
+          :class="{ 'drop-down-en': $i18n.locale === 'en' }"
           :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
           @mouseup.stop="openSecondDropdown">
           {{ secondaryLanguage }}
           <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>                
         </div>
         <div class="drop-down-content no-drag"
+          :class="{ 'drop-down-content-en': $i18n.locale === 'en' }"
           v-if="showSecondSelection">
           <div class="content">
             <div class="selection" ref="secondarySelection"
               v-for="(language, index) in secondaryLanguages"
               :style="{
-                color: (language === primaryLanguage && language !== '无') ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
+                color: (language === primaryLanguage && language !== $t('preferences.none')) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
               }"
               @mouseover="mouseover(index)"
               @mouseout="mouseout(index)"
               @mouseup.stop="handleSecondSelection(language, index)">
               {{ language }}
-              <span v-if="language === primaryLanguage && language !== '无'"
-                style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.primaryLanguage') }}</span>
+              <span v-if="language === primaryLanguage && language !== $t('preferences.none')"
+                style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.primary') }}</span>
             </div>
           </div>
         </div>
@@ -149,9 +153,11 @@ export default {
     },
     secondaryLanguage: {
       get() {
+        if (this.$store.getters.secondaryLanguage === '') return this.$t('preferences.none');
         return this.$store.getters.secondaryLanguage;
       },
       set(val) {
+        if (val === this.$t('preferences.none')) val = '';
         this.$store.dispatch('secondaryLanguage', val).then(() => {
           electron.ipcRenderer.send('preference-to-main', this.preferenceData);
         });
@@ -247,15 +253,16 @@ export default {
   .languages-select {
     background-color: rgba(0,0,0,0.05);
     width: 348px;
-    height: 170px;
     margin-bottom: 24px;
     .select-content {
       padding-top: 20px;
       padding-left: 28px;
+      padding-right: 22px;
+      padding-bottom: 24px;
       .title {
         font-family: $font-medium;
         font-size: 13px;
-        margin-bottom: 7px;
+        margin-bottom: 5px;
         color: rgba(255,255,255,0.9);
         letter-spacing: 0;
       }
@@ -264,17 +271,17 @@ export default {
         font-size: 11px;
         color: rgba(255,255,255,0.5);
         letter-spacing: 0;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
       }
       .selection-title {
-        position: relative;
-        top: 6px;
+        text-overflow:ellipsis;
+        white-space:nowrap;
         margin-right: 12px;
         font-family: $font-medium;
         font-size: 12px;
         color: rgba(255,255,255,0.7);
         letter-spacing: 0;
-        line-height: 13px;
+        line-height: 28px;
       }
       .down-arrow {
         position: absolute;
@@ -298,7 +305,8 @@ export default {
         .drop-down {
           -webkit-app-region: no-drag;
           cursor: pointer;
-          position: relative;
+          position: absolute;
+          right: 10px;
           z-index: 100;
           width: 228px;
           height: 22px;
@@ -312,12 +320,15 @@ export default {
           letter-spacing: 0;
           text-align: center;
         }
+        .drop-down-en {
+          width: 210px;
+        }
         .drop-down-content {
           cursor: pointer;
           position: absolute;
           z-index: 50;
           top: 0;
-          left: 60px;
+          left: 58px;
           width: 228px;
           height: 164px;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
@@ -346,6 +357,11 @@ export default {
             }
           }
         }
+        .drop-down-content-en {
+          left: 76px;
+          width: 210px;
+          height: 138px;
+        }
       }
       .second-selection {
         display: flex;
@@ -354,7 +370,8 @@ export default {
         .drop-down {
           -webkit-app-region: no-drag;
           cursor: pointer;
-          position: relative;
+          position: absolute;
+          right: 10px;
           z-index: 40;
           width: 228px;
           height: 22px;
@@ -368,11 +385,14 @@ export default {
           letter-spacing: 0;
           text-align: center;
         }
+        .drop-down-en {
+          width: 210px;
+        }
         .drop-down-content {
           position: absolute;
           z-index: 10;
           top: 0;
-          left: 60px;
+          left: 58px;
           width: 228px;
           height: 164px;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
@@ -400,6 +420,11 @@ export default {
               background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
             }
           }
+        }
+        .drop-down-content-en {
+          left: 76px;
+          width: 210px;
+          height: 138px;
         }
       }
     }

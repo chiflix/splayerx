@@ -97,7 +97,7 @@ export default {
         }
       }
       if (!data.secondaryLanguage) {
-        this.$store.dispatch('secondaryLanguage', this.$t('preferences.none'));
+        this.$store.dispatch('secondaryLanguage', '');
       }
     });
     this.$bus.$on('privacy-confirm', () => {

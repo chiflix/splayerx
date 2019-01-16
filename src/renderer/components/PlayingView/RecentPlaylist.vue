@@ -314,11 +314,11 @@ export default {
     // if you wanna know the meanings of wABC, please look up the product doc:
     // https://www.notion.so/splayer/Playlist-685b398ac7ce45508a4283af00f76534
     thumbnailNumber() {
-      let number = 0;
+      let number = 3;
       const w = 112; // default width of playlist item
       const B = 15; // space between each playlist item
       if (this.winWidth >= 512 && this.winWidth < 720) {
-        number = Math.floor(3 + ((this.winWidth - 512) / (w + B)));
+        number = Math.ceil(3 + ((this.winWidth - 512) / (w + B)));
       } else if (this.winWidth >= 720 && this.winWidth <= 1355) {
         number = Math.floor(((this.winWidth - 720) / (w + B)) + 5);
       } else if (this.winWidth > 1355) {
@@ -331,7 +331,7 @@ export default {
       const A = 40; // playlist left margin
       const B = 15; // space between each playlist item
       const C = 60; // the space between last playlist item and right edge of the screen
-      if (this.winWidth >= 512 && this.winWidth <= 1355) {
+      if (this.winWidth <= 1355) {
         width = ((((this.winWidth - A) - C) + B) / this.thumbnailNumber) - B;
       } else if (this.winWidth > 1355) {
         width = this.winWidth * (112 / 1355);
@@ -347,10 +347,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  @media screen and (max-width: 510px) {
-    display: none;
-  }
-  @media screen and (min-width: 512px) and (max-width: 1355px) {
+  @media screen and (max-width: 1355px) {
     height: 282px;
   }
   @media screen and (min-width: 1356px) {

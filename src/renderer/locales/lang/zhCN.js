@@ -102,6 +102,8 @@ export default {
     languageDescription: '在您观赏影片时，射手影音会为您推送以下语言的翻译结果。',
     primaryLanguage: '首要语言',
     secondaryLanguage: '次要语言',
+    primary: '首要语言',
+    secondary: '次要语言',
   },
   advance: {
     rateTitle: '播放速度',

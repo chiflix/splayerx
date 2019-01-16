@@ -103,6 +103,8 @@ export default {
     languageDescription: 'SPlayer will push translation results in the following language for you when the video is being played.',
     primaryLanguage: 'Primary Language',
     secondaryLanguage: 'Secondary Language',
+    primary: 'Primary',
+    secondary: 'Secondary',
   },
   advance: {
     rateTitle: 'Play Speed',
