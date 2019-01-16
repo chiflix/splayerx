@@ -43,12 +43,12 @@
     "directories": {
       "output": "build"
     },
-    "electronVersion": "4.0.0",
+    "electronVersion": "4.0.1",
     "electronDist": "node_modules/@chiflix/electron/dist",
     "electronDownload": {
       "mirror": "https://github.com/chiflix/electron/releases/download/v",
       "isVerifyChecksum": false,
-      "version": "4.0.0"
+      "version": "4.0.1"
     },
     "files": [
       "dist/electron/**/*"
