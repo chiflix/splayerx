@@ -1,10 +1,9 @@
 <template>
   <div
-    v-fade-in="showAllWidgets"
     :data-component-name="$options.name"
-    :class="{ 'darwin-titlebar': isDarwin, titlebar: !isDarwin }"
+    :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
     @dblclick.stop="handleDbClick">
-    <div class="win-icons" v-if="!isDarwin">
+    <div class="win-icons" v-if="!isDarwin" v-fade-in="showTitleBar">
       <Icon class="title-button no-drag"
         @click.native="handleMinimize"
         type="titleBarWinExitFull">
@@ -29,9 +28,11 @@
         type="titleBarWinClose">
       </Icon>
     </div>
-    <div class="mac-icons" v-if="isDarwin"
-         @mouseover="handleMouseOver"
-         @mouseout="handleMouseOut">
+    <div class="mac-icons" 
+      v-if="isDarwin"
+      v-fade-in="showTitleBar"
+      @mouseover="handleMouseOver"
+      @mouseout="handleMouseOut">
       <Icon id="close" class="title-button no-drag"
             type="titleBarClose"
             :state="state"
@@ -69,7 +70,6 @@ export default {
   name: 'titlebar',
   data() {
     return {
-      isDarwin: process.platform === 'darwin',
       state: 'default',
       itemTypeEnum: {
         FULLSCREEN: 'titleBarFull',
@@ -78,6 +78,7 @@ export default {
       itemType: 'titleBarFull',
       keyAlt: false,
       keyOver: false,
+      showTitleBar: true,
     };
   },
   props: {
@@ -86,6 +87,7 @@ export default {
       type: Boolean,
       default: true,
     },
+    recentPlaylist: Boolean,
   },
   components: {
     Icon,
@@ -103,6 +105,12 @@ export default {
     });
   },
   watch: {
+    recentPlaylist(val) {
+      if (!val) this.showTitleBar = this.showAllWidgets;
+    },
+    showAllWidgets(val) {
+      this.showTitleBar = this.recentPlaylist || val;
+    },
     keyAlt(val) {
       if (!val || !this.keyOver) {
         this.itemType = this.itemTypeEnum.FULLSCREEN;
@@ -166,6 +174,9 @@ export default {
       'isMaximized',
       'isFullScreen',
     ]),
+    isDarwin() {
+      return process.platform === 'darwin';
+    },
     middleButtonStatus() {
       return this.isFullScreen ? 'exit-fullscreen' : this.isMaximized ? 'restore' : 'maximize'; // eslint-disable-line no-nested-ternary
     },

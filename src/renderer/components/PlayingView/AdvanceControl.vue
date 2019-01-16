@@ -21,7 +21,7 @@
 <script>
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
 
@@ -52,6 +52,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['originSrc']),
     mousedownCurrentTarget() {
       return this.$store.state.Input.mousedownTarget;
     },
@@ -60,6 +61,9 @@ export default {
     },
   },
   watch: {
+    originSrc() {
+      this.showAttached = false;
+    },
     showAttached(val) {
       if (!val) {
         this.animFlag = true;
@@ -89,6 +93,7 @@ export default {
         if (this.lastDragging) {
           if (this.showAttached) {
             this.anim.playSegments([68, 73]);
+            this.$emit('update:lastDragging', false);
           }
           this.clearMousedown({ target: '' });
         } else if (val !== this.$options.name && this.showAttached) {

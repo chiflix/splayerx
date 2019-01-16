@@ -40,6 +40,7 @@ let rendererConfig = {
   mode: 'development',
   devtool: '#cheap-module-eval-source-map',
   entry: {
+    preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
     index: path.join(__dirname, '../src/renderer/main.js')
   },
@@ -100,11 +101,27 @@ let rendererConfig = {
       },
       {
         test: /\.sass$/,
-        use: ['vue-style-loader', 'css-loader', { loader: 'sass-loader', options: { indentedSyntax: 1 }}]
+        use: [
+          'vue-style-loader',
+          'css-loader',
+          { loader: 'sass-loader', options: { indentedSyntax: 1 }},
+          {
+            loader: 'sass-resources-loader',
+            options: { resources: path.join(__dirname, '../src/renderer/css/global.scss') },
+          },
+        ]
       },
       {
         test: /\.scss$/,
-        use: ['vue-style-loader', 'css-loader', 'sass-loader']
+        use: [
+          'vue-style-loader',
+          'css-loader',
+          'sass-loader',
+          {
+            loader: 'sass-resources-loader',
+            options: { resources: path.join(__dirname, '../src/renderer/css/global.scss') },
+          },
+        ]
       },
       {
         test: /\.svg$/,
@@ -158,6 +175,7 @@ let rendererConfig = {
     new ExtractTextPlugin('styles.css'),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
     new webpack.HotModuleReplacementPlugin()
   ],
   output: {

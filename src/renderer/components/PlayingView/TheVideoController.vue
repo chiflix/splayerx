@@ -11,13 +11,13 @@
     @mousedown.left="handleMousedownLeft"
     @mouseup.left="handleMouseupLeft"
     @dblclick="handleDblclick">
-    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets"></titlebar>
+    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
     :mousemovePosition="mousemovePosition"
     :isDragging="isDragging"
-    :lastDragging="lastDragging"
+    :lastDragging.sync="lastDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
@@ -27,10 +27,10 @@
     <div class="control-buttons" v-fade-in="showAllWidgets">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
-      v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging="lastDragging"
+      v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging.sync="lastDragging"
       @conflict-resolve="conflictResolve"/>
       <advance-control class="button advance" v-fade-in="displayState['advance-control']"
-      v-bind.sync="widgetsStatus['advance-control']" :lastDragging="lastDragging"
+      v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
     <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" />
@@ -135,6 +135,11 @@ export default {
   },
   watch: {
     originSrc() {
+      Object.keys(this.widgetsStatus).forEach((item) => {
+        if (item !== 'playlist-control') {
+          this.widgetsStatus[item].showAttached = false;
+        }
+      });
       this.isMousedown = false;
     },
     isDragging(val, oldval) {

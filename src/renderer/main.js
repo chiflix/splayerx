@@ -104,7 +104,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -175,16 +175,6 @@ new Vue({
     chosenSize(val) {
       if (this.menu) {
         this.menu.getMenuItemById(`size${val}`).checked = true;
-      }
-    },
-    deleteVideoHistoryOnExit(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById('deleteHistory').checked = val;
-      }
-    },
-    privacyAgreement(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById('privacy').checked = val;
       }
     },
     volume(val) {
@@ -563,40 +553,18 @@ new Vue({
             submenu: [
               {
                 label: this.$t('msg.splayerx.about'),
-                role: 'about',
+                click: () => {
+                  this.$electron.ipcRenderer.send('add-windows-about');
+                },
               },
               { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.preferences'),
                 enabled: true,
-                submenu: [
-                  {
-                    label: this.$t('msg.preferences.clearHistory'),
-                    id: 'deleteHistory',
-                    type: 'checkbox',
-                    checked: this.$store.getters.deleteVideoHistoryOnExit,
-                    click: () => {
-                      if (this.$store.getters.deleteVideoHistoryOnExit) {
-                        this.$store.dispatch('notDeleteVideoHistoryOnExit');
-                      } else {
-                        this.$store.dispatch('deleteVideoHistoryOnExit');
-                      }
-                    },
-                  },
-                  {
-                    label: this.$t('msg.preferences.privacyConfirm'),
-                    id: 'privacy',
-                    type: 'checkbox',
-                    checked: this.$store.getters.privacyAgreement,
-                    click: () => {
-                      if (this.$store.getters.privacyAgreement) {
-                        this.$store.dispatch('disagreeOnPrivacyPolicy');
-                      } else {
-                        this.$store.dispatch('agreeOnPrivacyPolicy');
-                      }
-                    },
-                  },
-                ],
+                accelerator: 'Cmd+,',
+                click: () => {
+                  this.$electron.ipcRenderer.send('add-preference');
+                },
               },
               { type: 'separator' },
               {
@@ -624,35 +592,12 @@ new Vue({
             template.unshift(menuItem);
           });
           template.splice(5, 0, {
-            label: this.$t('msg.preferences.settings'),
-            submenu: [
-              {
-                label: this.$t('msg.preferences.clearHistory'),
-                id: 'deleteHistory',
-                type: 'checkbox',
-                checked: this.$store.getters.deleteVideoHistoryOnExit,
-                click: () => {
-                  if (this.$store.getters.deleteVideoHistoryOnExit) {
-                    this.$store.dispatch('notDeleteVideoHistoryOnExit');
-                  } else {
-                    this.$store.dispatch('deleteVideoHistoryOnExit');
-                  }
-                },
-              },
-              {
-                label: this.$t('msg.preferences.privacyConfirm'),
-                id: 'privacy',
-                type: 'checkbox',
-                checked: this.$store.getters.privacyAgreement,
-                click: () => {
-                  if (this.$store.getters.privacyAgreement) {
-                    this.$store.dispatch('disagreeOnPrivacyPolicy');
-                  } else {
-                    this.$store.dispatch('agreeOnPrivacyPolicy');
-                  }
-                },
-              },
-            ],
+            label: this.$t('msg.splayerx.preferences'),
+            enabled: true,
+            accelerator: 'Cmd+,',
+            click: () => {
+              this.$electron.ipcRenderer.send('add-preference');
+            },
           });
           template[10].submenu.unshift(
             {

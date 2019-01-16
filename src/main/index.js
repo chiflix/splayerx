@@ -10,7 +10,7 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, NO_TRANSLATION_RESULT, NOT_SUPPORTED_SUBTITLE  } from '../shared/notificationcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, NO_TRANSLATION_RESULT, NOT_SUPPORTED_SUBTITLE } from '../shared/notificationcodes';
 
 /**
  * Set `__static` path to static files in production
@@ -24,6 +24,7 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 let mainWindow = null;
 let aboutWindow = null;
+let preferenceWindow = null;
 let tray = null;
 let inited = false;
 const filesToOpen = [];
@@ -35,6 +36,9 @@ const mainURL = process.env.NODE_ENV === 'development'
 const aboutURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/about.html'
   : `file://${__dirname}/about.html`;
+const preferenceURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/preference.html'
+  : `file://${__dirname}/preference.html`;
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -236,13 +240,10 @@ function registerMainWindowEvent() {
       useContentSize: true,
       frame: false,
       titleBarStyle: 'none',
-      width: 390,
-      height: 290,
-      minWidth: 390,
-      minHeight: 290,
+      width: 180,
+      height: 270,
       transparent: true,
       resizable: false,
-      parent: mainWindow,
       show: false,
       webPreferences: {
         webSecurity: false,
@@ -263,6 +264,44 @@ function registerMainWindowEvent() {
     aboutWindow.once('ready-to-show', () => {
       aboutWindow.show();
     });
+  });
+  ipcMain.on('add-preference', () => {
+    const preferenceWindowOptions = {
+      useContentSize: true,
+      frame: false,
+      titleBarStyle: 'none',
+      width: 510,
+      height: 360,
+      transparent: true,
+      resizable: false,
+      show: false,
+      webPreferences: {
+        webSecurity: false,
+        experimentalFeatures: true,
+      },
+      acceptFirstMouse: true,
+      fullscreenable: false,
+      maximizable: false,
+      minimizable: false,
+    };
+    if (!preferenceWindow) {
+      preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+      preferenceWindow.loadURL(`${preferenceURL}`);
+      preferenceWindow.on('closed', () => {
+        preferenceWindow = null;
+      });
+    } else {
+      preferenceWindow.focus();
+    }
+    preferenceWindow.once('ready-to-show', () => {
+      preferenceWindow.show();
+    });
+  });
+  ipcMain.on('preference-to-main', (e, args) => {
+    mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
+  });
+  ipcMain.on('main-to-preference', (e, args) => {
+    preferenceWindow?.webContents.send('preferenceDispatch', 'setPreference', args);
   });
 }
 

@@ -81,6 +81,24 @@ export default {
   mounted() {
     asyncStorage.get('preferences').then((data) => {
       this.showPrivacyBubble = data.privacyAgreement === undefined;
+      if (!data.primaryLanguage) {
+        switch (this.$i18n.locale) {
+          case 'zhCN':
+            this.$store.dispatch('primaryLanguage', '简体中文');
+            break;
+          case 'zhTW':
+            this.$store.dispatch('primaryLanguage', '繁體中文');
+            break;
+          case 'en':
+            this.$store.dispatch('primaryLanguage', 'English');
+            break;
+          default:
+            break;
+        }
+      }
+      if (!data.secondaryLanguage) {
+        this.$store.dispatch('secondaryLanguage', this.$t('preferences.none'));
+      }
     });
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
@@ -241,33 +259,33 @@ export default {
   z-index: 8;
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (min-width: 320px) and (max-width: 512px) {
-    width: 186px;
+    width: 166px;
     height: 32px;
-    margin-left: 30px;
+    margin-left: 50px;
     margin-bottom: 8px;
     border-radius: 6px;
     clip-path: inset(0 round 6px);
   }
   @media screen and (min-width: 513px) and (max-width: 854px) {
-    width: 204px;
+    width: 178px;
     height: 36px;
-    margin-left: 36px;
+    margin-left: 62px;
     margin-bottom: 12px;
     border-radius: 7px;
     clip-path: inset(0 round 7px);
   }
   @media screen and (min-width: 855px) and (max-width: 1920px) {
-    width: 248px;
+    width: 218px;
     height: 43px;
-    margin-left: 40px;
+    margin-left: 70px;
     margin-bottom: 15px;
     border-radius: 8px;
     clip-path: inset(0 round 8px);
   }
   @media screen and (min-width: 1921px) {
-    width: 348px;
+    width: 306px;
     height: 60px;
-    margin-left: 55px;
+    margin-left: 97px;
     margin-bottom: 18px;
     border-radius: 11px;
     clip-path: inset(0 round 11px);
@@ -275,27 +293,28 @@ export default {
 
   .bubbleContent {
     @media screen and (min-width: 320px) and (max-width: 512px) {
-      width: 156px;
+      width: auto;
       height: 11px;
-      margin: 11px 14px auto 14px;
+      margin: auto;
     }
     @media screen and (min-width: 513px) and (max-width: 854px) {
-      width: 174px;
+      width: auto;
       height: 12px;
-      margin: auto 16px auto 16px;
+      margin: auto;
     }
     @media screen and (min-width: 855px) and (max-width: 1920px) {
-      width: 212px;
+      width: auto;
       height: 15px;
-      margin: auto 19px auto 19px;
+      margin: auto;
     }
     @media screen and (min-width: 1921px) {
-      width: 294px;
+      width: auto;
       height: 21px;
-      margin: auto 26px auto 26px;
+      margin: auto;
     }
     .content {
       color: rgba(255, 255, 255, 0.8);
+      text-align: center;
       @media screen and (min-width: 320px) and (max-width: 512px) {
         font-size: 11px;
         line-height: 11px;

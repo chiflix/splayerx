@@ -359,6 +359,17 @@ export default {
     height: 21px;
   }
 }
+.rightArrow {
+  display: block;
+  width: 12px;
+  height: 12px;
+  opacity: 0.5;
+}
+.nike {
+  display: block;
+  width: 14px;
+  height: 15px;
+}
 .speed {
   display: block;
   @media screen and (max-width: 512px) {

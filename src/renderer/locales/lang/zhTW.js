@@ -40,7 +40,8 @@ export default {
       mainSubtitle: '第一字幕',
       langZhCN: '中文',
       langEn: '英文',
-      noSubtitle: '無',
+      notToShowSubtitle: '無',
+      noSubtitle: '暫無可用翻譯結果',
       secondarySubtitle: '第二字幕',
       subtitleStyle: '字幕樣式',
       style1: '電影風格',
@@ -78,11 +79,6 @@ export default {
       hideOthers: '隱藏其他',
       quit: '退出射手影音',
     },
-    preferences: {
-      settings: '設置',
-      clearHistory: '退出時自動清空播放記錄',
-      privacyConfirm: '啟用匿名信息和智能翻譯',
-    },
     update: {
       title: '更新就緒',
       message: '更新已就緒，是否現在重啟?',
@@ -94,6 +90,18 @@ export default {
   css: {
     titleFontSize: { fontSize: '21px' },
     versionFontSize: { fontSize: '14px' },
+  },
+  preferences: {
+    none: '無',
+    settings: '設置',
+    generalSetting: '通用設置',
+    clearHistory: '退出時自動清空播放記錄',
+    privacyConfirm: '啟用匿名信息和智能翻譯',
+    setAsDefault: '將SPlayer設為默認播放器',
+    languagePriority: '語言優先級',
+    languageDescription: '在您觀賞影片時，射手影音會為您推送以下語言的翻譯結果。',
+    primaryLanguage: '首要語言',
+    secondaryLanguage: '次要語言',
   },
   advance: {
     rateTitle: '播放速度',
@@ -132,7 +140,7 @@ export default {
   },
   loading: {
     title: '',
-    content: '正在加載翻譯結果...',
+    content: '正在加載智能翻譯結果 ...',
   },
   privacyBubble: {
     masVersion: {
