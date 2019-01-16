@@ -145,7 +145,7 @@ export default {
       computedAvaliableItems: [],
       continueRefresh: false,
       isShowingHovered: false,
-      isInitial: false,
+      isInitial: true,
       onAnimation: false,
       refAnimation: '',
     };
@@ -164,6 +164,9 @@ export default {
       },
     }),
     noSubtitle() {
+      if (this.timer && this.isInitial) {
+        return this.$t('loading.content');
+      }
       return this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
     },
     iconOpacity() {
@@ -392,7 +395,6 @@ export default {
           this.anim.setSpeed(1.5);
         });
         this.anim.loop = false;
-        this.isInitial = false;
       }
       if (!this.showAttached) {
         this.isShowingHovered = true;
