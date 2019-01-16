@@ -109,16 +109,16 @@ export default {
       color: rgba(255, 255 ,255 , 1);
     }
     .version {
-      font-size: 9px;
-      letter-spacing: 0.22px;
+      font-size: 11px;
+      letter-spacing: 0.28px;
       margin: 7px auto 0 auto;
       color: rgba(255, 255 ,255 , 0.7);
     }
     .copyright {
-      font-size: 8px;
-      letter-spacing: 0.4px;
+      font-size: 10px;
+      letter-spacing: 0.5px;
       color: rgba(255, 255 ,255 , 0.3);
-      margin: auto auto 18px auto;
+      margin: auto auto 14px auto;
     }
   }
 </style>
