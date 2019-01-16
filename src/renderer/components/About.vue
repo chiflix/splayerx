@@ -111,7 +111,7 @@ export default {
     .version {
       font-size: 11px;
       letter-spacing: 0.28px;
-      margin: 7px auto 0 auto;
+      margin: 3px auto 0 auto;
       color: rgba(255, 255 ,255 , 0.7);
     }
     .copyright {
