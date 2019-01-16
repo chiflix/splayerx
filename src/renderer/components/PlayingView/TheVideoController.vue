@@ -95,6 +95,8 @@ export default {
       displayState: {},
       tempRecentPlaylistDisplayState: false,
       clicks: 0,
+      videoChanged: false,
+      videoChangedTimer: 0,
     };
   },
   computed: {
@@ -113,7 +115,7 @@ export default {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
-        this.attachedShown);
+        this.attachedShown || this.videoChanged);
     },
     onOtherWidget() {
       return this.currentWidget !== this.$options.name;
@@ -140,6 +142,13 @@ export default {
         }
       });
       this.isMousedown = false;
+      this.videoChanged = true;
+      if (this.videoChangedTimer) {
+        this.clock.clearTimeout(this.videoChangedTimer);
+      }
+      this.videoChangedTimer = this.clock.setTimeout(() => {
+        this.videoChanged = false;
+      }, 3000);
     },
     isDragging(val, oldval) {
       if (!val && oldval) {
