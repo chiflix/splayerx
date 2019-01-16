@@ -331,7 +331,7 @@ export default {
       const A = 40; // playlist left margin
       const B = 15; // space between each playlist item
       const C = 60; // the space between last playlist item and right edge of the screen
-      if (this.winWidth >= 512 && this.winWidth <= 1355) {
+      if (this.winWidth <= 1355) {
         width = ((((this.winWidth - A) - C) + B) / this.thumbnailNumber) - B;
       } else if (this.winWidth > 1355) {
         width = this.winWidth * (112 / 1355);
