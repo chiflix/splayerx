@@ -339,7 +339,6 @@ export default {
             this.count += 1;
             this.rotateTime = Math.ceil(this.count / 100);
           }, 10);
-          document.querySelector('.scrollScope').scrollTop = 0;
           this.$bus.$emit('refresh-subtitles');
           if (!this.isInitial) {
             this.addLog('info', {
@@ -347,10 +346,12 @@ export default {
               code: ONLINE_LOADING,
             });
           } else {
-            this.onAnimation = true;
-            this.anim.loop = true;
-            this.anim.setSpeed(0.6);
-            this.anim.playSegments([115, 146], false);
+            setTimeout(() => {
+              this.onAnimation = true;
+              this.anim.loop = true;
+              this.anim.setSpeed(0.6);
+              this.anim.playSegments([115, 146], false);
+            }, 1000);
           }
           clearTimeout(this.breakTimer);
           this.breakTimer = setTimeout(() => {
@@ -396,12 +397,12 @@ export default {
       this.validEnter = true;
     },
     handleLeave() {
-      if (this.onAnimation) {
-        this.anim.loop = true;
-        this.anim.setSpeed(0.6);
-        this.anim.playSegments([115, 146], false);
-      }
       if (!this.showAttached) {
+        if (this.onAnimation) {
+          this.anim.loop = true;
+          this.anim.setSpeed(0.6);
+          this.anim.playSegments([115, 146], false);
+        }
         this.isShowingHovered = false;
       }
       this.validEnter = false;
@@ -464,6 +465,7 @@ export default {
         } else {
           this.$store.dispatch('removeMessagesByType');
         }
+        document.querySelector('.scrollScope').scrollTop = 0;
         this.$bus.$emit('no-translation-result');
         this.timer = null;
       }, 1000);
