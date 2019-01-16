@@ -165,7 +165,7 @@ export default {
     }),
     noSubtitle() {
       if (this.timer && this.isInitial) {
-        return this.$t('loading.content');
+        return this.$t('msg.subtitle.menuLoading');
       }
       return this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
     },
@@ -353,10 +353,12 @@ export default {
             });
           } else {
             setTimeout(() => {
-              this.onAnimation = true;
-              this.anim.loop = true;
-              this.anim.setSpeed(0.6);
-              this.anim.playSegments([115, 146], false);
+              if (!this.showAttached) {
+                this.onAnimation = true;
+                this.anim.loop = true;
+                this.anim.setSpeed(0.6);
+                this.anim.playSegments([115, 146], false);
+              }
             }, 1000);
           }
           clearTimeout(this.breakTimer);

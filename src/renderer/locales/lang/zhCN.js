@@ -36,6 +36,7 @@ export default {
       name: '字幕',
       subtitleSelect: '翻译结果',
       AITranslation: '重新加载翻译结果',
+      menuLoading: '正在匹配翻译结果 ...',
       loadSubtitleFile: '加载字幕文件…',
       mainSubtitle: '第一字幕',
       langZhCN: '中文',
