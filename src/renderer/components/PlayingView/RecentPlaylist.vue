@@ -347,10 +347,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  @media screen and (max-width: 510px) {
-    display: none;
-  }
-  @media screen and (min-width: 512px) and (max-width: 1355px) {
+  @media screen and (max-width: 1355px) {
     height: 282px;
   }
   @media screen and (min-width: 1356px) {
