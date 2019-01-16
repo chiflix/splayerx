@@ -69,7 +69,8 @@
 </template>
 <script>
 import path from 'path';
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 
@@ -100,6 +101,7 @@ export default {
       tranFlag: false,
       filePathNeedToDelete: '',
       eventTarget: {},
+      changeByRecent: false,
     };
   },
   created() {
@@ -118,6 +120,9 @@ export default {
     this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
+    ...mapMutations({
+      updateMousemoveTarget: inputMutations.MOUSEMOVE_TARGET_UPDATE,
+    }),
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
@@ -129,10 +134,11 @@ export default {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
     },
     handleMouseup() {
-      if (!this.isDragging) {
+      if (this.isDragging) {
+        this.clearMousedown({ target: '' });
+      } else if (this.backgroundDisplayState) {
         this.$emit('update:playlistcontrol-showattached', false);
-        this.$emit('conflict-resolve', this.$options.name);
-        this.$emit('update:isDragging', false);
+        this.updateMousemoveTarget('the-video-controller');
       }
     },
     onItemMouseover(index, media) {
@@ -176,12 +182,18 @@ export default {
         }, 400);
       } else if (index !== this.playingIndex && !this.shifting
         && this.filePathNeedToDelete !== this.playingList[index]) {
+        this.changeByRecent = true;
         this.playFile(this.playingList[index]);
       }
     },
   },
   watch: {
     originSrc() {
+      if (!this.changeByRecent) {
+        this.displayState = false;
+        this.$emit('update:playlistcontrol-showattached', false);
+      }
+      this.changeByRecent = false;
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
@@ -196,19 +208,26 @@ export default {
       }
     },
     mousedownCurrentTarget(val) {
-      if (val !== this.$options.name && this.backgroundDisplayState) {
-        if (this.lastDragging) {
-          this.clearMouseup({ target: '' });
-        } else if (this.mouseupCurrentTarget !== 'playlist-control' && this.mouseupCurrentTarget !== '') {
-          this.$emit('update:playlistcontrol-showattached', false);
+      if (val !== 'notification-bubble' && val !== 'titlebar') {
+        if (val !== this.$options.name && this.backgroundDisplayState) {
+          if (this.lastDragging) {
+            this.clearMouseup({ target: '' });
+          } else if (this.mouseupCurrentTarget !== 'playlist-control' && this.mouseupCurrentTarget !== '') {
+            this.$emit('update:playlistcontrol-showattached', false);
+          }
         }
       }
     },
     mouseupCurrentTarget(val) {
-      if (this.lastDragging) {
-        this.clearMousedown({ target: '' });
-      } else if (val !== this.$options.name && this.backgroundDisplayState) {
-        this.$emit('update:playlistcontrol-showattached', false);
+      if (this.mousedownCurrentTarget !== 'notification-bubble' && this.mousedownCurrentTarget !== 'titlebar') {
+        if (this.lastDragging) {
+          this.clearMousedown({ target: '' });
+          if (this.displayState) {
+            this.$emit('update:lastDragging', false);
+          }
+        } else if (val !== this.$options.name && this.backgroundDisplayState) {
+          this.$emit('update:playlistcontrol-showattached', false);
+        }
       }
     },
     playingIndex(val) {
@@ -295,11 +314,11 @@ export default {
     // if you wanna know the meanings of wABC, please look up the product doc:
     // https://www.notion.so/splayer/Playlist-685b398ac7ce45508a4283af00f76534
     thumbnailNumber() {
-      let number = 0;
+      let number = 3;
       const w = 112; // default width of playlist item
       const B = 15; // space between each playlist item
       if (this.winWidth >= 512 && this.winWidth < 720) {
-        number = Math.floor(3 + ((this.winWidth - 512) / (w + B)));
+        number = Math.ceil(3 + ((this.winWidth - 512) / (w + B)));
       } else if (this.winWidth >= 720 && this.winWidth <= 1355) {
         number = Math.floor(((this.winWidth - 720) / (w + B)) + 5);
       } else if (this.winWidth > 1355) {
@@ -312,7 +331,7 @@ export default {
       const A = 40; // playlist left margin
       const B = 15; // space between each playlist item
       const C = 60; // the space between last playlist item and right edge of the screen
-      if (this.winWidth >= 512 && this.winWidth <= 1355) {
+      if (this.winWidth <= 1355) {
         width = ((((this.winWidth - A) - C) + B) / this.thumbnailNumber) - B;
       } else if (this.winWidth > 1355) {
         width = this.winWidth * (112 / 1355);
@@ -328,10 +347,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  @media screen and (max-width: 510px) {
-    display: none;
-  }
-  @media screen and (min-width: 512px) and (max-width: 1355px) {
+  @media screen and (max-width: 1355px) {
     height: 282px;
   }
   @media screen and (min-width: 1356px) {
@@ -348,7 +364,7 @@ export default {
     .info {
       width: 90%;
       .top {
-        font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+        font-family: $font-heavy;
         color: rgba(235,235,235,0.6);
         letter-spacing: 0.64px;
         width: fit-content;
@@ -358,7 +374,7 @@ export default {
         text-overflow: ellipsis;
         white-space: nowrap;
 
-        font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+        font-family: $font-heavy;
         color: rgba(255,255,255,0.70);
         letter-spacing: 1px;
         width: 100%;

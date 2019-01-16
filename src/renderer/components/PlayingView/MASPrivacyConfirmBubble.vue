@@ -43,15 +43,22 @@ export default {
   },
   methods: {
     handleAgreeMouseup() {
-      this.$store.dispatch('agreeOnPrivacyPolicy');
+      this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
       this.$emit('close-privacy-bubble');
     },
     handleDisagreeMouseup() {
-      this.$store.dispatch('disagreeOnPrivacyPolicy');
+      this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+        this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+      });
       this.$emit('close-privacy-bubble');
     },
   },
   computed: {
+    preferenceData() {
+      return this.$store.getters.preferenceData;
+    },
     infoCSS() {
       if (this.$i18n.locale === 'en') {
         return 'info-en-state-1';

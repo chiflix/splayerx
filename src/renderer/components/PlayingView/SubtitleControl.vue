@@ -25,7 +25,8 @@
               </div>
 
               <div class="sub-menu">
-                <div class="scrollScope"
+                <div class="scrollScope" :class="refAnimation"
+                  @animationend="finishAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                     height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
@@ -42,29 +43,29 @@
                           height: `${itemHeight}px`,
                           cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
                         }">
-                        <div class="text">{{ this.$t('msg.subtitle.noSubtitle') }}</div>
+                        <div class="text">{{ noSubtitle }}</div>
                       </div>
                     </div>
 
-                    <div v-if="foundSubtitles"
-                      v-for="(item, index) in computedAvaliableItems">
-                      <div class="menu-item-text-wrapper"
-                        @mouseup="toggleItemClick(index)"
-                        @mouseover="toggleItemsMouseOver(index)"
-                        @mouseleave="toggleItemsMouseLeave(index)"
-                        :id="'item'+index"
-                        :style="{
-                          transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                          color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                          height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                          cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
-                        }">
-                        <div class="text"
-                          :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                            whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                          }">{{ item.path ? getSubName(item.path) : item.name }}</div>
+                      <div v-if="foundSubtitles"
+                        v-for="(item, index) in computedAvaliableItems" :key="item.rank">
+                        <div class="menu-item-text-wrapper"
+                          @mouseup="toggleItemClick(index)"
+                          @mouseover="toggleItemsMouseOver(index)"
+                          @mouseleave="toggleItemsMouseLeave(index)"
+                          :id="'item'+index"
+                          :style="{
+                            transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                            color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                            height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                            cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                          }">
+                          <div class="text"
+                            :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                              whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                            }">{{ item.path ? getSubName(item.path) : item.name }}</div>
+                        </div>
                       </div>
-                    </div>
 
                     <div v-if="loadingTypes.length > 0"
                       v-for="(item, index) in loadingTypes"
@@ -91,7 +92,11 @@
       </transition>
     </div>
     <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
-      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
+      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"
+        :style="{
+          opacity: iconOpacity,
+          transition: 'opacity 150ms',
+        }"></lottie>
     </div>
   </div>
 </template>
@@ -103,6 +108,7 @@ import { Subtitle as subtitleActions, Input as InputActions } from '@/store/acti
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
+import { ONLINE_LOADING, NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-control',
@@ -126,10 +132,7 @@ export default {
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
-      animFlag: true,
-      mouseDown: false,
       validEnter: false,
-      showFlag: false,
       hoverIndex: -5,
       hiddenText: false,
       hoverHeight: 0,
@@ -139,20 +142,17 @@ export default {
       loadingType: '',
       detailTimer: null,
       breakTimer: null,
+      computedAvaliableItems: [],
+      continueRefresh: false,
+      isShowingHovered: false,
+      isInitial: false,
+      onAnimation: false,
+      refAnimation: '',
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub']),
     ...mapState({
-      computedAvaliableItems: ({ Subtitle }) => {
-        const { loadingStates, types, names } = Subtitle;
-        return Object.keys(loadingStates).map(id => ({
-          id,
-          loading: loadingStates[id],
-          type: types[id],
-          name: names[id],
-        })).filter(subtitle => subtitle.loading !== 'failed' && subtitle.type && subtitle.name);
-      },
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
         const loadingSubtitles = Object.keys(loadingStates).filter(id => loadingStates[id] === 'loading');
@@ -163,6 +163,12 @@ export default {
         return result;
       },
     }),
+    noSubtitle() {
+      return this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
+    },
+    iconOpacity() {
+      return this.isShowingHovered ? 0.9 : 0.75;
+    },
     mousedownCurrentTarget() {
       return this.$store.state.Input.mousedownTarget;
     },
@@ -250,6 +256,10 @@ export default {
     },
   },
   watch: {
+    originSrc() {
+      this.showAttached = false;
+      this.computedAvaliableItems = [];
+    },
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
       if (val === 0) {
@@ -258,39 +268,43 @@ export default {
     },
     showAttached(val) {
       if (!val) {
-        this.animFlag = true;
+        this.anim.playSegments([79, 92], false);
         if (!this.validEnter) {
-          this.anim.playSegments([79, 98], false);
-        } else {
-          this.showFlag = true;
-          this.anim.playSegments([79, 92], false);
-          setTimeout(() => { this.showFlag = false; }, 250);
+          this.isShowingHovered = false;
         }
       }
     },
     mousedownCurrentTarget(val) {
-      if (val !== this.$options.name && this.showAttached) {
-        this.anim.playSegments([62, 64], false);
-        if (this.lastDragging) {
-          this.clearMouseup({ target: '' });
-        } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
-          this.$emit('update:showAttached', false);
+      if (val !== 'notification-bubble') {
+        if (val !== this.$options.name && this.showAttached) {
+          this.anim.playSegments([62, 64], false);
+          if (this.lastDragging) {
+            this.clearMouseup({ target: '' });
+          } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
+            this.$emit('update:showAttached', false);
+          }
         }
       }
     },
     mouseupCurrentTarget(val) {
-      if (this.lastDragging) {
-        if (this.showAttached) {
-          this.anim.playSegments([79, 85]);
+      if (this.mousedownCurrentTarget !== 'notification-bubble') {
+        if (this.lastDragging) {
+          if (this.showAttached) {
+            this.anim.playSegments([79, 85]);
+            this.$emit('update:lastDragging', false);
+          }
+          this.clearMousedown({ target: '' });
+        } else if (val !== this.$options.name && this.showAttached) {
+          this.$emit('update:showAttached', false);
         }
-        this.clearMousedown({ target: '' });
-      } else if (val !== this.$options.name && this.showAttached) {
-        this.$emit('update:showAttached', false);
       }
     },
-    computedAvaliableItems(val, oldval) {
+    subtitleList(val, oldval) {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
+      }
+      if (val.length >= oldval.length) {
+        this.computedAvaliableItems = val.filter(sub => sub.name);
       }
     },
     loadingType(val) {
@@ -312,25 +326,48 @@ export default {
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
     }),
+    finishAnimation() {
+      this.refAnimation = '';
+    },
     getSubName(subPath) {
       return path.basename(subPath);
     },
     handleRefresh() {
-      if (!this.privacyAgreement) {
-        this.$bus.$emit('privacy-confirm');
-      } else if (this.privacyAgreement && !this.timer) {
-        this.timer = setInterval(() => {
-          this.count += 1;
-          this.rotateTime = Math.ceil(this.count / 100);
-        }, 10);
-        document.querySelector('.scrollScope').scrollTop = 0;
-        this.$bus.$emit('refresh-subtitles');
-        clearTimeout(this.breakTimer);
-        this.breakTimer = setTimeout(() => {
-          if (this.timer) {
-            this.$bus.$emit('refresh-finished');
+      if (navigator.onLine) {
+        if (!this.privacyAgreement) {
+          this.$bus.$emit('privacy-confirm');
+          this.continueRefresh = true;
+        } else if (this.privacyAgreement && !this.timer) {
+          this.timer = setInterval(() => {
+            this.count += 1;
+            this.rotateTime = Math.ceil(this.count / 100);
+          }, 10);
+          this.$bus.$emit('refresh-subtitles');
+          if (!this.isInitial) {
+            this.addLog('info', {
+              message: 'Online subtitles loading .',
+              code: ONLINE_LOADING,
+            });
+          } else {
+            setTimeout(() => {
+              this.onAnimation = true;
+              this.anim.loop = true;
+              this.anim.setSpeed(0.6);
+              this.anim.playSegments([115, 146], false);
+            }, 1000);
           }
-        }, 20000);
+          clearTimeout(this.breakTimer);
+          this.breakTimer = setTimeout(() => {
+            if (this.timer) {
+              this.$bus.$emit('refresh-finished');
+            }
+          }, 10000);
+        }
+      } else {
+        this.addLog('error', {
+          message: 'No Translation Result .',
+          errcode: NO_TRANSLATION_RESULT,
+        });
       }
     },
     orify(...args) {
@@ -343,7 +380,6 @@ export default {
       this.anim = anim;
     },
     handleDown() {
-      this.mouseDown = true;
       if (!this.showAttached) {
         this.anim.playSegments([28, 32], false);
       } else {
@@ -351,31 +387,26 @@ export default {
       }
     },
     handleEnter() {
-      if (this.animFlag && !this.showAttached) {
-        if (!this.mouseDown) {
-          this.anim.playSegments([4, 8], false);
-        } else {
-          this.anim.playSegments([102, 105], false);
-        }
+      if (this.onAnimation) {
+        this.anim.addEventListener('complete', () => {
+          this.anim.setSpeed(1.5);
+        });
+        this.anim.loop = false;
+        this.isInitial = false;
       }
-      this.showFlag = false;
+      if (!this.showAttached) {
+        this.isShowingHovered = true;
+      }
       this.validEnter = true;
-      this.animFlag = false;
     },
     handleLeave() {
       if (!this.showAttached) {
-        if (this.mouseDown) {
-          this.anim.playSegments([35, 38], false);
-        } else if (this.showFlag) {
-          this.anim.addEventListener('complete', () => {
-            this.anim.playSegments([95, 98], false);
-            this.showFlag = false;
-            this.anim.removeEventListener('complete');
-          });
-        } else {
-          this.anim.playSegments([95, 98], false);
+        if (this.onAnimation) {
+          this.anim.loop = true;
+          this.anim.setSpeed(0.6);
+          this.anim.playSegments([115, 146], false);
         }
-        this.animFlag = true;
+        this.isShowingHovered = false;
       }
       this.validEnter = false;
     },
@@ -427,12 +458,34 @@ export default {
       this.count = this.rotateTime * 100;
       setTimeout(() => {
         this.$bus.$emit('finished-add-subtitles');
+        if (this.onAnimation) {
+          this.anim.addEventListener('complete', () => {
+            this.anim.setSpeed(1.5);
+          });
+          this.onAnimation = false;
+          this.anim.loop = false;
+          this.isInitial = false;
+        } else {
+          this.refAnimation = 'refresh-animation';
+          this.$store.dispatch('removeMessagesByType');
+        }
+        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$bus.$emit('no-translation-result');
         this.timer = null;
       }, 1000);
     });
   },
   mounted() {
-    this.$bus.$on('menu-subtitle-refresh', this.handleRefresh);
+    this.$bus.$on('menu-subtitle-refresh', (initial) => {
+      this.isInitial = !!initial;
+      this.handleRefresh();
+    });
+    this.$bus.$on('subtitle-refresh-continue', () => {
+      if (this.continueRefresh) {
+        this.continueRefresh = false;
+        this.handleRefresh();
+      }
+    });
     document.addEventListener('mouseup', (e) => {
       if (e.button === 0) {
         if (!this.showAttached) {
@@ -442,7 +495,6 @@ export default {
             this.anim.playSegments([40, 44], false);
           }
         }
-        this.mouseDown = false;
       }
     });
   },
@@ -559,7 +611,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 32px;
-      left: -58px;
+      left: -102px;
       width: 170px;
       max-height: 138px;
     }
@@ -624,7 +676,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 44px;
-      left: -42px;
+      left: -106px;
       width: 204px;
       max-height: 239px;
     }
@@ -684,7 +736,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 70px;
-      left: -33px;
+      left: -133px;
       width: 286px;
       max-height: 433px;
     }
@@ -727,5 +779,16 @@ export default {
 }
 .sub-trans-l-leave-active {
   position: absolute;
+}
+
+.refresh-animation {
+  animation: menu-refresh 300ms linear 1 normal forwards;
+}
+@keyframes menu-refresh {
+  0% { opacity: 1 }
+  25% { opacity: 0.5 }
+  50% { opacity: 0 }
+  75% { opacity: 0.5 }
+  100% { opacity: 1 }
 }
 </style>

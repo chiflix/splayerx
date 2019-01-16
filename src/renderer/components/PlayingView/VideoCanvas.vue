@@ -19,14 +19,16 @@
       :currentTime="seekTime"
       :currentAudioTrackId="currentAudioTrackId.toString()" />
     </transition>
+    <div class="mask"
+      :style="{
+        backgroundColor: maskBackground
+      }"/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
 
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
-import syncStorage from '@/helpers/syncStorage';
-import WindowSizeHelper from '@/helpers/WindowSizeHelper';
 import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
@@ -40,12 +42,13 @@ export default {
   data() {
     return {
       videoExisted: false,
-      windowSizeHelper: null,
       videoElement: null,
       coverFinded: false,
       seekTime: [0],
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
+      maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
+      asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
     };
   },
   methods: {
@@ -115,7 +118,6 @@ export default {
         newSize,
       );
       this.controlWindowRect(newPosition.concat(newSize));
-      this.windowSizeHelper.setNewWindowSize();
     },
     calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
       let result = videoSize;
@@ -159,11 +161,11 @@ export default {
       })(windowRect, tempRect);
     },
     controlWindowRect(rect) {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', rect.slice(2, 4));
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', rect.slice(0, 2));
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
-    saveScreenshot() {
+    async saveScreenshot(videoPath) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -191,10 +193,16 @@ export default {
         lastPlayedTime: videodata.time,
         duration: this.duration,
       };
-      syncStorage.setSync('recent-played', data);
+
+      const val = await this.infoDB.get('recent-played', 'path', videoPath);
+      if (val) {
+        const mergedData = Object.assign(val, data);
+        await this.infoDB.add('recent-played', mergedData);
+        this.$bus.$emit('database-saved');
+      }
     },
     saveSubtitleStyle() {
-      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
+      return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
     async getVideoCover(grabCoverTime) {
       if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
@@ -273,17 +281,7 @@ export default {
   watch: {
     originSrc(val, oldVal) {
       this.coverFinded = false;
-      this.saveScreenshot();
-      asyncStorage.get('recent-played')
-        .then(async (data) => {
-          const val = await this.infoDB.get('recent-played', 'path', oldVal);
-          if (val && data) {
-            const mergedData = Object.assign(val, data);
-            this.infoDB.add('recent-played', mergedData).then(() => {
-              this.$bus.$emit('database-saved');
-            });
-          }
-        });
+      this.saveScreenshot(oldVal);
       this.$bus.$emit('showlabel');
       this.videoConfigInitialize({
         audioTrackList: [],
@@ -294,8 +292,8 @@ export default {
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.ratio]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [this.ratio]);
     });
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
@@ -321,11 +319,30 @@ export default {
         this.$bus.$emit('seek-subtitle', e);
       }
     });
-    this.windowSizeHelper = new WindowSizeHelper(this);
-    window.onbeforeunload = () => {
-      this.saveScreenshot();
-      this.saveSubtitleStyle();
+    this.$bus.$on('drag-over', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0.18)';
+    });
+    this.$bus.$on('drag-leave', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
+    });
+    this.$bus.$on('drop', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
+    });
+    window.onbeforeunload = (e) => {
+      if (!this.asyncTasksDone) {
+        this.saveScreenshot(this.originSrc).then(this.saveSubtitleStyle).then(() => {
+          this.asyncTasksDone = true;
+          window.close();
+        }).catch(() => {
+          this.asyncTasksDone = true;
+          window.close();
+        });
+        e.returnValue = false;
+      }
     };
+  },
+  beforeDestroy() {
+    window.onbeforeunload = null;
   },
 };
 </script>
@@ -334,6 +351,12 @@ export default {
   position: relative;
   height: 0;
   z-index: auto;
+}
+.mask {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  transition: background-color 120ms linear;
 }
 .base-video-player {
   width: 100%;

@@ -84,7 +84,7 @@ export default {
   },
   created() {
     const { subtitleInstance } = this;
-    subtitleInstance.on('data', subtitleInstance.parse);
+    subtitleInstance.once('data', subtitleInstance.parse);
     subtitleInstance.on('parse', (parsed) => {
       this.videoSegments = this.getVideoSegments(parsed, this.duration);
       if (parsed.length) {

@@ -12,9 +12,9 @@ export default {
     playback: {
       name: '播放',
       fullScreen: '全屏/退出全屏',
-      keepPlayingWindowFront: '保持播放窗口在前',
-      increasePlaybackSpeed: '加快播放速度         [',
-      decreasePlaybackSpeed: '減緩播放速度         ]',
+      keepPlayingWindowFront: '保持窗口在前',
+      increasePlaybackSpeed: '加快播放速度',
+      decreasePlaybackSpeed: '減緩播放速度',
       captureScreen: '截圖',
       captureVideoClip: '截取視頻片段',
       play: '播放',
@@ -40,7 +40,8 @@ export default {
       mainSubtitle: '第一字幕',
       langZhCN: '中文',
       langEn: '英文',
-      noSubtitle: '無',
+      notToShowSubtitle: '無',
+      noSubtitle: '暫無可用翻譯結果',
       secondarySubtitle: '第二字幕',
       subtitleStyle: '字幕樣式',
       style1: '電影風格',
@@ -67,21 +68,16 @@ export default {
     },
     help: {
       name: '幫助',
-      splayerxHelp: '射手影音 幫助',
+      splayerxHelp: '幫助',
     },
     splayerx: {
-      about: '關於 射手影音…',
-      preferences: '偏好設置…',
-      homepage: '射手影音 主頁',
-      feedback: '意見反饋',
-      hide: '隱藏 射手影音',
-      hideOthers: '隱藏 其他',
-      quit: '退出',
-    },
-    preferences: {
-      settings: '設置',
-      clearHistory: '退出時自動清空播放記錄',
-      privacyConfirm: '啟用匿名信息和智能翻譯',
+      about: '關於射手影音',
+      preferences: '偏好設置',
+      homepage: '網站',
+      feedback: '反饋',
+      hide: '隱藏射手影音',
+      hideOthers: '隱藏其他',
+      quit: '退出射手影音',
     },
     update: {
       title: '更新就緒',
@@ -94,6 +90,20 @@ export default {
   css: {
     titleFontSize: { fontSize: '21px' },
     versionFontSize: { fontSize: '14px' },
+  },
+  preferences: {
+    none: '無',
+    settings: '設置',
+    generalSetting: '通用設置',
+    clearHistory: '退出時自動清空播放記錄',
+    privacyConfirm: '啟用匿名信息和智能翻譯',
+    setAsDefault: '將SPlayer設為默認播放器',
+    languagePriority: '語言優先級',
+    languageDescription: '在您觀賞影片時，射手影音會為您推送以下語言的翻譯結果。',
+    primaryLanguage: '首要語言',
+    secondaryLanguage: '次要語言',
+    primary: '首要語言',
+    secondary: '次要語言',
   },
   advance: {
     rateTitle: '播放速度',
@@ -121,10 +131,18 @@ export default {
       title: '文件錯誤',
       content: '無法找到相應文件',
     },
+    loadFailed: {
+      title: '未能加載字幕',
+      content: '暫不支持該字幕類型',
+    },
+    noResult: {
+      title: '未找到翻譯結果',
+      content: '網絡異常或缺少翻譯結果',
+    },
   },
   loading: {
     title: '',
-    content: '正在搜索翻譯結果...',
+    content: '正在加載智能翻譯結果 ...',
   },
   privacyBubble: {
     masVersion: {
@@ -151,7 +169,7 @@ export default {
     playing: '正在播放',
   },
   nextVideo: {
-    nextInFolder: '文件夹中下一視頻',
+    nextInFolder: '文件夾中下一視頻',
     nextInPlaylist: '播放列表中下一視頻',
   },
   subtitle: {

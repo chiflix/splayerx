@@ -1,3 +1,7 @@
+/* eslint-disable import/first */
+// Be sure to call Sentry function as early as possible in the main process
+import '../shared/sentry';
+
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 import os from 'os';
@@ -100,14 +104,14 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'deleteVideoHistoryOnExit', 'privacyAgreement', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
           label: this.$t('msg.window_.exitFullScreen'),
           accelerator: 'Esc',
           click: () => {
-            this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [false]);
+            this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
           },
         };
       }
@@ -115,7 +119,7 @@ new Vue({
         label: this.$t('msg.window_.enterFullScreen'),
         accelerator: 'F',
         click: () => {
-          this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [true]);
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
         },
       };
     },
@@ -171,16 +175,6 @@ new Vue({
     chosenSize(val) {
       if (this.menu) {
         this.menu.getMenuItemById(`size${val}`).checked = true;
-      }
-    },
-    deleteVideoHistoryOnExit(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById('deleteHistory').checked = val;
-      }
-    },
-    privacyAgreement(val) {
-      if (this.menu) {
-        this.menu.getMenuItemById('privacy').checked = val;
       }
     },
     volume(val) {
@@ -300,12 +294,14 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.playback.increasePlaybackSpeed'),
+              accelerator: ']',
               click: () => {
                 this.$store.dispatch(videoActions.INCREASE_RATE);
               },
             },
             {
               label: this.$t('msg.playback.decreasePlaybackSpeed'),
+              accelerator: '[',
               click: () => {
                 this.$store.dispatch(videoActions.DECREASE_RATE);
               },
@@ -557,39 +553,18 @@ new Vue({
             submenu: [
               {
                 label: this.$t('msg.splayerx.about'),
-                role: 'about',
+                click: () => {
+                  this.$electron.ipcRenderer.send('add-windows-about');
+                },
               },
+              { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.preferences'),
                 enabled: true,
-                submenu: [
-                  {
-                    label: this.$t('msg.preferences.clearHistory'),
-                    id: 'deleteHistory',
-                    type: 'checkbox',
-                    checked: this.$store.getters.deleteVideoHistoryOnExit,
-                    click: () => {
-                      if (this.$store.getters.deleteVideoHistoryOnExit) {
-                        this.$store.dispatch('notDeleteVideoHistoryOnExit');
-                      } else {
-                        this.$store.dispatch('deleteVideoHistoryOnExit');
-                      }
-                    },
-                  },
-                  {
-                    label: this.$t('msg.preferences.privacyConfirm'),
-                    id: 'privacy',
-                    type: 'checkbox',
-                    checked: this.$store.getters.privacyAgreement,
-                    click: () => {
-                      if (this.$store.getters.privacyAgreement) {
-                        this.$store.dispatch('disagreeOnPrivacyPolicy');
-                      } else {
-                        this.$store.dispatch('agreeOnPrivacyPolicy');
-                      }
-                    },
-                  },
-                ],
+                accelerator: 'Cmd+,',
+                click: () => {
+                  this.$electron.ipcRenderer.send('add-preference');
+                },
               },
               { type: 'separator' },
               {
@@ -600,6 +575,7 @@ new Vue({
                 label: this.$t('msg.splayerx.hideOthers'),
                 role: 'hideothers',
               },
+              { type: 'separator' },
               {
                 label: this.$t('msg.splayerx.quit'),
                 role: 'quit',
@@ -616,40 +592,23 @@ new Vue({
             template.unshift(menuItem);
           });
           template.splice(5, 0, {
-            label: this.$t('msg.preferences.settings'),
-            submenu: [
-              {
-                label: this.$t('msg.preferences.clearHistory'),
-                id: 'deleteHistory',
-                type: 'checkbox',
-                checked: this.$store.getters.deleteVideoHistoryOnExit,
-                click: () => {
-                  if (this.$store.getters.deleteVideoHistoryOnExit) {
-                    this.$store.dispatch('notDeleteVideoHistoryOnExit');
-                  } else {
-                    this.$store.dispatch('deleteVideoHistoryOnExit');
-                  }
-                },
-              },
-              {
-                label: this.$t('msg.preferences.privacyConfirm'),
-                id: 'privacy',
-                type: 'checkbox',
-                checked: this.$store.getters.privacyAgreement,
-                click: () => {
-                  if (this.$store.getters.privacyAgreement) {
-                    this.$store.dispatch('disagreeOnPrivacyPolicy');
-                  } else {
-                    this.$store.dispatch('agreeOnPrivacyPolicy');
-                  }
-                },
-              },
-            ],
+            label: this.$t('msg.splayerx.preferences'),
+            enabled: true,
+            accelerator: 'Cmd+,',
+            click: () => {
+              this.$electron.ipcRenderer.send('add-preference');
+            },
           });
-          template[10].submenu.unshift({
-            label: this.$t('msg.splayerx.about'),
-            role: 'about',
-          });
+          template[10].submenu.unshift(
+            {
+              label: this.$t('msg.splayerx.about'),
+              role: 'about',
+              click: () => {
+                this.$electron.ipcRenderer.send('add-windows-about');
+              },
+            },
+            { type: 'separator' },
+          );
         }
         return template;
       }).then((result) => {
@@ -797,7 +756,7 @@ new Vue({
           }
         });
         return recentMenuTemplate;
-      });
+      }).catch(() => recentMenuTemplate);
     },
     menuStateControl(flag) {
       this.menu.getMenuItemById('playback').submenu.items.forEach((item) => {
@@ -918,10 +877,16 @@ new Vue({
       }
       switch (e.keyCode) {
         case 219:
+          e.preventDefault();
           this.$store.dispatch(videoActions.DECREASE_RATE);
           break;
         case 221:
+          e.preventDefault();
           this.$store.dispatch(videoActions.INCREASE_RATE);
+          break;
+        case 32:
+          e.preventDefault();
+          this.$bus.$emit('toggle-playback');
           break;
         default:
           break;
@@ -929,8 +894,8 @@ new Vue({
     });
     /* eslint-disable */
     window.addEventListener('wheel', (e) => {
+      // ctrlKey is the official way of detecting pinch zoom on mac for chrome
       if (!e.ctrlKey) {
-        const up = e.deltaY > 0;
         let isAdvanceColumeItem;
         let isSubtitleScrollItem;
         const advance = document.querySelector('.advance-column-items');
@@ -950,7 +915,7 @@ new Vue({
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
           if (process.platform !== 'darwin') {
             this.$store.dispatch(
-              up ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+              e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
               Math.abs(e.deltaY) * 0.2,
             );
           }
@@ -959,14 +924,12 @@ new Vue({
     });
     /* eslint-disable */
 
-    /**
-     * Todo:
-     * Handle multiple files
-     */
     window.addEventListener('drop', (e) => {
       e.preventDefault();
+      this.$bus.$emit('drop');
       const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
       const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+      files.forEach(file => this.$electron.remote.app.addRecentDocument(file));
       if (onlyFolders) {
         this.openFolder(...files);
       } else {
@@ -975,6 +938,12 @@ new Vue({
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      this.$bus.$emit('drag-over');
+    });
+    window.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      this.$bus.$emit('drag-leave');
     });
 
     this.$electron.ipcRenderer.on('open-file', (event, ...files) => {

@@ -1,12 +1,16 @@
+/* eslint-disable import/first */
+// Be sure to call Sentry function as early as possible in the main process
+import '../shared/sentry';
+
 import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
 import path from 'path';
 import fs from 'fs';
+import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
-import WindowResizer from './helpers/windowResizer';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '../shared/errorcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, NO_TRANSLATION_RESULT, NOT_SUPPORTED_SUBTITLE } from '../shared/notificationcodes';
 
 /**
  * Set `__static` path to static files in production
@@ -19,14 +23,22 @@ if (process.env.NODE_ENV !== 'development') {
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 let mainWindow = null;
+let aboutWindow = null;
+let preferenceWindow = null;
 let tray = null;
 let inited = false;
 const filesToOpen = [];
 const snapShotQueue = [];
 const mediaInfoQueue = [];
-const winURL = process.env.NODE_ENV === 'development'
+const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
+const aboutURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/about.html'
+  : `file://${__dirname}/about.html`;
+const preferenceURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/preference.html'
+  : `file://${__dirname}/preference.html`;
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -85,9 +97,8 @@ function registerMainWindowEvent() {
     mainWindow?.webContents.send('mainCommit', 'isFocused', false);
   });
 
-  ipcMain.on('callCurrentWindowMethod', (evt, method, args = []) => {
-    const currentWindow = BrowserWindow.getFocusedWindow() || mainWindow;
-    currentWindow?.[method]?.(...args);
+  ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
+    mainWindow?.[method]?.(...args);
   });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
@@ -97,10 +108,6 @@ function registerMainWindowEvent() {
   });
 
   function snapShot(video, callback) {
-    /*
-      TODO:
-        img name should be more unique
-     */
     const imgPath = path.join(app.getPath('temp'), video.quickHash);
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
@@ -121,7 +128,7 @@ function registerMainWindowEvent() {
 
   function snapShotQueueProcess(event) {
     const callback = (resultCode, imgPath) => {
-      if (resultCode === 'Waiting for task completion.') {
+      if (resultCode === 'Waiting for the task completion.') {
         snapShot(snapShotQueue[0], callback);
       } else if (resultCode === '0') {
         const lastRecord = snapShotQueue.shift();
@@ -207,20 +214,94 @@ function registerMainWindowEvent() {
   ipcMain.on('bossKey', () => {
     handleBossKey();
   });
-  ipcMain.on('writeLog', (event, level, log) => {
+  ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
     if (!log) return;
     writeLog(level, log);
-    if (mainWindow && log.message && log.errcode) {
-      switch (log.errcode) {
-        case FILE_NON_EXIST:
-        case EMPTY_FOLDER:
-        case OPEN_FAILED:
-          mainWindow.webContents.send('addMessages', log.errcode);
-          break;
-        default:
-          break;
+    if (mainWindow && log.message) {
+      if (log.errcode) {
+        switch (log.errcode) {
+          case FILE_NON_EXIST:
+          case EMPTY_FOLDER:
+          case OPEN_FAILED:
+          case NO_TRANSLATION_RESULT:
+          case NOT_SUPPORTED_SUBTITLE:
+            mainWindow.webContents.send('addMessages', log.errcode);
+            break;
+          default:
+            break;
+        }
+      } else if (log.code) {
+        mainWindow.webContents.send('addMessages', log.code);
       }
     }
+  });
+  ipcMain.on('add-windows-about', () => {
+    const aboutWindowOptions = {
+      useContentSize: true,
+      frame: false,
+      titleBarStyle: 'none',
+      width: 180,
+      height: 270,
+      transparent: true,
+      resizable: false,
+      show: false,
+      webPreferences: {
+        webSecurity: false,
+        experimentalFeatures: true,
+      },
+      acceptFirstMouse: true,
+      fullscreenable: false,
+      maximizable: false,
+      minimizable: false,
+    };
+    if (!aboutWindow) {
+      aboutWindow = new BrowserWindow(aboutWindowOptions);
+      aboutWindow.loadURL(`${aboutURL}`);
+      aboutWindow.on('closed', () => {
+        aboutWindow = null;
+      });
+    }
+    aboutWindow.once('ready-to-show', () => {
+      aboutWindow.show();
+    });
+  });
+  ipcMain.on('add-preference', () => {
+    const preferenceWindowOptions = {
+      useContentSize: true,
+      frame: false,
+      titleBarStyle: 'none',
+      width: 510,
+      height: 360,
+      transparent: true,
+      resizable: false,
+      show: false,
+      webPreferences: {
+        webSecurity: false,
+        experimentalFeatures: true,
+      },
+      acceptFirstMouse: true,
+      fullscreenable: false,
+      maximizable: false,
+      minimizable: false,
+    };
+    if (!preferenceWindow) {
+      preferenceWindow = new BrowserWindow(preferenceWindowOptions);
+      preferenceWindow.loadURL(`${preferenceURL}`);
+      preferenceWindow.on('closed', () => {
+        preferenceWindow = null;
+      });
+    } else {
+      preferenceWindow.focus();
+    }
+    preferenceWindow.once('ready-to-show', () => {
+      preferenceWindow.show();
+    });
+  });
+  ipcMain.on('preference-to-main', (e, args) => {
+    mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
+  });
+  ipcMain.on('main-to-preference', (e, args) => {
+    preferenceWindow?.webContents.send('preferenceDispatch', 'setPreference', args);
   });
 }
 
@@ -253,7 +334,7 @@ function createWindow() {
 
   mainWindow = new BrowserWindow(windowOptions);
 
-  mainWindow.loadURL(filesToOpen.length ? `${winURL}#/play` : winURL);
+  mainWindow.loadURL(filesToOpen.length ? `${mainURL}#/play` : mainURL);
 
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
@@ -271,8 +352,6 @@ function createWindow() {
     inited = true;
   });
 
-  const resizer = new WindowResizer(mainWindow);
-  resizer.onStart(); // will only register listener for win
   registerMainWindowEvent();
 
   if (process.env.NODE_ENV === 'development') {
@@ -320,7 +399,7 @@ if (process.platform === 'darwin') {
 }
 
 app.on('ready', () => {
-  app.setName('SPlayerX');
+  app.setName('SPlayer');
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
     mainWindow?.openDevTools();
   });
@@ -335,7 +414,7 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.env.NODE_ENV !== 'development') {
+  if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
     app.quit();
   }
 });

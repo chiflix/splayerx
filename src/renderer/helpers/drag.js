@@ -48,9 +48,9 @@ export default function drag(element) {
     if (!offset) return;
     x = Math.round((x / getRatio()) - offset[0]);
     y = Math.round((y / getRatio()) - offset[1]);
-    ipcRenderer.send('callCurrentWindowMethod', 'setPosition', [x, y]);
+    ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
     if (windowSize) {
-      ipcRenderer.send('callCurrentWindowMethod', 'setSize', windowSize);
+      ipcRenderer.send('callMainWindowMethod', 'setSize', windowSize);
     }
   });
 

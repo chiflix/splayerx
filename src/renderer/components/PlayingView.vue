@@ -30,7 +30,7 @@ export default {
     },
   },
   mounted() {
-    this.$electron.remote.getCurrentWindow().setMinimumSize(320, 180);
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
     videodata.checkTick();
     videodata.onTick = this.onUpdateTick;
   },
