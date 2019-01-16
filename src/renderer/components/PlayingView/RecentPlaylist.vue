@@ -374,7 +374,7 @@ export default {
         text-overflow: ellipsis;
         white-space: nowrap;
 
-        font-family: $font-heavy;
+        font-family: $font-normal;
         color: rgba(255,255,255,0.70);
         letter-spacing: 1px;
         width: 100%;

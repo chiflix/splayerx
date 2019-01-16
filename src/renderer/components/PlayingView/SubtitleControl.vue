@@ -145,7 +145,7 @@ export default {
       computedAvaliableItems: [],
       continueRefresh: false,
       isShowingHovered: false,
-      isInitial: false,
+      isInitial: true,
       onAnimation: false,
       refAnimation: '',
     };
@@ -164,6 +164,9 @@ export default {
       },
     }),
     noSubtitle() {
+      if (this.timer && this.isInitial) {
+        return this.$t('msg.subtitle.menuLoading');
+      }
       return this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
     },
     iconOpacity() {
@@ -350,10 +353,12 @@ export default {
             });
           } else {
             setTimeout(() => {
-              this.onAnimation = true;
-              this.anim.loop = true;
-              this.anim.setSpeed(0.6);
-              this.anim.playSegments([115, 146], false);
+              if (!this.showAttached) {
+                this.onAnimation = true;
+                this.anim.loop = true;
+                this.anim.setSpeed(0.6);
+                this.anim.playSegments([115, 146], false);
+              }
             }, 1000);
           }
           clearTimeout(this.breakTimer);
@@ -392,7 +397,6 @@ export default {
           this.anim.setSpeed(1.5);
         });
         this.anim.loop = false;
-        this.isInitial = false;
       }
       if (!this.showAttached) {
         this.isShowingHovered = true;
@@ -561,7 +565,6 @@ export default {
     .text {
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
-      text-transform: capitalize;
     }
   }
   .placeholder-item-text-wrapper {

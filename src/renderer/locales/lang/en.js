@@ -38,6 +38,7 @@ export default {
       subtitleSelect: 'Translation',
       AITranslation: 'Reload Smart Translation',
       loadSubtitleFile: 'Load Subtitle File…',
+      menuLoading: 'Loading ...',
       langZhCN: 'Chinese',
       langEn: 'English',
       notToShowSubtitle: 'None',

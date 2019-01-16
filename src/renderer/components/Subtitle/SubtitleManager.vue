@@ -21,7 +21,7 @@ import helpers from '@/helpers';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { promisify } from './SubtitleLoader/utils';
-import { ONLINE_LOADING, NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
+import { NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-manager',
@@ -59,6 +59,7 @@ export default {
       this.resetSubtitles();
       this.addInitialSubtitles(newVal);
       this.lastSubtitleInfo = { rankIndex: -1 };
+      this.$store.dispatch('ifNoSubtitle', true);
     },
     premiumSubtitles(newVal) {
       if (this.privacyAgreement) {
@@ -121,7 +122,7 @@ export default {
       if (localEmbeddedSubtitles.length) addSubtitles(localEmbeddedSubtitles);
       else {
         this.initial = true;
-        this.$bus.$emit('menu-subtitle-refresh', true);
+        this.$bus.$emit('menu-subtitle-refresh', this.initial);
       }
     },
     // different subtitle getters
