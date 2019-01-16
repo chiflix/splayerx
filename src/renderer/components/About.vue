@@ -10,7 +10,6 @@
             @click.native="handleClose"/>
       <Icon class="title-button-disable" type="titleBarExitFull"/>
       <Icon class="title-button-disable" type="titleBarFull"/>
-      </Icon>
     </div>
     <Icon class="win-title-button no-drag"
       v-if="!isDarwin"
@@ -19,7 +18,7 @@
     </Icon>
     <img class="winLogo" src="../assets/win-about-logo.png" draggable="false">
     <div class="name">{{ name }}</div>
-    <div class="version">{{ `Version ${version} (${version})` }}</div>
+    <div class="version">{{ `Version ${version}` }}</div>
     <div class="copyright">Copyright © 2018 tomasen</div>
   </div>
 </template>
@@ -61,8 +60,7 @@ export default {
   .content {
     width: 100%;
     height: 100%;
-    background: url("../assets/windows-about.jpg");
-    opacity: 0.95;
+    background-image: linear-gradient(-28deg, rgba(65,65,65,0.97) 0%, rgba(84,84,84,0.97) 47%, rgba(123,123,123,0.97) 100%);
     border-radius: 4px;
     display: flex;
     flex-direction: column;
@@ -102,25 +100,25 @@ export default {
       }
     }
     .winLogo {
-      width: 96px;
-      margin: 67px auto 0 auto;
+      width: 90px;
+      margin: 50px auto 0 auto;
     }
     .name {
-      font-size: 20px;
-      margin: -15px auto 0 auto;
+      font-size: 17px;
+      margin: -8px auto 0 auto;
       color: rgba(255, 255 ,255 , 1);
     }
     .version {
-      font-size: 12px;
-      letter-spacing: 0.3px;
+      font-size: 9px;
+      letter-spacing: 0.22px;
       margin: 7px auto 0 auto;
-      color: rgba(255, 255 ,255 , 0.8);
+      color: rgba(255, 255 ,255 , 0.7);
     }
     .copyright {
-      font-size: 11px;
-      letter-spacing: 0.5px;
+      font-size: 8px;
+      letter-spacing: 0.4px;
       color: rgba(255, 255 ,255 , 0.3);
-      margin: auto auto 14px auto;
+      margin: auto auto 18px auto;
     }
   }
 </style>
