@@ -25,7 +25,8 @@
               </div>
 
               <div class="sub-menu">
-                <div class="scrollScope"
+                <div class="scrollScope" :class="refAnimation"
+                  @animationend="finishAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                     height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
@@ -46,7 +47,6 @@
                       </div>
                     </div>
 
-                    <transition-group name="subtitle-group">
                       <div v-if="foundSubtitles"
                         v-for="(item, index) in computedAvaliableItems" :key="item.rank">
                         <div class="menu-item-text-wrapper"
@@ -66,7 +66,6 @@
                             }">{{ item.path ? getSubName(item.path) : item.name }}</div>
                         </div>
                       </div>
-                    </transition-group>
 
                     <div v-if="loadingTypes.length > 0"
                       v-for="(item, index) in loadingTypes"
@@ -148,6 +147,7 @@ export default {
       isShowingHovered: false,
       isInitial: false,
       onAnimation: false,
+      refAnimation: '',
     };
   },
   computed: {
@@ -326,6 +326,9 @@ export default {
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
     }),
+    finishAnimation() {
+      this.refAnimation = '';
+    },
     getSubName(subPath) {
       return path.basename(subPath);
     },
@@ -339,7 +342,6 @@ export default {
             this.count += 1;
             this.rotateTime = Math.ceil(this.count / 100);
           }, 10);
-          document.querySelector('.scrollScope').scrollTop = 0;
           this.$bus.$emit('refresh-subtitles');
           if (!this.isInitial) {
             this.addLog('info', {
@@ -347,10 +349,12 @@ export default {
               code: ONLINE_LOADING,
             });
           } else {
-            this.onAnimation = true;
-            this.anim.loop = true;
-            this.anim.setSpeed(0.6);
-            this.anim.playSegments([115, 146], false);
+            setTimeout(() => {
+              this.onAnimation = true;
+              this.anim.loop = true;
+              this.anim.setSpeed(0.6);
+              this.anim.playSegments([115, 146], false);
+            }, 1000);
           }
           clearTimeout(this.breakTimer);
           this.breakTimer = setTimeout(() => {
@@ -396,12 +400,12 @@ export default {
       this.validEnter = true;
     },
     handleLeave() {
-      if (this.onAnimation) {
-        this.anim.loop = true;
-        this.anim.setSpeed(0.6);
-        this.anim.playSegments([115, 146], false);
-      }
       if (!this.showAttached) {
+        if (this.onAnimation) {
+          this.anim.loop = true;
+          this.anim.setSpeed(0.6);
+          this.anim.playSegments([115, 146], false);
+        }
         this.isShowingHovered = false;
       }
       this.validEnter = false;
@@ -462,8 +466,10 @@ export default {
           this.anim.loop = false;
           this.isInitial = false;
         } else {
+          this.refAnimation = 'refresh-animation';
           this.$store.dispatch('removeMessagesByType');
         }
+        document.querySelector('.scrollScope').scrollTop = 0;
         this.$bus.$emit('no-translation-result');
         this.timer = null;
       }, 1000);
@@ -774,14 +780,15 @@ export default {
 .sub-trans-l-leave-active {
   position: absolute;
 }
-.subtitle-group-enter-active, .subtitle-group-leave-active {
-  transition: opacity 300ms linear;
-  transition-delay: 100ms;
+
+.refresh-animation {
+  animation: menu-refresh 300ms linear 1 normal forwards;
 }
-.subtitle-group-enter, .subtitle-group-leave-to {
-  opacity: 0;
-}
-.subtitle-group-enter-to, .subtitle-group-leave {
-  opacity: 1;
+@keyframes menu-refresh {
+  0% { opacity: 1 }
+  25% { opacity: 0.5 }
+  50% { opacity: 0 }
+  75% { opacity: 0.5 }
+  100% { opacity: 1 }
 }
 </style>
