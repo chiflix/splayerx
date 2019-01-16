@@ -9,8 +9,7 @@
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
-    @mouseup.left="handleMouseupLeft"
-    @dblclick="handleDblclick">
+    @mouseup.left="handleMouseupLeft">
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
@@ -84,7 +83,6 @@ export default {
       clicksDelay: 200,
       dragDelay: 200,
       widgetsStatus: {},
-      preventSingleClick: false,
       lastAttachedShowing: false,
       focusedTimestamp: 0,
       focusDelay: 500,
@@ -96,6 +94,7 @@ export default {
       lastDragging: false,
       displayState: {},
       tempRecentPlaylistDisplayState: false,
+      clicks: 0,
     };
   },
   computed: {
@@ -356,30 +355,31 @@ export default {
     handleMouseupLeft() {
       this.isMousemove = false;
       this.isMousedown = false;
+      this.clicks += 1;
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
       }
       if (!this.isValidClick() || (this.lastDragging && this.lastAttachedShowing)) {
         return;
       }
-      this.clicksTimer = setTimeout(() => {
-        const attachedShowing = this.lastAttachedShowing;
-        if (
-          this.currentMousedownWidget === 'the-video-controller' &&
-          this.currentMouseupWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.lastDragging) {
-          this.togglePlayback();
+      if (this.clicks === 1) {
+        this.clicksTimer = setTimeout(() => {
+          this.clicks = 0;
+          const attachedShowing = this.lastAttachedShowing;
+          if (
+            this.currentMousedownWidget === 'the-video-controller' &&
+            this.currentMouseupWidget === 'the-video-controller' && !attachedShowing && !this.lastDragging) {
+            this.togglePlayback();
+          }
+          this.lastDragging = false;
+          this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
+        }, this.clicksDelay);
+      } else if (this.clicks === 2) {
+        clearTimeout(this.clicksTimer);
+        this.clicks = 0;
+        if (this.currentMouseupWidget === 'the-video-controller') {
+          this.toggleFullScreenState();
         }
-        this.lastDragging = false;
-        this.preventSingleClick = false;
-        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
-      }, this.clicksDelay);
-    },
-    handleDblclick() {
-      clearTimeout(this.clicksTimer); // cancel the time out
-      this.preventSingleClick = true;
-      if (this.currentMouseupWidget === 'the-video-controller') {
-        this.toggleFullScreenState();
-        this.preventSingleClick = false;
       }
     },
     handleKeydown({ code }) {

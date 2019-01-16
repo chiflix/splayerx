@@ -555,7 +555,6 @@ export default {
     .text {
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
-      text-transform: capitalize;
     }
   }
   .placeholder-item-text-wrapper {
