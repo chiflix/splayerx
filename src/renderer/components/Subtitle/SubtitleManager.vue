@@ -43,6 +43,7 @@ export default {
     ...mapGetters([
       'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
       'duration', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
+      'primaryLanguageCode', 'secondaryLanguageCode',
     ]),
     ...mapState({
       loadingOnlineSubtitleIds: ({ Subtitle }) => {
@@ -156,8 +157,8 @@ export default {
         });
       };
       return (await Promise.all([
-        Sagi.mediaTranslate(hash, 'zh'),
-        Sagi.mediaTranslate(hash, 'en'),
+        Sagi.mediaTranslate(hash, this.primaryLanguageCode),
+        Sagi.mediaTranslate(hash, this.secondaryLanguageCode),
       ].map(promise => promise.catch(err => err))))
         .filter(result => !(result instanceof Error))
         .reduce((prev, curr) => prev.concat(curr), [])
@@ -246,7 +247,7 @@ export default {
       const subtitleIndexToChoose = this.choosePrimarySubtitle(
         this.lastSubtitleInfo,
         processedSubtitleList,
-        this.systemLanguageCode,
+        this.primaryLanguageCode,
       );
       if (processedSubtitleList.length) {
         this.$store.dispatch('ifNoSubtitle', false);
