@@ -21,7 +21,6 @@ import helpers from '@/helpers';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { promisify } from './SubtitleLoader/utils';
-import { NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-manager',
