@@ -1,10 +1,17 @@
 <template>
-  <transition name="label">
-    <div class="speedLabel" v-show="showLabel">
-      <Icon type="speed" class="speedIcon"></Icon>
-      <div class="rateNum">{{ rate }}</div>
+  <div class="labels">
+    <transition name="label">
+    <div class="cycle-label" v-show="showCycleLabel" key="cycle">
+      <Icon type="cycle" class="cycle-icon"/>
     </div>
-  </transition>
+    </transition>
+    <transition name="label">
+    <div class="speed-label" v-show="showSpeedLabel" key="speed">
+      <Icon type="speed" class="speed-icon"/>
+      <div class="rate-num">{{ rate }}</div>
+    </div>
+    </transition>
+  </div>
 </template>
 
 <script>
@@ -15,7 +22,8 @@ export default {
   name: 'speedLabel',
   data() {
     return {
-      showLabel: false,
+      showSpeedLabel: false,
+      showCycleLabel: false,
       changeSrc: false,
       changeState: false,
     };
@@ -24,28 +32,31 @@ export default {
     Icon,
   },
   computed: {
-    ...mapGetters(['rate']),
+    ...mapGetters(['rate', 'singleCycle']),
   },
   watch: {
+    singleCycle(val) {
+      this.showCycleLabel = val;
+    },
     rate(val) {
       if (val === 1 && !this.changeSrc) {
         this.changeState = true;
         setTimeout(() => {
           if (this.changeState) {
-            this.showLabel = false;
+            this.showSpeedLabel = false;
           }
         }, 3000);
       } else if (val === 1 && this.changeSrc) {
-        this.showLabel = false;
+        this.showSpeedLabel = false;
       } else {
         this.changeState = false;
-        this.showLabel = true;
+        this.showSpeedLabel = true;
       }
       this.changeSrc = false;
     },
   },
   mounted() {
-    this.$bus.$on('showlabel', () => {
+    this.$bus.$on('show-speedlabel', () => {
       this.changeSrc = true;
     });
   },
@@ -53,67 +64,124 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.speedLabel {
-  background-color: rgba(255, 255, 255, 0.22);
-  border: 0.5px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(3px);
-  border-radius: 3px;
+.labels {
   display: flex;
-  flex-direction: row;
-  .rateNum {
-    color: rgba(255, 255, 255, 0.36);
-    font-weight: 600;
+  .speed-label {
+    background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
+    border: 0.5px solid rgba(255,255,255,0.20);
+    backdrop-filter: blur(5px);
+    border-radius: 5px;
+    display: flex;
+    flex-direction: row;
+    .rate-num {
+      color: rgba(255, 255, 255, 0.36);
+      font-weight: 600;
+    }
+  }
+  .cycle-label {
+    background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
+    border: 0.5px solid rgba(255,255,255,0.20);
+    backdrop-filter: blur(5px);
+    border-radius: 5px;
   }
 }
 @media screen and (max-width: 512px) {
-  .speedLabel {
+  .labels {
     height: 15px;
-    .speedIcon {
-      margin: auto 0 auto 7.5px;
+    .speed-label {
+      .speed-icon {
+        margin: auto 0 auto 7.5px;
+      }
+      .rate-num {
+        line-height: 10px;
+        font-size: 10px;
+        margin: auto 7px auto 2.5px;
+      }
     }
-    .rateNum {
-      line-height: 10px;
-      font-size: 10px;
-      margin: auto 7px auto 2.5px;
+    .cycle-label {
+      width: 23px;
+      margin-right: 5px;
+      .cycle-icon {
+        margin-top: 3px;
+        margin-left: 5px;
+        margin-right: 6px;
+        margin-bottom: 4px;
+      }
     }
   }
 }
 @media screen and (min-width: 513px) and (max-width: 854px) {
-  .speedLabel {
+  .labels {
     height: 15px;
-    .speedIcon {
-      margin: auto 0 auto 7.5px;
+    .speed-label {
+      .speed-icon {
+        margin: auto 0 auto 7.5px;
+      }
+      .rate-num {
+        line-height: 10px;
+        font-size: 10px;
+        margin: auto 7px auto 2.5px;
+      }
     }
-    .rateNum {
-      line-height: 10px;
-      font-size: 10px;
-      margin: auto 7px auto 2.5px;
+    .cycle-label {
+      width: 23px;
+      margin-right: 5px;
+      .cycle-icon {
+        margin-top: 3px;
+        margin-left: 5px;
+        margin-right: 6px;
+        margin-bottom: 4px;
+      }
     }
   }
 }
 @media screen and (min-width: 855px) and (max-width: 1920px) {
-  .speedLabel {
+  .labels {
     height: 18px;
-    .speedIcon {
-      margin: auto 0 auto 8px;
+    .speed-label {
+      .speed-icon {
+        margin: auto 0 auto 8px;
+      }
+      .rate-num {
+        line-height: 12px;
+        font-size: 12px;
+        margin: auto 8px auto 3px;
+      }
     }
-    .rateNum {
-      line-height: 12px;
-      font-size: 12px;
-      margin: auto 8px auto 3px;
+    .cycle-label {
+      width: 28px;
+      margin-right: 6px;
+      .cycle-icon {
+        margin-top: 4px;
+        margin-left: 7px;
+        margin-right: 7.5px;
+        margin-bottom: 5px;
+      }
     }
   }
 }
 @media screen and (min-width: 1921px) {
-  .speedLabel {
+  .labels {
     height: 28px;
-    .speedIcon {
-      margin: 8px 0 0 12px;
+    .speed-label {
+      .speed-icon {
+        margin: 8px 0 0 12px;
+      }
+      .rate-num {
+        line-height: 16px;
+        font-size: 16px;
+        margin: 6px 10px 0 4px;
+      }
     }
-    .rateNum {
-      line-height: 16px;
-      font-size: 16px;
-      margin: 6px 10px 0 4px;
+    .cycle-label {
+      width: 38px;
+      margin-right: 9px;
+      .cycle-icon {
+        margin-top: 7px;
+        margin-left: 9px;
+        margin-right: 10px;
+        margin-bottom: 6.75px;
+      }
     }
   }
 }

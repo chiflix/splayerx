@@ -283,7 +283,7 @@ export default {
     originSrc(val, oldVal) {
       this.coverFinded = false;
       this.saveScreenshot(oldVal);
-      this.$bus.$emit('showlabel');
+      this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
         audioTrackList: [],
       });
