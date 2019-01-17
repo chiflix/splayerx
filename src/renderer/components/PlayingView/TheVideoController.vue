@@ -9,8 +9,7 @@
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
-    @mouseup.left="handleMouseupLeft"
-    @dblclick="handleDblclick">
+    @mouseup.left="handleMouseupLeft">
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
@@ -79,10 +78,9 @@ export default {
       mouseleftDelay: 1000,
       popupShow: false,
       clicksTimer: 0,
-      clicksDelay: 200,
+      clicksDelay: 250,
       dragDelay: 200,
       widgetsStatus: {},
-      preventSingleClick: false,
       lastAttachedShowing: false,
       focusedTimestamp: 0,
       focusDelay: 500,
@@ -94,6 +92,9 @@ export default {
       lastDragging: false,
       displayState: {},
       tempRecentPlaylistDisplayState: false,
+      clicks: 0,
+      videoChanged: false,
+      videoChangedTimer: 0,
     };
   },
   computed: {
@@ -112,7 +113,7 @@ export default {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
-        this.attachedShown);
+        this.attachedShown || this.videoChanged);
     },
     onOtherWidget() {
       return this.currentWidget !== this.$options.name;
@@ -139,6 +140,13 @@ export default {
         }
       });
       this.isMousedown = false;
+      this.videoChanged = true;
+      if (this.videoChangedTimer) {
+        this.clock.clearTimeout(this.videoChangedTimer);
+      }
+      this.videoChangedTimer = this.clock.setTimeout(() => {
+        this.videoChanged = false;
+      }, 3000);
     },
     isDragging(val, oldval) {
       if (!val && oldval) {
@@ -354,30 +362,32 @@ export default {
     handleMouseupLeft() {
       this.isMousemove = false;
       this.isMousedown = false;
+      this.clicks += 1;
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
       }
       if (!this.isValidClick() || (this.lastDragging && this.lastAttachedShowing)) {
+        this.clicks = 0;
         return;
       }
-      this.clicksTimer = setTimeout(() => {
-        const attachedShowing = this.lastAttachedShowing;
-        if (
-          this.currentMousedownWidget === 'the-video-controller' &&
-          this.currentMouseupWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.lastDragging) {
-          this.togglePlayback();
+      if (this.clicks === 1) {
+        this.clicksTimer = setTimeout(() => {
+          this.clicks = 0;
+          const attachedShowing = this.lastAttachedShowing;
+          if (
+            this.currentMousedownWidget === 'the-video-controller' &&
+            this.currentMouseupWidget === 'the-video-controller' && !attachedShowing && !this.lastDragging) {
+            this.togglePlayback();
+          }
+          this.lastDragging = false;
+          this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
+        }, this.clicksDelay);
+      } else if (this.clicks === 2) {
+        clearTimeout(this.clicksTimer);
+        this.clicks = 0;
+        if (this.currentMouseupWidget === 'the-video-controller') {
+          this.toggleFullScreenState();
         }
-        this.lastDragging = false;
-        this.preventSingleClick = false;
-        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
-      }, this.clicksDelay);
-    },
-    handleDblclick() {
-      clearTimeout(this.clicksTimer); // cancel the time out
-      this.preventSingleClick = true;
-      if (this.currentMouseupWidget === 'the-video-controller') {
-        this.toggleFullScreenState();
-        this.preventSingleClick = false;
       }
     },
     handleKeydown({ code }) {

@@ -38,6 +38,7 @@ export default {
       subtitleSelect: '翻譯結果',
       AITranslation: '重新加載翻譯結果',
       loadSubtitleFile: '加載字幕文件…',
+      menuLoading: '正在匹配翻譯結果 ...',
       mainSubtitle: '第一字幕',
       langZhCN: '中文',
       langEn: '英文',
@@ -136,9 +137,9 @@ export default {
       title: '未能加載字幕',
       content: '暫不支持該字幕類型',
     },
-    noResult: {
-      title: '未找到翻譯結果',
-      content: '網絡異常或缺少翻譯結果',
+    offLine: {
+      title: '未能連接網絡',
+      content: '建議您檢查網絡狀況後重試。',
     },
   },
   loading: {

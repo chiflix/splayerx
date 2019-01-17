@@ -21,7 +21,6 @@ import helpers from '@/helpers';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { promisify } from './SubtitleLoader/utils';
-import { ONLINE_LOADING, NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-manager',
@@ -36,7 +35,6 @@ export default {
       embeddedSubtitles: [],
       newOnlineSubtitles: [],
       lastSubtitleInfo: { rankIndex: -1 },
-      initial: false,
     };
   },
   computed: {
@@ -59,6 +57,7 @@ export default {
       this.resetSubtitles();
       this.addInitialSubtitles(newVal);
       this.lastSubtitleInfo = { rankIndex: -1 };
+      this.$store.dispatch('ifNoSubtitle', true);
     },
     premiumSubtitles(newVal) {
       if (this.privacyAgreement) {
@@ -120,7 +119,6 @@ export default {
         .reduce((prev, curr) => prev.concat(curr));
       if (localEmbeddedSubtitles.length) addSubtitles(localEmbeddedSubtitles);
       else {
-        this.initial = true;
         this.$bus.$emit('menu-subtitle-refresh', true);
       }
     },
@@ -289,22 +287,6 @@ export default {
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
     this.$bus.$on('finished-add-subtitles', () => {
       this.addSubtitles(this.newOnlineSubtitles);
-    });
-    this.$bus.$on('no-translation-result', () => {
-      setTimeout(() => {
-        if (!this.subtitleList.length) {
-          if (!this.initial) {
-            this.addLog('error', {
-              message: 'No Translation Result .',
-              errcode: NO_TRANSLATION_RESULT,
-            });
-          }
-          this.initial = false;
-          this.$store.dispatch('ifNoSubtitle', true);
-        } else {
-          this.$store.dispatch('ifNoSubtitle', false);
-        }
-      }, 500);
     });
     this.addInitialSubtitles(this.originSrc);
   },
