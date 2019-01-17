@@ -43,7 +43,7 @@ export default {
     ...mapGetters([
       'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
       'duration', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
-      'primaryLanguageCode', 'secondaryLanguageCode',
+      'primaryLanguage', 'primaryLanguageCode', 'secondaryLanguage', 'secondaryLanguageCode', 'codeToLanguage',
     ]),
     ...mapState({
       loadingOnlineSubtitleIds: ({ Subtitle }) => {
@@ -217,7 +217,9 @@ export default {
               const subtitleRankIndex = this.subtitleList
                 .filter(subtitle => subtitle.type === type && subtitle.language === language)
                 .findIndex(subtitle => subtitle.id === id) + 1;
-              sub.metaInfo.name = `${this.$t(`subtitle.language.${language}`)} ${romanize(subtitleRankIndex)}`;
+              const languageName = this.secondaryLanguageCode === ''
+                ? this.$t(`subtitle.language.${language}`) : this.codeToLanguage(language);
+              sub.metaInfo.name = `${languageName} ${romanize(subtitleRankIndex)}`;
             } else {
               const subtitleRankIndex = this.subtitleList
                 .filter(subtitle => subtitle.type === type)
