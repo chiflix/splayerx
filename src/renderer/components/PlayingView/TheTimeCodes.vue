@@ -5,17 +5,17 @@
       @mousedown="switchTimeContent">
           <span class="timeContent" ref="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration"></span>
     </div>
-    <rateLabel class="rate"></rateLabel>
+    <Labels class="rate"/>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import rateLabel from './RateLabel.vue';
+import Labels from './Labels.vue';
 
 export default {
   name: 'the-time-codes',
   components: {
-    rateLabel,
+    Labels,
   },
   props: ['showAllWidgets'],
   data() {
