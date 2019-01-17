@@ -389,6 +389,25 @@ export default {
     height: 11px;
   }
 }
+.cycle {
+  display: block;
+  @media screen and (max-width: 512px) {
+    width: 11px;
+    height: 7px;
+  }
+  @media screen and (min-width: 513px) and (max-width: 854px) {
+    width: 11px;
+    height: 7px;
+  }
+  @media screen and (min-width: 855px) and (max-width: 1920px) {
+    width: 13px;
+    height: 8px;
+  }
+  @media screen and (min-width: 1921px) {
+    width: 18px;
+    height: 11.5px;
+  }
+}
 .refresh {
   .default {
     display: block;

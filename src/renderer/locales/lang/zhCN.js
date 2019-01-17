@@ -21,6 +21,7 @@ export default {
       pause: '暂停',
       forward: '前进',
       backward: '后退',
+      singleCycle: '循环播放单个视频',
     },
     audio: {
       name: '音频',

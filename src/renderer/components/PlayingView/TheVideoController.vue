@@ -50,7 +50,6 @@ import TheTimeCodes from './TheTimeCodes.vue';
 import TheProgressBar from './TheProgressBar.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
-import SpeedLabel from './RateLabel.vue';
 import { videodata } from '../../store/video';
 
 export default {
@@ -66,7 +65,6 @@ export default {
     'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
     'recent-playlist': RecentPlaylist,
-    SpeedLabel,
   },
   data() {
     return {
