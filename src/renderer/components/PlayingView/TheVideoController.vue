@@ -80,7 +80,7 @@ export default {
       mouseleftDelay: 1000,
       popupShow: false,
       clicksTimer: 0,
-      clicksDelay: 200,
+      clicksDelay: 250,
       dragDelay: 200,
       widgetsStatus: {},
       lastAttachedShowing: false,
