@@ -2,21 +2,14 @@ import Vue from 'vue';
 import pick from 'lodash/pick';
 import partialRight from 'lodash/partialRight';
 import camelCase from 'lodash/camelCase';
-import osLocale from 'os-locale';
 import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
 
-function getFormattedSystemLocale() {
-  const locale = osLocale.sync();
-  return locale.slice(0, locale.indexOf('_'));
-}
-
-function metaInfoToWeight(type, value, subtitleList) {
+function metaInfoToWeight(type, value, subtitleList, primaryLanguage) {
   const result = { existed: subtitleList.filter(({ rank }) => !!rank).length };
   switch (type) {
     case 'language': {
-      const systemLocale = getFormattedSystemLocale();
-      result.matchSystemLocale = systemLocale === value ? 1 : 0;
+      result.matchPrimaryLanguage = primaryLanguage === value ? 1 : 0;
       result.existedLanguage = subtitleList
         .filter(({ language: existedLanguage }) => existedLanguage === value).length;
       break;
@@ -46,7 +39,7 @@ function rankCalculation(type, options, lastRank) {
   };
   const rankTypes = [
     {
-      name: 'MATCH_SYSTEM_LOCALE',
+      name: 'MATCH_PRIMARY_LANGUAGE',
       value: 1e3,
       types: ['local', 'online'],
     },
@@ -82,8 +75,12 @@ function rankCalculation(type, options, lastRank) {
     .reduce((prev, { name, value }) => prev + (value * options[camelCase(name)]), baseRank);
 }
 
-function metaInfoUpdate(subtitleType, subtitleList, infoType, infoValue, lastRank) {
-  const weightOptions = metaInfoToWeight(infoType, infoValue, subtitleList);
+function metaInfoUpdate(
+  subtitleType, subtitleList, primaryLanguage,
+  infoType, infoValue,
+  lastRank,
+) {
+  const weightOptions = metaInfoToWeight(infoType, infoValue, subtitleList, primaryLanguage);
   if (lastRank) Reflect.deleteProperty(weightOptions, 'existed');
   return rankCalculation(subtitleType, weightOptions, lastRank);
 }
@@ -236,7 +233,12 @@ const actions = {
   [subtitleActions.UPDATE_METAINFO]({ commit, state, getters }, { id, type, value }) {
     if (state[`${type}s`]) commit(`${type.toUpperCase()}S_UPDATE`, { id, [type]: value });
     const { types, ranks } = state;
-    const rank = metaInfoUpdate(types[id], getters.subtitleList, type, value, ranks[id]);
+    const { primaryLanguageCode } = getters;
+    const rank = metaInfoUpdate(
+      types[id], getters.subtitleList, primaryLanguageCode,
+      type, value,
+      ranks[id],
+    );
     commit(subtitleMutations.RANKS_UPDATE, { id, rank });
   },
   updateSubDelay({ commit }, delta) {
