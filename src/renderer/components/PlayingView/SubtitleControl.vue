@@ -462,19 +462,18 @@ export default {
       this.count = this.rotateTime * 100;
       setTimeout(() => {
         this.$bus.$emit('finished-add-subtitles');
+        this.isInitial = false;
         if (this.onAnimation) {
           this.anim.addEventListener('complete', () => {
             this.anim.setSpeed(1.5);
           });
           this.onAnimation = false;
           this.anim.loop = false;
-          this.isInitial = false;
         } else {
           this.refAnimation = 'refresh-animation';
           this.$store.dispatch('removeMessagesByType');
         }
         document.querySelector('.scrollScope').scrollTop = 0;
-        this.$bus.$emit('no-translation-result');
         this.timer = null;
       }, 1000);
     });

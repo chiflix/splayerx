@@ -136,9 +136,9 @@ export default {
       title: '未能加载字幕',
       content: '暂不支持该字幕类型',
     },
-    noResult: {
-      title: '未找到翻译结果',
-      content: '网络异常或缺少翻译结果',
+    offLine: {
+      title: '未能连接网络',
+      content: '建议您检查网络状况后重试。',
     },
   },
   loading: {
