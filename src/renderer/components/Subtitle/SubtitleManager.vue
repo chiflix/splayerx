@@ -217,9 +217,7 @@ export default {
               const subtitleRankIndex = this.subtitleList
                 .filter(subtitle => subtitle.type === type && subtitle.language === language)
                 .findIndex(subtitle => subtitle.id === id) + 1;
-              const languageName = this.secondaryLanguageCode === ''
-                ? this.$t(`subtitle.language.${language}`) : this.codeToLanguage(language);
-              sub.metaInfo.name = `${languageName} ${romanize(subtitleRankIndex)}`;
+              sub.metaInfo.name = `${this.codeToLanguage(language)} ${romanize(subtitleRankIndex)}`;
             } else {
               const subtitleRankIndex = this.subtitleList
                 .filter(subtitle => subtitle.type === type)
