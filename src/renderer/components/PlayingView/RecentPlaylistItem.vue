@@ -298,14 +298,6 @@ $border-radius: 3px;
       background-color: rgba(255, 255, 255, 0.2);
       transition: opacity 80ms 80ms ease-out;
     }
-    .black-gradient {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      border-radius: $border-radius;
-    }
     .blur {
       filter: blur(1.5px);
       clip-path: inset(0 round $border-radius);
