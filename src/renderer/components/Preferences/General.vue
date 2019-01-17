@@ -360,7 +360,7 @@ export default {
         .drop-down-content-en {
           left: 76px;
           width: 210px;
-          height: 138px;
+          height: 85px;
         }
       }
       .second-selection {
@@ -424,7 +424,7 @@ export default {
         .drop-down-content-en {
           left: 76px;
           width: 210px;
-          height: 138px;
+          height: 112px;
         }
       }
     }
