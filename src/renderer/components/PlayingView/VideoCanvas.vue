@@ -177,7 +177,7 @@ export default {
         videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
-      const imagePath = canvas.toDataURL('image/png');
+      const imagePath = canvas.toDataURL('image/jpeg', 0.8);
       // 用于测试截图的代码，以后可能还会用到
       // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
       // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
@@ -186,7 +186,7 @@ export default {
         videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
-      const smallImagePath = canvas.toDataURL('image/png');
+      const smallImagePath = canvas.toDataURL('image/jpeg', 0.8);
       const data = {
         shortCut: imagePath,
         smallShortCut: smallImagePath,
