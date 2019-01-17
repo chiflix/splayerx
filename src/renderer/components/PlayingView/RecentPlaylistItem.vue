@@ -8,9 +8,9 @@
   }">
       <div class="child-item" style="will-change: transform;">
         <div class="img blur" ref="blur"
-          v-if="!isPlaying && imageLoaded"
+          v-if="imageLoaded"
           :style="{
-            backgroundImage: backgroundImage,
+            backgroundImage: !isPlaying ? `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}` : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
           }"/>
         <transition name="fade2">
         <div class="white-hover"
@@ -21,70 +21,68 @@
             minHeight: `${thumbnailHeight}px`,
           }"/>
         </transition>
-        <div class="black-gradient"
+        <div class="content" ref="content"
           @mouseenter="mouseoverVideo"
           @mouseleave="mouseoutVideo"
-          @mouseup="mouseupVideo">
-          <div class="content" ref="content"
+          @mouseup="mouseupVideo"
+          :style="{
+            height: '100%',
+          }">
+          <div class="info"
             :style="{
-              height: '100%',
-            }">
-              <div class="info"
+                height: `${thumbnailHeight - bottom}px`,
+                width: `${thumbnailWidth - 2 * side}px`,
+                left: `${side}px`,
+              }">
+            <div class="overflow-container"
+              :style="{
+                height: sizeAdaption(22),
+                bottom: sizeAdaption(14),
+              }">
+            <transition name="icon">
+            <div class="icon-container"
+              v-if="isPlaying">
+              <Icon type="playlistplay" class="playlist-play"
                 :style="{
-                    height: `${thumbnailHeight - bottom}px`,
-                    width: `${thumbnailWidth - 2 * side}px`,
-                    left: `${side}px`,
-                  }">
-                <div class="overflow-container"
-                  :style="{
-                    height: sizeAdaption(22),
-                    bottom: sizeAdaption(14),
-                  }">
-                <transition name="icon">
-                <div class="icon-container"
-                  v-if="isPlaying">
-                  <Icon type="playlistplay" class="playlist-play"
-                    :style="{
-                      width: sizeAdaption(10),
-                      height: sizeAdaption(22),
-                      marginRight: sizeAdaption(4),
-                    }"/>
-                  <div class="playing"
-                    :style="{
-                      paddingTop: sizeAdaption(5),
-                      fontSize: sizeAdaption(12),
-                      lineHeight: sizeAdaption(12),
-                    }">{{ $t('recentPlaylist.playing') }}</div>
-                </div>
-                </transition>
-                </div>
-                <transition name="fade">
-                <div class="progress" ref="progress"
-                  :style="{
-                    opacity: '0',
-                    height: sizeAdaption(2),
-                    bottom: sizeAdaption(14),
-                    marginBottom: sizeAdaption(7),
-                  }">
-                  <div class="slider"
-                  :style="{
-                    width: `${sliderPercentage}%`,
-                  }"></div>
-                </div>
-                </transition>
-                <div class="title" ref="title"
-                  :style="{
-                    color: 'rgba(255,255,255,0.40)',
-                    fontSize: sizeAdaption(14),
-                    lineHeight: sizeAdaption(14),
-                  }">{{ baseName }}</div>
-              </div>
+                  width: sizeAdaption(10),
+                  height: sizeAdaption(22),
+                  marginRight: sizeAdaption(4),
+                }"/>
+              <div class="playing"
+                :style="{
+                  paddingTop: sizeAdaption(5),
+                  fontSize: sizeAdaption(12),
+                  lineHeight: sizeAdaption(12),
+                }">{{ $t('recentPlaylist.playing') }}</div>
+            </div>
+            </transition>
+            </div>
+            <transition name="fade">
+            <div class="progress" ref="progress"
+              :style="{
+                opacity: '0',
+                height: sizeAdaption(2),
+                bottom: sizeAdaption(14),
+                marginBottom: sizeAdaption(7),
+              }">
+              <div class="slider"
+              :style="{
+                width: `${sliderPercentage}%`,
+              }"></div>
+            </div>
+            </transition>
+            <div class="title" ref="title"
+              :style="{
+                color: 'rgba(255,255,255,0.40)',
+                fontSize: sizeAdaption(14),
+                lineHeight: sizeAdaption(14),
+              }">{{ baseName }}</div>
           </div>
-          <div class="border" ref="border"
-            :style="{
-              borderColor: 'rgba(255,255,255,0.15)',
-            }"/>
         </div>
+        <div class="border" ref="border"
+          :style="{
+            borderColor: 'rgba(255,255,255,0.15)',
+          }"/>
       </div>
 </div>
 </template>
@@ -292,20 +290,21 @@ $border-radius: 3px;
     border-radius: $border-radius;
     width: 100%;
     height: 100%;
-    background-color: rgba(255,255,255,0.1);
-    .black-gradient {
-      position: absolute;
-      border-radius: $border-radius;
-      width: 100%;
-      height: calc(100% + 0.08vw);
-      background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
-    }
+    background-color: rgba(111,111,111,0.30);
     .white-hover {
       pointer-events:none;
       position: absolute;
       border-radius: $border-radius;
       background-color: rgba(255, 255, 255, 0.2);
       transition: opacity 80ms 80ms ease-out;
+    }
+    .black-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: $border-radius;
     }
     .blur {
       filter: blur(1.5px);
@@ -326,9 +325,9 @@ $border-radius: 3px;
       position: absolute;
       z-index: 100;
       top: 0;
-      bottom: 0;
       left: 0;
       right: 0;
+      bottom: 0;
 
       .info {
         position: absolute;
