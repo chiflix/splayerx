@@ -1,5 +1,21 @@
 import asyncStorage from '@/helpers/asyncStorage';
 
+const languageToCode = {
+  简体中文: 'zh-CN',
+  繁體中文: 'zh-TW',
+  English: 'en',
+  Español: 'es',
+  日本語: 'ja',
+  Français: 'fr',
+  한국어: 'ko',
+  Português: 'pt',
+  العربية: 'ar',
+  Deutsch: 'de',
+  Русский: 'ru',
+  हिन्दी: 'hi',
+  Italiano: 'it',
+};
+
 const state = {
   deleteVideoHistoryOnExit: false,
   privacyAgreement: false,
@@ -10,8 +26,12 @@ const getters = {
   preferenceData: state => state,
   deleteVideoHistoryOnExit: state => state.deleteVideoHistoryOnExit,
   privacyAgreement: state => state.privacyAgreement,
-  primaryLanguage: state => state.primaryLanguage,
-  secondaryLanguage: state => state.secondaryLanguage,
+  primaryLanguage: state => Object
+    .keys(languageToCode)[Object.values(languageToCode).indexOf(state.primaryLanguage)] || '',
+  primaryLanguageCode: state => state.primaryLanguage,
+  secondaryLanguage: state => Object
+    .keys(languageToCode)[Object.values(languageToCode).indexOf(state.secondaryLanguage)] || '',
+  secondaryLanguageCode: state => state.secondaryLanguage,
 };
 
 const mutations = {
@@ -49,11 +69,11 @@ const actions = {
     asyncStorage.set('preferences', state);
   },
   primaryLanguage({ commit, state }, payload) {
-    commit('primaryLanguage', payload);
+    commit('primaryLanguage', languageToCode[payload] || 'none');
     asyncStorage.set('preferences', state);
   },
   secondaryLanguage({ commit, state }, payload) {
-    commit('secondaryLanguage', payload);
+    commit('secondaryLanguage', languageToCode[payload] || 'none');
     asyncStorage.set('preferences', state);
   },
   getLocalPreference({ commit }) {
