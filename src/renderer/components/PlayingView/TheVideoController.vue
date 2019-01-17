@@ -369,6 +369,7 @@ export default {
         clearTimeout(this.clicksTimer);
       }
       if (!this.isValidClick() || (this.lastDragging && this.lastAttachedShowing)) {
+        this.clicks = 0;
         return;
       }
       if (this.clicks === 1) {
