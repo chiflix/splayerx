@@ -27,7 +27,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'rate']),
+    ...mapGetters(['duration', 'rate', 'singleCycle']),
     hasDuration() {
       return !Number.isNaN(this.duration);
     },
@@ -41,6 +41,13 @@ export default {
           this.progressTriggerStopped = false;
         }, this.progressDisappearDelay);
       }
+    },
+    singleCycle() {
+      this.progressTriggerStopped = true;
+      this.clock.clearTimeout(this.progressTriggerId);
+      this.progressTriggerId = this.clock.setTimeout(() => {
+        this.progressTriggerStopped = false;
+      }, this.progressDisappearDelay);
     },
   },
   methods: {

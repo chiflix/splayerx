@@ -1,6 +1,6 @@
 <template>
   <div class="labels">
-    <transition name="label">
+    <transition name="cycle-label">
     <div class="cycle-label" v-show="showCycleLabel" key="cycle">
       <Icon type="cycle" class="cycle-icon"/>
     </div>
@@ -189,6 +189,12 @@ export default {
   transition: opacity .3s;
 }
 .label-enter, .label-leave-to {
+  opacity: 0;
+}
+.cycle-label-enter-active {
+  transition: opacity 300ms;
+}
+.cycle-label-enter, .cycle-label-leave-to {
   opacity: 0;
 }
 </style>
