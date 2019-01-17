@@ -32,6 +32,8 @@ const getters = {
   secondaryLanguage: state => Object
     .keys(languageToCode)[Object.values(languageToCode).indexOf(state.secondaryLanguage)] || '',
   secondaryLanguageCode: state => state.secondaryLanguage,
+  codeToLanguage: () => code => Object
+    .keys(languageToCode)[Object.values(languageToCode).indexOf(code)] || '',
 };
 
 const mutations = {
