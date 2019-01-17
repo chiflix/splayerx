@@ -36,7 +36,6 @@ export default {
       embeddedSubtitles: [],
       newOnlineSubtitles: [],
       lastSubtitleInfo: { rankIndex: -1 },
-      initial: false,
     };
   },
   computed: {
@@ -121,8 +120,7 @@ export default {
         .reduce((prev, curr) => prev.concat(curr));
       if (localEmbeddedSubtitles.length) addSubtitles(localEmbeddedSubtitles);
       else {
-        this.initial = true;
-        this.$bus.$emit('menu-subtitle-refresh', this.initial);
+        this.$bus.$emit('menu-subtitle-refresh', true);
       }
     },
     // different subtitle getters
@@ -290,22 +288,6 @@ export default {
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
     this.$bus.$on('finished-add-subtitles', () => {
       this.addSubtitles(this.newOnlineSubtitles);
-    });
-    this.$bus.$on('no-translation-result', () => {
-      setTimeout(() => {
-        if (!this.subtitleList.length) {
-          if (!this.initial) {
-            this.addLog('error', {
-              message: 'No Translation Result .',
-              errcode: NO_TRANSLATION_RESULT,
-            });
-          }
-          this.initial = false;
-          this.$store.dispatch('ifNoSubtitle', true);
-        } else {
-          this.$store.dispatch('ifNoSubtitle', false);
-        }
-      }, 500);
     });
     this.addInitialSubtitles(this.originSrc);
   },
