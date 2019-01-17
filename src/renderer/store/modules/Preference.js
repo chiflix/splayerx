@@ -5,6 +5,7 @@ const state = {
   privacyAgreement: false,
   primaryLanguage: '',
   secondaryLanguage: '',
+  singleCycle: false,
 };
 const getters = {
   preferenceData: state => state,
@@ -12,6 +13,7 @@ const getters = {
   privacyAgreement: state => state.privacyAgreement,
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
+  singleCycle: state => state.singleCycle,
 };
 
 const mutations = {
@@ -26,6 +28,9 @@ const mutations = {
   },
   secondaryLanguage(state, payload) {
     state.secondaryLanguage = payload;
+  },
+  singleCycle(state, payload) {
+    state.singleCycle = payload;
   },
   setPreference(state, payload) {
     Object.assign(state, payload);
@@ -55,6 +60,14 @@ const actions = {
   secondaryLanguage({ commit, state }, payload) {
     commit('secondaryLanguage', payload);
     asyncStorage.set('preferences', state);
+  },
+  singleCycle({ commit }) {
+    commit('singleCycle', true);
+    commit('LOOP_UPDATE', true);
+  },
+  notSingleCycle({ commit }) {
+    commit('singleCycle', false);
+    commit('LOOP_UPDATE', false);
   },
   getLocalPreference({ commit }) {
     asyncStorage.get('preferences').then((data) => {

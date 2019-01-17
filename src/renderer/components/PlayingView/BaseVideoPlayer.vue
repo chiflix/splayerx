@@ -137,6 +137,7 @@ export default {
       this.$refs.video.playbackRate = newVal;
     },
     loop(newVal) {
+      console.log(newVal);
       this.$refs.video.loop = newVal;
     },
     // tracks
