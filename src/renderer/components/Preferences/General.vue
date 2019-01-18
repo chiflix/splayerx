@@ -15,7 +15,7 @@
           :class="{ 'drop-down-en': $i18n.locale === 'en' }"
           :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
           @mouseup.stop="openFirstDropdown">
-          {{ primaryLanguage }}
+          {{ codeToLanguageName(primaryLanguage) }}
           <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
         </div>
         <div class="drop-down-content no-drag"
@@ -24,8 +24,9 @@
           <div class="content">
             <div class="selection"
               v-for="(language, index) in primaryLanguages"
+              :key="index"
               @mouseup.stop="handleFirstSelection(language)">
-              {{ language }}
+              {{ codeToLanguageName(language) }}
             </div>
           </div>
         </div>
@@ -36,7 +37,7 @@
           :class="{ 'drop-down-en': $i18n.locale === 'en' }"
           :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
           @mouseup.stop="openSecondDropdown">
-          {{ secondaryLanguage }}
+          {{ codeToLanguageName(secondaryLanguage) }}
           <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>                
         </div>
         <div class="drop-down-content no-drag"
@@ -45,14 +46,15 @@
           <div class="content">
             <div class="selection" ref="secondarySelection"
               v-for="(language, index) in secondaryLanguages"
+              :key="index"
               :style="{
-                color: (language === primaryLanguage && language !== $t('preferences.none')) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
+                color: (language === primaryLanguage && language !== noLanguage) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
               }"
               @mouseover="mouseover(index)"
               @mouseout="mouseout(index)"
               @mouseup.stop="handleSecondSelection(language, index)">
-              {{ language }}
-              <span v-if="language === primaryLanguage && language !== $t('preferences.none')"
+              {{ codeToLanguageName(language) }}
+              <span v-if="language === primaryLanguage && language !== noLanguage"
                 style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.primary') }}</span>
             </div>
           </div>
@@ -70,6 +72,7 @@
 
 <script>
 import electron from 'electron';
+import { codeToLanguageName } from '@/helpers/language';
 import Icon from '@/components/BaseIconContainer.vue';
 import BaseCheckBox from './BaseCheckBox.vue';
 
@@ -84,23 +87,13 @@ export default {
       showFirstSelection: false,
       showSecondSelection: false,
       languages: [
-        this.$t('preferences.none'),
-        '简体中文',
-        '繁體中文',
-        'English',
-        // 'Español',
-        // '日本語',
-        // 'Français',
-        // '한국어',
-        // 'Português',
-        // 'العربية',
-        // 'Deutsch',
-        // 'Русский',
-        // 'हिन्दी',
-        // 'Italiano',
+        'zh-CN',
+        'zh-TW',
+        'en',
       ],
       mouseDown: false,
       isMoved: false,
+      noLanguage: this.$t('preferences.none'),
     };
   },
   created() {
@@ -133,10 +126,11 @@ export default {
   },
   computed: {
     primaryLanguages() {
-      return this.languages.filter(language => language !== this.primaryLanguage && language !== this.$t('preferences.none'));
+      return this.languages.filter(language => language !== this.primaryLanguage);
     },
     secondaryLanguages() {
-      return this.languages.filter(language => language !== this.secondaryLanguage);
+      return [this.noLanguage]
+        .concat(this.languages.filter(language => language !== this.secondaryLanguage));
     },
     preferenceData() {
       return this.$store.getters.preferenceData;
@@ -153,11 +147,11 @@ export default {
     },
     secondaryLanguage: {
       get() {
-        if (this.$store.getters.secondaryLanguage === '') return this.$t('preferences.none');
+        if (this.$store.getters.secondaryLanguage === '') return this.noLanguage;
         return this.$store.getters.secondaryLanguage;
       },
       set(val) {
-        if (val === this.$t('preferences.none')) val = '';
+        if (val === this.noLanguage) val = '';
         this.$store.dispatch('secondaryLanguage', val).then(() => {
           electron.ipcRenderer.send('preference-to-main', this.preferenceData);
         });
@@ -198,6 +192,10 @@ export default {
     },
   },
   methods: {
+    codeToLanguageName(code) {
+      if (code === this.noLanguage) return code;
+      return codeToLanguageName(code);
+    },
     mouseover(index) {
       if (this.secondaryLanguages[index] !== this.primaryLanguage) {
         this.$refs.secondarySelection[index].classList.add('selection-hover');
@@ -209,7 +207,7 @@ export default {
       }
     },
     handleFirstSelection(selection) {
-      if (selection === this.secondaryLanguage) this.secondaryLanguage = this.$t('preferences.none');
+      if (selection === this.secondaryLanguage) this.secondaryLanguage = this.noLanguage;
       this.primaryLanguage = selection;
       this.showFirstSelection = false;
     },

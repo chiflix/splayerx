@@ -190,7 +190,7 @@ export default {
       const basicInfo = [
         'src', 'crossOrigin', 'preload',
         'defaultPlaybackRate', 'autoplay',
-        'defaultMuted', 'muted', 'volume',
+        'defaultMuted', 'muted', 'volume', 'loop',
       ];
       basicInfo.forEach((settingItem) => {
         videoElement[settingItem] = this[settingItem];

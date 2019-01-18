@@ -328,6 +328,7 @@ new Vue({
                 }
               },
             },
+            { type: 'separator' },
             { label: this.$t('msg.playback.captureScreen'), enabled: false },
             { label: this.$t('msg.playback.captureVideoClip'), enabled: false },
           ],
