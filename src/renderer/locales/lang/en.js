@@ -22,7 +22,7 @@ export default {
       pause: 'Pause',
       forward: 'Step Forward',
       backward: 'Step Backward',
-      singleCycle: 'Single Cycle',
+      singleCycle: 'File Loop',
     },
     audio: {
       name: 'Audio',
