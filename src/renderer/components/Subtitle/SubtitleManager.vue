@@ -16,6 +16,7 @@ import { readdir } from 'fs';
 import osLocale from 'os-locale';
 import romanize from 'romanize';
 import Sagi from '@/helpers/sagi';
+import { codeToLanguageName, normalizeCode } from '@/helpers/language';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
 import SubtitleRenderer from './SubtitleRenderer.vue';
@@ -41,6 +42,7 @@ export default {
     ...mapGetters([
       'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
       'duration', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
+      'primaryLanguage', 'secondaryLanguage',
     ]),
     ...mapState({
       loadingOnlineSubtitleIds: ({ Subtitle }) => {
@@ -153,8 +155,8 @@ export default {
         });
       };
       return (await Promise.all([
-        Sagi.mediaTranslate(hash, 'zh'),
-        Sagi.mediaTranslate(hash, 'en'),
+        Sagi.mediaTranslate(hash, this.primaryLanguage),
+        Sagi.mediaTranslate(hash, this.secondaryLanguage),
       ].map(promise => promise.catch(err => err))))
         .filter(result => !(result instanceof Error))
         .reduce((prev, curr) => prev.concat(curr), [])
@@ -202,7 +204,7 @@ export default {
         sub.meta();
 
         sub.on('meta-change', ({ field, value }) => {
-          metaInfoUpdate(id, field, value);
+          metaInfoUpdate(id, field, field === 'language' ? normalizeCode(value) : value);
         });
         sub.on('failed', (id) => {
           addSubtitleWhenFailed({ id });
@@ -211,9 +213,10 @@ export default {
           if (!name) {
             if (language) {
               const subtitleRankIndex = this.subtitleList
-                .filter(subtitle => subtitle.type === type && subtitle.language === language)
+                .filter(subtitle =>
+                  subtitle.type === type && subtitle.language === normalizeCode(language))
                 .findIndex(subtitle => subtitle.id === id) + 1;
-              sub.metaInfo.name = `${this.$t(`subtitle.language.${language}`)} ${romanize(subtitleRankIndex)}`;
+              sub.metaInfo.name = `${codeToLanguageName(language)} ${romanize(subtitleRankIndex)}`;
             } else {
               const subtitleRankIndex = this.subtitleList
                 .filter(subtitle => subtitle.type === type)
@@ -243,7 +246,7 @@ export default {
       const subtitleIndexToChoose = this.choosePrimarySubtitle(
         this.lastSubtitleInfo,
         processedSubtitleList,
-        this.systemLanguageCode,
+        this.primaryLanguage,
       );
       if (processedSubtitleList.length) {
         this.$store.dispatch('ifNoSubtitle', false);
