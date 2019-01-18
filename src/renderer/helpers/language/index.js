@@ -1,15 +1,15 @@
 import { names, codes } from './allLanguages';
 
-export function codeNormalizer(code) {
-  const resultArray = Object.keys(codes).filter(name => codes[name].includes(code));
-  return resultArray.length ? resultArray[0] : 'none';
+export function normalizeCode(code) {
+  const result = Object.keys(codes).find(name => codes[name].includes(code));
+  return result || 'none';
 }
 
 export function codeToLanguageName(code) {
-  const standardCode = codeNormalizer(code);
+  const standardCode = normalizeCode(code);
   return standardCode === 'none' ? 'none' : names[standardCode];
 }
 
 export function codeIndex(code) {
-  return Object.keys(codes).indexOf(codeNormalizer(code));
+  return Object.keys(codes).indexOf(normalizeCode(code));
 }

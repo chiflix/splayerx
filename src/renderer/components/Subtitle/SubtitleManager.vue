@@ -16,7 +16,7 @@ import { readdir } from 'fs';
 import osLocale from 'os-locale';
 import romanize from 'romanize';
 import Sagi from '@/helpers/sagi';
-import { codeToLanguageName, codeNormalizer } from '@/helpers/language';
+import { codeToLanguageName, normalizeCode } from '@/helpers/language';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
 import SubtitleRenderer from './SubtitleRenderer.vue';
@@ -204,7 +204,7 @@ export default {
         sub.meta();
 
         sub.on('meta-change', ({ field, value }) => {
-          metaInfoUpdate(id, field, field === 'language' ? codeNormalizer(value) : value);
+          metaInfoUpdate(id, field, field === 'language' ? normalizeCode(value) : value);
         });
         sub.on('failed', (id) => {
           addSubtitleWhenFailed({ id });
@@ -214,7 +214,7 @@ export default {
             if (language) {
               const subtitleRankIndex = this.subtitleList
                 .filter(subtitle =>
-                  subtitle.type === type && subtitle.language === codeNormalizer(language))
+                  subtitle.type === type && subtitle.language === normalizeCode(language))
                 .findIndex(subtitle => subtitle.id === id) + 1;
               sub.metaInfo.name = `${codeToLanguageName(language)} ${romanize(subtitleRankIndex)}`;
             } else {
