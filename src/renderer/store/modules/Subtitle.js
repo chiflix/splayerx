@@ -42,7 +42,7 @@ function rankCalculation(type, options, lastRank) {
   const rankTypes = [
     {
       name: 'MATCH_PRIMARY_LANGUAGE',
-      value: 1e3,
+      value: 1e4,
       types: ['local', 'online'],
     },
     {
@@ -51,12 +51,12 @@ function rankCalculation(type, options, lastRank) {
       types: ['embedded'],
     },
     {
-      name: 'EXISTED_LANGUAGE',
-      value: -1e2,
+      name: 'LANGUAGE_RANKING',
+      value: -1e3,
       types: ['local', 'online'],
     },
     {
-      name: 'LANGUAGE_RANKING',
+      name: 'EXISTED_LANGUAGE',
       value: -1e2,
       types: ['local', 'online'],
     },
@@ -240,9 +240,9 @@ const actions = {
   [subtitleActions.UPDATE_METAINFO]({ commit, state, getters }, { id, type, value }) {
     if (state[`${type}s`]) commit(`${type.toUpperCase()}S_UPDATE`, { id, [type]: value });
     const { types, ranks } = state;
-    const { primaryLanguageCode } = getters;
+    const { primaryLanguage } = getters;
     const rank = metaInfoUpdate(
-      types[id], getters.subtitleList, primaryLanguageCode,
+      types[id], getters.subtitleList, primaryLanguage,
       type, value,
       ranks[id],
     );
