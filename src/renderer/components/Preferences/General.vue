@@ -88,16 +88,16 @@ export default {
         '简体中文',
         '繁體中文',
         'English',
-        'Español',
-        '日本語',
-        'Français',
-        '한국어',
-        'Português',
-        'العربية',
-        'Deutsch',
-        'Русский',
-        'हिन्दी',
-        'Italiano',
+        // 'Español',
+        // '日本語',
+        // 'Français',
+        // '한국어',
+        // 'Português',
+        // 'العربية',
+        // 'Deutsch',
+        // 'Русский',
+        // 'हिन्दी',
+        // 'Italiano',
       ],
       mouseDown: false,
       isMoved: false,
@@ -330,7 +330,7 @@ export default {
           top: 0;
           left: 58px;
           width: 228px;
-          height: 164px;
+          height: 85px;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
           border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
           border-width: 1px 1px 1px 1px;
@@ -360,7 +360,7 @@ export default {
         .drop-down-content-en {
           left: 76px;
           width: 210px;
-          height: 138px;
+          height: 85px;
         }
       }
       .second-selection {
@@ -394,7 +394,7 @@ export default {
           top: 0;
           left: 58px;
           width: 228px;
-          height: 164px;
+          height: 112px;
           background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
           border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
           border-width: 1px 1px 1px 1px;
@@ -424,7 +424,7 @@ export default {
         .drop-down-content-en {
           left: 76px;
           width: 210px;
-          height: 138px;
+          height: 112px;
         }
       }
     }

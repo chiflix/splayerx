@@ -58,7 +58,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration']),
+    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -76,6 +76,11 @@ export default {
     },
     container() {
       return process.platform === 'win32' ? 'winContainer' : 'container';
+    },
+  },
+  watch: {
+    singleCycle(val) {
+      this.showNextVideo = !val;
     },
   },
   mounted() {

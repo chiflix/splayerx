@@ -318,7 +318,7 @@ export default {
       const w = 112; // default width of playlist item
       const B = 15; // space between each playlist item
       if (this.winWidth >= 512 && this.winWidth < 720) {
-        number = Math.ceil(3 + ((this.winWidth - 512) / (w + B)));
+        number = Math.floor(3 + ((this.winWidth - 512) / (w + B)));
       } else if (this.winWidth >= 720 && this.winWidth <= 1355) {
         number = Math.floor(((this.winWidth - 720) / (w + B)) + 5);
       } else if (this.winWidth > 1355) {

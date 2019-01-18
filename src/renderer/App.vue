@@ -82,8 +82,8 @@
           case NO_TRANSLATION_RESULT:
             this.$store.dispatch('addMessages', {
               type: 'error',
-              title: this.$t('errorFile.noResult.title'),
-              content: this.$t('errorFile.noResult.content'),
+              title: this.$t('errorFile.offLine.title'),
+              content: this.$t('errorFile.offLine.content'),
               dismissAfter: 5000,
             });
             break;

@@ -62,6 +62,7 @@ const getters = {
     return process.platform === 'win32' ? converted : `file://${converted}`;
   },
   // playback state
+  loop: state => state.loop,
   duration: state => state.duration,
   nextVideoPreviewTime: (state) => {
     const time = state.duration > 3000 ? 60 : state.duration * 0.02;
