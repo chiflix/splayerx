@@ -21,6 +21,7 @@ export default {
       pause: '暂停',
       forward: '前进',
       backward: '后退',
+      singleCycle: '循环单个文件',
     },
     audio: {
       name: '音频',
@@ -136,9 +137,9 @@ export default {
       title: '未能加载字幕',
       content: '暂不支持该字幕类型',
     },
-    noResult: {
-      title: '未找到翻译结果',
-      content: '网络异常或缺少翻译结果',
+    offLine: {
+      title: '未能连接网络',
+      content: '建议您检查网络状况后重试。',
     },
   },
   loading: {

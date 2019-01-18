@@ -104,7 +104,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -160,6 +160,11 @@ new Vue({
     });
   },
   watch: {
+    singleCycle(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('singleCycle').checked = val;
+      }
+    },
     currentRouteName(val) {
       if (val === 'landing-view') {
         this.menuStateControl(false);
@@ -307,6 +312,20 @@ new Vue({
               },
             },
             /** */
+            { type: 'separator' },
+            {
+              label: this.$t('msg.playback.singleCycle'),
+              type: 'checkbox',
+              id: 'singleCycle',
+              checked: this.singleCycle,
+              click: () => {
+                if (this.singleCycle) {
+                  this.$store.dispatch('notSingleCycle');
+                } else {
+                  this.$store.dispatch('singleCycle');
+                }
+              },
+            },
             { type: 'separator' },
             { label: this.$t('msg.playback.captureScreen'), enabled: false },
             { label: this.$t('msg.playback.captureVideoClip'), enabled: false },

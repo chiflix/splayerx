@@ -22,6 +22,7 @@ export default {
       pause: 'Pause',
       forward: 'Step Forward',
       backward: 'Step Backward',
+      singleCycle: 'File Loop',
     },
     audio: {
       name: 'Audio',
@@ -137,9 +138,9 @@ export default {
       title: 'Load Subtitle Failed',
       content: 'Subtitle type unsupported.',
     },
-    noResult: {
-      title: 'No Result Found',
-      content: 'Network error or lack of results.',
+    offLine: {
+      title: 'No Network Access',
+      content: 'Please check network and try again.',
     },
   },
   loading: {

@@ -5,17 +5,17 @@
       @mousedown="switchTimeContent">
           <span class="timeContent" ref="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration"></span>
     </div>
-    <rateLabel class="rate"></rateLabel>
+    <Labels class="rate"/>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import rateLabel from './RateLabel.vue';
+import Labels from './Labels.vue';
 
 export default {
   name: 'the-time-codes',
   components: {
-    rateLabel,
+    Labels,
   },
   props: ['showAllWidgets'],
   data() {
@@ -27,7 +27,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'rate']),
+    ...mapGetters(['duration', 'rate', 'singleCycle']),
     hasDuration() {
       return !Number.isNaN(this.duration);
     },
@@ -41,6 +41,13 @@ export default {
           this.progressTriggerStopped = false;
         }, this.progressDisappearDelay);
       }
+    },
+    singleCycle() {
+      this.progressTriggerStopped = true;
+      this.clock.clearTimeout(this.progressTriggerId);
+      this.progressTriggerId = this.clock.setTimeout(() => {
+        this.progressTriggerStopped = false;
+      }, this.progressDisappearDelay);
     },
   },
   methods: {

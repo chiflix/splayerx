@@ -50,7 +50,6 @@ import TheTimeCodes from './TheTimeCodes.vue';
 import TheProgressBar from './TheProgressBar.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
-import SpeedLabel from './RateLabel.vue';
 import { videodata } from '../../store/video';
 
 export default {
@@ -66,7 +65,6 @@ export default {
     'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
     'recent-playlist': RecentPlaylist,
-    SpeedLabel,
   },
   data() {
     return {
@@ -80,7 +78,7 @@ export default {
       mouseleftDelay: 1000,
       popupShow: false,
       clicksTimer: 0,
-      clicksDelay: 200,
+      clicksDelay: 250,
       dragDelay: 200,
       widgetsStatus: {},
       lastAttachedShowing: false,
@@ -369,6 +367,7 @@ export default {
         clearTimeout(this.clicksTimer);
       }
       if (!this.isValidClick() || (this.lastDragging && this.lastAttachedShowing)) {
+        this.clicks = 0;
         return;
       }
       if (this.clicks === 1) {
