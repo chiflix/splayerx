@@ -55,7 +55,7 @@
     ],
     "dmg": {
       "background": "build/icons/dmg/bg.tiff",
-      "icon": "build/icons/dmg/logo.tiff",
+      "icon": "build/icons/dmg/install.icns",
       "iconSize": 95,
       "window": {
         "width": 540,
