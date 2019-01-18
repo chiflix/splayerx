@@ -2,6 +2,7 @@ import Vue from 'vue';
 import pick from 'lodash/pick';
 import partialRight from 'lodash/partialRight';
 import camelCase from 'lodash/camelCase';
+import { codeIndex } from '@/helpers/language';
 import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
 
@@ -12,6 +13,7 @@ function metaInfoToWeight(type, value, subtitleList, primaryLanguage) {
       result.matchPrimaryLanguage = primaryLanguage === value ? 1 : 0;
       result.existedLanguage = subtitleList
         .filter(({ language: existedLanguage }) => existedLanguage === value).length;
+      result.languageRanking = codeIndex(value);
       break;
     }
     case 'isDefault':
@@ -50,6 +52,11 @@ function rankCalculation(type, options, lastRank) {
     },
     {
       name: 'EXISTED_LANGUAGE',
+      value: -1e2,
+      types: ['local', 'online'],
+    },
+    {
+      name: 'LANGUAGE_RANKING',
       value: -1e2,
       types: ['local', 'online'],
     },

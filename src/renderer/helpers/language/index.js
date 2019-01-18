@@ -9,3 +9,7 @@ export function codeToLanguageName(code) {
   const standardCode = codeNormalizer(code);
   return standardCode === 'none' ? 'none' : names[standardCode];
 }
+
+export function codeIndex(code) {
+  return Object.keys(codes).indexOf(codeNormalizer(code));
+}
