@@ -15,7 +15,6 @@ import { dirname, extname, basename, join } from 'path';
 import { readdir } from 'fs';
 import osLocale from 'os-locale';
 import romanize from 'romanize';
-import stringSimilarity from 'string-similarity';
 import Sagi from '@/helpers/sagi';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
@@ -135,8 +134,7 @@ export default {
         readdir(videoDir, (err, files) => {
           if (err) reject(err);
           const subtitles = files.filter(file =>
-            (stringSimilarity.compareTwoStrings(file, filename) >= 0.8 &&
-              extensionRegex.test(file)));
+            (extensionRegex.test(file) && file.slice(0, file.lastIndexOf('.')) === filename));
           resolve(subtitles.map(subtitle => ({
             src: join(dirname(videoSrc), subtitle),
             type: 'local',
