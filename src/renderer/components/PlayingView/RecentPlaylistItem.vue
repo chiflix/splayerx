@@ -89,6 +89,8 @@
 <script>
 import fs from 'fs';
 import path from 'path';
+import guessit from 'guessit-wrapper';
+import anitomy from 'anitomyscript';
 import { filePathToUrl } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
 
@@ -144,6 +146,29 @@ export default {
     };
   },
   methods: {
+    async parseName(path) {
+      let episode = 0;
+      let season = 0;
+      const nameVideo = await guessit.parseName(path);
+      if (nameVideo.episodeNumber) {
+        episode = nameVideo.episodeNumber < 10 ? `0${nameVideo.episodeNumber}` : nameVideo.episodeNumber;
+        if (nameVideo.season) {
+          season = nameVideo.season < 10 ? `0${nameVideo.season}` : nameVideo.season;
+        }
+      } else {
+        const nameAnim = await anitomy.parse(path);
+        if (nameAnim.episode_number) {
+          episode = nameAnim.episode_number < 10 ? `0${nameAnim.episode_number}` : nameAnim.episode_number;
+          if (nameAnim.season) {
+            season = nameAnim.season < 10 ? `0${nameAnim.season}` : nameAnim.season;
+          }
+        }
+      }
+      return {
+        episode,
+        season,
+      };
+    },
     sizeAdaption(size) {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
     },
@@ -243,6 +268,17 @@ export default {
       }
     },
   },
+  asyncComputed: {
+    async baseName() {
+      const parsedName = await this.parseName(this.path);
+      if (parsedName.episode && parsedName.season) {
+        return `S${parsedName.season}E${parsedName.episode}`;
+      } else if (parsedName.episode && !parsedName.season) {
+        return `EP${parsedName.episode}`;
+      }
+      return path.basename(this.path, path.extname(this.path));
+    },
+  },
   computed: {
     backgroundImage() {
       return `url(${this.imageSrc})`;
@@ -275,9 +311,6 @@ export default {
     },
     bottom() {
       return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
-    },
-    baseName() {
-      return path.basename(this.path, path.extname(this.path));
     },
   },
 };
