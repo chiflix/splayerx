@@ -143,6 +143,7 @@ export default {
     },
     async getOnlineSubtitlesList(videoSrc) {
       const hash = await helpers.methods.mediaQuickHash(videoSrc);
+      this.addLog('info', `media-hash: ${hash}`);
       const onlineMetaInfo = (subtitle) => {
         const { language_code: code, transcript_identity: src, ranking } = subtitle;
         return ({
