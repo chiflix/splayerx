@@ -7,6 +7,7 @@ import VueI18n from 'vue-i18n';
 import os from 'os';
 import axios from 'axios';
 import uuidv4 from 'uuid/v4';
+import electron from 'electron';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
@@ -78,8 +79,11 @@ Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
 
 Vue.use(VueAnalytics, {
-  id: 'UA-2468227-6',
+  id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
   router,
+  set: [
+    { field: 'clientVersion', value: electron.remote.app.getVersion() },
+  ],
 });
 
 Vue.mixin(helpers);
