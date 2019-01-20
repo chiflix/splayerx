@@ -297,11 +297,8 @@ export default {
       switch (level) {
         case 'error':
           console.error(log);
-          if (log && process.env.NODE_ENV === 'production') {
-            // this.$ga only avalible in prod env
-            if (this.$ga) {
-              this.$ga && this.$ga.exception(log.message || log);  
-            }
+          if (log && process.env.NODE_ENV !== 'development') {
+            this.$ga && this.$ga.exception(log.message || log);  
             Sentry.captureException(log);
           }
           break;

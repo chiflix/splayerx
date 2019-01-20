@@ -78,15 +78,13 @@ Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
 
-if (process.env.NODE_ENV === 'production') {
-  Vue.use(VueAnalytics, {
-    id: 'UA-2468227-6',
-    router,
-    set: [
-      { field: 'clientVersion', value: electron.remote.app.getVersion() },
-    ],
-  });
-}
+Vue.use(VueAnalytics, {
+  id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
+  router,
+  set: [
+    { field: 'clientVersion', value: electron.remote.app.getVersion() },
+  ],
+});
 
 Vue.mixin(helpers);
 Vue.prototype.$bus = new Vue(); // Global event bus
