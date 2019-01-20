@@ -107,7 +107,9 @@
       });
       this.$electron.ipcRenderer.send('windowInit');
       drag(this.$el);
-      this.$ga.event('app', 'mounted');
+      if (this.$ga) {
+        this.$ga.event('app', 'mounted');
+      }
     },
   };
 </script>
