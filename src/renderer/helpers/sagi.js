@@ -27,8 +27,8 @@ class Sagi {
     if (process.env.NODE_ENV === 'production') {
       this.endpoint = 'apis.sagittarius.ai:8443';
     } else {
-      // this.endpoint = '127.0.0.1:8443'; // use this when debuging server
       this.endpoint = 'apis.stage.sagittarius.ai:8443';
+      // this.endpoint = '127.0.0.1:8443'; // uncomment this when debuging
     }
     this.transcripts = [];
   }
