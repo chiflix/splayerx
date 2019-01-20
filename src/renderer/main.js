@@ -77,10 +77,12 @@ Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
 
-Vue.use(VueAnalytics, {
-  id: 'UA-2468227-6',
-  router,
-});
+if (process.env.NODE_ENV === 'production') {
+  Vue.use(VueAnalytics, {
+    id: 'UA-2468227-6',
+    router,
+  });
+}
 
 Vue.mixin(helpers);
 Vue.prototype.$bus = new Vue(); // Global event bus
