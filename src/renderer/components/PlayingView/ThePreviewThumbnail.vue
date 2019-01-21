@@ -34,6 +34,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import idb from 'idb';
+import { ipcRenderer } from 'electron';
 import {
   THUMBNAIL_DB_NAME,
   THUMBNAIL_OBJECT_STORE_NAME,
@@ -87,7 +88,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['convertedSrc', 'mediaHash']),
+    ...mapGetters(['originSrc', 'convertedSrc', 'mediaHash']),
   },
   watch: {
     async mediaHash(newValue) {
@@ -172,6 +173,17 @@ export default {
         this.mountImage = typeof result.lastGenerationIndex === 'number' &&
           result.lastGenerationIndex > 0;
       }
+    },
+    autoGenerationCondition(videoSrc) {
+      return new Promise((resolve) => {
+        ipcRenderer.once(`mediaInfo-${videoSrc}-reply`, (event, info) => {
+          const {
+            codec_long_name: codecName,
+            coded_width: width,
+          } = JSON.parse(info).streams[0]; // eslint-disable-line
+          resolve(/HEVC|265/.test(codecName) || width >= 1920);
+        });
+      });
     },
   },
   created() {
