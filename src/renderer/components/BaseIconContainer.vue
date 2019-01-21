@@ -130,7 +130,7 @@ export default {
 }
 
 .volume {
-@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 24px;
     height: 24px;
   }
@@ -144,7 +144,7 @@ export default {
 }
 
 .play, .pause {
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 49px;
     height: 49px;
   }
@@ -173,7 +173,7 @@ export default {
   .active {
     display: none;
   }
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 20px;
     height: 20px;
   }
@@ -291,7 +291,7 @@ export default {
 .hoveredEnd {
   display: block;
   z-index: 20;
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 6px;
     height: 6px;
   }
@@ -372,7 +372,7 @@ export default {
 }
 .speed {
   display: block;
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 8px;
     height: 6px;
   }
@@ -391,7 +391,7 @@ export default {
 }
 .cycle {
   display: block;
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 11px;
     height: 7px;
   }
