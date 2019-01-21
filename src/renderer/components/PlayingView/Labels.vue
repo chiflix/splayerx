@@ -85,7 +85,7 @@ export default {
     border-radius: 5px;
   }
 }
-@media screen and (max-width: 512px) {
+@media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
   .labels {
     height: 15px;
     .speed-label {
@@ -110,7 +110,7 @@ export default {
     }
   }
 }
-@media screen and (min-width: 513px) and (max-width: 854px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .labels {
     height: 15px;
     .speed-label {
@@ -135,7 +135,7 @@ export default {
     }
   }
 }
-@media screen and (min-width: 855px) and (max-width: 1920px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .labels {
     height: 18px;
     .speed-label {
@@ -160,7 +160,7 @@ export default {
     }
   }
 }
-@media screen and (min-width: 1921px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .labels {
     height: 28px;
     .speed-label {
