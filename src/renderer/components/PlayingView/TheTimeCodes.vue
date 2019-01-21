@@ -85,7 +85,7 @@ export default {
 </script>
 
 <style lang="scss">
-@media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .cont {
     bottom: 23px;
     left: 20px;
