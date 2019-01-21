@@ -126,7 +126,7 @@ export default {
  opacity: 0;
 }
 .next-video {
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     & {
       display: none;
     }

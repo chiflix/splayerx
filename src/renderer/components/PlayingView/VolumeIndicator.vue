@@ -121,7 +121,7 @@ export default {
     position: absolute;
     top: var(--mute-top);
   }
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     right: 23px;
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {

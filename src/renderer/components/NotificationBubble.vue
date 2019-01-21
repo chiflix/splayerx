@@ -176,7 +176,7 @@ export default {
   .next-video {
     transition: 200ms ease-out;
     transition-property: opacity, transform;
-    @media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
       display: none;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
@@ -198,7 +198,7 @@ export default {
   .privacy-bubble {
     position: relative;
     z-index: 8;
-    @media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
       display: none;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
@@ -214,7 +214,7 @@ export default {
   .mas-privacy-bubble {
     position: relative;
     z-index: 8;
-    @media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
       display: none;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {

@@ -541,7 +541,7 @@ export default {
     height: 100%;
   }
 }
-@media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .control-buttons {
     display: none;
   }

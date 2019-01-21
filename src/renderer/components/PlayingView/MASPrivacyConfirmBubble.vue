@@ -96,7 +96,7 @@ export default {
   background-color: rgba(0,0,0,0.1);
   backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 289px), screen and (min-aspect-ratio: 1/1) and (max-height: 289px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     display: none;
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
