@@ -278,19 +278,15 @@ export default {
       }
     },
     mousedownCurrentTarget(val) {
-      if (val !== 'notification-bubble') {
+      if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([62, 64], false);
-          if (this.lastDragging) {
-            this.clearMouseup({ target: '' });
-          } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
-            this.$emit('update:showAttached', false);
-          }
+          this.clearMouseup({ target: '' });
         }
       }
     },
     mouseupCurrentTarget(val) {
-      if (this.mousedownCurrentTarget !== 'notification-bubble') {
+      if (this.mousedownCurrentTarget !== 'notification-bubble' && val !== '') {
         if (this.lastDragging) {
           if (this.showAttached) {
             this.anim.playSegments([79, 85]);

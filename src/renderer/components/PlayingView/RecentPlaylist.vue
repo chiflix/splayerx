@@ -208,18 +208,14 @@ export default {
       }
     },
     mousedownCurrentTarget(val) {
-      if (val !== 'notification-bubble' && val !== 'titlebar') {
+      if (val !== 'notification-bubble' && val !== 'titlebar' && val !== '') {
         if (val !== this.$options.name && this.backgroundDisplayState) {
-          if (this.lastDragging) {
-            this.clearMouseup({ target: '' });
-          } else if (this.mouseupCurrentTarget !== 'playlist-control' && this.mouseupCurrentTarget !== '') {
-            this.$emit('update:playlistcontrol-showattached', false);
-          }
+          this.clearMouseup({ target: '' });
         }
       }
     },
     mouseupCurrentTarget(val) {
-      if (this.mousedownCurrentTarget !== 'notification-bubble' && this.mousedownCurrentTarget !== 'titlebar') {
+      if (this.mousedownCurrentTarget !== 'notification-bubble' && this.mousedownCurrentTarget !== 'titlebar' && val !== '') {
         if (this.lastDragging) {
           this.clearMousedown({ target: '' });
           if (this.displayState) {
