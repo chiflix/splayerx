@@ -10,6 +10,7 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
+import { videodata } from '../../store/video';
 import Labels from './Labels.vue';
 
 export default {
@@ -53,6 +54,15 @@ export default {
   methods: {
     switchTimeContent() {
       this.isRemainTime = !this.isRemainTime;
+      if (this.$refs.timeContent) {
+        if (this.isRemainTime) {
+          this.$refs.timeContent.textContent =
+          this.timecodeFromSeconds(Math.floor(this.duration) - Math.floor(videodata.time));
+        } else {
+          this.$refs.timeContent.textContent =
+          this.timecodeFromSeconds(Math.floor(videodata.time));
+        }
+      }
     },
     updateTimeContent(time) {
       if (this.$refs.timeContent) {
