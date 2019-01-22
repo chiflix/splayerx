@@ -144,9 +144,9 @@ export default {
     },
     cardPos() {
       if (this.moveLength) {
-        if (this.size > 289 && this.size <= 480) {
+        if (this.size >= 289 && this.size <= 480) {
           return `${this.moveLength}px`;
-        } else if (this.size > 481 && this.size <= 1080) {
+        } else if (this.size >= 481 && this.size <= 1080) {
           return `${this.moveLength * 1.2}px`;
         }
         return `${this.moveLength * 1.2 * 1.4}px`;
@@ -174,9 +174,9 @@ export default {
       return 'fontCard bigFontCard';
     },
     heightSize() {
-      if (this.size > 289 && this.size <= 480) {
+      if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
-      } else if (this.size > 481 && this.size <= 1080) {
+      } else if (this.size >= 481 && this.size <= 1080) {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
@@ -188,9 +188,9 @@ export default {
       return this.item === this.$t('advance.fontSize') ? [0, 2] : [1, 4];
     },
     difWidth() {
-      if (this.size > 289 && this.size <= 480) {
+      if (this.size >= 289 && this.size <= 480) {
         return this.item === this.$t('advance.fontSize') ? [29, 35] : [25, 29];
-      } else if (this.size > 481 && this.size <= 1080) {
+      } else if (this.size >= 481 && this.size <= 1080) {
         return this.item === this.$t('advance.fontSize') ? [29 * 1.2, 35 * 1.2] : [25 * 1.2, 29 * 1.2];
       }
       return this.item === this.$t('advance.fontSize') ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];

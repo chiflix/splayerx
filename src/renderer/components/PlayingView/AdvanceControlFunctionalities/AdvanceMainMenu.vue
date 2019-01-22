@@ -330,9 +330,9 @@ export default {
   },
   methods: {
     initialSize(size) {
-      if (this.computedSize > 289 && this.computedSize <= 480) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return size;
-      } else if (this.computedSize > 481 && this.computedSize <= 1080) {
+      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
         return size * 1.2;
       }
       return size * 1.2 * 1.4;
