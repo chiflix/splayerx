@@ -1,11 +1,24 @@
 import ThumbnailVideoPlayer from '@/components/PlayingView/ThumbnailVideoPlayer.vue';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
-import { shallowMount } from '@vue/test-utils';
+import { createLocalVue, shallowMount } from '@vue/test-utils';
+import Video from '@/store/modules/Video';
+import Vuex from 'vuex';
 import sinon from 'sinon';
 
 describe('Component - ThumbnailVideoPlayer', () => {
   let wrapper;
   let sandbox;
+  const store = new Vuex.Store({
+    modules: {
+      Video: {
+        state: Video.state,
+        mutations: Video.mutations,
+        getters: Video.getters,
+      },
+    },
+  });
+  const localVue = createLocalVue();
+  localVue.use(Vuex);
   const propsData = {
     currentTime: 0,
     outerThumbnailInfo: {
@@ -21,7 +34,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
   };
 
   it('Sanity - should render BaseVideoPlayer properly', () => {
-    wrapper = shallowMount(ThumbnailVideoPlayer, { propsData });
+    wrapper = shallowMount(ThumbnailVideoPlayer, { propsData, store, localVue });
 
     const baseVideoPlayer = wrapper.find(BaseVideoPlayer);
 
@@ -52,7 +65,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
         },
       );
 
-      wrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData });
+      wrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData, store, localVue });
 
       expect(wrapper.vm.autoGenerationIndex)
         .to.equal(newPropsData.outerThumbnailInfo.lastGenerationIndex);
@@ -77,7 +90,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
           },
         );
 
-        const tempWrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData });
+        const tempWrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData, store, localVue });
 
         expect(tempWrapper.vm.screenWidth).to.equal(testCase);
         expect(tempWrapper.vm.autoGenerationIndex).to.equal(0);
@@ -86,7 +99,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
       });
     });
     it('should auto generation be started upon mounted', () => {
-      const wrapper = shallowMount(ThumbnailVideoPlayer, { propsData });
+      const wrapper = shallowMount(ThumbnailVideoPlayer, { propsData, store, localVue });
 
       expect(wrapper.vm.isAutoGeneration).to.equal(true);
     });
@@ -95,7 +108,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
   describe('Behavior - Should auto generation function normally', () => {
     beforeEach(() => {
       sandbox = sinon.createSandbox();
-      wrapper = shallowMount(ThumbnailVideoPlayer, { propsData });
+      wrapper = shallowMount(ThumbnailVideoPlayer, { propsData, store, localVue });
     });
     afterEach(() => {
       sandbox.restore();
@@ -124,7 +137,7 @@ describe('Component - ThumbnailVideoPlayer', () => {
     beforeEach(() => {
       sandbox = sinon.createSandbox();
       generationClock = sandbox.useFakeTimers();
-      wrapper = shallowMount(ThumbnailVideoPlayer, { propsData });
+      wrapper = shallowMount(ThumbnailVideoPlayer, { propsData, store, localVue });
     });
     afterEach(() => {
       sandbox.restore();
