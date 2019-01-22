@@ -151,7 +151,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -163,6 +163,9 @@ export default {
         return result;
       },
     }),
+    computedSize() {
+      return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
+    },
     noSubtitle() {
       if (this.timer && this.isInitial) {
         return this.$t('msg.subtitle.menuLoading');
@@ -179,36 +182,36 @@ export default {
       return this.$store.state.Input.mouseupTarget;
     },
     textHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize > 289 && this.computedSize <= 480) {
         return 13;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize > 481 && this.computedSize <= 1080) {
         return 14;
       }
       return 18;
     },
     itemHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize > 289 && this.computedSize <= 480) {
         return 27;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize > 481 && this.computedSize <= 1080) {
         return 32;
       }
       return 44;
     },
     isOverFlow() {
-      if (this.andify(this.winWidth > 512, this.winWidth <= 854)) {
+      if (this.andify(this.computedSize > 289, this.computedSize <= 480)) {
         return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 2) ? 'scroll' : '';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize > 481 && this.computedSize <= 1080) {
         return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 4) ? 'scroll' : '';
       }
       return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 6) ? ' scroll' : '';
     },
     scopeHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize > 289 && this.computedSize <= 480) {
         return this.computedAvaliableItems.length > 2 ?
           (this.loadingTypes.length * 31) + 89 :
           (((this.computedAvaliableItems.length + 1) * 31) - 4) +
           (this.loadingTypes.length * 31);
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize > 481 && this.computedSize <= 1080) {
         return this.computedAvaliableItems.length > 4 ?
           (this.loadingTypes.length * 37) + 180 :
           (((this.computedAvaliableItems.length + 1) * 37) - 5) +
@@ -220,12 +223,12 @@ export default {
         (this.loadingTypes.length * 51);
     },
     contHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize > 289 && this.computedSize <= 480) {
         return this.computedAvaliableItems.length > 2 ?
           (this.loadingTypes.length * 31) + 138 :
           45 + ((this.computedAvaliableItems.length + 1) * 31) +
           (this.loadingTypes.length * 31);
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize > 481 && this.computedSize <= 1080) {
         return this.computedAvaliableItems.length > 4 ?
           (this.loadingTypes.length * 37) + 239 :
           54 + ((this.computedAvaliableItems.length + 1) * 37) +
@@ -237,12 +240,12 @@ export default {
         (this.loadingTypes.length * 51);
     },
     cardPos() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize > 289 && this.computedSize <= 480) {
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 31 :
           this.scopeHeight + 4;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize > 481 && this.computedSize <= 1080) {
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 37 :
