@@ -185,8 +185,8 @@ export function loadLocalFile(path) {
  * @param {string} subtitleCodec - the codec of the embedded subtitle
  * @returns {Promise<string|SubtitleError>} the subtitle path string or SubtitleError
  */
-export function embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec) {
-  ipcRenderer.send('extract-subtitle-request', videoSrc, subtitleStreamIndex, SubtitleLoader.codecToFormat(subtitleCodec), mediaHash);
+export async function embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec) {
+  ipcRenderer.send('extract-subtitle-request', videoSrc, subtitleStreamIndex, SubtitleLoader.codecToFormat(subtitleCodec), await helpers.methods.mediaQuickHash(videoSrc));
   return new Promise((resolve, reject) => {
     ipcRenderer.once('extract-subtitle-response', (event, { error, index, path }) => {
       if (error) reject(new SubtitleError(ErrorCodes.SUBTITLE_RETRIEVE_FAILED, `${videoSrc}'s No.${index} extraction failed with ${error}.`));

@@ -46,6 +46,9 @@ if (process.mas === undefined && !app.requestSingleInstanceLock()) {
   app.quit();
 }
 
+const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
+if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
+
 function handleBossKey() {
   if (!mainWindow) return;
   if (mainWindow.isVisible()) {
@@ -165,7 +168,10 @@ function registerMainWindowEvent() {
   });
 
   ipcMain.on('extract-subtitle-request', (event, videoPath, index, format, hash) => {
-    const subtitlePath = path.join(app.getPath('temp'), `${hash}-${index}.${format}`);
+    const subtitleFolderPath = path.join(tempFolderPath, hash);
+    if (!fs.existsSync(subtitleFolderPath)) fs.mkdirSync(subtitleFolderPath);
+    console.log(subtitleFolderPath);
+    const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
     if (fs.existsSync(subtitlePath)) event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath });
     else {
       extractSubtitle(videoPath, subtitlePath, index)
