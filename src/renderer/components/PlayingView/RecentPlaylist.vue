@@ -30,6 +30,7 @@
           marginTop: sizeAdaption(9),
           fontSize: sizeAdaption(18),
           lineHeight: sizeAdaption(20),
+          fontWeight: 500,
         }">{{filename}}</div>
     </div>
     </transition>
