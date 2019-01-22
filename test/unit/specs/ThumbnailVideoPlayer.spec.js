@@ -90,7 +90,10 @@ describe('Component - ThumbnailVideoPlayer', () => {
           },
         );
 
-        const tempWrapper = shallowMount(ThumbnailVideoPlayer, { propsData: newPropsData, store, localVue });
+        const tempWrapper = shallowMount(
+          ThumbnailVideoPlayer,
+          { propsData: newPropsData, store, localVue },
+        );
 
         expect(tempWrapper.vm.screenWidth).to.equal(testCase);
         expect(tempWrapper.vm.autoGenerationIndex).to.equal(0);
