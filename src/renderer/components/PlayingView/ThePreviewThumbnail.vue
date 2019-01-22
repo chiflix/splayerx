@@ -133,7 +133,7 @@ export default {
     },
     retrieveThumbnailInfo(quickHash) {
       return new Promise(async (resolve) => {
-        this.disableAutoGeneration = await this.autoGenerationCondition(this.originSrc);
+        this.disableAutoGeneration = await this.isInvalidVideo(this.originSrc);
         this.infoDB.get(THUMBNAIL_OBJECT_STORE_NAME, quickHash).then((result) => {
           if (result) {
             const { lastGenerationIndex, maxThumbnailCount, generationInterval } = result;
@@ -177,14 +177,14 @@ export default {
           result.lastGenerationIndex > 0;
       }
     },
-    autoGenerationCondition(videoSrc) {
+    isInvalidVideo(videoSrc) {
       return new Promise((resolve) => {
         ipcRenderer.once(`mediaInfo-${videoSrc}-reply`, (event, info) => {
           const {
             codec_long_name: codecName,
             coded_width: width,
-          } = JSON.parse(info).streams[0]; // eslint-disable-line
-          resolve(/HEVC|265/.test(codecName) || width >= 1920);
+          } = JSON.parse(info).streams[0]; // eslint-disable-line camelcase
+          resolve(/HEVC|265/.test(codecName) || width > 1920);
         });
       });
     },
