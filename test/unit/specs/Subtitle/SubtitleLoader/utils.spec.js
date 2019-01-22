@@ -1,8 +1,6 @@
 import sinon from 'sinon';
-import partial from 'lodash/partial';
 import * as utils from '@/components/Subtitle/SubtitleLoader/utils';
-import { SubtitleError, ErrorCodes } from '@/components/Subtitle/SubtitleLoader/errors';
-import { join, dirname } from 'path';
+import { join } from 'path';
 
 describe('SubtitleLoader utils functions unit test', () => {
   let sandbox;

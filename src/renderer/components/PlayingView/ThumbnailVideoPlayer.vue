@@ -22,6 +22,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay.vue';
 import { THUMBNAIL_DB_NAME } from '@/constants';
@@ -44,7 +45,6 @@ export default {
       type: Object,
       required: true,
       default: () => ({
-        videoSrc: 'file:///',
         videoDuration: 0,
         generationInterval: 3,
         screenWidth: 1920,
@@ -55,12 +55,12 @@ export default {
     thumbnailWidth: Number,
     thumbnailHeight: Number,
     quickHash: String,
+    disabled: false,
   },
   data() {
     return {
       isAutoGeneration: true,
       videoDuration: 0,
-      videoSrc: null,
       thumbnailSet: new Set(),
       canvasContainer: null,
       autoGenerationIndex: -1,
@@ -80,6 +80,11 @@ export default {
         opacity: 0.99,
       },
     };
+  },
+  computed: {
+    ...mapGetters({
+      videoSrc: 'convertedSrc',
+    }),
   },
   watch: {
     outerThumbnailInfo(newValue) {
@@ -129,11 +134,11 @@ export default {
             this.tempImage = imageBitmap;
           } else {
             this.thumbnailSet.add(index);
-            this.tempBlobArray.push({
-              index,
-              imageBitmap,
-            });
           }
+          this.tempBlobArray.push({
+            index,
+            imageBitmap,
+          });
           if (
             (this.isAutoGeneration && index >= this.maxThumbnailCount) ||
             this.tempBlobArray.length === 30) {
@@ -175,9 +180,11 @@ export default {
       }
     },
     resumeAutoGeneration() {
-      this.useFallback = false;
-      this.isAutoGeneration = true;
-      this.videoSeek(this.autoGenerationIndex);
+      if (!this.disabled) {
+        this.useFallback = false;
+        this.isAutoGeneration = true;
+        this.videoSeek(this.autoGenerationIndex);
+      }
     },
     thumbnailArrayHandler(array) {
       const promiseArray = [];
@@ -197,7 +204,6 @@ export default {
       return Promise.all(promiseArray);
     },
     updateVideoInfo(outerThumbnailInfo) {
-      this.videoSrc = outerThumbnailInfo.videoSrc;
       if (!outerThumbnailInfo.newVideo) {
         this.screenWidth = outerThumbnailInfo.screenWidth;
         this.generationInterval = outerThumbnailInfo.generationInterval <= 0 ?
