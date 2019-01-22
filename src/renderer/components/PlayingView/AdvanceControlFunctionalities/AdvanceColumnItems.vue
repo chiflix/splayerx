@@ -56,7 +56,7 @@ export default {
     item: {
       type: String,
     },
-    winWidth: {
+    size: {
       type: Number,
     },
     isChosen: {
@@ -89,9 +89,9 @@ export default {
   },
   methods: {
     initialSize(size) {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
+      if (this.size > 289 && this.size <= 480) {
         return size;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.size > 481 && this.size <= 1080) {
         return size * 1.2;
       }
       return size * 1.2 * 1.4;

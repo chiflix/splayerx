@@ -81,7 +81,7 @@ export default {
     isChosen: {
       type: Boolean,
     },
-    winWidth: {
+    size: {
       type: Number,
     },
   },
@@ -113,22 +113,13 @@ export default {
         this.calculateFontLength(val);
       }
     },
-    winHeight(val) {
-      if (this.videoAspectRatio >= 1) {
-        if (val > 1080) {
-          this.updateVideoScaleByFactors(val);
-        } else {
-          this.updatePCVideoScaleByFactors(this.chosenSize);
-        }
-      }
-    },
-    winWidth(val) {
-      if (this.videoAspectRatio < 1) {
-        if (val > 1080) {
-          this.updateVideoScaleByFactors(val);
-        } else {
-          this.updateMobileVideoScaleByFactors(this.chosenSize);
-        }
+    size(val) {
+      if (val > 1080) {
+        this.updateVideoScaleByFactors(val);
+      } else if (this.videoAspectRatio >= 1) {
+        this.updatePCVideoScaleByFactors(this.chosenSize);
+      } else if (this.videoAspectRatio < 1) {
+        this.updateMobileVideoScaleByFactors(this.chosenSize);
       }
     },
   },
@@ -153,9 +144,9 @@ export default {
     },
     cardPos() {
       if (this.moveLength) {
-        if (this.winWidth > 514 && this.winWidth <= 854) {
+        if (this.size > 289 && this.size <= 480) {
           return `${this.moveLength}px`;
-        } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        } else if (this.size > 481 && this.size <= 1080) {
           return `${this.moveLength * 1.2}px`;
         }
         return `${this.moveLength * 1.2 * 1.4}px`;
@@ -183,9 +174,9 @@ export default {
       return 'fontCard bigFontCard';
     },
     heightSize() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
+      if (this.size > 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.size > 481 && this.size <= 1080) {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
@@ -197,9 +188,9 @@ export default {
       return this.item === this.$t('advance.fontSize') ? [0, 2] : [1, 4];
     },
     difWidth() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
+      if (this.size > 289 && this.size <= 480) {
         return this.item === this.$t('advance.fontSize') ? [29, 35] : [25, 29];
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.size > 481 && this.size <= 1080) {
         return this.item === this.$t('advance.fontSize') ? [29 * 1.2, 35 * 1.2] : [25 * 1.2, 29 * 1.2];
       }
       return this.item === this.$t('advance.fontSize') ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
