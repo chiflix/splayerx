@@ -3,16 +3,17 @@
     :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', transform: `translateX(${positionOfThumbnail}px)`}">
     <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
       <thumbnail-video-player
-        v-if="mountVideo"
+        v-if="disableAutoGeneration && mountVideo"
         v-show="displayVideo"
         :quickHash="mediaHash"
         :currentTime="videoCurrentTime"
         :thumbnailWidth="thumbnailWidth"
         :thumbnailHeight="thumbnailHeight"
         :outerThumbnailInfo="outerThumbnailInfo"
+        :disabled="disableAutoGeneration"
         @update-thumbnail-info="updateThumbnailInfo" />
       <thumbnail-display
-        v-if="mountImage"
+        v-if="!disableAutoGeneration && mountImage"
         v-show="!displayVideo"
         :quickHash="mediaHash"
         :autoGenerationIndex="autoGenerationIndex"
@@ -85,6 +86,7 @@ export default {
       lastGenerationIndex: 0,
       currentIndex: 0,
       generatedIndex: 0,
+      disableAutoGeneration: false,
     };
   },
   computed: {
@@ -130,7 +132,8 @@ export default {
       }
     },
     retrieveThumbnailInfo(quickHash) {
-      return new Promise((resolve) => {
+      return new Promise(async (resolve) => {
+        this.disableAutoGeneration = await this.autoGenerationCondition(this.originSrc);
         this.infoDB.get(THUMBNAIL_OBJECT_STORE_NAME, quickHash).then((result) => {
           if (result) {
             const { lastGenerationIndex, maxThumbnailCount, generationInterval } = result;
@@ -201,7 +204,6 @@ export default {
         });
       }
     });
-
     this.retrieveThumbnailInfo(this.mediaHash)
       .then(this.updateThumbnailData)
       .catch((err) => {
