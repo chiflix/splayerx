@@ -288,15 +288,15 @@ export default {
     },
     // update video scale that width is larger than height
     updatePCVideoScaleByFactors(index) {
-      const factors1 = [21, 29, 37, 45];
-      const factors2 = [24, 26, 28, 30];
-      this.$store.dispatch('updateScale', `${(((factors1[index] / 900) * this.winHeight) + (factors2[index] / 5)) / 9}`);
+      const firstFactors = [21, 29, 37, 45];
+      const secondFactors = [24, 26, 28, 30];
+      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 900) * this.winHeight) + (secondFactors[index] / 5)) / 9}`);
     },
     // update video scale that height is larger than width
     updateMobileVideoScaleByFactors(index) {
-      const factors1 = [21, 29, 37, 45];
-      const factors2 = [12, -92, -196, -300];
-      this.$store.dispatch('updateScale', `${(((factors1[index] / 760) * this.winHeight) + (factors2[index] / 76)) / 9}`);
+      const firstFactors = [21, 29, 37, 45];
+      const secondFactors = [12, -92, -196, -300];
+      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 760) * this.winHeight) + (secondFactors[index] / 76)) / 9}`);
     },
     // update video scale when width or height is larger than 1080
     updateVideoScaleByFactors(val) {
