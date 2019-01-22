@@ -11,14 +11,14 @@
             <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.2 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
         </filter>
     </defs>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.7" stroke-linecap="round" stroke-linejoin="round">
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="1" stroke-linecap="round" stroke-linejoin="round">
         <g id="CH_General" transform="translate(-233.000000, -136.000000)">
             <g id="设置" transform="translate(95.000000, 95.000000)">
                 <g id="通用设置内容" transform="translate(136.000000, 37.000000)">
                     <g id="勾选框1:-启用匿名信息">
                         <g id="checked">
                             <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
-                            <use stroke="#FBFBFB" stroke-width="1.41176471" xlink:href="#path-1"></use>
+                            <use stroke="#FFFFFF" stroke-width="1.5" xlink:href="#path-1"></use>
                         </g>
                     </g>
                 </g>
