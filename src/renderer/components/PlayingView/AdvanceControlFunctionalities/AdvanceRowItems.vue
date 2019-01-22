@@ -113,38 +113,27 @@ export default {
         this.calculateFontLength(val);
       }
     },
+    winHeight(val) {
+      if (this.videoAspectRatio >= 1) {
+        if (val > 1080) {
+          this.handleVideoScale(val);
+        } else {
+          this.handleNormalVideo(this.chosenSize);
+        }
+      }
+    },
     winWidth(val) {
-      if (val > 1920) {
-        if (this.chosenSize === 0) {
-          this.$store.dispatch('updateScale', `${(30 / 11) * (val / 1920)}`);
-        }
-        if (this.chosenSize === 1) {
-          this.$store.dispatch('updateScale', `${(40 / 11) * (val / 1920)}`);
-        }
-        if (this.chosenSize === 2) {
-          this.$store.dispatch('updateScale', `${(50 / 11) * (val / 1920)}`);
-        }
-        if (this.chosenSize === 3) {
-          this.$store.dispatch('updateScale', `${(60 / 11) * (val / 1920)}`);
-        }
-      } else {
-        if (this.chosenSize === 0) {
-          this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * val) + (24 / 55)}`);
-        }
-        if (this.chosenSize === 1) {
-          this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * val) + (26 / 55)}`);
-        }
-        if (this.chosenSize === 2) {
-          this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * val) + (28 / 55)}`);
-        }
-        if (this.chosenSize === 3) {
-          this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * val) + (30 / 55)}`);
+      if (this.videoAspectRatio < 1) {
+        if (val > 1080) {
+          this.handleVideoScale(val);
+        } else {
+          this.handleSmallVideo(this.chosenSize);
         }
       }
     },
   },
   computed: {
-    ...mapGetters(['rate', 'chosenSize']),
+    ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'winHeight']),
     /**
      * @return {string}
      */
@@ -214,6 +203,9 @@ export default {
         return this.item === this.$t('advance.fontSize') ? [29 * 1.2, 35 * 1.2] : [25 * 1.2, 29 * 1.2];
       }
       return this.item === this.$t('advance.fontSize') ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
+    },
+    videoAspectRatio() {
+      return this.intrinsicWidth / this.intrinsicHeight;
     },
   },
   created() {
@@ -303,26 +295,73 @@ export default {
           break;
       }
     },
-    changeFontSize(index) {
+    handleNormalVideo(index) {
       switch (index) {
         case 0:
           this.$store.dispatch('updateChosenSize', 0);
-          this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
+          this.$store.dispatch('updateScale', `${(((21 / 900) * this.winHeight) + (24 / 5)) / 9}`);
           break;
         case 1:
           this.$store.dispatch('updateChosenSize', 1);
-          this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
+          this.$store.dispatch('updateScale', `${(((29 / 900) * this.winHeight) + (26 / 5)) / 9}`);
           break;
         case 2:
           this.$store.dispatch('updateChosenSize', 2);
-          this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
+          this.$store.dispatch('updateScale', `${(((37 / 900) * this.winHeight) + (28 / 5)) / 9}`);
           break;
         case 3:
           this.$store.dispatch('updateChosenSize', 3);
-          this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
+          this.$store.dispatch('updateScale', `${(((45 / 900) * this.winHeight) + 6) / 9}`);
           break;
         default:
           break;
+      }
+    },
+    handleSmallVideo(index) {
+      switch (index) {
+        case 0:
+          this.$store.dispatch('updateChosenSize', 0);
+          this.$store.dispatch('updateScale', `${(((21 / 760) * this.winHeight) + (12 / 76)) / 9}`);
+          break;
+        case 1:
+          this.$store.dispatch('updateChosenSize', 1);
+          this.$store.dispatch('updateScale', `${(((29 / 760) * this.winHeight) - (92 / 76)) / 9}`);
+          break;
+        case 2:
+          this.$store.dispatch('updateChosenSize', 2);
+          this.$store.dispatch('updateScale', `${(((37 / 760) * this.winHeight) - (196 / 76)) / 9}`);
+          break;
+        case 3:
+          this.$store.dispatch('updateChosenSize', 3);
+          this.$store.dispatch('updateScale', `${(((45 / 760) * this.winHeight) - (300 / 76)) / 9}`);
+          break;
+        default:
+          break;
+      }
+    },
+    handleVideoScale(val) {
+      switch (this.chosenSize) {
+        case 0:
+          this.$store.dispatch('updateScale', `${((val / 1080) * 30) / 9}`);
+          break;
+        case 1:
+          this.$store.dispatch('updateScale', `${((val / 1080) * 40) / 9}`);
+          break;
+        case 2:
+          this.$store.dispatch('updateScale', `${((val / 1080) * 50) / 9}`);
+          break;
+        case 3:
+          this.$store.dispatch('updateScale', `${((val / 1080) * 60) / 9}`);
+          break;
+        default:
+          break;
+      }
+    },
+    changeFontSize(index) {
+      if (this.videoAspectRatio >= 1) {
+        this.handleNormalVideo(index);
+      } else if (this.videoAspectRatio < 1) {
+        this.handleSmallVideo(index);
       }
     },
   },
