@@ -3,7 +3,7 @@
     :style="{width: thumbnailWidth +'px', height: thumbnailHeight +'px', transform: `translateX(${positionOfThumbnail}px)`}">
     <div class="the-preview-thumbnail" :style="{height: thumbnailHeight + 2 +'px'}">
       <thumbnail-video-player
-        v-if="disableAutoGeneration && mountVideo"
+        v-if="disableAutoGeneration || mountVideo"
         v-show="displayVideo"
         :quickHash="mediaHash"
         :currentTime="videoCurrentTime"
