@@ -46,6 +46,9 @@ if (process.mas === undefined && !app.requestSingleInstanceLock()) {
   app.quit();
 }
 
+const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
+if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
+
 function handleBossKey() {
   if (!mainWindow) return;
   if (mainWindow.isVisible()) {
@@ -108,12 +111,11 @@ function registerMainWindowEvent() {
   });
 
   function snapShot(video, callback) {
-    const imgPath = path.join(app.getPath('temp'), video.quickHash);
     const randomNumber = Math.round((Math.random() * 20) + 5);
     const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
-    splayerx.snapshotVideo(video.videoPath, `${imgPath}.png`, `00:00:${numberString}`, (resultCode) => {
+    splayerx.snapshotVideo(video.videoPath, `${video.imgPath}`, `00:00:${numberString}`, (resultCode) => {
       console[resultCode === '0' ? 'log' : 'error'](resultCode, video.videoPath);
-      callback(resultCode, imgPath);
+      callback(resultCode, video.imgPath);
     });
   }
 
@@ -151,10 +153,13 @@ function registerMainWindowEvent() {
   }
 
   ipcMain.on('snapShot', (event, videoPath, quickHash) => {
-    const imgPath = path.join(app.getPath('temp'), quickHash);
+    const imgFolderPath = path.join(tempFolderPath, quickHash);
+    if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
+    const imgPath = path.join(imgFolderPath, 'thumbnail.png');
+    console.log(imgFolderPath, imgPath);
 
-    if (!fs.existsSync(`${imgPath}.png`)) {
-      snapShotQueue.push({ videoPath, quickHash });
+    if (!fs.existsSync(imgPath)) {
+      snapShotQueue.push({ videoPath, quickHash, imgPath });
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
       }
@@ -165,7 +170,10 @@ function registerMainWindowEvent() {
   });
 
   ipcMain.on('extract-subtitle-request', (event, videoPath, index, format, hash) => {
-    const subtitlePath = path.join(app.getPath('temp'), `${hash}-${index}.${format}`);
+    const subtitleFolderPath = path.join(tempFolderPath, hash);
+    if (!fs.existsSync(subtitleFolderPath)) fs.mkdirSync(subtitleFolderPath);
+    console.log(subtitleFolderPath);
+    const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
     if (fs.existsSync(subtitlePath)) event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath });
     else {
       extractSubtitle(videoPath, subtitlePath, index)
