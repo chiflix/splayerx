@@ -25,7 +25,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!speedChosen && hoverIndex === 1" :style="{ height: speedHeight }"></div>
         </transition>
-        <advance-row-items :lists="numList" :item="itemSpeedName" :winWidth="winWidth" :isChosen="speedChosen" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
+        <advance-row-items :lists="numList" :item="itemSpeedName" :size="computedSize" :isChosen="speedChosen" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleControl"
         @mouseenter="handleMouseenter(2)"
@@ -99,7 +99,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!subSizeChosen && hoverSubIndex === 1" :style="{ height: subSizeHeight }"></div>
         </transition>
-        <advance-row-items :lists="textList" :item="itemFontName" :winWidth="winWidth" :isChosen="subSizeChosen" :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
+        <advance-row-items :lists="textList" :item="itemFontName" :size="computedSize" :isChosen="subSizeChosen" :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleStyle" @click.left="handleColorClick"
         @mouseenter="handleSubMouseenter(2)"
@@ -111,7 +111,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!subColorChosen && hoverSubIndex === 2" :style="{ height: subColorHeight }"></div>
         </transition>
-        <advance-color-items :item="itemColorName" :winWidth="winWidth" :isChosen="subColorChosen" :color="hoverSubIndex === 2 && !subColorChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-color-items>
+        <advance-color-items :item="itemColorName" :size="computedSize" :isChosen="subColorChosen" :color="hoverSubIndex === 2 && !subColorChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-color-items>
       </div>
       <div class="subtitleDelay" @click.left="handleDelayClick"
         @mouseenter="handleSubMouseenter(3)"
@@ -123,7 +123,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!subDelayChosen && hoverSubIndex === 3" :style="{ height: subDelayHeight }"></div>
         </transition>
-        <advance-selected-items :item="itemDelayName" :winWidth="winWidth" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
+        <advance-selected-items :item="itemDelayName" :size="computedSize" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
       </div>
     </div>
   </transition>
@@ -156,7 +156,7 @@
         <transition name="arrow">
           <!--<div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1" :style="{ height: audioDelayHeight }"></div>-->
         </transition>
-        <advance-selected-items :item="audioDelayName" :winWidth="winWidth" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"></advance-selected-items>
+        <advance-selected-items :item="audioDelayName" :size="computedSize" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"></advance-selected-items>
       </div>
       <div class="changeTrack" @click.left="handleTrackClick"
         @mouseenter="handleAudioMouseenter(2)"
@@ -184,7 +184,7 @@
         </transition>
         </div>
         <transition name="audioTransOut">
-          <advance-column-items :item="itemTrack" :winWidth="winWidth" v-show="showTrack"></advance-column-items>
+          <advance-column-items :item="itemTrack" :size="computedSize" v-show="showTrack"></advance-column-items>
         </transition>
       </div>
     </div>
@@ -256,7 +256,10 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentSubtitleId']),
+    ...mapGetters(['winWidth', 'currentSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
+    computedSize() {
+      return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
+    },
     currentAudioTrack() {
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
       if (track) {
@@ -327,9 +330,9 @@ export default {
   },
   methods: {
     initialSize(size) {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return size;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
         return size * 1.2;
       }
       return size * 1.2 * 1.4;

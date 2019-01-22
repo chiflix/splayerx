@@ -69,15 +69,15 @@ export default {
     isChosen: {
       type: Boolean,
     },
-    winWidth: {
+    size: {
       type: Number,
     },
   },
   computed: {
     heightSize() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
+      if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.size >= 481 && this.size <= 1080) {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
