@@ -87,6 +87,7 @@ export default {
       showFirstSelection: false,
       showSecondSelection: false,
       languages: [
+        '',
         'zh-CN',
         'zh-TW',
         'en',
@@ -126,11 +127,10 @@ export default {
   },
   computed: {
     primaryLanguages() {
-      return this.languages.filter(language => language !== this.primaryLanguage);
+      return this.languages.filter(language => language && language !== this.primaryLanguage);
     },
     secondaryLanguages() {
-      return [this.noLanguage]
-        .concat(this.languages.filter(language => language !== this.secondaryLanguage));
+      return this.languages.filter(language => language !== this.secondaryLanguage);
     },
     preferenceData() {
       return this.$store.getters.preferenceData;
@@ -147,11 +147,9 @@ export default {
     },
     secondaryLanguage: {
       get() {
-        if (this.$store.getters.secondaryLanguage === '') return this.noLanguage;
         return this.$store.getters.secondaryLanguage;
       },
       set(val) {
-        if (val === this.noLanguage) val = '';
         this.$store.dispatch('secondaryLanguage', val).then(() => {
           electron.ipcRenderer.send('preference-to-main', this.preferenceData);
         });
@@ -164,7 +162,6 @@ export default {
       set(val) {
         if (val) {
           this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
-            console.log('ddd');
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         } else {
@@ -193,7 +190,7 @@ export default {
   },
   methods: {
     codeToLanguageName(code) {
-      if (code === this.noLanguage) return code;
+      if (!code) return this.noLanguage;
       return codeToLanguageName(code);
     },
     mouseover(index) {
