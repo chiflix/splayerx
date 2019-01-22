@@ -55,6 +55,7 @@ export default {
     thumbnailWidth: Number,
     thumbnailHeight: Number,
     quickHash: String,
+    disabled: false,
   },
   data() {
     return {
@@ -129,11 +130,11 @@ export default {
             this.tempImage = imageBitmap;
           } else {
             this.thumbnailSet.add(index);
-            this.tempBlobArray.push({
-              index,
-              imageBitmap,
-            });
           }
+          this.tempBlobArray.push({
+            index,
+            imageBitmap,
+          });
           if (
             (this.isAutoGeneration && index >= this.maxThumbnailCount) ||
             this.tempBlobArray.length === 30) {
@@ -175,9 +176,11 @@ export default {
       }
     },
     resumeAutoGeneration() {
-      this.useFallback = false;
-      this.isAutoGeneration = true;
-      this.videoSeek(this.autoGenerationIndex);
+      if (!this.disabled) {
+        this.useFallback = false;
+        this.isAutoGeneration = true;
+        this.videoSeek(this.autoGenerationIndex);
+      }
     },
     thumbnailArrayHandler(array) {
       const promiseArray = [];
