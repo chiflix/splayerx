@@ -16,6 +16,7 @@ import Path from 'path';
 import fs from 'fs';
 import { mapGetters } from 'vuex';
 import osLocale from 'os-locale';
+import AsyncComputed from 'vue-async-computed';
 
 import App from '@/App.vue';
 import router from '@/router';
@@ -77,6 +78,7 @@ Vue.use(VueElectron);
 Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
+Vue.use(AsyncComputed);
 
 Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',

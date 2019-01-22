@@ -133,7 +133,7 @@ export default {
         readdir(videoDir, (err, files) => {
           if (err) reject(err);
           const subtitles = files.filter(file =>
-            (file.includes(filename) && extensionRegex.test(file)));
+            (extensionRegex.test(file) && file.slice(0, file.lastIndexOf('.')) === filename));
           resolve(subtitles.map(subtitle => ({
             src: join(dirname(videoSrc), subtitle),
             type: 'local',
