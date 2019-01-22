@@ -116,18 +116,18 @@ export default {
     winHeight(val) {
       if (this.videoAspectRatio >= 1) {
         if (val > 1080) {
-          this.handleVideoScale(val);
+          this.updateVideoScaleByFactors(val);
         } else {
-          this.handleNormalVideo(this.chosenSize);
+          this.updatePCVideoScaleByFactors(this.chosenSize);
         }
       }
     },
     winWidth(val) {
       if (this.videoAspectRatio < 1) {
         if (val > 1080) {
-          this.handleVideoScale(val);
+          this.updateVideoScaleByFactors(val);
         } else {
-          this.handleSmallVideo(this.chosenSize);
+          this.updateMobileVideoScaleByFactors(this.chosenSize);
         }
       }
     },
@@ -295,73 +295,29 @@ export default {
           break;
       }
     },
-    handleNormalVideo(index) {
-      switch (index) {
-        case 0:
-          this.$store.dispatch('updateChosenSize', 0);
-          this.$store.dispatch('updateScale', `${(((21 / 900) * this.winHeight) + (24 / 5)) / 9}`);
-          break;
-        case 1:
-          this.$store.dispatch('updateChosenSize', 1);
-          this.$store.dispatch('updateScale', `${(((29 / 900) * this.winHeight) + (26 / 5)) / 9}`);
-          break;
-        case 2:
-          this.$store.dispatch('updateChosenSize', 2);
-          this.$store.dispatch('updateScale', `${(((37 / 900) * this.winHeight) + (28 / 5)) / 9}`);
-          break;
-        case 3:
-          this.$store.dispatch('updateChosenSize', 3);
-          this.$store.dispatch('updateScale', `${(((45 / 900) * this.winHeight) + 6) / 9}`);
-          break;
-        default:
-          break;
-      }
+    // update video scale that width is larger than height
+    updatePCVideoScaleByFactors(index) {
+      const factors1 = [21, 29, 37, 45];
+      const factors2 = [24, 26, 28, 30];
+      this.$store.dispatch('updateScale', `${(((factors1[index] / 900) * this.winHeight) + (factors2[index] / 5)) / 9}`);
     },
-    handleSmallVideo(index) {
-      switch (index) {
-        case 0:
-          this.$store.dispatch('updateChosenSize', 0);
-          this.$store.dispatch('updateScale', `${(((21 / 760) * this.winHeight) + (12 / 76)) / 9}`);
-          break;
-        case 1:
-          this.$store.dispatch('updateChosenSize', 1);
-          this.$store.dispatch('updateScale', `${(((29 / 760) * this.winHeight) - (92 / 76)) / 9}`);
-          break;
-        case 2:
-          this.$store.dispatch('updateChosenSize', 2);
-          this.$store.dispatch('updateScale', `${(((37 / 760) * this.winHeight) - (196 / 76)) / 9}`);
-          break;
-        case 3:
-          this.$store.dispatch('updateChosenSize', 3);
-          this.$store.dispatch('updateScale', `${(((45 / 760) * this.winHeight) - (300 / 76)) / 9}`);
-          break;
-        default:
-          break;
-      }
+    // update video scale that height is larger than width
+    updateMobileVideoScaleByFactors(index) {
+      const factors1 = [21, 29, 37, 45];
+      const factors2 = [12, -92, -196, -300];
+      this.$store.dispatch('updateScale', `${(((factors1[index] / 760) * this.winHeight) + (factors2[index] / 76)) / 9}`);
     },
-    handleVideoScale(val) {
-      switch (this.chosenSize) {
-        case 0:
-          this.$store.dispatch('updateScale', `${((val / 1080) * 30) / 9}`);
-          break;
-        case 1:
-          this.$store.dispatch('updateScale', `${((val / 1080) * 40) / 9}`);
-          break;
-        case 2:
-          this.$store.dispatch('updateScale', `${((val / 1080) * 50) / 9}`);
-          break;
-        case 3:
-          this.$store.dispatch('updateScale', `${((val / 1080) * 60) / 9}`);
-          break;
-        default:
-          break;
-      }
+    // update video scale when width or height is larger than 1080
+    updateVideoScaleByFactors(val) {
+      const factors = [30, 40, 50, 60];
+      this.$store.dispatch('updateScale', `${((val / 1080) * factors[this.chosenSize]) / 9}`);
     },
     changeFontSize(index) {
+      this.$store.dispatch('updateChosenSize', index);
       if (this.videoAspectRatio >= 1) {
-        this.handleNormalVideo(index);
+        this.updatePCVideoScaleByFactors(index);
       } else if (this.videoAspectRatio < 1) {
-        this.handleSmallVideo(index);
+        this.updateMobileVideoScaleByFactors(index);
       }
     },
   },
