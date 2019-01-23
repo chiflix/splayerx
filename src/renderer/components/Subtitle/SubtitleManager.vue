@@ -225,10 +225,10 @@ export default {
               case 'local':
                 break;
               case 'embedded':
-                if (language) sub.metaInfo.name = `${{ zh: '内嵌', en: 'embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
+                if (language) sub.metaInfo.name = `${{ zh: '内嵌', en: 'Embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
                 else {
                   localLanguageLoader(sub.src, sub.format).then((language) => {
-                    sub.metaInfo.name = `${{ zh: '内嵌', en: 'embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
+                    sub.metaInfo.name = `${{ zh: '内嵌', en: 'Embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
                   });
                 }
                 break;
