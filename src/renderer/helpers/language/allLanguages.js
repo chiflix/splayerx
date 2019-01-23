@@ -4,14 +4,12 @@ export const codes = {
     'chi',
     'cmn',
     'zh-CN',
-    'zhCN',
   ],
   'zh-TW': [
     'zh',
     'chi',
     'cmn',
     'zh-TW',
-    'zhTW',
   ],
   en: [
     'en',
