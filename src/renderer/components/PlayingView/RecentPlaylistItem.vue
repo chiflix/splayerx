@@ -213,10 +213,10 @@ export default {
     this.mediaQuickHash(this.path).then((quickHash) => {
       this.$electron.ipcRenderer.send('snapShot', this.path, quickHash);
       this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-        this.coverSrc = filePathToUrl(`${imgPath}.png`);
+        this.coverSrc = filePathToUrl(`${imgPath}`);
         this.imgPath = imgPath;
         if (this.isPlaying || this.lastPlayedTime) {
-          fs.readFile(`${imgPath}.png`, 'base64', (err, data) => {
+          fs.readFile(`${imgPath}`, 'base64', (err, data) => {
             if (!err) {
               const cover = `data:image/png;base64, ${data}`;
               this.infoDB.get('recent-played', 'path', this.path).then((data) => {
