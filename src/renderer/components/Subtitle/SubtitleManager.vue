@@ -292,7 +292,6 @@ export default {
     this.$bus.$on('finished-add-subtitles', () => {
       this.addSubtitles(this.newOnlineSubtitles);
     });
-    this.addInitialSubtitles(this.originSrc);
   },
 };
 </script>
