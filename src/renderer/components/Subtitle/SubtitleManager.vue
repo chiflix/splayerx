@@ -155,9 +155,11 @@ export default {
           },
         });
       };
-      return (await Promise.all([
+      return (await Promise.all(this.secondaryLanguage ? [
         Sagi.mediaTranslate(hash, this.primaryLanguage),
         Sagi.mediaTranslate(hash, this.secondaryLanguage),
+      ] : [
+        Sagi.mediaTranslate(hash, this.primaryLanguage),
       ].map(promise => promise.catch(err => err))))
         .filter(result => !(result instanceof Error))
         .reduce((prev, curr) => prev.concat(curr), [])
