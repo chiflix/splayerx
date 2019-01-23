@@ -69,15 +69,15 @@ export default {
     isChosen: {
       type: Boolean,
     },
-    winWidth: {
+    size: {
       type: Number,
     },
   },
   computed: {
     heightSize() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
+      if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.size >= 481 && this.size <= 1080) {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
@@ -107,7 +107,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (min-width: 513px) and (max-width: 854px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
     width: 170px;
     .textContainer {
@@ -143,7 +143,7 @@ export default {
     animation: hideP1 100ms;
   }
 }
-@media screen and (min-width: 855px) and (max-width: 1920px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
     width: 204px;
     .textContainer {
@@ -179,7 +179,7 @@ export default {
     animation: hideP2 100ms;
   }
 }
-@media screen and (min-width: 1921px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
     width: 285.6px;
     .textContainer {

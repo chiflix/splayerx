@@ -11,6 +11,7 @@
       :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
       @audiotrack="onAudioTrack"
+      :loop="loop"
       :src="convertedSrc"
       :playbackRate="rate"
       :volume="volume"
@@ -19,13 +20,16 @@
       :currentTime="seekTime"
       :currentAudioTrackId="currentAudioTrackId.toString()" />
     </transition>
+    <div class="mask"
+      :style="{
+        backgroundColor: maskBackground
+      }"/>
     <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
 
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
-import syncStorage from '@/helpers/syncStorage';
 import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
@@ -44,6 +48,8 @@ export default {
       seekTime: [0],
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
+      maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
+      asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
     };
   },
   methods: {
@@ -156,11 +162,11 @@ export default {
       })(windowRect, tempRect);
     },
     controlWindowRect(rect) {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setSize', rect.slice(2, 4));
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setPosition', rect.slice(0, 2));
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
-    saveScreenshot() {
+    async saveScreenshot(videoPath) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -172,7 +178,7 @@ export default {
         videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
-      const imagePath = canvas.toDataURL('image/png');
+      const imagePath = canvas.toDataURL('image/jpeg', 0.8);
       // 用于测试截图的代码，以后可能还会用到
       // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
       // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
@@ -181,17 +187,23 @@ export default {
         videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
-      const smallImagePath = canvas.toDataURL('image/png');
+      const smallImagePath = canvas.toDataURL('image/jpeg', 0.8);
       const data = {
         shortCut: imagePath,
         smallShortCut: smallImagePath,
         lastPlayedTime: videodata.time,
         duration: this.duration,
       };
-      syncStorage.setSync('recent-played', data);
+
+      const val = await this.infoDB.get('recent-played', 'path', videoPath);
+      if (val) {
+        const mergedData = Object.assign(val, data);
+        await this.infoDB.add('recent-played', mergedData);
+        this.$bus.$emit('database-saved');
+      }
     },
     saveSubtitleStyle() {
-      syncStorage.setSync('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
+      return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
     async getVideoCover(grabCoverTime) {
       if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
@@ -260,7 +272,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo']),
+      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -270,18 +282,8 @@ export default {
   watch: {
     originSrc(val, oldVal) {
       this.coverFinded = false;
-      this.saveScreenshot();
-      asyncStorage.get('recent-played')
-        .then(async (data) => {
-          const val = await this.infoDB.get('recent-played', 'path', oldVal);
-          if (val && data) {
-            const mergedData = Object.assign(val, data);
-            this.infoDB.add('recent-played', mergedData).then(() => {
-              this.$bus.$emit('database-saved');
-            });
-          }
-        });
-      this.$bus.$emit('showlabel');
+      this.saveScreenshot(oldVal);
+      this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
         audioTrackList: [],
       });
@@ -291,8 +293,8 @@ export default {
   mounted() {
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setFullScreen', [!this.isFullScreen]);
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setAspectRatio', [this.ratio]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [this.ratio]);
     });
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
@@ -318,10 +320,30 @@ export default {
         this.$bus.$emit('seek-subtitle', e);
       }
     });
-    window.onbeforeunload = () => {
-      this.saveScreenshot();
-      this.saveSubtitleStyle();
+    this.$bus.$on('drag-over', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0.18)';
+    });
+    this.$bus.$on('drag-leave', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
+    });
+    this.$bus.$on('drop', () => {
+      this.maskBackground = 'rgba(255, 255, 255, 0)';
+    });
+    window.onbeforeunload = (e) => {
+      if (!this.asyncTasksDone) {
+        this.saveScreenshot(this.originSrc).then(this.saveSubtitleStyle).then(() => {
+          this.asyncTasksDone = true;
+          window.close();
+        }).catch(() => {
+          this.asyncTasksDone = true;
+          window.close();
+        });
+        e.returnValue = false;
+      }
     };
+  },
+  beforeDestroy() {
+    window.onbeforeunload = null;
   },
 };
 </script>
@@ -330,6 +352,12 @@ export default {
   position: relative;
   height: 0;
   z-index: auto;
+}
+.mask {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  transition: background-color 120ms linear;
 }
 .base-video-player {
   width: 100%;

@@ -8,9 +8,9 @@
   }">
       <div class="child-item" style="will-change: transform;">
         <div class="img blur" ref="blur"
-          v-if="!isPlaying && imageLoaded"
+          v-if="imageLoaded"
           :style="{
-            backgroundImage: backgroundImage,
+            backgroundImage: !isPlaying ? `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}` : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
           }"/>
         <transition name="fade2">
         <div class="white-hover"
@@ -21,76 +21,76 @@
             minHeight: `${thumbnailHeight}px`,
           }"/>
         </transition>
-        <div class="black-gradient"
+        <div class="content" ref="content"
           @mouseenter="mouseoverVideo"
           @mouseleave="mouseoutVideo"
-          @mouseup="mouseupVideo">
-          <div class="content" ref="content"
+          @mouseup="mouseupVideo"
+          :style="{
+            height: '100%',
+          }">
+          <div class="info"
             :style="{
-              height: '100%',
-            }">
-              <div class="info"
+                height: `${thumbnailHeight - bottom}px`,
+                width: `${thumbnailWidth - 2 * side}px`,
+                left: `${side}px`,
+              }">
+            <div class="overflow-container"
+              :style="{
+                height: sizeAdaption(22),
+                bottom: sizeAdaption(14),
+              }">
+            <transition name="icon">
+            <div class="icon-container"
+              v-if="isPlaying">
+              <Icon type="playlistplay" class="playlist-play"
                 :style="{
-                    height: `${thumbnailHeight - bottom}px`,
-                    width: `${thumbnailWidth - 2 * side}px`,
-                    left: `${side}px`,
-                  }">
-                <div class="overflow-container"
-                  :style="{
-                    height: sizeAdaption(22),
-                    bottom: sizeAdaption(14),
-                  }">
-                <transition name="icon">
-                <div class="icon-container"
-                  v-if="isPlaying">
-                  <Icon type="playlistplay" class="playlist-play"
-                    :style="{
-                      width: sizeAdaption(10),
-                      height: sizeAdaption(22),
-                      marginRight: sizeAdaption(4),
-                    }"/>
-                  <div class="playing"
-                    :style="{
-                      paddingTop: sizeAdaption(5),
-                      fontSize: sizeAdaption(12),
-                      lineHeight: sizeAdaption(12),
-                    }">{{ $t('recentPlaylist.playing') }}</div>
-                </div>
-                </transition>
-                </div>
-                <transition name="fade">
-                <div class="progress" ref="progress"
-                  :style="{
-                    opacity: '0',
-                    height: sizeAdaption(2),
-                    bottom: sizeAdaption(14),
-                    marginBottom: sizeAdaption(7),
-                  }">
-                  <div class="slider"
-                  :style="{
-                    width: `${sliderPercentage}%`,
-                  }"></div>
-                </div>
-                </transition>
-                <div class="title" ref="title"
-                  :style="{
-                    color: 'rgba(255,255,255,0.40)',
-                    fontSize: sizeAdaption(14),
-                    lineHeight: sizeAdaption(14),
-                  }">{{ baseName }}</div>
-              </div>
+                  width: sizeAdaption(10),
+                  height: sizeAdaption(22),
+                  marginRight: sizeAdaption(4),
+                }"/>
+              <div class="playing"
+                :style="{
+                  paddingTop: sizeAdaption(5),
+                  fontSize: sizeAdaption(12),
+                  lineHeight: sizeAdaption(12),
+                }">{{ $t('recentPlaylist.playing') }}</div>
+            </div>
+            </transition>
+            </div>
+            <transition name="fade">
+            <div class="progress" ref="progress"
+              :style="{
+                opacity: '0',
+                height: sizeAdaption(2),
+                bottom: sizeAdaption(14),
+                marginBottom: sizeAdaption(7),
+              }">
+              <div class="slider"
+              :style="{
+                width: `${sliderPercentage}%`,
+              }"></div>
+            </div>
+            </transition>
+            <div class="title" ref="title"
+              :style="{
+                color: 'rgba(255,255,255,0.40)',
+                fontSize: sizeAdaption(14),
+                lineHeight: sizeAdaption(14),
+              }">{{ baseName }}</div>
           </div>
-          <div class="border" ref="border"
-            :style="{
-              borderColor: 'rgba(255,255,255,0.15)',
-            }"/>
         </div>
+        <div class="border" ref="border"
+          :style="{
+            borderColor: 'rgba(255,255,255,0.15)',
+          }"/>
       </div>
 </div>
 </template>
 <script>
 import fs from 'fs';
 import path from 'path';
+import guessit from 'guessit-wrapper';
+import anitomy from 'anitomyscript';
 import { filePathToUrl } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
 
@@ -137,9 +137,7 @@ export default {
   },
   data() {
     return {
-      isBlur: true,
       showVideo: false,
-      isChosen: false,
       coverSrc: '',
       lastPlayedTime: 0,
       mediaInfo: { path: this.path },
@@ -148,6 +146,29 @@ export default {
     };
   },
   methods: {
+    async parseName(path) {
+      let episode = 0;
+      let season = 0;
+      const nameVideo = await guessit.parseName(path);
+      if (nameVideo.episodeNumber) {
+        episode = nameVideo.episodeNumber < 10 ? `0${nameVideo.episodeNumber}` : nameVideo.episodeNumber;
+        if (nameVideo.season) {
+          season = nameVideo.season < 10 ? `0${nameVideo.season}` : nameVideo.season;
+        }
+      } else {
+        const nameAnim = await anitomy.parse(path);
+        if (nameAnim.episode_number) {
+          episode = nameAnim.episode_number < 10 ? `0${nameAnim.episode_number}` : nameAnim.episode_number;
+          if (nameAnim.season) {
+            season = nameAnim.season < 10 ? `0${nameAnim.season}` : nameAnim.season;
+          }
+        }
+      }
+      return {
+        episode,
+        season,
+      };
+    },
     sizeAdaption(size) {
       return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
     },
@@ -161,8 +182,8 @@ export default {
       }
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
       this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
-      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
+      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
       if (!this.isPlaying && this.sliderPercentage > 0) {
         this.$refs.progress.style.setProperty('opacity', '1');
       }
@@ -173,22 +194,17 @@ export default {
       }
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
       this.$refs.content.style.setProperty('height', '100%');
-      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.40)');
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.15)');
+      this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.40)');
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
       if (!this.isPlaying && this.isInRange && !this.isShifting && this.canHoverItem) {
-        this.isBlur = false;
-        this.isChosen = true;
-        this.mouseoverRecently = true;
         this.eventTarget.onItemMouseover(this.index, this.mediaInfo);
         requestAnimationFrame(this.updateAnimationIn);
       }
     },
     mouseoutVideo() {
-      this.isBlur = true;
-      this.isChosen = false;
       this.eventTarget.onItemMouseout();
       requestAnimationFrame(this.updateAnimationOut);
     },
@@ -252,6 +268,17 @@ export default {
       }
     },
   },
+  asyncComputed: {
+    async baseName() {
+      const parsedName = await this.parseName(this.path);
+      if (parsedName.episode && parsedName.season) {
+        return `S${parsedName.season}E${parsedName.episode}`;
+      } else if (parsedName.episode && !parsedName.season) {
+        return `EP${parsedName.episode}`;
+      }
+      return path.basename(this.path, path.extname(this.path));
+    },
+  },
   computed: {
     backgroundImage() {
       return `url(${this.imageSrc})`;
@@ -285,9 +312,6 @@ export default {
     bottom() {
       return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
     },
-    baseName() {
-      return path.basename(this.path, path.extname(this.path));
-    },
   },
 };
 </script>
@@ -299,20 +323,13 @@ $border-radius: 3px;
     border-radius: $border-radius;
     width: 100%;
     height: 100%;
-    background-color: rgba(255,255,255,0.1);
-    .black-gradient {
-      position: absolute;
-      border-radius: $border-radius;
-      width: 100%;
-      height: calc(100% + 0.08vw);
-      background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
-    }
+    background-color: rgba(111,111,111,0.30);
     .white-hover {
       pointer-events:none;
       position: absolute;
       border-radius: $border-radius;
       background-color: rgba(255, 255, 255, 0.2);
-      transition: opacity 150ms 50ms linear;
+      transition: opacity 80ms 80ms ease-out;
     }
     .blur {
       filter: blur(1.5px);
@@ -333,9 +350,9 @@ $border-radius: 3px;
       position: absolute;
       z-index: 100;
       top: 0;
-      bottom: 0;
       left: 0;
       right: 0;
+      bottom: 0;
 
       .info {
         position: absolute;
@@ -357,7 +374,7 @@ $border-radius: 3px;
         }
         .playing {
           opacity: 0.7;
-          font-family: PingFangSC-Semibold;
+          font-family: $font-semibold;
           color: #FFFFFF;
           letter-spacing: 0.5px;
         }
@@ -378,8 +395,9 @@ $border-radius: 3px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      transition: color 80ms 80ms ease-out;
 
-      font-family: Avenir-Heavy, Arial, "Microsoft YaHei";
+      font-family: $font-heavy;
       letter-spacing: 0.58px;
 
       width: 100%;
@@ -390,6 +408,7 @@ $border-radius: 3px;
   .border {
     position: absolute;
     box-sizing: border-box;
+    transition: border-color 20ms ease-out;
 
     width: 100%;
     height: 100%;

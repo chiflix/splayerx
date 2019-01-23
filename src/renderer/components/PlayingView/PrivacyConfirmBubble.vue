@@ -8,7 +8,7 @@
       <div class="content">
         <div :class="infoCSS">
           {{ partOne }}<span class="underline"
-            @mouseup.stop="underlineMouseup"
+            @mouseup="underlineMouseup"
           >{{ underlinedContent }}</span>{{ partTwo }}
         </div>
         <div class="button"
@@ -17,7 +17,7 @@
           }"
           @mouseover.stop="hovered = true"
           @mouseout.stop="hovered = false"
-          @mouseup.stop="handleCloseMouseup">
+          @mouseup="handleCloseMouseup">
           <div class="button-info">{{ button }}</div>
         </div>
       </div>
@@ -38,7 +38,10 @@ export default {
   methods: {
     handleCloseMouseup() {
       if (this.state === 1) {
-        this.$store.dispatch('agreeOnPrivacyPolicy');
+        this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
+          this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+        });
+        this.$bus.$emit('subtitle-refresh-continue');
         this.$emit('close-privacy-bubble');
       } else {
         this.state = 1;
@@ -48,12 +51,17 @@ export default {
       if (this.state === 1) {
         this.state = 2;
       } else {
-        this.$store.dispatch('disagreeOnPrivacyPolicy');
+        this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+          this.$electron.ipcRenderer.send('main-to-preference', this.preferenceData);
+        });
         this.$emit('close-privacy-bubble');
       }
     },
   },
   computed: {
+    preferenceData() {
+      return this.$store.getters.preferenceData;
+    },
     infoCSS() {
       if (this.$i18n.locale === 'en') {
         if (this.state === 1) {
@@ -98,13 +106,13 @@ export default {
   transition: transform 400ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
 }
 .bubble-enter, .bubble-leave-to {
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     transform: translateX(350px);
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     transform: translateX(420px);
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     transform: translateX(593px);
   }
 }
@@ -112,18 +120,18 @@ export default {
   background-color: rgba(0,0,0,0.1);
   backdrop-filter: blur(9.6px);
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
-  @media screen and (max-width: 512px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     display: none;
   }
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     border-radius: 7px;
     clip-path: inset(0px round 7px);
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     border-radius: 8.4px;
     clip-path: inset(0px round 8.4px);
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     border-radius: 11.76px;
     clip-path: inset(0px round 11.76px);
   }
@@ -133,15 +141,15 @@ export default {
   border-width: 0.5px;
   border-color: rgba(255,255,255,0.1);
 
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     border-radius: 7px;
     clip-path: inset(0px round 7px);
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     border-radius: 8.4px;
     clip-path: inset(0px round 8.4px);
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     border-radius: 11.76px;
     clip-path: inset(0px round 11.76px);
   }
@@ -150,13 +158,13 @@ export default {
     justify-content: flex-end;
     align-items: center;
 
-    @media screen and (min-width: 513px) and (max-width: 854px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       min-height: 54px;
     }
-    @media screen and (min-width: 855px) and (max-width: 1920px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       min-height: 62px;
     }
-    @media screen and (min-width: 1921px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       min-height: 87px;
     }
     .underline {
@@ -169,7 +177,7 @@ export default {
       color: rgba(255,255,255,0.7);
       height: fit-content;
       font-weight: 500;
-      @media screen and (min-width: 513px) and (max-width: 854px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         margin-left: 18px;
         margin-right: 14px;
         margin-top: 14px;
@@ -180,7 +188,7 @@ export default {
         letter-spacing: 0.2px;
         line-height: 15px;
       }
-      @media screen and (min-width: 855px) and (max-width: 1920px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         margin-left: 19px;
         margin-right: 16px;
         margin-top: 14px;
@@ -191,7 +199,7 @@ export default {
         letter-spacing: 0.24px;
         line-height: 18px;
       }
-      @media screen and (min-width: 1921px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         margin-left: 26px;
         margin-right: 20px;
         margin-top: 20px;
@@ -207,7 +215,7 @@ export default {
       color: rgba(255,255,255,0.7);
       height: fit-content;
       font-weight: 500;
-      @media screen and (min-width: 513px) and (max-width: 854px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         margin-left: 18px;
         margin-right: 14px;
         margin-top: 14px;
@@ -218,7 +226,7 @@ export default {
         letter-spacing: 0.2px;
         line-height: 15px;
       }
-      @media screen and (min-width: 855px) and (max-width: 1920px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         margin-left: 19px;
         margin-right: 16px;
         margin-top: 14px;
@@ -229,7 +237,7 @@ export default {
         letter-spacing: 0.24px;
         line-height: 18px;
       }
-      @media screen and (min-width: 1921px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         margin-left: 26px;
         margin-right: 20px;
         margin-top: 20px;
@@ -245,7 +253,7 @@ export default {
       color: rgba(255,255,255,0.7);
       height: min-content;
       font-weight: 500;
-      @media screen and (min-width: 513px) and (max-width: 854px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         margin-left: 18px;
         margin-right: 14px;
         margin-top: 10px;
@@ -255,7 +263,7 @@ export default {
         font-size: 11px;
         line-height: 15px;
       }
-      @media screen and (min-width: 855px) and (max-width: 1920px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         margin-left: 19px;
         margin-right: 16px;
         margin-top: 12px;
@@ -265,7 +273,7 @@ export default {
         font-size: 13.2px;
         line-height: 18px;
       }
-      @media screen and (min-width: 1921px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         margin-left: 26px;
         margin-right: 20px;
         margin-top: 20px;
@@ -280,7 +288,7 @@ export default {
       color: rgba(255,255,255,0.7);
       height: min-content;
       font-weight: 500;
-      @media screen and (min-width: 513px) and (max-width: 854px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         margin-left: 18px;
         margin-right: 14px;
         margin-top: 12px;
@@ -290,7 +298,7 @@ export default {
         font-size: 11px;
         line-height: 15px;
       }
-      @media screen and (min-width: 855px) and (max-width: 1920px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         margin-left: 19px;
         margin-right: 16px;
         margin-top: 13px;
@@ -300,7 +308,7 @@ export default {
         font-size: 13.2px;
         line-height: 18px;
       }
-      @media screen and (min-width: 1921px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         margin-left: 26px;
         margin-right: 20px;
         margin-top: 20px;
@@ -321,7 +329,7 @@ export default {
       justify-content: space-between;
       align-items: center;
       transition: background-color 80ms linear;
-      @media screen and (min-width: 513px) and (max-width: 854px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         height: 24px;
         margin-right: 16px;
         border-radius: 11px;
@@ -330,7 +338,7 @@ export default {
         backdrop-filter: blur(3px);
         clip-path: inset(0px round 11px);
       }
-      @media screen and (min-width: 855px) and (max-width: 1920px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         height: 28px;
         margin-right: 20px;
         border-radius: 13.2px;
@@ -339,7 +347,7 @@ export default {
         backdrop-filter: blur(3px);
         clip-path: inset(0px round 13.2px);
       }
-      @media screen and (min-width: 1921px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         height: 39px;
         margin-right: 28px;
         border-radius: 18.5px;
@@ -357,7 +365,7 @@ export default {
       color: rgba(255,255,255,0.5);
       font-weight: 700;
       letter-spacing: 0.2px;
-      @media screen and (min-width: 513px) and (max-width: 854px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         padding-left: 12px;
         padding-right: 12px;
 
@@ -365,7 +373,7 @@ export default {
         letter-spacing: 0.2px;
         line-height: 10px;
       }
-      @media screen and (min-width: 855px) and (max-width: 1920px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         padding-left: 14px;
         padding-right: 14px;
 
@@ -374,7 +382,7 @@ export default {
         text-align: center;
         line-height: 12px;
       }
-      @media screen and (min-width: 1921px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         padding-left: 20px;
         padding-right: 20px;
 

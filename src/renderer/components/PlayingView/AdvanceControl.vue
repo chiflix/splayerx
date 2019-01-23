@@ -21,7 +21,7 @@
 <script>
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
 
@@ -52,6 +52,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['originSrc']),
     mousedownCurrentTarget() {
       return this.$store.state.Input.mousedownTarget;
     },
@@ -60,6 +61,9 @@ export default {
     },
   },
   watch: {
+    originSrc() {
+      this.showAttached = false;
+    },
     showAttached(val) {
       if (!val) {
         this.animFlag = true;
@@ -73,23 +77,24 @@ export default {
       }
     },
     mousedownCurrentTarget(val) {
-      if (val !== this.$options.name && this.showAttached) {
-        this.anim.playSegments([37, 41], false);
-        if (this.lastDragging) {
+      if (val !== 'notification-bubble' && val !== '') {
+        if (val !== this.$options.name && this.showAttached) {
+          this.anim.playSegments([37, 41], false);
           this.clearMouseup({ target: '' });
-        } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
-          this.$emit('update:showAttached', false);
         }
       }
     },
     mouseupCurrentTarget(val) {
-      if (this.lastDragging) {
-        if (this.showAttached) {
-          this.anim.playSegments([68, 73]);
+      if (this.mousedownCurrentTarget !== 'notification-bubble' && val !== '') {
+        if (this.lastDragging) {
+          if (this.showAttached) {
+            this.anim.playSegments([68, 73]);
+            this.$emit('update:lastDragging', false);
+          }
+          this.clearMousedown({ target: '' });
+        } else if (val !== this.$options.name && this.showAttached) {
+          this.$emit('update:showAttached', false);
         }
-        this.clearMousedown({ target: '' });
-      } else if (val !== this.$options.name && this.showAttached) {
-        this.$emit('update:showAttached', false);
       }
     },
   },
@@ -191,18 +196,18 @@ button:hover {
   position: absolute;
   z-index: 100;
   transition-property: opacity, transform;
-  @media screen and (min-width: 320px) and (max-width: 512px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     display: none;
   }
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     bottom: 32px;
     right: 3px;
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     bottom: 44px;
     right: 3px;
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     bottom: 70px;
     right: 7px;
   }

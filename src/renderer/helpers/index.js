@@ -5,7 +5,7 @@ import lolex from 'lolex';
 import { times } from 'lodash';
 import InfoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '@/../shared/errorcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
 
@@ -130,6 +130,7 @@ export default {
         if (files) {
           // if selected files contain folders only, then call openFolder()
           const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+          files.forEach(file => remote.app.addRecentDocument(file));
           if (onlyFolders) {
             this.openFolder(...files);
           } else {
@@ -164,9 +165,7 @@ export default {
         }
       }
       if (videoFiles.length !== 0) {
-        if (!videoFiles[0].includes('\\') || process.platform === 'win32') {
-          this.openVideoFile(...videoFiles);
-        }
+        this.openVideoFile(...videoFiles);
       } else {
         // TODO: no videoFiles in folders error catch
         this.addLog('error', {
@@ -258,7 +257,6 @@ export default {
       }
       this.$bus.$emit('new-file-open');
       this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
-      remote.app.addRecentDocument(originPath);
       this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
@@ -300,7 +298,7 @@ export default {
         case 'error':
           console.error(log);
           if (log && process.env.NODE_ENV !== 'development') {
-            this.$ga && this.$ga.exception(log.message || log);
+            this.$ga && this.$ga.exception(log.message || log);  
             Sentry.captureException(log);
           }
           break;
@@ -315,8 +313,8 @@ export default {
       if (!log || typeof log === 'string') {
         normalizedLog = { message: log };
       } else {
-        const { errcode, message, stack } = log;
-        normalizedLog = { errcode, message, stack };
+        const { errcode, code, message, stack } = log;
+        normalizedLog = { errcode, code, message, stack };
       }
       ipcRenderer.send('writeLog', level, normalizedLog);
     },

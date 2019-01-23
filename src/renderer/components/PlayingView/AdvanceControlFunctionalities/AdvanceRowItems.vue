@@ -81,7 +81,7 @@ export default {
     isChosen: {
       type: Boolean,
     },
-    winWidth: {
+    size: {
       type: Number,
     },
   },
@@ -113,38 +113,18 @@ export default {
         this.calculateFontLength(val);
       }
     },
-    winWidth(val) {
-      if (val > 1920) {
-        if (this.chosenSize === 0) {
-          this.$store.dispatch('updateScale', `${(30 / 11) * (val / 1920)}`);
-        }
-        if (this.chosenSize === 1) {
-          this.$store.dispatch('updateScale', `${(40 / 11) * (val / 1920)}`);
-        }
-        if (this.chosenSize === 2) {
-          this.$store.dispatch('updateScale', `${(50 / 11) * (val / 1920)}`);
-        }
-        if (this.chosenSize === 3) {
-          this.$store.dispatch('updateScale', `${(60 / 11) * (val / 1920)}`);
-        }
-      } else {
-        if (this.chosenSize === 0) {
-          this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * val) + (24 / 55)}`);
-        }
-        if (this.chosenSize === 1) {
-          this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * val) + (26 / 55)}`);
-        }
-        if (this.chosenSize === 2) {
-          this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * val) + (28 / 55)}`);
-        }
-        if (this.chosenSize === 3) {
-          this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * val) + (30 / 55)}`);
-        }
+    size(val) {
+      if (val > 1080) {
+        this.updateVideoScaleByFactors(val);
+      } else if (this.videoAspectRatio >= 1) {
+        this.updatePCVideoScaleByFactors(this.chosenSize);
+      } else if (this.videoAspectRatio < 1) {
+        this.updateMobileVideoScaleByFactors(this.chosenSize);
       }
     },
   },
   computed: {
-    ...mapGetters(['rate', 'chosenSize']),
+    ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'winHeight']),
     /**
      * @return {string}
      */
@@ -164,9 +144,9 @@ export default {
     },
     cardPos() {
       if (this.moveLength) {
-        if (this.winWidth > 514 && this.winWidth <= 854) {
+        if (this.size >= 289 && this.size <= 480) {
           return `${this.moveLength}px`;
-        } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+        } else if (this.size >= 481 && this.size <= 1080) {
           return `${this.moveLength * 1.2}px`;
         }
         return `${this.moveLength * 1.2 * 1.4}px`;
@@ -194,9 +174,9 @@ export default {
       return 'fontCard bigFontCard';
     },
     heightSize() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
+      if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.size >= 481 && this.size <= 1080) {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
@@ -208,12 +188,15 @@ export default {
       return this.item === this.$t('advance.fontSize') ? [0, 2] : [1, 4];
     },
     difWidth() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
+      if (this.size >= 289 && this.size <= 480) {
         return this.item === this.$t('advance.fontSize') ? [29, 35] : [25, 29];
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.size >= 481 && this.size <= 1080) {
         return this.item === this.$t('advance.fontSize') ? [29 * 1.2, 35 * 1.2] : [25 * 1.2, 29 * 1.2];
       }
       return this.item === this.$t('advance.fontSize') ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
+    },
+    videoAspectRatio() {
+      return this.intrinsicWidth / this.intrinsicHeight;
     },
   },
   created() {
@@ -303,26 +286,29 @@ export default {
           break;
       }
     },
+    // update video scale that width is larger than height
+    updatePCVideoScaleByFactors(index) {
+      const firstFactors = [21, 29, 37, 45];
+      const secondFactors = [24, 26, 28, 30];
+      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 900) * this.winHeight) + (secondFactors[index] / 5)) / 9}`);
+    },
+    // update video scale that height is larger than width
+    updateMobileVideoScaleByFactors(index) {
+      const firstFactors = [21, 29, 37, 45];
+      const secondFactors = [12, -92, -196, -300];
+      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 760) * this.winHeight) + (secondFactors[index] / 76)) / 9}`);
+    },
+    // update video scale when width or height is larger than 1080
+    updateVideoScaleByFactors(val) {
+      const factors = [30, 40, 50, 60];
+      this.$store.dispatch('updateScale', `${((val / 1080) * factors[this.chosenSize]) / 9}`);
+    },
     changeFontSize(index) {
-      switch (index) {
-        case 0:
-          this.$store.dispatch('updateChosenSize', 0);
-          this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
-          break;
-        case 1:
-          this.$store.dispatch('updateChosenSize', 1);
-          this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
-          break;
-        case 2:
-          this.$store.dispatch('updateChosenSize', 2);
-          this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
-          break;
-        case 3:
-          this.$store.dispatch('updateChosenSize', 3);
-          this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
-          break;
-        default:
-          break;
+      this.$store.dispatch('updateChosenSize', index);
+      if (this.videoAspectRatio >= 1) {
+        this.updatePCVideoScaleByFactors(index);
+      } else if (this.videoAspectRatio < 1) {
+        this.updateMobileVideoScaleByFactors(index);
       }
     },
   },
@@ -330,7 +316,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (min-width: 513px) and (max-width: 854px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
     width: 170px;
     .textContainer {
@@ -384,7 +370,7 @@ export default {
     animation: hideP1 100ms;
   }
 }
-@media screen and (min-width: 855px) and (max-width: 1920px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
     width: 204px;
     .textContainer {
@@ -438,7 +424,7 @@ export default {
     animation: hideP2 100ms;
   }
 }
-@media screen and (min-width: 1921px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
     width: 285.6px;
     .textContainer {

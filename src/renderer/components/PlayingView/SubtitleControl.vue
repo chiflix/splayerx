@@ -25,7 +25,8 @@
               </div>
 
               <div class="sub-menu">
-                <div class="scrollScope"
+                <div class="scrollScope" :class="refAnimation"
+                  @animationend="finishAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                     height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
@@ -42,29 +43,29 @@
                           height: `${itemHeight}px`,
                           cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
                         }">
-                        <div class="text">{{ this.$t('msg.subtitle.noSubtitle') }}</div>
+                        <div class="text">{{ noSubtitle }}</div>
                       </div>
                     </div>
 
-                    <div v-if="foundSubtitles"
-                      v-for="(item, index) in computedAvaliableItems" :key="item.rank">
-                      <div class="menu-item-text-wrapper"
-                        @mouseup="toggleItemClick(index)"
-                        @mouseover="toggleItemsMouseOver(index)"
-                        @mouseleave="toggleItemsMouseLeave(index)"
-                        :id="'item'+index"
-                        :style="{
-                          transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                          color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                          height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                          cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
-                        }">
-                        <div class="text"
-                          :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                            whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                          }">{{ item.path ? getSubName(item.path) : item.name }}</div>
+                      <div v-if="foundSubtitles"
+                        v-for="(item, index) in computedAvaliableItems" :key="item.rank">
+                        <div class="menu-item-text-wrapper"
+                          @mouseup="toggleItemClick(index)"
+                          @mouseover="toggleItemsMouseOver(index)"
+                          @mouseleave="toggleItemsMouseLeave(index)"
+                          :id="'item'+index"
+                          :style="{
+                            transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                            color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                            height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                            cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                          }">
+                          <div class="text"
+                            :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                              whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                            }">{{ item.path ? getSubName(item.path) : item.name }}</div>
+                        </div>
                       </div>
-                    </div>
 
                     <div v-if="loadingTypes.length > 0"
                       v-for="(item, index) in loadingTypes"
@@ -91,7 +92,11 @@
       </transition>
     </div>
     <div ref="sub" @mouseup.left="toggleSubMenuDisplay" @mousedown.left="handleDown" @mouseenter="handleEnter" @mouseleave="handleLeave" >
-      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"></lottie>
+      <lottie v-on:animCreated="handleAnimation" :options="defaultOptions" lot="subtitle"
+        :style="{
+          opacity: iconOpacity,
+          transition: 'opacity 150ms',
+        }"></lottie>
     </div>
   </div>
 </template>
@@ -103,6 +108,7 @@ import { Subtitle as subtitleActions, Input as InputActions } from '@/store/acti
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
+import { ONLINE_LOADING, NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-control',
@@ -126,10 +132,7 @@ export default {
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
-      animFlag: true,
-      mouseDown: false,
       validEnter: false,
-      showFlag: false,
       hoverIndex: -5,
       hiddenText: false,
       hoverHeight: 0,
@@ -139,13 +142,16 @@ export default {
       loadingType: '',
       detailTimer: null,
       breakTimer: null,
+      computedAvaliableItems: [],
+      continueRefresh: false,
+      isShowingHovered: false,
+      isInitial: true,
+      onAnimation: false,
+      refAnimation: '',
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId']),
-    ...mapGetters({
-      computedAvaliableItems: 'subtitleList',
-    }),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -157,6 +163,18 @@ export default {
         return result;
       },
     }),
+    computedSize() {
+      return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
+    },
+    noSubtitle() {
+      if (this.timer && this.isInitial) {
+        return this.$t('msg.subtitle.menuLoading');
+      }
+      return this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
+    },
+    iconOpacity() {
+      return this.isShowingHovered ? 0.9 : 0.75;
+    },
     mousedownCurrentTarget() {
       return this.$store.state.Input.mousedownTarget;
     },
@@ -164,36 +182,36 @@ export default {
       return this.$store.state.Input.mouseupTarget;
     },
     textHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 13;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
         return 14;
       }
       return 18;
     },
     itemHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 27;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
         return 32;
       }
       return 44;
     },
     isOverFlow() {
-      if (this.andify(this.winWidth > 512, this.winWidth <= 854)) {
+      if (this.andify(this.computedSize >= 289, this.computedSize <= 480)) {
         return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 2) ? 'scroll' : '';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
         return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 4) ? 'scroll' : '';
       }
       return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 6) ? ' scroll' : '';
     },
     scopeHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.computedAvaliableItems.length > 2 ?
           (this.loadingTypes.length * 31) + 89 :
           (((this.computedAvaliableItems.length + 1) * 31) - 4) +
           (this.loadingTypes.length * 31);
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
         return this.computedAvaliableItems.length > 4 ?
           (this.loadingTypes.length * 37) + 180 :
           (((this.computedAvaliableItems.length + 1) * 37) - 5) +
@@ -205,12 +223,12 @@ export default {
         (this.loadingTypes.length * 51);
     },
     contHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.computedAvaliableItems.length > 2 ?
           (this.loadingTypes.length * 31) + 138 :
           45 + ((this.computedAvaliableItems.length + 1) * 31) +
           (this.loadingTypes.length * 31);
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
         return this.computedAvaliableItems.length > 4 ?
           (this.loadingTypes.length * 37) + 239 :
           54 + ((this.computedAvaliableItems.length + 1) * 37) +
@@ -222,12 +240,12 @@ export default {
         (this.loadingTypes.length * 51);
     },
     cardPos() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 31 :
           this.scopeHeight + 4;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 37 :
@@ -244,6 +262,10 @@ export default {
     },
   },
   watch: {
+    originSrc() {
+      this.showAttached = false;
+      this.computedAvaliableItems = [];
+    },
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
       if (val === 0) {
@@ -252,39 +274,39 @@ export default {
     },
     showAttached(val) {
       if (!val) {
-        this.animFlag = true;
+        this.anim.playSegments([79, 92], false);
         if (!this.validEnter) {
-          this.anim.playSegments([79, 98], false);
-        } else {
-          this.showFlag = true;
-          this.anim.playSegments([79, 92], false);
-          setTimeout(() => { this.showFlag = false; }, 250);
+          this.isShowingHovered = false;
         }
       }
     },
     mousedownCurrentTarget(val) {
-      if (val !== this.$options.name && this.showAttached) {
-        this.anim.playSegments([62, 64], false);
-        if (this.lastDragging) {
+      if (val !== 'notification-bubble' && val !== '') {
+        if (val !== this.$options.name && this.showAttached) {
+          this.anim.playSegments([62, 64], false);
           this.clearMouseup({ target: '' });
-        } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
-          this.$emit('update:showAttached', false);
         }
       }
     },
     mouseupCurrentTarget(val) {
-      if (this.lastDragging) {
-        if (this.showAttached) {
-          this.anim.playSegments([79, 85]);
+      if (this.mousedownCurrentTarget !== 'notification-bubble' && val !== '') {
+        if (this.lastDragging) {
+          if (this.showAttached) {
+            this.anim.playSegments([79, 85]);
+            this.$emit('update:lastDragging', false);
+          }
+          this.clearMousedown({ target: '' });
+        } else if (val !== this.$options.name && this.showAttached) {
+          this.$emit('update:showAttached', false);
         }
-        this.clearMousedown({ target: '' });
-      } else if (val !== this.$options.name && this.showAttached) {
-        this.$emit('update:showAttached', false);
       }
     },
-    computedAvaliableItems(val, oldval) {
+    subtitleList(val, oldval) {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
+      }
+      if (val.length >= oldval.length) {
+        this.computedAvaliableItems = val.filter(sub => sub.name);
       }
     },
     loadingType(val) {
@@ -306,25 +328,50 @@ export default {
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
     }),
+    finishAnimation() {
+      this.refAnimation = '';
+    },
     getSubName(subPath) {
       return path.basename(subPath);
     },
     handleRefresh() {
-      if (!this.privacyAgreement) {
-        this.$bus.$emit('privacy-confirm');
-      } else if (this.privacyAgreement && !this.timer) {
-        this.timer = setInterval(() => {
-          this.count += 1;
-          this.rotateTime = Math.ceil(this.count / 100);
-        }, 10);
-        document.querySelector('.scrollScope').scrollTop = 0;
-        this.$bus.$emit('refresh-subtitles');
-        clearTimeout(this.breakTimer);
-        this.breakTimer = setTimeout(() => {
-          if (this.timer) {
-            this.$bus.$emit('refresh-finished');
+      if (navigator.onLine) {
+        if (!this.privacyAgreement) {
+          this.$bus.$emit('privacy-confirm');
+          this.continueRefresh = true;
+        } else if (this.privacyAgreement && !this.timer) {
+          this.timer = setInterval(() => {
+            this.count += 1;
+            this.rotateTime = Math.ceil(this.count / 100);
+          }, 10);
+          this.$bus.$emit('refresh-subtitles');
+          if (!this.isInitial) {
+            this.addLog('info', {
+              message: 'Online subtitles loading .',
+              code: ONLINE_LOADING,
+            });
+          } else {
+            setTimeout(() => {
+              if (!this.showAttached) {
+                this.onAnimation = true;
+                this.anim.loop = true;
+                this.anim.setSpeed(0.6);
+                this.anim.playSegments([115, 146], false);
+              }
+            }, 1000);
           }
-        }, 20000);
+          clearTimeout(this.breakTimer);
+          this.breakTimer = setTimeout(() => {
+            if (this.timer) {
+              this.$bus.$emit('refresh-finished');
+            }
+          }, 10000);
+        }
+      } else {
+        this.addLog('error', {
+          message: 'No Translation Result .',
+          errcode: NO_TRANSLATION_RESULT,
+        });
       }
     },
     orify(...args) {
@@ -337,7 +384,6 @@ export default {
       this.anim = anim;
     },
     handleDown() {
-      this.mouseDown = true;
       if (!this.showAttached) {
         this.anim.playSegments([28, 32], false);
       } else {
@@ -345,31 +391,25 @@ export default {
       }
     },
     handleEnter() {
-      if (this.animFlag && !this.showAttached) {
-        if (!this.mouseDown) {
-          this.anim.playSegments([4, 8], false);
-        } else {
-          this.anim.playSegments([102, 105], false);
-        }
+      if (this.onAnimation) {
+        this.anim.addEventListener('complete', () => {
+          this.anim.setSpeed(1.5);
+        });
+        this.anim.loop = false;
       }
-      this.showFlag = false;
+      if (!this.showAttached) {
+        this.isShowingHovered = true;
+      }
       this.validEnter = true;
-      this.animFlag = false;
     },
     handleLeave() {
       if (!this.showAttached) {
-        if (this.mouseDown) {
-          this.anim.playSegments([35, 38], false);
-        } else if (this.showFlag) {
-          this.anim.addEventListener('complete', () => {
-            this.anim.playSegments([95, 98], false);
-            this.showFlag = false;
-            this.anim.removeEventListener('complete');
-          });
-        } else {
-          this.anim.playSegments([95, 98], false);
+        if (this.onAnimation) {
+          this.anim.loop = true;
+          this.anim.setSpeed(0.6);
+          this.anim.playSegments([115, 146], false);
         }
-        this.animFlag = true;
+        this.isShowingHovered = false;
       }
       this.validEnter = false;
     },
@@ -421,12 +461,33 @@ export default {
       this.count = this.rotateTime * 100;
       setTimeout(() => {
         this.$bus.$emit('finished-add-subtitles');
+        this.isInitial = false;
+        if (this.onAnimation) {
+          this.anim.addEventListener('complete', () => {
+            this.anim.setSpeed(1.5);
+          });
+          this.onAnimation = false;
+          this.anim.loop = false;
+        } else {
+          this.refAnimation = 'refresh-animation';
+          this.$store.dispatch('removeMessagesByType');
+        }
+        document.querySelector('.scrollScope').scrollTop = 0;
         this.timer = null;
       }, 1000);
     });
   },
   mounted() {
-    this.$bus.$on('menu-subtitle-refresh', this.handleRefresh);
+    this.$bus.$on('menu-subtitle-refresh', (initial) => {
+      this.isInitial = !!initial;
+      this.handleRefresh();
+    });
+    this.$bus.$on('subtitle-refresh-continue', () => {
+      if (this.continueRefresh) {
+        this.continueRefresh = false;
+        this.handleRefresh();
+      }
+    });
     document.addEventListener('mouseup', (e) => {
       if (e.button === 0) {
         if (!this.showAttached) {
@@ -436,7 +497,6 @@ export default {
             this.anim.playSegments([40, 44], false);
           }
         }
-        this.mouseDown = false;
       }
     });
   },
@@ -503,7 +563,6 @@ export default {
     .text {
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
-      text-transform: capitalize;
     }
   }
   .placeholder-item-text-wrapper {
@@ -526,12 +585,12 @@ export default {
     box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
     background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
   }
-  @media screen and (min-width: 320px) and (max-width: 512px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     .sub-menu-wrapper {
       display: none;
     }
   }
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     .topContainer {
       cursor: default;
       width: 100%;
@@ -553,7 +612,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 32px;
-      left: -58px;
+      left: -102px;
       width: 170px;
       max-height: 138px;
     }
@@ -591,7 +650,7 @@ export default {
       margin-left: 9px;
     }
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     .topContainer {
       cursor: default;
       width: 100%;
@@ -618,7 +677,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 44px;
-      left: -42px;
+      left: -106px;
       width: 204px;
       max-height: 239px;
     }
@@ -651,7 +710,7 @@ export default {
       margin-left: 9.5px;
     }
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .topContainer {
       cursor: default;
       width: 100%;
@@ -678,7 +737,7 @@ export default {
     .sub-menu-wrapper {
       position: absolute;
       bottom: 70px;
-      left: -33px;
+      left: -133px;
       width: 286px;
       max-height: 433px;
     }
@@ -721,5 +780,16 @@ export default {
 }
 .sub-trans-l-leave-active {
   position: absolute;
+}
+
+.refresh-animation {
+  animation: menu-refresh 300ms linear 1 normal forwards;
+}
+@keyframes menu-refresh {
+  0% { opacity: 1 }
+  25% { opacity: 0.5 }
+  50% { opacity: 0 }
+  75% { opacity: 0.5 }
+  100% { opacity: 1 }
 }
 </style>

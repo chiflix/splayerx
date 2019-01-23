@@ -78,7 +78,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'duration', 'ratio', 'nextVideo', 'progressKeydown']),
+    ...mapGetters(['winWidth', 'duration', 'ratio', 'nextVideo']),
     hoveredPercent() {
       return this.hovering ? this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100 : 0;
     },
@@ -113,16 +113,6 @@ export default {
   watch: {
     winWidth(newValue) {
       this.thumbnailWidth = this.winWidthToThumbnailWidth(newValue);
-    },
-    progressKeydown(newValue) {
-      if (newValue) {
-        this.progressTriggerStopped = true;
-        this.clock.clearTimeout(this.progressTriggerId);
-      } else {
-        this.progressTriggerId = this.clock.setTimeout(() => {
-          this.progressTriggerStopped = false;
-        }, this.progressDisappearDelay);
-      }
     },
   },
   methods: {
@@ -277,6 +267,13 @@ export default {
     document.addEventListener('mousemove', this.handleDocumentMousemove);
     document.addEventListener('mouseup', this.handleDocumentMouseup);
     this.thumbnailWidth = this.winWidthToThumbnailWidth(this.winWidth);
+    this.$bus.$on('seek', () => {
+      this.progressTriggerStopped = true;
+      this.clock.clearTimeout(this.progressTriggerId);
+      this.progressTriggerId = this.clock.setTimeout(() => {
+        this.progressTriggerStopped = false;
+      }, this.progressDisappearDelay);
+    });
   },
   beforeDestroy() {
     document.removeEventListener('mousemove', this.handleDocumentMousemove);

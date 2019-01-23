@@ -84,15 +84,9 @@ export default {
       this.$emit('ready-to-show');
     },
     updatePlayingTime(time) {
-      if (time < this.nextVideoPreviewTime) {
-        this.$emit('close-next-video');
-      } else if (time >= this.duration && this.nextVideo) {
-        this.$emit('close-next-video');
-      } else {
-        const fractionProgress = (time - this.nextVideoPreviewTime) /
-          (this.duration - this.nextVideoPreviewTime);
-        this.progress = fractionProgress * 100;
-      }
+      const fractionProgress = (time - this.nextVideoPreviewTime) /
+        (this.duration - this.nextVideoPreviewTime);
+      this.progress = fractionProgress * 100;
     },
   },
   computed: {
@@ -132,7 +126,7 @@ export default {
  opacity: 0;
 }
 .next-video {
-  @media screen and (max-width: 512px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     & {
       display: none;
     }
@@ -143,17 +137,17 @@ export default {
     filter: blur(11.55px);
     background-color: rgba(0,0,0,0.20);
     border-radius: 21.6px;
-    @media screen and (min-width: 513px) and (max-width: 854px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       height: 70px;
       width: 116px;
       left: 7px;
     }
-    @media screen and (min-width: 855px) and (max-width: 1920px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       height: 84px;
       width: 140px;
       left: 8.5px;
     }
-    @media screen and (min-width: 1921px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       height: 118px;
       width: 195px;
       left: 12px;
@@ -172,17 +166,17 @@ export default {
 
     border: 1px solid rgba(0,0,0,0.2);
 
-    @media screen and (min-width: 513px) and (max-width: 854px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       border-radius: 2px;
       height: 70px;
       width: 123px;
     }
-    @media screen and (min-width: 855px) and (max-width: 1920px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       border-radius:4px;
       height: 84px;
       width: 148px;
     }
-    @media screen and (min-width: 1921px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       border-radius: 3.36px;
       height: 118px;
       width: 207px;
@@ -196,15 +190,15 @@ export default {
     }
     .notificationPlay {
       position: absolute;
-      @media screen and (min-width: 513px) and (max-width: 854px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         top: 20.1875px;
         left: 47.8125px;
       }
-      @media screen and (min-width: 855px) and (max-width: 1920px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         top: 24.4375px;
         left: 57.375px;
       }
-      @media screen and (min-width: 1921px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         top: 35.0625px;
         left: 80.75px;
       }
@@ -218,19 +212,19 @@ export default {
 
     border-radius: 3.36px 7px 7px 3.36px;
     clip-path: inset(0px round 7px);
-    @media screen and (min-width: 513px) and (max-width: 854px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       height: 70px;
       width: 340px;
       border-radius: 3.36px 7px 7px 3.36px;
       clip-path: inset(0px round 7px);
     }
-    @media screen and (min-width: 855px) and (max-width: 1920px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       height: 84px;
       width: 408px;
       border-radius: 3.36px 9px 9px 3.36px;
       clip-path: inset(0px round 9px);
     }
-    @media screen and (min-width: 1921px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       height: 118px;
       width: 571px;
       border-radius: 3.36px 11px 11px 3.36px;
@@ -243,20 +237,21 @@ export default {
     border-color: rgba(255,255,255,0.1);
 
     clip-path: inset(0px round 3.36px);
+    overflow: hidden;
 
     border-radius: 3.36px 7px 7px 3.36px;
 
-    @media screen and (min-width: 513px) and (max-width: 854px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       height: 70px;
       width: 340px;
       border-radius: 3.36px 7px 7px 3.36px;
     }
-    @media screen and (min-width: 855px) and (max-width: 1920px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       height: 84px;
       width: 408px;
       border-radius: 3.36px 9px 9px 3.36px;
     }
-    @media screen and (min-width: 1921px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       height: 118px;
       width: 571px;
       border-radius: 3.36px 11px 11px 3.36px;
@@ -264,22 +259,22 @@ export default {
     .progress{
       position: absolute;
       border-radius: 11px;
-      @media screen and (min-width: 513px) and (max-width: 854px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         top: 1.5px;
         height: 68px;
-        left: 121px;
+        left: 122px;
         width: 217px;
       }
-      @media screen and (min-width: 855px) and (max-width: 1920px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         top: 1.5px;
         height: 82px;
-        left: 144px;
+        left: 147px;
         width: 260px;
       }
-      @media screen and (min-width: 1921px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         top: 1.5px;
         height: 116px;
-        left: 205px;
+        left: 206px;
         width: 364px;
       }
       .progress-color {
@@ -293,13 +288,13 @@ export default {
           right: 0;
           height: 100%;
           background-image: linear-gradient(-90deg, rgba(238,238,238,0.29) 0%, rgba(255,255,255,0.00) 100%);
-          @media screen and (min-width: 513px) and (max-width: 854px) {
+          @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
             width: 34px;
           }
-          @media screen and (min-width: 855px) and (max-width: 1920px) {
+          @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
             width: 42px;
           }
-          @media screen and (min-width: 1921px) {
+          @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
             width: 57.5px;
           }
         }
@@ -315,15 +310,15 @@ export default {
     }
     .content {
       display: flex;
-      @media screen and (min-width: 513px) and (max-width: 854px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         padding-left: 136px;
         padding-top: 13px;
       }
-      @media screen and (min-width: 855px) and (max-width: 1920px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         padding-left: 164px;
         padding-top: 15px;
       }
-      @media screen and (min-width: 1921px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         padding-left: 230px;
         padding-top: 23px;
       }
@@ -335,19 +330,19 @@ export default {
           display: flex;
           .duration {
             opacity: 0.7;
-            font-family: Avenir-Light;
+            font-family: $font-light;
             color: #FFFFFF;
-            @media screen and (min-width: 513px) and (max-width: 854px) {
+            @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
               font-size: 8px;
               letter-spacing: 0.48px;
               line-height: 10px;
             }
-            @media screen and (min-width: 855px) and (max-width: 1920px) {
+            @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
               font-size: 10px;
               letter-spacing: 0.6px;
               line-height: 12px;
             }
-            @media screen and (min-width: 1921px) {
+            @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
               font-size: 14px;
               letter-spacing: 0.8px;
               line-height: 14px;
@@ -355,21 +350,21 @@ export default {
           }
           .title {
             opacity: 0.7;
-            font-family: PingFangSC-Light;
+            font-family: $font-light;
             color: #FFFFFF;
-            @media screen and (min-width: 513px) and (max-width: 854px) {
+            @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
               font-size: 8px;
               letter-spacing: 0.42px;
               line-height: 10px;
               transform: translateY(-0.5px);
             }
-            @media screen and (min-width: 855px) and (max-width: 1920px) {
+            @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
               font-size: 10px;
               letter-spacing: 0.52px;
               line-height: 12px;
               transform: translateY(-1px);
             }
-            @media screen and (min-width: 1921px) {
+            @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
               font-size: 14px;
               letter-spacing: 0.73px;
               line-height: 14px;
@@ -377,7 +372,7 @@ export default {
           }
         }
         .vid-name {
-          font-family: PingFangSC-Semibold;
+          font-family: $font-semibold;
           color: #FFFFFF;
 
           opacity: 0.9;
@@ -389,21 +384,21 @@ export default {
           -webkit-box-orient: vertical;
           -webkit-line-clamp: 2;
           text-overflow: ellipsis;
-          @media screen and (min-width: 513px) and (max-width: 854px) {
+          @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
             padding-top: 4px;
             width: 150px;
             font-size: 10px;
             letter-spacing: 0.3px;
             line-height: 16px;
           }
-          @media screen and (min-width: 855px) and (max-width: 1920px) {
+          @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
             padding-top: 5px;
             width: 178px;
             font-size: 12px;
             letter-spacing: 0.36px;
             line-height: 19.2px;
           }
-          @media screen and (min-width: 1921px) {
+          @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
             padding-top: 8px;
             width: 249px;
             font-size: 17px;
@@ -415,15 +410,15 @@ export default {
     }
     .close {
       position: absolute;
-      @media screen and (min-width: 513px) and (max-width: 854px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         top: 24px;
         right: 16px;
       }
-      @media screen and (min-width: 855px) and (max-width: 1920px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         top: 29px;
         right: 20px;
       }
-      @media screen and (min-width: 1921px) {
+      @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         top: 41px;
         right: 28px;
       }

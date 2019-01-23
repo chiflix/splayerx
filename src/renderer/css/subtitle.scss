@@ -1,6 +1,6 @@
 .subtitle-style0 {
-  font-family: "PingFang SC", "Microsoft YaHei";
-  font-size: 11px;
+  font-family: $font-normal;
+  font-size: 9px;
   letter-spacing: 1px;
   opacity: 1;
   color: white;
@@ -8,8 +8,8 @@
   -webkit-font-smoothing: antialiased;
 }
 .subtitle-border-style0 {
-  font-family: "PingFang SC", "Microsoft YaHei";
-  font-size: 11px;
+  font-family: $font-normal;
+  font-size: 9px;
   letter-spacing: 1px;
   padding: 0px;
   -webkit-text-fill-color: transparent;
@@ -21,8 +21,8 @@
 }
 
 .subtitle-style1 {
-  font-family: "PingFang SC", "Microsoft YaHei";
-  font-size: 11px;
+  font-family: $font-normal;
+  font-size: 9px;
   letter-spacing: 1px;
   opacity: 1;
   color: white;
@@ -30,8 +30,8 @@
   -webkit-font-smoothing: antialiased;
 }
 .subtitle-border-style1 {
-  font-family: "PingFang SC", "Microsoft YaHei";
-  font-size: 11px;
+  font-family: $font-normal;
+  font-size: 9px;
   letter-spacing: 1px;
   padding: 0px;
   -webkit-text-fill-color: transparent;
@@ -44,8 +44,8 @@
 
 
 .subtitle-style2 {
-  font-family: "PingFang SC", "Microsoft YaHei";
-  font-size: 11px;
+  font-family: $font-normal;
+  font-size: 9px;
   letter-spacing: 1px;
   opacity: 1;
   color: #fffc00;
@@ -53,8 +53,8 @@
   -webkit-font-smoothing: antialiased;
 }
 .subtitle-border-style2 {
-  font-family: "PingFang SC", "Microsoft YaHei";
-  font-size: 11px;
+  font-family: $font-normal;
+  font-size: 9px;
   letter-spacing: 1px;
   padding: 0px;
   -webkit-text-fill-color: transparent;
@@ -65,8 +65,8 @@
 }
 
 .subtitle-style3 {
-  font-family: "Yuanti SC", "PingFang SC", "Microsoft YaHei";
-  font-size: 11px;
+  font-family: $font-yuanti;
+  font-size: 9px;
   letter-spacing: 1px;
   opacity: 1;
   color: #fff;
@@ -74,8 +74,8 @@
   -webkit-font-smoothing: antialiased;
 }
 .subtitle-border-style3 {
-  font-family: "Yuanti SC", "PingFang SC", "Microsoft YaHei";
-  font-size: 11px;
+  font-family: $font-yuanti;
+  font-size: 9px;
   letter-spacing: 1px;
   padding: 0px;
   -webkit-text-fill-color: transparent;
@@ -86,8 +86,8 @@
 }
 
 .subtitle-style4 {
-  font-family: "PingFang SC", "Microsoft YaHei";
-  font-size: 11px;
+  font-family: $font-normal;
+  font-size: 9px;
   letter-spacing: 1px;
   opacity: 1;
   color: #fff;
@@ -96,8 +96,8 @@
   padding: 0 5px;
 }
 .subtitle-border-style4 {
-  font-family: "PingFang SC", "Microsoft YaHei";
-  font-size: 11px;
+  font-family: $font-normal;
+  font-size: 9px;
   letter-spacing: 1px;
   -webkit-text-fill-color: transparent;
   font-weight: 400;

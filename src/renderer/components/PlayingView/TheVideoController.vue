@@ -8,17 +8,15 @@
     @mouseleave="handleMouseleave"
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
-    @mousedown.right="handleMousedownRight"
     @mousedown.left="handleMousedownLeft"
-    @mouseup.left="handleMouseupLeft"
-    @dblclick="handleDblclick">
-    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets"></titlebar>
+    @mouseup.left="handleMouseupLeft">
+    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
     :mousemovePosition="mousemovePosition"
     :isDragging="isDragging"
-    :lastDragging="lastDragging"
+    :lastDragging.sync="lastDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
@@ -26,12 +24,12 @@
     <play-button :paused="paused" />
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons" v-fade-in="showAllWidgets">
-      <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
-      v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging="lastDragging"
-      @conflict-resolve="conflictResolve"/>
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
+      <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
+      v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging.sync="lastDragging"
+      @conflict-resolve="conflictResolve"/>
       <advance-control class="button advance" v-fade-in="displayState['advance-control']"
-      v-bind.sync="widgetsStatus['advance-control']" :lastDragging="lastDragging"
+      v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
     <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" />
@@ -52,7 +50,6 @@ import TheTimeCodes from './TheTimeCodes.vue';
 import TheProgressBar from './TheProgressBar.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
-import SpeedLabel from './RateLabel.vue';
 import { videodata } from '../../store/video';
 
 export default {
@@ -68,7 +65,6 @@ export default {
     'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
     'recent-playlist': RecentPlaylist,
-    SpeedLabel,
   },
   data() {
     return {
@@ -82,10 +78,9 @@ export default {
       mouseleftDelay: 1000,
       popupShow: false,
       clicksTimer: 0,
-      clicksDelay: 200,
+      clicksDelay: 250,
       dragDelay: 200,
       widgetsStatus: {},
-      preventSingleClick: false,
       lastAttachedShowing: false,
       focusedTimestamp: 0,
       focusDelay: 500,
@@ -97,6 +92,9 @@ export default {
       lastDragging: false,
       displayState: {},
       tempRecentPlaylistDisplayState: false,
+      clicks: 0,
+      videoChanged: false,
+      videoChangedTimer: 0,
     };
   },
   computed: {
@@ -107,12 +105,15 @@ export default {
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio']),
+    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc']),
+    onlyOneVideo() {
+      return this.playingList.length === 1;
+    },
     showAllWidgets() {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
-        this.attachedShown);
+        this.attachedShown || this.videoChanged);
     },
     onOtherWidget() {
       return this.currentWidget !== this.$options.name;
@@ -125,10 +126,28 @@ export default {
       return this.$store.state.Window.isFocused;
     },
     isDragging() {
-      return this.isMousemove && this.leftMousedown;
+      if (this.isMousedown) {
+        return this.isMousemove;
+      }
+      return false;
     },
   },
   watch: {
+    originSrc() {
+      Object.keys(this.widgetsStatus).forEach((item) => {
+        if (item !== 'playlist-control') {
+          this.widgetsStatus[item].showAttached = false;
+        }
+      });
+      this.isMousedown = false;
+      this.videoChanged = true;
+      if (this.videoChangedTimer) {
+        this.clock.clearTimeout(this.videoChangedTimer);
+      }
+      this.videoChangedTimer = this.clock.setTimeout(() => {
+        this.videoChanged = false;
+      }, 3000);
+    },
     isDragging(val, oldval) {
       if (!val && oldval) {
         this.lastDragging = true;
@@ -160,6 +179,9 @@ export default {
     this.UIElements.forEach((value) => {
       this.displayState[value.name] = true;
       if (value.name === 'recent-playlist') this.displayState[value.name] = false;
+      if (value.name === 'playlist-control' && this.onlyOneVideo) {
+        this.displayState['playlist-control'] = false;
+      }
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
@@ -189,7 +211,7 @@ export default {
       const minimumSize = this.tempRecentPlaylistDisplayState
         ? [512, Math.round(512 / this.ratio)]
         : [320, 180];
-      this.$electron.ipcRenderer.send('callCurrentWindowMethod', 'setMinimumSize', minimumSize);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
     },
     conflictResolve(name) {
       Object.keys(this.widgetsStatus).forEach((item) => {
@@ -258,6 +280,7 @@ export default {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
+      tempObject['playlist-control'] = !this.onlyOneVideo;
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
@@ -333,51 +356,38 @@ export default {
         this.mouseLeftWindow = true;
       }, this.mouseleftDelay);
     },
-    handleMousedownRight() {
-      if (process.platform !== 'darwin') {
-        const menu = this.$electron.remote.Menu.getApplicationMenu();
-        menu.popup(this.$electron.remote.getCurrentWindow());
-        this.popupShow = true;
-      }
-    },
     handleMousedownLeft() {
       this.isMousedown = true;
-      if (!this.isValidClick()) { return; }
-      if (process.platform !== 'darwin') {
-        const menu = this.$electron.remote.Menu.getApplicationMenu();
-        if (this.popupShow === true) {
-          menu.closePopup();
-          this.popupShow = false;
-        }
-      }
     },
     handleMouseupLeft() {
       this.isMousemove = false;
       this.isMousedown = false;
+      this.clicks += 1;
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
       }
       if (!this.isValidClick() || (this.lastDragging && this.lastAttachedShowing)) {
+        this.clicks = 0;
         return;
       }
-      this.clicksTimer = setTimeout(() => {
-        const attachedShowing = this.lastAttachedShowing;
-        if (
-          this.currentMousedownWidget === 'the-video-controller' &&
-          this.currentMouseupWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.lastDragging) {
-          this.togglePlayback();
+      if (this.clicks === 1) {
+        this.clicksTimer = setTimeout(() => {
+          this.clicks = 0;
+          const attachedShowing = this.lastAttachedShowing;
+          if (
+            this.currentMousedownWidget === 'the-video-controller' &&
+            this.currentMouseupWidget === 'the-video-controller' && !attachedShowing && !this.lastDragging) {
+            this.togglePlayback();
+          }
+          this.lastDragging = false;
+          this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
+        }, this.clicksDelay);
+      } else if (this.clicks === 2) {
+        clearTimeout(this.clicksTimer);
+        this.clicks = 0;
+        if (this.currentMouseupWidget === 'the-video-controller') {
+          this.toggleFullScreenState();
         }
-        this.lastDragging = false;
-        this.preventSingleClick = false;
-        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
-      }, this.clicksDelay);
-    },
-    handleDblclick() {
-      clearTimeout(this.clicksTimer); // cancel the time out
-      this.preventSingleClick = true;
-      if (this.currentMouseupWidget === 'the-video-controller') {
-        this.toggleFullScreenState();
-        this.preventSingleClick = false;
       }
     },
     handleKeydown({ code }) {
@@ -496,7 +506,7 @@ export default {
 }
 .control-buttons {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   position: fixed;
   z-index: 10;
   .button {
@@ -505,24 +515,24 @@ export default {
     position: relative;
   }
   .subtitle {
-    @media screen and (min-width: 513px) and (max-width: 854px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-right: 17.6px;
     }
-    @media screen and (min-width: 855px) and (max-width: 1920px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-right: 25.6px;
     }
-    @media screen and (min-width: 1921px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-right: 40px;
     }
   }
   .playlist {
-    @media screen and (min-width: 513px) and (max-width: 854px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-right: 17.6px;
     }
-    @media screen and (min-width: 855px) and (max-width: 1920px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-right: 25.6px;
     }
-    @media screen and (min-width: 1921px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-right: 40px;
     }
   }
@@ -531,12 +541,12 @@ export default {
     height: 100%;
   }
 }
-@media screen and (max-width: 512px) {
+@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .control-buttons {
     display: none;
   }
 }
-@media screen and (min-width: 513px) and (max-width: 854px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .control-buttons {
     width: 115px;
     height: 22px;
@@ -548,7 +558,7 @@ export default {
     }
   }
 }
-@media screen and (min-width: 855px) and (max-width: 1920px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .control-buttons {
     width: 167px;
     height: 32px;
@@ -560,7 +570,7 @@ export default {
     }
   }
 }
-@media screen and (min-width: 1921px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .control-buttons {
     width: 260px;
     height: 50px;
