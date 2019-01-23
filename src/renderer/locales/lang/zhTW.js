@@ -4,8 +4,8 @@ export default {
     file: {
       name: '文件',
       open: '打開文件…',
-      openURL: '打開URL…',
-      openRecent: '最近播放',
+      openURL: '打開 URL…',
+      openRecent: '打開最近播放',
       clearHistory: '清空播放記錄',
       closeWindow: '關閉',
     },
@@ -37,13 +37,13 @@ export default {
       name: '字幕',
       subtitleSelect: '翻譯結果',
       AITranslation: '重新加載翻譯結果',
-      loadSubtitleFile: '加載字幕文件…',
       menuLoading: '正在匹配翻譯結果 ...',
+      loadSubtitleFile: '加載字幕文件…',
       mainSubtitle: '第一字幕',
       langZhCN: '中文',
       langEn: '英文',
       notToShowSubtitle: '無',
-      noSubtitle: '暫無可用翻譯結果',
+      noSubtitle: '暫未找到翻譯結果',
       secondarySubtitle: '第二字幕',
       subtitleStyle: '字幕樣式',
       style1: '電影風格',
@@ -122,7 +122,7 @@ export default {
   },
   errorFile: {
     fileNonExist: {
-      title: '無法找到相應文件',
+      title: '未找到文件',
       content: '將從列表中移除此項目。',
     },
     emptyFolder: {
@@ -130,12 +130,12 @@ export default {
       content: '未找到可播放文件。',
     },
     default: {
-      title: '文件錯誤',
-      content: '無法找到相應文件',
+      title: '打開錯誤',
+      content: '暫不支持該文件類型。',
     },
     loadFailed: {
       title: '未能加載字幕',
-      content: '暫不支持該字幕類型',
+      content: '暫不支持該字幕類型。',
     },
     offLine: {
       title: '未能連接網絡',
@@ -144,7 +144,7 @@ export default {
   },
   loading: {
     title: '',
-    content: '正在加載智能翻譯結果 ...',
+    content: '正在智能匹配翻譯結果 ...',
   },
   privacyBubble: {
     masVersion: {

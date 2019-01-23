@@ -43,7 +43,7 @@ export default {
       langZhCN: '中文',
       langEn: '英文',
       notToShowSubtitle: '无',
-      noSubtitle: '暂无可用翻译结果',
+      noSubtitle: '暂未找到翻译结果',
       secondarySubtitle: '第二字幕',
       subtitleStyle: '字幕样式',
       style1: '电影风格',
@@ -122,7 +122,7 @@ export default {
   },
   errorFile: {
     fileNonExist: {
-      title: '无法找到相应文件',
+      title: '未找到文件',
       content: '将从列表中移除此项目。',
     },
     emptyFolder: {
@@ -130,12 +130,12 @@ export default {
       content: '未找到可播放文件。',
     },
     default: {
-      title: '文件错误',
-      content: '无法找到相应文件',
+      title: '打开错误',
+      content: '暂不支持该文件类型。',
     },
     loadFailed: {
       title: '未能加载字幕',
-      content: '暂不支持该字幕类型',
+      content: '暂不支持该字幕类型。',
     },
     offLine: {
       title: '未能连接网络',
