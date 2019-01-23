@@ -1,14 +1,16 @@
 import { extname, basename } from 'path';
 import { open, readSync, readFile, closeSync, statSync } from 'fs';
 import chardet from 'chardet';
-import convert3To1 from 'iso-639-3-to-1';
 import iconv from 'iconv-lite';
 import franc from 'franc';
 import { ipcRenderer } from 'electron';
 import helpers from '@/helpers';
 import Sagi from '@/helpers/sagi';
+import { normalizeCode } from '@/helpers/language';
 import SubtitleLoader from './index';
 import { SubtitleError, ErrorCodes } from './errors';
+
+export { normalizeCode };
 
 export function toArray(element) {
   return element instanceof Array ? element : [element];
@@ -95,7 +97,7 @@ export async function localLanguageLoader(path, format) {
   try {
     const string = iconv.decode(await getFragmentBuffer(path), fileEncoding);
     const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
-    return convert3To1(franc(stringCallback(string)));
+    return normalizeCode(franc(stringCallback(string)));
   } catch (e) {
     helpers.methods.addLog('error', {
       message: 'Unsupported Subtitle .',

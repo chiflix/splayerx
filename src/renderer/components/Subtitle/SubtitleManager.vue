@@ -16,12 +16,12 @@ import { readdir } from 'fs';
 import osLocale from 'os-locale';
 import romanize from 'romanize';
 import Sagi from '@/helpers/sagi';
-import { codeToLanguageName, normalizeCode } from '@/helpers/language';
+import { codeToLanguageName } from '@/helpers/language';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import helpers from '@/helpers';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
-import { promisify } from './SubtitleLoader/utils';
+import { promisify, localLanguageLoader } from './SubtitleLoader/utils';
 
 export default {
   name: 'subtitle-manager',
@@ -205,25 +205,35 @@ export default {
         sub.meta();
 
         sub.on('meta-change', ({ field, value }) => {
-          metaInfoUpdate(id, field, field === 'language' ? normalizeCode(value) : value);
+          metaInfoUpdate(id, field, value);
         });
         sub.on('failed', (id) => {
           addSubtitleWhenFailed({ id });
         });
-        sub.once('ready', ({ name, format, language }) => {
-          if (!name) {
-            if (language) {
-              const subtitleRankIndex = this.subtitleList
-                .filter(subtitle =>
-                  subtitle.type === type && subtitle.language === normalizeCode(language))
-                .findIndex(subtitle => subtitle.id === id) + 1;
+        sub.once('ready', ({ format, language }) => {
+          const subtitleRankIndex = this.subtitleList
+            .filter((subtitle) => {
+              if (subtitle.language) {
+                return subtitle.type === type && subtitle.language === language;
+              }
+              return subtitle.type === type;
+            })
+            .findIndex(subtitle => subtitle.id === id) + 1;
+          switch (type) {
+            default:
+            case 'local':
+              break;
+            case 'embedded':
+              if (language) sub.metaInfo.name = `${{ zh: '内嵌', en: 'Embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
+              else {
+                localLanguageLoader(sub.src, sub.format).then((language) => {
+                  sub.metaInfo.name = `${{ zh: '内嵌', en: 'Embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
+                });
+              }
+              break;
+            case 'online':
               sub.metaInfo.name = `${codeToLanguageName(language)} ${romanize(subtitleRankIndex)}`;
-            } else {
-              const subtitleRankIndex = this.subtitleList
-                .filter(subtitle => subtitle.type === type)
-                .findIndex(subtitle => subtitle.id === id) + 1;
-              sub.metaInfo.name = `${{ zh: '内嵌', en: 'embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)}`;
-            }
+              break;
           }
           addSubtitleWhenReady({ id, format });
           if (chooseWhenReady) changeCurrentSubtitle(id);

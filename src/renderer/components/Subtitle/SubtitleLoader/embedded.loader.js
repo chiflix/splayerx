@@ -1,4 +1,4 @@
-import { loadEmbeddedSubtitle, toArray, mediaHash } from './utils';
+import { loadEmbeddedSubtitle, toArray, mediaHash, normalizeCode } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
 import SubtitleLoader from './index';
 
@@ -26,7 +26,10 @@ export default {
     params: ['videoSrc', 'streamIndex'],
   },
   infoLoaders: {
-    // language: 'language', tempoarily disable language and use localLanguageLoader instead
+    language: {
+      func: normalizeCode,
+      params: 'language',
+    },
     name: 'name',
   },
   loader: {
