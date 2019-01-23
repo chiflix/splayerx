@@ -210,32 +210,30 @@ export default {
         sub.on('failed', (id) => {
           addSubtitleWhenFailed({ id });
         });
-        sub.once('ready', ({ name, format, language }) => {
-          if (!name) {
-            const subtitleRankIndex = this.subtitleList
-              .filter((subtitle) => {
-                if (subtitle.language) {
-                  return subtitle.type === type && subtitle.language === language;
-                }
-                return subtitle.type === type;
-              })
-              .findIndex(subtitle => subtitle.id === id) + 1;
-            switch (type) {
-              default:
-              case 'local':
-                break;
-              case 'embedded':
-                if (language) sub.metaInfo.name = `${{ zh: '内嵌', en: 'Embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
-                else {
-                  localLanguageLoader(sub.src, sub.format).then((language) => {
-                    sub.metaInfo.name = `${{ zh: '内嵌', en: 'Embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
-                  });
-                }
-                break;
-              case 'online':
-                sub.metaInfo.name = `${codeToLanguageName(language)} ${romanize(subtitleRankIndex)}`;
-                break;
-            }
+        sub.once('ready', ({ format, language }) => {
+          const subtitleRankIndex = this.subtitleList
+            .filter((subtitle) => {
+              if (subtitle.language) {
+                return subtitle.type === type && subtitle.language === language;
+              }
+              return subtitle.type === type;
+            })
+            .findIndex(subtitle => subtitle.id === id) + 1;
+          switch (type) {
+            default:
+            case 'local':
+              break;
+            case 'embedded':
+              if (language) sub.metaInfo.name = `${{ zh: '内嵌', en: 'Embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
+              else {
+                localLanguageLoader(sub.src, sub.format).then((language) => {
+                  sub.metaInfo.name = `${{ zh: '内嵌', en: 'Embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
+                });
+              }
+              break;
+            case 'online':
+              sub.metaInfo.name = `${codeToLanguageName(language)} ${romanize(subtitleRankIndex)}`;
+              break;
           }
           addSubtitleWhenReady({ id, format });
           if (chooseWhenReady) changeCurrentSubtitle(id);
