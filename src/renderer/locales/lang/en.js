@@ -22,7 +22,7 @@ export default {
       pause: 'Pause',
       forward: 'Step Forward',
       backward: 'Step Backward',
-      singleCycle: 'File Loop',
+      singleCycle: 'Repeat One',
     },
     audio: {
       name: 'Audio',
@@ -43,7 +43,7 @@ export default {
       langZhCN: 'Chinese',
       langEn: 'English',
       notToShowSubtitle: 'None',
-      noSubtitle: 'No Available Result.',
+      noSubtitle: 'Not Found.',
       mainSubtitle: 'Primary Subtitle',
       secondarySubtitle: 'Secondary Subtitle',
       subtitleStyle: 'Font Style',
@@ -102,7 +102,7 @@ export default {
     privacyConfirm: 'Allow anonymous data / Smart Translation',
     setAsDefault: 'Set SPlayer as the Default Application',
     languagePriority: 'Language Priority',
-    languageDescription: 'SPlayer will push translation results in the following language for you when the video is being played.',
+    languageDescription: 'SPlayer will search translation results in the following language sequence while the video is being played.',
     primaryLanguage: 'Primary Language',
     secondaryLanguage: 'Secondary Language',
     primary: 'Primary',
@@ -123,16 +123,16 @@ export default {
   },
   errorFile: {
     fileNonExist: {
-      title: 'Cannot find the file',
-      content: 'Will be removed from the list.',
+      title: 'File Not Found',
+      content: 'It will be removed from the list.',
     },
     emptyFolder: {
       title: 'Open Failed',
       content: 'Cannot find playable file',
     },
     default: {
-      title: 'File error',
-      content: 'Failed to open file.',
+      title: 'Open Failed',
+      content: 'Video type unsupported.',
     },
     loadFailed: {
       title: 'Load Subtitle Failed',
