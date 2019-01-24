@@ -131,6 +131,7 @@ const getters = {
   chosenSize: state => state.chosenSize,
   scaleNum: state => state.scaleNum,
   calculatedNoSub: state => state.calculatedNoSub,
+  getLanguageFromId: ({ languages }) => id => languages[id],
 };
 
 const mutations = {
