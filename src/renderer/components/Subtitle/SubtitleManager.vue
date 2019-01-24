@@ -52,6 +52,12 @@ export default {
       preferredLanguages: ({ Preference }) => (
         [Preference.primaryLanguage, Preference.secondaryLanguage].filter(language => !!language)
       ),
+      allLanguageLoaded: ({ Subtitle }) => {
+        const { loadingStates, languages } = Subtitle;
+        const notFailedSubtitles = Object.keys(loadingStates)
+          .filter(id => loadingStates[id] !== 'failed');
+        return !!notFailedSubtitles.length && notFailedSubtitles.every(id => !!languages[id]);
+      },
     }),
     currentSubtitle() {
       return this.subtitleInstances[this.currentSubtitleId];
