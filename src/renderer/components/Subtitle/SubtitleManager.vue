@@ -36,6 +36,7 @@ export default {
       embeddedSubtitles: [],
       newOnlineSubtitles: [],
       lastSubtitleInfo: { rankIndex: -1 },
+      subtitlePriority: ['local', 'embedded', 'online'],
     };
   },
   computed: {
@@ -242,6 +243,7 @@ export default {
         });
         sub.once('parse', () => addSubtitleWhenLoaded({ id }));
       });
+      return sub;
     },
     addSubtitles(subtitleList) {
       const processedSubtitleList = [];
@@ -256,20 +258,13 @@ export default {
       } else if (typeof subtitleList === 'string') {
         processedSubtitleList.push({ src: subtitleList, type: 'local', options: {} });
       }
-      const subtitleIndexToChoose = this.choosePrimarySubtitle(
-        this.lastSubtitleInfo,
-        processedSubtitleList,
-        this.primaryLanguage,
-      );
       if (processedSubtitleList.length) {
         this.$store.dispatch('ifNoSubtitle', false);
       } else {
         this.$store.dispatch('ifNoSubtitle', true);
       }
-      processedSubtitleList.forEach(({ src, type, options }, index) => this.addSubtitle(
-        src, type, options,
-        index === subtitleIndexToChoose,
-      ));
+      return processedSubtitleList
+        .map(({ src, type, options }) => this.addSubtitle(src, type, options));
     },
     async refreshOnlineSubtitles() {
       this.resetOnlineSubtitles();
@@ -279,19 +274,6 @@ export default {
     },
     metaInfoUpdate(id, field, value) {
       this.updateMetaInfo({ id, type: field, value });
-    },
-    choosePrimarySubtitle(lastSubtitleInfo, newSubtitleList, systemLocale) {
-      const newType = newSubtitleList[0].type;
-      const lastType = lastSubtitleInfo.type;
-      const lastSubtitleIndex = lastSubtitleInfo.rankIndex;
-      if (lastSubtitleIndex === -1) {
-        const index = newSubtitleList.findIndex(({ options }) => options.language === systemLocale);
-        return index === -1 ? 0 : index;
-      } else if (lastType !== 'online' && newType === 'online') return -1;
-      const matchedSubtitleList = newSubtitleList
-        .filter(({ options }) => options.language === lastSubtitleInfo.language);
-      if (lastSubtitleIndex >= matchedSubtitleList.length) return 0;
-      return newSubtitleList.indexOf(matchedSubtitleList[lastSubtitleIndex]);
     },
   },
   created() {
