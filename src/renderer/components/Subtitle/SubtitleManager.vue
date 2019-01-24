@@ -14,6 +14,8 @@ import { mapGetters, mapActions, mapState } from 'vuex';
 import osLocale from 'os-locale';
 import romanize from 'romanize';
 import flatten from 'lodash/flatten';
+import isEqual from 'lodash/isEqual';
+import difference from 'lodash/difference';
 import Sagi from '@/helpers/sagi';
 import { codeToLanguageName } from '@/helpers/language';
 import { getLocalSubtitles, getOnlineSubtitles, getEmbeddedSubtitles } from '@/helpers/subtitle';
@@ -34,15 +36,13 @@ export default {
       localPremiumSubtitles: {},
       embeddedSubtitles: [],
       newOnlineSubtitles: [],
-      lastSubtitleInfo: { rankIndex: -1 },
-      subtitlePriority: ['local', 'embedded', 'online'],
     };
   },
   computed: {
     ...mapGetters([
       'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
       'duration', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
-      'primaryLanguage', 'secondaryLanguage',
+      'primaryLanguage', 'secondaryLanguage', 'getLanguageFromId', 'isExistedSubtitle',
     ]),
     ...mapState({
       loadingOnlineSubtitleIds: ({ Subtitle }) => {
@@ -58,6 +58,11 @@ export default {
           .filter(id => loadingStates[id] !== 'failed');
         return !!notFailedSubtitles.length && notFailedSubtitles.every(id => !!languages[id]);
       },
+      loadedLanguageIds: ({ Subtitle }) => {
+        const { loadingStates, languages } = Subtitle;
+        return Object.keys(loadingStates)
+          .filter(id => loadingStates[id] !== 'failed' && languages[id]);
+      },
     }),
     currentSubtitle() {
       return this.subtitleInstances[this.currentSubtitleId];
@@ -67,7 +72,6 @@ export default {
     originSrc(newVal) {
       this.resetSubtitles();
       this.addInitialSubtitles(newVal);
-      this.lastSubtitleInfo = { rankIndex: -1 };
       this.$store.dispatch('ifNoSubtitle', true);
     },
     premiumSubtitles(newVal) {
@@ -92,6 +96,18 @@ export default {
             this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
           }
         });
+      }
+    },
+    loadedLanguageIds(newVal, oldVal) {
+      if (!isEqual(oldVal, newVal)) {
+        const extraSubtitles = difference(newVal, oldVal);
+        let result = extraSubtitles
+          .find(id => this.getLanguageFromId(id) === this.preferredLanguages[0]);
+        if (!result && this.preferredLanguages[1]) {
+          result = extraSubtitles
+            .find(id => this.getLanguageFromId(id) === this.preferredLanguages[1]);
+        }
+        this.changeCurrentSubtitle(result);
       }
     },
   },
@@ -141,6 +157,7 @@ export default {
       } = this;
       const sub = new SubtitleLoader(subtitle, type, options);
       sub.once('loading', (id) => {
+        if (this.isExistedSubtitle(id)) return;
         this.$set(subtitleInstances, id, sub);
         addSubtitleWhenLoading({ id, type });
         sub.meta();
