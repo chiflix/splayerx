@@ -55,11 +55,16 @@ export default {
     },
   },
   watch: {
-    originSrc(newVal) {
-      this.resetSubtitles();
-      this.addInitialSubtitles(newVal);
-      this.lastSubtitleInfo = { rankIndex: -1 };
-      this.$store.dispatch('ifNoSubtitle', true);
+    originSrc: {
+      handler: function handler(newVal) {
+        if (newVal) {
+          this.resetSubtitles();
+          this.addInitialSubtitles(newVal);
+          this.lastSubtitleInfo = { rankIndex: -1 };
+          this.$store.dispatch('ifNoSubtitle', true);
+        }
+      },
+      immediate: true,
     },
     premiumSubtitles(newVal) {
       if (this.privacyAgreement) {
