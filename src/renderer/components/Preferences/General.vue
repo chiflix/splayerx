@@ -204,7 +204,7 @@ export default {
       }
     },
     handleFirstSelection(selection) {
-      if (selection === this.secondaryLanguage) this.secondaryLanguage = this.noLanguage;
+      if (selection === this.secondaryLanguage) this.secondaryLanguage = '';
       this.primaryLanguage = selection;
       this.showFirstSelection = false;
     },
