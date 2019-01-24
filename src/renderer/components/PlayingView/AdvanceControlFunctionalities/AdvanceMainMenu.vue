@@ -256,10 +256,9 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['computedWidth', 'currentSubtitleId', 'computedHeight', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['winWidth', 'currentSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
     computedSize() {
-      return this.intrinsicWidth / this.intrinsicHeight >= 1 ?
-        this.computedHeight : this.computedWidth;
+      return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
     },
     currentAudioTrack() {
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
