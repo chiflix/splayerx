@@ -113,7 +113,7 @@ export default {
         this.calculateFontLength(val);
       }
     },
-    size(val) {
+    computedSize(val) {
       if (val > 1080) {
         this.updateVideoScaleByFactors(val);
       } else if (this.videoAspectRatio >= 1) {
@@ -124,7 +124,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'computedHeight']),
+    ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'computedHeight', 'computedWidth']),
     /**
      * @return {string}
      */
@@ -141,6 +141,9 @@ export default {
         default:
           return this.$t('advance.fontItems[1]');
       }
+    },
+    computedSize() {
+      return this.videoAspectRatio >= 1 ? this.computedHeight : this.computedWidth;
     },
     cardPos() {
       if (this.moveLength) {
