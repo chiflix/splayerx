@@ -24,7 +24,7 @@ export const mediaHash = helpers.methods.mediaQuickHash;
  * @returns {string} an extension without '.'
  */
 export function localFormatLoader(src) {
-  return extname(src).slice(1);
+  return extname(src).slice(1).toLowerCase();
 }
 
 /**

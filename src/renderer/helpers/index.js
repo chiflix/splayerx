@@ -83,7 +83,7 @@ export default {
 
       const baseName = path.basename(vidPath, path.extname(vidPath));
       const dirPath = path.dirname(vidPath);
-      const filter = /\.(srt|vtt|ass)$/;
+      const filter = /\.(srt|vtt|ass)$/i;
 
       if (!fs.existsSync(dirPath)) {
         this.addLog('error', `no dir ${dirPath}`);
@@ -182,7 +182,7 @@ export default {
     openFile(...files) {
       let containsSubFiles = false;
       const subtitleFiles = [];
-      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
+      const subRegex = new RegExp('\\.(srt|ass|vtt)$', 'i');
       const videoFiles = [];
 
       for (let i = 0; i < files.length; i += 1) {
