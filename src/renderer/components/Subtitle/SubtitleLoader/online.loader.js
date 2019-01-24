@@ -1,4 +1,4 @@
-import { tagsGetter, loadOnlineTranscript } from './utils';
+import { tagsGetter, loadOnlineTranscript, normalizeCode } from './utils';
 
 const baseTags = { alignment: 2, pos: null };
 const normalizer = parsedSubtitle => parsedSubtitle.map(subtitle => ({
@@ -14,7 +14,10 @@ export default {
   supportedFormats: ['online'],
   id: 'src',
   infoLoaders: {
-    language: 'language',
+    language: {
+      func: normalizeCode,
+      params: 'language',
+    },
   },
   loader: loadOnlineTranscript,
   parser: normalizer,
