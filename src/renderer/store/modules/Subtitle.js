@@ -132,6 +132,8 @@ const getters = {
   scaleNum: state => state.scaleNum,
   calculatedNoSub: state => state.calculatedNoSub,
   getLanguageFromId: ({ languages }) => id => languages[id],
+  isExistedSubtitle: ({ loadingStates }) => id => !!Object.keys(loadingStates)
+    .filter((id, index, array) => array[id] !== 'failed').includes(id),
 };
 
 const mutations = {
