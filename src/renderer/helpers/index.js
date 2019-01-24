@@ -143,7 +143,7 @@ export default {
       const files = [];
       let containsSubFiles = false;
       const subtitleFiles = [];
-      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
+      const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
       const videoFiles = [];
 
       folders.forEach((dirPath) => {
@@ -182,7 +182,7 @@ export default {
     openFile(...files) {
       let containsSubFiles = false;
       const subtitleFiles = [];
-      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
+      const subRegex = new RegExp('\\.(srt|ass|vtt)$', 'i');
       const videoFiles = [];
 
       for (let i = 0; i < files.length; i += 1) {
