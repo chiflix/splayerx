@@ -91,7 +91,7 @@ export default {
     initialSize(size) {
       if (this.size >= 289 && this.size <= 480) {
         return size;
-      } else if (this.size >= 481 && this.size <= 1080) {
+      } else if (this.size >= 481 && this.size < 1080) {
         return size * 1.2;
       }
       return size * 1.2 * 1.4;
