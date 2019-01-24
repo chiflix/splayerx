@@ -11,14 +11,13 @@
 </template>
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex';
-import { dirname, extname, basename, join } from 'path';
-import { readdir } from 'fs';
 import osLocale from 'os-locale';
 import romanize from 'romanize';
+import flatten from 'lodash/flatten';
 import Sagi from '@/helpers/sagi';
 import { codeToLanguageName } from '@/helpers/language';
+import { getLocalSubtitles, getOnlineSubtitles, getEmbeddedSubtitles } from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
-import helpers from '@/helpers';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { promisify, localLanguageLoader } from './SubtitleLoader/utils';
@@ -50,6 +49,9 @@ export default {
         const { loadingStates, types } = Subtitle;
         return Object.keys(loadingStates).filter(id => types[id] === 'online' && loadingStates[id] === 'loading');
       },
+      preferredLanguages: ({ Preference }) => (
+        [Preference.primaryLanguage, Preference.secondaryLanguage].filter(language => !!language)
+      ),
     }),
     currentSubtitle() {
       return this.subtitleInstances[this.currentSubtitleId];
@@ -86,17 +88,6 @@ export default {
         });
       }
     },
-    currentSubtitleId(newVal) {
-      if (newVal) {
-        this.lastSubtitleInfo = this.subtitleList.find(({ id }) => id === newVal);
-        const { type, language } = this.lastSubtitleInfo;
-        this.lastSubtitleInfo.rankIndex = this.subtitleList
-          .filter(subtitle => subtitle.type === type && subtitle.language === language)
-          .findIndex(subtitle => subtitle.id === newVal);
-      } else {
-        this.lastSubtitleInfo = { rankIndex: -1 };
-      }
-    },
   },
   methods: {
     ...mapActions({
@@ -125,74 +116,15 @@ export default {
         this.$bus.$emit('menu-subtitle-refresh', true);
       }
     },
-    // different subtitle getters
-    getLocalSubtitlesList(videoSrc, supportedExtensions) {
-      const videoDir = dirname(videoSrc);
-      const filename = basename(videoSrc, extname(videoSrc));
-      const extensionRegex = new RegExp(`\\.(${supportedExtensions.join('|')})$`);
-      return new Promise((resolve, reject) => {
-        readdir(videoDir, (err, files) => {
-          if (err) reject(err);
-          const subtitles = files.filter(file =>
-            (extensionRegex.test(file) && file.slice(0, file.lastIndexOf('.')) === filename));
-          resolve(subtitles.map(subtitle => ({
-            src: join(dirname(videoSrc), subtitle),
-            type: 'local',
-          })));
-        });
-      });
+    getLocalSubtitlesList(videoSrc) {
+      return getLocalSubtitles(videoSrc, SubtitleLoader.supportedCodecs);
     },
     async getOnlineSubtitlesList(videoSrc) {
-      const hash = await helpers.methods.mediaQuickHash(videoSrc);
-      this.addLog('info', `media-hash: ${hash}`);
-      const onlineMetaInfo = (subtitle) => {
-        const { language_code: code, transcript_identity: src, ranking } = subtitle;
-        return ({
-          src,
-          type: 'online',
-          options: {
-            language: code,
-            ranking,
-          },
-        });
-      };
-      return (await Promise.all(this.secondaryLanguage ? [
-        Sagi.mediaTranslate(hash, this.primaryLanguage),
-        Sagi.mediaTranslate(hash, this.secondaryLanguage),
-      ] : [
-        Sagi.mediaTranslate(hash, this.primaryLanguage),
-      ].map(promise => promise.catch(err => err))))
-        .filter(result => !(result instanceof Error))
-        .reduce((prev, curr) => prev.concat(curr), [])
-        .map(onlineMetaInfo);
+      return flatten(await Promise.all(this.preferredLanguages
+        .map(language => getOnlineSubtitles(videoSrc, language))));
     },
-    getEmbeddedSubtitlesList(videoSrc, supportedCodecs) {
-      const { ipcRenderer } = this.$electron;
-      ipcRenderer.send('mediaInfo', videoSrc);
-      return new Promise((resolve, reject) => {
-        setTimeout(() => { reject(new Error('Embedded Subtitles Retrieve Timeout!')); }, 20000);
-        ipcRenderer.once(`mediaInfo-${videoSrc}-reply`, (event, info) => {
-          try {
-            const subtitleStreams = JSON.parse(info).streams
-              .filter(stream => stream.codec_type === 'subtitle' && supportedCodecs.includes(stream.codec_name)); // eslint-disable-line camelcase;
-            if (!subtitleStreams.length) resolve([]);
-            resolve(...subtitleStreams.map(subtitle => ({
-              src: subtitle.index,
-              type: 'embedded',
-              options: {
-                videoSrc,
-                streamIndex: subtitle.index,
-                codec: subtitle.codec_name,
-                language: subtitle.tags.language,
-                name: subtitle.tags.title,
-                isDefault: !!subtitle.disposition.default,
-              }, // eslint-disable-line camelcase
-            })));
-          } catch (error) {
-            reject(error);
-          }
-        });
-      });
+    getEmbeddedSubtitlesList(videoSrc) {
+      return getEmbeddedSubtitles(videoSrc, SubtitleLoader.supportedCodecs);
     },
     addSubtitle(subtitle, type, options, chooseWhenReady) {
       const {
