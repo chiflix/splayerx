@@ -55,11 +55,16 @@ export default {
     },
   },
   watch: {
-    originSrc(newVal) {
-      this.resetSubtitles();
-      this.addInitialSubtitles(newVal);
-      this.lastSubtitleInfo = { rankIndex: -1 };
-      this.$store.dispatch('ifNoSubtitle', true);
+    originSrc: {
+      handler: function handler(newVal) {
+        if (newVal) {
+          this.resetSubtitles();
+          this.addInitialSubtitles(newVal);
+          this.lastSubtitleInfo = { rankIndex: -1 };
+          this.$store.dispatch('ifNoSubtitle', true);
+        }
+      },
+      immediate: true,
     },
     premiumSubtitles(newVal) {
       if (this.privacyAgreement) {
@@ -128,7 +133,7 @@ export default {
     getLocalSubtitlesList(videoSrc, supportedExtensions) {
       const videoDir = dirname(videoSrc);
       const filename = basename(videoSrc, extname(videoSrc));
-      const extensionRegex = new RegExp(`\\.(${supportedExtensions.join('|')})$`);
+      const extensionRegex = new RegExp(`\\.(${supportedExtensions.join('|')})$`, 'i');
       return new Promise((resolve, reject) => {
         readdir(videoDir, (err, files) => {
           if (err) reject(err);

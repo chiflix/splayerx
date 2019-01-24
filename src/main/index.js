@@ -101,7 +101,11 @@ function registerMainWindowEvent() {
   });
 
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
-    mainWindow?.[method]?.(...args);
+    try {
+      mainWindow?.[method]?.(...args);
+    } catch (ex) {
+      console.error('callMainWindowMethod', ex, method, JSON.stringify(args));
+    }
   });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
