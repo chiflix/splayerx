@@ -124,7 +124,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'winHeight']),
+    ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'computedHeight']),
     /**
      * @return {string}
      */
@@ -290,13 +290,13 @@ export default {
     updatePCVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [24, 26, 28, 30];
-      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 900) * this.winHeight) + (secondFactors[index] / 5)) / 9}`);
+      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 900) * this.computedHeight) + (secondFactors[index] / 5)) / 9}`);
     },
     // update video scale that height is larger than width
     updateMobileVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [12, -92, -196, -300];
-      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 760) * this.winHeight) + (secondFactors[index] / 76)) / 9}`);
+      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 760) * this.computedHeight) + (secondFactors[index] / 76)) / 9}`);
     },
     // update video scale when width or height is larger than 1080
     updateVideoScaleByFactors(val) {
