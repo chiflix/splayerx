@@ -133,7 +133,7 @@ export default {
     getLocalSubtitlesList(videoSrc, supportedExtensions) {
       const videoDir = dirname(videoSrc);
       const filename = basename(videoSrc, extname(videoSrc));
-      const extensionRegex = new RegExp(`\\.(${supportedExtensions.join('|')})$`);
+      const extensionRegex = new RegExp(`\\.(${supportedExtensions.join('|')})$`, 'i');
       return new Promise((resolve, reject) => {
         readdir(videoDir, (err, files) => {
           if (err) reject(err);
