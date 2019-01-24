@@ -151,7 +151,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['computedWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'computedHeight', 'intrinsicWidth', 'intrinsicHeight']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -164,7 +164,8 @@ export default {
       },
     }),
     computedSize() {
-      return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
+      return this.intrinsicWidth / this.intrinsicHeight >= 1 ?
+        this.computedHeight : this.computedWidth;
     },
     noSubtitle() {
       if (this.timer && this.isInitial) {
