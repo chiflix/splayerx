@@ -123,12 +123,6 @@ export default {
         if (result) this.autoSelectionCompleted = true;
       }
     },
-    allLanguageLoaded(newVal) {
-      console.log(
-        newVal,
-        this.languageLoadedSubtitleInfoList, this.languageLoadedSubtitleInfoList.length,
-      );
-    },
   },
   methods: {
     ...mapActions({
