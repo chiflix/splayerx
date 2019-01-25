@@ -16,7 +16,7 @@ import romanize from 'romanize';
 import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
 import sortBy from 'lodash/sortBy';
-import difference from 'lodash/difference';
+import differenceWith from 'lodash/differenceWith';
 import Sagi from '@/helpers/sagi';
 import { codeToLanguageName } from '@/helpers/language';
 import { getLocalSubtitles, getOnlineSubtitles, getEmbeddedSubtitles } from '@/helpers/subtitle';
@@ -106,7 +106,7 @@ export default {
       }
     },
     languageLoadedSubtitleInfoList(newVal, oldVal) {
-      if (!isEqual(oldVal, newVal, (sub1, sub2) => sub1.id === sub2.id)) {
+      if (!isEqual(oldVal, newVal)) {
         const {
           isAutoSelection: auto,
           findSubtitleByLanguageWithTypeRank: finder,
@@ -114,7 +114,7 @@ export default {
           allLanguageLoaded: all,
           currentSubtitleId: curr,
         } = this;
-        const subtitlesToFindFrom = auto ? newVal : difference(newVal, oldVal);
+        const subtitlesToFindFrom = auto ? newVal : differenceWith(newVal, oldVal, isEqual);
         let result = finder(subtitlesToFindFrom, langs[0]);
         if (!result && all) result = finder(subtitlesToFindFrom, langs[1]);
         this.changeCurrentSubtitle(result ? result.id : curr);
@@ -144,7 +144,7 @@ export default {
         getOnlineSubtitlesList(videoSrc),
       ].map(promise => promise.catch(err => err))))
         .map(list => (list instanceof Array ? list : [list]).filter(sub => !(sub instanceof Error)))
-        .forEach(addSubtitles);
+        .forEach(list => addSubtitles(list, true));
     },
     async refreshLocalAndOnlineSubtitles() {
       const {
@@ -159,7 +159,7 @@ export default {
         getOnlineSubtitlesList(videoSrc),
       ].map(promise => promise.catch(err => err))))
         .map(list => (list instanceof Array ? list : [list]).filter(sub => !(sub instanceof Error)))
-        .forEach(addSubtitles);
+        .forEach(list => addSubtitles(list, true));
       this.$bus.$emit('refresh-finished');
     },
     getLocalSubtitlesList(videoSrc) {
@@ -224,8 +224,9 @@ export default {
       });
       return sub;
     },
-    addSubtitles(subtitleList) {
+    addSubtitles(subtitleList, isAutoSelection) {
       if (!subtitleList || !Object.keys(subtitleList).length) return [];
+      this.isAutoSelection = !!isAutoSelection;
       const processedSubtitleList = [];
       if (subtitleList instanceof Array) {
         processedSubtitleList
@@ -250,7 +251,10 @@ export default {
       this.updateMetaInfo({ id, type: field, value });
     },
     findSubtitleByWith(rank, withParameter, byParameter, subtitleList, expected) {
-      const listSortedByParameter = sortBy(subtitleList, sub => rank.indexOf(sub[withParameter]));
+      const listSortedByParameter = sortBy(
+        subtitleList,
+        sub => rank.lastIndexOf(sub[withParameter]),
+      );
       return listSortedByParameter.find(sub => sub[byParameter] === expected);
     },
     findSubtitleByLanguageWithTypeRank(subtitleList, language) {
