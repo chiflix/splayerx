@@ -29,6 +29,7 @@
 </template>;
 
 <script>
+import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
@@ -166,41 +167,34 @@ export default {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
-    async saveScreenshot(videoPath) {
-      const { videoElement } = this;
-      const canvas = this.$refs.thumbnailCanvas;
-      const canvasCTX = canvas.getContext('2d');
-      // todo: use metaloaded to get videoHeight and videoWidth
-      const { videoHeight, videoWidth } = this;
-      // cannot delete
-      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
-      canvasCTX.drawImage(
-        videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, (videoWidth / videoHeight) * 1080, 1080,
-      );
-      const imagePath = canvas.toDataURL('image/jpeg', 0.8);
-      // 用于测试截图的代码，以后可能还会用到
-      // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
-      // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
-      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
-      canvasCTX.drawImage(
-        videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
-      );
-      const smallImagePath = canvas.toDataURL('image/jpeg', 0.8);
-      const data = {
-        shortCut: imagePath,
-        smallShortCut: smallImagePath,
-        lastPlayedTime: videodata.time,
-        duration: this.duration,
-      };
-
-      const val = await this.infoDB.get('recent-played', 'path', videoPath);
-      if (val) {
-        const mergedData = Object.assign(val, data);
-        await this.infoDB.add('recent-played', mergedData);
-        this.$bus.$emit('database-saved');
-      }
+    saveScreenshot() {
+      // const { videoElement } = this;
+      // const canvas = this.$refs.thumbnailCanvas;
+      // const canvasCTX = canvas.getContext('2d');
+      // // todo: use metaloaded to get videoHeight and videoWidth
+      // const { videoHeight, videoWidth } = this;
+      // // cannot delete
+      // [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
+      // canvasCTX.drawImage(
+      //   videoElement, 0, 0, videoWidth, videoHeight,
+      //   0, 0, (videoWidth / videoHeight) * 1080, 1080,
+      // );
+      // const imagePath = canvas.toDataURL('image/jpeg', 0.8);
+      // // 用于测试截图的代码，以后可能还会用到
+      // // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
+      // // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
+      // [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
+      // canvasCTX.drawImage(
+      //   videoElement, 0, 0, videoWidth, videoHeight,
+      //   0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
+      // );
+      // const smallImagePath = canvas.toDataURL('image/jpeg', 0.8);
+      // const val = await this.infoDB.get('recent-played', 'path', videoPath);
+      // if (val) {
+      //   const mergedData = Object.assign(val, data);
+      //   await this.infoDB.add('recent-played', mergedData);
+      //   this.$bus.$emit('database-saved');
+      // }
     },
     saveSubtitleStyle() {
       return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
@@ -271,7 +265,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'mediaHash',
       'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -331,12 +325,31 @@ export default {
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
-        this.saveScreenshot(this.originSrc).then(this.saveSubtitleStyle).then(() => {
-          this.asyncTasksDone = true;
-          window.close();
-        }).catch(() => {
-          this.asyncTasksDone = true;
-          window.close();
+        this.$electron.ipcRenderer.send('snapShot', this.originSrc, this.mediaHash, 'lastFrame', videodata.time);
+        this.$electron.ipcRenderer.once(`snapShot-${this.originSrc}-reply`, (event, imgPath) => {
+          fs.readFile(`${imgPath}`, 'base64', (err, data) => {
+            if (!err) {
+              const cover = `data:image/png;base64, ${data}`;
+              this.infoDB.get('recent-played', 'path', this.originSrc).then((val) => {
+                if (val) {
+                  const data = {
+                    shortCut: cover,
+                    smallShortCut: cover,
+                    lastPlayedTime: videodata.time,
+                    duration: this.duration,
+                  };
+                  const mergedData = Object.assign(val, data);
+                  this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
+                    this.asyncTasksDone = true;
+                    window.close();
+                  }).catch(() => {
+                    this.asyncTasksDone = true;
+                    window.close();
+                  });
+                }
+              });
+            }
+          });
         });
         e.returnValue = false;
       }

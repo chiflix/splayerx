@@ -110,12 +110,37 @@ function registerMainWindowEvent() {
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
 
-  function snapShot(video, callback) {
-    const randomNumber = Math.round((Math.random() * 20) + 5);
-    const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
-    splayerx.snapshotVideo(video.videoPath, `${video.imgPath}`, `00:00:${numberString}`, (resultCode) => {
-      console[resultCode === '0' ? 'log' : 'error'](resultCode, video.videoPath);
-      callback(resultCode, video.imgPath);
+  function timecodeFromSeconds(s) {
+    const dt = new Date(Math.abs(s) * 1000);
+    let hours = dt.getUTCHours();
+    let minutes = dt.getUTCMinutes();
+    let seconds = dt.getUTCSeconds();
+
+    if (minutes < 10) {
+      minutes = `0${minutes}`;
+    }
+    if (seconds < 10) {
+      seconds = `0${seconds}`;
+    }
+    if (hours > 0) {
+      if (hours < 10) {
+        hours = `${hours}`;
+      }
+      return `${hours}:${minutes}:${seconds}`;
+    }
+    return `00:${minutes}:${seconds}`;
+  }
+  function snapShot(snapShot, callback) {
+    let numberString;
+    if (snapShot.type === 'cover') {
+      const randomNumber = Math.round((Math.random() * 20) + 5);
+      numberString = timecodeFromSeconds(randomNumber);
+    } else {
+      numberString = timecodeFromSeconds(snapShot.time);
+    }
+    splayerx.snapshotVideo(snapShot.videoPath, snapShot.imgPath, numberString, (resultCode) => {
+      console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
+      callback(resultCode, snapShot.imgPath);
     });
   }
 
@@ -152,14 +177,15 @@ function registerMainWindowEvent() {
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, videoPath, quickHash) => {
+  ipcMain.on('snapShot', (event, videoPath, quickHash, type = 'cover', time = 0) => {
     const imgFolderPath = path.join(tempFolderPath, quickHash);
     if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
-    const imgPath = path.join(imgFolderPath, 'thumbnail.png');
-    console.log(imgFolderPath, imgPath);
+    const imgPath = path.join(imgFolderPath, `${type}.png`);
 
-    if (!fs.existsSync(imgPath)) {
-      snapShotQueue.push({ videoPath, quickHash, imgPath });
+    if (!fs.existsSync(imgPath) || type === 'lastFrame') {
+      snapShotQueue.push({
+        videoPath, quickHash, imgPath, type, time,
+      });
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
       }
