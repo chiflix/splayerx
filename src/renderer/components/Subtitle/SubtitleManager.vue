@@ -127,8 +127,9 @@ export default {
       addSubtitleWhenFailed: subtitleActions.ADD_SUBTITLE_WHEN_FAILED,
       updateMetaInfo: subtitleActions.UPDATE_METAINFO,
     }),
-    async refreshAllSubtitles(videoSrc) {
+    async refreshAllSubtitles() {
       const {
+        originSrc: videoSrc,
         addSubtitles,
         getLocalSubtitlesList, getEmbeddedSubtitlesList, getOnlineSubtitlesList,
       } = this;

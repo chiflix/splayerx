@@ -457,7 +457,12 @@ export default {
   },
   created() {
     this.$bus.$on('subtitle-refresh-from-menu', this.handleRefresh);
-    this.$bus.$on('subtitle-refresh-from-src-change', this.handleRefresh);
+    this.$bus.$on('subtitle-refresh-from-src-change', () => {
+      this.isInitial = true;
+      this.$store.dispatch('getLocalPreference').then(() => {
+        this.handleRefresh();
+      });
+    });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
