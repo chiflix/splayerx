@@ -37,6 +37,7 @@ export default {
       localPremiumSubtitles: {},
       embeddedSubtitles: [],
       isAutoSelection: false,
+      autoSelectionCompleted: false,
     };
   },
   computed: {
@@ -60,9 +61,12 @@ export default {
         return !!notFailedSubtitles.length && notFailedSubtitles.every(id => !!languages[id]);
       },
       languageLoadedSubtitleInfoList: ({ Subtitle }) => {
-        const { loadingStates, languages, types } = Subtitle;
+        const {
+          loadingStates, languages, types, ranks,
+        } = Subtitle;
         return Object.keys(loadingStates)
           .filter(id => loadingStates[id] !== 'failed' && languages[id])
+          .sort((prevId, currId) => ranks[currId] - ranks[prevId])
           .map(id => ({ id, language: languages[id], type: types[id] }));
       },
     }),
@@ -106,7 +110,7 @@ export default {
       }
     },
     languageLoadedSubtitleInfoList(newVal, oldVal) {
-      if (!isEqual(oldVal, newVal)) {
+      if (!this.autoSelectionCompleted && !isEqual(oldVal, newVal)) {
         const {
           isAutoSelection: auto,
           findSubtitleByLanguageWithTypeRank: finder,
@@ -118,6 +122,7 @@ export default {
         let result = finder(subtitlesToFindFrom, langs[0]);
         if (!result && all) result = finder(subtitlesToFindFrom, langs[1]);
         this.changeCurrentSubtitle(result ? result.id : curr);
+        if (result) this.autoSelectionCompleted = true;
       }
     },
   },
@@ -269,8 +274,12 @@ export default {
   created() {
     this.resetSubtitles();
     this.systemLanguageCode = osLocale.sync().slice(0, 2);
-    this.$bus.$on('add-subtitles', this.addSubtitles);
+    this.$bus.$on('add-subtitles', (subs) => {
+      this.autoSelectionCompleted = false;
+      this.addSubtitles(subs);
+    });
     this.$bus.$on('refresh-subtitles', (result) => {
+      this.autoSelectionCompleted = false;
       this[result ? 'refreshAllSubtitles' : 'refreshLocalAndOnlineSubtitles']();
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
