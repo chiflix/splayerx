@@ -80,6 +80,7 @@ Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
 Vue.use(AsyncComputed);
 
+console.log('SPlayerClientVersion', electron.remote.app.getVersion());
 Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
   router,
