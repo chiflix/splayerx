@@ -86,6 +86,9 @@ Vue.use(VueAnalytics, {
   router,
   set: [
     { field: 'SPlayerClientVersion', value: electron.remote.app.getVersion() },
+    { field: 'checkProtocolTask', value: null }, // fix ga not work from file:// url
+    { field: 'checkStorageTask', value: null }, // fix ga not work from file:// url
+    { field: 'historyImportTask', value: null }, // fix ga not work from file:// url
   ],
 });
 
