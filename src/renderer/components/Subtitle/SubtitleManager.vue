@@ -36,6 +36,7 @@ export default {
       embeddedSubtitles: [],
       isAutoSelection: false,
       autoSelectionCompleted: false,
+      addingSubtitlesCount: 0,
     };
   },
   computed: {
@@ -52,12 +53,6 @@ export default {
       preferredLanguages: ({ Preference }) => (
         [Preference.primaryLanguage, Preference.secondaryLanguage].filter(language => !!language)
       ),
-      allLanguageLoaded: ({ Subtitle }) => {
-        const { loadingStates, languages } = Subtitle;
-        const notFailedSubtitles = Object.keys(loadingStates)
-          .filter(id => loadingStates[id] !== 'failed');
-        return !!notFailedSubtitles.length && notFailedSubtitles.every(id => !!languages[id]);
-      },
       languageLoadedSubtitleInfoList: ({ Subtitle }) => {
         const {
           loadingStates, languages, types, ranks,
@@ -71,11 +66,16 @@ export default {
     currentSubtitle() {
       return this.subtitleInstances[this.currentSubtitleId];
     },
+    allLanguageLoaded() {
+      return this.addingSubtitlesCount &&
+        this.addingSubtitlesCount === this.languageLoadedSubtitleInfoList.length;
+    },
   },
   watch: {
     originSrc: {
       handler: function handler(newVal) {
         if (newVal) {
+          this.addingSubtitlesCount = 0;
           this.resetSubtitles();
           this.$bus.$emit('subtitle-refresh-from-src-change');
           this.$store.dispatch('ifNoSubtitle', true);
@@ -118,10 +118,16 @@ export default {
         } = this;
         const subtitlesToFindFrom = auto ? newVal : differenceWith(newVal, oldVal, isEqual);
         let result = finder(subtitlesToFindFrom, langs[0]);
-        if (!result && all) result = finder(subtitlesToFindFrom, langs[1]);
+        if (!result && all) result = finder(newVal, langs[1]);
         this.changeCurrentSubtitle(result ? result.id : curr);
         if (result) this.autoSelectionCompleted = true;
       }
+    },
+    allLanguageLoaded(newVal) {
+      console.log(
+        newVal,
+        this.languageLoadedSubtitleInfoList, this.languageLoadedSubtitleInfoList.length,
+      );
     },
   },
   methods: {
@@ -184,6 +190,7 @@ export default {
         subtitleInstances,
       } = this;
       const sub = new SubtitleLoader(subtitle, type, options);
+      this.addingSubtitlesCount += 1;
       sub.once('loading', (id) => {
         if (this.isExistedSubtitle(id)) return;
         this.$set(subtitleInstances, id, sub);
@@ -194,6 +201,8 @@ export default {
           metaInfoUpdate(id, field, value);
         });
         sub.on('failed', (id) => {
+          this.addingSubtitlesCount -= 1;
+          delete this.subtitleInstances[id];
           addSubtitleWhenFailed({ id });
         });
         sub.once('ready', ({ format, language }) => {
