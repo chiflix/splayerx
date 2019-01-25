@@ -72,7 +72,7 @@ export default {
       handler: function handler(newVal) {
         if (newVal) {
           this.resetSubtitles();
-          this.refreshAllSubtitles(newVal);
+          this.$bus.$emit('subtitle-refresh-from-src-change');
           this.$store.dispatch('ifNoSubtitle', true);
         }
       },
@@ -248,7 +248,9 @@ export default {
     this.resetSubtitles();
     this.systemLanguageCode = osLocale.sync().slice(0, 2);
     this.$bus.$on('add-subtitles', this.addSubtitles);
-    this.$bus.$on('refresh-subtitles', this.refreshLocalAndOnlineSubtitles);
+    this.$bus.$on('refresh-subtitles', (result) => {
+      this[result ? 'refreshAllSubtitles' : 'refreshLocalAndOnlineSubtitles']();
+    });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
   },

@@ -344,7 +344,7 @@ export default {
             this.count += 1;
             this.rotateTime = Math.ceil(this.count / 100);
           }, 10);
-          this.$bus.$emit('refresh-subtitles');
+          this.$bus.$emit('refresh-subtitles', this.isInitial);
           if (!this.isInitial) {
             this.addLog('info', {
               message: 'Online subtitles loading .',
@@ -456,6 +456,8 @@ export default {
     },
   },
   created() {
+    this.$bus.$on('subtitle-refresh-from-menu', this.handleRefresh);
+    this.$bus.$on('subtitle-refresh-from-src-change', this.handleRefresh);
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
@@ -484,7 +486,7 @@ export default {
         this.handleRefresh();
       }
     });
-    this.$bus.$on('subtitle-refresh-from-menu', this.handleRefresh);
+
     document.addEventListener('mouseup', (e) => {
       if (e.button === 0) {
         if (!this.showAttached) {
