@@ -4,7 +4,7 @@
     @mousedown.left.stop="handleLeftClick"
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
-    <titlebar currentView="LandingView"></titlebar>
+    <titlebar currentView="LandingView"/>
     <transition name="background-container-transition">
       <div class="background" v-if="showShortcutImage">
         <transition name="background-transition" mode="in-out">

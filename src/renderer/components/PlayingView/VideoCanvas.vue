@@ -29,7 +29,6 @@
 </template>;
 
 <script>
-import fs from 'fs';
 import asyncStorage from '@/helpers/asyncStorage';
 import { mapGetters, mapActions } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
@@ -276,7 +275,25 @@ export default {
   watch: {
     originSrc(val, oldVal) {
       this.coverFinded = false;
-      this.saveScreenshot(oldVal);
+      this.mediaQuickHash(oldVal).then((quickHash) => {
+        this.$electron.ipcRenderer.send('snapShot', oldVal, quickHash, 'lastFrame', videodata.time);
+        this.$electron.ipcRenderer.once(`snapShot-${oldVal}-reply`, (event, imgPath) => {
+          this.infoDB.get('recent-played', 'path', oldVal).then((val) => {
+            if (val) {
+              const data = {
+                shortCut: imgPath,
+                smallShortCut: imgPath,
+                lastPlayedTime: videodata.time,
+                duration: this.duration,
+              };
+              const mergedData = Object.assign(val, data);
+              this.infoDB.add('recent-played', mergedData).then(() => {
+                this.$bus.$emit('database-saved');
+              });
+            }
+          });
+        });
+      });
       this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
         audioTrackList: [],
@@ -327,26 +344,21 @@ export default {
       if (!this.asyncTasksDone) {
         this.$electron.ipcRenderer.send('snapShot', this.originSrc, this.mediaHash, 'lastFrame', videodata.time);
         this.$electron.ipcRenderer.once(`snapShot-${this.originSrc}-reply`, (event, imgPath) => {
-          fs.readFile(`${imgPath}`, 'base64', (err, data) => {
-            if (!err) {
-              const cover = `data:image/png;base64, ${data}`;
-              this.infoDB.get('recent-played', 'path', this.originSrc).then((val) => {
-                if (val) {
-                  const data = {
-                    shortCut: cover,
-                    smallShortCut: cover,
-                    lastPlayedTime: videodata.time,
-                    duration: this.duration,
-                  };
-                  const mergedData = Object.assign(val, data);
-                  this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
-                    this.asyncTasksDone = true;
-                    window.close();
-                  }).catch(() => {
-                    this.asyncTasksDone = true;
-                    window.close();
-                  });
-                }
+          this.infoDB.get('recent-played', 'path', this.originSrc).then((val) => {
+            if (val) {
+              const data = {
+                shortCut: imgPath,
+                smallShortCut: imgPath,
+                lastPlayedTime: videodata.time,
+                duration: this.duration,
+              };
+              const mergedData = Object.assign(val, data);
+              this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
+                this.asyncTasksDone = true;
+                window.close();
+              }).catch(() => {
+                this.asyncTasksDone = true;
+                window.close();
               });
             }
           });

@@ -59,6 +59,7 @@
 </template>
 
 <script>
+import { filePathToUrl } from '@/helpers/path';
 import path from 'path';
 import Icon from '../BaseIconContainer.vue';
 
@@ -202,7 +203,9 @@ export default {
       }
     },
     itemShortcut(shortCut, cover, lastPlayedTime, duration) {
-      return duration - lastPlayedTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
+      const fileUrlShortCut = filePathToUrl(shortCut);
+      const fileUrlCover = filePathToUrl(cover);
+      return duration - lastPlayedTime < 5 ? `url("${fileUrlCover}")` : `url("${fileUrlShortCut}")`;
     },
     itemInfo() {
       return {

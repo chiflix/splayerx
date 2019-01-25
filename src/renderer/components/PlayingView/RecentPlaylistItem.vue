@@ -216,15 +216,10 @@ export default {
         this.coverSrc = filePathToUrl(`${imgPath}`);
         this.imgPath = imgPath;
         if (this.isPlaying || this.lastPlayedTime) {
-          fs.readFile(`${imgPath}`, 'base64', (err, data) => {
-            if (!err) {
-              const cover = `data:image/png;base64, ${data}`;
-              this.infoDB.get('recent-played', 'path', this.path).then((data) => {
-                if (data) {
-                  const mergedData = Object.assign(data, { cover });
-                  this.infoDB.add('recent-played', mergedData);
-                }
-              });
+          this.infoDB.get('recent-played', 'path', this.path).then((data) => {
+            if (data) {
+              const mergedData = Object.assign(data, { cover: imgPath });
+              this.infoDB.add('recent-played', mergedData);
             }
           });
         }
@@ -237,7 +232,7 @@ export default {
     this.infoDB.get('recent-played', 'path', this.path).then((val) => {
       if (val && val.lastPlayedTime) {
         this.lastPlayedTime = val.lastPlayedTime;
-        this.smallShortCut = val.smallShortCut;
+        this.smallShortCut = filePathToUrl(val.smallShortCut);
       }
       this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
@@ -245,7 +240,7 @@ export default {
       this.infoDB.get('recent-played', 'path', this.path).then((val) => {
         if (val && val.lastPlayedTime) {
           this.lastPlayedTime = val.lastPlayedTime;
-          this.smallShortCut = val.smallShortCut;
+          this.smallShortCut = filePathToUrl(val.smallShortCut);
         }
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
@@ -254,15 +249,10 @@ export default {
   watch: {
     isPlaying(val) {
       if (val) {
-        fs.readFile(`${this.imgPath}`, 'base64', (err, data) => {
-          if (!err) {
-            const cover = `data:image/png;base64, ${data}`;
-            this.infoDB.get('recent-played', 'path', this.path).then((data) => {
-              if (data) {
-                const mergedData = Object.assign(data, { cover });
-                this.infoDB.add('recent-played', mergedData);
-              }
-            });
+        this.infoDB.get('recent-played', 'path', this.path).then((data) => {
+          if (data) {
+            const mergedData = Object.assign(data, { cover: this.imgPath });
+            this.infoDB.add('recent-played', mergedData);
           }
         });
       }
