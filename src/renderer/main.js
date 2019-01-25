@@ -84,7 +84,7 @@ Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
   router,
   set: [
-    { field: 'clientVersion', value: electron.remote.app.getVersion() },
+    { field: 'SPlayerClientVersion', value: electron.remote.app.getVersion() },
   ],
 });
 
