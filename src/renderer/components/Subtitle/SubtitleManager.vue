@@ -16,7 +16,6 @@ import romanize from 'romanize';
 import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
 import sortBy from 'lodash/sortBy';
-import partial from 'lodash/partial';
 import difference from 'lodash/difference';
 import Sagi from '@/helpers/sagi';
 import { codeToLanguageName } from '@/helpers/language';
@@ -104,6 +103,21 @@ export default {
             this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
           }
         });
+      }
+    },
+    languageLoadedSubtitleInfoList(newVal, oldVal) {
+      if (!isEqual(oldVal, newVal, (sub1, sub2) => sub1.id === sub2.id)) {
+        const {
+          isAutoSelection: auto,
+          findSubtitleByLanguageWithTypeRank: finder,
+          preferredLanguages: langs,
+          allLanguageLoaded: all,
+          currentSubtitleId: curr,
+        } = this;
+        const subtitlesToFindFrom = auto ? newVal : difference(newVal, oldVal);
+        let result = finder(subtitlesToFindFrom, langs[0]);
+        if (!result && all) result = finder(subtitlesToFindFrom, langs[1]);
+        this.changeCurrentSubtitle(result ? result.id : curr);
       }
     },
   },
@@ -235,15 +249,18 @@ export default {
     metaInfoUpdate(id, field, value) {
       this.updateMetaInfo({ id, type: field, value });
     },
-    findSubtitleByWith(rank, parameter, subtitleList, expected) {
-      const listSortedByParameter = sortBy(subtitleList, sub => rank.indexOf(sub[parameter]));
-      return listSortedByParameter.find(sub => sub[parameter] === expected);
+    findSubtitleByWith(rank, withParameter, byParameter, subtitleList, expected) {
+      const listSortedByParameter = sortBy(subtitleList, sub => rank.indexOf(sub[withParameter]));
+      return listSortedByParameter.find(sub => sub[byParameter] === expected);
     },
-    findSubtitleByLanguageWithTypeRank: partial(
-      this.findSubtitleByWith,
-      ['local', 'embedded', 'online'],
-      'type',
-    ),
+    findSubtitleByLanguageWithTypeRank(subtitleList, language) {
+      return this.findSubtitleByWith(
+        ['local', 'embedded', 'online'],
+        'type', 'language',
+        subtitleList,
+        language,
+      );
+    },
   },
   created() {
     this.resetSubtitles();
