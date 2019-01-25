@@ -6,9 +6,9 @@ import { codeIndex } from '@/helpers/language';
 import { Subtitle as subtitleMutations } from '../mutationTypes';
 import { Subtitle as subtitleActions } from '../actionTypes';
 
-function metaInfoToWeight(type, value, subtitleList, primaryLanguage) {
-  const result = { existed: subtitleList.filter(({ rank }) => !!rank).length };
-  switch (type) {
+function metaInfoToWeight(subtitleType, infoType, value, subtitleList, primaryLanguage) {
+  const result = { existed: subtitleList.filter(({ rank }) => !!rank).length * (subtitleType === 'local' ? -1 : 1) };
+  switch (infoType) {
     case 'language': {
       result.matchPrimaryLanguage = primaryLanguage === value ? 1 : 0;
       result.existedLanguage = subtitleList
@@ -43,7 +43,7 @@ function rankCalculation(type, options, lastRank) {
     {
       name: 'MATCH_PRIMARY_LANGUAGE',
       value: 1e4,
-      types: ['local', 'online'],
+      types: ['online'],
     },
     {
       name: 'MATCH_DEFAULT',
@@ -53,12 +53,12 @@ function rankCalculation(type, options, lastRank) {
     {
       name: 'LANGUAGE_RANKING',
       value: -1e3,
-      types: ['local', 'online'],
+      types: ['online'],
     },
     {
       name: 'EXISTED_LANGUAGE',
       value: -1e2,
-      types: ['local', 'online'],
+      types: ['online'],
     },
     {
       name: 'STREAM_INDEX',
@@ -87,7 +87,11 @@ function metaInfoUpdate(
   infoType, infoValue,
   lastRank,
 ) {
-  const weightOptions = metaInfoToWeight(infoType, infoValue, subtitleList, primaryLanguage);
+  const weightOptions = metaInfoToWeight(
+    subtitleType,
+    infoType, infoValue,
+    subtitleList, primaryLanguage,
+  );
   if (lastRank) Reflect.deleteProperty(weightOptions, 'existed');
   return rankCalculation(subtitleType, weightOptions, lastRank);
 }
