@@ -60,10 +60,11 @@ export default {
           .filter(id => loadingStates[id] !== 'failed');
         return !!notFailedSubtitles.length && notFailedSubtitles.every(id => !!languages[id]);
       },
-      loadedLanguageIds: ({ Subtitle }) => {
-        const { loadingStates, languages } = Subtitle;
+      languageLoadedSubtitleInfoList: ({ Subtitle }) => {
+        const { loadingStates, languages, types } = Subtitle;
         return Object.keys(loadingStates)
-          .filter(id => loadingStates[id] !== 'failed' && languages[id]);
+          .filter(id => loadingStates[id] !== 'failed' && languages[id])
+          .map(id => ({ id, language: languages[id], type: types[id] }));
       },
     }),
     currentSubtitle() {
@@ -103,18 +104,6 @@ export default {
             this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
           }
         });
-      }
-    },
-    loadedLanguageIds(newVal, oldVal) {
-      if (!isEqual(oldVal, newVal)) {
-        const extraSubtitles = difference(newVal, oldVal);
-        let result = extraSubtitles
-          .find(id => this.getLanguageFromId(id) === this.preferredLanguages[0]);
-        if (!result && this.preferredLanguages[1]) {
-          result = extraSubtitles
-            .find(id => this.getLanguageFromId(id) === this.preferredLanguages[1]);
-        }
-        this.changeCurrentSubtitle(result);
       }
     },
   },
