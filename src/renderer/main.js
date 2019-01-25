@@ -80,12 +80,14 @@ Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
 Vue.use(AsyncComputed);
 
-console.log('SPlayerClientVersion', electron.remote.app.getVersion());
 Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
   router,
   set: [
-    { field: 'SPlayerClientVersion', value: electron.remote.app.getVersion() },
+    { field: 'dimension1', value: electron.remote.app.getVersion() },
+    { field: 'checkProtocolTask', value: null }, // fix ga not work from file:// url
+    { field: 'checkStorageTask', value: null }, // fix ga not work from file:// url
+    { field: 'historyImportTask', value: null }, // fix ga not work from file:// url
   ],
 });
 
