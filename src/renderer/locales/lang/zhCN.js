@@ -175,6 +175,7 @@ export default {
     nextInPlaylist: '播放列表中下一视频',
   },
   subtitle: {
+    embedded: '内嵌',
     language: {
       zh: '中文（简体）',
       'zh-CN': '中文（简体）',
