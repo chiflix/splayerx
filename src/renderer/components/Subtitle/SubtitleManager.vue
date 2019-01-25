@@ -15,6 +15,8 @@ import osLocale from 'os-locale';
 import romanize from 'romanize';
 import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
+import sortBy from 'lodash/sortBy';
+import partial from 'lodash/partial';
 import difference from 'lodash/difference';
 import Sagi from '@/helpers/sagi';
 import { codeToLanguageName } from '@/helpers/language';
@@ -35,6 +37,7 @@ export default {
       subtitleInstances: {},
       localPremiumSubtitles: {},
       embeddedSubtitles: [],
+      isAutoSelection: false,
     };
   },
   computed: {
@@ -243,6 +246,15 @@ export default {
     metaInfoUpdate(id, field, value) {
       this.updateMetaInfo({ id, type: field, value });
     },
+    findSubtitleByWith(rank, parameter, subtitleList, expected) {
+      const listSortedByParameter = sortBy(subtitleList, sub => rank.indexOf(sub[parameter]));
+      return listSortedByParameter.find(sub => sub[parameter] === expected);
+    },
+    findSubtitleByLanguageWithTypeRank: partial(
+      this.findSubtitleByWith,
+      ['local', 'embedded', 'online'],
+      'type',
+    ),
   },
   created() {
     this.resetSubtitles();
