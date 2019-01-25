@@ -484,6 +484,7 @@ export default {
         this.handleRefresh();
       }
     });
+    this.$bus.$on('subtitle-refresh-from-menu', this.handleRefresh);
     document.addEventListener('mouseup', (e) => {
       if (e.button === 0) {
         if (!this.showAttached) {
