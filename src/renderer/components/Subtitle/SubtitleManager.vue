@@ -22,7 +22,7 @@ import { getLocalSubtitles, getOnlineSubtitles, getEmbeddedSubtitles } from '@/h
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
-import { promisify, localLanguageLoader } from './SubtitleLoader/utils';
+import { localLanguageLoader } from './SubtitleLoader/utils';
 
 export default {
   name: 'subtitle-manager',
@@ -35,7 +35,6 @@ export default {
       subtitleInstances: {},
       localPremiumSubtitles: {},
       embeddedSubtitles: [],
-      newOnlineSubtitles: [],
     };
   },
   computed: {
@@ -73,7 +72,7 @@ export default {
       handler: function handler(newVal) {
         if (newVal) {
           this.resetSubtitles();
-          this.addInitialSubtitles(newVal);
+          this.refreshAllSubtitles(newVal);
           this.$store.dispatch('ifNoSubtitle', true);
         }
       },
@@ -128,20 +127,34 @@ export default {
       addSubtitleWhenFailed: subtitleActions.ADD_SUBTITLE_WHEN_FAILED,
       updateMetaInfo: subtitleActions.UPDATE_METAINFO,
     }),
-    async addInitialSubtitles(videoSrc) {
+    async refreshAllSubtitles(videoSrc) {
       const {
         addSubtitles,
-        getLocalSubtitlesList, getEmbeddedSubtitlesList,
+        getLocalSubtitlesList, getEmbeddedSubtitlesList, getOnlineSubtitlesList,
       } = this;
-      const localEmbeddedSubtitles = (await Promise.all([
-        promisify(getLocalSubtitlesList.bind(null, videoSrc, SubtitleLoader.supportedFormats)),
-        promisify(getEmbeddedSubtitlesList.bind(null, videoSrc, SubtitleLoader.supportedCodecs)),
-      ]))
-        .reduce((prev, curr) => prev.concat(curr));
-      if (localEmbeddedSubtitles.length) addSubtitles(localEmbeddedSubtitles);
-      else {
-        this.$bus.$emit('menu-subtitle-refresh', true);
-      }
+      (await Promise.all([
+        getLocalSubtitlesList(videoSrc),
+        getEmbeddedSubtitlesList(videoSrc),
+        getOnlineSubtitlesList(videoSrc),
+      ].map(promise => promise.catch(err => err))))
+        .map(list => (list instanceof Array ? list : [list]).filter(sub => !(sub instanceof Error)))
+        .forEach(addSubtitles);
+    },
+    async refreshLocalAndOnlineSubtitles() {
+      const {
+        originSrc: videoSrc,
+        addSubtitles,
+        getLocalSubtitlesList, getOnlineSubtitlesList,
+        resetOnlineSubtitles,
+      } = this;
+      resetOnlineSubtitles();
+      (await Promise.all([
+        getLocalSubtitlesList(videoSrc),
+        getOnlineSubtitlesList(videoSrc),
+      ].map(promise => promise.catch(err => err))))
+        .map(list => (list instanceof Array ? list : [list]).filter(sub => !(sub instanceof Error)))
+        .forEach(addSubtitles);
+      this.$bus.$emit('refresh-finished');
     },
     getLocalSubtitlesList(videoSrc) {
       return getLocalSubtitles(videoSrc, SubtitleLoader.supportedCodecs);
@@ -206,6 +219,7 @@ export default {
       return sub;
     },
     addSubtitles(subtitleList) {
+      if (!subtitleList || !Object.keys(subtitleList).length) return [];
       const processedSubtitleList = [];
       if (subtitleList instanceof Array) {
         processedSubtitleList
@@ -226,12 +240,6 @@ export default {
       return processedSubtitleList
         .map(({ src, type, options }) => this.addSubtitle(src, type, options));
     },
-    async refreshOnlineSubtitles() {
-      this.resetOnlineSubtitles();
-      const { getOnlineSubtitlesList, originSrc: videoSrc } = this;
-      this.newOnlineSubtitles = await getOnlineSubtitlesList(videoSrc);
-      this.$bus.$emit('refresh-finished');
-    },
     metaInfoUpdate(id, field, value) {
       this.updateMetaInfo({ id, type: field, value });
     },
@@ -240,12 +248,9 @@ export default {
     this.resetSubtitles();
     this.systemLanguageCode = osLocale.sync().slice(0, 2);
     this.$bus.$on('add-subtitles', this.addSubtitles);
-    this.$bus.$on('refresh-subtitles', this.refreshOnlineSubtitles);
+    this.$bus.$on('refresh-subtitles', this.refreshLocalAndOnlineSubtitles);
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
-    this.$bus.$on('finished-add-subtitles', () => {
-      this.addSubtitles(this.newOnlineSubtitles);
-    });
   },
 };
 </script>

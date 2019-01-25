@@ -381,7 +381,7 @@ new Vue({
             {
               label: this.$t('msg.subtitle.AITranslation'),
               click: () => {
-                this.$bus.$emit('menu-subtitle-refresh');
+                this.$bus.$emit('refresh-subtitles');
               },
             },
             {

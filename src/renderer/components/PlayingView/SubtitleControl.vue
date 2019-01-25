@@ -478,10 +478,6 @@ export default {
     });
   },
   mounted() {
-    this.$bus.$on('menu-subtitle-refresh', (initial) => {
-      this.isInitial = !!initial;
-      this.handleRefresh();
-    });
     this.$bus.$on('subtitle-refresh-continue', () => {
       if (this.continueRefresh) {
         this.continueRefresh = false;
