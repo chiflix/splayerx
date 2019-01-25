@@ -11,7 +11,6 @@
 </template>
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex';
-import osLocale from 'os-locale';
 import romanize from 'romanize';
 import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
@@ -32,7 +31,6 @@ export default {
   },
   data() {
     return {
-      systemLanguageCode: '',
       subtitleInstances: {},
       localPremiumSubtitles: {},
       embeddedSubtitles: [],
@@ -212,10 +210,10 @@ export default {
             case 'local':
               break;
             case 'embedded':
-              if (language) sub.metaInfo.name = `${{ zh: '内嵌', en: 'Embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
+              if (language) sub.metaInfo.name = `${this.$t('subtitle.embedded')} ${romanize(subtitleRankIndex)} - ${codeToLanguageName(language)}`;
               else {
                 localLanguageLoader(sub.src, sub.format).then((language) => {
-                  sub.metaInfo.name = `${{ zh: '内嵌', en: 'Embedded' }[this.systemLanguageCode]} ${romanize(subtitleRankIndex)} (${this.$t(`subtitle.language.${language}`)})`;
+                  sub.metaInfo.name = `${this.$t('subtitle.embedded')} ${romanize(subtitleRankIndex)} - ${codeToLanguageName(language)}`;
                 });
               }
               break;
@@ -274,7 +272,6 @@ export default {
   },
   created() {
     this.resetSubtitles();
-    this.systemLanguageCode = osLocale.sync().slice(0, 2);
     this.$bus.$on('add-subtitles', (subs) => {
       this.autoSelectionCompleted = false;
       this.addSubtitles(subs);

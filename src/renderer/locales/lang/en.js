@@ -176,6 +176,7 @@ export default {
     nextInPlaylist: 'Next in Playlist',
   },
   subtitle: {
+    embedded: 'Embedded',
     language: {
       zh: 'Chinese (Simplified)',
       'zh-CN': 'Chinese (Simplified)',
