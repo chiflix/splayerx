@@ -15,7 +15,6 @@ import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
 import sortBy from 'lodash/sortBy';
 import differenceWith from 'lodash/differenceWith';
-import Sagi from '@/helpers/sagi';
 import { codeToLanguageName } from '@/helpers/language';
 import { getLocalSubtitles, getOnlineSubtitles, getEmbeddedSubtitles } from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
@@ -31,7 +30,6 @@ export default {
   data() {
     return {
       subtitleInstances: {},
-      embeddedSubtitles: [],
       isAutoSelection: false,
       autoSelectionCompleted: false,
       addingSubtitlesCount: 0,
@@ -40,6 +38,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', // use to find proper subtitles and clear subtitle upon change
+      'mediaHash', // use to provide subtitle with videoIdentity
       'subtitleList', 'currentSubtitleId', // use to get current subtitle info and auto selection subtitles
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
       'duration', // do not load subtitle renderer when video(duration) is not available(todo: global variable to tell if video is totally available)
@@ -154,7 +153,11 @@ export default {
         addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded, addSubtitleWhenFailed,
         subtitleInstances,
       } = this;
-      const sub = new SubtitleLoader(subtitle, type, options);
+      const sub = new SubtitleLoader(subtitle, type, {
+        ...options,
+        videoSrc: this.originSrc,
+        videoIdentity: this.mediaHash,
+      });
       this.addingSubtitlesCount += 1;
       sub.once('loading', (id) => {
         this.$set(subtitleInstances, id, sub);
