@@ -118,7 +118,7 @@ const getters = {
     loadingStates, names, languages, formats, ranks, types,
   }) =>
     Object.keys(loadingStates)
-      .filter(id => loadingStates[id] === 'ready' || loadingStates[id] === 'loaded')
+      .filter(id => loadingStates[id] !== 'failed')
       .map(id => ({
         id,
         name: names[id],
