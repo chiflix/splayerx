@@ -16,6 +16,7 @@ import isEqual from 'lodash/isEqual';
 import sortBy from 'lodash/sortBy';
 import differenceWith from 'lodash/differenceWith';
 import { codeToLanguageName } from '@/helpers/language';
+import Sagi from '@/helpers/sagi';
 import { getLocalSubtitles, getOnlineSubtitles, getEmbeddedSubtitles } from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
@@ -60,7 +61,7 @@ export default {
         const { loadingStates, types, durations } = Subtitle;
         const { duration } = Video;
         return Object.keys(loadingStates)
-          .filter(id => loadingStates[id] === 'loaded' && durations[id] >= duration * 0.6 * 0)
+          .filter(id => loadingStates[id] === 'loaded' && durations[id] >= duration * 0.6)
           .map(id => ({ id, type: types[id], duration: durations[id] }));
       },
     }),
@@ -98,6 +99,16 @@ export default {
         if (!result && all) result = finder(newVal, langs[1]);
         this.changeCurrentSubtitle(result ? result.id : curr);
         if (result) this.autoSelectionCompleted = true;
+      }
+    },
+    qualifiedSubtitles(newVal, oldVal) {
+      const newQualified = differenceWith(newVal, oldVal, isEqual);
+      if (newQualified.length) {
+        newQualified.forEach((subtitlePayload) => {
+          Sagi.pushTranscript(this.makeSubtitleUploadParameter(subtitlePayload))
+            .then(res => console.log(res))
+            .catch(err => console.log(err));
+        });
       }
     },
   },
