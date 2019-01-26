@@ -61,7 +61,7 @@ export default {
         const { duration } = Video;
         return Object.keys(loadingStates)
           .filter(id => loadingStates[id] === 'loaded' && durations[id] >= duration * 0.6 * 0)
-          .map(id => ({ id, type: types[id], played: durations[id] }));
+          .map(id => ({ id, type: types[id], duration: durations[id] }));
       },
     }),
     currentSubtitle() {
@@ -251,6 +251,32 @@ export default {
         subtitleList,
         language,
       );
+    },
+    makeSubtitleUploadParameter(payload) {
+      if (payload && payload.id) {
+        const { id, type, duration: played_time } = payload; // eslint-disable-line camelcase
+        const subtitleInstance = this.subtitleInstances[id];
+        if (subtitleInstance) {
+          const {
+            metaInfo, src, parsed, options,
+          } = subtitleInstance;
+          if (
+            (type === 'online' && src) ||
+            (type !== 'online' && parsed)
+          ) {
+            return ({
+              media_identity: options.videoIdentity,
+              language_code: metaInfo.language,
+              format: metaInfo.format,
+              played_time,
+              total_time: this.duration,
+              [type === 'online' ? 'transcript_identity' : 'payload']:
+                type === 'online' ? src : parsed,
+            });
+          }
+        }
+      }
+      return undefined;
     },
   },
   created() {
