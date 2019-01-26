@@ -794,7 +794,7 @@ new Vue({
         item.enabled = flag;
       });
       this.menu.getMenuItemById('subtitle').submenu.items.forEach((item) => {
-        item.submenu ?.items.forEach((item) => {
+        item.submenu?.items.forEach((item) => {
           item.enabled = flag;
         });
         item.enabled = flag;
@@ -858,7 +858,7 @@ new Vue({
       return menuRecentData;
     },
     refreshMenu() {
-      this.$electron.remote.Menu.getApplicationMenu() ?.clear();
+      this.$electron.remote.Menu.getApplicationMenu()?.clear();
       this.createMenu();
     },
   },
