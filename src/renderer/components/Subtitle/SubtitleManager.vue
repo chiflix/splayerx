@@ -2,7 +2,6 @@
   <div class="subtitle-manager"
     :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
     <subtitle-render
-      ref="currentSubtitle"
       v-if="currentSubtitleId && duration"
       :subtitle-instance="currentSubtitle"
       :key="currentSubtitleId"
@@ -32,7 +31,6 @@ export default {
   data() {
     return {
       subtitleInstances: {},
-      localPremiumSubtitles: {},
       embeddedSubtitles: [],
       isAutoSelection: false,
       autoSelectionCompleted: false,
@@ -41,9 +39,10 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
-      'duration', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
-      'primaryLanguage', 'secondaryLanguage', 'getLanguageFromId', 'isExistedSubtitle',
+      'originSrc', // use to find proper subtitles and clear subtitle upon change
+      'subtitleList', 'currentSubtitleId', // use to get current subtitle info and auto selection subtitles
+      'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
+      'duration', // do not load subtitle renderer when video(duration) is not available(todo: global variable to tell if video is totally available)
     ]),
     ...mapState({
       loadingOnlineSubtitleIds: ({ Subtitle }) => {
@@ -82,30 +81,6 @@ export default {
         }
       },
       immediate: true,
-    },
-    premiumSubtitles(newVal) {
-      if (this.privacyAgreement) {
-        newVal.forEach((subtitle) => {
-          const { id, played } = subtitle;
-          if (id && !this.localPremiumSubtitles[id]) {
-            const subtitleInfo = this.subtitleList.filter(subtitle => subtitle.id === id)[0];
-            const { subtitle } = this.$refs.currentSubtitle;
-            const payload = {
-              media_identity: this.mediaHash,
-              language_code: subtitleInfo.langCode,
-              format: `.${subtitleInfo.ext}`,
-              played_time: played,
-              total_time: this.duration,
-              delay: 0,
-              payload: Buffer.from(subtitle.data),
-            };
-            Sagi.pushTranscript(payload).then((res) => {
-              console.log(res);
-            });
-            this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
-          }
-        });
-      }
     },
     languageLoadedSubtitleInfoList(newVal, oldVal) {
       if (!this.autoSelectionCompleted && !isEqual(oldVal, newVal)) {
@@ -186,7 +161,6 @@ export default {
       const sub = new SubtitleLoader(subtitle, type, options);
       this.addingSubtitlesCount += 1;
       sub.once('loading', (id) => {
-        if (this.isExistedSubtitle(id)) return;
         this.$set(subtitleInstances, id, sub);
         addSubtitleWhenLoading({ id, type });
         sub.meta();

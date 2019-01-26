@@ -114,30 +114,26 @@ const state = {
 
 const getters = {
   currentSubtitleId: state => state.currentSubtitleId,
-  subtitleIds: ({ loadingStates }) => Object.keys(loadingStates),
   subtitleList: ({
     loadingStates, names, languages, formats, ranks, types,
   }) =>
-    Object.keys(loadingStates).map(id => ({
-      id,
-      name: names[id],
-      language: languages[id],
-      format: formats[id],
-      rank: ranks[id],
-      loading: loadingStates[id],
-      type: types[id],
-    })).sort((a, b) => b.rank - a.rank),
-  premiumSubtitles: ({ durations }, getters) => Object.keys(durations)
-    .filter(id => durations[id] >= 0.6 * getters.duration)
-    .map(id => ({ id, played: durations[id] })),
+    Object.keys(loadingStates)
+      .filter(id => loadingStates[id] === 'ready' || loadingStates[id] === 'loaded')
+      .map(id => ({
+        id,
+        name: names[id],
+        language: languages[id],
+        format: formats[id],
+        rank: ranks[id],
+        loading: loadingStates[id],
+        type: types[id],
+      }))
+      .sort((a, b) => b.rank - a.rank),
   subtitleDelay: state => state.subtitleDelay,
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,
   scaleNum: state => state.scaleNum,
   calculatedNoSub: state => state.calculatedNoSub,
-  getLanguageFromId: ({ languages }) => id => languages[id],
-  isExistedSubtitle: ({ loadingStates }) => id => !!Object.keys(loadingStates)
-    .filter((id, index, array) => array[id] !== 'failed').includes(id),
 };
 
 const mutations = {
@@ -220,7 +216,9 @@ const actions = {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'failed' });
   },
   [subtitleActions.CHANGE_CURRENT_SUBTITLE]({ commit, getters }, id) {
-    if (getters.subtitleIds.includes(id)) commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, id);
+    if (getters.subtitleList.map(({ id }) => id).includes(id)) {
+      commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, id);
+    }
   },
   [subtitleActions.OFF_SUBTITLES]({ commit }) {
     commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
