@@ -9,7 +9,6 @@ import axios from 'axios';
 import uuidv4 from 'uuid/v4';
 import electron from 'electron';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
-import ElectronJSONStorage from 'electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
 import VueElectron from 'vue-electron';
@@ -81,32 +80,15 @@ Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
 Vue.use(AsyncComputed);
 
-// use ElectronJSONStorage get `user-uuid` before app mount
-ElectronJSONStorage.get('user-uuid', (err, userUUID) => {
-  if (err || Object.keys(userUUID).length === 0) {
-    err && addLog.methods.addLog('error', err);
-    userUUID = uuidv4();
-    ElectronJSONStorage.set('user-uuid', userUUID);
-  }
-
-  // set userUUID to google analytics uid
-  Vue.use(VueAnalytics, {
-    id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
-    router,
-    set: [
-      { field: 'dimension1', value: electron.remote.app.getVersion() },
-      { field: 'userId', value: userUUID }, 
-      { field: 'checkProtocolTask', value: null }, // fix ga not work from file:// url
-      { field: 'checkStorageTask', value: null }, // fix ga not work from file:// url
-      { field: 'historyImportTask', value: null }, // fix ga not work from file:// url
-    ],
-  });
-
-  const platform = os.platform() + os.release();
-  const { app } = require('electron').remote;
-  const version = app.getVersion();
-  Vue.http.headers.common['X-Application-Token'] = userUUID;
-  Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
+Vue.use(VueAnalytics, {
+  id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
+  router,
+  set: [
+    { field: 'dimension1', value: electron.remote.app.getVersion() },
+    { field: 'checkProtocolTask', value: null }, // fix ga not work from file:// url
+    { field: 'checkStorageTask', value: null }, // fix ga not work from file:// url
+    { field: 'historyImportTask', value: null }, // fix ga not work from file:// url
+  ],
 });
 
 Vue.mixin(helpers);
@@ -812,7 +794,7 @@ new Vue({
         item.enabled = flag;
       });
       this.menu.getMenuItemById('subtitle').submenu.items.forEach((item) => {
-        item.submenu?.items.forEach((item) => {
+        item.submenu ?.items.forEach((item) => {
           item.enabled = flag;
         });
         item.enabled = flag;
@@ -876,7 +858,7 @@ new Vue({
       return menuRecentData;
     },
     refreshMenu() {
-      this.$electron.remote.Menu.getApplicationMenu()?.clear();
+      this.$electron.remote.Menu.getApplicationMenu() ?.clear();
       this.createMenu();
     },
   },
@@ -887,6 +869,22 @@ new Vue({
     this.createMenu();
     this.$bus.$on('new-file-open', this.refreshMenu);
     // TODO: Setup user identity
+    this.$storage.get('user-uuid', (err, userUUID) => {
+      if (err || Object.keys(userUUID).length === 0) {
+        err && this.addLog('error', err);
+        userUUID = uuidv4();
+        this.$storage.set('user-uuid', userUUID);
+      }
+      const platform = os.platform() + os.release();
+      const { app } = this.$electron.remote;
+      const version = app.getVersion();
+
+      Vue.http.headers.common['X-Application-Token'] = userUUID;
+      Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
+
+      // set userUUID to google analytics uid
+      this.$ga && this.$ga.set('userId', userUUID);
+    });
 
     window.addEventListener('mousedown', (e) => {
       if (e.button === 2 && process.platform === 'win32') {
