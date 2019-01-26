@@ -56,6 +56,13 @@ export default {
           .sort((prevId, currId) => ranks[currId] - ranks[prevId])
           .map(id => ({ id, language: languages[id], type: types[id] }));
       },
+      qualifiedSubtitles: ({ Subtitle, Video }) => {
+        const { loadingStates, types, durations } = Subtitle;
+        const { duration } = Video;
+        return Object.keys(loadingStates)
+          .filter(id => loadingStates[id] === 'loaded' && durations[id] >= duration * 0.6 * 0)
+          .map(id => ({ id, type: types[id], played: durations[id] }));
+      },
     }),
     currentSubtitle() {
       return this.subtitleInstances[this.currentSubtitleId];
