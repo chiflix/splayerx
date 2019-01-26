@@ -45,10 +45,6 @@ export default {
       'duration', // do not load subtitle renderer when video(duration) is not available(todo: global variable to tell if video is totally available)
     ]),
     ...mapState({
-      loadingOnlineSubtitleIds: ({ Subtitle }) => {
-        const { loadingStates, types } = Subtitle;
-        return Object.keys(loadingStates).filter(id => types[id] === 'online' && loadingStates[id] === 'loading');
-      },
       preferredLanguages: ({ Preference }) => (
         [Preference.primaryLanguage, Preference.secondaryLanguage].filter(language => !!language)
       ),
