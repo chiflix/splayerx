@@ -269,11 +269,11 @@ export default {
         const subtitleInstance = this.subtitleInstances[id];
         if (subtitleInstance) {
           const {
-            metaInfo, src, parsed, options,
+            metaInfo, src, data, options,
           } = subtitleInstance;
           if (
             (type === 'online' && src) ||
-            (type !== 'online' && parsed)
+            (type !== 'online' && data)
           ) {
             return ({
               media_identity: options.videoIdentity,
@@ -282,7 +282,7 @@ export default {
               played_time,
               total_time: this.duration,
               [type === 'online' ? 'transcript_identity' : 'payload']:
-                type === 'online' ? src : parsed,
+                type === 'online' ? src : Buffer.from(data),
             });
           }
         }
