@@ -138,7 +138,7 @@ function registerMainWindowEvent() {
     } else {
       numberString = timecodeFromSeconds(snapShot.time);
     }
-    splayerx.snapshotVideo(snapShot.videoPath, snapShot.imgPath, numberString, (resultCode) => {
+    splayerx.snapshotVideo(snapShot.videoPath, snapShot.imgPath, numberString, '1920', '1080', (resultCode) => {
       console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
       callback(resultCode, snapShot.imgPath);
     });
@@ -180,7 +180,7 @@ function registerMainWindowEvent() {
   ipcMain.on('snapShot', (event, videoPath, quickHash, type = 'cover', time = 0) => {
     const imgFolderPath = path.join(tempFolderPath, quickHash);
     if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
-    const imgPath = path.join(imgFolderPath, `${type}.png`);
+    const imgPath = path.join(imgFolderPath, `${type}.jpg`);
 
     if (!fs.existsSync(imgPath) || type === 'lastFrame') {
       snapShotQueue.push({
