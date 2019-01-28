@@ -87,7 +87,6 @@
 </div>
 </template>
 <script>
-import fs from 'fs';
 import path from 'path';
 import guessit from 'guessit-wrapper';
 import anitomy from 'anitomyscript';
@@ -218,7 +217,13 @@ export default {
       this.videoWidth = JSON.parse(info).streams[0].coded_width;
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
       this.mediaQuickHash(this.path).then((quickHash) => {
-        this.$electron.ipcRenderer.send('snapShot', this.path, quickHash, `${this.videoWidth}`, `${this.videoHeight}`);
+        this.$electron.ipcRenderer.send('snapShot', {
+          videoPath: this.path,
+          quickHash,
+          duration: this.mediaInfo.duration,
+          videoWidth: `${this.videoWidth}`,
+          videoHeight: `${this.videoHeight}`,
+        });
       });
     });
     this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {

@@ -24,7 +24,6 @@
       :style="{
         backgroundColor: maskBackground
       }"/>
-    <canvas class="canvas" ref="thumbnailCanvas"></canvas>
   </div>
 </template>;
 
@@ -166,95 +165,8 @@ export default {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
-    saveScreenshot() {
-      // const { videoElement } = this;
-      // const canvas = this.$refs.thumbnailCanvas;
-      // const canvasCTX = canvas.getContext('2d');
-      // // todo: use metaloaded to get videoHeight and videoWidth
-      // const { videoHeight, videoWidth } = this;
-      // // cannot delete
-      // [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
-      // canvasCTX.drawImage(
-      //   videoElement, 0, 0, videoWidth, videoHeight,
-      //   0, 0, (videoWidth / videoHeight) * 1080, 1080,
-      // );
-      // const imagePath = canvas.toDataURL('image/jpeg', 0.8);
-      // // 用于测试截图的代码，以后可能还会用到
-      // // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
-      // // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
-      // [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
-      // canvasCTX.drawImage(
-      //   videoElement, 0, 0, videoWidth, videoHeight,
-      //   0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
-      // );
-      // const smallImagePath = canvas.toDataURL('image/jpeg', 0.8);
-      // const val = await this.infoDB.get('recent-played', 'path', videoPath);
-      // if (val) {
-      //   const mergedData = Object.assign(val, data);
-      //   await this.infoDB.add('recent-played', mergedData);
-      //   this.$bus.$emit('database-saved');
-      // }
-    },
     saveSubtitleStyle() {
       return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
-    },
-    async getVideoCover(grabCoverTime) {
-      if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
-      // Because we are execution in async, we do double check.
-      if (this.coverFinded) {
-        return;
-      }
-
-      // Assume to grab the cover can be the success and to keep
-      // it doesn't execution multiple times. if grab failed,
-      // we set it back to false.
-      this.coverFinded = true;
-
-      const videoElement = this.$refs.videoCanvas.videoElement();
-      const canvas = this.$refs.thumbnailCanvas;
-      const canvasCTX = canvas.getContext('2d');
-      const { videoHeight, videoWidth } = videoElement;
-      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
-      canvasCTX.drawImage(
-        videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
-      );
-
-      let grabCoverDone = false;
-      const { data } = canvasCTX.getImageData(0, 0, 100, 100);
-      // check the cover is it right.
-      for (let i = 0; i < data.length; i += 1) {
-        if ((i + 1) % 4 !== 0 && data[i] > 20) {
-          grabCoverDone = true;
-          break;
-        }
-      }
-      if (grabCoverDone) {
-        const smallImagePath = canvas.toDataURL('image/png');
-        [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
-        canvasCTX.drawImage(
-          videoElement, 0, 0, videoWidth, videoHeight,
-          0, 0, (videoWidth / videoHeight) * 1080, 1080,
-        );
-        const imagePath = canvas.toDataURL('image/png');
-        const val = await this.infoDB.get('recent-played', 'path', this.originSrc);
-        if (val) {
-          const mergedData = Object.assign(val, { cover: imagePath, smallCover: smallImagePath });
-          this.infoDB.add('recent-played', mergedData);
-        } else {
-          const data = {
-            quickHash: await this.mediaQuickHash(this.originSrc),
-            path: this.originSrc,
-            cover: imagePath,
-            smallCover: smallImagePath,
-            duration: this.$store.getters.duration,
-          };
-          this.infoDB.add('recent-played', data);
-        }
-      }
-
-      this.coverFinded = grabCoverDone;
-      this.lastCoverDetectingTime = grabCoverTime;
     },
     checkPresentTime() {
       if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
@@ -276,22 +188,30 @@ export default {
     originSrc(val, oldVal) {
       this.coverFinded = false;
       this.mediaQuickHash(oldVal).then((quickHash) => {
-        this.$electron.ipcRenderer.send('snapShot', oldVal, quickHash, `${this.videoWidth}`, `${this.videoHeight}`, 'lastFrame', videodata.time);
-        this.$electron.ipcRenderer.once(`snapShot-${oldVal}-reply`, (event, imgPath) => {
-          this.infoDB.get('recent-played', 'path', oldVal).then((val) => {
-            if (val) {
-              const data = {
-                shortCut: imgPath,
-                smallShortCut: imgPath,
-                lastPlayedTime: videodata.time,
-                duration: this.duration,
-              };
-              const mergedData = Object.assign(val, data);
-              this.infoDB.add('recent-played', mergedData).then(() => {
-                this.$bus.$emit('database-saved');
-              });
-            }
-          });
+        const imgPath = this.$electron.ipcRenderer.sendSync(
+          'snapShot-lastFrame',
+          {
+            videoPath: oldVal,
+            quickHash,
+            duration: this.duration,
+            videoWidth: `${this.videoWidth}`,
+            videoHeight: `${this.videoHeight}`,
+          },
+          videodata.time,
+        );
+        this.infoDB.get('recent-played', 'path', oldVal).then((val) => {
+          if (val) {
+            const data = {
+              shortCut: imgPath,
+              smallShortCut: imgPath,
+              lastPlayedTime: videodata.time,
+              duration: this.duration,
+            };
+            const mergedData = Object.assign(val, data);
+            this.infoDB.add('recent-played', mergedData).then(() => {
+              this.$bus.$emit('database-saved');
+            });
+          }
         });
       });
       this.$bus.$emit('show-speedlabel');
@@ -342,39 +262,48 @@ export default {
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
-        this.$electron.ipcRenderer.send('snapShot', this.originSrc, this.mediaHash, `${this.videoWidth}`, `${this.videoHeight}`, 'lastFrame', videodata.time);
-        this.$electron.ipcRenderer.once(`snapShot-${this.originSrc}-reply`, (event, imgPath) => {
-          this.infoDB.get('recent-played', 'path', this.originSrc).then((val) => {
-            const data = {
-              shortCut: imgPath,
-              smallShortCut: imgPath,
-              lastPlayedTime: videodata.time,
-              duration: this.duration,
-            };
-            if (val) {
-              const mergedData = Object.assign(val, data);
-              this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
-                this.asyncTasksDone = true;
-                window.close();
-              }).catch(() => {
-                this.asyncTasksDone = true;
-                window.close();
-              });
-            } else {
-              const mergedData = Object.assign({
-                quickHash: this.mediaHash,
-                path: this.originSrc,
-                lastOpened: Date.now(),
-              }, data);
-              this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
-                this.asyncTasksDone = true;
-                window.close();
-              }).catch(() => {
-                this.asyncTasksDone = true;
-                window.close();
-              });
-            }
-          });
+        const imgPath = this.$electron.ipcRenderer.sendSync(
+          'snapShot-lastFrame',
+          {
+            videoPath: this.originSrc,
+            quickHash: this.mediaHash,
+            duration: this.duration,
+            videoWidth: `${this.videoWidth}`,
+            videoHeight: `${this.videoHeight}`,
+          },
+          videodata.time,
+        );
+        console.log(imgPath);
+        this.infoDB.get('recent-played', 'path', this.originSrc).then((val) => {
+          const data = {
+            shortCut: imgPath,
+            smallShortCut: imgPath,
+            lastPlayedTime: videodata.time,
+            duration: this.duration,
+          };
+          if (val) {
+            const mergedData = Object.assign(val, data);
+            this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
+              this.asyncTasksDone = true;
+              window.close();
+            }).catch(() => {
+              this.asyncTasksDone = true;
+              window.close();
+            });
+          } else {
+            const mergedData = Object.assign({
+              quickHash: this.mediaHash,
+              path: this.originSrc,
+              lastOpened: Date.now(),
+            }, data);
+            this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
+              this.asyncTasksDone = true;
+              window.close();
+            }).catch(() => {
+              this.asyncTasksDone = true;
+              window.close();
+            });
+          }
         });
         e.returnValue = false;
       }

@@ -139,12 +139,12 @@ function registerMainWindowEvent() {
   function snapShot(snapShot, callback) {
     let numberString;
     if (snapShot.type === 'cover') {
-      const randomNumber = Math.round((Math.random() * 20) + 5);
+      let randomNumber = Math.round((Math.random() * 20) + 5);
+      if (randomNumber > snapShot.duration) randomNumber = snapShot.duration;
       numberString = timecodeFromSeconds(randomNumber);
     } else {
       numberString = timecodeFromSeconds(snapShot.time);
     }
-    console.log(snapShot.videoWidth, snapShot.videoHeight, snapShot.imgPath);
     splayerx.snapshotVideo(snapShot.videoPath, snapShot.imgPath, numberString, snapShot.videoWidth, snapShot.videoHeight, (resultCode) => {
       console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
       callback(resultCode, snapShot.imgPath);
@@ -184,22 +184,41 @@ function registerMainWindowEvent() {
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, videoPath, quickHash, videoWidth = '1920', videoHeight = '1080', type = 'cover', time = 0) => {
-    const imgFolderPath = path.join(appFolderPath, quickHash);
+  ipcMain.on('snapShot', (event, video, type = 'cover', time = 0) => {
+    if (!video.videoWidth) video.videoWidth = 1920;
+    if (!video.videoHeight) video.videoHeight = 1080;
+    const imgFolderPath = path.join(appFolderPath, video.quickHash);
     if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
     const imgPath = path.join(imgFolderPath, `${type}.jpg`);
 
     if (!fs.existsSync(imgPath) || type === 'lastFrame') {
-      snapShotQueue.push({
-        videoPath, quickHash, imgPath, type, time, videoWidth, videoHeight,
-      });
+      snapShotQueue.push(Object.assign({ imgPath, type, time }, video));
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
       }
     } else {
       console.log('pass', imgPath);
-      event.sender.send(`snapShot-${videoPath}-reply`, imgPath);
+      event.sender.send(`snapShot-${video.videoPath}-reply`, imgPath);
     }
+  });
+  ipcMain.on('snapShot-lastFrame', (event, video, time = 0) => {
+    if (!video.videoWidth) video.videoWidth = 1920;
+    if (!video.videoHeight) video.videoHeight = 1080;
+    const imgFolderPath = path.join(appFolderPath, video.quickHash);
+    if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
+    const imgPath = path.join(imgFolderPath, 'lastFrame.jpg');
+
+    const lastFrameInfo = Object.assign({ imgPath, type: 'lastFrame', time }, video);
+    const callback = (resultCode, imgPath) => {
+      if (resultCode === 'Waiting for the task completion.') {
+        snapShot(lastFrameInfo, callback);
+      } else if (resultCode === '0') {
+        event.returnValue = imgPath;
+      } else {
+        event.returnValue = resultCode;
+      }
+    };
+    snapShot(lastFrameInfo, callback);
   });
 
   ipcMain.on('extract-subtitle-request', (event, videoPath, index, format, hash) => {
