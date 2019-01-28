@@ -203,8 +203,8 @@ export default {
       }
     },
     itemShortcut(shortCut, cover, lastPlayedTime, duration) {
-      const fileUrlShortCut = shortCut.startsWith('data:image') ? shortCut : filePathToUrl(shortCut);
-      const fileUrlCover = cover.startsWith('data:image') ? cover : filePathToUrl(cover);
+      const fileUrlShortCut = shortCut.startsWith('data:image') || !shortCut ? shortCut : filePathToUrl(shortCut);
+      const fileUrlCover = cover.startsWith('data:image') || !cover ? cover : filePathToUrl(cover);
       return duration - lastPlayedTime < 5 ? `url("${fileUrlCover}")` : `url("${fileUrlShortCut}")`;
     },
     itemInfo() {
