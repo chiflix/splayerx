@@ -185,8 +185,7 @@ function registerMainWindowEvent() {
   }
 
   ipcMain.on('snapShot', (event, videoPath, quickHash, videoWidth = '1920', videoHeight = '1080', type = 'cover', time = 0) => {
-    const basename = path.basename(videoPath, path.extname(videoPath));
-    const imgFolderPath = path.join(appFolderPath, basename);
+    const imgFolderPath = path.join(appFolderPath, quickHash);
     if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
     const imgPath = path.join(imgFolderPath, `${type}.jpg`);
 
