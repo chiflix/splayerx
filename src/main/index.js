@@ -145,10 +145,13 @@ function registerMainWindowEvent() {
     } else {
       numberString = timecodeFromSeconds(snapShot.time);
     }
-    splayerx.snapshotVideo(snapShot.videoPath, snapShot.imgPath, numberString, snapShot.videoWidth, snapShot.videoHeight, (resultCode) => {
-      console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
-      callback(resultCode, snapShot.imgPath);
-    });
+    splayerx.snapshotVideo(
+      snapShot.videoPath, snapShot.imgPath, numberString, snapShot.videoWidth, snapShot.videoHeight,
+      (resultCode) => {
+        console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
+        callback(resultCode, snapShot.imgPath);
+      },
+    );
   }
 
   function extractSubtitle(videoPath, subtitlePath, index) {
