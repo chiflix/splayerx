@@ -143,6 +143,8 @@ export default {
       mediaInfo: { path: this.path },
       smallShortCut: '',
       imgPath: '',
+      videoHeight: 0,
+      videoWidth: 0,
     };
   },
   methods: {
@@ -210,24 +212,26 @@ export default {
     },
   },
   mounted() {
-    this.mediaQuickHash(this.path).then((quickHash) => {
-      this.$electron.ipcRenderer.send('snapShot', this.path, quickHash);
-      this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-        this.coverSrc = filePathToUrl(`${imgPath}`);
-        this.imgPath = imgPath;
-        if (this.isPlaying || this.lastPlayedTime) {
-          this.infoDB.get('recent-played', 'path', this.path).then((data) => {
-            if (data) {
-              const mergedData = Object.assign(data, { cover: imgPath });
-              this.infoDB.add('recent-played', mergedData);
-            }
-          });
-        }
-      });
-    });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
+      this.videoHeight = JSON.parse(info).streams[0].coded_height;
+      this.videoWidth = JSON.parse(info).streams[0].coded_width;
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
+      this.mediaQuickHash(this.path).then((quickHash) => {
+        this.$electron.ipcRenderer.send('snapShot', this.path, quickHash, `${this.videoWidth}`, `${this.videoHeight}`);
+      });
+    });
+    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
+      this.coverSrc = filePathToUrl(imgPath);
+      this.imgPath = imgPath;
+      if (this.isPlaying || this.lastPlayedTime) {
+        this.infoDB.get('recent-played', 'path', this.path).then((data) => {
+          if (data) {
+            const mergedData = Object.assign(data, { cover: imgPath });
+            this.infoDB.add('recent-played', mergedData);
+          }
+        });
+      }
     });
     this.infoDB.get('recent-played', 'path', this.path).then((val) => {
       if (val && val.lastPlayedTime) {
@@ -241,22 +245,12 @@ export default {
         if (val && val.lastPlayedTime) {
           this.lastPlayedTime = val.lastPlayedTime;
           this.smallShortCut = filePathToUrl(val.smallShortCut);
+          const mergedData = Object.assign(val, { cover: this.imgPath });
+          this.infoDB.add('recent-played', mergedData);
         }
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
     });
-  },
-  watch: {
-    isPlaying(val) {
-      if (val) {
-        this.infoDB.get('recent-played', 'path', this.path).then((data) => {
-          if (data) {
-            const mergedData = Object.assign(data, { cover: this.imgPath });
-            this.infoDB.add('recent-played', mergedData);
-          }
-        });
-      }
-    },
   },
   asyncComputed: {
     async baseName() {

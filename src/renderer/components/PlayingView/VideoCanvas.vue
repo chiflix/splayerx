@@ -276,7 +276,7 @@ export default {
     originSrc(val, oldVal) {
       this.coverFinded = false;
       this.mediaQuickHash(oldVal).then((quickHash) => {
-        this.$electron.ipcRenderer.send('snapShot', oldVal, quickHash, 'lastFrame', videodata.time);
+        this.$electron.ipcRenderer.send('snapShot', oldVal, quickHash, `${this.videoWidth}`, `${this.videoHeight}`, 'lastFrame', videodata.time);
         this.$electron.ipcRenderer.once(`snapShot-${oldVal}-reply`, (event, imgPath) => {
           this.infoDB.get('recent-played', 'path', oldVal).then((val) => {
             if (val) {
@@ -342,17 +342,30 @@ export default {
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
-        this.$electron.ipcRenderer.send('snapShot', this.originSrc, this.mediaHash, 'lastFrame', videodata.time);
+        this.$electron.ipcRenderer.send('snapShot', this.originSrc, this.mediaHash, `${this.videoWidth}`, `${this.videoHeight}`, 'lastFrame', videodata.time);
         this.$electron.ipcRenderer.once(`snapShot-${this.originSrc}-reply`, (event, imgPath) => {
           this.infoDB.get('recent-played', 'path', this.originSrc).then((val) => {
+            const data = {
+              shortCut: imgPath,
+              smallShortCut: imgPath,
+              lastPlayedTime: videodata.time,
+              duration: this.duration,
+            };
             if (val) {
-              const data = {
-                shortCut: imgPath,
-                smallShortCut: imgPath,
-                lastPlayedTime: videodata.time,
-                duration: this.duration,
-              };
               const mergedData = Object.assign(val, data);
+              this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
+                this.asyncTasksDone = true;
+                window.close();
+              }).catch(() => {
+                this.asyncTasksDone = true;
+                window.close();
+              });
+            } else {
+              const mergedData = Object.assign({
+                quickHash: this.mediaHash,
+                path: this.originSrc,
+                lastOpened: Date.now(),
+              }, data);
               this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
                 this.asyncTasksDone = true;
                 window.close();

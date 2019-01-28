@@ -48,6 +48,8 @@ if (process.mas === undefined && !app.requestSingleInstanceLock()) {
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
+const appFolderPath = path.join(app.getPath('userData'), 'img');
+if (!fs.existsSync(appFolderPath)) fs.mkdirSync(appFolderPath);
 
 function handleBossKey() {
   if (!mainWindow) return;
@@ -142,7 +144,8 @@ function registerMainWindowEvent() {
     } else {
       numberString = timecodeFromSeconds(snapShot.time);
     }
-    splayerx.snapshotVideo(snapShot.videoPath, snapShot.imgPath, numberString, '1920', '1080', (resultCode) => {
+    console.log(snapShot.videoWidth, snapShot.videoHeight, snapShot.imgPath);
+    splayerx.snapshotVideo(snapShot.videoPath, snapShot.imgPath, numberString, snapShot.videoWidth, snapShot.videoHeight, (resultCode) => {
       console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
       callback(resultCode, snapShot.imgPath);
     });
@@ -181,14 +184,15 @@ function registerMainWindowEvent() {
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, videoPath, quickHash, type = 'cover', time = 0) => {
-    const imgFolderPath = path.join(tempFolderPath, quickHash);
+  ipcMain.on('snapShot', (event, videoPath, quickHash, videoWidth = '1920', videoHeight = '1080', type = 'cover', time = 0) => {
+    const basename = path.basename(videoPath, path.extname(videoPath));
+    const imgFolderPath = path.join(appFolderPath, basename);
     if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
     const imgPath = path.join(imgFolderPath, `${type}.jpg`);
 
     if (!fs.existsSync(imgPath) || type === 'lastFrame') {
       snapShotQueue.push({
-        videoPath, quickHash, imgPath, type, time,
+        videoPath, quickHash, imgPath, type, time, videoWidth, videoHeight,
       });
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);

@@ -203,8 +203,8 @@ export default {
       }
     },
     itemShortcut(shortCut, cover, lastPlayedTime, duration) {
-      const fileUrlShortCut = filePathToUrl(shortCut);
-      const fileUrlCover = filePathToUrl(cover);
+      const fileUrlShortCut = shortCut ? filePathToUrl(shortCut) : shortCut;
+      const fileUrlCover = cover ? filePathToUrl(cover) : cover;
       return duration - lastPlayedTime < 5 ? `url("${fileUrlCover}")` : `url("${fileUrlShortCut}")`;
     },
     itemInfo() {
