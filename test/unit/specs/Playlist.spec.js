@@ -19,10 +19,4 @@ describe('Playlist.vue', () => {
     expect(wrapper.vm.showingPopupDialog).equal(true);
     wrapper.vm.open('');
   });
-  it('itemShortcut method works fine', () => {
-    const wrapper = mount(Playlist);
-    const link = 'link';
-    wrapper.vm.itemShortcut(link);
-    expect(wrapper.vm.itemShortcut(link)).equal(`url("${link}")`);
-  });
 });
