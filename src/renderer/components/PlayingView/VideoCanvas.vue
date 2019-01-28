@@ -273,7 +273,6 @@ export default {
           },
           videodata.time,
         );
-        console.log(imgPath);
         this.infoDB.get('recent-played', 'path', this.originSrc).then((val) => {
           const data = {
             shortCut: imgPath,
