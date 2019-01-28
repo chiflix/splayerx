@@ -201,6 +201,7 @@ function registerMainWindowEvent() {
       event.sender.send(`snapShot-${video.videoPath}-reply`, imgPath);
     }
   });
+  // sync version of 'snapShot' event, currently only for getting last frame of video
   ipcMain.on('snapShot-lastFrame', (event, video, time = 0) => {
     if (!video.videoWidth) video.videoWidth = 1920;
     if (!video.videoHeight) video.videoHeight = 1080;
