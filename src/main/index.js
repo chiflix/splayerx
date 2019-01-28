@@ -217,9 +217,10 @@ function registerMainWindowEvent() {
     const callback = (resultCode, imgPath) => {
       if (resultCode === 'Waiting for the task completion.') {
         if (count < 100) {
-          snapShot(lastFrameInfo, callback);
           count += 1;
+          snapShot(lastFrameInfo, callback);
         }
+        event.returnValue = '';
       } else if (resultCode === '0') {
         event.returnValue = imgPath;
       } else {
