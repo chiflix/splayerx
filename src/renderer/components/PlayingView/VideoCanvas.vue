@@ -43,10 +43,8 @@ export default {
     return {
       videoExisted: false,
       videoElement: null,
-      coverFinded: false,
       seekTime: [0],
       lastPlayedTime: 0,
-      lastCoverDetectingTime: 0,
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
     };
@@ -167,11 +165,6 @@ export default {
     },
     saveSubtitleStyle() {
       return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
-    },
-    checkPresentTime() {
-      if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
-        this.getVideoCover(videodata.time);
-      }
     },
   },
   computed: {
