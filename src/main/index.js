@@ -213,9 +213,13 @@ function registerMainWindowEvent() {
     const imgPath = path.join(folderName, 'lastFrame.jpg');
 
     const lastFrameInfo = Object.assign({ imgPath, type: 'lastFrame', time }, video);
+    let count = 0;
     const callback = (resultCode, imgPath) => {
       if (resultCode === 'Waiting for the task completion.') {
-        snapShot(lastFrameInfo, callback);
+        if (count < 100) {
+          snapShot(lastFrameInfo, callback);
+          count += 1;
+        }
       } else if (resultCode === '0') {
         event.returnValue = imgPath;
       } else {
