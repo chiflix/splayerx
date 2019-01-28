@@ -48,8 +48,8 @@ if (process.mas === undefined && !app.requestSingleInstanceLock()) {
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
-const appFolderPath = path.join(app.getPath('userData'), 'img');
-if (!fs.existsSync(appFolderPath)) fs.mkdirSync(appFolderPath);
+const imgFolderPath = path.join(app.getPath('userData'), 'img');
+if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
 
 function handleBossKey() {
   if (!mainWindow) return;
@@ -187,9 +187,9 @@ function registerMainWindowEvent() {
   ipcMain.on('snapShot', (event, video, type = 'cover', time = 0) => {
     if (!video.videoWidth) video.videoWidth = 1920;
     if (!video.videoHeight) video.videoHeight = 1080;
-    const imgFolderPath = path.join(appFolderPath, video.quickHash);
-    if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
-    const imgPath = path.join(imgFolderPath, `${type}.jpg`);
+    const folderName = path.join(imgFolderPath, video.quickHash);
+    if (!fs.existsSync(folderName)) fs.mkdirSync(folderName);
+    const imgPath = path.join(folderName, `${type}.jpg`);
 
     if (!fs.existsSync(imgPath) || type === 'lastFrame') {
       snapShotQueue.push(Object.assign({ imgPath, type, time }, video));
@@ -205,9 +205,9 @@ function registerMainWindowEvent() {
   ipcMain.on('snapShot-lastFrame', (event, video, time = 0) => {
     if (!video.videoWidth) video.videoWidth = 1920;
     if (!video.videoHeight) video.videoHeight = 1080;
-    const imgFolderPath = path.join(appFolderPath, video.quickHash);
-    if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
-    const imgPath = path.join(imgFolderPath, 'lastFrame.jpg');
+    const folderName = path.join(imgFolderPath, video.quickHash);
+    if (!fs.existsSync(folderName)) fs.mkdirSync(folderName);
+    const imgPath = path.join(folderName, 'lastFrame.jpg');
 
     const lastFrameInfo = Object.assign({ imgPath, type: 'lastFrame', time }, video);
     const callback = (resultCode, imgPath) => {
