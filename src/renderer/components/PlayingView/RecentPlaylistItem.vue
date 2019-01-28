@@ -270,7 +270,7 @@ export default {
   },
   computed: {
     backgroundImage() {
-      return `url(${this.imageSrc})`;
+      return `url("${this.imageSrc}?version=${this.lastPlayedTime}")`;
     },
     imageSrc() {
       if (this.lastPlayedTime) {
