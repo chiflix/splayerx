@@ -84,7 +84,10 @@ Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
   router,
   set: [
-    { field: 'clientVersion', value: electron.remote.app.getVersion() },
+    { field: 'dimension1', value: electron.remote.app.getVersion() },
+    { field: 'checkProtocolTask', value: null }, // fix ga not work from file:// url
+    { field: 'checkStorageTask', value: null }, // fix ga not work from file:// url
+    { field: 'historyImportTask', value: null }, // fix ga not work from file:// url
   ],
 });
 
@@ -381,7 +384,7 @@ new Vue({
             {
               label: this.$t('msg.subtitle.AITranslation'),
               click: () => {
-                this.$bus.$emit('menu-subtitle-refresh');
+                this.$bus.$emit('subtitle-refresh-from-menu');
               },
             },
             {
@@ -867,8 +870,8 @@ new Vue({
     this.$bus.$on('new-file-open', this.refreshMenu);
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
-      if (err) {
-        this.addLog('error', err);
+      if (err || Object.keys(userUUID).length === 0) {
+        err && this.addLog('error', err);
         userUUID = uuidv4();
         this.$storage.set('user-uuid', userUUID);
       }
@@ -878,6 +881,9 @@ new Vue({
 
       Vue.http.headers.common['X-Application-Token'] = userUUID;
       Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
+
+      // set userUUID to google analytics uid
+      this.$ga && this.$ga.set('userId', userUUID);
     });
 
     window.addEventListener('mousedown', (e) => {

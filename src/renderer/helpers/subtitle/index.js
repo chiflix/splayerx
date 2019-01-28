@@ -1,0 +1,73 @@
+import { dirname, extname, basename, join } from 'path';
+import { readdir } from 'fs';
+import { ipcRenderer } from 'electron';
+import Sagi from '@/helpers/sagi';
+import helpers from '@/helpers';
+
+const { addLog: l } = helpers.methods;
+
+export function getLocalSubtitles(videoSrc, supportedExtensions) {
+  return new Promise((resolve, reject) => {
+    const videoDir = dirname(videoSrc);
+    const filename = basename(videoSrc, extname(videoSrc));
+    const extensionRegex = new RegExp(`\\.(${supportedExtensions.join('|')})$`);
+    readdir(videoDir, (err, files) => {
+      if (err) reject(err);
+      const subtitles = files.filter(file =>
+        (extensionRegex.test(file) && file.slice(0, file.lastIndexOf('.')) === filename));
+      resolve(subtitles.map(subtitle => ({
+        src: join(dirname(videoSrc), subtitle),
+        type: 'local',
+      })));
+    });
+  });
+}
+
+export async function getOnlineSubtitles(videoSrc, language) {
+  const hash = await helpers.methods.mediaQuickHash(videoSrc);
+  l('info', `[subtitle, online]: media-hash: ${hash}`);
+  const subtitleInfoNormalizer = (subtitle) => {
+    const { language_code: code, transcript_identity: src, ranking } = subtitle;
+    return ({
+      src,
+      type: 'online',
+      options: {
+        language: code,
+        ranking,
+      },
+    });
+  };
+  try {
+    return (await Sagi.mediaTranslate(hash, language)).map(subtitleInfoNormalizer);
+  } catch (_) {
+    return [];
+  }
+}
+
+export function getEmbeddedSubtitles(videoSrc, supportedCodecs) {
+  ipcRenderer.send('mediaInfo', videoSrc);
+  return new Promise((resolve, reject) => {
+    setTimeout(() => { reject(new Error('Embedded Subtitles Retrieve Timeout!')); }, 20000);
+    ipcRenderer.once(`mediaInfo-${videoSrc}-reply`, (event, info) => {
+      try {
+        const subtitleStreams = JSON.parse(info).streams
+          .filter(stream => stream.codec_type === 'subtitle' && supportedCodecs.includes(stream.codec_name)); // eslint-disable-line camelcase;
+        if (!subtitleStreams.length) resolve([]);
+        resolve(...subtitleStreams.map(subtitle => ({
+          src: subtitle.index,
+          type: 'embedded',
+          options: {
+            videoSrc,
+            streamIndex: subtitle.index,
+            codec: subtitle.codec_name,
+            language: subtitle.tags.language,
+            name: subtitle.tags.title,
+            isDefault: !!subtitle.disposition.default,
+          }, // eslint-disable-line camelcase
+        })));
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+}

@@ -184,7 +184,7 @@ export default {
     textHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 13;
-      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 14;
       }
       return 18;
@@ -192,7 +192,7 @@ export default {
     itemHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 27;
-      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 32;
       }
       return 44;
@@ -200,7 +200,7 @@ export default {
     isOverFlow() {
       if (this.andify(this.computedSize >= 289, this.computedSize <= 480)) {
         return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 2) ? 'scroll' : '';
-      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 4) ? 'scroll' : '';
       }
       return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 6) ? ' scroll' : '';
@@ -211,7 +211,7 @@ export default {
           (this.loadingTypes.length * 31) + 89 :
           (((this.computedAvaliableItems.length + 1) * 31) - 4) +
           (this.loadingTypes.length * 31);
-      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.computedAvaliableItems.length > 4 ?
           (this.loadingTypes.length * 37) + 180 :
           (((this.computedAvaliableItems.length + 1) * 37) - 5) +
@@ -228,7 +228,7 @@ export default {
           (this.loadingTypes.length * 31) + 138 :
           45 + ((this.computedAvaliableItems.length + 1) * 31) +
           (this.loadingTypes.length * 31);
-      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.computedAvaliableItems.length > 4 ?
           (this.loadingTypes.length * 37) + 239 :
           54 + ((this.computedAvaliableItems.length + 1) * 37) +
@@ -245,7 +245,7 @@ export default {
           ((this.computedAvaliableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 31 :
           this.scopeHeight + 4;
-      } else if (this.computedSize >= 481 && this.computedSize <= 1080) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 37 :
@@ -344,7 +344,7 @@ export default {
             this.count += 1;
             this.rotateTime = Math.ceil(this.count / 100);
           }, 10);
-          this.$bus.$emit('refresh-subtitles');
+          this.$bus.$emit('refresh-subtitles', this.isInitial);
           if (!this.isInitial) {
             this.addLog('info', {
               message: 'Online subtitles loading .',
@@ -456,6 +456,13 @@ export default {
     },
   },
   created() {
+    this.$bus.$on('subtitle-refresh-from-menu', this.handleRefresh);
+    this.$bus.$on('subtitle-refresh-from-src-change', () => {
+      this.isInitial = true;
+      this.$store.dispatch('getLocalPreference').then(() => {
+        this.handleRefresh();
+      });
+    });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
@@ -478,16 +485,13 @@ export default {
     });
   },
   mounted() {
-    this.$bus.$on('menu-subtitle-refresh', (initial) => {
-      this.isInitial = !!initial;
-      this.handleRefresh();
-    });
     this.$bus.$on('subtitle-refresh-continue', () => {
       if (this.continueRefresh) {
         this.continueRefresh = false;
         this.handleRefresh();
       }
     });
+
     document.addEventListener('mouseup', (e) => {
       if (e.button === 0) {
         if (!this.showAttached) {

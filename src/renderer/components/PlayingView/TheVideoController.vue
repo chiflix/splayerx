@@ -9,7 +9,7 @@
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
-    @mouseup.left="handleMouseupLeft">
+    @click.left="handleMouseupLeft">
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
@@ -95,6 +95,7 @@ export default {
       clicks: 0,
       videoChanged: false,
       videoChangedTimer: 0,
+      isValidClick: true,
     };
   },
   computed: {
@@ -105,7 +106,7 @@ export default {
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc']),
+    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused']),
     onlyOneVideo() {
       return this.playingList.length === 1;
     },
@@ -121,9 +122,6 @@ export default {
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ||
         this.tempRecentPlaylistDisplayState ? 'default' : 'none';
-    },
-    isFocused() {
-      return this.$store.state.Window.isFocused;
     },
     isDragging() {
       if (this.isMousedown) {
@@ -153,9 +151,9 @@ export default {
         this.lastDragging = true;
       }
     },
-    isFocused(newValue) {
-      if (newValue) {
-        this.focusedTimestamp = Date.now();
+    isFocused(newValue, oldValue) {
+      if (!oldValue && newValue) {
+        this.isValidClick = false;
       }
     },
     currentWidget(newVal, oldVal) {
@@ -366,7 +364,7 @@ export default {
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
       }
-      if (!this.isValidClick() || (this.lastDragging && this.lastAttachedShowing)) {
+      if (this.lastDragging && this.lastAttachedShowing) {
         this.clicks = 0;
         return;
       }
@@ -376,16 +374,17 @@ export default {
           const attachedShowing = this.lastAttachedShowing;
           if (
             this.currentMousedownWidget === 'the-video-controller' &&
-            this.currentMouseupWidget === 'the-video-controller' && !attachedShowing && !this.lastDragging) {
+            this.currentMouseupWidget === 'the-video-controller' && !attachedShowing && !this.lastDragging && this.isValidClick) {
             this.togglePlayback();
           }
+          this.isValidClick = true;
           this.lastDragging = false;
           this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
         }, this.clicksDelay);
       } else if (this.clicks === 2) {
         clearTimeout(this.clicksTimer);
         this.clicks = 0;
-        if (this.currentMouseupWidget === 'the-video-controller') {
+        if (this.currentMouseupWidget === 'the-video-controller' && this.isValidClick) {
           this.toggleFullScreenState();
         }
       }
@@ -450,9 +449,6 @@ export default {
         });
       }
       return componentName;
-    },
-    isValidClick() {
-      return Date.now() - this.focusedTimestamp > this.focusDelay;
     },
     toggleFullScreenState() {
       this.$bus.$emit('toggle-fullscreen');

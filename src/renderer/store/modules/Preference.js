@@ -70,9 +70,10 @@ const actions = {
     commit('LOOP_UPDATE', false);
   },
   getLocalPreference({ commit }) {
-    asyncStorage.get('preferences').then((data) => {
-      commit('setPreference', data);
-    });
+    return new Promise((async (resolve) => {
+      commit('setPreference', await asyncStorage.get('preferences'));
+      resolve();
+    }));
   },
   setPreference({ commit, state }, payload) {
     commit('setPreference', payload);
