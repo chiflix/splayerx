@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs';
-import { get, partialRight, flow, nth } from 'lodash';
 
 import healthMsg from 'sagi-api/health/v1/health_pb';
 import healthRpc from 'sagi-api/health/v1/health_grpc_pb';
@@ -13,7 +12,6 @@ import { TrainngClient } from 'sagi-api/training/v1/training_grpc_pb';
 const grpc = require('grpc');
 /* eslint-enable */
 
-const getResponseArray = flow(partialRight(get, 'array'), partialRight(nth, 1));
 
 class Sagi {
   constructor() {
@@ -38,32 +36,26 @@ class Sagi {
       const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
       const req = new translationMsg.MediaTranslationRequest();
       req.setMediaIdentity(mediaIdentity);
-      if (!languageCode || languageCode.length === 0) {
-        console.log('warning: empty languageCode in mediaTranslate, fail back to "zh"');
-        languageCode = 'zh';
-      }
       req.setLanguageCode(languageCode);
-      client.translateMedia(req, (err, response) => {
+      client.translateMedia(req, (err, res) => {
         if (err) {
           reject(err);
-        } else {
-          resolve(response);
         }
+        resolve(res);
       });
     });
   }
 
-  mediaTranslate(mediaIdentity, languageCode) {
+  mediaTranslate({ mediaIdentity, languageCode }) {
+    if (!languageCode) {
+      languageCode = 'zh';
+      console.warn('No languageCode provided, falling back to zh.');
+    }
     return new Promise((resolve, reject) => {
       this.mediaTranslateRaw(mediaIdentity, languageCode).then((response) => {
-        const transcriptInfo = array => ({
-          transcript_identity: array[0],
-          language_code: array[1] || 'unknown',
-          ranking: array[2] || -1,
-          tags: array[3] || [],
-          delay: array[4] || 0,
-        });
-        resolve(getResponseArray(response).map(transcriptInfo));
+        const { error, resultsList } = response.toObject();
+        if (error && error.code) reject(error);
+        resolve(resultsList);
       }, reject);
     });
   }
@@ -76,46 +68,117 @@ class Sagi {
       client.transcript(req, (err, res) => {
         if (err) {
           reject(err);
-        } else {
-          resolve(res);
         }
+        resolve(res);
       });
     });
   }
 
-  getTranscript(transcriptIdentity) {
+  getTranscript({ transcriptIdentity }) {
     return new Promise((resolve, reject) => {
       this.getTranscriptRaw(transcriptIdentity).then((response) => {
-        resolve(getResponseArray(response));
+        const { error, transcriptsList } = response.toObject();
+        if (error && error.code) reject(error);
+        resolve(transcriptsList);
       }, reject);
     });
   }
 
-  pushTranscript(transcriptData) {
+  pushTranscriptRawWithPayload(
+    mediaIdentity,
+    languageCode,
+    format,
+    playedTime,
+    totalTime,
+    delay,
+    payload,
+  ) {
     return new Promise((resolve, reject) => {
       const client = new TrainngClient(this.endpoint, this.creds);
       const req = new TrainingData();
-      req.setMediaIdentity(transcriptData.media_identity);
-      req.setLanguageCode(transcriptData.language_code);
-      req.setFormat(transcriptData.format);
-      req.setPlayedTime(transcriptData.played_time);
-      req.setTotalTime(transcriptData.total_time);
-      req.setDelay(transcriptData.delay);
-      if (transcriptData.payload !== undefined && transcriptData.payload !== null) {
-        req.setPayload(transcriptData.payload);
-      } else if (transcriptData.transcript_identity !== undefined
-          && transcriptData.transcript_identity !== null) {
-        req.setTranscriptIdentity(transcriptData.transcript_identity);
-      } else {
-        const err = new Error('missing transcript payload and transcript_identity');
-        reject(err);
-      }
+      req.setMediaIdentity(mediaIdentity);
+      req.setLanguageCode(languageCode);
+      req.setFormat(format);
+      req.setPlayedTime(playedTime);
+      req.setTotalTime(totalTime);
+      req.setDelay(delay);
+      req.setPayload(payload);
       client.pushData(req, (err, res) => {
-        if (err) {
-          reject(err);
-        }
+        if (err) reject(err);
         resolve(res);
       });
+    });
+  }
+
+  pushTranscriptRawWithTranscriptIdentity(
+    mediaIdentity,
+    languageCode,
+    format,
+    playedTime,
+    totalTime,
+    delay,
+    transcriptIdentity,
+  ) {
+    return new Promise((resolve, reject) => {
+      const client = new TrainngClient(this.endpoint, this.creds);
+      const req = new TrainingData();
+      req.setMediaIdentity(mediaIdentity);
+      req.setLanguageCode(languageCode);
+      req.setFormat(format);
+      req.setPlayedTime(playedTime);
+      req.setTotalTime(totalTime);
+      req.setDelay(delay);
+      req.setTranscriptIdentity(transcriptIdentity);
+      client.pushData(req, (err, res) => {
+        if (err) reject(err);
+        resolve(res);
+      });
+    });
+  }
+
+  pushTranscript(transcriptInfo) {
+    const {
+      mediaIdentity,
+      languageCode,
+      format,
+      playedTime,
+      totalTime,
+      delay,
+      transcriptIdentity,
+      payload,
+    } = transcriptInfo;
+    return new Promise((resolve, reject) => {
+      if (!mediaIdentity) reject(new Error('Missing mediaIdentity.'));
+      if (!transcriptIdentity && !payload) reject(new Error('Missing transcriptIdentity or payload.'));
+      if (payload) {
+        this.pushTranscriptRawWithPayload(
+          mediaIdentity,
+          languageCode,
+          format,
+          playedTime,
+          totalTime,
+          delay,
+          payload,
+        ).then((res) => {
+          const resAsObject = res.toObject();
+          if (res.code) reject(resAsObject);
+          resolve(resAsObject);
+        });
+      } else {
+        this.pushTranscriptRawWithTranscriptIdentity(
+          mediaIdentity,
+          languageCode,
+          format,
+          playedTime,
+          totalTime,
+          delay,
+          transcriptIdentity,
+        ).then((res) => {
+          const resAsObject = res.toObject();
+          if (res.code) reject(resAsObject);
+          resolve(resAsObject);
+        });
+      }
     });
   }
 
