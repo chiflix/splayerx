@@ -44,7 +44,7 @@ describe('helper.sagi api', () => {
     });
   }).timeout(20000);
 
-  describe.only('pushTranscript unit tests', () => {
+  describe('pushTranscript unit tests', () => {
     function randstr() {
       return Math.random().toString(36).substring(7);
     }
