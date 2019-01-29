@@ -870,8 +870,8 @@ new Vue({
     this.$bus.$on('new-file-open', this.refreshMenu);
     // TODO: Setup user identity
     this.$storage.get('user-uuid', (err, userUUID) => {
-      if (err) {
-        this.addLog('error', err);
+      if (err || Object.keys(userUUID).length === 0) {
+        err && this.addLog('error', err);
         userUUID = uuidv4();
         this.$storage.set('user-uuid', userUUID);
       }
@@ -881,6 +881,9 @@ new Vue({
 
       Vue.http.headers.common['X-Application-Token'] = userUUID;
       Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
+
+      // set userUUID to google analytics uid
+      this.$ga && this.$ga.set('userId', userUUID);
     });
 
     window.addEventListener('mousedown', (e) => {

@@ -4,7 +4,7 @@ import { ipcRenderer } from 'electron';
 import Sagi from '@/helpers/sagi';
 import helpers from '@/helpers';
 
-const { addLog: l } = helpers.methods;
+const { mediaQuickHash: getMediaIdentity } = helpers.methods;
 
 export function getLocalSubtitles(videoSrc, supportedExtensions) {
   return new Promise((resolve, reject) => {
@@ -23,11 +23,9 @@ export function getLocalSubtitles(videoSrc, supportedExtensions) {
   });
 }
 
-export async function getOnlineSubtitles(videoSrc, language) {
-  const hash = await helpers.methods.mediaQuickHash(videoSrc);
-  l('info', `[subtitle, online]: media-hash: ${hash}`);
+export function getOnlineSubtitles(videoSrc, languageCode) {
   const subtitleInfoNormalizer = (subtitle) => {
-    const { language_code: code, transcript_identity: src, ranking } = subtitle;
+    const { languageCode: code, transcriptIdentity: src, ranking } = subtitle;
     return ({
       src,
       type: 'online',
@@ -37,11 +35,12 @@ export async function getOnlineSubtitles(videoSrc, language) {
       },
     });
   };
-  try {
-    return (await Sagi.mediaTranslate(hash, language)).map(subtitleInfoNormalizer);
-  } catch (_) {
-    return [];
-  }
+  return new Promise((resolve, reject) => {
+    getMediaIdentity(videoSrc)
+      .then(mediaIdentity => Sagi.mediaTranslate({ mediaIdentity, languageCode }))
+      .then(results => resolve(results.map(subtitleInfoNormalizer)))
+      .catch(err => reject(err));
+  });
 }
 
 export function getEmbeddedSubtitles(videoSrc, supportedCodecs) {
