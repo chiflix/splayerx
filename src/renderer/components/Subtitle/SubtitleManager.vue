@@ -265,24 +265,24 @@ export default {
     },
     makeSubtitleUploadParameter(payload) {
       if (payload && payload.id) {
-        const { id, type, duration: played_time } = payload; // eslint-disable-line camelcase
+        const { id, type, duration: playedTime } = payload;
         const subtitleInstance = this.subtitleInstances[id];
         if (subtitleInstance) {
           const {
-            metaInfo, src, parsed, options,
+            metaInfo, src, data, options,
           } = subtitleInstance;
           if (
             (type === 'online' && src) ||
-            (type !== 'online' && parsed)
+            (type !== 'online' && data)
           ) {
             return ({
-              media_identity: options.videoIdentity,
-              language_code: metaInfo.language,
+              mediaIdentity: options.videoIdentity,
+              languageCode: metaInfo.language,
               format: metaInfo.format,
-              played_time,
-              total_time: this.duration,
-              [type === 'online' ? 'transcript_identity' : 'payload']:
-                type === 'online' ? src : parsed,
+              playedTime,
+              totalTime: this.duration,
+              [type === 'online' ? 'transcriptIdentity' : 'payload']:
+                type === 'online' ? src : Buffer.from(data),
             });
           }
         }
