@@ -114,13 +114,42 @@ function registerMainWindowEvent() {
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
 
-  function snapShot(video, callback) {
-    const randomNumber = Math.round((Math.random() * 20) + 5);
-    const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
-    splayerx.snapshotVideo(video.videoPath, `${video.imgPath}`, `00:00:${numberString}`, (resultCode) => {
-      console[resultCode === '0' ? 'log' : 'error'](resultCode, video.videoPath);
-      callback(resultCode, video.imgPath);
-    });
+  function timecodeFromSeconds(s) {
+    const dt = new Date(Math.abs(s) * 1000);
+    let hours = dt.getUTCHours();
+    let minutes = dt.getUTCMinutes();
+    let seconds = dt.getUTCSeconds();
+
+    if (minutes < 10) {
+      minutes = `0${minutes}`;
+    }
+    if (seconds < 10) {
+      seconds = `0${seconds}`;
+    }
+    if (hours > 0) {
+      if (hours < 10) {
+        hours = `${hours}`;
+      }
+      return `${hours}:${minutes}:${seconds}`;
+    }
+    return `00:${minutes}:${seconds}`;
+  }
+  function snapShot(snapShot, callback) {
+    let numberString;
+    if (snapShot.type === 'cover') {
+      let randomNumber = Math.round((Math.random() * 20) + 5);
+      if (randomNumber > snapShot.duration) randomNumber = snapShot.duration;
+      numberString = timecodeFromSeconds(randomNumber);
+    } else {
+      numberString = timecodeFromSeconds(snapShot.time);
+    }
+    splayerx.snapshotVideo(
+      snapShot.videoPath, snapShot.imgPath, numberString, snapShot.videoWidth, snapShot.videoHeight,
+      (resultCode) => {
+        console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
+        callback(resultCode, snapShot.imgPath);
+      },
+    );
   }
 
   function extractSubtitle(videoPath, subtitlePath, index) {
@@ -156,20 +185,21 @@ function registerMainWindowEvent() {
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, videoPath, quickHash) => {
-    const imgFolderPath = path.join(tempFolderPath, quickHash);
+  ipcMain.on('snapShot', (event, video, type = 'cover', time = 0) => {
+    if (!video.videoWidth) video.videoWidth = '1920';
+    if (!video.videoHeight) video.videoHeight = '1080';
+    const imgFolderPath = path.join(tempFolderPath, video.quickHash);
     if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
-    const imgPath = path.join(imgFolderPath, 'thumbnail.png');
-    console.log(imgFolderPath, imgPath);
+    const imgPath = path.join(imgFolderPath, `${type}.jpg`);
 
     if (!fs.existsSync(imgPath)) {
-      snapShotQueue.push({ videoPath, quickHash, imgPath });
+      snapShotQueue.push(Object.assign({ imgPath, type, time }, video));
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
       }
     } else {
       console.log('pass', imgPath);
-      event.sender.send(`snapShot-${videoPath}-reply`, imgPath);
+      event.sender.send(`snapShot-${video.videoPath}-reply`, imgPath);
     }
   });
 

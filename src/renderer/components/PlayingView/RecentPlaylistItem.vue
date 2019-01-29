@@ -143,6 +143,8 @@ export default {
       mediaInfo: { path: this.path },
       smallShortCut: '',
       imgPath: '',
+      videoHeight: 0,
+      videoWidth: 0,
     };
   },
   methods: {
@@ -210,29 +212,37 @@ export default {
     },
   },
   mounted() {
-    this.mediaQuickHash(this.path).then((quickHash) => {
-      this.$electron.ipcRenderer.send('snapShot', this.path, quickHash);
-      this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-        this.coverSrc = filePathToUrl(`${imgPath}`);
-        this.imgPath = imgPath;
-        if (this.isPlaying || this.lastPlayedTime) {
-          fs.readFile(`${imgPath}`, 'base64', (err, data) => {
-            if (!err) {
-              const cover = `data:image/png;base64, ${data}`;
-              this.infoDB.get('recent-played', 'path', this.path).then((data) => {
-                if (data) {
-                  const mergedData = Object.assign(data, { cover });
-                  this.infoDB.add('recent-played', mergedData);
-                }
-              });
-            }
-          });
-        }
-      });
-    });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
+      this.videoHeight = JSON.parse(info).streams[0].coded_height;
+      this.videoWidth = JSON.parse(info).streams[0].coded_width;
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
+      this.mediaQuickHash(this.path).then((quickHash) => {
+        this.$electron.ipcRenderer.send('snapShot', {
+          videoPath: this.path,
+          quickHash,
+          duration: this.mediaInfo.duration,
+          videoWidth: `${this.videoWidth}`,
+          videoHeight: `${this.videoHeight}`,
+        });
+      });
+    });
+    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
+      this.coverSrc = filePathToUrl(`${imgPath}`);
+      this.imgPath = imgPath;
+      if (this.isPlaying || this.lastPlayedTime) {
+        fs.readFile(`${imgPath}`, 'base64', (err, data) => {
+          if (!err) {
+            const cover = `data:image/png;base64, ${data}`;
+            this.infoDB.get('recent-played', 'path', this.path).then((data) => {
+              if (data) {
+                const mergedData = Object.assign(data, { cover });
+                this.infoDB.add('recent-played', mergedData);
+              }
+            });
+          }
+        });
+      }
     });
     this.infoDB.get('recent-played', 'path', this.path).then((val) => {
       if (val && val.lastPlayedTime) {
