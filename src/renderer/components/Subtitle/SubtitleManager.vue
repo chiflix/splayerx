@@ -2,7 +2,6 @@
   <div class="subtitle-manager"
     :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
     <subtitle-render
-      ref="currentSubtitle"
       v-if="currentSubtitleId && duration"
       :subtitle-instance="currentSubtitle"
       :key="currentSubtitleId"
@@ -16,8 +15,8 @@ import flatten from 'lodash/flatten';
 import isEqual from 'lodash/isEqual';
 import sortBy from 'lodash/sortBy';
 import differenceWith from 'lodash/differenceWith';
-import Sagi from '@/helpers/sagi';
 import { codeToLanguageName } from '@/helpers/language';
+import Sagi from '@/helpers/sagi';
 import { getLocalSubtitles, getOnlineSubtitles, getEmbeddedSubtitles } from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
@@ -32,8 +31,6 @@ export default {
   data() {
     return {
       subtitleInstances: {},
-      localPremiumSubtitles: {},
-      embeddedSubtitles: [],
       isAutoSelection: false,
       autoSelectionCompleted: false,
       addingSubtitlesCount: 0,
@@ -41,15 +38,13 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'subtitleList', 'currentSubtitleId', 'computedWidth', 'computedHeight',
-      'duration', 'premiumSubtitles', 'mediaHash', 'duration', 'privacyAgreement',
-      'primaryLanguage', 'secondaryLanguage', 'getLanguageFromId', 'isExistedSubtitle',
+      'originSrc', // use to find proper subtitles and clear subtitle upon change
+      'mediaHash', // use to provide subtitle with videoIdentity
+      'subtitleList', 'currentSubtitleId', // use to get current subtitle info and auto selection subtitles
+      'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
+      'duration', // do not load subtitle renderer when video(duration) is not available(todo: global variable to tell if video is totally available)
     ]),
     ...mapState({
-      loadingOnlineSubtitleIds: ({ Subtitle }) => {
-        const { loadingStates, types } = Subtitle;
-        return Object.keys(loadingStates).filter(id => types[id] === 'online' && loadingStates[id] === 'loading');
-      },
       preferredLanguages: ({ Preference }) => (
         [Preference.primaryLanguage, Preference.secondaryLanguage].filter(language => !!language)
       ),
@@ -61,6 +56,13 @@ export default {
           .filter(id => loadingStates[id] !== 'failed' && languages[id])
           .sort((prevId, currId) => ranks[currId] - ranks[prevId])
           .map(id => ({ id, language: languages[id], type: types[id] }));
+      },
+      qualifiedSubtitles: ({ Subtitle, Video }) => {
+        const { loadingStates, types, durations } = Subtitle;
+        const { duration } = Video;
+        return Object.keys(loadingStates)
+          .filter(id => loadingStates[id] === 'loaded' && durations[id] >= duration * 0.6)
+          .map(id => ({ id, type: types[id], duration: durations[id] }));
       },
     }),
     currentSubtitle() {
@@ -83,30 +85,6 @@ export default {
       },
       immediate: true,
     },
-    premiumSubtitles(newVal) {
-      if (this.privacyAgreement) {
-        newVal.forEach((subtitle) => {
-          const { id, played } = subtitle;
-          if (id && !this.localPremiumSubtitles[id]) {
-            const subtitleInfo = this.subtitleList.filter(subtitle => subtitle.id === id)[0];
-            const { subtitle } = this.$refs.currentSubtitle;
-            const payload = {
-              media_identity: this.mediaHash,
-              language_code: subtitleInfo.langCode,
-              format: `.${subtitleInfo.ext}`,
-              played_time: played,
-              total_time: this.duration,
-              delay: 0,
-              payload: Buffer.from(subtitle.data),
-            };
-            Sagi.pushTranscript(payload).then((res) => {
-              console.log(res);
-            });
-            this.localPremiumSubtitles[id] = { ...payload, status: 'loading' };
-          }
-        });
-      }
-    },
     languageLoadedSubtitleInfoList(newVal, oldVal) {
       if (!this.autoSelectionCompleted && !isEqual(oldVal, newVal)) {
         const {
@@ -121,6 +99,16 @@ export default {
         if (!result && all) result = finder(newVal, langs[1]);
         this.changeCurrentSubtitle(result ? result.id : curr);
         if (result) this.autoSelectionCompleted = true;
+      }
+    },
+    qualifiedSubtitles(newVal, oldVal) {
+      const newQualified = differenceWith(newVal, oldVal, isEqual);
+      if (newQualified.length) {
+        newQualified.forEach((subtitlePayload) => {
+          Sagi.pushTranscript(this.makeSubtitleUploadParameter(subtitlePayload))
+            .then(res => console.log(res))
+            .catch(err => console.log(err));
+        });
       }
     },
   },
@@ -183,10 +171,13 @@ export default {
         addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded, addSubtitleWhenFailed,
         subtitleInstances,
       } = this;
-      const sub = new SubtitleLoader(subtitle, type, options);
+      const sub = new SubtitleLoader(subtitle, type, {
+        ...options,
+        videoSrc: this.originSrc,
+        videoIdentity: this.mediaHash,
+      });
       this.addingSubtitlesCount += 1;
       sub.once('loading', (id) => {
-        if (this.isExistedSubtitle(id)) return;
         this.$set(subtitleInstances, id, sub);
         addSubtitleWhenLoading({ id, type });
         sub.meta();
@@ -271,6 +262,32 @@ export default {
         subtitleList,
         language,
       );
+    },
+    makeSubtitleUploadParameter(payload) {
+      if (payload && payload.id) {
+        const { id, type, duration: playedTime } = payload;
+        const subtitleInstance = this.subtitleInstances[id];
+        if (subtitleInstance) {
+          const {
+            metaInfo, src, data, options,
+          } = subtitleInstance;
+          if (
+            (type === 'online' && src) ||
+            (type !== 'online' && data)
+          ) {
+            return ({
+              mediaIdentity: options.videoIdentity,
+              languageCode: metaInfo.language,
+              format: metaInfo.format,
+              playedTime,
+              totalTime: this.duration,
+              [type === 'online' ? 'transcriptIdentity' : 'payload']:
+                type === 'online' ? src : Buffer.from(data),
+            });
+          }
+        }
+      }
+      return undefined;
     },
   },
   created() {

@@ -1,11 +1,11 @@
 import { tagsGetter, loadOnlineTranscript, normalizeCode } from './utils';
 
 const baseTags = { alignment: 2, pos: null };
-const normalizer = parsedSubtitle => parsedSubtitle.map(subtitle => ({
-  start: subtitle[0],
-  end: subtitle[1],
-  text: subtitle[2].replace(/\{[^{}]*\}/g, ''),
-  tags: tagsGetter(subtitle[2], baseTags),
+const normalizer = parsedSubtitle => parsedSubtitle.map(({ startTime, endTime, text }) => ({
+  start: startTime,
+  end: endTime,
+  text: text.replace(/\{[^{}]*\}/g, ''),
+  tags: tagsGetter(text, baseTags),
 }));
 
 export default {
