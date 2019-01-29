@@ -969,7 +969,7 @@ new Vue({
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
+      e.dataTransfer.dropEffect = process.platform === 'darwin' ? 'copy' : '';
       this.$bus.$emit('drag-over');
     });
     window.addEventListener('dragleave', (e) => {
