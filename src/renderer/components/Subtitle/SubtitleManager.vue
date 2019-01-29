@@ -124,35 +124,16 @@ export default {
       addSubtitleWhenFailed: subtitleActions.ADD_SUBTITLE_WHEN_FAILED,
       updateMetaInfo: subtitleActions.UPDATE_METAINFO,
     }),
-    async refreshAllSubtitles() {
-      const {
-        originSrc: videoSrc,
-        addSubtitles,
-        getLocalSubtitlesList, getEmbeddedSubtitlesList, getOnlineSubtitlesList,
-      } = this;
-      (await Promise.all([
-        getLocalSubtitlesList(videoSrc),
-        getEmbeddedSubtitlesList(videoSrc),
-        getOnlineSubtitlesList(videoSrc),
-      ].map(promise => promise.catch(err => err))))
+    async refreshSubtitles(types) {
+      const supportedTypes = ['local', 'embedded', 'online'];
+      const requestedTypes = types
+        .map(type => type.toLowerCase())
+        .filter(type => supportedTypes.includes(type))
+        .map(type => type.replace(/^\w/, match => match.toUpperCase()));
+      if (requestedTypes.includes('Online')) this.resetOnlineSubtitles();
+      (await Promise.all(requestedTypes.map(type => this[`get${type}SubtitlesList`](this.originSrc).catch(err => err))))
         .map(list => (list instanceof Array ? list : [list]).filter(sub => !(sub instanceof Error)))
-        .forEach(list => addSubtitles(list, true));
-    },
-    async refreshLocalAndOnlineSubtitles() {
-      const {
-        originSrc: videoSrc,
-        addSubtitles,
-        getLocalSubtitlesList, getOnlineSubtitlesList,
-        resetOnlineSubtitles,
-      } = this;
-      resetOnlineSubtitles();
-      (await Promise.all([
-        getLocalSubtitlesList(videoSrc),
-        getOnlineSubtitlesList(videoSrc),
-      ].map(promise => promise.catch(err => err))))
-        .map(list => (list instanceof Array ? list : [list]).filter(sub => !(sub instanceof Error)))
-        .forEach(list => addSubtitles(list, true));
-      this.$bus.$emit('refresh-finished');
+        .forEach(list => this.addSubtitles(list, true));
     },
     getLocalSubtitlesList(videoSrc) {
       return getLocalSubtitles(videoSrc, SubtitleLoader.supportedCodecs);
@@ -298,7 +279,7 @@ export default {
     });
     this.$bus.$on('refresh-subtitles', (result) => {
       this.autoSelectionCompleted = false;
-      this[result ? 'refreshAllSubtitles' : 'refreshLocalAndOnlineSubtitles']();
+      this.refreshSubtitles(result ? ['local', 'embedded', 'online'] : ['local', 'online']);
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
