@@ -3,7 +3,7 @@ import syncStorage from '@/helpers/syncStorage';
 
 const state = {
   deleteVideoHistoryOnExit: false,
-  privacyAgreement: false,
+  privacyAgreement: undefined,
   primaryLanguage: '',
   secondaryLanguage: '',
   singleCycle: false,
