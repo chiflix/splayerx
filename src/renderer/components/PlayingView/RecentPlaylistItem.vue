@@ -214,16 +214,17 @@ export default {
   mounted() {
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
-      this.videoHeight = JSON.parse(info).streams[0].coded_height;
-      this.videoWidth = JSON.parse(info).streams[0].coded_width;
+      const videoStream = JSON.parse(info).streams.find(stream => stream.codec_type === 'video');
+      this.videoHeight = videoStream.height;
+      this.videoWidth = videoStream.width;
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
       this.mediaQuickHash(this.path).then((quickHash) => {
         this.$electron.ipcRenderer.send('snapShot', {
           videoPath: this.path,
           quickHash,
           duration: this.mediaInfo.duration,
-          videoWidth: `${this.videoWidth}`,
-          videoHeight: `${this.videoHeight}`,
+          videoWidth: this.videoWidth,
+          videoHeight: this.videoHeight,
         });
       });
     });

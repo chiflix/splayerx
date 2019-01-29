@@ -144,7 +144,7 @@ function registerMainWindowEvent() {
       numberString = timecodeFromSeconds(snapShot.time);
     }
     splayerx.snapshotVideo(
-      snapShot.videoPath, snapShot.imgPath, numberString, snapShot.videoWidth, snapShot.videoHeight,
+      snapShot.videoPath, snapShot.imgPath, numberString, `${snapShot.videoWidth}`, `${snapShot.videoHeight}`,
       (resultCode) => {
         console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
         callback(resultCode, snapShot.imgPath);
@@ -186,8 +186,8 @@ function registerMainWindowEvent() {
   }
 
   ipcMain.on('snapShot', (event, video, type = 'cover', time = 0) => {
-    if (!video.videoWidth) video.videoWidth = '1920';
-    if (!video.videoHeight) video.videoHeight = '1080';
+    if (!video.videoWidth) video.videoWidth = 1920;
+    if (!video.videoHeight) video.videoHeight = 1080;
     const imgFolderPath = path.join(tempFolderPath, video.quickHash);
     if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
     const imgPath = path.join(imgFolderPath, `${type}.jpg`);
