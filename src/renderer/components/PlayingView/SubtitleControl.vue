@@ -103,7 +103,7 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import difference from 'lodash/difference';
-import path from 'path';
+import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
@@ -344,7 +344,14 @@ export default {
             this.count += 1;
             this.rotateTime = Math.ceil(this.count / 100);
           }, 10);
-          this.$bus.$emit('refresh-subtitles', this.isInitial);
+          const types = ['local'];
+          if (this.isInitial) types.push('embedded');
+          if (!this.isInitial || ['ts', 'avi', 'mkv'].includes(extname(this.originSrc).slice(1).toLowerCase())) types.push('online');
+          // three suitations for variable 'types':
+          // first open && matched extensions: ['local', 'embedded', 'online']
+          // first open && !matched extensions: ['local', 'embedded']
+          // !first open: ['local', 'online']
+          this.$bus.$emit('refresh-subtitles', types);
           if (!this.isInitial) {
             this.addLog('info', {
               message: 'Online subtitles loading .',

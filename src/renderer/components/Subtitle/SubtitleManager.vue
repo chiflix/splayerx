@@ -124,45 +124,45 @@ export default {
       addSubtitleWhenFailed: subtitleActions.ADD_SUBTITLE_WHEN_FAILED,
       updateMetaInfo: subtitleActions.UPDATE_METAINFO,
     }),
-    async refreshAllSubtitles() {
+    async refreshSubtitles(types) {
+      const supportedTypes = ['local', 'embedded', 'online'];
       const {
-        originSrc: videoSrc,
+        getLocalSubtitlesList,
+        getOnlineSubtitlesList,
+        getEmbeddedSubtitlesList,
         addSubtitles,
-        getLocalSubtitlesList, getEmbeddedSubtitlesList, getOnlineSubtitlesList,
-      } = this;
-      (await Promise.all([
-        getLocalSubtitlesList(videoSrc),
-        getEmbeddedSubtitlesList(videoSrc),
-        getOnlineSubtitlesList(videoSrc),
-      ].map(promise => promise.catch(err => err))))
-        .map(list => (list instanceof Array ? list : [list]).filter(sub => !(sub instanceof Error)))
-        .forEach(list => addSubtitles(list, true));
-    },
-    async refreshLocalAndOnlineSubtitles() {
-      const {
         originSrc: videoSrc,
-        addSubtitles,
-        getLocalSubtitlesList, getOnlineSubtitlesList,
         resetOnlineSubtitles,
       } = this;
-      resetOnlineSubtitles();
-      (await Promise.all([
-        getLocalSubtitlesList(videoSrc),
-        getOnlineSubtitlesList(videoSrc),
-      ].map(promise => promise.catch(err => err))))
-        .map(list => (list instanceof Array ? list : [list]).filter(sub => !(sub instanceof Error)))
-        .forEach(list => addSubtitles(list, true));
-      this.$bus.$emit('refresh-finished');
+      const requestedTypes = types
+        .map(type => type.toLowerCase())
+        .filter(type => supportedTypes.includes(type));
+      if (requestedTypes.includes('Online')) this.resetOnlineSubtitles();
+      const subtitlePromises = [];
+      if (requestedTypes.includes('local')) subtitlePromises.push(getLocalSubtitlesList(videoSrc).then(addSubtitles));
+      if (requestedTypes.includes('embedded')) subtitlePromises.push(getEmbeddedSubtitlesList(videoSrc).then(addSubtitles));
+      if (requestedTypes.includes('online')) {
+        resetOnlineSubtitles();
+        subtitlePromises.push(getOnlineSubtitlesList(videoSrc).then(addSubtitles));
+      }
     },
     getLocalSubtitlesList(videoSrc) {
-      return getLocalSubtitles(videoSrc, SubtitleLoader.supportedCodecs);
+      return new Promise((resolve) => {
+        getLocalSubtitles(videoSrc, SubtitleLoader.supportedFormats)
+          .then(subs => resolve(subs))
+          .catch(() => resolve([]));
+      });
     },
     async getOnlineSubtitlesList(videoSrc) {
       return flatten(await Promise.all(this.preferredLanguages
-        .map(language => getOnlineSubtitles(videoSrc, language))));
+        .map(language => getOnlineSubtitles(videoSrc, language).catch(() => []))));
     },
     getEmbeddedSubtitlesList(videoSrc) {
-      return getEmbeddedSubtitles(videoSrc, SubtitleLoader.supportedCodecs);
+      return new Promise((resolve) => {
+        getEmbeddedSubtitles(videoSrc, SubtitleLoader.supportedCodecs)
+          .then(subs => resolve(subs))
+          .catch(() => resolve([]));
+      });
     },
     addSubtitle(subtitle, type, options, chooseWhenReady) {
       const {
@@ -222,7 +222,7 @@ export default {
       });
       return sub;
     },
-    addSubtitles(subtitleList, isAutoSelection) {
+    addSubtitles(subtitleList, isAutoSelection = true) {
       if (!subtitleList || !Object.keys(subtitleList).length) return [];
       this.isAutoSelection = !!isAutoSelection;
       const processedSubtitleList = [];
@@ -294,11 +294,11 @@ export default {
     this.resetSubtitles();
     this.$bus.$on('add-subtitles', (subs) => {
       this.autoSelectionCompleted = false;
-      this.addSubtitles(subs);
+      this.addSubtitles(subs, false);
     });
-    this.$bus.$on('refresh-subtitles', (result) => {
+    this.$bus.$on('refresh-subtitles', (types) => {
       this.autoSelectionCompleted = false;
-      this[result ? 'refreshAllSubtitles' : 'refreshLocalAndOnlineSubtitles']();
+      this.refreshSubtitles(types);
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
