@@ -131,19 +131,27 @@ export default {
         .filter(type => supportedTypes.includes(type))
         .map(type => type.replace(/^\w/, match => match.toUpperCase()));
       if (requestedTypes.includes('Online')) this.resetOnlineSubtitles();
-      (await Promise.all(requestedTypes.map(type => this[`get${type}SubtitlesList`](this.originSrc).catch(err => err))))
-        .map(list => (list instanceof Array ? list : [list]).filter(sub => !(sub instanceof Error)))
+      (await Promise.all(requestedTypes.map(type => this[`get${type}SubtitlesList`](this.originSrc))))
+        .map(list => (list instanceof Array ? list : [list]))
         .forEach(list => this.addSubtitles(list, true));
     },
     getLocalSubtitlesList(videoSrc) {
-      return getLocalSubtitles(videoSrc, SubtitleLoader.supportedCodecs);
+      return new Promise((resolve) => {
+        getLocalSubtitles(videoSrc, SubtitleLoader.supportedFormats)
+          .then(subs => resolve(subs))
+          .catch(() => resolve([]));
+      });
     },
     async getOnlineSubtitlesList(videoSrc) {
       return flatten(await Promise.all(this.preferredLanguages
-        .map(language => getOnlineSubtitles(videoSrc, language))));
+        .map(language => getOnlineSubtitles(videoSrc, language).catch(err => []))));
     },
     getEmbeddedSubtitlesList(videoSrc) {
-      return getEmbeddedSubtitles(videoSrc, SubtitleLoader.supportedCodecs);
+      return new Promise((resolve) => {
+        getEmbeddedSubtitles(videoSrc, SubtitleLoader.supportedCodecs)
+          .then(subs => resolve(subs))
+          .catch(() => resolve([]));
+      });
     },
     addSubtitle(subtitle, type, options, chooseWhenReady) {
       const {
