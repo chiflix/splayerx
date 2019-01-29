@@ -1,4 +1,5 @@
 import asyncStorage from '@/helpers/asyncStorage';
+import syncStorage from '@/helpers/syncStorage';
 
 const state = {
   deleteVideoHistoryOnExit: false,
@@ -35,6 +36,10 @@ const mutations = {
   setPreference(state, payload) {
     Object.assign(state, payload);
   },
+  getLocalPreference(state) {
+    const data = syncStorage.getSync('preferences');
+    Object.assign(state, data);
+  },
 };
 const actions = {
   agreeOnPrivacyPolicy({ commit, state }) {
@@ -68,12 +73,6 @@ const actions = {
   notSingleCycle({ commit }) {
     commit('singleCycle', false);
     commit('LOOP_UPDATE', false);
-  },
-  getLocalPreference({ commit }) {
-    return new Promise((async (resolve) => {
-      commit('setPreference', await asyncStorage.get('preferences'));
-      resolve();
-    }));
   },
   setPreference({ commit, state }, payload) {
     commit('setPreference', payload);

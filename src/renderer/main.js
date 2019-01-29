@@ -163,7 +163,7 @@ new Vue({
         this.$store.dispatch('updateChosenSize', data.chosenSize);
       }
     });
-    this.$store.dispatch('getLocalPreference');
+    this.$store.commit('getLocalPreference');
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
     });
