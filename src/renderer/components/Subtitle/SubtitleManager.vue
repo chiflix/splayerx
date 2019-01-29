@@ -126,14 +126,25 @@ export default {
     }),
     async refreshSubtitles(types) {
       const supportedTypes = ['local', 'embedded', 'online'];
+      const {
+        getLocalSubtitlesList,
+        getOnlineSubtitlesList,
+        getEmbeddedSubtitlesList,
+        addSubtitles,
+        originSrc: videoSrc,
+        resetOnlineSubtitles,
+      } = this;
       const requestedTypes = types
         .map(type => type.toLowerCase())
-        .filter(type => supportedTypes.includes(type))
-        .map(type => type.replace(/^\w/, match => match.toUpperCase()));
+        .filter(type => supportedTypes.includes(type));
       if (requestedTypes.includes('Online')) this.resetOnlineSubtitles();
-      (await Promise.all(requestedTypes.map(type => this[`get${type}SubtitlesList`](this.originSrc))))
-        .map(list => (list instanceof Array ? list : [list]))
-        .forEach(list => this.addSubtitles(list, true));
+      const subtitlePromises = [];
+      if (requestedTypes.includes('local')) subtitlePromises.push(getLocalSubtitlesList(videoSrc).then(addSubtitles));
+      if (requestedTypes.includes('embedded')) subtitlePromises.push(getEmbeddedSubtitlesList(videoSrc).then(addSubtitles));
+      if (requestedTypes.includes('online')) {
+        resetOnlineSubtitles();
+        subtitlePromises.push(getOnlineSubtitlesList(videoSrc).then(addSubtitles));
+      }
     },
     getLocalSubtitlesList(videoSrc) {
       return new Promise((resolve) => {
@@ -144,7 +155,7 @@ export default {
     },
     async getOnlineSubtitlesList(videoSrc) {
       return flatten(await Promise.all(this.preferredLanguages
-        .map(language => getOnlineSubtitles(videoSrc, language).catch(err => []))));
+        .map(language => getOnlineSubtitles(videoSrc, language).catch(() => []))));
     },
     getEmbeddedSubtitlesList(videoSrc) {
       return new Promise((resolve) => {
@@ -211,7 +222,7 @@ export default {
       });
       return sub;
     },
-    addSubtitles(subtitleList, isAutoSelection) {
+    addSubtitles(subtitleList, isAutoSelection = true) {
       if (!subtitleList || !Object.keys(subtitleList).length) return [];
       this.isAutoSelection = !!isAutoSelection;
       const processedSubtitleList = [];
@@ -283,7 +294,7 @@ export default {
     this.resetSubtitles();
     this.$bus.$on('add-subtitles', (subs) => {
       this.autoSelectionCompleted = false;
-      this.addSubtitles(subs);
+      this.addSubtitles(subs, false);
     });
     this.$bus.$on('refresh-subtitles', (types) => {
       this.autoSelectionCompleted = false;
