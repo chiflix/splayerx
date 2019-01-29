@@ -59,7 +59,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle']),
+    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -82,6 +82,11 @@ export default {
   watch: {
     singleCycle(val) {
       this.showNextVideo = !val;
+    },
+    privacyAgreement(val) {
+      if (val) {
+        this.showPrivacyBubble = false;
+      }
     },
   },
   mounted() {

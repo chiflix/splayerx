@@ -466,9 +466,7 @@ export default {
     this.$bus.$on('subtitle-refresh-from-menu', this.handleRefresh);
     this.$bus.$on('subtitle-refresh-from-src-change', () => {
       this.isInitial = true;
-      this.$store.dispatch('getLocalPreference').then(() => {
-        this.handleRefresh();
-      });
+      this.handleRefresh();
     });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
