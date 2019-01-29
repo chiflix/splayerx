@@ -217,7 +217,7 @@ export function loadEmbeddedSubtitle(videoSrc, subtitleStreamIndex, subtitleCode
 }
 
 export function loadOnlineTranscript(hash) {
-  return Sagi.getTranscript(hash);
+  return Sagi.getTranscript({ transcriptIdentity: hash });
 }
 
 export function promisify(func) {

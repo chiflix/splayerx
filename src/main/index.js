@@ -188,8 +188,8 @@ function registerMainWindowEvent() {
   }
 
   ipcMain.on('snapShot', (event, video, type = 'cover', time = 0) => {
-    if (!video.videoWidth) video.videoWidth = 1920;
-    if (!video.videoHeight) video.videoHeight = 1080;
+    if (!video.videoWidth) video.videoWidth = '1920';
+    if (!video.videoHeight) video.videoHeight = '1080';
     const folderName = path.join(imgFolderPath, video.quickHash);
     if (!fs.existsSync(folderName)) fs.mkdirSync(folderName);
     const imgPath = path.join(folderName, `${type}.jpg`);
@@ -206,8 +206,8 @@ function registerMainWindowEvent() {
   });
   // sync version of 'snapShot' event, currently only for getting last frame of video
   ipcMain.on('snapShot-lastFrame', (event, video, time = 0) => {
-    if (!video.videoWidth) video.videoWidth = 1920;
-    if (!video.videoHeight) video.videoHeight = 1080;
+    if (!video.videoWidth) video.videoWidth = '1920';
+    if (!video.videoHeight) video.videoHeight = '1080';
     const folderName = path.join(imgFolderPath, video.quickHash);
     if (!fs.existsSync(folderName)) fs.mkdirSync(folderName);
     const imgPath = path.join(folderName, 'lastFrame.jpg');
