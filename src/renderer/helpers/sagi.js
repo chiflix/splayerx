@@ -161,7 +161,7 @@ class Sagi {
           payload,
         ).then((res) => {
           const resAsObject = res.toObject();
-          if (res.code) reject(resAsObject);
+          if (resAsObject.code) reject(resAsObject);
           resolve(resAsObject);
         });
       } else {
@@ -175,7 +175,7 @@ class Sagi {
           transcriptIdentity,
         ).then((res) => {
           const resAsObject = res.toObject();
-          if (res.code) reject(resAsObject);
+          if (resAsObject.code) reject(resAsObject);
           resolve(resAsObject);
         });
       }

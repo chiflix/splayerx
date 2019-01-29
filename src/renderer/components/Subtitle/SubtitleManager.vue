@@ -302,6 +302,25 @@ export default {
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
+
+    function pushCurrentSubtitle() {
+      if (this.currentSubtitleId) {
+        console.log(`Find subtitle id: ${this.currentSubtitleId}, about to upload.`);
+        const currentSubtitleInfo = {
+          ...this.subtitleList
+            .find(({ id }) => id === this.currentSubtitleId),
+          duration: this.$store.state.Subtitle.durations[this.currentSubtitleId],
+        };
+        const subtitleInfo = this.makeSubtitleUploadParameter(currentSubtitleInfo);
+        console.log('Subtitle info retrieved,', subtitleInfo, 'ready to upload.');
+        Sagi.pushTranscript(subtitleInfo)
+          .then(() => console.log('Horay! Subtitle uploaded.'))
+          .catch(err => console.error('Opps, subtitle upload failed.', err));
+      } else {
+        console.error('Current subtitle not found. Do this again when you choose a subtitle.');
+      }
+    }
+    window.pushCurrentSubtitle = pushCurrentSubtitle.bind(this);
   },
 };
 </script>
