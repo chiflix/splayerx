@@ -277,9 +277,9 @@ export default {
       this.autoSelectionCompleted = false;
       this.addSubtitles(subs);
     });
-    this.$bus.$on('refresh-subtitles', (result) => {
+    this.$bus.$on('refresh-subtitles', (types) => {
       this.autoSelectionCompleted = false;
-      this.refreshSubtitles(result ? ['local', 'embedded', 'online'] : ['local', 'online']);
+      this.refreshSubtitles(types);
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);

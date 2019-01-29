@@ -344,7 +344,10 @@ export default {
             this.count += 1;
             this.rotateTime = Math.ceil(this.count / 100);
           }, 10);
-          this.$bus.$emit('refresh-subtitles', this.isInitial);
+          const types = ['local'];
+          if (this.isInitial) types.push('embedded');
+          if (!this.isInitial || ['ts', 'avi', 'mkv'].includes(this.originSrc.slice(1 + this.originSrc.lastIndexOf('.')))) types.push('online');
+          this.$bus.$emit('refresh-subtitles', types);
           if (!this.isInitial) {
             this.addLog('info', {
               message: 'Online subtitles loading .',
