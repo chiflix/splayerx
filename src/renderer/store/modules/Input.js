@@ -45,7 +45,7 @@ const mutations = {
   },
 };
 
-const getButtonNames = (buttons) => {
+const buttonsToButtonNames = (buttons) => {
   // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
   const buttonsMap = ['left', 'right', 'middle', 'back', 'forward'];
   return buttons.toString(2).split('').reverse()
@@ -60,13 +60,13 @@ const actions = {
   },
   [actionTypes.MOUSEDOWN_UPDATE]({ commit }, { buttons, componentName }) {
     if (buttons) {
-      commit(mutationTypes.MOUSEDOWN_COMPONENT_NAME_UPDATE, getButtonNames(buttons));
+      commit(mutationTypes.PRESSED_MOUSE_BUTTON_NAMES_UPDATE, buttonsToButtonNames(buttons));
     }
     commit(mutationTypes.MOUSEDOWN_COMPONENT_NAME_UPDATE, componentName);
   },
   [actionTypes.MOUSEUP_UPDATE]({ commit }, { buttons, componentName }) {
     if (buttons) {
-      commit(mutationTypes.PRESSED_MOUSE_BUTTON_NAMES_UPDATE, getButtonNames(buttons));
+      commit(mutationTypes.PRESSED_MOUSE_BUTTON_NAMES_UPDATE, buttonsToButtonNames(buttons));
     }
     commit(mutationTypes.MOUSEUP_COMPONENT_NAME_UPDATE, componentName);
   },
