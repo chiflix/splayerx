@@ -3,7 +3,7 @@ import { Input as actionTypes } from '../actionTypes';
 
 const state = {
   mousemovePosition: { x: 0, y: 0 },
-  mousemoveTarget: 'the-video-controller',
+  mousemoveComponentName: 'the-video-controller',
   mousedownButtons: [],
   mousedownTarget: 'the-video-controller',
   mouseupTarget: 'the-video-controller',
@@ -23,7 +23,7 @@ const mutations = {
     state.mousemovePosition = payload;
   },
   [mutationTypes.MOUSEMOVE_TARGET_UPDATE](state, payload) {
-    state.mousemoveTarget = payload;
+    state.mousemoveComponentName = payload;
   },
   [mutationTypes.MOUSEDOWN_BUTTONS_UPDATE](state, payload) {
     state.mousedownButtons = payload;

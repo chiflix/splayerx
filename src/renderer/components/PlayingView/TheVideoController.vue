@@ -100,7 +100,7 @@ export default {
   },
   computed: {
     ...mapState({
-      currentWidget: state => state.Input.mousemoveTarget,
+      currentWidget: ({ Input }) => Input.mousemoveComponentName,
       currentMouseupWidget: state => state.Input.mouseupTarget,
       currentMousedownWidget: state => state.Input.mousedownTarget,
       mousemovePosition: state => state.Input.mousemovePosition,
