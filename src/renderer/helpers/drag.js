@@ -32,6 +32,11 @@ export default function drag(element) {
   let offset = null;
   let windowSize = null;
   const onmousedown = (e) => {
+    // In WebKit、Gecko which property in MouseEvent can judge if right click
+    // In IE can use button property in MouseEvent
+    // 当在windows系统下面，右键窗口会打开目录，同时也会执行mousedown
+    // 在mousedown内部判断e.which是否为rightClick，来过滤这些事件
+    if (e && e.which === 3) return;
     if (parentsHasClass(e.target, 'no-drag')) {
       offset = null;
     } else {

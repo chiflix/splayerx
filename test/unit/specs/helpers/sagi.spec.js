@@ -128,8 +128,7 @@ describe('helper.sagi api', () => {
         .then((transcriptsList) => {
           expect(transcriptsList.length).to.above(0);
           return Promise.all(transcriptsList
-            .map(({ transcriptIdentity }) => Sagi.getTranscript({ transcriptIdentity }))
-          );
+            .map(({ transcriptIdentity }) => Sagi.getTranscript({ transcriptIdentity })));
         })
         .then((transcripts) => {
           const realTranscripts = flatMap(transcripts);
@@ -139,7 +138,7 @@ describe('helper.sagi api', () => {
         })
         .catch((err) => {
           console.error(err);
-          done(`Failed to fetch transcripts for mediaHash ${randomMediaIdentity}.`)
+          done(`Failed to fetch transcripts for mediaHash ${randomMediaIdentity}.`);
         });
     });
   });
