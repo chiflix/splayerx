@@ -28,7 +28,7 @@
           width: `${thumbnailWidth}px`,
           height: `${thumbnailHeight}px`,
           marginRight: `${marginRight}px`,
-          backgroundImage: itemShortcut(item.smallShortCut, item.cover, item.lastPlayedTime, item.duration),
+          backgroundImage: itemShortcut(item.shortCut, item.cover, item.lastPlayedTime, item.duration),
         }">
         <div class="white-hover"
             v-show="item.chosen"/>
@@ -203,8 +203,8 @@ export default {
       }
     },
     itemShortcut(shortCut, cover, lastPlayedTime, duration) {
-      const fileUrlShortCut = shortCut.startsWith('data:image') || !shortCut ? shortCut : filePathToUrl(shortCut);
-      const fileUrlCover = cover.startsWith('data:image') || !cover ? cover : filePathToUrl(cover);
+      const fileUrlShortCut = !shortCut || shortCut.startsWith('data:image') ? shortCut : filePathToUrl(shortCut);
+      const fileUrlCover = !cover || cover.startsWith('data:image') ? cover : filePathToUrl(cover);
       return duration - lastPlayedTime < 5 ? `url("${fileUrlCover}")` : `url("${fileUrlShortCut}")`;
     },
     itemInfo() {

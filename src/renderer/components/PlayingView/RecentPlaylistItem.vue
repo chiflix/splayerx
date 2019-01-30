@@ -140,7 +140,7 @@ export default {
       coverSrc: '',
       lastPlayedTime: 0,
       mediaInfo: { path: this.path },
-      smallShortCut: '',
+      shortCut: '',
       imgPath: '',
       videoHeight: 0,
       videoWidth: 0,
@@ -242,7 +242,7 @@ export default {
     this.infoDB.get('recent-played', 'path', this.path).then((val) => {
       if (val && val.lastPlayedTime) {
         this.lastPlayedTime = val.lastPlayedTime;
-        this.smallShortCut = filePathToUrl(val.smallShortCut);
+        this.shortCut = filePathToUrl(val.shortCut);
       }
       this.mediaInfo = Object.assign(this.mediaInfo, val);
     });
@@ -250,7 +250,7 @@ export default {
       this.infoDB.get('recent-played', 'path', this.path).then((val) => {
         if (val && val.lastPlayedTime) {
           this.lastPlayedTime = val.lastPlayedTime;
-          this.smallShortCut = filePathToUrl(val.smallShortCut);
+          this.shortCut = filePathToUrl(val.shortCut);
           const mergedData = Object.assign(val, { cover: this.imgPath });
           this.infoDB.add('recent-played', mergedData);
         }
@@ -278,12 +278,12 @@ export default {
         if (this.mediaInfo.duration - this.lastPlayedTime < 10) {
           return this.coverSrc;
         }
-        return this.smallShortCut;
+        return this.shortCut;
       }
       return this.coverSrc;
     },
     imageLoaded() {
-      return this.smallShortCut || this.coverSrc !== '';
+      return this.shortCut || this.coverSrc !== '';
     },
     thumbnailHeight() {
       return this.thumbnailWidth / (112 / 63);

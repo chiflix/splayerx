@@ -169,6 +169,11 @@ function registerMainWindowEvent() {
         snapShot(snapShotQueue[0], callback);
       } else if (resultCode === '0') {
         const lastRecord = snapShotQueue.shift();
+        const lastFrameIndex = snapShotQueue.findIndex(element => element.type === 'lastFrame');
+        if (lastFrameIndex !== -1) {
+          const lastFrame = snapShotQueue.splice(lastFrameIndex, 1);
+          snapShotQueue.unshift(lastFrame[0]);
+        }
         if (event.sender.isDestroyed()) {
           snapShotQueue.splice(0, snapShotQueue.length);
         } else {
@@ -203,31 +208,6 @@ function registerMainWindowEvent() {
       console.log('pass', imgPath);
       event.sender.send(`snapShot-${video.videoPath}-reply`, imgPath);
     }
-  });
-  // sync version of 'snapShot' event, currently only for getting last frame of video
-  ipcMain.on('snapShot-lastFrame', (event, video, time = 0) => {
-    if (!video.videoWidth) video.videoWidth = '1920';
-    if (!video.videoHeight) video.videoHeight = '1080';
-    const folderName = path.join(imgFolderPath, video.quickHash);
-    if (!fs.existsSync(folderName)) fs.mkdirSync(folderName);
-    const imgPath = path.join(folderName, 'lastFrame.jpg');
-
-    const lastFrameInfo = Object.assign({ imgPath, type: 'lastFrame', time }, video);
-    let count = 0;
-    const callback = (resultCode, imgPath) => {
-      if (resultCode === 'Waiting for the task completion.') {
-        if (count < 100) {
-          count += 1;
-          snapShot(lastFrameInfo, callback);
-        }
-        event.returnValue = '';
-      } else if (resultCode === '0') {
-        event.returnValue = imgPath;
-      } else {
-        event.returnValue = resultCode;
-      }
-    };
-    snapShot(lastFrameInfo, callback);
   });
 
   ipcMain.on('extract-subtitle-request', (event, videoPath, index, format, hash) => {

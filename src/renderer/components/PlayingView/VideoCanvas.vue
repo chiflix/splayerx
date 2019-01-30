@@ -181,8 +181,8 @@ export default {
     originSrc(val, oldVal) {
       this.coverFinded = false;
       this.mediaQuickHash(oldVal).then((quickHash) => {
-        const imgPath = this.$electron.ipcRenderer.sendSync(
-          'snapShot-lastFrame',
+        this.$electron.ipcRenderer.send(
+          'snapShot',
           {
             videoPath: oldVal,
             quickHash,
@@ -190,13 +190,15 @@ export default {
             videoWidth: `${this.videoWidth}`,
             videoHeight: `${this.videoHeight}`,
           },
+          'lastFrame',
           videodata.time,
         );
+      });
+      this.$electron.ipcRenderer.once(`snapShot-${oldVal}-reply`, (event, imgPath) => {
         this.infoDB.get('recent-played', 'path', oldVal).then((val) => {
           if (val) {
             const data = {
               shortCut: imgPath,
-              smallShortCut: imgPath,
               lastPlayedTime: videodata.time,
               duration: this.duration,
             };
@@ -255,8 +257,8 @@ export default {
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
-        const imgPath = this.$electron.ipcRenderer.sendSync(
-          'snapShot-lastFrame',
+        this.$electron.ipcRenderer.send(
+          'snapShot',
           {
             videoPath: this.originSrc,
             quickHash: this.mediaHash,
@@ -264,38 +266,40 @@ export default {
             videoWidth: `${this.videoWidth}`,
             videoHeight: `${this.videoHeight}`,
           },
+          'lastFrame',
           videodata.time,
         );
-        this.infoDB.get('recent-played', 'path', this.originSrc).then((val) => {
-          const data = {
-            shortCut: imgPath,
-            smallShortCut: imgPath,
-            lastPlayedTime: videodata.time,
-            duration: this.duration,
-          };
-          if (val) {
-            const mergedData = Object.assign(val, data);
-            this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
-              this.asyncTasksDone = true;
-              window.close();
-            }).catch(() => {
-              this.asyncTasksDone = true;
-              window.close();
-            });
-          } else {
-            const mergedData = Object.assign({
-              quickHash: this.mediaHash,
-              path: this.originSrc,
-              lastOpened: Date.now(),
-            }, data);
-            this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
-              this.asyncTasksDone = true;
-              window.close();
-            }).catch(() => {
-              this.asyncTasksDone = true;
-              window.close();
-            });
-          }
+        this.$electron.ipcRenderer.once(`snapShot-${this.originSrc}-reply`, (event, imgPath) => {
+          this.infoDB.get('recent-played', 'path', this.originSrc).then((val) => {
+            const data = {
+              shortCut: imgPath,
+              lastPlayedTime: videodata.time,
+              duration: this.duration,
+            };
+            if (val) {
+              const mergedData = Object.assign(val, data);
+              this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
+                this.asyncTasksDone = true;
+                window.close();
+              }).catch(() => {
+                this.asyncTasksDone = true;
+                window.close();
+              });
+            } else {
+              const mergedData = Object.assign({
+                quickHash: this.mediaHash,
+                path: this.originSrc,
+                lastOpened: Date.now(),
+              }, data);
+              this.infoDB.add('recent-played', mergedData).then(this.saveSubtitleStyle).then(() => {
+                this.asyncTasksDone = true;
+                window.close();
+              }).catch(() => {
+                this.asyncTasksDone = true;
+                window.close();
+              });
+            }
+          });
         });
         e.returnValue = false;
       }
