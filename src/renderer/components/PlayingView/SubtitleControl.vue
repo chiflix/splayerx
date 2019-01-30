@@ -265,6 +265,8 @@ export default {
     originSrc() {
       this.showAttached = false;
       this.computedAvaliableItems = [];
+      clearInterval(this.timer);
+      this.timer = this.count = 0;
     },
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
