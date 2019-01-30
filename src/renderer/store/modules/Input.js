@@ -7,14 +7,14 @@ const state = {
   pressedMouseButtonNames: [],
   mousedownComponentName: 'the-video-controller',
   mouseupComponentName: 'the-video-controller',
-  downKeys: [],
+  pressedKeyboardCodes: [],
   wheelComponentName: 'the-video-controller',
   wheelTimestamp: 0,
 };
 
 const getters = {
-  progressKeydown: state => state.downKeys.includes('ArrowLeft') || state.downKeys.includes('ArrowRight') || state.downKeys.includes('BracketLeft') || state.downKeys.includes('BracketRight'),
-  volumeKeydown: state => state.downKeys.includes('ArrowUp') || state.downKeys.includes('ArrowDown') || state.downKeys.includes('KeyM'),
+  progressKeydown: state => state.pressedKeyboardCodes.includes('ArrowLeft') || state.pressedKeyboardCodes.includes('ArrowRight') || state.pressedKeyboardCodes.includes('BracketLeft') || state.pressedKeyboardCodes.includes('BracketRight'),
+  volumeKeydown: state => state.pressedKeyboardCodes.includes('ArrowUp') || state.pressedKeyboardCodes.includes('ArrowDown') || state.pressedKeyboardCodes.includes('KeyM'),
   leftMousedown: state => state.pressedMouseButtonNames.includes('left'),
 };
 
@@ -35,7 +35,7 @@ const mutations = {
     state.mouseupComponentName = payload;
   },
   [mutationTypes.DOWN_KEYS_UPDATE](state, payload) {
-    state.downKeys = payload;
+    state.pressedKeyboardCodes = payload;
   },
   [mutationTypes.WHEEL_TARGET_UPDATE](state, payload) {
     state.wheelComponentName = payload;
@@ -72,12 +72,12 @@ const actions = {
     commit(mutationTypes.MOUSEUP_TARGET_UPDATE, target);
   },
   [actionTypes.KEYDOWN_UPDATE]({ commit, state }, downKey) {
-    const tempKeys = [...state.downKeys];
+    const tempKeys = [...state.pressedKeyboardCodes];
     if (!tempKeys.includes(downKey)) tempKeys.push(downKey);
     commit(mutationTypes.DOWN_KEYS_UPDATE, tempKeys);
   },
   [actionTypes.KEYUP_UPDATE]({ commit, state }, upKey) {
-    const tempKeys = [...state.downKeys];
+    const tempKeys = [...state.pressedKeyboardCodes];
     if (tempKeys.includes(upKey)) tempKeys.splice(tempKeys.indexOf(upKey), 1);
     commit(mutationTypes.DOWN_KEYS_UPDATE, tempKeys);
   },
