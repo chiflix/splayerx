@@ -102,7 +102,7 @@ export default {
     ...mapState({
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
       currentMouseupWidget: state => state.Input.mouseupTarget,
-      currentMousedownWidget: state => state.Input.mousedownTarget,
+      currentMousedownWidget: state => state.Input.mousedownComponentName,
       mousemovePosition: state => state.Input.mousemovePosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),

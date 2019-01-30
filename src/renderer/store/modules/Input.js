@@ -5,7 +5,7 @@ const state = {
   mousemovePosition: { x: 0, y: 0 },
   mousemoveComponentName: 'the-video-controller',
   mousedownButtons: [],
-  mousedownTarget: 'the-video-controller',
+  mousedownComponentName: 'the-video-controller',
   mouseupTarget: 'the-video-controller',
   downKeys: [],
   wheelTarget: 'the-video-controller',
@@ -29,7 +29,7 @@ const mutations = {
     state.mousedownButtons = payload;
   },
   [mutationTypes.MOUSEDOWN_TARGET_UPDATE](state, payload) {
-    state.mousedownTarget = payload;
+    state.mousedownComponentName = payload;
   },
   [mutationTypes.MOUSEUP_TARGET_UPDATE](state, payload) {
     state.mouseupTarget = payload;

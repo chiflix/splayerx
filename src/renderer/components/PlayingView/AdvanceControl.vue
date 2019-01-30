@@ -21,7 +21,7 @@
 <script>
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
 
@@ -53,9 +53,9 @@ export default {
   },
   computed: {
     ...mapGetters(['originSrc']),
-    mousedownCurrentTarget() {
-      return this.$store.state.Input.mousedownTarget;
-    },
+    ...mapState({
+      currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
+    }),
     mouseupCurrentTarget() {
       return this.$store.state.Input.mouseupTarget;
     },
@@ -76,7 +76,7 @@ export default {
         }
       }
     },
-    mousedownCurrentTarget(val) {
+    currentMousedownComponent(val) {
       if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([37, 41], false);
@@ -85,7 +85,7 @@ export default {
       }
     },
     mouseupCurrentTarget(val) {
-      if (this.mousedownCurrentTarget !== 'notification-bubble' && val !== '') {
+      if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
         if (this.lastDragging) {
           if (this.showAttached) {
             this.anim.playSegments([68, 73]);
@@ -118,7 +118,7 @@ export default {
           if (!this.showAttached) {
             if (this.validEnter) {
               this.anim.playSegments([23, 36], false);
-            } else if (this.mousedownCurrentTarget === this.$options.name) {
+            } else if (this.currentMousedownComponent === this.$options.name) {
               this.anim.playSegments([105, 109], false);
             }
           }
