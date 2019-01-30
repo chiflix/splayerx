@@ -103,7 +103,7 @@ export default {
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
       currentMouseupWidget: state => state.Input.mouseupComponentName,
       currentMousedownWidget: state => state.Input.mousedownComponentName,
-      mousemovePosition: state => state.Input.mousemovePosition,
+      mousemovePosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
     ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused']),
