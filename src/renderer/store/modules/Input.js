@@ -8,7 +8,7 @@ const state = {
   mousedownComponentName: 'the-video-controller',
   mouseupComponentName: 'the-video-controller',
   downKeys: [],
-  wheelTarget: 'the-video-controller',
+  wheelComponentName: 'the-video-controller',
   wheelTimestamp: 0,
 };
 
@@ -38,7 +38,7 @@ const mutations = {
     state.downKeys = payload;
   },
   [mutationTypes.WHEEL_TARGET_UPDATE](state, payload) {
-    state.wheelTarget = payload;
+    state.wheelComponentName = payload;
   },
   [mutationTypes.WHEEL_TIMESTAMP_UPDATE](state, payload) {
     state.wheelTimestamp = payload;
