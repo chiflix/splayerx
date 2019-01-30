@@ -70,7 +70,7 @@
 </template>
 <script>
 import path from 'path';
-import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
@@ -208,15 +208,15 @@ export default {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
-    mousedownCurrentTarget(val) {
+    currentMousedownComponent(val) {
       if (val !== 'notification-bubble' && val !== 'titlebar' && val !== '') {
         if (val !== this.$options.name && this.backgroundDisplayState) {
           this.clearMouseup({ target: '' });
         }
       }
     },
-    mouseupCurrentTarget(val) {
-      if (this.mousedownCurrentTarget !== 'notification-bubble' && this.mousedownCurrentTarget !== 'titlebar' && val !== '') {
+    currentMouseupComponent(val) {
+      if (this.currentMousedownComponent !== 'notification-bubble' && this.currentMousedownComponent !== 'titlebar' && val !== '') {
         if (this.lastDragging) {
           this.clearMousedown({ target: '' });
           if (this.displayState) {
@@ -259,12 +259,10 @@ export default {
   },
   computed: {
     ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
-    mousedownCurrentTarget() {
-      return this.$store.state.Input.mousedownTarget;
-    },
-    mouseupCurrentTarget() {
-      return this.$store.state.Input.mouseupTarget;
-    },
+    ...mapState({
+      currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
+      currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
+    }),
     inWhichSource() {
       if (this.isFolderList) {
         return this.$t('recentPlaylist.folderSource');

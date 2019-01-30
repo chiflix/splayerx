@@ -162,6 +162,8 @@ export default {
         });
         return result;
       },
+      currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
+      currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
     computedSize() {
       return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
@@ -174,12 +176,6 @@ export default {
     },
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.75;
-    },
-    mousedownCurrentTarget() {
-      return this.$store.state.Input.mousedownTarget;
-    },
-    mouseupCurrentTarget() {
-      return this.$store.state.Input.mouseupTarget;
     },
     textHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -280,7 +276,7 @@ export default {
         }
       }
     },
-    mousedownCurrentTarget(val) {
+    currentMousedownComponent(val) {
       if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([62, 64], false);
@@ -288,8 +284,8 @@ export default {
         }
       }
     },
-    mouseupCurrentTarget(val) {
-      if (this.mousedownCurrentTarget !== 'notification-bubble' && val !== '') {
+    currentMouseupComponent(val) {
+      if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
         if (this.lastDragging) {
           if (this.showAttached) {
             this.anim.playSegments([79, 85]);
@@ -502,7 +498,7 @@ export default {
         if (!this.showAttached) {
           if (this.validEnter) {
             this.anim.playSegments([46, 60], false);
-          } else if (this.mousedownCurrentTarget === this.$options.name) {
+          } else if (this.currentMousedownComponent === this.$options.name) {
             this.anim.playSegments([40, 44], false);
           }
         }

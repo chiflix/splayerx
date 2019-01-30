@@ -4,6 +4,7 @@
   </div>
 </template>
 <script>
+import { mapState } from 'vuex';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/playlist.json';
 
@@ -25,9 +26,9 @@ export default {
     };
   },
   computed: {
-    mousedownCurrentTarget() {
-      return this.$store.state.Input.mousedownTarget;
-    },
+    ...mapState({
+      currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
+    }),
   },
   methods: {
     handleAnimation(anim) {
@@ -55,7 +56,7 @@ export default {
       document.onmouseup = () => {
         if (this.validEnter) {
           this.anim.playSegments([47, 51], false);
-        } else if (this.mousedownCurrentTarget === this.$options.name) {
+        } else if (this.currentMousedownComponent === this.$options.name) {
           this.anim.playSegments([37, 41], false);
         }
         this.mouseDown = false;
