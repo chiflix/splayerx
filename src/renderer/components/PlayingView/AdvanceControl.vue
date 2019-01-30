@@ -55,10 +55,8 @@ export default {
     ...mapGetters(['originSrc']),
     ...mapState({
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
+      currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
-    mouseupCurrentTarget() {
-      return this.$store.state.Input.mouseupTarget;
-    },
   },
   watch: {
     originSrc() {
@@ -84,7 +82,7 @@ export default {
         }
       }
     },
-    mouseupCurrentTarget(val) {
+    currentMouseupComponent(val) {
       if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
         if (this.lastDragging) {
           if (this.showAttached) {

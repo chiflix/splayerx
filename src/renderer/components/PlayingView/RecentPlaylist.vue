@@ -215,7 +215,7 @@ export default {
         }
       }
     },
-    mouseupCurrentTarget(val) {
+    currentMouseupComponent(val) {
       if (this.currentMousedownComponent !== 'notification-bubble' && this.currentMousedownComponent !== 'titlebar' && val !== '') {
         if (this.lastDragging) {
           this.clearMousedown({ target: '' });
@@ -261,10 +261,8 @@ export default {
     ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
     ...mapState({
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
+      currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
-    mouseupCurrentTarget() {
-      return this.$store.state.Input.mouseupTarget;
-    },
     inWhichSource() {
       if (this.isFolderList) {
         return this.$t('recentPlaylist.folderSource');

@@ -163,6 +163,7 @@ export default {
         return result;
       },
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
+      currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
     computedSize() {
       return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
@@ -175,9 +176,6 @@ export default {
     },
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.75;
-    },
-    mouseupCurrentTarget() {
-      return this.$store.state.Input.mouseupTarget;
     },
     textHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -286,7 +284,7 @@ export default {
         }
       }
     },
-    mouseupCurrentTarget(val) {
+    currentMouseupComponent(val) {
       if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
         if (this.lastDragging) {
           if (this.showAttached) {
