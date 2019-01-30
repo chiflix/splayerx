@@ -4,7 +4,7 @@ import { Input as actionTypes } from '../actionTypes';
 const state = {
   mousemovePosition: { x: 0, y: 0 },
   mousemoveComponentName: 'the-video-controller',
-  mousedownButtons: [],
+  pressedMouseButtonNames: [],
   mousedownComponentName: 'the-video-controller',
   mouseupComponentName: 'the-video-controller',
   downKeys: [],
@@ -15,7 +15,7 @@ const state = {
 const getters = {
   progressKeydown: state => state.downKeys.includes('ArrowLeft') || state.downKeys.includes('ArrowRight') || state.downKeys.includes('BracketLeft') || state.downKeys.includes('BracketRight'),
   volumeKeydown: state => state.downKeys.includes('ArrowUp') || state.downKeys.includes('ArrowDown') || state.downKeys.includes('KeyM'),
-  leftMousedown: state => state.mousedownButtons.includes('left'),
+  leftMousedown: state => state.pressedMouseButtonNames.includes('left'),
 };
 
 const mutations = {
@@ -26,7 +26,7 @@ const mutations = {
     state.mousemoveComponentName = payload;
   },
   [mutationTypes.MOUSEDOWN_BUTTONS_UPDATE](state, payload) {
-    state.mousedownButtons = payload;
+    state.pressedMouseButtonNames = payload;
   },
   [mutationTypes.MOUSEDOWN_TARGET_UPDATE](state, payload) {
     state.mousedownComponentName = payload;
