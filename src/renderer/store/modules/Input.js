@@ -54,36 +54,34 @@ const getButtonNames = (buttons) => {
 };
 
 const actions = {
-  [actionTypes.MOUSEMOVE_UPDATE]({ commit }, position) {
+  [actionTypes.MOUSEMOVE_UPDATE]({ commit }, { clientPosition: position, componentName }) {
     commit(mutationTypes.MOUSEMOVE_CLIENT_POSITION_UPDATE, { x: position[0], y: position[1] });
+    commit(mutationTypes.MOUSEMOVE_COMPONENT_NAME_UPDATE, componentName);
   },
-  [actionTypes.MOUSEDOWN_UPDATE]({ commit }, mousedownEvent) {
-    const { buttons, target } = mousedownEvent;
+  [actionTypes.MOUSEDOWN_UPDATE]({ commit }, { buttons, componentName }) {
     if (buttons) {
       commit(mutationTypes.MOUSEDOWN_COMPONENT_NAME_UPDATE, getButtonNames(buttons));
     }
-    commit(mutationTypes.MOUSEDOWN_COMPONENT_NAME_UPDATE, target);
+    commit(mutationTypes.MOUSEDOWN_COMPONENT_NAME_UPDATE, componentName);
   },
-  [actionTypes.MOUSEUP_UPDATE]({ commit }, mouseupEvent) {
-    const { buttons, target } = mouseupEvent;
+  [actionTypes.MOUSEUP_UPDATE]({ commit }, { buttons, componentName }) {
     if (buttons) {
       commit(mutationTypes.PRESSED_MOUSE_BUTTON_NAMES_UPDATE, getButtonNames(buttons));
     }
-    commit(mutationTypes.MOUSEUP_COMPONENT_NAME_UPDATE, target);
+    commit(mutationTypes.MOUSEUP_COMPONENT_NAME_UPDATE, componentName);
   },
-  [actionTypes.KEYDOWN_UPDATE]({ commit, state }, downKey) {
-    const tempKeys = [...state.pressedKeyboardCodes];
-    if (!tempKeys.includes(downKey)) tempKeys.push(downKey);
-    commit(mutationTypes.PRESSED_KEYBOARD_CODES_UPDATE, tempKeys);
+  [actionTypes.KEYDOWN_UPDATE]({ commit, state }, { pressedKeyboardCode: code }) {
+    const pressedKeys = [...state.pressedKeyboardCodes];
+    if (!pressedKeys.includes(code)) pressedKeys.push(code);
+    commit(mutationTypes.PRESSED_KEYBOARD_CODES_UPDATE, pressedKeys);
   },
-  [actionTypes.KEYUP_UPDATE]({ commit, state }, upKey) {
-    const tempKeys = [...state.pressedKeyboardCodes];
-    if (tempKeys.includes(upKey)) tempKeys.splice(tempKeys.indexOf(upKey), 1);
-    commit(mutationTypes.PRESSED_KEYBOARD_CODES_UPDATE, tempKeys);
+  [actionTypes.KEYUP_UPDATE]({ commit, state }, { releasedKeyboardCode: code }) {
+    const pressedKeys = [...state.pressedKeyboardCodes];
+    if (pressedKeys.includes(code)) pressedKeys.splice(pressedKeys.indexOf(code), 1);
+    commit(mutationTypes.PRESSED_KEYBOARD_CODES_UPDATE, pressedKeys);
   },
-  [actionTypes.WHEEL_UPDATE]({ commit }, wheelEvent) {
-    const { target, timestamp } = wheelEvent;
-    commit(mutationTypes.WHEEL_COMPONENT_NAME_UPDATE, target);
+  [actionTypes.WHEEL_UPDATE]({ commit }, { componentName, timestamp }) {
+    commit(mutationTypes.WHEEL_COMPONENT_NAME_UPDATE, componentName);
     commit(mutationTypes.WHEEL_TIMESTAMP_UPDATE, timestamp);
   },
 };

@@ -37,7 +37,7 @@
   </div>
 </template>
 <script>
-import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as inputActions } from '@/store/actionTypes';
 import Titlebar from '../Titlebar.vue';
@@ -194,11 +194,8 @@ export default {
     document.addEventListener('wheel', this.handleWheel);
   },
   methods: {
-    ...mapMutations({
-      updateMousemoveTarget: inputMutations.MOUSEMOVE_TARGET_UPDATE,
-    }),
     ...mapActions({
-      updateMousemovePosition: inputActions.MOUSEMOVE_POSITION,
+      updateMousemove: inputActions.MOUSEMOVE_UPDATE,
       updateMousedown: inputActions.MOUSEDOWN_UPDATE,
       updateMouseup: inputActions.MOUSEUP_UPDATE,
       updateKeydown: inputActions.KEYDOWN_UPDATE,
@@ -332,8 +329,10 @@ export default {
       this.mouseStoppedId = this.clock.setTimeout(() => {
         this.mouseStopped = true;
       }, this.mousestopDelay);
-      this.updateMousemovePosition([clientX, clientY]);
-      this.updateMousemoveTarget(this.getComponentName(target));
+      this.updateMousemove({
+        componentName: this.getComponentName(target),
+        clientPosition: [clientX, clientY],
+      });
     },
     handleMouseenter() {
       this.mouseLeftWindow = false;
@@ -343,11 +342,11 @@ export default {
     },
     handleMousedown(event) {
       const { target, buttons } = event;
-      this.updateMousedown({ target: this.getComponentName(target), buttons });
+      this.updateMousedown({ componentName: this.getComponentName(target), buttons });
     },
     handleMouseup(event) {
       const { target, buttons } = event;
-      this.updateMouseup({ target: this.getComponentName(target), buttons });
+      this.updateMouseup({ componentName: this.getComponentName(target), buttons });
     },
     handleMouseleave() {
       this.mouseLeftId = this.clock.setTimeout(() => {
@@ -390,15 +389,15 @@ export default {
       }
     },
     handleKeydown({ code }) {
-      this.updateKeydown(code);
+      this.updateKeydown({ pressedKeyboardCode: code });
     },
     handleKeyup({ code }) {
-      this.updateKeyup(code);
+      this.updateKeyup({ releasedKeyboardCode: code });
     },
-    handleWheel(event) {
+    handleWheel({ target, timeStamp }) {
       this.updateWheel({
-        target: this.getComponentName(event.target),
-        timestamp: event.timeStamp,
+        componentName: this.getComponentName(target),
+        timestamp: timeStamp,
       });
     },
     // Helper functions
