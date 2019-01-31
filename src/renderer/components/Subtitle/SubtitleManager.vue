@@ -11,10 +11,7 @@
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
-import flatten from 'lodash/flatten';
-import isEqual from 'lodash/isEqual';
-import sortBy from 'lodash/sortBy';
-import differenceWith from 'lodash/differenceWith';
+import { flatten, isEqual, sortBy, differenceWith, isFunction, partial } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import Sagi from '@/helpers/sagi';
 import { getLocalSubtitles, getOnlineSubtitles, getEmbeddedSubtitles } from '@/helpers/subtitle';
@@ -167,38 +164,13 @@ export default {
       });
     },
     async addSubtitle(src, type, options) {
-      const {
-        metaInfoUpdate, computeSubtitleName,
-        addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded, addSubtitleWhenFailed,
-        subtitleInstances,
-      } = this;
-      const sub = new SubtitleLoader(src, type, {
-        ...options,
-        videoSrc: this.originSrc,
-        videoIdentity: this.mediaHash,
-      });
-      this.addingSubtitlesCount += 1;
-      sub.once('loading', (id) => {
-        this.$set(subtitleInstances, id, sub);
-        addSubtitleWhenLoading({ id, type });
-        sub.meta();
-
-        sub.on('meta-change', ({ field, value }) => { metaInfoUpdate(id, field, value); });
-        sub.on('failed', (id) => {
-          this.addingSubtitlesCount -= 1;
-          delete this.subtitleInstances[id];
-          addSubtitleWhenFailed({ id });
-        });
-        sub.once('ready', async ({ format, language, name }) => {
-          sub.metaInfo.name = await computeSubtitleName(
-            type,
-            id,
-            { format, language, src: sub.src },
-            this.subtitleList,
-          ) || name;
-          addSubtitleWhenReady({ id, format });
-        });
-        sub.once('parse', () => addSubtitleWhenLoaded({ id }));
+      const subtitleInstance = new SubtitleLoader(src, type, { ...options });
+      this.setupListeners(subtitleInstance, {
+        metaChange: this.metaChangeCallback,
+        loading: this.loadingCallback,
+        ready: this.readyCallback,
+        loaded: this.loadedCallback,
+        failed: this.failedCallback,
       });
       return true;
     },
@@ -301,6 +273,52 @@ export default {
           return `${codeToLanguageName(language)} ${romanize(computedIndex)}`;
         }
       }
+    },
+    async setupListeners(subtitleInstance, listeners) {
+      if (subtitleInstance instanceof SubtitleLoader) {
+        const {
+          loading, ready, loaded, failed,
+          metaChange,
+        } = listeners;
+        if (isFunction(loading)) {
+          subtitleInstance.once('loading', () => {
+            loading(subtitleInstance);
+            subtitleInstance.meta();
+
+            if (isFunction(metaChange)) subtitleInstance.on('meta-change', partial(metaChange, subtitleInstance));
+            if (isFunction(ready)) subtitleInstance.once('ready', partial(ready, subtitleInstance));
+            if (isFunction(failed)) subtitleInstance.once('failed', partial(failed, subtitleInstance));
+            if (isFunction(loaded)) subtitleInstance.once('parse', partial(loaded, subtitleInstance));
+
+            return true;
+          });
+        }
+      }
+      return false;
+    },
+    metaChangeCallback({ id }, { field, value }) {
+      this.metaInfoUpdate(id, field, value);
+    },
+    loadingCallback(subtitleInstance) {
+      const { id, type } = subtitleInstance;
+      this.$set(this.subtitleInstances, id, subtitleInstance);
+      this.addSubtitleWhenLoading({ id, type });
+    },
+    async readyCallback(subtitleInstance, metaInfo) {
+      const { type, id, src } = subtitleInstance;
+      const { format, language } = metaInfo;
+      metaInfo.name = await this.computeSubtitleName(
+        type,
+        id,
+        { format, language, src },
+        this.subtitleList,
+      );
+      this.addSubtitleWhenReady({ id, format });
+    },
+    failedCallback({ id }) {
+      this.addingSubtitlesCount -= 1;
+      this.$delete(this.subtitleInstances, id);
+      this.addSubtitleWhenFailed({ id });
     },
   },
   created() {
