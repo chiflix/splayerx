@@ -74,16 +74,13 @@ export default {
     },
   },
   watch: {
-    originSrc: {
-      handler: function handler(newVal) {
-        if (newVal) {
-          this.addingSubtitlesCount = 0;
-          this.resetSubtitles();
-          this.$bus.$emit('subtitle-refresh-from-src-change');
-          this.$store.dispatch('ifNoSubtitle', true);
-        }
-      },
-      immediate: true,
+    originSrc(newVal) {
+      if (newVal) {
+        this.addingSubtitlesCount = 0;
+        this.resetSubtitles();
+        this.$bus.$emit('subtitle-refresh-from-src-change');
+        this.$store.dispatch('ifNoSubtitle', true);
+      }
     },
     languageLoadedSubtitleInfoList(newVal, oldVal) {
       if (!this.autoSelectionCompleted && !isEqual(oldVal, newVal)) {
@@ -308,6 +305,12 @@ export default {
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
+
+    // when set immediate on watcher, it may run before the created hook
+    this.addingSubtitlesCount = 0;
+    this.resetSubtitles();
+    this.$bus.$emit('subtitle-refresh-from-src-change');
+    this.$store.dispatch('ifNoSubtitle', true);
 
     function pushCurrentSubtitle() {
       if (this.currentSubtitleId) {
