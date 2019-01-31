@@ -8,7 +8,7 @@
       :key="originSrc"
       :needtimeupdate=true
       :events="['loadedmetadata', 'audiotrack']"
-      :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
+      :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}" 
       @loadedmetadata="onMetaLoaded"
       @audiotrack="onAudioTrack"
       :loop="loop"
@@ -19,6 +19,7 @@
       :paused="paused"
       :currentTime="seekTime"
       :currentAudioTrackId="currentAudioTrackId.toString()" />
+      <!-- calc(100% - 0.1px) fix for mac book pro 15 full screen after video controller fade-out video will shake -->
     </transition>
     <div class="mask"
       :style="{

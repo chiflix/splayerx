@@ -1,11 +1,12 @@
 import { ipcRenderer, remote } from 'electron'; //eslint-disable-line
 
 let mouseConstructor = null;
+const isWin32 = process.platform === 'win32'; // judge which system
 
 function getMouseConstructor() {
   if (mouseConstructor) return mouseConstructor;
   try {
-    if (process.platform === 'win32') {
+    if (isWin32) {
       mouseConstructor = require('win-mouse'); //eslint-disable-line
     }
     return mouseConstructor;
@@ -27,7 +28,7 @@ function parentsHasClass(element, className) {
 
 export default function drag(element) {
   const mouseConstructor = getMouseConstructor();
-  if (!mouseConstructor) return () => {};
+  if (!mouseConstructor) return () => { };
   const mouse = mouseConstructor();
   let offset = null;
   let windowSize = null;
@@ -48,6 +49,15 @@ export default function drag(element) {
   };
 
   element.addEventListener('mousedown', onmousedown, true);
+
+  // 在windows系统下，正常情况win-mouse模块的left-up事件会正常触发，但是虚拟机下面
+  // 有时会失效，导致拖动窗口，松开鼠标，应用窗口吸附的bug，通过mouseup，来释放拖拽
+  if (isWin32) {
+    element.addEventListener('mouseup', () => {
+      offset = null;
+      windowSize = null;
+    }, true);
+  }
 
   mouse.on('left-drag', (x, y) => {
     if (!offset) return;
