@@ -5,7 +5,7 @@
     @mousemove="handleMousemove"
     @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
-    @mousedown="handleMousedown">
+    @mousedown.stop="handleMousedown">
     <the-preview-thumbnail class="the-preview-thumbnail" v-show="showThumbnail"
       :currentTime="hoveredCurrentTime"
       :maxThumbnailWidth="240"
