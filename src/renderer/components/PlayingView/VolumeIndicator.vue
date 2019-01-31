@@ -1,7 +1,21 @@
 <template>
-  <div v-fade-in="showVolume" class="indicator-container">
-    <base-info-card class="card">
-      <div class="indicator" :style="{ height: volume * 100 + '%', opacity: muted ? 0.25 : 0.8 }"></div>
+  <div v-fade-in="showVolume" class="indicator-container"
+    :style="{
+      top: isFullScreen ? `${containerTop}px` : '',
+      width: isFullScreen ? `${containerWidth}px` : '',
+      height: isFullScreen ? `${volumeHeight}px` : '',
+    }">
+    <base-info-card class="card"
+      :style="{
+        width: isFullScreen ? `${cardWidth}px` : '',
+        height: isFullScreen ? `${backgroundHeight}px` : '',
+      }">
+      <div class="indicator" 
+        :style="{
+          height: volume * 100 + '%',
+          opacity: muted ? 0.25 : 0.8,
+          width: isFullScreen ? `${indicatorWidth}px` : '',
+        }"></div>
     </base-info-card>
     <base-icon v-show="muted || volume <= 0" class="mute" type="volume" effect="mute" />
   </div>
@@ -26,13 +40,39 @@ export default {
   },
   props: ['showAllWidgets'],
   computed: {
-    ...mapGetters(['volume', 'muted', 'volumeKeydown']),
+    ...mapGetters(['volume', 'muted', 'volumeKeydown', 'winWidth', 'winHeight', 'winRatio', 'ratio', 'isFullScreen']),
     ...mapState({
       validWheelTarget: ({ Input }) => Input.wheelTarget === 'the-video-controller',
       wheelTimestamp: ({ Input }) => Input.wheelTimestamp,
     }),
     showVolume() {
       return this.volumeTriggerStopped;
+    },
+    extraHeight() {
+      if (this.winRatio > this.ratio) {
+        return this.winHeight;
+      }
+      return this.winWidth / this.ratio;
+    },
+    cardWidth() {
+      return this.extraHeight <= 1080 ? 6 : 12;
+    },
+    indicatorWidth() {
+      return this.extraHeight <= 1080 ? 4 : 10;
+    },
+    containerWidth() {
+      return this.extraHeight <= 1080 ? 12 : 24;
+    },
+    containerTop() {
+      return (this.winHeight - this.backgroundHeight) / 2;
+    },
+    backgroundHeight() {
+      return this.extraHeight <= 1080 ? ((this.extraHeight - 180) / 3) + 100
+        : this.winHeight * 0.37;
+    },
+    volumeHeight() {
+      return this.extraHeight <= 1080 ? ((this.extraHeight - 180) / 3) + 100 + 24
+        : this.winHeight * 0.37;
     },
   },
   watch: {
@@ -98,8 +138,8 @@ export default {
   top: var(--container-top);
   --window-height: 100vh;
   --window-width: 100vw;
-  --extra-width: calc(var(--window-width) - 320px);
-  --extra-height: calc(var(--extra-width) / 5.53);
+  --extra-width: calc(var(--window-height) - 180px);
+  --extra-height: calc(var(--extra-width) / 3);
   --background-height: calc(100px + var(--extra-height));
   --remain-height: calc(var(--window-height) - var(--background-height));
   --container-top: calc(var(--remain-height) / 2);
