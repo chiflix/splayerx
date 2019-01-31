@@ -148,7 +148,8 @@ export default {
 
       return Promise.all(subtitleRequests)
         .then(subtitleLists => Promise.all(subtitleLists.map(normalizeSubtitleList)))
-        .then(normalizedLists => Promise.all(flatten(normalizedLists).map(addSubtitle)))
+        .then(normalizedLists => flatten(normalizedLists))
+        .then(allSubtitles => Promise.all(allSubtitles.map(addSubtitle)))
         .then(() => this.$bus.$emit('refresh-finished'));
     },
     getLocalSubtitlesList(videoSrc, mediaIdentity) {
@@ -190,11 +191,10 @@ export default {
       } catch (err) {
         this.failedCallback(subtitleInstance);
       }
-      return 'failed'; // slient errors temporaily
+      return 'failed'; // slient errors temporarily
     },
-    normalizeSubtitleList(subtitleList, isAutoSelection = true) {
+    normalizeSubtitleList(subtitleList) {
       if (!subtitleList || !Object.keys(subtitleList).length) return [];
-      this.isAutoSelection = !!isAutoSelection;
       const processedSubtitleList = [];
       if (subtitleList instanceof Array) {
         processedSubtitleList
@@ -301,7 +301,7 @@ export default {
           if (isFunction(loading)) {
             subtitleInstance.once('loading', () => {
               loading(subtitleInstance);
-              resolve();
+              resolve(subtitleInstance);
               subtitleInstance.meta();
 
               if (isFunction(metaChange)) subtitleInstance.on('meta-change', partial(metaChange, subtitleInstance));
@@ -323,13 +323,13 @@ export default {
     },
     async readyCallback(subtitleInstance, metaInfo) {
       const { type, id, src } = subtitleInstance;
-      const { format, language } = metaInfo;
+      const { format, language, name } = metaInfo;
       metaInfo.name = await this.computeSubtitleName(
         type,
         id,
         { format, language, src },
         this.subtitleList,
-      );
+      ) || name;
       this.addSubtitleWhenReady({ id, format });
     },
     failedCallback({ id }) {
@@ -342,7 +342,11 @@ export default {
     this.resetSubtitles();
     this.$bus.$on('add-subtitles', (subs) => {
       this.autoSelectionCompleted = false;
-      this.normalizeSubtitleList(subs, false);
+      Promise.all(this.normalizeSubtitleList(subs).map(this.addSubtitle))
+        .then((subtitleInstances) => {
+          this.changeCurrentSubtitle(subtitleInstances[0].id);
+          this.autoSelectionCompleted = true;
+        });
     });
     this.$bus.$on('refresh-subtitles', (types) => {
       this.autoSelectionCompleted = false;
