@@ -124,18 +124,32 @@ export default {
         getLocalSubtitlesList,
         getOnlineSubtitlesList,
         getEmbeddedSubtitlesList,
-        addSubtitles,
+        normalizeSubtitleList,
+        addSubtitle,
         resetOnlineSubtitles,
+        preferredLanguages,
       } = this;
       const requestedTypes = types
         .map(type => type.toLowerCase())
         .filter(type => supportedTypes.includes(type));
-      if (requestedTypes.includes('local')) getLocalSubtitlesList(videoSrc, mediaIdentity).then(addSubtitles);
-      if (requestedTypes.includes('embedded')) getEmbeddedSubtitlesList(videoSrc, mediaIdentity).then(addSubtitles);
+      const subtitleRequests = [];
+      if (requestedTypes.includes('local')) {
+        subtitleRequests.push(getLocalSubtitlesList(videoSrc, mediaIdentity));
+      }
+      if (requestedTypes.includes('embedded')) {
+        subtitleRequests.push(getEmbeddedSubtitlesList(videoSrc, mediaIdentity));
+      }
       if (requestedTypes.includes('online')) {
         resetOnlineSubtitles();
-        getOnlineSubtitlesList(videoSrc, mediaIdentity, this.preferredLanguages).then(addSubtitles);
+        subtitleRequests.push(getOnlineSubtitlesList(videoSrc, mediaIdentity, preferredLanguages));
       }
+
+      if (subtitleRequests.length) this.$bus.$emit('subtitle-requested');
+
+      return Promise.all(subtitleRequests)
+        .then(subtitleLists => Promise.all(subtitleLists.map(normalizeSubtitleList)))
+        .then(normalizedLists => Promise.all(flatten(normalizedLists).map(addSubtitle)))
+        .then(() => this.$bus.$emit('refresh-finished'));
     },
     getLocalSubtitlesList(videoSrc, mediaIdentity) {
       return new Promise((resolve) => {
@@ -163,18 +177,22 @@ export default {
           .catch(() => resolve([]));
       });
     },
-    async addSubtitle(src, type, options) {
+    async addSubtitle({ src, type, options }) {
       const subtitleInstance = new SubtitleLoader(src, type, { ...options });
-      this.setupListeners(subtitleInstance, {
-        metaChange: this.metaChangeCallback,
-        loading: this.loadingCallback,
-        ready: this.readyCallback,
-        loaded: this.loadedCallback,
-        failed: this.failedCallback,
-      });
-      return true;
+      try {
+        return this.setupListeners(subtitleInstance, {
+          metaChange: this.metaChangeCallback,
+          loading: this.loadingCallback,
+          ready: this.readyCallback,
+          loaded: this.loadedCallback,
+          failed: this.failedCallback,
+        });
+      } catch (err) {
+        this.failedCallback(subtitleInstance);
+      }
+      return 'failed'; // slient errors temporaily
     },
-    addSubtitles(subtitleList, isAutoSelection = true) {
+    normalizeSubtitleList(subtitleList, isAutoSelection = true) {
       if (!subtitleList || !Object.keys(subtitleList).length) return [];
       this.isAutoSelection = !!isAutoSelection;
       const processedSubtitleList = [];
@@ -194,8 +212,7 @@ export default {
       } else {
         this.$store.dispatch('ifNoSubtitle', true);
       }
-      return processedSubtitleList
-        .map(({ src, type, options }) => this.addSubtitle(src, type, options));
+      return processedSubtitleList;
     },
     metaInfoUpdate(id, field, value) {
       this.updateMetaInfo({ id, type: field, value });
@@ -274,27 +291,27 @@ export default {
         }
       }
     },
-    async setupListeners(subtitleInstance, listeners) {
-      if (subtitleInstance instanceof SubtitleLoader) {
-        const {
-          loading, ready, loaded, failed,
-          metaChange,
-        } = listeners;
-        if (isFunction(loading)) {
-          subtitleInstance.once('loading', () => {
-            loading(subtitleInstance);
-            subtitleInstance.meta();
+    setupListeners(subtitleInstance, listeners) {
+      return new Promise((resolve, reject) => {
+        if (subtitleInstance instanceof SubtitleLoader) {
+          const {
+            loading, ready, loaded, failed,
+            metaChange,
+          } = listeners;
+          if (isFunction(loading)) {
+            subtitleInstance.once('loading', () => {
+              loading(subtitleInstance);
+              resolve();
+              subtitleInstance.meta();
 
-            if (isFunction(metaChange)) subtitleInstance.on('meta-change', partial(metaChange, subtitleInstance));
-            if (isFunction(ready)) subtitleInstance.once('ready', partial(ready, subtitleInstance));
-            if (isFunction(failed)) subtitleInstance.once('failed', partial(failed, subtitleInstance));
-            if (isFunction(loaded)) subtitleInstance.once('parse', partial(loaded, subtitleInstance));
-
-            return true;
-          });
-        }
-      }
-      return false;
+              if (isFunction(metaChange)) subtitleInstance.on('meta-change', partial(metaChange, subtitleInstance));
+              if (isFunction(ready)) subtitleInstance.once('ready', partial(ready, subtitleInstance));
+              if (isFunction(failed)) subtitleInstance.once('failed', partial(failed, subtitleInstance));
+              if (isFunction(loaded)) subtitleInstance.once('parse', partial(loaded, subtitleInstance));
+            });
+          } else reject(new TypeError(`${loading} is not a function!`));
+        } else reject(new TypeError(`Expected a SubtitleLoader instance, but ${subtitleInstance} provided.`));
+      });
     },
     metaChangeCallback({ id }, { field, value }) {
       this.metaInfoUpdate(id, field, value);
@@ -325,7 +342,7 @@ export default {
     this.resetSubtitles();
     this.$bus.$on('add-subtitles', (subs) => {
       this.autoSelectionCompleted = false;
-      this.addSubtitles(subs, false);
+      this.normalizeSubtitleList(subs, false);
     });
     this.$bus.$on('refresh-subtitles', (types) => {
       this.autoSelectionCompleted = false;
