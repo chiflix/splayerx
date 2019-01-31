@@ -348,7 +348,7 @@ export default {
           }, 10);
           const types = ['local'];
           if (this.isInitial) types.push('embedded');
-          if (!this.isInitial || ['ts', 'avi', 'mkv'].includes(extname(this.originSrc).slice(1).toLowerCase())) types.push('online');
+          if (!this.isInitial || ['ts', 'avi', 'mkv', 'mp4'].includes(extname(this.originSrc).slice(1).toLowerCase())) types.push('online');
           // three suitations for variable 'types':
           // first open && matched extensions: ['local', 'embedded', 'online']
           // first open && !matched extensions: ['local', 'embedded']
