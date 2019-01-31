@@ -124,43 +124,49 @@ export default {
       addSubtitleWhenFailed: subtitleActions.ADD_SUBTITLE_WHEN_FAILED,
       updateMetaInfo: subtitleActions.UPDATE_METAINFO,
     }),
-    async refreshSubtitles(types) {
+    async refreshSubtitles(types, videoSrc, mediaIdentity) {
       const supportedTypes = ['local', 'embedded', 'online'];
       const {
         getLocalSubtitlesList,
         getOnlineSubtitlesList,
         getEmbeddedSubtitlesList,
         addSubtitles,
-        originSrc: videoSrc,
         resetOnlineSubtitles,
       } = this;
       const requestedTypes = types
         .map(type => type.toLowerCase())
         .filter(type => supportedTypes.includes(type));
-      if (requestedTypes.includes('Online')) this.resetOnlineSubtitles();
-      const subtitlePromises = [];
-      if (requestedTypes.includes('local')) subtitlePromises.push(getLocalSubtitlesList(videoSrc).then(addSubtitles));
-      if (requestedTypes.includes('embedded')) subtitlePromises.push(getEmbeddedSubtitlesList(videoSrc).then(addSubtitles));
+      if (requestedTypes.includes('local')) getLocalSubtitlesList(videoSrc, mediaIdentity).then(addSubtitles);
+      if (requestedTypes.includes('embedded')) getEmbeddedSubtitlesList(videoSrc, mediaIdentity).then(addSubtitles);
       if (requestedTypes.includes('online')) {
         resetOnlineSubtitles();
-        subtitlePromises.push(getOnlineSubtitlesList(videoSrc).then(addSubtitles));
+        getOnlineSubtitlesList(videoSrc, mediaIdentity, this.preferredLanguages).then(addSubtitles);
       }
     },
-    getLocalSubtitlesList(videoSrc) {
+    getLocalSubtitlesList(videoSrc, mediaIdentity) {
       return new Promise((resolve) => {
         getLocalSubtitles(videoSrc, SubtitleLoader.supportedFormats)
-          .then(subs => resolve(subs))
+          .then((subs) => {
+            console.log(videoSrc);
+            resolve(mediaIdentity === this.mediaHash ? subs : []);
+          })
           .catch(() => resolve([]));
       });
     },
-    async getOnlineSubtitlesList(videoSrc) {
-      return flatten(await Promise.all(this.preferredLanguages
-        .map(language => getOnlineSubtitles(videoSrc, language).catch(() => []))));
+    getOnlineSubtitlesList(videoSrc, mediaIdentity, languages) {
+      return new Promise((resolve) => {
+        function getOnlineSubtitlesWithErrorHandling(language) {
+          return getOnlineSubtitles(videoSrc, language).catch(() => []);
+        }
+        Promise.all(languages.map(getOnlineSubtitlesWithErrorHandling))
+          .then(subtitlesArray => resolve(mediaIdentity === this.mediaHash ?
+            flatten(subtitlesArray) : []));
+      });
     },
-    getEmbeddedSubtitlesList(videoSrc) {
+    getEmbeddedSubtitlesList(videoSrc, mediaIdentity) {
       return new Promise((resolve) => {
         getEmbeddedSubtitles(videoSrc, SubtitleLoader.supportedCodecs)
-          .then(subs => resolve(subs))
+          .then(subs => resolve(mediaIdentity === this.mediaHash ? subs : []))
           .catch(() => resolve([]));
       });
     },
@@ -298,7 +304,7 @@ export default {
     });
     this.$bus.$on('refresh-subtitles', (types) => {
       this.autoSelectionCompleted = false;
-      this.refreshSubtitles(types);
+      this.refreshSubtitles(types, this.originSrc, this.mediaHash);
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
