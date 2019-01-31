@@ -144,7 +144,6 @@ export default {
       return new Promise((resolve) => {
         getLocalSubtitles(videoSrc, SubtitleLoader.supportedFormats)
           .then((subs) => {
-            console.log(videoSrc);
             resolve(mediaIdentity === this.mediaHash ? subs : []);
           })
           .catch(() => resolve([]));
@@ -167,14 +166,13 @@ export default {
           .catch(() => resolve([]));
       });
     },
-    addSubtitle(subtitle, type, options, chooseWhenReady) {
+    async addSubtitle(src, type, options) {
       const {
-        changeCurrentSubtitle,
-        metaInfoUpdate,
+        metaInfoUpdate, computeSubtitleName,
         addSubtitleWhenLoading, addSubtitleWhenReady, addSubtitleWhenLoaded, addSubtitleWhenFailed,
         subtitleInstances,
       } = this;
-      const sub = new SubtitleLoader(subtitle, type, {
+      const sub = new SubtitleLoader(src, type, {
         ...options,
         videoSrc: this.originSrc,
         videoIdentity: this.mediaHash,
@@ -185,45 +183,24 @@ export default {
         addSubtitleWhenLoading({ id, type });
         sub.meta();
 
-        sub.on('meta-change', ({ field, value }) => {
-          metaInfoUpdate(id, field, value);
-        });
+        sub.on('meta-change', ({ field, value }) => { metaInfoUpdate(id, field, value); });
         sub.on('failed', (id) => {
           this.addingSubtitlesCount -= 1;
           delete this.subtitleInstances[id];
           addSubtitleWhenFailed({ id });
         });
-        sub.once('ready', ({ format, language }) => {
-          const subtitleRankIndex = this.subtitleList
-            .filter((subtitle) => {
-              if (subtitle.language) {
-                return subtitle.type === type && subtitle.language === language;
-              }
-              return subtitle.type === type;
-            })
-            .findIndex(subtitle => subtitle.id === id) + 1;
-          switch (type) {
-            default:
-            case 'local':
-              break;
-            case 'embedded':
-              if (language) sub.metaInfo.name = `${this.$t('subtitle.embedded')} ${romanize(subtitleRankIndex)} - ${codeToLanguageName(language)}`;
-              else {
-                localLanguageLoader(sub.src, sub.format).then((language) => {
-                  sub.metaInfo.name = `${this.$t('subtitle.embedded')} ${romanize(subtitleRankIndex)} - ${codeToLanguageName(language)}`;
-                });
-              }
-              break;
-            case 'online':
-              sub.metaInfo.name = `${codeToLanguageName(language)} ${romanize(subtitleRankIndex)}`;
-              break;
-          }
+        sub.once('ready', async ({ format, language, name }) => {
+          sub.metaInfo.name = await computeSubtitleName(
+            type,
+            id,
+            { format, language, src: sub.src },
+            this.subtitleList,
+          ) || name;
           addSubtitleWhenReady({ id, format });
-          if (chooseWhenReady) changeCurrentSubtitle(id);
         });
         sub.once('parse', () => addSubtitleWhenLoaded({ id }));
       });
-      return sub;
+      return true;
     },
     addSubtitles(subtitleList, isAutoSelection = true) {
       if (!subtitleList || !Object.keys(subtitleList).length) return [];
@@ -291,6 +268,39 @@ export default {
         }
       }
       return undefined;
+    },
+    async computeSubtitleName(type, id, options, subtitleList) {
+      if (type === 'local') return '';
+      const computedIndex = subtitleList
+        .filter((subtitle) => {
+          if (subtitle.language && options.language) {
+            return subtitle.type === type && subtitle.language === options.language;
+          }
+          return subtitle.type === type;
+        })
+        .findIndex(subtitle => id === subtitle.id)
+        + 1;
+      switch (type) {
+        default:
+          return '';
+        case 'embedded': {
+          let { language } = options;
+          const { src, format } = options;
+          if (!language && !src) {
+            throw (new TypeError('Expected at least language or src for calculate embedded subtitle\'s name.'));
+          } else if (!language) {
+            language = await localLanguageLoader(src, format);
+          }
+          return `${this.$t('subtitle.embedded')} ${romanize(computedIndex)} - ${codeToLanguageName(language)}`;
+        }
+        case 'online': {
+          const { language } = options;
+          if (!language) {
+            throw (new TypeError('Expected language from option for online subtitle'));
+          }
+          return `${codeToLanguageName(language)} ${romanize(computedIndex)}`;
+        }
+      }
     },
   },
   created() {
