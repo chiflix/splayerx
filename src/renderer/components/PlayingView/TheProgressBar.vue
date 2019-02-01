@@ -214,12 +214,8 @@ export default {
       }
     },
     handleDocumentMouseup(event) {
-      let isTargetProgressBar = false;
-      try {
-        isTargetProgressBar = event.path.filter(e => e.tagName === 'DIV' && e.className.includes('the-progress-bar')).length > 0;
-      } catch (err) {
-        // err
-      }
+      const path = event.path || (event.composedPath && event.composedPath());
+      const isTargetProgressBar = path.find(e => e.tagName === 'DIV' && e.className.includes('the-progress-bar'));
       // 如果mouseup的target是当前组件，那么不需要触发leave
       if (!isTargetProgressBar) {
         this.mouseleave = true;
