@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import pick from 'lodash/pick';
 import partialRight from 'lodash/partialRight';
+import uniq from 'lodash/uniq';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import { metaInfoUpdate } from './rank';
@@ -14,6 +15,7 @@ const state = {
   types: {},
   ranks: {},
   currentSubtitleId: '',
+  videoSubtitleMap: {},
   chosenStyle: '',
   chosenSize: 1,
   subtitleDelay: 0,
@@ -65,6 +67,11 @@ const mutations = {
   [subtitleMutations.LOADING_STATES_UPDATE]({ loadingStates }, { id, state }) {
     Vue.set(loadingStates, id, state);
   },
+  [subtitleMutations.VIDEO_SUBTITLE_MAP_UPDATE]({ videoSubtitleMap }, { videoSrc, id }) {
+    const subtitleIds = videoSubtitleMap[videoSrc] instanceof Array ?
+      videoSubtitleMap[videoSrc] : [];
+    Vue.set(videoSubtitleMap, videoSrc, uniq([...subtitleIds, id]));
+  },
   [subtitleMutations.DURATIONS_UPDATE]({ durations }, { id, duration }) {
     Vue.set(durations, id, duration);
   },
@@ -108,8 +115,9 @@ const mutations = {
 };
 
 const actions = {
-  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit }, { id, type }) {
+  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit }, { id, type, videoSrc }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loading' });
+    commit(subtitleMutations.VIDEO_SUBTITLE_MAP_UPDATE, { videoSrc, id });
     commit(subtitleMutations.TYPES_UPDATE, { id, type });
   },
   [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit }, {
