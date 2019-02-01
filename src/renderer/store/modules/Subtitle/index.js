@@ -157,8 +157,8 @@ const actions = {
     }
   },
   [subtitleActions.CHANGE_CURRENT_SUBTITLE]({ commit, getters }, id) {
-    if (getters.subtitleList.map(({ id }) => id).includes(id)) {
-      commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, id);
+    if (!id || getters.subtitleList.map(({ id }) => id).includes(id)) {
+      commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, id || '');
     }
   },
   [subtitleActions.OFF_SUBTITLES]({ commit }) {
