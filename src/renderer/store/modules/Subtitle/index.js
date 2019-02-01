@@ -151,7 +151,8 @@ const actions = {
     if (!existedIds) {
       dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc });
     } else {
-      const finalIds = remove(existedIds, id => ids.includes(id));
+      const finalIds = [...existedIds];
+      remove(finalIds, id => ids.includes(id));
       commit(subtitleMutations.VIDEO_SUBTITLE_MAP_UPDATE, { videoSrc, ids: finalIds });
     }
   },
