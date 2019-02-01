@@ -76,7 +76,7 @@ export default class SubtitleLoader extends EventEmitter {
 
     const { func: idLoader, params: idParams } = functionExtraction(this.loader.id);
     promisify(idLoader.bind(null, ...this._getParams(idParams))).then((id) => {
-      this.metaInfo.id = id;
+      this.id = id;
       this.emit('loading', id);
     });
   }
@@ -95,7 +95,7 @@ export default class SubtitleLoader extends EventEmitter {
       });
       this.emit('ready', metaInfo);
     } catch (e) {
-      this.emit('failed', this.metaInfo.id);
+      this.emit('failed', this.id);
       throw e;
     }
   }

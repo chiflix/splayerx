@@ -1,100 +1,12 @@
 import Vue from 'vue';
 import pick from 'lodash/pick';
 import partialRight from 'lodash/partialRight';
-import camelCase from 'lodash/camelCase';
-import { codeIndex } from '@/helpers/language';
-import { Subtitle as subtitleMutations } from '../mutationTypes';
-import { Subtitle as subtitleActions } from '../actionTypes';
-
-function metaInfoToWeight(subtitleType, infoType, value, subtitleList, primaryLanguage) {
-  const result = { existed: subtitleList.filter(({ rank }) => !!rank).length * (subtitleType === 'local' ? -1 : 1) };
-  switch (infoType) {
-    case 'language': {
-      result.matchPrimaryLanguage = primaryLanguage === value ? 1 : 0;
-      result.existedLanguage = subtitleList
-        .filter(({ language: existedLanguage }) => existedLanguage === value).length;
-      result.languageRanking = codeIndex(value);
-      break;
-    }
-    case 'isDefault':
-      result.matchDefault = value ? 1 : 0;
-      break;
-    case 'streamIndex':
-      result.streamIndex = value || 0;
-      break;
-    case 'ranking':
-      result.ranking = value || 0;
-      break;
-    default:
-      break;
-  }
-
-  return result;
-}
-
-function rankCalculation(type, options, lastRank) {
-  const baseRanks = {
-    custom: 1e16,
-    local: 1e12,
-    embedded: 1e8,
-    online: 1e4,
-  };
-  const rankTypes = [
-    {
-      name: 'MATCH_PRIMARY_LANGUAGE',
-      value: 1e4,
-      types: ['online'],
-    },
-    {
-      name: 'MATCH_DEFAULT',
-      value: 1e3,
-      types: ['embedded'],
-    },
-    {
-      name: 'LANGUAGE_RANKING',
-      value: -1e3,
-      types: ['online'],
-    },
-    {
-      name: 'EXISTED_LANGUAGE',
-      value: -1e2,
-      types: ['online'],
-    },
-    {
-      name: 'STREAM_INDEX',
-      value: -1e2,
-      types: ['embedded'],
-    },
-    {
-      name: 'RANKING',
-      value: 1e1,
-      types: ['online'],
-    },
-    {
-      name: 'EXISTED',
-      value: -1e0,
-      types: ['custom', 'local', 'embedded', 'online'],
-    },
-  ];
-  const baseRank = lastRank || baseRanks[type] || 0;
-  return rankTypes
-    .filter(({ name, types }) => options[camelCase(name)] && types.includes(type))
-    .reduce((prev, { name, value }) => prev + (value * options[camelCase(name)]), baseRank);
-}
-
-function metaInfoUpdate(
-  subtitleType, subtitleList, primaryLanguage,
-  infoType, infoValue,
-  lastRank,
-) {
-  const weightOptions = metaInfoToWeight(
-    subtitleType,
-    infoType, infoValue,
-    subtitleList, primaryLanguage,
-  );
-  if (lastRank) Reflect.deleteProperty(weightOptions, 'existed');
-  return rankCalculation(subtitleType, weightOptions, lastRank);
-}
+import uniq from 'lodash/uniq';
+import difference from 'lodash/difference';
+import remove from 'lodash/remove';
+import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
+import { Subtitle as subtitleActions } from '@/store/actionTypes';
+import { metaInfoUpdate } from './rank';
 
 const state = {
   loadingStates: {},
@@ -105,6 +17,7 @@ const state = {
   types: {},
   ranks: {},
   currentSubtitleId: '',
+  videoSubtitleMap: {},
   chosenStyle: '',
   chosenSize: 1,
   subtitleDelay: 0,
@@ -115,9 +28,9 @@ const state = {
 const getters = {
   currentSubtitleId: state => state.currentSubtitleId,
   subtitleList: ({
-    loadingStates, names, languages, formats, ranks, types,
-  }) =>
-    Object.keys(loadingStates)
+    videoSubtitleMap, loadingStates, names, languages, formats, ranks, types,
+  }, { originSrc }) =>
+    (videoSubtitleMap[originSrc] || [])
       .filter(id => loadingStates[id] !== 'failed')
       .map(id => ({
         id,
@@ -155,6 +68,9 @@ const mutations = {
   },
   [subtitleMutations.LOADING_STATES_UPDATE]({ loadingStates }, { id, state }) {
     Vue.set(loadingStates, id, state);
+  },
+  [subtitleMutations.VIDEO_SUBTITLE_MAP_UPDATE]({ videoSubtitleMap }, { videoSrc, ids }) {
+    Vue.set(videoSubtitleMap, videoSrc, ids);
   },
   [subtitleMutations.DURATIONS_UPDATE]({ durations }, { id, duration }) {
     Vue.set(durations, id, duration);
@@ -199,8 +115,9 @@ const mutations = {
 };
 
 const actions = {
-  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit }, { id, type }) {
+  [subtitleActions.ADD_SUBTITLE_WHEN_LOADING]({ commit, dispatch }, { id, type, videoSrc }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'loading' });
+    dispatch(subtitleActions.ADD_TO_VIDEO_SUBTITLE_MAP, { videoSrc, ids: [id] });
     commit(subtitleMutations.TYPES_UPDATE, { id, type });
   },
   [subtitleActions.ADD_SUBTITLE_WHEN_READY]({ commit }, {
@@ -215,9 +132,33 @@ const actions = {
   [subtitleActions.ADD_SUBTITLE_WHEN_FAILED]({ commit }, { id }) {
     commit(subtitleMutations.LOADING_STATES_UPDATE, { id, state: 'failed' });
   },
+  [subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP]({ commit }, { videoSrc }) {
+    commit(subtitleMutations.VIDEO_SUBTITLE_MAP_UPDATE, { videoSrc, ids: [] });
+  },
+  [subtitleActions.ADD_TO_VIDEO_SUBTITLE_MAP]({ commit, state, dispatch }, { videoSrc, ids }) {
+    const existedIds = state.videoSubtitleMap[videoSrc];
+    let finalIds;
+    if (!existedIds) {
+      dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc });
+      finalIds = uniq([...ids]);
+    } else {
+      finalIds = uniq([...existedIds, ...ids]);
+    }
+    commit(subtitleMutations.VIDEO_SUBTITLE_MAP_UPDATE, { videoSrc, ids: finalIds });
+  },
+  [subtitleActions.REMOVE_FROM_VIDEO_SUBTITLE_MAP]({ commit, state, dispatch }, { videoSrc, ids }) {
+    const existedIds = state.videoSubtitleMap[videoSrc];
+    if (!existedIds) {
+      dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc });
+    } else {
+      const finalIds = [...existedIds];
+      remove(finalIds, id => ids.includes(id));
+      commit(subtitleMutations.VIDEO_SUBTITLE_MAP_UPDATE, { videoSrc, ids: finalIds });
+    }
+  },
   [subtitleActions.CHANGE_CURRENT_SUBTITLE]({ commit, getters }, id) {
-    if (getters.subtitleList.map(({ id }) => id).includes(id)) {
-      commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, id);
+    if (!id || getters.subtitleList.map(({ id }) => id).includes(id)) {
+      commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, id || '');
     }
   },
   [subtitleActions.OFF_SUBTITLES]({ commit }) {
@@ -225,14 +166,22 @@ const actions = {
   },
   [subtitleActions.RESET_SUBTITLES]({ commit }) {
     commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
-    commit(subtitleMutations.RESET_SUBTITLES);
   },
-  [subtitleActions.RESET_ONLINE_SUBTITLES]({ commit, state }) {
+  [subtitleActions.RESET_ONLINE_SUBTITLES]({
+    commit, state, getters, dispatch,
+  }) {
     const {
-      loadingStates, durations, names, languages, formats, types,
+      videoSubtitleMap, loadingStates, durations, names, languages, formats, types,
     } = state;
-    const notOnlineIds = Object.keys(types).filter(id => types[id] !== 'online');
-    const takeSupportedFields = partialRight(pick, notOnlineIds);
+    const { originSrc } = getters;
+    const idsKeeping = Object.keys(types)
+      .filter(id => types[id] !== 'online' || !videoSubtitleMap[originSrc].includes(id));
+    const idsRemoving = difference(Object.keys(types), idsKeeping);
+    dispatch(
+      subtitleActions.REMOVE_FROM_VIDEO_SUBTITLE_MAP,
+      { videoSrc: originSrc, ids: idsRemoving },
+    );
+    const takeSupportedFields = partialRight(pick, idsKeeping);
     commit(subtitleMutations.RESET_SUBTITLES, {
       loadingStates: takeSupportedFields(loadingStates),
       durations: takeSupportedFields(durations),

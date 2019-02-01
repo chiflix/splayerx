@@ -2,8 +2,8 @@ import Vue from 'vue';
 
 import Helpers from '@/helpers';
 import romanize from 'romanize';
-import { Video as mutationTypes } from '../mutationTypes';
-import { Video as actionTypes } from '../actionTypes';
+import { Video as videoMutations } from '../mutationTypes';
+import { Video as videoActions, Subtitle as subtitleActions } from '../actionTypes';
 
 const state = {
   // error state
@@ -114,9 +114,9 @@ function mutationer(mutationType) {
   };
 }
 
-function mutationsGenerator(mutationTypes) {
+function mutationsGenerator(videoMutations) {
   const mutations = {};
-  Object.keys(mutationTypes).forEach((type) => {
+  Object.keys(videoMutations).forEach((type) => {
     mutations[type] = mutationer(type);
   });
   return mutations;
@@ -151,66 +151,67 @@ function generateTracks(actionType, newTrack, oldTracks) {
   }
   return newTracks;
 }
-const mutations = mutationsGenerator(mutationTypes);
+const mutations = mutationsGenerator(videoMutations);
 
 const actions = {
-  [actionTypes.SRC_SET]({ commit }, { src, mediaHash }) {
+  [videoActions.SRC_SET]({ commit, dispatch }, { src, mediaHash }) {
     const srcRegexes = {
       unix: RegExp(/^[^\0]+$/),
       windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
     };
     Object.keys(srcRegexes).forEach(async (type) => {
       if (srcRegexes[type].test(src)) {
-        commit(mutationTypes.SRC_UPDATE, src);
+        commit(videoMutations.SRC_UPDATE, src);
         commit(
-          mutationTypes.MEDIA_HASH_UPDATE,
+          videoMutations.MEDIA_HASH_UPDATE,
           mediaHash || await Helpers.methods.mediaQuickHash(src),
         );
+        dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
       }
     });
   },
-  [actionTypes.INITIALIZE]({ commit }, config) {
+  [videoActions.INITIALIZE]({ commit }, config) {
     Object.keys(config).forEach((item) => {
       const mutation = stateToMutation(item);
-      if (mutationTypes[mutation]) commit(mutation, config[item]);
+      if (videoMutations[mutation]) commit(mutation, config[item]);
     });
   },
-  [actionTypes.INCREASE_VOLUME]({ dispatch, commit, state }, delta) {
-    if (state.muted) dispatch(actionTypes.TOGGLE_MUTED);
+  [videoActions.INCREASE_VOLUME]({ dispatch, commit, state }, delta) {
+    if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
     const finalDelta = delta || 10;
     const finalVolume = state.volume + finalDelta;
-    commit(mutationTypes.VOLUME_UPDATE, finalVolume > 100 ? 100 : finalVolume);
+    commit(videoMutations.VOLUME_UPDATE, finalVolume > 100 ? 100 : finalVolume);
   },
-  [actionTypes.DECREASE_VOLUME]({ dispatch, commit, state }, delta) {
-    if (state.muted) dispatch(actionTypes.TOGGLE_MUTED);
+  [videoActions.DECREASE_VOLUME]({ dispatch, commit, state }, delta) {
+    if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
     const finalDelta = delta || 10;
     const finalVolume = state.volume - finalDelta;
-    commit(mutationTypes.VOLUME_UPDATE, finalVolume < 0 ? 0 : finalVolume);
-    if (finalVolume <= 0) commit(mutationTypes.MUTED_UPDATE, true);
+    commit(videoMutations.VOLUME_UPDATE, finalVolume < 0 ? 0 : finalVolume);
+    if (finalVolume <= 0) commit(videoMutations.MUTED_UPDATE, true);
   },
-  [actionTypes.TOGGLE_MUTED]({ commit, state }) {
-    commit(mutationTypes.MUTED_UPDATE, !state.muted);
+  [videoActions.TOGGLE_MUTED]({ commit, state }) {
+    commit(videoMutations.MUTED_UPDATE, !state.muted);
   },
-  [actionTypes.INCREASE_RATE]({ commit, state }) {
+  [videoActions.INCREASE_RATE]({ commit, state }) {
     const rateArr = [0.5, 1, 1.2, 1.5, 2];
     const finalRate = rateArr[rateArr.indexOf(state.rate) + 1];
-    commit(mutationTypes.RATE_UPDATE, finalRate || state.rate);
+    commit(videoMutations.RATE_UPDATE, finalRate || state.rate);
   },
-  [actionTypes.DECREASE_RATE]({ commit, state }) {
+  [videoActions.DECREASE_RATE]({ commit, state }) {
     const rateArr = [0.5, 1, 1.2, 1.5, 2];
     const finalRate = rateArr[rateArr.indexOf(state.rate) - 1];
-    commit(mutationTypes.RATE_UPDATE, finalRate || state.rate);
+    commit(videoMutations.RATE_UPDATE, finalRate || state.rate);
   },
-  [actionTypes.CHANGE_RATE]({ commit }, delta) {
-    commit(mutationTypes.RATE_UPDATE, delta);
+  [videoActions.CHANGE_RATE]({ commit }, delta) {
+    commit(videoMutations.RATE_UPDATE, delta);
   },
-  [actionTypes.PLAY_VIDEO]({ commit }) {
-    commit(mutationTypes.PAUSED_UPDATE, false);
+  [videoActions.PLAY_VIDEO]({ commit }) {
+    commit(videoMutations.PAUSED_UPDATE, false);
   },
-  [actionTypes.PAUSE_VIDEO]({ commit }) {
-    commit(mutationTypes.PAUSED_UPDATE, true);
+  [videoActions.PAUSE_VIDEO]({ commit }) {
+    commit(videoMutations.PAUSED_UPDATE, true);
   },
-  [actionTypes.META_INFO]({ commit }, metaInfo) {
+  [videoActions.META_INFO]({ commit }, metaInfo) {
     const validMetaInfo = [
       'intrinsicWidth',
       'intrinsicHeight',
@@ -218,14 +219,16 @@ const actions = {
     ];
     Object.keys(metaInfo).forEach((item) => {
       const mutation = stateToMutation(item);
-      if (validMetaInfo.includes(item) && mutationTypes[mutation]) commit(mutation, metaInfo[item]);
+      if (validMetaInfo.includes(item) && videoMutations[mutation]) {
+        commit(mutation, metaInfo[item]);
+      }
     });
   },
-  [actionTypes.UPDATE_DELAY]({ commit }, delta) {
+  [videoActions.UPDATE_DELAY]({ commit }, delta) {
     const finalDelay = state.AudioDelay + delta;
-    commit(mutationTypes.DELAY_UPDATE, finalDelay);
+    commit(videoMutations.DELAY_UPDATE, finalDelay);
   },
-  [actionTypes.ADD_AUDIO_TRACK]({ commit, state }, trackToAdd) {
+  [videoActions.ADD_AUDIO_TRACK]({ commit, state }, trackToAdd) {
     let times = 1;
     state.audioTrackList.forEach((item) => {
       if (item.language === trackToAdd.language) {
@@ -234,15 +237,15 @@ const actions = {
     });
     trackToAdd = Object.assign(trackToAdd, { name: `${trackToAdd.language} ${romanize(times)}` });
     const newAudioTracks = generateTracks('add', trackToAdd, state.audioTrackList);
-    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+    commit(videoMutations.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
-  [actionTypes.SWITCH_AUDIO_TRACK]({ commit, state }, trackToSwitch) {
+  [videoActions.SWITCH_AUDIO_TRACK]({ commit, state }, trackToSwitch) {
     const newAudioTracks = generateTracks('switch', trackToSwitch, state.audioTrackList);
-    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+    commit(videoMutations.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
-  [actionTypes.REMOVE_ALL_AUDIO_TRACK]({ commit, state }) {
+  [videoActions.REMOVE_ALL_AUDIO_TRACK]({ commit, state }) {
     const newAudioTracks = generateTracks('removeAll', null, state.audioTrackList);
-    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+    commit(videoMutations.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
 };
 

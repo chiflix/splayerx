@@ -103,6 +103,7 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import difference from 'lodash/difference';
+import debounce from 'lodash/debounce';
 import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
@@ -148,6 +149,7 @@ export default {
       isInitial: true,
       onAnimation: false,
       refAnimation: '',
+      debouncedHandler: debounce(this.handleRefresh, 1000),
     };
   },
   computed: {
@@ -261,6 +263,7 @@ export default {
     originSrc() {
       this.showAttached = false;
       this.computedAvaliableItems = [];
+      clearInterval(this.timer);
     },
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
@@ -330,7 +333,10 @@ export default {
     getSubName(subPath) {
       return path.basename(subPath);
     },
-    handleRefresh() {
+    debouncedHandleRefresh(e, hasOnlineSubtitles = false) {
+      this.debouncedHandler(e, hasOnlineSubtitles);
+    },
+    handleRefresh(e, hasOnlineSubtitles = false) {
       if (navigator.onLine) {
         if (!this.privacyAgreement) {
           this.$bus.$emit('privacy-confirm');
@@ -342,7 +348,10 @@ export default {
           }, 10);
           const types = ['local'];
           if (this.isInitial) types.push('embedded');
-          if (!this.isInitial || ['ts', 'avi', 'mkv'].includes(extname(this.originSrc).slice(1).toLowerCase())) types.push('online');
+          if (!hasOnlineSubtitles &&
+            (!this.isInitial || ['ts', 'avi', 'mkv', 'mp4'].includes(extname(this.originSrc).slice(1).toLowerCase()))) {
+            types.push('online');
+          }
           // three suitations for variable 'types':
           // first open && matched extensions: ['local', 'embedded', 'online']
           // first open && !matched extensions: ['local', 'embedded']
@@ -459,10 +468,10 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('subtitle-refresh-from-menu', this.handleRefresh);
-    this.$bus.$on('subtitle-refresh-from-src-change', () => {
+    this.$bus.$on('subtitle-refresh-from-menu', this.debouncedHandleRefresh);
+    this.$bus.$on('subtitle-refresh-from-src-change', (e, hasOnlineSubtitles) => {
       this.isInitial = true;
-      this.handleRefresh();
+      this.debouncedHandleRefresh(hasOnlineSubtitles);
     });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
@@ -489,7 +498,7 @@ export default {
     this.$bus.$on('subtitle-refresh-continue', () => {
       if (this.continueRefresh) {
         this.continueRefresh = false;
-        this.handleRefresh();
+        this.debouncedHandleRefresh();
       }
     });
 
