@@ -142,7 +142,6 @@ const actions = {
   },
   [subtitleActions.RESET_SUBTITLES]({ commit }) {
     commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
-    commit(subtitleMutations.RESET_SUBTITLES);
   },
   [subtitleActions.RESET_ONLINE_SUBTITLES]({ commit, state }) {
     const {
