@@ -69,7 +69,6 @@ export default {
       showThumbnail: false,
       mousedown: false,
       mouseleave: true,
-      thumbnailWidth: 272,
       hovering: false,
       hoveringId: 0,
       progressTriggerStopped: false,
@@ -78,7 +77,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'duration', 'ratio', 'nextVideo']),
+    ...mapGetters(['winWidth', 'winHeight', 'winRatio', 'duration', 'ratio', 'nextVideo']),
     hoveredPercent() {
       return this.hovering ? this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100 : 0;
     },
@@ -90,6 +89,23 @@ export default {
     },
     hoveredSmallerThanPlayed() {
       return !this.mouseleave && this.hoveredCurrentTime < videodata.time;
+    },
+    thumbnailWidth() {
+      const reactivePhases = {
+        phases: [288, 480, 1080],
+        thumbnailWidth: [100, 136, 170, 272],
+      };
+      let widthIndex = reactivePhases.phases.findIndex((value) => {
+        if (this.winRatio > 1) return value > this.winHeight;
+        return value > this.winWidth;
+      });
+      if (widthIndex < 0) {
+        if ((this.winRatio > 1 && this.winHeight >= 1080)
+          || (this.winRatio < 1 && this.winWidth >= 1080)) {
+          widthIndex = 3;
+        }
+      }
+      return reactivePhases.thumbnailWidth[widthIndex];
     },
     thumbnailHeight() {
       return Math.round(this.thumbnailWidth / this.ratio);
@@ -108,11 +124,6 @@ export default {
       if (this.hoveredCurrentTime === 0 && this.hoveredSmallerThanPlayed) opacity = 0.3;
       if (this.hoveredCurrentTime > 0) opacity = 0.9;
       return this.whiteWithOpacity(opacity);
-    },
-  },
-  watch: {
-    winWidth(newValue) {
-      this.thumbnailWidth = this.winWidthToThumbnailWidth(newValue);
     },
   },
   methods: {
@@ -242,21 +253,6 @@ export default {
       }
       return pageX - (thumbnailWidth / 2);
     },
-    winWidthToThumbnailWidth(winWidth) {
-      let thumbnailWidth = 0;
-      const reactivePhases = {
-        winWidth: [513, 846, 1921, 3841],
-        thumbnailWidth: [100, 136, 170, 272],
-      };
-      reactivePhases.winWidth.some((value, index) => {
-        if (winWidth < value) {
-          thumbnailWidth = reactivePhases.thumbnailWidth[index];
-          return true;
-        }
-        return false;
-      });
-      return thumbnailWidth;
-    },
     whiteWithOpacity(opacity) {
       return `rgba(255, 255, 255, ${opacity}`;
     },
@@ -276,7 +272,6 @@ export default {
   created() {
     document.addEventListener('mousemove', this.handleDocumentMousemove);
     document.addEventListener('mouseup', this.handleDocumentMouseup);
-    this.thumbnailWidth = this.winWidthToThumbnailWidth(this.winWidth);
     this.$bus.$on('seek', () => {
       this.progressTriggerStopped = true;
       this.clock.clearTimeout(this.progressTriggerId);

@@ -199,39 +199,5 @@ describe('Component - TheProgressBar', () => {
         expect(result).to.equal(expectedResult);
       });
     });
-
-    describe('Method - winWidthToThumbnailWidth', () => {
-      it('should return 100 when winWidth < minimum breakpoint', () => {
-        const winWidth = 512;
-
-        const result = wrapper.vm.winWidthToThumbnailWidth(winWidth);
-
-        expect(result).to.equal(100);
-      });
-
-      it('should return 272 when winWidth > maximum breakpoint', () => {
-        const winWidth = 1921;
-
-        const result = wrapper.vm.winWidthToThumbnailWidth(winWidth);
-
-        expect(result).to.equal(272);
-      });
-
-      it('should return 136 when winWidth is at second breakpoint', () => {
-        const winWidth = 800;
-
-        const result = wrapper.vm.winWidthToThumbnailWidth(winWidth);
-
-        expect(result).to.equal(136);
-      });
-
-      it('should return 170 when winWidth is at third breakpoint', () => {
-        const winWidth = 1280;
-
-        const result = wrapper.vm.winWidthToThumbnailWidth(winWidth);
-
-        expect(result).to.equal(170);
-      });
-    });
   });
 });
