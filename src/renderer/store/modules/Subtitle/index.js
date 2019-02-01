@@ -70,7 +70,8 @@ const mutations = {
   [subtitleMutations.VIDEO_SUBTITLE_MAP_UPDATE]({ videoSubtitleMap }, { videoSrc, id }) {
     const subtitleIds = videoSubtitleMap[videoSrc] instanceof Array ?
       videoSubtitleMap[videoSrc] : [];
-    Vue.set(videoSubtitleMap, videoSrc, uniq([...subtitleIds, id]));
+    const finalIds = uniq(id ? [...subtitleIds, id] : [...subtitleIds]);
+    Vue.set(videoSubtitleMap, videoSrc, finalIds);
   },
   [subtitleMutations.DURATIONS_UPDATE]({ durations }, { id, duration }) {
     Vue.set(durations, id, duration);
@@ -143,12 +144,14 @@ const actions = {
   [subtitleActions.RESET_SUBTITLES]({ commit }) {
     commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
   },
-  [subtitleActions.RESET_ONLINE_SUBTITLES]({ commit, state }) {
+  [subtitleActions.RESET_ONLINE_SUBTITLES]({ commit, state, getters }) {
     const {
-      loadingStates, durations, names, languages, formats, types,
+      videoSubtitleMap, loadingStates, durations, names, languages, formats, types,
     } = state;
-    const notOnlineIds = Object.keys(types).filter(id => types[id] !== 'online');
-    const takeSupportedFields = partialRight(pick, notOnlineIds);
+    const { originSrc } = getters;
+    const idsKeeping = Object.keys(types)
+      .filter(id => types[id] !== 'online' || !videoSubtitleMap[originSrc].includes(id));
+    const takeSupportedFields = partialRight(pick, idsKeeping);
     commit(subtitleMutations.RESET_SUBTITLES, {
       loadingStates: takeSupportedFields(loadingStates),
       durations: takeSupportedFields(durations),
