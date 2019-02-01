@@ -358,15 +358,17 @@ export default {
     },
     handleMouseupLeft() {
       this.isMousemove = false;
-      this.isMousedown = false;
       this.clicks += 1;
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
       }
-      if (this.lastDragging && this.lastAttachedShowing) {
+      // 这里的事件监听和progress-bar里面document.mouseup 事件有冲突
+      // 需要mouse down来记录是否是组件内部事件处理
+      if ((this.lastDragging && this.lastAttachedShowing) || !this.isMousedown) {
         this.clicks = 0;
         return;
       }
+      this.isMousedown = false;
       if (this.clicks === 1) {
         this.clicksTimer = setTimeout(() => {
           this.clicks = 0;

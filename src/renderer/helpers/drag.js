@@ -48,7 +48,7 @@ export default function drag(element) {
     }
   };
 
-  element.addEventListener('mousedown', onmousedown, true);
+  element.addEventListener('mousedown', onmousedown, false);
 
   // 在windows系统下，正常情况win-mouse模块的left-up事件会正常触发，但是虚拟机下面
   // 有时会失效，导致拖动窗口，松开鼠标，应用窗口吸附的bug，通过mouseup，来释放拖拽

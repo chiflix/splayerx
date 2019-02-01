@@ -5,7 +5,7 @@
     @mousemove="handleMousemove"
     @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
-    @mousedown="handleMousedown">
+    @mousedown.stop="handleMousedown">
     <the-preview-thumbnail class="the-preview-thumbnail" v-show="showThumbnail"
       :currentTime="hoveredCurrentTime"
       :maxThumbnailWidth="240"
@@ -193,8 +193,11 @@ export default {
       if (!this.mousedown) {
         this.setHoveringToFalse(true);
         this.showThumbnail = false;
+        // 这里在没有mouse-down的情况下，才处理mouseleave
+        // 如果有mouse-down，mouseleave应该放到document.mouseup中处理
+        // 不然document.mousemove无法正确处理progress-bar的play|hover样式
+        this.mouseleave = true;
       }
-      this.mouseleave = true;
     },
     handleMousedown(event) {
       this.mousedown = true;
@@ -210,12 +213,23 @@ export default {
         this.$bus.$emit('play');
       }
     },
-    handleDocumentMouseup() {
+    handleDocumentMouseup(event) {
+      let isTargetProgressBar = false;
+      try {
+        isTargetProgressBar = event.path.filter(e => e.tagName === 'DIV' && e.className.includes('the-progress-bar')).length > 0;
+      } catch (err) {
+        // err
+      }
+      // 如果mouseup的target是当前组件，那么不需要触发leave
+      if (!isTargetProgressBar) {
+        this.mouseleave = true;
+        this.showThumbnail = false;
+      }
       if (this.mousedown) {
         this.mousedown = false;
         if (this.mouseleave) {
-          this.setHoveringToFalse(false);
-          this.showThumbnail = false;
+          // 如果mouseup是在组件外，立马移除hover，不做延迟处理
+          this.setHoveringToFalse(true);
         }
         this.$bus.$emit('seek', this.hoveredCurrentTime);
       }
