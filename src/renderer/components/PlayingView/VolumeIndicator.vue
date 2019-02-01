@@ -59,11 +59,9 @@ export default {
     isFullScreen(val) {
       if (val) {
         this.$refs.indicatorContainer.style.setProperty('--background-height', `${this.backgroundHeight}px`);
-        this.$refs.indicatorContainer.style.setProperty('--indicator-container-width', `${this.containerWidth}px`);
         this.$refs.indicatorContainer.style.setProperty('--mute-top', `${this.muteTop}px`);
       } else {
         this.$refs.indicatorContainer.style.setProperty('--background-height', '');
-        this.$refs.indicatorContainer.style.setProperty('--indicator-container-width', '');
         this.$refs.indicatorContainer.style.setProperty('--mute-top', '');
       }
     },
