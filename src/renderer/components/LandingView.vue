@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper"
     :data-component-name="$options.name"
-    @mousedown.left.stop="handleLeftClick"
+    @mousedown.left="handleLeftClick"
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
