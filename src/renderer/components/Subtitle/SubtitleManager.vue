@@ -332,9 +332,11 @@ export default {
   created() {
     this.resetSubtitles();
     this.$bus.$on('add-subtitles', (subs) => {
-      Promise.all(this.normalizeSubtitleList(subs).map(this.addSubtitle))
+      Promise.all(this.normalizeSubtitleList(subs)
+        .map(sub => this.addSubtitle(sub, this.originSrc)))
         .then((subtitleInstances) => {
-          this.changeCurrentSubtitle(subtitleInstances[0].id);
+          this.changeCurrentSubtitle(subtitleInstances[subtitleInstances.length - 1].id);
+          this.selectionComplete = true;
         });
     });
     this.$bus.$on('refresh-subtitles', (types) => {
