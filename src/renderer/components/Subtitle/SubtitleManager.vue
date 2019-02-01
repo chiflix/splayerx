@@ -149,7 +149,7 @@ export default {
       return Promise.all(subtitleRequests)
         .then(subtitleLists => Promise.all(subtitleLists.map(normalizeSubtitleList)))
         .then(normalizedLists => flatten(normalizedLists))
-        .then(allSubtitles => Promise.all(allSubtitles.map(addSubtitle)))
+        .then(allSubtitles => Promise.all(allSubtitles.map(sub => addSubtitle(sub, videoSrc))))
         .then(() => this.$bus.$emit('refresh-finished'));
     },
     getLocalSubtitlesList(videoSrc) {
@@ -165,12 +165,12 @@ export default {
     getEmbeddedSubtitlesList(videoSrc) {
       return getEmbeddedSubtitles(videoSrc, SubtitleLoader.supportedCodecs).catch(() => []);
     },
-    async addSubtitle({ src, type, options }) {
+    async addSubtitle({ src, type, options }, videoSrc) {
       const subtitleInstance = new SubtitleLoader(src, type, { ...options });
       try {
         return this.setupListeners(subtitleInstance, {
           metaChange: this.metaChangeCallback,
-          loading: this.loadingCallback,
+          loading: partial(this.loadingCallback, videoSrc),
           ready: this.readyCallback,
           loaded: this.loadedCallback,
           failed: this.failedCallback,
@@ -303,10 +303,10 @@ export default {
     metaChangeCallback({ id }, { field, value }) {
       this.metaInfoUpdate(id, field, value);
     },
-    loadingCallback(subtitleInstance) {
+    loadingCallback(videoSrc, subtitleInstance) {
       const { id, type } = subtitleInstance;
       this.$set(this.subtitleInstances, id, subtitleInstance);
-      this.addSubtitleWhenLoading({ id, type });
+      this.addSubtitleWhenLoading({ id, type, videoSrc });
     },
     async readyCallback(subtitleInstance, metaInfo) {
       const { type, id, src } = subtitleInstance;
