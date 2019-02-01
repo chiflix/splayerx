@@ -28,9 +28,7 @@ export default {
   data() {
     return {
       subtitleInstances: {},
-      isAutoSelection: false,
-      autoSelectionCompleted: false,
-      addingSubtitlesCount: 0,
+      selectionComplete: false,
     };
   },
   computed: {
@@ -45,15 +43,6 @@ export default {
       preferredLanguages: ({ Preference }) => (
         [Preference.primaryLanguage, Preference.secondaryLanguage].filter(language => !!language)
       ),
-      languageLoadedSubtitleInfoList: ({ Subtitle }) => {
-        const {
-          loadingStates, languages, types, ranks,
-        } = Subtitle;
-        return Object.keys(loadingStates)
-          .filter(id => loadingStates[id] !== 'failed' && languages[id])
-          .sort((prevId, currId) => ranks[currId] - ranks[prevId])
-          .map(id => ({ id, language: languages[id], type: types[id] }));
-      },
       qualifiedSubtitles: ({ Subtitle, Video }) => {
         const { loadingStates, types, durations } = Subtitle;
         const { duration } = Video;
@@ -65,15 +54,10 @@ export default {
     currentSubtitle() {
       return this.subtitleInstances[this.currentSubtitleId];
     },
-    allLanguageLoaded() {
-      return this.addingSubtitlesCount &&
-        this.addingSubtitlesCount === this.languageLoadedSubtitleInfoList.length;
-    },
   },
   watch: {
     originSrc(newVal) {
       if (newVal) {
-        this.addingSubtitlesCount = 0;
         this.resetSubtitles();
         const hasOnlineSubtitles =
           !!this.$store.state.Subtitle.videoSubtitleMap[this.originSrc]
@@ -85,22 +69,6 @@ export default {
             .length;
         this.$bus.$emit('subtitle-refresh-from-src-change', hasOnlineSubtitles);
         this.$store.dispatch('ifNoSubtitle', true);
-      }
-    },
-    languageLoadedSubtitleInfoList(newVal, oldVal) {
-      if (!this.autoSelectionCompleted && !isEqual(oldVal, newVal)) {
-        const {
-          isAutoSelection: auto,
-          findSubtitleByLanguageWithTypeRank: finder,
-          preferredLanguages: langs,
-          allLanguageLoaded: all,
-          currentSubtitleId: curr,
-        } = this;
-        const subtitlesToFindFrom = auto ? newVal : differenceWith(newVal, oldVal, isEqual);
-        let result = finder(subtitlesToFindFrom, langs[0]);
-        if (!result && all) result = finder(newVal, langs[1]);
-        this.changeCurrentSubtitle(result ? result.id : curr);
-        if (result) this.autoSelectionCompleted = true;
       }
     },
     qualifiedSubtitles(newVal, oldVal) {
@@ -152,13 +120,17 @@ export default {
         subtitleRequests.push(getOnlineSubtitlesList(videoSrc, preferredLanguages));
       }
 
-      if (subtitleRequests.length) this.$bus.$emit('subtitle-requested');
+      this.selectionComplete = false;
+      this.checkCurrentSubtitleList();
 
       return Promise.all(subtitleRequests)
         .then(subtitleLists => Promise.all(subtitleLists.map(normalizeSubtitleList)))
         .then(normalizedLists => flatten(normalizedLists))
         .then(allSubtitles => Promise.all(allSubtitles.map(sub => addSubtitle(sub, videoSrc))))
-        .then(() => this.$bus.$emit('refresh-finished'));
+        .then(() => {
+          this.$bus.$emit('refresh-finished');
+          this.checkCurrentSubtitleList();
+        });
     },
     getLocalSubtitlesList(videoSrc) {
       return getLocalSubtitles(videoSrc, SubtitleLoader.supportedFormats).catch(() => []);
@@ -326,32 +298,52 @@ export default {
         this.subtitleList,
       ) || name;
       this.addSubtitleWhenReady({ id, format });
+      this.checkCurrentSubtitleList();
     },
     failedCallback({ id }) {
-      this.addingSubtitlesCount -= 1;
       this.$delete(this.subtitleInstances, id);
       this.addSubtitleWhenFailed({ id });
+    },
+    checkCurrentSubtitleList() {
+      const {
+        selectionComplete,
+        subtitleList,
+        preferredLanguages,
+      } = this;
+      if (!selectionComplete) {
+        const hasPrimaryLanguage = subtitleList
+          .find(({ language }) => language === preferredLanguages[0]);
+        if (hasPrimaryLanguage) {
+          this.changeCurrentSubtitle(hasPrimaryLanguage.id);
+          this.selectionComplete = true;
+        } else {
+          const hasSecondaryLanguage = subtitleList
+            .find(({ language }) => language === preferredLanguages[1]);
+          if (hasSecondaryLanguage) {
+            this.changeCurrentSubtitle(hasSecondaryLanguage.id);
+            this.selectionComplete = true;
+          } else {
+            this.changeCurrentSubtitle('');
+          }
+        }
+      }
     },
   },
   created() {
     this.resetSubtitles();
     this.$bus.$on('add-subtitles', (subs) => {
-      this.autoSelectionCompleted = false;
       Promise.all(this.normalizeSubtitleList(subs).map(this.addSubtitle))
         .then((subtitleInstances) => {
           this.changeCurrentSubtitle(subtitleInstances[0].id);
-          this.autoSelectionCompleted = true;
         });
     });
     this.$bus.$on('refresh-subtitles', (types) => {
-      this.autoSelectionCompleted = false;
       this.refreshSubtitles(types, this.originSrc);
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
 
     // when set immediate on watcher, it may run before the created hook
-    this.addingSubtitlesCount = 0;
     this.resetSubtitles();
     this.$bus.$emit('subtitle-refresh-from-src-change');
     this.$store.dispatch('ifNoSubtitle', true);
