@@ -103,6 +103,7 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import difference from 'lodash/difference';
+import debounce from 'lodash/debounce';
 import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
@@ -148,6 +149,7 @@ export default {
       isInitial: true,
       onAnimation: false,
       refAnimation: '',
+      debouncedHandler: debounce(this.handleRefresh, 1000),
     };
   },
   computed: {
@@ -266,7 +268,6 @@ export default {
       this.showAttached = false;
       this.computedAvaliableItems = [];
       clearInterval(this.timer);
-      this.timer = this.count = 0;
     },
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
@@ -335,6 +336,9 @@ export default {
     },
     getSubName(subPath) {
       return path.basename(subPath);
+    },
+    debouncedHandleRefresh(e, hasOnlineSubtitles = false) {
+      this.debouncedHandler(e, hasOnlineSubtitles);
     },
     handleRefresh(e, hasOnlineSubtitles = false) {
       if (navigator.onLine) {
@@ -468,10 +472,10 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('subtitle-refresh-from-menu', this.handleRefresh);
+    this.$bus.$on('subtitle-refresh-from-menu', this.debouncedHandleRefresh);
     this.$bus.$on('subtitle-refresh-from-src-change', (e, hasOnlineSubtitles) => {
       this.isInitial = true;
-      this.handleRefresh(hasOnlineSubtitles);
+      this.debouncedHandleRefresh(hasOnlineSubtitles);
     });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
@@ -498,7 +502,7 @@ export default {
     this.$bus.$on('subtitle-refresh-continue', () => {
       if (this.continueRefresh) {
         this.continueRefresh = false;
-        this.handleRefresh();
+        this.debouncedHandleRefresh();
       }
     });
 
