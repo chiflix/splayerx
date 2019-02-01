@@ -15,7 +15,7 @@
 
               <div class="topContainer">
                 <div class="title">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
-                <Icon type="refresh" class="refresh" @mouseup.native="$bus.$emit('subtitle-refresh-from-button-clicked')"
+                <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
                   :style="{
                     cursor: 'pointer',
                     transform: `rotate(${rotateTime * 360}deg)`,
@@ -336,7 +336,7 @@ export default {
     getSubName(subPath) {
       return path.basename(subPath);
     },
-    handleRefresh(hasOnlineSubtitles = false) {
+    handleRefresh(e, hasOnlineSubtitles = false) {
       if (navigator.onLine) {
         if (!this.privacyAgreement) {
           this.$bus.$emit('privacy-confirm');
@@ -469,8 +469,7 @@ export default {
   },
   created() {
     this.$bus.$on('subtitle-refresh-from-menu', this.handleRefresh);
-    this.$bus.$on('subtitle-refresh-from-button-clicked', this.handleRefresh);
-    this.$bus.$on('subtitle-refresh-from-src-change', (hasOnlineSubtitles) => {
+    this.$bus.$on('subtitle-refresh-from-src-change', (e, hasOnlineSubtitles) => {
       this.isInitial = true;
       this.handleRefresh(hasOnlineSubtitles);
     });
