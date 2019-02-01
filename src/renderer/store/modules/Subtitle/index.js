@@ -26,9 +26,9 @@ const state = {
 const getters = {
   currentSubtitleId: state => state.currentSubtitleId,
   subtitleList: ({
-    loadingStates, names, languages, formats, ranks, types,
-  }) =>
-    Object.keys(loadingStates)
+    videoSubtitleMap, loadingStates, names, languages, formats, ranks, types,
+  }, { originSrc }) =>
+    (videoSubtitleMap[originSrc] || [])
       .filter(id => loadingStates[id] !== 'failed')
       .map(id => ({
         id,
