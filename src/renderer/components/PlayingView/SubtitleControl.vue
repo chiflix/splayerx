@@ -336,7 +336,7 @@ export default {
     getSubName(subPath) {
       return path.basename(subPath);
     },
-    handleRefresh() {
+    handleRefresh(hasOnlineSubtitles = false) {
       if (navigator.onLine) {
         if (!this.privacyAgreement) {
           this.$bus.$emit('privacy-confirm');
@@ -348,7 +348,10 @@ export default {
           }, 10);
           const types = ['local'];
           if (this.isInitial) types.push('embedded');
-          if (!this.isInitial || ['ts', 'avi', 'mkv', 'mp4'].includes(extname(this.originSrc).slice(1).toLowerCase())) types.push('online');
+          if (!hasOnlineSubtitles &&
+            (!this.isInitial || ['ts', 'avi', 'mkv', 'mp4'].includes(extname(this.originSrc).slice(1).toLowerCase()))) {
+            types.push('online');
+          }
           // three suitations for variable 'types':
           // first open && matched extensions: ['local', 'embedded', 'online']
           // first open && !matched extensions: ['local', 'embedded']
@@ -466,9 +469,9 @@ export default {
   },
   created() {
     this.$bus.$on('subtitle-refresh-from-menu', this.handleRefresh);
-    this.$bus.$on('subtitle-refresh-from-src-change', () => {
+    this.$bus.$on('subtitle-refresh-from-src-change', (hasOnlineSubtitles) => {
       this.isInitial = true;
-      this.handleRefresh();
+      this.handleRefresh(hasOnlineSubtitles);
     });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);

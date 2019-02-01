@@ -75,7 +75,15 @@ export default {
       if (newVal) {
         this.addingSubtitlesCount = 0;
         this.resetSubtitles();
-        this.$bus.$emit('subtitle-refresh-from-src-change');
+        const hasOnlineSubtitles =
+          !!this.$store.state.Subtitle.videoSubtitleMap[this.originSrc]
+            .map((id) => {
+              const { type, language } = this.subtitleInstances[id];
+              return { type, language };
+            })
+            .filter(({ type }) => type === 'online')
+            .length;
+        this.$bus.$emit('subtitle-refresh-from-src-change', hasOnlineSubtitles);
         this.$store.dispatch('ifNoSubtitle', true);
       }
     },
