@@ -15,7 +15,7 @@
 
               <div class="topContainer">
                 <div class="title">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
-                <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
+                <Icon type="refresh" class="refresh" @mouseup.native="$bus.$emit('subtitle-refresh-from-button-clicked')"
                   :style="{
                     cursor: 'pointer',
                     transform: `rotate(${rotateTime * 360}deg)`,
@@ -469,6 +469,7 @@ export default {
   },
   created() {
     this.$bus.$on('subtitle-refresh-from-menu', this.handleRefresh);
+    this.$bus.$on('subtitle-refresh-from-button-clicked', this.handleRefresh);
     this.$bus.$on('subtitle-refresh-from-src-change', (hasOnlineSubtitles) => {
       this.isInitial = true;
       this.handleRefresh(hasOnlineSubtitles);
