@@ -1,20 +1,10 @@
 <template>
-  <div v-fade-in="showVolume" class="indicator-container"
-    :style="{
-      top: isFullScreen ? `${containerTop}px` : '',
-      width: isFullScreen ? `${containerWidth}px` : '',
-      height: isFullScreen ? `${volumeHeight}px` : '',
-    }">
-    <base-info-card class="card"
-      :style="{
-        width: isFullScreen ? `${cardWidth}px` : '',
-        height: isFullScreen ? `${backgroundHeight}px` : '',
-      }">
-      <div class="indicator" 
+  <div v-fade-in="showVolume" class="indicator-container" ref="indicatorContainer">
+    <base-info-card class="card" ref="card">
+      <div class="indicator" ref="indicator"
         :style="{
           height: volume * 100 + '%',
           opacity: muted ? 0.25 : 0.8,
-          width: isFullScreen ? `${indicatorWidth}px` : '',
         }"></div>
     </base-info-card>
     <base-icon v-show="muted || volume <= 0" class="mute" type="volume" effect="mute" />
@@ -54,28 +44,29 @@ export default {
       }
       return this.winWidth / this.ratio;
     },
-    cardWidth() {
-      return this.extraHeight <= 1080 ? 6 : 12;
-    },
-    indicatorWidth() {
-      return this.extraHeight <= 1080 ? 4 : 10;
+    muteTop() {
+      return this.extraHeight <= 1080 ? this.backgroundHeight + 2 : this.backgroundHeight + 4;
     },
     containerWidth() {
       return this.extraHeight <= 1080 ? 12 : 24;
-    },
-    containerTop() {
-      return (this.winHeight - this.backgroundHeight) / 2;
     },
     backgroundHeight() {
       return this.extraHeight <= 1080 ? ((this.extraHeight - 180) / 3) + 100
         : this.winHeight * 0.37;
     },
-    volumeHeight() {
-      return this.extraHeight <= 1080 ? ((this.extraHeight - 180) / 3) + 100 + 24
-        : this.winHeight * 0.37;
-    },
   },
   watch: {
+    isFullScreen(val) {
+      if (val) {
+        this.$refs.indicatorContainer.style.setProperty('--background-height', `${this.backgroundHeight}px`);
+        this.$refs.indicatorContainer.style.setProperty('--indicator-container-width', `${this.containerWidth}px`);
+        this.$refs.indicatorContainer.style.setProperty('--mute-top', `${this.muteTop}px`);
+      } else {
+        this.$refs.indicatorContainer.style.setProperty('--background-height', '');
+        this.$refs.indicatorContainer.style.setProperty('--indicator-container-width', '');
+        this.$refs.indicatorContainer.style.setProperty('--mute-top', '');
+      }
+    },
     showAllWidgets(newVal) {
       if (this.muted) {
         this.volumeTriggerStopped = newVal;
@@ -133,25 +124,25 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 12px;
+  width: var(--indicator-container-width);
   height: calc(var(--background-height) + 24px);
   top: var(--container-top);
+  --indicator-container-width: 12px;
   --window-height: 100vh;
   --window-width: 100vw;
-  --extra-width: calc(var(--window-height) - 180px);
-  --extra-height: calc(var(--extra-width) / 3);
-  --background-height: calc(100px + var(--extra-height));
+  --init-height: 100px;
+  --extra-height: calc((var(--window-height) - 180px) / 3);
+  --background-height: calc(var(--init-height) + var(--extra-height)); // indicator-height
   --remain-height: calc(var(--window-height) - var(--background-height));
   --container-top: calc(var(--remain-height) / 2);
   --mute-top: calc(var(--background-height) + 2px);
   .card {
     top: 0;
-    left: 3px;
-    width: 6px;
+    width: calc(var(--indicator-container-width) / 2);
     height: var(--background-height);
   }
   .indicator {
-    width: 4px;
+    width: 100%;
     background: white;
     border-radius: 0 1px 1px 0;
     position: absolute;
@@ -160,6 +151,8 @@ export default {
   .mute {
     position: absolute;
     top: var(--mute-top);
+    width: var(--indicator-container-width);
+    height: var(--indicator-container-width);
   }
   @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     right: 23px;
@@ -172,16 +165,9 @@ export default {
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     right: 57px;
-    width: 24px;
     --background-height: calc(var(--window-height) * 0.37);
+    --indicator-container-width: 24px;
     --mute-top: calc(var(--background-height) + 4px);
-    .card {
-      left: 6px;
-      width: 12px;
-    }
-    .indicator {
-      width: 10px;
-    }
   }
 }
 </style>

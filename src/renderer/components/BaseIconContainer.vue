@@ -130,12 +130,8 @@ export default {
 }
 
 .volume {
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 24px;
-    height: 24px;
-  }
-  width: 12px;
-  height: 12px;
+  width: 100%;
+  height: 100%;
 }
 
 .playlistplay {
