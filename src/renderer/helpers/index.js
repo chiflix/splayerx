@@ -3,7 +3,7 @@ import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
 import { times } from 'lodash';
-import InfoDB from '@/helpers/infoDB';
+import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
@@ -12,7 +12,6 @@ import Sagi from './sagi';
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 
 const clock = lolex.createClock();
-const infoDB = new InfoDB();
 
 export default {
   data() {
