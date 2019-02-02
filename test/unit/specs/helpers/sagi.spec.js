@@ -1,7 +1,7 @@
 import { createSandbox, assert } from 'sinon';
 import Sagi from '@/helpers/sagi';
 
-describe.only('helper.sagi api', () => {
+describe('helper.sagi api', () => {
   let sandbox;
   let randomMediaIdentity;
 
@@ -10,7 +10,7 @@ describe.only('helper.sagi api', () => {
     return `${randStr()}-${randStr()}-${randStr()}-${randStr()}`;
   }
 
-  // NOTE: to test raw functions, coresponding client and data need mocking
+  // NOTE&TODO: to test raw functions, coresponding client and data need mocking
 
   beforeEach(() => {
     sandbox = createSandbox();
