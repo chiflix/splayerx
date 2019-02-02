@@ -102,8 +102,12 @@ export default class SubtitleLoader extends EventEmitter {
 
   async load() {
     const loader = functionExtraction(this.loader.loader);
-    this.data = await promisify(loader.func.bind(null, ...this._getParams(toArray(loader.params))));
-    this.emit('data', this.data);
+    if (this.data) this.emit('data', this.data);
+    else {
+      this.data =
+        await promisify(loader.func.bind(null, ...this._getParams(toArray(loader.params))));
+      this.emit('data', this.data);
+    }
   }
 
   async parse() {
@@ -119,5 +123,17 @@ export default class SubtitleLoader extends EventEmitter {
       });
       throw e;
     }
+  }
+
+  toObject() {
+    const { type, id, src } = this;
+    const { language, name } = this.metaInfo;
+    return ({
+      src,
+      type,
+      id,
+      metaInfo: { language, name },
+      data: type === 'online' ? this.data : null,
+    });
   }
 }
