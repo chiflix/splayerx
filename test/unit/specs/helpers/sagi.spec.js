@@ -1,11 +1,20 @@
 import { createSandbox, assert } from 'sinon';
-import flatMap from 'lodash/flatMap';
 import Sagi from '@/helpers/sagi';
 
-describe('helper.sagi api', () => {
+describe.only('helper.sagi api', () => {
   let sandbox;
+  let randomMediaIdentity;
+
+  function generateMediaHash() {
+    const randStr = () => Math.random().toString(36).substring(7);
+    return `${randStr()}-${randStr()}-${randStr()}-${randStr()}`;
+  }
+
+  // NOTE: to test raw functions, coresponding client and data need mocking
+
   beforeEach(() => {
     sandbox = createSandbox();
+    randomMediaIdentity = generateMediaHash();
   });
   afterEach(() => {
     sandbox.restore();
@@ -22,33 +31,30 @@ describe('helper.sagi api', () => {
   }).timeout(20000);
 
   describe('mediaTranslate unit tests', () => {
-    const mediaIdentity = '11-22-33-44';
-    it('should proper mediaIdentity return OK when not in production', (done) => {
-      if (process.env.NODE_ENV !== 'production') {
-        Sagi.mediaTranslate({ mediaIdentity }).then(({ length }) => {
-          expect(length, 'results list length').to.be.above(0);
-          done();
-        });
-      }
-      done();
+    it('should mediaTranslate invoke mediaTranslateRaw', () => {
+      const mediaTranslateRawSpy = sandbox.spy(Sagi, 'mediaTranslateRaw');
+
+      Sagi.mediaTranslate({ mediaIdentity: randomMediaIdentity });
+
+      sandbox.assert.calledWithExactly(mediaTranslateRawSpy, randomMediaIdentity, 'zh');
     });
 
-    it('should proper mediaIdentity return error when in production', (done) => {
-      if (process.env.NODE_ENV === 'production') {
-        Sagi.mediaTranslate({ mediaIdentity }).catch(({ code }) => {
-          expect(code, 'error').to.equal(5); // no result
-          done();
-        });
-      }
-      done();
+    // TODO: error handling tests
+  });
+
+  describe('getTranscript unit tests', () => {
+    it('should getTranscript invoke getTranscriptRaw', () => {
+      const getTranscriptRawSpy = sandbox.spy(Sagi, 'getTranscriptRaw');
+
+      Sagi.getTranscript({ transcriptIdentity: randomMediaIdentity });
+
+      sandbox.assert.calledWithExactly(getTranscriptRawSpy, randomMediaIdentity);
     });
-  }).timeout(20000);
+
+    // TODO: error handling tests
+  });
 
   describe('pushTranscript unit tests', () => {
-    function randstr() {
-      return Math.random().toString(36).substring(7);
-    }
-    let randomMediaIdentity;
     let sampleText;
     let samplePayload;
     const baseTranscriptData = {
@@ -61,8 +67,7 @@ describe('helper.sagi api', () => {
     let transcriptData;
 
     beforeEach(() => {
-      randomMediaIdentity = `${randstr()}-${randstr()}-${randstr()}-${randstr()}`;
-      sampleText = `this is a playload sample ${randstr()}`;
+      sampleText = `this is a playload sample ${randomMediaIdentity}`;
       samplePayload = Buffer.from(`
         1
         00:00:00,440 --> 00:02:20,375
@@ -79,7 +84,16 @@ describe('helper.sagi api', () => {
 
       Sagi.pushTranscript({ ...transcriptData, payload: samplePayload });
 
-      assert.calledOnce(pushTranscriptRawWithPayloadSpy);
+      sandbox.assert.calledWithExactly(
+        pushTranscriptRawWithPayloadSpy,
+        transcriptData.mediaIdentity,
+        transcriptData.languageCode,
+        transcriptData.format,
+        transcriptData.playedTime,
+        transcriptData.totalTime,
+        transcriptData.delay,
+        samplePayload,
+      );
     });
 
     it('should transcriptData with only transcriptIdentity invoke pushTranscriptRawWithTranscriptIdentity', () => {
@@ -87,7 +101,16 @@ describe('helper.sagi api', () => {
 
       Sagi.pushTranscript({ ...transcriptData, transcriptIdentity: randomMediaIdentity });
 
-      assert.calledOnce(pushTransctiptRawWithTranscriptSpy);
+      sandbox.assert.calledWithExactly(
+        pushTransctiptRawWithTranscriptSpy,
+        transcriptData.mediaIdentity,
+        transcriptData.languageCode,
+        transcriptData.format,
+        transcriptData.playedTime,
+        transcriptData.totalTime,
+        transcriptData.delay,
+        randomMediaIdentity,
+      );
     });
 
     it('should transcriptData with payload and transcriptIdentity invoke pushTranscriptRawWithPayload', () => {
@@ -100,46 +123,19 @@ describe('helper.sagi api', () => {
         transcriptIdentity: randomMediaIdentity,
       });
 
-      assert.calledOnce(pushTranscriptRawWithPayloadSpy);
-      assert.notCalled(pushTransctiptRawWithTranscriptSpy);
+      sandbox.assert.calledWithExactly(
+        pushTranscriptRawWithPayloadSpy,
+        transcriptData.mediaIdentity,
+        transcriptData.languageCode,
+        transcriptData.format,
+        transcriptData.playedTime,
+        transcriptData.totalTime,
+        transcriptData.delay,
+        samplePayload,
+      );
+      sandbox.assert.notCalled(pushTransctiptRawWithTranscriptSpy);
     });
 
-    it('should be able to pushTranscript', (done) => {
-      Sagi.pushTranscript({ ...transcriptData, payload: samplePayload })
-        .then((res) => {
-          expect(res.code).to.equal(0);
-          done();
-        })
-        .catch(err => done(err));
-    });
-
-    it('should be able to get the transcript just pushed', (done) => {
-      Sagi.pushTranscript({ ...transcriptData, payload: samplePayload })
-        .then((err) => {
-          expect(transcriptData.mediaIdentity).to.equal(randomMediaIdentity);
-          if (!err.code) {
-            return Sagi.mediaTranslate({
-              mediaIdentity: randomMediaIdentity,
-              languageCode: 'en',
-            });
-          }
-          throw (err);
-        })
-        .then((transcriptsList) => {
-          expect(transcriptsList.length).to.above(0);
-          return Promise.all(transcriptsList
-            .map(({ transcriptIdentity }) => Sagi.getTranscript({ transcriptIdentity })));
-        })
-        .then((transcripts) => {
-          const realTranscripts = flatMap(transcripts);
-          expect(realTranscripts.length).to.above(0);
-          expect(realTranscripts.map(({ text }) => text.toLowerCase())).to.includes(sampleText);
-          done();
-        })
-        .catch((err) => {
-          console.error(err);
-          done(`Failed to fetch transcripts for mediaHash ${randomMediaIdentity}.`);
-        });
-    });
+    // TODO: error handling tests
   });
 });
