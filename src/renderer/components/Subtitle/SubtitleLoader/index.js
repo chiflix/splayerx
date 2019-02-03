@@ -73,6 +73,7 @@ export default class SubtitleLoader extends EventEmitter {
     }
 
     this.options = options || {};
+    this.data = this.options.data;
 
     const { func: idLoader, params: idParams } = functionExtraction(this.loader.id);
     promisify(idLoader.bind(null, ...this._getParams(idParams))).then((id) => {

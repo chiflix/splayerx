@@ -341,14 +341,15 @@ export default {
     async storeSubtitleList(videoSrc) {
       const subtitleList = this.$store.state.Subtitle.videoSubtitleMap[videoSrc] || [];
       const subtitleObjects = await Promise.all(subtitleList
-        .map(id => this.subtitleInstances[id].toObject()));
+        .map(async id => ({
+          ...await this.subtitleInstances[id].toObject(),
+          selected: id === this.currentSubtitleId,
+        })));
       const videoInfo = await infoDB.get('recent-played', 'path', videoSrc);
-      console.log({ ...videoInfo, subtitleObjects });
       return infoDB.add('recent-played', { ...videoInfo, subtitles: subtitleObjects });
     },
   },
   created() {
-    this.resetSubtitles();
     this.$bus.$on('add-subtitles', (subs) => {
       Promise.all(this.normalizeSubtitleList(subs)
         .map(sub => this.addSubtitle(sub, this.originSrc)))
