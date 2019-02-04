@@ -38,7 +38,6 @@
 </template>
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
-import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as inputActions } from '@/store/actionTypes';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
