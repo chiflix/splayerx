@@ -113,15 +113,18 @@ describe('Subtitle Searchers Unit Tests', () => {
     });
 
     it('should fetchOnlineList invoke mediaQuickHash', (done) => {
-      fetchOnlineList(videoSrc).then((res) => {
+      fetchOnlineList(videoSrc).then(() => {
         sandbox.assert.calledWithExactly(mediaQuickHashStub, videoSrc);
         done();
       }).catch(err => done(err));
     });
 
     it('should fetchOnlineList invoke mediaTranslate', (done) => {
-      fetchOnlineList(videoSrc).then((res) => {
-        sandbox.assert.calledWithExactly(mediaTranslateStub, { mediaIdentity, languageCode: undefined });
+      fetchOnlineList(videoSrc).then(() => {
+        sandbox.assert.calledWithExactly(mediaTranslateStub, {
+          mediaIdentity,
+          languageCode: undefined,
+        });
         done();
       }).catch(err => done(err));
     });

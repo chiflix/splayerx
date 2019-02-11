@@ -1,4 +1,4 @@
-import { createSandbox, assert } from 'sinon';
+import { createSandbox } from 'sinon';
 import Sagi from '@/helpers/sagi';
 
 describe('helper.sagi api', () => {
