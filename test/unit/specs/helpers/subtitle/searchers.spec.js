@@ -1,8 +1,10 @@
-import { searchforLocalList } from '@/helpers/subtitle/searchers';
+import { searchforLocalList, fetchOnlineList } from '@/helpers/subtitle/searchers';
 import sinon from 'sinon';
 import mock from 'mock-fs';
 import { resolve } from 'path';
 import SubtitleLoader from '@/components/Subtitle/SubtitleLoader';
+import Sagi from '@/helpers/sagi';
+import helpers from '@/helpers';
 
 describe('Subtitle Searchers Unit Tests', () => {
   let sandbox;
@@ -89,6 +91,39 @@ describe('Subtitle Searchers Unit Tests', () => {
         expect(results).to.deep.include(filenameToLocalSubtitle('subtitleTestVideo.vtt'));
         done();
       });
+    });
+  });
+
+  describe('function - fetchOnlineList', () => {
+    const randStr = () => Math.random().toString(36).substring(7);
+    const generateMediaIdentity = () => `${randStr()}-${randStr()}-${randStr()}-${randStr()}`;
+    let videoSrc;
+    let mediaIdentity;
+    let mediaQuickHashStub;
+    let mediaTranslateStub;
+    beforeEach(() => {
+      videoSrc = randStr();
+      mediaIdentity = generateMediaIdentity();
+      mediaQuickHashStub = sandbox.stub(helpers.methods, 'mediaQuickHash');
+      mediaQuickHashStub.resolves(mediaIdentity);
+      mediaTranslateStub = sandbox.stub(Sagi, 'mediaTranslate');
+      mediaTranslateStub.resolves([{
+        transcriptIdentity: generateMediaIdentity(),
+      }]);
+    });
+
+    it('should fetchOnlineList invoke mediaQuickHash', (done) => {
+      fetchOnlineList(videoSrc).then((res) => {
+        sandbox.assert.calledWithExactly(mediaQuickHashStub, videoSrc);
+        done();
+      }).catch(err => done(err));
+    });
+
+    it('should fetchOnlineList invoke mediaTranslate', (done) => {
+      fetchOnlineList(videoSrc).then((res) => {
+        sandbox.assert.calledWithExactly(mediaTranslateStub, { mediaIdentity, languageCode: undefined });
+        done();
+      }).catch(err => done(err));
     });
   });
 });

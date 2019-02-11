@@ -4,8 +4,6 @@ import { ipcRenderer } from 'electron';
 import Sagi from '@/helpers/sagi';
 import helpers from '@/helpers';
 
-const { mediaQuickHash: getMediaIdentity } = helpers.methods;
-
 export function searchforLocalList(videoSrc, supportedExtensions) {
   return new Promise((resolve, reject) => {
     const videoDir = dirname(videoSrc);
@@ -42,7 +40,7 @@ export function fetchOnlineList(videoSrc, languageCode) {
     });
   };
   return new Promise((resolve, reject) => {
-    getMediaIdentity(videoSrc)
+    helpers.methods.mediaQuickHash(videoSrc)
       .then(mediaIdentity => Sagi.mediaTranslate({ mediaIdentity, languageCode }))
       .then(results => resolve(results.map(subtitleInfoNormalizer)))
       .catch(err => reject(err));
