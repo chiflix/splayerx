@@ -60,6 +60,14 @@ describe('Subtitle Manager Unit Tests', () => {
       videoSrc = randStr();
     });
 
+    it('should throw error when no valid types provided', (done) => {
+      wrapper.vm.refreshSubtitles([])
+        .then(res => done(res))
+        .catch((err) => {
+          expect(err).to.be.an.instanceOf(Error).with.property('message', 'No valid subtitle type provided.');
+          done();
+        });
+    });
     it('should invoke getLocalSubtitlesList when types includes local', () => {
       const getLocalSubtitlesListSpy = sandbox.spy(wrapper.vm, 'getLocalSubtitlesList');
 
@@ -87,6 +95,43 @@ describe('Subtitle Manager Unit Tests', () => {
       wrapper.vm.refreshSubtitles(['online'], videoSrc);
 
       sandbox.assert.calledWithExactly(getOnlineSubtitlesListSpy, videoSrc, wrapper.vm.preferredLanguages);
+    });
+
+    it('should refreshSubtitles set selectionComplete to false', () => {
+      wrapper.setData({ selectionComplete: true });
+      expect(wrapper.vm.selectionComplete).to.equal(true);
+
+      wrapper.vm.refreshSubtitles(['local'], videoSrc);
+      expect(wrapper.vm.selectionComplete).to.equal(false);
+    });
+
+    it('should invoke checkCurrentSubtitleList', () => {
+      const checkCurrentSubtitleListSpy = sandbox.spy(wrapper.vm, 'checkCurrentSubtitleList');
+
+      wrapper.vm.refreshSubtitles(['local'], videoSrc);
+
+      sandbox.assert.calledOnce(checkCurrentSubtitleListSpy);
+    });
+
+    it('should emit bus event "refresh-finished" when all subtitles are loaded', (done) => {
+      const eventBusEmitSpy = sandbox.spy(wrapper.vm.$bus, '$emit');
+      wrapper.vm.refreshSubtitles(['local'], videoSrc)
+        .then(() => {
+          sandbox.assert.calledWithExactly(eventBusEmitSpy, 'refresh-finished');
+          done();
+        })
+        .catch(err => done(err));
+    });
+
+    it('should invoke checkCurrentSubtitleList when all subtitles are loaded', () => {
+      const checkCurrentSubtitleListSpy = sandbox.spy(wrapper.vm, 'checkCurrentSubtitleList');
+
+      wrapper.vm.refreshSubtitles(['local'], videoSrc)
+        .then(() => {
+          sandbox.assert.calledOnce(checkCurrentSubtitleListSpy);
+          done();
+        })
+        .catch(err => done(err));
     });
   });
 });
