@@ -6,7 +6,7 @@ import helpers from '@/helpers';
 
 const { mediaQuickHash: getMediaIdentity } = helpers.methods;
 
-export function getLocalSubtitles(videoSrc, supportedExtensions) {
+export function searchforLocalList(videoSrc, supportedExtensions) {
   return new Promise((resolve, reject) => {
     const videoDir = dirname(videoSrc);
     const filename = basename(videoSrc, extname(videoSrc));
@@ -23,7 +23,7 @@ export function getLocalSubtitles(videoSrc, supportedExtensions) {
   });
 }
 
-export function getOnlineSubtitles(videoSrc, languageCode) {
+export function fetchOnlineList(videoSrc, languageCode) {
   const subtitleInfoNormalizer = (subtitle) => {
     const { languageCode: code, transcriptIdentity: src, ranking } = subtitle;
     return ({
@@ -43,7 +43,7 @@ export function getOnlineSubtitles(videoSrc, languageCode) {
   });
 }
 
-export function getEmbeddedSubtitles(videoSrc, supportedCodecs) {
+export function retrieveEmbeddedList(videoSrc, supportedCodecs) {
   ipcRenderer.send('mediaInfo', videoSrc);
   return new Promise((resolve, reject) => {
     setTimeout(() => { reject(new Error('Embedded Subtitles Retrieve Timeout!')); }, 20000);

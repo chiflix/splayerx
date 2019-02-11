@@ -14,7 +14,7 @@ import romanize from 'romanize';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import Sagi from '@/helpers/sagi';
-import { getLocalSubtitles, getOnlineSubtitles, getEmbeddedSubtitles } from '@/helpers/subtitle';
+import { searchforLocalList, fetchOnlineList, retrieveEmbeddedList } from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
@@ -133,17 +133,17 @@ export default {
         });
     },
     getLocalSubtitlesList(videoSrc) {
-      return getLocalSubtitles(videoSrc, SubtitleLoader.supportedFormats).catch(() => []);
+      return searchforLocalList(videoSrc, SubtitleLoader.supportedFormats).catch(() => []);
     },
     getOnlineSubtitlesList(videoSrc, languages) {
       function getOnlineSubtitlesWithErrorHandling(languages) {
-        return getOnlineSubtitles(videoSrc, languages).catch(() => []);
+        return fetchOnlineList(videoSrc, languages).catch(() => []);
       }
       return Promise.all(languages.map(getOnlineSubtitlesWithErrorHandling))
         .then(subtitleLists => flatten(subtitleLists));
     },
     getEmbeddedSubtitlesList(videoSrc) {
-      return getEmbeddedSubtitles(videoSrc, SubtitleLoader.supportedCodecs).catch(() => []);
+      return retrieveEmbeddedList(videoSrc, SubtitleLoader.supportedCodecs).catch(() => []);
     },
     async addSubtitle({ src, type, options }, videoSrc) {
       const subtitleInstance = new SubtitleLoader(src, type, { ...options });
