@@ -9,16 +9,22 @@ const { mediaQuickHash: getMediaIdentity } = helpers.methods;
 export function searchforLocalList(videoSrc, supportedExtensions) {
   return new Promise((resolve, reject) => {
     const videoDir = dirname(videoSrc);
-    const filename = basename(videoSrc, extname(videoSrc));
-    const extensionRegex = new RegExp(`\\.(${supportedExtensions.join('|')})$`);
+    const videoBasename = basename(videoSrc, extname(videoSrc));
+    const videoFilename = basename(videoSrc);
+    const validExtensions = supportedExtensions || ['srt', 'ass', 'vtt'];
+    const extensionRegex = new RegExp(`\\.(${validExtensions.join('|')})$`);
     readdir(videoDir, (err, files) => {
       if (err) reject(err);
-      const subtitles = files.filter(file =>
-        (extensionRegex.test(file) && file.slice(0, file.lastIndexOf('.')) === filename));
-      resolve(subtitles.map(subtitle => ({
-        src: join(dirname(videoSrc), subtitle),
-        type: 'local',
-      })));
+      resolve(files
+        .filter(subtitleFilename => (
+          extensionRegex.test(subtitleFilename) &&
+          subtitleFilename.slice(0, subtitleFilename.lastIndexOf('.')) === videoBasename &&
+          subtitleFilename !== videoFilename
+        ))
+        .map(subtitleFilename => ({
+          src: join(videoDir, subtitleFilename),
+          type: 'local',
+        })));
     });
   });
 }
