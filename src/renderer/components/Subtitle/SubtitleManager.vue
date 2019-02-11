@@ -108,6 +108,7 @@ export default {
       const requestedTypes = types
         .map(type => type.toLowerCase())
         .filter(type => supportedTypes.includes(type));
+      if (!requestedTypes.length) throw new Error('No valid subtitle type provided.');
       const subtitleRequests = [];
       if (requestedTypes.includes('local')) {
         subtitleRequests.push(getLocalSubtitlesList(videoSrc));
