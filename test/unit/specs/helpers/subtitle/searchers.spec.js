@@ -1,4 +1,4 @@
-import { searchforLocalList, fetchOnlineList } from '@/helpers/subtitle/searchers';
+import { searchforLocalList, fetchOnlineList, __RewireAPI__ as SearchersRewireAPI } from '@/helpers/subtitle/searchers';
 import sinon from 'sinon';
 import mock from 'mock-fs';
 import { resolve } from 'path';
@@ -104,12 +104,15 @@ describe('Subtitle Searchers Unit Tests', () => {
     beforeEach(() => {
       videoSrc = randStr();
       mediaIdentity = generateMediaIdentity();
-      mediaQuickHashStub = sandbox.stub(helpers.methods, 'mediaQuickHash');
-      mediaQuickHashStub.resolves(mediaIdentity);
+      mediaQuickHashStub = sandbox.stub().resolves(mediaIdentity);
+      SearchersRewireAPI.__Rewire__('calculateMediaIdentity', mediaQuickHashStub);
       mediaTranslateStub = sandbox.stub(Sagi, 'mediaTranslate');
       mediaTranslateStub.resolves([{
         transcriptIdentity: generateMediaIdentity(),
       }]);
+    });
+    afterEach(() => {
+      SearchersRewireAPI.__ResetDependency__('calculateMediaIdentity');
     });
 
     it('should fetchOnlineList invoke mediaQuickHash', (done) => {
