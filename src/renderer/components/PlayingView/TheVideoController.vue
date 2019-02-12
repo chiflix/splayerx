@@ -105,7 +105,7 @@ export default {
       mousemovePosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused']),
+    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized']),
     onlyOneVideo() {
       return this.playingList.length === 1;
     },
@@ -153,6 +153,11 @@ export default {
     isFocused(newVal, oldVal) {
       if (!newVal) {
         this.isValidClick = false;
+      }
+    },
+    isMinimized(newVal, oldVal) {
+      if (!newVal && oldVal) {
+        this.isValidClick = true;
       }
     },
     currentWidget(newVal, oldVal) {
