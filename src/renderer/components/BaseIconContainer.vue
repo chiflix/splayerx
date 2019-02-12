@@ -140,6 +140,7 @@ export default {
 }
 
 .play, .pause {
+  margin: auto;
   @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 49px;
     height: 49px;

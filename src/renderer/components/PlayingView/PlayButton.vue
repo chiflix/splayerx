@@ -1,11 +1,11 @@
 <template>
-  <div
-    :data-component-name="$options.name">
-  <Icon :type="paused ? 'pause' : 'play'" class="icon" :class="ani_mode"
-          v-if="iconAppear"
-          @animationend.native="iconAppear = false">
-    </Icon>
-  </div>
+<div :data-component-name="$options.name"
+  @mouseenter.stop="handleMouseenter"
+  @mouseleave.stop="handleMouseleave"
+  @mousedown.stop="handleMousedown">
+  <Icon v-fade-in="iconAppear && paused" class="icon" type="pause"/>
+  <Icon v-fade-in="iconAppear && !paused" class="icon play" type="play"/>
+</div>
 </template>
 
 <script>
@@ -15,20 +15,41 @@ export default {
   name: 'play-button',
   props: {
     paused: false,
+    attachedShown: false,
   },
   data() {
     return {
       iconAppear: false, // control whether the icon show up or not
-      ani_mode: '', // change the CSS
+      animateTimer: NaN,
+      mouseOver: false,
     };
   },
   components: {
     Icon,
   },
+  methods: {
+    handleMouseenter() {
+      this.mouseOver = true;
+      if (!this.attachedShown) this.iconAppear = true;
+    },
+    handleMouseleave() {
+      this.iconAppear = this.mouseOver = false;
+    },
+    handleMousedown() {
+      if (!this.attachedShown) {
+        this.$bus.$emit('toggle-playback');
+      }
+    },
+  },
   watch: {
-    paused(newVal) {
+    paused() {
       this.iconAppear = true;
-      this.ani_mode = newVal ? 'icon-ani-pause' : 'icon-ani-play';
+      if (this.animateTimer) {
+        clearTimeout(this.animateTimer);
+      }
+      this.animateTimer = setTimeout(() => {
+        if (!this.mouseOver) this.iconAppear = false;
+      }, 1000);
     },
   },
 };
@@ -37,37 +58,16 @@ export default {
 
 <style lang="scss" scoped>
 .icon {
-  /* display: none; */
   position: absolute;
-  margin: auto;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  -webkit-user-select: none;
+  cursor: pointer;
 }
-
-.icon-ani-pause {
-  animation: ytp-bezel-fadeout1 500ms linear 1 normal forwards;
-}
-.icon-ani-play {
-  animation: ytp-bezel-fadeout2 500ms linear 1 normal forwards;
-}
-@keyframes ytp-bezel-fadeout1 {
-  0% {opacity: 1; transform: scale(0.25)};
-  50% {opacity: 0.5; transform: scale(0.5)}
-  100% {opacity: 0; transform: scale(1)};
-}
-@keyframes ytp-bezel-fadeout2 {
-  0% {opacity: 1; transform: scale(0.25)};
-  50% {opacity: 0.5; transform: scale(0.5)}
-  100% {opacity: 0; transform: scale(1)};
-}
-
 @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .icon {
     width: 54px;
     height: 54px;
+  }
+  .play {
+    left: 2px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
@@ -75,17 +75,26 @@ export default {
     width: 67px;
     height: 67px;
   }
+  .play {
+    left: 3px;
+  }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .icon {
     width: 93px;
     height: 93px;
   }
+  .play {
+    left: 3px;
+  }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .icon {
     width: 129px;
     height: 129px;
+  }
+  .play {
+    left: 3px;
   }
 }
 </style>
