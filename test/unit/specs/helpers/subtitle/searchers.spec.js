@@ -4,7 +4,6 @@ import mock from 'mock-fs';
 import { resolve } from 'path';
 import SubtitleLoader from '@/components/Subtitle/SubtitleLoader';
 import Sagi from '@/helpers/sagi';
-import helpers from '@/helpers';
 
 describe('Subtitle Searchers Unit Tests', () => {
   let sandbox;

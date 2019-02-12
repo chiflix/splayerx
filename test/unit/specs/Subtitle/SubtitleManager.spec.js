@@ -7,8 +7,6 @@ import Preference from '@/store/modules/Preference';
 import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import SubtitleLoader from '@/components/Subtitle/SubtitleLoader';
 
-/* eslint-disable no-underscore-dangle */
-
 const localVue = createLocalVue();
 localVue.use(Vuex);
 const randStr = () => Math.random().toString(36).substring(7);
@@ -280,5 +278,3 @@ describe('Subtitle Manager Unit Tests', () => {
     });
   });
 });
-
-/* eslint-enable no-underscore-dangle */
