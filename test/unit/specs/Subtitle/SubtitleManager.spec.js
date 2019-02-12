@@ -141,14 +141,17 @@ describe('Subtitle Manager Unit Tests', () => {
 
   describe('method - getLocalSubtitlesList', () => {
     let videoSrc;
-    let searchforLocalListStub;
     let getLocalSubtitlesList;
+    let searchforLocalListStub;
 
     beforeEach(() => {
       searchforLocalListStub = sandbox.stub().resolves();
       searchforLocalListStub.withArgs('11-22-33-44').rejects();
       SubtitleManager.__Rewire__('searchforLocalList', searchforLocalListStub);
       ({ getLocalSubtitlesList } = wrapper.vm);
+    });
+    afterEach(() => {
+      SubtitleManager.__ResetDependency__('searchforLocalList');
     });
 
     it('should invoke searchforLocalList', () => {
@@ -174,18 +177,21 @@ describe('Subtitle Manager Unit Tests', () => {
   });
 
   describe('method - getOnlineSubtitlesList', () => {
-    let fetchOnlineListStub;
     let videoSrc;
     let getOnlineSubtitlesList;
+    let fetchOnlineListStub;
     
     beforeEach(() => {
       videoSrc = randStr();
+      ({ getOnlineSubtitlesList } = wrapper.vm);
 
       fetchOnlineListStub = sandbox.stub().resolves(videoSrc.split(''));
       fetchOnlineListStub.withArgs('11-22-33-44').rejects();
       SubtitleManager.__Rewire__('fetchOnlineList', fetchOnlineListStub);
+    });
 
-      ({ getOnlineSubtitlesList } = wrapper.vm);
+    afterEach(() => {
+      SubtitleManager.__ResetDependency__('fetchOnlineList');
     });
 
     it('should resolve an empty array when no languages provided', (done) => {
