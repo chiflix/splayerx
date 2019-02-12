@@ -136,11 +136,12 @@ export default {
     getLocalSubtitlesList(videoSrc) {
       return searchforLocalList(videoSrc, SubtitleLoader.supportedFormats).catch(() => []);
     },
-    getOnlineSubtitlesList(videoSrc, languages) {
-      function getOnlineSubtitlesWithErrorHandling(languages) {
-        return fetchOnlineList(videoSrc, languages).catch(() => []);
+    async getOnlineSubtitlesList(videoSrc, languages) {
+      if (!languages || !languages.length) return [];
+      function getOnlineSubtitlesWithErrorHandling(language) {
+        return fetchOnlineList(videoSrc, language).catch(() => []);
       }
-      return Promise.all(languages.map(getOnlineSubtitlesWithErrorHandling))
+      return await Promise.all(languages.map(getOnlineSubtitlesWithErrorHandling))
         .then(subtitleLists => flatten(subtitleLists));
     },
     getEmbeddedSubtitlesList(videoSrc) {
