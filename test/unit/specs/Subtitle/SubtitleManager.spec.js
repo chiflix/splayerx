@@ -53,7 +53,6 @@ describe('Subtitle Manager Unit Tests', () => {
 
   describe('method - refreshSubtitles', () => {
     const randStr = () => Math.random().toString(36).substring(7);
-    const generateMediaIdentity = () => `${randStr()}-${randStr()}-${randStr()}-${randStr()}`;
 
     let videoSrc;
     beforeEach(() => {
@@ -64,7 +63,9 @@ describe('Subtitle Manager Unit Tests', () => {
       wrapper.vm.refreshSubtitles([])
         .then(res => done(res))
         .catch((err) => {
-          expect(err).to.be.an.instanceOf(Error).with.property('message', 'No valid subtitle type provided.');
+          expect(err)
+            .to.be.an.instanceOf(Error)
+            .with.property('message', 'No valid subtitle type provided.');
           done();
         });
     });
@@ -91,10 +92,11 @@ describe('Subtitle Manager Unit Tests', () => {
     });
     it('should invoke getOnlineSubtitlesList when types includes online', () => {
       const getOnlineSubtitlesListSpy = sandbox.spy(wrapper.vm, 'getOnlineSubtitlesList');
+      const { preferredLanguages } = wrapper.vm;
 
       wrapper.vm.refreshSubtitles(['online'], videoSrc);
 
-      sandbox.assert.calledWithExactly(getOnlineSubtitlesListSpy, videoSrc, wrapper.vm.preferredLanguages);
+      sandbox.assert.calledWithExactly(getOnlineSubtitlesListSpy, videoSrc, preferredLanguages);
     });
 
     it('should refreshSubtitles set selectionComplete to false', () => {
@@ -123,7 +125,7 @@ describe('Subtitle Manager Unit Tests', () => {
         .catch(err => done(err));
     });
 
-    it('should invoke checkCurrentSubtitleList when all subtitles are loaded', () => {
+    it('should invoke checkCurrentSubtitleList when all subtitles are loaded', (done) => {
       const checkCurrentSubtitleListSpy = sandbox.spy(wrapper.vm, 'checkCurrentSubtitleList');
 
       wrapper.vm.refreshSubtitles(['local'], videoSrc)
