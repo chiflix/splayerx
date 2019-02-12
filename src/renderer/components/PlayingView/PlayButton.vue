@@ -3,8 +3,8 @@
   @mouseenter.stop="handleMouseenter"
   @mouseleave.stop="handleMouseleave"
   @mousedown.stop="handleMousedown">
-  <Icon v-fade-in="iconAppear && paused" class="icon" type="pause"/>
-  <Icon v-fade-in="iconAppear && !paused" class="icon play" type="play"/>
+  <Icon v-fade-in="iconAppear && paused" class="icon play" type="play"/>
+  <Icon v-fade-in="iconAppear && !paused" class="icon" type="pause"/>
 </div>
 </template>
 
@@ -15,8 +15,9 @@ export default {
   name: 'play-button',
   props: {
     paused: false,
+    isFocused: true,
     attachedShown: false,
-    isValidClick: true,
+    showAllWidgets: false,
   },
   data() {
     return {
@@ -37,12 +38,16 @@ export default {
       this.iconAppear = this.mouseOver = false;
     },
     handleMousedown() {
-      if (!this.attachedShown && this.isValidClick) {
+      if (!this.attachedShown) {
         this.$bus.$emit('toggle-playback');
       }
     },
   },
   watch: {
+    showAllWidgets(val) {
+      if (!this.isFocused && val) this.iconAppear = val;
+      if (!val) this.iconAppear = val;
+    },
     paused() {
       this.iconAppear = true;
       if (this.animateTimer) {

@@ -21,7 +21,9 @@
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets"/>
-    <play-button class="play-button" :paused="paused" :attachedShown="attachedShown" :isValidClick="isValidClick"/>
+    <play-button class="play-button" 
+      :showAllWidgets="showAllWidgets" :isFocused="isFocused"
+      :paused="paused" :attachedShown="attachedShown"/>
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons" v-fade-in="showAllWidgets">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
