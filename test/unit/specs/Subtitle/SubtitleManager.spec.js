@@ -10,6 +10,7 @@ import SubtitleLoader from '@/components/Subtitle/SubtitleLoader';
 const localVue = createLocalVue();
 localVue.use(Vuex);
 const randStr = () => Math.random().toString(36).substring(7);
+const errorVideoSrc = '11-22-33-44';
 
 describe('Subtitle Manager Unit Tests', () => {
   let store;
@@ -124,7 +125,7 @@ describe('Subtitle Manager Unit Tests', () => {
           sandbox.assert.calledWithExactly(eventBusEmitSpy, 'refresh-finished');
           done();
         })
-        .catch(err => done(err));
+        .catch(done);
     });
 
     it('should invoke checkCurrentSubtitleList when all subtitles are loaded', (done) => {
@@ -135,7 +136,7 @@ describe('Subtitle Manager Unit Tests', () => {
           sandbox.assert.called(checkCurrentSubtitleListSpy);
           done();
         })
-        .catch(err => done(err));
+        .catch(done);
     });
   });
 
@@ -146,7 +147,7 @@ describe('Subtitle Manager Unit Tests', () => {
 
     beforeEach(() => {
       searchforLocalListStub = sandbox.stub().resolves();
-      searchforLocalListStub.withArgs('11-22-33-44').rejects();
+      searchforLocalListStub.withArgs(errorVideoSrc).rejects();
       SubtitleManager.__Rewire__('searchforLocalList', searchforLocalListStub);
       ({ getLocalSubtitlesList } = wrapper.vm);
     });
@@ -167,12 +168,12 @@ describe('Subtitle Manager Unit Tests', () => {
     });
 
     it('should slience errors rejected from searchforLocalList', (done) => {
-      getLocalSubtitlesList('11-22-33-44')
+      getLocalSubtitlesList(errorVideoSrc)
         .then((results) => {
           expect(results.length).to.equal(0);
           done();
         })
-        .catch(err => done(err));
+        .catch(done);
     });
   });
 
@@ -186,7 +187,7 @@ describe('Subtitle Manager Unit Tests', () => {
       ({ getOnlineSubtitlesList } = wrapper.vm);
 
       fetchOnlineListStub = sandbox.stub().resolves(videoSrc.split(''));
-      fetchOnlineListStub.withArgs('11-22-33-44').rejects();
+      fetchOnlineListStub.withArgs(errorVideoSrc).rejects();
       SubtitleManager.__Rewire__('fetchOnlineList', fetchOnlineListStub);
     });
 
@@ -197,12 +198,10 @@ describe('Subtitle Manager Unit Tests', () => {
     it('should resolve an empty array when no languages provided', (done) => {
       getOnlineSubtitlesList(videoSrc)
         .then((results) => {
-          expect(results)
-            .to.be.an.instanceOf(Array)
-            .with.property('length', 0);
+          expect(results).to.deep.equal([]);
           done();
         })
-        .catch(err => done(err));
+        .catch(done);
     });
 
     it('should invoke fetchOnlineList', () => {
@@ -220,13 +219,52 @@ describe('Subtitle Manager Unit Tests', () => {
     });
 
     it('should slience errors from fetchOnlineList', (done) => {
-      const languages = [randStr(), '11-22-33-44'];
+      const languages = [randStr(), errorVideoSrc];
       getOnlineSubtitlesList(videoSrc, languages)
         .then((results) => {
-          expect(results).to.not.include([...'11-22-33-44'.split('')]);
+          expect(results).to.not.include([...errorVideoSrc.split('')]);
           done();
         })
-        .catch(err => done(err));
+        .catch(done);
+    });
+  });
+
+  describe('method - getEmbeddedSubtitlesList', () => {
+    let videoSrc;
+    let getEmbeddedSubtitlesList;
+    let retrieveEmbeddedListStub;
+
+    beforeEach(() => {
+      videoSrc = randStr();
+      ({ getEmbeddedSubtitlesList } = wrapper.vm);
+
+      retrieveEmbeddedListStub = sandbox.stub().resolves();
+      retrieveEmbeddedListStub.withArgs(errorVideoSrc).rejects();
+      SubtitleManager.__Rewire__('retrieveEmbeddedList', retrieveEmbeddedListStub);
+    });
+    afterEach(() => {
+      SubtitleManager.__ResetDependency__('retrieveEmbeddedList');
+    });
+
+    it('should invoke retrieveEmbeddedList', () => {
+      getEmbeddedSubtitlesList(videoSrc);
+
+      sandbox.assert.called(retrieveEmbeddedListStub);
+    });
+
+    it('should invoke retrieveEmbeddedList with videoSrc and SubtitleLoader.supportedCodecs', () => {
+      getEmbeddedSubtitlesList(videoSrc);
+
+      sandbox.assert.calledWithExactly(retrieveEmbeddedListStub, videoSrc, SubtitleLoader.supportedCodecs);
+    });
+
+    it('should slience errors rejected from retrieveEmbeddedList to an empty array', (done) => {
+      getEmbeddedSubtitlesList(errorVideoSrc)
+        .then((results) => {
+          expect(results).to.deep.equal([]);
+          done();
+        })
+        .catch(done);
     });
   });
 });
