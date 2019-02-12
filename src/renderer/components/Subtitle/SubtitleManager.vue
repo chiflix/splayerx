@@ -141,7 +141,7 @@ export default {
       function getOnlineSubtitlesWithErrorHandling(language) {
         return fetchOnlineList(videoSrc, language).catch(() => []);
       }
-      return await Promise.all(languages.map(getOnlineSubtitlesWithErrorHandling))
+      return Promise.all(languages.map(getOnlineSubtitlesWithErrorHandling))
         .then(subtitleLists => flatten(subtitleLists));
     },
     getEmbeddedSubtitlesList(videoSrc) {

@@ -7,6 +7,8 @@ import Preference from '@/store/modules/Preference';
 import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import SubtitleLoader from '@/components/Subtitle/SubtitleLoader';
 
+/* eslint-disable no-underscore-dangle */
+
 const localVue = createLocalVue();
 localVue.use(Vuex);
 const randStr = () => Math.random().toString(36).substring(7);
@@ -163,8 +165,9 @@ describe('Subtitle Manager Unit Tests', () => {
 
     it('should invoke searchforLocalList with videoSrc and SubtitleLoader.supportedFormats', () => {
       getLocalSubtitlesList(videoSrc);
+      const { supportedFormats } = SubtitleLoader;
 
-      sandbox.assert.calledWithExactly(searchforLocalListStub, videoSrc, SubtitleLoader.supportedFormats);
+      sandbox.assert.calledWithExactly(searchforLocalListStub, videoSrc, supportedFormats);
     });
 
     it('should slience errors rejected from searchforLocalList', (done) => {
@@ -181,7 +184,7 @@ describe('Subtitle Manager Unit Tests', () => {
     let videoSrc;
     let getOnlineSubtitlesList;
     let fetchOnlineListStub;
-    
+
     beforeEach(() => {
       videoSrc = randStr();
       ({ getOnlineSubtitlesList } = wrapper.vm);
@@ -214,8 +217,16 @@ describe('Subtitle Manager Unit Tests', () => {
       const randomLanguages = [randStr(), randStr()];
       getOnlineSubtitlesList(videoSrc, randomLanguages);
 
-      sandbox.assert.calledWithExactly(fetchOnlineListStub.firstCall, videoSrc, randomLanguages[0]);
-      sandbox.assert.calledWithExactly(fetchOnlineListStub.secondCall, videoSrc, randomLanguages[1]);
+      sandbox.assert.calledWithExactly(
+        fetchOnlineListStub.firstCall,
+        videoSrc,
+        randomLanguages[0],
+      );
+      sandbox.assert.calledWithExactly(
+        fetchOnlineListStub.secondCall,
+        videoSrc,
+        randomLanguages[1],
+      );
     });
 
     it('should slience errors from fetchOnlineList', (done) => {
@@ -254,8 +265,9 @@ describe('Subtitle Manager Unit Tests', () => {
 
     it('should invoke retrieveEmbeddedList with videoSrc and SubtitleLoader.supportedCodecs', () => {
       getEmbeddedSubtitlesList(videoSrc);
+      const { supportedCodecs } = SubtitleLoader;
 
-      sandbox.assert.calledWithExactly(retrieveEmbeddedListStub, videoSrc, SubtitleLoader.supportedCodecs);
+      sandbox.assert.calledWithExactly(retrieveEmbeddedListStub, videoSrc, supportedCodecs);
     });
 
     it('should slience errors rejected from retrieveEmbeddedList to an empty array', (done) => {
@@ -268,3 +280,5 @@ describe('Subtitle Manager Unit Tests', () => {
     });
   });
 });
+
+/* eslint-enable no-underscore-dangle */
