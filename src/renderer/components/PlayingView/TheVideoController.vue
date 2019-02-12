@@ -21,7 +21,7 @@
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets"/>
-    <play-button class="play-button" :paused="paused" :attachedShown="attachedShown"/>
+    <play-button class="play-button" :paused="paused" :attachedShown="attachedShown" :isValidClick="isValidClick"/>
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons" v-fade-in="showAllWidgets">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
@@ -151,7 +151,7 @@ export default {
       }
     },
     isFocused(newVal, oldVal) {
-      if (!oldVal && newVal) {
+      if (!newVal) {
         this.isValidClick = false;
       }
     },
@@ -357,6 +357,7 @@ export default {
     },
     handleMouseupLeft() {
       this.isMousemove = false;
+      this.isValidClick = true;
       this.clicks += 1;
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
@@ -371,8 +372,6 @@ export default {
       if (this.clicks === 1) {
         this.clicksTimer = setTimeout(() => {
           this.clicks = 0;
-          const attachedShowing = this.lastAttachedShowing;
-          this.isValidClick = true;
           this.lastDragging = false;
           this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
         }, this.clicksDelay);

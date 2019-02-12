@@ -16,6 +16,7 @@ export default {
   props: {
     paused: false,
     attachedShown: false,
+    isValidClick: true,
   },
   data() {
     return {
@@ -36,7 +37,7 @@ export default {
       this.iconAppear = this.mouseOver = false;
     },
     handleMousedown() {
-      if (!this.attachedShown) {
+      if (!this.attachedShown && this.isValidClick) {
         this.$bus.$emit('toggle-playback');
       }
     },
