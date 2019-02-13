@@ -14,7 +14,7 @@ import romanize from 'romanize';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import Sagi from '@/helpers/sagi';
-import { searchforLocalList, fetchOnlineList, retrieveEmbeddedList } from '@/helpers/subtitle';
+import { searchForLocalList, fetchOnlineList, retrieveEmbeddedList } from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
@@ -134,7 +134,7 @@ export default {
         });
     },
     getLocalSubtitlesList(videoSrc) {
-      return searchforLocalList(videoSrc, SubtitleLoader.supportedFormats).catch(() => []);
+      return searchForLocalList(videoSrc, SubtitleLoader.supportedFormats).catch(() => []);
     },
     async getOnlineSubtitlesList(videoSrc, languages) {
       if (!languages || !languages.length) return [];

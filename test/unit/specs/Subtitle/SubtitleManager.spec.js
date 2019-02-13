@@ -143,32 +143,32 @@ describe('Subtitle Manager Unit Tests', () => {
   describe('method - getLocalSubtitlesList', () => {
     let videoSrc;
     let getLocalSubtitlesList;
-    let searchforLocalListStub;
+    let searchForLocalListStub;
 
     beforeEach(() => {
-      searchforLocalListStub = sandbox.stub().resolves();
-      searchforLocalListStub.withArgs(errorVideoSrc).rejects();
-      SubtitleManager.__Rewire__('searchforLocalList', searchforLocalListStub);
+      searchForLocalListStub = sandbox.stub().resolves();
+      searchForLocalListStub.withArgs(errorVideoSrc).rejects();
+      SubtitleManager.__Rewire__('searchForLocalList', searchForLocalListStub);
       ({ getLocalSubtitlesList } = wrapper.vm);
     });
     afterEach(() => {
-      SubtitleManager.__ResetDependency__('searchforLocalList');
+      SubtitleManager.__ResetDependency__('searchForLocalList');
     });
 
-    it('should invoke searchforLocalList', () => {
+    it('should invoke searchForLocalList', () => {
       getLocalSubtitlesList();
 
-      sandbox.assert.calledOnce(searchforLocalListStub);
+      sandbox.assert.calledOnce(searchForLocalListStub);
     });
 
-    it('should invoke searchforLocalList with videoSrc and SubtitleLoader.supportedFormats', () => {
+    it('should invoke searchForLocalList with videoSrc and SubtitleLoader.supportedFormats', () => {
       getLocalSubtitlesList(videoSrc);
       const { supportedFormats } = SubtitleLoader;
 
-      sandbox.assert.calledWithExactly(searchforLocalListStub, videoSrc, supportedFormats);
+      sandbox.assert.calledWithExactly(searchForLocalListStub, videoSrc, supportedFormats);
     });
 
-    it('should slience errors rejected from searchforLocalList', (done) => {
+    it('should slience errors rejected from searchForLocalList', (done) => {
       getLocalSubtitlesList(errorVideoSrc)
         .then((results) => {
           expect(results.length).to.equal(0);

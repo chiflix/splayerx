@@ -6,7 +6,7 @@ import helpers from '@/helpers';
 
 const { mediaQuickHash: calculateMediaIdentity } = helpers.methods;
 
-export function searchforLocalList(videoSrc, supportedExtensions) {
+export function searchForLocalList(videoSrc, supportedExtensions) {
   return new Promise((resolve, reject) => {
     const videoDir = dirname(videoSrc);
     const videoBasename = basename(videoSrc, extname(videoSrc));
