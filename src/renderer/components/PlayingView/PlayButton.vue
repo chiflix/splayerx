@@ -61,12 +61,12 @@ export default {
 .fade-in {
   visibility: visible;
   opacity: 1;
-  transition: opacity 150ms ease-in;
+  transition: opacity 120ms ease-in;
 }
 .fade-out {
   visibility: hidden;
   opacity: 0;
-  transition: visibility 0s 300ms, opacity 300ms ease-out;
+  transition: visibility 0s 280ms, opacity 280ms ease-out;
 }
 .icon-wrapper {
   position: relative;
