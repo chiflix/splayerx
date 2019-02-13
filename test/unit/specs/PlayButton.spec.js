@@ -10,11 +10,11 @@ describe('PlayButton.vue', () => {
     wrapper = mount(PlayButton, { propsData });
   });
 
-  it('should changed paused value trigger iconAppear to true', () => {
+  it('should changed paused value trigger iconAppear to false', () => {
     wrapper.vm.iconAppear = false;
 
     wrapper.setProps({ paused: !wrapper.vm.paused });
 
-    expect(wrapper.vm.iconAppear).to.equal(true);
+    expect(wrapper.vm.iconAppear).to.equal(false);
   });
 });
