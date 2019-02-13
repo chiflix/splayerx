@@ -113,7 +113,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -240,10 +240,47 @@ new Vue({
       this.refreshMenu();
     },
     paused() {
-      this.refreshMenu();
+      // 因为老板键，pause 比 isFocused慢，所以在paused watcher里面
+      // 需要判断是否需要禁用menu
+      this.refreshMenu().then(() => {
+        if (!this.isFocused) {
+          this.menu && this.menu.items.forEach((e, i) => {
+            if (i === 0) return;
+            this.disableMenus(e);
+          });
+        }
+      }).catch(() => {
+      });
+    },
+    isFocused(val) {
+      // 如果window失去焦点，那么就禁用menu，除了第一选项
+      // 如果window获得焦点，就重新创建menu
+      // 这里使用焦点作为条件，主要考虑老板键和最小化
+      if (val) {
+        this.refreshMenu();
+      } else {
+        this.menu && this.menu.items.forEach((e, i) => {
+          if (i === 0) return;
+          this.disableMenus(e);
+        });
+      }
     },
   },
   methods: {
+    /**
+     * @description 递归禁用menu子项
+     * @author tanghaixiang@xindong.com
+     * @date 2019-02-13
+     * @param {Menu.item} item
+     */
+    disableMenus(item) {
+      if (item && item.label) {
+        item.enabled = false;
+        item.submenu && item.submenu.items.forEach((e) => {
+          this.disableMenus(e);
+        });
+      }
+    },
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
       const template = [
@@ -564,7 +601,7 @@ new Vue({
           ],
         },
       ];
-      this.updateRecentPlay().then((result) => {
+      return this.updateRecentPlay().then((result) => {
         // menu.file add "open recent"
         template[3].submenu.splice(3, 0, this.recentSubMenu());
         template[1].submenu.splice(0, 0, this.updatePlayOrPause);
@@ -852,9 +889,9 @@ new Vue({
       }
       return menuRecentData;
     },
-    refreshMenu() {
+    async refreshMenu() {
       this.$electron.remote.Menu.getApplicationMenu()?.clear();
-      this.createMenu();
+      await this.createMenu();
     },
   },
   mounted() {
