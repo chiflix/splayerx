@@ -4,7 +4,7 @@
   @mouseleave.stop="handleMouseleave">
   <div class="icon-wrapper"
     @mousedown.stop=""
-    @mouseup.stop="handleMouseup">
+    @mouseup="handleMouseup">
     <Icon :class="iconAppear && paused ? 'fade-in' : 'fade-out'" class="icon play" type="play"/>
     <Icon :class="iconAppear && !paused ? 'fade-in' : 'fade-out'" class="icon" type="pause"/>
   </div>
