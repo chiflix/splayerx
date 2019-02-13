@@ -14,8 +14,7 @@ import romanize from 'romanize';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import Sagi from '@/helpers/sagi';
-import { getLocalSubtitles, getOnlineSubtitles, getEmbeddedSubtitles } from '@/helpers/subtitle';
-import infoDB from '@/helpers/infoDB';
+import { searchForLocalList, fetchOnlineList, retrieveEmbeddedList } from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
@@ -110,6 +109,7 @@ export default {
       const requestedTypes = types
         .map(type => type.toLowerCase())
         .filter(type => supportedTypes.includes(type));
+      if (!requestedTypes.length) throw new Error('No valid subtitle type provided.');
       const subtitleRequests = [];
       if (requestedTypes.includes('local')) {
         subtitleRequests.push(getLocalSubtitlesList(videoSrc));
@@ -140,17 +140,18 @@ export default {
         });
     },
     getLocalSubtitlesList(videoSrc) {
-      return getLocalSubtitles(videoSrc, SubtitleLoader.supportedFormats).catch(() => []);
+      return searchForLocalList(videoSrc, SubtitleLoader.supportedFormats).catch(() => []);
     },
-    getOnlineSubtitlesList(videoSrc, languages) {
-      function getOnlineSubtitlesWithErrorHandling(languages) {
-        return getOnlineSubtitles(videoSrc, languages).catch(() => []);
+    async getOnlineSubtitlesList(videoSrc, languages) {
+      if (!languages || !languages.length) return [];
+      function getOnlineSubtitlesWithErrorHandling(language) {
+        return fetchOnlineList(videoSrc, language).catch(() => []);
       }
       return Promise.all(languages.map(getOnlineSubtitlesWithErrorHandling))
         .then(subtitleLists => flatten(subtitleLists));
     },
     getEmbeddedSubtitlesList(videoSrc) {
-      return getEmbeddedSubtitles(videoSrc, SubtitleLoader.supportedCodecs).catch(() => []);
+      return retrieveEmbeddedList(videoSrc, SubtitleLoader.supportedCodecs).catch(() => []);
     },
     async addSubtitle({ src, type, options }, videoSrc) {
       const subtitleInstance = new SubtitleLoader(src, type, { ...options });
