@@ -21,7 +21,7 @@
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets"/>
-    <play-button class="play-button" 
+    <play-button class="play-button no-drag"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
     <volume-indicator :showAllWidgets="showAllWidgets" />
@@ -470,7 +470,10 @@ export default {
   z-index: auto;
 }
 .play-button {
-  position: fixed;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin: auto;
   top: 0;
   left: 0;

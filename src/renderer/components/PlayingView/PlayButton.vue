@@ -1,10 +1,12 @@
 <template>
 <div :data-component-name="$options.name"
   @mouseenter.stop="handleMouseenter"
-  @mouseleave.stop="handleMouseleave"
-  @mousedown.stop="handleMousedown">
-  <Icon v-fade-in="iconAppear && paused" class="icon play" type="play"/>
-  <Icon v-fade-in="iconAppear && !paused" class="icon" type="pause"/>
+  @mouseleave.stop="handleMouseleave">
+  <div class="icon-wrapper"
+    @mousedown.stop="handleMousedown">
+    <Icon :class="iconAppear && paused ? 'fade-in' : 'fade-out'" class="icon play" type="play"/>
+    <Icon :class="iconAppear && !paused ? 'fade-in' : 'fade-out'" class="icon" type="pause"/>
+  </div>
 </div>
 </template>
 
@@ -22,7 +24,6 @@ export default {
   data() {
     return {
       iconAppear: false, // control whether the icon show up or not
-      animateTimer: NaN,
       mouseOver: false,
     };
   },
@@ -44,18 +45,12 @@ export default {
     },
   },
   watch: {
-    showAllWidgets(val) {
-      if (!this.isFocused && val) this.iconAppear = val;
-      if (!val) this.iconAppear = val;
-    },
-    paused() {
-      this.iconAppear = true;
-      if (this.animateTimer) {
-        clearTimeout(this.animateTimer);
-      }
-      this.animateTimer = setTimeout(() => {
-        if (!this.mouseOver) this.iconAppear = false;
-      }, 1000);
+    // showAllWidgets(val) {
+    //   if (!this.isFocused && val) this.iconAppear = val;
+    //   if (!val) this.iconAppear = val;
+    // },
+    attachedShown(val) {
+      if (!val && this.mouseOver) this.iconAppear = true;
     },
   },
 };
@@ -63,44 +58,59 @@ export default {
 
 
 <style lang="scss" scoped>
+.fade-in {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 150ms ease-in;
+}
+.fade-out {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 300ms, opacity 300ms ease-out;
+}
+.icon-wrapper {
+  position: relative;
+}
 .icon {
   position: absolute;
+  width: 100%;
+  height: 100%;
   cursor: pointer;
 }
 @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
-  .icon {
+  .icon-wrapper {
     width: 54px;
     height: 54px;
   }
   .play {
-    left: 2px;
+    margin-left: 2px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-  .icon {
+  .icon-wrapper {
     width: 67px;
     height: 67px;
   }
   .play {
-    left: 3px;
+    margin-left: 3px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-  .icon {
+  .icon-wrapper {
     width: 93px;
     height: 93px;
   }
   .play {
-    left: 3px;
+    margin-left: 3px;
   }
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-  .icon {
+  .icon-wrapper {
     width: 129px;
     height: 129px;
   }
   .play {
-    left: 3px;
+    margin-left: 3px;
   }
 }
 </style>

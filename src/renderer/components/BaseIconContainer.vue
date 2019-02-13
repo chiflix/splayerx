@@ -141,22 +141,8 @@ export default {
 
 .play, .pause {
   margin: auto;
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
-    width: 49px;
-    height: 49px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 59px;
-    height: 59px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 79px;
-    height: 79px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 109px;
-    height: 108px;
-  }
+  width: 100%;
+  height: 100%;
   display: block;
 }
 
