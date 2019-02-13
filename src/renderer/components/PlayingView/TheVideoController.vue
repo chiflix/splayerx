@@ -152,7 +152,7 @@ export default {
         this.lastDragging = true;
       }
     },
-    isFocused(newVal, oldVal) {
+    isFocused(newVal) {
       if (!newVal) {
         this.isValidClick = false;
       }

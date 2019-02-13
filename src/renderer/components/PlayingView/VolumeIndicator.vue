@@ -57,12 +57,7 @@ export default {
   },
   created() {
     this.$bus.$on('toggle-fullscreen', () => {
-      if (this.isFullScreen) {
-        requestAnimationFrame(() => {
-          this.$refs.indicatorContainer.style.setProperty('--background-height', '');
-          this.$refs.indicatorContainer.style.setProperty('--mute-top', '');
-        });
-      } else {
+      if (!this.isFullScreen) {
         requestAnimationFrame(() => {
           this.$refs.indicatorContainer.style.setProperty('--background-height', `${this.backgroundHeight}px`);
           this.$refs.indicatorContainer.style.setProperty('--mute-top', `${this.muteTop}px`);
@@ -71,6 +66,12 @@ export default {
     });
   },
   watch: {
+    isFullScreen(val) {
+      if (!val) {
+        this.$refs.indicatorContainer.style.setProperty('--background-height', '');
+        this.$refs.indicatorContainer.style.setProperty('--mute-top', '');
+      }
+    },
     showAllWidgets(newVal) {
       if (this.muted) {
         this.volumeTriggerStopped = newVal;
