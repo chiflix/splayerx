@@ -55,12 +55,19 @@ export default {
         : this.winHeight * 0.37;
     },
   },
+  created() {
+    this.$bus.$on('toggle-fullscreen', () => {
+      if (!this.isFullScreen) {
+        requestAnimationFrame(() => {
+          this.$refs.indicatorContainer.style.setProperty('--background-height', `${this.backgroundHeight}px`);
+          this.$refs.indicatorContainer.style.setProperty('--mute-top', `${this.muteTop}px`);
+        });
+      }
+    });
+  },
   watch: {
     isFullScreen(val) {
-      if (val) {
-        this.$refs.indicatorContainer.style.setProperty('--background-height', `${this.backgroundHeight}px`);
-        this.$refs.indicatorContainer.style.setProperty('--mute-top', `${this.muteTop}px`);
-      } else {
+      if (!val) {
         this.$refs.indicatorContainer.style.setProperty('--background-height', '');
         this.$refs.indicatorContainer.style.setProperty('--mute-top', '');
       }
@@ -70,7 +77,7 @@ export default {
         this.volumeTriggerStopped = newVal;
       }
     },
-    muted() {
+    muted(val) {
       const { clock, volumeTriggerTimerId } = this;
       if (!this.volumeKeydown && this.volume !== 0) {
         this.volumeTriggerStopped = true;
@@ -78,6 +85,17 @@ export default {
         this.volumeTriggerTimerId = clock.setTimeout(() => {
           this.volumeTriggerStopped = false;
         }, 1000);
+      } else if (this.volumeKeydown && val) {
+        if (!this.showAllWidgets) {
+          this.volumeTriggerStopped = true;
+          clock.clearTimeout(volumeTriggerTimerId);
+          this.volumeTriggerTimerId = clock.setTimeout(() => {
+            this.volumeTriggerStopped = false;
+          }, 1000);
+        } else {
+          this.volumeTriggerStopped = this.showAllWidgets;
+          clock.clearTimeout(volumeTriggerTimerId);
+        }
       }
     },
     volume() {

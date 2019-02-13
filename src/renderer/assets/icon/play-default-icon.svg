@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="84px" height="84px" viewBox="0 0 84 84" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 52.3 (67297) - http://www.bohemiancoding.com/sketch -->
-    <title>Play Button / Playing View Huge Button / Play</title>
-    <desc>Created with Sketch.</desc>
     <defs>
         <filter x="-28.7%" y="-29.2%" width="157.5%" height="158.3%" filterUnits="objectBoundingBox" id="filter-1">
             <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>

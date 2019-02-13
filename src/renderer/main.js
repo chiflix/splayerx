@@ -195,9 +195,6 @@ new Vue({
       if (val <= 0) {
         this.menu.getMenuItemById('mute').checked = true;
         this.menu.getMenuItemById('deVolume').enabled = false;
-      } else if (val >= 1) {
-        this.menu.getMenuItemById('mute').checked = false;
-        this.menu.getMenuItemById('inVolume').enabled = false;
       } else {
         this.menu.getMenuItemById('inVolume').enabled = true;
         this.menu.getMenuItemById('deVolume').enabled = true;
@@ -666,9 +663,7 @@ new Vue({
             this.menu.getMenuItemById(`track${index}`).checked = true;
           }
         });
-        if (this.volume >= 1) {
-          this.menu.getMenuItemById('inVolume').enabled = false;
-        } else if (this.volume <= 0) {
+        if (this.volume <= 0) {
           this.menu.getMenuItemById('deVolume').enabled = false;
         }
         this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
