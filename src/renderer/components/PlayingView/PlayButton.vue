@@ -2,12 +2,16 @@
 <div :data-component-name="$options.name"
   @mouseenter.stop="handleMouseenter"
   @mouseleave.stop="handleMouseleave">
+  <transition name="icon" mode="out-in">
   <div class="icon-wrapper"
+    v-fade-in="iconAppear"
+    :key="paused"
     @mousedown.stop=""
     @mouseup="handleMouseup">
-    <Icon :class="iconAppear && paused ? 'fade-in' : 'fade-out'" class="icon play" type="play"/>
-    <Icon :class="iconAppear && !paused ? 'fade-in' : 'fade-out'" class="icon" type="pause"/>
+    <Icon v-if="paused" class="icon play" type="play"/>
+    <Icon v-if="!paused" class="icon" type="pause"/>
   </div>
+  </transition>
 </div>
 </template>
 
@@ -59,15 +63,11 @@ export default {
 
 
 <style lang="scss" scoped>
-.fade-in {
-  visibility: visible;
-  opacity: 1;
-  transition: opacity 120ms ease-in;
+.icon-enter-active, .icon-leave-active {
+  transition: opacity 100ms ease-in;
 }
-.fade-out {
-  visibility: hidden;
+.icon-enter, .icon-leave-to {
   opacity: 0;
-  transition: visibility 0s 280ms, opacity 280ms ease-out;
 }
 .icon-wrapper {
   position: relative;
