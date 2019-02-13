@@ -85,8 +85,16 @@ export default {
           this.volumeTriggerStopped = false;
         }, 1000);
       } else if (this.volumeKeydown && val) {
-        this.volumeTriggerStopped = this.showAllWidgets;
-        clock.clearTimeout(volumeTriggerTimerId);
+        if (!this.showAllWidgets) {
+          this.volumeTriggerStopped = true;
+          clock.clearTimeout(volumeTriggerTimerId);
+          this.volumeTriggerTimerId = clock.setTimeout(() => {
+            this.volumeTriggerStopped = false;
+          }, 1000);
+        } else {
+          this.volumeTriggerStopped = this.showAllWidgets;
+          clock.clearTimeout(volumeTriggerTimerId);
+        }
       }
     },
     volume() {

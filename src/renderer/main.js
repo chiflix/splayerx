@@ -663,9 +663,7 @@ new Vue({
             this.menu.getMenuItemById(`track${index}`).checked = true;
           }
         });
-        if (this.volume >= 1) {
-          this.menu.getMenuItemById('inVolume').enabled = false;
-        } else if (this.volume <= 0) {
+        if (this.volume <= 0) {
           this.menu.getMenuItemById('deVolume').enabled = false;
         }
         this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
