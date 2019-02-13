@@ -3,7 +3,8 @@
   @mouseenter.stop="handleMouseenter"
   @mouseleave.stop="handleMouseleave">
   <div class="icon-wrapper"
-    @mousedown.stop="handleMousedown">
+    @mousedown.stop=""
+    @mouseup.stop="handleMouseup">
     <Icon :class="iconAppear && paused ? 'fade-in' : 'fade-out'" class="icon play" type="play"/>
     <Icon :class="iconAppear && !paused ? 'fade-in' : 'fade-out'" class="icon" type="pause"/>
   </div>
@@ -38,7 +39,7 @@ export default {
     handleMouseleave() {
       this.iconAppear = this.mouseOver = false;
     },
-    handleMousedown() {
+    handleMouseup() {
       if (!this.attachedShown) {
         this.$bus.$emit('toggle-playback');
       }
