@@ -195,9 +195,6 @@ new Vue({
       if (val <= 0) {
         this.menu.getMenuItemById('mute').checked = true;
         this.menu.getMenuItemById('deVolume').enabled = false;
-      } else if (val >= 1) {
-        this.menu.getMenuItemById('mute').checked = false;
-        this.menu.getMenuItemById('inVolume').enabled = false;
       } else {
         this.menu.getMenuItemById('inVolume').enabled = true;
         this.menu.getMenuItemById('deVolume').enabled = true;
