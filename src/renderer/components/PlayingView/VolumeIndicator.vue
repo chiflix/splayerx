@@ -70,7 +70,7 @@ export default {
         this.volumeTriggerStopped = newVal;
       }
     },
-    muted() {
+    muted(val) {
       const { clock, volumeTriggerTimerId } = this;
       if (!this.volumeKeydown && this.volume !== 0) {
         this.volumeTriggerStopped = true;
@@ -78,6 +78,9 @@ export default {
         this.volumeTriggerTimerId = clock.setTimeout(() => {
           this.volumeTriggerStopped = false;
         }, 1000);
+      } else if (this.volumeKeydown && val) {
+        this.volumeTriggerStopped = this.showAllWidgets;
+        clock.clearTimeout(volumeTriggerTimerId);
       }
     },
     volume() {
