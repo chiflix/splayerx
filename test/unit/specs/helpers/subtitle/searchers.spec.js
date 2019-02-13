@@ -25,6 +25,8 @@ describe('Subtitle Searchers Unit Tests', () => {
           'subtitleTestVideo.srt': '',
           'subtitleTestVideo.ass': '',
           'subtitleTestVideo.vtt': '',
+          'subtitletestvideo.ass': '',
+          'subtitleTestVideo.VTT': '',
           'subtitleTestVideo.ssa': '',
           'subtitleTestVideo.sub': '',
           'subtitleTestVideo.idx': '',
@@ -50,6 +52,14 @@ describe('Subtitle Searchers Unit Tests', () => {
         expect(results).to.deep.include(filenameToLocalSubtitle('subtitleTestVideo.vtt'));
         done();
       });
+    });
+
+    it('should find subtitle with the same filename regardless of case', (done) => {
+      searchForLocalList(videoSrc, SubtitleLoader.supportedFormats).then((results) => {
+        expect(results).to.deep.include(filenameToLocalSubtitle('subtitleTestVideo.VTT'));
+        expect(results).to.deep.include(filenameToLocalSubtitle('subtitletestvideo.ass'));
+        done();
+      }).catch(done);
     });
 
     it('should not find subtitle with one or more dot other than video\'s filename', (done) => {
