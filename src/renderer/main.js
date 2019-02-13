@@ -244,7 +244,7 @@ new Vue({
       // 需要判断是否需要禁用menu
       this.refreshMenu().then(() => {
         if (!this.isFocused) {
-          this.menu && this.menu?.items.forEach((e, i) => {
+          this.menu && this.menu.items.forEach((e, i) => {
             if (i === 0) return;
             this.disableMenus(e);
           });
@@ -259,7 +259,7 @@ new Vue({
       if (val) {
         this.refreshMenu();
       } else {
-        this.menu && this.menu?.items.forEach((e, i) => {
+        this.menu && this.menu.items.forEach((e, i) => {
           if (i === 0) return;
           this.disableMenus(e);
         });
@@ -276,7 +276,7 @@ new Vue({
     disableMenus(item) {
       if (item && item.label) {
         item.enabled = false;
-        item.submenu && item.submenu?.items.forEach((e) => {
+        item.submenu && item.submenu.items.forEach((e) => {
           this.disableMenus(e);
         });
       }
