@@ -356,7 +356,7 @@ export default {
           // first open && matched extensions: ['local', 'embedded', 'online']
           // first open && !matched extensions: ['local', 'embedded']
           // !first open: ['local', 'online']
-          this.$bus.$emit('refresh-subtitles', types);
+          this.$bus.$emit('refresh-subtitles', types, this.isInitial);
           if (!this.isInitial) {
             this.addLog('info', {
               message: 'Online subtitles loading .',
