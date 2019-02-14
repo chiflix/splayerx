@@ -94,7 +94,6 @@ export default {
       addSubtitleWhenLoaded: subtitleActions.ADD_SUBTITLE_WHEN_LOADED,
       addSubtitleWhenFailed: subtitleActions.ADD_SUBTITLE_WHEN_FAILED,
       updateMetaInfo: subtitleActions.UPDATE_METAINFO,
-      storeCurrentSubtitleLanguagePreference: subtitleActions.STORE_LANGUAGE_PREFERENCE,
     }),
     async refreshSubtitles(types, videoSrc) {
       const supportedTypes = ['local', 'embedded', 'online'];
@@ -133,11 +132,6 @@ export default {
         .then(() => {
           this.$bus.$emit('refresh-finished');
           this.checkCurrentSubtitleList();
-          this.storeSubtitleList(videoSrc);
-          this.storeCurrentSubtitleLanguagePreference({
-            videoSrc,
-            languagePreference: preferredLanguages,
-          });
         });
     },
     getLocalSubtitlesList(videoSrc) {
@@ -309,9 +303,6 @@ export default {
       this.addSubtitleWhenReady({ id, format });
       this.checkCurrentSubtitleList();
     },
-    loadedCallback() {
-      this.storeSubtitleList(this.originSrc);
-    },
     failedCallback({ id }) {
       this.$delete(this.subtitleInstances, id);
       this.addSubtitleWhenFailed({ id });
@@ -339,16 +330,6 @@ export default {
           }
         }
       }
-    },
-    async storeSubtitleList(videoSrc) {
-      const subtitleList = this.$store.state.Subtitle.videoSubtitleMap[videoSrc] || [];
-      const subtitleObjects = await Promise.all(subtitleList
-        .map(async id => ({
-          ...await this.subtitleInstances[id].toObject(),
-          selected: id === this.currentSubtitleId,
-        })));
-      const videoInfo = await infoDB.get('recent-played', 'path', videoSrc);
-      return infoDB.add('recent-played', { ...videoInfo, subtitles: subtitleObjects });
     },
   },
   created() {
