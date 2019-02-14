@@ -14,6 +14,7 @@ import romanize from 'romanize';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import Sagi from '@/helpers/sagi';
+import infoDB from '@/helpers/infoDB';
 import { searchForLocalList, fetchOnlineList, retrieveEmbeddedList } from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
@@ -308,7 +309,7 @@ export default {
       this.addSubtitleWhenReady({ id, format });
       this.checkCurrentSubtitleList();
     },
-    loadedCallback(subtitleInstance) {
+    loadedCallback() {
       this.storeSubtitleList(this.originSrc);
     },
     failedCallback({ id }) {
