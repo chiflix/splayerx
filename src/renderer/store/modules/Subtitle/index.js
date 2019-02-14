@@ -6,7 +6,6 @@ import difference from 'lodash/difference';
 import remove from 'lodash/remove';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
-import infoDB from '@/helpers/infoDB';
 import { metaInfoUpdate } from './rank';
 
 const state = {
@@ -202,16 +201,6 @@ const actions = {
       ranks[id],
     );
     commit(subtitleMutations.RANKS_UPDATE, { id, rank });
-  },
-  [subtitleActions.STORE_LANGUAGE_PREFERENCE]({ getters }, { videoSrc, langauagePreference }) {
-    const { primaryLanguage, secondaryLanguage } = getters;
-    const finalPreference = langauagePreference instanceof Array && langauagePreference.length ?
-      [...langauagePreference] : [primaryLanguage, secondaryLanguage];
-    return infoDB.get('recent-played', 'path', videoSrc)
-      .then(videoInfo => infoDB.add('recent-played', {
-        ...videoInfo,
-        subtitleLanguagePreference: finalPreference,
-      }));
   },
   updateSubDelay({ commit }, delta) {
     commit('UpdateDelay', delta);
