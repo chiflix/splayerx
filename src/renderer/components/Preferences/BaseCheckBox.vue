@@ -59,8 +59,8 @@ export default {
   .nike {
     position: absolute;
     display: none;
-    top: 3px;
-    left: 1.5px;
+    top: 2px;
+    left: 2px;
   }
 }
 </style>
