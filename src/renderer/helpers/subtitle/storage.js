@@ -8,7 +8,7 @@ function setVideoInfo(infoPayload) {
 }
 function updateVideoInfo(videoSrc, info) {
   return getVideoInfoFromVideoSrc(videoSrc)
-    .then((videoInfo) => setVideoInfo({ ...(videoInfo || { path: videoSrc }), ...info }));
+    .then(videoInfo => setVideoInfo({ ...(videoInfo || { path: videoSrc }), ...info }));
 }
 
 export function storeLanguagePreference(videoSrc, languagePreference) {

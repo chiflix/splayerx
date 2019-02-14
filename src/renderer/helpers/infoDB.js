@@ -1,5 +1,5 @@
 
-import idb from 'idb';
+import { openDb } from 'idb';
 import { INFO_DATABASE_NAME, INFO_SCHEMA, INFODB_VERSION } from '@/constants';
 import addLog from './index';
 
@@ -16,7 +16,7 @@ class InfoDB {
    */
   async getDB() {
     if (this.db) return this.db;
-    this.db = await idb.open(INFO_DATABASE_NAME, INFODB_VERSION, (upgradeDB) => {
+    this.db = await openDb(INFO_DATABASE_NAME, INFODB_VERSION, (upgradeDB) => {
       INFO_SCHEMA.forEach((schema) => {
         let store;
         if (!upgradeDB.objectStoreNames.contains(schema.name)) {

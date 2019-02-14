@@ -371,7 +371,7 @@
     "google-protobuf": "^3.6.0",
     "guessit-wrapper": "^1.0.1",
     "iconv-lite": "^0.4.24",
-    "idb": "^2.1.3",
+    "idb": "^3.0.2",
     "lodash": "^4.17.10",
     "lolex": "^3.0.0",
     "lottie-web": "^5.4.2",
