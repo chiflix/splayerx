@@ -32,7 +32,7 @@ import { videodata } from '@/store/video';
 // require('source-map-support').install();
 
 function getSystemLocale() {
-  const { app } = this.$electron.remote;
+  const { app } = electron.remote;
   const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
   if (locale === 'zh-TW') {
     return 'zhTW';
