@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
+import electron from 'electron';
 import osLocale from 'os-locale';
 import '@/css/style.scss';
 import messages from '@/locales';
@@ -18,7 +19,8 @@ const store = new Vuex.Store({
 });
 
 function getSystemLocale() {
-  const locale = osLocale.sync();
+  const { app } = electron.remote;
+  const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
   if (locale === 'zh-TW') {
     return 'zhTW';
   } else if (locale.startsWith('zh')) {
