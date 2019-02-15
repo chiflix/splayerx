@@ -31,10 +31,9 @@ export default {
   margin-bottom: 18px;
   width: fit-content;
   cursor: pointer;
-  opacity: 0.7;
   font-family: $font-medium;
   font-size: 13px;
-  color: #FFFFFF;
+  color: rgba(255,255,255,0.7);
   letter-spacing: 0.32px;
   line-height: 13px;
   user-select: none;
@@ -59,8 +58,8 @@ export default {
   .nike {
     position: absolute;
     display: none;
-    top: 3px;
-    left: 1.5px;
+    top: 2px;
+    left: 2px;
   }
 }
 </style>

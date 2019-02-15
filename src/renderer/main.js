@@ -120,6 +120,7 @@ new Vue({
           label: this.$t('msg.window_.exitFullScreen'),
           accelerator: 'Esc',
           click: () => {
+            this.$bus.$emit('off-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
           },
         };
@@ -128,6 +129,7 @@ new Vue({
         label: this.$t('msg.window_.enterFullScreen'),
         accelerator: 'F',
         click: () => {
+          this.$bus.$emit('to-fullscreen');
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
         },
       };
