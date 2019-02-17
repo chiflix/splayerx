@@ -179,6 +179,54 @@ describe('class DataDb unit tests', () => {
         }).catch(done);
     });
   });
+  describe('method - add unit tests', () => {
+    const testObjectStoreName = 'testObjectStore';
+    const errorCompleteParam = 'errorComplete';
+    const testData = { test: testObjectStoreName };
+    let testDataDb;
+    const testSchema = { name: testObjectStoreName };
+
+    let putStub;
+    let objectStoreStub;
+    let completeStub;
+    let transactionStub;
+    beforeEach(() => {
+      testDataDb = new DataDb(1, testSchema);
+
+      putStub = sandbox.stub();
+      objectStoreStub = sandbox.stub().returns({ put: putStub });
+      completeStub = sandbox.stub().resolves(233);
+      completeStub.withArgs(errorCompleteParam).rejects();
+      transactionStub = sandbox.stub().returns({
+        objectStore: objectStoreStub,
+        complete: completeStub,
+      });
+      sandbox.stub(testDataDb, 'getOwnDb').resolves({
+        transaction: transactionStub,
+        objectStoreNames: new DOMStringListStub([testObjectStoreName]),
+      });
+    });
+
+    it('should invoke proper params when add', (done) => {
+      testDataDb.add(testObjectStoreName, testData)
+        .then(() => {
+          sandbox.assert.calledWithExactly(putStub, testData);
+          sandbox.assert.calledWithExactly(objectStoreStub, testObjectStoreName);
+          sandbox.assert.calledWithExactly(transactionStub, testObjectStoreName, 'readwrite');
+          done();
+        }).catch(done);
+    });
+    it('should throw error when non-existent objectStoreName provided', (done) => {
+      testDataDb.add(testObjectStoreName.slice(1), testData)
+        .catch(() => done())
+        .then(done);
+    });
+    it('should handle transaction error outside', (done) => {
+      testDataDb.add(testObjectStoreName, testData)
+        .then(res => res(errorCompleteParam))
+        .catch(() => done());
+    });
+  });
 });
 describe('dataDb unit tests', () => {
   it('sanity - should dataDb be properly imported', () => {

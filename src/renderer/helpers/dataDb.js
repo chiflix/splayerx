@@ -68,6 +68,17 @@ export class DataDb {
       .objectStore(objectStoreName)
       .get(index);
   }
+
+  async add(objectStoreName, data) {
+    const db = await this.getOwnDb();
+    const { objectStoreNames } = db;
+    if (!objectStoreNames.contains(objectStoreName)) {
+      throw new Error(`Object store ${objectStoreName} does not exist. Add them to constant.js please.`);
+    }
+    const tx = db.transaction(objectStoreName, 'readwrite');
+    tx.objectStore(objectStoreName).put(data);
+    return tx.complete;
+  }
 }
 
 export default new DataDb(schemas[0].version, schemas[0].schema);
