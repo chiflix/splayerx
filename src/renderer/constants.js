@@ -73,18 +73,23 @@ export const INFO_SCHEMA = [
 ];
 
 export const DATADB_NAME = 'data';
+export const SUBTITLE_OBJECTSTORE_NAME = 'subtitles';
 export const DATADB_SHCEMAS = [
   {
     version: 1,
     schema: [
       {
-        name: 'subtitles',
+        name: SUBTITLE_OBJECTSTORE_NAME,
         options: {
           autoIncrement: true,
         },
         indexes: [
           {
             name: 'id',
+            unique: true,
+          },
+          {
+            name: 'mediaIdentity',
             unique: true,
           },
         ],
