@@ -6,6 +6,7 @@ import {
   retrieveLanguagePreference,
   storeSubtitles,
   retrieveSubtitles,
+  deleteSubtitles,
 } from '@/helpers/subtitle/storage';
 import { SUBTITLE_OBJECTSTORE_NAME } from '@/constants';
 import dataDb from '@/helpers/dataDb';
@@ -137,37 +138,40 @@ describe('helper - subtitle - storage', () => {
 
   describe('subtitles storage unit tests', () => {
     const objectStoreName = SUBTITLE_OBJECTSTORE_NAME;
-    const failureSubtitleId = 'failure';
-    const failureSubtitle = { id: failureSubtitleId };
+    describe('method - storeSubtitles unit tests', () => {
+      const failureSubtitleId = 'failure';
+      const failureSubtitle = { id: failureSubtitleId };
 
-    let addStub;
-    beforeEach(() => {
-      addStub = sandbox.stub(dataDb, 'add').resolves();
-      addStub.withArgs(objectStoreName, failureSubtitle).rejects();
+      let addStub;
+      beforeEach(() => {
+        addStub = sandbox.stub(dataDb, 'add').resolves();
+        addStub.withArgs(objectStoreName, failureSubtitle).rejects();
+      });
+
+      it('should invoke dataDb.add', (done) => {
+        const randomSubtitles = [1, 2, 3, 4, 5].map(() => ({ id: randStr() }));
+        const randomIds = randomSubtitles.map(({ id }) => id);
+
+        storeSubtitles(randomSubtitles)
+          .then(({ success, failure }) => {
+            sandbox.assert.calledWithExactly(addStub, SUBTITLE_OBJECTSTORE_NAME, randomSubtitles[0]);
+            expect(success).to.deep.equal(randomIds);
+            expect(failure).to.deep.equal([]);
+            done();
+          }).catch(done);
+      });
+      it('should slience error to failure ids', (done) => {
+        const randomSubtitles = [{ id: randStr() }, failureSubtitle];
+
+        storeSubtitles(randomSubtitles)
+          .then(({ success, failure }) => {
+            expect(success).to.deep.equal([randomSubtitles[0].id]);
+            expect(failure).to.deep.equal([failureSubtitleId]);
+            done();
+          }).catch(done);
+      });
     });
 
-    it('should invoke dataDb.add', (done) => {
-      const randomSubtitles = [1, 2, 3, 4, 5].map(() => ({ id: randStr() }));
-      const randomIds = randomSubtitles.map(({ id }) => id);
-
-      storeSubtitles(randomSubtitles)
-        .then(({ success, failure }) => {
-          sandbox.assert.calledWithExactly(addStub, SUBTITLE_OBJECTSTORE_NAME, randomSubtitles[0]);
-          expect(success).to.deep.equal(randomIds);
-          expect(failure).to.deep.equal([]);
-          done();
-        }).catch(done);
-    });
-    it('should slience error to failure ids', (done) => {
-      const randomSubtitles = [{ id: randStr() }, failureSubtitle];
-
-      storeSubtitles(randomSubtitles)
-        .then(({ success, failure }) => {
-          expect(success).to.deep.equal([randomSubtitles[0].id]);
-          expect(failure).to.deep.equal([failureSubtitleId]);
-          done();
-        }).catch(done);
-    });
     it('should retrieveSubtitles invoke getAll', (done) => {
       const getAllStub = sandbox.stub(dataDb, 'getAll');
       const onlyStub = sandbox.stub(IDBKeyRange, 'only');
@@ -179,6 +183,65 @@ describe('helper - subtitle - storage', () => {
           sandbox.assert.calledWith(getAllStub, SUBTITLE_OBJECTSTORE_NAME);
           done();
         }).catch(done);
+    });
+
+    describe('method - deleteSubtitles', () => {
+      let testSubtitleIds;
+      const failureSubtitleId = 'failure';
+
+      let deleteStub;
+      beforeEach(() => {
+        testSubtitleIds = [randStr(), failureSubtitleId];
+        deleteStub = sandbox.stub(dataDb, 'delete').resolves();
+        deleteStub.withArgs(objectStoreName, failureSubtitleId).rejects();
+      });
+
+      it('should return empty arrays when empty subtitleIds provided', (done) => {
+        const subtitleIds = [];
+        deleteSubtitles(subtitleIds)
+          .then(({ success, failure }) => {
+            expect(success).to.deep.equal([]);
+            expect(failure).to.deep.equal([]);
+            done();
+          }).catch(done);
+      });
+      it('should return empty arrays when invalid subtitleIds provided', (done) => {
+        const subtitleIds = undefined;
+        deleteSubtitles(subtitleIds)
+          .then(({ success, failure }) => {
+            expect(success).to.deep.equal([]);
+            expect(failure).to.deep.equal([]);
+            done();
+          }).catch(done);
+      });
+      it('should return empty arrays when string subtitleIds provided', (done) => {
+        const subtitleIds = 'test';
+        deleteSubtitles(subtitleIds)
+          .then(({ success, failure }) => {
+            expect(success).to.deep.equal([]);
+            expect(failure).to.deep.equal([]);
+            done();
+          }).catch(done);
+      });
+      it('should invoke dataDb.delete', (done) => {
+        deleteSubtitles(testSubtitleIds)
+          .then(() => {
+            sandbox.assert.calledWithExactly(
+              deleteStub,
+              SUBTITLE_OBJECTSTORE_NAME,
+              testSubtitleIds[0],
+            );
+            done();
+          }).catch(done);
+      });
+      it('should slience errors to failure', (done) => {
+        deleteSubtitles(testSubtitleIds)
+          .then(({ success, failure }) => {
+            expect(success).to.deep.equal([testSubtitleIds[0]]);
+            expect(failure).to.deep.equal([failureSubtitleId]);
+            done();
+          }).catch(done);
+      });
     });
   });
 });

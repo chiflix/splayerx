@@ -46,3 +46,20 @@ export async function storeSubtitles(subtitles) {
 export async function retrieveSubtitles(mediaIdentity) {
   return dataDb.getAll(SUBTITLE_OBJECTSTORE_NAME, IDBKeyRange.only(mediaIdentity));
 }
+export async function deleteSubtitles(subtitleIds) {
+  if (!(subtitleIds instanceof Array) || !subtitleIds.length) return ({ success: [], failure: [] });
+  const success = [];
+  const failure = [...subtitleIds];
+  const deleteSubtitle = subtitleId => (
+    dataDb.delete(SUBTITLE_OBJECTSTORE_NAME, subtitleId)
+      .then(() => {
+        success.push(subtitleId);
+        remove(failure, id => id === subtitleId);
+      })
+      .catch(console.log)
+  );
+
+  await Promise.all(subtitleIds.map(deleteSubtitle));
+
+  return ({ success, failure });
+}
