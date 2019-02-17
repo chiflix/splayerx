@@ -21,6 +21,7 @@ export class DataDb {
     return openDb(dBName, version, (upgradeDb) => {
       const { objectStoreNames } = upgradeDb;
       schema.forEach(({ name, options, indexes }) => {
+        // todo: predefined database upgrade logic should go here
         if (!objectStoreNames.contains(name)) {
           const store = upgradeDb.createObjectStore(name, options);
           (indexes || []).forEach(({ name, keyPath, options }) => {
@@ -77,6 +78,17 @@ export class DataDb {
     }
     const tx = db.transaction(objectStoreName, 'readwrite');
     tx.objectStore(objectStoreName).put(data);
+    return tx.complete;
+  }
+
+  async delete(objectStoreName, keyPathVal) {
+    const db = await this.getOwnDb();
+    const { objectStoreNames } = db;
+    if (!objectStoreNames.contains(objectStoreName)) {
+      throw new Error(`Object store ${objectStoreName} does not exist. Add them to @/constant.js please.`);
+    }
+    const tx = db.transaction(objectStoreName, 'readwrite');
+    tx.objectStore(objectStoreName).delete(keyPathVal);
     return tx.complete;
   }
 }

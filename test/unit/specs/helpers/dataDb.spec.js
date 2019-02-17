@@ -227,6 +227,55 @@ describe('class DataDb unit tests', () => {
         .catch(() => done());
     });
   });
+  describe('method - delete unit tests', () => {
+    const testObjectStoreName = 'testObjectStore';
+    const testKeyPathVal = 'testKeyPathVal';
+    const errorCompleteParam = 'errorComplete';
+
+    let testDataDb;
+    const testSchema = { name: testObjectStoreName };
+
+    let deelteStub;
+    let objectStoreStub;
+    let completeStub;
+    let transactionStub;
+    beforeEach(() => {
+      testDataDb = new DataDb(1, testSchema);
+
+      deelteStub = sandbox.stub();
+      objectStoreStub = sandbox.stub().returns({ delete: deelteStub });
+      completeStub = sandbox.stub().resolves(233);
+      completeStub.withArgs(errorCompleteParam).rejects();
+      transactionStub = sandbox.stub().returns({
+        objectStore: objectStoreStub,
+        complete: completeStub,
+      });
+      sandbox.stub(testDataDb, 'getOwnDb').resolves({
+        transaction: transactionStub,
+        objectStoreNames: new DOMStringListStub([testObjectStoreName]),
+      });
+    });
+
+    it('should invoke proper params when delete', (done) => {
+      testDataDb.delete(testObjectStoreName, testKeyPathVal)
+        .then(() => {
+          sandbox.assert.calledWithExactly(deelteStub, testKeyPathVal);
+          sandbox.assert.calledWithExactly(objectStoreStub, testObjectStoreName);
+          sandbox.assert.calledWithExactly(transactionStub, testObjectStoreName, 'readwrite');
+          done();
+        }).catch(done);
+    });
+    it('should throw error when non-existent objectStoreName provided', (done) => {
+      testDataDb.delete(testObjectStoreName.slice(1), testKeyPathVal)
+        .catch(() => done())
+        .then(done);
+    });
+    it('should handle transaction error outside', (done) => {
+      testDataDb.delete(testObjectStoreName, testKeyPathVal)
+        .then(res => res(errorCompleteParam))
+        .catch(() => done());
+    });
+  });
 });
 describe('dataDb unit tests', () => {
   it('sanity - should dataDb be properly imported', () => {
