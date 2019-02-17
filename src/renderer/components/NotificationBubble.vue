@@ -93,7 +93,8 @@ export default {
     asyncStorage.get('preferences').then((data) => {
       this.showPrivacyBubble = data.privacyAgreement === undefined;
       if (!data.primaryLanguage) {
-        const locale = osLocale.sync();
+        const { app } = this.$electron.remote;
+        const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
         if (locale === 'zh_TW' || locale === 'zh_CN') {
           this.$store.dispatch('primaryLanguage', locale.replace('_', '-'));
         } else {

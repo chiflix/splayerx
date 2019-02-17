@@ -1,28 +1,12 @@
-<svg width="13px" height="12px" viewBox="0 0 13 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="13px" height="13px" viewBox="0 0 13 13" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
-        <polyline id="path-1" points="5 8.97320537 7.34192615 11.5 12 5.5"></polyline>
-        <filter x="-71.4%" y="-49.8%" width="242.7%" height="261.6%" filterUnits="objectBoundingBox" id="filter-2">
-            <feMorphology radius="0.705882353" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
-            <feOffset dx="0" dy="2" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
-            <feMorphology radius="1" operator="erode" in="SourceAlpha" result="shadowInner"></feMorphology>
-            <feOffset dx="0" dy="2" in="shadowInner" result="shadowInner"></feOffset>
-            <feComposite in="shadowOffsetOuter1" in2="shadowInner" operator="out" result="shadowOffsetOuter1"></feComposite>
-            <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
-            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.2 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
-        </filter>
+        <radialGradient cx="81.8460892%" cy="79.2345085%" fx="81.8460892%" fy="79.2345085%" r="158.735339%" gradientTransform="translate(0.818461,0.792345),scale(1.000000,0.552460),rotate(-121.038473),translate(-0.818461,-0.792345)" id="radialGradient-1">
+            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
+        </radialGradient>
     </defs>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="1" stroke-linecap="round" stroke-linejoin="round">
-        <g id="CH_General" transform="translate(-233.000000, -136.000000)">
-            <g id="设置" transform="translate(95.000000, 95.000000)">
-                <g id="通用设置内容" transform="translate(136.000000, 37.000000)">
-                    <g id="勾选框1:-启用匿名信息">
-                        <g id="checked">
-                            <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
-                            <use stroke="#FFFFFF" stroke-width="1.5" xlink:href="#path-1"></use>
-                        </g>
-                    </g>
-                </g>
-            </g>
-        </g>
+    <g id="icons/nike-default-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.7" stroke-opacity="0.168081975">
+        <path d="M8.71200854,9.56324566 C8.66676744,9.60848676 8.60426744,9.63646896 8.53523184,9.63646896 L4.46476816,9.63646896 C4.32669697,9.63646896 4.21476816,9.52454015 4.21476816,9.38646896 L4.21476816,8.18646896 C4.21476816,8.04839778 4.32669697,7.93646896 4.46476816,7.93646896 L7.08523184,7.93646896 L7.08523184,1.61353104 C7.08523184,1.47545985 7.19716066,1.36353104 7.33523184,1.36353104 L8.53523184,1.36353104 C8.67330303,1.36353104 8.78523184,1.47545985 8.78523184,1.61353104 L8.78523184,9.38646896 C8.78523184,9.45550456 8.75724964,9.51800456 8.71200854,9.56324566 Z" id="Shape" stroke="#FFFFFF" stroke-width="0.5" fill="url(#radialGradient-1)" transform="translate(6.500000, 5.500000) rotate(43.000000) translate(-6.500000, -5.500000) "></path>
     </g>
 </svg>

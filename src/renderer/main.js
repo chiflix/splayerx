@@ -32,7 +32,8 @@ import { videodata } from '@/store/video';
 // require('source-map-support').install();
 
 function getSystemLocale() {
-  const locale = osLocale.sync();
+  const { app } = electron.remote;
+  const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
   if (locale === 'zh-TW') {
     return 'zhTW';
   } else if (locale.startsWith('zh')) {
@@ -113,13 +114,14 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
           label: this.$t('msg.window_.exitFullScreen'),
           accelerator: 'Esc',
           click: () => {
+            this.$bus.$emit('off-fullscreen');
             this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
           },
         };
@@ -128,6 +130,7 @@ new Vue({
         label: this.$t('msg.window_.enterFullScreen'),
         accelerator: 'F',
         click: () => {
+          this.$bus.$emit('to-fullscreen');
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
         },
       };
@@ -195,9 +198,6 @@ new Vue({
       if (val <= 0) {
         this.menu.getMenuItemById('mute').checked = true;
         this.menu.getMenuItemById('deVolume').enabled = false;
-      } else if (val >= 1) {
-        this.menu.getMenuItemById('mute').checked = false;
-        this.menu.getMenuItemById('inVolume').enabled = false;
       } else {
         this.menu.getMenuItemById('inVolume').enabled = true;
         this.menu.getMenuItemById('deVolume').enabled = true;
@@ -243,10 +243,47 @@ new Vue({
       this.refreshMenu();
     },
     paused() {
-      this.refreshMenu();
+      // 因为老板键，pause 比 isFocused慢，所以在paused watcher里面
+      // 需要判断是否需要禁用menu
+      this.refreshMenu().then(() => {
+        if (!this.isFocused) {
+          this.menu && this.menu.items.forEach((e, i) => {
+            if (i === 0) return;
+            this.disableMenus(e);
+          });
+        }
+      }).catch(() => {
+      });
+    },
+    isFocused(val) {
+      // 如果window失去焦点，那么就禁用menu，除了第一选项
+      // 如果window获得焦点，就重新创建menu
+      // 这里使用焦点作为条件，主要考虑老板键和最小化
+      if (val) {
+        this.refreshMenu();
+      } else {
+        this.menu && this.menu.items.forEach((e, i) => {
+          if (i === 0) return;
+          this.disableMenus(e);
+        });
+      }
     },
   },
   methods: {
+    /**
+     * @description 递归禁用menu子项
+     * @author tanghaixiang@xindong.com
+     * @date 2019-02-13
+     * @param {Menu.item} item
+     */
+    disableMenus(item) {
+      if (item && item.label) {
+        item.enabled = false;
+        item.submenu && item.submenu.items.forEach((e) => {
+          this.disableMenus(e);
+        });
+      }
+    },
     createMenu() {
       const { Menu, app, dialog } = this.$electron.remote;
       const template = [
@@ -567,7 +604,7 @@ new Vue({
           ],
         },
       ];
-      this.updateRecentPlay().then((result) => {
+      return this.updateRecentPlay().then((result) => {
         // menu.file add "open recent"
         template[3].submenu.splice(3, 0, this.recentSubMenu());
         template[1].submenu.splice(0, 0, this.updatePlayOrPause);
@@ -666,9 +703,7 @@ new Vue({
             this.menu.getMenuItemById(`track${index}`).checked = true;
           }
         });
-        if (this.volume >= 1) {
-          this.menu.getMenuItemById('inVolume').enabled = false;
-        } else if (this.volume <= 0) {
+        if (this.volume <= 0) {
           this.menu.getMenuItemById('deVolume').enabled = false;
         }
         this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
@@ -857,9 +892,9 @@ new Vue({
       }
       return menuRecentData;
     },
-    refreshMenu() {
+    async refreshMenu() {
       this.$electron.remote.Menu.getApplicationMenu()?.clear();
-      this.createMenu();
+      await this.createMenu();
     },
   },
   mounted() {

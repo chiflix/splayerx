@@ -93,6 +93,12 @@ function registerMainWindowEvent() {
   mainWindow.on('unmaximize', () => {
     mainWindow?.webContents.send('mainCommit', 'isMaximized', false);
   });
+  mainWindow.on('minimize', () => {
+    mainWindow?.webContents.send('mainCommit', 'isMinimized', true);
+  });
+  mainWindow.on('restore', () => {
+    mainWindow?.webContents.send('mainCommit', 'isMinimized', false);
+  });
   mainWindow.on('focus', () => {
     mainWindow?.webContents.send('mainCommit', 'isFocused', true);
   });

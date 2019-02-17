@@ -71,3 +71,24 @@ export const INFO_SCHEMA = [
     name: THUMBNAIL_OBJECT_STORE_NAME,
   },
 ];
+
+export const DATADB_NAME = 'data';
+export const DATADB_SHCEMAS = [
+  {
+    version: 1,
+    schema: [
+      {
+        name: 'subtitles',
+        options: {
+          autoIncrement: true,
+        },
+        indexes: [
+          {
+            name: 'id',
+            unique: true,
+          },
+        ],
+      },
+    ],
+  },
+];

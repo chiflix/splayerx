@@ -1,13 +1,11 @@
-
 import { openDb } from 'idb';
 import { INFO_DATABASE_NAME, INFO_SCHEMA, INFODB_VERSION } from '@/constants';
 import addLog from './index';
 
-
 /**
-* You can change schema info in 'constants.js'
-*/
-class InfoDB {
+ * You can change schema info in 'constants.js'
+ */
+export class InfoDB {
   #db;
 
   /**
@@ -83,10 +81,12 @@ class InfoDB {
     const db = await this.getDB();
     const tx = db.transaction('recent-played');
     let val;
-    tx.objectStore('recent-played').index('lastOpened').iterateCursor(null, 'prev', (cursor) => {
-      if (!cursor) return;
-      val = cursor.value;
-    });
+    tx.objectStore('recent-played')
+      .index('lastOpened')
+      .iterateCursor(null, 'prev', (cursor) => {
+        if (!cursor) return;
+        val = cursor.value;
+      });
     return tx.complete.then(() => Promise.resolve(val));
   }
 
@@ -104,11 +104,13 @@ class InfoDB {
     const db = await this.getDB();
     const tx = db.transaction(schema);
     const res = [];
-    tx.objectStore(schema).index(key).iterateCursor(null, direction, (cursor) => {
-      if (!cursor) return;
-      res.push(cursor.value);
-      cursor.continue();
-    });
+    tx.objectStore(schema)
+      .index(key)
+      .iterateCursor(null, direction, (cursor) => {
+        if (!cursor) return;
+        res.push(cursor.value);
+        cursor.continue();
+      });
     return tx.complete.then(() => Promise.resolve(res));
   }
 
@@ -122,11 +124,18 @@ class InfoDB {
   async get(schema, key, val) {
     const db = await this.getDB();
     if (val) {
-      const value = await db.transaction(schema).objectStore(schema).index(key).get(val);
+      const value = await db
+        .transaction(schema)
+        .objectStore(schema)
+        .index(key)
+        .get(val);
       return value;
     }
     val = key;
-    const value = await db.transaction(schema).objectStore(schema).get(val);
+    const value = await db
+      .transaction(schema)
+      .objectStore(schema)
+      .get(val);
     return value;
   }
 

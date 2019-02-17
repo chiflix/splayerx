@@ -30,7 +30,7 @@ export default {
   },
   props: ['showAllWidgets'],
   computed: {
-    ...mapGetters(['volume', 'muted', 'volumeKeydown', 'winWidth', 'winHeight', 'winRatio', 'ratio', 'isFullScreen']),
+    ...mapGetters(['volume', 'muted', 'volumeKeydown', 'ratio', 'isFullScreen']),
     ...mapState({
       validWheelTarget: ({ Input }) => Input.wheelTarget === 'the-video-controller',
       wheelTimestamp: ({ Input }) => Input.wheelTimestamp,
@@ -38,39 +38,42 @@ export default {
     showVolume() {
       return this.volumeTriggerStopped;
     },
-    extraHeight() {
-      if (this.winRatio > this.ratio) {
-        return this.winHeight;
+  },
+  methods: {
+    handleFullScreen() {
+      const winHeight = window.screen.height;
+      const winWidth = window.screen.width;
+      const winRatio = winWidth / winHeight;
+      // the height of video after scaling
+      const videoRealHeight = winRatio > this.ratio ? winHeight : winWidth / this.ratio;
+      const backgroundHeight = videoRealHeight <= 1080 ? ((videoRealHeight - 180) / 3) + 100
+        : winHeight * 0.37;
+      const muteTop = videoRealHeight <= 1080 ? backgroundHeight + 2 : backgroundHeight + 4;
+      if (!this.isFullScreen) {
+        requestAnimationFrame(() => {
+          this.$refs.indicatorContainer.style.setProperty('--background-height', `${backgroundHeight}px`);
+          this.$refs.indicatorContainer.style.setProperty('--mute-top', `${muteTop}px`);
+        });
+      } else {
+        requestAnimationFrame(() => {
+          this.$refs.indicatorContainer.style.setProperty('--background-height', '');
+          this.$refs.indicatorContainer.style.setProperty('--mute-top', '');
+        });
       }
-      return this.winWidth / this.ratio;
-    },
-    muteTop() {
-      return this.extraHeight <= 1080 ? this.backgroundHeight + 2 : this.backgroundHeight + 4;
-    },
-    containerWidth() {
-      return this.extraHeight <= 1080 ? 12 : 24;
-    },
-    backgroundHeight() {
-      return this.extraHeight <= 1080 ? ((this.extraHeight - 180) / 3) + 100
-        : this.winHeight * 0.37;
     },
   },
+  created() {
+    this.$bus.$on('toggle-fullscreen', this.handleFullScreen);
+    this.$bus.$on('to-fullscreen', this.handleFullScreen);
+    this.$bus.$on('off-fullscreen', this.handleFullScreen);
+  },
   watch: {
-    isFullScreen(val) {
-      if (val) {
-        this.$refs.indicatorContainer.style.setProperty('--background-height', `${this.backgroundHeight}px`);
-        this.$refs.indicatorContainer.style.setProperty('--mute-top', `${this.muteTop}px`);
-      } else {
-        this.$refs.indicatorContainer.style.setProperty('--background-height', '');
-        this.$refs.indicatorContainer.style.setProperty('--mute-top', '');
-      }
-    },
     showAllWidgets(newVal) {
       if (this.muted) {
         this.volumeTriggerStopped = newVal;
       }
     },
-    muted() {
+    muted(val) {
       const { clock, volumeTriggerTimerId } = this;
       if (!this.volumeKeydown && this.volume !== 0) {
         this.volumeTriggerStopped = true;
@@ -78,6 +81,17 @@ export default {
         this.volumeTriggerTimerId = clock.setTimeout(() => {
           this.volumeTriggerStopped = false;
         }, 1000);
+      } else if (this.volumeKeydown && val) {
+        if (!this.showAllWidgets) {
+          this.volumeTriggerStopped = true;
+          clock.clearTimeout(volumeTriggerTimerId);
+          this.volumeTriggerTimerId = clock.setTimeout(() => {
+            this.volumeTriggerStopped = false;
+          }, 1000);
+        } else {
+          this.volumeTriggerStopped = this.showAllWidgets;
+          clock.clearTimeout(volumeTriggerTimerId);
+        }
       }
     },
     volume() {
