@@ -143,9 +143,53 @@ describe('class DataDb unit tests', () => {
         }).catch(done);
     });
   });
+  describe('method - get unit tests', () => {
+    const testObjectStoreName = 'testObjectStore';
+    const testIndex = 'testIndex';
+    const testVal = 'testVal';
+    let getStub;
+    let indexStub;
+    let objectStoreStub;
+    let transactionStub;
+    beforeEach(() => {
+      getStub = sandbox.stub();
+      indexStub = sandbox.stub().returns({ get: getStub });
+      objectStoreStub = sandbox.stub().returns({ get: getStub, index: indexStub });
+      transactionStub = sandbox.stub().returns({ objectStore: objectStoreStub });
+      sandbox.stub(dataDb, 'getOwnDb').returns({ transaction: transactionStub });
+    });
+
+    it('should invoke properly when val not empty', (done) => {
+      dataDb.get(testObjectStoreName, testIndex, testVal)
+        .then(() => {
+          sandbox.assert.calledWithExactly(getStub, testVal);
+          sandbox.assert.calledWithExactly(indexStub, testIndex);
+          sandbox.assert.calledWithExactly(objectStoreStub, testObjectStoreName);
+          sandbox.assert.calledWithExactly(transactionStub, testObjectStoreName);
+          done();
+        }).catch(done);
+    });
+    it('should invoke properly when val empty', (done) => {
+      dataDb.get(testObjectStoreName, testIndex)
+        .then(() => {
+          sandbox.assert.calledWithExactly(getStub, testIndex);
+          sandbox.assert.calledWithExactly(objectStoreStub, testObjectStoreName);
+          sandbox.assert.calledWithExactly(transactionStub, testObjectStoreName);
+          done();
+        }).catch(done);
+    });
+  });
 });
 describe('dataDb unit tests', () => {
   it('sanity - should dataDb be properly imported', () => {
     expect(dataDb).not.to.equal(undefined);
+  });
+
+  let sandbox;
+  beforeEach(() => {
+    sandbox = createSandbox();
+  });
+  afterEach(() => {
+    sandbox.restore();
   });
 });

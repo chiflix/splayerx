@@ -53,6 +53,21 @@ export class DataDb {
     this.db = await DataDb.getDb(this.version, this.schema);
     return this.db;
   }
+
+  async get(objectStoreName, index, val) {
+    const db = await this.getOwnDb();
+    if (val) {
+      return db
+        .transaction(objectStoreName)
+        .objectStore(objectStoreName)
+        .index(index)
+        .get(val);
+    }
+    return db
+      .transaction(objectStoreName)
+      .objectStore(objectStoreName)
+      .get(index);
+  }
 }
 
 export default new DataDb(schemas[0].version, schemas[0].schema);
