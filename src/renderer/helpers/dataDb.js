@@ -69,6 +69,14 @@ export class DataDb {
       .objectStore(objectStoreName)
       .get(index);
   }
+  async getAll(objectStoreName, keyRange) {
+    const db = await this.getOwnDb();
+    const tx = db.transaction(objectStoreName);
+    if (keyRange) {
+      return tx.objectStore(objectStoreName).getAll(keyRange);
+    }
+    return tx.objectStore(objectStoreName).getAll();
+  }
 
   async add(objectStoreName, data) {
     const db = await this.getOwnDb();
