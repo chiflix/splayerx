@@ -179,6 +179,39 @@ describe('class DataDb unit tests', () => {
         }).catch(done);
     });
   });
+  describe('method - getAll unit tests', () => {
+    const testObjectStoreName = 'testObjectStore';
+    const testKeyRange = {};
+
+    let getAllStub;
+    let objectStoreStub;
+    let transactionStub;
+    beforeEach(() => {
+      getAllStub = sandbox.stub();
+      objectStoreStub = sandbox.stub().returns({ getAll: getAllStub });
+      transactionStub = sandbox.stub().returns({ objectStore: objectStoreStub });
+      sandbox.stub(dataDb, 'getOwnDb').returns({ transaction: transactionStub });
+    });
+
+    it('should invoke properly when keyRange not empty', (done) => {
+      dataDb.getAll(testObjectStoreName, testKeyRange)
+        .then(() => {
+          sandbox.assert.calledWithExactly(getAllStub, testKeyRange);
+          sandbox.assert.calledWithExactly(objectStoreStub, testObjectStoreName);
+          sandbox.assert.calledWithExactly(transactionStub, testObjectStoreName);
+          done();
+        }).catch(done);
+    });
+    it('should invoke properly when keyRange empty', (done) => {
+      dataDb.getAll(testObjectStoreName)
+        .then(() => {
+          sandbox.assert.calledWithExactly(getAllStub);
+          sandbox.assert.calledWithExactly(objectStoreStub, testObjectStoreName);
+          sandbox.assert.calledWithExactly(transactionStub, testObjectStoreName);
+          done();
+        }).catch(done);
+    });
+  });
   describe('method - add unit tests', () => {
     const testObjectStoreName = 'testObjectStore';
     const errorCompleteParam = 'errorComplete';
