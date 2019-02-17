@@ -5,6 +5,7 @@ import {
   __RewireAPI__ as storageRewireAPI,
   retrieveLanguagePreference,
   storeSubtitles,
+  retrieveSubtitles,
 } from '@/helpers/subtitle/storage';
 import { SUBTITLE_OBJECTSTORE_NAME } from '@/constants';
 import dataDb from '@/helpers/dataDb';
@@ -164,6 +165,18 @@ describe('helper - subtitle - storage', () => {
         .then(({ success, failure }) => {
           expect(success).to.deep.equal([randomSubtitles[0].id]);
           expect(failure).to.deep.equal([failureSubtitleId]);
+          done();
+        }).catch(done);
+    });
+    it('should retrieveSubtitles invoke getAll', (done) => {
+      const getAllStub = sandbox.stub(dataDb, 'getAll');
+      const onlyStub = sandbox.stub(IDBKeyRange, 'only');
+      const testMediaIdentity = randStr();
+
+      retrieveSubtitles(testMediaIdentity)
+        .then(() => {
+          sandbox.assert.calledWithExactly(onlyStub, testMediaIdentity);
+          sandbox.assert.calledWith(getAllStub, SUBTITLE_OBJECTSTORE_NAME);
           done();
         }).catch(done);
     });

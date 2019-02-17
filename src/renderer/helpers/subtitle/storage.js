@@ -11,8 +11,8 @@ function setVideoInfo(infoPayload) {
   return infoDB.add('recent-played', infoPayload);
 }
 function updateVideoInfo(videoSrc, info) {
-  return getVideoInfoFromVideoSrc(videoSrc)
-    .then(videoInfo => setVideoInfo({ ...(videoInfo || { path: videoSrc }), ...info }));
+  return getVideoInfoFromVideoSrc(videoSrc).then(videoInfo =>
+    setVideoInfo({ ...(videoInfo || { path: videoSrc }), ...info }));
 }
 
 export function storeLanguagePreference(videoSrc, languagePreference) {
@@ -32,14 +32,17 @@ export async function retrieveLanguagePreference(videoSrc) {
 export async function storeSubtitles(subtitles) {
   const successIds = [];
   const failureIds = subtitles.map(({ id }) => id);
-  const storeSubtitle = subtitle => (
-    dataDb.add(SUBTITLE_OBJECTSTORE_NAME, subtitle)
+  const storeSubtitle = subtitle =>
+    dataDb
+      .add(SUBTITLE_OBJECTSTORE_NAME, subtitle)
       .then(() => {
         successIds.push(subtitle.id);
         remove(failureIds, id => id === subtitle.id);
       })
-      .catch(console.log)
-  );
+      .catch(console.log);
   await Promise.all(subtitles.map(storeSubtitle));
-  return ({ success: successIds, failure: failureIds });
+  return { success: successIds, failure: failureIds };
+}
+export async function retrieveSubtitles(mediaIdentity) {
+  return dataDb.getAll(SUBTITLE_OBJECTSTORE_NAME, IDBKeyRange.only(mediaIdentity));
 }
