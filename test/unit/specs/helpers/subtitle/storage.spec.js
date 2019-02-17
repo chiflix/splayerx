@@ -4,7 +4,10 @@ import {
   storeLanguagePreference,
   __RewireAPI__ as storageRewireAPI,
   retrieveLanguagePreference,
+  storeSubtitles,
 } from '@/helpers/subtitle/storage';
+import { SUBTITLE_OBJECTSTORE_NAME } from '@/constants';
+import dataDb from '@/helpers/dataDb';
 
 const randStr = () => Math.random().toString(36).substring(7);
 const errorVideoSrc = '11-22-33-44';
@@ -19,7 +22,7 @@ describe('helper - subtitle - storage', () => {
     sandbox.restore();
   });
 
-  describe('language preference unit tests', () => {
+  describe('language preference storage unit tests', () => {
     const recentPlaySchemaName = 'recent-played';
     const databaseIndexName = 'path';
     let videoSrc;
@@ -128,6 +131,41 @@ describe('helper - subtitle - storage', () => {
           })
           .catch(done);
       });
+    });
+  });
+
+  describe('subtitles storage unit tests', () => {
+    const objectStoreName = SUBTITLE_OBJECTSTORE_NAME;
+    const failureSubtitleId = 'failure';
+    const failureSubtitle = { id: failureSubtitleId };
+
+    let addStub;
+    beforeEach(() => {
+      addStub = sandbox.stub(dataDb, 'add').resolves();
+      addStub.withArgs(objectStoreName, failureSubtitle).rejects();
+    });
+
+    it('should invoke dataDb.add', (done) => {
+      const randomSubtitles = [1, 2, 3, 4, 5].map(() => ({ id: randStr() }));
+      const randomIds = randomSubtitles.map(({ id }) => id);
+
+      storeSubtitles(randomSubtitles)
+        .then(({ success, failure }) => {
+          sandbox.assert.calledWithExactly(addStub, SUBTITLE_OBJECTSTORE_NAME, randomSubtitles[0]);
+          expect(success).to.deep.equal(randomIds);
+          expect(failure).to.deep.equal([]);
+          done();
+        }).catch(done);
+    });
+    it('should slience error to failure ids', (done) => {
+      const randomSubtitles = [{ id: randStr() }, failureSubtitle];
+
+      storeSubtitles(randomSubtitles)
+        .then(({ success, failure }) => {
+          expect(success).to.deep.equal([randomSubtitles[0].id]);
+          expect(failure).to.deep.equal([failureSubtitleId]);
+          done();
+        }).catch(done);
     });
   });
 });
