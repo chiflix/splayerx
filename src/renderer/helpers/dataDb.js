@@ -1,9 +1,11 @@
 import { openDb } from 'idb';
 import { includes } from 'lodash';
-import { DATADB_NAME as dBName } from '@/constants';
+import { DATADB_NAME as dBName, DATADB_SHCEMAS as schemas } from '@/constants';
 
 export class DataDb {
   #db;
+  #version;
+  #schema;
 
   /**
    * retrieve or createDb with dbName, version and schema
@@ -40,6 +42,17 @@ export class DataDb {
       });
     });
   }
+
+  constructor(version, schema) {
+    this.version = version;
+    this.schema = schema;
+  }
+
+  async getOwnDb() {
+    if (this.db) return this.db;
+    this.db = await DataDb.getDb(this.version, this.schema);
+    return this.db;
+  }
 }
 
-export default new DataDb();
+export default new DataDb(schemas[0].version, schemas[0].schema);

@@ -8,6 +8,9 @@ describe('class DataDb unit tests', () => {
   beforeEach(() => {
     sandbox = createSandbox();
   });
+  afterEach(() => {
+    sandbox.restore();
+  });
 
   describe('method - getDb unit tests', () => {
     const randStr = () => Math.random().toString(36).substring(7);
@@ -112,6 +115,32 @@ describe('class DataDb unit tests', () => {
             done();
           }).catch(done);
       });
+    });
+  });
+  describe('method - getOwnDb unit tests', () => {
+    let getDbStub;
+    let testDataDb;
+
+    beforeEach(() => {
+      getDbStub = sandbox.stub(DataDb, 'getDb').resolves({});
+      testDataDb = new DataDb();
+    });
+
+    it('should return invoke getDb when empty', (done) => {
+      testDataDb.getOwnDb()
+        .then(() => {
+          sandbox.assert.called(getDbStub);
+          done();
+        }).catch(done);
+    });
+
+    it('should not invoke getDb when not empty', (done) => {
+      testDataDb.getOwnDb()
+        .then(() => testDataDb.getOwnDb())
+        .then(() => {
+          sandbox.assert.calledOnce(getDbStub);
+          done();
+        }).catch(done);
     });
   });
 });
