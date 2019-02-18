@@ -172,7 +172,7 @@ function registerMainWindowEvent() {
     let waitingCount = 0;
     const callback = (resultCode, imgPath) => {
       if (resultCode === 'Waiting for the task completion.') {
-        waitingCount = 0;
+        waitingCount += 1;
         if (waitingCount <= maxWaitingCount) {
           snapShot(snapShotQueue[0], callback);
         } else {
