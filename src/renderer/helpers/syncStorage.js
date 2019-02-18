@@ -42,11 +42,11 @@ function getSync(key) {
   try {
     data = fs.readFileSync(filename);
   } catch (err) {
-    helpers.methods.addLog('error', err);
     if (err instanceof Error) {
       if (err.code === 'ENOENT') {
         data = JSON.stringify({});
       } else {
+        helpers.methods.addLog('error', err);
         throw err;
       }
     }
