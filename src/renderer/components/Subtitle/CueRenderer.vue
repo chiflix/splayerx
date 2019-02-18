@@ -1,8 +1,10 @@
 <template>
   <div class="subtitle-wrapper">
     <span class="subtitle-border-content"
+       :style="{ textAlign: this.textAlign}"
        :class="'subtitle-border-style'+ChosenIndex" v-html="finalText"></span>
     <span class="subtitle-content"
+       :style="{ textAlign: this.textAlign}"
        :class="'subtitle-style'+ChosenIndex" v-html="finalText"></span>
   </div>
 </template>
@@ -14,6 +16,7 @@ export default {
   name: 'CueRender',
   data() {
     return {
+      textAlign: 'center',
     };
   },
   props: {
@@ -27,6 +30,7 @@ export default {
     },
     finalText() {
       let tmp = this.text;
+      this.textAlign = tmp.includes('<br>') ? '' : 'center';
       if (this.settings) {
         if (this.settings.i) {
           tmp = `<i>${tmp}`;
@@ -56,12 +60,10 @@ export default {
 .subtitle-content {
   z-index: 1;
   white-space: pre;
-  text-align: center;
 }
 .subtitle-border-content {
   position: absolute;
   z-index: 0;
   white-space: pre;
-  text-align: center;
 }
 </style>

@@ -203,10 +203,10 @@ export default {
         if (!isEqual(tags[index], tags[index - 1])) {
           break;
         }
-        tmp += texts[index - 1].split('\n').length;
+        tmp += texts[index - 1].split('<br>').length;
         index -= 1;
       }
-      return tmp / texts[lastNum].split('\n').length;
+      return tmp / texts[lastNum].split('<br>').length;
     },
     assLine(index) {
       const { currentTags: tags } = this;
