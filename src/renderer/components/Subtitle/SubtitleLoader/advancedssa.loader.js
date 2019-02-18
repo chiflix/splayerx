@@ -16,8 +16,8 @@ const baseInfo = {
   // 'Video File': '',
   // 'Video Aspect Ratio': '0',
   // 'Video Zoom': '8',
-  // 'Video Position': '0'
-}
+  // 'Video Position': '0',
+};
 const baseTags = {
   // fn: '',
   // fs: '',
@@ -48,7 +48,7 @@ const baseTags = {
 const normalizer = (parsedSubtitle) => {
   const finalDialogues = [];
   const { info, dialogues } = parsedSubtitle;
-  const { PlayResX, PlayResY } = info;
+  const validInfo = pick(info, Object.keys(baseInfo));
   dialogues.forEach((dialogue) => {
     const {
       start, end, alignment, slices, pos,
@@ -76,7 +76,7 @@ const normalizer = (parsedSubtitle) => {
     });
   });
   return {
-    info: { PlayResX, PlayResY },
+    info: validInfo,
     dialogues: finalDialogues,
   };
 };
