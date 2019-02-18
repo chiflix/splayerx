@@ -335,6 +335,18 @@ export default {
         }
       }
     },
+    async generateValidSubtitle(id) {
+      const subtitleInstance = this.subtitleInstances[id];
+      const subtitleInfo = this.subtitleList.find(({ id: subtitleId }) => id === subtitleId);
+      if (!subtitleInstance || !subtitleInfo) throw new Error(`No subtitle instance ${id}!`);
+      const { type, format, data } = subtitleInstance;
+      const { language, name, rank } = subtitleInfo;
+      return ({
+        id,
+        type, format, data,
+        language, name, rank,
+      });
+    },
   },
   created() {
     this.$bus.$on('add-subtitles', (subs) => {
@@ -358,7 +370,6 @@ export default {
 
     function pushCurrentSubtitle() {
       if (this.currentSubtitleId) {
-        console.log(`Find subtitle id: ${this.currentSubtitleId}, about to upload.`);
         const currentSubtitleInfo = {
           ...this.subtitleList
             .find(({ id }) => id === this.currentSubtitleId),

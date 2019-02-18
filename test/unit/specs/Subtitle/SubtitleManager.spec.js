@@ -1,6 +1,7 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
 import sinon from 'sinon';
+import { merge } from 'lodash';
 import Subtitle from '@/store/modules/Subtitle';
 import Video from '@/store/modules/Video';
 import Preference from '@/store/modules/Preference';
@@ -14,34 +15,33 @@ const errorVideoSrc = '11-22-33-44';
 
 describe('Subtitle Manager Unit Tests', () => {
   let store;
+  const baseStore = {modules: {
+    Video: {
+      state: Video.state,
+      getters: Video.getters,
+      mutations: Video.mutations,
+      actions: Video.mutations,
+    },
+    Subtitle: {
+      state: Subtitle.state,
+      getters: Subtitle.getters,
+      mutations: Subtitle.mutations,
+      actions: Subtitle.actions,
+    },
+    Preference: {
+      state: Preference.state,
+      getters: Preference.getters,
+      mutations: Preference.mutations,
+      actions: Preference.actions,
+    },
+  }};
   let wrapper;
   let sandbox;
 
   beforeEach(() => {
     sandbox = sinon.createSandbox();
 
-    store = new Vuex.Store({
-      modules: {
-        Video: {
-          state: Video.state,
-          getters: Video.getters,
-          mutations: Video.mutations,
-          actions: Video.mutations,
-        },
-        Subtitle: {
-          state: Subtitle.state,
-          getters: Subtitle.getters,
-          mutations: Subtitle.mutations,
-          actions: Subtitle.actions,
-        },
-        Preference: {
-          state: Preference.state,
-          getters: Preference.getters,
-          mutations: Preference.mutations,
-          actions: Preference.actions,
-        },
-      },
-    });
+    store = new Vuex.Store(baseStore);
     wrapper = shallowMount(SubtitleManager, { localVue, store });
   });
 
@@ -291,6 +291,53 @@ describe('Subtitle Manager Unit Tests', () => {
           done();
         })
         .catch(done);
+    });
+  });
+
+  describe('method - generateValidSubtitle', () => {
+    let subtitleId;
+    const testSubtitleId = 'testSubtitle';
+    const testSubtitleInstance = { type: 'local', format: 'ass', data: '' };
+    const testSubtitleInstances = { [testSubtitleId]: testSubtitleInstance };
+    const testSubtitleInfo = { id: testSubtitleId, language: 'zh-CN', name: `${randStr()}.ass`, rank: 1000 };
+    const testSubtitleList = [testSubtitleInfo];
+    beforeEach(() => {
+      subtitleId = randStr();
+      const subtitleListStore = merge(baseStore, {
+        modules: {
+          Subtitle: {
+            getters: {
+              subtitleList: () => testSubtitleList,
+            },
+          },
+        },
+      })
+      wrapper = shallowMount(SubtitleManager, { localVue, store: new Vuex.Store(subtitleListStore) });
+      wrapper.vm.subtitleInstances = testSubtitleInstances;
+    });
+
+    it('should throw error when no subtitleInstance found', (done) => {
+      testSubtitleList.push({ id: subtitleId });
+      wrapper.vm.generateValidSubtitle(subtitleId)
+        .catch((err) => {
+          expect(err).to.be.an.instanceOf(Error);
+          done();
+        }).then(done);
+    });
+    it('should throw error when no subtitleInfo found', (done) => {
+      wrapper.vm.subtitleInstances = { ...testSubtitleInstances, subtitleId: {} };
+      wrapper.vm.generateValidSubtitle(subtitleId)
+        .catch((err) => {
+          expect(err).to.be.an.instanceOf(Error);
+          done();
+        }).then(done);
+    });
+    it('should resolves the proper subtitleInfo', (done) => {
+      wrapper.vm.generateValidSubtitle(testSubtitleId)
+        .then((result) => {
+          expect(result).to.deep.equal({ ...testSubtitleInfo, ...testSubtitleInstance });
+          done();
+        }).catch(done);
     });
   });
 });

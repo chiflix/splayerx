@@ -125,16 +125,4 @@ export default class SubtitleLoader extends EventEmitter {
       throw e;
     }
   }
-
-  toObject() {
-    const { type, id, src } = this;
-    const { language, name } = this.metaInfo;
-    return ({
-      src,
-      type,
-      id,
-      metaInfo: { language, name },
-      data: type === 'online' ? this.data : null,
-    });
-  }
 }
