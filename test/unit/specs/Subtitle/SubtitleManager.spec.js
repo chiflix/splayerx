@@ -15,26 +15,28 @@ const errorVideoSrc = '11-22-33-44';
 
 describe('Subtitle Manager Unit Tests', () => {
   let store;
-  const baseStore = {modules: {
-    Video: {
-      state: Video.state,
-      getters: Video.getters,
-      mutations: Video.mutations,
-      actions: Video.mutations,
+  const baseStore = {
+    modules: {
+      Video: {
+        state: Video.state,
+        getters: Video.getters,
+        mutations: Video.mutations,
+        actions: Video.mutations,
+      },
+      Subtitle: {
+        state: Subtitle.state,
+        getters: Subtitle.getters,
+        mutations: Subtitle.mutations,
+        actions: Subtitle.actions,
+      },
+      Preference: {
+        state: Preference.state,
+        getters: Preference.getters,
+        mutations: Preference.mutations,
+        actions: Preference.actions,
+      },
     },
-    Subtitle: {
-      state: Subtitle.state,
-      getters: Subtitle.getters,
-      mutations: Subtitle.mutations,
-      actions: Subtitle.actions,
-    },
-    Preference: {
-      state: Preference.state,
-      getters: Preference.getters,
-      mutations: Preference.mutations,
-      actions: Preference.actions,
-    },
-  }};
+  };
   let wrapper;
   let sandbox;
 
@@ -299,11 +301,16 @@ describe('Subtitle Manager Unit Tests', () => {
     const testSubtitleId = 'testSubtitle';
     const testSubtitleInstance = { type: 'local', format: 'ass', data: '' };
     const testSubtitleInstances = { [testSubtitleId]: testSubtitleInstance };
-    const testSubtitleInfo = { id: testSubtitleId, language: 'zh-CN', name: `${randStr()}.ass`, rank: 1000 };
+    const testSubtitleInfo = {
+      id: testSubtitleId,
+      language: 'zh-CN',
+      name: `${randStr()}.ass`,
+      rank: 1000,
+    };
     const testSubtitleList = [testSubtitleInfo];
     beforeEach(() => {
       subtitleId = randStr();
-      const subtitleListStore = merge(baseStore, {
+      const subtitleListStore = merge({}, baseStore, {
         modules: {
           Subtitle: {
             getters: {
@@ -311,8 +318,11 @@ describe('Subtitle Manager Unit Tests', () => {
             },
           },
         },
-      })
-      wrapper = shallowMount(SubtitleManager, { localVue, store: new Vuex.Store(subtitleListStore) });
+      });
+      wrapper = shallowMount(SubtitleManager, {
+        localVue,
+        store: new Vuex.Store(subtitleListStore),
+      });
       wrapper.vm.subtitleInstances = testSubtitleInstances;
     });
 
@@ -336,6 +346,61 @@ describe('Subtitle Manager Unit Tests', () => {
       wrapper.vm.generateValidSubtitle(testSubtitleId)
         .then((result) => {
           expect(result).to.deep.equal({ ...testSubtitleInfo, ...testSubtitleInstance });
+          done();
+        }).catch(done);
+    });
+  });
+
+  describe('method - generateValidSubtitleList', () => {
+    let videoSrc;
+    let testVideoSegments;
+    const testCurrentSubtitleId = 'testCurrentSubtitleId';
+    const testCurrentSubtitle = { id: testCurrentSubtitleId, type: 'online' };
+    let testSubtitleList;
+    beforeEach(() => {
+      videoSrc = randStr();
+      testVideoSegments = [[Math.random(), Math.random() + 5]];
+      testSubtitleList = [{ id: randStr(), type: 'local' }, testCurrentSubtitle];
+      const subtitleListStore = merge({}, baseStore, {
+        modules: {
+          Subtitle: {
+            getters: {
+              currentSubtitleId: () => testCurrentSubtitleId,
+              subtitleList: () => testSubtitleList,
+            },
+          },
+          Video: {
+            getters: {
+              duration: () => 1, // to trigger SubtitleRenderer's v-if
+            },
+          },
+        },
+      });
+      const SubtitleRendererStub = {
+        render(h) { return h('div'); },
+        data() { return { videoSegments: testVideoSegments }; },
+      };
+      wrapper = shallowMount(SubtitleManager, {
+        localVue,
+        store: new Vuex.Store(subtitleListStore),
+        stubs: {
+          SubtitleRenderer: SubtitleRendererStub,
+        },
+      });
+      wrapper.setData({
+        subtitleInstances: { [testCurrentSubtitleId]: testCurrentSubtitle },
+      });
+    });
+
+    it('should generateValidSubtitleList generate proper subtitleList', (done) => {
+      wrapper.vm.generateValidSubtitleList(videoSrc)
+        .then((result) => {
+          expect(result).to.has.property('videoSrc', videoSrc);
+          expect(result.subtitles).to
+            .have.deep.ordered.members([
+              testSubtitleList[0],
+              { ...testSubtitleList[1], videoSegments: testVideoSegments },
+            ]);
           done();
         }).catch(done);
     });

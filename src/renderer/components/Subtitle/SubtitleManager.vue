@@ -1,7 +1,8 @@
 <template>
   <div class="subtitle-manager"
     :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
-    <subtitle-render
+    <subtitle-renderer
+      ref="subtitleRenderer"
       v-if="currentSubtitleId && duration"
       :subtitle-instance="currentSubtitle"
       :key="currentSubtitleId"
@@ -14,7 +15,6 @@ import romanize from 'romanize';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import Sagi from '@/helpers/sagi';
-import infoDB from '@/helpers/infoDB';
 import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
   storeLanguagePreference,
@@ -27,7 +27,7 @@ import { localLanguageLoader } from './SubtitleLoader/utils';
 export default {
   name: 'subtitle-manager',
   components: {
-    'subtitle-render': SubtitleRenderer,
+    'subtitle-renderer': SubtitleRenderer,
   },
   data() {
     return {
@@ -343,9 +343,33 @@ export default {
       const { language, name, rank } = subtitleInfo;
       return ({
         id,
-        type, format, data,
-        language, name, rank,
+        type,
+        format,
+        data,
+        language,
+        name,
+        rank,
       });
+    },
+    async generateValidSubtitleList(videoSrc) {
+      const finalList = [];
+      const currentSubtitleInfo = {
+        id: this.currentSubtitleId,
+        type: this.currentSubtitle.type,
+        videoSegments: this.$refs.subtitleRenderer.videoSegments,
+      };
+      this.subtitleList.forEach(({ id, type }) => {
+        if (id !== this.currentSubtitleId) {
+          finalList.push({ id, type });
+        } else {
+          finalList.push(currentSubtitleInfo);
+        }
+      });
+
+      return {
+        videoSrc,
+        subtitles: finalList,
+      };
     },
   },
   created() {
