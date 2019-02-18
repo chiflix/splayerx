@@ -16,7 +16,6 @@ export default {
   name: 'CueRender',
   data() {
     return {
-      textAlign: 'center',
     };
   },
   props: {
@@ -28,9 +27,18 @@ export default {
     ChosenIndex() {
       return this.chosenStyle ? this.chosenStyle : 0;
     },
+    textAlign() {
+      const alignLeft = [1, 4, 7];
+      const alignRight = [3, 6, 9];
+      if (alignLeft.includes(this.settings.alignment)) {
+        return 'left';
+      } else if (alignRight.includes(this.settings.alignment)) {
+        return 'right';
+      }
+      return 'center';
+    },
     finalText() {
       let tmp = this.text;
-      this.textAlign = tmp.includes('<br>') ? '' : 'center';
       if (this.settings) {
         if (this.settings.i) {
           tmp = `<i>${tmp}`;
