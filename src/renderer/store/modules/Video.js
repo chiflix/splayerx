@@ -176,6 +176,9 @@ const actions = {
       if (videoMutations[mutation]) commit(mutation, config[item]);
     });
   },
+  [videoActions.VOLUME_UPDATE]({ commit }, delta) {
+    commit(videoMutations.VOLUME_UPDATE, delta > 100 ? 100 : delta);
+  },
   [videoActions.INCREASE_VOLUME]({ dispatch, commit, state }, delta) {
     if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
     const finalDelta = delta || 10;

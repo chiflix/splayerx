@@ -24,8 +24,6 @@ export default {
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
     // else it is triggered by setInterval.
     onUpdateTick() {
-      // might be used in the future
-      // this.$refs.videoCanvas.checkPresentTime();
       this.$refs.videoctrl.onTickUpdate();
     },
   },
