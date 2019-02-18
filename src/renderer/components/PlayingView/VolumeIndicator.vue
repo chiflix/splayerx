@@ -63,6 +63,7 @@ export default {
     },
   },
   created() {
+    if (this.muted) this.volumeTriggerStopped = this.showAllWidgets;
     this.$bus.$on('toggle-fullscreen', this.handleFullScreen);
     this.$bus.$on('to-fullscreen', this.handleFullScreen);
     this.$bus.$on('off-fullscreen', this.handleFullScreen);

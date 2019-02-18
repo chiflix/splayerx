@@ -177,7 +177,13 @@ const actions = {
     });
   },
   [videoActions.VOLUME_UPDATE]({ commit }, delta) {
-    commit(videoMutations.VOLUME_UPDATE, delta > 100 ? 100 : delta);
+    if (delta > 100) {
+      delta = 100;
+    } else if (delta <= 0) {
+      delta = 0;
+      commit(videoMutations.MUTED_UPDATE, true);
+    }
+    commit(videoMutations.VOLUME_UPDATE, delta);
   },
   [videoActions.INCREASE_VOLUME]({ dispatch, commit, state }, delta) {
     if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
@@ -191,6 +197,9 @@ const actions = {
     const finalVolume = state.volume - finalDelta;
     commit(videoMutations.VOLUME_UPDATE, finalVolume < 0 ? 0 : finalVolume);
     if (finalVolume <= 0) commit(videoMutations.MUTED_UPDATE, true);
+  },
+  [videoActions.MUTED_UPDATE]({ commit }, mute) {
+    commit(videoMutations.MUTED_UPDATE, mute);
   },
   [videoActions.TOGGLE_MUTED]({ commit, state }) {
     commit(videoMutations.MUTED_UPDATE, !state.muted);

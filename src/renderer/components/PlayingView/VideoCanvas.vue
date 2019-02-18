@@ -207,7 +207,7 @@ export default {
       return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
     savePlaybackStates() {
-      return asyncStorage.set('playback-states', { volume: this.volume });
+      return asyncStorage.set('playback-states', { volume: this.volume, muted: this.muted });
     },
   },
   computed: {

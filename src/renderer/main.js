@@ -168,7 +168,10 @@ new Vue({
     });
     asyncStorage.get('playback-states').then((data) => {
       if (data.volume) {
-        this.$store.dispatch('VOLUME_UPDATE', data.volume * 100);
+        this.$store.dispatch(videoActions.VOLUME_UPDATE, data.volume * 100);
+      }
+      if (data.muted) {
+        this.$store.dispatch(videoActions.MUTED_UPDATE, data.muted);
       }
     });
     this.$store.commit('getLocalPreference');
