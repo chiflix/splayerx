@@ -1,6 +1,5 @@
 import flow from 'lodash/flow';
 import pick from 'lodash/pick';
-import isEqual from 'lodash/isEqual';
 import { compile } from 'ass-compiler';
 
 import { localLanguageLoader, localNameLoader, loadLocalFile, localIdLoader } from './utils';
