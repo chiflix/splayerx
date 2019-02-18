@@ -57,7 +57,6 @@ export default {
       videoConfigInitialize: videoActions.INITIALIZE,
       play: videoActions.PLAY_VIDEO,
       pause: videoActions.PAUSE_VIDEO,
-      updateVolume: videoActions.VOLUME_UPDATE,
       updateMetaInfo: videoActions.META_INFO,
       toggleMute: videoActions.TOGGLE_MUTED,
       addAudioTrack: videoActions.ADD_AUDIO_TRACK,
