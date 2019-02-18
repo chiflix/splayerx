@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import Subtitle from '@/store/modules/Subtitle';
 import Video from '@/store/modules/Video';
 import Preference from '@/store/modules/Preference';
-import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
+import SubtitleManager, { __RewireAPI__ as subtitleManagerRewireAPI } from '@/components/Subtitle/SubtitleManager.vue';
 import SubtitleLoader from '@/components/Subtitle/SubtitleLoader';
 
 const localVue = createLocalVue();
@@ -57,9 +57,13 @@ describe('Subtitle Manager Unit Tests', () => {
   describe('method - refreshSubtitles', () => {
     let videoSrc;
     let refreshSubtitles;
+    let storeLanguagePreferenceStub;
     beforeEach(() => {
       videoSrc = randStr();
       ({ refreshSubtitles } = wrapper.vm);
+
+      storeLanguagePreferenceStub = sandbox.stub().resolves();
+      subtitleManagerRewireAPI.__Rewire__('storeLanguagePreference', storeLanguagePreferenceStub);
     });
 
     it('should throw error when no valid types provided', (done) => {
@@ -137,6 +141,18 @@ describe('Subtitle Manager Unit Tests', () => {
           done();
         })
         .catch(done);
+    });
+
+    it('should invoke storeLanguagePreference when all loaded', (done) => {
+      refreshSubtitles(['local'], videoSrc)
+        .then(() => {
+          sandbox.assert.calledWithExactly(
+            storeLanguagePreferenceStub,
+            videoSrc,
+            wrapper.vm.preferredLanguages,
+          );
+          done();
+        }).catch(done);
     });
   });
 

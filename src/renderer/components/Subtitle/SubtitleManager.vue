@@ -15,7 +15,10 @@ import { flatten, isEqual, sortBy, differenceWith, isFunction, partial } from 'l
 import { codeToLanguageName } from '@/helpers/language';
 import Sagi from '@/helpers/sagi';
 import infoDB from '@/helpers/infoDB';
-import { searchForLocalList, fetchOnlineList, retrieveEmbeddedList } from '@/helpers/subtitle';
+import {
+  searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
+  storeLanguagePreference,
+} from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
@@ -132,6 +135,7 @@ export default {
         .then(() => {
           this.$bus.$emit('refresh-finished');
           this.checkCurrentSubtitleList();
+          return storeLanguagePreference(videoSrc, preferredLanguages);
         });
     },
     getLocalSubtitlesList(videoSrc) {
