@@ -54,7 +54,7 @@ const normalizer = (parsedSubtitle) => {
         const finalDiagolue = Object.assign(
           {},
           baseDiagolue,
-          { text: text.replace(/[\\/][Nn]/g, ''), tags: finalTags },
+          { text: text.replace(/[\\/][Nn]/g, '<br>'), tags: finalTags },
         );
         finalSubtitles.push(finalDiagolue);
       });

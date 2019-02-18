@@ -121,15 +121,18 @@ export default {
       updateDuration: subtitleMutations.DURATIONS_UPDATE,
     }),
     avaliableClass(index) {
-      if (!this.isVtt && !this.currentTags[index].pos) {
-        if (this.subToTop && this.currentTags[index].alignment !== 8) {
-          this.lastIndex.push(index);
-          this.lastAlignment.push(this.currentTags[index].alignment);
-          this.lastText.push(this.currentTexts[index]);
-          this.currentTags[index].alignment = 8;
-          return 'subtitle-alignment8';
+      if (!this.isVtt) {
+        if (!this.currentTags[index].pos) {
+          if (this.subToTop && this.currentTags[index].alignment !== 8) {
+            this.lastIndex.push(index);
+            this.lastAlignment.push(this.currentTags[index].alignment);
+            this.lastText.push(this.currentTexts[index]);
+            this.currentTags[index].alignment = 8;
+            return 'subtitle-alignment8';
+          }
+          return `subtitle-alignment${this.currentTags[index].alignment}`;
         }
-        return `subtitle-alignment${this.currentTags[index].alignment}`;
+        return '';
       } else if (this.isVtt && this.currentTags[index].line !== '' && this.currentTags[index].position !== '') {
         return '';
       }
