@@ -7,6 +7,8 @@ import {
   storeSubtitles,
   retrieveSubtitles,
   deleteSubtitles,
+  storeSubtitleList,
+  retrieveSubtitleList,
 } from '@/helpers/subtitle/storage';
 import { SUBTITLE_OBJECTSTORE_NAME } from '@/constants';
 import dataDb from '@/helpers/dataDb';
@@ -102,7 +104,6 @@ describe('helper - subtitle - storage', () => {
           .catch(done);
       });
     });
-
     describe('retrieveLanguagePreference unit test', () => {
       it('should retrieveLanguagePreferencec invoke infoDB.get', () => {
         retrieveLanguagePreference(videoSrc);
@@ -134,6 +135,75 @@ describe('helper - subtitle - storage', () => {
           .catch(done);
       });
     });
+
+    describe('storeSubtitleList unit tests', () => {
+      let testSubtitleList;
+      beforeEach(() => {
+        testSubtitleList = [1, 2, 3].map(() => randStr());
+      });
+
+      it('should storeSubtitleList invoke infoDb.get', (done) => {
+        storeSubtitleList(videoSrc, testSubtitleList)
+          .then(() => {
+            sandbox.assert.calledWithExactly(
+              infoDBGetStub,
+              recentPlaySchemaName,
+              databaseIndexName,
+              videoSrc,
+            );
+            done();
+          }).catch(done);
+      });
+
+      it('should storeSubtitleList invoke infoDb.add', (done) => {
+        storeSubtitleList(videoSrc, testSubtitleList)
+          .then(() => {
+            sandbox.assert.calledWithExactly(
+              infoDBAddStub,
+              recentPlaySchemaName,
+              {
+                preference: {
+                  subtitle: {
+                    list: testSubtitleList,
+                  },
+                },
+              },
+            );
+            done();
+          }).catch(done);
+      });
+    });
+    describe('retrieveSubtitleList unit tests', () => {
+      it('should retrieveSubtitleList invoke infoDb.get', (done) => {
+        retrieveSubtitleList(videoSrc)
+          .then(() => {
+            sandbox.assert.calledWithExactly(
+              infoDBGetStub,
+              recentPlaySchemaName,
+              databaseIndexName,
+              videoSrc,
+            );
+            done();
+          }).catch(done);
+      });
+      it('should retrieveSubtitleList retrieve subtitleList', (done) => {
+        const testSubtitleList = [randStr()];
+        infoDBGetStub.resolves({ preference: { subtitle: { list: testSubtitleList } } });
+
+        retrieveSubtitleList(videoSrc)
+          .then((result) => {
+            expect(result).to.deep.equal(testSubtitleList);
+            done();
+          }).catch(done);
+      });
+      it('should non-existent videoSrc resolves empty array', (done) => {
+        retrieveSubtitleList(videoSrc)
+          .then((result) => {
+            expect(result).to.deep.equal([]);
+            done();
+          }).catch(done);
+      });
+    });
   });
 
   describe('subtitles storage unit tests', () => {
@@ -154,7 +224,11 @@ describe('helper - subtitle - storage', () => {
 
         storeSubtitles(randomSubtitles)
           .then(({ success, failure }) => {
-            sandbox.assert.calledWithExactly(addStub, SUBTITLE_OBJECTSTORE_NAME, randomSubtitles[0]);
+            sandbox.assert.calledWithExactly(
+              addStub,
+              SUBTITLE_OBJECTSTORE_NAME,
+              randomSubtitles[0],
+            );
             expect(success).to.deep.equal(randomIds);
             expect(failure).to.deep.equal([]);
             done();

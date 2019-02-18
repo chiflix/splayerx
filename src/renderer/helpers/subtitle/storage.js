@@ -1,4 +1,4 @@
-import { remove } from 'lodash';
+import { remove, merge } from 'lodash';
 
 import infoDB from '@/helpers/infoDB';
 import dataDb from '@/helpers/dataDb';
@@ -12,7 +12,7 @@ function setVideoInfo(infoPayload) {
 }
 function updateVideoInfo(videoSrc, info) {
   return getVideoInfoFromVideoSrc(videoSrc).then(videoInfo =>
-    setVideoInfo({ ...(videoInfo || { path: videoSrc }), ...info }));
+    setVideoInfo(merge(videoInfo || { path: videoSrc }, info)));
 }
 
 export function storeLanguagePreference(videoSrc, languagePreference) {
@@ -24,9 +24,21 @@ export function storeLanguagePreference(videoSrc, languagePreference) {
     },
   });
 }
-
 export async function retrieveLanguagePreference(videoSrc) {
   return (await getVideoInfoFromVideoSrc(videoSrc)).preference.subtitle.language;
+}
+export function storeSubtitleList(videoSrc, subtitleList) {
+  return updateVideoInfo(videoSrc, {
+    preference: {
+      subtitle: {
+        list: subtitleList,
+      },
+    },
+  });
+}
+export function retrieveSubtitleList(videoSrc) {
+  return getVideoInfoFromVideoSrc(videoSrc)
+    .then(({ preference }) => (preference ? preference.subtitle.list : []));
 }
 
 export async function storeSubtitles(subtitles) {
