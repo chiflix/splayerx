@@ -179,7 +179,7 @@ export default {
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     updateAnimationIn() {
-      if (!this.isPlaying) {
+      if (!this.isPlaying && this.imageLoaded) {
         this.$refs.blur.classList.remove('blur');
       }
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
@@ -191,7 +191,7 @@ export default {
       }
     },
     updateAnimationOut() {
-      if (!this.isPlaying) {
+      if (!this.isPlaying && this.imageLoaded) {
         this.$refs.blur.classList.add('blur');
       }
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
