@@ -471,7 +471,11 @@ export default {
     this.$bus.$on('subtitle-refresh-from-menu', this.debouncedHandleRefresh);
     this.$bus.$on('subtitle-refresh-from-src-change', (e, hasOnlineSubtitles) => {
       this.isInitial = true;
-      this.debouncedHandleRefresh(hasOnlineSubtitles);
+      if (this.privacyAgreement) {
+        this.debouncedHandleRefresh(hasOnlineSubtitles);
+      } else {
+        this.$bus.$emit('refresh-subtitles', ['local', 'embedded']);
+      }
     });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
