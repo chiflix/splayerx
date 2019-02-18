@@ -1,5 +1,6 @@
 import flow from 'lodash/flow';
 import pick from 'lodash/pick';
+import isEqual from 'lodash/isEqual';
 import { compile } from 'ass-compiler';
 
 import { localLanguageLoader, localNameLoader, loadLocalFile, localIdLoader } from './utils';
@@ -43,7 +44,7 @@ const normalizer = (parsedSubtitle) => {
     };
     Object.values(slices).forEach((slice) => {
       const { tag: sliceTag, fragments } = slice;
-      fragments.forEach((fragment) => {
+      const processedFragments = fragments.map((fragment) => {
         const { tag: fragmentTag, text } = fragment;
         const finalTags = {
           ...baseTags,
@@ -51,13 +52,13 @@ const normalizer = (parsedSubtitle) => {
           pos,
           ...pick(Object.assign({}, sliceTag, fragmentTag), ['b', 'i', 'u', 's']),
         };
-        const finalDiagolue = Object.assign(
-          {},
-          baseDiagolue,
-          { text: text.replace(/[\\/][Nn]/g, '<br>'), tags: finalTags },
-        );
-        finalSubtitles.push(finalDiagolue);
+        return { text: text.replace(/[\\/][Nn]/g, '<br>'), tags: finalTags };
       });
+      const finalDialogue = {
+        ...baseDiagolue,
+        fragments: processedFragments,
+      };
+      finalSubtitles.push(finalDialogue);
     });
   });
   return finalSubtitles;
