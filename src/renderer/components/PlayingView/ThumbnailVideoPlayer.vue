@@ -26,7 +26,7 @@ import { mapGetters } from 'vuex';
 import BaseVideoPlayer from '@/components/PlayingView/BaseVideoPlayer.vue';
 import BaseImageDisplay from '@/components/PlayingView/BaseImageDisplay.vue';
 import { THUMBNAIL_DB_NAME } from '@/constants';
-import idb from 'idb';
+import { openDb } from 'idb';
 
 export default {
   name: 'thumbnail-video-player',
@@ -188,7 +188,7 @@ export default {
     },
     thumbnailArrayHandler(array) {
       const promiseArray = [];
-      idb.open(THUMBNAIL_DB_NAME).then((db) => {
+      openDb(THUMBNAIL_DB_NAME).then((db) => {
         const name = `thumbnail-width-${this.maxThumbnailWidth}`;
         const tx = db.transaction(name, 'readwrite');
         const store = tx.objectStore(name);

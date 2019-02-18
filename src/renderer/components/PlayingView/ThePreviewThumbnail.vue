@@ -34,7 +34,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import idb from 'idb';
+import { openDb } from 'idb';
 import { ipcRenderer } from 'electron';
 import {
   THUMBNAIL_DB_NAME,
@@ -190,10 +190,10 @@ export default {
     },
   },
   created() {
-    idb.open(THUMBNAIL_DB_NAME).then((db) => {
+    openDb(THUMBNAIL_DB_NAME).then((db) => {
       const obejctStoreName = `thumbnail-width-${this.maxThumbnailWidth}`;
       if (!db.objectStoreNames.contains(obejctStoreName)) {
-        idb.open(THUMBNAIL_DB_NAME, db.version + 1, (upgradeDB) => {
+        openDb(THUMBNAIL_DB_NAME, db.version + 1, (upgradeDB) => {
           this.addLog('info', `[IndexedDB]: Initial thumbnails storage objectStore of width: ${this.maxThumbnailWidth} `);
           const store = upgradeDB.createObjectStore(
             `thumbnail-width-${this.maxThumbnailWidth}`,

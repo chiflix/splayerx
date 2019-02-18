@@ -11,7 +11,7 @@
 </template>
 <script>
 import { THUMBNAIL_DB_NAME } from '@/constants';
-import idb from 'idb';
+import { openDb } from 'idb';
 import BaseImageDisplay from './BaseImageDisplay.vue';
 
 export default {
@@ -65,7 +65,7 @@ export default {
       const objectStoreName = `thumbnail-width-${this.maxThumbnailWidth}`;
       let result = [];
       if (thumbnailCount === 1) {
-        const object = await idb.open(THUMBNAIL_DB_NAME).then((db) => {
+        const object = await openDb(THUMBNAIL_DB_NAME).then((db) => {
           const tx = db.transaction(objectStoreName, 'readonly');
           return tx.objectStore(objectStoreName).get(`${startIndex}-${this.quickHash}`);
         });
@@ -80,7 +80,7 @@ export default {
         }
       } else {
         result = [];
-        idb.open(THUMBNAIL_DB_NAME).then((db) => {
+        openDb(THUMBNAIL_DB_NAME).then((db) => {
           const hashRange = IDBKeyRange.only(this.quickHash);
           const numRegex = new RegExp(/^(\d+)/);
           const tx = db.transaction(objectStoreName, 'readonly');
