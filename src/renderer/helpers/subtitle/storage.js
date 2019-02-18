@@ -24,8 +24,9 @@ export function storeLanguagePreference(videoSrc, languagePreference) {
     },
   });
 }
-export async function retrieveLanguagePreference(videoSrc) {
-  return (await getVideoInfoFromVideoSrc(videoSrc)).preference.subtitle.language;
+export function retrieveLanguagePreference(videoSrc) {
+  return getVideoInfoFromVideoSrc(videoSrc)
+    .then(({ preference }) => (preference ? preference.subtitle.language : []));
 }
 export function storeSubtitleList(videoSrc, subtitleList) {
   return updateVideoInfo(videoSrc, {

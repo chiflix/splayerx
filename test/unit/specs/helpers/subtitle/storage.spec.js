@@ -134,6 +134,14 @@ describe('helper - subtitle - storage', () => {
           })
           .catch(done);
       });
+
+      it('should non-existent videoSrc resolves empty array', (done) => {
+        retrieveLanguagePreference(videoSrc)
+          .then((result) => {
+            expect(result).to.deep.equal([]);
+            done();
+          }).catch(done);
+      });
     });
 
     describe('storeSubtitleList unit tests', () => {
