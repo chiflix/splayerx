@@ -5,6 +5,19 @@ import { compile } from 'ass-compiler';
 
 import { localLanguageLoader, localNameLoader, loadLocalFile, localIdLoader } from './utils';
 
+const baseInfo = {
+  // Title: '',
+  // ScriptType: '',
+  // WrapStyle: '',
+  PlayResX: '',
+  PlayResY: '',
+  // ScaledBorderAndShadow: 'yes',
+  // 'Last Style Storage': 'Default',
+  // 'Video File': '',
+  // 'Video Aspect Ratio': '0',
+  // 'Video Zoom': '8',
+  // 'Video Position': '0'
+}
 const baseTags = {
   // fn: '',
   // fs: '',
@@ -33,8 +46,9 @@ const baseTags = {
   pos: null,
 };
 const normalizer = (parsedSubtitle) => {
-  const finalSubtitles = [];
-  const { dialogues } = parsedSubtitle;
+  const finalDialogues = [];
+  const { info, dialogues } = parsedSubtitle;
+  const { PlayResX, PlayResY } = info;
   dialogues.forEach((dialogue) => {
     const {
       start, end, alignment, slices, pos,
@@ -58,10 +72,13 @@ const normalizer = (parsedSubtitle) => {
         ...baseDiagolue,
         fragments: processedFragments,
       };
-      finalSubtitles.push(finalDialogue);
+      finalDialogues.push(finalDialogue);
     });
   });
-  return finalSubtitles;
+  return {
+    info: { PlayResX, PlayResY },
+    dialogues: finalDialogues,
+  };
 };
 
 export default {
