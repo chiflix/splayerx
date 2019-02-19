@@ -366,14 +366,6 @@ describe('class DataDb unit tests', () => {
 });
 describe('dataDb unit tests', () => {
   it('sanity - should dataDb be properly imported', () => {
-    expect(dataDb).not.to.equal(undefined);
-  });
-
-  let sandbox;
-  beforeEach(() => {
-    sandbox = createSandbox();
-  });
-  afterEach(() => {
-    sandbox.restore();
+    expect(dataDb).to.be.an.instanceOf(DataDb);
   });
 });
