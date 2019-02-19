@@ -339,13 +339,14 @@ export default {
       const subtitleInstance = this.subtitleInstances[id];
       const subtitleInfo = this.subtitleList.find(({ id: subtitleId }) => id === subtitleId);
       if (!subtitleInstance || !subtitleInfo) throw new Error(`No subtitle instance ${id}!`);
-      const { type, format, data } = subtitleInstance;
+      const { type, src, data, format } = subtitleInstance;
       const { language, name, rank } = subtitleInfo;
       return ({
         id,
+        src,
         type,
         format,
-        data,
+        data: type === 'online' ? data : undefined, // only store online subtitle's data
         language,
         name,
         rank,
