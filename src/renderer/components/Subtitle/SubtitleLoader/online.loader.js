@@ -2,10 +2,13 @@ import { tagsGetter, loadOnlineTranscript, normalizeCode } from './utils';
 
 const baseTags = { alignment: 2, pos: null };
 const normalizer = parsedSubtitle => parsedSubtitle.map(({ startTime, endTime, text }) => ({
-  start: startTime,
-  end: endTime,
-  text: text.replace(/\{[^{}]*\}/g, ''),
-  tags: tagsGetter(text, baseTags),
+  info: {},
+  dialogues: {
+    start: startTime,
+    end: endTime,
+    text: text.replace(/\{[^{}]*\}/g, ''),
+    tags: tagsGetter(text, baseTags),
+  },
 }));
 
 export default {

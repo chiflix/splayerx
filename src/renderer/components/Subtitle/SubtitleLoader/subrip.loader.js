@@ -5,11 +5,14 @@ import { localLanguageLoader, localNameLoader, localIdLoader, tagsGetter, loadLo
 
 const baseTags = { alignment: 2, pos: null };
 const normalizer = parsedSubtitle => parsedSubtitle.map(subtitle => ({
-  ...subtitle,
-  start: toMS(subtitle.start) / 1000,
-  end: toMS(subtitle.end) / 1000,
-  tags: tagsGetter(subtitle.text, baseTags),
-  text: subtitle.text.replace(/\{[^{}]*\}/g, ''),
+  info: {},
+  dialogues: {
+    ...subtitle,
+    start: toMS(subtitle.start) / 1000,
+    end: toMS(subtitle.end) / 1000,
+    tags: tagsGetter(subtitle.text, baseTags),
+    text: subtitle.text.replace(/\{[^{}]*\}/g, ''),
+  },
 }));
 
 export default {

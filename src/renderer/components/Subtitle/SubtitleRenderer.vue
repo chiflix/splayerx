@@ -87,7 +87,7 @@ export default {
     const { subtitleInstance } = this;
     subtitleInstance.once('data', subtitleInstance.parse);
     subtitleInstance.on('parse', (parsed) => {
-      const parsedData = this.type === 'ass' ? parsed.dialogues : parsed;
+      const parsedData = parsed.dialogues;
       this.videoSegments = this.getVideoSegments(parsedData, this.duration);
       if (parsedData.length) {
         const cues = parsedData
@@ -158,7 +158,7 @@ export default {
     },
     setCurrentCues(currentTime) {
       if (!this.subtitleInstance.parsed) return;
-      const parsedData = this.type === 'ass' ? this.subtitleInstance.parsed.dialogues : this.subtitleInstance.parsed;
+      const parsedData = this.subtitleInstance.parsed.dialogues;
       if (parsedData) {
         const cues = parsedData
           .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');
