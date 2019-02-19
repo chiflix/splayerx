@@ -1,6 +1,11 @@
 import { openDb } from 'idb';
 import { includes } from 'lodash';
-import { DATADB_NAME as dBName, DATADB_SHCEMAS as schemas } from '@/constants';
+import {
+  DATADB_VERSION as currentVersion,
+  DATADB_NAME as dBName,
+  DATADB_SHCEMAS as schemas,
+} from '@/constants';
+const currentSchema = schemas.find(({ version }) => version === currentVersion).schema;
 
 export class DataDb {
   #db;
@@ -101,4 +106,4 @@ export class DataDb {
   }
 }
 
-export default new DataDb(schemas[0].version, schemas[0].schema);
+export default new DataDb(currentVersion, currentSchema);
