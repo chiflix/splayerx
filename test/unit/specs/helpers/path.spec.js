@@ -31,5 +31,11 @@ describe('helper.path', () => {
         episode: '01',
       }));
     });
+    ['S11E12', 'S11E12', 'SE11EP12', 'SE11EP12', '一十一季十二集', '第十一季第十二集', '第11季第一十二集', '第一十一季第12集'].forEach((e) => {
+      expect(JSON.stringify(parseNameFromPath(e))).to.be.equals(JSON.stringify({
+        season: '11',
+        episode: '12',
+      }));
+    });
   });
 });
