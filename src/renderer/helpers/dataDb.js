@@ -5,6 +5,7 @@ import {
   DATADB_NAME as dBName,
   DATADB_SHCEMAS as schemas,
 } from '@/constants';
+
 const currentSchema = schemas.find(({ version }) => version === currentVersion).schema;
 
 export class DataDb {
@@ -90,7 +91,7 @@ export class DataDb {
       throw new Error(`Object store ${objectStoreName} does not exist. Add them to constant.js please.`);
     }
     const tx = db.transaction(objectStoreName, 'readwrite');
-    tx.objectStore(objectStoreName).put(data);
+    tx.objectStore(objectStoreName).add(data);
     return tx.complete;
   }
 

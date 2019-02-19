@@ -219,15 +219,15 @@ describe('class DataDb unit tests', () => {
     let testDataDb;
     const testSchema = { name: testObjectStoreName };
 
-    let putStub;
+    let addStub;
     let objectStoreStub;
     let completeStub;
     let transactionStub;
     beforeEach(() => {
       testDataDb = new DataDb(1, testSchema);
 
-      putStub = sandbox.stub();
-      objectStoreStub = sandbox.stub().returns({ put: putStub });
+      addStub = sandbox.stub();
+      objectStoreStub = sandbox.stub().returns({ add: addStub });
       completeStub = sandbox.stub().resolves(233);
       completeStub.withArgs(errorCompleteParam).rejects();
       transactionStub = sandbox.stub().returns({
@@ -243,7 +243,7 @@ describe('class DataDb unit tests', () => {
     it('should invoke proper params when add', (done) => {
       testDataDb.add(testObjectStoreName, testData)
         .then(() => {
-          sandbox.assert.calledWithExactly(putStub, testData);
+          sandbox.assert.calledWithExactly(addStub, testData);
           sandbox.assert.calledWithExactly(objectStoreStub, testObjectStoreName);
           sandbox.assert.calledWithExactly(transactionStub, testObjectStoreName, 'readwrite');
           done();
