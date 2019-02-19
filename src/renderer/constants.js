@@ -83,6 +83,7 @@ export const DATADB_SHCEMAS = [
         name: SUBTITLE_OBJECTSTORE_NAME,
         options: {
           autoIncrement: true,
+          keyPath: '_id',
         },
         indexes: [
           {
