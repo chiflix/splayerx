@@ -62,7 +62,7 @@ export default {
   },
   watch: {
     showAllWidgets(val) {
-      if (!val && !this.isMousedown) this.iconAppear = val;
+      if ((!val && !this.isMousedown) || (val && this.mouseOver)) this.iconAppear = val;
     },
     attachedShown(val) {
       if (!val && this.mouseOver) this.iconAppear = true;
