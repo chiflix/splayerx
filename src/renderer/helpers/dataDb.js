@@ -88,10 +88,26 @@ export class DataDb {
     const db = await this.getOwnDb();
     const { objectStoreNames } = db;
     if (!objectStoreNames.contains(objectStoreName)) {
-      throw new Error(`Object store ${objectStoreName} does not exist. Add them to constant.js please.`);
+      throw new Error(`ObjectStore ${objectStoreName} does not exist. Add them to constant.js please.`);
     }
     const tx = db.transaction(objectStoreName, 'readwrite');
     tx.objectStore(objectStoreName).add(data);
+    return tx.complete;
+  }
+
+  async put(objectStoreName, data, keyPathVal) {
+    const db = await this.getOwnDb();
+    const { objectStoreNames } = db;
+    if (!objectStoreNames.contains(objectStoreName)) {
+      throw new Error(`ObjectStore ${objectStoreName} does not exist. Add them to constant.js please.`);
+    }
+    const tx = db.transaction(objectStoreName, 'readwrite');
+    // check if the objectStore used out-of-line key
+    const { autoIncrement } = tx.objectStore(objectStoreName);
+    if (autoIncrement && typeof keyPathVal === 'undefined') {
+      throw new Error(`ObjectStore ${objectStoreName} used out-of-line key and keyPathVal is missing.`);
+    }
+    tx.objectStore(objectStoreName).put(data, keyPathVal);
     return tx.complete;
   }
 
@@ -99,7 +115,7 @@ export class DataDb {
     const db = await this.getOwnDb();
     const { objectStoreNames } = db;
     if (!objectStoreNames.contains(objectStoreName)) {
-      throw new Error(`Object store ${objectStoreName} does not exist. Add them to @/constant.js please.`);
+      throw new Error(`ObjectStore ${objectStoreName} does not exist. Add them to constant.js please.`);
     }
     const tx = db.transaction(objectStoreName, 'readwrite');
     tx.objectStore(objectStoreName).delete(keyPathVal);

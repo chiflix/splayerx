@@ -228,7 +228,7 @@ describe('class DataDb unit tests', () => {
 
       addStub = sandbox.stub();
       objectStoreStub = sandbox.stub().returns({ add: addStub });
-      completeStub = sandbox.stub().resolves(233);
+      completeStub = sandbox.stub().resolves();
       completeStub.withArgs(errorCompleteParam).rejects();
       transactionStub = sandbox.stub().returns({
         objectStore: objectStoreStub,
@@ -256,6 +256,60 @@ describe('class DataDb unit tests', () => {
     });
     it('should handle transaction error outside', (done) => {
       testDataDb.add(testObjectStoreName, testData)
+        .then(res => res(errorCompleteParam))
+        .catch(() => done());
+    });
+  });
+  describe('method - put unit tests', () => {
+    const testObjectStoreName = 'testObjectStore';
+    const errorCompleteParam = 'errorComplete';
+    const testData = { test: testObjectStoreName };
+    const testKeyPathVal = 1;
+    let testDataDb;
+    const testSchema = { name: testObjectStoreName };
+
+    let putStub;
+    let objectStoreStub;
+    let completeStub;
+    let transactionStub;
+    beforeEach(() => {
+      testDataDb = new DataDb(1, testSchema);
+
+      putStub = sandbox.stub();
+      objectStoreStub = sandbox.stub().returns({ put: putStub, autoIncrement: true });
+      completeStub = sandbox.stub().resolves();
+      completeStub.withArgs(errorCompleteParam).rejects();
+      transactionStub = sandbox.stub().returns({
+        objectStore: objectStoreStub,
+        complete: completeStub,
+      });
+      sandbox.stub(testDataDb, 'getOwnDb').resolves({
+        transaction: transactionStub,
+        objectStoreNames: new DOMStringListStub([testObjectStoreName]),
+      });
+    });
+
+    it('should invoke proper params when put', (done) => {
+      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+        .then(() => {
+          sandbox.assert.calledWithExactly(putStub, testData, testKeyPathVal);
+          sandbox.assert.calledWithExactly(objectStoreStub, testObjectStoreName);
+          sandbox.assert.calledWithExactly(transactionStub, testObjectStoreName, 'readwrite');
+          done();
+        }).catch(done);
+    });
+    it('should throw error when non-existent objectStoreName provided', (done) => {
+      testDataDb.put(testObjectStoreName.slice(1), testData, testKeyPathVal)
+        .catch(() => done())
+        .then(done);
+    });
+    it('should throw error when not providing autoIncrement objectStore with keyPathVal', (done) => {
+      testDataDb.put(testObjectStoreName, testData)
+        .catch(() => done())
+        .then(done);
+    });
+    it('should handle transaction error outside', (done) => {
+      testDataDb.put(testObjectStoreName, testData)
         .then(res => res(errorCompleteParam))
         .catch(() => done());
     });
