@@ -78,7 +78,7 @@ export default {
       if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([37, 41], false);
-          this.clearMouseup({ target: '' });
+          this.clearMouseup({ componentName: '' });
         }
       }
     },
@@ -89,7 +89,7 @@ export default {
             this.anim.playSegments([68, 73]);
             this.$emit('update:lastDragging', false);
           }
-          this.clearMousedown({ target: '' });
+          this.clearMousedown({ componentName: '' });
         } else if (val !== this.$options.name && this.showAttached) {
           this.$emit('update:showAttached', false);
         }
