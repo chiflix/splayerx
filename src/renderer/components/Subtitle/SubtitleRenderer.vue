@@ -22,8 +22,7 @@
 </template>
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import isEqual from 'lodash/isEqual';
-import toArray from 'lodash/toArray';
+import { isEqual, toArray, isEmpty } from 'lodash';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
 import CueRenderer from './CueRenderer.vue';
@@ -48,8 +47,8 @@ export default {
       lastIndex: [],
       lastAlignment: [],
       lastText: [],
-      subPlayResX: 0,
-      subPlayResY: 0,
+      subPlayResX: this.intrinsicWidth,
+      subPlayResY: this.intrinsicHeight,
     };
   },
   computed: {
@@ -97,8 +96,10 @@ export default {
           this.currentCues = cues;
         }
       }
-      this.subPlayResX = parsed.info.PlayResX ? parsed.info.PlayResX : this.intrinsicWidth;
-      this.subPlayResY = parsed.info.PlayResY ? parsed.info.PlayResY : this.intrinsicHeight;
+      if (!isEmpty(parsed.info)) {
+        this.subPlayResX = parsed.info.PlayResX ? parsed.info.PlayResX : this.intrinsicWidth;
+        this.subPlayResY = parsed.info.PlayResY ? parsed.info.PlayResY : this.intrinsicHeight;
+      }
     });
     subtitleInstance.load();
     this.$bus.$on('subtitle-to-top', (val) => {
