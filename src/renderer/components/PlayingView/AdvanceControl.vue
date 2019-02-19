@@ -109,6 +109,7 @@ export default {
       if (!this.showAttached) {
         this.anim.playSegments([17, 21], false);
       } else {
+        this.clearMouseup({ componentName: '' });
         this.anim.playSegments([37, 41], false);
       }
       document.addEventListener('mouseup', (e) => {

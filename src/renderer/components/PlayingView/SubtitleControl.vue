@@ -399,6 +399,7 @@ export default {
       if (!this.showAttached) {
         this.anim.playSegments([28, 32], false);
       } else {
+        this.clearMouseup({ componentName: '' });
         this.anim.playSegments([62, 64], false);
       }
     },
