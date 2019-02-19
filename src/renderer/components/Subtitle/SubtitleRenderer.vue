@@ -47,8 +47,8 @@ export default {
       lastIndex: [],
       lastAlignment: [],
       lastText: [],
-      subPlayResX: this.intrinsicWidth,
-      subPlayResY: this.intrinsicHeight,
+      subPlayResX: 0,
+      subPlayResY: 0,
     };
   },
   computed: {
@@ -96,10 +96,9 @@ export default {
           this.currentCues = cues;
         }
       }
-      if (!isEmpty(parsed.info)) {
-        this.subPlayResX = parsed.info.PlayResX ? parsed.info.PlayResX : this.intrinsicWidth;
-        this.subPlayResY = parsed.info.PlayResY ? parsed.info.PlayResY : this.intrinsicHeight;
-      }
+      this.subPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth;
+      this.subPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY) :
+        this.intrinsicHeight;
     });
     subtitleInstance.load();
     this.$bus.$on('subtitle-to-top', (val) => {
