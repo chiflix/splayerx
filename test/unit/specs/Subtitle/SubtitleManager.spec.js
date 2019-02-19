@@ -355,7 +355,6 @@ describe('Subtitle Manager Unit Tests', () => {
           expect(result).to.have.property('src');
           expect(result).to.have.property('format');
           expect(result).to.have.property('language');
-          expect(result).to.have.property('rank');
           done();
         }).catch(done);
     });
@@ -363,13 +362,12 @@ describe('Subtitle Manager Unit Tests', () => {
       wrapper.vm.generateValidSubtitle(testSubtitleId)
         .then((result) => {
           const { src } = testSubtitleInstance;
-          const { rank, format } = testSubtitleInfo;
+          const { format } = testSubtitleInfo;
           expect(result).to.have.property('id', testSubtitleId);
           expect(result).to.have.property('type', 'local');
           expect(result).to.have.property('src', src);
           expect(result).to.have.property('format', format);
           expect(result.data).to.not.exist;
-          expect(result).to.have.property('rank', rank);
           done();
         }).catch(done);
     });
@@ -379,13 +377,12 @@ describe('Subtitle Manager Unit Tests', () => {
         .then((result) => {
           testSubtitleInstance.type = 'embedded';
           const { src } = testSubtitleInstance;
-          const { rank, format } = testSubtitleInfo;
+          const { format } = testSubtitleInfo;
           expect(result).to.have.property('id', testSubtitleId);
           expect(result).to.have.property('type', 'embedded');
           expect(result).to.have.property('src', src);
           expect(result).to.have.property('format', format);
           expect(result.data).to.not.exist;
-          expect(result).to.have.property('rank', rank);
           done();
         }).catch(done);
     });
@@ -395,13 +392,12 @@ describe('Subtitle Manager Unit Tests', () => {
         .then((result) => {
           testSubtitleInstance.type = 'online';
           const { src, data } = testSubtitleInstance;
-          const { rank, format } = testSubtitleInfo;
+          const { format } = testSubtitleInfo;
           expect(result).to.have.property('id', testSubtitleId);
           expect(result).to.have.property('type', 'online');
           expect(result).to.have.property('src', src);
           expect(result).to.have.property('format', format);
           expect(result).to.have.property('data', data);
-          expect(result).to.have.property('rank', rank);
           done();
         }).catch(done);
     });
@@ -411,12 +407,26 @@ describe('Subtitle Manager Unit Tests', () => {
     let videoSrc;
     let testVideoSegments;
     const testCurrentSubtitleId = 'testCurrentSubtitleId';
-    const testCurrentSubtitle = { id: testCurrentSubtitleId, type: 'online' };
+    let testCurrentSubtitle;
+    let testSubtitleWithName;
     let testSubtitleList;
     beforeEach(() => {
       videoSrc = randStr();
+      testCurrentSubtitle = {
+        id: testCurrentSubtitleId,
+        src: randStr(),
+        type: 'local',
+        rank: 9999,
+      };
       testVideoSegments = [[Math.random(), Math.random() + 5]];
-      testSubtitleList = [{ id: randStr(), type: 'local' }, testCurrentSubtitle];
+      testSubtitleWithName = {
+        id: randStr(),
+        src: randStr(),
+        type: 'online',
+        name: 'Chinese I',
+        rank: 9997,
+      };
+      testSubtitleList = [testCurrentSubtitle, testSubtitleWithName];
       const subtitleListStore = merge({}, baseStore, {
         modules: {
           Subtitle: {
@@ -452,11 +462,18 @@ describe('Subtitle Manager Unit Tests', () => {
       wrapper.vm.generateValidSubtitleList(videoSrc)
         .then((result) => {
           expect(result).to.has.property('videoSrc', videoSrc);
-          expect(result.subtitles).to
-            .have.deep.ordered.members([
-              testSubtitleList[0],
-              { ...testSubtitleList[1], videoSegments: testVideoSegments },
-            ]);
+          result.subtitles.forEach((subtitleInfo) => {
+            const {
+              id, type, name, rank,
+            } = testSubtitleList.find(({ id }) => id === subtitleInfo.id);
+            expect(subtitleInfo).to.have.property('id', id);
+            expect(subtitleInfo).to.have.property('type', type);
+            expect(subtitleInfo).to.have.property('name', name);
+            expect(subtitleInfo).to.have.property('rank', rank);
+            if (subtitleInfo.id === testCurrentSubtitleId) {
+              expect(subtitleInfo).to.have.property('videoSegments', testVideoSegments);
+            }
+          });
           done();
         }).catch(done);
     });

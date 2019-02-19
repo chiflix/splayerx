@@ -340,9 +340,7 @@ export default {
       const subtitleInfo = this.subtitleList.find(({ id: subtitleId }) => id === subtitleId);
       if (!subtitleInstance || !subtitleInfo) throw new Error(`No subtitle instance ${id}!`);
       const { type, src, data } = subtitleInstance;
-      const {
-        language, name, rank, format,
-      } = subtitleInfo;
+      const { language, format } = subtitleInfo;
       return ({
         id,
         src,
@@ -350,22 +348,29 @@ export default {
         format,
         data: type === 'online' ? data : undefined, // only store online subtitle's data
         language,
-        name,
-        rank,
       });
     },
     async generateValidSubtitleList(videoSrc) {
       const finalList = [];
-      const currentSubtitleInfo = {
-        id: this.currentSubtitleId,
-        type: this.currentSubtitle.type,
-        videoSegments: this.$refs.subtitleRenderer.videoSegments,
-      };
-      this.subtitleList.forEach(({ id, type }) => {
-        if (id !== this.currentSubtitleId) {
-          finalList.push({ id, type });
+      const { currentSubtitleId } = this;
+      const currentVideoSegments = this.$refs.subtitleRenderer.videoSegments;
+      // generate valid subtitle list members
+      this.subtitleList.forEach((subtitleInfo) => {
+        const {
+          id, type, name, rank,
+        } = subtitleInfo;
+        if (id !== currentSubtitleId) {
+          finalList.push({
+            id, type, name, rank,
+          });
         } else {
-          finalList.push(currentSubtitleInfo);
+          finalList.push({
+            id,
+            type,
+            name,
+            rank,
+            videoSegments: currentVideoSegments,
+          });
         }
       });
 
