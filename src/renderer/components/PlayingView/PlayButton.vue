@@ -1,17 +1,15 @@
 <template>
 <div :data-component-name="$options.name"
-  @mouseenter.stop="handleMouseenter"
-  @mouseleave.stop="handleMouseleave">
-  <transition name="icon" mode="out-in">
+  @mouseenter="handleMouseenter"
+  @mouseleave="handleMouseleave">
   <div class="icon-wrapper"
     v-fade-in="iconAppear"
-    :key="paused"
-    @mousedown.stop=""
+    @mousedown.left.stop="handleMousedown"
     @mouseup="handleMouseup">
-    <Icon v-if="paused" class="icon play" type="play"/>
-    <Icon v-if="!paused" class="icon" type="pause"/>
+    <transition name="scale" mode="out-in">
+    <Icon :key="paused" :class="iconClass" :type="paused ? 'play' : 'pause'"/>
+    </transition>
   </div>
-  </transition>
 </div>
 </template>
 
@@ -30,10 +28,20 @@ export default {
     return {
       iconAppear: false, // control whether the icon show up or not
       mouseOver: false,
+      isMousedown: false,
     };
   },
   components: {
     Icon,
+  },
+  computed: {
+    iconClass() {
+      return {
+        icon: true,
+        play: this.paused,
+        'scale-enter': this.isMousedown,
+      };
+    },
   },
   methods: {
     handleMouseenter() {
@@ -43,6 +51,9 @@ export default {
     handleMouseleave() {
       this.iconAppear = this.mouseOver = false;
     },
+    handleMousedown() {
+      this.isMousedown = true;
+    },
     handleMouseup() {
       if (!this.attachedShown) {
         this.$bus.$emit('toggle-playback');
@@ -50,13 +61,17 @@ export default {
     },
   },
   watch: {
-    // showAllWidgets(val) {
-    //   if (!this.isFocused && val) this.iconAppear = val;
-    //   if (!val) this.iconAppear = val;
-    // },
+    showAllWidgets(val) {
+      if (!val && !this.isMousedown) this.iconAppear = val;
+    },
     attachedShown(val) {
       if (!val && this.mouseOver) this.iconAppear = true;
     },
+  },
+  created() {
+    document.addEventListener('mouseup', () => {
+      if (this.isMousedown) this.isMousedown = false;
+    });
   },
 };
 </script>
@@ -69,6 +84,12 @@ export default {
 .icon-enter, .icon-leave-to {
   opacity: 0;
 }
+.scale-enter {
+  transform: scale(0.8);
+}
+.scale-enter-to {
+  transform: scale(1.0);
+}
 .icon-wrapper {
   position: relative;
 }
@@ -77,6 +98,7 @@ export default {
   width: 100%;
   height: 100%;
   cursor: pointer;
+  transition: transform 50ms ease-in;
 }
 @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .icon-wrapper {
