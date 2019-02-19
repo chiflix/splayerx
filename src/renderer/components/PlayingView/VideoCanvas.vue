@@ -234,6 +234,7 @@ export default {
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [this.ratio]);
+      this.$ga.event('app', 'toggle-fullscreen');
     });
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
@@ -243,6 +244,7 @@ export default {
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
+      this.$ga.event('app', 'toggle-playback');
     });
     this.$bus.$on('next-video', () => {
       if (this.nextVideo) {
@@ -258,6 +260,7 @@ export default {
       if (ext === 'mkv') {
         this.$bus.$emit('seek-subtitle', e);
       }
+      this.$ga.event('app', 'seek');
     });
     this.$bus.$on('drag-over', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0.18)';
@@ -267,6 +270,7 @@ export default {
     });
     this.$bus.$on('drop', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0)';
+      this.$ga.event('app', 'drop');
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
