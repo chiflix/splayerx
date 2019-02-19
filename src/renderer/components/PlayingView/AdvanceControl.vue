@@ -78,18 +78,18 @@ export default {
       if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([37, 41], false);
-          this.clearMouseup({ target: '' });
+          this.clearMouseup({ componentName: '' });
         }
       }
     },
     currentMouseupComponent(val) {
       if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
-        if (this.lastDragging) {
+        if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
           if (this.showAttached) {
             this.anim.playSegments([68, 73]);
             this.$emit('update:lastDragging', false);
           }
-          this.clearMousedown({ target: '' });
+          this.clearMousedown({ componentName: '' });
         } else if (val !== this.$options.name && this.showAttached) {
           this.$emit('update:showAttached', false);
         }
@@ -109,6 +109,7 @@ export default {
       if (!this.showAttached) {
         this.anim.playSegments([17, 21], false);
       } else {
+        this.clearMouseup({ componentName: '' });
         this.anim.playSegments([37, 41], false);
       }
       document.addEventListener('mouseup', (e) => {
@@ -119,6 +120,9 @@ export default {
             } else if (this.currentMousedownComponent === this.$options.name) {
               this.anim.playSegments([105, 109], false);
             }
+          } else if (this.currentMousedownComponent === this.$options.name
+            && this.currentMouseupComponent !== this.$options.name) {
+            this.anim.playSegments([68, 73], false);
           }
           this.mouseDown = false;
         }

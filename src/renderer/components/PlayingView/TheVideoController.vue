@@ -148,7 +148,7 @@ export default {
       }, 3000);
     },
     isDragging(val, oldval) {
-      if (!val && oldval) {
+      if (!val && oldval && !['subtitle-control', 'advance-control'].includes(this.currentMousedownWidget)) {
         this.lastDragging = true;
       }
     },
