@@ -1,8 +1,8 @@
-import { remove, merge } from 'lodash';
+import { remove, merge, pick } from 'lodash';
 
 import infoDB from '@/helpers/infoDB';
 import dataDb from '@/helpers/dataDb';
-import { SUBTITLE_OBJECTSTORE_NAME } from '@/constants';
+import { SUBTITLE_OBJECTSTORE_NAME, DATADB_SHCEMAS, DATADB_VERSION } from '@/constants';
 
 function getVideoInfoFromVideoSrc(videoSrc) {
   return infoDB.get('recent-played', 'path', videoSrc);
@@ -42,19 +42,15 @@ export function retrieveSubtitleList(videoSrc) {
     .then(({ preference }) => (preference ? preference.subtitle.list : []));
 }
 
-export async function storeSubtitles(subtitles) {
-  const successIds = [];
-  const failureIds = subtitles.map(({ id }) => id);
-  const storeSubtitle = subtitle =>
-    dataDb
-      .add(SUBTITLE_OBJECTSTORE_NAME, subtitle)
-      .then(() => {
-        successIds.push(subtitle.id);
-        remove(failureIds, id => id === subtitle.id);
-      })
-      .catch(console.log);
-  await Promise.all(subtitles.map(storeSubtitle));
-  return { success: successIds, failure: failureIds };
+export async function storeSubtitle(subtitle) {
+  const supportedProperties = DATADB_SHCEMAS
+    .find(({ version }) => version === DATADB_VERSION)
+    .schema // find the correct version
+    .find(({ name }) => name === SUBTITLE_OBJECTSTORE_NAME) // find the correct objectStore
+    .properties;
+  const subtitleToStore = pick(subtitle, supportedProperties);
+  return dataDb.add(SUBTITLE_OBJECTSTORE_NAME, subtitleToStore)
+    .then(() => subtitle.id).catch(() => subtitle.id);
 }
 export async function retrieveSubtitles(mediaIdentity) {
   return dataDb.getAll(SUBTITLE_OBJECTSTORE_NAME, IDBKeyRange.only(mediaIdentity));

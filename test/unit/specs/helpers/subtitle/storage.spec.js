@@ -1,16 +1,17 @@
 import { createSandbox } from 'sinon';
+import { pick } from 'lodash';
 
 import {
   storeLanguagePreference,
   __RewireAPI__ as storageRewireAPI,
   retrieveLanguagePreference,
-  storeSubtitles,
+  storeSubtitle,
   retrieveSubtitles,
   deleteSubtitles,
   storeSubtitleList,
   retrieveSubtitleList,
 } from '@/helpers/subtitle/storage';
-import { SUBTITLE_OBJECTSTORE_NAME } from '@/constants';
+import { SUBTITLE_OBJECTSTORE_NAME, DATADB_SHCEMAS, DATADB_VERSION } from '@/constants';
 import dataDb from '@/helpers/dataDb';
 
 const randStr = () => Math.random().toString(36).substring(7);
@@ -216,7 +217,7 @@ describe('helper - subtitle - storage', () => {
 
   describe('subtitles storage unit tests', () => {
     const objectStoreName = SUBTITLE_OBJECTSTORE_NAME;
-    describe('method - storeSubtitles unit tests', () => {
+    describe('method - storeSubtitle unit tests', () => {
       const failureSubtitleId = 'failure';
       const failureSubtitle = { id: failureSubtitleId };
 
@@ -227,28 +228,45 @@ describe('helper - subtitle - storage', () => {
       });
 
       it('should invoke dataDb.add', (done) => {
-        const randomSubtitles = [1, 2, 3, 4, 5].map(() => ({ id: randStr() }));
-        const randomIds = randomSubtitles.map(({ id }) => id);
+        const randomSubtitle = { id: randStr() };
+        const randomId = randomSubtitle.id;
 
-        storeSubtitles(randomSubtitles)
-          .then(({ success, failure }) => {
+        storeSubtitle(randomSubtitle)
+          .then((id) => {
             sandbox.assert.calledWithExactly(
               addStub,
               SUBTITLE_OBJECTSTORE_NAME,
-              randomSubtitles[0],
+              randomSubtitle,
             );
-            expect(success).to.deep.equal(randomIds);
-            expect(failure).to.deep.equal([]);
+            expect(id).to.deep.equal(randomId);
             done();
           }).catch(done);
       });
-      it('should slience error to failure ids', (done) => {
-        const randomSubtitles = [{ id: randStr() }, failureSubtitle];
-
-        storeSubtitles(randomSubtitles)
-          .then(({ success, failure }) => {
-            expect(success).to.deep.equal([randomSubtitles[0].id]);
-            expect(failure).to.deep.equal([failureSubtitleId]);
+      it('should only pick proper properties', (done) => {
+        const supportedProperties = DATADB_SHCEMAS
+          .find(({ version }) => version === DATADB_VERSION)
+          .schema
+          .find(({ name }) => name === SUBTITLE_OBJECTSTORE_NAME)
+          .properties;
+        const testSubtitle = {
+          // list all possible subtitle properties
+          id: randStr(),
+          type: randStr(),
+          name: randStr(),
+          language: randStr(),
+          format: randStr(),
+          src: randStr(),
+          data: randStr(),
+          lastOpened: randStr(),
+          videoSegments: randStr(),
+          rank: randStr(),
+        };
+        storeSubtitle(testSubtitle)
+          .then(() => {
+            expect(addStub).to.have.been.calledWithExactly(
+              SUBTITLE_OBJECTSTORE_NAME,
+              pick(testSubtitle, supportedProperties),
+            );
             done();
           }).catch(done);
       });
