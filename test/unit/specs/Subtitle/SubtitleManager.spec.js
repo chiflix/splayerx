@@ -303,7 +303,6 @@ describe('Subtitle Manager Unit Tests', () => {
       type: 'local',
       src: randStr(),
       data: randStr(),
-      format: 'ass',
     };
     const testSubtitleInstances = { [testSubtitleId]: testSubtitleInstance };
     const testSubtitleInfo = {

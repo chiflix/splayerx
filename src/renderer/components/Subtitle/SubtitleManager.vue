@@ -339,8 +339,10 @@ export default {
       const subtitleInstance = this.subtitleInstances[id];
       const subtitleInfo = this.subtitleList.find(({ id: subtitleId }) => id === subtitleId);
       if (!subtitleInstance || !subtitleInfo) throw new Error(`No subtitle instance ${id}!`);
-      const { type, src, data, format } = subtitleInstance;
-      const { language, name, rank } = subtitleInfo;
+      const { type, src, data } = subtitleInstance;
+      const {
+        language, name, rank, format,
+      } = subtitleInfo;
       return ({
         id,
         src,
