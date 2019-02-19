@@ -1,8 +1,10 @@
 <template>
   <div class="subtitle-wrapper">
     <span class="subtitle-border-content"
+       :style="{ textAlign: this.textAlign}"
        :class="'subtitle-border-style'+ChosenIndex" v-html="finalText"></span>
     <span class="subtitle-content"
+       :style="{ textAlign: this.textAlign}"
        :class="'subtitle-style'+ChosenIndex" v-html="finalText"></span>
   </div>
 </template>
@@ -24,6 +26,16 @@ export default {
     ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth']),
     ChosenIndex() {
       return this.chosenStyle ? this.chosenStyle : 0;
+    },
+    textAlign() {
+      const alignLeft = [1, 4, 7];
+      const alignRight = [3, 6, 9];
+      if (alignLeft.includes(this.settings.alignment)) {
+        return 'left';
+      } else if (alignRight.includes(this.settings.alignment)) {
+        return 'right';
+      }
+      return 'center';
     },
     finalText() {
       let tmp = this.text;
@@ -56,12 +68,10 @@ export default {
 .subtitle-content {
   z-index: 1;
   white-space: pre;
-  text-align: center;
 }
 .subtitle-border-content {
   position: absolute;
   z-index: 0;
   white-space: pre;
-  text-align: center;
 }
 </style>
