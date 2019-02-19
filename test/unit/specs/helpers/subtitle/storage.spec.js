@@ -10,6 +10,7 @@ import {
   deleteSubtitles,
   storeSubtitleList,
   retrieveSubtitleList,
+  updateSubtitle,
 } from '@/helpers/subtitle/storage';
 import { SUBTITLE_OBJECTSTORE_NAME, DATADB_SHCEMAS, DATADB_VERSION } from '@/constants';
 import dataDb from '@/helpers/dataDb';
@@ -266,6 +267,116 @@ describe('helper - subtitle - storage', () => {
             expect(addStub).to.have.been.calledWithExactly(
               SUBTITLE_OBJECTSTORE_NAME,
               pick(testSubtitle, supportedProperties),
+            );
+            done();
+          }).catch(done);
+      });
+    });
+
+    describe('method - updateSubtitle unit tests', () => {
+      const noResultSubtitleId = 'no-result';
+      const twoResultsSubtitleId = 'two-results';
+      const twoResultsButNoLastOpenedSubtitleId = 'two-results-no-last-opened';
+      const mixedResultsSubtitleId = 'mixed-results';
+      let testSubtitleId;
+
+      const result1 = { _id: randStr(), lastOpened: new Date() };
+      const result2 = { _id: randStr(), lastOpened: new Date(Date.now() + 1) };
+      const resultWithoutLastOpened1 = { _id: randStr(), name: randStr() };
+      const resultWithoutLastOpened2 = { _id: randStr(), name: randStr() };
+      const testSubtitleInfo = { lastOpened: new Date(Date.now() + 2) };
+
+      let getAllStub;
+      let storeSubtitleStub;
+      let putStub;
+      beforeEach(() => {
+        testSubtitleId = randStr();
+
+        getAllStub = sandbox.stub(dataDb, 'getAll').resolves();
+        storeSubtitleStub = sandbox.stub().resolves();
+        storageRewireAPI.__Rewire__('storeSubtitle', storeSubtitleStub);
+
+        putStub = sandbox.stub(dataDb, 'put').resolves();
+      });
+      afterEach(() => {
+        storageRewireAPI.__ResetDependency__('storeSubtitle');
+      });
+
+      it('should invoke dataDB.getAll', (done) => {
+        getAllStub.withArgs(
+          SUBTITLE_OBJECTSTORE_NAME,
+          IDBKeyRange.only(twoResultsSubtitleId),
+        ).resolves([result1, result2]);
+        updateSubtitle(testSubtitleId, testSubtitleInfo)
+          .then(() => {
+            expect(getAllStub).to.have.been.calledWith(SUBTITLE_OBJECTSTORE_NAME);
+            done();
+          }).catch(done);
+      });
+      it('should invoke dataDb.put when results found', (done) => {
+        getAllStub.withArgs(
+          SUBTITLE_OBJECTSTORE_NAME,
+          IDBKeyRange.only(twoResultsSubtitleId),
+        ).resolves([result1, result2]);
+        updateSubtitle(twoResultsSubtitleId, testSubtitleInfo)
+          .then(() => {
+            expect(putStub).to.have.been.called;
+            done();
+          }).catch(done);
+      });
+      it('should invoke storeSubtitle when no results found', (done) => {
+        getAllStub.withArgs(
+          SUBTITLE_OBJECTSTORE_NAME,
+          IDBKeyRange.only(noResultSubtitleId),
+        ).resolves([]);
+        updateSubtitle(noResultSubtitleId, testSubtitleInfo)
+          .then(() => {
+            console.log(testSubtitleInfo);
+            expect(storeSubtitleStub).to.have.been.calledWithExactly(testSubtitleInfo);
+            done();
+          }).catch(done);
+      });
+      it('should update the latest when multiple results found', (done) => {
+        getAllStub.withArgs(
+          SUBTITLE_OBJECTSTORE_NAME,
+          IDBKeyRange.only(twoResultsSubtitleId),
+        ).resolves([result1, result2]);
+        updateSubtitle(twoResultsSubtitleId, testSubtitleInfo)
+          .then(() => {
+            expect(putStub).to.have.been.calledWithExactly(
+              SUBTITLE_OBJECTSTORE_NAME,
+              { ...result2, ...testSubtitleInfo },
+              result2._id,
+            );
+            done();
+          }).catch(done);
+      });
+      it('should update the first when lastOpened not found on all results', (done) => {
+        getAllStub.withArgs(
+          SUBTITLE_OBJECTSTORE_NAME,
+          IDBKeyRange.only(twoResultsButNoLastOpenedSubtitleId),
+        ).resolves([resultWithoutLastOpened1, resultWithoutLastOpened2]);
+        updateSubtitle(twoResultsButNoLastOpenedSubtitleId, testSubtitleInfo)
+          .then(() => {
+            expect(putStub).to.have.been.calledWithExactly(
+              SUBTITLE_OBJECTSTORE_NAME,
+              { ...resultWithoutLastOpened1, ...testSubtitleInfo },
+              resultWithoutLastOpened1._id,
+            );
+            done();
+          }).catch(done);
+      });
+      it('should update the latest when lastOpened not found on some results', (done) => {
+        getAllStub.withArgs(
+          SUBTITLE_OBJECTSTORE_NAME,
+          IDBKeyRange.only(mixedResultsSubtitleId),
+        ).resolves([result1, result2, resultWithoutLastOpened1, resultWithoutLastOpened2]);
+        updateSubtitle(mixedResultsSubtitleId, testSubtitleInfo)
+          .then(() => {
+            expect(putStub).to.have.been.calledWithExactly(
+              SUBTITLE_OBJECTSTORE_NAME,
+              { ...result2, ...testSubtitleInfo },
+              result2._id,
             );
             done();
           }).catch(done);

@@ -52,6 +52,26 @@ export async function storeSubtitle(subtitle) {
   return dataDb.add(SUBTITLE_OBJECTSTORE_NAME, subtitleToStore)
     .then(() => subtitle.id).catch(() => subtitle.id);
 }
+export async function updateSubtitle(subtitleId, subtitleInfo) {
+  const subtitleIdKeyRange = IDBKeyRange.only(subtitleId);
+  const existingSubtitles = await dataDb.getAll(SUBTITLE_OBJECTSTORE_NAME, subtitleIdKeyRange);
+  if (!existingSubtitles.length) return storeSubtitle(subtitleInfo);
+  const chooseSubtitleToUpdate = (subtitles) => {
+    const subtitlesWithLastOpened = subtitles.filter(({ lastOpened }) => !!lastOpened);
+    if (subtitlesWithLastOpened.length) {
+      const subtitleSortedByLastOpened = subtitlesWithLastOpened
+        .sort((a, b) => b.lastOpened.getTime() - a.lastOpened.getTime());
+      return subtitleSortedByLastOpened[0];
+    }
+    return subtitles[0];
+  };
+  const subtitleToUpdate = { ...chooseSubtitleToUpdate(existingSubtitles), ...subtitleInfo };
+  return dataDb.put(
+    SUBTITLE_OBJECTSTORE_NAME,
+    subtitleToUpdate,
+    subtitleToUpdate._id, // eslint-disable-line no-underscore-dangle
+  );
+}
 export async function retrieveSubtitles(mediaIdentity) {
   return dataDb.getAll(SUBTITLE_OBJECTSTORE_NAME, IDBKeyRange.only(mediaIdentity));
 }
