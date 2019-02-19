@@ -118,7 +118,7 @@ export default {
         this.attachedShown || this.videoChanged);
     },
     onOtherWidget() {
-      return this.currentWidget !== this.$options.name;
+      return (this.currentWidget !== this.$options.name) && (this.currentWidget !== 'play-button');
     },
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ||
