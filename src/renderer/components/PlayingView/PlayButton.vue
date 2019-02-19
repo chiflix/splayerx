@@ -78,12 +78,6 @@ export default {
 
 
 <style lang="scss" scoped>
-.icon-enter-active, .icon-leave-active {
-  transition: opacity 100ms ease-in;
-}
-.icon-enter, .icon-leave-to {
-  opacity: 0;
-}
 .scale-enter {
   transform: scale(0.8);
 }
