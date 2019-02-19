@@ -48,6 +48,7 @@ const EPREG = /([e|p](\d+)|(\d+)集|([零|一|二|三|四|五|六|七|八|九|�
  */
 export function parseNameFromPath(path) {
   if (Object.prototype.toString.call(path).toLowerCase() !== '[object string]') throw new Error('path should be String');
+  path = path.trim().replace(/\.(\w+)$/i, '');
   const ls = [null, null]; // [se, ep]
   const l = [SEREG, EPREG];
   l.forEach((r, i) => {

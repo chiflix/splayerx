@@ -19,19 +19,19 @@ describe('helper.path', () => {
     Object.defineProperty(process, 'platform', { value: currentPlatform });
   });
   it('should parse name correctly', () => {
-    ['S01E01', 'S1E1', 'SE01EP01', 'SE1EP1', '第一季第一集', '第1季第1集', '第01季第01集'].forEach((e) => {
+    ['S01E01', 'S1E1', 'SE01EP01.3gp2', 'SE1EP1', '第一季第一集', '第1季第1集', '第01季第01集'].forEach((e) => {
       expect(JSON.stringify(parseNameFromPath(e))).to.be.equals(JSON.stringify({
         season: '01',
         episode: '01',
       }));
     });
-    ['EP01', '第一集', '第1集', ' 第01集', '01集'].forEach((e) => {
+    ['EP01', '第一集.test.mp4', '第1集.mp4', ' 第01集', '01集'].forEach((e) => {
       expect(JSON.stringify(parseNameFromPath(e))).to.be.equals(JSON.stringify({
         season: null,
         episode: '01',
       }));
     });
-    ['S11E12', 'S11E12', 'SE11EP12', 'SE11EP12', '一十一季十二集', '第十一季第十二集', '第11季第一十二集', '第一十一季第12集'].forEach((e) => {
+    ['S11E12', 'S11E12', 'SE11EP12.se4', 'SE11EP12.mp5', '一十一季十二集', '第十一季第十二集', '第11季第一十二集', '第一十一季第12集'].forEach((e) => {
       expect(JSON.stringify(parseNameFromPath(e))).to.be.equals(JSON.stringify({
         season: '11',
         episode: '12',
