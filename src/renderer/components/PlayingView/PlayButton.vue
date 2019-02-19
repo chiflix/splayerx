@@ -92,7 +92,7 @@ export default {
   width: 100%;
   height: 100%;
   cursor: pointer;
-  transition: transform 50ms ease-in;
+  transition: transform 40ms ease-in;
 }
 @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .icon-wrapper {
