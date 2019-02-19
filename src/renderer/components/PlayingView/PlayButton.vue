@@ -4,10 +4,10 @@
   @mouseleave="handleMouseleave">
   <div class="icon-wrapper"
     v-fade-in="iconAppear"
-    @mousedown.left.stop="handleMousedown"
+    @mousedown="handleMousedown"
     @mouseup="handleMouseup">
     <transition name="scale" mode="out-in">
-    <Icon :key="paused" :class="iconClass" :type="paused ? 'play' : 'pause'"/>
+    <Icon :key="paused" :style="{cursor: iconAppear ? 'pointer' : 'none'}" :class="iconClass" :type="paused ? 'play' : 'pause'"/>
     </transition>
   </div>
 </div>
@@ -91,7 +91,6 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-  cursor: pointer;
   transition: transform 40ms ease-in;
 }
 @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {

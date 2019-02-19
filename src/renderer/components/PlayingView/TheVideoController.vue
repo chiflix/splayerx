@@ -97,6 +97,7 @@ export default {
       videoChanged: false,
       videoChangedTimer: 0,
       isValidClick: true,
+      lastMousedownPlaybutton: false,
     };
   },
   computed: {
@@ -115,7 +116,8 @@ export default {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
-        this.attachedShown || this.videoChanged);
+        this.attachedShown || this.videoChanged ||
+        (this.isMousedown && this.currentMousedownWidget === 'play-button'));
     },
     onOtherWidget() {
       return (this.currentWidget !== this.$options.name) && (this.currentWidget !== 'play-button');
@@ -332,9 +334,11 @@ export default {
       if (this.mouseStoppedId) {
         this.clock.clearTimeout(this.mouseStoppedId);
       }
-      this.mouseStoppedId = this.clock.setTimeout(() => {
-        this.mouseStopped = true;
-      }, this.mousestopDelay);
+      if (!this.lastMousedownPlaybutton) {
+        this.mouseStoppedId = this.clock.setTimeout(() => {
+          this.mouseStopped = true;
+        }, this.mousestopDelay);
+      }
       this.updateMousemove({
         componentName: this.getComponentName(target),
         clientPosition: [clientX, clientY],
@@ -359,8 +363,14 @@ export default {
         this.mouseLeftWindow = true;
       }, this.mouseleftDelay);
     },
-    handleMousedownLeft() {
+    handleMousedownLeft(e) {
       this.isMousedown = true;
+      this.lastMousedownPlaybutton = this.getComponentName(e.target) === 'play-button';
+      if (this.lastMousedownPlaybutton) {
+        if (this.mouseStoppedId) {
+          this.clock.clearTimeout(this.mouseStoppedId);
+        }
+      }
     },
     handleMouseupLeft() {
       this.isMousemove = false;
@@ -374,6 +384,12 @@ export default {
       if ((this.lastDragging && this.lastAttachedShowing) || !this.isMousedown) {
         this.clicks = 0;
         return;
+      }
+      if (this.isMousedown && this.lastMousedownPlaybutton) {
+        this.mouseStoppedId = this.clock.setTimeout(() => {
+          this.mouseStopped = true;
+        }, this.mousestopDelay);
+        this.lastMousedownPlaybutton = false;
       }
       this.isMousedown = false;
       if (this.clicks === 1) {
