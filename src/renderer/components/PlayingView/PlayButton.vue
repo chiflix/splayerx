@@ -10,14 +10,12 @@
       type="play"
       ref="play"
       v-show="showPlayIcon"
-      @animationend.native="handleAnimationEnd"
       :class="ani_mode"
       :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
     <Icon class="icon"
       type="pause"
       ref="pause"
       v-show="!showPlayIcon"
-      @animationend.native="handleAnimationEnd"
       :class="ani_mode"
       :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
   </div>
@@ -41,25 +39,13 @@ export default {
       mouseOver: false,
       isMousedown: false,
       showPlayIcon: false,
-      ani_mode: '',
+      ani_mode: 'icon-ani-fade-in',
     };
   },
   components: {
     Icon,
   },
-  computed: {
-    iconClass() {
-      return {
-        // 'scale-enter': this.isMousedown,
-        'icon-ani-fade-out': this.isMousedown,
-      };
-    },
-  },
   methods: {
-    handleAnimationEnd() {
-      // this.showPlayIcon = !this.showPlayIcon;
-      // this.ani_mode = 'icon-ani-fade-in';
-    },
     handleMouseenter() {
       this.mouseOver = true;
       if (!this.attachedShown) this.iconAppear = true;
@@ -85,6 +71,9 @@ export default {
     },
     attachedShown(val) {
       if (!val && this.mouseOver) this.iconAppear = true;
+    },
+    paused(val) {
+      this.showPlayIcon = val;
     },
   },
   created() {
