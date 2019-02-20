@@ -154,7 +154,7 @@ export default {
           metaChange: this.metaChangeCallback,
           loading: partial(this.loadingCallback, videoSrc),
           ready: this.readyCallback,
-          loaded: this.loadedCallback,
+          loaded: this.addSubtitleWhenLoaded,
           failed: this.failedCallback,
         });
       } catch (err) {
