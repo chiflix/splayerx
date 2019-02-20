@@ -367,6 +367,7 @@ export default {
       this.isMousedown = true;
       this.lastMousedownPlaybutton = this.getComponentName(e.target) === 'play-button';
       if (this.lastMousedownPlaybutton) {
+        this.mouseStopped = false;
         if (this.mouseStoppedId) {
           this.clock.clearTimeout(this.mouseStoppedId);
         }
@@ -386,6 +387,7 @@ export default {
         return;
       }
       if (this.isMousedown && this.lastMousedownPlaybutton) {
+        console.log('mouseup');
         this.mouseStoppedId = this.clock.setTimeout(() => {
           this.mouseStopped = true;
         }, this.mousestopDelay);
