@@ -231,9 +231,8 @@ export default {
               if (playInfo && playInfo.audioTrackId) {
                 enabled = playInfo.audioTrackId === id;
                 for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
-                  if (this.$refs.video.audioTracks[i].id === id) {
-                    this.$refs.video.audioTracks[i].enabled = playInfo.audioTrackId === id;
-                  }
+                  this.$refs.video.audioTracks[i].enabled =
+                    this.$refs.video.audioTracks[i].id === playInfo.audioTrackId;
                 }
               } else {
                 enabled = trackEvent.track.enabled;
