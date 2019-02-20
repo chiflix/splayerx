@@ -33,9 +33,9 @@ export function fileUrlToPath(fileUrl) {
 }
 
 // season math reg
-const SEREG = /([s|e](\d+)|(\d+)季|([零|一|二|三|四|五|六|七|八|九|十|百|千]+)季)/i;
+const SEREG = /(\.s[e]?(\d+)|(\d+)季|([零一二三四五六七八九十百千]+)季)/i;
 // episode match reg
-const EPREG = /([e|p](\d+)|(\d+)集|([零|一|二|三|四|五|六|七|八|九|十|百|千]+)集)/i;
+const EPREG = /(e[p]?(\d+)\.|(\d+)集|([零一二三四五六七八九十百千]+)集)/i;
 
 /**
  * 匹配路径中视频文件名称里面的season和episode
@@ -48,7 +48,7 @@ const EPREG = /([e|p](\d+)|(\d+)集|([零|一|二|三|四|五|六|七|八|九|�
  */
 export function parseNameFromPath(path) {
   if (Object.prototype.toString.call(path).toLowerCase() !== '[object string]') throw new Error('path should be String');
-  path = path.trim().replace(/\.(\w+)$/i, '');
+  path = path.trim().replace(/\.(\w+)$/i, '.');
   const ls = [null, null]; // [se, ep]
   const l = [SEREG, EPREG];
   l.forEach((r, i) => {
