@@ -254,13 +254,23 @@ describe('class DataDb unit tests', () => {
         .catch(() => done())
         .then(done);
     });
-    it('should handle transaction error outside', (done) => {
+    it('should resolve new key when add succeeded', (done) => {
+      const newKey = 233;
+      addStub.resolves(newKey);
       testDataDb.add(testObjectStoreName, testData)
-        .then(res => res(errorCompleteParam))
-        .catch(() => done());
+        .then((key) => {
+          expect(key).to.equal(newKey);
+          done();
+        }).catch(done);
+    });
+    it('should reject when add failed', (done) => {
+      addStub.rejects();
+      testDataDb.add(testObjectStoreName, testData)
+        .catch(() => done())
+        .then(() => done('Should reject but it resolves.'));
     });
   });
-  describe('method - put unit tests', () => {
+  describe.only('method - put unit tests', () => {
     const testObjectStoreName = 'testObjectStore';
     const errorCompleteParam = 'errorComplete';
     const testData = { test: testObjectStoreName };
@@ -308,10 +318,20 @@ describe('class DataDb unit tests', () => {
         .catch(() => done())
         .then(done);
     });
-    it('should handle transaction error outside', (done) => {
-      testDataDb.put(testObjectStoreName, testData)
-        .then(res => res(errorCompleteParam))
-        .catch(() => done());
+    it('should resolve new key when put succeeded', (done) => {
+      const newKey = 233;
+      putStub.resolves(newKey);
+      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+        .then((key) => {
+          expect(key).to.equal(newKey);
+          done();
+        }).catch(done);
+    });
+    it('should reject when put failed', (done) => {
+      putStub.rejects();
+      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+        .catch(() => done())
+        .then(() => done('Should reject but it resolves.'));
     });
   });
   describe('method - delete unit tests', () => {

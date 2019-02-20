@@ -91,8 +91,11 @@ export class DataDb {
       throw new Error(`ObjectStore ${objectStoreName} does not exist. Add them to constant.js please.`);
     }
     const tx = db.transaction(objectStoreName, 'readwrite');
-    tx.objectStore(objectStoreName).add(data);
-    return tx.complete;
+    try {
+      const newKey = await tx.objectStore(objectStoreName).add(data);
+      await tx.complete();
+      return newKey;
+    } catch (err) { throw err; }
   }
 
   async put(objectStoreName, data, keyPathVal) {
@@ -107,8 +110,11 @@ export class DataDb {
     if (autoIncrement && typeof keyPathVal === 'undefined') {
       throw new Error(`ObjectStore ${objectStoreName} used out-of-line key and keyPathVal is missing.`);
     }
-    tx.objectStore(objectStoreName).put(data, keyPathVal);
-    return tx.complete;
+    try {
+      const newKey = await tx.objectStore(objectStoreName).put(data, keyPathVal);
+      await tx.complete();
+      return newKey;
+    } catch (err) { throw err; }
   }
 
   async delete(objectStoreName, keyPathVal) {
