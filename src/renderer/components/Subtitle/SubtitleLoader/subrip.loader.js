@@ -1,7 +1,7 @@
 import flow from 'lodash/flow';
 import { parse, toMS } from 'subtitle';
 
-import { localLanguageLoader, localNameLoader, localIdLoader, tagsGetter, loadLocalFile } from './utils';
+import { localLanguageLoader, localNameLoader, tagsGetter, loadLocalFile } from './utils';
 
 const baseTags = { alignment: 2, pos: null };
 const normalizer = parsedSubtitle => parsedSubtitle.map(subtitle => ({
@@ -16,7 +16,6 @@ export default {
   longName: 'SubRip subtitle',
   name: 'subrip',
   supportedFormats: ['srt'],
-  id: localIdLoader,
   infoLoaders: {
     language: {
       func: localLanguageLoader,

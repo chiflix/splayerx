@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import flatten from 'lodash/flatten';
 import helpers from '@/helpers';
+import { storeSubtitle } from '@/helpers/subtitle';
 import { localFormatLoader, toArray, promisify, functionExtraction } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
 
@@ -75,8 +76,11 @@ export default class SubtitleLoader extends EventEmitter {
     this.options = options || {};
     this.data = this.options.data;
 
-    const { func: idLoader, params: idParams } = functionExtraction(this.loader.id);
-    promisify(idLoader.bind(null, ...this._getParams(idParams))).then((id) => {
+    storeSubtitle({
+      src: this.src,
+      type: this.type,
+      format: this.metaInfo.format,
+    }).then((id) => {
       this.id = id;
       this.emit('loading', id);
     });

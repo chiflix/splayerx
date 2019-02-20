@@ -67,7 +67,6 @@ export default {
   longName: 'ASS (Advanced SSA) subtitle',
   name: 'ass',
   supportedFormats: ['ass'],
-  id: localIdLoader,
   infoLoaders: {
     language: {
       func: localLanguageLoader,

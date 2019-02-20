@@ -12,7 +12,6 @@ export default {
   longName: 'Online Transcript',
   name: 'online',
   supportedFormats: ['online'],
-  id: 'src',
   infoLoaders: {
     language: {
       func: normalizeCode,
