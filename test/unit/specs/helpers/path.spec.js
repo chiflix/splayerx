@@ -19,13 +19,24 @@ describe('helper.path', () => {
     Object.defineProperty(process, 'platform', { value: currentPlatform });
   });
   it('should parse name correctly', () => {
-    ['美剧.S01E01.mkv', '美剧.S1E1.x264-SVA.mp4', '美剧.SE01EP01.3gp2', '美剧.SE1EP1.x264-SVA,rmvb', '美剧.第一季第一集.mp4', '天龙八部第1季第1集.mp4', '天龙八部.第01季第01集.mp4'].forEach((e) => {
+    [
+      '美剧.S01E01.mkv',
+      '美剧.S1E1.x264-SVA.mp4',
+      '美剧.SE01EP01.3gp2',
+      '美剧.SE1EP1.x264-SVA,rmvb',
+      '美剧.第一季第一集.mp4',
+      '天龙八部第1季第1集.mp4',
+      '天龙八部.第01季第01集.mp4',
+      'Greys Anatomy - s01e01.mp4',
+      'Greys Anatomy - s01e01 x264.HD.mp4',
+      '7o9-ancient-aliens-s01e01-720p-bluray-x264.mkv',
+    ].forEach((e) => {
       expect(JSON.stringify(parseNameFromPath(e))).to.be.equals(JSON.stringify({
         season: '01',
         episode: '01',
       }));
     });
-    ['美剧.EP01.x264-SVA.mp4', '天龙八部第一集.test.mp4', '天龙八部.第1集.mp4', ' 天龙八部第01集.mkv', '天龙八部01集.mp4'].forEach((e) => {
+    ['美剧.EP01.x264-SVA.mp4', '天龙八部第一集.test.mp4', '天龙八部.第1集.mp4', ' 天龙八部第01集.mkv', '天龙八部第01集.mp4'].forEach((e) => {
       expect(JSON.stringify(parseNameFromPath(e))).to.be.equals(JSON.stringify({
         season: null,
         episode: '01',
@@ -36,17 +47,21 @@ describe('helper.path', () => {
       '啦啦队之舞.S11E12.Chi_Jap.HDTVrip.1280X720.mp4',
       '美剧.SE11EP12.se4',
       '美剧.SE11EP12.mp5',
-      '天龙八部一十一季十二集.mp4',
+      '天龙八部第一十一季第十二集.mp4',
       '天龙八部.第十一季第十二集.3gp2',
       '天龙八部第11季第一十二集.mp4',
-      '天龙八部第一十一季第12集.mkv'
+      '天龙八部第一十一季第12集.mkv',
     ].forEach((e) => {
       expect(JSON.stringify(parseNameFromPath(e))).to.be.equals(JSON.stringify({
         season: '11',
         episode: '12',
       }));
     });
-    ['Apple Special Event. October 22, 2013..mp4', 'Event.测试测绘试p6-p7.mkv'].forEach((e) => {
+    [
+      'Apple Special Event. October 22, 2013..mp4',
+      'Event.测试测绘试p6~p7.mkv',
+      'Event.四季花园.mkv',
+    ].forEach((e) => {
       expect(JSON.stringify(parseNameFromPath(e))).to.be.equals(JSON.stringify({
         season: null,
         episode: null,

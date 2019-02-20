@@ -33,9 +33,9 @@ export function fileUrlToPath(fileUrl) {
 }
 
 // season math reg
-const SEREG = /(\.s[e]?(\d+)|(\d+)季|([零一二三四五六七八九十百千]+)季)/i;
+const SEREG = /([.-\s]s[e]?(\d+)|第(\d+)季|第([零一二三四五六七八九十百千]+)季)/i;
 // episode match reg
-const EPREG = /(e[p]?(\d+)\.|(\d+)集|([零一二三四五六七八九十百千]+)集)/i;
+const EPREG = /(e[p]?(\d+)[.-\s]|第(\d+)集|第([零一二三四五六七八九十百千]+)集)/i;
 
 /**
  * 匹配路径中视频文件名称里面的season和episode
@@ -49,28 +49,39 @@ const EPREG = /(e[p]?(\d+)\.|(\d+)集|([零一二三四五六七八九十百千]
 export function parseNameFromPath(path) {
   if (Object.prototype.toString.call(path).toLowerCase() !== '[object string]') throw new Error('path should be String');
   path = path.trim().replace(/\.(\w+)$/i, '.');
-  const ls = [null, null]; // [se, ep]
-  const l = [SEREG, EPREG];
-  l.forEach((r, i) => {
-    path = path.trim().replace(r, (...a) => {
-      if (a[2] || a[3]) { // match 第一个和第二个子项(\d+)
-        const p = a[2] !== undefined ? parseInt(a[2], 10) : parseInt(a[3], 10);
-        ls[i] = p < 10 ? `0${p}` : `${p}`;
+  const result = {
+    season: null,
+    episode: null,
+  };
+  [
+    {
+      section: 'season',
+      pattern: SEREG,
+    },
+    {
+      section: 'episode',
+      pattern: EPREG,
+    },
+  ].forEach((item) => {
+    path = path.trim().replace(item.pattern, (match, contents, $0, $1, $2) => {
+      // $0 -> first offset (\d+)
+      // $1 -> second offset (\d+)
+      // $2 -> third offset ([零一二三四五六七八九十百千]+)
+      if ($0 || $1) {
+        const p = $0 !== undefined ? parseInt($0, 10) : parseInt($1, 10);
+        result[item.section] = p < 10 ? `0${p}` : `${p}`;
         return '';
       }
-      if (a[4]) { // match 第三个子项 中文字符
-        const p = nzh.cn.decodeS(a[4]);
-        if (p > 0) ls[i] = p < 10 ? `0${p}` : `${p}`;
+      if ($2) {
+        const p = nzh.cn.decodeS($2);
+        if (p > 0) result[item.section] = p < 10 ? `0${p}` : `${p}`;
         return '';
       }
-      if (a[0]) return a[0];
+      if (match) return match;
       return '';
     });
   });
-  return {
-    season: ls[0],
-    episode: ls[1],
-  };
+  return result;
 }
 
 export default {
