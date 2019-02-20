@@ -1,17 +1,22 @@
 <template>
 <div :data-component-name="$options.name"
-  @mouseenter.stop="handleMouseenter"
-  @mouseleave.stop="handleMouseleave">
-  <transition name="icon" mode="out-in">
+  @mouseenter="handleMouseenter"
+  @mouseleave="handleMouseleave">
   <div class="icon-wrapper"
     v-fade-in="iconAppear"
-    :key="paused"
-    @mousedown.stop=""
+    @mousedown="handleMousedown"
     @mouseup="handleMouseup">
-    <Icon v-if="paused" class="icon play" type="play"/>
-    <Icon v-if="!paused" class="icon" type="pause"/>
+    <Icon class="icon play"
+      type="play"
+      v-show="showPlayIcon"
+      :class="ani_mode"
+      :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
+    <Icon class="icon"
+      type="pause"
+      v-show="!showPlayIcon"
+      :class="ani_mode"
+      :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
   </div>
-  </transition>
 </div>
 </template>
 
@@ -30,6 +35,9 @@ export default {
     return {
       iconAppear: false, // control whether the icon show up or not
       mouseOver: false,
+      isMousedown: false,
+      showPlayIcon: false,
+      ani_mode: 'icon-ani-fade-in',
     };
   },
   components: {
@@ -43,31 +51,62 @@ export default {
     handleMouseleave() {
       this.iconAppear = this.mouseOver = false;
     },
+    handleMousedown() {
+      this.isMousedown = true;
+      this.ani_mode = 'icon-ani-fade-out';
+    },
     handleMouseup() {
-      if (!this.attachedShown) {
+      if (this.isMousedown && !this.attachedShown) {
+        this.showPlayIcon = !this.showPlayIcon;
         this.$bus.$emit('toggle-playback');
       }
     },
   },
   watch: {
-    // showAllWidgets(val) {
-    //   if (!this.isFocused && val) this.iconAppear = val;
-    //   if (!val) this.iconAppear = val;
-    // },
+    showAllWidgets(val) {
+      if ((!val && !this.isMousedown) || (val && this.mouseOver)) this.iconAppear = val;
+    },
     attachedShown(val) {
       if (!val && this.mouseOver) this.iconAppear = true;
     },
+    paused(val) {
+      this.showPlayIcon = val;
+    },
+  },
+  created() {
+    document.addEventListener('mouseup', () => {
+      if (this.isMousedown) {
+        this.isMousedown = false;
+        this.ani_mode = 'icon-ani-fade-in';
+      }
+    });
   },
 };
 </script>
 
 
 <style lang="scss" scoped>
-.icon-enter-active, .icon-leave-active {
-  transition: opacity 100ms ease-in;
+.icon-ani-fade-in {
+  animation: ytp-bezel-fadein 110ms linear 1 normal forwards;
 }
-.icon-enter, .icon-leave-to {
-  opacity: 0;
+.icon-ani-fade-out {
+  animation: ytp-bezel-fadeout 110ms linear 1 normal forwards;
+}
+@keyframes ytp-bezel-fadein {
+  0% {opacity: 0.7; transform: scale(0.8)};
+  100% {opacity: 1; transform: scale(1)};
+}
+@keyframes ytp-bezel-fadeout {
+  0% {opacity: 1; transform: scale(1)};
+  100% {opacity: 0.7; transform: scale(0.8)};
+}
+.scale-enter {
+  opacity: 0.7;
+  transform: scale(0.8);
+}
+.scale-enter-to {
+  opacity: 1;
+  transform: scale(1.0);
 }
 .icon-wrapper {
   position: relative;
@@ -76,7 +115,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-  cursor: pointer;
+  transition: transform 90ms cubic-bezier(0, 1, 1, 1);
 }
 @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .icon-wrapper {
