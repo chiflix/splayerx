@@ -345,7 +345,6 @@ describe('helper - subtitle - storage', () => {
         ).resolves([]);
         updateSubtitle(noResultSubtitleId, testSubtitleInfo)
           .then(() => {
-            console.log(testSubtitleInfo);
             expect(storeSubtitleStub).to.have.been.calledWithExactly(testSubtitleInfo);
             done();
           }).catch(done);
@@ -394,6 +393,34 @@ describe('helper - subtitle - storage', () => {
             );
             done();
           }).catch(done);
+      });
+      it('should resolve what dataDb.put resolves', (done) => {
+        const newKey = 233;
+        putStub.resolves(newKey);
+        getAllStub.withArgs(
+          SUBTITLE_OBJECTSTORE_NAME,
+          IDBKeyRange.only(twoResultsSubtitleId),
+        ).resolves([result1, result2]);
+
+        updateSubtitle(twoResultsSubtitleId, testSubtitleInfo)
+          .then((result) => {
+            expect(result).to.equal(newKey);
+            done();
+          }).catch(done);
+      });
+      it('should reject what dataDb.put rejects', (done) => {
+        const newError = new Error();
+        putStub.rejects(newError);
+        getAllStub.withArgs(
+          SUBTITLE_OBJECTSTORE_NAME,
+          IDBKeyRange.only(twoResultsSubtitleId),
+        ).resolves([result1, result2]);
+
+        updateSubtitle(twoResultsSubtitleId, testSubtitleInfo)
+          .catch((err) => {
+            expect(err).to.equal(newError);
+            done();
+          }).then(() => done('Should reject but it resolves.'));
       });
     });
 
