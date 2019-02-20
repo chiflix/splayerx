@@ -49,8 +49,7 @@ export async function storeSubtitle(subtitle) {
     .find(({ name }) => name === SUBTITLE_OBJECTSTORE_NAME) // find the correct objectStore
     .properties;
   const subtitleToStore = pick(subtitle, supportedProperties);
-  return dataDb.add(SUBTITLE_OBJECTSTORE_NAME, subtitleToStore)
-    .then(() => subtitle.id).catch(() => subtitle.id);
+  return dataDb.add(SUBTITLE_OBJECTSTORE_NAME, subtitleToStore);
 }
 export async function updateSubtitle(subtitleId, subtitleInfo) {
   const subtitleIdKeyRange = IDBKeyRange.only(subtitleId);

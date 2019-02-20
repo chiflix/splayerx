@@ -219,27 +219,21 @@ describe('helper - subtitle - storage', () => {
   describe('subtitles storage unit tests', () => {
     const objectStoreName = SUBTITLE_OBJECTSTORE_NAME;
     describe('method - storeSubtitle unit tests', () => {
-      const failureSubtitleId = 'failure';
-      const failureSubtitle = { id: failureSubtitleId };
-
+      let testSubtitle;
       let addStub;
       beforeEach(() => {
+        testSubtitle = { src: randStr() };
         addStub = sandbox.stub(dataDb, 'add').resolves();
-        addStub.withArgs(objectStoreName, failureSubtitle).rejects();
       });
 
       it('should invoke dataDb.add', (done) => {
-        const randomSubtitle = { id: randStr() };
-        const randomId = randomSubtitle.id;
-
-        storeSubtitle(randomSubtitle)
-          .then((id) => {
+        storeSubtitle(testSubtitle)
+          .then(() => {
             sandbox.assert.calledWithExactly(
               addStub,
               SUBTITLE_OBJECTSTORE_NAME,
-              randomSubtitle,
+              testSubtitle,
             );
-            expect(id).to.deep.equal(randomId);
             done();
           }).catch(done);
       });
@@ -270,6 +264,26 @@ describe('helper - subtitle - storage', () => {
             );
             done();
           }).catch(done);
+      });
+      it('should resolve what dataDb.add resolves', (done) => {
+        const newKey = 233;
+        addStub.resolves(newKey);
+
+        storeSubtitle(testSubtitle)
+          .then((result) => {
+            expect(result).to.equal(newKey);
+            done();
+          }).catch(done);
+      });
+      it('should reject what dataDb.add rejects', (done) => {
+        const newError = new Error();
+        addStub.rejects(newError);
+
+        storeSubtitle(testSubtitle)
+          .catch((err) => {
+            expect(err).to.equal(newError);
+            done();
+          }).then(() => done('Should reject but it resolves.'));
       });
     });
 
