@@ -3,7 +3,7 @@
   @mouseenter="handleMouseenter"
   @mouseleave="handleMouseleave">
   <div class="icon-wrapper"
-    v-fade-in="iconAppear"
+    :class="iconClass"
     @mousedown="handleMousedown"
     @mouseup="handleMouseup">
     <Icon class="icon play"
@@ -38,6 +38,8 @@ export default {
       isMousedown: false,
       showPlayIcon: false,
       ani_mode: 'icon-ani-fade-in',
+      iconClass: 'fade-out',
+      iconFadingId: NaN,
     };
   },
   components: {
@@ -47,9 +49,15 @@ export default {
     handleMouseenter() {
       this.mouseOver = true;
       if (!this.attachedShown) this.iconAppear = true;
+      if (this.iconFadingId) clearTimeout(this.iconFadingId);
+      this.iconClass = 'fade-in';
     },
     handleMouseleave() {
       this.iconAppear = this.mouseOver = false;
+      if (this.iconFadingId) clearTimeout(this.iconFadingId);
+      this.iconFadingId = setTimeout(() => {
+        this.iconClass = 'fade-out';
+      }, 200);
     },
     handleMousedown() {
       this.isMousedown = true;
@@ -100,13 +108,19 @@ export default {
   0% {opacity: 1; transform: scale(1)};
   100% {opacity: 0.7; transform: scale(0.8)};
 }
-.scale-enter {
-  opacity: 0.7;
-  transform: scale(0.8);
+@keyframes fadein {
+  0% {opacity: 0};
+  100% {opacity: 1};
 }
-.scale-enter-to {
-  opacity: 1;
-  transform: scale(1.0);
+@keyframes fadeout {
+  0% {opacity: 1};
+  100% {opacity: 0};
+}
+.fade-in {
+  animation: fadein 100ms linear 1 normal forwards;
+}
+.fade-out {
+  animation: fadeout 300ms linear 1 normal forwards;
 }
 .icon-wrapper {
   position: relative;
