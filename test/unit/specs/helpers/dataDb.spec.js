@@ -270,7 +270,7 @@ describe('class DataDb unit tests', () => {
         .then(() => done('Should reject but it resolves.'));
     });
   });
-  describe.only('method - put unit tests', () => {
+  describe('method - put unit tests', () => {
     const testObjectStoreName = 'testObjectStore';
     const errorCompleteParam = 'errorComplete';
     const testData = { test: testObjectStoreName };
