@@ -79,9 +79,11 @@ export default {
 
 <style lang="scss" scoped>
 .scale-enter {
+  opacity: 0.7;
   transform: scale(0.8);
 }
 .scale-enter-to {
+  opacity: 1;
   transform: scale(1.0);
 }
 .icon-wrapper {
@@ -91,7 +93,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-  transition: transform 110ms ease-out;
+  transition: transform 110ms ease-out, opacity 110ms ease-out;
 }
 @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .icon-wrapper {
