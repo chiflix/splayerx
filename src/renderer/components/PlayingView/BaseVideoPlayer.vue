@@ -113,13 +113,12 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['audioTrackList']),
+    ...mapGetters(['audioTrackList', 'originSrc']),
   },
   data() {
     return {
       eventListeners: new Map(),
       currentTimeAnimationFrameId: 0,
-      currentAudioTrack: null,
     };
   },
   watch: {
@@ -216,19 +215,28 @@ export default {
       }
     },
     addEvents(events) {
-      events.forEach((event) => {
+      events.forEach(async (event) => {
         if (!this.eventListeners.has(event)) {
           if (event !== 'audiotrack') {
             const listener = _.partial(this.emitEvents, event);
             this.$refs.video.addEventListener(event, listener);
             this.eventListeners.set(event, listener);
           } else {
+            const playInfo = await this.infoDB.get('recent-played', 'path', this.originSrc);
             const generateAudioEvent = type => (trackEvent) => {
               const {
-                id, kind, label, language, enabled,
+                id, kind, label, language,
               } = trackEvent.track;
-              if (type === 'add' && enabled) {
-                this.currentAudioTrack = trackEvent.track;
+              let enabled;
+              if (playInfo && playInfo.audioTrackId) {
+                enabled = playInfo.audioTrackId === id;
+                for (let i = 0; i < this.$refs.video.audioTracks.length; i += 1) {
+                  if (this.$refs.video.audioTracks[i].id === id) {
+                    this.$refs.video.audioTracks[i].enabled = playInfo.audioTrackId === id;
+                  }
+                }
+              } else {
+                enabled = trackEvent.track.enabled;
               }
               this.$emit('audiotrack', {
                 type,
