@@ -93,7 +93,7 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-  transition: transform 110ms ease-out, opacity 110ms ease-out;
+  transition: transform 90ms cubic-bezier(0, 1, 1, 1);
 }
 @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .icon-wrapper {
