@@ -31,8 +31,6 @@ export class TranscriptQueue {
       const options = { priority: 0 };
       switch (this.subtitleState[id]) {
         default:
-          break;
-        case undefined:
           this.subtitleState[id] = 'loading';
           break;
         case 'failed':
