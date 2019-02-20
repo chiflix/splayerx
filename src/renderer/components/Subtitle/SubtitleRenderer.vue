@@ -72,7 +72,7 @@ export default {
         .filter(segment => segment[2])
         .map(segment => segment[1] - segment[0])
         .reduce((prev, curr) => prev + curr, 0);
-      this.updateDuration({ id: this.subtitleInstance.metaInfo.id, duration });
+      this.updateDuration({ id: this.subtitleInstance.id, duration });
     },
     currentTexts(val) {
       val.forEach((de, index) => {
