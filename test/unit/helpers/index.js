@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 export class DOMStringListStub extends Array {
   contains(name) {
     return this.includes(name);
@@ -9,4 +8,8 @@ export class DOMStringListStub extends Array {
   constructor(items) {
     super(...(items || []));
   }
+}
+
+export function randStr() {
+  return Math.random().toString(36).substring(7);
 }
