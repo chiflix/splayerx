@@ -55,7 +55,7 @@ export default {
       this.isMousedown = true;
     },
     handleMouseup() {
-      if (!this.attachedShown) {
+      if (this.isMousedown && !this.attachedShown) {
         this.$bus.$emit('toggle-playback');
       }
     },
