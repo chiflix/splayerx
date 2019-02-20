@@ -10,3 +10,7 @@ export class DOMStringListStub extends Array {
     super(...(items || []));
   }
 }
+
+export function randStr() {
+  return Math.random().toString(36).substring(7);
+}
