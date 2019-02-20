@@ -8,13 +8,11 @@
     @mouseup="handleMouseup">
     <Icon class="icon play"
       type="play"
-      ref="play"
       v-show="showPlayIcon"
       :class="ani_mode"
       :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
     <Icon class="icon"
       type="pause"
-      ref="pause"
       v-show="!showPlayIcon"
       :class="ani_mode"
       :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
