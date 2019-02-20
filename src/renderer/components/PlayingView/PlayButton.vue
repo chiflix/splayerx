@@ -58,7 +58,6 @@ export default {
     handleMouseup() {
       if (this.isMousedown && !this.attachedShown) {
         this.showPlayIcon = !this.showPlayIcon;
-        this.ani_mode = 'icon-ani-fade-in';
         this.$bus.$emit('toggle-playback');
       }
     },
@@ -76,7 +75,10 @@ export default {
   },
   created() {
     document.addEventListener('mouseup', () => {
-      if (this.isMousedown) this.isMousedown = false;
+      if (this.isMousedown) {
+        this.isMousedown = false;
+        this.ani_mode = 'icon-ani-fade-in';
+      }
     });
   },
 };
