@@ -8,7 +8,7 @@
       :key="originSrc"
       :needtimeupdate=true
       :events="['loadedmetadata', 'audiotrack']"
-      :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}" 
+      :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
       @audiotrack="onAudioTrack"
       :loop="loop"
@@ -193,6 +193,7 @@ export default {
         smallShortCut: smallImagePath,
         lastPlayedTime: videodata.time,
         duration: this.duration,
+        audioTrackId: this.currentAudioTrackId,
       };
 
       const val = await this.infoDB.get('recent-played', 'path', videoPath);
