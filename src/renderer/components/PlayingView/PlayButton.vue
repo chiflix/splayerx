@@ -6,9 +6,20 @@
     v-fade-in="iconAppear"
     @mousedown="handleMousedown"
     @mouseup="handleMouseup">
-    <transition name="scale" mode="out-in">
-    <Icon :key="paused" :style="{cursor: iconAppear ? 'pointer' : 'none'}" :class="iconClass" :type="paused ? 'play' : 'pause'"/>
-    </transition>
+    <Icon class="icon play"
+      type="play"
+      ref="play"
+      v-show="showPlayIcon"
+      @animationend.native="handleAnimationEnd"
+      :class="ani_mode"
+      :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
+    <Icon class="icon"
+      type="pause"
+      ref="pause"
+      v-show="!showPlayIcon"
+      @animationend.native="handleAnimationEnd"
+      :class="ani_mode"
+      :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
   </div>
 </div>
 </template>
@@ -29,6 +40,8 @@ export default {
       iconAppear: false, // control whether the icon show up or not
       mouseOver: false,
       isMousedown: false,
+      showPlayIcon: false,
+      ani_mode: '',
     };
   },
   components: {
@@ -37,13 +50,16 @@ export default {
   computed: {
     iconClass() {
       return {
-        icon: true,
-        play: this.paused,
-        'scale-enter': this.isMousedown,
+        // 'scale-enter': this.isMousedown,
+        'icon-ani-fade-out': this.isMousedown,
       };
     },
   },
   methods: {
+    handleAnimationEnd() {
+      // this.showPlayIcon = !this.showPlayIcon;
+      // this.ani_mode = 'icon-ani-fade-in';
+    },
     handleMouseenter() {
       this.mouseOver = true;
       if (!this.attachedShown) this.iconAppear = true;
@@ -53,9 +69,12 @@ export default {
     },
     handleMousedown() {
       this.isMousedown = true;
+      this.ani_mode = 'icon-ani-fade-out';
     },
     handleMouseup() {
       if (this.isMousedown && !this.attachedShown) {
+        this.showPlayIcon = !this.showPlayIcon;
+        this.ani_mode = 'icon-ani-fade-in';
         this.$bus.$emit('toggle-playback');
       }
     },
@@ -78,6 +97,20 @@ export default {
 
 
 <style lang="scss" scoped>
+.icon-ani-fade-in {
+  animation: ytp-bezel-fadein 110ms linear 1 normal forwards;
+}
+.icon-ani-fade-out {
+  animation: ytp-bezel-fadeout 110ms linear 1 normal forwards;
+}
+@keyframes ytp-bezel-fadein {
+  0% {opacity: 0.7; transform: scale(0.8)};
+  100% {opacity: 1; transform: scale(1)};
+}
+@keyframes ytp-bezel-fadeout {
+  0% {opacity: 1; transform: scale(1)};
+  100% {opacity: 0.7; transform: scale(0.8)};
+}
 .scale-enter {
   opacity: 0.7;
   transform: scale(0.8);
