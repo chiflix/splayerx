@@ -478,4 +478,66 @@ describe('Subtitle Manager Unit Tests', () => {
         }).catch(done);
     });
   });
+
+  describe('method - loadedCallback', () => {
+    let testSubtitleInstance;
+    let addSubtitleWhenLoadedStub;
+    let updateSubtitleStub;
+    beforeEach(() => {
+      testSubtitleInstance = {
+        id: randStr(),
+        type: 'online',
+        metaInfo: {
+          language: 'zh-CN',
+        },
+        data: [randStr()],
+      };
+      addSubtitleWhenLoadedStub = sandbox.stub(wrapper.vm, 'addSubtitleWhenLoaded');
+      updateSubtitleStub = sandbox.stub();
+      subtitleManagerRewireAPI.__Rewire__('updateSubtitle', updateSubtitleStub);
+    });
+    afterEach(() => {
+      subtitleManagerRewireAPI.__ResetDependency__('updateSubtitle');
+    });
+    it('should invoke addSubtitleWhenLoaded', (done) => {
+      wrapper.vm.loadedCallback(testSubtitleInstance)
+        .then(() => {
+          expect(addSubtitleWhenLoadedStub).to.have.been.calledWithExactly(testSubtitleInstance.id);
+          done();
+        }).catch(done);
+    });
+    it('should invoke updateSubtitle', (done) => {
+      wrapper.vm.loadedCallback(testSubtitleInstance)
+        .then(() => {
+          expect(updateSubtitleStub).to.have.been.called;
+          done();
+        }).catch(done);
+    });
+    it('should invoke updateSubtitle with language and data when online', (done) => {
+      wrapper.vm.loadedCallback(testSubtitleInstance)
+        .then(() => {
+          expect(updateSubtitleStub).to.have.been.calledWithExactly(
+            testSubtitleInstance.id,
+            {
+              language: testSubtitleInstance.metaInfo.language,
+              data: testSubtitleInstance.data,
+            },
+          );
+          done();
+        }).catch(done);
+    });
+    it('should invoke updateSubtitle with only language when not online', (done) => {
+      testSubtitleInstance.type = 'local';
+      wrapper.vm.loadedCallback(testSubtitleInstance)
+        .then(() => {
+          expect(updateSubtitleStub).to.have.been.calledWithExactly(
+            testSubtitleInstance.id,
+            {
+              language: testSubtitleInstance.metaInfo.language,
+            },
+          );
+          done();
+        }).catch(done);
+    });
+  });
 });

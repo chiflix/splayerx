@@ -18,6 +18,7 @@ import Sagi from '@/helpers/sagi';
 import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
   storeLanguagePreference,
+  updateSubtitle,
 } from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
@@ -306,6 +307,15 @@ export default {
       ) || name;
       this.addSubtitleWhenReady({ id, format });
       this.checkCurrentSubtitleList();
+    },
+    async loadedCallback(subtitleInstance) {
+      const {
+        id, type, metaInfo, data,
+      } = subtitleInstance;
+      this.addSubtitleWhenLoaded(id);
+      const result = { language: metaInfo.language };
+      if (type === 'online') result.data = data;
+      return updateSubtitle(id, result);
     },
     failedCallback({ id }) {
       this.$delete(this.subtitleInstances, id);
