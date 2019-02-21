@@ -157,7 +157,7 @@ function generateTracks(actionType, newTrack, oldTracks) {
 function generateRate(rateInfo, nowRate, oldRateGroup) {
   const newRateGroup = [...oldRateGroup];
   let existed;
-  newRateGroup.forEach((item, index) => {
+  oldRateGroup.forEach((item, index) => {
     if (item.dirPath === rateInfo.oldDir) {
       newRateGroup.splice(index, 1, {
         dirPath: item.dirPath, rate: nowRate, playingList: item.playingList,
