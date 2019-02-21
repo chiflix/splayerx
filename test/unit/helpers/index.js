@@ -14,3 +14,7 @@ export class DOMStringListStub extends Array {
 export function randStr() {
   return Math.random().toString(36).substring(7);
 }
+
+export function randNum() {
+  return Math.round(Math.random() * 10000);
+}
