@@ -87,10 +87,6 @@ export const DATADB_SHCEMAS = [
         },
         indexes: [
           {
-            name: 'id',
-            unique: true,
-          },
-          {
             name: 'type',
             unique: false,
           },
@@ -112,7 +108,6 @@ export const DATADB_SHCEMAS = [
           },
         ],
         properties: [
-          'id',
           'type',
           'src',
           'format',
