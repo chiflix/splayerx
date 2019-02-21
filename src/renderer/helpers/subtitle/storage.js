@@ -72,13 +72,14 @@ export async function storeSubtitle(subtitle) {
   return dataDb.add(SUBTITLE_OBJECTSTORE_NAME, subtitleToStore);
 }
 export async function updateSubtitle(subtitleId, subtitleInfo) {
-  const existingSubtitle = await dataDb.get(SUBTITLE_OBJECTSTORE_NAME, subtitleId);
+  const realSubtitleId = parseInt(subtitleId, 10);
+  const existingSubtitle = await dataDb.get(SUBTITLE_OBJECTSTORE_NAME, realSubtitleId);
   if (!existingSubtitle) return storeSubtitle(subtitleInfo);
   const subtitleToPut = { ...existingSubtitle, ...subtitleInfo };
   return dataDb.put(
     SUBTITLE_OBJECTSTORE_NAME,
     subtitleToPut,
-    subtitleId,
+    realSubtitleId,
   );
 }
 export async function retrieveSubtitles(mediaIdentity) {

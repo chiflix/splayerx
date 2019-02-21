@@ -1,4 +1,4 @@
-import { createSandbox } from 'sinon';
+import { createSandbox, match } from 'sinon';
 import { pick } from 'lodash';
 
 import {
@@ -15,8 +15,8 @@ import {
 } from '@/helpers/subtitle/storage';
 import { SUBTITLE_OBJECTSTORE_NAME, DATADB_SHCEMAS, DATADB_VERSION } from '@/constants';
 import dataDb from '@/helpers/dataDb';
+import { randNum, randStr } from '../../../helpers';
 
-const randStr = () => Math.random().toString(36).substring(7);
 const errorVideoSrc = '11-22-33-44';
 const emptyVideoSrc = 'empty';
 
@@ -369,18 +369,18 @@ describe('helper - subtitle - storage', () => {
     });
 
     describe('method - updateSubtitle unit tests', () => {
-      const hasResultSubtitleId = 'has-result';
-      const noResultSubtitleId = 'no-result';
+      const hasResultSubtitleId = randNum();
+      const noResultSubtitleId = randNum();
       let testSubtitleId;
 
-      const result = { _id: randStr(), lastOpened: new Date() };
+      const result = { _id: randNum(), lastOpened: new Date() };
       const testSubtitleInfo = { lastOpened: new Date(Date.now() + 2) };
 
       let getStub;
       let storeSubtitleStub;
       let putStub;
       beforeEach(() => {
-        testSubtitleId = randStr();
+        testSubtitleId = randNum();
         getStub = sandbox.stub(dataDb, 'get').resolves();
         getStub.withArgs(
           SUBTITLE_OBJECTSTORE_NAME,
@@ -407,6 +407,15 @@ describe('helper - subtitle - storage', () => {
               SUBTITLE_OBJECTSTORE_NAME,
               testSubtitleId,
             );
+            done();
+          }).catch(done);
+      });
+      it('should turn string subtitleId into number', (done) => {
+        const testSubtitleStringId = hasResultSubtitleId.toString();
+        updateSubtitle(testSubtitleStringId, testSubtitleInfo)
+          .then(() => {
+            expect(getStub).to.have.been.calledWithMatch(match.any, hasResultSubtitleId);
+            expect(putStub).to.have.been.calledWithMatch(match.any, match.any, hasResultSubtitleId);
             done();
           }).catch(done);
       });
