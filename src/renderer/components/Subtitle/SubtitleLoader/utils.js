@@ -209,6 +209,7 @@ export async function embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleC
 export function loadEmbeddedSubtitle(videoSrc, subtitleStreamIndex, subtitleCodec) {
   return new Promise((resolve, reject) => {
     embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec).then((path) => {
+      this.metaInfo.format = extname(path).slice(1);
       resolve(loadLocalFile(path));
     }).catch((err) => {
       reject(err);
