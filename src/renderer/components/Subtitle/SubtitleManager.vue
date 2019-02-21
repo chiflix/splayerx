@@ -12,7 +12,7 @@
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
-import { flatten, isEqual, sortBy, differenceWith, isFunction, partial } from 'lodash';
+import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import Sagi from '@/helpers/sagi';
 import {
@@ -87,6 +87,9 @@ export default {
             .catch(err => console.log(err));
         });
       }
+    },
+    allSubtitleList(newVal, oldVal) {
+      this.allSubtitleListWatcher(newVal, oldVal);
     },
   },
   methods: {
@@ -392,8 +395,16 @@ export default {
       };
     },
     async allSubtitleListWatcher(newVal, oldVal) {
+      const pickValidProperties = val => pick(val, 'id', 'type', 'language', 'rank');
       const extractReadySubtitles = subtitles => subtitles
-        .filter(({ loading }) => loading === 'ready' || loading === 'loaded');
+        .filter(({ loading }) => loading === 'ready' || loading === 'loaded')
+        .map((subtitleInfo) => {
+          const result = pickValidProperties(subtitleInfo);
+          if (result.id === this.currentSubtitleId) {
+            result.videoSegments = this.$refs.subtitleRenderer.videoSegments;
+          }
+          return result;
+        });
       const newSubtitles = differenceWith(
         extractReadySubtitles(newVal),
         extractReadySubtitles(oldVal),

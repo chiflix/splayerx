@@ -1,6 +1,6 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { createSandbox, match } from 'sinon';
+import { createSandbox } from 'sinon';
 import { merge } from 'lodash';
 import Subtitle from '@/store/modules/Subtitle';
 import Video from '@/store/modules/Video';
@@ -546,6 +546,8 @@ describe('Subtitle Manager Unit Tests', () => {
     let updateSubtitleListStub;
     let testVideoSrc;
     let getVideoSrcByIdStub;
+    let idWithVideoSegments;
+    let testVideoSegments;
     let loadingSubtitle;
     let failedSubtitle;
     let readySubtitle;
@@ -555,16 +557,34 @@ describe('Subtitle Manager Unit Tests', () => {
       subtitleManagerRewireAPI.__Rewire__('updateSubtitleList', updateSubtitleListStub);
       testVideoSrc = randStr();
       getVideoSrcByIdStub = sandbox.stub().returns(testVideoSrc);
+      idWithVideoSegments = randStr();
+      testVideoSegments = [[Math.random(), Math.random() + 5]];
       store = merge({}, baseStore, {
         modules: {
           Subtitle: {
             getters: {
               getVideoSrcById: () => getVideoSrcByIdStub,
+              currentSubtitleId: () => idWithVideoSegments,
+            },
+          },
+          Video: {
+            getters: {
+              duration: () => 1, // to trigger SubtitleRenderer's v-if
             },
           },
         },
       });
-      wrapper = shallowMount(SubtitleManager, { localVue, store: new Vuex.Store(store) });
+      const SubtitleRendererStub = {
+        render(h) { return h('div'); },
+        data() { return { videoSegments: testVideoSegments }; },
+      };
+      wrapper = shallowMount(SubtitleManager, {
+        localVue,
+        store: new Vuex.Store(store),
+        stubs: {
+          SubtitleRenderer: SubtitleRendererStub,
+        },
+      });
 
       loadingSubtitle = { id: randStr(), loading: 'loading' };
       failedSubtitle = { id: randStr(), loading: 'failed' };
@@ -589,9 +609,9 @@ describe('Subtitle Manager Unit Tests', () => {
 
       wrapper.vm.allSubtitleListWatcher(newVal, oldVal)
         .then(() => {
-          expect(updateSubtitleListStub).to.have.been.calledWithMatch(
+          expect(updateSubtitleListStub).to.have.been.calledWithExactly(
             testVideoSrc,
-            match.array.deepEquals([readySubtitle, loadedSubtitle]),
+            [{ id: readySubtitle.id }, { id: loadedSubtitle.id }],
           );
           done();
         }).catch(done);
@@ -608,11 +628,50 @@ describe('Subtitle Manager Unit Tests', () => {
         .then(() => {
           expect(updateSubtitleListStub).to.have.been.calledWithExactly(
             testVideoSrc1,
-            [readySubtitle],
+            [{ id: readySubtitle.id }],
           );
           expect(updateSubtitleListStub).to.have.been.calledWithExactly(
             testVideoSrc2,
-            [loadedSubtitle],
+            [{ id: loadedSubtitle.id }],
+          );
+          done();
+        }).catch(done);
+    });
+    it('should only pick proper properties', (done) => {
+      readySubtitle = {
+        id: randStr(),
+        loading: 'ready',
+        format: 'embedded',
+        language: 'zh-CN',
+        name: randStr(),
+        rank: 10000,
+        type: 'embedded',
+      };
+      const newVal = [readySubtitle];
+      const oldVal = [];
+      wrapper.vm.allSubtitleListWatcher(newVal, oldVal)
+        .then(() => {
+          expect(updateSubtitleListStub).to.have.been.calledWithExactly(
+            testVideoSrc,
+            [{
+              id: readySubtitle.id,
+              language: readySubtitle.language,
+              type: readySubtitle.type,
+              rank: readySubtitle.rank,
+            }],
+          );
+          done();
+        }).catch(done);
+    });
+    it('should store videoSegments if available', (done) => {
+      const newVal = [{ loading: 'ready', id: idWithVideoSegments }];
+
+      wrapper.vm.allSubtitleListWatcher(newVal, [])
+        .then(() => {
+          expect(updateSubtitleListStub).to.have.been.called;
+          expect(updateSubtitleListStub).to.have.been.calledWithExactly(
+            testVideoSrc,
+            [{ id: idWithVideoSegments, videoSegments: testVideoSegments }],
           );
           done();
         }).catch(done);
