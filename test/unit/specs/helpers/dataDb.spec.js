@@ -232,7 +232,7 @@ describe('class DataDb unit tests', () => {
       completeStub.withArgs(errorCompleteParam).rejects();
       transactionStub = sandbox.stub().returns({
         objectStore: objectStoreStub,
-        complete: completeStub,
+        complete: completeStub(),
       });
       sandbox.stub(testDataDb, 'getOwnDb').resolves({
         transaction: transactionStub,
@@ -291,7 +291,7 @@ describe('class DataDb unit tests', () => {
       completeStub.withArgs(errorCompleteParam).rejects();
       transactionStub = sandbox.stub().returns({
         objectStore: objectStoreStub,
-        complete: completeStub,
+        complete: completeStub(),
       });
       sandbox.stub(testDataDb, 'getOwnDb').resolves({
         transaction: transactionStub,

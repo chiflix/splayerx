@@ -93,7 +93,7 @@ export class DataDb {
     const tx = db.transaction(objectStoreName, 'readwrite');
     try {
       const newKey = await tx.objectStore(objectStoreName).add(data);
-      await tx.complete();
+      await tx.complete;
       return newKey;
     } catch (err) { throw err; }
   }
@@ -112,7 +112,7 @@ export class DataDb {
     }
     try {
       const newKey = await tx.objectStore(objectStoreName).put(data, keyPathVal);
-      await tx.complete();
+      await tx.complete;
       return newKey;
     } catch (err) { throw err; }
   }
