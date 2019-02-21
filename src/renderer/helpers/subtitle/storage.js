@@ -37,9 +37,14 @@ export function storeSubtitleList(videoSrc, subtitleList) {
     },
   });
 }
-export function retrieveSubtitleList(videoSrc) {
-  return getVideoInfoFromVideoSrc(videoSrc)
-    .then(({ preference }) => (preference ? preference.subtitle.list : []));
+export async function retrieveSubtitleList(videoSrc) {
+  const videoInfo = await getVideoInfoFromVideoSrc(videoSrc);
+  const { preference } = videoInfo;
+  const isValidArray = val => Array.isArray(val);
+  if (!preference) return [];
+  if (!preference.subtitle) return [];
+  if (!isValidArray(preference.subtitle.list)) return [];
+  return preference.subtitle.list;
 }
 export async function updateSubtitleList(videoSrc, newSubtitles) {
   if (!(newSubtitles instanceof Array) || !newSubtitles.length) return false;

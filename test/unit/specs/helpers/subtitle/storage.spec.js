@@ -214,6 +214,18 @@ describe('helper - subtitle - storage', () => {
             done();
           }).catch(done);
       });
+      it('should no list resolves empty array', (done) => {
+        infoDBGetStub.resolves({
+          preference: {
+            subtitle: {},
+          },
+        });
+        retrieveSubtitleList(videoSrc)
+          .then((result) => {
+            expect(result).to.deep.equal([]);
+            done();
+          }).catch(done);
+      });
     });
     describe('updateSubtitleList', () => {
       let testVideoSrc;
