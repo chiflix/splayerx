@@ -1,6 +1,6 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import sinon from 'sinon';
+import { createSandbox, match } from 'sinon';
 import { merge } from 'lodash';
 import Subtitle from '@/store/modules/Subtitle';
 import Video from '@/store/modules/Video';
@@ -41,7 +41,7 @@ describe('Subtitle Manager Unit Tests', () => {
   let sandbox;
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox();
+    sandbox = createSandbox();
 
     store = new Vuex.Store(baseStore);
     wrapper = shallowMount(SubtitleManager, { localVue, store });
@@ -502,7 +502,8 @@ describe('Subtitle Manager Unit Tests', () => {
     it('should invoke addSubtitleWhenLoaded', (done) => {
       wrapper.vm.loadedCallback(testSubtitleInstance)
         .then(() => {
-          expect(addSubtitleWhenLoadedStub).to.have.been.calledWithExactly(testSubtitleInstance.id);
+          expect(addSubtitleWhenLoadedStub)
+            .to.have.been.calledWithExactly({ id: testSubtitleInstance.id });
           done();
         }).catch(done);
     });
@@ -535,6 +536,83 @@ describe('Subtitle Manager Unit Tests', () => {
             {
               language: testSubtitleInstance.metaInfo.language,
             },
+          );
+          done();
+        }).catch(done);
+    });
+  });
+
+  describe('method - allSubtitleListWacher', () => {
+    let updateSubtitleListStub;
+    let testVideoSrc;
+    let getVideoSrcByIdStub;
+    let loadingSubtitle;
+    let failedSubtitle;
+    let readySubtitle;
+    let loadedSubtitle;
+    beforeEach(() => {
+      updateSubtitleListStub = sandbox.stub();
+      subtitleManagerRewireAPI.__Rewire__('updateSubtitleList', updateSubtitleListStub);
+      testVideoSrc = randStr();
+      getVideoSrcByIdStub = sandbox.stub().returns(testVideoSrc);
+      store = merge({}, baseStore, {
+        modules: {
+          Subtitle: {
+            getters: {
+              getVideoSrcById: () => getVideoSrcByIdStub,
+            },
+          },
+        },
+      });
+      wrapper = shallowMount(SubtitleManager, { localVue, store: new Vuex.Store(store) });
+
+      loadingSubtitle = { id: randStr(), loading: 'loading' };
+      failedSubtitle = { id: randStr(), loading: 'failed' };
+      readySubtitle = { id: randStr(), loading: 'ready' };
+      loadedSubtitle = { id: randStr(), loading: 'loaded' };
+    });
+    afterEach(() => {
+      subtitleManagerRewireAPI.__ResetDependency__('updateSubtitleList');
+    });
+
+    it('should invoke updateSubtitleList', () => {
+      const newVal = [readySubtitle, loadedSubtitle];
+      const oldVal = [readySubtitle];
+
+      wrapper.vm.allSubtitleListWatcher(newVal, oldVal);
+
+      expect(updateSubtitleListStub).to.have.been.called;
+    });
+    it('should only update the new ready or loaded subtitles', (done) => {
+      const newVal = [readySubtitle, loadedSubtitle, failedSubtitle, loadingSubtitle];
+      const oldVal = [];
+
+      wrapper.vm.allSubtitleListWatcher(newVal, oldVal)
+        .then(() => {
+          expect(updateSubtitleListStub).to.have.been.calledWithMatch(
+            testVideoSrc,
+            match.array.deepEquals([readySubtitle, loadedSubtitle]),
+          );
+          done();
+        }).catch(done);
+    });
+    it('should invoke updateSubtitle with proper videoSrc', (done) => {
+      const testVideoSrc1 = randStr();
+      const testVideoSrc2 = randStr();
+      getVideoSrcByIdStub.onFirstCall().returns(testVideoSrc1);
+      getVideoSrcByIdStub.onSecondCall().returns(testVideoSrc2);
+      const newVal = [readySubtitle, loadedSubtitle];
+      const oldVal = [];
+
+      wrapper.vm.allSubtitleListWatcher(newVal, oldVal)
+        .then(() => {
+          expect(updateSubtitleListStub).to.have.been.calledWithExactly(
+            testVideoSrc1,
+            [readySubtitle],
+          );
+          expect(updateSubtitleListStub).to.have.been.calledWithExactly(
+            testVideoSrc2,
+            [loadedSubtitle],
           );
           done();
         }).catch(done);

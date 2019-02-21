@@ -19,6 +19,7 @@ import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
   storeLanguagePreference,
   updateSubtitle,
+  updateSubtitleList,
 } from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
@@ -43,6 +44,7 @@ export default {
       'subtitleList', 'currentSubtitleId', // use to get current subtitle info and auto selection subtitles
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
       'duration', // do not load subtitle renderer when video(duration) is not available(todo: global variable to tell if video is totally available)
+      'getVideoSrcById', 'allSubtitleList', // serve allSubtitleListWatcher
     ]),
     ...mapState({
       preferredLanguages: ({ Preference }) => (
@@ -312,7 +314,7 @@ export default {
       const {
         id, type, metaInfo, data,
       } = subtitleInstance;
-      this.addSubtitleWhenLoaded(id);
+      this.addSubtitleWhenLoaded({ id });
       const result = { language: metaInfo.language };
       if (type === 'online') result.data = data;
       return updateSubtitle(id, result);
@@ -388,6 +390,30 @@ export default {
         videoSrc,
         subtitles: finalList,
       };
+    },
+    async allSubtitleListWatcher(newVal, oldVal) {
+      const extractReadySubtitles = subtitles => subtitles
+        .filter(({ loading }) => loading === 'ready' || loading === 'loaded');
+      const newSubtitles = differenceWith(
+        extractReadySubtitles(newVal),
+        extractReadySubtitles(oldVal),
+        isEqual,
+      );
+      const subtitleMap = newSubtitles
+        .reduce((finalMap, currentSubtitleInfo) => {
+          const { id } = currentSubtitleInfo;
+          const videoSrc = this.getVideoSrcById(id);
+          const subtitles = finalMap[videoSrc];
+          if (subtitles) {
+            finalMap[videoSrc] = [...subtitles, currentSubtitleInfo];
+          } else {
+            finalMap[videoSrc] = [currentSubtitleInfo];
+          }
+          return finalMap;
+        }, {});
+      const updateSubtitleListPromises = Object.keys(subtitleMap)
+        .map(videoSrc => updateSubtitleList(videoSrc, subtitleMap[videoSrc]));
+      return Promise.all(updateSubtitleListPromises);
     },
   },
   created() {
