@@ -29,6 +29,7 @@ const state = {
   // playback state
   duration: NaN,
   rate: 1,
+  playinglistRate: [],
   defaultPlaybackRate: 1,
   paused: false,
   ended: false,
@@ -75,6 +76,7 @@ const getters = {
   volume: state => state.volume / 100,
   muted: state => state.muted,
   rate: state => state.rate,
+  playinglistRate: state => state.playinglistRate,
   // tracks
   audioTrackList: state => state.audioTrackList,
   currentAudioTrackId: (state) => {
@@ -151,6 +153,25 @@ function generateTracks(actionType, newTrack, oldTracks) {
   }
   return newTracks;
 }
+function generateRate(newRate, nowRate, oldRateGroup) {
+  const newRateGroup = [...oldRateGroup];
+  let existed;
+  newRateGroup.forEach((item, index) => {
+    if (item.dirPath === newRate.oldDir) {
+      newRateGroup.splice(index, 1, {
+        dirPath: item.dirPath, rate: nowRate,
+      });
+    } else if (item.dirPath === newRate.newDir) {
+      existed = true;
+    }
+  });
+  if (!existed && newRate.oldDir !== newRate.newDir) {
+    newRateGroup.splice(newRateGroup.length, 0, {
+      dirPath: newRate.newDir, rate: 1,
+    });
+  }
+  return newRateGroup;
+}
 const mutations = mutationsGenerator(videoMutations);
 
 const actions = {
@@ -208,6 +229,10 @@ const actions = {
     const rateArr = [0.5, 1, 1.2, 1.5, 2];
     const finalRate = rateArr[rateArr.indexOf(state.rate) + 1];
     commit(videoMutations.RATE_UPDATE, finalRate || state.rate);
+  },
+  [videoActions.UPDATE_PLAYINGLIST_RATE]({ commit, state }, delta) {
+    const newPlayinglistRateGroup = generateRate(delta, state.rate, state.playinglistRate);
+    commit(videoMutations.PLAYINGLIST_RATE_UPDATE, newPlayinglistRateGroup);
   },
   [videoActions.DECREASE_RATE]({ commit, state }) {
     const rateArr = [0.5, 1, 1.2, 1.5, 2];

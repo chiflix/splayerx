@@ -188,7 +188,7 @@ export default {
     basicInfoInitialization(videoElement) {
       const basicInfo = [
         'src', 'crossOrigin', 'preload',
-        'defaultPlaybackRate', 'autoplay',
+        'playbackRate', 'autoplay',
         'defaultMuted', 'muted', 'volume', 'loop',
       ];
       basicInfo.forEach((settingItem) => {

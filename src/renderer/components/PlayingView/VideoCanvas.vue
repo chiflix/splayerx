@@ -32,6 +32,7 @@
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
 import { mapGetters, mapActions } from 'vuex';
+import path from 'path';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
 import { videodata } from '../../store/video';
@@ -50,6 +51,7 @@ export default {
       lastCoverDetectingTime: 0,
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
+      nowRate: 1,
     };
   },
   methods: {
@@ -63,13 +65,14 @@ export default {
       removeAudioTrack: videoActions.REMOVE_AUDIO_TRACK,
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
+      updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
     }),
     onMetaLoaded(event) {
       this.videoElement = event.target;
       this.videoConfigInitialize({
         volume: this.volume * 100,
         muted: this.muted,
-        rate: 1,
+        rate: this.nowRate,
         duration: event.target.duration,
         currentTime: 0,
       });
@@ -213,12 +216,15 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop']),
+      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
       videoRatio: 'ratio',
     }),
+  },
+  created() {
+    this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc) });
   },
   watch: {
     originSrc(val, oldVal) {
@@ -228,6 +234,15 @@ export default {
         audioTrackList: [],
       });
       this.play();
+      this.updatePlayinglistRate({
+        oldDir: path.dirname(oldVal), newDir: path.dirname(val),
+      });
+      this.playinglistRate.forEach((item) => {
+        if (item.dirPath === path.dirname(val)) {
+          this.$store.dispatch(videoActions.CHANGE_RATE, item.rate);
+          this.nowRate = item.rate;
+        }
+      });
     },
   },
   mounted() {
