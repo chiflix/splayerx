@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { filePathToUrl, fileUrlToPath, parseNameFromPath } from '../../../../src/renderer/helpers/path';
 
 describe('helper.path', () => {
@@ -36,7 +37,7 @@ describe('helper.path', () => {
         episode: '01',
       }));
     });
-    ['美剧.EP01.x264-SVA.mp4', '天龙八部第一集.test.mp4', '天龙八部.第1集.mp4', ' 天龙八部第01集.mkv', '天龙八部第01集.mp4'].forEach((e) => {
+    ['美剧.EP01.x264-SVA.mp4', '天龙八部第一集.test.mp4', '天龙八部.第1集.mp4', ' 天龙八部第01集.mkv'].forEach((e) => {
       expect(JSON.stringify(parseNameFromPath(e))).to.be.equals(JSON.stringify({
         season: null,
         episode: '01',
@@ -67,5 +68,23 @@ describe('helper.path', () => {
         episode: null,
       }));
     });
+  });
+
+  it('should hit names percentage > 93%', () => {
+    const str = readFileSync('./test/assets/names.txt', {}).toString();
+    const j = {};
+    let count = 0;
+    const names = str.split('\n').filter((e) => {
+      if (!e) return false;
+      if (j[e]) return false;
+      j[e] = true;
+      return true;
+    });
+    names.forEach((e) => {
+      if (parseNameFromPath(e).episode !== null) {
+        count += 1;
+      }
+    });
+    expect(count / names.length > 0.93).to.be.equals(true);
   });
 });
