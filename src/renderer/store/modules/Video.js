@@ -154,26 +154,26 @@ function generateTracks(actionType, newTrack, oldTracks) {
   }
   return newTracks;
 }
-function generateRate(newRate, nowRate, oldRateGroup) {
+function generateRate(rateInfo, nowRate, oldRateGroup) {
   const newRateGroup = [...oldRateGroup];
   let existed;
   newRateGroup.forEach((item, index) => {
-    if (item.dirPath === newRate.oldDir) {
+    if (item.dirPath === rateInfo.oldDir) {
       newRateGroup.splice(index, 1, {
         dirPath: item.dirPath, rate: nowRate, playingList: item.playingList,
       });
-    } else if (item.dirPath === newRate.newDir) {
+    } else if (item.dirPath === rateInfo.newDir) {
       existed = true;
-      if (!isEqual(item.playingList, newRate.playingList)) {
+      if (!isEqual(item.playingList, rateInfo.playingList)) {
         newRateGroup.splice(index, 1, {
-          dirPath: newRate.newDir, rate: 1, playingList: newRate.playingList,
+          dirPath: rateInfo.newDir, rate: 1, playingList: rateInfo.playingList,
         });
       }
     }
   });
-  if (!existed && newRate.oldDir !== newRate.newDir) {
+  if (!existed && rateInfo.oldDir !== rateInfo.newDir) {
     newRateGroup.splice(newRateGroup.length, 0, {
-      dirPath: newRate.newDir, rate: 1, playingList: newRate.playingList,
+      dirPath: rateInfo.newDir, rate: 1, playingList: rateInfo.playingList,
     });
   }
   return newRateGroup;
