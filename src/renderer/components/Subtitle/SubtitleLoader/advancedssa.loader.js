@@ -2,7 +2,7 @@ import flow from 'lodash/flow';
 import pick from 'lodash/pick';
 import { compile } from 'ass-compiler';
 
-import { localLanguageLoader, localNameLoader, loadLocalFile, localIdLoader } from './utils';
+import { localLanguageLoader, localNameLoader, loadLocalFile } from './utils';
 
 const baseInfo = {
   // Title: '',
