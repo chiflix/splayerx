@@ -60,7 +60,7 @@ export default {
   },
   watch: {
     originSrc() {
-      this.showAttached = false;
+      this.$emit('update:showAttached', false);
     },
     showAttached(val) {
       if (!val) {

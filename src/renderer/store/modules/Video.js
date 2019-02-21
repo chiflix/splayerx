@@ -2,6 +2,7 @@ import Vue from 'vue';
 
 import Helpers from '@/helpers';
 import romanize from 'romanize';
+import isEqual from 'lodash/isEqual';
 import { Video as videoMutations } from '../mutationTypes';
 import { Video as videoActions, Subtitle as subtitleActions } from '../actionTypes';
 
@@ -29,6 +30,7 @@ const state = {
   // playback state
   duration: NaN,
   rate: 1,
+  playinglistRate: [],
   defaultPlaybackRate: 1,
   paused: false,
   ended: false,
@@ -75,6 +77,7 @@ const getters = {
   volume: state => state.volume / 100,
   muted: state => state.muted,
   rate: state => state.rate,
+  playinglistRate: state => state.playinglistRate,
   // tracks
   audioTrackList: state => state.audioTrackList,
   currentAudioTrackId: (state) => {
@@ -134,11 +137,7 @@ function generateTracks(actionType, newTrack, oldTracks) {
       if (newTracks.includes(newTrack)) {
         newTracks.splice(0, newTracks.length, ...newTracks.map((track) => {
           const tempTrack = Object.assign({}, track);
-          if (tempTrack.id === newTrack.id) {
-            tempTrack.enabled = true;
-          } else {
-            tempTrack.enabled = false;
-          }
+          tempTrack.enabled = tempTrack.id === newTrack.id;
           return tempTrack;
         }));
       }
@@ -150,6 +149,30 @@ function generateTracks(actionType, newTrack, oldTracks) {
       break;
   }
   return newTracks;
+}
+function generateRate(rateInfo, nowRate, oldRateGroup) {
+  const newRateGroup = [...oldRateGroup];
+  let existed;
+  oldRateGroup.forEach((item, index) => {
+    if (item.dirPath === rateInfo.oldDir) {
+      newRateGroup.splice(index, 1, {
+        dirPath: item.dirPath, rate: nowRate, playingList: item.playingList,
+      });
+    } else if (item.dirPath === rateInfo.newDir) {
+      existed = true;
+      if (!isEqual(item.playingList, rateInfo.playingList)) {
+        newRateGroup.splice(index, 1, {
+          dirPath: rateInfo.newDir, rate: 1, playingList: rateInfo.playingList,
+        });
+      }
+    }
+  });
+  if (!existed && rateInfo.oldDir !== rateInfo.newDir) {
+    newRateGroup.splice(newRateGroup.length, 0, {
+      dirPath: rateInfo.newDir, rate: 1, playingList: rateInfo.playingList,
+    });
+  }
+  return newRateGroup;
 }
 const mutations = mutationsGenerator(videoMutations);
 
@@ -208,6 +231,10 @@ const actions = {
     const rateArr = [0.5, 1, 1.2, 1.5, 2];
     const finalRate = rateArr[rateArr.indexOf(state.rate) + 1];
     commit(videoMutations.RATE_UPDATE, finalRate || state.rate);
+  },
+  [videoActions.UPDATE_PLAYINGLIST_RATE]({ commit, state }, delta) {
+    const newPlayinglistRateGroup = generateRate(delta, state.rate, state.playinglistRate);
+    commit(videoMutations.PLAYINGLIST_RATE_UPDATE, newPlayinglistRateGroup);
   },
   [videoActions.DECREASE_RATE]({ commit, state }) {
     const rateArr = [0.5, 1, 1.2, 1.5, 2];
