@@ -141,6 +141,10 @@ export default {
       title: '未能连接网络',
       content: '建议您检查网络状况后重试。',
     },
+    timeout: {
+      title: '网络请求超时',
+      content: '网络延迟或云端异常。',
+    },
   },
   loading: {
     title: '',

@@ -19,6 +19,7 @@
     ONLINE_LOADING,
     NO_TRANSLATION_RESULT,
     NOT_SUPPORTED_SUBTITLE,
+    REQUEST_TIMEOUT,
   } from '../shared/notificationcodes';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
@@ -92,6 +93,14 @@
               type: 'error',
               title: this.$t('errorFile.loadFailed.title'),
               content: this.$t('errorFile.loadFailed.content'),
+              dismissAfter: 5000,
+            });
+            break;
+          case REQUEST_TIMEOUT:
+            this.$store.dispatch('addMessages', {
+              type: 'error',
+              title: this.$t('errorFile.timeout.title'),
+              content: this.$t('errorFile.timeout.content'),
               dismissAfter: 5000,
             });
             break;

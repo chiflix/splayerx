@@ -141,6 +141,10 @@ export default {
       title: '未能連接網絡',
       content: '建議您檢查網絡狀況後重試。',
     },
+    timeout: {
+      title: '網絡請求超時',
+      content: '網絡延遲或雲端異常。',
+    },
   },
   loading: {
     title: '',

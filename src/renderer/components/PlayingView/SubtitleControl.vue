@@ -109,7 +109,7 @@ import { Subtitle as subtitleActions, Input as InputActions } from '@/store/acti
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
-import { ONLINE_LOADING, NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
+import { ONLINE_LOADING, NO_TRANSLATION_RESULT, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-control',
@@ -376,6 +376,12 @@ export default {
           this.breakTimer = setTimeout(() => {
             if (this.timer) {
               this.$bus.$emit('refresh-finished');
+              if (!this.isInitial) {
+                this.addLog('error', {
+                  message: 'Request Timeout .',
+                  errcode: REQUEST_TIMEOUT,
+                });
+              }
             }
           }, 10000);
         }

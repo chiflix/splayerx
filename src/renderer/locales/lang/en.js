@@ -142,6 +142,10 @@ export default {
       title: 'No Network Access',
       content: 'Please check network and try again.',
     },
+    timeout: {
+      title: 'Request Timeout',
+      content: 'Network delay or server error.',
+    },
   },
   loading: {
     title: '',
