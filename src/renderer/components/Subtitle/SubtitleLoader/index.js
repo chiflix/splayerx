@@ -76,14 +76,19 @@ export default class SubtitleLoader extends EventEmitter {
     this.options = options || {};
     this.data = this.options.data;
 
-    storeSubtitle({
-      src: this.src,
-      type: this.type,
-      format: this.metaInfo.format,
-    }).then((id) => {
-      this.id = id;
-      this.emit('loading', id);
-    });
+    if (this.options.id) {
+      this.id = this.options.id.toString();
+      setImmediate(() => this.emit('loading', this.id));
+    } else {
+      storeSubtitle({
+        src: this.src,
+        type: this.type,
+        format: this.metaInfo.format,
+      }).then((id) => {
+        this.id = id.toString();
+        setImmediate(() => this.emit('loading', id));
+      });
+    }
   }
 
   async meta() {

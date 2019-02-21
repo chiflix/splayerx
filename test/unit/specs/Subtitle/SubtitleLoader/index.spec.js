@@ -28,15 +28,6 @@ describe('SubtitleLoader unit tests', () => {
     it('should SubtitleLoader instanceof EventEmitter', () => {
       expect(loader).to.be.an.instanceOf(EventEmitter);
     });
-    it('should invoke storeSubtitle', (done) => {
-      const testSrc = randStr();
-      const testSubtitleLoader = new SubtitleLoader(testSrc, 'online');
-
-      testSubtitleLoader.on('loading', () => {
-        expect(storeSubtitleStub).to.have.been.called;
-        done();
-      });
-    });
     it('should use storeSubtitle\'s id as subtitle\'s id', (done) => {
       const testId = randStr();
       storeSubtitleStub.resolves(testId);
@@ -45,6 +36,17 @@ describe('SubtitleLoader unit tests', () => {
 
       testSubtitleLoader.on('loading', (id) => {
         expect(testSubtitleLoader.id).to.equal(id);
+        expect(id).to.equal(testId);
+        done();
+      });
+    });
+    it('should not invoke storeSubtitle when id available', (done) => {
+      const testSrc = randStr();
+      const testId = randStr();
+      const testSubtitleLoader = new SubtitleLoader(testSrc, 'online', { id: testId });
+
+      testSubtitleLoader.on('loading', (id) => {
+        expect(storeSubtitleStub).to.not.have.been.called;
         expect(id).to.equal(testId);
         done();
       });
