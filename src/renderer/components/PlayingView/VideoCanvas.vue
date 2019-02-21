@@ -216,7 +216,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate']),
+      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -224,7 +224,7 @@ export default {
     }),
   },
   created() {
-    this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc) });
+    this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   watch: {
     originSrc(val, oldVal) {
@@ -235,7 +235,7 @@ export default {
       });
       this.play();
       this.updatePlayinglistRate({
-        oldDir: path.dirname(oldVal), newDir: path.dirname(val),
+        oldDir: path.dirname(oldVal), newDir: path.dirname(val), playingList: this.playingList,
       });
       this.playinglistRate.forEach((item) => {
         if (item.dirPath === path.dirname(val)) {

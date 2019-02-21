@@ -2,6 +2,7 @@ import Vue from 'vue';
 
 import Helpers from '@/helpers';
 import romanize from 'romanize';
+import isEqual from 'lodash/isEqual';
 import { Video as videoMutations } from '../mutationTypes';
 import { Video as videoActions, Subtitle as subtitleActions } from '../actionTypes';
 
@@ -159,15 +160,20 @@ function generateRate(newRate, nowRate, oldRateGroup) {
   newRateGroup.forEach((item, index) => {
     if (item.dirPath === newRate.oldDir) {
       newRateGroup.splice(index, 1, {
-        dirPath: item.dirPath, rate: nowRate,
+        dirPath: item.dirPath, rate: nowRate, playingList: item.playingList,
       });
     } else if (item.dirPath === newRate.newDir) {
       existed = true;
+      if (!isEqual(item.playingList, newRate.playingList)) {
+        newRateGroup.splice(index, 1, {
+          dirPath: newRate.newDir, rate: 1, playingList: newRate.playingList,
+        });
+      }
     }
   });
   if (!existed && newRate.oldDir !== newRate.newDir) {
     newRateGroup.splice(newRateGroup.length, 0, {
-      dirPath: newRate.newDir, rate: 1,
+      dirPath: newRate.newDir, rate: 1, playingList: newRate.playingList,
     });
   }
   return newRateGroup;
