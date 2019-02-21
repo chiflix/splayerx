@@ -137,11 +137,7 @@ function generateTracks(actionType, newTrack, oldTracks) {
       if (newTracks.includes(newTrack)) {
         newTracks.splice(0, newTracks.length, ...newTracks.map((track) => {
           const tempTrack = Object.assign({}, track);
-          if (tempTrack.id === newTrack.id) {
-            tempTrack.enabled = true;
-          } else {
-            tempTrack.enabled = false;
-          }
+          tempTrack.enabled = tempTrack.id === newTrack.id;
           return tempTrack;
         }));
       }
