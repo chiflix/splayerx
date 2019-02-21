@@ -52,11 +52,12 @@ export async function storeSubtitle(subtitle) {
   return dataDb.add(SUBTITLE_OBJECTSTORE_NAME, subtitleToStore);
 }
 export async function updateSubtitle(subtitleId, subtitleInfo) {
-  const existingSubtitle = await dataDb.get(SUBTITLE_OBJECTSTORE_NAME, '_id', subtitleId);
+  const existingSubtitle = await dataDb.get(SUBTITLE_OBJECTSTORE_NAME, subtitleId);
   if (!existingSubtitle) return storeSubtitle(subtitleInfo);
+  const subtitleToPut = { ...existingSubtitle, ...subtitleInfo };
   return dataDb.put(
     SUBTITLE_OBJECTSTORE_NAME,
-    subtitleInfo,
+    subtitleToPut,
     subtitleId,
   );
 }

@@ -291,7 +291,6 @@ describe('helper - subtitle - storage', () => {
       const hasResultSubtitleId = 'has-result';
       const noResultSubtitleId = 'no-result';
       let testSubtitleId;
-      const primaryKeyPath = '_id';
 
       const result = { _id: randStr(), lastOpened: new Date() };
       const testSubtitleInfo = { lastOpened: new Date(Date.now() + 2) };
@@ -304,12 +303,10 @@ describe('helper - subtitle - storage', () => {
         getStub = sandbox.stub(dataDb, 'get').resolves();
         getStub.withArgs(
           SUBTITLE_OBJECTSTORE_NAME,
-          primaryKeyPath,
           hasResultSubtitleId,
         ).resolves(result);
         getStub.withArgs(
           SUBTITLE_OBJECTSTORE_NAME,
-          primaryKeyPath,
           noResultSubtitleId,
         ).resolves();
         storeSubtitleStub = sandbox.stub().resolves();
@@ -327,7 +324,6 @@ describe('helper - subtitle - storage', () => {
           .then(() => {
             expect(getStub).to.have.been.calledWithExactly(
               SUBTITLE_OBJECTSTORE_NAME,
-              primaryKeyPath,
               testSubtitleId,
             );
             done();
@@ -339,7 +335,7 @@ describe('helper - subtitle - storage', () => {
           .then(() => {
             expect(putStub).to.have.been.calledWithExactly(
               SUBTITLE_OBJECTSTORE_NAME,
-              testSubtitleInfo,
+              { ...result, ...testSubtitleInfo },
               testSubtitleId,
             );
             done();
