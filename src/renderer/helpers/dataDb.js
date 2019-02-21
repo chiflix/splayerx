@@ -106,9 +106,11 @@ export class DataDb {
     }
     const tx = db.transaction(objectStoreName, 'readwrite');
     // check if the objectStore used out-of-line key
-    const { autoIncrement } = tx.objectStore(objectStoreName);
-    if (autoIncrement && typeof keyPathVal === 'undefined') {
-      throw new Error(`ObjectStore ${objectStoreName} used out-of-line key and keyPathVal is missing.`);
+    const isInlineObjectStore = !!tx.objectStore(objectStoreName).keyPath;
+    if (isInlineObjectStore && keyPathVal) {
+      throw new Error('Providing an inline objectStore with keyPathVal is invalid.');
+    } else if (!isInlineObjectStore && !keyPathVal) {
+      throw new Error('Providing out-of-line objectStore without keyPathVal is invalid.');
     }
     try {
       const newKey = await tx.objectStore(objectStoreName).put(data, keyPathVal);

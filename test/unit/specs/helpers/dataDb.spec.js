@@ -1,7 +1,7 @@
 import { createSandbox } from 'sinon';
 import { flatten } from 'lodash';
 import dataDb, { DataDb, __RewireAPI__ as dataDbRewireAPI } from '@/helpers/dataDb';
-import { DOMStringListStub } from '../../helpers';
+import { DOMStringListStub, randStr } from '../../helpers';
 
 describe('class DataDb unit tests', () => {
   let sandbox;
@@ -286,7 +286,7 @@ describe('class DataDb unit tests', () => {
       testDataDb = new DataDb(1, testSchema);
 
       putStub = sandbox.stub();
-      objectStoreStub = sandbox.stub().returns({ put: putStub, autoIncrement: true });
+      objectStoreStub = sandbox.stub().returns({ put: putStub });
       completeStub = sandbox.stub().resolves();
       completeStub.withArgs(errorCompleteParam).rejects();
       transactionStub = sandbox.stub().returns({
@@ -313,10 +313,16 @@ describe('class DataDb unit tests', () => {
         .catch(() => done())
         .then(done);
     });
-    it('should throw error when not providing autoIncrement objectStore with keyPathVal', (done) => {
+    it('should throw error when not providing out-of-line key objectStore with keyPathVal', (done) => {
       testDataDb.put(testObjectStoreName, testData)
         .catch(() => done())
-        .then(done);
+        .then(() => done('Should reject but it resolves'));
+    });
+    it('should throw error when providing in-line key objectStore with keyPathVal', (done) => {
+      objectStoreStub.returns({ put: putStub, keyPath: randStr() });
+      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+        .catch(() => done())
+        .then(() => done('Should reject but it resolves'));
     });
     it('should resolve new key when put succeeded', (done) => {
       const newKey = 233;
