@@ -168,9 +168,20 @@ function registerMainWindowEvent() {
   }
 
   function snapShotQueueProcess(event) {
+    const maxWaitingCount = 40;
+    let waitingCount = 0;
     const callback = (resultCode, imgPath) => {
       if (resultCode === 'Waiting for the task completion.') {
-        snapShot(snapShotQueue[0], callback);
+        waitingCount += 1;
+        if (waitingCount <= maxWaitingCount) {
+          snapShot(snapShotQueue[0], callback);
+        } else {
+          waitingCount = 0;
+          snapShotQueue.shift();
+          if (snapShotQueue.length > 0) {
+            snapShot(snapShotQueue[0], callback);
+          }
+        }
       } else if (resultCode === '0') {
         const lastRecord = snapShotQueue.shift();
         if (event.sender.isDestroyed()) {
@@ -183,7 +194,7 @@ function registerMainWindowEvent() {
         }
       } else {
         snapShotQueue.shift();
-        if (snapShotQueue.length) {
+        if (snapShotQueue.length > 0) {
           snapShot(snapShotQueue[0], callback);
         }
       }

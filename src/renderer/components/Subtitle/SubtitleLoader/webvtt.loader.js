@@ -11,16 +11,24 @@ const baseTags = {
   // size: '',
   // align: '',
 };
-const normalizer = parsedSubtitle => parsedSubtitle.map(subtitle => ({
-  ...subtitle,
-  start: toMS(subtitle.start) / 1000,
-  end: toMS(subtitle.end) / 1000,
-  text: subtitle.text.replace(/\{[^{}]*\}/g, ''),
-  tags: !subtitle.settings ? baseTags : {
-    ...baseTags,
-    ...subtitle.split(' ').reduce((accu, curr) => ({ ...accu, [curr.split(':')[0]]: curr.split(':')[1] }), {}),
-  },
-}));
+const normalizer = (parsedSubtitle) => {
+  const finalDialogues = [];
+  parsedSubtitle.forEach((subtitle) => {
+    finalDialogues.push({
+      start: toMS(subtitle.start) / 1000,
+      end: toMS(subtitle.end) / 1000,
+      text: subtitle.text.replace(/\{[^{}]*\}/g, ''),
+      tags: !subtitle.settings ? baseTags : {
+        ...baseTags,
+        ...subtitle.split(' ').reduce((accu, curr) => ({ ...accu, [curr.split(':')[0]]: curr.split(':')[1] }), {}),
+      },
+    });
+  });
+  return {
+    info: {},
+    dialogues: finalDialogues,
+  };
+};
 
 export default {
   longName: 'WebVTT subtitle',

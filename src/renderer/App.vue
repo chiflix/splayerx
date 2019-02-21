@@ -108,6 +108,9 @@
       this.$electron.ipcRenderer.send('windowInit');
       drag(this.$el);
       this.$ga.event('app', 'mounted');
+      setInterval(() => {
+        this.$ga.event('app', 'heartbeat');
+      }, 300000);
     },
   };
 </script>

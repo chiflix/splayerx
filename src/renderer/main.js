@@ -166,6 +166,14 @@ new Vue({
         this.$store.dispatch('updateChosenSize', data.chosenSize);
       }
     });
+    asyncStorage.get('playback-states').then((data) => {
+      if (data.volume) {
+        this.$store.dispatch(videoActions.VOLUME_UPDATE, data.volume * 100);
+      }
+      if (data.muted) {
+        this.$store.dispatch(videoActions.MUTED_UPDATE, data.muted);
+      }
+    });
     this.$store.commit('getLocalPreference');
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();

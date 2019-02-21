@@ -136,7 +136,7 @@ export default {
     },
     handleMouseup() {
       if (this.isDragging) {
-        this.clearMousedown({ target: '' });
+        this.clearMousedown({ componentName: '' });
       } else if (this.backgroundDisplayState) {
         this.$emit('update:playlistcontrol-showattached', false);
         this.updateMousemoveTarget('the-video-controller');
@@ -211,14 +211,14 @@ export default {
     currentMousedownComponent(val) {
       if (val !== 'notification-bubble' && val !== 'titlebar' && val !== '') {
         if (val !== this.$options.name && this.backgroundDisplayState) {
-          this.clearMouseup({ target: '' });
+          this.clearMouseup({ componentName: '' });
         }
       }
     },
     currentMouseupComponent(val) {
       if (this.currentMousedownComponent !== 'notification-bubble' && this.currentMousedownComponent !== 'titlebar' && val !== '') {
         if (this.lastDragging) {
-          this.clearMousedown({ target: '' });
+          this.clearMousedown({ componentName: '' });
           if (this.displayState) {
             this.$emit('update:lastDragging', false);
           }

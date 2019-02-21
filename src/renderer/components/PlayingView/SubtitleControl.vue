@@ -283,18 +283,18 @@ export default {
       if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([62, 64], false);
-          this.clearMouseup({ target: '' });
+          this.clearMouseup({ componentName: '' });
         }
       }
     },
     currentMouseupComponent(val) {
       if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
-        if (this.lastDragging) {
+        if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
           if (this.showAttached) {
             this.anim.playSegments([79, 85]);
             this.$emit('update:lastDragging', false);
           }
-          this.clearMousedown({ target: '' });
+          this.clearMousedown({ componentName: '' });
         } else if (val !== this.$options.name && this.showAttached) {
           this.$emit('update:showAttached', false);
         }
@@ -399,6 +399,7 @@ export default {
       if (!this.showAttached) {
         this.anim.playSegments([28, 32], false);
       } else {
+        this.clearMouseup({ componentName: '' });
         this.anim.playSegments([62, 64], false);
       }
     },
@@ -471,7 +472,11 @@ export default {
     this.$bus.$on('subtitle-refresh-from-menu', this.debouncedHandleRefresh);
     this.$bus.$on('subtitle-refresh-from-src-change', (e, hasOnlineSubtitles) => {
       this.isInitial = true;
-      this.debouncedHandleRefresh(hasOnlineSubtitles);
+      if (this.privacyAgreement) {
+        this.debouncedHandleRefresh(hasOnlineSubtitles);
+      } else {
+        this.$bus.$emit('refresh-subtitles', ['local', 'embedded']);
+      }
     });
     this.$bus.$on('refresh-finished', () => {
       clearInterval(this.timer);
@@ -510,6 +515,9 @@ export default {
           } else if (this.currentMousedownComponent === this.$options.name) {
             this.anim.playSegments([40, 44], false);
           }
+        } else if (this.currentMousedownComponent === this.$options.name
+          && this.currentMouseupComponent !== this.$options.name) {
+          this.anim.playSegments([79, 85], false);
         }
       }
     });

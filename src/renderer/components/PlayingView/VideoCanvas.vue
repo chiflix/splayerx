@@ -8,7 +8,7 @@
       :key="originSrc"
       :needtimeupdate=true
       :events="['loadedmetadata', 'audiotrack']"
-      :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}" 
+      :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
       @audiotrack="onAudioTrack"
       :loop="loop"
@@ -45,7 +45,6 @@ export default {
     return {
       videoExisted: false,
       videoElement: null,
-      coverFinded: false,
       seekTime: [0],
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
@@ -194,6 +193,7 @@ export default {
         smallShortCut: smallImagePath,
         lastPlayedTime: videodata.time,
         duration: this.duration,
+        audioTrackId: this.currentAudioTrackId,
       };
 
       const val = await this.infoDB.get('recent-played', 'path', videoPath);
@@ -206,68 +206,8 @@ export default {
     saveSubtitleStyle() {
       return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
-    async getVideoCover(grabCoverTime) {
-      if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
-      // Because we are execution in async, we do double check.
-      if (this.coverFinded) {
-        return;
-      }
-
-      // Assume to grab the cover can be the success and to keep
-      // it doesn't execution multiple times. if grab failed,
-      // we set it back to false.
-      this.coverFinded = true;
-
-      const videoElement = this.$refs.videoCanvas.videoElement();
-      const canvas = this.$refs.thumbnailCanvas;
-      const canvasCTX = canvas.getContext('2d');
-      const { videoHeight, videoWidth } = videoElement;
-      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
-      canvasCTX.drawImage(
-        videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
-      );
-
-      let grabCoverDone = false;
-      const { data } = canvasCTX.getImageData(0, 0, 100, 100);
-      // check the cover is it right.
-      for (let i = 0; i < data.length; i += 1) {
-        if ((i + 1) % 4 !== 0 && data[i] > 20) {
-          grabCoverDone = true;
-          break;
-        }
-      }
-      if (grabCoverDone) {
-        const smallImagePath = canvas.toDataURL('image/png');
-        [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
-        canvasCTX.drawImage(
-          videoElement, 0, 0, videoWidth, videoHeight,
-          0, 0, (videoWidth / videoHeight) * 1080, 1080,
-        );
-        const imagePath = canvas.toDataURL('image/png');
-        const val = await this.infoDB.get('recent-played', 'path', this.originSrc);
-        if (val) {
-          const mergedData = Object.assign(val, { cover: imagePath, smallCover: smallImagePath });
-          this.infoDB.add('recent-played', mergedData);
-        } else {
-          const data = {
-            quickHash: await this.mediaQuickHash(this.originSrc),
-            path: this.originSrc,
-            cover: imagePath,
-            smallCover: smallImagePath,
-            duration: this.$store.getters.duration,
-          };
-          this.infoDB.add('recent-played', data);
-        }
-      }
-
-      this.coverFinded = grabCoverDone;
-      this.lastCoverDetectingTime = grabCoverTime;
-    },
-    checkPresentTime() {
-      if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
-        this.getVideoCover(videodata.time);
-      }
+    savePlaybackStates() {
+      return asyncStorage.set('playback-states', { volume: this.volume, muted: this.muted });
     },
   },
   computed: {
@@ -282,7 +222,6 @@ export default {
   },
   watch: {
     originSrc(val, oldVal) {
-      this.coverFinded = false;
       this.saveScreenshot(oldVal);
       this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
@@ -296,6 +235,7 @@ export default {
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [this.ratio]);
+      this.$ga.event('app', 'toggle-fullscreen');
     });
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
@@ -305,6 +245,7 @@ export default {
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
+      this.$ga.event('app', 'toggle-playback');
     });
     this.$bus.$on('next-video', () => {
       if (this.nextVideo) {
@@ -320,6 +261,7 @@ export default {
       if (ext === 'mkv') {
         this.$bus.$emit('seek-subtitle', e);
       }
+      this.$ga.event('app', 'seek');
     });
     this.$bus.$on('drag-over', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0.18)';
@@ -329,16 +271,21 @@ export default {
     });
     this.$bus.$on('drop', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0)';
+      this.$ga.event('app', 'drop');
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
-        this.saveScreenshot(this.originSrc).then(this.saveSubtitleStyle).then(() => {
-          this.asyncTasksDone = true;
-          window.close();
-        }).catch(() => {
-          this.asyncTasksDone = true;
-          window.close();
-        });
+        this.saveScreenshot(this.originSrc)
+          .then(this.saveSubtitleStyle)
+          .then(this.savePlaybackStates)
+          .then(() => {
+            this.asyncTasksDone = true;
+            window.close();
+          })
+          .catch(() => {
+            this.asyncTasksDone = true;
+            window.close();
+          });
         e.returnValue = false;
       }
     };
