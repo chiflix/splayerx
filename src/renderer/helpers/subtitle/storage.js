@@ -41,6 +41,21 @@ export function retrieveSubtitleList(videoSrc) {
   return getVideoInfoFromVideoSrc(videoSrc)
     .then(({ preference }) => (preference ? preference.subtitle.list : []));
 }
+export async function updateSubtitleList(videoSrc, newSubtitles) {
+  if (!(newSubtitles instanceof Array) || !newSubtitles.length) return false;
+  const subtitleList = await retrieveSubtitleList(videoSrc);
+  newSubtitles.forEach((subtitleInfo) => {
+    const { id } = subtitleInfo;
+    const existingSubtitleIndex = subtitleList.findIndex(({ id: subtitleId }) => subtitleId === id);
+    if (existingSubtitleIndex !== -1) {
+      const existingSubtitle = subtitleList[existingSubtitleIndex];
+      subtitleList[existingSubtitleIndex] = { ...existingSubtitle, ...subtitleInfo };
+    } else {
+      subtitleList.push(subtitleInfo);
+    }
+  });
+  return storeSubtitleList(videoSrc, subtitleList);
+}
 
 export async function storeSubtitle(subtitle) {
   const supportedProperties = DATADB_SHCEMAS

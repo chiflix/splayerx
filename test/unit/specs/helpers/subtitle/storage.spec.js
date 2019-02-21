@@ -11,6 +11,7 @@ import {
   storeSubtitleList,
   retrieveSubtitleList,
   updateSubtitle,
+  updateSubtitleList,
 } from '@/helpers/subtitle/storage';
 import { SUBTITLE_OBJECTSTORE_NAME, DATADB_SHCEMAS, DATADB_VERSION } from '@/constants';
 import dataDb from '@/helpers/dataDb';
@@ -210,6 +211,74 @@ describe('helper - subtitle - storage', () => {
         retrieveSubtitleList(videoSrc)
           .then((result) => {
             expect(result).to.deep.equal([]);
+            done();
+          }).catch(done);
+      });
+    });
+    describe('updateSubtitleList', () => {
+      let testVideoSrc;
+      let testNewSubtitles;
+      let retrieveSubtitleListStub;
+      let storeSubtitleListStub;
+      beforeEach(() => {
+        testVideoSrc = randStr();
+        testNewSubtitles = [{ id: randStr() }, { id: randStr() }];
+
+        retrieveSubtitleListStub = sandbox.stub().resolves([]);
+        storageRewireAPI.__Rewire__('retrieveSubtitleList', retrieveSubtitleListStub);
+        storeSubtitleListStub = sandbox.stub().resolves([]);
+        storageRewireAPI.__Rewire__('storeSubtitleList', storeSubtitleListStub);
+      });
+      afterEach(() => {
+        storageRewireAPI.__ResetDependency__('retrieveSubtitleList');
+        storageRewireAPI.__ResetDependency__('storeSubtitleList');
+      });
+
+      it('should directly return false when no newSubtitles available', (done) => {
+        updateSubtitleList(testVideoSrc)
+          .then((result) => {
+            expect(result).to.be.false;
+            expect(retrieveSubtitleListStub).to.not.have.been.called;
+            expect(storeSubtitleListStub).to.not.have.been.called;
+            done();
+          }).catch(done);
+      });
+      it('should invoke retrieveSubtitleList with videoSrc', () => {
+        updateSubtitleList(testVideoSrc, testNewSubtitles);
+
+        expect(retrieveSubtitleListStub).to.have.been.calledWithExactly(testVideoSrc);
+      });
+      it('should invoke storeSubtitleList with videoSrc', (done) => {
+        updateSubtitleList(testVideoSrc, testNewSubtitles)
+          .then(() => {
+            expect(storeSubtitleListStub).to.have.been.calledWith(testVideoSrc);
+            done();
+          }).catch(done);
+      });
+      it('should invoke storeSubtitleList with deduplicated subtitleList', (done) => {
+        const testSubtitleId1 = randStr();
+        const testSubtitleId2 = randStr();
+        const testSubtitleId3 = randStr();
+        retrieveSubtitleListStub.resolves([
+          { id: testSubtitleId1, language: 'zh-CN' },
+          { id: testSubtitleId2, type: 'local' },
+          { id: testSubtitleId3, format: 'ass' },
+        ]);
+        const testSubtitleList = [
+          { id: testSubtitleId1, delay: 0 },
+          { id: testSubtitleId2, language: 'zh-CN', type: 'online' },
+        ];
+
+        updateSubtitleList(testVideoSrc, testSubtitleList)
+          .then(() => {
+            expect(storeSubtitleListStub).to.have.been.calledWithMatch(
+              testVideoSrc,
+              [
+                { id: testSubtitleId1, language: 'zh-CN', delay: 0 },
+                { id: testSubtitleId2, language: 'zh-CN', type: 'online' },
+                { id: testSubtitleId3, format: 'ass' },
+              ],
+            );
             done();
           }).catch(done);
       });
