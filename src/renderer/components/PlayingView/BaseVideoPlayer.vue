@@ -43,11 +43,6 @@ export default {
       default: () => [0],
       validator: value => value[0] >= 0,
     },
-    defaultPlaybackRate: {
-      type: Number,
-      default: 1,
-      validator: value => value >= 0 && value <= 16,
-    },
     playbackRate: {
       type: Number,
       default: 1,
