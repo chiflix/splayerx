@@ -478,11 +478,11 @@ export default {
         this.$bus.$emit('refresh-subtitles', ['local', 'embedded']);
       }
     });
-    this.$bus.$on('refresh-finished', (flag) => {
+    this.$bus.$on('refresh-finished', (timeout) => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
       this.$store.dispatch('removeMessagesByType');
-      if (flag) {
+      if (timeout) {
         setTimeout(() => {
           this.addLog('error', {
             message: 'Request Timeout .',
