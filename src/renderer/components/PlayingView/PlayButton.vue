@@ -80,8 +80,7 @@ export default {
         this.cursorAppear = false;
         this.iconClass = 'fade-out';
       } else if (val && this.mouseOver) {
-        this.cursorAppear = true;
-        this.iconClass = 'fade-in';
+        this.detectMovePosition = true;
       }
     },
     attachedShown(val) {
