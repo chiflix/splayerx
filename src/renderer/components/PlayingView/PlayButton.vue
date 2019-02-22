@@ -77,7 +77,10 @@ export default {
       if ((!val && !this.isMousedown) || (val && this.mouseOver)) this.iconAppear = val;
     },
     attachedShown(val) {
-      if (!val && this.mouseOver) this.iconAppear = true;
+      if (!val && this.mouseOver) {
+        this.iconAppear = true;
+        this.iconClass = 'fade-in';
+      }
     },
     paused(val) {
       this.showPlayIcon = val;
