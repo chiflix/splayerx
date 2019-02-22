@@ -6,7 +6,7 @@ import {
   __RewireAPI__ as storageRewireAPI,
   retrieveLanguagePreference,
   storeSubtitle,
-  retrieveSubtitles,
+  retrieveSubtitle,
   deleteSubtitles,
   storeSubtitleList,
   retrieveSubtitleList,
@@ -150,7 +150,7 @@ describe('helper - subtitle - storage', () => {
     describe('storeSubtitleList unit tests', () => {
       let testSubtitleList;
       beforeEach(() => {
-        testSubtitleList = [1, 2, 3].map(() => randStr());
+        testSubtitleList = [1, 2, 3].map(() => ({ id: randNum() }));
       });
 
       it('should storeSubtitleList invoke infoDb.get', (done) => {
@@ -255,11 +255,6 @@ describe('helper - subtitle - storage', () => {
             done();
           }).catch(done);
       });
-      it('should invoke retrieveSubtitleList with videoSrc', () => {
-        updateSubtitleList(testVideoSrc, testNewSubtitles);
-
-        expect(retrieveSubtitleListStub).to.have.been.calledWithExactly(testVideoSrc);
-      });
       it('should invoke storeSubtitleList with videoSrc', (done) => {
         updateSubtitleList(testVideoSrc, testNewSubtitles)
           .then(() => {
@@ -267,7 +262,7 @@ describe('helper - subtitle - storage', () => {
             done();
           }).catch(done);
       });
-      it('should invoke storeSubtitleList with deduplicated subtitleList', (done) => {
+      it('should invoke storeSubtitleList with subtitleList', (done) => {
         const testSubtitleId1 = randStr();
         const testSubtitleId2 = randStr();
         const testSubtitleId3 = randStr();
@@ -285,11 +280,7 @@ describe('helper - subtitle - storage', () => {
           .then(() => {
             expect(storeSubtitleListStub).to.have.been.calledWithMatch(
               testVideoSrc,
-              [
-                { id: testSubtitleId1, language: 'zh-CN', delay: 0 },
-                { id: testSubtitleId2, language: 'zh-CN', type: 'online' },
-                { id: testSubtitleId3, format: 'ass' },
-              ],
+              testSubtitleList,
             );
             done();
           }).catch(done);
@@ -310,6 +301,7 @@ describe('helper - subtitle - storage', () => {
       it('should invoke dataDb.add', (done) => {
         storeSubtitle(testSubtitle)
           .then(() => {
+            console.log(testSubtitle);
             sandbox.assert.calledWithExactly(
               addStub,
               SUBTITLE_OBJECTSTORE_NAME,
@@ -461,26 +453,27 @@ describe('helper - subtitle - storage', () => {
       });
     });
 
-    it('should retrieveSubtitles invoke getAll', (done) => {
-      const getAllStub = sandbox.stub(dataDb, 'getAll');
-      const onlyStub = sandbox.stub(IDBKeyRange, 'only');
-      const testMediaIdentity = randStr();
+    it('should retrieveSubtitle invoke get', (done) => {
+      const getStub = sandbox.stub(dataDb, 'get');
+      const testSubtitleId = randNum();
 
-      retrieveSubtitles(testMediaIdentity)
+      retrieveSubtitle(testSubtitleId)
         .then(() => {
-          sandbox.assert.calledWithExactly(onlyStub, testMediaIdentity);
-          sandbox.assert.calledWith(getAllStub, SUBTITLE_OBJECTSTORE_NAME);
+          expect(getStub).to.have.been.calledWithExactly(
+            SUBTITLE_OBJECTSTORE_NAME,
+            testSubtitleId,
+          );
           done();
         }).catch(done);
     });
 
     describe('method - deleteSubtitles', () => {
       let testSubtitleIds;
-      const failureSubtitleId = 'failure';
+      const failureSubtitleId = randNum();
 
       let deleteStub;
       beforeEach(() => {
-        testSubtitleIds = [randStr(), failureSubtitleId];
+        testSubtitleIds = [randNum(), failureSubtitleId];
         deleteStub = sandbox.stub(dataDb, 'delete').resolves();
         deleteStub.withArgs(objectStoreName, failureSubtitleId).rejects();
       });
