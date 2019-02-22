@@ -83,6 +83,13 @@ export async function updateSubtitleList(videoSrc, newSubtitles) {
   });
   return storeSubtitleList(videoSrc, subtitleList);
 }
+export async function retrieveSelectedSubtitleId(videoSrc) {
+  return getVideoInfoFromVideoSrc(videoSrc)
+    .then(({ preference }) => (preference ? preference.subtitle.selected : 0));
+}
+export async function updateSelectedSubtitleId(videoSrc, id) {
+  return updateSubtitlePreference(videoSrc, { selected: id });
+}
 
 export async function storeSubtitle(subtitle) {
   const supportedProperties = DATADB_SHCEMAS
@@ -108,7 +115,6 @@ export async function retrieveSubtitle(subtitleId) {
   return dataDb.get(SUBTITLE_OBJECTSTORE_NAME, parseInt(subtitleId, 10));
 }
 export async function deleteSubtitles(subtitleIds) {
-  console.log('Horray', subtitleIds);
   if (!(subtitleIds instanceof Array) || !subtitleIds.length) return ({ success: [], failure: [] });
   const success = [];
   const failure = [...subtitleIds];
