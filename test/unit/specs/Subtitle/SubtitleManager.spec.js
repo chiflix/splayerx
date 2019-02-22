@@ -1,12 +1,13 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { createSandbox } from 'sinon';
+import { createSandbox, match } from 'sinon';
 import { merge } from 'lodash';
 import Subtitle from '@/store/modules/Subtitle';
 import Video from '@/store/modules/Video';
 import Preference from '@/store/modules/Preference';
 import SubtitleManager, { __RewireAPI__ as subtitleManagerRewireAPI } from '@/components/Subtitle/SubtitleManager.vue';
 import SubtitleLoader from '@/components/Subtitle/SubtitleLoader';
+import { randNum } from '../../helpers';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -38,7 +39,7 @@ describe('Subtitle Manager Unit Tests', () => {
     },
   };
   let wrapper;
-  let sandbox;
+  let sandbox = createSandbox();
 
   beforeEach(() => {
     sandbox = createSandbox();
@@ -59,13 +60,24 @@ describe('Subtitle Manager Unit Tests', () => {
   describe('method - refreshSubtitles', () => {
     let videoSrc;
     let refreshSubtitles;
+    let retrieveLanguagePreferenceStub;
+    let retrieveSubtitleListStub;
     let storeLanguagePreferenceStub;
     beforeEach(() => {
       videoSrc = randStr();
       ({ refreshSubtitles } = wrapper.vm);
 
+      retrieveLanguagePreferenceStub = sandbox.stub().resolves();
+      subtitleManagerRewireAPI.__Rewire__('retrieveLanguagePreference', retrieveLanguagePreferenceStub);
+      retrieveSubtitleListStub = sandbox.stub().resolves([]);
+      subtitleManagerRewireAPI.__Rewire__('retrieveSubtitleList', retrieveSubtitleListStub);
       storeLanguagePreferenceStub = sandbox.stub().resolves();
       subtitleManagerRewireAPI.__Rewire__('storeLanguagePreference', storeLanguagePreferenceStub);
+    });
+    afterEach(() => {
+      subtitleManagerRewireAPI.__ResetDependency__('retrieveLanguagePreference');
+      subtitleManagerRewireAPI.__ResetDependency__('retrieveSubtitleList');
+      subtitleManagerRewireAPI.__ResetDependency__('storeLanguagePreference');
     });
 
     it('should throw error when no valid types provided', (done) => {
@@ -78,57 +90,68 @@ describe('Subtitle Manager Unit Tests', () => {
           done();
         });
     });
-    it('should invoke getLocalSubtitlesList when types includes local', () => {
+    it('should invoke getLocalSubtitlesList when types includes local', (done) => {
       const getLocalSubtitlesListSpy = sandbox.spy(wrapper.vm, 'getLocalSubtitlesList');
 
-      refreshSubtitles(['local'], videoSrc);
-
-      sandbox.assert.calledWithExactly(getLocalSubtitlesListSpy, videoSrc);
+      refreshSubtitles(['local'], videoSrc).then(() => {
+        expect(getLocalSubtitlesListSpy).to.have.been.called;
+        done();
+      }).catch(done);
     });
-    it('should invoke getEmbeddedSubtitlesList when types includes embedded', () => {
-      const getEmbeddedSubtitlesListSpy = sandbox.spy(wrapper.vm, 'getEmbeddedSubtitlesList');
+    it('should invoke getEmbeddedSubtitlesList when types includes embedded', (done) => {
+      const getEmbeddedSubtitlesListStub = sandbox.stub(wrapper.vm, 'getEmbeddedSubtitlesList').resolves([]);
 
-      refreshSubtitles(['embedded'], videoSrc);
-
-      sandbox.assert.calledWithExactly(getEmbeddedSubtitlesListSpy, videoSrc);
+      refreshSubtitles(['embedded'], videoSrc)
+        .then(() => {
+          expect(getEmbeddedSubtitlesListStub).to.have.been.calledWith(videoSrc);
+          done();
+        }).catch(done);
     });
-    it('should invoke resetOnlineSubtitles when types includes online', () => {
-      const resetOnlineSubtitlesSpy = sandbox.spy(wrapper.vm, 'resetOnlineSubtitles');
+    it('should invoke resetOnlineSubtitles when types includes online', (done) => {
+      const resetOnlineSubtitlesStub = sandbox.stub(wrapper.vm, 'resetOnlineSubtitles').resolves([]);
 
-      refreshSubtitles(['online'], videoSrc);
-
-      sandbox.assert.calledOnce(resetOnlineSubtitlesSpy);
-    });
-    it('should invoke getOnlineSubtitlesList when types includes online', () => {
-      const getOnlineSubtitlesListSpy = sandbox.spy(wrapper.vm, 'getOnlineSubtitlesList');
-      const { preferredLanguages } = wrapper.vm;
-
-      refreshSubtitles(['online'], videoSrc);
-
-      sandbox.assert.calledWithExactly(getOnlineSubtitlesListSpy, videoSrc, preferredLanguages);
+      refreshSubtitles(['online'], videoSrc)
+        .then(() => {
+          expect(resetOnlineSubtitlesStub).to.have.been.called;
+          done();
+        }).catch(done);
     });
 
-    it('should refreshSubtitles set selectionComplete to false', () => {
+    it('should refreshSubtitles set selectionComplete to false when not isInitial', (done) => {
       wrapper.setData({ selectionComplete: true });
       expect(wrapper.vm.selectionComplete).to.equal(true);
 
-      refreshSubtitles(['local'], videoSrc);
-      expect(wrapper.vm.selectionComplete).to.equal(false);
+      refreshSubtitles(['local'], videoSrc)
+        .then(() => {
+          expect(wrapper.vm.selectionComplete).to.equal(false);
+          done();
+        }).catch(done);
     });
-
-    it('should invoke checkCurrentSubtitleList', () => {
+    it('should invoke checkCurrentSubtitleList when not isInitial', (done) => {
       const checkCurrentSubtitleListSpy = sandbox.spy(wrapper.vm, 'checkCurrentSubtitleList');
 
-      refreshSubtitles(['local'], videoSrc);
+      refreshSubtitles(['local'], videoSrc)
+        .then(() => {
+          expect(checkCurrentSubtitleListSpy).to.have.been.calledTwice;
+          done();
+        }).catch(done);
+    });
+    it('should invoke checkCurrentSubtitleList when isInitial', (done) => {
+      wrapper.setData({ isInitial: true });
+      const checkCurrentSubtitleListSpy = sandbox.spy(wrapper.vm, 'checkCurrentSubtitleList');
 
-      sandbox.assert.calledOnce(checkCurrentSubtitleListSpy);
+      refreshSubtitles(['local'], videoSrc)
+        .then(() => {
+          expect(checkCurrentSubtitleListSpy).to.have.been.calledOnce;
+          done();
+        }).catch(done);
     });
 
     it('should emit bus event "refresh-finished" when all subtitles are loaded', (done) => {
       const eventBusEmitSpy = sandbox.spy(wrapper.vm.$bus, '$emit');
       refreshSubtitles(['local'], videoSrc)
         .then(() => {
-          sandbox.assert.calledWithExactly(eventBusEmitSpy, 'refresh-finished');
+          sandbox.assert.calledWith(eventBusEmitSpy, 'refresh-finished');
           done();
         })
         .catch(done);
@@ -148,7 +171,7 @@ describe('Subtitle Manager Unit Tests', () => {
     it('should invoke storeLanguagePreference when all loaded', (done) => {
       refreshSubtitles(['local'], videoSrc)
         .then(() => {
-          sandbox.assert.calledWithExactly(
+          sandbox.assert.calledWith(
             storeLanguagePreferenceStub,
             videoSrc,
             wrapper.vm.preferredLanguages,
@@ -173,21 +196,23 @@ describe('Subtitle Manager Unit Tests', () => {
       SubtitleManager.__ResetDependency__('searchForLocalList');
     });
 
-    it('should invoke searchForLocalList', () => {
-      getLocalSubtitlesList();
-
-      sandbox.assert.calledOnce(searchForLocalListStub);
+    it('should invoke searchForLocalList', (done) => {
+      getLocalSubtitlesList(videoSrc, [])
+        .then(() => {
+          expect(searchForLocalListStub).to.have.been.called;
+          done();
+        }).catch(done);
     });
 
     it('should invoke searchForLocalList with videoSrc and SubtitleLoader.supportedFormats', () => {
-      getLocalSubtitlesList(videoSrc);
+      getLocalSubtitlesList(videoSrc, []);
       const { supportedFormats } = SubtitleLoader;
 
       sandbox.assert.calledWithExactly(searchForLocalListStub, videoSrc, supportedFormats);
     });
 
     it('should slience errors rejected from searchForLocalList', (done) => {
-      getLocalSubtitlesList(errorVideoSrc)
+      getLocalSubtitlesList(errorVideoSrc, [])
         .then((results) => {
           expect(results.length).to.equal(0);
           done();
@@ -223,26 +248,22 @@ describe('Subtitle Manager Unit Tests', () => {
         .catch(done);
     });
 
-    it('should invoke fetchOnlineList', () => {
-      getOnlineSubtitlesList(videoSrc, [randStr()]);
-
-      sandbox.assert.called(fetchOnlineListStub);
+    it('should invoke fetchOnlineList', (done) => {
+      getOnlineSubtitlesList(videoSrc, [randStr()], [])
+        .then(() => {
+          expect(fetchOnlineListStub).to.have.been.called;
+          done();
+        }).catch(done);
     });
 
-    it('should invoke fetchOnlineList with videoSrc and language', () => {
+    it('should invoke fetchOnlineList with videoSrc and language', (done) => {
       const randomLanguages = [randStr(), randStr()];
-      getOnlineSubtitlesList(videoSrc, randomLanguages);
-
-      sandbox.assert.calledWithExactly(
-        fetchOnlineListStub.firstCall,
-        videoSrc,
-        randomLanguages[0],
-      );
-      sandbox.assert.calledWithExactly(
-        fetchOnlineListStub.secondCall,
-        videoSrc,
-        randomLanguages[1],
-      );
+      getOnlineSubtitlesList(videoSrc, randomLanguages)
+        .then(() => {
+          expect(fetchOnlineListStub).to.have.been.calledWithExactly(videoSrc, randomLanguages[0]);
+          expect(fetchOnlineListStub).to.have.been.calledWithExactly(videoSrc, randomLanguages[1]);
+          done();
+        }).catch(done);
     });
 
     it('should slience errors from fetchOnlineList', (done) => {
@@ -287,7 +308,7 @@ describe('Subtitle Manager Unit Tests', () => {
     });
 
     it('should slience errors rejected from retrieveEmbeddedList to an empty array', (done) => {
-      getEmbeddedSubtitlesList(errorVideoSrc)
+      getEmbeddedSubtitlesList(errorVideoSrc, [])
         .then((results) => {
           expect(results).to.deep.equal([]);
           done();
@@ -552,6 +573,12 @@ describe('Subtitle Manager Unit Tests', () => {
     let failedSubtitle;
     let readySubtitle;
     let loadedSubtitle;
+    let testSubtitleInstances;
+    const noloading = (sub) => {
+      const newSub = { ...sub };
+      delete newSub.loading;
+      return newSub;
+    };
     beforeEach(() => {
       updateSubtitleListStub = sandbox.stub();
       subtitleManagerRewireAPI.__Rewire__('updateSubtitleList', updateSubtitleListStub);
@@ -586,22 +613,32 @@ describe('Subtitle Manager Unit Tests', () => {
         },
       });
 
-      loadingSubtitle = { id: randStr(), loading: 'loading' };
-      failedSubtitle = { id: randStr(), loading: 'failed' };
-      readySubtitle = { id: randStr(), loading: 'ready' };
-      loadedSubtitle = { id: randStr(), loading: 'loaded' };
+      loadingSubtitle = { id: randNum(), loading: 'loading', src: randStr() };
+      failedSubtitle = { id: randNum(), loading: 'failed', src: randStr() };
+      readySubtitle = { id: randNum(), loading: 'ready', src: randStr() };
+      loadedSubtitle = { id: randNum(), loading: 'loaded', src: randStr() };
+
+      testSubtitleInstances = {
+        [loadingSubtitle.id]: loadedSubtitle,
+        [failedSubtitle.id]: failedSubtitle,
+        [readySubtitle.id]: readySubtitle,
+        [loadedSubtitle.id]: loadedSubtitle,
+      };
+      wrapper.setData({ subtitleInstances: testSubtitleInstances });
     });
     afterEach(() => {
       subtitleManagerRewireAPI.__ResetDependency__('updateSubtitleList');
     });
 
-    it('should invoke updateSubtitleList', () => {
+    it('should invoke updateSubtitleList', (done) => {
       const newVal = [readySubtitle, loadedSubtitle];
       const oldVal = [readySubtitle];
 
-      wrapper.vm.allSubtitleListWatcher(newVal, oldVal);
-
-      expect(updateSubtitleListStub).to.have.been.called;
+      wrapper.vm.allSubtitleListWatcher(newVal, oldVal)
+        .then(() => {
+          expect(updateSubtitleListStub).to.have.been.called;
+          done();
+        }).catch(done);
     });
     it('should only update the new ready or loaded subtitles', (done) => {
       const newVal = [readySubtitle, loadedSubtitle, failedSubtitle, loadingSubtitle];
@@ -611,7 +648,7 @@ describe('Subtitle Manager Unit Tests', () => {
         .then(() => {
           expect(updateSubtitleListStub).to.have.been.calledWithExactly(
             testVideoSrc,
-            [{ id: readySubtitle.id }, { id: loadedSubtitle.id }],
+            [noloading(readySubtitle), noloading(loadedSubtitle)],
           );
           done();
         }).catch(done);
@@ -628,11 +665,11 @@ describe('Subtitle Manager Unit Tests', () => {
         .then(() => {
           expect(updateSubtitleListStub).to.have.been.calledWithExactly(
             testVideoSrc1,
-            [{ id: readySubtitle.id }],
+            [noloading(readySubtitle)],
           );
           expect(updateSubtitleListStub).to.have.been.calledWithExactly(
             testVideoSrc2,
-            [{ id: loadedSubtitle.id }],
+            [noloading(loadedSubtitle)],
           );
           done();
         }).catch(done);
@@ -669,9 +706,9 @@ describe('Subtitle Manager Unit Tests', () => {
       wrapper.vm.allSubtitleListWatcher(newVal, [])
         .then(() => {
           expect(updateSubtitleListStub).to.have.been.called;
-          expect(updateSubtitleListStub).to.have.been.calledWithExactly(
+          expect(updateSubtitleListStub).to.have.been.calledWithMatch(
             testVideoSrc,
-            [{ id: idWithVideoSegments, videoSegments: testVideoSegments }],
+            [match.has('videoSegments', testVideoSegments)],
           );
           done();
         }).catch(done);

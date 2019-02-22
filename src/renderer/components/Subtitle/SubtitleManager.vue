@@ -42,6 +42,7 @@ export default {
     return {
       subtitleInstances: {},
       selectionComplete: false,
+      isInitial: false,
     };
   },
   computed: {
@@ -112,7 +113,7 @@ export default {
       addSubtitleWhenFailed: subtitleActions.ADD_SUBTITLE_WHEN_FAILED,
       updateMetaInfo: subtitleActions.UPDATE_METAINFO,
     }),
-    async refreshSubtitles(types, videoSrc, isInitial) {
+    async refreshSubtitles(types, videoSrc) {
       const supportedTypes = ['local', 'embedded', 'online'];
       const {
         getLocalSubtitlesList,
@@ -150,7 +151,7 @@ export default {
           sortBy(preferredLanguages),
         ) || !storedOnlineSubtitleIds.length;
         resetOnlineSubtitles();
-        if (!isInitial || (isInitial && clearOnline)) {
+        if (!this.isInitial || (this.isInitial && clearOnline)) {
           subtitleRequests.push(getOnlineSubtitlesList(
             videoSrc,
             preferredLanguages,
@@ -171,7 +172,7 @@ export default {
         }
       }
 
-      if (!isInitial) {
+      if (!this.isInitial) {
         this.selectionComplete = false;
         this.checkCurrentSubtitleList();
       }
@@ -467,7 +468,9 @@ export default {
           if (result.id === this.currentSubtitleId && this.$refs.subtitleRenderer) {
             result.videoSegments = this.$refs.subtitleRenderer.videoSegments;
           }
-          result.src = this.subtitleInstances[result.id].src;
+          if (this.subtitleInstances[result.id] && this.subtitleInstances[result.id].src) {
+            result.src = this.subtitleInstances[result.id].src;
+          }
           return result;
         });
       const newSubtitles = differenceWith(
