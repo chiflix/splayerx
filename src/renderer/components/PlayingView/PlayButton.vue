@@ -79,7 +79,10 @@ export default {
     attachedShown(val) {
       if (!val && this.mouseOver) {
         this.iconAppear = true;
-        this.iconClass = 'fade-in';
+        if (this.iconFadingId) clearTimeout(this.iconFadingId);
+        this.iconFadingId = setTimeout(() => {
+          this.iconClass = 'fade-in';
+        }, 200);
       }
     },
     paused(val) {
