@@ -30,6 +30,7 @@ export default {
     isFocused: true,
     attachedShown: false,
     showAllWidgets: false,
+    mousemovePosition: { x: 0, y: 0 },
   },
   data() {
     return {
@@ -40,6 +41,7 @@ export default {
       ani_mode: 'icon-ani-fade-in',
       iconClass: 'fade-out',
       iconFadingId: NaN,
+      detectMovePosition: false,
     };
   },
   components: {
@@ -84,11 +86,16 @@ export default {
     },
     attachedShown(val) {
       if (!val && this.mouseOver) {
-        this.cursorAppear = true;
-        if (this.iconFadingId) clearTimeout(this.iconFadingId);
-        this.iconFadingId = setTimeout(() => {
+        this.detectMovePosition = true;
+      }
+    },
+    mousemovePosition(newVal, oldVal) {
+      if (this.detectMovePosition) {
+        if (Math.abs(newVal.x - oldVal.x) > 0 || Math.abs(newVal.y - oldVal.y) > 0) {
+          this.cursorAppear = true;
           this.iconClass = 'fade-in';
-        }, 200);
+          this.detectMovePosition = false;
+        }
       }
     },
     paused(val) {
