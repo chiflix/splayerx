@@ -2,7 +2,10 @@ import { remove, pick } from 'lodash';
 
 import infoDB from '@/helpers/infoDB';
 import dataDb from '@/helpers/dataDb';
+import TaskQueue from '@/helpers/proceduralQueue';
 import { SUBTITLE_OBJECTSTORE_NAME, DATADB_SHCEMAS, DATADB_VERSION } from '@/constants';
+
+const taskQueues = {};
 
 function getVideoInfoFromVideoSrc(videoSrc) {
   return infoDB.get('recent-played', 'path', videoSrc);
@@ -10,15 +13,40 @@ function getVideoInfoFromVideoSrc(videoSrc) {
 function setVideoInfo(infoPayload) {
   return infoDB.add('recent-played', infoPayload);
 }
-function updateSubtitlePreference(videoSrc, preference) {
+function updateSubtitlePreferenceRaw(videoSrc, preference) {
   return getVideoInfoFromVideoSrc(videoSrc).then((videoInfo) => {
     if (!videoInfo) videoInfo = { path: videoSrc };
     if (!videoInfo.preference) videoInfo.preference = {};
     if (!videoInfo.preference.subtitle) videoInfo.preference.subtitle = {};
     const oldPreference = videoInfo.preference.subtitle;
-    videoInfo.preference.subtitle = { ...oldPreference, ...preference };
+    const newPreference = { ...oldPreference };
+    Object.keys(preference).forEach((field) => {
+      switch (field) {
+        case 'list': {
+          const oldList = newPreference.list || [];
+          const newList = preference.list;
+          newList.forEach((subtitle) => {
+            const existedIndex = oldList.findIndex(({ id }) => id === subtitle.id);
+            if (existedIndex !== -1) {
+              const existedSubtitle = oldList[existedIndex];
+              oldList[existedIndex] = { ...existedSubtitle, ...subtitle };
+            } else oldList.push(subtitle);
+          });
+          newPreference.list = oldList;
+          break;
+        }
+        default:
+          newPreference[field] = preference[field];
+          break;
+      }
+    });
+    videoInfo.preference.subtitle = newPreference;
     return setVideoInfo(videoInfo);
   });
+}
+function updateSubtitlePreference(videoSrc, preference) {
+  if (!taskQueues[videoSrc]) taskQueues[videoSrc] = new TaskQueue();
+  return taskQueues[videoSrc].add(() => updateSubtitlePreferenceRaw(videoSrc, preference));
 }
 
 export function storeLanguagePreference(videoSrc, languagePreference) {
@@ -42,7 +70,7 @@ export async function retrieveSubtitleList(videoSrc) {
 }
 export async function updateSubtitleList(videoSrc, newSubtitles) {
   if (!(newSubtitles instanceof Array) || !newSubtitles.length) return false;
-  const subtitleList = await retrieveSubtitleList(videoSrc);
+  const subtitleList = [...newSubtitles];
   newSubtitles.forEach((subtitleInfo) => {
     const { id } = subtitleInfo;
     const existingSubtitleIndex = subtitleList.findIndex(({ id: subtitleId }) => subtitleId === id);
@@ -76,13 +104,15 @@ export async function updateSubtitle(subtitleId, subtitleInfo) {
     realSubtitleId,
   );
 }
-export async function retrieveSubtitles(mediaIdentity) {
-  return dataDb.getAll(SUBTITLE_OBJECTSTORE_NAME, IDBKeyRange.only(mediaIdentity));
+export async function retrieveSubtitle(subtitleId) {
+  return dataDb.get(SUBTITLE_OBJECTSTORE_NAME, parseInt(subtitleId, 10));
 }
 export async function deleteSubtitles(subtitleIds) {
+  console.log('Horray', subtitleIds);
   if (!(subtitleIds instanceof Array) || !subtitleIds.length) return ({ success: [], failure: [] });
   const success = [];
   const failure = [...subtitleIds];
+  subtitleIds = subtitleIds.map(id => parseInt(id, 10));
   const deleteSubtitle = subtitleId => (
     dataDb.delete(SUBTITLE_OBJECTSTORE_NAME, subtitleId)
       .then(() => {
