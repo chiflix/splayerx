@@ -1,4 +1,4 @@
-import { remove, merge, pick } from 'lodash';
+import { remove, pick } from 'lodash';
 
 import infoDB from '@/helpers/infoDB';
 import dataDb from '@/helpers/dataDb';
@@ -10,32 +10,26 @@ function getVideoInfoFromVideoSrc(videoSrc) {
 function setVideoInfo(infoPayload) {
   return infoDB.add('recent-played', infoPayload);
 }
-function updateVideoInfo(videoSrc, info) {
-  return getVideoInfoFromVideoSrc(videoSrc).then(videoInfo =>
-    setVideoInfo(merge(videoInfo || { path: videoSrc }, info)));
+function updateSubtitlePreference(videoSrc, preference) {
+  return getVideoInfoFromVideoSrc(videoSrc).then((videoInfo) => {
+    if (!videoInfo) videoInfo = { path: videoSrc };
+    if (!videoInfo.preference) videoInfo.preference = {};
+    if (!videoInfo.preference.subtitle) videoInfo.preference.subtitle = {};
+    const oldPreference = videoInfo.preference.subtitle;
+    videoInfo.preference.subtitle = { ...oldPreference, ...preference };
+    return setVideoInfo(videoInfo);
+  });
 }
 
 export function storeLanguagePreference(videoSrc, languagePreference) {
-  return updateVideoInfo(videoSrc, {
-    preference: {
-      subtitle: {
-        language: languagePreference,
-      },
-    },
-  });
+  return updateSubtitlePreference(videoSrc, { language: languagePreference });
 }
 export function retrieveLanguagePreference(videoSrc) {
   return getVideoInfoFromVideoSrc(videoSrc)
     .then(({ preference }) => (preference ? preference.subtitle.language : []));
 }
 export function storeSubtitleList(videoSrc, subtitleList) {
-  return updateVideoInfo(videoSrc, {
-    preference: {
-      subtitle: {
-        list: subtitleList,
-      },
-    },
-  });
+  return updateSubtitlePreference(videoSrc, { list: subtitleList });
 }
 export async function retrieveSubtitleList(videoSrc) {
   const videoInfo = await getVideoInfoFromVideoSrc(videoSrc);
