@@ -71,7 +71,7 @@ export default {
         this.iconClass = 'fade-in';
         this.mousedown = true;
         this.ani_mode = 'icon-ani-fade-out';
-      } else if (!this.showAllWidgets && !this.attachedShown) {
+      } else if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
       }
