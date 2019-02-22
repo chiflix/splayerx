@@ -10,12 +10,12 @@
       type="play"
       v-show="showPlayIcon"
       :class="ani_mode"
-      :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
+      :style="{cursor: cursorAppear ? 'pointer' : 'none'}"/>
     <Icon class="icon"
       type="pause"
       v-show="!showPlayIcon"
       :class="ani_mode"
-      :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
+      :style="{cursor: cursorAppear ? 'pointer' : 'none'}"/>
   </div>
 </div>
 </template>
@@ -33,9 +33,9 @@ export default {
   },
   data() {
     return {
-      iconAppear: false, // control whether the icon show up or not
+      cursorAppear: false, // control whether the cursor show up or not
       mouseOver: false,
-      isMousedown: false,
+      mousedown: false,
       showPlayIcon: false,
       ani_mode: 'icon-ani-fade-in',
       iconClass: 'fade-out',
@@ -49,24 +49,24 @@ export default {
     handleMouseenter() {
       this.mouseOver = true;
       if (!this.attachedShown) {
-        this.iconAppear = true;
-        this.iconClass = 'fade-in';
+          this.cursorAppear = true;
+          this.iconClass = 'fade-in';
       }
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
     },
     handleMouseleave() {
-      this.iconAppear = this.mouseOver = false;
+      this.cursorAppear = this.mouseOver = false;
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
       this.iconFadingId = setTimeout(() => {
         this.iconClass = 'fade-out';
       }, 200);
     },
     handleMousedown() {
-      this.isMousedown = true;
+      this.mousedown = true;
       this.ani_mode = 'icon-ani-fade-out';
     },
     handleMouseup() {
-      if (this.isMousedown && !this.attachedShown) {
+      if (this.mousedown && !this.attachedShown) {
         this.showPlayIcon = !this.showPlayIcon;
         this.$bus.$emit('toggle-playback');
       }
@@ -74,11 +74,11 @@ export default {
   },
   watch: {
     showAllWidgets(val) {
-      if ((!val && !this.isMousedown) || (val && this.mouseOver)) this.iconAppear = val;
+      if ((!val && !this.mousedown) || (val && this.mouseOver)) this.cursorAppear = val;
     },
     attachedShown(val) {
       if (!val && this.mouseOver) {
-        this.iconAppear = true;
+        this.cursorAppear = true;
         if (this.iconFadingId) clearTimeout(this.iconFadingId);
         this.iconFadingId = setTimeout(() => {
           this.iconClass = 'fade-in';
@@ -91,8 +91,8 @@ export default {
   },
   created() {
     document.addEventListener('mouseup', () => {
-      if (this.isMousedown) {
-        this.isMousedown = false;
+      if (this.mousedown) {
+        this.mousedown = false;
         this.ani_mode = 'icon-ani-fade-in';
       }
     });
