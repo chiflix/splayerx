@@ -137,11 +137,7 @@ function generateTracks(actionType, newTrack, oldTracks) {
       if (newTracks.includes(newTrack)) {
         newTracks.splice(0, newTracks.length, ...newTracks.map((track) => {
           const tempTrack = Object.assign({}, track);
-          if (tempTrack.id === newTrack.id) {
-            tempTrack.enabled = true;
-          } else {
-            tempTrack.enabled = false;
-          }
+          tempTrack.enabled = tempTrack.id === newTrack.id;
           return tempTrack;
         }));
       }
@@ -157,7 +153,7 @@ function generateTracks(actionType, newTrack, oldTracks) {
 function generateRate(rateInfo, nowRate, oldRateGroup) {
   const newRateGroup = [...oldRateGroup];
   let existed;
-  newRateGroup.forEach((item, index) => {
+  oldRateGroup.forEach((item, index) => {
     if (item.dirPath === rateInfo.oldDir) {
       newRateGroup.splice(index, 1, {
         dirPath: item.dirPath, rate: nowRate, playingList: item.playingList,

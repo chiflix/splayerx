@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import Vue from 'vue';
 
 import healthMsg from 'sagi-api/health/v1/health_pb';
 import healthRpc from 'sagi-api/health/v1/health_grpc_pb';
@@ -15,13 +16,23 @@ const grpc = require('grpc');
 
 class Sagi {
   constructor() {
-    this.creds = grpc.credentials.createSsl(
+    const sslCreds = grpc.credentials.createSsl(
       // How to access resources with fs see:
       // https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
       fs.readFileSync(path.join(__static, '/certs/ca.pem')),
       fs.readFileSync(path.join(__static, '/certs/key.pem')),
       fs.readFileSync(path.join(__static, '/certs/cert.pem')),
     );
+    const metadataUpdater = (_, cb) => {
+      const metadata = new grpc.Metadata();
+      metadata.set('uuid', Vue.http.headers.common['X-Application-Token']);
+      metadata.set('agent', Vue.http.headers.common['User-Agent']);
+      cb(null, metadata);
+    };
+    const metadataCreds = grpc.credentials.createFromMetadataGenerator(metadataUpdater);
+    const combinedCreds = grpc.credentials.combineChannelCredentials(sslCreds, metadataCreds);
+    this.creds = combinedCreds;
+
     if (process.env.NODE_ENV === 'production') {
       this.endpoint = 'apis.sagittarius.ai:8443';
     } else {
