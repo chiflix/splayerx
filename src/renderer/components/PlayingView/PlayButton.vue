@@ -1,11 +1,11 @@
 <template>
 <div :data-component-name="$options.name"
+  @mousedown="handleMousedown"
+  @mouseup="handleMouseup"
   @mouseenter="handleMouseenter"
   @mouseleave="handleMouseleave">
   <div class="icon-wrapper"
-    :class="iconClass"
-    @mousedown="handleMousedown"
-    @mouseup="handleMouseup">
+    :class="iconClass">
     <Icon class="icon play"
       type="play"
       v-show="showPlayIcon"
@@ -42,6 +42,8 @@ export default {
       iconClass: 'fade-out',
       iconFadingId: NaN,
       detectMovePosition: false,
+      justCloseAttached: false,
+      justFocused: false,
     };
   },
   components: {
@@ -66,8 +68,23 @@ export default {
       }, 200);
     },
     handleMousedown() {
-      this.mousedown = true;
-      this.ani_mode = 'icon-ani-fade-out';
+      if (this.justFocused) {
+        this.justFocused = false;
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+      } else if (this.showAllWidgets && this.justCloseAttached) {
+        this.justCloseAttached = false;
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+      } else if (this.showAllWidgets && !this.attachedShown && this.isFocused) {
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+        this.mousedown = true;
+        this.ani_mode = 'icon-ani-fade-out';
+      } else if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+      }
     },
     handleMouseup() {
       if (this.mousedown && !this.attachedShown) {
@@ -85,14 +102,22 @@ export default {
         this.detectMovePosition = true;
       }
     },
-    attachedShown(val) {
+    attachedShown(val, oldVal) {
       if (!val && this.mouseOver) {
+        if (oldVal) this.justCloseAttached = true;
         this.detectMovePosition = true;
+      }
+    },
+    isFocused(val, oldVal) {
+      if (val && !oldVal) {
+        this.justFocused = true;
       }
     },
     mousemovePosition(newVal, oldVal) {
       if (this.detectMovePosition && this.isFocused) {
         if (Math.abs(newVal.x - oldVal.x) > 0 || Math.abs(newVal.y - oldVal.y) > 0) {
+          this.justCloseAttached = false;
+          this.justFocused = false;
           this.cursorAppear = true;
           this.iconClass = 'fade-in';
           this.detectMovePosition = false;
