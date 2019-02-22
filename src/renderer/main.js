@@ -469,8 +469,7 @@ new Vue({
                   type: 'radio',
                   id: 'size0',
                   click: () => {
-                    this.$store.dispatch('updateChosenSize', 0);
-                    this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
+                    this.$bus.$emit('change-size-by-menu', 0);
                   },
                 },
                 {
@@ -479,8 +478,7 @@ new Vue({
                   id: 'size1',
                   checked: true,
                   click: () => {
-                    this.$store.dispatch('updateChosenSize', 1);
-                    this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
+                    this.$bus.$emit('change-size-by-menu', 1);
                   },
                 },
                 {
@@ -488,8 +486,7 @@ new Vue({
                   type: 'radio',
                   id: 'size2',
                   click: () => {
-                    this.$store.dispatch('updateChosenSize', 2);
-                    this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
+                    this.$bus.$emit('change-size-by-menu', 2);
                   },
                 },
                 {
@@ -497,8 +494,7 @@ new Vue({
                   type: 'radio',
                   id: 'size3',
                   click: () => {
-                    this.$store.dispatch('updateChosenSize', 3);
-                    this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
+                    this.$bus.$emit('change-size-by-menu', 3);
                   },
                 },
               ],

@@ -109,7 +109,7 @@ import { Subtitle as subtitleActions, Input as InputActions } from '@/store/acti
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
-import { ONLINE_LOADING, NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
+import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-control',
@@ -177,7 +177,7 @@ export default {
       return this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
     },
     iconOpacity() {
-      return this.isShowingHovered ? 0.9 : 0.75;
+      return this.isShowingHovered ? 0.9 : 0.77;
     },
     textHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -375,14 +375,14 @@ export default {
           clearTimeout(this.breakTimer);
           this.breakTimer = setTimeout(() => {
             if (this.timer) {
-              this.$bus.$emit('refresh-finished');
+              this.$bus.$emit('refresh-finished', !this.isInitial);
             }
           }, 10000);
         }
       } else {
         this.addLog('error', {
-          message: 'No Translation Result .',
-          errcode: NO_TRANSLATION_RESULT,
+          message: 'Offline error .',
+          errcode: SUBTITLE_OFFLINE,
         });
       }
     },
@@ -478,9 +478,18 @@ export default {
         this.$bus.$emit('refresh-subtitles', ['local', 'embedded']);
       }
     });
-    this.$bus.$on('refresh-finished', () => {
+    this.$bus.$on('refresh-finished', (timeout) => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
+      this.$store.dispatch('removeMessagesByType');
+      if (timeout) {
+        setTimeout(() => {
+          this.addLog('error', {
+            message: 'Request Timeout .',
+            errcode: REQUEST_TIMEOUT,
+          });
+        }, 500);
+      }
       setTimeout(() => {
         this.$bus.$emit('finished-add-subtitles');
         this.isInitial = false;
@@ -492,7 +501,6 @@ export default {
           this.anim.loop = false;
         } else {
           this.refAnimation = 'refresh-animation';
-          this.$store.dispatch('removeMessagesByType');
         }
         document.querySelector('.scrollScope').scrollTop = 0;
         this.timer = null;
