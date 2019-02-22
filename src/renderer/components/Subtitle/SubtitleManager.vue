@@ -133,8 +133,7 @@ export default {
       const storedSubtitles = await retrieveSubtitleList(videoSrc);
 
       if (requestedTypes.includes('local')) {
-        const storedLocalSubtitles = storedSubtitles
-          .filter(({ type }) => type === 'local');
+        const storedLocalSubtitles = storedSubtitles.filter(({ type }) => type === 'local');
         subtitleRequests.push(getLocalSubtitlesList(videoSrc, storedLocalSubtitles));
       }
       if (requestedTypes.includes('embedded')) {
@@ -297,6 +296,7 @@ export default {
     },
     async computeSubtitleName(type, id, options, subtitleList) {
       if (type === 'local') return '';
+      subtitleList = sortBy([...subtitleList], ['id']);
       const computedIndex = subtitleList
         .filter((subtitle) => {
           if (subtitle.language && options.language) {
