@@ -10,12 +10,12 @@
       type="play"
       v-show="showPlayIcon"
       :class="ani_mode"
-      :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
+      :style="{cursor: cursorAppear ? 'pointer' : 'none'}"/>
     <Icon class="icon"
       type="pause"
       v-show="!showPlayIcon"
       :class="ani_mode"
-      :style="{cursor: iconAppear ? 'pointer' : 'none'}"/>
+      :style="{cursor: cursorAppear ? 'pointer' : 'none'}"/>
   </div>
 </div>
 </template>
@@ -30,16 +30,18 @@ export default {
     isFocused: true,
     attachedShown: false,
     showAllWidgets: false,
+    mousemovePosition: { x: 0, y: 0 },
   },
   data() {
     return {
-      iconAppear: false, // control whether the icon show up or not
+      cursorAppear: false, // control whether the cursor show up or not
       mouseOver: false,
-      isMousedown: false,
+      mousedown: false,
       showPlayIcon: false,
       ani_mode: 'icon-ani-fade-in',
       iconClass: 'fade-out',
       iconFadingId: NaN,
+      detectMovePosition: false,
     };
   },
   components: {
@@ -48,23 +50,27 @@ export default {
   methods: {
     handleMouseenter() {
       this.mouseOver = true;
-      if (!this.attachedShown) this.iconAppear = true;
+      if (!this.attachedShown && this.isFocused) {
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+      } else if (!this.isFocused) {
+        this.detectMovePosition = true;
+      }
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
-      this.iconClass = 'fade-in';
     },
     handleMouseleave() {
-      this.iconAppear = this.mouseOver = false;
+      this.cursorAppear = this.mouseOver = false;
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
       this.iconFadingId = setTimeout(() => {
         this.iconClass = 'fade-out';
       }, 200);
     },
     handleMousedown() {
-      this.isMousedown = true;
+      this.mousedown = true;
       this.ani_mode = 'icon-ani-fade-out';
     },
     handleMouseup() {
-      if (this.isMousedown && !this.attachedShown) {
+      if (this.mousedown && !this.attachedShown) {
         this.showPlayIcon = !this.showPlayIcon;
         this.$bus.$emit('toggle-playback');
       }
@@ -72,10 +78,26 @@ export default {
   },
   watch: {
     showAllWidgets(val) {
-      if ((!val && !this.isMousedown) || (val && this.mouseOver)) this.iconAppear = val;
+      if (!val && !this.mousedown) {
+        this.cursorAppear = false;
+        this.iconClass = 'fade-out';
+      } else if (val && this.mouseOver) {
+        this.detectMovePosition = true;
+      }
     },
     attachedShown(val) {
-      if (!val && this.mouseOver) this.iconAppear = true;
+      if (!val && this.mouseOver) {
+        this.detectMovePosition = true;
+      }
+    },
+    mousemovePosition(newVal, oldVal) {
+      if (this.detectMovePosition && this.isFocused) {
+        if (Math.abs(newVal.x - oldVal.x) > 0 || Math.abs(newVal.y - oldVal.y) > 0) {
+          this.cursorAppear = true;
+          this.iconClass = 'fade-in';
+          this.detectMovePosition = false;
+        }
+      }
     },
     paused(val) {
       this.showPlayIcon = val;
@@ -83,8 +105,8 @@ export default {
   },
   created() {
     document.addEventListener('mouseup', () => {
-      if (this.isMousedown) {
-        this.isMousedown = false;
+      if (this.mousedown) {
+        this.mousedown = false;
         this.ani_mode = 'icon-ani-fade-in';
       }
     });
