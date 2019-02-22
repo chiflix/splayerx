@@ -42,6 +42,8 @@ export default {
       iconClass: 'fade-out',
       iconFadingId: NaN,
       detectMovePosition: false,
+      justCloseAttached: false,
+      justFocused: false,
     };
   },
   components: {
@@ -66,7 +68,15 @@ export default {
       }, 200);
     },
     handleMousedown() {
-      if (this.showAllWidgets && !this.attachedShown && this.isFocused) {
+      if (this.justFocused) {
+        this.justFocused = false;
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+      } else if (this.showAllWidgets && this.justCloseAttached) {
+        this.justCloseAttached = false;
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+      } else if (this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
         this.mousedown = true;
@@ -92,14 +102,22 @@ export default {
         this.detectMovePosition = true;
       }
     },
-    attachedShown(val) {
+    attachedShown(val, oldVal) {
       if (!val && this.mouseOver) {
+        if (oldVal) this.justCloseAttached = true;
         this.detectMovePosition = true;
+      }
+    },
+    isFocused(val, oldVal) {
+      if (val && !oldVal) {
+        this.justFocused = true;
       }
     },
     mousemovePosition(newVal, oldVal) {
       if (this.detectMovePosition && this.isFocused) {
         if (Math.abs(newVal.x - oldVal.x) > 0 || Math.abs(newVal.y - oldVal.y) > 0) {
+          this.justCloseAttached = false;
+          this.justFocused = false;
           this.cursorAppear = true;
           this.iconClass = 'fade-in';
           this.detectMovePosition = false;
