@@ -222,6 +222,9 @@ export default {
         }
       }
     });
+    this.$bus.$on('change-size-by-menu', (index) => {
+      this.changeFontSize(index);
+    });
   },
   methods: {
     handleOver(index) {
