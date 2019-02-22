@@ -375,13 +375,7 @@ export default {
           clearTimeout(this.breakTimer);
           this.breakTimer = setTimeout(() => {
             if (this.timer) {
-              this.$bus.$emit('refresh-finished');
-              if (!this.isInitial) {
-                this.addLog('error', {
-                  message: 'Request Timeout .',
-                  errcode: REQUEST_TIMEOUT,
-                });
-              }
+              this.$bus.$emit('refresh-finished', !this.isInitial);
             }
           }, 10000);
         }
@@ -484,9 +478,18 @@ export default {
         this.$bus.$emit('refresh-subtitles', ['local', 'embedded']);
       }
     });
-    this.$bus.$on('refresh-finished', () => {
+    this.$bus.$on('refresh-finished', (flag) => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
+      this.$store.dispatch('removeMessagesByType');
+      if (flag) {
+        setTimeout(() => {
+          this.addLog('error', {
+            message: 'Request Timeout .',
+            errcode: REQUEST_TIMEOUT,
+          });
+        }, 500);
+      }
       setTimeout(() => {
         this.$bus.$emit('finished-add-subtitles');
         this.isInitial = false;
@@ -498,7 +501,6 @@ export default {
           this.anim.loop = false;
         } else {
           this.refAnimation = 'refresh-animation';
-          this.$store.dispatch('removeMessagesByType');
         }
         document.querySelector('.scrollScope').scrollTop = 0;
         this.timer = null;
