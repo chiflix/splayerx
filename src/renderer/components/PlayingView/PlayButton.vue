@@ -1,11 +1,11 @@
 <template>
 <div :data-component-name="$options.name"
+  @mousedown="handleMousedown"
+  @mouseup="handleMouseup"
   @mouseenter="handleMouseenter"
   @mouseleave="handleMouseleave">
   <div class="icon-wrapper"
-    :class="iconClass"
-    @mousedown="handleMousedown"
-    @mouseup="handleMouseup">
+    :class="iconClass">
     <Icon class="icon play"
       type="play"
       v-show="showPlayIcon"
@@ -66,8 +66,15 @@ export default {
       }, 200);
     },
     handleMousedown() {
-      this.mousedown = true;
-      this.ani_mode = 'icon-ani-fade-out';
+      if (this.showAllWidgets && !this.attachedShown && this.isFocused) {
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+        this.mousedown = true;
+        this.ani_mode = 'icon-ani-fade-out';
+      } else if (!this.showAllWidgets && !this.attachedShown) {
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+      }
     },
     handleMouseup() {
       if (this.mousedown && !this.attachedShown) {
