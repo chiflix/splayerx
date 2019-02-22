@@ -48,9 +48,11 @@ export default {
   methods: {
     handleMouseenter() {
       this.mouseOver = true;
-      if (!this.attachedShown) this.iconAppear = true;
+      if (!this.attachedShown) {
+        this.iconAppear = true;
+        this.iconClass = 'fade-in';
+      }
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
-      this.iconClass = 'fade-in';
     },
     handleMouseleave() {
       this.iconAppear = this.mouseOver = false;
