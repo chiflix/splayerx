@@ -115,7 +115,7 @@ export default class SubtitleLoader extends EventEmitter {
     if (this.data) this.emit('data', this.data);
     else {
       this.data =
-        await promisify(loader.func.bind(null, ...this._getParams(toArray(loader.params))));
+        await promisify(loader.func.bind(this, ...this._getParams(toArray(loader.params))));
       this.emit('data', this.data);
     }
   }
