@@ -436,7 +436,7 @@ export default {
           this.selectionComplete = true;
         });
     });
-    this.$bus.$on('refresh-subtitles', (types) => {
+    this.$bus.$on('refresh-subtitles', ({ types }) => {
       this.refreshSubtitles(types, this.originSrc);
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
