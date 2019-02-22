@@ -400,7 +400,7 @@ export default {
         .filter(({ loading }) => loading === 'ready' || loading === 'loaded')
         .map((subtitleInfo) => {
           const result = pickValidProperties(subtitleInfo);
-          if (result.id === this.currentSubtitleId) {
+          if (result.id === this.currentSubtitleId && this.$refs.subtitleRenderer) {
             result.videoSegments = this.$refs.subtitleRenderer.videoSegments;
           }
           return result;
