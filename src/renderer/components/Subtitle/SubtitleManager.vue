@@ -24,6 +24,8 @@ import {
   retrieveSubtitleList,
   deleteSubtitles,
   retrieveSubtitle,
+  updateSelectedSubtitleId,
+  retrieveSelectedSubtitleId,
 } from '@/helpers/subtitle';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
@@ -95,6 +97,9 @@ export default {
     allSubtitleList(newVal, oldVal) {
       this.allSubtitleListWatcher(newVal, oldVal);
     },
+    currentSubtitleId(newVal) {
+      updateSelectedSubtitleId(this.originSrc, newVal);
+    },
   },
   methods: {
     ...mapActions({
@@ -158,7 +163,7 @@ export default {
             .then(({ src, data, language }) => ({
               src,
               type: 'online',
-              options: { language, data },
+              options: { language, data, id },
             }))
             .catch(err => err);
           const retrieveSubtitles = Promise.all(storedOnlineSubtitleIds
@@ -168,8 +173,10 @@ export default {
         }
       }
 
-      this.selectionComplete = false;
-      this.checkCurrentSubtitleList();
+      if (!isInitial) {
+        this.selectionComplete = false;
+        this.checkCurrentSubtitleList();
+      }
 
       return Promise.all(subtitleRequests)
         .then(subtitleLists => Promise.all(subtitleLists.map(normalizeSubtitleList)))
@@ -404,20 +411,21 @@ export default {
       this.$delete(this.subtitleInstances, id);
       this.addSubtitleWhenFailed({ id });
     },
-    checkCurrentSubtitleList() {
+    async checkCurrentSubtitleList() {
       const {
         selectionComplete,
         subtitleList,
         preferredLanguages,
       } = this;
+      const validSubtitleList = subtitleList.filter(({ name }) => !!name);
       if (!selectionComplete) {
-        const hasPrimaryLanguage = subtitleList
+        const hasPrimaryLanguage = validSubtitleList
           .find(({ language }) => language === preferredLanguages[0]);
         if (hasPrimaryLanguage) {
           this.changeCurrentSubtitle(hasPrimaryLanguage.id);
           this.selectionComplete = true;
         } else {
-          const hasSecondaryLanguage = subtitleList
+          const hasSecondaryLanguage = validSubtitleList
             .find(({ language }) => language === preferredLanguages[1]);
           if (hasSecondaryLanguage) {
             this.changeCurrentSubtitle(hasSecondaryLanguage.id);
@@ -426,6 +434,11 @@ export default {
             this.changeCurrentSubtitle('');
           }
         }
+      } else if (this.isInitial && this.originSrc) {
+        const id = await retrieveSelectedSubtitleId(this.originSrc);
+        if (id) this.changeCurrentSubtitle(id);
+        this.selectionComplete = true;
+        this.isInitial = false;
       }
     },
     async generateValidSubtitle(id) {
@@ -517,6 +530,7 @@ export default {
     });
     this.$bus.$on('refresh-subtitles', ({ types, isInitial }) => {
       this.refreshSubtitles(types, this.originSrc, isInitial);
+      this.isInitial = isInitial;
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
