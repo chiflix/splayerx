@@ -22,6 +22,7 @@
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets"/>
     <play-button class="play-button no-drag"
+      :mousemovePosition="mousemovePosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
     <volume-indicator :showAllWidgets="showAllWidgets" />

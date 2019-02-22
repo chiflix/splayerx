@@ -135,10 +135,6 @@ describe('Component - BaseVideoPlayer', () => {
         assertVideoAttributes('autoplay', propsData.autoplay, [!propsData.autoplay], false);
       });
 
-      it('should defaultPlaybackRate not be changed dynamically', () => {
-        assertVideoAttributes('defaultPlaybackRate', propsData.defaultPlaybackRate, [!propsData.defaultPlaybackRate], false);
-      });
-
       it('should defaultMuted not be changed dynamically', () => {
         assertVideoAttributes('defaultMuted', propsData.defaultMuted, [!propsData.defaultMuted], false);
       });

@@ -122,7 +122,7 @@ export default {
   },
   methods: {
     ...mapMutations({
-      updateMousemoveTarget: inputMutations.MOUSEMOVE_TARGET_UPDATE,
+      updateMousemoveTarget: inputMutations.MOUSEMOVE_COMPONENT_NAME_UPDATE,
     }),
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,

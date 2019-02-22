@@ -114,7 +114,7 @@ export default {
     fontSize: '字體大小',
     fontStyle: '字體樣式',
     subDelay: '字幕延遲',
-    fontItems: [['小'], ['默認'], ['大'], ['超大']],
+    fontItems: ['小', '默認', '大', '超大'],
     audioDelay: '音頻延遲',
     changeTrack: '切換軌道',
     chosenTrack: '默認',
@@ -140,6 +140,10 @@ export default {
     offLine: {
       title: '未能連接網絡',
       content: '建議您檢查網絡狀況後重試。',
+    },
+    timeout: {
+      title: '網絡請求超時',
+      content: '網絡延遲或雲端異常。',
     },
   },
   loading: {

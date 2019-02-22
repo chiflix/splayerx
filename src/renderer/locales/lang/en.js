@@ -115,7 +115,7 @@ export default {
     fontSize: 'Font Size',
     fontStyle: 'Font Style',
     subDelay: 'Subtitle Delay',
-    fontItems: [['S'], ['M'], ['L'], ['XL']],
+    fontItems: ['S', 'M', 'L', 'XL'],
     audioDelay: 'Audio Delay',
     changeTrack: 'Audio Track',
     chosenTrack: 'Default',
@@ -141,6 +141,10 @@ export default {
     offLine: {
       title: 'No Network Access',
       content: 'Please check network and try again.',
+    },
+    timeout: {
+      title: 'Request Timeout',
+      content: 'Network delay or server error.',
     },
   },
   loading: {

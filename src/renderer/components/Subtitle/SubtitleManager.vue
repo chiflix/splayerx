@@ -27,6 +27,7 @@ import {
   updateSelectedSubtitleId,
   retrieveSelectedSubtitleId,
 } from '@/helpers/subtitle';
+import transcriptQueue from '@/helpers/subtitle/push';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
@@ -51,6 +52,7 @@ export default {
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
       'duration', // do not load subtitle renderer when video(duration) is not available(todo: global variable to tell if video is totally available)
       'getVideoSrcById', 'allSubtitleList', // serve allSubtitleListWatcher
+      'subtitleDelay', // subtitle's delay
     ]),
     ...mapState({
       preferredLanguages: ({ Preference }) => (
@@ -87,11 +89,8 @@ export default {
     qualifiedSubtitles(newVal, oldVal) {
       const newQualified = differenceWith(newVal, oldVal, isEqual);
       if (newQualified.length) {
-        newQualified.forEach((subtitlePayload) => {
-          Sagi.pushTranscript(this.makeSubtitleUploadParameter(subtitlePayload))
-            .then(res => console.log(res))
-            .catch(err => console.log(err));
-        });
+        const subtitles = newQualified.map(this.makeSubtitleUploadParameter);
+        transcriptQueue.addAll(subtitles);
       }
     },
     allSubtitleList(newVal, oldVal) {
@@ -249,7 +248,7 @@ export default {
           metaChange: this.metaChangeCallback,
           loading: partial(this.loadingCallback, videoSrc),
           ready: this.readyCallback,
-          loaded: this.loadedCallback,
+          loaded: this.addSubtitleWhenLoaded,
           failed: this.failedCallback,
         });
       } catch (err) {
@@ -295,32 +294,6 @@ export default {
         subtitleList,
         language,
       );
-    },
-    makeSubtitleUploadParameter(payload) {
-      if (payload && payload.id) {
-        const { id, type, duration: playedTime } = payload;
-        const subtitleInstance = this.subtitleInstances[id];
-        if (subtitleInstance) {
-          const {
-            metaInfo, src, data, options,
-          } = subtitleInstance;
-          if (
-            (type === 'online' && src) ||
-            (type !== 'online' && data)
-          ) {
-            return ({
-              mediaIdentity: options.videoIdentity,
-              languageCode: metaInfo.language,
-              format: metaInfo.format,
-              playedTime,
-              totalTime: this.duration,
-              [type === 'online' ? 'transcriptIdentity' : 'payload']:
-                type === 'online' ? src : Buffer.from(data),
-            });
-          }
-        }
-      }
-      return undefined;
     },
     async computeSubtitleName(type, id, options, subtitleList) {
       if (type === 'local') return '';
@@ -517,6 +490,39 @@ export default {
       const updateSubtitleListPromises = Object.keys(subtitleMap)
         .map(videoSrc => updateSubtitleList(videoSrc, subtitleMap[videoSrc]));
       return Promise.all(updateSubtitleListPromises);
+    },
+    makeSubtitleUploadParameter({ id, duration: playedTime }) {
+      const result = {
+        playedTime,
+        mediaIdentity: this.mediaHash,
+        totalTime: this.duration,
+        delay: this.subtitleDelay,
+      };
+      const instance = this.subtitleInstances[id];
+      if (instance) {
+        const {
+          src, type, data, metaInfo,
+        } = instance;
+        const {
+          language: languageCode,
+          format,
+        } = metaInfo;
+        if (languageCode) result.languageCode = languageCode;
+        switch (type) {
+          default:
+            break;
+          case 'online':
+            result.format = 'online';
+            result.transcriptIdentity = src;
+            break;
+          case 'embedded':
+          case 'local':
+            result.format = format;
+            result.payload = Buffer.from(data);
+            break;
+        }
+      }
+      return result;
     },
   },
   created() {

@@ -10,7 +10,14 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, NO_TRANSLATION_RESULT, NOT_SUPPORTED_SUBTITLE } from '../shared/notificationcodes';
+import {
+  FILE_NON_EXIST,
+  EMPTY_FOLDER,
+  OPEN_FAILED,
+  NOT_SUPPORTED_SUBTITLE,
+  REQUEST_TIMEOUT,
+  SUBTITLE_OFFLINE,
+} from '../shared/notificationcodes';
 
 /**
  * Set `__static` path to static files in production
@@ -282,8 +289,9 @@ function registerMainWindowEvent() {
           case FILE_NON_EXIST:
           case EMPTY_FOLDER:
           case OPEN_FAILED:
-          case NO_TRANSLATION_RESULT:
+          case SUBTITLE_OFFLINE:
           case NOT_SUPPORTED_SUBTITLE:
+          case REQUEST_TIMEOUT:
             mainWindow.webContents.send('addMessages', log.errcode);
             break;
           default:
