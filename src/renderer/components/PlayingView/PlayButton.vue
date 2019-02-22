@@ -50,9 +50,11 @@ export default {
   methods: {
     handleMouseenter() {
       this.mouseOver = true;
-      if (!this.attachedShown) {
+      if (!this.attachedShown && this.isFocused) {
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
+      } else if (!this.isFocused) {
+        this.detectMovePosition = true;
       }
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
     },
@@ -89,7 +91,7 @@ export default {
       }
     },
     mousemovePosition(newVal, oldVal) {
-      if (this.detectMovePosition) {
+      if (this.detectMovePosition && this.isFocused) {
         if (Math.abs(newVal.x - oldVal.x) > 0 || Math.abs(newVal.y - oldVal.y) > 0) {
           this.cursorAppear = true;
           this.iconClass = 'fade-in';
