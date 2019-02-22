@@ -109,7 +109,7 @@ import { Subtitle as subtitleActions, Input as InputActions } from '@/store/acti
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
-import { ONLINE_LOADING, NO_TRANSLATION_RESULT, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
+import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-control',
@@ -387,8 +387,8 @@ export default {
         }
       } else {
         this.addLog('error', {
-          message: 'No Translation Result .',
-          errcode: NO_TRANSLATION_RESULT,
+          message: 'Offline error .',
+          errcode: SUBTITLE_OFFLINE,
         });
       }
     },
