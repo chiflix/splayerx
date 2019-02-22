@@ -177,7 +177,7 @@ export default {
       return this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
     },
     iconOpacity() {
-      return this.isShowingHovered ? 0.9 : 0.76;
+      return this.isShowingHovered ? 0.9 : 0.77;
     },
     textHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
