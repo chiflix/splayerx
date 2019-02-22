@@ -74,7 +74,13 @@ export default {
   },
   watch: {
     showAllWidgets(val) {
-      if ((!val && !this.mousedown) || (val && this.mouseOver)) this.cursorAppear = val;
+      if (!val && !this.mousedown) {
+        this.cursorAppear = false;
+        this.iconClass = 'fade-out';
+      } else if (val && this.mouseOver) {
+        this.cursorAppear = true;
+        this.iconClass = 'fade-in';
+      }
     },
     attachedShown(val) {
       if (!val && this.mouseOver) {
