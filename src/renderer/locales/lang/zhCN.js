@@ -114,7 +114,7 @@ export default {
     fontSize: '字体大小',
     fontStyle: '字体样式',
     subDelay: '字幕延迟',
-    fontItems: [['小'], ['默认'], ['大'], ['超大']],
+    fontItems: ['小', '默认', '大', '超大'],
     audioDelay: '音频延迟',
     changeTrack: '切换轨道',
     chosenTrack: '默认',

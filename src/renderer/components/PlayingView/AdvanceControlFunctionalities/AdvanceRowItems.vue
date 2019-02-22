@@ -30,14 +30,14 @@
               @click="handleClick(index)"
               :style="{
                 width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`,
-                cursor: list.chosen ? 'default' : 'pointer',
+                cursor: itemChosen(index) ? 'default' : 'pointer',
               }">
               <div class="text"
                 :style="{
-                  color: list.chosen || index === hoverIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                  color: itemChosen(index) || index === hoverIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                   margin: 'auto',
                   transition: 'color 300ms',
-                }">{{ list[0] }}
+                }">{{ list }}
               </div>
             </div>
             <div :class="cardType" :style="{
@@ -89,26 +89,12 @@ export default {
     rate(val) {
       if (this.item === this.$t('advance.rateTitle')) {
         const numList = [0.5, 1, 1.2, 1.5, 2];
-        this.lists.forEach((i, ind) => {
-          if (ind !== numList.indexOf(val)) {
-            this.$set(this.lists[ind], 'chosen', false);
-          } else {
-            this.$set(this.lists[ind], 'chosen', true);
-          }
-        });
         this.selectedIndex = numList.indexOf(val);
         this.calculateSpeedLength(numList.indexOf(val));
       }
     },
     chosenSize(val) {
       if (this.item === this.$t('advance.fontSize')) {
-        this.lists.forEach((i, ind) => {
-          if (ind !== val) {
-            this.$set(this.lists[ind], 'chosen', false);
-          } else {
-            this.$set(this.lists[ind], 'chosen', true);
-          }
-        });
         this.selectedIndex = val;
         this.calculateFontLength(val);
       }
@@ -131,13 +117,13 @@ export default {
     ChosenSize() {
       switch (this.chosenSize) {
         case 0:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'S' ? 'Small' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
+          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'S' ? 'Small' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
         case 1:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'M' ? 'Normal' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
+          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'M' ? 'Normal' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
         case 2:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'L' ? 'Large' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
+          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'L' ? 'Large' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
         case 3:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'XL' ? 'Extra Large' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
+          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'XL' ? 'Extra Large' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
         default:
           return this.$t('advance.fontItems[1]');
       }
@@ -227,6 +213,12 @@ export default {
     });
   },
   methods: {
+    itemChosen(index) {
+      if (this.item === this.$t('advance.rateTitle')) {
+        return [0.5, 1, 1.2, 1.5, 2].indexOf(this.rate) === index;
+      }
+      return this.chosenSize === index;
+    },
     handleOver(index) {
       this.hoverIndex = index;
     },
@@ -240,15 +232,8 @@ export default {
       } else {
         this.calculateFontLength(index);
       }
-      this.lists.forEach((i, ind) => {
-        if (ind !== index) {
-          this.$set(this.lists[ind], 'chosen', false);
-        } else {
-          this.$set(this.lists[ind], 'chosen', true);
-        }
-      });
       if (this.item === this.$t('advance.rateTitle')) {
-        this.$store.dispatch(videoActions.CHANGE_RATE, this.lists[index][0]);
+        this.$store.dispatch(videoActions.CHANGE_RATE, this.lists[index]);
       } else if (this.item === this.$t('advance.fontSize')) {
         this.changeFontSize(index);
       }

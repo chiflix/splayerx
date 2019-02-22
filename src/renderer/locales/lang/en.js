@@ -115,7 +115,7 @@ export default {
     fontSize: 'Font Size',
     fontStyle: 'Font Style',
     subDelay: 'Subtitle Delay',
-    fontItems: [['S'], ['M'], ['L'], ['XL']],
+    fontItems: ['S', 'M', 'L', 'XL'],
     audioDelay: 'Audio Delay',
     changeTrack: 'Audio Track',
     chosenTrack: 'Default',

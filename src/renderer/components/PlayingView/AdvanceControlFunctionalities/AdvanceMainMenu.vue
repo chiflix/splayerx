@@ -205,7 +205,7 @@ export default {
   name: 'AdvanceMainMenu',
   data() {
     return {
-      numList: [[0.5], [1], [1.2], [1.5], [2]],
+      numList: [0.5, 1, 1.2, 1.5, 2],
       itemSpeedName: this.$t('advance.rateTitle'),
       speedChosen: false,
       rightArrowSub: false,
