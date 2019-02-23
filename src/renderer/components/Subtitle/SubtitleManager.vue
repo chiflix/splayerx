@@ -52,7 +52,7 @@ export default {
       'subtitleList', 'currentSubtitleId', // use to get current subtitle info and auto selection subtitles
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
       'duration', // do not load subtitle renderer when video(duration) is not available(todo: global variable to tell if video is totally available)
-      'getVideoSrcById', 'allSubtitleList', // serve allSubtitleListWatcher
+      'getVideoSrcById', 'getIdByVideoSrc', 'allSubtitleList', // serve allSubtitleListWatcher
       'subtitleDelay', // subtitle's delay
     ]),
     ...mapState({
@@ -72,7 +72,7 @@ export default {
     },
   },
   watch: {
-    originSrc(newVal) {
+    originSrc(newVal, oldVal) {
       if (newVal) {
         this.resetSubtitles();
         const hasOnlineSubtitles =
@@ -85,6 +85,10 @@ export default {
             .length;
         this.$bus.$emit('subtitle-refresh-from-src-change', hasOnlineSubtitles);
         this.$store.dispatch('ifNoSubtitle', true);
+      }
+      if (oldVal) {
+        const lastVideoSubtitles = this.getIdByVideoSrc(oldVal);
+        console.log(...lastVideoSubtitles);
       }
     },
     qualifiedSubtitles(newVal, oldVal) {
@@ -242,6 +246,11 @@ export default {
       return newEmbeddedSubs;
     },
     async addSubtitle({ src, type, options }, videoSrc) {
+      if (options.id) {
+        const existedInList = !!this.subtitleList.find(({ id }) => id === options.id);
+        const existedInInstances = !!this.subtitleInstances[options.id];
+        if (existedInList && existedInInstances) return 'success';
+      }
       const subtitleInstance = new SubtitleLoader(src, type, { ...options });
       try {
         return this.setupListeners(subtitleInstance, {
