@@ -61,6 +61,7 @@ describe('Subtitle Manager Unit Tests', () => {
     let videoSrc;
     let refreshSubtitles;
     let retrieveLanguagePreferenceStub;
+    let retrieveSelectedSubtitleIdStub;
     let retrieveSubtitleListStub;
     let storeLanguagePreferenceStub;
     beforeEach(() => {
@@ -69,6 +70,8 @@ describe('Subtitle Manager Unit Tests', () => {
 
       retrieveLanguagePreferenceStub = sandbox.stub().resolves();
       subtitleManagerRewireAPI.__Rewire__('retrieveLanguagePreference', retrieveLanguagePreferenceStub);
+      retrieveSelectedSubtitleIdStub = sandbox.stub().resolves();
+      subtitleManagerRewireAPI.__Rewire__('retrieveSelectedSubtitleId', retrieveSelectedSubtitleIdStub);
       retrieveSubtitleListStub = sandbox.stub().resolves([]);
       subtitleManagerRewireAPI.__Rewire__('retrieveSubtitleList', retrieveSubtitleListStub);
       storeLanguagePreferenceStub = sandbox.stub().resolves();
@@ -76,6 +79,7 @@ describe('Subtitle Manager Unit Tests', () => {
     });
     afterEach(() => {
       subtitleManagerRewireAPI.__ResetDependency__('retrieveLanguagePreference');
+      subtitleManagerRewireAPI.__ResetDependency__('retrieveSelectedSubtitleId');
       subtitleManagerRewireAPI.__ResetDependency__('retrieveSubtitleList');
       subtitleManagerRewireAPI.__ResetDependency__('storeLanguagePreference');
     });
@@ -127,7 +131,7 @@ describe('Subtitle Manager Unit Tests', () => {
           done();
         }).catch(done);
     });
-    it('should invoke checkCurrentSubtitleList when not isInitial', (done) => {
+    it('should invoke checkCurrentSubtitleList twice when not isInitial', (done) => {
       const checkCurrentSubtitleListSpy = sandbox.spy(wrapper.vm, 'checkCurrentSubtitleList');
 
       refreshSubtitles(['local'], videoSrc)
@@ -136,7 +140,7 @@ describe('Subtitle Manager Unit Tests', () => {
           done();
         }).catch(done);
     });
-    it('should invoke checkCurrentSubtitleList when isInitial', (done) => {
+    it('should invoke checkCurrentSubtitleList once when isInitial', (done) => {
       wrapper.setData({ isInitial: true });
       const checkCurrentSubtitleListSpy = sandbox.spy(wrapper.vm, 'checkCurrentSubtitleList');
 

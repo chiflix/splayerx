@@ -85,7 +85,7 @@ export async function updateSubtitleList(videoSrc, newSubtitles) {
 }
 export async function retrieveSelectedSubtitleId(videoSrc) {
   return getVideoInfoFromVideoSrc(videoSrc)
-    .then(({ preference }) => (preference ? preference.subtitle.selected : 0));
+    .then(({ preference }) => preference?.subtitle?.selected || 0);
 }
 export async function updateSelectedSubtitleId(videoSrc, id) {
   return updateSubtitlePreference(videoSrc, { selected: id });
