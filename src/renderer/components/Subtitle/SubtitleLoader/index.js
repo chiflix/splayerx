@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import flatten from 'lodash/flatten';
 import helpers from '@/helpers';
 import { storeSubtitle } from '@/helpers/subtitle';
-import { localFormatLoader, toArray, promisify, functionExtraction } from './utils';
+import { localFormatLoader, castArray, promisify, functionExtraction } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
 
 const files = require.context('.', false, /\.loader\.js$/);
@@ -36,7 +36,8 @@ export default class SubtitleLoader extends EventEmitter {
   })
 
   _getParams(params) {
-    return toArray(params).map(param => this[param] || this.metaInfo[param] || this.options[param]);
+    return castArray(params)
+      .map(param => this[param] || this.metaInfo[param] || this.options[param]);
   }
 
   /**
@@ -64,7 +65,7 @@ export default class SubtitleLoader extends EventEmitter {
     if (supportedFormats.includes(format)) {
       this.metaInfo.format = format;
       this.loader = Object.values(loaders)
-        .find(loader => toArray(loader.supportedFormats).includes(format));
+        .find(loader => castArray(loader.supportedFormats).includes(format));
     } else {
       helpers.methods.addLog('error', {
         message: 'Unsupported Subtitle .',
@@ -115,7 +116,7 @@ export default class SubtitleLoader extends EventEmitter {
     if (this.data) this.emit('data', this.data);
     else {
       this.data =
-        await promisify(loader.func.bind(this, ...this._getParams(toArray(loader.params))));
+        await promisify(loader.func.bind(this, ...this._getParams(castArray(loader.params))));
       this.emit('data', this.data);
     }
   }
@@ -124,7 +125,7 @@ export default class SubtitleLoader extends EventEmitter {
     try {
       const parser = functionExtraction(this.loader.parser, 'data');
       this.parsed =
-        await promisify(parser.func.bind(null, ...this._getParams(toArray(parser.params))));
+        await promisify(parser.func.bind(null, ...this._getParams(castArray(parser.params))));
       this.emit('parse', this.parsed);
     } catch (e) {
       helpers.methods.addLog('error', {
