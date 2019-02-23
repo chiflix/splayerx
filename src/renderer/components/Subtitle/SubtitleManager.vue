@@ -152,7 +152,7 @@ export default {
           sortBy(preferredLanguages),
         ) || !storedOnlineSubtitleIds.length;
         resetOnlineSubtitles();
-        if (!this.isInitial || (this.isInitial && clearOnline)) {
+        if (!this.isInitial || clearOnline) {
           subtitleRequests.push(getOnlineSubtitlesList(
             videoSrc,
             preferredLanguages,
