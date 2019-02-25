@@ -395,6 +395,12 @@ export default {
         }
       }
     },
+    /**
+     * generate a valid subtitle from the given id
+     * valid subtitle is from both this.subtitleList and this.subtitleInstances
+     * @param {string} id - the valid subtitle id
+     * @returns an object with src, id, type, format, language and data(maybe)
+     */
     async generateValidSubtitle(id) {
       const subtitleInstance = this.subtitleInstances[id];
       const subtitleInfo = this.subtitleList.find(({ id: subtitleId }) => id === subtitleId);
@@ -410,6 +416,12 @@ export default {
         language,
       });
     },
+    /**
+     * generate a valid subtitle list of info for the given videoSrc
+     * valid subtitle info is from this.subtitleList and this.$refs.subtitleRenderer
+     * @param {string} videoSrc - valid videoSrc
+     * @returns a list of subtitle info(with id, type, name, rank and videoSegments(maybe))
+     */
     async generateValidSubtitleList(videoSrc) {
       const finalList = [];
       const { currentSubtitleId } = this;
