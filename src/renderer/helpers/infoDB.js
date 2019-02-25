@@ -5,7 +5,7 @@ import addLog from './index';
 /**
  * You can change schema info in 'constants.js'
  */
-export default class InfoDB {
+export class InfoDB {
   #db;
 
   /**
@@ -157,3 +157,5 @@ export default class InfoDB {
     return val;
   }
 }
+
+export default new InfoDB();

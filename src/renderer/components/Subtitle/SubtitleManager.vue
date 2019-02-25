@@ -1,7 +1,8 @@
 <template>
   <div class="subtitle-manager"
     :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
-    <subtitle-render
+    <subtitle-renderer
+      ref="subtitleRenderer"
       v-if="currentSubtitleId && duration"
       :subtitle-instance="currentSubtitle"
       :key="currentSubtitleId"
@@ -11,10 +12,21 @@
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
-import { flatten, isEqual, sortBy, differenceWith, isFunction, partial } from 'lodash';
+import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import Sagi from '@/helpers/sagi';
-import { searchForLocalList, fetchOnlineList, retrieveEmbeddedList } from '@/helpers/subtitle';
+import {
+  searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
+  storeLanguagePreference,
+  updateSubtitle,
+  updateSubtitleList,
+  retrieveLanguagePreference,
+  retrieveSubtitleList,
+  deleteSubtitles,
+  retrieveSubtitle,
+  updateSelectedSubtitleId,
+  retrieveSelectedSubtitleId,
+} from '@/helpers/subtitle';
 import transcriptQueue from '@/helpers/subtitle/push';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
@@ -24,12 +36,13 @@ import { localLanguageLoader } from './SubtitleLoader/utils';
 export default {
   name: 'subtitle-manager',
   components: {
-    'subtitle-render': SubtitleRenderer,
+    'subtitle-renderer': SubtitleRenderer,
   },
   data() {
     return {
       subtitleInstances: {},
       selectionComplete: false,
+      isInitial: false,
     };
   },
   computed: {
@@ -39,6 +52,7 @@ export default {
       'subtitleList', 'currentSubtitleId', // use to get current subtitle info and auto selection subtitles
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
       'duration', // do not load subtitle renderer when video(duration) is not available(todo: global variable to tell if video is totally available)
+      'getVideoSrcById', 'allSubtitleList', // serve allSubtitleListWatcher
       'subtitleDelay', // subtitle's delay
     ]),
     ...mapState({
@@ -61,6 +75,7 @@ export default {
     originSrc(newVal) {
       if (newVal) {
         this.resetSubtitles();
+        this.selectionComplete = false;
         const hasOnlineSubtitles =
           !!this.$store.state.Subtitle.videoSubtitleMap[this.originSrc]
             .map((id) => {
@@ -79,6 +94,12 @@ export default {
         const subtitles = newQualified.map(this.makeSubtitleUploadParameter);
         transcriptQueue.addAll(subtitles);
       }
+    },
+    allSubtitleList(newVal, oldVal) {
+      this.allSubtitleListWatcher(newVal, oldVal);
+    },
+    currentSubtitleId(newVal) {
+      if (this.selectionComplete || newVal) updateSelectedSubtitleId(this.originSrc, newVal);
     },
   },
   methods: {
@@ -109,44 +130,103 @@ export default {
         .filter(type => supportedTypes.includes(type));
       if (!requestedTypes.length) throw new Error('No valid subtitle type provided.');
       const subtitleRequests = [];
+
+      const storedLanguagePreference = await retrieveLanguagePreference(videoSrc);
+      const storedSubtitles = await retrieveSubtitleList(videoSrc);
+
       if (requestedTypes.includes('local')) {
-        subtitleRequests.push(getLocalSubtitlesList(videoSrc));
+        const storedLocalSubtitles = storedSubtitles.filter(({ type }) => type === 'local');
+        subtitleRequests.push(getLocalSubtitlesList(videoSrc, storedLocalSubtitles));
       }
       if (requestedTypes.includes('embedded')) {
-        subtitleRequests.push(getEmbeddedSubtitlesList(videoSrc));
+        const storedEmbeddedSubtitles = storedSubtitles
+          .filter(({ type }) => type === 'embedded');
+        subtitleRequests.push(getEmbeddedSubtitlesList(videoSrc, storedEmbeddedSubtitles));
       }
       if (requestedTypes.includes('online')) {
+        const storedOnlineSubtitleIds = storedSubtitles
+          .filter(({ type }) => type === 'online')
+          .map(({ id }) => id);
+        const clearOnline = !isEqual(
+          sortBy(storedLanguagePreference),
+          sortBy(preferredLanguages),
+        ) || !storedOnlineSubtitleIds.length;
         resetOnlineSubtitles();
-        subtitleRequests.push(getOnlineSubtitlesList(videoSrc, preferredLanguages));
+        const isFetching = !this.isInitial || clearOnline;
+        subtitleRequests.push(getOnlineSubtitlesList(
+          videoSrc,
+          isFetching,
+          storedOnlineSubtitleIds,
+          preferredLanguages,
+        ));
       }
 
-      this.selectionComplete = false;
-      this.checkCurrentSubtitleList();
+      if (!this.isInitial) {
+        this.selectionComplete = false;
+        this.checkCurrentSubtitleList();
+      }
 
       return Promise.all(subtitleRequests)
         .then(subtitleLists => Promise.all(subtitleLists.map(normalizeSubtitleList)))
         .then(normalizedLists => flatten(normalizedLists))
         .then(allSubtitles => Promise.all(allSubtitles.map(sub => addSubtitle(sub, videoSrc))))
-        .then(() => {
+        .then(async () => {
           this.$bus.$emit('refresh-finished');
+          if (this.isInitial) {
+            const id = await retrieveSelectedSubtitleId(videoSrc);
+            if (id) {
+              this.changeCurrentSubtitle(id);
+              this.selectionComplete = true;
+            }
+            this.isInitial = false;
+          }
           this.checkCurrentSubtitleList();
+          return storeLanguagePreference(videoSrc, preferredLanguages);
         });
     },
-    getLocalSubtitlesList(videoSrc) {
-      return searchForLocalList(videoSrc, SubtitleLoader.supportedFormats).catch(() => []);
+    async getLocalSubtitlesList(videoSrc, storedSubs) {
+      const newLocalSubs = await searchForLocalList(videoSrc, SubtitleLoader.supportedFormats)
+        .catch(() => []);
+      return values(mergeWith(
+        keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'local', options: { id } })), 'src'),
+        keyBy(newLocalSubs, 'src'),
+      ));
     },
-    async getOnlineSubtitlesList(videoSrc, languages) {
-      if (!languages || !languages.length) return [];
-      function getOnlineSubtitlesWithErrorHandling(language) {
-        return fetchOnlineList(videoSrc, language).catch(() => []);
+    async getOnlineSubtitlesList(videoSrc, isFetching, storedSubIds, languages) {
+      if (!isFetching) {
+        const retrieveSub = id => retrieveSubtitle(id)
+          .then(({ src, data, language }) => ({
+            src,
+            type: 'online',
+            options: { language, data, id },
+          }))
+          .catch(() => []);
+        const storedSubs = await Promise.all(storedSubIds.map(retrieveSub)).then(flatten);
+        if (storedSubs.length) {
+          return storedSubs;
+        }
       }
-      return Promise.all(languages.map(getOnlineSubtitlesWithErrorHandling))
-        .then(subtitleLists => flatten(subtitleLists));
+      const fetchSubs = lang => fetchOnlineList(videoSrc, lang).catch(() => []);
+      const newSubs = await Promise.all(languages.map(fetchSubs)).then(flatten);
+      deleteSubtitles(storedSubIds);
+      return newSubs;
     },
-    getEmbeddedSubtitlesList(videoSrc) {
-      return retrieveEmbeddedList(videoSrc, SubtitleLoader.supportedCodecs).catch(() => []);
+    async getEmbeddedSubtitlesList(videoSrc, storedSubs) {
+      const newEmbeddedSubs = await retrieveEmbeddedList(
+        videoSrc,
+        SubtitleLoader.supportedCodecs,
+      ).catch(() => []).then(castArray);
+      return values(mergeWith(
+        keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'embedded', options: { id } })), 'src'),
+        keyBy(newEmbeddedSubs, 'src'),
+      ));
     },
     async addSubtitle({ src, type, options }, videoSrc) {
+      if (options.id) {
+        const existedInList = !!this.subtitleList.find(({ id }) => id === options.id);
+        const existedInInstances = !!this.subtitleInstances[options.id];
+        if (existedInList && existedInInstances) return 'success';
+      }
       const subtitleInstance = new SubtitleLoader(src, type, { ...options });
       try {
         return this.setupListeners(subtitleInstance, {
@@ -202,6 +282,7 @@ export default {
     },
     async computeSubtitleName(type, id, options, subtitleList) {
       if (type === 'local') return '';
+      subtitleList = sortBy([...subtitleList], ['id']);
       const computedIndex = subtitleList
         .filter((subtitle) => {
           if (subtitle.language && options.language) {
@@ -273,7 +354,17 @@ export default {
         this.subtitleList,
       ) || name;
       this.addSubtitleWhenReady({ id, format });
+      updateSubtitle(id, { language });
       this.checkCurrentSubtitleList();
+    },
+    async loadedCallback(subtitleInstance) {
+      const {
+        id, type, metaInfo, data,
+      } = subtitleInstance;
+      this.addSubtitleWhenLoaded({ id });
+      const result = { language: metaInfo.language };
+      if (type === 'online') result.data = data;
+      return updateSubtitle(id, result);
     },
     failedCallback({ id }) {
       this.$delete(this.subtitleInstances, id);
@@ -285,14 +376,15 @@ export default {
         subtitleList,
         preferredLanguages,
       } = this;
+      const validSubtitleList = subtitleList.filter(({ name }) => !!name);
       if (!selectionComplete) {
-        const hasPrimaryLanguage = subtitleList
+        const hasPrimaryLanguage = validSubtitleList
           .find(({ language }) => language === preferredLanguages[0]);
         if (hasPrimaryLanguage) {
           this.changeCurrentSubtitle(hasPrimaryLanguage.id);
           this.selectionComplete = true;
         } else {
-          const hasSecondaryLanguage = subtitleList
+          const hasSecondaryLanguage = validSubtitleList
             .find(({ language }) => language === preferredLanguages[1]);
           if (hasSecondaryLanguage) {
             this.changeCurrentSubtitle(hasSecondaryLanguage.id);
@@ -302,6 +394,97 @@ export default {
           }
         }
       }
+    },
+    /**
+     * generate a valid subtitle from the given id
+     * valid subtitle is from both this.subtitleList and this.subtitleInstances
+     * @param {string} id - the valid subtitle id
+     * @returns an object with src, id, type, format, language and data(maybe)
+     */
+    async generateValidSubtitle(id) {
+      const subtitleInstance = this.subtitleInstances[id];
+      const subtitleInfo = this.subtitleList.find(({ id: subtitleId }) => id === subtitleId);
+      if (!subtitleInstance || !subtitleInfo) throw new Error(`No subtitle instance ${id}!`);
+      const { type, src, data } = subtitleInstance;
+      const { language, format } = subtitleInfo;
+      return ({
+        id,
+        src,
+        type,
+        format,
+        data: type === 'online' ? data : undefined, // only store online subtitle's data
+        language,
+      });
+    },
+    /**
+     * generate a valid subtitle list of info for the given videoSrc
+     * valid subtitle info is from this.subtitleList and this.$refs.subtitleRenderer
+     * @param {string} videoSrc - valid videoSrc
+     * @returns a list of subtitle info(with id, type, name, rank and videoSegments(maybe))
+     */
+    async generateValidSubtitleList(videoSrc) {
+      const finalList = [];
+      const { currentSubtitleId } = this;
+      const currentVideoSegments = this.$refs.subtitleRenderer.videoSegments;
+      // generate valid subtitle list members
+      this.subtitleList.forEach((subtitleInfo) => {
+        const {
+          id, type, name, rank,
+        } = subtitleInfo;
+        if (id !== currentSubtitleId) {
+          finalList.push({
+            id, type, name, rank,
+          });
+        } else {
+          finalList.push({
+            id,
+            type,
+            name,
+            rank,
+            videoSegments: currentVideoSegments,
+          });
+        }
+      });
+
+      return {
+        videoSrc,
+        subtitles: finalList,
+      };
+    },
+    async allSubtitleListWatcher(newVal, oldVal) {
+      const pickValidProperties = val => pick(val, 'id', 'type', 'language', 'rank');
+      const extractReadySubtitles = subtitles => subtitles
+        .filter(({ loading }) => loading === 'ready' || loading === 'loaded')
+        .map((subtitleInfo) => {
+          const result = pickValidProperties(subtitleInfo);
+          if (result.id === this.currentSubtitleId && this.$refs.subtitleRenderer) {
+            result.videoSegments = this.$refs.subtitleRenderer.videoSegments;
+          }
+          if (this.subtitleInstances[result.id] && this.subtitleInstances[result.id].src) {
+            result.src = this.subtitleInstances[result.id].src;
+          }
+          return result;
+        });
+      const newSubtitles = differenceWith(
+        extractReadySubtitles(newVal),
+        extractReadySubtitles(oldVal),
+        isEqual,
+      );
+      const subtitleMap = newSubtitles
+        .reduce((finalMap, currentSubtitleInfo) => {
+          const { id } = currentSubtitleInfo;
+          const videoSrc = this.getVideoSrcById(id);
+          const subtitles = finalMap[videoSrc];
+          if (subtitles) {
+            finalMap[videoSrc] = [...subtitles, currentSubtitleInfo];
+          } else {
+            finalMap[videoSrc] = [currentSubtitleInfo];
+          }
+          return finalMap;
+        }, {});
+      const updateSubtitleListPromises = Object.keys(subtitleMap)
+        .map(videoSrc => updateSubtitleList(videoSrc, subtitleMap[videoSrc]));
+      return Promise.all(updateSubtitleListPromises);
     },
     makeSubtitleUploadParameter({ id, duration: playedTime }) {
       const result = {
@@ -338,7 +521,6 @@ export default {
     },
   },
   created() {
-    this.resetSubtitles();
     this.$bus.$on('add-subtitles', (subs) => {
       Promise.all(this.normalizeSubtitleList(subs)
         .map(sub => this.addSubtitle(sub, this.originSrc)))
@@ -347,8 +529,9 @@ export default {
           this.selectionComplete = true;
         });
     });
-    this.$bus.$on('refresh-subtitles', (types) => {
-      this.refreshSubtitles(types, this.originSrc);
+    this.$bus.$on('refresh-subtitles', ({ types, isInitial }) => {
+      this.refreshSubtitles(types, this.originSrc, isInitial);
+      this.isInitial = isInitial;
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
@@ -360,7 +543,6 @@ export default {
 
     function pushCurrentSubtitle() {
       if (this.currentSubtitleId) {
-        console.log(`Find subtitle id: ${this.currentSubtitleId}, about to upload.`);
         const currentSubtitleInfo = {
           ...this.subtitleList
             .find(({ id }) => id === this.currentSubtitleId),

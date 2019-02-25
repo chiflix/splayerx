@@ -13,19 +13,6 @@ describe('SubtitleLoader utils functions unit test', () => {
     sandbox.restore();
   });
 
-  describe('toArray unit tests', () => {
-    const { toArray } = utils;
-    it('should toArray turn one element to an array', () => {
-      expect(toArray(1)).to.deep.equal([1]);
-    });
-
-    it('should toArray return what it is when passed an array', () => {
-      const testArray = [];
-
-      expect(toArray(testArray)).to.equal(testArray);
-    });
-  });
-
   it('should localFormatLoader return extname without dot', () => {
     const { localFormatLoader } = utils;
 

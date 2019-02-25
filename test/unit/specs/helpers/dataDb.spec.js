@@ -1,7 +1,7 @@
 import { createSandbox } from 'sinon';
 import { flatten } from 'lodash';
 import dataDb, { DataDb, __RewireAPI__ as dataDbRewireAPI } from '@/helpers/dataDb';
-import { DOMStringListStub } from '../../helpers';
+import { DOMStringListStub, randStr } from '../../helpers';
 
 describe('class DataDb unit tests', () => {
   let sandbox;
@@ -219,20 +219,20 @@ describe('class DataDb unit tests', () => {
     let testDataDb;
     const testSchema = { name: testObjectStoreName };
 
-    let putStub;
+    let addStub;
     let objectStoreStub;
     let completeStub;
     let transactionStub;
     beforeEach(() => {
       testDataDb = new DataDb(1, testSchema);
 
-      putStub = sandbox.stub();
-      objectStoreStub = sandbox.stub().returns({ put: putStub });
-      completeStub = sandbox.stub().resolves(233);
+      addStub = sandbox.stub();
+      objectStoreStub = sandbox.stub().returns({ add: addStub });
+      completeStub = sandbox.stub().resolves();
       completeStub.withArgs(errorCompleteParam).rejects();
       transactionStub = sandbox.stub().returns({
         objectStore: objectStoreStub,
-        complete: completeStub,
+        complete: completeStub(),
       });
       sandbox.stub(testDataDb, 'getOwnDb').resolves({
         transaction: transactionStub,
@@ -243,7 +243,7 @@ describe('class DataDb unit tests', () => {
     it('should invoke proper params when add', (done) => {
       testDataDb.add(testObjectStoreName, testData)
         .then(() => {
-          sandbox.assert.calledWithExactly(putStub, testData);
+          sandbox.assert.calledWithExactly(addStub, testData);
           sandbox.assert.calledWithExactly(objectStoreStub, testObjectStoreName);
           sandbox.assert.calledWithExactly(transactionStub, testObjectStoreName, 'readwrite');
           done();
@@ -254,10 +254,90 @@ describe('class DataDb unit tests', () => {
         .catch(() => done())
         .then(done);
     });
-    it('should handle transaction error outside', (done) => {
+    it('should resolve new key when add succeeded', (done) => {
+      const newKey = 233;
+      addStub.resolves(newKey);
       testDataDb.add(testObjectStoreName, testData)
-        .then(res => res(errorCompleteParam))
-        .catch(() => done());
+        .then((key) => {
+          expect(key).to.equal(newKey);
+          done();
+        }).catch(done);
+    });
+    it('should reject when add failed', (done) => {
+      addStub.rejects();
+      testDataDb.add(testObjectStoreName, testData)
+        .catch(() => done())
+        .then(() => done('Should reject but it resolves.'));
+    });
+  });
+  describe('method - put unit tests', () => {
+    const testObjectStoreName = 'testObjectStore';
+    const errorCompleteParam = 'errorComplete';
+    const testData = { test: testObjectStoreName };
+    const testKeyPathVal = 1;
+    let testDataDb;
+    const testSchema = { name: testObjectStoreName };
+
+    let putStub;
+    let objectStoreStub;
+    let completeStub;
+    let transactionStub;
+    beforeEach(() => {
+      testDataDb = new DataDb(1, testSchema);
+
+      putStub = sandbox.stub();
+      objectStoreStub = sandbox.stub().returns({ put: putStub });
+      completeStub = sandbox.stub().resolves();
+      completeStub.withArgs(errorCompleteParam).rejects();
+      transactionStub = sandbox.stub().returns({
+        objectStore: objectStoreStub,
+        complete: completeStub(),
+      });
+      sandbox.stub(testDataDb, 'getOwnDb').resolves({
+        transaction: transactionStub,
+        objectStoreNames: new DOMStringListStub([testObjectStoreName]),
+      });
+    });
+
+    it('should invoke proper params when put', (done) => {
+      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+        .then(() => {
+          sandbox.assert.calledWithExactly(putStub, testData, testKeyPathVal);
+          sandbox.assert.calledWithExactly(objectStoreStub, testObjectStoreName);
+          sandbox.assert.calledWithExactly(transactionStub, testObjectStoreName, 'readwrite');
+          done();
+        }).catch(done);
+    });
+    it('should throw error when non-existent objectStoreName provided', (done) => {
+      testDataDb.put(testObjectStoreName.slice(1), testData, testKeyPathVal)
+        .catch(() => done())
+        .then(done);
+    });
+    it('should throw error when not providing out-of-line key objectStore with keyPathVal', (done) => {
+      testDataDb.put(testObjectStoreName, testData)
+        .catch(() => done())
+        .then(() => done('Should reject but it resolves'));
+    });
+    it('should throw error when providing in-line key objectStore with keyPathVal', (done) => {
+      objectStoreStub.returns({ put: putStub, keyPath: randStr() });
+      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+        .catch(() => done())
+        .then(() => done('Should reject but it resolves'));
+    });
+    it('should resolve new key when put succeeded', (done) => {
+      const newKey = 233;
+      putStub.resolves(newKey);
+      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+        .then((key) => {
+          expect(key).to.equal(newKey);
+          done();
+        }).catch(done);
+    });
+    it('should reject when put failed', (done) => {
+      putStub.rejects();
+      testDataDb.put(testObjectStoreName, testData, testKeyPathVal)
+        .catch(() => done())
+        .then(() => done('Should reject but it resolves.'));
     });
   });
   describe('method - delete unit tests', () => {
@@ -312,14 +392,6 @@ describe('class DataDb unit tests', () => {
 });
 describe('dataDb unit tests', () => {
   it('sanity - should dataDb be properly imported', () => {
-    expect(dataDb).not.to.equal(undefined);
-  });
-
-  let sandbox;
-  beforeEach(() => {
-    sandbox = createSandbox();
-  });
-  afterEach(() => {
-    sandbox.restore();
+    expect(dataDb).to.be.an.instanceOf(DataDb);
   });
 });

@@ -1,7 +1,7 @@
 import flow from 'lodash/flow';
 import { parse, toMS } from 'subtitle';
 
-import { localLanguageLoader, localNameLoader, loadLocalFile, localIdLoader } from './utils';
+import { localLanguageLoader, localNameLoader, loadLocalFile } from './utils';
 
 const baseTags = {
   // https://developer.mozilla.org/en-US/docs/Web/API/WebVTT_API#Cue_settings
@@ -34,7 +34,6 @@ export default {
   longName: 'WebVTT subtitle',
   name: 'webvtt',
   supportedFormats: ['vtt'],
-  id: localIdLoader,
   infoLoaders: {
     language: {
       func: localLanguageLoader,
