@@ -60,6 +60,7 @@
 
 <script>
 import path from 'path';
+import { mapGetters } from 'vuex';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -124,6 +125,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['dirname']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -188,8 +190,14 @@ export default {
     },
   },
   methods: {
-    open(link) {
-      this.openFilesByDialog({ defaultPath: link });
+    open() {
+      const { app } = this.$electron.remote;
+      if (this.dirname) {
+        this.openFilesByDialog();
+      } else {
+        this.$store.dispatch('UPDATE_DIRNAME', app.getPath('home'));
+        this.openFilesByDialog({ defaultPath: app.getPath('home') });
+      }
     },
     openOrMove() {
       if (this.firstIndex === 1) {

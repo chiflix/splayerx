@@ -53,6 +53,7 @@ const state = {
   intrinsicHeight: 0,
   ratio: 0,
   AudioDelay: 0,
+  dirname: '',
 };
 
 const getters = {
@@ -95,6 +96,7 @@ const getters = {
   ratio: state => state.ratio,
   AudioDelay: state => state.AudioDelay,
   mediaHash: state => state.mediaHash,
+  dirname: state => state.dirname,
 };
 
 function stateToMutation(stateType) {
@@ -285,6 +287,10 @@ const actions = {
   [videoActions.REMOVE_ALL_AUDIO_TRACK]({ commit, state }) {
     const newAudioTracks = generateTracks('removeAll', null, state.audioTrackList);
     commit(videoMutations.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+  },
+  [videoActions.UPDATE_DIRNAME]({ commit }, delta) {
+    console.log(delta);
+    commit(videoMutations.DIRNAME_UPDATE, delta);
   },
 };
 

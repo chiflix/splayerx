@@ -115,7 +115,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
-      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc']),
+      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'dirname']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -304,7 +304,12 @@ new Vue({
               label: this.$t('msg.file.open'),
               accelerator: 'CmdOrCtrl+O',
               click: () => {
-                this.openFilesByDialog();
+                if (this.dirname) {
+                  this.openFilesByDialog();
+                } else {
+                  this.$store.dispatch('UPDATE_DIRNAME', app.getPath('home'));
+                  this.openFilesByDialog({ defaultPath: app.getPath('home') });
+                }
               },
             },
             {
