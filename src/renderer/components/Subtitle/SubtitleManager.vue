@@ -12,7 +12,7 @@
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
-import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick } from 'lodash';
+import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import Sagi from '@/helpers/sagi';
 import {
@@ -152,25 +152,13 @@ export default {
           sortBy(preferredLanguages),
         ) || !storedOnlineSubtitleIds.length;
         resetOnlineSubtitles();
-        if (!this.isInitial || clearOnline) {
-          subtitleRequests.push(getOnlineSubtitlesList(
-            videoSrc,
-            preferredLanguages,
-            storedOnlineSubtitleIds,
-          ));
-        } else {
-          const retrieveSubtitlePromise = id => retrieveSubtitle(id)
-            .then(({ src, data, language }) => ({
-              src,
-              type: 'online',
-              options: { language, data, id },
-            }))
-            .catch(err => err);
-          const retrieveSubtitles = Promise.all(storedOnlineSubtitleIds
-            .map(retrieveSubtitlePromise)
-            .filter(result => !(result instanceof Error)));
-          subtitleRequests.push(retrieveSubtitles);
-        }
+        const isFetching = !this.isInitial || clearOnline;
+        subtitleRequests.push(getOnlineSubtitlesList(
+          videoSrc,
+          isFetching,
+          storedOnlineSubtitleIds,
+          preferredLanguages,
+        ));
       }
 
       if (!this.isInitial) {
@@ -199,56 +187,39 @@ export default {
     async getLocalSubtitlesList(videoSrc, storedSubs) {
       const newLocalSubs = await searchForLocalList(videoSrc, SubtitleLoader.supportedFormats)
         .catch(() => []);
-      storedSubs.forEach((sub) => {
-        const existedSubIndex = newLocalSubs.findIndex(({ src }) => src === sub.src);
-        if (existedSubIndex !== -1) {
-          const existedSub = newLocalSubs[existedSubIndex];
-          newLocalSubs[existedSubIndex] = {
-            ...existedSub,
-            options: { ...existedSub.options, id: sub.id },
-          };
-        } else {
-          newLocalSubs.push({
-            src: sub.src,
-            type: 'local',
-            options: { id: sub.id },
-          });
-        }
-      });
-      return newLocalSubs;
+      return values(mergeWith(
+        keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'local', options: { id } })), 'src'),
+        keyBy(newLocalSubs, 'src'),
+      ));
     },
-    async getOnlineSubtitlesList(videoSrc, languages, storedSubtitleIds) {
-      if (!languages || !languages.length) return [];
-      function getOnlineSubtitlesWithErrorHandling(language) {
-        return fetchOnlineList(videoSrc, language).catch(() => []);
+    async getOnlineSubtitlesList(videoSrc, isFetching, storedSubIds, languages) {
+      if (!isFetching) {
+        const retrieveSub = id => retrieveSubtitle(id)
+          .then(({ src, data, language }) => ({
+            src,
+            type: 'online',
+            options: { language, data, id },
+          }))
+          .catch(() => []);
+        const storedSubs = await Promise.all(storedSubIds.map(retrieveSub)).then(flatten);
+        if (storedSubs.length) {
+          return storedSubs;
+        }
       }
-      await deleteSubtitles(storedSubtitleIds);
-      return Promise.all(languages.map(getOnlineSubtitlesWithErrorHandling))
-        .then(subtitleLists => flatten(subtitleLists));
+      const fetchSubs = lang => fetchOnlineList(videoSrc, lang).catch(() => []);
+      const newSubs = await Promise.all(languages.map(fetchSubs)).then(flatten);
+      deleteSubtitles(storedSubIds);
+      return newSubs;
     },
     async getEmbeddedSubtitlesList(videoSrc, storedSubs) {
-      let newEmbeddedSubs = await retrieveEmbeddedList(
+      const newEmbeddedSubs = await retrieveEmbeddedList(
         videoSrc,
         SubtitleLoader.supportedCodecs,
-      ).catch(() => []);
-      newEmbeddedSubs = newEmbeddedSubs instanceof Array ? newEmbeddedSubs : [newEmbeddedSubs];
-      storedSubs.forEach((sub) => {
-        const existedSubIndex = newEmbeddedSubs.findIndex(({ src }) => src === sub.src);
-        if (existedSubIndex !== -1) {
-          const existedSub = newEmbeddedSubs[existedSubIndex];
-          newEmbeddedSubs[existedSubIndex] = {
-            ...existedSub,
-            options: { ...existedSub.options, id: sub.id },
-          };
-        } else {
-          newEmbeddedSubs.push({
-            src: sub.src,
-            type: 'embedded',
-            options: { id: sub.id },
-          });
-        }
-      });
-      return newEmbeddedSubs;
+      ).catch(() => []).then(castArray);
+      return values(mergeWith(
+        keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'embedded', options: { id } })), 'src'),
+        keyBy(newEmbeddedSubs, 'src'),
+      ));
     },
     async addSubtitle({ src, type, options }, videoSrc) {
       if (options.id) {

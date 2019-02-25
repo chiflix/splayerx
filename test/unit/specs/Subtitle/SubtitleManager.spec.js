@@ -227,11 +227,13 @@ describe('Subtitle Manager Unit Tests', () => {
 
   describe('method - getOnlineSubtitlesList', () => {
     let videoSrc;
+    let testStoredSubIds;
     let getOnlineSubtitlesList;
     let fetchOnlineListStub;
 
     beforeEach(() => {
       videoSrc = randStr();
+      testStoredSubIds = [];
       ({ getOnlineSubtitlesList } = wrapper.vm);
 
       fetchOnlineListStub = sandbox.stub().resolves(videoSrc.split(''));
@@ -244,7 +246,7 @@ describe('Subtitle Manager Unit Tests', () => {
     });
 
     it('should resolve an empty array when no languages provided', (done) => {
-      getOnlineSubtitlesList(videoSrc)
+      getOnlineSubtitlesList(videoSrc, true, testStoredSubIds, [])
         .then((results) => {
           expect(results).to.deep.equal([]);
           done();
@@ -253,7 +255,7 @@ describe('Subtitle Manager Unit Tests', () => {
     });
 
     it('should invoke fetchOnlineList', (done) => {
-      getOnlineSubtitlesList(videoSrc, [randStr()], [])
+      getOnlineSubtitlesList(videoSrc, true, testStoredSubIds, [randStr()])
         .then(() => {
           expect(fetchOnlineListStub).to.have.been.called;
           done();
@@ -262,7 +264,7 @@ describe('Subtitle Manager Unit Tests', () => {
 
     it('should invoke fetchOnlineList with videoSrc and language', (done) => {
       const randomLanguages = [randStr(), randStr()];
-      getOnlineSubtitlesList(videoSrc, randomLanguages)
+      getOnlineSubtitlesList(videoSrc, true, testStoredSubIds, randomLanguages)
         .then(() => {
           expect(fetchOnlineListStub).to.have.been.calledWithExactly(videoSrc, randomLanguages[0]);
           expect(fetchOnlineListStub).to.have.been.calledWithExactly(videoSrc, randomLanguages[1]);
@@ -272,7 +274,7 @@ describe('Subtitle Manager Unit Tests', () => {
 
     it('should slience errors from fetchOnlineList', (done) => {
       const languages = [randStr(), errorVideoSrc];
-      getOnlineSubtitlesList(videoSrc, languages)
+      getOnlineSubtitlesList(videoSrc, true, testStoredSubIds, languages)
         .then((results) => {
           expect(results).to.not.include([...errorVideoSrc.split('')]);
           done();
