@@ -125,7 +125,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['dirname']),
+    ...mapGetters(['defaultDir']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -192,11 +192,11 @@ export default {
   methods: {
     open() {
       const { app } = this.$electron.remote;
-      if (this.dirname) {
+      if (this.defaultDir) {
         this.openFilesByDialog();
       } else {
         const defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
-        this.$store.dispatch('UPDATE_DIRNAME', defaultPath);
+        this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
         this.openFilesByDialog({ defaultPath });
       }
     },

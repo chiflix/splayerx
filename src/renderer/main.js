@@ -115,7 +115,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
-      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'dirname']),
+      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -304,11 +304,11 @@ new Vue({
               label: this.$t('msg.file.open'),
               accelerator: 'CmdOrCtrl+O',
               click: () => {
-                if (this.dirname) {
+                if (this.defaultDir) {
                   this.openFilesByDialog();
                 } else {
                   const defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
-                  this.$store.dispatch('UPDATE_DIRNAME', defaultPath);
+                  this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
                   this.openFilesByDialog({ defaultPath });
                 }
               },
