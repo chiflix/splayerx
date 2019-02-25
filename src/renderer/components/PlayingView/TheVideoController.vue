@@ -22,6 +22,7 @@
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets"/>
     <play-button class="play-button no-drag"
+      :mousemovePosition="mousemovePosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
     <volume-indicator :showAllWidgets="showAllWidgets" />
@@ -496,7 +497,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 2;
+  z-index: 101;
 }
 .masking {
   position: absolute;
@@ -517,7 +518,7 @@ export default {
   position: absolute;
   bottom: 0;
   width: 100%;
-  z-index: 1000; // in front of all widgets
+  z-index: 100; // in front of all widgets
 }
 
 .translate-enter-active, .translate-leave-active {

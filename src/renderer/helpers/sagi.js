@@ -27,7 +27,12 @@ class Sagi {
       const metadata = new grpc.Metadata();
       metadata.set('uuid', Vue.http.headers.common['X-Application-Token']);
       metadata.set('agent', Vue.http.headers.common['User-Agent']);
-      cb(null, metadata);
+      Vue.http.get('https://ip.xindong.com/myip').then((response) => {
+        metadata.set('clientip', response.bodyText);
+        cb(null, metadata);
+      }, (response) => {
+        cb(null, metadata);
+      });
     };
     const metadataCreds = grpc.credentials.createFromMetadataGenerator(metadataUpdater);
     const combinedCreds = grpc.credentials.combineChannelCredentials(sslCreds, metadataCreds);
