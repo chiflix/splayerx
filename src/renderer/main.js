@@ -114,7 +114,8 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused']),
+    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
+      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -442,7 +443,7 @@ new Vue({
 
                 dialog.showOpenDialog(focusWindow, {
                   title: 'Open Dialog',
-                  defaultPath: './',
+                  defaultPath: Path.dirname(this.originSrc),
                   filters: [{
                     name: 'Subtitle Files',
                     extensions: VALID_EXTENSION,
