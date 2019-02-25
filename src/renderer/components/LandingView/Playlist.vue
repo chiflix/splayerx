@@ -195,8 +195,9 @@ export default {
       if (this.dirname) {
         this.openFilesByDialog();
       } else {
-        this.$store.dispatch('UPDATE_DIRNAME', app.getPath('home'));
-        this.openFilesByDialog({ defaultPath: app.getPath('home') });
+        const defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
+        this.$store.dispatch('UPDATE_DIRNAME', defaultPath);
+        this.openFilesByDialog({ defaultPath });
       }
     },
     openOrMove() {

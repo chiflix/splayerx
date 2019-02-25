@@ -289,7 +289,6 @@ const actions = {
     commit(videoMutations.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
   [videoActions.UPDATE_DIRNAME]({ commit }, delta) {
-    console.log(delta);
     commit(videoMutations.DIRNAME_UPDATE, delta);
   },
 };
