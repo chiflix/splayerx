@@ -22,7 +22,7 @@
 </template>
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import { isEqual, toArray, isEmpty } from 'lodash';
+import { isEqual, castArray, isEmpty } from 'lodash';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
 import CueRenderer from './CueRenderer.vue';
@@ -166,8 +166,8 @@ export default {
           const tmp = cues;
           if (cues.length >= 2) {
             for (let i = 0; i < tmp.length; i += 1) {
-              const pre = toArray(tmp[i]);
-              const next = toArray(tmp[i + 1]);
+              const pre = castArray(tmp[i]);
+              const next = castArray(tmp[i + 1]);
               if (next) {
                 pre.splice(2, 1);
                 next.splice(2, 1);

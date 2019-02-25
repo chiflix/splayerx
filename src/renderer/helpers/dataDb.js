@@ -1,6 +1,12 @@
 import { openDb } from 'idb';
 import { includes } from 'lodash';
-import { DATADB_NAME as dBName, DATADB_SHCEMAS as schemas } from '@/constants';
+import {
+  DATADB_VERSION as currentVersion,
+  DATADB_NAME as dBName,
+  DATADB_SHCEMAS as schemas,
+} from '@/constants';
+
+const currentSchema = schemas.find(({ version }) => version === currentVersion).schema;
 
 export class DataDb {
   #db;
@@ -82,18 +88,42 @@ export class DataDb {
     const db = await this.getOwnDb();
     const { objectStoreNames } = db;
     if (!objectStoreNames.contains(objectStoreName)) {
-      throw new Error(`Object store ${objectStoreName} does not exist. Add them to constant.js please.`);
+      throw new Error(`ObjectStore ${objectStoreName} does not exist. Add them to constant.js please.`);
     }
     const tx = db.transaction(objectStoreName, 'readwrite');
-    tx.objectStore(objectStoreName).put(data);
-    return tx.complete;
+    try {
+      const newKey = await tx.objectStore(objectStoreName).add(data);
+      await tx.complete;
+      return newKey;
+    } catch (err) { throw err; }
+  }
+
+  async put(objectStoreName, data, keyPathVal) {
+    const db = await this.getOwnDb();
+    const { objectStoreNames } = db;
+    if (!objectStoreNames.contains(objectStoreName)) {
+      throw new Error(`ObjectStore ${objectStoreName} does not exist. Add them to constant.js please.`);
+    }
+    const tx = db.transaction(objectStoreName, 'readwrite');
+    // check if the objectStore used out-of-line key
+    const isInlineObjectStore = !!tx.objectStore(objectStoreName).keyPath;
+    if (isInlineObjectStore && keyPathVal) {
+      throw new Error('Providing an inline objectStore with keyPathVal is invalid.');
+    } else if (!isInlineObjectStore && !keyPathVal) {
+      throw new Error('Providing out-of-line objectStore without keyPathVal is invalid.');
+    }
+    try {
+      const newKey = await tx.objectStore(objectStoreName).put(data, keyPathVal);
+      await tx.complete;
+      return newKey;
+    } catch (err) { throw err; }
   }
 
   async delete(objectStoreName, keyPathVal) {
     const db = await this.getOwnDb();
     const { objectStoreNames } = db;
     if (!objectStoreNames.contains(objectStoreName)) {
-      throw new Error(`Object store ${objectStoreName} does not exist. Add them to @/constant.js please.`);
+      throw new Error(`ObjectStore ${objectStoreName} does not exist. Add them to constant.js please.`);
     }
     const tx = db.transaction(objectStoreName, 'readwrite');
     tx.objectStore(objectStoreName).delete(keyPathVal);
@@ -101,4 +131,4 @@ export class DataDb {
   }
 }
 
-export default new DataDb(schemas[0].version, schemas[0].schema);
+export default new DataDb(currentVersion, currentSchema);

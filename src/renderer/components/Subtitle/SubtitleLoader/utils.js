@@ -10,11 +10,9 @@ import { normalizeCode } from '@/helpers/language';
 import SubtitleLoader from './index';
 import { SubtitleError, ErrorCodes } from './errors';
 
-export { normalizeCode };
+export { castArray } from 'lodash';
 
-export function toArray(element) {
-  return element instanceof Array ? element : [element];
-}
+export { normalizeCode };
 
 export const mediaHash = helpers.methods.mediaQuickHash;
 
@@ -105,10 +103,6 @@ export async function localLanguageLoader(path, format) {
     });
     throw new SubtitleError(ErrorCodes.ENCODING_UNSUPPORTED_ENCODING, `Unsupported encoding: ${fileEncoding}.`);
   }
-}
-
-export async function localIdLoader(path) {
-  return `${path}-${(await mediaHash(path))}`;
 }
 
 export function localNameLoader(path) {

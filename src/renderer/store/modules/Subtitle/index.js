@@ -27,11 +27,10 @@ const state = {
 
 const getters = {
   currentSubtitleId: state => state.currentSubtitleId,
-  subtitleList: ({
-    videoSubtitleMap, loadingStates, names, languages, formats, ranks, types,
-  }, { originSrc }) =>
-    (videoSubtitleMap[originSrc] || [])
-      .filter(id => loadingStates[id] !== 'failed')
+  allSubtitleList: ({
+    loadingStates, names, languages, formats, ranks, types,
+  }) => (
+    Object.keys(loadingStates)
       .map(id => ({
         id,
         name: names[id],
@@ -41,7 +40,13 @@ const getters = {
         loading: loadingStates[id],
         type: types[id],
       }))
+  ),
+  subtitleList: ({ videoSubtitleMap }, { originSrc, allSubtitleList }) =>
+    (videoSubtitleMap[originSrc] || [])
+      .map(subtitleId => allSubtitleList.find(({ id }) => id === subtitleId))
       .sort((a, b) => b.rank - a.rank),
+  getVideoSrcById: ({ videoSubtitleMap }) => id =>
+    (Object.keys(videoSubtitleMap).find(videoSrc => videoSubtitleMap[videoSrc].includes(id))),
   subtitleDelay: state => state.subtitleDelay,
   chosenStyle: state => state.chosenStyle,
   chosenSize: state => state.chosenSize,
