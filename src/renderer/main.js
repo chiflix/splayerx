@@ -555,14 +555,14 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.increaseSubtitleDelay'),
-              accelerator: 'CmdOrCtrl+]',
+              accelerator: 'CmdOrCtrl+=',
               click: () => {
                 this.$store.dispatch('updateSubDelay', { num: 0.1, manual: false });
               },
             },
             {
               label: this.$t('msg.subtitle.decreaseSubtitleDelay'),
-              accelerator: 'CmdOrCtrl+[',
+              accelerator: 'CmdOrCtrl+-',
               click: () => {
                 this.$store.dispatch('updateSubDelay', { num: -0.1, manual: false });
               },
