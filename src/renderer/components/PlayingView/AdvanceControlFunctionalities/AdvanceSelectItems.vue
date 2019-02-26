@@ -110,10 +110,14 @@ export default {
         if (IntegerReg.test(nowInput) || DecimalReg.test(nowInput)) {
           e.returnValue = false;
         }
-      } else if (e.key === '-' && nowInput) {
-        e.returnValue = false;
-      } else if (e.key === '.' && !nowInput) {
-        e.returnValue = false;
+      } else if (e.key === '-') {
+        if (nowInput) {
+          e.returnValue = false;
+        }
+      } else if (e.key === '.') {
+        if (!nowInput) {
+          e.returnValue = false;
+        }
       } else {
         e.returnValue = false;
       }
