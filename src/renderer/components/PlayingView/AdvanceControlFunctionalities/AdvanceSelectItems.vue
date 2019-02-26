@@ -16,7 +16,7 @@
           color: color,
           transition: 'color 300ms',
         }">{{ item }}</div>
-      <div class="rightItem" :style="{ color: color }">{{ isChosen ? timeUnits : item === this.$t('advance.subDelay') ? screenSubtitleDelay : audioDelay }}</div>
+      <div class="rightItem" :style="{ color: color }">{{ item === this.$t('advance.subDelay') ? screenSubtitleDelay : audioDelay }}</div>
     </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -25,8 +25,7 @@
              @mousedown.native="handleDeMousedown"
              @mouseup.native="handleDeMouseup"
              @mouseleave.native="handleDeMouseup"></Icon>
-           <div class="card"></div>
-           <div class="delay">{{ delayNum }}</div>
+           <input class="card" id='delayValue' :value="delayNum" @blur="losePoint" @keypress="handleKeypress">
            <Icon type="plus" class="increase"
              @mousedown.native="handleInMousedown"
              @mouseup.native="handleInMouseup"
@@ -80,21 +79,8 @@ export default {
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
     },
-    timeUnits() {
-      if (this.item === this.$t('advance.subDelay')) {
-        if (Math.abs(this.subtitleDelay) >= 10000) {
-          return 's';
-        }
-      } else if (Math.abs(this.AudioDelay) >= 10000) {
-        return 's';
-      }
-      return 'ms';
-    },
     screenSubtitleDelay() {
-      if (Math.abs(this.subtitleDelay) >= 10000) {
-        return `${this.subtitleDelay / 1000} s`;
-      }
-      return `${this.subtitleDelay} ms`;
+      return `${this.subtitleDelay / 1000} s`;
     },
     audioDelay() {
       if (Math.abs(this.AudioDelay) >= 10000) {
@@ -104,27 +90,42 @@ export default {
     },
     delayNum() {
       if (this.item === this.$t('advance.subDelay')) {
-        if (Math.abs(this.subtitleDelay) >= 10000) {
-          return `${this.subtitleDelay / 1000}`;
-        }
-        return this.subtitleDelay;
+        return `${this.subtitleDelay / 1000}`;
       }
       if (Math.abs(this.AudioDelay) >= 10000) {
         return `${this.AudioDelay / 1000}`;
       }
       return this.AudioDelay;
     },
-    changeDelay() {
-      if (Math.abs(this.subtitleDelay) >= 10000 || Math.abs(this.AudioDelay) >= 10000) {
-        return 100;
-      }
-      return 50;
-    },
   },
   components: {
     Icon,
   },
   methods: {
+    handleKeypress(e) {
+      const nowInput = document.querySelector('#delayValue').value;
+      if (e.key >= 0 && e.key <= 9) {
+        const IntegerReg = new RegExp(/^[-]?[\d]{5}$/);
+        const DecimalReg = new RegExp(/^[-]?[\d]+([.][\d])/);
+        if (IntegerReg.test(nowInput) || DecimalReg.test(nowInput)) {
+          e.returnValue = false;
+        }
+      } else if (e.key === '-' && nowInput) {
+        e.returnValue = false;
+      } else if (e.key === '.' && !nowInput) {
+        e.returnValue = false;
+      } else {
+        e.returnValue = false;
+      }
+    },
+    losePoint() {
+      const formater = new RegExp(/^[-]?[\d]+([.][\d])?$/);
+      const inputDelayNum = document.querySelector('#delayValue').value;
+      if ((formater.test(inputDelayNum) || inputDelayNum === '') && inputDelayNum !== this.delayNum) {
+        console.log(inputDelayNum);
+        this.$store.dispatch('updateSubDelay', { num: inputDelayNum || 0, manual: true });
+      }
+    },
     handleDeMousedown() {
       if (this.item === this.$t('advance.subDelay')) {
         const myFunction = () => {
@@ -132,10 +133,10 @@ export default {
           if (this.changeSpeed >= 20) {
             this.changeSpeed -= 2;
           }
-          this.$store.dispatch('updateSubDelay', -this.changeDelay);
+          this.$store.dispatch('updateSubDelay', { num: -0.5, manual: false });
           this.timeDeInt = setInterval(myFunction, this.changeSpeed);
         };
-        this.$store.dispatch('updateSubDelay', -this.changeDelay);
+        this.$store.dispatch('updateSubDelay', { num: -0.5, manual: false });
         this.timeDeSet = setTimeout(() => {
           myFunction(myFunction, this.changeSpeed);
         }, 500);
@@ -155,10 +156,10 @@ export default {
           if (this.changeSpeed >= 20) {
             this.changeSpeed -= 2;
           }
-          this.$store.dispatch('updateSubDelay', this.changeDelay);
+          this.$store.dispatch('updateSubDelay', { num: 0.5, manual: false });
           this.timeInInt = setInterval(myFunction, this.changeSpeed);
         };
-        this.$store.dispatch('updateSubDelay', this.changeDelay);
+        this.$store.dispatch('updateSubDelay', { num: 0.5, manual: false });
         this.timeInSet = setTimeout(() => {
           myFunction(myFunction, this.changeSpeed);
         }, 500);
@@ -208,10 +209,9 @@ export default {
           width: 41px;
           height: 27px;
           margin-right: 10px;
-        }
-        .delay {
           font-size: 11px;
-          margin-top: 6.5px;
+          color: rgba(255, 255, 255, 0.9);
+          text-align: center;
         }
       }
     }
@@ -257,10 +257,9 @@ export default {
           width: 49.2px;
           height: 32.4px;
           margin-right: 12px;
-        }
-        .delay {
           font-size: 13.2px;
-          margin-top: 7.8px;
+          color: rgba(255, 255, 255, 0.9);
+          text-align: center;
         }
       }
     }
@@ -307,10 +306,9 @@ export default {
           width: 68.88px;
           height: 45.36px;
           margin-right: 16.8px;
-        }
-        .delay {
           font-size: 18.48px;
-          margin-top: 10.92px;
+          color: rgba(255, 255, 255, 0.9);
+          text-align: center;
         }
       }
     }
@@ -360,15 +358,9 @@ export default {
       .card {
         cursor: default;
         border-radius: 7px;
-        opacity: 0.4;
-        border: 0.5px solid rgba(255, 255, 255, 0.20);
-        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+        border: 0.5px solid rgba(255, 255, 255, 0.08);
+        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.036) 44%, rgba(255, 255, 255, 0.02) 100%);
         box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
-      }
-      .delay{
-        cursor: default;
-        position: absolute;
-        color: rgba(255, 255, 255, 0.9);
       }
       .decrease {
         cursor: pointer;

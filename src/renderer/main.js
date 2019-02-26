@@ -553,8 +553,20 @@ new Vue({
               ],
             },
             { type: 'separator' },
-            { label: this.$t('msg.subtitle.increaseSubtitleDelay'), enabled: false },
-            { label: this.$t('msg.subtitle.decreaseSubtitleDelay'), enabled: false },
+            {
+              label: this.$t('msg.subtitle.increaseSubtitleDelay'),
+              accelerator: 'CmdOrCtrl+]',
+              click: () => {
+                this.$store.dispatch('updateSubDelay', { num: 0.1, manual: false });
+              },
+            },
+            {
+              label: this.$t('msg.subtitle.decreaseSubtitleDelay'),
+              accelerator: 'CmdOrCtrl+[',
+              click: () => {
+                this.$store.dispatch('updateSubDelay', { num: -0.1, manual: false });
+              },
+            },
             // { type: 'separator' },
             // { label: 'Smart Translating' },
             // { label: 'Search on Shooter.cn' },
