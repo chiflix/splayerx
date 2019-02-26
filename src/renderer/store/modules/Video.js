@@ -230,18 +230,18 @@ const actions = {
     commit(videoMutations.MUTED_UPDATE, !state.muted);
   },
   [videoActions.INCREASE_RATE]({ commit, state }) {
-    const rateArr = [0.5, 1, 1.2, 1.5, 2];
-    const finalRate = rateArr[rateArr.indexOf(state.rate) + 1];
-    commit(videoMutations.RATE_UPDATE, finalRate || state.rate);
+    let nowRate = state.rate;
+    const finalRate = nowRate < 4 ? nowRate += 0.1 : nowRate;
+    commit(videoMutations.RATE_UPDATE, parseFloat(finalRate.toPrecision(12)));
   },
   [videoActions.UPDATE_PLAYINGLIST_RATE]({ commit, state }, delta) {
     const newPlayinglistRateGroup = generateRate(delta, state.rate, state.playinglistRate);
     commit(videoMutations.PLAYINGLIST_RATE_UPDATE, newPlayinglistRateGroup);
   },
   [videoActions.DECREASE_RATE]({ commit, state }) {
-    const rateArr = [0.5, 1, 1.2, 1.5, 2];
-    const finalRate = rateArr[rateArr.indexOf(state.rate) - 1];
-    commit(videoMutations.RATE_UPDATE, finalRate || state.rate);
+    let nowRate = state.rate;
+    const finalRate = nowRate > 0.1 ? nowRate -= 0.1 : nowRate;
+    commit(videoMutations.RATE_UPDATE, parseFloat(finalRate.toPrecision(12)));
   },
   [videoActions.CHANGE_RATE]({ commit }, delta) {
     commit(videoMutations.RATE_UPDATE, delta);

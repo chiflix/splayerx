@@ -17,7 +17,7 @@
             color: color,
             transition: 'color 300ms',
           }">{{ item }}</div>
-        <div class="rightItem" v-show="!isChosen">{{ showDetail }}</div>
+        <div class="rightItem" v-show="!isChosen || this.item === this.$t('advance.rateTitle')">{{ showDetail }}</div>
       </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -40,10 +40,12 @@
                 }">{{ list }}
               </div>
             </div>
-            <div :class="cardType" :style="{
-              left: cardPos,
-              transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
-            }"></div>
+            <div :class="cardType"
+              v-show="this.item !== this.$t('advance.rateTitle') || this.lists.includes(this.rate)"
+              :style="{
+                left: cardPos,
+                transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
+              }"></div>
           </div>
         </div>
       </transition>
