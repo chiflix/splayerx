@@ -122,7 +122,6 @@ export default {
       const formater = new RegExp(/^[-]?[\d]+([.][\d])?$/);
       const inputDelayNum = document.querySelector('#delayValue').value;
       if ((formater.test(inputDelayNum) || inputDelayNum === '') && inputDelayNum !== this.delayNum) {
-        console.log(inputDelayNum);
         this.$store.dispatch('updateSubDelay', { num: inputDelayNum || 0, manual: true });
       }
     },
