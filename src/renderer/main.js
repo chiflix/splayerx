@@ -949,7 +949,7 @@ new Vue({
         this.menu.popup(this.$electron.remote.getCurrentWindow());
       }
     });
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
       switch (e.key) {
         case 'ArrowLeft':
           if (e.altKey === true) {
@@ -959,6 +959,16 @@ new Vue({
         case 'ArrowRight':
           if (e.altKey === true) {
             this.$bus.$emit('seek', videodata.time + 60);
+          }
+          break;
+        case '-':
+          if (e.shiftKey === true && e.metaKey === true) {
+            this.$store.dispatch('updateSubDelay', { num: -0.5, manual: false });
+          }
+          break;
+        case '=':
+          if (e.shiftKey === true && e.metaKey === true) {
+            this.$store.dispatch('updateSubDelay', { num: 0.5, manual: false });
           }
           break;
         default:

@@ -25,7 +25,8 @@
              @mousedown.native="handleDeMousedown"
              @mouseup.native="handleDeMouseup"
              @mouseleave.native="handleDeMouseup"></Icon>
-           <input class="card" id='delayValue' :value="delayNum" @blur="losePoint" @keypress="handleKeypress">
+           <div class="card"></div>
+           <div class="delay">{{ delayNum }}</div>
            <Icon type="plus" class="increase"
              @mousedown.native="handleInMousedown"
              @mouseup.native="handleInMouseup"
@@ -102,33 +103,6 @@ export default {
     Icon,
   },
   methods: {
-    handleKeypress(e) {
-      const nowInput = document.querySelector('#delayValue').value;
-      if (e.key >= 0 && e.key <= 9) {
-        const IntegerReg = new RegExp(/^[-]?[\d]{5}$/);
-        const DecimalReg = new RegExp(/^[-]?[\d]+([.][\d])/);
-        if (IntegerReg.test(nowInput) || DecimalReg.test(nowInput)) {
-          e.returnValue = false;
-        }
-      } else if (e.key === '-') {
-        if (nowInput) {
-          e.returnValue = false;
-        }
-      } else if (e.key === '.') {
-        if (!nowInput) {
-          e.returnValue = false;
-        }
-      } else {
-        e.returnValue = false;
-      }
-    },
-    losePoint() {
-      const formater = new RegExp(/^[-]?[\d]+([.][\d])?$/);
-      const inputDelayNum = document.querySelector('#delayValue').value;
-      if ((formater.test(inputDelayNum) || inputDelayNum === '') && inputDelayNum !== this.delayNum) {
-        this.$store.dispatch('updateSubDelay', { num: inputDelayNum || 0, manual: true });
-      }
-    },
     handleDeMousedown() {
       if (this.item === this.$t('advance.subDelay')) {
         const myFunction = () => {
@@ -136,10 +110,10 @@ export default {
           if (this.changeSpeed >= 20) {
             this.changeSpeed -= 2;
           }
-          this.$store.dispatch('updateSubDelay', { num: -0.5, manual: false });
+          this.$store.dispatch('updateSubDelay', { num: -0.1, manual: false });
           this.timeDeInt = setInterval(myFunction, this.changeSpeed);
         };
-        this.$store.dispatch('updateSubDelay', { num: -0.5, manual: false });
+        this.$store.dispatch('updateSubDelay', { num: -0.1, manual: false });
         this.timeDeSet = setTimeout(() => {
           myFunction(myFunction, this.changeSpeed);
         }, 500);
@@ -159,10 +133,10 @@ export default {
           if (this.changeSpeed >= 20) {
             this.changeSpeed -= 2;
           }
-          this.$store.dispatch('updateSubDelay', { num: 0.5, manual: false });
+          this.$store.dispatch('updateSubDelay', { num: 0.1, manual: false });
           this.timeInInt = setInterval(myFunction, this.changeSpeed);
         };
-        this.$store.dispatch('updateSubDelay', { num: 0.5, manual: false });
+        this.$store.dispatch('updateSubDelay', { num: 0.1, manual: false });
         this.timeInSet = setTimeout(() => {
           myFunction(myFunction, this.changeSpeed);
         }, 500);
@@ -212,9 +186,10 @@ export default {
           width: 41px;
           height: 27px;
           margin-right: 10px;
+        }
+        .delay {
           font-size: 11px;
-          color: rgba(255, 255, 255, 0.9);
-          text-align: center;
+          margin-top: 6.5px;
         }
       }
     }
@@ -260,9 +235,10 @@ export default {
           width: 49.2px;
           height: 32.4px;
           margin-right: 12px;
+        }
+        .delay {
           font-size: 13.2px;
-          color: rgba(255, 255, 255, 0.9);
-          text-align: center;
+          margin-top: 7.8px;
         }
       }
     }
@@ -309,9 +285,10 @@ export default {
           width: 68.88px;
           height: 45.36px;
           margin-right: 16.8px;
+        }
+        .delay{
           font-size: 18.48px;
-          color: rgba(255, 255, 255, 0.9);
-          text-align: center;
+          margin-top: 10.92px;
         }
       }
     }
@@ -361,9 +338,15 @@ export default {
       .card {
         cursor: default;
         border-radius: 7px;
-        border: 0.5px solid rgba(255, 255, 255, 0.08);
-        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.036) 44%, rgba(255, 255, 255, 0.02) 100%);
+        opacity: 0.4;
+        border: 0.5px solid rgba(255, 255, 255, 0.20);
+        background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
         box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
+      }
+      .delay{
+        cursor: default;
+        position: absolute;
+        color: rgba(255, 255, 255, 0.9);
       }
       .decrease {
         cursor: pointer;
