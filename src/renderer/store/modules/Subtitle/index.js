@@ -99,10 +99,10 @@ const mutations = {
     state.currentSubtitleId = subtitleId;
   },
   UpdateDelay(state, payload) {
-    if (payload.num === 0 || payload.manual) {
-      state.subtitleDelay = payload.num * 1000;
-    } else {
-      state.subtitleDelay += payload.num * 1000;
+    if (payload === 0) {
+      state.subtitleDelay = payload;
+    } else if (Math.abs((state.subtitleDelay / 1000) + payload) <= 10000) {
+      state.subtitleDelay += payload * 1000;
     }
   },
   UpdateScale(state, payload) {

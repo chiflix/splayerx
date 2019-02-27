@@ -557,14 +557,14 @@ new Vue({
               label: this.$t('msg.subtitle.increaseSubtitleDelay'),
               accelerator: 'CmdOrCtrl+=',
               click: () => {
-                this.$store.dispatch('updateSubDelay', { num: 0.1, manual: false });
+                this.$store.dispatch('updateSubDelay', 0.1);
               },
             },
             {
               label: this.$t('msg.subtitle.decreaseSubtitleDelay'),
               accelerator: 'CmdOrCtrl+-',
               click: () => {
-                this.$store.dispatch('updateSubDelay', { num: -0.1, manual: false });
+                this.$store.dispatch('updateSubDelay', -0.1);
               },
             },
             // { type: 'separator' },
@@ -963,12 +963,12 @@ new Vue({
           break;
         case '-':
           if (e.shiftKey === true && e.metaKey === true) {
-            this.$store.dispatch('updateSubDelay', { num: -0.5, manual: false });
+            this.$store.dispatch('updateSubDelay', -0.5);
           }
           break;
         case '=':
           if (e.shiftKey === true && e.metaKey === true) {
-            this.$store.dispatch('updateSubDelay', { num: 0.5, manual: false });
+            this.$store.dispatch('updateSubDelay', 0.5);
           }
           break;
         default:

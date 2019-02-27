@@ -31,6 +31,9 @@
              @mousedown.native="handleInMousedown"
              @mouseup.native="handleInMouseup"
              @mouseleave.native="handleInMouseup"></Icon>
+           <Icon type="reset" class="reset" v-show="delayNum !== '0'"
+             @click.native="handleResetDelay">
+           </Icon>
           </div>
         </div>
       </transition>
@@ -103,6 +106,9 @@ export default {
     Icon,
   },
   methods: {
+    handleResetDelay() {
+      this.$store.dispatch('updateSubDelay', 0);
+    },
     handleDeMousedown() {
       if (this.item === this.$t('advance.subDelay')) {
         const myFunction = () => {
@@ -110,10 +116,10 @@ export default {
           if (this.changeSpeed >= 20) {
             this.changeSpeed -= 2;
           }
-          this.$store.dispatch('updateSubDelay', { num: -0.1, manual: false });
+          this.$store.dispatch('updateSubDelay', -0.1);
           this.timeDeInt = setInterval(myFunction, this.changeSpeed);
         };
-        this.$store.dispatch('updateSubDelay', { num: -0.1, manual: false });
+        this.$store.dispatch('updateSubDelay', -0.1);
         this.timeDeSet = setTimeout(() => {
           myFunction(myFunction, this.changeSpeed);
         }, 500);
@@ -133,10 +139,10 @@ export default {
           if (this.changeSpeed >= 20) {
             this.changeSpeed -= 2;
           }
-          this.$store.dispatch('updateSubDelay', { num: 0.1, manual: false });
+          this.$store.dispatch('updateSubDelay', 0.1);
           this.timeInInt = setInterval(myFunction, this.changeSpeed);
         };
-        this.$store.dispatch('updateSubDelay', { num: 0.1, manual: false });
+        this.$store.dispatch('updateSubDelay', 0.1);
         this.timeInSet = setTimeout(() => {
           myFunction(myFunction, this.changeSpeed);
         }, 500);
@@ -172,15 +178,16 @@ export default {
         width: 137px;
         height: 27px;
         .increase {
-          height: 11px;
-          width: 11px;
           margin-top: 7.5px;
         }
         .decrease {
-          height: 11px;
-          width: 11px;
           margin-right: 10px;
           margin-top: 7.5px;
+        }
+        .reset {
+          position: absolute;
+          margin-top: 7.5px;
+          margin-left: 57px;
         }
         .card {
           width: 41px;
@@ -221,15 +228,16 @@ export default {
         width: 164.4px;
         height: 32.4px;
         .increase {
-          height: 13.2px;
-          width: 13.2px;
           margin-top: 9px;
         }
         .decrease {
-          height: 13.2px;
-          width: 13.2px;
           margin-right: 12px;
           margin-top: 9px;
+        }
+        .reset {
+          position: absolute;
+          margin-top: 9px;
+          margin-left: 68.4px;
         }
         .card {
           width: 49.2px;
@@ -271,15 +279,16 @@ export default {
         width: 230.16px;
         height: 45.36px;
         .increase {
-          height: 18.48px;
-          width: 18.48px;
           margin-top: 12.6px;
         }
         .decrease {
-          height: 18.48px;
-          width: 18.48px;
           margin-right: 16.8px;
           margin-top: 12.6px;
+        }
+        .reset {
+          position: absolute;
+          margin-top: 12.6px;
+          margin-left: 95.76px;
         }
         .card {
           width: 68.88px;
@@ -348,10 +357,7 @@ export default {
         position: absolute;
         color: rgba(255, 255, 255, 0.9);
       }
-      .decrease {
-        cursor: pointer;
-      }
-      .increase {
+      .decrease, .increase, .reset {
         cursor: pointer;
       }
     }

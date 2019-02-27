@@ -224,7 +224,7 @@ export default {
     height: 46.375px;
   }
 }
-.minus, .plus {
+.minus, .plus, .reset {
   -webkit-app-region: no-drag;
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 11px;
