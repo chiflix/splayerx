@@ -17,7 +17,7 @@
             color: color,
             transition: 'color 300ms',
           }">{{ item }}</div>
-        <div class="rightItem" v-show="!isChosen">{{ showDetail }}</div>
+        <div class="rightItem" v-show="!isChosen || isRateMenu">{{ showDetail }}</div>
       </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -40,10 +40,12 @@
                 }">{{ list }}
               </div>
             </div>
-            <div :class="cardType" :style="{
-              left: cardPos,
-              transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
-            }"></div>
+            <div :class="cardType"
+              v-show="!this.isRateMenu || this.lists.includes(this.rate)"
+              :style="{
+                left: cardPos,
+                transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
+              }"></div>
           </div>
         </div>
       </transition>
@@ -53,8 +55,8 @@
 
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
-import { mapGetters } from 'vuex';
-import { Video as videoActions } from '@/store/actionTypes';
+import { mapGetters, mapActions } from 'vuex';
+import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 
 export default {
   name: 'AdvanceRowItems',
@@ -84,17 +86,30 @@ export default {
     size: {
       type: Number,
     },
+    isRateMenu: {
+      type: Boolean,
+    },
   },
   watch: {
+    subToTop(val) {
+      if (!this.isRateMenu) {
+        if (val) {
+          this.lastSize = this.chosenSize;
+          this.handleClick(0);
+        } else {
+          this.handleClick(this.lastSize);
+        }
+      }
+    },
     rate(val) {
-      if (this.item === this.$t('advance.rateTitle')) {
+      if (this.isRateMenu) {
         const numList = [0.5, 1, 1.2, 1.5, 2];
         this.selectedIndex = numList.indexOf(val);
         this.calculateSpeedLength(numList.indexOf(val));
       }
     },
     chosenSize(val) {
-      if (this.item === this.$t('advance.fontSize')) {
+      if (!this.isRateMenu) {
         this.selectedIndex = val;
         this.calculateFontLength(val);
       }
@@ -110,7 +125,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'computedHeight', 'computedWidth']),
+    ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'computedHeight', 'computedWidth', 'subToTop']),
     /**
      * @return {string}
      */
@@ -143,21 +158,21 @@ export default {
       return '';
     },
     showDetail() {
-      if (this.item === this.$t('advance.rateTitle')) {
+      if (this.isRateMenu) {
         return `${this.rate} x`;
-      } else if (this.item === this.$t('advance.fontSize')) {
+      } else if (!this.isRateMenu) {
         return `${this.ChosenSize}`;
       }
       return null;
     },
     cardType() {
       if (this.selectedIndex === this.difIndex[0] || this.selectedIndex === this.difIndex[1]) {
-        if (this.item === this.$t('advance.rateTitle')) {
+        if (this.isRateMenu) {
           return 'speedCard smallSpeedCard';
         }
         return 'fontCard smallFontCard';
       }
-      if (this.item === this.$t('advance.rateTitle')) {
+      if (this.isRateMenu) {
         return 'speedCard bigSpeedCard';
       }
       return 'fontCard bigFontCard';
@@ -171,18 +186,18 @@ export default {
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
     },
     rowNumDetail() {
-      return this.item === this.$t('advance.fontSize') ? 'fontRowNumDetail' : 'speedRowNumDetail';
+      return !this.isRateMenu ? 'fontRowNumDetail' : 'speedRowNumDetail';
     },
     difIndex() {
-      return this.item === this.$t('advance.fontSize') ? [0, 2] : [1, 4];
+      return !this.isRateMenu ? [0, 2] : [1, 4];
     },
     difWidth() {
       if (this.size >= 289 && this.size <= 480) {
-        return this.item === this.$t('advance.fontSize') ? [29, 35] : [25, 29];
+        return !this.isRateMenu ? [29, 35] : [25, 29];
       } else if (this.size >= 481 && this.size < 1080) {
-        return this.item === this.$t('advance.fontSize') ? [29 * 1.2, 35 * 1.2] : [25 * 1.2, 29 * 1.2];
+        return !this.isRateMenu ? [29 * 1.2, 35 * 1.2] : [25 * 1.2, 29 * 1.2];
       }
-      return this.item === this.$t('advance.fontSize') ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
+      return !this.isRateMenu ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
     },
     videoAspectRatio() {
       return this.intrinsicWidth / this.intrinsicHeight;
@@ -191,30 +206,25 @@ export default {
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
       if (data.chosenSize) {
-        if (this.item === this.$t('advance.fontSize')) {
+        if (!this.isRateMenu) {
           this.handleClick(data.chosenSize);
         }
       }
     });
   },
   mounted() {
-    this.$bus.$on('subtitle-to-top', (val) => {
-      if (this.item === this.$t('advance.fontSize')) {
-        if (val) {
-          this.lastSize = this.chosenSize;
-          this.handleClick(0);
-        } else {
-          this.handleClick(this.lastSize);
-        }
-      }
-    });
     this.$bus.$on('change-size-by-menu', (index) => {
       this.changeFontSize(index);
     });
   },
   methods: {
+    ...mapActions({
+      changeRate: videoActions.CHANGE_RATE,
+      updateSubScale: subtitleActions.UPDATE_SUBTITLE_SCALE,
+      updateSubSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
+    }),
     itemChosen(index) {
-      if (this.item === this.$t('advance.rateTitle')) {
+      if (this.isRateMenu) {
         return [0.5, 1, 1.2, 1.5, 2].indexOf(this.rate) === index;
       }
       return this.chosenSize === index;
@@ -227,14 +237,14 @@ export default {
     },
     handleClick(index) {
       this.selectedIndex = index;
-      if (this.item === this.$t('advance.rateTitle')) {
+      if (this.isRateMenu) {
         this.calculateSpeedLength(index);
       } else {
         this.calculateFontLength(index);
       }
-      if (this.item === this.$t('advance.rateTitle')) {
-        this.$store.dispatch(videoActions.CHANGE_RATE, this.lists[index]);
-      } else if (this.item === this.$t('advance.fontSize')) {
+      if (this.isRateMenu) {
+        this.changeRate(this.lists[index]);
+      } else {
         this.changeFontSize(index);
       }
     },
@@ -281,21 +291,21 @@ export default {
     updatePCVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [24, 26, 28, 30];
-      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 900) * this.computedHeight) + (secondFactors[index] / 5)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedHeight) + (secondFactors[index] / 5)) / 9}`);
     },
     // update video scale that height is larger than width
     updateMobileVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [12, -92, -196, -300];
-      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 760) * this.computedHeight) + (secondFactors[index] / 76)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedHeight) + (secondFactors[index] / 76)) / 9}`);
     },
     // update video scale when width or height is larger than 1080
     updateVideoScaleByFactors(val) {
       const factors = [30, 40, 50, 60];
-      this.$store.dispatch('updateScale', `${((val / 1080) * factors[this.chosenSize]) / 9}`);
+      this.updateSubScale(`${((val / 1080) * factors[this.chosenSize]) / 9}`);
     },
     changeFontSize(index) {
-      this.$store.dispatch('updateChosenSize', index);
+      this.updateSubSize(index);
       if (this.videoAspectRatio >= 1) {
         this.updatePCVideoScaleByFactors(index);
       } else if (this.videoAspectRatio < 1) {

@@ -72,7 +72,7 @@
 import path from 'path';
 import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
-import { Input as InputActions } from '@/store/actionTypes';
+import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 
 export default {
@@ -127,6 +127,7 @@ export default {
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
+      updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
     }),
     afterLeave() {
       this.backgroundDisplayState = false;
@@ -194,6 +195,7 @@ export default {
         this.displayState = false;
         this.$emit('update:playlistcontrol-showattached', false);
       }
+      this.updateSubToTop(this.displayState);
       this.changeByRecent = false;
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
@@ -236,7 +238,7 @@ export default {
     },
     displayState(val, oldval) {
       if (oldval !== undefined) {
-        this.$bus.$emit('subtitle-to-top', val);
+        this.updateSubToTop(val);
       }
       this.canHoverItem = false;
       this.mousePosition = this.mousemovePosition;

@@ -85,7 +85,7 @@ export default {
             .filter(({ type }) => type === 'online')
             .length;
         this.$bus.$emit('subtitle-refresh-from-src-change', hasOnlineSubtitles);
-        this.$store.dispatch('ifNoSubtitle', true);
+        this.updateNoSubtitle(true);
       }
     },
     qualifiedSubtitles(newVal, oldVal) {
@@ -113,6 +113,7 @@ export default {
       addSubtitleWhenLoaded: subtitleActions.ADD_SUBTITLE_WHEN_LOADED,
       addSubtitleWhenFailed: subtitleActions.ADD_SUBTITLE_WHEN_FAILED,
       updateMetaInfo: subtitleActions.UPDATE_METAINFO,
+      updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
     }),
     async refreshSubtitles(types, videoSrc) {
       const supportedTypes = ['local', 'embedded', 'online'];
@@ -256,9 +257,9 @@ export default {
         processedSubtitleList.push({ src: subtitleList, type: 'local', options: {} });
       }
       if (processedSubtitleList.length) {
-        this.$store.dispatch('ifNoSubtitle', false);
+        this.updateNoSubtitle(false);
       } else {
-        this.$store.dispatch('ifNoSubtitle', true);
+        this.updateNoSubtitle(true);
       }
       return processedSubtitleList;
     },
@@ -539,7 +540,7 @@ export default {
     // when set immediate on watcher, it may run before the created hook
     this.resetSubtitles();
     this.$bus.$emit('subtitle-refresh-from-src-change');
-    this.$store.dispatch('ifNoSubtitle', true);
+    this.updateNoSubtitle(true);
 
     function pushCurrentSubtitle() {
       if (this.currentSubtitleId) {

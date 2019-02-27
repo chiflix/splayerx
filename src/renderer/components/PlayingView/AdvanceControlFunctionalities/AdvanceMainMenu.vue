@@ -25,7 +25,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!speedChosen && hoverIndex === 1" :style="{ height: speedHeight }"></div>
         </transition>
-        <advance-row-items :lists="numList" :item="itemSpeedName" :size="computedSize" :isChosen="speedChosen" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
+        <advance-row-items :isRateMenu="true" :lists="numList" :item="itemSpeedName" :size="computedSize" :isChosen="speedChosen" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleControl"
         @mouseenter="handleMouseenter(2)"
@@ -41,9 +41,9 @@
               color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">
-            <div>{{ this.$t('advance.subMenu') }}</div>
+            <div :style="{ margin: 'auto 0' }">{{ this.$t('advance.subMenu') }}</div>
             <transition name="arrow">
-              <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
+              <Icon class="arrowRight" type="rightArrow" v-show="hoverIndex === 2"></Icon>
             </transition>
           </div>
         </div>
@@ -62,9 +62,9 @@
               color: hoverIndex === 3 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">
-            <div>{{ this.$t('advance.audioMenu') }}</div>
+            <div :style="{ margin: 'auto 0' }">{{ this.$t('advance.audioMenu') }}</div>
             <transition name="arrow">
-              <Icon type="rightArrow" v-show="hoverIndex === 3"></Icon>
+              <Icon class="arrowRight" type="rightArrow" v-show="hoverIndex === 3"></Icon>
             </transition>
           </div>
         </div>
@@ -99,7 +99,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!subSizeChosen && hoverSubIndex === 1" :style="{ height: subSizeHeight }"></div>
         </transition>
-        <advance-row-items :lists="textList" :item="itemFontName" :size="computedSize" :isChosen="subSizeChosen" :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
+        <advance-row-items :isRateMenu="false" :lists="textList" :item="itemFontName" :size="computedSize" :isChosen="subSizeChosen" :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleStyle" @click.left="handleColorClick"
         @mouseenter="handleSubMouseenter(2)"
@@ -123,7 +123,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!subDelayChosen && hoverSubIndex === 3" :style="{ height: subDelayHeight }"></div>
         </transition>
-        <advance-selected-items :item="itemDelayName" :size="computedSize" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
+        <advance-selected-items :isSubDelay="true" :item="itemDelayName" :size="computedSize" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
       </div>
     </div>
   </transition>
@@ -156,7 +156,7 @@
         <transition name="arrow">
           <!--<div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1" :style="{ height: audioDelayHeight }"></div>-->
         </transition>
-        <advance-selected-items :item="audioDelayName" :size="computedSize" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"></advance-selected-items>
+        <advance-selected-items :isSubDelay="false" :item="audioDelayName" :size="computedSize" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"></advance-selected-items>
       </div>
       <div class="changeTrack" @click.left="handleTrackClick"
         @mouseenter="handleAudioMouseenter(2)"
@@ -435,9 +435,8 @@ export default {
   }
   .item2, .item3 {
     font-size: 13px;
-    line-height: 15px;
     width: 136px;
-    height: 13px;
+    height: 18px;
   }
   .topContent {
     width: 133px;
@@ -485,9 +484,8 @@ export default {
   }
   .item2, .item3 {
     font-size: 15.6px;
-    line-height: 18px;
     width: 163.2px;
-    height: 15.6px;
+    height: 22px;
   }
   .topContent {
     width: 159.6px;
@@ -534,9 +532,8 @@ export default {
   }
   .item2, .item3 {
     font-size: 21.84px;
-    line-height: 25.2px;
     width: 228.48px;
-    height: 21.84px;
+    height: 30px;
   }
   .topContent {
     width: 223.44px;
@@ -582,7 +579,7 @@ export default {
   display: flex;
   flex-direction: column;
   position: absolute;
-  .rightArrow {
+  .arrowRight {
     margin: auto 0;
   }
   .playSpeed {
