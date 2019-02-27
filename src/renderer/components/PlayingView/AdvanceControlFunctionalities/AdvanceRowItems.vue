@@ -91,6 +91,16 @@ export default {
     },
   },
   watch: {
+    subToTop(val) {
+      if (!this.isRateMenu) {
+        if (val) {
+          this.lastSize = this.chosenSize;
+          this.handleClick(0);
+        } else {
+          this.handleClick(this.lastSize);
+        }
+      }
+    },
     rate(val) {
       if (this.isRateMenu) {
         const numList = [0.5, 1, 1.2, 1.5, 2];
@@ -115,7 +125,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'computedHeight', 'computedWidth']),
+    ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'computedHeight', 'computedWidth', 'subToTop']),
     /**
      * @return {string}
      */
@@ -203,16 +213,6 @@ export default {
     });
   },
   mounted() {
-    this.$bus.$on('subtitle-to-top', (val) => {
-      if (!this.isRateMenu) {
-        if (val) {
-          this.lastSize = this.chosenSize;
-          this.handleClick(0);
-        } else {
-          this.handleClick(this.lastSize);
-        }
-      }
-    });
     this.$bus.$on('change-size-by-menu', (index) => {
       this.changeFontSize(index);
     });

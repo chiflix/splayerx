@@ -23,7 +23,7 @@ const state = {
   subtitleDelay: 0,
   scaleNum: 1,
   calculatedNoSub: true,
-  subPostionTop: false,
+  subToTop: false,
 };
 
 const getters = {
@@ -53,7 +53,7 @@ const getters = {
   chosenSize: state => state.chosenSize,
   scaleNum: state => state.scaleNum,
   calculatedNoSub: state => state.calculatedNoSub,
-  subToTop: state => state.subPostionTop,
+  subToTop: state => state.subToTop,
 };
 
 const mutations = {
@@ -120,7 +120,7 @@ const mutations = {
     state.calculatedNoSub = payload;
   },
   [subtitleMutations.SUBTITLE_TOP_UPDATE](state, payload) {
-    state.subPostionTop = payload;
+    state.subToTop = payload;
   },
 };
 
