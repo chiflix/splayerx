@@ -114,7 +114,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused']),
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -900,6 +900,37 @@ new Vue({
       this.$electron.remote.Menu.getApplicationMenu()?.clear();
       await this.createMenu();
     },
+    changeWindowSize(key) {
+      let newSize = [];
+      const windowRect = [
+        window.screen.availLeft, window.screen.availTop,
+        window.screen.availWidth, window.screen.availHeight,
+      ];
+      let videoSize = [this.intrinsicWidth, this.intrinsicHeight];
+      switch (key) {
+        case '2':
+          videoSize = videoSize.map(edge => edge * 2);
+          break;
+        case '3':
+          videoSize = videoSize.map(edge => edge * 3);
+          break;
+        default: break;
+      }
+      newSize = this.calculateWindowSize(
+        [320, 180],
+        windowRect.slice(2, 4),
+        videoSize,
+      );
+      const newPosition = this.calculateWindowPosition(
+        this.winPos.concat(this.winSize),
+        windowRect,
+        newSize,
+      );
+      const rect = newPosition.concat(newSize);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
+    },
   },
   mounted() {
     // https://github.com/electron/electron/issues/3609
@@ -930,7 +961,7 @@ new Vue({
         this.menu.popup(this.$electron.remote.getCurrentWindow());
       }
     });
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
       switch (e.key) {
         case 'ArrowLeft':
           if (e.altKey === true) {
@@ -940,6 +971,13 @@ new Vue({
         case 'ArrowRight':
           if (e.altKey === true) {
             this.$bus.$emit('seek', videodata.time + 60);
+          }
+          break;
+        case '1':
+        case '2':
+        case '3':
+          if ((process.platform === 'win32' && e.ctrlKey) || (process.platform === 'darwin' && e.metaKey)) {
+            this.changeWindowSize(e.key);
           }
           break;
         default:

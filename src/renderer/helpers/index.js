@@ -18,6 +18,47 @@ export default {
     return { clock, infoDB, sagi: Sagi };
   },
   methods: {
+    calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
+      let result = videoSize;
+      const getRatio = size => size[0] / size[1];
+      const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
+      const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
+      const biggerSize = (size, diffedSize) =>
+        size.some((value, index) => value >= diffedSize[index]);
+      const biggerWidth = (size, diffedSize) => size[0] >= diffedSize[0];
+      const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
+      if (videoExisted && biggerWidth(result, maxSize)) {
+        result = setHeightByWidth(maxSize);
+      }
+      const realMaxSize = videoExisted ? screenSize : maxSize;
+      if (biggerSize(result, realMaxSize)) {
+        result = biggerRatio(result, realMaxSize) ?
+          setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
+      }
+      if (biggerSize(minSize, result)) {
+        result = biggerRatio(minSize, result) ?
+          setHeightByWidth(minSize) : setWidthByHeight(minSize);
+      }
+      return result.map(Math.round);
+    },
+    calculateWindowPosition(currentRect, windowRect, newSize) {
+      const tempRect = currentRect.slice(0, 2)
+        .map((value, index) => Math.floor(value + (currentRect.slice(2, 4)[index] / 2)))
+        .map((value, index) => Math.floor(value - (newSize[index] / 2))).concat(newSize);
+      return ((windowRect, tempRect) => {
+        const alterPos = (boundX, boundLength, videoX, videoLength) => {
+          if (videoX < boundX) return boundX;
+          if (videoX + videoLength > boundX + boundLength) {
+            return (boundX + boundLength) - videoLength;
+          }
+          return videoX;
+        };
+        return [
+          alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
+          alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
+        ];
+      })(windowRect, tempRect);
+    },
     timecodeFromSeconds(s) {
       const dt = new Date(Math.abs(s) * 1000);
       let hours = dt.getUTCHours();
