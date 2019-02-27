@@ -61,12 +61,15 @@ export default {
       increaseSubtitleDelay: '增加字幕延時',
       decreaseSubtitleDelay: '減少字幕延時',
     },
-    window_: {
+    window: {
       name: '窗口',
       minimize: '最小化',
       enterFullScreen: '進入全屏',
       exitFullScreen: '退出全屏',
       bossKey: '老板鍵',
+      originSize: '100%',
+      doubleSize: '200%',
+      maxmize: '最大化',
     },
     help: {
       name: '幫助',

@@ -62,12 +62,15 @@ export default {
       increaseSubtitleDelay: 'Increase Subtitle Delay',
       decreaseSubtitleDelay: 'Decrease Subtitle Delay',
     },
-    window_: {
+    window: {
       name: 'Window',
       minimize: 'Minimize',
       enterFullScreen: 'Enter Full Screen',
       exitFullScreen: 'Exit Full Screen',
       bossKey: 'Boss Key',
+      originSize: '100%',
+      doubleSize: '200%',
+      maxmize: 'Zoom',
     },
     help: {
       name: 'Help',
