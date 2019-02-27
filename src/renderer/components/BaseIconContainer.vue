@@ -293,7 +293,6 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .rightArrow {
-    display: block;
     width: 13px;
     height: 13px;
   }
@@ -310,7 +309,6 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .rightArrow {
-    display: block;
     width: 15.6px;
     height: 15.6px;
   }
@@ -327,7 +325,6 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .rightArrow {
-    display: block;
     width: 21.84px;
     height: 21.84px;
   }
@@ -344,8 +341,6 @@ export default {
 }
 .rightArrow {
   display: block;
-  width: 12px;
-  height: 12px;
   opacity: 0.5;
 }
 .nike {
