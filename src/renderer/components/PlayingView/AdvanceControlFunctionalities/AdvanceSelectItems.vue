@@ -9,14 +9,14 @@
         height: heightSize,
       }">
     <div class="textContainer" :style="{
-      cursor: isChosen || item === this.$t('advance.audioDelay') ? 'default' : 'pointer',
+      cursor: isChosen || !isSubDelay ? 'default' : 'pointer',
     }">
       <div class="textItem"
         :style="{
           color: color,
           transition: 'color 300ms',
         }">{{ item }}</div>
-      <div class="rightItem" :style="{ color: color }">{{ item === this.$t('advance.subDelay') ? screenSubtitleDelay : audioDelay }}</div>
+      <div class="rightItem" :style="{ color: color }">{{ isSubDelay ? screenSubtitleDelay : audioDelay }}</div>
     </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -31,7 +31,7 @@
              @mousedown.native="handleInMousedown"
              @mouseup.native="handleInMouseup"
              @mouseleave.native="handleInMouseup"></Icon>
-           <Icon type="reset" class="reset" v-show="delayNum !== '0'"
+           <Icon type="reset" class="reset" v-show="this.subtitleDelay !== 0"
              @click.native="handleResetDelay">
            </Icon>
           </div>
@@ -72,6 +72,9 @@ export default {
     size: {
       type: Number,
     },
+    isSubDelay: {
+      type: Boolean,
+    },
   },
   computed: {
     ...mapGetters(['subtitleDelay', 'AudioDelay']),
@@ -93,7 +96,7 @@ export default {
       return `${this.AudioDelay} ms`;
     },
     delayNum() {
-      if (this.item === this.$t('advance.subDelay')) {
+      if (this.isSubDelay) {
         return `${this.subtitleDelay / 1000}`;
       }
       if (Math.abs(this.AudioDelay) >= 10000) {
@@ -110,7 +113,7 @@ export default {
       this.$store.dispatch('updateSubDelay', 0);
     },
     handleDeMousedown() {
-      if (this.item === this.$t('advance.subDelay')) {
+      if (this.isSubDelay) {
         const myFunction = () => {
           clearInterval(this.timeDeInt);
           if (this.changeSpeed >= 20) {
@@ -126,14 +129,14 @@ export default {
       }
     },
     handleDeMouseup() {
-      if (this.item === this.$t('advance.subDelay')) {
+      if (this.isSubDelay) {
         this.changeSpeed = 120;
         clearTimeout(this.timeDeSet);
         clearInterval(this.timeDeInt);
       }
     },
     handleInMousedown() {
-      if (this.item === this.$t('advance.subDelay')) {
+      if (this.isSubDelay) {
         const myFunction = () => {
           clearInterval(this.timeInInt);
           if (this.changeSpeed >= 20) {
@@ -149,7 +152,7 @@ export default {
       }
     },
     handleInMouseup() {
-      if (this.item === this.$t('advance.subDelay')) {
+      if (this.isSubDelay) {
         this.changeSpeed = 120;
         clearTimeout(this.timeInSet);
         clearInterval(this.timeInInt);
