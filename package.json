@@ -98,7 +98,6 @@
             "dv",
             "dvr-ms",
             "evo",
-            "f4v",
             "gvi",
             "gxf",
             "iso",
@@ -114,7 +113,6 @@
             "mpeg1",
             "mpeg2",
             "mpeg4",
-            "mpg",
             "mpv2",
             "mts",
             "mtv",
@@ -128,23 +126,67 @@
             "ogx",
             "ps",
             "rec",
-            "rm",
             "rpl",
             "thp",
             "tod",
             "tp",
-            "ts",
             "tts",
             "txd",
-            "vob",
             "vro",
-            "webm",
             "wm",
             "wtv",
             "xesc"
           ],
           "role": "Viewer",
           "icon": "build/icons/others.icns"
+        },
+        {
+          "name": "WEBM",
+          "ext": [
+            "webm"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/webm.icns"
+        },
+        {
+          "name": "VOB",
+          "ext": [
+            "vob"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/vob.icns"
+        },
+        {
+          "name": "TS",
+          "ext": [
+            "ts"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/ts.icns"
+        },
+        {
+          "name": "RM",
+          "ext": [
+            "rm"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/rm.icns"
+        },
+        {
+          "name": "MPG",
+          "ext": [
+            "mpg"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/mpg.icns"
+        },
+        {
+          "name": "F4V",
+          "ext": [
+            "f4v"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/f4v.icns"
         },
         {
           "name": "AVI",
@@ -236,7 +278,6 @@
             "dv",
             "dvr-ms",
             "evo",
-            "f4v",
             "gvi",
             "gxf",
             "iso",
@@ -252,7 +293,6 @@
             "mpeg1",
             "mpeg2",
             "mpeg4",
-            "mpg",
             "mpv2",
             "mts",
             "mtv",
@@ -266,23 +306,67 @@
             "ogx",
             "ps",
             "rec",
-            "rm",
             "rpl",
             "thp",
             "tod",
             "tp",
-            "ts",
             "tts",
             "txd",
-            "vob",
             "vro",
-            "webm",
             "wm",
             "wtv",
             "xesc"
           ],
           "role": "Viewer",
           "icon": "build/icons/others.ico"
+        },
+        {
+          "name": "WEBM",
+          "ext": [
+            "webm"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/webm.ico"
+        },
+        {
+          "name": "VOB",
+          "ext": [
+            "vob"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/vob.ico"
+        },
+        {
+          "name": "TS",
+          "ext": [
+            "ts"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/ts.ico"
+        },
+        {
+          "name": "RM",
+          "ext": [
+            "rm"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/rm.ico"
+        },
+        {
+          "name": "MPG",
+          "ext": [
+            "mpg"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/mpg.ico"
+        },
+        {
+          "name": "F4V",
+          "ext": [
+            "f4v"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/f4v.ico"
         },
         {
           "name": "AVI",
