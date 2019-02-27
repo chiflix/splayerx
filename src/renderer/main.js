@@ -114,7 +114,8 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused']),
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
+      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -303,7 +304,13 @@ new Vue({
               label: this.$t('msg.file.open'),
               accelerator: 'CmdOrCtrl+O',
               click: () => {
-                this.openFilesByDialog();
+                if (this.defaultDir) {
+                  this.openFilesByDialog();
+                } else {
+                  const defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
+                  this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
+                  this.openFilesByDialog({ defaultPath });
+                }
               },
             },
             {
@@ -442,7 +449,7 @@ new Vue({
 
                 dialog.showOpenDialog(focusWindow, {
                   title: 'Open Dialog',
-                  defaultPath: './',
+                  defaultPath: Path.dirname(this.originSrc),
                   filters: [{
                     name: 'Subtitle Files',
                     extensions: VALID_EXTENSION,

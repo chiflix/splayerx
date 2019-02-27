@@ -60,6 +60,7 @@
 
 <script>
 import path from 'path';
+import { mapGetters } from 'vuex';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -124,6 +125,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters(['defaultDir']),
     lastIndex: {
       get() {
         return (this.firstIndex + this.showItemNum) - 1;
@@ -188,8 +190,15 @@ export default {
     },
   },
   methods: {
-    open(link) {
-      this.openFilesByDialog({ defaultPath: link });
+    open() {
+      const { app } = this.$electron.remote;
+      if (this.defaultDir) {
+        this.openFilesByDialog();
+      } else {
+        const defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
+        this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
+        this.openFilesByDialog({ defaultPath });
+      }
     },
     openOrMove() {
       if (this.firstIndex === 1) {
