@@ -114,12 +114,12 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'winWidth', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
       'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
-          label: this.$t('msg.window_.exitFullScreen'),
+          label: this.$t('msg.window.exitFullScreen'),
           accelerator: 'Esc',
           click: () => {
             this.$bus.$emit('off-fullscreen');
@@ -128,7 +128,7 @@ new Vue({
         };
       }
       return {
-        label: this.$t('msg.window_.enterFullScreen'),
+        label: this.$t('msg.window.enterFullScreen'),
         accelerator: 'F',
         click: () => {
           this.$bus.$emit('to-fullscreen');
@@ -562,7 +562,7 @@ new Vue({
         },
         // menu.window
         {
-          label: this.$t('msg.window_.name'),
+          label: this.$t('msg.window.name'),
           submenu: [
             {
               label: this.$t('msg.playback.keepPlayingWindowFront'),
@@ -582,12 +582,37 @@ new Vue({
             },
             { type: 'separator' },
             {
-              label: this.$t('msg.window_.minimize'),
+              label: this.$t('msg.window.minimize'),
               role: 'minimize',
             },
             { type: 'separator' },
             {
-              label: this.$t('msg.window_.bossKey'),
+              label: this.$t('msg.window.originSize'),
+              checked: true,
+              accelerator: 'CmdOrCtrl+1',
+              click: () => {
+                this.changeWindowSize(1);
+              },
+            },
+            {
+              label: this.$t('msg.window.doubleSize'),
+              checked: false,
+              accelerator: 'CmdOrCtrl+2',
+              click: () => {
+                this.changeWindowSize(2);
+              },
+            },
+            {
+              label: this.$t('msg.window.maxmize'),
+              checked: false,
+              accelerator: 'CmdOrCtrl+3',
+              click: () => {
+                this.changeWindowSize(3);
+              },
+            },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.window.bossKey'),
               accelerator: 'CmdOrCtrl+`',
               click: () => {
                 this.$electron.ipcRenderer.send('bossKey');
@@ -907,6 +932,37 @@ new Vue({
       this.$electron.remote.Menu.getApplicationMenu()?.clear();
       await this.createMenu();
     },
+    changeWindowSize(key) {
+      if (!this.originSrc) {
+        return;
+      }
+      let newSize = [];
+      const windowRect = [
+        window.screen.availLeft, window.screen.availTop,
+        window.screen.availWidth, window.screen.availHeight,
+      ];
+      const videoSize = [this.intrinsicWidth * key, this.intrinsicHeight * key];
+      if (key === 3) {
+        if (videoSize[0] < windowRect[2] && videoSize[1] < windowRect[3]) {
+          videoSize[1] = window.screen.availHeight;
+          videoSize[0] = videoSize[1] * this.ratio;
+        }
+      }
+      newSize = this.calculateWindowSize(
+        [320, 180],
+        windowRect.slice(2, 4),
+        videoSize,
+      );
+      const newPosition = this.calculateWindowPosition(
+        this.winPos.concat(this.winSize),
+        windowRect,
+        newSize,
+      );
+      const rect = newPosition.concat(newSize);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
+    },
   },
   mounted() {
     // https://github.com/electron/electron/issues/3609
@@ -937,7 +993,7 @@ new Vue({
         this.menu.popup(this.$electron.remote.getCurrentWindow());
       }
     });
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
       switch (e.key) {
         case 'ArrowLeft':
           if (e.altKey === true) {
