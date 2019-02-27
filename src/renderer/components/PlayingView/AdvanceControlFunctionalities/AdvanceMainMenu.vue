@@ -43,7 +43,7 @@
             }">
             <div :style="{ margin: 'auto 0' }">{{ this.$t('advance.subMenu') }}</div>
             <transition name="arrow">
-              <Icon class="rightArrow" type="rightArrow" v-show="hoverIndex === 2"></Icon>
+              <Icon class="arrowRight" type="rightArrow" v-show="hoverIndex === 2"></Icon>
             </transition>
           </div>
         </div>
@@ -64,7 +64,7 @@
             }">
             <div :style="{ margin: 'auto 0' }">{{ this.$t('advance.audioMenu') }}</div>
             <transition name="arrow">
-              <Icon class="rightArrow" type="rightArrow" v-show="hoverIndex === 3"></Icon>
+              <Icon class="arrowRight" type="rightArrow" v-show="hoverIndex === 3"></Icon>
             </transition>
           </div>
         </div>
@@ -579,7 +579,7 @@ export default {
   display: flex;
   flex-direction: column;
   position: absolute;
-  .rightArrow {
+  .arrowRight {
     margin: auto 0;
   }
   .playSpeed {

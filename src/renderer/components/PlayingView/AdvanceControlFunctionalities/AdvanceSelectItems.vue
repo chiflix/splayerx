@@ -31,7 +31,7 @@
              @mousedown.native="handleInMousedown"
              @mouseup.native="handleInMouseup"
              @mouseleave.native="handleInMouseup"></Icon>
-           <Icon type="reset" class="reset" v-show="this.subtitleDelay !== 0"
+           <Icon type="reset" class="resetPos" v-show="this.subtitleDelay !== 0"
              @click.native="handleResetDelay">
            </Icon>
           </div>
@@ -187,7 +187,7 @@ export default {
           margin-right: 10px;
           margin-top: 7.5px;
         }
-        .reset {
+        .resetPos {
           position: absolute;
           margin-top: 7.5px;
           margin-left: 57px;
@@ -237,7 +237,7 @@ export default {
           margin-right: 12px;
           margin-top: 9px;
         }
-        .reset {
+        .resetPos {
           position: absolute;
           margin-top: 9px;
           margin-left: 68.4px;
@@ -288,7 +288,7 @@ export default {
           margin-right: 16.8px;
           margin-top: 12.6px;
         }
-        .reset {
+        .resetPos {
           position: absolute;
           margin-top: 12.6px;
           margin-left: 95.76px;
@@ -360,7 +360,7 @@ export default {
         position: absolute;
         color: rgba(255, 255, 255, 0.9);
       }
-      .decrease, .increase, .reset {
+      .decrease, .increase, .resetPos {
         cursor: pointer;
       }
     }
