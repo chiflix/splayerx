@@ -100,26 +100,26 @@ const mutations = {
   [subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE](state, subtitleId) {
     state.currentSubtitleId = subtitleId;
   },
-  UpdateDelay(state, payload) {
+  [subtitleMutations.SUBTITLE_DELAY_UPDATE](state, payload) {
     if (payload === 0) {
       state.subtitleDelay = payload;
     } else if (Math.abs((state.subtitleDelay / 1000) + payload) <= 10000) {
       state.subtitleDelay += payload * 1000;
     }
   },
-  UpdateScale(state, payload) {
+  [subtitleMutations.SUBTITLE_SCALE_UPDATE](state, payload) {
     state.scaleNum = payload;
   },
-  UpdateChosenStyle(state, payload) {
+  [subtitleMutations.SUBTITLE_STYLE_UPDATE](state, payload) {
     state.chosenStyle = payload;
   },
-  UpdateChosenSize(state, payload) {
+  [subtitleMutations.SUBTITLE_SIZE_UPDATE](state, payload) {
     state.chosenSize = payload;
   },
-  IfNoSubtitle(state, payload) {
+  [subtitleMutations.NO_SUBTITLE_UPDATE](state, payload) {
     state.calculatedNoSub = payload;
   },
-  SubTopUpdate(state, payload) {
+  [subtitleMutations.SUBTITLE_TOP_UPDATE](state, payload) {
     state.subPostionTop = payload;
   },
 };
@@ -212,23 +212,23 @@ const actions = {
     );
     commit(subtitleMutations.RANKS_UPDATE, { id, rank });
   },
-  updateSubDelay({ commit }, delta) {
-    commit('UpdateDelay', delta);
+  [subtitleActions.UPDATE_SUBTITLE_DELAY]({ commit }, delta) {
+    commit(subtitleMutations.SUBTITLE_DELAY_UPDATE, delta);
   },
-  updateScale({ commit }, delta) {
-    commit('UpdateScale', delta);
+  [subtitleActions.UPDATE_SUBTITLE_SCALE]({ commit }, delta) {
+    commit(subtitleMutations.SUBTITLE_SCALE_UPDATE, delta);
   },
-  updateChosenStyle({ commit }, delta) {
-    commit('UpdateChosenStyle', delta);
+  [subtitleActions.UPDATE_SUBTITLE_STYLE]({ commit }, delta) {
+    commit(subtitleMutations.SUBTITLE_STYLE_UPDATE, delta);
   },
-  updateChosenSize({ commit }, delta) {
-    commit('UpdateChosenSize', delta);
+  [subtitleActions.UPDATE_SUBTITLE_SIZE]({ commit }, delta) {
+    commit(subtitleMutations.SUBTITLE_SIZE_UPDATE, delta);
   },
-  ifNoSubtitle({ commit }, delta) {
-    commit('IfNoSubtitle', delta);
+  [subtitleActions.UPDATE_NO_SUBTITLE]({ commit }, delta) {
+    commit(subtitleMutations.NO_SUBTITLE_UPDATE, delta);
   },
-  updateSubTop({ commit }, delta) {
-    commit('SubTopUpdate', delta);
+  [subtitleActions.UPDATE_SUBTITLE_TOP]({ commit }, delta) {
+    commit(subtitleMutations.SUBTITLE_TOP_UPDATE, delta);
   },
 };
 

@@ -14,7 +14,7 @@ import VueAnalytics from 'vue-analytics';
 import VueElectron from 'vue-electron';
 import Path from 'path';
 import fs from 'fs';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import osLocale from 'os-locale';
 import AsyncComputed from 'vue-async-computed';
 
@@ -23,7 +23,7 @@ import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
-import { Video as videoActions } from '@/store/actionTypes';
+import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
@@ -161,10 +161,10 @@ new Vue({
   created() {
     asyncStorage.get('subtitle-style').then((data) => {
       if (data.chosenStyle) {
-        this.$store.dispatch('updateChosenStyle', data.chosenStyle);
+        this.updateChosenStyle(data.chosenStyle);
       }
       if (data.chosenSize) {
-        this.$store.dispatch('updateChosenSize', data.chosenSize);
+        this.updateChosenSize(data.chosenSize);
       }
     });
     asyncStorage.get('playback-states').then((data) => {
@@ -279,6 +279,11 @@ new Vue({
     },
   },
   methods: {
+    ...mapActions({
+      updateSubDelay: subtitleActions.UPDATE_SUBTITLE_DELAY,
+      updateChosenStyle: subtitleActions.UPDATE_SUBTITLE_STYLE,
+      updateChosenSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
+    }),
     /**
      * @description 递归禁用menu子项
      * @author tanghaixiang@xindong.com
@@ -515,7 +520,7 @@ new Vue({
                   type: 'radio',
                   id: 'style0',
                   click: () => {
-                    this.$store.dispatch('updateChosenStyle', 0);
+                    this.updateChosenStyle(0);
                   },
                 },
                 {
@@ -523,7 +528,7 @@ new Vue({
                   type: 'radio',
                   id: 'style1',
                   click: () => {
-                    this.$store.dispatch('updateChosenStyle', 1);
+                    this.updateChosenStyle(1);
                   },
                 },
                 {
@@ -531,7 +536,7 @@ new Vue({
                   type: 'radio',
                   id: 'style2',
                   click: () => {
-                    this.$store.dispatch('updateChosenStyle', 2);
+                    this.updateChosenStyle(2);
                   },
                 },
                 {
@@ -539,7 +544,7 @@ new Vue({
                   type: 'radio',
                   id: 'style3',
                   click: () => {
-                    this.$store.dispatch('updateChosenStyle', 3);
+                    this.updateChosenStyle(3);
                   },
                 },
                 {
@@ -547,7 +552,7 @@ new Vue({
                   type: 'radio',
                   id: 'style4',
                   click: () => {
-                    this.$store.dispatch('updateChosenStyle', 4);
+                    this.updateChosenStyle(4);
                   },
                 },
               ],
@@ -557,14 +562,14 @@ new Vue({
               label: this.$t('msg.subtitle.increaseSubtitleDelay'),
               accelerator: 'CmdOrCtrl+=',
               click: () => {
-                this.$store.dispatch('updateSubDelay', 0.1);
+                this.updateSubDelay(0.1);
               },
             },
             {
               label: this.$t('msg.subtitle.decreaseSubtitleDelay'),
               accelerator: 'CmdOrCtrl+-',
               click: () => {
-                this.$store.dispatch('updateSubDelay', -0.1);
+                this.updateSubDelay(-0.1);
               },
             },
             // { type: 'separator' },
@@ -963,12 +968,12 @@ new Vue({
           break;
         case '-':
           if (e.shiftKey === true && e.metaKey === true) {
-            this.$store.dispatch('updateSubDelay', -0.5);
+            this.updateSubDelay(-0.5);
           }
           break;
         case '=':
           if (e.shiftKey === true && e.metaKey === true) {
-            this.$store.dispatch('updateSubDelay', 0.5);
+            this.updateSubDelay(0.5);
           }
           break;
         default:

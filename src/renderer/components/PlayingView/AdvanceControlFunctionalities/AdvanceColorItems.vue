@@ -35,6 +35,7 @@
 </template>
 
 <script>
+import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import style0 from '../../../assets/subtitle-style1-normal.png';
 import style1 from '../../../assets/subtitle-style2-normal.png';
 import style2 from '../../../assets/subtitle-style3-normal.png';
@@ -100,7 +101,7 @@ export default {
       this.hoverIndex = -1;
     },
     handleClick(e, index) {
-      this.$store.dispatch('updateChosenStyle', index);
+      this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_STYLE, index);
     },
   },
 };

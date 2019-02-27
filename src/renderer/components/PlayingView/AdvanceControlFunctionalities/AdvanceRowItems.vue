@@ -55,8 +55,8 @@
 
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
-import { mapGetters } from 'vuex';
-import { Video as videoActions } from '@/store/actionTypes';
+import { mapGetters, mapActions } from 'vuex';
+import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 
 export default {
   name: 'AdvanceRowItems',
@@ -218,6 +218,11 @@ export default {
     });
   },
   methods: {
+    ...mapActions({
+      changeRate: videoActions.CHANGE_RATE,
+      updateSubScale: subtitleActions.UPDATE_SUBTITLE_SCALE,
+      updateSubSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
+    }),
     itemChosen(index) {
       if (this.isRateMenu) {
         return [0.5, 1, 1.2, 1.5, 2].indexOf(this.rate) === index;
@@ -238,7 +243,7 @@ export default {
         this.calculateFontLength(index);
       }
       if (this.isRateMenu) {
-        this.$store.dispatch(videoActions.CHANGE_RATE, this.lists[index]);
+        this.changeRate(this.lists[index]);
       } else {
         this.changeFontSize(index);
       }
@@ -286,21 +291,21 @@ export default {
     updatePCVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [24, 26, 28, 30];
-      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 900) * this.computedHeight) + (secondFactors[index] / 5)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedHeight) + (secondFactors[index] / 5)) / 9}`);
     },
     // update video scale that height is larger than width
     updateMobileVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [12, -92, -196, -300];
-      this.$store.dispatch('updateScale', `${(((firstFactors[index] / 760) * this.computedHeight) + (secondFactors[index] / 76)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedHeight) + (secondFactors[index] / 76)) / 9}`);
     },
     // update video scale when width or height is larger than 1080
     updateVideoScaleByFactors(val) {
       const factors = [30, 40, 50, 60];
-      this.$store.dispatch('updateScale', `${((val / 1080) * factors[this.chosenSize]) / 9}`);
+      this.updateSubScale(`${((val / 1080) * factors[this.chosenSize]) / 9}`);
     },
     changeFontSize(index) {
-      this.$store.dispatch('updateChosenSize', index);
+      this.updateSubSize(index);
       if (this.videoAspectRatio >= 1) {
         this.updatePCVideoScaleByFactors(index);
       } else if (this.videoAspectRatio < 1) {

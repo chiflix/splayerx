@@ -43,6 +43,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import Icon from '../../BaseIconContainer.vue';
 
 export default {
@@ -110,7 +111,7 @@ export default {
   },
   methods: {
     handleResetDelay() {
-      this.$store.dispatch('updateSubDelay', 0);
+      this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_DELAY, 0);
     },
     handleDeMousedown() {
       if (this.isSubDelay) {
@@ -119,10 +120,10 @@ export default {
           if (this.changeSpeed >= 20) {
             this.changeSpeed -= 2;
           }
-          this.$store.dispatch('updateSubDelay', -0.1);
+          this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_DELAY, -0.1);
           this.timeDeInt = setInterval(myFunction, this.changeSpeed);
         };
-        this.$store.dispatch('updateSubDelay', -0.1);
+        this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_DELAY, -0.1);
         this.timeDeSet = setTimeout(() => {
           myFunction(myFunction, this.changeSpeed);
         }, 500);
@@ -142,10 +143,10 @@ export default {
           if (this.changeSpeed >= 20) {
             this.changeSpeed -= 2;
           }
-          this.$store.dispatch('updateSubDelay', 0.1);
+          this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_DELAY, 0.1);
           this.timeInInt = setInterval(myFunction, this.changeSpeed);
         };
-        this.$store.dispatch('updateSubDelay', 0.1);
+        this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_DELAY, 0.1);
         this.timeInSet = setTimeout(() => {
           myFunction(myFunction, this.changeSpeed);
         }, 500);
