@@ -194,6 +194,7 @@ export default {
         this.displayState = false;
         this.$emit('update:playlistcontrol-showattached', false);
       }
+      this.$store.dispatch('updateSubTop', this.displayState);
       this.changeByRecent = false;
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
@@ -236,7 +237,7 @@ export default {
     },
     displayState(val, oldval) {
       if (oldval !== undefined) {
-        this.$bus.$emit('subtitle-to-top', val);
+        this.$store.dispatch('updateSubTop', val);
       }
       this.canHoverItem = false;
       this.mousePosition = this.mousemovePosition;

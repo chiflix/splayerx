@@ -43,7 +43,6 @@ export default {
       videoSegments: [],
       currentSegment: [0, 0, false],
       elapsedSegmentTime: 0,
-      subToTop: false,
       lastIndex: [],
       lastAlignment: [],
       lastText: [],
@@ -52,7 +51,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth']),
+    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'subToTop']),
     type() {
       return this.subtitleInstance.metaInfo.format;
     },
@@ -82,6 +81,16 @@ export default {
         }
       });
     },
+    subToTop(val) {
+      if (!val) {
+        this.lastIndex.forEach((index) => {
+          if (this.currentTags[index]) {
+            this.currentTags[index].alignment = this.lastAlignment[index]
+              ? this.lastAlignment[index] : 2;
+          }
+        });
+      }
+    },
   },
   created() {
     const { subtitleInstance } = this;
@@ -101,17 +110,6 @@ export default {
         this.intrinsicHeight;
     });
     subtitleInstance.load();
-    this.$bus.$on('subtitle-to-top', (val) => {
-      this.subToTop = val;
-      if (!val) {
-        this.lastIndex.forEach((index) => {
-          if (this.currentTags[index]) {
-            this.currentTags[index].alignment = this.lastAlignment[index]
-              ? this.lastAlignment[index] : 2;
-          }
-        });
-      }
-    });
   },
   mounted() {
     requestAnimationFrame(this.currentTimeUpdate);

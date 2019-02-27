@@ -23,6 +23,7 @@ const state = {
   subtitleDelay: 0,
   scaleNum: 1,
   calculatedNoSub: true,
+  subPostionTop: false,
 };
 
 const getters = {
@@ -52,6 +53,7 @@ const getters = {
   chosenSize: state => state.chosenSize,
   scaleNum: state => state.scaleNum,
   calculatedNoSub: state => state.calculatedNoSub,
+  subToTop: state => state.subPostionTop,
 };
 
 const mutations = {
@@ -116,6 +118,9 @@ const mutations = {
   },
   IfNoSubtitle(state, payload) {
     state.calculatedNoSub = payload;
+  },
+  SubTopUpdate(state, payload) {
+    state.subPostionTop = payload;
   },
 };
 
@@ -221,6 +226,9 @@ const actions = {
   },
   ifNoSubtitle({ commit }, delta) {
     commit('IfNoSubtitle', delta);
+  },
+  updateSubTop({ commit }, delta) {
+    commit('SubTopUpdate', delta);
   },
 };
 
