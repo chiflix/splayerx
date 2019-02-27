@@ -105,10 +105,12 @@ export default {
         }, 1000);
       }
     },
-    volumeKeydown(newVal) {
+    volumeKeydown(newVal, oldVal) {
       const { clock, volumeTriggerTimerId } = this;
       if (newVal) {
         this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+      } else if (!newVal && oldVal) {
         clock.clearTimeout(volumeTriggerTimerId);
         this.volumeTriggerTimerId = clock.setTimeout(() => {
           this.volumeTriggerStopped = false;
