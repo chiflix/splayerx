@@ -115,7 +115,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
-      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir']),
+      'currentSubtitleId', 'displayLanguage', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -159,6 +159,24 @@ new Vue({
     },
   },
   created() {
+    asyncStorage.get('preferences').then((data) => {
+      if (data.privacyAgreement === undefined) this.$bus.$emit('privacy-confirm');
+      if (!data.primaryLanguage) {
+        const { app } = this.$electron.remote;
+        const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
+        if (locale === 'zh_TW' || locale === 'zh_CN') {
+          this.$store.dispatch('primaryLanguage', locale.replace('_', '-'));
+        } else {
+          this.$store.dispatch('primaryLanguage', 'en');
+        }
+      }
+      if (!data.secondaryLanguage) {
+        this.$store.dispatch('secondaryLanguage', '');
+      }
+      if (data.displayLanguage) {
+        this.$i18n.locale = data.displayLanguage;
+      }
+    });
     asyncStorage.get('subtitle-style').then((data) => {
       if (data.chosenStyle) {
         this.updateChosenStyle(data.chosenStyle);
@@ -181,6 +199,10 @@ new Vue({
     });
   },
   watch: {
+    displayLanguage(val) {
+      this.$i18n.locale = val;
+      this.refreshMenu();
+    },
     singleCycle(val) {
       if (this.menu) {
         this.menu.getMenuItemById('singleCycle').checked = val;

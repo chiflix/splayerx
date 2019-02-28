@@ -5,6 +5,16 @@
     @update:checkbox-value="deleteVideoHistoryOnExit = $event">
     {{ $t('preferences.general.clearHistory') }}
   </BaseCheckBox>
+  <BaseCheckBox
+    :checkboxValue="$i18n.locale === 'zhCN'"
+    @update:checkbox-value="displayLanguage = 'zhCN'">
+    {{ '中文' }}
+  </BaseCheckBox>
+  <BaseCheckBox
+    :checkboxValue="$i18n.locale === 'en'"
+    @update:checkbox-value="displayLanguage = 'en'">
+    {{ '英文' }}
+  </BaseCheckBox>
 </div>
 </template>
 
@@ -26,6 +36,9 @@ export default {
       if (!val) {
         this.showFirstSelection = this.showSecondSelection = false;
       }
+    },
+    displayLanguage(val) {
+      this.$i18n.locale = val;
     },
   },
   computed: {
@@ -62,6 +75,16 @@ export default {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
+      },
+    },
+    displayLanguage: {
+      get() {
+        return this.$store.getters.displayLanguage;
+      },
+      set(val) {
+        this.$store.dispatch('displayLanguage', val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
       },
     },
   },
