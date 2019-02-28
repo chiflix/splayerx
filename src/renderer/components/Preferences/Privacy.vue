@@ -77,6 +77,7 @@ export default {
     Icon,
     BaseCheckBox,
   },
+  props: ['mouseDown', 'isMoved'],
   data() {
     return {
       showFirstSelection: false,
@@ -87,36 +88,20 @@ export default {
         'zh-TW',
         'en',
       ],
-      mouseDown: false,
-      isMoved: false,
       noLanguage: this.$t('preferences.privacy.none'),
     };
-  },
-  created() {
-    window.onmousedown = () => {
-      this.mouseDown = true;
-      this.isMoved = false;
-    };
-    window.onmousemove = () => {
-      if (this.mouseDown) this.isMoved = true;
-    };
-    window.onmouseup = () => {
-      if (!this.isMoved) {
-        this.showFirstSelection = this.showSecondSelection = false;
-      }
-      this.mouseDown = false;
-      this.isMoved = false;
-    };
-  },
-  beforeDestroy() {
-    window.onmousedown = null;
-    window.onmousemove = null;
-    window.onmouseup = null;
   },
   watch: {
     privacyAgreement(val) {
       if (!val) {
         this.showFirstSelection = this.showSecondSelection = false;
+      }
+    },
+    mouseDown(val, oldVal) {
+      if (!val && oldVal && !this.isMoved) {
+        this.showFirstSelection = this.showSecondSelection = false;
+      } else if (!val && oldVal && this.isMoved) {
+        this.$emit('move-stoped');
       }
     },
   },

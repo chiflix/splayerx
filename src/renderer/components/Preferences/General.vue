@@ -40,6 +40,7 @@ export default {
     BaseCheckBox,
     Icon,
   },
+  props: ['mouseDown', 'isMoved'],
   data() {
     return {
       showSelection: false,
@@ -49,6 +50,13 @@ export default {
   watch: {
     displayLanguage(val) {
       this.$i18n.locale = val;
+    },
+    mouseDown(val, oldVal) {
+      if (!val && oldVal && !this.isMoved) {
+        this.showFirstSelection = this.showSecondSelection = false;
+      } else if (!val && oldVal && this.isMoved) {
+        this.$emit('move-stoped');
+      }
     },
   },
   computed: {

@@ -31,7 +31,9 @@
         <Icon class="title-button" type="titleBarWinClose" @click.native="handleClose"/>
         </Icon>
       </div>
-      <component :is="currentPreference"></component>
+      <component :is="currentPreference"
+      @move-stoped="isMoved = false"
+      :mouseDown="mouseDown" :isMoved="isMoved"/>
     </div>
   </div>
 </template>
@@ -53,6 +55,8 @@ export default {
     return {
       state: 'default',
       currentPreference: 'General',
+      mouseDown: false,
+      isMoved: false,
     };
   },
   computed: {
@@ -76,6 +80,21 @@ export default {
     electron.ipcRenderer.on('preferenceDispatch', (event, actionType, actionPayload) => {
       this.mainDispatchProxy(actionType, actionPayload);
     });
+    window.onmousedown = () => {
+      this.mouseDown = true;
+      this.isMoved = false;
+    };
+    window.onmousemove = () => {
+      if (this.mouseDown) this.isMoved = true;
+    };
+    window.onmouseup = () => {
+      this.mouseDown = false;
+    };
+  },
+  beforeDestroy() {
+    window.onmousedown = null;
+    window.onmousemove = null;
+    window.onmouseup = null;
   },
 };
 </script>
