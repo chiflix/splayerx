@@ -13,7 +13,12 @@
         <Icon class="title-button-disable" type="titleBarFull"/>
         </Icon>
       </div>
-      <div class="general">{{ $t('preferences.generalSetting') }}</div>
+      <div class="preferenceTitle"
+          :class="currentPreference === 'General' ? 'chosen' : ''" 
+          @mouseup="handleMouseup('General')">{{ $t('preferences.general.generalSetting') }}</div>
+      <div class="preferenceTitle"
+          :class="currentPreference === 'Privacy' ? 'chosen' : ''" 
+          @mouseup="handleMouseup('Privacy')">{{ $t('preferences.general.generalSetting') }}</div>
     </div>
     <div class="right">
       <div class="win-icons no-drag"
@@ -35,12 +40,14 @@
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
 import General from './Preferences/General.vue';
+import Privacy from './Preferences/Privacy.vue';
 
 export default {
   name: 'Preference',
   components: {
     Icon,
     General,
+    Privacy,
   },
   data() {
     return {
@@ -60,6 +67,9 @@ export default {
     },
     mainDispatchProxy(actionType, actionPayload) {
       this.$store.dispatch(actionType, actionPayload);
+    },
+    handleMouseup(panel) {
+      this.currentPreference = panel;
     },
   },
   created() {
@@ -103,6 +113,7 @@ export default {
   .mac-icons {
     margin-top: 12px;
     margin-left: 12px;
+    margin-bottom: 18px;
     width: fit-content;
     display: flex;
     flex-wrap: nowrap;
@@ -123,10 +134,9 @@ export default {
     flex-basis: 110px;
     height: 100%;
     background-image: linear-gradient(-28deg, rgba(65,65,65,0.85) 0%, rgba(84,84,84,0.85) 47%, rgba(123,123,123,0.85) 100%);
-    .general {
+    .preferenceTitle {
       -webkit-app-region: no-drag;
-      border-left: 1px solid white;
-      margin-top: 18px;
+      border-left: 1px solid rgba(0,0,0,0);
       padding-left: 15px;
       padding-top: 13px;
       padding-bottom: 13px;
@@ -136,7 +146,9 @@ export default {
       color: #FFFFFF;
       letter-spacing: 0;
       line-height: 16px;
-
+    }
+    .chosen {
+      border-left: 1px solid white;
       background-image: linear-gradient(99deg, rgba(243,243,243,0.15) 0%, rgba(255,255,255,0.0675) 81%);
     }
   }

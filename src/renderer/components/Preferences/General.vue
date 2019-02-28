@@ -3,14 +3,14 @@
   <BaseCheckBox
     :checkboxValue="privacyAgreement"
     @update:checkbox-value="privacyAgreement = $event">
-    {{ $t('preferences.privacyConfirm') }}
+    {{ $t('preferences.general.privacyConfirm') }}
   </BaseCheckBox>
   <div class="languages-select">
     <div class="select-content" :style="{opacity: privacyAgreement ? 1 : 0.3}">
-      <div class="title">{{ $t('preferences.languagePriority')}}</div>
-      <div class="description">{{ $t('preferences.languageDescription')}}</div>
+      <div class="title">{{ $t('preferences.general.languagePriority')}}</div>
+      <div class="description">{{ $t('preferences.general.languageDescription')}}</div>
       <div class="first-selection">
-        <div class="selection-title">{{ $t('preferences.primary')}}</div>
+        <div class="selection-title">{{ $t('preferences.general.primary')}}</div>
         <div class="drop-down"
           :class="{ 'drop-down-en': $i18n.locale === 'en' }"
           :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
@@ -32,7 +32,7 @@
         </div>
       </div>
       <div class="second-selection">
-        <div class="selection-title">{{ $t('preferences.secondary')}}</div>
+        <div class="selection-title">{{ $t('preferences.general.secondary')}}</div>
         <div class="drop-down"
           :class="{ 'drop-down-en': $i18n.locale === 'en' }"
           :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
@@ -55,7 +55,7 @@
               @mouseup.stop="handleSecondSelection(language, index)">
               {{ codeToLanguageName(language) }}
               <span v-if="language === primaryLanguage && language !== noLanguage"
-                style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.primary') }}</span>
+                style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.general.primary') }}</span>
             </div>
           </div>
         </div>
@@ -65,7 +65,7 @@
   <BaseCheckBox
     :checkboxValue="deleteVideoHistoryOnExit"
     @update:checkbox-value="deleteVideoHistoryOnExit = $event">
-    {{ $t('preferences.clearHistory') }}
+    {{ $t('preferences.general.clearHistory') }}
   </BaseCheckBox>
 </div>
 </template>
@@ -94,7 +94,7 @@ export default {
       ],
       mouseDown: false,
       isMoved: false,
-      noLanguage: this.$t('preferences.none'),
+      noLanguage: this.$t('preferences.general.none'),
     };
   },
   created() {
