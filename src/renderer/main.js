@@ -159,6 +159,8 @@ new Vue({
     },
   },
   created() {
+    this.$store.commit('getLocalPreference');
+    this.$i18n.locale = this.displayLanguage;
     asyncStorage.get('preferences').then((data) => {
       if (data.privacyAgreement === undefined) this.$bus.$emit('privacy-confirm');
       if (!data.primaryLanguage) {
@@ -172,9 +174,6 @@ new Vue({
       }
       if (!data.secondaryLanguage) {
         this.$store.dispatch('secondaryLanguage', '');
-      }
-      if (data.displayLanguage) {
-        this.$i18n.locale = data.displayLanguage;
       }
     });
     asyncStorage.get('subtitle-style').then((data) => {
@@ -193,7 +192,6 @@ new Vue({
         this.$store.dispatch(videoActions.MUTED_UPDATE, data.muted);
       }
     });
-    this.$store.commit('getLocalPreference');
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
     });
