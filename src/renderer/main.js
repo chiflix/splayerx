@@ -176,7 +176,7 @@ new Vue({
         this.$store.dispatch('secondaryLanguage', '');
       }
       if (!data.displayLanguage) {
-        this.displayLanguage = getSystemLocale();
+        this.$store.dispatch('displayLanguage', getSystemLocale());
       }
     });
     asyncStorage.get('subtitle-style').then((data) => {
