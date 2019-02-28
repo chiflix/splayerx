@@ -108,7 +108,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['audioTrackList', 'originSrc', 'duration']),
+    ...mapGetters(['audioTrackList', 'originSrc']),
   },
   data() {
     return {
@@ -121,6 +121,7 @@ export default {
     // playback state
     currentTime(newVal) {
       [this.$refs.video.currentTime] = newVal || 0;
+
       // update the seek time
       if (this.needtimeupdate) {
         videodata.time = this.$refs.video.currentTime;
