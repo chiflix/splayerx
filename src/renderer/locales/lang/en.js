@@ -114,7 +114,7 @@ export default {
       secondaryLanguage: 'Secondary Language',
       primary: 'Primary',
       secondary: 'Secondary',
-    }
+    },
   },
   advance: {
     rateTitle: 'Play Speed',
