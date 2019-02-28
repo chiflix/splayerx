@@ -60,6 +60,7 @@ export default {
       // decreaseSubtitleSize: '減小字母尺寸',
       increaseSubtitleDelay: '增加字幕延時',
       decreaseSubtitleDelay: '減少字幕延時',
+      uploadSelectedSubtitle: '上傳所選字幕',
     },
     window: {
       name: '窗口',

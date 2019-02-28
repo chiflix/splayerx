@@ -61,6 +61,7 @@ export default {
       // decreaseSubtitleSize: 'Decrease Subtitle Size',
       increaseSubtitleDelay: 'Increase Subtitle Delay',
       decreaseSubtitleDelay: 'Decrease Subtitle Delay',
+      uploadSelectedSubtitle: 'Upload Selected Subtitle',
     },
     window: {
       name: 'Window',
