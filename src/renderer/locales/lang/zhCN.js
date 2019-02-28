@@ -12,7 +12,7 @@ export default {
     playback: {
       name: '播放',
       fullScreen: '全屏/退出全屏',
-      keepPlayingWindowFront: '保持窗口在前',
+      keepPlayingWindowFront: '播放时保持在前',
       increasePlaybackSpeed: '加快播放速度',
       decreasePlaybackSpeed: '减缓播放速度',
       captureScreen: '截图',
