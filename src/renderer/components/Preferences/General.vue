@@ -49,7 +49,7 @@ export default {
   },
   watch: {
     displayLanguage(val) {
-      this.$i18n.locale = val;
+      if (val) this.$i18n.locale = val;
     },
     mouseDown(val, oldVal) {
       if (!val && oldVal && !this.isMoved) {

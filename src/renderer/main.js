@@ -160,7 +160,7 @@ new Vue({
   },
   created() {
     this.$store.commit('getLocalPreference');
-    this.$i18n.locale = this.displayLanguage;
+    if (this.displayLanguage) this.$i18n.locale = this.displayLanguage;
     asyncStorage.get('preferences').then((data) => {
       if (data.privacyAgreement === undefined) this.$bus.$emit('privacy-confirm');
       if (!data.primaryLanguage) {
@@ -174,6 +174,9 @@ new Vue({
       }
       if (!data.secondaryLanguage) {
         this.$store.dispatch('secondaryLanguage', '');
+      }
+      if (!data.displayLanguage) {
+        this.displayLanguage = getSystemLocale();
       }
     });
     asyncStorage.get('subtitle-style').then((data) => {
