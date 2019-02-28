@@ -493,6 +493,7 @@ export default {
         mediaIdentity: this.mediaHash,
         totalTime: this.duration,
         delay: this.subtitleDelay,
+        src: id,
       };
       const instance = this.subtitleInstances[id];
       if (instance) {
@@ -536,29 +537,24 @@ export default {
     });
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
+    this.$bus.$on('upload-current-subtitle', () => {
+      const qualifiedSubtitle = {
+        id: this.currentSubtitleId,
+        duration: this.$store.state.Subtitle.durations[this.currentSubtitleId],
+      };
+      if (qualifiedSubtitle) {
+        const parameter = this.makeSubtitleUploadParameter(qualifiedSubtitle);
+        transcriptQueue.add(parameter, true)
+          .then((res) => {
+            console.log(`Uploading subtitle No.${this.currentSubtitleId} ${res ? 'succeeded' : 'failed'}!`);
+          });
+      }
+    });
 
     // when set immediate on watcher, it may run before the created hook
     this.resetSubtitles();
     this.$bus.$emit('subtitle-refresh-from-src-change');
     this.updateNoSubtitle(true);
-
-    function pushCurrentSubtitle() {
-      if (this.currentSubtitleId) {
-        const currentSubtitleInfo = {
-          ...this.subtitleList
-            .find(({ id }) => id === this.currentSubtitleId),
-          duration: this.$store.state.Subtitle.durations[this.currentSubtitleId],
-        };
-        const subtitleInfo = this.makeSubtitleUploadParameter(currentSubtitleInfo);
-        console.log('Subtitle info retrieved,', subtitleInfo, 'ready to upload.');
-        Sagi.pushTranscript(subtitleInfo)
-          .then(() => console.log('Horay! Subtitle uploaded.'))
-          .catch(err => console.error('Opps, subtitle upload failed.', err));
-      } else {
-        console.error('Current subtitle not found. Do this again when you choose a subtitle.');
-      }
-    }
-    window.pushCurrentSubtitle = pushCurrentSubtitle.bind(this);
   },
 };
 </script>
