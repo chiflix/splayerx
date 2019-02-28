@@ -115,7 +115,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
-      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir']),
+      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -282,6 +282,9 @@ new Vue({
           this.disableMenus(e);
         });
       }
+    },
+    ableToPushCurrentSubtitle(val) {
+      this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
     },
   },
   methods: {
@@ -581,6 +584,12 @@ new Vue({
             // { type: 'separator' },
             // { label: 'Smart Translating' },
             // { label: 'Search on Shooter.cn' },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.subtitle.uploadSelectedSubtitle'),
+              id: 'uploadSelectedSubtitle',
+              click: () => this.$bus.$emit('upload-current-subtitle'),
+            },
           ],
         },
         // menu.window
