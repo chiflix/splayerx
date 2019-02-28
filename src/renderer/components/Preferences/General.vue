@@ -203,5 +203,19 @@ export default {
       }
     }
   }
+  ::-webkit-scrollbar {
+  width: 3px;
+  user-select: none;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1); 
+  border-radius: 1.5px;
+}
+::-webkit-scrollbar-track {
+  border-radius: 2px;
+  width: 10px;
+  user-select: none;
+}
 }
 </style>
