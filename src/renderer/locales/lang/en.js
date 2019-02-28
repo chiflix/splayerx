@@ -99,8 +99,11 @@ export default {
   },
   preferences: {
     general: {
+      others: 'Others',
       generalSetting: 'General',
+      displayLanguage: 'Display Language',
       clearHistory: 'Always clear playback history on exit',
+      switchDisplayLanguages: 'Display Language controls the language you see in SPlayer',
     },
     privacy: {
       privacySetting: 'Privacy',

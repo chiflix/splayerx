@@ -143,12 +143,13 @@ export default {
 
       font-family: $font-semibold;
       font-size: 14px;
-      color: #FFFFFF;
+      color: rgba(255,255,255,0.3);
       letter-spacing: 0;
       line-height: 16px;
     }
     .chosen {
       border-left: 1px solid white;
+      color: rgba(255,255,255,1);
       background-image: linear-gradient(99deg, rgba(243,243,243,0.15) 0%, rgba(255,255,255,0.0675) 81%);
     }
   }

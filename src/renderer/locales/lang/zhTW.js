@@ -98,8 +98,11 @@ export default {
   },
   preferences: {
     general: {
+      others: '其他',
       generalSetting: '通用設置',
+      displayLanguage: '顯示語言',
       clearHistory: '退出時自動清空播放記錄',
+      switchDisplayLanguages: '您可以在此修改射手影音播放器菜單、對話框中的顯示語言',
     },
     privacy: {
       privacySetting: '智能翻譯',
