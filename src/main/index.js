@@ -126,6 +126,15 @@ function registerMainWindowEvent() {
     mainWindow.setSize(...args);
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
+  ipcMain.on('generateThumbnails', (event, args) => {
+    console.log(args);
+    splayerx.generateThumbnails(
+      args.src, args.outPath, args.width, args.num[0], args.num[1],
+      (ret) => {
+        console.log(ret);
+      },
+    );
+  });
 
   function timecodeFromSeconds(s) {
     const dt = new Date(Math.abs(s) * 1000);

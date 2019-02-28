@@ -108,7 +108,7 @@ export default {
       return reactivePhases.thumbnailWidth[widthIndex];
     },
     thumbnailHeight() {
-      return Math.round(this.thumbnailWidth / this.ratio);
+      return Math.floor(this.thumbnailWidth / this.ratio);
     },
     thumbnailPosition() {
       return this.pageXToThumbnailPosition(
