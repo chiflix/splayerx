@@ -265,7 +265,6 @@ export default {
       return path.basename(this.path, path.extname(this.path));
     },
     backgroundImage() {
-      console.log(this.imageSrc);
       return `url(${this.imageSrc})`;
     },
     imageSrc() {

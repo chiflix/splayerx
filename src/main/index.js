@@ -127,11 +127,13 @@ function registerMainWindowEvent() {
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
   ipcMain.on('generateThumbnails', (event, args) => {
-    console.log(args);
     splayerx.generateThumbnails(
       args.src, args.outPath, args.width, args.num[0], args.num[1],
       (ret) => {
         console.log(ret);
+        if (ret === '0') {
+          mainWindow.webContents.send('thumbnail-saved');
+        }
       },
     );
   });
