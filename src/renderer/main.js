@@ -251,7 +251,13 @@ new Vue({
     isFullScreen() {
       this.refreshMenu();
     },
-    paused() {
+    paused(val) {
+      const browserWindow = this.$electron.remote.getCurrentWindow();
+      if (val && browserWindow.isAlwaysOnTop()) {
+        browserWindow.setAlwaysOnTop(false);
+      } else if (!val && this.menu.getMenuItemById('windowFront').checked) {
+        browserWindow.setAlwaysOnTop(true);
+      }
       // 因为老板键，pause 比 isFocused慢，所以在paused watcher里面
       // 需要判断是否需要禁用menu
       this.refreshMenu().then(() => {
