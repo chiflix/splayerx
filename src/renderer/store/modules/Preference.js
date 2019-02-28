@@ -49,7 +49,6 @@ const mutations = {
 const actions = {
   displayLanguage({ commit, state }, payload) {
     commit('displayLanguage', payload);
-    console.log(this);
     asyncStorage.set('preferences', state);
   },
   agreeOnPrivacyPolicy({ commit, state }) {
