@@ -18,7 +18,7 @@
           @mouseup="handleMouseup('General')">{{ $t('preferences.general.generalSetting') }}</div>
       <div class="preferenceTitle"
           :class="currentPreference === 'Privacy' ? 'chosen' : ''" 
-          @mouseup="handleMouseup('Privacy')">{{ $t('preferences.general.generalSetting') }}</div>
+          @mouseup="handleMouseup('Privacy')">{{ $t('preferences.privacy.privacySetting') }}</div>
     </div>
     <div class="right">
       <div class="win-icons no-drag"

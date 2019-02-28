@@ -1,68 +1,6 @@
 <template>
 <div class="general-setting">
   <BaseCheckBox
-    :checkboxValue="privacyAgreement"
-    @update:checkbox-value="privacyAgreement = $event">
-    {{ $t('preferences.general.privacyConfirm') }}
-  </BaseCheckBox>
-  <div class="languages-select">
-    <div class="select-content" :style="{opacity: privacyAgreement ? 1 : 0.3}">
-      <div class="title">{{ $t('preferences.general.languagePriority')}}</div>
-      <div class="description">{{ $t('preferences.general.languageDescription')}}</div>
-      <div class="first-selection">
-        <div class="selection-title">{{ $t('preferences.general.primary')}}</div>
-        <div class="drop-down"
-          :class="{ 'drop-down-en': $i18n.locale === 'en' }"
-          :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-          @mouseup.stop="openFirstDropdown">
-          {{ codeToLanguageName(primaryLanguage) }}
-          <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
-        </div>
-        <div class="drop-down-content no-drag"
-          :class="{ 'drop-down-content-en': $i18n.locale === 'en' }"
-          v-if="showFirstSelection">
-          <div class="content">
-            <div class="selection"
-              v-for="(language, index) in primaryLanguages"
-              :key="index"
-              @mouseup.stop="handleFirstSelection(language)">
-              {{ codeToLanguageName(language) }}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="second-selection">
-        <div class="selection-title">{{ $t('preferences.general.secondary')}}</div>
-        <div class="drop-down"
-          :class="{ 'drop-down-en': $i18n.locale === 'en' }"
-          :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-          @mouseup.stop="openSecondDropdown">
-          {{ codeToLanguageName(secondaryLanguage) }}
-          <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>                
-        </div>
-        <div class="drop-down-content no-drag"
-          :class="{ 'drop-down-content-en': $i18n.locale === 'en' }"
-          v-if="showSecondSelection">
-          <div class="content">
-            <div class="selection" ref="secondarySelection"
-              v-for="(language, index) in secondaryLanguages"
-              :key="index"
-              :style="{
-                color: (language === primaryLanguage && language !== noLanguage) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
-              }"
-              @mouseover="mouseover(index)"
-              @mouseout="mouseout(index)"
-              @mouseup.stop="handleSecondSelection(language, index)">
-              {{ codeToLanguageName(language) }}
-              <span v-if="language === primaryLanguage && language !== noLanguage"
-                style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.general.primary') }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <BaseCheckBox
     :checkboxValue="deleteVideoHistoryOnExit"
     @update:checkbox-value="deleteVideoHistoryOnExit = $event">
     {{ $t('preferences.general.clearHistory') }}
@@ -72,51 +10,16 @@
 
 <script>
 import electron from 'electron';
-import { codeToLanguageName } from '@/helpers/language';
-import Icon from '@/components/BaseIconContainer.vue';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
   name: 'General',
   components: {
-    Icon,
     BaseCheckBox,
   },
   data() {
     return {
-      showFirstSelection: false,
-      showSecondSelection: false,
-      languages: [
-        '',
-        'zh-CN',
-        'zh-TW',
-        'en',
-      ],
-      mouseDown: false,
-      isMoved: false,
-      noLanguage: this.$t('preferences.general.none'),
     };
-  },
-  created() {
-    window.onmousedown = () => {
-      this.mouseDown = true;
-      this.isMoved = false;
-    };
-    window.onmousemove = () => {
-      if (this.mouseDown) this.isMoved = true;
-    };
-    window.onmouseup = () => {
-      if (!this.isMoved) {
-        this.showFirstSelection = this.showSecondSelection = false;
-      }
-      this.mouseDown = false;
-      this.isMoved = false;
-    };
-  },
-  beforeDestroy() {
-    window.onmousedown = null;
-    window.onmousemove = null;
-    window.onmouseup = null;
   },
   watch: {
     privacyAgreement(val) {
@@ -126,34 +29,8 @@ export default {
     },
   },
   computed: {
-    primaryLanguages() {
-      return this.languages.filter(language => language && language !== this.primaryLanguage);
-    },
-    secondaryLanguages() {
-      return this.languages.filter(language => language !== this.secondaryLanguage);
-    },
     preferenceData() {
       return this.$store.getters.preferenceData;
-    },
-    primaryLanguage: {
-      get() {
-        return this.$store.getters.primaryLanguage;
-      },
-      set(val) {
-        this.$store.dispatch('primaryLanguage', val).then(() => {
-          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-        });
-      },
-    },
-    secondaryLanguage: {
-      get() {
-        return this.$store.getters.secondaryLanguage;
-      },
-      set(val) {
-        this.$store.dispatch('secondaryLanguage', val).then(() => {
-          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-        });
-      },
     },
     privacyAgreement: {
       get() {
@@ -189,52 +66,6 @@ export default {
     },
   },
   methods: {
-    codeToLanguageName(code) {
-      if (!code) return this.noLanguage;
-      return codeToLanguageName(code);
-    },
-    mouseover(index) {
-      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
-        this.$refs.secondarySelection[index].classList.add('selection-hover');
-      }
-    },
-    mouseout(index) {
-      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
-        this.$refs.secondarySelection[index].classList.remove('selection-hover');
-      }
-    },
-    handleFirstSelection(selection) {
-      if (selection === this.secondaryLanguage) this.secondaryLanguage = '';
-      this.primaryLanguage = selection;
-      this.showFirstSelection = false;
-    },
-    handleSecondSelection(selection, index) {
-      if (selection !== this.primaryLanguage) {
-        this.secondaryLanguage = selection;
-        this.showSecondSelection = false;
-        this.$refs.secondarySelection[index].classList.remove('selection-hover');
-      }
-    },
-    openFirstDropdown() {
-      if (this.privacyAgreement) {
-        if (this.showFirstSelection) {
-          this.showFirstSelection = false;
-        } else {
-          this.showFirstSelection = true;
-          this.showSecondSelection = false;
-        }
-      }
-    },
-    openSecondDropdown() {
-      if (this.privacyAgreement) {
-        if (this.showSecondSelection) {
-          this.showSecondSelection = false;
-        } else {
-          this.showSecondSelection = true;
-          this.showFirstSelection = false;
-        }
-      }
-    },
   },
 };
 </script>

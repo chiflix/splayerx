@@ -99,10 +99,13 @@ export default {
   },
   preferences: {
     general: {
-      none: 'None',
-      settings: 'Settings',
       generalSetting: 'General',
       clearHistory: 'Always clear playback history on exit',
+    },
+    privacy: {
+      privacySetting: 'Privacy',
+      none: 'None',
+      settings: 'Settings',
       privacyConfirm: 'Allow anonymous data / Smart Translation',
       setAsDefault: 'Set SPlayer as the Default Application',
       languagePriority: 'Language Priority',
@@ -111,7 +114,7 @@ export default {
       secondaryLanguage: 'Secondary Language',
       primary: 'Primary',
       secondary: 'Secondary',
-    },
+    }
   },
   advance: {
     rateTitle: 'Play Speed',

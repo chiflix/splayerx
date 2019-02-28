@@ -98,10 +98,13 @@ export default {
   },
   preferences: {
     general: {
-      none: '無',
-      settings: '設置',
       generalSetting: '通用設置',
       clearHistory: '退出時自動清空播放記錄',
+    },
+    privacy: {
+      privacySetting: '智能翻譯',
+      none: '無',
+      settings: '設置',
       privacyConfirm: '啟用匿名信息和智能翻譯',
       setAsDefault: '將SPlayer設為默認播放器',
       languagePriority: '語言優先級',
