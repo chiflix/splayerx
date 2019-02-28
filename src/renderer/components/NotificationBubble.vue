@@ -90,21 +90,6 @@ export default {
     },
   },
   mounted() {
-    asyncStorage.get('preferences').then((data) => {
-      this.showPrivacyBubble = data.privacyAgreement === undefined;
-      if (!data.primaryLanguage) {
-        const { app } = this.$electron.remote;
-        const locale = process.platform === 'win32' ? app.getLocale() : osLocale.sync();
-        if (locale === 'zh_TW' || locale === 'zh_CN') {
-          this.$store.dispatch('primaryLanguage', locale.replace('_', '-'));
-        } else {
-          this.$store.dispatch('primaryLanguage', 'en');
-        }
-      }
-      if (!data.secondaryLanguage) {
-        this.$store.dispatch('secondaryLanguage', '');
-      }
-    });
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
     });
