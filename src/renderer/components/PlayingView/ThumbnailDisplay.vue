@@ -37,13 +37,17 @@ export default {
       const row = index - (10 * column);
       return `-${row * this.thumbnailWidth}px -${column * this.thumbnailHeight}px`;
     },
+    src() {
+      const imgSrc = `${remote.app.getPath('desktop')}/${path.basename(this.originSrc)}.jpg`;
+      return existsSync(`${remote.app.getPath('desktop')}/${path.basename(this.originSrc)}.jpg`) || this.isSaved ? `url("${filePathToUrl(imgSrc)}")` : '';
+    },
   },
   data() {
     return {
-      src: '',
       num: [],
       currentIndex: 0,
       thumbnailCount: 0,
+      isSaved: false,
     };
   },
   methods: {
@@ -55,8 +59,7 @@ export default {
   },
   mounted() {
     this.$bus.$on('set-thumbnail-src', () => {
-      const imgSrc = `${remote.app.getPath('desktop')}/${path.basename(this.originSrc)}.jpg`;
-      this.src = `url("${filePathToUrl(imgSrc)}")`;
+      this.isSaved = true;
     });
     this.$bus.$on('generateThumbnails', (num) => {
       this.thumbnailCount = num;
