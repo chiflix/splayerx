@@ -1,5 +1,5 @@
 <template>
-<div class="general-setting">
+<div class="preference-setting">
   <BaseCheckBox
     :checkboxValue="privacyAgreement"
     @update:checkbox-value="privacyAgreement = $event">
@@ -218,7 +218,7 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-.general-setting {
+.preference-setting {
   box-sizing: border-box;
   padding-top: 37px;
   padding-left: 26px;
