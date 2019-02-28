@@ -53,7 +53,7 @@ export default {
     },
     mouseDown(val, oldVal) {
       if (!val && oldVal && !this.isMoved) {
-        this.showFirstSelection = this.showSecondSelection = false;
+        this.showSelection = false;
       } else if (!val && oldVal && this.isMoved) {
         this.$emit('move-stoped');
       }
