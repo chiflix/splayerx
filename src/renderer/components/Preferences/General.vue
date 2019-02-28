@@ -32,11 +32,6 @@ export default {
     };
   },
   watch: {
-    privacyAgreement(val) {
-      if (!val) {
-        this.showFirstSelection = this.showSecondSelection = false;
-      }
-    },
     displayLanguage(val) {
       this.$i18n.locale = val;
     },
@@ -44,22 +39,6 @@ export default {
   computed: {
     preferenceData() {
       return this.$store.getters.preferenceData;
-    },
-    privacyAgreement: {
-      get() {
-        return this.$store.getters.privacyAgreement;
-      },
-      set(val) {
-        if (val) {
-          this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
-            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-          });
-        } else {
-          this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
-            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-          });
-        }
-      },
     },
     deleteVideoHistoryOnExit: {
       get() {
