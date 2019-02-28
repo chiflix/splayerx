@@ -230,14 +230,12 @@ function registerMainWindowEvent() {
   });
 
   ipcMain.on('extract-subtitle-request', (event, videoPath, index, format, hash) => {
-    console.log(index);
     const subtitleFolderPath = path.join(tempFolderPath, hash);
     if (!fs.existsSync(subtitleFolderPath)) fs.mkdirSync(subtitleFolderPath);
     console.log(subtitleFolderPath);
     const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
     if (fs.existsSync(subtitlePath)) event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath });
     else {
-      console.log(subtitlePath);
       embeeddSubtitlesQueue.add(() => extractSubtitle(videoPath, subtitlePath, index)
         .then(index => event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath }))
         .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index })));
