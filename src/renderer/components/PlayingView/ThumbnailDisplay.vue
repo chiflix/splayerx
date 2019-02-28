@@ -56,6 +56,9 @@ export default {
     currentTime(val) {
       this.currentIndex = Math.abs(Math.floor(val / (this.duration / this.thumbnailCount)));
     },
+    originSrc() {
+      this.isSaved = false;
+    },
   },
   mounted() {
     this.$bus.$on('set-thumbnail-src', () => {
