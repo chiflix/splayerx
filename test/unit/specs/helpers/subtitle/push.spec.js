@@ -26,7 +26,7 @@ describe('helper - subtitle - push', () => {
       testPQueue = new PQueue();
       testTQueue = new TranscriptQueue(testPQueue);
     });
-    describe('method - add', () => {
+    describe.only('method - add', () => {
       let testSubtitle;
       let testSubtitleId;
       let addStub;
@@ -81,6 +81,14 @@ describe('helper - subtitle - push', () => {
         testTQueue.add(testSubtitle)
           .then(() => {
             expect(addStub).to.have.been.calledWithMatch(match.any, { priority: 1 });
+            done();
+          }).catch(done);
+      });
+      it('should subtitle be added no matter what when adding manually', (done) => {
+        testTQueue.subtitleState[testSubtitleId] = 'loading';
+        testTQueue.add(testSubtitle, true)
+          .then(() => {
+            expect(addStub).to.have.been.called;
             done();
           }).catch(done);
       });
