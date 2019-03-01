@@ -13,6 +13,8 @@ configuration: Release
 
 init:
   - git config --global core.autocrlf input
+  # Provide a short commit SHA1 too
+  - ps: ${env:APPVEYOR_REPO_COMMIT_SHORT} = (${env:APPVEYOR_REPO_COMMIT}).Substring(0, 7)
 
 install:
   - ps: Install-Product node 11 x64
@@ -26,18 +28,18 @@ build_script:
 test: off
 
 after_build:
-  - ps: Move-Item -Path build\*.appx -Destination "build\splayerx-${env:APPVEYOR_REPO_COMMIT}-${env:APPVEYOR_BUILD_VERSION}.appx"
+  - ps: Move-Item -Path build\*.appx -Destination "build\splayerx-${env:APPVEYOR_REPO_COMMIT_SHORT}-${env:APPVEYOR_BUILD_VERSION}.appx"
 
 artifacts:
   - path: 'build\*.appx'
 
 deploy:
   provider: S3
-  access_key_id: $AWS_ACCESSID
-  secret_access_key: $AWS_ACCESSKEY
+  access_key_id: ${env:AWS_ACCESSID}
+  secret_access_key: ${env:AWS_ACCESSKEY}
   bucket: tomasen
   region: ap-northeast-1
   unzip: false
   set_public: true
   folder: / 
-  artifact: 'splayerx-${env:APPVEYOR_REPO_COMMIT}-${env:APPVEYOR_BUILD_VERSION}.appx'
+  artifact: 'splayerx-${env:APPVEYOR_REPO_COMMIT_SHORT}-${env:APPVEYOR_BUILD_VERSION}.appx'
