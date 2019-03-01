@@ -9,6 +9,7 @@
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",
+    "build:appx": "scripts/appxbuild.sh",
     "build:mas": "scripts/masbuild.sh mas",
     "build:mas-dev": "scripts/masbuild.sh mas-dev",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
@@ -53,6 +54,14 @@
     "files": [
       "dist/electron/**/*"
     ],
+    "appx": {
+      "identityName": "29951SHENGSHEN.SPlayer4",
+      "publisher": "CN=840E2570-B48E-4F56-A2DA-0D9720F91080",
+      "publisherDisplayName": "SHENG SHEN",
+      "languages": [
+        "en-US", "zh-CN", "zh-TW"
+      ]
+    },
     "dmg": {
       "background": "build/icons/dmg/bg.tiff",
       "icon": "build/icons/dmg/install.icns",

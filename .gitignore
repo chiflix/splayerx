@@ -2,6 +2,7 @@
 dist/
 build/*
 !build/icons
+!build/appx
 coverage
 node_modules/
 npm-debug.log
