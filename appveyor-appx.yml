@@ -35,8 +35,10 @@ artifacts:
 
 deploy:
   provider: S3
-  access_key_id: $AWS_ACCESSID
-  secret_access_key: $AWS_ACCESSKEY
+  access_key_id:
+    secure: tLI8AWsbZbrNwTLU5p/j7wgD2fwbZ8BmE+h9gzxEkLI=
+  secret_access_key:
+    secure: Kta60XT42Orc93ZSoxbNRlFP41JmfzaB3UjjijKPtHN/199BXPcdshLIy4VduOIP
   bucket: tomasen
   region: ap-northeast-1
   unzip: false
