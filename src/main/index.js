@@ -130,7 +130,7 @@ function registerMainWindowEvent() {
     splayerx.generateThumbnails(
       args.src, args.outPath, args.width, args.num[0], args.num[1],
       (ret) => {
-        console.log(ret);
+        console[ret === '0' ? 'log' : 'error'](ret, args.src);
         if (ret === '0') {
           mainWindow.webContents.send('thumbnail-saved');
         }
