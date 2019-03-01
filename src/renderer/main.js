@@ -347,14 +347,14 @@ new Vue({
                 }
               },
             },
-            {
-              label: this.$t('msg.file.openURL'),
-              accelerator: 'CmdOrCtrl+U',
-              click: () => {
-                // TODO: openURL.click
-              },
-              enabled: false,
-            },
+            // {
+            //   label: this.$t('msg.file.openURL'),
+            //   accelerator: 'CmdOrCtrl+U',
+            //   click: () => {
+            //     // TODO: openURL.click
+            //   },
+            //   enabled: false,
+            // },
             { type: 'separator' },
             {
               label: this.$t('msg.file.clearHistory'),
@@ -442,9 +442,9 @@ new Vue({
                 }
               },
             },
-            { type: 'separator' },
-            { label: this.$t('msg.playback.captureScreen'), enabled: false },
-            { label: this.$t('msg.playback.captureVideoClip'), enabled: false },
+            // { type: 'separator' },
+            // { label: this.$t('msg.playback.captureScreen'), enabled: false },
+            // { label: this.$t('msg.playback.captureVideoClip'), enabled: false },
           ],
         },
         // menu.audio
@@ -478,9 +478,9 @@ new Vue({
               },
             },
             { type: 'separator' },
-            { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
-            { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
-            { type: 'separator' },
+            // { label: this.$t('msg.audio.increaseAudioDelay'), enabled: false },
+            // { label: this.$t('msg.audio.decreaseAudioDelay'), enabled: false },
+            // { type: 'separator' },
           ],
         },
         // menu.subtitle
@@ -518,10 +518,10 @@ new Vue({
               },
             },
             { type: 'separator' },
-            {
-              label: this.$t('msg.subtitle.secondarySubtitle'),
-              enabled: false,
-            },
+            // {
+            //   label: this.$t('msg.subtitle.secondarySubtitle'),
+            //   enabled: false,
+            // },
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.subtitleSize'),
@@ -727,7 +727,7 @@ new Vue({
         template[1].submenu.splice(0, 0, this.updatePlayOrPause);
         template[4].submenu.splice(2, 0, this.updateFullScreen);
         template[2].submenu.splice(7, 0, this.updateAudioTrack());
-        template[0].submenu.splice(2, 0, result);
+        template[0].submenu.splice(1, 0, result);
         // menu.about
         if (process.platform === 'darwin') {
           template.unshift({
