@@ -26,9 +26,6 @@ build_script:
 test: off
 
 after_build:
-  # need appveyor will replace space in filename by ., but electron updater need '-', before deploy need to replace \s by -
-  - cmd: 'forfiles  /P build /m *.blockmap /C "cmd /e:on /v:on /c set \"Phile=@file\" & if @ISDIR==FALSE ren @file !Phile: =-!"'
-  - cmd: 'forfiles  /P build /m *.exe  /C "cmd /e:on /v:on /c set \"Phile=@file\" & if @ISDIR==FALSE ren @file !Phile: =-!"'
   - ps: mv build\*.appx "build\splayerx-${APPVEYOR_REPO_COMMIT}-${APPVEYOR_BUILD_VERSION}.appx"
 
 artifacts:
