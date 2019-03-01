@@ -474,6 +474,7 @@
     "sagi-api": "^0.0.7",
     "source-map-support": "^0.5.9",
     "subtitle": "^2.0.1",
+    "traditional-or-simplified": "^1.0.3",
     "uuid": "^3.2.1",
     "vue": "^2.5.18",
     "vue-analytics": "^5.16.1",
