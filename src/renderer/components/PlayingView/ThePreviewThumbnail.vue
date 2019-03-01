@@ -21,7 +21,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import { ipcRenderer } from 'electron';
 import Icon from '../BaseIconContainer.vue';
 import ThumbnailDisplay from './ThumbnailDisplay.vue';
 
@@ -60,17 +59,6 @@ export default {
   watch: {
   },
   methods: {
-    // isInvalidVideo(videoSrc) {
-    //   return new Promise((resolve) => {
-    //     ipcRenderer.once(`mediaInfo-${videoSrc}-reply`, (event, info) => {
-    //       const {
-    //         codec_long_name: codecName,
-    //         coded_width: width,
-    //       } = JSON.parse(info).streams[0]; // eslint-disable-line camelcase
-    //       resolve(/HEVC|265/.test(codecName) || width > 1920);
-    //     });
-    //   });
-    // },
   },
   created() {
   },

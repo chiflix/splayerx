@@ -12,11 +12,10 @@
   </div>
 </template>
 <script>
-import { existsSync } from 'fs';
-import path from 'path';
-import { ipcRenderer, remote } from 'electron';
+import { ipcRenderer } from 'electron';
 import { mapGetters } from 'vuex';
 import { filePathToUrl } from '@/helpers/path';
+import { getVideoInfoByMediaHash, generateThumbnailPathByMediaHash } from '@/helpers/cacheFileStorage';
 
 export default {
   name: 'thumbnail-display',
@@ -30,7 +29,7 @@ export default {
     thumbnailHeight: Number,
   },
   computed: {
-    ...mapGetters(['originSrc', 'duration']),
+    ...mapGetters(['originSrc', 'duration', 'mediaHash']),
     backPos() {
       const index = this.currentIndex;
       const column = index === 0 ? 0 : Math.ceil(index / 10) - 1;
@@ -38,8 +37,7 @@ export default {
       return `-${row * this.thumbnailWidth}px -${column * this.thumbnailHeight}px`;
     },
     src() {
-      const imgSrc = `${remote.app.getPath('desktop')}/${path.basename(this.originSrc)}.jpg`;
-      return existsSync(`${remote.app.getPath('desktop')}/${path.basename(this.originSrc)}.jpg`) || this.isSaved ? `url("${filePathToUrl(imgSrc)}")` : '';
+      return this.imgExisted || this.isSaved ? `url("${filePathToUrl(this.imgSrc)}")` : '';
     },
   },
   data() {
@@ -48,6 +46,8 @@ export default {
       currentIndex: 0,
       thumbnailCount: 0,
       isSaved: false,
+      imgExisted: false,
+      imgSrc: '',
     };
   },
   methods: {
@@ -58,20 +58,25 @@ export default {
     },
     originSrc() {
       this.isSaved = false;
+      this.imgExisted = false;
+      this.imgSrc = '';
     },
   },
   mounted() {
     this.$bus.$on('set-thumbnail-src', () => {
       this.isSaved = true;
     });
-    this.$bus.$on('generateThumbnails', (num) => {
+    this.$bus.$on('generateThumbnails', async (num) => {
+      const fileContent = await await getVideoInfoByMediaHash(this.mediaHash);
+      this.imgExisted = !!fileContent.thumbnail;
+      this.imgSrc = await generateThumbnailPathByMediaHash(this.mediaHash);
       this.thumbnailCount = num;
       this.num = ['10', `${Math.ceil(num / 10)}`];
-      if (!existsSync(`${remote.app.getPath('desktop')}/${path.basename(this.originSrc)}.jpg`)) {
+      if (!this.imgExisted) {
         setTimeout(() => {
           const info = {
             src: this.originSrc,
-            outPath: `${remote.app.getPath('desktop')}/${path.basename(this.originSrc)}.jpg`,
+            outPath: this.imgSrc,
             width: `${this.thumbnailWidth}`,
             num: this.num,
           };
