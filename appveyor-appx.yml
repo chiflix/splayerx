@@ -31,7 +31,7 @@ after_build:
   - ps: Move-Item -Path build\*.appx -Destination "splayerx-${env:APPVEYOR_REPO_COMMIT_SHORT}-${env:APPVEYOR_BUILD_VERSION}.appx"
 
 artifacts:
-  - path: 'build\*.appx'
+  - path: '*.appx'
 
 deploy:
   provider: S3
