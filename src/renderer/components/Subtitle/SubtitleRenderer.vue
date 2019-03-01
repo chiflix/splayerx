@@ -185,11 +185,15 @@ export default {
         const currentCues = [];
         cues.forEach((item) => {
           let currentText = '';
+          let currentTags = {};
           item.fragments.forEach((cue) => {
             currentText += cue.text;
+            if (cue.tags) {
+              currentTags = cue.tags;
+            }
           });
           currentCues.push({
-            start: item.start, end: item.end, tags: item.fragments[0].tags, text: currentText,
+            start: item.start, end: item.end, tags: currentTags, text: currentText,
           });
         });
         return currentCues;
