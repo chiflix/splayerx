@@ -9,7 +9,7 @@
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",
-    "build:appx": "scripts/appxbuild.sh",
+    "build:appx": "bash -c scripts/appxbuild.sh",
     "build:mas": "scripts/masbuild.sh mas",
     "build:mas-dev": "scripts/masbuild.sh mas-dev",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
