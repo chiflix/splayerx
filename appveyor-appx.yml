@@ -14,7 +14,7 @@ configuration: Release
 init:
   - git config --global core.autocrlf input
   # Provide a short commit SHA1 too
-  - ps: ${env:APPVEYOR_REPO_COMMIT_SHORT} = (${env:APPVEYOR_REPO_COMMIT}).Substring(0, 7)
+  - ps: ${env:APPVEYOR_REPO_COMMIT_SHORT} = (${env:APPVEYOR_REPO_COMMIT}).Substring(0, 8)
 
 install:
   - ps: Install-Product node 11 x64
