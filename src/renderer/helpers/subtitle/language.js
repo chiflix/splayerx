@@ -37,21 +37,26 @@ export default function fragmentToLanguage(fragment, type) {
   };
   let dialogues;
   let splitterRegex = /\n/g;
-  switch (type) {
+  switch (type.toLowerCase()) {
     default:
       break;
-    case 'ass': {
+    case 'ass':
+    case 'advanced substation alpha':
+    case 'ssa':
+    case 'substation alpha': {
       const textRegex = /(Dialogue([:,.*\w\d\s]+))|(\{.+\})/g;
       dialogues = dialogueNomalizer(fragment, textRegex);
       splitterRegex = /\\+n\s?/gi;
       break;
     }
-    case 'srt': {
+    case 'srt':
+    case 'subrip': {
       const textRegex = /\d+\n.*\n|<\/?\w>|{.*}/g;
       dialogues = dialogueNomalizer(fragment, textRegex);
       break;
     }
-    case 'vtt': {
+    case 'vtt':
+    case 'webvtt': {
       const textRegex = /(\d+|[\d\s:.\->]{29})\n/g;
       dialogues = dialogueNomalizer(fragment, textRegex);
       break;
