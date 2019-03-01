@@ -8,6 +8,7 @@
        height: `${thumbnailHeight}px`,
        backgroundImage: src,
        backgroundPosition: backPos,
+       backgroundSize: backSize,
      }"></div>
   </div>
 </template>
@@ -22,8 +23,6 @@ export default {
   components: {
   },
   props: {
-    quickHash: String,
-    maxThumbnailWidth: Number,
     currentTime: Number,
     thumbnailWidth: Number,
     thumbnailHeight: Number,
@@ -34,7 +33,10 @@ export default {
       const index = this.currentIndex;
       const column = index === 0 ? 0 : Math.ceil(index / 10) - 1;
       const row = index - (10 * column);
-      return `-${row * this.thumbnailWidth}px -${column * this.thumbnailHeight}px`;
+      return `-${row * 100}% -${column * 100}%`;
+    },
+    backSize() {
+      return `1000% ${Math.ceil(this.thumbnailCount / 10) * 100}%`;
     },
     src() {
       return this.imgExisted || this.isSaved ? `url("${filePathToUrl(this.imgSrc)}")` : '';
@@ -73,15 +75,13 @@ export default {
       this.thumbnailCount = num;
       this.num = ['10', `${Math.ceil(num / 10)}`];
       if (!this.imgExisted) {
-        setTimeout(() => {
-          const info = {
-            src: this.originSrc,
-            outPath: this.imgSrc,
-            width: `${this.thumbnailWidth}`,
-            num: this.num,
-          };
-          ipcRenderer.send('generateThumbnails', info);
-        }, 100);
+        const info = {
+          src: this.originSrc,
+          outPath: this.imgSrc,
+          width: '272',
+          num: this.num,
+        };
+        ipcRenderer.send('generateThumbnails', info);
       }
     });
   },
