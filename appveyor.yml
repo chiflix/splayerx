@@ -27,8 +27,8 @@ install:
   - node --version
 
 build_script:
-  #- npm t
   - npm run build
+  - npm run build:appx
 
 test: off
 
