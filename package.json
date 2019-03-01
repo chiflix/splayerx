@@ -55,7 +55,8 @@
       "dist/electron/**/*"
     ],
     "appx": {
-      "identityName": "SPlayer4",
+      "identityName": "29951SHENGSHEN.SPlayer4",
+      "applicationId": "SPlayer",
       "publisher": "CN=840E2570-B48E-4F56-A2DA-0D9720F91080",
       "publisherDisplayName": "SHENG SHEN",
       "languages": [
