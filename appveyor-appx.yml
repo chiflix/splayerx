@@ -22,13 +22,16 @@ install:
   - npm i
   - node --version
 
+before_build:
+  - ps: ${env:REV} = (git rev-list --count HEAD)
+
 build_script:
   - npm run build:appx
 
 test: off
 
 after_build:
-  - ps: Move-Item -Path build\*.appx -Destination "splayerx-${env:APPVEYOR_REPO_COMMIT_SHORT}-${env:APPVEYOR_BUILD_VERSION}.appx"
+  - ps: Move-Item -Path build\*.appx -Destination "splayerx-${env:APPVEYOR_REPO_COMMIT_SHORT}-${env:REV}.appx"
 
 artifacts:
   - path: '*.appx'
