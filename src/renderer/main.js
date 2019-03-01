@@ -378,17 +378,31 @@ new Vue({
           id: 'playback',
           submenu: [
             {
-              label: this.$t('msg.playback.forward'),
+              label: this.$t('msg.playback.forwardS'),
               accelerator: 'Right',
               click: () => {
                 this.$bus.$emit('seek', videodata.time + 5);
               },
             },
             {
-              label: this.$t('msg.playback.backward'),
+              label: this.$t('msg.playback.backwardS'),
               accelerator: 'Left',
               click: () => {
                 this.$bus.$emit('seek', videodata.time - 5);
+              },
+            },
+            {
+              label: this.$t('msg.playback.forwardL'),
+              accelerator: 'Alt+Right',
+              click: () => {
+                this.$bus.$emit('seek', videodata.time + 60);
+              },
+            },
+            {
+              label: this.$t('msg.playback.backwardL'),
+              accelerator: 'Alt+Left',
+              click: () => {
+                this.$bus.$emit('seek', videodata.time - 60);
               },
             },
             { type: 'separator' },
@@ -404,6 +418,13 @@ new Vue({
               accelerator: '[',
               click: () => {
                 this.$store.dispatch(videoActions.DECREASE_RATE);
+              },
+            },
+            {
+              label: this.$t('msg.playback.resetSpeed'),
+              accelerator: '\\',
+              click: () => {
+                this.$store.dispatch(videoActions.CHANGE_RATE, 1);
               },
             },
             /** */
@@ -588,17 +609,31 @@ new Vue({
             },
             { type: 'separator' },
             {
-              label: this.$t('msg.subtitle.increaseSubtitleDelay'),
+              label: this.$t('msg.subtitle.increaseSubtitleDelayS'),
               accelerator: 'CmdOrCtrl+=',
               click: () => {
                 this.updateSubDelay(0.1);
               },
             },
             {
-              label: this.$t('msg.subtitle.decreaseSubtitleDelay'),
+              label: this.$t('msg.subtitle.decreaseSubtitleDelayS'),
               accelerator: 'CmdOrCtrl+-',
               click: () => {
                 this.updateSubDelay(-0.1);
+              },
+            },
+            {
+              label: this.$t('msg.subtitle.increaseSubtitleDelayL'),
+              accelerator: 'CmdOrCtrl+Shift+=',
+              click: () => {
+                this.updateSubDelay(0.5);
+              },
+            },
+            {
+              label: this.$t('msg.subtitle.decreaseSubtitleDelayL'),
+              accelerator: 'CmdOrCtrl+Shift+-',
+              click: () => {
+                this.updateSubDelay(-0.5);
               },
             },
             // { type: 'separator' },
@@ -1039,31 +1074,7 @@ new Vue({
         this.menu.popup(this.$electron.remote.getCurrentWindow());
       }
     });
-    window.addEventListener('keydown', (e) => { // eslint-disable-line complexity
-      switch (e.key) {
-        case 'ArrowLeft':
-          if (e.altKey === true) {
-            this.$bus.$emit('seek', videodata.time - 60);
-          }
-          break;
-        case 'ArrowRight':
-          if (e.altKey === true) {
-            this.$bus.$emit('seek', videodata.time + 60);
-          }
-          break;
-        case '-':
-          if (e.shiftKey === true && e.metaKey === true) {
-            this.updateSubDelay(-0.5);
-          }
-          break;
-        case '=':
-          if (e.shiftKey === true && e.metaKey === true) {
-            this.updateSubDelay(0.5);
-          }
-          break;
-        default:
-          break;
-      }
+    window.addEventListener('keydown', (e) => {
       switch (e.keyCode) {
         case 219:
           e.preventDefault();
