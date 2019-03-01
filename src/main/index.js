@@ -6,6 +6,7 @@ import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayer
 import { throttle, debounce } from 'lodash';
 import path from 'path';
 import fs from 'fs';
+import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
@@ -37,6 +38,7 @@ let inited = false;
 const filesToOpen = [];
 const snapShotQueue = [];
 const mediaInfoQueue = [];
+const embeeddSubtitlesQueue = new TaskQueue();
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -234,9 +236,9 @@ function registerMainWindowEvent() {
     const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
     if (fs.existsSync(subtitlePath)) event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath });
     else {
-      extractSubtitle(videoPath, subtitlePath, index)
+      embeeddSubtitlesQueue.add(() => extractSubtitle(videoPath, subtitlePath, index)
         .then(index => event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath }))
-        .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index }));
+        .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index })));
     }
   });
 
