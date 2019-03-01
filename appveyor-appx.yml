@@ -26,7 +26,7 @@ build_script:
 test: off
 
 after_build:
-  - ps: mv build\*.appx "build\splayerx-${APPVEYOR_REPO_COMMIT}-${APPVEYOR_BUILD_VERSION}.appx"
+  - ps: Move-Item -Path build\*.appx -Destination "build\splayerx-${APPVEYOR_REPO_COMMIT}-${APPVEYOR_BUILD_VERSION}.appx"
 
 artifacts:
   - path: 'build\*.appx'
