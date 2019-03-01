@@ -1,0 +1,31 @@
+# Commented sections below can be used to run tests on the CI server
+# https://simulatedgreg.gitbooks.io/electron-vue/content/en/testing.html#on-the-subject-of-ci-testing
+version: 0.1.{build}
+
+# branches:
+
+image: Visual Studio 2017
+
+platform:
+  - x64
+
+configuration: Release
+
+cache:
+init:
+  - git config --global core.autocrlf input
+
+install:
+  - ps: Install-Product node 11 x64
+  - git reset --hard HEAD
+  - npm i
+  - node --version
+
+build_script:
+  - npm run build:appx
+  
+test: off
+after_build:
+artifacts:
+environment:
+deploy:
