@@ -1,8 +1,8 @@
 .DS_Store
 dist/
 build/*
-!build/icons
 !build/appx
+!build/icons
 coverage
 node_modules/
 npm-debug.log
