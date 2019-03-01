@@ -40,4 +40,4 @@ deploy:
   unzip: false
   set_public: true
   folder: / 
-  artifact: "build\splayerx-${env:APPVEYOR_REPO_COMMIT}-${env:APPVEYOR_BUILD_VERSION}.appx"
+  artifact: 'build\splayerx-${env:APPVEYOR_REPO_COMMIT}-${env:APPVEYOR_BUILD_VERSION}.appx'
