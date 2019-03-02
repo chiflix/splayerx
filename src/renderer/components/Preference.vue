@@ -11,13 +11,12 @@
               @click.native="handleClose"/>
         <Icon class="title-button-disable" type="titleBarExitFull"/>
         <Icon class="title-button-disable" type="titleBarFull"/>
-        </Icon>
       </div>
       <div class="preferenceTitle"
-          :class="currentPreference === 'General' ? 'chosen' : ''" 
+          :class="currentPreference === 'General' ? 'chosen' : ''"
           @mouseup="handleMouseup('General')">{{ $t('preferences.general.generalSetting') }}</div>
       <div class="preferenceTitle"
-          :class="currentPreference === 'Privacy' ? 'chosen' : ''" 
+          :class="currentPreference === 'Privacy' ? 'chosen' : ''"
           @mouseup="handleMouseup('Privacy')">{{ $t('preferences.privacy.privacySetting') }}</div>
     </div>
     <div class="right">
@@ -29,7 +28,6 @@
               type="titleBarWinExitFull"/>
         <Icon class="title-button-disable" type="titleBarWinFull"/>
         <Icon class="title-button" type="titleBarWinClose" @click.native="handleClose"/>
-        </Icon>
       </div>
       <component :is="currentPreference"
       @move-stoped="isMoved = false"
