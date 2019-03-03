@@ -767,13 +767,13 @@ new Vue({
         }
         if (process.platform === 'win32') {
           const file = template.shift();
-          const winFile = file.submenu.slice(0, 3);
-          winFile[2].submenu.unshift(file.submenu[4], file.submenu[3]);
-          winFile.push(file.submenu[6], file.submenu[5]);
+          const winFile = file.submenu.slice(0, 2);
+          winFile[1].submenu.unshift(file.submenu[3], file.submenu[2]);
+          winFile.push(file.submenu[5], file.submenu[4]);
           winFile.reverse().forEach((menuItem) => {
             template.unshift(menuItem);
           });
-          template.splice(5, 0, {
+          template.splice(4, 0, {
             label: this.$t('msg.splayerx.preferences'),
             enabled: true,
             accelerator: 'Cmd+,',
@@ -781,7 +781,7 @@ new Vue({
               this.$electron.ipcRenderer.send('add-preference');
             },
           });
-          template[10].submenu.unshift(
+          template[9].submenu.unshift(
             {
               label: this.$t('msg.splayerx.about'),
               role: 'about',
