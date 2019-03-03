@@ -36,6 +36,7 @@ let tray = null;
 let inited = false;
 const filesToOpen = [];
 const snapShotQueue = [];
+const thumbnailQueue = [];
 const mediaInfoQueue = [];
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
@@ -126,20 +127,34 @@ function registerMainWindowEvent() {
     mainWindow.setSize(...args);
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
-  ipcMain.on('generateThumbnails', (event, args) => {
+  function thumbnail(args, cb) {
     splayerx.generateThumbnails(
       args.src, args.outPath, args.width, args.num.rows, args.num.cols,
       (ret) => {
         console[ret === '0' ? 'log' : 'error'](ret, args.src);
-        if (ret === '0') {
-          mainWindow.webContents.send('thumbnail-saved');
-        }
+        cb(ret, args.src);
       },
     );
-  });
-  function thumbnailQueue(args) {
-    const 
   }
+  function thumbnailQueueCallback(event) {
+    const cb = (ret, src) => {
+      thumbnailQueue.shift();
+      if (thumbnailQueue.length > 0) {
+        thumbnail(thumbnailQueue[thumbnailQueue.length - 1], cb);
+        thumbnailQueue.splice(0, thumbnailQueue.length);
+      }
+      if (ret === '0') {
+        event.sender.send('thumbnail-saved', src);
+      }
+    };
+    thumbnail(thumbnailQueue[0], cb);
+  }
+  ipcMain.on('generateThumbnails', (event, args) => {
+    thumbnailQueue.push(args);
+    if (thumbnailQueue.length === 1) {
+      thumbnailQueueCallback(event);
+    }
+  });
 
   function timecodeFromSeconds(s) {
     const dt = new Date(Math.abs(s) * 1000);

@@ -64,8 +64,10 @@ export default {
     },
   },
   mounted() {
-    this.$bus.$on('set-thumbnail-src', () => {
-      this.isSaved = true;
+    this.$bus.$on('set-thumbnail-src', (src) => {
+      if (src === this.originSrc) {
+        this.isSaved = true;
+      }
     });
     this.$bus.$on('generate-thumbnails', async (num) => {
       const fileContent = await getVideoInfoByMediaHash(this.mediaHash);

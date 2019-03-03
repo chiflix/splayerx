@@ -115,8 +115,8 @@
         this.mainDispatchProxy(actionType, actionPayload);
       });
       this.$electron.ipcRenderer.send('windowInit');
-      this.$electron.ipcRenderer.on('thumbnail-saved', () => {
-        this.$bus.$emit('set-thumbnail-src');
+      this.$electron.ipcRenderer.on('thumbnail-saved', (event, src) => {
+        this.$bus.$emit('set-thumbnail-src', src);
       });
       drag(this.$el);
       this.$ga.event('app', 'mounted');
