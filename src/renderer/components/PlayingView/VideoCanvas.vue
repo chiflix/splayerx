@@ -78,7 +78,7 @@ export default {
       });
       const generationInterval = Math.round(event.target.duration / (window.screen.width / 4)) || 1;
       const maxThumbnailCount = Math.floor(event.target.duration / generationInterval);
-      this.$bus.$emit('generateThumbnails', maxThumbnailCount);
+      this.$bus.$emit('generate-thumbnails', maxThumbnailCount);
       this.updateMetaInfo({
         intrinsicWidth: event.target.videoWidth,
         intrinsicHeight: event.target.videoHeight,

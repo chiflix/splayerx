@@ -128,7 +128,7 @@ function registerMainWindowEvent() {
   });
   ipcMain.on('generateThumbnails', (event, args) => {
     splayerx.generateThumbnails(
-      args.src, args.outPath, args.width, args.num[0], args.num[1],
+      args.src, args.outPath, args.width, args.num.rows, args.num.cols,
       (ret) => {
         console[ret === '0' ? 'log' : 'error'](ret, args.src);
         if (ret === '0') {
@@ -137,6 +137,9 @@ function registerMainWindowEvent() {
       },
     );
   });
+  function thumbnailQueue(args) {
+    const 
+  }
 
   function timecodeFromSeconds(s) {
     const dt = new Date(Math.abs(s) * 1000);
