@@ -110,9 +110,6 @@ export default {
       wheelTime: state => state.Input.wheelTimestamp,
     }),
     ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized']),
-    onlyOneVideo() {
-      return this.playingList.length === 1;
-    },
     showAllWidgets() {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
@@ -186,9 +183,6 @@ export default {
     this.UIElements.forEach((value) => {
       this.displayState[value.name] = true;
       if (value.name === 'recent-playlist') this.displayState[value.name] = false;
-      if (value.name === 'playlist-control' && this.onlyOneVideo) {
-        this.displayState['playlist-control'] = false;
-      }
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
@@ -284,7 +278,6 @@ export default {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
-      tempObject['playlist-control'] = !this.onlyOneVideo;
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
