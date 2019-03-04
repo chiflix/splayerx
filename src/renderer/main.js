@@ -622,20 +622,20 @@ new Vue({
                 this.updateSubDelay(-0.1);
               },
             },
-            {
-              label: this.$t('msg.subtitle.increaseSubtitleDelayL'),
-              accelerator: 'CmdOrCtrl+Shift+=',
-              click: () => {
-                this.updateSubDelay(0.5);
-              },
-            },
-            {
-              label: this.$t('msg.subtitle.decreaseSubtitleDelayL'),
-              accelerator: 'CmdOrCtrl+Shift+-',
-              click: () => {
-                this.updateSubDelay(-0.5);
-              },
-            },
+            // {
+            //   label: this.$t('msg.subtitle.increaseSubtitleDelayL'),
+            //   accelerator: 'CmdOrCtrl+Shift+=',
+            //   click: () => {
+            //     this.updateSubDelay(0.5);
+            //   },
+            // },
+            // {
+            //   label: this.$t('msg.subtitle.decreaseSubtitleDelayL'),
+            //   accelerator: 'CmdOrCtrl+Shift+-',
+            //   click: () => {
+            //     this.updateSubDelay(-0.5);
+            //   },
+            // },
             // { type: 'separator' },
             // { label: 'Smart Translating' },
             // { label: 'Search on Shooter.cn' },
