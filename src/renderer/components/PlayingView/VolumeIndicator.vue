@@ -1,14 +1,21 @@
 <template>
-  <div v-fade-in="showVolume" class="indicator-container" ref="indicatorContainer">
+<div class="show-area" ref="showArea"
+  @mouseenter="enterArea"
+  @mouseleave="leaveArea">
+  <div :class="showVolume ? 'fade-in' : 'fade-out'" ref="indicatorContainer"
+    class="indicator-container border-out"
+    @mouseenter="actionArea"
+    @mouseleave="leaveActionArea">
     <base-info-card class="card" ref="card">
       <div class="indicator" ref="indicator"
         :style="{
           height: volume * 100 + '%',
           opacity: muted ? 0.25 : 0.8,
-        }"></div>
+        }"/>
     </base-info-card>
-    <base-icon v-show="muted || volume <= 0" class="mute" type="volume" effect="mute" />
+    <base-icon v-show="mouseOver" class="volume" type="volume" :effect="muted || volume <= 0 ? 'mute' : 'icon'" />
   </div>
+</div>
 </template>
 
 <script>
@@ -26,20 +33,37 @@ export default {
     return {
       volumeTriggerStopped: false,
       volumeTriggerTimerId: 0,
+      showIcon: false,
+      mouseOver: false,
+      inArea: false,
     };
   },
   props: ['showAllWidgets'],
   computed: {
     ...mapGetters(['volume', 'muted', 'volumeKeydown', 'ratio', 'isFullScreen']),
-    ...mapState({
-      validWheelTarget: ({ Input }) => Input.wheelTarget === 'the-video-controller',
-      wheelTimestamp: ({ Input }) => Input.wheelTimestamp,
-    }),
     showVolume() {
       return this.volumeTriggerStopped;
     },
   },
   methods: {
+    enterArea() {
+      this.volumeTriggerStopped = this.inArea = true;
+    },
+    leaveArea() {
+      this.volumeTriggerStopped = this.inArea = false;
+    },
+    actionArea() {
+      this.mouseOver = true;
+      this.showIcon = true;
+      this.$refs.indicatorContainer.classList.remove('border-out');
+      this.$refs.indicatorContainer.classList.add('border-in');
+    },
+    leaveActionArea() {
+      this.mouseOver = false;
+      this.showIcon = false;
+      this.$refs.indicatorContainer.classList.remove('border-in');
+      this.$refs.indicatorContainer.classList.add('border-out');
+    },
     handleFullScreen() {
       const winHeight = window.screen.height;
       const winWidth = window.screen.width;
@@ -51,13 +75,13 @@ export default {
       const muteTop = videoRealHeight <= 1080 ? backgroundHeight + 2 : backgroundHeight + 4;
       if (!this.isFullScreen) {
         requestAnimationFrame(() => {
-          this.$refs.indicatorContainer.style.setProperty('--background-height', `${backgroundHeight}px`);
-          this.$refs.indicatorContainer.style.setProperty('--mute-top', `${muteTop}px`);
+          this.$refs.showArea.style.setProperty('--background-height', `${backgroundHeight}px`);
+          this.$refs.showArea.style.setProperty('--mute-top', `${muteTop}px`);
         });
       } else {
         requestAnimationFrame(() => {
-          this.$refs.indicatorContainer.style.setProperty('--background-height', '');
-          this.$refs.indicatorContainer.style.setProperty('--mute-top', '');
+          this.$refs.showArea.style.setProperty('--background-height', '');
+          this.$refs.showArea.style.setProperty('--mute-top', '');
         });
       }
     },
@@ -70,9 +94,7 @@ export default {
   },
   watch: {
     showAllWidgets(newVal) {
-      if (this.muted) {
-        this.volumeTriggerStopped = newVal;
-      }
+      this.volumeTriggerStopped = this.inArea ? newVal : false;
     },
     muted(val) {
       const { clock, volumeTriggerTimerId } = this;
@@ -100,9 +122,11 @@ export default {
       if (!this.volumeKeydown) {
         this.volumeTriggerStopped = true;
         clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
-          this.volumeTriggerStopped = false;
-        }, 1000);
+        if (!this.mouseOver) {
+          this.volumeTriggerTimerId = clock.setTimeout(() => {
+            this.volumeTriggerStopped = false;
+          }, 1000);
+        }
       }
     },
     volumeKeydown(newVal, oldVal) {
@@ -110,23 +134,11 @@ export default {
       if (newVal) {
         this.volumeTriggerStopped = true;
         clock.clearTimeout(volumeTriggerTimerId);
-      } else if (!newVal && oldVal) {
+      } else if (!newVal && oldVal && !this.mouseOver) {
         clock.clearTimeout(volumeTriggerTimerId);
         this.volumeTriggerTimerId = clock.setTimeout(() => {
           this.volumeTriggerStopped = false;
         }, 1000);
-      }
-    },
-    wheelTimestamp(newVal) {
-      const { validWheelTarget, clock, volumeTriggerTimerId } = this;
-      if (process.platform !== 'darwin' && validWheelTarget) {
-        if (newVal) {
-          this.volumeTriggerStopped = true;
-          clock.clearTimeout(volumeTriggerTimerId);
-          this.volumeTriggerTimerId = clock.setTimeout(() => {
-            this.volumeTriggerStopped = false;
-          }, 1000);
-        }
       }
     },
   },
@@ -134,15 +146,58 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.indicator-container {
+@keyframes fadein {
+  0% {opacity: 0};
+  100% {opacity: 1};
+}
+@keyframes fadeout {
+  0% {opacity: 1};
+  100% {opacity: 0};
+}
+@keyframes borderout {
+  0% {
+    border-width: 1.5px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.4);
+  };
+  100% {
+    border-width: 1.5px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.0);
+  };
+}
+@keyframes borderin {
+  100% {
+    border-width: 1.5px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.4);
+  };
+  0% {
+    border-width: 1.5px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.0);
+  };
+}
+.fade-in {
+  animation: fadein 100ms linear 1 normal forwards;
+}
+.fade-out {
+  animation: fadeout 300ms linear 1 normal forwards;
+}
+.border-in {
+  animation: borderin 100ms linear 1 normal forwards;
+}
+.border-out {
+  animation: borderout 300ms linear 1 normal forwards;
+}
+.show-area {
   position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: var(--indicator-container-width);
+  right: 0;
+  z-index: 101;
+  width: 100px;
   height: calc(var(--background-height) + 24px);
   top: var(--container-top);
-  --indicator-container-width: 12px;
+  --indicator-container-width: 9px;
   --window-height: 100vh;
   --window-width: 100vw;
   --init-height: 100px;
@@ -151,38 +206,47 @@ export default {
   --remain-height: calc(var(--window-height) - var(--background-height));
   --container-top: calc(var(--remain-height) / 2);
   --mute-top: calc(var(--background-height) + 2px);
-  .card {
+  .indicator-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 2.5px;
+    width: calc(var(--indicator-container-width));
+    height: calc(var(--background-height) + 4px);
     top: 0;
-    width: calc(var(--indicator-container-width) / 2);
-    height: var(--background-height);
-  }
-  .indicator {
-    width: 100%;
-    background: white;
-    border-radius: 0 1px 1px 0;
-    position: absolute;
-    bottom: 0px;
-  }
-  .mute {
-    position: absolute;
-    top: var(--mute-top);
-    width: var(--indicator-container-width);
-    height: var(--indicator-container-width);
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
-    right: 23px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    right: 30px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    right: 38px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    right: 57px;
-    --background-height: calc(var(--window-height) * 0.37);
-    --indicator-container-width: 24px;
-    --mute-top: calc(var(--background-height) + 4px);
+    .card {
+      top: 0;
+      width: calc(var(--indicator-container-width) / 2);
+      height: var(--background-height);
+    }
+    .indicator {
+      width: 100%;
+      background: white;
+      border-radius: 0 1px 1px 0;
+      position: absolute;
+      bottom: 0px;
+    }
+    .volume {
+      position: absolute;
+      top: var(--mute-top);
+      width: var(--indicator-container-width);
+      height: var(--indicator-container-width);
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+      right: 23px;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+      right: 30px;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+      right: 38px;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+      right: 57px;
+      --background-height: calc(var(--window-height) * 0.37);
+      --mute-top: calc(var(--background-height) + 4px);
+    }
   }
 }
 </style>
