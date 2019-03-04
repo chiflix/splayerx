@@ -14,7 +14,6 @@ import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
-import Sagi from '@/helpers/sagi';
 import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
   storeLanguagePreference,
@@ -538,6 +537,10 @@ export default {
     this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
     this.$bus.$on('upload-current-subtitle', () => {
+      this.addLog('info', {
+        message: 'Upload current subtitle .',
+        code: 'SUBTITLE_UPLOAD',
+      });
       const qualifiedSubtitle = {
         id: this.currentSubtitleId,
         duration: this.$store.state.Subtitle.durations[this.currentSubtitleId],
@@ -546,6 +549,18 @@ export default {
         const parameter = this.makeSubtitleUploadParameter(qualifiedSubtitle);
         transcriptQueue.add(parameter, true)
           .then((res) => {
+            this.$store.dispatch('removeMessagesByType', 'Uploading');
+            if (res) {
+              this.addLog('error', {
+                message: 'Upload successfully !',
+                errcode: 'UPLOAD_SUCCESS',
+              });
+            } else {
+              this.addLog('error', {
+                message: 'Upload failed !',
+                errcode: 'UPLOAD_FAILED',
+              });
+            }
             console.log(`Uploading subtitle No.${this.currentSubtitleId} ${res ? 'succeeded' : 'failed'}!`);
           });
       }

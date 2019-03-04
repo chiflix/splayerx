@@ -154,6 +154,18 @@ export default {
     title: '',
     content: '正在智能匹配翻譯結果 ...',
   },
+  uploading: {
+    title: '',
+    content: '字幕正在上傳中 ...',
+  },
+  uploadingSuccess: {
+    title: '上傳成功',
+    content: '字幕已上傳。',
+  },
+  uploadingFailed: {
+    title: '上傳失敗',
+    content: '請稍後重試。',
+  },
   privacyBubble: {
     masVersion: {
       content: '智能翻譯功能需要您同意通過匿名方式上傳媒體信息至服務端，否則將無法使用該功能獲取翻譯結果，我們不會收集關於您個人的隱私信息。',

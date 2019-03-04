@@ -21,9 +21,11 @@ const actions = {
   removeMessages({ commit }, id) {
     commit('removeMessages', id);
   },
-  removeMessagesByType({ commit }) {
+  removeMessagesByType({ commit }, delta) {
     state.messages.filter(m => m.type === 'loading').forEach((item) => {
-      commit('removeMessages', item.id);
+      if (item.title === delta) {
+        commit('removeMessages', item.id);
+      }
     });
   },
   addMessages({ commit }, {

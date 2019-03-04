@@ -155,6 +155,18 @@ export default {
     title: '',
     content: 'Loading Translations ...',
   },
+  uploading: {
+    title: '',
+    content: 'Subtitle Uploading ...',
+  },
+  uploadingSuccess: {
+    title: 'Upload Successfully',
+    content: 'Subtitle has been uploaded.',
+  },
+  uploadingFailed: {
+    title: 'Upload Failed',
+    content: 'Please try later.',
+  },
   privacyBubble: {
     masVersion: {
       content: 'Smart Translation function needs your consent for uploading anonymous media info to the server  side, and you will not receive translation results if you disagree. There is no privacy information will be collected.',

@@ -154,6 +154,18 @@ export default {
     title: '',
     content: '正在智能匹配翻译结果 ...',
   },
+  uploading: {
+    title: '',
+    content: '字幕正在上传中 ...',
+  },
+  uploadingSuccess: {
+    title: '上传成功',
+    content: '字幕已上传。',
+  },
+  uploadingFailed: {
+    title: '上传失败',
+    content: '请稍后重试。',
+  },
   privacyBubble: {
     masVersion: {
       content: '智能翻译功能需要您同意通过匿名方式上传媒体信息至服务端，否则将无法使用该功能获取翻译结果，我们不会收集关于您个人的隐私信息。',
