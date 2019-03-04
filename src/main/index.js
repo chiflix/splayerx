@@ -6,11 +6,19 @@ import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayer
 import { throttle, debounce } from 'lodash';
 import path from 'path';
 import fs from 'fs';
+import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, NO_TRANSLATION_RESULT, NOT_SUPPORTED_SUBTITLE } from '../shared/notificationcodes';
+import {
+  FILE_NON_EXIST,
+  EMPTY_FOLDER,
+  OPEN_FAILED,
+  NOT_SUPPORTED_SUBTITLE,
+  REQUEST_TIMEOUT,
+  SUBTITLE_OFFLINE,
+} from '../shared/notificationcodes';
 
 /**
  * Set `__static` path to static files in production
@@ -30,6 +38,7 @@ let inited = false;
 const filesToOpen = [];
 const snapShotQueue = [];
 const mediaInfoQueue = [];
+const embeeddSubtitlesQueue = new TaskQueue();
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -45,6 +54,9 @@ const preferenceURL = process.env.NODE_ENV === 'development'
 if (process.mas === undefined && !app.requestSingleInstanceLock()) {
   app.quit();
 }
+
+const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
+if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
 
 function handleBossKey() {
   if (!mainWindow) return;
@@ -90,6 +102,12 @@ function registerMainWindowEvent() {
   mainWindow.on('unmaximize', () => {
     mainWindow?.webContents.send('mainCommit', 'isMaximized', false);
   });
+  mainWindow.on('minimize', () => {
+    mainWindow?.webContents.send('mainCommit', 'isMinimized', true);
+  });
+  mainWindow.on('restore', () => {
+    mainWindow?.webContents.send('mainCommit', 'isMinimized', false);
+  });
   mainWindow.on('focus', () => {
     mainWindow?.webContents.send('mainCommit', 'isFocused', true);
   });
@@ -98,7 +116,11 @@ function registerMainWindowEvent() {
   });
 
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
-    mainWindow?.[method]?.(...args);
+    try {
+      mainWindow?.[method]?.(...args);
+    } catch (ex) {
+      console.error('callMainWindowMethod', ex, method, JSON.stringify(args));
+    }
   });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
@@ -107,14 +129,42 @@ function registerMainWindowEvent() {
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
   });
 
-  function snapShot(video, callback) {
-    const imgPath = path.join(app.getPath('temp'), video.quickHash);
-    const randomNumber = Math.round((Math.random() * 20) + 5);
-    const numberString = randomNumber < 10 ? `0${randomNumber}` : `${randomNumber}`;
-    splayerx.snapshotVideo(video.videoPath, `${imgPath}.png`, `00:00:${numberString}`, (resultCode) => {
-      console[resultCode === '0' ? 'log' : 'error'](resultCode, video.videoPath);
-      callback(resultCode, imgPath);
-    });
+  function timecodeFromSeconds(s) {
+    const dt = new Date(Math.abs(s) * 1000);
+    let hours = dt.getUTCHours();
+    let minutes = dt.getUTCMinutes();
+    let seconds = dt.getUTCSeconds();
+
+    if (minutes < 10) {
+      minutes = `0${minutes}`;
+    }
+    if (seconds < 10) {
+      seconds = `0${seconds}`;
+    }
+    if (hours > 0) {
+      if (hours < 10) {
+        hours = `${hours}`;
+      }
+      return `${hours}:${minutes}:${seconds}`;
+    }
+    return `00:${minutes}:${seconds}`;
+  }
+  function snapShot(snapShot, callback) {
+    let numberString;
+    if (snapShot.type === 'cover') {
+      let randomNumber = Math.round((Math.random() * 20) + 5);
+      if (randomNumber > snapShot.duration) randomNumber = snapShot.duration;
+      numberString = timecodeFromSeconds(randomNumber);
+    } else {
+      numberString = timecodeFromSeconds(snapShot.time);
+    }
+    splayerx.snapshotVideo(
+      snapShot.videoPath, snapShot.imgPath, numberString, `${snapShot.videoWidth}`, `${snapShot.videoHeight}`,
+      (resultCode) => {
+        console[resultCode === '0' ? 'log' : 'error'](resultCode, snapShot.videoPath);
+        callback(resultCode, snapShot.imgPath);
+      },
+    );
   }
 
   function extractSubtitle(videoPath, subtitlePath, index) {
@@ -127,9 +177,20 @@ function registerMainWindowEvent() {
   }
 
   function snapShotQueueProcess(event) {
+    const maxWaitingCount = 40;
+    let waitingCount = 0;
     const callback = (resultCode, imgPath) => {
       if (resultCode === 'Waiting for the task completion.') {
-        snapShot(snapShotQueue[0], callback);
+        waitingCount += 1;
+        if (waitingCount <= maxWaitingCount) {
+          snapShot(snapShotQueue[0], callback);
+        } else {
+          waitingCount = 0;
+          snapShotQueue.shift();
+          if (snapShotQueue.length > 0) {
+            snapShot(snapShotQueue[0], callback);
+          }
+        }
       } else if (resultCode === '0') {
         const lastRecord = snapShotQueue.shift();
         if (event.sender.isDestroyed()) {
@@ -142,7 +203,7 @@ function registerMainWindowEvent() {
         }
       } else {
         snapShotQueue.shift();
-        if (snapShotQueue.length) {
+        if (snapShotQueue.length > 0) {
           snapShot(snapShotQueue[0], callback);
         }
       }
@@ -150,27 +211,34 @@ function registerMainWindowEvent() {
     snapShot(snapShotQueue[0], callback);
   }
 
-  ipcMain.on('snapShot', (event, videoPath, quickHash) => {
-    const imgPath = path.join(app.getPath('temp'), quickHash);
+  ipcMain.on('snapShot', (event, video, type = 'cover', time = 0) => {
+    if (!video.videoWidth) video.videoWidth = 1920;
+    if (!video.videoHeight) video.videoHeight = 1080;
+    const imgFolderPath = path.join(tempFolderPath, video.quickHash);
+    if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
+    const imgPath = path.join(imgFolderPath, `${type}.jpg`);
 
-    if (!fs.existsSync(`${imgPath}.png`)) {
-      snapShotQueue.push({ videoPath, quickHash });
+    if (!fs.existsSync(imgPath)) {
+      snapShotQueue.push(Object.assign({ imgPath, type, time }, video));
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
       }
     } else {
       console.log('pass', imgPath);
-      event.sender.send(`snapShot-${videoPath}-reply`, imgPath);
+      event.sender.send(`snapShot-${video.videoPath}-reply`, imgPath);
     }
   });
 
   ipcMain.on('extract-subtitle-request', (event, videoPath, index, format, hash) => {
-    const subtitlePath = path.join(app.getPath('temp'), `${hash}-${index}.${format}`);
+    const subtitleFolderPath = path.join(tempFolderPath, hash);
+    if (!fs.existsSync(subtitleFolderPath)) fs.mkdirSync(subtitleFolderPath);
+    console.log(subtitleFolderPath);
+    const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
     if (fs.existsSync(subtitlePath)) event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath });
     else {
-      extractSubtitle(videoPath, subtitlePath, index)
+      embeeddSubtitlesQueue.add(() => extractSubtitle(videoPath, subtitlePath, index)
         .then(index => event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath }))
-        .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index }));
+        .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index })));
     }
   });
 
@@ -223,8 +291,9 @@ function registerMainWindowEvent() {
           case FILE_NON_EXIST:
           case EMPTY_FOLDER:
           case OPEN_FAILED:
-          case NO_TRANSLATION_RESULT:
+          case SUBTITLE_OFFLINE:
           case NOT_SUPPORTED_SUBTITLE:
+          case REQUEST_TIMEOUT:
             mainWindow.webContents.send('addMessages', log.errcode);
             break;
           default:
@@ -240,8 +309,8 @@ function registerMainWindowEvent() {
       useContentSize: true,
       frame: false,
       titleBarStyle: 'none',
-      width: 180,
-      height: 270,
+      width: 190,
+      height: 280,
       transparent: true,
       resizable: false,
       show: false,

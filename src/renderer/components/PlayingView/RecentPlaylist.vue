@@ -30,6 +30,7 @@
           marginTop: sizeAdaption(9),
           fontSize: sizeAdaption(18),
           lineHeight: sizeAdaption(20),
+          fontWeight: 500,
         }">{{filename}}</div>
     </div>
     </transition>
@@ -69,9 +70,9 @@
 </template>
 <script>
 import path from 'path';
-import { mapGetters, mapActions, mapMutations } from 'vuex';
+import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
-import { Input as InputActions } from '@/store/actionTypes';
+import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 
 export default {
@@ -121,11 +122,12 @@ export default {
   },
   methods: {
     ...mapMutations({
-      updateMousemoveTarget: inputMutations.MOUSEMOVE_TARGET_UPDATE,
+      updateMousemoveTarget: inputMutations.MOUSEMOVE_COMPONENT_NAME_UPDATE,
     }),
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
+      updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
     }),
     afterLeave() {
       this.backgroundDisplayState = false;
@@ -135,7 +137,7 @@ export default {
     },
     handleMouseup() {
       if (this.isDragging) {
-        this.clearMousedown({ target: '' });
+        this.clearMousedown({ componentName: '' });
       } else if (this.backgroundDisplayState) {
         this.$emit('update:playlistcontrol-showattached', false);
         this.updateMousemoveTarget('the-video-controller');
@@ -193,6 +195,7 @@ export default {
         this.displayState = false;
         this.$emit('update:playlistcontrol-showattached', false);
       }
+      this.updateSubToTop(this.displayState);
       this.changeByRecent = false;
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
@@ -207,21 +210,17 @@ export default {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
-    mousedownCurrentTarget(val) {
-      if (val !== 'notification-bubble' && val !== 'titlebar') {
+    currentMousedownComponent(val) {
+      if (val !== 'notification-bubble' && val !== 'titlebar' && val !== '') {
         if (val !== this.$options.name && this.backgroundDisplayState) {
-          if (this.lastDragging) {
-            this.clearMouseup({ target: '' });
-          } else if (this.mouseupCurrentTarget !== 'playlist-control' && this.mouseupCurrentTarget !== '') {
-            this.$emit('update:playlistcontrol-showattached', false);
-          }
+          this.clearMouseup({ componentName: '' });
         }
       }
     },
-    mouseupCurrentTarget(val) {
-      if (this.mousedownCurrentTarget !== 'notification-bubble' && this.mousedownCurrentTarget !== 'titlebar') {
+    currentMouseupComponent(val) {
+      if (this.currentMousedownComponent !== 'notification-bubble' && this.currentMousedownComponent !== 'titlebar' && val !== '') {
         if (this.lastDragging) {
-          this.clearMousedown({ target: '' });
+          this.clearMousedown({ componentName: '' });
           if (this.displayState) {
             this.$emit('update:lastDragging', false);
           }
@@ -239,7 +238,7 @@ export default {
     },
     displayState(val, oldval) {
       if (oldval !== undefined) {
-        this.$bus.$emit('subtitle-to-top', val);
+        this.updateSubToTop(val);
       }
       this.canHoverItem = false;
       this.mousePosition = this.mousemovePosition;
@@ -262,12 +261,10 @@ export default {
   },
   computed: {
     ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
-    mousedownCurrentTarget() {
-      return this.$store.state.Input.mousedownTarget;
-    },
-    mouseupCurrentTarget() {
-      return this.$store.state.Input.mouseupTarget;
-    },
+    ...mapState({
+      currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
+      currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
+    }),
     inWhichSource() {
       if (this.isFolderList) {
         return this.$t('recentPlaylist.folderSource');
@@ -314,7 +311,7 @@ export default {
     // if you wanna know the meanings of wABC, please look up the product doc:
     // https://www.notion.so/splayer/Playlist-685b398ac7ce45508a4283af00f76534
     thumbnailNumber() {
-      let number = 0;
+      let number = 3;
       const w = 112; // default width of playlist item
       const B = 15; // space between each playlist item
       if (this.winWidth >= 512 && this.winWidth < 720) {
@@ -331,7 +328,7 @@ export default {
       const A = 40; // playlist left margin
       const B = 15; // space between each playlist item
       const C = 60; // the space between last playlist item and right edge of the screen
-      if (this.winWidth >= 512 && this.winWidth <= 1355) {
+      if (this.winWidth <= 1355) {
         width = ((((this.winWidth - A) - C) + B) / this.thumbnailNumber) - B;
       } else if (this.winWidth > 1355) {
         width = this.winWidth * (112 / 1355);
@@ -347,10 +344,7 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  @media screen and (max-width: 510px) {
-    display: none;
-  }
-  @media screen and (min-width: 512px) and (max-width: 1355px) {
+  @media screen and (max-width: 1355px) {
     height: 282px;
   }
   @media screen and (min-width: 1356px) {
@@ -377,7 +371,7 @@ export default {
         text-overflow: ellipsis;
         white-space: nowrap;
 
-        font-family: $font-heavy;
+        font-family: $font-normal;
         color: rgba(255,255,255,0.70);
         letter-spacing: 1px;
         width: 100%;

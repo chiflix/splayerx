@@ -3,7 +3,7 @@ import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
 import { times } from 'lodash';
-import InfoDB from '@/helpers/infoDB';
+import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
@@ -12,13 +12,53 @@ import Sagi from './sagi';
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 
 const clock = lolex.createClock();
-const infoDB = new InfoDB();
 
 export default {
   data() {
     return { clock, infoDB, sagi: Sagi };
   },
   methods: {
+    calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
+      let result = videoSize;
+      const getRatio = size => size[0] / size[1];
+      const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
+      const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
+      const biggerSize = (size, diffedSize) =>
+        size.some((value, index) => value >= diffedSize[index]);
+      const biggerWidth = (size, diffedSize) => size[0] >= diffedSize[0];
+      const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
+      if (videoExisted && biggerWidth(result, maxSize)) {
+        result = setHeightByWidth(maxSize);
+      }
+      const realMaxSize = videoExisted ? screenSize : maxSize;
+      if (biggerSize(result, realMaxSize)) {
+        result = biggerRatio(result, realMaxSize) ?
+          setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
+      }
+      if (biggerSize(minSize, result)) {
+        result = biggerRatio(minSize, result) ?
+          setHeightByWidth(minSize) : setWidthByHeight(minSize);
+      }
+      return result.map(Math.round);
+    },
+    calculateWindowPosition(currentRect, windowRect, newSize) {
+      const tempRect = currentRect.slice(0, 2)
+        .map((value, index) => Math.floor(value + (currentRect.slice(2, 4)[index] / 2)))
+        .map((value, index) => Math.floor(value - (newSize[index] / 2))).concat(newSize);
+      return ((windowRect, tempRect) => {
+        const alterPos = (boundX, boundLength, videoX, videoLength) => {
+          if (videoX < boundX) return boundX;
+          if (videoX + videoLength > boundX + boundLength) {
+            return (boundX + boundLength) - videoLength;
+          }
+          return videoX;
+        };
+        return [
+          alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
+          alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
+        ];
+      })(windowRect, tempRect);
+    },
     timecodeFromSeconds(s) {
       const dt = new Date(Math.abs(s) * 1000);
       let hours = dt.getUTCHours();
@@ -143,7 +183,7 @@ export default {
       const files = [];
       let containsSubFiles = false;
       const subtitleFiles = [];
-      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
+      const subRegex = new RegExp('^\\.(srt|ass|vtt)$', 'i');
       const videoFiles = [];
 
       folders.forEach((dirPath) => {
@@ -182,7 +222,7 @@ export default {
     openFile(...files) {
       let containsSubFiles = false;
       const subtitleFiles = [];
-      const subRegex = new RegExp('^\\.(srt|ass|vtt)$');
+      const subRegex = new RegExp('\\.(srt|ass|vtt)$', 'i');
       const videoFiles = [];
 
       for (let i = 0; i < files.length; i += 1) {
@@ -298,7 +338,7 @@ export default {
         case 'error':
           console.error(log);
           if (log && process.env.NODE_ENV !== 'development') {
-            this.$ga && this.$ga.exception(log.message || log);
+            this.$ga && this.$ga.exception(log.message || log);  
             Sentry.captureException(log);
           }
           break;

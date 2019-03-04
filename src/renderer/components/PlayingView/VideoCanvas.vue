@@ -8,9 +8,10 @@
       :key="originSrc"
       :needtimeupdate=true
       :events="['loadedmetadata', 'audiotrack']"
-      :styles="{objectFit: 'contain', width: '100%', height: '100%'}"
+      :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
       @loadedmetadata="onMetaLoaded"
       @audiotrack="onAudioTrack"
+      :loop="loop"
       :src="convertedSrc"
       :playbackRate="rate"
       :volume="volume"
@@ -18,6 +19,7 @@
       :paused="paused"
       :currentTime="seekTime"
       :currentAudioTrackId="currentAudioTrackId.toString()" />
+      <!-- calc(100% - 0.1px) fix for mac book pro 15 full screen after video controller fade-out video will shake -->
     </transition>
     <div class="mask"
       :style="{
@@ -30,6 +32,7 @@
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
 import { mapGetters, mapActions } from 'vuex';
+import path from 'path';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
 import { videodata } from '../../store/video';
@@ -43,12 +46,12 @@ export default {
     return {
       videoExisted: false,
       videoElement: null,
-      coverFinded: false,
       seekTime: [0],
       lastPlayedTime: 0,
       lastCoverDetectingTime: 0,
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
+      nowRate: 1,
     };
   },
   methods: {
@@ -62,13 +65,14 @@ export default {
       removeAudioTrack: videoActions.REMOVE_AUDIO_TRACK,
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
+      updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
     }),
     onMetaLoaded(event) {
       this.videoElement = event.target;
       this.videoConfigInitialize({
         volume: this.volume * 100,
         muted: this.muted,
-        rate: 1,
+        rate: this.nowRate,
         duration: event.target.duration,
         currentTime: 0,
       });
@@ -119,47 +123,6 @@ export default {
       );
       this.controlWindowRect(newPosition.concat(newSize));
     },
-    calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
-      let result = videoSize;
-      const getRatio = size => size[0] / size[1];
-      const setWidthByHeight = size => [size[1] * getRatio(videoSize), size[1]];
-      const setHeightByWidth = size => [size[0], size[0] / getRatio(videoSize)];
-      const biggerSize = (size, diffedSize) =>
-        size.some((value, index) => value >= diffedSize[index]);
-      const biggerWidth = (size, diffedSize) => size[0] >= diffedSize[0];
-      const biggerRatio = (size1, size2) => getRatio(size1) > getRatio(size2);
-      if (videoExisted && biggerWidth(result, maxSize)) {
-        result = setHeightByWidth(maxSize);
-      }
-      const realMaxSize = videoExisted ? screenSize : maxSize;
-      if (biggerSize(result, realMaxSize)) {
-        result = biggerRatio(result, realMaxSize) ?
-          setHeightByWidth(realMaxSize) : setWidthByHeight(realMaxSize);
-      }
-      if (biggerSize(minSize, result)) {
-        result = biggerRatio(minSize, result) ?
-          setHeightByWidth(minSize) : setWidthByHeight(minSize);
-      }
-      return result.map(Math.round);
-    },
-    calculateWindowPosition(currentRect, windowRect, newSize) {
-      const tempRect = currentRect.slice(0, 2)
-        .map((value, index) => Math.floor(value + (currentRect.slice(2, 4)[index] / 2)))
-        .map((value, index) => Math.floor(value - (newSize[index] / 2))).concat(newSize);
-      return ((windowRect, tempRect) => {
-        const alterPos = (boundX, boundLength, videoX, videoLength) => {
-          if (videoX < boundX) return boundX;
-          if (videoX + videoLength > boundX + boundLength) {
-            return (boundX + boundLength) - videoLength;
-          }
-          return videoX;
-        };
-        return [
-          alterPos(windowRect[0], windowRect[2], tempRect[0], tempRect[2]),
-          alterPos(windowRect[1], windowRect[3], tempRect[1], tempRect[3]),
-        ];
-      })(windowRect, tempRect);
-    },
     controlWindowRect(rect) {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
@@ -177,7 +140,7 @@ export default {
         videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 1080, 1080,
       );
-      const imagePath = canvas.toDataURL('image/png');
+      const imagePath = canvas.toDataURL('image/jpeg', 0.8);
       // 用于测试截图的代码，以后可能还会用到
       // const img = imagePath.replace(/^data:image\/\w+;base64,/, '');
       // fs.writeFileSync('/Users/jinnaide/Desktop/screenshot.png', img, 'base64');
@@ -186,12 +149,13 @@ export default {
         videoElement, 0, 0, videoWidth, videoHeight,
         0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
       );
-      const smallImagePath = canvas.toDataURL('image/png');
+      const smallImagePath = canvas.toDataURL('image/jpeg', 0.8);
       const data = {
         shortCut: imagePath,
         smallShortCut: smallImagePath,
         lastPlayedTime: videodata.time,
         duration: this.duration,
+        audioTrackId: this.currentAudioTrackId,
       };
 
       const val = await this.infoDB.get('recent-played', 'path', videoPath);
@@ -204,89 +168,40 @@ export default {
     saveSubtitleStyle() {
       return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
     },
-    async getVideoCover(grabCoverTime) {
-      if (!this.$refs.videoCanvas || !this.$refs.thumbnailCanvas) return;
-      // Because we are execution in async, we do double check.
-      if (this.coverFinded) {
-        return;
-      }
-
-      // Assume to grab the cover can be the success and to keep
-      // it doesn't execution multiple times. if grab failed,
-      // we set it back to false.
-      this.coverFinded = true;
-
-      const videoElement = this.$refs.videoCanvas.videoElement();
-      const canvas = this.$refs.thumbnailCanvas;
-      const canvasCTX = canvas.getContext('2d');
-      const { videoHeight, videoWidth } = videoElement;
-      [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 122.6, 122.6];
-      canvasCTX.drawImage(
-        videoElement, 0, 0, videoWidth, videoHeight,
-        0, 0, (videoWidth / videoHeight) * 122.6, 122.6,
-      );
-
-      let grabCoverDone = false;
-      const { data } = canvasCTX.getImageData(0, 0, 100, 100);
-      // check the cover is it right.
-      for (let i = 0; i < data.length; i += 1) {
-        if ((i + 1) % 4 !== 0 && data[i] > 20) {
-          grabCoverDone = true;
-          break;
-        }
-      }
-      if (grabCoverDone) {
-        const smallImagePath = canvas.toDataURL('image/png');
-        [canvas.width, canvas.height] = [(videoWidth / videoHeight) * 1080, 1080];
-        canvasCTX.drawImage(
-          videoElement, 0, 0, videoWidth, videoHeight,
-          0, 0, (videoWidth / videoHeight) * 1080, 1080,
-        );
-        const imagePath = canvas.toDataURL('image/png');
-        const val = await this.infoDB.get('recent-played', 'path', this.originSrc);
-        if (val) {
-          const mergedData = Object.assign(val, { cover: imagePath, smallCover: smallImagePath });
-          this.infoDB.add('recent-played', mergedData);
-        } else {
-          const data = {
-            quickHash: await this.mediaQuickHash(this.originSrc),
-            path: this.originSrc,
-            cover: imagePath,
-            smallCover: smallImagePath,
-            duration: this.$store.getters.duration,
-          };
-          this.infoDB.add('recent-played', data);
-        }
-      }
-
-      this.coverFinded = grabCoverDone;
-      this.lastCoverDetectingTime = grabCoverTime;
-    },
-    checkPresentTime() {
-      if (!this.coverFinded && videodata.time - this.lastCoverDetectingTime > 1) {
-        this.getVideoCover(videodata.time);
-      }
+    savePlaybackStates() {
+      return asyncStorage.set('playback-states', { volume: this.volume, muted: this.muted });
     },
   },
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
-      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo']),
+      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
       videoRatio: 'ratio',
     }),
   },
+  created() {
+    this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
+  },
   watch: {
     originSrc(val, oldVal) {
-      this.coverFinded = false;
       this.saveScreenshot(oldVal);
-      this.$bus.$emit('showlabel');
+      this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
         audioTrackList: [],
       });
       this.play();
+      this.updatePlayinglistRate({
+        oldDir: path.dirname(oldVal), newDir: path.dirname(val), playingList: this.playingList,
+      });
+      this.playinglistRate.forEach((item) => {
+        if (item.dirPath === path.dirname(val)) {
+          this.$store.dispatch(videoActions.CHANGE_RATE, item.rate);
+          this.nowRate = item.rate;
+        }
+      });
     },
   },
   mounted() {
@@ -294,6 +209,7 @@ export default {
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [this.ratio]);
+      this.$ga.event('app', 'toggle-fullscreen');
     });
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
@@ -303,6 +219,7 @@ export default {
     });
     this.$bus.$on('toggle-playback', () => {
       this[this.paused ? 'play' : 'pause']();
+      this.$ga.event('app', 'toggle-playback');
     });
     this.$bus.$on('next-video', () => {
       if (this.nextVideo) {
@@ -318,6 +235,7 @@ export default {
       if (ext === 'mkv') {
         this.$bus.$emit('seek-subtitle', e);
       }
+      this.$ga.event('app', 'seek');
     });
     this.$bus.$on('drag-over', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0.18)';
@@ -327,16 +245,21 @@ export default {
     });
     this.$bus.$on('drop', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0)';
+      this.$ga.event('app', 'drop');
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
-        this.saveScreenshot(this.originSrc).then(this.saveSubtitleStyle).then(() => {
-          this.asyncTasksDone = true;
-          window.close();
-        }).catch(() => {
-          this.asyncTasksDone = true;
-          window.close();
-        });
+        this.saveScreenshot(this.originSrc)
+          .then(this.saveSubtitleStyle)
+          .then(this.savePlaybackStates)
+          .then(() => {
+            this.asyncTasksDone = true;
+            window.close();
+          })
+          .catch(() => {
+            this.asyncTasksDone = true;
+            window.close();
+          });
         e.returnValue = false;
       }
     };

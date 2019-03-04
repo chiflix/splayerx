@@ -22,8 +22,7 @@
 </template>
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import isEqual from 'lodash/isEqual';
-import toArray from 'lodash/toArray';
+import { isEqual, castArray, isEmpty } from 'lodash';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
 import CueRenderer from './CueRenderer.vue';
@@ -44,14 +43,15 @@ export default {
       videoSegments: [],
       currentSegment: [0, 0, false],
       elapsedSegmentTime: 0,
-      subToTop: false,
       lastIndex: [],
       lastAlignment: [],
       lastText: [],
+      subPlayResX: 0,
+      subPlayResY: 0,
     };
   },
   computed: {
-    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth']),
+    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'subToTop']),
     type() {
       return this.subtitleInstance.metaInfo.format;
     },
@@ -71,7 +71,7 @@ export default {
         .filter(segment => segment[2])
         .map(segment => segment[1] - segment[0])
         .reduce((prev, curr) => prev + curr, 0);
-      this.updateDuration({ id: this.subtitleInstance.src, duration });
+      this.updateDuration({ id: this.subtitleInstance.id, duration });
     },
     currentTexts(val) {
       val.forEach((de, index) => {
@@ -81,23 +81,7 @@ export default {
         }
       });
     },
-  },
-  created() {
-    const { subtitleInstance } = this;
-    subtitleInstance.once('data', subtitleInstance.parse);
-    subtitleInstance.on('parse', (parsed) => {
-      this.videoSegments = this.getVideoSegments(parsed, this.duration);
-      if (parsed.length) {
-        const cues = parsed
-          .filter(subtitle => subtitle.start <= this.subtitleCurrentTime && subtitle.end >= this.subtitleCurrentTime && subtitle.text !== '');
-        if (!isEqual(cues, this.currentCues)) {
-          this.currentCues = cues;
-        }
-      }
-    });
-    subtitleInstance.load();
-    this.$bus.$on('subtitle-to-top', (val) => {
-      this.subToTop = val;
+    subToTop(val) {
       if (!val) {
         this.lastIndex.forEach((index) => {
           if (this.currentTags[index]) {
@@ -106,7 +90,26 @@ export default {
           }
         });
       }
+    },
+  },
+  created() {
+    const { subtitleInstance } = this;
+    subtitleInstance.once('data', subtitleInstance.parse);
+    subtitleInstance.on('parse', (parsed) => {
+      const parsedData = parsed.dialogues;
+      this.videoSegments = this.getVideoSegments(parsedData, this.duration);
+      if (parsedData.length) {
+        const cues = parsedData
+          .filter(subtitle => subtitle.start <= this.subtitleCurrentTime && subtitle.end >= this.subtitleCurrentTime && subtitle.text !== '');
+        if (!isEqual(cues, this.currentCues)) {
+          this.currentCues = cues;
+        }
+      }
+      this.subPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth;
+      this.subPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY) :
+        this.intrinsicHeight;
     });
+    subtitleInstance.load();
   },
   mounted() {
     requestAnimationFrame(this.currentTimeUpdate);
@@ -121,15 +124,18 @@ export default {
       updateDuration: subtitleMutations.DURATIONS_UPDATE,
     }),
     avaliableClass(index) {
-      if (!this.isVtt && !this.currentTags[index].pos) {
-        if (this.subToTop && this.currentTags[index].alignment !== 8) {
-          this.lastIndex.push(index);
-          this.lastAlignment.push(this.currentTags[index].alignment);
-          this.lastText.push(this.currentTexts[index]);
-          this.currentTags[index].alignment = 8;
-          return 'subtitle-alignment8';
+      if (!this.isVtt) {
+        if (!this.currentTags[index].pos) {
+          if (this.subToTop && this.currentTags[index].alignment !== 8) {
+            this.lastIndex.push(index);
+            this.lastAlignment.push(this.currentTags[index].alignment);
+            this.lastText.push(this.currentTexts[index]);
+            this.currentTags[index].alignment = 8;
+            return 'subtitle-alignment8';
+          }
+          return `subtitle-alignment${this.currentTags[index].alignment}`;
         }
-        return `subtitle-alignment${this.currentTags[index].alignment}`;
+        return '';
       } else if (this.isVtt && this.currentTags[index].line !== '' && this.currentTags[index].position !== '') {
         return '';
       }
@@ -148,18 +154,18 @@ export default {
       requestAnimationFrame(this.currentTimeUpdate);
     },
     setCurrentCues(currentTime) {
-      if (!this.subtitleInstance) return;
-      const { parsed } = this.subtitleInstance;
-      if (parsed) {
-        const cues = parsed
+      if (!this.subtitleInstance.parsed) return;
+      const parsedData = this.subtitleInstance.parsed.dialogues;
+      if (parsedData) {
+        const cues = parsedData
           .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');
         if (!isEqual(cues, this.currentCues)) {
           let rev = false;
           const tmp = cues;
           if (cues.length >= 2) {
             for (let i = 0; i < tmp.length; i += 1) {
-              const pre = toArray(tmp[i]);
-              const next = toArray(tmp[i + 1]);
+              const pre = castArray(tmp[i]);
+              const next = castArray(tmp[i + 1]);
               if (next) {
                 pre.splice(2, 1);
                 next.splice(2, 1);
@@ -169,9 +175,30 @@ export default {
               }
             }
           }
-          this.currentCues = rev ? cues.reverse() : cues;
+          this.currentCues = rev ? this.parsedFragments(cues).reverse()
+            : this.parsedFragments(cues);
         }
       }
+    },
+    parsedFragments(cues) {
+      if (this.type === 'ass') {
+        const currentCues = [];
+        cues.forEach((item) => {
+          let currentText = '';
+          let currentTags = {};
+          item.fragments.forEach((cue) => {
+            currentText += cue.text;
+            if (cue.tags) {
+              currentTags = cue.tags;
+            }
+          });
+          currentCues.push({
+            start: item.start, end: item.end, tags: currentTags, text: currentText,
+          });
+        });
+        return currentCues;
+      }
+      return cues;
     },
     updateVideoSegments(lastCurrentTime, currentTime) {
       const { videoSegments, currentSegment, elapsedSegmentTime } = this;
@@ -200,10 +227,10 @@ export default {
         if (!isEqual(tags[index], tags[index - 1])) {
           break;
         }
-        tmp += texts[index - 1].split('\n').length;
+        tmp += texts[index - 1].split('<br>').length;
         index -= 1;
       }
-      return tmp / texts[lastNum].split('\n').length;
+      return tmp / texts[lastNum].split('<br>').length;
     },
     assLine(index) {
       const { currentTags: tags } = this;
@@ -253,7 +280,7 @@ export default {
     subLeft(index) {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
-        return `${(tags[index].pos.x / this.intrinsicWidth) * 100}vw`;
+        return `${(tags[index].pos.x / this.subPlayResX) * 100}vw`;
       } else if (type === 'vtt') {
         if (tags[index].vertical) {
           if (!tags[index].line.includes('%')) {
@@ -269,7 +296,7 @@ export default {
     subTop(index) {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
-        return `${(tags[index].pos.y / this.intrinsicHeight) * 100}vh`;
+        return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
       } else if (type === 'vtt') {
         if (tags[index].vertical) {
           return tags[index].position;

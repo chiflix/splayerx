@@ -1,20 +1,28 @@
 import asyncStorage from '@/helpers/asyncStorage';
+import syncStorage from '@/helpers/syncStorage';
 
 const state = {
   deleteVideoHistoryOnExit: false,
-  privacyAgreement: false,
+  privacyAgreement: undefined,
+  displayLanguage: '',
   primaryLanguage: '',
   secondaryLanguage: '',
+  singleCycle: false,
 };
 const getters = {
   preferenceData: state => state,
   deleteVideoHistoryOnExit: state => state.deleteVideoHistoryOnExit,
   privacyAgreement: state => state.privacyAgreement,
+  displayLanguage: state => state.displayLanguage,
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
+  singleCycle: state => state.singleCycle,
 };
 
 const mutations = {
+  displayLanguage(state, payload) {
+    state.displayLanguage = payload;
+  },
   deleteVideoHistoryOnExit(state, payload) {
     state.deleteVideoHistoryOnExit = payload;
   },
@@ -27,11 +35,22 @@ const mutations = {
   secondaryLanguage(state, payload) {
     state.secondaryLanguage = payload;
   },
+  singleCycle(state, payload) {
+    state.singleCycle = payload;
+  },
   setPreference(state, payload) {
     Object.assign(state, payload);
   },
+  getLocalPreference(state) {
+    const data = syncStorage.getSync('preferences');
+    Object.assign(state, data);
+  },
 };
 const actions = {
+  displayLanguage({ commit, state }, payload) {
+    commit('displayLanguage', payload);
+    asyncStorage.set('preferences', state);
+  },
   agreeOnPrivacyPolicy({ commit, state }) {
     commit('privacyAgreement', true);
     asyncStorage.set('preferences', state);
@@ -56,10 +75,13 @@ const actions = {
     commit('secondaryLanguage', payload);
     asyncStorage.set('preferences', state);
   },
-  getLocalPreference({ commit }) {
-    asyncStorage.get('preferences').then((data) => {
-      commit('setPreference', data);
-    });
+  singleCycle({ commit }) {
+    commit('singleCycle', true);
+    commit('LOOP_UPDATE', true);
+  },
+  notSingleCycle({ commit }) {
+    commit('singleCycle', false);
+    commit('LOOP_UPDATE', false);
   },
   setPreference({ commit, state }, payload) {
     commit('setPreference', payload);

@@ -17,8 +17,9 @@
     EMPTY_FOLDER,
     OPEN_FAILED,
     ONLINE_LOADING,
-    NO_TRANSLATION_RESULT,
     NOT_SUPPORTED_SUBTITLE,
+    REQUEST_TIMEOUT,
+    SUBTITLE_OFFLINE,
   } from '../shared/notificationcodes';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
@@ -79,11 +80,11 @@
               content: this.$t('loading.content'),
             });
             break;
-          case NO_TRANSLATION_RESULT:
+          case SUBTITLE_OFFLINE:
             this.$store.dispatch('addMessages', {
               type: 'error',
-              title: this.$t('errorFile.noResult.title'),
-              content: this.$t('errorFile.noResult.content'),
+              title: this.$t('errorFile.offLine.title'),
+              content: this.$t('errorFile.offLine.content'),
               dismissAfter: 5000,
             });
             break;
@@ -92,6 +93,14 @@
               type: 'error',
               title: this.$t('errorFile.loadFailed.title'),
               content: this.$t('errorFile.loadFailed.content'),
+              dismissAfter: 5000,
+            });
+            break;
+          case REQUEST_TIMEOUT:
+            this.$store.dispatch('addMessages', {
+              type: 'error',
+              title: this.$t('errorFile.timeout.title'),
+              content: this.$t('errorFile.timeout.content'),
               dismissAfter: 5000,
             });
             break;
@@ -108,6 +117,9 @@
       this.$electron.ipcRenderer.send('windowInit');
       drag(this.$el);
       this.$ga.event('app', 'mounted');
+      setInterval(() => {
+        this.$ga.event('app', 'heartbeat');
+      }, 300000);
     },
   };
 </script>

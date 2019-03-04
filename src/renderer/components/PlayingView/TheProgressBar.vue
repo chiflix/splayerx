@@ -5,7 +5,7 @@
     @mousemove="handleMousemove"
     @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
-    @mousedown="handleMousedown">
+    @mousedown.stop="handleMousedown">
     <the-preview-thumbnail class="the-preview-thumbnail" v-show="showThumbnail"
       :currentTime="hoveredCurrentTime"
       :maxThumbnailWidth="240"
@@ -69,7 +69,6 @@ export default {
       showThumbnail: false,
       mousedown: false,
       mouseleave: true,
-      thumbnailWidth: 272,
       hovering: false,
       hoveringId: 0,
       progressTriggerStopped: false,
@@ -78,7 +77,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'duration', 'ratio', 'nextVideo']),
+    ...mapGetters(['winWidth', 'winHeight', 'winRatio', 'duration', 'ratio', 'nextVideo']),
     hoveredPercent() {
       return this.hovering ? this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100 : 0;
     },
@@ -90,6 +89,23 @@ export default {
     },
     hoveredSmallerThanPlayed() {
       return !this.mouseleave && this.hoveredCurrentTime < videodata.time;
+    },
+    thumbnailWidth() {
+      const reactivePhases = {
+        phases: [288, 480, 1080],
+        thumbnailWidth: [100, 136, 170, 272],
+      };
+      let widthIndex = reactivePhases.phases.findIndex((value) => {
+        if (this.winRatio > 1) return value > this.winHeight;
+        return value > this.winWidth;
+      });
+      if (widthIndex < 0) {
+        if ((this.winRatio > 1 && this.winHeight >= 1080)
+          || (this.winRatio < 1 && this.winWidth >= 1080)) {
+          widthIndex = 3;
+        }
+      }
+      return reactivePhases.thumbnailWidth[widthIndex];
     },
     thumbnailHeight() {
       return Math.round(this.thumbnailWidth / this.ratio);
@@ -108,11 +124,6 @@ export default {
       if (this.hoveredCurrentTime === 0 && this.hoveredSmallerThanPlayed) opacity = 0.3;
       if (this.hoveredCurrentTime > 0) opacity = 0.9;
       return this.whiteWithOpacity(opacity);
-    },
-  },
-  watch: {
-    winWidth(newValue) {
-      this.thumbnailWidth = this.winWidthToThumbnailWidth(newValue);
     },
   },
   methods: {
@@ -193,8 +204,11 @@ export default {
       if (!this.mousedown) {
         this.setHoveringToFalse(true);
         this.showThumbnail = false;
+        // 这里在没有mouse-down的情况下，才处理mouseleave
+        // 如果有mouse-down，mouseleave应该放到document.mouseup中处理
+        // 不然document.mousemove无法正确处理progress-bar的play|hover样式
+        this.mouseleave = true;
       }
-      this.mouseleave = true;
     },
     handleMousedown(event) {
       this.mousedown = true;
@@ -210,12 +224,19 @@ export default {
         this.$bus.$emit('play');
       }
     },
-    handleDocumentMouseup() {
+    handleDocumentMouseup(event) {
+      const path = event.path || (event.composedPath && event.composedPath());
+      const isTargetProgressBar = path.find(e => e.tagName === 'DIV' && e.className.includes('the-progress-bar'));
+      // 如果mouseup的target是当前组件，那么不需要触发leave
+      if (!isTargetProgressBar) {
+        this.mouseleave = true;
+        this.showThumbnail = false;
+      }
       if (this.mousedown) {
         this.mousedown = false;
         if (this.mouseleave) {
-          this.setHoveringToFalse(false);
-          this.showThumbnail = false;
+          // 如果mouseup是在组件外，立马移除hover，不做延迟处理
+          this.setHoveringToFalse(true);
         }
         this.$bus.$emit('seek', this.hoveredCurrentTime);
       }
@@ -231,21 +252,6 @@ export default {
         return winWidth - (fakeButtonWidth + thumbnailWidth);
       }
       return pageX - (thumbnailWidth / 2);
-    },
-    winWidthToThumbnailWidth(winWidth) {
-      let thumbnailWidth = 0;
-      const reactivePhases = {
-        winWidth: [513, 846, 1921, 3841],
-        thumbnailWidth: [100, 136, 170, 272],
-      };
-      reactivePhases.winWidth.some((value, index) => {
-        if (winWidth < value) {
-          thumbnailWidth = reactivePhases.thumbnailWidth[index];
-          return true;
-        }
-        return false;
-      });
-      return thumbnailWidth;
     },
     whiteWithOpacity(opacity) {
       return `rgba(255, 255, 255, ${opacity}`;
@@ -266,7 +272,6 @@ export default {
   created() {
     document.addEventListener('mousemove', this.handleDocumentMousemove);
     document.addEventListener('mouseup', this.handleDocumentMouseup);
-    this.thumbnailWidth = this.winWidthToThumbnailWidth(this.winWidth);
     this.$bus.$on('seek', () => {
       this.progressTriggerStopped = true;
       this.clock.clearTimeout(this.progressTriggerId);

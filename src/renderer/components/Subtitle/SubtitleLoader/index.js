@@ -1,7 +1,8 @@
 import { EventEmitter } from 'events';
 import flatten from 'lodash/flatten';
 import helpers from '@/helpers';
-import { localFormatLoader, toArray, promisify, functionExtraction } from './utils';
+import { storeSubtitle } from '@/helpers/subtitle';
+import { localFormatLoader, castArray, promisify, functionExtraction } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
 
 const files = require.context('.', false, /\.loader\.js$/);
@@ -35,7 +36,8 @@ export default class SubtitleLoader extends EventEmitter {
   })
 
   _getParams(params) {
-    return toArray(params).map(param => this[param] || this.metaInfo[param] || this.options[param]);
+    return castArray(params)
+      .map(param => this[param] || this.metaInfo[param] || this.options[param]);
   }
 
   /**
@@ -63,7 +65,7 @@ export default class SubtitleLoader extends EventEmitter {
     if (supportedFormats.includes(format)) {
       this.metaInfo.format = format;
       this.loader = Object.values(loaders)
-        .find(loader => toArray(loader.supportedFormats).includes(format));
+        .find(loader => castArray(loader.supportedFormats).includes(format));
     } else {
       helpers.methods.addLog('error', {
         message: 'Unsupported Subtitle .',
@@ -73,12 +75,21 @@ export default class SubtitleLoader extends EventEmitter {
     }
 
     this.options = options || {};
+    this.data = this.options.data;
 
-    const { func: idLoader, params: idParams } = functionExtraction(this.loader.id);
-    promisify(idLoader.bind(null, ...this._getParams(idParams))).then((id) => {
-      this.metaInfo.id = id;
-      this.emit('loading', id);
-    });
+    if (this.options.id) {
+      this.id = this.options.id.toString();
+      setImmediate(() => this.emit('loading', this.id));
+    } else {
+      storeSubtitle({
+        src: this.src,
+        type: this.type,
+        format: this.metaInfo.format,
+      }).then((id) => {
+        this.id = id.toString();
+        setImmediate(() => this.emit('loading', id));
+      });
+    }
   }
 
   async meta() {
@@ -95,22 +106,26 @@ export default class SubtitleLoader extends EventEmitter {
       });
       this.emit('ready', metaInfo);
     } catch (e) {
-      this.emit('failed', this.metaInfo.id);
+      this.emit('failed', this.id);
       throw e;
     }
   }
 
   async load() {
     const loader = functionExtraction(this.loader.loader);
-    this.data = await promisify(loader.func.bind(null, ...this._getParams(toArray(loader.params))));
-    this.emit('data', this.data);
+    if (this.data) this.emit('data', this.data);
+    else {
+      this.data =
+        await promisify(loader.func.bind(this, ...this._getParams(castArray(loader.params))));
+      this.emit('data', this.data);
+    }
   }
 
   async parse() {
     try {
       const parser = functionExtraction(this.loader.parser, 'data');
       this.parsed =
-        await promisify(parser.func.bind(null, ...this._getParams(toArray(parser.params))));
+        await promisify(parser.func.bind(null, ...this._getParams(castArray(parser.params))));
       this.emit('parse', this.parsed);
     } catch (e) {
       helpers.methods.addLog('error', {

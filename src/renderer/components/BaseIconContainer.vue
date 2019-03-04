@@ -130,12 +130,8 @@ export default {
 }
 
 .volume {
-  @media screen and (min-width: 1921px) {
-    width: 24px;
-    height: 24px;
-  }
-  width: 12px;
-  height: 12px;
+  width: 100%;
+  height: 100%;
 }
 
 .playlistplay {
@@ -144,22 +140,9 @@ export default {
 }
 
 .play, .pause {
-  @media screen and (max-width: 512px) {
-    width: 49px;
-    height: 49px;
-  }
-  @media screen and (min-width: 513px) and (max-width: 854px) {
-    width: 59px;
-    height: 59px;
-  }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
-    width: 79px;
-    height: 79px;
-  }
-  @media screen and (min-width: 1921px) {
-    width: 109px;
-    height: 108px;
-  }
+  margin: auto;
+  width: 100%;
+  height: 100%;
   display: block;
 }
 
@@ -173,19 +156,19 @@ export default {
   .active {
     display: none;
   }
-  @media screen and (max-width: 512px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 20px;
     height: 20px;
   }
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 22px;
     height: 22px;
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     width: 26px;
     height: 26px;
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 36px;
     height: 36px;
   }
@@ -214,44 +197,44 @@ export default {
   }
 }
 .notificationPlay {
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 30.625px;
     height: 24.5px;
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     width: 36.75px;
     height: 33.25px;
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 51.625px;
     height: 46.375px;
   }
 }
 .notificationPlayHover {
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 30.625px;
     height: 24.5px;
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     width: 36.75px;
     height: 33.25px;
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 51.625px;
     height: 46.375px;
   }
 }
-.minus, .plus {
+.minus, .plus, .reset {
   -webkit-app-region: no-drag;
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 11px;
     height: 11px;
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     width: 13.2px;
     height: 13.2px;
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 18.48px;
     height: 18.48px;
   }
@@ -291,26 +274,25 @@ export default {
 .hoveredEnd {
   display: block;
   z-index: 20;
-  @media screen and (max-width: 512px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 6px;
     height: 6px;
   }
-  @media screen and (min-width: 513px) and(max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 8px;
     height: 8px;
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     width: 10px;
     height: 10px;
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 16px;
     height: 16px;
   }
 }
-@media screen and (min-width: 513px) and (max-width: 854px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .rightArrow {
-    display: block;
     width: 13px;
     height: 13px;
   }
@@ -325,9 +307,8 @@ export default {
     height: 13px;
   }
 }
-@media screen and (min-width: 855px) and (max-width: 1920px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .rightArrow {
-    display: block;
     width: 15.6px;
     height: 15.6px;
   }
@@ -342,9 +323,8 @@ export default {
     height: 17px;
   }
 }
-@media screen and (min-width: 1921px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .rightArrow {
-    display: block;
     width: 21.84px;
     height: 21.84px;
   }
@@ -361,8 +341,6 @@ export default {
 }
 .rightArrow {
   display: block;
-  width: 12px;
-  height: 12px;
   opacity: 0.5;
 }
 .nike {
@@ -372,21 +350,40 @@ export default {
 }
 .speed {
   display: block;
-  @media screen and (max-width: 512px) {
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
     width: 8px;
     height: 6px;
   }
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     width: 8px;
     height: 6px;
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     width: 12px;
     height: 8.25px;
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     width: 14px;
     height: 11px;
+  }
+}
+.cycle {
+  display: block;
+  @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+    width: 11px;
+    height: 7px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    width: 11px;
+    height: 7px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    width: 13px;
+    height: 8px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    width: 18px;
+    height: 11.5px;
   }
 }
 .refresh {

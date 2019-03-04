@@ -8,9 +8,9 @@
   }">
       <div class="child-item" style="will-change: transform;">
         <div class="img blur" ref="blur"
-          v-if="!isPlaying && imageLoaded"
+          v-if="imageLoaded"
           :style="{
-            backgroundImage: backgroundImage,
+            backgroundImage: !isPlaying ? `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}` : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
           }"/>
         <transition name="fade2">
         <div class="white-hover"
@@ -21,77 +21,75 @@
             minHeight: `${thumbnailHeight}px`,
           }"/>
         </transition>
-        <div class="black-gradient"
+        <div class="content" ref="content"
           @mouseenter="mouseoverVideo"
           @mouseleave="mouseoutVideo"
-          @mouseup="mouseupVideo">
-          <div class="content" ref="content"
+          @mouseup="mouseupVideo"
+          :style="{
+            height: '100%',
+          }">
+          <div class="info"
             :style="{
-              height: '100%',
-            }">
-              <div class="info"
+                height: `${thumbnailHeight - bottom}px`,
+                width: `${thumbnailWidth - 2 * side}px`,
+                left: `${side}px`,
+              }">
+            <div class="overflow-container"
+              :style="{
+                height: sizeAdaption(22),
+                bottom: sizeAdaption(14),
+              }">
+            <transition name="icon">
+            <div class="icon-container"
+              v-if="isPlaying">
+              <Icon type="playlistplay" class="playlist-play"
                 :style="{
-                    height: `${thumbnailHeight - bottom}px`,
-                    width: `${thumbnailWidth - 2 * side}px`,
-                    left: `${side}px`,
-                  }">
-                <div class="overflow-container"
-                  :style="{
-                    height: sizeAdaption(22),
-                    bottom: sizeAdaption(14),
-                  }">
-                <transition name="icon">
-                <div class="icon-container"
-                  v-if="isPlaying">
-                  <Icon type="playlistplay" class="playlist-play"
-                    :style="{
-                      width: sizeAdaption(10),
-                      height: sizeAdaption(22),
-                      marginRight: sizeAdaption(4),
-                    }"/>
-                  <div class="playing"
-                    :style="{
-                      paddingTop: sizeAdaption(5),
-                      fontSize: sizeAdaption(12),
-                      lineHeight: sizeAdaption(12),
-                    }">{{ $t('recentPlaylist.playing') }}</div>
-                </div>
-                </transition>
-                </div>
-                <transition name="fade">
-                <div class="progress" ref="progress"
-                  :style="{
-                    opacity: '0',
-                    height: sizeAdaption(2),
-                    bottom: sizeAdaption(14),
-                    marginBottom: sizeAdaption(7),
-                  }">
-                  <div class="slider"
-                  :style="{
-                    width: `${sliderPercentage}%`,
-                  }"></div>
-                </div>
-                </transition>
-                <div class="title" ref="title"
-                  :style="{
-                    color: 'rgba(255,255,255,0.40)',
-                    fontSize: sizeAdaption(14),
-                    lineHeight: sizeAdaption(14),
-                  }">{{ baseName }}</div>
-              </div>
+                  width: sizeAdaption(10),
+                  height: sizeAdaption(22),
+                  marginRight: sizeAdaption(4),
+                }"/>
+              <div class="playing"
+                :style="{
+                  paddingTop: sizeAdaption(5),
+                  fontSize: sizeAdaption(12),
+                  lineHeight: sizeAdaption(12),
+                }">{{ $t('recentPlaylist.playing') }}</div>
+            </div>
+            </transition>
+            </div>
+            <transition name="fade">
+            <div class="progress" ref="progress"
+              :style="{
+                opacity: '0',
+                height: sizeAdaption(2),
+                bottom: sizeAdaption(14),
+                marginBottom: sizeAdaption(7),
+              }">
+              <div class="slider"
+              :style="{
+                width: `${sliderPercentage}%`,
+              }"></div>
+            </div>
+            </transition>
+            <div class="title" ref="title"
+              :style="{
+                color: 'rgba(255,255,255,0.40)',
+                fontSize: sizeAdaption(14),
+                lineHeight: sizeAdaption(14),
+              }">{{ baseName }}</div>
           </div>
-          <div class="border" ref="border"
-            :style="{
-              borderColor: 'rgba(255,255,255,0.15)',
-            }"/>
         </div>
+        <div class="border" ref="border"
+          :style="{
+            borderColor: 'rgba(255,255,255,0.15)',
+          }"/>
       </div>
 </div>
 </template>
 <script>
 import fs from 'fs';
 import path from 'path';
-import { filePathToUrl } from '@/helpers/path';
+import { filePathToUrl, parseNameFromPath } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -143,6 +141,8 @@ export default {
       mediaInfo: { path: this.path },
       smallShortCut: '',
       imgPath: '',
+      videoHeight: 0,
+      videoWidth: 0,
     };
   },
   methods: {
@@ -154,7 +154,7 @@ export default {
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     updateAnimationIn() {
-      if (!this.isPlaying) {
+      if (!this.isPlaying && this.imageLoaded) {
         this.$refs.blur.classList.remove('blur');
       }
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
@@ -166,7 +166,7 @@ export default {
       }
     },
     updateAnimationOut() {
-      if (!this.isPlaying) {
+      if (!this.isPlaying && this.imageLoaded) {
         this.$refs.blur.classList.add('blur');
       }
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
@@ -187,29 +187,38 @@ export default {
     },
   },
   mounted() {
-    this.mediaQuickHash(this.path).then((quickHash) => {
-      this.$electron.ipcRenderer.send('snapShot', this.path, quickHash);
-      this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
-        this.coverSrc = filePathToUrl(`${imgPath}.png`);
-        this.imgPath = imgPath;
-        if (this.isPlaying || this.lastPlayedTime) {
-          fs.readFile(`${imgPath}.png`, 'base64', (err, data) => {
-            if (!err) {
-              const cover = `data:image/png;base64, ${data}`;
-              this.infoDB.get('recent-played', 'path', this.path).then((data) => {
-                if (data) {
-                  const mergedData = Object.assign(data, { cover });
-                  this.infoDB.add('recent-played', mergedData);
-                }
-              });
-            }
-          });
-        }
-      });
-    });
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
+      const videoStream = JSON.parse(info).streams.find(stream => stream.codec_type === 'video');
+      this.videoHeight = videoStream.height;
+      this.videoWidth = videoStream.width;
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
+      this.mediaQuickHash(this.path).then((quickHash) => {
+        this.$electron.ipcRenderer.send('snapShot', {
+          videoPath: this.path,
+          quickHash,
+          duration: this.mediaInfo.duration,
+          videoWidth: this.videoWidth,
+          videoHeight: this.videoHeight,
+        });
+      });
+    });
+    this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
+      this.coverSrc = filePathToUrl(`${imgPath}`);
+      this.imgPath = imgPath;
+      if (this.isPlaying || this.lastPlayedTime) {
+        fs.readFile(`${imgPath}`, 'base64', (err, data) => {
+          if (!err) {
+            const cover = `data:image/png;base64, ${data}`;
+            this.infoDB.get('recent-played', 'path', this.path).then((data) => {
+              if (data) {
+                const mergedData = Object.assign(data, { cover });
+                this.infoDB.add('recent-played', mergedData);
+              }
+            });
+          }
+        });
+      }
     });
     this.infoDB.get('recent-played', 'path', this.path).then((val) => {
       if (val && val.lastPlayedTime) {
@@ -231,7 +240,7 @@ export default {
   watch: {
     isPlaying(val) {
       if (val) {
-        fs.readFile(`${this.imgPath}.png`, 'base64', (err, data) => {
+        fs.readFile(`${this.imgPath}`, 'base64', (err, data) => {
           if (!err) {
             const cover = `data:image/png;base64, ${data}`;
             this.infoDB.get('recent-played', 'path', this.path).then((data) => {
@@ -246,6 +255,15 @@ export default {
     },
   },
   computed: {
+    baseName() {
+      const parsedName = parseNameFromPath(this.path);
+      if (parsedName.episode && parsedName.season) {
+        return `S${parsedName.season}E${parsedName.episode}`;
+      } else if (parsedName.episode && !parsedName.season) {
+        return `EP${parsedName.episode}`;
+      }
+      return path.basename(this.path, path.extname(this.path));
+    },
     backgroundImage() {
       return `url(${this.imageSrc})`;
     },
@@ -278,9 +296,6 @@ export default {
     bottom() {
       return this.winWidth > 1355 ? this.thumbnailWidth / (112 / 14) : 14;
     },
-    baseName() {
-      return path.basename(this.path, path.extname(this.path));
-    },
   },
 };
 </script>
@@ -292,14 +307,7 @@ $border-radius: 3px;
     border-radius: $border-radius;
     width: 100%;
     height: 100%;
-    background-color: rgba(255,255,255,0.1);
-    .black-gradient {
-      position: absolute;
-      border-radius: $border-radius;
-      width: 100%;
-      height: calc(100% + 0.08vw);
-      background-image: linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%);
-    }
+    background-color: rgba(111,111,111,0.30);
     .white-hover {
       pointer-events:none;
       position: absolute;
@@ -326,9 +334,9 @@ $border-radius: 3px;
       position: absolute;
       z-index: 100;
       top: 0;
-      bottom: 0;
       left: 0;
       right: 0;
+      bottom: 0;
 
       .info {
         position: absolute;

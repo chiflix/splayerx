@@ -1,18 +1,18 @@
 import { extname, basename } from 'path';
 import { open, readSync, readFile, closeSync, statSync } from 'fs';
 import chardet from 'chardet';
-import convert3To1 from 'iso-639-3-to-1';
 import iconv from 'iconv-lite';
-import franc from 'franc';
 import { ipcRenderer } from 'electron';
 import helpers from '@/helpers';
 import Sagi from '@/helpers/sagi';
+import { normalizeCode } from '@/helpers/language';
+import languageLoader from '@/helpers/subtitle/language';
 import SubtitleLoader from './index';
 import { SubtitleError, ErrorCodes } from './errors';
 
-export function toArray(element) {
-  return element instanceof Array ? element : [element];
-}
+export { castArray } from 'lodash';
+
+export { normalizeCode };
 
 export const mediaHash = helpers.methods.mediaQuickHash;
 
@@ -24,7 +24,7 @@ export const mediaHash = helpers.methods.mediaQuickHash;
  * @returns {string} an extension without '.'
  */
 export function localFormatLoader(src) {
-  return extname(src).slice(1);
+  return extname(src).slice(1).toLowerCase();
 }
 
 /**
@@ -46,29 +46,6 @@ function getFragmentBuffer(path, detectEncoding) {
       closeSync(fd);
     });
   });
-}
-
-/**
- * Get callback for turn subtitle into plain text without second line.
- *
- * @param {string} subtitleFormat - Subtitle format name, e.g. 'ass', 'SubStation Alpha', 'WebVtt'.
- * @returns {fucntion} Callback for removing tags and other lines for each cue text.
- */
-function getSubtitleCallback(subtitleFormat) {
-  switch (subtitleFormat.toLowerCase()) {
-    case 'ssa':
-    case 'ass':
-    case 'advanced substation alpha':
-    case 'substation alpha':
-      return str => str.replace(/^(Dialogue:)(.*\d,)(((\d{0,2}:){2}\d{0,2}\d{0,2}([.]\d{0,3})?,)){2}(.*,)(\w*,)(\d+,){3}(\w*,)|(\\[nN])|([\\{\\]\\.*[\\}].*)/gm, '');
-    case 'srt':
-    case 'subrip':
-    case 'vtt':
-    case 'webvtt':
-      return str => str.replace(/^\d+.*/gm, '').replace(/\n.*\s{1,}/gm, '');
-    default:
-      return str => str.replace(/\d/gm, '');
-  }
 }
 
 /**
@@ -94,8 +71,7 @@ export async function localLanguageLoader(path, format) {
   const fileEncoding = await localEncodingLoader(path);
   try {
     const string = iconv.decode(await getFragmentBuffer(path), fileEncoding);
-    const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
-    return convert3To1(franc(stringCallback(string)));
+    return languageLoader(string, format)[0];
   } catch (e) {
     helpers.methods.addLog('error', {
       message: 'Unsupported Subtitle .',
@@ -103,10 +79,6 @@ export async function localLanguageLoader(path, format) {
     });
     throw new SubtitleError(ErrorCodes.ENCODING_UNSUPPORTED_ENCODING, `Unsupported encoding: ${fileEncoding}.`);
   }
-}
-
-export async function localIdLoader(path) {
-  return `${path}-${(await mediaHash(path))}`;
 }
 
 export function localNameLoader(path) {
@@ -185,8 +157,8 @@ export function loadLocalFile(path) {
  * @param {string} subtitleCodec - the codec of the embedded subtitle
  * @returns {Promise<string|SubtitleError>} the subtitle path string or SubtitleError
  */
-export function embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec) {
-  ipcRenderer.send('extract-subtitle-request', videoSrc, subtitleStreamIndex, SubtitleLoader.codecToFormat(subtitleCodec), mediaHash);
+export async function embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec) {
+  ipcRenderer.send('extract-subtitle-request', videoSrc, subtitleStreamIndex, SubtitleLoader.codecToFormat(subtitleCodec), await helpers.methods.mediaQuickHash(videoSrc));
   return new Promise((resolve, reject) => {
     ipcRenderer.once('extract-subtitle-response', (event, { error, index, path }) => {
       if (error) reject(new SubtitleError(ErrorCodes.SUBTITLE_RETRIEVE_FAILED, `${videoSrc}'s No.${index} extraction failed with ${error}.`));
@@ -207,6 +179,7 @@ export function embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec) 
 export function loadEmbeddedSubtitle(videoSrc, subtitleStreamIndex, subtitleCodec) {
   return new Promise((resolve, reject) => {
     embeddedSrcLoader(videoSrc, subtitleStreamIndex, subtitleCodec).then((path) => {
+      this.metaInfo.format = extname(path).slice(1);
       resolve(loadLocalFile(path));
     }).catch((err) => {
       reject(err);
@@ -215,7 +188,7 @@ export function loadEmbeddedSubtitle(videoSrc, subtitleStreamIndex, subtitleCode
 }
 
 export function loadOnlineTranscript(hash) {
-  return Sagi.getTranscript(hash);
+  return Sagi.getTranscript({ transcriptIdentity: hash });
 }
 
 export function promisify(func) {

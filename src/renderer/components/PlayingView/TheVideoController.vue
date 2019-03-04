@@ -9,8 +9,7 @@
     @mousedown="handleMousedown"
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
-    @mouseup.left="handleMouseupLeft"
-    @dblclick="handleDblclick">
+    @click.left="handleMouseupLeft">
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
@@ -22,7 +21,10 @@
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets"/>
-    <play-button :paused="paused" />
+    <play-button class="play-button no-drag"
+      :mousemovePosition="mousemovePosition"
+      :showAllWidgets="showAllWidgets" :isFocused="isFocused"
+      :paused="paused" :attachedShown="attachedShown"/>
     <volume-indicator :showAllWidgets="showAllWidgets" />
     <div class="control-buttons" v-fade-in="showAllWidgets">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
@@ -38,8 +40,7 @@
   </div>
 </template>
 <script>
-import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
-import { Input as inputMutations } from '@/store/mutationTypes';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
@@ -51,7 +52,6 @@ import TheTimeCodes from './TheTimeCodes.vue';
 import TheProgressBar from './TheProgressBar.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
-import SpeedLabel from './RateLabel.vue';
 import { videodata } from '../../store/video';
 
 export default {
@@ -67,7 +67,6 @@ export default {
     'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
     'recent-playlist': RecentPlaylist,
-    SpeedLabel,
   },
   data() {
     return {
@@ -81,10 +80,9 @@ export default {
       mouseleftDelay: 1000,
       popupShow: false,
       clicksTimer: 0,
-      clicksDelay: 200,
+      clicksDelay: 250,
       dragDelay: 200,
       widgetsStatus: {},
-      preventSingleClick: false,
       lastAttachedShowing: false,
       focusedTimestamp: 0,
       focusDelay: 500,
@@ -96,17 +94,22 @@ export default {
       lastDragging: false,
       displayState: {},
       tempRecentPlaylistDisplayState: false,
+      clicks: 0,
+      videoChanged: false,
+      videoChangedTimer: 0,
+      isValidClick: true,
+      lastMousedownPlaybutton: false,
     };
   },
   computed: {
     ...mapState({
-      currentWidget: state => state.Input.mousemoveTarget,
-      currentMouseupWidget: state => state.Input.mouseupTarget,
-      currentMousedownWidget: state => state.Input.mousedownTarget,
-      mousemovePosition: state => state.Input.mousemovePosition,
+      currentWidget: ({ Input }) => Input.mousemoveComponentName,
+      currentMouseupWidget: state => state.Input.mouseupComponentName,
+      currentMousedownWidget: state => state.Input.mousedownComponentName,
+      mousemovePosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc']),
+    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized']),
     onlyOneVideo() {
       return this.playingList.length === 1;
     },
@@ -114,17 +117,15 @@ export default {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
         (!this.mouseLeftWindow && this.onOtherWidget) ||
-        this.attachedShown);
+        this.attachedShown || this.videoChanged ||
+        (this.isMousedown && this.currentMousedownWidget === 'play-button'));
     },
     onOtherWidget() {
-      return this.currentWidget !== this.$options.name;
+      return (this.currentWidget !== this.$options.name) && (this.currentWidget !== 'play-button');
     },
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ||
         this.tempRecentPlaylistDisplayState ? 'default' : 'none';
-    },
-    isFocused() {
-      return this.$store.state.Window.isFocused;
     },
     isDragging() {
       if (this.isMousedown) {
@@ -141,15 +142,27 @@ export default {
         }
       });
       this.isMousedown = false;
+      this.videoChanged = true;
+      if (this.videoChangedTimer) {
+        this.clock.clearTimeout(this.videoChangedTimer);
+      }
+      this.videoChangedTimer = this.clock.setTimeout(() => {
+        this.videoChanged = false;
+      }, 3000);
     },
     isDragging(val, oldval) {
-      if (!val && oldval) {
+      if (!val && oldval && !['subtitle-control', 'advance-control'].includes(this.currentMousedownWidget)) {
         this.lastDragging = true;
       }
     },
-    isFocused(newValue) {
-      if (newValue) {
-        this.focusedTimestamp = Date.now();
+    isFocused(newVal) {
+      if (!newVal) {
+        this.isValidClick = false;
+      }
+    },
+    isMinimized(newVal, oldVal) {
+      if (!newVal && oldVal) {
+        this.isValidClick = true;
       }
     },
     currentWidget(newVal, oldVal) {
@@ -190,11 +203,8 @@ export default {
     document.addEventListener('wheel', this.handleWheel);
   },
   methods: {
-    ...mapMutations({
-      updateMousemoveTarget: inputMutations.MOUSEMOVE_TARGET_UPDATE,
-    }),
     ...mapActions({
-      updateMousemovePosition: inputActions.MOUSEMOVE_POSITION,
+      updateMousemove: inputActions.MOUSEMOVE_UPDATE,
       updateMousedown: inputActions.MOUSEDOWN_UPDATE,
       updateMouseup: inputActions.MOUSEUP_UPDATE,
       updateKeydown: inputActions.KEYDOWN_UPDATE,
@@ -325,11 +335,15 @@ export default {
       if (this.mouseStoppedId) {
         this.clock.clearTimeout(this.mouseStoppedId);
       }
-      this.mouseStoppedId = this.clock.setTimeout(() => {
-        this.mouseStopped = true;
-      }, this.mousestopDelay);
-      this.updateMousemovePosition([clientX, clientY]);
-      this.updateMousemoveTarget(this.getComponentName(target));
+      if (!this.lastMousedownPlaybutton) {
+        this.mouseStoppedId = this.clock.setTimeout(() => {
+          this.mouseStopped = true;
+        }, this.mousestopDelay);
+      }
+      this.updateMousemove({
+        componentName: this.getComponentName(target),
+        clientPosition: [clientX, clientY],
+      });
     },
     handleMouseenter() {
       this.mouseLeftWindow = false;
@@ -339,59 +353,71 @@ export default {
     },
     handleMousedown(event) {
       const { target, buttons } = event;
-      this.updateMousedown({ target: this.getComponentName(target), buttons });
+      this.updateMousedown({ componentName: this.getComponentName(target), buttons });
     },
     handleMouseup(event) {
       const { target, buttons } = event;
-      this.updateMouseup({ target: this.getComponentName(target), buttons });
+      this.updateMouseup({ componentName: this.getComponentName(target), buttons });
     },
     handleMouseleave() {
       this.mouseLeftId = this.clock.setTimeout(() => {
         this.mouseLeftWindow = true;
       }, this.mouseleftDelay);
     },
-    handleMousedownLeft() {
+    handleMousedownLeft(e) {
       this.isMousedown = true;
+      this.lastMousedownPlaybutton = this.getComponentName(e.target) === 'play-button';
+      if (this.lastMousedownPlaybutton) {
+        this.mouseStopped = false;
+        if (this.mouseStoppedId) {
+          this.clock.clearTimeout(this.mouseStoppedId);
+        }
+      }
     },
     handleMouseupLeft() {
       this.isMousemove = false;
-      this.isMousedown = false;
+      this.isValidClick = true;
+      this.clicks += 1;
       if (this.clicksTimer) {
         clearTimeout(this.clicksTimer);
       }
-      if (!this.isValidClick() || (this.lastDragging && this.lastAttachedShowing)) {
+      // 这里的事件监听和progress-bar里面document.mouseup 事件有冲突
+      // 需要mouse down来记录是否是组件内部事件处理
+      if ((this.lastDragging && this.lastAttachedShowing) || !this.isMousedown) {
+        this.clicks = 0;
         return;
       }
-      this.clicksTimer = setTimeout(() => {
-        const attachedShowing = this.lastAttachedShowing;
-        if (
-          this.currentMousedownWidget === 'the-video-controller' &&
-          this.currentMouseupWidget === 'the-video-controller' && !this.preventSingleClick && !attachedShowing && !this.lastDragging) {
-          this.togglePlayback();
+      if (this.isMousedown && this.lastMousedownPlaybutton) {
+        this.mouseStoppedId = this.clock.setTimeout(() => {
+          this.mouseStopped = true;
+        }, this.mousestopDelay);
+        this.lastMousedownPlaybutton = false;
+      }
+      this.isMousedown = false;
+      if (this.clicks === 1) {
+        this.clicksTimer = setTimeout(() => {
+          this.clicks = 0;
+          this.lastDragging = false;
+          this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
+        }, this.clicksDelay);
+      } else if (this.clicks === 2) {
+        clearTimeout(this.clicksTimer);
+        this.clicks = 0;
+        if (this.currentMouseupWidget === 'the-video-controller') {
+          this.toggleFullScreenState();
         }
-        this.lastDragging = false;
-        this.preventSingleClick = false;
-        this.lastAttachedShowing = this.widgetsStatus['subtitle-control'].showAttached || this.widgetsStatus['advance-control'].showAttached || this.widgetsStatus['playlist-control'].showAttached;
-      }, this.clicksDelay);
-    },
-    handleDblclick() {
-      clearTimeout(this.clicksTimer); // cancel the time out
-      this.preventSingleClick = true;
-      if (this.currentMouseupWidget === 'the-video-controller') {
-        this.toggleFullScreenState();
-        this.preventSingleClick = false;
       }
     },
     handleKeydown({ code }) {
-      this.updateKeydown(code);
+      this.updateKeydown({ pressedKeyboardCode: code });
     },
     handleKeyup({ code }) {
-      this.updateKeyup(code);
+      this.updateKeyup({ releasedKeyboardCode: code });
     },
-    handleWheel(event) {
+    handleWheel({ target, timeStamp }) {
       this.updateWheel({
-        target: this.getComponentName(event.target),
-        timestamp: event.timeStamp,
+        componentName: this.getComponentName(target),
+        timestamp: timeStamp,
       });
     },
     // Helper functions
@@ -443,14 +469,8 @@ export default {
       }
       return componentName;
     },
-    isValidClick() {
-      return Date.now() - this.focusedTimestamp > this.focusDelay;
-    },
     toggleFullScreenState() {
       this.$bus.$emit('toggle-fullscreen');
-    },
-    togglePlayback() {
-      this.$bus.$emit('toggle-playback');
     },
   },
 };
@@ -466,6 +486,18 @@ export default {
   opacity: 1;
   transition: opacity 400ms;
   z-index: auto;
+}
+.play-button {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 101;
 }
 .masking {
   position: absolute;
@@ -486,7 +518,7 @@ export default {
   position: absolute;
   bottom: 0;
   width: 100%;
-  z-index: 1000; // in front of all widgets
+  z-index: 100; // in front of all widgets
 }
 
 .translate-enter-active, .translate-leave-active {
@@ -507,24 +539,24 @@ export default {
     position: relative;
   }
   .subtitle {
-    @media screen and (min-width: 513px) and (max-width: 854px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-right: 17.6px;
     }
-    @media screen and (min-width: 855px) and (max-width: 1920px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-right: 25.6px;
     }
-    @media screen and (min-width: 1921px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-right: 40px;
     }
   }
   .playlist {
-    @media screen and (min-width: 513px) and (max-width: 854px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       margin-right: 17.6px;
     }
-    @media screen and (min-width: 855px) and (max-width: 1920px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       margin-right: 25.6px;
     }
-    @media screen and (min-width: 1921px) {
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       margin-right: 40px;
     }
   }
@@ -533,12 +565,16 @@ export default {
     height: 100%;
   }
 }
-@media screen and (max-width: 512px) {
+@media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
   .control-buttons {
     display: none;
   }
+  .play-button {
+    width: 54px;
+    height: 54px;
+  }
 }
-@media screen and (min-width: 513px) and (max-width: 854px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .control-buttons {
     width: 115px;
     height: 22px;
@@ -549,8 +585,12 @@ export default {
       height: 22px;
     }
   }
+  .play-button {
+    width: 67px;
+    height: 67px;
+  }
 }
-@media screen and (min-width: 855px) and (max-width: 1920px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .control-buttons {
     width: 167px;
     height: 32px;
@@ -561,8 +601,12 @@ export default {
       height: 32px;
     }
   }
+  .play-button {
+    width: 93px;
+    height: 93px;
+  }
 }
-@media screen and (min-width: 1921px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .control-buttons {
     width: 260px;
     height: 50px;
@@ -572,6 +616,10 @@ export default {
       width: 60px;
       height: 50px;
     }
+  }
+  .play-button {
+    width: 129px;
+    height: 129px;
   }
 }
 .fade-in {

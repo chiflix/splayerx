@@ -25,7 +25,8 @@
               </div>
 
               <div class="sub-menu">
-                <div class="scrollScope"
+                <div class="scrollScope" :class="refAnimation"
+                  @animationend="finishAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                     height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
@@ -46,7 +47,6 @@
                       </div>
                     </div>
 
-                    <transition-group name="subtitle-group">
                       <div v-if="foundSubtitles"
                         v-for="(item, index) in computedAvaliableItems" :key="item.rank">
                         <div class="menu-item-text-wrapper"
@@ -66,7 +66,6 @@
                             }">{{ item.path ? getSubName(item.path) : item.name }}</div>
                         </div>
                       </div>
-                    </transition-group>
 
                     <div v-if="loadingTypes.length > 0"
                       v-for="(item, index) in loadingTypes"
@@ -104,12 +103,13 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import difference from 'lodash/difference';
-import path from 'path';
+import debounce from 'lodash/debounce';
+import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import Icon from '../BaseIconContainer.vue';
-import { ONLINE_LOADING, NO_TRANSLATION_RESULT } from '../../../shared/notificationcodes';
+import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-control',
@@ -146,12 +146,14 @@ export default {
       computedAvaliableItems: [],
       continueRefresh: false,
       isShowingHovered: false,
-      isInitial: false,
+      isInitial: true,
       onAnimation: false,
+      refAnimation: '',
+      debouncedHandler: debounce(this.handleRefresh, 1000),
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -162,50 +164,52 @@ export default {
         });
         return result;
       },
+      currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
+      currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
+    computedSize() {
+      return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
+    },
     noSubtitle() {
+      if (this.timer && this.isInitial) {
+        return this.$t('msg.subtitle.menuLoading');
+      }
       return this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
     },
     iconOpacity() {
-      return this.isShowingHovered ? 0.9 : 0.75;
-    },
-    mousedownCurrentTarget() {
-      return this.$store.state.Input.mousedownTarget;
-    },
-    mouseupCurrentTarget() {
-      return this.$store.state.Input.mouseupTarget;
+      return this.isShowingHovered ? 0.9 : 0.77;
     },
     textHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 13;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 14;
       }
       return 18;
     },
     itemHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return 27;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return 32;
       }
       return 44;
     },
     isOverFlow() {
-      if (this.andify(this.winWidth > 512, this.winWidth <= 854)) {
+      if (this.andify(this.computedSize >= 289, this.computedSize <= 480)) {
         return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 2) ? 'scroll' : '';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 4) ? 'scroll' : '';
       }
       return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 6) ? ' scroll' : '';
     },
     scopeHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.computedAvaliableItems.length > 2 ?
           (this.loadingTypes.length * 31) + 89 :
           (((this.computedAvaliableItems.length + 1) * 31) - 4) +
           (this.loadingTypes.length * 31);
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.computedAvaliableItems.length > 4 ?
           (this.loadingTypes.length * 37) + 180 :
           (((this.computedAvaliableItems.length + 1) * 37) - 5) +
@@ -217,12 +221,12 @@ export default {
         (this.loadingTypes.length * 51);
     },
     contHeight() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.computedAvaliableItems.length > 2 ?
           (this.loadingTypes.length * 31) + 138 :
           45 + ((this.computedAvaliableItems.length + 1) * 31) +
           (this.loadingTypes.length * 31);
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.computedAvaliableItems.length > 4 ?
           (this.loadingTypes.length * 37) + 239 :
           54 + ((this.computedAvaliableItems.length + 1) * 37) +
@@ -234,12 +238,12 @@ export default {
         (this.loadingTypes.length * 51);
     },
     cardPos() {
-      if (this.winWidth > 512 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 31 :
           this.scopeHeight + 4;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 37 :
@@ -259,6 +263,7 @@ export default {
     originSrc() {
       this.showAttached = false;
       this.computedAvaliableItems = [];
+      clearInterval(this.timer);
     },
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
@@ -274,26 +279,22 @@ export default {
         }
       }
     },
-    mousedownCurrentTarget(val) {
-      if (val !== 'notification-bubble') {
+    currentMousedownComponent(val) {
+      if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([62, 64], false);
-          if (this.lastDragging) {
-            this.clearMouseup({ target: '' });
-          } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
-            this.$emit('update:showAttached', false);
-          }
+          this.clearMouseup({ componentName: '' });
         }
       }
     },
-    mouseupCurrentTarget(val) {
-      if (this.mousedownCurrentTarget !== 'notification-bubble') {
-        if (this.lastDragging) {
+    currentMouseupComponent(val) {
+      if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
+        if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
           if (this.showAttached) {
             this.anim.playSegments([79, 85]);
             this.$emit('update:lastDragging', false);
           }
-          this.clearMousedown({ target: '' });
+          this.clearMousedown({ componentName: '' });
         } else if (val !== this.$options.name && this.showAttached) {
           this.$emit('update:showAttached', false);
         }
@@ -326,10 +327,16 @@ export default {
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
     }),
+    finishAnimation() {
+      this.refAnimation = '';
+    },
     getSubName(subPath) {
       return path.basename(subPath);
     },
-    handleRefresh() {
+    debouncedHandleRefresh(e, hasOnlineSubtitles = false) {
+      this.debouncedHandler(e, hasOnlineSubtitles);
+    },
+    handleRefresh(e, hasOnlineSubtitles = false) {
       if (navigator.onLine) {
         if (!this.privacyAgreement) {
           this.$bus.$emit('privacy-confirm');
@@ -339,30 +346,43 @@ export default {
             this.count += 1;
             this.rotateTime = Math.ceil(this.count / 100);
           }, 10);
-          document.querySelector('.scrollScope').scrollTop = 0;
-          this.$bus.$emit('refresh-subtitles');
+          const types = ['local'];
+          if (this.isInitial) types.push('embedded');
+          if (!hasOnlineSubtitles &&
+            (!this.isInitial || ['ts', 'avi', 'mkv', 'mp4'].includes(extname(this.originSrc).slice(1).toLowerCase()))) {
+            types.push('online');
+          }
+          // three suitations for variable 'types':
+          // first open && matched extensions: ['local', 'embedded', 'online']
+          // first open && !matched extensions: ['local', 'embedded']
+          // !first open: ['local', 'online']
+          this.$bus.$emit('refresh-subtitles', { types, isInitial: this.isInitial });
           if (!this.isInitial) {
             this.addLog('info', {
               message: 'Online subtitles loading .',
               code: ONLINE_LOADING,
             });
           } else {
-            this.onAnimation = true;
-            this.anim.loop = true;
-            this.anim.setSpeed(0.6);
-            this.anim.playSegments([115, 146], false);
+            setTimeout(() => {
+              if (!this.showAttached) {
+                this.onAnimation = true;
+                this.anim.loop = true;
+                this.anim.setSpeed(0.6);
+                this.anim.playSegments([115, 146], false);
+              }
+            }, 1000);
           }
           clearTimeout(this.breakTimer);
           this.breakTimer = setTimeout(() => {
             if (this.timer) {
-              this.$bus.$emit('refresh-finished');
+              this.$bus.$emit('refresh-finished', !this.isInitial);
             }
           }, 10000);
         }
       } else {
         this.addLog('error', {
-          message: 'No Translation Result .',
-          errcode: NO_TRANSLATION_RESULT,
+          message: 'Offline error .',
+          errcode: SUBTITLE_OFFLINE,
         });
       }
     },
@@ -379,6 +399,7 @@ export default {
       if (!this.showAttached) {
         this.anim.playSegments([28, 32], false);
       } else {
+        this.clearMouseup({ componentName: '' });
         this.anim.playSegments([62, 64], false);
       }
     },
@@ -388,7 +409,6 @@ export default {
           this.anim.setSpeed(1.5);
         });
         this.anim.loop = false;
-        this.isInitial = false;
       }
       if (!this.showAttached) {
         this.isShowingHovered = true;
@@ -396,12 +416,12 @@ export default {
       this.validEnter = true;
     },
     handleLeave() {
-      if (this.onAnimation) {
-        this.anim.loop = true;
-        this.anim.setSpeed(0.6);
-        this.anim.playSegments([115, 146], false);
-      }
       if (!this.showAttached) {
+        if (this.onAnimation) {
+          this.anim.loop = true;
+          this.anim.setSpeed(0.6);
+          this.anim.playSegments([115, 146], false);
+        }
         this.isShowingHovered = false;
       }
       this.validEnter = false;
@@ -449,45 +469,63 @@ export default {
     },
   },
   created() {
-    this.$bus.$on('refresh-finished', () => {
+    this.$bus.$on('subtitle-refresh-from-menu', this.debouncedHandleRefresh);
+    this.$bus.$on('subtitle-refresh-from-src-change', (e, hasOnlineSubtitles) => {
+      this.isInitial = true;
+      if (this.privacyAgreement) {
+        this.debouncedHandleRefresh(hasOnlineSubtitles);
+      } else {
+        this.$bus.$emit('refresh-subtitles', ['local', 'embedded']);
+      }
+    });
+    this.$bus.$on('refresh-finished', (timeout) => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
+      this.$store.dispatch('removeMessagesByType');
+      if (timeout) {
+        setTimeout(() => {
+          this.addLog('error', {
+            message: 'Request Timeout .',
+            errcode: REQUEST_TIMEOUT,
+          });
+        }, 500);
+      }
       setTimeout(() => {
         this.$bus.$emit('finished-add-subtitles');
+        this.isInitial = false;
         if (this.onAnimation) {
           this.anim.addEventListener('complete', () => {
             this.anim.setSpeed(1.5);
           });
           this.onAnimation = false;
           this.anim.loop = false;
-          this.isInitial = false;
         } else {
-          this.$store.dispatch('removeMessagesByType');
+          this.refAnimation = 'refresh-animation';
         }
-        this.$bus.$emit('no-translation-result');
+        document.querySelector('.scrollScope').scrollTop = 0;
         this.timer = null;
       }, 1000);
     });
   },
   mounted() {
-    this.$bus.$on('menu-subtitle-refresh', (initial) => {
-      this.isInitial = !!initial;
-      this.handleRefresh();
-    });
     this.$bus.$on('subtitle-refresh-continue', () => {
       if (this.continueRefresh) {
         this.continueRefresh = false;
-        this.handleRefresh();
+        this.debouncedHandleRefresh();
       }
     });
+
     document.addEventListener('mouseup', (e) => {
       if (e.button === 0) {
         if (!this.showAttached) {
           if (this.validEnter) {
             this.anim.playSegments([46, 60], false);
-          } else if (this.mousedownCurrentTarget === this.$options.name) {
+          } else if (this.currentMousedownComponent === this.$options.name) {
             this.anim.playSegments([40, 44], false);
           }
+        } else if (this.currentMousedownComponent === this.$options.name
+          && this.currentMouseupComponent !== this.$options.name) {
+          this.anim.playSegments([79, 85], false);
         }
       }
     });
@@ -555,7 +593,6 @@ export default {
     .text {
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
-      text-transform: capitalize;
     }
   }
   .placeholder-item-text-wrapper {
@@ -578,12 +615,12 @@ export default {
     box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
     background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
   }
-  @media screen and (min-width: 320px) and (max-width: 512px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     .sub-menu-wrapper {
       display: none;
     }
   }
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     .topContainer {
       cursor: default;
       width: 100%;
@@ -643,7 +680,7 @@ export default {
       margin-left: 9px;
     }
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     .topContainer {
       cursor: default;
       width: 100%;
@@ -703,7 +740,7 @@ export default {
       margin-left: 9.5px;
     }
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     .topContainer {
       cursor: default;
       width: 100%;
@@ -774,14 +811,15 @@ export default {
 .sub-trans-l-leave-active {
   position: absolute;
 }
-.subtitle-group-enter-active, .subtitle-group-leave-active {
-  transition: opacity 300ms linear;
-  transition-delay: 100ms;
+
+.refresh-animation {
+  animation: menu-refresh 300ms linear 1 normal forwards;
 }
-.subtitle-group-enter, .subtitle-group-leave-to {
-  opacity: 0;
-}
-.subtitle-group-enter-to, .subtitle-group-leave {
-  opacity: 1;
+@keyframes menu-refresh {
+  0% { opacity: 1 }
+  25% { opacity: 0.5 }
+  50% { opacity: 0 }
+  75% { opacity: 0.5 }
+  100% { opacity: 1 }
 }
 </style>

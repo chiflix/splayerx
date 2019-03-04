@@ -7,7 +7,7 @@
     cursor: 'default',
     height: this.readyShow === 'mainMenu' ? menuCardHeight : this.readyShow === 'subMenu' ? subtitleCardHeight : audioCardHeight,
     transition: 'height 100ms linear',
-    fontWeight: '900',
+    fontWeight: '700',
   }">
   <transition :name="this.readyShow === 'mainMenu' ? 'setUp' : 'setUpLeft'">
     <div class="mainItems" v-show="readyShow === 'mainMenu'"
@@ -25,7 +25,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!speedChosen && hoverIndex === 1" :style="{ height: speedHeight }"></div>
         </transition>
-        <advance-row-items :lists="numList" :item="itemSpeedName" :winWidth="winWidth" :isChosen="speedChosen" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
+        <advance-row-items :isRateMenu="true" :lists="numList" :item="$t('advance.rateTitle')" :size="computedSize" :isChosen="speedChosen" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleControl"
         @mouseenter="handleMouseenter(2)"
@@ -41,9 +41,9 @@
               color: hoverIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">
-            <div>{{ this.$t('advance.subMenu') }}</div>
+            <div :style="{ margin: 'auto 0' }">{{ this.$t('advance.subMenu') }}</div>
             <transition name="arrow">
-              <Icon type="rightArrow" v-show="hoverIndex === 2"></Icon>
+              <Icon class="arrowRight" type="rightArrow" v-show="hoverIndex === 2"></Icon>
             </transition>
           </div>
         </div>
@@ -62,9 +62,9 @@
               color: hoverIndex === 3 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">
-            <div>{{ this.$t('advance.audioMenu') }}</div>
+            <div :style="{ margin: 'auto 0' }">{{ this.$t('advance.audioMenu') }}</div>
             <transition name="arrow">
-              <Icon type="rightArrow" v-show="hoverIndex === 3"></Icon>
+              <Icon class="arrowRight" type="rightArrow" v-show="hoverIndex === 3"></Icon>
             </transition>
           </div>
         </div>
@@ -99,7 +99,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!subSizeChosen && hoverSubIndex === 1" :style="{ height: subSizeHeight }"></div>
         </transition>
-        <advance-row-items :lists="textList" :item="itemFontName" :winWidth="winWidth" :isChosen="subSizeChosen" :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
+        <advance-row-items :isRateMenu="false" :lists="$t('advance.fontItems')" :item="$t('advance.fontSize')" :size="computedSize" :isChosen="subSizeChosen" :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleStyle" @click.left="handleColorClick"
         @mouseenter="handleSubMouseenter(2)"
@@ -111,7 +111,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!subColorChosen && hoverSubIndex === 2" :style="{ height: subColorHeight }"></div>
         </transition>
-        <advance-color-items :item="itemColorName" :winWidth="winWidth" :isChosen="subColorChosen" :color="hoverSubIndex === 2 && !subColorChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-color-items>
+        <advance-color-items :item="$t('advance.fontStyle')" :size="computedSize" :isChosen="subColorChosen" :color="hoverSubIndex === 2 && !subColorChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-color-items>
       </div>
       <div class="subtitleDelay" @click.left="handleDelayClick"
         @mouseenter="handleSubMouseenter(3)"
@@ -123,7 +123,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!subDelayChosen && hoverSubIndex === 3" :style="{ height: subDelayHeight }"></div>
         </transition>
-        <advance-selected-items :item="itemDelayName" :winWidth="winWidth" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
+        <advance-selected-items :isSubDelay="true" :item="$t('advance.subDelay')" :size="computedSize" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
       </div>
     </div>
   </transition>
@@ -156,7 +156,7 @@
         <transition name="arrow">
           <!--<div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1" :style="{ height: audioDelayHeight }"></div>-->
         </transition>
-        <advance-selected-items :item="audioDelayName" :winWidth="winWidth" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"></advance-selected-items>
+        <advance-selected-items :isSubDelay="false" :item="$t('advance.audioDelay')" :size="computedSize" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"></advance-selected-items>
       </div>
       <div class="changeTrack" @click.left="handleTrackClick"
         @mouseenter="handleAudioMouseenter(2)"
@@ -184,7 +184,7 @@
         </transition>
         </div>
         <transition name="audioTransOut">
-          <advance-column-items :item="itemTrack" :winWidth="winWidth" v-show="showTrack"></advance-column-items>
+          <advance-column-items :item="$t('advance.changeTrack')" :size="computedSize" v-show="showTrack"></advance-column-items>
         </transition>
       </div>
     </div>
@@ -205,8 +205,7 @@ export default {
   name: 'AdvanceMainMenu',
   data() {
     return {
-      numList: [[0.5], [1], [1.2], [1.5], [2]],
-      itemSpeedName: this.$t('advance.rateTitle'),
+      numList: [0.5, 1, 1.2, 1.5, 2],
       speedChosen: false,
       rightArrowSub: false,
       rightArrowMed: false,
@@ -214,16 +213,10 @@ export default {
       hoverIndex: -1,
       readyShow: 'mainMenu',
       backSubHover: false,
-      textList: this.$t('advance.fontItems'),
-      itemFontName: this.$t('advance.fontSize'),
       subSizeChosen: false,
       subColorChosen: false,
       subDelayChosen: false,
-      itemColorName: this.$t('advance.fontStyle'),
-      itemDelayName: this.$t('advance.subDelay'),
       hoverSubIndex: -1,
-      audioDelayName: this.$t('advance.audioDelay'),
-      itemTrack: this.$t('advance.changeTrack'),
       showDelay: false,
       showTrack: false,
       hoverAudioIndex: -1,
@@ -256,7 +249,10 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentSubtitleId']),
+    ...mapGetters(['winWidth', 'currentSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
+    computedSize() {
+      return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
+    },
     currentAudioTrack() {
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];
       if (track) {
@@ -327,9 +323,9 @@ export default {
   },
   methods: {
     initialSize(size) {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
         return size;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return size * 1.2;
       }
       return size * 1.2 * 1.4;
@@ -419,7 +415,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (min-width: 513px) and (max-width: 854px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .card {
     width: 170px;
   }
@@ -432,9 +428,8 @@ export default {
   }
   .item2, .item3 {
     font-size: 13px;
-    line-height: 15px;
     width: 136px;
-    height: 13px;
+    height: 18px;
   }
   .topContent {
     width: 133px;
@@ -469,7 +464,7 @@ export default {
     animation: hideLeftP1 .2s;
   }
 }
-@media screen and (min-width: 855px) and (max-width: 1920px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .card {
     width: 204px;
   }
@@ -482,9 +477,8 @@ export default {
   }
   .item2, .item3 {
     font-size: 15.6px;
-    line-height: 18px;
     width: 163.2px;
-    height: 15.6px;
+    height: 22px;
   }
   .topContent {
     width: 159.6px;
@@ -518,7 +512,7 @@ export default {
     animation: hideLeftP2 .2s;
   }
 }
-@media screen and (min-width: 1921px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .card {
     width: 285.6px;
   }
@@ -531,9 +525,8 @@ export default {
   }
   .item2, .item3 {
     font-size: 21.84px;
-    line-height: 25.2px;
     width: 228.48px;
-    height: 21.84px;
+    height: 30px;
   }
   .topContent {
     width: 223.44px;
@@ -579,7 +572,7 @@ export default {
   display: flex;
   flex-direction: column;
   position: absolute;
-  .rightArrow {
+  .arrowRight {
     margin: auto 0;
   }
   .playSpeed {

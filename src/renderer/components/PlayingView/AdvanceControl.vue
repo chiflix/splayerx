@@ -21,7 +21,7 @@
 <script>
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
 
@@ -53,16 +53,14 @@ export default {
   },
   computed: {
     ...mapGetters(['originSrc']),
-    mousedownCurrentTarget() {
-      return this.$store.state.Input.mousedownTarget;
-    },
-    mouseupCurrentTarget() {
-      return this.$store.state.Input.mouseupTarget;
-    },
+    ...mapState({
+      currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
+      currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
+    }),
   },
   watch: {
     originSrc() {
-      this.showAttached = false;
+      this.$emit('update:showAttached', false);
     },
     showAttached(val) {
       if (!val) {
@@ -76,26 +74,22 @@ export default {
         }
       }
     },
-    mousedownCurrentTarget(val) {
-      if (val !== 'notification-bubble') {
+    currentMousedownComponent(val) {
+      if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
           this.anim.playSegments([37, 41], false);
-          if (this.lastDragging) {
-            this.clearMouseup({ target: '' });
-          } else if (this.mouseupCurrentTarget !== this.$options.name && this.mouseupCurrentTarget !== '') {
-            this.$emit('update:showAttached', false);
-          }
+          this.clearMouseup({ componentName: '' });
         }
       }
     },
-    mouseupCurrentTarget(val) {
-      if (this.mousedownCurrentTarget !== 'notification-bubble') {
-        if (this.lastDragging) {
+    currentMouseupComponent(val) {
+      if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
+        if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
           if (this.showAttached) {
             this.anim.playSegments([68, 73]);
             this.$emit('update:lastDragging', false);
           }
-          this.clearMousedown({ target: '' });
+          this.clearMousedown({ componentName: '' });
         } else if (val !== this.$options.name && this.showAttached) {
           this.$emit('update:showAttached', false);
         }
@@ -115,6 +109,7 @@ export default {
       if (!this.showAttached) {
         this.anim.playSegments([17, 21], false);
       } else {
+        this.clearMouseup({ componentName: '' });
         this.anim.playSegments([37, 41], false);
       }
       document.addEventListener('mouseup', (e) => {
@@ -122,9 +117,12 @@ export default {
           if (!this.showAttached) {
             if (this.validEnter) {
               this.anim.playSegments([23, 36], false);
-            } else if (this.mousedownCurrentTarget === this.$options.name) {
+            } else if (this.currentMousedownComponent === this.$options.name) {
               this.anim.playSegments([105, 109], false);
             }
+          } else if (this.currentMousedownComponent === this.$options.name
+            && this.currentMouseupComponent !== this.$options.name) {
+            this.anim.playSegments([68, 73], false);
           }
           this.mouseDown = false;
         }
@@ -200,18 +198,18 @@ button:hover {
   position: absolute;
   z-index: 100;
   transition-property: opacity, transform;
-  @media screen and (min-width: 320px) and (max-width: 512px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     display: none;
   }
-  @media screen and (min-width: 513px) and (max-width: 854px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     bottom: 32px;
     right: 3px;
   }
-  @media screen and (min-width: 855px) and (max-width: 1920px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     bottom: 44px;
     right: 3px;
   }
-  @media screen and (min-width: 1921px) {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     bottom: 70px;
     right: 7px;
   }
