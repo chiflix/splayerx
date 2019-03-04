@@ -63,8 +63,8 @@ export default {
       // decreaseSubtitleSize: '減小字母尺寸',
       increaseSubtitleDelayS: '字幕延時 +0.1s',
       decreaseSubtitleDelayS: '字幕延時 -0.1s',
-      increaseSubtitleDelayL: '字幕延时 +0.5s',
-      decreaseSubtitleDelayL: '字幕延时 -0.5s',
+      // increaseSubtitleDelayL: '字幕延时 +0.5s',
+      // decreaseSubtitleDelayL: '字幕延时 -0.5s',
     },
     window: {
       name: '窗口',
