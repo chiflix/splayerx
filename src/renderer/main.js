@@ -865,7 +865,7 @@ new Vue({
         id: 'sub-1',
         visible: true,
         type: 'radio',
-        label: this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
+        label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
         click: () => {
           this.$bus.$emit('off-subtitle');
         },
