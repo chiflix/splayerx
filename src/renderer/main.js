@@ -115,7 +115,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
-      'currentSubtitleId', 'displayLanguage', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir']),
+      'currentSubtitleId', 'displayLanguage', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'calculatedNoSub']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -865,7 +865,7 @@ new Vue({
         id: 'sub-1',
         visible: true,
         type: 'radio',
-        label: this.$t('msg.subtitle.noSubtitle'),
+        label: this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
         click: () => {
           this.$bus.$emit('off-subtitle');
         },
