@@ -286,7 +286,7 @@ export default {
       subtitleList = sortBy([...subtitleList], ['id']);
       const computedIndex = subtitleList
         .filter((subtitle) => {
-          if (subtitle.language && options.language) {
+          if (type === 'online' && subtitle.language && options.language) {
             return subtitle.type === type && subtitle.language === options.language;
           }
           return subtitle.type === type;
