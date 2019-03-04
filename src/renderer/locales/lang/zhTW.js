@@ -160,7 +160,7 @@ export default {
   },
   uploadingSuccess: {
     title: '上傳成功',
-    content: '字幕已上傳。',
+    content: '字幕已成功上傳。',
   },
   uploadingFailed: {
     title: '上傳失敗',
