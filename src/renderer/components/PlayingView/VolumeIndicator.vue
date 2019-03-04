@@ -4,6 +4,7 @@
   @mouseleave="leaveArea">
   <div :class="showVolume ? 'fade-in' : 'fade-out'" ref="indicatorContainer"
     class="indicator-container border-out"
+    @mousedown.stop="mouseDownOnIndicator"
     @mouseenter="actionArea"
     @mouseleave="leaveActionArea">
     <base-info-card class="card" ref="card">
@@ -20,6 +21,7 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
+import { Video as videoActions } from '@/store/actionTypes';
 import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
 
@@ -36,13 +38,25 @@ export default {
       showIcon: false,
       mouseOver: false,
       inArea: false,
+      mousedown: false,
     };
   },
   props: ['showAllWidgets'],
   computed: {
-    ...mapGetters(['volume', 'muted', 'volumeKeydown', 'ratio', 'isFullScreen']),
+    ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen']),
+    ...mapState({
+      currentWidget: ({ Input }) => Input.mousemoveComponentName,
+    }),
     showVolume() {
-      return this.volumeTriggerStopped;
+      return this.volumeTriggerStopped || this.mousedown;
+    },
+    volume: {
+      get() {
+        return this.$store.getters.volume;
+      },
+      set(val) {
+        this.$store.dispatch(videoActions.VOLUME_UPDATE, val * 100);
+      },
     },
   },
   methods: {
@@ -63,6 +77,21 @@ export default {
       this.showIcon = false;
       this.$refs.indicatorContainer.classList.remove('border-in');
       this.$refs.indicatorContainer.classList.add('border-out');
+    },
+    mouseDownOnIndicator(e) {
+      const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
+      const containerTop = (window.innerHeight - backgroundHeight) / 2;
+      this.volume = ((window.innerHeight - e.clientY) - containerTop) /
+        this.$refs.indicatorContainer.clientHeight;
+      this.mousedown = true;
+      document.onmousemove = (e) => {
+        this.volume = ((window.innerHeight - e.clientY) - containerTop) /
+          this.$refs.indicatorContainer.clientHeight;
+      };
+      document.onmouseup = () => {
+        document.onmousemove = null;
+        this.mousedown = false;
+      };
     },
     handleFullScreen() {
       const winHeight = window.screen.height;
@@ -93,8 +122,11 @@ export default {
     this.$bus.$on('off-fullscreen', this.handleFullScreen);
   },
   watch: {
+    showVolume(val) {
+      if (!val) document.onmouseup = null;
+    },
     showAllWidgets(newVal) {
-      this.volumeTriggerStopped = this.inArea ? newVal : false;
+      this.volumeTriggerStopped = this.inArea || this.mousedown ? newVal : false;
     },
     muted(val) {
       const { clock, volumeTriggerTimerId } = this;
