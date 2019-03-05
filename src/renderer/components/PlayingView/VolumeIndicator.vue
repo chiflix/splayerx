@@ -56,7 +56,7 @@ export default {
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
     }),
     showVolume() {
-      return this.inArea || this.mousedown;
+      return this.inArea || this.mousedown || this.volumeTriggerStopped;
     },
     volume: {
       get() {
