@@ -3,7 +3,7 @@
   @mouseenter="enterArea"
   @mouseleave="leaveArea">
   <div class="trigger-area"
-    :class="true ? 'fade-in' : 'fade-out'"
+    :class="showVolume ? 'fade-in' : 'fade-out'"
     @mouseenter="actionArea"
     @mouseleave="leaveActionArea">
     <div ref="indicatorContainer"
