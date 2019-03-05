@@ -89,7 +89,7 @@ export default {
         if (this.borderFadingId) clearTimeout(this.borderFadingId);
         this.borderFadingId = setTimeout(() => {
           this.mouseover = false;
-        }, 300);
+        }, 200);
       }
     },
     mouseDownOnIndicator(e) {
@@ -172,11 +172,9 @@ export default {
       if (!this.volumeKeydown) {
         this.volumeTriggerStopped = true;
         clock.clearTimeout(volumeTriggerTimerId);
-        if (!this.mouseover) {
-          this.volumeTriggerTimerId = clock.setTimeout(() => {
-            this.volumeTriggerStopped = false;
-          }, 1000);
-        }
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
       }
     },
     volumeKeydown(newVal, oldVal) {
@@ -184,7 +182,7 @@ export default {
       if (newVal) {
         this.volumeTriggerStopped = true;
         clock.clearTimeout(volumeTriggerTimerId);
-      } else if (!newVal && oldVal && !this.mouseover) {
+      } else if (!newVal && oldVal) {
         clock.clearTimeout(volumeTriggerTimerId);
         this.volumeTriggerTimerId = clock.setTimeout(() => {
           this.volumeTriggerStopped = false;
