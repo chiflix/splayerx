@@ -50,6 +50,7 @@ export default {
       inArea: false,
       mouseover: false,
       mousedown: false,
+      canToggleMute: false,
     };
   },
   props: ['showAllWidgets', 'mousedownOnPlayButton'],
@@ -101,6 +102,7 @@ export default {
       }
     },
     mouseDownOnIndicator(e) {
+      this.canToggleMute = true;
       const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
       const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;
       const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
@@ -117,10 +119,11 @@ export default {
         this.mousedown = false;
         this.$emit('update:volume-state', false);
         if (!this.inArea) this.mouseover = false;
+        this.canToggleMute = false;
       };
     },
     mouseupOnMuteIcon() {
-      this.$store.dispatch(videoActions.TOGGLE_MUTED);
+      if (this.canToggleMute) this.$store.dispatch(videoActions.TOGGLE_MUTED);
     },
     handleFullScreen() {
       const winHeight = window.screen.height;
