@@ -119,7 +119,7 @@
       this.$ga.event('app', 'mounted');
       setInterval(() => {
         this.$ga.event('app', 'heartbeat');
-      }, 300000);
+      }, 1500000); // keep alive every 25 min.
     },
   };
 </script>
