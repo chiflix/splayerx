@@ -75,7 +75,7 @@
               :style="{
                 color: 'rgba(255,255,255,0.40)',
                 fontSize: sizeAdaption(14),
-                lineHeight: sizeAdaption(14),
+                lineHeight: sizeAdaption(16),
               }">{{ baseName }}</div>
           </div>
         </div>
