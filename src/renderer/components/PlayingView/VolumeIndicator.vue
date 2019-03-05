@@ -229,8 +229,11 @@ export default {
     border-color: rgba(255, 255, 255, 0.0);
   };
 }
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 150ms ease-in;
+.fade-enter-active {
+  transition: opacity 150ms linear;
+}
+.fade-leave-active {
+  transition: opacity 300ms linear;
 }
 .fade-enter, .fade-leave-to {
   opacity: 0;
