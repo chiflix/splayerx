@@ -58,7 +58,7 @@ export default {
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
     }),
     showVolume() {
-      return this.inArea || this.mousedown || this.volumeTriggerStopped ||
+      return (this.inArea && this.showAllWidgets) || this.mousedown || this.volumeTriggerStopped ||
         (this.muted && this.showAllWidgets);
     },
     volume: {
@@ -148,9 +148,6 @@ export default {
   watch: {
     showVolume(val) {
       if (!val) document.onmouseup = null;
-    },
-    showAllWidgets(newVal) {
-      this.volumeTriggerStopped = this.inArea || this.mousedown ? newVal : false;
     },
     muted(val) {
       const { clock, volumeTriggerTimerId } = this;

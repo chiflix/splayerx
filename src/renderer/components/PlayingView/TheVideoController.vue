@@ -118,7 +118,7 @@ export default {
         (this.isMousedown && this.currentMousedownWidget === 'play-button'));
     },
     onOtherWidget() {
-      return (this.currentWidget !== this.$options.name) && (this.currentWidget !== 'play-button');
+      return (this.currentWidget !== this.$options.name) && (this.currentWidget !== 'play-button') && (this.currentWidget !== 'volume-indicator');
     },
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ||
