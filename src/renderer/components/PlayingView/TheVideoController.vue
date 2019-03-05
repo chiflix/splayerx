@@ -104,6 +104,7 @@ export default {
       videoChangedTimer: 0,
       isValidClick: true,
       lastMousedownPlaybutton: false,
+      lastMousedownVolume: false,
       mousedownOnPlayButton: false,
       mousedownOnVolume: false,
     };
@@ -373,14 +374,15 @@ export default {
     handleMousedownLeft(e) {
       this.isMousedown = true;
       this.lastMousedownPlaybutton = this.getComponentName(e.target) === 'play-button';
-      if (this.lastMousedownPlaybutton) {
+      this.lastMousedownVolume = this.getComponentName(e.target) === 'volume-indicator';
+      if (this.lastMousedownPlaybutton || this.lastMousedownVolume) {
         this.mouseStopped = false;
         if (this.mouseStoppedId) {
           this.clock.clearTimeout(this.mouseStoppedId);
         }
       }
     },
-    handleMouseupLeft() {
+    handleMouseupLeft() { // eslint-disable-line complexity
       this.isMousemove = false;
       this.isValidClick = true;
       this.clicks += 1;
@@ -393,11 +395,12 @@ export default {
         this.clicks = 0;
         return;
       }
-      if (this.isMousedown && this.lastMousedownPlaybutton) {
+      if (this.isMousedown && (this.lastMousedownPlaybutton || this.lastMousedownVolume)) {
         this.mouseStoppedId = this.clock.setTimeout(() => {
           this.mouseStopped = true;
         }, this.mousestopDelay);
         this.lastMousedownPlaybutton = false;
+        this.lastMousedownVolume = false;
       }
       this.isMousedown = false;
       if (this.clicks === 1) {

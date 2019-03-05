@@ -4,6 +4,7 @@
   @mouseleave="leaveArea">
   <div class="trigger-area"
     :class="showVolume ? 'fade-in' : 'fade-out'"
+    :style="{cursor: showAllWidgets ? 'pointer' : 'none'}"
     @mouseenter="actionArea"
     @mouseleave="leaveActionArea"
     @mousedown="mouseDownOnIndicator">
@@ -89,6 +90,7 @@ export default {
     },
     actionArea() {
       this.mouseover = true;
+      if (this.borderFadingId) clearTimeout(this.borderFadingId);
     },
     leaveActionArea() {
       if (!this.mousedown) {
@@ -100,7 +102,7 @@ export default {
     },
     mouseDownOnIndicator(e) {
       const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
-      const containerTop = (window.innerHeight - (backgroundHeight + 30)) / 2;
+      const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;
       const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
         this.$refs.indicatorContainer.clientHeight;
       if (percentOfVolume >= 0) this.volume = percentOfVolume;
