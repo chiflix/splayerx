@@ -100,14 +100,14 @@ export default {
     },
     mouseDownOnIndicator(e) {
       const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
-      const containerTop = (window.innerHeight - backgroundHeight) / 2;
-      const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop - 8)) /
+      const containerTop = (window.innerHeight - (backgroundHeight + 30)) / 2;
+      const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
         this.$refs.indicatorContainer.clientHeight;
       if (percentOfVolume >= 0) this.volume = percentOfVolume;
       this.mousedown = true;
       this.$emit('update:volume-state', true);
       document.onmousemove = (e) => {
-        this.volume = ((window.innerHeight - e.clientY) - containerTop) /
+        this.volume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
           this.$refs.indicatorContainer.clientHeight;
       };
       document.onmouseup = () => {
@@ -259,7 +259,7 @@ export default {
   align-items: flex-end;
   flex-direction: column;
   right: 0;
-  z-index: 101;
+  z-index: 99;
   width: 100px;
   height: calc(var(--background-height) + 30px);
   top: var(--container-top);
@@ -269,7 +269,7 @@ export default {
   --init-height: 100px;
   --extra-height: calc((var(--window-height) - 180px) / 3);
   --background-height: calc(var(--init-height) + var(--extra-height)); // indicator-height
-  --remain-height: calc(var(--window-height) - var(--background-height));
+  --remain-height: calc(var(--window-height) - var(--background-height) - 30px);
   --container-top: calc(var(--remain-height) / 2);
   --mute-top: var(--background-height);
   .trigger-area {
