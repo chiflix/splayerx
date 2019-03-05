@@ -20,7 +20,9 @@
     </div>
     <div class="volume"
       @mouseup="mouseupOnMuteIcon">
-      <base-icon v-show="showIcon" class="volume-icon" type="volume" :effect="muted || volume <= 0 ? 'mute' : 'icon'" />
+      <transition name="fade">
+        <base-icon v-show="showIcon" class="volume-icon" type="volume" :effect="muted || volume <= 0 ? 'mute' : 'icon'" />
+      </transition>
     </div>
   </div>
 </div>
@@ -229,6 +231,12 @@ export default {
     border-style: solid;
     border-color: rgba(255, 255, 255, 0.0);
   };
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 150ms ease-in;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 .fade-in {
   animation: fadein 100ms linear 1 normal forwards;
