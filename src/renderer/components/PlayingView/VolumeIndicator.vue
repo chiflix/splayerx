@@ -20,7 +20,7 @@
     </div>
     <div class="volume"
       @mouseup="mouseupOnMuteIcon">
-      <base-icon v-show="mouseover || muted" class="volume-icon" type="volume" :effect="muted || volume <= 0 ? 'mute' : 'icon'" />
+      <base-icon v-show="showIcon" class="volume-icon" type="volume" :effect="muted || volume <= 0 ? 'mute' : 'icon'" />
     </div>
   </div>
 </div>
@@ -69,6 +69,9 @@ export default {
     },
     borderClass() {
       return this.volumeTriggerStopped || this.mouseover || this.mousedown ? 'border-in' : 'border-out';
+    },
+    showIcon() {
+      return this.volumeTriggerStopped || this.mouseover || this.mousedown || this.muted;
     },
   },
   methods: {
