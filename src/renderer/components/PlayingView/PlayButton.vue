@@ -109,7 +109,7 @@ export default {
       }
     },
     isFocused(val, oldVal) {
-      if (val && !oldVal) {
+      if (val && !oldVal && this.mouseOver) {
         this.justFocused = true;
       }
     },
