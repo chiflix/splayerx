@@ -5,11 +5,11 @@
   <div class="trigger-area"
     :class="showVolume ? 'fade-in' : 'fade-out'"
     @mouseenter="actionArea"
-    @mouseleave="leaveActionArea">
+    @mouseleave="leaveActionArea"
+    @mousedown="mouseDownOnIndicator">
     <div ref="indicatorContainer"
       :class="borderClass"
-      class="indicator-container"
-      @mousedown="mouseDownOnIndicator">
+      class="indicator-container">
       <base-info-card class="card" ref="card">
         <div class="indicator" ref="indicator"
           :style="{
@@ -42,7 +42,7 @@ export default {
   },
   data() {
     return {
-      volumeTriggerStopped: false,
+      volumeTriggerStopped: false, // true when volume's changing
       volumeTriggerTimerId: 0,
       volumeFadingId: NaN,
       borderFadingId: NaN,
@@ -101,8 +101,9 @@ export default {
     mouseDownOnIndicator(e) {
       const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
       const containerTop = (window.innerHeight - backgroundHeight) / 2;
-      this.volume = ((window.innerHeight - e.clientY) - containerTop) /
+      const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop - 8)) /
         this.$refs.indicatorContainer.clientHeight;
+      if (percentOfVolume >= 0) this.volume = percentOfVolume;
       this.mousedown = true;
       this.$emit('update:volume-state', true);
       document.onmousemove = (e) => {
@@ -254,10 +255,13 @@ export default {
 }
 .show-area {
   position: absolute;
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
   right: 0;
   z-index: 101;
   width: 100px;
-  height: calc(var(--background-height) + 24px);
+  height: calc(var(--background-height) + 30px);
   top: var(--container-top);
   --indicator-container-width: 9px;
   --window-height: 100vh;
@@ -269,13 +273,14 @@ export default {
   --container-top: calc(var(--remain-height) / 2);
   --mute-top: var(--background-height);
   .trigger-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    width: calc(var(--indicator-container-width) + 10px);
+    height: calc(var(--background-height) + 30px);
     cursor: pointer;
-    position: absolute;
-    width: var(--indicator-container-width);
-    height: calc(var(--background-height) + 24px);
     .indicator-container {
-      position: absolute;
-      right: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -296,30 +301,26 @@ export default {
       }
     }
     .volume {
-      position: absolute;
-      top: var(--mute-top);
-      width: var(--indicator-container-width);
+      margin: 0 auto 0 auto;
+      width: var(--indicator-container-width + 4px);
       height: calc(var(--indicator-container-width) + 10px);
       .volume-icon {
-        position: absolute;
-        bottom: 0;
+        margin: 0 auto 0 auto;
         width: var(--indicator-container-width);
         height: var(--indicator-container-width);
       }
     }
     @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
-      right: 23px;
+      margin-right: 23px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-      right: 30px;
+      margin-right: 30px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-      right: 38px;
+      margin-right: 38px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-      right: 57px;
-      --background-height: calc(var(--window-height) * 0.37);
-      --mute-top: calc(var(--background-height) + 4px);
+      margin-right: 57px;
     }
   }
 }
