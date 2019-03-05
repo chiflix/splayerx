@@ -51,15 +51,15 @@ export default {
       mousedown: false,
     };
   },
-  props: ['showAllWidgets'],
+  props: ['showAllWidgets', 'mousedownOnPlayButton'],
   computed: {
     ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen']),
     ...mapState({
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
     }),
     showVolume() {
-      return (this.inArea && this.showAllWidgets) || this.mousedown || this.volumeTriggerStopped ||
-        (this.muted && this.showAllWidgets);
+      return (this.inArea && this.showAllWidgets && !this.mousedownOnPlayButton) ||
+        this.mousedown || this.volumeTriggerStopped || (this.muted && this.showAllWidgets);
     },
     volume: {
       get() {
@@ -104,6 +104,7 @@ export default {
       this.volume = ((window.innerHeight - e.clientY) - containerTop) /
         this.$refs.indicatorContainer.clientHeight;
       this.mousedown = true;
+      this.$emit('update:volume-state', true);
       document.onmousemove = (e) => {
         this.volume = ((window.innerHeight - e.clientY) - containerTop) /
           this.$refs.indicatorContainer.clientHeight;
@@ -111,6 +112,7 @@ export default {
       document.onmouseup = () => {
         document.onmousemove = null;
         this.mousedown = false;
+        this.$emit('update:volume-state', false);
         if (!this.inArea) this.mouseover = false;
       };
     },

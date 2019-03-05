@@ -22,10 +22,15 @@
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets"/>
     <play-button class="play-button no-drag"
+      @update:playbutton-state="updatePlayButtonState"
+      :mousedownOnVolume="mousedownOnVolume"
       :mousemovePosition="mousemovePosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
-    <volume-indicator class="no-drag" :showAllWidgets="showAllWidgets" />
+    <volume-indicator class="no-drag"
+      @update:volume-state="updateVolumeState"
+      :mousedownOnPlayButton="mousedownOnPlayButton"
+      :showAllWidgets="showAllWidgets"/>
     <div class="control-buttons" v-fade-in="showAllWidgets">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
@@ -99,6 +104,8 @@ export default {
       videoChangedTimer: 0,
       isValidClick: true,
       lastMousedownPlaybutton: false,
+      mousedownOnPlayButton: false,
+      mousedownOnVolume: false,
     };
   },
   computed: {
@@ -220,6 +227,12 @@ export default {
     },
     updatePlaylistShowAttached(event) {
       this.widgetsStatus['playlist-control'].showAttached = event;
+    },
+    updatePlayButtonState(mousedownState) {
+      this.mousedownOnPlayButton = mousedownState;
+    },
+    updateVolumeState(mousedownState) {
+      this.mousedownOnVolume = mousedownState;
     },
     onTickUpdate() {
       if (!this.start) {
