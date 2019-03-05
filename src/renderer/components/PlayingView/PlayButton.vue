@@ -86,13 +86,6 @@ export default {
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
       }
-      document.onmouseup = () => {
-        if (this.mousedown) {
-          this.mousedown = false;
-          this.ani_mode = 'icon-ani-fade-in';
-          this.$emit('update:playbutton-state', false);
-        }
-      };
     },
     handleMouseup() {
       if (this.mousedown && !this.attachedShown) {
@@ -140,6 +133,15 @@ export default {
     paused(val) {
       this.showPlayIcon = val;
     },
+  },
+  created() {
+    document.addEventListener('mouseup', () => {
+      if (this.mousedown) {
+        this.mousedown = false;
+        this.ani_mode = 'icon-ani-fade-in';
+        this.$emit('update:playbutton-state', false);
+      }
+    });
   },
 };
 </script>
