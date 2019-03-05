@@ -41,6 +41,7 @@ export default {
     return {
       volumeTriggerStopped: false,
       volumeTriggerTimerId: 0,
+      iconFadingId: NaN,
       showIcon: false,
       inArea: false,
       mouseover: false,
@@ -68,9 +69,13 @@ export default {
   methods: {
     enterArea() {
       this.volumeTriggerStopped = this.inArea = true;
+      if (this.iconFadingId) clearTimeout(this.iconFadingId);
     },
     leaveArea() {
-      this.volumeTriggerStopped = this.inArea = false;
+      if (this.iconFadingId) clearTimeout(this.iconFadingId);
+      this.iconFadingId = setTimeout(() => {
+        this.volumeTriggerStopped = this.inArea = false;
+      }, 200);
     },
     actionArea() {
       this.mouseover = true;
@@ -251,6 +256,7 @@ export default {
   --container-top: calc(var(--remain-height) / 2);
   --mute-top: var(--background-height);
   .trigger-area {
+    cursor: pointer;
     position: absolute;
     width: var(--indicator-container-width);
     height: calc(var(--background-height) + 24px);
