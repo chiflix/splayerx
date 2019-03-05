@@ -115,7 +115,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
-      'currentSubtitleId', 'displayLanguage', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir']),
+      'currentSubtitleId', 'displayLanguage', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'calculatedNoSub']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -622,20 +622,20 @@ new Vue({
                 this.updateSubDelay(-0.1);
               },
             },
-            {
-              label: this.$t('msg.subtitle.increaseSubtitleDelayL'),
-              accelerator: 'CmdOrCtrl+Shift+=',
-              click: () => {
-                this.updateSubDelay(0.5);
-              },
-            },
-            {
-              label: this.$t('msg.subtitle.decreaseSubtitleDelayL'),
-              accelerator: 'CmdOrCtrl+Shift+-',
-              click: () => {
-                this.updateSubDelay(-0.5);
-              },
-            },
+            // {
+            //   label: this.$t('msg.subtitle.increaseSubtitleDelayL'),
+            //   accelerator: 'CmdOrCtrl+Shift+=',
+            //   click: () => {
+            //     this.updateSubDelay(0.5);
+            //   },
+            // },
+            // {
+            //   label: this.$t('msg.subtitle.decreaseSubtitleDelayL'),
+            //   accelerator: 'CmdOrCtrl+Shift+-',
+            //   click: () => {
+            //     this.updateSubDelay(-0.5);
+            //   },
+            // },
             // { type: 'separator' },
             // { label: 'Smart Translating' },
             // { label: 'Search on Shooter.cn' },
@@ -767,13 +767,13 @@ new Vue({
         }
         if (process.platform === 'win32') {
           const file = template.shift();
-          const winFile = file.submenu.slice(0, 3);
-          winFile[2].submenu.unshift(file.submenu[4], file.submenu[3]);
-          winFile.push(file.submenu[6], file.submenu[5]);
+          const winFile = file.submenu.slice(0, 2);
+          winFile[1].submenu.unshift(file.submenu[3], file.submenu[2]);
+          winFile.push(file.submenu[5], file.submenu[4]);
           winFile.reverse().forEach((menuItem) => {
             template.unshift(menuItem);
           });
-          template.splice(5, 0, {
+          template.splice(4, 0, {
             label: this.$t('msg.splayerx.preferences'),
             enabled: true,
             accelerator: 'Cmd+,',
@@ -781,7 +781,7 @@ new Vue({
               this.$electron.ipcRenderer.send('add-preference');
             },
           });
-          template[10].submenu.unshift(
+          template[9].submenu.unshift(
             {
               label: this.$t('msg.splayerx.about'),
               role: 'about',
@@ -865,7 +865,7 @@ new Vue({
         id: 'sub-1',
         visible: true,
         type: 'radio',
-        label: this.$t('msg.subtitle.noSubtitle'),
+        label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
         click: () => {
           this.$bus.$emit('off-subtitle');
         },

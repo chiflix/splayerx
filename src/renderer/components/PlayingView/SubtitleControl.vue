@@ -174,7 +174,7 @@ export default {
       if (this.timer && this.isInitial) {
         return this.$t('msg.subtitle.menuLoading');
       }
-      return this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
+      return this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
     },
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.77;
