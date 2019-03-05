@@ -14,7 +14,7 @@
           transition: 'color 300ms',
           cursor: isChosen ? 'default' : 'pointer',
         }">
-        <div class="textItem">{{ item }}</div>
+        <div class="textItem" :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'">{{ item }}</div>
         <div class="rightItem" v-show="!isChosen"><img :src="chosenStyle"></div>
       </div>
       <transition name="detail">
@@ -114,7 +114,6 @@ export default {
     .textContainer {
       width: 136px;
       height: 37px;
-      font-size: 13px;
       margin: auto auto auto 17px;
       .rightItem {
         width: 17px;
@@ -150,7 +149,6 @@ export default {
     .textContainer {
       width: 163.2px;
       height: 44.4px;
-      font-size: 15.6px;
       margin: auto auto auto 20.4px;
       .rightItem {
         width: 21px;
@@ -186,7 +184,6 @@ export default {
     .textContainer {
       width: 228.48px;
       height: 62.16px;
-      font-size: 21.84px;
       margin: auto auto auto 28.56px;
       .rightItem {
         width: 29px;
