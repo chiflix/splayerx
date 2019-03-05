@@ -107,12 +107,13 @@ export default {
       const containerTop = (window.innerHeight - (backgroundHeight + 26)) / 2;
       const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
         this.$refs.indicatorContainer.clientHeight;
-      if (percentOfVolume >= 0) this.volume = percentOfVolume;
+      if (percentOfVolume > 0) this.volume = percentOfVolume;
       this.mousedown = true;
       this.$emit('update:volume-state', true);
       document.onmousemove = (e) => {
-        this.volume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
+        const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
           this.$refs.indicatorContainer.clientHeight;
+        if (percentOfVolume > 0) this.volume = percentOfVolume;
       };
       document.onmouseup = () => {
         document.onmousemove = null;
@@ -306,8 +307,8 @@ export default {
       }
     }
     .volume {
-      margin: 0 auto 0 auto;
-      width: var(--indicator-container-width + 4px);
+      padding: 0 auto 0 auto;
+      width: 100%;
       height: calc(var(--indicator-container-width) + 10px);
       .volume-icon {
         margin: 0 auto 0 auto;
