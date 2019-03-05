@@ -339,7 +339,7 @@ function registerMainWindowEvent() {
       useContentSize: true,
       frame: false,
       titleBarStyle: 'none',
-      width: 510,
+      width: 540,
       height: 360,
       transparent: true,
       resizable: false,
