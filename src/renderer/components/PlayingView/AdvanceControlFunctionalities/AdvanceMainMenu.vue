@@ -121,9 +121,9 @@
           transition: 'height 100ms linear',
         }">
         <transition name="arrow">
-          <div class="hoverBack" v-show="!subDelayChosen && hoverSubIndex === 3" :style="{ height: subDelayHeight }"></div>
+          <div class="hoverBack" v-show="!subDelayChosen && hoverSubIndex === 3 && isSubtitleAvailable" :style="{ height: subDelayHeight }"></div>
         </transition>
-        <advance-selected-items :isSubDelay="true" :item="$t('advance.subDelay')" :size="computedSize" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
+        <advance-selected-items :isSubtitleAvaliable="isSubtitleAvailable" :isSubDelay="true" :item="$t('advance.subDelay')" :size="computedSize" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
       </div>
     </div>
   </transition>
@@ -249,7 +249,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['winWidth', 'currentSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'currentSubtitleId']),
     computedSize() {
       return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
     },
@@ -296,6 +296,9 @@ export default {
         return `${this.initialSize(this.containerHeight)}px`;
       }
       return `${this.initialSize(119)}px`;
+    },
+    isSubtitleAvailable() {
+      return this.currentSubtitleId !== '';
     },
     trackNum() {
       return this.$store.getters.audioTrackList.length;
@@ -378,10 +381,12 @@ export default {
       this.subDelayChosen = false;
     },
     handleDelayClick() {
-      this.hoverSubIndex = -1;
-      this.subDelayChosen = true;
-      this.subSizeChosen = false;
-      this.subColorChosen = false;
+      if (this.isSubtitleAvailable) {
+        this.hoverSubIndex = -1;
+        this.subDelayChosen = true;
+        this.subSizeChosen = false;
+        this.subColorChosen = false;
+      }
     },
     handleAudioBackEnter() {
       this.backAudioHover = true;
