@@ -124,7 +124,13 @@ export default {
       };
     },
     mouseupOnMuteIcon() {
-      if (this.canToggleMute) this.$store.dispatch(videoActions.TOGGLE_MUTED);
+      if (this.canToggleMute) {
+        if (this.volume <= 0) {
+          this.volume = 0.1;
+        } else {
+          this.$store.dispatch(videoActions.TOGGLE_MUTED);
+        }
+      }
     },
     handleFullScreen() {
       const winHeight = window.screen.height;
