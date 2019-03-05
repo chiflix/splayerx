@@ -44,7 +44,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .titleBarWinExitFull, .titleBarWinFull, .titleBarWinClose, .titleBarWinRestore, .titleBarWinResize {
   display: flex;
   width: 45px;
@@ -130,6 +130,8 @@ export default {
 }
 
 .volume {
+  position: absolute;
+  bottom: 0;
   width: 100%;
   height: 100%;
 }

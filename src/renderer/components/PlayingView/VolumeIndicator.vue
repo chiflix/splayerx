@@ -2,19 +2,25 @@
 <div class="show-area" ref="showArea"
   @mouseenter="enterArea"
   @mouseleave="leaveArea">
-  <div :class="showVolume ? 'fade-in' : 'fade-out'" ref="indicatorContainer"
-    class="indicator-container border-out"
-    @mousedown.stop="mouseDownOnIndicator"
+  <div class="trigger-area"
+    :class="true ? 'fade-in' : 'fade-out'"
     @mouseenter="actionArea"
     @mouseleave="leaveActionArea">
-    <base-info-card class="card" ref="card">
-      <div class="indicator" ref="indicator"
-        :style="{
-          height: volume * 100 + '%',
-          opacity: muted ? 0.25 : 0.8,
-        }"/>
-    </base-info-card>
-    <base-icon v-show="mouseOver" class="volume" type="volume" :effect="muted || volume <= 0 ? 'mute' : 'icon'" />
+    <div ref="indicatorContainer"
+      class="indicator-container border-out"
+      @mousedown="mouseDownOnIndicator">
+      <base-info-card class="card" ref="card">
+        <div class="indicator" ref="indicator"
+          :style="{
+            height: volume * 100 + '%',
+            opacity: muted ? 0.25 : 0.8,
+          }"/>
+      </base-info-card>
+    </div>
+    <div class="volume"
+      @mouseup="mouseupOnMuteIcon">
+      <base-icon v-show="mouseover || muted" class="volume-icon" type="volume" :effect="muted || volume <= 0 ? 'mute' : 'icon'" />
+    </div>
   </div>
 </div>
 </template>
@@ -36,8 +42,8 @@ export default {
       volumeTriggerStopped: false,
       volumeTriggerTimerId: 0,
       showIcon: false,
-      mouseOver: false,
       inArea: false,
+      mouseover: false,
       mousedown: false,
     };
   },
@@ -67,18 +73,19 @@ export default {
       this.volumeTriggerStopped = this.inArea = false;
     },
     actionArea() {
-      this.mouseOver = true;
+      this.mouseover = true;
       this.showIcon = true;
       this.$refs.indicatorContainer.classList.remove('border-out');
       this.$refs.indicatorContainer.classList.add('border-in');
     },
     leaveActionArea() {
-      this.mouseOver = false;
+      if (!this.mousedown) this.mouseover = false;
       this.showIcon = false;
       this.$refs.indicatorContainer.classList.remove('border-in');
       this.$refs.indicatorContainer.classList.add('border-out');
     },
     mouseDownOnIndicator(e) {
+      console.log('mousedown', e.clientY);
       const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
       const containerTop = (window.innerHeight - backgroundHeight) / 2;
       this.volume = ((window.innerHeight - e.clientY) - containerTop) /
@@ -91,7 +98,12 @@ export default {
       document.onmouseup = () => {
         document.onmousemove = null;
         this.mousedown = false;
+        if (!this.inArea) this.mouseover = false;
       };
+    },
+    mouseupOnMuteIcon() {
+      console.log('mouseup');
+      this.$store.dispatch(videoActions.TOGGLE_MUTED);
     },
     handleFullScreen() {
       const winHeight = window.screen.height;
@@ -154,7 +166,7 @@ export default {
       if (!this.volumeKeydown) {
         this.volumeTriggerStopped = true;
         clock.clearTimeout(volumeTriggerTimerId);
-        if (!this.mouseOver) {
+        if (!this.mouseover) {
           this.volumeTriggerTimerId = clock.setTimeout(() => {
             this.volumeTriggerStopped = false;
           }, 1000);
@@ -166,7 +178,7 @@ export default {
       if (newVal) {
         this.volumeTriggerStopped = true;
         clock.clearTimeout(volumeTriggerTimerId);
-      } else if (!newVal && oldVal && !this.mouseOver) {
+      } else if (!newVal && oldVal && !this.mouseover) {
         clock.clearTimeout(volumeTriggerTimerId);
         this.volumeTriggerTimerId = clock.setTimeout(() => {
           this.volumeTriggerStopped = false;
@@ -237,33 +249,44 @@ export default {
   --background-height: calc(var(--init-height) + var(--extra-height)); // indicator-height
   --remain-height: calc(var(--window-height) - var(--background-height));
   --container-top: calc(var(--remain-height) / 2);
-  --mute-top: calc(var(--background-height) + 2px);
-  .indicator-container {
+  --mute-top: var(--background-height);
+  .trigger-area {
     position: absolute;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-radius: 2.5px;
-    width: calc(var(--indicator-container-width));
-    height: calc(var(--background-height) + 4px);
-    top: 0;
-    .card {
-      top: 0;
-      width: calc(var(--indicator-container-width) / 2);
-      height: var(--background-height);
-    }
-    .indicator {
-      width: 100%;
-      background: white;
-      border-radius: 0 1px 1px 0;
+    width: var(--indicator-container-width);
+    height: calc(var(--background-height) + 24px);
+    .indicator-container {
       position: absolute;
-      bottom: 0px;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-radius: 2.5px;
+      width: calc(var(--indicator-container-width));
+      height: calc(var(--background-height) + 4px);
+      top: 0;
+      .card {
+        width: calc(var(--indicator-container-width) / 2);
+        height: var(--background-height);
+      }
+      .indicator {
+        position: absolute;
+        width: 100%;
+        background: white;
+        border-radius: 0 1px 1px 0;
+        bottom: 0px;
+      }
     }
     .volume {
       position: absolute;
       top: var(--mute-top);
       width: var(--indicator-container-width);
-      height: var(--indicator-container-width);
+      height: calc(var(--indicator-container-width) + 10px);
+      .volume-icon {
+        position: absolute;
+        bottom: 0;
+        width: var(--indicator-container-width);
+        height: var(--indicator-container-width);
+      }
     }
     @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
       right: 23px;
