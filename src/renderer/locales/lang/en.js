@@ -63,8 +63,8 @@ export default {
       // decreaseSubtitleSize: 'Decrease Subtitle Size',
       increaseSubtitleDelayS: 'Subtitle Delay +0.1s',
       decreaseSubtitleDelayS: 'Subtitle Delay -0.1s',
-      increaseSubtitleDelayL: 'Subtitle Delay +0.5s',
-      decreaseSubtitleDelayL: 'Subtitle Delay -0.5s',
+      // increaseSubtitleDelayL: 'Subtitle Delay +0.5s',
+      // decreaseSubtitleDelayL: 'Subtitle Delay -0.5s',
     },
     window: {
       name: 'Window',
