@@ -57,6 +57,7 @@ export default {
       if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
+        this.justMousedownOnVolume = false;
       } else if (!this.isFocused) {
         this.detectMovePosition = true;
       }
