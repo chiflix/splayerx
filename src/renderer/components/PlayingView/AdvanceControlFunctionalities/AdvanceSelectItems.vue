@@ -8,7 +8,7 @@
       :style="{
         height: heightSize,
       }">
-    <div class="textContainer" :style="{
+    <div class="textContainer" :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'" :style="{
       cursor: isChosen || !isSubDelay || !isSubtitleAvaliable ? 'default' : 'pointer',
     }">
       <div class="textItem"
@@ -173,7 +173,6 @@ export default {
     .textContainer {
       width: 136px;
       height: 37px;
-      font-size: 13px;
       margin: auto auto auto 17px;
       .rightItem {
         font-size: 11px;
@@ -223,7 +222,6 @@ export default {
     .textContainer {
       width: 163.2px;
       height: 44.4px;
-      font-size: 15.6px;
       margin: auto auto auto 20.4px;
       .rightItem {
         font-size: 13.2px;
@@ -274,7 +272,6 @@ export default {
     .textContainer {
       width: 228.48px;
       height: 62.16px;
-      font-size: 21.84px;
       margin: auto auto auto 28.56px;
       .rightItem {
         font-size: 18.48px;

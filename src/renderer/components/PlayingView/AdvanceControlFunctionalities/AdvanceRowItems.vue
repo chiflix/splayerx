@@ -12,12 +12,12 @@
         :style="{
            cursor: isChosen ? 'default' : 'pointer',
         }">
-        <div class="textItem"
+        <div class="textItem" :class="$i18n.locale === 'ja' && !isRateMenu ? 'advanceJaTitle' : 'advanceNormalTitle'"
           :style="{
             color: color,
             transition: 'color 300ms',
           }">{{ item }}</div>
-        <div class="rightItem" v-show="!isChosen || isRateMenu">{{ showDetail }}</div>
+        <div class="rightItem" :class="$i18n.locale === 'ja' && !isRateMenu? 'advanceJaItem' : 'advanceNormalItem'" v-show="!isChosen || isRateMenu">{{ showDetail }}</div>
       </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -323,11 +323,7 @@ export default {
     .textContainer {
       width: 136px;
       height: 37px;
-      font-size: 13px;
       margin: auto auto auto 17px;
-      .rightItem {
-        font-size: 11px;
-      }
     }
     .listContainer {
       height: 37px;
@@ -377,11 +373,7 @@ export default {
     .textContainer {
       width: 163.2px;
       height: 44.4px;
-      font-size: 15.6px;
       margin: auto auto auto 20.4px;
-      .rightItem {
-        font-size: 13.2px;
-      }
     }
     .listContainer {
       height: 44.4px;
@@ -431,11 +423,7 @@ export default {
     .textContainer {
       width: 228.48px;
       height: 62.16px;
-      font-size: 21.84px;
       margin: auto auto auto 28.56px;
-      .rightItem {
-        font-size: 18.48px;
-      }
     }
     .listContainer {
       height: 62.16px;

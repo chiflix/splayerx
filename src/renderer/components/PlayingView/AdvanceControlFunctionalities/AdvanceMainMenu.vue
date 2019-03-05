@@ -172,11 +172,11 @@
         <transition name="audioTransIn">
           <div class="item2" v-show="!showTrack"
             :style="{ cursor: 'pointer' }">
-            <div :style="{
+            <div :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'" :style="{
               color: hoverAudioIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">{{ this.$t('advance.changeTrack') }}</div>
-            <div class="trackDetail"
+            <div :class="$i18n.locale === 'ja' ? 'advanceJaItem' : 'advanceNormalItem'"
               :style="{
                 color: 'rgba(255, 255, 255, 0.6)',
               }">{{ currentAudioTrack }}</div>
@@ -446,9 +446,6 @@ export default {
     line-height: 13px;
     margin-left: 3px;
   }
-  .trackDetail {
-    font-size: 11px;
-  }
   .setUp-enter-active {
     animation: showP1 .2s;
   }
@@ -495,9 +492,6 @@ export default {
     line-height: 15.6px;
     margin-left: 3.6px;
   }
-  .trackDetail {
-    font-size: 13.2px;
-  }
   .setUp-enter-active {
     animation: showP2 .2s;
   }
@@ -542,9 +536,6 @@ export default {
     font-size: 18.48px;
     line-height: 21.84px;
     margin-left: 5.04px;
-  }
-  .trackDetail {
-    font-size: 18.48px;
   }
   .setUp-enter-active {
     animation: showP3 .2s;

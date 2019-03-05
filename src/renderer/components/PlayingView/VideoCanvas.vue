@@ -235,7 +235,6 @@ export default {
       if (ext === 'mkv') {
         this.$bus.$emit('seek-subtitle', e);
       }
-      this.$ga.event('app', 'seek');
     });
     this.$bus.$on('drag-over', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0.18)';
