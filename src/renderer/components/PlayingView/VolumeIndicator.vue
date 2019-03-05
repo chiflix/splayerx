@@ -7,7 +7,8 @@
     @mouseenter="actionArea"
     @mouseleave="leaveActionArea">
     <div ref="indicatorContainer"
-      class="indicator-container border-out"
+      :class="borderClass"
+      class="indicator-container"
       @mousedown="mouseDownOnIndicator">
       <base-info-card class="card" ref="card">
         <div class="indicator" ref="indicator"
@@ -41,8 +42,8 @@ export default {
     return {
       volumeTriggerStopped: false,
       volumeTriggerTimerId: 0,
-      iconFadingId: NaN,
-      showIcon: false,
+      volumeFadingId: NaN,
+      borderFadingId: NaN,
       inArea: false,
       mouseover: false,
       mousedown: false,
@@ -55,7 +56,7 @@ export default {
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
     }),
     showVolume() {
-      return this.volumeTriggerStopped || this.mousedown;
+      return this.inArea || this.mousedown;
     },
     volume: {
       get() {
@@ -65,32 +66,33 @@ export default {
         this.$store.dispatch(videoActions.VOLUME_UPDATE, val * 100);
       },
     },
+    borderClass() {
+      return this.volumeTriggerStopped || this.mouseover || this.mousedown ? 'border-in' : 'border-out';
+    },
   },
   methods: {
     enterArea() {
-      this.volumeTriggerStopped = this.inArea = true;
-      if (this.iconFadingId) clearTimeout(this.iconFadingId);
+      this.inArea = true;
+      if (this.volumeFadingId) clearTimeout(this.volumeFadingId);
     },
     leaveArea() {
-      if (this.iconFadingId) clearTimeout(this.iconFadingId);
-      this.iconFadingId = setTimeout(() => {
-        this.volumeTriggerStopped = this.inArea = false;
+      if (this.volumeFadingId) clearTimeout(this.volumeFadingId);
+      this.volumeFadingId = setTimeout(() => {
+        this.inArea = false;
       }, 200);
     },
     actionArea() {
       this.mouseover = true;
-      this.showIcon = true;
-      this.$refs.indicatorContainer.classList.remove('border-out');
-      this.$refs.indicatorContainer.classList.add('border-in');
     },
     leaveActionArea() {
-      if (!this.mousedown) this.mouseover = false;
-      this.showIcon = false;
-      this.$refs.indicatorContainer.classList.remove('border-in');
-      this.$refs.indicatorContainer.classList.add('border-out');
+      if (!this.mousedown) {
+        if (this.borderFadingId) clearTimeout(this.borderFadingId);
+        this.borderFadingId = setTimeout(() => {
+          this.mouseover = false;
+        }, 300);
+      }
     },
     mouseDownOnIndicator(e) {
-      console.log('mousedown', e.clientY);
       const backgroundHeight = 100 + ((window.innerHeight - 180) / 3);
       const containerTop = (window.innerHeight - backgroundHeight) / 2;
       this.volume = ((window.innerHeight - e.clientY) - containerTop) /
@@ -107,7 +109,6 @@ export default {
       };
     },
     mouseupOnMuteIcon() {
-      console.log('mouseup');
       this.$store.dispatch(videoActions.TOGGLE_MUTED);
     },
     handleFullScreen() {
