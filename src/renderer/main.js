@@ -1124,11 +1124,18 @@ new Vue({
           }
         }
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
-          if (process.platform !== 'darwin') {
-            this.$store.dispatch(
-              e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-              Math.abs(e.deltaY) * 0.2,
-            );
+          if (Math.abs(e.deltaY) !== 0) {
+            if (process.platform !== 'darwin') {
+              this.$store.dispatch(
+                e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+                Math.abs(e.deltaY) * 0.2,
+              );
+            } else {
+              this.$store.dispatch(
+                e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+                Math.abs(e.deltaY) * 0.2,
+              );
+            }
           }
         }
       }
