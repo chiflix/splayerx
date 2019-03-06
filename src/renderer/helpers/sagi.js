@@ -30,7 +30,7 @@ class Sagi {
       Vue.http.get('https://ip.xindong.com/myip').then((response) => {
         metadata.set('clientip', response.bodyText);
         cb(null, metadata);
-      }, (response) => {
+      }, () => {
         cb(null, metadata);
       });
     };
