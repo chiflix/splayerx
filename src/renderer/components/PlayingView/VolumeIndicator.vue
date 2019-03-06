@@ -271,7 +271,7 @@ export default {
   align-items: flex-end;
   flex-direction: column;
   right: 0;
-  z-index: 99;
+  z-index: 5;
   width: 100px;
   height: calc(var(--background-height) + 30px);
   top: var(--container-top);
