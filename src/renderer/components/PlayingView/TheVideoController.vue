@@ -195,17 +195,21 @@ export default {
       this.updateMinimumSize();
     },
     isFullScreen(val) {
-      if (!val) {
-        this.touchBar.escapeItem.icon = this.createIcon('touchBar/fullscreen.png');
-      } else {
-        this.touchBar.escapeItem.icon = this.createIcon('touchBar/resize.png');
+      if (this.touchBar) {
+        if (!val) {
+          this.touchBar.escapeItem.icon = this.createIcon('touchBar/fullscreen.png');
+        } else {
+          this.touchBar.escapeItem.icon = this.createIcon('touchBar/resize.png');
+        }
       }
     },
     paused(val) {
-      if (val) {
-        this.playButton.icon = this.createIcon('touchBar/play.png');
-      } else {
-        this.playButton.icon = this.createIcon('touchBar/pause.png');
+      if (this.playButton) {
+        if (val) {
+          this.playButton.icon = this.createIcon('touchBar/play.png');
+        } else {
+          this.playButton.icon = this.createIcon('touchBar/pause.png');
+        }
       }
     },
   },
@@ -247,7 +251,7 @@ export default {
       const { TouchBar } = this.$electron.remote;
       const {
         TouchBarLabel, TouchBarButton,
-        TouchBarSpacer,
+        TouchBarSpacer, TouchBarScrubber,
       } = TouchBar;
 
       this.timeLabel = new TouchBarLabel();
