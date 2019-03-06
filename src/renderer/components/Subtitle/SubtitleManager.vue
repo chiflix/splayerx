@@ -514,7 +514,7 @@ export default {
           case 'embedded':
           case 'local':
             result.format = format;
-            result.payload = Buffer.from(data);
+            if (data) result.payload = Buffer.from(data);
             break;
         }
       }
