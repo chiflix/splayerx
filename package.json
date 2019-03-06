@@ -44,12 +44,12 @@
     "directories": {
       "output": "build"
     },
-    "electronVersion": "4.0.2",
+    "electronVersion": "4.0.6",
     "electronDist": "node_modules/@chiflix/electron/dist",
     "electronDownload": {
       "mirror": "https://github.com/chiflix/electron/releases/download/v",
       "isVerifyChecksum": false,
-      "version": "4.0.2"
+      "version": "4.0.6"
     },
     "files": [
       "dist/electron/**/*"
@@ -469,9 +469,11 @@
     "lodash": "^4.17.10",
     "lolex": "^3.0.0",
     "lottie-web": "^5.4.2",
+    "mkdirp": "^0.5.1",
     "nzh": "^1.0.4",
     "os-locale": "^3.0.1",
     "p-queue": "^3.1.0",
+    "rimraf": "^2.6.3",
     "romanize": "^1.1.1",
     "sagi-api": "^0.0.7",
     "source-map-support": "^0.5.9",
@@ -513,7 +515,7 @@
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
-    "@chiflix/electron": "^4.0.2",
+    "@chiflix/electron": "^4.0.6",
     "@vue/test-utils": "^1.0.0-beta.26",
     "babel-eslint": "^9.0.0",
     "babel-loader": "^8.0.0",
