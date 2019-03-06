@@ -9,51 +9,57 @@
     <div class="select-content" :style="{opacity: privacyAgreement ? 1 : 0.3}">
       <div class="title">{{ $t('preferences.privacy.languagePriority')}}</div>
       <div class="description">{{ $t('preferences.privacy.languageDescription')}}</div>
-      <div class="first-selection">
-        <div class="selection-title">{{ $t('preferences.privacy.primary')}}</div>
-        <div class="drop-down">
-          <div :class="showFirstSelection ? 'drop-down-content' : 'drop-down-brief'"
-            :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-            @mouseup.stop="openFirstDropdown">
-            <div class="selected">{{ codeToLanguageName(primaryLanguage) }}</div>
-            <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
-            <div class="content" v-if="showFirstSelection">
-              <div class="selection"
-                v-for="(language, index) in primaryLanguages"
-                :key="index"
-                @mouseup.stop="handleFirstSelection(language)">
-                {{ codeToLanguageName(language) }}
+      <table>
+        <tr>
+          <td class="selection-title">{{ $t('preferences.privacy.primary')}}</td>
+          <td class="first-selection">
+            <div class="drop-down">
+            <div :class="showFirstSelection ? 'drop-down-content' : 'drop-down-brief'"
+              :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
+              @mouseup.stop="openFirstDropdown">
+              <div class="selected">{{ codeToLanguageName(primaryLanguage) }}</div>
+              <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
+              <div class="content" v-if="showFirstSelection">
+                <div class="selection"
+                  v-for="(language, index) in primaryLanguages"
+                  :key="index"
+                  @mouseup.stop="handleFirstSelection(language)">
+                  {{ codeToLanguageName(language) }}
+                </div>
+              </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-      <div class="second-selection">
-        <div class="selection-title">{{ $t('preferences.privacy.secondary')}}</div>
-        <div class="drop-down">
-          <div :class="showSecondSelection ? 'drop-down-content' : 'drop-down-brief'"
-            :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-            @mouseup.stop="openSecondDropdown">
-            <div class="selected">{{ codeToLanguageName(secondaryLanguage) }}</div>
-            <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>
-            <div class="content" v-if="showSecondSelection">
-              <div class="selection" ref="secondarySelection"
-                v-for="(language, index) in secondaryLanguages"
-                :key="index"
-                :style="{
-                  color: (language === primaryLanguage && language !== noLanguage) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
-                }"
-                @mouseover="mouseover(index)"
-                @mouseout="mouseout(index)"
-                @mouseup.stop="handleSecondSelection(language, index)">
-                {{ codeToLanguageName(language) }}
-                <span v-if="language === primaryLanguage && language !== noLanguage"
-                  style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.privacy.primary') }}</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="selection-title">{{ $t('preferences.privacy.secondary')}}</td>
+          <td class="second-selection">
+            <div class="drop-down">
+              <div :class="showSecondSelection ? 'drop-down-content' : 'drop-down-brief'"
+                :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
+                @mouseup.stop="openSecondDropdown">
+                <div class="selected">{{ codeToLanguageName(secondaryLanguage) }}</div>
+                <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>
+                <div class="content" v-if="showSecondSelection">
+                  <div class="selection" ref="secondarySelection"
+                    v-for="(language, index) in secondaryLanguages"
+                    :key="index"
+                    :style="{
+                      color: (language === primaryLanguage && language !== noLanguage) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
+                    }"
+                    @mouseover="mouseover(index)"
+                    @mouseout="mouseout(index)"
+                    @mouseup.stop="handleSecondSelection(language, index)">
+                    {{ codeToLanguageName(language) }}
+                    <span v-if="language === primaryLanguage && language !== noLanguage"
+                      style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.privacy.primary') }}</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
 </div>
@@ -214,7 +220,7 @@ $dropdown-height: 156px;
       padding-top: 20px;
       padding-left: 28px;
       padding-right: 22px;
-      padding-bottom: 24px;
+      padding-bottom: 19px;
       .title {
         font-family: $font-medium;
         font-size: 13px;
@@ -227,17 +233,19 @@ $dropdown-height: 156px;
         font-size: 11px;
         color: rgba(255,255,255,0.5);
         letter-spacing: 0;
-        margin-bottom: 14px;
+        margin-bottom: 9px;
       }
       .selection-title {
         text-overflow:ellipsis;
         white-space:nowrap;
-        margin-right: 20px;
+        padding-right: 20px;
+        padding-top: 13px;
+        padding-bottom: 13px;
         font-family: $font-medium;
         font-size: 12px;
         color: rgba(255,255,255,0.7);
         letter-spacing: 0;
-        line-height: 28px;
+        line-height: 13px;
       }
       .down-arrow {
         position: absolute;
@@ -254,7 +262,8 @@ $dropdown-height: 156px;
       .first-selection {
         display: flex;
         flex-direction: row;
-        margin-bottom: 14px;
+        padding-top: 7px;
+        padding-bottom: 7px;
         .drop-down {
           width: $dropdown-width;
           height: 22px;
@@ -317,6 +326,8 @@ $dropdown-height: 156px;
       .second-selection {
         display: flex;
         flex-direction: row;
+        padding-top: 7px;
+        padding-bottom: 7px;
         .drop-down {
           width: $dropdown-width;
           height: 22px;
