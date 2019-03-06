@@ -109,7 +109,7 @@ export default {
 </script>
 <style scoped lang="scss">
 $dropdown-width: 218px;
-$dropdown-height: 156px;
+$dropdown-height: 111px;
 .preference-setting {
   box-sizing: border-box;
   padding-top: 37px;
@@ -187,7 +187,7 @@ $dropdown-height: 156px;
         margin-top: -1px;
         padding-top: 5px;
         height: 24px;
-        background-color: rgba(255,255,255,0.07);
+        background-color: rgba(255,255,255,0.1);
       }
       .content {
         position: absolute;
