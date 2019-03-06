@@ -174,7 +174,7 @@ $dropdown-height: 156px;
       width: $dropdown-width;
       height: $dropdown-height;
       background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
-      border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.0) rgba(255,255,255,0.1) rgba(255,255,255,0.35);
+      border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.0) rgba(255,255,255,0.1) rgba(255,255,255,0.3);
       border-width: 1px 1px 1px 1px;
       border-style: solid;
       border-radius: 2px;

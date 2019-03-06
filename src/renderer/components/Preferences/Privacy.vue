@@ -369,8 +369,6 @@ $dropdown-height: 156px;
             }
             .content {
               position: absolute;
-              width: 100%;
-              height: 100%;
               top: 30px;
               left: 8px;
               right: 4px;
