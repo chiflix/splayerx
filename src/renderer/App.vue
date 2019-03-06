@@ -115,11 +115,14 @@
         this.mainDispatchProxy(actionType, actionPayload);
       });
       this.$electron.ipcRenderer.send('windowInit');
+      this.$electron.ipcRenderer.on('thumbnail-saved', (event, src) => {
+        this.$bus.$emit('set-thumbnail-src', src);
+      });
       drag(this.$el);
       this.$ga.event('app', 'mounted');
       setInterval(() => {
         this.$ga.event('app', 'heartbeat');
-      }, 300000);
+      }, 1500000); // keep alive every 25 min.
     },
   };
 </script>

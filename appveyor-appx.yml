@@ -1,0 +1,50 @@
+# Commented sections below can be used to run tests on the CI server
+# https://simulatedgreg.gitbooks.io/electron-vue/content/en/testing.html#on-the-subject-of-ci-testing
+version: 0.1.{build}
+
+# branches:
+
+image: Visual Studio 2017
+
+platform:
+  - x64
+
+configuration: Release
+
+init:
+  - git config --global core.autocrlf input
+  # Provide a short commit SHA1 too
+  - ps: ${env:APPVEYOR_REPO_COMMIT_SHORT} = (${env:APPVEYOR_REPO_COMMIT}).Substring(0, 8)
+
+install:
+  - ps: Install-Product node 11 x64
+  - git reset --hard HEAD
+  - npm i
+  - node --version
+
+before_build:
+  - ps: ${env:REV} = (git rev-list --count HEAD)
+
+build_script:
+  - npm run build:appx
+
+test: off
+
+after_build:
+  - ps: Move-Item -Path build\*.appx -Destination "splayerx-${env:APPVEYOR_REPO_COMMIT_SHORT}-${env:REV}.appx"
+
+artifacts:
+  - path: '*.appx'
+
+deploy:
+  provider: S3
+  access_key_id:
+    secure: tLI8AWsbZbrNwTLU5p/j7wgD2fwbZ8BmE+h9gzxEkLI=
+  secret_access_key:
+    secure: Kta60XT42Orc93ZSoxbNRlFP41JmfzaB3UjjijKPtHN/199BXPcdshLIy4VduOIP
+  bucket: tomasen
+  region: ap-northeast-1
+  unzip: false
+  set_public: true
+  on:
+    branch: develop

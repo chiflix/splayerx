@@ -1,6 +1,6 @@
 <template>
   <div class="itemContainer advance-column-items">
-    <div class="textContainer" :style="{
+    <div class="textContainer" :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'" :style="{
       cursor: 'default',
     }">
       <div class="textItem">{{ item }}</div>
@@ -21,7 +21,7 @@
             @mouseout="handleOut(index)"
             @click="handleClick(index)"
             :style="{ cursor: track.enabled ? 'default' : 'pointer' }">
-            <div class="text"
+            <div class="text" :class="$i18n.locale === 'ja' ? 'advanceJaItem' : 'advanceNormalItem'"
               :style="{
                 color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
@@ -122,7 +122,6 @@ export default {
     .textContainer {
       width: 136px;
       height: 37px;
-      font-size: 13px;
       margin: auto auto auto 17px;
     }
     .listContainer {
@@ -134,7 +133,6 @@ export default {
           height: 27px;
           margin: 0 auto 5px 17px;
           .text {
-            font-size: 11px;
             margin: auto auto auto 10px;
           }
         }
@@ -153,7 +151,6 @@ export default {
     .textContainer {
       width: 163.2px;
       height: 44.4px;
-      font-size: 15.6px;
       margin: auto auto auto 20.4px;
     }
     .listContainer {
@@ -165,7 +162,6 @@ export default {
           height: 32.4px;
           margin: 0 auto 6px 20.4px;
           .text {
-            font-size: 13.2px;
             margin: auto auto auto 12px;
           }
         }
@@ -184,7 +180,6 @@ export default {
     .textContainer {
       width: 228.48px;
       height: 62.16px;
-      font-size: 21.84px;
       margin: auto auto auto 28.56px;
     }
     .listContainer {
@@ -196,7 +191,6 @@ export default {
           height: 45.36px;
           margin: 0 auto 8.4px 28.56px;
           .text {
-            font-size: 18.48px;
             margin: auto auto auto 16.8px;
           }
         }

@@ -22,10 +22,16 @@
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets"/>
     <play-button class="play-button no-drag"
+      @update:playbutton-state="updatePlayButtonState"
+      :mousedownOnVolume="mousedownOnVolume"
       :mousemovePosition="mousemovePosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
-    <volume-indicator :showAllWidgets="showAllWidgets" />
+    <volume-indicator class="no-drag"
+      @update:volume-state="updateVolumeState"
+      :attachedShown="attachedShown"
+      :mousedownOnPlayButton="mousedownOnPlayButton"
+      :showAllWidgets="showAllWidgets"/>
     <div class="control-buttons" v-fade-in="showAllWidgets">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
@@ -104,6 +110,9 @@ export default {
       timeLabel: null, // Time Label which indicates the current time
       scrubber: null,
       touchBar: null,
+      lastMousedownVolume: false,
+      mousedownOnPlayButton: false,
+      mousedownOnVolume: false,
     };
   },
   computed: {
@@ -126,7 +135,7 @@ export default {
         (this.isMousedown && this.currentMousedownWidget === 'play-button'));
     },
     onOtherWidget() {
-      return (this.currentWidget !== this.$options.name) && (this.currentWidget !== 'play-button');
+      return (this.currentWidget !== this.$options.name) && (this.currentWidget !== 'play-button') && (this.currentWidget !== 'volume-indicator');
     },
     cursorStyle() {
       return this.showAllWidgets || !this.isFocused ||
@@ -206,9 +215,6 @@ export default {
     this.UIElements.forEach((value) => {
       this.displayState[value.name] = true;
       if (value.name === 'recent-playlist') this.displayState[value.name] = false;
-      if (value.name === 'playlist-control' && this.onlyOneVideo) {
-        this.displayState['playlist-control'] = false;
-      }
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
@@ -285,6 +291,12 @@ export default {
     updatePlaylistShowAttached(event) {
       this.widgetsStatus['playlist-control'].showAttached = event;
     },
+    updatePlayButtonState(mousedownState) {
+      this.mousedownOnPlayButton = mousedownState;
+    },
+    updateVolumeState(mousedownState) {
+      this.mousedownOnVolume = mousedownState;
+    },
     onTickUpdate() {
       if (!this.start) {
         this.start = Date.now();
@@ -343,7 +355,6 @@ export default {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
-      tempObject['playlist-control'] = !this.onlyOneVideo;
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
@@ -426,14 +437,15 @@ export default {
     handleMousedownLeft(e) {
       this.isMousedown = true;
       this.lastMousedownPlaybutton = this.getComponentName(e.target) === 'play-button';
-      if (this.lastMousedownPlaybutton) {
+      this.lastMousedownVolume = this.getComponentName(e.target) === 'volume-indicator';
+      if (this.lastMousedownPlaybutton || this.lastMousedownVolume) {
         this.mouseStopped = false;
         if (this.mouseStoppedId) {
           this.clock.clearTimeout(this.mouseStoppedId);
         }
       }
     },
-    handleMouseupLeft() {
+    handleMouseupLeft() { // eslint-disable-line complexity
       this.isMousemove = false;
       this.isValidClick = true;
       this.clicks += 1;
@@ -446,11 +458,12 @@ export default {
         this.clicks = 0;
         return;
       }
-      if (this.isMousedown && this.lastMousedownPlaybutton) {
+      if (this.isMousedown && (this.lastMousedownPlaybutton || this.lastMousedownVolume)) {
         this.mouseStoppedId = this.clock.setTimeout(() => {
           this.mouseStopped = true;
         }, this.mousestopDelay);
         this.lastMousedownPlaybutton = false;
+        this.lastMousedownVolume = false;
       }
       this.isMousedown = false;
       if (this.clicks === 1) {
