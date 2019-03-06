@@ -15,10 +15,18 @@ export const codes = {
     'en',
     'eng',
   ],
+  ja: [
+    'ja',
+  ],
+  ar: [
+    'ar',
+  ],
 };
 
 export const names = {
   'zh-CN': '简体中文',
   'zh-TW': '繁體中文',
   en: 'English',
+  ja: '日本語',
+  ar: '',
 };

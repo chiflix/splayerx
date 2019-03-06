@@ -38,7 +38,7 @@
           :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
           @mouseup.stop="openSecondDropdown">
           {{ codeToLanguageName(secondaryLanguage) }}
-          <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>                
+          <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>
         </div>
         <div class="drop-down-content no-drag"
           :class="{ 'drop-down-content-en': $i18n.locale === 'en' }"
@@ -87,6 +87,7 @@ export default {
         'zh-CN',
         'zh-TW',
         'en',
+        'ja',
       ],
       noLanguage: this.$t('preferences.privacy.none'),
     };
@@ -395,7 +396,7 @@ export default {
 }
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1); 
+  background: rgba(255,255,255,0.1);
   border-radius: 1.5px;
 }
 ::-webkit-scrollbar-track {
