@@ -835,6 +835,7 @@ new Vue({
         } else {
           this.menu.getMenuItemById('increaseSubDelay').enabled = false;
           this.menu.getMenuItemById('decreaseSubDelay').enabled = false;
+          this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = false;
           this.menu.getMenuItemById('sub-1').checked = true;
         }
         this.audioTrackList.forEach((item, index) => {
