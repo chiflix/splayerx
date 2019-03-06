@@ -29,6 +29,7 @@
       :paused="paused" :attachedShown="attachedShown"/>
     <volume-indicator class="no-drag"
       @update:volume-state="updateVolumeState"
+      :attachedShown="attachedShown"
       :mousedownOnPlayButton="mousedownOnPlayButton"
       :showAllWidgets="showAllWidgets"/>
     <div class="control-buttons" v-fade-in="showAllWidgets">
@@ -47,6 +48,7 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
+import path from 'path';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
 import VolumeIndicator from './VolumeIndicator.vue';
@@ -104,6 +106,10 @@ export default {
       videoChangedTimer: 0,
       isValidClick: true,
       lastMousedownPlaybutton: false,
+      playButton: null, // Play Button on Touch Bar
+      timeLabel: null, // Time Label which indicates the current time
+      scrubber: null,
+      touchBar: null,
       lastMousedownVolume: false,
       mousedownOnPlayButton: false,
       mousedownOnVolume: false,
@@ -117,7 +123,10 @@ export default {
       mousemovePosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized']),
+    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized']),
+    onlyOneVideo() {
+      return this.playingList.length === 1;
+    },
     showAllWidgets() {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
@@ -185,8 +194,27 @@ export default {
     ratio() {
       this.updateMinimumSize();
     },
+    isFullScreen(val) {
+      if (this.touchBar) {
+        if (!val) {
+          this.touchBar.escapeItem.icon = this.createIcon('touchBar/fullscreen.png');
+        } else {
+          this.touchBar.escapeItem.icon = this.createIcon('touchBar/resize.png');
+        }
+      }
+    },
+    paused(val) {
+      if (this.playButton) {
+        if (val) {
+          this.playButton.icon = this.createIcon('touchBar/play.png');
+        } else {
+          this.playButton.icon = this.createIcon('touchBar/pause.png');
+        }
+      }
+    },
   },
   mounted() {
+    this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
       this.displayState[value.name] = true;
@@ -213,6 +241,44 @@ export default {
       updateKeyup: inputActions.KEYUP_UPDATE,
       updateWheel: inputActions.WHEEL_UPDATE,
     }),
+    createIcon(iconPath) {
+      const { nativeImage } = this.$electron.remote;
+      return nativeImage.createFromPath(path.join(__static, iconPath)).resize({
+        width: 20,
+      });
+    },
+    createTouchBar() {
+      const { TouchBar } = this.$electron.remote;
+      const {
+        TouchBarLabel, TouchBarButton,
+        TouchBarSpacer, TouchBarScrubber,
+      } = TouchBar;
+
+      this.timeLabel = new TouchBarLabel();
+
+      this.playButton = new TouchBarButton({
+        icon: this.createIcon('touchBar/pause.png'),
+        click: () => {
+          this.$bus.$emit('toggle-playback');
+        },
+      });
+      const fullScreenBar = new TouchBarButton({
+        icon: this.createIcon('touchBar/fullscreen.png'),
+        click: () => {
+          this.$bus.$emit('toggle-fullscreen');
+        },
+      });
+      this.touchBar = new TouchBar({
+        items: [
+          this.playButton,
+          new TouchBarSpacer({ size: 'large' }),
+          this.timeLabel,
+          new TouchBarSpacer({ size: 'large' }),
+        ],
+        escapeItem: fullScreenBar,
+      });
+      this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
+    },
     updateMinimumSize() {
       const minimumSize = this.tempRecentPlaylistDisplayState
         ? [512, Math.round(512 / this.ratio)]
@@ -273,6 +339,7 @@ export default {
             this.$refs.recentPlaylist.updatelastPlayedTime(videodata.time);
           } else {
             this.$refs.theTimeCodes.updateTimeContent(videodata.time);
+            this.timeLabel.label = this.timecodeFromSeconds(Math.floor(videodata.time));
             if (this.needResetHoverProgressBar) {
               this.needResetHoverProgressBar = false;
               // reset hover-progressbar state

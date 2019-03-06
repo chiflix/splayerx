@@ -61,7 +61,9 @@
       "publisher": "CN=840E2570-B48E-4F56-A2DA-0D9720F91080",
       "publisherDisplayName": "SHENG SHEN",
       "languages": [
-        "en-US", "zh-CN", "zh-TW"
+        "en-US",
+        "zh-CN",
+        "zh-TW"
       ]
     },
     "dmg": {

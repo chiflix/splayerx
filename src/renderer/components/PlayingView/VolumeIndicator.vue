@@ -53,15 +53,16 @@ export default {
       canToggleMute: false,
     };
   },
-  props: ['showAllWidgets', 'mousedownOnPlayButton'],
+  props: ['showAllWidgets', 'mousedownOnPlayButton', 'attachedShown'],
   computed: {
     ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen']),
     ...mapState({
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
     }),
     showVolume() {
-      return (this.inArea && this.showAllWidgets && !this.mousedownOnPlayButton) ||
-        this.mousedown || this.volumeTriggerStopped || (this.muted && this.showAllWidgets);
+      return (this.inArea && this.showAllWidgets
+        && !this.mousedownOnPlayButton && !this.attachedShown)
+        || this.mousedown || this.volumeTriggerStopped || (this.muted && this.showAllWidgets);
     },
     volume: {
       get() {
@@ -271,7 +272,7 @@ export default {
   align-items: flex-end;
   flex-direction: column;
   right: 0;
-  z-index: 99;
+  z-index: 5;
   width: 100px;
   height: calc(var(--background-height) + 30px);
   top: var(--container-top);
