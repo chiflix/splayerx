@@ -97,7 +97,6 @@ export default {
         'fr',
         'de',
         'ru',
-        'id',
         'cs',
         'it',
         'hi',
@@ -409,7 +408,7 @@ $dropdown-height: 156px;
 }
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1); 
+  background: rgba(255,255,255,0.1);
   border-radius: 1.5px;
 }
 ::-webkit-scrollbar-track {
