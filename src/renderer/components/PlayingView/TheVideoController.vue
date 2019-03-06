@@ -244,7 +244,7 @@ export default {
       });
     },
     createTouchBar() {
-      const { TouchBar, nativeImage } = this.$electron.remote;
+      const { TouchBar } = this.$electron.remote;
       const {
         TouchBarLabel, TouchBarButton,
         TouchBarSpacer, TouchBarScrubber,
