@@ -157,6 +157,9 @@ new Vue({
     currentRouteName() {
       return this.$route.name;
     },
+    isSubtitleAvaliable() {
+      return this.currentSubtitleId !== '';
+    },
   },
   created() {
     this.$store.commit('getLocalPreference');
@@ -200,6 +203,12 @@ new Vue({
     });
   },
   watch: {
+    isSubtitleAvaliable(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('increaseSubDelay').enabled = val;
+        this.menu.getMenuItemById('decreaseSubDelay').enabled = val;
+      }
+    },
     displayLanguage(val) {
       this.$i18n.locale = val;
       this.refreshMenu();
@@ -610,6 +619,7 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.increaseSubtitleDelayS'),
+              id: 'increaseSubDelay',
               accelerator: 'CmdOrCtrl+=',
               click: () => {
                 this.updateSubDelay(0.1);
@@ -617,6 +627,7 @@ new Vue({
             },
             {
               label: this.$t('msg.subtitle.decreaseSubtitleDelayS'),
+              id: 'decreaseSubDelay',
               accelerator: 'CmdOrCtrl+-',
               click: () => {
                 this.updateSubDelay(-0.1);
