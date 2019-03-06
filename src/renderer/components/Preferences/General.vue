@@ -7,7 +7,8 @@
       @mouseup.stop="showSelection = !showSelection">
       <div class="selected">{{ mapCode(displayLanguage) }}</div>
       <Icon type="rightArrow" :class="showSelection ? 'up-arrow' : 'down-arrow'"/>
-      <div class="content" v-if="showSelection">
+      <div class="content" v-if="showSelection"
+        @mouseup.stop="">
         <div class="selection"
           v-for="(language, index) in displayLanguages"
           :key="index"
@@ -191,6 +192,7 @@ $dropdown-height: 111px;
       }
       .content {
         position: absolute;
+        cursor: pointer;
         top: 30px;
         left: 8px;
         right: 4px;

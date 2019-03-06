@@ -19,7 +19,8 @@
               @mouseup.stop="openFirstDropdown">
               <div class="selected">{{ codeToLanguageName(primaryLanguage) }}</div>
               <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
-              <div class="content" v-if="showFirstSelection">
+              <div class="content" v-if="showFirstSelection"
+                @mouseup.stop="">
                 <div class="selection"
                   v-for="(language, index) in primaryLanguages"
                   :key="index"
@@ -40,7 +41,8 @@
                 @mouseup.stop="openSecondDropdown">
                 <div class="selected">{{ codeToLanguageName(secondaryLanguage) }}</div>
                 <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>
-                <div class="content" v-if="showSecondSelection">
+                <div class="content" v-if="showSecondSelection"
+                  @mouseup.stop="">
                   <div class="selection" ref="secondarySelection"
                     v-for="(language, index) in secondaryLanguages"
                     :key="index"
@@ -318,6 +320,7 @@ $dropdown-height: 156px;
               background-color: rgba(255,255,255,0.07);
             }
             .content {
+              cursor: pointer;
               position: absolute;
               top: 30px;
               left: 8px;
@@ -380,6 +383,7 @@ $dropdown-height: 156px;
               background-color: rgba(255,255,255,0.07);
             }
             .content {
+              cursor: pointer;
               position: absolute;
               top: 30px;
               left: 8px;
