@@ -157,6 +157,9 @@ new Vue({
     currentRouteName() {
       return this.$route.name;
     },
+    isSubtitleAvaliable() {
+      return this.currentSubtitleId !== '';
+    },
   },
   created() {
     this.$store.commit('getLocalPreference');
@@ -200,6 +203,12 @@ new Vue({
     });
   },
   watch: {
+    isSubtitleAvaliable(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('increaseSubDelay').enabled = val;
+        this.menu.getMenuItemById('decreaseSubDelay').enabled = val;
+      }
+    },
     displayLanguage(val) {
       this.$i18n.locale = val;
       this.refreshMenu();
@@ -610,6 +619,7 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.increaseSubtitleDelayS'),
+              id: 'increaseSubDelay',
               accelerator: 'CmdOrCtrl+=',
               click: () => {
                 this.updateSubDelay(0.1);
@@ -617,6 +627,7 @@ new Vue({
             },
             {
               label: this.$t('msg.subtitle.decreaseSubtitleDelayS'),
+              id: 'decreaseSubDelay',
               accelerator: 'CmdOrCtrl+-',
               click: () => {
                 this.updateSubDelay(-0.1);
@@ -806,13 +817,15 @@ new Vue({
         if (this.chosenSize !== '') {
           this.menu.getMenuItemById(`size${this.chosenSize}`).checked = true;
         }
-        if (this.currentSubtitleId !== '') {
+        if (this.isSubtitleAvailable) {
           this.subtitleList.forEach((item, index) => {
             if (item.id === this.currentSubtitleId) {
               this.menu.getMenuItemById(`sub${index}`).checked = true;
             }
           });
         } else {
+          this.menu.getMenuItemById('increaseSubDelay').enabled = false;
+          this.menu.getMenuItemById('decreaseSubDelay').enabled = false;
           this.menu.getMenuItemById('sub-1').checked = true;
         }
         this.audioTrackList.forEach((item, index) => {

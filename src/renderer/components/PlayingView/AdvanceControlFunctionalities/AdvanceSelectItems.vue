@@ -9,14 +9,14 @@
         height: heightSize,
       }">
     <div class="textContainer" :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'" :style="{
-      cursor: isChosen || !isSubDelay ? 'default' : 'pointer',
+      cursor: isChosen || !isSubDelay || !isSubtitleAvaliable ? 'default' : 'pointer',
     }">
       <div class="textItem"
         :style="{
-          color: color,
+          color: isSubtitleAvaliable ? color : 'rgba(255, 255, 255, 0.2)',
           transition: 'color 300ms',
         }">{{ item }}</div>
-      <div class="rightItem" :style="{ color: color }">{{ isSubDelay ? screenSubtitleDelay : audioDelay }}</div>
+      <div class="rightItem" :style="{ color: isSubtitleAvaliable ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.2)' }">{{ isSubDelay ? screenSubtitleDelay : audioDelay }}</div>
     </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -74,6 +74,9 @@ export default {
       type: Number,
     },
     isSubDelay: {
+      type: Boolean,
+    },
+    isSubtitleAvaliable: {
       type: Boolean,
     },
   },
