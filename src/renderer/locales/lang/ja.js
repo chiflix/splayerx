@@ -110,7 +110,7 @@ export default {
       switchDisplayLanguages: 'SPlayerの言語表示を修正。',
     },
     privacy: {
-      privacySetting: 'トランスレーション',
+      privacySetting: '翻訳設定',
       none: 'なし',
       settings: '設定',
       privacyConfirm: 'プライバシーとSmart Translationに許可',

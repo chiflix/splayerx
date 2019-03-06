@@ -108,7 +108,7 @@ export default {
       return reactivePhases.thumbnailWidth[widthIndex];
     },
     thumbnailHeight() {
-      return Math.round(this.thumbnailWidth / this.ratio);
+      return Math.floor(this.thumbnailWidth / this.ratio);
     },
     thumbnailPosition() {
       return this.pageXToThumbnailPosition(
@@ -219,6 +219,7 @@ export default {
       }
       if (this.hoveredCurrentTime !== this.duration) {
         this.$bus.$emit('seek', this.hoveredCurrentTime);
+        this.$ga.event('app', 'seek');
       }
       if (this.hoveredCurrentTime === 0) {
         this.$bus.$emit('play');

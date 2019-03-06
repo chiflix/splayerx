@@ -41,7 +41,7 @@ export default {
   data() {
     return {
       showSelection: false,
-      languages: ['zhCN', 'zhTW', 'en'],
+      languages: ['zhCN', 'zhTW', 'en', 'ja'],
     };
   },
   watch: {
@@ -96,6 +96,7 @@ export default {
         en: 'English',
         zhCN: '简体中文',
         zhTW: '繁体中文',
+        ja: '日本語',
       };
       return languages[code];
     },
@@ -211,7 +212,7 @@ $dropdown-height: 156px;
 }
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1); 
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 1.5px;
 }
 ::-webkit-scrollbar-track {
