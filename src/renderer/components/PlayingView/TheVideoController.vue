@@ -187,22 +187,16 @@ export default {
     },
     isFullScreen(val) {
       if (!val) {
-        const { TouchBarButton } = this.$electron.remote.TouchBar;
-        this.touchBar.escapeItem = new TouchBarButton({
-          icon: path.join(__static, 'touchBar/subtitle-style5-hover.png'),
-          click: () => {
-            this.$bus.$emit('toggle-fullscreen');
-          },
-        });
+        this.touchBar.escapeItem.icon = this.createIcon('touchBar/fullscreen.png');
       } else {
-        this.touchBar.escapeItem = null;
+        this.touchBar.escapeItem.icon = this.createIcon('touchBar/resize.png');
       }
     },
     paused(val) {
       if (val) {
-        this.playButton.icon = path.join(__static, 'touchBar/subtitle-style5-hover.png');
+        this.playButton.icon = this.createIcon('touchBar/play.png');
       } else {
-        this.playButton.icon = path.join(__static, 'touchBar/subtitle-style3-hover.png');
+        this.playButton.icon = this.createIcon('touchBar/pause.png');
       }
     },
   },
@@ -237,6 +231,12 @@ export default {
       updateKeyup: inputActions.KEYUP_UPDATE,
       updateWheel: inputActions.WHEEL_UPDATE,
     }),
+    createIcon(iconPath) {
+      const { nativeImage } = this.$electron.remote;
+      return nativeImage.createFromPath(path.join(__static, iconPath)).resize({
+        width: 20,
+      });
+    },
     createTouchBar() {
       const { TouchBar, nativeImage } = this.$electron.remote;
       const {
@@ -247,41 +247,26 @@ export default {
       this.timeLabel = new TouchBarLabel();
 
       this.playButton = new TouchBarButton({
-        icon: path.join(__static, 'touchBar/subtitle-style3-hover.png'),
+        icon: this.createIcon('touchBar/pause.png'),
         click: () => {
           this.$bus.$emit('toggle-playback');
-          this.playButton.icon = path.join(__static, 'touchBar/subtitle-style5-hover.png');
         },
       });
-      const imgPath = nativeImage.createFromPath(path.join(__static, 'touchBar/subtitle-style3-hover.png'));
-      const scaledImg = imgPath.resize({
-        width: 4,
-        height: 40,
-      });
-      const item = [];
-      for (let i = 0; i < 60; i += 1) {
-        item.push({ icon: scaledImg });
-      }
-      this.scrubber = new TouchBarScrubber({
-        items: item,
-        highlight: (highlightedIndex) => {
-          const replaceItem = item.slice(0);
-          replaceItem.splice(highlightedIndex, 1, { icon: imgPath });
-          this.scrubber.items = replaceItem;
+      const fullScreenBar = new TouchBarButton({
+        icon: this.createIcon('touchBar/fullscreen.png'),
+        click: () => {
+          this.$bus.$emit('toggle-fullscreen');
         },
-        selectedStyle: 'background',
-        overlayStyle: 'outline',
-        showArrowButtons: false,
-        mode: 'fixed',
-        continuous: true,
       });
-      this.touchBar = new TouchBar([
-        this.playButton,
-        new TouchBarSpacer({ size: 'large' }),
-        this.timeLabel,
-        new TouchBarSpacer({ size: 'large' }),
-        this.scrubber,
-      ]);
+      this.touchBar = new TouchBar({
+        items: [
+          this.playButton,
+          new TouchBarSpacer({ size: 'large' }),
+          this.timeLabel,
+          new TouchBarSpacer({ size: 'large' }),
+        ],
+        escapeItem: fullScreenBar,
+      });
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
     updateMinimumSize() {
