@@ -61,6 +61,7 @@ export default {
       size4: '最大',
       // increaseSubtitleSize: '增大字幕尺寸',
       // decreaseSubtitleSize: '减小字母尺寸',
+      uploadSelectedSubtitle: '字幕をアップロード',
       increaseSubtitleDelayS: '字幕ディレイ +0.1s',
       decreaseSubtitleDelayS: '字幕ディレイ -0.1s',
       increaseSubtitleDelayL: '字幕ディレイ +0.5s',
@@ -163,6 +164,18 @@ export default {
   loading: {
     title: '',
     content: '翻訳の読み込み ...',
+  },
+  uploading: {
+    title: '',
+    content: 'アップロードしています...',
+  },
+  uploadingSuccess: {
+    title: 'アップロードに成功しました',
+    content: '字幕がアップロードされました。',
+  },
+  uploadingFailed: {
+    title: 'アップロードに失敗しました',
+    content: '後でお試しください。',
   },
   privacyBubble: {
     masVersion: {

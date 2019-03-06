@@ -18,6 +18,10 @@ import {
   NOT_SUPPORTED_SUBTITLE,
   REQUEST_TIMEOUT,
   SUBTITLE_OFFLINE,
+  ONLINE_LOADING,
+  SUBTITLE_UPLOAD,
+  UPLOAD_FAILED,
+  UPLOAD_SUCCESS,
 } from '../shared/notificationcodes';
 
 /**
@@ -323,13 +327,22 @@ function registerMainWindowEvent() {
           case SUBTITLE_OFFLINE:
           case NOT_SUPPORTED_SUBTITLE:
           case REQUEST_TIMEOUT:
+          case UPLOAD_FAILED:
+          case UPLOAD_SUCCESS:
             mainWindow.webContents.send('addMessages', log.errcode);
             break;
           default:
             break;
         }
       } else if (log.code) {
-        mainWindow.webContents.send('addMessages', log.code);
+        switch (log.code) {
+          case ONLINE_LOADING:
+          case SUBTITLE_UPLOAD:
+            mainWindow.webContents.send('addMessages', log.code);
+            break;
+          default:
+            break;
+        }
       }
     }
   });
