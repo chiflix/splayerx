@@ -29,6 +29,7 @@
       :paused="paused" :attachedShown="attachedShown"/>
     <volume-indicator class="no-drag"
       @update:volume-state="updateVolumeState"
+      :attachedShown="attachedShown"
       :mousedownOnPlayButton="mousedownOnPlayButton"
       :showAllWidgets="showAllWidgets"/>
     <div class="control-buttons" v-fade-in="showAllWidgets">

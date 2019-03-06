@@ -148,10 +148,11 @@ export default {
     }
   }
   .left {
-    flex-basis: 110px;
+    flex-basis: 112px;
     height: 100%;
     background-image: linear-gradient(-28deg, rgba(65,65,65,0.85) 0%, rgba(84,84,84,0.85) 47%, rgba(123,123,123,0.85) 100%);
     .preferenceTitle {
+      cursor: pointer;
       -webkit-app-region: no-drag;
       border-left: 1px solid rgba(0,0,0,0);
       padding-left: 15px;
@@ -171,7 +172,7 @@ export default {
     }
   }
   .right {
-    flex-basis: 400px;
+    flex-basis: 428px;
     background-image: linear-gradient(-28deg, rgba(65,65,65,0.97) 0%, rgba(84,84,84,0.97) 47%, rgba(123,123,123,0.97) 100%);
   }
 }
