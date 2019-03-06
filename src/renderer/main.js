@@ -817,13 +817,15 @@ new Vue({
         if (this.chosenSize !== '') {
           this.menu.getMenuItemById(`size${this.chosenSize}`).checked = true;
         }
-        if (this.currentSubtitleId !== '') {
+        if (this.isSubtitleAvailable) {
           this.subtitleList.forEach((item, index) => {
             if (item.id === this.currentSubtitleId) {
               this.menu.getMenuItemById(`sub${index}`).checked = true;
             }
           });
         } else {
+          this.menu.getMenuItemById('increaseSubDelay').enabled = false;
+          this.menu.getMenuItemById('decreaseSubDelay').enabled = false;
           this.menu.getMenuItemById('sub-1').checked = true;
         }
         this.audioTrackList.forEach((item, index) => {
