@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-02-22 11:37:18
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-03-01 13:25:19
+ * @Last Modified time: 2019-03-06 11:45:05
  */
 
 /** file dir list
@@ -24,7 +24,7 @@ import electron from 'electron';
 const app = electron.app || electron.remote.app;
 
 const ELECTRON_CACHE_DIRNAME = 'userData'; // 用户数据路径
-const DEFAULT_DIRNAME = 'temp'; // 设定的应用缓存目录
+const DEFAULT_DIRNAME = '__cache_files__'; // 设定的应用缓存目录
 const VIDEO_DIRNAME = 'videos'; // 视频缓存目录
 
 /**
@@ -67,11 +67,15 @@ function checkPermission(p) {
   return new Promise((resolve, reject) => {
     access(p, async (err) => {
       if (err) {
-        const result = await mkdir(p);
-        if (result instanceof Error) {
-          reject(result);
+        if (err.code === 'ENOENT') {
+          try {
+            await mkdir(p);
+            resolve(true);
+          } catch (err) {
+            reject(err);
+          }
         } else {
-          resolve(true);
+          reject(err);
         }
       } else {
         resolve(true);
@@ -124,18 +128,33 @@ export function getVideoInfoByMediaHash(key) {
   if (Object.prototype.toString.call(key).toLowerCase() !== '[object string]') throw new Error('key should be String');
   const p = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, key);
   return new Promise(async (resolve, reject) => {
-    const cp = await checkPermission(p);
-    if (cp instanceof Error) {
-      reject(cp);
-    } else {
+    try {
+      await checkPermission(p);
       const result = await readDirDeep(p);
-      if (result instanceof Error) {
-        reject(result);
-      } else {
-        resolve(result);
-      }
+      resolve(result);
+    } catch (err) {
+      reject(err);
     }
   });
+}
+
+/**
+ * @description 通用生成文件方法
+ * @author tanghaixiang@xindong.com
+ * @date 2019-03-06
+ * @param {String} key 视频的mediaHash
+ * @param {String} name 需要生成的文件名
+ * @returns err | path
+ */
+async function generatePath(key, name) {
+  if (Object.prototype.toString.call(key).toLowerCase() !== '[object string]') throw new Error('key should be String');
+  const p = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, key);
+  try {
+    await checkPermission(p);
+    return join(p, `${name}.jpg`);
+  } catch (err) {
+    return err;
+  }
 }
 
 /**
@@ -146,14 +165,8 @@ export function getVideoInfoByMediaHash(key) {
  * @param {String} key 视频的mediaHash
  * @returns {Promise} resolve '/.../thumbnail.jpg' or reject Error
  */
-export async function generateThumbnailPathByMediaHash(key) {
-  if (Object.prototype.toString.call(key).toLowerCase() !== '[object string]') throw new Error('key should be String');
-  const p = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, key);
-  const cp = await checkPermission(p);
-  if (cp instanceof Error) {
-    return cp;
-  }
-  return join(p, 'thumbnail.jpg');
+export function generateThumbnailPathByMediaHash(key) {
+  return generatePath(key, 'thumbnail');
 }
 
 /**
@@ -164,14 +177,8 @@ export async function generateThumbnailPathByMediaHash(key) {
  * @param {String} key 视频的mediaHash
  * @returns {Promise} resolve '/.../cover.jpg' or reject Error
  */
-export async function generateCoverPathByMediaHash(key) {
-  if (Object.prototype.toString.call(key).toLowerCase() !== '[object string]') throw new Error('key should be String');
-  const p = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, key);
-  const cp = await checkPermission(p);
-  if (cp instanceof Error) {
-    return cp;
-  }
-  return join(p, 'cover.jpg');
+export function generateCoverPathByMediaHash(key) {
+  return generatePath(key, 'cover');
 }
 
 /**
@@ -182,14 +189,8 @@ export async function generateCoverPathByMediaHash(key) {
  * @param {String} key 视频的mediaHash
  * @returns {Promise} resolve '/.../shortCut.jpg' or reject Error
  */
-export async function generateShortCutPathByMediaHash(key) {
-  if (Object.prototype.toString.call(key).toLowerCase() !== '[object string]') throw new Error('key should be String');
-  const p = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, key);
-  const cp = await checkPermission(p);
-  if (cp instanceof Error) {
-    return cp;
-  }
-  return join(p, 'shortCut.jpg');
+export function generateShortCutPathByMediaHash(key) {
+  return generatePath(key, 'shortCut');
 }
 
 /**
@@ -200,7 +201,7 @@ export async function generateShortCutPathByMediaHash(key) {
  * @param {String} key 视频的mediaHash
  * @returns {Promise} resolve true or reject Error
  */
-export async function deleteDirByMediaHash(key) {
+export function deleteDirByMediaHash(key) {
   const p = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, key);
   return new Promise((resolve, reject) => {
     rimraf(p, (err) => {
@@ -220,7 +221,7 @@ export async function deleteDirByMediaHash(key) {
  * @export
  * @returns {Promise} resolve true or reject Error
  */
-export async function clearAll() {
+export function clearAll() {
   return new Promise((resolve, reject) => {
     rimraf(getDefaultDataPath(), (err) => {
       if (err) {
