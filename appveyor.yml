@@ -27,9 +27,8 @@ install:
   - node --version
 
 build_script:
-  #- npm t
   - npm run build
-
+  
 test: off
 
 after_build:

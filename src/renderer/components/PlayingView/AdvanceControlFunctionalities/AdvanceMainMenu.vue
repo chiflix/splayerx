@@ -25,7 +25,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!speedChosen && hoverIndex === 1" :style="{ height: speedHeight }"></div>
         </transition>
-        <advance-row-items :isRateMenu="true" :lists="numList" :item="itemSpeedName" :size="computedSize" :isChosen="speedChosen" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
+        <advance-row-items :isRateMenu="true" :lists="numList" :item="$t('advance.rateTitle')" :size="computedSize" :isChosen="speedChosen" :color="hoverIndex === 1 && !speedChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleControl"
         @mouseenter="handleMouseenter(2)"
@@ -99,7 +99,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!subSizeChosen && hoverSubIndex === 1" :style="{ height: subSizeHeight }"></div>
         </transition>
-        <advance-row-items :isRateMenu="false" :lists="textList" :item="itemFontName" :size="computedSize" :isChosen="subSizeChosen" :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
+        <advance-row-items :isRateMenu="false" :lists="$t('advance.fontItems')" :item="$t('advance.fontSize')" :size="computedSize" :isChosen="subSizeChosen" :color="hoverSubIndex === 1 && !subSizeChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-row-items>
       </div>
       <div class="subtitleStyle" @click.left="handleColorClick"
         @mouseenter="handleSubMouseenter(2)"
@@ -111,7 +111,7 @@
         <transition name="arrow">
           <div class="hoverBack" v-show="!subColorChosen && hoverSubIndex === 2" :style="{ height: subColorHeight }"></div>
         </transition>
-        <advance-color-items :item="itemColorName" :size="computedSize" :isChosen="subColorChosen" :color="hoverSubIndex === 2 && !subColorChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-color-items>
+        <advance-color-items :item="$t('advance.fontStyle')" :size="computedSize" :isChosen="subColorChosen" :color="hoverSubIndex === 2 && !subColorChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-color-items>
       </div>
       <div class="subtitleDelay" @click.left="handleDelayClick"
         @mouseenter="handleSubMouseenter(3)"
@@ -121,9 +121,9 @@
           transition: 'height 100ms linear',
         }">
         <transition name="arrow">
-          <div class="hoverBack" v-show="!subDelayChosen && hoverSubIndex === 3" :style="{ height: subDelayHeight }"></div>
+          <div class="hoverBack" v-show="!subDelayChosen && hoverSubIndex === 3 && isSubtitleAvailable" :style="{ height: subDelayHeight }"></div>
         </transition>
-        <advance-selected-items :isSubDelay="true" :item="itemDelayName" :size="computedSize" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
+        <advance-selected-items :isSubtitleAvaliable="isSubtitleAvailable" :isSubDelay="true" :item="$t('advance.subDelay')" :size="computedSize" :isChosen="subDelayChosen" :color="hoverSubIndex === 3 && !subDelayChosen ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)'"></advance-selected-items>
       </div>
     </div>
   </transition>
@@ -156,7 +156,7 @@
         <transition name="arrow">
           <!--<div class="hoverBack" v-show="!showDelay && hoverAudioIndex === 1" :style="{ height: audioDelayHeight }"></div>-->
         </transition>
-        <advance-selected-items :isSubDelay="false" :item="audioDelayName" :size="computedSize" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"></advance-selected-items>
+        <advance-selected-items :isSubDelay="false" :item="$t('advance.audioDelay')" :size="computedSize" :isChosen="showDelay" :color="hoverAudioIndex === 1 && !showDelay ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.2)'"></advance-selected-items>
       </div>
       <div class="changeTrack" @click.left="handleTrackClick"
         @mouseenter="handleAudioMouseenter(2)"
@@ -172,11 +172,11 @@
         <transition name="audioTransIn">
           <div class="item2" v-show="!showTrack"
             :style="{ cursor: 'pointer' }">
-            <div :style="{
+            <div :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'" :style="{
               color: hoverAudioIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">{{ this.$t('advance.changeTrack') }}</div>
-            <div class="trackDetail"
+            <div :class="$i18n.locale === 'ja' ? 'advanceJaItem' : 'advanceNormalItem'"
               :style="{
                 color: 'rgba(255, 255, 255, 0.6)',
               }">{{ currentAudioTrack }}</div>
@@ -184,7 +184,7 @@
         </transition>
         </div>
         <transition name="audioTransOut">
-          <advance-column-items :item="itemTrack" :size="computedSize" v-show="showTrack"></advance-column-items>
+          <advance-column-items :item="$t('advance.changeTrack')" :size="computedSize" v-show="showTrack"></advance-column-items>
         </transition>
       </div>
     </div>
@@ -206,7 +206,6 @@ export default {
   data() {
     return {
       numList: [0.5, 1, 1.2, 1.5, 2],
-      itemSpeedName: this.$t('advance.rateTitle'),
       speedChosen: false,
       rightArrowSub: false,
       rightArrowMed: false,
@@ -214,16 +213,10 @@ export default {
       hoverIndex: -1,
       readyShow: 'mainMenu',
       backSubHover: false,
-      textList: this.$t('advance.fontItems'),
-      itemFontName: this.$t('advance.fontSize'),
       subSizeChosen: false,
       subColorChosen: false,
       subDelayChosen: false,
-      itemColorName: this.$t('advance.fontStyle'),
-      itemDelayName: this.$t('advance.subDelay'),
       hoverSubIndex: -1,
-      audioDelayName: this.$t('advance.audioDelay'),
-      itemTrack: this.$t('advance.changeTrack'),
       showDelay: false,
       showTrack: false,
       hoverAudioIndex: -1,
@@ -256,7 +249,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['winWidth', 'currentSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'currentSubtitleId']),
     computedSize() {
       return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
     },
@@ -303,6 +296,9 @@ export default {
         return `${this.initialSize(this.containerHeight)}px`;
       }
       return `${this.initialSize(119)}px`;
+    },
+    isSubtitleAvailable() {
+      return this.currentSubtitleId !== '';
     },
     trackNum() {
       return this.$store.getters.audioTrackList.length;
@@ -385,10 +381,12 @@ export default {
       this.subDelayChosen = false;
     },
     handleDelayClick() {
-      this.hoverSubIndex = -1;
-      this.subDelayChosen = true;
-      this.subSizeChosen = false;
-      this.subColorChosen = false;
+      if (this.isSubtitleAvailable) {
+        this.hoverSubIndex = -1;
+        this.subDelayChosen = true;
+        this.subSizeChosen = false;
+        this.subColorChosen = false;
+      }
     },
     handleAudioBackEnter() {
       this.backAudioHover = true;
@@ -448,9 +446,6 @@ export default {
     line-height: 13px;
     margin-left: 3px;
   }
-  .trackDetail {
-    font-size: 11px;
-  }
   .setUp-enter-active {
     animation: showP1 .2s;
   }
@@ -497,9 +492,6 @@ export default {
     line-height: 15.6px;
     margin-left: 3.6px;
   }
-  .trackDetail {
-    font-size: 13.2px;
-  }
   .setUp-enter-active {
     animation: showP2 .2s;
   }
@@ -544,9 +536,6 @@ export default {
     font-size: 18.48px;
     line-height: 21.84px;
     margin-left: 5.04px;
-  }
-  .trackDetail {
-    font-size: 18.48px;
   }
   .setUp-enter-active {
     animation: showP3 .2s;

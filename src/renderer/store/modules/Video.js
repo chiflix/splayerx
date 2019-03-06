@@ -207,6 +207,8 @@ const actions = {
     } else if (delta <= 0) {
       delta = 0;
       commit(videoMutations.MUTED_UPDATE, true);
+    } else {
+      commit(videoMutations.MUTED_UPDATE, false);
     }
     commit(videoMutations.VOLUME_UPDATE, delta);
   },

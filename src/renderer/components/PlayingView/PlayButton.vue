@@ -31,11 +31,12 @@ export default {
     attachedShown: false,
     showAllWidgets: false,
     mousemovePosition: { x: 0, y: 0 },
+    mousedownOnVolume: false,
   },
   data() {
     return {
       cursorAppear: false, // control whether the cursor show up or not
-      mouseOver: false,
+      mouseover: false,
       mousedown: false,
       showPlayIcon: false,
       ani_mode: 'icon-ani-fade-in',
@@ -44,6 +45,7 @@ export default {
       detectMovePosition: false,
       justCloseAttached: false,
       justFocused: false,
+      justMousedownOnVolume: false,
     };
   },
   components: {
@@ -51,29 +53,27 @@ export default {
   },
   methods: {
     handleMouseenter() {
-      this.mouseOver = true;
-      if (!this.attachedShown && this.isFocused) {
+      this.mouseover = true;
+      if (!this.attachedShown && this.isFocused && !this.mousedownOnVolume) {
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
+        this.justMousedownOnVolume = false;
       } else if (!this.isFocused) {
         this.detectMovePosition = true;
       }
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
     },
     handleMouseleave() {
-      this.cursorAppear = this.mouseOver = false;
+      this.cursorAppear = this.mouseover = false;
       if (this.iconFadingId) clearTimeout(this.iconFadingId);
       this.iconFadingId = setTimeout(() => {
         this.iconClass = 'fade-out';
       }, 200);
     },
-    handleMousedown() {
-      if (this.justFocused) {
-        this.justFocused = false;
-        this.cursorAppear = true;
-        this.iconClass = 'fade-in';
-      } else if (this.showAllWidgets && this.justCloseAttached) {
-        this.justCloseAttached = false;
+    handleMousedown() { // eslint-disable-line complexity
+      if (this.justFocused || (this.showAllWidgets &&
+        (this.justCloseAttached || this.justMousedownOnVolume))) {
+        this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
       } else if (this.showAllWidgets && !this.attachedShown && this.isFocused) {
@@ -81,6 +81,7 @@ export default {
         this.iconClass = 'fade-in';
         this.mousedown = true;
         this.ani_mode = 'icon-ani-fade-out';
+        this.$emit('update:playbutton-state', true);
       } else if (!this.showAllWidgets && !this.attachedShown && this.isFocused) {
         this.cursorAppear = true;
         this.iconClass = 'fade-in';
@@ -98,26 +99,31 @@ export default {
       if (!val && !this.mousedown) {
         this.cursorAppear = false;
         this.iconClass = 'fade-out';
-      } else if (val && this.mouseOver) {
+      } else if (val && this.mouseover) {
         this.detectMovePosition = true;
       }
     },
     attachedShown(val, oldVal) {
-      if (!val && this.mouseOver) {
+      if (!val && this.mouseover) {
         if (oldVal) this.justCloseAttached = true;
         this.detectMovePosition = true;
       }
     },
     isFocused(val, oldVal) {
-      if (val && !oldVal) {
+      if (val && !oldVal && this.mouseover) {
         this.justFocused = true;
+      }
+    },
+    mousedownOnVolume(val, oldVal) {
+      if (!val && oldVal) {
+        this.justMousedownOnVolume = true;
+        if (this.mouseover) this.detectMovePosition = true;
       }
     },
     mousemovePosition(newVal, oldVal) {
       if (this.detectMovePosition && this.isFocused) {
         if (Math.abs(newVal.x - oldVal.x) > 0 || Math.abs(newVal.y - oldVal.y) > 0) {
-          this.justCloseAttached = false;
-          this.justFocused = false;
+          this.justFocused = this.justCloseAttached = this.justMousedownOnVolume = false;
           this.cursorAppear = true;
           this.iconClass = 'fade-in';
           this.detectMovePosition = false;
@@ -133,6 +139,7 @@ export default {
       if (this.mousedown) {
         this.mousedown = false;
         this.ani_mode = 'icon-ani-fade-in';
+        this.$emit('update:playbutton-state', false);
       }
     });
   },

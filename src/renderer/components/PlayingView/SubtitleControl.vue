@@ -14,7 +14,7 @@
             <div class="element content">
 
               <div class="topContainer">
-                <div class="title">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
+                <div class="title" :class="$i18n.locale === 'ja' ? 'subtitleJa' : 'subtitleNormal'">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
                 <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
                   :style="{
                     cursor: 'pointer',
@@ -174,7 +174,7 @@ export default {
       if (this.timer && this.isInitial) {
         return this.$t('msg.subtitle.menuLoading');
       }
-      return this.calculatedNoSub ? this.$t('msg .subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
+      return this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
     },
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.77;
@@ -628,7 +628,6 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        font-size: 13px;
         margin: 15px auto auto 16px;
         letter-spacing: 0.2px;
         line-height: 15px;
@@ -688,7 +687,6 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        font-size: 15.6px;
         margin: 18px auto auto 19px;
         letter-spacing: 0.23px;
         line-height: 17px;
@@ -748,7 +746,6 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        font-size: 21.84px;
         margin: 24px auto auto 26px;
         letter-spacing: 0.32px;
         line-height: 23px;

@@ -9,6 +9,7 @@
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",
+    "build:appx": "node .electron-vue/build.js && electron-builder --p never -w appx",
     "build:mas": "scripts/masbuild.sh mas",
     "build:mas-dev": "scripts/masbuild.sh mas-dev",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
@@ -43,16 +44,26 @@
     "directories": {
       "output": "build"
     },
-    "electronVersion": "4.0.2",
+    "electronVersion": "4.0.6",
     "electronDist": "node_modules/@chiflix/electron/dist",
     "electronDownload": {
       "mirror": "https://github.com/chiflix/electron/releases/download/v",
       "isVerifyChecksum": false,
-      "version": "4.0.2"
+      "version": "4.0.6"
     },
     "files": [
       "dist/electron/**/*"
     ],
+    "appx": {
+      "identityName": "29951SHENGSHEN.SPlayer4",
+      "applicationId": "SPlayer",
+      "displayName": "SPlayer - Make it easier to understand",
+      "publisher": "CN=840E2570-B48E-4F56-A2DA-0D9720F91080",
+      "publisherDisplayName": "SHENG SHEN",
+      "languages": [
+        "en-US", "zh-CN", "zh-TW"
+      ]
+    },
     "dmg": {
       "background": "build/icons/dmg/bg.tiff",
       "icon": "build/icons/dmg/install.icns",
@@ -458,13 +469,16 @@
     "lodash": "^4.17.10",
     "lolex": "^3.0.0",
     "lottie-web": "^5.4.2",
+    "mkdirp": "^0.5.1",
     "nzh": "^1.0.4",
     "os-locale": "^3.0.1",
     "p-queue": "^3.1.0",
+    "rimraf": "^2.6.3",
     "romanize": "^1.1.1",
     "sagi-api": "^0.0.7",
     "source-map-support": "^0.5.9",
     "subtitle": "^2.0.1",
+    "traditional-or-simplified": "^1.0.3",
     "uuid": "^3.2.1",
     "vue": "^2.5.18",
     "vue-analytics": "^5.16.1",
@@ -501,7 +515,7 @@
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
-    "@chiflix/electron": "^4.0.2",
+    "@chiflix/electron": "^4.0.6",
     "@vue/test-utils": "^1.0.0-beta.26",
     "babel-eslint": "^9.0.0",
     "babel-loader": "^8.0.0",

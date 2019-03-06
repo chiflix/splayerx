@@ -2,11 +2,11 @@ import { extname, basename } from 'path';
 import { open, readSync, readFile, closeSync, statSync } from 'fs';
 import chardet from 'chardet';
 import iconv from 'iconv-lite';
-import franc from 'franc';
 import { ipcRenderer } from 'electron';
 import helpers from '@/helpers';
 import Sagi from '@/helpers/sagi';
 import { normalizeCode } from '@/helpers/language';
+import languageLoader from '@/helpers/subtitle/language';
 import SubtitleLoader from './index';
 import { SubtitleError, ErrorCodes } from './errors';
 
@@ -49,29 +49,6 @@ function getFragmentBuffer(path, detectEncoding) {
 }
 
 /**
- * Get callback for turn subtitle into plain text without second line.
- *
- * @param {string} subtitleFormat - Subtitle format name, e.g. 'ass', 'SubStation Alpha', 'WebVtt'.
- * @returns {fucntion} Callback for removing tags and other lines for each cue text.
- */
-function getSubtitleCallback(subtitleFormat) {
-  switch (subtitleFormat.toLowerCase()) {
-    case 'ssa':
-    case 'ass':
-    case 'advanced substation alpha':
-    case 'substation alpha':
-      return str => str.replace(/^(Dialogue:)(.*\d,)(((\d{0,2}:){2}\d{0,2}\d{0,2}([.]\d{0,3})?,)){2}(.*,)(\w*,)(\d+,){3}(\w*,)|(\\[nN])|([\\{\\]\\.*[\\}].*)/gm, '');
-    case 'srt':
-    case 'subrip':
-    case 'vtt':
-    case 'webvtt':
-      return str => str.replace(/^\d+.*/gm, '').replace(/\n.*\s{1,}/gm, '');
-    default:
-      return str => str.replace(/\d/gm, '');
-  }
-}
-
-/**
  * Return the autoGuess encoding of the local subtitle file
  * @param {string} path - path of the local subtitle file
  * @returns chardet format encoding
@@ -94,8 +71,7 @@ export async function localLanguageLoader(path, format) {
   const fileEncoding = await localEncodingLoader(path);
   try {
     const string = iconv.decode(await getFragmentBuffer(path), fileEncoding);
-    const stringCallback = getSubtitleCallback(format || localFormatLoader(path));
-    return normalizeCode(franc(stringCallback(string)));
+    return languageLoader(string, format)[0];
   } catch (e) {
     helpers.methods.addLog('error', {
       message: 'Unsupported Subtitle .',

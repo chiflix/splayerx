@@ -301,7 +301,6 @@ describe('helper - subtitle - storage', () => {
       it('should invoke dataDb.add', (done) => {
         storeSubtitle(testSubtitle)
           .then(() => {
-            console.log(testSubtitle);
             sandbox.assert.calledWithExactly(
               addStub,
               SUBTITLE_OBJECTSTORE_NAME,

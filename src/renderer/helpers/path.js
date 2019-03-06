@@ -7,7 +7,7 @@ import nzh from 'nzh';
  * @returns
  */
 export function filePathToUrl(filePath) {
-  if (!filePath) throw new Error('filePath should not be empty');
+  if (!filePath) return '';
   let fileUrl = filePath.replace(/\\/g, '/');
   if (!fileUrl.startsWith('/')) {
     fileUrl = `/${fileUrl}`;

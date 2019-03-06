@@ -6,6 +6,7 @@ import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayer
 import { throttle, debounce } from 'lodash';
 import path from 'path';
 import fs from 'fs';
+import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
@@ -40,7 +41,9 @@ let tray = null;
 let inited = false;
 const filesToOpen = [];
 const snapShotQueue = [];
+const thumbnailQueue = [];
 const mediaInfoQueue = [];
+const embeeddSubtitlesQueue = new TaskQueue();
 const mainURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080'
   : `file://${__dirname}/index.html`;
@@ -129,6 +132,34 @@ function registerMainWindowEvent() {
     if (!mainWindow || event.sender.isDestroyed()) return;
     mainWindow.setSize(...args);
     event.sender.send('windowSizeChange-asyncReply', mainWindow.getSize());
+  });
+  function thumbnail(args, cb) {
+    splayerx.generateThumbnails(
+      args.src, args.outPath, args.width, args.num.rows, args.num.cols,
+      (ret) => {
+        console[ret === '0' ? 'log' : 'error'](ret, args.src);
+        cb(ret, args.src);
+      },
+    );
+  }
+  function thumbnailQueueCallback(event) {
+    const cb = (ret, src) => {
+      thumbnailQueue.shift();
+      if (thumbnailQueue.length > 0) {
+        thumbnail(thumbnailQueue[thumbnailQueue.length - 1], cb);
+        thumbnailQueue.splice(0, thumbnailQueue.length);
+      }
+      if (ret === '0') {
+        event.sender.send('thumbnail-saved', src);
+      }
+    };
+    thumbnail(thumbnailQueue[0], cb);
+  }
+  ipcMain.on('generateThumbnails', (event, args) => {
+    thumbnailQueue.push(args);
+    if (thumbnailQueue.length === 1) {
+      thumbnailQueueCallback(event);
+    }
   });
 
   function timecodeFromSeconds(s) {
@@ -238,9 +269,9 @@ function registerMainWindowEvent() {
     const subtitlePath = path.join(subtitleFolderPath, `embedded-${index}.${format}`);
     if (fs.existsSync(subtitlePath)) event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath });
     else {
-      extractSubtitle(videoPath, subtitlePath, index)
+      embeeddSubtitlesQueue.add(() => extractSubtitle(videoPath, subtitlePath, index)
         .then(index => event.sender.send('extract-subtitle-response', { error: null, index, path: subtitlePath }))
-        .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index }));
+        .catch(index => event.sender.send('extract-subtitle-response', { error: 'error', index })));
     }
   });
 

@@ -76,6 +76,9 @@ export default {
         duration: event.target.duration,
         currentTime: 0,
       });
+      const generationInterval = Math.round(event.target.duration / (window.screen.width / 4)) || 1;
+      const maxThumbnailCount = Math.floor(event.target.duration / generationInterval);
+      this.$bus.$emit('generate-thumbnails', maxThumbnailCount);
       this.updateMetaInfo({
         intrinsicWidth: event.target.videoWidth,
         intrinsicHeight: event.target.videoHeight,
@@ -235,7 +238,6 @@ export default {
       if (ext === 'mkv') {
         this.$bus.$emit('seek-subtitle', e);
       }
-      this.$ga.event('app', 'seek');
     });
     this.$bus.$on('drag-over', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0.18)';

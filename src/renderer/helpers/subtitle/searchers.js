@@ -61,18 +61,19 @@ export function retrieveEmbeddedList(videoSrc, supportedCodecs) {
         const subtitleStreams = JSON.parse(info).streams
           .filter(stream => stream.codec_type === 'subtitle' && supportedCodecs.includes(stream.codec_name)); // eslint-disable-line camelcase;
         if (!subtitleStreams.length) resolve([]);
-        resolve(...subtitleStreams.map(subtitle => ({
-          src: subtitle.index,
+        const normalizeStream = subtitleStream => ({
+          src: subtitleStream.index,
           type: 'embedded',
           options: {
             videoSrc,
-            streamIndex: subtitle.index,
-            codec: subtitle.codec_name,
-            language: subtitle.tags.language,
-            name: subtitle.tags.title,
-            isDefault: !!subtitle.disposition.default,
+            streamIndex: subtitleStream.index,
+            codec: subtitleStream.codec_name,
+            language: subtitleStream.tags.language,
+            name: subtitleStream.tags.title,
+            isDefault: !!subtitleStream.disposition.default,
           }, // eslint-disable-line camelcase
-        })));
+        });
+        resolve(subtitleStreams.map(normalizeStream));
       } catch (error) {
         reject(error);
       }
