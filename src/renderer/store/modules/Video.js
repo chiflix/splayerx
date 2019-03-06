@@ -214,13 +214,13 @@ const actions = {
   },
   [videoActions.INCREASE_VOLUME]({ dispatch, commit, state }, delta) {
     if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
-    const finalDelta = delta || 10;
+    const finalDelta = delta || 5;
     const finalVolume = state.volume + finalDelta;
     commit(videoMutations.VOLUME_UPDATE, finalVolume > 100 ? 100 : finalVolume);
   },
   [videoActions.DECREASE_VOLUME]({ dispatch, commit, state }, delta) {
     if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
-    const finalDelta = delta || 10;
+    const finalDelta = delta || 5;
     const finalVolume = state.volume - finalDelta;
     commit(videoMutations.VOLUME_UPDATE, finalVolume < 0 ? 0 : finalVolume);
     if (finalVolume <= 0) commit(videoMutations.MUTED_UPDATE, true);
