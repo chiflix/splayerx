@@ -14,7 +14,7 @@
           <td class="selection-title">{{ $t('preferences.privacy.primary')}}</td>
           <td class="first-selection">
             <div class="drop-down">
-            <div :class="showFirstSelection ? 'drop-down-content' : 'drop-down-brief'"
+            <div class="no-drag" :class="showFirstSelection ? 'drop-down-content' : 'drop-down-brief'"
               :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
               @mouseup.stop="openFirstDropdown">
               <div class="selected">{{ codeToLanguageName(primaryLanguage) }}</div>
@@ -36,7 +36,7 @@
           <td class="selection-title">{{ $t('preferences.privacy.secondary')}}</td>
           <td class="second-selection">
             <div class="drop-down">
-              <div :class="showSecondSelection ? 'drop-down-content' : 'drop-down-brief'"
+              <div class="no-drag" :class="showSecondSelection ? 'drop-down-content' : 'drop-down-brief'"
                 :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
                 @mouseup.stop="openSecondDropdown">
                 <div class="selected">{{ codeToLanguageName(secondaryLanguage) }}</div>
@@ -281,9 +281,9 @@ $dropdown-height: 156px;
         .drop-down {
           width: $dropdown-width;
           height: 22px;
+          -webkit-app-region: no-drag;
           .drop-down-brief {
             position: relative;
-            -webkit-app-region: no-drag;
             cursor: pointer;
             z-index: 100;
             width: $dropdown-width;
@@ -348,7 +348,6 @@ $dropdown-height: 156px;
           height: 22px;
           .drop-down-brief {
             position: relative;
-            -webkit-app-region: no-drag;
             cursor: pointer;
             width: $dropdown-width;
             height: 22px;
@@ -414,6 +413,7 @@ $dropdown-height: 156px;
   border-radius: 1.5px;
 }
 ::-webkit-scrollbar-track {
+  cursor: pointer;
   border-radius: 2px;
   width: 10px;
   user-select: none;

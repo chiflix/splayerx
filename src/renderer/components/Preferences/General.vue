@@ -3,7 +3,7 @@
   <div class="title">{{ $t("preferences.general.displayLanguage") }}</div>
   <div class="description">{{ $t("preferences.general.switchDisplayLanguages")}}</div>
   <div class="drop-down">
-    <div :class="showSelection ? 'drop-down-content' : 'drop-down-brief'"
+    <div class="no-drag" :class="showSelection ? 'drop-down-content' : 'drop-down-brief'"
       @mouseup.stop="showSelection = !showSelection">
       <div class="selected">{{ mapCode(displayLanguage) }}</div>
       <Icon type="rightArrow" :class="showSelection ? 'up-arrow' : 'down-arrow'"/>
