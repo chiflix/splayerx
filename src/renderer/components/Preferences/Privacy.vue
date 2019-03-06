@@ -221,12 +221,12 @@ $dropdown-height: 156px;
 .preference-setting {
   box-sizing: border-box;
   padding-top: 37px;
-  padding-left: 26px;
+  padding-left: 24px;
   width: 100%;
   height: 100%;
   .languages-select {
     background-color: rgba(0,0,0,0.05);
-    width: 348px;
+    width: 380px;
     margin-bottom: 24px;
     .select-content {
       padding-top: 20px;
@@ -250,7 +250,7 @@ $dropdown-height: 156px;
       .selection-title {
         text-overflow:ellipsis;
         white-space:nowrap;
-        padding-right: 20px;
+        padding-right: 10px;
         padding-top: 13px;
         padding-bottom: 13px;
         font-family: $font-medium;
