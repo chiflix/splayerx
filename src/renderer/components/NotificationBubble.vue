@@ -20,7 +20,7 @@
         :id="'item' + m.id">
         <div :class="m.type === 'error' ? 'black-gradient-error' : 'black-gradient-loading'"/>
         <div
-        :class="m.type === 'error' ? 'errorContainer' : 'loadingContainer'">
+        :class="m.type === 'error' ? 'errorContainer' : `loadingContainer ${m.title}`">
           <div class="bubbleContent">
             <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
             <div class="content">{{ m.content }}</div>
@@ -238,6 +238,34 @@ export default {
   flex-direction: column;
   align-items: flex-end;
 }
+.Uploading {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
+    width: 140px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    width: 160px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    width: 200px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    width: 280px;
+  }
+}
+.Loading {
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
+    width: 166px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    width: 178px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    width: 218px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    width: 306px;
+  }
+}
 .loadingContainer {
   position: relative;
   display: flex;
@@ -247,7 +275,6 @@ export default {
   z-index: 8;
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    width: 166px;
     height: 32px;
     margin-left: 50px;
     margin-bottom: 8px;
@@ -255,7 +282,6 @@ export default {
     clip-path: inset(0 round 6px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 178px;
     height: 36px;
     margin-left: 62px;
     margin-bottom: 12px;
@@ -263,7 +289,6 @@ export default {
     clip-path: inset(0 round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 218px;
     height: 43px;
     margin-left: 70px;
     margin-bottom: 15px;
@@ -271,7 +296,6 @@ export default {
     clip-path: inset(0 round 8px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 306px;
     height: 60px;
     margin-left: 97px;
     margin-bottom: 18px;

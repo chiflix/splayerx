@@ -115,7 +115,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
-      'currentSubtitleId', 'displayLanguage', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'calculatedNoSub']),
+      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -314,6 +314,9 @@ new Vue({
           this.disableMenus(e);
         });
       }
+    },
+    ableToPushCurrentSubtitle(val) {
+      this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
     },
   },
   methods: {
@@ -650,6 +653,12 @@ new Vue({
             // { type: 'separator' },
             // { label: 'Smart Translating' },
             // { label: 'Search on Shooter.cn' },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.subtitle.uploadSelectedSubtitle'),
+              id: 'uploadSelectedSubtitle',
+              click: () => this.$bus.$emit('upload-current-subtitle'),
+            },
           ],
         },
         // menu.window
@@ -826,6 +835,7 @@ new Vue({
         } else {
           this.menu.getMenuItemById('increaseSubDelay').enabled = false;
           this.menu.getMenuItemById('decreaseSubDelay').enabled = false;
+          this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
           this.menu.getMenuItemById('sub-1').checked = true;
         }
         this.audioTrackList.forEach((item, index) => {

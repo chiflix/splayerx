@@ -59,8 +59,7 @@ export default {
       size2: 'Standard',
       size3: 'Large',
       size4: 'Extra Large',
-      // increaseSubtitleSize: 'Increase Subtitle Size',
-      // decreaseSubtitleSize: 'Decrease Subtitle Size',
+      uploadSelectedSubtitle: 'Upload Selected Subtitle',
       increaseSubtitleDelayS: 'Subtitle Delay +0.1s',
       decreaseSubtitleDelayS: 'Subtitle Delay -0.1s',
       // increaseSubtitleDelayL: 'Subtitle Delay +0.5s',
@@ -163,6 +162,18 @@ export default {
   loading: {
     title: '',
     content: 'Loading Translations ...',
+  },
+  uploading: {
+    title: '',
+    content: 'Subtitle Uploading ...',
+  },
+  uploadingSuccess: {
+    title: 'Upload Successfully',
+    content: 'Subtitle has been uploaded.',
+  },
+  uploadingFailed: {
+    title: 'Upload Failed',
+    content: 'Please try later.',
   },
   privacyBubble: {
     masVersion: {

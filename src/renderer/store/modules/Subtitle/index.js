@@ -46,6 +46,14 @@ const getters = {
     (videoSubtitleMap[originSrc] || [])
       .map(subtitleId => allSubtitleList.find(({ id }) => id === subtitleId))
       .sort((a, b) => b.rank - a.rank),
+  ableToPushCurrentSubtitle: ({ currentSubtitleId }, { subtitleList }) => {
+    if (!currentSubtitleId) return false;
+    const currentSubtitle = subtitleList.find(({ id }) => id === currentSubtitleId);
+    if (currentSubtitle) {
+      return currentSubtitle.loading === 'loaded' || currentSubtitle.loading === 'ready';
+    }
+    return false;
+  },
   getVideoSrcById: ({ videoSubtitleMap }) => id =>
     (Object.keys(videoSubtitleMap).find(videoSrc => videoSubtitleMap[videoSrc].includes(id))),
   subtitleDelay: state => state.subtitleDelay,

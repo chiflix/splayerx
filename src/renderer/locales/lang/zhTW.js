@@ -59,8 +59,7 @@ export default {
       size2: '標準',
       size3: '大',
       size4: '超大',
-      // increaseSubtitleSize: '增大字幕尺寸',
-      // decreaseSubtitleSize: '減小字母尺寸',
+      uploadSelectedSubtitle: '上傳所選字幕',
       increaseSubtitleDelayS: '字幕延時 +0.1s',
       decreaseSubtitleDelayS: '字幕延時 -0.1s',
       // increaseSubtitleDelayL: '字幕延时 +0.5s',
@@ -163,6 +162,18 @@ export default {
   loading: {
     title: '',
     content: '正在智能匹配翻譯結果 ...',
+  },
+  uploading: {
+    title: '',
+    content: '字幕正在上傳中 ...',
+  },
+  uploadingSuccess: {
+    title: '上傳成功',
+    content: '字幕已成功上傳。',
+  },
+  uploadingFailed: {
+    title: '上傳失敗',
+    content: '請稍後重試。',
   },
   privacyBubble: {
     masVersion: {
