@@ -74,7 +74,7 @@
             <div class="title" ref="title"
               :style="{
                 color: 'rgba(255,255,255,0.40)',
-                fontSize: sizeAdaption(14),
+                fontSize: sizeAdaption(12),
                 lineHeight: sizeAdaption(16),
               }">{{ baseName }}</div>
           </div>
@@ -132,6 +132,9 @@ export default {
       type: Object,
       required: true,
     },
+    sizeAdaption: {
+      type: Function,
+    },
   },
   data() {
     return {
@@ -146,9 +149,6 @@ export default {
     };
   },
   methods: {
-    sizeAdaption(size) {
-      return this.winWidth > 1355 ? `${(this.winWidth / 1355) * size}px` : `${size}px`;
-    },
     mouseupVideo() {
       this.eventTarget.onItemMouseup(this.index);
       this.$refs.progress.style.setProperty('opacity', '0');

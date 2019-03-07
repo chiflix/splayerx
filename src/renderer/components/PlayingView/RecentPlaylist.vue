@@ -21,17 +21,23 @@
         paddingLeft: sizeAdaption(40),
       }">
       <div class="top"
-      :style="{
-        fontSize: sizeAdaption(14),
-        lineHeight: sizeAdaption(13),
-      }"><span ref="lastPlayedTime"></span> {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+        :style="{
+          fontSize: sizeAdaption(14),
+          lineHeight: sizeAdaption(13),
+        }">
+        <div v-if="onAuthorize">加载同目录视频</div>
+        <div v-show="!onAuthorize">
+          <span ref="lastPlayedTime"></span>
+          {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}
+        </div>
+      </div>
       <div class="file-name"
         :style="{
           marginTop: sizeAdaption(9),
           fontSize: sizeAdaption(18),
           lineHeight: sizeAdaption(20),
           fontWeight: 500,
-        }">{{filename}}</div>
+        }">{{ onAuthorize ? directoryName : filename }}</div>
     </div>
     </transition>
     <div class="playlist-items"
@@ -54,7 +60,14 @@
         :isShifting="shifting"
         :hoverIndex="hoverIndex"
         :thumbnailWidth="thumbnailWidth"
-        :eventTarget="eventTarget" />
+        :sizeAdaption="sizeAdaption"
+        :eventTarget="eventTarget"/>
+      <AuthorizeFolder v-if="isMas"
+        :onAuthorizeMouseover="onAuthorizeMouseover"
+        :onAuthorizeMouseout="onAuthorizeMouseout"
+        :thumbnailWidth="thumbnailWidth"
+        :winWidth="winWidth"
+        :sizeAdaption="sizeAdaption"/>
       <div class="next-page"
         v-if="thumbnailNumber < numberOfPlaylistItem"
         @mouseup.stop=""
@@ -74,11 +87,13 @@ import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
+import AuthorizeFolder from '@/components/PlayingView/AuthorizeFolder.vue';
 
 export default {
   name: 'recent-playlist',
   components: {
     RecentPlaylistItem,
+    AuthorizeFolder,
   },
   props: {
     mousemovePosition: {},
@@ -103,6 +118,7 @@ export default {
       filePathNeedToDelete: '',
       eventTarget: {},
       changeByRecent: false,
+      onAuthorize: false,
     };
   },
   created() {
@@ -150,6 +166,12 @@ export default {
         media.path,
         path.extname(media.path),
       );
+    },
+    onAuthorizeMouseover() {
+      this.onAuthorize = true;
+    },
+    onAuthorizeMouseout() {
+      this.onAuthorize = false;
     },
     onItemMouseout() {
       this.hoverIndex = this.playingIndex;
@@ -265,6 +287,16 @@ export default {
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
+    isMas() {
+      // return process.platform === 'darwin' && process.mas;
+      return true;
+    },
+    onlyOneVideo() {
+      return this.playingList.length === 1;
+    },
+    directoryName() {
+      return path.dirname(this.originSrc);
+    },
     inWhichSource() {
       if (this.isFolderList) {
         return this.$t('recentPlaylist.folderSource');

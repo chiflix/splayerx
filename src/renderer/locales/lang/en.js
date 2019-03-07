@@ -198,6 +198,8 @@ export default {
     folderSource: 'Folder',
     playlistSource: 'Playlist',
     playing: 'Playing',
+    authorize: '加载同目录视频',
+    briefAuthorize: '加载同目录',
   },
   nextVideo: {
     nextInFolder: 'Next in Folder',

@@ -200,6 +200,8 @@ export default {
     folderSource: 'ホルダー',
     playlistSource: 'プレイリスト',
     playing: '再生中',
+    authorize: '加载同目录视频',
+    briefAuthorize: '加载同目录',
   },
   nextVideo: {
     nextInFolder: 'ホルダー中の次のビデオ',
