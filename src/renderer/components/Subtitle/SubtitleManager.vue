@@ -549,20 +549,17 @@ export default {
         const parameter = this.makeSubtitleUploadParameter(qualifiedSubtitle);
         transcriptQueue.add(parameter, true)
           .then((res) => {
-            this.$store.dispatch('removeMessagesByType', 'Uploading');
-            setTimeout(() => {
-              if (res) {
-                this.addLog('error', {
-                  message: 'Upload successfully !',
-                  errcode: 'UPLOAD_SUCCESS',
-                });
-              } else {
-                this.addLog('error', {
-                  message: 'Upload failed !',
-                  errcode: 'UPLOAD_FAILED',
-                });
-              }
-            }, 200);
+            if (res) {
+              this.addLog('error', {
+                message: 'Upload successfully !',
+                errcode: 'UPLOAD_SUCCESS',
+              });
+            } else {
+              this.addLog('error', {
+                message: 'Upload failed !',
+                errcode: 'UPLOAD_FAILED',
+              });
+            }
             console.log(`Uploading subtitle No.${this.currentSubtitleId} ${res ? 'succeeded' : 'failed'}!`);
           });
       }

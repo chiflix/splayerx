@@ -481,7 +481,6 @@ export default {
     this.$bus.$on('refresh-finished', (timeout) => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
-      this.$store.dispatch('removeMessagesByType', 'Loading');
       if (timeout) {
         setTimeout(() => {
           this.addLog('error', {
