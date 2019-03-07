@@ -413,22 +413,22 @@ export default {
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
       width: auto;
       height: 23px;
-      margin: 12px 8px auto 14px;
+      margin: 12px 10px auto 14px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       width: auto;
       height: 26px;
-      margin: 13px 8px auto 16px;
+      margin: 13px 15px auto 16px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-      width: 214px;
+      width: auto;
       height: 32px;
-      margin: 15px 8px auto 19px;
+      margin: 15px 20px auto 19px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-      width: 300px;
+      width: auto;
       height: 45px;
-      margin: 21px 8px auto 26px;
+      margin: 21px 25px auto 26px;
     }
     .title {
       color: rgba(255, 255, 255, 1);
