@@ -95,7 +95,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .authorize-item {
-  transition: background-image 1s linear;
+  cursor: pointer;
   background-color: rgba(0,0,0,0.12);
   border-radius: 2px;
   border: 1px solid rgba(255,255,255,0.25);
