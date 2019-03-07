@@ -57,21 +57,24 @@ const normalizer = (parsedSubtitle) => {
     };
     Object.values(slices).forEach((slice) => {
       const { tag: sliceTag, fragments } = slice;
-      const processedFragments = fragments.map((fragment) => {
-        const { tag: fragmentTag, text } = fragment;
-        const finalTags = {
-          ...baseTags,
-          alignment,
-          pos,
-          ...pick(Object.assign({}, sliceTag, fragmentTag), ['b', 'i', 'u', 's']),
+      const hasDrawing = fragments.some(({ drawing }) => !!drawing);
+      if (!hasDrawing) {
+        const processedFragments = fragments.map((fragment) => {
+          const { tag: fragmentTag, text } = fragment;
+          const finalTags = {
+            ...baseTags,
+            alignment,
+            pos,
+            ...pick(Object.assign({}, sliceTag, fragmentTag), ['b', 'i', 'u', 's']),
+          };
+          return { text: text.replace(/[\\/][Nn]/g, '<br>'), tags: finalTags };
+        });
+        const finalDialogue = {
+          ...baseDiagolue,
+          fragments: processedFragments,
         };
-        return { text: text.replace(/[\\/][Nn]/g, '<br>'), tags: finalTags };
-      });
-      const finalDialogue = {
-        ...baseDiagolue,
-        fragments: processedFragments,
-      };
-      finalDialogues.push(finalDialogue);
+        finalDialogues.push(finalDialogue);
+      }
     });
   });
   return {
