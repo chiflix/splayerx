@@ -303,7 +303,7 @@ export default {
           } else if (!language) {
             language = await localLanguageLoader(src, format);
           }
-          return `${this.$t('subtitle.embedded')} ${romanize(computedIndex)} - ${codeToLanguageName(language)}`;
+          return `${romanize(computedIndex)} - ${codeToLanguageName(language)}`;
         }
         case 'online': {
           const { language } = options;
@@ -549,20 +549,17 @@ export default {
         const parameter = this.makeSubtitleUploadParameter(qualifiedSubtitle);
         transcriptQueue.add(parameter, true)
           .then((res) => {
-            this.$store.dispatch('removeMessagesByType', 'Uploading');
-            setTimeout(() => {
-              if (res) {
-                this.addLog('error', {
-                  message: 'Upload successfully !',
-                  errcode: 'UPLOAD_SUCCESS',
-                });
-              } else {
-                this.addLog('error', {
-                  message: 'Upload failed !',
-                  errcode: 'UPLOAD_FAILED',
-                });
-              }
-            }, 200);
+            if (res) {
+              this.addLog('error', {
+                message: 'Upload successfully !',
+                errcode: 'UPLOAD_SUCCESS',
+              });
+            } else {
+              this.addLog('error', {
+                message: 'Upload failed !',
+                errcode: 'UPLOAD_FAILED',
+              });
+            }
             console.log(`Uploading subtitle No.${this.currentSubtitleId} ${res ? 'succeeded' : 'failed'}!`);
           });
       }

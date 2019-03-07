@@ -40,7 +40,7 @@ export default {
       name: '字幕',
       subtitleSelect: 'トランスレーション',
       AITranslation: 'トランスレーション結果を再読込',
-      menuLoading: 'トランスレーション結果マッチング ...',
+      menuLoading: 'ローディング ...',
       loadSubtitleFile: '字幕ファイルを開く…',
       mainSubtitle: '第一字幕',
       langZhCN: '中文',
