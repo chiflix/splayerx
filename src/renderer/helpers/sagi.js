@@ -47,12 +47,13 @@ class Sagi {
     this.transcripts = [];
   }
 
-  mediaTranslateRaw(mediaIdentity, languageCode) {
+  mediaTranslateRaw(mediaIdentity, languageCode, hints) {
     return new Promise((resolve, reject) => {
       const client = new translationRpc.TranslationClient(this.endpoint, this.creds);
       const req = new translationMsg.MediaTranslationRequest();
       req.setMediaIdentity(mediaIdentity);
       req.setLanguageCode(languageCode);
+      req.setHints(hints);
       client.translateMedia(req, (err, res) => {
         if (err) {
           reject(err);
@@ -62,13 +63,13 @@ class Sagi {
     });
   }
 
-  mediaTranslate({ mediaIdentity, languageCode }) {
+  mediaTranslate({ mediaIdentity, languageCode, hints }) {
     if (!languageCode) {
       languageCode = 'zh';
       console.warn('No languageCode provided, falling back to zh.');
     }
     return new Promise((resolve, reject) => {
-      this.mediaTranslateRaw(mediaIdentity, languageCode).then((response) => {
+      this.mediaTranslateRaw(mediaIdentity, languageCode, hints).then((response) => {
         const { error, resultsList } = response.toObject();
         if (error && error.code) reject(error);
         resolve(resultsList);
