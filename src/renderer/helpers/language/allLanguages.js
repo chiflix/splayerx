@@ -53,12 +53,10 @@ export const codes = {
   ru: [
     'ru',
     'rus',
-    'bel', // Belarusian
   ],
   id: [
     'id',
     'ind',
-    'zlm', // Malay (individual language) (Arabic)
   ],
   ar: [
     'ar',
