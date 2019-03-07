@@ -11,26 +11,17 @@ export const codes = {
     'cmn',
     'zh-TW',
   ],
-  en: [
-    'en',
-    'eng',
-  ],
   ja: [
     'ja',
     'jpn',
   ],
-  ar: [
-    'ar',
-    'ara',
-    'arb',
-  ],
-  pt: [
-    'pt',
-    'por',
-  ],
   ko: [
     'ko',
     'kor',
+  ],
+  en: [
+    'en',
+    'eng',
   ],
   es: [
     'es',
@@ -46,18 +37,31 @@ export const codes = {
     'ger',
     'deu',
   ],
-  ru: [
-    'ru',
-    'rus',
+  it: [
+    'it',
+    'ita',
+  ],
+  pt: [
+    'pt',
+    'por',
   ],
   cs: [
     'cs',
     'cze',
     'ces',
   ],
-  it: [
-    'it',
-    'ita',
+  ru: [
+    'ru',
+    'rus',
+  ],
+  id: [
+    'id',
+    'ind',
+  ],
+  ar: [
+    'ar',
+    'ara',
+    'arb',
   ],
   hi: [
     'hi',
@@ -68,16 +72,17 @@ export const codes = {
 export const names = {
   'zh-CN': '简体中文',
   'zh-TW': '繁體中文',
-  en: 'English',
   ja: '日本語',
-  ar: 'العربية',
-  pt: 'Português',
   ko: '한국어',
+  en: 'English',
   es: 'Español',
   fr: 'Français',
   de: 'Deutsch',
-  ru: 'Русский',
-  cs: 'čeština',
   it: 'Italiano',
+  pt: 'Português',
+  cs: 'čeština',
+  ru: 'Русский',
+  id: 'Bahasa Indonesia',
+  ar: 'العربية',
   hi: 'हिन्दी',
 };

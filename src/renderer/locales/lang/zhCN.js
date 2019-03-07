@@ -161,7 +161,7 @@ export default {
   },
   loading: {
     title: '',
-    content: '正在智能匹配翻译结果 ...',
+    content: '正在匹配智能翻译结果 ...',
   },
   uploading: {
     title: '',

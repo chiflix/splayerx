@@ -21,13 +21,6 @@ const actions = {
   removeMessages({ commit }, id) {
     commit('removeMessages', id);
   },
-  removeMessagesByType({ commit }, delta) {
-    state.messages.filter(m => m.type === 'loading').forEach((item) => {
-      if (item.title === delta) {
-        commit('removeMessages', item.id);
-      }
-    });
-  },
   addMessages({ commit }, {
     type, title, content, dismissAfter, cb,
   }) {

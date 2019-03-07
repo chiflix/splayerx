@@ -79,8 +79,9 @@
           case ONLINE_LOADING:
             this.$store.dispatch('addMessages', {
               type: 'loading',
-              title: 'Loading',
+              title: '',
               content: this.$t('loading.content'),
+              dismissAfter: 2000,
             });
             break;
           case SUBTITLE_OFFLINE:
@@ -110,9 +111,9 @@
           case SUBTITLE_UPLOAD:
             this.$store.dispatch('addMessages', {
               type: 'loading',
-              title: 'Uploading',
+              title: '',
               content: this.$t('uploading.content'),
-              dismissAfter: 3000,
+              dismissAfter: 2000,
             });
             break;
           case UPLOAD_SUCCESS:
