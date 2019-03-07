@@ -136,6 +136,7 @@ describe('Subtitle Searchers Unit Tests', () => {
         sandbox.assert.calledWithExactly(mediaTranslateStub, {
           mediaIdentity,
           languageCode: undefined,
+          hints: undefined,
         });
         done();
       }).catch(err => done(err));

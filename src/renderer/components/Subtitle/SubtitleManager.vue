@@ -12,6 +12,7 @@
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
+import { sep } from 'path';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import {
@@ -206,7 +207,8 @@ export default {
           return storedSubs;
         }
       }
-      const fetchSubs = lang => fetchOnlineList(videoSrc, lang).catch(() => []);
+      const hints = this.generateHints(videoSrc);
+      const fetchSubs = lang => fetchOnlineList(videoSrc, lang, hints).catch(() => []);
       const newSubs = await Promise.all(languages.map(fetchSubs)).then(flatten);
       deleteSubtitles(storedSubIds);
       return newSubs;
@@ -303,7 +305,7 @@ export default {
           } else if (!language) {
             language = await localLanguageLoader(src, format);
           }
-          return `${this.$t('subtitle.embedded')} ${romanize(computedIndex)} - ${codeToLanguageName(language)}`;
+          return `${romanize(computedIndex)} - ${codeToLanguageName(language)}`;
         }
         case 'online': {
           const { language } = options;
@@ -520,6 +522,21 @@ export default {
       }
       return result;
     },
+    generateHints(videoSrc) {
+      let result;
+      videoSrc.split(sep).reverse().some((dirOrFileName, index) => {
+        if (index === 0) {
+          result = dirOrFileName;
+          return false;
+        } else if (index <= 2) {
+          result = `${dirOrFileName}${sep}${result}`;
+          return false;
+        }
+        result = `${sep}${result}`;
+        return true;
+      });
+      return result;
+    },
   },
   created() {
     this.$bus.$on('add-subtitles', (subs) => {
@@ -549,20 +566,17 @@ export default {
         const parameter = this.makeSubtitleUploadParameter(qualifiedSubtitle);
         transcriptQueue.add(parameter, true)
           .then((res) => {
-            this.$store.dispatch('removeMessagesByType', 'Uploading');
-            setTimeout(() => {
-              if (res) {
-                this.addLog('error', {
-                  message: 'Upload successfully !',
-                  errcode: 'UPLOAD_SUCCESS',
-                });
-              } else {
-                this.addLog('error', {
-                  message: 'Upload failed !',
-                  errcode: 'UPLOAD_FAILED',
-                });
-              }
-            }, 200);
+            if (res) {
+              this.addLog('error', {
+                message: 'Upload successfully !',
+                errcode: 'UPLOAD_SUCCESS',
+              });
+            } else {
+              this.addLog('error', {
+                message: 'Upload failed !',
+                errcode: 'UPLOAD_FAILED',
+              });
+            }
             console.log(`Uploading subtitle No.${this.currentSubtitleId} ${res ? 'succeeded' : 'failed'}!`);
           });
       }

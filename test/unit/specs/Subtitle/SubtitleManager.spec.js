@@ -266,8 +266,8 @@ describe('Subtitle Manager Unit Tests', () => {
       const randomLanguages = [randStr(), randStr()];
       getOnlineSubtitlesList(videoSrc, true, testStoredSubIds, randomLanguages)
         .then(() => {
-          expect(fetchOnlineListStub).to.have.been.calledWithExactly(videoSrc, randomLanguages[0]);
-          expect(fetchOnlineListStub).to.have.been.calledWithExactly(videoSrc, randomLanguages[1]);
+          expect(fetchOnlineListStub).to.have.been.calledWith(videoSrc, randomLanguages[0]);
+          expect(fetchOnlineListStub).to.have.been.calledWith(videoSrc, randomLanguages[1]);
           done();
         }).catch(done);
     });

@@ -32,7 +32,7 @@ export function searchForLocalList(videoSrc, supportedExtensions) {
   });
 }
 
-export function fetchOnlineList(videoSrc, languageCode) {
+export function fetchOnlineList(videoSrc, languageCode, hints) {
   const subtitleInfoNormalizer = (subtitle) => {
     const { languageCode: code, transcriptIdentity: src, ranking } = subtitle;
     return ({
@@ -46,7 +46,7 @@ export function fetchOnlineList(videoSrc, languageCode) {
   };
   return new Promise((resolve, reject) => {
     calculateMediaIdentity(videoSrc)
-      .then(mediaIdentity => Sagi.mediaTranslate({ mediaIdentity, languageCode }))
+      .then(mediaIdentity => Sagi.mediaTranslate({ mediaIdentity, languageCode, hints }))
       .then(results => resolve(results.map(subtitleInfoNormalizer)))
       .catch(err => reject(err));
   });

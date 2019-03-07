@@ -3,7 +3,6 @@ import Sagi from '@/helpers/sagi';
 
 const validProperties = [
   'mediaIdentity',
-  'languageCode',
   'format',
   'playedTime',
   'totalTime',

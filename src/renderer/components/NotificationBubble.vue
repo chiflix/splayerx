@@ -13,14 +13,12 @@
     <MASPrivacyBubble class="mas-privacy-bubble"
       v-if="showPrivacyBubble && isMas"
       @close-privacy-bubble="closePrivacyBubble"/>
-    <div>
-    <transition-group name="toast">
+    <transition-group name="toast" class="transGroup">
       <div v-for="m in messages" :key="m.id"
         class="messageContainer"
         :id="'item' + m.id">
         <div :class="m.type === 'error' ? 'black-gradient-error' : 'black-gradient-loading'"/>
-        <div
-        :class="m.type === 'error' ? 'errorContainer' : `loadingContainer ${m.title}`">
+        <div :class="m.type === 'error' ? 'errorContainer' : `loadingContainer`">
           <div class="bubbleContent">
             <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
             <div class="content">{{ m.content }}</div>
@@ -29,7 +27,6 @@
         </div>
       </div>
     </transition-group>
-    </div>
   </div>
 </template>
 
@@ -155,6 +152,8 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  width: auto;
+  height: auto;
 
   .next-video {
     transition: 200ms ease-out;
@@ -233,41 +232,12 @@ export default {
     right: 52px;
   }
 }
-.transContainer {
+.transGroup {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }
-.Uploading {
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    width: 140px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 160px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 200px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 280px;
-  }
-}
-.Loading {
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    width: 166px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 178px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 218px;
-  }
-  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 306px;
-  }
-}
 .loadingContainer {
-  position: relative;
   display: flex;
   justify-content: flex-start;
   background-color: rgba(0, 0, 0, 0.1);
@@ -276,29 +246,21 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
     height: 32px;
-    margin-left: 50px;
-    margin-bottom: 8px;
     border-radius: 6px;
     clip-path: inset(0 round 6px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
     height: 36px;
-    margin-left: 62px;
-    margin-bottom: 12px;
     border-radius: 7px;
     clip-path: inset(0 round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
     height: 43px;
-    margin-left: 70px;
-    margin-bottom: 15px;
     border-radius: 8px;
     clip-path: inset(0 round 8px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     height: 60px;
-    margin-left: 97px;
-    margin-bottom: 18px;
     border-radius: 11px;
     clip-path: inset(0 round 11px);
   }
@@ -307,22 +269,22 @@ export default {
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
       width: auto;
       height: 11px;
-      margin: auto;
+      margin: auto 14px auto 14px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
       width: auto;
       height: 12px;
-      margin: auto;
+      margin: auto 16px auto 16px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
       width: auto;
       height: 15px;
-      margin: auto;
+      margin: auto 19px auto 19px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
       width: auto;
       height: 21px;
-      margin: auto;
+      margin: auto 26px auto 26px;
     }
     .content {
       color: rgba(255, 255, 255, 0.8);
@@ -351,75 +313,71 @@ export default {
   }
 }
 .messageContainer {
-  position: relative;
   z-index: 8;
   transition: 400ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
   transition-property: opacity, transform;
+  width: auto;
+  white-space: nowrap;
+  right: 0;
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
+    margin-bottom: 8px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    margin-bottom: 12px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    margin-bottom: 15px;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    margin-bottom: 18px;
+  }
 }
 .black-gradient-error {
   position: absolute;
+  width: 100%;
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    width: 216px;
     height: 47px;
-    margin-bottom: 8px;
     border-radius: 6px;
     clip-path: inset(0 round 6px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 240px;
     height: 52px;
-    margin-bottom: 12px;
     border-radius: 7px;
     clip-path: inset(0 round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 288px;
     height: 62px;
-    margin-bottom: 15px;
     border-radius: 8px;
     clip-path: inset(0 round 8px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 403px;
     height: 87px;
-    margin-bottom: 18px;
     border-radius: 11px;
     clip-path: inset(0 round 11px);
   }
 }
 .black-gradient-loading {
   position: absolute;
+  width: 100%;
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    width: 186px;
     height: 32px;
-    margin-left: 30px;
-    margin-bottom: 8px;
     border-radius: 6px;
     clip-path: inset(0 round 6px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 204px;
     height: 36px;
-    margin-left: 36px;
-    margin-bottom: 12px;
     border-radius: 7px;
     clip-path: inset(0 round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 248px;
     height: 43px;
-    margin-left: 40px;
-    margin-bottom: 15px;
     border-radius: 8px;
     clip-path: inset(0 round 8px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 348px;
     height: 60px;
-    margin-left: 55px;
-    margin-bottom: 18px;
     border-radius: 11px;
     clip-path: inset(0 round 11px);
   }
@@ -431,54 +389,46 @@ export default {
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-    width: 216px;
     height: 47px;
-    margin-bottom: 8px;
     border-radius: 6px;
     clip-path: inset(0 round 6px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-    width: 240px;
     height: 52px;
-    margin-bottom: 12px;
     border-radius: 7px;
     clip-path: inset(0 round 7px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-    width: 288px;
     height: 62px;
-    margin-bottom: 15px;
     border-radius: 8px;
     clip-path: inset(0 round 8px);
   }
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-    width: 403px;
     height: 87px;
-    margin-bottom: 18px;
     border-radius: 11px;
     clip-path: inset(0 round 11px);
   }
 
   .bubbleContent {
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 180px) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (min-height: 180px) and (max-height: 288px) {
-      width: 160px;
+      width: auto;
       height: 23px;
-      margin: 12px auto auto 14px;
+      margin: 12px 10px auto 14px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
-      width: 178px;
+      width: auto;
       height: 26px;
-      margin: 13px auto auto 16px;
+      margin: 13px 15px auto 16px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
-      width: 214px;
+      width: auto;
       height: 32px;
-      margin: 15px auto auto 19px;
+      margin: 15px 20px auto 19px;
     }
     @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
-      width: 300px;
+      width: auto;
       height: 45px;
-      margin: 21px auto auto 26px;
+      margin: 21px 25px auto 26px;
     }
     .title {
       color: rgba(255, 255, 255, 1);

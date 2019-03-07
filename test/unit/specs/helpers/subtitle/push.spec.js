@@ -26,7 +26,7 @@ describe('helper - subtitle - push', () => {
       testPQueue = new PQueue();
       testTQueue = new TranscriptQueue(testPQueue);
     });
-    describe.only('method - add', () => {
+    describe('method - add', () => {
       let testSubtitle;
       let testSubtitleId;
       let addStub;

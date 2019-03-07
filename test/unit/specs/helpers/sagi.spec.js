@@ -36,7 +36,7 @@ describe('helper.sagi api', () => {
 
       Sagi.mediaTranslate({ mediaIdentity: randomMediaIdentity });
 
-      sandbox.assert.calledWithExactly(mediaTranslateRawSpy, randomMediaIdentity, 'zh');
+      sandbox.assert.calledWith(mediaTranslateRawSpy, randomMediaIdentity, 'zh');
     });
 
     // TODO: error handling tests
