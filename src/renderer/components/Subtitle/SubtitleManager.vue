@@ -550,9 +550,9 @@ export default {
         transcriptQueue.add(parameter, true)
           .then((res) => {
             if (res) {
-              this.addLog('error', {
+              this.addLog('success', {
                 message: 'Upload successfully !',
-                errcode: 'UPLOAD_SUCCESS',
+                code: 'UPLOAD_SUCCESS',
               });
             } else {
               this.addLog('error', {
