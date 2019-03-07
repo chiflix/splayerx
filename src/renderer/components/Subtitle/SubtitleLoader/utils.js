@@ -1,5 +1,5 @@
 import { extname, basename } from 'path';
-import { open, readSync, readFile, closeSync, statSync } from 'fs';
+import { open, readSync, readFile, closeSync } from 'fs';
 import chardet from 'chardet';
 import iconv from 'iconv-lite';
 import { ipcRenderer } from 'electron';
