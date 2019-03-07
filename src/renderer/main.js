@@ -236,17 +236,19 @@ new Vue({
       }
     },
     volume(val) {
-      if (val <= 0) {
-        this.menu.getMenuItemById('mute').checked = true;
-        this.menu.getMenuItemById('deVolume').enabled = false;
-      } else {
-        this.menu.getMenuItemById('inVolume').enabled = true;
-        this.menu.getMenuItemById('deVolume').enabled = true;
-        this.menu.getMenuItemById('mute').checked = false;
+      if (this.menu) {
+        if (val <= 0) {
+          this.menu.getMenuItemById('mute').checked = true;
+          this.menu.getMenuItemById('deVolume').enabled = false;
+        } else {
+          this.menu.getMenuItemById('inVolume').enabled = true;
+          this.menu.getMenuItemById('deVolume').enabled = true;
+          this.menu.getMenuItemById('mute').checked = false;
+        }
       }
     },
     muted(val) {
-      if (val) {
+      if (this.menu && val) {
         this.menu.getMenuItemById('mute').checked = val;
       }
     },
