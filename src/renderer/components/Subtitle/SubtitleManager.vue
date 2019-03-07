@@ -303,7 +303,7 @@ export default {
           } else if (!language) {
             language = await localLanguageLoader(src, format);
           }
-          return `${this.$t('subtitle.embedded')} ${romanize(computedIndex)} - ${codeToLanguageName(language)}`;
+          return `${romanize(computedIndex)} - ${codeToLanguageName(language)}`;
         }
         case 'online': {
           const { language } = options;

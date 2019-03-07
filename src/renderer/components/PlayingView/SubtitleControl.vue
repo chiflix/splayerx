@@ -63,7 +63,7 @@
                           <div class="text"
                             :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
                               whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                            }">{{ item.path ? getSubName(item.path) : item.name }}</div>
+                            }">{{ getSubName(item) }}</div>
                         </div>
                       </div>
 
@@ -330,8 +330,13 @@ export default {
     finishAnimation() {
       this.refAnimation = '';
     },
-    getSubName(subPath) {
-      return path.basename(subPath);
+    getSubName(item) {
+      if (item.path) {
+        return path.basename(item);
+      } else if (item.type === 'embedded') {
+        return `${this.$t('subtitle.embedded')} ${item.name}`;
+      }
+      return item.name;
     },
     debouncedHandleRefresh(e, hasOnlineSubtitles = false) {
       this.debouncedHandler(e, hasOnlineSubtitles);
