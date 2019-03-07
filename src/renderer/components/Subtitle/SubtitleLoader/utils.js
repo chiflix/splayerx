@@ -39,7 +39,7 @@ function getFragmentBuffer(path, detectEncoding) {
   return new Promise((resolve, reject) => {
     open(path, 'r', (err, fd) => {
       if (err) reject(err);
-      const pos = detectEncoding ? 0 : Math.round(statSync(path).size / 2);
+      const pos = detectEncoding ? 0 : 4096 * 30;
       const buf = Buffer.alloc(4096); // https://github.com/Microsoft/vscode/blob/f886dd4fb84bb82478bfab4a68cd3f31b32f5eb5/src/vs/base/node/encoding.ts#L268
       readSync(fd, buf, 0, 4096, pos);
       resolve(buf);
