@@ -477,7 +477,7 @@
     "p-queue": "^3.1.0",
     "rimraf": "^2.6.3",
     "romanize": "^1.1.1",
-    "sagi-api": "^0.0.7",
+    "sagi-api": "^0.0.9",
     "source-map-support": "^0.5.9",
     "subtitle": "^2.0.1",
     "traditional-or-simplified": "^1.0.3",

@@ -12,6 +12,7 @@
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
+import { sep } from 'path';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import {
@@ -206,7 +207,8 @@ export default {
           return storedSubs;
         }
       }
-      const fetchSubs = lang => fetchOnlineList(videoSrc, lang).catch(() => []);
+      const hints = this.generateHints(videoSrc);
+      const fetchSubs = lang => fetchOnlineList(videoSrc, lang, hints).catch(() => []);
       const newSubs = await Promise.all(languages.map(fetchSubs)).then(flatten);
       deleteSubtitles(storedSubIds);
       return newSubs;
@@ -518,6 +520,21 @@ export default {
             break;
         }
       }
+      return result;
+    },
+    generateHints(videoSrc) {
+      let result;
+      videoSrc.split(sep).reverse().some((dirOrFileName, index) => {
+        if (index === 0) {
+          result = dirOrFileName;
+          return false;
+        } else if (index <= 2) {
+          result = `${dirOrFileName}${sep}${result}`;
+          return false;
+        }
+        result = `${sep}${result}`;
+        return true;
+      });
       return result;
     },
   },
