@@ -41,7 +41,7 @@ let tray = null;
 let inited = false;
 const filesToOpen = [];
 const snapShotQueue = [];
-const thumbnailQueue = [];
+const thumbnailTask = [];
 const mediaInfoQueue = [];
 const embeeddSubtitlesQueue = new TaskQueue();
 const mainURL = process.env.NODE_ENV === 'development'
@@ -142,23 +142,24 @@ function registerMainWindowEvent() {
       },
     );
   }
-  function thumbnailQueueCallback(event) {
+  function thumbnailTaskCallback() {
     const cb = (ret, src) => {
-      thumbnailQueue.shift();
-      if (thumbnailQueue.length > 0) {
-        thumbnail(thumbnailQueue[thumbnailQueue.length - 1], cb);
-        thumbnailQueue.splice(0, thumbnailQueue.length);
+      thumbnailTask.shift();
+      if (thumbnailTask.length > 0) {
+        thumbnail(thumbnailTask[0], cb);
       }
       if (ret === '0') {
-        event.sender.send('thumbnail-saved', src);
+        mainWindow?.webContents.send('thumbnail-saved', src);
       }
     };
-    thumbnail(thumbnailQueue[0], cb);
+    thumbnail(thumbnailTask[0], cb);
   }
   ipcMain.on('generateThumbnails', (event, args) => {
-    thumbnailQueue.push(args);
-    if (thumbnailQueue.length === 1) {
-      thumbnailQueueCallback(event);
+    if (thumbnailTask.length === 0) {
+      thumbnailTask.push(args);
+      thumbnailTaskCallback();
+    } else {
+      thumbnailTask.splice(1, 1, args);
     }
   });
 
