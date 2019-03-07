@@ -251,7 +251,7 @@ export default {
       const { TouchBar } = this.$electron.remote;
       const {
         TouchBarLabel, TouchBarButton,
-        TouchBarSpacer, TouchBarScrubber,
+        TouchBarSpacer,
       } = TouchBar;
 
       this.timeLabel = new TouchBarLabel();
