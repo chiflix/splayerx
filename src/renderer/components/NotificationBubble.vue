@@ -17,13 +17,13 @@
       <div v-for="m in messages" :key="m.id"
         class="messageContainer"
         :id="'item' + m.id">
-        <div :class="m.type === 'error' ? 'black-gradient-error' : 'black-gradient-loading'"/>
-        <div :class="m.type === 'error' ? 'errorContainer' : `loadingContainer`">
+        <div :class="m.type === 'result' ? 'black-gradient-result' : 'black-gradient-state'"/>
+        <div :class="m.type === 'result' ? 'resultContainer' : `stateContainer`">
           <div class="bubbleContent">
-            <div class="title" v-if="m.type === 'error'">{{ m.title }}</div>
+            <div class="title" v-if="m.type === 'result'">{{ m.title }}</div>
             <div class="content">{{ m.content }}</div>
           </div>
-          <Icon v-if="m.type === 'error'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id, m.title)"></Icon>
+          <Icon v-if="m.type === 'result'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id, m.title)"></Icon>
         </div>
       </div>
     </transition-group>
@@ -237,7 +237,7 @@ export default {
   flex-direction: column;
   align-items: flex-end;
 }
-.loadingContainer {
+.stateContainer {
   display: flex;
   justify-content: flex-start;
   background-color: rgba(0, 0, 0, 0.1);
@@ -332,7 +332,7 @@ export default {
     margin-bottom: 18px;
   }
 }
-.black-gradient-error {
+.black-gradient-result {
   position: absolute;
   width: 100%;
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
@@ -357,7 +357,7 @@ export default {
     clip-path: inset(0 round 11px);
   }
 }
-.black-gradient-loading {
+.black-gradient-state {
   position: absolute;
   width: 100%;
   box-shadow: 0 0 2px 0 rgba(0,0,0,0.30);
@@ -383,7 +383,7 @@ export default {
   }
 }
 
-.errorContainer {
+.resultContainer {
   display: flex;
   background-color: rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);

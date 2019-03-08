@@ -329,7 +329,6 @@ function registerMainWindowEvent() {
           case NOT_SUPPORTED_SUBTITLE:
           case REQUEST_TIMEOUT:
           case UPLOAD_FAILED:
-          case UPLOAD_SUCCESS:
             mainWindow.webContents.send('addMessages', log.errcode);
             break;
           default:
@@ -339,6 +338,7 @@ function registerMainWindowEvent() {
         switch (log.code) {
           case ONLINE_LOADING:
           case SUBTITLE_UPLOAD:
+          case UPLOAD_SUCCESS:
             mainWindow.webContents.send('addMessages', log.code);
             break;
           default:

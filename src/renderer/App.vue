@@ -51,7 +51,7 @@
         switch (code) {
           case FILE_NON_EXIST:
             this.$store.dispatch('addMessages', {
-              type: 'error',
+              type: 'result',
               title: this.$t('errorFile.fileNonExist.title'),
               content: this.$t('errorFile.fileNonExist.content'),
               dismissAfter: 5000,
@@ -62,7 +62,7 @@
             break;
           case EMPTY_FOLDER:
             this.$store.dispatch('addMessages', {
-              type: 'error',
+              type: 'result',
               title: this.$t('errorFile.emptyFolder.title'),
               content: this.$t('errorFile.emptyFolder.content'),
               dismissAfter: 5000,
@@ -70,7 +70,7 @@
             break;
           case OPEN_FAILED:
             this.$store.dispatch('addMessages', {
-              type: 'error',
+              type: 'result',
               title: this.$t('errorFile.default.title'),
               content: this.$t('errorFile.default.content'),
               dismissAfter: 5000,
@@ -78,7 +78,7 @@
             break;
           case ONLINE_LOADING:
             this.$store.dispatch('addMessages', {
-              type: 'loading',
+              type: 'state',
               title: '',
               content: this.$t('loading.content'),
               dismissAfter: 2000,
@@ -86,7 +86,7 @@
             break;
           case SUBTITLE_OFFLINE:
             this.$store.dispatch('addMessages', {
-              type: 'error',
+              type: 'result',
               title: this.$t('errorFile.offLine.title'),
               content: this.$t('errorFile.offLine.content'),
               dismissAfter: 5000,
@@ -94,7 +94,7 @@
             break;
           case NOT_SUPPORTED_SUBTITLE:
             this.$store.dispatch('addMessages', {
-              type: 'error',
+              type: 'result',
               title: this.$t('errorFile.loadFailed.title'),
               content: this.$t('errorFile.loadFailed.content'),
               dismissAfter: 5000,
@@ -102,7 +102,7 @@
             break;
           case REQUEST_TIMEOUT:
             this.$store.dispatch('addMessages', {
-              type: 'error',
+              type: 'result',
               title: this.$t('errorFile.timeout.title'),
               content: this.$t('errorFile.timeout.content'),
               dismissAfter: 5000,
@@ -110,7 +110,7 @@
             break;
           case SUBTITLE_UPLOAD:
             this.$store.dispatch('addMessages', {
-              type: 'loading',
+              type: 'state',
               title: '',
               content: this.$t('uploading.content'),
               dismissAfter: 2000,
@@ -118,7 +118,7 @@
             break;
           case UPLOAD_SUCCESS:
             this.$store.dispatch('addMessages', {
-              type: 'error',
+              type: 'result',
               title: this.$t('uploadingSuccess.title'),
               content: this.$t('uploadingSuccess.content'),
               dismissAfter: 5000,
@@ -126,7 +126,7 @@
             break;
           case UPLOAD_FAILED:
             this.$store.dispatch('addMessages', {
-              type: 'error',
+              type: 'result',
               title: this.$t('uploadingFailed.title'),
               content: this.$t('uploadingFailed.content'),
               dismissAfter: 5000,
