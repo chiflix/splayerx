@@ -21,6 +21,7 @@
         }">
         <Icon type="folder"
           :style="{
+            opacity: mouseover ? '1' : '0.5',
             width: sizeAdaption(10),
             height: sizeAdaption(16),
             marginRight: sizeAdaption(4),
