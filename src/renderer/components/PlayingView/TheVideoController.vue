@@ -124,7 +124,7 @@ export default {
       mousemovePosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen']),
+    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
     onlyOneVideo() {
       return this.playingList.length === 1;
     },
@@ -147,6 +147,10 @@ export default {
         return this.isMousemove;
       }
       return false;
+    },
+    shouldLift() {
+      return process.platform === 'darwin' &&
+        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height;
     },
   },
   watch: {
@@ -230,13 +234,19 @@ export default {
       };
     });
     this.$bus.$on('to-fullscreen', () => {
-      this.preFullScreen = true;
+      if (this.shouldLift) {
+        this.preFullScreen = true;
+      }
     });
     this.$bus.$on('toggle-fullscreen', () => {
-      this.preFullScreen = !this.preFullScreen;
+      if (this.shouldLift) {
+        this.preFullScreen = !this.preFullScreen;
+      }
     });
     this.$bus.$on('off-fullscreen', () => {
-      this.preFullScreen = false;
+      if (this.shouldLift) {
+        this.preFullScreen = false;
+      }
     });
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
