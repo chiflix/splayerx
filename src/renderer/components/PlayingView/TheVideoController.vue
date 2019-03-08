@@ -32,7 +32,7 @@
       :attachedShown="attachedShown"
       :mousedownOnPlayButton="mousedownOnPlayButton"
       :showAllWidgets="showAllWidgets"/>
-    <div class="control-buttons" v-fade-in="showAllWidgets">
+    <div class="control-buttons" v-fade-in="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
       v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging.sync="lastDragging"
@@ -41,8 +41,8 @@
       v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" />
-    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" />
+    <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
+    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
   </div>
 </template>
 <script>
@@ -113,6 +113,7 @@ export default {
       lastMousedownVolume: false,
       mousedownOnPlayButton: false,
       mousedownOnVolume: false,
+      preFullScreen: false,
     };
   },
   computed: {
@@ -123,7 +124,7 @@ export default {
       mousemovePosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized']),
+    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
     showAllWidgets() {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
@@ -211,6 +212,7 @@ export default {
     },
   },
   mounted() {
+    this.preFullScreen = this.isFullScreen;
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
@@ -224,7 +226,24 @@ export default {
         hovering: false,
       };
     });
-
+    this.$bus.$on('to-fullscreen', () => {
+      if (process.platform === 'darwin' &&
+        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
+        this.preFullScreen = true;
+      }
+    });
+    this.$bus.$on('toggle-fullscreen', () => {
+      if (process.platform === 'darwin' &&
+        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
+        this.preFullScreen = !this.preFullScreen;
+      }
+    });
+    this.$bus.$on('off-fullscreen', () => {
+      if (process.platform === 'darwin' &&
+        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
+        this.preFullScreen = false;
+      }
+    });
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);

@@ -28,7 +28,7 @@
         type="titleBarWinClose">
       </Icon>
     </div>
-    <div class="mac-icons" 
+    <div class="mac-icons"
       v-if="isDarwin"
       v-fade-in="showTitleBar"
       @mouseover="handleMouseOver"
@@ -156,11 +156,13 @@ export default {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
     },
     handleFullscreenExit() {
+      this.$bus.$emit('off-fullscreen');
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
     },
     // OS-specific methods
     handleMacFull() {
       if (this.itemType === this.itemTypeEnum.FULLSCREEN) {
+        this.$bus.$emit('to-fullscreen');
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
       } else if (this.isMaximized) {
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
