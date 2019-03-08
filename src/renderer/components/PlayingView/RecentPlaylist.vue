@@ -62,7 +62,7 @@
         :thumbnailWidth="thumbnailWidth"
         :sizeAdaption="sizeAdaption"
         :eventTarget="eventTarget"/>
-      <AuthorizeFolder v-if="isMas"
+      <AuthorizeFolder v-if="isMas && onlyOneVideo"
         :onAuthorizeMouseover="onAuthorizeMouseover"
         :onAuthorizeMouseout="onAuthorizeMouseout"
         :thumbnailWidth="thumbnailWidth"
@@ -169,9 +169,11 @@ export default {
     },
     onAuthorizeMouseover() {
       this.onAuthorize = true;
+      this.hoverIndex = this.authorizeIndex;
     },
     onAuthorizeMouseout() {
       this.onAuthorize = false;
+      this.hoverIndex = this.playingIndex;
     },
     onItemMouseout() {
       this.hoverIndex = this.playingIndex;
@@ -287,6 +289,9 @@ export default {
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
+    authorizeIndex() {
+      return this.playingList.length;
+    },
     isMas() {
       // return process.platform === 'darwin' && process.mas;
       return true;

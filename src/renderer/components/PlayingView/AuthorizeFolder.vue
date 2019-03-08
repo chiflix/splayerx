@@ -22,11 +22,12 @@
         <Icon type="folder"
           :style="{
             width: sizeAdaption(10),
-            height: sizeAdaption(22),
+            height: sizeAdaption(16),
             marginRight: sizeAdaption(4),
           }"/>
         <div class="content"
           :style="{
+            lineHeight: sizeAdaption(16),
             color: mouseover ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.4)',
             fontSize: sizeAdaption(12),
           }">{{ $t('recentPlaylist.briefAuthorize') }}</div>
@@ -76,7 +77,7 @@ export default {
     },
     handleMousedown() {
       this.openFilesByDialog({
-        defaultPath: path.dirname(path.dirname(this.$store.getters.originSrc)),
+        defaultPath: path.dirname(this.$store.getters.originSrc),
       });
     },
   },
@@ -111,13 +112,11 @@ export default {
       display: flex;
       flex-direction: row;
       align-items: center;
-      height: fit-content;
 
       .content {
         opacity: 0.7;
         font-family: $font-semibold;
         letter-spacing: 0.5px;
-        line-height: 16px;
       }
     }
     .folder-address {
