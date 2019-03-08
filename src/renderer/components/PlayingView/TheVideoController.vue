@@ -148,10 +148,6 @@ export default {
       }
       return false;
     },
-    shouldLift() {
-      return process.platform === 'darwin' &&
-        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height;
-    },
   },
   watch: {
     originSrc() {
@@ -234,17 +230,20 @@ export default {
       };
     });
     this.$bus.$on('to-fullscreen', () => {
-      if (this.shouldLift) {
+      if (process.platform === 'darwin' &&
+        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
         this.preFullScreen = true;
       }
     });
     this.$bus.$on('toggle-fullscreen', () => {
-      if (this.shouldLift) {
+      if (process.platform === 'darwin' &&
+        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
         this.preFullScreen = !this.preFullScreen;
       }
     });
     this.$bus.$on('off-fullscreen', () => {
-      if (this.shouldLift) {
+      if (process.platform === 'darwin' &&
+        this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
         this.preFullScreen = false;
       }
     });
