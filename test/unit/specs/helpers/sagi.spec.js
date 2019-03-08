@@ -1,5 +1,6 @@
 import { createSandbox } from 'sinon';
 import Sagi from '@/helpers/sagi';
+import { randStr } from '../../helpers';
 
 describe('helper.sagi api', () => {
   let sandbox;
@@ -76,6 +77,7 @@ describe('helper.sagi api', () => {
       transcriptData = {
         ...baseTranscriptData,
         mediaIdentity: randomMediaIdentity,
+        hints: randStr(),
       };
     });
 
@@ -92,6 +94,7 @@ describe('helper.sagi api', () => {
         transcriptData.playedTime,
         transcriptData.totalTime,
         transcriptData.delay,
+        transcriptData.hints,
         samplePayload,
       );
     });
@@ -109,6 +112,7 @@ describe('helper.sagi api', () => {
         transcriptData.playedTime,
         transcriptData.totalTime,
         transcriptData.delay,
+        transcriptData.hints,
         randomMediaIdentity,
       );
     });
@@ -131,6 +135,7 @@ describe('helper.sagi api', () => {
         transcriptData.playedTime,
         transcriptData.totalTime,
         transcriptData.delay,
+        transcriptData.hints,
         samplePayload,
       );
       sandbox.assert.notCalled(pushTransctiptRawWithTranscriptSpy);
