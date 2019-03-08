@@ -62,7 +62,7 @@
         :thumbnailWidth="thumbnailWidth"
         :sizeAdaption="sizeAdaption"
         :eventTarget="eventTarget"/>
-      <AuthorizeFolder v-if="isMas && onlyOneVideo"
+      <AuthorizeFolder v-if="isMas"
         :onAuthorizeMouseover="onAuthorizeMouseover"
         :onAuthorizeMouseout="onAuthorizeMouseout"
         :thumbnailWidth="thumbnailWidth"
