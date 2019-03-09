@@ -108,6 +108,7 @@ class Sagi {
     playedTime,
     totalTime,
     delay,
+    hints,
     payload,
   ) {
     return new Promise((resolve, reject) => {
@@ -119,6 +120,7 @@ class Sagi {
       req.setPlayedTime(playedTime);
       req.setTotalTime(totalTime);
       req.setDelay(delay);
+      req.setHints(hints);
       req.setPayload(payload);
       client.pushData(req, (err, res) => {
         if (err) reject(err);
@@ -134,6 +136,7 @@ class Sagi {
     playedTime,
     totalTime,
     delay,
+    hints,
     transcriptIdentity,
   ) {
     return new Promise((resolve, reject) => {
@@ -145,6 +148,7 @@ class Sagi {
       req.setPlayedTime(playedTime);
       req.setTotalTime(totalTime);
       req.setDelay(delay);
+      req.setHints(hints);
       req.setTranscriptIdentity(transcriptIdentity);
       client.pushData(req, (err, res) => {
         if (err) reject(err);
@@ -161,6 +165,7 @@ class Sagi {
       playedTime,
       totalTime,
       delay,
+      hints,
       transcriptIdentity,
       payload,
     } = transcriptInfo;
@@ -175,6 +180,7 @@ class Sagi {
           playedTime,
           totalTime,
           delay,
+          hints,
           payload,
         ).then((res) => {
           const resAsObject = res.toObject();
@@ -189,6 +195,7 @@ class Sagi {
           playedTime,
           totalTime,
           delay,
+          hints,
           transcriptIdentity,
         ).then((res) => {
           const resAsObject = res.toObject();

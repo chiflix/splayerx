@@ -495,6 +495,7 @@ export default {
         totalTime: this.duration,
         delay: this.subtitleDelay,
         src: id,
+        hints: this.generateHints(this.originSrc),
       };
       const instance = this.subtitleInstances[id];
       if (instance) {
