@@ -35,13 +35,14 @@ export function localFormatLoader(src) {
  * @param {boolean} detectEncoding - to encoding detection or subtitle format detection
  * @returns {Promise<Buffer>} buffer of the sample text
  */
-function getFragmentBuffer(path, detectEncoding) {
+function getFragmentBuffer(path, detectLanguage) {
   return new Promise((resolve, reject) => {
+    const size = detectLanguage ? 4096 * 20 : 4096;
     open(path, 'r', (err, fd) => {
       if (err) reject(err);
-      const pos = detectEncoding ? 0 : 4096 * 30;
-      const buf = Buffer.alloc(4096); // https://github.com/Microsoft/vscode/blob/f886dd4fb84bb82478bfab4a68cd3f31b32f5eb5/src/vs/base/node/encoding.ts#L268
-      readSync(fd, buf, 0, 4096, pos);
+      const pos = 0;
+      const buf = Buffer.alloc(size); // https://github.com/Microsoft/vscode/blob/f886dd4fb84bb82478bfab4a68cd3f31b32f5eb5/src/vs/base/node/encoding.ts#L268
+      readSync(fd, buf, 0, size, pos);
       resolve(buf);
       closeSync(fd);
     });
@@ -54,7 +55,7 @@ function getFragmentBuffer(path, detectEncoding) {
  * @returns chardet format encoding
  */
 export async function localEncodingLoader(path) {
-  const encodingBuffer = await getFragmentBuffer(path, true);
+  const encodingBuffer = await getFragmentBuffer(path);
   return chardet.detect(encodingBuffer);
 }
 
@@ -70,7 +71,8 @@ export async function localEncodingLoader(path) {
 export async function localLanguageLoader(path, format) {
   const fileEncoding = await localEncodingLoader(path);
   try {
-    const string = iconv.decode(await getFragmentBuffer(path), fileEncoding);
+    const string = iconv.decode(await getFragmentBuffer(path, true), fileEncoding);
+    console.log(languageLoader(string, format));
     return languageLoader(string, format)[0];
   } catch (e) {
     helpers.methods.addLog('error', {
