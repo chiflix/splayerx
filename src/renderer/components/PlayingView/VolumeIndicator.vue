@@ -111,12 +111,19 @@ export default {
       if (percentOfVolume > 0) this.volume = percentOfVolume;
       this.mousedown = true;
       this.$emit('update:volume-state', true);
+      let isMoved = false;
       document.onmousemove = (e) => {
+        isMoved = true;
         const percentOfVolume = ((window.innerHeight - e.clientY) - (containerTop) - 19) /
           this.$refs.indicatorContainer.clientHeight;
         if (percentOfVolume > 0) this.volume = percentOfVolume;
       };
       document.onmouseup = () => {
+        if (isMoved) {
+          this.$ga.event('app', 'volume', 'drag');
+        } else {
+          this.$ga.event('app', 'volune', 'mousedown');
+        }
         document.onmousemove = null;
         this.mousedown = false;
         this.$emit('update:volume-state', false);

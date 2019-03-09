@@ -111,6 +111,7 @@ new Vue({
     return {
       menu: null,
       topOnWindow: false,
+      canSendVolumeGa: true,
     };
   },
   computed: {
@@ -471,6 +472,7 @@ new Vue({
               accelerator: 'Up',
               id: 'inVolume',
               click: () => {
+                this.$ga.event('app', 'volume', 'keyboard');
                 this.$store.dispatch(videoActions.INCREASE_VOLUME);
               },
             },
@@ -479,6 +481,7 @@ new Vue({
               accelerator: 'Down',
               id: 'deVolume',
               click: () => {
+                this.$ga.event('app', 'volume', 'keyboard');
                 this.$store.dispatch(videoActions.DECREASE_VOLUME);
               },
             },
@@ -1139,6 +1142,13 @@ new Vue({
         }
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
           if (Math.abs(e.deltaY) !== 0) {
+            if (this.canSendVolumeGa) {
+              this.$ga.event('app', 'volume', 'wheel');
+              this.canSendVolumeGa = false;
+              setTimeout(() => {
+                this.canSendVolumeGa = true;
+              }, 1000);
+            }
             if (process.platform !== 'darwin') {
               this.$store.dispatch(
                 e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
