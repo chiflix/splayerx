@@ -16,9 +16,9 @@ export default function fragmentToLanguage(fragment, type) {
   const dialoguesSplitter = (dialogues, splitterRegex) => {
     dialogues = dialogues.map(dialogue => dialogue.split(splitterRegex));
 
-    const firstDialogueLanguageCount = dialogues[0].length;
-    const secondDialogueLanguageCount = dialogues[1].length;
-    const languageCount = Math.max(firstDialogueLanguageCount, secondDialogueLanguageCount);
+    const languageCount = dialogues
+      .map(({ length }) => length)
+      .some(length => length > 1) ? 2 : 1;
 
     const result = [];
     for (let i = 0; i < languageCount; i += 1) {
@@ -30,7 +30,11 @@ export default function fragmentToLanguage(fragment, type) {
     }
     return result.map(franc).map((iso6393code, index) => {
       if (iso6393code === 'cmn') {
-        return isSimplified(result[index]) ? 'zh-CN' : 'zh-TW';
+        try {
+          return isSimplified(result[index]) ? 'zh-CN' : 'zh-TW';
+        } catch (e) {
+          return 'zh-CN';
+        }
       }
       return normalizeCode(iso6393code);
     });
@@ -44,8 +48,15 @@ export default function fragmentToLanguage(fragment, type) {
     case 'advanced substation alpha':
     case 'ssa':
     case 'substation alpha': {
-      const textRegex = /(Dialogue([:,.*\w\d\s]+))|(\{.+\})/g;
-      dialogues = dialogueNomalizer(fragment, textRegex);
+      const dialogueMatchRegex = /^Dialogue.*/gm;
+      let matched = dialogueMatchRegex.exec(fragment);
+      let resultFragment = '';
+      while (matched) {
+        resultFragment = `${resultFragment}\n${matched[0]}`;
+        matched = dialogueMatchRegex.exec(fragment);
+      }
+      const textRegex = /[^{}\n]*,|\{.+\}|[mlb][\s\d-]*/g;
+      dialogues = dialogueNomalizer(resultFragment, textRegex);
       splitterRegex = /\\+n\s?/gi;
       break;
     }
