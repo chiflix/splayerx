@@ -122,7 +122,7 @@ export default {
         if (isMoved) {
           this.$ga.event('app', 'volume', 'drag');
         } else {
-          this.$ga.event('app', 'volune', 'mousedown');
+          this.$ga.event('app', 'volume', 'mousedown');
         }
         document.onmousemove = null;
         this.mousedown = false;
