@@ -225,6 +225,7 @@ export default {
       this.$ga.event('app', 'toggle-playback');
     });
     this.$bus.$on('next-video', () => {
+      videodata.paused = false;
       if (this.nextVideo) {
         this.playFile(this.nextVideo);
       }
