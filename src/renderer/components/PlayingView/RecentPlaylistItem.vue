@@ -16,7 +16,7 @@
         <div class="white-hover"
           ref="whiteHover"
           :style="{
-            opacity: hoverIndex === index ? '1' : '0',
+            opacity: hovered ? '1' : '0',
             minWidth: `${thumbnailWidth}px`,
             minHeight: `${thumbnailHeight}px`,
           }"/>
@@ -24,9 +24,11 @@
         <div class="content" ref="content"
           @mouseenter="mouseoverVideo"
           @mouseleave="mouseoutVideo"
+          @mousedown="mousedownVideo"
           @mouseup="mouseupVideo"
           :style="{
             height: '100%',
+            zIndex: moveIndex === index ? '200' : '100',
           }">
           <div class="info"
             :style="{
@@ -100,7 +102,16 @@ export default {
     index: {
       type: Number,
     },
-    hoverIndex: {
+    hovered: {
+      type: Boolean,
+    },
+    moveIndex: {
+      type: Number,
+    },
+    movementX: {
+      type: Number,
+    },
+    movementY: {
       type: Number,
     },
     isInRange: {
@@ -116,6 +127,9 @@ export default {
     thumbnailWidth: {
       type: Number,
       default: 112,
+    },
+    thumbnailHeight: {
+      type: Number,
     },
     winWidth: {
       type: Number,
@@ -146,18 +160,32 @@ export default {
       imgPath: '',
       videoHeight: 0,
       videoWidth: 0,
+      itemMoving: false,
     };
   },
   methods: {
+    mousedownVideo(e) {
+      const mousedownPosition = [e.pageX, e.pageY];
+      document.onmousemove = (e) => {
+        this.itemMoving = true;
+        const offsetX = e.pageX - mousedownPosition[0];
+        const offsetY = e.pageY - mousedownPosition[1];
+        this.eventTarget.onItemMousemove(this.index, offsetX, offsetY);
+        this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${offsetX}px, ${offsetY}px)`);
+      };
+    },
     mouseupVideo() {
-      this.eventTarget.onItemMouseup(this.index);
+      document.onmousemove = null;
+      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
       this.$refs.progress.style.setProperty('opacity', '0');
+      this.eventTarget.onItemMouseup(this.index);
+      this.itemMoving = false;
     },
     updateAnimationIn() {
       if (!this.isPlaying && this.imageLoaded) {
         this.$refs.blur.classList.remove('blur');
       }
-      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(-9px)');
+      if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,-9px)');
       this.$refs.content.style.setProperty('height', `${this.thumbnailHeight + 10}px`);
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.6)');
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.8)');
@@ -169,7 +197,7 @@ export default {
       if (!this.isPlaying && this.imageLoaded) {
         this.$refs.blur.classList.add('blur');
       }
-      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translateY(0)');
+      if (!this.itemMoving) this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
       this.$refs.content.style.setProperty('height', '100%');
       this.$refs.border.style.setProperty('border-color', 'rgba(255,255,255,0.15)');
       this.$refs.title.style.setProperty('color', 'rgba(255,255,255,0.40)');
@@ -253,8 +281,35 @@ export default {
         });
       }
     },
+    displayIndex(val) {
+      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+      const distance = marginRight + this.thumbnailWidth;
+      if (val !== this.index) {
+        this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${(val - this.index) * distance}px,0)`);
+      } else {
+        this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+      }
+    },
   },
   computed: {
+    displayIndex() {
+      let displayIndex = this.index;
+      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+      const distance = marginRight + this.thumbnailWidth;
+      if (Math.abs(this.movementY) > this.thumbnailHeight && this.moveIndex < this.index) {
+        displayIndex = this.index - 1;
+      } else if (Math.abs(this.movementY) < this.thumbnailHeight) {
+        const indexOfMoveItem = this.movementX > 0 ? // 移动到的位置
+          this.moveIndex + Math.floor(this.movementX / distance) :
+          this.moveIndex + Math.ceil(this.movementX / distance);
+        if (this.index > this.moveIndex && this.index <= indexOfMoveItem) {
+          displayIndex = this.index - 1;
+        } else if (this.index >= indexOfMoveItem && this.index < this.moveIndex) {
+          displayIndex = this.index + 1;
+        }
+      }
+      return displayIndex;
+    },
     baseName() {
       const parsedName = parseNameFromPath(this.path);
       if (parsedName.episode && parsedName.season) {
@@ -278,9 +333,6 @@ export default {
     },
     imageLoaded() {
       return this.smallShortCut || this.coverSrc !== '';
-    },
-    thumbnailHeight() {
-      return this.thumbnailWidth / (112 / 63);
     },
     sliderPercentage() {
       if (this.lastPlayedTime) {
@@ -332,7 +384,6 @@ $border-radius: 3px;
     }
     .content {
       position: absolute;
-      z-index: 100;
       top: 0;
       left: 0;
       right: 0;
@@ -354,8 +405,6 @@ $border-radius: 3px;
         flex-direction: row;
         height: fit-content;
 
-        .playlist-play {
-        }
         .playing {
           opacity: 0.7;
           font-family: $font-semibold;
@@ -400,9 +449,6 @@ $border-radius: 3px;
     border-style: solid;
     border-radius: 3px;
   }
-}
-.middleChosen {
-  background-color: rgba(255, 255, 255, 0.7);
 }
 
 .fade-enter-active, .fade-leave-active {

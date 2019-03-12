@@ -50,6 +50,7 @@
         marginLeft: sizeAdaption(40),
       }">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
+        :class="index === moveIndex ? 'lifting' : ''"
         :key="item"
         :index="index"
         :path="item"
@@ -58,11 +59,15 @@
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
         :isShifting="shifting"
-        :hoverIndex="hoverIndex"
+        :hovered="hoverIndex === index"
+        :moveIndex="moveIndex"
+        :movementX="movementX"
+        :movementY="movementY"
         :thumbnailWidth="thumbnailWidth"
+        :thumbnailHeight="thumbnailHeight"
         :sizeAdaption="sizeAdaption"
         :eventTarget="eventTarget"/>
-      <AuthorizeFolder v-if="isMas"
+      <AuthorizeFolder
         :onAuthorizeMouseover="onAuthorizeMouseover"
         :onAuthorizeMouseout="onAuthorizeMouseout"
         :thumbnailWidth="thumbnailWidth"
@@ -108,6 +113,9 @@ export default {
       filename: '',
       firstIndex: 0, // first index of current page
       hoverIndex: 0, // only for display
+      moveIndex: NaN, // index of move item
+      movementX: NaN, // movementX of move item
+      movementY: NaN, // movementY of move item
       shifting: false,
       snapShoted: false,
       hoveredMediaInfo: {}, // the hovered video's media info
@@ -130,10 +138,12 @@ export default {
       this.filePathNeedToDelete = '';
     });
     this.hoverIndex = this.playingIndex;
+    this.eventTarget.onItemMousemove = this.onItemMousemove;
     this.eventTarget.onItemMouseover = this.onItemMouseover;
     this.eventTarget.onItemMouseout = this.onItemMouseout;
     this.eventTarget.onItemMouseup = this.onItemMouseup;
 
+    this.moveIndex = this.playingList.length;
     this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
@@ -159,6 +169,24 @@ export default {
         this.updateMousemoveTarget('the-video-controller');
       }
     },
+    updatelastPlayedTime(time) {
+      if (this.$refs.lastPlayedTime) {
+        if (this.hoverIndex === this.playingIndex) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
+        } else if (this.hoveredMediaInfo.lastPlayedTime) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
+        }
+      }
+    },
+    onItemMousemove(index, movementX, movementY) {
+      if (Math.abs(movementY) > 0 || Math.abs(movementX) > 0) {
+        this.moveIndex = index;
+        this.movementX = movementX;
+        this.movementY = movementY;
+      } else {
+        this.moveIndex = this.playingList.length;
+      }
+    },
     onItemMouseover(index, media) {
       this.hoverIndex = index;
       this.hoveredMediaInfo = media;
@@ -179,15 +207,6 @@ export default {
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
-    updatelastPlayedTime(time) {
-      if (this.$refs.lastPlayedTime) {
-        if (this.hoverIndex === this.playingIndex) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
-        } else if (this.hoveredMediaInfo.lastPlayedTime) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
-        }
-      }
-    },
     onItemMouseup(index) {
       // last page
       if (index === this.firstIndex - 1) {
@@ -207,10 +226,12 @@ export default {
           this.tranFlag = false;
         }, 400);
       } else if (index !== this.playingIndex && !this.shifting
+        && this.moveIndex === this.playingList.length
         && this.filePathNeedToDelete !== this.playingList[index]) {
         this.changeByRecent = true;
         this.playFile(this.playingList[index]);
       }
+      this.moveIndex = this.playingList.length;
     },
   },
   watch: {
@@ -223,6 +244,9 @@ export default {
       this.changeByRecent = false;
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+    },
+    playingList(val) {
+      this.moveIndex = val.length;
     },
     firstIndex() {
       if (this.lastIndex > this.maxIndex) {
@@ -291,10 +315,6 @@ export default {
     }),
     authorizeIndex() {
       return this.playingList.length;
-    },
-    isMas() {
-      // return process.platform === 'darwin' && process.mas;
-      return true;
     },
     onlyOneVideo() {
       return this.playingList.length === 1;
@@ -371,6 +391,9 @@ export default {
         width = this.winWidth * (112 / 1355);
       }
       return Math.floor(width);
+    },
+    thumbnailHeight() {
+      return this.thumbnailWidth / (112 / 63);
     },
   },
 };
