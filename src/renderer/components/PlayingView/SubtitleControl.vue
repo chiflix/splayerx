@@ -60,13 +60,17 @@
                           }">
                           <div class="textContainer"
                             @mouseover="toggleItemsMouseOver(index)"
-                            @mouseleave="toggleItemsMouseLeave(index)">
+                            @mouseleave="toggleItemsMouseLeave(index)"
+                            :style="{ width: currentSubtitleId === item.id ? `${textWidth}px` : '100%' }">
                             <div class="text"
-                              :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                              :style="{
+                                wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
                                 whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
                               }">{{ getSubName(item) }}</div>
                           </div>
-                          <Icon type="deleteSub" class="delete"></Icon>
+                          <div class="iconContainer" :style="{ width: currentSubtitleId === item.id ? `${iconWidth}px` : '0' }">
+                            <Icon type="deleteSub" class="deleteIcon" v-show="item.type === 'local' && currentSubtitleId === item.id"></Icon>
+                          </div>
                         </div>
                       </div>
 
@@ -181,6 +185,22 @@ export default {
     },
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.77;
+    },
+    textWidth() {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
+        return 116;
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+        return 141;
+      }
+      return 196;
+    },
+    iconWidth() {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
+        return 26;
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+        return 33;
+      }
+      return 46;
     },
     textHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -662,19 +682,21 @@ export default {
       display: flex;
       margin: auto auto 4px 9px;
       .textContainer {
-        width: 120px;
         display: flex;
       }
       .text {
         font-size: 11px;
         letter-spacing: 0.2px;
         line-height: 13px;
-        margin: auto 9.43px;
+        margin: auto 0 auto 9px;
       }
-      .delete {
-        width: 22px;
-        height: 100%;
-        display: flex;
+      .iconContainer {
+        height: 27px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
@@ -737,12 +759,15 @@ export default {
         font-size: 12px;
         letter-spacing: 0.2px;
         line-height: 14px;
-        margin: auto 12.73px;
+        margin: auto 0 auto 12.73px;
       }
-      .delete {
-        width: 34px;
-        height: 100%;
-        display: flex;
+      .iconContainer {
+        height: 32px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
@@ -805,12 +830,15 @@ export default {
         font-size: 16px;
         letter-spacing: 0.27px;
         line-height: 18px;
-        margin: auto 17.89px;
+        margin: auto 0 auto 17.89px;
       }
-      .delete {
-        width: 62px;
-        height: 100%;
-        display: flex;
+      .iconContainer {
+        height: 44px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
