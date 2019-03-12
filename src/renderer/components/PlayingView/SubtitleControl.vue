@@ -69,7 +69,7 @@
                               }">{{ getSubName(item) }}</div>
                           </div>
                           <div class="iconContainer" :style="{ width: currentSubtitleId === item.id ? `${iconWidth}px` : '0' }">
-                            <Icon type="deleteSub" class="deleteIcon" v-show="item.type === 'local' && currentSubtitleId === item.id"></Icon>
+                            <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete(item)" v-show="item.type === 'local' && currentSubtitleId === item.id"></Icon>
                           </div>
                         </div>
                       </div>
@@ -115,6 +115,7 @@ import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
+import { deleteSubtitles } from '@/helpers/subtitle';
 import Icon from '../BaseIconContainer.vue';
 import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
@@ -327,9 +328,7 @@ export default {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
       }
-      if (val.length >= oldval.length) {
-        this.computedAvaliableItems = val.filter(sub => sub.name);
-      }
+      this.computedAvaliableItems = val.filter(sub => sub.name);
     },
     loadingType(val) {
       if (val === 'local') {
@@ -349,7 +348,14 @@ export default {
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
+      removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
     }),
+    async handleSubDelete(item) {
+      this.removeLocalSub(item.id);
+      this.$bus.$emit('off-subtitle');
+      const result = await deleteSubtitles([item.id]);
+      console.log(result);
+    },
     finishAnimation() {
       this.refAnimation = '';
     },
@@ -472,6 +478,10 @@ export default {
       }
     },
     toggleItemsMouseOver(index) {
+      this.showSubtitleDetails(index);
+      this.hoverIndex = index;
+    },
+    showSubtitleDetails(index) {
       if (index >= 0) {
         clearTimeout(this.detailTimer);
         const hoverItem = document.querySelector(`#item${index} .text`);
@@ -483,7 +493,6 @@ export default {
           }, 1500);
         }
       }
-      this.hoverIndex = index;
     },
     toggleItemsMouseLeave() {
       clearTimeout(this.detailTimer);
@@ -494,6 +503,11 @@ export default {
     toggleItemClick(index) {
       const { computedAvaliableItems } = this;
       this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+      setTimeout(() => {
+        console.log(123);
+        console.log(document.querySelector(`#item${index} .text`).clientWidth, document.querySelector(`#item${index} .text`).scrollWidth);
+        this.showSubtitleDetails(index);
+      }, 0);
     },
   },
   created() {

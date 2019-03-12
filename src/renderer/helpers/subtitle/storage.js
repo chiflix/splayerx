@@ -116,6 +116,7 @@ export async function retrieveSubtitle(subtitleId) {
 }
 export async function deleteSubtitles(subtitleIds) {
   if (!(subtitleIds instanceof Array) || !subtitleIds.length) return ({ success: [], failure: [] });
+  subtitleIds = subtitleIds.map(id => parseInt(id, 10));
   const success = [];
   const failure = [...subtitleIds];
   subtitleIds = subtitleIds.map(id => parseInt(id, 10));
