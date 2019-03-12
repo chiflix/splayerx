@@ -408,4 +408,22 @@ export default {
     }
   }
 }
+.deleteSub {
+  display: block;
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    width: 15px;
+    height: 15px;
+    margin: auto 8px auto auto;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    width: 18px;
+    height: 18px;
+    margin: auto 10px auto auto;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    width: 25px;
+    height: 25px;
+    margin: auto 15px auto auto;
+  }
+}
 </style>

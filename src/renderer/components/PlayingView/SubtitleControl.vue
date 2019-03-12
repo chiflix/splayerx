@@ -51,8 +51,6 @@
                         v-for="(item, index) in computedAvaliableItems" :key="item.rank">
                         <div class="menu-item-text-wrapper"
                           @mouseup="toggleItemClick(index)"
-                          @mouseover="toggleItemsMouseOver(index)"
-                          @mouseleave="toggleItemsMouseLeave(index)"
                           :id="'item'+index"
                           :style="{
                             transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
@@ -60,10 +58,15 @@
                             height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                             cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
                           }">
-                          <div class="text"
-                            :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                              whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                            }">{{ getSubName(item) }}</div>
+                          <div class="textContainer"
+                            @mouseover="toggleItemsMouseOver(index)"
+                            @mouseleave="toggleItemsMouseLeave(index)">
+                            <div class="text"
+                              :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                                whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                              }">{{ getSubName(item) }}</div>
+                          </div>
+                          <Icon type="deleteSub" class="delete"></Icon>
                         </div>
                       </div>
 
@@ -658,11 +661,20 @@ export default {
       width: 142px;
       display: flex;
       margin: auto auto 4px 9px;
+      .textContainer {
+        width: 120px;
+        display: flex;
+      }
       .text {
         font-size: 11px;
         letter-spacing: 0.2px;
         line-height: 13px;
         margin: auto 9.43px;
+      }
+      .delete {
+        width: 22px;
+        height: 100%;
+        display: flex;
       }
     }
     .placeholder-item-text-wrapper {
@@ -717,11 +729,20 @@ export default {
       width: 174px;
       display: flex;
       margin: auto auto 5px 9.5px;
+      .textContainer {
+        width: 140px;
+        display: flex;
+      }
       .text {
         font-size: 12px;
         letter-spacing: 0.2px;
         line-height: 14px;
         margin: auto 12.73px;
+      }
+      .delete {
+        width: 34px;
+        height: 100%;
+        display: flex;
       }
     }
     .placeholder-item-text-wrapper {
@@ -776,11 +797,20 @@ export default {
       width: 242px;
       display: flex;
       margin: auto auto 7px 12px;
+      .textContainer {
+        width: 180px;
+        display: flex;
+      }
       .text {
         font-size: 16px;
         letter-spacing: 0.27px;
         line-height: 18px;
         margin: auto 17.89px;
+      }
+      .delete {
+        width: 62px;
+        height: 100%;
+        display: flex;
       }
     }
     .placeholder-item-text-wrapper {
