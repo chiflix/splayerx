@@ -51,13 +51,6 @@ describe('SubtitleLoader unit tests', () => {
         done();
       });
     });
-
-    it(`should throw ${ErrorCodes.SUBTITLE_INVALID_TYPE} when pass invalid type`, () => {
-      expect(() => new SubtitleLoader('', 'invalid')).to.throw(SubtitleError).with.property('code', ErrorCodes.SUBTITLE_INVALID_TYPE);
-    });
-    it(`should throw ${ErrorCodes.SUBTITLE_INVALID_FORMAT} when no loader found`, () => {
-      expect(() => new SubtitleLoader('', 'local')).to.throw(SubtitleError).with.property('code', ErrorCodes.SUBTITLE_INVALID_FORMAT);
-    });
   });
 
   describe('metaInfo test', () => {
