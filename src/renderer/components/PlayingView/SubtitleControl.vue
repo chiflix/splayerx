@@ -43,9 +43,7 @@
                           height: `${itemHeight}px`,
                           cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
                         }">
-                        <div class="text" :style="{
-                          transitionDelay: hoverIndex === -1 ? '200ms' : '',
-                        }">{{ noSubtitle }}</div>
+                        <div class="text">{{ noSubtitle }}</div>
                       </div>
                     </div>
 
@@ -53,6 +51,8 @@
                         v-for="(item, index) in computedAvaliableItems" :key="item.rank">
                         <div class="menu-item-text-wrapper"
                           @mouseup="toggleItemClick($event, index)"
+                          @mouseover="toggleItemsMouseOver(index)"
+                          @mouseleave="toggleItemsMouseLeave(index)"
                           :id="'item'+index"
                           :style="{
                             transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
@@ -60,18 +60,14 @@
                             height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                             cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
                           }">
-                          <div class="textContainer"
-                            @mouseover="toggleItemsMouseOver(index)"
-                            @mouseleave="toggleItemsMouseLeave(index)"
-                            :style="{ width: hoverIndex === index ? `${textWidth}px` : '100%' }">
+                          <div class="textContainer">
                             <div class="text"
                               :style="{
-                                transitionDelay: hoverIndex === index ? '200ms' : '',
                                 wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
                                 whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
                               }">{{ getSubName(item) }}</div>
                           </div>
-                          <div class="iconContainer" :style="{ width: hoverIndex === index ? `${iconWidth}px` : '0' }">
+                          <div class="iconContainer">
                             <transition name="sub-delete">
                               <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete(item)" v-show="item.type === 'local' && hoverIndex === index"></Icon>
                             </transition>
@@ -191,22 +187,6 @@ export default {
     },
     iconOpacity() {
       return this.isShowingHovered ? 0.9 : 0.77;
-    },
-    textWidth() {
-      if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return 116;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return 141;
-      }
-      return 196;
-    },
-    iconWidth() {
-      if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return 26;
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return 33;
-      }
-      return 46;
     },
     textHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -637,9 +617,11 @@ export default {
   }
   .menu-item-text-wrapper {
     .deleteIcon {
-      transition-delay: 200ms;
+      transition-delay: 30ms;
     }
     .text {
+      transition: color 200ms linear;
+      transition-delay: 70ms;
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
     }
@@ -704,6 +686,7 @@ export default {
       display: flex;
       margin: auto auto 4px 9px;
       .textContainer {
+        width: 116px;
         display: flex;
       }
       .text {
@@ -713,6 +696,7 @@ export default {
         margin: auto 0 auto 9px;
       }
       .iconContainer {
+        width: 26px;
         height: 27px;
         .deleteIcon {
           width: 100%;
@@ -774,6 +758,7 @@ export default {
       display: flex;
       margin: auto auto 5px 9.5px;
       .textContainer {
+        width: 141px;
         display: flex;
       }
       .text {
@@ -783,6 +768,7 @@ export default {
         margin: auto 0 auto 12.73px;
       }
       .iconContainer {
+        width: 33px;
         height: 32px;
         .deleteIcon {
           width: 100%;
@@ -844,6 +830,7 @@ export default {
       display: flex;
       margin: auto auto 7px 12px;
       .textContainer {
+        width: 196px;
         display: flex;
       }
       .text {
@@ -853,6 +840,7 @@ export default {
         margin: auto 0 auto 17.89px;
       }
       .iconContainer {
+        width: 46px;
         height: 44px;
         .deleteIcon {
           width: 100%;
@@ -890,11 +878,11 @@ export default {
 .sub-trans-l-leave-active {
   position: absolute;
 }
-.sub-delete-enter-active, .sub-delete-leave {
-  transition: opacity 80ms linear;
-  opacity: 1;
+
+.sub-delete-enter-active, .sub-delete-leave-active {
+  transition: opacity 200ms;
 }
-.sub-delete-enter, .sub-delete-leave-active {
+.sub-delete-enter, .sub-delete-leave-to {
   opacity: 0;
 }
 
