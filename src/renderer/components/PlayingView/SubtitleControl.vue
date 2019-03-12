@@ -766,7 +766,6 @@ export default {
       display: flex;
       margin: auto auto 5px 9.5px;
       .textContainer {
-        width: 140px;
         display: flex;
       }
       .text {
@@ -837,7 +836,6 @@ export default {
       display: flex;
       margin: auto auto 7px 12px;
       .textContainer {
-        width: 180px;
         display: flex;
       }
       .text {
