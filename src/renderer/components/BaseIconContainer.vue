@@ -409,6 +409,7 @@ export default {
   }
 }
 .deleteSub {
+  cursor: pointer;
   .default {
     display: block;
   }
