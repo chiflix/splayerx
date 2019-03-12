@@ -43,6 +43,11 @@ const mutations = {
       state.PlayingList.splice(pos, 1);
     }
   },
+  InsertItemToPlayingListByPos(state, item) {
+    if (item.newPosition >= 0) {
+      state.PlayingList.splice(item.newPosition, 0, item.src);
+    }
+  },
 };
 
 const actions = {
@@ -54,9 +59,14 @@ const actions = {
     commit('isFolderList', true);
     commit('PlayingList', payload);
   },
-  RemovePlayingList({ state, commit }, t) {
-    const pos = state.PlayingList.indexOf(t);
+  RemoveItemFromPlayingList({ state, commit }, item) {
+    const pos = state.PlayingList.indexOf(item);
     commit('RemoveItemFromPlayingListByPos', pos);
+  },
+  RepositionItemFromPlayingList({ state, commit }, item) {
+    const pos = state.PlayingList.indexOf(item.src);
+    commit('RemoveItemFromPlayingListByPos', pos);
+    commit('InsertItemToPlayingListByPos', item);
   },
   UpdatePlayingList({ dispatch, commit, state }) {
     const dirPath = path.dirname(state.PlayingList[0]);
@@ -78,7 +88,7 @@ const actions = {
     } else {
       for (let i = 0; i < state.PlayingList.length; i += 1) {
         fs.access(state.PlayingList[i], fs.constants.F_OK, (err) => {
-          if (err?.code === 'ENOENT') dispatch('RemovePlayingList', state.PlayingList[i]);
+          if (err?.code === 'ENOENT') dispatch('RemoveItemFromPlayingList', state.PlayingList[i]);
         });
       }
     }

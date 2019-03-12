@@ -135,7 +135,7 @@ export default {
       this.filePathNeedToDelete = path;
     });
     this.$bus.$on('delete-file', () => {
-      this.$store.dispatch('RemovePlayingList', this.filePathNeedToDelete);
+      this.$store.dispatch('RemoveItemFromPlayingList', this.filePathNeedToDelete);
       this.filePathNeedToDelete = '';
     });
     this.hoverIndex = this.playingIndex;
@@ -233,7 +233,12 @@ export default {
         this.playFile(this.playingList[index]);
       }
       if (Math.abs(this.movementY) > this.thumbnailHeight) {
-        this.$store.dispatch('RemovePlayingList', this.playingList[index]);
+        this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
+      } else if (this.indexOfMovingTo !== this.indexOfMovingItem) {
+        this.$store.dispatch('RepositionItemFromPlayingList', {
+          src: this.playingList[index],
+          newPosition: this.indexOfMovingTo,
+        });
       }
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
@@ -318,7 +323,7 @@ export default {
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
-    indexOfMovingTo() {
+    indexOfMovingTo() { // the place where the moving item is going to be set
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
       const distance = marginRight + this.thumbnailWidth;
       const indexOfMovingTo = this.movementX > 0 ? // 移动到的位置
