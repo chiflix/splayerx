@@ -43,7 +43,9 @@
                           height: `${itemHeight}px`,
                           cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
                         }">
-                        <div class="text">{{ noSubtitle }}</div>
+                        <div class="text" :style="{
+                          transitionDelay: hoverIndex === -1 ? '200ms' : '',
+                        }">{{ noSubtitle }}</div>
                       </div>
                     </div>
 
@@ -61,15 +63,18 @@
                           <div class="textContainer"
                             @mouseover="toggleItemsMouseOver(index)"
                             @mouseleave="toggleItemsMouseLeave(index)"
-                            :style="{ width: currentSubtitleId === item.id ? `${textWidth}px` : '100%' }">
+                            :style="{ width: hoverIndex === index ? `${textWidth}px` : '100%' }">
                             <div class="text"
                               :style="{
+                                transitionDelay: hoverIndex === index ? '200ms' : '',
                                 wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
                                 whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
                               }">{{ getSubName(item) }}</div>
                           </div>
-                          <div class="iconContainer" :style="{ width: currentSubtitleId === item.id ? `${iconWidth}px` : '0' }">
-                            <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete(item)" v-show="item.type === 'local' && currentSubtitleId === item.id"></Icon>
+                          <div class="iconContainer" :style="{ width: hoverIndex === index ? `${iconWidth}px` : '0' }">
+                            <transition name="sub-delete">
+                              <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete(item)" v-show="item.type === 'local' && hoverIndex === index"></Icon>
+                            </transition>
                           </div>
                         </div>
                       </div>
@@ -631,6 +636,9 @@ export default {
     color: rgba(255, 255, 255, 0.6);
   }
   .menu-item-text-wrapper {
+    .deleteIcon {
+      transition-delay: 200ms;
+    }
     .text {
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
@@ -881,6 +889,13 @@ export default {
 }
 .sub-trans-l-leave-active {
   position: absolute;
+}
+.sub-delete-enter-active, .sub-delete-leave {
+  transition: opacity 80ms linear;
+  opacity: 1;
+}
+.sub-delete-enter, .sub-delete-leave-active {
+  opacity: 0;
 }
 
 .refresh-animation {
