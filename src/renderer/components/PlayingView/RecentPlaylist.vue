@@ -50,17 +50,18 @@
         marginLeft: sizeAdaption(40),
       }">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
-        :class="index === moveIndex ? 'lifting' : ''"
         :key="item"
         :index="index"
         :path="item"
+        :itemMoving="itemMoving"
+        :indexOfMovingTo="indexOfMovingTo"
         :canHoverItem="canHoverItem"
         :isInRange="index >= firstIndex && index <= lastIndex"
         :isPlaying="index === playingIndex"
         :winWidth="winWidth"
         :isShifting="shifting"
         :hovered="hoverIndex === index"
-        :moveIndex="moveIndex"
+        :indexOfMovingItem="indexOfMovingItem"
         :movementX="movementX"
         :movementY="movementY"
         :thumbnailWidth="thumbnailWidth"
@@ -113,9 +114,9 @@ export default {
       filename: '',
       firstIndex: 0, // first index of current page
       hoverIndex: 0, // only for display
-      moveIndex: NaN, // index of move item
-      movementX: NaN, // movementX of move item
-      movementY: NaN, // movementY of move item
+      indexOfMovingItem: NaN, // index of move item
+      movementX: 0, // movementX of move item
+      movementY: 0, // movementY of move item
       shifting: false,
       snapShoted: false,
       hoveredMediaInfo: {}, // the hovered video's media info
@@ -143,7 +144,7 @@ export default {
     this.eventTarget.onItemMouseout = this.onItemMouseout;
     this.eventTarget.onItemMouseup = this.onItemMouseup;
 
-    this.moveIndex = this.playingList.length;
+    this.indexOfMovingItem = this.playingList.length;
     this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
@@ -178,13 +179,21 @@ export default {
         }
       }
     },
+    onAuthorizeMouseover() {
+      this.onAuthorize = true;
+      this.hoverIndex = this.authorizeIndex;
+    },
+    onAuthorizeMouseout() {
+      this.onAuthorize = false;
+      this.hoverIndex = this.playingIndex;
+    },
     onItemMousemove(index, movementX, movementY) {
       if (Math.abs(movementY) > 0 || Math.abs(movementX) > 0) {
-        this.moveIndex = index;
+        this.indexOfMovingItem = index;
         this.movementX = movementX;
         this.movementY = movementY;
       } else {
-        this.moveIndex = this.playingList.length;
+        this.indexOfMovingItem = this.playingList.length;
       }
     },
     onItemMouseover(index, media) {
@@ -194,14 +203,6 @@ export default {
         media.path,
         path.extname(media.path),
       );
-    },
-    onAuthorizeMouseover() {
-      this.onAuthorize = true;
-      this.hoverIndex = this.authorizeIndex;
-    },
-    onAuthorizeMouseout() {
-      this.onAuthorize = false;
-      this.hoverIndex = this.playingIndex;
     },
     onItemMouseout() {
       this.hoverIndex = this.playingIndex;
@@ -226,12 +227,16 @@ export default {
           this.tranFlag = false;
         }, 400);
       } else if (index !== this.playingIndex && !this.shifting
-        && this.moveIndex === this.playingList.length
+        && this.indexOfMovingItem === this.playingList.length
         && this.filePathNeedToDelete !== this.playingList[index]) {
         this.changeByRecent = true;
         this.playFile(this.playingList[index]);
       }
-      this.moveIndex = this.playingList.length;
+      if (Math.abs(this.movementY) > this.thumbnailHeight) {
+        this.$store.dispatch('RemovePlayingList', this.playingList[index]);
+      }
+      this.indexOfMovingItem = this.playingList.length;
+      this.movementX = this.movementY = 0;
     },
   },
   watch: {
@@ -246,7 +251,7 @@ export default {
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
     playingList(val) {
-      this.moveIndex = val.length;
+      this.indexOfMovingItem = val.length;
     },
     firstIndex() {
       if (this.lastIndex > this.maxIndex) {
@@ -313,6 +318,19 @@ export default {
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
+    indexOfMovingTo() {
+      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+      const distance = marginRight + this.thumbnailWidth;
+      const indexOfMovingTo = this.movementX > 0 ? // 移动到的位置
+        this.indexOfMovingItem +
+          Math.floor((this.movementX + (this.thumbnailWidth / 2)) / distance) :
+        this.indexOfMovingItem +
+          Math.ceil((this.movementX - (this.thumbnailWidth / 2)) / distance);
+      return indexOfMovingTo;
+    },
+    itemMoving() {
+      return this.indexOfMovingItem !== this.playingList.length;
+    },
     authorizeIndex() {
       return this.playingList.length;
     },

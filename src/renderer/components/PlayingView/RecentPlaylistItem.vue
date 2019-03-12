@@ -1,6 +1,7 @@
 <template>
 <div class="recent-playlist-item" ref="recentPlaylistItem"
   :style="{
+    transition: transFlag ? 'transform 100ms ease-out' : '',
     marginRight: sizeAdaption(15),
     cursor: isPlaying && isInRange ? '' : 'pointer',
     minWidth: `${thumbnailWidth}px`,
@@ -12,7 +13,6 @@
           :style="{
             backgroundImage: !isPlaying ? `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}` : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
           }"/>
-        <transition name="fade2">
         <div class="white-hover"
           ref="whiteHover"
           :style="{
@@ -20,7 +20,6 @@
             minWidth: `${thumbnailWidth}px`,
             minHeight: `${thumbnailHeight}px`,
           }"/>
-        </transition>
         <div class="content" ref="content"
           @mouseenter="mouseoverVideo"
           @mouseleave="mouseoutVideo"
@@ -28,7 +27,6 @@
           @mouseup="mouseupVideo"
           :style="{
             height: '100%',
-            zIndex: moveIndex === index ? '200' : '100',
           }">
           <div class="info"
             :style="{
@@ -105,13 +103,19 @@ export default {
     hovered: {
       type: Boolean,
     },
-    moveIndex: {
+    itemMoving: {
+      type: Boolean,
+    },
+    indexOfMovingItem: {
       type: Number,
     },
     movementX: {
       type: Number,
     },
     movementY: {
+      type: Number,
+    },
+    indexOfMovingTo: {
       type: Number,
     },
     isInRange: {
@@ -160,14 +164,14 @@ export default {
       imgPath: '',
       videoHeight: 0,
       videoWidth: 0,
-      itemMoving: false,
+      displayIndex: NaN,
+      transFlag: true,
     };
   },
   methods: {
     mousedownVideo(e) {
       const mousedownPosition = [e.pageX, e.pageY];
       document.onmousemove = (e) => {
-        this.itemMoving = true;
         const offsetX = e.pageX - mousedownPosition[0];
         const offsetY = e.pageY - mousedownPosition[1];
         this.eventTarget.onItemMousemove(this.index, offsetX, offsetY);
@@ -179,7 +183,6 @@ export default {
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
       this.$refs.progress.style.setProperty('opacity', '0');
       this.eventTarget.onItemMouseup(this.index);
-      this.itemMoving = false;
     },
     updateAnimationIn() {
       if (!this.isPlaying && this.imageLoaded) {
@@ -204,7 +207,8 @@ export default {
       this.$refs.progress.style.setProperty('opacity', '0');
     },
     mouseoverVideo() {
-      if (!this.isPlaying && this.isInRange && !this.isShifting && this.canHoverItem) {
+      if (!this.isPlaying && this.isInRange && !this.isShifting
+        && this.canHoverItem && !this.itemMoving) {
         this.eventTarget.onItemMouseover(this.index, this.mediaInfo);
         requestAnimationFrame(this.updateAnimationIn);
       }
@@ -215,6 +219,7 @@ export default {
     },
   },
   mounted() {
+    this.displayIndex = this.index;
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
     this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
       const videoStream = JSON.parse(info).streams.find(stream => stream.codec_type === 'video');
@@ -266,6 +271,13 @@ export default {
     });
   },
   watch: {
+    index(val) {
+      this.transFlag = false;
+      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+      setTimeout(() => {
+        this.transFlag = true;
+      }, 0);
+    },
     isPlaying(val) {
       if (val) {
         fs.readFile(`${this.imgPath}`, 'base64', (err, data) => {
@@ -290,25 +302,50 @@ export default {
         this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
       }
     },
-  },
-  computed: {
-    displayIndex() {
-      let displayIndex = this.index;
-      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
-      const distance = marginRight + this.thumbnailWidth;
-      if (Math.abs(this.movementY) > this.thumbnailHeight && this.moveIndex < this.index) {
-        displayIndex = this.index - 1;
-      } else if (Math.abs(this.movementY) < this.thumbnailHeight) {
-        const indexOfMoveItem = this.movementX > 0 ? // 移动到的位置
-          this.moveIndex + Math.floor(this.movementX / distance) :
-          this.moveIndex + Math.ceil(this.movementX / distance);
-        if (this.index > this.moveIndex && this.index <= indexOfMoveItem) {
-          displayIndex = this.index - 1;
-        } else if (this.index >= indexOfMoveItem && this.index < this.moveIndex) {
-          displayIndex = this.index + 1;
+    selfMoving(val) {
+      if (val) {
+        this.$refs.recentPlaylistItem.style.zIndex = 200;
+        this.$refs.content.style.zIndex = 200;
+      } else {
+        this.$refs.recentPlaylistItem.style.zIndex = 0;
+        this.$refs.content.style.zIndex = 10;
+      }
+    },
+    itemMoving(val) {
+      if (!val) {
+        this.displayIndex = this.index;
+      }
+    },
+    movementX() {
+      if (Math.abs(this.movementY) < this.thumbnailHeight) {
+        if (this.index > this.indexOfMovingItem && this.index <= this.indexOfMovingTo) {
+          this.displayIndex = this.index - 1;
+        } else if (this.index >= this.indexOfMovingTo && this.index < this.indexOfMovingItem) {
+          this.displayIndex = this.index + 1;
+        } else {
+          this.displayIndex = this.index;
         }
       }
-      return displayIndex;
+    },
+    movementY(val) {
+      if (Math.abs(val) > this.thumbnailHeight) {
+        if (this.index >= this.indexOfMovingTo && this.index < this.indexOfMovingItem) {
+          this.displayIndex = this.index;
+        } else if (this.index > this.indexOfMovingItem) {
+          this.displayIndex = this.index - 1;
+        }
+      } else if (Math.abs(val) < this.thumbnailHeight) {
+        if (this.index > this.indexOfMovingItem && this.index <= this.indexOfMovingTo) {
+          this.displayIndex = this.index - 1;
+        } else if (this.index >= this.indexOfMovingTo && this.index < this.indexOfMovingItem) {
+          this.displayIndex = this.index + 1;
+        }
+      }
+    },
+  },
+  computed: {
+    selfMoving() {
+      return this.indexOfMovingItem === this.index;
     },
     baseName() {
       const parsedName = parseNameFromPath(this.path);
@@ -354,19 +391,11 @@ export default {
 <style lang="scss" scoped>
 $border-radius: 3px;
 .recent-playlist-item {
-  transition: transform 100ms ease-out;
   .child-item {
     border-radius: $border-radius;
     width: 100%;
     height: 100%;
     background-color: rgba(111,111,111,0.30);
-    .white-hover {
-      pointer-events:none;
-      position: absolute;
-      border-radius: $border-radius;
-      background-color: rgba(255, 255, 255, 0.2);
-      transition: opacity 80ms 80ms ease-out;
-    }
     .blur {
       filter: blur(1.5px);
       clip-path: inset(0 round $border-radius);
@@ -382,8 +411,16 @@ $border-radius: 3px;
       background-repeat: no-repeat;
       background-position: center center;
     }
+    .white-hover {
+      pointer-events:none;
+      position: absolute;
+      border-radius: $border-radius;
+      background-color: rgba(255, 255, 255, 0.2);
+      transition: opacity 80ms 80ms ease-out;
+    }
     .content {
       position: absolute;
+      z-index: 10;
       top: 0;
       left: 0;
       right: 0;
@@ -455,12 +492,6 @@ $border-radius: 3px;
   transition: opacity 100ms ease-out;
 }
 .fade-enter, .fade-leave-to {
-  opacity: 0;
-}
-.fade2-enter-active, .fade2-leave-active {
-  transition: opacity 300ms ease-out;
-}
-.fade2-enter, .fade2-leave-to {
   opacity: 0;
 }
 .icon-enter-active, .icon-leave-active {
