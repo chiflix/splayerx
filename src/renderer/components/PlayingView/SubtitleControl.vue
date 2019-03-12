@@ -50,7 +50,7 @@
                       <div v-if="foundSubtitles"
                         v-for="(item, index) in computedAvaliableItems" :key="item.rank">
                         <div class="menu-item-text-wrapper"
-                          @mouseup="toggleItemClick(index)"
+                          @mouseup="toggleItemClick($event, index)"
                           :id="'item'+index"
                           :style="{
                             transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
@@ -500,14 +500,14 @@ export default {
       this.hiddenText = false;
       this.hoverIndex = -5;
     },
-    toggleItemClick(index) {
-      const { computedAvaliableItems } = this;
-      this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
-      setTimeout(() => {
-        console.log(123);
-        console.log(document.querySelector(`#item${index} .text`).clientWidth, document.querySelector(`#item${index} .text`).scrollWidth);
-        this.showSubtitleDetails(index);
-      }, 0);
+    toggleItemClick(event, index) {
+      if (event.target.nodeName === 'DIV') {
+        const { computedAvaliableItems } = this;
+        this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+        setTimeout(() => {
+          this.showSubtitleDetails(index);
+        }, 0);
+      }
     },
   },
   created() {
