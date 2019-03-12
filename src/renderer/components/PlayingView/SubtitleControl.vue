@@ -353,8 +353,8 @@ export default {
     async handleSubDelete(item) {
       this.removeLocalSub(item.id);
       this.$bus.$emit('off-subtitle');
-      const result = await deleteSubtitles([item.id]);
-      console.log(result);
+      const result = await deleteSubtitles([item.id], this.originSrc);
+      this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
     },
     finishAnimation() {
       this.refAnimation = '';
