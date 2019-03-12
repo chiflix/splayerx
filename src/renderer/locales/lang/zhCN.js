@@ -106,7 +106,7 @@ export default {
       generalSetting: '通用设置',
       displayLanguage: '显示语言',
       clearHistory: '退出时自动清空播放记录',
-      switchDisplayLanguages: '您可以在此修改射手影音播放器菜单、对话框中的显示语言',
+      switchDisplayLanguages: '您可以在此修改射手影音播放器菜单、对话框中的显示语言。',
     },
     privacy: {
       privacySetting: '智能翻译',
