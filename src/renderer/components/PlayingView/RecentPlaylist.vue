@@ -208,7 +208,7 @@ export default {
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
-    onItemMouseup(index) {
+    onItemMouseup(index) { // eslint-disable-line complexity
       // last page
       if (index === this.firstIndex - 1) {
         this.lastIndex = index;
@@ -233,8 +233,27 @@ export default {
         this.playFile(this.playingList[index]);
       }
       if (Math.abs(this.movementY) > this.thumbnailHeight) {
-        this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
+        if (index !== this.playingIndex) this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
       } else if (this.indexOfMovingTo !== this.indexOfMovingItem) {
+        if (this.indexOfMovingTo === this.lastIndex + 1
+          && this.lastIndex + 1 !== this.playingList.length) {
+          this.lastIndex += 1;
+          this.shifting = true;
+          this.tranFlag = true;
+          setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
+        } else if (this.indexOfMovingTo === this.firstIndex - 1
+          && this.firstIndex !== 0) {
+          this.firstIndex -= 1;
+          this.shifting = true;
+          this.tranFlag = true;
+          setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
+        }
         this.$store.dispatch('RepositionItemFromPlayingList', {
           src: this.playingList[index],
           newPosition: this.indexOfMovingTo,

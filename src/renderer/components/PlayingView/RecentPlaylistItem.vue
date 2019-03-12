@@ -1,7 +1,7 @@
 <template>
 <div class="recent-playlist-item" ref="recentPlaylistItem"
   :style="{
-    transition: transFlag ? 'transform 100ms ease-out' : '',
+    transition: tranFlag ? 'transform 100ms ease-out' : '',
     marginRight: sizeAdaption(15),
     cursor: isPlaying && isInRange ? '' : 'pointer',
     minWidth: `${thumbnailWidth}px`,
@@ -165,7 +165,7 @@ export default {
       videoHeight: 0,
       videoWidth: 0,
       displayIndex: NaN,
-      transFlag: true,
+      tranFlag: true,
     };
   },
   methods: {
@@ -272,10 +272,10 @@ export default {
   },
   watch: {
     index(val) {
-      this.transFlag = false;
+      this.tranFlag = false;
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
       setTimeout(() => {
-        this.transFlag = true;
+        this.tranFlag = true;
       }, 0);
     },
     isPlaying(val) {
