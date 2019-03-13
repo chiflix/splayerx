@@ -69,7 +69,7 @@
                           </div>
                           <div class="iconContainer">
                             <transition name="sub-delete">
-                              <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete(item)" v-show="item.type === 'local' && hoverIndex === index"></Icon>
+                              <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete($event, item)" v-show="item.type === 'local' && hoverIndex === index"></Icon>
                             </transition>
                           </div>
                         </div>
@@ -335,11 +335,15 @@ export default {
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
     }),
-    async handleSubDelete(item) {
-      this.removeLocalSub(item.id);
-      this.$bus.$emit('off-subtitle');
-      const result = await deleteSubtitles([item.id], this.originSrc);
-      this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
+    async handleSubDelete(e, item) {
+      if (e.target.nodeName !== 'DIV') {
+        this.removeLocalSub(item.id);
+        if (item.id === this.currentSubtitleId) {
+          this.$bus.$emit('off-subtitle');
+        }
+        const result = await deleteSubtitles([item.id], this.originSrc);
+        this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
+      }
     },
     finishAnimation() {
       this.refAnimation = '';
@@ -617,11 +621,11 @@ export default {
   }
   .menu-item-text-wrapper {
     .deleteIcon {
-      transition-delay: 30ms;
+      transition-delay: 100ms;
     }
     .text {
       transition: color 200ms linear;
-      transition-delay: 70ms;
+      transition-delay: 100ms;
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
     }
