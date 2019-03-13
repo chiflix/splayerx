@@ -170,6 +170,7 @@ export default {
   },
   methods: {
     mousedownVideo(e) {
+      if (this.isPlaying) return;
       this.eventTarget.onItemMousedown(this.index, e.pageX, e.pageY, e);
       document.onmousemove = (e) => {
         this.tranFlag = false;
