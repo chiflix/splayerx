@@ -340,6 +340,7 @@ export default {
       if (e.target.nodeName !== 'DIV') {
         this.transFlag = false;
         this.removeLocalSub(item.id);
+        this.hoverHeight = 0;
         if (item.id === this.currentSubtitleId) {
           this.$bus.$emit('off-subtitle');
         }
