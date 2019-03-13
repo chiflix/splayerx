@@ -356,7 +356,7 @@ export default {
   },
   computed: {
     aboutToDelete() {
-      return this.selfMoving && (Math.abs(this.movementY) > this.thumbnailHeight * 1.5);
+      return this.selfMoving && (Math.abs(this.movementY) > this.thumbnailHeight * 2);
     },
     selfMoving() {
       return this.indexOfMovingItem === this.index;

@@ -310,7 +310,7 @@ export default {
         this.changeByRecent = true;
         this.playFile(this.playingList[index]);
       }
-      if (Math.abs(this.movementY) > this.thumbnailHeight * 1.5) {
+      if (Math.abs(this.movementY) > this.thumbnailHeight * 2) {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         this.hoverIndex = this.playingIndex;
         this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
