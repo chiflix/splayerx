@@ -234,8 +234,7 @@ export default {
               this.firstIndex += this.thumbnailNumber;
               this.shifting = true;
               this.tranFlag = true;
-              this.movementX = offsetX +
-                ((this.lastIndex - this.lastIndexOnMousedown) * distance);
+              this.movementX = offsetX + (this.thumbnailNumber * distance);
 
               setTimeout(() => {
                 this.shifting = false;
@@ -251,8 +250,7 @@ export default {
               this.lastIndex -= this.thumbnailNumber;
               this.shifting = true;
               this.tranFlag = true;
-              this.movementX = offsetX +
-                ((this.firstIndex - this.firstIndexOnMousedown) * distance);
+              this.movementX = offsetX - (this.thumbnailNumber * distance);
 
               setTimeout(() => {
                 this.shifting = false;
