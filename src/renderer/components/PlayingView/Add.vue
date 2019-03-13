@@ -61,7 +61,7 @@ export default {
     };
   },
   watch: {
-    index(val, oldVal) {
+    index(val) {
       this.displayIndex = val;
       this.tranFlag = false;
       this.$refs.addButton.style.setProperty('transform', 'translate(0,0)');
