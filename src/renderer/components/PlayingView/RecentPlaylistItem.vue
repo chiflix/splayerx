@@ -215,6 +215,7 @@ export default {
       }
     },
     mouseoutVideo() {
+      if (this.selfMoving) return;
       this.eventTarget.onItemMouseout();
       requestAnimationFrame(this.updateAnimationOut);
     },

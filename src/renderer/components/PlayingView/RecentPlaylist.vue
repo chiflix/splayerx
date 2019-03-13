@@ -311,7 +311,9 @@ export default {
         this.playFile(this.playingList[index]);
       }
       if (Math.abs(this.movementY) > this.thumbnailHeight) {
-        if (index !== this.playingIndex) this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
+        this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
+        this.hoverIndex = this.playingIndex;
+        this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
       } else if (this.indexOfMovingTo !== this.indexOfMovingItem) {
         if (this.indexOfMovingTo === this.lastIndex + 1
           && this.lastIndex + 1 !== this.playingList.length) {
