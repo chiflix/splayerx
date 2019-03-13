@@ -89,7 +89,7 @@
                         height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                         top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
                         marginTop: `${-cardPos}px`,
-                        transition: 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+                        transition: transFlag ? 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
                       }"/>
                   </div>
                 </div>
@@ -159,6 +159,7 @@ export default {
       onAnimation: false,
       refAnimation: '',
       debouncedHandler: debounce(this.handleRefresh, 1000),
+      transFlag: true,
     };
   },
   computed: {
@@ -335,14 +336,17 @@ export default {
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
     }),
-    async handleSubDelete(e, item) {
+    handleSubDelete(e, item) {
       if (e.target.nodeName !== 'DIV') {
+        this.transFlag = false;
         this.removeLocalSub(item.id);
         if (item.id === this.currentSubtitleId) {
           this.$bus.$emit('off-subtitle');
         }
-        const result = await deleteSubtitles([item.id], this.originSrc);
-        this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
+        deleteSubtitles([item.id], this.originSrc).then((result) => {
+          this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
+          this.transFlag = true;
+        });
       }
     },
     finishAnimation() {
