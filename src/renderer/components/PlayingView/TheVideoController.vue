@@ -218,6 +218,9 @@ export default {
     this.UIElements.forEach((value) => {
       this.displayState[value.name] = true;
       if (value.name === 'recent-playlist') this.displayState[value.name] = false;
+      if (value.name === 'playlist-control' && !this.playinglIst.length) {
+        this.displayState['playlist-control'] = false;
+      }
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
@@ -375,6 +378,7 @@ export default {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
+      tempObject['playlist-control'] = !(this.playingList.length === 0);
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
