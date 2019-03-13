@@ -142,6 +142,10 @@ export default {
       title: '打開錯誤',
       content: '未找到可播放文件。',
     },
+    addNoVideo: {
+      title: '添加错误',
+      content: '未添加可播放文件。',
+    },
     default: {
       title: '打開錯誤',
       content: '暫不支持該文件類型。',

@@ -142,6 +142,10 @@ export default {
       title: 'Open Failed',
       content: 'Cannot find playable file',
     },
+    addNoVideo: {
+      title: '添加错误',
+      content: '未添加可播放文件。',
+    },
     default: {
       title: 'Open Failed',
       content: 'Video type unsupported.',
