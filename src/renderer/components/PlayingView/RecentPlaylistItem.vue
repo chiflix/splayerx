@@ -14,8 +14,8 @@
             backgroundImage: !isPlaying ? `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}` : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
           }"/>
         <div class="white-hover"
-          ref="whiteHover"
           :style="{
+            backgroundColor: !aboutToDelete ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0,0,0,0.6)',
             opacity: hovered ? '1' : '0',
             minWidth: `${thumbnailWidth}px`,
             minHeight: `${thumbnailHeight}px`,
@@ -30,6 +30,7 @@
           }">
           <div class="info"
             :style="{
+                opacity: aboutToDelete ? 0 : 1,
                 height: `${thumbnailHeight - bottom}px`,
                 width: `${thumbnailWidth - 2 * side}px`,
                 left: `${side}px`,
@@ -77,6 +78,13 @@
                 fontSize: sizeAdaption(12),
                 lineHeight: sizeAdaption(16),
               }">{{ baseName }}</div>
+          </div>
+          <div class="deleteUi"
+            :style="{
+              opacity: aboutToDelete ? '1' : '0',
+              height: `${thumbnailHeight}px`,
+            }">
+            <Icon type="delete"/>
           </div>
         </div>
         <div class="border" ref="border"
@@ -347,6 +355,9 @@ export default {
     },
   },
   computed: {
+    aboutToDelete() {
+      return this.selfMoving && (Math.abs(this.movementY) > this.thumbnailHeight * 1.5);
+    },
     selfMoving() {
       return this.indexOfMovingItem === this.index;
     },
@@ -419,8 +430,7 @@ $border-radius: 3px;
       pointer-events:none;
       position: absolute;
       border-radius: $border-radius;
-      background-color: rgba(255, 255, 255, 0.2);
-      transition: opacity 80ms 80ms ease-out;
+      transition: opacity 100ms 80ms ease-in, background-color 100ms 80ms ease-in;
     }
     .content {
       position: absolute;
@@ -430,8 +440,15 @@ $border-radius: 3px;
       right: 0;
       bottom: 0;
 
+      .deleteUi {
+        transition: opacity 100ms 80ms ease-in;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
       .info {
         position: absolute;
+        transition: opacity 100ms 80ms ease-in;
         top: 0;
       }
       .overflow-container {
