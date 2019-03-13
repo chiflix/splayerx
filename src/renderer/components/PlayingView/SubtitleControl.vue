@@ -621,11 +621,11 @@ export default {
   }
   .menu-item-text-wrapper {
     .deleteIcon {
-      transition-delay: 100ms;
+      transition-delay: 75ms;
     }
     .text {
-      transition: color 200ms linear;
-      transition-delay: 100ms;
+      transition: color 90ms linear;
+      transition-delay: 75ms;
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
     }
@@ -884,7 +884,7 @@ export default {
 }
 
 .sub-delete-enter-active, .sub-delete-leave-active {
-  transition: opacity 200ms;
+  transition: opacity 150ms;
 }
 .sub-delete-enter, .sub-delete-leave-to {
   opacity: 0;
