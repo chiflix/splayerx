@@ -374,7 +374,8 @@ export default {
     },
     sliderPercentage() {
       if (this.lastPlayedTime) {
-        if (this.mediaInfo.duration) {
+        if (this.mediaInfo.duration &&
+            this.lastPlayedTime / this.mediaInfo.duration <= 1) {
           return (this.lastPlayedTime / this.mediaInfo.duration) * 100;
         }
       }
