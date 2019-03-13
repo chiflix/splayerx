@@ -286,6 +286,7 @@ export default {
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
     onItemMouseup(index) { // eslint-disable-line complexity
+      if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
       // last page
       if (index === this.firstIndex - 1) {
         this.lastIndex = index;
