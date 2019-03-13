@@ -47,32 +47,39 @@
                       </div>
                     </div>
 
-                      <div v-if="foundSubtitles"
-                        v-for="(item, index) in computedAvaliableItems" :key="item.rank">
-                        <div class="menu-item-text-wrapper"
-                          @mouseup="toggleItemClick(index)"
-                          @mouseover="toggleItemsMouseOver(index)"
-                          @mouseleave="toggleItemsMouseLeave(index)"
-                          :id="'item'+index"
-                          :style="{
-                            transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                            color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                            height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                            cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
-                          }">
-                          <div class="text"
-                            :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                              whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                            }">{{ getSubName(item) }}</div>
+                    <div v-if="foundSubtitles">
+                      <div class="menu-item-text-wrapper"
+                        v-for="(item, index) in computedAvaliableItems" :key="item.rank"
+                        @mouseup="toggleItemClick(index)"
+                        @mouseover="toggleItemsMouseOver(index)"
+                        @mouseleave="toggleItemsMouseLeave(index)"
+                        :id="'item'+index"
+                        :style="{
+                          transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                          color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                          height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                          cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                        }">
+                        <div class="text"
+                          :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                            whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                          }">{{ getSubName(item) }}</div>
+                        <div v-if="item.type === 'modified'" v-show="currentSubtitleIndex === index" class="menu-item-icon-wrapper">
+                          <Icon type="delete" class="delete" @mouseup.native="handleDeleteSubtitle($event, item)"
+                            :style="{
+                              cursor: 'pointer',
+                            }"/>
                         </div>
                       </div>
-
-                    <div v-if="loadingTypes.length > 0"
-                      v-for="(item, index) in loadingTypes"
-                      class="placeholders-wrapper"
-                      :key="`${item}-${index}`">
-                      <div class="placeholder-item-text-wrapper">
-                        <div class="text">{{ item }}</div>
+                    </div>
+                    
+                    <div v-if="loadingTypes.length > 0">
+                      <div v-for="(item, index) in loadingTypes"
+                        class="placeholders-wrapper"
+                        :key="`${item}-${index}`">
+                        <div class="placeholder-item-text-wrapper">
+                          <div class="text">{{ item }}</div>
+                        </div>
                       </div>
                     </div>
 
@@ -305,7 +312,7 @@ export default {
         this.loadingType = difference(val, oldval)[0].type;
       }
       if (val.length >= oldval.length) {
-        this.computedAvaliableItems = val.filter(sub => sub.name);
+        this.computedAvaliableItems = val.filter(sub => sub && sub.name);
       }
     },
     loadingType(val) {
@@ -351,7 +358,7 @@ export default {
             this.count += 1;
             this.rotateTime = Math.ceil(this.count / 100);
           }, 10);
-          const types = ['local'];
+          const types = ['local', 'modified'];
           if (this.isInitial) types.push('embedded');
           if (!hasOnlineSubtitles &&
             (!this.isInitial || ['ts', 'avi', 'mkv', 'mp4'].includes(extname(this.originSrc).slice(1).toLowerCase()))) {
@@ -390,6 +397,9 @@ export default {
           errcode: SUBTITLE_OFFLINE,
         });
       }
+    },
+    handleDeleteSubtitle(e, sub) {
+      this.$bus.$emit('delete-subtitles', { sub });
     },
     orify(...args) {
       return args.some(arg => arg == true); // eslint-disable-line
@@ -480,7 +490,7 @@ export default {
       if (this.privacyAgreement) {
         this.debouncedHandleRefresh(hasOnlineSubtitles);
       } else {
-        this.$bus.$emit('refresh-subtitles', ['local', 'embedded']);
+        this.$bus.$emit('refresh-subtitles', ['local', 'embedded', 'modified']);
       }
     });
     this.$bus.$on('refresh-finished', (timeout) => {
@@ -594,10 +604,21 @@ export default {
     color: rgba(255, 255, 255, 0.6);
   }
   .menu-item-text-wrapper {
+    display: flex;
+    justify-content: space-between;
     .text {
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
     }
+    .delete {
+      width: 14px;
+      height: 14px;
+    }
+  }
+  .menu-item-icon-wrapper {
+    display: flex;
+    align-self: center;
+    margin: auto 10px auto 0;
   }
   .placeholder-item-text-wrapper {
     .text {

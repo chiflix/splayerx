@@ -3,6 +3,7 @@ import { readdir } from 'fs';
 import { ipcRenderer } from 'electron';
 import Sagi from '@/helpers/sagi';
 import helpers from '@/helpers';
+import { getVideoSubtitlesByMediaHash } from '@/helpers/cacheFileStorage';
 
 const { mediaQuickHash: calculateMediaIdentity } = helpers.methods;
 
@@ -76,6 +77,20 @@ export function retrieveEmbeddedList(videoSrc, supportedCodecs) {
         resolve(subtitleStreams.map(normalizeStream));
       } catch (error) {
         reject(error);
+      }
+    });
+  });
+}
+
+export function searchFromTempList(videoSrc) {
+  return new Promise((resolve, reject) => {
+    calculateMediaIdentity(videoSrc).then(async (mediaIdentity) => {
+      try {
+        const result = await getVideoSubtitlesByMediaHash(mediaIdentity);
+        const subs = Array.prototype.concat.apply([], result);
+        resolve(subs);
+      } catch (err) {
+        reject(err);
       }
     });
   });

@@ -516,6 +516,32 @@ app.on('ready', () => {
     mainWindow?.openDevTools();
   });
 
+  // 添加编辑快捷键
+  globalShortcut.register('CmdOrCtrl+Z', () => {
+    mainWindow.webContents.undo();
+  });
+
+  globalShortcut.register('CmdOrCtrl+Shift+Z', () => {
+    mainWindow.webContents.redo();
+  });
+
+  globalShortcut.register('CmdOrCtrl+X', () => {
+    mainWindow.webContents.cut();
+  });
+
+  globalShortcut.register('CmdOrCtrl+C', () => {
+    mainWindow.webContents.copy();
+  });
+
+  globalShortcut.register('CmdOrCtrl+V', () => {
+    mainWindow.webContents.paste();
+  });
+
+  globalShortcut.register('CmdOrCtrl+A', () => {
+    mainWindow.webContents.selectAll();
+  });
+  // 添加编辑快捷键
+
   if (process.platform === 'win32') {
     globalShortcut.register('CmdOrCtrl+`', () => {
       handleBossKey();

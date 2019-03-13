@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="73px" height="60px" viewBox="0 0 73 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.1 (72631) - https://sketchapp.com -->
+    <title>Combined Shape</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <radialGradient cx="84.2036702%" cy="81.3988863%" fx="84.2036702%" fy="81.3988863%" r="128.843443%" gradientTransform="translate(0.842037,0.813989),scale(0.816901,1.000000),rotate(-143.131698),translate(-0.842037,-0.813989)" id="radialGradient-1">
+            <stop stop-color="#FFFFFF" stop-opacity="0.775928442" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.508378623" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.7" stroke-opacity="0.168081975">
+        <g id="撤销" transform="translate(-24.000000, -63.000000)" fill="url(#radialGradient-1)" stroke="#FFFFFF" stroke-width="0.5">
+            <path d="M28,64 L93,64 C94.6568542,64 96,65.3431458 96,67 C96,68.6568542 94.6568542,70 93,70 L28,70 C26.3431458,70 25,68.6568542 25,67 C25,65.3431458 26.3431458,64 28,64 Z M50,90 L93,90 C94.6568542,90 96,91.3431458 96,93 C96,94.6568542 94.6568542,96 93,96 L50,96 C48.3431458,96 47,94.6568542 47,93 C47,91.3431458 48.3431458,90 50,90 Z M68,116 L93,116 C94.6568542,116 96,117.343146 96,119 C96,120.656854 94.6568542,122 93,122 L68,122 C66.3431458,122 65,120.656854 65,119 C65,117.343146 66.3431458,116 68,116 Z" id="Combined-Shape"></path>
+        </g>
+    </g>
+</svg>

@@ -128,6 +128,11 @@ export default {
   height: 27px;
   display: block;
 }
+.subtitleEditorEnter, .subtitleEditorExit {
+  width: 27px;
+  height: 21px;
+  display: block;
+}
 
 .volume {
   width: 100%;
@@ -407,5 +412,9 @@ export default {
       display: none;
     }
   }
+}
+.menu-item-icon-wrapper .delete {
+  width: 100%;
+  height: 100%;
 }
 </style>

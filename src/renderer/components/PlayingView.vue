@@ -2,12 +2,12 @@
   <div :data-component-name="$options.name" class="player">
     <the-video-canvas ref="videoCanvas" />
     <the-video-controller ref="videoctrl" />
-    <subtitle-manager />
+    <!-- <subtitle-manager /> -->
   </div>
 </template>
 
 <script>
-import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
+// import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheVideoController from './PlayingView/TheVideoController.vue';
 import { videodata } from '../store/video';
@@ -17,7 +17,7 @@ export default {
   components: {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
-    'subtitle-manager': SubtitleManager,
+    // 'subtitle-manager': SubtitleManager,
   },
   methods: {
     // Compute UI states

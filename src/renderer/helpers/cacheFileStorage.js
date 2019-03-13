@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-02-22 11:37:18
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-03-06 11:45:05
+ * @Last Modified time: 2019-03-12 18:09:04
  */
 
 /** file dir list
@@ -15,7 +15,7 @@
  *  └── thumbnail.jpg
  */
 
-import { access, readdir } from 'fs';
+import { access, readdir, writeFile, unlink } from 'fs';
 import path, { join } from 'path';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
@@ -26,6 +26,7 @@ const app = electron.app || electron.remote.app;
 const ELECTRON_CACHE_DIRNAME = 'userData'; // 用户数据路径
 const DEFAULT_DIRNAME = '__cache_files__'; // 设定的应用缓存目录
 const VIDEO_DIRNAME = 'videos'; // 视频缓存目录
+const SUBTITLES_DIRNAME = 'subtitles'; // 视频字幕缓存目录
 
 /**
  * @description 获取electron应用用户目录下的设定的缓存路径
@@ -233,6 +234,96 @@ export function clearAll() {
   });
 }
 
+export function writeSubtitleByMediaHash(key, s, { name, mimeType, type }) {
+  const p = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, `${key}/${SUBTITLES_DIRNAME}/${type}/`);
+  return new Promise(async (resolve, reject) => {
+    const cp = checkPermission(p);
+    if (cp instanceof Error) {
+      reject(cp);
+    } else {
+      readdir(p, (err, files) => {
+        if (err) {
+          reject(err);
+        } else {
+          let fileName = name;
+          if (files.filter(e => e.indexOf(name) > -1)) {
+            let index = 0;
+            files.forEach((e) => {
+              const num = parseInt(e.replace(/\D/gi, ''), 10);
+              if (num > index) {
+                index = num;
+              }
+            });
+            index += 1;
+            const pp = path.basename(`自制 ${index}`, `.${mimeType}`);
+            fileName = `${pp}.${mimeType}`;
+          } else {
+            const pp = path.basename(name, `.${mimeType}`);
+            fileName = `${pp}.${mimeType}`;
+          }
+          writeFile(path.join(p, fileName), s, () => {
+            resolve(path.join(p, fileName));
+          });
+        }
+      });
+    }
+  });
+}
+
+export function writeSubtitleByPath(p, s) {
+  return new Promise((resolve, reject) => {
+    writeFile(path.join(p), s, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(path.join(p));
+      }
+    });
+  });
+}
+
+export function deleteFileByPath(p) {
+  return new Promise((resolve, reject) => {
+    unlink(p, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve({});
+      }
+    });
+  });
+}
+
+export function getVideoSubtitlesByMediaHash(key) {
+  const jobs = [];
+  ['modified', 'online'].forEach((cell) => {
+    const job = new Promise(async (resolve, reject) => {
+      const src = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, `${key}/${SUBTITLES_DIRNAME}/${cell}/`);
+      const cp = await checkPermission(src);
+      if (cp instanceof Error) {
+        reject(cp);
+      } else {
+        readdir(src, (err, files) => {
+          if (err) {
+            resolve(null);
+          } else {
+            const result = [];
+            files
+              .filter(name => name.replace(/\.(\w+)$/i, '').trim().length > 0)
+              .forEach(e => result.push({
+                type: cell,
+                src: join(src, e),
+              }));
+            resolve(result);
+          }
+        });
+      }
+    });
+    jobs.push(job);
+  });
+  return Promise.all(jobs);
+}
+
 export default {
   getVideoInfoByMediaHash,
   generateThumbnailPathByMediaHash,
@@ -240,4 +331,7 @@ export default {
   generateShortCutPathByMediaHash,
   deleteDirByMediaHash,
   clearAll,
+  writeSubtitleByMediaHash,
+  writeSubtitleByPath,
+  deleteFileByPath,
 };

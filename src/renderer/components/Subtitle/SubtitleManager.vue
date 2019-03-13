@@ -1,6 +1,5 @@
 <template>
-  <div class="subtitle-manager"
-    :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
+  <div class="subtitle-manager">
     <subtitle-renderer
       ref="subtitleRenderer"
       v-if="currentSubtitleId && duration"
@@ -10,15 +9,16 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapActions, mapState } from 'vuex';
+import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
 import romanize from 'romanize';
 import { sep } from 'path';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import {
-  searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
+  searchForLocalList, searchFromTempList, fetchOnlineList, retrieveEmbeddedList,
   storeLanguagePreference,
   updateSubtitle,
+  updateSubtitleListForce,
   updateSubtitleList,
   retrieveLanguagePreference,
   retrieveSubtitleList,
@@ -28,7 +28,9 @@ import {
   retrieveSelectedSubtitleId,
 } from '@/helpers/subtitle';
 import transcriptQueue from '@/helpers/subtitle/push';
+import { deleteFileByPath } from '@/helpers/cacheFileStorage';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
+import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { localLanguageLoader } from './SubtitleLoader/utils';
@@ -115,10 +117,14 @@ export default {
       updateMetaInfo: subtitleActions.UPDATE_METAINFO,
       updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
     }),
+    ...mapMutations({
+      resetSubtitlesByMutation: subtitleMutations.RESET_SUBTITLES,
+    }),
     async refreshSubtitles(types, videoSrc) {
-      const supportedTypes = ['local', 'embedded', 'online'];
+      const supportedTypes = ['local', 'embedded', 'online', 'modified'];
       const {
         getLocalSubtitlesList,
+        getModifiedSubtitlesList,
         getOnlineSubtitlesList,
         getEmbeddedSubtitlesList,
         normalizeSubtitleList,
@@ -135,6 +141,10 @@ export default {
       const storedLanguagePreference = await retrieveLanguagePreference(videoSrc);
       const storedSubtitles = await retrieveSubtitleList(videoSrc);
 
+      if (requestedTypes.includes('modified')) {
+        const storedModifiedSubtitles = storedSubtitles.filter(({ type }) => type === 'modified');
+        subtitleRequests.push(getModifiedSubtitlesList(videoSrc, storedModifiedSubtitles));
+      }
       if (requestedTypes.includes('local')) {
         const storedLocalSubtitles = storedSubtitles.filter(({ type }) => type === 'local');
         subtitleRequests.push(getLocalSubtitlesList(videoSrc, storedLocalSubtitles));
@@ -190,6 +200,14 @@ export default {
         .catch(() => []);
       return values(mergeWith(
         keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'local', options: { id } })), 'src'),
+        keyBy(newLocalSubs, 'src'),
+      ));
+    },
+    async getModifiedSubtitlesList(videoSrc, storedSubs) {
+      const newLocalSubs = await searchFromTempList(videoSrc, SubtitleLoader.supportedFormats)
+        .catch(() => []);
+      return values(mergeWith(
+        keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'modified', options: { id } })), 'src'),
         keyBy(newLocalSubs, 'src'),
       ));
     },
@@ -538,6 +556,35 @@ export default {
       });
       return result;
     },
+    modifiedSubtitle({ sub }) {
+      // this.$set(this.subtitleInstances, sub.id, this.subtitleInstances[sub.id]);
+      // console.log('modifiedSubtitle');
+      const s = {};
+      s[sub.id] = sub;
+      this.subtitleInstances = Object.assign({}, this.subtitleInstances, s);
+    },
+    async deleteSubtitle({ sub }) {
+      // rm indexDB
+      const filter = {};
+      const types = [];
+      // const newAllSubtitleList = [];
+      this.allSubtitleList.forEach((e) => {
+        // if (e.id !== sub.id) {
+        //   newAllSubtitleList.push(e);
+        // }
+        if (!filter[e.type]) {
+          types.push(e.type);
+          filter[e.type] = true;
+        }
+      });
+      await updateSubtitleListForce(this.originSrc, []);
+      // rm file
+      await deleteFileByPath(this.subtitleInstances[sub.id].src);
+      this.$bus.$emit('off-subtitle');
+      this.resetSubtitlesByMutation();
+      this.subtitleInstances = {};
+      this.$bus.$emit('refresh-subtitles', { types, isInitial: true });
+    },
   },
   created() {
     this.$bus.$on('add-subtitles', (subs) => {
@@ -582,7 +629,10 @@ export default {
           });
       }
     });
-
+    // 当修改自制的字幕，直接修改内存里面的值
+    this.$bus.$on('modified-subtitle', this.modifiedSubtitle);
+    // 当删除某个字幕的时候，同步
+    this.$bus.$on('delete-subtitles', this.deleteSubtitle);
     // when set immediate on watcher, it may run before the created hook
     this.resetSubtitles();
     this.$bus.$emit('subtitle-refresh-from-src-change');
@@ -592,11 +642,11 @@ export default {
 </script>
 <style lang="scss" scoped>
 .subtitle-manager {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 5;
+  // position: absolute;
+  // left: 50%;
+  // top: 50%;
+  // transform: translate(-50%, -50%);
+  // pointer-events: none;
+  // z-index: 5;
 }
 </style>

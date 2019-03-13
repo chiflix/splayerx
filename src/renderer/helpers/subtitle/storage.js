@@ -132,3 +132,18 @@ export async function deleteSubtitles(subtitleIds) {
 
   return ({ success, failure });
 }
+
+export async function updateSubtitleListForce(videoSrc, subtitleList) {
+  return getVideoInfoFromVideoSrc(videoSrc).then(async (videoInfo) => {
+    if (!videoInfo) videoInfo = { path: videoSrc };
+    if (!videoInfo.preference) videoInfo.preference = {};
+    if (!videoInfo.preference.subtitle) videoInfo.preference.subtitle = {};
+    if (videoInfo.preference.subtitle.list) {
+      const ids = [];
+      videoInfo.preference.subtitle.list.forEach(e => ids.push(e.id));
+      await deleteSubtitles(ids);
+    }
+    videoInfo.preference.subtitle.list = subtitleList;
+    return setVideoInfo(videoInfo);
+  });
+}

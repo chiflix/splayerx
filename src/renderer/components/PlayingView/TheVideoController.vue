@@ -10,9 +10,9 @@
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
     @click.left="handleMouseupLeft">
-    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
-    <notification-bubble ref="nextVideoUI"/>
-    <recent-playlist class="recent-playlist" ref="recentPlaylist"
+    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']" v-if="!isEditable && !isProfessional"></titlebar>
+    <notification-bubble ref="nextVideoUI" v-if="!isEditable && !isProfessional"/>
+    <recent-playlist class="recent-playlist" ref="recentPlaylist"  v-if="!isEditable && !isProfessional"
     :displayState="displayState['recent-playlist']"
     :mousemovePosition="mousemovePosition"
     :isDragging="isDragging"
@@ -20,19 +20,19 @@
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-fade-in="showAllWidgets"/>
-    <play-button class="play-button no-drag"
+    <div class="masking" v-fade-in="showAllWidgets" v-if="!isEditable && !isProfessional"/>
+    <play-button class="play-button no-drag"  v-if="!isEditable && !isProfessional"
       @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
       :mousemovePosition="mousemovePosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
-    <volume-indicator class="no-drag"
+    <volume-indicator class="no-drag" v-if="!isEditable && !isProfessional"
       @update:volume-state="updateVolumeState"
       :attachedShown="attachedShown"
       :mousedownOnPlayButton="mousedownOnPlayButton"
       :showAllWidgets="showAllWidgets"/>
-    <div class="control-buttons" v-fade-in="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
+    <div class="control-buttons" v-fade-in="showAllWidgets" v-if="!isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
       v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging.sync="lastDragging"
@@ -41,14 +41,16 @@
       v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
-    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
+    <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" v-if="!isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
+    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" v-if="!isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
+    <subtitle-manager />
   </div>
 </template>
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
 import path from 'path';
+import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
 import VolumeIndicator from './VolumeIndicator.vue';
@@ -74,6 +76,7 @@ export default {
     'the-progress-bar': TheProgressBar,
     'notification-bubble': NotificationBubble,
     'recent-playlist': RecentPlaylist,
+    'subtitle-manager': SubtitleManager,
   },
   data() {
     return {
@@ -124,7 +127,7 @@ export default {
       mousemovePosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight', 'isEditable', 'isProfessional']),
     onlyOneVideo() {
       return this.playingList.length === 1;
     },

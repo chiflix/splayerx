@@ -1,3 +1,6 @@
+
+import { Window as windowMutations } from '../mutationTypes';
+
 const state = {
   windowSize: [0, 0],
   windowMinimumSize: [0, 0],
@@ -6,6 +9,8 @@ const state = {
   isFocused: true,
   isMaximized: false,
   isMinimized: false,
+  isEditable: false, // 字幕编辑模式
+  isProfessional: false, // 字幕高级编辑模式
 };
 
 const getters = {
@@ -20,6 +25,8 @@ const getters = {
   isFocused: state => state.isFocused,
   isMaximized: state => state.isMaximized,
   isMinimized: state => state.isMinimized,
+  isEditable: state => state.isEditable,
+  isProfessional: state => state.isProfessional,
 };
 
 const mutations = {
@@ -44,9 +51,17 @@ const mutations = {
   isMinimized(state, payload) {
     state.isMinimized = payload;
   },
+  [windowMutations.TOGGLE_EDITABLE](state, payload) {
+    state.isEditable = payload;
+  },
+  [windowMutations.TOGGLE_PROFESSIONAL](state, payload) {
+    // state.isEditable = payload;
+    state.isProfessional = payload;
+  },
 };
 
-const actions = {};
+const actions = {
+};
 
 export default {
   state,

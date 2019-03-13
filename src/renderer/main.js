@@ -115,7 +115,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'isEditable',
       'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub']),
     updateFullScreen() {
       if (this.isFullScreen) {
@@ -310,6 +310,17 @@ new Vue({
       // 如果window获得焦点，就重新创建menu
       // 这里使用焦点作为条件，主要考虑老板键和最小化
       if (val) {
+        this.refreshMenu();
+      } else {
+        this.menu && this.menu.items.forEach((e, i) => {
+          if (i === 0) return;
+          this.disableMenus(e);
+        });
+      }
+    },
+    isEditable(val) {
+      // 编辑状态下，禁止播放器快捷键
+      if (!val) {
         this.refreshMenu();
       } else {
         this.menu && this.menu.items.forEach((e, i) => {

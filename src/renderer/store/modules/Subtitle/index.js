@@ -72,6 +72,7 @@ const mutations = {
       Vue.set(state, 'names', {});
       Vue.set(state, 'languages', {});
       Vue.set(state, 'formats', {});
+      Vue.set(state, 'videoSubtitleMap', {});
     } else {
       const supportedFields = ['loadingStates', 'durations', 'names', 'languages', 'formats', 'types'];
       const changingFields = Object.keys(resetFields)
@@ -193,7 +194,7 @@ const actions = {
     } = state;
     const { originSrc } = getters;
     const idsKeeping = Object.keys(types)
-      .filter(id => types[id] !== 'online' || !videoSubtitleMap[originSrc].includes(id));
+      .filter(id => types[id] !== 'online' || (videoSubtitleMap[originSrc] && !videoSubtitleMap[originSrc].includes(id)));
     const idsRemoving = difference(Object.keys(types), idsKeeping);
     dispatch(
       subtitleActions.REMOVE_FROM_VIDEO_SUBTITLE_MAP,
