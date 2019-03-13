@@ -218,7 +218,7 @@ export default {
     this.UIElements.forEach((value) => {
       this.displayState[value.name] = true;
       if (value.name === 'recent-playlist') this.displayState[value.name] = false;
-      if (value.name === 'playlist-control' && !this.playinglIst.length) {
+      if (value.name === 'playlist-control' && !this.playingList.length) {
         this.displayState['playlist-control'] = false;
       }
       this.widgetsStatus[value.name] = {
