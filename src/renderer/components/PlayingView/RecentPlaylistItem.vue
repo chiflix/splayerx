@@ -330,12 +330,16 @@ export default {
       }
     },
     movementY(val) {
-      if (this.index > this.indexOfMovingItem && this.index <= this.indexOfMovingTo) {
-        this.displayIndex = this.index - 1;
-      } else if (this.index >= this.indexOfMovingTo && this.index < this.indexOfMovingItem) {
-        if (Math.abs(val) > this.thumbnailHeight) {
+      if (Math.abs(val) > this.thumbnailHeight) {
+        if (this.index >= this.indexOfMovingTo && this.index < this.indexOfMovingItem) {
           this.displayIndex = this.index;
-        } else {
+        } else if (this.index > this.indexOfMovingItem) {
+          this.displayIndex = this.index - 1;
+        }
+      } else if (Math.abs(val) < this.thumbnailHeight) {
+        if (this.index > this.indexOfMovingItem && this.index <= this.indexOfMovingTo) {
+          this.displayIndex = this.index - 1;
+        } else if (this.index >= this.indexOfMovingTo && this.index < this.indexOfMovingItem) {
           this.displayIndex = this.index + 1;
         }
       }
