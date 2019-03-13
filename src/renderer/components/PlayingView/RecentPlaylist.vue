@@ -206,7 +206,7 @@ export default {
     addMouseup() {
       this.onItemMouseup(this.addIndex);
       if (this.lastIndex === this.maxIndex) {
-        this.openFilesByDialog({
+        this.addFilesByDialog({
           defaultPath: path.dirname(this.originSrc),
         });
       }
@@ -366,6 +366,11 @@ export default {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
+    maxIndex(val, oldVal) {
+      if (this.lastIndex === oldVal) {
+        this.lastIndex = val;
+      }
+    },
     currentMousedownComponent(val) {
       if (val !== 'notification-bubble' && val !== 'titlebar' && val !== '') {
         if (val !== this.$options.name && this.backgroundDisplayState) {
@@ -424,11 +429,11 @@ export default {
     indexOfMovingTo() { // the place where the moving item is going to be set
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
       const distance = marginRight + this.thumbnailWidth;
-      const indexOfMovingTo = this.movementX > 0 ? // 移动到的位置
+      const indexOfMovingTo = this.movementX > 0 ? // the position where item moving to
         this.indexOfMovingItem +
-          Math.floor((this.movementX + (this.thumbnailWidth / 2)) / distance) :
+          Math.floor((this.movementX + (this.thumbnailWidth * 0.8)) / distance) :
         this.indexOfMovingItem +
-          Math.ceil((this.movementX - (this.thumbnailWidth / 2)) / distance);
+          Math.ceil((this.movementX - (this.thumbnailWidth * 0.8)) / distance);
       return indexOfMovingTo;
     },
     itemMoving() {

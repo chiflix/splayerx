@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import helpers from '@/helpers/index';
 
 const state = {
   PlayingList: [],
@@ -61,12 +60,22 @@ const actions = {
   },
   RemoveItemFromPlayingList({ state, commit }, item) {
     const pos = state.PlayingList.indexOf(item);
-    commit('RemoveItemFromPlayingListByPos', pos);
+    if (pos >= 0) commit('RemoveItemFromPlayingListByPos', pos);
   },
   RepositionItemFromPlayingList({ state, commit }, item) {
     const pos = state.PlayingList.indexOf(item.src);
     commit('RemoveItemFromPlayingListByPos', pos);
     commit('InsertItemToPlayingListByPos', item);
+  },
+  AddItemsToPlayingList({ commit, dispatch }, items) {
+    if (items.length) {
+      items.forEach((item) => {
+        dispatch('RemoveItemFromPlayingList', item);
+      });
+    } else {
+      dispatch('RemoveItemFromPlayingList', items);
+    }
+    commit('AddItemsToPlayingList', items);
   },
   UpdatePlayingList({ dispatch, commit, state }) {
     const dirPath = path.dirname(state.PlayingList[0]);
