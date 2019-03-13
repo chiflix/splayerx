@@ -73,18 +73,6 @@ const actions = {
 
     if (!fs.existsSync(dirPath)) {
       commit('PlayingList', []);
-    } else if (state.isFolderList) {
-      /*
-        Currently not judging whether app is mas version
-        Until detecting same directory be abandoned on mas version
-       */
-      helpers.methods.findSimilarVideoByVidPath(state.PlayingList[0]).then((videoFiles) => {
-        commit('PlayingList', videoFiles);
-      }, (err) => {
-        if (process.mas && err?.code === 'EPERM') {
-          dispatch('FolderList', state.PlayingList);
-        }
-      });
     } else {
       for (let i = 0; i < state.PlayingList.length; i += 1) {
         fs.access(state.PlayingList[i], fs.constants.F_OK, (err) => {
