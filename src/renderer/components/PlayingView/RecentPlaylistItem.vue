@@ -170,12 +170,11 @@ export default {
   },
   methods: {
     mousedownVideo(e) {
-      const mousedownPosition = [e.pageX, e.pageY];
+      this.eventTarget.onItemMousedown(this.index, e.pageX, e.pageY, e);
       document.onmousemove = (e) => {
-        const offsetX = e.pageX - mousedownPosition[0];
-        const offsetY = e.pageY - mousedownPosition[1];
-        this.eventTarget.onItemMousemove(this.index, offsetX, offsetY);
-        this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${offsetX}px, ${offsetY}px)`);
+        this.tranFlag = false;
+        this.eventTarget.onItemMousemove(this.index, e.pageX, e.pageY, e);
+        this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
       };
     },
     mouseupVideo() {
@@ -183,6 +182,7 @@ export default {
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
       this.$refs.progress.style.setProperty('opacity', '0');
       this.eventTarget.onItemMouseup(this.index);
+      this.tranFlag = true;
     },
     updateAnimationIn() {
       if (!this.isPlaying && this.imageLoaded) {
@@ -272,6 +272,7 @@ export default {
   },
   watch: {
     index(val) {
+      this.displayIndex = val;
       this.tranFlag = false;
       this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
       setTimeout(() => {

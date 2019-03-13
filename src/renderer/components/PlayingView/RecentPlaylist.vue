@@ -55,25 +55,35 @@
         :path="item"
         :itemMoving="itemMoving"
         :indexOfMovingTo="indexOfMovingTo"
-        :canHoverItem="canHoverItem"
-        :isInRange="index >= firstIndex && index <= lastIndex"
-        :isPlaying="index === playingIndex"
-        :winWidth="winWidth"
-        :isShifting="shifting"
-        :hovered="hoverIndex === index"
         :indexOfMovingItem="indexOfMovingItem"
         :movementX="movementX"
         :movementY="movementY"
+        :canHoverItem="canHoverItem"
+        :isInRange="index >= firstIndex && index <= lastIndex"
+        :isPlaying="index === playingIndex"
+        :isShifting="shifting"
+        :hovered="hoverIndex === index"
+        :winWidth="winWidth"
         :thumbnailWidth="thumbnailWidth"
         :thumbnailHeight="thumbnailHeight"
         :sizeAdaption="sizeAdaption"
         :eventTarget="eventTarget"/>
-      <AuthorizeFolder
-        :onAuthorizeMouseover="onAuthorizeMouseover"
-        :onAuthorizeMouseout="onAuthorizeMouseout"
-        :thumbnailWidth="thumbnailWidth"
+      <Add :style="{
+          marginRight: sizeAdaption(15),
+          minWidth: `${thumbnailWidth}px`,
+          minHeight: `${thumbnailHeight}px`,
+        }"
         :winWidth="winWidth"
-        :sizeAdaption="sizeAdaption"/>
+        :thumbnailWidth="thumbnailWidth"
+        :thumbnailHeight="thumbnailHeight"
+        :index="addIndex"
+        :indexOfMovingTo="indexOfMovingTo"
+        :indexOfMovingItem="indexOfMovingItem"
+        :movementX="movementX"
+        :movementY="movementY"
+        :addMouseenter="addMouseenter"
+        :addMouseleave="addMouseleave"
+        :addMouseup="addMouseup"/>
       <div class="next-page"
         v-if="thumbnailNumber < numberOfPlaylistItem"
         @mouseup.stop=""
@@ -93,13 +103,13 @@ import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
-import AuthorizeFolder from '@/components/PlayingView/AuthorizeFolder.vue';
+import Add from '@/components/PlayingView/Add.vue';
 
 export default {
   name: 'recent-playlist',
   components: {
     RecentPlaylistItem,
-    AuthorizeFolder,
+    Add,
   },
   props: {
     mousemovePosition: {},
@@ -128,6 +138,11 @@ export default {
       eventTarget: {},
       changeByRecent: false,
       onAuthorize: false,
+      pageSwitching: false,
+      pageSwitchingTimeId: NaN,
+      mousedownPosition: [],
+      firstIndexOnMousedown: 0,
+      lastIndexOnMousedown: 0,
     };
   },
   created() {
@@ -140,6 +155,7 @@ export default {
     });
     this.hoverIndex = this.playingIndex;
     this.eventTarget.onItemMousemove = this.onItemMousemove;
+    this.eventTarget.onItemMousedown = this.onItemMousedown;
     this.eventTarget.onItemMouseover = this.onItemMouseover;
     this.eventTarget.onItemMouseout = this.onItemMouseout;
     this.eventTarget.onItemMouseup = this.onItemMouseup;
@@ -179,19 +195,82 @@ export default {
         }
       }
     },
-    onAuthorizeMouseover() {
+    addMouseenter() {
       this.onAuthorize = true;
-      this.hoverIndex = this.authorizeIndex;
+      this.hoverIndex = this.addIndex;
     },
-    onAuthorizeMouseout() {
+    addMouseleave() {
       this.onAuthorize = false;
       this.hoverIndex = this.playingIndex;
     },
-    onItemMousemove(index, movementX, movementY) {
-      if (Math.abs(movementY) > 0 || Math.abs(movementX) > 0) {
+    addMouseup() {
+      this.onItemMouseup(this.addIndex);
+      if (this.lastIndex === this.maxIndex) {
+        this.openFilesByDialog({
+          defaultPath: path.dirname(this.originSrc),
+        });
+      }
+    },
+    onItemMousedown(index, pageX, pageY) {
+      this.mousedownPosition = [pageX, pageY];
+      this.firstIndexOnMousedown = this.firstIndex;
+      this.lastIndexOnMousedown = this.lastIndex;
+    },
+    onItemMousemove(index, pageX, pageY) {
+      const offsetX = pageX - this.mousedownPosition[0];
+      const offsetY = pageY - this.mousedownPosition[1];
+      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+      const distance = marginRight + this.thumbnailWidth;
+
+      if (Math.abs(offsetY) > 0 || Math.abs(offsetX) > 0) {
         this.indexOfMovingItem = index;
-        this.movementX = movementX;
-        this.movementY = movementY;
+        this.movementY = offsetY;
+
+        if (window.innerWidth - pageX < 20) {
+          if (!this.pageSwitching) {
+            this.pageSwitching = true;
+            this.pageSwitchingTimeId = setTimeout(() => {
+              this.pageSwitching = false;
+              this.firstIndex += this.thumbnailNumber;
+              this.shifting = true;
+              this.tranFlag = true;
+              this.movementX = offsetX +
+                ((this.lastIndex - this.lastIndexOnMousedown) * distance);
+
+              setTimeout(() => {
+                this.shifting = false;
+                this.tranFlag = false;
+              }, 400);
+            }, 1000);
+          }
+        } else if (pageX < 20) {
+          if (!this.pageSwitching) {
+            this.pageSwitching = true;
+            this.pageSwitchingTimeId = setTimeout(() => {
+              this.pageSwitching = false;
+              this.lastIndex -= this.thumbnailNumber;
+              this.shifting = true;
+              this.tranFlag = true;
+              this.movementX = offsetX +
+                ((this.firstIndex - this.firstIndexOnMousedown) * distance);
+
+              setTimeout(() => {
+                this.shifting = false;
+                this.tranFlag = false;
+              }, 400);
+            }, 1000);
+          }
+        } else {
+          clearTimeout(this.pageSwitchingTimeId);
+          this.pageSwitching = false;
+        }
+        if (this.lastIndex > this.lastIndexOnMousedown) {
+          this.movementX = offsetX + ((this.lastIndex - this.lastIndexOnMousedown) * distance);
+        } else if (this.firstIndex < this.firstIndexOnMousedown) {
+          this.movementX = offsetX + ((this.firstIndex - this.firstIndexOnMousedown) * distance);
+        } else {
+          this.movementX = offsetX;
+        }
       } else {
         this.indexOfMovingItem = this.playingList.length;
       }
@@ -355,7 +434,7 @@ export default {
     itemMoving() {
       return this.indexOfMovingItem !== this.playingList.length;
     },
-    authorizeIndex() {
+    addIndex() {
       return this.playingList.length;
     },
     onlyOneVideo() {
@@ -402,7 +481,7 @@ export default {
       return this.firstIndex * (this.thumbnailWidth + 15);
     },
     maxIndex() {
-      return this.playingList.length - 1;
+      return this.playingList.length;
     },
     maxDistance() {
       return (this.maxIndex - (this.thumbnailNumber - 1)) * this.thumbnailWidth;
