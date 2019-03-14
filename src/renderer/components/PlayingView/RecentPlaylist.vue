@@ -25,7 +25,6 @@
           fontSize: sizeAdaption(14),
           lineHeight: sizeAdaption(13),
         }">
-        <div v-if="onAuthorize">加载同目录视频</div>
         <div v-show="!onAuthorize">
           <span ref="lastPlayedTime"></span>
           {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}
@@ -37,7 +36,7 @@
           fontSize: sizeAdaption(18),
           lineHeight: sizeAdaption(20),
           fontWeight: 500,
-        }">{{ onAuthorize ? directoryName : filename }}</div>
+        }">{{ onAuthorize ? addMoreVideos : filename }}</div>
     </div>
     </transition>
     <div class="playlist-items"
@@ -53,6 +52,7 @@
         :key="item"
         :index="index"
         :path="item"
+        :inLastPage="lastIndex === maxIndex"
         :itemMoving="itemMoving"
         :indexOfMovingTo="indexOfMovingTo"
         :indexOfMovingItem="indexOfMovingItem"
@@ -310,7 +310,7 @@ export default {
         this.changeByRecent = true;
         this.playFile(this.playingList[index]);
       }
-      if (Math.abs(this.movementY) > this.thumbnailHeight * 2) {
+      if (Math.abs(this.movementY) > this.thumbnailHeight * 1.5) {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         this.hoverIndex = this.playingIndex;
         this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
@@ -447,8 +447,8 @@ export default {
     onlyOneVideo() {
       return this.playingList.length === 1;
     },
-    directoryName() {
-      return path.dirname(this.originSrc);
+    addMoreVideos() {
+      return '添加视频至播放列表';
     },
     inWhichSource() {
       if (this.isFolderList) {
