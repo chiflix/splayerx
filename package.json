@@ -44,12 +44,12 @@
     "directories": {
       "output": "build"
     },
-    "electronVersion": "4.0.7",
+    "electronVersion": "5.0.0-beta.5",
     "electronDist": "node_modules/@chiflix/electron/dist",
     "electronDownload": {
       "mirror": "https://github.com/chiflix/electron/releases/download/v",
       "isVerifyChecksum": false,
-      "version": "4.0.7"
+      "version": "5.0.0-beta.5"
     },
     "files": [
       "dist/electron/**/*"
@@ -152,6 +152,14 @@
           ],
           "role": "Viewer",
           "icon": "build/icons/others.icns"
+        },
+        {
+          "name": "DAT",
+          "ext": [
+            "dat"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/dat.icns"
         },
         {
           "name": "WEBM",
@@ -332,6 +340,14 @@
           ],
           "role": "Viewer",
           "icon": "build/icons/others.ico"
+        },
+        {
+          "name": "DAT",
+          "ext": [
+            "dat"
+          ],
+          "role": "Viewer",
+          "icon": "build/icons/dat.ico"
         },
         {
           "name": "WEBM",
