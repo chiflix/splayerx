@@ -15,7 +15,12 @@ const clock = lolex.createClock();
 
 export default {
   data() {
-    return { clock, infoDB, sagi: Sagi };
+    return {
+      clock,
+      infoDB,
+      sagi: Sagi,
+      showingPopupDialog: false,
+    };
   },
   methods: {
     calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
