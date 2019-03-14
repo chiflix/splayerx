@@ -338,6 +338,7 @@ export default {
           src: this.playingList[index],
           newPosition: this.indexOfMovingTo,
         });
+        this.hoverIndex = this.indexOfMovingTo;
       }
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;

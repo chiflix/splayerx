@@ -183,13 +183,17 @@ export default {
       document.onmousemove = (e) => {
         this.tranFlag = false;
         this.eventTarget.onItemMousemove(this.index, e.pageX, e.pageY, e);
-        this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
+        requestAnimationFrame(() => {
+          this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
+        });
       };
     },
     mouseupVideo() {
       document.onmousemove = null;
-      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-      this.$refs.progress.style.setProperty('opacity', '0');
+      requestAnimationFrame(() => {
+        this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+        this.$refs.progress.style.setProperty('opacity', '0');
+      });
       this.eventTarget.onItemMouseup(this.index);
       this.tranFlag = true;
     },
@@ -305,13 +309,15 @@ export default {
       }
     },
     displayIndex(val) {
-      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
-      const distance = marginRight + this.thumbnailWidth;
-      if (val !== this.index) {
-        this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${(val - this.index) * distance}px,0)`);
-      } else {
-        this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-      }
+      requestAnimationFrame(() => {
+        const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+        const distance = marginRight + this.thumbnailWidth;
+        if (val !== this.index) {
+          this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${(val - this.index) * distance}px,0)`);
+        } else {
+          this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+        }
+      });
     },
     selfMoving(val) {
       if (val) {
