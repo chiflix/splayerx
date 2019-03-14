@@ -25,10 +25,8 @@
           fontSize: sizeAdaption(14),
           lineHeight: sizeAdaption(13),
         }">
-        <div v-show="!onAuthorize">
-          <span ref="lastPlayedTime"></span>
-          {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}
-        </div>
+        <span ref="lastPlayedTime"></span>
+        {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}
       </div>
       <div class="file-name"
         :style="{
@@ -36,7 +34,7 @@
           fontSize: sizeAdaption(18),
           lineHeight: sizeAdaption(20),
           fontWeight: 500,
-        }">{{ onAuthorize ? addMoreVideos : filename }}</div>
+        }">{{ filename }}</div>
     </div>
     </transition>
     <div class="playlist-items"
@@ -137,7 +135,6 @@ export default {
       filePathNeedToDelete: '',
       eventTarget: {},
       changeByRecent: false,
-      onAuthorize: false,
       pageSwitching: false,
       pageSwitchingTimeId: NaN,
       mousedownPosition: [],
@@ -195,14 +192,6 @@ export default {
         }
       }
     },
-    addMouseenter() {
-      this.onAuthorize = true;
-      this.hoverIndex = this.addIndex;
-    },
-    addMouseleave() {
-      this.onAuthorize = false;
-      this.hoverIndex = this.playingIndex;
-    },
     addMouseup() {
       this.onItemMouseup(this.addIndex);
       if (this.lastIndex === this.maxIndex) {
@@ -216,16 +205,20 @@ export default {
       this.firstIndexOnMousedown = this.firstIndex;
       this.lastIndexOnMousedown = this.lastIndex;
     },
-    onItemMousemove(index, pageX, pageY) {
+    onItemMousemove(index, pageX, pageY) { // eslint-disable-line complexity
       const offsetX = pageX - this.mousedownPosition[0];
       const offsetY = pageY - this.mousedownPosition[1];
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
       const distance = marginRight + this.thumbnailWidth;
+      const outOfWindow = pageX > window.innerWidth || pageX < 0
+        || pageY > window.innerHeight || pageY < 0;
 
       if (Math.abs(offsetY) > 0 || Math.abs(offsetX) > 0) {
         this.indexOfMovingItem = index;
         this.movementY = offsetY;
 
+        // if the item is moved to the edge of the window and stay for 1s
+        // this action will trigger the page switching
         if (this.indexOfMovingTo === this.lastIndex + 1) {
           if (!this.pageSwitching) {
             this.pageSwitching = true;
@@ -261,7 +254,16 @@ export default {
         } else {
           clearTimeout(this.pageSwitchingTimeId);
           this.pageSwitching = false;
+          if (outOfWindow) {
+            document.onmouseup = () => {
+              this.indexOfMovingItem = this.playingList.length;
+              this.movementX = this.movementY = 0;
+            };
+          } else {
+            document.onmouseup = null;
+          }
         }
+        // calculate the movement of the item if page had been switch
         if (this.lastIndex > this.lastIndexOnMousedown) {
           this.movementX = offsetX + ((this.lastIndex - this.lastIndexOnMousedown) * distance);
         } else if (this.firstIndex < this.firstIndexOnMousedown) {
@@ -450,9 +452,6 @@ export default {
     },
     onlyOneVideo() {
       return this.playingList.length === 1;
-    },
-    addMoreVideos() {
-      return '添加视频至播放列表';
     },
     inWhichSource() {
       if (this.isFolderList) {

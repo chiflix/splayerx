@@ -348,6 +348,16 @@ export default {
       }
     },
     movementY(val) { // eslint-disable-line complexity
+      // resolve situation that item been moved out of window
+      if (val === 0 && this.movementX === 0) {
+        document.onmousemove = null;
+        requestAnimationFrame(() => {
+          this.updateAnimationOut();
+          this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+        });
+        this.tranFlag = true;
+        this.eventTarget.onItemMouseout();
+      }
       if (Math.abs(val) > this.thumbnailHeight) {
         // avoid the wrong layout after moving to left and lift up
         if (this.index <= this.indexOfMovingItem) {
