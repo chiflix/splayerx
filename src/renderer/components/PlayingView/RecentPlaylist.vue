@@ -226,7 +226,7 @@ export default {
         this.indexOfMovingItem = index;
         this.movementY = offsetY;
 
-        if (window.innerWidth - pageX < 20) {
+        if (this.indexOfMovingTo === this.lastIndex + 1) {
           if (!this.pageSwitching) {
             this.pageSwitching = true;
             this.pageSwitchingTimeId = setTimeout(() => {
@@ -242,7 +242,7 @@ export default {
               }, 400);
             }, 1000);
           }
-        } else if (pageX < 20) {
+        } else if (this.indexOfMoving === this.firstIndex - 1) {
           if (!this.pageSwitching) {
             this.pageSwitching = true;
             this.pageSwitchingTimeId = setTimeout(() => {
@@ -334,9 +334,13 @@ export default {
             this.tranFlag = false;
           }, 400);
         }
+        let newPosition;
+        if (this.indexOfMovingTo >= this.maxIndex) newPosition = this.maxIndex - 1;
+        else if (this.indexOfMovingTo < 0) newPosition = 0;
+        else newPosition = this.indexOfMovingTo;
         this.$store.dispatch('RepositionItemFromPlayingList', {
           src: this.playingList[index],
-          newPosition: this.indexOfMovingTo,
+          newPosition,
         });
         this.hoverIndex = this.indexOfMovingTo;
       }
