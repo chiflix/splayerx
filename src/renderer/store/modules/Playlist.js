@@ -22,10 +22,7 @@ const getters = {
     return '';
   },
   playingList: state => state.PlayList,
-  playingIndex: (state, getters) => {
-    const list = state.PlayList;
-    return list.findIndex(value => value === getters.originSrc);
-  },
+  playingIndex: (state, getters) => state.PlayList.findIndex(value => value === getters.originSrc),
 };
 
 const mutations = {
