@@ -333,11 +333,11 @@ export default {
         this.displayIndex = this.index;
       }
     },
-    movementX() {
+    indexOfMovingTo(val) {
       if (Math.abs(this.movementY) < this.thumbnailHeight) {
-        if (this.index > this.indexOfMovingItem && this.index <= this.indexOfMovingTo) {
+        if (this.index > this.indexOfMovingItem && this.index <= val) {
           this.displayIndex = this.index - 1;
-        } else if (this.index >= this.indexOfMovingTo && this.index < this.indexOfMovingItem) {
+        } else if (this.index >= val && this.index < this.indexOfMovingItem) {
           this.displayIndex = this.index + 1;
         } else {
           this.displayIndex = this.index;
