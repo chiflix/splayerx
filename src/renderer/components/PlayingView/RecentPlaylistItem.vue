@@ -126,6 +126,9 @@ export default {
     indexOfMovingTo: {
       type: Number,
     },
+    isLastPage: {
+      type: Boolean,
+    },
     isInRange: {
       type: Boolean,
     },
@@ -344,18 +347,23 @@ export default {
         }
       }
     },
-    movementY(val) {
+    movementY(val) { // eslint-disable-line complexity
       if (Math.abs(val) > this.thumbnailHeight) {
-        if (this.index >= this.indexOfMovingTo && this.index < this.indexOfMovingItem) {
-          this.displayIndex = this.index;
+        // avoid the wrong layout after moving to left and lift up
+        if (this.index <= this.indexOfMovingItem) {
+          this.displayIndex = this.isLastPage ? this.index + 1 : this.index;
         } else if (this.index > this.indexOfMovingItem) {
-          this.displayIndex = this.index - 1;
+          this.displayIndex = this.isLastPage ? this.index : this.index - 1;
         }
-      } else if (Math.abs(val) < this.thumbnailHeight) {
+      } else if (Math.abs(val) <= this.thumbnailHeight) {
+        // item moving to right
         if (this.index > this.indexOfMovingItem && this.index <= this.indexOfMovingTo) {
           this.displayIndex = this.index - 1;
+        // item moving to left
         } else if (this.index >= this.indexOfMovingTo && this.index < this.indexOfMovingItem) {
           this.displayIndex = this.index + 1;
+        } else {
+          this.displayIndex = this.index;
         }
       }
     },

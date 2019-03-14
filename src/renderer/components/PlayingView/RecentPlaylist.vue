@@ -52,7 +52,7 @@
         :key="item"
         :index="index"
         :path="item"
-        :inLastPage="lastIndex === maxIndex"
+        :isLastPage="lastIndex === maxIndex"
         :itemMoving="itemMoving"
         :indexOfMovingTo="indexOfMovingTo"
         :indexOfMovingItem="indexOfMovingItem"
