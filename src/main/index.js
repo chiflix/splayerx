@@ -359,6 +359,7 @@ function registerMainWindowEvent() {
       show: false,
       webPreferences: {
         webSecurity: false,
+        nodeIntegration: true,
         experimentalFeatures: true,
       },
       acceptFirstMouse: true,
@@ -389,6 +390,7 @@ function registerMainWindowEvent() {
       show: false,
       webPreferences: {
         webSecurity: false,
+        nodeIntegration: true,
         experimentalFeatures: true,
       },
       acceptFirstMouse: true,
@@ -433,6 +435,7 @@ function createWindow() {
     transparent: false, // set to false to solve the backdrop-filter bug
     webPreferences: {
       webSecurity: false,
+      nodeIntegration: true,
       experimentalFeatures: true,
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
