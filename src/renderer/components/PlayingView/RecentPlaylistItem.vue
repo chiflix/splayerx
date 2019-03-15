@@ -180,6 +180,7 @@ export default {
       videoWidth: 0,
       displayIndex: NaN,
       tranFlag: true,
+      outOfWindow: false,
     };
   },
   methods: {
@@ -187,6 +188,8 @@ export default {
       if (this.isPlaying) return;
       this.eventTarget.onItemMousedown(this.index, e.pageX, e.pageY, e);
       document.onmousemove = (e) => {
+        this.outOfWindow = e.pageX > window.innerWidth || e.pageX < 0
+          || e.pageY > window.innerHeight || e.pageY < 0;
         this.tranFlag = false;
         this.eventTarget.onItemMousemove(this.index, e.pageX, e.pageY, e);
         requestAnimationFrame(() => {
@@ -195,7 +198,6 @@ export default {
       };
     },
     mouseupVideo() {
-      document.onmousemove = null;
       requestAnimationFrame(() => {
         this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
         this.$refs.progress.style.setProperty('opacity', '0');
@@ -233,9 +235,11 @@ export default {
       }
     },
     mouseoutVideo() {
-      if (this.selfMoving) return;
-      this.eventTarget.onItemMouseout();
-      requestAnimationFrame(this.updateAnimationOut);
+      console.log(this.mouseoutVideo);
+      if (!this.itemMoving) {
+        this.eventTarget.onItemMouseout();
+        requestAnimationFrame(this.updateAnimationOut);
+      }
     },
   },
   mounted() {
@@ -293,11 +297,13 @@ export default {
   watch: {
     index(val) {
       this.displayIndex = val;
-      this.tranFlag = false;
-      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-      setTimeout(() => {
-        this.tranFlag = true;
-      }, 0);
+      requestAnimationFrame(() => {
+        this.tranFlag = false;
+        this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+        setTimeout(() => {
+          this.tranFlag = true;
+        }, 0);
+      });
     },
     isPlaying(val) {
       if (val) {
@@ -330,11 +336,21 @@ export default {
         this.$refs.recentPlaylistItem.style.zIndex = 200;
         this.$refs.content.style.zIndex = 200;
       } else {
-        this.$refs.recentPlaylistItem.style.zIndex = 0;
-        this.$refs.content.style.zIndex = 10;
+        document.onmousemove = null;
+        this.tranFlag = true;
+        requestAnimationFrame(() => {
+          this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+          if (this.outOfWindow) {
+            this.updateAnimationOut();
+            this.eventTarget.onItemMouseout();
+          }
+          this.$refs.recentPlaylistItem.style.zIndex = 0;
+          this.$refs.content.style.zIndex = 10;
+        });
       }
     },
     itemMoving(val) {
+      console.log('itemMoving', val);
       if (!val) {
         this.displayIndex = this.index;
       }
@@ -354,15 +370,16 @@ export default {
     },
     movementY(val) { // eslint-disable-line complexity
       // resolve situation that item been moved out of window
-      if (val === 0 && this.movementX === 0) {
-        document.onmousemove = null;
-        requestAnimationFrame(() => {
-          this.updateAnimationOut();
-          this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-        });
-        this.tranFlag = true;
-        this.eventTarget.onItemMouseout();
-      }
+      // if (val === 0 && this.movementX === 0) {
+      //   document.onmousemove = null;
+      //   requestAnimationFrame(() => {
+      //     this.tranFlag = true;
+      //     console.log(1);
+      //     this.updateAnimationOut();
+      //     this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+      //   });
+      //   this.eventTarget.onItemMouseout();
+      // }
       if (Math.abs(val) > this.thumbnailHeight) {
         // avoid the wrong layout after moving to left and lift up
         if (this.index <= this.indexOfMovingItem) {

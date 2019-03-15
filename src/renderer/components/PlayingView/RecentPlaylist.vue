@@ -217,7 +217,7 @@ export default {
         this.movementY = offsetY;
 
         // if the item is moved to the edge of the window and stay for 1s
-        // this action will trigger the page switching
+        // then switch the page
         if (this.indexOfMovingTo === this.lastIndex + 1) {
           if (!this.pageSwitching) {
             this.pageSwitching = true;
