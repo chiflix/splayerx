@@ -198,6 +198,7 @@ export default {
       };
     },
     mouseupVideo() {
+      document.onmousemove = null;
       requestAnimationFrame(() => {
         this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
         this.$refs.progress.style.setProperty('opacity', '0');
@@ -235,7 +236,6 @@ export default {
       }
     },
     mouseoutVideo() {
-      console.log(this.mouseoutVideo);
       if (!this.itemMoving) {
         this.eventTarget.onItemMouseout();
         requestAnimationFrame(this.updateAnimationOut);
