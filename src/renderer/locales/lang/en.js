@@ -205,6 +205,7 @@ export default {
   },
   subtitle: {
     embedded: 'Embed',
+    modified: 'My Subtitle',
     language: {
       zh: 'Chinese (Simplified)',
       'zh-CN': 'Chinese (Simplified)',

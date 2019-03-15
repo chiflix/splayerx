@@ -12,7 +12,7 @@
     @click.left="handleMouseupLeft">
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']" v-if="!isEditable && !isProfessional"></titlebar>
     <notification-bubble ref="nextVideoUI" v-if="!isEditable && !isProfessional"/>
-    <recent-playlist class="recent-playlist" ref="recentPlaylist"  v-if="!isEditable && !isProfessional"
+    <recent-playlist class="recent-playlist" ref="recentPlaylist"  v-fade-in="!isEditable && !isProfessional"
     :displayState="displayState['recent-playlist']"
     :mousemovePosition="mousemovePosition"
     :isDragging="isDragging"
@@ -20,19 +20,19 @@
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-fade-in="showAllWidgets" v-if="!isEditable && !isProfessional"/>
-    <play-button class="play-button no-drag"  v-if="!isEditable && !isProfessional"
+    <div class="masking" v-fade-in="showAllWidgets && !isEditable && !isProfessional"/>
+    <play-button class="play-button no-drag"  v-fade-in="!isEditable && !isProfessional"
       @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
       :mousemovePosition="mousemovePosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
-    <volume-indicator class="no-drag" v-if="!isEditable && !isProfessional"
+    <volume-indicator class="no-drag" v-fade-in="!isEditable && !isProfessional"
       @update:volume-state="updateVolumeState"
       :attachedShown="attachedShown"
       :mousedownOnPlayButton="mousedownOnPlayButton"
       :showAllWidgets="showAllWidgets"/>
-    <div class="control-buttons" v-fade-in="showAllWidgets" v-if="!isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
+    <div class="control-buttons" v-fade-in="showAllWidgets && !isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
       v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging.sync="lastDragging"
@@ -332,7 +332,7 @@ export default {
       this.clock.tick(timestamp - this.start);
       this.UIStateManager();
 
-      if (!videodata.paused && videodata.time + 1 >= this.duration) {
+      if (!this.isProfessional && !videodata.paused && videodata.time + 1 >= this.duration) {
         // we need set the paused state to go to next video
         // this state will be reset on mounted of BaseVideoPlayer
         videodata.paused = true;

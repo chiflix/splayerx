@@ -80,7 +80,6 @@ const normalizer = (parsedSubtitle) => {
   return {
     info: validInfo,
     dialogues: finalDialogues,
-    origin: parsedSubtitle,
   };
 };
 

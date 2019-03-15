@@ -46,33 +46,43 @@
                         <div class="text">{{ noSubtitle }}</div>
                       </div>
                     </div>
-
-                    <div v-if="foundSubtitles">
-                      <div class="menu-item-text-wrapper"
-                        v-for="(item, index) in computedAvaliableItems" :key="item.rank"
-                        @mouseup="toggleItemClick(index)"
-                        @mouseover="toggleItemsMouseOver(index)"
-                        @mouseleave="toggleItemsMouseLeave(index)"
-                        :id="'item'+index"
+                    <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0) && computedAvaliableItems.length === 0">
+                      <div class="menu-item-text-wrapper create-subtitle-btn"
+                        @click.stop="handleCreateBtnClick"
                         :style="{
-                          transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                          color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                          height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                          cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                          height: `${itemHeight}px`,
                         }">
-                        <div class="text"
-                          :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                            whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                          }">{{ getSubName(item) }}</div>
-                        <div v-if="item.type === 'modified'" v-show="currentSubtitleIndex === index" class="menu-item-icon-wrapper">
-                          <Icon type="delete" class="delete" @mouseup.native="handleDeleteSubtitle($event, item)"
-                            :style="{
-                              cursor: 'pointer',
-                            }"/>
+                        <div class="text">{{ '创建字幕' }}</div>
+                      </div>
+                    </div>
+                    <div v-if="foundSubtitles">
+                      <div v-for="(item, index) in computedAvaliableItems" :key="item.id">
+                        <div class="menu-item-text-wrapper"
+                          @mouseup="toggleItemClick($event, index)"
+                          @mouseover="toggleItemsMouseOver(index)"
+                          @mouseleave="toggleItemsMouseLeave(index)"
+                          :id="'item'+index"
+                          :style="{
+                            transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                            color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                            height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                            cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                          }">
+                          <div class="textContainer">
+                            <div class="text"
+                              :style="{
+                                wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                                whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                              }">{{ getSubName(item) }}</div>
+                          </div>
+                          <div class="iconContainer">
+                            <transition name="sub-delete">
+                              <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete($event, item)" v-show="(item.type === 'local' || item.type === 'modified') && hoverIndex === index"></Icon>
+                            </transition>
+                          </div>
                         </div>
                       </div>
                     </div>
-                    
                     <div v-if="loadingTypes.length > 0">
                       <div v-for="(item, index) in loadingTypes"
                         class="placeholders-wrapper"
@@ -88,7 +98,7 @@
                         height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                         top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
                         marginTop: `${-cardPos}px`,
-                        transition: 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+                        transition: transFlag ? 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
                       }"/>
                   </div>
                 </div>
@@ -108,13 +118,15 @@
   </div>
 </template>
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapMutations, mapGetters, mapState } from 'vuex';
 import difference from 'lodash/difference';
 import debounce from 'lodash/debounce';
 import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
+import { Window as windowMutations } from '@/store/mutationTypes';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
+import { deleteSubtitles } from '@/helpers/subtitle';
 import Icon from '../BaseIconContainer.vue';
 import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
@@ -157,10 +169,11 @@ export default {
       onAnimation: false,
       refAnimation: '',
       debouncedHandler: debounce(this.handleRefresh, 1000),
+      transFlag: true,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'paused']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -210,34 +223,52 @@ export default {
       }
       return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 6) ? ' scroll' : '';
     },
-    scopeHeight() {
+    scopeHeight() {// eslint-disable-line
       if (this.computedSize >= 289 && this.computedSize <= 480) {
+        if (this.computedAvaliableItems.length === 0) {
+          return ((2 * 31) - 4) + (this.loadingTypes.length * 31);
+        }
         return this.computedAvaliableItems.length > 2 ?
           (this.loadingTypes.length * 31) + 89 :
           (((this.computedAvaliableItems.length + 1) * 31) - 4) +
           (this.loadingTypes.length * 31);
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+        if (this.computedAvaliableItems.length === 0) {
+          return ((2 * 37) - 5) + (this.loadingTypes.length * 37);
+        }
         return this.computedAvaliableItems.length > 4 ?
           (this.loadingTypes.length * 37) + 180 :
           (((this.computedAvaliableItems.length + 1) * 37) - 5) +
           (this.loadingTypes.length * 37);
+      }
+      if (this.computedAvaliableItems.length === 0) {
+        return ((2 * 51) - 7) + (this.loadingTypes.length * 51);
       }
       return this.computedAvaliableItems.length > 6 ?
         (this.loadingTypes.length * 51) + 350 :
         (((this.computedAvaliableItems.length + 1) * 51) - 7) +
         (this.loadingTypes.length * 51);
     },
-    contHeight() {
+    contHeight() {// eslint-disable-line
       if (this.computedSize >= 289 && this.computedSize <= 480) {
+        if (this.computedAvaliableItems.length === 0) {
+          return ((2 * 31) + 45) + (this.loadingTypes.length * 31);
+        }
         return this.computedAvaliableItems.length > 2 ?
           (this.loadingTypes.length * 31) + 138 :
           45 + ((this.computedAvaliableItems.length + 1) * 31) +
           (this.loadingTypes.length * 31);
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+        if (this.computedAvaliableItems.length === 0) {
+          return ((2 * 37) + 54) + (this.loadingTypes.length * 31);
+        }
         return this.computedAvaliableItems.length > 4 ?
           (this.loadingTypes.length * 37) + 239 :
           54 + ((this.computedAvaliableItems.length + 1) * 37) +
           (this.loadingTypes.length * 37);
+      }
+      if (this.computedAvaliableItems.length === 0) {
+        return ((2 * 51) + 76) + (this.loadingTypes.length * 31);
       }
       return this.computedAvaliableItems.length > 6 ?
         (this.loadingTypes.length * 51) + 433 :
@@ -311,9 +342,7 @@ export default {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
       }
-      if (val.length >= oldval.length) {
-        this.computedAvaliableItems = val.filter(sub => sub && sub.name);
-      }
+      this.computedAvaliableItems = val.filter(sub => sub && sub.name);
     },
     loadingType(val) {
       if (val === 'local') {
@@ -333,7 +362,49 @@ export default {
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
+      removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
     }),
+    ...mapMutations({
+      toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
+    }),
+    handleCreateBtnClick() {
+      // this.$bus.$emit('add-subtitles', [{
+      //   src: '1',
+      //   type: 'modified',
+      //   options: {
+      //     id: '1',
+      //     storage: {
+      //       parsed: {
+      //         dialogues: [],
+      //       },
+      //       metaInfo: {
+      //         language: 'zh-CN',
+      //         name: 1,
+      //       },
+      //     },
+      //   },
+      // }]);
+      if (!this.paused) this.$bus.$emit('toggle-playback');
+      this.toggleProfessional(true);
+    },
+    handleSubDelete(e, item) {
+      if (e.target.nodeName !== 'DIV') {
+        this.transFlag = false;
+        this.removeLocalSub(item.id);
+        this.hoverHeight = 0;
+        if (item.id === this.currentSubtitleId) {
+          this.$bus.$emit('off-subtitle');
+        }
+        deleteSubtitles([item.id], this.originSrc).then((result) => {
+          this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
+          this.transFlag = true;
+          if (item.type === 'modified') {
+            // 自制字幕，需要删除源文件
+            this.$bus.$emit('delete-subtitle', { sub: item });
+          }
+        });
+      }
+    },
     finishAnimation() {
       this.refAnimation = '';
     },
@@ -342,6 +413,8 @@ export default {
         return path.basename(item);
       } else if (item.type === 'embedded') {
         return `${this.$t('subtitle.embedded')} ${item.name}`;
+      } else if (item.type === 'modified') {
+        return `${this.$t('subtitle.modified')} ${item.name}`;
       }
       return item.name;
     },
@@ -397,9 +470,6 @@ export default {
           errcode: SUBTITLE_OFFLINE,
         });
       }
-    },
-    handleDeleteSubtitle(e, sub) {
-      this.$bus.$emit('delete-subtitles', { sub });
     },
     orify(...args) {
       return args.some(arg => arg == true); // eslint-disable-line
@@ -459,6 +529,10 @@ export default {
       }
     },
     toggleItemsMouseOver(index) {
+      this.showSubtitleDetails(index);
+      this.hoverIndex = index;
+    },
+    showSubtitleDetails(index) {
       if (index >= 0) {
         clearTimeout(this.detailTimer);
         const hoverItem = document.querySelector(`#item${index} .text`);
@@ -470,7 +544,6 @@ export default {
           }, 1500);
         }
       }
-      this.hoverIndex = index;
     },
     toggleItemsMouseLeave() {
       clearTimeout(this.detailTimer);
@@ -478,9 +551,14 @@ export default {
       this.hiddenText = false;
       this.hoverIndex = -5;
     },
-    toggleItemClick(index) {
-      const { computedAvaliableItems } = this;
-      this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+    toggleItemClick(event, index) {
+      if (event.target.nodeName === 'DIV') {
+        const { computedAvaliableItems } = this;
+        this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+        setTimeout(() => {
+          this.showSubtitleDetails(index);
+        }, 0);
+      }
     },
   },
   created() {
@@ -604,21 +682,23 @@ export default {
     color: rgba(255, 255, 255, 0.6);
   }
   .menu-item-text-wrapper {
-    display: flex;
-    justify-content: space-between;
+    .deleteIcon {
+      transition-delay: 75ms;
+    }
     .text {
+      transition: color 90ms linear;
+      transition-delay: 75ms;
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
     }
-    .delete {
-      width: 14px;
-      height: 14px;
+    &.create-subtitle-btn {
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.6);
+      transition: color 80ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
+      &:hover {
+        color: rgba(255, 255, 255, 0.9);
+      }
     }
-  }
-  .menu-item-icon-wrapper {
-    display: flex;
-    align-self: center;
-    margin: auto 10px auto 0;
   }
   .placeholder-item-text-wrapper {
     .text {
@@ -679,11 +759,24 @@ export default {
       width: 142px;
       display: flex;
       margin: auto auto 4px 9px;
+      .textContainer {
+        width: 116px;
+        display: flex;
+      }
       .text {
         font-size: 11px;
         letter-spacing: 0.2px;
         line-height: 13px;
-        margin: auto 9.43px;
+        margin: auto 0 auto 9px;
+      }
+      .iconContainer {
+        width: 26px;
+        height: 27px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
@@ -738,11 +831,24 @@ export default {
       width: 174px;
       display: flex;
       margin: auto auto 5px 9.5px;
+      .textContainer {
+        width: 141px;
+        display: flex;
+      }
       .text {
         font-size: 12px;
         letter-spacing: 0.2px;
         line-height: 14px;
-        margin: auto 12.73px;
+        margin: auto 0 auto 12.73px;
+      }
+      .iconContainer {
+        width: 33px;
+        height: 32px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
@@ -797,11 +903,24 @@ export default {
       width: 242px;
       display: flex;
       margin: auto auto 7px 12px;
+      .textContainer {
+        width: 196px;
+        display: flex;
+      }
       .text {
         font-size: 16px;
         letter-spacing: 0.27px;
         line-height: 18px;
-        margin: auto 17.89px;
+        margin: auto 0 auto 17.89px;
+      }
+      .iconContainer {
+        width: 46px;
+        height: 44px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
@@ -832,6 +951,13 @@ export default {
 }
 .sub-trans-l-leave-active {
   position: absolute;
+}
+
+.sub-delete-enter-active, .sub-delete-leave-active {
+  transition: opacity 150ms;
+}
+.sub-delete-enter, .sub-delete-leave-to {
+  opacity: 0;
 }
 
 .refresh-animation {

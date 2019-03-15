@@ -23,9 +23,9 @@ export default {
     settings: Object,
   },
   computed: {
-    ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth']),
+    ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth', 'isProfessional']),
     ChosenIndex() {
-      return this.chosenStyle ? this.chosenStyle : 0;
+      return this.chosenStyle && !this.isProfessional ? this.chosenStyle : 0;
     },
     textAlign() {
       const alignLeft = [1, 4, 7];

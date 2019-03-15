@@ -45,7 +45,7 @@
     </div>
     <div class="sub-editor-body">
       <subtitle-input
-      :key="subtitleInstance.id"
+      :key="subtitleInstance && subtitleInstance.id"
       :showAddInput="showAddInput"
       :newSubHolder="newSubHolder"
       :currentSub="currentSub"
@@ -79,6 +79,7 @@ export default {
   },
   data() {
     return {
+      dialogues: [],
       timeLineDraging: false,
       dragStartX: 0,
       dragStartLeft: 0,
@@ -116,14 +117,18 @@ export default {
       return Math.ceil((3 * this.winWidth) / (this.space * 2));
     },
     type() {
-      return this.subtitleInstance.metaInfo.format;
+      if (this.subtitleInstance && this.subtitleInstance.metaInfo) {
+        return this.subtitleInstance.metaInfo.format;
+      }
+      return '';
     },
     times() {
       return [...Array(this.scales).keys()]
         .map(e => (this.currentTime * 1) + ((e * 1) - this.offset));
     },
     validitySubs() {
-      const filters = this.subtitleInstance.parsed.dialogues
+      const filters = this.dialogues
+        .map((e, i) => Object.assign({}, e, { index: i }))
         .filter((e) => {
           const isInRange = e.start >= (this.preciseTime - this.offset)
           && e.end <= (this.preciseTime + this.offset);
@@ -136,8 +141,8 @@ export default {
         const focus = e.start <= this.preciseTime && e.end >= this.preciseTime;
         let left = (e.start - this.times[0]) * this.space;
         let width = (e.end - e.start) * this.space;
-        let minLeft = 0;
-        let maxLeft = (this.winWidth * 3) - width;
+        let minLeft = (0 - this.times[0]) * this.space;
+        let maxLeft = ((this.duration - this.times[0]) - (e.end - e.start)) * this.space;
         if (i !== 0) {
           const prevLeft = (filters[i - 1].start - this.times[0]) * this.space;
           const prevWidth = (filters[i - 1].end - filters[i - 1].start) * this.space;
@@ -168,17 +173,7 @@ export default {
       });
     },
     currentSub() {
-      const currentSub = this.parsedFragments(this.subtitleInstance.parsed.dialogues
-        .find((e, i) => {
-          const tags = e.fragments && e.fragments[0] && e.fragments[0].tags;
-          const isOtherPos = this.type === 'ass' && tags && (tags.pos || tags.alignment !== 2);
-          if (e.start <= this.preciseTime && e.end >= this.preciseTime && !isOtherPos) {
-            this.lastSubIndex = i;
-            return true;
-          }
-          return false;
-        }));
-      return currentSub;
+      return this.validitySubs.find(e => e.start <= this.preciseTime && e.end >= this.preciseTime);
     },
   },
   watch: {
@@ -187,48 +182,19 @@ export default {
       this.triggerCount += 1;
     },
     currentSub(val) {
-      const len = this.subtitleInstance.parsed.dialogues.length;
-      let insertIndex = this.lastSubIndex;
-      if (!val && this.lastSubIndex && this.lastSubIndex < len) {
-        let last = this.subtitleInstance.parsed.dialogues[this.lastSubIndex];
-        if (this.preciseTime < last.start) {
-          last = this.subtitleInstance.parsed.dialogues[this.lastSubIndex - 1];
-          insertIndex = this.lastSubIndex - 1;
-        }
-        insertIndex += 1;
-        this.showAddInput = (this.preciseTime - last.end) > 0.2;
-        this.newSubHolder = {
-          distance: this.preciseTime - last.end,
-          preciseTime: this.preciseTime,
-          last,
-          insertIndex,
-        };
-      } else {
-        this.showAddInput = false;
-        this.newSubHolder = null;
-      }
+      this.computedCanShowAddBtn(val);
     },
     triggerCount() {
-      const len = this.subtitleInstance.parsed.dialogues.length;
-      let insertIndex = this.lastSubIndex;
-      if (!this.currentSub && this.lastSubIndex && this.lastSubIndex < len) {
-        let last = this.subtitleInstance.parsed.dialogues[this.lastSubIndex];
-        if (this.preciseTime < last.start) {
-          last = this.subtitleInstance.parsed.dialogues[this.lastSubIndex - 1];
-          insertIndex = this.lastSubIndex - 1;
+      this.computedCanShowAddBtn(this.currentSub);
+    },
+    subtitleInstance: {
+      immediate: true,
+      deep: true,
+      handler(val) {
+        if (val && val.parsed && this.dialogues.length !== val.parsed.dialogues.length) {
+          this.dialogues = val.parsed.dialogues;
         }
-        this.showAddInput = (this.preciseTime - last.end) > 0.2;
-        insertIndex += 1;
-        this.newSubHolder = {
-          distance: this.preciseTime - last.end,
-          preciseTime: this.preciseTime,
-          last,
-          insertIndex,
-        };
-      } else {
-        this.showAddInput = false;
-        this.newSubHolder = null;
-      }
+      },
     },
   },
   created() {
@@ -236,6 +202,7 @@ export default {
   mounted() {
     this.resetCurrentTime();
     this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
+    this.computedCanShowAddBtn(this.currentSub);
     // init
     document.addEventListener('mousemove', this.handleDragingSub);
     document.addEventListener('mouseup', this.handleDragEndSub);
@@ -251,11 +218,15 @@ export default {
     // 添加字幕条，需要先播放动画，在往字幕对象新增一条字幕
     this.$bus.$on('modified-subtitle-bridge', (obj) => {
       const sub = document.createElement('div');
-      const attr = this.$refs.subtitles && this.$refs.subtitles.attributes[0];
-      sub.setAttribute(attr.name, '');
-      sub.className = 'sub focus';
-      sub.style.left = `${(this.preciseTime - this.times[0]) * this.space}px`;
-      sub.style.width = `${1}px`;
+      sub.setAttribute('style', `width: 1px;
+        position: absolute;
+        top: 12vh;
+        height: 3vh;
+        max-height: 30px;
+        z-index: 1;
+        background: rgba(255,255,255,0.39);
+        border: 1px solid rgba(255,255,255,0.46);
+        left: ${(this.preciseTime - this.times[0]) * this.space}px`);
       this.$refs.subtitles && this.$refs.subtitles.appendChild(sub);
       sub.style.transition = 'all 0.3s ease-in-out';
       sub.addEventListener('transitionend', (e) => {
@@ -270,15 +241,87 @@ export default {
     });
   },
   methods: {
+    computedCanShowAddBtn(currentSub) { // eslint-disable-line
+      // 当前有显示的字幕, 或者刚刚开始
+      if (currentSub || this.preciseTime < 0.2) {
+        this.showAddInput = false;
+        this.newSubHolder = null;
+        return;
+      }
+      // 完全无字幕
+      if (this.dialogues.length === 0) {
+        this.newSubHolder = {
+          distance: this.preciseTime - 0,
+          preciseTime: this.preciseTime,
+          last: {
+            start: 0,
+            end: 0,
+            tags: {
+              alignment: 2,
+              pos: null,
+            },
+            text: '',
+          },
+          insertIndex: 0,
+        };
+        this.showAddInput = true;
+      } else {
+        const last = this.validitySubs.slice().reverse().find(e => e.end < this.preciseTime);
+        if (last && (this.preciseTime - last.end) > 0.2) {
+          // 当前时间段有字幕、且可以显示按钮
+          this.showAddInput = true;
+          this.newSubHolder = {
+            distance: this.preciseTime - last.end,
+            preciseTime: this.preciseTime,
+            last,
+            insertIndex: last.index + 1,
+          };
+        } else if (last) {
+          // 有字幕，但是不能显示按钮
+          this.showAddInput = false;
+          this.newSubHolder = null;
+        } else {
+          // 当前时间段没有字幕，需要找dialogues中合法的上个字幕
+          let insertIndex = 0;
+          let last = null;
+          const len = this.dialogues.length;
+          for (let i = 0; i < len; i += 1) {
+            const e = this.dialogues[i];
+            const tags = e.fragments && e.fragments[0] && e.fragments[0].tags;
+            const isOtherPos = this.type === 'ass' && tags && (tags.pos || tags.alignment !== 2);
+            if (!isOtherPos) {
+              last = e;
+            } else if (e.end < this.preciseTime) {
+              insertIndex = i + 1;
+            } else if (last && e.start > this.preciseTime) {
+              break;
+            }
+          }
+          this.showAddInput = true;
+          this.newSubHolder = {
+            distance: this.preciseTime - 0,
+            preciseTime: this.preciseTime,
+            last,
+            insertIndex,
+          };
+        }
+      }
+    },
     validityTime(time) {
       return time >= 0 && time <= this.duration ? '' : ' illegal';
     },
     afterBridgeAnimation(obj, sub) {
       // 新增字幕，动画结束，触发modified-subtitle事件
       if (this.newSubHolder) {
-        this.subtitleInstance.parsed.dialogues.splice(this.newSubHolder.insertIndex, 0, obj.add);
-        this.$bus.$emit('modified-subtitle', { sub: this.subtitleInstance });
-        sub.parentNode.removeChild(sub);
+        obj.sub.parsed.dialogues.splice(this.newSubHolder.insertIndex, 0, obj.add);
+        this.$bus.$emit('modified-subtitle', { sub: obj.sub });
+        if (obj.sub.type !== 'modified') {
+          setTimeout(() => {
+            sub.parentNode.removeChild(sub);
+          }, 200);
+        } else {
+          sub.parentNode.removeChild(sub);
+        }
         this.newSubHolder = null;
         this.triggerCount += 1;
       }
@@ -305,6 +348,7 @@ export default {
         this.currentLeft = ((this.currentTime - currentTime) * this.space) -
         ((this.offset * this.space) - (this.winWidth / 2));
         this.preciseTime = currentTime;
+        this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
         requestAnimationFrame(this.updateWhenPlaying);
       }
     },
@@ -347,7 +391,7 @@ export default {
       // 时间轴偏移计算
       this.currentLeft = this.dragStartLeft + offset;
       this.preciseTime = this.dragStartTime - (offset / this.space);
-      // this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
+      this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
       this.$bus.$emit('seek', this.preciseTime);
     },
     handleMouseUpOnTimeLine(e) {
@@ -369,6 +413,7 @@ export default {
     transitionend() {
       // 时间轴运动到点击位置，动画结束，重设时间
       this.resetCurrentTime(this.preciseTime);
+      this.triggerCount += 1;
       this.$bus.$emit('seek', this.preciseTime);
       this.$refs.timeLine.style.transition = '';
       this.$refs.timeLine.removeEventListener('transitionend', this.transitionend);
@@ -386,6 +431,7 @@ export default {
     doubleClickTransitionend() {
       // 时间轴运动到字幕条开始位置，动画结束，重设时间
       this.resetCurrentTime(this.preciseTime);
+      this.triggerCount += 1;
       this.$bus.$emit('seek', this.preciseTime);
       this.$refs.timeLine.style.transition = '';
       this.$refs.timeLine.removeEventListener('transitionend', this.doubleClickTransitionend);
@@ -629,7 +675,6 @@ export default {
         border-color: rgba(255,255,255,0.46);
       }
       .drag-left {
-        // content: '';
         position: absolute;
         width: 5%;
         height: 100%;
@@ -639,7 +684,6 @@ export default {
         cursor: col-resize;
       }
       .drag-right {
-        // content: '';
         position: absolute;
         width: 5%;
         height: 100%;

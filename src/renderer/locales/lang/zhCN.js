@@ -205,6 +205,7 @@ export default {
   },
   subtitle: {
     embedded: '内嵌',
+    modified: '自制',
     language: {
       zh: '中文（简体）',
       'zh-CN': '中文（简体）',

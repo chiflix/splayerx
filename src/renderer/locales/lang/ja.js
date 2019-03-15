@@ -207,6 +207,7 @@ export default {
   },
   subtitle: {
     embedded: '埋め込み式',
+    modified: '自家製',
     language: {
       zh: '中国語（簡体字）',
       'zh-CN': '中国語（簡体字）',

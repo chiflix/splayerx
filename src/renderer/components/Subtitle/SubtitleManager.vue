@@ -2,7 +2,6 @@
   <div class="subtitle-manager">
     <subtitle-renderer
       ref="subtitleRenderer"
-      v-if="currentSubtitleId && duration"
       :subtitle-instance="currentSubtitle"
       :key="currentSubtitleId"
     />
@@ -18,7 +17,6 @@ import {
   searchForLocalList, searchFromTempList, fetchOnlineList, retrieveEmbeddedList,
   storeLanguagePreference,
   updateSubtitle,
-  updateSubtitleListForce,
   updateSubtitleList,
   retrieveLanguagePreference,
   retrieveSubtitleList,
@@ -28,7 +26,7 @@ import {
   retrieveSelectedSubtitleId,
 } from '@/helpers/subtitle';
 import transcriptQueue from '@/helpers/subtitle/push';
-import { deleteFileByPath } from '@/helpers/cacheFileStorage';
+import { deleteFileByPath, getSubtitleContentByPath, addSubtitleByMediaHash, writeSubtitleByPath } from '@/helpers/cacheFileStorage';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
@@ -56,6 +54,7 @@ export default {
       'duration', // do not load subtitle renderer when video(duration) is not available(todo: global variable to tell if video is totally available)
       'getVideoSrcById', 'allSubtitleList', // serve allSubtitleListWatcher
       'subtitleDelay', // subtitle's delay
+      'isProfessional',
     ]),
     ...mapState({
       preferredLanguages: ({ Preference }) => (
@@ -102,6 +101,17 @@ export default {
     },
     currentSubtitleId(newVal) {
       if (this.selectionComplete || newVal) updateSelectedSubtitleId(this.originSrc, newVal);
+    },
+    isProfessional(val) {
+      // 离开高级模式
+      const isModifiedExit = this.currentSubtitle && this.currentSubtitle.type === 'modified';
+      if (!val && isModifiedExit) {
+        const subString = JSON.stringify({
+          parsed: this.currentSubtitle.parsed,
+          metaInfo: this.currentSubtitle.metaInfo,
+        });
+        writeSubtitleByPath(this.currentSubtitle.src, subString);
+      }
     },
   },
   methods: {
@@ -206,10 +216,12 @@ export default {
     async getModifiedSubtitlesList(videoSrc, storedSubs) {
       const newLocalSubs = await searchFromTempList(videoSrc, SubtitleLoader.supportedFormats)
         .catch(() => []);
-      return values(mergeWith(
+      const list = values(mergeWith(
         keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'modified', options: { id } })), 'src'),
         keyBy(newLocalSubs, 'src'),
       ));
+      const result = await getSubtitleContentByPath(list);
+      return result;
     },
     async getOnlineSubtitlesList(videoSrc, isFetching, storedSubIds, languages) {
       if (!isFetching) {
@@ -248,6 +260,12 @@ export default {
         if (existedInList && existedInInstances) return 'success';
       }
       const subtitleInstance = new SubtitleLoader(src, type, { ...options });
+      // modified trigger metaInfo
+      if (subtitleInstance.type === 'modified' && subtitleInstance.id) {
+        const { name, language } = subtitleInstance.metaInfo;
+        this.metaInfoUpdate(subtitleInstance.id, 'name', name);
+        this.metaInfoUpdate(subtitleInstance.id, 'language', language);
+      }
       try {
         return this.setupListeners(subtitleInstance, {
           metaChange: this.metaChangeCallback,
@@ -557,33 +575,49 @@ export default {
       return result;
     },
     modifiedSubtitle({ sub }) {
-      // this.$set(this.subtitleInstances, sub.id, this.subtitleInstances[sub.id]);
-      // console.log('modifiedSubtitle');
-      const s = {};
-      s[sub.id] = sub;
-      this.subtitleInstances = Object.assign({}, this.subtitleInstances, s);
+      // 这里统一处理新增或者修改自制
+      // 如果type 不是 modified 就是创建新的自制字幕
+      // 如果是modified就修改原来的文件，更新instance
+      if (sub.type === 'modified') {
+        // 先更新当前内存字幕信息
+        const s = {};
+        s[sub.id] = sub;
+        this.subtitleInstances = Object.assign({}, this.subtitleInstances, s);
+        if (!this.isProfessional) {
+          // 如果不是高级模式，出现修改字幕就立即同步文件
+          const subString = JSON.stringify({
+            parsed: sub.parsed,
+            metaInfo: sub.metaInfo,
+          });
+          writeSubtitleByPath(sub.src, subString);
+        }
+      } else {
+        // 如果不是自制的字幕出现修改，就是先创建新的自制字幕
+        // 再加载刚刚创建的字幕
+        const subString = JSON.stringify({
+          parsed: sub.parsed,
+          metaInfo: sub.metaInfo,
+        });
+        addSubtitleByMediaHash(this.mediaHash, subString, { type: 'modified' }).then((result) => {
+          this.$bus.$emit('add-subtitles', [{
+            src: result.path,
+            type: 'modified',
+            options: {
+              storage: {
+                parsed: sub.parsed,
+                metaInfo: {
+                  ...sub.metaInfo,
+                  name: result.name,
+                },
+              },
+            },
+          }]);
+        });
+      }
     },
     async deleteSubtitle({ sub }) {
-      // rm indexDB
-      const filter = {};
-      const types = [];
-      // const newAllSubtitleList = [];
-      this.allSubtitleList.forEach((e) => {
-        // if (e.id !== sub.id) {
-        //   newAllSubtitleList.push(e);
-        // }
-        if (!filter[e.type]) {
-          types.push(e.type);
-          filter[e.type] = true;
-        }
-      });
-      await updateSubtitleListForce(this.originSrc, []);
       // rm file
       await deleteFileByPath(this.subtitleInstances[sub.id].src);
-      this.$bus.$emit('off-subtitle');
-      this.resetSubtitlesByMutation();
-      this.subtitleInstances = {};
-      this.$bus.$emit('refresh-subtitles', { types, isInitial: true });
     },
   },
   created() {
@@ -632,7 +666,7 @@ export default {
     // 当修改自制的字幕，直接修改内存里面的值
     this.$bus.$on('modified-subtitle', this.modifiedSubtitle);
     // 当删除某个字幕的时候，同步
-    this.$bus.$on('delete-subtitles', this.deleteSubtitle);
+    this.$bus.$on('delete-subtitle', this.deleteSubtitle);
     // when set immediate on watcher, it may run before the created hook
     this.resetSubtitles();
     this.$bus.$emit('subtitle-refresh-from-src-change');

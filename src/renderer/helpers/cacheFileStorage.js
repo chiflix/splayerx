@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-02-22 11:37:18
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-03-12 18:09:04
+ * @Last Modified time: 2019-03-14 16:08:43
  */
 
 /** file dir list
@@ -15,8 +15,8 @@
  *  └── thumbnail.jpg
  */
 
-import { access, readdir, writeFile, unlink } from 'fs';
-import path, { join } from 'path';
+import { access, readdir, writeFile, unlink, readFile } from 'fs';
+import path, { join, basename } from 'path';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import electron from 'electron';
@@ -234,54 +234,87 @@ export function clearAll() {
   });
 }
 
-export function writeSubtitleByMediaHash(key, s, { name, mimeType, type }) {
+/**
+ * @description 给视频创建新的字幕
+ * @author tanghaixiang@xindong.com
+ * @date 2019-03-14
+ * @export
+ * @param {String} key 视频的mediaHash
+ * @param {String} s 字幕信息字符
+ * @param {Object} { type } 字幕的分类 modified(自制) online(在线) embedded(内嵌)
+ * @returns {Promise} resolve { path: '', name: '' } or reject Error
+ */
+export function addSubtitleByMediaHash(key, s, { type }) {
   const p = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, `${key}/${SUBTITLES_DIRNAME}/${type}/`);
   return new Promise(async (resolve, reject) => {
-    const cp = checkPermission(p);
-    if (cp instanceof Error) {
-      reject(cp);
-    } else {
+    try {
+      await checkPermission(p);
       readdir(p, (err, files) => {
         if (err) {
           reject(err);
         } else {
-          let fileName = name;
-          if (files.filter(e => e.indexOf(name) > -1)) {
-            let index = 0;
-            files.forEach((e) => {
-              const num = parseInt(e.replace(/\D/gi, ''), 10);
-              if (num > index) {
-                index = num;
-              }
-            });
-            index += 1;
-            const pp = path.basename(`自制 ${index}`, `.${mimeType}`);
-            fileName = `${pp}.${mimeType}`;
-          } else {
-            const pp = path.basename(name, `.${mimeType}`);
-            fileName = `${pp}.${mimeType}`;
-          }
-          writeFile(path.join(p, fileName), s, () => {
-            resolve(path.join(p, fileName));
+          let name = 0;
+          files.forEach((e) => {
+            const num = parseInt(e.replace(/\D/gi, ''), 10);
+            if (num > name) {
+              name = num;
+            }
+          });
+          name += 1;
+          const fileName = `${basename(`${name}`, '.json')}.json`;
+          const filePath = join(p, fileName);
+          writeFile(filePath, s, (err) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve({
+                path: filePath,
+                name,
+              });
+            }
           });
         }
       });
+    } catch (err) {
+      reject(err);
     }
   });
 }
 
+/**
+ * @description 修改字幕信息
+ * @author tanghaixiang@xindong.com
+ * @date 2019-03-14
+ * @export
+ * @param {String} p 字幕路径
+ * @param {String} s 字幕信息字符
+ * @returns {Promise} resolve String or reject Error
+ */
 export function writeSubtitleByPath(p, s) {
-  return new Promise((resolve, reject) => {
-    writeFile(path.join(p), s, (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(path.join(p));
-      }
-    });
+  return new Promise(async (resolve, reject) => {
+    try {
+      await checkPermission(p);
+      writeFile(path.join(p), s, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(path.join(p));
+        }
+      });
+    } catch (err) {
+      reject(err);
+    }
   });
 }
 
+/**
+ * @description 删除指定的文件
+ * @author tanghaixiang@xindong.com
+ * @date 2019-03-14
+ * @export
+ * @param {String} p 文件路径
+ * @returns {Promise} resolve {} or reject Error
+ */
 export function deleteFileByPath(p) {
   return new Promise((resolve, reject) => {
     unlink(p, (err) => {
@@ -324,6 +357,31 @@ export function getVideoSubtitlesByMediaHash(key) {
   return Promise.all(jobs);
 }
 
+export function getSubtitleContentByPath(list) {
+  const jobs = [];
+  list.forEach((cell) => {
+    const job = new Promise((resolve, reject) => {
+      readFile(cell.src, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          try {
+            cell.options = cell.options ? cell.options : {};
+            cell.options.storage = JSON.parse(data);
+            const matchs = cell.src.match(/(\d+)\.?(\w+)$/i);
+            cell.options.storage.metaInfo.name = matchs[1] ? matchs[1] : matchs[0];
+            resolve(cell);
+          } catch (e) {
+            reject(e);
+          }
+        }
+      });
+    });
+    jobs.push(job);
+  });
+  return Promise.all(jobs);
+}
+
 export default {
   getVideoInfoByMediaHash,
   generateThumbnailPathByMediaHash,
@@ -331,7 +389,8 @@ export default {
   generateShortCutPathByMediaHash,
   deleteDirByMediaHash,
   clearAll,
-  writeSubtitleByMediaHash,
+  addSubtitleByMediaHash,
   writeSubtitleByPath,
   deleteFileByPath,
+  getSubtitleContentByPath,
 };

@@ -2,11 +2,10 @@
   <div class="subtitle-loader">
     <subtitle-input
       v-if="!isProfessional"
-      :key="subtitleInstance.id"
+      :key="subtitleInstance && subtitleInstance.id"
       :subtitleInstance="subtitleInstance"/>
     <subtitle-editor
       v-if="isProfessional"
-      :key="subtitleInstance.id"
       :subtitleInstance="subtitleInstance"/>
   </div>
 </template>

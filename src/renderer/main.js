@@ -863,6 +863,11 @@ new Vue({
           this.menu.getMenuItemById('deVolume').enabled = false;
         }
         this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
+        this.subtitleList.forEach((item, index) => {
+          if (item.id === this.currentSubtitleId) {
+            this.menu.getMenuItemById(`sub${index}`).checked = true;
+          }
+        });
       })
         .catch((err) => {
           this.addLog('error', err);
@@ -879,12 +884,22 @@ new Vue({
         },
       };
     },
+    getSubName(item) {
+      if (item.path) {
+        return Path.basename(item);
+      } else if (item.type === 'embedded') {
+        return `${this.$t('subtitle.embedded')} ${item.name}`;
+      } else if (item.type === 'modified') {
+        return `${this.$t('subtitle.modified')} ${item.name}`;
+      }
+      return item.name;
+    },
     recentSubTmp(key, value) {
       return {
         id: `sub${key}`,
         visible: true,
         type: 'radio',
-        label: value.path ? Path.basename(value.path) : value.name,
+        label: this.getSubName(value),
         click: () => {
           this.$bus.$emit('change-subtitle', value.id || value.src);
         },

@@ -3,10 +3,18 @@ import pick from 'lodash/pick';
 import partialRight from 'lodash/partialRight';
 import uniq from 'lodash/uniq';
 import difference from 'lodash/difference';
+import sortBy from 'lodash/sortBy';
 import remove from 'lodash/remove';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import { metaInfoUpdate } from './rank';
+
+const subtitleTypes = {
+  modified: 1,
+  local: 2,
+  embedded: 3,
+  online: 4,
+};
 
 const state = {
   loadingStates: {},
@@ -42,10 +50,13 @@ const getters = {
         type: types[id],
       }))
   ),
-  subtitleList: ({ videoSubtitleMap }, { originSrc, allSubtitleList }) =>
-    (videoSubtitleMap[originSrc] || [])
+  subtitleList: ({ videoSubtitleMap }, { originSrc, allSubtitleList }) => {
+    const tmp = (videoSubtitleMap[originSrc] || [])
       .map(subtitleId => allSubtitleList.find(({ id }) => id === subtitleId))
-      .sort((a, b) => b.rank - a.rank),
+      .sort((a, b) => b.rank - a.rank);
+    // 对vuex内的subtitle list排序，按type、id排序
+    return sortBy(tmp, [o => subtitleTypes[o.type], o => parseInt(o.id, 10)]);
+  },
   ableToPushCurrentSubtitle: ({ currentSubtitleId }, { subtitleList }) => {
     if (!currentSubtitleId) return false;
     const currentSubtitle = subtitleList.find(({ id }) => id === currentSubtitleId);
@@ -130,6 +141,10 @@ const mutations = {
   },
   [subtitleMutations.SUBTITLE_TOP_UPDATE](state, payload) {
     state.subToTop = payload;
+  },
+  [subtitleMutations.CURRENT_SUBTITLE_REMOVE](state, payload) {
+    const index = state.videoSubtitleMap[payload.src].indexOf(payload.id);
+    state.videoSubtitleMap[payload.src].splice(index, 1);
   },
 };
 
@@ -238,6 +253,9 @@ const actions = {
   },
   [subtitleActions.UPDATE_SUBTITLE_TOP]({ commit }, delta) {
     commit(subtitleMutations.SUBTITLE_TOP_UPDATE, delta);
+  },
+  [subtitleActions.REMOVE_LOCAL_SUBTITLE]({ commit, getters }, delta) {
+    commit(subtitleMutations.CURRENT_SUBTITLE_REMOVE, { id: delta, src: getters.originSrc });
   },
 };
 

@@ -61,7 +61,7 @@ export default class SubtitleLoader extends EventEmitter {
     }
     this.type = type;
 
-    const format = type === 'local' || type === 'modified' ? localFormatLoader(src) : type;
+    const format = type === 'local' ? localFormatLoader(src) : type;
     if (supportedFormats.includes(format)) {
       this.metaInfo.format = format;
       this.loader = Object.values(loaders)
@@ -76,6 +76,10 @@ export default class SubtitleLoader extends EventEmitter {
 
     this.options = options || {};
     this.data = this.options.data;
+    if (this.type === 'modified') {
+      this.data = '**';
+      this.metaInfo = this.options.storage.metaInfo;
+    }
 
     if (this.options.id) {
       this.id = this.options.id.toString();
@@ -88,6 +92,11 @@ export default class SubtitleLoader extends EventEmitter {
       }).then((id) => {
         this.id = id.toString();
         setImmediate(() => this.emit('loading', id));
+        if (this.type === 'modified') {
+          const { name, language } = this.metaInfo;
+          setImmediate(() => this.emit('meta-change', { field: 'name', value: name }));
+          setImmediate(() => this.emit('meta-change', { field: 'language', value: language }));
+        }
       });
     }
   }
@@ -112,9 +121,9 @@ export default class SubtitleLoader extends EventEmitter {
   }
 
   async load() {
-    const loader = functionExtraction(this.loader.loader);
     if (this.data) this.emit('data', this.data);
     else {
+      const loader = functionExtraction(this.loader.loader);
       this.data =
         await promisify(loader.func.bind(this, ...this._getParams(castArray(loader.params))));
       this.emit('data', this.data);
@@ -123,10 +132,15 @@ export default class SubtitleLoader extends EventEmitter {
 
   async parse() {
     try {
-      const parser = functionExtraction(this.loader.parser, 'data');
-      this.parsed =
-        await promisify(parser.func.bind(null, ...this._getParams(castArray(parser.params))));
-      this.emit('parse', this.parsed);
+      if (this.type === 'modified' && this.options.storage.parsed) {
+        this.parsed = this.options.storage.parsed;
+        this.emit('parse', this.parsed);
+      } else {
+        const parser = functionExtraction(this.loader.parser, 'data');
+        this.parsed =
+          await promisify(parser.func.bind(null, ...this._getParams(castArray(parser.params))));
+        this.emit('parse', this.parsed);
+      }
     } catch (e) {
       helpers.methods.addLog('error', {
         message: 'Unsupported Subtitle .',

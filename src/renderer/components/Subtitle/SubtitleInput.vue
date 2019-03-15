@@ -12,7 +12,7 @@
         transform: transPos(i),
         display: !isProfessional || isProfessional && currentSub && currentSub.start === cue.start ? 'flex' : 'none',
       }"
-      :class="avaliableClass(i)+`${paused && !isEditable ? ' enable-hover': ''}`">
+      :class="avaliableClass(i)+`${paused ? ' enable-hover': ''}`+`${isEditable ? ' editable': ''}`">
       <div class="cue-wrap" v-if="filter(cue)">
         <CueRenderer v-show="!isEditable || i !== index" class="cueRender"
           :text="cue.text"
@@ -40,7 +40,7 @@
             }"></textarea>
         </div>
       </div>
-      <div class="professional-btn-wrap" @click.stop="handleClickProfessional">
+      <div class="professional-btn-wrap" @click.stop="handleClickProfessional" v-if="!isEditable">
         <Icon type="subtitleEditorEnter" class="subtitleEditorEnter" v-if="!isProfessional"
           :style="{
             cursor: 'pointer',
@@ -86,11 +86,10 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import { isEqual, castArray, isEmpty, cloneDeep } from 'lodash';
-import { stringifyVtt, toVttTime } from 'subtitle';
+// import { stringifyVtt, toVttTime } from 'subtitle';
 import { Subtitle as subtitleMutations, Window as windowMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
-import { writeSubtitleByMediaHash, writeSubtitleByPath } from '@/helpers/cacheFileStorage';
-import { stringifyAss } from '@/helpers/subtitle';
+// import { stringifyAss } from '@/helpers/subtitle';
 import CueRenderer from './CueRenderer.vue';
 import Icon from '../BaseIconContainer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
@@ -138,7 +137,10 @@ export default {
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
     ]),
     type() {
-      return this.subtitleInstance.metaInfo.format;
+      if (this.subtitleInstance && this.subtitleInstance.metaInfo) {
+        return this.subtitleInstance.metaInfo.format;
+      }
+      return '';
     },
     currentTags() {
       return this.currentCues.map(cue => cue.tags);
@@ -184,7 +186,7 @@ export default {
   },
   created() {
     const { subtitleInstance } = this;
-    if (!subtitleInstance.parsed) {
+    if (subtitleInstance && !subtitleInstance.parsed) {
       subtitleInstance.once('data', subtitleInstance.parse);
       subtitleInstance.on('parse', (parsed) => {
         const parsedData = parsed.dialogues;
@@ -276,67 +278,37 @@ export default {
             this.$set(this.currentCues, i, this.currentCues[i]);
             // 保存副本
             // 本地字幕
-            new Promise(async (resolve) => {
-              const start = this.currentCues[i].start;
-              const end = this.currentCues[i].end;
-              const text = this.currentCues[i].text;
-              let sub = '';
-              let mimeType = 'vtt';
-              let matchIndex = 0;
-              const subtitleInstance = cloneDeep(this.subtitleInstance);
-              if (subtitleInstance.metaInfo && subtitleInstance.metaInfo.format === 'ass') {
-                let old = '';
-                let fresh = '';
-                subtitleInstance.parsed.dialogues.find((e, i) => {
-                  if (e && e.start === start && e.end === end) {
-                    // e.text = cu.text;
-                    // return true;
-                    subtitleInstance.parsed.dialogues[i].fragments[0].text = text;
-                    old = stringifyAss(subtitleInstance.parsed.origin.dialogues[i]);
-                    subtitleInstance.parsed.origin.dialogues[i].slices[0].fragments[0].text = text;
-                    fresh = stringifyAss(subtitleInstance.parsed.origin.dialogues[i]);
-                    matchIndex = i;
-                  }
-                  return false;
-                });
-                mimeType = 'ass';
-                if (text.length === 0) {
-                  subtitleInstance.parsed.dialogues.splice(matchIndex, 1);
-                  sub = subtitleInstance.data.replace(old, '');
-                } else {
-                  sub = subtitleInstance.data.replace(old, fresh);
+            const start = this.currentCues[i].start;
+            const end = this.currentCues[i].end;
+            const text = this.currentCues[i].text;
+            let matchIndex = 0;
+            const subtitleInstance = cloneDeep(this.subtitleInstance);
+            if (subtitleInstance.metaInfo && subtitleInstance.metaInfo.format === 'ass') {
+              subtitleInstance.parsed.dialogues.find((e, i) => {
+                if (e && e.start === start && e.end === end) {
+                  subtitleInstance.parsed.dialogues[i].fragments[0].text = text;
+                  matchIndex = i;
+                  return true;
                 }
-              } else {
-                subtitleInstance.parsed.dialogues.find((e, i) => {
-                  if (e.start === start && e.end === end) {
-                    e.text = text;
-                    matchIndex = i;
-                    // return true;
-                  }
-                  if (subtitleInstance.type !== 'modified') {
-                    e.start = toVttTime(e.start * 1000);
-                    e.end = toVttTime(e.end * 1000);
-                  }
-                  return false;
-                });
-                if (text.length === 0) {
-                  subtitleInstance.parsed.dialogues.splice(matchIndex, 1);
-                  sub = stringifyVtt(subtitleInstance.parsed.dialogues);
-                } else {
-                  sub = stringifyVtt(subtitleInstance.parsed.dialogues);
+                return false;
+              });
+              if (text.length === 0) {
+                subtitleInstance.parsed.dialogues.splice(matchIndex, 1);
+              }
+            } else {
+              subtitleInstance.parsed.dialogues.find((e, i) => {
+                if (e.start === start && e.end === end) {
+                  e.text = text;
+                  matchIndex = i;
+                  return true;
                 }
+                return false;
+              });
+              if (text.length === 0) {
+                subtitleInstance.parsed.dialogues.splice(matchIndex, 1);
               }
-              if (subtitleInstance.type === 'modified') {
-                this.$bus.$emit('modified-subtitle', { sub: subtitleInstance });
-                await writeSubtitleByPath(subtitleInstance.src, sub);
-              } else {
-                await writeSubtitleByMediaHash(this.mediaHash, sub, { name: '自制 1', mimeType, type: 'modified' }).then((p) => {
-                  this.$bus.$emit('add-subtitles', [{ src: p, type: 'modified' }]);
-                });
-              }
-              resolve({});
-            }).then(() => {
-            });
+            }
+            this.$bus.$emit('modified-subtitle', { sub: subtitleInstance });
           }
           if (this.index === i) {
             this.toggleEditable(false);
@@ -353,8 +325,23 @@ export default {
           } else {
             sub.start = sub.end - 0.2;
           }
-          sub.fragments[0].text = this.editVal.trim();
-          this.$bus.$emit('modified-subtitle-bridge', { add: sub });
+          if (this.type === 'ass') {
+            sub.fragments[0].text = this.editVal.trim();
+          } else {
+            sub.text = this.editVal.trim();
+          }
+          const subtitleInstance = !this.subtitleInstance ? {
+            parsed: {
+              dialogues: [],
+            },
+            metaInfo: {
+              language: 'zh-CN',
+              name: '',
+              format: 'online',
+            },
+            type: 'online',
+          } : cloneDeep(this.subtitleInstance);
+          this.$bus.$emit('modified-subtitle-bridge', { sub: subtitleInstance, add: sub, index: this.newSubHolder.insertIndex });
         }
         this.toggleEditable(false);
         this.editVal = '';
@@ -390,11 +377,10 @@ export default {
       const { lastCurrentTime } = this;
       this.setCurrentCues(currentTime - (subtitleDelay / 1000));
       this.updateVideoSegments(lastCurrentTime, currentTime);
-
       requestAnimationFrame(this.currentTimeUpdate);
     },
     setCurrentCues(currentTime) {
-      if (!this.subtitleInstance.parsed) return;
+      if (!this.subtitleInstance || !this.subtitleInstance.parsed) return;
       const parsedData = this.subtitleInstance.parsed.dialogues;
       if (parsedData) {
         const cues = parsedData
@@ -606,7 +592,7 @@ export default {
 <style lang="scss" scoped>
 .professional {
   .subContainer {
-    padding: 5px 15px;
+    // padding: 5px 15px;
     &::before {
       content: "";
       width: 100%;
@@ -636,6 +622,7 @@ export default {
   }
 }
 .subContainer {
+  padding: 5px 15px;
   position: absolute;
   display: flex;
   flex-direction: row;
@@ -671,7 +658,7 @@ export default {
 } 
 .enable-hover {
   &:hover {
-    padding: 5px 15px;
+    // padding: 5px 15px;
     &::before {
       content: "";
       width: 100%;
@@ -687,6 +674,21 @@ export default {
     }
     .professional-btn-wrap {
       display: flex;
+    }
+  }
+  &.editable {
+    &::before {
+      content: "";
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 1;
+      backdrop-filter: blur(3px); 
+      background: rgba(0,0,0,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 5px;
     }
   }
 }
