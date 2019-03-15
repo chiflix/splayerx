@@ -50,6 +50,7 @@
         :key="item"
         :index="index"
         :path="item"
+        :maxIndex="maxIndex"
         :isLastPage="lastIndex === maxIndex"
         :itemMoving="itemMoving"
         :indexOfMovingTo="indexOfMovingTo"
@@ -79,8 +80,6 @@
         :indexOfMovingItem="indexOfMovingItem"
         :movementX="movementX"
         :movementY="movementY"
-        :addMouseenter="addMouseenter"
-        :addMouseleave="addMouseleave"
         :addMouseup="addMouseup"/>
       <div class="next-page"
         v-if="thumbnailNumber < numberOfPlaylistItem"
@@ -316,7 +315,8 @@ export default {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         this.hoverIndex = this.playingIndex;
         this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
-      } else if (this.indexOfMovingTo !== this.indexOfMovingItem) {
+      } else if (this.indexOfMovingTo !== this.indexOfMovingItem
+        && Math.abs(this.movementY) < this.thumbnailHeight) {
         if (this.indexOfMovingTo === this.lastIndex + 1
           && this.lastIndex + 1 !== this.playingList.length) {
           this.lastIndex += 1;

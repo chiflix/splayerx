@@ -108,6 +108,9 @@ export default {
     index: {
       type: Number,
     },
+    maxIndex: {
+      type: Number,
+    },
     hovered: {
       type: Boolean,
     },
@@ -338,8 +341,10 @@ export default {
     },
     indexOfMovingTo(val) {
       if (Math.abs(this.movementY) < this.thumbnailHeight) {
+        // item moving to right
         if (this.index > this.indexOfMovingItem && this.index <= val) {
           this.displayIndex = this.index - 1;
+        // item moving to left
         } else if (this.index >= val && this.index < this.indexOfMovingItem) {
           this.displayIndex = this.index + 1;
         } else {

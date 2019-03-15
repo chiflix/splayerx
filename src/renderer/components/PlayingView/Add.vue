@@ -1,7 +1,5 @@
 <template>
   <div class="button"
-    @mouseenter="addMouseenter"
-    @mouseleave="addMouseleave"
     @mouseup="addMouseup">
     <div class="btnMask">
       <Icon class="addUi" type="add"></Icon>
@@ -18,12 +16,6 @@ export default {
   props: {
     index: {
       type: Number,
-    },
-    addMouseenter: {
-      type: Function,
-    },
-    addMouseleave: {
-      type: Function,
     },
     addMouseup: {
       type: Function,
