@@ -193,7 +193,7 @@ export default {
     },
     addMouseup() {
       this.onItemMouseup(this.addIndex);
-      if (this.lastIndex === this.maxIndex) {
+      if (this.addIndex !== this.lastIndex + 1) {
         this.addFilesByDialog({
           defaultPath: path.dirname(this.originSrc),
         });
