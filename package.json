@@ -510,8 +510,7 @@
     "winston": "^3.1.0"
   },
   "optionalDependencies": {
-    "fsevents": "1.2.4",
-    "win-mouse": "^1.2.0"
+    "win-mouse": "github:ipy/win-mouse"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
@@ -551,7 +550,7 @@
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-mocha": "^6.0.4",
-    "electron-rebuild": "^1.8.2",
+    "electron-rebuild": "^1.8.4",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-friendly-formatter": "^4.0.1",
