@@ -288,29 +288,7 @@ export default {
     },
     onItemMouseup(index) { // eslint-disable-line complexity
       if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
-      // last page
-      if (index === this.firstIndex - 1) {
-        this.lastIndex = index;
-        this.shifting = true;
-        this.tranFlag = true;
-        setTimeout(() => {
-          this.shifting = false;
-          this.tranFlag = false;
-        }, 400);
-      } else if (index === this.lastIndex + 1) { // next page
-        this.firstIndex = index;
-        this.shifting = true;
-        this.tranFlag = true;
-        setTimeout(() => {
-          this.shifting = false;
-          this.tranFlag = false;
-        }, 400);
-      } else if (index !== this.playingIndex && !this.shifting
-        && this.indexOfMovingItem === this.playingList.length
-        && this.filePathNeedToDelete !== this.playingList[index]) {
-        this.changeByRecent = true;
-        this.playFile(this.playingList[index]);
-      }
+
       if (Math.abs(this.movementY) > this.thumbnailHeight * 1.5) {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         this.hoverIndex = this.playingIndex;
@@ -345,6 +323,28 @@ export default {
           newPosition,
         });
         this.hoverIndex = this.indexOfMovingTo;
+        // last page
+      } else if (index === this.firstIndex - 1) {
+        this.lastIndex = index;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      } else if (index === this.lastIndex + 1) { // next page
+        this.firstIndex = index;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      } else if (index !== this.playingIndex && !this.shifting
+        && this.indexOfMovingItem === this.playingList.length
+        && this.filePathNeedToDelete !== this.playingList[index]) {
+        this.changeByRecent = true;
+        this.playFile(this.playingList[index]);
       }
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
