@@ -199,10 +199,12 @@ export default {
     },
     mouseupVideo() {
       document.onmousemove = null;
-      requestAnimationFrame(() => {
-        this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-        this.$refs.progress.style.setProperty('opacity', '0');
-      });
+      if (this.selfMoving) {
+        requestAnimationFrame(() => {
+          this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+          this.$refs.progress.style.setProperty('opacity', '0');
+        });
+      }
       this.eventTarget.onItemMouseup(this.index);
       this.tranFlag = true;
     },
