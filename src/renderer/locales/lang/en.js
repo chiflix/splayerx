@@ -74,6 +74,7 @@ export default {
       originSize: '100%',
       doubleSize: '200%',
       maxmize: 'Zoom',
+      halfSize: '50%',
     },
     help: {
       name: 'Help',

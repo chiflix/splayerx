@@ -716,6 +716,14 @@ new Vue({
                 this.changeWindowSize(3);
               },
             },
+            {
+              label: this.$t('msg.window.halfSize'),
+              checked: false,
+              accelerator: 'CmdOrCtrl+0',
+              click: () => {
+                this.changeWindowSize(0.5);
+              },
+            },
             { type: 'separator' },
             {
               label: this.$t('msg.window.bossKey'),
