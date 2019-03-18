@@ -6,6 +6,7 @@ const state = {
   isFocused: true,
   isMaximized: false,
   isMinimized: false,
+  sizePercent: 1,
 };
 
 const getters = {
@@ -20,6 +21,7 @@ const getters = {
   isFocused: state => state.isFocused,
   isMaximized: state => state.isMaximized,
   isMinimized: state => state.isMinimized,
+  sizePercent: state => state.sizePercent,
 };
 
 const mutations = {
@@ -44,9 +46,16 @@ const mutations = {
   isMinimized(state, payload) {
     state.isMinimized = payload;
   },
+  sizePercentUpdate(state, payload) {
+    state.sizePercent = payload;
+  },
 };
 
-const actions = {};
+const actions = {
+  updateSizePercent({ commit }, delta) {
+    commit('sizePercentUpdate', delta);
+  },
+};
 
 export default {
   state,
