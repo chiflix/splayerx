@@ -32,75 +32,71 @@
                     height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
                     overflowY: isOverFlow,
                   }">
-                  <div class="itemContainer">
-                    <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)">
-                      <div class="menu-item-text-wrapper"
-                        @mouseup="$bus.$emit('off-subtitle')"
-                        @mouseover="toggleItemsMouseOver(-1)"
-                        @mouseleave="toggleItemsMouseLeave(-1)"
-                        :style="{
-                          color: hoverIndex === -1 || currentSubtitleIndex === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                          height: `${itemHeight}px`,
-                          cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
-                        }">
-                        <div class="text">{{ noSubtitle }}</div>
-                      </div>
-                    </div>
-                    <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0) && computedAvaliableItems.length === 0">
-                      <div class="menu-item-text-wrapper create-subtitle-btn"
-                        @click.stop="handleCreateBtnClick"
-                        :style="{
-                          height: `${itemHeight}px`,
-                        }">
-                        <div class="text">{{ '创建字幕' }}</div>
-                      </div>
-                    </div>
-                    <div v-if="foundSubtitles">
-                      <div v-for="(item, index) in computedAvaliableItems" :key="item.id">
-                        <div class="menu-item-text-wrapper"
-                          @mouseup="toggleItemClick($event, index)"
-                          @mouseover="toggleItemsMouseOver(index)"
-                          @mouseleave="toggleItemsMouseLeave(index)"
-                          :id="'item'+index"
-                          :style="{
-                            transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                            color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                            height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                            cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
-                          }">
-                          <div class="textContainer">
-                            <div class="text"
-                              :style="{
-                                wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                                whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                              }">{{ getSubName(item) }}</div>
-                          </div>
-                          <div class="iconContainer">
-                            <transition name="sub-delete">
-                              <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete($event, item)" v-show="(item.type === 'local' || item.type === 'modified') && hoverIndex === index"></Icon>
-                            </transition>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div v-if="loadingTypes.length > 0">
-                      <div v-for="(item, index) in loadingTypes"
-                        class="placeholders-wrapper"
-                        :key="`${item}-${index}`">
-                        <div class="placeholder-item-text-wrapper">
-                          <div class="text">{{ item }}</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="card" v-if="0 <= computedAvaliableItems.length"
+                  <div v-if="!(loadingSubsPlaceholders.length > 0)">
+                    <div class="menu-item-text-wrapper"
+                      @mouseup="$bus.$emit('off-subtitle')"
+                      @mouseover="toggleItemsMouseOver(-1)"
+                      @mouseleave="toggleItemsMouseLeave(-1)"
                       :style="{
-                        height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                        top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
-                        marginTop: `${-cardPos}px`,
-                        transition: transFlag ? 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
-                      }"/>
+                        color: hoverIndex === -1 || currentSubtitleIndex === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                        height: `${itemHeight}px`,
+                        cursor: currentSubtitleIndex === -1 ? 'default' : 'pointer',
+                      }">
+                      <div class="text">{{ noSubtitle }}</div>
+                    </div>
                   </div>
+                  <div v-if="!(loadingSubsPlaceholders.length > 0) && computedAvaliableItems.length === 0">
+                    <div class="menu-item-text-wrapper create-subtitle-btn"
+                      @click.stop="handleCreateBtnClick"
+                      :style="{
+                        height: `${itemHeight}px`,
+                      }">
+                      <div class="text">{{ '创建字幕' }}</div>
+                    </div>
+                  </div>
+                  <div v-for="(item, index) in computedAvaliableItems" :key="item.id">
+                    <div class="menu-item-text-wrapper"
+                      @mouseup="toggleItemClick($event, index)"
+                      @mouseover="toggleItemsMouseOver(index)"
+                      @mouseleave="toggleItemsMouseLeave(index)"
+                      :id="'item'+index"
+                      :style="{
+                        transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
+                        color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                        height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                        cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                      }">
+                      <div class="textContainer">
+                        <div class="text"
+                          :style="{
+                            wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                            whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                          }">{{ getSubName(item) }}</div>
+                      </div>
+                      <div class="iconContainer">
+                        <transition name="sub-delete">
+                          <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete($event, item)" v-show="(item.type === 'local' || item.type === 'modified') && hoverIndex === index"></Icon>
+                        </transition>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="loadingTypes.length > 0">
+                    <div v-for="(item, index) in loadingTypes"
+                      class="placeholders-wrapper"
+                      :key="`${item}-${index}`">
+                      <div class="placeholder-item-text-wrapper">
+                        <div class="text">{{ item }}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card" v-if="0 <= computedAvaliableItems.length"
+                    :style="{
+                      height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                      top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
+                      marginTop: `${-cardPos}px`,
+                      transition: transFlag ? 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
+                    }"/>
                 </div>
               </div>
             </div>
@@ -148,7 +144,6 @@ export default {
         embedded: '',
         online: '',
       },
-      foundSubtitles: true,
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
