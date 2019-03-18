@@ -1,17 +1,20 @@
 <template>
-  <div class="subtitle-manager">
+  <div>
     <subtitle-renderer
       ref="subtitleRenderer"
-      :subtitle-instance="currentSubtitle"
-      :key="currentSubtitleId"
-    />
+      v-if="!isProfessional"
+      :key="currentSubtitle && currentSubtitle.id"
+      :subtitleInstance="currentSubtitle"/>
+    <subtitle-editor
+      v-if="isProfessional"
+      :subtitleInstance="currentSubtitle"/>
   </div>
 </template>
 <script>
 import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
 import romanize from 'romanize';
 import { sep } from 'path';
-import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
+import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray, intersectionBy } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import {
   searchForLocalList, searchFromTempList, fetchOnlineList, retrieveEmbeddedList,
@@ -29,6 +32,8 @@ import transcriptQueue from '@/helpers/subtitle/push';
 import { deleteFileByPath, getSubtitleContentByPath, addSubtitleByMediaHash, writeSubtitleByPath } from '@/helpers/cacheFileStorage';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
+// import SubtitleRenderer from './SubtitleRenderer.vue';
+import SubtitleEditor from './SubtitleEditor.vue';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { localLanguageLoader } from './SubtitleLoader/utils';
@@ -36,7 +41,8 @@ import { localLanguageLoader } from './SubtitleLoader/utils';
 export default {
   name: 'subtitle-manager',
   components: {
-    'subtitle-renderer': SubtitleRenderer,
+    SubtitleEditor,
+    SubtitleRenderer,
   },
   data() {
     return {
@@ -54,7 +60,7 @@ export default {
       'duration', // do not load subtitle renderer when video(duration) is not available(todo: global variable to tell if video is totally available)
       'getVideoSrcById', 'allSubtitleList', // serve allSubtitleListWatcher
       'subtitleDelay', // subtitle's delay
-      'isProfessional',
+      'isProfessional', // 字幕编辑高级模式属性
     ]),
     ...mapState({
       preferredLanguages: ({ Preference }) => (
@@ -103,7 +109,7 @@ export default {
       if (this.selectionComplete || newVal) updateSelectedSubtitleId(this.originSrc, newVal);
     },
     isProfessional(val) {
-      // 离开高级模式
+      // 如果当前修改的是自制字幕，再离开字幕编辑高级模式，这个时候触发保存到本地的操作
       const isModifiedExit = this.currentSubtitle && this.currentSubtitle.type === 'modified';
       if (!val && isModifiedExit) {
         const subString = JSON.stringify({
@@ -150,8 +156,8 @@ export default {
 
       const storedLanguagePreference = await retrieveLanguagePreference(videoSrc);
       const storedSubtitles = await retrieveSubtitleList(videoSrc);
-
       if (requestedTypes.includes('modified')) {
+        // 自制字幕加载请求
         const storedModifiedSubtitles = storedSubtitles.filter(({ type }) => type === 'modified');
         subtitleRequests.push(getModifiedSubtitlesList(videoSrc, storedModifiedSubtitles));
       }
@@ -214,12 +220,13 @@ export default {
       ));
     },
     async getModifiedSubtitlesList(videoSrc, storedSubs) {
-      const newLocalSubs = await searchFromTempList(videoSrc, SubtitleLoader.supportedFormats)
+      // 加载自制字幕,
+      // 先根据视频，查找缓存目录自制字幕列表
+      const cacheSubs = await searchFromTempList(videoSrc, SubtitleLoader.supportedFormats)
         .catch(() => []);
-      const list = values(mergeWith(
-        keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'modified', options: { id } })), 'src'),
-        keyBy(newLocalSubs, 'src'),
-      ));
+      const cacheModifiedSubs = cacheSubs.filter(e => e.type === 'modified');
+      // 和indexDB中modified字幕列表对比取交集元素
+      const list = intersectionBy(storedSubs.map(({ src, id }) => ({ src, type: 'modified', options: { id } })), cacheModifiedSubs, 'src');
       const result = await getSubtitleContentByPath(list);
       return result;
     },
@@ -260,7 +267,7 @@ export default {
         if (existedInList && existedInInstances) return 'success';
       }
       const subtitleInstance = new SubtitleLoader(src, type, { ...options });
-      // modified trigger metaInfo
+      // 如果字幕是自制字幕，并且已经存到IndexDB，就直接更新vuex中name、language
       if (subtitleInstance.type === 'modified' && subtitleInstance.id) {
         const { name, language } = subtitleInstance.metaInfo;
         this.metaInfoUpdate(subtitleInstance.id, 'name', name);
@@ -598,7 +605,9 @@ export default {
           parsed: sub.parsed,
           metaInfo: sub.metaInfo,
         });
+        // 创建新的自制字幕
         addSubtitleByMediaHash(this.mediaHash, subString, { type: 'modified' }).then((result) => {
+          // 创建成功后往当前字幕列表添加新创建的自制字幕
           this.$bus.$emit('add-subtitles', [{
             src: result.path,
             type: 'modified',
@@ -615,8 +624,8 @@ export default {
         });
       }
     },
-    async deleteSubtitle({ sub }) {
-      // rm file
+    async deleteSubtitleFile({ sub }) {
+      // 删除字幕文件(自制字幕)
       await deleteFileByPath(this.subtitleInstances[sub.id].src);
     },
   },
@@ -663,10 +672,10 @@ export default {
           });
       }
     });
-    // 当修改自制的字幕，直接修改内存里面的值
+    // 接受字幕的修改，包括自制字幕和原始字幕，处理逻辑统一在this.modifiedSubtitle
     this.$bus.$on('modified-subtitle', this.modifiedSubtitle);
-    // 当删除某个字幕的时候，同步
-    this.$bus.$on('delete-subtitle', this.deleteSubtitle);
+    // 当删除某个字幕的文件
+    this.$bus.$on('delete-subtitle-file', this.deleteSubtitleFile);
     // when set immediate on watcher, it may run before the created hook
     this.resetSubtitles();
     this.$bus.$emit('subtitle-refresh-from-src-change');
@@ -675,12 +684,4 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.subtitle-manager {
-  // position: absolute;
-  // left: 50%;
-  // top: 50%;
-  // transform: translate(-50%, -50%);
-  // pointer-events: none;
-  // z-index: 5;
-}
 </style>

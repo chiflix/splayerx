@@ -76,6 +76,8 @@ export default class SubtitleLoader extends EventEmitter {
 
     this.options = options || {};
     this.data = this.options.data;
+    // 如果是自制字幕，就不需要解析了，因为自制字幕在存储的时候都是
+    // 把内存中的数组以JSON的形式存在缓存目录下,JSON包含字幕的meta和dialogues
     if (this.type === 'modified') {
       this.data = '**';
       this.metaInfo = this.options.storage.metaInfo;
@@ -93,6 +95,8 @@ export default class SubtitleLoader extends EventEmitter {
         this.id = id.toString();
         setImmediate(() => this.emit('loading', id));
         if (this.type === 'modified') {
+          // 在往indexBD存自制字幕的时候，存储成功可以直接发送meta-change
+          // meta数组也是存在文件里面的
           const { name, language } = this.metaInfo;
           setImmediate(() => this.emit('meta-change', { field: 'name', value: name }));
           setImmediate(() => this.emit('meta-change', { field: 'language', value: language }));
@@ -133,6 +137,7 @@ export default class SubtitleLoader extends EventEmitter {
   async parse() {
     try {
       if (this.type === 'modified' && this.options.storage.parsed) {
+        // 如果是自制字幕不需要parse了，可以直接取存在storage里面的数据
         this.parsed = this.options.storage.parsed;
         this.emit('parse', this.parsed);
       } else {

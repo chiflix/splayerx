@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex';
 // import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheVideoController from './PlayingView/TheVideoController.vue';
@@ -20,6 +21,9 @@ export default {
     // 'subtitle-manager': SubtitleManager,
   },
   methods: {
+    ...mapMutations({
+      windowMinimumSize: 'windowMinimumSize',
+    }),
     // Compute UI states
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
     // else it is triggered by setInterval.
@@ -29,6 +33,8 @@ export default {
   },
   mounted() {
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
+    // 这里设置了最小宽高，需要同步到vuex
+    this.windowMinimumSize([320, 180]);
     videodata.checkTick();
     videodata.onTick = this.onUpdateTick;
   },
