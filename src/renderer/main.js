@@ -116,7 +116,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
-      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub']),
+      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -1050,7 +1050,7 @@ new Vue({
       await this.createMenu();
     },
     changeWindowSize(key) {
-      if (!this.originSrc) {
+      if (!this.originSrc || key === this.sizePercent) {
         return;
       }
       let newSize = [];
@@ -1075,6 +1075,7 @@ new Vue({
         windowRect,
         newSize,
       );
+      this.$store.dispatch('updateSizePercent', key);
       const rect = newPosition.concat(newSize);
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
