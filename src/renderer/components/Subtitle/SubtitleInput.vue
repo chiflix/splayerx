@@ -80,7 +80,7 @@
             }"></textarea>
         </div>
       </div>
-    </div> 
+    </div>
   </div>
 </template>
 <script>
@@ -465,13 +465,13 @@ export default {
     assLine(index) {
       const { currentTags: tags } = this;
       if (tags[index].pos) {
-        return `translateY(${-100 * this.lineNum(index)}%)`;
+        return -100 * this.lineNum(index);
       }
       const arr = [1, 2, 3];
       if (arr.includes(tags[index].alignment) && !this.subToTop) {
-        return `translateY(${-100 * this.lineNum(index)}%)`;
+        return -100 * this.lineNum(index);
       }
-      return `translateY(${100 * this.lineNum(index)}%)`;
+      return 100 * this.lineNum(index);
     },
     vttLine(index) {
       const { currentTags: tags } = this;
@@ -494,7 +494,7 @@ export default {
       const { currentTags: tags, isVtt } = this;
       if (isEqual(tags[index], tags[index - 1])) {
         if (!isVtt) {
-          return this.assLine(index);
+          return `${this.assLine(index)}%`;
         }
         return this.vttLine(index);
       }
@@ -502,8 +502,22 @@ export default {
     },
     transPos(index) {
       const { currentTags: tags, isVtt } = this;
-      if (!isVtt && tags[index].pos) {
-        return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.translateNum(tags[index].alignment)[1]}%)`;
+      const initialTranslate = [
+        [0, 0],
+        [-50, 0],
+        [0, 0],
+        [0, -50],
+        [-50, -50],
+        [0, -50],
+        [0, 0],
+        [-50, 0],
+        [0, 0],
+      ];
+      if (!isVtt) {
+        if (tags[index].pos) {
+          return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.translateNum(tags[index].alignment)[1]}%)`;
+        }
+        return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${initialTranslate[tags[index].alignment - 1][1] + this.assLine(index)}%)`;
       }
       return '';
     },
@@ -511,7 +525,7 @@ export default {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
         return `${(tags[index].pos.x / this.subPlayResX) * 100}vw`;
-      } else if (type === 'vtt') {
+      } else if (type === 'vtt' && tags[index].line && tags[index].position) {
         if (tags[index].vertical) {
           if (!tags[index].line.includes('%')) {
             tags[index].line = Math.abs(tags[index].line) * 100;
@@ -527,7 +541,7 @@ export default {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
         return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
-      } else if (type === 'vtt') {
+      } else if (type === 'vtt' && tags[index].line && tags[index].position) {
         if (tags[index].vertical) {
           return tags[index].position;
         }
@@ -535,6 +549,7 @@ export default {
           tags[index].line = Math.abs(tags[index].line) * 100;
           tags[index].line += '%';
         }
+        console.log(tags[index]);
         return tags[index].line;
       }
       return '';
@@ -601,7 +616,7 @@ export default {
       left: 0;
       top: 0;
       z-index: 1;
-      backdrop-filter: blur(3px); 
+      backdrop-filter: blur(3px);
       background: rgba(0,0,0,0.05);
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 5px;
@@ -649,13 +664,13 @@ export default {
     display: none;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(3px); 
+    backdrop-filter: blur(3px);
     background: rgba(0,0,0,0.05);
     border: 1px solid rgba(255,255,255,0.15);
     border-left: none;
     border-radius: 0 5px 5px 0;
   }
-} 
+}
 .enable-hover {
   &:hover {
     // padding: 5px 15px;
@@ -667,7 +682,7 @@ export default {
       left: 0;
       top: 0;
       z-index: 1;
-      backdrop-filter: blur(3px); 
+      backdrop-filter: blur(3px);
       background: rgba(0,0,0,0.05);
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 5px;
@@ -685,7 +700,7 @@ export default {
       left: 0;
       top: 0;
       z-index: 1;
-      backdrop-filter: blur(3px); 
+      backdrop-filter: blur(3px);
       background: rgba(0,0,0,0.05);
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 5px;

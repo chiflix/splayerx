@@ -7,7 +7,7 @@ const normalizer = (parsedSubtitle) => {
     finalDialogues.push({
       start: startTime,
       end: endTime,
-      text: text.replace(/\{[^{}]*\}/g, ''),
+      text: text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '<br>'),
       tags: tagsGetter(text, baseTags),
     });
   });

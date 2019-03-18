@@ -67,7 +67,7 @@ const normalizer = (parsedSubtitle) => {
             pos,
             ...pick(Object.assign({}, sliceTag, fragmentTag), ['b', 'i', 'u', 's']),
           };
-          return { text: text.replace(/[\\/][Nn]/g, '<br>'), tags: finalTags };
+          return { text: text.replace(/[\\/][Nn]|\r?\n|\r/g, '<br>'), tags: finalTags };
         });
         const finalDialogue = {
           ...baseDiagolue,
