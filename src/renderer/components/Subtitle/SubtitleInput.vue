@@ -540,8 +540,12 @@ export default {
     },
     subTop(index) {
       const { currentTags: tags, type, isVtt } = this;
-      if (!isVtt && tags[index].pos) {
-        return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
+      if (!isVtt) {
+        if (tags[index].pos) {
+          return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
+        } else if ([7, 8, 9].includes(tags[index].alignment)) {
+          return `${((20 + ((this.winHeight - this.computedHeight) / 2)) / this.winHeight) * 100}%`;
+        }
       } else if (type === 'vtt' && tags[index].line && tags[index].position) {
         if (tags[index].vertical) {
           return tags[index].position;
@@ -551,14 +555,12 @@ export default {
           tags[index].line += '%';
         }
         return tags[index].line;
-      } else if ([7, 8, 9].includes(tags[index].alignment)) {
-        return `${((20 + ((this.winHeight - this.computedHeight) / 2)) / this.winHeight) * 100}%`;
       }
       return '';
     },
     subBottom(index) {
       const { currentTags: tags, isVtt } = this;
-      if ([1, 2, 3].includes(this.currentTags[index].alignment) ||
+      if (([1, 2, 3].includes(tags[index].alignment) && !tags[index].pos) ||
         (isVtt && (!tags[index].line || !tags[index].position))) {
         return `${((20 + ((this.winHeight - this.computedHeight) / 2)) / this.winHeight) * 100}%`;
       }
