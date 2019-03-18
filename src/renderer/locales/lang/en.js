@@ -74,6 +74,7 @@ export default {
       originSize: '100%',
       doubleSize: '200%',
       maxmize: 'Zoom',
+      halfSize: '50%',
     },
     help: {
       name: 'Help',
@@ -106,7 +107,7 @@ export default {
       generalSetting: 'General',
       displayLanguage: 'Display Language',
       clearHistory: 'Always clear playback history on exit',
-      switchDisplayLanguages: 'Display Language controls the language you see in SPlayer',
+      switchDisplayLanguages: 'Display Language controls the language you see in SPlayer.',
     },
     privacy: {
       privacySetting: 'Translation',

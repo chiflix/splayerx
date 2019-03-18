@@ -76,6 +76,7 @@ export default {
       originSize: '100%',
       doubleSize: '200%',
       maxmize: '最大化',
+      halfSize: '50%',
     },
     help: {
       name: 'ヘルプ',
