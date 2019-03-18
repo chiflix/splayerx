@@ -693,6 +693,14 @@ new Vue({
             },
             { type: 'separator' },
             {
+              label: this.$t('msg.window.halfSize'),
+              checked: false,
+              accelerator: 'CmdOrCtrl+0',
+              click: () => {
+                this.changeWindowSize(0.5);
+              },
+            },
+            {
               label: this.$t('msg.window.originSize'),
               checked: true,
               accelerator: 'CmdOrCtrl+1',
@@ -714,14 +722,6 @@ new Vue({
               accelerator: 'CmdOrCtrl+3',
               click: () => {
                 this.changeWindowSize(3);
-              },
-            },
-            {
-              label: this.$t('msg.window.halfSize'),
-              checked: false,
-              accelerator: 'CmdOrCtrl+0',
-              click: () => {
-                this.changeWindowSize(0.5);
               },
             },
             { type: 'separator' },
