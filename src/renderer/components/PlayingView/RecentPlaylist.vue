@@ -72,14 +72,8 @@
           minWidth: `${thumbnailWidth}px`,
           minHeight: `${thumbnailHeight}px`,
         }"
-        :winWidth="winWidth"
-        :thumbnailWidth="thumbnailWidth"
-        :thumbnailHeight="thumbnailHeight"
+        :itemMoving="itemMoving"
         :index="addIndex"
-        :indexOfMovingTo="indexOfMovingTo"
-        :indexOfMovingItem="indexOfMovingItem"
-        :movementX="movementX"
-        :movementY="movementY"
         :addMouseup="addMouseup"/>
       <div class="next-page"
         v-if="thumbnailNumber < numberOfPlaylistItem"
