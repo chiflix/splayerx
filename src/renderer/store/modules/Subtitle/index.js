@@ -130,6 +130,10 @@ const mutations = {
   [subtitleMutations.SUBTITLE_TOP_UPDATE](state, payload) {
     state.subToTop = payload;
   },
+  [subtitleMutations.CURRENT_SUBTITLE_REMOVE](state, payload) {
+    const index = state.videoSubtitleMap[payload.src].indexOf(payload.id);
+    state.videoSubtitleMap[payload.src].splice(index, 1);
+  },
 };
 
 const actions = {
@@ -237,6 +241,9 @@ const actions = {
   },
   [subtitleActions.UPDATE_SUBTITLE_TOP]({ commit }, delta) {
     commit(subtitleMutations.SUBTITLE_TOP_UPDATE, delta);
+  },
+  [subtitleActions.REMOVE_LOCAL_SUBTITLE]({ commit, getters }, delta) {
+    commit(subtitleMutations.CURRENT_SUBTITLE_REMOVE, { id: delta, src: getters.originSrc });
   },
 };
 

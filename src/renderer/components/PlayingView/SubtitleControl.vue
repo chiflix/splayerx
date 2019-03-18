@@ -50,7 +50,7 @@
                       <div v-if="foundSubtitles"
                         v-for="(item, index) in computedAvaliableItems" :key="item.rank">
                         <div class="menu-item-text-wrapper"
-                          @mouseup="toggleItemClick(index)"
+                          @mouseup="toggleItemClick($event, index)"
                           @mouseover="toggleItemsMouseOver(index)"
                           @mouseleave="toggleItemsMouseLeave(index)"
                           :id="'item'+index"
@@ -60,10 +60,18 @@
                             height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                             cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
                           }">
-                          <div class="text"
-                            :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                              whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                            }">{{ getSubName(item) }}</div>
+                          <div class="textContainer">
+                            <div class="text"
+                              :style="{
+                                wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                                whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                              }">{{ getSubName(item) }}</div>
+                          </div>
+                          <div class="iconContainer">
+                            <transition name="sub-delete">
+                              <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete($event, item)" v-show="item.type === 'local' && hoverIndex === index"></Icon>
+                            </transition>
+                          </div>
                         </div>
                       </div>
 
@@ -81,7 +89,7 @@
                         height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                         top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
                         marginTop: `${-cardPos}px`,
-                        transition: 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+                        transition: transFlag ? 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
                       }"/>
                   </div>
                 </div>
@@ -108,6 +116,7 @@ import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
+import { deleteSubtitles } from '@/helpers/subtitle';
 import Icon from '../BaseIconContainer.vue';
 import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
@@ -150,6 +159,7 @@ export default {
       onAnimation: false,
       refAnimation: '',
       debouncedHandler: debounce(this.handleRefresh, 1000),
+      transFlag: true,
     };
   },
   computed: {
@@ -304,9 +314,7 @@ export default {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
       }
-      if (val.length >= oldval.length) {
-        this.computedAvaliableItems = val.filter(sub => sub.name);
-      }
+      this.computedAvaliableItems = val.filter(sub => sub.name);
     },
     loadingType(val) {
       if (val === 'local') {
@@ -326,7 +334,22 @@ export default {
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
+      removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
     }),
+    handleSubDelete(e, item) {
+      if (e.target.nodeName !== 'DIV') {
+        this.transFlag = false;
+        this.removeLocalSub(item.id);
+        this.hoverHeight = 0;
+        if (item.id === this.currentSubtitleId) {
+          this.$bus.$emit('off-subtitle');
+        }
+        deleteSubtitles([item.id], this.originSrc).then((result) => {
+          this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
+          this.transFlag = true;
+        });
+      }
+    },
     finishAnimation() {
       this.refAnimation = '';
     },
@@ -449,6 +472,10 @@ export default {
       }
     },
     toggleItemsMouseOver(index) {
+      this.showSubtitleDetails(index);
+      this.hoverIndex = index;
+    },
+    showSubtitleDetails(index) {
       if (index >= 0) {
         clearTimeout(this.detailTimer);
         const hoverItem = document.querySelector(`#item${index} .text`);
@@ -460,7 +487,6 @@ export default {
           }, 1500);
         }
       }
-      this.hoverIndex = index;
     },
     toggleItemsMouseLeave() {
       clearTimeout(this.detailTimer);
@@ -468,9 +494,14 @@ export default {
       this.hiddenText = false;
       this.hoverIndex = -5;
     },
-    toggleItemClick(index) {
-      const { computedAvaliableItems } = this;
-      this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+    toggleItemClick(event, index) {
+      if (event.target.nodeName === 'DIV') {
+        const { computedAvaliableItems } = this;
+        this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+        setTimeout(() => {
+          this.showSubtitleDetails(index);
+        }, 0);
+      }
     },
   },
   created() {
@@ -594,7 +625,12 @@ export default {
     color: rgba(255, 255, 255, 0.6);
   }
   .menu-item-text-wrapper {
+    .deleteIcon {
+      transition-delay: 75ms;
+    }
     .text {
+      transition: color 90ms linear;
+      transition-delay: 75ms;
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
     }
@@ -658,11 +694,24 @@ export default {
       width: 142px;
       display: flex;
       margin: auto auto 4px 9px;
+      .textContainer {
+        width: 116px;
+        display: flex;
+      }
       .text {
         font-size: 11px;
         letter-spacing: 0.2px;
         line-height: 13px;
-        margin: auto 9.43px;
+        margin: auto 0 auto 9px;
+      }
+      .iconContainer {
+        width: 26px;
+        height: 27px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
@@ -717,11 +766,24 @@ export default {
       width: 174px;
       display: flex;
       margin: auto auto 5px 9.5px;
+      .textContainer {
+        width: 141px;
+        display: flex;
+      }
       .text {
         font-size: 12px;
         letter-spacing: 0.2px;
         line-height: 14px;
-        margin: auto 12.73px;
+        margin: auto 0 auto 12.73px;
+      }
+      .iconContainer {
+        width: 33px;
+        height: 32px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
@@ -776,11 +838,24 @@ export default {
       width: 242px;
       display: flex;
       margin: auto auto 7px 12px;
+      .textContainer {
+        width: 196px;
+        display: flex;
+      }
       .text {
         font-size: 16px;
         letter-spacing: 0.27px;
         line-height: 18px;
-        margin: auto 17.89px;
+        margin: auto 0 auto 17.89px;
+      }
+      .iconContainer {
+        width: 46px;
+        height: 44px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
@@ -811,6 +886,13 @@ export default {
 }
 .sub-trans-l-leave-active {
   position: absolute;
+}
+
+.sub-delete-enter-active, .sub-delete-leave-active {
+  transition: opacity 150ms;
+}
+.sub-delete-enter, .sub-delete-leave-to {
+  opacity: 0;
 }
 
 .refresh-animation {
