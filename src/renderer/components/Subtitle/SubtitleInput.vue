@@ -9,6 +9,7 @@
         writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
         left: subLeft(i),
         top: subTop(i),
+        bottom: subBottom(i),
         transform: transPos(i),
         display: !isProfessional || isProfessional && currentSub && currentSub.start === cue.start ? 'flex' : 'none',
       }"
@@ -131,7 +132,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleList',
+      'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleList', 'winHeight',
       'paused',
       'isEditable', 'isProfessional',
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
@@ -549,8 +550,17 @@ export default {
           tags[index].line = Math.abs(tags[index].line) * 100;
           tags[index].line += '%';
         }
-        console.log(tags[index]);
         return tags[index].line;
+      } else if ([7, 8, 9].includes(tags[index].alignment)) {
+        return `${((20 + ((this.winHeight - this.computedHeight) / 2)) / this.winHeight) * 100}%`;
+      }
+      return '';
+    },
+    subBottom(index) {
+      const { currentTags: tags, isVtt } = this;
+      if ([1, 2, 3].includes(this.currentTags[index].alignment) ||
+        (isVtt && (!tags[index].line || !tags[index].position))) {
+        return `${((20 + ((this.winHeight - this.computedHeight) / 2)) / this.winHeight) * 100}%`;
       }
       return '';
     },
