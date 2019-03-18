@@ -223,7 +223,7 @@ export default {
             this.pageSwitching = true;
             this.pageSwitchingTimeId = setTimeout(() => {
               this.pageSwitching = false;
-              this.firstIndex += this.thumbnailNumber;
+              this.lastIndex += this.thumbnailNumber;
               this.shifting = true;
               this.tranFlag = true;
               this.movementX = offsetX + (this.thumbnailNumber * distance);
@@ -234,12 +234,12 @@ export default {
               }, 400);
             }, 1000);
           }
-        } else if (this.indexOfMoving === this.firstIndex - 1) {
+        } else if (this.indexOfMovingTo === this.firstIndex - 1) {
           if (!this.pageSwitching) {
             this.pageSwitching = true;
             this.pageSwitchingTimeId = setTimeout(() => {
               this.pageSwitching = false;
-              this.lastIndex -= this.thumbnailNumber;
+              this.firstIndex -= this.thumbnailNumber;
               this.shifting = true;
               this.tranFlag = true;
               this.movementX = offsetX - (this.thumbnailNumber * distance);
@@ -325,7 +325,7 @@ export default {
         this.hoverIndex = this.indexOfMovingTo;
         // last page
       } else if (index === this.firstIndex - 1) {
-        this.lastIndex = index;
+        this.firstIndex -= this.thumbnailNumber;
         this.shifting = true;
         this.tranFlag = true;
         setTimeout(() => {
@@ -333,7 +333,7 @@ export default {
           this.tranFlag = false;
         }, 400);
       } else if (index === this.lastIndex + 1) { // next page
-        this.firstIndex = index;
+        this.lastIndex += this.thumbnailNumber;
         this.shifting = true;
         this.tranFlag = true;
         setTimeout(() => {
@@ -364,13 +364,14 @@ export default {
     playingList(val) {
       this.indexOfMovingItem = val.length;
     },
-    firstIndex() {
+    firstIndex(val) {
       if (this.lastIndex > this.maxIndex) {
         this.lastIndex = this.maxIndex;
       }
     },
     lastIndex(val) {
-      if (this.firstIndex > 0 && this.maxIndex > this.firstIndex && this.maxIndex <= val) {
+      if (this.firstIndex > 0 && this.maxIndex > this.firstIndex
+       && this.maxIndex <= val && !this.itemMoving) {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
       }
     },
@@ -396,13 +397,6 @@ export default {
         } else if (val !== this.$options.name && this.backgroundDisplayState) {
           this.$emit('update:playlistcontrol-showattached', false);
         }
-      }
-    },
-    playingIndex(val) {
-      if (val > this.lastIndex) {
-        this.firstIndex = val;
-      } else if (val < this.firstIndex) {
-        this.lastIndex = val;
       }
     },
     displayState(val, oldval) {
