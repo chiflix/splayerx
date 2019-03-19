@@ -62,6 +62,7 @@ export default {
       uploadSelectedSubtitle: 'Upload Selected Subtitle',
       increaseSubtitleDelayS: 'Subtitle Delay +0.1s',
       decreaseSubtitleDelayS: 'Subtitle Delay -0.1s',
+      enabledSecondarySub: 'Enable Secondary Subtitle',
       // increaseSubtitleDelayL: 'Subtitle Delay +0.5s',
       // decreaseSubtitleDelayL: 'Subtitle Delay -0.5s',
     },

@@ -115,7 +115,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
       'currentFirstSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent']),
     updateFullScreen() {
       if (this.isFullScreen) {
@@ -327,6 +327,7 @@ new Vue({
       updateSubDelay: subtitleActions.UPDATE_SUBTITLE_DELAY,
       updateChosenStyle: subtitleActions.UPDATE_SUBTITLE_STYLE,
       updateChosenSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
+      updateEnabledSecondarySub: subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE,
     }),
     /**
      * @description 递归禁用menu子项
@@ -539,6 +540,12 @@ new Vue({
             //   label: this.$t('msg.subtitle.secondarySubtitle'),
             //   enabled: false,
             // },
+            {
+              label: this.$t('msg.subtitle.enabledSecondarySub'),
+              click: () => {
+                this.updateEnabledSecondarySub(!this.enabledSecondarySub);
+              },
+            },
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.subtitleSize'),

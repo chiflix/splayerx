@@ -26,6 +26,7 @@ const state = {
   calculatedNoSub: true,
   subToTop: false,
   isFirstSubtitle: true,
+  enabledSecondarySub: false,
 };
 
 const getters = {
@@ -66,6 +67,7 @@ const getters = {
   calculatedNoSub: state => state.calculatedNoSub,
   subToTop: state => state.subToTop,
   isFirstSubtitle: state => state.isFirstSubtitle,
+  enabledSecondarySub: state => state.enabledSecondarySub,
 };
 
 const mutations = {
@@ -143,6 +145,9 @@ const mutations = {
   },
   [subtitleMutations.SUBTITLE_TYPE_UPDATE](state, payload) {
     state.isFirstSubtitle = payload;
+  },
+  [subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE](state, payload) {
+    state.enabledSecondarySub = payload;
   },
 };
 
@@ -272,6 +277,9 @@ const actions = {
   },
   [subtitleActions.UPDATE_SUBTITLE_TYPE]({ commit }, delta) {
     commit(subtitleMutations.SUBTITLE_TYPE_UPDATE, delta);
+  },
+  [subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE]({ commit }, delta) {
+    commit(subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE, delta);
   },
 };
 

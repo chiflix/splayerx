@@ -62,6 +62,7 @@ export default {
       uploadSelectedSubtitle: '上傳所選字幕',
       increaseSubtitleDelayS: '字幕延時 +0.1s',
       decreaseSubtitleDelayS: '字幕延時 -0.1s',
+      enabledSecondarySub: '啟用第二字幕',
       // increaseSubtitleDelayL: '字幕延时 +0.5s',
       // decreaseSubtitleDelayL: '字幕延时 -0.5s',
     },
