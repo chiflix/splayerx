@@ -168,6 +168,9 @@ export default {
     sizeAdaption: {
       type: Function,
     },
+    pageSwitching: {
+      type: Boolean,
+    },
   },
   data() {
     return {
@@ -367,6 +370,13 @@ export default {
         } else {
           this.displayIndex = this.index;
         }
+      }
+    },
+    pageSwitching(val, oldVal) {
+      if (!val && oldVal && this.selfMoving) {
+        requestAnimationFrame(() => {
+          this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
+        });
       }
     },
     movementY(val) { // eslint-disable-line complexity

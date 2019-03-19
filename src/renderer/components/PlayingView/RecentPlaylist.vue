@@ -52,6 +52,7 @@
         :path="item"
         :maxIndex="maxIndex"
         :isLastPage="lastIndex === maxIndex"
+        :pageSwitching="pageSwitching"
         :itemMoving="itemMoving"
         :indexOfMovingTo="indexOfMovingTo"
         :indexOfMovingItem="indexOfMovingItem"
@@ -103,7 +104,7 @@ export default {
     Add,
   },
   props: {
-    mousemovePosition: {},
+    mousemoveClientPosition: {},
     displayState: Boolean,
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
@@ -121,7 +122,7 @@ export default {
       shifting: false,
       snapShoted: false,
       hoveredMediaInfo: {}, // the hovered video's media info
-      mousePosition: [],
+      mousePosition: {},
       backgroundDisplayState: this.displayState, // it's weird but DON'T DELETE IT!!
       canHoverItem: false,
       tranFlag: false,
@@ -131,6 +132,7 @@ export default {
       pageSwitching: false,
       pageSwitchingTimeId: NaN,
       mousedownPosition: [],
+      mousemovePosition: [],
       firstIndexOnMousedown: 0,
       lastIndexOnMousedown: 0,
     };
@@ -204,6 +206,7 @@ export default {
       };
     },
     onItemMousemove(index, pageX, pageY) { // eslint-disable-line complexity
+      this.mousemovePosition = [pageX, pageY];
       const offsetX = pageX - this.mousedownPosition[0];
       const offsetY = pageY - this.mousedownPosition[1];
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
@@ -361,7 +364,8 @@ export default {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
       const distance = marginRight + this.thumbnailWidth;
       if (this.itemMoving && this.lastIndex > this.lastIndexOnMousedown) {
-        this.movementX += ((this.lastIndex - this.lastIndexOnMousedown) * distance);
+        this.movementX = (this.mousemovePosition[0] - this.mousedownPosition[0])
+         + ((this.lastIndex - this.lastIndexOnMousedown) * distance);
       }
       if (this.lastIndex > this.maxIndex) {
         this.lastIndex = this.maxIndex;
@@ -371,7 +375,8 @@ export default {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
       const distance = marginRight + this.thumbnailWidth;
       if (this.itemMoving && this.firstIndex < this.firstIndexOnMousedown) {
-        this.movementX += ((this.firstIndex - this.firstIndexOnMousedown) * distance);
+        this.movementX = (this.mousemovePosition[0] - this.mousedownPosition[0])
+         + ((this.firstIndex - this.firstIndexOnMousedown) * distance);
       }
       if (this.firstIndex > 0 && this.maxIndex > this.firstIndex
        && this.maxIndex <= val && !this.itemMoving) {
@@ -407,7 +412,7 @@ export default {
         this.updateSubToTop(val);
       }
       this.canHoverItem = false;
-      this.mousePosition = this.mousemovePosition;
+      this.mousePosition = this.mousemoveClientPosition;
       if (val) {
         this.$store.dispatch('UpdatePlayingList');
         this.backgroundDisplayState = val;
@@ -417,7 +422,7 @@ export default {
         document.onmouseup = null;
       }
     },
-    mousemovePosition(val) {
+    mousemoveClientPosition(val) {
       const distance = this.winWidth > 1355 ? 20 : 10;
       if (!this.canHoverItem && this.displayState) {
         if (Math.abs(this.mousePosition.x - val.x) > distance ||

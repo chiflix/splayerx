@@ -14,7 +14,7 @@
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
-    :mousemovePosition="mousemovePosition"
+    :mousemoveClientPosition="mousemoveClientPosition"
     :isDragging="isDragging"
     :lastDragging.sync="lastDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
@@ -24,7 +24,7 @@
     <play-button class="play-button no-drag"
       @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
-      :mousemovePosition="mousemovePosition"
+      :mousemovePosition="mousemoveClientPosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
     <volume-indicator class="no-drag"
@@ -121,7 +121,7 @@ export default {
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
       currentMouseupWidget: state => state.Input.mouseupComponentName,
       currentMousedownWidget: state => state.Input.mousedownComponentName,
-      mousemovePosition: state => state.Input.mousemoveClientPosition,
+      mousemoveClientPosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
     ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
