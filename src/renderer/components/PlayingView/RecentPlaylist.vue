@@ -217,7 +217,7 @@ export default {
             this.pageSwitching = true;
             this.pageSwitchingTimeId = setTimeout(() => {
               this.pageSwitching = false;
-              this.lastIndex += this.thumbnailNumber;
+              this.firstIndex += this.thumbnailNumber;
               this.shifting = true;
               this.tranFlag = true;
               this.movementX = offsetX + (this.thumbnailNumber * distance);
@@ -233,7 +233,7 @@ export default {
             this.pageSwitching = true;
             this.pageSwitchingTimeId = setTimeout(() => {
               this.pageSwitching = false;
-              this.firstIndex -= this.thumbnailNumber;
+              this.lastIndex -= this.thumbnailNumber;
               this.shifting = true;
               this.tranFlag = true;
               this.movementX = offsetX - (this.thumbnailNumber * distance);
@@ -319,7 +319,7 @@ export default {
         this.hoverIndex = this.indexOfMovingTo;
         // last page
       } else if (index === this.firstIndex - 1) {
-        this.firstIndex -= this.thumbnailNumber;
+        this.lastIndex -= this.thumbnailNumber;
         this.shifting = true;
         this.tranFlag = true;
         setTimeout(() => {
@@ -327,7 +327,7 @@ export default {
           this.tranFlag = false;
         }, 400);
       } else if (index === this.lastIndex + 1) { // next page
-        this.lastIndex += this.thumbnailNumber;
+        this.firstIndex += this.thumbnailNumber;
         this.shifting = true;
         this.tranFlag = true;
         setTimeout(() => {
