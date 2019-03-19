@@ -201,6 +201,15 @@ export default {
       this.lastIndexOnMousedown = this.lastIndex;
       document.onmouseup = () => {
         document.onmousemove = null;
+        if (this.firstIndex !== this.firstIndexOnMousedown) {
+          let newPosition;
+          if (this.mousemovePosition[0] < 0) newPosition = this.firstIndex;
+          else if (this.mousemovePosition[0] > window.innerWidth) newPosition = this.lastIndex;
+          this.$store.dispatch('RepositionItemFromPlayingList', {
+            src: this.playingList[index],
+            newPosition,
+          });
+        }
         this.indexOfMovingItem = this.playingList.length;
         this.movementX = this.movementY = 0;
       };
