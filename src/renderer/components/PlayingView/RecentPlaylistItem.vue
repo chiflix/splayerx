@@ -97,6 +97,7 @@
 <script>
 import fs from 'fs';
 import path from 'path';
+import { mapGetters } from 'vuex';
 import { filePathToUrl, parseNameFromPath } from '@/helpers/path';
 import Icon from '@/components/BaseIconContainer.vue';
 
@@ -387,8 +388,16 @@ export default {
         }
       }
     },
+    playingList() {
+      this.tranFlag = false;
+      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+      setTimeout(() => {
+        this.tranFlag = true;
+      }, 0);
+    },
   },
   computed: {
+    ...mapGetters(['playingList']),
     aboutToDelete() {
       return this.selfMoving && (Math.abs(this.movementY) > this.thumbnailHeight * 1.5);
     },
