@@ -244,7 +244,7 @@ export default {
       if (Math.abs(offsetY) > 0 || Math.abs(offsetX) > 0) {
         this.indexOfMovingItem = index;
         this.movementY = offsetY;
-        this.canRemove = false;
+        if (Math.abs(this.movementY) < this.thumbnailHeight) this.canRemove = false;
 
         if (outOfWindow) {
           clearTimeout(this.pageSwitchingTimeId);
