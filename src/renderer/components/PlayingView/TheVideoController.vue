@@ -114,6 +114,7 @@ export default {
       mousedownOnPlayButton: false,
       mousedownOnVolume: false,
       preFullScreen: false,
+      dragOver: false,
     };
   },
   computed: {
@@ -228,6 +229,12 @@ export default {
         mouseupOnOther: false,
         hovering: false,
       };
+    });
+    this.$bus.$on('drag-over', () => {
+      this.dragOver = true;
+    });
+    this.$bus.$on('drag-leave', () => {
+      this.dragOver = false;
     });
     this.$bus.$on('to-fullscreen', () => {
       if (process.platform === 'darwin' &&
@@ -377,7 +384,7 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
-      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
+      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached && !this.dragOver;
       tempObject['playlist-control'] = !(this.playingList.length === 0);
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
