@@ -1,5 +1,6 @@
 import Vuex from 'vuex';
 import Video from '@/store/modules/Video';
+import Preference from '@/store/modules/Preference';
 import TheTimeCodes from '@/components/PlayingView/TheTimeCodes.vue';
 import { mount, createLocalVue } from '@vue/test-utils';
 
@@ -12,6 +13,9 @@ describe('Component - TheTimeCodes', () => {
     modules: {
       Video: {
         getters: Video.getters,
+      },
+      Preference: {
+        getters: Preference.getters,
       },
     },
   });

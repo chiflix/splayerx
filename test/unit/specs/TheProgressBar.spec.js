@@ -1,5 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
+import Window from '@/store/modules/Window';
 import TheProgressBar from '@/components/PlayingView/TheProgressBar.vue';
 import sinon from 'sinon';
 
@@ -21,6 +22,10 @@ describe('Component - TheProgressBar', () => {
           currentTime: () => 1400,
           ratio: () => 1.78,
         },
+      },
+      Window: {
+        state: Window.state,
+        getters: Window.getters,
       },
     },
   });

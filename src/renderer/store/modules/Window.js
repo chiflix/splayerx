@@ -12,6 +12,7 @@ const state = {
   isEditable: false, // 字幕编辑模式
   isProfessional: false, // 字幕高级编辑模式
   storedWindowInfo: null, // 字幕高级模式下需要存储windowSize、windowMinimumSize、windowPosition
+  sizePercent: 1,
 };
 
 const getters = {
@@ -29,6 +30,7 @@ const getters = {
   isEditable: state => state.isEditable,
   isProfessional: state => state.isProfessional,
   storedWindowInfo: state => state.storedWindowInfo,
+  sizePercent: state => state.sizePercent,
 };
 
 const mutations = {
@@ -60,16 +62,22 @@ const mutations = {
     // state.isEditable = payload;
     // 如果payload===true,就是准备进入高级编辑模式，这个时候，需要存储当前window信息
     // 保证退出高级编辑模式，可以恢复原来的window尺寸
-    state.storedWindowInfo = payload ? {
+    state.storedWindowInfo = {
       size: state.windowSize,
       minimumSize: state.windowMinimumSize,
       position: state.windowPosition,
-    } : null;
+    };
     state.isProfessional = payload;
+  },
+  sizePercentUpdate(state, payload) {
+    state.sizePercent = payload;
   },
 };
 
 const actions = {
+  updateSizePercent({ commit }, delta) {
+    commit('sizePercentUpdate', delta);
+  },
 };
 
 export default {

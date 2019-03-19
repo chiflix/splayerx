@@ -5,6 +5,7 @@ import { merge } from 'lodash';
 import Subtitle from '@/store/modules/Subtitle';
 import Video from '@/store/modules/Video';
 import Preference from '@/store/modules/Preference';
+import Window from '@/store/modules/Window';
 import SubtitleManager, { __RewireAPI__ as subtitleManagerRewireAPI } from '@/components/Subtitle/SubtitleManager.vue';
 import SubtitleLoader from '@/components/Subtitle/SubtitleLoader';
 import { randNum } from '../../helpers';
@@ -35,6 +36,10 @@ describe('Subtitle Manager Unit Tests', () => {
         getters: Preference.getters,
         mutations: Preference.mutations,
         actions: Preference.actions,
+      },
+      Window: {
+        getters: Window.getters,
+        mutations: Window.mutations,
       },
     },
   };
@@ -99,6 +104,14 @@ describe('Subtitle Manager Unit Tests', () => {
 
       refreshSubtitles(['local'], videoSrc).then(() => {
         expect(getLocalSubtitlesListSpy).to.have.been.called;
+        done();
+      }).catch(done);
+    });
+    it('should invoke getModifiedSubtitlesList when types includes modified', (done) => {
+      const getModifiedSubtitlesListSpy = sandbox.spy(wrapper.vm, 'getModifiedSubtitlesList');
+
+      refreshSubtitles(['modified'], videoSrc).then(() => {
+        expect(getModifiedSubtitlesListSpy).to.have.been.called;
         done();
       }).catch(done);
     });

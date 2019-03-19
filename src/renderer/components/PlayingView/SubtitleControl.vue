@@ -44,15 +44,15 @@
                       }">
                       <div class="text">{{ noSubtitle }}</div>
                     </div>
-                  </div>
-                  <!-- 当没有有效的字幕的时候，就是显示创建字幕按钮 -->
-                  <div v-if="!(loadingSubsPlaceholders.length > 0) && computedAvaliableItems.length === 0">
-                    <div class="menu-item-text-wrapper create-subtitle-btn"
-                      @click.stop="handleCreateBtnClick"
-                      :style="{
-                        height: `${itemHeight}px`,
-                      }">
-                      <div class="text">{{ '创建字幕' }}</div>
+                    <!-- 当没有有效的字幕的时候，窗口尺寸是phase2，就是显示创建字幕按钮 -->
+                    <div v-if="canShowCreateBtn">
+                      <div class="menu-item-text-wrapper create-subtitle-btn"
+                        @click.stop="handleCreateBtnClick"
+                        :style="{
+                          height: `${itemHeight}px`,
+                        }">
+                        <div class="text">{{ '创建字幕' }}</div>
+                      </div>
                     </div>
                   </div>
                   <div v-for="(item, index) in computedAvaliableItems" :key="item.id">
@@ -166,7 +166,6 @@ export default {
       refAnimation: '',
       debouncedHandler: debounce(this.handleRefresh, 1000),
       transFlag: true,
-      shortCell: 480,
     };
   },
   computed: {
@@ -269,6 +268,20 @@ export default {
       return this.computedAvaliableItems.findIndex(subtitle =>
         subtitle.id === this.currentSubtitleId);
     },
+    canShowCreateBtn() {
+      // 暂时使用computed属性来控制是否可以使用编辑模式
+      // 后期采用vuex统一管理界面版本 [0,1,2,3]
+      let sizeAvaliable = false;
+      if (this.winRatio > 1) {
+        // 当视频的宽度大于等于高度，如果高度超过480px,才可以使用编辑模式
+        sizeAvaliable = this.winHeight >= 480;
+      } else {
+        // 当视频宽度小于高度，如果宽度超过480px,才可以使用编辑模式
+        sizeAvaliable = this.winWidth >= 480;
+      }
+      return this.foundSubtitles && !(this.loadingSubsPlaceholders.length > 0) &&
+        this.computedAvaliableItems.length === 0 && sizeAvaliable;
+    },
   },
   watch: {
     originSrc() {
@@ -344,44 +357,6 @@ export default {
       // 当点击创建按钮后，先暂停播放、再切换高级编辑模式
       if (!this.paused) this.$bus.$emit('toggle-playback');
       this.toggleProfessional(true);
-      // 这块逻辑和render里面重复了，可以考虑抽象到一个watch里面处理。
-      if (this.winRatio > 1) {
-        // 当视频的宽度大于等于高度，则判断高度是否大于等于480像素，如果不足，按比例扩大视频尺寸，直至宽度达到屏幕尺寸上限或者达到454像素。（刻度为10s左右)
-        let mh = this.shortCell;
-        let mw = mh * this.winRatio;
-        if (mw < 850) {
-          mw = 850;
-          mh = mw / this.winRatio;
-        }
-        this.changeWindowSize([mw, mh], this.winSize);
-      } else {
-        // 当视频的高度大于宽度，则判断宽度是否大于等于480像素，如果不足，按比例扩大视频尺寸，直至高度达到屏幕尺寸上限或者达到480像素。（刻度为6s左右）
-        const mw = this.shortCell;
-        const mh = mw / this.winRatio;
-        this.changeWindowSize([mw, mh], this.winSize);
-      }
-    },
-    changeWindowSize(minSize, size) {
-      let newSize = [];
-      const windowRect = [
-        window.screen.availLeft, window.screen.availTop,
-        window.screen.availWidth, window.screen.availHeight,
-      ];
-      const videoSize = size;
-      newSize = this.calculateWindowSize(
-        minSize,
-        windowRect.slice(2, 4),
-        videoSize,
-      );
-      const newPosition = this.calculateWindowPosition(
-        this.winPos.concat(this.winSize),
-        windowRect,
-        newSize,
-      );
-      const rect = newPosition.concat(newSize);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minSize.map(Math.round));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
     },
     handleSubDelete(e, item) {
       if (e.target.nodeName !== 'DIV') {

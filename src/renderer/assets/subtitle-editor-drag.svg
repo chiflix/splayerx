@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="5px" height="9px" viewBox="0 0 5 9" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 53.1 (72631) - https://sketchapp.com -->
+    <title>拖拽</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.305873326" stroke-linecap="square">
+        <g id="时间轴编辑模式3" transform="translate(-345.000000, -68.000000)" stroke="#FFFFFF" stroke-width="0.5">
+            <path d="M349.5,68.5 L349.5,76.5 L349.5,68.5 Z M347.5,68.5 L347.5,76.5 L347.5,68.5 Z M345.5,68.5 L345.5,76.5 L345.5,68.5 Z" id="拖拽"></path>
+        </g>
+    </g>
+</svg>

@@ -19,6 +19,7 @@ describe('Component - TheVideoController Unit Test', () => {
       modules: {
         Window: {
           state: Window.state,
+          getters: Window.getters,
           mutations: Window.mutations,
         },
         Video: {

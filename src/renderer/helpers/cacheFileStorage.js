@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-02-22 11:37:18
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-03-18 13:37:44
+ * @Last Modified time: 2019-03-19 15:14:50
  */
 
 /** file dir list
@@ -245,6 +245,8 @@ export function clearAll() {
  * @returns {Promise} resolve { path: '', name: '' } or reject Error
  */
 export function addSubtitleByMediaHash(key, s, { type }) {
+  if (Object.prototype.toString.call(key).toLowerCase() !== '[object string]') throw new Error('key should be String');
+  if (!['online', 'modified'].includes(type)) throw new Error('type should be in [local, modified]');
   const p = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, `${key}/${SUBTITLES_DIRNAME}/${type}/`);
   return new Promise(async (resolve, reject) => {
     try {
@@ -313,7 +315,7 @@ export function writeSubtitleByPath(p, s) {
  * @date 2019-03-14
  * @export
  * @param {String} p 文件路径
- * @returns {Promise} resolve {} or reject Error
+ * @returns {Promise} resolve true or reject Error
  */
 export function deleteFileByPath(p) {
   return new Promise((resolve, reject) => {
@@ -321,7 +323,7 @@ export function deleteFileByPath(p) {
       if (err) {
         reject(err);
       } else {
-        resolve({});
+        resolve(true);
       }
     });
   });
@@ -333,7 +335,7 @@ export function deleteFileByPath(p) {
  * @date 2019-03-18
  * @export
  * @param {String} key 视频的mediaHash
- * @returns {Promise} resolve [] or reject Error
+ * @returns {Promise} resolve [{type: '', src: ''}] or reject Error
  */
 export function getVideoSubtitlesByMediaHash(key) {
   const jobs = [];

@@ -82,6 +82,14 @@ export function retrieveEmbeddedList(videoSrc, supportedCodecs) {
   });
 }
 
+/**
+ * @description 查找缓存目录下的字幕集合
+ * @author tanghaixiang@xindong.com
+ * @date 2019-03-19
+ * @export
+ * @param {String} 视频的路径
+ * @returns {Promise} resolve [{type: '', src: ''},...] or reject Error
+ */
 export function searchFromTempList(videoSrc) {
   return new Promise((resolve, reject) => {
     calculateMediaIdentity(videoSrc).then(async (mediaIdentity) => {
@@ -92,6 +100,6 @@ export function searchFromTempList(videoSrc) {
       } catch (err) {
         reject(err);
       }
-    });
+    }, err => reject(err));
   });
 }

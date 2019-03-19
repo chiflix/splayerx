@@ -4,6 +4,7 @@
       ref="subtitleRenderer"
       v-if="!isProfessional"
       :key="currentSubtitle && currentSubtitle.id"
+      :playlistShow="playlistShow"
       :subtitleInstance="currentSubtitle"/>
     <subtitle-editor
       v-if="isProfessional"
@@ -44,6 +45,12 @@ export default {
     SubtitleEditor,
     SubtitleRenderer,
   },
+  props: {
+    playlistShow: { // 从videoController传到render,当播放列表显示时，不可以进入编辑模式
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       subtitleInstances: {},
@@ -61,6 +68,7 @@ export default {
       'getVideoSrcById', 'allSubtitleList', // serve allSubtitleListWatcher
       'subtitleDelay', // subtitle's delay
       'isProfessional', // 字幕编辑高级模式属性
+      'storedWindowInfo', 'winRatio',
     ]),
     ...mapState({
       preferredLanguages: ({ Preference }) => (
@@ -118,6 +126,17 @@ export default {
         });
         writeSubtitleByPath(this.currentSubtitle.src, subString);
       }
+      // 处理最小尺寸设置
+      let minSize = [];
+      if (!val && this.storedWindowInfo && this.storedWindowInfo.minimumSize) {
+        minSize = this.storedWindowInfo.minimumSize;
+      } else {
+        // 进入编辑模式，设定phase2为最小的尺寸
+        minSize = this.winRatio > 1 ? [480 * this.winRatio, 480] : [480, 480 / this.winRatio];
+        minSize = minSize.map(Math.round);
+      }
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minSize);
+      // this.windowMinimumSize(minSize);
     },
   },
   methods: {
@@ -135,6 +154,7 @@ export default {
     }),
     ...mapMutations({
       resetSubtitlesByMutation: subtitleMutations.RESET_SUBTITLES,
+      windowMinimumSize: 'windowMinimumSize', // 需要设置到常量里面
     }),
     async refreshSubtitles(types, videoSrc) {
       const supportedTypes = ['local', 'embedded', 'online', 'modified'];
@@ -222,11 +242,12 @@ export default {
     async getModifiedSubtitlesList(videoSrc, storedSubs) {
       // 加载自制字幕,
       // 先根据视频，查找缓存目录自制字幕列表
-      const cacheSubs = await searchFromTempList(videoSrc, SubtitleLoader.supportedFormats)
+      const cacheSubs = await searchFromTempList(videoSrc)
         .catch(() => []);
       const cacheModifiedSubs = cacheSubs.filter(e => e.type === 'modified');
       // 和indexDB中modified字幕列表对比取交集元素
       const list = intersectionBy(storedSubs.map(({ src, id }) => ({ src, type: 'modified', options: { id } })), cacheModifiedSubs, 'src');
+      if (list.length === 0) return [];
       const result = await getSubtitleContentByPath(list);
       return result;
     },

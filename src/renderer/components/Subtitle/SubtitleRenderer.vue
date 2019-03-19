@@ -12,8 +12,9 @@
         bottom: subBottom(i),
         transform: transPos(i),
         display: !isProfessional || isProfessional && currentSub && currentSub.start === cue.start ? 'flex' : 'none',
+        cursor: canUseEditor ? 'pointer' : ''
       }"
-      :class="avaliableClass(i)+`${paused ? ' enable-hover': ''}`+`${isEditable ? ' editable': ''}`">
+      :class="avaliableClass(i)+`${paused && canUseEditor ? ' enable-hover': ''}`+`${isEditable ? ' editable': ''}`">
       <div class="cue-wrap" v-if="filter(cue)">
         <CueRenderer v-show="!isEditable || i !== index" class="cueRender"
           :text="cue.text"
@@ -41,7 +42,7 @@
             }"></textarea>
         </div>
       </div>
-      <div class="professional-btn-wrap" @click.stop="handleClickProfessional" v-if="!isEditable">
+      <div class="professional-btn-wrap" @click.stop="handleClickProfessional" v-if="!isEditable && canUseEditor">
         <Icon type="subtitleEditorEnter" class="subtitleEditorEnter" v-if="!isProfessional"
           :style="{
             cursor: 'pointer',
@@ -99,6 +100,10 @@ export default {
   name: 'subtitle-renderer',
   props: {
     subtitleInstance: SubtitleInstance,
+    playlistShow: {
+      type: Boolean,
+      default: false,
+    },
     showAddInput: {
       type: Boolean,
       default: false,
@@ -135,7 +140,7 @@ export default {
     ...mapGetters([
       'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleLis', 'winHeight',
       'paused',
-      'isEditable', 'isProfessional', 'winRatio', 'storedWindowInfo', 'winWidth', 'winHeight', 'winPos', 'winSize',
+      'isEditable', 'isProfessional', 'winRatio', 'winWidth', 'winHeight',
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
     ]),
     type() {
@@ -153,14 +158,19 @@ export default {
     isVtt() {
       return this.type === 'vtt';
     },
-    avaliableProfessional() {
-      // 是否可以使用高级编辑模式
-      // 当视频宽和高，其中长的一边已经达到 window.screen.availWidth, window.screen.availHeight
-      // 这个时候短的一边还未达到480px就不允许使用高级字幕编辑模式
+    canUseEditor() {
+      // 是否可以使用编辑模式
+      // 暂时使用computed属性来控制是否可以使用编辑模式
+      // 后期采用vuex统一管理界面版本 [0,1,2,3]
+      let sizeAvaliable = false;
       if (this.winRatio > 1) {
-        return Math.round(window.screen.availWidth / this.winRatio) >= this.shortCell;
+        // 当视频的宽度大于等于高度，如果高度超过480px,才可以使用编辑模式
+        sizeAvaliable = this.winHeight >= 480;
+      } else {
+        // 当视频宽度小于高度，如果宽度超过480px,才可以使用编辑模式
+        sizeAvaliable = this.winWidth >= 480;
       }
-      return Math.round(window.screen.availHeight * this.winRatio) >= this.shortCell;
+      return sizeAvaliable && !this.playlistShow;
     },
   },
   watch: {
@@ -193,9 +203,6 @@ export default {
       if (val === false) {
         this.editable = false;
       }
-    },
-    isProfessional() {
-
     },
   },
   created() {
@@ -256,6 +263,7 @@ export default {
       }
     },
     handleClickSubContainer(e, i) {
+      if (!this.canUseEditor) return;
       if (this.paused) {
         this.index = i;
         if (!this.isEditable) {
@@ -270,6 +278,7 @@ export default {
       }
     },
     handleDoubleClickSubContainer(e, i) {
+      if (!this.canUseEditor) return;
       if (!this.paused) {
         this.index = i;
         this.$bus.$emit('toggle-playback');
@@ -364,54 +373,7 @@ export default {
     handleClickProfessional() {
       // 如果退出高级模式，需要恢复原来播放尺寸
       // 进入高级模式，需要设定window的信息，在本组件的watch里
-      if (this.isProfessional) {
-        if (this.storedWindowInfo) {
-          const { size, minimumSize, position } = this.storedWindowInfo;
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minimumSize);
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', size);
-          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', position);
-        }
-        this.toggleProfessional(!this.isProfessional);
-      } else {
-        this.toggleProfessional(!this.isProfessional);
-        if (this.winRatio > 1) {
-          // 当视频的宽度大于等于高度，则判断高度是否大于等于480像素，如果不足，按比例扩大视频尺寸，直至宽度达到屏幕尺寸上限或者达到454像素。（刻度为10s左右)
-          let mh = this.shortCell;
-          let mw = mh * this.winRatio;
-          if (mw < 850) {
-            mw = 850;
-            mh = mw / this.winRatio;
-          }
-          this.changeWindowSize([mw, mh], this.winSize);
-        } else {
-          // 当视频的高度大于宽度，则判断宽度是否大于等于480像素，如果不足，按比例扩大视频尺寸，直至高度达到屏幕尺寸上限或者达到480像素。（刻度为6s左右）
-          const mw = this.shortCell;
-          const mh = mw / this.winRatio;
-          this.changeWindowSize([mw, mh], this.winSize);
-        }
-      }
-    },
-    changeWindowSize(minSize, size) {
-      let newSize = [];
-      const windowRect = [
-        window.screen.availLeft, window.screen.availTop,
-        window.screen.availWidth, window.screen.availHeight,
-      ];
-      const videoSize = size;
-      newSize = this.calculateWindowSize(
-        minSize,
-        windowRect.slice(2, 4),
-        videoSize,
-      );
-      const newPosition = this.calculateWindowPosition(
-        this.winPos.concat(this.winSize),
-        windowRect,
-        newSize,
-      );
-      const rect = newPosition.concat(newSize);
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minSize.map(Math.round));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
+      this.toggleProfessional(!this.isProfessional);
     },
     avaliableClass(index) {
       if (!this.isVtt) {
@@ -719,7 +681,9 @@ export default {
   transform-origin: bottom left;
   z-index: 5;
   border: 1px solid transparent;
-  cursor: pointer;
+  .pointer {
+    cursor: pointer;
+  }
   .cue-wrap {
     display: flex;
     flex-direction: column-reverse;

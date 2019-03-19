@@ -33,9 +33,10 @@
             @mouseup.left="handleDragEndSub($event, sub)"
             @dblclick.left="handleDoubleClickSub($event, sub)"
             :class="sub.focus ? 'focus' : ''"
+            :data="sub.width"
             :style="{
               left: `${sub.left}px`,
-              width: `${sub.width}px`,
+              right: `${sub.right}px`,
             }">
             <i class="drag-left"></i>
             <i class="drag-right"></i>
@@ -66,7 +67,7 @@
 <script>
 import { mapGetters } from 'vuex';
 import { throttle } from 'lodash';
-// import { videodata } from '@/store/video';
+import { videodata } from '@/store/video';
 import TheProgressBar from '@/components/PlayingView/TheProgressBar.vue';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
@@ -80,27 +81,26 @@ export default {
   data() {
     return {
       dialogues: [],
-      timeLineDraging: false,
-      dragStartX: 0,
-      dragStartLeft: 0,
-      dragStartTime: 0,
-      currentLeft: 0,
-      currentTime: 0,
-      preciseTime: 0,
-      timeLineClickDelay: 300,
+      currentLeft: 0, // 时间轴左偏移 --|-.-|--
+      currentTime: 0, // 当前时间轴中分时间刻度，时间轴的中心时间不一定是播放的时间
+      preciseTime: 0, // 当前视频的播放时间
+      timeLineDraging: false, // 标记是否是拖拽时间轴
+      dragStartX: 0, // 标记拖拽时间轴起始位置
+      dragStartLeft: 0, // 标记开始拖拽当前时间轴left
+      dragStartTime: 0, // 标记开始拖拽时间轴当前播放时间
+      timeLineClickDelay: 300, // 点击时间轴刻度反应的延迟时间
       timeLineClickTimestamp: 0,
-      subDragMoving: false,
-      subLeftDraging: false,
-      subRightDraging: false,
-      subDragStartX: 0,
-      subDragElement: null,
-      subDragCurrentSub: null,
+      subDragMoving: false, // 标记是不是拖拽字幕条
+      subLeftDraging: false, // 标记是不是向左伸缩字幕条
+      subRightDraging: false, // 标记是不是向右伸缩字幕条
+      subDragStartX: 0, // 标记拖拽字幕条起始位置
+      subDragElement: null, // 标记拖拽的字幕条dom元素
+      subDragCurrentSub: null, // 标记拖拽的字幕条model
       subDragTimeLineMoving: false,
-      triggerCount: 1,
-      space: 85,
-      lastSubIndex: null,
-      showAddInput: false,
-      newSubHolder: null,
+      triggerCount: 1, // rerender doms count
+      space: 85, // 1s pxs
+      showAddInput: false, // 可以显示添加字幕的属性
+      newSubHolder: null, // 配合showAddInput，存储添加字幕的数据格式以及插入位置
     };
   },
   props: {
@@ -141,6 +141,7 @@ export default {
         const focus = e.start <= this.preciseTime && e.end >= this.preciseTime;
         let left = (e.start - this.times[0]) * this.space;
         let width = (e.end - e.start) * this.space;
+        let right = (3 * this.winWidth) - (left + width);
         let minLeft = (0 - this.times[0]) * this.space;
         let maxLeft = ((this.duration - this.times[0]) - (e.end - e.start)) * this.space;
         if (i !== 0) {
@@ -152,10 +153,15 @@ export default {
           const nextLeft = (filters[i + 1].start - this.times[0]) * this.space;
           maxLeft = nextLeft - width;
         }
+        let maxRight = (3 * this.winWidth) - (minLeft + width);
+        let minRight = (3 * this.winWidth) - (maxLeft + width);
         left = parseFloat(left.toFixed(2), 10);
+        right = parseFloat(right.toFixed(2), 10);
         width = parseFloat(width.toFixed(2), 10);
         minLeft = parseFloat(minLeft.toFixed(2), 10);
         maxLeft = parseFloat(maxLeft.toFixed(2), 10);
+        minRight = parseFloat(minRight.toFixed(2), 10);
+        maxRight = parseFloat(maxRight.toFixed(2), 10);
         return Object.assign({
           triggerCount: this.triggerCount,
         }, e, {
@@ -163,12 +169,16 @@ export default {
           originEnd: e.end,
           minLeft,
           maxLeft,
+          minRight,
+          maxRight,
           left,
+          right,
           width,
           originLeft: left,
+          originRight: right,
           originWidth: width,
           text,
-          focus,
+          focus, // 是否是当前播放的字幕
         });
       });
     },
@@ -196,12 +206,15 @@ export default {
         }
       },
     },
+    winWidth() {
+      // 当resize的时候，重新render timeline
+      this.resetCurrentTime();
+    },
   },
   created() {
   },
   mounted() {
-    this.resetCurrentTime();
-    this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
+    this.resetCurrentTime(videodata.time);
     this.computedCanShowAddBtn(this.currentSub);
     // init
     document.addEventListener('mousemove', this.handleDragingSub);
@@ -328,7 +341,7 @@ export default {
     },
     resetCurrentTime(currentTime) {
       // 同步时间轴中位时间和当前播放时间
-      if (!currentTime) {
+      if (typeof currentTime === 'undefined') {
         const b = document.getElementsByTagName('video')[0];
         currentTime = b.currentTime;
       }
@@ -422,6 +435,7 @@ export default {
     handleDoubleClickSub(e, sub) {
       // 双击字幕条，触发时间轴运动到字幕条开始位置
       const offset = (this.preciseTime - sub.start) * this.space;
+      if (Math.abs(offset) < 1) return; // 偏移太小就不触发运动
       // this.$refs.timeLine.style.transition = '';
       this.$refs.timeLine.addEventListener('transitionend', this.doubleClickTransitionend, false);
       this.$refs.timeLine.style.transition = 'left 0.3s ease-in-out';
@@ -455,41 +469,49 @@ export default {
       if (!this.paused) {
         this.$bus.$emit('toggle-playback');
       }
+      // 当拖拽字幕条时，保持hover的UI
+      const className = `sub draging${sub.focus ? ' focus' : ''}`;
+      subElement.setAttribute('class', className);
     },
     handleDragingSub(e) {
-      requestAnimationFrame(throttle(() => {
-        const offset = e.pageX - this.subDragStartX;
-        this.updateSubWhenDraging(offset, this.subDragCurrentSub, this.subDragElement);
-        this.subDragStartX = e.pageX;
-      }, 100));
+      if (this.subLeftDraging || this.subLeftDraging || this.subDragMoving) {
+        requestAnimationFrame(throttle(() => {
+          const offset = e.pageX - this.subDragStartX;
+          this.updateSubWhenDraging(offset, this.subDragCurrentSub, this.subDragElement);
+          this.subDragStartX = e.pageX;
+        }, 100));
+      }
     },
     updateSubWhenDraging(offset, sub, subElement) { // eslint-disable-line
       if (subElement && this.subDragMoving) {
         sub.left += offset;
+        sub.right -= offset;
         sub.left = sub.left > sub.maxLeft ? sub.maxLeft : sub.left;
         sub.left = sub.left < sub.minLeft ? sub.minLeft : sub.left;
+        sub.right = sub.right > sub.maxRight ? sub.maxRight : sub.right;
+        sub.right = sub.right < sub.minRight ? sub.minRight : sub.right;
         subElement.style.left = `${sub.left}px`;
+        subElement.style.right = `${sub.right}px`;
       } else if (this.subLeftDraging && subElement) {
         if (!(offset < 0 && sub.left === sub.minLeft)) {
           sub.left += offset;
           sub.left = sub.left < sub.minLeft ? sub.minLeft : sub.left;
           const maxL = (sub.originLeft + sub.originWidth) - (0.2 * this.space);
           sub.left = sub.left > maxL ? maxL : sub.left;
-          sub.width -= offset;
-          sub.width = sub.width < 0.2 * this.space ? 0.2 * this.space : sub.width;
           subElement.style.left = `${sub.left}px`;
-          subElement.style.width = `${sub.width}px`;
         }
       } else if (this.subRightDraging && subElement) {
-        sub.width += offset;
-        sub.width = sub.width > ((sub.maxLeft - sub.left) + sub.originWidth) ?
-          ((sub.maxLeft - sub.left) + sub.originWidth) : sub.width;
-        sub.width = sub.width < 0.2 * this.space ? 0.2 * this.space : sub.width;
-        subElement.style.width = `${sub.width}px`;
+        sub.right -= offset;
+        sub.right = sub.right < sub.minRight ? sub.minRight : sub.right;
+        const maxR = sub.originRight + (sub.originWidth - (0.2 * this.space));
+        sub.right = sub.right > maxR ? maxR : sub.right;
+        subElement.style.right = `${sub.right}px`;
       }
     },
     handleDragEndSub() {
-      this.finishSubDrag(this.subDragCurrentSub);
+      if (this.subLeftDraging || this.subLeftDraging || this.subDragMoving) {
+        this.finishSubDrag(this.subDragCurrentSub);
+      }
     },
     finishSubDrag(sub) {
       this.subDragTimeLineMoving = false;
@@ -506,7 +528,7 @@ export default {
         newStart = parseFloat(newStart.toFixed(2), 10);
       } else if (this.subRightDraging) {
         newStart = sub.originStart;
-        newEnd = (sub.originEnd * 1) + ((sub.width - sub.originWidth) / this.space);
+        newEnd = (sub.originEnd * 1) - ((sub.right - sub.originRight) / this.space);
         newEnd = parseFloat(newEnd.toFixed(2), 10);
       }
       if (newStart && newEnd) {
@@ -518,14 +540,14 @@ export default {
         });
         this.$bus.$emit('modified-subtitle', { sub: this.subtitleInstance });
       }
+      // 拖拽字幕条结束，移除hover的UI
+      const className = `sub${sub.focus ? ' focus' : ''}`;
+      this.subDragElement.setAttribute('class', className);
       this.subDragStartX = 0;
       this.subDragMoving = false;
       this.subLeftDraging = false;
       this.subRightDraging = false;
       this.triggerCount += 1;
-    },
-    handleDocumentMouseupWhenDragSub() {
-      this.finishSubDrag(this.subDragCurrentSub);
     },
     transcode(time, num) {
       if (time < 0) {
@@ -574,6 +596,10 @@ export default {
     bottom: 0;
     z-index: 9999;
     cursor: pointer;
+    // background-image: url(../../assets/dot.svg);
+    // background-repeat: no-repeat;
+    // background-position-x: center;
+    // background-position-y: -2px;
     background-image: radial-gradient(50% 136%, rgba(0,0,0,0.36) 50%, rgba(0,0,0,0.48) 100%);
     // background-color: rgba(0, 0, 0, .36);
   }
@@ -669,10 +695,39 @@ export default {
       max-height: 30px;
       z-index: 1;
       background: rgba(255,255,255,0.13);
-      border: 1px solid rgba(255,255,255,0.40);
+      border: 1px solid rgba(255,255,255,0.21);
+      border-radius: 1px;
+      // transition: border 0.3s ease-in-out;
+      &::before {
+        content: "";
+        width: 50%;
+        height: 80%;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -55%);
+        background-image: url(../../assets/subtitle-editor-drag.svg);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        background-position: center;
+        opacity: 0;
+        // transition: all 0.3s ease-in-out;
+      }
       &.focus {
         background: rgba(255,255,255,0.39);
         border-color: rgba(255,255,255,0.46);
+      }
+      &:hover {
+        border-color: rgba(255,255,255,0.40);
+        &::before {
+          opacity: 1;
+        }
+      }
+      &.draging {
+        border-color: rgba(255,255,255,0.40);
+        &::before {
+          opacity: 1;
+        }
       }
       .drag-left {
         position: absolute;
