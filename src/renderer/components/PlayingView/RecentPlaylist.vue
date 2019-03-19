@@ -201,15 +201,30 @@ export default {
       this.lastIndexOnMousedown = this.lastIndex;
       document.onmouseup = () => {
         document.onmousemove = null;
-        if (this.firstIndex !== this.firstIndexOnMousedown) {
-          let newPosition;
-          if (this.mousemovePosition[0] < 0) newPosition = this.firstIndex;
-          else if (this.mousemovePosition[0] > window.innerWidth) newPosition = this.lastIndex;
-          this.$store.dispatch('RepositionItemFromPlayingList', {
-            src: this.playingList[index],
-            newPosition,
-          });
+        let newPosition;
+        if (this.mousemovePosition[0] < 0) {
+          newPosition = this.firstIndex - 1 >= 0 ? this.firstIndex - 1 : 0;
+          this.firstIndex -= 1;
+          this.shifting = true;
+          this.tranFlag = true;
+          setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
+        } else if (this.mousemovePosition[0] > window.innerWidth) {
+          newPosition = this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : 0;
+          this.lastIndex += 1;
+          this.shifting = true;
+          this.tranFlag = true;
+          setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
         }
+        this.$store.dispatch('RepositionItemFromPlayingList', {
+          src: this.playingList[index],
+          newPosition,
+        });
         this.indexOfMovingItem = this.playingList.length;
         this.movementX = this.movementY = 0;
       };
