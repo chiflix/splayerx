@@ -163,13 +163,18 @@ export default {
     },
   },
   created() {
-    if (this.muted) this.volumeTriggerStopped = this.showAllWidgets;
+    if (this.muted) {
+      this.volumeTriggerStopped = this.showAllWidgets;
+    }
     this.$bus.$on('toggle-fullscreen', this.handleFullScreen);
     this.$bus.$on('to-fullscreen', this.handleFullScreen);
     this.$bus.$on('off-fullscreen', this.handleFullScreen);
   },
   watch: {
-    wheelTriggered(newVal, oldVal) {
+    showAllWidgets(val) {
+      if (!val) this.volumeTriggerStopped = false;
+    },
+    wheelTriggered() {
       const { clock, volumeTriggerTimerId } = this;
       this.volumeTriggerStopped = true;
       clock.clearTimeout(volumeTriggerTimerId);
