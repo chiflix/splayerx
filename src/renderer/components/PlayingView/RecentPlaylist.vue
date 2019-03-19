@@ -210,10 +210,20 @@ export default {
         this.indexOfMovingItem = index;
         this.movementY = offsetY;
 
+        if (outOfWindow) {
+          clearTimeout(this.pageSwitchingTimeId);
+          this.pageSwitching = false;
+          document.onmouseup = () => {
+            this.indexOfMovingItem = this.playingList.length;
+            this.movementX = this.movementY = 0;
+          };
+        } else {
+          document.onmouseup = null;
+        }
         // if the item is moved to the edge of the window and stay for 1s
         // then switch the page
         if (this.indexOfMovingTo === this.lastIndex + 1) {
-          if (!this.pageSwitching) {
+          if (!this.pageSwitching && !outOfWindow) {
             this.pageSwitching = true;
             this.pageSwitchingTimeId = setTimeout(() => {
               this.pageSwitching = false;
@@ -229,7 +239,7 @@ export default {
             }, 1000);
           }
         } else if (this.indexOfMovingTo === this.firstIndex - 1) {
-          if (!this.pageSwitching) {
+          if (!this.pageSwitching && !outOfWindow) {
             this.pageSwitching = true;
             this.pageSwitchingTimeId = setTimeout(() => {
               this.pageSwitching = false;
@@ -247,14 +257,6 @@ export default {
         } else {
           clearTimeout(this.pageSwitchingTimeId);
           this.pageSwitching = false;
-          if (outOfWindow) {
-            document.onmouseup = () => {
-              this.indexOfMovingItem = this.playingList.length;
-              this.movementX = this.movementY = 0;
-            };
-          } else {
-            document.onmouseup = null;
-          }
         }
         // calculate the movement of the item if page had been switch
         if (this.lastIndex > this.lastIndexOnMousedown) {
@@ -422,15 +424,16 @@ export default {
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
-    indexOfMovingTo() { // the place where the moving item is going to be set
+    movingOffset() {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
       const distance = marginRight + this.thumbnailWidth;
-      const indexOfMovingTo = this.movementX > 0 ? // the position where item moving to
-        this.indexOfMovingItem +
-          Math.floor((this.movementX + (this.thumbnailWidth * 0.8)) / distance) :
-        this.indexOfMovingItem +
-          Math.ceil((this.movementX - (this.thumbnailWidth * 0.8)) / distance);
-      return indexOfMovingTo;
+      const movingOffset = this.movementX > 0 ? // the position where item moving to
+        Math.floor((this.movementX + (this.thumbnailWidth * 0.8)) / distance) :
+        Math.ceil((this.movementX - (this.thumbnailWidth * 0.8)) / distance);
+      return movingOffset;
+    },
+    indexOfMovingTo() { // the place where the moving item is going to be set
+      return this.indexOfMovingItem + this.movingOffset;
     },
     itemMoving() {
       return this.indexOfMovingItem !== this.playingList.length;

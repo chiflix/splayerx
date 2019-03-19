@@ -308,6 +308,7 @@ export default {
     },
     isPlaying(val) {
       if (val) {
+        requestAnimationFrame(this.updateAnimationOut);
         fs.readFile(`${this.imgPath}`, 'base64', (err, data) => {
           if (!err) {
             const cover = `data:image/png;base64, ${data}`;
