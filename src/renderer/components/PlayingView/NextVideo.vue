@@ -182,7 +182,9 @@ export default {
       width: 207px;
     }
     video {
+      width: 100%;
       height: 100%;
+      object-fit: cover;
       background-color: black;
     }
     .blur {
