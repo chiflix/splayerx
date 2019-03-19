@@ -249,7 +249,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'currentSubtitleId']),
+    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'currentFirstSubtitleId']),
     computedSize() {
       return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
     },
@@ -298,7 +298,7 @@ export default {
       return `${this.initialSize(119)}px`;
     },
     isSubtitleAvailable() {
-      return this.currentSubtitleId !== '';
+      return this.currentFirstSubtitleId !== '';
     },
     trackNum() {
       return this.$store.getters.audioTrackList.length;

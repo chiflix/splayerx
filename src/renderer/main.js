@@ -116,7 +116,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList',
-      'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent']),
+      'currentFirstSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -159,7 +159,7 @@ new Vue({
       return this.$route.name;
     },
     isSubtitleAvaliable() {
-      return this.currentSubtitleId !== '';
+      return this.currentFirstSubtitleId !== '';
     },
   },
   created() {
@@ -258,7 +258,7 @@ new Vue({
         this.refreshMenu();
       }
     },
-    currentSubtitleId(val) {
+    currentFirstSubtitleId(val) {
       if (this.menu) {
         if (val !== '') {
           this.subtitleList.forEach((item, index) => {
@@ -841,7 +841,7 @@ new Vue({
         }
         if (this.isSubtitleAvailable) {
           this.subtitleList.forEach((item, index) => {
-            if (item.id === this.currentSubtitleId) {
+            if (item.id === this.currentFirstSubtitleId) {
               this.menu.getMenuItemById(`sub${index}`).checked = true;
             }
           });
@@ -861,7 +861,7 @@ new Vue({
         }
         this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
         this.subtitleList.forEach((item, index) => {
-          if (item.id === this.currentSubtitleId) {
+          if (item.id === this.currentFirstSubtitleId) {
             this.menu.getMenuItemById(`sub${index}`).checked = true;
           }
         });

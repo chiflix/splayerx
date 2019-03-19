@@ -3,9 +3,19 @@
     :style="{ width: computedWidth + 'px', height: computedHeight + 'px' }">
     <subtitle-renderer
       ref="subtitleRenderer"
-      v-if="currentSubtitleId && duration"
-      :subtitle-instance="currentSubtitle"
-      :key="currentSubtitleId"
+      v-if="currentFirstSubtitleId && duration"
+      :subtitle-instance="subtitleInstances[this.currentFirstSubtitleId]"
+      :key="currentFirstSubtitleId"
+      :isFirstSub="true"
+      :linesNum.sync="linesNum"
+    />
+    <subtitle-renderer
+      ref="subtitleRenderer"
+      v-if="currentSecondSubtitleId && duration"
+      :subtitle-instance="subtitleInstances[this.currentSecondSubtitleId]"
+      :key="currentSecondSubtitleId"
+      :isFirstSub="false"
+      :linesNum.sync="linesNum"
     />
   </div>
 </template>
@@ -43,17 +53,19 @@ export default {
       subtitleInstances: {},
       selectionComplete: false,
       isInitial: false,
+      linesNum: 1,
     };
   },
   computed: {
     ...mapGetters([
       'originSrc', // use to find proper subtitles and clear subtitle upon change
       'mediaHash', // use to provide subtitle with videoIdentity
-      'subtitleList', 'currentSubtitleId', // use to get current subtitle info and auto selection subtitles
+      'subtitleList', 'currentFirstSubtitleId', 'currentSecondSubtitleId', // use to get current subtitle info and auto selection subtitles
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
       'duration', // do not load subtitle renderer when video(duration) is not available(todo: global variable to tell if video is totally available)
       'getVideoSrcById', 'allSubtitleList', // serve allSubtitleListWatcher
       'subtitleDelay', // subtitle's delay
+      'isFirstSubtitle',
     ]),
     ...mapState({
       preferredLanguages: ({ Preference }) => (
@@ -67,9 +79,6 @@ export default {
           .map(id => ({ id, type: types[id], duration: durations[id] }));
       },
     }),
-    currentSubtitle() {
-      return this.subtitleInstances[this.currentSubtitleId];
-    },
   },
   watch: {
     originSrc(newVal) {
@@ -98,15 +107,19 @@ export default {
     allSubtitleList(newVal, oldVal) {
       this.allSubtitleListWatcher(newVal, oldVal);
     },
-    currentSubtitleId(newVal) {
+    currentFirstSubtitleId(newVal) {
       if (this.selectionComplete || newVal) updateSelectedSubtitleId(this.originSrc, newVal);
+      if (!newVal) {
+        this.linesNum = 0;
+      }
     },
   },
   methods: {
     ...mapActions({
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
       resetOnlineSubtitles: subtitleActions.RESET_ONLINE_SUBTITLES,
-      changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_SUBTITLE,
+      changeCurrentFirstSubtitle: subtitleActions.CHANGE_CURRENT_FIRST_SUBTITLE,
+      changeCurrentSecondSubtitle: subtitleActions.CHANGE_CURRENT_SECOND_SUBTITLE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       addSubtitleWhenLoading: subtitleActions.ADD_SUBTITLE_WHEN_LOADING,
       addSubtitleWhenReady: subtitleActions.ADD_SUBTITLE_WHEN_READY,
@@ -176,7 +189,7 @@ export default {
           if (this.isInitial) {
             const id = await retrieveSelectedSubtitleId(videoSrc);
             if (id) {
-              this.changeCurrentSubtitle(id);
+              this.changeCurrentFirstSubtitle(id);
               this.selectionComplete = true;
             }
             this.isInitial = false;
@@ -383,16 +396,16 @@ export default {
         const hasPrimaryLanguage = validSubtitleList
           .find(({ language }) => language === preferredLanguages[0]);
         if (hasPrimaryLanguage) {
-          this.changeCurrentSubtitle(hasPrimaryLanguage.id);
+          this.changeCurrentFirstSubtitle(hasPrimaryLanguage.id);
           this.selectionComplete = true;
         } else {
           const hasSecondaryLanguage = validSubtitleList
             .find(({ language }) => language === preferredLanguages[1]);
           if (hasSecondaryLanguage) {
-            this.changeCurrentSubtitle(hasSecondaryLanguage.id);
+            this.changeCurrentFirstSubtitle(hasSecondaryLanguage.id);
             this.selectionComplete = true;
           } else {
-            this.changeCurrentSubtitle('');
+            this.changeCurrentFirstSubtitle('');
           }
         }
       }
@@ -426,14 +439,14 @@ export default {
      */
     async generateValidSubtitleList(videoSrc) {
       const finalList = [];
-      const { currentSubtitleId } = this;
+      const { currentFirstSubtitleId } = this;
       const currentVideoSegments = this.$refs.subtitleRenderer.videoSegments;
       // generate valid subtitle list members
       this.subtitleList.forEach((subtitleInfo) => {
         const {
           id, type, name, rank,
         } = subtitleInfo;
-        if (id !== currentSubtitleId) {
+        if (id !== currentFirstSubtitleId) {
           finalList.push({
             id, type, name, rank,
           });
@@ -459,7 +472,7 @@ export default {
         .filter(({ loading }) => loading === 'ready' || loading === 'loaded')
         .map((subtitleInfo) => {
           const result = pickValidProperties(subtitleInfo);
-          if (result.id === this.currentSubtitleId && this.$refs.subtitleRenderer) {
+          if (result.id === this.currentFirstSubtitleId && this.$refs.subtitleRenderer) {
             result.videoSegments = this.$refs.subtitleRenderer.videoSegments;
           }
           if (this.subtitleInstances[result.id] && this.subtitleInstances[result.id].src) {
@@ -544,7 +557,7 @@ export default {
       Promise.all(this.normalizeSubtitleList(subs)
         .map(sub => this.addSubtitle(sub, this.originSrc)))
         .then((subtitleInstances) => {
-          this.changeCurrentSubtitle(subtitleInstances[subtitleInstances.length - 1].id);
+          this.changeCurrentFirstSubtitle(subtitleInstances[subtitleInstances.length - 1].id);
           this.selectionComplete = true;
         });
     });
@@ -552,7 +565,13 @@ export default {
       this.refreshSubtitles(types, this.originSrc, isInitial);
       this.isInitial = isInitial;
     });
-    this.$bus.$on('change-subtitle', this.changeCurrentSubtitle);
+    this.$bus.$on('change-subtitle', (id) => {
+      if (this.isFirstSubtitle) {
+        this.changeCurrentFirstSubtitle(id);
+      } else {
+        this.changeCurrentSecondSubtitle(id);
+      }
+    });
     this.$bus.$on('off-subtitle', this.offCurrentSubtitle);
     this.$bus.$on('upload-current-subtitle', () => {
       this.addLog('info', {
@@ -560,8 +579,8 @@ export default {
         code: 'SUBTITLE_UPLOAD',
       });
       const qualifiedSubtitle = {
-        id: this.currentSubtitleId,
-        duration: this.$store.state.Subtitle.durations[this.currentSubtitleId],
+        id: this.currentFirstSubtitleId,
+        duration: this.$store.state.Subtitle.durations[this.currentFirstSubtitleId],
       };
       if (qualifiedSubtitle) {
         const parameter = this.makeSubtitleUploadParameter(qualifiedSubtitle);
@@ -578,7 +597,7 @@ export default {
                 errcode: 'UPLOAD_FAILED',
               });
             }
-            console.log(`Uploading subtitle No.${this.currentSubtitleId} ${res ? 'succeeded' : 'failed'}!`);
+            console.log(`Uploading subtitle No.${this.currentFirstSubtitleId} ${res ? 'succeeded' : 'failed'}!`);
           });
       }
     });

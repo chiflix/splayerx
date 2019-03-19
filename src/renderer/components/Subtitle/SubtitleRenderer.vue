@@ -1,20 +1,21 @@
 <template>
   <div class="subtitle-loader">
     <div class="subContainer"
+      :class="avaliableClass(index)"
       v-for="(cue, index) in currentCues"
       :key="index"
       :style="{
         writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
         left: subLeft(index),
         top: subTop(index),
+        bottom: subBottom(index),
         transform: transPos(index),
-      }"
-      :class="avaliableClass(index)">
+      }">
       <CueRenderer class="cueRender"
         :text="cue.text"
         :settings="cue.tags"
         :style="{
-          zoom: `${scaleNum}`,
+          zoom: isFirstSub ? `${scaleNum}` : `${scaleNum * 3 / 4}`,
           transform: subLine(index),
         }"></CueRenderer>
     </div>
@@ -32,6 +33,14 @@ export default {
   name: 'subtitle-renderer',
   props: {
     subtitleInstance: SubtitleInstance,
+    isFirstSub: {
+      type: Boolean,
+      default: true,
+    },
+    linesNum: {
+      type: Number,
+      default: 1,
+    },
   },
   components: {
     CueRenderer,
@@ -51,7 +60,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'subToTop']),
+    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'subToTop', 'currentSecondSubtitleId', 'winHeight']),
     type() {
       return this.subtitleInstance.metaInfo.format;
     },
@@ -219,8 +228,8 @@ export default {
         }
       }
     },
-    lineNum(index) {
-      const lastNum = index;
+    lastLineNum(index) {
+      // 全部显示的字幕中，除当前最新一条字幕外所有字幕的行数
       const { currentTexts: texts, currentTags: tags } = this;
       let tmp = 0;
       while (texts[index - 1]) {
@@ -230,18 +239,23 @@ export default {
         tmp += texts[index - 1].split('<br>').length;
         index -= 1;
       }
-      return tmp / texts[lastNum].split('<br>').length;
+      return tmp;
+    },
+    lineNum(index) {
+      // 最新一条字幕需要换行的translate比例
+      const { currentTexts: texts } = this;
+      return this.lastLineNum(index) / texts[index].split('<br>').length;
     },
     assLine(index) {
       const { currentTags: tags } = this;
       if (tags[index].pos) {
-        return `translateY(${-100 * this.lineNum(index)}%)`;
+        return -100 * this.lineNum(index);
       }
       const arr = [1, 2, 3];
       if (arr.includes(tags[index].alignment) && !this.subToTop) {
-        return `translateY(${-100 * this.lineNum(index)}%)`;
+        return -100 * this.lineNum(index);
       }
-      return `translateY(${100 * this.lineNum(index)}%)`;
+      return 100 * this.lineNum(index);
     },
     vttLine(index) {
       const { currentTags: tags } = this;
@@ -261,19 +275,54 @@ export default {
       return `translateY(${100 * this.lineNum(index)}%)`;
     },
     subLine(index) {
-      const { currentTags: tags, isVtt } = this;
+      const { currentTags: tags, currentTexts: texts, isVtt } = this;
+      if (!this.isFirstSub) {
+        this.$emit('update:linesNum', this.lastLineNum(index) + texts[index].split('<br>').length);
+      }
       if (isEqual(tags[index], tags[index - 1])) {
         if (!isVtt) {
-          return this.assLine(index);
+          return `${this.assLine(index)}%`;
         }
         return this.vttLine(index);
       }
       return '';
     },
+    transDirection(transNum) {
+      return this.subToTop ? Math.abs(transNum) : transNum;
+    },
     transPos(index) {
-      const { currentTags: tags, isVtt } = this;
-      if (!isVtt && tags[index].pos) {
-        return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.translateNum(tags[index].alignment)[1]}%)`;
+      const { currentTags: tags, currentTexts: texts, isVtt } = this;
+      const initialTranslate = [
+        [0, 0],
+        [-50, 0],
+        [0, 0],
+        [0, -50],
+        [-50, -50],
+        [0, -50],
+        [0, 0],
+        [-50, 0],
+        [0, 0],
+      ];
+      // 根据字体尺寸和换行数计算第一字幕需要translate的百分比
+      const secondSubHeight = this.linesNum * 9 * this.scaleNum * (3 / 4);
+      const firstSubHeight = (this.lastLineNum(index) + texts[index].split('<br>').length) * 9 * this.scaleNum;
+      const transPercent = -((secondSubHeight + (15 / (1080 * this.winHeight))) / firstSubHeight)
+        * 100;
+      if (!isVtt) {
+        if (tags[index].pos) {
+          // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
+          return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.transDirection(this.translateNum(tags[index].alignment)[1])}%)`;
+        }
+        if (!this.isFirstSub || (this.isFirstSub && this.currentSecondSubtitleId === '')) {
+          // 是第二字幕或者是第一字幕但是没有第二字幕的情况下，正常translate
+          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index))}%)`;
+        }
+        // 同时存在第一字幕和第二字幕时，第一字幕需要translate的值
+        return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index) + transPercent)}%)`;
+      }
+      if ((!tags[index].line || !tags[index].position) && this.isFirstSub && this.currentSecondSubtitleId !== '') {
+        // vtt字幕没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
+        return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index) + transPercent)}%)`;
       }
       return '';
     },
@@ -281,7 +330,7 @@ export default {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
         return `${(tags[index].pos.x / this.subPlayResX) * 100}vw`;
-      } else if (type === 'vtt') {
+      } else if (type === 'vtt' && tags[index].line && tags[index].position) {
         if (tags[index].vertical) {
           if (!tags[index].line.includes('%')) {
             tags[index].line = Math.abs(tags[index].line) * 100;
@@ -297,7 +346,7 @@ export default {
       const { currentTags: tags, type, isVtt } = this;
       if (!isVtt && tags[index].pos) {
         return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
-      } else if (type === 'vtt') {
+      } else if (type === 'vtt' && tags[index].line && tags[index].position) {
         if (tags[index].vertical) {
           return tags[index].position;
         }
@@ -306,6 +355,17 @@ export default {
           tags[index].line += '%';
         }
         return tags[index].line;
+      } else if ([7, 8, 9].includes(tags[index].alignment)) {
+        return `${(60 / 1080) * 100}%`;
+      }
+      return '';
+    },
+    subBottom(index) {
+      // 把subtitle.scss里固定的bottom移到这里进行计算
+      const { currentTags: tags, isVtt } = this;
+      if ([1, 2, 3].includes(tags[index].alignment) ||
+        (isVtt && (!tags[index].line || !tags[index].position))) {
+        return `${(60 / 1080) * 100}%`;
       }
       return '';
     },
@@ -361,7 +421,7 @@ export default {
 </script>
 <style scoped lang="scss">
 .subtitle-loader {
-  position: relative;
+  position: absolute;
   width: 100%;
   height: 100%;
 }

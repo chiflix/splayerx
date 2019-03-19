@@ -14,7 +14,7 @@
             <div class="element content">
 
               <div class="topContainer">
-                <div class="title" :class="$i18n.locale === 'ja' ? 'subtitleJa' : 'subtitleNormal'">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
+                <div class="title" :class="$i18n.locale === 'ja' ? 'subtitleJa' : 'subtitleNormal'" @mouseup="handleSubtitleShift">{{ `${this.$t('msg.subtitle.subtitleSelect' )}  ${isFirstSubtitle ? 'I' : 'II'}` }}</div>
                 <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
                   :style="{
                     cursor: 'pointer',
@@ -163,7 +163,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'isFirstSubtitle']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -265,8 +265,11 @@ export default {
         this.scopeHeight + 7;
     },
     currentSubtitleIndex() {
-      return this.computedAvaliableItems.findIndex(subtitle =>
-        subtitle.id === this.currentSubtitleId);
+      return this.isFirstSubtitle ?
+        this.computedAvaliableItems.findIndex(subtitle =>
+          subtitle.id === this.currentFirstSubtitleId) :
+        this.computedAvaliableItems.findIndex(subtitle =>
+          subtitle.id === this.currentSecondSubtitleId);
     },
   },
   watch: {
@@ -330,18 +333,23 @@ export default {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
-      changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_SUBTITLE,
+      changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_FIRST_SUBTITLE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
+      updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
+      updateSecondSubtitle: subtitleActions.CHANGE_CURRENT_SECOND_SUBTITLE,
     }),
+    handleSubtitleShift() {
+      this.updateSubtitleType(!this.isFirstSubtitle);
+    },
     handleSubDelete(e, item) {
       if (e.target.nodeName !== 'DIV') {
         this.transFlag = false;
         this.removeLocalSub(item.id);
         this.hoverHeight = 0;
-        if (item.id === this.currentSubtitleId) {
+        if (item.id === this.currentFirstSubtitleId) {
           this.$bus.$emit('off-subtitle');
         }
         deleteSubtitles([item.id], this.originSrc).then((result) => {
@@ -384,6 +392,7 @@ export default {
           // first open && matched extensions: ['local', 'embedded', 'online']
           // first open && !matched extensions: ['local', 'embedded']
           // !first open: ['local', 'online']
+          this.updateSecondSubtitle('');
           this.$bus.$emit('refresh-subtitles', { types, isInitial: this.isInitial });
           if (!this.isInitial) {
             this.addLog('info', {
