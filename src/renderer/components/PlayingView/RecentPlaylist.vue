@@ -191,12 +191,12 @@ export default {
       }
     },
     addMouseup() {
-      this.onItemMouseup(this.addIndex);
       if (this.addIndex !== this.lastIndex + 1) {
         this.addFilesByDialog({
           defaultPath: path.dirname(this.originSrc),
         });
       }
+      this.onItemMouseup(this.addIndex);
     },
     onItemMousedown(index, pageX, pageY) {
       this.mousedownPosition = [pageX, pageY];
@@ -313,7 +313,9 @@ export default {
     onItemMouseup(index) { // eslint-disable-line complexity
       if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
 
-      if (Math.abs(this.movementY) > this.thumbnailHeight * 1.5 && this.canRemove) {
+      document.onmouseup = null;
+      if (Math.abs(this.movementY) > this.thumbnailHeight * 1.5
+       && this.itemMoving && this.canRemove) {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         this.hoverIndex = this.playingIndex;
         this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
