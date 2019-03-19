@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-02-22 11:37:18
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-03-14 16:08:43
+ * @Last Modified time: 2019-03-18 13:37:44
  */
 
 /** file dir list
@@ -327,6 +327,14 @@ export function deleteFileByPath(p) {
   });
 }
 
+/**
+ * @description 根据视频获取该视频相关的缓存字幕
+ * @author tanghaixiang@xindong.com
+ * @date 2019-03-18
+ * @export
+ * @param {String} key 视频的mediaHash
+ * @returns {Promise} resolve [] or reject Error
+ */
 export function getVideoSubtitlesByMediaHash(key) {
   const jobs = [];
   ['modified', 'online'].forEach((cell) => {
@@ -357,6 +365,14 @@ export function getVideoSubtitlesByMediaHash(key) {
   return Promise.all(jobs);
 }
 
+/**
+ * @description 根据字幕路径，获取字幕的内容
+ * @author tanghaixiang@xindong.com
+ * @date 2019-03-18
+ * @export
+ * @param {Array} list 字幕列表[{src: "..../../xxx.json", ...}]
+ * @returns {Promise} resolve [{src: "", ..., options: {storage: {...}}}] or reject Error
+ */
 export function getSubtitleContentByPath(list) {
   const jobs = [];
   list.forEach((cell) => {
@@ -392,5 +408,6 @@ export default {
   addSubtitleByMediaHash,
   writeSubtitleByPath,
   deleteFileByPath,
+  getVideoSubtitlesByMediaHash,
   getSubtitleContentByPath,
 };

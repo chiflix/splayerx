@@ -44,7 +44,7 @@
       </div>
     </div>
     <div class="sub-editor-body">
-      <subtitle-input
+      <subtitle-renderer
       :key="subtitleInstance && subtitleInstance.id"
       :showAddInput="showAddInput"
       :newSubHolder="newSubHolder"
@@ -68,14 +68,14 @@ import { mapGetters } from 'vuex';
 import { throttle } from 'lodash';
 // import { videodata } from '@/store/video';
 import TheProgressBar from '@/components/PlayingView/TheProgressBar.vue';
-import SubtitleInput from './SubtitleInput.vue';
+import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
 
 export default {
   name: 'subtitle-editor',
   components: {
     'the-progress-bar': TheProgressBar,
-    SubtitleInput,
+    SubtitleRenderer,
   },
   data() {
     return {

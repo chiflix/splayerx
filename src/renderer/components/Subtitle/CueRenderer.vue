@@ -25,6 +25,7 @@ export default {
   computed: {
     ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth', 'isProfessional']),
     ChosenIndex() {
+      // 如果是字幕高级编辑模式，字幕块就使用默认的样式
       return this.chosenStyle && !this.isProfessional ? this.chosenStyle : 0;
     },
     textAlign() {

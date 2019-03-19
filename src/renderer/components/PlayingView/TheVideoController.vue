@@ -10,6 +10,7 @@
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
     @click.left="handleMouseupLeft">
+    <!-- 当目前字幕处于快速编辑模式或者高级编辑模式正常播放的组件都从DOM节点删除 -->
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']" v-if="!isEditable && !isProfessional"></titlebar>
     <notification-bubble ref="nextVideoUI" v-if="!isEditable && !isProfessional"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"  v-fade-in="!isEditable && !isProfessional"
@@ -43,6 +44,7 @@
     </div>
     <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" v-if="!isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
     <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" v-if="!isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
+    <!-- 将subtitleManager 从PlayingView 移到 VideoController 里 主要是因为mouse事件无法传递 videoController盖住了subtitleManager -->
     <subtitle-manager />
   </div>
 </template>
@@ -331,7 +333,7 @@ export default {
 
       this.clock.tick(timestamp - this.start);
       this.UIStateManager();
-
+      // 当处于字幕高级编辑模式，不自动播放下一视频
       if (!this.isProfessional && !videodata.paused && videodata.time + 1 >= this.duration) {
         // we need set the paused state to go to next video
         // this state will be reset on mounted of BaseVideoPlayer

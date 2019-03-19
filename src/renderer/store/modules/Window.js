@@ -11,6 +11,7 @@ const state = {
   isMinimized: false,
   isEditable: false, // 字幕编辑模式
   isProfessional: false, // 字幕高级编辑模式
+  storedWindowInfo: null, // 字幕高级模式下需要存储windowSize、windowMinimumSize、windowPosition
 };
 
 const getters = {
@@ -27,6 +28,7 @@ const getters = {
   isMinimized: state => state.isMinimized,
   isEditable: state => state.isEditable,
   isProfessional: state => state.isProfessional,
+  storedWindowInfo: state => state.storedWindowInfo,
 };
 
 const mutations = {
@@ -56,6 +58,13 @@ const mutations = {
   },
   [windowMutations.TOGGLE_PROFESSIONAL](state, payload) {
     // state.isEditable = payload;
+    // 如果payload===true,就是准备进入高级编辑模式，这个时候，需要存储当前window信息
+    // 保证退出高级编辑模式，可以恢复原来的window尺寸
+    state.storedWindowInfo = payload ? {
+      size: state.windowSize,
+      minimumSize: state.windowMinimumSize,
+      position: state.windowPosition,
+    } : null;
     state.isProfessional = payload;
   },
 };

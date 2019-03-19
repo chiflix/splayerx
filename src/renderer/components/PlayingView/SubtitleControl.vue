@@ -45,6 +45,7 @@
                       <div class="text">{{ noSubtitle }}</div>
                     </div>
                   </div>
+                  <!-- 当没有有效的字幕的时候，就是显示创建字幕按钮 -->
                   <div v-if="!(loadingSubsPlaceholders.length > 0) && computedAvaliableItems.length === 0">
                     <div class="menu-item-text-wrapper create-subtitle-btn"
                       @click.stop="handleCreateBtnClick"
@@ -165,10 +166,13 @@ export default {
       refAnimation: '',
       debouncedHandler: debounce(this.handleRefresh, 1000),
       transFlag: true,
+      shortCell: 480,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'paused']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'paused',
+      'winRatio', 'winWidth', 'winHeight', 'winPos', 'winSize',
+    ]),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -211,6 +215,9 @@ export default {
       return 44;
     },
     isOverFlow() {
+      // computed scopeHeight 有点复杂，特别处理纯在创建按钮的高度需要重新计算。
+      // 可以通过computedSize 计算一个刻度值，通过刻度值，再去计算高度，这里的高度
+      // 都强关联像素，有点冗余
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.realItemsNum > 3 ? 'scroll' : '';
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
@@ -225,6 +232,7 @@ export default {
       return this.computedAvaliableItems.length + 1 + this.loadingTypes.length;
     },
     scopeHeight() {
+      // 这里其实和上面的 scopeHeight 纯在同样的问题，计算高度逻辑过于复杂
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return (this.realItemsNum * 31) - 4;
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
@@ -333,24 +341,47 @@ export default {
       toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
     }),
     handleCreateBtnClick() {
-      // this.$bus.$emit('add-subtitles', [{
-      //   src: '1',
-      //   type: 'modified',
-      //   options: {
-      //     id: '1',
-      //     storage: {
-      //       parsed: {
-      //         dialogues: [],
-      //       },
-      //       metaInfo: {
-      //         language: 'zh-CN',
-      //         name: 1,
-      //       },
-      //     },
-      //   },
-      // }]);
+      // 当点击创建按钮后，先暂停播放、再切换高级编辑模式
       if (!this.paused) this.$bus.$emit('toggle-playback');
       this.toggleProfessional(true);
+      // 这块逻辑和render里面重复了，可以考虑抽象到一个watch里面处理。
+      if (this.winRatio > 1) {
+        // 当视频的宽度大于等于高度，则判断高度是否大于等于480像素，如果不足，按比例扩大视频尺寸，直至宽度达到屏幕尺寸上限或者达到454像素。（刻度为10s左右)
+        let mh = this.shortCell;
+        let mw = mh * this.winRatio;
+        if (mw < 850) {
+          mw = 850;
+          mh = mw / this.winRatio;
+        }
+        this.changeWindowSize([mw, mh], this.winSize);
+      } else {
+        // 当视频的高度大于宽度，则判断宽度是否大于等于480像素，如果不足，按比例扩大视频尺寸，直至高度达到屏幕尺寸上限或者达到480像素。（刻度为6s左右）
+        const mw = this.shortCell;
+        const mh = mw / this.winRatio;
+        this.changeWindowSize([mw, mh], this.winSize);
+      }
+    },
+    changeWindowSize(minSize, size) {
+      let newSize = [];
+      const windowRect = [
+        window.screen.availLeft, window.screen.availTop,
+        window.screen.availWidth, window.screen.availHeight,
+      ];
+      const videoSize = size;
+      newSize = this.calculateWindowSize(
+        minSize,
+        windowRect.slice(2, 4),
+        videoSize,
+      );
+      const newPosition = this.calculateWindowPosition(
+        this.winPos.concat(this.winSize),
+        windowRect,
+        newSize,
+      );
+      const rect = newPosition.concat(newSize);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minSize.map(Math.round));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
     },
     handleSubDelete(e, item) {
       if (e.target.nodeName !== 'DIV') {
@@ -363,9 +394,9 @@ export default {
         deleteSubtitles([item.id], this.originSrc).then((result) => {
           this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
           this.transFlag = true;
+          // 如果删除的是自制字幕，需要删除源文件
           if (item.type === 'modified') {
-            // 自制字幕，需要删除源文件
-            this.$bus.$emit('delete-subtitle', { sub: item });
+            this.$bus.$emit('delete-subtitle-file', { sub: item });
           }
         });
       }
