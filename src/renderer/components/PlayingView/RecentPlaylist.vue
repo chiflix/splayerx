@@ -197,6 +197,11 @@ export default {
       this.mousedownPosition = [pageX, pageY];
       this.firstIndexOnMousedown = this.firstIndex;
       this.lastIndexOnMousedown = this.lastIndex;
+      document.onmouseup = () => {
+        document.onmousemove = null;
+        this.indexOfMovingItem = this.playingList.length;
+        this.movementX = this.movementY = 0;
+      };
     },
     onItemMousemove(index, pageX, pageY) { // eslint-disable-line complexity
       const offsetX = pageX - this.mousedownPosition[0];
@@ -213,12 +218,6 @@ export default {
         if (outOfWindow) {
           clearTimeout(this.pageSwitchingTimeId);
           this.pageSwitching = false;
-          document.onmouseup = () => {
-            this.indexOfMovingItem = this.playingList.length;
-            this.movementX = this.movementY = 0;
-          };
-        } else {
-          document.onmouseup = null;
         }
         // if the item is moved to the edge of the window and stay for 1s
         // then switch the page
@@ -230,7 +229,6 @@ export default {
               this.firstIndex += this.thumbnailNumber;
               this.shifting = true;
               this.tranFlag = true;
-              this.movementX = offsetX + (this.thumbnailNumber * distance);
 
               setTimeout(() => {
                 this.shifting = false;
@@ -246,7 +244,6 @@ export default {
               this.lastIndex -= this.thumbnailNumber;
               this.shifting = true;
               this.tranFlag = true;
-              this.movementX = offsetX - (this.thumbnailNumber * distance);
 
               setTimeout(() => {
                 this.shifting = false;
@@ -361,11 +358,21 @@ export default {
       this.indexOfMovingItem = val.length;
     },
     firstIndex(val) {
+      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+      const distance = marginRight + this.thumbnailWidth;
+      if (this.itemMoving && this.lastIndex > this.lastIndexOnMousedown) {
+        this.movementX += ((this.lastIndex - this.lastIndexOnMousedown) * distance);
+      }
       if (this.lastIndex > this.maxIndex) {
         this.lastIndex = this.maxIndex;
       }
     },
     lastIndex(val) {
+      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+      const distance = marginRight + this.thumbnailWidth;
+      if (this.itemMoving && this.firstIndex < this.firstIndexOnMousedown) {
+        this.movementX += ((this.firstIndex - this.firstIndexOnMousedown) * distance);
+      }
       if (this.firstIndex > 0 && this.maxIndex > this.firstIndex
        && this.maxIndex <= val && !this.itemMoving) {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
@@ -406,6 +413,8 @@ export default {
         this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;
+      } else {
+        document.onmouseup = null;
       }
     },
     mousemovePosition(val) {
