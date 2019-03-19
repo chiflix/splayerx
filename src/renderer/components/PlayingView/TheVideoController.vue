@@ -600,7 +600,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 101;
+  z-index: 99;
 }
 .masking {
   position: absolute;
