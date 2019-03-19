@@ -47,11 +47,12 @@
         marginLeft: sizeAdaption(40),
       }">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
+        @can-remove="canRemove = true"
         :key="item"
         :index="index"
         :path="item"
         :maxIndex="maxIndex"
-        :isLastPage="lastIndex === maxIndex"
+        :isLastPage="lastIndex === maxIndex && firstIndex > 0"
         :pageSwitching="pageSwitching"
         :itemMoving="itemMoving"
         :indexOfMovingTo="indexOfMovingTo"
@@ -131,6 +132,8 @@ export default {
       changeByRecent: false,
       pageSwitching: false,
       pageSwitchingTimeId: NaN,
+      removeTimeId: NaN,
+      canRemove: false,
       mousedownPosition: [],
       mousemovePosition: [],
       firstIndexOnMousedown: 0,
@@ -241,6 +244,7 @@ export default {
       if (Math.abs(offsetY) > 0 || Math.abs(offsetX) > 0) {
         this.indexOfMovingItem = index;
         this.movementY = offsetY;
+        this.canRemove = false;
 
         if (outOfWindow) {
           clearTimeout(this.pageSwitchingTimeId);
@@ -309,10 +313,11 @@ export default {
     onItemMouseup(index) { // eslint-disable-line complexity
       if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
 
-      if (Math.abs(this.movementY) > this.thumbnailHeight * 1.5) {
+      if (Math.abs(this.movementY) > this.thumbnailHeight * 1.5 && this.canRemove) {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         this.hoverIndex = this.playingIndex;
         this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+        this.canRemove = false;
       } else if (this.indexOfMovingTo !== this.indexOfMovingItem
         && Math.abs(this.movementY) < this.thumbnailHeight) {
         if (this.indexOfMovingTo === this.lastIndex + 1
@@ -384,7 +389,7 @@ export default {
     playingList(val) {
       this.indexOfMovingItem = val.length;
     },
-    firstIndex(val) {
+    firstIndex() {
       const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
       const distance = marginRight + this.thumbnailWidth;
       if (this.itemMoving && this.lastIndex > this.lastIndexOnMousedown) {

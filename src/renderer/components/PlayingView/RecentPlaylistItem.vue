@@ -13,9 +13,8 @@
           :style="{
             backgroundImage: !isPlaying ? `linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%), ${backgroundImage}` : 'linear-gradient(-180deg, rgba(0,0,0,0) 26%, rgba(0,0,0,0.73) 98%)',
           }"/>
-        <div class="white-hover"
+        <div class="white-hover" ref="whiteHover"
           :style="{
-            backgroundColor: !aboutToDelete ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0,0,0,0.6)',
             opacity: hovered ? '1' : '0',
             minWidth: `${thumbnailWidth}px`,
             minHeight: `${thumbnailHeight}px`,
@@ -28,9 +27,8 @@
           :style="{
             height: '100%',
           }">
-          <div class="info"
+          <div class="info" ref="info"
             :style="{
-                opacity: aboutToDelete ? 0 : 1,
                 height: `${thumbnailHeight - bottom}px`,
                 width: `${thumbnailWidth - 2 * side}px`,
                 left: `${side}px`,
@@ -79,9 +77,8 @@
                 lineHeight: sizeAdaption(16),
               }">{{ baseName }}</div>
           </div>
-          <div class="deleteUi"
+          <div class="deleteUi" ref="deleteUi"
             :style="{
-              opacity: aboutToDelete ? '1' : '0',
               height: `${thumbnailHeight}px`,
             }">
             <Icon type="delete"/>
@@ -185,6 +182,7 @@ export default {
       displayIndex: NaN,
       tranFlag: true,
       outOfWindow: false,
+      deleteTimeId: NaN,
     };
   },
   methods: {
@@ -301,6 +299,23 @@ export default {
     });
   },
   watch: {
+    aboutToDelete(val) {
+      if (val) {
+        this.deleteTimeId = setTimeout(() => {
+          this.$refs.whiteHover.style.backgroundColor = 'rgba(0,0,0,0.6)';
+          this.$refs.info.style.opacity = '0';
+          this.$refs.deleteUi.style.opacity = '1';
+          this.$emit('can-remove');
+        }, 1000);
+      } else {
+        clearTimeout(this.deleteTimeId);
+        requestAnimationFrame(() => {
+          this.$refs.whiteHover.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+          this.$refs.info.style.opacity = '1';
+          this.$refs.deleteUi.style.opacity = '0';
+        });
+      }
+    },
     index(val) {
       this.displayIndex = val;
       this.tranFlag = false;
@@ -484,7 +499,8 @@ $border-radius: 3px;
       pointer-events:none;
       position: absolute;
       border-radius: $border-radius;
-      transition: opacity 100ms 80ms ease-in, background-color 100ms 80ms ease-in;
+      background-color: rgba(255, 255, 255, 0.2);
+      transition: opacity 100ms ease-in, background-color 100ms ease-in;
     }
     .content {
       position: absolute;
@@ -495,14 +511,16 @@ $border-radius: 3px;
       bottom: 0;
 
       .deleteUi {
-        transition: opacity 100ms 80ms ease-in;
+        transition: opacity 100ms ease-in;
+        opacity: 0;
         display: flex;
         justify-content: center;
         align-items: center;
       }
       .info {
         position: absolute;
-        transition: opacity 100ms 80ms ease-in;
+        transition: opacity 100ms ease-in;
+        opacity: 1;
         top: 0;
       }
       .overflow-container {
