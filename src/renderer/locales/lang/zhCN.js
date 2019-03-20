@@ -202,8 +202,6 @@ export default {
     folderSource: '文件夹',
     playlistSource: '播放列表',
     playing: '正在播放',
-    authorize: '加载同目录视频',
-    briefAuthorize: '加载同目录',
   },
   nextVideo: {
     nextInFolder: '文件夹中下一视频',
