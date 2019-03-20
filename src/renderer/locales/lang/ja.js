@@ -68,7 +68,7 @@ export default {
       decreaseSubtitleDelayS: '字幕ディレイ -0.1s',
       increaseSubtitleDelayL: '字幕ディレイ +0.5s',
       decreaseSubtitleDelayL: '字幕ディレイ -0.5s',
-      enabledSecondarySub: '啟用第二字幕',
+      enabledSecondarySub: '第二字幕を開く',
     },
     window: {
       name: 'ウィンドウ',

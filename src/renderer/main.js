@@ -263,32 +263,6 @@ new Vue({
         this.refreshMenu();
       }
     },
-    currentFirstSubtitleId(val) {
-      if (this.menu) {
-        if (val !== '') {
-          this.subtitleList.forEach((item, index) => {
-            if (item.id === val && this.menu.getMenuItemById(`sub${index}`)) {
-              this.menu.getMenuItemById(`sub${index}`).checked = true;
-            }
-          });
-        } else {
-          this.menu.getMenuItemById('sub-1').checked = true;
-        }
-      }
-    },
-    currentSecondSubtitleId(val) {
-      if (this.menu) {
-        if (val !== '') {
-          this.subtitleList.forEach((item, index) => {
-            if (item.id === val && this.menu.getMenuItemById(`secondSub${index}`)) {
-              this.menu.getMenuItemById(`secondSub${index}`).checked = true;
-            }
-          });
-        } else {
-          this.menu.getMenuItemById('secondSub-1').checked = true;
-        }
-      }
-    },
     audioTrackList(val, oldval) {
       if (val.length !== oldval.length) {
         this.refreshMenu();
@@ -875,13 +849,7 @@ new Vue({
         if (this.chosenSize !== '') {
           this.menu.getMenuItemById(`size${this.chosenSize}`).checked = true;
         }
-        if (this.isSubtitleAvailable) {
-          this.subtitleList.forEach((item, index) => {
-            if (item.id === this.currentFirstSubtitleId) {
-              this.menu.getMenuItemById(`sub${index}`).checked = true;
-            }
-          });
-        } else {
+        if (!this.isSubtitleAvailable) {
           this.menu.getMenuItemById('increaseSubDelay').enabled = false;
           this.menu.getMenuItemById('decreaseSubDelay').enabled = false;
           this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
@@ -899,6 +867,9 @@ new Vue({
         this.subtitleList.forEach((item, index) => {
           if (item.id === this.currentFirstSubtitleId) {
             this.menu.getMenuItemById(`sub${index}`).checked = true;
+          }
+          if (item.id === this.currentSecondSubtitleId) {
+            this.menu.getMenuItemById(`secondSub${index}`).checked = true;
           }
         });
       })
@@ -927,7 +898,7 @@ new Vue({
     },
     recentSubTmp(key, value, type) {
       return {
-        id: `sub${key}`,
+        id: type ? `sub${key}` : `secondSub${key}`,
         visible: true,
         type: 'radio',
         label: this.getSubName(value),

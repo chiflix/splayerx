@@ -8,7 +8,7 @@
       :key="currentFirstSubtitleId"
       :isFirstSub="true"
       :linesNum.sync="linesNum"
-    />
+      :tags.sync="tags"/>
     <subtitle-renderer
       ref="subtitleRenderer"
       v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
@@ -16,7 +16,7 @@
       :key="currentSecondSubtitleId"
       :isFirstSub="false"
       :linesNum.sync="linesNum"
-    />
+      :tags.sync="tags"/>
   </div>
 </template>
 <script>
@@ -54,6 +54,7 @@ export default {
       selectionComplete: false,
       isInitial: false,
       linesNum: 1,
+      tags: {},
     };
   },
   computed: {
