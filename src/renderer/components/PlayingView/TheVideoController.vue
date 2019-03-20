@@ -236,6 +236,9 @@ export default {
     this.$bus.$on('drag-leave', () => {
       this.dragOver = false;
     });
+    this.$bus.$on('drop', () => {
+      this.dragOver = false;
+    });
     this.$bus.$on('to-fullscreen', () => {
       if (process.platform === 'darwin' &&
         this.intrinsicWidth / this.intrinsicHeight > window.screen.width / window.screen.height) {
