@@ -204,30 +204,33 @@ export default {
       this.lastIndexOnMousedown = this.lastIndex;
       document.onmouseup = () => {
         document.onmousemove = null;
-        let newPosition;
-        if (this.mousemovePosition[0] < 0) {
-          newPosition = this.firstIndex - 1 >= 0 ? this.firstIndex - 1 : 0;
-          this.firstIndex = this.firstIndex - 1 >= 0 ? this.firstIndex - 1 : 0;
-          this.shifting = true;
-          this.tranFlag = true;
-          setTimeout(() => {
-            this.shifting = false;
-            this.tranFlag = false;
-          }, 400);
-        } else if (this.mousemovePosition[0] > window.innerWidth) {
-          newPosition = this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : 0;
-          this.lastIndex = this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : 0;
-          this.shifting = true;
-          this.tranFlag = true;
-          setTimeout(() => {
-            this.shifting = false;
-            this.tranFlag = false;
-          }, 400);
+        if (this.indexOfMovingItem !== this.indexOfMovingTo
+          && Math.abs(this.movementY) < this.thumbnailHeight) {
+          let newPosition;
+          if (this.mousemovePosition[0] < 0) {
+            newPosition = this.firstIndex - 1 >= 0 ? this.firstIndex - 1 : 0;
+            this.firstIndex = this.firstIndex - 1 >= 0 ? this.firstIndex - 1 : 0;
+            this.shifting = true;
+            this.tranFlag = true;
+            setTimeout(() => {
+              this.shifting = false;
+              this.tranFlag = false;
+            }, 400);
+          } else if (this.mousemovePosition[0] > window.innerWidth) {
+            newPosition = this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : 0;
+            this.lastIndex = this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : 0;
+            this.shifting = true;
+            this.tranFlag = true;
+            setTimeout(() => {
+              this.shifting = false;
+              this.tranFlag = false;
+            }, 400);
+          }
+          this.$store.dispatch('RepositionItemFromPlayingList', {
+            src: this.playingList[index],
+            newPosition,
+          });
         }
-        this.$store.dispatch('RepositionItemFromPlayingList', {
-          src: this.playingList[index],
-          newPosition,
-        });
         this.indexOfMovingItem = this.playingList.length;
         this.movementX = this.movementY = 0;
       };
@@ -314,7 +317,7 @@ export default {
       if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
 
       document.onmouseup = null;
-      if (Math.abs(this.movementY) > this.thumbnailHeight * 1.5
+      if (-(this.movementY) > this.thumbnailHeight * 1.5
        && this.itemMoving && this.canRemove) {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         this.hoverIndex = this.playingIndex;
