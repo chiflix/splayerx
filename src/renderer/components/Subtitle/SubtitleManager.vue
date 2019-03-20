@@ -11,7 +11,7 @@
     />
     <subtitle-renderer
       ref="subtitleRenderer"
-      v-if="currentSecondSubtitleId && duration"
+      v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
       :subtitle-instance="subtitleInstances[this.currentSecondSubtitleId]"
       :key="currentSecondSubtitleId"
       :isFirstSub="false"
@@ -66,6 +66,7 @@ export default {
       'getVideoSrcById', 'allSubtitleList', // serve allSubtitleListWatcher
       'subtitleDelay', // subtitle's delay
       'isFirstSubtitle',
+      'enabledSecondarySub',
     ]),
     ...mapState({
       preferredLanguages: ({ Preference }) => (

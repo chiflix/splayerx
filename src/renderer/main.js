@@ -219,6 +219,11 @@ new Vue({
         this.menu.getMenuItemById('singleCycle').checked = val;
       }
     },
+    enabledSecondarySub(val) {
+      if (this.menu) {
+        this.menu.getMenuItemById('secondarySub').checked = val;
+      }
+    },
     currentRouteName(val) {
       if (val === 'landing-view') {
         this.menuStateControl(false);
@@ -542,6 +547,8 @@ new Vue({
             // },
             {
               label: this.$t('msg.subtitle.enabledSecondarySub'),
+              id: 'secondarySub',
+              type: 'checkbox',
               click: () => {
                 this.updateEnabledSecondarySub(!this.enabledSecondarySub);
               },

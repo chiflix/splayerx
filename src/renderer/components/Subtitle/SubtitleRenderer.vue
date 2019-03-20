@@ -60,7 +60,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'subToTop', 'currentSecondSubtitleId', 'winHeight']),
+    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'subToTop', 'currentSecondSubtitleId', 'winHeight', 'enabledSecondarySub']),
     type() {
       return this.subtitleInstance.metaInfo.format;
     },
@@ -290,7 +290,7 @@ export default {
     transDirection(transNum) {
       return this.subToTop ? Math.abs(transNum) : transNum;
     },
-    transPos(index) {
+    transPos(index) { // eslint-disable-line complexity
       const { currentTags: tags, currentTexts: texts, isVtt } = this;
       const initialTranslate = [
         [0, 0],
@@ -313,14 +313,14 @@ export default {
           // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
           return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.transDirection(this.translateNum(tags[index].alignment)[1])}%)`;
         }
-        if (!this.isFirstSub || (this.isFirstSub && this.currentSecondSubtitleId === '')) {
+        if (!this.isFirstSub || (this.isFirstSub && this.currentSecondSubtitleId === '') || !this.enabledSecondarySub) {
           // 是第二字幕或者是第一字幕但是没有第二字幕的情况下，正常translate
           return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index))}%)`;
         }
         // 同时存在第一字幕和第二字幕时，第一字幕需要translate的值
         return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index) + transPercent)}%)`;
       }
-      if ((!tags[index].line || !tags[index].position) && this.isFirstSub && this.currentSecondSubtitleId !== '') {
+      if ((!tags[index].line || !tags[index].position) && this.isFirstSub && this.currentSecondSubtitleId !== '' && this.enabledSecondarySub) {
         // vtt字幕没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
         return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index) + transPercent)}%)`;
       }

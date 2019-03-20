@@ -271,11 +271,11 @@ export default {
         this.scopeHeight + 7;
     },
     currentSubtitleIndex() {
-      return this.isFirstSubtitle ?
+      return !this.isFirstSubtitle && this.enabledSecondarySub ?
         this.computedAvaliableItems.findIndex(subtitle =>
-          subtitle.id === this.currentFirstSubtitleId) :
+          subtitle.id === this.currentSecondSubtitleId) :
         this.computedAvaliableItems.findIndex(subtitle =>
-          subtitle.id === this.currentSecondSubtitleId);
+          subtitle.id === this.currentFirstSubtitleId);
     },
   },
   watch: {
@@ -680,7 +680,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        margin: 15px auto auto 10px;
+        margin: 15px auto auto 14px;
         letter-spacing: 0.2px;
         line-height: 15px;
       }
@@ -707,7 +707,7 @@ export default {
       height: auto;
       display: flex;
       flex-direction: row;
-      margin: 1px auto 10px 10px;
+      margin: 1px auto 10px 14px;
       font-size: 9px;
       .firstSub {
         margin-right: 12px;
