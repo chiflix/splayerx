@@ -49,7 +49,7 @@ export default {
       mainSubtitle: 'Primary Subtitle',
       secondarySubtitle: 'Secondary Subtitle',
       firstSubItem: 'Subtitle I',
-      secondarySubItem: 'subtitle II',
+      secondarySubItem: 'Subtitle II',
       subtitleStyle: 'Font Style',
       style1: 'Movie Style',
       style2: 'Anime Style',

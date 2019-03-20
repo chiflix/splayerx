@@ -417,6 +417,7 @@ export default {
           // first open && !matched extensions: ['local', 'embedded']
           // !first open: ['local', 'online']
           this.updateSecondSubtitle('');
+          this.updateSubtitleType(true);
           this.$bus.$emit('refresh-subtitles', { types, isInitial: this.isInitial });
           if (!this.isInitial) {
             this.addLog('info', {

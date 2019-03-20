@@ -64,7 +64,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'subToTop', 'currentSecondSubtitleId', 'winHeight', 'enabledSecondarySub']),
+    ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'subToTop', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'winHeight', 'enabledSecondarySub']),
     type() {
       return this.subtitleInstance.metaInfo.format;
     },
@@ -78,6 +78,9 @@ export default {
       return this.type === 'vtt';
     },
     secondarySubScale() { // 第二字幕的字号最小不小于9px
+      if (this.currentFirstSubtitleId === '') {
+        return this.scaleNum;
+      }
       return (this.scaleNum * 3) / 4 < 1 ? 1 : (this.scaleNum * 3) / 4;
     },
   },
@@ -314,8 +317,9 @@ export default {
       // 根据字体尺寸和换行数计算第一字幕需要translate的百分比
       const secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
       const firstSubHeight = (this.lastLineNum(index) + texts[index].split('<br>').length) * 9 * this.scaleNum;
+      console.log((50 / (1080 * this.winHeight)));
       const transPercent = texts[index - 1] ? this.lastTransPercent :
-        -((secondSubHeight + (15 / (1080 * this.winHeight))) / firstSubHeight) * 100;
+        -((secondSubHeight + ((15 / 1080) * this.winHeight)) / firstSubHeight) * 100;
       this.lastTransPercent = transPercent;
       if (!isVtt) {
         if (tags[index].pos) {
