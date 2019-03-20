@@ -139,6 +139,11 @@ export default {
   height: 100%;
 }
 
+.folder {
+  width: 100%;
+  height: 100%;
+}
+
 .play, .pause {
   margin: auto;
   width: 100%;

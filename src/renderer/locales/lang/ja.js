@@ -145,6 +145,10 @@ export default {
       title: 'エラー',
       content: '再生できるファイルが見つかりませんでした。',
     },
+    addNoVideo: {
+      title: '追加錯誤',
+      content: '再生できるファイルが見つかりませんでした。',
+    },
     default: {
       title: 'エラー',
       content: 'ビデオタイプが再生できません。',
