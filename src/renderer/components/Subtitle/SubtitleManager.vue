@@ -7,8 +7,8 @@
       :subtitle-instance="subtitleInstances[this.currentFirstSubtitleId]"
       :key="currentFirstSubtitleId"
       :isFirstSub="true"
-      :linesNum.sync="linesNum"
-      :tags.sync="tags"/>
+      :linesNum="linesNum"
+      :tags="tags"/>
     <subtitle-renderer
       ref="subtitleRenderer"
       v-if="currentSecondSubtitleId && duration && enabledSecondarySub"

@@ -297,7 +297,7 @@ export default {
     transDirection(transNum) {
       return this.subToTop ? Math.abs(transNum) : transNum;
     },
-    transPos(index) { // eslint-disable-line complexity
+    transPos(index) {
       const { currentTags: tags, currentTexts: texts, isVtt } = this;
       const initialTranslate = [
         [0, 0],
@@ -320,22 +320,27 @@ export default {
           // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
           return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.transDirection(this.translateNum(tags[index].alignment)[1])}%)`;
         }
-        if (!this.isFirstSub || (this.isFirstSub && (this.currentSecondSubtitleId === '' || ((this.tags.line && this.tags.position) || (this.tags.alignment && this.tags.alignment !== 2)))) || !this.enabledSecondarySub) {
-          // 是第二字幕或者是第一字幕但是没有第二字幕的情况下，正常translate
-          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index))}%)`;
+        if (this.translateWithPos(tags[index].alignment !== 2)) {
+          // 没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
+          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index) + transPercent)}%)`;
         }
-        // 同时存在第一字幕和第二字幕时，第一字幕需要translate的值
-        return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index) + transPercent)}%)`;
+        // 正常translate
+        return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index))}%)`;
       }
       if (tags[index].line && tags[index].position) {
         return '';
       }
-      if (!this.isFirstSub || (this.isFirstSub && (this.currentSecondSubtitleId === '' || ((this.tags.line && this.tags.position) || (this.tags.alignment && this.tags.alignment !== 2)))) || !this.enabledSecondarySub) {
-        // 是第二字幕或者是第一字幕但是没有第二字幕的情况下，正常translate
-        return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index))}%)`;
+      if (this.translateWithPos(tags[index].line && tags[index].position)) {
+        // vtt字幕没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
+        return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index) + transPercent)}%)`;
       }
-      // vtt字幕没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
-      return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index) + transPercent)}%)`;
+      // 正常translate
+      return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index))}%)`;
+    },
+    translateWithPos(firstPos) {
+      const secondPos = (this.tags.line && this.tags.position) ||
+        (this.tags.alignment && this.tags.alignment !== 2); // 判断第二字幕是否存在位置信息
+      return !!(this.isFirstSub && this.currentSubtitleId !== '' && !secondPos && !firstPos);
     },
     subLeft(index) {
       const { currentTags: tags, type, isVtt } = this;
