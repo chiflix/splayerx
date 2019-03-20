@@ -49,6 +49,8 @@ export default {
       noSubtitle: '見つかりませんでした',
       secondarySubtitle: '第二字幕',
       subtitleStyle: '字幕スタイル',
+      firstSubItem: '第一字幕',
+      secondarySubItem: '第二字幕',
       style1: '映画スタイル',
       style2: 'アニメスタイル',
       style3: 'クラシックスタイル',

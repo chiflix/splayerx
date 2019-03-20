@@ -26,12 +26,16 @@
 
               <div class="sub-menu">
                 <div class="enabledSecondary" v-show="enabledSecondarySub">
-                  <div class="firstSub" @mouseup="changeToFirst" :style="{ color: isFirstSubtitle ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.3)' }">第一翻译
+                  <div class="firstSub" @mouseup="subToFirst" :style="{
+                    color: isFirstSubtitle ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.3)',
+                    cursor: isFirstSubtitle ? 'default' : 'pointer' }">{{ this.$t('msg.subtitle.firstSubItem') }}
                   </div>
-                  <div class="secondarySub" @mouseup="changeToSecond" :style="{ color: isFirstSubtitle ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.6)' }">第二翻译
+                  <div class="secondarySub" @mouseup="subToSecondary" :style="{
+                    color: isFirstSubtitle ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.6)',
+                    cursor: isFirstSubtitle ? 'pointer' : 'default' }">{{ this.$t('msg.subtitle.secondarySubItem') }}
                   </div>
                 </div>
-                <div class="scrollScope" :class="refAnimation"
+                <div class="scrollScope" :class="refAnimation" ref="scroll"
                   @animationend="finishAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
@@ -277,6 +281,11 @@ export default {
         this.computedAvaliableItems.findIndex(subtitle =>
           subtitle.id === this.currentFirstSubtitleId);
     },
+    currentScrollTop() {
+      const marginFactors = [4, 5, 7];
+      return this.currentSubtitleIndex *
+        (this.itemHeight + marginFactors[[27, 32, 44].indexOf(this.itemHeight)]);
+    },
   },
   watch: {
     originSrc() {
@@ -287,7 +296,7 @@ export default {
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
       if (val === 0) {
-        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$refs.scroll.scrollTop = 0;
       }
     },
     showAttached(val) {
@@ -334,6 +343,12 @@ export default {
         this.loadingSubsPlaceholders.embedded = 'loading';
       }
     },
+    enabledSecondarySub(val) {
+      this.$refs.scroll.scrollTop = val ? 0 : this.currentScrollTop;
+    },
+    isFirstSubtitle() {
+      this.$refs.scroll.scrollTop = this.currentScrollTop;
+    },
   },
   methods: {
     ...mapActions({
@@ -347,10 +362,10 @@ export default {
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
       updateSecondSubtitle: subtitleActions.CHANGE_CURRENT_SECOND_SUBTITLE,
     }),
-    changeToFirst() {
+    subToFirst() {
       this.updateSubtitleType(true);
     },
-    changeToSecond() {
+    subToSecondary() {
       this.updateSubtitleType(false);
     },
     handleSubDelete(e, item) {
@@ -549,7 +564,7 @@ export default {
         } else {
           this.refAnimation = 'refresh-animation';
         }
-        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$refs.scroll.scrollTop = 0;
         this.timer = null;
       }, 1000);
     });

@@ -48,6 +48,8 @@ export default {
       notToShowSubtitle: '無',
       noSubtitle: '暫未找到翻譯結果',
       secondarySubtitle: '第二字幕',
+      firstSubItem: '第一字幕',
+      secondarySubItem: '第二字幕',
       subtitleStyle: '字幕樣式',
       style1: '電影風格',
       style2: '動漫風格',
