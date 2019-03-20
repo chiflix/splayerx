@@ -865,10 +865,10 @@ new Vue({
         }
         this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
         this.subtitleList.forEach((item, index) => {
-          if (item.id === this.currentFirstSubtitleId) {
+          if (item.id === this.currentFirstSubtitleId && this.menu.getMenuItemById(`sub${index}`)) {
             this.menu.getMenuItemById(`sub${index}`).checked = true;
           }
-          if (item.id === this.currentSecondSubtitleId) {
+          if (item.id === this.currentSecondSubtitleId && this.menu.getMenuItemById(`secondSub${index}`)) {
             this.menu.getMenuItemById(`secondSub${index}`).checked = true;
           }
         });
