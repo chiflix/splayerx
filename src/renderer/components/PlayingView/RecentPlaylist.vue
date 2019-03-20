@@ -323,7 +323,7 @@ export default {
         this.hoverIndex = this.playingIndex;
         this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
         this.canRemove = false;
-      } else if (this.indexOfMovingTo !== this.indexOfMovingItem
+      } else if (this.movingOffset !== 0
         && Math.abs(this.movementY) < this.thumbnailHeight) {
         if (this.indexOfMovingTo === this.lastIndex + 1
           && this.lastIndex + 1 !== this.playingList.length) {
@@ -481,7 +481,11 @@ export default {
       return movingOffset;
     },
     indexOfMovingTo() { // the place where the moving item is going to be set
-      return this.indexOfMovingItem + this.movingOffset;
+      if (!this.itemMoving) return this.indexOfMovingItem;
+      let indexOfMovingTo = this.indexOfMovingItem + this.movingOffset;
+      if (indexOfMovingTo > this.lastIndex + 1) indexOfMovingTo = this.lastIndex + 1;
+      else if (indexOfMovingTo < this.firstIndex - 1) indexOfMovingTo = this.firstIndex - 1;
+      return indexOfMovingTo;
     },
     itemMoving() {
       return this.indexOfMovingItem !== this.playingList.length;
