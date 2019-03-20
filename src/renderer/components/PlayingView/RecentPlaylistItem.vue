@@ -397,7 +397,7 @@ export default {
     movementY(val) { // eslint-disable-line complexity
       if (Math.abs(val) > this.thumbnailHeight) {
         // avoid the wrong layout after moving to left and lift up
-        if (this.index <= this.indexOfMovingItem) {
+        if (this.index < this.indexOfMovingItem) {
           this.displayIndex = this.isLastPage ? this.index + 1 : this.index;
         } else if (this.index > this.indexOfMovingItem) {
           this.displayIndex = this.isLastPage ? this.index : this.index - 1;
