@@ -306,7 +306,7 @@ export default {
           this.$refs.info.style.opacity = '0';
           this.$refs.deleteUi.style.opacity = '1';
           this.$emit('can-remove');
-        }, 500);
+        }, 250);
       } else {
         clearTimeout(this.deleteTimeId);
         requestAnimationFrame(() => {
