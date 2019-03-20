@@ -144,7 +144,7 @@ export default {
     },
     addNoVideo: {
       title: '添加错误',
-      content: '未添加可播放文件。',
+      content: '未找到可播放文件。',
     },
     default: {
       title: '打开错误',
