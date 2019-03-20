@@ -60,6 +60,7 @@ export default {
       lastText: [],
       subPlayResX: 0,
       subPlayResY: 0,
+      lastTransPercent: 0,
     };
   },
   computed: {
@@ -313,8 +314,9 @@ export default {
       // 根据字体尺寸和换行数计算第一字幕需要translate的百分比
       const secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
       const firstSubHeight = (this.lastLineNum(index) + texts[index].split('<br>').length) * 9 * this.scaleNum;
-      const transPercent = -((secondSubHeight + (15 / (1080 * this.winHeight))) / firstSubHeight)
-        * 100;
+      const transPercent = texts[index - 1] ? this.lastTransPercent :
+        -((secondSubHeight + (15 / (1080 * this.winHeight))) / firstSubHeight) * 100;
+      this.lastTransPercent = transPercent;
       if (!isVtt) {
         if (tags[index].pos) {
           // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
