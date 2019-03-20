@@ -15,7 +15,7 @@
         :text="cue.text"
         :settings="cue.tags"
         :style="{
-          zoom: isFirstSub ? `${scaleNum}` : `${scaleNum * 3 / 4}`,
+          zoom: isFirstSub ? `${scaleNum}` : `${secondarySubScale}`,
           transform: subLine(index),
         }"></CueRenderer>
     </div>
@@ -72,6 +72,9 @@ export default {
     },
     isVtt() {
       return this.type === 'vtt';
+    },
+    secondarySubScale() { // 第二字幕的字号最小不小于9px
+      return (this.scaleNum * 3) / 4 < 1 ? 1 : (this.scaleNum * 3) / 4;
     },
   },
   watch: {
@@ -304,16 +307,20 @@ export default {
         [0, 0],
       ];
       // 根据字体尺寸和换行数计算第一字幕需要translate的百分比
-      const secondSubHeight = this.linesNum * 9 * this.scaleNum * (3 / 4);
+      const secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
       const firstSubHeight = (this.lastLineNum(index) + texts[index].split('<br>').length) * 9 * this.scaleNum;
-      const transPercent = -((secondSubHeight + (15 / (1080 * this.winHeight))) / firstSubHeight)
+      let transPercent = -((secondSubHeight + (15 / (1080 * this.winHeight))) / firstSubHeight)
         * 100;
+      if (this.isFirstSub && tags[index].alignment !== 2) {
+        // 当第二字幕有位置信息时，第一字幕相对第二字幕的translate为0
+        transPercent = 0;
+      }
       if (!isVtt) {
         if (tags[index].pos) {
           // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
           return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.transDirection(this.translateNum(tags[index].alignment)[1])}%)`;
         }
-        if (!this.isFirstSub || (this.isFirstSub && this.currentSecondSubtitleId === '') || !this.enabledSecondarySub) {
+        if (!this.isFirstSub || (this.isFirstSub && (this.currentSecondSubtitleId === '' || tags[index].alignment !== 2)) || !this.enabledSecondarySub) {
           // 是第二字幕或者是第一字幕但是没有第二字幕的情况下，正常translate
           return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index))}%)`;
         }
