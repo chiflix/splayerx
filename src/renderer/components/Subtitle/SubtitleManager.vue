@@ -23,7 +23,7 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
 import { sep } from 'path';
-import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
+import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray, isEmpty } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
@@ -109,7 +109,18 @@ export default {
       this.allSubtitleListWatcher(newVal, oldVal);
     },
     currentFirstSubtitleId(newVal) {
-      if (this.selectionComplete || newVal) updateSelectedSubtitleId(this.originSrc, newVal);
+      if (this.selectionComplete || newVal) {
+        updateSelectedSubtitleId(this.originSrc, {
+          firstId: newVal, secondaryId: this.currentSecondSubtitleId,
+        });
+      }
+    },
+    currentSecondSubtitleId(newVal) {
+      if (this.selectionComplete || newVal) {
+        updateSelectedSubtitleId(this.originSrc, {
+          firstId: this.currentFirstSubtitleId, secondaryId: newVal,
+        });
+      }
       if (!newVal) {
         this.linesNum = 0;
       }
@@ -188,9 +199,10 @@ export default {
         .then(async () => {
           this.$bus.$emit('refresh-finished');
           if (this.isInitial) {
-            const id = await retrieveSelectedSubtitleId(videoSrc);
-            if (id) {
-              this.changeCurrentFirstSubtitle(id);
+            const Ids = await retrieveSelectedSubtitleId(videoSrc);
+            if (!isEmpty(Ids)) {
+              this.changeCurrentFirstSubtitle(Ids.firstId || '');
+              this.changeCurrentSecondSubtitle(Ids.secondaryId || '');
               this.selectionComplete = true;
             }
             this.isInitial = false;

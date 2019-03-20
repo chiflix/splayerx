@@ -14,7 +14,7 @@
             <div class="element content">
 
               <div class="topContainer">
-                <div class="title" :class="$i18n.locale === 'ja' ? 'subtitleJa' : 'subtitleNormal'">{{ `${this.$t('msg.subtitle.subtitleSelect' )}` }}</div>
+                <div class="title" :class="$i18n.locale === 'ja' ? 'subtitleJa' : 'subtitleNormal'">{{ this.$t('msg.subtitle.subtitleSelect') }}</div>
                 <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
                   :style="{
                     cursor: 'pointer',
@@ -651,6 +651,12 @@ export default {
   .title {
     color: rgba(255, 255, 255, 0.6);
   }
+  .enabledSecondary {
+    width: auto;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+  }
   .menu-item-text-wrapper {
     .deleteIcon {
       transition-delay: 75ms;
@@ -718,10 +724,6 @@ export default {
       max-height: 89px
     }
     .enabledSecondary {
-      width: auto;
-      height: auto;
-      display: flex;
-      flex-direction: row;
       margin: 1px auto 10px 14px;
       font-size: 9px;
       .firstSub {
@@ -794,10 +796,6 @@ export default {
       max-height: 180px
     }
     .enabledSecondary {
-      width: auto;
-      height: auto;
-      display: flex;
-      flex-direction: row;
       margin: -2px auto 10px 16px;
       font-size: 10px;
       .firstSub {
@@ -877,10 +875,6 @@ export default {
       max-height: 350px
     }
     .enabledSecondary {
-      width: auto;
-      height: auto;
-      display: flex;
-      flex-direction: row;
       margin: -2px auto 10px 24px;
       font-size: 12px;
       .firstSub {
