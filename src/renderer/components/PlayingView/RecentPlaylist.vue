@@ -207,7 +207,7 @@ export default {
         let newPosition;
         if (this.mousemovePosition[0] < 0) {
           newPosition = this.firstIndex - 1 >= 0 ? this.firstIndex - 1 : 0;
-          this.firstIndex -= 1;
+          this.firstIndex = this.firstIndex - 1 >= 0 ? this.firstIndex - 1 : 0;
           this.shifting = true;
           this.tranFlag = true;
           setTimeout(() => {
@@ -216,7 +216,7 @@ export default {
           }, 400);
         } else if (this.mousemovePosition[0] > window.innerWidth) {
           newPosition = this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : 0;
-          this.lastIndex += 1;
+          this.lastIndex = this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : 0;
           this.shifting = true;
           this.tranFlag = true;
           setTimeout(() => {
