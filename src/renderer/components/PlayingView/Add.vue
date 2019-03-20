@@ -2,7 +2,7 @@
   <div class="button" ref="button"
     @mouseenter="addMouseenter"
     @mouseleave="addMouseleave"
-    @mouseup="addMouseup">
+    @mouseup.left="addMouseup">
     <div class="btnMask" ref="btnMask">
       <Icon class="addUi" type="add"></Icon>
     </div>

@@ -22,8 +22,8 @@
         <div class="content" ref="content"
           @mouseenter="mouseoverVideo"
           @mouseleave="mouseoutVideo"
-          @mousedown="mousedownVideo"
-          @mouseup="mouseupVideo"
+          @mousedown.left="mousedownVideo"
+          @mouseup.left="mouseupVideo"
           :style="{
             height: '100%',
           }">
