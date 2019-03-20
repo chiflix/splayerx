@@ -23,6 +23,7 @@
     SUBTITLE_UPLOAD,
     UPLOAD_SUCCESS,
     UPLOAD_FAILED,
+    ADD_NO_VIDEO,
   } from '../shared/notificationcodes';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
@@ -58,6 +59,14 @@
               cb: () => {
                 this.$bus.$emit('delete-file');
               },
+            });
+            break;
+          case ADD_NO_VIDEO:
+            this.$store.dispatch('addMessages', {
+              type: 'result',
+              title: this.$t('errorFile.addNoVideo.title'),
+              content: this.$t('errorFile.addNoVideo.content'),
+              dismissAfter: 5000,
             });
             break;
           case EMPTY_FOLDER:

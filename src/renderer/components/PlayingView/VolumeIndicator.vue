@@ -55,7 +55,7 @@ export default {
   },
   props: ['showAllWidgets', 'mousedownOnPlayButton', 'attachedShown'],
   computed: {
-    ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen']),
+    ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen', 'wheelTriggered']),
     ...mapState({
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
     }),
@@ -163,12 +163,25 @@ export default {
     },
   },
   created() {
-    if (this.muted) this.volumeTriggerStopped = this.showAllWidgets;
+    if (this.muted) {
+      this.volumeTriggerStopped = this.showAllWidgets;
+    }
     this.$bus.$on('toggle-fullscreen', this.handleFullScreen);
     this.$bus.$on('to-fullscreen', this.handleFullScreen);
     this.$bus.$on('off-fullscreen', this.handleFullScreen);
   },
   watch: {
+    showAllWidgets(val) {
+      if (!val) this.volumeTriggerStopped = false;
+    },
+    wheelTriggered() {
+      const { clock, volumeTriggerTimerId } = this;
+      this.volumeTriggerStopped = true;
+      clock.clearTimeout(volumeTriggerTimerId);
+      this.volumeTriggerTimerId = clock.setTimeout(() => {
+        this.volumeTriggerStopped = false;
+      }, 1000);
+    },
     showVolume(val) {
       if (!val) document.onmouseup = null;
     },

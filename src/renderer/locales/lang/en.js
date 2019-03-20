@@ -144,7 +144,11 @@ export default {
     },
     emptyFolder: {
       title: 'Open Failed',
-      content: 'Cannot find playable file',
+      content: 'Cannot find playable file.',
+    },
+    addNoVideo: {
+      title: 'Add File Failed',
+      content: 'Cannot find playable file.',
     },
     default: {
       title: 'Open Failed',
