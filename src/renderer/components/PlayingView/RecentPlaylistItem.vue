@@ -1,5 +1,5 @@
 <template>
-<div class="recent-playlist-item" ref="recentPlaylistItem"
+<div class="recent-playlist-item no-drag" ref="recentPlaylistItem"
   :style="{
     transition: tranFlag ? 'transform 100ms ease-out' : '',
     marginRight: sizeAdaption(15),
@@ -375,7 +375,7 @@ export default {
       }
     },
     indexOfMovingTo(val) {
-      if (Math.abs(this.movementY) < this.thumbnailHeight) {
+      if (this.itemMoving && Math.abs(this.movementY) < this.thumbnailHeight) {
         // item moving to right
         if (this.index > this.indexOfMovingItem && this.index <= val) {
           this.displayIndex = this.index - 1;
