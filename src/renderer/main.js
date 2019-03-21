@@ -97,7 +97,6 @@ Vue.mixin(helpers);
 
 const createTextVNode = Vue.prototype._v; // eslint-disable-line
 Vue.prototype._v = function(val) { // eslint-disable-line
-  console.log(this.$i18n);
   const createElement = this.$createElement;
   if (!createElement || !val || typeof val !== 'string'
     || !this.$i18n || this.$i18n.locale !== 'ja') {
@@ -105,7 +104,7 @@ Vue.prototype._v = function(val) { // eslint-disable-line
   }
   const result = kern(createElement, val)
     .map(node => (typeof node === 'string' ? createTextVNode(node) : node));
-  return createElement('span', result);
+  return result.length === 1 ? result[0] : createElement('span', result);
 };
 
 Vue.prototype.$bus = new Vue(); // Global event bus
