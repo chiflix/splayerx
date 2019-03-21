@@ -363,7 +363,6 @@ export default {
       this.$router.push({
         name: 'playing-view',
       });
-      this.$electron.ipcRenderer.send('update-current-route', this.$route.name);
       const value = await this.infoDB.get('recent-played', mediaQuickHash);
       if (value) {
         this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);

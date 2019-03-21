@@ -129,9 +129,6 @@ function registerMainWindowEvent() {
       console.error('callMainWindowMethod', ex, method, JSON.stringify(args));
     }
   });
-  ipcMain.on('update-current-route', (event, args) => {
-    currentRoute = args;
-  });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
     if (!mainWindow || event.sender.isDestroyed()) return;
@@ -457,10 +454,6 @@ function createWindow() {
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
     mainWindow = null;
-    if (currentRoute === 'playing-view') {
-      createWindow();
-    }
-    currentRoute = 'landing-view';
   });
 
   mainWindow.once('ready-to-show', () => {

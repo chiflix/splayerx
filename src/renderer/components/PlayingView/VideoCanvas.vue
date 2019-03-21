@@ -269,8 +269,10 @@ export default {
         this.$router.push({
           name: 'landing-view',
         });
+        const x = (window.screen.width / 2) - 360;
+        const y = (window.screen.height / 2) - 200;
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [720, 405]);
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [200, 200]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
       }
     };
   },
