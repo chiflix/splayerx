@@ -270,6 +270,7 @@ export default {
         e.returnValue = false;
       } else if (!this.quit) {
         e.returnValue = false;
+        this.$bus.$off(); // remove all listeners before back to landing view
         this.$router.push({
           name: 'landing-view',
         });
