@@ -40,7 +40,6 @@ let aboutWindow = null;
 let preferenceWindow = null;
 let tray = null;
 let inited = false;
-let currentRoute = 'landing-view'; // route of mainWindow
 const filesToOpen = [];
 const snapShotQueue = [];
 const thumbnailTask = [];
@@ -529,7 +528,7 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (currentRoute === 'landing-view') {
+  if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
     app.quit();
   }
 });
