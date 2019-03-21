@@ -264,6 +264,13 @@ export default {
             window.close();
           });
         e.returnValue = false;
+      } else {
+        e.returnValue = false;
+        this.$router.push({
+          name: 'landing-view',
+        });
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [720, 405]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [200, 200]);
       }
     };
   },
