@@ -137,6 +137,24 @@ new Vue({
         },
       };
     },
+    updateSecondarySub() {
+      if (this.enabledSecondarySub) {
+        return {
+          label: this.$t('msg.subtitle.disabledSecondarySub'),
+          id: 'secondarySub',
+          click: () => {
+            this.updateEnabledSecondarySub(false);
+          },
+        };
+      }
+      return {
+        label: this.$t('msg.subtitle.enabledSecondarySub'),
+        id: 'secondarySub',
+        click: () => {
+          this.updateEnabledSecondarySub(true);
+        },
+      };
+    },
     updatePlayOrPause() {
       if (!this.paused) {
         return {
@@ -220,9 +238,7 @@ new Vue({
       }
     },
     enabledSecondarySub() {
-      if (this.menu) {
-        this.refreshMenu();
-      }
+      this.refreshMenu();
     },
     currentRouteName(val) {
       if (val === 'landing-view') {
@@ -535,14 +551,6 @@ new Vue({
             //   label: this.$t('msg.subtitle.secondarySubtitle'),
             //   enabled: false,
             // },
-            {
-              label: this.$t('msg.subtitle.enabledSecondarySub'),
-              id: 'secondarySub',
-              type: 'checkbox',
-              click: () => {
-                this.updateEnabledSecondarySub(!this.enabledSecondarySub);
-              },
-            },
             { type: 'separator' },
             {
               label: this.$t('msg.subtitle.subtitleSize'),
@@ -761,9 +769,7 @@ new Vue({
       return this.updateRecentPlay().then((result) => {
         // menu.file add "open recent"
         template[3].submenu.splice(3, 0, this.recentSubMenu());
-        if (this.enabledSecondarySub) {
-          template[3].submenu.splice(4, 0, this.recentSecondarySubMenu());
-        }
+        template[3].submenu.splice(4, 0, this.recentSecondarySubMenu());
         template[1].submenu.splice(0, 0, this.updatePlayOrPause);
         template[4].submenu.splice(2, 0, this.updateFullScreen);
         template[2].submenu.splice(7, 0, this.updateAudioTrack());
@@ -839,9 +845,6 @@ new Vue({
       }).then(() => {
         if (this.currentRouteName === 'landing-view') {
           this.menuStateControl(false);
-        }
-        if (this.enabledSecondarySub) {
-          this.menu.getMenuItemById('secondarySub').checked = true;
         }
         if (this.chosenStyle !== '') {
           this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
@@ -942,18 +945,24 @@ new Vue({
           label: '',
         })),
       };
-      tmp.submenu.splice(0, 1, {
-        id: 'secondSub-1',
-        visible: true,
-        type: 'radio',
-        label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
-        click: () => {
-          this.changeSecondarySubtitle('');
-        },
+      tmp.submenu.splice(0, 1, this.updateSecondarySub);
+      tmp.submenu.splice(1, 1, {
+        type: 'separator',
       });
-      this.subtitleList.forEach((item, index) => {
-        tmp.submenu.splice(index + 1, 1, this.recentSubTmp(index, item, false));
-      });
+      if (this.enabledSecondarySub) {
+        tmp.submenu.splice(2, 1, {
+          id: 'secondSub-1',
+          visible: true,
+          type: 'radio',
+          label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
+          click: () => {
+            this.changeSecondarySubtitle('');
+          },
+        });
+        this.subtitleList.forEach((item, index) => {
+          tmp.submenu.splice(index + 3, 1, this.recentSubTmp(index, item, false));
+        });
+      }
       return tmp;
     },
     updateAudioTrackItem(key, value) {

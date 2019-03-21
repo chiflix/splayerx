@@ -65,6 +65,7 @@ export default {
       increaseSubtitleDelayS: 'Subtitle Delay +0.1s',
       decreaseSubtitleDelayS: 'Subtitle Delay -0.1s',
       enabledSecondarySub: 'Enable Secondary Subtitle',
+      disabledSecondarySub: 'Disable Secondary Subtitle',
       // increaseSubtitleDelayL: 'Subtitle Delay +0.5s',
       // decreaseSubtitleDelayL: 'Subtitle Delay -0.5s',
     },

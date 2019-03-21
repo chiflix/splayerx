@@ -26,12 +26,12 @@
 
               <div class="sub-menu">
                 <div class="enabledSecondary" v-show="enabledSecondarySub">
-                  <div class="firstSub" @mouseup="subToFirst" :style="{
-                    color: isFirstSubtitle ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.3)',
+                  <div class="firstSub" @mouseup="subToFirst" @mouseover="subTypeMouseover(1)" @mouseleave="subTypeMouseleave" :style="{
+                    color: isFirstSubtitle || subTypeHoverIndex === 1 ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.3)',
                     cursor: isFirstSubtitle ? 'default' : 'pointer' }">{{ this.$t('msg.subtitle.firstSubItem') }}
                   </div>
-                  <div class="secondarySub" @mouseup="subToSecondary" :style="{
-                    color: isFirstSubtitle ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.6)',
+                  <div class="secondarySub" @mouseup="subToSecondary" @mouseover="subTypeMouseover(2)" @mouseleave="subTypeMouseleave" :style="{
+                    color: isFirstSubtitle && subTypeHoverIndex !== 2 ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.6)',
                     cursor: isFirstSubtitle ? 'pointer' : 'default' }">{{ this.$t('msg.subtitle.secondarySubItem') }}
                   </div>
                 </div>
@@ -171,6 +171,7 @@ export default {
       refAnimation: '',
       debouncedHandler: debounce(this.handleRefresh, 1000),
       transFlag: true,
+      subTypeHoverIndex: 1,
     };
   },
   computed: {
@@ -362,6 +363,12 @@ export default {
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
       updateSecondSubtitle: subtitleActions.CHANGE_CURRENT_SECOND_SUBTITLE,
     }),
+    subTypeMouseover(index) {
+      this.subTypeHoverIndex = index;
+    },
+    subTypeMouseleave() {
+      this.subTypeHoverIndex = -1;
+    },
     subToFirst() {
       this.updateSubtitleType(true);
     },
@@ -726,7 +733,7 @@ export default {
     }
     .enabledSecondary {
       margin: 1px auto 10px 14px;
-      font-size: 9px;
+      font-size: 10px;
       .firstSub {
         margin-right: 12px;
       }
@@ -798,7 +805,7 @@ export default {
     }
     .enabledSecondary {
       margin: -2px auto 10px 16px;
-      font-size: 10px;
+      font-size: 12px;
       .firstSub {
         margin-right: 12px;
       }
@@ -819,7 +826,7 @@ export default {
         display: flex;
       }
       .text {
-        font-size: 12px;
+        font-size: 13.2px;
         letter-spacing: 0.2px;
         line-height: 14px;
         margin: auto 0 auto 12.73px;
@@ -877,7 +884,7 @@ export default {
     }
     .enabledSecondary {
       margin: -2px auto 10px 24px;
-      font-size: 12px;
+      font-size: 16.8px;
       .firstSub {
         margin-right: 12px;
       }
@@ -898,7 +905,7 @@ export default {
         display: flex;
       }
       .text {
-        font-size: 16px;
+        font-size: 18.48px;
         letter-spacing: 0.27px;
         line-height: 18px;
         margin: auto 0 auto 17.89px;
