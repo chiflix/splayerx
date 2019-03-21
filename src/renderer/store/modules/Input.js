@@ -17,6 +17,7 @@ const getters = {
   volumeKeydown: state => state.pressedKeyboardCodes.includes('ArrowUp') || state.pressedKeyboardCodes.includes('ArrowDown') || state.pressedKeyboardCodes.includes('KeyM'),
   leftMousedown: state => state.pressedMouseButtonNames.includes('left'),
   wheelTriggered: state => state.wheelTimestamp,
+  volumeWheelTriggered: state => state.wheelComponentName !== 'subtitle-control' && state.wheelComponenetName !== 'advance-control',
 };
 
 const mutations = {

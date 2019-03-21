@@ -360,7 +360,6 @@ export default {
       }
       this.$bus.$emit('new-file-open');
       this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
-      this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
       });

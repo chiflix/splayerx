@@ -52,6 +52,7 @@ export default {
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
       nowRate: 1,
+      quit: false,
     };
   },
   methods: {
@@ -208,6 +209,9 @@ export default {
     },
   },
   mounted() {
+    this.$electron.ipcRenderer.on('quit', (event, ...files) => {
+      this.quit = true;
+    });
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
@@ -264,6 +268,17 @@ export default {
             window.close();
           });
         e.returnValue = false;
+      } else if (!this.quit) {
+        e.returnValue = false;
+        this.$bus.$off(); // remove all listeners before back to landing view
+        this.$router.push({
+          name: 'landing-view',
+        });
+        if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+        const x = (window.screen.width / 2) - 360;
+        const y = (window.screen.height / 2) - 200;
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [720, 405]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
       }
     };
   },
