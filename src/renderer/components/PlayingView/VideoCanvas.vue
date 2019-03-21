@@ -273,6 +273,7 @@ export default {
         this.$router.push({
           name: 'landing-view',
         });
+        if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
         const x = (window.screen.width / 2) - 360;
         const y = (window.screen.height / 2) - 200;
         this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [720, 405]);
