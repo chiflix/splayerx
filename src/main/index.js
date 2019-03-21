@@ -40,6 +40,7 @@ let aboutWindow = null;
 let preferenceWindow = null;
 let tray = null;
 let inited = false;
+let currentRoute = 'landing-view'; // route of mainWindow
 const filesToOpen = [];
 const snapShotQueue = [];
 const thumbnailTask = [];
@@ -127,6 +128,9 @@ function registerMainWindowEvent() {
     } catch (ex) {
       console.error('callMainWindowMethod', ex, method, JSON.stringify(args));
     }
+  });
+  ipcMain.on('update-current-route', (event, args) => {
+    currentRoute = args;
   });
   /* eslint-disable no-unused-vars */
   ipcMain.on('windowSizeChange', (event, args) => {
@@ -453,6 +457,10 @@ function createWindow() {
   mainWindow.on('closed', () => {
     ipcMain.removeAllListeners();
     mainWindow = null;
+    if (currentRoute === 'playing-view') {
+      createWindow();
+    }
+    currentRoute = 'landing-view';
   });
 
   mainWindow.once('ready-to-show', () => {
@@ -528,7 +536,7 @@ app.on('ready', () => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
+  if (currentRoute === 'landing-view') {
     app.quit();
   }
 });
