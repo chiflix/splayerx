@@ -475,6 +475,9 @@ function createWindow() {
   }
 }
 
+app.on('before-quit', () => {
+  mainWindow?.webContents.send('quit');
+});
 app.on('second-instance', () => {
   if (mainWindow?.isMinimized()) mainWindow.restore();
   mainWindow?.focus();
