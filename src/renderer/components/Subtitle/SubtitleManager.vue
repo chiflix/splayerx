@@ -23,7 +23,7 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
 import { sep } from 'path';
-import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray, isEmpty } from 'lodash';
+import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
@@ -52,6 +52,7 @@ export default {
     return {
       subtitleInstances: {},
       selectionComplete: false,
+      selectionSecondaryComplete: false,
       isInitial: false,
       linesNum: 1,
       tags: {},
@@ -87,6 +88,7 @@ export default {
       if (newVal) {
         this.resetSubtitles();
         this.selectionComplete = false;
+        this.selectionSecondaryComplete = false;
         const hasOnlineSubtitles =
           !!this.$store.state.Subtitle.videoSubtitleMap[this.originSrc]
             .map((id) => {
@@ -117,7 +119,7 @@ export default {
       }
     },
     currentSecondSubtitleId(newVal) {
-      if (this.selectionComplete || newVal) {
+      if (this.selectionSecondaryComplete || newVal) {
         updateSelectedSubtitleId(this.originSrc, {
           firstId: this.currentFirstSubtitleId, secondaryId: newVal,
         });
@@ -190,6 +192,7 @@ export default {
 
       if (!this.isInitial) {
         this.selectionComplete = false;
+        this.selectionSecondaryComplete = false;
         this.checkCurrentSubtitleList();
       }
 
@@ -201,10 +204,13 @@ export default {
           this.$bus.$emit('refresh-finished');
           if (this.isInitial) {
             const Ids = await retrieveSelectedSubtitleId(videoSrc);
-            if (!isEmpty(Ids)) {
-              this.changeCurrentFirstSubtitle(Ids.firstId || '');
-              this.changeCurrentSecondSubtitle(Ids.secondaryId || '');
+            if (Ids.firstId) {
+              this.changeCurrentFirstSubtitle(Ids.firstId);
               this.selectionComplete = true;
+            }
+            if (Ids.secondaryId) {
+              this.changeCurrentSecondSubtitle(Ids.secondaryId);
+              this.selectionSecondaryComplete = true;
             }
             this.isInitial = false;
           }
@@ -402,25 +408,36 @@ export default {
     checkCurrentSubtitleList() {
       const {
         selectionComplete,
+        selectionSecondaryComplete,
         subtitleList,
         preferredLanguages,
       } = this;
       const validSubtitleList = subtitleList.filter(({ name }) => !!name);
-      if (!selectionComplete) {
+      if (!selectionComplete || !selectionSecondaryComplete) {
         const hasPrimaryLanguage = validSubtitleList
           .find(({ language }) => language === preferredLanguages[0]);
+        const hasSecondaryLanguage = validSubtitleList
+          .find(({ language }) => language === preferredLanguages[1]);
         if (hasPrimaryLanguage) {
           this.changeCurrentFirstSubtitle(hasPrimaryLanguage.id);
           this.selectionComplete = true;
-        } else {
-          const hasSecondaryLanguage = validSubtitleList
-            .find(({ language }) => language === preferredLanguages[1]);
           if (hasSecondaryLanguage) {
-            this.changeCurrentFirstSubtitle(hasSecondaryLanguage.id);
-            this.selectionComplete = true;
-          } else {
-            this.changeCurrentFirstSubtitle('');
+            this.changeCurrentSecondSubtitle(hasSecondaryLanguage.id);
+            this.selectionSecondaryComplete = true;
           }
+        } else if (hasSecondaryLanguage) {
+          if (selectionComplete) {
+            this.changeCurrentSecondSubtitle(hasSecondaryLanguage.id);
+            this.selectionSecondaryComplete = true;
+          } else {
+            this.changeCurrentFirstSubtitle(hasSecondaryLanguage.id);
+            this.changeCurrentSecondSubtitle('');
+            this.selectionComplete = true;
+            this.selectionSecondaryComplete = true;
+          }
+        } else {
+          this.changeCurrentFirstSubtitle('');
+          this.changeCurrentSecondSubtitle('');
         }
       }
     },
@@ -573,6 +590,7 @@ export default {
         .then((subtitleInstances) => {
           this.changeCurrentFirstSubtitle(subtitleInstances[subtitleInstances.length - 1].id);
           this.selectionComplete = true;
+          this.selectionSecondaryComplete = true;
         });
     });
     this.$bus.$on('refresh-subtitles', ({ types, isInitial }) => {

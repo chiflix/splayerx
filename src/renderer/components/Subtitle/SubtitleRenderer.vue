@@ -362,7 +362,7 @@ export default {
         (this.tags.alignment && this.tags.alignment !== 2 && !this.subToTop); // 判断第二字幕是否存在位置信息
     },
     translateWithPos(firstTags) {
-      return !!(this.isFirstSub && this.currentSecondSubtitleId !== '' && !this.isSecondaryHasPos() && !this.isFirstSubHasPos(firstTags));
+      return !!(this.isFirstSub && this.currentSecondSubtitleId !== '' && this.enabledSecondarySub && !this.isSecondaryHasPos() && !this.isFirstSubHasPos(firstTags));
     },
     subLeft(index) {
       const { currentTags: tags, type, isVtt } = this;

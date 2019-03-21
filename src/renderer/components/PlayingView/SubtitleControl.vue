@@ -355,13 +355,11 @@ export default {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
-      changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_FIRST_SUBTITLE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
-      updateSecondSubtitle: subtitleActions.CHANGE_CURRENT_SECOND_SUBTITLE,
     }),
     subTypeMouseover(index) {
       this.subTypeHoverIndex = index;
@@ -423,7 +421,6 @@ export default {
           // first open && matched extensions: ['local', 'embedded', 'online']
           // first open && !matched extensions: ['local', 'embedded']
           // !first open: ['local', 'online']
-          this.updateSecondSubtitle('');
           this.updateSubtitleType(true);
           this.$bus.$emit('refresh-subtitles', { types, isInitial: this.isInitial });
           if (!this.isInitial) {
