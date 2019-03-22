@@ -116,13 +116,12 @@ export default {
       updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
     }),
     async refreshSubtitles(types, videoSrc) {
+      this.updateNoSubtitle(true);
       const supportedTypes = ['local', 'embedded', 'online'];
       const {
         getLocalSubtitlesList,
         getOnlineSubtitlesList,
         getEmbeddedSubtitlesList,
-        normalizeSubtitleList,
-        addSubtitle,
         resetOnlineSubtitles,
         preferredLanguages,
       } = this;
@@ -168,9 +167,6 @@ export default {
       }
 
       return Promise.all(subtitleRequests)
-        .then(subtitleLists => Promise.all(subtitleLists.map(normalizeSubtitleList)))
-        .then(normalizedLists => flatten(normalizedLists))
-        .then(allSubtitles => Promise.all(allSubtitles.map(sub => addSubtitle(sub, videoSrc))))
         .then(async () => {
           this.$bus.$emit('refresh-finished');
           if (this.isInitial) {
@@ -191,7 +187,8 @@ export default {
       return values(mergeWith(
         keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'local', options: { id } })), 'src'),
         keyBy(newLocalSubs, 'src'),
-      ));
+      )).map(this.normalizeSubtitle)
+        .map(sub => this.addSubtitle(sub, videoSrc));
     },
     async getOnlineSubtitlesList(videoSrc, isFetching, storedSubIds, languages) {
       if (!isFetching) {
@@ -208,7 +205,13 @@ export default {
         }
       }
       const hints = this.generateHints(videoSrc);
-      const fetchSubs = lang => fetchOnlineList(videoSrc, lang, hints).catch(() => []);
+      const fetchSubs = lang => fetchOnlineList(videoSrc, lang, hints)
+        .then((results) => {
+          this.$bus.$emit('online-subtitle-found');
+          return Promise.all(results
+            .map(this.normalizeSubtitle)
+            .map(sub => this.addSubtitle(sub, videoSrc)));
+        }).catch(() => []);
       const newSubs = await Promise.all(languages.map(fetchSubs)).then(flatten);
       deleteSubtitles(storedSubIds);
       return newSubs;
@@ -221,7 +224,8 @@ export default {
       return values(mergeWith(
         keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'embedded', options: { id } })), 'src'),
         keyBy(newEmbeddedSubs, 'src'),
-      ));
+      )).map(this.normalizeSubtitle)
+        .map(sub => this.addSubtitle(sub, videoSrc));
     },
     async addSubtitle({ src, type, options }, videoSrc) {
       if (options.id) {
@@ -243,26 +247,18 @@ export default {
       }
       return 'failed'; // slient errors temporarily
     },
-    normalizeSubtitleList(subtitleList) {
-      if (!subtitleList || !Object.keys(subtitleList).length) return [];
-      const processedSubtitleList = [];
-      if (subtitleList instanceof Array) {
-        processedSubtitleList
-          .push(...subtitleList
-            .filter(subtitle => !!subtitle.src && !!subtitle.type)
-            .map(subtitle => ({ ...subtitle, options: subtitle.options || {} })));
-      } else if (typeof subtitleList === 'object') {
-        const { src, type, options } = subtitleList;
-        if (src && type) processedSubtitleList.push({ src, type, options: options || {} });
-      } else if (typeof subtitleList === 'string') {
-        processedSubtitleList.push({ src: subtitleList, type: 'local', options: {} });
-      }
-      if (processedSubtitleList.length) {
+    normalizeSubtitle(subtitle) {
+      if (typeof subtitle === 'object') {
+        const { src, type, options } = subtitle;
+        if (src && type) {
+          this.updateNoSubtitle(false);
+          return { src, type, options: options || {} };
+        }
+      } else if (typeof subtitle === 'string') {
         this.updateNoSubtitle(false);
-      } else {
-        this.updateNoSubtitle(true);
+        return { src: subtitle, type: 'local', options: {} };
       }
-      return processedSubtitleList;
+      return null;
     },
     metaInfoUpdate(id, field, value) {
       this.updateMetaInfo({ id, type: field, value });
@@ -541,7 +537,9 @@ export default {
   },
   created() {
     this.$bus.$on('add-subtitles', (subs) => {
-      Promise.all(this.normalizeSubtitleList(subs)
+      Promise.all(subs
+        .map(this.normalizeSubtitle)
+        .filter(sub => !!sub)
         .map(sub => this.addSubtitle(sub, this.originSrc)))
         .then((subtitleInstances) => {
           this.changeCurrentSubtitle(subtitleInstances[subtitleInstances.length - 1].id);
