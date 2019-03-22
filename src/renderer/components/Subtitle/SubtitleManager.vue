@@ -209,9 +209,9 @@ export default {
             const selectedSubtitles = storedSubtitles
               .filter(({ id }) => [Ids.firstId, Ids.secondaryId].includes(id));
             const shiftFirstId = selectedSubtitles
-              .find(({ language }) => language === preferredLanguages[0]).id;
+              .find(({ language }) => language === preferredLanguages[0])?.id;
             const shiftSecondaryId = selectedSubtitles
-              .find(({ language }) => language === preferredLanguages[1]).id;
+              .find(({ language }) => language === preferredLanguages[1])?.id;
             const firstId = switchLanguage ? shiftFirstId : Ids.firstId;
             const secondaryId = switchLanguage ? shiftSecondaryId : Ids.secondaryId;
             if (firstId) {
