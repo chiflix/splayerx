@@ -204,12 +204,22 @@ export default {
           this.$bus.$emit('refresh-finished');
           if (this.isInitial) {
             const Ids = await retrieveSelectedSubtitleId(videoSrc);
-            if (Ids.firstId) {
-              this.changeCurrentFirstSubtitle(Ids.firstId);
+            const switchLanguage = storedLanguagePreference[0] === preferredLanguages[1] &&
+              storedLanguagePreference[1] === preferredLanguages[0];
+            const selectedSubtitles = storedSubtitles
+              .filter(({ id }) => [Ids.firstId, Ids.secondaryId].includes(id));
+            const shiftFirstId = selectedSubtitles
+              .find(({ language }) => language === preferredLanguages[0]).id;
+            const shiftSecondaryId = selectedSubtitles
+              .find(({ language }) => language === preferredLanguages[1]).id;
+            const firstId = switchLanguage ? shiftFirstId : Ids.firstId;
+            const secondaryId = switchLanguage ? shiftSecondaryId : Ids.secondaryId;
+            if (firstId) {
+              this.changeCurrentFirstSubtitle(firstId);
               this.selectionComplete = true;
             }
-            if (Ids.secondaryId) {
-              this.changeCurrentSecondSubtitle(Ids.secondaryId);
+            if (secondaryId) {
+              this.changeCurrentSecondSubtitle(secondaryId);
               this.selectionSecondaryComplete = true;
             }
             this.isInitial = false;

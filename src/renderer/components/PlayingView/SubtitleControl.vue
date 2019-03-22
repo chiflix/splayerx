@@ -407,6 +407,7 @@ export default {
           this.$bus.$emit('privacy-confirm');
           this.continueRefresh = true;
         } else if (this.privacyAgreement && !this.timer) {
+          this.transFlag = false;
           this.timer = setInterval(() => {
             this.count += 1;
             this.rotateTime = Math.ceil(this.count / 100);
@@ -549,6 +550,7 @@ export default {
     this.$bus.$on('refresh-finished', (timeout) => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
+      this.transFlag = true;
       if (timeout) {
         setTimeout(() => {
           this.addLog('error', {
