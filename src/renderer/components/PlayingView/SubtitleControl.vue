@@ -249,13 +249,13 @@ export default {
     },
     contHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.enabledSecondarySub ? (this.realItemsNum * 31) + 68 :
+        return this.enabledSecondarySub ? (this.realItemsNum * 31) + 74 :
           (this.realItemsNum * 31) + 45;
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.enabledSecondarySub ? (this.realItemsNum * 37) + 75 :
+        return this.enabledSecondarySub ? (this.realItemsNum * 37) + 84 :
           (this.realItemsNum * 37) + 54;
       }
-      return this.enabledSecondarySub ? (this.realItemsNum * 51) + 100 :
+      return this.enabledSecondarySub ? (this.realItemsNum * 51) + 115 :
         (this.realItemsNum * 51) + 76;
     },
     cardPos() {
@@ -729,7 +729,7 @@ export default {
       max-height: 89px
     }
     .enabledSecondary {
-      margin: 1px auto 10px 14px;
+      margin: 3px auto 12px 14px;
       font-size: 10px;
       .firstSub {
         margin-right: 12px;
@@ -801,7 +801,7 @@ export default {
       max-height: 180px
     }
     .enabledSecondary {
-      margin: -2px auto 10px 16px;
+      margin: 1px auto 13px 16px;
       font-size: 12px;
       .firstSub {
         margin-right: 12px;
@@ -880,7 +880,7 @@ export default {
       max-height: 350px
     }
     .enabledSecondary {
-      margin: -2px auto 10px 24px;
+      margin: 2px auto 15px 24px;
       font-size: 16.8px;
       .firstSub {
         margin-right: 12px;

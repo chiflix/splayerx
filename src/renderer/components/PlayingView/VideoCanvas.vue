@@ -169,7 +169,7 @@ export default {
       }
     },
     saveSubtitleStyle() {
-      return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
+      return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize, enabledSecondarySub: this.enabledSecondarySub });
     },
     savePlaybackStates() {
       return asyncStorage.set('playback-states', { volume: this.volume, muted: this.muted });
@@ -177,7 +177,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub',
       'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',

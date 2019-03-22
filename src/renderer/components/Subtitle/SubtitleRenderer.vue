@@ -361,7 +361,7 @@ export default {
       return this.tags.pos || (this.tags.line && this.tags.position) ||
         (this.tags.alignment && this.tags.alignment !== 2 && !this.subToTop); // 判断第二字幕是否存在位置信息
     },
-    translateWithPos(firstTags) {
+    translateWithPos(firstTags) { // 同时存在第一、第二字幕时，如果都没有位置信息，第一字幕需要额外translate
       return !!(this.isFirstSub && this.currentSecondSubtitleId !== '' && this.enabledSecondarySub && !this.isSecondaryHasPos() && !this.isFirstSubHasPos(firstTags));
     },
     subLeft(index) {

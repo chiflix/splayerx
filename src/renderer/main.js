@@ -208,6 +208,7 @@ new Vue({
       if (data.chosenSize) {
         this.updateChosenSize(data.chosenSize);
       }
+      this.updateEnabledSecondarySub(data.enabledSecondarySub);
     });
     asyncStorage.get('playback-states').then((data) => {
       if (data.volume) {
