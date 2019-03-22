@@ -305,13 +305,13 @@ export default {
       }
       return '';
     },
-    transDirection(transNum) {
+    transDirection(transNum) { // 播放列表打开，translate方向改变
       return this.subToTop ? Math.abs(transNum) : transNum;
     },
-    firstSubTransPercent(transPercent) {
+    firstSubTransPercent(transPercent) { // 当播放列表打开，第一字幕对应的transPercent
       return this.subToTop ? 0 : transPercent;
     },
-    secondarySubTransPercent(transPercent) {
+    secondarySubTransPercent(transPercent) { // 当播放列表打开，第二字幕对应的transPercent
       return this.subToTop ? transPercent : 0;
     },
     transPos(index) { // eslint-disable-line
@@ -327,15 +327,15 @@ export default {
         [-50, 0],
         [0, 0],
       ];
-      // const subSpace = [12, 15, 18, 21];
+      // 两个字幕的间距，由不同字幕大小下的不同表达式决定
       const subSpaceFactorsA = [5 / 900, 9 / 900, 10 / 900, 12 / 900];
       const subSpaceFactorsB = [4, 21 / 5, 4, 23 / 5];
-      // 根据字体尺寸和换行数计算第一字幕需要translate的百分比
       const secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
       const firstSubHeight = this.firstLinesNum * 9 * this.scaleNum;
+      // 当播放列表打开时，计算为第二字幕相对于第一字幕需要translate的值
       const subHeightWithDirection = this.subToTop ?
         [firstSubHeight, secondSubHeight] : [secondSubHeight, firstSubHeight];
-      // 第一字幕同时存在多条且之前条存在位置信息时，之前条不纳入translate计算
+      // 根据字体尺寸和换行数计算字幕需要translate的百分比，当第一字幕同时存在多条且之前条存在位置信息时，之前条不纳入translate计算
       const transPercent = texts[index - 1] && !this.isFirstLastSubHasPos(tags[index - 1]) ?
         this.lastTransPercent :
         -((subHeightWithDirection[0] + ((subSpaceFactorsA[this.chosenSize] * this.winHeight) +
