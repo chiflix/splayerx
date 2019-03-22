@@ -549,6 +549,9 @@ export default {
         this.debouncedHandleRefresh();
       }
     });
+    this.$bus.$on('online-subtitle-found', () => {
+      clearTimeout(this.breakTimer);
+    });
 
     document.addEventListener('mouseup', (e) => {
       if (e.button === 0) {
