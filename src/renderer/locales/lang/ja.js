@@ -49,6 +49,8 @@ export default {
       noSubtitle: '見つかりませんでした',
       secondarySubtitle: '第二字幕',
       subtitleStyle: '字幕スタイル',
+      firstSubItem: '結果 I',
+      secondarySubItem: '結果 II',
       style1: '映画スタイル',
       style2: 'アニメスタイル',
       style3: 'クラシックスタイル',
@@ -66,6 +68,8 @@ export default {
       decreaseSubtitleDelayS: '字幕ディレイ -0.1s',
       increaseSubtitleDelayL: '字幕ディレイ +0.5s',
       decreaseSubtitleDelayL: '字幕ディレイ -0.5s',
+      enabledSecondarySub: '第二字幕を開く',
+      disabledSecondarySub: '第二字幕を閉じる',
     },
     window: {
       name: 'ウィンドウ',

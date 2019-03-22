@@ -14,7 +14,7 @@
             <div class="element content">
 
               <div class="topContainer">
-                <div class="title" :class="$i18n.locale === 'ja' ? 'subtitleJa' : 'subtitleNormal'">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
+                <div class="title" :class="$i18n.locale === 'ja' ? 'subtitleJa' : 'subtitleNormal'">{{ this.$t('msg.subtitle.subtitleSelect') }}</div>
                 <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
                   :style="{
                     cursor: 'pointer',
@@ -25,12 +25,23 @@
               </div>
 
               <div class="sub-menu">
-                <div class="scrollScope" :class="refAnimation"
+                <div class="enabledSecondary" v-show="enabledSecondarySub">
+                  <div class="firstSub" @mouseup="subToFirst" @mouseover="subTypeMouseover(1)" @mouseleave="subTypeMouseleave" :style="{
+                    color: isFirstSubtitle || subTypeHoverIndex === 1 ? 'rgba(255, 255, 255, 0.6)' : 'rgba(255, 255, 255, 0.3)',
+                    cursor: isFirstSubtitle ? 'default' : 'pointer' }">{{ this.$t('msg.subtitle.firstSubItem') }}
+                  </div>
+                  <div class="secondarySub" @mouseup="subToSecondary" @mouseover="subTypeMouseover(2)" @mouseleave="subTypeMouseleave" :style="{
+                    color: isFirstSubtitle && subTypeHoverIndex !== 2 ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.6)',
+                    cursor: isFirstSubtitle ? 'pointer' : 'default' }">{{ this.$t('msg.subtitle.secondarySubItem') }}
+                  </div>
+                </div>
+                <div class="scrollScope" :class="refAnimation" ref="scroll"
                   @animationend="finishAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                     height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
                     overflowY: isOverFlow,
+                    maxHeight: scrollMaxHeight,
                   }">
                   <div class="itemContainer">
                     <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)">
@@ -160,10 +171,11 @@ export default {
       refAnimation: '',
       debouncedHandler: debounce(this.handleRefresh, 1000),
       transFlag: true,
+      subTypeHoverIndex: 1,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'isFirstSubtitle', 'enabledSecondarySub']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -205,47 +217,46 @@ export default {
       }
       return 44;
     },
-    isOverFlow() {
-      if (this.andify(this.computedSize >= 289, this.computedSize <= 480)) {
-        return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 2) ? 'scroll' : '';
+    realItemsNum() {
+      return this.computedAvaliableItems.length + 1 + this.loadingTypes.length;
+    },
+    isOverFlow() { // eslint-disable-line complexity
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
+        const stands = this.enabledSecondarySub ? 2 : 3;
+        return this.realItemsNum > stands ? 'scroll' : '';
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 4) ? 'scroll' : '';
+        const stands = this.enabledSecondarySub ? 4 : 5;
+        return this.realItemsNum > stands ? 'scroll' : '';
       }
-      return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 6) ? ' scroll' : '';
+      const stands = this.enabledSecondarySub ? 6 : 7;
+      return this.realItemsNum >= stands ? 'scroll' : '';
     },
     scopeHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.computedAvaliableItems.length > 2 ?
-          (this.loadingTypes.length * 31) + 89 :
-          (((this.computedAvaliableItems.length + 1) * 31) - 4) +
-          (this.loadingTypes.length * 31);
+        return (this.realItemsNum * 31) - 4;
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.computedAvaliableItems.length > 4 ?
-          (this.loadingTypes.length * 37) + 180 :
-          (((this.computedAvaliableItems.length + 1) * 37) - 5) +
-          (this.loadingTypes.length * 37);
+        return (this.realItemsNum * 37) - 5;
       }
-      return this.computedAvaliableItems.length > 6 ?
-        (this.loadingTypes.length * 51) + 350 :
-        (((this.computedAvaliableItems.length + 1) * 51) - 7) +
-        (this.loadingTypes.length * 51);
+      return (this.realItemsNum * 51) - 7;
+    },
+    scrollMaxHeight() {
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
+        return this.enabledSecondarySub ? '66px' : '89px';
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+        return this.enabledSecondarySub ? '155px' : '180px';
+      }
+      return this.enabledSecondarySub ? '322px' : '350px';
     },
     contHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.computedAvaliableItems.length > 2 ?
-          (this.loadingTypes.length * 31) + 138 :
-          45 + ((this.computedAvaliableItems.length + 1) * 31) +
-          (this.loadingTypes.length * 31);
+        return this.enabledSecondarySub ? (this.realItemsNum * 31) + 74 :
+          (this.realItemsNum * 31) + 45;
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.computedAvaliableItems.length > 4 ?
-          (this.loadingTypes.length * 37) + 239 :
-          54 + ((this.computedAvaliableItems.length + 1) * 37) +
-          (this.loadingTypes.length * 37);
+        return this.enabledSecondarySub ? (this.realItemsNum * 37) + 84 :
+          (this.realItemsNum * 37) + 54;
       }
-      return this.computedAvaliableItems.length > 6 ?
-        (this.loadingTypes.length * 51) + 433 :
-        76 + ((this.computedAvaliableItems.length + 1) * 51) +
-        (this.loadingTypes.length * 51);
+      return this.enabledSecondarySub ? (this.realItemsNum * 51) + 115 :
+        (this.realItemsNum * 51) + 76;
     },
     cardPos() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -265,8 +276,16 @@ export default {
         this.scopeHeight + 7;
     },
     currentSubtitleIndex() {
-      return this.computedAvaliableItems.findIndex(subtitle =>
-        subtitle.id === this.currentSubtitleId);
+      return !this.isFirstSubtitle && this.enabledSecondarySub ?
+        this.computedAvaliableItems.findIndex(subtitle =>
+          subtitle.id === this.currentSecondSubtitleId) :
+        this.computedAvaliableItems.findIndex(subtitle =>
+          subtitle.id === this.currentFirstSubtitleId);
+    },
+    currentScrollTop() {
+      const marginFactors = [4, 5, 7];
+      return this.currentSubtitleIndex *
+        (this.itemHeight + marginFactors[[27, 32, 44].indexOf(this.itemHeight)]);
     },
   },
   watch: {
@@ -278,7 +297,7 @@ export default {
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
       if (val === 0) {
-        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$refs.scroll.scrollTop = 0;
       }
     },
     showAttached(val) {
@@ -325,23 +344,41 @@ export default {
         this.loadingSubsPlaceholders.embedded = 'loading';
       }
     },
+    enabledSecondarySub(val) {
+      this.$refs.scroll.scrollTop = val ? 0 : this.currentScrollTop;
+    },
+    isFirstSubtitle() {
+      this.$refs.scroll.scrollTop = this.currentScrollTop;
+    },
   },
   methods: {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
-      changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_SUBTITLE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
+      updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
+    subTypeMouseover(index) {
+      this.subTypeHoverIndex = index;
+    },
+    subTypeMouseleave() {
+      this.subTypeHoverIndex = -1;
+    },
+    subToFirst() {
+      this.updateSubtitleType(true);
+    },
+    subToSecondary() {
+      this.updateSubtitleType(false);
+    },
     handleSubDelete(e, item) {
       if (e.target.nodeName !== 'DIV') {
         this.transFlag = false;
         this.removeLocalSub(item.id);
         this.hoverHeight = 0;
-        if (item.id === this.currentSubtitleId) {
+        if (item.id === this.currentFirstSubtitleId) {
           this.$bus.$emit('off-subtitle');
         }
         deleteSubtitles([item.id], this.originSrc).then((result) => {
@@ -370,6 +407,7 @@ export default {
           this.$bus.$emit('privacy-confirm');
           this.continueRefresh = true;
         } else if (this.privacyAgreement && !this.timer) {
+          this.transFlag = false;
           this.timer = setInterval(() => {
             this.count += 1;
             this.rotateTime = Math.ceil(this.count / 100);
@@ -384,6 +422,7 @@ export default {
           // first open && matched extensions: ['local', 'embedded', 'online']
           // first open && !matched extensions: ['local', 'embedded']
           // !first open: ['local', 'online']
+          this.updateSubtitleType(true);
           this.$bus.$emit('refresh-subtitles', { types, isInitial: this.isInitial });
           if (!this.isInitial) {
             this.addLog('info', {
@@ -413,12 +452,6 @@ export default {
           errcode: SUBTITLE_OFFLINE,
         });
       }
-    },
-    orify(...args) {
-      return args.some(arg => arg == true); // eslint-disable-line
-    },
-    andify(...args) {
-      return args.every(arg => arg == true); // eslint-disable-line
     },
     handleAnimation(anim) {
       this.anim = anim;
@@ -517,6 +550,7 @@ export default {
     this.$bus.$on('refresh-finished', (timeout) => {
       clearInterval(this.timer);
       this.count = this.rotateTime * 100;
+      this.transFlag = true;
       if (timeout) {
         setTimeout(() => {
           this.addLog('error', {
@@ -537,7 +571,7 @@ export default {
         } else {
           this.refAnimation = 'refresh-animation';
         }
-        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$refs.scroll.scrollTop = 0;
         this.timer = null;
       }, 1000);
     });
@@ -627,6 +661,12 @@ export default {
   .title {
     color: rgba(255, 255, 255, 0.6);
   }
+  .enabledSecondary {
+    width: auto;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+  }
   .menu-item-text-wrapper {
     .deleteIcon {
       transition-delay: 75ms;
@@ -671,7 +711,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        margin: 15px auto auto 16px;
+        margin: 15px auto auto 14px;
         letter-spacing: 0.2px;
         line-height: 15px;
       }
@@ -692,6 +732,13 @@ export default {
       width: 160px;
       margin: auto auto 10px auto;
       max-height: 89px
+    }
+    .enabledSecondary {
+      margin: 3px auto 12px 14px;
+      font-size: 10px;
+      .firstSub {
+        margin-right: 12px;
+      }
     }
     .menu-item-text-wrapper {
       width: 142px;
@@ -743,7 +790,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        margin: 18px auto auto 19px;
+        margin: 18px auto auto 16px;
         letter-spacing: 0.23px;
         line-height: 17px;
       }
@@ -757,6 +804,13 @@ export default {
       width: 191px;
       margin: auto auto 12px auto;
       max-height: 180px
+    }
+    .enabledSecondary {
+      margin: 1px auto 13px 16px;
+      font-size: 12px;
+      .firstSub {
+        margin-right: 12px;
+      }
     }
     .sub-menu-wrapper {
       position: absolute;
@@ -774,7 +828,7 @@ export default {
         display: flex;
       }
       .text {
-        font-size: 12px;
+        font-size: 13.2px;
         letter-spacing: 0.2px;
         line-height: 14px;
         margin: auto 0 auto 12.73px;
@@ -815,7 +869,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        margin: 24px auto auto 26px;
+        margin: 24px auto auto 24px;
         letter-spacing: 0.32px;
         line-height: 23px;
       }
@@ -829,6 +883,13 @@ export default {
       width: 266px;
       margin: auto auto 19px auto;
       max-height: 350px
+    }
+    .enabledSecondary {
+      margin: 2px auto 15px 24px;
+      font-size: 16.8px;
+      .firstSub {
+        margin-right: 12px;
+      }
     }
     .sub-menu-wrapper {
       position: absolute;
@@ -846,7 +907,7 @@ export default {
         display: flex;
       }
       .text {
-        font-size: 16px;
+        font-size: 18.48px;
         letter-spacing: 0.27px;
         line-height: 18px;
         margin: auto 0 auto 17.89px;
