@@ -42,6 +42,10 @@ export default {
       type: Number,
       default: 1,
     },
+    firstLinesNum: {
+      type: Number,
+      default: 1,
+    },
     tags: {
       type: Object,
     },
@@ -290,6 +294,8 @@ export default {
       if (!this.isFirstSub) {
         this.$emit('update:linesNum', this.lastLineNum(index) + texts[index].split('<br>').length); // 第二字幕的行数
         this.$emit('update:tags', tags[index]); // 第二字幕的tags
+      } else {
+        this.$emit('update:firstLinesNum', this.lastLineNum(index) + texts[index].split('<br>').length); // 第一字幕的行数
       }
       if (isEqual(tags[index], tags[index - 1])) {
         if (!isVtt) {
@@ -301,6 +307,12 @@ export default {
     },
     transDirection(transNum) {
       return this.subToTop ? Math.abs(transNum) : transNum;
+    },
+    firstSubTransPercent(transPercent) {
+      return this.subToTop ? 0 : transPercent;
+    },
+    secondarySubTransPercent(transPercent) {
+      return this.subToTop ? transPercent : 0;
     },
     transPos(index) { // eslint-disable-line
       const { currentTags: tags, currentTexts: texts, isVtt } = this;
@@ -320,12 +332,14 @@ export default {
       const subSpaceFactorsB = [4, 21 / 5, 4, 23 / 5];
       // 根据字体尺寸和换行数计算第一字幕需要translate的百分比
       const secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
-      const firstSubHeight = (this.lastLineNum(index) + texts[index].split('<br>').length) * 9 * this.scaleNum;
+      const firstSubHeight = this.firstLinesNum * 9 * this.scaleNum;
+      const subHeightWithDirection = this.subToTop ?
+        [firstSubHeight, secondSubHeight] : [secondSubHeight, firstSubHeight];
       // 第一字幕同时存在多条且之前条存在位置信息时，之前条不纳入translate计算
       const transPercent = texts[index - 1] && !this.isFirstLastSubHasPos(tags[index - 1]) ?
         this.lastTransPercent :
-        -((secondSubHeight + ((subSpaceFactorsA[this.chosenSize] * this.winHeight) +
-          subSpaceFactorsB[this.chosenSize])) / firstSubHeight) * 100;
+        -((subHeightWithDirection[0] + ((subSpaceFactorsA[this.chosenSize] * this.winHeight) +
+          subSpaceFactorsB[this.chosenSize])) / subHeightWithDirection[1]) * 100;
       this.lastTransPercent = transPercent;
       if (!isVtt) {
         if (tags[index].pos) {
@@ -334,20 +348,20 @@ export default {
         }
         if (this.translateWithPos(tags[index])) {
           // 没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
-          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index) + transPercent)}%)`;
+          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index) + this.firstSubTransPercent(transPercent))}%)`;
         }
         // 正常translate
-        return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index))}%)`;
+        return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index) + this.secondarySubTransPercent(transPercent))}%)`;
       }
       if (tags[index].line && tags[index].position) {
         return '';
       }
       if (this.translateWithPos(tags[index])) {
         // vtt字幕没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
-        return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index) + transPercent)}%)`;
+        return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index) + this.firstSubTransPercent(transPercent))}%)`;
       }
       // 正常translate
-      return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index))}%)`;
+      return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index) + this.secondarySubTransPercent(transPercent))}%)`;
     },
     isFirstLastSubHasPos(firstTags) {
       return firstTags.pos || (firstTags.line && firstTags.position) ||

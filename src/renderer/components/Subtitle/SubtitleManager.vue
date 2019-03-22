@@ -8,6 +8,7 @@
       :key="currentFirstSubtitleId"
       :isFirstSub="true"
       :linesNum="linesNum"
+      :firstLinesNum.sync="firstLinesNum"
       :tags="tags"/>
     <subtitle-renderer
       ref="subtitleRenderer"
@@ -15,6 +16,7 @@
       :subtitle-instance="subtitleInstances[this.currentSecondSubtitleId]"
       :key="currentSecondSubtitleId"
       :isFirstSub="false"
+      :firstLinesNum="firstLinesNum"
       :linesNum.sync="linesNum"
       :tags.sync="tags"/>
   </div>
@@ -55,6 +57,7 @@ export default {
       selectionSecondaryComplete: false,
       isInitial: false,
       linesNum: 1,
+      firstLinesNum: 1,
       tags: {},
     };
   },
