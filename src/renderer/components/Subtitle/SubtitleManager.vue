@@ -198,6 +198,7 @@ export default {
             type: 'online',
             options: { language, data, id },
           }))
+          .then(sub => this.addSubtitle(this.normalizeSubtitle(sub), videoSrc))
           .catch(() => []);
         const storedSubs = await Promise.all(storedSubIds.map(retrieveSub)).then(flatten);
         if (storedSubs.length) {
