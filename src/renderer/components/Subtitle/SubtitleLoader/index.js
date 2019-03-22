@@ -86,6 +86,13 @@ export default class SubtitleLoader extends EventEmitter {
     if (this.options.id) {
       this.id = this.options.id.toString();
       setImmediate(() => this.emit('loading', this.id));
+      if (this.type === 'modified') {
+        // 在往indexBD存自制字幕的时候，存储成功可以直接发送meta-change
+        // meta数组也是存在文件里面的
+        const { name, language } = this.metaInfo;
+        setImmediate(() => this.emit('meta-change', { field: 'name', value: name }));
+        setImmediate(() => this.emit('meta-change', { field: 'language', value: language }));
+      }
     } else {
       storeSubtitle({
         src: this.src,

@@ -288,12 +288,6 @@ export default {
         if (existedInList && existedInInstances) return 'success';
       }
       const subtitleInstance = new SubtitleLoader(src, type, { ...options });
-      // 如果字幕是自制字幕，并且已经存到IndexDB，就直接更新vuex中name、language
-      if (subtitleInstance.type === 'modified' && subtitleInstance.id) {
-        const { name, language } = subtitleInstance.metaInfo;
-        this.metaInfoUpdate(subtitleInstance.id, 'name', name);
-        this.metaInfoUpdate(subtitleInstance.id, 'language', language);
-      }
       try {
         return this.setupListeners(subtitleInstance, {
           metaChange: this.metaChangeCallback,

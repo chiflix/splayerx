@@ -279,7 +279,7 @@ export default {
         // 当视频宽度小于高度，如果宽度超过480px,才可以使用编辑模式
         sizeAvaliable = this.winWidth >= 480;
       }
-      return this.foundSubtitles && !(this.loadingSubsPlaceholders.length > 0) &&
+      return !(this.loadingSubsPlaceholders.length > 0) &&
         this.computedAvaliableItems.length === 0 && sizeAvaliable;
     },
   },

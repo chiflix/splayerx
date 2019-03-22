@@ -11,10 +11,10 @@
         top: subTop(i),
         bottom: subBottom(i),
         transform: transPos(i),
-        display: !isProfessional || isProfessional && currentSub && currentSub.start === cue.start ? 'flex' : 'none',
+        display: !isProfessional || checkCurrentSub(cue) ? 'flex' : 'none',
         cursor: canUseEditor ? 'pointer' : ''
       }"
-      :class="avaliableClass(i)+`${paused && canUseEditor ? ' enable-hover': ''}`+`${isEditable ? ' editable': ''}`">
+      :class="avaliableClass(i)+`${paused && canUseEditor ? ' enable-hover': ''}`+`${isEditable && index === i ? ' editable': ''}`">
       <div class="cue-wrap" v-if="filter(cue)">
         <CueRenderer v-show="!isEditable || i !== index" class="cueRender"
           :text="cue.text"
@@ -25,6 +25,7 @@
           }"></CueRenderer>
         <div
           class="edit-box"
+          @mousemove.stop=""
           v-show="isEditable && paused && i === index">
           <textarea
             class="subtitle-style1 no-drag"
@@ -56,7 +57,10 @@
     <div
       v-if="(isProfessional && showAddInput)"
       @click.stop="handleClickAddSub"
-      :class="'subContainer subtitle-alignment2'+`${paused && !isEditable ? ' enable-hover': ''}`">
+      :class="'subContainer subtitle-alignment2'+`${paused && !isEditable ? ' enable-hover': ''}`"
+      :style="{
+        bottom: `${((20 + ((winHeight - computedHeight) / 2)) / winHeight) * 100}%`
+      }">
       <div class="cue-wrap">
         <CueRenderer v-show="!isEditable" class="cueRender"
           :text="'点击添加字幕'"
@@ -66,6 +70,7 @@
           }"></CueRenderer>
         <div
           class="edit-box"
+          @mousemove.stop=""
           v-show="isEditable && paused">
           <textarea
             class="subtitle-style1 no-drag"
@@ -112,7 +117,8 @@ export default {
       type: Object,
     },
     currentSub: {
-      type: Object,
+      type: Array,
+      default: () => [],
     },
   },
   components: {
@@ -133,7 +139,6 @@ export default {
       subPlayResY: 0,
       index: 0,
       editVal: '',
-      shortCell: 480,
     };
   },
   computed: {
@@ -210,7 +215,7 @@ export default {
     if (subtitleInstance && !subtitleInstance.parsed) {
       subtitleInstance.once('data', subtitleInstance.parse);
       subtitleInstance.on('parse', (parsed) => {
-        const parsedData = parsed.dialogues;
+        const parsedData = parsed.dialogues.map((e, i) => ({ ...e, index: i }));
         this.videoSegments = this.getVideoSegments(parsedData, this.duration);
         if (parsedData.length) {
           const cues = parsedData
@@ -248,6 +253,12 @@ export default {
         }
       }
       return true;
+    },
+    checkCurrentSub(sub) {
+      if (this.currentSub.length === 0) {
+        return false;
+      }
+      return this.isProfessional && this.currentSub.some(e => e.start === sub.start);
     },
     handleClickAddSub() {
       if (this.paused) {
@@ -301,34 +312,20 @@ export default {
             this.$set(this.currentCues, i, this.currentCues[i]);
             // 保存副本
             // 本地字幕
-            const start = this.currentCues[i].start;
-            const end = this.currentCues[i].end;
             const text = this.currentCues[i].text;
-            let matchIndex = 0;
+            const index = this.currentCues[i].index;
             const subtitleInstance = cloneDeep(this.subtitleInstance);
             if (subtitleInstance.metaInfo && subtitleInstance.metaInfo.format === 'ass') {
-              subtitleInstance.parsed.dialogues.find((e, i) => {
-                if (e && e.start === start && e.end === end) {
-                  subtitleInstance.parsed.dialogues[i].fragments[0].text = text;
-                  matchIndex = i;
-                  return true;
-                }
-                return false;
-              });
               if (text.length === 0) {
-                subtitleInstance.parsed.dialogues.splice(matchIndex, 1);
+                subtitleInstance.parsed.dialogues.splice(index, 1);
+              } else {
+                subtitleInstance.parsed.dialogues[index].fragments[0].text = text;
               }
-            } else {
-              subtitleInstance.parsed.dialogues.find((e, i) => {
-                if (e.start === start && e.end === end) {
-                  e.text = text;
-                  matchIndex = i;
-                  return true;
-                }
-                return false;
-              });
+            } else if (subtitleInstance.metaInfo) {
               if (text.length === 0) {
-                subtitleInstance.parsed.dialogues.splice(matchIndex, 1);
+                subtitleInstance.parsed.dialogues.splice(index, 1);
+              } else {
+                subtitleInstance.parsed.dialogues[index].text = text;
               }
             }
             this.$bus.$emit('modified-subtitle', { sub: subtitleInstance });
@@ -406,7 +403,7 @@ export default {
     },
     setCurrentCues(currentTime) {
       if (!this.subtitleInstance || !this.subtitleInstance.parsed) return;
-      const parsedData = this.subtitleInstance.parsed.dialogues;
+      const parsedData = this.subtitleInstance.parsed.dialogues.map((e, i) => ({ ...e, index: i }));
       if (parsedData) {
         const cues = parsedData
           .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');
@@ -448,7 +445,11 @@ export default {
             }
           });
           currentCues.push({
-            start: item.start, end: item.end, tags: currentTags, text: currentText,
+            start: item.start,
+            end: item.end,
+            tags: currentTags,
+            text: currentText,
+            index: item.index,
           });
         });
         return currentCues;

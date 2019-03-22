@@ -29,46 +29,46 @@ export function metaInfoToWeight(subtitleType, infoType, value, subtitleList, pr
 
 export function rankCalculation(type, options, lastRank) {
   const baseRanks = {
-    custom: 1e16,
+    modified: 1e16,
     local: 1e12,
     embedded: 1e8,
     online: 1e4,
   };
   const rankTypes = [
     {
-      name: 'MATCH_PRIMARY_LANGUAGE',
+      name: 'MATCH_PRIMARY_LANGUAGE', // 匹配到首选语言，++
       value: 1e4,
       types: ['online'],
     },
     {
-      name: 'MATCH_DEFAULT',
+      name: 'MATCH_DEFAULT', // 内嵌字幕流的default属性是true排前面
       value: 1e3,
       types: ['embedded'],
     },
     {
-      name: 'LANGUAGE_RANKING',
+      name: 'LANGUAGE_RANKING', // **不同语言分组
       value: -1e3,
       types: ['online'],
     },
     {
-      name: 'EXISTED_LANGUAGE',
+      name: 'EXISTED_LANGUAGE', // 同一个语言的在线字幕 按加载顺序排
       value: -1e2,
       types: ['online'],
     },
     {
-      name: 'STREAM_INDEX',
+      name: 'STREAM_INDEX', // 内嵌字幕 按照顺序
       value: -1e2,
       types: ['embedded'],
     },
     {
-      name: 'RANKING',
+      name: 'RANKING', // online 数据 会有ranking 属性 ++
       value: 1e1,
       types: ['online'],
     },
     {
-      name: 'EXISTED',
+      name: 'EXISTED', //
       value: -1e0,
-      types: ['custom', 'local', 'embedded', 'online'],
+      types: ['modified', 'local', 'embedded', 'online'],
     },
   ];
   const baseRank = lastRank || baseRanks[type] || 0;
