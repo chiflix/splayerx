@@ -120,6 +120,11 @@ export default function kern(createElement, text) { // eslint-disable-line compl
     } else {
       result[result.length - 1] = result[result.length - 1] + char2;
     }
+
+    if ((/[\u3000-\u9fa5가-힝]/.test(char) && /[a-zA-Z0-9]/.test(nextChar))
+    || (/[\u3000-\u9fa5가-힝]/.test(nextChar) && /[a-zA-Z0-9]/.test(char))) {
+      result.push(createElement('span', { style: { marginLeft: '0.3em' } }));
+    }
   }
   return result;
 }
