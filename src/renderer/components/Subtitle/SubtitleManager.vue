@@ -116,7 +116,6 @@ export default {
       updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
     }),
     async refreshSubtitles(types, videoSrc) {
-      this.updateNoSubtitle(true);
       const supportedTypes = ['local', 'embedded', 'online'];
       const {
         getLocalSubtitlesList,
@@ -168,6 +167,7 @@ export default {
 
       return Promise.all(subtitleRequests)
         .then(async () => {
+          this.updateNoSubtitle(!this.subtitleList.length);
           this.$bus.$emit('refresh-finished');
           if (this.isInitial) {
             const id = await retrieveSelectedSubtitleId(videoSrc);
@@ -251,11 +251,9 @@ export default {
       if (typeof subtitle === 'object') {
         const { src, type, options } = subtitle;
         if (src && type) {
-          this.updateNoSubtitle(false);
           return { src, type, options: options || {} };
         }
       } else if (typeof subtitle === 'string') {
-        this.updateNoSubtitle(false);
         return { src: subtitle, type: 'local', options: {} };
       }
       return null;
