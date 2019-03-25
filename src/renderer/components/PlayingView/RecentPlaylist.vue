@@ -281,6 +281,10 @@ export default {
         this.canRemove = false;
       } else if (this.movingOffset !== 0
         && Math.abs(this.movementY) < this.thumbnailHeight) {
+        this.$store.dispatch('RepositionItemFromPlayingList', {
+          src: this.playingList[index],
+          newPosition: this.indexOfMovingTo,
+        });
         if (this.indexOfMovingTo > this.lastIndex
           && this.lastIndex + 1 !== this.playingList.length) {
           this.lastIndex += 1;
@@ -300,10 +304,6 @@ export default {
             this.tranFlag = false;
           }, 400);
         }
-        this.$store.dispatch('RepositionItemFromPlayingList', {
-          src: this.playingList[index],
-          newPosition: this.indexOfMovingTo,
-        });
         this.hoverIndex = this.indexOfMovingTo;
         // last page
       } else if (index === this.firstIndex - 1) {
