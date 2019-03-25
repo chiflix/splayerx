@@ -202,39 +202,6 @@ export default {
       this.mousedownPosition = [pageX, pageY];
       this.firstIndexOnMousedown = this.firstIndex;
       this.lastIndexOnMousedown = this.lastIndex;
-      document.onmouseup = () => {
-        document.onmousemove = null;
-        if (this.movingOffset !== 0
-          && Math.abs(this.movementY) < this.thumbnailHeight) {
-          let newPosition;
-          if (this.mousemovePosition[0] < 0) {
-            newPosition = this.firstIndex - 1 >= 0 ? this.firstIndex - 1 : 0;
-            this.firstIndex = this.firstIndex - 1 >= 0 ? this.firstIndex - 1 : 0;
-            this.shifting = true;
-            this.tranFlag = true;
-            setTimeout(() => {
-              this.shifting = false;
-              this.tranFlag = false;
-            }, 400);
-          } else if (this.mousemovePosition[0] > window.innerWidth) {
-            newPosition = this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : 0;
-            this.lastIndex =
-             this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : this.lastIndex;
-            this.shifting = true;
-            this.tranFlag = true;
-            setTimeout(() => {
-              this.shifting = false;
-              this.tranFlag = false;
-            }, 400);
-          }
-          this.$store.dispatch('RepositionItemFromPlayingList', {
-            src: this.playingList[index],
-            newPosition,
-          });
-        }
-        this.indexOfMovingItem = this.playingList.length;
-        this.movementX = this.movementY = 0;
-      };
     },
     onItemMousemove(index, pageX, pageY) { // eslint-disable-line complexity
       this.mousemovePosition = [pageX, pageY];
@@ -302,21 +269,9 @@ export default {
         this.indexOfMovingItem = this.playingList.length;
       }
     },
-    onItemMouseover(index, media) {
-      this.hoverIndex = index;
-      this.hoveredMediaInfo = media;
-      this.filename = path.basename(
-        media.path,
-        path.extname(media.path),
-      );
-    },
-    onItemMouseout() {
-      this.hoverIndex = this.playingIndex;
-      this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
-    },
     onItemMouseup(index) { // eslint-disable-line complexity
       if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
-
+      console.log('item-mouseup2');
       document.onmouseup = null;
       if (-(this.movementY) > this.thumbnailHeight * 1.5
        && this.itemMoving && this.canRemove) {
@@ -326,7 +281,7 @@ export default {
         this.canRemove = false;
       } else if (this.movingOffset !== 0
         && Math.abs(this.movementY) < this.thumbnailHeight) {
-        if (this.indexOfMovingTo === this.lastIndex + 1
+        if (this.indexOfMovingTo > this.lastIndex
           && this.lastIndex + 1 !== this.playingList.length) {
           this.lastIndex += 1;
           this.shifting = true;
@@ -335,7 +290,7 @@ export default {
             this.shifting = false;
             this.tranFlag = false;
           }, 400);
-        } else if (this.indexOfMovingTo === this.firstIndex - 1
+        } else if (this.indexOfMovingTo < this.firstIndex
           && this.firstIndex !== 0) {
           this.firstIndex -= 1;
           this.shifting = true;
@@ -345,13 +300,9 @@ export default {
             this.tranFlag = false;
           }, 400);
         }
-        let newPosition;
-        if (this.indexOfMovingTo >= this.maxIndex) newPosition = this.maxIndex - 1;
-        else if (this.indexOfMovingTo < 0) newPosition = 0;
-        else newPosition = this.indexOfMovingTo;
         this.$store.dispatch('RepositionItemFromPlayingList', {
           src: this.playingList[index],
-          newPosition,
+          newPosition: this.indexOfMovingTo,
         });
         this.hoverIndex = this.indexOfMovingTo;
         // last page
@@ -379,6 +330,18 @@ export default {
       }
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
+    },
+    onItemMouseover(index, media) {
+      this.hoverIndex = index;
+      this.hoveredMediaInfo = media;
+      this.filename = path.basename(
+        media.path,
+        path.extname(media.path),
+      );
+    },
+    onItemMouseout() {
+      this.hoverIndex = this.playingIndex;
+      this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
   },
   watch: {
