@@ -252,7 +252,13 @@ new Vue({
         this.menu.getMenuItemById('singleCycle').checked = val;
       }
     },
-    enabledSecondarySub() {
+    enabledSecondarySub(val) {
+      if (this.menu) {
+        this.subtitleList.forEach((item, index) => {
+          this.menu.getMenuItemById(`secondSub${index}`).enabled = val;
+        });
+        this.menu.getMenuItemById('secondSub-1').enabled = val;
+      }
       this.refreshMenu();
     },
     currentRouteName(val) {
@@ -889,7 +895,9 @@ new Vue({
           if (item.id === this.currentSecondSubtitleId && this.menu.getMenuItemById(`secondSub${index}`)) {
             this.menu.getMenuItemById(`secondSub${index}`).checked = true;
           }
+          this.menu.getMenuItemById(`secondSub${index}`).enabled = this.enabledSecondarySub;
         });
+        this.menu.getMenuItemById('secondSub-1').enabled = this.enabledSecondarySub;
       })
         .catch((err) => {
           this.addLog('error', err);
@@ -964,20 +972,18 @@ new Vue({
       tmp.submenu.splice(1, 1, {
         type: 'separator',
       });
-      if (this.enabledSecondarySub) {
-        tmp.submenu.splice(2, 1, {
-          id: 'secondSub-1',
-          visible: true,
-          type: 'radio',
-          label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
-          click: () => {
-            this.changeSecondarySubtitle('');
-          },
-        });
-        this.subtitleList.forEach((item, index) => {
-          tmp.submenu.splice(index + 3, 1, this.recentSubTmp(index, item, false));
-        });
-      }
+      tmp.submenu.splice(2, 1, {
+        id: 'secondSub-1',
+        visible: true,
+        type: 'radio',
+        label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
+        click: () => {
+          this.changeSecondarySubtitle('');
+        },
+      });
+      this.subtitleList.forEach((item, index) => {
+        tmp.submenu.splice(index + 3, 1, this.recentSubTmp(index, item, false));
+      });
       return tmp;
     },
     updateAudioTrackItem(key, value) {

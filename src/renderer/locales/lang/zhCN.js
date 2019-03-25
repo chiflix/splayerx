@@ -38,7 +38,7 @@ export default {
     },
     subtitle: {
       name: '字幕',
-      subtitleSelect: '智能翻译',
+      subtitleSelect: '翻译',
       AITranslation: '重新加载翻译结果',
       menuLoading: '正在匹配翻译结果 ...',
       loadSubtitleFile: '加载字幕文件…',
