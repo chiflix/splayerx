@@ -20,7 +20,7 @@
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-fade-in="showAllWidgets"/>
+    <div class="masking" v-fade-in="showAllWidgets || progressTriggerStopped"/>
     <play-button class="play-button no-drag"
       @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
@@ -41,7 +41,7 @@
       v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
+    <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
     <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
   </div>
 </template>
@@ -115,6 +115,7 @@ export default {
       mousedownOnVolume: false,
       preFullScreen: false,
       dragOver: false,
+      progressTriggerStopped: false,
     };
   },
   computed: {
