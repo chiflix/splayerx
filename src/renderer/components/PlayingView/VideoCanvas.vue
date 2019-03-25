@@ -71,6 +71,7 @@ export default {
     onMetaLoaded(event) {
       this.videoElement = event.target;
       this.videoConfigInitialize({
+        paused: false,
         volume: this.volume * 100,
         muted: this.muted,
         rate: this.nowRate,
@@ -209,7 +210,7 @@ export default {
     },
   },
   mounted() {
-    this.$electron.ipcRenderer.on('quit', (event, ...files) => {
+    this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
     this.videoElement = this.$refs.videoCanvas.videoElement();

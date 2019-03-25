@@ -249,7 +249,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'currentFirstSubtitleId']),
+    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
     computedSize() {
       return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
     },
