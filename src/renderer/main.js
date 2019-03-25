@@ -1230,12 +1230,12 @@ new Vue({
             if (process.platform !== 'darwin') {
               this.$store.dispatch(
                 e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                Math.abs(e.deltaY) * 0.2,
+                Math.abs(e.deltaY) * 0.06,
               );
             } else {
               this.$store.dispatch(
                 e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                Math.abs(e.deltaY) * 0.2,
+                Math.abs(e.deltaY) * 0.06,
               );
             }
           }
