@@ -204,7 +204,7 @@ export default {
       this.lastIndexOnMousedown = this.lastIndex;
       document.onmouseup = () => {
         document.onmousemove = null;
-        if (this.indexOfMovingItem !== this.indexOfMovingTo
+        if (this.movingOffset !== 0
           && Math.abs(this.movementY) < this.thumbnailHeight) {
           let newPosition;
           if (this.mousemovePosition[0] < 0) {
@@ -218,7 +218,8 @@ export default {
             }, 400);
           } else if (this.mousemovePosition[0] > window.innerWidth) {
             newPosition = this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : 0;
-            this.lastIndex = this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : 0;
+            this.lastIndex =
+             this.lastIndex + 1 <= this.maxIndex ? this.lastIndex + 1 : this.lastIndex;
             this.shifting = true;
             this.tranFlag = true;
             setTimeout(() => {
