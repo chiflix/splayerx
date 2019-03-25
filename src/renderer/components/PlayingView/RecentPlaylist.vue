@@ -271,7 +271,6 @@ export default {
     },
     onItemMouseup(index) { // eslint-disable-line complexity
       if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
-      console.log('item-mouseup2');
       document.onmouseup = null;
       if (-(this.movementY) > this.thumbnailHeight * 1.5
        && this.itemMoving && this.canRemove) {
