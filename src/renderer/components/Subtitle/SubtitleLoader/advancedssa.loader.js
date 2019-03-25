@@ -67,7 +67,12 @@ const normalizer = (parsedSubtitle) => {
             pos,
             ...pick(Object.assign({}, sliceTag, fragmentTag), ['b', 'i', 'u', 's']),
           };
-          return { text: text.replace(/[\\/][Nn]|\r?\n|\r/g, '<br>'), tags: finalTags };
+          return {
+            text: text
+              .replace(/[\\/][Nn]|\r?\n|\r/g, '<br>') // replace soft and hard line breaks with <br/>
+              .replace(/\\h/g, ' '), // replace hard space with space
+            tags: finalTags,
+          };
         });
         const finalDialogue = {
           ...baseDiagolue,
