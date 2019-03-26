@@ -3,8 +3,6 @@ import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
 import { times } from 'lodash';
-import asyncStorage from '@/helpers/asyncStorage';
-import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO } from '@/../shared/notificationcodes';
@@ -22,7 +20,6 @@ export default {
       infoDB,
       sagi: Sagi,
       showingPopupDialog: false,
-      stopAccessing: null,
     };
   },
   methods: {
@@ -173,13 +170,7 @@ export default {
         this.showingPopupDialog = false;
         if (process.mas && bookmarks?.length > 0) {
           // TODO: put bookmarks to database
-          asyncStorage.get('bookmark').then((mapObj) => {
-            const temp = {};
-            files.forEach((file, i) => {
-              temp[file] = bookmarks[i];
-            });
-            asyncStorage.set('bookmark', { ...mapObj, ...temp });
-          });
+          console.log(bookmarks);
         }
         if (files) {
           // if selected files contain folders only, then call openFolder()
@@ -351,15 +342,6 @@ export default {
     async playFile(vidPath) {
       const originPath = vidPath;
       let mediaQuickHash;
-      if (process.mas) {
-        if (typeof this.stopAccessing === 'function') this.stopAccessing();
-        const bookmarkObj = syncStorage.getSync('bookmark');
-        if (bookmarkObj.hasOwnProperty(vidPath)) {
-          const { app } = remote;
-          const bookmark = bookmarkObj[vidPath];
-          app.startAccessingSecurityScopedResource(bookmark);
-        }
-      }
       try {
         mediaQuickHash = await this.mediaQuickHash(originPath);
       } catch (err) {

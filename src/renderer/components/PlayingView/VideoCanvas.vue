@@ -261,7 +261,6 @@ export default {
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
           .then(() => {
-            this.stopAccessing();
             this.asyncTasksDone = true;
             window.close();
           })
