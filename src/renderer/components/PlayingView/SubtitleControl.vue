@@ -155,7 +155,7 @@ export default {
       hiddenText: false,
       hoverHeight: 0,
       timer: null,
-      count: 0,
+      count: 1,
       stopCount: 10,
       animClass: false,
       loadingType: '',
