@@ -29,7 +29,7 @@
                     borderRadius: !isFirstSubtitle ? '2px' : '',
                   }"><span>2</span></div>
                 </div>
-                <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh" :class="refRotate" @animationend.native="finishRotate"/>
+                <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh" :class="animClass ? 'icon-rotate-animation' : ''"/>
               </div>
 
               <div class="sub-menu">
@@ -156,7 +156,8 @@ export default {
       hoverHeight: 0,
       timer: null,
       count: 0,
-      rotateTime: 0,
+      stopCount: 10,
+      animClass: false,
       loadingType: '',
       detailTimer: null,
       breakTimer: null,
@@ -273,8 +274,16 @@ export default {
     },
   },
   watch: {
-    rotateTime() {
-      this.refRotate = 'icon-rotate-animation';
+    count(val) {
+      if (val === this.stopCount) {
+        this.animClass = false;
+      }
+    },
+    animClass(val) {
+      if (!val) {
+        this.count = 0;
+        this.stopCount = 10;
+      }
     },
     originSrc() {
       this.showAttached = false;
@@ -348,9 +357,6 @@ export default {
       removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
     }),
-    finishRotate() {
-      this.refRotate = '';
-    },
     subTypeShift() {
       this.updateSubtitleType(!this.isFirstSubtitle);
     },
@@ -389,10 +395,7 @@ export default {
           this.continueRefresh = true;
         } else if (this.privacyAgreement && !this.timer) {
           this.transFlag = false;
-          this.timer = setInterval(() => {
-            this.count += 1;
-            this.rotateTime = Math.ceil(this.count / 100);
-          }, 10);
+          this.animClass = true;
           const types = ['local'];
           if (this.isInitial) types.push('embedded');
           if (!hasOnlineSubtitles &&
@@ -530,7 +533,7 @@ export default {
     });
     this.$bus.$on('refresh-finished', (timeout) => {
       clearInterval(this.timer);
-      this.count = this.rotateTime * 100;
+      this.stopCount = this.count + 1;
       this.transFlag = true;
       if (timeout) {
         setTimeout(() => {
@@ -549,15 +552,17 @@ export default {
           });
           this.onAnimation = false;
           this.anim.loop = false;
-        } else {
-          this.refAnimation = 'refresh-animation';
         }
+        this.refAnimation = 'refresh-animation';
         this.$refs.scroll.scrollTop = 0;
         this.timer = null;
       }, 1000);
     });
   },
   mounted() {
+    document.querySelector('.refresh').addEventListener('animationiteration', () => {
+      this.count += 1;
+    });
     this.$bus.$on('subtitle-refresh-continue', () => {
       if (this.continueRefresh) {
         this.continueRefresh = false;
@@ -981,6 +986,7 @@ export default {
 }
 .icon-rotate-animation {
   animation: icon-rotate 1s linear 1 normal forwards;
+  animation-iteration-count: 10;
 }
 @keyframes menu-refresh {
   0% { opacity: 1 }
