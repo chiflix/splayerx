@@ -38,7 +38,7 @@ export default {
     },
     subtitle: {
       name: '字幕',
-      subtitleSelect: 'トランスレーション',
+      subtitleSelect: '翻訳',
       AITranslation: 'トランスレーション結果を再読込',
       menuLoading: 'ローディング ...',
       loadSubtitleFile: '字幕ファイルを開く…',
@@ -49,8 +49,6 @@ export default {
       noSubtitle: '見つかりませんでした',
       secondarySubtitle: '第二字幕',
       subtitleStyle: '字幕スタイル',
-      firstSubItem: '結果 I',
-      secondarySubItem: '結果 II',
       style1: '映画スタイル',
       style2: 'アニメスタイル',
       style3: 'クラシックスタイル',
