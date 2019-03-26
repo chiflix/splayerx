@@ -14,7 +14,7 @@
         display: !isProfessional || checkCurrentSub(cue) ? 'flex' : 'none',
         cursor: canUseEditor ? 'pointer' : ''
       }"
-      :class="avaliableClass(i)+`${paused && canUseEditor ? ' enable-hover': ''}`+`${isEditable && index === i ? ' editable': ''}`">
+      :class="avaliableClass(i)+`${paused && canUseEditor ? ' enable-hover': ''}`+`${isEditable && index === i ? ' editable': ''}`+isCueFocus(cue)">
       <div class="cue-wrap" v-if="filter(cue)">
         <CueRenderer v-show="!isEditable || i !== index" class="cueRender"
           :text="cue.text"
@@ -30,7 +30,7 @@
           <textarea
             class="subtitle-style1 no-drag"
             contenteditable="true"
-            ref="textarea"
+            :ref="`textarea${i}`"
             @keydown.stop=""
             @blur="handleBlurTextArea($event, i)"
             type="text"
@@ -43,7 +43,7 @@
             }"></textarea>
         </div>
       </div>
-      <div class="professional-btn-wrap" @click.stop="handleClickProfessional" v-if="!isEditable && canUseEditor">
+      <div class="professional-btn-wrap" @click.stop="handleClickProfessional" v-if="!isProfessional && !isEditable && canUseEditor">
         <Icon type="subtitleEditorEnter" class="subtitleEditorEnter" v-if="!isProfessional"
           :style="{
             cursor: 'pointer',
@@ -62,7 +62,7 @@
         bottom: `${((20 + ((winHeight - computedHeight) / 2)) / winHeight) * 100}%`
       }">
       <div class="cue-wrap">
-        <CueRenderer v-show="!isEditable" class="cueRender"
+        <CueRenderer v-show="!isEditable || index !== null" class="cueRender add-cue-render"
           :text="'点击添加字幕'"
           :settings="{}"
           :style="{
@@ -71,7 +71,7 @@
         <div
           class="edit-box"
           @mousemove.stop=""
-          v-show="isEditable && paused">
+          v-show="isEditable && paused && index === null">
           <textarea
             class="subtitle-style1 no-drag"
             contenteditable="true"
@@ -120,6 +120,9 @@ export default {
       type: Array,
       default: () => [],
     },
+    chooseIndexs: {
+      type: Number,
+    },
   },
   components: {
     CueRenderer,
@@ -137,7 +140,7 @@ export default {
       lastText: [],
       subPlayResX: 0,
       subPlayResY: 0,
-      index: 0,
+      index: null,
       editVal: '',
     };
   },
@@ -260,6 +263,23 @@ export default {
       }
       return this.isProfessional && this.currentSub.some(e => e.start === sub.start);
     },
+    isCueFocus(cue) {
+      if (this.currentSub.length === 0 || !this.isProfessional) {
+        return '';
+      }
+      const result = this.currentSub.find(e => cue.start === e.start && cue.end === e.end);
+      if (result && result.index === this.chooseIndexs) {
+        return ' focus';
+      }
+      return '';
+    },
+    getCueIndex(cue) {
+      if (this.currentSub.length === 0 || !this.isProfessional) {
+        return -1;
+      }
+      const result = this.currentSub.find(e => cue.start === e.start && cue.end === e.end);
+      return result ? result.index : -1;
+    },
     handleClickAddSub() {
       if (this.paused) {
         if (!this.isEditable) {
@@ -272,6 +292,7 @@ export default {
       } else {
         this.$bus.$emit('toggle-playback');
       }
+      this.$emit('update:chooseIndexs', -1);
     },
     handleClickSubContainer(e, i) {
       if (!this.canUseEditor) return;
@@ -281,11 +302,16 @@ export default {
           this.toggleEditable(this.paused);
           this.$nextTick(() => {
             this.editVal = this.currentCues[i].text;
-            this.$refs.textarea[this.index] && this.$refs.textarea[this.index].focus();
+            this.$refs[`textarea${i}`][0] && this.$refs[`textarea${i}`][0].focus();
           });
         }
       } else {
         this.$bus.$emit('toggle-playback');
+      }
+      // 点击字幕块，更新字幕条选中状态
+      const index = this.getCueIndex(this.currentCues[i]);
+      if (this.isProfessional && index !== -1) {
+        this.$emit('update:chooseIndexs', index);
       }
     },
     handleDoubleClickSubContainer(e, i) {
@@ -297,9 +323,14 @@ export default {
           this.toggleEditable(this.paused);
           this.$nextTick(() => {
             this.editVal = this.currentCues[i].text;
-            this.$refs.textarea[this.index] && this.$refs.textarea[this.index].focus();
+            this.$refs[`textarea${i}`][0] && this.$refs[`textarea${i}`][0].focus();
           });
         });
+      }
+      // 点击字幕块，更新字幕条选中状态
+      const index = this.getCueIndex(this.currentCues[i]);
+      if (this.isProfessional && index !== -1) {
+        this.$emit('update:chooseIndexs', index);
       }
     },
     handleBlurTextArea(e, i) {
@@ -333,6 +364,7 @@ export default {
           if (this.index === i) {
             this.toggleEditable(false);
             this.editVal = '';
+            this.index = null;
           }
         });
       } else {
@@ -643,8 +675,16 @@ export default {
 </script>
 <style lang="scss" scoped>
 .professional {
+  position: absolute;
+  left: 50%;
+  bottom: 2.88184%;
+  transform-origin: bottom left;
+  z-index: 5;
+  transform: translate(-50%, 0);
   .subContainer {
-    // padding: 5px 15px;
+    position: static;
+    transform: translate(0, 0)!important;
+    justify-content: center;
     &::before {
       content: "";
       width: 100%;
@@ -657,9 +697,19 @@ export default {
       background: rgba(0,0,0,0.05);
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 5px;
+      visibility: hidden;
     }
     .professional-btn-wrap {
       display: flex;
+    }
+    
+    &.editable, &.focus, &:hover {
+      &::before {
+        visibility: visible;
+      }
+    }
+    .add-cue-render {
+      opacity: 0.3;
     }
   }
   .edit-box {

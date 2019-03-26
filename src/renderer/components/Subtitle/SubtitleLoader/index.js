@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import flatten from 'lodash/flatten';
 import helpers from '@/helpers';
 import { storeSubtitle } from '@/helpers/subtitle';
-import { localFormatLoader, castArray, promisify, functionExtraction } from './utils';
+import { localFormatLoader, castArray, promisify, functionExtraction, generateTrack, megreSameTime } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
 
 const files = require.context('.', false, /\.loader\.js$/);
@@ -146,11 +146,26 @@ export default class SubtitleLoader extends EventEmitter {
       if (this.type === 'modified' && this.options.storage.parsed) {
         // 如果是自制字幕不需要parse了，可以直接取存在storage里面的数据
         this.parsed = this.options.storage.parsed;
+        // try {
+        //   // 自制字幕就不需要处理dialogues了
+        //   megreSameTime(this.parsed.dialogues, this.metaInfo.format);
+        //   generateTrack(this.parsed.dialogues, this.metaInfo.format);
+        // } catch (err) {
+        //   console.log(err);
+        // }
         this.emit('parse', this.parsed);
       } else {
         const parser = functionExtraction(this.loader.parser, 'data');
         this.parsed =
           await promisify(parser.func.bind(null, ...this._getParams(castArray(parser.params))));
+        try {
+          // 先合并相同字幕
+          megreSameTime(this.parsed.dialogues, this.metaInfo.format);
+          // 过滤字幕生成对应的轨道
+          generateTrack(this.parsed.dialogues, this.metaInfo.format);
+        } catch (err) {
+          console.log(err);
+        }
         this.emit('parse', this.parsed);
       }
     } catch (e) {

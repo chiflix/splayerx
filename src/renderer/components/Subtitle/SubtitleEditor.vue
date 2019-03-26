@@ -26,20 +26,22 @@
           </div>
         </div> 
         <div class="subtitles" ref="subtitles">
-          <div class="sub" v-for="(sub) in validitySubs"
-            :key="`${sub.width}-${sub.text}`"
+          <div v-for="(sub) in validitySubs"
+            :key="`${sub.width}-${sub.index}-${sub.track}-${sub.text}`"
             @mousedown.left.stop="handleDragStartSub($event, sub)"
             @mousemove.left="handleDragingSub($event, sub)"
             @mouseup.left="handleDragEndSub($event, sub)"
             @dblclick.left="handleDoubleClickSub($event, sub)"
-            :class="sub.focus ? 'focus' : ''"
-            :data="sub.text"
+            :class="sub.index === chooseIndexs ? 'sub focus' : 'sub'"
+            :data="`${sub.width}-${sub.index}-${chooseIndexs}-${sub.track}-${sub.text}`"
             :style="{
               left: `${sub.left}px`,
               right: `${sub.right}px`,
+              top: `${(12 + (sub.track - 1) * 4)}vh`,
               opacity: `${sub.opacity}`,
               // background: `${sub.opacity === 0 ? 'red' : 'rgba(255,255,255,0.13)'}`,
             }">
+            <!-- <span>{{`${sub.left}-${sub.minLeft}-${sub.maxLeft + sub.width}`}}</span> -->
             <i class="drag-left"></i>
             <i class="drag-right"></i>
           </div>
@@ -47,12 +49,19 @@
       </div>
     </div>
     <div class="sub-editor-body">
+      <div class="exit-btn-wrap" @click.stop="handleClickProfessional">
+        <Icon type="subtitleEditorExit" class="subtitleEditorExit"
+          :style="{
+            cursor: 'pointer',
+          }"/>
+      </div>
       <subtitle-renderer
       v-if="!subDragTimeLineMoving"
       :key="subtitleInstance && subtitleInstance.id"
       :showAddInput="showAddInput"
       :newSubHolder="newSubHolder"
       :currentSub="currentSub"
+      :chooseIndexs.sync="chooseIndexs"
       :subtitleInstance="subtitleInstance"/>
     </div>
     <div class="sub-editor-foot">
@@ -68,22 +77,26 @@
   </div>
 </template>
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapMutations } from 'vuex';
 import { throttle } from 'lodash';
 import { videodata } from '@/store/video';
+import { Window as windowMutations } from '@/store/mutationTypes';
 import TheProgressBar from '@/components/PlayingView/TheProgressBar.vue';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
+import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'subtitle-editor',
   components: {
     'the-progress-bar': TheProgressBar,
     SubtitleRenderer,
+    Icon,
   },
   data() {
     return {
       dialogues: [],
+      chooseIndexs: -1, // 单击字幕条选择字幕条的索引，支持ctrl多选
       currentLeft: 0, // 时间轴左偏移 --|-.-|--
       currentTime: 0, // 当前时间轴中分时间刻度，时间轴的中心时间不一定是播放的时间
       preciseTime: 0, // 当前视频的播放时间
@@ -118,7 +131,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'winWidth', 'duration', 'paused',
+      'winWidth', 'duration', 'paused', 'isFullScreen',
     ]),
     scales() {
       return Math.ceil((3 * this.winWidth) / this.space);
@@ -145,23 +158,46 @@ export default {
           const tags = e.fragments && e.fragments[0] && e.fragments[0].tags;
           const isOtherPos = this.type === 'ass' && tags && (tags.pos || tags.alignment !== 2);
           return isInRange && !isOtherPos;
+          // return isInRange;
         });
-      return filters.map((e, i) => {
-        const text = e.fragments && e.fragments[0] && e.fragments[0].text;
-        const focus = e.start <= this.preciseTime && e.end >= this.preciseTime;
+      return filters.map((e, i) => { // eslint-disable-line
+        const text = this.type === 'ass' ? e.fragments && e.fragments[0] && e.fragments[0].text : e.text;
+        // const focus = e.start <= this.preciseTime && e.end >= this.preciseTime;
         let left = (e.start - this.times[0]) * this.space;
         let width = (e.end - e.start) * this.space;
         let right = (3 * this.winWidth) - (left + width);
         let minLeft = (0 - this.times[0]) * this.space;
         let maxLeft = ((this.duration - this.times[0]) - (e.end - e.start)) * this.space;
-        if (i !== 0) {
-          const prevLeft = (filters[i - 1].start - this.times[0]) * this.space;
-          const prevWidth = (filters[i - 1].end - filters[i - 1].start) * this.space;
-          minLeft = prevLeft + prevWidth;
+        // 多轨道，需要比较同一轨道的左右字幕
+        let leftIndex = i - 1;
+        let rightIndex = i + 1;
+        while (leftIndex > -1) { // 往左遍历，找到同一个轨道左边的字幕，设定minLeft
+          if (e.track === filters[leftIndex].track) {
+            if (filters[leftIndex].start > e.start) {
+              const nextLeft = (filters[leftIndex].start - this.times[0]) * this.space;
+              maxLeft = nextLeft - width;
+            } else {
+              const prevLeft = (filters[leftIndex].start - this.times[0]) * this.space;
+              const prevWidth = (filters[leftIndex].end - filters[leftIndex].start) * this.space;
+              minLeft = prevLeft + prevWidth;
+              break;
+            }
+          }
+          leftIndex -= 1;
         }
-        if (i !== (filters.length - 1)) {
-          const nextLeft = (filters[i + 1].start - this.times[0]) * this.space;
-          maxLeft = nextLeft - width;
+        while (rightIndex < filters.length) { // 往右遍历，找到同一轨道右边字幕，设定maxLeft
+          if (e.track === filters[rightIndex].track) {
+            if (filters[rightIndex].start < e.start) {
+              const prevLeft = (filters[rightIndex].start - this.times[0]) * this.space;
+              const prevWidth = (filters[rightIndex].end - filters[rightIndex].start) * this.space;
+              minLeft = prevLeft + prevWidth;
+            } else {
+              const nextLeft = (filters[rightIndex].start - this.times[0]) * this.space;
+              maxLeft = nextLeft - width;
+            }
+            break;
+          }
+          rightIndex += 1;
         }
         let maxRight = (3 * this.winWidth) - (minLeft + width);
         let minRight = (3 * this.winWidth) - (maxLeft + width);
@@ -203,7 +239,7 @@ export default {
           originRight: right,
           originWidth: width,
           text,
-          focus, // 是否是当前播放的字幕
+          // focus, // 是否是当前播放的字幕
           opacity,
         });
       });
@@ -220,6 +256,7 @@ export default {
     },
     currentSub(val) {
       this.computedCanShowAddBtn(val);
+      // console.log(this.validitySubs);
     },
     triggerCount() {
       this.computedCanShowAddBtn(this.currentSub);
@@ -245,13 +282,17 @@ export default {
     },
   },
   created() {
+    // console.log(this.subtitleInstance.parsed.dialogues);
   },
   mounted() {
     this.resetCurrentTime(videodata.time);
     this.computedCanShowAddBtn(this.currentSub);
-    // init
+    // 初始化组件
     document.addEventListener('mousemove', this.handleDragingSub);
     document.addEventListener('mouseup', this.handleDragEndSub);
+    // 键盘事件
+    document.addEventListener('keydown', this.handleKeyDown);
+    document.addEventListener('keyup', this.handleKeyUp);
     // 接受seek事件，触发时间轴重新计算
     this.$bus.$on('seek', (e) => {
       if (!this.timeLineDraging) {
@@ -288,7 +329,11 @@ export default {
     });
   },
   methods: {
+    ...mapMutations({
+      toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
+    }),
     computedCanShowAddBtn(currentSub) { // eslint-disable-line
+      currentSub = currentSub.filter(e => e.track === 1);
       // 当前有显示的字幕, 或者刚刚开始
       if (currentSub.length !== 0 || this.preciseTime < 0.2) {
         this.showAddInput = false;
@@ -313,7 +358,10 @@ export default {
         };
         this.showAddInput = true;
       } else {
-        const last = this.validitySubs.slice().reverse().find(e => e.end < this.preciseTime);
+        const last = this.validitySubs
+          .slice()
+          .reverse()
+          .find(e => e.end < this.preciseTime && e.track === 1);
         if (last && (this.preciseTime - last.end) > 0.2) {
           // 当前时间段有字幕、且可以显示按钮
           this.showAddInput = true;
@@ -469,6 +517,7 @@ export default {
       this.$refs.timeLine.style.transition = 'left 0.3s ease-in-out';
       this.currentLeft += offset;
       this.preciseTime = sub.start + 0.01;
+      this.chooseIndexs = sub.index;
     },
     doubleClickTransitionend() {
       // 时间轴运动到字幕条开始位置，动画结束，重设时间
@@ -487,6 +536,7 @@ export default {
       const rightTarget = path.find(e => e.tagName === 'I' && e.className.includes('drag-right'));
       this.subDragElement = subElement;
       this.subDragCurrentSub = sub;
+      this.chooseIndexs = sub.index;
       if (leftTarget) {
         this.subLeftDraging = true;
       } else if (rightTarget) {
@@ -498,8 +548,8 @@ export default {
         this.$bus.$emit('toggle-playback');
       }
       // 当拖拽字幕条时，保持hover的UI
-      const className = `sub draging${sub.focus ? ' focus' : ''}`;
-      subElement.setAttribute('class', className);
+      // const className = `sub draging${sub.index === this.chooseIndexs ? ' focus' : ''}`;
+      // subElement.setAttribute('class', className);
     },
     handleDragingSub(e) {
       if (this.subRightDraging || this.subLeftDraging || this.subDragMoving) {
@@ -569,7 +619,7 @@ export default {
             this.createSubElement = document.createElement('div');
             this.createSubElement.setAttribute('style', `width: ${sub.width}px;
               position: fixed;
-              top: 12vh;
+              top: ${(12 + ((sub.track - 1) * 4))}vh;
               height: 3vh;
               max-height: 30px;
               z-index: 1;
@@ -665,7 +715,7 @@ export default {
             this.createSubElement = document.createElement('div');
             this.createSubElement.setAttribute('style', `width: ${sub.width}px;
               position: fixed;
-              top: 12vh;
+              top: ${(12 + ((sub.track - 1) * 4))}vh;
               height: 3vh;
               max-height: 30px;
               z-index: 1;
@@ -681,7 +731,6 @@ export default {
               const distance = sub.minLeft - ((3 * this.winWidth) - bMaxR);
               // 当拖拽的字幕条已经快差一步就全部显示到窗口里面的时候
               // DOM镜像就定位到时间轴上面
-              console.log(sub.minLeft);
               if ((distance + (this.step * this.space)) > 0) {
                 this.createSubElement.style.position = 'absolute';
                 this.createSubElement.style.left = `${(this.subDragCurrentSub.minLeft)}px`;
@@ -801,8 +850,8 @@ export default {
         this.$bus.$emit('modified-subtitle', { sub: this.subtitleInstance });
       }
       // 拖拽字幕条结束，移除hover的UI
-      const className = `sub${sub.focus ? ' focus' : ''}`;
-      this.subDragElement.setAttribute('class', className);
+      // const className = `sub${sub.index === this.chooseIndexs ? ' focus' : ''}`;
+      // this.subDragElement.setAttribute('class', className);
       this.subDragStartX = 0;
       this.subDragMoving = false;
       this.subLeftDraging = false;
@@ -816,6 +865,13 @@ export default {
         this.createSubElement.parentNode.removeChild(this.createSubElement);
         this.createSubElement = null;
       }
+    },
+    handleKeyDown(e) {
+      if (e && e.keyCode === 27 && !this.isFullScreen) {
+        this.toggleProfessional(false);
+      }
+    },
+    handleKeyUp() {
     },
     transcode(time, num) {
       if (time < 0) {
@@ -848,10 +904,17 @@ export default {
       }
       return cues;
     },
+    handleClickProfessional() {
+      // 如果退出高级模式，需要恢复原来播放尺寸
+      // 进入高级模式，需要设定window的信息，在本组件的watch里
+      this.toggleProfessional(false);
+    },
   },
   destroyed() {
     document.removeEventListener('mousemove', this.handleDragingSub);
     document.removeEventListener('mouseup', this.handleDragEndSub);
+    document.removeEventListener('keydown', this.handleKeyDown);
+    document.removeEventListener('keyup', this.handleKeyUp);
   },
 };
 </script>
@@ -1027,5 +1090,18 @@ export default {
         cursor: col-resize;
       }
     }
+  }
+  .exit-btn-wrap {
+    width: 6vh; 
+    height: 6vh;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 1111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+    background: rgba(255,255,255,0.05);
   }
 </style>
