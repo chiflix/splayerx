@@ -183,6 +183,7 @@ export default {
       tranFlag: true,
       outOfWindow: false,
       deleteTimeId: NaN,
+      selfMoving: false,
     };
   },
   methods: {
@@ -190,25 +191,43 @@ export default {
       if (this.isPlaying) return;
       this.eventTarget.onItemMousedown(this.index, e.pageX, e.pageY, e);
       document.onmousemove = (e) => {
+        this.selfMoving = true;
+        this.tranFlag = false;
+        this.$refs.recentPlaylistItem.style.zIndex = 200;
+        this.$refs.content.style.zIndex = 200;
         this.outOfWindow = e.pageX > window.innerWidth || e.pageX < 0
           || e.pageY > window.innerHeight || e.pageY < 0;
-        this.tranFlag = false;
         this.eventTarget.onItemMousemove(this.index, e.pageX, e.pageY, e);
         requestAnimationFrame(() => {
           this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${this.movementX}px, ${this.movementY}px)`);
         });
       };
-    },
-    mouseupVideo() {
-      document.onmousemove = null;
-      if (this.selfMoving) {
+      document.onmouseup = () => {
+        document.onmousemove = null;
+        this.selfMoving = false;
+        this.tranFlag = true;
         requestAnimationFrame(() => {
           this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
           this.$refs.progress.style.setProperty('opacity', '0');
+          this.$refs.recentPlaylistItem.style.zIndex = 0;
+          this.$refs.content.style.zIndex = 10;
+          this.updateAnimationOut();
         });
-      }
-      this.eventTarget.onItemMouseup(this.index);
+        this.eventTarget.onItemMouseout();
+        this.eventTarget.onItemMouseup(this.index);
+      };
+    },
+    mouseupVideo() {
+      document.onmousemove = null;
+      this.selfMoving = false;
       this.tranFlag = true;
+      requestAnimationFrame(() => {
+        this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+        this.$refs.progress.style.setProperty('opacity', '0');
+        this.$refs.recentPlaylistItem.style.zIndex = 0;
+        this.$refs.content.style.zIndex = 10;
+      });
+      this.eventTarget.onItemMouseup(this.index);
     },
     updateAnimationIn() {
       if (!this.isPlaying && this.imageLoaded) {
@@ -316,14 +335,6 @@ export default {
         });
       }
     },
-    index(val) {
-      this.displayIndex = val;
-      this.tranFlag = false;
-      this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-      setTimeout(() => {
-        this.tranFlag = true;
-      }, 0);
-    },
     isPlaying(val) {
       if (val) {
         requestAnimationFrame(this.updateAnimationOut);
@@ -347,35 +358,22 @@ export default {
         if (val !== this.index) {
           this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${(val - this.index) * distance}px,0)`);
         } else {
+          this.tranFlag = false;
           this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+          setTimeout(() => {
+            this.tranFlag = true;
+          }, 0);
         }
       });
     },
-    selfMoving(val) {
-      if (val) {
-        this.$refs.recentPlaylistItem.style.zIndex = 200;
-        this.$refs.content.style.zIndex = 200;
-      } else {
-        document.onmousemove = null;
-        this.tranFlag = true;
-        requestAnimationFrame(() => {
-          this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-          if (this.outOfWindow) {
-            this.updateAnimationOut();
-            this.eventTarget.onItemMouseout();
-          }
-          this.$refs.recentPlaylistItem.style.zIndex = 0;
-          this.$refs.content.style.zIndex = 10;
-        });
-      }
-    },
     itemMoving(val) {
       if (!val) {
+        this.tranFlag = true;
         this.displayIndex = this.index;
       }
     },
     indexOfMovingTo(val) {
-      if (this.itemMoving && Math.abs(this.movementY) < this.thumbnailHeight) {
+      if (this.itemMoving && Math.abs(this.movementY) < this.thumbnailHeight && !this.selfMoving) {
         // item moving to right
         if (this.index > this.indexOfMovingItem && this.index <= val) {
           this.displayIndex = this.index - 1;
@@ -426,9 +424,6 @@ export default {
     ...mapGetters(['playingList']),
     aboutToDelete() {
       return this.selfMoving && (-(this.movementY) > this.thumbnailHeight * 1.5);
-    },
-    selfMoving() {
-      return this.indexOfMovingItem === this.index;
     },
     baseName() {
       const parsedName = parseNameFromPath(this.path);
