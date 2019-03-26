@@ -216,7 +216,13 @@ export default {
         this.showingPopupDialog = false;
         if (process.mas && bookmarks?.length > 0) {
           // TODO: put bookmarks to database
-          console.log(bookmarks);
+          asyncStorage.get('bookmark').then((mapObj) => {
+            const temp = {};
+            files.forEach((file, i) => {
+              temp[file] = bookmarks[i];
+            });
+            asyncStorage.set('bookmark', { ...mapObj, ...temp });
+          });
         }
         if (files) {
           this.addFiles(...files);
