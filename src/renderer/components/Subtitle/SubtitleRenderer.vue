@@ -312,7 +312,7 @@ export default {
       return this.subToTop ? 0 : transPercent;
     },
     secondarySubTransPercent(transPercent) { // 当播放列表打开，第二字幕对应的transPercent
-      return this.subToTop ? transPercent : 0;
+      return this.subToTop && this.currentSecondSubtitleId !== '' && this.currentFirstSubtitleId !== '' ? transPercent : 0;
     },
     transPos(index) { // eslint-disable-line
       const { currentTags: tags, currentTexts: texts, isVtt } = this;

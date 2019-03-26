@@ -14,7 +14,7 @@
             <div class="element content">
 
               <div class="topContainer">
-                <div class="title" :class="$i18n.locale === 'ja' ? 'subtitleJa' : 'subtitleNormal'">{{ this.$t('msg.subtitle.subtitleSelect') }}</div>
+                <div class="title subtitleNormal">{{ this.$t('msg.subtitle.subtitleSelect') }}</div>
                 <div class="subtitleShift" @mouseup="subTypeShift" v-show="enabledSecondarySub">
                   <div class="firstSub" :style="{
                     color: isFirstSubtitle ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
