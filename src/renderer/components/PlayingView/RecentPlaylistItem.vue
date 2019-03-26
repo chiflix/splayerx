@@ -206,7 +206,13 @@ export default {
         document.onmousemove = null;
         this.selfMoving = false;
         this.tranFlag = true;
-        this.updateAnimationOut();
+        requestAnimationFrame(() => {
+          this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
+          this.$refs.progress.style.setProperty('opacity', '0');
+          this.$refs.recentPlaylistItem.style.zIndex = 0;
+          this.$refs.content.style.zIndex = 10;
+          this.updateAnimationOut();
+        });
         this.eventTarget.onItemMouseout();
         this.eventTarget.onItemMouseup(this.index);
       };

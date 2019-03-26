@@ -274,6 +274,7 @@ export default {
       document.onmouseup = null;
       if (-(this.movementY) > this.thumbnailHeight * 1.5
        && this.itemMoving && this.canRemove) {
+        console.log('1');
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
         this.hoverIndex = this.playingIndex;
         this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
