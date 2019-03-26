@@ -281,7 +281,7 @@ export default {
     },
     animClass(val) {
       if (!val) {
-        this.count = 0;
+        this.count = 1;
         this.stopCount = 10;
       }
     },
@@ -346,6 +346,9 @@ export default {
     isFirstSubtitle() {
       this.$refs.scroll.scrollTop = this.currentScrollTop;
     },
+    computedAvaliableItems(val) {
+      this.updateNoSubtitle(!val.length);
+    },
   },
   methods: {
     ...mapActions({
@@ -356,6 +359,7 @@ export default {
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
+      updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
     }),
     subTypeShift() {
       this.updateSubtitleType(!this.isFirstSubtitle);
