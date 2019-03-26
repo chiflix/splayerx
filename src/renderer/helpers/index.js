@@ -363,7 +363,7 @@ export default {
         if (bookmarkObj.hasOwnProperty(vidPath)) {
           const { app } = remote;
           const bookmark = bookmarkObj[vidPath];
-          app.startAccessingSecurityScopedResource(bookmark);
+          this.stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
         }
       }
       try {

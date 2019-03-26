@@ -94,6 +94,7 @@ export default {
       this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
       this.changeWindowSize();
+      this.stopAccessing();
     },
     onAudioTrack(event) {
       const { type, track } = event;
@@ -261,7 +262,6 @@ export default {
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
           .then(() => {
-            this.stopAccessing();
             this.asyncTasksDone = true;
             window.close();
           })
