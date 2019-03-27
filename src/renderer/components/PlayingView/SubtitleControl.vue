@@ -29,7 +29,7 @@
                     borderRadius: !isFirstSubtitle ? '2px' : '',
                   }"><span>2</span></div>
                 </div>
-                <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh" :class="animClass ? 'icon-rotate-animation' : ''"/>
+                <Icon type="refresh" class="refresh" ref="refreshRotate" @mouseup.native="handleRefresh" :class="animClass ? 'icon-rotate-animation' : ''"/>
               </div>
 
               <div class="sub-menu">
@@ -569,7 +569,7 @@ export default {
     });
   },
   mounted() {
-    document.querySelector('.refresh').addEventListener('animationiteration', () => {
+    this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
       this.count += 1;
     });
     this.$bus.$on('subtitle-refresh-continue', () => {
