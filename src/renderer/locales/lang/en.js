@@ -48,8 +48,6 @@ export default {
       noSubtitle: 'Not Found',
       mainSubtitle: 'Primary Subtitle',
       secondarySubtitle: 'Secondary Subtitle',
-      firstSubItem: 'Result I',
-      secondarySubItem: 'Result II',
       subtitleStyle: 'Font Style',
       style1: 'Movie Style',
       style2: 'Anime Style',
