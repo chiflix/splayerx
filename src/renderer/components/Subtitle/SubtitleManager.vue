@@ -199,7 +199,6 @@ export default {
 
       return Promise.all(subtitleRequests)
         .then(async () => {
-          this.updateNoSubtitle(!this.subtitleList.length);
           this.$bus.$emit('refresh-finished');
           if (this.isInitial) {
             const Ids = await retrieveSelectedSubtitleId(videoSrc);

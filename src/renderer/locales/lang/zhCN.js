@@ -38,7 +38,7 @@ export default {
     },
     subtitle: {
       name: '字幕',
-      subtitleSelect: '智能翻译',
+      subtitleSelect: '翻译',
       AITranslation: '重新加载翻译结果',
       menuLoading: '正在匹配翻译结果 ...',
       loadSubtitleFile: '加载字幕文件…',
@@ -48,8 +48,6 @@ export default {
       notToShowSubtitle: '无',
       noSubtitle: '暂未找到翻译结果',
       secondarySubtitle: '第二字幕',
-      firstSubItem: '结果 I',
-      secondarySubItem: '结果 II',
       subtitleStyle: '字幕样式',
       style1: '电影风格',
       style2: '动漫风格',
