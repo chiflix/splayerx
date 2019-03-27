@@ -15,15 +15,15 @@
 
               <div class="topContainer">
                 <div class="title subtitleNormal">{{ this.$t('msg.subtitle.subtitleSelect') }}</div>
-                <div class="subtitleShift" @mouseup="subTypeShift" v-show="enabledSecondarySub">
+                <div class="subtitleShift" @mouseup="subTypeShift" v-show="enabledSecondarySub" @mouseover="shiftItemHover" @mouseleave="shiftItemLeave">
                   <div class="firstSub" :style="{
-                    color: isFirstSubtitle ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                    color: isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
                     background: isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
                     boxShadow: isFirstSubtitle ? '1px 0 2px rgba(0, 0, 0, 0.09)' : '',
                     borderRadius: isFirstSubtitle ? '2px' : '',
                   }"><span>1</span></div>
                   <div class="secondarySub" :style="{
-                    color: isFirstSubtitle ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.5)',
+                    color: !isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
                     background: !isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
                     boxShadow: !isFirstSubtitle ? '-1px 0 2px rgba(0, 0, 0, 0.09)' : '',
                     borderRadius: !isFirstSubtitle ? '2px' : '',
@@ -41,7 +41,7 @@
                     overflowY: isOverFlow,
                   }">
                   <div class="itemContainer">
-                    <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)">
+                    <div v-if="!(loadingSubsPlaceholders.length > 0)">
                       <div class="menu-item-text-wrapper"
                         @mouseup="$bus.$emit('off-subtitle')"
                         @mouseover="toggleItemsMouseOver(-1)"
@@ -55,8 +55,7 @@
                       </div>
                     </div>
 
-                      <div v-if="foundSubtitles"
-                        v-for="(item, index) in computedAvaliableItems" :key="item.rank">
+                      <div v-for="(item, index) in computedAvaliableItems" :key="item.rank">
                         <div class="menu-item-text-wrapper"
                           @mouseup="toggleItemClick($event, index)"
                           @mouseover="toggleItemsMouseOver(index)"
@@ -146,7 +145,6 @@ export default {
         embedded: '',
         online: '',
       },
-      foundSubtitles: true,
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
@@ -171,6 +169,7 @@ export default {
       debouncedHandler: debounce(this.handleRefresh, 1000),
       transFlag: true,
       subTypeHoverIndex: 1,
+      shiftItemHovered: false,
     };
   },
   computed: {
@@ -361,6 +360,12 @@ export default {
       updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
       updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
     }),
+    shiftItemHover() {
+      this.shiftItemHovered = true;
+    },
+    shiftItemLeave() {
+      this.shiftItemHovered = false;
+    },
     subTypeShift() {
       this.updateSubtitleType(!this.isFirstSubtitle);
     },
@@ -651,14 +656,11 @@ export default {
   .title {
     color: rgba(255, 255, 255, 0.6);
   }
+  .firstSub, .secondarySub {
+    transition: color 90ms linear;
+  }
   .refresh {
     cursor: pointer;
-  }
-  .enabledSecondary {
-    width: auto;
-    height: auto;
-    display: flex;
-    flex-direction: row;
   }
   .menu-item-text-wrapper {
     .deleteIcon {
