@@ -30,6 +30,7 @@
 <script>
 import electron from 'electron';
 import Icon from '@/components/BaseIconContainer.vue';
+import { codeToLanguageName } from '@/helpers/language';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
@@ -42,7 +43,7 @@ export default {
   data() {
     return {
       showSelection: false,
-      languages: ['zhCN', 'zhTW', 'en', 'ja'],
+      languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
     };
   },
   watch: {
@@ -93,13 +94,7 @@ export default {
   },
   methods: {
     mapCode(code) {
-      const languages = {
-        en: 'English',
-        zhCN: '简体中文',
-        zhTW: '繁体中文',
-        ja: '日本語',
-      };
-      return languages[code];
+      return codeToLanguageName(code);
     },
     handleSelection(language) {
       this.displayLanguage = language;
