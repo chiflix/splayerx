@@ -26,7 +26,7 @@ import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
 import { existsSync } from 'fs';
 import { sep } from 'path';
-import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
+import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, merge, castArray } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
@@ -230,7 +230,7 @@ export default {
     async getLocalSubtitlesList(videoSrc, storedSubs) {
       const newLocalSubs = await searchForLocalList(videoSrc, SubtitleLoader.supportedFormats)
         .catch(() => []);
-      return values(mergeWith(
+      return values(merge(
         keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'local', options: { id } })), 'src'),
         keyBy(newLocalSubs, 'src'),
       ))
@@ -261,7 +261,7 @@ export default {
             .map(sub => this.addSubtitle(sub, videoSrc)));
         }).catch(() => []);
       const newSubs = await Promise.all(languages.map(fetchSubs)).then(flatten);
-      deleteSubtitles(storedSubIds);
+      await deleteSubtitles(storedSubIds, videoSrc);
       return newSubs;
     },
     async getEmbeddedSubtitlesList(videoSrc, storedSubs) {
@@ -269,7 +269,7 @@ export default {
         videoSrc,
         SubtitleLoader.supportedCodecs,
       ).catch(() => []).then(castArray);
-      return values(mergeWith(
+      return values(merge(
         keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'embedded', options: { id } })), 'src'),
         keyBy(newEmbeddedSubs, 'src'),
       )).map(this.normalizeSubtitle)
