@@ -24,6 +24,7 @@
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
+import { existsSync } from 'fs';
 import { sep } from 'path';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
@@ -232,7 +233,8 @@ export default {
       return values(mergeWith(
         keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'local', options: { id } })), 'src'),
         keyBy(newLocalSubs, 'src'),
-      )).map(this.normalizeSubtitle)
+      ))
+        .map(this.normalizeSubtitle)
         .map(sub => this.addSubtitle(sub, videoSrc));
     },
     async getOnlineSubtitlesList(videoSrc, isFetching, storedSubIds, languages) {
@@ -298,6 +300,11 @@ export default {
       if (typeof subtitle === 'object') {
         const { src, type, options } = subtitle;
         if (src && type) {
+          if (type === 'local' && !existsSync(src)) {
+            const failedSubtitle = Object.values(this.subtitleInstances)
+              .find(({ src: existedSrc }) => existedSrc === src);
+            if (failedSubtitle) this.failedCallback(failedSubtitle, {});
+          }
           return { src, type, options: options || {} };
         }
       } else if (typeof subtitle === 'string') {
@@ -409,7 +416,7 @@ export default {
       if (type === 'online') result.data = data;
       return updateSubtitle(id, result);
     },
-    failedCallback({ id, videoSrc }, { error, bubble }) {
+    failedCallback({ id, videoSrc }, { error, bubble } = {}) {
       if (bubble) this.addLog('error', { errcode: bubble, message: error.message });
       if (this.currentFirstSubtitleId === id) this.changeCurrentFirstSubtitle('');
       if (this.currentSecondSubtitleId === id) this.changeCurrentSecondSubtitle('');
