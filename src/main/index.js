@@ -520,6 +520,9 @@ app.on('ready', () => {
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
     mainWindow?.openDevTools();
   });
+  globalShortcut.register('CmdOrCtrl+Shift+J+K+L', () => {
+    preferenceWindow?.openDevTools();
+  });
 
   if (process.platform === 'win32') {
     globalShortcut.register('CmdOrCtrl+`', () => {
