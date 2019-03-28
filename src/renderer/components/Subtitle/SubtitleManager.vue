@@ -408,8 +408,12 @@ export default {
       if (type === 'online') result.data = data;
       return updateSubtitle(id, result);
     },
-    failedCallback({ id }) {
+    failedCallback({ id }, { error, bubble }) {
+      if (bubble) this.addLog('error', { errcode: bubble, message: error.message });
+      if (this.currentFirstSubtitleId === id) this.changeCurrentFirstSubtitle('');
+      if (this.currentSecondSubtitleId === id) this.changeCurrentSecondSubtitle('');
       this.$delete(this.subtitleInstances, id);
+      deleteSubtitles([id]);
       this.addSubtitleWhenFailed({ id });
     },
     checkCurrentSubtitleList() {
