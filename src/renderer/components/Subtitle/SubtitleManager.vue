@@ -281,7 +281,7 @@ export default {
         const existedInInstances = !!this.subtitleInstances[options.id];
         if (existedInList && existedInInstances) return 'success';
       }
-      const subtitleInstance = new SubtitleLoader(src, type, { ...options });
+      const subtitleInstance = new SubtitleLoader(src, type, { ...options, videoSrc });
       subtitleInstance.videoSrc = videoSrc;
       try {
         return this.setupListeners(subtitleInstance, {

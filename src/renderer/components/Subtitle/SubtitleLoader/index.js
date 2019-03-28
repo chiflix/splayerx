@@ -82,6 +82,7 @@ export default class SubtitleLoader extends EventEmitter {
 
       this.options = options || {};
       this.data = this.options.data; // set data for stored online subtitles
+      this.videoSrc = this.options.videoSrc; // set videoSrc
 
       // subtitle id
       if (this.options.id) {
