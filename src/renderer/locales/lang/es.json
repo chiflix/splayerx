@@ -5,10 +5,10 @@
 		"changeTrack": "Pista de audio",
 		"chosenTrack": "Defecto",
 		"fontItems": [
-			"s",
-			"metro",
+			"S",
+			"M",
 			"L",
-			"SG"
+			"XL"
 		],
 		"fontSize": "Tamaño de fuente",
 		"fontStyle": "Estilo de fuente",
