@@ -4,6 +4,7 @@ import flatten from 'lodash/flatten';
 import { storeSubtitle } from '@/helpers/subtitle';
 import { localFormatLoader, castArray, promisify, functionExtraction, detectEncodingFromFileSync, embeddedSrcLoader } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
+import { NOT_SUPPORTED_SUBTITLE } from '../../../../shared/notificationcodes';
 
 const files = require.context('.', false, /\.loader\.js$/);
 const loaders = {};
@@ -113,7 +114,7 @@ export default class SubtitleLoader extends EventEmitter {
         });
       }
     } catch (err) {
-      this.fail(err);
+      this.fail.bind(this)(err);
     }
   }
 
@@ -131,7 +132,7 @@ export default class SubtitleLoader extends EventEmitter {
       });
       this.emit('ready', metaInfo);
     } catch (e) {
-      this.fail(e);
+      this.fail.bind(this)(e);
     }
   }
 
@@ -145,7 +146,7 @@ export default class SubtitleLoader extends EventEmitter {
         this.emit('data', this.data);
       }
     } catch (e) {
-      this.fail(e);
+      this.fail.bind(this)(e);
     }
   }
 
@@ -156,25 +157,14 @@ export default class SubtitleLoader extends EventEmitter {
         await promisify(parser.func.bind(null, ...this._getParams(castArray(parser.params))));
       this.emit('parse', this.parsed);
     } catch (e) {
-      this.fail(e);
+      this.fail.bind(this)(e);
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  fail(err) {
-    if (err.name === 'SubtitleError') {
-      switch (err.code) {
-        default:
-          break;
-        case ErrorCodes.SUBTITLE_INVALID_FORMAT:
-        case ErrorCodes.SUBTITLE_INVALID_TYPE:
-        case ErrorCodes.ENCODING_UNSUPPORTED_ENCODING:
-        case ErrorCodes.SUBTITLE_INVALID_CONTENT:
-          this.emit('failed', {
-            id: this.id,
-            error: 'Unsupported Subtitle.',
-          });
-      }
-    }
+  fail(error) {
+    this.emit('failed', {
+      error,
+      bubble: NOT_SUPPORTED_SUBTITLE,
+    });
   }
 }
