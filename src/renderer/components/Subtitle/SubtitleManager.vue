@@ -280,6 +280,7 @@ export default {
         if (existedInList && existedInInstances) return 'success';
       }
       const subtitleInstance = new SubtitleLoader(src, type, { ...options });
+      subtitleInstance.videoSrc = videoSrc;
       try {
         return this.setupListeners(subtitleInstance, {
           metaChange: this.metaChangeCallback,
@@ -408,12 +409,12 @@ export default {
       if (type === 'online') result.data = data;
       return updateSubtitle(id, result);
     },
-    failedCallback({ id }, { error, bubble }) {
+    failedCallback({ id, videoSrc }, { error, bubble }) {
       if (bubble) this.addLog('error', { errcode: bubble, message: error.message });
       if (this.currentFirstSubtitleId === id) this.changeCurrentFirstSubtitle('');
       if (this.currentSecondSubtitleId === id) this.changeCurrentSecondSubtitle('');
       this.$delete(this.subtitleInstances, id);
-      deleteSubtitles([id]);
+      deleteSubtitles([id], videoSrc);
       this.addSubtitleWhenFailed({ id });
     },
     checkCurrentSubtitleList() {
