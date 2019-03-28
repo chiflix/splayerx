@@ -328,7 +328,8 @@ export default {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
       }
-      this.computedAvaliableItems = val.filter(sub => sub.name);
+      this.computedAvaliableItems = val
+        .filter(({ name, loading }) => name && loading !== 'failed');
     },
     loadingType(val) {
       if (val === 'local') {
