@@ -186,8 +186,8 @@
 	"privacyBubble": {
 		"confirmDisable": {
 			"button": "CANCEL",
-			"partOne": "Confirm to",
-			"partTwo": "anonymous data and Smart Translation.",
+			"partOne": "Confirm to ",
+			"partTwo": " anonymous data and Smart Translation.",
 			"underlinedContent": "disable"
 		},
 		"masVersion": {
@@ -197,7 +197,7 @@
 		},
 		"tryToDisable": {
 			"button": "OK",
-			"partOne": "SPlayer uses anonymous data to enhance user experience. Smart Translation will be disabled if you",
+			"partOne": "SPlayer uses anonymous data to enhance user experience. Smart Translation will be disabled if you ",
 			"partTwo": ".",
 			"underlinedContent": "disagree"
 		}
