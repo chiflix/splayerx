@@ -35,7 +35,7 @@
     <transition name="welcome-container-transition">
       <div class="welcome-container" v-if="landingLogoAppear">
         <div class="logo-container">
-          <img class="logo" src="~@/assets/logo.png" alt="electron-vue" draggable="false">
+          <Icon type="logo"/>
         </div>
         <div class="welcome">
           <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
@@ -60,6 +60,7 @@
 <script>
 import fs from 'fs';
 import { mapState, mapGetters } from 'vuex';
+import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
@@ -86,6 +87,7 @@ export default {
   watch: {
   },
   components: {
+    Icon,
     Titlebar,
     Playlist,
     NotificationBubble,

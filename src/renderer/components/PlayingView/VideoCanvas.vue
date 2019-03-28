@@ -52,6 +52,7 @@ export default {
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
       nowRate: 1,
+      quit: false,
     };
   },
   methods: {
@@ -70,6 +71,7 @@ export default {
     onMetaLoaded(event) {
       this.videoElement = event.target;
       this.videoConfigInitialize({
+        paused: false,
         volume: this.volume * 100,
         muted: this.muted,
         rate: this.nowRate,
@@ -169,7 +171,7 @@ export default {
       }
     },
     saveSubtitleStyle() {
-      return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize });
+      return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize, enabledSecondarySub: this.enabledSecondarySub });
     },
     savePlaybackStates() {
       return asyncStorage.set('playback-states', { volume: this.volume, muted: this.muted });
@@ -177,7 +179,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId',
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub',
       'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -208,6 +210,9 @@ export default {
     },
   },
   mounted() {
+    this.$electron.ipcRenderer.on('quit', () => {
+      this.quit = true;
+    });
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
@@ -225,6 +230,7 @@ export default {
       this.$ga.event('app', 'toggle-playback');
     });
     this.$bus.$on('next-video', () => {
+      videodata.paused = false;
       if (this.nextVideo) {
         this.playFile(this.nextVideo);
       }
@@ -263,6 +269,17 @@ export default {
             window.close();
           });
         e.returnValue = false;
+      } else if (!this.quit) {
+        e.returnValue = false;
+        this.$bus.$off(); // remove all listeners before back to landing view
+        this.$router.push({
+          name: 'landing-view',
+        });
+        if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
+        const x = (window.screen.width / 2) - 360;
+        const y = (window.screen.height / 2) - 200;
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [720, 405]);
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
       }
     };
   },

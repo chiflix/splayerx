@@ -16,7 +16,8 @@ const state = {
   formats: {},
   types: {},
   ranks: {},
-  currentSubtitleId: '',
+  currentFirstSubtitleId: '',
+  currentSecondSubtitleId: '',
   videoSubtitleMap: {},
   chosenStyle: '',
   chosenSize: 1,
@@ -24,10 +25,13 @@ const state = {
   scaleNum: 1,
   calculatedNoSub: true,
   subToTop: false,
+  isFirstSubtitle: true,
+  enabledSecondarySub: false,
 };
 
 const getters = {
-  currentSubtitleId: state => state.currentSubtitleId,
+  currentFirstSubtitleId: state => state.currentFirstSubtitleId,
+  currentSecondSubtitleId: state => state.currentSecondSubtitleId,
   allSubtitleList: ({
     loadingStates, names, languages, formats, ranks, types,
   }) => (
@@ -46,9 +50,9 @@ const getters = {
     (videoSubtitleMap[originSrc] || [])
       .map(subtitleId => allSubtitleList.find(({ id }) => id === subtitleId))
       .sort((a, b) => b.rank - a.rank),
-  ableToPushCurrentSubtitle: ({ currentSubtitleId }, { subtitleList }) => {
-    if (!currentSubtitleId) return false;
-    const currentSubtitle = subtitleList.find(({ id }) => id === currentSubtitleId);
+  ableToPushCurrentSubtitle: ({ currentFirstSubtitleId }, { subtitleList }) => {
+    if (!currentFirstSubtitleId) return false;
+    const currentSubtitle = subtitleList.find(({ id }) => id === currentFirstSubtitleId);
     if (currentSubtitle) {
       return currentSubtitle.loading === 'loaded' || currentSubtitle.loading === 'ready';
     }
@@ -62,6 +66,8 @@ const getters = {
   scaleNum: state => state.scaleNum,
   calculatedNoSub: state => state.calculatedNoSub,
   subToTop: state => state.subToTop,
+  isFirstSubtitle: state => state.isFirstSubtitle,
+  enabledSecondarySub: state => state.enabledSecondarySub,
 };
 
 const mutations = {
@@ -105,8 +111,11 @@ const mutations = {
   [subtitleMutations.RANKS_UPDATE]({ ranks }, { id, rank }) {
     Vue.set(ranks, id, rank);
   },
-  [subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE](state, subtitleId) {
-    state.currentSubtitleId = subtitleId;
+  [subtitleMutations.CURRENT_FIRST_SUBTITLE_ID_UPDATE](state, subtitleId) {
+    state.currentFirstSubtitleId = subtitleId;
+  },
+  [subtitleMutations.CURRENT_SECOND_SUBTITLE_ID_UPDATE](state, subtitleId) {
+    state.currentSecondSubtitleId = subtitleId;
   },
   [subtitleMutations.SUBTITLE_DELAY_UPDATE](state, payload) {
     if (payload === 0) {
@@ -129,6 +138,16 @@ const mutations = {
   },
   [subtitleMutations.SUBTITLE_TOP_UPDATE](state, payload) {
     state.subToTop = payload;
+  },
+  [subtitleMutations.CURRENT_SUBTITLE_REMOVE](state, payload) {
+    const index = state.videoSubtitleMap[payload.src].indexOf(payload.id);
+    state.videoSubtitleMap[payload.src].splice(index, 1);
+  },
+  [subtitleMutations.SUBTITLE_TYPE_UPDATE](state, payload) {
+    state.isFirstSubtitle = payload;
+  },
+  [subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE](state, payload) {
+    state.enabledSecondarySub = payload;
   },
 };
 
@@ -174,16 +193,31 @@ const actions = {
       commit(subtitleMutations.VIDEO_SUBTITLE_MAP_UPDATE, { videoSrc, ids: finalIds });
     }
   },
-  [subtitleActions.CHANGE_CURRENT_SUBTITLE]({ commit, getters }, id) {
+  [subtitleActions.CHANGE_CURRENT_FIRST_SUBTITLE]({ commit, getters }, id) {
     if (!id || getters.subtitleList.map(({ id }) => id).includes(id)) {
-      commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, id || '');
+      if (getters.currentSecondSubtitleId === id) {
+        commit(subtitleMutations.CURRENT_SECOND_SUBTITLE_ID_UPDATE, '');
+      }
+      commit(subtitleMutations.CURRENT_FIRST_SUBTITLE_ID_UPDATE, id || '');
     }
   },
-  [subtitleActions.OFF_SUBTITLES]({ commit }) {
-    commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
+  [subtitleActions.CHANGE_CURRENT_SECOND_SUBTITLE]({ commit, getters }, id) {
+    if (!id || getters.subtitleList.map(({ id }) => id).includes(id)) {
+      if (getters.currentFirstSubtitleId === id) {
+        commit(subtitleMutations.CURRENT_FIRST_SUBTITLE_ID_UPDATE, '');
+      }
+      commit(subtitleMutations.CURRENT_SECOND_SUBTITLE_ID_UPDATE, id || '');
+    }
+  },
+  [subtitleActions.OFF_SUBTITLES]({ commit, getters }) {
+    if (getters.isFirstSubtitle) {
+      commit(subtitleMutations.CURRENT_FIRST_SUBTITLE_ID_UPDATE, '');
+    } else {
+      commit(subtitleMutations.CURRENT_SECOND_SUBTITLE_ID_UPDATE, '');
+    }
   },
   [subtitleActions.RESET_SUBTITLES]({ commit }) {
-    commit(subtitleMutations.CURRENT_SUBTITLE_ID_UPDATE, '');
+    commit(subtitleMutations.CURRENT_FIRST_SUBTITLE_ID_UPDATE, '');
   },
   [subtitleActions.RESET_ONLINE_SUBTITLES]({
     commit, state, getters, dispatch,
@@ -237,6 +271,15 @@ const actions = {
   },
   [subtitleActions.UPDATE_SUBTITLE_TOP]({ commit }, delta) {
     commit(subtitleMutations.SUBTITLE_TOP_UPDATE, delta);
+  },
+  [subtitleActions.REMOVE_LOCAL_SUBTITLE]({ commit, getters }, delta) {
+    commit(subtitleMutations.CURRENT_SUBTITLE_REMOVE, { id: delta, src: getters.originSrc });
+  },
+  [subtitleActions.UPDATE_SUBTITLE_TYPE]({ commit }, delta) {
+    commit(subtitleMutations.SUBTITLE_TYPE_UPDATE, delta);
+  },
+  [subtitleActions.UPDATE_ENABLED_SECONDARY_SUBTITLE]({ commit }, delta) {
+    commit(subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE, delta);
   },
 };
 

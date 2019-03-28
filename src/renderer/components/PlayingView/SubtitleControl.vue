@@ -14,18 +14,26 @@
             <div class="element content">
 
               <div class="topContainer">
-                <div class="title" :class="$i18n.locale === 'ja' ? 'subtitleJa' : 'subtitleNormal'">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
-                <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
-                  :style="{
-                    cursor: 'pointer',
-                    transform: `rotate(${rotateTime * 360}deg)`,
-                    transition: 'transform 1s linear',
-                    transformOrigin: 'center',
-                  }"/>
+                <div class="title subtitleNormal">{{ this.$t('msg.subtitle.subtitleSelect') }}</div>
+                <div class="subtitleShift" @mouseup="subTypeShift" v-show="enabledSecondarySub" @mouseover="shiftItemHover" @mouseleave="shiftItemLeave">
+                  <div class="firstSub" :style="{
+                    color: isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                    background: isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
+                    boxShadow: isFirstSubtitle ? '1px 0 2px rgba(0, 0, 0, 0.09)' : '',
+                    borderRadius: isFirstSubtitle ? '2px' : '',
+                  }"><span>1</span></div>
+                  <div class="secondarySub" :style="{
+                    color: !isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                    background: !isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
+                    boxShadow: !isFirstSubtitle ? '-1px 0 2px rgba(0, 0, 0, 0.09)' : '',
+                    borderRadius: !isFirstSubtitle ? '2px' : '',
+                  }"><span>2</span></div>
+                </div>
+                <Icon type="refresh" class="refresh" ref="refreshRotate" @mouseup.native="handleRefresh" :class="animClass ? 'icon-rotate-animation' : ''"/>
               </div>
 
               <div class="sub-menu">
-                <div class="scrollScope" :class="refAnimation"
+                <div class="scrollScope" :class="refAnimation" ref="scroll"
                   @animationend="finishAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
@@ -33,7 +41,7 @@
                     overflowY: isOverFlow,
                   }">
                   <div class="itemContainer">
-                    <div v-if="foundSubtitles && !(loadingSubsPlaceholders.length > 0)">
+                    <div v-if="!(loadingSubsPlaceholders.length > 0)">
                       <div class="menu-item-text-wrapper"
                         @mouseup="$bus.$emit('off-subtitle')"
                         @mouseover="toggleItemsMouseOver(-1)"
@@ -47,10 +55,9 @@
                       </div>
                     </div>
 
-                      <div v-if="foundSubtitles"
-                        v-for="(item, index) in computedAvaliableItems" :key="item.rank">
+                      <div v-for="(item, index) in computedAvaliableItems" :key="item.rank">
                         <div class="menu-item-text-wrapper"
-                          @mouseup="toggleItemClick(index)"
+                          @mouseup="toggleItemClick($event, index)"
                           @mouseover="toggleItemsMouseOver(index)"
                           @mouseleave="toggleItemsMouseLeave(index)"
                           :id="'item'+index"
@@ -60,10 +67,18 @@
                             height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                             cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
                           }">
-                          <div class="text"
-                            :style="{ wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                              whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                            }">{{ getSubName(item) }}</div>
+                          <div class="textContainer">
+                            <div class="text"
+                              :style="{
+                                wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                                whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                              }">{{ getSubName(item) }}</div>
+                          </div>
+                          <div class="iconContainer">
+                            <transition name="sub-delete">
+                              <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete($event, item)" v-show="item.type === 'local' && hoverIndex === index"></Icon>
+                            </transition>
+                          </div>
                         </div>
                       </div>
 
@@ -81,7 +96,7 @@
                         height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                         top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
                         marginTop: `${-cardPos}px`,
-                        transition: 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)'
+                        transition: transFlag ? 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
                       }"/>
                   </div>
                 </div>
@@ -108,6 +123,7 @@ import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
+import { deleteSubtitles } from '@/helpers/subtitle';
 import Icon from '../BaseIconContainer.vue';
 import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
@@ -129,7 +145,6 @@ export default {
         embedded: '',
         online: '',
       },
-      foundSubtitles: true,
       clicks: 0,
       defaultOptions: { animationData },
       anim: {},
@@ -138,8 +153,9 @@ export default {
       hiddenText: false,
       hoverHeight: 0,
       timer: null,
-      count: 0,
-      rotateTime: 0,
+      count: 1,
+      stopCount: 10,
+      animClass: false,
       loadingType: '',
       detailTimer: null,
       breakTimer: null,
@@ -149,11 +165,15 @@ export default {
       isInitial: true,
       onAnimation: false,
       refAnimation: '',
+      refRotate: '',
       debouncedHandler: debounce(this.handleRefresh, 1000),
+      transFlag: true,
+      subTypeHoverIndex: 1,
+      shiftItemHovered: false,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'isFirstSubtitle', 'enabledSecondarySub']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -195,47 +215,32 @@ export default {
       }
       return 44;
     },
+    realItemsNum() {
+      return this.computedAvaliableItems.length + 1 + this.loadingTypes.length;
+    },
     isOverFlow() {
-      if (this.andify(this.computedSize >= 289, this.computedSize <= 480)) {
-        return this.orify(this.andify(this.contHeight + this.hoverHeight > 138, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 2) ? 'scroll' : '';
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
+        return this.realItemsNum > 3 ? 'scroll' : '';
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.orify(this.andify(this.contHeight + this.hoverHeight > 239, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 4) ? 'scroll' : '';
+        return this.realItemsNum > 5 ? 'scroll' : '';
       }
-      return this.orify(this.andify(this.contHeight + this.hoverHeight >= 433, this.hiddenText), this.computedAvaliableItems.length + this.loadingTypes.length > 6) ? ' scroll' : '';
+      return this.realItemsNum >= 7 ? 'scroll' : '';
     },
     scopeHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.computedAvaliableItems.length > 2 ?
-          (this.loadingTypes.length * 31) + 89 :
-          (((this.computedAvaliableItems.length + 1) * 31) - 4) +
-          (this.loadingTypes.length * 31);
+        return (this.realItemsNum * 31) - 4;
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.computedAvaliableItems.length > 4 ?
-          (this.loadingTypes.length * 37) + 180 :
-          (((this.computedAvaliableItems.length + 1) * 37) - 5) +
-          (this.loadingTypes.length * 37);
+        return (this.realItemsNum * 37) - 5;
       }
-      return this.computedAvaliableItems.length > 6 ?
-        (this.loadingTypes.length * 51) + 350 :
-        (((this.computedAvaliableItems.length + 1) * 51) - 7) +
-        (this.loadingTypes.length * 51);
+      return (this.realItemsNum * 51) - 7;
     },
     contHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.computedAvaliableItems.length > 2 ?
-          (this.loadingTypes.length * 31) + 138 :
-          45 + ((this.computedAvaliableItems.length + 1) * 31) +
-          (this.loadingTypes.length * 31);
+        return (this.realItemsNum * 31) + 45;
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.computedAvaliableItems.length > 4 ?
-          (this.loadingTypes.length * 37) + 239 :
-          54 + ((this.computedAvaliableItems.length + 1) * 37) +
-          (this.loadingTypes.length * 37);
+        return (this.realItemsNum * 37) + 54;
       }
-      return this.computedAvaliableItems.length > 6 ?
-        (this.loadingTypes.length * 51) + 433 :
-        76 + ((this.computedAvaliableItems.length + 1) * 51) +
-        (this.loadingTypes.length * 51);
+      return (this.realItemsNum * 51) + 76;
     },
     cardPos() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -255,11 +260,30 @@ export default {
         this.scopeHeight + 7;
     },
     currentSubtitleIndex() {
-      return this.computedAvaliableItems.findIndex(subtitle =>
-        subtitle.id === this.currentSubtitleId);
+      return !this.isFirstSubtitle && this.enabledSecondarySub ?
+        this.computedAvaliableItems.findIndex(subtitle =>
+          subtitle.id === this.currentSecondSubtitleId) :
+        this.computedAvaliableItems.findIndex(subtitle =>
+          subtitle.id === this.currentFirstSubtitleId);
+    },
+    currentScrollTop() {
+      const marginFactors = [4, 5, 7];
+      return this.currentSubtitleIndex *
+        (this.itemHeight + marginFactors[[27, 32, 44].indexOf(this.itemHeight)]);
     },
   },
   watch: {
+    count(val) {
+      if (val === this.stopCount) {
+        this.animClass = false;
+      }
+    },
+    animClass(val) {
+      if (!val) {
+        this.count = 1;
+        this.stopCount = 10;
+      }
+    },
     originSrc() {
       this.showAttached = false;
       this.computedAvaliableItems = [];
@@ -268,7 +292,7 @@ export default {
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
       if (val === 0) {
-        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$refs.scroll.scrollTop = 0;
       }
     },
     showAttached(val) {
@@ -304,9 +328,7 @@ export default {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
       }
-      if (val.length >= oldval.length) {
-        this.computedAvaliableItems = val.filter(sub => sub.name);
-      }
+      this.computedAvaliableItems = val.filter(sub => sub.name);
     },
     loadingType(val) {
       if (val === 'local') {
@@ -317,16 +339,50 @@ export default {
         this.loadingSubsPlaceholders.embedded = 'loading';
       }
     },
+    enabledSecondarySub(val) {
+      this.$refs.scroll.scrollTop = val ? 0 : this.currentScrollTop;
+    },
+    isFirstSubtitle() {
+      this.$refs.scroll.scrollTop = this.currentScrollTop;
+    },
+    computedAvaliableItems(val) {
+      this.updateNoSubtitle(!val.length);
+    },
   },
   methods: {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
-      changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_SUBTITLE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
+      removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
+      updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
+      updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
     }),
+    shiftItemHover() {
+      this.shiftItemHovered = true;
+    },
+    shiftItemLeave() {
+      this.shiftItemHovered = false;
+    },
+    subTypeShift() {
+      this.updateSubtitleType(!this.isFirstSubtitle);
+    },
+    handleSubDelete(e, item) {
+      if (e.target.nodeName !== 'DIV') {
+        this.transFlag = false;
+        this.removeLocalSub(item.id);
+        this.hoverHeight = 0;
+        if (item.id === this.currentFirstSubtitleId) {
+          this.$bus.$emit('off-subtitle');
+        }
+        deleteSubtitles([item.id], this.originSrc).then((result) => {
+          this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
+          this.transFlag = true;
+        });
+      }
+    },
     finishAnimation() {
       this.refAnimation = '';
     },
@@ -347,10 +403,8 @@ export default {
           this.$bus.$emit('privacy-confirm');
           this.continueRefresh = true;
         } else if (this.privacyAgreement && !this.timer) {
-          this.timer = setInterval(() => {
-            this.count += 1;
-            this.rotateTime = Math.ceil(this.count / 100);
-          }, 10);
+          this.transFlag = false;
+          this.animClass = true;
           const types = ['local'];
           if (this.isInitial) types.push('embedded');
           if (!hasOnlineSubtitles &&
@@ -361,6 +415,7 @@ export default {
           // first open && matched extensions: ['local', 'embedded', 'online']
           // first open && !matched extensions: ['local', 'embedded']
           // !first open: ['local', 'online']
+          this.updateSubtitleType(true);
           this.$bus.$emit('refresh-subtitles', { types, isInitial: this.isInitial });
           if (!this.isInitial) {
             this.addLog('info', {
@@ -390,12 +445,6 @@ export default {
           errcode: SUBTITLE_OFFLINE,
         });
       }
-    },
-    orify(...args) {
-      return args.some(arg => arg == true); // eslint-disable-line
-    },
-    andify(...args) {
-      return args.every(arg => arg == true); // eslint-disable-line
     },
     handleAnimation(anim) {
       this.anim = anim;
@@ -449,6 +498,10 @@ export default {
       }
     },
     toggleItemsMouseOver(index) {
+      this.showSubtitleDetails(index);
+      this.hoverIndex = index;
+    },
+    showSubtitleDetails(index) {
       if (index >= 0) {
         clearTimeout(this.detailTimer);
         const hoverItem = document.querySelector(`#item${index} .text`);
@@ -460,7 +513,6 @@ export default {
           }, 1500);
         }
       }
-      this.hoverIndex = index;
     },
     toggleItemsMouseLeave() {
       clearTimeout(this.detailTimer);
@@ -468,9 +520,14 @@ export default {
       this.hiddenText = false;
       this.hoverIndex = -5;
     },
-    toggleItemClick(index) {
-      const { computedAvaliableItems } = this;
-      this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+    toggleItemClick(event, index) {
+      if (event.target.nodeName === 'DIV') {
+        const { computedAvaliableItems } = this;
+        this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+        setTimeout(() => {
+          this.showSubtitleDetails(index);
+        }, 0);
+      }
     },
   },
   created() {
@@ -485,7 +542,8 @@ export default {
     });
     this.$bus.$on('refresh-finished', (timeout) => {
       clearInterval(this.timer);
-      this.count = this.rotateTime * 100;
+      this.stopCount = this.count + 1;
+      this.transFlag = true;
       if (timeout) {
         setTimeout(() => {
           this.addLog('error', {
@@ -503,20 +561,25 @@ export default {
           });
           this.onAnimation = false;
           this.anim.loop = false;
-        } else {
-          this.refAnimation = 'refresh-animation';
         }
-        document.querySelector('.scrollScope').scrollTop = 0;
+        this.refAnimation = 'refresh-animation';
+        this.$refs.scroll.scrollTop = 0;
         this.timer = null;
       }, 1000);
     });
   },
   mounted() {
+    this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
+      this.count += 1;
+    });
     this.$bus.$on('subtitle-refresh-continue', () => {
       if (this.continueRefresh) {
         this.continueRefresh = false;
         this.debouncedHandleRefresh();
       }
+    });
+    this.$bus.$on('online-subtitle-found', () => {
+      clearTimeout(this.breakTimer);
     });
 
     document.addEventListener('mouseup', (e) => {
@@ -593,8 +656,19 @@ export default {
   .title {
     color: rgba(255, 255, 255, 0.6);
   }
+  .firstSub, .secondarySub {
+    transition: color 90ms linear;
+  }
+  .refresh {
+    cursor: pointer;
+  }
   .menu-item-text-wrapper {
+    .deleteIcon {
+      transition-delay: 75ms;
+    }
     .text {
+      transition: color 90ms linear;
+      transition-delay: 75ms;
       overflow: hidden; //超出的文本隐藏
       text-overflow: ellipsis;
     }
@@ -632,7 +706,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        margin: 15px auto auto 16px;
+        margin: 15px 0 auto 14px;
         letter-spacing: 0.2px;
         line-height: 15px;
       }
@@ -640,6 +714,24 @@ export default {
         width: 13px;
         height: 13px;
         margin: 14px 15px auto auto;
+      }
+      .subtitleShift {
+        width: 30px;
+        height: 13px;
+        background: rgba(0, 0, 0, 0.09);
+        margin: 15px auto auto 6px;
+        border-radius: 2px;
+        cursor: pointer;
+        display: flex;
+        .firstSub, .secondarySub {
+          width: 50%;
+          height: 100%;
+          font-size: 9px;
+          display: flex;
+          span {
+            margin: auto;
+          }
+        }
       }
     }
     .sub-menu-wrapper {
@@ -658,11 +750,24 @@ export default {
       width: 142px;
       display: flex;
       margin: auto auto 4px 9px;
+      .textContainer {
+        width: 116px;
+        display: flex;
+      }
       .text {
         font-size: 11px;
         letter-spacing: 0.2px;
         line-height: 13px;
-        margin: auto 9.43px;
+        margin: auto 0 auto 9px;
+      }
+      .iconContainer {
+        width: 26px;
+        height: 27px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
@@ -691,7 +796,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        margin: 18px auto auto 19px;
+        margin: 18px 0 auto 16px;
         letter-spacing: 0.23px;
         line-height: 17px;
       }
@@ -699,6 +804,24 @@ export default {
         width: 17px;
         height: 17px;
         margin: 17px 19px auto auto;
+      }
+      .subtitleShift {
+        width: 36px;
+        height: 16px;
+        background: rgba(0, 0, 0, 0.09);
+        margin: 17px auto auto 7.2px;
+        border-radius: 2px;
+        cursor: pointer;
+        display: flex;
+        .firstSub, .secondarySub {
+          width: 50%;
+          height: 100%;
+          font-size: 11px;
+          display: flex;
+          span {
+            margin: auto;
+          }
+        }
       }
     }
     .scrollScope {
@@ -717,11 +840,24 @@ export default {
       width: 174px;
       display: flex;
       margin: auto auto 5px 9.5px;
+      .textContainer {
+        width: 141px;
+        display: flex;
+      }
       .text {
-        font-size: 12px;
+        font-size: 13.2px;
         letter-spacing: 0.2px;
         line-height: 14px;
-        margin: auto 12.73px;
+        margin: auto 0 auto 12.73px;
+      }
+      .iconContainer {
+        width: 33px;
+        height: 32px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
@@ -750,7 +886,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        margin: 24px auto auto 26px;
+        margin: 24px 0 auto 24px;
         letter-spacing: 0.32px;
         line-height: 23px;
       }
@@ -758,6 +894,24 @@ export default {
         width: 21px;
         height: 21px;
         margin: 23px 26px auto auto;
+      }
+      .subtitleShift {
+        width: 50.4px;
+        height: 22px;
+        background: rgba(0, 0, 0, 0.09);
+        margin: 23px auto auto 10.08px;
+        border-radius: 2px;
+        cursor: pointer;
+        display: flex;
+        .firstSub, .secondarySub {
+          width: 50%;
+          height: 100%;
+          font-size: 15px;
+          display: flex;
+          span {
+            margin: auto;
+          }
+        }
       }
     }
     .scrollScope {
@@ -776,11 +930,24 @@ export default {
       width: 242px;
       display: flex;
       margin: auto auto 7px 12px;
+      .textContainer {
+        width: 196px;
+        display: flex;
+      }
       .text {
-        font-size: 16px;
+        font-size: 18.48px;
         letter-spacing: 0.27px;
         line-height: 18px;
-        margin: auto 17.89px;
+        margin: auto 0 auto 17.89px;
+      }
+      .iconContainer {
+        width: 46px;
+        height: 44px;
+        .deleteIcon {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
       }
     }
     .placeholder-item-text-wrapper {
@@ -813,8 +980,19 @@ export default {
   position: absolute;
 }
 
+.sub-delete-enter-active, .sub-delete-leave-active {
+  transition: opacity 150ms;
+}
+.sub-delete-enter, .sub-delete-leave-to {
+  opacity: 0;
+}
+
 .refresh-animation {
   animation: menu-refresh 300ms linear 1 normal forwards;
+}
+.icon-rotate-animation {
+  animation: icon-rotate 1s linear 1 normal forwards;
+  animation-iteration-count: 10;
 }
 @keyframes menu-refresh {
   0% { opacity: 1 }
@@ -822,5 +1000,12 @@ export default {
   50% { opacity: 0 }
   75% { opacity: 0.5 }
   100% { opacity: 1 }
+}
+@keyframes icon-rotate {
+  0% { transform: rotate(0deg) }
+  25% { transform: rotate(90deg) }
+  50% { transform: rotate(180deg) }
+  75% { transform: rotate(270deg) }
+  100% { transform: rotate(360deg) }
 }
 </style>

@@ -139,6 +139,11 @@ export default {
   height: 100%;
 }
 
+.folder {
+  width: 100%;
+  height: 100%;
+}
+
 .play, .pause {
   margin: auto;
   width: 100%;
@@ -406,6 +411,55 @@ export default {
     .active {
       display: none;
     }
+  }
+}
+.deleteSub {
+  cursor: pointer;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+    width: 10px;
+    height: 10px;
+    margin: auto 9px auto auto;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+    width: 12px;
+    height: 12px;
+    margin: auto 10.8px auto auto;
+  }
+  @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+    width: 16.8px;
+    height: 16.8px;
+    margin: auto 15.12px auto auto;
   }
 }
 </style>

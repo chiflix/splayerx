@@ -22,6 +22,7 @@ import {
   SUBTITLE_UPLOAD,
   UPLOAD_FAILED,
   UPLOAD_SUCCESS,
+  ADD_NO_VIDEO,
 } from '../shared/notificationcodes';
 
 /**
@@ -329,6 +330,7 @@ function registerMainWindowEvent() {
           case NOT_SUPPORTED_SUBTITLE:
           case REQUEST_TIMEOUT:
           case UPLOAD_FAILED:
+          case ADD_NO_VIDEO:
             mainWindow.webContents.send('addMessages', log.errcode);
             break;
           default:
@@ -473,6 +475,9 @@ function createWindow() {
   }
 }
 
+app.on('before-quit', () => {
+  mainWindow?.webContents.send('quit');
+});
 app.on('second-instance', () => {
   if (mainWindow?.isMinimized()) mainWindow.restore();
   mainWindow?.focus();

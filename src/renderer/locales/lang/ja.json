@@ -1,0 +1,241 @@
+{
+  "msg": {
+    "titleName": "SPlayer",
+    "file": {
+      "name": "ファイル",
+      "open": "ファイルを開く…",
+      "openURL": "URLから開く…",
+      "openRecent": "最近使用した項目を開く",
+      "clearHistory": "プレイ履歴をクリア",
+      "closeWindow": "閉じる"
+    },
+    "playback": {
+      "name": "プレイ",
+      "fullScreen": "ズーム/フルスクリーンを解除",
+      "keepPlayingWindowFront": "再生時に最前面に表示",
+      "increasePlaybackSpeed": "再生速度の増加",
+      "decreasePlaybackSpeed": "再生速度の低下",
+      "resetSpeed": "重置播放速度",
+      "captureScreen": "スクリンショット",
+      "captureVideoClip": "トリム",
+      "play": "プレイ",
+      "pause": "停止",
+      "forwardS": "進む +5s",
+      "backwardS": "戻る -5s",
+      "forwardL": "進む +60s",
+      "backwardL": "戻る -60s",
+      "singleCycle": "リピート"
+    },
+    "audio": {
+      "name": "オ−ディオ",
+      "increaseAudioDelay": "オ−ディオディレイ",
+      "decreaseAudioDelay": "オ−ディオディレイ",
+      "mute": "ミュート",
+      "switchAudioTrack": "オーディオトラック",
+      "defaultAudioTrack": "デフォルト",
+      "increaseVolume": "音量を上げる",
+      "decreaseVolume": "音量を下げる"
+    },
+    "subtitle": {
+      "name": "字幕",
+      "subtitleSelect": "翻訳",
+      "AITranslation": "トランスレーション結果を再読込",
+      "menuLoading": "ローディング ...",
+      "loadSubtitleFile": "字幕ファイルを開く…",
+      "mainSubtitle": "第一字幕",
+      "langZhCN": "中文",
+      "langEn": "英文",
+      "notToShowSubtitle": "なし",
+      "noSubtitle": "見つかりませんでした",
+      "secondarySubtitle": "第二字幕",
+      "subtitleStyle": "字幕スタイル",
+      "style1": "映画スタイル",
+      "style2": "アニメスタイル",
+      "style3": "クラシックスタイル",
+      "style4": "ニッポンスタイル",
+      "style5": "モダンクラシック",
+      "subtitleSize": "字幕サイズ",
+      "size1": "小",
+      "size2": "通常",
+      "size3": "大",
+      "size4": "最大",
+      "uploadSelectedSubtitle": "字幕をアップロード",
+      "increaseSubtitleDelayS": "字幕ディレイ +0.1s",
+      "decreaseSubtitleDelayS": "字幕ディレイ -0.1s",
+      "increaseSubtitleDelayL": "字幕ディレイ +0.5s",
+      "decreaseSubtitleDelayL": "字幕ディレイ -0.5s",
+      "enabledSecondarySub": "第二字幕を開く",
+      "disabledSecondarySub": "第二字幕を閉じる"
+    },
+    "window": {
+      "name": "ウィンドウ",
+      "minimize": "最小化",
+      "enterFullScreen": "フルスクリーン",
+      "exitFullScreen": "フルスクリーンを解除",
+      "bossKey": "ボスキー",
+      "originSize": "100%",
+      "doubleSize": "200%",
+      "maxmize": "最大化",
+      "halfSize": "50%"
+    },
+    "help": {
+      "name": "ヘルプ",
+      "splayerxHelp": "ヘルプ"
+    },
+    "splayerx": {
+      "about": "SPlayerについて",
+      "preferences": "環境設定",
+      "homepage": "ホームページ",
+      "feedback": "フィードバック",
+      "hide": "SPlayerを隠す",
+      "hideOthers": "その他を隠す",
+      "quit": "SPlayerを終了"
+    },
+    "update": {
+      "title": "更新就绪",
+      "message": "更新已就绪，是否现在重启?",
+      "yes": "更新",
+      "no": "暂不更新",
+      "updateInstalled": "播放器已更新至最新版本!"
+    }
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": "21px"
+    },
+    "versionFontSize": {
+      "fontSize": "14px"
+    }
+  },
+  "preferences": {
+    "general": {
+      "others": "その他",
+      "generalSetting": "通常設定",
+      "displayLanguage": "言語表示",
+      "clearHistory": "終了時にプレイ履歴を削除",
+      "switchDisplayLanguages": "SPlayerの言語表示を修正。"
+    },
+    "privacy": {
+      "privacySetting": "翻訳設定",
+      "none": "なし",
+      "settings": "設定",
+      "privacyConfirm": "プライバシーとSmart Translationに許可",
+      "setAsDefault": "SPlayerをデフォルトにする",
+      "languagePriority": "言語の優先順位",
+      "languageDescription": "ビデオ再生時、SPlayerは以下の順番で通訳結果を推薦します。",
+      "primary": "ファースト",
+      "secondary": "セカンド"
+    }
+  },
+  "advance": {
+    "rateTitle": "再生速度",
+    "subMenu": "字幕設定",
+    "audioMenu": "オーディオ",
+    "fontSize": "文字サイズ",
+    "fontStyle": "文字スタイル",
+    "subDelay": "字幕ディレイ",
+    "fontItems": [
+      "小",
+      "通常",
+      "大",
+      "最大"
+    ],
+    "audioDelay": "オディオディレイ",
+    "changeTrack": "オディオトラック",
+    "chosenTrack": "デフォルト",
+    "track": "トラック"
+  },
+  "errorFile": {
+    "fileNonExist": {
+      "title": "ファイルが見つかりませんでした。",
+      "content": "プライリストから削除する。"
+    },
+    "emptyFolder": {
+      "title": "エラー",
+      "content": "再生できるファイルが見つかりませんでした。"
+    },
+    "addNoVideo": {
+      "title": "追加錯誤",
+      "content": "再生できるファイルが見つかりませんでした。"
+    },
+    "default": {
+      "title": "エラー",
+      "content": "ビデオタイプが再生できません。"
+    },
+    "loadFailed": {
+      "title": "字幕読み込みエラー",
+      "content": "字幕タイプが読み込めません。"
+    },
+    "offLine": {
+      "title": "ネットワーク接続エラー",
+      "content": "ネットワークをお確かめの上、もう一度お試し下さい。"
+    },
+    "timeout": {
+      "title": "リクエストタイムアウト",
+      "content": "ネットワークディレイもしくはサーバーエラー。"
+    }
+  },
+  "loading": {
+    "title": "",
+    "content": "翻訳の読み込み ..."
+  },
+  "uploading": {
+    "title": "",
+    "content": "アップロードしています..."
+  },
+  "uploadingSuccess": {
+    "title": "アップロードに成功しました",
+    "content": "字幕がアップロードされました。"
+  },
+  "uploadingFailed": {
+    "title": "アップロードに失敗しました",
+    "content": "後でお試しください。"
+  },
+  "privacyBubble": {
+    "masVersion": {
+      "content": "Smart Translationを使用するには無記名メディア情報をアップロードし、それ以外の場合は翻訳できません。個人情報を収集することはありません。",
+      "agree": "許可",
+      "disagree": "解除"
+    },
+    "tryToDisable": {
+      "partOne": "SPlayerがより良いサービスを提供するため，プライバシーに許可する。",
+      "partTwo": "プライバシーを解除するとSmart Translationの使用ができなくなる。",
+      "underlinedContent": "禁止",
+      "button": "確定"
+    },
+    "confirmDisable": {
+      "partOne": "確認",
+      "partTwo": "プライバシーとSmart Translation。",
+      "underlinedContent": "禁止",
+      "button": "取り消し"
+    }
+  },
+  "recentPlaylist": {
+    "folderSource": "ホルダー",
+    "playlistSource": "プレイリスト",
+    "playing": "再生中"
+  },
+  "nextVideo": {
+    "nextInFolder": "ホルダー中の次のビデオ",
+    "nextInPlaylist": "プレイリスト中の次のビデオ"
+  },
+  "subtitle": {
+    "embedded": "埋め込み式",
+    "language": {
+      "zh": "中国語（簡体字）",
+      "zh-CN": "中国語（簡体字）",
+      "zh-TW": "中国語（繁体字）",
+      "en": "英語",
+      "es": "スペイン語",
+      "ja": "日本語",
+      "fr": "フランス語",
+      "ko": "韓国語",
+      "pt": "スペイン語（ポルトガル、ブラジル）",
+      "ar": "サウジアラビア語",
+      "de": "ドイツ語",
+      "ru": "ロシア語",
+      "hi": "ヒンディー語",
+      "it": "イタリア語"
+    }
+  }
+}

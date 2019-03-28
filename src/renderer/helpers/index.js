@@ -5,7 +5,7 @@ import lolex from 'lolex';
 import { times } from 'lodash';
 import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED } from '@/../shared/notificationcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
 
@@ -15,7 +15,12 @@ const clock = lolex.createClock();
 
 export default {
   data() {
-    return { clock, infoDB, sagi: Sagi };
+    return {
+      clock,
+      infoDB,
+      sagi: Sagi,
+      showingPopupDialog: false,
+    };
   },
   methods: {
     calculateWindowSize(minSize, maxSize, videoSize, videoExisted, screenSize) {
@@ -179,6 +184,64 @@ export default {
         }
       });
     },
+    addFilesByDialog({ defaultPath } = {}) {
+      if (this.showingPopupDialog) return;
+      this.showingPopupDialog = true;
+      const opts = ['openFile', 'multiSelections'];
+      if (process.platform === 'darwin') {
+        opts.push('openDirectory');
+      }
+      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+        title: 'Open Dialog',
+        defaultPath,
+        filters: [{
+          name: 'Video Files',
+          extensions: getValidVideoExtensions(),
+        }, {
+          name: 'All Files',
+          extensions: ['*'],
+        }],
+        properties: opts,
+        securityScopedBookmarks: process.mas,
+      }, (files, bookmarks) => {
+        this.showingPopupDialog = false;
+        if (process.mas && bookmarks?.length > 0) {
+          // TODO: put bookmarks to database
+          console.log(bookmarks);
+        }
+        if (files) {
+          this.addFiles(...files);
+        }
+      });
+    },
+    addFiles(...files) {
+      const videoFiles = [];
+
+      for (let i = 0; i < files.length; i += 1) {
+        if (fs.statSync(files[i]).isDirectory()) {
+          const dirPath = files[i];
+          const dirFiles = fs.readdirSync(dirPath).map(file => path.join(dirPath, file));
+          files.push(...dirFiles);
+        }
+      }
+
+      for (let i = 0; i < files.length; i += 1) {
+        const file = files[i];
+        if (!path.basename(file).startsWith('.') && getValidVideoRegex().test(path.extname(file))) {
+          videoFiles.push(file);
+        }
+      }
+      if (videoFiles.length !== 0) {
+        this.$store.dispatch('AddItemsToPlayingList', videoFiles);
+      } else {
+        this.addLog('error', {
+          errcode: ADD_NO_VIDEO,
+          message: 'Didn\'t add any playable file in this folder.',
+        });
+      }
+    },
+    // the difference between openFolder and openFile function
+    // is the way they treat the situation of empty folders and error files
     openFolder(...folders) {
       const files = [];
       let containsSubFiles = false;
@@ -297,7 +360,6 @@ export default {
       }
       this.$bus.$emit('new-file-open');
       this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
-      this.$bus.$emit('new-video-opened');
       this.$router.push({
         name: 'playing-view',
       });

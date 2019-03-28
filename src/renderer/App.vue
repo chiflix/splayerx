@@ -23,6 +23,7 @@
     SUBTITLE_UPLOAD,
     UPLOAD_SUCCESS,
     UPLOAD_FAILED,
+    ADD_NO_VIDEO,
   } from '../shared/notificationcodes';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
@@ -60,6 +61,14 @@
               },
             });
             break;
+          case ADD_NO_VIDEO:
+            this.$store.dispatch('addMessages', {
+              type: 'result',
+              title: this.$t('errorFile.addNoVideo.title'),
+              content: this.$t('errorFile.addNoVideo.content'),
+              dismissAfter: 5000,
+            });
+            break;
           case EMPTY_FOLDER:
             this.$store.dispatch('addMessages', {
               type: 'result',
@@ -77,6 +86,7 @@
             });
             break;
           case ONLINE_LOADING:
+            if (this.$route.name !== 'playing-view') break;
             this.$store.dispatch('addMessages', {
               type: 'state',
               title: '',
@@ -85,6 +95,7 @@
             });
             break;
           case SUBTITLE_OFFLINE:
+            if (this.$route.name !== 'playing-view') break;
             this.$store.dispatch('addMessages', {
               type: 'result',
               title: this.$t('errorFile.offLine.title'),
@@ -93,6 +104,7 @@
             });
             break;
           case NOT_SUPPORTED_SUBTITLE:
+            if (this.$route.name !== 'playing-view') break;
             this.$store.dispatch('addMessages', {
               type: 'result',
               title: this.$t('errorFile.loadFailed.title'),
@@ -101,6 +113,7 @@
             });
             break;
           case REQUEST_TIMEOUT:
+            if (this.$route.name !== 'playing-view') break;
             this.$store.dispatch('addMessages', {
               type: 'result',
               title: this.$t('errorFile.timeout.title'),
@@ -109,6 +122,7 @@
             });
             break;
           case SUBTITLE_UPLOAD:
+            if (this.$route.name !== 'playing-view') break;
             this.$store.dispatch('addMessages', {
               type: 'state',
               title: '',
@@ -117,6 +131,7 @@
             });
             break;
           case UPLOAD_SUCCESS:
+            if (this.$route.name !== 'playing-view') break;
             this.$store.dispatch('addMessages', {
               type: 'result',
               title: this.$t('uploadingSuccess.title'),
@@ -125,6 +140,7 @@
             });
             break;
           case UPLOAD_FAILED:
+            if (this.$route.name !== 'playing-view') break;
             this.$store.dispatch('addMessages', {
               type: 'result',
               title: this.$t('uploadingFailed.title'),

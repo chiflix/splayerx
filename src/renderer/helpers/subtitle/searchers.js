@@ -46,7 +46,10 @@ export function fetchOnlineList(videoSrc, languageCode, hints) {
   };
   return new Promise((resolve, reject) => {
     calculateMediaIdentity(videoSrc)
-      .then(mediaIdentity => Sagi.mediaTranslate({ mediaIdentity, languageCode, hints }))
+      .then(mediaIdentity => Promise.race([
+        Sagi.mediaTranslate({ mediaIdentity, languageCode, hints }),
+        new Promise((resolve, reject) => setTimeout(() => reject(), 10000)),
+      ]))
       .then(results => resolve(results.map(subtitleInfoNormalizer)))
       .catch(err => reject(err));
   });
