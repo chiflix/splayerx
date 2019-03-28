@@ -1,0 +1,241 @@
+{
+	"advance": {
+		"audioDelay": "오디오 지연",
+		"audioMenu": "오디오 설정",
+		"changeTrack": "오디오 트랙",
+		"chosenTrack": "태만",
+		"fontItems": [
+			"에스",
+			"엠",
+			"엘",
+			"특대"
+		],
+		"fontSize": "글자 크기",
+		"fontStyle": "글꼴 스타일",
+		"rateTitle": "재생 속도",
+		"subDelay": "자막 지연",
+		"subMenu": "자막 설정",
+		"track": "선로"
+	},
+	"css": {
+		"titleFontSize": {
+			"fontSize": "21px"
+		},
+		"versionFontSize": {
+			"fontSize": "14px"
+		}
+	},
+	"errorFile": {
+		"addNoVideo": {
+			"content": "재생할 수있는 파일을 찾을 수 없습니다.",
+			"title": "파일 추가 실패"
+		},
+		"default": {
+			"content": "지원되지 않는 비디오 유형입니다.",
+			"title": "열기 실패"
+		},
+		"emptyFolder": {
+			"content": "재생할 수있는 파일을 찾을 수 없습니다.",
+			"title": "열기 실패"
+		},
+		"fileNonExist": {
+			"content": "목록에서 제거됩니다.",
+			"title": "파일을 찾을 수 없음"
+		},
+		"loadFailed": {
+			"content": "자막 유형이 지원되지 않습니다.",
+			"title": "로드 자막 실패"
+		},
+		"offLine": {
+			"content": "네트워크를 확인한 후 다시 시도하십시오.",
+			"title": "네트워크 액세스 없음"
+		},
+		"timeout": {
+			"content": "네트워크 지연 또는 서버 오류.",
+			"title": "요청 시간 초과"
+		}
+	},
+	"loading": {
+		"content": "번역로드 중 ...",
+		"title": ""
+	},
+	"msg": {
+		"audio": {
+			"decreaseAudioDelay": "오디오 지연",
+			"decreaseVolume": "볼륨 감소",
+			"defaultAudioTrack": "태만",
+			"increaseAudioDelay": "오디오 지연",
+			"increaseVolume": "볼륨 높이기",
+			"mute": "묵자",
+			"name": "오디오",
+			"switchAudioTrack": "오디오 트랙 전환"
+		},
+		"file": {
+			"clearHistory": "재생 기록 지우기",
+			"closeWindow": "창 닫기",
+			"name": "파일",
+			"open": "열다…",
+			"openRecent": "열기 최근",
+			"openURL": "URL 열기 ..."
+		},
+		"help": {
+			"name": "도움",
+			"splayerxHelp": "도움"
+		},
+		"playback": {
+			"backwardL": "단계 뒤로 -60 년대",
+			"backwardS": "스텝 뒤로 -5s",
+			"captureScreen": "화면 캡처",
+			"captureVideoClip": "비디오 클립 캡처",
+			"decreasePlaybackSpeed": "재생 속도 감소",
+			"forwardL": "60 초 앞으로",
+			"forwardS": "1 단계 앞으로",
+			"fullScreen": "전체 화면",
+			"increasePlaybackSpeed": "재생 속도 향상",
+			"keepPlayingWindowFront": "재생할 때 플로트",
+			"name": "재생",
+			"pause": "중지",
+			"play": "놀이",
+			"resetSpeed": "재생 속도 재설정",
+			"singleCycle": "하나 반복"
+		},
+		"splayerx": {
+			"about": "SPlayer 정보",
+			"feedback": "피드백",
+			"hide": "숨는 장소",
+			"hideOthers": "다른 사람 숨기기",
+			"homepage": "웹 사이트",
+			"preferences": "환경 설정",
+			"quit": "SPlayer 종료"
+		},
+		"subtitle": {
+			"AITranslation": "스마트 번역 새로 고침",
+			"decreaseSubtitleDelayL": "",
+			"decreaseSubtitleDelayS": "자막 지연 -0.1s",
+			"disabledSecondarySub": "보조 부제목 사용 중지",
+			"enabledSecondarySub": "보조 부제목 사용",
+			"increaseSubtitleDelayL": "",
+			"increaseSubtitleDelayS": "자막 지연 0.1s",
+			"langEn": "영어",
+			"langZhCN": "중국말",
+			"loadSubtitleFile": "자막 파일로드 중 ...",
+			"mainSubtitle": "1 차 자막",
+			"menuLoading": "로드 중 ...",
+			"name": "자막",
+			"noSubtitle": "찾을 수 없음",
+			"notToShowSubtitle": "없음",
+			"secondarySubtitle": "보조 부제목",
+			"size1": "작은",
+			"size2": "표준",
+			"size3": "큰",
+			"size4": "특대",
+			"style1": "영화 스타일",
+			"style2": "애니메이션 스타일",
+			"style3": "복고풍 스타일",
+			"style4": "일본식",
+			"style5": "현대 클래식",
+			"subtitleSelect": "번역",
+			"subtitleSize": "글자 크기",
+			"subtitleStyle": "글꼴 스타일",
+			"uploadSelectedSubtitle": "선택한 부제목 업로드"
+		},
+		"titleName": "SPlayer",
+		"update": {
+			"message": "업데이트를 설치하려면 지금 앱을 다시 시작 하시겠습니까?",
+			"no": "아니",
+			"title": "업데이트 대화 상자",
+			"updateInstalled": "업데이트가 성공적으로 설치되었습니다!",
+			"yes": "예"
+		},
+		"window": {
+			"bossKey": "보스 키",
+			"doubleSize": "200 %",
+			"enterFullScreen": "전체 화면으로 들어가기",
+			"exitFullScreen": "전체 화면 나가기",
+			"halfSize": "50 %",
+			"maxmize": "줌",
+			"minimize": "최소화",
+			"name": "창문",
+			"originSize": "100 %"
+		}
+	},
+	"nextVideo": {
+		"nextInFolder": "폴더에서 다음",
+		"nextInPlaylist": "다음 재생 목록에서"
+	},
+	"preferences": {
+		"general": {
+			"clearHistory": "종료시 항상 재생 기록 지우기",
+			"displayLanguage": "표시 언어",
+			"generalSetting": "일반",
+			"others": "기타",
+			"switchDisplayLanguages": "표시 언어는 SPlayer에 표시되는 언어를 제어합니다."
+		},
+		"privacy": {
+			"languageDescription": "비디오가 재생되는 동안 다음 언어 순서로 번역 결과를 찾습니다.",
+			"languagePriority": "언어 우선 순위",
+			"none": "없음",
+			"primary": "행성",
+			"privacyConfirm": "익명 데이터 / 스마트 번역 허용",
+			"privacySetting": "번역",
+			"secondary": "반성",
+			"setAsDefault": "SPlayer를 기본 응용 프로그램으로 설정",
+			"settings": "설정"
+		}
+	},
+	"privacyBubble": {
+		"confirmDisable": {
+			"button": "취소",
+			"partOne": "확인",
+			"partTwo": "익명 데이터 및 스마트 번역.",
+			"underlinedContent": "사용 안함"
+		},
+		"masVersion": {
+			"agree": "사용",
+			"content": "스마트 번역 기능은 익명의 미디어 정보를 서버 측에 업로드하는 데 동의해야하며 동의하지 않으면 번역 결과를받지 못합니다. 개인 정보가 수집되지 않습니다.",
+			"disagree": "사용 안함"
+		},
+		"tryToDisable": {
+			"button": "승인",
+			"partOne": "SPlayer는 익명 데이터를 사용하여 사용자 경험을 향상시킵니다. 스마트 번역은 귀하가",
+			"partTwo": ".",
+			"underlinedContent": "동의하지 않는다"
+		}
+	},
+	"recentPlaylist": {
+		"folderSource": "폴더",
+		"playing": "연주 중",
+		"playlistSource": "재생 목록"
+	},
+	"subtitle": {
+		"embedded": "깊숙이 박다",
+		"language": {
+			"ar": "아라비아 말",
+			"de": "독일 사람",
+			"en": "영어",
+			"es": "스페인 사람",
+			"fr": "프랑스 국민",
+			"hi": "힌디 어",
+			"it": "이탈리아 사람",
+			"ja": "일본어",
+			"ko": "한국어",
+			"pt": "포르투갈어 (포르투갈, 브라질)",
+			"ru": "러시아인",
+			"zh": "중국어 간체)",
+			"zh-CN": "중국어 간체)",
+			"zh-TW": "중국 전통)"
+		}
+	},
+	"uploading": {
+		"content": "자막 업로드 중 ...",
+		"title": ""
+	},
+	"uploadingFailed": {
+		"content": "나중에 다시 시도 해주세요.",
+		"title": "업로드 실패"
+	},
+	"uploadingSuccess": {
+		"content": "부제목이 업로드되었습니다.",
+		"title": "성공적으로 업로드"
+	}
+}
