@@ -4,6 +4,10 @@
     class="video">
     <transition name="fade" mode="out-in">
     <base-video-player
+      :style="{
+        transform: (winAngle === 90 || winAngle === 270) ?
+          `rotate(${winAngle}deg) scale(${ratio}, ${ratio})` : `rotate(${winAngle}deg)`,
+      }"
       ref="videoCanvas"
       :key="originSrc"
       :needtimeupdate=true
@@ -180,7 +184,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub',
-      'winSize', 'winPos', 'isFullScreen', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList']),
+      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -254,6 +258,9 @@ export default {
     this.$bus.$on('drop', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0)';
       this.$ga.event('app', 'drop');
+    });
+    this.$bus.$on('rotate', () => {
+      // this.$refs.videoCanvas.$el.style.setProperty('transform', 'rotate(0deg)');
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {

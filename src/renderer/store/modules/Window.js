@@ -2,6 +2,7 @@ const state = {
   windowSize: [0, 0],
   windowMinimumSize: [0, 0],
   windowPosition: [0, 0],
+  windowAngle: 0,
   isFullScreen: false,
   isFocused: true,
   isMaximized: false,
@@ -17,6 +18,7 @@ const getters = {
   winPosX: state => state.windowPosition[0],
   winPosY: state => state.windowPosition[1],
   winPos: state => state.windowPosition,
+  winAngle: state => state.windowAngle,
   isFullScreen: state => state.isFullScreen,
   isFocused: state => state.isFocused,
   isMaximized: state => state.isMaximized,
@@ -49,11 +51,17 @@ const mutations = {
   sizePercentUpdate(state, payload) {
     state.sizePercent = payload;
   },
+  windowAngle(state, payload) {
+    state.windowAngle = payload;
+  },
 };
 
 const actions = {
   updateSizePercent({ commit }, delta) {
     commit('sizePercentUpdate', delta);
+  },
+  windowRotate90Deg({ commit, state }) {
+    (state.windowAngle + 90) === 360 ? commit('windowAngle', 0) : commit('windowAngle', state.windowAngle + 90);
   },
 };
 
