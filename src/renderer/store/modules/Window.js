@@ -63,6 +63,9 @@ const actions = {
   windowRotate90Deg({ commit, state }) {
     (state.windowAngle + 90) === 360 ? commit('windowAngle', 0) : commit('windowAngle', state.windowAngle + 90);
   },
+  initWindowRotate({ commit }) {
+    commit('windowAngle', 0);
+  },
 };
 
 export default {
