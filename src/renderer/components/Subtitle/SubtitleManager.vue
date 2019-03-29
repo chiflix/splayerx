@@ -96,6 +96,9 @@ export default {
         this.lastFirstSubtitleId = '';
         this.lastSecondSubtitleId = '';
         this.resetSubtitles();
+        Object.keys(this.subtitleInstances)
+          .filter(({ videoSrc }) => newVal !== videoSrc)
+          .forEach(id => delete this.subtitleInstances[id]);
         this.selectionComplete = false;
         this.selectionSecondaryComplete = false;
         const hasOnlineSubtitles =
@@ -255,9 +258,7 @@ export default {
           .then(sub => this.addSubtitle(this.normalizeSubtitle(sub), videoSrc))
           .catch(() => []);
         const storedSubs = await Promise.all(storedSubIds.map(retrieveSub)).then(flatten);
-        if (storedSubs.length) {
-          return storedSubs;
-        }
+        if (storedSubs.length) return storedSubs;
       }
       const hints = this.generateHints(videoSrc);
       const fetchSubs = lang => fetchOnlineList(videoSrc, lang, hints)
@@ -291,7 +292,7 @@ export default {
         if (id !== options.id) this.failedCallback(sameSrcSubtitle);
         // same id from options indicates that this sub is already loaded
         else {
-          if (existsSync(src) || type !== 'local') return 'success';
+          if (existsSync(src) || type !== 'local') return sameSrcSubtitle;
           return this.failedCallback(sameSrcSubtitle, {
             error: { message: `Local subtitle ${src} removed!` },
             bubble: LOCAL_SUBTITLE_REMOVED,
