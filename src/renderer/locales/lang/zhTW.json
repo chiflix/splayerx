@@ -171,6 +171,10 @@
     "timeout": {
       "title": "網絡請求超時",
       "content": "網絡延遲或雲端異常。"
+    },
+    "localSubtitleRemoved": {
+      "title": "字幕加載失敗",
+      "content": "本地字幕文件被刪除或已改名"
     }
   },
   "loading": {
