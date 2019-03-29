@@ -169,19 +169,22 @@ export default {
 <style lang="scss" scoped>
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
-    width: 170px;
+    width: 100%;
     .textContainer {
-      width: 136px;
+      width: 100%;
       height: 37px;
-      margin: auto auto auto 17px;
+      .textItem {
+        margin: auto auto auto 17px;
+      }
       .rightItem {
         font-size: 11px;
+        margin: auto 17px auto auto;
       }
     }
     .listContainer {
       height: 37px;
       .rowContainer {
-        width: 137px;
+        width: 80%;
         height: 27px;
         .increase {
           margin-top: 7.5px;
@@ -218,19 +221,22 @@ export default {
   }}
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
-    width: 204px;
+    width: 100%;
     .textContainer {
-      width: 163.2px;
+      width: 100%;
       height: 44.4px;
-      margin: auto auto auto 20.4px;
+      .textItem {
+        margin: auto auto auto 20.4px;
+      }
       .rightItem {
+        margin: auto 20.4px auto auto;
         font-size: 13.2px;
       }
     }
     .listContainer {
       height: 44.4px;
       .rowContainer {
-        width: 164.4px;
+        width: 80%;
         height: 32.4px;
         .increase {
           margin-top: 9px;
@@ -268,19 +274,22 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
-    width: 285.6px;
+    width: 100%;
     .textContainer {
-      width: 228.48px;
+      width: 100%;
       height: 62.16px;
-      margin: auto auto auto 28.56px;
+      .textItem {
+        margin: auto auto auto 28.56px;
+      }
       .rightItem {
+        margin: auto 28.56px auto auto;
         font-size: 18.48px;
       }
     }
     .listContainer {
       height: 62.16px;
       .rowContainer {
-        width: 230.16px;
+        width: 80%;
         height: 45.36px;
         .increase {
           margin-top: 12.6px;
@@ -333,11 +342,9 @@ export default {
     flex: 1;
     .textItem {
       letter-spacing: 0.2px;
-      margin: auto auto auto 0;
     }
     .rightItem {
       color: rgba(255, 255, 255, 0.6);
-      margin: auto 0 auto auto;
     }
   }
   .listContainer {

@@ -29,7 +29,7 @@
               @mouseout="handleOut(index)"
               @click="handleClick(index)"
               :style="{
-                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`,
+                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}%` : `${difWidth[1]}%`,
                 cursor: itemChosen(index) ? 'default' : 'pointer',
               }">
               <div class="text"
@@ -43,7 +43,7 @@
             <div :class="cardType"
               v-show="!this.isRateMenu || this.lists.includes(this.rate)"
               :style="{
-                left: cardPos,
+                left: `${moveLength}px`,
                 transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
               }"></div>
           </div>
@@ -89,6 +89,12 @@ export default {
     isRateMenu: {
       type: Boolean,
     },
+    ChosenSize: {
+      type: String,
+    },
+    cardWidth: {
+      type: Number,
+    },
   },
   watch: {
     subToTop(val) {
@@ -126,36 +132,8 @@ export default {
   },
   computed: {
     ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'computedHeight', 'computedWidth', 'subToTop']),
-    /**
-     * @return {string}
-     */
-    ChosenSize() {
-      switch (this.chosenSize) {
-        case 0:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'S' ? 'Small' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
-        case 1:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'M' ? 'Normal' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
-        case 2:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'L' ? 'Large' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
-        case 3:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'XL' ? 'Extra Large' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
-        default:
-          return this.$t('advance.fontItems[1]');
-      }
-    },
     computedSize() {
       return this.videoAspectRatio >= 1 ? this.computedHeight : this.computedWidth;
-    },
-    cardPos() {
-      if (this.moveLength) {
-        if (this.size >= 289 && this.size <= 480) {
-          return `${this.moveLength}px`;
-        } else if (this.size >= 481 && this.size < 1080) {
-          return `${this.moveLength * 1.2}px`;
-        }
-        return `${this.moveLength * 1.2 * 1.4}px`;
-      }
-      return '';
     },
     showDetail() {
       if (this.isRateMenu) {
@@ -193,11 +171,12 @@ export default {
     },
     difWidth() {
       if (this.size >= 289 && this.size <= 480) {
-        return !this.isRateMenu ? [29, 35] : [25, 29];
+        return !this.isRateMenu ? [23, 27] : [18.5, 23];
       } else if (this.size >= 481 && this.size < 1080) {
-        return !this.isRateMenu ? [29 * 1.2, 35 * 1.2] : [25 * 1.2, 29 * 1.2];
+        return !this.isRateMenu ? [23 * 1.2, 27 * 1.2] : [18.5 * 1.2, 23 * 1.2];
       }
-      return !this.isRateMenu ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
+      return !this.isRateMenu ? [23 * 1.2 * 1.4, 27 * 1.2 * 1.4] :
+        [18.5 * 1.2 * 1.4, 23 * 1.2 * 1.4];
     },
     videoAspectRatio() {
       return this.intrinsicWidth / this.intrinsicHeight;
@@ -213,6 +192,16 @@ export default {
     });
   },
   mounted() {
+    this.$bus.$on('rowCard-init-left', () => {
+      setTimeout(() => {
+        if (this.isRateMenu) {
+          this.selectedIndex = 1;
+          this.calculateSpeedLength(1);
+        } else {
+          this.handleClick(this.chosenSize);
+        }
+      }, 0);
+    });
     this.$bus.$on('change-size-by-menu', (index) => {
       this.changeFontSize(index);
     });
@@ -251,19 +240,19 @@ export default {
     calculateSpeedLength(index) {
       switch (index) {
         case 0:
-          this.moveLength = 17;
+          this.moveLength = (17 / 170) * this.cardWidth;
           break;
         case 1:
-          this.moveLength = 46;
+          this.moveLength = (46 / 170) * this.cardWidth;
           break;
         case 2:
-          this.moveLength = 71;
+          this.moveLength = (71 / 170) * this.cardWidth;
           break;
         case 3:
-          this.moveLength = 100;
+          this.moveLength = (100 / 170) * this.cardWidth;
           break;
         case 4:
-          this.moveLength = 129;
+          this.moveLength = (129 / 170) * this.cardWidth;
           break;
         default:
           break;
@@ -272,16 +261,16 @@ export default {
     calculateFontLength(index) {
       switch (index) {
         case 0:
-          this.moveLength = 17;
+          this.moveLength = (17 / 170) * this.cardWidth;
           break;
         case 1:
-          this.moveLength = 49;
+          this.moveLength = (49 / 170) * this.cardWidth;
           break;
         case 2:
-          this.moveLength = 86;
+          this.moveLength = (86 / 170) * this.cardWidth;
           break;
         case 3:
-          this.moveLength = 117;
+          this.moveLength = (117 / 170) * this.cardWidth;
           break;
         default:
           break;
@@ -319,40 +308,40 @@ export default {
 <style lang="scss" scoped>
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
-    width: 170px;
+    width: 100%;
     .textContainer {
-      width: 136px;
+      width: auto;
       height: 37px;
-      margin: auto auto auto 17px;
+      margin: auto 17px auto 17px;
     }
     .listContainer {
       height: 37px;
       .rowContainer {
-        width: 137px;
+        width: 80%;
         height: 27px;
         .text {
           line-height: 12px;
           font-size: 10px;
         }
         .speedCard {
-          left: 46px;
+          /*left: 46px;*/
           height: 27px;
         }
         .fontCard {
-          left: 49px;
+          /*left: 49px;*/
           height: 27px;
         }
         .smallSpeedCard {
-          width: 25px;
+          width: 14.8%;
         }
         .smallFontCard {
-          width: 29px;
+          width: 18.4%;
         }
         .bigSpeedCard {
-          width: 29px;
+          width: 16.8%;
         }
         .bigFontCard {
-          width: 35px;
+          width: 21.6%;
         }
       }
     }
@@ -369,40 +358,40 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
-    width: 204px;
+    width: 100%;
     .textContainer {
-      width: 163.2px;
+      width: auto;
       height: 44.4px;
-      margin: auto auto auto 20.4px;
+      margin: auto 20.4px auto 20.4px;
     }
     .listContainer {
       height: 44.4px;
       .rowContainer {
-        width: 164.4px;
+        width: 80%;
         height: 32.4px;
         .text {
           line-height: 14.4px;
           font-size: 12px;
         }
         .speedCard {
-          left: 55.2px;
+          /*left: 55.2px;*/
           height: 32.4px;
         }
         .fontCard {
-          left: 58.8px;
+          /*left: 58.8px;*/
           height: 32.4px;
         }
         .smallSpeedCard {
-          width: 30px;
+          width: 14.8%;
         }
         .smallFontCard {
-          width: 34.8px;
+          width: 18.4%;
         }
         .bigSpeedCard {
-          width: 34.8px;
+          width: 16.8%;
         }
         .bigFontCard {
-          width: 42px;
+          width: 21.6%;
         }
       }
     }
@@ -419,7 +408,7 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
-    width: 285.6px;
+    width: 100%;
     .textContainer {
       width: 228.48px;
       height: 62.16px;
@@ -428,31 +417,31 @@ export default {
     .listContainer {
       height: 62.16px;
       .rowContainer {
-        width: 230.16px;
+        width: 80%;
         height: 45.36px;
         .text {
           line-height: 20.16px;
           font-size: 16.8px;
         }
         .speedCard {
-          left: 77.28px;
+          /*left: 77.28px;*/
           height: 45.36px;
         }
         .fontCard {
-          left: 82.32px;
+          /*left: 82.32px;*/
           height: 45.36px;
         }
         .smallSpeedCard {
-          width: 42px;
+          width: 14.8%;
         }
         .smallFontCard {
-          width: 48.72px;
+          width: 18.4%;
         }
         .bigSpeedCard {
-          width: 48.72px;
+          width: 16.8%;
         }
         .bigFontCard {
-          width: 58.8px;
+          width: 21.6%;
         }
       }
     }
