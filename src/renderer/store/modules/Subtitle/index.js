@@ -88,7 +88,7 @@ const mutations = {
     }
   },
   [subtitleMutations.LOADING_STATES_UPDATE]({ loadingStates }, { id, state }) {
-    Vue.set(loadingStates, id, state);
+    if (loadingStates[id] !== 'failed') Vue.set(loadingStates, id, state);
   },
   [subtitleMutations.VIDEO_SUBTITLE_MAP_UPDATE]({ videoSubtitleMap }, { videoSrc, ids }) {
     Vue.set(videoSubtitleMap, videoSrc, ids);
