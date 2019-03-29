@@ -1,5 +1,5 @@
 import { createSandbox, match } from 'sinon';
-import { pick } from 'lodash';
+import { pick, differenceWith, isEqual } from 'lodash';
 
 import {
   storeLanguagePreference,
@@ -169,16 +169,10 @@ describe('helper - subtitle - storage', () => {
       it('should storeSubtitleList invoke infoDb.add', (done) => {
         storeSubtitleList(videoSrc, testSubtitleList)
           .then(() => {
-            sandbox.assert.calledWithExactly(
-              infoDBAddStub,
+            const veryDeepArrayMatcher = match(arr => !differenceWith(arr, testSubtitleList, isEqual).length);
+            expect(infoDBAddStub).to.have.been.calledWithMatch(
               recentPlaySchemaName,
-              {
-                preference: {
-                  subtitle: {
-                    list: testSubtitleList,
-                  },
-                },
-              },
+              match.hasNested('preference.subtitle.list', veryDeepArrayMatcher),
             );
             done();
           }).catch(done);
