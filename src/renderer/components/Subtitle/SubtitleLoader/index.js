@@ -73,8 +73,7 @@ export default class SubtitleLoader extends EventEmitter {
         case 'online':
           break;
         case 'local': {
-          if (!existsSync(src)) throw new SubtitleError(ErrorCodes.SUBTITLE_NO_SUCH_FILE);
-          this.metaInfo.encoding = detectEncodingFromFileSync(src);
+          if (existsSync(src)) this.metaInfo.encoding = detectEncodingFromFileSync(src);
           break;
         }
       }

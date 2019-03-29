@@ -299,7 +299,6 @@ export default {
         }
       }
       const subtitleInstance = new SubtitleLoader(src, type, { ...options, videoSrc });
-      subtitleInstance.videoSrc = videoSrc;
       try {
         return this.setupListeners(subtitleInstance, {
           metaChange: this.metaChangeCallback,
@@ -400,9 +399,15 @@ export default {
       this.metaInfoUpdate(id, field, value);
     },
     loadingCallback(videoSrc, subtitleInstance) {
-      const { id, type } = subtitleInstance;
+      const { id, type, src } = subtitleInstance;
       this.$set(this.subtitleInstances, id, subtitleInstance);
       this.addSubtitleWhenLoading({ id, type, videoSrc });
+      if (type === 'local' && !existsSync(src)) {
+        this.failedCallback(subtitleInstance, {
+          error: { message: `Local subtitle ${src} removed!` },
+          bubble: LOCAL_SUBTITLE_REMOVED,
+        });
+      }
     },
     async readyCallback(subtitleInstance, metaInfo) {
       const { type, id, src } = subtitleInstance;
