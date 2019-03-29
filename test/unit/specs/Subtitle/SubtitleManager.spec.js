@@ -231,6 +231,7 @@ describe('Subtitle Manager Unit Tests', () => {
     let videoSrc;
     let testStoredSubIds;
     let getOnlineSubtitlesList;
+    let deleteSubtitlesStub;
     let fetchOnlineListStub;
 
     beforeEach(() => {
@@ -241,10 +242,14 @@ describe('Subtitle Manager Unit Tests', () => {
       fetchOnlineListStub = sandbox.stub().resolves(videoSrc.split(''));
       fetchOnlineListStub.withArgs(errorVideoSrc).rejects();
       SubtitleManager.__Rewire__('fetchOnlineList', fetchOnlineListStub);
+      deleteSubtitlesStub = sandbox.stub().resolves();
+      SubtitleManager.__Rewire__('deleteSubtitles', deleteSubtitlesStub);
+      wrapper.vm.normalizeSubtitle = wrapper.vm.addSubtitle = sandbox.stub().resolves();
     });
 
     afterEach(() => {
       SubtitleManager.__ResetDependency__('fetchOnlineList');
+      SubtitleManager.__ResetDependency__('deleteSubtitles');
     });
 
     it('should resolve an empty array when no languages provided', (done) => {
