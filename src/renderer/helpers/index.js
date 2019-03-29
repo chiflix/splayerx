@@ -3,7 +3,7 @@ import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
 import { times } from 'lodash';
-import asyncStorage from '@/helpers/asyncStorage';
+import { resolveBookmarks } from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
@@ -173,13 +173,7 @@ export default {
         this.showingPopupDialog = false;
         if (process.mas && bookmarks?.length > 0) {
           // TODO: put bookmarks to database
-          asyncStorage.get('bookmark').then((mapObj) => {
-            const temp = {};
-            files.forEach((file, i) => {
-              temp[file] = bookmarks[i];
-            });
-            asyncStorage.set('bookmark', { ...mapObj, ...temp });
-          });
+          resolveBookmarks(files, bookmarks);
         }
         if (files) {
           // if selected files contain folders only, then call openFolder()
@@ -216,13 +210,7 @@ export default {
         this.showingPopupDialog = false;
         if (process.mas && bookmarks?.length > 0) {
           // TODO: put bookmarks to database
-          asyncStorage.get('bookmark').then((mapObj) => {
-            const temp = {};
-            files.forEach((file, i) => {
-              temp[file] = bookmarks[i];
-            });
-            asyncStorage.set('bookmark', { ...mapObj, ...temp });
-          });
+          resolveBookmarks(files, bookmarks);
         }
         if (files) {
           this.addFiles(...files);
