@@ -61,6 +61,8 @@ export default {
       linesNum: 1,
       firstLinesNum: 1,
       tags: {},
+      lastFirstSubtitleId: '',
+      lastSecondSubtitleId: '',
     };
   },
   computed: {
@@ -91,6 +93,8 @@ export default {
   watch: {
     originSrc(newVal) {
       if (newVal) {
+        this.lastFirstSubtitleId = '';
+        this.lastSecondSubtitleId = '';
         this.resetSubtitles();
         this.selectionComplete = false;
         this.selectionSecondaryComplete = false;
@@ -116,15 +120,17 @@ export default {
     allSubtitleList(newVal, oldVal) {
       this.allSubtitleListWatcher(newVal, oldVal);
     },
-    currentFirstSubtitleId(newVal) {
+    currentFirstSubtitleId(newVal, oldVal) {
       if (this.selectionComplete || newVal) {
+        this.lastFirstSubtitleId = oldVal;
         updateSelectedSubtitleId(this.originSrc, {
           firstId: newVal, secondaryId: this.currentSecondSubtitleId,
         });
       }
     },
-    currentSecondSubtitleId(newVal) {
+    currentSecondSubtitleId(newVal, oldVal) {
       if (this.selectionSecondaryComplete || newVal) {
+        this.lastSecondSubtitleId = oldVal;
         updateSelectedSubtitleId(this.originSrc, {
           firstId: this.currentFirstSubtitleId, secondaryId: newVal,
         });
@@ -422,8 +428,12 @@ export default {
     },
     failedCallback({ id, videoSrc }, { error, bubble } = {}) {
       if (bubble) this.addLog('error', { errcode: bubble, message: error.message });
-      if (this.currentFirstSubtitleId === id) this.changeCurrentFirstSubtitle('');
-      if (this.currentSecondSubtitleId === id) this.changeCurrentSecondSubtitle('');
+      if (this.currentFirstSubtitleId === id) {
+        this.changeCurrentFirstSubtitle(this.lastFirstSubtitleId);
+      }
+      if (this.currentSecondSubtitleId === id) {
+        this.changeCurrentSecondSubtitle(this.lastSecondSubtitleId);
+      }
       this.$delete(this.subtitleInstances, id);
       deleteSubtitles([id], videoSrc);
       this.addSubtitleWhenFailed({ id });
