@@ -5,7 +5,7 @@
     <transition name="fade" mode="out-in">
     <base-video-player
       :style="{
-        transform: (winAngle === 90 || winAngle === 270) ?
+        transform: (winAngle === 90 || winAngle === 270) && !isFullScreen ?
           `rotate(${winAngle}deg) scale(${ratio}, ${ratio})` : `rotate(${winAngle}deg)`,
       }"
       ref="videoCanvas"
