@@ -284,7 +284,7 @@ export default {
         if (id !== options.id) this.failedCallback(sameSrcSubtitle);
         // same id from options indicates that this sub is already loaded
         else {
-          if (existsSync(src)) return 'success';
+          if (existsSync(src) || type !== 'local') return 'success';
           return this.failedCallback(sameSrcSubtitle);
         }
       }
