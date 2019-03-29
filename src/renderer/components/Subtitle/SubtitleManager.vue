@@ -276,10 +276,17 @@ export default {
         .map(sub => this.addSubtitle(sub, videoSrc));
     },
     async addSubtitle({ src, type, options }, videoSrc) {
-      if (options.id) {
-        const existedInList = !!this.subtitleList.find(({ id }) => id === options.id);
-        const existedInInstances = !!this.subtitleInstances[options.id];
-        if (existedInList && existedInInstances) return 'success';
+      const sameSrcSubtitle = Object.values(this.subtitleInstances)
+        .find(sub => sub.src === src);
+      if (sameSrcSubtitle instanceof SubtitleLoader) {
+        const { id } = sameSrcSubtitle;
+        // different id indicates that this sub is new and need to delete the old
+        if (id !== options.id) this.failedCallback(sameSrcSubtitle);
+        // same id from options indicates that this sub is already loaded
+        else {
+          if (existsSync(src)) return 'success';
+          return this.failedCallback(sameSrcSubtitle);
+        }
       }
       const subtitleInstance = new SubtitleLoader(src, type, { ...options, videoSrc });
       subtitleInstance.videoSrc = videoSrc;
@@ -299,14 +306,7 @@ export default {
     normalizeSubtitle(subtitle) {
       if (typeof subtitle === 'object') {
         const { src, type, options } = subtitle;
-        if (src && type) {
-          if (type === 'local' && !existsSync(src)) {
-            const failedSubtitle = Object.values(this.subtitleInstances)
-              .find(({ src: existedSrc }) => existedSrc === src);
-            if (failedSubtitle) this.failedCallback(failedSubtitle, {});
-          }
-          return { src, type, options: options || {} };
-        }
+        if (src && type) return { src, type, options: options || {} };
       } else if (typeof subtitle === 'string') {
         return { src: subtitle, type: 'local', options: {} };
       }
