@@ -172,9 +172,9 @@
       "title": "网络请求超时",
       "content": "网络延迟或云端异常。"
     },
-    "localSubtitleNotFound": {
+    "localSubtitleRemoved": {
       "title": "字幕加载失败",
-      "content": "未找到本地字幕文件"
+      "content": "本地字幕文件被删除或已改名"
     }
   },
   "loading": {
