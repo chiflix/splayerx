@@ -172,9 +172,9 @@
       "title": "Request Timeout",
       "content": "Network delay or server error."
     },
-    "localSubtitleNotFound": {
+    "localSubtitleRemoved": {
       "title": "Load Subtitle Failed",
-      "content": "Local subtitle not found."
+      "content": "Local subtitle removed or renamed."
     }
   },
   "loading": {
