@@ -1,5 +1,4 @@
 import SubtitleLoader, { __RewireAPI__ as subtitleLoaderRewireAPI } from '@/components/Subtitle/SubtitleLoader';
-import { SubtitleError, ErrorCodes } from '@/components/Subtitle/SubtitleLoader/errors';
 import sinon from 'sinon';
 import EventEmitter from 'events';
 import { randStr } from '../../../helpers';

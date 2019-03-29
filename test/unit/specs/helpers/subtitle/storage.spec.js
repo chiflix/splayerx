@@ -169,7 +169,8 @@ describe('helper - subtitle - storage', () => {
       it('should storeSubtitleList invoke infoDb.add', (done) => {
         storeSubtitleList(videoSrc, testSubtitleList)
           .then(() => {
-            const veryDeepArrayMatcher = match(arr => !differenceWith(arr, testSubtitleList, isEqual).length);
+            const veryDeepArrayMatcher = match(arr =>
+              !differenceWith(arr, testSubtitleList, isEqual).length);
             expect(infoDBAddStub).to.have.been.calledWithMatch(
               recentPlaySchemaName,
               match.hasNested('preference.subtitle.list', veryDeepArrayMatcher),
