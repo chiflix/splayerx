@@ -272,18 +272,9 @@ export default {
      * @return {string}
      */
     ChosenSize() {
-      switch (this.chosenSize) {
-        case 0:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'S' ? 'Small' : this.$t('advance.fontItems[0]');
-        case 1:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'M' ? 'Normal' : this.$t('advance.fontItems[1]');
-        case 2:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'L' ? 'Large' : this.$t('advance.fontItems[2]');
-        case 3:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`) === 'XL' ? 'Extra Large' : this.$t('advance.fontItems[3]');
-        default:
-          return this.$t('advance.fontItems[1]');
-      }
+      const compareContent = ['S', 'M', 'L', 'XL'];
+      const enContent = ['Small', 'Normal', 'Large', 'Extra Large'];
+      return this.$t(`advance.fontItems[${this.chosenSize}]`) === compareContent[this.chosenSize] ? enContent[this.chosenSize] : this.$t(`advance.fontItems[${this.chosenSize}]`);
     },
     minInfoCardWidth() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
