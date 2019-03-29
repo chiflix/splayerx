@@ -1134,6 +1134,7 @@ new Vue({
     },
     windowRotate() {
       this.$store.dispatch('windowRotate90Deg');
+      if (this.isFullScreen) return;
       let newSize = [];
       const windowRect = [
         window.screen.availLeft, window.screen.availTop,
