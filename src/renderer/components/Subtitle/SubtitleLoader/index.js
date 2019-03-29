@@ -59,6 +59,9 @@ export default class SubtitleLoader extends EventEmitter {
       const format = type === 'local' ? localFormatLoader(src) : type;
       if (supportedFormats.includes(format)) {
         this.metaInfo.format = format;
+        if (format === 'embedded' && options.codec) {
+          this.metaInfo.codecFormat = SubtitleLoader.codecToFormat(options.codec);
+        }
         this.loader = Object.values(loaders)
           .find(loader => castArray(loader.supportedFormats).includes(format));
       } else {
@@ -88,14 +91,14 @@ export default class SubtitleLoader extends EventEmitter {
         this.id = this.options.id.toString();
         setImmediate(() => this.emit('loading', this.id));
       } else if (this.type === 'embedded') {
-        embeddedSrcLoader(options.videoSrc, src, this.metaInfo.format)
+        embeddedSrcLoader(options.videoSrc, src, this.metaInfo.codecFormat)
           .then((embeddedSrc) => {
             this.options.src = embeddedSrc;
             this.metaInfo.encoding = detectEncodingFromFileSync(embeddedSrc);
             return storeSubtitle({
               src: this.src,
               type: this.type,
-              format: this.metaInfo.format,
+              format: this.metaInfo.codecFormat,
             });
           })
           .then((id) => {
@@ -162,6 +165,7 @@ export default class SubtitleLoader extends EventEmitter {
   }
 
   fail(error) {
+    console.log('SubtitleError:', error);
     this.emit('failed', {
       error,
       bubble: NOT_SUPPORTED_SUBTITLE,
