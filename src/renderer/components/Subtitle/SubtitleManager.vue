@@ -45,6 +45,7 @@ import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { localLanguageLoader } from './SubtitleLoader/utils';
+import { LOCAL_SUBTITLE_REMOVED } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-manager',
@@ -285,7 +286,10 @@ export default {
         // same id from options indicates that this sub is already loaded
         else {
           if (existsSync(src) || type !== 'local') return 'success';
-          return this.failedCallback(sameSrcSubtitle);
+          return this.failedCallback(sameSrcSubtitle, {
+            error: { message: `Local subtitle ${src} removed!` },
+            bubble: LOCAL_SUBTITLE_REMOVED,
+          });
         }
       }
       const subtitleInstance = new SubtitleLoader(src, type, { ...options, videoSrc });

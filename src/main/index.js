@@ -23,6 +23,7 @@ import {
   UPLOAD_FAILED,
   UPLOAD_SUCCESS,
   ADD_NO_VIDEO,
+  LOCAL_SUBTITLE_REMOVED,
 } from '../shared/notificationcodes';
 
 /**
@@ -331,6 +332,7 @@ function registerMainWindowEvent() {
           case REQUEST_TIMEOUT:
           case UPLOAD_FAILED:
           case ADD_NO_VIDEO:
+          case LOCAL_SUBTITLE_REMOVED:
             mainWindow.webContents.send('addMessages', log.errcode);
             break;
           default:
