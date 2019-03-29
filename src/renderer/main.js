@@ -479,7 +479,6 @@ new Vue({
             {
               label: this.$t('msg.playback.windowRotate'),
               id: 'windowRotate',
-              accelerator: 'CmdOrCtrl+L',
               click: () => {
                 this.windowRotate();
               },
