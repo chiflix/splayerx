@@ -4,10 +4,6 @@
     class="video">
     <transition name="fade" mode="out-in">
     <base-video-player
-      :style="{
-        transform: (winAngle === 90 || winAngle === 270) && !isFullScreen ?
-          `rotate(${winAngle}deg) scale(${ratio}, ${ratio})` : `rotate(${winAngle}deg)`,
-      }"
       ref="videoCanvas"
       :key="originSrc"
       :needtimeupdate=true
@@ -183,8 +179,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub',
-      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList']),
+      'originSrc', 'convertedSrc', 'intrinsicHeight', 'intrinsicWidth', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub',
+      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winAngle', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -195,6 +191,33 @@ export default {
     this.updatePlayinglistRate({ oldDir: '', newDir: path.dirname(this.originSrc), playingList: this.playingList });
   },
   watch: {
+    winAngle(val) {
+      switch (val) {
+        case 90:
+        case 270:
+          if (!this.isFullScreen) {
+            requestAnimationFrame(() => {
+              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${this.ratio}, ${this.ratio})`);
+            });
+          } else {
+            requestAnimationFrame(() => {
+              const newWidth = this.winHeight;
+              const newHeight = newWidth / this.ratio;
+              const scale1 = newWidth / this.winWidth;
+              const scale2 = newHeight / this.winHeight;
+              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale1}, ${scale2})`);
+            });
+          }
+          break;
+        case 0:
+        case 180:
+          requestAnimationFrame(() => {
+            this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg)`);
+          });
+          break;
+        default: break;
+      }
+    },
     originSrc(val, oldVal) {
       this.saveScreenshot(oldVal);
       this.$bus.$emit('show-speedlabel');
@@ -258,9 +281,6 @@ export default {
     this.$bus.$on('drop', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0)';
       this.$ga.event('app', 'drop');
-    });
-    this.$bus.$on('rotate', () => {
-      // this.$refs.videoCanvas.$el.style.setProperty('transform', 'rotate(0deg)');
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
