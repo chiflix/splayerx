@@ -24,6 +24,7 @@
       "backwardS": "Step Backward -5s",
       "forwardL": "Step Forward +60s",
       "backwardL": "Step Backward -60s",
+      "windowRotate": "Rotate 90° Clockwise",
       "singleCycle": "Repeat One"
     },
     "audio": {
