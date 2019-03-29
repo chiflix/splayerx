@@ -22,7 +22,7 @@
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets && !isEditable && !isProfessional"/>
-    <play-button class="play-button no-drag"  v-fade-in="!isEditable && !isProfessional"
+    <play-button class="play-button no-drag"  v-fade-in="!isEditable"
       @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
       :mousemovePosition="mousemovePosition"
@@ -633,6 +633,7 @@ export default {
   justify-content: flex-end;
   position: fixed;
   z-index: 10;
+  box-sizing: content-box; // 为了盖住字幕条
   .button {
     -webkit-app-region: no-drag;
     cursor: pointer;
@@ -694,8 +695,11 @@ export default {
   .control-buttons {
     width: 167px;
     height: 32px;
-    right: 30px;
-    bottom: 29px;
+    // right: 30px;
+    // bottom: 29px;
+    right: 0;
+    bottom: 15px;
+    padding: 15px 30px 14px 15px;
     .button {
       width: 38.4px;
       height: 32px;
@@ -710,8 +714,11 @@ export default {
   .control-buttons {
     width: 260px;
     height: 50px;
-    right: 45px;
-    bottom: 37px;
+    // right: 45px;
+    // bottom: 37px;
+    right: 0;
+    bottom: 19px;
+    padding: 18px 45px 18px 22px;
     .button {
       width: 60px;
       height: 50px;

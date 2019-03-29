@@ -336,6 +336,7 @@ export function megreSameTime(dialogues, type) {
   const target = {
   };
   let text = '';
+  // 判断两个字幕是不是相同位置
   const same = (l, r) => { // eslint-disable-line
     text = '';
     let leftTags;
@@ -350,8 +351,10 @@ export function megreSameTime(dialogues, type) {
       rightTags = r.tags;
       text = r.text;
     }
+    // 是不是相同的alignment
     const sameAlignment = leftTags.alignment === rightTags.alignment;
     if (typeof leftTags.pos === typeof rightTags.pos) {
+      // 是不是相同的定位
       samePos = typeof leftTags.pos === 'undefined' || leftTags.pos === null ? true :
         leftTags.pos.x === rightTags.pos.x && leftTags.pos.y === rightTags.pos.y;
     }

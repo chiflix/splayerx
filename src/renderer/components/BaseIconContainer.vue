@@ -129,8 +129,11 @@ export default {
   display: block;
 }
 .subtitleEditorEnter, .subtitleEditorExit {
-  width: 27px;
-  height: 21px;
+  // 字幕的编辑时间轴尺寸单位都是是vh，这边icon和时间轴等比例的
+  width: 2.4375vh;
+  height: 2.25vh;
+  max-width: 24.375px;
+  max-height: 22.5px;
   display: block;
 }
 

@@ -125,8 +125,11 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .cont {
-    bottom: 34px;
-    left: 33px;
+    // bottom: 34px;
+    // left: 33px;
+    bottom: 17px;
+    left: 0;
+    padding: 12px 17px 12px 33px;
   }
   .timing {
     height: 24px;
@@ -144,8 +147,11 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .cont {
-    bottom: 44px;
-    left: 51px;
+    // bottom: 44px;
+    // left: 51px;
+    bottom: 22px;
+    left: 0;
+    padding: 22px 25px 22px 51px;
   }
   .timing {
     height: 36px;

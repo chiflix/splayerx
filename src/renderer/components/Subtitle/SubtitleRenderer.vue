@@ -26,21 +26,26 @@
         <div
           class="edit-box"
           @mousemove.stop=""
+          :style="{
+            // zoom: `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}`,
+            zoom: `${scaleNum}`,
+            transform: subLine(i),
+            width: `${computedWidth*0.60/scaleNum}px`
+          }"
           v-show="isEditable && paused && i === index">
+          <div
+            class="back subtitle-style1 no-drag"
+            contenteditable="true">{{editVal.replace(/ /g, '&nbsp;')}}</div>
           <textarea
             class="subtitle-style1 no-drag"
             contenteditable="true"
             :ref="`textarea${i}`"
-            @keydown.stop=""
+            @keydown.stop="handleKeyDownTextArea"
             @blur="handleBlurTextArea($event, i)"
+            @mousedown.left.stop=""
+            :rows="rows"
             type="text"
-            rows="2"
-            v-model="editVal"
-            :style="{
-              zoom: `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}`,
-              transform: subLine(i),
-              width: `${computedWidth*0.60/scaleNum}px`
-            }"></textarea>
+            v-model="editVal"></textarea>
         </div>
       </div>
       <div class="professional-btn-wrap" @click.stop="handleClickProfessional" v-if="!isProfessional && !isEditable && canUseEditor">
@@ -57,7 +62,7 @@
     <div
       v-if="(isProfessional && showAddInput)"
       @click.stop="handleClickAddSub"
-      :class="'subContainer subtitle-alignment2'+`${paused && !isEditable ? ' enable-hover': ''}`"
+      :class="'subContainer subtitle-alignment2'+/*`${paused && !isEditable ? ' enable-hover': ''}`*/`${isEditable && index === null ? ' editable': ''}`"
       :style="{
         bottom: `${((20 + ((winHeight - computedHeight) / 2)) / winHeight) * 100}%`
       }">
@@ -71,20 +76,24 @@
         <div
           class="edit-box"
           @mousemove.stop=""
-          v-show="isEditable && paused && index === null">
+          v-show="isEditable && paused && index === null"
+          :style="{
+            // zoom: `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}`,
+            zoom: `${scaleNum}`,
+            width: `${computedWidth*0.60/scaleNum}px`
+          }">
+          <div
+            class="back subtitle-style1 no-drag"
+            contenteditable="true">{{editVal.replace(/ /g, '&nbsp;')}}</div>
           <textarea
             class="subtitle-style1 no-drag"
             contenteditable="true"
             ref="textarea"
-            @keydown.stop=""
+            @keydown.stop="handleKeyDownTextArea"
             @blur="handleBlurTextArea($event, null)"
             type="text"
-            rows="2"
-            v-model="editVal"
-            :style="{
-              zoom: `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}`,
-              width: `${computedWidth*0.60/scaleNum}px`
-            }"></textarea>
+            :rows="rows"
+            v-model="editVal"></textarea>
         </div>
       </div>
     </div>
@@ -142,12 +151,13 @@ export default {
       subPlayResY: 0,
       index: null,
       editVal: '',
+      rows: 1,
     };
   },
   computed: {
     ...mapGetters([
       'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleLis', 'winHeight',
-      'paused',
+      'paused', 'isFullScreen',
       'isEditable', 'isProfessional', 'winRatio', 'winWidth', 'winHeight',
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
     ]),
@@ -179,6 +189,9 @@ export default {
         sizeAvaliable = this.winWidth >= 480;
       }
       return sizeAvaliable && !this.playlistShow;
+    },
+    trimEditVal() {
+      return this.editVal.replace(/ /g, '*');
     },
   },
   watch: {
@@ -212,6 +225,21 @@ export default {
         this.editable = false;
       }
     },
+    editVal(val) {
+      if (val && val.match(/\n/i)) {
+        this.rows = 2;
+        return;
+      }
+      const index = this.index;
+      this.$nextTick(() => {
+        const ref = this.$refs.textarea ? this.$refs.textarea : (this.$refs[`textarea${index}`] && this.$refs[`textarea${index}`][0]);
+        const back = ref && ref.parentNode && ref.parentNode.children && ref.parentNode.children[0];
+        const backHeight = back && back.offsetHeight;
+        if (backHeight) {
+          this.rows = backHeight > 20 ? 2 : 1;
+        }
+      });
+    },
   },
   created() {
     const { subtitleInstance } = this;
@@ -242,6 +270,9 @@ export default {
       this.lastAlignment = [];
       this.lastText = [];
     });
+    // 输入框键盘事件
+    document.addEventListener('keydown', this.handleKeyDown);
+    document.addEventListener('keyup', this.handleKeyUp);
   },
   methods: {
     ...mapMutations({
@@ -281,9 +312,10 @@ export default {
       return result ? result.index : -1;
     },
     handleClickAddSub() {
-      if (this.paused) {
+      const isPaused = this.paused;
+      if (isPaused) {
         if (!this.isEditable) {
-          this.toggleEditable(this.paused);
+          this.toggleEditable(isPaused);
           this.$nextTick(() => {
             this.editVal = '';
             this.$refs.textarea && this.$refs.textarea.focus();
@@ -296,13 +328,19 @@ export default {
     },
     handleClickSubContainer(e, i) {
       if (!this.canUseEditor) return;
-      if (this.paused) {
+      const isPaused = this.paused;
+      if (isPaused) {
         this.index = i;
         if (!this.isEditable) {
-          this.toggleEditable(this.paused);
+          this.toggleEditable(isPaused);
           this.$nextTick(() => {
-            this.editVal = this.currentCues[i].text;
-            this.$refs[`textarea${i}`][0] && this.$refs[`textarea${i}`][0].focus();
+            const txt = this.currentCues[i].text;
+            const ref = this.$refs[`textarea${i}`][0];
+            this.editVal = txt.replace(/<br>/gi, '\n');
+            ref && ref.focus();
+            setImmediate(() => {
+              ref.scrollTop = 9999;
+            });
           });
         }
       } else {
@@ -322,8 +360,13 @@ export default {
         this.$nextTick(() => {
           this.toggleEditable(this.paused);
           this.$nextTick(() => {
-            this.editVal = this.currentCues[i].text;
-            this.$refs[`textarea${i}`][0] && this.$refs[`textarea${i}`][0].focus();
+            const txt = this.currentCues[i].text;
+            const ref = this.$refs[`textarea${i}`][0];
+            this.editVal = txt.replace(/<br>/gi, '\n');
+            ref && ref.focus();
+            setImmediate(() => {
+              ref.scrollTop = 9999;
+            });
           });
         });
       }
@@ -365,6 +408,7 @@ export default {
             this.toggleEditable(false);
             this.editVal = '';
             this.index = null;
+            this.rows = 1;
           }
         });
       } else {
@@ -397,7 +441,28 @@ export default {
         }
         this.toggleEditable(false);
         this.editVal = '';
+        this.rows = 1;
       }
+    },
+    handleKeyDownTextArea(e) {
+      if (e && e.keyCode === 27) {
+        e.target && e.target.blur();
+      }
+    },
+    handleKeyDown(e) {
+      if (e && e.keyCode === 27) {
+        const index = this.index;
+        const ref = this.$refs.textarea ? this.$refs.textarea : (this.$refs[`textarea${index}`] && this.$refs[`textarea${index}`][0]);
+        if (ref) {
+          ref.blur();
+          return;
+        }
+        if (!this.isFullScreen) {
+          this.toggleProfessional(false);
+        }
+      }
+    },
+    handleKeyUp() {
     },
     handleClickProfessional() {
       // 如果退出高级模式，需要恢复原来播放尺寸
@@ -671,6 +736,10 @@ export default {
       return result.map(segment => [...segment, false]);
     },
   },
+  destroyed() {
+    document.removeEventListener('keydown', this.handleKeyDown);
+    document.removeEventListener('keyup', this.handleKeyUp);
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -685,27 +754,43 @@ export default {
     position: static;
     transform: translate(0, 0)!important;
     justify-content: center;
-    &::before {
-      content: "";
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-      z-index: 1;
-      backdrop-filter: blur(3px);
-      background: rgba(0,0,0,0.05);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 5px;
-      visibility: hidden;
-    }
+    // &::before {
+    //   content: "";
+    //   width: 100%;
+    //   height: 100%;
+    //   position: absolute;
+    //   left: 0;
+    //   top: 0;
+    //   z-index: 1;
+    //   backdrop-filter: blur(3px);
+    //   background: rgba(0,0,0,0.05);
+    //   border: 1px solid rgba(255,255,255,0.15);
+    //   border-radius: 5px;
+    //   // visibility: hidden;
+    // }
     .professional-btn-wrap {
       display: flex;
     }
-    
-    &.editable, &.focus, &:hover {
+    // &.editable, &.focus, &:hover {
+    //   &::before {
+    //     visibility: visible;
+    //   }
+    // }
+    &.focus {
+      padding: 0 12px;
       &::before {
-        visibility: visible;
+        content: "";
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 1;
+        backdrop-filter: blur(3px);
+        background: rgba(0,0,0,0.05);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 5px;
+        // visibility: hidden;
       }
     }
     .add-cue-render {
@@ -719,18 +804,18 @@ export default {
   .enable-hover {
     &:hover {
       border-radius: 0;
-      overflow: visible;
+      // overflow: visible;
     }
   }
 }
 .subContainer {
-  padding: 5px 15px;
+  // padding: 5px 15px;
   position: absolute;
   display: flex;
   flex-direction: row;
   align-items: center;
   transform-origin: bottom left;
-  z-index: 5;
+  z-index: 4;
   border: 1px solid transparent;
   .pointer {
     cursor: pointer;
@@ -763,41 +848,46 @@ export default {
 .enable-hover {
   &:hover {
     // padding: 5px 15px;
-    &::before {
-      content: "";
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-      z-index: 1;
-      backdrop-filter: blur(3px);
-      background: rgba(0,0,0,0.05);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 5px;
-    }
+    // &::before {
+    //   content: "";
+    //   width: 100%;
+    //   height: 100%;
+    //   position: absolute;
+    //   left: 0;
+    //   top: 0;
+    //   z-index: 1;
+    //   backdrop-filter: blur(3px);
+    //   background: rgba(0,0,0,0.05);
+    //   border: 1px solid rgba(255,255,255,0.15);
+    //   border-radius: 5px;
+    //   // visibility: hidden;
+    // }
     .professional-btn-wrap {
       display: flex;
     }
   }
-  &.editable {
-    &::before {
-      content: "";
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      left: 0;
-      top: 0;
-      z-index: 1;
-      backdrop-filter: blur(3px);
-      background: rgba(0,0,0,0.05);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 5px;
-    }
+}
+.editable {
+  &::before {
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    backdrop-filter: blur(3px);
+    background: rgba(0,0,0,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 5px;
   }
 }
 .edit-box {
+  display: flex;
+  position: relative;
+  overflow: hidden;
   div, textarea {
+    width: 100%;
     outline: none;
     border: none;
     text-align: center;
@@ -805,10 +895,22 @@ export default {
     padding: 0 5px;
     word-break: break-all;
     resize: none;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    &::-webkit-scrollbar {
+      width: 0!important;
+    }
+  }
+  textarea {
+    position: relative;
+    z-index: 10;
+  }
+  .back {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    opacity: 0;
   }
 }
 </style>

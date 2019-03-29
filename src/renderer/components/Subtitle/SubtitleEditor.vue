@@ -1,13 +1,12 @@
 <template>
-  <div class="sub-editor no-drag"
-    @mousedown.left.stop="handleDragStartEditor"
-    @mousemove.left="handleDragingEditor"
-    @mouseleave.left="handleDragEndEditor"
-    @mouseup.left="handleDragEndEditor">
-    <div class="sub-editor-head">
+  <div class="sub-editor">
+    <div class="sub-editor-head no-drag"
+      @dblclick="handleMouseUpOnTimeLine"
+      @mousedown.left.stop="handleDragStartEditor"
+      @mousemove.left="handleDragingEditor"
+      @mouseup.left="handleDragEndEditor">
       <div class="sub-editor-time-line"
         ref="timeLine"
-        @mouseup.left="handleMouseUpOnTimeLine"
         :style="{
           width: `${3 * winWidth}px`,
           left: `${currentLeft}px`
@@ -17,33 +16,35 @@
         }">
           <div v-for="(time) in times"
             :key="time"
-            :class="'scale' + validityTime(time)"
+            :class="'scale' + validityTime(time) + `${isHighlight(time) ? ' highlight' : ''}`"
             :style="{
-              width: `${space}px`
+              width: `${space}px`,
             }">
             <i></i>
-            <span>{{transcode(time)}}</span>
+            <span>{{isHighlight(time) ? transcode(time) : getSecond(time)}}</span>
           </div>
         </div> 
         <div class="subtitles" ref="subtitles">
           <div v-for="(sub) in validitySubs"
             :key="`${sub.width}-${sub.index}-${sub.track}-${sub.text}`"
+            @mouseover.stop="handleHoverIn($event, sub)"
+            @mouseleave.stop="handleHoverOut($event, sub)"
             @mousedown.left.stop="handleDragStartSub($event, sub)"
             @mousemove.left="handleDragingSub($event, sub)"
             @mouseup.left="handleDragEndSub($event, sub)"
             @dblclick.left="handleDoubleClickSub($event, sub)"
-            :class="sub.index === chooseIndexs ? 'sub focus' : 'sub'"
+            :class="computedSubClass(sub.index)"
             :data="`${sub.width}-${sub.index}-${chooseIndexs}-${sub.track}-${sub.text}`"
             :style="{
               left: `${sub.left}px`,
               right: `${sub.right}px`,
-              top: `${(12 + (sub.track - 1) * 4)}vh`,
+              top: `${(12 + (sub.track - 1) * 4) * vh}px`,
               opacity: `${sub.opacity}`,
               // background: `${sub.opacity === 0 ? 'red' : 'rgba(255,255,255,0.13)'}`,
             }">
             <!-- <span>{{`${sub.left}-${sub.minLeft}-${sub.maxLeft + sub.width}`}}</span> -->
-            <i class="drag-left"></i>
-            <i class="drag-right"></i>
+            <i :class="'drag-left'+`${sub.index === chooseIndexs && subDragMoving ? ' pointer' : ''}`"></i>
+            <i :class="'drag-right'+`${sub.index === chooseIndexs && subDragMoving ? ' pointer' : ''}`"></i>
           </div>
         </div>
       </div>
@@ -97,6 +98,7 @@ export default {
     return {
       dialogues: [],
       chooseIndexs: -1, // 单击字幕条选择字幕条的索引，支持ctrl多选
+      hoverIndex: -1, // 目前鼠标hover的字幕条索引
       currentLeft: 0, // 时间轴左偏移 --|-.-|--
       currentTime: 0, // 当前时间轴中分时间刻度，时间轴的中心时间不一定是播放的时间
       preciseTime: 0, // 当前视频的播放时间
@@ -110,6 +112,7 @@ export default {
       subLeftDraging: false, // 标记是不是向左伸缩字幕条
       subRightDraging: false, // 标记是不是向右伸缩字幕条
       subDragStartX: 0, // 标记拖拽字幕条起始位置
+      subDragStartOffsetLeft: 0, // 标记拖拽字幕条起始，pagex到字幕条左边的距离
       subDragElement: null, // 标记拖拽的字幕条dom元素
       subDragCurrentSub: null, // 标记拖拽的字幕条model
       subDragTimeLineMoving: false, // 拖拽字幕条出窗口, 时间轴运动标记
@@ -131,8 +134,11 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'winWidth', 'duration', 'paused', 'isFullScreen',
+      'winWidth', 'winHeight', 'duration', 'paused',
     ]),
+    vh() {
+      return this.winHeight / 100 > 10 ? 10 : Math.abs(this.winHeight / 100);
+    },
     scales() {
       return Math.ceil((3 * this.winWidth) / this.space);
     },
@@ -288,6 +294,8 @@ export default {
     this.resetCurrentTime(videodata.time);
     this.computedCanShowAddBtn(this.currentSub);
     // 初始化组件
+    document.addEventListener('mousemove', this.handleDragingEditor);
+    document.addEventListener('mouseup', this.handleDragEndEditor);
     document.addEventListener('mousemove', this.handleDragingSub);
     document.addEventListener('mouseup', this.handleDragEndSub);
     // 键盘事件
@@ -484,20 +492,20 @@ export default {
       this.$bus.$emit('seek', this.preciseTime);
     },
     handleMouseUpOnTimeLine(e) {
-      const doubleClickTime = (Date.now() - this.timeLineClickTimestamp);
+      // const doubleClickTime = (Date.now() - this.timeLineClickTimestamp);
       // 单机时间轴、触发时间轴运动到点击位置
-      if (doubleClickTime > this.timeLineClickDelay && (e.pageX - this.dragStartX) === 0) {
-        const offset = (this.winWidth / 2) - e.pageX;
-        const seekTime = this.preciseTime - (offset / this.space);
-        if (seekTime >= 0 && seekTime <= this.duration) {
-          // this.$refs.timeLine.style.transition = '';
-          this.$refs.timeLine.addEventListener('transitionend', this.transitionend, false);
-          this.$refs.timeLine.style.transition = 'left 0.3s ease-in-out';
-          this.currentLeft += offset;
-          this.preciseTime = seekTime;
-        }
+      // if (doubleClickTime > this.timeLineClickDelay) {
+      const offset = (this.winWidth / 2) - e.pageX;
+      const seekTime = this.preciseTime - (offset / this.space);
+      if (seekTime >= 0 && seekTime <= this.duration) {
+        // this.$refs.timeLine.style.transition = '';
+        this.$refs.timeLine.addEventListener('transitionend', this.transitionend, false);
+        this.$refs.timeLine.style.transition = 'left 0.3s ease-in-out';
+        this.currentLeft += offset;
+        this.preciseTime = seekTime;
       }
-      this.timeLineClickTimestamp = Date.now();
+      // }
+      // this.timeLineClickTimestamp = Date.now();
     },
     transitionend() {
       // 时间轴运动到点击位置，动画结束，重设时间
@@ -527,6 +535,33 @@ export default {
       this.$refs.timeLine.style.transition = '';
       this.$refs.timeLine.removeEventListener('transitionend', this.doubleClickTransitionend);
     },
+    computedSubClass(i) {
+      const ci = this.chooseIndexs;
+      const hi = this.hoverIndex;
+      let c = 'sub';
+      if (i === ci && this.subDragMoving) {
+        c = 'sub focus hover pointer';
+      } else if (i === ci && (this.subLeftDraging || this.subRightDraging)) {
+        c = 'sub focus hover resize';
+      } else if (i === ci && i === hi) {
+        c = 'sub focus hover';
+      } else if (i === ci) {
+        c = 'sub focus';
+      } else if (i === hi) {
+        c = 'sub hover';
+      }
+      return c;
+    },
+    handleHoverIn(e, sub) {
+      if (!(this.subDragMoving || this.subLeftDraging || this.subRightDraging)) {
+        this.hoverIndex = sub.index;
+      }
+    },
+    handleHoverOut() {
+      if (!(this.subDragMoving || this.subLeftDraging || this.subRightDraging)) {
+        this.hoverIndex = -1;
+      }
+    },
     handleDragStartSub(e, sub) {
       // 开始拖动字幕条，需要计算拉升还是位移
       this.subDragStartX = e.pageX;
@@ -537,6 +572,7 @@ export default {
       this.subDragElement = subElement;
       this.subDragCurrentSub = sub;
       this.chooseIndexs = sub.index;
+      this.subDragStartOffsetLeft = (e.pageX - (sub.left + this.currentLeft));
       if (leftTarget) {
         this.subLeftDraging = true;
       } else if (rightTarget) {
@@ -553,16 +589,19 @@ export default {
     },
     handleDragingSub(e) {
       if (this.subRightDraging || this.subLeftDraging || this.subDragMoving) {
-        const pointerL = this.subDragCurrentSub.minLeft +
-          (this.currentLeft + (this.subDragCurrentSub.width * 0.03));
-        const pointerR = this.subDragCurrentSub.maxLeft +
-          (this.currentLeft + (this.subDragCurrentSub.width * 0.97));
-        if (e.pageX > pointerR || e.pageX < pointerL) return;
-        requestAnimationFrame(throttle(() => {
-          const offset = e.pageX - this.subDragStartX;
-          this.updateSubWhenDraging(offset, this.subDragCurrentSub, this.subDragElement);
-          this.subDragStartX = e.pageX;
-        }, 100));
+        // const pointerL = this.subDragCurrentSub.minLeft +
+        //   (this.currentLeft + (this.subDragCurrentSub.width * 0.03));
+        // const pointerR = this.subDragCurrentSub.maxLeft +
+        //   (this.currentLeft + (this.subDragCurrentSub.width * 0.97));
+        // if (e.pageX > pointerR || e.pageX < pointerL) return;
+        // requestAnimationFrame(throttle(() => {
+        //   const offset = e.pageX - this.subDragStartX;
+        //   this.updateSubWhenDraging(offset, this.subDragCurrentSub, this.subDragElement);
+        //   this.subDragStartX = e.pageX;
+        // }, 100));
+        const offset = e.pageX - this.subDragStartX;
+        this.updateSubWhenDraging(offset, this.subDragCurrentSub, this.subDragElement, e.pageX);
+        this.subDragStartX = e.pageX;
       }
     },
     timeLineTransitionend() {
@@ -584,10 +623,12 @@ export default {
         this.finishSubDrag(this.subDragCurrentSub);
       }
     },
-    updateSubWhenDraging(offset, sub, subElement) { // eslint-disable-line
+    updateSubWhenDraging(offset, sub, subElement, pageX) { // eslint-disable-line
       if (subElement && this.subDragMoving) {
-        sub.left += offset;
-        sub.right -= offset;
+        // sub.left += offset;
+        // sub.right -= offset;
+        sub.left = pageX - (this.subDragStartOffsetLeft + this.currentLeft);
+        sub.right = (3 * this.winWidth) - (sub.left + sub.width);
         const bMaxL = this.winWidth - this.currentLeft;
         const maxL = bMaxL - ((this.space / 5) * 2); // 字幕拖拽，最大左定位 最右位置
         const bMaxR = (3 * this.winWidth) + this.currentLeft;
@@ -619,7 +660,7 @@ export default {
             this.createSubElement = document.createElement('div');
             this.createSubElement.setAttribute('style', `width: ${sub.width}px;
               position: fixed;
-              top: ${(12 + ((sub.track - 1) * 4))}vh;
+              top: ${(12 + ((sub.track - 1) * 4)) * this.vh}px;
               height: 3vh;
               max-height: 30px;
               z-index: 1;
@@ -715,7 +756,7 @@ export default {
             this.createSubElement = document.createElement('div');
             this.createSubElement.setAttribute('style', `width: ${sub.width}px;
               position: fixed;
-              top: ${(12 + ((sub.track - 1) * 4))}vh;
+              top: ${(12 + ((sub.track - 1) * 4)) * this.vh}px;
               height: 3vh;
               max-height: 30px;
               z-index: 1;
@@ -800,19 +841,30 @@ export default {
           this.step = 1;
         }
       } else if (this.subLeftDraging && subElement) {
-        if (!(offset < 0 && sub.left === sub.minLeft)) {
-          sub.left += offset;
-          sub.left = sub.left < sub.minLeft ? sub.minLeft : sub.left;
-          const maxL = (sub.originLeft + sub.originWidth) - (0.2 * this.space);
-          sub.left = sub.left > maxL ? maxL : sub.left;
-          subElement.style.left = `${sub.left}px`;
-        }
+        sub.left = pageX - (this.subDragStartOffsetLeft + this.currentLeft);
+        sub.left = sub.left < sub.minLeft ? sub.minLeft : sub.left;
+        const maxL = (sub.originLeft + sub.originWidth) - (0.2 * this.space);
+        sub.left = sub.left > maxL ? maxL : sub.left;
+        subElement.style.left = `${sub.left}px`;
+        // if (!(offset < 0 && sub.left === sub.minLeft)) {
+        //   sub.left += offset;
+        //   sub.left = sub.left < sub.minLeft ? sub.minLeft : sub.left;
+        //   const maxL = (sub.originLeft + sub.originWidth) - (0.2 * this.space);
+        //   sub.left = sub.left > maxL ? maxL : sub.left;
+        //   subElement.style.left = `${sub.left}px`;
+        // }
       } else if (this.subRightDraging && subElement) {
-        sub.right -= offset;
+        const l = pageX - (this.subDragStartOffsetLeft + this.currentLeft);
+        sub.right = (3 * this.winWidth) - (l + sub.width);
         sub.right = sub.right < sub.minRight ? sub.minRight : sub.right;
         const maxR = sub.originRight + (sub.originWidth - (0.2 * this.space));
         sub.right = sub.right > maxR ? maxR : sub.right;
         subElement.style.right = `${sub.right}px`;
+        // sub.right -= offset;
+        // sub.right = sub.right < sub.minRight ? sub.minRight : sub.right;
+        // const maxR = sub.originRight + (sub.originWidth - (0.2 * this.space));
+        // sub.right = sub.right > maxR ? maxR : sub.right;
+        // subElement.style.right = `${sub.right}px`;
       }
     },
     handleDragEndSub() {
@@ -853,6 +905,8 @@ export default {
       // const className = `sub${sub.index === this.chooseIndexs ? ' focus' : ''}`;
       // this.subDragElement.setAttribute('class', className);
       this.subDragStartX = 0;
+      this.subDragStartOffsetLeft = 0;
+      this.subDragStartOffsetRight = 0;
       this.subDragMoving = false;
       this.subLeftDraging = false;
       this.subRightDraging = false;
@@ -867,8 +921,11 @@ export default {
       }
     },
     handleKeyDown(e) {
-      if (e && e.keyCode === 27 && !this.isFullScreen) {
-        this.toggleProfessional(false);
+      if (e && e.keyCode === 46 && this.chooseIndexs !== -1) {
+        this.subtitleInstance.parsed.dialogues.splice(this.chooseIndexs, 1);
+        this.$bus.$emit('modified-subtitle', { sub: this.subtitleInstance });
+        this.chooseIndexs = -1;
+        this.hoverIndex = -1;
       }
     },
     handleKeyUp() {
@@ -894,6 +951,22 @@ export default {
       }
       return `${hours}:${minutes}:${seconds}`;
     },
+    getSecond(time) {
+      if (time < 0) {
+        return -1;
+      } else if (time > this.duration) {
+        return -1;
+      }
+      const hours = Math.floor(time / 3600);
+      const minutes = Math.floor((time - (hours * 3600)) / 60);
+      let seconds = time - (hours * 3600) - (minutes * 60);
+      seconds = Math.round(seconds);
+      seconds = seconds < 10 ? `0${seconds}` : seconds;
+      return seconds;
+    },
+    isHighlight(time) {
+      return this.getSecond(time) % 10 === 0;
+    },
     parsedFragments(cues) {
       if (this.type === 'ass' && cues) {
         let currentText = '';
@@ -911,6 +984,8 @@ export default {
     },
   },
   destroyed() {
+    document.removeEventListener('mousemove', this.handleDragingEditor);
+    document.removeEventListener('mouseup', this.handleDragEndEditor);
     document.removeEventListener('mousemove', this.handleDragingSub);
     document.removeEventListener('mouseup', this.handleDragEndSub);
     document.removeEventListener('keydown', this.handleKeyDown);
@@ -925,8 +1000,7 @@ export default {
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 9999;
-    cursor: pointer;
+    z-index: 100;
     background-image: radial-gradient(50% 136%, rgba(0,0,0,0.36) 50%, rgba(0,0,0,0.48) 100%);
     // background-color: rgba(0, 0, 0, .36);
     &::before {
@@ -942,12 +1016,13 @@ export default {
       background-repeat: repeat-x;
       background-position: center 0;
       z-index: -1;
-      opacity: 0.5;
+      opacity: 0.3;
     }
   }
   .sub-editor-head {
-    height: 60vh;
+    height: 25vh;
     position: relative;
+    cursor: pointer;
     &::before {
       content: "";
       display: block;
@@ -990,6 +1065,15 @@ export default {
       display: flex;
       position: relative;
       align-items: center;
+      color: #ffffff;
+      opacity: 0.25;
+      font-weight: lighter;
+      font-size: 14px;
+      &.highlight {
+        // font-size: 14px;
+        opacity: 0.5;
+        font-weight: bolder;
+      }
       &.illegal {
         &::before, &::after, i, span {
           display: none;
@@ -1027,7 +1111,7 @@ export default {
         border-right: 0.5px solid rgba(255,255,255,0.5);
       }
       span {
-        transform: translateX(-50%);
+        transform: translate(calc(-0.5px - 50%), 1px);
       }
     }
     .sub {
@@ -1055,15 +1139,24 @@ export default {
         opacity: 0;
         // transition: all 0.3s ease-in-out;
       }
-      &.focus {
-        background: rgba(255,255,255,0.39);
-        border-color: rgba(255,255,255,0.46);
-      }
-      &:hover {
+      &.hover {
         border-color: rgba(255,255,255,0.40);
         &::before {
           opacity: 1;
         }
+      }
+      &.focus {
+        background: rgba(255,255,255,0.39);
+        border-color: rgba(255,255,255,0.46);
+        // &::before {
+        //   opacity: 1;
+        // }
+      }
+      &.pointer {
+        cursor: pointer;
+      }
+      &.resize {
+        cursor: col-resize;
       }
       &.draging {
         border-color: rgba(255,255,255,0.40);
@@ -1079,6 +1172,9 @@ export default {
         top: 0;
         z-index: 1;
         cursor: col-resize;
+        &.pointer {
+          cursor: pointer;
+        }
       }
       .drag-right {
         position: absolute;
@@ -1088,12 +1184,17 @@ export default {
         top: 0;
         z-index: 1;
         cursor: col-resize;
+        &.pointer {
+          cursor: pointer;
+        }
       }
     }
   }
   .exit-btn-wrap {
     width: 6vh; 
     height: 6vh;
+    max-width: 60px;
+    max-height: 60px;
     position: fixed;
     right: 0;
     top: 0;
