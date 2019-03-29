@@ -1,6 +1,6 @@
 <template>
   <div class="itemContainer advance-column-items">
-    <div class="textContainer" :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'" :style="{
+    <div class="textContainer advanceNormalTitle" :style="{
       cursor: 'default',
     }">
       <div class="textItem">{{ item }}</div>
@@ -21,7 +21,7 @@
             @mouseout="handleOut(index)"
             @click="handleClick(index)"
             :style="{ cursor: track.enabled ? 'default' : 'pointer' }">
-            <div class="text" :class="$i18n.locale === 'ja' ? 'advanceJaItem' : 'advanceNormalItem'"
+            <div class="text advanceNormalItem"
               :style="{
                 color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',

@@ -8,7 +8,7 @@
       :style="{
         height: heightSize,
       }">
-    <div class="textContainer" :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'" :style="{
+    <div class="textContainer advanceNormalTitle" :style="{
       cursor: isChosen || !isSubDelay || !isSubtitleAvaliable ? 'default' : 'pointer',
     }">
       <div class="textItem"

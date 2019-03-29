@@ -14,7 +14,7 @@
           transition: 'color 300ms',
           cursor: isChosen ? 'default' : 'pointer',
         }">
-        <div class="textItem" :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'">{{ item }}</div>
+        <div class="textItem advanceNormalTitle">{{ item }}</div>
         <div class="rightItem" v-show="!isChosen"><img :src="chosenStyle"></div>
       </div>
       <transition name="detail">

@@ -174,11 +174,11 @@
         <transition name="audioTransIn">
           <div class="item2" v-show="!showTrack"
             :style="{ cursor: 'pointer' }">
-            <div class="leftTrackTitle" :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'" :style="{
+            <div class="leftTrackTitle advanceNormalTitle" :style="{
               color: hoverAudioIndex === 2 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
               transition: 'color 300ms',
             }">{{ this.$t('advance.changeTrack') }}</div>
-            <div class="rightTrackItem" :class="$i18n.locale === 'ja' ? 'advanceJaItem' : 'advanceNormalItem'"
+            <div class="rightTrackItem advanceNormalItem"
               :style="{
                 color: 'rgba(255, 255, 255, 0.6)',
               }">{{ currentAudioTrack }}</div>
@@ -224,6 +224,7 @@ export default {
       hoverAudioIndex: -1,
       backAudioHover: false,
       cardWidth: 170,
+      normalFont: 'Avenir, Roboto-Regular, PingFang SC, Microsoft Yahei',
     };
   },
   props: {
@@ -233,19 +234,19 @@ export default {
   },
   watch: {
     displayLanguage() {
-      this.cardWidth = this.maxText + (3 * this.subStyleWidth);
+      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
       this.$bus.$emit('rowCard-init-left');
     },
     readyShow() {
-      this.cardWidth = this.maxText + (3 * this.subStyleWidth);
+      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
       this.$bus.$emit('rowCard-init-left');
     },
     textItemFontSize() {
-      this.cardWidth = this.maxText + (3 * this.subStyleWidth);
+      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
       this.$bus.$emit('rowCard-init-left');
     },
     clearState(val) {
-      this.cardWidth = this.maxText + (3 * this.subStyleWidth);
+      this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
       this.$bus.$emit('rowCard-init-left');
       if (!val) {
         setTimeout(() => {
@@ -292,7 +293,7 @@ export default {
       }
       return 285.6;
     },
-    maxLengthText() {
+    leftTitleToShow() { // 菜单左侧显示的text
       if (this.readyShow === 'audioMenu') {
         return [this.$t('advance.changeTrack'), this.$t('advance.audioDelay')];
       } else if (this.readyShow === 'subMenu') {
@@ -300,25 +301,25 @@ export default {
       }
       return [this.$t('advance.rateTitle'), this.$t('advance.subMenu'), this.$t('advance.audioMenu')];
     },
-    maxText() {
+    maxTextLength() { // 不同菜单界面，一行文字加起来最大的长度
       if (this.readyShow === 'audioMenu') {
-        const firstLine = this.getTextWidth(`${this.textItemFontSize}px`, document.body.style.fontFamily, this.maxLengthText[0]) +
-          this.getTextWidth(`${this.rightItemFontSize}px`, document.body.style.fontFamily, '0 ms');
-        const secondLine = this.getTextWidth(`${this.textItemFontSize}px`, document.body.style.fontFamily, this.maxLengthText[1]) +
-          this.getTextWidth(`${this.rightItemFontSize}px`, document.body.style.fontFamily, this.currentAudioTrack);
+        const firstLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[0]) +
+          this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, '0 ms');
+        const secondLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[1]) +
+          this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, this.currentAudioTrack);
         return Math.max(firstLine, secondLine);
       } else if (this.readyShow === 'subMenu') {
-        const firstLine = this.getTextWidth(`${this.textItemFontSize}px`, document.body.style.fontFamily, this.maxLengthText[0]) +
-          this.getTextWidth(`${this.rightItemFontSize}px`, document.body.style.fontFamily, this.ChosenSize);
-        const secondLine = this.getTextWidth(`${this.textItemFontSize}px`, document.body.style.fontFamily, this.maxLengthText[1]) + this.subStyleWidth;
-        const thirdLine = this.getTextWidth(`${this.textItemFontSize}px`, document.body.style.fontFamily, this.maxLengthText[2]) +
-          this.getTextWidth(`${this.rightItemFontSize}px`, document.body.style.fontFamily, `${this.subtitleDelay / 1000} s`);
+        const firstLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[0]) +
+          this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, this.ChosenSize);
+        const secondLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[1]) + this.subStyleWidth;
+        const thirdLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[2]) +
+          this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, `${this.subtitleDelay / 1000} s`);
         return Math.max(firstLine, secondLine, thirdLine);
       }
-      const firstLine = this.getTextWidth(`${this.textItemFontSize}px`, document.body.style.fontFamily, this.maxLengthText[0]) +
-        this.getTextWidth(`${this.rightItemFontSize}px`, document.body.style.fontFamily, `${this.rate} x`);
-      const secondLine = this.getTextWidth(`${this.textItemFontSize}px`, document.body.style.fontFamily, this.maxLengthText[1]) + this.textItemFontSize;
-      const thirdLine = this.getTextWidth(`${this.textItemFontSize}px`, document.body.style.fontFamily, this.maxLengthText[2]) + this.textItemFontSize;
+      const firstLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[0]) +
+        this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, `${this.rate} x`);
+      const secondLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[1]) + this.textItemFontSize;
+      const thirdLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[2]) + this.textItemFontSize;
       return Math.max(firstLine, secondLine, thirdLine);
     },
     subStyleWidth() {

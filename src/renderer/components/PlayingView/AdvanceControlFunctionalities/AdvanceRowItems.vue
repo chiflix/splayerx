@@ -12,12 +12,12 @@
         :style="{
            cursor: isChosen ? 'default' : 'pointer',
         }">
-        <div class="textItem" :class="$i18n.locale === 'ja' && !isRateMenu ? 'advanceJaTitle' : 'advanceNormalTitle'"
+        <div class="textItem advanceNormalTitle"
           :style="{
             color: color,
             transition: 'color 300ms',
           }">{{ item }}</div>
-        <div class="rightItem" :class="$i18n.locale === 'ja' && !isRateMenu? 'advanceJaItem' : 'advanceNormalItem'" v-show="!isChosen || isRateMenu">{{ showDetail }}</div>
+        <div class="rightItem advanceNormalItem" v-show="!isChosen || isRateMenu">{{ showDetail }}</div>
       </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
