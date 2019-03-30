@@ -105,7 +105,7 @@ export default {
 </script>
 <style scoped lang="scss">
 $dropdown-width: 218px;
-$dropdown-height: 111px;
+$dropdown-height: 156px;
 .preference-setting {
   box-sizing: border-box;
   padding-top: 37px;
