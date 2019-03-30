@@ -53,6 +53,10 @@
 		"timeout": {
 			"content": "네트워크 지연 또는 서버 오류.",
 			"title": "요청 시간 초과"
+    },
+    "localSubtitleRemoved": {
+      "title": "로드 자막 실패",
+      "content": "로컬 자막이 제거되거나 이름이 변경되었습니다."
 		}
 	},
 	"loading": {

@@ -53,6 +53,10 @@
 		"timeout": {
 			"content": "Retraso en la red o error del servidor.",
 			"title": "Pide tiempo fuera"
+    },
+    "localSubtitleRemoved": {
+      "title": "Fallo en el subtítulo de carga",
+      "content": "El subtítulo local se elimina o cambia de nombre."
 		}
 	},
 	"loading": {

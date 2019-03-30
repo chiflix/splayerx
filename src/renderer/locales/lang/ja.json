@@ -53,6 +53,10 @@
 		"timeout": {
 			"content": "ネットワークディレイもしくはサーバーエラー。",
 			"title": "リクエストタイムアウト"
+    },
+    "localSubtitleRemoved": {
+      "title": "字幕読み込みエラー",
+      "content": "ローカル字幕が削除または名前変更されました。"
 		}
 	},
 	"loading": {

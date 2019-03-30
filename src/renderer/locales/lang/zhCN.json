@@ -53,6 +53,10 @@
 		"timeout": {
 			"content": "网络延迟或云端异常。",
 			"title": "网络请求超时"
+    },
+    "localSubtitleRemoved": {
+      "title": "字幕加载失败",
+      "content": "本地字幕文件被删除或已改名。"
 		}
 	},
 	"loading": {
