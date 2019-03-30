@@ -24,8 +24,9 @@
 <script>
 import { mapGetters, mapActions, mapState } from 'vuex';
 import romanize from 'romanize';
+import { existsSync } from 'fs';
 import { sep } from 'path';
-import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray } from 'lodash';
+import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, merge, castArray } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import {
   searchForLocalList, fetchOnlineList, retrieveEmbeddedList,
@@ -44,6 +45,7 @@ import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { localLanguageLoader } from './SubtitleLoader/utils';
+import { LOCAL_SUBTITLE_REMOVED } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-manager',
@@ -59,6 +61,8 @@ export default {
       linesNum: 1,
       firstLinesNum: 1,
       tags: {},
+      lastFirstSubtitleId: '',
+      lastSecondSubtitleId: '',
     };
   },
   computed: {
@@ -89,7 +93,12 @@ export default {
   watch: {
     originSrc(newVal) {
       if (newVal) {
+        this.lastFirstSubtitleId = '';
+        this.lastSecondSubtitleId = '';
         this.resetSubtitles();
+        Object.keys(this.subtitleInstances)
+          .filter(({ videoSrc }) => newVal !== videoSrc)
+          .forEach(id => delete this.subtitleInstances[id]);
         this.selectionComplete = false;
         this.selectionSecondaryComplete = false;
         const hasOnlineSubtitles =
@@ -114,15 +123,17 @@ export default {
     allSubtitleList(newVal, oldVal) {
       this.allSubtitleListWatcher(newVal, oldVal);
     },
-    currentFirstSubtitleId(newVal) {
+    currentFirstSubtitleId(newVal, oldVal) {
       if (this.selectionComplete || newVal) {
+        this.lastFirstSubtitleId = oldVal;
         updateSelectedSubtitleId(this.originSrc, {
           firstId: newVal, secondaryId: this.currentSecondSubtitleId,
         });
       }
     },
-    currentSecondSubtitleId(newVal) {
+    currentSecondSubtitleId(newVal, oldVal) {
       if (this.selectionSecondaryComplete || newVal) {
+        this.lastSecondSubtitleId = oldVal;
         updateSelectedSubtitleId(this.originSrc, {
           firstId: this.currentFirstSubtitleId, secondaryId: newVal,
         });
@@ -229,10 +240,11 @@ export default {
     async getLocalSubtitlesList(videoSrc, storedSubs) {
       const newLocalSubs = await searchForLocalList(videoSrc, SubtitleLoader.supportedFormats)
         .catch(() => []);
-      return values(mergeWith(
+      return values(merge(
         keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'local', options: { id } })), 'src'),
         keyBy(newLocalSubs, 'src'),
-      )).map(this.normalizeSubtitle)
+      ))
+        .map(this.normalizeSubtitle)
         .map(sub => this.addSubtitle(sub, videoSrc));
     },
     async getOnlineSubtitlesList(videoSrc, isFetching, storedSubIds, languages) {
@@ -246,9 +258,7 @@ export default {
           .then(sub => this.addSubtitle(this.normalizeSubtitle(sub), videoSrc))
           .catch(() => []);
         const storedSubs = await Promise.all(storedSubIds.map(retrieveSub)).then(flatten);
-        if (storedSubs.length) {
-          return storedSubs;
-        }
+        if (storedSubs.length) return storedSubs;
       }
       const hints = this.generateHints(videoSrc);
       const fetchSubs = lang => fetchOnlineList(videoSrc, lang, hints)
@@ -259,7 +269,7 @@ export default {
             .map(sub => this.addSubtitle(sub, videoSrc)));
         }).catch(() => []);
       const newSubs = await Promise.all(languages.map(fetchSubs)).then(flatten);
-      deleteSubtitles(storedSubIds);
+      await deleteSubtitles(storedSubIds, videoSrc);
       return newSubs;
     },
     async getEmbeddedSubtitlesList(videoSrc, storedSubs) {
@@ -267,19 +277,29 @@ export default {
         videoSrc,
         SubtitleLoader.supportedCodecs,
       ).catch(() => []).then(castArray);
-      return values(mergeWith(
+      return values(merge(
         keyBy(storedSubs.map(({ src, id }) => ({ src, type: 'embedded', options: { id } })), 'src'),
         keyBy(newEmbeddedSubs, 'src'),
       )).map(this.normalizeSubtitle)
         .map(sub => this.addSubtitle(sub, videoSrc));
     },
     async addSubtitle({ src, type, options }, videoSrc) {
-      if (options.id) {
-        const existedInList = !!this.subtitleList.find(({ id }) => id === options.id);
-        const existedInInstances = !!this.subtitleInstances[options.id];
-        if (existedInList && existedInInstances) return 'success';
+      const sameSrcSubtitle = Object.values(this.subtitleInstances)
+        .find(sub => sub.src === src);
+      if (sameSrcSubtitle instanceof SubtitleLoader) {
+        const { id } = sameSrcSubtitle;
+        // different id indicates that this sub is new and need to delete the old
+        if (id !== options.id) this.failedCallback(sameSrcSubtitle);
+        // same id from options indicates that this sub is already loaded
+        else {
+          if (existsSync(src) || type !== 'local') return sameSrcSubtitle;
+          return this.failedCallback(sameSrcSubtitle, {
+            error: { message: `Local subtitle ${src} removed!` },
+            bubble: LOCAL_SUBTITLE_REMOVED,
+          });
+        }
       }
-      const subtitleInstance = new SubtitleLoader(src, type, { ...options });
+      const subtitleInstance = new SubtitleLoader(src, type, { ...options, videoSrc });
       try {
         return this.setupListeners(subtitleInstance, {
           metaChange: this.metaChangeCallback,
@@ -296,9 +316,7 @@ export default {
     normalizeSubtitle(subtitle) {
       if (typeof subtitle === 'object') {
         const { src, type, options } = subtitle;
-        if (src && type) {
-          return { src, type, options: options || {} };
-        }
+        if (src && type) return { src, type, options: options || {} };
       } else if (typeof subtitle === 'string') {
         return { src: subtitle, type: 'local', options: {} };
       }
@@ -382,9 +400,15 @@ export default {
       this.metaInfoUpdate(id, field, value);
     },
     loadingCallback(videoSrc, subtitleInstance) {
-      const { id, type } = subtitleInstance;
+      const { id, type, src } = subtitleInstance;
       this.$set(this.subtitleInstances, id, subtitleInstance);
       this.addSubtitleWhenLoading({ id, type, videoSrc });
+      if (type === 'local' && !existsSync(src)) {
+        this.failedCallback(subtitleInstance, {
+          error: { message: `Local subtitle ${src} removed!` },
+          bubble: LOCAL_SUBTITLE_REMOVED,
+        });
+      }
     },
     async readyCallback(subtitleInstance, metaInfo) {
       const { type, id, src } = subtitleInstance;
@@ -408,8 +432,16 @@ export default {
       if (type === 'online') result.data = data;
       return updateSubtitle(id, result);
     },
-    failedCallback({ id }) {
+    failedCallback({ id, videoSrc }, { error, bubble } = {}) {
+      if (bubble) this.addLog('error', { errcode: bubble, message: error.message });
+      if (this.currentFirstSubtitleId === id) {
+        this.changeCurrentFirstSubtitle(this.lastFirstSubtitleId);
+      }
+      if (this.currentSecondSubtitleId === id) {
+        this.changeCurrentSecondSubtitle(this.lastSecondSubtitleId);
+      }
       this.$delete(this.subtitleInstances, id);
+      deleteSubtitles([id], videoSrc);
       this.addSubtitleWhenFailed({ id });
     },
     checkCurrentSubtitleList() {

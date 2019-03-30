@@ -231,6 +231,7 @@ describe('Subtitle Manager Unit Tests', () => {
     let videoSrc;
     let testStoredSubIds;
     let getOnlineSubtitlesList;
+    let deleteSubtitlesStub;
     let fetchOnlineListStub;
 
     beforeEach(() => {
@@ -241,10 +242,14 @@ describe('Subtitle Manager Unit Tests', () => {
       fetchOnlineListStub = sandbox.stub().resolves(videoSrc.split(''));
       fetchOnlineListStub.withArgs(errorVideoSrc).rejects();
       SubtitleManager.__Rewire__('fetchOnlineList', fetchOnlineListStub);
+      deleteSubtitlesStub = sandbox.stub().resolves();
+      SubtitleManager.__Rewire__('deleteSubtitles', deleteSubtitlesStub);
+      wrapper.vm.normalizeSubtitle = wrapper.vm.addSubtitle = sandbox.stub().resolves();
     });
 
     afterEach(() => {
       SubtitleManager.__ResetDependency__('fetchOnlineList');
+      SubtitleManager.__ResetDependency__('deleteSubtitles');
     });
 
     it('should resolve an empty array when no languages provided', (done) => {
@@ -322,77 +327,6 @@ describe('Subtitle Manager Unit Tests', () => {
           done();
         })
         .catch(done);
-    });
-  });
-
-  describe('method - addSubttile', () => {
-    let SubtitleLoaderStub;
-    beforeEach(() => {
-      SubtitleLoaderStub = sandbox.stub();
-      subtitleManagerRewireAPI.__Rewire__('SubtitleLoader', SubtitleLoaderStub);
-    });
-    afterEach(() => {
-      subtitleManagerRewireAPI.__ResetDependency__('SubtitleLoader');
-    });
-    it('should generate a new SubtitleLoader instance when no one exist', (done) => {
-      store = merge({}, baseStore, {
-        modules: {
-          Subtitle: {
-            getters: {
-              subtitleList: () => [],
-            },
-          },
-        },
-      });
-      wrapper = shallowMount(SubtitleManager, {
-        localVue, store: new Vuex.Store(store),
-      });
-      wrapper.setData({ subtitleInstances: {} });
-      wrapper.vm.setupListeners = sandbox.stub();
-      const testSubtitle = {
-        src: randStr(),
-        type: 'online',
-        options: { [randStr()]: randStr() },
-      };
-      const testVideoSrc = randStr();
-
-      wrapper.vm.addSubtitle(testSubtitle, testVideoSrc)
-        .then(() => {
-          expect(SubtitleLoaderStub).to.have.been.calledWithNew;
-          done();
-        }).catch(done);
-    });
-    it('should not generate a new one when already having one', (done) => {
-      const testSubtitleSrc = randStr();
-      const testSubtitleInfo = {
-        id: testSubtitleSrc,
-        loading: 'loaded',
-      };
-      const testSubtitleInstance = {
-        src: testSubtitleSrc,
-        type: 'online',
-        options: { id: testSubtitleSrc },
-      };
-      store = merge({}, baseStore, {
-        modules: {
-          Subtitle: {
-            getters: {
-              subtitleList: () => [testSubtitleInfo],
-            },
-          },
-        },
-      });
-      wrapper = shallowMount(SubtitleManager, {
-        localVue, store: new Vuex.Store(store),
-      });
-      wrapper.setData({ subtitleInstances: { [testSubtitleSrc]: testSubtitleInstance } });
-      wrapper.vm.setupListeners = sandbox.stub();
-
-      wrapper.vm.addSubtitle(testSubtitleInstance, randStr())
-        .then(() => {
-          expect(SubtitleLoaderStub).to.have.not.been.calledWithNew;
-          done();
-        }).catch(done);
     });
   });
 
