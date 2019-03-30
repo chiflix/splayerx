@@ -192,7 +192,7 @@ export default {
     });
   },
   mounted() {
-    this.$bus.$on('rowCard-init-left', () => {
+    this.$bus.$on('card-init-left', () => {
       setTimeout(() => {
         if (this.isRateMenu) {
           this.selectedIndex = 1;
