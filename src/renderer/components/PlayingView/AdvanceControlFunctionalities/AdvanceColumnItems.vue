@@ -1,6 +1,6 @@
 <template>
   <div class="itemContainer advance-column-items">
-    <div class="textContainer" :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'" :style="{
+    <div class="textContainer advanceNormalTitle" :style="{
       cursor: 'default',
     }">
       <div class="textItem">{{ item }}</div>
@@ -21,7 +21,7 @@
             @mouseout="handleOut(index)"
             @click="handleClick(index)"
             :style="{ cursor: track.enabled ? 'default' : 'pointer' }">
-            <div class="text" :class="$i18n.locale === 'ja' ? 'advanceJaItem' : 'advanceNormalItem'"
+            <div class="text advanceNormalItem"
               :style="{
                 color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
@@ -118,26 +118,28 @@ export default {
 <style lang="scss" scoped>
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
-    width: 170px;
+    width: 100%;
     .textContainer {
-      width: 136px;
+      width: 100%;
       height: 37px;
-      margin: auto auto auto 17px;
+      .textItem {
+        margin: auto auto auto 17px;
+      }
     }
     .listContainer {
       height: 37px;
       .scrollScope {
-        width: 165px;
+        width: 97%;
         .columnNumDetail {
-          width: 136px;
+          width: 100%;
           height: 27px;
-          margin: 0 auto 5px 17px;
+          margin: 0 auto 5px auto;
           .text {
-            margin: auto auto auto 10px;
+            margin: auto auto auto 27px;
           }
         }
         .card {
-          width: 136px;
+          width: 82%;
           height: 27px;
           margin-left: 17px;
         }
@@ -147,26 +149,28 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
-    width: 204px;
+    width: 100%;
     .textContainer {
-      width: 163.2px;
+      width: 100%;
       height: 44.4px;
-      margin: auto auto auto 20.4px;
+      .textItem {
+        margin: auto auto auto 20.4px;
+      }
     }
     .listContainer {
       height: 44.4px;
       .scrollScope {
-        width: 198px;
+        width: 97%;
         .columnNumDetail {
-          width: 163.2px;
+          width: 100%;
           height: 32.4px;
-          margin: 0 auto 6px 20.4px;
+          margin: 0 auto 6px auto;
           .text {
-            margin: auto auto auto 12px;
+            margin: auto auto auto 32.4px;
           }
         }
         .card {
-          width: 163.2px;
+          width: 82%;
           height: 32.4px;
           margin-left: 20.4px;
         }
@@ -176,26 +180,28 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
-    width: 285.6px;
+    width: 100%;
     .textContainer {
-      width: 228.48px;
+      width: 100%;
       height: 62.16px;
-      margin: auto auto auto 28.56px;
+      .textItem {
+        margin: auto auto auto 28.56px;
+      }
     }
     .listContainer {
       height: 62.16px;
       .scrollScope {
-        width: 277.2px;
+        width: 97%;
         .columnNumDetail {
-          width: 228.48px;
+          width: 100%;
           height: 45.36px;
-          margin: 0 auto 8.4px 28.56px;
+          margin: 0 auto 8.4px auto;
           .text {
-            margin: auto auto auto 16.8px;
+            margin: auto auto auto 45.36px;
           }
         }
         .card {
-          width: 228.48px;
+          width: 82%;
           height: 45.36px;
           margin-left: 28.56px;
         }
@@ -224,7 +230,6 @@ export default {
     color: rgba(255, 255, 255, 0.6);
     .textItem {
       letter-spacing: 0.2px;
-      margin: auto 0;
     }
   }
   .listContainer {
