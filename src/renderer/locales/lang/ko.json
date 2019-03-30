@@ -89,6 +89,7 @@
 		"playback": {
 			"backwardL": "단계 뒤로 -60 년대",
 			"backwardS": "스텝 뒤로 -5s",
+      "windowRotate": "90도 회전",
 			"captureScreen": "화면 캡처",
 			"captureVideoClip": "비디오 클립 캡처",
 			"decreasePlaybackSpeed": "재생 속도 감소",

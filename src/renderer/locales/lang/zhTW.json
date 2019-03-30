@@ -88,7 +88,8 @@
 		},
 		"playback": {
 			"backwardL": "後退 -60s",
-			"backwardS": "後退 -5s",
+      "backwardS": "後退 -5s",
+      "windowRotate": "旋轉 90°",      
 			"captureScreen": "截圖",
 			"captureVideoClip": "截取視頻片段",
 			"decreasePlaybackSpeed": "減緩播放速度",
