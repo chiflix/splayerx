@@ -24,6 +24,7 @@
       "backwardS": "戻る -5s",
       "forwardL": "進む +60s",
       "backwardL": "戻る -60s",
+      "windowRotate": "90° 回転",
       "singleCycle": "リピート"
     },
     "audio": {

@@ -24,7 +24,7 @@
       "backwardS": "后退 -5s",
       "forwardL": "前进 +60s",
       "backwardL": "后退 -60s",
-      "windowRotate": "画面旋转",
+      "windowRotate": "旋转 90°",
       "singleCycle": "循环单个文件"
     },
     "audio": {

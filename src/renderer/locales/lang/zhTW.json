@@ -24,6 +24,7 @@
       "backwardS": "後退 -5s",
       "forwardL": "前進 +60s",
       "backwardL": "後退 -60s",
+      "windowRotate": "旋轉 90°",
       "singleCycle": "循環單個文件"
     },
     "audio": {
