@@ -24,6 +24,7 @@
     UPLOAD_SUCCESS,
     UPLOAD_FAILED,
     ADD_NO_VIDEO,
+    LOCAL_SUBTITLE_REMOVED,
   } from '../shared/notificationcodes';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
@@ -145,6 +146,15 @@
               type: 'result',
               title: this.$t('uploadingFailed.title'),
               content: this.$t('uploadingFailed.content'),
+              dismissAfter: 5000,
+            });
+            break;
+          case LOCAL_SUBTITLE_REMOVED:
+            if (this.$route.name !== 'playing-view') break;
+            this.$store.dispatch('addMessages', {
+              type: 'result',
+              title: this.$t('errorFile.localSubtitleRemoved.title'),
+              content: this.$t('errorFile.localSubtitleRemoved.content'),
               dismissAfter: 5000,
             });
             break;
