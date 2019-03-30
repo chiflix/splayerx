@@ -14,7 +14,7 @@
           transition: 'color 300ms',
           cursor: isChosen ? 'default' : 'pointer',
         }">
-        <div class="textItem" :class="$i18n.locale === 'ja' ? 'advanceJaTitle' : 'advanceNormalTitle'">{{ item }}</div>
+        <div class="textItem advanceNormalTitle">{{ item }}</div>
         <div class="rightItem" v-show="!isChosen"><img :src="chosenStyle"></div>
       </div>
       <transition name="detail">
@@ -110,20 +110,23 @@ export default {
 <style lang="scss" scoped>
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
-    width: 170px;
+    width: 100%;
     .textContainer {
-      width: 136px;
+      width: 100%;
       height: 37px;
-      margin: auto auto auto 17px;
+      .textItem {
+        margin: auto auto auto 17px;
+      }
       .rightItem {
         width: 17px;
         height: 17px;
+        margin: auto 17px auto auto;
       }
     }
     .listContainer {
       height: 37px;
       .rowContainer {
-        width: 137px;
+        width: 80%;
         height: 27px;
         .imgContainer {
           width: 17px;
@@ -145,20 +148,23 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
-    width: 204px;
+    width: 100%;
     .textContainer {
-      width: 163.2px;
+      width: 100%;
       height: 44.4px;
-      margin: auto auto auto 20.4px;
+      .textItem {
+        margin: auto auto auto 20.4px;
+      }
       .rightItem {
-        width: 21px;
-        height: 21px;
+        width: 20.4px;
+        height: 20.4px;
+        margin: auto 20.4px auto auto;
       }
     }
     .listContainer {
       height: 44.4px;
       .rowContainer {
-        width: 164.4px;
+        width: 80%;
         height: 32.4px;
         .imgContainer {
           width: 21px;
@@ -180,20 +186,23 @@ export default {
 }
 @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
-    width: 285.6px;
+    width: 100%;
     .textContainer {
-      width: 228.48px;
+      width: 100%;
       height: 62.16px;
-      margin: auto auto auto 28.56px;
+      .textItem {
+        margin: auto auto auto 28.56px;
+      }
       .rightItem {
-        width: 29px;
-        height: 29px;
+        width: 28.56px;
+        height: 28.56px;
+        margin: auto 28.56px auto auto;
       }
     }
     .listContainer {
       height: 62.16px;
       .rowContainer {
-        width: 230.16px;
+        width: 80%;
         height: 45.36px;
         .imgContainer {
           width: 29px;
@@ -229,10 +238,6 @@ export default {
     color: rgba(255, 255, 255, 0.6);
     .textItem {
       letter-spacing: 0.2px;
-      margin: auto auto auto 0;
-    }
-    .rightItem {
-      margin: auto 0 auto auto;
     }
   }
   .listContainer {

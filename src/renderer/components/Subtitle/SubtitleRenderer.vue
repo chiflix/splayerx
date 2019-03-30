@@ -295,7 +295,7 @@ export default {
         this.$emit('update:linesNum', this.lastLineNum(index) + texts[index].split('<br>').length); // 第二字幕的行数
         this.$emit('update:tags', tags[index]); // 第二字幕的tags
       } else {
-        this.$emit('update:firstLinesNum', this.lastLineNum(index) + texts[index].split('<br>').length); // 第一字幕的行数
+        this.$emit('update:firstLinesNum', texts[index].split('<br>').length); // 第一字幕的行数
       }
       if (isEqual(tags[index], tags[index - 1])) {
         if (!isVtt) {

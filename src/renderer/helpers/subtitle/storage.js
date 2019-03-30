@@ -1,4 +1,4 @@
-import { remove, pick } from 'lodash';
+import { remove, pick, values, merge, keyBy } from 'lodash';
 
 import infoDB from '@/helpers/infoDB';
 import dataDb from '@/helpers/dataDb';
@@ -19,24 +19,22 @@ function updateSubtitlePreferenceRaw(videoSrc, preference, isDelete) {
     if (!videoInfo.preference) videoInfo.preference = {};
     if (!videoInfo.preference.subtitle) videoInfo.preference.subtitle = {};
     const oldPreference = videoInfo.preference.subtitle;
-    const newPreference = { ...oldPreference };
+    const newPreference = { ...videoInfo.preference.subtitle };
     Object.keys(preference).forEach((field) => {
       switch (field) {
         case 'list': {
-          const oldList = newPreference.list || [];
+          const oldList = oldPreference.list || [];
           const newList = preference.list;
-          if (!isDelete) {
-            newList.forEach((subtitle) => {
-              const existedIndex = oldList.findIndex(({ id }) => id === subtitle.id);
-              if (existedIndex !== -1) {
-                const existedSubtitle = oldList[existedIndex];
-                oldList[existedIndex] = { ...existedSubtitle, ...subtitle };
-              } else oldList.push(subtitle);
-            });
+          if (isDelete) {
+            const newListIds = newList.map(({ id }) => id);
+            remove(oldList, ({ id }) => newListIds.includes(id));
+            newPreference.list = oldList;
           } else {
-            remove(oldList, ({ id }) => newList.every(({ id: newId }) => newId !== id));
+            newPreference.list = values(merge(
+              keyBy(oldList, 'id'),
+              keyBy(newList, 'id'),
+            ));
           }
-          newPreference.list = oldList;
           break;
         }
         default:
@@ -136,9 +134,10 @@ export async function deleteSubtitles(subtitleIds, videoSrc) {
 
   await Promise.all(subtitleIds.map(deleteSubtitle));
   if (videoSrc) {
-    const existingIds = await retrieveSubtitleList(videoSrc);
-    remove(existingIds, ({ id }) => success.includes(parseInt(id, 10)));
-    await storeSubtitleList(videoSrc, existingIds, true);
+    const existingSubtitles = await retrieveSubtitleList(videoSrc);
+    subtitleIds = subtitleIds.map(id => id.toString());
+    remove(existingSubtitles, ({ id }) => !subtitleIds.includes(id));
+    await storeSubtitleList(videoSrc, existingSubtitles, true);
   }
 
   return ({ success, failure });
