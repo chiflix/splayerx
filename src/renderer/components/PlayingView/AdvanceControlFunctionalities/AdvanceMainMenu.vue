@@ -235,19 +235,19 @@ export default {
   watch: {
     displayLanguage() {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('rowCard-init-left');
+      this.$bus.$emit('card-init-left');
     },
     readyShow() {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('rowCard-init-left');
+      this.$bus.$emit('card-init-left');
     },
     textItemFontSize() {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('rowCard-init-left');
+      this.$bus.$emit('card-init-left');
     },
     clearState(val) {
       this.cardWidth = this.maxTextLength + (3 * this.subStyleWidth);
-      this.$bus.$emit('rowCard-init-left');
+      this.$bus.$emit('card-init-left');
       if (!val) {
         setTimeout(() => {
           this.readyShow = 'mainMenu';
@@ -286,9 +286,9 @@ export default {
     },
     leftTitleToShow() { // 菜单左侧显示的text
       if (this.readyShow === 'audioMenu') {
-        return [this.$t('advance.changeTrack'), this.$t('advance.audioDelay')];
+        return [this.$t('advance.changeTrack'), this.$t('advance.audioDelay'), this.$t('advance.audioMenu')];
       } else if (this.readyShow === 'subMenu') {
-        return [this.$t('advance.subDelay'), this.$t('advance.fontSize'), this.$t('advance.fontStyle')];
+        return [this.$t('advance.subDelay'), this.$t('advance.fontSize'), this.$t('advance.fontStyle'), this.$t('advance.subMenu')];
       }
       return [this.$t('advance.rateTitle'), this.$t('advance.subMenu'), this.$t('advance.audioMenu')];
     },
@@ -298,14 +298,18 @@ export default {
           this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, '0 ms');
         const secondLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[1]) +
           this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, this.currentAudioTrack);
-        return Math.max(firstLine, secondLine);
+        const thirdLine = this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, this.leftTitleToShow[2]) +
+          this.rightItemFontSize;
+        return Math.max(firstLine, secondLine, thirdLine);
       } else if (this.readyShow === 'subMenu') {
         const firstLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[0]) +
           this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, this.ChosenSize);
         const secondLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[1]) + this.subStyleWidth;
         const thirdLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[2]) +
           this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, `${this.subtitleDelay / 1000} s`);
-        return Math.max(firstLine, secondLine, thirdLine);
+        const fourthLine = this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, this.leftTitleToShow[3]) +
+          this.rightItemFontSize;
+        return Math.max(firstLine, secondLine, thirdLine, fourthLine);
       }
       const firstLine = this.getTextWidth(`${this.textItemFontSize}px`, this.normalFont, this.leftTitleToShow[0]) +
         this.getTextWidth(`${this.rightItemFontSize}px`, this.normalFont, `${this.rate} x`);
@@ -527,7 +531,7 @@ export default {
     }
   }
   .topContent {
-    width: 133px;
+    width: auto;
     height: 12px;
     margin: auto 9px;
   }
@@ -576,7 +580,7 @@ export default {
     }
   }
   .topContent {
-    width: 159.6px;
+    width: auto;
     height: 14.4px;
     margin: auto 10.8px;
   }
@@ -624,7 +628,7 @@ export default {
     }
   }
   .topContent {
-    width: 223.44px;
+    width: auto;
     height: 20.16px;
     margin: auto 15.12px;
   }
