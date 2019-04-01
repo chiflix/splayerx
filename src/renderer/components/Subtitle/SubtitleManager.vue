@@ -14,7 +14,7 @@
 <script>
 import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
 import romanize from 'romanize';
-import { sep } from 'path';
+import { sep, join, basename } from 'path';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, mergeWith, castArray, intersectionBy } from 'lodash';
 import { codeToLanguageName } from '@/helpers/language';
 import {
@@ -28,11 +28,13 @@ import {
   retrieveSubtitle,
   updateSelectedSubtitleId,
   retrieveSelectedSubtitleId,
+  dialogueToString,
 } from '@/helpers/subtitle';
 import transcriptQueue from '@/helpers/subtitle/push';
 import { deleteFileByPath, getSubtitleContentByPath, addSubtitleByMediaHash, writeSubtitleByPath } from '@/helpers/cacheFileStorage';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
+import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 // import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleEditor from './SubtitleEditor.vue';
 import SubtitleRenderer from './SubtitleRenderer.vue';
@@ -68,7 +70,7 @@ export default {
       'getVideoSrcById', 'allSubtitleList', // serve allSubtitleListWatcher
       'subtitleDelay', // subtitle's delay
       'isProfessional', // 字幕编辑高级模式属性
-      'storedWindowInfo', 'winRatio',
+      'storedWindowInfo', 'winRatio', 'defaultDir',
     ]),
     ...mapState({
       preferredLanguages: ({ Preference }) => (
@@ -643,6 +645,33 @@ export default {
       // 删除字幕文件(自制字幕)
       await deleteFileByPath(this.subtitleInstances[sub.id].src);
     },
+    exportSubtitle() {
+      if (this.currentSubtitle.type === 'modified') {
+        const { remote } = this.$electron;
+        const { app, dialog } = remote;
+        const browserWindow = remote.BrowserWindow;
+        const focusWindow = browserWindow.getFocusedWindow();
+        let defaultPath = this.defaultDir;
+        if (!this.defaultDir) {
+          defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
+          this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
+        }
+        const fileName = `${basename(`${this.currentSubtitle.metaInfo.name}`, '.vtt')}.vtt`;
+        defaultPath = join(defaultPath, fileName);
+        dialog.showSaveDialog(focusWindow, {
+          defaultPath,
+        }, async (filePath) => {
+          if (filePath) {
+            const str = dialogueToString(this.currentSubtitle.parsed.dialogues);
+            try {
+              writeSubtitleByPath(filePath, str);
+            } catch (err) {
+              console.log(err);
+            }
+          }
+        });
+      }
+    },
   },
   created() {
     this.$bus.$on('add-subtitles', (subs) => {
@@ -691,6 +720,8 @@ export default {
     this.$bus.$on('modified-subtitle', this.modifiedSubtitle);
     // 当删除某个字幕的文件
     this.$bus.$on('delete-subtitle-file', this.deleteSubtitleFile);
+    // 导出自制字幕
+    this.$bus.$on(bus.EXPORT_MODIFIED_SUBTITLE, this.exportSubtitle);
     // when set immediate on watcher, it may run before the created hook
     this.resetSubtitles();
     this.$bus.$emit('subtitle-refresh-from-src-change');

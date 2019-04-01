@@ -27,6 +27,7 @@ import { Video as videoActions, Subtitle as subtitleActions } from '@/store/acti
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
+import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -115,7 +116,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'isEditable',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'isEditable', 'isProfessional',
       'currentSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent']),
     updateFullScreen() {
       if (this.isFullScreen) {
@@ -283,6 +284,9 @@ new Vue({
         });
       }
     },
+    isProfessional() {
+      this.refreshMenu();
+    },
     isFullScreen() {
       this.refreshMenu();
     },
@@ -338,6 +342,7 @@ new Vue({
       updateSubDelay: subtitleActions.UPDATE_SUBTITLE_DELAY,
       updateChosenStyle: subtitleActions.UPDATE_SUBTITLE_STYLE,
       updateChosenSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
+      addMessages: 'addMessages',
     }),
     /**
      * @description 递归禁用menu子项
@@ -836,6 +841,11 @@ new Vue({
             { type: 'separator' },
           );
         }
+        // 时间轴高级编辑模式，菜单中file，subtile去掉，添加advanced目录
+        if (this.isProfessional) {
+          template.splice(1, 1, this.advancedMenu());
+          // template.splice(4, 1);
+        }
         return template;
       }).then((result) => {
         this.menu = Menu.buildFromTemplate(result);
@@ -844,11 +854,13 @@ new Vue({
         if (this.currentRouteName === 'landing-view') {
           this.menuStateControl(false);
         }
-        if (this.chosenStyle !== '') {
-          this.menu.getMenuItemById(`style${this.chosenStyle}`).checked = true;
+        const menuStyle = this.menu.getMenuItemById(`style${this.chosenStyle}`);
+        if (this.chosenStyle !== '' && menuStyle) {
+          menuStyle.checked = true;
         }
-        if (this.chosenSize !== '') {
-          this.menu.getMenuItemById(`size${this.chosenSize}`).checked = true;
+        const menuSize = this.menu.getMenuItemById(`size${this.chosenSize}`);
+        if (this.chosenSize !== '' && menuSize) {
+          menuSize.checked = true;
         }
         if (this.isSubtitleAvailable) {
           this.subtitleList.forEach((item, index) => {
@@ -863,8 +875,9 @@ new Vue({
           this.menu.getMenuItemById('sub-1').checked = true;
         }
         this.audioTrackList.forEach((item, index) => {
-          if (item.enabled === true) {
-            this.menu.getMenuItemById(`track${index}`).checked = true;
+          const mebuTrackIndex = this.menu.getMenuItemById(`track${index}`);
+          if (item.enabled === true && mebuTrackIndex) {
+            mebuTrackIndex.checked = true;
           }
         });
         if (this.volume <= 0) {
@@ -880,6 +893,46 @@ new Vue({
         .catch((err) => {
           this.addLog('error', err);
         });
+    },
+    advancedMenu() {
+      return {
+        label: '高级',
+        submenu: [
+          {
+            label: '保存',
+            accelerator: 'CmdOrCtrl+S',
+            click: () => {
+            },
+          },
+          {
+            label: '撤销',
+            accelerator: 'CmdOrCtrl+Z',
+            click: () => {
+              this.$bus.$emit(bus.UNDO);
+            },
+          },
+          {
+            label: '重复',
+            accelerator: 'CmdOrCtrl+Shift+Z',
+            click: () => {
+              this.$bus.$emit(bus.REDO);
+            },
+          },
+          {
+            label: '导出',
+            accelerator: 'CmdOrCtrl+E',
+            click: () => {
+              this.$bus.$emit(bus.EXPORT_MODIFIED_SUBTITLE);
+            },
+          },
+          {
+            label: '退出',
+            accelerator: 'Esc',
+            click: () => {
+            },
+          },
+        ],
+      };
     },
     updateRecentItem(key, value) {
       return {

@@ -377,17 +377,19 @@ export default {
       }
     },
     handleBlurTextArea(e, i) {
+      const editVal = this.editVal.trim();
       if (i !== null) {
         this.$nextTick(() => {
           // 处理是否真正修改了字符
-          if (this.editVal !== this.currentCues[i].text) {
+          if (editVal !== this.currentCues[i].text) {
             // 修改当前currentCues
-            this.currentCues[i].text = this.editVal;
+            this.currentCues[i].text = editVal;
             this.$set(this.currentCues, i, this.currentCues[i]);
             // 保存副本
             // 本地字幕
             const text = this.currentCues[i].text;
             const index = this.currentCues[i].index;
+            let before = null;
             const subtitleInstance = cloneDeep(this.subtitleInstance);
             if (subtitleInstance.metaInfo && subtitleInstance.metaInfo.format === 'ass') {
               if (text.length === 0) {
@@ -397,12 +399,18 @@ export default {
               }
             } else if (subtitleInstance.metaInfo) {
               if (text.length === 0) {
-                subtitleInstance.parsed.dialogues.splice(index, 1);
+                before = subtitleInstance.parsed.dialogues.splice(index, 1);
               } else {
+                before = cloneDeep(subtitleInstance.parsed.dialogues[index]);
                 subtitleInstance.parsed.dialogues[index].text = text;
               }
             }
-            this.$bus.$emit('modified-subtitle', { sub: subtitleInstance });
+            this.$bus.$emit('modified-subtitle', {
+              sub: subtitleInstance,
+              action: 'replace',
+              index,
+              before,
+            });
           }
           if (this.index === i) {
             this.toggleEditable(false);
@@ -412,7 +420,7 @@ export default {
           }
         });
       } else {
-        if (this.editVal !== '' && this.newSubHolder) {
+        if (editVal !== '' && this.newSubHolder) {
           const sub = Object.assign({}, JSON.parse(JSON.stringify(this.newSubHolder.last)), {
             end: parseFloat(this.newSubHolder.preciseTime.toFixed(2), 10) + 0.01,
           });
@@ -444,19 +452,36 @@ export default {
         this.rows = 1;
       }
     },
-    handleKeyDownTextArea(e) {
+    handleKeyDownTextArea(e) { // eslint-disable-line
+      // 处理输入框快捷键
+      const { remote } = this.$electron;
+      const browserWindow = remote.BrowserWindow;
+      const focusWindow = browserWindow.getFocusedWindow();
+      const checkCmdOrCtrl = (process.platform === 'darwin' && e.metaKey) || (process.platform !== 'darwin' && e.ctrlKey);
       if (e && e.keyCode === 27) {
         e.target && e.target.blur();
+      } else if (e && e.keyCode === 65 && checkCmdOrCtrl) { // c+a
+        focusWindow.webContents.selectAll();
+      } else if (e && e.keyCode === 67 && checkCmdOrCtrl) { // c+c
+        focusWindow.webContents.copy();
+      } else if (e && e.keyCode === 86 && checkCmdOrCtrl) { // c+v
+        focusWindow.webContents.paste();
+      } else if (e && e.keyCode === 88 && checkCmdOrCtrl) { // c+x
+        focusWindow.webContents.cut();
+      } else if (e && e.keyCode === 90 && checkCmdOrCtrl) { // c+z
+        focusWindow.webContents.undo();
+      } else if (e && e.keyCode === 90 && checkCmdOrCtrl && e.shiftKey) { // c+s+z
+        focusWindow.webContents.redo();
       }
     },
     handleKeyDown(e) {
       if (e && e.keyCode === 27) {
-        const index = this.index;
-        const ref = this.$refs.textarea ? this.$refs.textarea : (this.$refs[`textarea${index}`] && this.$refs[`textarea${index}`][0]);
-        if (ref) {
-          ref.blur();
-          return;
-        }
+        // const index = this.index;
+        // console.log(index, ref);
+        // if (ref) {
+        //   ref.blur();
+        //   // return;
+        // }
         if (!this.isFullScreen) {
           this.toggleProfessional(false);
         }
@@ -795,6 +820,7 @@ export default {
     }
     .add-cue-render {
       opacity: 0.3;
+      cursor: pointer;
     }
   }
   .edit-box {

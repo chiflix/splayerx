@@ -1,15 +1,18 @@
 <template>
   <div class="sub-editor">
-    <div class="sub-editor-head no-drag"
-      @dblclick="handleMouseUpOnTimeLine"
-      @mousedown.left.stop="handleDragStartEditor"
-      @mousemove.left="handleDragingEditor"
-      @mouseup.left="handleDragEndEditor">
-      <div class="sub-editor-time-line"
+    <div class="sub-editor-head"
+      :style="{
+        cursor: `${timeLineDraging ? 'grabbing' : 'grab'}`,
+      }">
+      <div class="sub-editor-time-line no-drag"
         ref="timeLine"
+        @dblclick.left.stop="handleMouseUpOnTimeLine"
+        @mousedown.left.stop="handleDragStartEditor"
+        @mousemove.left="handleDragingEditor"
+        @mouseup.left="handleDragEndEditor"
         :style="{
           width: `${3 * winWidth}px`,
-          left: `${currentLeft}px`
+          left: `${currentLeft}px`,
         }">
         <div class="scales" :style="{
           width: `${scales * space}px`
@@ -32,8 +35,8 @@
             @mousedown.left.stop="handleDragStartSub($event, sub)"
             @mousemove.left="handleDragingSub($event, sub)"
             @mouseup.left="handleDragEndSub($event, sub)"
-            @dblclick.left="handleDoubleClickSub($event, sub)"
-            :class="computedSubClass(sub.index)"
+            @dblclick.left.stop="handleDoubleClickSub($event, sub)"
+            :class="computedSubClass(sub.index)+' no-drag'"
             :data="`${sub.width}-${sub.index}-${chooseIndexs}-${sub.track}-${sub.text}`"
             :style="{
               left: `${sub.left}px`,
@@ -43,8 +46,8 @@
               // background: `${sub.opacity === 0 ? 'red' : 'rgba(255,255,255,0.13)'}`,
             }">
             <!-- <span>{{`${sub.left}-${sub.minLeft}-${sub.maxLeft + sub.width}`}}</span> -->
-            <i :class="'drag-left'+`${sub.index === chooseIndexs && subDragMoving ? ' pointer' : ''}`"></i>
-            <i :class="'drag-right'+`${sub.index === chooseIndexs && subDragMoving ? ' pointer' : ''}`"></i>
+            <i :class="'drag-left'+`${sub.index === chooseIndexs && subDragMoving ? ' grabbing' : ''}`"></i>
+            <i :class="'drag-right'+`${sub.index === chooseIndexs && subDragMoving ? ' grabbing' : ''}`"></i>
           </div>
         </div>
       </div>
@@ -79,7 +82,8 @@
 </template>
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import { throttle } from 'lodash';
+import { throttle, cloneDeep } from 'lodash';
+import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import { videodata } from '@/store/video';
 import { Window as windowMutations } from '@/store/mutationTypes';
 import TheProgressBar from '@/components/PlayingView/TheProgressBar.vue';
@@ -127,6 +131,8 @@ export default {
       space: 85, // 1s pxs
       showAddInput: false, // 可以显示添加字幕的属性
       newSubHolder: null, // 配合showAddInput，存储添加字幕的数据格式以及插入位置
+      history: [],
+      currentIndex: -1,
     };
   },
   props: {
@@ -272,7 +278,7 @@ export default {
       deep: true,
       handler(val) {
         this.hook = 0;
-        if (val && val.parsed && this.dialogues.length !== val.parsed.dialogues.length) {
+        if (val && val.parsed) {
           this.dialogues = val.parsed.dialogues;
         }
         if (this.createSubElement && !this.subDragTimeLineMoving) {
@@ -315,7 +321,7 @@ export default {
       this.createSubElement = document.createElement('div');
       this.createSubElement.setAttribute('style', `width: 1px;
         position: absolute;
-        top: 12vh;
+        top: ${12 * this.vh}px;
         height: 3vh;
         max-height: 30px;
         z-index: 1;
@@ -335,6 +341,22 @@ export default {
         this.createSubElement.style.width = `${(obj.add.end - obj.add.start) * this.space}px`;
       });
     });
+    // 拦截modified-subtitle，push到操作历史记录里面
+    this.$bus.$on('modified-subtitle', ({
+      sub, action, index, before,
+    }) => {
+      // 如果不是撤销或者重复，就记录到历史记录
+      if (action) {
+        this.updateHistory({
+          type: action,
+          index,
+          before,
+          after: cloneDeep(sub.parsed.dialogues[index]),
+        });
+      }
+    });
+    this.$bus.$on(bus.UNDO, this.undo);
+    this.$bus.$on(bus.REDO, this.redo);
   },
   methods: {
     ...mapMutations({
@@ -361,6 +383,7 @@ export default {
               pos: null,
             },
             text: '',
+            track: 1,
           },
           insertIndex: 0,
         };
@@ -417,7 +440,12 @@ export default {
       // 新增字幕，动画结束，触发modified-subtitle事件
       if (this.newSubHolder) {
         obj.sub.parsed.dialogues.splice(this.newSubHolder.insertIndex, 0, obj.add);
-        this.$bus.$emit('modified-subtitle', { sub: obj.sub });
+        this.$bus.$emit('modified-subtitle', {
+          sub: obj.sub,
+          action: 'add',
+          index: this.newSubHolder.insertIndex,
+          before: null,
+        });
         this.newSubHolder = null;
         this.triggerCount += 1;
       }
@@ -540,7 +568,7 @@ export default {
       const hi = this.hoverIndex;
       let c = 'sub';
       if (i === ci && this.subDragMoving) {
-        c = 'sub focus hover pointer';
+        c = 'sub focus hover draging';
       } else if (i === ci && (this.subLeftDraging || this.subRightDraging)) {
         c = 'sub focus hover resize';
       } else if (i === ci && i === hi) {
@@ -726,9 +754,15 @@ export default {
                   let newEnd = newStart + (sub.originEnd - sub.originStart);
                   newStart = parseFloat(newStart.toFixed(2), 10);
                   newEnd = parseFloat(newEnd.toFixed(2), 10);
+                  const before = cloneDeep(this.subtitleInstance.parsed.dialogues[sub.index]);
                   this.subtitleInstance.parsed.dialogues[sub.index].start = newStart;
                   this.subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
-                  this.$bus.$emit('modified-subtitle', { sub: this.subtitleInstance });
+                  this.$bus.$emit('modified-subtitle', {
+                    sub: this.subtitleInstance,
+                    action: 'replace',
+                    index: sub.index,
+                    before,
+                  });
                   this.hook = this.step;
                 }
                 // 时间轴往右运动一个步长
@@ -803,9 +837,15 @@ export default {
                   let newEnd = newStart + (sub.originEnd - sub.originStart);
                   newStart = parseFloat(newStart.toFixed(2), 10);
                   newEnd = parseFloat(newEnd.toFixed(2), 10);
+                  const before = cloneDeep(this.subtitleInstance.parsed.dialogues[sub.index]);
                   this.subtitleInstance.parsed.dialogues[sub.index].start = newStart;
                   this.subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
-                  this.$bus.$emit('modified-subtitle', { sub: this.subtitleInstance });
+                  this.$bus.$emit('modified-subtitle', {
+                    sub: this.subtitleInstance,
+                    action: 'replace',
+                    index: sub.index,
+                    before,
+                  });
                 }
                 // 时间轴往左运动一个步长
                 this.$refs.timeLine.addEventListener('transitionend', this.timeLineTransitionend, false);
@@ -896,10 +936,16 @@ export default {
         newEnd = (sub.originEnd * 1) - ((sub.right - sub.originRight) / this.space);
         newEnd = parseFloat(newEnd.toFixed(2), 10);
       }
-      if (newStart && newEnd) {
+      if (newStart && newEnd && (newStart !== sub.originStart || newEnd !== sub.originEnd)) {
+        const before = cloneDeep(this.subtitleInstance.parsed.dialogues[sub.index]);
         this.subtitleInstance.parsed.dialogues[sub.index].start = newStart;
         this.subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
-        this.$bus.$emit('modified-subtitle', { sub: this.subtitleInstance });
+        this.$bus.$emit('modified-subtitle', {
+          sub: this.subtitleInstance,
+          action: 'replace',
+          index: sub.index,
+          before,
+        });
       }
       // 拖拽字幕条结束，移除hover的UI
       // const className = `sub${sub.index === this.chooseIndexs ? ' focus' : ''}`;
@@ -921,9 +967,14 @@ export default {
       }
     },
     handleKeyDown(e) {
-      if (e && e.keyCode === 46 && this.chooseIndexs !== -1) {
-        this.subtitleInstance.parsed.dialogues.splice(this.chooseIndexs, 1);
-        this.$bus.$emit('modified-subtitle', { sub: this.subtitleInstance });
+      if (e && (e.keyCode === 46 || e.keyCode === 8) && this.chooseIndexs !== -1) {
+        const before = this.subtitleInstance.parsed.dialogues.splice(this.chooseIndexs, 1)[0];
+        this.$bus.$emit('modified-subtitle', {
+          sub: this.subtitleInstance,
+          action: 'del',
+          index: this.chooseIndexs,
+          before,
+        });
         this.chooseIndexs = -1;
         this.hoverIndex = -1;
       }
@@ -982,6 +1033,91 @@ export default {
       // 进入高级模式，需要设定window的信息，在本组件的watch里
       this.toggleProfessional(false);
     },
+    updateHistory(step) {
+      if (this.currentIndex + 1 < this.history.length) {
+        this.history.splice(this.currentIndex + 1);
+      }
+      this.history.push(step);
+      this.currentIndex += 1;
+    },
+    undo() {
+      const pick = this.history[this.currentIndex];
+      if (pick && pick.type === 'add') {
+        const sub = cloneDeep(this.subtitleInstance);
+        sub.parsed.dialogues.splice(pick.index);
+        this.$bus.$emit('modified-subtitle', {
+          sub,
+        });
+        this.currentIndex -= 1;
+      } else if (pick && pick.type === 'del') {
+        const sub = cloneDeep(this.subtitleInstance);
+        const before = {
+          start: pick.before.start,
+          end: pick.before.end,
+          tags: pick.before.tags,
+          text: pick.before.text,
+          track: pick.before.track,
+        };
+        sub.parsed.dialogues.splice(pick.index, 0, before);
+        this.$bus.$emit('modified-subtitle', {
+          sub,
+        });
+        this.currentIndex -= 1;
+      } else if (pick && pick.type === 'replace') {
+        const sub = cloneDeep(this.subtitleInstance);
+        const before = {
+          start: pick.before.start,
+          end: pick.before.end,
+          tags: pick.before.tags,
+          text: pick.before.text,
+          track: pick.before.track,
+        };
+        sub.parsed.dialogues.splice(pick.index, 1, before);
+        this.$bus.$emit('modified-subtitle', {
+          sub,
+        });
+        this.currentIndex -= 1;
+      }
+    },
+    redo() {
+      const pick = this.history[this.currentIndex + 1];
+      if (pick && pick.type === 'add') {
+        const sub = cloneDeep(this.subtitleInstance);
+        const after = {
+          start: pick.after.start,
+          end: pick.after.end,
+          tags: pick.after.tags,
+          text: pick.after.text,
+          track: pick.after.track,
+        };
+        sub.parsed.dialogues.splice(pick.index, 0, after);
+        this.$bus.$emit('modified-subtitle', {
+          sub,
+        });
+        this.currentIndex += 1;
+      } else if (pick && pick.type === 'del') {
+        const sub = cloneDeep(this.subtitleInstance);
+        sub.parsed.dialogues.splice(pick.index, 1);
+        this.$bus.$emit('modified-subtitle', {
+          sub,
+        });
+        this.currentIndex += 1;
+      } else if (pick && pick.type === 'replace') {
+        const sub = cloneDeep(this.subtitleInstance);
+        const after = {
+          start: pick.after.start,
+          end: pick.after.end,
+          tags: pick.after.tags,
+          text: pick.after.text,
+          track: pick.after.track,
+        };
+        sub.parsed.dialogues.splice(pick.index, 1, after);
+        this.$bus.$emit('modified-subtitle', {
+          sub,
+        });
+        this.currentIndex += 1;
+      }
+    },
   },
   destroyed() {
     document.removeEventListener('mousemove', this.handleDragingEditor);
@@ -1022,7 +1158,7 @@ export default {
   .sub-editor-head {
     height: 25vh;
     position: relative;
-    cursor: pointer;
+    cursor: grab;
     &::before {
       content: "";
       display: block;
@@ -1051,7 +1187,7 @@ export default {
     left: 0;
     top: 0;
     z-index: 2;
-    cursor: pointer;
+    // cursor: pointer;
     // background-color: aquamarine;
     .scales {
       display: flex;
@@ -1152,13 +1288,11 @@ export default {
         //   opacity: 1;
         // }
       }
-      &.pointer {
-        cursor: pointer;
-      }
       &.resize {
         cursor: col-resize;
       }
       &.draging {
+        cursor: grabbing;
         border-color: rgba(255,255,255,0.40);
         &::before {
           opacity: 1;
@@ -1172,8 +1306,8 @@ export default {
         top: 0;
         z-index: 1;
         cursor: col-resize;
-        &.pointer {
-          cursor: pointer;
+        &.grabbing {
+          cursor: grabbing;
         }
       }
       .drag-right {
@@ -1184,8 +1318,8 @@ export default {
         top: 0;
         z-index: 1;
         cursor: col-resize;
-        &.pointer {
-          cursor: pointer;
+        &.grabbing {
+          cursor: grabbing;
         }
       }
     }

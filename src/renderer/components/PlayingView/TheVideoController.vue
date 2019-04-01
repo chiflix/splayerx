@@ -28,7 +28,7 @@
       :mousemovePosition="mousemovePosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
-    <volume-indicator class="no-drag" v-fade-in="!isEditable && !isProfessional"
+    <volume-indicator class="no-drag" v-fade-in="!isEditable"
       @update:volume-state="updateVolumeState"
       :attachedShown="attachedShown"
       :mousedownOnPlayButton="mousedownOnPlayButton"

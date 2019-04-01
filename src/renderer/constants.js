@@ -118,3 +118,12 @@ export const DATADB_SHCEMAS = [
     ],
   },
 ];
+
+// $bus.$emit name constants collections
+export const EVENT_BUS_COLLECTIONS = {
+  // subtitle manager
+  EXPORT_MODIFIED_SUBTITLE: 'EXPORT_MODIFIED_SUBTITLE', // 导出自制字幕到本地
+  // short key
+  UNDO: 'UNDO', // 撤销
+  REDO: 'REDO', // 重复
+};

@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-02-22 11:37:18
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-03-19 15:14:50
+ * @Last Modified time: 2019-04-01 11:47:15
  */
 
 /** file dir list
@@ -295,7 +295,6 @@ export function addSubtitleByMediaHash(key, s, { type }) {
 export function writeSubtitleByPath(p, s) {
   return new Promise(async (resolve, reject) => {
     try {
-      await checkPermission(p);
       writeFile(path.join(p), s, (err) => {
         if (err) {
           reject(err);
@@ -335,17 +334,15 @@ export function deleteFileByPath(p) {
  * @date 2019-03-18
  * @export
  * @param {String} key 视频的mediaHash
- * @returns {Promise} resolve [{type: '', src: ''}] or reject Error
+ * @returns {Promise} resolve [{type: '', src: ''}]
  */
 export function getVideoSubtitlesByMediaHash(key) {
   const jobs = [];
   ['modified', 'online'].forEach((cell) => {
-    const job = new Promise(async (resolve, reject) => {
+    const job = new Promise(async (resolve) => {
       const src = join(`${getDefaultDataPath()}/${VIDEO_DIRNAME}/`, `${key}/${SUBTITLES_DIRNAME}/${cell}/`);
-      const cp = await checkPermission(src);
-      if (cp instanceof Error) {
-        reject(cp);
-      } else {
+      try {
+        await checkPermission(src);
         readdir(src, (err, files) => {
           if (err) {
             resolve(null);
@@ -360,6 +357,8 @@ export function getVideoSubtitlesByMediaHash(key) {
             resolve(result);
           }
         });
+      } catch (err) {
+        resolve(null);
       }
     });
     jobs.push(job);

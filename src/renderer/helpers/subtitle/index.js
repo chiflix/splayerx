@@ -1,3 +1,5 @@
+import { toVttTime } from 'subtitle';
+
 export * from './searchers';
 export * from './storage';
 
@@ -64,4 +66,16 @@ function generateCurrentCueToRaw(currentCue) { // eslint-disable-line
 
 export function stringifyAss(subtitle) {
   return generateCurrentCueToRaw(subtitle);
+}
+
+export function stringifyVtt(subtitle) {
+  // todo text with style
+  const start = toVttTime(subtitle.start * 1000);
+  const end = toVttTime(subtitle.end * 1000);
+  const text = subtitle.text.split('<br>').join('\n');
+  return `${start} --> ${end}\n${text}`;
+}
+
+export function dialogueToString(dialogues) {
+  return dialogues.map((e, i) => `\n${i + 1}\n${stringifyVtt(e)}`).join('\n');
 }
