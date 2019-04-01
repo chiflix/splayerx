@@ -559,6 +559,7 @@ export default {
       width: 90%;
       .top {
         font-family: $font-heavy;
+        white-space:nowrap; 
         color: rgba(235,235,235,0.6);
         letter-spacing: 0.64px;
         width: fit-content;
