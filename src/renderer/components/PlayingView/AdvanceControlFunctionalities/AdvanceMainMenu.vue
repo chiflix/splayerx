@@ -267,7 +267,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'rate', 'chosenSize', 'subtitleDelay', 'displayLanguage']),
+    ...mapGetters(['winWidth', 'currentFirstSubtitleId', 'winHeight', 'rate', 'chosenSize', 'subtitleDelay', 'displayLanguage', 'winRatio']),
     /**
      * @return {string}
      */
@@ -342,7 +342,7 @@ export default {
       return 21.84;
     },
     computedSize() {
-      return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
+      return this.winRatio >= 1 ? this.winHeight : this.winWidth;
     },
     currentAudioTrack() {
       const track = this.$store.getters.audioTrackList.filter(track => track.enabled)[0];

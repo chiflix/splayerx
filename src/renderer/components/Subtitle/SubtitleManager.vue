@@ -5,7 +5,7 @@
       ref="subtitleRenderer"
       v-if="currentFirstSubtitleId && duration"
       :subtitle-instance="subtitleInstances[this.currentFirstSubtitleId]"
-      :key="currentFirstSubtitleId"
+      :key='first+originSrc+currentFirstSubtitleId'
       :isFirstSub="true"
       :linesNum="linesNum"
       :firstLinesNum.sync="firstLinesNum"
@@ -14,7 +14,7 @@
       ref="subtitleRenderer"
       v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
       :subtitle-instance="subtitleInstances[this.currentSecondSubtitleId]"
-      :key="currentSecondSubtitleId"
+      :key='second+originSrc+currentSecondSubtitleId'
       :isFirstSub="false"
       :firstLinesNum="firstLinesNum"
       :linesNum.sync="linesNum"
