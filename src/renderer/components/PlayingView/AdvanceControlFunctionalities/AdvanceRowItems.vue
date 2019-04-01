@@ -123,17 +123,17 @@ export default {
     computedSize(val) {
       if (val >= 1080) {
         this.updateVideoScaleByFactors(val);
-      } else if (this.videoAspectRatio >= 1) {
+      } else if (this.winRatio >= 1) {
         this.updatePCVideoScaleByFactors(this.chosenSize);
-      } else if (this.videoAspectRatio < 1) {
+      } else if (this.winRatio < 1) {
         this.updateMobileVideoScaleByFactors(this.chosenSize);
       }
     },
   },
   computed: {
-    ...mapGetters(['rate', 'chosenSize', 'intrinsicWidth', 'intrinsicHeight', 'computedHeight', 'computedWidth', 'subToTop']),
+    ...mapGetters(['rate', 'chosenSize', 'computedHeight', 'computedWidth', 'subToTop', 'winRatio']),
     computedSize() {
-      return this.videoAspectRatio >= 1 ? this.computedHeight : this.computedWidth;
+      return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
     },
     showDetail() {
       if (this.isRateMenu) {
@@ -177,9 +177,6 @@ export default {
       }
       return !this.isRateMenu ? [23 * 1.2 * 1.4, 27 * 1.2 * 1.4] :
         [18.5 * 1.2 * 1.4, 23 * 1.2 * 1.4];
-    },
-    videoAspectRatio() {
-      return this.intrinsicWidth / this.intrinsicHeight;
     },
   },
   created() {
@@ -280,13 +277,13 @@ export default {
     updatePCVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [24, 26, 28, 30];
-      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedHeight) + (secondFactors[index] / 5)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedSize) + (secondFactors[index] / 5)) / 9}`);
     },
     // update video scale that height is larger than width
     updateMobileVideoScaleByFactors(index) {
       const firstFactors = [21, 29, 37, 45];
       const secondFactors = [12, -92, -196, -300];
-      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedHeight) + (secondFactors[index] / 76)) / 9}`);
+      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedSize) + (secondFactors[index] / 76)) / 9}`);
     },
     // update video scale when width or height is larger than 1080
     updateVideoScaleByFactors(val) {
@@ -295,9 +292,9 @@ export default {
     },
     changeFontSize(index) {
       this.updateSubSize(index);
-      if (this.videoAspectRatio >= 1) {
+      if (this.winRatio >= 1) {
         this.updatePCVideoScaleByFactors(index);
-      } else if (this.videoAspectRatio < 1) {
+      } else if (this.winRatio < 1) {
         this.updateMobileVideoScaleByFactors(index);
       }
     },

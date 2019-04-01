@@ -173,7 +173,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'isFirstSubtitle', 'enabledSecondarySub']),
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'winRatio']),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
         const { loadingStates, types } = Subtitle;
@@ -188,7 +188,7 @@ export default {
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
     computedSize() {
-      return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
+      return this.winRatio >= 1 ? this.winHeight : this.winWidth;
     },
     noSubtitle() {
       if (this.timer && this.isInitial) {
