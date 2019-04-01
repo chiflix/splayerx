@@ -121,10 +121,32 @@ export default function kern(createElement, text) { // eslint-disable-line compl
       result[result.length - 1] = result[result.length - 1] + char2;
     }
 
+    // Insert margin between CJK and English
     if ((/[\u3000-\u9fa5가-힝]/.test(char) && /[a-zA-Z0-9]/.test(nextChar))
     || (/[\u3000-\u9fa5가-힝]/.test(nextChar) && /[a-zA-Z0-9]/.test(char))) {
-      result.push(createElement('span', { style: { marginLeft: '0.3em' } }));
+      result.push(createElement('span', { style: { marginLeft: '0.1em' } }));
+    }
+    // Insert margin between hiragana and kanji
+    if ((/[ぁ-ん]/.test(char) && /[一-龯]/.test(nextChar))
+    || (/[ぁ-ん]/.test(nextChar) && /[一-龯]/.test(char))) {
+      result.push(createElement('span', { style: { marginLeft: '0.1em' } }));
     }
   }
   return result;
+}
+
+export function hookVue(Vue) {
+  if (Vue.prototype._v._kerning) return; // eslint-disable-line
+  const createTextVNode = Vue.prototype._v; // eslint-disable-line
+  Vue.prototype._v = function(val) { // eslint-disable-line
+    const createElement = this.$createElement;
+    if (!createElement || !val || typeof val !== 'string'
+      || !this.$i18n || this.$i18n.locale !== 'ja') {
+      return createTextVNode(val);
+    }
+    const result = kern(createElement, val)
+      .map(node => (typeof node === 'string' ? createTextVNode(node) : node));
+    return result.length === 1 ? result[0] : createElement('span', result);
+  };
+  Vue.prototype._v._kerning = true; // eslint-disable-line
 }
