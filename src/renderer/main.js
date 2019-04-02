@@ -441,14 +441,14 @@ new Vue({
             },
             {
               label: this.$t('msg.playback.forwardL'),
-              accelerator: 'Alt+Right',
+              accelerator: 'Up',
               click: () => {
                 this.$bus.$emit('seek', videodata.time + 60);
               },
             },
             {
               label: this.$t('msg.playback.backwardL'),
-              accelerator: 'Alt+Left',
+              accelerator: 'Down',
               click: () => {
                 this.$bus.$emit('seek', videodata.time - 60);
               },
@@ -507,24 +507,6 @@ new Vue({
           label: this.$t('msg.audio.name'),
           id: 'audio',
           submenu: [
-            {
-              label: this.$t('msg.audio.increaseVolume'),
-              accelerator: 'Up',
-              id: 'inVolume',
-              click: () => {
-                this.$ga.event('app', 'volume', 'keyboard');
-                this.$store.dispatch(videoActions.INCREASE_VOLUME);
-              },
-            },
-            {
-              label: this.$t('msg.audio.decreaseVolume'),
-              accelerator: 'Down',
-              id: 'deVolume',
-              click: () => {
-                this.$ga.event('app', 'volume', 'keyboard');
-                this.$store.dispatch(videoActions.DECREASE_VOLUME);
-              },
-            },
             {
               label: this.$t('msg.audio.mute'),
               type: 'checkbox',
