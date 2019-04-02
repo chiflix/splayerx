@@ -256,7 +256,7 @@ export default {
         if (!isEqual(tags[index], tags[index - 1])) {
           break;
         }
-        tmp += texts[index - 1].endsWith('<br>') ? 1 : texts[index - 1].split('<br>').length;
+        tmp += texts[index - 1].replace('/<br>$/g', '').split('<br>').length;
         index -= 1;
       }
       return tmp;
