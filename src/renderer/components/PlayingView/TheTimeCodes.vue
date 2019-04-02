@@ -18,11 +18,10 @@ export default {
   components: {
     Labels,
   },
-  props: ['showAllWidgets'],
+  props: ['showAllWidgets', 'progressTriggerStopped'],
   data() {
     return {
       isRemainTime: false,
-      progressTriggerStopped: false,
       progressTriggerId: 0,
       progressDisappearDelay: 1000,
     };
@@ -36,18 +35,18 @@ export default {
   watch: {
     rate() {
       if (!this.progressKeydown) {
-        this.progressTriggerStopped = true;
+        this.$emit('update:progressTriggerStopped', true);
         this.clock.clearTimeout(this.progressTriggerId);
         this.progressTriggerId = this.clock.setTimeout(() => {
-          this.progressTriggerStopped = false;
+          this.$emit('update:progressTriggerStopped', false);
         }, this.progressDisappearDelay);
       }
     },
     singleCycle() {
-      this.progressTriggerStopped = true;
+      this.$emit('update:progressTriggerStopped', true);
       this.clock.clearTimeout(this.progressTriggerId);
       this.progressTriggerId = this.clock.setTimeout(() => {
-        this.progressTriggerStopped = false;
+        this.$emit('update:progressTriggerStopped', false);
       }, this.progressDisappearDelay);
     },
   },
@@ -74,10 +73,10 @@ export default {
   },
   created() {
     this.$bus.$on('seek', () => {
-      this.progressTriggerStopped = true;
+      this.$emit('update:progressTriggerStopped', true);
       this.clock.clearTimeout(this.progressTriggerId);
       this.progressTriggerId = this.clock.setTimeout(() => {
-        this.progressTriggerStopped = false;
+        this.$emit('update:progressTriggerStopped', false);
       }, this.progressDisappearDelay);
     });
   },

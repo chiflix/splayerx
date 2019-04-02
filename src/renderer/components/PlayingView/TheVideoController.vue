@@ -15,17 +15,17 @@
     <notification-bubble ref="nextVideoUI" v-if="!isEditable && !isProfessional"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"  v-fade-in="!isEditable && !isProfessional"
     :displayState="displayState['recent-playlist']"
-    :mousemovePosition="mousemovePosition"
+    :mousemoveClientPosition="mousemoveClientPosition"
     :isDragging="isDragging"
     :lastDragging.sync="lastDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-fade-in="showAllWidgets && !isEditable && !isProfessional"/>
-    <play-button class="play-button no-drag"  v-fade-in="!isEditable"
+    <div class="masking" v-fade-in="(showAllWidgets || progressTriggerStopped) && !isEditable && !isProfessional"/>
+    <play-button class="play-button no-drag" v-fade-in="!isEditable"
       @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
-      :mousemovePosition="mousemovePosition"
+      :mousemovePosition="mousemoveClientPosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
     <volume-indicator class="no-drag" v-fade-in="!isEditable"
@@ -42,8 +42,8 @@
       v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" v-if="!isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
-    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" v-if="!isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
+    <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable && !isProfessional" />
+    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable && !isProfessional" />
     <!-- 将subtitleManager 从PlayingView 移到 VideoController 里 主要是因为mouse事件无法传递 videoController盖住了subtitleManager -->
     <subtitle-manager :playlistShow="widgetsStatus['playlist-control'] && widgetsStatus['playlist-control'].showAttached" />
   </div>
@@ -119,6 +119,8 @@ export default {
       mousedownOnPlayButton: false,
       mousedownOnVolume: false,
       preFullScreen: false,
+      dragOver: false,
+      progressTriggerStopped: false,
     };
   },
   computed: {
@@ -126,7 +128,7 @@ export default {
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
       currentMouseupWidget: state => state.Input.mouseupComponentName,
       currentMousedownWidget: state => state.Input.mousedownComponentName,
-      mousemovePosition: state => state.Input.mousemoveClientPosition,
+      mousemoveClientPosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
     ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight', 'isEditable', 'isProfessional']),
@@ -226,6 +228,9 @@ export default {
     this.UIElements.forEach((value) => {
       this.displayState[value.name] = true;
       if (value.name === 'recent-playlist') this.displayState[value.name] = false;
+      if (value.name === 'playlist-control' && !this.playingList.length) {
+        this.displayState['playlist-control'] = false;
+      }
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
@@ -233,6 +238,15 @@ export default {
         mouseupOnOther: false,
         hovering: false,
       };
+    });
+    this.$bus.$on('drag-over', () => {
+      this.dragOver = true;
+    });
+    this.$bus.$on('drag-leave', () => {
+      this.dragOver = false;
+    });
+    this.$bus.$on('drop', () => {
+      this.dragOver = false;
     });
     this.$bus.$on('to-fullscreen', () => {
       if (process.platform === 'darwin' &&
@@ -382,7 +396,8 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
-      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
+      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached && !this.dragOver;
+      tempObject['playlist-control'] = !(this.playingList.length === 0);
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
@@ -597,7 +612,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 101;
+  z-index: 99;
 }
 .masking {
   position: absolute;

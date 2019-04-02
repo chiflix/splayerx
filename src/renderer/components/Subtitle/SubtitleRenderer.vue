@@ -20,8 +20,9 @@
           :text="cue.text"
           :settings="cue.tags"
           :style="{
-            zoom: `${scaleNum}`,
+            zoom: isFirstSub ? `${scaleNum}` : `${secondarySubScale}`,
             transform: subLine(i),
+            lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
           }"></CueRenderer>
         <div
           class="edit-box"
@@ -132,6 +133,21 @@ export default {
     chooseIndexs: {
       type: Number,
     },
+    isFirstSub: {
+      type: Boolean,
+      default: true,
+    },
+    linesNum: {
+      type: Number,
+      default: 1,
+    },
+    firstLinesNum: {
+      type: Number,
+      default: 1,
+    },
+    tags: {
+      type: Object,
+    },
   },
   components: {
     CueRenderer,
@@ -152,12 +168,13 @@ export default {
       index: null,
       editVal: '',
       rows: 1,
+      lastTransPercent: 0,
     };
   },
   computed: {
     ...mapGetters([
       'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleLis', 'winHeight',
-      'paused', 'isFullScreen',
+      'paused', 'isFullScreen', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'enabledSecondarySub', 'chosenSize',
       'isEditable', 'isProfessional', 'winRatio', 'winWidth', 'winHeight',
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
     ]),
@@ -188,10 +205,16 @@ export default {
         // 当视频宽度小于高度，如果宽度超过480px,才可以使用编辑模式
         sizeAvaliable = this.winWidth >= 480;
       }
-      return sizeAvaliable && !this.playlistShow;
+      return sizeAvaliable && !this.enabledSecondarySub && !this.playlistShow;
     },
     trimEditVal() {
       return this.editVal.replace(/ /g, '*');
+    },
+    secondarySubScale() { // 第二字幕的字号最小不小于9px
+      if (this.currentFirstSubtitleId === '') {
+        return this.scaleNum;
+      }
+      return (this.scaleNum * 5) / 6 < 1 ? 1 : (this.scaleNum * 5) / 6;
     },
   },
   watch: {
@@ -597,8 +620,8 @@ export default {
         }
       }
     },
-    lineNum(index) {
-      const lastNum = index;
+    lastLineNum(index) {
+      // 全部显示的字幕中，除当前最新一条字幕外所有字幕的行数
       const { currentTexts: texts, currentTags: tags } = this;
       let tmp = 0;
       while (texts[index - 1]) {
@@ -608,7 +631,12 @@ export default {
         tmp += texts[index - 1].split('<br>').length;
         index -= 1;
       }
-      return tmp / texts[lastNum].split('<br>').length;
+      return tmp;
+    },
+    lineNum(index) {
+      // 最新一条字幕需要换行的translate比例
+      const { currentTexts: texts } = this;
+      return this.lastLineNum(index) / texts[index].split('<br>').length;
     },
     assLine(index) {
       const { currentTags: tags } = this;
@@ -639,7 +667,13 @@ export default {
       return `translateY(${100 * this.lineNum(index)}%)`;
     },
     subLine(index) {
-      const { currentTags: tags, isVtt } = this;
+      const { currentTags: tags, currentTexts: texts, isVtt } = this;
+      if (!this.isFirstSub) {
+        this.$emit('update:linesNum', this.lastLineNum(index) + texts[index].split('<br>').length); // 第二字幕的行数
+        this.$emit('update:tags', tags[index]); // 第二字幕的tags
+      } else {
+        this.$emit('update:firstLinesNum', texts[index].split('<br>').length); // 第一字幕的行数
+      }
       if (isEqual(tags[index], tags[index - 1])) {
         if (!isVtt) {
           return `${this.assLine(index)}%`;
@@ -648,8 +682,17 @@ export default {
       }
       return '';
     },
-    transPos(index) {
-      const { currentTags: tags, isVtt } = this;
+    transDirection(transNum) { // 播放列表打开，translate方向改变
+      return this.subToTop ? Math.abs(transNum) : transNum;
+    },
+    firstSubTransPercent(transPercent) { // 当播放列表打开，第一字幕对应的transPercent
+      return this.subToTop ? 0 : transPercent;
+    },
+    secondarySubTransPercent(transPercent) { // 当播放列表打开，第二字幕对应的transPercent
+      return this.subToTop && this.currentSecondSubtitleId !== '' && this.currentFirstSubtitleId !== '' && this.enabledSecondarySub ? transPercent : 0;
+    },
+    transPos(index) { // eslint-disable-line
+      const { currentTags: tags, currentTexts: texts, isVtt } = this;
       const initialTranslate = [
         [0, 0],
         [-50, 0],
@@ -661,13 +704,56 @@ export default {
         [-50, 0],
         [0, 0],
       ];
+      // 两个字幕的间距，由不同字幕大小下的不同表达式决定
+      const subSpaceFactorsA = [5 / 900, 9 / 900, 10 / 900, 12 / 900];
+      const subSpaceFactorsB = [4, 21 / 5, 4, 23 / 5];
+      const secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
+      const firstSubHeight = this.firstLinesNum * 9 * this.scaleNum;
+      // 当播放列表打开时，计算为第二字幕相对于第一字幕需要translate的值
+      const subHeightWithDirection = this.subToTop ?
+        [firstSubHeight, secondSubHeight] : [secondSubHeight, firstSubHeight];
+      // 根据字体尺寸和换行数计算字幕需要translate的百分比，当第一字幕同时存在多条且之前条存在位置信息时，之前条不纳入translate计算
+      const transPercent = texts[index - 1] && !this.isFirstLastSubHasPos(tags[index - 1]) ?
+        this.lastTransPercent :
+        -((subHeightWithDirection[0] + ((subSpaceFactorsA[this.chosenSize] * this.winHeight) +
+          subSpaceFactorsB[this.chosenSize])) / subHeightWithDirection[1]) * 100;
+      this.lastTransPercent = transPercent;
       if (!isVtt) {
         if (tags[index].pos) {
-          return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.translateNum(tags[index].alignment)[1]}%)`;
+          // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
+          return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.transDirection(this.translateNum(tags[index].alignment)[1])}%)`;
         }
-        return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${initialTranslate[tags[index].alignment - 1][1] + this.assLine(index)}%)`;
+        if (this.translateWithPos(tags[index])) {
+          // 没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
+          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index) + this.firstSubTransPercent(transPercent))}%)`;
+        }
+        // 正常translate
+        return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index) + this.secondarySubTransPercent(transPercent))}%)`;
       }
-      return '';
+      if (tags[index].line && tags[index].position) {
+        return '';
+      }
+      if (this.translateWithPos(tags[index])) {
+        // vtt字幕没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
+        return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index) + this.firstSubTransPercent(transPercent))}%)`;
+      }
+      // 正常translate
+      return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index) + this.secondarySubTransPercent(transPercent))}%)`;
+    },
+    isFirstLastSubHasPos(firstTags) {
+      return firstTags.pos || (firstTags.line && firstTags.position) ||
+        (firstTags.alignment && firstTags.alignment !== 2);
+    },
+    isFirstSubHasPos(firstTags) {
+      return firstTags.pos || (firstTags.line && firstTags.position) ||
+        (firstTags.alignment && firstTags.alignment !== 2 && !this.subToTop); // 判断第一字幕是否存在位置信息
+    },
+    isSecondaryHasPos() {
+      return this.tags.pos || (this.tags.line && this.tags.position) ||
+        (this.tags.alignment && this.tags.alignment !== 2 && !this.subToTop); // 判断第二字幕是否存在位置信息
+    },
+    translateWithPos(firstTags) { // 同时存在第一、第二字幕时，如果都没有位置信息，第一字幕需要额外translate
+      return !!(this.isFirstSub && this.currentSecondSubtitleId !== '' && this.enabledSecondarySub && !this.isSecondaryHasPos() && !this.isFirstSubHasPos(firstTags));
     },
     subLeft(index) {
       const { currentTags: tags, type, isVtt } = this;
@@ -687,12 +773,15 @@ export default {
     },
     subTop(index) {
       const { currentTags: tags, type, isVtt } = this;
-      if (!isVtt) {
-        if (tags[index].pos) {
-          return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
-        } else if ([7, 8, 9].includes(tags[index].alignment)) {
-          return `${((20 + ((this.winHeight - this.computedHeight) / 2)) / this.winHeight) * 100}%`;
-        }
+      // if (!isVtt) {
+      //   if (tags[index].pos) {
+      //     return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
+      //   } else if ([7, 8, 9].includes(tags[index].alignment)) {
+      //     return `${((20 + ((this.winHeight - this.computedHeight) / 2)) /
+      //       this.winHeight) * 100}%`;
+      //   }
+      if (!isVtt && tags[index].pos) {
+        return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
       } else if (type === 'vtt' && tags[index].line && tags[index].position) {
         if (tags[index].vertical) {
           return tags[index].position;
@@ -702,6 +791,8 @@ export default {
           tags[index].line += '%';
         }
         return tags[index].line;
+      } else if ([7, 8, 9].includes(tags[index].alignment)) {
+        return `${(60 / 1080) * 100}%`;
       }
       return '';
     },
@@ -709,6 +800,7 @@ export default {
       const { currentTags: tags, isVtt } = this;
       if (([1, 2, 3].includes(tags[index].alignment) && !tags[index].pos) ||
         (isVtt && (!tags[index].line || !tags[index].position))) {
+        // return `${(60 / 1080) * 100}%`;
         return `${((20 + ((this.winHeight - this.computedHeight) / 2)) / this.winHeight) * 100}%`;
       }
       return '';

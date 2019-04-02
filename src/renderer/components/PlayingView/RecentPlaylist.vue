@@ -21,17 +21,20 @@
         paddingLeft: sizeAdaption(40),
       }">
       <div class="top"
-      :style="{
-        fontSize: sizeAdaption(14),
-        lineHeight: sizeAdaption(13),
-      }"><span ref="lastPlayedTime"></span> {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}</div>
+        :style="{
+          fontSize: sizeAdaption(14),
+          lineHeight: sizeAdaption(13),
+        }">
+        <span ref="lastPlayedTime"></span>
+        {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}
+      </div>
       <div class="file-name"
         :style="{
           marginTop: sizeAdaption(9),
           fontSize: sizeAdaption(18),
           lineHeight: sizeAdaption(20),
           fontWeight: 500,
-        }">{{filename}}</div>
+        }">{{ filename }}</div>
     </div>
     </transition>
     <div class="playlist-items"
@@ -44,17 +47,36 @@
         marginLeft: sizeAdaption(40),
       }">
       <RecentPlaylistItem v-for="(item, index) in playingList" class="item"
+        @can-remove="canRemove = true"
         :key="item"
         :index="index"
         :path="item"
+        :maxIndex="maxIndex"
+        :isLastPage="lastIndex === maxIndex && firstIndex > 0"
+        :pageSwitching="pageSwitching"
+        :itemMoving="itemMoving"
+        :indexOfMovingTo="indexOfMovingTo"
+        :indexOfMovingItem="indexOfMovingItem"
+        :movementX="movementX"
+        :movementY="movementY"
         :canHoverItem="canHoverItem"
         :isInRange="index >= firstIndex && index <= lastIndex"
         :isPlaying="index === playingIndex"
-        :winWidth="winWidth"
         :isShifting="shifting"
-        :hoverIndex="hoverIndex"
+        :hovered="hoverIndex === index"
+        :winWidth="winWidth"
         :thumbnailWidth="thumbnailWidth"
-        :eventTarget="eventTarget" />
+        :thumbnailHeight="thumbnailHeight"
+        :sizeAdaption="sizeAdaption"
+        :eventTarget="eventTarget"/>
+      <Add :style="{
+          marginRight: sizeAdaption(15),
+          minWidth: `${thumbnailWidth}px`,
+          minHeight: `${thumbnailHeight}px`,
+        }"
+        :itemMoving="itemMoving"
+        :index="addIndex"
+        :addMouseup="addMouseup"/>
       <div class="next-page"
         v-if="thumbnailNumber < numberOfPlaylistItem"
         @mouseup.stop=""
@@ -74,14 +96,16 @@ import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
 import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
+import Add from '@/components/PlayingView/Add.vue';
 
 export default {
   name: 'recent-playlist',
   components: {
     RecentPlaylistItem,
+    Add,
   },
   props: {
-    mousemovePosition: {},
+    mousemoveClientPosition: {},
     displayState: Boolean,
     mousedownOnOther: Boolean,
     mouseupOnOther: Boolean,
@@ -93,16 +117,27 @@ export default {
       filename: '',
       firstIndex: 0, // first index of current page
       hoverIndex: 0, // only for display
+      indexOfMovingItem: NaN, // index of move item
+      movementX: 0, // movementX of move item
+      movementY: 0, // movementY of move item
       shifting: false,
       snapShoted: false,
       hoveredMediaInfo: {}, // the hovered video's media info
-      mousePosition: [],
+      mousePosition: {},
       backgroundDisplayState: this.displayState, // it's weird but DON'T DELETE IT!!
       canHoverItem: false,
       tranFlag: false,
       filePathNeedToDelete: '',
       eventTarget: {},
       changeByRecent: false,
+      pageSwitching: false,
+      pageSwitchingTimeId: NaN,
+      removeTimeId: NaN,
+      canRemove: false,
+      mousedownPosition: [],
+      mousemovePosition: [],
+      firstIndexOnMousedown: 0,
+      lastIndexOnMousedown: 0,
     };
   },
   created() {
@@ -110,14 +145,17 @@ export default {
       this.filePathNeedToDelete = path;
     });
     this.$bus.$on('delete-file', () => {
-      this.$store.dispatch('RemovePlayingList', this.filePathNeedToDelete);
+      this.$store.dispatch('RemoveItemFromPlayingList', this.filePathNeedToDelete);
       this.filePathNeedToDelete = '';
     });
     this.hoverIndex = this.playingIndex;
+    this.eventTarget.onItemMousemove = this.onItemMousemove;
+    this.eventTarget.onItemMousedown = this.onItemMousedown;
     this.eventTarget.onItemMouseover = this.onItemMouseover;
     this.eventTarget.onItemMouseout = this.onItemMouseout;
     this.eventTarget.onItemMouseup = this.onItemMouseup;
 
+    this.indexOfMovingItem = this.playingList.length;
     this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
@@ -143,6 +181,155 @@ export default {
         this.updateMousemoveTarget('the-video-controller');
       }
     },
+    updatelastPlayedTime(time) {
+      if (this.$refs.lastPlayedTime) {
+        if (this.hoverIndex === this.playingIndex) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
+        } else if (this.hoveredMediaInfo.lastPlayedTime) {
+          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
+        }
+      }
+    },
+    addMouseup() {
+      if (this.addIndex !== this.lastIndex + 1) {
+        this.addFilesByDialog({
+          defaultPath: path.dirname(this.originSrc),
+        });
+      }
+      this.onItemMouseup(this.addIndex);
+    },
+    onItemMousedown(index, pageX, pageY) {
+      this.mousedownPosition = [pageX, pageY];
+      this.firstIndexOnMousedown = this.firstIndex;
+      this.lastIndexOnMousedown = this.lastIndex;
+    },
+    onItemMousemove(index, pageX, pageY) { // eslint-disable-line complexity
+      this.mousemovePosition = [pageX, pageY];
+      const offsetX = pageX - this.mousedownPosition[0];
+      const offsetY = pageY - this.mousedownPosition[1];
+      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+      const distance = marginRight + this.thumbnailWidth;
+      const outOfWindow = pageX > window.innerWidth || pageX < 0
+        || pageY > window.innerHeight || pageY < 0;
+
+      if (Math.abs(offsetY) > 0 || Math.abs(offsetX) > 0) {
+        this.indexOfMovingItem = index;
+        this.movementY = offsetY;
+        if (Math.abs(this.movementY) < this.thumbnailHeight) this.canRemove = false;
+
+        if (outOfWindow) {
+          clearTimeout(this.pageSwitchingTimeId);
+          this.pageSwitching = false;
+        }
+        // if the item is moved to the edge of the window and stay for 1s
+        // then switch the page
+        if (this.indexOfMovingTo === this.lastIndex + 1) {
+          if (!this.pageSwitching && !outOfWindow) {
+            this.pageSwitching = true;
+            this.pageSwitchingTimeId = setTimeout(() => {
+              this.pageSwitching = false;
+              this.firstIndex += this.thumbnailNumber;
+              this.shifting = true;
+              this.tranFlag = true;
+
+              setTimeout(() => {
+                this.shifting = false;
+                this.tranFlag = false;
+              }, 400);
+            }, 1000);
+          }
+        } else if (this.indexOfMovingTo === this.firstIndex - 1) {
+          if (!this.pageSwitching && !outOfWindow) {
+            this.pageSwitching = true;
+            this.pageSwitchingTimeId = setTimeout(() => {
+              this.pageSwitching = false;
+              this.lastIndex -= this.thumbnailNumber;
+              this.shifting = true;
+              this.tranFlag = true;
+
+              setTimeout(() => {
+                this.shifting = false;
+                this.tranFlag = false;
+              }, 400);
+            }, 1000);
+          }
+        } else {
+          clearTimeout(this.pageSwitchingTimeId);
+          this.pageSwitching = false;
+        }
+        // calculate the movement of the item if page had been switch
+        if (this.lastIndex > this.lastIndexOnMousedown) {
+          this.movementX = offsetX + ((this.lastIndex - this.lastIndexOnMousedown) * distance);
+        } else if (this.firstIndex < this.firstIndexOnMousedown) {
+          this.movementX = offsetX + ((this.firstIndex - this.firstIndexOnMousedown) * distance);
+        } else {
+          this.movementX = offsetX;
+        }
+      } else {
+        this.indexOfMovingItem = this.playingList.length;
+      }
+    },
+    onItemMouseup(index) { // eslint-disable-line complexity
+      if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
+      document.onmouseup = null;
+      if (-(this.movementY) > this.thumbnailHeight * 1.5
+       && this.itemMoving && this.canRemove) {
+        this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
+        this.hoverIndex = this.playingIndex;
+        this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
+        this.canRemove = false;
+      } else if (this.movingOffset !== 0
+        && Math.abs(this.movementY) < this.thumbnailHeight) {
+        this.$store.dispatch('RepositionItemFromPlayingList', {
+          src: this.playingList[index],
+          newPosition: this.indexOfMovingTo,
+        });
+        if (this.indexOfMovingTo > this.lastIndex
+          && this.lastIndex + 1 !== this.playingList.length) {
+          this.lastIndex += 1;
+          this.shifting = true;
+          this.tranFlag = true;
+          setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
+        } else if (this.indexOfMovingTo < this.firstIndex
+          && this.firstIndex !== 0) {
+          this.firstIndex -= 1;
+          this.shifting = true;
+          this.tranFlag = true;
+          setTimeout(() => {
+            this.shifting = false;
+            this.tranFlag = false;
+          }, 400);
+        }
+        this.hoverIndex = this.indexOfMovingTo;
+        // last page
+      } else if (index === this.firstIndex - 1) {
+        this.lastIndex -= this.thumbnailNumber;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      } else if (index === this.lastIndex + 1) { // next page
+        this.firstIndex += this.thumbnailNumber;
+        this.shifting = true;
+        this.tranFlag = true;
+        setTimeout(() => {
+          this.shifting = false;
+          this.tranFlag = false;
+        }, 400);
+      } else if (index !== this.playingIndex && !this.shifting
+        && this.indexOfMovingItem === this.playingList.length
+        && this.filePathNeedToDelete !== this.playingList[index]) {
+        this.changeByRecent = true;
+        this.playFile(this.playingList[index]);
+      }
+      this.indexOfMovingItem = this.playingList.length;
+      this.movementX = this.movementY = 0;
+    },
     onItemMouseover(index, media) {
       this.hoverIndex = index;
       this.hoveredMediaInfo = media;
@@ -154,39 +341,6 @@ export default {
     onItemMouseout() {
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
-    },
-    updatelastPlayedTime(time) {
-      if (this.$refs.lastPlayedTime) {
-        if (this.hoverIndex === this.playingIndex) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(time)} /`;
-        } else if (this.hoveredMediaInfo.lastPlayedTime) {
-          this.$refs.lastPlayedTime.textContent = `${this.timecodeFromSeconds(this.hoveredMediaInfo.lastPlayedTime)} /`;
-        }
-      }
-    },
-    onItemMouseup(index) {
-      // last page
-      if (index === this.firstIndex - 1) {
-        this.lastIndex = index;
-        this.shifting = true;
-        this.tranFlag = true;
-        setTimeout(() => {
-          this.shifting = false;
-          this.tranFlag = false;
-        }, 400);
-      } else if (index === this.lastIndex + 1) { // next page
-        this.firstIndex = index;
-        this.shifting = true;
-        this.tranFlag = true;
-        setTimeout(() => {
-          this.shifting = false;
-          this.tranFlag = false;
-        }, 400);
-      } else if (index !== this.playingIndex && !this.shifting
-        && this.filePathNeedToDelete !== this.playingList[index]) {
-        this.changeByRecent = true;
-        this.playFile(this.playingList[index]);
-      }
     },
   },
   watch: {
@@ -200,14 +354,35 @@ export default {
       this.hoverIndex = this.playingIndex;
       this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
     },
+    playingList(val) {
+      this.indexOfMovingItem = val.length;
+    },
     firstIndex() {
+      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+      const distance = marginRight + this.thumbnailWidth;
+      if (this.itemMoving && this.lastIndex > this.lastIndexOnMousedown) {
+        this.movementX = (this.mousemovePosition[0] - this.mousedownPosition[0])
+         + ((this.lastIndex - this.lastIndexOnMousedown) * distance);
+      }
       if (this.lastIndex > this.maxIndex) {
         this.lastIndex = this.maxIndex;
       }
     },
     lastIndex(val) {
-      if (this.firstIndex > 0 && this.maxIndex > this.firstIndex && this.maxIndex <= val) {
+      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+      const distance = marginRight + this.thumbnailWidth;
+      if (this.itemMoving && this.firstIndex < this.firstIndexOnMousedown) {
+        this.movementX = (this.mousemovePosition[0] - this.mousedownPosition[0])
+         + ((this.firstIndex - this.firstIndexOnMousedown) * distance);
+      }
+      if (this.firstIndex > 0 && this.maxIndex > this.firstIndex
+       && this.maxIndex <= val && !this.itemMoving) {
         this.firstIndex = (this.maxIndex - this.thumbnailNumber) + 1;
+      }
+    },
+    maxIndex(val, oldVal) {
+      if (this.lastIndex === oldVal) {
+        this.lastIndex = val;
       }
     },
     currentMousedownComponent(val) {
@@ -229,27 +404,22 @@ export default {
         }
       }
     },
-    playingIndex(val) {
-      if (val > this.lastIndex) {
-        this.firstIndex = val;
-      } else if (val < this.firstIndex) {
-        this.lastIndex = val;
-      }
-    },
     displayState(val, oldval) {
       if (oldval !== undefined) {
         this.updateSubToTop(val);
       }
       this.canHoverItem = false;
-      this.mousePosition = this.mousemovePosition;
+      this.mousePosition = this.mousemoveClientPosition;
       if (val) {
         this.$store.dispatch('UpdatePlayingList');
         this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;
+      } else {
+        document.onmouseup = null;
       }
     },
-    mousemovePosition(val) {
+    mousemoveClientPosition(val) {
       const distance = this.winWidth > 1355 ? 20 : 10;
       if (!this.canHoverItem && this.displayState) {
         if (Math.abs(this.mousePosition.x - val.x) > distance ||
@@ -265,6 +435,30 @@ export default {
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
+    movingOffset() {
+      const marginRight = this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+      const distance = marginRight + this.thumbnailWidth;
+      const movingOffset = this.movementX > 0 ? // the position where item moving to
+        Math.floor((this.movementX + (this.thumbnailWidth * 0.8)) / distance) :
+        Math.ceil((this.movementX - (this.thumbnailWidth * 0.8)) / distance);
+      return movingOffset;
+    },
+    indexOfMovingTo() { // the place where the moving item is going to be set
+      if (!this.itemMoving) return this.indexOfMovingItem;
+      let indexOfMovingTo = this.indexOfMovingItem + this.movingOffset;
+      if (indexOfMovingTo > this.lastIndex + 1) indexOfMovingTo = this.lastIndex + 1;
+      else if (indexOfMovingTo < this.firstIndex - 1) indexOfMovingTo = this.firstIndex - 1;
+      return indexOfMovingTo;
+    },
+    itemMoving() {
+      return this.indexOfMovingItem !== this.playingList.length;
+    },
+    addIndex() {
+      return this.playingList.length;
+    },
+    onlyOneVideo() {
+      return this.playingList.length === 1;
+    },
     inWhichSource() {
       if (this.isFolderList) {
         return this.$t('recentPlaylist.folderSource');
@@ -303,7 +497,7 @@ export default {
       return this.firstIndex * (this.thumbnailWidth + 15);
     },
     maxIndex() {
-      return this.playingList.length - 1;
+      return this.playingList.length;
     },
     maxDistance() {
       return (this.maxIndex - (this.thumbnailNumber - 1)) * this.thumbnailWidth;
@@ -334,6 +528,9 @@ export default {
         width = this.winWidth * (112 / 1355);
       }
       return Math.floor(width);
+    },
+    thumbnailHeight() {
+      return this.thumbnailWidth / (112 / 63);
     },
   },
 };

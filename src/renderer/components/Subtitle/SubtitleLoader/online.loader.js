@@ -7,7 +7,11 @@ const normalizer = (parsedSubtitle) => {
     finalDialogues.push({
       start: startTime,
       end: endTime,
-      text: text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '<br>'),
+      // text: text.replace(/\{[^{}]*\}/g, '').replace(/[\\/][Nn]|\r?\n|\r/g, '<br>'),
+      text: text
+        .replace(/\{[^{}]*\}/g, '')
+        .replace(/[\\/][Nn]|\r?\n|\r/g, '<br>') // replace soft and hard line breaks with <br/>
+        .replace(/\\h/g, ' '), // replace hard space with space
       tags: tagsGetter(text, baseTags),
     });
   });

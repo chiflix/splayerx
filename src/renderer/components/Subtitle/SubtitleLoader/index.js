@@ -1,9 +1,10 @@
 import { EventEmitter } from 'events';
+import { existsSync } from 'fs';
 import flatten from 'lodash/flatten';
-import helpers from '@/helpers';
 import { storeSubtitle } from '@/helpers/subtitle';
-import { localFormatLoader, castArray, promisify, functionExtraction, generateTrack, megreSameTime } from './utils';
+import { localFormatLoader, castArray, promisify, functionExtraction, generateTrack, megreSameTime, detectEncodingFromFileSync, embeddedSrcLoader } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
+import { NOT_SUPPORTED_SUBTITLE } from '../../../../shared/notificationcodes';
 
 const files = require.context('.', false, /\.loader\.js$/);
 const loaders = {};
@@ -48,59 +49,62 @@ export default class SubtitleLoader extends EventEmitter {
    * @param {object} options - (optional)other info about subtitle,
    * like language or name(for online subtitle)
    */
+  // eslint-disable-next-line complexity
   constructor(src, type, options) {
     super();
-    this.src = src; // to-do: src validator
-
-    if (!type || ['local', 'embedded', 'online', 'modified'].indexOf(type) === -1) {
-      helpers.methods.addLog('error', {
-        message: 'Unsupported Subtitle .',
-        errcode: 'NOT_SUPPORTED_SUBTITLE',
-      });
-      throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE, `Unknown subtitle type ${type}.`);
-    }
-    this.type = type;
-
-    const format = type === 'local' ? localFormatLoader(src) : type;
-    if (supportedFormats.includes(format)) {
-      this.metaInfo.format = format;
-      this.loader = Object.values(loaders)
-        .find(loader => castArray(loader.supportedFormats).includes(format));
-    } else {
-      helpers.methods.addLog('error', {
-        message: 'Unsupported Subtitle .',
-        errcode: 'NOT_SUPPORTED_SUBTITLE',
-      });
-      throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_FORMAT, `Unknown subtitle format for subtitle ${src}.`);
-    }
-
-    this.options = options || {};
-    this.data = this.options.data;
-    // 如果是自制字幕，就不需要解析了，因为自制字幕在存储的时候都是
-    // 把内存中的数组以JSON的形式存在缓存目录下,JSON包含字幕的meta和dialogues
-    if (this.type === 'modified') {
-      this.data = '**';
-      this.metaInfo = this.options.storage.metaInfo;
-    }
-
-    if (this.options.id) {
-      this.id = this.options.id.toString();
-      setImmediate(() => this.emit('loading', this.id));
-      if (this.type === 'modified') {
-        // 在往indexBD存自制字幕的时候，存储成功可以直接发送meta-change
-        // meta数组也是存在文件里面的
-        const { name, language } = this.metaInfo;
-        setImmediate(() => this.emit('meta-change', { field: 'name', value: name }));
-        setImmediate(() => this.emit('meta-change', { field: 'language', value: language }));
+    try {
+      this.src = src;
+      // if (!type || ['local', 'embedded', 'online', 'modified'].indexOf(type) === -1) {
+      //   helpers.methods.addLog('error', {
+      //     message: 'Unsupported Subtitle .',
+      //     errcode: 'NOT_SUPPORTED_SUBTITLE',
+      //   });
+      //   throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE,
+      //     `Unknown subtitle type ${type}.`);
+      // }
+      // this.type = type;
+      // format validator (mainly for local subtitle)
+      const format = type === 'local' ? localFormatLoader(src) : type;
+      if (supportedFormats.includes(format)) {
+        this.metaInfo.format = format;
+        if (format === 'embedded' && options.codec) {
+          this.metaInfo.codecFormat = SubtitleLoader.codecToFormat(options.codec);
+        }
+        this.loader = Object.values(loaders)
+          .find(loader => castArray(loader.supportedFormats).includes(format));
+      } else {
+        throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_FORMAT, `Unknown subtitle format for subtitle ${src}.`);
       }
-    } else {
-      storeSubtitle({
-        src: this.src,
-        type: this.type,
-        format: this.metaInfo.format,
-      }).then((id) => {
-        this.id = id.toString();
-        setImmediate(() => this.emit('loading', id));
+
+      // type validator (src and encoding validators for local subtitle)
+      switch (type.toLowerCase()) {
+        default:
+          throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE, `Unknown subtitle type ${type}.`);
+        case 'embedded':
+        case 'online':
+          break;
+        case 'modified':
+          break;
+        case 'local': {
+          if (existsSync(src)) this.metaInfo.encoding = detectEncodingFromFileSync(src);
+          break;
+        }
+      }
+      this.type = type.toLowerCase();
+      this.options = options || {};
+      this.data = this.options.data; // set data for stored online subtitles
+      // 如果是自制字幕，就不需要解析了，因为自制字幕在存储的时候都是
+      // 把内存中的数组以JSON的形式存在缓存目录下,JSON包含字幕的meta和dialogues
+      if (this.type === 'modified') {
+        this.data = '**';
+        this.metaInfo = this.options.storage.metaInfo;
+      }
+      this.videoSrc = this.options.videoSrc; // set videoSrc
+
+      // subtitle id
+      if (this.options.id) {
+        this.id = this.options.id.toString();
+        setImmediate(() => this.emit('loading', this.id));
         if (this.type === 'modified') {
           // 在往indexBD存自制字幕的时候，存储成功可以直接发送meta-change
           // meta数组也是存在文件里面的
@@ -108,7 +112,41 @@ export default class SubtitleLoader extends EventEmitter {
           setImmediate(() => this.emit('meta-change', { field: 'name', value: name }));
           setImmediate(() => this.emit('meta-change', { field: 'language', value: language }));
         }
-      });
+      } else if (this.type === 'embedded') {
+        embeddedSrcLoader(options.videoSrc, src, this.metaInfo.codecFormat)
+          .then((embeddedSrc) => {
+            this.options.src = embeddedSrc;
+            this.metaInfo.encoding = detectEncodingFromFileSync(embeddedSrc);
+            return storeSubtitle({
+              src: this.src,
+              type: this.type,
+              format: this.metaInfo.codecFormat,
+            });
+          })
+          .then((id) => {
+            this.id = id.toString();
+            setImmediate(() => this.emit('loading', id));
+          })
+          .catch(this.fail);
+      } else {
+        storeSubtitle({
+          src: this.src,
+          type: this.type,
+          format: this.metaInfo.format,
+        }).then((id) => {
+          this.id = id.toString();
+          setImmediate(() => this.emit('loading', id));
+          if (this.type === 'modified') {
+            // 在往indexBD存自制字幕的时候，存储成功可以直接发送meta-change
+            // meta数组也是存在文件里面的
+            const { name, language } = this.metaInfo;
+            setImmediate(() => this.emit('meta-change', { field: 'name', value: name }));
+            setImmediate(() => this.emit('meta-change', { field: 'language', value: language }));
+          }
+        });
+      }
+    } catch (err) {
+      this.fail.bind(this)(err);
     }
   }
 
@@ -126,18 +164,21 @@ export default class SubtitleLoader extends EventEmitter {
       });
       this.emit('ready', metaInfo);
     } catch (e) {
-      this.emit('failed', this.id);
-      throw e;
+      this.fail.bind(this)(e);
     }
   }
 
   async load() {
-    if (this.data) this.emit('data', this.data);
-    else {
-      const loader = functionExtraction(this.loader.loader);
-      this.data =
-        await promisify(loader.func.bind(this, ...this._getParams(castArray(loader.params))));
-      this.emit('data', this.data);
+    try {
+      if (this.data) this.emit('data', this.data);
+      else {
+        const loader = functionExtraction(this.loader.loader);
+        this.data =
+          await promisify(loader.func.bind(this, ...this._getParams(castArray(loader.params))));
+        this.emit('data', this.data);
+      }
+    } catch (e) {
+      this.fail.bind(this)(e);
     }
   }
 
@@ -169,11 +210,15 @@ export default class SubtitleLoader extends EventEmitter {
         this.emit('parse', this.parsed);
       }
     } catch (e) {
-      helpers.methods.addLog('error', {
-        message: 'Unsupported Subtitle .',
-        errcode: 'NOT_SUPPORTED_SUBTITLE',
-      });
-      throw e;
+      this.fail.bind(this)(e);
     }
+  }
+
+  fail(error) {
+    console.log('SubtitleError:', error);
+    this.emit('failed', {
+      error,
+      bubble: NOT_SUPPORTED_SUBTITLE,
+    });
   }
 }

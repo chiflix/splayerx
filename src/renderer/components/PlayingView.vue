@@ -32,6 +32,7 @@ export default {
     },
   },
   mounted() {
+    this.$store.dispatch('initWindowRotate');
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
     // 这里设置了最小宽高，需要同步到vuex
     this.windowMinimumSize([320, 180]);

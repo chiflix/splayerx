@@ -14,18 +14,26 @@
             <div class="element content">
 
               <div class="topContainer">
-                <div class="title" :class="$i18n.locale === 'ja' ? 'subtitleJa' : 'subtitleNormal'">{{ this.$t('msg.subtitle.subtitleSelect' ) }}</div>
-                <Icon type="refresh" class="refresh" @mouseup.native="handleRefresh"
-                  :style="{
-                    cursor: 'pointer',
-                    transform: `rotate(${rotateTime * 360}deg)`,
-                    transition: 'transform 1s linear',
-                    transformOrigin: 'center',
-                  }"/>
+                <div class="title subtitleNormal">{{ this.$t('msg.subtitle.subtitleSelect') }}</div>
+                <div class="subtitleShift" @mouseup="subTypeShift" v-show="enabledSecondarySub" @mouseover="shiftItemHover" @mouseleave="shiftItemLeave">
+                  <div class="firstSub" :style="{
+                    color: isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                    background: isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
+                    boxShadow: isFirstSubtitle ? '1px 0 2px rgba(0, 0, 0, 0.09)' : '',
+                    borderRadius: isFirstSubtitle ? '2px' : '',
+                  }"><span>1</span></div>
+                  <div class="secondarySub" :style="{
+                    color: !isFirstSubtitle || shiftItemHovered ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0.2)',
+                    background: !isFirstSubtitle ? 'rgba(255, 255, 255, 0.13)' : '',
+                    boxShadow: !isFirstSubtitle ? '-1px 0 2px rgba(0, 0, 0, 0.09)' : '',
+                    borderRadius: !isFirstSubtitle ? '2px' : '',
+                  }"><span>2</span></div>
+                </div>
+                <Icon type="refresh" class="refresh" ref="refreshRotate" @mouseup.native="handleRefresh" :class="animClass ? 'icon-rotate-animation' : ''"/>
               </div>
 
               <div class="sub-menu">
-                <div class="scrollScope" :class="refAnimation"
+                <div class="scrollScope" :class="refAnimation" ref="scroll"
                   @animationend="finishAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
@@ -153,8 +161,9 @@ export default {
       hiddenText: false,
       hoverHeight: 0,
       timer: null,
-      count: 0,
-      rotateTime: 0,
+      count: 1,
+      stopCount: 10,
+      animClass: false,
       loadingType: '',
       detailTimer: null,
       breakTimer: null,
@@ -164,13 +173,16 @@ export default {
       isInitial: true,
       onAnimation: false,
       refAnimation: '',
+      refRotate: '',
       debouncedHandler: debounce(this.handleRefresh, 1000),
       transFlag: true,
+      subTypeHoverIndex: 1,
+      shiftItemHovered: false,
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'paused',
-      'winRatio', 'winWidth', 'winHeight', 'winPos', 'winSize',
+    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'paused',
+      'winRatio', 'winWidth', 'winHeight', 'winPos', 'winSize', 'isFirstSubtitle', 'enabledSecondarySub',
     ]),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
@@ -265,8 +277,16 @@ export default {
         this.scopeHeight + 7;
     },
     currentSubtitleIndex() {
-      return this.computedAvaliableItems.findIndex(subtitle =>
-        subtitle.id === this.currentSubtitleId);
+      return !this.isFirstSubtitle && this.enabledSecondarySub ?
+        this.computedAvaliableItems.findIndex(subtitle =>
+          subtitle.id === this.currentSecondSubtitleId) :
+        this.computedAvaliableItems.findIndex(subtitle =>
+          subtitle.id === this.currentFirstSubtitleId);
+    },
+    currentScrollTop() {
+      const marginFactors = [4, 5, 7];
+      return this.currentSubtitleIndex *
+        (this.itemHeight + marginFactors[[27, 32, 44].indexOf(this.itemHeight)]);
     },
     canShowCreateBtn() {
       // 暂时使用computed属性来控制是否可以使用编辑模式
@@ -284,6 +304,17 @@ export default {
     },
   },
   watch: {
+    count(val) {
+      if (val === this.stopCount) {
+        this.animClass = false;
+      }
+    },
+    animClass(val) {
+      if (!val) {
+        this.count = 1;
+        this.stopCount = 10;
+      }
+    },
     originSrc() {
       this.showAttached = false;
       this.computedAvaliableItems = [];
@@ -292,7 +323,7 @@ export default {
     currentSubtitleIndex(val) {
       this.$bus.$emit('clear-last-cue');
       if (val === 0) {
-        document.querySelector('.scrollScope').scrollTop = 0;
+        this.$refs.scroll.scrollTop = 0;
       }
     },
     showAttached(val) {
@@ -328,7 +359,8 @@ export default {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
       }
-      this.computedAvaliableItems = val.filter(sub => sub && sub.name);
+      this.computedAvaliableItems = val
+        .filter(({ name, loading }) => name && loading !== 'failed');
     },
     loadingType(val) {
       if (val === 'local') {
@@ -339,16 +371,26 @@ export default {
         this.loadingSubsPlaceholders.embedded = 'loading';
       }
     },
+    enabledSecondarySub(val) {
+      this.$refs.scroll.scrollTop = val ? 0 : this.currentScrollTop;
+    },
+    isFirstSubtitle() {
+      this.$refs.scroll.scrollTop = this.currentScrollTop;
+    },
+    computedAvaliableItems(val) {
+      this.updateNoSubtitle(!val.length);
+    },
   },
   methods: {
     ...mapActions({
       addSubtitles: subtitleActions.ADD_SUBTITLES,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
-      changeCurrentSubtitle: subtitleActions.CHANGE_CURRENT_SUBTITLE,
       offCurrentSubtitle: subtitleActions.OFF_SUBTITLES,
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
       removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
+      updateSubtitleType: subtitleActions.UPDATE_SUBTITLE_TYPE,
+      updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
     }),
     ...mapMutations({
       toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
@@ -358,12 +400,21 @@ export default {
       if (!this.paused) this.$bus.$emit('toggle-playback');
       this.toggleProfessional(true);
     },
+    shiftItemHover() {
+      this.shiftItemHovered = true;
+    },
+    shiftItemLeave() {
+      this.shiftItemHovered = false;
+    },
+    subTypeShift() {
+      this.updateSubtitleType(!this.isFirstSubtitle);
+    },
     handleSubDelete(e, item) {
       if (e.target.nodeName !== 'DIV') {
         this.transFlag = false;
         this.removeLocalSub(item.id);
         this.hoverHeight = 0;
-        if (item.id === this.currentSubtitleId) {
+        if (item.id === this.currentFirstSubtitleId) {
           this.$bus.$emit('off-subtitle');
         }
         deleteSubtitles([item.id], this.originSrc).then((result) => {
@@ -403,6 +454,8 @@ export default {
             this.rotateTime = Math.ceil(this.count / 100);
           }, 10);
           const types = ['local', 'modified'];
+          this.transFlag = false;
+          this.animClass = true;
           if (this.isInitial) types.push('embedded');
           if (!hasOnlineSubtitles &&
             (!this.isInitial || ['ts', 'avi', 'mkv', 'mp4'].includes(extname(this.originSrc).slice(1).toLowerCase()))) {
@@ -412,6 +465,7 @@ export default {
           // first open && matched extensions: ['local', 'embedded', 'online']
           // first open && !matched extensions: ['local', 'embedded']
           // !first open: ['local', 'online']
+          this.updateSubtitleType(true);
           this.$bus.$emit('refresh-subtitles', { types, isInitial: this.isInitial });
           if (!this.isInitial) {
             this.addLog('info', {
@@ -538,7 +592,8 @@ export default {
     });
     this.$bus.$on('refresh-finished', (timeout) => {
       clearInterval(this.timer);
-      this.count = this.rotateTime * 100;
+      this.stopCount = this.count + 1;
+      this.transFlag = true;
       if (timeout) {
         setTimeout(() => {
           this.addLog('error', {
@@ -556,20 +611,25 @@ export default {
           });
           this.onAnimation = false;
           this.anim.loop = false;
-        } else {
-          this.refAnimation = 'refresh-animation';
         }
-        document.querySelector('.scrollScope').scrollTop = 0;
+        this.refAnimation = 'refresh-animation';
+        this.$refs.scroll.scrollTop = 0;
         this.timer = null;
       }, 1000);
     });
   },
   mounted() {
+    this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
+      this.count += 1;
+    });
     this.$bus.$on('subtitle-refresh-continue', () => {
       if (this.continueRefresh) {
         this.continueRefresh = false;
         this.debouncedHandleRefresh();
       }
+    });
+    this.$bus.$on('online-subtitle-found', () => {
+      clearTimeout(this.breakTimer);
     });
 
     document.addEventListener('mouseup', (e) => {
@@ -646,6 +706,12 @@ export default {
   .title {
     color: rgba(255, 255, 255, 0.6);
   }
+  .firstSub, .secondarySub {
+    transition: color 90ms linear;
+  }
+  .refresh {
+    cursor: pointer;
+  }
   .menu-item-text-wrapper {
     .deleteIcon {
       transition-delay: 75ms;
@@ -698,7 +764,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        margin: 15px auto auto 16px;
+        margin: 15px 0 auto 14px;
         letter-spacing: 0.2px;
         line-height: 15px;
       }
@@ -706,6 +772,24 @@ export default {
         width: 13px;
         height: 13px;
         margin: 14px 15px auto auto;
+      }
+      .subtitleShift {
+        width: 30px;
+        height: 13px;
+        background: rgba(0, 0, 0, 0.09);
+        margin: 15px auto auto 6px;
+        border-radius: 2px;
+        cursor: pointer;
+        display: flex;
+        .firstSub, .secondarySub {
+          width: 50%;
+          height: 100%;
+          font-size: 9px;
+          display: flex;
+          span {
+            margin: auto;
+          }
+        }
       }
     }
     .sub-menu-wrapper {
@@ -770,7 +854,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        margin: 18px auto auto 19px;
+        margin: 18px 0 auto 16px;
         letter-spacing: 0.23px;
         line-height: 17px;
       }
@@ -778,6 +862,24 @@ export default {
         width: 17px;
         height: 17px;
         margin: 17px 19px auto auto;
+      }
+      .subtitleShift {
+        width: 36px;
+        height: 16px;
+        background: rgba(0, 0, 0, 0.09);
+        margin: 17px auto auto 7.2px;
+        border-radius: 2px;
+        cursor: pointer;
+        display: flex;
+        .firstSub, .secondarySub {
+          width: 50%;
+          height: 100%;
+          font-size: 11px;
+          display: flex;
+          span {
+            margin: auto;
+          }
+        }
       }
     }
     .scrollScope {
@@ -801,7 +903,7 @@ export default {
         display: flex;
       }
       .text {
-        font-size: 12px;
+        font-size: 13.2px;
         letter-spacing: 0.2px;
         line-height: 14px;
         margin: auto 0 auto 12.73px;
@@ -842,7 +944,7 @@ export default {
       display: flex;
       flex-direction: row;
       .title {
-        margin: 24px auto auto 26px;
+        margin: 24px 0 auto 24px;
         letter-spacing: 0.32px;
         line-height: 23px;
       }
@@ -850,6 +952,24 @@ export default {
         width: 21px;
         height: 21px;
         margin: 23px 26px auto auto;
+      }
+      .subtitleShift {
+        width: 50.4px;
+        height: 22px;
+        background: rgba(0, 0, 0, 0.09);
+        margin: 23px auto auto 10.08px;
+        border-radius: 2px;
+        cursor: pointer;
+        display: flex;
+        .firstSub, .secondarySub {
+          width: 50%;
+          height: 100%;
+          font-size: 15px;
+          display: flex;
+          span {
+            margin: auto;
+          }
+        }
       }
     }
     .scrollScope {
@@ -873,7 +993,7 @@ export default {
         display: flex;
       }
       .text {
-        font-size: 16px;
+        font-size: 18.48px;
         letter-spacing: 0.27px;
         line-height: 18px;
         margin: auto 0 auto 17.89px;
@@ -928,11 +1048,22 @@ export default {
 .refresh-animation {
   animation: menu-refresh 300ms linear 1 normal forwards;
 }
+.icon-rotate-animation {
+  animation: icon-rotate 1s linear 1 normal forwards;
+  animation-iteration-count: 10;
+}
 @keyframes menu-refresh {
   0% { opacity: 1 }
   25% { opacity: 0.5 }
   50% { opacity: 0 }
   75% { opacity: 0.5 }
   100% { opacity: 1 }
+}
+@keyframes icon-rotate {
+  0% { transform: rotate(0deg) }
+  25% { transform: rotate(90deg) }
+  50% { transform: rotate(180deg) }
+  75% { transform: rotate(270deg) }
+  100% { transform: rotate(360deg) }
 }
 </style>
