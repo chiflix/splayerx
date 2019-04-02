@@ -1,5 +1,5 @@
 <template>
-  <div :class="container">
+  <div :class="[container, { rtl: isRtl }]">
     <transition name="nextvideo">
       <NextVideo class="next-video" ref="nextVideo"
         v-if="showNextVideo"
@@ -16,7 +16,6 @@
     <transition-group name="toast" class="transGroup">
       <div v-for="m in messages" :key="m.id"
         class="messageContainer"
-        :class="{ rtl: isRtl }"
         :id="'item' + m.id">
         <div :class="m.type === 'result' ? 'black-gradient-result' : 'black-gradient-state'"/>
         <div :class="m.type === 'result' ? 'resultContainer' : `stateContainer`">
@@ -335,9 +334,6 @@ export default {
   @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
     margin-bottom: 18px;
   }
-}
-.rtl p {
-  direction: rtl;
 }
 .black-gradient-result {
   position: absolute;
