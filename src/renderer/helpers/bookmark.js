@@ -1,4 +1,3 @@
-import path from 'path';
 import syncStorage from '@/helpers/syncStorage';
 
 function resolveBookmarks(files, bookmarks) {

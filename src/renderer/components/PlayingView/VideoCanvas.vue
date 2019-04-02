@@ -286,7 +286,7 @@ export default {
   },
   beforeDestroy() {
     window.onbeforeunload = null;
-    this.stopAccessing = null;
+    if (process.mas) this.stopAccessing = null;
   },
 };
 </script>
