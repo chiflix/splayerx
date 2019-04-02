@@ -3,7 +3,7 @@ import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
 import { times } from 'lodash';
-import { resolveBookmarks } from '@/helpers/bookmark';
+import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
@@ -173,7 +173,7 @@ export default {
         this.showingPopupDialog = false;
         if (process.mas && bookmarks?.length > 0) {
           // TODO: put bookmarks to database
-          resolveBookmarks(files, bookmarks);
+          bookmark.resolveBookmarks(files, bookmarks);
         }
         if (files) {
           // if selected files contain folders only, then call openFolder()
@@ -210,7 +210,7 @@ export default {
         this.showingPopupDialog = false;
         if (process.mas && bookmarks?.length > 0) {
           // TODO: put bookmarks to database
-          resolveBookmarks(files, bookmarks);
+          bookmark.resolveBookmarks(files, bookmarks);
         }
         if (files) {
           this.addFiles(...files);
