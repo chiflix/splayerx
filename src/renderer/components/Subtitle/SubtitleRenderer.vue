@@ -90,6 +90,10 @@ export default {
       }
       return (this.scaleNum * 5) / 6 < 1 ? 1 : (this.scaleNum * 5) / 6;
     },
+    shouldTranslate() {
+      return !this.tags.pos && !this.firstTags.pos &&
+        this.tags.alignment === this.firstTags.alignment;
+    },
   },
   watch: {
     videoSegments(newVal) {
@@ -336,10 +340,11 @@ export default {
         if (this.isFirstSub) { // 第一字幕不是VTT
           if (tags[index].pos) {
             // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
-            return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.transDirection(this.translateNum(tags[index].alignment)[1], tags[index].alignment) + this.assLine(index)}%)`;
+            return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.translateNum(tags[index].alignment)[1] + this.assLine(index)}%)`;
           }
-          if (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub && !this.isSecondaryHasPos() && !this.isFirstSubHasPos()) {
+          if (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub && this.shouldTranslate) {
             // 没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
+            console.log(123);
             return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.firstSubTransPercent(transPercent, tags[index].alignment), tags[index].alignment) + this.assLine(index)}%)`;
           }
           // 只有第一字幕时需要translate的值
@@ -355,7 +360,7 @@ export default {
         return '';
       }
       if (this.isFirstSub) {
-        if (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub && !this.isSecondaryHasPos() && !this.isFirstSubHasPos()) {
+        if (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub) {
           // vtt字幕没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
           if (tags[index].vertical) {
             return `translate(${initialTranslate[1][0] + this.vttLine(index)}%, ${this.transDirection(initialTranslate[1][1] + this.firstSubTransPercent(transPercent))}%)`;
@@ -369,12 +374,6 @@ export default {
         return `translate(${initialTranslate[1][0]}%, ${this.transDirection([1][1], tags[index].alignment) + this.vttLine(index)}%)`;
       }
       return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.secondarySubTransPercent(transPercent, tags[index].alignment), tags[index].alignment) + this.assLine(index)}%)`;
-    },
-    isFirstSubHasPos() { // 判断第一字幕是否存在位置信息
-      return this.firstTags.pos || (this.firstTags.line && this.firstTags.position);
-    },
-    isSecondaryHasPos() {
-      return this.tags.pos || (this.tags.line && this.tags.position); // 判断第二字幕是否存在位置信息
     },
     subLeft(index) {
       const { currentTags: tags, type, isVtt } = this;
