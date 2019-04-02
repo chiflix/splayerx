@@ -6,11 +6,11 @@
   <div class="plane-background">
     <div class="plane">
       <div class="content">
-        <div :class="infoCSS">
+        <p :class="infoCSS">
           {{ partOne }}<span class="underline"
             @mouseup="underlineMouseup"
           >{{ underlinedContent }}</span>{{ partTwo }}
-        </div>
+        </p>
         <div class="button"
           :class="{
             hover: hovered,
