@@ -83,12 +83,12 @@
 			"openURL": "打開 URL…"
 		},
     "advanced": {
-      "name": "Advanced",
-      "save": "Save",
-      "undo": "Undo",
-      "redo": "Redo",
-      "export": "Export",
-      "back": "退出"
+      "name": "高級",
+      "save": "保存",
+      "undo": "撤銷",
+      "redo": "重做",
+      "export": "導出",
+      "back": "返回"
     },
 		"help": {
 			"name": "幫助",

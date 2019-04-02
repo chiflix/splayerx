@@ -89,10 +89,22 @@ const getters = {
   // meta info
   intrinsicWidth: state => state.intrinsicWidth,
   intrinsicHeight: state => state.intrinsicHeight,
-  computedWidth: (state, getters) => Math
-    .round(getters.winRatio > getters.ratio ? getters.winHeight * getters.ratio : getters.winWidth),
-  computedHeight: (state, getters) => Math
-    .round(getters.winRatio < getters.ratio ? getters.winWidth / getters.ratio : getters.winHeight),
+  computedWidth: (state, getters) => {
+    if (getters.winAngle === 0 || getters.winAngle === 180) {
+      return Math.round(getters.winRatio > getters.ratio ?
+        getters.winHeight * getters.ratio : getters.winWidth);
+    }
+    return Math.round(getters.winRatio > 1 / getters.ratio ?
+      getters.winHeight * (1 / getters.ratio) : getters.winWidth);
+  },
+  computedHeight: (state, getters) => {
+    if (getters.winAngle === 0 || getters.winAngle === 180) {
+      return Math.round(getters.winRatio < getters.ratio ?
+        getters.winWidth / getters.ratio : getters.winHeight);
+    }
+    return Math.round(getters.winRatio < 1 / getters.ratio ?
+      getters.winWidth / (1 / getters.ratio) : getters.winHeight);
+  },
   ratio: state => state.ratio,
   AudioDelay: state => state.AudioDelay,
   mediaHash: state => state.mediaHash,

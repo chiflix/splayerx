@@ -88,7 +88,7 @@
       "undo": "Undo",
       "redo": "Redo",
       "export": "Export",
-      "back": "退出"
+      "back": "Back"
     },
 		"help": {
 			"name": "Help",

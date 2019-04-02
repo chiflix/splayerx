@@ -83,12 +83,12 @@
 			"openURL": "رابط مفتوح…"
 		},
     "advanced": {
-      "name": "Advanced",
-      "save": "Save",
-      "undo": "Undo",
-      "redo": "Redo",
-      "export": "Export",
-      "back": "退出"
+      "name": "المتقدمة",
+      "save": "عودة",
+      "undo": "تصدير",
+      "redo": "استعداد",
+      "export": "فك",
+      "back": "ظهر"
     },
 		"help": {
 			"name": "مساعدة",
@@ -222,7 +222,7 @@
 	},
 	"subtitle": {
 		"embedded": "تضمين",
-		"modified": "بيتي",
+		"modified": "ترجمي",
 		"language": {
 			"ar": "عربى",
 			"de": "ألمانية",

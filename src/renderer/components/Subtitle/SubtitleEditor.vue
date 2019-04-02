@@ -1,9 +1,6 @@
 <template>
   <div class="sub-editor">
-    <div class="sub-editor-head"
-      :style="{
-        cursor: `${timeLineDraging ? 'grabbing' : 'grab'}`,
-      }">
+    <div class="sub-editor-head">
       <div class="sub-editor-time-line no-drag"
         ref="timeLine"
         @dblclick.left.stop="handleMouseUpOnTimeLine"
@@ -13,6 +10,7 @@
         :style="{
           width: `${3 * winWidth}px`,
           left: `${currentLeft}px`,
+          cursor: `${timeLineDraging ? 'grabbing' : 'grab'}`,
         }">
         <div class="scales" :style="{
           width: `${scales * space}px`
@@ -1158,7 +1156,6 @@ export default {
   .sub-editor-head {
     height: 25vh;
     position: relative;
-    cursor: grab;
     &::before {
       content: "";
       display: block;
@@ -1187,6 +1184,7 @@ export default {
     left: 0;
     top: 0;
     z-index: 2;
+    cursor: grab;
     // cursor: pointer;
     // background-color: aquamarine;
     .scales {

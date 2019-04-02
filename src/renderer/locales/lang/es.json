@@ -83,12 +83,12 @@
 			"openURL": "Abrir URL ..."
 		},
     "advanced": {
-      "name": "Advanced",
-      "save": "Save",
-      "undo": "Undo",
-      "redo": "Redo",
-      "export": "Export",
-      "back": "退出"
+      "name": "Avanzado",
+      "save": "salvar",
+      "undo": "deshacer",
+      "redo": "rehacer",
+      "export": "Exportación",
+      "back": "volver"
     },
 		"help": {
 			"name": "Ayuda",
@@ -222,7 +222,7 @@
 	},
 	"subtitle": {
 		"embedded": "Empotrar",
-		"modified": "Caseros",
+		"modified": "Mi traduccion",
 		"language": {
 			"ar": "Arábica",
 			"de": "alemán",

@@ -1,19 +1,12 @@
 <template>
   <div>
-    <!-- <subtitle-renderer
-      ref="subtitleRenderer"
-      :key="currentSubtitle && currentSubtitle.id"
-      :playlistShow="playlistShow"
-      :subtitleInstance="currentSubtitle"/> -->
-    
     <div
       v-if="!isProfessional">
       <subtitle-renderer
         ref="subtitleRenderer"
         v-if="currentFirstSubtitleId && duration"
         :subtitle-instance="subtitleInstances[this.currentFirstSubtitleId]"
-        :playlistShow="playlistShow"
-        :key="currentFirstSubtitleId"
+        :key='originSrc+currentFirstSubtitleId'
         :isFirstSub="true"
         :linesNum="linesNum"
         :firstLinesNum.sync="firstLinesNum"
@@ -22,8 +15,7 @@
         ref="subtitleRenderer"
         v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
         :subtitle-instance="subtitleInstances[this.currentSecondSubtitleId]"
-        :playlistShow="playlistShow"
-        :key="currentSecondSubtitleId"
+        :key='originSrc+currentSecondSubtitleId'
         :isFirstSub="false"
         :firstLinesNum="firstLinesNum"
         :linesNum.sync="linesNum"

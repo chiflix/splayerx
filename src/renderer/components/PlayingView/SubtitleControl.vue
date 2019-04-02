@@ -198,7 +198,7 @@ export default {
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
     }),
     computedSize() {
-      return this.intrinsicWidth / this.intrinsicHeight >= 1 ? this.winHeight : this.winWidth;
+      return this.winRatio >= 1 ? this.winHeight : this.winWidth;
     },
     noSubtitle() {
       if (this.timer && this.isInitial) {

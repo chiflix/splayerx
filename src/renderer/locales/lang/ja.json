@@ -83,12 +83,12 @@
 			"openURL": "URLから開く…"
 		},
     "advanced": {
-      "name": "Advanced",
-      "save": "Save",
-      "undo": "Undo",
-      "redo": "Redo",
-      "export": "Export",
-      "back": "退出"
+      "name": "アドバンスド",
+      "save": "保存",
+      "undo": "元に戻す",
+      "redo": "やり直す",
+      "export": "書き出す",
+      "back": "後退"
     },
 		"help": {
 			"name": "ヘルプ",
@@ -222,7 +222,7 @@
 	},
 	"subtitle": {
 		"embedded": "埋め込み式",
-		"modified": "自家製",
+		"modified": "私の翻訳",
 		"language": {
 			"ar": "サウジアラビア語",
 			"de": "ドイツ語",

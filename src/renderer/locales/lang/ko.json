@@ -83,12 +83,12 @@
 			"openURL": "URL 열기 ..."
 		},
     "advanced": {
-      "name": "Advanced",
-      "save": "Save",
-      "undo": "Undo",
-      "redo": "Redo",
-      "export": "Export",
-      "back": "退出"
+      "name": "많은",
+      "save": "저장",
+      "undo": "실행 취소",
+      "redo": "실행 복귀",
+      "export": "내보내기",
+      "back": "뒤로"
     },
 		"help": {
 			"name": "도움",
@@ -222,7 +222,7 @@
 	},
 	"subtitle": {
 		"embedded": "깊숙이 박다",
-		"modified": "직접 만든",
+		"modified": "내 번역",
 		"language": {
 			"ar": "아라비아 말",
 			"de": "독일 사람",
