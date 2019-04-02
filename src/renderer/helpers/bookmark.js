@@ -3,10 +3,9 @@ import syncStorage from '@/helpers/syncStorage';
 
 function resolveBookmarks(files, bookmarks) {
   const data = syncStorage.getSync('bookmark');
-  const filePaths = Object.keys(data);
   const temp = {};
-  files.forEach((file, index) => {
-    const relativePath = path.relative(filePaths[0], file);
+  files.forEach((file, i) => {
+    temp[file] = bookmarks[i];
   });
   syncStorage.setSync('bookmark', { ...data, ...temp });
 }

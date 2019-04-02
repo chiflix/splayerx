@@ -94,7 +94,7 @@ export default {
       this.lastPlayedTime = 0;
       this.$bus.$emit('video-loaded');
       this.changeWindowSize();
-      this.stopAccessing();
+      if (process.mas) this.stopAccessing();
     },
     onAudioTrack(event) {
       const { type, track } = event;
@@ -286,6 +286,7 @@ export default {
   },
   beforeDestroy() {
     window.onbeforeunload = null;
+    this.stopAccessing = null;
   },
 };
 </script>

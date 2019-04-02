@@ -21,15 +21,15 @@ describe.only('bookmark', () => {
       '/path/1/2/3/4.mp4': 'bookmark3',
     });
   });
-  it('resolveBookmarks can replace the child files', () => {
-    const files = ['/path/1/2'];
-    const bookmarks = ['bookmark4'];
-    bookmark.resolveBookmarks(files, bookmarks);
+  // it('resolveBookmarks can replace the child files', () => {
+  //   const files = ['/path/1/2'];
+  //   const bookmarks = ['bookmark4'];
+  //   bookmark.resolveBookmarks(files, bookmarks);
 
-    const data = syncStorage.getSync('bookmark');
-    expect(data).deep.equal({
-      '/path/1/2': 'bookmark4',
-      '/path/1/3/2': 'bookmark2',
-    });
-  });
+  //   const data = syncStorage.getSync('bookmark');
+  //   expect(data).deep.equal({
+  //     '/path/1/2': 'bookmark4',
+  //     '/path/1/3/2': 'bookmark2',
+  //   });
+  // });
 });

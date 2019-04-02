@@ -346,7 +346,6 @@ export default {
       const originPath = vidPath;
       let mediaQuickHash;
       if (process.mas) {
-        if (typeof this.stopAccessing === 'function') this.stopAccessing();
         const bookmarkObj = syncStorage.getSync('bookmark');
         if (bookmarkObj.hasOwnProperty(vidPath)) {
           const { app } = remote;
