@@ -156,7 +156,7 @@ export default {
     avaliableClass(index) {
       if (!this.isVtt) {
         if (!this.currentTags[index].pos) {
-          if (this.subToTop && ![7, 8, 9].includes(this.currentTags[index].alignment)) {
+          if (this.subToTop && ![4, 5, 6, 7, 8, 9].includes(this.currentTags[index].alignment)) {
             this.lastIndex.push(index);
             this.lastAlignment.push(this.currentTags[index].alignment);
             this.lastText.push(this.currentTexts[index]);
