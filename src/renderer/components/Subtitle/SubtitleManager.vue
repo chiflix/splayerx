@@ -9,6 +9,7 @@
       :isFirstSub="true"
       :linesNum="linesNum"
       :firstLinesNum.sync="firstLinesNum"
+      :firstTags.sync="firstTags"
       :tags="tags"/>
     <subtitle-renderer
       ref="subtitleRenderer"
@@ -18,7 +19,8 @@
       :isFirstSub="false"
       :firstLinesNum="firstLinesNum"
       :linesNum.sync="linesNum"
-      :tags.sync="tags"/>
+      :tags.sync="tags"
+      :firstTags="firstTags"/>
   </div>
 </template>
 <script>
@@ -61,6 +63,7 @@ export default {
       linesNum: 1,
       firstLinesNum: 1,
       tags: {},
+      firstTags: {},
       lastFirstSubtitleId: '',
       lastSecondSubtitleId: '',
     };
