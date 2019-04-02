@@ -358,11 +358,7 @@ export default {
         if (val !== this.index) {
           this.$refs.recentPlaylistItem.style.setProperty('transform', `translate(${(val - this.index) * distance}px,0)`);
         } else {
-          this.tranFlag = false;
           this.$refs.recentPlaylistItem.style.setProperty('transform', 'translate(0,0)');
-          setTimeout(() => {
-            this.tranFlag = true;
-          }, 0);
         }
       });
     },

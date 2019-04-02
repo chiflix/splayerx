@@ -411,7 +411,7 @@ export default {
         case 'error':
           console.error(log);
           if (log && process.env.NODE_ENV !== 'development') {
-            this.$ga && this.$ga.exception(log.message || log);  
+            this.$ga && this.$ga.exception(log.message || log);
             Sentry.captureException(log);
           }
           break;
@@ -430,6 +430,25 @@ export default {
         normalizedLog = { errcode, code, message, stack };
       }
       ipcRenderer.send('writeLog', level, normalizedLog);
+    },
+    getTextWidth(fontSize, fontFamily, text) {
+      const span = document.createElement('span');
+      let result = span.offsetWidth;
+      span.style.visibility = 'hidden';
+      span.style.fontSize = fontSize;
+      span.style.fontFamily = fontFamily;
+      span.style.display = 'inline-block';
+      span.style.fontWeight = '700';
+      span.style.letterSpacing = '0.2px';
+      document.body.appendChild(span);
+      if (typeof span.textContent !== 'undefined') {
+        span.textContent = text;
+      } else {
+        span.innerText = text;
+      }
+      result = parseFloat(window.getComputedStyle(span).width) - result;
+      span.parentNode.removeChild(span);
+      return result;
     },
   },
 };

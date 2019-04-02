@@ -23,7 +23,7 @@ import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
-import kern from '@/kerning';
+import { hookVue } from '@/kerning';
 import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
@@ -95,17 +95,7 @@ Vue.use(VueAnalytics, {
 
 Vue.mixin(helpers);
 
-const createTextVNode = Vue.prototype._v; // eslint-disable-line
-Vue.prototype._v = function(val) { // eslint-disable-line
-  const createElement = this.$createElement;
-  if (!createElement || !val || typeof val !== 'string'
-    || !this.$i18n || this.$i18n.locale !== 'ja') {
-    return createTextVNode(val);
-  }
-  const result = kern(createElement, val)
-    .map(node => (typeof node === 'string' ? createTextVNode(node) : node));
-  return result.length === 1 ? result[0] : createElement('span', result);
-};
+hookVue(Vue);
 
 Vue.prototype.$bus = new Vue(); // Global event bus
 
@@ -129,7 +119,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winWidth', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
       'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent']),
     updateFullScreen() {
       if (this.isFullScreen) {
@@ -252,7 +242,13 @@ new Vue({
         this.menu.getMenuItemById('singleCycle').checked = val;
       }
     },
-    enabledSecondarySub() {
+    enabledSecondarySub(val) {
+      if (this.menu) {
+        this.subtitleList.forEach((item, index) => {
+          this.menu.getMenuItemById(`secondSub${index}`).enabled = val;
+        });
+        this.menu.getMenuItemById('secondSub-1').enabled = val;
+      }
       this.refreshMenu();
     },
     currentRouteName(val) {
@@ -469,7 +465,14 @@ new Vue({
                 this.$store.dispatch(videoActions.CHANGE_RATE, 1);
               },
             },
-            /** */
+            { type: 'separator' },
+            {
+              label: this.$t('msg.playback.windowRotate'),
+              id: 'windowRotate',
+              click: () => {
+                this.windowRotate();
+              },
+            },
             { type: 'separator' },
             {
               label: this.$t('msg.playback.singleCycle'),
@@ -889,7 +892,9 @@ new Vue({
           if (item.id === this.currentSecondSubtitleId && this.menu.getMenuItemById(`secondSub${index}`)) {
             this.menu.getMenuItemById(`secondSub${index}`).checked = true;
           }
+          this.menu.getMenuItemById(`secondSub${index}`).enabled = this.enabledSecondarySub;
         });
+        this.menu.getMenuItemById('secondSub-1').enabled = this.enabledSecondarySub;
       })
         .catch((err) => {
           this.addLog('error', err);
@@ -964,20 +969,18 @@ new Vue({
       tmp.submenu.splice(1, 1, {
         type: 'separator',
       });
-      if (this.enabledSecondarySub) {
-        tmp.submenu.splice(2, 1, {
-          id: 'secondSub-1',
-          visible: true,
-          type: 'radio',
-          label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
-          click: () => {
-            this.changeSecondarySubtitle('');
-          },
-        });
-        this.subtitleList.forEach((item, index) => {
-          tmp.submenu.splice(index + 3, 1, this.recentSubTmp(index, item, false));
-        });
-      }
+      tmp.submenu.splice(2, 1, {
+        id: 'secondSub-1',
+        visible: true,
+        type: 'radio',
+        label: this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle'),
+        click: () => {
+          this.changeSecondarySubtitle('');
+        },
+      });
+      this.subtitleList.forEach((item, index) => {
+        tmp.submenu.splice(index + 3, 1, this.recentSubTmp(index, item, false));
+      });
       return tmp;
     },
     updateAudioTrackItem(key, value) {
@@ -1117,6 +1120,31 @@ new Vue({
     async refreshMenu() {
       this.$electron.remote.Menu.getApplicationMenu()?.clear();
       await this.createMenu();
+    },
+    windowRotate() {
+      this.$store.dispatch('windowRotate90Deg');
+      if (this.isFullScreen) return;
+      let newSize = [];
+      const windowRect = [
+        window.screen.availLeft, window.screen.availTop,
+        window.screen.availWidth, window.screen.availHeight,
+      ];
+      const videoSize = (this.winAngle === 90 || this.winAngle === 270) ?
+        [this.intrinsicHeight, this.intrinsicWidth] : [this.intrinsicWidth, this.intrinsicHeight];
+      newSize = this.calculateWindowSize(
+        [320, 180],
+        windowRect.slice(2, 4),
+        videoSize,
+      );
+      const newPosition = this.calculateWindowPosition(
+        this.winPos.concat(this.winSize),
+        windowRect,
+        newSize,
+      );
+      const rect = newPosition.concat(newSize);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', rect.slice(2, 4));
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
     },
     changeWindowSize(key) {
       if (!this.originSrc || key === this.sizePercent) {
