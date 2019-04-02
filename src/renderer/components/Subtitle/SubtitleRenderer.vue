@@ -344,7 +344,6 @@ export default {
           }
           if (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub && this.shouldTranslate) {
             // 没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
-            console.log(123);
             return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.firstSubTransPercent(transPercent, tags[index].alignment), tags[index].alignment) + this.assLine(index)}%)`;
           }
           // 只有第一字幕时需要translate的值
