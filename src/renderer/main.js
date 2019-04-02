@@ -23,7 +23,7 @@ import router from '@/router';
 import store from '@/store';
 import messages from '@/locales';
 import helpers from '@/helpers';
-import kern from '@/kerning';
+import { hookVue } from '@/kerning';
 import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
@@ -95,17 +95,7 @@ Vue.use(VueAnalytics, {
 
 Vue.mixin(helpers);
 
-const createTextVNode = Vue.prototype._v; // eslint-disable-line
-Vue.prototype._v = function(val) { // eslint-disable-line
-  const createElement = this.$createElement;
-  if (!createElement || !val || typeof val !== 'string'
-    || !this.$i18n || this.$i18n.locale !== 'ja') {
-    return createTextVNode(val);
-  }
-  const result = kern(createElement, val)
-    .map(node => (typeof node === 'string' ? createTextVNode(node) : node));
-  return result.length === 1 ? result[0] : createElement('span', result);
-};
+hookVue(Vue);
 
 Vue.prototype.$bus = new Vue(); // Global event bus
 
