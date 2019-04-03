@@ -84,12 +84,13 @@
 		},
 		"help": {
 			"name": "مساعدة",
-			"splayerxHelp": "مساعدة"
+			"splayerxHelp": "مساعدة",
+			"shortCuts": "قائمة الاختصارات"
 		},
 		"playback": {
 			"backwardL": "خطوة الى الوراء - 60s",
 			"backwardS": "خطوة الى الوراء - 5S",
-      "windowRotate": "تدوير 90 درجة",
+			"windowRotate": "تدوير 90 درجة",
 			"captureScreen": "التقاط الشاشة",
 			"captureVideoClip": "التقاط الفيديو كليب",
 			"decreasePlaybackSpeed": "تقليل سرعة التشغيل",

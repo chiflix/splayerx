@@ -763,6 +763,12 @@ new Vue({
                 this.$electron.shell.openExternal('https://beta.splayer.org');
               },
             },
+            {
+              label: this.$t('msg.help.shortCuts'),
+              click: () => {
+                this.$electron.shell.openExternal('https://github.com/chiflix/splayerx/wiki/SPlayer-Shortcuts-List');
+              },
+            },
           ],
         },
       ];

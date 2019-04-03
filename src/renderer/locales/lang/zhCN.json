@@ -84,12 +84,13 @@
 		},
 		"help": {
 			"name": "帮助",
-			"splayerxHelp": "帮助"
+			"splayerxHelp": "帮助",
+			"shortCuts": "快捷键列表"
 		},
 		"playback": {
 			"backwardL": "后退 -60s",
-      "backwardS": "后退 -5s",
-      "windowRotate": "旋转 90°",      
+			"backwardS": "后退 -5s",
+			"windowRotate": "旋转 90°",
 			"captureScreen": "截图",
 			"captureVideoClip": "截取视频片段",
 			"decreasePlaybackSpeed": "减缓播放速度",

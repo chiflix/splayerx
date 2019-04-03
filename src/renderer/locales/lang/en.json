@@ -84,12 +84,13 @@
 		},
 		"help": {
 			"name": "Help",
-			"splayerxHelp": "Help"
+			"splayerxHelp": "Help",
+			"shortCuts": "Shortcuts List"
 		},
 		"playback": {
 			"backwardL": "Step Backward -60s",
 			"backwardS": "Step Backward -5s",
-      "windowRotate": "Rotate 90° Clockwise",
+			"windowRotate": "Rotate 90° Clockwise",
 			"captureScreen": "Capture Screen",
 			"captureVideoClip": "Capture Video Clip",
 			"decreasePlaybackSpeed": "Decrease Playback Speed",
