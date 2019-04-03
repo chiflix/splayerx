@@ -296,7 +296,7 @@ export default {
     },
     showAttached(val) {
       if (!val) {
-        this.anim.playSegments([79, 92], false);
+        this.anim.playSegments([79, 92], true);
         if (!this.validEnter) {
           this.isShowingHovered = false;
         }
@@ -305,7 +305,7 @@ export default {
     currentMousedownComponent(val) {
       if (val !== 'notification-bubble' && val !== '') {
         if (val !== this.$options.name && this.showAttached) {
-          this.anim.playSegments([62, 64], false);
+          this.anim.playSegments([62, 64], true);
           this.clearMouseup({ componentName: '' });
         }
       }
@@ -428,7 +428,7 @@ export default {
                 this.onAnimation = true;
                 this.anim.loop = true;
                 this.anim.setSpeed(0.6);
-                this.anim.playSegments([115, 146], false);
+                this.anim.playSegments([115, 146], true);
               }
             }, 1000);
           }
@@ -451,10 +451,10 @@ export default {
     },
     handleDown() {
       if (!this.showAttached) {
-        this.anim.playSegments([28, 32], false);
+        this.anim.playSegments([28, 32], true);
       } else {
         this.clearMouseup({ componentName: '' });
-        this.anim.playSegments([62, 64], false);
+        this.anim.playSegments([62, 64], true);
       }
     },
     handleEnter() {
@@ -474,7 +474,7 @@ export default {
         if (this.onAnimation) {
           this.anim.loop = true;
           this.anim.setSpeed(0.6);
-          this.anim.playSegments([115, 146], false);
+          this.anim.playSegments([115, 146], true);
         }
         this.isShowingHovered = false;
       }
@@ -586,13 +586,13 @@ export default {
       if (e.button === 0) {
         if (!this.showAttached) {
           if (this.validEnter) {
-            this.anim.playSegments([46, 60], false);
+            this.anim.playSegments([46, 60], true);
           } else if (this.currentMousedownComponent === this.$options.name) {
-            this.anim.playSegments([40, 44], false);
+            this.anim.playSegments([40, 44], true);
           }
         } else if (this.currentMousedownComponent === this.$options.name
           && this.currentMouseupComponent !== this.$options.name) {
-          this.anim.playSegments([79, 85], false);
+          this.anim.playSegments([79, 85], true);
         }
       }
     });
