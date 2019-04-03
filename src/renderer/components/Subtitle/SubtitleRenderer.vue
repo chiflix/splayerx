@@ -68,6 +68,7 @@ export default {
       subPlayResX: 0,
       subPlayResY: 0,
       lastTransPercent: 0,
+      requestId: 0,
     };
   },
   computed: {
@@ -142,12 +143,13 @@ export default {
     subtitleInstance.load();
   },
   mounted() {
-    requestAnimationFrame(this.currentTimeUpdate);
-    this.$bus.$on('clear-last-cue', () => {
-      this.lastIndex = [];
-      this.lastAlignment = [];
-      this.lastText = [];
-    });
+    this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+  },
+  beforeDestroy() {
+    cancelAnimationFrame(this.requestId);
+    this.lastIndex = [];
+    this.lastAlignment = [];
+    this.lastText = [];
   },
   methods: {
     ...mapMutations({
@@ -180,7 +182,7 @@ export default {
       this.setCurrentCues(currentTime - (subtitleDelay / 1000));
       this.updateVideoSegments(lastCurrentTime, currentTime);
 
-      requestAnimationFrame(this.currentTimeUpdate);
+      this.requestId = requestAnimationFrame(this.currentTimeUpdate);
     },
     setCurrentCues(currentTime) {
       if (!this.subtitleInstance.parsed) return;

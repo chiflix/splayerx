@@ -290,7 +290,6 @@ export default {
       clearInterval(this.timer);
     },
     currentSubtitleIndex(val) {
-      this.$bus.$emit('clear-last-cue');
       if (val === 0) {
         this.$refs.scroll.scrollTop = 0;
       }
