@@ -84,12 +84,13 @@
 		},
 		"help": {
 			"name": "Ayuda",
-			"splayerxHelp": "Ayuda"
+			"splayerxHelp": "Ayuda",
+			"shortCuts": "Lista de accesos directos"
 		},
 		"playback": {
 			"backwardL": "Paso atrás -60s",
 			"backwardS": "Paso hacia atrás -5s",
-      "windowRotate": "Girar 90 °",
+      		"windowRotate": "Girar 90 °",
 			"captureScreen": "Captura de pantalla",
 			"captureVideoClip": "Captura de video clip",
 			"decreasePlaybackSpeed": "Disminuir la velocidad de reproducción",
