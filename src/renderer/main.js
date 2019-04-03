@@ -270,14 +270,7 @@ new Vue({
     },
     volume(val) {
       if (this.menu) {
-        if (val <= 0) {
-          this.menu.getMenuItemById('mute').checked = true;
-          this.menu.getMenuItemById('deVolume').enabled = false;
-        } else {
-          this.menu.getMenuItemById('inVolume').enabled = true;
-          this.menu.getMenuItemById('deVolume').enabled = true;
-          this.menu.getMenuItemById('mute').checked = false;
-        }
+        this.menu.getMenuItemById('mute').checked = val <= 0;
       }
     },
     muted(val) {
@@ -869,9 +862,6 @@ new Vue({
             this.menu.getMenuItemById(`track${index}`).checked = true;
           }
         });
-        if (this.volume <= 0) {
-          this.menu.getMenuItemById('deVolume').enabled = false;
-        }
         this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
         this.subtitleList.forEach((item, index) => {
           if (item.id === this.currentFirstSubtitleId && this.menu.getMenuItemById(`sub${index}`)) {
