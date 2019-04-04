@@ -47,7 +47,7 @@ import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { localLanguageLoader } from './SubtitleLoader/utils';
-import { LOCAL_SUBTITLE_REMOVED } from '../../../shared/notificationcodes';
+import { LOCAL_SUBTITLE_REMOVED, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-manager',
@@ -259,8 +259,19 @@ export default {
             options: { language, data, id },
           }))
           .then(sub => this.addSubtitle(this.normalizeSubtitle(sub), videoSrc))
-          .catch(() => []);
-        const storedSubs = await Promise.all(storedSubIds.map(retrieveSub)).then(flatten);
+          .catch(err => (err instanceof Error ? new Error(err) : err));
+        const storedSubs = await Promise.all(storedSubIds.map(retrieveSub))
+          .then(subtitleResults => subtitleResults.filter((result) => {
+            if (result instanceof Error) {
+              this.addLog('error', {
+                message: 'Request Timeout .',
+                errcode: REQUEST_TIMEOUT,
+              });
+              return [];
+            }
+            return result;
+          }))
+          .then(flatten);
         if (storedSubs.length) return storedSubs;
       }
       const hints = this.generateHints(videoSrc);
