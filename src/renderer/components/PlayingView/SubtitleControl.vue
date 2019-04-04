@@ -152,7 +152,6 @@ export default {
       hoverIndex: -5,
       hiddenText: false,
       hoverHeight: 0,
-      timer: null,
       count: 1,
       stopCount: 10,
       animClass: false,
@@ -191,7 +190,7 @@ export default {
       return this.winRatio >= 1 ? this.winHeight : this.winWidth;
     },
     noSubtitle() {
-      if (this.timer && this.isInitial) {
+      if (this.animClass && this.isInitial) {
         return this.$t('msg.subtitle.menuLoading');
       }
       return this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
@@ -287,7 +286,6 @@ export default {
     originSrc() {
       this.showAttached = false;
       this.computedAvaliableItems = [];
-      clearInterval(this.timer);
     },
     currentSubtitleIndex(val) {
       if (val === 0) {
@@ -402,7 +400,7 @@ export default {
         if (!this.privacyAgreement) {
           this.$bus.$emit('privacy-confirm');
           this.continueRefresh = true;
-        } else if (this.privacyAgreement && !this.timer) {
+        } else if (this.privacyAgreement && !this.animClass) {
           this.transFlag = false;
           this.animClass = true;
           const types = ['local'];
@@ -434,7 +432,7 @@ export default {
           }
           clearTimeout(this.breakTimer);
           this.breakTimer = setTimeout(() => {
-            if (this.timer) {
+            if (this.animClass) {
               this.$bus.$emit('refresh-finished', !this.isInitial);
             }
           }, 10000);
@@ -541,8 +539,11 @@ export default {
       }
     });
     this.$bus.$on('refresh-finished', (timeout) => {
-      clearInterval(this.timer);
-      this.stopCount = this.count + 1;
+      if (this.showAttached) {
+        this.stopCount = this.count + 1;
+      } else {
+        this.animClass = false;
+      }
       this.transFlag = true;
       if (timeout) {
         setTimeout(() => {
@@ -564,7 +565,6 @@ export default {
         }
         this.refAnimation = 'refresh-animation';
         this.$refs.scroll.scrollTop = 0;
-        this.timer = null;
       }, 1000);
     });
   },

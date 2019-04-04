@@ -821,7 +821,7 @@ new Vue({
           template.splice(4, 0, {
             label: this.$t('msg.splayerx.preferences'),
             enabled: true,
-            accelerator: 'Cmd+,',
+            accelerator: 'Ctrl+,',
             click: () => {
               this.$electron.ipcRenderer.send('add-preference');
             },
