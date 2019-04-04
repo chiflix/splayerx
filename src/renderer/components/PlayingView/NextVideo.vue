@@ -14,8 +14,8 @@
     <div class="content">
       <div class="info">
         <div class="top">
-          <div class="duration">{{ timecode }}</div>
-          <div class="title">&nbsp;· {{ title }}</div>
+          <div class="duration">{{ timecode }}&nbsp;· </div>
+          <p class="title">{{ title }}</p>
         </div>
         <div class="vid-name">{{ videoName }}</div>
       </div>

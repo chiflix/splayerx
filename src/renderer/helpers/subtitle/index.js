@@ -72,7 +72,8 @@ export function stringifyVtt(subtitle) {
   // todo text with style
   const start = toVttTime(subtitle.start * 1000);
   const end = toVttTime(subtitle.end * 1000);
-  const text = subtitle.text.split('<br>').join('\n');
+  const text = !subtitle.fragments ? subtitle.text :
+    subtitle.fragments.filter(e => e.text).map(e => e.text.split('<br>')).join('\n');
   return `${start} --> ${end}\n${text}`;
 }
 

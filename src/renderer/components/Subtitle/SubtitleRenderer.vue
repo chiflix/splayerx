@@ -12,7 +12,7 @@
         bottom: subBottom(i),
         transform: transPos(i),
         display: !isProfessional || checkCurrentSub(cue) ? 'flex' : 'none',
-        cursor: canUseEditor ? 'pointer' : ''
+        cursor: dragingMode !== 'default' ? dragingMode : canUseEditor ? 'pointer' : 'default'
       }"
       :class="avaliableClass(i)+`${paused && canUseEditor ? ' enable-hover': ''}`+`${isEditable && index === i ? ' editable': ''}`+isCueFocus(cue)">
       <div class="cue-wrap" v-if="filter(cue)">
@@ -21,24 +21,23 @@
           :settings="cue.tags"
           :style="{
             zoom: isFirstSub ? `${scaleNum}` : `${secondarySubScale}`,
-            transform: subLine(i),
             lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
           }"></CueRenderer>
         <div
           class="edit-box"
           @mousemove.stop=""
           :style="{
-            // zoom: `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}`,
-            zoom: `${scaleNum}`,
-            transform: subLine(i),
+            zoom: isProfessional ? `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}` : `${scaleNum}`,
+            // zoom: `${scaleNum}`,
+            // transform: subLine(i),
             width: `${computedWidth*0.60/scaleNum}px`
           }"
           v-show="isEditable && paused && i === index">
           <div
-            class="back subtitle-style1 no-drag"
+            :class="'back no-drag '+`${isProfessional ? 'subtitle-style1' : `subtitle-style${chosenStyle ? chosenStyle : 0}`}`"
             contenteditable="true">{{editVal.replace(/ /g, '&nbsp;')}}</div>
           <textarea
-            class="subtitle-style1 no-drag"
+            :class="'no-drag '+`${isProfessional ? 'subtitle-style1' : `subtitle-style${chosenStyle ? chosenStyle : 0}`}`"
             contenteditable="true"
             :ref="`textarea${i}`"
             @keydown.stop="handleKeyDownTextArea"
@@ -49,38 +48,29 @@
             v-model="editVal"></textarea>
         </div>
       </div>
-      <div class="professional-btn-wrap" @click.stop="handleClickProfessional" v-if="!isProfessional && !isEditable && canUseEditor">
-        <Icon type="subtitleEditorEnter" class="subtitleEditorEnter" v-if="!isProfessional"
-          :style="{
-            cursor: 'pointer',
-          }"/>
-        <Icon type="subtitleEditorExit" class="subtitleEditorExit" v-if="isProfessional"
-          :style="{
-            cursor: 'pointer',
-          }"/>
-      </div>
     </div>
     <div
       v-if="(isProfessional && showAddInput)"
       @click.stop="handleClickAddSub"
       :class="'subContainer subtitle-alignment2'+/*`${paused && !isEditable ? ' enable-hover': ''}`*/`${isEditable && index === null ? ' editable': ''}`"
       :style="{
-        bottom: `${((20 + ((winHeight - computedHeight) / 2)) / winHeight) * 100}%`
+        bottom: `${((20 + ((winHeight - computedHeight) / 2)) / winHeight) * 100}%`,
+        cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
       }">
       <div class="cue-wrap">
         <CueRenderer v-show="!isEditable || index !== null" class="cueRender add-cue-render"
           :text="'点击添加字幕'"
           :settings="{}"
           :style="{
-            zoom: `${scaleNum}`,
+            zoom: `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}`,
           }"></CueRenderer>
         <div
           class="edit-box"
           @mousemove.stop=""
           v-show="isEditable && paused && index === null"
           :style="{
-            // zoom: `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}`,
-            zoom: `${scaleNum}`,
+            zoom: `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}`,
+            // zoom: `${scaleNum}`,
             width: `${computedWidth*0.60/scaleNum}px`
           }">
           <div
@@ -103,13 +93,12 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import { isEqual, castArray, isEmpty, cloneDeep } from 'lodash';
-// import { stringifyVtt, toVttTime } from 'subtitle';
 import { Subtitle as subtitleMutations, Window as windowMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
-// import { stringifyAss } from '@/helpers/subtitle';
 import CueRenderer from './CueRenderer.vue';
-import Icon from '../BaseIconContainer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
+
+let count = 1;
 
 export default {
   name: 'subtitle-renderer',
@@ -125,6 +114,10 @@ export default {
     },
     newSubHolder: {
       type: Object,
+    },
+    dragingMode: {
+      type: String,
+      default: 'default',
     },
     currentSub: {
       type: Array,
@@ -148,10 +141,12 @@ export default {
     tags: {
       type: Object,
     },
+    firstTags: {
+      type: Object,
+    },
   },
   components: {
     CueRenderer,
-    Icon,
   },
   data() {
     return {
@@ -173,9 +168,9 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleLis', 'winHeight',
+      'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleList', 'winHeight',
       'paused', 'isFullScreen', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'enabledSecondarySub', 'chosenSize',
-      'isEditable', 'isProfessional', 'winRatio', 'winWidth', 'winHeight',
+      'isEditable', 'isProfessional', 'winRatio', 'winWidth', 'winHeight', 'chosenStyle', 'isCreateSubtitleMode',
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
     ]),
     type() {
@@ -215,6 +210,10 @@ export default {
         return this.scaleNum;
       }
       return (this.scaleNum * 5) / 6 < 1 ? 1 : (this.scaleNum * 5) / 6;
+    },
+    shouldTranslate() {
+      return !this.tags.pos && !this.firstTags.pos &&
+        this.tags.alignment === this.firstTags.alignment;
     },
   },
   watch: {
@@ -287,7 +286,8 @@ export default {
     }
   },
   mounted() {
-    requestAnimationFrame(this.currentTimeUpdate);
+    count = requestAnimationFrame(this.currentTimeUpdate);
+    this.$bus.$off('clear-last-cue');
     this.$bus.$on('clear-last-cue', () => {
       this.lastIndex = [];
       this.lastAlignment = [];
@@ -302,6 +302,7 @@ export default {
       updateDuration: subtitleMutations.DURATIONS_UPDATE,
       toggleEditable: windowMutations.TOGGLE_EDITABLE,
       toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
+      setCreateMode: windowMutations.SET_CREATE_MODE,
     }),
     filter(cue) {
       if (!this.isVtt && this.isProfessional && cue.tags) {
@@ -452,12 +453,12 @@ export default {
           } else {
             sub.start = sub.end - 0.2;
           }
-          if (this.type === 'ass') {
-            sub.fragments[0].text = this.editVal.trim();
+          if (this.type === 'ass' && !this.isCreateSubtitleMode) {
+            sub.fragments[0].text = editVal.trim;
           } else {
-            sub.text = this.editVal.trim();
+            sub.text = editVal;
           }
-          const subtitleInstance = !this.subtitleInstance ? {
+          const subtitleInstance = !this.subtitleInstance || this.isCreateSubtitleMode ? {
             parsed: {
               dialogues: [],
             },
@@ -468,6 +469,7 @@ export default {
             },
             type: 'online',
           } : cloneDeep(this.subtitleInstance);
+          this.setCreateMode(false);
           this.$bus.$emit('modified-subtitle-bridge', { sub: subtitleInstance, add: sub, index: this.newSubHolder.insertIndex });
         }
         this.toggleEditable(false);
@@ -520,12 +522,11 @@ export default {
     avaliableClass(index) {
       if (!this.isVtt) {
         if (!this.currentTags[index].pos) {
-          if (this.subToTop && this.currentTags[index].alignment !== 8) {
+          if (this.subToTop && ![4, 5, 6, 7, 8, 9].includes(this.currentTags[index].alignment)) {
             this.lastIndex.push(index);
             this.lastAlignment.push(this.currentTags[index].alignment);
             this.lastText.push(this.currentTexts[index]);
-            this.currentTags[index].alignment = 8;
-            return 'subtitle-alignment8';
+            this.currentTags[index].alignment += 6;
           }
           return `subtitle-alignment${this.currentTags[index].alignment}`;
         }
@@ -544,7 +545,7 @@ export default {
       const { lastCurrentTime } = this;
       this.setCurrentCues(currentTime - (subtitleDelay / 1000));
       this.updateVideoSegments(lastCurrentTime, currentTime);
-      requestAnimationFrame(this.currentTimeUpdate);
+      count = requestAnimationFrame(this.currentTimeUpdate);
     },
     setCurrentCues(currentTime) {
       if (!this.subtitleInstance || !this.subtitleInstance.parsed) return;
@@ -628,14 +629,21 @@ export default {
         if (!isEqual(tags[index], tags[index - 1])) {
           break;
         }
-        tmp += texts[index - 1].split('<br>').length;
+        tmp += texts[index - 1].replace('/<br>$/g', '').split('<br>').length;
         index -= 1;
       }
       return tmp;
     },
     lineNum(index) {
       // 最新一条字幕需要换行的translate比例
-      const { currentTexts: texts } = this;
+      const { currentTags: tags, currentTexts: texts } = this;
+      if (!this.isFirstSub) {
+        this.$emit('update:linesNum', this.subToTop || [7, 8, 9].includes(tags[index].alignment) ? texts[index].split('<br>').length : this.lastLineNum(index) + texts[index].split('<br>').length); // 第二字幕的行数
+        this.$emit('update:tags', tags[index]); // 第二字幕的tags
+      } else {
+        this.$emit('update:firstLinesNum', this.subToTop || [7, 8, 9].includes(tags[index].alignment) ? this.lastLineNum(index) + texts[index].split('<br>').length : texts[index].split('<br>').length); // 第一字幕的行数
+        this.$emit('update:firstTags', tags[index]); // 第一字幕的tags
+      }
       return this.lastLineNum(index) / texts[index].split('<br>').length;
     },
     assLine(index) {
@@ -655,41 +663,19 @@ export default {
       if (tags[index].line.includes('%')) {
         tmp = -parseInt(tags[index].line, 10) / 100;
       }
-      if (tags[index].vertical) {
-        if (tmp >= -1 && tmp < -0.5) {
-          return `translateX(${-100 * this.lineNum(index)}%)`;
-        }
-        return `translateX(${100 * this.lineNum(index)}%)`;
-      }
       if (tmp >= -1 && tmp < -0.5) {
-        return `translateY(${-100 * this.lineNum(index)}%)`;
+        return -100 * this.lineNum(index);
       }
-      return `translateY(${100 * this.lineNum(index)}%)`;
+      return 100 * this.lineNum(index);
     },
-    subLine(index) {
-      const { currentTags: tags, currentTexts: texts, isVtt } = this;
-      if (!this.isFirstSub) {
-        this.$emit('update:linesNum', this.lastLineNum(index) + texts[index].split('<br>').length); // 第二字幕的行数
-        this.$emit('update:tags', tags[index]); // 第二字幕的tags
-      } else {
-        this.$emit('update:firstLinesNum', texts[index].split('<br>').length); // 第一字幕的行数
-      }
-      if (isEqual(tags[index], tags[index - 1])) {
-        if (!isVtt) {
-          return `${this.assLine(index)}%`;
-        }
-        return this.vttLine(index);
-      }
-      return '';
+    transDirection(transNum, alignment) { // 播放列表打开，translate方向改变
+      return this.subToTop || [7, 8, 9].includes(alignment) ? Math.abs(transNum) : transNum;
     },
-    transDirection(transNum) { // 播放列表打开，translate方向改变
-      return this.subToTop ? Math.abs(transNum) : transNum;
+    firstSubTransPercent(transPercent, alignment) { // 当播放列表打开，第一字幕对应的transPercent
+      return this.subToTop || [7, 8, 9].includes(alignment) ? 0 : transPercent;
     },
-    firstSubTransPercent(transPercent) { // 当播放列表打开，第一字幕对应的transPercent
-      return this.subToTop ? 0 : transPercent;
-    },
-    secondarySubTransPercent(transPercent) { // 当播放列表打开，第二字幕对应的transPercent
-      return this.subToTop && this.currentSecondSubtitleId !== '' && this.currentFirstSubtitleId !== '' && this.enabledSecondarySub ? transPercent : 0;
+    secondarySubTransPercent(transPercent, alignment) { // 当播放列表打开，第二字幕对应的transPercent
+      return (this.subToTop || [7, 8, 9].includes(alignment)) && this.currentSecondSubtitleId !== '' && this.currentFirstSubtitleId !== '' && this.enabledSecondarySub ? transPercent : 0;
     },
     transPos(index) { // eslint-disable-line
       const { currentTags: tags, currentTexts: texts, isVtt } = this;
@@ -710,50 +696,57 @@ export default {
       const secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
       const firstSubHeight = this.firstLinesNum * 9 * this.scaleNum;
       // 当播放列表打开时，计算为第二字幕相对于第一字幕需要translate的值
-      const subHeightWithDirection = this.subToTop ?
+      const subHeightWithDirection = this.subToTop || [7, 8, 9].includes(tags[index].alignment) ?
         [firstSubHeight, secondSubHeight] : [secondSubHeight, firstSubHeight];
       // 根据字体尺寸和换行数计算字幕需要translate的百分比，当第一字幕同时存在多条且之前条存在位置信息时，之前条不纳入translate计算
-      const transPercent = texts[index - 1] && !this.isFirstLastSubHasPos(tags[index - 1]) ?
-        this.lastTransPercent :
-        -((subHeightWithDirection[0] + ((subSpaceFactorsA[this.chosenSize] * this.winHeight) +
-          subSpaceFactorsB[this.chosenSize])) / subHeightWithDirection[1]) * 100;
+      let transPercent;
+      if (texts[index - 1] && isEqual(tags[index], tags[index - 1]) && this.linesNum === texts[index - 1].split('<br>').length) {
+        transPercent = this.lastTransPercent;
+      } else if (this.tags &&
+        this.tags.alignment !== this.firstTags.alignment && !texts[index - 1]) {
+        transPercent = 0;
+      } else {
+        transPercent = -((subHeightWithDirection[0] + ((subSpaceFactorsA[this.chosenSize] *
+          this.winHeight) + subSpaceFactorsB[this.chosenSize])) / subHeightWithDirection[1]) * 100;
+      }
       this.lastTransPercent = transPercent;
       if (!isVtt) {
-        if (tags[index].pos) {
+        if (this.isFirstSub) { // 第一字幕不是VTT
+          if (tags[index] && tags[index].pos) {
+            // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
+            return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.translateNum(tags[index].alignment)[1] + this.assLine(index)}%)`;
+          }
+          if (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub && this.shouldTranslate) {
+            // 没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
+            return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.firstSubTransPercent(transPercent, tags[index].alignment), tags[index].alignment) + this.assLine(index)}%)`;
+          }
+          // 只有第一字幕时需要translate的值
+          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1], tags[index].alignment) + this.assLine(index)}%)`;
+        }
+        if (tags[index] && tags[index].pos) { // 第二字幕不是VTT
           // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
-          return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.transDirection(this.translateNum(tags[index].alignment)[1])}%)`;
+          return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.transDirection(this.translateNum(tags[index].alignment)[1], tags[index].alignment) + this.assLine(index)}%)`;
         }
-        if (this.translateWithPos(tags[index])) {
-          // 没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
-          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index) + this.firstSubTransPercent(transPercent))}%)`;
-        }
-        // 正常translate
-        return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.assLine(index) + this.secondarySubTransPercent(transPercent))}%)`;
+        return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.secondarySubTransPercent(transPercent, tags[index].alignment), tags[index].alignment) + this.assLine(index)}%)`;
       }
-      if (tags[index].line && tags[index].position) {
+      if (tags[index].line && tags[index].position) { // 字幕为VTT且有位置信息
         return '';
       }
-      if (this.translateWithPos(tags[index])) {
-        // vtt字幕没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
-        return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index) + this.firstSubTransPercent(transPercent))}%)`;
+      if (this.isFirstSub) {
+        if (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub) {
+          // vtt字幕没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
+          if (tags[index] && tags[index].vertical) {
+            return `translate(${initialTranslate[1][0] + this.vttLine(index)}%, ${this.transDirection(initialTranslate[1][1] + this.firstSubTransPercent(transPercent))}%)`;
+          }
+          return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.firstSubTransPercent(transPercent)) + this.vttLine(index)}%)`;
+        }
+        // 只有第一字幕时需要translate的值
+        if (tags[index] && tags[index].vertical) {
+          return `translate(${initialTranslate[1][0] + this.vttLine(index)}%, ${this.transDirection([1][1], tags[index].alignment)}%)`;
+        }
+        return `translate(${initialTranslate[1][0]}%, ${this.transDirection([1][1], tags[index].alignment) + this.vttLine(index)}%)`;
       }
-      // 正常translate
-      return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.assLine(index) + this.secondarySubTransPercent(transPercent))}%)`;
-    },
-    isFirstLastSubHasPos(firstTags) {
-      return firstTags.pos || (firstTags.line && firstTags.position) ||
-        (firstTags.alignment && firstTags.alignment !== 2);
-    },
-    isFirstSubHasPos(firstTags) {
-      return firstTags.pos || (firstTags.line && firstTags.position) ||
-        (firstTags.alignment && firstTags.alignment !== 2 && !this.subToTop); // 判断第一字幕是否存在位置信息
-    },
-    isSecondaryHasPos() {
-      return this.tags.pos || (this.tags.line && this.tags.position) ||
-        (this.tags.alignment && this.tags.alignment !== 2 && !this.subToTop); // 判断第二字幕是否存在位置信息
-    },
-    translateWithPos(firstTags) { // 同时存在第一、第二字幕时，如果都没有位置信息，第一字幕需要额外translate
-      return !!(this.isFirstSub && this.currentSecondSubtitleId !== '' && this.enabledSecondarySub && !this.isSecondaryHasPos() && !this.isFirstSubHasPos(firstTags));
+      return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.secondarySubTransPercent(transPercent, tags[index].alignment), tags[index].alignment) + this.assLine(index)}%)`;
     },
     subLeft(index) {
       const { currentTags: tags, type, isVtt } = this;
@@ -772,17 +765,15 @@ export default {
       return '';
     },
     subTop(index) {
-      const { currentTags: tags, type, isVtt } = this;
-      // if (!isVtt) {
-      //   if (tags[index].pos) {
-      //     return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
-      //   } else if ([7, 8, 9].includes(tags[index].alignment)) {
-      //     return `${((20 + ((this.winHeight - this.computedHeight) / 2)) /
-      //       this.winHeight) * 100}%`;
-      //   }
-      if (!isVtt && tags[index].pos) {
-        return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
-      } else if (type === 'vtt' && tags[index].line && tags[index].position) {
+      const { currentTags: tags, isVtt } = this;
+      if (!isVtt) {
+        if (tags[index].pos) {
+          return `${(tags[index].pos.y / this.subPlayResY) * 100}vh`;
+        } else if ([7, 8, 9].includes(tags[index].alignment)) {
+          return `${(60 / 1080) * 100}%`;
+        }
+        return '';
+      } else if (isVtt && tags[index].line && tags[index].position) {
         if (tags[index].vertical) {
           return tags[index].position;
         }
@@ -791,14 +782,12 @@ export default {
           tags[index].line += '%';
         }
         return tags[index].line;
-      } else if ([7, 8, 9].includes(tags[index].alignment)) {
-        return `${(60 / 1080) * 100}%`;
       }
       return '';
     },
     subBottom(index) {
       const { currentTags: tags, isVtt } = this;
-      if (([1, 2, 3].includes(tags[index].alignment) && !tags[index].pos) ||
+      if (((!isVtt && [1, 2, 3].includes(tags[index].alignment)) && !tags[index].pos) ||
         (isVtt && (!tags[index].line || !tags[index].position))) {
         // return `${(60 / 1080) * 100}%`;
         return `${((20 + ((this.winHeight - this.computedHeight) / 2)) / this.winHeight) * 100}%`;
@@ -854,6 +843,7 @@ export default {
     },
   },
   destroyed() {
+    cancelAnimationFrame(count);
     document.removeEventListener('keydown', this.handleKeyDown);
     document.removeEventListener('keyup', this.handleKeyUp);
   },
@@ -871,28 +861,6 @@ export default {
     position: static;
     transform: translate(0, 0)!important;
     justify-content: center;
-    // &::before {
-    //   content: "";
-    //   width: 100%;
-    //   height: 100%;
-    //   position: absolute;
-    //   left: 0;
-    //   top: 0;
-    //   z-index: 1;
-    //   backdrop-filter: blur(3px);
-    //   background: rgba(0,0,0,0.05);
-    //   border: 1px solid rgba(255,255,255,0.15);
-    //   border-radius: 5px;
-    //   // visibility: hidden;
-    // }
-    .professional-btn-wrap {
-      display: flex;
-    }
-    // &.editable, &.focus, &:hover {
-    //   &::before {
-    //     visibility: visible;
-    //   }
-    // }
     &.focus {
       padding: 0 12px;
       &::before {
@@ -912,7 +880,7 @@ export default {
     }
     .add-cue-render {
       opacity: 0.3;
-      cursor: pointer;
+      // cursor: pointer;
     }
   }
   .edit-box {
@@ -943,46 +911,6 @@ export default {
     flex-direction: column-reverse;
     position: relative;
     z-index: 2;
-  }
-  .professional-btn-wrap {
-    display: flex;
-    width: 36px;
-    height: 82.5%;
-    position: absolute;
-    right: -2px;
-    top: 50%;
-    transform: translate(100%, -50%);
-    z-index: 1;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(3px);
-    background: rgba(0,0,0,0.05);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-left: none;
-    border-radius: 0 5px 5px 0;
-  }
-}
-.enable-hover {
-  &:hover {
-    // padding: 5px 15px;
-    // &::before {
-    //   content: "";
-    //   width: 100%;
-    //   height: 100%;
-    //   position: absolute;
-    //   left: 0;
-    //   top: 0;
-    //   z-index: 1;
-    //   backdrop-filter: blur(3px);
-    //   background: rgba(0,0,0,0.05);
-    //   border: 1px solid rgba(255,255,255,0.15);
-    //   border-radius: 5px;
-    //   // visibility: hidden;
-    // }
-    .professional-btn-wrap {
-      display: flex;
-    }
   }
 }
 .editable {
@@ -1022,6 +950,11 @@ export default {
   textarea {
     position: relative;
     z-index: 10;
+    // background: #009be6;
+    font-weight: 800;
+    // -webkit-background-clip: text;
+    // -webkit-text-fill-color: #fff;
+    // -webkit-text-stroke: 1.6px transparent;
   }
   .back {
     position: absolute;

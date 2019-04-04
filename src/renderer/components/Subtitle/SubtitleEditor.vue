@@ -1,5 +1,9 @@
 <template>
-  <div class="sub-editor">
+  <div class="sub-editor"
+    :style="{
+      zIndex: dragingMode !== 'default' || spaceKeyPressStartTime > 0 ? '9999' : '4',
+      cursor: dragingMode
+    }">
     <div class="sub-editor-head">
       <div class="sub-editor-time-line no-drag"
         ref="timeLine"
@@ -10,7 +14,9 @@
         :style="{
           width: `${3 * winWidth}px`,
           left: `${currentLeft}px`,
-          cursor: `${timeLineDraging ? 'grabbing' : 'grab'}`,
+          height: spaceKeyPressStartTime > 0 ? '100vh' : 'auto',
+          cursor: dragingMode !== 'default' ? dragingMode : 'grab',
+          zIndex: spaceKeyPressStartTime > 0 ? '9999' : '2',
         }">
         <div class="scales" :style="{
           width: `${scales * space}px`
@@ -41,40 +47,48 @@
               right: `${sub.right}px`,
               top: `${(12 + (sub.track - 1) * 4) * vh}px`,
               opacity: `${sub.opacity}`,
-              // background: `${sub.opacity === 0 ? 'red' : 'rgba(255,255,255,0.13)'}`,
+              cursor: dragingMode !== 'default' ? dragingMode : 'grab'
             }">
-            <!-- <span>{{`${sub.left}-${sub.minLeft}-${sub.maxLeft + sub.width}`}}</span> -->
-            <i :class="'drag-left'+`${sub.index === chooseIndexs && subDragMoving ? ' grabbing' : ''}`"></i>
-            <i :class="'drag-right'+`${sub.index === chooseIndexs && subDragMoving ? ' grabbing' : ''}`"></i>
+            <i class="drag-left"
+              :style="{
+                cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
+              }"></i>
+            <i class="drag-right"
+              :style="{
+                cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
+              }"></i>
           </div>
         </div>
       </div>
     </div>
     <div class="sub-editor-body">
-      <div class="exit-btn-wrap" @click.stop="handleClickProfessional">
-        <Icon type="subtitleEditorExit" class="subtitleEditorExit"
-          :style="{
-            cursor: 'pointer',
-          }"/>
+      <div class="exit-btn-wrap" @click.stop="handleClickProfessional"
+        :style="{
+          cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
+        }">
+        <Icon type="subtitleEditorExit" class="subtitleEditorExit"/>
       </div>
       <subtitle-renderer
-      v-if="!subDragTimeLineMoving"
-      :key="subtitleInstance && subtitleInstance.id"
-      :showAddInput="showAddInput"
-      :newSubHolder="newSubHolder"
-      :currentSub="currentSub"
-      :chooseIndexs.sync="chooseIndexs"
-      :subtitleInstance="subtitleInstance"/>
+        v-if="!subDragTimeLineMoving"
+        :key='originSrc+currentFirstSubtitleId'
+        :showAddInput="showAddInput"
+        :newSubHolder="newSubHolder"
+        :currentSub="currentSub"
+        :chooseIndexs.sync="chooseIndexs"
+        :dragingMode="dragingMode"
+        :subtitleInstance="subtitleInstance"/>
     </div>
     <div class="sub-editor-foot">
       <div class="times-wrap">
         <div class="cont">
-          <div class="timing">
+          <div class="timing"
+            :style="{
+              cursor: dragingMode
+            }">
             <span class="timeContent">{{transcode(preciseTime, 1)}}</span>
           </div>
         </div>
       </div>
-      <the-progress-bar ref="progressbar" :showAllWidgets="true" />
     </div>
   </div>
 </template>
@@ -98,6 +112,7 @@ export default {
   },
   data() {
     return {
+      subtitleInstanceBridge: null, //
       dialogues: [],
       chooseIndexs: -1, // 单击字幕条选择字幕条的索引，支持ctrl多选
       hoverIndex: -1, // 目前鼠标hover的字幕条索引
@@ -131,6 +146,9 @@ export default {
       newSubHolder: null, // 配合showAddInput，存储添加字幕的数据格式以及插入位置
       history: [],
       currentIndex: -1,
+      dragingMode: 'default', // 光标类型
+      spaceKeyPressStartTime: 0, //
+      lastPaused: false, //
     };
   },
   props: {
@@ -138,7 +156,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'winWidth', 'winHeight', 'duration', 'paused',
+      'winWidth', 'winHeight', 'duration', 'paused', 'isCreateSubtitleMode', 'currentFirstSubtitleId', 'originSrc',
     ]),
     vh() {
       return this.winHeight / 100 > 10 ? 10 : Math.abs(this.winHeight / 100);
@@ -260,13 +278,14 @@ export default {
     },
   },
   watch: {
-    paused() {
-      requestAnimationFrame(this.updateWhenPlaying);
-      this.triggerCount += 1;
+    paused(val) {
+      if (!val) {
+        requestAnimationFrame(this.updateWhenPlaying);
+        this.triggerCount += 1;
+      }
     },
     currentSub(val) {
       this.computedCanShowAddBtn(val);
-      // console.log(this.validitySubs);
     },
     triggerCount() {
       this.computedCanShowAddBtn(this.currentSub);
@@ -276,8 +295,11 @@ export default {
       deep: true,
       handler(val) {
         this.hook = 0;
-        if (val && val.parsed) {
+        if (val && val.parsed && !this.isCreateSubtitleMode) {
           this.dialogues = val.parsed.dialogues;
+        }
+        if (val && !this.isCreateSubtitleMode) {
+          this.subtitleInstanceBridge = val;
         }
         if (this.createSubElement && !this.subDragTimeLineMoving) {
           this.createSubElement.parentNode &&
@@ -290,9 +312,6 @@ export default {
       // 当resize的时候，重新render timeline
       this.resetCurrentTime();
     },
-  },
-  created() {
-    // console.log(this.subtitleInstance.parsed.dialogues);
   },
   mounted() {
     this.resetCurrentTime(videodata.time);
@@ -480,6 +499,7 @@ export default {
       this.dragStartLeft = this.currentLeft;
       this.dragStartTime = this.preciseTime;
       this.timeLineDraging = true;
+      this.dragingMode = 'grabbing';
       if (!this.paused) {
         this.$bus.$emit('toggle-playback');
       }
@@ -507,6 +527,7 @@ export default {
         }
         this.dragStartX = 0;
         this.timeLineDraging = false;
+        this.dragingMode = 'default';
         this.triggerCount += 1;
       }
     },
@@ -601,10 +622,13 @@ export default {
       this.subDragStartOffsetLeft = (e.pageX - (sub.left + this.currentLeft));
       if (leftTarget) {
         this.subLeftDraging = true;
+        this.dragingMode = 'col-resize';
       } else if (rightTarget) {
         this.subRightDraging = true;
+        this.dragingMode = 'col-resize';
       } else {
         this.subDragMoving = true;
+        this.dragingMode = 'grabbing';
       }
       if (!this.paused) {
         this.$bus.$emit('toggle-playback');
@@ -954,6 +978,7 @@ export default {
       this.subDragMoving = false;
       this.subLeftDraging = false;
       this.subRightDraging = false;
+      this.dragingMode = 'default';
       this.subDragTimeLineMoving = false;
       this.subDragTimeLineMovingDirection = '';
       this.step = 1;
@@ -975,9 +1000,19 @@ export default {
         });
         this.chooseIndexs = -1;
         this.hoverIndex = -1;
+      } else if (e && e.keyCode === 32 && this.spaceKeyPressStartTime === 0) {
+        this.spaceKeyPressStartTime = Date.now();
+        this.lastPaused = this.paused;
+        !this.lastPaused && this.$bus.$emit('toggle-playback');
       }
     },
-    handleKeyUp() {
+    handleKeyUp(e) {
+      const distance = Date.now() - this.spaceKeyPressStartTime;
+      if (e && e.keyCode === 32 && distance < 1000 && this.lastPaused) {
+        // 触发暂停/播放
+        this.$bus.$emit('toggle-playback');
+      }
+      this.spaceKeyPressStartTime = 0;
     },
     transcode(time, num) {
       if (time < 0) {
@@ -1124,6 +1159,9 @@ export default {
     document.removeEventListener('mouseup', this.handleDragEndSub);
     document.removeEventListener('keydown', this.handleKeyDown);
     document.removeEventListener('keyup', this.handleKeyUp);
+    // this.$bus.$off('modified-subtitle');
+    // this.$bus.$off('modified-subtitle-bridge');
+    // this.$bus.$off('seek');
   },
 };
 </script>
@@ -1134,7 +1172,7 @@ export default {
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 100;
+    z-index: 4;
     background-image: radial-gradient(50% 136%, rgba(0,0,0,0.36) 50%, rgba(0,0,0,0.48) 100%);
     // background-color: rgba(0, 0, 0, .36);
     &::before {
@@ -1173,9 +1211,14 @@ export default {
       left: 50%;
       z-index: 1;
       transform: translateX(-50%);
-      background-color: #d8d8d8;
-      box-shadow: 0 0 1px 0 rgba(255,255,255,0.50);
+      background: rgba(216,216,216,0.20);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 0 2px 0 rgba(255,255,255,0.50);
       border-radius: 0 0 1px 1px;
+      border-top-width: 0;
+      // background-color: #d8d8d8;
+      // box-shadow: 0 0 1px 0 rgba(255,255,255,0.50);
+      // border-radius: 0 0 1px 1px;
     }
   }
   .sub-editor-time-line {
@@ -1200,7 +1243,7 @@ export default {
       position: relative;
       align-items: center;
       color: #ffffff;
-      opacity: 0.25;
+      opacity: 0.4;
       font-weight: lighter;
       font-size: 14px;
       &.highlight {
@@ -1336,5 +1379,12 @@ export default {
     justify-content: center;
     backdrop-filter: blur(3px);
     background: rgba(255,255,255,0.05);
+  }
+  .sub-editor-foot {
+    .timing {
+      &:hover {
+        cursor: default;
+      }
+    }
   }
 </style>

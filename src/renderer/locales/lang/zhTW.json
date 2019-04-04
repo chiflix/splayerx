@@ -251,5 +251,17 @@
 	"uploadingSuccess": {
 		"content": "字幕已成功上傳。",
 		"title": "上傳成功"
-	}
+	},
+  "notificationMessage": {
+    "subtitle": {
+      "saveSuccess": {
+        "content": "保存成功",
+        "title": ""
+      },
+      "exitProfessionalMode": {
+        "content": "本次修改已保存",
+        "title": ""
+      }
+    }
+  }
 }

@@ -136,6 +136,10 @@ export default {
   max-height: 22.5px;
   display: block;
 }
+.downArrow, .subtitleDetach, .subtitleEdit, .subtitleExport, .subtitleDelete {
+  width: 100%;
+  height: 100%;
+}
 
 .volume {
   width: 100%;

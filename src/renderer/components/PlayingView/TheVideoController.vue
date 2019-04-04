@@ -12,7 +12,7 @@
     @click.left="handleMouseupLeft">
     <!-- 当目前字幕处于快速编辑模式或者高级编辑模式正常播放的组件都从DOM节点删除 -->
     <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']" v-if="!isEditable && !isProfessional"></titlebar>
-    <notification-bubble ref="nextVideoUI" v-if="!isEditable && !isProfessional"/>
+    <notification-bubble ref="nextVideoUI" v-if="!isEditable"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"  v-fade-in="!isEditable && !isProfessional"
     :displayState="displayState['recent-playlist']"
     :mousemoveClientPosition="mousemoveClientPosition"
@@ -43,7 +43,7 @@
       @conflict-resolve="conflictResolve"/>
     </div>
     <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable && !isProfessional" />
-    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable && !isProfessional" />
+    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable" />
     <!-- 将subtitleManager 从PlayingView 移到 VideoController 里 主要是因为mouse事件无法传递 videoController盖住了subtitleManager -->
     <subtitle-manager :playlistShow="widgetsStatus['playlist-control'] && widgetsStatus['playlist-control'].showAttached" />
   </div>

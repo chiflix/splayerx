@@ -251,5 +251,17 @@
 	"uploadingSuccess": {
 		"content": "字幕がアップロードされました。",
 		"title": "アップロードに成功しました"
-	}
+	},
+  "notificationMessage": {
+    "subtitle": {
+      "saveSuccess": {
+        "content": "保存成功",
+        "title": ""
+      },
+      "exitProfessionalMode": {
+        "content": "本次修改已保存",
+        "title": ""
+      }
+    }
+  }
 }

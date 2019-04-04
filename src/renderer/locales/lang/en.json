@@ -251,5 +251,17 @@
 	"uploadingSuccess": {
 		"content": "Subtitle has been uploaded.",
 		"title": "Upload Successfully"
-	}
+	},
+  "notificationMessage": {
+    "subtitle": {
+      "saveSuccess": {
+        "content": "保存成功",
+        "title": ""
+      },
+      "exitProfessionalMode": {
+        "content": "本次修改已保存",
+        "title": ""
+      }
+    }
+  }
 }

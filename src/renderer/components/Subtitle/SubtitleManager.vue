@@ -10,6 +10,7 @@
         :isFirstSub="true"
         :linesNum="linesNum"
         :firstLinesNum.sync="firstLinesNum"
+        :firstTags.sync="firstTags"
         :tags="tags"/>
       <subtitle-renderer
         ref="subtitleRenderer"
@@ -19,7 +20,8 @@
         :isFirstSub="false"
         :firstLinesNum="firstLinesNum"
         :linesNum.sync="linesNum"
-        :tags.sync="tags"/>
+        :tags.sync="tags"
+        :firstTags="firstTags"/>
     </div>
     <subtitle-editor
       v-if="isProfessional"
@@ -79,6 +81,7 @@ export default {
       linesNum: 1,
       firstLinesNum: 1,
       tags: {},
+      firstTags: {},
       lastFirstSubtitleId: '',
       lastSecondSubtitleId: '',
     };
@@ -93,7 +96,7 @@ export default {
       'getVideoSrcById', 'allSubtitleList', // serve allSubtitleListWatcher
       'subtitleDelay', // subtitle's delay
       'isProfessional', // 字幕编辑高级模式属性
-      'storedWindowInfo', 'winRatio', 'defaultDir',
+      'storedBeforeProfessionalInfo', 'winRatio', 'defaultDir', 'isCreateSubtitleMode',
       'isFirstSubtitle',
       'enabledSecondarySub',
     ]),
@@ -175,11 +178,13 @@ export default {
       }
       // 处理最小尺寸设置
       let minSize = [];
-      if (!val && this.storedWindowInfo && this.storedWindowInfo.minimumSize) {
-        minSize = this.storedWindowInfo.minimumSize;
+      const store = this.storedBeforeProfessionalInfo;
+      const winRatio = this.winRatio;
+      if (!val && store && store.minimumSize) {
+        minSize = store.minimumSize;
       } else {
         // 进入编辑模式，设定phase2为最小的尺寸
-        minSize = this.winRatio > 1 ? [480 * this.winRatio, 480] : [480, 480 / this.winRatio];
+        minSize = winRatio > 1 ? [480 * winRatio, 480] : [480, 480 / winRatio];
         minSize = minSize.map(Math.round);
       }
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minSize);
@@ -309,7 +314,8 @@ export default {
       const list = intersectionBy(storedSubs.map(({ src, id }) => ({ src, type: 'modified', options: { id } })), cacheModifiedSubs, 'src');
       if (list.length === 0) return [];
       const result = await getSubtitleContentByPath(list);
-      return result;
+      return result.map(this.normalizeSubtitle)
+        .map(sub => this.addSubtitle(sub, videoSrc));
     },
     async getOnlineSubtitlesList(videoSrc, isFetching, storedSubIds, languages) {
       if (!isFetching) {

@@ -31,7 +31,6 @@
                 </div>
                 <Icon type="refresh" class="refresh" ref="refreshRotate" @mouseup.native="handleRefresh" :class="animClass ? 'icon-rotate-animation' : ''"/>
               </div>
-
               <div class="sub-menu">
                 <div class="scrollScope" :class="refAnimation" ref="scroll"
                   @animationend="finishAnimation"
@@ -41,10 +40,11 @@
                     overflowY: isOverFlow,
                   }">
                   <div v-if="!(loadingSubsPlaceholders.length > 0)">
-                    <div class="menu-item-text-wrapper"
+                    <div
                       @mouseup="$bus.$emit('off-subtitle')"
                       @mouseover="toggleItemsMouseOver(-1)"
                       @mouseleave="toggleItemsMouseLeave(-1)"
+                      :class="'menu-item-text-wrapper'+`${!backCardVisiable && currentSubtitleIndex === -1 ? ' focused' : ''}`"
                       :style="{
                         color: hoverIndex === -1 || currentSubtitleIndex === -1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                         height: `${itemHeight}px`,
@@ -52,42 +52,70 @@
                       }">
                       <div class="text">{{ noSubtitle }}</div>
                     </div>
-                    <!-- 当没有有效的字幕的时候，窗口尺寸是phase2，就是显示创建字幕按钮 -->
-                    <div v-if="canShowCreateBtn">
-                      <div class="menu-item-text-wrapper create-subtitle-btn"
-                        @click.stop="handleCreateBtnClick"
-                        :style="{
-                          height: `${itemHeight}px`,
-                        }">
-                        <div class="text">{{ '创建字幕' }}</div>
-                      </div>
-                    </div>
                   </div>
                   <div v-for="(item, index) in computedAvaliableItems" :key="item.id">
-                    <div class="menu-item-text-wrapper"
-                      @mouseup="toggleItemClick($event, index)"
+                    <div @mouseup="toggleItemClick($event, index)"
                       @mouseover="toggleItemsMouseOver(index)"
                       @mouseleave="toggleItemsMouseLeave(index)"
+                      :class="'menu-item-text-wrapper'+`${!backCardVisiable && currentSubtitleIndex === index ? ' focused' : ''}`"
                       :id="'item'+index"
                       :style="{
                         transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                         color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                        height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                         cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                        display: item.type === 'modified' ? 'block' : 'flex',
                       }">
-                      <div class="textContainer">
-                        <div class="text"
-                          :style="{
-                            wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
-                            whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
-                          }">{{ getSubName(item) }}</div>
+                      <div :style="{
+                          display: 'flex',
+                          height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
+                        }">
+                        <div class="textContainer">
+                          <div class="text"
+                            :style="{
+                              wordBreak: hoverIndex === index && hiddenText ? 'break-all' : '',
+                              whiteSpace: hoverIndex === index && hiddenText ? '' : 'nowrap'
+                            }">{{ getSubName(item) }}</div>
+                        </div>
+                        <div class="iconContainer">
+                          <transition name="sub-delete" v-if="item.type === 'local'">
+                            <Icon type="subtitleDetach" class="detach-icon" @mouseup.native="handleSubDelete($event, item)" v-show="hoverIndex === index"></Icon>
+                          </transition>
+                          <transition name="sub-delete" v-if="item.type === 'modified'" >
+                            <div class="down-arrow-icon-wrap">
+                              <Icon
+                               :class="'down-arrow-icon' + `${currentSubtitleIndex === index && modifiedAdvancedPanelVisiable ? ' up' : ''}`"
+                                type="downArrow" @mouseup.native="handleSubToggle($event, index)" v-show="hoverIndex === index || currentSubtitleIndex === index"></Icon>
+                            </div>
+                            </transition>
+                        </div>
                       </div>
-                      <div class="iconContainer">
-                        <transition name="sub-delete">
-                          <Icon type="deleteSub" class="deleteIcon" @mouseup.native="handleSubDelete($event, item)" v-show="(item.type === 'local' || item.type === 'modified') && hoverIndex === index"></Icon>
-                        </transition>
+                      <div class="modified-subtitle-advanced-panel" v-if="item.type === 'modified'"
+                        :style="{
+                          height: currentSubtitleIndex === index && !backCardVisiable && modifiedAdvancedPanelVisiable ? `${itemHeight}px`: 0,
+                        }">
+                        <div class="icons-wrap" v-show="!confirmDeletePanelVisiable">
+                          <Icon type="subtitleEdit" @mouseup.native="handleSubEdit($event, item)"></Icon>
+                          <Icon type="subtitleExport" @mouseup.native="handleSubExport($event, item)"></Icon>
+                          <Icon type="subtitleDelete" @mouseup.native="handleSubDelete($event, item)"></Icon>
+                          <!-- <Icon type="subtitleDelete" @mouseup.native="handleSubConfirmDelete($event, item)"></Icon> -->
+                        </div>
+                        <!-- <div class="confirm-delete-wrap" v-show="confirmDeletePanelVisiable">
+                          <span class="submit" @mouseup.native.stop="handleSubDelete($event, item)">确认删除</span>
+                          <span class="cancel" @mouseup.native.stop="confirmDeletePanelVisiable = false;">取消</span>
+                        </div> -->
                       </div>
                     </div>
+                  </div>
+                  <!-- 当没有有效的字幕的时候，窗口尺寸是phase2，就是显示创建字幕按钮
+                  <div v-if="canShowCreateBtn">
+                  </div>
+                  -->
+                  <div class="menu-item-text-wrapper create-subtitle-btn"
+                    @click.stop="handleCreateBtnClick"
+                    :style="{
+                      height: `${itemHeight}px`,
+                    }">
+                    <div class="text">{{ '创建字幕' }}</div>
                   </div>
                   <div v-if="loadingTypes.length > 0">
                     <div v-for="(item, index) in loadingTypes"
@@ -100,11 +128,13 @@
                   </div>
 
                   <div class="card" v-if="0 <= computedAvaliableItems.length"
+                    ref="backCard"
                     :style="{
                       height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                       top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
                       marginTop: `${-cardPos}px`,
-                      transition: transFlag ? 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
+                      transition: transFlag ? 'margin-top 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
+                      opacity: backCardVisiable ? '0.4': '0'
                     }"/>
                 </div>
               </div>
@@ -129,6 +159,7 @@ import debounce from 'lodash/debounce';
 import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
 import { Window as windowMutations } from '@/store/mutationTypes';
+import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import { deleteSubtitles } from '@/helpers/subtitle';
@@ -178,6 +209,11 @@ export default {
       transFlag: true,
       subTypeHoverIndex: 1,
       shiftItemHovered: false,
+      backCardVisiable: false, // 背景card动画结束就隐藏
+      clickItem: false, //
+      clickItemArrow: false, //
+      modifiedAdvancedPanelVisiable: false,
+      confirmDeletePanelVisiable: false,
     };
   },
   computed: {
@@ -237,10 +273,10 @@ export default {
       return this.realItemsNum >= 7 ? 'scroll' : '';
     },
     realItemsNum() {
-      if (this.computedAvaliableItems.length === 0) {
-        return 2 + this.loadingTypes.length;
-      }
-      return this.computedAvaliableItems.length + 1 + this.loadingTypes.length;
+      // if (this.computedAvaliableItems.length === 0) {
+      //   return 2 + this.loadingTypes.length;
+      // }
+      return this.computedAvaliableItems.length + 2 + this.loadingTypes.length;
     },
     scopeHeight() {
       // 这里其实和上面的 scopeHeight 纯在同样的问题，计算高度逻辑过于复杂
@@ -263,17 +299,17 @@ export default {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingTypes.length)
-            - this.currentSubtitleIndex) * 31 :
+            - (this.currentSubtitleIndex - 1)) * 31 :
           this.scopeHeight + 4;
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.computedAvaliableItems.length > 0 ?
           ((this.computedAvaliableItems.length + this.loadingTypes.length)
-            - this.currentSubtitleIndex) * 37 :
+            - (this.currentSubtitleIndex - 1)) * 37 :
           this.scopeHeight + 5;
       }
       return this.computedAvaliableItems.length > 0 ?
         ((this.computedAvaliableItems.length + this.loadingTypes.length)
-          - this.currentSubtitleIndex) * 51 :
+          - (this.currentSubtitleIndex - 1)) * 51 :
         this.scopeHeight + 7;
     },
     currentSubtitleIndex() {
@@ -325,6 +361,8 @@ export default {
       if (val === 0) {
         this.$refs.scroll.scrollTop = 0;
       }
+      this.backCardVisiable = this.transFlag && this.clickItem;
+      this.modifiedAdvancedPanelVisiable = this.clickItemArrow;
     },
     showAttached(val) {
       if (!val) {
@@ -394,10 +432,12 @@ export default {
     }),
     ...mapMutations({
       toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
+      setCreateMode: windowMutations.SET_CREATE_MODE,
     }),
     handleCreateBtnClick() {
       // 当点击创建按钮后，先暂停播放、再切换高级编辑模式
       if (!this.paused) this.$bus.$emit('toggle-playback');
+      this.setCreateMode(true);
       this.toggleProfessional(true);
     },
     shiftItemHover() {
@@ -408,6 +448,18 @@ export default {
     },
     subTypeShift() {
       this.updateSubtitleType(!this.isFirstSubtitle);
+    },
+    handleSubEdit() {
+      if (!this.paused) {
+        this.$bus.$emit('toggle-playback');
+      }
+      this.toggleProfessional(true);
+    },
+    handleSubExport() {
+      this.$bus.$emit(bus.EXPORT_MODIFIED_SUBTITLE);
+    },
+    handleSubConfirmDelete() {
+      this.confirmDeletePanelVisiable = true;
     },
     handleSubDelete(e, item) {
       if (e.target.nodeName !== 'DIV') {
@@ -426,6 +478,19 @@ export default {
           }
         });
       }
+    },
+    handleSubToggle(e, index) {
+      if (this.currentSubtitleIndex === index) {
+        this.modifiedAdvancedPanelVisiable = !this.modifiedAdvancedPanelVisiable;
+      } else {
+        const { computedAvaliableItems } = this;
+        this.clickItem = true;
+        this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+        setTimeout(() => {
+          this.showSubtitleDetails(index);
+        }, 0);
+      }
+      this.clickItemArrow = true;
     },
     finishAnimation() {
       this.refAnimation = '';
@@ -573,10 +638,12 @@ export default {
     toggleItemClick(event, index) {
       if (event.target.nodeName === 'DIV') {
         const { computedAvaliableItems } = this;
+        this.clickItem = true;
         this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
         setTimeout(() => {
           this.showSubtitleDetails(index);
         }, 0);
+        this.clickItemArrow = false;
       }
     },
   },
@@ -621,6 +688,13 @@ export default {
   mounted() {
     this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
       this.count += 1;
+    });
+    // card transition end
+    this.$refs.backCard.addEventListener('transitionend', (e) => {
+      if (e.propertyName !== 'opacity') {
+        this.clickItem = false;
+        this.backCardVisiable = false;
+      }
     });
     this.$bus.$on('subtitle-refresh-continue', () => {
       if (this.continueRefresh) {
@@ -713,8 +787,56 @@ export default {
     cursor: pointer;
   }
   .menu-item-text-wrapper {
-    .deleteIcon {
+    position: relative;
+    &::before {
+      width: calc(100% - 2px);
+      height: 100%;
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      z-index: -5;
+      transform: translateX(calc(-50% - 1px));
+      box-sizing: inherit;
+      border-radius: 7px;
+      opacity: 0;
+      border: 0.5px solid rgba(255, 255, 255, 0.20);
+      box-shadow: 0px 1px 2px rgba(0, 0, 0, .2);
+      background-image: radial-gradient(60% 134%, rgba(255, 255, 255, 0.09) 44%, rgba(255, 255, 255, 0.05) 100%);
+    }
+    &.focused {
+      border-radius: 7px;
+      overflow: hidden;
+      &::before {
+        opacity: 0.4;
+      }
+    }
+    .deleteIcon, .detach-icon {
       transition-delay: 75ms;
+    }
+    .detach-icon {
+      height: 48%;
+      display: flex;
+      cursor: pointer;
+    }
+    .down-arrow-icon-wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
+      .down-arrow-icon {
+        width: 100%;
+        height: 48%;
+        display: flex;
+        transition: transform 0.1s ease-in-out;
+        &.up {
+          transform: rotate(180deg);
+        }
+      }
     }
     .text {
       transition: color 90ms linear;
@@ -723,11 +845,45 @@ export default {
       text-overflow: ellipsis;
     }
     &.create-subtitle-btn {
-      cursor: pointer;
       color: rgba(255, 255, 255, 0.6);
       transition: color 80ms cubic-bezier(0.17, 0.67, 0.17, 0.98);
+      cursor: pointer;
       &:hover {
         color: rgba(255, 255, 255, 0.9);
+      }
+    }
+    .iconContainer {
+      display: flex;
+      align-items: center;
+    }
+    .modified-subtitle-advanced-panel {
+      background: rgba(0,0,0,0.05);
+      overflow: hidden;
+      transition: height 0.1s ease-in-out;
+      .icons-wrap, .confirm-delete-wrap {
+        height: 100%;
+      }
+      .icons-wrap {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        &>div {
+          height: 53%;
+          cursor: pointer;
+        }
+      }
+      .confirm-delete-wrap {
+        text-align: right;
+        .submit, .cancel {
+          color: #FFFFFF;
+          margin-right: 15px;
+        }
+        .submit {
+          opacity: 0.4;
+        }
+        .cancel {
+          opacity: 0.2;
+        }
       }
     }
   }
@@ -812,7 +968,7 @@ export default {
         width: 116px;
         display: flex;
       }
-      .text {
+      .text, .confirm-delete-wrap {
         font-size: 11px;
         letter-spacing: 0.2px;
         line-height: 13px;
@@ -902,7 +1058,7 @@ export default {
         width: 141px;
         display: flex;
       }
-      .text {
+      .text, .confirm-delete-wrap {
         font-size: 13.2px;
         letter-spacing: 0.2px;
         line-height: 14px;
@@ -992,7 +1148,7 @@ export default {
         width: 196px;
         display: flex;
       }
-      .text {
+      .text, .confirm-delete-wrap {
         font-size: 18.48px;
         letter-spacing: 0.27px;
         line-height: 18px;

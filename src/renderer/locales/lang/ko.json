@@ -251,5 +251,17 @@
 	"uploadingSuccess": {
 		"content": "부제목이 업로드되었습니다.",
 		"title": "성공적으로 업로드"
-	}
+	},
+  "notificationMessage": {
+    "subtitle": {
+      "saveSuccess": {
+        "content": "保存成功",
+        "title": ""
+      },
+      "exitProfessionalMode": {
+        "content": "本次修改已保存",
+        "title": ""
+      }
+    }
+  }
 }

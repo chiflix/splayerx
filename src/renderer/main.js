@@ -165,7 +165,9 @@ new Vue({
         return {
           label: `${this.$t('msg.playback.pause')}`,
           accelerator: 'Space',
+          enabled: !this.isProfessional,
           click: () => {
+            console.log(1);
             this.$bus.$emit('toggle-playback');
           },
         };
@@ -173,7 +175,9 @@ new Vue({
       return {
         label: `${this.$t('msg.playback.play')}`,
         accelerator: 'Space',
+        enabled: !this.isProfessional,
         click: () => {
+          console.log(1);
           this.$bus.$emit('toggle-playback');
         },
       };
@@ -303,8 +307,15 @@ new Vue({
         });
       }
     },
-    isProfessional() {
+    isProfessional(val) {
       this.refreshMenu();
+      if (!val) {
+        this.$store.dispatch('addMessages', {
+          type: 'state',
+          content: this.$t('notificationMessage.subtitle.exitProfessionalMode.content'),
+          dismissAfter: 2000,
+        });
+      }
     },
     isFullScreen() {
       this.refreshMenu();
@@ -447,14 +458,14 @@ new Vue({
             },
             {
               label: this.$t('msg.playback.forwardL'),
-              accelerator: 'Alt+Right',
+              accelerator: 'Up',
               click: () => {
                 this.$bus.$emit('seek', videodata.time + 60);
               },
             },
             {
               label: this.$t('msg.playback.backwardL'),
-              accelerator: 'Alt+Left',
+              accelerator: 'Down',
               click: () => {
                 this.$bus.$emit('seek', videodata.time - 60);
               },
@@ -513,24 +524,6 @@ new Vue({
           label: this.$t('msg.audio.name'),
           id: 'audio',
           submenu: [
-            {
-              label: this.$t('msg.audio.increaseVolume'),
-              accelerator: 'Up',
-              id: 'inVolume',
-              click: () => {
-                this.$ga.event('app', 'volume', 'keyboard');
-                this.$store.dispatch(videoActions.INCREASE_VOLUME);
-              },
-            },
-            {
-              label: this.$t('msg.audio.decreaseVolume'),
-              accelerator: 'Down',
-              id: 'deVolume',
-              click: () => {
-                this.$ga.event('app', 'volume', 'keyboard');
-                this.$store.dispatch(videoActions.DECREASE_VOLUME);
-              },
-            },
             {
               label: this.$t('msg.audio.mute'),
               type: 'checkbox',
@@ -932,6 +925,11 @@ new Vue({
             label: this.$t('msg.advanced.save'),
             accelerator: 'CmdOrCtrl+S',
             click: () => {
+              this.$store.dispatch('addMessages', {
+                type: 'state',
+                content: this.$t('notificationMessage.subtitle.saveSuccess.content'),
+                dismissAfter: 2000,
+              });
             },
           },
           {
@@ -1290,7 +1288,9 @@ new Vue({
           break;
         case 32:
           e.preventDefault();
-          this.$bus.$emit('toggle-playback');
+          if (!this.isProfessional) {
+            this.$bus.$emit('toggle-playback');
+          }
           break;
         default:
           break;
