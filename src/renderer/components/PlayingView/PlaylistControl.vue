@@ -52,12 +52,12 @@ export default {
     },
     handleDown() {
       this.mouseDown = true;
-      this.anim.playSegments([15, 19], false);
+      this.anim.playSegments([15, 19], true);
       document.onmouseup = () => {
         if (this.validEnter) {
-          this.anim.playSegments([47, 51], false);
+          this.anim.playSegments([47, 51], true);
         } else if (this.currentMousedownComponent === this.$options.name) {
-          this.anim.playSegments([37, 41], false);
+          this.anim.playSegments([37, 41], true);
         }
         this.mouseDown = false;
       };
@@ -65,9 +65,9 @@ export default {
     handleEnter() {
       if (this.animFlag) {
         if (!this.mouseDown) {
-          this.anim.playSegments([9, 13], false);
+          this.anim.playSegments([9, 13], true);
         } else {
-          this.anim.playSegments([27, 31], false);
+          this.anim.playSegments([27, 31], true);
         }
       }
       this.validEnter = true;
@@ -75,9 +75,9 @@ export default {
     },
     handleLeave() {
       if (this.mouseDown) {
-        this.anim.playSegments([21, 25], false);
+        this.anim.playSegments([21, 25], true);
       } else {
-        this.anim.playSegments([3, 7], false);
+        this.anim.playSegments([3, 7], true);
       }
       this.animFlag = true;
       this.validEnter = false;

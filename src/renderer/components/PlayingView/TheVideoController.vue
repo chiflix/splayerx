@@ -43,7 +43,7 @@
       @conflict-resolve="conflictResolve"/>
     </div>
     <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable && !isProfessional" />
-    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable" />
+    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets && !isEditable" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
     <!-- 将subtitleManager 从PlayingView 移到 VideoController 里 主要是因为mouse事件无法传递 videoController盖住了subtitleManager -->
     <subtitle-manager :playlistShow="widgetsStatus['playlist-control'] && widgetsStatus['playlist-control'].showAttached" />
   </div>

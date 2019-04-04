@@ -128,17 +128,42 @@ export default {
   height: 27px;
   display: block;
 }
-.subtitleEditorEnter, .subtitleEditorExit {
-  // 字幕的编辑时间轴尺寸单位都是是vh，这边icon和时间轴等比例的
-  width: 2.4375vh;
-  height: 2.25vh;
-  max-width: 24.375px;
-  max-height: 22.5px;
-  display: block;
-}
-.downArrow, .subtitleDetach, .subtitleEdit, .subtitleExport, .subtitleDelete {
+
+.downArrow, .subtitleDetach, .subtitleEdit, .subtitleExport, .subtitleDelete, .subtitleEditorExit {
   width: 100%;
   height: 100%;
+  cursor: pointer;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
 }
 
 .volume {

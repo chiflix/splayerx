@@ -26,6 +26,7 @@
             :class="'scale' + validityTime(time) + `${isHighlight(time) ? ' highlight' : ''}`"
             :style="{
               width: `${space}px`,
+              fontSize: winHeight > 1000 ? '22px': '2.1vh',
             }">
             <i></i>
             <span>{{isHighlight(time) ? transcode(time) : getSecond(time)}}</span>
@@ -40,12 +41,12 @@
             @mousemove.left="handleDragingSub($event, sub)"
             @mouseup.left="handleDragEndSub($event, sub)"
             @dblclick.left.stop="handleDoubleClickSub($event, sub)"
-            :class="computedSubClass(sub.index)+' no-drag'"
+            :class="computedSubClass(sub.index)+' no-drag sub-line-mark'+`${sub.focus ? ' focus' : ''}`"
             :data="`${sub.width}-${sub.index}-${chooseIndexs}-${sub.track}-${sub.text}`"
             :style="{
               left: `${sub.left}px`,
               right: `${sub.right}px`,
-              top: `${(12 + (sub.track - 1) * 4) * vh}px`,
+              top: `${((6 + (sub.track - 1) * 4) * vh) + 33}px`,
               opacity: `${sub.opacity}`,
               cursor: dragingMode !== 'default' ? dragingMode : 'grab'
             }">
@@ -66,7 +67,7 @@
         :style="{
           cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
         }">
-        <Icon type="subtitleEditorExit" class="subtitleEditorExit"/>
+        <Icon type="subtitleEditorExit" class="subtitle-editor-exit"/>
       </div>
       <subtitle-renderer
         v-if="!subDragTimeLineMoving"
@@ -190,7 +191,7 @@ export default {
         });
       return filters.map((e, i) => { // eslint-disable-line
         const text = this.type === 'ass' ? e.fragments && e.fragments[0] && e.fragments[0].text : e.text;
-        // const focus = e.start <= this.preciseTime && e.end >= this.preciseTime;
+        const focus = e.start <= this.preciseTime && e.end >= this.preciseTime;
         let left = (e.start - this.times[0]) * this.space;
         let width = (e.end - e.start) * this.space;
         let right = (3 * this.winWidth) - (left + width);
@@ -267,7 +268,7 @@ export default {
           originRight: right,
           originWidth: width,
           text,
-          // focus, // 是否是当前播放的字幕
+          focus, // 是否是当前播放的字幕
           opacity,
         });
       });
@@ -338,7 +339,7 @@ export default {
       this.createSubElement = document.createElement('div');
       this.createSubElement.setAttribute('style', `width: 1px;
         position: absolute;
-        top: ${12 * this.vh}px;
+        top: ${(6 * this.vh) + 33}px;
         height: 3vh;
         max-height: 30px;
         z-index: 1;
@@ -530,6 +531,12 @@ export default {
         this.dragingMode = 'default';
         this.triggerCount += 1;
       }
+      // 判断path里面有没有sub，没有就取消当前选中的sub
+      const path = e.path || (e.composedPath && e.composedPath());
+      const hasSubElement = path.find(e => e.tagName === 'DIV' && e.className.includes('sub-line-mark'));
+      if (!hasSubElement) {
+        this.chooseIndexs = -1;
+      }
     },
     updateWhenMoving(offset) {
       // 时间轴偏移计算
@@ -587,13 +594,13 @@ export default {
       const hi = this.hoverIndex;
       let c = 'sub';
       if (i === ci && this.subDragMoving) {
-        c = 'sub focus hover draging';
+        c = 'sub choose hover draging';
       } else if (i === ci && (this.subLeftDraging || this.subRightDraging)) {
-        c = 'sub focus hover resize';
+        c = 'sub choose hover resize';
       } else if (i === ci && i === hi) {
-        c = 'sub focus hover';
+        c = 'sub choose hover';
       } else if (i === ci) {
-        c = 'sub focus';
+        c = 'sub choose';
       } else if (i === hi) {
         c = 'sub hover';
       }
@@ -613,7 +620,7 @@ export default {
       // 开始拖动字幕条，需要计算拉升还是位移
       this.subDragStartX = e.pageX;
       const path = e.path || (e.composedPath && e.composedPath());
-      const subElement = path.find(e => e.tagName === 'DIV' && e.className.includes('sub'));
+      const subElement = path.find(e => e.tagName === 'DIV' && e.className.includes('sub-line-mark'));
       const leftTarget = path.find(e => e.tagName === 'I' && e.className.includes('drag-left'));
       const rightTarget = path.find(e => e.tagName === 'I' && e.className.includes('drag-right'));
       this.subDragElement = subElement;
@@ -710,7 +717,7 @@ export default {
             this.createSubElement = document.createElement('div');
             this.createSubElement.setAttribute('style', `width: ${sub.width}px;
               position: fixed;
-              top: ${(12 + ((sub.track - 1) * 4)) * this.vh}px;
+              top: ${((6 + ((sub.track - 1) * 4)) * this.vh) + 33}px;
               height: 3vh;
               max-height: 30px;
               z-index: 1;
@@ -812,7 +819,7 @@ export default {
             this.createSubElement = document.createElement('div');
             this.createSubElement.setAttribute('style', `width: ${sub.width}px;
               position: fixed;
-              top: ${(12 + ((sub.track - 1) * 4)) * this.vh}px;
+              top: ${((6 + ((sub.track - 1) * 4)) * this.vh) + 33}px;
               height: 3vh;
               max-height: 30px;
               z-index: 1;
@@ -1192,27 +1199,21 @@ export default {
     }
   }
   .sub-editor-head {
-    height: 25vh;
+    // height: 25vh;
     position: relative;
-    &::before {
-      content: "";
-      display: block;
-      height: 6vh;
-      max-height: 60px;
-      backdrop-filter: blur(4px); 
-      background: rgba(255,255,255,0.06);
-    }
     &:after {
       content: "";
-      width: 2px;
-      height: 15.75vh;
+      width: 0.5px;
+      // height: calc(15.75vh)
+      height: calc(9vh + 35px);
+      max-height: 125px;
       position: absolute;
       top: 0;
       left: 50%;
-      z-index: 1;
+      z-index: 9999;
       transform: translateX(-50%);
-      background: rgba(216,216,216,0.20);
-      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(216,216,216,0.8);
+      border: 0.5px solid rgba(255,255,255,0.10);
       box-shadow: 0 0 2px 0 rgba(255,255,255,0.50);
       border-radius: 0 0 1px 1px;
       border-top-width: 0;
@@ -1236,6 +1237,24 @@ export default {
       width: 100%;
       height: 6vh;
       max-height: 60px;
+      &::before {
+        content: "";
+        width: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: block;
+        height: 6vh;
+        max-height: 60px;
+        backdrop-filter: blur(4px); 
+        background: rgba(255,255,255,0.06);
+        transition: background 0.2s ease-in-out;
+      }
+      &:hover {
+        &::before {
+          background: rgba(255,255,255,0.10);
+        }
+      }
     }
     .scale {
       height: 100%;
@@ -1244,12 +1263,12 @@ export default {
       align-items: center;
       color: #ffffff;
       opacity: 0.4;
-      font-weight: lighter;
-      font-size: 14px;
+      font-weight: 300;
+      font-size: 2.2vh;
       &.highlight {
         // font-size: 14px;
-        opacity: 0.5;
-        font-weight: bolder;
+        opacity: 0.7;
+        font-weight: 800;
       }
       &.illegal {
         &::before, &::after, i, span {
@@ -1297,47 +1316,51 @@ export default {
       height: 3vh;
       max-height: 30px;
       z-index: 1;
-      background: rgba(255,255,255,0.13);
-      border: 1px solid rgba(255,255,255,0.21);
-      border-radius: 1px;
-      // transition: border 0.3s ease-in-out;
-      &::before {
-        content: "";
-        width: 50%;
-        height: 80%;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -55%);
-        background-image: url(../../assets/subtitle-editor-drag.svg);
-        background-repeat: no-repeat;
-        background-size: 100% 100%;
-        background-position: center;
-        opacity: 0;
-        // transition: all 0.3s ease-in-out;
-      }
-      &.hover {
-        border-color: rgba(255,255,255,0.40);
-        &::before {
-          opacity: 1;
-        }
-      }
+      background: rgba(255,255,255,0.20);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 2px;
+      transition: background 0.1s ease-in-out, border 0.1s ease-in-out;
+      // &::before {
+      //   content: "";
+      //   width: 50%;
+      //   height: 80%;
+      //   position: absolute;
+      //   left: 50%;
+      //   top: 50%;
+      //   transform: translate(-50%, -55%);
+      //   background-image: url(../../assets/subtitle-editor-drag.svg);
+      //   background-repeat: no-repeat;
+      //   background-size: 100% 100%;
+      //   background-position: center;
+      //   opacity: 0;
+      //   // transition: all 0.3s ease-in-out;
+      // }
       &.focus {
-        background: rgba(255,255,255,0.39);
-        border-color: rgba(255,255,255,0.46);
+        background: rgba(255,255,255,0.50);
+        border-color: rgba(255,255,255,0.15);
         // &::before {
         //   opacity: 1;
         // }
+      }
+      &.hover {
+        border-color: rgba(255,255,255,0.40);
+        // &::before {
+        //   // opacity: 1;
+        // }
+      }
+      &.choose {
+        // background: rgba(255,255,255,0.39);
+        border-color: rgba(255,255,255,0.70);
       }
       &.resize {
         cursor: col-resize;
       }
       &.draging {
         cursor: grabbing;
-        border-color: rgba(255,255,255,0.40);
-        &::before {
-          opacity: 1;
-        }
+        border-color: rgba(255,255,255,0.70);
+        // &::before {
+        //   // opacity: 1;
+        // }
       }
       .drag-left {
         position: absolute;
@@ -1378,7 +1401,15 @@ export default {
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(3px);
-    background: rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.1);
+    transition: background 0.2s ease-in-out;
+    &:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .subtitle-editor-exit {
+      width: 60%;
+      height: 60%;
+    }
   }
   .sub-editor-foot {
     .timing {

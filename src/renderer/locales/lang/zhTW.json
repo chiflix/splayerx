@@ -92,12 +92,13 @@
     },
 		"help": {
 			"name": "幫助",
-			"splayerxHelp": "幫助"
+			"splayerxHelp": "幫助",
+			"shortCuts": "快捷鍵列表"
 		},
 		"playback": {
 			"backwardL": "後退 -60s",
-      "backwardS": "後退 -5s",
-      "windowRotate": "旋轉 90°",      
+			"backwardS": "後退 -5s",
+			"windowRotate": "旋轉 90°",
 			"captureScreen": "截圖",
 			"captureVideoClip": "截取視頻片段",
 			"decreasePlaybackSpeed": "減緩播放速度",

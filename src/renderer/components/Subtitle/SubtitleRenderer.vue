@@ -98,8 +98,6 @@ import { videodata } from '@/store/video';
 import CueRenderer from './CueRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
 
-let count = 1;
-
 export default {
   name: 'subtitle-renderer',
   props: {
@@ -164,6 +162,7 @@ export default {
       editVal: '',
       rows: 1,
       lastTransPercent: 0,
+      requestId: 0,
     };
   },
   computed: {
@@ -286,16 +285,18 @@ export default {
     }
   },
   mounted() {
-    count = requestAnimationFrame(this.currentTimeUpdate);
-    this.$bus.$off('clear-last-cue');
-    this.$bus.$on('clear-last-cue', () => {
-      this.lastIndex = [];
-      this.lastAlignment = [];
-      this.lastText = [];
-    });
     // 输入框键盘事件
     document.addEventListener('keydown', this.handleKeyDown);
     document.addEventListener('keyup', this.handleKeyUp);
+    this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+  },
+  beforeDestroy() {
+    cancelAnimationFrame(this.requestId);
+    this.lastIndex = [];
+    this.lastAlignment = [];
+    this.lastText = [];
+    document.removeEventListener('keydown', this.handleKeyDown);
+    document.removeEventListener('keyup', this.handleKeyUp);
   },
   methods: {
     ...mapMutations({
@@ -454,7 +455,7 @@ export default {
             sub.start = sub.end - 0.2;
           }
           if (this.type === 'ass' && !this.isCreateSubtitleMode) {
-            sub.fragments[0].text = editVal.trim;
+            sub.fragments[0].text = editVal;
           } else {
             sub.text = editVal;
           }
@@ -483,6 +484,7 @@ export default {
       const browserWindow = remote.BrowserWindow;
       const focusWindow = browserWindow.getFocusedWindow();
       const checkCmdOrCtrl = (process.platform === 'darwin' && e.metaKey) || (process.platform !== 'darwin' && e.ctrlKey);
+      console.log(e.keyCode);
       if (e && e.keyCode === 27) {
         e.target && e.target.blur();
       } else if (e && e.keyCode === 65 && checkCmdOrCtrl) { // c+a
@@ -497,6 +499,9 @@ export default {
         focusWindow.webContents.undo();
       } else if (e && e.keyCode === 90 && checkCmdOrCtrl && e.shiftKey) { // c+s+z
         focusWindow.webContents.redo();
+      } else if (e && e.keyCode === 13 && !e.shiftKey) {
+        // console.log(e);
+        e.target.blur();
       }
     },
     handleKeyDown(e) {
@@ -545,7 +550,7 @@ export default {
       const { lastCurrentTime } = this;
       this.setCurrentCues(currentTime - (subtitleDelay / 1000));
       this.updateVideoSegments(lastCurrentTime, currentTime);
-      count = requestAnimationFrame(this.currentTimeUpdate);
+      this.requestId = requestAnimationFrame(this.currentTimeUpdate);
     },
     setCurrentCues(currentTime) {
       if (!this.subtitleInstance || !this.subtitleInstance.parsed) return;
@@ -842,11 +847,6 @@ export default {
       return result.map(segment => [...segment, false]);
     },
   },
-  destroyed() {
-    cancelAnimationFrame(count);
-    document.removeEventListener('keydown', this.handleKeyDown);
-    document.removeEventListener('keyup', this.handleKeyUp);
-  },
 };
 </script>
 <style lang="scss" scoped>
@@ -951,7 +951,7 @@ export default {
     position: relative;
     z-index: 10;
     // background: #009be6;
-    font-weight: 800;
+    // font-weight: 800;
     // -webkit-background-clip: text;
     // -webkit-text-fill-color: #fff;
     // -webkit-text-stroke: 1.6px transparent;

@@ -2,7 +2,7 @@
   <div :class="[container, { rtl: isRtl }]">
     <transition name="nextvideo">
       <NextVideo class="next-video" ref="nextVideo"
-        v-if="showNextVideo"
+        v-if="showNextVideo && !isProfessional"
         @close-next-video="closeNextVideo"
         @manualclose-next-video="manualClose"
         @ready-to-show="readyToShow = true"/>
@@ -54,7 +54,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement']),
+    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement', 'isProfessional']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {

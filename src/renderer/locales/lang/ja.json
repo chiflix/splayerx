@@ -92,12 +92,13 @@
     },
 		"help": {
 			"name": "ヘルプ",
-			"splayerxHelp": "ヘルプ"
+			"splayerxHelp": "ヘルプ",
+			"shortCuts": "ショートカットリスト"
 		},
 		"playback": {
 			"backwardL": "戻る -60s",
 			"backwardS": "戻る -5s",
-      "windowRotate": "90° 回転",
+			"windowRotate": "90° 回転",
 			"captureScreen": "スクリンショット",
 			"captureVideoClip": "トリム",
 			"decreasePlaybackSpeed": "再生速度の低下",
