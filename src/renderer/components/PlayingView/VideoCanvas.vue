@@ -95,7 +95,6 @@ export default {
       this.$bus.$emit('video-loaded');
       this.changeWindowRotate(this.winAngle);
       this.changeWindowSize();
-      if (process.mas) this.stopAccessing();
     },
     onAudioTrack(event) {
       const { type, track } = event;
@@ -226,6 +225,9 @@ export default {
       this.changeWindowRotate(val);
     },
     originSrc(val, oldVal) {
+      if (process.mas && oldVal) {
+        this.$bus.$emit('stop-accessing', oldVal);
+      }
       this.saveScreenshot(oldVal);
       this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
@@ -397,8 +399,8 @@ export default {
     };
   },
   beforeDestroy() {
+    this.$bus.$emit('stop-accessing', this.originSrc);
     window.onbeforeunload = null;
-    if (process.mas) this.stopAccessing = null;
   },
 };
 </script>

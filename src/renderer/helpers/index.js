@@ -22,7 +22,7 @@ export default {
       infoDB,
       sagi: Sagi,
       showingPopupDialog: false,
-      stopAccessing: null,
+      access: [],
     };
   },
   methods: {
@@ -350,7 +350,16 @@ export default {
         if (bookmarkObj.hasOwnProperty(vidPath)) {
           const { app } = remote;
           const bookmark = bookmarkObj[vidPath];
-          this.stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
+          const stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
+          this.access.push({
+            src: vidPath,
+            stopAccessing
+          });
+          this.$bus.$once('stop-accessing', (e) => {
+            this.access.find(item => item.src === e)?.stopAccessing();
+            const index = this.access.findIndex(item => item.src === e);
+            this.access.splice(index, 1);
+          });
         }
       }
       try {
