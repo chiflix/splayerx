@@ -111,6 +111,9 @@ export default {
     window.onkeyup = null;
   },
   mounted() {
+    this.$bus.$on('clean-lastPlayedFile', () => {
+      this.firstIndex = 0;
+    });
     window.onkeyup = (e) => {
       this.tranFlag = true;
       if (e.keyCode === 39) {
