@@ -539,7 +539,11 @@ export default {
       }
     });
     this.$bus.$on('refresh-finished', (timeout) => {
-      this.stopCount = this.count + 1;
+      if (this.showAttached) {
+        this.stopCount = this.count + 1;
+      } else {
+        this.animClass = false;
+      }
       this.transFlag = true;
       if (timeout) {
         setTimeout(() => {
