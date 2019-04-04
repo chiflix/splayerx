@@ -355,7 +355,7 @@ export default {
             src: vidPath,
             stopAccessing
           });
-          this.$bus.$once('stop-accessing', (e) => {
+          this.$bus.$once(`stop-accessing-${vidPath}`, (e) => {
             this.access.find(item => item.src === e)?.stopAccessing();
             const index = this.access.findIndex(item => item.src === e);
             if (index >= 0) this.access.splice(index, 1);

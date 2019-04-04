@@ -226,7 +226,7 @@ export default {
     },
     originSrc(val, oldVal) {
       if (process.mas && oldVal) {
-        this.$bus.$emit('stop-accessing', oldVal);
+        this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
       }
       this.saveScreenshot(oldVal);
       this.$bus.$emit('show-speedlabel');
@@ -399,7 +399,7 @@ export default {
     };
   },
   beforeDestroy() {
-    this.$bus.$emit('stop-accessing', this.originSrc);
+    this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
     window.onbeforeunload = null;
   },
 };
