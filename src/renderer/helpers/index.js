@@ -358,7 +358,7 @@ export default {
           this.$bus.$once('stop-accessing', (e) => {
             this.access.find(item => item.src === e)?.stopAccessing();
             const index = this.access.findIndex(item => item.src === e);
-            this.access.splice(index, 1);
+            if (index >= 0) this.access.splice(index, 1);
           });
         }
       }
