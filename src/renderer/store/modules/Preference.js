@@ -88,11 +88,11 @@ const actions = {
     commit('singleCycle', false);
     commit('LOOP_UPDATE', false);
   },
-  saveWinSize({ commit, getters }) {
-    if (getters.winAngle === 90 || getters.winAngle === 270) {
-      commit('lastWinSize', [getters.winHeight, getters.winWidth]);
+  saveWinSize({ commit }, payload) {
+    if (payload.angle === 90 || payload.angle === 270) {
+      commit('lastWinSize', [payload.size[1], payload.size[0]]);
     } else {
-      commit('lastWinSize', getters.winSize);
+      commit('lastWinSize', payload.size);
     }
     return asyncStorage.set('preferences', state);
   },

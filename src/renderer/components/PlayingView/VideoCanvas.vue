@@ -350,7 +350,7 @@ export default {
         this.saveScreenshot(this.originSrc)
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
-          .then(this.$store.dispatch('saveWinSize'))
+          .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
           .then(() => {
             this.asyncTasksDone = true;
             window.close();
