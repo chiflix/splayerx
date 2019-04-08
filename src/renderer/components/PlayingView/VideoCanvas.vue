@@ -48,7 +48,6 @@ export default {
       videoElement: null,
       seekTime: [0],
       lastPlayedTime: 0,
-      
       lastCoverDetectingTime: 0,
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
