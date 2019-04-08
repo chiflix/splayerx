@@ -8,6 +8,7 @@ const state = {
   primaryLanguage: '',
   secondaryLanguage: '',
   singleCycle: false,
+  lastWinSize: [],
 };
 const getters = {
   preferenceData: state => state,
@@ -17,6 +18,7 @@ const getters = {
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
   singleCycle: state => state.singleCycle,
+  lastWinSize: state => state.lastWinSize,
 };
 
 const mutations = {
@@ -38,6 +40,9 @@ const mutations = {
   singleCycle(state, payload) {
     state.singleCycle = payload;
   },
+  lastWinSize(state, payload) {
+    state.lastWinSize = payload;
+  },
   setPreference(state, payload) {
     Object.assign(state, payload);
   },
@@ -49,31 +54,31 @@ const mutations = {
 const actions = {
   displayLanguage({ commit, state }, payload) {
     commit('displayLanguage', payload);
-    asyncStorage.set('preferences', state);
+    return asyncStorage.set('preferences', state);
   },
   agreeOnPrivacyPolicy({ commit, state }) {
     commit('privacyAgreement', true);
-    asyncStorage.set('preferences', state);
+    return asyncStorage.set('preferences', state);
   },
   disagreeOnPrivacyPolicy({ commit, state }) {
     commit('privacyAgreement', false);
-    asyncStorage.set('preferences', state);
+    return asyncStorage.set('preferences', state);
   },
   deleteVideoHistoryOnExit({ commit, state }) {
     commit('deleteVideoHistoryOnExit', true);
-    asyncStorage.set('preferences', state);
+    return asyncStorage.set('preferences', state);
   },
   notDeleteVideoHistoryOnExit({ commit, state }) {
     commit('deleteVideoHistoryOnExit', false);
-    asyncStorage.set('preferences', state);
+    return asyncStorage.set('preferences', state);
   },
   primaryLanguage({ commit, state }, payload) {
     commit('primaryLanguage', payload);
-    asyncStorage.set('preferences', state);
+    return asyncStorage.set('preferences', state);
   },
   secondaryLanguage({ commit, state }, payload) {
     commit('secondaryLanguage', payload);
-    asyncStorage.set('preferences', state);
+    return asyncStorage.set('preferences', state);
   },
   singleCycle({ commit }) {
     commit('singleCycle', true);
@@ -83,9 +88,17 @@ const actions = {
     commit('singleCycle', false);
     commit('LOOP_UPDATE', false);
   },
+  saveWinSize({ commit, getters }) {
+    if (getters.winAngle === 90 || getters.winAngle === 270) {
+      commit('lastWinSize', [getters.winHeight, getters.winWidth]);
+    } else {
+      commit('lastWinSize', getters.winSize);
+    }
+    return asyncStorage.set('preferences', state);
+  },
   setPreference({ commit, state }, payload) {
     commit('setPreference', payload);
-    asyncStorage.set('preferences', state);
+    return asyncStorage.set('preferences', state);
   },
 };
 export default {

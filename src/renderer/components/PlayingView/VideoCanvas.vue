@@ -48,6 +48,7 @@ export default {
       videoElement: null,
       seekTime: [0],
       lastPlayedTime: 0,
+      
       lastCoverDetectingTime: 0,
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
@@ -120,7 +121,7 @@ export default {
         newSize = this.calculateWindowSize(
           [320, 180],
           getWindowRect().slice(2, 4),
-          [this.videoWidth, this.videoHeight],
+          this.lastWinSize,
         );
         this.videoExisted = true;
       }
@@ -209,7 +210,7 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub',
+      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize',
       'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
@@ -375,6 +376,7 @@ export default {
         this.saveScreenshot(this.originSrc)
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
+          .then(this.$store.dispatch('saveWinSize'))
           .then(() => {
             this.asyncTasksDone = true;
             window.close();
