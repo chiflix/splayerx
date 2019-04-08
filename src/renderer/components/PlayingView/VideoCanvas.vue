@@ -121,8 +121,10 @@ export default {
       } else {
         newSize = this.calculateWindowSize(
           [320, 180],
-          getWindowRect().slice(2, 4),
           this.lastWinSize,
+          [this.videoWidth, this.videoHeight],
+          true,
+          getWindowRect().slice(2, 4),
         );
         this.videoExisted = true;
       }
