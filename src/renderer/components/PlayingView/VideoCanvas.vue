@@ -165,6 +165,55 @@ export default {
         default: break;
       }
     },
+    toFullScreen() {
+      this.winSizeBeforeFullScreen = this.winSize;
+      this.winAngleBeforeFullScreen = this.winAngle;
+      if (this.winAngle === 90 || this.winAngle === 270) {
+        requestAnimationFrame(() => {
+          const newWidth = window.screen.height;
+          const newHeight = newWidth / this.ratio;
+          const scale1 = newWidth / window.screen.width;
+          const scale2 = newHeight / window.screen.height;
+          this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale1}, ${scale2})`);
+        });
+      }
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+    },
+    offFullScreen() {
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+      let newSize = [];
+      const windowRect = [
+        window.screen.availLeft, window.screen.availTop,
+        window.screen.availWidth, window.screen.availHeight,
+      ];
+      if (this.winAngle === 90 || this.winAngle === 270) {
+        this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${this.ratio}, ${this.ratio})`);
+        if (this.winAngleBeforeFullScreen === 0 || this.winAngleBeforeFullScreen === 180) {
+          newSize = this.calculateWindowSize(
+            [320, 180],
+            windowRect.slice(2, 4),
+            [this.winSizeBeforeFullScreen[1], this.winSizeBeforeFullScreen[0]],
+          );
+        }
+      } else {
+        this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg)`);
+        if (this.winAngleBeforeFullScreen === 90 || this.winAngleBeforeFullScreen === 270) {
+          newSize = this.calculateWindowSize(
+            [320, 180],
+            windowRect.slice(2, 4),
+            [this.winSizeBeforeFullScreen[1], this.winSizeBeforeFullScreen[0]],
+          );
+        }
+      }
+      if (newSize.length > 0) {
+        const newPosition = this.calculateWindowPosition(
+          this.winPos.concat(this.winSize),
+          windowRect,
+          newSize,
+        );
+        this.controlWindowRect(newPosition.concat(newSize));
+      }
+    },
     async saveScreenshot(videoPath) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
@@ -254,60 +303,17 @@ export default {
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
       if (!this.isFullScreen) {
-        this.$bus.$emit('to-fullscreen');
+        this.toFullScreen();
       } else {
-        this.$bus.$emit('off-fullscreen');
+        this.offFullScreen();
       }
       this.$ga.event('app', 'toggle-fullscreen');
     });
     this.$bus.$on('to-fullscreen', () => {
-      this.winSizeBeforeFullScreen = this.winSize;
-      this.winAngleBeforeFullScreen = this.winAngle;
-      if (this.winAngle === 90 || this.winAngle === 270) {
-        requestAnimationFrame(() => {
-          const newWidth = window.screen.height;
-          const newHeight = newWidth / this.ratio;
-          const scale1 = newWidth / window.screen.width;
-          const scale2 = newHeight / window.screen.height;
-          this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale1}, ${scale2})`);
-        });
-      }
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+      this.toFullScreen();
     });
     this.$bus.$on('off-fullscreen', () => {
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
-      let newSize = [];
-      const windowRect = [
-        window.screen.availLeft, window.screen.availTop,
-        window.screen.availWidth, window.screen.availHeight,
-      ];
-      if (this.winAngle === 90 || this.winAngle === 270) {
-        this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${this.ratio}, ${this.ratio})`);
-        if (this.winAngleBeforeFullScreen === 0 || this.winAngleBeforeFullScreen === 180) {
-          newSize = this.calculateWindowSize(
-            [320, 180],
-            windowRect.slice(2, 4),
-            [this.winSizeBeforeFullScreen[1], this.winSizeBeforeFullScreen[0]],
-          );
-        }
-      } else {
-        this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg)`);
-        if (this.winAngleBeforeFullScreen === 90 || this.winAngleBeforeFullScreen === 270) {
-          newSize = this.calculateWindowSize(
-            [320, 180],
-            windowRect.slice(2, 4),
-            [this.winSizeBeforeFullScreen[1], this.winSizeBeforeFullScreen[0]],
-          );
-        }
-      }
-      if (newSize.length > 0) {
-        const newPosition = this.calculateWindowPosition(
-          this.winPos.concat(this.winSize),
-          windowRect,
-          newSize,
-        );
-        this.controlWindowRect(newPosition.concat(newSize));
-      }
+      this.offFullScreen();
     });
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
