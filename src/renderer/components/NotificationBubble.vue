@@ -16,7 +16,10 @@
     <transition-group name="toast" class="transGroup">
       <div v-for="m in messages" :key="m.id"
         class="messageContainer"
-        :id="'item' + m.id">
+        :id="'item' + m.id"
+        :style="{
+          zIndex: isProfessional ? '15': '8',
+        }">
         <div :class="m.type === 'result' ? 'black-gradient-result' : 'black-gradient-state'"/>
         <div :class="m.type === 'result' ? 'resultContainer' : `stateContainer`">
           <div class="bubbleContent">

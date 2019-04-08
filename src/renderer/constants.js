@@ -123,7 +123,8 @@ export const DATADB_SHCEMAS = [
 export const EVENT_BUS_COLLECTIONS = {
   // subtitle manager
   EXPORT_MODIFIED_SUBTITLE: 'EXPORT_MODIFIED_SUBTITLE', // 导出自制字幕到本地
-  // short key
-  UNDO: 'UNDO', // 撤销
-  REDO: 'REDO', // 重复
+  // subtitle editor short key
+  SUBTITLE_EDITOR_UNDO: 'SUBTITLE_EDITOR_UNDO', // 撤销
+  SUBTITLE_EDITOR_REDO: 'SUBTITLE_EDITOR_REDO', // 重复
+  SUBTITLE_EDITOR_SAVE: 'SUBTITLE_EDITOR_SAVE', // 保存
 };

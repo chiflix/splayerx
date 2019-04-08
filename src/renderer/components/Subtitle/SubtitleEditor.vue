@@ -1,7 +1,7 @@
 <template>
   <div class="sub-editor"
     :style="{
-      zIndex: dragingMode !== 'default' || spaceKeyPressStartTime > 0 ? '9999' : '4',
+      zIndex: dragingMode !== 'default' || spaceKeyPressStartTime > 0 ? '9999' : '11',
       cursor: dragingMode
     }">
     <div class="sub-editor-head">
@@ -373,8 +373,8 @@ export default {
         });
       }
     });
-    this.$bus.$on(bus.UNDO, this.undo);
-    this.$bus.$on(bus.REDO, this.redo);
+    this.$bus.$on(bus.SUBTITLE_EDITOR_UNDO, this.undo);
+    this.$bus.$on(bus.SUBTITLE_EDITOR_REDO, this.redo);
   },
   methods: {
     ...mapMutations({
@@ -1179,7 +1179,7 @@ export default {
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 4;
+    z-index: 11;
     background-image: radial-gradient(50% 136%, rgba(0,0,0,0.36) 50%, rgba(0,0,0,0.48) 100%);
     // background-color: rgba(0, 0, 0, .36);
     &::before {
@@ -1396,7 +1396,7 @@ export default {
     position: fixed;
     right: 0;
     top: 0;
-    z-index: 1111;
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -14,7 +14,7 @@ import VueAnalytics from 'vue-analytics';
 import VueElectron from 'vue-electron';
 import Path from 'path';
 import fs from 'fs';
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapMutations } from 'vuex';
 import osLocale from 'os-locale';
 import AsyncComputed from 'vue-async-computed';
 
@@ -25,6 +25,7 @@ import messages from '@/locales';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
 import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
+import { Window as windowMutations } from '@/store/mutationTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
@@ -303,7 +304,7 @@ new Vue({
     isProfessional(val) {
       this.refreshMenu();
       if (!val) {
-        this.$store.dispatch('addMessages', {
+        this.addMessages({
           type: 'state',
           content: this.$t('notificationMessage.subtitle.exitProfessionalMode.content'),
           dismissAfter: 2000,
@@ -361,6 +362,9 @@ new Vue({
     },
   },
   methods: {
+    ...mapMutations({
+      toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
+    }),
     ...mapActions({
       updateSubDelay: subtitleActions.UPDATE_SUBTITLE_DELAY,
       updateChosenStyle: subtitleActions.UPDATE_SUBTITLE_STYLE,
@@ -848,7 +852,7 @@ new Vue({
           template.splice(4, 0, {
             label: this.$t('msg.splayerx.preferences'),
             enabled: true,
-            accelerator: 'Cmd+,',
+            accelerator: 'Ctrl+,',
             click: () => {
               this.$electron.ipcRenderer.send('add-preference');
             },
@@ -918,28 +922,25 @@ new Vue({
         label: this.$t('msg.advanced.name'),
         submenu: [
           {
-            label: this.$t('msg.advanced.save'),
-            accelerator: 'CmdOrCtrl+S',
-            click: () => {
-              this.$store.dispatch('addMessages', {
-                type: 'state',
-                content: this.$t('notificationMessage.subtitle.saveSuccess.content'),
-                dismissAfter: 2000,
-              });
-            },
-          },
-          {
             label: this.$t('msg.advanced.undo'),
             accelerator: 'CmdOrCtrl+Z',
             click: () => {
-              this.$bus.$emit(bus.UNDO);
+              this.$bus.$emit(bus.SUBTITLE_EDITOR_UNDO);
             },
           },
           {
             label: this.$t('msg.advanced.redo'),
             accelerator: 'CmdOrCtrl+Shift+Z',
             click: () => {
-              this.$bus.$emit(bus.REDO);
+              this.$bus.$emit(bus.SUBTITLE_EDITOR_REDO);
+            },
+          },
+          { type: 'separator' },
+          {
+            label: this.$t('msg.advanced.save'),
+            accelerator: 'CmdOrCtrl+S',
+            click: () => {
+              this.$bus.$emit(bus.SUBTITLE_EDITOR_SAVE);
             },
           },
           {
@@ -949,10 +950,12 @@ new Vue({
               this.$bus.$emit(bus.EXPORT_MODIFIED_SUBTITLE);
             },
           },
+          { type: 'separator' },
           {
             label: this.$t('msg.advanced.back'),
             accelerator: 'Esc',
             click: () => {
+              this.toggleProfessional(false);
             },
           },
         ],

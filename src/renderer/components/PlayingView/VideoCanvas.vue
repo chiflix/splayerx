@@ -225,6 +225,9 @@ export default {
       this.changeWindowRotate(val);
     },
     originSrc(val, oldVal) {
+      if (process.mas && oldVal) {
+        this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
+      }
       this.saveScreenshot(oldVal);
       this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
@@ -396,6 +399,7 @@ export default {
     };
   },
   beforeDestroy() {
+    this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
     window.onbeforeunload = null;
   },
 };

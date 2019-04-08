@@ -3,6 +3,8 @@ import fs, { promises as fsPromises } from 'fs';
 import crypto from 'crypto';
 import lolex from 'lolex';
 import { times } from 'lodash';
+import bookmark from '@/helpers/bookmark';
+import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO } from '@/../shared/notificationcodes';
@@ -20,6 +22,7 @@ export default {
       infoDB,
       sagi: Sagi,
       showingPopupDialog: false,
+      access: [],
     };
   },
   methods: {
@@ -170,7 +173,7 @@ export default {
         this.showingPopupDialog = false;
         if (process.mas && bookmarks?.length > 0) {
           // TODO: put bookmarks to database
-          console.log(bookmarks);
+          bookmark.resolveBookmarks(files, bookmarks);
         }
         if (files) {
           // if selected files contain folders only, then call openFolder()
@@ -207,7 +210,7 @@ export default {
         this.showingPopupDialog = false;
         if (process.mas && bookmarks?.length > 0) {
           // TODO: put bookmarks to database
-          console.log(bookmarks);
+          bookmark.resolveBookmarks(files, bookmarks);
         }
         if (files) {
           this.addFiles(...files);
@@ -342,6 +345,23 @@ export default {
     async playFile(vidPath) {
       const originPath = vidPath;
       let mediaQuickHash;
+      if (process.mas) {
+        const bookmarkObj = syncStorage.getSync('bookmark');
+        if (bookmarkObj.hasOwnProperty(vidPath)) {
+          const { app } = remote;
+          const bookmark = bookmarkObj[vidPath];
+          const stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
+          this.access.push({
+            src: vidPath,
+            stopAccessing
+          });
+          this.$bus.$once(`stop-accessing-${vidPath}`, (e) => {
+            this.access.find(item => item.src === e)?.stopAccessing();
+            const index = this.access.findIndex(item => item.src === e);
+            if (index >= 0) this.access.splice(index, 1);
+          });
+        }
+      }
       try {
         mediaQuickHash = await this.mediaQuickHash(originPath);
       } catch (err) {

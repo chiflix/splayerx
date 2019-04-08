@@ -191,7 +191,6 @@ export default {
       hoverIndex: -5,
       hiddenText: false,
       hoverHeight: 0,
-      timer: null,
       count: 1,
       stopCount: 10,
       animClass: false,
@@ -237,7 +236,7 @@ export default {
       return this.winRatio >= 1 ? this.winHeight : this.winWidth;
     },
     noSubtitle() {
-      if (this.timer && this.isInitial) {
+      if (this.animClass && this.isInitial) {
         return this.$t('msg.subtitle.menuLoading');
       }
       return this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
@@ -354,7 +353,6 @@ export default {
     originSrc() {
       this.showAttached = false;
       this.computedAvaliableItems = [];
-      clearInterval(this.timer);
     },
     currentSubtitleIndex(val) {
       if (val === 0) {
@@ -512,23 +510,19 @@ export default {
         if (!this.privacyAgreement) {
           this.$bus.$emit('privacy-confirm');
           this.continueRefresh = true;
-        } else if (this.privacyAgreement && !this.timer) {
-          this.timer = setInterval(() => {
-            this.count += 1;
-            this.rotateTime = Math.ceil(this.count / 100);
-          }, 10);
-          const types = ['local', 'modified'];
+        } else if (this.privacyAgreement && !this.animClass) {
           this.transFlag = false;
           this.animClass = true;
+          const types = ['local', 'modified'];
           if (this.isInitial) types.push('embedded');
           if (!hasOnlineSubtitles &&
             (!this.isInitial || ['ts', 'avi', 'mkv', 'mp4'].includes(extname(this.originSrc).slice(1).toLowerCase()))) {
             types.push('online');
           }
           // three suitations for variable 'types':
-          // first open && matched extensions: ['local', 'embedded', 'online']
-          // first open && !matched extensions: ['local', 'embedded']
-          // !first open: ['local', 'online']
+          // first open && matched extensions: ['local', 'modified', 'embedded', 'online']
+          // first open && !matched extensions: ['local', 'modified', 'embedded']
+          // !first open: ['local', 'modified', 'online']
           this.updateSubtitleType(true);
           this.$bus.$emit('refresh-subtitles', { types, isInitial: this.isInitial });
           if (!this.isInitial) {
@@ -548,7 +542,7 @@ export default {
           }
           clearTimeout(this.breakTimer);
           this.breakTimer = setTimeout(() => {
-            if (this.timer) {
+            if (this.animClass) {
               this.$bus.$emit('refresh-finished', !this.isInitial);
             }
           }, 10000);
@@ -657,8 +651,11 @@ export default {
       }
     });
     this.$bus.$on('refresh-finished', (timeout) => {
-      clearInterval(this.timer);
-      this.stopCount = this.count + 1;
+      if (this.showAttached) {
+        this.stopCount = this.count + 1;
+      } else {
+        this.animClass = false;
+      }
       this.transFlag = true;
       if (timeout) {
         setTimeout(() => {
@@ -680,7 +677,6 @@ export default {
         }
         this.refAnimation = 'refresh-animation';
         this.$refs.scroll.scrollTop = 0;
-        this.timer = null;
       }, 1000);
     });
   },

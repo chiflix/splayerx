@@ -21,7 +21,7 @@
     v-bind.sync="widgetsStatus['recent-playlist']"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-fade-in="(showAllWidgets || progressTriggerStopped) && !isEditable && !isProfessional"/>
+    <div class="masking" v-fade-in="(showAllWidgets || progressTriggerStopped)" v-if="!isEditable && !isProfessional"/>
     <play-button class="play-button no-drag" v-fade-in="!isEditable"
       @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
@@ -42,7 +42,9 @@
       v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable && !isProfessional" />
+    <transition name="fade">
+      <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable && !isProfessional" />
+    </transition>
     <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets && !isEditable" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
     <!-- 将subtitleManager 从PlayingView 移到 VideoController 里 主要是因为mouse事件无法传递 videoController盖住了subtitleManager -->
     <subtitle-manager :playlistShow="widgetsStatus['playlist-control'] && widgetsStatus['playlist-control'].showAttached" />
@@ -111,6 +113,7 @@ export default {
       videoChangedTimer: 0,
       isValidClick: true,
       lastMousedownPlaybutton: false,
+      fullScreenBar: null, // fullScreen Button on Touch Bar
       playButton: null, // Play Button on Touch Bar
       timeLabel: null, // Time Label which indicates the current time
       scrubber: null,
@@ -203,11 +206,11 @@ export default {
       this.updateMinimumSize();
     },
     isFullScreen(val) {
-      if (this.touchBar) {
+      if (this.fullScreenBar) {
         if (!val) {
-          this.touchBar.escapeItem.icon = this.createIcon('touchBar/fullscreen.png');
+          this.fullScreenBar.icon = this.createIcon('touchBar/fullscreen.png');
         } else {
-          this.touchBar.escapeItem.icon = this.createIcon('touchBar/resize.png');
+          this.fullScreenBar.icon = this.createIcon('touchBar/resize.png');
         }
       }
     },
@@ -300,7 +303,7 @@ export default {
           this.$bus.$emit('toggle-playback');
         },
       });
-      const fullScreenBar = new TouchBarButton({
+      this.fullScreenBar = new TouchBarButton({
         icon: this.createIcon('touchBar/fullscreen.png'),
         click: () => {
           this.$bus.$emit('toggle-fullscreen');
@@ -308,12 +311,13 @@ export default {
       });
       this.touchBar = new TouchBar({
         items: [
+          this.fullScreenBar,
+          new TouchBarSpacer({ size: 'small' }),
           this.playButton,
           new TouchBarSpacer({ size: 'large' }),
           this.timeLabel,
           new TouchBarSpacer({ size: 'large' }),
         ],
-        escapeItem: fullScreenBar,
       });
       this.$electron.remote.getCurrentWindow().setTouchBar(this.touchBar);
     },
@@ -753,5 +757,11 @@ export default {
   visibility: hidden;
   opacity: 0;
   transition: visibility 0s 300ms, opacity 300ms ease-out;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 200ms ease-in;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>

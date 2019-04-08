@@ -1,31 +1,35 @@
 <template>
   <div>
-    <div
-      v-if="!isProfessional">
-      <subtitle-renderer
-        ref="subtitleRenderer"
-        v-if="currentFirstSubtitleId && duration"
-        :subtitle-instance="subtitleInstances[this.currentFirstSubtitleId]"
-        :key='originSrc+currentFirstSubtitleId'
-        :isFirstSub="true"
-        :linesNum="linesNum"
-        :firstLinesNum.sync="firstLinesNum"
-        :firstTags.sync="firstTags"
-        :tags="tags"/>
-      <subtitle-renderer
-        ref="subtitleRenderer"
-        v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
-        :subtitle-instance="subtitleInstances[this.currentSecondSubtitleId]"
-        :key='originSrc+currentSecondSubtitleId'
-        :isFirstSub="false"
-        :firstLinesNum="firstLinesNum"
-        :linesNum.sync="linesNum"
-        :tags.sync="tags"
-        :firstTags="firstTags"/>
-    </div>
-    <subtitle-editor
-      v-if="isProfessional"
-      :subtitleInstance="subtitleInstances[this.currentFirstSubtitleId]"/>
+    <transition name="fade">
+      <div
+        v-if="!isProfessional">
+        <subtitle-renderer
+          ref="subtitleRenderer"
+          v-if="currentFirstSubtitleId && duration"
+          :subtitle-instance="subtitleInstances[this.currentFirstSubtitleId]"
+          :key='originSrc+currentFirstSubtitleId'
+          :isFirstSub="true"
+          :linesNum="linesNum"
+          :firstLinesNum.sync="firstLinesNum"
+          :firstTags.sync="firstTags"
+          :tags="tags"/>
+        <subtitle-renderer
+          ref="subtitleRenderer"
+          v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
+          :subtitle-instance="subtitleInstances[this.currentSecondSubtitleId]"
+          :key='originSrc+currentSecondSubtitleId'
+          :isFirstSub="false"
+          :firstLinesNum="firstLinesNum"
+          :linesNum.sync="linesNum"
+          :tags.sync="tags"
+          :firstTags="firstTags"/>
+      </div>
+    </transition>
+    <transition name="fade" mode="out-in" appear>
+      <subtitle-editor
+        v-if="isProfessional"
+        :subtitleInstance="subtitleInstances[this.currentFirstSubtitleId]"/>
+    </transition>
   </div>
 </template>
 <script>
@@ -58,7 +62,7 @@ import SubtitleEditor from './SubtitleEditor.vue';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { localLanguageLoader } from './SubtitleLoader/utils';
-import { LOCAL_SUBTITLE_REMOVED } from '../../../shared/notificationcodes';
+import { LOCAL_SUBTITLE_REMOVED, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-manager',
@@ -204,6 +208,7 @@ export default {
       addSubtitleWhenFailed: subtitleActions.ADD_SUBTITLE_WHEN_FAILED,
       updateMetaInfo: subtitleActions.UPDATE_METAINFO,
       updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
+      addMessages: 'addMessages',
     }),
     ...mapMutations({
       resetSubtitlesByMutation: subtitleMutations.RESET_SUBTITLES,
@@ -326,8 +331,19 @@ export default {
             options: { language, data, id },
           }))
           .then(sub => this.addSubtitle(this.normalizeSubtitle(sub), videoSrc))
-          .catch(() => []);
-        const storedSubs = await Promise.all(storedSubIds.map(retrieveSub)).then(flatten);
+          .catch(err => (err instanceof Error ? new Error(err) : err));
+        const storedSubs = await Promise.all(storedSubIds.map(retrieveSub))
+          .then(subtitleResults => subtitleResults.filter((result) => {
+            if (result instanceof Error) {
+              this.addLog('error', {
+                message: 'Request Timeout .',
+                errcode: REQUEST_TIMEOUT,
+              });
+              return [];
+            }
+            return result;
+          }))
+          .then(flatten);
         if (storedSubs.length) return storedSubs;
       }
       const hints = this.generateHints(videoSrc);
@@ -734,6 +750,27 @@ export default {
         });
       }
     },
+    async saveSubtitle() {
+      // 主动触发保存操作
+      const currentSubtitle = this.subtitleInstances[this.currentFirstSubtitleId];
+      const isModifiedExit = currentSubtitle && currentSubtitle.type === 'modified';
+      if (isModifiedExit) {
+        const subString = JSON.stringify({
+          parsed: currentSubtitle.parsed,
+          metaInfo: currentSubtitle.metaInfo,
+        });
+        try {
+          await writeSubtitleByPath(currentSubtitle.src, subString);
+          this.addMessages({
+            type: 'state',
+            content: this.$t('notificationMessage.subtitle.saveSuccess.content'),
+            dismissAfter: 2000,
+          });
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    },
     async deleteSubtitleFile({ sub }) {
       // 删除字幕文件(自制字幕)
       await deleteFileByPath(this.subtitleInstances[sub.id].src);
@@ -825,6 +862,8 @@ export default {
     this.$bus.$on('delete-subtitle-file', this.deleteSubtitleFile);
     // 导出自制字幕
     this.$bus.$on(bus.EXPORT_MODIFIED_SUBTITLE, this.exportSubtitle);
+    // 保存字幕
+    this.$bus.$on(bus.SUBTITLE_EDITOR_SAVE, this.saveSubtitle);
     // when set immediate on watcher, it may run before the created hook
     this.resetSubtitles();
     this.$bus.$emit('subtitle-refresh-from-src-change');
@@ -833,4 +872,10 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity 200ms ease-in;
+  }
+  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
+  }
 </style>

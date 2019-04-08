@@ -1,7 +1,10 @@
 <template>
 <div class="show-area" ref="showArea"
   @mouseenter="enterArea"
-  @mouseleave="leaveArea">
+  @mouseleave="leaveArea"
+  :style="{
+    zIndex: isProfessional ? '15': '4',
+  }">
   <div class="trigger-area"
     :class="showVolume ? 'fade-in' : 'fade-out'"
     :style="{cursor: showAllWidgets ? 'pointer' : 'none'}"
@@ -55,7 +58,7 @@ export default {
   },
   props: ['showAllWidgets', 'mousedownOnPlayButton', 'attachedShown'],
   computed: {
-    ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen', 'wheelTriggered', 'volumeWheelTriggered']),
+    ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen', 'wheelTriggered', 'volumeWheelTriggered', 'isProfessional']),
     ...mapState({
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
     }),
