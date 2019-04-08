@@ -7,7 +7,7 @@ const state = {
   isFocused: true,
   isMaximized: false,
   isMinimized: false,
-  sizePercent: 1,
+  sizePercent: 0,
 };
 
 const getters = {
@@ -29,6 +29,7 @@ const getters = {
 const mutations = {
   windowSize(state, payload) {
     state.windowSize = payload;
+    state.sizePercent = 0;
   },
   windowMinimumSize(state, payload) {
     state.windowMinimumSize = payload;
