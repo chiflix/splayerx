@@ -53,6 +53,8 @@ export default {
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
       nowRate: 1,
       quit: false,
+      winAngleBeforeFullScreen: 0, // winAngel before full screen
+      winSizeBeforeFullScreen: [], // winSize before full screen
     };
   },
   methods: {
@@ -252,48 +254,15 @@ export default {
     this.videoElement = this.$refs.videoCanvas.videoElement();
     this.$bus.$on('toggle-fullscreen', () => {
       if (!this.isFullScreen) {
-        if (this.winAngle === 90 || this.winAngle === 270) {
-          requestAnimationFrame(() => {
-            const newWidth = window.screen.height;
-            const newHeight = newWidth / this.ratio;
-            const scale1 = newWidth / window.screen.width;
-            const scale2 = newHeight / window.screen.height;
-            this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale1}, ${scale2})`);
-          });
-        }
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+        this.$bus.$emit('to-fullscreen');
       } else {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
-        let newSize = [];
-        const windowRect = [
-          window.screen.availLeft, window.screen.availTop,
-          window.screen.availWidth, window.screen.availHeight,
-        ];
-        if (this.winAngle === 90 || this.winAngle === 270) {
-          this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${this.ratio}, ${this.ratio})`);
-          newSize = this.calculateWindowSize(
-            [320, 180],
-            windowRect.slice(2, 4),
-            [this.videoHeight, this.videoWidth],
-          );
-        } else {
-          this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg)`);
-          newSize = this.calculateWindowSize(
-            [320, 180],
-            windowRect.slice(2, 4),
-            [this.videoWidth, this.videoHeight],
-          );
-        }
-        const newPosition = this.calculateWindowPosition(
-          this.winPos.concat(this.winSize),
-          windowRect,
-          newSize,
-        );
-        this.controlWindowRect(newPosition.concat(newSize));
+        this.$bus.$emit('off-fullscreen');
       }
       this.$ga.event('app', 'toggle-fullscreen');
     });
     this.$bus.$on('to-fullscreen', () => {
+      this.winSizeBeforeFullScreen = this.winSize;
+      this.winAngleBeforeFullScreen = this.winAngle;
       if (this.winAngle === 90 || this.winAngle === 270) {
         requestAnimationFrame(() => {
           const newWidth = window.screen.height;
@@ -314,25 +283,31 @@ export default {
       ];
       if (this.winAngle === 90 || this.winAngle === 270) {
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${this.ratio}, ${this.ratio})`);
-        newSize = this.calculateWindowSize(
-          [320, 180],
-          windowRect.slice(2, 4),
-          [this.videoHeight, this.videoWidth],
-        );
+        if (this.winAngleBeforeFullScreen === 0 || this.winAngleBeforeFullScreen === 180) {
+          newSize = this.calculateWindowSize(
+            [320, 180],
+            windowRect.slice(2, 4),
+            [this.winSizeBeforeFullScreen[1], this.winSizeBeforeFullScreen[0]],
+          );
+        }
       } else {
         this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg)`);
-        newSize = this.calculateWindowSize(
-          [320, 180],
-          windowRect.slice(2, 4),
-          [this.videoWidth, this.videoHeight],
-        );
+        if (this.winAngleBeforeFullScreen === 90 || this.winAngleBeforeFullScreen === 270) {
+          newSize = this.calculateWindowSize(
+            [320, 180],
+            windowRect.slice(2, 4),
+            [this.winSizeBeforeFullScreen[1], this.winSizeBeforeFullScreen[0]],
+          );
+        }
       }
-      const newPosition = this.calculateWindowPosition(
-        this.winPos.concat(this.winSize),
-        windowRect,
-        newSize,
-      );
-      this.controlWindowRect(newPosition.concat(newSize));
+      if (newSize.length > 0) {
+        const newPosition = this.calculateWindowPosition(
+          this.winPos.concat(this.winSize),
+          windowRect,
+          newSize,
+        );
+        this.controlWindowRect(newPosition.concat(newSize));
+      }
     });
     this.$bus.$on('toggle-muted', () => {
       this.toggleMute();
