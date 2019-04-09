@@ -108,14 +108,18 @@ export default {
             const waitArray = [];
             for (let i = 0; i < data.length; i += 1) {
               const accessPromise = new Promise((resolve) => {
-                fs.access(data[i].path, fs.constants.F_OK, (err) => {
-                  if (err) {
-                    this.infoDB.delete('recent-played', data[i].quickHash);
-                    resolve();
-                  } else {
-                    resolve(data[i]);
-                  }
-                });
+                if (data[i].type !== 'playlist') {
+                  fs.access(data[i].path, fs.constants.F_OK, (err) => {
+                    if (err) {
+                      this.infoDB.delete('recent-played', data[i].quickHash);
+                      resolve();
+                    } else {
+                      resolve(data[i]);
+                    }
+                  });
+                } else {
+                  resolve(data[i]);
+                }
               });
               waitArray.push(accessPromise);
             }
