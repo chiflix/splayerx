@@ -28,6 +28,7 @@ import { Video as videoActions, Subtitle as subtitleActions } from '@/store/acti
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
+import NotificationBubble, { addMessages } from '../shared/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -104,6 +105,7 @@ const i18n = new VueI18n({
   locale: getSystemLocale(), // set locale
   messages, // set locale messages
 });
+Vue.use(NotificationBubble, i18n);
 
 /* eslint-disable no-new */
 new Vue({
@@ -492,6 +494,7 @@ new Vue({
                       message: 'Snapshot failed .',
                       code: SNAPSHOT_FAILED,
                     });
+                    addMessages(SNAPSHOT_FAILED, this.$i18n);
                   }
                   sources.forEach((source) => {
                     if (source.name === 'SPlayer') {
@@ -506,11 +509,13 @@ new Vue({
                             message: 'Snapshot failed .',
                             code: SNAPSHOT_FAILED,
                           });
+                          addMessages(SNAPSHOT_FAILED, this.$i18n);
                         } else {
                           this.addLog('info', {
                             message: 'Snapshot success .',
                             code: SNAPSHOT_SUCCESS,
                           });
+                          addMessages(SNAPSHOT_SUCCESS, this.$i18n);
                         }
                       });
                     }

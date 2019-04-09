@@ -11,20 +11,6 @@ import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
-import {
-  FILE_NON_EXIST,
-  EMPTY_FOLDER,
-  OPEN_FAILED,
-  NOT_SUPPORTED_SUBTITLE,
-  REQUEST_TIMEOUT,
-  SUBTITLE_OFFLINE,
-  ONLINE_LOADING,
-  SUBTITLE_UPLOAD,
-  UPLOAD_FAILED,
-  UPLOAD_SUCCESS,
-  ADD_NO_VIDEO,
-  LOCAL_SUBTITLE_REMOVED, SNAPSHOT_SUCCESS, SNAPSHOT_FAILED,
-} from '../shared/notificationcodes';
 
 /**
  * Set `__static` path to static files in production
@@ -321,37 +307,6 @@ function registerMainWindowEvent() {
   ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
     if (!log) return;
     writeLog(level, log);
-    if (mainWindow && log.message) {
-      if (log.errcode) {
-        switch (log.errcode) {
-          case FILE_NON_EXIST:
-          case EMPTY_FOLDER:
-          case OPEN_FAILED:
-          case SUBTITLE_OFFLINE:
-          case NOT_SUPPORTED_SUBTITLE:
-          case REQUEST_TIMEOUT:
-          case UPLOAD_FAILED:
-          case ADD_NO_VIDEO:
-          case LOCAL_SUBTITLE_REMOVED:
-            mainWindow.webContents.send('addMessages', log.errcode);
-            break;
-          default:
-            break;
-        }
-      } else if (log.code) {
-        switch (log.code) {
-          case ONLINE_LOADING:
-          case SUBTITLE_UPLOAD:
-          case UPLOAD_SUCCESS:
-          case SNAPSHOT_SUCCESS:
-          case SNAPSHOT_FAILED:
-            mainWindow.webContents.send('addMessages', log.code);
-            break;
-          default:
-            break;
-        }
-      }
-    }
   });
   ipcMain.on('add-windows-about', () => {
     const aboutWindowOptions = {
