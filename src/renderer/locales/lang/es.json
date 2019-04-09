@@ -103,7 +103,8 @@
 			"pause": "pausa",
 			"play": "Jugar",
 			"resetSpeed": "Restablecer velocidad de reproducción",
-			"singleCycle": "Repetir una"
+			"singleCycle": "Repetir una",
+			"snapShot": "instantánea"
 		},
 		"splayerx": {
 			"about": "Acerca de SPlayer",
@@ -243,5 +244,13 @@
 	"uploadingSuccess": {
 		"content": "Subtítulo ha sido subido.",
 		"title": "Subir con éxito"
+	},
+	"snapshotSuccess": {
+		"content": "Instantánea con éxito [Instantánea se ha guardado en su escritorio.]",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "Instantánea fallada [por favor intente más tarde.]",
+		"title": ""
 	}
 }

@@ -28,6 +28,7 @@ import { Video as videoActions, Subtitle as subtitleActions } from '@/store/acti
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
+import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -460,14 +461,6 @@ new Vue({
             },
             { type: 'separator' },
             {
-              label: this.$t('msg.playback.windowRotate'),
-              id: 'windowRotate',
-              click: () => {
-                this.windowRotate();
-              },
-            },
-            { type: 'separator' },
-            {
               label: this.$t('msg.playback.singleCycle'),
               type: 'checkbox',
               id: 'singleCycle',
@@ -478,6 +471,51 @@ new Vue({
                 } else {
                   this.$store.dispatch('singleCycle');
                 }
+              },
+            },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.playback.windowRotate'),
+              id: 'windowRotate',
+              click: () => {
+                this.windowRotate();
+              },
+            },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.playback.snapShot'),
+              click: () => {
+                const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
+                electron.desktopCapturer.getSources(options, (error, sources) => {
+                  if (error) {
+                    this.addLog('info', {
+                      message: 'Snapshot failed .',
+                      code: SNAPSHOT_FAILED,
+                    });
+                  }
+                  sources.forEach((source) => {
+                    if (source.name === 'SPlayer') {
+                      const date = new Date();
+                      const screenshotPath = Path.join(
+                        app.getPath('desktop'),
+                        `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDay()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`,
+                      );
+                      fs.writeFile(screenshotPath, source.thumbnail.toPNG(), (error) => {
+                        if (error) {
+                          this.addLog('info', {
+                            message: 'Snapshot failed .',
+                            code: SNAPSHOT_FAILED,
+                          });
+                        } else {
+                          this.addLog('info', {
+                            message: 'Snapshot success .',
+                            code: SNAPSHOT_SUCCESS,
+                          });
+                        }
+                      });
+                    }
+                  });
+                });
               },
             },
             // { type: 'separator' },

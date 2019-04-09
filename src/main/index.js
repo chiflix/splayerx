@@ -23,7 +23,7 @@ import {
   UPLOAD_FAILED,
   UPLOAD_SUCCESS,
   ADD_NO_VIDEO,
-  LOCAL_SUBTITLE_REMOVED,
+  LOCAL_SUBTITLE_REMOVED, SNAPSHOT_SUCCESS, SNAPSHOT_FAILED,
 } from '../shared/notificationcodes';
 
 /**
@@ -343,6 +343,8 @@ function registerMainWindowEvent() {
           case ONLINE_LOADING:
           case SUBTITLE_UPLOAD:
           case UPLOAD_SUCCESS:
+          case SNAPSHOT_SUCCESS:
+          case SNAPSHOT_FAILED:
             mainWindow.webContents.send('addMessages', log.code);
             break;
           default:

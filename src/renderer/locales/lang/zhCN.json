@@ -103,7 +103,8 @@
 			"pause": "暂停",
 			"play": "播放",
 			"resetSpeed": "重置播放速度",
-			"singleCycle": "循环单个文件"
+			"singleCycle": "循环单个文件",
+			"snapShot": "截图"
 		},
 		"splayerx": {
 			"about": "关于射手影音",
@@ -243,5 +244,13 @@
 	"uploadingSuccess": {
 		"content": "字幕已成功上传。",
 		"title": "上传成功"
+	},
+	"snapshotSuccess": {
+		"content": "截图成功 [截图已经保存在桌面上]",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "截图失败 [请稍后重试。]",
+		"title": ""
 	}
 }

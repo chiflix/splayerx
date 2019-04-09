@@ -25,6 +25,8 @@
     UPLOAD_FAILED,
     ADD_NO_VIDEO,
     LOCAL_SUBTITLE_REMOVED,
+    SNAPSHOT_SUCCESS,
+    SNAPSHOT_FAILED,
   } from '../shared/notificationcodes';
   import UpdaterProgressIndicator from './components/UpdaterView/UpdaterProgressIndicator.vue';
   import UpdaterNotification from './components/UpdaterView/UpdaterNotification.vue';
@@ -156,6 +158,24 @@
               title: this.$t('errorFile.localSubtitleRemoved.title'),
               content: this.$t('errorFile.localSubtitleRemoved.content'),
               dismissAfter: 5000,
+            });
+            break;
+          case SNAPSHOT_SUCCESS:
+            if (this.$route.name !== 'playing-view') break;
+            this.$store.dispatch('addMessages', {
+              type: 'state',
+              title: this.$t('snapshotSuccess.title'),
+              content: this.$t('snapshotSuccess.content'),
+              dismissAfter: 2000,
+            });
+            break;
+          case SNAPSHOT_FAILED:
+            if (this.$route.name !== 'playing-view') break;
+            this.$store.dispatch('addMessages', {
+              type: 'state',
+              title: this.$t('snapshotFailed.title'),
+              content: this.$t('snapshotFailed.content'),
+              dismissAfter: 2000,
             });
             break;
           default:

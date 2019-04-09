@@ -103,7 +103,8 @@
 			"pause": "وقفة",
 			"play": "لعب",
 			"resetSpeed": "إعادة ضبط سرعة التشغيل",
-			"singleCycle": "كرر مرة واحدة"
+			"singleCycle": "كرر مرة واحدة",
+			"snapShot": "لمحة"
 		},
 		"splayerx": {
 			"about": "حول SPlayer",
@@ -243,5 +244,13 @@
 	"uploadingSuccess": {
 		"content": "تم تحميل العنوان الفرعي.",
 		"title": "تحميل النجاح"
+	},
+	"snapshotSuccess": {
+		"content": "تم حفظ اللقطة على سطح المكتب الخاص بك.]  لقطات ناجحة]",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "يرجى المحاولة لاحقا.]   فشل لقطة]",
+		"title": ""
 	}
 }
