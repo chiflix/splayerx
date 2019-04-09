@@ -139,7 +139,6 @@ export function addMessages(code, i18n) { // eslint-disable-line complexity
 }
 const NotificationBubble = {};
 NotificationBubble.install = (Vue, i18n) => {
-  console.log(FILE_NON_EXIST);
   Vue.prototype.$addBubble = (code) => {
     addMessages(code, i18n);
   };

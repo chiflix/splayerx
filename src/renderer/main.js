@@ -123,7 +123,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
-      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent']),
+      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -499,17 +499,25 @@ new Vue({
                   sources.forEach((source) => {
                     if (source.name === 'SPlayer') {
                       const date = new Date();
+                      const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDay()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
                       const screenshotPath = Path.join(
-                        app.getPath('desktop'),
-                        `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDay()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`,
+                        this.snapshotSavedPath ? this.snapshotSavedPath : app.getPath('desktop'),
+                        imgName,
                       );
                       fs.writeFile(screenshotPath, source.thumbnail.toPNG(), (error) => {
                         if (error) {
-                          this.addLog('info', {
-                            message: 'Snapshot failed .',
-                            code: SNAPSHOT_FAILED,
-                          });
-                          addMessages(SNAPSHOT_FAILED, this.$i18n);
+                          if (error.message.includes('operation not permitted')) {
+                            this.chooseSnapshotFolder(
+                              imgName,
+                              { name: imgName, buffer: source.thumbnail.toPNG() },
+                            );
+                          } else {
+                            this.addLog('info', {
+                              message: 'Snapshot failed .',
+                              code: SNAPSHOT_FAILED,
+                            });
+                            addMessages(SNAPSHOT_FAILED, this.$i18n);
+                          }
                         } else {
                           this.addLog('info', {
                             message: 'Snapshot success .',

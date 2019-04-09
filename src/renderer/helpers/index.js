@@ -7,7 +7,7 @@ import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO } from '@/../shared/notificationcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
 import { addMessages } from '../../shared/notificationControl';
@@ -215,6 +215,37 @@ export default {
         }
         if (files) {
           this.addFiles(...files);
+        }
+      });
+    },
+    chooseSnapshotFolder(defaultName, data) {
+      if (this.showingPopupDialog) return;
+      this.showingPopupDialog = true;
+      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+        title: 'Snapshot Save',
+        defaultPath: '',
+        filters: [{
+          name: 'Snapshot',
+        }, {
+          name: 'All Files',
+        }],
+        properties: ['openDirectory'],
+        securityScopedBookmarks: process.mas,
+      }, (files, bookmarks) => {
+        if (files) {
+          fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
+            if (error) {
+              addMessages(SNAPSHOT_FAILED, this.$i18n);
+            } else {
+              this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
+              addMessages(SNAPSHOT_SUCCESS, this.$i18n);
+            }
+          });
+        }
+        this.showingPopupDialog = false;
+        if (process.mas && bookmarks?.length > 0) {
+          // TODO: put bookmarks to database
+          bookmark.resolveBookmarks(files, bookmarks);
         }
       });
     },
