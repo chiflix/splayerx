@@ -505,7 +505,11 @@ new Vue({
                           if (error.message.includes('operation not permitted')) {
                             this.chooseSnapshotFolder(
                               imgName,
-                              { name: imgName, buffer: source.thumbnail.toPNG() },
+                              {
+                                name: imgName,
+                                buffer: source.thumbnail.toPNG(),
+                                defaultFolder: this.snapshotSavedPath,
+                              },
                             );
                           } else {
                             this.addLog('info', {

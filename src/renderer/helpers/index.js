@@ -223,7 +223,7 @@ export default {
       this.showingPopupDialog = true;
       process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
         title: 'Snapshot Save',
-        defaultPath: '',
+        defaultPath: data.defaultFolder ? data.defaultFolder : remote.app.getPath('desktop'),
         filters: [{
           name: 'Snapshot',
         }, {
