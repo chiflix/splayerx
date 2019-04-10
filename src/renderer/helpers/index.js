@@ -10,7 +10,7 @@ import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
 import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
-import { addMessages } from '../../shared/notificationControl';
+import { addBubble } from '../../shared/notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 
@@ -235,10 +235,10 @@ export default {
         if (files) {
           fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
             if (error) {
-              addMessages(SNAPSHOT_FAILED, this.$i18n);
+              addBubble(SNAPSHOT_FAILED, this.$i18n);
             } else {
               this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
-              addMessages(SNAPSHOT_SUCCESS, this.$i18n);
+              addBubble(SNAPSHOT_SUCCESS, this.$i18n);
             }
           });
         }
@@ -273,7 +273,7 @@ export default {
           errcode: ADD_NO_VIDEO,
           message: 'Didn\'t add any playable file in this folder.',
         });
-        addMessages(ADD_NO_VIDEO, this.$i18n);
+        addBubble(ADD_NO_VIDEO, this.$i18n);
       }
     },
     // the difference between openFolder and openFile function
@@ -311,7 +311,7 @@ export default {
           errcode: EMPTY_FOLDER,
           message: 'There is no playable file in this folder.',
         });
-        addMessages(EMPTY_FOLDER, this.$i18n);
+        addBubble(EMPTY_FOLDER, this.$i18n);
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitles', subtitleFiles);
@@ -349,7 +349,7 @@ export default {
             errcode: OPEN_FAILED,
             message: `Failed to open file : ${tempFilePath}`,
           });
-          addMessages(OPEN_FAILED, this.$i18n);
+          addBubble(OPEN_FAILED, this.$i18n);
         }
       }
       if (videoFiles.length !== 0) {
@@ -405,7 +405,7 @@ export default {
             errcode: FILE_NON_EXIST,
             message: 'Failed to open file, it will be removed from list.'
           });
-          addMessages(FILE_NON_EXIST, this.$i18n);
+          addBubble(FILE_NON_EXIST, this.$i18n);
           this.$bus.$emit('file-not-existed', originPath);
         }
         if (process.mas && err?.code === 'EPERM') {
