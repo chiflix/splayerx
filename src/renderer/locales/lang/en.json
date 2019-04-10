@@ -246,7 +246,7 @@
 		"title": "Upload Successfully"
 	},
 	"snapshotSuccess": {
-		"content": "Snapshot Successfully [Snapshot has been saved on your desktop.]",
+		"content": "Snapshot Successfully",
 		"title": ""
 	},
 	"snapshotFailed": {

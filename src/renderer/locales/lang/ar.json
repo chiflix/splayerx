@@ -246,7 +246,7 @@
 		"title": "تحميل النجاح"
 	},
 	"snapshotSuccess": {
-		"content": "تم حفظ اللقطة على سطح المكتب الخاص بك.]  لقطات ناجحة]",
+		"content": "لقطة بنجاح",
 		"title": ""
 	},
 	"snapshotFailed": {

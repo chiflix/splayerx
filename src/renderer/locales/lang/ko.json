@@ -246,7 +246,7 @@
 		"title": "성공적으로 업로드"
 	},
 	"snapshotSuccess": {
-		"content": "성공적인 스냅 샷 [스냅 샷이 바탕 화면에 저장되었습니다.]",
+		"content": "성공적인 스냅 샷",
 		"title": ""
 	},
 	"snapshotFailed": {

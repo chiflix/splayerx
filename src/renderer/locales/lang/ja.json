@@ -246,7 +246,7 @@
 		"title": "アップロードに成功しました"
 	},
 	"snapshotSuccess": {
-		"content": "スナップショット成功 [スナップショットはデスクトップに保存されました。]",
+		"content": "スナップショット成功",
 		"title": ""
 	},
 	"snapshotFailed": {

@@ -246,7 +246,7 @@
 		"title": "Subir con éxito"
 	},
 	"snapshotSuccess": {
-		"content": "Instantánea con éxito [Instantánea se ha guardado en su escritorio.]",
+		"content": "Instantánea con éxito",
 		"title": ""
 	},
 	"snapshotFailed": {

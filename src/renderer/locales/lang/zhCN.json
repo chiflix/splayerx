@@ -246,7 +246,7 @@
 		"title": "上传成功"
 	},
 	"snapshotSuccess": {
-		"content": "截图成功 [截图已经保存在桌面上]",
+		"content": "截图成功",
 		"title": ""
 	},
 	"snapshotFailed": {
