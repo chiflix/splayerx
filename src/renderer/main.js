@@ -486,6 +486,7 @@ new Vue({
             { type: 'separator' },
             {
               label: this.$t('msg.playback.snapShot'),
+              accelerator: 'CmdOrCtrl+Shift+S',
               click: () => {
                 const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
                 electron.desktopCapturer.getSources(options, (error, sources) => {
