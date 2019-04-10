@@ -21,7 +21,7 @@
       <div class="item"
         v-for="(item, index) in lastPlayedFile"
         :id="'item'+index"
-        :key="item.path"
+        :key="item.quickHash"
         :class="{ shadow: showShadow || !item.chosen }"
         :style="{
           bottom: item.chosen ? '9px' : '0',
@@ -68,7 +68,6 @@ export default {
   components: { Icon },
   data() {
     return {
-      isTurnToOdd: false,
       backgroundUrl: '',
       showShortcutImage: false,
       landingLogoAppear: true,
@@ -80,8 +79,6 @@ export default {
       recentFileDel: false,
       mouseFlag: true,
       showShadow: true,
-      itemWidth: 112,
-      itemHeight: 65,
       tranFlag: true,
       validHover: true,
       firstIndex: 0,
@@ -334,7 +331,11 @@ export default {
         } else if (index + 1 < this.firstIndex && !this.isFullScreen) {
           this.firstIndex = 0;
         } else if (!this.filePathNeedToDelete) {
-          this.openVideoFile(item.path);
+          if (item.type === 'playlist') {
+            this.openPlaylist(item.quickHash);
+          } else {
+            this.openVideoFile(item.path);
+          }
         }
       }
     },
