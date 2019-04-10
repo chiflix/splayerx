@@ -572,7 +572,9 @@ export default {
     });
   },
   destroyed() {
-    this.animClass = false;
+    if (this.breakTimer) {
+      clearTimeout(this.breakTimer);
+    }
   },
   mounted() {
     this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
