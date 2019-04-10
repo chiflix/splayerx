@@ -477,14 +477,6 @@ new Vue({
             },
             { type: 'separator' },
             {
-              label: this.$t('msg.playback.windowRotate'),
-              id: 'windowRotate',
-              click: () => {
-                this.windowRotate();
-              },
-            },
-            { type: 'separator' },
-            {
               label: this.$t('msg.playback.snapShot'),
               accelerator: 'CmdOrCtrl+Shift+S',
               click: () => {
@@ -779,6 +771,14 @@ new Vue({
               accelerator: 'CmdOrCtrl+3',
               click: () => {
                 this.changeWindowSize(3);
+              },
+            },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.playback.windowRotate'),
+              id: 'windowRotate',
+              click: () => {
+                this.windowRotate();
               },
             },
             { type: 'separator' },
