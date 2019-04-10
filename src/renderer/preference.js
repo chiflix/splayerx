@@ -5,19 +5,13 @@ import electron from 'electron';
 import osLocale from 'os-locale';
 import { hookVue } from '@/kerning';
 import messages from '@/locales';
+import store from '@/store';
 import Preference from '@/components/Preference.vue';
-import preference from '@/store/modules/Preference';
 import '@/css/style.scss';
 
 Vue.use(VueI18n);
 Vue.use(Vuex);
 
-const store = new Vuex.Store({
-  modules: {
-    preference,
-  },
-  strict: process.env.NODE_ENV !== 'production',
-});
 
 function getSystemLocale() {
   const { app } = electron.remote;
