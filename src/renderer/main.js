@@ -483,7 +483,7 @@ new Vue({
                 if (!this.paused) {
                   this.$bus.$emit('toggle-playback');
                 }
-                const options = { types: ['window'], thumbnailSize: { width: this.intrinsicWidth, height: this.intrinsicHeight } };
+                const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
                 electron.desktopCapturer.getSources(options, (error, sources) => {
                   if (error) {
                     this.addLog('info', {
