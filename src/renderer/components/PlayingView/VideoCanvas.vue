@@ -246,11 +246,26 @@ export default {
         audioTrackId: this.currentAudioTrackId,
       };
 
-      const val = await this.infoDB.get('recent-played', 'path', videoPath);
-      if (val) {
-        const mergedData = Object.assign(val, data);
-        await this.infoDB.add('recent-played', mergedData);
+      if (!this.$store.getters.isFolderList) {
+        const playlist = await this.infoDB.get('recent-played', this.$store.getters.playListHash);
+        playlist.currentVideo = this.originSrc;
+        const videoInfo = playlist.infos.find(info => info.path === videoPath);
+        if (videoInfo) {
+          const videoIndex = playlist.infos.findIndex(info => info.path === videoPath);
+          playlist.infos.splice(videoIndex, 1, {
+            ...videoInfo,
+            ...data,
+          });
+        }
+        await this.infoDB.add('recent-played', playlist);
         this.$bus.$emit('database-saved');
+      } else {
+        const val = await this.infoDB.get('recent-played', 'path', videoPath);
+        if (val) {
+          const mergedData = Object.assign(val, data);
+          await this.infoDB.add('recent-played', mergedData);
+          this.$bus.$emit('database-saved');
+        }
       }
     },
     saveSubtitleStyle() {
@@ -371,6 +386,7 @@ export default {
       } else if (!this.quit) {
         e.returnValue = false;
         this.$bus.$off(); // remove all listeners before back to landing view
+        // need to init Vuex States
         this.$router.push({
           name: 'landing-view',
         });
@@ -383,7 +399,7 @@ export default {
     };
   },
   beforeDestroy() {
-    this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
+    if (process.mas) this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
     window.onbeforeunload = null;
   },
 };
