@@ -500,7 +500,7 @@ new Vue({
                   sources.forEach((source) => {
                     if (source.name === 'SPlayer') {
                       const date = new Date();
-                      const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDay()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
+                      const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
                       const screenshotPath = Path.join(
                         this.snapshotSavedPath ? this.snapshotSavedPath : app.getPath('desktop'),
                         imgName,

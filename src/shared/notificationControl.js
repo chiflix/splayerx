@@ -1,4 +1,4 @@
-import store from '../renderer/store/index';
+import store from '@/store';
 import {
   FILE_NON_EXIST,
   EMPTY_FOLDER,
