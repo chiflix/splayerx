@@ -103,7 +103,8 @@
 			"pause": "중지",
 			"play": "놀이",
 			"resetSpeed": "재생 속도 재설정",
-			"singleCycle": "하나 반복"
+			"singleCycle": "하나 반복",
+			"snapShot": "스냅 샷"
 		},
 		"splayerx": {
 			"about": "SPlayer 정보",
@@ -243,5 +244,13 @@
 	"uploadingSuccess": {
 		"content": "부제목이 업로드되었습니다.",
 		"title": "성공적으로 업로드"
+	},
+	"snapshotSuccess": {
+		"content": "성공적인 스냅 샷",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "나중에 다시 시도 해주세요.",
+		"title": "스냅 샷 실패"
 	}
 }

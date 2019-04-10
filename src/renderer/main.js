@@ -28,6 +28,8 @@ import { Video as videoActions, Subtitle as subtitleActions } from '@/store/acti
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
+import NotificationBubble, { addBubble } from '../shared/notificationControl';
+import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -103,6 +105,7 @@ const i18n = new VueI18n({
   locale: getSystemLocale(), // set locale
   messages, // set locale messages
 });
+Vue.use(NotificationBubble, i18n);
 
 /* eslint-disable no-new */
 new Vue({
@@ -120,7 +123,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
-      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent']),
+      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -460,14 +463,6 @@ new Vue({
             },
             { type: 'separator' },
             {
-              label: this.$t('msg.playback.windowRotate'),
-              id: 'windowRotate',
-              click: () => {
-                this.windowRotate();
-              },
-            },
-            { type: 'separator' },
-            {
               label: this.$t('msg.playback.singleCycle'),
               type: 'checkbox',
               id: 'singleCycle',
@@ -478,6 +473,58 @@ new Vue({
                 } else {
                   this.$store.dispatch('singleCycle');
                 }
+              },
+            },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.playback.snapShot'),
+              accelerator: 'CmdOrCtrl+Shift+S',
+              click: () => {
+                if (!this.paused) {
+                  this.$bus.$emit('toggle-playback');
+                }
+                const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
+                electron.desktopCapturer.getSources(options, (error, sources) => {
+                  if (error) {
+                    this.addLog('info', {
+                      message: 'Snapshot failed .',
+                      code: SNAPSHOT_FAILED,
+                    });
+                    addBubble(SNAPSHOT_FAILED, this.$i18n);
+                  }
+                  sources.forEach((source) => {
+                    if (source.name === 'SPlayer') {
+                      const date = new Date();
+                      const imgName = `SPlayer-${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()}-${date.getHours()}.${date.getMinutes()}.${date.getSeconds()}.png`;
+                      const screenshotPath = Path.join(
+                        this.snapshotSavedPath ? this.snapshotSavedPath : app.getPath('desktop'),
+                        imgName,
+                      );
+                      fs.writeFile(screenshotPath, source.thumbnail.toPNG(), (error) => {
+                        if (error) {
+                          if (error.message.includes('operation not permitted')) {
+                            this.chooseSnapshotFolder(
+                              imgName,
+                              { name: imgName, buffer: source.thumbnail.toPNG() },
+                            );
+                          } else {
+                            this.addLog('info', {
+                              message: 'Snapshot failed .',
+                              code: SNAPSHOT_FAILED,
+                            });
+                            addBubble(SNAPSHOT_FAILED, this.$i18n);
+                          }
+                        } else {
+                          this.addLog('info', {
+                            message: 'Snapshot success .',
+                            code: SNAPSHOT_SUCCESS,
+                          });
+                          addBubble(SNAPSHOT_SUCCESS, this.$i18n);
+                        }
+                      });
+                    }
+                  });
+                });
               },
             },
             // { type: 'separator' },
@@ -727,6 +774,14 @@ new Vue({
               accelerator: 'CmdOrCtrl+3',
               click: () => {
                 this.changeWindowSize(3);
+              },
+            },
+            { type: 'separator' },
+            {
+              label: this.$t('msg.playback.windowRotate'),
+              id: 'windowRotate',
+              click: () => {
+                this.windowRotate();
               },
             },
             { type: 'separator' },

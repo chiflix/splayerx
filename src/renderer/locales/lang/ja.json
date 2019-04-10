@@ -103,7 +103,8 @@
 			"pause": "停止",
 			"play": "プレイ",
 			"resetSpeed": "重置播放速度",
-			"singleCycle": "リピート"
+			"singleCycle": "リピート",
+			"snapShot": "スナップショット"
 		},
 		"splayerx": {
 			"about": "SPlayerについて",
@@ -243,5 +244,13 @@
 	"uploadingSuccess": {
 		"content": "字幕がアップロードされました。",
 		"title": "アップロードに成功しました"
+	},
+	"snapshotSuccess": {
+		"content": "スナップショット成功",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "後でお試しください。",
+		"title": "スナップショット失敗"
 	}
 }

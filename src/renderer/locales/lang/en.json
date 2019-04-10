@@ -103,7 +103,8 @@
 			"pause": "Pause",
 			"play": "Play",
 			"resetSpeed": "Reset Playback Speed",
-			"singleCycle": "Repeat One"
+			"singleCycle": "Repeat One",
+			"snapShot": "Snapshot"
 		},
 		"splayerx": {
 			"about": "About SPlayer",
@@ -243,5 +244,13 @@
 	"uploadingSuccess": {
 		"content": "Subtitle has been uploaded.",
 		"title": "Upload Successfully"
+	},
+	"snapshotSuccess": {
+		"content": "Snapshot Successfully",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "Please try again later.",
+		"title": "Snapshot Failed"
 	}
 }

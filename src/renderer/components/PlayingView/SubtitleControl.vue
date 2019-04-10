@@ -420,6 +420,7 @@ export default {
               message: 'Online subtitles loading .',
               code: ONLINE_LOADING,
             });
+            this.$addBubble(ONLINE_LOADING);
           } else {
             setTimeout(() => {
               if (!this.showAttached) {
@@ -442,6 +443,7 @@ export default {
           message: 'Offline error .',
           errcode: SUBTITLE_OFFLINE,
         });
+        this.$addBubble(SUBTITLE_OFFLINE);
       }
     },
     handleAnimation(anim) {
@@ -551,6 +553,7 @@ export default {
             message: 'Request Timeout .',
             errcode: REQUEST_TIMEOUT,
           });
+          this.$addBubble(REQUEST_TIMEOUT);
         }, 500);
       }
       setTimeout(() => {
@@ -567,6 +570,11 @@ export default {
         this.$refs.scroll.scrollTop = 0;
       }, 1000);
     });
+  },
+  destroyed() {
+    if (this.breakTimer) {
+      clearTimeout(this.breakTimer);
+    }
   },
   mounted() {
     this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
