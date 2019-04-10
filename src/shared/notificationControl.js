@@ -127,7 +127,7 @@ export function addBubble(code, i18n) { // eslint-disable-line complexity
       break;
     case SNAPSHOT_FAILED:
       store.dispatch('addMessages', {
-        type: 'state',
+        type: 'result',
         title: i18n.t('snapshotFailed.title', i18n.locale, i18n.messages),
         content: i18n.t('snapshotFailed.content', i18n.locale, i18n.messages),
         dismissAfter: 2000,

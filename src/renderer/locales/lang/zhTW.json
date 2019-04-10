@@ -250,7 +250,7 @@
 		"title": ""
 	},
 	"snapshotFailed": {
-		"content": "截圖失敗 [請稍後重試。]",
-		"title": ""
+		"content": "請稍後重試。",
+		"title": "截圖失敗"
 	}
 }

@@ -480,7 +480,10 @@ new Vue({
               label: this.$t('msg.playback.snapShot'),
               accelerator: 'CmdOrCtrl+Shift+S',
               click: () => {
-                const options = { types: ['window'], thumbnailSize: { width: this.winWidth, height: this.winHeight } };
+                if (!this.paused) {
+                  this.$bus.$emit('toggle-playback');
+                }
+                const options = { types: ['window'], thumbnailSize: { width: this.intrinsicWidth, height: this.intrinsicHeight } };
                 electron.desktopCapturer.getSources(options, (error, sources) => {
                   if (error) {
                     this.addLog('info', {

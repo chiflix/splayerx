@@ -250,7 +250,7 @@
 		"title": ""
 	},
 	"snapshotFailed": {
-		"content": "スナップショット失敗 [後でお試しください。]",
-		"title": ""
+		"content": "後でお試しください。",
+		"title": "スナップショット失敗"
 	}
 }

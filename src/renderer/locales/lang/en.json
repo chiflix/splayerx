@@ -250,7 +250,7 @@
 		"title": ""
 	},
 	"snapshotFailed": {
-		"content": "Snapshot Failed [Please try again later.]",
-		"title": ""
+		"content": "Please try again later.",
+		"title": "Snapshot Failed"
 	}
 }

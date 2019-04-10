@@ -104,7 +104,7 @@
 			"play": "Jugar",
 			"resetSpeed": "Restablecer velocidad de reproducción",
 			"singleCycle": "Repetir una",
-			"snapShot": "instantánea"
+			"snapShot": "Instantánea"
 		},
 		"splayerx": {
 			"about": "Acerca de SPlayer",
@@ -250,7 +250,7 @@
 		"title": ""
 	},
 	"snapshotFailed": {
-		"content": "Instantánea fallada [por favor intente más tarde.]",
-		"title": ""
+		"content": "por favor intente más tarde.",
+		"title": "Instantánea fallada"
 	}
 }
