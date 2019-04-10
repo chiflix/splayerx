@@ -676,7 +676,7 @@ export default {
         transcriptQueue.add(parameter, true)
           .then((res) => {
             if (res) {
-              this.addLog('success', {
+              this.addLog('info', {
                 message: 'Upload successfully !',
                 code: UPLOAD_SUCCESS,
               });

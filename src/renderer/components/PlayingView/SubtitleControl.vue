@@ -571,6 +571,9 @@ export default {
       }, 1000);
     });
   },
+  destroyed() {
+    this.animClass = false;
+  },
   mounted() {
     this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
       this.count += 1;
