@@ -132,6 +132,7 @@ export default {
 .downArrow, .subtitleDetach, .subtitleEdit, .subtitleExport, .subtitleDelete, .subtitleEditorExit {
   width: 100%;
   height: 100%;
+  display: block;
   cursor: pointer;
   .default {
     display: block;

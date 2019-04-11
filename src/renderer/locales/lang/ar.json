@@ -88,6 +88,7 @@
       "undo": "تصدير",
       "redo": "استعداد",
       "export": "فك",
+      "reference": "مراجع الترجمة",
       "back": "ظهر"
     },
 		"help": {
@@ -111,7 +112,8 @@
 			"pause": "وقفة",
 			"play": "لعب",
 			"resetSpeed": "إعادة ضبط سرعة التشغيل",
-			"singleCycle": "كرر مرة واحدة"
+			"singleCycle": "كرر مرة واحدة",
+			"snapShot": "لمحة"
 		},
 		"splayerx": {
 			"about": "حول SPlayer",
@@ -266,9 +268,17 @@
         "title": ""
       },
       "referenceIdNotExist": {
-        "content": "参考字幕不存在",
-        "title": ""
+        "content": ".تم تحديث المرجع أو حذفه",
+        "title": "فشل تحميل مرجع"
       }
     }
-  }
+  },
+	"snapshotSuccess": {
+		"content": "لقطة بنجاح",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "يرجى المحاولة لاحقا.",
+		"title": " فشل لقطة"
+	}
 }

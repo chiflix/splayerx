@@ -88,6 +88,7 @@
       "undo": "元に戻す",
       "redo": "やり直す",
       "export": "書き出す",
+      "reference": "翻訳参照",
       "back": "後退"
     },
 		"help": {
@@ -111,7 +112,8 @@
 			"pause": "停止",
 			"play": "プレイ",
 			"resetSpeed": "重置播放速度",
-			"singleCycle": "リピート"
+			"singleCycle": "リピート",
+			"snapShot": "スナップショット"
 		},
 		"splayerx": {
 			"about": "SPlayerについて",
@@ -266,9 +268,17 @@
         "title": ""
       },
       "referenceIdNotExist": {
-        "content": "参考字幕不存在",
-        "title": ""
+        "content": "参照が更新または削除されました。",
+        "title": "参照のロードに失敗しました"
       }
     }
-  }
+  },
+	"snapshotSuccess": {
+		"content": "スナップショット成功",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "後でお試しください。",
+		"title": "スナップショット失敗"
+	}
 }

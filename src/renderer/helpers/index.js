@@ -7,9 +7,10 @@ import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO } from '@/../shared/notificationcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
+import { addBubble } from '../../shared/notificationControl';
 
 import { ipcRenderer, remote } from 'electron'; // eslint-disable-line
 
@@ -217,6 +218,37 @@ export default {
         }
       });
     },
+    chooseSnapshotFolder(defaultName, data) {
+      if (this.showingPopupDialog) return;
+      this.showingPopupDialog = true;
+      process.env.NODE_ENV === 'testing' ? '' : remote.dialog.showOpenDialog({
+        title: 'Snapshot Save',
+        defaultPath: data.defaultFolder ? data.defaultFolder : remote.app.getPath('desktop'),
+        filters: [{
+          name: 'Snapshot',
+        }, {
+          name: 'All Files',
+        }],
+        properties: ['openDirectory'],
+        securityScopedBookmarks: process.mas,
+      }, (files, bookmarks) => {
+        if (files) {
+          fs.writeFile(path.join(files[0], data.name), data.buffer, (error) => {
+            if (error) {
+              addBubble(SNAPSHOT_FAILED, this.$i18n);
+            } else {
+              this.$store.dispatch('UPDATE_SNAPSHOT_SAVED_PATH', files[0]);
+              addBubble(SNAPSHOT_SUCCESS, this.$i18n);
+            }
+          });
+        }
+        this.showingPopupDialog = false;
+        if (process.mas && bookmarks?.length > 0) {
+          // TODO: put bookmarks to database
+          bookmark.resolveBookmarks(files, bookmarks);
+        }
+      });
+    },
     addFiles(...files) {
       const videoFiles = [];
 
@@ -241,6 +273,7 @@ export default {
           errcode: ADD_NO_VIDEO,
           message: 'Didn\'t add any playable file in this folder.',
         });
+        addBubble(ADD_NO_VIDEO, this.$i18n);
       }
     },
     // the difference between openFolder and openFile function
@@ -278,6 +311,7 @@ export default {
           errcode: EMPTY_FOLDER,
           message: 'There is no playable file in this folder.',
         });
+        addBubble(EMPTY_FOLDER, this.$i18n);
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitles', subtitleFiles);
@@ -315,6 +349,7 @@ export default {
             errcode: OPEN_FAILED,
             message: `Failed to open file : ${tempFilePath}`,
           });
+          addBubble(OPEN_FAILED, this.$i18n);
         }
       }
       if (videoFiles.length !== 0) {
@@ -370,6 +405,7 @@ export default {
             errcode: FILE_NON_EXIST,
             message: 'Failed to open file, it will be removed from list.'
           });
+          addBubble(FILE_NON_EXIST, this.$i18n);
           this.$bus.$emit('file-not-existed', originPath);
         }
         if (process.mas && err?.code === 'EPERM') {

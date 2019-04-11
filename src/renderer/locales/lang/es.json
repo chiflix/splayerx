@@ -88,6 +88,7 @@
       "undo": "deshacer",
       "redo": "rehacer",
       "export": "Exportación",
+      "reference": "Referencias de traducción",
       "back": "volver"
     },
 		"help": {
@@ -111,7 +112,8 @@
 			"pause": "pausa",
 			"play": "Jugar",
 			"resetSpeed": "Restablecer velocidad de reproducción",
-			"singleCycle": "Repetir una"
+			"singleCycle": "Repetir una",
+			"snapShot": "Instantánea"
 		},
 		"splayerx": {
 			"about": "Acerca de SPlayer",
@@ -266,9 +268,17 @@
         "title": ""
       },
       "referenceIdNotExist": {
-        "content": "参考字幕不存在",
-        "title": ""
+        "content": "La referencia se ha actualizado o eliminado.",
+        "title": "Falló la referencia de carga"
       }
     }
-  }
+  },
+	"snapshotSuccess": {
+		"content": "Instantánea con éxito",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "por favor intente más tarde.",
+		"title": "Instantánea fallada"
+	}
 }

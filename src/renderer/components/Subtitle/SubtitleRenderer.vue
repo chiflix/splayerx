@@ -15,9 +15,9 @@
         display: !isProfessional || checkCurrentSub(cue) ? 'flex' : 'none',
         cursor: dragingMode !== 'default' ? dragingMode : canUseEditor ? 'pointer' : 'default'
       }"
-      :class="avaliableClass(i)+`${paused && canUseEditor ? ' enable-hover': ''}`+`${isEditable && index === i ? ' editable': ''}`+isCueFocus(cue)">
+      :class="avaliableClass(i)+`${paused && canUseEditor ? ' enable-hover': ''}`+`${isEditable && index === cue.index ? ' editable': ''}`+isCueFocus(cue)">
       <div class="cue-wrap" v-if="filter(cue)">
-        <CueRenderer v-show="!isEditable || i !== index" class="cueRender"
+        <CueRenderer v-show="!isEditable || cue.index !== index" class="cueRender"
           :text="cue.text"
           :settings="cue.tags"
           :style="{
@@ -34,14 +34,14 @@
             // transform: subLine(i),
             width: `${computedWidth*0.60/scaleNum}px`
           }"
-          v-show="isEditable && paused && i === index">
+          v-show="isEditable && paused && cue.index === index">
           <div
             :class="'back no-drag '+`${isProfessional ? 'subtitle-style1' : `subtitle-style${chosenStyle ? chosenStyle : 0}`}`"
             contenteditable="true">{{editVal.replace(/ /g, '&nbsp;')}}</div>
           <textarea
             :class="'no-drag '+`${isProfessional ? 'subtitle-style1' : `subtitle-style${chosenStyle ? chosenStyle : 0}`}`"
             contenteditable="true"
-            :ref="`textarea${i}`"
+            :ref="`textarea${cue.index}`"
             @keydown.stop="handleKeyDownTextArea"
             @blur="handleBlurTextArea($event, i)"
             @mousedown.left.stop=""
@@ -113,6 +113,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    showTextarea: {
+      type: Boolean,
+      default: false,
+    },
     showAddInput: {
       type: Boolean,
       default: false,
@@ -165,11 +169,12 @@ export default {
       lastText: [],
       subPlayResX: 0,
       subPlayResY: 0,
-      index: null,
+      index: null, // cue.index
       editVal: '',
       rows: 1,
       lastTransPercent: 0,
       requestId: 0,
+      stillWaitTextAreaFocus: false,
     };
   },
   computed: {
@@ -274,6 +279,29 @@ export default {
         }
       });
     },
+    subtitleInstance: {
+      immediate: true,
+      deep: true,
+      handler(val) {
+        if (val && val.parsed && val.parsed.dialogues) {
+          this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+        }
+      },
+    },
+    referenceDialogues: {
+      immediate: true,
+      deep: true,
+      handler(val) {
+        if (val) {
+          this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+        }
+      },
+    },
+    showTextarea(val) {
+      if (val && this.chooseIndexs > -1) {
+        this.stillWaitTextAreaFocus = true;
+      }
+    },
   },
   created() {
     const { subtitleInstance } = this;
@@ -295,6 +323,28 @@ export default {
           this.intrinsicHeight;
       });
       subtitleInstance.load();
+    }
+  },
+  updated() {
+    const ref = this.$refs[`textarea${this.chooseIndexs}`];
+    if (this.stillWaitTextAreaFocus && this.chooseIndexs > -1 && ref && ref[0]) { // eslint-disable-line
+      this.index = this.chooseIndexs;
+      this.toggleEditable(true);
+      this.$nextTick(() => {
+        const focusSub = this.currentCues.find(e => e.index === this.chooseIndexs);
+        const txt = focusSub.text;
+        this.editVal = txt.replace(/<br>/gi, '\n');
+        ref[0].focus();
+        if (focusSub.reference) {
+          setImmediate(() => {
+            ref[0].select();
+          });
+        }
+        setImmediate(() => {
+          ref[0].scrollTop = 9999;
+        });
+      });
+      this.stillWaitTextAreaFocus = false;
     }
   },
   mounted() {
@@ -366,15 +416,23 @@ export default {
     handleClickSubContainer(e, i) {
       if (!this.canUseEditor) return;
       const isPaused = this.paused;
+      const currentCues = this.currentCues[i];
       if (isPaused) {
-        this.index = i;
+        this.index = currentCues.index;
         if (!this.isEditable) {
           this.toggleEditable(isPaused);
           this.$nextTick(() => {
-            const txt = this.currentCues[i].text;
-            const ref = this.$refs[`textarea${i}`][0];
+            const txt = currentCues.text;
+            const ref = this.$refs[`textarea${currentCues.index}`][0];
             this.editVal = txt.replace(/<br>/gi, '\n');
-            ref && ref.focus();
+            if (ref) {
+              ref.focus();
+              if (currentCues.reference) {
+                setImmediate(() => {
+                  ref.select();
+                });
+              }
+            }
             setImmediate(() => {
               ref.scrollTop = 9999;
             });
@@ -384,34 +442,43 @@ export default {
         this.$bus.$emit('toggle-playback');
       }
       // 点击字幕块，更新字幕条选中状态
-      const index = this.getCueIndex(this.currentCues[i]);
+      // const index = this.getCueIndex(currentCues);
+      const index = currentCues.index;
       if (this.isProfessional && index !== -1) {
         this.$emit('update:chooseIndexs', index);
       }
     },
-    handleDoubleClickSubContainer(e, i) {
-      if (!this.canUseEditor) return;
-      if (!this.paused) {
-        this.index = i;
-        this.$bus.$emit('toggle-playback');
-        this.$nextTick(() => {
-          this.toggleEditable(this.paused);
-          this.$nextTick(() => {
-            const txt = this.currentCues[i].text;
-            const ref = this.$refs[`textarea${i}`][0];
-            this.editVal = txt.replace(/<br>/gi, '\n');
-            ref && ref.focus();
-            setImmediate(() => {
-              ref.scrollTop = 9999;
-            });
-          });
-        });
-      }
-      // 点击字幕块，更新字幕条选中状态
-      const index = this.getCueIndex(this.currentCues[i]);
-      if (this.isProfessional && index !== -1) {
-        this.$emit('update:chooseIndexs', index);
-      }
+    handleDoubleClickSubContainer() {
+      // console.log(111);
+      // if (!this.canUseEditor) return;
+      // const isPaused = this.paused;
+      // const currentCues = this.currentCues[i];
+      // if (isPaused) {
+      //   this.index = i;
+      //   this.$bus.$emit('toggle-playback');
+      //   // this.$nextTick(() => {
+      //   // });
+      // }
+      // this.toggleEditable(isPaused);
+      // this.$nextTick(() => {
+      //   const txt = currentCues.text;
+      //   const ref = this.$refs[`textarea${i}`][0];
+      //   this.editVal = txt.replace(/<br>/gi, '\n');
+      //   if (ref) {
+      //     ref.focus();
+      //     if (currentCues.reference) {
+      //       ref.select();
+      //     }
+      //   }
+      //   setImmediate(() => {
+      //     ref.scrollTop = 9999;
+      //   });
+      // });
+      // // 点击字幕块，更新字幕条选中状态
+      // const index = this.getCueIndex(currentCues);
+      // if (this.isProfessional && index !== -1) {
+      //   this.$emit('update:chooseIndexs', index);
+      // }
     },
     handleBlurTextArea(e, i) { // eslint-disable-line
       // const startTime = Date.now();
@@ -510,13 +577,16 @@ export default {
             });
             this.$emit('update:chooseIndexs', -1);
           }
-          if (this.index === i) {
-            this.toggleEditable(false);
-            this.editVal = '';
-            this.index = null;
-            this.rows = 1;
-          }
-          this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+          // if (this.index === i) {
+          //   this.toggleEditable(false);
+          //   this.editVal = '';
+          //   this.index = null;
+          //   this.rows = 1;
+          // }
+          this.toggleEditable(false);
+          this.editVal = '';
+          this.index = null;
+          this.rows = 1;
           // console.log(Date.now() - startTime);
         });
       } else {
@@ -550,7 +620,7 @@ export default {
               reference: null,
             };
           } else {
-            subtitleInstance = this.subtitleInstance.type !== 'modified' ? cloneDeep(this.subtitleInstance) : this.subtitleInstance;
+            subtitleInstance = cloneDeep(this.subtitleInstance);
           }
           this.setCreateMode(false);
           this.$bus.$emit(bus.CREATE_MIRROR_SUBTITLE, {
@@ -561,6 +631,7 @@ export default {
         this.editVal = '';
         this.rows = 1;
       }
+      this.requestId = requestAnimationFrame(this.currentTimeUpdate);
     },
     handleKeyDownTextArea(e) { // eslint-disable-line
       // 处理输入框快捷键
@@ -635,12 +706,13 @@ export default {
       const currentDialogues = this.subtitleInstance && this.subtitleInstance.parsed ?
         this.subtitleInstance.parsed.dialogues : [];
       if ((currentDialogues.length + this.referenceDialogues.length) === 0) return;
-      const parsedData = this.referenceDialogues
-        .map((e, i) => ({
-          ...e, reference: true, selfIndex: i,
-        }))
-        .concat(currentDialogues)
-        .map((e, i) => ({ ...e, index: i }));
+      const referenceFilters = this.referenceDialogues
+        .map((e, i) => Object.assign({ reference: true }, e, { selfIndex: i }));
+      const parsedData = currentDialogues
+        .concat(referenceFilters)
+        .map((e, i) => ({ ...e, index: i }))
+        .sort((p, n) => (p.start - n.start))
+        .filter(e => this.filter(e));
       if (parsedData) {
         const cues = parsedData
           .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');

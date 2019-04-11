@@ -35,14 +35,14 @@
         <div class="subtitles" ref="subtitles">
           <div v-for="sub in validitySubs"
             :key="`${sub.width}-${sub.index}-${sub.track}-${sub.text}`"
+            v-fade-in="!(!paused && sub.reference)"
             @mouseover.stop="handleHoverIn($event, sub)"
             @mouseleave.stop="handleHoverOut($event, sub)"
             @mousedown.left.stop="handleDragStartSub($event, sub)"
             @mousemove.left="handleDragingSub($event, sub)"
             @mouseup.left="handleDragEndSub($event, sub)"
             @dblclick.left.stop="handleDoubleClickSub($event, sub)"
-            :class="computedSubClass(sub.index)+' no-drag sub-line-mark'+`${sub.focus ? ' focus' : ''}`+`${sub.reference ? ' reference' : ''}`"
-            :data="`${sub.width}-${sub.index}-${chooseIndexs}-${sub.track}-${sub.text}`"
+            :class="computedSubClass(sub)+' no-drag sub-line-mark'+`${sub.focus && !sub.reference ? ' focus' : ''}`+`${sub.reference ? ' reference' : ''}`"
             :style="{
               left: `${sub.left}px`,
               right: `${sub.right}px`,
@@ -72,8 +72,9 @@
       <div v-fade-in="paused && getCurrentReferenceCues()" class="referenceText" v-html="getCurrentReferenceCues()"></div>
       <subtitle-renderer
         v-fade-in="!subDragTimeLineMoving"
-        :key='originSrc+currentFirstSubtitleId+currentParseReferenceSubtitleId'
+        :key='originSrc+currentFirstSubtitleId'
         :showAddInput="showAddInput"
+        :showTextarea="showTextarea"
         :newSubHolder="newSubHolder"
         :currentSub="currentSub"
         :chooseIndexs.sync="chooseIndexs"
@@ -146,6 +147,7 @@ export default {
       triggerCount: 1, // rerender doms count
       createSubElement: null, // 添加字幕动画依赖的dom
       space: 85, // 1s pxs
+      showTextarea: false, //
       showAddInput: false, // 可以显示添加字幕的属性
       newSubHolder: null, // 配合showAddInput，存储添加字幕的数据格式以及插入位置
       history: [],
@@ -304,8 +306,14 @@ export default {
         if (val && val.parsed && !this.isCreateSubtitleMode) {
           this.dialogues = val.parsed.dialogues;
         }
-        if (val && val.referenceSubtitleId !== this.referenceSubtitleId) {
-          this.swicthReferenceSubtitle(val.referenceSubtitleId);
+        if (val && val.referenceSubtitleId !== this.referenceSubtitleId &&
+          !this.isCreateSubtitleMode) {
+          const referenceSubtitleId = val.referenceSubtitleId;
+          // 跳出vue watcher 队列
+          setImmediate(() => {
+            console.log(referenceSubtitleId);
+            this.swicthReferenceSubtitle(referenceSubtitleId);
+          });
         }
         // hooks for clear doms
         if (this.createSubElement && !this.subDragTimeLineMoving) {
@@ -353,6 +361,8 @@ export default {
               content: this.$t('notificationMessage.subtitle.referenceIdNotExist.content'),
               dismissAfter: 2000,
             });
+            this.swicthReferenceSubtitle(null);
+            this.subtitleInstance.referenceSubtitleId = null;
           }
         }
         if (this.subtitleInstance && !this.isCreateSubtitleMode) {
@@ -630,20 +640,26 @@ export default {
       this.$bus.$emit('seek', this.preciseTime);
       this.$refs.timeLine.style.transition = '';
       this.$refs.timeLine.removeEventListener('transitionend', this.doubleClickTransitionend);
+      this.showTextarea = true;
+      setImmediate(() => {
+        this.showTextarea = false;
+      });
     },
-    computedSubClass(i) {
+    computedSubClass(sub) { // eslint-disable-line
       const ci = this.chooseIndexs;
       const hi = this.hoverIndex;
+      const index = sub.index;
+      const reference = sub.reference;
       let c = 'sub';
-      if (i === ci && this.subDragMoving) {
+      if (index === ci && this.subDragMoving) {
         c = 'sub choose hover draging';
-      } else if (i === ci && (this.subLeftDraging || this.subRightDraging)) {
+      } else if (index === ci && (this.subLeftDraging || this.subRightDraging)) {
         c = 'sub choose hover resize';
-      } else if (i === ci && i === hi) {
+      } else if (index === ci && index === hi) {
         c = 'sub choose hover';
-      } else if (i === ci) {
+      } else if (index === ci) {
         c = 'sub choose';
-      } else if (i === hi) {
+      } else if (index === hi && !reference) {
         c = 'sub hover';
       }
       return c;
@@ -1202,11 +1218,11 @@ export default {
           job.referenceBefore = this.referenceDialogues.splice(selfIndex, 1)[0];
           job.selfIndex = selfIndex;
         }
-        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
-          sub,
-        });
         this.updateHistory(job);
       }
+      this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
+        sub,
+      });
     },
     updateHistory(step) {
       if (this.currentIndex + 1 < this.history.length) {
@@ -1543,7 +1559,8 @@ export default {
       &.reference {
         background: rgba(255,255,255,0.05);
         // background-color: aqua;
-        border-color: rgba(151,151,151,0.30);
+        // border-color: rgba(151,151,151,0.30);
+        border-color: transparent;
       }
       &.focus {
         background: rgba(255,255,255,0.50);

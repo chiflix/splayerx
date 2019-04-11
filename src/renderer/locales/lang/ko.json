@@ -88,6 +88,7 @@
       "undo": "실행 취소",
       "redo": "실행 복귀",
       "export": "내보내기",
+      "reference": "参考翻译",
       "back": "뒤로"
     },
 		"help": {
@@ -111,7 +112,8 @@
 			"pause": "중지",
 			"play": "놀이",
 			"resetSpeed": "재생 속도 재설정",
-			"singleCycle": "하나 반복"
+			"singleCycle": "하나 반복",
+			"snapShot": "스냅 샷"
 		},
 		"splayerx": {
 			"about": "SPlayer 정보",
@@ -266,9 +268,17 @@
         "title": ""
       },
       "referenceIdNotExist": {
-        "content": "参考字幕不存在",
-        "title": ""
+        "content": "참조가 업데이트되거나 삭제되었습니다.",
+        "title": "로드 참조 실패"
       }
     }
-  }
+  },
+	"snapshotSuccess": {
+		"content": "성공적인 스냅 샷",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "나중에 다시 시도 해주세요.",
+		"title": "스냅 샷 실패"
+	}
 }

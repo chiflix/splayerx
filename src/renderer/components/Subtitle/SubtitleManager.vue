@@ -28,7 +28,7 @@
     <transition name="fade" mode="out-in" appear>
       <subtitle-editor
         v-if="isProfessional"
-        :referenceSubtitleInstance="subtitleInstances[this.referenceSubtitleId]"
+        :referenceSubtitleInstance="referenceSubtitleInstance"
         :subtitleInstance="subtitleInstances[this.currentFirstSubtitleId]"/>
     </transition>
   </div>
@@ -63,7 +63,7 @@ import SubtitleEditor from './SubtitleEditor.vue';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
 import { localLanguageLoader } from './SubtitleLoader/utils';
-import { LOCAL_SUBTITLE_REMOVED, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
+import { LOCAL_SUBTITLE_REMOVED, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-manager',
@@ -115,6 +115,12 @@ export default {
         return Object.keys(loadingStates)
           .filter(id => loadingStates[id] === 'loaded' && durations[id] >= duration * 0.6)
           .map(id => ({ id, type: types[id], duration: durations[id] }));
+      },
+      referenceSubtitleInstance() {
+        if (this.referenceSubtitleId) {
+          return this.subtitleInstances[this.referenceSubtitleId];
+        }
+        return null;
       },
     }),
   },
@@ -341,6 +347,7 @@ export default {
                 message: 'Request Timeout .',
                 errcode: REQUEST_TIMEOUT,
               });
+              this.$addBubble(REQUEST_TIMEOUT);
               return [];
             }
             return result;
@@ -357,6 +364,8 @@ export default {
             .map(sub => this.addSubtitle(sub, videoSrc)));
         }).catch(() => []);
       const newSubs = await Promise.all(languages.map(fetchSubs)).then(flatten);
+      //
+      storedSubIds.forEach(e => delete this.subtitleInstances[e]);
       await deleteSubtitles(storedSubIds, videoSrc);
       return newSubs;
     },
@@ -843,8 +852,9 @@ export default {
     this.$bus.$on('upload-current-subtitle', () => {
       this.addLog('info', {
         message: 'Upload current subtitle .',
-        code: 'SUBTITLE_UPLOAD',
+        code: SUBTITLE_UPLOAD,
       });
+      this.$addBubble(SUBTITLE_UPLOAD);
       const qualifiedSubtitle = {
         id: this.currentFirstSubtitleId,
         duration: this.$store.state.Subtitle.durations[this.currentFirstSubtitleId],
@@ -854,15 +864,17 @@ export default {
         transcriptQueue.add(parameter, true)
           .then((res) => {
             if (res) {
-              this.addLog('success', {
+              this.addLog('info', {
                 message: 'Upload successfully !',
-                code: 'UPLOAD_SUCCESS',
+                code: UPLOAD_SUCCESS,
               });
+              this.$addBubble(UPLOAD_SUCCESS);
             } else {
               this.addLog('error', {
                 message: 'Upload failed !',
-                errcode: 'UPLOAD_FAILED',
+                errcode: UPLOAD_FAILED,
               });
+              this.$addBubble(UPLOAD_FAILED);
             }
             console.log(`Uploading subtitle No.${this.currentFirstSubtitleId} ${res ? 'succeeded' : 'failed'}!`);
           });

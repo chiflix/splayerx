@@ -14,7 +14,7 @@ const state = {
   isProfessional: false, // 字幕高级编辑模式
   isCreateSubtitleMode: false, // 是否是创建字幕模式
   storedBeforeProfessionalInfo: null, // 字幕高级模式下需要存储windowSize、windowMinimumSize、windowPosition
-  sizePercent: 1,
+  sizePercent: 0,
 };
 
 const getters = {
@@ -40,6 +40,7 @@ const getters = {
 const mutations = {
   windowSize(state, payload) {
     state.windowSize = payload;
+    state.sizePercent = 0;
   },
   windowMinimumSize(state, payload) {
     state.windowMinimumSize = payload;

@@ -88,6 +88,7 @@
       "undo": "Undo",
       "redo": "Redo",
       "export": "Export",
+      "reference": "Translation References",
       "back": "Back"
     },
 		"help": {
@@ -111,7 +112,8 @@
 			"pause": "Pause",
 			"play": "Play",
 			"resetSpeed": "Reset Playback Speed",
-			"singleCycle": "Repeat One"
+			"singleCycle": "Repeat One",
+			"snapShot": "Snapshot"
 		},
 		"splayerx": {
 			"about": "About SPlayer",
@@ -266,9 +268,17 @@
         "title": ""
       },
       "referenceIdNotExist": {
-        "content": "参考字幕不存在",
-        "title": ""
+        "content": "Reference has been updated or deleted.",
+        "title": "Load Reference Failed"
       }
     }
-  }
+  },
+	"snapshotSuccess": {
+		"content": "Snapshot Successfully",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "Please try again later.",
+		"title": "Snapshot Failed"
+	}
 }

@@ -67,6 +67,7 @@
                       }">
                       <div :style="{
                           display: 'flex',
+                          width: 'calc(100% - 2px)',
                           height: hoverIndex === index && hiddenText ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                         }">
                         <div class="textContainer">
@@ -532,6 +533,7 @@ export default {
               message: 'Online subtitles loading .',
               code: ONLINE_LOADING,
             });
+            this.$addBubble(ONLINE_LOADING);
           } else {
             setTimeout(() => {
               if (!this.showAttached) {
@@ -554,6 +556,7 @@ export default {
           message: 'Offline error .',
           errcode: SUBTITLE_OFFLINE,
         });
+        this.$addBubble(SUBTITLE_OFFLINE);
       }
     },
     handleAnimation(anim) {
@@ -665,6 +668,7 @@ export default {
             message: 'Request Timeout .',
             errcode: REQUEST_TIMEOUT,
           });
+          this.$addBubble(REQUEST_TIMEOUT);
         }, 500);
       }
       setTimeout(() => {
@@ -681,6 +685,11 @@ export default {
         this.$refs.scroll.scrollTop = 0;
       }, 1000);
     });
+  },
+  destroyed() {
+    if (this.breakTimer) {
+      clearTimeout(this.breakTimer);
+    }
   },
   mounted() {
     this.$refs.refreshRotate.$el.addEventListener('animationiteration', () => {
@@ -854,6 +863,7 @@ export default {
       align-items: center;
     }
     .modified-subtitle-advanced-panel {
+      width: calc(100% - 2px);
       background: rgba(0,0,0,0.05);
       overflow: hidden;
       transition: height 0.1s ease-in-out;
@@ -865,8 +875,13 @@ export default {
         justify-content: space-around;
         align-items: center;
         &>div {
-          height: 60%;
+          // width: 16.95px;
+          height: 53.5%;
           cursor: pointer;
+        }
+        &>div:nth-child(2) {
+          border-left: 1px solid rgba(255, 255, 255, 0.1);
+          border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
       }
       .confirm-delete-wrap {

@@ -88,6 +88,7 @@
       "undo": "撤銷",
       "redo": "重做",
       "export": "導出",
+      "reference": "參考翻譯",
       "back": "返回"
     },
 		"help": {
@@ -111,7 +112,8 @@
 			"pause": "暫停",
 			"play": "播放",
 			"resetSpeed": "重置播放速度",
-			"singleCycle": "循環單個文件"
+			"singleCycle": "循環單個文件",
+			"snapShot": "截圖"
 		},
 		"splayerx": {
 			"about": "關於射手影音",
@@ -266,9 +268,17 @@
         "title": ""
       },
       "referenceIdNotExist": {
-        "content": "参考字幕不存在",
-        "title": ""
+        "content": "參考已更新或刪除。",
+        "title": "參考加載失敗"
       }
     }
-  }
+  },
+	"snapshotSuccess": {
+		"content": "截圖成功",
+		"title": ""
+	},
+	"snapshotFailed": {
+		"content": "請稍後重試。",
+		"title": "截圖失敗"
+	}
 }
