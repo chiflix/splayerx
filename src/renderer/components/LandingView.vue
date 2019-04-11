@@ -225,7 +225,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
 $themeColor-Light: white;
 
@@ -351,10 +351,6 @@ body {
 .logo-container {
   -webkit-user-select: none;
   text-align: center;
-  .logo {
-    height: 120px;
-    width: 120px;
-  }
 }
 
 main {
