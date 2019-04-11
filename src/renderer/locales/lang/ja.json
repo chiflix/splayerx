@@ -151,6 +151,7 @@
 			"subtitleSelect": "翻訳",
 			"subtitleSize": "字幕サイズ",
 			"subtitleStyle": "字幕スタイル",
+      "createSubtitle": "翻訳を追加",
 			"uploadSelectedSubtitle": "字幕をアップロード"
 		},
 		"titleName": "SPlayer",
@@ -224,6 +225,7 @@
 	"subtitle": {
 		"embedded": "埋め込み式",
 		"modified": "私の翻訳",
+    "createSubtitle": "翻訳を追加",
 		"language": {
 			"ar": "サウジアラビア語",
 			"de": "ドイツ語",
@@ -256,11 +258,15 @@
   "notificationMessage": {
     "subtitle": {
       "saveSuccess": {
-        "content": "保存成功",
+        "content": "保存しました",
         "title": ""
       },
       "exitProfessionalMode": {
-        "content": "本次修改已保存",
+        "content": "翻訳を保存しました",
+        "title": ""
+      },
+      "referenceIdNotExist": {
+        "content": "参考字幕不存在",
         "title": ""
       }
     }

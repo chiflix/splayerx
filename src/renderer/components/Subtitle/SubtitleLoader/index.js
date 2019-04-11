@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import { existsSync } from 'fs';
 import flatten from 'lodash/flatten';
+import cloneDeep from 'lodash/cloneDeep';
 import { storeSubtitle } from '@/helpers/subtitle';
 import { localFormatLoader, castArray, promisify, functionExtraction, generateTrack, megreSameTime, detectEncodingFromFileSync, embeddedSrcLoader } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
@@ -97,7 +98,8 @@ export default class SubtitleLoader extends EventEmitter {
       // 把内存中的数组以JSON的形式存在缓存目录下,JSON包含字幕的meta和dialogues
       if (this.type === 'modified') {
         this.data = '**';
-        this.metaInfo = this.options.storage.metaInfo;
+        this.metaInfo = cloneDeep(this.options.storage.metaInfo);
+        this.referenceSubtitleId = this.options.storage.referenceSubtitleId;
       }
       this.videoSrc = this.options.videoSrc; // set videoSrc
 
@@ -186,7 +188,8 @@ export default class SubtitleLoader extends EventEmitter {
     try {
       if (this.type === 'modified' && this.options.storage.parsed) {
         // 如果是自制字幕不需要parse了，可以直接取存在storage里面的数据
-        this.parsed = this.options.storage.parsed;
+        this.parsed = cloneDeep(this.options.storage.parsed);
+        delete this.options.storage;
         // try {
         //   // 自制字幕就不需要处理dialogues了
         //   megreSameTime(this.parsed.dialogues, this.metaInfo.format);

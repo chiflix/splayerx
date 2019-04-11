@@ -151,6 +151,7 @@
 			"subtitleSelect": "Translation",
 			"subtitleSize": "Font Size",
 			"subtitleStyle": "Font Style",
+      "createSubtitle": "Add Translation",
 			"uploadSelectedSubtitle": "Upload Selected Subtitle"
 		},
 		"titleName": "SPlayer",
@@ -223,7 +224,8 @@
 	},
 	"subtitle": {
 		"embedded": "Embed",
-		"modified": "My Subtitle",
+		"modified": "My Translation",
+    "createSubtitle": "Add Translation",
 		"language": {
 			"ar": "Arabic",
 			"de": "German",
@@ -256,11 +258,15 @@
   "notificationMessage": {
     "subtitle": {
       "saveSuccess": {
-        "content": "保存成功",
+        "content": "Saved",
         "title": ""
       },
       "exitProfessionalMode": {
-        "content": "本次修改已保存",
+        "content": "Translation Saved",
+        "title": ""
+      },
+      "referenceIdNotExist": {
+        "content": "参考字幕不存在",
         "title": ""
       }
     }

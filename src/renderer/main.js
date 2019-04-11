@@ -25,7 +25,7 @@ import messages from '@/locales';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
 import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
-import { Window as windowMutations } from '@/store/mutationTypes';
+import { Window as windowMutations, Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
@@ -122,7 +122,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub', 'isEditable', 'isProfessional',
-      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent']),
+      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'referenceSubtitleId']),
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -168,7 +168,6 @@ new Vue({
           accelerator: 'Space',
           enabled: !this.isProfessional,
           click: () => {
-            console.log(1);
             this.$bus.$emit('toggle-playback');
           },
         };
@@ -178,7 +177,6 @@ new Vue({
         accelerator: 'Space',
         enabled: !this.isProfessional,
         click: () => {
-          console.log(1);
           this.$bus.$emit('toggle-playback');
         },
       };
@@ -301,15 +299,14 @@ new Vue({
         });
       }
     },
-    isProfessional(val) {
+    referenceSubtitleId(val, oldValue) {
+      const old = this.menu.getMenuItemById(`reference-${oldValue}`);
+      const current = this.menu.getMenuItemById(`reference-${val}`);
+      if (old) old.checked = false;
+      if (current) current.checked = true;
+    },
+    isProfessional() {
       this.refreshMenu();
-      if (!val) {
-        this.addMessages({
-          type: 'state',
-          content: this.$t('notificationMessage.subtitle.exitProfessionalMode.content'),
-          dismissAfter: 2000,
-        });
-      }
     },
     isFullScreen() {
       this.refreshMenu();
@@ -364,6 +361,8 @@ new Vue({
   methods: {
     ...mapMutations({
       toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
+      setCreateMode: windowMutations.SET_CREATE_MODE,
+      swicthReferenceSubtitle: subtitleMutations.SWITCH_REFERENCE_SUBTITLE,
     }),
     ...mapActions({
       updateSubDelay: subtitleActions.UPDATE_SUBTITLE_DELAY,
@@ -696,6 +695,17 @@ new Vue({
             // { label: 'Search on Shooter.cn' },
             { type: 'separator' },
             {
+              label: this.$t('msg.subtitle.createSubtitle'),
+              id: 'createSelectedSubtitle',
+              click: () => {
+                // this.$bus.$emit('upload-current-subtitle');
+                if (!this.paused) this.$bus.$emit('toggle-playback');
+                this.setCreateMode(true);
+                this.swicthReferenceSubtitle(null);
+                this.toggleProfessional(true);
+              },
+            },
+            {
               label: this.$t('msg.subtitle.uploadSelectedSubtitle'),
               id: 'uploadSelectedSubtitle',
               click: () => this.$bus.$emit('upload-current-subtitle'),
@@ -918,6 +928,16 @@ new Vue({
         });
     },
     advancedMenu() {
+      const reference = [{
+        visible: true,
+        id: `reference-${null}`,
+        type: 'radio',
+        checked: this.referenceSubtitleId === null,
+        label: this.$t('msg.subtitle.notToShowSubtitle'),
+        click: () => {
+          this.swicthReferenceSubtitle(null);
+        },
+      }];
       const advancedTemplate = {
         label: this.$t('msg.advanced.name'),
         submenu: [
@@ -952,10 +972,16 @@ new Vue({
           },
           { type: 'separator' },
           {
+            label: '参考',
+            id: 'reference',
+            submenu: reference,
+          },
+          { type: 'separator' },
+          {
             label: this.$t('msg.advanced.back'),
             accelerator: 'Esc',
             click: () => {
-              this.toggleProfessional(false);
+              this.$bus.$emit(bus.SUBTITLE_EDITOR_EXIT);
             },
           },
         ],
@@ -963,6 +989,20 @@ new Vue({
       if (this.isFullScreen) {
         advancedTemplate.submenu.pop();
       }
+      this.subtitleList.forEach((e) => {
+        if (e.type !== 'modified' && reference.length < 11) {
+          reference.push({
+            id: `reference-${e.id}`,
+            visible: true,
+            checked: e.id === this.referenceSubtitleId,
+            type: 'radio',
+            label: this.getSubName(e),
+            click: () => {
+              this.swicthReferenceSubtitle(e.id);
+            },
+          });
+        }
+      });
       return advancedTemplate;
     },
     updateRecentItem(key, value) {

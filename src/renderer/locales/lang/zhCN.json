@@ -151,6 +151,7 @@
 			"subtitleSelect": "翻译",
 			"subtitleSize": "字幕尺寸",
 			"subtitleStyle": "字幕样式",
+      "createSubtitle": "创建翻译",
 			"uploadSelectedSubtitle": "上传所选字幕"
 		},
 		"titleName": "SPlayer",
@@ -223,7 +224,8 @@
 	},
 	"subtitle": {
 		"embedded": "内嵌",
-		"modified": "自制",
+    "modified": "自制翻译",
+    "createSubtitle": "创建翻译",
 		"language": {
 			"ar": "阿拉伯语",
 			"de": "德语",
@@ -260,7 +262,11 @@
         "title": ""
       },
       "exitProfessionalMode": {
-        "content": "本次修改已保存",
+        "content": "翻译已保存",
+        "title": ""
+      },
+      "referenceIdNotExist": {
+        "content": "参考字幕不存在",
         "title": ""
       }
     }

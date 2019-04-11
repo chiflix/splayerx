@@ -151,6 +151,7 @@
 			"subtitleSelect": "ترجمة",
 			"subtitleSize": "حجم الخط",
 			"subtitleStyle": "نوع الخط",
+      "createSubtitle": "إضافة الترجمة",
 			"uploadSelectedSubtitle": "تحميل العنوان الفرعي المحدد"
 		},
 		"titleName": "SPlayer",
@@ -224,6 +225,7 @@
 	"subtitle": {
 		"embedded": "تضمين",
 		"modified": "ترجمي",
+    "createSubtitle": "إضافة الترجمة",
 		"language": {
 			"ar": "عربى",
 			"de": "ألمانية",
@@ -256,11 +258,15 @@
   "notificationMessage": {
     "subtitle": {
       "saveSuccess": {
-        "content": "保存成功",
+        "content": "حفظ",
         "title": ""
       },
       "exitProfessionalMode": {
-        "content": "本次修改已保存",
+        "content": "تم حفظ الترجمة",
+        "title": ""
+      },
+      "referenceIdNotExist": {
+        "content": "参考字幕不存在",
         "title": ""
       }
     }

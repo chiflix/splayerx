@@ -28,6 +28,7 @@
     <transition name="fade" mode="out-in" appear>
       <subtitle-editor
         v-if="isProfessional"
+        :referenceSubtitleInstance="subtitleInstances[this.referenceSubtitleId]"
         :subtitleInstance="subtitleInstances[this.currentFirstSubtitleId]"/>
     </transition>
   </div>
@@ -101,7 +102,7 @@ export default {
       'subtitleDelay', // subtitle's delay
       'isProfessional', // 字幕编辑高级模式属性
       'storedBeforeProfessionalInfo', 'winRatio', 'defaultDir', 'isCreateSubtitleMode',
-      'isFirstSubtitle',
+      'isFirstSubtitle', 'referenceSubtitleId',
       'enabledSecondarySub',
     ]),
     ...mapState({
@@ -177,6 +178,7 @@ export default {
         const subString = JSON.stringify({
           parsed: currentSubtitle.parsed,
           metaInfo: currentSubtitle.metaInfo,
+          referenceSubtitleId: this.referenceSubtitleId,
         });
         writeSubtitleByPath(currentSubtitle.src, subString);
       }
@@ -711,7 +713,7 @@ export default {
       // 这里统一处理新增或者修改自制
       // 如果type 不是 modified 就是创建新的自制字幕
       // 如果是modified就修改原来的文件，更新instance
-      if (sub.type === 'modified') {
+      if (sub && sub.type === 'modified') {
         // 先更新当前内存字幕信息
         const s = {};
         s[sub.id] = sub;
@@ -721,15 +723,20 @@ export default {
           const subString = JSON.stringify({
             parsed: sub.parsed,
             metaInfo: sub.metaInfo,
+            referenceSubtitleId: sub.referenceSubtitleId,
+            // reference: sub.reference,
           });
           writeSubtitleByPath(sub.src, subString);
         }
-      } else {
+      } else if (sub) {
         // 如果不是自制的字幕出现修改，就是先创建新的自制字幕
         // 再加载刚刚创建的字幕
         const subString = JSON.stringify({
           parsed: sub.parsed,
           metaInfo: sub.metaInfo,
+          referenceSubtitleId: this.isProfessional ? this.referenceSubtitleId :
+            this.currentFirstSubtitleId,
+          // reference: sub.reference,
         });
         // 创建新的自制字幕
         addSubtitleByMediaHash(this.mediaHash, subString, { type: 'modified' }).then((result) => {
@@ -744,6 +751,8 @@ export default {
                   ...sub.metaInfo,
                   name: result.name,
                 },
+                referenceSubtitleId: this.isProfessional ? this.referenceSubtitleId :
+                  this.currentFirstSubtitleId,
               },
             },
           }]);
@@ -758,6 +767,9 @@ export default {
         const subString = JSON.stringify({
           parsed: currentSubtitle.parsed,
           metaInfo: currentSubtitle.metaInfo,
+          referenceSubtitleId: this.isProfessional ? this.referenceSubtitleId :
+            currentSubtitle.referenceSubtitleId,
+          // reference: currentSubtitle.reference,
         });
         try {
           await writeSubtitleByPath(currentSubtitle.src, subString);
@@ -857,7 +869,7 @@ export default {
       }
     });
     // 接受字幕的修改，包括自制字幕和原始字幕，处理逻辑统一在this.modifiedSubtitle
-    this.$bus.$on('modified-subtitle', this.modifiedSubtitle);
+    this.$bus.$on(bus.DID_MODIFIED_SUBTITLE, this.modifiedSubtitle);
     // 当删除某个字幕的文件
     this.$bus.$on('delete-subtitle-file', this.deleteSubtitleFile);
     // 导出自制字幕

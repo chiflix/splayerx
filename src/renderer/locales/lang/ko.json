@@ -151,6 +151,7 @@
 			"subtitleSelect": "번역",
 			"subtitleSize": "글자 크기",
 			"subtitleStyle": "글꼴 스타일",
+      "createSubtitle": "번역 추가",
 			"uploadSelectedSubtitle": "선택한 부제목 업로드"
 		},
 		"titleName": "SPlayer",
@@ -224,6 +225,7 @@
 	"subtitle": {
 		"embedded": "깊숙이 박다",
 		"modified": "내 번역",
+    "createSubtitle": "번역 추가",
 		"language": {
 			"ar": "아라비아 말",
 			"de": "독일 사람",
@@ -256,11 +258,15 @@
   "notificationMessage": {
     "subtitle": {
       "saveSuccess": {
-        "content": "保存成功",
+        "content": "저장된",
         "title": ""
       },
       "exitProfessionalMode": {
-        "content": "本次修改已保存",
+        "content": "저장된 번역",
+        "title": ""
+      },
+      "referenceIdNotExist": {
+        "content": "参考字幕不存在",
         "title": ""
       }
     }

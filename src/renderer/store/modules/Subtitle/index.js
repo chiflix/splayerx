@@ -27,11 +27,13 @@ const state = {
   subToTop: false,
   isFirstSubtitle: true,
   enabledSecondarySub: false,
+  referenceSubtitleId: null, // 参考字幕的ID
 };
 
 const getters = {
   currentFirstSubtitleId: state => state.currentFirstSubtitleId,
   currentSecondSubtitleId: state => state.currentSecondSubtitleId,
+  referenceSubtitleId: state => state.referenceSubtitleId,
   allSubtitleList: ({
     loadingStates, names, languages, formats, ranks, types,
   }) => (
@@ -149,6 +151,9 @@ const mutations = {
   },
   [subtitleMutations.SECONDARY_SUBTITLE_ENABLED_UPDATE](state, payload) {
     state.enabledSecondarySub = payload;
+  },
+  [subtitleMutations.SWITCH_REFERENCE_SUBTITLE](state, payload) {
+    state.referenceSubtitleId = payload;
   },
 };
 

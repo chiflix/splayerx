@@ -33,7 +33,7 @@
           </div>
         </div> 
         <div class="subtitles" ref="subtitles">
-          <div v-for="(sub) in validitySubs"
+          <div v-for="sub in validitySubs"
             :key="`${sub.width}-${sub.index}-${sub.track}-${sub.text}`"
             @mouseover.stop="handleHoverIn($event, sub)"
             @mouseleave.stop="handleHoverOut($event, sub)"
@@ -41,7 +41,7 @@
             @mousemove.left="handleDragingSub($event, sub)"
             @mouseup.left="handleDragEndSub($event, sub)"
             @dblclick.left.stop="handleDoubleClickSub($event, sub)"
-            :class="computedSubClass(sub.index)+' no-drag sub-line-mark'+`${sub.focus ? ' focus' : ''}`"
+            :class="computedSubClass(sub.index)+' no-drag sub-line-mark'+`${sub.focus ? ' focus' : ''}`+`${sub.reference ? ' reference' : ''}`"
             :data="`${sub.width}-${sub.index}-${chooseIndexs}-${sub.track}-${sub.text}`"
             :style="{
               left: `${sub.left}px`,
@@ -61,23 +61,25 @@
           </div>
         </div>
       </div>
-    </div>
-    <div class="sub-editor-body">
       <div class="exit-btn-wrap" @click.stop="handleClickProfessional"
         :style="{
           cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
         }">
         <Icon type="subtitleEditorExit" class="subtitle-editor-exit"/>
       </div>
+    </div>
+    <div class="sub-editor-body">
+      <div v-fade-in="paused && getCurrentReferenceCues()" class="referenceText" v-html="getCurrentReferenceCues()"></div>
       <subtitle-renderer
-        v-if="!subDragTimeLineMoving"
-        :key='originSrc+currentFirstSubtitleId'
+        v-fade-in="!subDragTimeLineMoving"
+        :key='originSrc+currentFirstSubtitleId+currentParseReferenceSubtitleId'
         :showAddInput="showAddInput"
         :newSubHolder="newSubHolder"
         :currentSub="currentSub"
         :chooseIndexs.sync="chooseIndexs"
         :dragingMode="dragingMode"
-        :subtitleInstance="subtitleInstance"/>
+        :referenceDialogues="referenceDialogues"
+        :subtitleInstance="isCreateSubtitleMode ? null : subtitleInstance"/>
     </div>
     <div class="sub-editor-foot">
       <div class="times-wrap">
@@ -94,11 +96,11 @@
   </div>
 </template>
 <script>
-import { mapGetters, mapMutations } from 'vuex';
+import { mapGetters, mapMutations, mapActions } from 'vuex';
 import { throttle, cloneDeep } from 'lodash';
 import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import { videodata } from '@/store/video';
-import { Window as windowMutations } from '@/store/mutationTypes';
+import { Window as windowMutations, Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import TheProgressBar from '@/components/PlayingView/TheProgressBar.vue';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
@@ -113,7 +115,8 @@ export default {
   },
   data() {
     return {
-      subtitleInstanceBridge: null, //
+      currentParseReferenceSubtitleId: null, //
+      referenceDialogues: [],
       dialogues: [],
       chooseIndexs: -1, // 单击字幕条选择字幕条的索引，支持ctrl多选
       hoverIndex: -1, // 目前鼠标hover的字幕条索引
@@ -154,10 +157,11 @@ export default {
   },
   props: {
     subtitleInstance: SubtitleInstance,
+    referenceSubtitleInstance: SubtitleInstance,
   },
   computed: {
     ...mapGetters([
-      'winWidth', 'winHeight', 'duration', 'paused', 'isCreateSubtitleMode', 'currentFirstSubtitleId', 'originSrc',
+      'winWidth', 'winHeight', 'duration', 'paused', 'isCreateSubtitleMode', 'currentFirstSubtitleId', 'originSrc', 'referenceSubtitleId',
     ]),
     vh() {
       return this.winHeight / 100 > 10 ? 10 : Math.abs(this.winHeight / 100);
@@ -179,16 +183,17 @@ export default {
         .map(e => (this.currentTime * 1) + ((e * 1) - this.offset));
     },
     validitySubs() {
-      const filters = this.dialogues
-        .map((e, i) => Object.assign({}, e, { index: i }))
-        .filter((e) => {
-          const isInRange = e.start >= (this.preciseTime - this.offset)
-          && e.end <= (this.preciseTime + this.offset);
-          const tags = e.fragments && e.fragments[0] && e.fragments[0].tags;
-          const isOtherPos = this.type === 'ass' && tags && (tags.pos || tags.alignment !== 2);
-          return isInRange && !isOtherPos;
-          // return isInRange;
-        });
+      // const len = this.dialogues.length;
+      const referenceFilters = this.referenceDialogues
+        .map((e, i) => Object.assign({ reference: true }, e, { selfIndex: i }));
+      const currentDialogues = this.dialogues;
+      // TODO 降低时间复杂度
+      const filters = currentDialogues
+        .concat(referenceFilters)
+        .map((e, i) => ({ ...e, index: i }))
+        .sort((p, n) => (p.start - n.start))
+        .filter(e => this.filter(e));
+      // console.log(filters);
       return filters.map((e, i) => { // eslint-disable-line
         const text = this.type === 'ass' ? e.fragments && e.fragments[0] && e.fragments[0].text : e.text;
         const focus = e.start <= this.preciseTime && e.end >= this.preciseTime;
@@ -294,14 +299,15 @@ export default {
     subtitleInstance: {
       immediate: true,
       deep: true,
-      handler(val) {
+      handler(val) { // eslint-disable-line
         this.hook = 0;
         if (val && val.parsed && !this.isCreateSubtitleMode) {
           this.dialogues = val.parsed.dialogues;
         }
-        if (val && !this.isCreateSubtitleMode) {
-          this.subtitleInstanceBridge = val;
+        if (val && val.referenceSubtitleId !== this.referenceSubtitleId) {
+          this.swicthReferenceSubtitle(val.referenceSubtitleId);
         }
+        // hooks for clear doms
         if (this.createSubElement && !this.subDragTimeLineMoving) {
           this.createSubElement.parentNode &&
           this.createSubElement.parentNode.removeChild(this.createSubElement);
@@ -313,72 +319,56 @@ export default {
       // 当resize的时候，重新render timeline
       this.resetCurrentTime();
     },
-  },
-  mounted() {
-    this.resetCurrentTime(videodata.time);
-    this.computedCanShowAddBtn(this.currentSub);
-    // 初始化组件
-    document.addEventListener('mousemove', this.handleDragingEditor);
-    document.addEventListener('mouseup', this.handleDragEndEditor);
-    document.addEventListener('mousemove', this.handleDragingSub);
-    document.addEventListener('mouseup', this.handleDragEndSub);
-    // 键盘事件
-    document.addEventListener('keydown', this.handleKeyDown);
-    document.addEventListener('keyup', this.handleKeyUp);
-    // 接受seek事件，触发时间轴重新计算
-    this.$bus.$on('seek', (e) => {
-      if (!this.timeLineDraging) {
-        this.preciseTime = e;
-        this.currentTime = parseInt(e, 10);
-        this.currentLeft = ((this.currentTime - e) * this.space) -
-        ((this.offset * this.space) - (this.winWidth / 2));
-      }
-    });
-    // 添加字幕条，需要先播放动画，在往字幕对象新增一条字幕
-    this.$bus.$on('modified-subtitle-bridge', (obj) => {
-      this.createSubElement = document.createElement('div');
-      this.createSubElement.setAttribute('style', `width: 1px;
-        position: absolute;
-        top: ${(6 * this.vh) + 33}px;
-        height: 3vh;
-        max-height: 30px;
-        z-index: 1;
-        background: rgba(255,255,255,0.39);
-        border: 1px solid rgba(255,255,255,0.46);
-        border-radius: 1px;
-        left: ${(this.preciseTime - this.times[0]) * this.space}px`);
-      this.$refs.subtitles && this.$refs.subtitles.appendChild(this.createSubElement);
-      this.createSubElement.style.transition = 'all 0.3s ease-in-out';
-      this.createSubElement.addEventListener('transitionend', (e) => {
-        if (e.propertyName === 'left') {
-          this.afterBridgeAnimation(obj);
+    referenceSubtitleInstance: {
+      immediate: true,
+      deep: true,
+      handler(val) {
+        if (val && this.currentParseReferenceSubtitleId !== val.id) {
+          this.referenceDialogues = [];
+          this.currentParseReferenceSubtitleId = val.id;
+          const isCross = (l, r) => {
+            const nl = l.start < r.start && l.end <= r.start;
+            const rl = r.start < l.start && r.end <= l.start;
+            return !(nl || rl);
+          };
+          if (!val.parsed) {
+            val.once('data', val.parse);
+            val.on('parse', (parsed) => {
+              if (this.dialogues && parsed.dialogues) {
+                this.referenceDialogues =
+                  parsed.dialogues.filter(e => !this.dialogues.some(c => isCross(c, e)));
+              }
+            });
+            val.load();
+          } else if (this.dialogues && val.parsed.dialogues) {
+            this.referenceDialogues =
+              val.parsed.dialogues.filter(e => !this.dialogues.some(c => isCross(c, e)));
+          }
+        } else if (!val) {
+          this.currentParseReferenceSubtitleId = null;
+          this.referenceDialogues = [];
+          if (this.referenceSubtitleId != null) {
+            this.addMessages({
+              type: 'state',
+              content: this.$t('notificationMessage.subtitle.referenceIdNotExist.content'),
+              dismissAfter: 2000,
+            });
+          }
         }
-      }, false);
-      setImmediate(() => {
-        this.createSubElement.style.left = `${(obj.add.start - this.times[0]) * this.space}px`;
-        this.createSubElement.style.width = `${(obj.add.end - obj.add.start) * this.space}px`;
-      });
-    });
-    // 拦截modified-subtitle，push到操作历史记录里面
-    this.$bus.$on('modified-subtitle', ({
-      sub, action, index, before,
-    }) => {
-      // 如果不是撤销或者重复，就记录到历史记录
-      if (action) {
-        this.updateHistory({
-          type: action,
-          index,
-          before,
-          after: cloneDeep(sub.parsed.dialogues[index]),
-        });
-      }
-    });
-    this.$bus.$on(bus.SUBTITLE_EDITOR_UNDO, this.undo);
-    this.$bus.$on(bus.SUBTITLE_EDITOR_REDO, this.redo);
+        if (this.subtitleInstance && !this.isCreateSubtitleMode) {
+          this.subtitleInstance.referenceSubtitleId = this.referenceSubtitleId;
+        }
+      },
+    },
   },
   methods: {
     ...mapMutations({
       toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
+      swicthReferenceSubtitle: subtitleMutations.SWITCH_REFERENCE_SUBTITLE,
+      setCreateMode: windowMutations.SET_CREATE_MODE,
+    }),
+    ...mapActions({
+      addMessages: 'addMessages',
     }),
     computedCanShowAddBtn(currentSub) { // eslint-disable-line
       currentSub = currentSub.filter(e => e.track === 1);
@@ -388,8 +378,9 @@ export default {
         this.newSubHolder = null;
         return;
       }
+      const len = this.dialogues.length + this.referenceDialogues.length;
       // 完全无字幕
-      if (this.dialogues.length === 0) {
+      if (len === 0) {
         this.newSubHolder = {
           distance: this.preciseTime - 0,
           preciseTime: this.preciseTime,
@@ -428,9 +419,10 @@ export default {
           // 当前时间段没有字幕，需要找dialogues中合法的上个字幕
           let insertIndex = 0;
           let last = null;
-          const len = this.dialogues.length;
+          const stuff = this.dialogues.concat(this.referenceDialogues);
+          // const len = stuff.length;
           for (let i = 0; i < len; i += 1) {
-            const e = this.dialogues[i];
+            const e = stuff[i];
             const tags = e.fragments && e.fragments[0] && e.fragments[0].tags;
             const isOtherPos = this.type === 'ass' && tags && (tags.pos || tags.alignment !== 2);
             if (!isOtherPos) {
@@ -451,14 +443,63 @@ export default {
         }
       }
     },
+    getCurrentReferenceCues() {
+      const instance = this.referenceSubtitleInstance;
+      if (instance && instance.parsed && instance.parsed.dialogues) {
+        const filter = instance.parsed.dialogues.filter((e) => {
+          const isInRange = e.start <= this.preciseTime && e.end >= this.preciseTime;
+          const tags = e.fragments && e.fragments[0] && e.fragments[0].tags;
+          const isOtherPos = this.type === 'ass' && tags && (tags.pos || tags.alignment !== 2);
+          return isInRange && !isOtherPos;
+        });
+        return filter.map((e) => {
+          if (e.fragments) {
+            return e.fragments.map(c => c.text).join('\n');
+          }
+          return e.text;
+        }).join('\n');
+      }
+      return null;
+    },
+    filter(e) {
+      const isInRange = e.start >= (this.preciseTime - this.offset)
+      && e.end <= (this.preciseTime + this.offset);
+      const tags = e.fragments && e.fragments[0] && e.fragments[0].tags;
+      const isOtherPos = this.type === 'ass' && tags && (tags.pos || tags.alignment !== 2);
+      return isInRange && !isOtherPos;
+    },
     validityTime(time) {
       return time >= 0 && time <= this.duration ? '' : ' illegal';
     },
-    afterBridgeAnimation(obj) {
+    createMirrorSubtitle(obj) {
+      this.createSubElement = document.createElement('div');
+      this.createSubElement.setAttribute('style', `width: 1px;
+        position: absolute;
+        top: ${(6 * this.vh) + 33}px;
+        height: 3vh;
+        max-height: 30px;
+        z-index: 1;
+        background: rgba(255,255,255,0.39);
+        border: 1px solid rgba(255,255,255,0.46);
+        border-radius: 1px;
+        left: ${(this.preciseTime - this.times[0]) * this.space}px`);
+      this.$refs.subtitles && this.$refs.subtitles.appendChild(this.createSubElement);
+      this.createSubElement.style.transition = 'all 0.3s ease-in-out';
+      this.createSubElement.addEventListener('transitionend', (e) => {
+        if (e.propertyName === 'left') {
+          this.afterMirrorSubtitleAnimation(obj);
+        }
+      }, false);
+      setImmediate(() => {
+        this.createSubElement.style.left = `${(obj.add.start - this.times[0]) * this.space}px`;
+        this.createSubElement.style.width = `${(obj.add.end - obj.add.start) * this.space}px`;
+      });
+    },
+    afterMirrorSubtitleAnimation(obj) {
       // 新增字幕，动画结束，触发modified-subtitle事件
       if (this.newSubHolder) {
         obj.sub.parsed.dialogues.splice(this.newSubHolder.insertIndex, 0, obj.add);
-        this.$bus.$emit('modified-subtitle', {
+        this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
           sub: obj.sub,
           action: 'add',
           index: this.newSubHolder.insertIndex,
@@ -540,8 +581,9 @@ export default {
     },
     updateWhenMoving(offset) {
       // 时间轴偏移计算
+      const preciseTime = this.dragStartTime - (offset / this.space);
       this.currentLeft = this.dragStartLeft + offset;
-      this.preciseTime = this.dragStartTime - (offset / this.space);
+      this.preciseTime = preciseTime > 0 ? preciseTime : 0;
       this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
       this.$bus.$emit('seek', this.preciseTime);
     },
@@ -776,22 +818,22 @@ export default {
                   this.createSubElement.style.position = 'absolute';
                   this.createSubElement.style.left = `${sub.maxLeft}px`;
                 } else {
-                  let newStart = sub.originStart +
-                    (Math.floor(sub.left - sub.originLeft) / this.space);
-                  newStart += this.step;
-                  newStart = newStart < 0 ? 0 : newStart;
-                  let newEnd = newStart + (sub.originEnd - sub.originStart);
-                  newStart = parseFloat(newStart.toFixed(2), 10);
-                  newEnd = parseFloat(newEnd.toFixed(2), 10);
-                  const before = cloneDeep(this.subtitleInstance.parsed.dialogues[sub.index]);
-                  this.subtitleInstance.parsed.dialogues[sub.index].start = newStart;
-                  this.subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
-                  this.$bus.$emit('modified-subtitle', {
-                    sub: this.subtitleInstance,
-                    action: 'replace',
-                    index: sub.index,
-                    before,
-                  });
+                  // let newStart = sub.originStart +
+                  //   (Math.floor(sub.left - sub.originLeft) / this.space);
+                  // newStart += this.step;
+                  // newStart = newStart < 0 ? 0 : newStart;
+                  // let newEnd = newStart + (sub.originEnd - sub.originStart);
+                  // newStart = parseFloat(newStart.toFixed(2), 10);
+                  // newEnd = parseFloat(newEnd.toFixed(2), 10);
+                  // const before = cloneDeep(this.subtitleInstance.parsed.dialogues[sub.index]);
+                  // this.subtitleInstance.parsed.dialogues[sub.index].start = newStart;
+                  // this.subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
+                  // this.$bus.$emit('modified-subtitle', {
+                  //   sub: this.subtitleInstance,
+                  //   action: 'replace',
+                  //   index: sub.index,
+                  //   before,
+                  // });
                   this.hook = this.step;
                 }
                 // 时间轴往右运动一个步长
@@ -835,10 +877,10 @@ export default {
               const distance = sub.minLeft - ((3 * this.winWidth) - bMaxR);
               // 当拖拽的字幕条已经快差一步就全部显示到窗口里面的时候
               // DOM镜像就定位到时间轴上面
-              if ((distance + (this.step * this.space)) > 0) {
-                this.createSubElement.style.position = 'absolute';
-                this.createSubElement.style.left = `${(this.subDragCurrentSub.minLeft)}px`;
-              }
+              // if ((distance + (this.step * this.space)) > 0) {
+              //   this.createSubElement.style.position = 'absolute';
+              //   this.createSubElement.style.left = `${(this.subDragCurrentSub.minLeft)}px`;
+              // }
               // 当拖拽的字幕条已经全部显示到窗口里面，就结束定时运动
               // 结束运动，就把镜像删掉，当前拖拽的字幕条显示
               if (distance > 0) {
@@ -858,23 +900,29 @@ export default {
               } else {
                 // 如果字幕条往左运动一个步长还不超出这个字幕的最左定位
                 // 就让这个字幕条在时间轴上面往前加一步
-                if (this.subDragCurrentSub.maxLeft > (sub.left + (this.step * this.space))) {
-                  let newStart = sub.originStart +
-                    (Math.floor(sub.left - sub.originLeft) / this.space);
-                  newStart -= this.step;
-                  newStart = newStart < 0 ? 0 : newStart;
-                  let newEnd = newStart + (sub.originEnd - sub.originStart);
-                  newStart = parseFloat(newStart.toFixed(2), 10);
-                  newEnd = parseFloat(newEnd.toFixed(2), 10);
-                  const before = cloneDeep(this.subtitleInstance.parsed.dialogues[sub.index]);
-                  this.subtitleInstance.parsed.dialogues[sub.index].start = newStart;
-                  this.subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
-                  this.$bus.$emit('modified-subtitle', {
-                    sub: this.subtitleInstance,
-                    action: 'replace',
-                    index: sub.index,
-                    before,
-                  });
+                // if (this.subDragCurrentSub.maxLeft > (sub.left + (this.step * this.space))) {
+                //   let newStart = sub.originStart +
+                //     (Math.floor(sub.left - sub.originLeft) / this.space);
+                //   newStart -= this.step;
+                //   newStart = newStart < 0 ? 0 : newStart;
+                //   let newEnd = newStart + (sub.originEnd - sub.originStart);
+                //   newStart = parseFloat(newStart.toFixed(2), 10);
+                //   newEnd = parseFloat(newEnd.toFixed(2), 10);
+                //   const before = cloneDeep(this.subtitleInstance.parsed.dialogues[sub.index]);
+                //   this.subtitleInstance.parsed.dialogues[sub.index].start = newStart;
+                //   this.subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
+                //   this.$bus.$emit('modified-subtitle', {
+                //     sub: this.subtitleInstance,
+                //     action: 'replace',
+                //     index: sub.index,
+                //     before,
+                //   });
+                // }
+                if ((left - this.currentLeft) < (sub.minLeft + (this.step * this.space))) {
+                  this.createSubElement.style.position = 'absolute';
+                  this.createSubElement.style.left = `${sub.minLeft}px`;
+                } else {
+                  this.hook = this.step;
                 }
                 // 时间轴往左运动一个步长
                 this.$refs.timeLine.addEventListener('transitionend', this.timeLineTransitionend, false);
@@ -882,7 +930,7 @@ export default {
                 this.currentLeft += this.step * this.space;
                 this.preciseTime -= this.step;
                 this.lock = true;
-                this.step += 0.3; // 步长自增
+                // this.step += 0.3; // 步长自增
               }
             }, this.animationTime);
           }
@@ -946,35 +994,81 @@ export default {
     finishSubDrag(sub) { // eslint-disable-line
       let newStart = 0;
       let newEnd = 0;
+      const originStart = parseFloat(sub.originStart.toFixed(2), 10);
+      const originEnd = parseFloat(sub.originEnd.toFixed(2), 10);
       if (this.subDragMoving) {
         if (sub.left > sub.maxLeft) {
           sub.left = sub.maxLeft;
         }
-        newStart = sub.originStart +
-          (Math.floor(sub.left - sub.originLeft) / this.space) + this.hook;
-        newEnd = newStart + (sub.originEnd - sub.originStart);
+        let hook = this.hook - this.step;
+        hook = hook > 0 ? hook : 0;
+        newStart = originStart + (Math.floor(sub.left - sub.originLeft) / this.space) + hook;
+        newEnd = newStart + (originEnd - originStart);
         newStart = newStart < 0 ? 0 : newStart;
         newStart = parseFloat(newStart.toFixed(2), 10);
         newEnd = parseFloat(newEnd.toFixed(2), 10);
       } else if (this.subLeftDraging) {
-        newStart = sub.originStart + ((sub.left - sub.originLeft) / this.space);
-        newEnd = sub.originEnd;
+        newStart = originStart + ((sub.left - sub.originLeft) / this.space);
+        newEnd = originEnd;
         newStart = parseFloat(newStart.toFixed(2), 10);
       } else if (this.subRightDraging) {
-        newStart = sub.originStart;
-        newEnd = (sub.originEnd * 1) - ((sub.right - sub.originRight) / this.space);
+        newStart = originStart;
+        newEnd = originEnd - ((sub.right - sub.originRight) / this.space);
         newEnd = parseFloat(newEnd.toFixed(2), 10);
       }
-      if (newStart && newEnd && (newStart !== sub.originStart || newEnd !== sub.originEnd)) {
-        const before = cloneDeep(this.subtitleInstance.parsed.dialogues[sub.index]);
-        this.subtitleInstance.parsed.dialogues[sub.index].start = newStart;
-        this.subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
-        this.$bus.$emit('modified-subtitle', {
-          sub: this.subtitleInstance,
-          action: 'replace',
-          index: sub.index,
-          before,
-        });
+      if (newStart && newEnd && (newStart !== originStart || newEnd !== originEnd)) {
+        if (!sub.reference) {
+          const before = cloneDeep(this.subtitleInstance.parsed.dialogues[sub.index]);
+          const subtitleInstance = cloneDeep(this.subtitleInstance);
+          if (subtitleInstance.type !== 'modified' && !subtitleInstance.reference) {
+            const reference = cloneDeep(this.subtitleInstance);
+            delete reference.data;
+            subtitleInstance.reference = reference;
+          }
+          subtitleInstance.parsed.dialogues[sub.index].start = newStart;
+          subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
+          // TODO
+          this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+            sub: subtitleInstance,
+            action: 'replace',
+            index: sub.index,
+            before,
+          });
+        } else {
+          const add = cloneDeep(sub);
+          delete add.reference;
+          delete add.selfIndex;
+          add.start = newStart;
+          add.end = newEnd;
+          let subtitleInstance = null;
+          let index = 0;
+          if (!this.subtitleInstance || this.isCreateSubtitleMode) {
+            subtitleInstance = {
+              parsed: {
+                dialogues: [],
+              },
+              metaInfo: {
+                language: 'zh-CN',
+                name: '',
+                format: 'online',
+              },
+              type: 'online',
+              reference: null,
+            };
+          } else {
+            subtitleInstance = this.subtitleInstance.type !== 'modified' ? cloneDeep(this.subtitleInstance) : this.subtitleInstance;
+          }
+          index = subtitleInstance.parsed.dialogues.length;
+          this.setCreateMode(false);
+          subtitleInstance.parsed.dialogues.splice(index, 0, add);
+          this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+            sub: subtitleInstance,
+            action: 'addfromreference',
+            index,
+            selfIndex: sub.selfIndex,
+            before: null,
+          });
+        }
       }
       // 拖拽字幕条结束，移除hover的UI
       // const className = `sub${sub.index === this.chooseIndexs ? ' focus' : ''}`;
@@ -996,15 +1090,38 @@ export default {
         this.createSubElement = null;
       }
     },
-    handleKeyDown(e) {
+    handleKeyDown(e) { // eslint-disable-line
       if (e && (e.keyCode === 46 || e.keyCode === 8) && this.chooseIndexs !== -1) {
-        const before = this.subtitleInstance.parsed.dialogues.splice(this.chooseIndexs, 1)[0];
-        this.$bus.$emit('modified-subtitle', {
-          sub: this.subtitleInstance,
-          action: 'del',
-          index: this.chooseIndexs,
-          before,
-        });
+        const subtitleInstance = cloneDeep(this.subtitleInstance);
+        // 判断删除的是不是参考
+        if (subtitleInstance && subtitleInstance.parsed && subtitleInstance.parsed.dialogues &&
+          subtitleInstance.parsed.dialogues.length > this.chooseIndexs) {
+          const before = subtitleInstance.parsed.dialogues.splice(this.chooseIndexs, 1)[0];
+          this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+            sub: subtitleInstance,
+            action: 'del',
+            index: this.chooseIndexs,
+            before,
+          });
+        } else if (subtitleInstance && subtitleInstance.parsed &&
+          subtitleInstance.parsed.dialogues) {
+          const selfIndex = this.chooseIndexs - subtitleInstance.parsed.dialogues.length;
+          this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+            sub: subtitleInstance,
+            action: 'delfromreference',
+            index: this.chooseIndexs,
+            before: null,
+            selfIndex,
+          });
+        } else {
+          this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+            sub: subtitleInstance,
+            action: 'delfromreference',
+            index: this.chooseIndexs,
+            before: null,
+            selfIndex: this.chooseIndexs,
+          });
+        }
         this.chooseIndexs = -1;
         this.hoverIndex = -1;
       } else if (e && e.keyCode === 32 && this.spaceKeyPressStartTime === 0) {
@@ -1015,7 +1132,7 @@ export default {
     },
     handleKeyUp(e) {
       const distance = Date.now() - this.spaceKeyPressStartTime;
-      if (e && e.keyCode === 32 && distance < 1000 && this.lastPaused) {
+      if (e && e.keyCode === 32 && distance < 500 && this.lastPaused) {
         // 触发暂停/播放
         this.$bus.$emit('toggle-playback');
       }
@@ -1058,20 +1175,38 @@ export default {
     isHighlight(time) {
       return this.getSecond(time) % 10 === 0;
     },
-    parsedFragments(cues) {
-      if (this.type === 'ass' && cues) {
-        let currentText = '';
-        cues.fragments.forEach((cue) => {
-          currentText += cue.text;
-        });
-        return Object.assign({}, cues, { text: currentText });
-      }
-      return cues;
-    },
     handleClickProfessional() {
       // 如果退出高级模式，需要恢复原来播放尺寸
       // 进入高级模式，需要设定window的信息，在本组件的watch里
-      this.toggleProfessional(false);
+      // this.toggleProfessional(false);
+      this.$bus.$emit(bus.SUBTITLE_EDITOR_EXIT);
+    },
+    intercept({
+      sub, action, index, before, selfIndex,
+    }) {
+      // 如果不是撤销或者重复，就记录到历史记录
+      if (action) {
+        const job = {
+          type: action,
+          index,
+          before,
+          after: sub && sub.parsed ? cloneDeep(sub.parsed.dialogues[index]) : null,
+        };
+        if (action === 'addfromreference') {
+          job.referenceBefore = this.referenceDialogues.splice(selfIndex, 1)[0];
+          job.selfIndex = selfIndex;
+          this.$nextTick(() => {
+            this.chooseIndexs = index;
+          });
+        } else if (action === 'delfromreference') {
+          job.referenceBefore = this.referenceDialogues.splice(selfIndex, 1)[0];
+          job.selfIndex = selfIndex;
+        }
+        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
+          sub,
+        });
+        this.updateHistory(job);
+      }
     },
     updateHistory(step) {
       if (this.currentIndex + 1 < this.history.length) {
@@ -1080,12 +1215,12 @@ export default {
       this.history.push(step);
       this.currentIndex += 1;
     },
-    undo() {
+    undo() { // eslint-disable-line
       const pick = this.history[this.currentIndex];
       if (pick && pick.type === 'add') {
         const sub = cloneDeep(this.subtitleInstance);
         sub.parsed.dialogues.splice(pick.index);
-        this.$bus.$emit('modified-subtitle', {
+        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
           sub,
         });
         this.currentIndex -= 1;
@@ -1099,7 +1234,7 @@ export default {
           track: pick.before.track,
         };
         sub.parsed.dialogues.splice(pick.index, 0, before);
-        this.$bus.$emit('modified-subtitle', {
+        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
           sub,
         });
         this.currentIndex -= 1;
@@ -1113,13 +1248,24 @@ export default {
           track: pick.before.track,
         };
         sub.parsed.dialogues.splice(pick.index, 1, before);
-        this.$bus.$emit('modified-subtitle', {
+        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
           sub,
         });
         this.currentIndex -= 1;
+      } else if (pick && pick.type === 'addfromreference') {
+        const sub = cloneDeep(this.subtitleInstance);
+        sub.parsed.dialogues.splice(pick.index);
+        this.referenceDialogues.splice(pick.selfIndex, 0, pick.referenceBefore);
+        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
+          sub,
+        });
+        this.currentIndex -= 1;
+      } else if (pick && pick.type === 'delfromreference') {
+        this.referenceDialogues.splice(pick.selfIndex, 0, pick.referenceBefore);
+        this.currentIndex -= 1;
       }
     },
-    redo() {
+    redo() { // eslint-disable-line
       const pick = this.history[this.currentIndex + 1];
       if (pick && pick.type === 'add') {
         const sub = cloneDeep(this.subtitleInstance);
@@ -1131,14 +1277,14 @@ export default {
           track: pick.after.track,
         };
         sub.parsed.dialogues.splice(pick.index, 0, after);
-        this.$bus.$emit('modified-subtitle', {
+        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
           sub,
         });
         this.currentIndex += 1;
       } else if (pick && pick.type === 'del') {
         const sub = cloneDeep(this.subtitleInstance);
         sub.parsed.dialogues.splice(pick.index, 1);
-        this.$bus.$emit('modified-subtitle', {
+        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
           sub,
         });
         this.currentIndex += 1;
@@ -1152,12 +1298,69 @@ export default {
           track: pick.after.track,
         };
         sub.parsed.dialogues.splice(pick.index, 1, after);
-        this.$bus.$emit('modified-subtitle', {
+        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
           sub,
         });
         this.currentIndex += 1;
+      } else if (pick && pick.type === 'addfromreference') {
+        const sub = cloneDeep(this.subtitleInstance);
+        const after = {
+          start: pick.after.start,
+          end: pick.after.end,
+          tags: pick.after.tags,
+          text: pick.after.text,
+          track: pick.after.track,
+        };
+        sub.parsed.dialogues.splice(pick.index, 0, after);
+        this.referenceDialogues.splice(pick.selfIndex, 1);
+        this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
+          sub,
+        });
+        this.currentIndex += 1;
+      } else if (pick && pick.type === 'delfromreference') {
+        this.referenceDialogues.splice(pick.selfIndex, 1);
+        this.currentIndex += 1;
       }
     },
+  },
+  mounted() {
+    this.resetCurrentTime(videodata.time);
+    this.computedCanShowAddBtn(this.currentSub);
+    // 初始化组件
+    document.addEventListener('mousemove', this.handleDragingEditor);
+    document.addEventListener('mouseup', this.handleDragEndEditor);
+    document.addEventListener('mousemove', this.handleDragingSub);
+    document.addEventListener('mouseup', this.handleDragEndSub);
+    // 键盘事件
+    document.addEventListener('keydown', this.handleKeyDown);
+    document.addEventListener('keyup', this.handleKeyUp);
+    // 接受seek事件，触发时间轴重新计算
+    this.$bus.$on('seek', (e) => {
+      if (!this.timeLineDraging) {
+        this.preciseTime = e;
+        this.currentTime = parseInt(e, 10);
+        this.currentLeft = ((this.currentTime - e) * this.space) -
+        ((this.offset * this.space) - (this.winWidth / 2));
+      }
+    });
+    // 添加字幕条，需要先播放动画，在往字幕对象新增一条字幕
+    this.$bus.$on(bus.CREATE_MIRROR_SUBTITLE, this.createMirrorSubtitle);
+    // 拦截modified-subtitle，push到操作历史记录里面
+    this.$bus.$on(bus.WILL_MODIFIED_SUBTITLE, this.intercept);
+    //
+    this.$bus.$on(bus.SUBTITLE_EDITOR_UNDO, this.undo);
+    this.$bus.$on(bus.SUBTITLE_EDITOR_REDO, this.redo);
+    //
+    this.$bus.$on(bus.SUBTITLE_EDITOR_EXIT, () => {
+      if (!this.isCreateSubtitleMode) {
+        this.addMessages({
+          type: 'state',
+          content: this.$t('notificationMessage.subtitle.exitProfessionalMode.content'),
+          dismissAfter: 2000,
+        });
+      }
+      this.toggleProfessional(false);
+    });
   },
   destroyed() {
     document.removeEventListener('mousemove', this.handleDragingEditor);
@@ -1166,9 +1369,11 @@ export default {
     document.removeEventListener('mouseup', this.handleDragEndSub);
     document.removeEventListener('keydown', this.handleKeyDown);
     document.removeEventListener('keyup', this.handleKeyUp);
-    // this.$bus.$off('modified-subtitle');
-    // this.$bus.$off('modified-subtitle-bridge');
-    // this.$bus.$off('seek');
+    this.$bus.$off(bus.SUBTITLE_EDITOR_EXIT);
+    this.$bus.$off(bus.SUBTITLE_EDITOR_UNDO);
+    this.$bus.$off(bus.SUBTITLE_EDITOR_REDO);
+    this.$bus.$off(bus.WILL_MODIFIED_SUBTITLE);
+    this.$bus.$off(bus.CREATE_MIRROR_SUBTITLE);
   },
 };
 </script>
@@ -1335,6 +1540,11 @@ export default {
       //   opacity: 0;
       //   // transition: all 0.3s ease-in-out;
       // }
+      &.reference {
+        background: rgba(255,255,255,0.05);
+        // background-color: aqua;
+        border-color: rgba(151,151,151,0.30);
+      }
       &.focus {
         background: rgba(255,255,255,0.50);
         border-color: rgba(255,255,255,0.15);
@@ -1409,6 +1619,21 @@ export default {
     .subtitle-editor-exit {
       width: 60%;
       height: 60%;
+    }
+  }
+  .sub-editor-body {
+    position: absolute;
+    left: 50%;
+    bottom: 2.88184%;
+    transform-origin: bottom left;
+    z-index: 5;
+    transform: translate(-50%, 0);
+    .referenceText {
+      background: rgba(0,0,0,0.30);
+      border-radius: 3px 3px 0 0;
+      text-align: center;
+      margin-bottom: 5px;
+      white-space: pre;
     }
   }
   .sub-editor-foot {

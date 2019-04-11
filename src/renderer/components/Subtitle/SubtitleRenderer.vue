@@ -4,6 +4,7 @@
       @click.stop="handleClickSubContainer($event, i)"
       @dblclick.stop="handleDoubleClickSubContainer($event, i)"
       v-for="(cue, i) in currentCues"
+      v-fade-in="!(isProfessional && cue.reference && !paused)"
       :key="i"
       :style="{
         writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
@@ -20,6 +21,7 @@
           :text="cue.text"
           :settings="cue.tags"
           :style="{
+            opacity: cue.reference ? '0.3' : '0.9',
             zoom: isFirstSub ? `${scaleNum}` : `${secondarySubScale}`,
             lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
           }"></CueRenderer>
@@ -50,7 +52,7 @@
       </div>
     </div>
     <div
-      v-if="(isProfessional && showAddInput)"
+      v-fade-in="(isProfessional && showAddInput && paused)"
       @click.stop="handleClickAddSub"
       :class="'subContainer subtitle-alignment2'+/*`${paused && !isEditable ? ' enable-hover': ''}`*/`${isEditable && index === null ? ' editable': ''}`"
       :style="{
@@ -95,6 +97,7 @@ import { mapGetters, mapMutations } from 'vuex';
 import { isEqual, castArray, isEmpty, cloneDeep } from 'lodash';
 import { Subtitle as subtitleMutations, Window as windowMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
+import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import CueRenderer from './CueRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
 
@@ -102,6 +105,10 @@ export default {
   name: 'subtitle-renderer',
   props: {
     subtitleInstance: SubtitleInstance,
+    referenceDialogues: {
+      type: Array,
+      default: () => [],
+    },
     playlistShow: {
       type: Boolean,
       default: false,
@@ -168,7 +175,7 @@ export default {
   computed: {
     ...mapGetters([
       'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleList', 'winHeight',
-      'paused', 'isFullScreen', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'enabledSecondarySub', 'chosenSize',
+      'paused', 'isFullScreen', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'enabledSecondarySub', 'chosenSize', 'currentTime',
       'isEditable', 'isProfessional', 'winRatio', 'winWidth', 'winHeight', 'chosenStyle', 'isCreateSubtitleMode',
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
     ]),
@@ -243,7 +250,13 @@ export default {
     },
     paused(val) {
       if (val === false) {
-        this.editable = false;
+        // this.editable = false;
+        this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+      }
+    },
+    currentTime() {
+      if (this.paused) {
+        this.requestId = requestAnimationFrame(this.currentTimeUpdate);
       }
     },
     editVal(val) {
@@ -302,7 +315,6 @@ export default {
     ...mapMutations({
       updateDuration: subtitleMutations.DURATIONS_UPDATE,
       toggleEditable: windowMutations.TOGGLE_EDITABLE,
-      toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
       setCreateMode: windowMutations.SET_CREATE_MODE,
     }),
     filter(cue) {
@@ -401,21 +413,32 @@ export default {
         this.$emit('update:chooseIndexs', index);
       }
     },
-    handleBlurTextArea(e, i) {
+    handleBlurTextArea(e, i) { // eslint-disable-line
+      // const startTime = Date.now();
       const editVal = this.editVal.trim();
       if (i !== null) {
-        this.$nextTick(() => {
+        this.$nextTick(() => { // eslint-disable-line
           // 处理是否真正修改了字符
-          if (editVal !== this.currentCues[i].text) {
+          const currentCue = this.currentCues[i];
+          if (!currentCue.reference && editVal !== currentCue.text) {
             // 修改当前currentCues
-            this.currentCues[i].text = editVal;
-            this.$set(this.currentCues, i, this.currentCues[i]);
+            currentCue.text = editVal;
+            this.$set(this.currentCues, i, currentCue);
             // 保存副本
             // 本地字幕
-            const text = this.currentCues[i].text;
-            const index = this.currentCues[i].index;
+            const text = currentCue.text;
+            const index = currentCue.index;
             let before = null;
-            const subtitleInstance = cloneDeep(this.subtitleInstance);
+            const subtitleInstance = this.subtitleInstance.type !== 'modified' ?
+              cloneDeep(this.subtitleInstance) : this.subtitleInstance;
+            // if (subtitleInstance.type !== 'modified' && !subtitleInstance.reference) {
+            //   const reference = cloneDeep(this.subtitleInstance);
+            //   delete reference.data;
+            //   subtitleInstance.reference = reference;
+            // }
+            // if (subtitleInstance.type !== 'modified' && !subtitleInstance.referenceId) {
+            //   subtitleInstance.referenceId = this.subtitleInstance.id;
+            // }
             if (subtitleInstance.metaInfo && subtitleInstance.metaInfo.format === 'ass') {
               if (text.length === 0) {
                 subtitleInstance.parsed.dialogues.splice(index, 1);
@@ -430,12 +453,62 @@ export default {
                 subtitleInstance.parsed.dialogues[index].text = text;
               }
             }
-            this.$bus.$emit('modified-subtitle', {
+            if (this.isProfessional) {
+              this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+                sub: subtitleInstance,
+                action: 'replace',
+                index,
+                before,
+              });
+            } else {
+              this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
+                sub: subtitleInstance,
+              });
+            }
+          } else if (currentCue.reference) {
+            const currentCue = this.currentCues[i];
+            currentCue.text = editVal;
+            this.$set(this.currentCues, i, currentCue);
+            const sub = cloneDeep(currentCue);
+            delete sub.reference;
+            delete sub.selfIndex;
+            let subtitleInstance = null;
+            let index = 0;
+            if (!this.subtitleInstance || this.isCreateSubtitleMode) {
+              subtitleInstance = {
+                parsed: {
+                  dialogues: [],
+                },
+                metaInfo: {
+                  language: 'zh-CN',
+                  name: '',
+                  format: 'online',
+                },
+                type: 'online',
+                reference: null,
+              };
+            } else {
+              subtitleInstance = this.subtitleInstance.type !== 'modified' ? cloneDeep(this.subtitleInstance) : this.subtitleInstance;
+              // if (subtitleInstance.type !== 'modified' && !subtitleInstance.reference) {
+              //   const reference = cloneDeep(this.subtitleInstance);
+              //   delete reference.data;
+              //   subtitleInstance.reference = reference;
+              // }
+              // if (subtitleInstance.type !== 'modified' && !subtitleInstance.referenceId) {
+              //   subtitleInstance.referenceId = this.subtitleInstance.id;
+              // }
+              index = subtitleInstance.parsed.dialogues.length;
+            }
+            this.setCreateMode(false);
+            subtitleInstance.parsed.dialogues.splice(index, 0, sub);
+            this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
               sub: subtitleInstance,
-              action: 'replace',
+              action: 'addfromreference',
               index,
-              before,
+              selfIndex: currentCue.selfIndex,
+              before: null,
             });
+            this.$emit('update:chooseIndexs', -1);
           }
           if (this.index === i) {
             this.toggleEditable(false);
@@ -443,12 +516,15 @@ export default {
             this.index = null;
             this.rows = 1;
           }
+          this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+          // console.log(Date.now() - startTime);
         });
       } else {
         if (editVal !== '' && this.newSubHolder) {
           const sub = Object.assign({}, JSON.parse(JSON.stringify(this.newSubHolder.last)), {
             end: parseFloat(this.newSubHolder.preciseTime.toFixed(2), 10) + 0.01,
           });
+          delete sub.reference;
           if (this.newSubHolder.distance > 0.5) {
             sub.start = sub.end - 0.5;
           } else {
@@ -459,19 +535,27 @@ export default {
           } else {
             sub.text = editVal;
           }
-          const subtitleInstance = !this.subtitleInstance || this.isCreateSubtitleMode ? {
-            parsed: {
-              dialogues: [],
-            },
-            metaInfo: {
-              language: 'zh-CN',
-              name: '',
-              format: 'online',
-            },
-            type: 'online',
-          } : cloneDeep(this.subtitleInstance);
+          let subtitleInstance = null;
+          if (!this.subtitleInstance || this.isCreateSubtitleMode) {
+            subtitleInstance = {
+              parsed: {
+                dialogues: [],
+              },
+              metaInfo: {
+                language: 'zh-CN',
+                name: '',
+                format: 'online',
+              },
+              type: 'online',
+              reference: null,
+            };
+          } else {
+            subtitleInstance = this.subtitleInstance.type !== 'modified' ? cloneDeep(this.subtitleInstance) : this.subtitleInstance;
+          }
           this.setCreateMode(false);
-          this.$bus.$emit('modified-subtitle-bridge', { sub: subtitleInstance, add: sub, index: this.newSubHolder.insertIndex });
+          this.$bus.$emit(bus.CREATE_MIRROR_SUBTITLE, {
+            sub: subtitleInstance, add: sub, index: this.newSubHolder.insertIndex,
+          });
         }
         this.toggleEditable(false);
         this.editVal = '';
@@ -484,7 +568,6 @@ export default {
       const browserWindow = remote.BrowserWindow;
       const focusWindow = browserWindow.getFocusedWindow();
       const checkCmdOrCtrl = (process.platform === 'darwin' && e.metaKey) || (process.platform !== 'darwin' && e.ctrlKey);
-      console.log(e.keyCode);
       if (e && e.keyCode === 27) {
         e.target && e.target.blur();
       } else if (e && e.keyCode === 65 && checkCmdOrCtrl) { // c+a
@@ -500,7 +583,6 @@ export default {
       } else if (e && e.keyCode === 90 && checkCmdOrCtrl && e.shiftKey) { // c+s+z
         focusWindow.webContents.redo();
       } else if (e && e.keyCode === 13 && !e.shiftKey) {
-        // console.log(e);
         e.target.blur();
       }
     },
@@ -513,16 +595,11 @@ export default {
         //   // return;
         // }
         if (!this.isFullScreen) {
-          this.toggleProfessional(false);
+          // this.$bus.$emit(bus.SUBTITLE_EDITOR_EXIT);
         }
       }
     },
     handleKeyUp() {
-    },
-    handleClickProfessional() {
-      // 如果退出高级模式，需要恢复原来播放尺寸
-      // 进入高级模式，需要设定window的信息，在本组件的watch里
-      this.toggleProfessional(!this.isProfessional);
     },
     avaliableClass(index) {
       if (!this.isVtt) {
@@ -550,11 +627,20 @@ export default {
       const { lastCurrentTime } = this;
       this.setCurrentCues(currentTime - (subtitleDelay / 1000));
       this.updateVideoSegments(lastCurrentTime, currentTime);
-      this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+      if (!this.paused) {
+        this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+      }
     },
-    setCurrentCues(currentTime) {
-      if (!this.subtitleInstance || !this.subtitleInstance.parsed) return;
-      const parsedData = this.subtitleInstance.parsed.dialogues.map((e, i) => ({ ...e, index: i }));
+    setCurrentCues(currentTime) { // eslint-disable-line
+      const currentDialogues = this.subtitleInstance && this.subtitleInstance.parsed ?
+        this.subtitleInstance.parsed.dialogues : [];
+      if ((currentDialogues.length + this.referenceDialogues.length) === 0) return;
+      const parsedData = this.referenceDialogues
+        .map((e, i) => ({
+          ...e, reference: true, selfIndex: i,
+        }))
+        .concat(currentDialogues)
+        .map((e, i) => ({ ...e, index: i }));
       if (parsedData) {
         const cues = parsedData
           .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');
@@ -851,12 +937,6 @@ export default {
 </script>
 <style lang="scss" scoped>
 .professional {
-  position: absolute;
-  left: 50%;
-  bottom: 2.88184%;
-  transform-origin: bottom left;
-  z-index: 5;
-  transform: translate(-50%, 0);
   .subContainer {
     position: static;
     transform: translate(0, 0)!important;

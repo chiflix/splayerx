@@ -115,7 +115,7 @@
                     :style="{
                       height: `${itemHeight}px`,
                     }">
-                    <div class="text">{{ '创建字幕' }}</div>
+                    <div class="text">{{ $t('subtitle.createSubtitle') }}</div>
                   </div>
                   <div v-if="loadingTypes.length > 0">
                     <div v-for="(item, index) in loadingTypes"
@@ -158,7 +158,7 @@ import difference from 'lodash/difference';
 import debounce from 'lodash/debounce';
 import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
-import { Window as windowMutations } from '@/store/mutationTypes';
+import { Window as windowMutations, Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
@@ -430,11 +430,13 @@ export default {
     ...mapMutations({
       toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
       setCreateMode: windowMutations.SET_CREATE_MODE,
+      swicthReferenceSubtitle: subtitleMutations.SWITCH_REFERENCE_SUBTITLE,
     }),
     handleCreateBtnClick() {
       // 当点击创建按钮后，先暂停播放、再切换高级编辑模式
       if (!this.paused) this.$bus.$emit('toggle-playback');
       this.setCreateMode(true);
+      this.swicthReferenceSubtitle(null);
       this.toggleProfessional(true);
     },
     shiftItemHover() {

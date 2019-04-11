@@ -31,8 +31,9 @@
 
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, mapMutations } from 'vuex';
 import path from 'path';
+import { Video as videoMutations } from '@/store/mutationTypes';
 import { Video as videoActions } from '@/store/actionTypes';
 import BaseVideoPlayer from './BaseVideoPlayer.vue';
 import { videodata } from '../../store/video';
@@ -67,6 +68,9 @@ export default {
       switchAudioTrack: videoActions.SWITCH_AUDIO_TRACK,
       removeAllAudioTrack: videoActions.REMOVE_ALL_AUDIO_TRACK,
       updatePlayinglistRate: videoActions.UPDATE_PLAYINGLIST_RATE,
+    }),
+    ...mapMutations({
+      updateVideoCurrentTime: videoMutations.CURRENT_TIME_UPDATE,
     }),
     onMetaLoaded(event) {
       this.videoElement = event.target;
@@ -352,6 +356,8 @@ export default {
     });
     this.$bus.$on('seek', (e) => {
       this.seekTime = [e];
+      // update vuex currentTime to use some where
+      this.updateVideoCurrentTime(e);
       // todo: use vuex get video element src
       const filePath = decodeURI(this.src);
       const indexOfLastDot = filePath.lastIndexOf('.');
