@@ -38,6 +38,7 @@
         "repo": "splayerx"
       }
     ],
+    "afterPack": "scripts/afterPack.js",
     "productName": "SPlayer",
     "appId": "org.splayer.splayerx",
     "compression": "maximum",
