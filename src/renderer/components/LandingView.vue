@@ -46,14 +46,48 @@
       :style="{
         backgroundColor: maskBackground
       }"/>
-    <playlist
-      :lastPlayedFile="lastPlayedFile"
-      :isFullScreen="isFullScreen"
-      :winWidth="winWidth"
-      :filePathNeedToDelete="filePathNeedToDelete"
-      @displayInfo="displayInfoUpdate"/>
+    <div class="controller"
+      :style="{
+        transform: isFullScreen ? '' : `translateX(${move}px)`,
+        bottom : winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
+        transition: tranFlag ? 'transform 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
+      }">
+      <div class="playlist no-drag"
+        :style="{marginLeft: this.winWidth > 1355 ? `${50 / 1355 * this.winWidth}px` : '50px'}">
+        <div class="button"
+          :style="{
+            height:`${thumbnailHeight}px`,
+            width:`${thumbnailWidth}px`,
+            marginRight: `${marginRight}px`,
+          }"
+          @click="openOrMove">
+          <div class="btnMask">
+            <Icon class="addUi" type="add"/>
+          </div>
+        </div>
+        <VideoItem v-for="(item, index) in lastPlayedFile"
+          :key="item.quickHash"
+          :index="index"
+          :firstIndex="firstIndex"
+          :lastIndex="lastIndex"
+          :isInRange="index + 1 >= firstIndex && index + 1 <= lastIndex"
+          :item="item"
+          :thumbnailWidth="thumbnailWidth"
+          :thumbnailHeight="thumbnailHeight"
+          :shifting="shifting"
+          :style="{
+            marginRight: `${marginRight}px`,
+          }"
+          @delete-item="deleteItem"
+          @next-page="lastIndex = lastPlayedFile.length"
+          @previous-page="firstIndex = 0"
+          @showShortcutImage="showShortcut(true)"
+          @showLandingLogo="showShortcut(false)"
+          @displayInfo="displayInfoUpdate">
+        </VideoItem>
+      </div>
+    </div>
     <NotificationBubble/>
-
   </div>
 </template>
 
@@ -63,7 +97,7 @@ import { mapState, mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
-import Playlist from './LandingView/Playlist.vue';
+import VideoItem from './LandingView/VideoItem.vue';
 import NotificationBubble from './NotificationBubble.vue';
 
 export default {
@@ -82,14 +116,31 @@ export default {
       isDragging: false,
       filePathNeedToDelete: '',
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
+      displayInfo: [],
+      tranFlag: true,
+      shifting: false,
+      firstIndex: 0,
     };
   },
   watch: {
+    firstIndex() {
+      this.shifting = true;
+    },
+    lastIndex() {
+      this.shifting = true;
+    },
+    shifting(val) {
+      if (val) {
+        setTimeout(() => {
+          this.shifting = false;
+        }, 400);
+      }
+    },
   },
   components: {
     Icon,
     Titlebar,
-    Playlist,
+    VideoItem,
     NotificationBubble,
   },
   computed: {
@@ -97,7 +148,51 @@ export default {
       version: state => state.App.version,
       isFullScreen: state => state.Window.isFullScreen,
     }),
-    ...mapGetters(['winWidth']),
+    ...mapGetters(['winWidth', 'defaultDir']),
+    lastIndex: {
+      get() {
+        return (this.firstIndex + this.showItemNum) - 1;
+      },
+      set(val) {
+        if (val < this.showItemNum - 1) {
+          this.firstIndex = 0;
+        } else {
+          this.firstIndex = (val - this.showItemNum) + 1;
+        }
+      },
+    },
+    move() {
+      return -(this.firstIndex * (this.thumbnailWidth + this.marginRight));
+    },
+    marginRight() {
+      return this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+    },
+    thumbnailWidth() {
+      let width = 0;
+      const A = 50; // playlist left margin
+      const B = 15; // space between each playlist item
+      const C = 50; // the space between last playlist item and right edge of the screen
+      if (this.winWidth > 512 && this.winWidth <= 1355) {
+        width = ((((this.winWidth - A) - C) + B) / this.showItemNum) - B;
+      } else if (this.winWidth > 1355) {
+        width = this.winWidth * (112 / 1355);
+      }
+      return Math.round(width);
+    },
+    thumbnailHeight() {
+      return Math.round((this.thumbnailWidth * 63) / 112);
+    },
+    showItemNum() {
+      let number;
+      if (this.winWidth < 720) {
+        number = 5;
+      } else if (this.winWidth >= 720 && this.winWidth <= 1355) {
+        number = Math.floor(((this.winWidth - 720) / (112 + 15)) + 5);
+      } else if (this.winWidth > 1355) {
+        number = 10;
+      }
+      return number;
+    },
   },
   created() {
     // Get all data and show
@@ -191,18 +286,55 @@ export default {
         this.addLog('info', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
+    this.$bus.$on('clean-lastPlayedFile', () => {
+      this.firstIndex = 0;
+    });
+    window.onkeyup = (e) => {
+      if (e.keyCode === 39) {
+        this.shifting = true;
+        this.tranFlag = true;
+        this.lastIndex = this.lastPlayedFile.length;
+      } else if (e.keyCode === 37) {
+        this.shifting = true;
+        this.tranFlag = true;
+        this.firstIndex = 0;
+      }
+    };
   },
   methods: {
+    open() {
+      const { app } = this.$electron.remote;
+      if (this.defaultDir) {
+        this.openFilesByDialog();
+      } else {
+        const defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
+        this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
+        this.openFilesByDialog({ defaultPath });
+      }
+    },
+    openOrMove() {
+      if (this.firstIndex === 1) {
+        this.tranFlag = true;
+        this.firstIndex = 0;
+      } else if (this.winWidth > 1355) {
+        this.open();
+      } else {
+        this.open();
+      }
+    },
+    deleteItem(item) {
+      const dataIndex = this.lastPlayedFile.findIndex(file => file.path === item.path);
+      this.lastPlayedFile.splice(dataIndex, 1);
+      this.infoDB.delete('recent-played', item.quickHash);
+    },
+    showShortcut(flag) {
+      this.showShortcutImage = flag;
+      this.landingLogoAppear = !flag;
+    },
     displayInfoUpdate(displayInfo) {
       this.backgroundUrl = displayInfo.backgroundUrl;
       this.cover = displayInfo.cover;
-      this.landingLogoAppear = displayInfo.landingLogoAppear;
-      this.showShortcutImage = displayInfo.showShortcutImage;
-      this.item.baseName = displayInfo.baseName;
-      this.item.lastTime = displayInfo.lastTime;
-      this.item.duration = displayInfo.duration;
-      this.item.percentage = displayInfo.percentage;
-      this.item.path = displayInfo.path;
+      this.item = displayInfo;
     },
     timeInValidForm(time) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);
@@ -235,10 +367,6 @@ $themeColor-Light: white;
   padding: 0;
 }
 
-body {
-  color: $themeColor-Light;
-}
-
 .wrapper {
   background-image: url(../assets/gradient-bg.png);
   background-size: cover;
@@ -252,6 +380,46 @@ body {
     right: 0;
     bottom: 0;
     transition: background-color 120ms linear;
+  }
+}
+.controller {
+  position: absolute;
+  left: 0;
+  width: auto;
+
+  .playlist {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-end;
+
+    .button {
+      background-color: rgba(0, 0, 0, 0.12);
+      transition: background-color 150ms ease-out;
+      backdrop-filter: blur(9.8px);
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: rgba(123, 123, 123, 0.12);
+      transition: background-color 150ms ease-out;
+    }
+
+    .btnMask {
+      border-radius: 2px;
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+    }
+
+    .btnMask:hover {
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .addUi {
+      margin: auto;
+    }
   }
 }
 .background {
@@ -287,6 +455,7 @@ body {
     }
   }
   .item-name {
+    color: $themeColor-Light;
     width: 70%;
     word-break: break-all;
     font-size: 30px;
