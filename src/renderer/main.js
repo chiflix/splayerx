@@ -381,14 +381,16 @@ new Vue({
                 }
               },
             },
-            // {
-            //   label: this.$t('msg.file.openURL'),
-            //   accelerator: 'CmdOrCtrl+U',
-            //   click: () => {
-            //     // TODO: openURL.click
-            //   },
-            //   enabled: false,
-            // },
+            {
+              label: this.$t('msg.file.openURL'),
+              accelerator: 'CmdOrCtrl+U',
+              click: () => {
+                // TODO: openURL.click
+                this.$router.push({
+                  name: 'browsing-view',
+                });
+              },
+            },
             { type: 'separator' },
             {
               label: this.$t('msg.file.clearHistory'),

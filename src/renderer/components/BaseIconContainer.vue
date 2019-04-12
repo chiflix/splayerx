@@ -462,4 +462,92 @@ export default {
     margin: auto 15.12px auto auto;
   }
 }
+.download {
+  width: 16px;
+  height: 16px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.picInpic {
+  width: 20px;
+  height: 16px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.picInpicDisabled {
+  width: 20px;
+  height: 16px;
+  display: block;
+}
+.back, .forward, .pageRefresh {
+  width: 16px;
+  height: 16px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.backDisabled, .forwardDisabled, .downloadDisabled, .star, .starActive {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+.pageRefreshDisabled {
+  display: block;
+  width: 16px;
+  height: 16px;
+  opacity: 0.2;
+}
 </style>

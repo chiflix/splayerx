@@ -1,38 +1,37 @@
 <template>
   <div
     :data-component-name="$options.name"
-    :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
-    @dblclick.stop="handleDbClick">
+    :class="isDarwin ? 'darwin-titlebar' : 'titlebar'">
     <div class="win-icons" v-if="!isDarwin" v-fade-in="showTitleBar">
       <Icon class="title-button no-drag"
-        @mouseup.native="handleMinimize"
-        type="titleBarWinExitFull">
+            @mouseup.native="handleMinimize"
+            type="titleBarWinExitFull">
       </Icon>
       <Icon class="title-button no-drag"
-        @mouseup.native="handleWinFull"
-        v-show="middleButtonStatus === 'maximize'"
-        type="titleBarWinFull">
+            @mouseup.native="handleWinFull"
+            v-show="middleButtonStatus === 'maximize'"
+            type="titleBarWinFull">
       </Icon>
       <Icon class="title-button no-drag"
-        @mouseup.native="handleRestore"
-        type="titleBarWinRestore"
-        v-show="middleButtonStatus === 'restore'">
+            @mouseup.native="handleRestore"
+            type="titleBarWinRestore"
+            v-show="middleButtonStatus === 'restore'">
       </Icon>
       <Icon class="title-button no-drag"
-        @mouseup.native="handleFullscreenExit"
-        v-show="middleButtonStatus === 'exit-fullscreen'"
-        type="titleBarWinResize">
+            @mouseup.native="handleFullscreenExit"
+            v-show="middleButtonStatus === 'exit-fullscreen'"
+            type="titleBarWinResize">
       </Icon>
       <Icon class="title-button no-drag"
-        @mouseup.native="handleClose"
-        type="titleBarWinClose">
+            @mouseup.native="handleClose"
+            type="titleBarWinClose">
       </Icon>
     </div>
     <div class="mac-icons"
-      v-if="isDarwin"
-      v-fade-in="showTitleBar"
-      @mouseover="handleMouseOver"
-      @mouseout="handleMouseOut">
+         v-if="isDarwin"
+         v-fade-in="showTitleBar"
+         @mouseover="handleMouseOver"
+         @mouseout="handleMouseOut">
       <Icon id="close" class="title-button no-drag"
             type="titleBarClose"
             :state="state"
@@ -64,10 +63,10 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Icon from './BaseIconContainer.vue';
+import Icon from '../BaseIconContainer.vue';
 
 export default {
-  name: 'titlebar',
+  name: 'BrowsingTitlebar',
   data() {
     return {
       state: 'default',
@@ -127,13 +126,6 @@ export default {
     },
   },
   methods: {
-    handleDbClick() {
-      if (!this.isMaximized) {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
-      } else {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
-      }
-    },
     handleMouseOver() {
       this.keyOver = true;
       this.state = 'hover';
@@ -186,66 +178,62 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.titlebar {
-  position: absolute;
-  top: 0;
-  border-radius: 10px;
-  width: 100%;
-  height: 28px;
-  z-index: 6;
-  .win-icons {
+<style scoped lang="scss">
+  .titlebar {
+    top: 0;
+    border-radius: 10px;
+    width: 135px;
+    height: 40px;
+    z-index: 6;
+    .win-icons {
+      display: flex;
+      flex-wrap: nowrap;
+      position: absolute;
+      right: 5px;
+      .title-button {
+        margin: 0px 2px 2px 0px;
+        width: 45px;
+        height: 28px;
+        background-color: rgba(255,255,255,0);
+        transition: background-color 200ms;
+      }
+      .title-button:hover {
+        background-color: rgba(221, 221, 221, 0.2);
+      }
+      .title-button:active {
+        background-color: rgba(221, 221, 221, 0.5);
+      }
+    }
+  }
+  .darwin-titlebar {
+    z-index: 6;
+    height: 40px;
+    width: 90px;
     display: flex;
-    flex-wrap: nowrap;
-    position: absolute;
-    right: 5px;
+    .mac-icons {
+      margin: auto auto auto 10px;
+      display: flex;
+      flex-wrap: nowrap;
+    }
     .title-button {
-      margin: 0px 2px 2px 0px;
-      width: 40px;
-      height: 40px;
-      background-color: rgba(255,255,255,0);
-      transition: background-color 200ms;
+      width: 12px;
+      height: 12px;
+      margin-right: 8px;
+      background-repeat: no-repeat;
+      -webkit-app-region: no-drag;
+      border-radius: 100%;
     }
-    .title-button:hover {
-      background-color: rgba(221, 221, 221, 0.2);
+    #minimize {
+      &.disabled {
+        pointer-events: none;
+        opacity: 0.25;
+      }
     }
-    .title-button:active {
-      background-color: rgba(221, 221, 221, 0.5);
-    }
-  }
-}
-.darwin-titlebar {
-  position: absolute;
-  z-index: 6;
-  box-sizing: content-box;
-  height: 36px;
-  width: 100%;
-  .mac-icons {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    display: flex;
-    flex-wrap: nowrap;
-  }
-  .title-button {
-    width: 12px;
-    height: 12px;
-    margin-right: 8px;
-    background-repeat: no-repeat;
-    -webkit-app-region: no-drag;
-    border-radius: 100%;
-  }
-  #minimize {
-    &.disabled {
-      pointer-events: none;
-      opacity: 0.25;
+    #maximize {
+      &.disabled {
+        pointer-events: none;
+        opacity: 0.25;
+      }
     }
   }
-  #maximize {
-    &.disabled {
-      pointer-events: none;
-      opacity: 0.25;
-    }
-  }
-}
 </style>
