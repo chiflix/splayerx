@@ -1,7 +1,7 @@
 <template>
   <div class="header">
     <browsing-titlebar></browsing-titlebar>
-    <browsing-control class="change-width"></browsing-control>
+    <browsing-control class="change-width" :url="url"></browsing-control>
     <video-control-buttons></video-control-buttons>
   </div>
 </template>
@@ -17,6 +17,11 @@ export default {
     'browsing-titlebar': BrowsingTitlebar,
     'video-control-buttons': VideoControlButtons,
     'browsing-control': BrowsingControl,
+  },
+  props: {
+    url: {
+      type: String,
+    },
   },
 };
 </script>

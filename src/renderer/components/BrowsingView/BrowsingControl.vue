@@ -1,21 +1,22 @@
 <template>
   <div class="browsing-control">
     <div class="pages-control">
-      <Icon type="back" class="back-icon"></Icon>
-      <Icon type="forward" class="forward-icon"></Icon>
-      <Icon type="pageRefresh" class="page-refresh-icon"></Icon>
+      <Icon :type="backType" class="back-icon" @mouseup.native="handleUrlBack"></Icon>
+      <Icon :type="forwardType" class="forward-icon" @mouseup.native="handleUrlForward"></Icon>
+      <Icon type="pageRefresh" class="page-refresh-icon" @mouseup.native="handleUrlReload"></Icon>
     </div>
     <div class="link-input" :style="{
       background: addressToInput ? 'rgba(0, 0, 0, 0.2)' : '',
       borderRight: addressToInput ? '' : '0.6px solid rgba(0, 0, 0, 0.2)',
       borderLeft: addressToInput ? '' : '0.6px solid rgba(0, 0, 0, 0.2)',
       borderRadius: addressToInput ? '2.5px' : '',
+      width: `${inputWidth}px`,
     }">
       <Icon type="starActive" class="collection-star"></Icon>
-      <div class="address-show" v-show="!addressToInput" @mousedown="handleUrlInput">
-        <p>{{ address }}</p>
+      <div class="address-show" v-show="!addressToInput" @mousedown="handleUrlInput" :style="{ width: `${inputWidth}px` }">
+        <p>{{ url }}</p>
       </div>
-      <input class="address-input" ref="urlInput" v-model="address" @blur="handleInputBlur" v-show="addressToInput" @keypress="handleEnterKey">
+      <input class="address-input" ref="urlInput" v-model="url" @blur="handleInputBlur" v-show="addressToInput" @keypress="handleEnterKey">
     </div>
     <div class="address-marks">
       <div class="marks-margin">
@@ -39,9 +40,15 @@ export default {
     return {
       marks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       selectedMarks: -1,
-      address: 'https://www.youtube.com',
       addressToInput: false,
+      backType: 'back',
+      forwardType: 'forward',
     };
+  },
+  props: {
+    url: {
+      type: String,
+    },
   },
   computed: {
     ...mapGetters(['winWidth']),
@@ -58,6 +65,15 @@ export default {
       }
       return this.marks;
     },
+    inputWidth() {
+      return process.platform === 'darwin' ? this.winWidth - 336 - (this.showMarksNum * 40) : this.winWidth - 375 - (this.showMarksNum * 40);
+    },
+  },
+  mounted() {
+    this.$bus.$on('web-info', (info) => {
+      this.backType = info.canGoBack ? 'back' : 'backDisabled';
+      this.forwardType = info.canGoForward ? 'forward' : 'forwardDisabled';
+    });
   },
   watch: {
     addressToInput(val) {
@@ -72,9 +88,19 @@ export default {
     Icon,
   },
   methods: {
+    handleUrlReload() {
+      this.$bus.$emit('url-reload');
+    },
+    handleUrlBack() {
+      this.$bus.$emit('url-back');
+    },
+    handleUrlForward() {
+      this.$bus.$emit('url-forward');
+    },
     handleEnterKey(e) {
       if (e.key === 'Enter') {
-        this.$bus.$emit('search-with-url', this.address);
+        this.$bus.$emit('search-with-url', this.url);
+        this.addressToInput = false;
       }
     },
     handleMarksMouseup(index) {
@@ -121,6 +147,8 @@ export default {
     margin: auto 0 auto 0;
     display: flex;
     flex: 1;
+    width: auto;
+    -webkit-app-region: no-drag;
     .collection-star {
       margin: 6px 5px 6px 6px;
     }
@@ -149,6 +177,9 @@ export default {
         color: rgba(255, 255, 255, 0.8);
         font-family: $font-normal;
         vertical-align: middle;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
     }
   }
