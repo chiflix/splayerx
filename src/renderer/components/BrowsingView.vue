@@ -15,12 +15,11 @@ export default {
       url: 'https://www.youtube.com',
     };
   },
-  computed: {
-  },
   components: {
     'browsing-header': BrowsingHeader,
   },
   mounted() {
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$bus.$on('search-with-url', (url) => {
       this.$refs.webView.loadURL(url);
     });
