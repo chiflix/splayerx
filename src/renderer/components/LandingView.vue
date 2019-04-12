@@ -389,6 +389,7 @@ $themeColor-Light: white;
 }
 .controller {
   position: absolute;
+  z-index: 6;
   left: 0;
   width: auto;
 

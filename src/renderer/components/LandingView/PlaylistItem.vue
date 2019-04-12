@@ -35,6 +35,7 @@
           width: `${thumbnailWidth - 0.7}px`,
           height: `${thumbnailHeight - 0.7}px`,
           border: chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)',
+          backgroundColor: aboutToDelete ? 'rgba(0,0,0,0.43)' : chosen ? 'rgba(255,255,255,0.2)' : '',
         }">
         <div class="deleteUi" ref="deleteUi"><Icon type="delete"/></div>
       </div>
@@ -56,7 +57,6 @@ export default {
       isDragging: false,
       moving: false,
       aboutToDelete: false,
-      showShadow: true,
       chosen: false,
     };
   },
@@ -125,7 +125,6 @@ export default {
     onRecentItemMouseover() {
       if ((this.isInRange || this.isFullScreen) && !this.shifting) {
         this.chosen = true;
-        this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2)');
         this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
         if (this.coverVideo.shortCut !== '') {
           this.isChanging = true;
@@ -148,7 +147,6 @@ export default {
     onRecentItemMouseout() {
       if (!this.moving) {
         this.chosen = false;
-        this.$refs.border.style.setProperty('background-color', '');
         this.$refs.layer2.style.setProperty('transform', 'scale(0.9, 0.9)');
       }
     },
@@ -171,7 +169,6 @@ export default {
             requestAnimationFrame(() => {
               this.$refs.layer1.style.setProperty('transform', 'translateY(-8px) scale(0.8, 0.8)');
               this.$refs.layer2.style.setProperty('transform', 'translateY(-10px) scale(0.9, 0.9)');
-              this.$refs.border.style.setProperty('background-color', 'rgba(0,0,0,0.43)');
               this.$refs.deleteUi.style.setProperty('opacity', '1');
               this.aboutToDelete = true;
             });
@@ -183,7 +180,6 @@ export default {
             requestAnimationFrame(() => {
               this.$refs.layer1.style.setProperty('transform', `translateY(-${8 * percentage}px) scale(0.8, 0.8)`);
               this.$refs.layer2.style.setProperty('transform', `translateY(-${4 + (6 * percentage)}px) scale(0.9, 0.9)`);
-              this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2');
               this.$refs.deleteUi.style.setProperty('opacity', '0');
               this.aboutToDelete = false;
             });
@@ -191,20 +187,17 @@ export default {
             requestAnimationFrame(() => {
               this.$refs.layer1.style.setProperty('transform', 'scale(0.8, 0.8)');
               this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
-              this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2');
               this.$refs.deleteUi.style.setProperty('opacity', '0');
               this.aboutToDelete = false;
             });
           }
         };
         document.onmouseup = this.onRecentItemMouseup;
-        this.showShadow = false;
       }
     },
     onRecentItemMouseup() {
       document.onmousemove = null;
       this.moving = false;
-      this.showShadow = true;
       this.$refs.layer1.style.setProperty('transform', 'scale(0.8, 0.8)');
       this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
       this.$refs.playlistItem.style.setProperty('transform', 'translate(0,0)');
