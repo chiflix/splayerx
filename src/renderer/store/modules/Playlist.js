@@ -64,6 +64,7 @@ const actions = {
   FolderList({ commit }, payload) {
     commit('isFolderList');
     commit('playList', payload);
+    commit('hash', '');
   },
   RemoveItemFromPlayingList({ state, commit }, item) {
     commit('isPlayingList');

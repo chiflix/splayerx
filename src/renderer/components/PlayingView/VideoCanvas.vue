@@ -247,8 +247,23 @@ export default {
       };
 
       if (!this.$store.getters.isFolderList) {
-        const playlist = await this.infoDB.get('recent-played', this.$store.getters.playListHash);
+        let playlist;
+        if (this.playListHash) {
+          playlist = await this.infoDB.get('recent-played', this.playListHash);
+        } else {
+          const playListHash = this.playingList.reduce((hash, src) => `${hash}-${src}`);
+          const currentVideoInfo = await this.infoDB.get('recent-played', 'path', videoPath);
+          this.infoDB.delete('recent-played', currentVideoInfo.quickHash);
+          playlist = {
+            quickHash: playListHash,
+            type: 'playlist',
+            lastOpened: Date.now(),
+            infos: [currentVideoInfo],
+          };
+          this.$store.commit('hash', playListHash);
+        }
         playlist.currentVideo = this.originSrc;
+        playlist.paths = this.playingList;
         const videoInfo = playlist.infos.find(info => info.path === videoPath);
         if (videoInfo) {
           const videoIndex = playlist.infos.findIndex(info => info.path === videoPath);
@@ -278,7 +293,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize',
-      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList']),
+      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList', 'playListHash']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',

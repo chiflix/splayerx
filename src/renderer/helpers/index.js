@@ -419,8 +419,22 @@ export default {
           });
         }
       } else {
-        const playlist = await this.infoDB.get('recent-played', this.$store.getters.playListHash);
-        if (!playlist.infos) {
+        let playlist = await this.infoDB.get('recent-played', this.$store.getters.playListHash);
+        if (!playlist) {
+          const playListHash = this.$store.getters.playingList.reduce((hash, src) => `${hash}-${src}`);
+          playlist = {
+            quickHash: playListHash,
+            currentVideo: vidPath,
+            paths: this.$store.getters.playingList,
+            type: 'playlist',
+            lastOpened: Date.now(),
+            infos: [{
+              quickHash: mediaQuickHash,
+              path: originPath,
+            }],
+          };
+          this.$store.commit('hash', playListHash);
+        } else if (!playlist.infos) {
           playlist.infos = [{
             quickHash: mediaQuickHash,
             path: originPath,
@@ -429,7 +443,7 @@ export default {
           const videoInfo = playlist.infos.find(info => info.path === originPath);
           if (videoInfo) {
             const videoIndex = playlist.infos?.findIndex(info => info.path === originPath);
-            playlist.infos.splice(videoIndex, 1, { ...videoInfo, path: originPath });
+            playlist.infos.splice(videoIndex, 1, { ...videoInfo, path: originPath, quickHash: mediaQuickHash });
           } else {
             playlist.infos.push({
               quickHash: mediaQuickHash,
