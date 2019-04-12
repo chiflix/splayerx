@@ -22,6 +22,7 @@
       <div class="marks-margin">
         <div v-for="(item, index) in marksToShow" class="marks-container" @mouseup="handleMarksMouseup(index)" :style="{
           background: index === selectedMarks ? 'rgba(255, 255, 255, 0.5)' : '',
+          cursor: 'pointer'
         }">
           <div class="marks-img">{{ item }}</div>
         </div>

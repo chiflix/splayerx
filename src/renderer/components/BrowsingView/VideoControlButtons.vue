@@ -7,6 +7,7 @@
     <div class="left-border" :style="{ borderLeft: isDarwin ? '0.6px solid rgba(0, 0, 0, 0.2)' : '' }">
       <Icon type="download" class="download-icon" :style="{
         margin: isDarwin ? '6px 0 6px 17px' : '6px 24px 6px 0',
+        cursor: 'pointer',
       }"></Icon>
       <Icon type="picInpic" class="picture-in-picture" :style="{
         margin: isDarwin ? '6px 20px 6px 23px' : '6px 15px 6px 15px',
