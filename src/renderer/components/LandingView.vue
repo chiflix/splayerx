@@ -25,6 +25,9 @@
             <span class="timing-played">
               {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}</span>
             / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
+            <span v-if="item.playListLength">
+            · {{ $t('recentPlaylist.playlistSource') }}&nbsp&nbsp{{ item.index + 1 }} / {{ item.playListLength }}
+            </span>
           </div>
           <div class="item-progress">
             <div class="progress-played" :style="{ width: item.percentage + '%' }"/>

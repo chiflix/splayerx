@@ -54,6 +54,7 @@ export default {
     return {
       displayInfo: [],
       isDragging: false,
+      moving: false,
       aboutToDelete: false,
       showShadow: true,
       chosen: false,
@@ -117,6 +118,8 @@ export default {
         percentage: (this.coverVideo.lastPlayedTime / this.coverVideo.duration) * 100,
         path: this.coverVideo.path,
         cover: this.coverVideo.cover,
+        index: this.item.paths.findIndex(src => src === this.item.currentVideo),
+        playListLength: this.item.paths.length,
       };
     },
     onRecentItemMouseover() {
@@ -143,9 +146,11 @@ export default {
       }
     },
     onRecentItemMouseout() {
-      this.chosen = false;
-      this.$refs.border.style.setProperty('background-color', '');
-      this.$refs.layer2.style.setProperty('transform', 'scale(0.9, 0.9)');
+      if (!this.moving) {
+        this.chosen = false;
+        this.$refs.border.style.setProperty('background-color', '');
+        this.$refs.layer2.style.setProperty('transform', 'scale(0.9, 0.9)');
+      }
     },
     onRecentItemMousedown(e) {
       const disX = e.pageX;
@@ -155,24 +160,41 @@ export default {
       if (this.isInRange) {
         document.onmousemove = (e) => {
           this.isDragging = true;
+          this.moving = true;
           const movementX = e.pageX - disX;
           const movementY = e.pageY - disY;
 
-          this.$refs.playlistItem.style.setProperty('z-index', '5');
+          this.$refs.playlistItem.style.setProperty('z-index', '10');
           this.$refs.playlistItem.style.setProperty('transform', `translate(${movementX}px, ${movementY}px)`);
-          if (Math.abs(movementX) >= this.thumbnailWidth
-            || Math.abs(movementY) >= this.thumbnailHeight) {
-            this.$refs.layer1.style.setProperty('transform', 'translateY(-8px) scale(0.8, 0.8)');
-            this.$refs.layer2.style.setProperty('transform', 'translateY(-10px) scale(0.9, 0.9)');
-            this.$refs.border.style.setProperty('background-color', 'rgba(0,0,0,0.43)');
-            this.$refs.deleteUi.style.setProperty('opacity', '1');
-            this.aboutToDelete = true;
+          if (Math.abs(movementX) >= this.thumbnailWidth - 5
+            || Math.abs(movementY) >= this.thumbnailHeight - 10) {
+            requestAnimationFrame(() => {
+              this.$refs.layer1.style.setProperty('transform', 'translateY(-8px) scale(0.8, 0.8)');
+              this.$refs.layer2.style.setProperty('transform', 'translateY(-10px) scale(0.9, 0.9)');
+              this.$refs.border.style.setProperty('background-color', 'rgba(0,0,0,0.43)');
+              this.$refs.deleteUi.style.setProperty('opacity', '1');
+              this.aboutToDelete = true;
+            });
+          } else if (Math.abs(movementX) >= this.thumbnailWidth - 30
+            || Math.abs(movementY) >= this.thumbnailHeight - 30) {
+            const percentageY = (Math.abs(movementY) - (this.thumbnailHeight - 30)) / 20;
+            const percentageX = (Math.abs(movementX) - (this.thumbnailWidth - 30)) / 25;
+            const percentage = percentageX > percentageY ? percentageX : percentageY;
+            requestAnimationFrame(() => {
+              this.$refs.layer1.style.setProperty('transform', `translateY(-${8 * percentage}px) scale(0.8, 0.8)`);
+              this.$refs.layer2.style.setProperty('transform', `translateY(-${4 + (6 * percentage)}px) scale(0.9, 0.9)`);
+              this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2');
+              this.$refs.deleteUi.style.setProperty('opacity', '0');
+              this.aboutToDelete = false;
+            });
           } else {
-            this.$refs.layer1.style.setProperty('transform', 'scale(0.8, 0.8)');
-            this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
-            this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2');
-            this.$refs.deleteUi.style.setProperty('opacity', '0');
-            this.aboutToDelete = false;
+            requestAnimationFrame(() => {
+              this.$refs.layer1.style.setProperty('transform', 'scale(0.8, 0.8)');
+              this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
+              this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2');
+              this.$refs.deleteUi.style.setProperty('opacity', '0');
+              this.aboutToDelete = false;
+            });
           }
         };
         document.onmouseup = this.onRecentItemMouseup;
@@ -181,6 +203,7 @@ export default {
     },
     onRecentItemMouseup() {
       document.onmousemove = null;
+      this.moving = false;
       this.showShadow = true;
       this.$refs.layer1.style.setProperty('transform', 'scale(0.8, 0.8)');
       this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
