@@ -2,6 +2,7 @@
   <div class="video-control-buttons" :style="{
     width: isDarwin === 'win32' ? '90px' : '96px',
     direction: isDarwin ? '' : 'rtl',
+    order: isDarwin ? '2' : '0',
   }">
     <div class="left-border" :style="{ borderLeft: isDarwin ? '0.6px solid rgba(0, 0, 0, 0.2)' : '' }">
       <Icon type="download" class="download-icon" :style="{

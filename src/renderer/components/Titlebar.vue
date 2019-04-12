@@ -192,17 +192,17 @@ export default {
   top: 0;
   border-radius: 10px;
   width: 100%;
-  height: 28px;
+  height: 40px;
   z-index: 6;
   .win-icons {
     display: flex;
     flex-wrap: nowrap;
     position: absolute;
-    right: 5px;
+    right: 0;
+    top: 6px;
     .title-button {
-      margin: 0px 2px 2px 0px;
       width: 40px;
-      height: 40px;
+      height: 28px;
       background-color: rgba(255,255,255,0);
       transition: background-color 200ms;
     }

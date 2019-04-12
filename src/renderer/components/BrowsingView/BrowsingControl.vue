@@ -46,7 +46,7 @@ export default {
   computed: {
     ...mapGetters(['winWidth']),
     showMarksNum() {
-      const marksWidth = this.winWidth - 499;
+      const marksWidth = process.platform === 'darwin' ? this.winWidth - 499 : this.winWidth - 523;
       if (marksWidth >= 60) {
         return Math.floor((marksWidth - 60) / 40) + 1;
       }
@@ -97,6 +97,7 @@ export default {
   width: auto;
   height: 40px;
   display: flex;
+  order: 1;
   .pages-control {
     display: flex;
     width: 93px;

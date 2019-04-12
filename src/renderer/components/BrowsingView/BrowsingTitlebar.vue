@@ -182,17 +182,19 @@ export default {
   .titlebar {
     top: 0;
     border-radius: 10px;
-    width: 135px;
+    width: 120px;
     height: 40px;
     z-index: 6;
+    display: flex;
+    order: 2;
     .win-icons {
       display: flex;
       flex-wrap: nowrap;
-      position: absolute;
-      right: 5px;
+      margin: auto;
+      height: 28px;
+      border-left: 0.6px solid rgba(0, 0, 0, 0.2);
       .title-button {
-        margin: 0px 2px 2px 0px;
-        width: 45px;
+        width: 40px;
         height: 28px;
         background-color: rgba(255,255,255,0);
         transition: background-color 200ms;
@@ -210,6 +212,7 @@ export default {
     height: 40px;
     width: 90px;
     display: flex;
+    order: 0;
     .mac-icons {
       margin: auto auto auto 10px;
       display: flex;

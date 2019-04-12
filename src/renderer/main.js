@@ -873,7 +873,7 @@ new Vue({
         }
         if (process.platform === 'win32') {
           const file = template.shift();
-          const winFile = file.submenu.slice(0, 2);
+          const winFile = file.submenu.slice(0, 3);
           winFile[1].submenu.unshift(file.submenu[3], file.submenu[2]);
           winFile.push(file.submenu[5], file.submenu[4]);
           winFile.reverse().forEach((menuItem) => {
