@@ -19,7 +19,7 @@
     <img class="winLogo" src="../assets/win-about-logo.png" draggable="false">
     <div class="name">{{ name }}</div>
     <div class="version">{{ `Version ${version}` }}</div>
-    <div class="copyright">Copyright © 2018 tomasen</div>
+    <div class="copyright"><p>© 2009-2019</p><p>Sagittarius Technology Co.,Ltd</p></div>
   </div>
 </template>
 
@@ -119,6 +119,7 @@ export default {
       letter-spacing: 0.5px;
       color: rgba(255, 255 ,255 , 0.3);
       margin: auto auto 14px auto;
+      text-align: center;
     }
   }
 </style>

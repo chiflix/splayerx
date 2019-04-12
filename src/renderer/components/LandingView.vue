@@ -37,9 +37,6 @@
         <div class="logo-container">
           <Icon type="logo"/>
         </div>
-        <div class="welcome">
-          <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-        </div>
       </div>
     </transition>
     <div class="mask"
@@ -341,7 +338,7 @@ body {
 }
 .welcome-container {
   --client-height: 100vh;
-  --pos-y: calc(var(--client-height) * 0.37 - 82px);
+  --pos-y: calc(var(--client-height) * 0.37 - 46px);
   transform: translateY(var(--pos-y));
 }
 .logo-container {
@@ -357,23 +354,6 @@ main {
   justify-content: space-between;
 }
 
-.welcome {
-  margin-top: 7px;
-  text-align: center;
-  z-index: 1;
-
-  .title {
-    font-weight: 700;
-    color: rgba(0,0,0,0.13);
-    letter-spacing: 1.5px;
-  }
-  .version {
-    margin-top: 3px;
-    color: rgba(0,0,0,0.2);
-    font-weight: 100;
-    letter-spacing: 1px;
-  }
-}
 
 .background-transition-enter-active, .background-transition-leave-active {
   transition: opacity 300ms linear;
