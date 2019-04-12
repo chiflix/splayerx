@@ -1,7 +1,7 @@
 <template>
  <div class="browsing">
    <browsing-header :url="url"></browsing-header>
-   <webview :src="url" autosize class="web-view" ref="webView"></webview>
+   <webview :src="url" autosize class="web-view" ref="webView" allowpopups></webview>
  </div>
 </template>
 
@@ -53,6 +53,7 @@ export default {
   flex-direction: column;
   .web-view {
     flex: 1;
+    -webkit-app-region: no-drag;
   }
 }
 </style>
