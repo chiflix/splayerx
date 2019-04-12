@@ -430,13 +430,13 @@ export default {
     }),
     ...mapMutations({
       toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
-      setCreateMode: windowMutations.SET_CREATE_MODE,
       swicthReferenceSubtitle: subtitleMutations.SWITCH_REFERENCE_SUBTITLE,
+      updateCurrentEditedSubtitle: subtitleMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
     }),
     handleCreateBtnClick() {
       // 当点击创建按钮后，先暂停播放、再切换高级编辑模式
       if (!this.paused) this.$bus.$emit('toggle-playback');
-      this.setCreateMode(true);
+      this.updateCurrentEditedSubtitle(null);
       this.swicthReferenceSubtitle(null);
       this.toggleProfessional(true);
     },
@@ -449,10 +449,11 @@ export default {
     subTypeShift() {
       this.updateSubtitleType(!this.isFirstSubtitle);
     },
-    handleSubEdit() {
+    handleSubEdit(e, item) {
       if (!this.paused) {
         this.$bus.$emit('toggle-playback');
       }
+      this.updateCurrentEditedSubtitle(item.id);
       this.toggleProfessional(true);
     },
     handleSubExport() {

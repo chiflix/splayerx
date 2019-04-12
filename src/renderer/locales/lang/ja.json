@@ -83,12 +83,13 @@
 			"openURL": "URLから開く…"
 		},
     "advanced": {
-      "name": "アドバンスド",
+      "name": "翻訳修正",
       "save": "保存",
       "undo": "元に戻す",
       "redo": "やり直す",
       "export": "書き出す",
       "reference": "翻訳参照",
+			"loadLocalSubtitleFile": "ローカル参照を読み込む",
       "back": "後退"
     },
 		"help": {

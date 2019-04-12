@@ -12,6 +12,8 @@ const state = {
   isMinimized: false,
   isEditable: false, // 字幕编辑模式
   isProfessional: false, // 字幕高级编辑模式
+  editHistoryLen: 0, // 编辑模式下操作历史记录的长度
+  currentEditHistoryIndex: -1, // 编辑模式下当前undo\redo所在历史记录的索引
   isCreateSubtitleMode: false, // 是否是创建字幕模式
   storedBeforeProfessionalInfo: null, // 字幕高级模式下需要存储windowSize、windowMinimumSize、windowPosition
   sizePercent: 0,
@@ -33,6 +35,8 @@ const getters = {
   isEditable: state => state.isEditable,
   isProfessional: state => state.isProfessional,
   isCreateSubtitleMode: state => state.isCreateSubtitleMode,
+  editHistoryLen: state => state.editHistoryLen,
+  currentEditHistoryIndex: state => state.currentEditHistoryIndex,
   storedBeforeProfessionalInfo: state => state.storedBeforeProfessionalInfo,
   sizePercent: state => state.sizePercent,
 };
@@ -74,9 +78,17 @@ const mutations = {
     };
     state.isProfessional = payload;
     state.isCreateSubtitleMode = !payload ? false : state.isCreateSubtitleMode;
+    state.editHistoryLen = !payload ? 0 : state.editHistoryLen;
+    state.currentEditHistoryIndex = !payload ? -1 : state.currentEditHistoryIndex;
   },
   [windowMutations.SET_CREATE_MODE](state, payload) {
     state.isCreateSubtitleMode = payload;
+  },
+  [windowMutations.UPDATE_EDIT_HISTORY_LEN](state, payload) {
+    state.editHistoryLen = payload;
+  },
+  [windowMutations.UPDATE_CURRENT_EDIT_HISTORY_INDEX](state, payload) {
+    state.currentEditHistoryIndex = payload;
   },
   sizePercentUpdate(state, payload) {
     state.sizePercent = payload;

@@ -83,12 +83,13 @@
 			"openURL": "Open URL…"
 		},
     "advanced": {
-      "name": "Advanced",
+      "name": "Translation Edit",
       "save": "Save",
       "undo": "Undo",
       "redo": "Redo",
       "export": "Export",
       "reference": "Translation References",
+			"loadLocalSubtitleFile": "Load local reference",
       "back": "Back"
     },
 		"help": {

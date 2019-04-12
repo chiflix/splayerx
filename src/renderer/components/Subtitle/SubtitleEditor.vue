@@ -14,8 +14,8 @@
         :style="{
           width: `${3 * winWidth}px`,
           left: `${currentLeft}px`,
-          height: spaceKeyPressStartTime > 0 ? '100vh' : 'auto',
           cursor: dragingMode !== 'default' ? dragingMode : 'grab',
+          height: spaceKeyPressStartTime > 0 ? '100vh' : 'auto',
           zIndex: spaceKeyPressStartTime > 0 ? '9999' : '2',
         }">
         <div class="scales" :style="{
@@ -69,18 +69,23 @@
       </div>
     </div>
     <div class="sub-editor-body">
-      <div v-fade-in="paused && getCurrentReferenceCues()" class="referenceText" v-html="getCurrentReferenceCues()"></div>
+      <div v-fade-in="paused" class="referenceText subtitle-style" v-html="getCurrentReferenceCues()"
+      :style="{
+        zoom: zoom,
+      }"></div>
       <subtitle-renderer
         v-fade-in="!subDragTimeLineMoving"
-        :key='originSrc+currentFirstSubtitleId'
-        :showAddInput="showAddInput"
+        :key='originSrc+currentEditedSubtitleId'
+        :showAddInput.sync="showAddInput"
         :showTextarea="showTextarea"
         :newSubHolder="newSubHolder"
         :currentSub="currentSub"
         :chooseIndexs.sync="chooseIndexs"
         :dragingMode="dragingMode"
         :referenceDialogues="referenceDialogues"
-        :subtitleInstance="isCreateSubtitleMode ? null : subtitleInstance"/>
+        :subtitleInstance="!currentEditedSubtitleId ? null : subtitleInstance"
+        :tags.sync="tags"
+        :firstTags="firstTags"/>
     </div>
     <div class="sub-editor-foot">
       <div class="times-wrap">
@@ -155,6 +160,8 @@ export default {
       dragingMode: 'default', // 光标类型
       spaceKeyPressStartTime: 0, //
       lastPaused: false, //
+      tags: {},
+      firstTags: {},
     };
   },
   props: {
@@ -163,8 +170,12 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'winWidth', 'winHeight', 'duration', 'paused', 'isCreateSubtitleMode', 'currentFirstSubtitleId', 'originSrc', 'referenceSubtitleId',
+      'winWidth', 'winHeight', 'duration', 'paused', 'isCreateSubtitleMode', 'originSrc', 'referenceSubtitleId', 'currentEditedSubtitleId',
+      'winRatio', 'computedHeight', 'computedWidth',
     ]),
+    computedSize() {
+      return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
+    },
     vh() {
       return this.winHeight / 100 > 10 ? 10 : Math.abs(this.winHeight / 100);
     },
@@ -284,6 +295,31 @@ export default {
       return this.validitySubs
         .filter(e => e.start <= this.preciseTime && e.end >= this.preciseTime);
     },
+    zoom() {
+      // update video scale that width is larger than height
+      const updatePCVideoScaleByFactors = (index) => {
+        const firstFactors = [21, 29, 37, 45];
+        const secondFactors = [24, 26, 28, 30];
+        return `${(((firstFactors[index] / 900) * this.computedSize) + (secondFactors[index] / 5)) / 9}`;
+      };
+      // update video scale that height is larger than width
+      const updateMobileVideoScaleByFactors = (index) => {
+        const firstFactors = [21, 29, 37, 45];
+        const secondFactors = [12, -92, -196, -300];
+        return `${(((firstFactors[index] / 760) * this.computedSize) + (secondFactors[index] / 76)) / 9}`;
+      };
+      // update video scale when width or height is larger than 1080
+      const updateVideoScaleByFactors = (val) => {
+        const factors = [30, 40, 50, 60];
+        return `${((val / 1080) * factors[0]) / 9}`;
+      };
+      if (this.computedSize >= 1080) {
+        return updateVideoScaleByFactors(this.computedSize);
+      } else if (this.winRatio >= 1) {
+        return updatePCVideoScaleByFactors(0);
+      }
+      return updateMobileVideoScaleByFactors(0);
+    },
   },
   watch: {
     paused(val) {
@@ -303,11 +339,11 @@ export default {
       deep: true,
       handler(val) { // eslint-disable-line
         this.hook = 0;
-        if (val && val.parsed && !this.isCreateSubtitleMode) {
+        if (val && val.parsed && this.currentEditedSubtitleId) {
           this.dialogues = val.parsed.dialogues;
         }
         if (val && val.referenceSubtitleId !== this.referenceSubtitleId &&
-          !this.isCreateSubtitleMode) {
+          this.currentEditedSubtitleId) {
           const referenceSubtitleId = val.referenceSubtitleId;
           // 跳出vue watcher 队列
           setImmediate(() => {
@@ -365,17 +401,25 @@ export default {
             this.subtitleInstance.referenceSubtitleId = null;
           }
         }
-        if (this.subtitleInstance && !this.isCreateSubtitleMode) {
+        if (this.subtitleInstance && this.currentEditedSubtitleId) {
           this.subtitleInstance.referenceSubtitleId = this.referenceSubtitleId;
         }
       },
+    },
+    history(v) {
+      this.updateEditHistoryLen(v.length);
+    },
+    currentIndex(v) {
+      this.updateCurrentEditHistoryIndex(v);
     },
   },
   methods: {
     ...mapMutations({
       toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
+      updateEditHistoryLen: windowMutations.UPDATE_EDIT_HISTORY_LEN,
+      updateCurrentEditHistoryIndex: windowMutations.UPDATE_CURRENT_EDIT_HISTORY_INDEX,
       swicthReferenceSubtitle: subtitleMutations.SWITCH_REFERENCE_SUBTITLE,
-      setCreateMode: windowMutations.SET_CREATE_MODE,
+      updateCurrentEditedSubtitle: subtitleMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
     }),
     ...mapActions({
       addMessages: 'addMessages',
@@ -469,7 +513,7 @@ export default {
           return e.text;
         }).join('\n');
       }
-      return null;
+      return '\n';
     },
     filter(e) {
       const isInRange = e.start >= (this.preciseTime - this.offset)
@@ -1058,7 +1102,7 @@ export default {
           add.end = newEnd;
           let subtitleInstance = null;
           let index = 0;
-          if (!this.subtitleInstance || this.isCreateSubtitleMode) {
+          if (!this.subtitleInstance || !this.currentEditedSubtitleId) {
             subtitleInstance = {
               parsed: {
                 dialogues: [],
@@ -1075,7 +1119,6 @@ export default {
             subtitleInstance = this.subtitleInstance.type !== 'modified' ? cloneDeep(this.subtitleInstance) : this.subtitleInstance;
           }
           index = subtitleInstance.parsed.dialogues.length;
-          this.setCreateMode(false);
           subtitleInstance.parsed.dialogues.splice(index, 0, add);
           this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
             sub: subtitleInstance,
@@ -1154,7 +1197,7 @@ export default {
       }
       this.spaceKeyPressStartTime = 0;
     },
-    transcode(time, num) {
+    transcode(time, num) { // eslint-disable-line
       if (time < 0) {
         return '';
       } else if (time > this.duration) {
@@ -1169,7 +1212,7 @@ export default {
       minutes = minutes < 10 ? `0${minutes}` : minutes;
       seconds = seconds < 10 ? `0${seconds}` : seconds;
       if (minutes === '00' && hours === '00') {
-        return seconds;
+        return num ? `00:${seconds}` : seconds;
       } else if (hours === '00') {
         return `${minutes}:${seconds}`;
       }
@@ -1368,7 +1411,7 @@ export default {
     this.$bus.$on(bus.SUBTITLE_EDITOR_REDO, this.redo);
     //
     this.$bus.$on(bus.SUBTITLE_EDITOR_EXIT, () => {
-      if (!this.isCreateSubtitleMode) {
+      if (this.currentEditedSubtitleId) {
         this.addMessages({
           type: 'state',
           content: this.$t('notificationMessage.subtitle.exitProfessionalMode.content'),
@@ -1557,10 +1600,13 @@ export default {
       //   // transition: all 0.3s ease-in-out;
       // }
       &.reference {
-        background: rgba(255,255,255,0.05);
+        // background: rgba(255,255,255,0.05);
         // background-color: aqua;
-        // border-color: rgba(151,151,151,0.30);
-        border-color: transparent;
+        border-color: rgba(151,151,151,0.10);
+        background-image: url(../../assets/subtitle-editor-stripe.svg);
+        background-repeat: repeat-x;
+        // background-size: contain;
+        // border-color: transparent;
       }
       &.focus {
         background: rgba(255,255,255,0.50);

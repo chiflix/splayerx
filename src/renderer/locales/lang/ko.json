@@ -83,12 +83,13 @@
 			"openURL": "URL 열기 ..."
 		},
     "advanced": {
-      "name": "많은",
+      "name": "번역 수정",
       "save": "저장",
       "undo": "실행 취소",
       "redo": "실행 복귀",
       "export": "내보내기",
-      "reference": "参考翻译",
+      "reference": "번역 참조",
+			"loadLocalSubtitleFile": "로컬 참조로드",
       "back": "뒤로"
     },
 		"help": {

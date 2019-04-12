@@ -83,12 +83,13 @@
 			"openURL": "打开 URL…"
     },
     "advanced": {
-      "name": "高级",
+      "name": "翻译编辑",
       "save": "保存",
       "undo": "撤销",
       "redo": "重做",
       "export": "导出",
       "reference": "参考翻译",
+			"loadLocalSubtitleFile": "添加本地参考",
       "back": "返回"
     },
 		"help": {

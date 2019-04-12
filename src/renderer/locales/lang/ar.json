@@ -83,12 +83,13 @@
 			"openURL": "رابط مفتوح…"
 		},
     "advanced": {
-      "name": "المتقدمة",
+      "name": "تحرير الترجمة",
       "save": "عودة",
       "undo": "تصدير",
       "redo": "استعداد",
       "export": "فك",
       "reference": "مراجع الترجمة",
+			"loadLocalSubtitleFile": "تحميل المرجع المحلي",
       "back": "ظهر"
     },
 		"help": {

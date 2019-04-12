@@ -83,12 +83,13 @@
 			"openURL": "Abrir URL ..."
 		},
     "advanced": {
-      "name": "Avanzado",
+      "name": "Traducción editar",
       "save": "salvar",
       "undo": "deshacer",
       "redo": "rehacer",
       "export": "Exportación",
       "reference": "Referencias de traducción",
+			"loadLocalSubtitleFile": "Cargar referencia local",
       "back": "volver"
     },
 		"help": {

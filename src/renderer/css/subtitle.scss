@@ -1,3 +1,25 @@
+.subtitle-style {
+  font-family: $font-normal;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  opacity: 1;
+  color: white;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+.subtitle-border-style {
+  font-family: $font-normal;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  padding: 0px;
+  // -webkit-text-fill-color: transparent;
+  // -webkit-text-stroke: 0.5px #777;
+  font-weight: 400;
+  background-color: transparent;
+  // text-shadow: 0px 0.7px 0.5px rgba(0,0,0,.5);
+  -webkit-font-smoothing: antialiased;
+}
+
 .subtitle-style0 {
   font-family: $font-normal;
   font-size: 9px;

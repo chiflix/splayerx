@@ -100,6 +100,7 @@ export default class SubtitleLoader extends EventEmitter {
         this.data = '**';
         this.metaInfo = cloneDeep(this.options.storage.metaInfo);
         this.referenceSubtitleId = this.options.storage.referenceSubtitleId;
+        this.isFastCreateFromSecondSub = this.options.storage.isFastCreateFromSecondSub;
       }
       this.videoSrc = this.options.videoSrc; // set videoSrc
 

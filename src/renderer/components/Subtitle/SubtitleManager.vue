@@ -12,7 +12,8 @@
           :linesNum="linesNum"
           :firstLinesNum.sync="firstLinesNum"
           :firstTags.sync="firstTags"
-          :tags="tags"/>
+          :tags="tags"
+          :playlistShow="playlistShow"/>
         <subtitle-renderer
           ref="subtitleRenderer"
           v-if="currentSecondSubtitleId && duration && enabledSecondarySub"
@@ -22,14 +23,16 @@
           :firstLinesNum="firstLinesNum"
           :linesNum.sync="linesNum"
           :tags.sync="tags"
-          :firstTags="firstTags"/>
+          :firstTags="firstTags"
+          :playlistShow="playlistShow"/>
       </div>
     </transition>
     <transition name="fade" mode="out-in" appear>
       <subtitle-editor
         v-if="isProfessional"
+        :playlistShow="playlistShow"
         :referenceSubtitleInstance="referenceSubtitleInstance"
-        :subtitleInstance="subtitleInstances[this.currentFirstSubtitleId]"/>
+        :subtitleInstance="subtitleInstances[this.currentEditedSubtitleId]"/>
     </transition>
   </div>
 </template>
@@ -89,6 +92,7 @@ export default {
       firstTags: {},
       lastFirstSubtitleId: '',
       lastSecondSubtitleId: '',
+      watchLoadSubtitleFromLocal: null, // 当在高级编辑模式下，如果添加本地字幕作为参考，需要选择这个字幕
     };
   },
   computed: {
@@ -102,7 +106,7 @@ export default {
       'subtitleDelay', // subtitle's delay
       'isProfessional', // 字幕编辑高级模式属性
       'storedBeforeProfessionalInfo', 'winRatio', 'defaultDir', 'isCreateSubtitleMode',
-      'isFirstSubtitle', 'referenceSubtitleId',
+      'isFirstSubtitle', 'referenceSubtitleId', 'currentEditedSubtitleId',
       'enabledSecondarySub',
     ]),
     ...mapState({
@@ -156,6 +160,16 @@ export default {
     },
     allSubtitleList(newVal, oldVal) {
       this.allSubtitleListWatcher(newVal, oldVal);
+      const targetSrc = this.watchLoadSubtitleFromLocal;
+      if (targetSrc && this.isProfessional) {
+        const load = newVal.find((e) => {
+          const si = this.subtitleInstances[e.id];
+          return si && si.src === targetSrc;
+        });
+        if (load) {
+          this.swicthReferenceSubtitle(load.id);
+        }
+      }
     },
     currentFirstSubtitleId(newVal, oldVal) {
       if (this.selectionComplete || newVal) {
@@ -163,6 +177,11 @@ export default {
         updateSelectedSubtitleId(this.originSrc, {
           firstId: newVal, secondaryId: this.currentSecondSubtitleId,
         });
+      }
+      // 当在isProfessional状态下，创建了新的字幕，需要更新当前编辑的字幕
+      if (this.isProfessional && newVal &&
+        this.allSubtitleList.find(e => e.id === newVal && e.type === 'modified')) {
+        this.updateCurrentEditedSubtitle(newVal);
       }
     },
     currentSecondSubtitleId(newVal, oldVal) {
@@ -219,7 +238,9 @@ export default {
       addMessages: 'addMessages',
     }),
     ...mapMutations({
+      swicthReferenceSubtitle: subtitleMutations.SWITCH_REFERENCE_SUBTITLE,
       resetSubtitlesByMutation: subtitleMutations.RESET_SUBTITLES,
+      updateCurrentEditedSubtitle: subtitleMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
       windowMinimumSize: 'windowMinimumSize', // 需要设置到常量里面
     }),
     async refreshSubtitles(types, videoSrc) {
@@ -718,7 +739,7 @@ export default {
       });
       return result;
     },
-    modifiedSubtitle({ sub }) {
+    modifiedSubtitle({ sub, isSecondSub }) {
       // 这里统一处理新增或者修改自制
       // 如果type 不是 modified 就是创建新的自制字幕
       // 如果是modified就修改原来的文件，更新instance
@@ -755,6 +776,7 @@ export default {
             type: 'modified',
             options: {
               storage: {
+                isFastCreateFromSecondSub: isSecondSub,
                 parsed: sub.parsed,
                 metaInfo: {
                   ...sub.metaInfo,
@@ -832,9 +854,21 @@ export default {
         .filter(sub => !!sub)
         .map(sub => this.addSubtitle(sub, this.originSrc)))
         .then((subtitleInstances) => {
-          this.changeCurrentFirstSubtitle(subtitleInstances[subtitleInstances.length - 1].id);
-          this.selectionComplete = true;
-          this.selectionSecondaryComplete = true;
+          const sub = subtitleInstances[subtitleInstances.length - 1];
+          // 如果是在高级编辑模式下，当前有修改的字幕id，这个时候添加字幕都不会被选中
+          if (sub.isFastCreateFromSecondSub) {
+            this.changeCurrentSecondSubtitle(sub.id);
+            this.selectionComplete = true;
+            this.selectionSecondaryComplete = true;
+          } else if (!(this.isProfessional && this.currentEditedSubtitleId)) {
+            this.changeCurrentFirstSubtitle(sub.id);
+            // 如果是在第二字幕面板创建了一个新字幕，这时，第一字幕选中新字幕，第二字幕选中无
+            if (!this.isFirstSubtitle) {
+              this.changeCurrentSecondSubtitle('');
+            }
+            this.selectionComplete = true;
+            this.selectionSecondaryComplete = true;
+          }
         });
     });
     this.$bus.$on('refresh-subtitles', ({ types, isInitial }) => {
@@ -888,6 +922,9 @@ export default {
     this.$bus.$on(bus.EXPORT_MODIFIED_SUBTITLE, this.exportSubtitle);
     // 保存字幕
     this.$bus.$on(bus.SUBTITLE_EDITOR_SAVE, this.saveSubtitle);
+    this.$bus.$on(bus.SUBTITLE_EDITOR_LOAD_LOCAL, (src) => {
+      this.watchLoadSubtitleFromLocal = src;
+    });
     // when set immediate on watcher, it may run before the created hook
     this.resetSubtitles();
     this.$bus.$emit('subtitle-refresh-from-src-change');

@@ -124,7 +124,8 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub', 'isEditable', 'isProfessional', 'referenceSubtitleId',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
+      'isEditable', 'isProfessional', 'referenceSubtitleId', 'editHistoryLen', 'currentEditHistoryIndex', 'currentEditedSubtitleId',
       'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath']),
     updateFullScreen() {
       if (this.isFullScreen) {
@@ -236,8 +237,14 @@ new Vue({
   watch: {
     isSubtitleAvaliable(val) {
       if (this.menu) {
-        this.menu.getMenuItemById('increaseSubDelay').enabled = val;
-        this.menu.getMenuItemById('decreaseSubDelay').enabled = val;
+        const increaseSubDelayMenu = this.menu.getMenuItemById('increaseSubDelay');
+        const decreaseSubDelayMenu = this.menu.getMenuItemById('decreaseSubDelay');
+        if (increaseSubDelayMenu) {
+          increaseSubDelayMenu.enabled = val;
+        }
+        if (decreaseSubDelayMenu) {
+          decreaseSubDelayMenu.enabled = val;
+        }
       }
     },
     displayLanguage(val) {
@@ -309,7 +316,18 @@ new Vue({
       if (current) current.checked = true;
     },
     isProfessional() {
+      // 进入高级模式，重新加载目录
       this.refreshMenu();
+    },
+    editHistoryLen(v) {
+      // 当操作历史记录更新，重新计算undo、redo是否可以使用
+      this.menu.getMenuItemById('advancedRedo').enabled = this.currentEditHistoryIndex < (v - 1);
+      this.menu.getMenuItemById('advancedUndo').enabled = this.currentEditHistoryIndex >= 0;
+    },
+    currentEditHistoryIndex(v) {
+      // 当操作历史记录更新，重新计算undo、redo是否可以使用
+      this.menu.getMenuItemById('advancedRedo').enabled = (v + 1) < this.editHistoryLen;
+      this.menu.getMenuItemById('advancedUndo').enabled = v >= 0;
     },
     isFullScreen() {
       this.refreshMenu();
@@ -358,14 +376,17 @@ new Vue({
       }
     },
     ableToPushCurrentSubtitle(val) {
-      this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
+      const uploadSelectedSubtitleMenu = this.menu.getMenuItemById('uploadSelectedSubtitle');
+      if (uploadSelectedSubtitleMenu) {
+        uploadSelectedSubtitleMenu.enabled = val;
+      }
     },
   },
   methods: {
     ...mapMutations({
       toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
-      setCreateMode: windowMutations.SET_CREATE_MODE,
       swicthReferenceSubtitle: subtitleMutations.SWITCH_REFERENCE_SUBTITLE,
+      updateCurrentEditedSubtitle: subtitleMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
     }),
     ...mapActions({
       updateSubDelay: subtitleActions.UPDATE_SUBTITLE_DELAY,
@@ -751,7 +772,7 @@ new Vue({
               click: () => {
                 // this.$bus.$emit('upload-current-subtitle');
                 if (!this.paused) this.$bus.$emit('toggle-playback');
-                this.setCreateMode(true);
+                this.updateCurrentEditedSubtitle(null);
                 this.swicthReferenceSubtitle(null);
                 this.toggleProfessional(true);
               },
@@ -939,8 +960,8 @@ new Vue({
         }
         // 时间轴高级编辑模式，菜单中file，subtile去掉，添加advanced目录
         if (this.isProfessional) {
-          template.splice(1, 1, this.advancedMenu());
-          // template.splice(4, 1);
+          template.splice(4, 1, this.advancedMenu());
+          template.splice(1, 1);
         }
         return template;
       }).then((result) => {
@@ -958,7 +979,7 @@ new Vue({
         if (this.chosenSize !== '' && menuSize) {
           menuSize.checked = true;
         }
-        if (!this.isSubtitleAvailable) {
+        if (!this.isSubtitleAvailable && !this.isProfessional) {
           this.menu.getMenuItemById('increaseSubDelay').enabled = false;
           this.menu.getMenuItemById('decreaseSubDelay').enabled = false;
           this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = this.ableToPushCurrentSubtitle;
@@ -971,16 +992,18 @@ new Vue({
           }
         });
         this.menu.getMenuItemById('windowFront').checked = this.topOnWindow;
-        this.subtitleList.forEach((item, index) => {
-          if (item.id === this.currentFirstSubtitleId && this.menu.getMenuItemById(`sub${index}`)) {
-            this.menu.getMenuItemById(`sub${index}`).checked = true;
-          }
-          if (item.id === this.currentSecondSubtitleId && this.menu.getMenuItemById(`secondSub${index}`)) {
-            this.menu.getMenuItemById(`secondSub${index}`).checked = true;
-          }
-          this.menu.getMenuItemById(`secondSub${index}`).enabled = this.enabledSecondarySub;
-        });
-        this.menu.getMenuItemById('secondSub-1').enabled = this.enabledSecondarySub;
+        if (!this.isProfessional) {
+          this.subtitleList.forEach((item, index) => {
+            if (item.id === this.currentFirstSubtitleId && this.menu.getMenuItemById(`sub${index}`)) {
+              this.menu.getMenuItemById(`sub${index}`).checked = true;
+            }
+            if (item.id === this.currentSecondSubtitleId && this.menu.getMenuItemById(`secondSub${index}`)) {
+              this.menu.getMenuItemById(`secondSub${index}`).checked = true;
+            }
+            this.menu.getMenuItemById(`secondSub${index}`).enabled = this.enabledSecondarySub;
+          });
+          this.menu.getMenuItemById('secondSub-1').enabled = this.enabledSecondarySub;
+        }
       })
         .catch((err) => {
           this.addLog('error', err);
@@ -1002,6 +1025,8 @@ new Vue({
         submenu: [
           {
             label: this.$t('msg.advanced.undo'),
+            id: 'advancedUndo',
+            enabled: !!this.currentEditedSubtitleId && this.currentEditHistoryIndex >= 0,
             accelerator: 'CmdOrCtrl+Z',
             click: () => {
               this.$bus.$emit(bus.SUBTITLE_EDITOR_UNDO);
@@ -1009,6 +1034,9 @@ new Vue({
           },
           {
             label: this.$t('msg.advanced.redo'),
+            id: 'advancedRedo',
+            enabled: !!this.currentEditedSubtitleId &&
+              this.currentEditHistoryIndex < (this.editHistoryLen - 1),
             accelerator: 'CmdOrCtrl+Shift+Z',
             click: () => {
               this.$bus.$emit(bus.SUBTITLE_EDITOR_REDO);
@@ -1017,6 +1045,7 @@ new Vue({
           { type: 'separator' },
           {
             label: this.$t('msg.advanced.save'),
+            enabled: !!this.currentEditedSubtitleId,
             accelerator: 'CmdOrCtrl+S',
             click: () => {
               this.$bus.$emit(bus.SUBTITLE_EDITOR_SAVE);
@@ -1024,6 +1053,7 @@ new Vue({
           },
           {
             label: this.$t('msg.advanced.export'),
+            enabled: !!this.currentEditedSubtitleId,
             accelerator: 'CmdOrCtrl+E',
             click: () => {
               this.$bus.$emit(bus.EXPORT_MODIFIED_SUBTITLE);
@@ -1031,7 +1061,7 @@ new Vue({
           },
           { type: 'separator' },
           {
-            label: '参考',
+            label: this.$t('msg.advanced.reference'),
             id: 'reference',
             submenu: reference,
           },
@@ -1061,6 +1091,34 @@ new Vue({
             },
           });
         }
+      });
+      reference.push({ type: 'separator' });
+      reference.push({
+        visible: true,
+        label: this.$t('msg.advanced.loadLocalSubtitleFile'),
+        click: () => {
+          const { remote } = this.$electron;
+          const { dialog } = remote;
+          const browserWindow = remote.BrowserWindow;
+          const focusWindow = browserWindow.getFocusedWindow();
+          const VALID_EXTENSION = ['ass', 'srt', 'vtt'];
+
+          dialog.showOpenDialog(focusWindow, {
+            title: 'Open Dialog',
+            defaultPath: Path.dirname(this.originSrc),
+            filters: [{
+              name: 'Subtitle Files',
+              extensions: VALID_EXTENSION,
+            }],
+            properties: ['openFile'],
+          }, (item) => {
+            if (item) {
+              this.$bus.$emit('add-subtitles', [{ src: item[0], type: 'local' }]);
+              // 发送到manager里面，等待字幕加载出id
+              this.$bus.$emit(bus.SUBTITLE_EDITOR_LOAD_LOCAL, item[0]);
+            }
+          });
+        },
       });
       return advancedTemplate;
     },
@@ -1442,20 +1500,24 @@ new Vue({
 
     window.addEventListener('drop', (e) => {
       e.preventDefault();
-      this.$bus.$emit('drop');
-      const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
-      const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
-      files.forEach(file => this.$electron.remote.app.addRecentDocument(file));
-      if (onlyFolders) {
-        this.openFolder(...files);
-      } else {
-        this.openFile(...files);
+      if (!this.isProfessional) {
+        this.$bus.$emit('drop');
+        const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
+        const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+        files.forEach(file => this.$electron.remote.app.addRecentDocument(file));
+        if (onlyFolders) {
+          this.openFolder(...files);
+        } else {
+          this.openFile(...files);
+        }
       }
     });
     window.addEventListener('dragover', (e) => {
       e.preventDefault();
-      e.dataTransfer.dropEffect = process.platform === 'darwin' ? 'copy' : '';
-      this.$bus.$emit('drag-over');
+      if (!this.isProfessional) {
+        this.$bus.$emit('drag-over');
+        e.dataTransfer.dropEffect = process.platform === 'darwin' ? 'copy' : '';
+      }
     });
     window.addEventListener('dragleave', (e) => {
       e.preventDefault();

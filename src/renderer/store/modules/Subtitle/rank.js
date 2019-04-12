@@ -29,10 +29,10 @@ export function metaInfoToWeight(subtitleType, infoType, value, subtitleList, pr
 
 export function rankCalculation(type, options, lastRank) {
   const baseRanks = {
-    modified: 1e16,
     local: 1e12,
     embedded: 1e8,
     online: 1e4,
+    modified: 1e2,
   };
   const rankTypes = [
     {

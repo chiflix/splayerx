@@ -22,24 +22,24 @@
           :settings="cue.tags"
           :style="{
             opacity: cue.reference ? '0.3' : '0.9',
-            zoom: isFirstSub ? `${scaleNum}` : `${secondarySubScale}`,
+            zoom: zoom,
             lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
           }"></CueRenderer>
         <div
           class="edit-box"
           @mousemove.stop=""
           :style="{
-            zoom: isProfessional ? `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}` : `${scaleNum}`,
+            zoom: zoom,
             // zoom: `${scaleNum}`,
             // transform: subLine(i),
             width: `${computedWidth*0.60/scaleNum}px`
           }"
           v-show="isEditable && paused && cue.index === index">
           <div
-            :class="'back no-drag '+`${isProfessional ? 'subtitle-style1' : `subtitle-style${chosenStyle ? chosenStyle : 0}`}`"
+            :class="'back no-drag '+`${isProfessional ? 'subtitle-style' : `subtitle-style${chosenStyle ? chosenStyle : 0}`}`"
             contenteditable="true">{{editVal.replace(/ /g, '&nbsp;')}}</div>
           <textarea
-            :class="'no-drag '+`${isProfessional ? 'subtitle-style1' : `subtitle-style${chosenStyle ? chosenStyle : 0}`}`"
+            :class="'no-drag '+`${isProfessional ? 'subtitle-style' : `subtitle-style${chosenStyle ? chosenStyle : 0}`}`"
             contenteditable="true"
             :ref="`textarea${cue.index}`"
             @keydown.stop="handleKeyDownTextArea"
@@ -52,7 +52,7 @@
       </div>
     </div>
     <div
-      v-fade-in="(isProfessional && showAddInput && paused)"
+      v-if="(isProfessional && showAddInput && paused)"
       @click.stop="handleClickAddSub"
       :class="'subContainer subtitle-alignment2'+/*`${paused && !isEditable ? ' enable-hover': ''}`*/`${isEditable && index === null ? ' editable': ''}`"
       :style="{
@@ -64,19 +64,19 @@
           :text="'点击添加字幕'"
           :settings="{}"
           :style="{
-            zoom: `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}`,
+            zoom: zoom
           }"></CueRenderer>
         <div
           class="edit-box"
           @mousemove.stop=""
           v-show="isEditable && paused && index === null"
           :style="{
-            zoom: `${((29 / (11 * 1600)) * computedWidth) + (26 / 55)}`,
+            zoom: zoom,
             // zoom: `${scaleNum}`,
             width: `${computedWidth*0.60/scaleNum}px`
           }">
           <div
-            class="back subtitle-style1 no-drag"
+            class="back subtitle-style no-drag"
             contenteditable="true">{{editVal.replace(/ /g, '&nbsp;')}}</div>
           <textarea
             class="subtitle-style1 no-drag"
@@ -181,9 +181,12 @@ export default {
     ...mapGetters([
       'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleList', 'winHeight',
       'paused', 'isFullScreen', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'enabledSecondarySub', 'chosenSize', 'currentTime',
-      'isEditable', 'isProfessional', 'winRatio', 'winWidth', 'winHeight', 'chosenStyle', 'isCreateSubtitleMode',
+      'isEditable', 'isProfessional', 'winRatio', 'winWidth', 'winHeight', 'chosenStyle', 'isCreateSubtitleMode', 'currentEditedSubtitleId',
       'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
     ]),
+    computedSize() {
+      return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
+    },
     type() {
       if (this.subtitleInstance && this.subtitleInstance.metaInfo) {
         return this.subtitleInstance.metaInfo.format;
@@ -211,7 +214,35 @@ export default {
         // 当视频宽度小于高度，如果宽度超过480px,才可以使用编辑模式
         sizeAvaliable = this.winWidth >= 480;
       }
-      return sizeAvaliable && !this.enabledSecondarySub && !this.playlistShow;
+      return sizeAvaliable && !this.playlistShow;
+    },
+    zoom() {
+      if (this.isProfessional) {
+        // update video scale that width is larger than height
+        const updatePCVideoScaleByFactors = (index) => {
+          const firstFactors = [21, 29, 37, 45];
+          const secondFactors = [24, 26, 28, 30];
+          return `${(((firstFactors[index] / 900) * this.computedSize) + (secondFactors[index] / 5)) / 9}`;
+        };
+        // update video scale that height is larger than width
+        const updateMobileVideoScaleByFactors = (index) => {
+          const firstFactors = [21, 29, 37, 45];
+          const secondFactors = [12, -92, -196, -300];
+          return `${(((firstFactors[index] / 760) * this.computedSize) + (secondFactors[index] / 76)) / 9}`;
+        };
+        // update video scale when width or height is larger than 1080
+        const updateVideoScaleByFactors = (val) => {
+          const factors = [30, 40, 50, 60];
+          return `${((val / 1080) * factors[1]) / 9}`;
+        };
+        if (this.computedSize >= 1080) {
+          return updateVideoScaleByFactors(this.computedSize);
+        } else if (this.winRatio >= 1) {
+          return updatePCVideoScaleByFactors(1);
+        }
+        return updateMobileVideoScaleByFactors(1);
+      }
+      return this.isFirstSub ? `${this.scaleNum}` : `${this.secondarySubScale}`;
     },
     trimEditVal() {
       return this.editVal.replace(/ /g, '*');
@@ -256,12 +287,12 @@ export default {
     paused(val) {
       if (val === false) {
         // this.editable = false;
-        this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+        // this.requestId = requestAnimationFrame(this.currentTimeUpdate);
       }
     },
     currentTime() {
       if (this.paused) {
-        this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+        // this.requestId = requestAnimationFrame(this.currentTimeUpdate);
       }
     },
     editVal(val) {
@@ -279,24 +310,24 @@ export default {
         }
       });
     },
-    subtitleInstance: {
-      immediate: true,
-      deep: true,
-      handler(val) {
-        if (val && val.parsed && val.parsed.dialogues) {
-          this.requestId = requestAnimationFrame(this.currentTimeUpdate);
-        }
-      },
-    },
-    referenceDialogues: {
-      immediate: true,
-      deep: true,
-      handler(val) {
-        if (val) {
-          this.requestId = requestAnimationFrame(this.currentTimeUpdate);
-        }
-      },
-    },
+    // subtitleInstance: {
+    //   immediate: true,
+    //   deep: true,
+    //   handler(val) {
+    //     if (val && val.parsed && val.parsed.dialogues) {
+    //       this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+    //     }
+    //   },
+    // },
+    // referenceDialogues: {
+    //   immediate: true,
+    //   deep: true,
+    //   handler(val) {
+    //     if (val) {
+    //       this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+    //     }
+    //   },
+    // },
     showTextarea(val) {
       if (val && this.chooseIndexs > -1) {
         this.stillWaitTextAreaFocus = true;
@@ -365,7 +396,7 @@ export default {
     ...mapMutations({
       updateDuration: subtitleMutations.DURATIONS_UPDATE,
       toggleEditable: windowMutations.TOGGLE_EDITABLE,
-      setCreateMode: windowMutations.SET_CREATE_MODE,
+      updateCurrentEditedSubtitle: subtitleMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
     }),
     filter(cue) {
       if (!this.isVtt && this.isProfessional && cue.tags) {
@@ -530,6 +561,7 @@ export default {
             } else {
               this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
                 sub: subtitleInstance,
+                isSecondSub: !this.isFirstSub,
               });
             }
           } else if (currentCue.reference) {
@@ -541,7 +573,7 @@ export default {
             delete sub.selfIndex;
             let subtitleInstance = null;
             let index = 0;
-            if (!this.subtitleInstance || this.isCreateSubtitleMode) {
+            if (!this.subtitleInstance || !this.currentEditedSubtitleId) {
               subtitleInstance = {
                 parsed: {
                   dialogues: [],
@@ -566,7 +598,6 @@ export default {
               // }
               index = subtitleInstance.parsed.dialogues.length;
             }
-            this.setCreateMode(false);
             subtitleInstance.parsed.dialogues.splice(index, 0, sub);
             this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
               sub: subtitleInstance,
@@ -600,13 +631,13 @@ export default {
           } else {
             sub.start = sub.end - 0.2;
           }
-          if (this.type === 'ass' && !this.isCreateSubtitleMode) {
+          if (this.type === 'ass' && this.currentEditedSubtitleId) {
             sub.fragments[0].text = editVal;
           } else {
             sub.text = editVal;
           }
           let subtitleInstance = null;
-          if (!this.subtitleInstance || this.isCreateSubtitleMode) {
+          if (!this.subtitleInstance || !this.currentEditedSubtitleId) {
             subtitleInstance = {
               parsed: {
                 dialogues: [],
@@ -622,16 +653,16 @@ export default {
           } else {
             subtitleInstance = cloneDeep(this.subtitleInstance);
           }
-          this.setCreateMode(false);
           this.$bus.$emit(bus.CREATE_MIRROR_SUBTITLE, {
             sub: subtitleInstance, add: sub, index: this.newSubHolder.insertIndex,
           });
+          this.$emit('update:showAddInput', false);
         }
         this.toggleEditable(false);
         this.editVal = '';
         this.rows = 1;
       }
-      this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+      // this.requestId = requestAnimationFrame(this.currentTimeUpdate);
     },
     handleKeyDownTextArea(e) { // eslint-disable-line
       // 处理输入框快捷键
@@ -698,9 +729,9 @@ export default {
       const { lastCurrentTime } = this;
       this.setCurrentCues(currentTime - (subtitleDelay / 1000));
       this.updateVideoSegments(lastCurrentTime, currentTime);
-      if (!this.paused) {
-        this.requestId = requestAnimationFrame(this.currentTimeUpdate);
-      }
+      // if (!this.paused) {
+      this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+      // }
     },
     setCurrentCues(currentTime) { // eslint-disable-line
       const currentDialogues = this.subtitleInstance && this.subtitleInstance.parsed ?
