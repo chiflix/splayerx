@@ -65,7 +65,8 @@
             <Icon class="addUi" type="add"/>
           </div>
         </div>
-        <VideoItem v-for="(item, index) in lastPlayedFile"
+        <component v-for="(item, index) in lastPlayedFile"
+          :is="item.type === 'playlist' ? 'PlaylistItem' : 'VideoItem'"
           :key="item.quickHash"
           :index="index"
           :firstIndex="firstIndex"
@@ -83,8 +84,7 @@
           @previous-page="firstIndex = 0"
           @showShortcutImage="showShortcut(true)"
           @showLandingLogo="showShortcut(false)"
-          @displayInfo="displayInfoUpdate">
-        </VideoItem>
+          @displayInfo="displayInfoUpdate"/>
       </div>
     </div>
     <NotificationBubble/>
@@ -98,6 +98,7 @@ import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import VideoItem from './LandingView/VideoItem.vue';
+import PlaylistItem from './LandingView/PlaylistItem.vue';
 import NotificationBubble from './NotificationBubble.vue';
 
 export default {
@@ -141,6 +142,7 @@ export default {
     Icon,
     Titlebar,
     VideoItem,
+    PlaylistItem,
     NotificationBubble,
   },
   computed: {

@@ -219,7 +219,6 @@ $border-radius: 2px;
 }
 .content {
   position: absolute;
-  z-index: 10;
   top: 0;
   border-radius: $border-radius;
 }
