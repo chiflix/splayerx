@@ -1,7 +1,7 @@
 <template>
   <div class="subtitle-loader">
     <div class="subContainer"
-      :class="avaliableClass(index)"
+      :class="availableClass(index)"
       v-for="(cue, index) in currentCues"
       :key="index"
       :style="{
@@ -155,7 +155,7 @@ export default {
     ...mapMutations({
       updateDuration: subtitleMutations.DURATIONS_UPDATE,
     }),
-    avaliableClass(index) {
+    availableClass(index) {
       if (!this.isVtt) {
         if (!this.currentTags[index].pos) {
           if (this.subToTop && ![4, 5, 6, 7, 8, 9].includes(this.currentTags[index].alignment)) {
@@ -223,9 +223,11 @@ export default {
               currentTags = cue.tags;
             }
           });
-          currentCues.push({
-            start: item.start, end: item.end, tags: currentTags, text: currentText,
-          });
+          if (currentText) {
+            currentCues.push({
+              start: item.start, end: item.end, tags: currentTags, text: currentText,
+            });
+          }
         });
         return currentCues;
       }
