@@ -24,7 +24,10 @@ export default {
     ...mapGetters(['winSize', 'winPos', 'isFullScreen']),
   },
   mounted() {
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 675]);
+    if (this.winSize[0] < 1200) {
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 675]);
+    }
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
     const windowRect = [
       window.screen.availLeft, window.screen.availTop,
@@ -35,7 +38,7 @@ export default {
       windowRect,
       [1200, 675],
     );
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', newPosition);
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', newPosition);
     this.$bus.$on('search-with-url', (url) => {
       this.$refs.webView.loadURL(url);
     });
