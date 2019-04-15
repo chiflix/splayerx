@@ -1,6 +1,6 @@
 <template>
  <div class="browsing">
-   <browsing-header :url="url"></browsing-header>
+   <browsing-header></browsing-header>
    <webview :src="url" autosize class="web-view" ref="webView" allowpopups></webview>
  </div>
 </template>

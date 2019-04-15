@@ -44,12 +44,8 @@ export default {
       addressToInput: false,
       backType: 'back',
       forwardType: 'forward',
+      url: 'https://www.youtube.com',
     };
-  },
-  props: {
-    url: {
-      type: String,
-    },
   },
   computed: {
     ...mapGetters(['winWidth']),
