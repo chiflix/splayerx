@@ -442,6 +442,7 @@ export default {
         } else {
           const videoInfo = playlist.infos.find(info => info.path === originPath);
           if (videoInfo) {
+            this.$bus.$emit('send-lastplayedtime', videoInfo.lastPlayedTime);
             const videoIndex = playlist.infos?.findIndex(info => info.path === originPath);
             playlist.infos.splice(videoIndex, 1, { ...videoInfo, path: originPath, quickHash: mediaQuickHash });
           } else {
