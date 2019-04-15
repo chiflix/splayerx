@@ -1,9 +1,6 @@
 <template>
   <div class="wrapper"
-    :data-component-name="$options.name"
-    @mousedown.left="handleLeftClick"
-    @mouseup.left.stop="handleMouseUp"
-    @mousemove="handleMouseMove">
+    :data-component-name="$options.name">
     <titlebar currentView="LandingView"></titlebar>
     <transition name="background-container-transition">
       <div class="background" v-if="showShortcutImage">
@@ -342,20 +339,6 @@ export default {
     },
     timeInValidForm(time) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);
-    },
-    handleLeftClick() {
-      // Handle dragging-related variables
-      this.mouseDown = true;
-      this.isDragging = false;
-    },
-    handleMouseMove() {
-      // Handle dragging-related variables and methods
-      if (this.mouseDown) {
-        this.isDragging = true;
-      }
-    },
-    handleMouseUp() {
-      this.mouseDown = false;
     },
   },
 };
