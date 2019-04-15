@@ -246,7 +246,8 @@ export default {
         audioTrackId: this.currentAudioTrackId,
       };
 
-      if (!this.$store.getters.isFolderList) {
+      if (!this.$store.getters.isFolderList
+        && (!process.mas || (process.mas && this.$store.getters.source !== 'drop'))) {
         let playlist;
         if (this.playListHash) {
           playlist = await this.infoDB.get('recent-played', this.playListHash);

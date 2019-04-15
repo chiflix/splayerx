@@ -346,15 +346,23 @@ export default {
           hash: playListHash,
           paths: videoFiles,
         });
-        this.infoDB.add('recent-played', {
-          quickHash: playListHash,
-          currentVideo: videoFiles[0],
-          type: 'playlist',
-          paths: videoFiles,
-          lastOpened: Date.now(),
-        }).then(() => {
+        let dbPromise;
+        if (!process.mas || (process.mas && this.$store.getters.source !== 'drop')) {
+          dbPromise = this.infoDB.add('recent-played', {
+            quickHash: playListHash,
+            currentVideo: videoFiles[0],
+            type: 'playlist',
+            paths: videoFiles,
+            lastOpened: Date.now(),
+          });
+        }
+        if (dbPromise) {
+          dbPromise.then(() => {
+            this.playFile(videoFiles[0]);
+          });
+        } else {
           this.playFile(videoFiles[0]);
-        });
+        }
       } else {
         this.playFile(videoFiles[0]);
         this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
@@ -418,7 +426,7 @@ export default {
             lastOpened: Date.now(),
           });
         }
-      } else {
+      } else if (!process.mas || (process.mas && this.$store.getters.source !== 'drop')) {
         let playlist = await this.infoDB.get('recent-played', this.$store.getters.playListHash);
         if (!playlist) {
           const playListHash = this.$store.getters.playingList.reduce((hash, src) => `${hash}-${src}`);

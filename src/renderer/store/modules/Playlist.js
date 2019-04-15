@@ -3,12 +3,14 @@ import path from 'path';
 import helpers from '@/helpers/index';
 
 const state = {
+  source: '', // 'drop' or '', used on mas version
   hash: '',
   playList: [],
   isFolderList: undefined,
 };
 
 const getters = {
+  source: state => state.source,
   playListHash: state => state.hash,
   isFolderList: state => state.isFolderList,
   nextVideo: (state, getters) => {
@@ -28,6 +30,9 @@ const getters = {
 };
 
 const mutations = {
+  source(state, type) {
+    state.source = type;
+  },
   hash(state, h) {
     state.hash = h;
   },
