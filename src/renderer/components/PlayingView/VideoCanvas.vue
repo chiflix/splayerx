@@ -385,6 +385,7 @@ export default {
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
+        this.$store.dispatch('SRC_SET', { src: '', mediaHash: '' });
         this.saveScreenshot(this.originSrc)
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)

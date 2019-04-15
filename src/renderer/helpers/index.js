@@ -404,6 +404,8 @@ export default {
 
         return;
       }
+      this.$bus.$emit('new-file-open');
+      this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
       this.$router.push({ name: 'playing-view' });
 
       if (this.$store.getters.isFolderList) {
@@ -442,6 +444,7 @@ export default {
         } else {
           const videoInfo = playlist.infos.find(info => info.path === originPath);
           if (videoInfo) {
+            this.$bus.$emit('open-playlist');
             this.$bus.$emit('send-lastplayedtime', videoInfo.lastPlayedTime);
             const videoIndex = playlist.infos?.findIndex(info => info.path === originPath);
             playlist.infos.splice(videoIndex, 1, { ...videoInfo, path: originPath, quickHash: mediaQuickHash });
@@ -454,8 +457,6 @@ export default {
         }
         await this.infoDB.add('recent-played', playlist);
       }
-      this.$bus.$emit('new-file-open');
-      this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
     },
     async mediaQuickHash(filePath) {
       function md5Hex(text) {

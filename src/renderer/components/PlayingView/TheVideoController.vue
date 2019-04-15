@@ -231,6 +231,9 @@ export default {
         hovering: false,
       };
     });
+    this.$bus.$on('open-playlist', () => {
+      this.widgetsStatus['playlist-control'].showAttached = true;
+    });
     this.$bus.$on('drag-over', () => {
       this.dragOver = true;
     });
