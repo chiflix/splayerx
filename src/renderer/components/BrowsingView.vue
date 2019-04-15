@@ -61,6 +61,9 @@ export default {
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
+    this.$refs.webView.addEventListener('dom-ready', () => { // for webview test
+      this.$refs.webView.openDevTools();
+    });
     window.onbeforeunload = (e) => {
       if (!this.quit) {
         e.returnValue = false;
