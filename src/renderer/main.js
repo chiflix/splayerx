@@ -391,6 +391,16 @@ new Vue({
                 });
               },
             },
+            {
+              label: this.$t('msg.file.copy'),
+              accelerator: 'CmdOrCtrl+C',
+              selector: 'copy:',
+            },
+            {
+              label: this.$t('msg.file.paste'),
+              accelerator: 'CmdOrCtrl+V',
+              selector: 'paste:',
+            },
             { type: 'separator' },
             {
               label: this.$t('msg.file.clearHistory'),

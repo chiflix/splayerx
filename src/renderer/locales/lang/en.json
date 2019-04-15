@@ -80,7 +80,9 @@
 			"name": "File",
 			"open": "Open…",
 			"openRecent": "Open Recent",
-			"openURL": "Open URL…"
+			"openURL": "Open URL…",
+			"copy": "Copy",
+			"paste": "Paste"
 		},
 		"help": {
 			"name": "Help",
