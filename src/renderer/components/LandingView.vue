@@ -490,6 +490,7 @@ $themeColor-Light: white;
     font-size: 15px;
     font-weight: 400;
     letter-spacing: .5px;
+    line-height: 20px;
     margin-top: 10px;
     span.timing-played {
       color: rgba(255, 255, 255, .9);
