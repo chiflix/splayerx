@@ -328,7 +328,9 @@ export default {
     async openPlaylist(playListHash) {
       const value = await this.infoDB.get('recent-played', playListHash);
       if (value.type === 'playlist') {
-        this.playFile(value.currentVideo);
+        this.playFile(value.currentVideo).then(() => {
+          this.$bus.$emit('open-playlist');
+        });
         this.$store.dispatch('PlayingList', {
           hash: value.quickHash,
           paths: value.paths,
@@ -451,7 +453,6 @@ export default {
         } else {
           const videoInfo = playlist.infos.find(info => info.path === originPath);
           if (videoInfo) {
-            this.$bus.$emit('open-playlist');
             this.$bus.$emit('send-lastplayedtime', videoInfo.lastPlayedTime);
             const videoIndex = playlist.infos?.findIndex(info => info.path === originPath);
             playlist.infos.splice(videoIndex, 1, { ...videoInfo, path: originPath, quickHash: mediaQuickHash });

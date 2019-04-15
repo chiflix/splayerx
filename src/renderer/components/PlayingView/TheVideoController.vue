@@ -234,7 +234,7 @@ export default {
     this.$bus.$on('open-playlist', () => {
       this.widgetsStatus['playlist-control'].showAttached = true;
       setTimeout(() => {
-        this.widgetsStatus['playlist-control'].showAttached = true;
+        this.widgetsStatus['playlist-control'].showAttached = false;
       }, 3000);
     });
     this.$bus.$on('drag-over', () => {
