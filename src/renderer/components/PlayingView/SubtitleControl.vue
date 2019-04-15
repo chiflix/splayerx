@@ -55,7 +55,7 @@
                       </div>
                     </div>
 
-                      <div v-for="(item, index) in computedAvaliableItems" :key="item.rank">
+                      <div v-for="(item, index) in computedAvailableItems" :key="item.rank">
                         <div class="menu-item-text-wrapper"
                           @mouseup="toggleItemClick($event, index)"
                           @mouseover="toggleItemsMouseOver(index)"
@@ -91,7 +91,7 @@
                       </div>
                     </div>
 
-                    <div class="card" v-if="0 <= computedAvaliableItems.length"
+                    <div class="card" v-if="0 <= computedAvailableItems.length"
                       :style="{
                         height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
                         top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
@@ -158,7 +158,7 @@ export default {
       loadingType: '',
       detailTimer: null,
       breakTimer: null,
-      computedAvaliableItems: [],
+      computedAvailableItems: [],
       continueRefresh: false,
       isShowingHovered: false,
       isInitial: true,
@@ -215,7 +215,7 @@ export default {
       return 44;
     },
     realItemsNum() {
-      return this.computedAvaliableItems.length + 1 + this.loadingTypes.length;
+      return this.computedAvailableItems.length + 1 + this.loadingTypes.length;
     },
     isOverFlow() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
@@ -243,26 +243,26 @@ export default {
     },
     cardPos() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.computedAvaliableItems.length > 0 ?
-          ((this.computedAvaliableItems.length + this.loadingTypes.length)
+        return this.computedAvailableItems.length > 0 ?
+          ((this.computedAvailableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 31 :
           this.scopeHeight + 4;
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.computedAvaliableItems.length > 0 ?
-          ((this.computedAvaliableItems.length + this.loadingTypes.length)
+        return this.computedAvailableItems.length > 0 ?
+          ((this.computedAvailableItems.length + this.loadingTypes.length)
             - this.currentSubtitleIndex) * 37 :
           this.scopeHeight + 5;
       }
-      return this.computedAvaliableItems.length > 0 ?
-        ((this.computedAvaliableItems.length + this.loadingTypes.length)
+      return this.computedAvailableItems.length > 0 ?
+        ((this.computedAvailableItems.length + this.loadingTypes.length)
           - this.currentSubtitleIndex) * 51 :
         this.scopeHeight + 7;
     },
     currentSubtitleIndex() {
       return !this.isFirstSubtitle && this.enabledSecondarySub ?
-        this.computedAvaliableItems.findIndex(subtitle =>
+        this.computedAvailableItems.findIndex(subtitle =>
           subtitle.id === this.currentSecondSubtitleId) :
-        this.computedAvaliableItems.findIndex(subtitle =>
+        this.computedAvailableItems.findIndex(subtitle =>
           subtitle.id === this.currentFirstSubtitleId);
     },
     currentScrollTop() {
@@ -285,7 +285,7 @@ export default {
     },
     originSrc() {
       this.showAttached = false;
-      this.computedAvaliableItems = [];
+      this.computedAvailableItems = [];
     },
     currentSubtitleIndex(val) {
       if (val === 0) {
@@ -325,7 +325,7 @@ export default {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
       }
-      this.computedAvaliableItems = val
+      this.computedAvailableItems = val
         .filter(({ name, loading }) => name && loading !== 'failed');
     },
     loadingType(val) {
@@ -343,7 +343,7 @@ export default {
     isFirstSubtitle() {
       this.$refs.scroll.scrollTop = this.currentScrollTop;
     },
-    computedAvaliableItems(val) {
+    computedAvailableItems(val) {
       this.updateNoSubtitle(!val.length);
     },
   },
@@ -522,8 +522,8 @@ export default {
     },
     toggleItemClick(event, index) {
       if (event.target.nodeName === 'DIV') {
-        const { computedAvaliableItems } = this;
-        this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+        const { computedAvailableItems } = this;
+        this.$bus.$emit('change-subtitle', computedAvailableItems[index].id);
         setTimeout(() => {
           this.showSubtitleDetails(index);
         }, 0);

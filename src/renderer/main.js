@@ -183,8 +183,8 @@ new Vue({
     currentRouteName() {
       return this.$route.name;
     },
-    isSubtitleAvaliable() {
-      return this.currentFirstSubtitleId !== '';
+    isSubtitleAvailable() {
+      return this.currentFirstSubtitleId !== '' || (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub);
     },
   },
   created() {
@@ -230,7 +230,7 @@ new Vue({
     });
   },
   watch: {
-    isSubtitleAvaliable(val) {
+    isSubtitleAvailable(val) {
       if (this.menu) {
         this.menu.getMenuItemById('increaseSubDelay').enabled = val;
         this.menu.getMenuItemById('decreaseSubDelay').enabled = val;
