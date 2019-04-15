@@ -488,7 +488,7 @@ $themeColor-Light: white;
   .item-timing {
     color: rgba(255, 255, 255, .4);
     font-size: 15px;
-    font-weight: 400;
+    font-family: $font-heavy;
     letter-spacing: .5px;
     line-height: 20px;
     margin-top: 10px;
