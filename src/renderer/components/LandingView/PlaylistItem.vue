@@ -175,7 +175,7 @@ export default {
           } else if (Math.abs(movementX) >= this.thumbnailWidth - 30
             || Math.abs(movementY) >= this.thumbnailHeight - 30) {
             const percentageX = (Math.abs(movementX) - (this.thumbnailWidth - 30)) / 25;
-            const percentageY = (Math.abs(movementY) - (this.thumbnailHeight - 30)) / 21;
+            const percentageY = (Math.abs(movementY) - (this.thumbnailHeight - 30)) / 24;
             const percentage = percentageX > percentageY ? percentageX : percentageY;
             requestAnimationFrame(() => {
               this.$refs.layer1.style.setProperty('transform', `translateY(-${8 * percentage}px) scale(0.8, 0.8)`);

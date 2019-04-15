@@ -23,10 +23,9 @@
           <div class="item-description"/>
           <div class="item-timing">
             <span class="timing-played">
-              {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}</span>
+              {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}
             / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
-            <span v-if="item.playListLength">
-            · {{ $t('recentPlaylist.playlistSource') }}&nbsp&nbsp{{ item.index + 1 }} / {{ item.playListLength }}
+            <span v-if="item.playListLength">·&nbsp{{ $t('recentPlaylist.playlistSource') }}&nbsp&nbsp{{ item.index + 1 }} / {{ item.playListLength }}</span>
             </span>
           </div>
           <div class="item-progress">
@@ -489,7 +488,7 @@ $themeColor-Light: white;
   .item-timing {
     color: rgba(255, 255, 255, .4);
     font-size: 15px;
-    font-weight: normal;
+    font-weight: 400;
     letter-spacing: .5px;
     margin-top: 10px;
     span.timing-played {
