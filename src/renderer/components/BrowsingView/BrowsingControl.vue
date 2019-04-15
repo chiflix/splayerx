@@ -7,8 +7,8 @@
     </div>
     <div class="link-input" :style="{
       background: addressToInput ? 'rgba(0, 0, 0, 0.2)' : '',
-      borderRight: addressToInput ? '' : '0.6px solid rgba(0, 0, 0, 0.2)',
-      borderLeft: addressToInput ? '' : '0.6px solid rgba(0, 0, 0, 0.2)',
+      borderRight: !addressToInput && marksToShow.length ? '0.6px solid rgba(0, 0, 0, 0.2)' : '0.6px solid rgba(0, 0, 0, 0)',
+      borderLeft: addressToInput ? '0.6px solid rgba(0, 0, 0, 0)' : '0.6px solid rgba(0, 0, 0, 0.2)',
       borderRadius: addressToInput ? '2.5px' : '',
       width: `${inputWidth}px`,
     }">
@@ -16,9 +16,9 @@
       <div class="address-show" v-show="!addressToInput" @mousedown="handleUrlInput" :style="{ width: `${inputWidth}px` }">
         <p>{{ url }}</p>
       </div>
-      <input class="address-input" ref="urlInput" v-model="url" @blur="handleInputBlur" v-show="addressToInput" @keypress="handleEnterKey">
+      <input class="address-input" ref="urlInput" v-model="url" @blur="handleInputBlur" v-show="addressToInput" @keypress="handleEnterKey" onfocus="select()">
     </div>
-    <div class="address-marks">
+    <div class="address-marks" v-show="marksToShow.length">
       <div class="marks-margin">
         <div v-for="(item, index) in marksToShow" class="marks-container" @mouseup="handleMarksMouseup(index)" :style="{
           background: index === selectedMarks ? 'rgba(255, 255, 255, 0.5)' : '',
@@ -120,6 +120,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+::selection {
+  background-color: rgba(255, 255, 255, 0.2);
+}
 .browsing-control {
   width: auto;
   height: 40px;
@@ -159,7 +162,6 @@ export default {
       height: 16px;
       border: none;
       outline: none;
-      background: rgba(255, 255, 255, 0.2);
       color: rgba(255, 255, 255, 0.8);
       font-size: 13px;
       text-indent: 2px;
