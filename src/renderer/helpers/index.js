@@ -177,6 +177,7 @@ export default {
         }
         if (files) {
           // if selected files contain folders only, then call openFolder()
+          this.$store.commit('source', '');
           const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
           files.forEach(file => remote.app.addRecentDocument(file));
           if (onlyFolders) {
