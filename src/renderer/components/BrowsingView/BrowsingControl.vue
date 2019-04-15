@@ -68,6 +68,7 @@ export default {
   },
   mounted() {
     this.$bus.$on('web-info', (info) => {
+      this.url = info.url;
       this.backType = info.canGoBack ? 'back' : 'backDisabled';
       this.forwardType = info.canGoForward ? 'forward' : 'forwardDisabled';
     });

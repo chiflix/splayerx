@@ -1,7 +1,7 @@
 <template>
  <div class="browsing">
    <browsing-header></browsing-header>
-   <webview :src="url" autosize class="web-view" ref="webView" allowpopups></webview>
+   <webview src="https://www.youtube.com" autosize class="web-view" ref="webView" allowpopups></webview>
  </div>
 </template>
 
@@ -13,7 +13,6 @@ export default {
   name: 'BrowsingView',
   data() {
     return {
-      url: 'https://www.youtube.com',
       quit: false,
     };
   },
@@ -56,8 +55,8 @@ export default {
       this.$refs.webView.loadURL(this.$refs.webView.getURL());
     });
     this.$refs.webView.addEventListener('load-commit', () => {
-      this.url = this.$refs.webView.getURL();
-      this.$bus.$emit('web-info', { canGoBack: this.$refs.webView.canGoBack(), canGoForward: this.$refs.webView.canGoForward() });
+      this.$refs.webView.blur();
+      this.$bus.$emit('web-info', { url: this.$refs.webView.getURL(), canGoBack: this.$refs.webView.canGoBack(), canGoForward: this.$refs.webView.canGoForward() });
     });
     this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;

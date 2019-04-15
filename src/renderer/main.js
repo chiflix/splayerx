@@ -391,6 +391,7 @@ new Vue({
                 });
               },
             },
+            { type: 'separator' },
             {
               label: this.$t('msg.file.copy'),
               accelerator: 'CmdOrCtrl+C',
