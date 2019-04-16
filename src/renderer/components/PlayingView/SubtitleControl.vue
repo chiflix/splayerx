@@ -94,8 +94,7 @@
                     <div class="card" v-if="0 <= computedAvailableItems.length"
                       :style="{
                         height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                        top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
-                        marginTop: `${-cardPos}px`,
+                        marginTop: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-cardPos - hoverHeight}px` : `${-cardPos}px`,
                         transition: transFlag ? 'all 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
                       }"/>
                   </div>
@@ -217,13 +216,13 @@ export default {
     realItemsNum() {
       return this.computedAvailableItems.length + 1 + this.loadingTypes.length;
     },
-    isOverFlow() {
+    isOverFlow() { // eslint-disable-line complexity
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.realItemsNum > 3 ? 'scroll' : '';
+        return this.realItemsNum > 3 || (this.scopeHeight + this.hoverHeight > 89 && this.hiddenText) ? 'scroll' : '';
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.realItemsNum > 5 ? 'scroll' : '';
+        return this.realItemsNum > 5 || (this.scopeHeight + this.hoverHeight > 180 && this.hiddenText) ? 'scroll' : '';
       }
-      return this.realItemsNum >= 7 ? 'scroll' : '';
+      return this.realItemsNum > 7 || (this.scopeHeight + this.hoverHeight > 350 && this.hiddenText) ? 'scroll' : '';
     },
     scopeHeight() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
