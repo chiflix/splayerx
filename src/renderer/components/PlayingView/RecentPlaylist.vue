@@ -331,6 +331,7 @@ export default {
       this.movementX = this.movementY = 0;
     },
     onItemMouseover(index, media) {
+      this.$emit('can-hover-item');
       this.hoverIndex = index;
       this.hoveredMediaInfo = media;
       this.filename = path.basename(
@@ -425,7 +426,6 @@ export default {
         if (Math.abs(this.mousePosition.x - val.x) > distance ||
         Math.abs(this.mousePosition.y - val.y) > distance) {
           this.canHoverItem = true;
-          this.$emit('can-hover-item');
         }
       }
     },
