@@ -19,9 +19,9 @@
       backgroundImage: itemShortcut(coverVideo.smallShortCut, coverVideo.cover, coverVideo.lastPlayedTime, coverVideo.duration),
     }">
     <div class="content"
-      @click.stop="onRecentItemClick(item)"
-      @mouseout="onRecentItemMouseout"
-      @mouseover="onRecentItemMouseover"
+      @click.stop="onRecentItemClick"
+      @mouseenter="onRecentItemMouseenter"
+      @mouseleave="onRecentItemMouseleave"
       @mousedown.stop="onRecentItemMousedown"
       @mouseup="onRecentItemMouseup"
       :style="{
@@ -122,7 +122,7 @@ export default {
         playListLength: this.item.paths.length,
       };
     },
-    onRecentItemMouseover() {
+    onRecentItemMouseenter() {
       if ((this.isInRange || this.isFullScreen) && !this.shifting) {
         this.chosen = true;
         this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
@@ -144,7 +144,7 @@ export default {
         this.$emit('displayInfo', this.displayInfo);
       }
     },
-    onRecentItemMouseout() {
+    onRecentItemMouseleave() {
       if (!this.moving) {
         this.chosen = false;
         this.$refs.layer2.style.setProperty('transform', 'scale(0.9, 0.9)');

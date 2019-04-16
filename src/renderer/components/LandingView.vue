@@ -41,10 +41,7 @@
         </div>
       </div>
     </transition>
-    <div class="mask"
-      :style="{
-        backgroundColor: maskBackground
-      }"/>
+    <div class="mask" ref="mask"/>
     <div class="controller"
       :style="{
         transform: isFullScreen ? '' : `translateX(${move}px)`,
@@ -102,6 +99,13 @@ import NotificationBubble from './NotificationBubble.vue';
 
 export default {
   name: 'landing-view',
+  components: {
+    Icon,
+    Titlebar,
+    VideoItem,
+    PlaylistItem,
+    NotificationBubble,
+  },
   data() {
     return {
       lastPlayedFile: [],
@@ -115,7 +119,6 @@ export default {
       item: [],
       isDragging: false,
       filePathNeedToDelete: '',
-      maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
       displayInfo: [],
       tranFlag: true,
       shifting: false,
@@ -136,13 +139,6 @@ export default {
         }, 400);
       }
     },
-  },
-  components: {
-    Icon,
-    Titlebar,
-    VideoItem,
-    PlaylistItem,
-    NotificationBubble,
   },
   computed: {
     ...mapState({
@@ -263,13 +259,13 @@ export default {
       }
     });
     this.$bus.$on('drag-over', () => {
-      this.maskBackground = 'rgba(255, 255, 255, 0.18)';
+      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
     });
     this.$bus.$on('drag-leave', () => {
-      this.maskBackground = 'rgba(255, 255, 255, 0)';
+      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
     this.$bus.$on('drop', () => {
-      this.maskBackground = 'rgba(255, 255, 255, 0)';
+      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
   },
   mounted() {
