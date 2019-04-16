@@ -45,6 +45,8 @@ export default {
       aboutToDelete: false,
       showShadow: true,
       chosen: false,
+      disX: NaN,
+      disY: NaN,
     };
   },
   props: {
@@ -85,8 +87,8 @@ export default {
     },
   },
   destroyed() {
-    document.onmousemove = null;
-    document.onmouseup = null;
+    document.removeEventListener('mousemove', this.onRecentItemMousemove);
+    document.removeEventListener('mouseup', this.onRecentItemMouseup);
   },
   methods: {
     itemShortcut(shortCut, cover, lastPlayedTime, duration) {
@@ -129,34 +131,35 @@ export default {
       this.$refs.border.style.setProperty('background-color', '');
     },
     onRecentItemMousedown(e) {
-      const disX = e.pageX;
-      const disY = e.pageY;
+      this.disX = e.pageX;
+      this.disY = e.pageY;
       this.isDragging = false;
 
       if (this.isInRange) {
-        document.onmousemove = (e) => {
-          this.isDragging = true;
-          const movementX = e.pageX - disX;
-          const movementY = e.pageY - disY;
-          this.$refs.item.style.setProperty('transform', `translate(${movementX}px, ${movementY}px)`);
-          if (Math.abs(movementX) >= this.thumbnailWidth
-            || Math.abs(movementY) >= this.thumbnailHeight) {
-            this.$refs.border.style.setProperty('background-color', 'rgba(0,0,0,0.43)');
-            this.$refs.deleteUi.style.setProperty('opacity', '1');
-            this.aboutToDelete = true;
-          } else {
-            this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2');
-            this.$refs.deleteUi.style.setProperty('opacity', '0');
-            this.aboutToDelete = false;
-          }
-        };
-        document.onmouseup = this.onRecentItemMouseup;
+        document.addEventListener('mousemove', this.onRecentItemMousemove);
+        document.addEventListener('mouseup', this.onRecentItemMouseup);
         this.showShadow = false;
         this.$refs.item.style.setProperty('z-index', '5');
       }
     },
+    onRecentItemMousemove(e) {
+      this.isDragging = true;
+      const movementX = e.pageX - this.disX;
+      const movementY = e.pageY - this.disY;
+      this.$refs.item.style.setProperty('transform', `translate(${movementX}px, ${movementY}px)`);
+      if (Math.abs(movementX) >= this.thumbnailWidth
+        || Math.abs(movementY) >= this.thumbnailHeight) {
+        this.$refs.border.style.setProperty('background-color', 'rgba(0,0,0,0.43)');
+        this.$refs.deleteUi.style.setProperty('opacity', '1');
+        this.aboutToDelete = true;
+      } else {
+        this.$refs.border.style.setProperty('background-color', 'rgba(255,255,255,0.2');
+        this.$refs.deleteUi.style.setProperty('opacity', '0');
+        this.aboutToDelete = false;
+      }
+    },
     onRecentItemMouseup() {
-      document.onmousemove = null;
+      document.removeEventListener('mousemove', this.onRecentItemMousemove);
       this.showShadow = true;
       this.$refs.item.style.setProperty('transform', 'translate(0,0)');
       this.$refs.item.style.setProperty('z-index', '');
