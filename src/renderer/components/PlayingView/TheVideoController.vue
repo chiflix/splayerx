@@ -190,8 +190,15 @@ export default {
     currentMouseupWidget(newVal, oldVal) {
       this.lastMouseupWidget = oldVal;
     },
-    tempRecentPlaylistDisplayState() {
+    tempRecentPlaylistDisplayState(val) {
       this.updateMinimumSize();
+      if (!val) {
+        clearTimeout(this.openPlayListTimeId);
+        clearTimeout(this.mouseStoppedId);
+        this.mouseStoppedId = this.clock.setTimeout(() => {
+          this.mouseStopped = true;
+        }, this.mousestopDelay);
+      }
     },
     ratio() {
       this.updateMinimumSize();
@@ -451,7 +458,7 @@ export default {
       if (this.mouseStoppedId) {
         this.clock.clearTimeout(this.mouseStoppedId);
       }
-      if (!this.lastMousedownPlaybutton) {
+      if (!this.lastMousedownPlaybutton && !this.tempRecentPlaylistDisplayState) {
         this.mouseStoppedId = this.clock.setTimeout(() => {
           this.mouseStopped = true;
         }, this.mousestopDelay);
