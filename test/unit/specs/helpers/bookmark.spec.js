@@ -1,7 +1,7 @@
 import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 
-describe.only('bookmark', () => {
+describe('bookmark', () => {
   const data = {
     '/path/1/2/4': 'bookmark1',
     '/path/1/3/2': 'bookmark2',

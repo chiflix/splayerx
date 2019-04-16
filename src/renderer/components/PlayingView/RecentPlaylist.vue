@@ -23,7 +23,7 @@
       <div class="top"
         :style="{
           fontSize: sizeAdaption(14),
-          lineHeight: sizeAdaption(13),
+          lineHeight: sizeAdaption(14),
         }">
         <span ref="lastPlayedTime"></span>
         {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}
@@ -331,6 +331,7 @@ export default {
       this.movementX = this.movementY = 0;
     },
     onItemMouseover(index, media) {
+      this.$emit('can-hover-item');
       this.hoverIndex = index;
       this.hoveredMediaInfo = media;
       this.filename = path.basename(

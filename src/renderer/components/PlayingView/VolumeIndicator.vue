@@ -316,11 +316,12 @@ export default {
     height: calc(var(--background-height) + 30px);
     cursor: pointer;
     .indicator-container {
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: center;
       border-radius: 2.5px;
-      width: calc(var(--indicator-container-width));
+      width: var(--indicator-container-width);
       height: calc(var(--background-height) + 4px);
       top: 0;
       .card {

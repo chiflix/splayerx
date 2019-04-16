@@ -1312,6 +1312,7 @@ new Vue({
     window.addEventListener('drop', (e) => {
       e.preventDefault();
       this.$bus.$emit('drop');
+      this.$store.commit('source', 'drop');
       const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
       const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
       files.forEach(file => this.$electron.remote.app.addRecentDocument(file));
