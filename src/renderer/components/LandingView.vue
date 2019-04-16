@@ -320,7 +320,7 @@ export default {
       }
     },
     deleteItem(item) {
-      const dataIndex = this.lastPlayedFile.findIndex(file => file.path === item.path);
+      const dataIndex = this.lastPlayedFile.findIndex(file => file.quickHash === item.quickHash);
       this.lastPlayedFile.splice(dataIndex, 1);
       this.infoDB.delete('recent-played', item.quickHash);
     },
