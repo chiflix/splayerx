@@ -425,6 +425,7 @@ export default {
         if (Math.abs(this.mousePosition.x - val.x) > distance ||
         Math.abs(this.mousePosition.y - val.y) > distance) {
           this.canHoverItem = true;
+          this.$emit('can-hover-item');
         }
       }
     },

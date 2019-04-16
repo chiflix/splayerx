@@ -18,6 +18,7 @@
     :isDragging="isDragging"
     :lastDragging.sync="lastDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
+    @can-hover-item="cancelPlayListTimeout"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets || progressTriggerStopped"/>
@@ -116,6 +117,7 @@ export default {
       preFullScreen: false,
       dragOver: false,
       progressTriggerStopped: false,
+      openPlayListTimeId: NaN,
     };
   },
   computed: {
@@ -233,7 +235,7 @@ export default {
     });
     this.$bus.$on('open-playlist', () => {
       this.widgetsStatus['playlist-control'].showAttached = true;
-      setTimeout(() => {
+      this.openPlayListTimeId = setTimeout(() => {
         this.widgetsStatus['playlist-control'].showAttached = false;
       }, 3000);
     });
@@ -327,6 +329,9 @@ export default {
           this.widgetsStatus[item].showAttached = false;
         }
       });
+    },
+    cancelPlayListTimeout() {
+      clearTimeout(this.openPlayListTimeId);
     },
     updatePlaylistShowAttached(event) {
       this.widgetsStatus['playlist-control'].showAttached = event;
