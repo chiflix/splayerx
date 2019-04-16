@@ -338,6 +338,7 @@ export default {
       }
     },
     enabledSecondarySub(val) {
+      if (!val) this.updateSubtitleType(true);
       this.$refs.scroll.scrollTop = val ? 0 : this.currentScrollTop;
     },
     isFirstSubtitle() {
