@@ -24,11 +24,16 @@
     @update:checkbox-value="deleteVideoHistoryOnExit = $event">
     {{ $t('preferences.general.clearHistory') }}
   </BaseCheckBox>
+  <BaseCheckBox
+    @update:checkbox-value="setAsDefault($event)">
+    {{ '设为默认应用' }}
+  </BaseCheckBox>
 </div>
 </template>
 
 <script>
 import electron from 'electron';
+import { setAsDefaultApp } from '@/../shared/system';
 import Icon from '@/components/BaseIconContainer.vue';
 import { codeToLanguageName } from '@/helpers/language';
 import BaseCheckBox from './BaseCheckBox.vue';
@@ -99,6 +104,10 @@ export default {
     handleSelection(language) {
       this.displayLanguage = language;
       this.showSelection = false;
+    },
+    setAsDefault(val) {
+      if (!val) return;
+      setAsDefaultApp();
     },
   },
 };

@@ -143,6 +143,7 @@ export default {
       }
     },
     onRecentItemMousemove(e) {
+      console.log(this);
       this.isDragging = true;
       const movementX = e.pageX - this.disX;
       const movementY = e.pageY - this.disY;
@@ -159,6 +160,7 @@ export default {
       }
     },
     onRecentItemMouseup() {
+      console.log(this);
       document.removeEventListener('mousemove', this.onRecentItemMousemove);
       this.showShadow = true;
       this.$refs.item.style.setProperty('transform', 'translate(0,0)');
