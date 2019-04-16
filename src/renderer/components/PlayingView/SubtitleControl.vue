@@ -292,6 +292,7 @@ export default {
       }
     },
     showAttached(val) {
+      this.$refs.scroll.scrollTop = this.currentScrollTop;
       if (!val) {
         this.anim.playSegments([79, 92], true);
         if (!this.validEnter) {
