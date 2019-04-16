@@ -37,7 +37,9 @@
           border: chosen ? '0.7px solid rgba(255,255,255,0.6)' : '0.7px solid rgba(255,255,255,0.15)',
           backgroundColor: aboutToDelete ? 'rgba(0,0,0,0.43)' : chosen ? 'rgba(255,255,255,0.2)' : '',
         }">
-        <div class="deleteUi" ref="deleteUi"><Icon type="delete"/></div>
+        <div class="deleteUi" :style="{
+          opacity: aboutToDelete ? '1' : '0',
+        }"><Icon type="delete"/></div>
       </div>
     </div>
   </div>
@@ -169,7 +171,6 @@ export default {
             requestAnimationFrame(() => {
               this.$refs.layer1.style.setProperty('transform', 'translateY(-8px) scale(0.8, 0.8)');
               this.$refs.layer2.style.setProperty('transform', 'translateY(-10px) scale(0.9, 0.9)');
-              this.$refs.deleteUi.style.setProperty('opacity', '1');
               this.aboutToDelete = true;
             });
           } else if (Math.abs(movementX) >= this.thumbnailWidth - 30
@@ -180,14 +181,12 @@ export default {
             requestAnimationFrame(() => {
               this.$refs.layer1.style.setProperty('transform', `translateY(-${8 * percentage}px) scale(0.8, 0.8)`);
               this.$refs.layer2.style.setProperty('transform', `translateY(-${4 + (6 * percentage)}px) scale(0.9, 0.9)`);
-              this.$refs.deleteUi.style.setProperty('opacity', '0');
               this.aboutToDelete = false;
             });
           } else {
             requestAnimationFrame(() => {
               this.$refs.layer1.style.setProperty('transform', 'scale(0.8, 0.8)');
               this.$refs.layer2.style.setProperty('transform', 'translateY(-4px) scale(0.9, 0.9)');
-              this.$refs.deleteUi.style.setProperty('opacity', '0');
               this.aboutToDelete = false;
             });
           }
