@@ -89,12 +89,12 @@ export default {
 .browsing {
   height: 100vh;
   width: 100vw;
-  background-image: url(../assets/gradient-bg.png);
   display: flex;
   flex-direction: column;
   .web-view {
     flex: 1;
     -webkit-app-region: no-drag;
+    background: rgba(255, 255, 255, 1);
   }
 }
 </style>

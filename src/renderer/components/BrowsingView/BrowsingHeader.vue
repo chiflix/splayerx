@@ -26,6 +26,7 @@ export default {
   width: 100%;
   height: 40px;
   display: flex;
+  background-image: url(../../assets/gradient-bg.png);
   .change-width {
     flex: 1;
   }
