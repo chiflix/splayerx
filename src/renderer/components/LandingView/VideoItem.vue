@@ -176,11 +176,7 @@ export default {
         } else if (this.index + 1 < this.firstIndex && !this.isFullScreen) {
           this.$emit('previous-page');
         } else if (!this.filePathNeedToDelete) {
-          if (this.item.type === 'playlist') {
-            this.openPlaylist(this.item.quickHash);
-          } else {
-            this.openVideoFile(this.item.path);
-          }
+          this.openVideoFile(this.item.path);
         }
       }
     },
