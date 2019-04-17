@@ -3,14 +3,18 @@ import path from 'path';
 import helpers from '@/helpers/index';
 
 const state = {
-  PlayList: [],
+  source: '', // 'drop' or '', used on mas version
+  hash: '',
+  playList: [],
   isFolderList: undefined,
 };
 
 const getters = {
+  source: state => state.source,
+  playListHash: state => state.hash,
   isFolderList: state => state.isFolderList,
   nextVideo: (state, getters) => {
-    const list = state.PlayList;
+    const list = state.playList;
     const index = list.findIndex(value => value === getters.originSrc);
     if (!getters.singleCycle) {
       if (index !== -1 && index + 1 < list.length) {
@@ -21,31 +25,37 @@ const getters = {
     }
     return '';
   },
-  playingList: state => state.PlayList,
-  playingIndex: (state, getters) => state.PlayList.findIndex(value => value === getters.originSrc),
+  playingList: state => state.playList,
+  playingIndex: (state, getters) => state.playList.findIndex(value => value === getters.originSrc),
 };
 
 const mutations = {
+  source(state, type) {
+    state.source = type;
+  },
+  hash(state, h) {
+    state.hash = h;
+  },
   isFolderList(state) {
     state.isFolderList = true;
   },
   isPlayingList(state) {
     state.isFolderList = false;
   },
-  PlayList(state, t) {
-    state.PlayList = t;
+  playList(state, t) {
+    state.playList = t;
   },
   AddItemsToPlayingList(state, t) {
-    state.PlayList.push(...t);
+    state.playList.push(...t);
   },
   RemoveItemFromPlayingListByPos(state, pos) {
     if (pos >= 0) {
-      state.PlayList.splice(pos, 1);
+      state.playList.splice(pos, 1);
     }
   },
-  InsertItemToPlayingListByPos(state, item) {
+  InsertItemToPlayingList(state, item) {
     if (item.newPosition >= 0) {
-      state.PlayList.splice(item.newPosition, 0, item.src);
+      state.playList.splice(item.newPosition, 0, item.src);
     }
   },
 };
@@ -53,22 +63,24 @@ const mutations = {
 const actions = {
   PlayingList({ commit }, payload) {
     commit('isPlayingList');
-    commit('PlayList', payload);
+    commit('playList', payload.paths);
+    commit('hash', payload.hash);
   },
   FolderList({ commit }, payload) {
     commit('isFolderList');
-    commit('PlayList', payload);
+    commit('playList', payload);
+    commit('hash', '');
   },
   RemoveItemFromPlayingList({ state, commit }, item) {
     commit('isPlayingList');
-    const pos = state.PlayList.indexOf(item);
+    const pos = state.playList.indexOf(item);
     if (pos >= 0) commit('RemoveItemFromPlayingListByPos', pos);
   },
   RepositionItemFromPlayingList({ state, commit }, item) {
     commit('isPlayingList');
-    const pos = state.PlayList.indexOf(item.src);
+    const pos = state.playList.indexOf(item.src);
     commit('RemoveItemFromPlayingListByPos', pos);
-    commit('InsertItemToPlayingListByPos', item);
+    commit('InsertItemToPlayingList', item);
   },
   AddItemsToPlayingList({ commit, dispatch }, items) {
     commit('isPlayingList');
@@ -82,26 +94,26 @@ const actions = {
     commit('AddItemsToPlayingList', items);
   },
   UpdatePlayingList({ dispatch, commit, state }) {
-    const dirPath = path.dirname(state.PlayList[0]);
+    const dirPath = path.dirname(state.playList[0]);
 
     if (!fs.existsSync(dirPath)) {
-      commit('PlayList', []);
+      commit('playList', []);
     } else if (state.isFolderList) {
       /*
         Currently not judging whether app is mas version
         Until detecting same directory be abandoned on mas version
        */
-      helpers.methods.findSimilarVideoByVidPath(state.PlayList[0]).then((videoFiles) => {
-        commit('PlayList', videoFiles);
+      helpers.methods.findSimilarVideoByVidPath(state.playList[0]).then((videoFiles) => {
+        commit('playList', videoFiles);
       }, (err) => {
         if (process.mas && err?.code === 'EPERM') {
-          dispatch('FolderList', state.PlayList);
+          dispatch('FolderList', state.playList);
         }
       });
     } else {
-      for (let i = 0; i < state.PlayList.length; i += 1) {
-        fs.access(state.PlayList[i], fs.constants.F_OK, (err) => {
-          if (err?.code === 'ENOENT') dispatch('RemoveItemFromPlayingList', state.PlayList[i]);
+      for (let i = 0; i < state.playList.length; i += 1) {
+        fs.access(state.playList[i], fs.constants.F_OK, (err) => {
+          if (err?.code === 'ENOENT') dispatch('RemoveItemFromPlayingList', state.playList[i]);
         });
       }
     }

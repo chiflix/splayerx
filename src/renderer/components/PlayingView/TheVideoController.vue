@@ -19,6 +19,7 @@
     :isDragging="isDragging"
     :lastDragging.sync="lastDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
+    @can-hover-item="cancelPlayListTimeout"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="(showAllWidgets || progressTriggerStopped)" v-if="!isEditable && !isProfessional"/>
@@ -127,6 +128,7 @@ export default {
       preFullScreen: false,
       dragOver: false,
       progressTriggerStopped: false,
+      openPlayListTimeId: NaN,
     };
   },
   computed: {
@@ -202,8 +204,15 @@ export default {
     currentMouseupWidget(newVal, oldVal) {
       this.lastMouseupWidget = oldVal;
     },
-    tempRecentPlaylistDisplayState() {
+    tempRecentPlaylistDisplayState(val) {
       this.updateMinimumSize();
+      if (!val) {
+        clearTimeout(this.openPlayListTimeId);
+        clearTimeout(this.mouseStoppedId);
+        this.mouseStoppedId = this.clock.setTimeout(() => {
+          this.mouseStopped = true;
+        }, this.mousestopDelay);
+      }
     },
     ratio() {
       this.updateMinimumSize();
@@ -244,6 +253,12 @@ export default {
         mouseupOnOther: false,
         hovering: false,
       };
+    });
+    this.$bus.$on('open-playlist', () => {
+      this.widgetsStatus['playlist-control'].showAttached = true;
+      this.openPlayListTimeId = setTimeout(() => {
+        this.widgetsStatus['playlist-control'].showAttached = false;
+      }, 4000);
     });
     this.$bus.$on('drag-over', () => {
       this.dragOver = true;
@@ -336,6 +351,9 @@ export default {
           this.widgetsStatus[item].showAttached = false;
         }
       });
+    },
+    cancelPlayListTimeout() {
+      clearTimeout(this.openPlayListTimeId);
     },
     updatePlaylistShowAttached(event) {
       this.widgetsStatus['playlist-control'].showAttached = event;
@@ -455,7 +473,7 @@ export default {
       if (this.mouseStoppedId) {
         this.clock.clearTimeout(this.mouseStoppedId);
       }
-      if (!this.lastMousedownPlaybutton) {
+      if (!this.lastMousedownPlaybutton && !this.tempRecentPlaylistDisplayState) {
         this.mouseStoppedId = this.clock.setTimeout(() => {
           this.mouseStopped = true;
         }, this.mousestopDelay);

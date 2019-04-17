@@ -1,9 +1,6 @@
 <template>
   <div class="wrapper"
-    :data-component-name="$options.name"
-    @mousedown.left="handleLeftClick"
-    @mouseup.left.stop="handleMouseUp"
-    @mousemove="handleMouseMove">
+    :data-component-name="$options.name">
     <titlebar currentView="LandingView"></titlebar>
     <transition name="background-container-transition">
       <div class="background" v-if="showShortcutImage">
@@ -23,8 +20,10 @@
           <div class="item-description"/>
           <div class="item-timing">
             <span class="timing-played">
-              {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}</span>
+              {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}
             / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
+            <span v-if="item.playListLength">·&nbsp{{ $t('recentPlaylist.playlistSource') }}&nbsp&nbsp{{ item.index + 1 }} / {{ item.playListLength }}</span>
+            </span>
           </div>
           <div class="item-progress">
             <div class="progress-played" :style="{ width: item.percentage + '%' }"/>
@@ -37,23 +36,51 @@
         <div class="logo-container">
           <Icon type="logo"/>
         </div>
-        <div class="welcome">
-          <div class="title" :style="$t('css.titleFontSize')">{{ $t("msg.titleName") }}</div>
-        </div>
       </div>
     </transition>
-    <div class="mask"
+    <div class="mask" ref="mask"/>
+    <div class="controller"
       :style="{
-        backgroundColor: maskBackground
-      }"/>
-    <playlist
-      :lastPlayedFile="lastPlayedFile"
-      :isFullScreen="isFullScreen"
-      :winWidth="winWidth"
-      :filePathNeedToDelete="filePathNeedToDelete"
-      @displayInfo="displayInfoUpdate"/>
+        transform: isFullScreen ? '' : `translateX(${move}px)`,
+        bottom : winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
+        transition: tranFlag ? 'transform 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
+      }">
+      <div class="playlist no-drag"
+        :style="{marginLeft: this.winWidth > 1355 ? `${50 / 1355 * this.winWidth}px` : '50px'}">
+        <div class="button"
+          :style="{
+            height:`${thumbnailHeight}px`,
+            width:`${thumbnailWidth}px`,
+            marginRight: `${marginRight}px`,
+          }"
+          @click="openOrMove">
+          <div class="btnMask">
+            <Icon class="addUi" type="add"/>
+          </div>
+        </div>
+        <component v-for="(item, index) in lastPlayedFile"
+          :is="item.type === 'playlist' ? 'PlaylistItem' : 'VideoItem'"
+          :key="item.quickHash"
+          :index="index"
+          :firstIndex="firstIndex"
+          :lastIndex="lastIndex"
+          :isInRange="index + 1 >= firstIndex && index + 1 <= lastIndex"
+          :item="item"
+          :thumbnailWidth="thumbnailWidth"
+          :thumbnailHeight="thumbnailHeight"
+          :shifting="shifting"
+          :style="{
+            marginRight: `${marginRight}px`,
+          }"
+          @delete-item="deleteItem"
+          @next-page="lastIndex = lastPlayedFile.length"
+          @previous-page="firstIndex = 0"
+          @showShortcutImage="showShortcut(true)"
+          @showLandingLogo="showShortcut(false)"
+          @displayInfo="displayInfoUpdate"/>
+      </div>
+    </div>
     <NotificationBubble/>
-
   </div>
 </template>
 
@@ -63,11 +90,19 @@ import { mapState, mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
-import Playlist from './LandingView/Playlist.vue';
+import VideoItem from './LandingView/VideoItem.vue';
+import PlaylistItem from './LandingView/PlaylistItem.vue';
 import NotificationBubble from './NotificationBubble.vue';
 
 export default {
   name: 'landing-view',
+  components: {
+    Icon,
+    Titlebar,
+    VideoItem,
+    PlaylistItem,
+    NotificationBubble,
+  },
   data() {
     return {
       lastPlayedFile: [],
@@ -81,23 +116,77 @@ export default {
       item: [],
       isDragging: false,
       filePathNeedToDelete: '',
-      maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
+      displayInfo: [],
+      tranFlag: true,
+      shifting: false,
+      firstIndex: 0,
     };
   },
   watch: {
-  },
-  components: {
-    Icon,
-    Titlebar,
-    Playlist,
-    NotificationBubble,
+    firstIndex() {
+      this.shifting = true;
+    },
+    lastIndex() {
+      this.shifting = true;
+    },
+    shifting(val) {
+      if (val) {
+        setTimeout(() => {
+          this.shifting = false;
+        }, 400);
+      }
+    },
   },
   computed: {
     ...mapState({
       version: state => state.App.version,
       isFullScreen: state => state.Window.isFullScreen,
     }),
-    ...mapGetters(['winWidth']),
+    ...mapGetters(['winWidth', 'defaultDir']),
+    lastIndex: {
+      get() {
+        return (this.firstIndex + this.showItemNum) - 1;
+      },
+      set(val) {
+        if (val < this.showItemNum - 1) {
+          this.firstIndex = 0;
+        } else {
+          this.firstIndex = (val - this.showItemNum) + 1;
+        }
+      },
+    },
+    move() {
+      return -(this.firstIndex * (this.thumbnailWidth + this.marginRight));
+    },
+    marginRight() {
+      return this.winWidth > 1355 ? (this.winWidth / 1355) * 15 : 15;
+    },
+    thumbnailWidth() {
+      let width = 0;
+      const A = 50; // playlist left margin
+      const B = 15; // space between each playlist item
+      const C = 50; // the space between last playlist item and right edge of the screen
+      if (this.winWidth > 512 && this.winWidth <= 1355) {
+        width = ((((this.winWidth - A) - C) + B) / this.showItemNum) - B;
+      } else if (this.winWidth > 1355) {
+        width = this.winWidth * (112 / 1355);
+      }
+      return Math.round(width);
+    },
+    thumbnailHeight() {
+      return Math.round((this.thumbnailWidth * 63) / 112);
+    },
+    showItemNum() {
+      let number;
+      if (this.winWidth < 720) {
+        number = 5;
+      } else if (this.winWidth >= 720 && this.winWidth <= 1355) {
+        number = Math.floor(((this.winWidth - 720) / (112 + 15)) + 5);
+      } else if (this.winWidth > 1355) {
+        number = 10;
+      }
+      return number;
+    },
   },
   created() {
     // Get all data and show
@@ -108,14 +197,18 @@ export default {
             const waitArray = [];
             for (let i = 0; i < data.length; i += 1) {
               const accessPromise = new Promise((resolve) => {
-                fs.access(data[i].path, fs.constants.F_OK, (err) => {
-                  if (err) {
-                    this.infoDB.delete('recent-played', data[i].quickHash);
-                    resolve();
-                  } else {
-                    resolve(data[i]);
-                  }
-                });
+                if (data[i].type !== 'playlist') {
+                  fs.access(data[i].path, fs.constants.F_OK, (err) => {
+                    if (err) {
+                      this.infoDB.delete('recent-played', data[i].quickHash);
+                      resolve();
+                    } else {
+                      resolve(data[i]);
+                    }
+                  });
+                } else {
+                  resolve(data[i]);
+                }
               });
               waitArray.push(accessPromise);
             }
@@ -163,13 +256,13 @@ export default {
       }
     });
     this.$bus.$on('drag-over', () => {
-      this.maskBackground = 'rgba(255, 255, 255, 0.18)';
+      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
     });
     this.$bus.$on('drag-leave', () => {
-      this.maskBackground = 'rgba(255, 255, 255, 0)';
+      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
     this.$bus.$on('drop', () => {
-      this.maskBackground = 'rgba(255, 255, 255, 0)';
+      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
   },
   mounted() {
@@ -187,41 +280,64 @@ export default {
         this.addLog('info', `sagi API Status: ${this.sagiHealthStatus}`);
       }
     });
+    this.$bus.$on('clean-lastPlayedFile', () => {
+      this.firstIndex = 0;
+    });
+    window.onkeyup = (e) => {
+      if (e.keyCode === 39) {
+        this.shifting = true;
+        this.tranFlag = true;
+        this.lastIndex = this.lastPlayedFile.length;
+      } else if (e.keyCode === 37) {
+        this.shifting = true;
+        this.tranFlag = true;
+        this.firstIndex = 0;
+      }
+    };
   },
   methods: {
+    open() {
+      const { app } = this.$electron.remote;
+      if (this.defaultDir) {
+        this.openFilesByDialog();
+      } else {
+        const defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
+        this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
+        this.openFilesByDialog({ defaultPath });
+      }
+    },
+    openOrMove() {
+      if (this.firstIndex === 1) {
+        this.tranFlag = true;
+        this.firstIndex = 0;
+      } else if (this.winWidth > 1355) {
+        this.open();
+      } else {
+        this.open();
+      }
+    },
+    deleteItem(item) {
+      const dataIndex = this.lastPlayedFile.findIndex(file => file.quickHash === item.quickHash);
+      this.lastPlayedFile.splice(dataIndex, 1);
+      this.infoDB.delete('recent-played', item.quickHash);
+    },
+    showShortcut(flag) {
+      this.showShortcutImage = flag;
+      this.landingLogoAppear = !flag;
+    },
     displayInfoUpdate(displayInfo) {
       this.backgroundUrl = displayInfo.backgroundUrl;
       this.cover = displayInfo.cover;
-      this.landingLogoAppear = displayInfo.landingLogoAppear;
-      this.showShortcutImage = displayInfo.showShortcutImage;
-      this.item.baseName = displayInfo.baseName;
-      this.item.lastTime = displayInfo.lastTime;
-      this.item.duration = displayInfo.duration;
-      this.item.percentage = displayInfo.percentage;
-      this.item.path = displayInfo.path;
+      this.item = displayInfo;
     },
     timeInValidForm(time) {
       return (Number.isNaN(time) ? this.invalidTimeRepresentation : time);
-    },
-    handleLeftClick() {
-      // Handle dragging-related variables
-      this.mouseDown = true;
-      this.isDragging = false;
-    },
-    handleMouseMove() {
-      // Handle dragging-related variables and methods
-      if (this.mouseDown) {
-        this.isDragging = true;
-      }
-    },
-    handleMouseUp() {
-      this.mouseDown = false;
     },
   },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 
 $themeColor-Light: white;
 
@@ -229,10 +345,6 @@ $themeColor-Light: white;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-body {
-  color: $themeColor-Light;
 }
 
 .wrapper {
@@ -248,6 +360,47 @@ body {
     right: 0;
     bottom: 0;
     transition: background-color 120ms linear;
+  }
+}
+.controller {
+  position: absolute;
+  z-index: 6;
+  left: 0;
+  width: auto;
+
+  .playlist {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-end;
+
+    .button {
+      background-color: rgba(0, 0, 0, 0.12);
+      transition: background-color 150ms ease-out;
+      backdrop-filter: blur(9.8px);
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: rgba(123, 123, 123, 0.12);
+      transition: background-color 150ms ease-out;
+    }
+
+    .btnMask {
+      border-radius: 2px;
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+    }
+
+    .btnMask:hover {
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .addUi {
+      margin: auto;
+    }
   }
 }
 .background {
@@ -283,6 +436,7 @@ body {
     }
   }
   .item-name {
+    color: $themeColor-Light;
     width: 70%;
     word-break: break-all;
     font-size: 30px;
@@ -310,8 +464,9 @@ body {
   .item-timing {
     color: rgba(255, 255, 255, .4);
     font-size: 15px;
-    font-weight: 400;
+    font-family: $font-heavy;
     letter-spacing: .5px;
+    line-height: 20px;
     margin-top: 10px;
     span.timing-played {
       color: rgba(255, 255, 255, .9);
@@ -341,39 +496,18 @@ body {
 }
 .welcome-container {
   --client-height: 100vh;
-  --pos-y: calc(var(--client-height) * 0.37 - 82px);
+  --pos-y: calc(var(--client-height) * 0.37 - 46px);
   transform: translateY(var(--pos-y));
 }
 .logo-container {
   -webkit-user-select: none;
   text-align: center;
-  .logo {
-    height: 120px;
-    width: 120px;
-  }
 }
 
 main {
   justify-content: space-between;
 }
 
-.welcome {
-  margin-top: 7px;
-  text-align: center;
-  z-index: 1;
-
-  .title {
-    font-weight: 700;
-    color: rgba(0,0,0,0.13);
-    letter-spacing: 1.5px;
-  }
-  .version {
-    margin-top: 3px;
-    color: rgba(0,0,0,0.2);
-    font-weight: 100;
-    letter-spacing: 1px;
-  }
-}
 
 .background-transition-enter-active, .background-transition-leave-active {
   transition: opacity 300ms linear;

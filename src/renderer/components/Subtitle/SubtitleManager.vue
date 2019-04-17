@@ -65,7 +65,7 @@ import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import SubtitleEditor from './SubtitleEditor.vue';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleLoader from './SubtitleLoader';
-import { localLanguageLoader } from './SubtitleLoader/utils';
+import { localLanguageLoader, uniteSubtitleWithFragment } from './SubtitleLoader/utils';
 import { LOCAL_SUBTITLE_REMOVED, REQUEST_TIMEOUT, SUBTITLE_UPLOAD, UPLOAD_SUCCESS, UPLOAD_FAILED } from '../../../shared/notificationcodes';
 
 export default {
@@ -86,8 +86,8 @@ export default {
       selectionComplete: false,
       selectionSecondaryComplete: false,
       isInitial: false,
-      linesNum: 1,
-      firstLinesNum: 1,
+      linesNum: 0,
+      firstLinesNum: 0,
       tags: {},
       firstTags: {},
       lastFirstSubtitleId: '',
@@ -761,6 +761,8 @@ export default {
       } else if (sub) {
         // 如果不是自制的字幕出现修改，就是先创建新的自制字幕
         // 再加载刚刚创建的字幕
+        sub.metaInfo.format = 'ass'; // 所有自制字幕都以ass数据格式保存
+        sub.parsed.dialogues.map(e => uniteSubtitleWithFragment(e));
         const subString = JSON.stringify({
           parsed: sub.parsed,
           metaInfo: sub.metaInfo,
@@ -889,28 +891,44 @@ export default {
         code: SUBTITLE_UPLOAD,
       });
       this.$addBubble(SUBTITLE_UPLOAD);
-      const qualifiedSubtitle = {
-        id: this.currentFirstSubtitleId,
-        duration: this.$store.state.Subtitle.durations[this.currentFirstSubtitleId],
-      };
-      if (qualifiedSubtitle) {
-        const parameter = this.makeSubtitleUploadParameter(qualifiedSubtitle);
-        transcriptQueue.add(parameter, true)
+      const qualifiedSubtitles = [];
+      if (this.currentFirstSubtitleId) {
+        qualifiedSubtitles.push({
+          id: this.currentFirstSubtitleId,
+          duration: this.$store.state.Subtitle.durations[this.currentFirstSubtitleId],
+        });
+      }
+      if (this.currentSecondSubtitleId && this.enabledSecondarySub) {
+        qualifiedSubtitles.push({
+          id: this.currentSecondSubtitleId,
+          duration: this.$store.state.Subtitle.durations[this.currentSecondSubtitleId],
+        });
+      }
+      if (qualifiedSubtitles.length) {
+        const parameters = qualifiedSubtitles.map(this.makeSubtitleUploadParameter);
+        transcriptQueue.addAllManual(parameters)
           .then((res) => {
-            if (res) {
-              this.addLog('info', {
-                message: 'Upload successfully !',
-                code: UPLOAD_SUCCESS,
-              });
-              this.$addBubble(UPLOAD_SUCCESS);
-            } else {
+            if (res.failure.length) {
               this.addLog('error', {
                 message: 'Upload failed !',
                 errcode: UPLOAD_FAILED,
               });
               this.$addBubble(UPLOAD_FAILED);
+              res.failure.forEach((i) => {
+                console.log(`Uploading subtitle No.${i.src} failed!`);
+              });
+            } else {
+              this.addLog('info', {
+                message: 'Upload successfully !',
+                code: UPLOAD_SUCCESS,
+              });
+              this.$addBubble(UPLOAD_SUCCESS);
             }
-            console.log(`Uploading subtitle No.${this.currentFirstSubtitleId} ${res ? 'succeeded' : 'failed'}!`);
+            if (res.success.length) {
+              res.success.forEach((i) => {
+                console.log(`Uploading subtitle No.${i.src} succeeded!`);
+              });
+            }
           });
       }
     });

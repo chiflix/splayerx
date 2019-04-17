@@ -90,7 +90,10 @@
       "export": "Export",
       "reference": "Translation References",
 			"loadLocalSubtitleFile": "Load local reference",
-      "back": "Back"
+      "back": "Back",
+      "enter": "Select/Edit",
+      "prev": "Previous Clip",
+      "next": "Next Clip"
     },
 		"help": {
 			"name": "Help",

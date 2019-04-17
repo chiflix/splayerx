@@ -250,11 +250,42 @@ export default {
         audioTrackId: this.currentAudioTrackId,
       };
 
-      const val = await this.infoDB.get('recent-played', 'path', videoPath);
-      if (val) {
-        const mergedData = Object.assign(val, data);
-        await this.infoDB.add('recent-played', mergedData);
+      if (!this.$store.getters.isFolderList
+        && (!process.mas || (process.mas && this.$store.getters.source !== 'drop'))) {
+        let playlist;
+        if (this.playListHash) {
+          playlist = await this.infoDB.get('recent-played', this.playListHash);
+        } else {
+          const playListHash = this.playingList.reduce((hash, src) => `${hash}-${src}`);
+          const currentVideoInfo = await this.infoDB.get('recent-played', 'path', videoPath);
+          this.infoDB.delete('recent-played', currentVideoInfo.quickHash);
+          playlist = {
+            quickHash: playListHash,
+            type: 'playlist',
+            lastOpened: Date.now(),
+            infos: [currentVideoInfo],
+          };
+          this.$store.commit('hash', playListHash);
+        }
+        playlist.currentVideo = this.originSrc;
+        playlist.paths = this.playingList;
+        const videoInfo = playlist.infos.find(info => info.path === videoPath);
+        if (videoInfo) {
+          const videoIndex = playlist.infos.findIndex(info => info.path === videoPath);
+          playlist.infos.splice(videoIndex, 1, {
+            ...videoInfo,
+            ...data,
+          });
+        }
+        await this.infoDB.add('recent-played', playlist);
         this.$bus.$emit('database-saved');
+      } else {
+        const val = await this.infoDB.get('recent-played', 'path', videoPath);
+        if (val) {
+          const mergedData = Object.assign(val, data);
+          await this.infoDB.add('recent-played', mergedData);
+          this.$bus.$emit('database-saved');
+        }
       }
     },
     saveSubtitleStyle() {
@@ -267,7 +298,7 @@ export default {
   computed: {
     ...mapGetters([
       'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize',
-      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList']),
+      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList', 'playListHash']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -361,6 +392,7 @@ export default {
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
+        this.$store.dispatch('SRC_SET', { src: '', mediaHash: '' });
         this.saveScreenshot(this.originSrc)
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
@@ -377,6 +409,7 @@ export default {
       } else if (!this.quit) {
         e.returnValue = false;
         this.$bus.$off(); // remove all listeners before back to landing view
+        // need to init Vuex States
         this.$router.push({
           name: 'landing-view',
         });
@@ -389,7 +422,7 @@ export default {
     };
   },
   beforeDestroy() {
-    this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
+    if (process.mas) this.$bus.$emit(`stop-accessing-${this.originSrc}`, this.originSrc);
     window.onbeforeunload = null;
   },
 };

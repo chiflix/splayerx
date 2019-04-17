@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import { existsSync } from 'fs';
+import romanize from 'romanize';
 import flatten from 'lodash/flatten';
 import cloneDeep from 'lodash/cloneDeep';
 import { storeSubtitle } from '@/helpers/subtitle';
@@ -112,7 +113,7 @@ export default class SubtitleLoader extends EventEmitter {
           // 在往indexBD存自制字幕的时候，存储成功可以直接发送meta-change
           // meta数组也是存在文件里面的
           const { name, language } = this.metaInfo;
-          setImmediate(() => this.emit('meta-change', { field: 'name', value: name }));
+          setImmediate(() => this.emit('meta-change', { field: 'name', value: romanize(name) }));
           setImmediate(() => this.emit('meta-change', { field: 'language', value: language }));
         }
       } else if (this.type === 'embedded') {
@@ -143,7 +144,7 @@ export default class SubtitleLoader extends EventEmitter {
             // 在往indexBD存自制字幕的时候，存储成功可以直接发送meta-change
             // meta数组也是存在文件里面的
             const { name, language } = this.metaInfo;
-            setImmediate(() => this.emit('meta-change', { field: 'name', value: name }));
+            setImmediate(() => this.emit('meta-change', { field: 'name', value: romanize(name) }));
             setImmediate(() => this.emit('meta-change', { field: 'language', value: language }));
           }
         });

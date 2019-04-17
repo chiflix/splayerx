@@ -1,6 +1,7 @@
 import { extname, basename } from 'path';
 import { open, read, readFile, close } from 'fs-extra';
 import chardet from 'chardet';
+import { cloneDeep } from 'lodash';
 import iconv from 'iconv-lite';
 import { ipcRenderer } from 'electron';
 import helpers from '@/helpers';
@@ -347,7 +348,7 @@ export function megreSameTime(dialogues, type) {
     const key = `${dialogues[i].start}-${dialogues[i].end}`;
     if (typeof target[key] !== 'undefined') {
       if (same(dialogues[target[key]], dialogues[i]) && text !== '') {
-        dialogues[target[key]].text += `\n${text}`;
+        dialogues[target[key]].text += `<br>${text}`;
         dialogues.splice(i, 1);
         i -= 1;
       }
@@ -355,4 +356,28 @@ export function megreSameTime(dialogues, type) {
       target[key] = i;
     }
   }
+}
+
+/**
+ * @description 字幕数据结构统一使用ass结构
+ * @author tanghaixiang@xindong.com
+ * @date 2019-04-16
+ * @export
+ * @param {Object} cell
+ * @returns {Object} cell
+ */
+export function uniteSubtitleWithFragment(cell) {
+  if (!cell.fragments && cell.tags) {
+    const tags = cloneDeep(cell.tags);
+    const text = cell.text;
+    delete cell.tags;
+    delete cell.text;
+    cell.fragments = [
+      {
+        tags,
+        text,
+      },
+    ];
+  }
+  return cell;
 }

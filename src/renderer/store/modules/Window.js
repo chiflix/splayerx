@@ -17,6 +17,9 @@ const state = {
   isCreateSubtitleMode: false, // 是否是创建字幕模式
   storedBeforeProfessionalInfo: null, // 字幕高级模式下需要存储windowSize、windowMinimumSize、windowPosition
   sizePercent: 0,
+  subtitleEditMenuPrevEnable: false, // 监听字幕高级模式下菜单上一条是否可以使用
+  subtitleEditMenuNextEnable: false, // 监听字幕高级模式下菜单下一条是否可以使用
+  subtitleEditMenuEnterEnable: false, // 监听字幕高级模式下菜单enter是否可以使用
 };
 
 const getters = {
@@ -39,6 +42,9 @@ const getters = {
   currentEditHistoryIndex: state => state.currentEditHistoryIndex,
   storedBeforeProfessionalInfo: state => state.storedBeforeProfessionalInfo,
   sizePercent: state => state.sizePercent,
+  subtitleEditMenuPrevEnable: state => state.subtitleEditMenuPrevEnable,
+  subtitleEditMenuNextEnable: state => state.subtitleEditMenuNextEnable,
+  subtitleEditMenuEnterEnable: state => state.subtitleEditMenuEnterEnable,
 };
 
 const mutations = {
@@ -89,6 +95,15 @@ const mutations = {
   },
   [windowMutations.UPDATE_CURRENT_EDIT_HISTORY_INDEX](state, payload) {
     state.currentEditHistoryIndex = payload;
+  },
+  [windowMutations.UPDATE_CURRENT_EDIT_MENU_PREV_ENABLE](state, payload) {
+    state.subtitleEditMenuPrevEnable = payload;
+  },
+  [windowMutations.UPDATE_CURRENT_EDIT_MENU_NEXT_ENABLE](state, payload) {
+    state.subtitleEditMenuNextEnable = payload;
+  },
+  [windowMutations.UPDATE_CURRENT_EDIT_MENU_ENTER_ENABLE](state, payload) {
+    state.subtitleEditMenuEnterEnable = payload;
   },
   sizePercentUpdate(state, payload) {
     state.sizePercent = payload;

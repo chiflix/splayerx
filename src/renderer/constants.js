@@ -133,10 +133,16 @@ export const EVENT_BUS_COLLECTIONS = {
   CREATE_MIRROR_SUBTITLE: 'CREATE_MIRROR_SUBTITLE', // 高级模式，新增字幕，需要使用假的字幕dom来实现动效
   WILL_MODIFIED_SUBTITLE: 'WILL_MODIFIED_SUBTITLE', // 字幕高级模式将要修改字幕，用来存储历史记录
   DID_MODIFIED_SUBTITLE: 'DID_MODIFIED_SUBTITLE', // 字幕真正发生修改
+  SUBTITLE_EDITOR_SELECT_PREV_SUBTITLE: 'SUBTITLE_EDITOR_SELECT_PREV_SUBTITLE', // 字幕高级模式H选择上一个字幕
+  SUBTITLE_EDITOR_SELECT_NEXT_SUBTITLE: 'SUBTITLE_EDITOR_SELECT_NEXT_SUBTITLE', // 字幕高级模式L选择下一个字幕
+  SUBTITLE_EDITOR_FOCUS_BY_ENTER: 'SUBTITLE_EDITOR_FOCUS_BY_ENTER', // 字幕高级模式下，按回车键，触发当前输入框focus
 };
 
 // 字幕高级模式下，将要修改字幕操作类型
 export const MODIFIED_SUBTITLE_TYPE = Object.freeze({
   ADD: Symbol('add new subtitle'),
   DELETE: Symbol('delete one subtitle'),
+  REPLACE: Symbol('replace one subtitle'),
+  ADD_FROM_REFERENCE: Symbol('add new subtitle from reference subtitle'),
+  DELETE_FROM_REFERENCE: Symbol('delete one subtitle from reference subtitle'),
 });

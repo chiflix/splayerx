@@ -53,7 +53,7 @@
                       <div class="text">{{ noSubtitle }}</div>
                     </div>
                   </div>
-                  <div v-for="(item, index) in computedAvaliableItems" :key="item.id">
+                  <div v-for="(item, index) in computedAvailableItems" :key="item.id">
                     <div @mouseup="toggleItemClick($event, index)"
                       @mouseover="toggleItemsMouseOver(index)"
                       @mouseleave="toggleItemsMouseLeave(index)"
@@ -128,12 +128,11 @@
                     </div>
                   </div>
 
-                  <div class="card" v-if="0 <= computedAvaliableItems.length"
+                  <div class="card" v-if="0 <= computedAvailableItems.length"
                     ref="backCard"
                     :style="{
                       height: hiddenText && currentSubtitleIndex === hoverIndex ? `${itemHeight + hoverHeight}px` : `${itemHeight}px`,
-                      top: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-hoverHeight}px` : '',
-                      marginTop: `${-cardPos}px`,
+                      marginTop: hiddenText && currentSubtitleIndex <= hoverIndex ? `${-cardPos - hoverHeight}px` : `${-cardPos}px`,
                       transition: transFlag ? 'margin-top 100ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '',
                       opacity: backCardVisiable ? '0.4': '0'
                     }"/>
@@ -198,7 +197,7 @@ export default {
       loadingType: '',
       detailTimer: null,
       breakTimer: null,
-      computedAvaliableItems: [],
+      computedAvailableItems: [],
       continueRefresh: false,
       isShowingHovered: false,
       isInitial: true,
@@ -261,22 +260,16 @@ export default {
       }
       return 44;
     },
-    isOverFlow() {
-      // computed scopeHeight 有点复杂，特别处理纯在创建按钮的高度需要重新计算。
-      // 可以通过computedSize 计算一个刻度值，通过刻度值，再去计算高度，这里的高度
-      // 都强关联像素，有点冗余
-      if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.realItemsNum > 3 ? 'scroll' : '';
-      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.realItemsNum > 5 ? 'scroll' : '';
-      }
-      return this.realItemsNum >= 7 ? 'scroll' : '';
-    },
     realItemsNum() {
-      // if (this.computedAvaliableItems.length === 0) {
-      //   return 2 + this.loadingTypes.length;
-      // }
-      return this.computedAvaliableItems.length + 2 + this.loadingTypes.length;
+      return this.computedAvailableItems.length + 2 + this.loadingTypes.length;
+    },
+    isOverFlow() { // eslint-disable-line complexity
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
+        return this.realItemsNum > 3 || (this.scopeHeight + this.hoverHeight > 89 && this.hiddenText) ? 'scroll' : '';
+      } else if (this.computedSize >= 481 && this.computedSize < 1080) {
+        return this.realItemsNum > 5 || (this.scopeHeight + this.hoverHeight > 180 && this.hiddenText) ? 'scroll' : '';
+      }
+      return this.realItemsNum > 7 || (this.scopeHeight + this.hoverHeight > 350 && this.hiddenText) ? 'scroll' : '';
     },
     scopeHeight() {
       // 这里其实和上面的 scopeHeight 纯在同样的问题，计算高度逻辑过于复杂
@@ -297,26 +290,26 @@ export default {
     },
     cardPos() {
       if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.computedAvaliableItems.length > 0 ?
-          ((this.computedAvaliableItems.length + this.loadingTypes.length)
+        return this.computedAvailableItems.length > 0 ?
+          ((this.computedAvailableItems.length + this.loadingTypes.length)
             - (this.currentSubtitleIndex - 1)) * 31 :
           this.scopeHeight + 4;
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.computedAvaliableItems.length > 0 ?
-          ((this.computedAvaliableItems.length + this.loadingTypes.length)
+        return this.computedAvailableItems.length > 0 ?
+          ((this.computedAvailableItems.length + this.loadingTypes.length)
             - (this.currentSubtitleIndex - 1)) * 37 :
           this.scopeHeight + 5;
       }
-      return this.computedAvaliableItems.length > 0 ?
-        ((this.computedAvaliableItems.length + this.loadingTypes.length)
+      return this.computedAvailableItems.length > 0 ?
+        ((this.computedAvailableItems.length + this.loadingTypes.length)
           - (this.currentSubtitleIndex - 1)) * 51 :
         this.scopeHeight + 7;
     },
     currentSubtitleIndex() {
       return !this.isFirstSubtitle && this.enabledSecondarySub ?
-        this.computedAvaliableItems.findIndex(subtitle =>
+        this.computedAvailableItems.findIndex(subtitle =>
           subtitle.id === this.currentSecondSubtitleId) :
-        this.computedAvaliableItems.findIndex(subtitle =>
+        this.computedAvailableItems.findIndex(subtitle =>
           subtitle.id === this.currentFirstSubtitleId);
     },
     currentScrollTop() {
@@ -353,7 +346,7 @@ export default {
     },
     originSrc() {
       this.showAttached = false;
-      this.computedAvaliableItems = [];
+      this.computedAvailableItems = [];
     },
     currentSubtitleIndex(val) {
       if (val === 0) {
@@ -363,6 +356,7 @@ export default {
       this.modifiedAdvancedPanelVisiable = this.clickItemArrow;
     },
     showAttached(val) {
+      this.$refs.scroll.scrollTop = this.currentScrollTop;
       if (!val) {
         this.anim.playSegments([79, 92], true);
         if (!this.validEnter) {
@@ -395,7 +389,7 @@ export default {
       if (val.length > oldval.length) {
         this.loadingType = difference(val, oldval)[0].type;
       }
-      this.computedAvaliableItems = val
+      this.computedAvailableItems = val
         .filter(({ name, loading }) => name && loading !== 'failed');
     },
     loadingType(val) {
@@ -408,12 +402,13 @@ export default {
       }
     },
     enabledSecondarySub(val) {
+      if (!val) this.updateSubtitleType(true);
       this.$refs.scroll.scrollTop = val ? 0 : this.currentScrollTop;
     },
     isFirstSubtitle() {
       this.$refs.scroll.scrollTop = this.currentScrollTop;
     },
-    computedAvaliableItems(val) {
+    computedAvailableItems(val) {
       this.updateNoSubtitle(!val.length);
     },
   },
@@ -636,9 +631,9 @@ export default {
     },
     toggleItemClick(event, index) {
       if (event.target.nodeName === 'DIV') {
-        const { computedAvaliableItems } = this;
+        const { computedAvailableItems } = this;
         this.clickItem = true;
-        this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+        this.$bus.$emit('change-subtitle', computedAvailableItems[index].id);
         setTimeout(() => {
           this.showSubtitleDetails(index);
         }, 0);
@@ -797,7 +792,7 @@ export default {
     position: relative;
     &::before {
       width: calc(100% - 2px);
-      height: 100%;
+      height: calc(100% - 1px);
       content: "";
       position: absolute;
       top: 0;

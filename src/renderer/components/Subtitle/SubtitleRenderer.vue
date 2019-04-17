@@ -97,9 +97,13 @@ import { mapGetters, mapMutations } from 'vuex';
 import { isEqual, castArray, isEmpty, cloneDeep } from 'lodash';
 import { Subtitle as subtitleMutations, Window as windowMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
-import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
+import {
+  EVENT_BUS_COLLECTIONS as bus,
+  MODIFIED_SUBTITLE_TYPE as modifiedTypes,
+} from '@/constants';
 import CueRenderer from './CueRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
+import { uniteSubtitleWithFragment } from './SubtitleLoader/utils';
 
 export default {
   name: 'subtitle-renderer',
@@ -273,6 +277,22 @@ export default {
           this.currentCues[index].tags.alignment = this.lastAlignment[ind];
         }
       });
+      const { currentTags: tags } = this;
+      const len = val.length;
+      // 在这里监听当前currentCues,来更新firstLinesNum，linesNum
+      if (len > 0 && !this.isFirstSub) {
+        this.$emit('update:linesNum', this.lastLineNum(len - 1) + val[len - 1].split('<br>').length); // 第二字幕的行数
+        this.$emit('update:tags', tags[len - 1]); // 第二字幕的tags
+      } else if (len > 0) {
+        this.$emit('update:firstLinesNum', this.lastLineNum(len - 1) + val[len - 1].split('<br>').length);
+        this.$emit('update:firstTags', tags[len - 1]); // 第一字幕的tags
+      } else if (!this.isFirstSub) {
+        this.$emit('update:linesNum', 0); // 第二字幕的行数
+        this.$emit('update:tags', {}); // 第二字幕的tags
+      } else {
+        this.$emit('update:firstLinesNum', 0);
+        this.$emit('update:firstTags', {}); // 第一字幕的tags
+      }
     },
     subToTop(val) {
       if (!val) {
@@ -282,17 +302,6 @@ export default {
               ? this.lastAlignment[index] : 2;
           }
         });
-      }
-    },
-    paused(val) {
-      if (val === false) {
-        // this.editable = false;
-        // this.requestId = requestAnimationFrame(this.currentTimeUpdate);
-      }
-    },
-    currentTime() {
-      if (this.paused) {
-        // this.requestId = requestAnimationFrame(this.currentTimeUpdate);
       }
     },
     editVal(val) {
@@ -310,27 +319,59 @@ export default {
         }
       });
     },
-    // subtitleInstance: {
-    //   immediate: true,
-    //   deep: true,
-    //   handler(val) {
-    //     if (val && val.parsed && val.parsed.dialogues) {
-    //       this.requestId = requestAnimationFrame(this.currentTimeUpdate);
-    //     }
-    //   },
-    // },
-    // referenceDialogues: {
-    //   immediate: true,
-    //   deep: true,
-    //   handler(val) {
-    //     if (val) {
-    //       this.requestId = requestAnimationFrame(this.currentTimeUpdate);
-    //     }
-    //   },
-    // },
     showTextarea(val) {
-      if (val && this.chooseIndexs > -1) {
-        this.stillWaitTextAreaFocus = true;
+      if (val && this.showAddInput) {
+        const ref = this.$refs[`textarea${this.chooseIndexs}`];
+        if (ref && ref[0]) {
+          this.index = this.chooseIndexs;
+          this.toggleEditable(true);
+          this.$nextTick(() => {
+            const focusSub = this.currentCues.find(e => e.index === this.chooseIndexs);
+            const txt = focusSub.text;
+            this.editVal = txt.replace(/<br>/gi, '\n');
+            ref[0].focus();
+            if (focusSub.reference) {
+              setImmediate(() => {
+                ref[0].select();
+              });
+            }
+            setImmediate(() => {
+              ref[0].scrollTop = 9999;
+            });
+          });
+        } else {
+          const ref = this.$refs.textarea;
+          if (ref) { // eslint-disable-line
+            this.toggleEditable(true);
+            this.$nextTick(() => {
+              ref.focus();
+            });
+          } else {
+            this.stillWaitTextAreaFocus = true;
+          }
+        }
+      } else if (val && this.chooseIndexs > -1) {
+        const ref = this.$refs[`textarea${this.chooseIndexs}`];
+        if (ref && ref[0]) { // eslint-disable-line
+          this.index = this.chooseIndexs;
+          this.toggleEditable(true);
+          this.$nextTick(() => {
+            const focusSub = this.currentCues.find(e => e.index === this.chooseIndexs);
+            const txt = focusSub.text;
+            this.editVal = txt.replace(/<br>/gi, '\n');
+            ref[0].focus();
+            if (focusSub.reference) {
+              setImmediate(() => {
+                ref[0].select();
+              });
+            }
+            setImmediate(() => {
+              ref[0].scrollTop = 9999;
+            });
+          });
+        } else {
+          this.stillWaitTextAreaFocus = true;
+        }
       }
     },
   },
@@ -357,25 +398,57 @@ export default {
     }
   },
   updated() {
-    const ref = this.$refs[`textarea${this.chooseIndexs}`];
-    if (this.stillWaitTextAreaFocus && this.chooseIndexs > -1 && ref && ref[0]) { // eslint-disable-line
-      this.index = this.chooseIndexs;
-      this.toggleEditable(true);
-      this.$nextTick(() => {
-        const focusSub = this.currentCues.find(e => e.index === this.chooseIndexs);
-        const txt = focusSub.text;
-        this.editVal = txt.replace(/<br>/gi, '\n');
-        ref[0].focus();
-        if (focusSub.reference) {
+    if (this.stillWaitTextAreaFocus && this.showAddInput) {
+      const ref = this.$refs[`textarea${this.chooseIndexs}`];
+      if (ref && ref[0]) {
+        this.index = this.chooseIndexs;
+        this.toggleEditable(true);
+        this.$nextTick(() => {
+          const focusSub = this.currentCues.find(e => e.index === this.chooseIndexs);
+          const txt = focusSub.text;
+          this.editVal = txt.replace(/<br>/gi, '\n');
+          ref[0].focus();
+          if (focusSub.reference) {
+            setImmediate(() => {
+              ref[0].select();
+            });
+          }
           setImmediate(() => {
-            ref[0].select();
+            ref[0].scrollTop = 9999;
           });
-        }
-        setImmediate(() => {
-          ref[0].scrollTop = 9999;
         });
-      });
-      this.stillWaitTextAreaFocus = false;
+        this.stillWaitTextAreaFocus = false;
+      } else {
+        const ref = this.$refs.textarea;
+        if (ref) { // eslint-disable-line
+          this.toggleEditable(true);
+          this.$nextTick(() => {
+            ref.focus();
+          });
+          this.stillWaitTextAreaFocus = false;
+        }
+      }
+    } else if (this.stillWaitTextAreaFocus && this.chooseIndexs > -1) { // eslint-disable-line
+      const ref = this.$refs[`textarea${this.chooseIndexs}`];
+      if (ref && ref[0]) { // eslint-disable-line
+        this.index = this.chooseIndexs;
+        this.toggleEditable(true);
+        this.$nextTick(() => {
+          const focusSub = this.currentCues.find(e => e.index === this.chooseIndexs);
+          const txt = focusSub.text;
+          this.editVal = txt.replace(/<br>/gi, '\n');
+          ref[0].focus();
+          if (focusSub.reference) {
+            setImmediate(() => {
+              ref[0].select();
+            });
+          }
+          setImmediate(() => {
+            ref[0].scrollTop = 9999;
+          });
+        });
+        this.stillWaitTextAreaFocus = false;
+      }
     }
   },
   mounted() {
@@ -480,36 +553,6 @@ export default {
       }
     },
     handleDoubleClickSubContainer() {
-      // console.log(111);
-      // if (!this.canUseEditor) return;
-      // const isPaused = this.paused;
-      // const currentCues = this.currentCues[i];
-      // if (isPaused) {
-      //   this.index = i;
-      //   this.$bus.$emit('toggle-playback');
-      //   // this.$nextTick(() => {
-      //   // });
-      // }
-      // this.toggleEditable(isPaused);
-      // this.$nextTick(() => {
-      //   const txt = currentCues.text;
-      //   const ref = this.$refs[`textarea${i}`][0];
-      //   this.editVal = txt.replace(/<br>/gi, '\n');
-      //   if (ref) {
-      //     ref.focus();
-      //     if (currentCues.reference) {
-      //       ref.select();
-      //     }
-      //   }
-      //   setImmediate(() => {
-      //     ref.scrollTop = 9999;
-      //   });
-      // });
-      // // 点击字幕块，更新字幕条选中状态
-      // const index = this.getCueIndex(currentCues);
-      // if (this.isProfessional && index !== -1) {
-      //   this.$emit('update:chooseIndexs', index);
-      // }
     },
     handleBlurTextArea(e, i) { // eslint-disable-line
       // const startTime = Date.now();
@@ -520,7 +563,7 @@ export default {
           const currentCue = this.currentCues[i];
           if (!currentCue.reference && editVal !== currentCue.text) {
             // 修改当前currentCues
-            currentCue.text = editVal;
+            currentCue.text = editVal.replace(/\n/g, '<br>');
             this.$set(this.currentCues, i, currentCue);
             // 保存副本
             // 本地字幕
@@ -537,11 +580,15 @@ export default {
             // if (subtitleInstance.type !== 'modified' && !subtitleInstance.referenceId) {
             //   subtitleInstance.referenceId = this.subtitleInstance.id;
             // }
+            // TODO don't use format
             if (subtitleInstance.metaInfo && subtitleInstance.metaInfo.format === 'ass') {
               if (text.length === 0) {
-                subtitleInstance.parsed.dialogues.splice(index, 1);
+                before = subtitleInstance.parsed.dialogues.splice(index, 1);
               } else {
-                subtitleInstance.parsed.dialogues[index].fragments[0].text = text;
+                before = cloneDeep(subtitleInstance.parsed.dialogues[index]);
+                const firstFragments = subtitleInstance.parsed.dialogues[index].fragments[0];
+                firstFragments.text = text;
+                subtitleInstance.parsed.dialogues[index].fragments = [firstFragments];
               }
             } else if (subtitleInstance.metaInfo) {
               if (text.length === 0) {
@@ -552,12 +599,21 @@ export default {
               }
             }
             if (this.isProfessional) {
-              this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
-                sub: subtitleInstance,
-                action: 'replace',
-                index,
-                before,
-              });
+              if (text.length === 0) {
+                this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+                  sub: subtitleInstance,
+                  type: modifiedTypes.DELETE,
+                  index,
+                  before,
+                });
+              } else {
+                this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+                  sub: subtitleInstance,
+                  type: modifiedTypes.REPLACE,
+                  index,
+                  before,
+                });
+              }
             } else {
               this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
                 sub: subtitleInstance,
@@ -566,11 +622,6 @@ export default {
             }
           } else if (currentCue.reference) {
             const currentCue = this.currentCues[i];
-            currentCue.text = editVal;
-            this.$set(this.currentCues, i, currentCue);
-            const sub = cloneDeep(currentCue);
-            delete sub.reference;
-            delete sub.selfIndex;
             let subtitleInstance = null;
             let index = 0;
             if (!this.subtitleInstance || !this.currentEditedSubtitleId) {
@@ -588,24 +639,32 @@ export default {
               };
             } else {
               subtitleInstance = this.subtitleInstance.type !== 'modified' ? cloneDeep(this.subtitleInstance) : this.subtitleInstance;
-              // if (subtitleInstance.type !== 'modified' && !subtitleInstance.reference) {
-              //   const reference = cloneDeep(this.subtitleInstance);
-              //   delete reference.data;
-              //   subtitleInstance.reference = reference;
-              // }
-              // if (subtitleInstance.type !== 'modified' && !subtitleInstance.referenceId) {
-              //   subtitleInstance.referenceId = this.subtitleInstance.id;
-              // }
               index = subtitleInstance.parsed.dialogues.length;
             }
-            subtitleInstance.parsed.dialogues.splice(index, 0, sub);
-            this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
-              sub: subtitleInstance,
-              action: 'addfromreference',
-              index,
-              selfIndex: currentCue.selfIndex,
-              before: null,
-            });
+            if (editVal) {
+              currentCue.text = editVal;
+              this.$set(this.currentCues, i, currentCue);
+              const sub = cloneDeep(uniteSubtitleWithFragment(currentCue));
+              delete sub.reference;
+              delete sub.selfIndex;
+              subtitleInstance.parsed.dialogues.splice(index, 0, sub);
+              this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+                sub: subtitleInstance,
+                type: modifiedTypes.ADD_FROM_REFERENCE,
+                index,
+                selfIndex: currentCue.selfIndex,
+                before: null,
+              });
+            } else {
+              const selfIndex = this.chooseIndexs - index;
+              this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+                sub: subtitleInstance,
+                type: modifiedTypes.DELETE_FROM_REFERENCE,
+                index: this.chooseIndexs,
+                before: null,
+                selfIndex,
+              });
+            }
             this.$emit('update:chooseIndexs', -1);
           }
           // if (this.index === i) {
@@ -622,20 +681,21 @@ export default {
         });
       } else {
         if (editVal !== '' && this.newSubHolder) {
-          const sub = Object.assign({}, JSON.parse(JSON.stringify(this.newSubHolder.last)), {
-            end: parseFloat(this.newSubHolder.preciseTime.toFixed(2), 10) + 0.01,
+          const { time: currentTime } = videodata;
+          let sub = Object.assign({}, JSON.parse(JSON.stringify(this.newSubHolder.last)), {
+            end: parseFloat(currentTime.toFixed(2), 10) + 0.01,
           });
+          sub = uniteSubtitleWithFragment(sub);
           delete sub.reference;
           if (this.newSubHolder.distance > 0.5) {
             sub.start = sub.end - 0.5;
           } else {
             sub.start = sub.end - 0.2;
           }
-          if (this.type === 'ass' && this.currentEditedSubtitleId) {
-            sub.fragments[0].text = editVal;
-          } else {
-            sub.text = editVal;
-          }
+          const firstFragments = sub.fragments[0];
+          firstFragments.text = editVal.replace(/\n/g, '<br>');
+          sub.fragments = [firstFragments];
+          // ****
           let subtitleInstance = null;
           if (!this.subtitleInstance || !this.currentEditedSubtitleId) {
             subtitleInstance = {
@@ -662,7 +722,7 @@ export default {
         this.editVal = '';
         this.rows = 1;
       }
-      // this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+      this.$emit('update:showTextarea', false);
     },
     handleKeyDownTextArea(e) { // eslint-disable-line
       // 处理输入框快捷键
@@ -672,20 +732,28 @@ export default {
       const checkCmdOrCtrl = (process.platform === 'darwin' && e.metaKey) || (process.platform !== 'darwin' && e.ctrlKey);
       if (e && e.keyCode === 27) {
         e.target && e.target.blur();
+        e.preventDefault();
       } else if (e && e.keyCode === 65 && checkCmdOrCtrl) { // c+a
         focusWindow.webContents.selectAll();
+        e.preventDefault();
       } else if (e && e.keyCode === 67 && checkCmdOrCtrl) { // c+c
         focusWindow.webContents.copy();
+        e.preventDefault();
       } else if (e && e.keyCode === 86 && checkCmdOrCtrl) { // c+v
         focusWindow.webContents.paste();
+        e.preventDefault();
       } else if (e && e.keyCode === 88 && checkCmdOrCtrl) { // c+x
         focusWindow.webContents.cut();
+        e.preventDefault();
       } else if (e && e.keyCode === 90 && checkCmdOrCtrl) { // c+z
         focusWindow.webContents.undo();
+        e.preventDefault();
       } else if (e && e.keyCode === 90 && checkCmdOrCtrl && e.shiftKey) { // c+s+z
         focusWindow.webContents.redo();
+        e.preventDefault();
       } else if (e && e.keyCode === 13 && !e.shiftKey) {
         e.target.blur();
+        e.preventDefault();
       }
     },
     handleKeyDown(e) {
@@ -729,9 +797,7 @@ export default {
       const { lastCurrentTime } = this;
       this.setCurrentCues(currentTime - (subtitleDelay / 1000));
       this.updateVideoSegments(lastCurrentTime, currentTime);
-      // if (!this.paused) {
       this.requestId = requestAnimationFrame(this.currentTimeUpdate);
-      // }
     },
     setCurrentCues(currentTime) { // eslint-disable-line
       const currentDialogues = this.subtitleInstance && this.subtitleInstance.parsed ?
@@ -739,11 +805,19 @@ export default {
       if ((currentDialogues.length + this.referenceDialogues.length) === 0) return;
       const referenceFilters = this.referenceDialogues
         .map((e, i) => Object.assign({ reference: true }, e, { selfIndex: i }));
-      const parsedData = currentDialogues
-        .concat(referenceFilters)
-        .map((e, i) => ({ ...e, index: i }))
-        .sort((p, n) => (p.start - n.start))
-        .filter(e => this.filter(e));
+      let parsedData = [];
+      if (this.isProfessional) {
+        parsedData = currentDialogues
+          .concat(referenceFilters)
+          .map((e, i) => (uniteSubtitleWithFragment({ ...e, index: i })))
+          .sort((p, n) => (p.start - n.start))
+          .filter((e) => {
+            const tags = e.fragments && e.fragments[0] && e.fragments[0].tags;
+            return tags && !(tags.pos || tags.alignment !== 2);
+          });
+      } else {
+        parsedData = currentDialogues.map((e, i) => ({ ...e, index: i }));
+      }
       if (parsedData) {
         const cues = parsedData
           .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');
@@ -773,28 +847,59 @@ export default {
       return old.some((e, i) => `${e.start}-${e.end}` !== `${n[i].start}-${n[i].end}`);
     },
     parsedFragments(cues) {
-      if (this.type === 'ass') {
-        const currentCues = [];
-        cues.forEach((item) => {
-          let currentText = '';
-          let currentTags = {};
-          item.fragments.forEach((cue) => {
-            currentText += cue.text;
-            if (cue.tags) {
-              currentTags = cue.tags;
-            }
-          });
+      // if (this.type === 'ass') {
+      //   const currentCues = [];
+      //   cues.forEach((item) => {
+      //     let currentText = '';
+      //     let currentTags = {};
+      //     if (item.fragments.length) {
+      //       item.fragments.forEach((cue) => {
+      //         currentText += cue.text;
+      //         if (cue.tags) {
+      //           currentTags = cue.tags;
+      //         }
+      //       });
+      //       currentCues.push({
+      //         start: item.start, end: item.end, tags: currentTags, text: currentText,
+      //       });
+      //     }
+      //   });
+      //   return currentCues;
+      // }
+      // return cues;
+      const currentCues = [];
+      cues.forEach((item) => {
+        let currentText = '';
+        let currentTags = {};
+        if (item.tags) {
+          currentText = item.text;
+          currentTags = item.tags;
           currentCues.push({
             start: item.start,
             end: item.end,
             tags: currentTags,
             text: currentText,
             index: item.index,
+            reference: item.reference,
+            selfIndex: item.selfIndex,
+            track: item.track,
           });
-        });
-        return currentCues;
-      }
-      return cues;
+        } else if (item.fragments && item.fragments.length > 0) {
+          currentTags = item.fragments[0].tags;
+          currentText = item.fragments.map(e => e.text).join('');
+          currentCues.push({
+            start: item.start,
+            end: item.end,
+            tags: currentTags,
+            text: currentText,
+            index: item.index,
+            reference: item.reference,
+            selfIndex: item.selfIndex,
+            track: item.track,
+          });
+        }
+      });
+      return currentCues;
     },
     updateVideoSegments(lastCurrentTime, currentTime) {
       const { videoSegments, currentSegment, elapsedSegmentTime } = this;
@@ -830,14 +935,7 @@ export default {
     },
     lineNum(index) {
       // 最新一条字幕需要换行的translate比例
-      const { currentTags: tags, currentTexts: texts } = this;
-      if (!this.isFirstSub) {
-        this.$emit('update:linesNum', this.subToTop || [7, 8, 9].includes(tags[index].alignment) ? texts[index].split('<br>').length : this.lastLineNum(index) + texts[index].split('<br>').length); // 第二字幕的行数
-        this.$emit('update:tags', tags[index]); // 第二字幕的tags
-      } else {
-        this.$emit('update:firstLinesNum', this.subToTop || [7, 8, 9].includes(tags[index].alignment) ? this.lastLineNum(index) + texts[index].split('<br>').length : texts[index].split('<br>').length); // 第一字幕的行数
-        this.$emit('update:firstTags', tags[index]); // 第一字幕的tags
-      }
+      const { currentTexts: texts } = this;
       return this.lastLineNum(index) / texts[index].split('<br>').length;
     },
     assLine(index) {
@@ -887,23 +985,43 @@ export default {
       // 两个字幕的间距，由不同字幕大小下的不同表达式决定
       const subSpaceFactorsA = [5 / 900, 9 / 900, 10 / 900, 12 / 900];
       const subSpaceFactorsB = [4, 21 / 5, 4, 23 / 5];
-      const secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
-      const firstSubHeight = this.firstLinesNum * 9 * this.scaleNum;
+      // const secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
+      // const firstSubHeight = this.firstLinesNum * 9 * this.scaleNum;
+      let secondSubHeight = 0;
+      let firstSubHeight = 0;
       // 当播放列表打开时，计算为第二字幕相对于第一字幕需要translate的值
-      const subHeightWithDirection = this.subToTop || [7, 8, 9].includes(tags[index].alignment) ?
-        [firstSubHeight, secondSubHeight] : [secondSubHeight, firstSubHeight];
+      // const subHeightWithDirection = this.subToTop || [7, 8, 9].includes(tags[index].alignment) ?
+      //   [firstSubHeight, secondSubHeight] : [secondSubHeight, firstSubHeight];
       // 根据字体尺寸和换行数计算字幕需要translate的百分比，当第一字幕同时存在多条且之前条存在位置信息时，之前条不纳入translate计算
+      //  else if (texts[index - 1] && isEqual(tags[index], tags[index - 1]) && this.isFirstSub) {
+      //   console.log('ok', this.isFirstSub, texts[index], this.firstLinesNum, this.linesNum);
+      //   transPercent = this.lastTransPercent;
+      // }
       let transPercent;
-      if (texts[index - 1] && isEqual(tags[index], tags[index - 1]) && this.linesNum === texts[index - 1].split('<br>').length) {
-        transPercent = this.lastTransPercent;
-      } else if (this.tags &&
-        this.tags.alignment !== this.firstTags.alignment && !texts[index - 1]) {
+      let subHeightWithDirection = [];
+      // 当出现第二字幕的情况下
+      // *. 当第一字幕和第二字幕的alignment不同时，不需要transPercent
+      // 1。正常情况：第二字幕没有transPercent，第一字幕参考第二字幕的有效总行数，来计算transPercent
+      // 2。字幕在上面：第一字幕没有transPercent，第二字幕参考第一字幕的有效总行数，来计算transPercent
+      if (this.tags && this.firstTags && this.tags.alignment !== this.firstTags.alignment) {
         transPercent = 0;
-      } else {
+      } else if (this.isFirstSub && !(this.subToTop || [7, 8, 9].includes(tags[index].alignment))) {
+        // 根据第二字幕的有效行数，计算第二字幕的比较高度
+        secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
+        // 第一字幕的按顺序，计算当前自己的比较高度
+        firstSubHeight = texts[index].split('<br>').length * 9 * this.scaleNum;
+        subHeightWithDirection = [secondSubHeight, firstSubHeight];
+      } else if (!this.isFirstSub && (this.subToTop || [7, 8, 9].includes(tags[index].alignment))) {
+        // 第二字幕的按顺序，计算当前自己的比较高度
+        secondSubHeight = texts[index].split('<br>').length * 9 * this.secondarySubScale;
+        // 根据第一字幕的有效行数，计算第一字幕的比较高度
+        firstSubHeight = this.firstLinesNum * 9 * this.scaleNum;
+        subHeightWithDirection = [firstSubHeight, secondSubHeight];
+      }
+      if (subHeightWithDirection.length === 2) {
         transPercent = -((subHeightWithDirection[0] + ((subSpaceFactorsA[this.chosenSize] *
           this.winHeight) + subSpaceFactorsB[this.chosenSize])) / subHeightWithDirection[1]) * 100;
       }
-      this.lastTransPercent = transPercent;
       if (!isVtt) {
         if (this.isFirstSub) { // 第一字幕不是VTT
           if (tags[index] && tags[index].pos) {
@@ -983,8 +1101,9 @@ export default {
       const { currentTags: tags, isVtt } = this;
       if (((!isVtt && [1, 2, 3].includes(tags[index].alignment)) && !tags[index].pos) ||
         (isVtt && (!tags[index].line || !tags[index].position))) {
-        // return `${(60 / 1080) * 100}%`;
-        return `${((20 + ((this.winHeight - this.computedHeight) / 2)) / this.winHeight) * 100}%`;
+        return `${(60 / 1080) * 100}%`;
+        // return
+        // `${((20 + ((this.winHeight - this.computedHeight) / 2)) / this.winHeight) * 100}%`;
       }
       return '';
     },

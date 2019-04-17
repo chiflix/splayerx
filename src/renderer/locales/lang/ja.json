@@ -90,7 +90,10 @@
       "export": "書き出す",
       "reference": "翻訳参照",
 			"loadLocalSubtitleFile": "ローカル参照を読み込む",
-      "back": "後退"
+      "back": "後退",
+      "enter": "選択する/編集する",
+      "prev": "前のクリップ",
+      "next": "次のクリップ"
     },
 		"help": {
 			"name": "ヘルプ",

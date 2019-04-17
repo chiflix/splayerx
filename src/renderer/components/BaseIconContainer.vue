@@ -123,6 +123,10 @@ export default {
   }
 }
 
+.logo {
+  width: 118px;
+  height: 118px;
+}
 .add, .delete {
   width: 24px;
   height: 27px;

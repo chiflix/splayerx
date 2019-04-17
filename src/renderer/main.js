@@ -125,7 +125,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
-      'isEditable', 'isProfessional', 'referenceSubtitleId', 'editHistoryLen', 'currentEditHistoryIndex', 'currentEditedSubtitleId',
+      'isEditable', 'isProfessional', 'referenceSubtitleId', 'editHistoryLen', 'currentEditHistoryIndex', 'currentEditedSubtitleId', 'subtitleEditMenuPrevEnable', 'subtitleEditMenuNextEnable', 'subtitleEditMenuEnterEnable',
       'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath']),
     updateFullScreen() {
       if (this.isFullScreen) {
@@ -188,8 +188,8 @@ new Vue({
     currentRouteName() {
       return this.$route.name;
     },
-    isSubtitleAvaliable() {
-      return this.currentFirstSubtitleId !== '';
+    isSubtitleAvailable() {
+      return this.currentFirstSubtitleId !== '' || (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub);
     },
   },
   created() {
@@ -235,7 +235,7 @@ new Vue({
     });
   },
   watch: {
-    isSubtitleAvaliable(val) {
+    isSubtitleAvailable(val) {
       if (this.menu) {
         const increaseSubDelayMenu = this.menu.getMenuItemById('increaseSubDelay');
         const decreaseSubDelayMenu = this.menu.getMenuItemById('decreaseSubDelay');
@@ -321,13 +321,44 @@ new Vue({
     },
     editHistoryLen(v) {
       // 当操作历史记录更新，重新计算undo、redo是否可以使用
-      this.menu.getMenuItemById('advancedRedo').enabled = this.currentEditHistoryIndex < (v - 1);
-      this.menu.getMenuItemById('advancedUndo').enabled = this.currentEditHistoryIndex >= 0;
+      const menuRedo = this.menu.getMenuItemById('advancedRedo');
+      const menuUndo = this.menu.getMenuItemById('advancedUndo');
+      if (menuRedo) {
+        menuRedo.enabled = this.currentEditHistoryIndex < (v - 1);
+      }
+      if (menuUndo) {
+        menuUndo.enabled = this.currentEditHistoryIndex >= 0;
+      }
     },
     currentEditHistoryIndex(v) {
       // 当操作历史记录更新，重新计算undo、redo是否可以使用
-      this.menu.getMenuItemById('advancedRedo').enabled = (v + 1) < this.editHistoryLen;
-      this.menu.getMenuItemById('advancedUndo').enabled = v >= 0;
+      const menuRedo = this.menu.getMenuItemById('advancedRedo');
+      const menuUndo = this.menu.getMenuItemById('advancedUndo');
+      if (menuRedo) {
+        menuRedo.enabled = (v + 1) < this.editHistoryLen;
+      }
+      if (menuUndo) {
+        menuUndo.enabled = v >= 0;
+      }
+    },
+    subtitleEditMenuEnterEnable(v) {
+      // 菜单中是否可以使用enter快捷键的依赖vuex
+      const menu = this.menu.getMenuItemById('advanced-enter');
+      if (menu) {
+        menu.enabled = v;
+      }
+    },
+    subtitleEditMenuPrevEnable(v) {
+      const menu = this.menu.getMenuItemById('advanced-prev');
+      if (menu) {
+        menu.enabled = v;
+      }
+    },
+    subtitleEditMenuNextEnable(v) {
+      const menu = this.menu.getMenuItemById('advanced-next');
+      if (menu) {
+        menu.enabled = v;
+      }
     },
     isFullScreen() {
       this.refreshMenu();
@@ -1024,22 +1055,36 @@ new Vue({
         label: this.$t('msg.advanced.name'),
         submenu: [
           {
-            label: this.$t('msg.advanced.undo'),
-            id: 'advancedUndo',
-            enabled: !!this.currentEditedSubtitleId && this.currentEditHistoryIndex >= 0,
-            accelerator: 'CmdOrCtrl+Z',
+            label: this.$t('msg.advanced.reference'),
+            id: 'reference',
+            submenu: reference,
+          },
+          { type: 'separator' },
+          {
+            label: this.$t('msg.advanced.enter'),
+            enabled: this.subtitleEditMenuEnterEnable,
+            id: 'advanced-enter',
+            accelerator: 'Enter',
             click: () => {
-              this.$bus.$emit(bus.SUBTITLE_EDITOR_UNDO);
+              this.$bus.$emit(bus.SUBTITLE_EDITOR_FOCUS_BY_ENTER);
             },
           },
           {
-            label: this.$t('msg.advanced.redo'),
-            id: 'advancedRedo',
-            enabled: !!this.currentEditedSubtitleId &&
-              this.currentEditHistoryIndex < (this.editHistoryLen - 1),
-            accelerator: 'CmdOrCtrl+Shift+Z',
+            label: this.$t('msg.advanced.prev'),
+            enabled: this.subtitleEditMenuPrevEnable,
+            id: 'advanced-prev',
+            accelerator: 'J',
             click: () => {
-              this.$bus.$emit(bus.SUBTITLE_EDITOR_REDO);
+              this.$bus.$emit(bus.SUBTITLE_EDITOR_SELECT_PREV_SUBTITLE);
+            },
+          },
+          {
+            label: this.$t('msg.advanced.next'),
+            enabled: this.subtitleEditMenuNextEnable,
+            id: 'advanced-next',
+            accelerator: 'K',
+            click: () => {
+              this.$bus.$emit(bus.SUBTITLE_EDITOR_SELECT_NEXT_SUBTITLE);
             },
           },
           { type: 'separator' },
@@ -1061,9 +1106,23 @@ new Vue({
           },
           { type: 'separator' },
           {
-            label: this.$t('msg.advanced.reference'),
-            id: 'reference',
-            submenu: reference,
+            label: this.$t('msg.advanced.undo'),
+            id: 'advancedUndo',
+            enabled: !!this.currentEditedSubtitleId && this.currentEditHistoryIndex >= 0,
+            accelerator: 'CmdOrCtrl+Z',
+            click: () => {
+              this.$bus.$emit(bus.SUBTITLE_EDITOR_UNDO);
+            },
+          },
+          {
+            label: this.$t('msg.advanced.redo'),
+            id: 'advancedRedo',
+            enabled: !!this.currentEditedSubtitleId &&
+              this.currentEditHistoryIndex < (this.editHistoryLen - 1),
+            accelerator: 'CmdOrCtrl+Shift+Z',
+            click: () => {
+              this.$bus.$emit(bus.SUBTITLE_EDITOR_REDO);
+            },
           },
           { type: 'separator' },
           {
@@ -1502,6 +1561,7 @@ new Vue({
       e.preventDefault();
       if (!this.isProfessional) {
         this.$bus.$emit('drop');
+        this.$store.commit('source', 'drop');
         const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
         const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
         files.forEach(file => this.$electron.remote.app.addRecentDocument(file));
