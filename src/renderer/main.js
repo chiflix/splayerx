@@ -7,7 +7,7 @@ import VueI18n from 'vue-i18n';
 import os from 'os';
 import axios from 'axios';
 import uuidv4 from 'uuid/v4';
-import electron from 'electron';
+import electron, { ipcRenderer } from 'electron';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
@@ -119,6 +119,9 @@ new Vue({
       menu: null,
       topOnWindow: false,
       canSendVolumeGa: true,
+      isTrackpadBegan: false,
+      isTrackpadEnd: true,
+      trackpadScrollDirection: '',
     };
   },
   computed: {
@@ -228,6 +231,15 @@ new Vue({
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
     });
+
+    ipcRenderer.on('scroll-touch-begin', () => {
+      this.isTrackpadBegan = true;
+      this.isTrackpadEnd = false;
+    });
+    ipcRenderer.on('scroll-touch-end', () => {
+      this.isTrackpadBegan = false;
+      this.isTrackpadEnd = true;
+    });
   },
   watch: {
     isSubtitleAvailable(val) {
@@ -335,6 +347,9 @@ new Vue({
     },
     ableToPushCurrentSubtitle(val) {
       this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
+    },
+    isTrackpadEnd(newVal) {
+      if (newVal) this.trackpadScrollDirection = '';
     },
   },
   methods: {
@@ -1303,6 +1318,17 @@ new Vue({
                 Math.abs(e.deltaY) * 0.06,
               );
             }
+          }
+        }
+        if (this.isTrackpadBegan) {
+          const { deltaX, deltaY } = e;
+          const { trackpadScrollDirection: direction, isTrackpadEnd } = this;
+          if (deltaX && (!direction || direction === 'left' || direction === 'right')) {
+            this.trackpadScrollDirection = deltaX > 0 ? 'left' : 'right';
+            this.$bus.$emit('seek', videodata.time - (2 * deltaX));
+          }
+          else if (deltaY && (!direction || direction === 'up' || direction === 'down')) {
+            this.trackpadScrollDirection = deltaY > 0 ? 'up' : 'down';
           }
         }
       }
