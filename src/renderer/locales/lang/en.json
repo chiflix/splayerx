@@ -173,6 +173,7 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "Always clear playback history on exit",
+			"reverseScrolling": "Reverse scrolling for trackpad and mouse",
 			"displayLanguage": "Display Language",
 			"generalSetting": "General",
 			"others": "Others",
