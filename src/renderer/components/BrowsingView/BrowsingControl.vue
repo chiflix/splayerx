@@ -152,6 +152,7 @@ export default {
     -webkit-app-region: no-drag;
     .collection-star {
       margin: 6px 5px 6px 6px;
+      cursor: pointer;
     }
     .address-input {
       flex: 1;

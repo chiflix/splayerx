@@ -52,7 +52,7 @@ export default {
       }
     });
     this.$bus.$on('url-reload', () => {
-      this.$refs.webView.loadURL(this.$refs.webView.getURL());
+      this.$refs.webView.reload();
     });
     this.$refs.webView.addEventListener('load-commit', () => {
       this.$refs.webView.blur();
@@ -63,6 +63,9 @@ export default {
     });
     this.$refs.webView.addEventListener('dom-ready', () => { // for webview test
       this.$refs.webView.openDevTools();
+    });
+    this.$refs.webView.addEventListener('new-window', (e) => { // new tabs
+      this.$refs.webView.loadURL(e.url);
     });
     window.onbeforeunload = (e) => {
       if (!this.quit) {
