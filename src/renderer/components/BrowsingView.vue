@@ -7,6 +7,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import urlParseLax from 'url-parse-lax';
 import BrowsingHeader from './BrowsingView/BrowsingHeader.vue';
 
 export default {
@@ -39,7 +40,8 @@ export default {
     );
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', newPosition);
     this.$bus.$on('search-with-url', (url) => {
-      this.$refs.webView.loadURL(url);
+      const parsedUrl = urlParseLax(url).protocol;
+      this.$refs.webView.loadURL(parsedUrl.protocol ? parsedUrl.href : `http://${url}`);
     });
     this.$bus.$on('url-back', () => {
       if (this.$refs.webView.canGoBack()) {

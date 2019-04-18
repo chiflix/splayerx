@@ -550,4 +550,33 @@ export default {
   height: 16px;
   opacity: 0.2;
 }
+.showMarks, .hideMarks, .closeSearch {
+  width: 18px;
+  height: 18px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+}
+.youtube, .bilibili, .youku {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
 </style>

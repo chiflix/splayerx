@@ -1,8 +1,7 @@
 <template>
   <div
     :data-component-name="$options.name"
-    :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
-    @dblclick.stop="handleDbClick">
+    :class="isDarwin ? 'darwin-titlebar' : 'titlebar'">
     <div class="win-icons" v-if="!isDarwin" v-fade-in="showTitleBar">
       <Icon class="title-button no-drag"
         @mouseup.native="handleMinimize"
@@ -127,13 +126,6 @@ export default {
     },
   },
   methods: {
-    handleDbClick() {
-      if (!this.isMaximized) {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
-      } else {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
-      }
-    },
     handleMouseOver() {
       this.keyOver = true;
       this.state = 'hover';
@@ -191,7 +183,7 @@ export default {
   position: absolute;
   top: 0;
   border-radius: 10px;
-  width: 100%;
+  width: 120px;
   height: 40px;
   z-index: 6;
   .win-icons {
@@ -219,7 +211,7 @@ export default {
   z-index: 6;
   box-sizing: content-box;
   height: 36px;
-  width: 100%;
+  width: 90px;
   .mac-icons {
     position: absolute;
     top: 12px;

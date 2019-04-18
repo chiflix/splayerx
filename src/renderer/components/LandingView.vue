@@ -5,6 +5,8 @@
     @mouseup.left.stop="handleMouseUp"
     @mousemove="handleMouseMove">
     <titlebar currentView="LandingView"></titlebar>
+    <short-marks v-show="!openUrlShow"></short-marks>
+    <open-url v-show="openUrlShow"></open-url>
     <transition name="background-container-transition">
       <div class="background" v-if="showShortcutImage">
         <transition name="background-transition" mode="in-out">
@@ -65,6 +67,8 @@ import asyncStorage from '@/helpers/asyncStorage';
 import Titlebar from './Titlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
 import NotificationBubble from './NotificationBubble.vue';
+import ShortMarks from './LandingView/ShortMarks.vue';
+import OpenUrl from './LandingView/OpenUrl.vue';
 
 export default {
   name: 'landing-view',
@@ -82,6 +86,7 @@ export default {
       isDragging: false,
       filePathNeedToDelete: '',
       maskBackground: 'rgba(255, 255, 255, 0)', // drag and drop related var
+      openUrlShow: false,
     };
   },
   watch: {
@@ -91,6 +96,8 @@ export default {
     Titlebar,
     Playlist,
     NotificationBubble,
+    'short-marks': ShortMarks,
+    'open-url': OpenUrl,
   },
   computed: {
     ...mapState({
@@ -186,6 +193,9 @@ export default {
         this.addLog('info', `launching: ${app.getName()} ${app.getVersion()}`);
         this.addLog('info', `sagi API Status: ${this.sagiHealthStatus}`);
       }
+    });
+    this.$bus.$on('open-url-show', (val) => {
+      this.openUrlShow = val;
     });
   },
   methods: {
