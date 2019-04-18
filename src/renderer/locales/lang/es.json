@@ -174,6 +174,11 @@
 		"general": {
 			"clearHistory": "Borrar siempre el historial de reproducción al salir",
 			"reverseScrolling": "Desplazamiento hacia atrás para trackpad y mouse",
+			"setDefault": "Establecer como el jugador por defecto",
+			"setDefaultDescription": "Todos los formatos de video se abren automáticamente usando SPlayer.",
+			"restoreSettings": "Restaurar datos y configuraciones",
+			"restoreSettingsDescription": "Borrar todos los datos de SPlayer y los archivos de caché.",
+			"setButton": "Aplicar",
 			"displayLanguage": "Idioma de la pantalla",
 			"generalSetting": "General",
 			"others": "Otros",
