@@ -173,6 +173,7 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
+			"reverseScrolling": "التمرير العكسي للوحة التتبع والماوس",
 			"displayLanguage": "عرض اللغة",
 			"generalSetting": "جنرال لواء",
 			"others": "الآخرين",

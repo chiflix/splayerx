@@ -173,6 +173,7 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "종료시 항상 재생 기록 지우기",
+			"reverseScrolling": "트랙 패드 및 마우스의 역방향 스크롤",
 			"displayLanguage": "표시 언어",
 			"generalSetting": "일반",
 			"others": "기타",
