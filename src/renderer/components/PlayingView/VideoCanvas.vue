@@ -374,6 +374,16 @@ export default {
         this.$bus.$emit('seek-subtitle', e);
       }
     });
+    this.$bus.$on('seek-forward', (e) => {
+      let finalSeekTime = videodata.time + Math.abs(e);
+      if (finalSeekTime > this.duration) finalSeekTime = this.duration;
+      this.$bus.$emit('seek', finalSeekTime);
+    });
+    this.$bus.$on('seek-backward', (e) => {
+      let finalSeekTime = videodata.time - Math.abs(e);
+      if (finalSeekTime > this.duration) finalSeekTime = this.duration;
+      this.$bus.$emit('seek', finalSeekTime);
+    });
     this.$bus.$on('drag-over', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0.18)';
     });
