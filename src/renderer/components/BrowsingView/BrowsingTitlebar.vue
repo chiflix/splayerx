@@ -183,7 +183,7 @@ export default {
     top: 0;
     border-radius: 10px;
     width: 120px;
-    height: 40px;
+    height: 36px;
     z-index: 6;
     display: flex;
     order: 2;
@@ -209,7 +209,7 @@ export default {
   }
   .darwin-titlebar {
     z-index: 6;
-    height: 40px;
+    height: 36px;
     width: 90px;
     display: flex;
     order: 0;

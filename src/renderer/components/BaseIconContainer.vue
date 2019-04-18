@@ -579,4 +579,34 @@ export default {
   height: 20px;
   display: block;
 }
+.showFavicon, .hideFavicon {
+  width: 10px;
+  height: 10px;
+  display: block;
+}
+.closeInput {
+  width: 10px;
+  height: 10px;
+  margin: auto;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:hover {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: block;
+    }
+    .active {
+      display: none;
+    }
+  }
+}
 </style>

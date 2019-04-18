@@ -1,7 +1,7 @@
 <template>
   <div class="short-marks" :style="{ right: isDarwin ? '15px' : '', left: isDarwin ? '' : '15px' }">
     <div class="marks-details" v-show="showMarks" :style="{ order: isDarwin ? '1' : '2' }">
-      <div class="marks-container" v-for="(item, index) in marks" @mouseover="marksMouseOver(index)" @mouseleave="marksMouseLeave(index)"
+      <div class="marks-container" v-for="(item, index) in marks" @mouseover="marksMouseOver(index)" @mouseleave="marksMouseLeave()"
       :style="{
         background: markHoverIndex === index ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.08)',
         color: markHoverIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)'
@@ -12,7 +12,7 @@
         <p>{{ item.name }}</p>
       </div>
     </div>
-    <Icon :type="showMarks ? 'hideMarks' : 'showMarks'" class="display-marks" @mouseup.native="handleMarksDisplay" :style="{
+    <Icon :type="showMarksType" class="display-marks" @mouseup.native="handleMarksDisplay" :style="{
       order: isDarwin ? '2' : '1',
       margin: isDarwin ? 'auto 0 auto 10px' : 'auto 0 auto 0'
     }"></Icon>
@@ -39,6 +39,12 @@ export default {
   computed: {
     isDarwin() {
       return process.platform === 'darwin';
+    },
+    showMarksType() {
+      if (this.isDarwin) {
+        return this.showFavicon ? 'hideMarks' : 'showMarks';
+      }
+      return this.showFavicon ? 'showMarks' : 'hideMarks';
     },
   },
   methods: {
