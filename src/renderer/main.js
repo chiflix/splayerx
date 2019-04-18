@@ -7,7 +7,7 @@ import VueI18n from 'vue-i18n';
 import os from 'os';
 import axios from 'axios';
 import uuidv4 from 'uuid/v4';
-import electron, { ipcRenderer } from 'electron';
+import electron from 'electron';
 import VueElectronJSONStorage from 'vue-electron-json-storage';
 import VueResource from 'vue-resource';
 import VueAnalytics from 'vue-analytics';
@@ -30,6 +30,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import NotificationBubble, { addBubble } from '../shared/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
+import WheelEventManager from '../shared/trackpadSupport/renderer';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -106,6 +107,7 @@ const i18n = new VueI18n({
   messages, // set locale messages
 });
 Vue.use(NotificationBubble, i18n);
+Vue.use(WheelEventManager);
 
 /* eslint-disable no-new */
 new Vue({
@@ -119,9 +121,6 @@ new Vue({
       menu: null,
       topOnWindow: false,
       canSendVolumeGa: true,
-      isTrackpadBegan: false,
-      isTrackpadEnd: true,
-      trackpadScrollDirection: '',
     };
   },
   computed: {
@@ -231,15 +230,6 @@ new Vue({
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
     });
-
-    ipcRenderer.on('scroll-touch-begin', () => {
-      this.isTrackpadBegan = true;
-      this.isTrackpadEnd = false;
-    });
-    ipcRenderer.on('scroll-touch-end', () => {
-      this.isTrackpadBegan = false;
-      this.isTrackpadEnd = true;
-    });
   },
   watch: {
     isSubtitleAvailable(val) {
@@ -347,9 +337,6 @@ new Vue({
     },
     ableToPushCurrentSubtitle(val) {
       this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
-    },
-    isTrackpadEnd(newVal) {
-      if (newVal) this.trackpadScrollDirection = '';
     },
   },
   methods: {
@@ -1307,28 +1294,6 @@ new Vue({
                 this.canSendVolumeGa = true;
               }, 1000);
             }
-            if (process.platform !== 'darwin') {
-              this.$store.dispatch(
-                e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                Math.abs(e.deltaY) * 0.06,
-              );
-            } else {
-              this.$store.dispatch(
-                e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                Math.abs(e.deltaY) * 0.06,
-              );
-            }
-          }
-        }
-        if (this.isTrackpadBegan) {
-          const { deltaX, deltaY } = e;
-          const { trackpadScrollDirection: direction, isTrackpadEnd } = this;
-          if (deltaX && (!direction || direction === 'left' || direction === 'right')) {
-            this.trackpadScrollDirection = deltaX > 0 ? 'left' : 'right';
-            this.$bus.$emit('seek', videodata.time - (2 * deltaX));
-          }
-          else if (deltaY && (!direction || direction === 'up' || direction === 'down')) {
-            this.trackpadScrollDirection = deltaY > 0 ? 'up' : 'down';
           }
         }
       }
