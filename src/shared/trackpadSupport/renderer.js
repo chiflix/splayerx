@@ -1,3 +1,5 @@
+import { Video as videoActions } from '@/store/actionTypes';
+
 class TrackpadWheelManager {
   #_duration = 0;
   set duration(newVal) {
@@ -75,18 +77,32 @@ class TrackpadWheelManager {
 
           // eslint-disable-next-line complexity
           document.addEventListener('wheel', (event) => {
-            const { ctrlKey } = event;
+            const { ctrlKey, deltaX, deltaY } = event;
             const { isTrackpadBegan, direction } = self;
-            if (!ctrlKey && isTrackpadBegan) {
-              const { deltaX, deltaY } = event;
-              if (deltaX && (!direction || direction === 'left' || direction === 'right')) {
-                self.direction = deltaX > 0 ? 'left' : 'right';
-                const seekDelta = self.trackpadSpeedToSeekSeconds(deltaX);
-                this.$bus.$emit(`seek-${deltaX > 0 ? 'backward' : 'forward'}`, seekDelta);
-              } else if (deltaY && (!direction || direction === 'up' || direction === 'down')) {
-                self.direction = deltaY > 0 ? 'up' : 'down';
+            if (!ctrlKey) {
+              const isTrackPad = isTrackpadBegan && (!!deltaX || !!deltaY);
+              if (isTrackPad) {
+                if (deltaX && (!direction || direction === 'left' || direction === 'right')) {
+                  self.direction = deltaX > 0 ? 'left' : 'right';
+                  const seekDelta = self.trackpadSpeedToSeekSeconds(deltaX);
+                  this.$bus.$emit(`seek-${deltaX > 0 ? 'backward' : 'forward'}`, seekDelta);
+                } else if (deltaY && (!direction || direction === 'up' || direction === 'down')) {
+                  self.direction = deltaY > 0 ? 'up' : 'down';
+                  this.$store.dispatch(
+                    deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+                    Math.abs(deltaY) * 0.06,
+                  );
+                }
               }
             }
+          });
+          // even though it's deprecated,
+          // but it's necessary for detecting whether it's trackpad or mouse wheel
+          document.onmousewheel(({ deltaY }) => {
+            this.$store.dispatch(
+              deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+              Math.abs(deltaY) * 0.06,
+            );
           });
         }
       },
