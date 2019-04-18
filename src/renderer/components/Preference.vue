@@ -150,7 +150,7 @@ export default {
   .left {
     flex-basis: 110px;
     height: 100%;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.85) 0%, rgba(84,84,84,0.85) 47%, rgba(123,123,123,0.85) 100%);
+    background-image: linear-gradient(-28deg, rgba(65,65,65,0.9) 0%, rgba(84,84,84,0.9) 47%, rgba(123,123,123,0.9) 100%);
     .preferenceTitle {
       cursor: pointer;
       -webkit-app-region: no-drag;
