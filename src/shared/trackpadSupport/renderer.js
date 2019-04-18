@@ -2,7 +2,6 @@ class TrackpadWheelManager {
   #_duration = 0;
   set duration(newVal) {
     if (typeof newVal === 'number' && newVal > 0 && Number.isFinite(newVal)) {
-      console.log('TrackPad:', newVal);
       this._duration = newVal;
     }
   }
@@ -12,6 +11,43 @@ class TrackpadWheelManager {
   isTrackpadEnd = true;
 
   direction = '';
+
+  speedMap = {
+    slow: {
+      trackpad: 20,
+      seek: 5,
+    },
+    normal: {
+      trackpad: 250,
+      seek: '2.5%',
+    },
+    fast: {
+      trackpad: 250,
+      seek: '100%',
+    },
+  };
+  _seekSpeedToSeekSeconds(seekSpeed) {
+    if (typeof seekSpeed === 'number') {
+      const minimiumSeekSeconds = this.duration / 100 <= 1 ? 1 : this.duration / 100;
+      return seekSpeed < minimiumSeekSeconds ? seekSpeed : minimiumSeekSeconds;
+    } else if (typeof seekSpeed === 'string') {
+      const seekPercent = parseFloat(seekSpeed);
+      return (this.duration / 100) * seekPercent;
+    }
+    return 0;
+  }
+  trackpadSpeedToSeekSeconds(trackSpeed) {
+    let seekSeconds = 5;
+    trackSpeed = Math.abs(trackSpeed);
+    if (trackSpeed < this.speedMap.slow.trackpad) {
+      seekSeconds = this._seekSpeedToSeekSeconds(this.speedMap.slow.seek);
+    } else if (trackSpeed < this.speedMap.normal.trackpad) {
+      seekSeconds = this._seekSpeedToSeekSeconds(this.speedMap.normal.seek);
+    } else if (trackSpeed >= this.speedMap.fast.trackpad) {
+      seekSeconds = this._seekSpeedToSeekSeconds(this.speedMap.fast.seek);
+    }
+    return seekSeconds;
+  }
 
   install(Vue) {
     const self = this;
@@ -45,6 +81,8 @@ class TrackpadWheelManager {
               const { deltaX, deltaY } = event;
               if (deltaX && (!direction || direction === 'left' || direction === 'right')) {
                 self.direction = deltaX > 0 ? 'left' : 'right';
+                const seekDelta = self.trackpadSpeedToSeekSeconds(deltaX);
+                this.$bus.$emit(`seek-${deltaX > 0 ? 'backward' : 'forward'}`, seekDelta);
               } else if (deltaY && (!direction || direction === 'up' || direction === 'down')) {
                 self.direction = deltaY > 0 ? 'up' : 'down';
               }
