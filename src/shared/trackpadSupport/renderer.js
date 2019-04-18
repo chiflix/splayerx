@@ -52,11 +52,6 @@ class TrackpadWheelManager {
           });
         }
       },
-      destoryed() {
-        if (this === this.$root && typeof this.unregisterDurationWatcher === 'function') {
-          this.unregisterDurationWatcher();
-        }
-      },
     });
   }
 }
