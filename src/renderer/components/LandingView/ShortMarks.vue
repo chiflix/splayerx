@@ -91,14 +91,17 @@ export default {
       display: flex;
       margin-left: 10px;
       border-radius: 13px;
+      cursor: pointer;
       p {
         font-size: 13px;
         margin: auto 10px auto 0;
+        cursor: pointer;
       }
       .marks-icon {
         margin: auto 5px auto 10px;
         width: 20px;
         height: 20px;
+        cursor: pointer;
       }
     }
   }
@@ -106,6 +109,7 @@ export default {
     z-index: 6;
     width: 18px;
     height: 18px;
+    cursor: pointer;
   }
 }
 </style>

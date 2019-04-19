@@ -79,11 +79,13 @@ export default {
     .fav-icon-container {
       width: 20px;
       height: 20px;
+      cursor: pointer;
     }
   }
   .fav-display {
     width: 10px;
     height: 10px;
+    cursor: pointer;
   }
 }
 </style>

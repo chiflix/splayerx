@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="14px" height="24px" viewBox="0 0 14 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 52.2 (67145) - http://www.bohemiancoding.com/sketch -->
-    <title>&lt; unclick</title>
+    <title>icon-forward</title>
     <desc>Created with Sketch.</desc>
-    <defs>
-        <rect id="path-1" x="0" y="0" width="14" height="14"></rect>
-    </defs>
-    <g id="&lt;-unclick" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="Path-2" transform="translate(8.000000, 8.000000) scale(-1, 1) translate(-8.000000, -8.000000) translate(1.000000, 1.000000)">
-            <mask id="mask-2" fill="white">
-                <use xlink:href="#path-1"></use>
-            </mask>
-            <g id="Mask"></g>
-            <polyline stroke="#000000" stroke-width="1.44" opacity="0.2" stroke-linecap="round" stroke-linejoin="round" mask="url(#mask-2)" transform="translate(9.510408, 7.010408) rotate(-315.000000) translate(-9.510408, -7.010408) " points="5.01040764 2.51040764 5.01040764 11.5104076 14.0104076 11.1595776"></polyline>
+    <g id="页面1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.9" opacity="0.150204613">
+        <g id="browseing" transform="translate(-302.000000, -323.000000)" fill="#FFFFFF" fill-rule="nonzero">
+            <g id="control-bar" transform="translate(238.000000, 300.000000)">
+                <g id="icon-forward" transform="translate(59.000000, 19.000000)">
+                    <path d="M9.49916656,16.8568455 L9.61840468,16.9680369 C9.62214341,16.971095 9.62590018,16.974132 9.62967481,16.9771475 L18.1036175,24.8806259 C18.6085119,25.3514475 18.6361333,26.1424216 18.1653117,26.6473159 C17.6944901,27.1522103 16.903516,27.1798317 16.3986216,26.7090101 L5.89638247,16.9155137 C5.63201496,16.668987 5.49849992,16.334685 5.49887645,15.9996364 C5.49849992,15.6645878 5.63201496,15.3302859 5.89638247,15.0837592 L16.3978419,5.29098989 C16.9027362,4.82016827 17.6937103,4.84778969 18.1645319,5.35268406 C18.6353536,5.85757843 18.6077321,6.64855252 18.1028378,7.11937414 L9.50512837,15.1368679 C9.29086915,15.3612471 9.15928995,15.6652576 9.15928995,16 C9.15928995,16.3316264 9.28843093,16.6330904 9.49916656,16.8568455 Z" id="forward" transform="translate(12.000000, 16.000000) scale(-1, 1) translate(-12.000000, -16.000000) "></path>
+                </g>
+            </g>
         </g>
     </g>
 </svg>

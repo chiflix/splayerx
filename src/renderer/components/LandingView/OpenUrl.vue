@@ -68,12 +68,13 @@ export default {
     z-index: 6;
     text-indent: 15px;
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.47);
+    color: rgba(255, 255, 255, 0.8);
   }
   .close-icon {
     width: 18px;
     height: 18px;
     z-index: 6;
+    cursor: pointer;
   }
 }
 </style>

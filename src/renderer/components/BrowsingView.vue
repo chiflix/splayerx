@@ -2,13 +2,16 @@
  <div class="browsing">
    <browsing-header></browsing-header>
    <webview :src="availableUrl" autosize class="web-view" ref="webView" allowpopups></webview>
+   <browsing-control></browsing-control>
  </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
+import { Browsing as browsingActions } from '@/store/actionTypes';
 import urlParseLax from 'url-parse-lax';
 import BrowsingHeader from './BrowsingView/BrowsingHeader.vue';
+import BrowsingControl from './BrowsingView/BrowsingControl.vue';
 
 export default {
   name: 'BrowsingView',
@@ -19,11 +22,12 @@ export default {
   },
   components: {
     'browsing-header': BrowsingHeader,
+    'browsing-control': BrowsingControl,
   },
   computed: {
     ...mapGetters(['winSize', 'winPos', 'isFullScreen', 'initialUrl']),
     availableUrl() {
-      const parsedUrl = urlParseLax(this.initialUrl).protocol;
+      const parsedUrl = urlParseLax(this.initialUrl);
       return parsedUrl.protocol ? parsedUrl.href : `http://${this.initialUrl}`;
     },
   },
@@ -31,6 +35,11 @@ export default {
     initialUrl(val) {
       console.log(val);
     },
+  },
+  methods: {
+    ...mapActions({
+      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
+    }),
   },
   mounted() {
     if (this.winSize[0] < 1200) {
@@ -48,10 +57,6 @@ export default {
       [1200, 675],
     );
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', newPosition);
-    this.$bus.$on('search-with-url', (url) => {
-      const parsedUrl = urlParseLax(url).protocol;
-      this.$refs.webView.loadURL(parsedUrl.protocol ? parsedUrl.href : `http://${url}`);
-    });
     this.$bus.$on('url-back', () => {
       if (this.$refs.webView.canGoBack()) {
         this.$refs.webView.goBack();
@@ -76,7 +81,7 @@ export default {
       this.$refs.webView.openDevTools();
     });
     this.$refs.webView.addEventListener('new-window', (e) => { // new tabs
-      this.$refs.webView.loadURL(e.url);
+      this.updateInitialUrl(e.url);
     });
     window.onbeforeunload = (e) => {
       if (!this.quit) {

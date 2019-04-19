@@ -515,34 +515,20 @@ export default {
   height: 16px;
   display: block;
 }
-.back, .forward, .pageRefresh {
-  width: 16px;
-  height: 16px;
-  .default {
-    display: block;
-  }
-  .hover {
-    display: none;
-  }
-  .active {
-    display: none;
-  }
-  &:active {
-    .default {
-      display: none;
-    }
-    .hover {
-      display: none;
-    }
-    .active {
-      display: block;
-    }
-  }
+.back, .forward {
+  width: 24px;
+  height: 32px;
+  display: block;
+}
+.pageRefresh {
+  width: 32px;
+  height: 32px;
+  display: block;
 }
 .backDisabled, .forwardDisabled, .downloadDisabled, .star, .starActive {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 32px;
 }
 .pageRefreshDisabled {
   display: block;
@@ -608,5 +594,10 @@ export default {
       display: none;
     }
   }
+}
+.pipDisabled, .videoRecordDisabled {
+  display: block;
+  width: 32px;
+  height: 32px;
 }
 </style>

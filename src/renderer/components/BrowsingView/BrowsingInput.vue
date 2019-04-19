@@ -65,13 +65,14 @@ export default {
     z-index: 6;
     text-indent: 15px;
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.47);
+    color: rgba(255, 255, 255, 0.8);
   }
   .close-search-icon {
     width: 10px;
     height: 10px;
     z-index: 6;
     display: flex;
+    cursor: pointer;
   }
 }
 </style>
