@@ -173,6 +173,12 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "Always clear playback history on exit",
+			"reverseScrolling": "Reverse scrolling for trackpad and mouse",
+			"setDefault": "Set as the default video player",
+			"setDefaultDescription": "Open all video files with SPlayer.",
+			"restoreSettings": "Restore data and settings",
+			"restoreSettingsDescription": "Clear all SPlayer data and cache files.",
+			"setButton": "Apply",
 			"displayLanguage": "Display Language",
 			"generalSetting": "General",
 			"others": "Others",

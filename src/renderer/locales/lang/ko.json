@@ -173,6 +173,12 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "종료시 항상 재생 기록 지우기",
+			"reverseScrolling": "트랙 패드 및 마우스의 역방향 스크롤",
+			"setDefault": "기본 동영상 플레이어로 설정",
+			"setDefaultDescription": "SPlayer 로 모든 비디오 파일 열기.",
+			"restoreSettings": "데이터 및 설정 복원",
+			"restoreSettingsDescription": "모든 SPlayer 데이터 및 캐시 파일 지우기.",
+			"setButton": "대다",
 			"displayLanguage": "표시 언어",
 			"generalSetting": "일반",
 			"others": "기타",

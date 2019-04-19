@@ -18,21 +18,40 @@
       </div>
     </div>
   </div>
+  <div class="description-button">
+    <div class="setting-content">
+      <div class="setting-title">{{ $t("preferences.general.setDefault") }}</div>
+      <div class="setting-description">{{ $t("preferences.general.setDefaultDescription") }}</div>
+    </div>
+    <div class="setting-button no-drag"
+      @mouseup="setDefault"><div class="content">{{ $t("preferences.general.setButton") }}</div></div>
+  </div>
+  <!-- <div class="description-button">
+    <div class="setting-content">
+      <div class="setting-title">{{ $t("preferences.general.restoreSettings") }}</div>
+      <div class="setting-description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
+    </div>
+    <div class="setting-button no-drag"
+      @mouseup="restoreSettings"><div class="content">{{ $t("preferences.general.setButton") }}</div></div>
+  </div> -->
   <div class="title other-title">{{ $t("preferences.general.others") }}</div>
+  <BaseCheckBox
+    :checkboxValue="reverseScrolling"
+    @update:checkbox-value="reverseScrolling = $event">
+    {{ $t('preferences.general.reverseScrolling') }}
+  </BaseCheckBox>
   <BaseCheckBox
     :checkboxValue="deleteVideoHistoryOnExit"
     @update:checkbox-value="deleteVideoHistoryOnExit = $event">
     {{ $t('preferences.general.clearHistory') }}
-  </BaseCheckBox>
-  <BaseCheckBox
-    @update:checkbox-value="setAsDefault($event)">
-    {{ '设为默认应用' }}
   </BaseCheckBox>
 </div>
 </template>
 
 <script>
 import electron from 'electron';
+import path from 'path';
+import { promises as fsPromises } from 'fs';
 import { setAsDefaultApp } from '@/../shared/system';
 import Icon from '@/components/BaseIconContainer.vue';
 import { codeToLanguageName } from '@/helpers/language';
@@ -67,6 +86,22 @@ export default {
     preferenceData() {
       return this.$store.getters.preferenceData;
     },
+    reverseScrolling: {
+      get() {
+        return this.$store.getters.reverseScrolling;
+      },
+      set(val) {
+        if (val) {
+          this.$store.dispatch('reverseScrolling').then(() => {
+            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+          });
+        } else {
+          this.$store.dispatch('notReverseScrolling').then(() => {
+            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+          });
+        }
+      },
+    },
     deleteVideoHistoryOnExit: {
       get() {
         return this.$store.getters.deleteVideoHistoryOnExit;
@@ -98,16 +133,39 @@ export default {
     },
   },
   methods: {
+    async setDefault() {
+      try {
+        await setAsDefaultApp();
+        // TODO: feedback
+      } catch (ex) {
+        // TODO: feedback
+      }
+    },
+    restoreSettings() {
+      console.log('restore-settings');
+      // remove dir
+      const userData = electron.remote.app.getPath('userData');
+      const removeDir = dir => fsPromises.readdir(dir)
+        .then(files => files.reduce((result, file) => {
+          const filePath = path.join(dir, file);
+          return result.then(() => fsPromises.unlink(filePath)
+            .then(null, () => removeDir(filePath)));
+        }, Promise.resolve()).then(() => fsPromises.rmdir(dir)));
+      removeDir(userData)
+        .then(() => {
+          console.log('success');
+        })
+        .catch((err) => {
+          console.log('failed', err);
+        });
+      // this.$store.dispatch('init-settings');
+    },
     mapCode(code) {
       return codeToLanguageName(code);
     },
     handleSelection(language) {
       this.displayLanguage = language;
       this.showSelection = false;
-    },
-    setAsDefault(val) {
-      if (!val) return;
-      setAsDefaultApp();
     },
   },
 };
@@ -123,7 +181,7 @@ $dropdown-height: 156px;
   height: 100%;
   .title {
     margin-bottom: 7px;
-    font-family: PingFangSC-Medium;
+    font-family: $font-medium;
     font-size: 13px;
     color: rgba(255,255,255,0.9);
     letter-spacing: 0;
@@ -146,7 +204,7 @@ $dropdown-height: 156px;
   }
   .description {
     margin-bottom: 13px;
-    font-family: PingFangSC-Medium;
+    font-family: $font-medium;
     font-size: 11px;
     color: rgba(255,255,255,0.5);
     letter-spacing: 0;
@@ -209,6 +267,56 @@ $dropdown-height: 156px;
         .selection:hover {
           background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
         }
+      }
+    }
+  }
+  .description-button {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 35px;
+    width: 349px;
+    height: fit-content;
+    .setting-content {
+      width: 238px;
+      .setting-title {
+        white-space: nowrap;
+        margin-bottom: 6px;
+        font-family: $font-medium;
+        font-size: 13px;
+        color: rgba(255,255,255,0.9);
+        letter-spacing: 0;
+        line-height: 13px;
+      }
+      .setting-description {
+        font-family: $font-medium;
+        font-size: 11px;
+        color: rgba(255,255,255,0.5);
+        letter-spacing: 0;
+      }
+    }
+    .setting-button {
+      align-self: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
+      border: 0.5px solid rgba(255,255,255,0.20);
+      border-radius: 2px;
+      transition: background-color 100ms ease-in;
+
+      width: 61px;
+      height: 23px;
+      &:active {
+        background-color: rgba(0,0,0,0.20);
+      }
+      .content {
+        opacity: 0.9;
+        font-family: $font-medium;
+        font-size: 11px;
+        color: #FFFFFF;
+        letter-spacing: 0;
+        text-align: center;
+        line-height: 13px;
       }
     }
   }

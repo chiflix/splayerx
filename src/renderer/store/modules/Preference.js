@@ -9,10 +9,12 @@ const state = {
   secondaryLanguage: '',
   singleCycle: false,
   lastWinSize: [],
+  reverseScrolling: false,
 };
 const getters = {
   preferenceData: state => state,
   deleteVideoHistoryOnExit: state => state.deleteVideoHistoryOnExit,
+  reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
   displayLanguage: state => state.displayLanguage,
   primaryLanguage: state => state.primaryLanguage,
@@ -27,6 +29,9 @@ const mutations = {
   },
   deleteVideoHistoryOnExit(state, payload) {
     state.deleteVideoHistoryOnExit = payload;
+  },
+  reverseScrolling(state, payload) {
+    state.reverseScrolling = payload;
   },
   privacyAgreement(state, payload) {
     state.privacyAgreement = payload;
@@ -62,6 +67,14 @@ const actions = {
   },
   disagreeOnPrivacyPolicy({ commit, state }) {
     commit('privacyAgreement', false);
+    return asyncStorage.set('preferences', state);
+  },
+  reverseScrolling({ commit, state }) {
+    commit('reverseScrolling', true);
+    return asyncStorage.set('preferences', state);
+  },
+  notReverseScrolling({ commit, state }) {
+    commit('reverseScrolling', false);
     return asyncStorage.set('preferences', state);
   },
   deleteVideoHistoryOnExit({ commit, state }) {
