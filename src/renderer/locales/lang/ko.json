@@ -91,7 +91,7 @@
       "reference": "번역 참조",
 			"loadLocalSubtitleFile": "로컬 참조로드",
       "back": "뒤로",
-      "enter": "고르다/편집하다",
+      "enter": "고르다 / 편집하다",
       "prev": "이전 클립",
       "next": "다음 클립"
     },
@@ -274,8 +274,19 @@
       "referenceIdNotExist": {
         "content": "참조가 업데이트되거나 삭제되었습니다.",
         "title": "로드 참조 실패"
+      },
+      "referenceLoading": {
+        "content": "번역 참조로드 중...",
+        "title": ""
       }
     }
+  },
+  "editorCreateSubtitle": {
+    "button": "클릭하여 번역"
+  },
+  "deleteSubtitleBubble": {
+		"content": "번역이 삭제되었습니다",
+    "button": "끄르다"
   },
 	"snapshotSuccess": {
 		"content": "성공적인 스냅 샷",

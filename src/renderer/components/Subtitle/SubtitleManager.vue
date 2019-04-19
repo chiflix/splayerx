@@ -40,7 +40,7 @@
 import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
 import romanize from 'romanize';
 import { sep, join, basename } from 'path';
-import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, merge, castArray, intersectionBy } from 'lodash';
+import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, merge, castArray, intersectionBy, cloneDeep } from 'lodash';
 import { existsSync } from 'fs';
 import { codeToLanguageName } from '@/helpers/language';
 import {
@@ -59,7 +59,7 @@ import {
 import transcriptQueue from '@/helpers/subtitle/push';
 import { deleteFileByPath, getSubtitleContentByPath, addSubtitleByMediaHash, writeSubtitleByPath } from '@/helpers/cacheFileStorage';
 import { Subtitle as subtitleActions } from '@/store/actionTypes';
-import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
+import { Editor as editorMutations, Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 // import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleEditor from './SubtitleEditor.vue';
@@ -93,6 +93,8 @@ export default {
       lastFirstSubtitleId: '',
       lastSecondSubtitleId: '',
       watchLoadSubtitleFromLocal: null, // 当在高级编辑模式下，如果添加本地字幕作为参考，需要选择这个字幕
+      deleteModifiedSubtitleTimer: null, // 删除自制字幕的定时任务
+      deleteModifiedSubtitleInstance: null,
     };
   },
   computed: {
@@ -107,7 +109,7 @@ export default {
       'isProfessional', // 字幕编辑高级模式属性
       'storedBeforeProfessionalInfo', 'winRatio', 'defaultDir', 'isCreateSubtitleMode',
       'isFirstSubtitle', 'referenceSubtitleId', 'currentEditedSubtitleId',
-      'enabledSecondarySub',
+      'enabledSecondarySub', 'winWidth', 'winHeight',
     ]),
     ...mapState({
       preferredLanguages: ({ Preference }) => (
@@ -195,7 +197,7 @@ export default {
         this.linesNum = 0;
       }
     },
-    isProfessional(val) {
+    isProfessional(val) { // eslint-disable-line
       // 如果当前修改的是自制字幕，再离开字幕编辑高级模式，这个时候触发保存到本地的操作
       const currentSubtitle = this.subtitleInstances[this.currentFirstSubtitleId];
       const isModifiedExit = currentSubtitle && currentSubtitle.type === 'modified';
@@ -213,13 +215,18 @@ export default {
       const winRatio = this.winRatio;
       if (!val && store && store.minimumSize) {
         minSize = store.minimumSize;
-      } else {
+      } else if (val) {
         // 进入编辑模式，设定phase2为最小的尺寸
         minSize = winRatio > 1 ? [480 * winRatio, 480] : [480, 480 / winRatio];
         minSize = minSize.map(Math.round);
+        if ((winRatio > 1 && this.winHeight < 480) ||
+          (winRatio <= 1 && this.winWidth < 480)) {
+          this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', minSize);
+        }
       }
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minSize);
       // this.windowMinimumSize(minSize);
+      // 处理phase2以下的尺寸，进入高级模式，拉大窗口
     },
   },
   methods: {
@@ -235,12 +242,13 @@ export default {
       addSubtitleWhenFailed: subtitleActions.ADD_SUBTITLE_WHEN_FAILED,
       updateMetaInfo: subtitleActions.UPDATE_METAINFO,
       updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
+      removeLocalSub: subtitleActions.REMOVE_LOCAL_SUBTITLE,
       addMessages: 'addMessages',
     }),
     ...mapMutations({
-      swicthReferenceSubtitle: subtitleMutations.SWITCH_REFERENCE_SUBTITLE,
+      swicthReferenceSubtitle: editorMutations.SWITCH_REFERENCE_SUBTITLE,
       resetSubtitlesByMutation: subtitleMutations.RESET_SUBTITLES,
-      updateCurrentEditedSubtitle: subtitleMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
+      updateCurrentEditedSubtitle: editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
       windowMinimumSize: 'windowMinimumSize', // 需要设置到常量里面
     }),
     async refreshSubtitles(types, videoSrc) {
@@ -766,8 +774,7 @@ export default {
         const subString = JSON.stringify({
           parsed: sub.parsed,
           metaInfo: sub.metaInfo,
-          referenceSubtitleId: this.isProfessional ? this.referenceSubtitleId :
-            this.currentFirstSubtitleId,
+          referenceSubtitleId: this.isProfessional ? this.referenceSubtitleId : null,
           // reference: sub.reference,
         });
         // 创建新的自制字幕
@@ -784,8 +791,7 @@ export default {
                   ...sub.metaInfo,
                   name: result.name,
                 },
-                referenceSubtitleId: this.isProfessional ? this.referenceSubtitleId :
-                  this.currentFirstSubtitleId,
+                referenceSubtitleId: this.isProfessional ? this.referenceSubtitleId : null,
               },
             },
           }]);
@@ -816,9 +822,22 @@ export default {
         }
       }
     },
-    async deleteSubtitleFile({ sub }) {
+    deleteSubtitle({ sub }) {
       // 删除字幕文件(自制字幕)
-      await deleteFileByPath(this.subtitleInstances[sub.id].src);
+      // 拿到字幕的src发到气泡确认删除
+      const id = sub.id;
+      const path = this.subtitleInstances[id].src;
+      this.deleteModifiedSubtitleInstance = cloneDeep(this.subtitleInstances[id]);
+      this.$bus.$emit(bus.SUBTITLE_DELETE_CONFIRM, path);
+      // 开启定时删除，如果气泡确认不删除，就取消定时
+      this.deleteModifiedSubtitleTimer = setTimeout(async () => {
+        deleteSubtitles([id], this.originSrc).then(async (result) => {
+          this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
+          await deleteFileByPath(path);
+          this.$bus.$emit(bus.SUBTITLE_DELETE_DONE);
+          this.deleteModifiedSubtitleInstance = null;
+        });
+      }, 3000);
     },
     exportSubtitle() {
       const currentSubtitle = this.subtitleInstances[this.currentFirstSubtitleId];
@@ -935,7 +954,30 @@ export default {
     // 接受字幕的修改，包括自制字幕和原始字幕，处理逻辑统一在this.modifiedSubtitle
     this.$bus.$on(bus.DID_MODIFIED_SUBTITLE, this.modifiedSubtitle);
     // 当删除某个字幕的文件
-    this.$bus.$on('delete-subtitle-file', this.deleteSubtitleFile);
+    this.$bus.$on(bus.SUBTITLE_DELETE, this.deleteSubtitle);
+    this.$bus.$on(bus.SUBTITLE_DELETE_CANCEL, () => {
+      clearTimeout(this.deleteModifiedSubtitleTimer);
+      this.deleteModifiedSubtitleTimer = null;
+      // 取消删除的时候，需要重新加载
+      // TODO假删除不去infoDB删
+      if (this.deleteModifiedSubtitleInstance) {
+        const sub = this.deleteModifiedSubtitleInstance;
+        this.$bus.$emit('add-subtitles', [{
+          src: sub.src,
+          type: 'modified',
+          options: {
+            storage: {
+              isFastCreateFromSecondSub: sub.isFastCreateFromSecondSub,
+              parsed: sub.parsed,
+              metaInfo: {
+                ...sub.metaInfo,
+              },
+              referenceSubtitleId: sub.referenceSubtitleId,
+            },
+          },
+        }]);
+      }
+    });
     // 导出自制字幕
     this.$bus.$on(bus.EXPORT_MODIFIED_SUBTITLE, this.exportSubtitle);
     // 保存字幕

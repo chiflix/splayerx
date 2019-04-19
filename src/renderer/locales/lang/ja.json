@@ -91,7 +91,7 @@
       "reference": "翻訳参照",
 			"loadLocalSubtitleFile": "ローカル参照を読み込む",
       "back": "後退",
-      "enter": "選択する/編集する",
+      "enter": "選択する / 編集する",
       "prev": "前のクリップ",
       "next": "次のクリップ"
     },
@@ -274,8 +274,19 @@
       "referenceIdNotExist": {
         "content": "参照が更新または削除されました。",
         "title": "参照のロードに失敗しました"
+      },
+      "referenceLoading": {
+        "content": "翻訳参照の読み込み...",
+        "title": ""
       }
     }
+  },
+  "editorCreateSubtitle": {
+    "button": "クリックして翻訳"
+  },
+  "deleteSubtitleBubble": {
+		"content": "翻訳が削除されました",
+    "button": "元に戻す"
   },
 	"snapshotSuccess": {
 		"content": "スナップショット成功",

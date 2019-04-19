@@ -91,7 +91,7 @@
       "reference": "Translation References",
 			"loadLocalSubtitleFile": "Load local reference",
       "back": "Back",
-      "enter": "Select/Edit",
+      "enter": "Select / Edit",
       "prev": "Previous Clip",
       "next": "Next Clip"
     },
@@ -274,8 +274,19 @@
       "referenceIdNotExist": {
         "content": "Reference has been updated or deleted.",
         "title": "Load Reference Failed"
+      },
+      "referenceLoading": {
+        "content": "Loading Translation Reference",
+        "title": ""
       }
     }
+  },
+  "editorCreateSubtitle": {
+    "button": "Click to translate"
+  },
+  "deleteSubtitleBubble": {
+		"content": "Translation has been deleted",
+    "button": "Undo"
   },
 	"snapshotSuccess": {
 		"content": "Snapshot Successfully",

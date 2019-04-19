@@ -176,3 +176,106 @@
 }
 
 
+
+
+.subtitle-style, .subtitle-style0, .subtitle-style1, .subtitle-style2, .subtitle-style3, .subtitle-style4 {
+  width: 100%;
+  outline: none;
+  border: none;
+}
+
+
+.subtitle-style {
+  font-family: $font-normal;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  opacity: 1;
+  color: white;
+  font-weight: 400;
+  background-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+.subtitle-style0 {
+  // padding: 0px;
+  font-family: $font-normal;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  // white-space: pre-line;
+  // word-break: break-all;
+  font-weight: 400;
+  opacity: 1;
+  color: white;
+  background-color: #777;
+  text-shadow: 0px 0.7px 0.5px rgba(0,0,0,.5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: white;
+  -webkit-text-stroke: 0.5px transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+.subtitle-style1 {
+  // padding: 0px;
+  font-family: $font-normal;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  // white-space: pre-line;
+  // word-break: break-all;
+  font-weight: 400;
+  opacity: 1;
+  color: white;
+  background-color: #444;
+  text-shadow: 0px 1px 1px #333;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: white;
+  -webkit-text-stroke: 1.3px transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+.subtitle-style2 {
+  // padding: 0px;
+  font-family: $font-normal;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  // white-space: pre-line;
+  // word-break: break-all;
+  font-weight: 400;
+  opacity: 1;
+  color: #fffc00;
+  background-color: transparent;
+  text-shadow: 0px 0.5px 0.5px #555;
+  -webkit-font-smoothing: antialiased;
+}
+
+.subtitle-style3 {
+  // padding: 0px;
+  font-family: $font-yuanti;
+  font-size: 9px;
+  letter-spacing: 1px;
+  // white-space: pre-line;
+  // word-break: break-all;
+  font-weight: 800;
+  opacity: 1;
+  color: #fff;
+  background-color: #009be6;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: white;
+  -webkit-text-stroke: 1.6px transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+.subtitle-style4 {
+  // padding: 0px;
+  font-family: $font-normal;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  // white-space: pre-line;
+  // word-break: break-all;
+  opacity: 1;
+  color: #fff;
+  font-weight: 400;
+  background-color: rgba(0, 0, 0, .5);
+  -webkit-font-smoothing: antialiased;
+  padding: 0 5px;
+}

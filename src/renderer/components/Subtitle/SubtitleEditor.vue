@@ -1,7 +1,7 @@
 <template>
   <div class="sub-editor"
     :style="{
-      zIndex: dragingMode !== 'default' || spaceKeyPressStartTime > 0 ? '9999' : '11',
+      zIndex: dragingMode !== 'default' && isDragableInProfessional ? '9999' : '11',
       cursor: dragingMode
     }">
     <div class="sub-editor-head">
@@ -41,7 +41,7 @@
             @mousemove.left="handleDragingSub($event, sub)"
             @mouseup.left="handleDragEndSub($event, sub)"
             @dblclick.left.stop="handleDoubleClickSub($event, sub)"
-            :class="computedSubClass(sub)+' no-drag sub-line-mark'+`${sub.focus && !sub.reference ? ' focus' : ''}`+`${sub.reference ? ' reference' : ''}`"
+            :class="computedSubClass(sub)+' no-drag sub-mark'+`${sub.focus && !sub.reference ? ' focus' : ''}`+`${sub.reference ? ' reference' : ''}`"
             :style="{
               left: `${sub.left}px`,
               right: `${sub.right}px`,
@@ -60,31 +60,36 @@
           </div>
         </div>
       </div>
-      <div class="exit-btn-wrap" @click.stop="handleClickProfessional"
+      <div class="exit-btn-wrap" @click.stop="handleClickProfessional" v-fade-in="!isDragableInProfessional"
         :style="{
           cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
         }">
         <Icon type="subtitleEditorExit" class="subtitle-editor-exit"/>
       </div>
     </div>
-    <div class="sub-editor-body">
-      <div v-fade-in="paused" class="referenceText subtitle-style" v-html="getCurrentReferenceCues()"
+    <div class="sub-editor-body" :style="{
+      bottom: `${(60 / 1080) * 100}%`,
+      width: `${inputWitdh}px`
+    }">
+      <div v-if="referenceSubtitleId && paused" class="referenceText subtitle-style" v-html="`&nbsp;${getCurrentReferenceCues()}`"
       :style="{
         zoom: zoom,
       }"></div>
-      <subtitle-renderer
-        v-fade-in="!subDragTimeLineMoving"
-        :key='originSrc+currentEditedSubtitleId'
-        :showAddInput.sync="showAddInput"
-        :showTextarea.sync="showTextarea"
-        :newSubHolder="newSubHolder"
-        :currentSub="currentSub"
-        :chooseIndexs.sync="chooseIndexs"
-        :dragingMode="dragingMode"
-        :referenceDialogues="referenceDialogues"
-        :subtitleInstance="!currentEditedSubtitleId ? null : subtitleInstance"
-        :tags.sync="tags"
-        :firstTags="firstTags"/>
+      <div class="renderers">
+        <subtitle-renderer
+          v-fade-in="!subDragTimeLineMoving"
+          :key='originSrc+currentEditedSubtitleId'
+          :showAddInput.sync="showAddInput"
+          :showTextarea.sync="showTextarea"
+          :newSubHolder="newSubHolder"
+          :preciseTime="preciseTime"
+          :currentSub="currentSub"
+          :dragingMode="dragingMode"
+          :referenceDialogues="referenceDialogues"
+          :subtitleInstance="!currentEditedSubtitleId ? null : subtitleInstance"
+          :tags.sync="tags"
+          :firstTags="firstTags"/>
+      </div>
     </div>
     <div class="sub-editor-foot">
       <div class="times-wrap">
@@ -108,7 +113,7 @@ import {
   MODIFIED_SUBTITLE_TYPE as modifiedTypes,
 } from '@/constants';
 import { videodata } from '@/store/video';
-import { Window as windowMutations, Subtitle as subtitleMutations } from '@/store/mutationTypes';
+import { Editor as editorMutations } from '@/store/mutationTypes';
 import TheProgressBar from '@/components/PlayingView/TheProgressBar.vue';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
@@ -130,12 +135,13 @@ export default {
       chooseIndexs: -1, // 单击字幕条选择字幕条的索引，支持ctrl多选
       hoverIndex: -1, // 目前鼠标hover的字幕条索引
       currentLeft: 0, // 时间轴左偏移 --|-.-|--
-      currentTime: 0, // 当前时间轴中分时间刻度，时间轴的中心时间不一定是播放的时间
+      editorCurrentTime: 0, // 当前时间轴中分时间刻度，时间轴的中心时间不一定是播放的时间
       preciseTime: 0, // 当前视频的播放时间
       timeLineDraging: false, // 标记是否是拖拽时间轴
       dragStartX: 0, // 标记拖拽时间轴起始位置
       dragStartLeft: 0, // 标记开始拖拽当前时间轴left
       dragStartTime: 0, // 标记开始拖拽时间轴当前播放时间
+      timeLineClickLock: false, // 点击时间轴刻度反应的延迟时间内，锁住点击事件
       timeLineClickDelay: 300, // 点击时间轴刻度反应的延迟时间
       timeLineClickTimestamp: 0,
       subDragMoving: false, // 标记是不是拖拽字幕条
@@ -166,6 +172,8 @@ export default {
       tags: {},
       firstTags: {},
       transitionInfo: null, // 时间轴动画中，包括动画end 需要的数据
+      matchSwitchReferenceBubble: null, // 当切换参考字幕的时候，记录当前是否有气泡
+      protectKeyWithEnterShortKey: false, // 保护回车选择前
     };
   },
   props: {
@@ -175,7 +183,7 @@ export default {
   computed: {
     ...mapGetters([
       'winWidth', 'winHeight', 'duration', 'paused', 'isCreateSubtitleMode', 'originSrc', 'referenceSubtitleId', 'currentEditedSubtitleId',
-      'winRatio', 'computedHeight', 'computedWidth',
+      'winRatio', 'computedHeight', 'computedWidth', 'messageInfo', 'isDragableInProfessional', 'chooseIndex', 'currentTime',
     ]),
     computedSize() {
       // zoom依赖的计算属性
@@ -184,6 +192,20 @@ export default {
     vh() {
       // vh单位px化
       return this.winHeight / 100 > 10 ? 10 : Math.abs(this.winHeight / 100);
+    },
+    inputWitdh() { // eslint-disable-line
+      const winRatio = this.winRatio;
+      const width = this.winWidth;
+      const height = this.winHeight;
+      let computed = width;
+      if ((winRatio >= 1 && height > 1080) || (winRatio < 1 && width > 1080)) {
+        computed = width - (2 * 305);
+      } else if ((winRatio >= 1 && height > 481) || (winRatio < 1 && width > 481)) {
+        computed = width - (2 * 197);
+      } else if ((winRatio >= 1 && height > 289) || (winRatio < 1 && width > 289)) {
+        computed = width - (2 * 140);
+      }
+      return computed;
     },
     scales() {
       return Math.ceil((3 * this.winWidth) / this.space);
@@ -200,7 +222,7 @@ export default {
     },
     times() {
       return [...Array(this.scales).keys()]
-        .map(e => (this.currentTime * 1) + ((e * 1) - this.offset));
+        .map(e => (this.editorCurrentTime * 1) + ((e * 1) - this.offset));
     },
     filterSubs() {
       // filterSubs 是当前编辑字幕和参考字幕的组合，过滤掉位置不是alignment2且有定位的字幕
@@ -313,7 +335,7 @@ export default {
     currentSub() {
       // 当前指针下字幕
       return this.validitySubs
-        .filter(e => e.start <= this.preciseTime && e.end >= this.preciseTime);
+        .filter(e => e.start <= this.preciseTime && e.end > this.preciseTime);
     },
     zoom() {
       // update video scale that width is larger than height
@@ -346,13 +368,37 @@ export default {
       if (!val) {
         requestAnimationFrame(this.updateWhenPlaying);
         this.triggerCount += 1;
+        this.updateChooseIndex(-2);
       } else {
-        this.resetCurrentTime();
+        const canChooseSubs = this.currentSub.filter(e => e.track === 1);
+        if (canChooseSubs.length > 0) {
+          this.updateChooseIndex(canChooseSubs[0].index);
+        }
+      }
+    },
+    currentTime(v) {
+      if (!this.timeLineDraging) {
+        if (v < 0) {
+          v = 0;
+        } else if (v > this.duration) {
+          v = this.duration;
+        }
+        this.resetCurrentTime(v);
+      }
+    },
+    currentLeft() {
+      if (!this.protectKeyWithEnterShortKey) {
+        this.updateChooseIndex(-2);
       }
     },
     currentSub(val) {
       this.computedCanShowAddBtn(val);
       this.enableMenuEnter(val.length > 0 || this.showAddInput);
+      const canChooseSubs = val.filter(e => e.track === 1);
+      if (!this.protectKeyWithEnterShortKey && canChooseSubs.length > 0 &&
+        this.paused && this.chooseIndex === -2) {
+        this.updateChooseIndex(canChooseSubs[0].index);
+      }
     },
     showAddInput(val) {
       // 当前没有字幕条也不能新增字幕的时候就禁用菜单的进入编辑
@@ -360,6 +406,10 @@ export default {
     },
     triggerCount() {
       this.computedCanShowAddBtn(this.currentSub);
+    },
+    winWidth() {
+      // 当resize的时候，重新render timeline
+      this.resetCurrentTime();
     },
     subtitleInstance: {
       immediate: true,
@@ -374,7 +424,6 @@ export default {
           const referenceSubtitleId = val.referenceSubtitleId;
           // 跳出vue watcher 队列
           setImmediate(() => {
-            console.log(referenceSubtitleId);
             this.swicthReferenceSubtitle(referenceSubtitleId);
           });
         }
@@ -386,15 +435,12 @@ export default {
         }
       },
     },
-    winWidth() {
-      // 当resize的时候，重新render timeline
-      this.resetCurrentTime();
-    },
     referenceSubtitleInstance: {
       immediate: true,
       deep: true,
-      handler(val) {
+      handler(val) { // eslint-disable-line
         if (val && this.currentParseReferenceSubtitleId !== val.id) {
+          // TODO加载时不可以新增字幕
           this.referenceDialogues = [];
           this.currentParseReferenceSubtitleId = val.id;
           const isCross = (l, r) => {
@@ -403,17 +449,38 @@ export default {
             return !(nl || rl);
           };
           if (!val.parsed) {
-            val.once('data', val.parse);
+            // 开始加载，触发气泡
+            const t = this.$t('notificationMessage.subtitle.referenceLoading.content');
+            if (!this.matchSwitchReferenceBubble) {
+              this.addMessages({
+                type: 'state',
+                content: t,
+                dismissAfter: 200000,
+              });
+              this.matchSwitchReferenceBubble = this.messageInfo.find(e => e && e.content === t);
+            }
+            val.once('data', () => {
+              setTimeout(() => {
+                val.parse();
+              }, Math.random() * 3000);
+            });
             val.on('parse', (parsed) => {
               if (this.dialogues && parsed.dialogues) {
                 this.referenceDialogues =
                   parsed.dialogues.filter(e => !this.dialogues.some(c => isCross(c, e)));
+              }
+              // 加载完成，
+              if (val.id === this.referenceSubtitleId && this.matchSwitchReferenceBubble) {
+                this.removeMessages(this.matchSwitchReferenceBubble.id);
+                this.currentParseReferenceSubtitleId = null;
               }
             });
             val.load();
           } else if (this.dialogues && val.parsed.dialogues) {
             this.referenceDialogues =
               val.parsed.dialogues.filter(e => !this.dialogues.some(c => isCross(c, e)));
+            // 加载完成可以新增字幕
+            this.showAddInput = true;
           }
         } else if (!val) {
           this.currentParseReferenceSubtitleId = null;
@@ -441,31 +508,34 @@ export default {
     },
     filterSubs(v) {
       const preciseTime = this.preciseTime;
-      const prevs = v.filter(e => e.start < preciseTime);
+      const prevs = v.filter(e => e.start < preciseTime && e.track === 1);
       this.enableMenuPrev(prevs.length > 0);
-      const next = v.filter(e => e.start > preciseTime);
+      const next = v.filter(e => e.start > preciseTime && e.track === 1);
       this.enableMenuNext(next.length > 0);
     },
     preciseTime(v) {
-      const prevs = this.filterSubs.filter(e => e.start < v);
+      const prevs = this.filterSubs.filter(e => e.start < v && e.track === 1);
       this.enableMenuPrev(prevs.length > 0);
-      const next = this.filterSubs.filter(e => e.start > v);
+      const next = this.filterSubs.filter(e => e.start > v && e.track === 1);
       this.enableMenuNext(next.length > 0);
     },
   },
   methods: {
     ...mapMutations({
-      toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
-      updateEditHistoryLen: windowMutations.UPDATE_EDIT_HISTORY_LEN,
-      updateCurrentEditHistoryIndex: windowMutations.UPDATE_CURRENT_EDIT_HISTORY_INDEX,
-      swicthReferenceSubtitle: subtitleMutations.SWITCH_REFERENCE_SUBTITLE,
-      updateCurrentEditedSubtitle: subtitleMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
-      enableMenuEnter: windowMutations.UPDATE_CURRENT_EDIT_MENU_ENTER_ENABLE,
-      enableMenuPrev: windowMutations.UPDATE_CURRENT_EDIT_MENU_PREV_ENABLE,
-      enableMenuNext: windowMutations.UPDATE_CURRENT_EDIT_MENU_NEXT_ENABLE,
+      toggleDragable: editorMutations.TOGGLE_DRAGABLE_IN_PROFESSIONAL,
+      toggleProfessional: editorMutations.TOGGLE_PROFESSIONAL,
+      updateEditHistoryLen: editorMutations.UPDATE_EDIT_HISTORY_LEN,
+      updateCurrentEditHistoryIndex: editorMutations.UPDATE_CURRENT_EDIT_HISTORY_INDEX,
+      swicthReferenceSubtitle: editorMutations.SWITCH_REFERENCE_SUBTITLE,
+      updateCurrentEditedSubtitle: editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
+      enableMenuEnter: editorMutations.UPDATE_CURRENT_EDIT_MENU_ENTER_ENABLE,
+      enableMenuPrev: editorMutations.UPDATE_CURRENT_EDIT_MENU_PREV_ENABLE,
+      enableMenuNext: editorMutations.UPDATE_CURRENT_EDIT_MENU_NEXT_ENABLE,
+      updateChooseIndex: editorMutations.UPDATE_CHOOSE_SUBTITLE_INDEX,
     }),
     ...mapActions({
       addMessages: 'addMessages',
+      removeMessages: 'removeMessages',
     }),
     computedCanShowAddBtn(currentSub) { // eslint-disable-line
       currentSub = currentSub.filter(e => e.track === 1);
@@ -524,7 +594,7 @@ export default {
       const instance = this.referenceSubtitleInstance;
       if (instance && instance.parsed && instance.parsed.dialogues) {
         const filter = instance.parsed.dialogues.filter((e) => {
-          const isInRange = e.start <= this.preciseTime && e.end >= this.preciseTime;
+          const isInRange = e.start <= this.preciseTime && e.end > this.preciseTime;
           if (!isInRange) return false;
           const sub = uniteSubtitleWithFragment(e);
           const tags = sub.fragments && sub.fragments[0] && sub.fragments[0].tags;
@@ -535,9 +605,9 @@ export default {
             return e.fragments.map(c => c.text).join('');
           }
           return e.text;
-        }).join('\n');
+        }).join('<br>');
       }
-      return '\n';
+      return '<br>';
     },
     validityTime(time) {
       return time >= 0 && time <= this.duration ? '' : ' illegal';
@@ -586,9 +656,9 @@ export default {
         const b = document.getElementsByTagName('video')[0];
         currentTime = b ? b.currentTime : videodata.time;
       }
-      this.currentTime = parseInt(currentTime, 10);
+      this.editorCurrentTime = parseInt(currentTime, 10);
       this.preciseTime = currentTime;
-      this.currentLeft = ((this.currentTime - currentTime) * this.space) -
+      this.currentLeft = ((this.editorCurrentTime - currentTime) * this.space) -
       ((this.offset * this.space) - (this.winWidth / 2));
     },
     updateWhenPlaying() { // eslint-disable-line
@@ -596,10 +666,10 @@ export default {
         // 播放中，时间轴同步运动，当时间轴中位时间和当前播放时间相差一屏宽度时，重新设置时间轴中位时间
         const b = document.getElementsByTagName('video')[0];
         const currentTime = b.currentTime;
-        if (Math.abs(currentTime - this.currentTime) * this.space >= this.winWidth) {
-          this.currentTime = parseInt(currentTime, 10);
+        if (Math.abs(currentTime - this.editorCurrentTime) * this.space >= this.winWidth) {
+          this.editorCurrentTime = parseInt(currentTime, 10);
         }
-        this.currentLeft = ((this.currentTime - currentTime) * this.space) -
+        this.currentLeft = ((this.editorCurrentTime - currentTime) * this.space) -
         ((this.offset * this.space) - (this.winWidth / 2));
         this.preciseTime = currentTime;
         this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
@@ -608,6 +678,7 @@ export default {
     },
     handleDragStartEditor(e) {
       // 开始拖动时间轴，记录拖动位置、时间、暂停播放
+      if (this.timeLineClickLock) return;
       this.dragStartX = e.pageX;
       this.dragStartLeft = this.currentLeft;
       this.dragStartTime = this.preciseTime;
@@ -620,6 +691,7 @@ export default {
     handleDragingEditor(e) {
       if (this.timeLineDraging) {
         // 正在拖动时间轴， 处理越界
+        this.toggleDragable(true);
         let offset = e.pageX - this.dragStartX;
         const seekTime = this.preciseTime - (offset / this.space);
         if (seekTime <= 0) {
@@ -633,23 +705,40 @@ export default {
       }
     },
     handleDragEndEditor(e) {
+      // 判断path里面有没有sub，没有就取消当前选中的sub
+      const path = e.path || (e.composedPath && e.composedPath());
+      const hasSubElement = path.find(e => e.tagName === 'DIV' && e.className.includes('sub-mark'));
+      if (!hasSubElement) {
+        this.updateChooseIndex(-2);
+        // this.triggerCount += 1;
+      }
+      this.toggleDragable(false);
       // 拖动时间轴结束，重设时间、位置信息
       if (this.timeLineDraging) {
+        // 这段是处理this.chooseIndexs设为-1，但是这次拖拽，下面有字幕，需要选中
+        let offset = e.pageX - this.dragStartX;
+        const seekTime = this.preciseTime - (offset / this.space);
+        if (seekTime <= 0) {
+          offset = this.dragStartTime * this.space;
+        }
+        if (seekTime <= this.duration) {
+          requestAnimationFrame(throttle(() => {
+            this.updateWhenMoving(offset);
+          }, 100));
+        }
         if (e.pageX !== this.dragStartX) {
           this.resetCurrentTime();
         } else {
           this.handleMouseUpOnTimeLine(e);
+          this.timeLineClickLock = true;
+          setTimeout(() => {
+            this.timeLineClickLock = false;
+          }, this.timeLineClickDelay);
         }
         this.dragStartX = 0;
         this.timeLineDraging = false;
         this.dragingMode = 'default';
-        this.triggerCount += 1;
-      }
-      // 判断path里面有没有sub，没有就取消当前选中的sub
-      const path = e.path || (e.composedPath && e.composedPath());
-      const hasSubElement = path.find(e => e.tagName === 'DIV' && e.className.includes('sub-line-mark'));
-      if (!hasSubElement) {
-        this.chooseIndexs = -1;
+        // this.triggerCount += 1;
       }
     },
     updateWhenMoving(offset) {
@@ -657,7 +746,7 @@ export default {
       const preciseTime = this.dragStartTime - (offset / this.space);
       this.currentLeft = this.dragStartLeft + offset;
       this.preciseTime = preciseTime > 0 ? preciseTime : 0;
-      this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
+      // this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
       this.$bus.$emit('seek', this.preciseTime);
     },
     handleMouseUpOnTimeLine(e) {
@@ -698,23 +787,24 @@ export default {
     handleDoubleClickSub(e, sub) {
       // 双击字幕条，触发时间轴运动到字幕条开始位置
       const offset = (this.preciseTime - sub.start) * this.space;
-      if (Math.abs(offset) < 0.5 || this.showTextarea) return; // 偏移太小就不触发运动
-      // this.$refs.timeLine.style.transition = '';
-      this.$refs.timeLine.addEventListener('transitionend', this.doubleClickTransitionend, false);
-      this.$refs.timeLine.style.transition = 'left 0.1s ease-in-out';
-      // const left = this.currentLeft + offset;
-      // this.$refs.timeLine.style.left = `${left}px`;
-      // this.transitionInfo = {
-      //   currentLeft: left,
-      //   preciseTime: sub.start + 0.01,
-      //   chooseIndexs: sub.index,
-      // };
-      // const left = this.currentLeft + offset;
-      this.currentLeft += offset;
-      this.preciseTime = sub.start;
-      this.chooseIndexs = sub.index;
-      // this.resetCurrentTime(this.preciseTime);
-      // this.$bus.$emit('seek', this.preciseTime);
+      if (Math.abs(offset) < 0.5 || this.showTextarea) {
+        // 偏移太小就不触发运动
+        if (this.protectKeyWithEnterShortKey) {
+          this.showTextarea = true;
+          setImmediate(() => {
+            this.protectKeyWithEnterShortKey = false;
+          });
+        }
+      } else {
+        // this.$refs.timeLine.style.transition = '';
+        this.$refs.timeLine.addEventListener('transitionend', this.doubleClickTransitionend, false);
+        this.$refs.timeLine.style.transition = 'left 0.1s ease-in-out';
+        this.currentLeft += offset;
+        this.preciseTime = sub.start;
+        if (!this.protectKeyWithEnterShortKey) {
+          this.updateChooseIndex(sub.index);
+        }
+      }
     },
     doubleClickTransitionend() {
       // 时间轴运动到字幕条开始位置，动画结束，重设时间
@@ -723,6 +813,7 @@ export default {
       //   this.preciseTime = this.transitionInfo.preciseTime;
       //   this.chooseIndexs = this.transitionInfo.chooseIndexs;
       // }
+      // this.$bus.$emit('seek', this.preciseTime);
       this.resetCurrentTime(this.preciseTime);
       this.triggerCount += 1;
       // console.log(this.preciseTime);
@@ -734,9 +825,15 @@ export default {
       // setImmediate(() => {
       //   this.showTextarea = false;
       // });
+      if (this.protectKeyWithEnterShortKey) {
+        this.showTextarea = true;
+        setImmediate(() => {
+          this.protectKeyWithEnterShortKey = false;
+        });
+      }
     },
     computedSubClass(sub) { // eslint-disable-line
-      const ci = this.chooseIndexs;
+      const ci = this.chooseIndex;
       const hi = this.hoverIndex;
       const index = sub.index;
       // const reference = sub.reference;
@@ -773,7 +870,7 @@ export default {
       const rightTarget = path.find(e => e.tagName === 'I' && e.className.includes('drag-right'));
       this.subDragElement = subElement;
       this.subDragCurrentSub = sub;
-      this.chooseIndexs = sub.index;
+      this.updateChooseIndex(sub.index);
       this.subDragStartOffsetLeft = (e.pageX - (sub.left + this.currentLeft));
       if (leftTarget) {
         this.subLeftDraging = true;
@@ -794,6 +891,7 @@ export default {
     },
     handleDragingSub(e) {
       if (this.subRightDraging || this.subLeftDraging || this.subDragMoving) {
+        this.toggleDragable(true);
         // const pointerL = this.subDragCurrentSub.minLeft +
         //   (this.currentLeft + (this.subDragCurrentSub.width * 0.03));
         // const pointerR = this.subDragCurrentSub.maxLeft +
@@ -1189,33 +1287,34 @@ export default {
       this.subDragTimeLineMoving = false;
       this.subDragTimeLineMovingDirection = '';
       this.step = 1;
-      this.triggerCount += 1;
+      // this.triggerCount += 1;
       if (this.createSubElement) {
         this.createSubElement.parentNode &&
         this.createSubElement.parentNode.removeChild(this.createSubElement);
         this.createSubElement = null;
       }
+      this.toggleDragable(false);
     },
     handleKeyDown(e) { // eslint-disable-line
-      if (e && (e.keyCode === 46 || e.keyCode === 8) && this.chooseIndexs !== -1) {
+      if (e && (e.keyCode === 46 || e.keyCode === 8) && this.chooseIndex !== -2) {
         const subtitleInstance = cloneDeep(this.subtitleInstance);
         // 判断删除的是不是参考
         if (subtitleInstance && subtitleInstance.parsed && subtitleInstance.parsed.dialogues &&
-          subtitleInstance.parsed.dialogues.length > this.chooseIndexs) {
-          const before = subtitleInstance.parsed.dialogues.splice(this.chooseIndexs, 1)[0];
+          subtitleInstance.parsed.dialogues.length > this.chooseIndex) {
+          const before = subtitleInstance.parsed.dialogues.splice(this.chooseIndex, 1)[0];
           this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
             sub: subtitleInstance,
             type: modifiedTypes.DELETE,
-            index: this.chooseIndexs,
+            index: this.chooseIndex,
             before,
           });
         } else if (subtitleInstance && subtitleInstance.parsed &&
           subtitleInstance.parsed.dialogues) {
-          const selfIndex = this.chooseIndexs - subtitleInstance.parsed.dialogues.length;
+          const selfIndex = this.chooseIndex - subtitleInstance.parsed.dialogues.length;
           this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
             sub: subtitleInstance,
             type: modifiedTypes.DELETE_FROM_REFERENCE,
-            index: this.chooseIndexs,
+            index: this.chooseIndex,
             before: null,
             selfIndex,
           });
@@ -1223,13 +1322,13 @@ export default {
           this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
             sub: subtitleInstance,
             type: modifiedTypes.DELETE_FROM_REFERENCE,
-            index: this.chooseIndexs,
+            index: this.chooseIndex,
             before: null,
-            selfIndex: this.chooseIndexs,
+            selfIndex: this.chooseIndex,
           });
         }
-        this.chooseIndexs = -1;
-        this.hoverIndex = -1;
+        this.updateChooseIndex(-2);
+        this.hoverIndex = -2;
       } else if (e && e.keyCode === 32 && this.spaceKeyPressStartTime === 0) {
         this.spaceKeyPressStartTime = Date.now();
         this.lastPaused = this.paused;
@@ -1302,7 +1401,7 @@ export default {
           job.referenceBefore = this.referenceDialogues.splice(selfIndex, 1)[0];
           job.selfIndex = selfIndex;
           this.$nextTick(() => {
-            this.chooseIndexs = index;
+            this.updateChooseIndex(index);
           });
         } else if (type === modifiedTypes.DELETE_FROM_REFERENCE) {
           job.referenceBefore = this.referenceDialogues.splice(selfIndex, 1)[0];
@@ -1440,15 +1539,6 @@ export default {
     // 键盘事件
     document.addEventListener('keydown', this.handleKeyDown);
     document.addEventListener('keyup', this.handleKeyUp);
-    // 接受seek事件，触发时间轴重新计算
-    this.$bus.$on('seek', (e) => {
-      if (!this.timeLineDraging) {
-        this.preciseTime = e;
-        this.currentTime = parseInt(e, 10);
-        this.currentLeft = ((this.currentTime - e) * this.space) -
-        ((this.offset * this.space) - (this.winWidth / 2));
-      }
-    });
     // 添加字幕条，需要先播放动画，在往字幕对象新增一条字幕
     this.$bus.$on(bus.CREATE_MIRROR_SUBTITLE, this.createMirrorSubtitle);
     // 拦截modified-subtitle，push到操作历史记录里面
@@ -1472,7 +1562,7 @@ export default {
         this.$bus.$emit('toggle-playback');
       }
       const prevs = this.filterSubs
-        .filter(e => e.start < this.preciseTime);
+        .filter(e => e.start < this.preciseTime && e.track === 1);
       if (prevs && prevs[prevs.length - 1]) {
         this.handleDoubleClickSub(null, prevs[prevs.length - 1]);
       }
@@ -1482,7 +1572,7 @@ export default {
         this.$bus.$emit('toggle-playback');
       }
       const prevs = this.filterSubs
-        .filter(e => e.start > this.preciseTime);
+        .filter(e => e.start > this.preciseTime && e.track === 1);
       if (prevs && prevs[0]) {
         this.handleDoubleClickSub(null, prevs[0]);
       }
@@ -1492,15 +1582,18 @@ export default {
         if (!this.paused) {
           this.$bus.$emit('toggle-playback');
         }
-        const currentChooseSub = this.currentSub.find(e => e.index === this.chooseIndexs);
-        const currentSub = this.currentSub[0];
+        const currentChooseSub = this.validitySubs
+          .find(e => e.index === this.chooseIndex);
+        const currentSub = this.currentSub.find(e => e.track === 1);
         if (currentChooseSub) {
-          this.chooseIndexs = currentChooseSub.index;
-          this.showTextarea = true;
+          this.protectKeyWithEnterShortKey = true;
+          this.handleDoubleClickSub(null, currentChooseSub);
         } else if (currentSub) {
-          this.chooseIndexs = currentSub.index;
-          this.showTextarea = true;
+          this.updateChooseIndex(currentSub.index);
+          this.protectKeyWithEnterShortKey = true;
+          this.handleDoubleClickSub(null, currentSub);
         } else if (this.showAddInput) {
+          this.updateChooseIndex(-1);
           this.showTextarea = true;
         }
       }
@@ -1700,8 +1793,8 @@ export default {
         // border-color: transparent;
       }
       &.focus {
-        background: rgba(255,255,255,0.70);
-        border-color: rgba(255,255,255,0.15);
+        // background: rgba(255,255,255,0.70);
+        // border-color: rgba(255,255,255,0.15);
         // &::before {
         //   opacity: 1;
         // }
@@ -1784,10 +1877,15 @@ export default {
     transform: translate(-50%, 0);
     .referenceText {
       background: rgba(0,0,0,0.30);
-      border-radius: 3px 3px 0 0;
+      // border-radius: 3px 3px 0 0;
       text-align: center;
       margin-bottom: 5px;
       white-space: pre;
+    }
+    .renderers {
+      min-height: 80px;
+      display: flex;
+      flex-direction: column-reverse;
     }
   }
   .sub-editor-foot {
@@ -1796,5 +1894,21 @@ export default {
         cursor: default;
       }
     }
+  }
+  .fade-in {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 100ms ease-in;
+  }
+  .fade-out {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 300ms, opacity 300ms ease-out;
+  }
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity 200ms ease-in;
+  }
+  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
   }
 </style>

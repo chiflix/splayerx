@@ -25,7 +25,7 @@ import messages from '@/locales';
 import helpers from '@/helpers';
 import { hookVue } from '@/kerning';
 import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
-import { Window as windowMutations, Subtitle as subtitleMutations } from '@/store/mutationTypes';
+import { Editor as editorMutations } from '@/store/mutationTypes';
 import addLog from '@/helpers/index';
 import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
@@ -415,9 +415,9 @@ new Vue({
   },
   methods: {
     ...mapMutations({
-      toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
-      swicthReferenceSubtitle: subtitleMutations.SWITCH_REFERENCE_SUBTITLE,
-      updateCurrentEditedSubtitle: subtitleMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
+      toggleProfessional: editorMutations.TOGGLE_PROFESSIONAL,
+      swicthReferenceSubtitle: editorMutations.SWITCH_REFERENCE_SUBTITLE,
+      updateCurrentEditedSubtitle: editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
     }),
     ...mapActions({
       updateSubDelay: subtitleActions.UPDATE_SUBTITLE_DELAY,

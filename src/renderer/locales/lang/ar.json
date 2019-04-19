@@ -91,7 +91,7 @@
       "reference": "مراجع الترجمة",
 			"loadLocalSubtitleFile": "تحميل المرجع المحلي",
       "back": "ظهر",
-      "enter": "تحديد/تصحيح",
+      "enter": "تحديد / تصحيح",
       "prev": "مقطع السابق",
       "next": "مقطع التالي"
     },
@@ -274,8 +274,19 @@
       "referenceIdNotExist": {
         "content": ".تم تحديث المرجع أو حذفه",
         "title": "فشل تحميل مرجع"
+      },
+      "referenceLoading": {
+        "content": "...تحميل مرجع الترجمة",
+        "title": ""
       }
     }
+  },
+  "editorCreateSubtitle": {
+    "button": "انقر لترجمة"
+  },
+  "deleteSubtitleBubble": {
+		"content": "تم حذف الترجمة",
+    "button": "فك"
   },
 	"snapshotSuccess": {
 		"content": "لقطة بنجاح",

@@ -13,6 +13,9 @@
     <MASPrivacyBubble class="mas-privacy-bubble"
       v-if="showPrivacyBubble && isMas"
       @close-privacy-bubble="closePrivacyBubble"/>
+    <DeleteSubtitleConfirmBubble
+      v-if="showDeleteSubtitleBubble"
+      @close-privacy-bubble="closeDeleteSubtitleBubble"/>
     <transition-group name="toast" class="transGroup">
       <div v-for="m in messages" :key="m.id"
         class="messageContainer"
@@ -35,9 +38,11 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
 import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
+import DeleteSubtitleConfirmBubble from '@/components/PlayingView/DeleteSubtitleConfirmBubble.vue';
 import Icon from './BaseIconContainer.vue';
 
 export default {
@@ -47,6 +52,7 @@ export default {
     NextVideo,
     PrivacyBubble,
     MASPrivacyBubble,
+    DeleteSubtitleConfirmBubble,
   },
   data() {
     return {
@@ -54,6 +60,7 @@ export default {
       showNextVideo: false,
       readyToShow: false, // show after video element is loaded
       showPrivacyBubble: false,
+      showDeleteSubtitleBubble: false, // 删除自制字幕，显示确认气泡
     };
   },
   computed: {
@@ -94,8 +101,18 @@ export default {
     this.$bus.$on('privacy-confirm', () => {
       this.showPrivacyBubble = true;
     });
+    this.$bus.$on(bus.SUBTITLE_DELETE_CONFIRM, () => {
+      this.showDeleteSubtitleBubble = true;
+    });
+    this.$bus.$on(bus.SUBTITLE_DELETE_DONE, () => {
+      this.showDeleteSubtitleBubble = false;
+    });
   },
   methods: {
+    closeDeleteSubtitleBubble() {
+      this.showDeleteSubtitleBubble = false;
+      this.$bus.$emit(bus.SUBTITLE_DELETE_CANCEL);
+    },
     closePrivacyBubble() {
       this.showPrivacyBubble = false;
     },

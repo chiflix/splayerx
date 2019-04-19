@@ -1,8 +1,7 @@
 <template>
   <div :class="isProfessional ? 'professional' : ''">
     <div class="subContainer"
-      @click.stop="handleClickSubContainer($event, i)"
-      @dblclick.stop="handleDoubleClickSubContainer($event, i)"
+      @click.stop="handleClickSubContainer($event, cue)"
       v-for="(cue, i) in currentCues"
       v-fade-in="!(isProfessional && cue.reference && !paused)"
       :key="i"
@@ -16,78 +15,45 @@
         cursor: dragingMode !== 'default' ? dragingMode : canUseEditor ? 'pointer' : 'default'
       }"
       :class="avaliableClass(i)+`${paused && canUseEditor ? ' enable-hover': ''}`+`${isEditable && index === cue.index ? ' editable': ''}`+isCueFocus(cue)">
-      <div class="cue-wrap" v-if="filter(cue)">
-        <CueRenderer v-show="!isEditable || cue.index !== index" class="cueRender"
+      <div class="cue-wrap" v-if="filter(cue)"
+        :style="{
+          zoom: isProfessional ? zoom : isFirstSub ? `${scaleNum}` : `${secondarySubScale}`,
+          width: !isEditable ? 'auto' : isProfessional ? `${inputWitdh/zoom}px` : isFirstSub ? `${inputWitdh/scaleNum}px` : `${inputWitdh/secondarySubScale}px`,
+          minWidth: isProfessional ? `${inputWitdh/zoom}px` : isFirstSub ? `${inputWitdh/scaleNum}px` : `${inputWitdh/secondarySubScale}px`,
+          lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
+        }">
+        <cue-editable-renderer class="cueRender"
           :text="cue.text"
           :settings="cue.tags"
-          :style="{
-            opacity: cue.reference ? '0.3' : '0.9',
-            zoom: zoom,
-            lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
-          }"></CueRenderer>
-        <div
-          class="edit-box"
-          @mousemove.stop=""
-          :style="{
-            zoom: zoom,
-            // zoom: `${scaleNum}`,
-            // transform: subLine(i),
-            width: `${computedWidth*0.60/scaleNum}px`
-          }"
-          v-show="isEditable && paused && cue.index === index">
-          <div
-            :class="'back no-drag '+`${isProfessional ? 'subtitle-style' : `subtitle-style${chosenStyle ? chosenStyle : 0}`}`"
-            contenteditable="true">{{editVal.replace(/ /g, '&nbsp;')}}</div>
-          <textarea
-            :class="'no-drag '+`${isProfessional ? 'subtitle-style' : `subtitle-style${chosenStyle ? chosenStyle : 0}`}`"
-            contenteditable="true"
-            :ref="`textarea${cue.index}`"
-            @keydown.stop="handleKeyDownTextArea"
-            @blur="handleBlurTextArea($event, i)"
-            @mousedown.left.stop=""
-            :rows="rows"
-            type="text"
-            v-model="editVal"></textarea>
-        </div>
+          @update:show-textarea="hiddenTextArea"
+          :canUseEditor="canUseEditor"
+          :cue="cue"></cue-editable-renderer>
       </div>
     </div>
     <div
       v-if="(isProfessional && showAddInput && paused)"
-      @click.stop="handleClickAddSub"
-      :class="'subContainer subtitle-alignment2'+/*`${paused && !isEditable ? ' enable-hover': ''}`*/`${isEditable && index === null ? ' editable': ''}`"
+      @click.stop="handleClickSubContainer($event, {
+        index: -1,
+      })"
+      :class="'subContainer subtitle-alignment2'+`${paused ? ' enable-hover': ''}`+`${isEditable && index === -1 ? ' editable': ''}`"
       :style="{
-        bottom: `${((20 + ((winHeight - computedHeight) / 2)) / winHeight) * 100}%`,
         cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
       }">
-      <div class="cue-wrap">
-        <CueRenderer v-show="!isEditable || index !== null" class="cueRender add-cue-render"
-          :text="'点击添加字幕'"
+      <div class="cue-wrap"
+        :style="{
+          zoom: zoom,
+          width: !isEditable ? 'auto' : `${inputWitdh/zoom}px`,
+          minWidth: `${inputWitdh/zoom}px`,
+          lineHeight: 'normal',
+        }">
+        <cue-editable-renderer class="cueRender"
+          :text="$t('editorCreateSubtitle.button')"
           :settings="{}"
-          :style="{
-            zoom: zoom
-          }"></CueRenderer>
-        <div
-          class="edit-box"
-          @mousemove.stop=""
-          v-show="isEditable && paused && index === null"
-          :style="{
-            zoom: zoom,
-            // zoom: `${scaleNum}`,
-            width: `${computedWidth*0.60/scaleNum}px`
-          }">
-          <div
-            class="back subtitle-style no-drag"
-            contenteditable="true">{{editVal.replace(/ /g, '&nbsp;')}}</div>
-          <textarea
-            class="subtitle-style1 no-drag"
-            contenteditable="true"
-            ref="textarea"
-            @keydown.stop="handleKeyDownTextArea"
-            @blur="handleBlurTextArea($event, null)"
-            type="text"
-            :rows="rows"
-            v-model="editVal"></textarea>
-        </div>
+          @update:show-textarea="hiddenTextArea"
+          :canUseEditor="canUseEditor"
+          :cue="{
+            index: -1,
+          }"></cue-editable-renderer>
       </div>
     </div>
   </div>
@@ -95,13 +61,13 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import { isEqual, castArray, isEmpty, cloneDeep } from 'lodash';
-import { Subtitle as subtitleMutations, Window as windowMutations } from '@/store/mutationTypes';
+import { Editor as editorMutations, Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
 import {
   EVENT_BUS_COLLECTIONS as bus,
   MODIFIED_SUBTITLE_TYPE as modifiedTypes,
 } from '@/constants';
-import CueRenderer from './CueRenderer.vue';
+import CueEditableRenderer from './CueEditableRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
 import { uniteSubtitleWithFragment } from './SubtitleLoader/utils';
 
@@ -109,35 +75,35 @@ export default {
   name: 'subtitle-renderer',
   props: {
     subtitleInstance: SubtitleInstance,
-    referenceDialogues: {
+    referenceDialogues: { // 参考字幕集合
       type: Array,
       default: () => [],
     },
-    playlistShow: {
+    playlistShow: { // 监听是否可以使用编辑
       type: Boolean,
       default: false,
     },
-    showTextarea: {
+    showTextarea: { // 高级模式回车触发自动输入
       type: Boolean,
       default: false,
     },
-    showAddInput: {
+    showAddInput: { // 可以新增字幕
       type: Boolean,
       default: false,
     },
-    newSubHolder: {
+    newSubHolder: { // 新增字幕的案例 //TODO remove
       type: Object,
     },
-    dragingMode: {
+    preciseTime: {
+      type: Number,
+    },
+    dragingMode: { // 拖拽光标传递
       type: String,
       default: 'default',
     },
-    currentSub: {
+    currentSub: { // 高级模式，当前可显示的字幕
       type: Array,
       default: () => [],
-    },
-    chooseIndexs: {
-      type: Number,
     },
     isFirstSub: {
       type: Boolean,
@@ -159,7 +125,7 @@ export default {
     },
   },
   components: {
-    CueRenderer,
+    CueEditableRenderer,
   },
   data() {
     return {
@@ -173,12 +139,11 @@ export default {
       lastText: [],
       subPlayResX: 0,
       subPlayResY: 0,
-      index: null, // cue.index
+      index: -1, // cue.index
       editVal: '',
       rows: 1,
       lastTransPercent: 0,
       requestId: 0,
-      stillWaitTextAreaFocus: false,
     };
   },
   computed: {
@@ -186,7 +151,7 @@ export default {
       'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleList', 'winHeight',
       'paused', 'isFullScreen', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'enabledSecondarySub', 'chosenSize', 'currentTime',
       'isEditable', 'isProfessional', 'winRatio', 'winWidth', 'winHeight', 'chosenStyle', 'isCreateSubtitleMode', 'currentEditedSubtitleId',
-      'computedWidth', 'computedHeight', // to determine the subtitle renderer's container size
+      'computedWidth', 'computedHeight', 'chooseIndex', // to determine the subtitle renderer's container size
     ]),
     computedSize() {
       return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
@@ -210,15 +175,30 @@ export default {
       // 是否可以使用编辑模式
       // 暂时使用computed属性来控制是否可以使用编辑模式
       // 后期采用vuex统一管理界面版本 [0,1,2,3]
-      let sizeAvaliable = false;
-      if (this.winRatio > 1) {
-        // 当视频的宽度大于等于高度，如果高度超过480px,才可以使用编辑模式
-        sizeAvaliable = this.winHeight >= 480;
-      } else {
-        // 当视频宽度小于高度，如果宽度超过480px,才可以使用编辑模式
-        sizeAvaliable = this.winWidth >= 480;
+      // let sizeAvaliable = false;
+      // if (this.winRatio > 1) {
+      //   // 当视频的宽度大于等于高度，如果高度超过480px,才可以使用编辑模式
+      //   sizeAvaliable = this.winHeight >= 480;
+      // } else {
+      //   // 当视频宽度小于高度，如果宽度超过480px,才可以使用编辑模式
+      //   sizeAvaliable = this.winWidth >= 480;
+      // }
+      // return sizeAvaliable && !this.playlistShow;
+      return !this.playlistShow;
+    },
+    inputWitdh() { // eslint-disable-line
+      const winRatio = this.winRatio;
+      const width = this.winWidth;
+      const height = this.winHeight;
+      let computed = width;
+      if ((winRatio >= 1 && height > 1080) || (winRatio < 1 && width > 1080)) {
+        computed = width - (2 * 305);
+      } else if ((winRatio >= 1 && height > 481) || (winRatio < 1 && width > 481)) {
+        computed = width - (2 * 197);
+      } else if ((winRatio >= 1 && height > 289) || (winRatio < 1 && width > 289)) {
+        computed = width - (2 * 140);
       }
-      return sizeAvaliable && !this.playlistShow;
+      return computed;
     },
     zoom() {
       if (this.isProfessional) {
@@ -247,9 +227,6 @@ export default {
         return updateMobileVideoScaleByFactors(1);
       }
       return this.isFirstSub ? `${this.scaleNum}` : `${this.secondarySubScale}`;
-    },
-    trimEditVal() {
-      return this.editVal.replace(/ /g, '*');
     },
     secondarySubScale() { // 第二字幕的字号最小不小于9px
       if (this.currentFirstSubtitleId === '') {
@@ -304,74 +281,14 @@ export default {
         });
       }
     },
-    editVal(val) {
-      if (val && val.match(/\n/i)) {
-        this.rows = 2;
-        return;
-      }
-      const index = this.index;
-      this.$nextTick(() => {
-        const ref = this.$refs.textarea ? this.$refs.textarea : (this.$refs[`textarea${index}`] && this.$refs[`textarea${index}`][0]);
-        const back = ref && ref.parentNode && ref.parentNode.children && ref.parentNode.children[0];
-        const backHeight = back && back.offsetHeight;
-        if (backHeight) {
-          this.rows = backHeight > 20 ? 2 : 1;
-        }
-      });
-    },
     showTextarea(val) {
-      if (val && this.showAddInput) {
-        const ref = this.$refs[`textarea${this.chooseIndexs}`];
-        if (ref && ref[0]) {
-          this.index = this.chooseIndexs;
-          this.toggleEditable(true);
-          this.$nextTick(() => {
-            const focusSub = this.currentCues.find(e => e.index === this.chooseIndexs);
-            const txt = focusSub.text;
-            this.editVal = txt.replace(/<br>/gi, '\n');
-            ref[0].focus();
-            if (focusSub.reference) {
-              setImmediate(() => {
-                ref[0].select();
-              });
-            }
-            setImmediate(() => {
-              ref[0].scrollTop = 9999;
-            });
-          });
-        } else {
-          const ref = this.$refs.textarea;
-          if (ref) { // eslint-disable-line
+      if (val && this.chooseIndex > -2) {
+        this.index = this.chooseIndex;
+        this.$nextTick(() => {
+          setImmediate(() => {
             this.toggleEditable(true);
-            this.$nextTick(() => {
-              ref.focus();
-            });
-          } else {
-            this.stillWaitTextAreaFocus = true;
-          }
-        }
-      } else if (val && this.chooseIndexs > -1) {
-        const ref = this.$refs[`textarea${this.chooseIndexs}`];
-        if (ref && ref[0]) { // eslint-disable-line
-          this.index = this.chooseIndexs;
-          this.toggleEditable(true);
-          this.$nextTick(() => {
-            const focusSub = this.currentCues.find(e => e.index === this.chooseIndexs);
-            const txt = focusSub.text;
-            this.editVal = txt.replace(/<br>/gi, '\n');
-            ref[0].focus();
-            if (focusSub.reference) {
-              setImmediate(() => {
-                ref[0].select();
-              });
-            }
-            setImmediate(() => {
-              ref[0].scrollTop = 9999;
-            });
           });
-        } else {
-          this.stillWaitTextAreaFocus = true;
-        }
+        });
       }
     },
   },
@@ -397,79 +314,23 @@ export default {
       subtitleInstance.load();
     }
   },
-  updated() {
-    if (this.stillWaitTextAreaFocus && this.showAddInput) {
-      const ref = this.$refs[`textarea${this.chooseIndexs}`];
-      if (ref && ref[0]) {
-        this.index = this.chooseIndexs;
-        this.toggleEditable(true);
-        this.$nextTick(() => {
-          const focusSub = this.currentCues.find(e => e.index === this.chooseIndexs);
-          const txt = focusSub.text;
-          this.editVal = txt.replace(/<br>/gi, '\n');
-          ref[0].focus();
-          if (focusSub.reference) {
-            setImmediate(() => {
-              ref[0].select();
-            });
-          }
-          setImmediate(() => {
-            ref[0].scrollTop = 9999;
-          });
-        });
-        this.stillWaitTextAreaFocus = false;
-      } else {
-        const ref = this.$refs.textarea;
-        if (ref) { // eslint-disable-line
-          this.toggleEditable(true);
-          this.$nextTick(() => {
-            ref.focus();
-          });
-          this.stillWaitTextAreaFocus = false;
-        }
-      }
-    } else if (this.stillWaitTextAreaFocus && this.chooseIndexs > -1) { // eslint-disable-line
-      const ref = this.$refs[`textarea${this.chooseIndexs}`];
-      if (ref && ref[0]) { // eslint-disable-line
-        this.index = this.chooseIndexs;
-        this.toggleEditable(true);
-        this.$nextTick(() => {
-          const focusSub = this.currentCues.find(e => e.index === this.chooseIndexs);
-          const txt = focusSub.text;
-          this.editVal = txt.replace(/<br>/gi, '\n');
-          ref[0].focus();
-          if (focusSub.reference) {
-            setImmediate(() => {
-              ref[0].select();
-            });
-          }
-          setImmediate(() => {
-            ref[0].scrollTop = 9999;
-          });
-        });
-        this.stillWaitTextAreaFocus = false;
-      }
-    }
-  },
   mounted() {
     // 输入框键盘事件
-    document.addEventListener('keydown', this.handleKeyDown);
-    document.addEventListener('keyup', this.handleKeyUp);
     this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+    this.$bus.$on(bus.SUBTITLE_TEXTAREA_CHANGE, this.handleTextAreaChange);
   },
   beforeDestroy() {
+    this.$bus.$off(bus.SUBTITLE_TEXTAREA_CHANGE);
     cancelAnimationFrame(this.requestId);
     this.lastIndex = [];
     this.lastAlignment = [];
     this.lastText = [];
-    document.removeEventListener('keydown', this.handleKeyDown);
-    document.removeEventListener('keyup', this.handleKeyUp);
   },
   methods: {
     ...mapMutations({
       updateDuration: subtitleMutations.DURATIONS_UPDATE,
-      toggleEditable: windowMutations.TOGGLE_EDITABLE,
-      updateCurrentEditedSubtitle: subtitleMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
+      toggleEditable: editorMutations.TOGGLE_EDITABLE,
+      updateCurrentEditedSubtitle: editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
     }),
     filter(cue) {
       if (!this.isVtt && this.isProfessional && cue.tags) {
@@ -490,10 +351,13 @@ export default {
         return '';
       }
       const result = this.currentSub.find(e => cue.start === e.start && cue.end === e.end);
-      if (result && result.index === this.chooseIndexs) {
+      if (result && result.index === this.chooseIndex) {
         return ' focus';
       }
       return '';
+    },
+    hiddenTextArea() {
+      this.$emit('update:showTextarea', false);
     },
     getCueIndex(cue) {
       if (this.currentSub.length === 0 || !this.isProfessional) {
@@ -502,184 +366,23 @@ export default {
       const result = this.currentSub.find(e => cue.start === e.start && cue.end === e.end);
       return result ? result.index : -1;
     },
-    handleClickAddSub() {
-      const isPaused = this.paused;
-      if (isPaused) {
-        if (!this.isEditable) {
-          this.toggleEditable(isPaused);
-          this.$nextTick(() => {
-            this.editVal = '';
-            this.$refs.textarea && this.$refs.textarea.focus();
-          });
-        }
-      } else {
-        this.$bus.$emit('toggle-playback');
-      }
-      this.$emit('update:chooseIndexs', -1);
-    },
-    handleClickSubContainer(e, i) {
+    handleClickSubContainer(e, cue) {
+      this.index = -2;
       if (!this.canUseEditor) return;
       const isPaused = this.paused;
-      const currentCues = this.currentCues[i];
-      if (isPaused) {
-        this.index = currentCues.index;
-        if (!this.isEditable) {
-          this.toggleEditable(isPaused);
-          this.$nextTick(() => {
-            const txt = currentCues.text;
-            const ref = this.$refs[`textarea${currentCues.index}`][0];
-            this.editVal = txt.replace(/<br>/gi, '\n');
-            if (ref) {
-              ref.focus();
-              if (currentCues.reference) {
-                setImmediate(() => {
-                  ref.select();
-                });
-              }
-            }
-            setImmediate(() => {
-              ref.scrollTop = 9999;
-            });
-          });
-        }
-      } else {
-        this.$bus.$emit('toggle-playback');
-      }
-      // 点击字幕块，更新字幕条选中状态
-      // const index = this.getCueIndex(currentCues);
-      const index = currentCues.index;
-      if (this.isProfessional && index !== -1) {
-        this.$emit('update:chooseIndexs', index);
-      }
-    },
-    handleDoubleClickSubContainer() {
-    },
-    handleBlurTextArea(e, i) { // eslint-disable-line
-      // const startTime = Date.now();
-      const editVal = this.editVal.trim();
-      if (i !== null) {
-        this.$nextTick(() => { // eslint-disable-line
-          // 处理是否真正修改了字符
-          const currentCue = this.currentCues[i];
-          if (!currentCue.reference && editVal !== currentCue.text) {
-            // 修改当前currentCues
-            currentCue.text = editVal.replace(/\n/g, '<br>');
-            this.$set(this.currentCues, i, currentCue);
-            // 保存副本
-            // 本地字幕
-            const text = currentCue.text;
-            const index = currentCue.index;
-            let before = null;
-            const subtitleInstance = this.subtitleInstance.type !== 'modified' ?
-              cloneDeep(this.subtitleInstance) : this.subtitleInstance;
-            // if (subtitleInstance.type !== 'modified' && !subtitleInstance.reference) {
-            //   const reference = cloneDeep(this.subtitleInstance);
-            //   delete reference.data;
-            //   subtitleInstance.reference = reference;
-            // }
-            // if (subtitleInstance.type !== 'modified' && !subtitleInstance.referenceId) {
-            //   subtitleInstance.referenceId = this.subtitleInstance.id;
-            // }
-            // TODO don't use format
-            if (subtitleInstance.metaInfo && subtitleInstance.metaInfo.format === 'ass') {
-              if (text.length === 0) {
-                before = subtitleInstance.parsed.dialogues.splice(index, 1);
-              } else {
-                before = cloneDeep(subtitleInstance.parsed.dialogues[index]);
-                const firstFragments = subtitleInstance.parsed.dialogues[index].fragments[0];
-                firstFragments.text = text;
-                subtitleInstance.parsed.dialogues[index].fragments = [firstFragments];
-              }
-            } else if (subtitleInstance.metaInfo) {
-              if (text.length === 0) {
-                before = subtitleInstance.parsed.dialogues.splice(index, 1);
-              } else {
-                before = cloneDeep(subtitleInstance.parsed.dialogues[index]);
-                subtitleInstance.parsed.dialogues[index].text = text;
-              }
-            }
-            if (this.isProfessional) {
-              if (text.length === 0) {
-                this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
-                  sub: subtitleInstance,
-                  type: modifiedTypes.DELETE,
-                  index,
-                  before,
-                });
-              } else {
-                this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
-                  sub: subtitleInstance,
-                  type: modifiedTypes.REPLACE,
-                  index,
-                  before,
-                });
-              }
-            } else {
-              this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
-                sub: subtitleInstance,
-                isSecondSub: !this.isFirstSub,
-              });
-            }
-          } else if (currentCue.reference) {
-            const currentCue = this.currentCues[i];
-            let subtitleInstance = null;
-            let index = 0;
-            if (!this.subtitleInstance || !this.currentEditedSubtitleId) {
-              subtitleInstance = {
-                parsed: {
-                  dialogues: [],
-                },
-                metaInfo: {
-                  language: 'zh-CN',
-                  name: '',
-                  format: 'online',
-                },
-                type: 'online',
-                reference: null,
-              };
-            } else {
-              subtitleInstance = this.subtitleInstance.type !== 'modified' ? cloneDeep(this.subtitleInstance) : this.subtitleInstance;
-              index = subtitleInstance.parsed.dialogues.length;
-            }
-            if (editVal) {
-              currentCue.text = editVal;
-              this.$set(this.currentCues, i, currentCue);
-              const sub = cloneDeep(uniteSubtitleWithFragment(currentCue));
-              delete sub.reference;
-              delete sub.selfIndex;
-              subtitleInstance.parsed.dialogues.splice(index, 0, sub);
-              this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
-                sub: subtitleInstance,
-                type: modifiedTypes.ADD_FROM_REFERENCE,
-                index,
-                selfIndex: currentCue.selfIndex,
-                before: null,
-              });
-            } else {
-              const selfIndex = this.chooseIndexs - index;
-              this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
-                sub: subtitleInstance,
-                type: modifiedTypes.DELETE_FROM_REFERENCE,
-                index: this.chooseIndexs,
-                before: null,
-                selfIndex,
-              });
-            }
-            this.$emit('update:chooseIndexs', -1);
+      setImmediate(() => {
+        if (isPaused) {
+          this.index = cue.index;
+          if (!this.isEditable) {
+            this.toggleEditable(isPaused);
           }
-          // if (this.index === i) {
-          //   this.toggleEditable(false);
-          //   this.editVal = '';
-          //   this.index = null;
-          //   this.rows = 1;
-          // }
-          this.toggleEditable(false);
-          this.editVal = '';
-          this.index = null;
-          this.rows = 1;
-          // console.log(Date.now() - startTime);
-        });
-      } else {
+        } else {
+          this.$bus.$emit('toggle-playback');
+        }
+      });
+    },
+    handleTextAreaChange(cue, editVal) { // eslint-disable-line
+      if (cue && cue.index === -1) {
         if (editVal !== '' && this.newSubHolder) {
           const { time: currentTime } = videodata;
           let sub = Object.assign({}, JSON.parse(JSON.stringify(this.newSubHolder.last)), {
@@ -688,12 +391,12 @@ export default {
           sub = uniteSubtitleWithFragment(sub);
           delete sub.reference;
           if (this.newSubHolder.distance > 0.5) {
-            sub.start = sub.end - 0.5;
+            sub.start = parseFloat((sub.end - 0.5).toFixed(2), 10);
           } else {
-            sub.start = sub.end - 0.2;
+            sub.start = parseFloat((sub.end - 0.2).toFixed(2), 10);
           }
           const firstFragments = sub.fragments[0];
-          firstFragments.text = editVal.replace(/\n/g, '<br>');
+          firstFragments.text = editVal;
           sub.fragments = [firstFragments];
           // ****
           let subtitleInstance = null;
@@ -718,58 +421,94 @@ export default {
           });
           this.$emit('update:showAddInput', false);
         }
-        this.toggleEditable(false);
-        this.editVal = '';
-        this.rows = 1;
-      }
-      this.$emit('update:showTextarea', false);
-    },
-    handleKeyDownTextArea(e) { // eslint-disable-line
-      // 处理输入框快捷键
-      const { remote } = this.$electron;
-      const browserWindow = remote.BrowserWindow;
-      const focusWindow = browserWindow.getFocusedWindow();
-      const checkCmdOrCtrl = (process.platform === 'darwin' && e.metaKey) || (process.platform !== 'darwin' && e.ctrlKey);
-      if (e && e.keyCode === 27) {
-        e.target && e.target.blur();
-        e.preventDefault();
-      } else if (e && e.keyCode === 65 && checkCmdOrCtrl) { // c+a
-        focusWindow.webContents.selectAll();
-        e.preventDefault();
-      } else if (e && e.keyCode === 67 && checkCmdOrCtrl) { // c+c
-        focusWindow.webContents.copy();
-        e.preventDefault();
-      } else if (e && e.keyCode === 86 && checkCmdOrCtrl) { // c+v
-        focusWindow.webContents.paste();
-        e.preventDefault();
-      } else if (e && e.keyCode === 88 && checkCmdOrCtrl) { // c+x
-        focusWindow.webContents.cut();
-        e.preventDefault();
-      } else if (e && e.keyCode === 90 && checkCmdOrCtrl) { // c+z
-        focusWindow.webContents.undo();
-        e.preventDefault();
-      } else if (e && e.keyCode === 90 && checkCmdOrCtrl && e.shiftKey) { // c+s+z
-        focusWindow.webContents.redo();
-        e.preventDefault();
-      } else if (e && e.keyCode === 13 && !e.shiftKey) {
-        e.target.blur();
-        e.preventDefault();
-      }
-    },
-    handleKeyDown(e) {
-      if (e && e.keyCode === 27) {
-        // const index = this.index;
-        // console.log(index, ref);
-        // if (ref) {
-        //   ref.blur();
-        //   // return;
-        // }
-        if (!this.isFullScreen) {
-          // this.$bus.$emit(bus.SUBTITLE_EDITOR_EXIT);
+      } else if (cue && cue.reference) {
+        let subtitleInstance = null;
+        let index = 0;
+        if (!this.subtitleInstance || !this.currentEditedSubtitleId) {
+          subtitleInstance = {
+            parsed: {
+              dialogues: [],
+            },
+            metaInfo: {
+              language: 'zh-CN',
+              name: '',
+              format: 'online',
+            },
+            type: 'online',
+            reference: null,
+          };
+        } else {
+          subtitleInstance = this.subtitleInstance.type !== 'modified' ? cloneDeep(this.subtitleInstance) : this.subtitleInstance;
+          index = subtitleInstance.parsed.dialogues.length;
+        }
+        if (editVal) {
+          cue.text = editVal;
+          const sub = cloneDeep(uniteSubtitleWithFragment(cue));
+          delete sub.reference;
+          delete sub.selfIndex;
+          subtitleInstance.parsed.dialogues.splice(index, 0, sub);
+          this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+            sub: subtitleInstance,
+            type: modifiedTypes.ADD_FROM_REFERENCE,
+            index,
+            selfIndex: cue.selfIndex,
+            before: null,
+          });
+        } else {
+          const selfIndex = this.chooseIndex - index;
+          this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+            sub: subtitleInstance,
+            type: modifiedTypes.DELETE_FROM_REFERENCE,
+            index: this.chooseIndex,
+            before: null,
+            selfIndex,
+          });
+        }
+      } else {
+        const index = cue.index;
+        let before = null;
+        const subtitleInstance = this.subtitleInstance.type !== 'modified' ?
+          cloneDeep(this.subtitleInstance) : this.subtitleInstance;
+        if (subtitleInstance.metaInfo && subtitleInstance.metaInfo.format === 'ass') {
+          if (editVal.length === 0) {
+            before = subtitleInstance.parsed.dialogues.splice(index, 1);
+          } else {
+            before = cloneDeep(subtitleInstance.parsed.dialogues[index]);
+            const firstFragments = subtitleInstance.parsed.dialogues[index].fragments[0];
+            firstFragments.text = editVal;
+            subtitleInstance.parsed.dialogues[index].fragments = [firstFragments];
+          }
+        } else if (subtitleInstance.metaInfo) {
+          if (editVal.length === 0) {
+            before = subtitleInstance.parsed.dialogues.splice(index, 1);
+          } else {
+            before = cloneDeep(subtitleInstance.parsed.dialogues[index]);
+            subtitleInstance.parsed.dialogues[index].text = editVal;
+          }
+        }
+        if (this.isProfessional) {
+          if (editVal.length === 0) {
+            this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+              sub: subtitleInstance,
+              type: modifiedTypes.DELETE,
+              index,
+              before,
+            });
+          } else {
+            this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
+              sub: subtitleInstance,
+              type: modifiedTypes.REPLACE,
+              index,
+              before,
+            });
+          }
+        } else {
+          this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
+            sub: subtitleInstance,
+            isSecondSub: !this.isFirstSub,
+          });
         }
       }
-    },
-    handleKeyUp() {
     },
     avaliableClass(index) {
       if (!this.isVtt) {
@@ -820,7 +559,7 @@ export default {
       }
       if (parsedData) {
         const cues = parsedData
-          .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');
+          .filter(subtitle => subtitle.start <= currentTime && subtitle.end > currentTime);
         if (!isEqual(cues, this.currentCues)) {
           let rev = false;
           const tmp = cues;
@@ -847,26 +586,6 @@ export default {
       return old.some((e, i) => `${e.start}-${e.end}` !== `${n[i].start}-${n[i].end}`);
     },
     parsedFragments(cues) {
-      // if (this.type === 'ass') {
-      //   const currentCues = [];
-      //   cues.forEach((item) => {
-      //     let currentText = '';
-      //     let currentTags = {};
-      //     if (item.fragments.length) {
-      //       item.fragments.forEach((cue) => {
-      //         currentText += cue.text;
-      //         if (cue.tags) {
-      //           currentTags = cue.tags;
-      //         }
-      //       });
-      //       currentCues.push({
-      //         start: item.start, end: item.end, tags: currentTags, text: currentText,
-      //       });
-      //     }
-      //   });
-      //   return currentCues;
-      // }
-      // return cues;
       const currentCues = [];
       cues.forEach((item) => {
         let currentText = '';
@@ -1164,7 +883,7 @@ export default {
     transform: translate(0, 0)!important;
     justify-content: center;
     &.focus {
-      padding: 0 12px;
+      // padding: 0 12px;
       &::before {
         content: "";
         width: 100%;
@@ -1185,15 +904,14 @@ export default {
       // cursor: pointer;
     }
   }
+  .enable-hover { 
+    &::before {
+      visibility: visible;
+    }
+  }
   .edit-box {
     border-width: 0;
     border-radius: 0;
-  }
-  .enable-hover {
-    &:hover {
-      border-radius: 0;
-      // overflow: visible;
-    }
   }
 }
 .subContainer {
@@ -1215,7 +933,7 @@ export default {
     z-index: 2;
   }
 }
-.editable {
+.enable-hover {
   &::before {
     content: "";
     width: 100%;
@@ -1228,6 +946,17 @@ export default {
     background: rgba(0,0,0,0.05);
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 5px;
+    visibility: hidden;
+  }
+  &:hover {
+    &::before {
+      visibility: visible;
+    }
+  }
+}
+.editable {
+  &::before {
+    visibility: visible;
   }
 }
 .edit-box {

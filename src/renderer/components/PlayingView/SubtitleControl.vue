@@ -94,11 +94,11 @@
                         :style="{
                           height: currentSubtitleIndex === index && !backCardVisiable && modifiedAdvancedPanelVisiable ? `${itemHeight}px`: 0,
                         }">
-                        <div class="icons-wrap" v-show="!confirmDeletePanelVisiable">
+                        <div class="icons-wrap">
                           <Icon type="subtitleEdit" @mouseup.native="handleSubEdit($event, item)"></Icon>
                           <Icon type="subtitleExport" @mouseup.native="handleSubExport($event, item)"></Icon>
-                          <Icon type="subtitleDelete" @mouseup.native="handleSubDelete($event, item)"></Icon>
-                          <!-- <Icon type="subtitleDelete" @mouseup.native="handleSubConfirmDelete($event, item)"></Icon> -->
+                          <!-- <Icon type="subtitleDelete" @mouseup.native="handleSubDelete($event, item)"></Icon> -->
+                          <Icon type="subtitleDelete" @mouseup.native="handleSubConfirmDelete($event, item)"></Icon>
                         </div>
                         <!-- <div class="confirm-delete-wrap" v-show="confirmDeletePanelVisiable">
                           <span class="submit" @mouseup.native.stop="handleSubDelete($event, item)">确认删除</span>
@@ -158,7 +158,7 @@ import difference from 'lodash/difference';
 import debounce from 'lodash/debounce';
 import path, { extname } from 'path';
 import { Subtitle as subtitleActions, Input as InputActions } from '@/store/actionTypes';
-import { Window as windowMutations, Subtitle as subtitleMutations } from '@/store/mutationTypes';
+import { Editor as editorMutations } from '@/store/mutationTypes';
 import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
@@ -212,7 +212,6 @@ export default {
       clickItem: false, //
       clickItemArrow: false, //
       modifiedAdvancedPanelVisiable: false,
-      confirmDeletePanelVisiable: false,
     };
   },
   computed: {
@@ -264,7 +263,9 @@ export default {
       return this.computedAvailableItems.length + 2 + this.loadingTypes.length;
     },
     isOverFlow() { // eslint-disable-line complexity
-      if (this.computedSize >= 289 && this.computedSize <= 480) {
+      if (this.modifiedAdvancedPanelVisiable) {
+        return 'scroll';
+      } else if (this.computedSize >= 289 && this.computedSize <= 480) {
         return this.realItemsNum > 3 || (this.scopeHeight + this.hoverHeight > 89 && this.hiddenText) ? 'scroll' : '';
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
         return this.realItemsNum > 5 || (this.scopeHeight + this.hoverHeight > 180 && this.hiddenText) ? 'scroll' : '';
@@ -424,9 +425,9 @@ export default {
       updateNoSubtitle: subtitleActions.UPDATE_NO_SUBTITLE,
     }),
     ...mapMutations({
-      toggleProfessional: windowMutations.TOGGLE_PROFESSIONAL,
-      swicthReferenceSubtitle: subtitleMutations.SWITCH_REFERENCE_SUBTITLE,
-      updateCurrentEditedSubtitle: subtitleMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
+      toggleProfessional: editorMutations.TOGGLE_PROFESSIONAL,
+      swicthReferenceSubtitle: editorMutations.SWITCH_REFERENCE_SUBTITLE,
+      updateCurrentEditedSubtitle: editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
     }),
     handleCreateBtnClick() {
       // 当点击创建按钮后，先暂停播放、再切换高级编辑模式
@@ -450,12 +451,25 @@ export default {
       }
       this.updateCurrentEditedSubtitle(item.id);
       this.toggleProfessional(true);
+      this.modifiedAdvancedPanelVisiable = false;
+      this.clickItemArrow = false;
     },
     handleSubExport() {
       this.$bus.$emit(bus.EXPORT_MODIFIED_SUBTITLE);
+      this.modifiedAdvancedPanelVisiable = false;
+      this.clickItemArrow = false;
     },
-    handleSubConfirmDelete() {
-      this.confirmDeletePanelVisiable = true;
+    handleSubConfirmDelete(e, item) {
+      if (e.target.nodeName !== 'DIV') {
+        this.modifiedAdvancedPanelVisiable = false;
+        this.clickItemArrow = false;
+        this.hoverHeight = 0;
+        this.removeLocalSub(item.id);
+        if (item.id === this.currentFirstSubtitleId) {
+          this.$bus.$emit('off-subtitle');
+        }
+        this.$bus.$emit(bus.SUBTITLE_DELETE, { sub: item });
+      }
     },
     handleSubDelete(e, item) {
       if (e.target.nodeName !== 'DIV') {
@@ -468,10 +482,6 @@ export default {
         deleteSubtitles([item.id], this.originSrc).then((result) => {
           this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
           this.transFlag = true;
-          // 如果删除的是自制字幕，需要删除源文件
-          if (item.type === 'modified') {
-            this.$bus.$emit('delete-subtitle-file', { sub: item });
-          }
         });
       }
     },
@@ -479,9 +489,9 @@ export default {
       if (this.currentSubtitleIndex === index) {
         this.modifiedAdvancedPanelVisiable = !this.modifiedAdvancedPanelVisiable;
       } else {
-        const { computedAvaliableItems } = this;
+        const { computedAvailableItems } = this;
         this.clickItem = true;
-        this.$bus.$emit('change-subtitle', computedAvaliableItems[index].id);
+        this.$bus.$emit('change-subtitle', computedAvailableItems[index].id);
         setTimeout(() => {
           this.showSubtitleDetails(index);
         }, 0);

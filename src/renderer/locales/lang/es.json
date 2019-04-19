@@ -91,7 +91,7 @@
       "reference": "Referencias de traducción",
 			"loadLocalSubtitleFile": "Cargar referencia local",
       "back": "volver",
-      "enter": "Seleccionar/Editar",
+      "enter": "Seleccionar / Editar",
       "prev": "Clip anterior",
       "next": "Siguiente clip"
     },
@@ -274,8 +274,19 @@
       "referenceIdNotExist": {
         "content": "La referencia se ha actualizado o eliminado.",
         "title": "Falló la referencia de carga"
+      },
+      "referenceLoading": {
+        "content": "Cargando referencia de traducción...",
+        "title": ""
       }
     }
+  },
+  "editorCreateSubtitle": {
+    "button": "Haga clic para traducir"
+  },
+  "deleteSubtitleBubble": {
+		"content": "La traducción ha sido eliminada",
+    "button": "Deshacer"
   },
 	"snapshotSuccess": {
 		"content": "Instantánea con éxito",

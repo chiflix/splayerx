@@ -23,18 +23,18 @@
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="(showAllWidgets || progressTriggerStopped)" v-if="!isEditable && !isProfessional"/>
-    <play-button class="play-button no-drag" v-fade-in="!isEditable"
+    <play-button class="play-button no-drag"
       @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
       :mousemovePosition="mousemoveClientPosition"
-      :showAllWidgets="showAllWidgets" :isFocused="isFocused"
+      :showAllWidgets="showAllWidgets && !isEditable && !isDragableInProfessional" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
-    <volume-indicator class="no-drag" v-fade-in="!isEditable"
+    <volume-indicator class="no-drag" 
       @update:volume-state="updateVolumeState"
       :attachedShown="attachedShown"
       :mousedownOnPlayButton="mousedownOnPlayButton"
-      :showAllWidgets="showAllWidgets"/>
-    <div class="control-buttons" v-fade-in="showAllWidgets && !isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
+      :showAllWidgets="showAllWidgets && !isEditable && !isDragableInProfessional"/>
+    <div class="control-buttons" ref="control-buttons" v-fade-in="showAllWidgets && !isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
       v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging.sync="lastDragging"
@@ -46,9 +46,8 @@
     <transition name="fade">
       <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable && !isProfessional" />
     </transition>
-    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets && !isEditable" :style="{
+    <the-progress-bar ref="progressbar" v-fade-in="!isDragableInProfessional" :showAllWidgets="showAllWidgets && !isEditable" :style="{
       marginBottom: preFullScreen ? '10px' : '0',
-      zIndex: isProfessional ? '99991' : '12',
     }"/>
     <!-- 将subtitleManager 从PlayingView 移到 VideoController 里 主要是因为mouse事件无法传递 videoController盖住了subtitleManager -->
     <subtitle-manager :playlistShow="widgetsStatus['playlist-control'] && widgetsStatus['playlist-control'].showAttached" />
@@ -139,7 +138,7 @@ export default {
       mousemoveClientPosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight', 'isEditable', 'isProfessional']),
+    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight', 'isEditable', 'isProfessional', 'isDragableInProfessional']),
     onlyOneVideo() {
       return this.playingList.length === 1;
     },
@@ -719,8 +718,11 @@ export default {
   .control-buttons {
     width: 115px;
     height: 22px;
-    right: 25px;
-    bottom: 25px;
+    // right: 25px;
+    // bottom: 25px;
+    right: 0;
+    bottom: 13px;
+    padding: 12px 25px 12px 12px;
     .button {
       width: 26.4px;
       height: 22px;

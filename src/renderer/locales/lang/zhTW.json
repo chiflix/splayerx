@@ -91,7 +91,7 @@
       "reference": "參考翻譯",
 			"loadLocalSubtitleFile": "添加本地參考",
       "back": "返回",
-      "enter": "選中/編輯",
+      "enter": "選中 / 編輯",
       "prev": "上一條翻譯",
       "next": "下一條翻譯"
     },
@@ -274,8 +274,19 @@
       "referenceIdNotExist": {
         "content": "參考已更新或刪除。",
         "title": "參考加載失敗"
+      },
+      "referenceLoading": {
+        "content": "正在加載參考翻譯...",
+        "title": ""
       }
     }
+  },
+  "editorCreateSubtitle": {
+    "button": "點擊添加翻譯"
+  },
+  "deleteSubtitleBubble": {
+		"content": "已刪除所選翻譯",
+    "button": "恢復"
   },
 	"snapshotSuccess": {
 		"content": "截圖成功",

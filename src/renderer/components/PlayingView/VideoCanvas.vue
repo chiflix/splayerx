@@ -369,9 +369,11 @@ export default {
       }
     });
     this.$bus.$on('seek', (e) => {
-      this.seekTime = [e];
       // update vuex currentTime to use some where
-      this.updateVideoCurrentTime(e);
+      if (e >= 0 && e <= this.duration) {
+        this.seekTime = [e];
+        this.updateVideoCurrentTime(e);
+      }
       // todo: use vuex get video element src
       const filePath = decodeURI(this.src);
       const indexOfLastDot = filePath.lastIndexOf('.');
