@@ -483,20 +483,6 @@ new Vue({
                 this.$bus.$emit('seek', videodata.time - 5);
               },
             },
-            // {
-            //   label: this.$t('msg.playback.forwardL'),
-            //   accelerator: 'Up',
-            //   click: () => {
-            //     this.$bus.$emit('seek', videodata.time + 60);
-            //   },
-            // },
-            // {
-            //   label: this.$t('msg.playback.backwardL'),
-            //   accelerator: 'Down',
-            //   click: () => {
-            //     this.$bus.$emit('seek', videodata.time - 60);
-            //   },
-            // },
             { type: 'separator' },
             {
               label: this.$t('msg.playback.increasePlaybackSpeed'),
@@ -890,7 +876,6 @@ new Vue({
         template[4].submenu.splice(2, 0, this.updateFullScreen);
         template[2].submenu.splice(7, 0, this.updateAudioTrack());
         template[0].submenu.splice(1, 0, result);
-        console.log(template);
         // menu.about
         if (process.platform === 'darwin') {
           template[1].submenu.splice(3, 0, ...this.darwinPlayback);
