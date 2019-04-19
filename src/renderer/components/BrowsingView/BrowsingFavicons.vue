@@ -8,8 +8,10 @@
         <Icon :type="item.type" :style="{ opacity: index === faviconIndex ? '1' : 'calc(4 / 9)'}"></Icon>
       </div>
     </div>
-    <Icon :type="showFavType" class="fav-display" @mouseup.native="handleShowFavicon" :style="{
-      order: isDarwin ? '2' : '1', margin: isDarwin ? 'auto 0 auto 10px' : 'auto 10px auto 0' }"></Icon>
+    <Icon type="showFavicon" class="fav-display" @mouseup.native="handleShowFavicon" :style="{
+      order: isDarwin ? '2' : '1', margin: isDarwin ? 'auto 0 auto 10px' : 'auto 10px auto 0',
+      transform: `rotate(${rotateNum}deg)`,
+      transition: 'transform 100ms linear' }"></Icon>
   </div>
 </template>
 
@@ -35,11 +37,11 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
-    showFavType() {
+    rotateNum() {
       if (this.isDarwin) {
-        return this.showFavicon ? 'hideFavicon' : 'showFavicon';
+        return this.showFavicon ? '180' : '0';
       }
-      return this.showFavicon ? 'showFavicon' : 'hideFavicon';
+      return this.showFavicon ? '0' : '180';
     },
   },
   components: {
