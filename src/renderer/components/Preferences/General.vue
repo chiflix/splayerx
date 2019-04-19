@@ -26,14 +26,14 @@
     <div class="setting-button no-drag"
       @mouseup="setDefault"><div class="content">{{ $t("preferences.general.setButton") }}</div></div>
   </div>
-  <div class="description-button">
+  <!-- <div class="description-button">
     <div class="setting-content">
       <div class="setting-title">{{ $t("preferences.general.restoreSettings") }}</div>
       <div class="setting-description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
     </div>
     <div class="setting-button no-drag"
       @mouseup="restoreSettings"><div class="content">{{ $t("preferences.general.setButton") }}</div></div>
-  </div>
+  </div> -->
   <div class="title other-title">{{ $t("preferences.general.others") }}</div>
   <BaseCheckBox
     :checkboxValue="reverseScrolling"
