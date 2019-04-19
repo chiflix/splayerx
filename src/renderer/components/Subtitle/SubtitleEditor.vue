@@ -9,7 +9,7 @@
         ref="timeLine"
         @mousedown.left.stop="handleDragStartEditor"
         @mousemove.left="handleDragingEditor"
-        @mouseup.left="handleDragEndEditor"
+        @mouseup.left.stop="handleDragEndEditor"
         :style="{
           width: `${3 * winWidth}px`,
           left: `${currentLeft}px`,
@@ -678,7 +678,6 @@ export default {
     },
     handleDragStartEditor(e) {
       // 开始拖动时间轴，记录拖动位置、时间、暂停播放
-      if (this.timeLineClickLock) return;
       this.dragStartX = e.pageX;
       this.dragStartLeft = this.currentLeft;
       this.dragStartTime = this.preciseTime;
@@ -716,19 +715,20 @@ export default {
       // 拖动时间轴结束，重设时间、位置信息
       if (this.timeLineDraging) {
         // 这段是处理this.chooseIndexs设为-1，但是这次拖拽，下面有字幕，需要选中
-        let offset = e.pageX - this.dragStartX;
-        const seekTime = this.preciseTime - (offset / this.space);
-        if (seekTime <= 0) {
-          offset = this.dragStartTime * this.space;
-        }
-        if (seekTime <= this.duration) {
-          requestAnimationFrame(throttle(() => {
-            this.updateWhenMoving(offset);
-          }, 100));
-        }
+        // let offset = e.pageX - this.dragStartX;
+        // const seekTime = this.preciseTime - (offset / this.space);
+        // if (seekTime <= 0) {
+        //   offset = this.dragStartTime * this.space;
+        // }
+        // if (seekTime <= this.duration) {
+        //   requestAnimationFrame(throttle(() => {
+        //     this.updateWhenMoving(offset);
+        //   }, 100));
+        // }
         if (e.pageX !== this.dragStartX) {
           this.resetCurrentTime();
-        } else {
+          this.triggerCount += 1;
+        } else if (!this.timeLineClickLock) {
           this.handleMouseUpOnTimeLine(e);
           this.timeLineClickLock = true;
           setTimeout(() => {
