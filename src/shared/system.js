@@ -12,7 +12,7 @@ async function spawn(...args) {
 export async function setAsDefaultApp() {
   const exts = getValidVideoExtensions();
   if (process.platform === 'darwin') {
-    let { default: code } = await import('!raw-loader!./python/setAsDefaultAppForMac.py');
+    let { default: code } = await import('raw-loader!./python/setAsDefaultAppForMac.py');
     code = code.replace('$EXTS', exts.map(ext => `'${ext}'`).join(', '));
     await spawn('python', ['-c', code]);
   } else if (process.platform === 'win32') {
