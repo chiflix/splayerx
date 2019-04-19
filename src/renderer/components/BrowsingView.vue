@@ -1,7 +1,7 @@
 <template>
  <div class="browsing">
    <browsing-header></browsing-header>
-   <webview src="https://www.youtube.com" autosize class="web-view" ref="webView" allowpopups></webview>
+   <webview :src="initialUrl" autosize class="web-view" ref="webView" allowpopups></webview>
  </div>
 </template>
 
@@ -21,7 +21,12 @@ export default {
     'browsing-header': BrowsingHeader,
   },
   computed: {
-    ...mapGetters(['winSize', 'winPos', 'isFullScreen']),
+    ...mapGetters(['winSize', 'winPos', 'isFullScreen', 'initialUrl']),
+  },
+  watch: {
+    initialUrl(val) {
+      console.log(val);
+    },
   },
   mounted() {
     if (this.winSize[0] < 1200) {

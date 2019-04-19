@@ -56,3 +56,7 @@ export const Input = {
   KEYUP_UPDATE: 'KEYUP_UPDATE',
   WHEEL_UPDATE: 'WHEEL_UPDATE',
 };
+
+export const Browsing = {
+  UPDATE_INITIAL_URL: 'UPDATE_INITIAL_URL',
+};

@@ -1,8 +1,9 @@
 <template>
   <div class="fav-icons" :style="{ left: isDarwin ? '' : '10px', right: isDarwin ? '10px' : '' }">
     <div class="fav-icons-details" v-show="showFavicon" :style="{ order: isDarwin ? '1' : '2' }">
-      <div class="fav-icon-container" v-for="(item, index) in favicon" @mouseover="favIconMouseOver(index)" @mouseleave="favIconMouseLeave">
-        <Icon :type="item" :style="{ opacity: index === faviconIndex ? '1' : 'calc(4 / 9)'}"></Icon>
+      <div class="fav-icon-container" v-for="(item, index) in favicon" @mouseover="favIconMouseOver(index)" @mouseleave="favIconMouseLeave"
+      @mouseup="handleFavOpen(item)">
+        <Icon :type="item.type" :style="{ opacity: index === faviconIndex ? '1' : 'calc(4 / 9)'}"></Icon>
       </div>
     </div>
     <Icon :type="showFavType" class="fav-display" @mouseup.native="handleShowFavicon" :style="{
@@ -11,6 +12,8 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+import { Browsing as browsingActions } from '@/store/actionTypes';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -18,7 +21,11 @@ export default {
   data() {
     return {
       showFavicon: false,
-      favicon: ['youku', 'bilibili', 'youtube'],
+      favicon: [
+        { name: '优酷', type: 'youku', url: 'https://www.youku.com' },
+        { name: 'Bilibili', type: 'bilibili', url: 'https://www.bilibili.com' },
+        { name: 'YouTube', type: 'youtube', url: 'https://www.youtube.com' },
+      ],
       faviconIndex: -1,
     };
   },
@@ -37,6 +44,9 @@ export default {
     Icon,
   },
   methods: {
+    ...mapActions({
+      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
+    }),
     favIconMouseOver(index) {
       this.faviconIndex = index;
     },
@@ -45,6 +55,9 @@ export default {
     },
     handleShowFavicon() {
       this.showFavicon = !this.showFavicon;
+    },
+    handleFavOpen(item) {
+      this.updateInitialUrl(item.url);
     },
   },
 };

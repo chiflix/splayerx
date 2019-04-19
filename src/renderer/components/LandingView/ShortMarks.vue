@@ -2,6 +2,7 @@
   <div class="short-marks" :style="{ right: isDarwin ? '15px' : '', left: isDarwin ? '' : '15px' }">
     <div class="marks-details" v-show="showMarks" :style="{ order: isDarwin ? '1' : '2' }">
       <div class="marks-container" v-for="(item, index) in marks" @mouseover="marksMouseOver(index)" @mouseleave="marksMouseLeave()"
+      @mouseup="handleBrowsingOpen(item)"
       :style="{
         background: markHoverIndex === index ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.08)',
         color: markHoverIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)'
@@ -20,6 +21,8 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+import { Browsing as browsingActions } from '@/store/actionTypes';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -28,9 +31,9 @@ export default {
   data() {
     return {
       marks: [
-        { name: '优酷', type: 'youku' },
-        { name: 'Bilibili', type: 'bilibili' },
-        { name: 'YouTube', type: 'youtube' },
+        { name: '优酷', type: 'youku', url: 'https://www.youku.com' },
+        { name: 'Bilibili', type: 'bilibili', url: 'https://www.bilibili.com' },
+        { name: 'YouTube', type: 'youtube', url: 'https://www.youtube.com' },
       ],
       markHoverIndex: -1,
       showMarks: false,
@@ -48,6 +51,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
+    }),
     marksMouseOver(index) {
       this.markHoverIndex = index;
     },
@@ -56,6 +62,12 @@ export default {
     },
     handleMarksDisplay() {
       this.showMarks = !this.showMarks;
+    },
+    handleBrowsingOpen(item) {
+      this.$router.push({
+        name: 'browsing-view',
+      });
+      this.updateInitialUrl(item.url);
     },
   },
 };
