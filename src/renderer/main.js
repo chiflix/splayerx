@@ -381,16 +381,16 @@ new Vue({
                 }
               },
             },
-            {
-              label: this.$t('msg.file.openURL'),
-              accelerator: 'CmdOrCtrl+U',
-              click: () => {
-                // TODO: openURL.click
-                this.$router.push({
-                  name: 'browsing-view',
-                });
-              },
-            },
+            // {
+            //   label: this.$t('msg.file.openURL'),
+            //   accelerator: 'CmdOrCtrl+U',
+            //   click: () => {
+            //     // TODO: openURL.click
+            //     this.$router.push({
+            //       name: 'browsing-view',
+            //     });
+            //   },
+            // },
             { type: 'separator' },
             {
               label: this.$t('msg.file.copy'),
@@ -844,7 +844,7 @@ new Vue({
         template[1].submenu.splice(0, 0, this.updatePlayOrPause);
         template[4].submenu.splice(2, 0, this.updateFullScreen);
         template[2].submenu.splice(7, 0, this.updateAudioTrack());
-        template[0].submenu.splice(2, 0, result);
+        template[0].submenu.splice(1, 0, result);
         // menu.about
         if (process.platform === 'darwin') {
           template.unshift({

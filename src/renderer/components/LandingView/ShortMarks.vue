@@ -64,10 +64,10 @@ export default {
       this.showMarks = !this.showMarks;
     },
     handleBrowsingOpen(item) {
+      this.updateInitialUrl(item.url);
       this.$router.push({
         name: 'browsing-view',
       });
-      this.updateInitialUrl(item.url);
     },
   },
 };

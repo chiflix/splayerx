@@ -1,7 +1,7 @@
 <template>
  <div class="browsing">
    <browsing-header></browsing-header>
-   <webview :src="initialUrl" autosize class="web-view" ref="webView" allowpopups></webview>
+   <webview :src="availableUrl" autosize class="web-view" ref="webView" allowpopups></webview>
  </div>
 </template>
 
@@ -22,6 +22,10 @@ export default {
   },
   computed: {
     ...mapGetters(['winSize', 'winPos', 'isFullScreen', 'initialUrl']),
+    availableUrl() {
+      const parsedUrl = urlParseLax(this.initialUrl).protocol;
+      return parsedUrl.protocol ? parsedUrl.href : `http://${this.initialUrl}`;
+    },
   },
   watch: {
     initialUrl(val) {
