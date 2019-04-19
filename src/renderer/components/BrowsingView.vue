@@ -20,6 +20,7 @@ export default {
     return {
       quit: false,
       loadingState: false,
+      startTime: 0,
     };
   },
   components: {
@@ -86,10 +87,18 @@ export default {
       this.updateInitialUrl(e.url);
     });
     this.$refs.webView.addEventListener('did-start-loading', () => {
+      this.startTime = new Date();
       this.loadingState = true;
     });
     this.$refs.webView.addEventListener('did-stop-loading', () => {
-      this.loadingState = false;
+      const loadingTime = new Date() - this.startTime;
+      if (loadingTime % 3000 === 0) {
+        this.loadingState = false;
+      } else {
+        setTimeout(() => {
+          this.loadingState = false;
+        }, 3000 - (loadingTime % 3000));
+      }
     });
     window.onbeforeunload = (e) => {
       if (!this.quit) {
@@ -127,11 +136,11 @@ export default {
     width: 100%;
     height: 36px;
     position: absolute;
-    background-image: linear-gradient(-90deg, #414141 18%, #505050 44%, #545454 51%, #545454 56%, #505050 63%, #414141 86%);
+    background-image: linear-gradient(-90deg, #414141 18%, #555555 34%, #626262 51%, #626262 56%, #555555 69%, #414141 86%);
   }
 }
 .loading-animation {
-  animation: loading 1s linear 1 normal forwards;
+  animation: loading 3s linear 1 normal forwards;
   animation-iteration-count: infinite;
 }
 @keyframes loading {
