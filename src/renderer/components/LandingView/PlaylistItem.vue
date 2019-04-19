@@ -242,7 +242,7 @@ $border-radius: 3px;
   background-color: rgba(74,74,74,0.60);
   border: 0.7px solid rgba(255,255,255,0.1);
   box-shadow: 0 1px 2px 0 rgba(0,0,0,0.30);
-  border-radius: 1px;
+  border-radius: $border-radius;
 }
 .layer2 {
   position: absolute;
@@ -254,7 +254,7 @@ $border-radius: 3px;
   background-color: rgba(60,60,60,0.80);
   border: 0.7px solid rgba(255,255,255,0.25);
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.40);
-  border-radius: 1px;
+  border-radius: $border-radius;
 }
 .item {
   transition: bottom 100ms ease-in;
