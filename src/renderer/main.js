@@ -124,6 +124,64 @@ new Vue({
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub', 'reverseScrolling',
       'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath']),
+    darwinPlayback() {
+      return [
+        {
+          label: this.$t('msg.playback.forwardL'),
+          accelerator: 'Up',
+          click: () => {
+            this.$bus.$emit('seek', videodata.time + 60);
+          },
+        },
+        {
+          label: this.$t('msg.playback.backwardL'),
+          accelerator: 'Down',
+          click: () => {
+            this.$bus.$emit('seek', videodata.time - 60);
+          },
+        },
+      ];
+    },
+    winPlayback() {
+      return [
+        {
+          label: this.$t('msg.playback.forwardL'),
+          accelerator: 'Alt+Right',
+          click: () => {
+            this.$bus.$emit('seek', videodata.time + 60);
+          },
+        },
+        {
+          label: this.$t('msg.playback.backwardL'),
+          accelerator: 'Alt+Left',
+          click: () => {
+            this.$bus.$emit('seek', videodata.time - 60);
+          },
+        },
+      ];
+    },
+    winVolume() {
+      return [
+        {
+          label: this.$t('msg.audio.increaseVolume'),
+          accelerator: 'Up',
+          id: 'inVolume',
+          click: () => {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.INCREASE_VOLUME);
+          },
+        },
+        {
+          label: this.$t('msg.audio.decreaseVolume'),
+          accelerator: 'Down',
+          id: 'deVolume',
+          click: () => {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.DECREASE_VOLUME);
+          },
+        },
+      ];
+    },
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -423,20 +481,6 @@ new Vue({
               accelerator: 'Left',
               click: () => {
                 this.$bus.$emit('seek', videodata.time - 5);
-              },
-            },
-            {
-              label: this.$t('msg.playback.forwardL'),
-              accelerator: 'Up',
-              click: () => {
-                this.$bus.$emit('seek', videodata.time + 60);
-              },
-            },
-            {
-              label: this.$t('msg.playback.backwardL'),
-              accelerator: 'Down',
-              click: () => {
-                this.$bus.$emit('seek', videodata.time - 60);
               },
             },
             { type: 'separator' },
@@ -834,6 +878,7 @@ new Vue({
         template[0].submenu.splice(1, 0, result);
         // menu.about
         if (process.platform === 'darwin') {
+          template[1].submenu.splice(3, 0, ...this.darwinPlayback);
           template.unshift({
             label: app.getName(),
             submenu: [
@@ -870,6 +915,8 @@ new Vue({
           });
         }
         if (process.platform === 'win32') {
+          template[2].submenu.splice(0, 0, ...this.winVolume);
+          template[1].submenu.splice(3, 0, ...this.winPlayback);
           const file = template.shift();
           const winFile = file.submenu.slice(0, 2);
           winFile[1].submenu.unshift(file.submenu[3], file.submenu[2]);
