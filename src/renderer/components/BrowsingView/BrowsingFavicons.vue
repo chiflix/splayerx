@@ -1,6 +1,6 @@
 <template>
   <div class="fav-icons" :style="{ left: isDarwin ? '' : '15px', right: isDarwin ? '10px' : '' }">
-    <div class="fav-icons-details" v-show="showFavicon" :style="{ order: isDarwin ? '1' : '2' }">
+    <div class="fav-icons-details" ref="favDetail" :class="showFavicon ? 'fav-show-animation' : 'fav-hide-animation'" @animationend="handleFavAnimEnd" :style="{ order: isDarwin ? '1' : '2' }">
       <div class="fav-icon-container" v-for="(item, index) in favicon" @mouseover="favIconMouseOver(index)" @mouseleave="favIconMouseLeave"
       @mouseup="handleFavOpen(item)" :style="{
         margin: isDarwin ? 'auto 0 auto 15px' : 'auto 15px auto 0'
@@ -56,10 +56,18 @@ export default {
       this.faviconIndex = -1;
     },
     handleShowFavicon() {
+      if (!this.showFavicon) {
+        this.$refs.favDetail.style.display = 'flex';
+      }
       this.showFavicon = !this.showFavicon;
     },
     handleFavOpen(item) {
       this.updateInitialUrl(item.url);
+    },
+    handleFavAnimEnd(e) {
+      if (e.target.classList.contains('fav-hide-animation')) {
+        this.$refs.favDetail.style.display = 'none';
+      }
     },
   },
 };
@@ -72,10 +80,11 @@ export default {
   height: 20px;
   position: absolute;
   top: 8px;
+  z-index: 6;
   .fav-icons-details {
     width: auto;
     height: 20px;
-    display: flex;
+    display: none;
     .fav-icon-container {
       width: 20px;
       height: 20px;
@@ -87,5 +96,21 @@ export default {
     height: 10px;
     cursor: pointer;
   }
+}
+.fav-show-animation {
+  animation: fav-show 100ms linear 1 normal forwards;
+}
+.fav-hide-animation {
+  animation: fav-hide 100ms linear 1 normal forwards;
+}
+@keyframes fav-show {
+  0% { transform: translateX(10px); opacity: 0 }
+  50% { transform: translateX(5px); opacity: 0.5 }
+  100% { transform: translateX(0); opacity: 1 }
+}
+@keyframes fav-hide {
+  0% { transform: translateX(0); opacity: 1 }
+  50% { transform: translateX(5px); opacity: 0.5 }
+  100% { transform: translateX(10px); opacity: 0 }
 }
 </style>

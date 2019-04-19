@@ -36,6 +36,6 @@ export default {
   width: 100%;
   height: 36px;
   display: flex;
-  background-image: url(../../assets/gradient-bg.png);
+  background: rgba(65, 65, 65, 1);
 }
 </style>

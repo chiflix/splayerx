@@ -1,6 +1,7 @@
 <template>
  <div class="browsing">
    <browsing-header></browsing-header>
+   <div class="loading-state loading-animation" v-show="loadingState"></div>
    <webview :src="availableUrl" autosize class="web-view" ref="webView" allowpopups></webview>
    <browsing-control></browsing-control>
  </div>
@@ -18,6 +19,7 @@ export default {
   data() {
     return {
       quit: false,
+      loadingState: false,
     };
   },
   components: {
@@ -83,6 +85,12 @@ export default {
     this.$refs.webView.addEventListener('new-window', (e) => { // new tabs
       this.updateInitialUrl(e.url);
     });
+    this.$refs.webView.addEventListener('did-start-loading', () => {
+      this.loadingState = true;
+    });
+    this.$refs.webView.addEventListener('did-stop-loading', () => {
+      this.loadingState = false;
+    });
     window.onbeforeunload = (e) => {
       if (!this.quit) {
         e.returnValue = false;
@@ -115,5 +123,22 @@ export default {
     -webkit-app-region: no-drag;
     background: rgba(255, 255, 255, 1);
   }
+  .loading-state {
+    width: 100%;
+    height: 36px;
+    position: absolute;
+    background-image: linear-gradient(-90deg, #414141 18%, #505050 44%, #545454 51%, #545454 56%, #505050 63%, #414141 86%);
+  }
+}
+.loading-animation {
+  animation: loading 1s linear 1 normal forwards;
+  animation-iteration-count: infinite;
+}
+@keyframes loading {
+  0% { transform: translateX(-100%) }
+  25% { transform: translateX(-50%) }
+  50% { transform: translateX(0%) }
+  75% { transform: translateX(50%) }
+  100% { transform: translateX(100%) }
 }
 </style>
