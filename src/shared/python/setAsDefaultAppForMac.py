@@ -16,7 +16,7 @@ LSSetDefaultRoleHandlerForContentType('public.mpeg-4', kLSRolesViewer, SPLAYER)
 LSSetDefaultRoleHandlerForContentType('public.3gpp', kLSRolesViewer, SPLAYER)
 LSSetDefaultRoleHandlerForContentType('public.3gpp2', kLSRolesViewer, SPLAYER)
 # Create UTI for extra extensions
-for ext in ['mkv', 'rmvb', 'wmv', 'flv', 'ogg', 'ogv']:
+for ext in [$EXTS]:
     UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, ext, None)
     LSSetDefaultRoleHandlerForContentType(UTI, kLSRolesViewer, SPLAYER)
 
