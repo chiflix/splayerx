@@ -1,11 +1,11 @@
 <template>
   <div class="short-marks" :style="{ right: isDarwin ? '15px' : '', left: isDarwin ? '' : '15px' }">
-    <div class="marks-details" v-show="showMarks" :style="{ order: isDarwin ? '1' : '2' }">
+    <div class="marks-details" ref="marksDetail" :class="showMarks ? 'marks-show-animation' : 'marks-hide-animation'" @animationend="handleMarksAnimEnd" :style="{ order: isDarwin ? '1' : '2' }">
       <div class="marks-container" v-for="(item, index) in marks" @mouseover="marksMouseOver(index)" @mouseleave="marksMouseLeave()"
       @mouseup="handleBrowsingOpen(item)"
       :style="{
         background: markHoverIndex === index ? 'rgba(255, 255, 255, 0.35)' : 'rgba(255, 255, 255, 0.08)',
-        color: markHoverIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)'
+        color: markHoverIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.5)',
       }">
         <Icon :type="item.type" class="marks-icon" :style="{
           opacity: markHoverIndex === index ? '1' : 'calc(4 / 9)'
@@ -13,9 +13,11 @@
         <p>{{ item.name }}</p>
       </div>
     </div>
-    <Icon :type="showMarksType" class="display-marks" @mouseup.native="handleMarksDisplay" :style="{
+    <Icon type="showMarks" class="display-marks" @mouseup.native="handleMarksDisplay" :style="{
       order: isDarwin ? '2' : '1',
-      margin: isDarwin ? 'auto 0 auto 10px' : 'auto 0 auto 0'
+      margin: isDarwin ? 'auto 0 auto 10px' : 'auto 0 auto 0',
+      transform: `rotate(${rotateNum}deg)`,
+      transition: 'transform 100ms linear'
     }"></Icon>
   </div>
 </template>
@@ -43,11 +45,11 @@ export default {
     isDarwin() {
       return process.platform === 'darwin';
     },
-    showMarksType() {
+    rotateNum() {
       if (this.isDarwin) {
-        return this.showFavicon ? 'hideMarks' : 'showMarks';
+        return this.showMarks ? 180 : 0;
       }
-      return this.showFavicon ? 'showMarks' : 'hideMarks';
+      return this.showMarks ? 0 : 180;
     },
   },
   methods: {
@@ -61,6 +63,9 @@ export default {
       this.markHoverIndex = -1;
     },
     handleMarksDisplay() {
+      if (!this.showMarks) {
+        this.$refs.marksDetail.style.display = 'flex';
+      }
       this.showMarks = !this.showMarks;
     },
     handleBrowsingOpen(item) {
@@ -68,6 +73,11 @@ export default {
       this.$router.push({
         name: 'browsing-view',
       });
+    },
+    handleMarksAnimEnd(e) {
+      if (e.target.classList.contains('marks-hide-animation')) {
+        this.$refs.marksDetail.style.display = 'none';
+      }
     },
   },
 };
@@ -82,7 +92,7 @@ export default {
   top: 8px;
   z-index: 6;
   .marks-details {
-    display: flex;
+    display: none;
     width: auto;
     height: 26px;
     .marks-container {
@@ -111,5 +121,21 @@ export default {
     height: 18px;
     cursor: pointer;
   }
+}
+.marks-show-animation {
+  animation: marks-show 100ms linear 1 normal forwards;
+}
+.marks-hide-animation {
+  animation: marks-hide 100ms linear 1 normal forwards;
+}
+@keyframes marks-show {
+  0% { transform: translateX(43px); opacity: 0 }
+  50% { transform: translateX(21.5px); opacity: 0.5 }
+  100% { transform: translateX(0); opacity: 1 }
+}
+@keyframes marks-hide {
+  0% { transform: translateX(0); opacity: 1 }
+  50% { transform: translateX(21.5px); opacity: 0.5 }
+  100% { transform: translateX(43px); opacity: 0 }
 }
 </style>
