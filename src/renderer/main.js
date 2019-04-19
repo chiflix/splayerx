@@ -160,6 +160,28 @@ new Vue({
         },
       ];
     },
+    winVolume() {
+      return [
+        {
+          label: this.$t('msg.audio.increaseVolume'),
+          accelerator: 'Up',
+          id: 'inVolume',
+          click: () => {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.INCREASE_VOLUME);
+          },
+        },
+        {
+          label: this.$t('msg.audio.decreaseVolume'),
+          accelerator: 'Down',
+          id: 'deVolume',
+          click: () => {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.DECREASE_VOLUME);
+          },
+        },
+      ];
+    },
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -868,6 +890,7 @@ new Vue({
         template[4].submenu.splice(2, 0, this.updateFullScreen);
         template[2].submenu.splice(7, 0, this.updateAudioTrack());
         template[0].submenu.splice(1, 0, result);
+        console.log(template);
         // menu.about
         if (process.platform === 'darwin') {
           template[1].submenu.splice(3, 0, ...this.darwinPlayback);
@@ -907,6 +930,7 @@ new Vue({
           });
         }
         if (process.platform === 'win32') {
+          template[2].submenu.splice(0, 0, ...this.winVolume);
           template[1].submenu.splice(3, 0, ...this.winPlayback);
           const file = template.shift();
           const winFile = file.submenu.slice(0, 2);
