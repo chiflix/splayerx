@@ -20,6 +20,11 @@
   </div>
   <div class="title other-title">{{ $t("preferences.general.others") }}</div>
   <BaseCheckBox
+    :checkboxValue="reverseScrolling"
+    @update:checkbox-value="reverseScrolling = $event">
+    {{ $t('preferences.general.reverseScrolling') }}
+  </BaseCheckBox>
+  <BaseCheckBox
     :checkboxValue="deleteVideoHistoryOnExit"
     @update:checkbox-value="deleteVideoHistoryOnExit = $event">
     {{ $t('preferences.general.clearHistory') }}
@@ -66,6 +71,22 @@ export default {
   computed: {
     preferenceData() {
       return this.$store.getters.preferenceData;
+    },
+    reverseScrolling: {
+      get() {
+        return this.$store.getters.reverseScrolling;
+      },
+      set(val) {
+        if (val) {
+          this.$store.dispatch('reverseScrolling').then(() => {
+            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+          });
+        } else {
+          this.$store.dispatch('notReverseScrolling').then(() => {
+            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+          });
+        }
+      },
     },
     deleteVideoHistoryOnExit: {
       get() {

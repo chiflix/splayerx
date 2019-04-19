@@ -173,6 +173,7 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "退出時自動清空播放記錄",
+			"reverseScrolling": "觸摸板與鼠標反向滾動",
 			"displayLanguage": "顯示語言",
 			"generalSetting": "通用設置",
 			"others": "其他",
