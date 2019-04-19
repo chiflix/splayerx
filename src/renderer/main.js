@@ -122,7 +122,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub', 'reverseScrolling',
       'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath']),
     updateFullScreen() {
       if (this.isFullScreen) {
@@ -1298,10 +1298,17 @@ new Vue({
                 Math.abs(e.deltaY) * 0.06,
               );
             } else {
-              this.$store.dispatch(
-                e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                Math.abs(e.deltaY) * 0.06,
-              );
+              if (this.reverseScrolling) {
+                this.$store.dispatch(
+                  e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+                  Math.abs(e.deltaY) * 0.06,
+                );
+              } else {
+                this.$store.dispatch(
+                  e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+                  Math.abs(e.deltaY) * 0.06,
+                );
+              }
             }
           }
         }
