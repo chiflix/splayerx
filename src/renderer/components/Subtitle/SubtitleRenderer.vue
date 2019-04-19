@@ -386,7 +386,7 @@ export default {
         if (editVal !== '' && this.newSubHolder) {
           const { time: currentTime } = videodata;
           let sub = Object.assign({}, JSON.parse(JSON.stringify(this.newSubHolder.last)), {
-            end: parseFloat(currentTime.toFixed(2), 10) + 0.01,
+            end: parseFloat(currentTime.toFixed(2), 10) + 0.0001,
           });
           sub = uniteSubtitleWithFragment(sub);
           delete sub.reference;

@@ -620,10 +620,11 @@ export default {
         height: 3vh;
         max-height: 30px;
         z-index: 1;
-        background: rgba(255,255,255,0.39);
-        border: 1px solid rgba(255,255,255,0.46);
+        background: rgba(255,255,255,0.24);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.15);
         border-radius: 1px;
-        left: ${(this.preciseTime - this.times[0]) * this.space}px`);
+        left: ${(videodata.time - this.times[0]) * this.space}px`);
       this.$refs.subtitles && this.$refs.subtitles.appendChild(this.createSubElement);
       this.createSubElement.style.transition = 'all 0.3s ease-in-out';
       this.createSubElement.addEventListener('transitionend', (e) => {
@@ -865,7 +866,7 @@ export default {
       // 开始拖动字幕条，需要计算拉升还是位移
       this.subDragStartX = e.pageX;
       const path = e.path || (e.composedPath && e.composedPath());
-      const subElement = path.find(e => e.tagName === 'DIV' && e.className.includes('sub-line-mark'));
+      const subElement = path.find(e => e.tagName === 'DIV' && e.className.includes('sub-mark'));
       const leftTarget = path.find(e => e.tagName === 'I' && e.className.includes('drag-left'));
       const rightTarget = path.find(e => e.tagName === 'I' && e.className.includes('drag-right'));
       this.subDragElement = subElement;
