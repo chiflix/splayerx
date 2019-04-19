@@ -119,11 +119,14 @@ new Vue({
       menu: null,
       topOnWindow: false,
       canSendVolumeGa: true,
+      isTrackPad: false,
+      isWheelEnd: true,
+      wheelDirection: '',
     };
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
-      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath']),
+      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration']),
     darwinPlayback() {
       return [
         {
@@ -286,6 +289,8 @@ new Vue({
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
     });
+
+    this.currentWheelTimer = 0;
   },
   watch: {
     isSubtitleAvailable(val) {
@@ -1262,6 +1267,9 @@ new Vue({
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
+    isInteger(number) {
+      return !/\./.test(number.toString());
+    },
   },
   mounted() {
     // https://github.com/electron/electron/issues/3609
@@ -1331,7 +1339,7 @@ new Vue({
           }
         }
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
-          if (Math.abs(e.deltaY) !== 0) {
+          if (e.deltaY) {
             if (this.canSendVolumeGa) {
               this.$ga.event('app', 'volume', 'wheel');
               this.canSendVolumeGa = false;
@@ -1339,18 +1347,55 @@ new Vue({
                 this.canSendVolumeGa = true;
               }, 1000);
             }
-            if (process.platform !== 'darwin') {
-              this.$store.dispatch(
-                e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                Math.abs(e.deltaY) * 0.06,
-              );
-            } else {
-              this.$store.dispatch(
-                e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
-                Math.abs(e.deltaY) * 0.06,
-              );
+            if (this.wheelDirection === 'vertical') {
+              if (process.platform !== 'darwin') {
+                this.$store.dispatch(
+                  e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+                  Math.abs(e.deltaY) * 0.06,
+                );
+              } else {
+                this.$store.dispatch(
+                  e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
+                  Math.abs(e.deltaY) * 0.06,
+                );
+              }
             }
           }
+        }
+      }
+    });
+    window.addEventListener('wheel', (event) => {
+      const { deltaX: x, deltaY: y, deltaZ: z, ctrlKey } = event;
+      if (!ctrlKey) {
+        const { isInteger: int } = this;
+        this.isTrackPad = int(x) && int(y) && int(z);
+        this.isEnd = false;
+        clearTimeout(this.currentWheelTimer);
+        this.currentWheelTimer = setTimeout(() => {
+          this.isEnd = true;
+          this.wheelDirection = '';
+        }, 200);
+
+        if (!this.wheelDirection) {
+          if (this.isTrackPad && x) this.wheelDirection = 'horizontal';
+          else if (y) this.wheelDirection = 'vertical';
+        }
+
+        if (this.duration && this.wheelDirection === 'horizontal') {
+          let x = event.deltaX;
+          const eventName = x < 0 ? 'seek-forward' : 'seek-backward';
+          x = Math.abs(x);
+
+          let minimumSeekSpeed = 5;
+          const normalSeekSpeed = (this.duration / 100) * 2;
+          if (this.duration <= 100) minimumSeekSpeed = 1;
+          else if (normalSeekSpeed < minimumSeekSpeed) minimumSeekSpeed = normalSeekSpeed;
+
+          let finalSeekSpeed = minimumSeekSpeed;
+          if (x > 20 && x < 285) finalSeekSpeed = normalSeekSpeed;
+          else if (x >= 285) finalSeekSpeed = this.duration;
+
+          this.$bus.$emit(eventName, finalSeekSpeed);
         }
       }
     });
@@ -1387,5 +1432,6 @@ new Vue({
         this.openFile(...files);
       }
     });
+
   },
 }).$mount('#app');
