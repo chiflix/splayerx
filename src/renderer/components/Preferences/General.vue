@@ -373,6 +373,7 @@ $dropdown-height: 156px;
         transition: opacity 300ms ease-in;
       }
       .content {
+        width: 100%;
         font-family: $font-medium;
         font-size: 11px;
         color: #FFFFFF;
