@@ -364,7 +364,7 @@ $dropdown-height: 156px;
         transition: opacity 250ms ease-in;
       }
       .button-leave-active {
-        transition: opacity 400ms ease-in;
+        transition: opacity 300ms ease-in;
       }
       .content {
         font-family: $font-medium;
