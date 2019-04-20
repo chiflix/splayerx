@@ -173,7 +173,7 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "退出時自動清空播放記錄",
-			"reverseScrolling": "觸摸板與鼠標反向滾動",
+			"reverseScrolling": "鼠标滚轮反向",
 			"setDefault": "設為默認播放器",
 			"setDefaultDescription": "所有視頻文件都自動使用 SPlayer 打開。",
 			"restoreSettings": "還原初始設置",

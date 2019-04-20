@@ -173,7 +173,7 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "終了時にプレイ履歴を削除",
-			"reverseScrolling": "タッチパッドとマウスの逆スクロール",
+			"reverseScrolling": "マウスの逆スクロール",
 			"setDefault": "デフォルトのプレーヤーとして設定",
 			"setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",
 			"restoreSettings": "初期設定に戻す",

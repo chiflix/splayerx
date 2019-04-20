@@ -173,7 +173,7 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "Borrar siempre el historial de reproducción al salir",
-			"reverseScrolling": "Desplazamiento hacia atrás para trackpad y mouse",
+			"reverseScrolling": "Desplazamiento inverso del ratón",
 			"setDefault": "Establecer como el jugador por defecto",
 			"setDefaultDescription": "Todos los formatos de video se abren automáticamente usando SPlayer.",
 			"restoreSettings": "Restaurar datos y configuraciones",

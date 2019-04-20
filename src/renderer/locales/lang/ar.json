@@ -173,7 +173,7 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
-			"reverseScrolling": "التمرير العكسي للوحة التتبع والماوس",
+			"reverseScrolling": "التمرير عكس الماوس",
 			"setDefault": "تعيين كمشغل الفيديو الافتراضي",
 			"setDefaultDescription": ".افتح جميع ملفات الفيديو باستخدام SPlayer",
 			"restoreSettings": "استعادة البيانات والإعدادات",
