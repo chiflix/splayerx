@@ -1,3 +1,4 @@
+import { shell } from 'electron';
 import { getValidVideoExtensions } from './utils';
 
 async function spawn(...args) {
@@ -16,10 +17,13 @@ export async function setAsDefaultApp() {
     code = code.replace('$EXTS', exts.map(ext => `'${ext}'`).join(', '));
     await spawn('python', ['-c', code]);
   } else if (process.platform === 'win32') {
-    let exe = process.argv[0];
-    exe = `${exe} %1`;
+    // for Windows 10
+    if (shell.openExternal('ms-settings:defaultapps', { activate: true })) return;
+    // for old versions
+    let cmd = process.argv[0];
+    cmd = `${cmd} %1`;
     await spawn('reg', ['add', 'HKCU\\Software\\Classes\\Splayer', '/f', '/d', '"A Modern Media Player with Smart Translation"']);
-    await spawn('reg', ['add', 'HKCU\\Software\\Classes\\Splayer\\shell\\Open\\Command', '/f', '/d', exe]);
+    await spawn('reg', ['add', 'HKCU\\Software\\Classes\\Splayer\\shell\\Open\\Command', '/f', '/d', cmd]);
     await Promise.all(exts.map(ext => Promise.all([
       spawn('reg', ['add', `HKCU\\Software\\Classes\\.${ext}`, '/f', '/d', 'Splayer']),
       spawn('reg', ['add', `HKCU\\Software\\Classes\\.${ext}\\OpenWithProgids`, '/f', '/d', 'Splayer']),
