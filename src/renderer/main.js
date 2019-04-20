@@ -122,7 +122,7 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub', 'reverseScrolling',
       'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath']),
     darwinPlayback() {
       return [
@@ -1331,7 +1331,7 @@ new Vue({
           }
         }
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
-          if (Math.abs(e.deltaY) !== 0) {
+          if (e.deltaY) {
             if (this.canSendVolumeGa) {
               this.$ga.event('app', 'volume', 'wheel');
               this.canSendVolumeGa = false;
@@ -1339,7 +1339,7 @@ new Vue({
                 this.canSendVolumeGa = true;
               }, 1000);
             }
-            if (process.platform !== 'darwin') {
+            if (process.platform !== 'darwin' || this.reverseScrolling) {
               this.$store.dispatch(
                 e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
                 Math.abs(e.deltaY) * 0.06,

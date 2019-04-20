@@ -143,7 +143,6 @@ export default {
       }
     },
     onRecentItemMousemove(e) {
-      console.log(this);
       this.isDragging = true;
       const movementX = e.pageX - this.disX;
       const movementY = e.pageY - this.disY;
@@ -160,7 +159,6 @@ export default {
       }
     },
     onRecentItemMouseup() {
-      console.log(this);
       document.removeEventListener('mousemove', this.onRecentItemMousemove);
       this.showShadow = true;
       this.$refs.item.style.setProperty('transform', 'translate(0,0)');
@@ -190,7 +188,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$border-radius: 2px;
+$border-radius: 3px;
 .item {
   transition: bottom 100ms ease-in, transform 10ms ease-in;
   position: relative;

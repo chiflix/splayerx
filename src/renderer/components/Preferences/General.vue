@@ -18,8 +18,32 @@
       </div>
     </div>
   </div>
+  <div class="description-button">
+    <div class="setting-content">
+      <div class="setting-title">{{ $t("preferences.general.setDefault") }}</div>
+      <div class="setting-description">{{ $t("preferences.general.setDefaultDescription") }}</div>
+    </div>
+    <div class="setting-button no-drag" ref="button"
+      @mousedown="mousedownOnSetDefault"
+      @mouseup="setDefault">
+      <transition name="button" mode="out-in">
+        <div key="" v-if="!setState" class="content">{{ $t("preferences.general.setButton") }}</div>
+        <div :key="setState" v-else class="result">
+          <Icon :type="setState" :class="setState"/>
+        </div>
+      </transition>
+    </div>
+  </div>
+  <!-- <div class="description-button">
+    <div class="setting-content">
+      <div class="setting-title">{{ $t("preferences.general.restoreSettings") }}</div>
+      <div class="setting-description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
+    </div>
+    <div class="setting-button no-drag"
+      @mouseup="restoreSettings"><div class="content">{{ $t("preferences.general.setButton") }}</div></div>
+  </div> -->
   <div class="title other-title">{{ $t("preferences.general.others") }}</div>
-  <BaseCheckBox
+  <BaseCheckBox v-if="isMac"
     :checkboxValue="reverseScrolling"
     @update:checkbox-value="reverseScrolling = $event">
     {{ $t('preferences.general.reverseScrolling') }}
@@ -29,15 +53,13 @@
     @update:checkbox-value="deleteVideoHistoryOnExit = $event">
     {{ $t('preferences.general.clearHistory') }}
   </BaseCheckBox>
-  <BaseCheckBox
-    @update:checkbox-value="setAsDefault($event)">
-    {{ '设为默认应用' }}
-  </BaseCheckBox>
 </div>
 </template>
 
 <script>
 import electron from 'electron';
+import path from 'path';
+import { promises as fsPromises } from 'fs';
 import { setAsDefaultApp } from '@/../shared/system';
 import Icon from '@/components/BaseIconContainer.vue';
 import { codeToLanguageName } from '@/helpers/language';
@@ -53,6 +75,9 @@ export default {
   data() {
     return {
       showSelection: false,
+      isSetting: false,
+      setState: '',
+      buttonContentTimeoutId: NaN,
       languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
     };
   },
@@ -69,6 +94,9 @@ export default {
     },
   },
   computed: {
+    isMac() {
+      return process.platform === 'darwin';
+    },
     preferenceData() {
       return this.$store.getters.preferenceData;
     },
@@ -119,16 +147,78 @@ export default {
     },
   },
   methods: {
+    mouseupOnOther() {
+      if (!this.isSetting) {
+        this.$refs.button.style.setProperty('background-color', '');
+        this.$refs.button.style.setProperty('opacity', '');
+      }
+      document.removeEventListener('mouseup', this.mouseupOnOther);
+    },
+    mousedownOnSetDefault() {
+      if (!this.isSetting) {
+        this.$refs.button.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
+        this.$refs.button.style.setProperty('opacity', '0.5');
+        document.addEventListener('mouseup', this.mouseupOnOther);
+      }
+    },
+    async setDefault() {
+      if (this.isSetting) return;
+      this.isSetting = true;
+      try {
+        await setAsDefaultApp();
+        // TODO: feedback
+        clearTimeout(this.buttonContentTimeoutId);
+        this.setState = 'success';
+        this.$refs.button.style.setProperty('transition-delay', '350ms');
+        this.$refs.button.style.setProperty('background-color', '');
+        this.$refs.button.style.setProperty('opacity', '');
+        this.buttonContentTimeoutId = setTimeout(() => {
+          this.setState = '';
+          this.isSetting = false;
+          this.$refs.button.style.setProperty('transition-delay', '');
+        }, 1500);
+      } catch (ex) {
+        // TODO: feedback
+        clearTimeout(this.buttonContentTimeoutId);
+        this.setState = 'failed';
+        this.$refs.button.style.setProperty('transition-delay', '350ms');
+        this.$refs.button.style.setProperty('background-color', '');
+        this.$refs.button.style.setProperty('opacity', '');
+        this.buttonContentTimeoutId = setTimeout(() => {
+          this.setState = '';
+          this.isSetting = false;
+          this.$refs.button.style.setProperty('transition-delay', '');
+        }, 1500);
+      }
+    },
+    restoreSettings() {
+      console.log('restore-settings');
+      // remove dir
+      const userData = electron.remote.app.getPath('userData');
+      const removeDir = dir => fsPromises.readdir(dir)
+        .then(files => files.reduce((result, file) => {
+          const filePath = path.join(dir, file);
+          return result.then(() => fsPromises.unlink(filePath)
+            .then(null, () => removeDir(filePath)));
+        }, Promise.resolve()).then(() => {
+          if (dir !== userData) return fsPromises.rmdir(dir);
+          return Promise.resolve();
+        }));
+      removeDir(userData)
+        .then(() => {
+          console.log('success');
+        })
+        .catch((err) => {
+          console.log('failed', err);
+        });
+      // this.$store.dispatch('init-settings');
+    },
     mapCode(code) {
       return codeToLanguageName(code);
     },
     handleSelection(language) {
       this.displayLanguage = language;
       this.showSelection = false;
-    },
-    setAsDefault(val) {
-      if (!val) return;
-      setAsDefaultApp();
     },
   },
 };
@@ -144,7 +234,7 @@ $dropdown-height: 156px;
   height: 100%;
   .title {
     margin-bottom: 7px;
-    font-family: PingFangSC-Medium;
+    font-family: $font-medium;
     font-size: 13px;
     color: rgba(255,255,255,0.9);
     letter-spacing: 0;
@@ -167,7 +257,7 @@ $dropdown-height: 156px;
   }
   .description {
     margin-bottom: 13px;
-    font-family: PingFangSC-Medium;
+    font-family: $font-medium;
     font-size: 11px;
     color: rgba(255,255,255,0.5);
     letter-spacing: 0;
@@ -230,6 +320,69 @@ $dropdown-height: 156px;
         .selection:hover {
           background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
         }
+      }
+    }
+  }
+  .description-button {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 35px;
+    width: 349px;
+    height: fit-content;
+    .setting-content {
+      width: 238px;
+      .setting-title {
+        white-space: nowrap;
+        margin-bottom: 6px;
+        font-family: $font-medium;
+        font-size: 13px;
+        color: rgba(255,255,255,0.9);
+        letter-spacing: 0;
+        line-height: 13px;
+      }
+      .setting-description {
+        font-family: $font-medium;
+        font-size: 11px;
+        color: rgba(255,255,255,0.5);
+        letter-spacing: 0;
+      }
+    }
+    .setting-button {
+      cursor: pointer;
+      position: relative;
+      align-self: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
+      border: 0.5px solid rgba(255,255,255,0.20);
+      border-radius: 2px;
+      transition-property: background-color, opacity;
+      transition-duration: 80ms;
+      transition-timing-function: ease-in;
+
+      width: 61px;
+      height: 23px;
+      .button-enter, .button-leave-to {
+        opacity: 0;
+      }
+      .button-enter-active {
+        transition: opacity 250ms ease-in;
+      }
+      .button-leave-active {
+        transition: opacity 300ms ease-in;
+      }
+      .content {
+        width: 100%;
+        font-family: $font-medium;
+        font-size: 11px;
+        color: #FFFFFF;
+        letter-spacing: 0;
+        text-align: center;
+        line-height: 13px;
+      }
+      .result {
+        position: absolute;
       }
     }
   }
