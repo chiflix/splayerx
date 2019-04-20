@@ -344,6 +344,7 @@ $dropdown-height: 156px;
       }
     }
     .setting-button {
+      cursor: pointer;
       position: relative;
       align-self: center;
       display: flex;
