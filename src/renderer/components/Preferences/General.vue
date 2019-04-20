@@ -169,21 +169,25 @@ export default {
         // TODO: feedback
         clearTimeout(this.buttonContentTimeoutId);
         this.setState = 'success';
+        this.$refs.button.style.setProperty('transition-delay', '350ms');
         this.$refs.button.style.setProperty('background-color', '');
         this.$refs.button.style.setProperty('opacity', '');
         this.buttonContentTimeoutId = setTimeout(() => {
           this.setState = '';
           this.isSetting = false;
+          this.$refs.button.style.setProperty('transition-delay', '');
         }, 1500);
       } catch (ex) {
         // TODO: feedback
         clearTimeout(this.buttonContentTimeoutId);
         this.setState = 'failed';
+        this.$refs.button.style.setProperty('transition-delay', '350ms');
         this.$refs.button.style.setProperty('background-color', '');
         this.$refs.button.style.setProperty('opacity', '');
         this.buttonContentTimeoutId = setTimeout(() => {
           this.setState = '';
           this.isSetting = false;
+          this.$refs.button.style.setProperty('transition-delay', '');
         }, 1500);
       }
     },
@@ -353,7 +357,9 @@ $dropdown-height: 156px;
       background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
       border: 0.5px solid rgba(255,255,255,0.20);
       border-radius: 2px;
-      transition: background-color 80ms ease-in, opacity 80ms ease-in;
+      transition-property: background-color, opacity;
+      transition-duration: 80ms;
+      transition-timing-function: ease-in;
 
       width: 61px;
       height: 23px;
