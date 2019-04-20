@@ -168,7 +168,7 @@ export default {
         await setAsDefaultApp();
         // TODO: feedback
         clearTimeout(this.buttonContentTimeoutId);
-        this.setState = 'success';;
+        this.setState = 'success';
         this.$refs.button.style.setProperty('background-color', '');
         this.$refs.button.style.setProperty('opacity', '');
         this.buttonContentTimeoutId = setTimeout(() => {
