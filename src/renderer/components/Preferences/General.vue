@@ -23,8 +23,16 @@
       <div class="setting-title">{{ $t("preferences.general.setDefault") }}</div>
       <div class="setting-description">{{ $t("preferences.general.setDefaultDescription") }}</div>
     </div>
-    <div class="setting-button no-drag"
-      @mouseup="setDefault"><div class="content">{{ $t("preferences.general.setButton") }}</div></div>
+    <div class="setting-button no-drag" ref="button"
+      @mousedown="mousedownOnSetDefault"
+      @mouseup="setDefault">
+      <transition name="button" mode="out-in">
+        <div key="" v-if="!setState" class="content">{{ $t("preferences.general.setButton") }}</div>
+        <div :key="setState" v-else class="result">
+          <Icon :type="setState" :class="setState"/>
+        </div>
+      </transition>
+    </div>
   </div>
   <!-- <div class="description-button">
     <div class="setting-content">
@@ -35,7 +43,7 @@
       @mouseup="restoreSettings"><div class="content">{{ $t("preferences.general.setButton") }}</div></div>
   </div> -->
   <div class="title other-title">{{ $t("preferences.general.others") }}</div>
-  <BaseCheckBox
+  <BaseCheckBox v-if="isMac"
     :checkboxValue="reverseScrolling"
     @update:checkbox-value="reverseScrolling = $event">
     {{ $t('preferences.general.reverseScrolling') }}
@@ -67,6 +75,9 @@ export default {
   data() {
     return {
       showSelection: false,
+      isSetting: false,
+      setState: '',
+      buttonContentTimeoutId: NaN,
       languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
     };
   },
@@ -83,6 +94,9 @@ export default {
     },
   },
   computed: {
+    isMac() {
+      return process.platform === 'darwin';
+    },
     preferenceData() {
       return this.$store.getters.preferenceData;
     },
@@ -133,12 +147,44 @@ export default {
     },
   },
   methods: {
+    mouseupOnOther() {
+      if (!this.isSetting) {
+        this.$refs.button.style.setProperty('background-color', '');
+        this.$refs.button.style.setProperty('opacity', '');
+      }
+      document.removeEventListener('mouseup', this.mouseupOnOther);
+    },
+    mousedownOnSetDefault() {
+      if (!this.isSetting) {
+        this.$refs.button.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
+        this.$refs.button.style.setProperty('opacity', '0.5');
+        document.addEventListener('mouseup', this.mouseupOnOther);
+      }
+    },
     async setDefault() {
+      if (this.isSetting) return;
+      this.isSetting = true;
       try {
         await setAsDefaultApp();
         // TODO: feedback
+        clearTimeout(this.buttonContentTimeoutId);
+        this.setState = 'success';;
+        this.$refs.button.style.setProperty('background-color', '');
+        this.$refs.button.style.setProperty('opacity', '');
+        this.buttonContentTimeoutId = setTimeout(() => {
+          this.setState = '';
+          this.isSetting = false;
+        }, 1500);
       } catch (ex) {
         // TODO: feedback
+        clearTimeout(this.buttonContentTimeoutId);
+        this.setState = 'failed';
+        this.$refs.button.style.setProperty('background-color', '');
+        this.$refs.button.style.setProperty('opacity', '');
+        this.buttonContentTimeoutId = setTimeout(() => {
+          this.setState = '';
+          this.isSetting = false;
+        }, 1500);
       }
     },
     restoreSettings() {
@@ -150,7 +196,10 @@ export default {
           const filePath = path.join(dir, file);
           return result.then(() => fsPromises.unlink(filePath)
             .then(null, () => removeDir(filePath)));
-        }, Promise.resolve()).then(() => fsPromises.rmdir(dir)));
+        }, Promise.resolve()).then(() => {
+          if (dir !== userData) return fsPromises.rmdir(dir);
+          return Promise.resolve();
+        }));
       removeDir(userData)
         .then(() => {
           console.log('success');
@@ -295,6 +344,7 @@ $dropdown-height: 156px;
       }
     }
     .setting-button {
+      position: relative;
       align-self: center;
       display: flex;
       justify-content: center;
@@ -302,21 +352,29 @@ $dropdown-height: 156px;
       background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
       border: 0.5px solid rgba(255,255,255,0.20);
       border-radius: 2px;
-      transition: background-color 100ms ease-in;
+      transition: background-color 80ms ease-in, opacity 80ms ease-in;
 
       width: 61px;
       height: 23px;
-      &:active {
-        background-color: rgba(0,0,0,0.20);
+      .button-enter, .button-leave-to {
+        opacity: 0;
+      }
+      .button-enter-active {
+        transition: opacity 400ms ease-in;
+      }
+      .button-leave-active {
+        transition: opacity 500ms ease-in;
       }
       .content {
-        opacity: 0.9;
         font-family: $font-medium;
         font-size: 11px;
         color: #FFFFFF;
         letter-spacing: 0;
         text-align: center;
         line-height: 13px;
+      }
+      .result {
+        position: absolute;
       }
     }
   }
