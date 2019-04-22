@@ -216,7 +216,7 @@ export default {
   },
   computed: {
     ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'paused',
-      'winRatio', 'winWidth', 'winHeight', 'winPos', 'winSize', 'isFirstSubtitle', 'enabledSecondarySub',
+      'winRatio', 'winWidth', 'winHeight', 'winPos', 'winSize', 'isFirstSubtitle', 'enabledSecondarySub', 'isProfessional',
     ]),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {
@@ -411,6 +411,12 @@ export default {
     },
     computedAvailableItems(val) {
       this.updateNoSubtitle(!val.length);
+    },
+    isProfessional(val) {
+      if (val) {
+        this.modifiedAdvancedPanelVisiable = false;
+        this.clickItemArrow = false;
+      }
     },
   },
   methods: {
@@ -640,10 +646,15 @@ export default {
       this.hoverIndex = -5;
     },
     toggleItemClick(event, index) {
-      if (event.target.nodeName === 'DIV') {
-        const { computedAvailableItems } = this;
+      const isEffectiveClick = event.target.nodeName === 'DIV';
+      const { computedAvailableItems } = this;
+      const currentItem = computedAvailableItems[index];
+      if (isEffectiveClick && this.currentSubtitleIndex === index && currentItem && currentItem.type === 'modified') {
+        this.modifiedAdvancedPanelVisiable = !this.modifiedAdvancedPanelVisiable;
+        this.clickItemArrow = true;
+      } else if (isEffectiveClick && currentItem) {
         this.clickItem = true;
-        this.$bus.$emit('change-subtitle', computedAvailableItems[index].id);
+        this.$bus.$emit('change-subtitle', currentItem.id);
         setTimeout(() => {
           this.showSubtitleDetails(index);
         }, 0);

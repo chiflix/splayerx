@@ -69,7 +69,7 @@
     </div>
     <div class="sub-editor-body" :style="{
       bottom: `${(60 / 1080) * 100}%`,
-      width: `${inputWitdh}px`
+      minWidth: `${inputWitdh}px`
     }">
       <div v-if="referenceSubtitleId && paused" class="referenceText subtitle-style" v-html="`&nbsp;${getCurrentReferenceCues()}`"
       :style="{
@@ -107,7 +107,7 @@
 </template>
 <script>
 import { mapGetters, mapMutations, mapActions } from 'vuex';
-import { throttle, cloneDeep } from 'lodash';
+import { cloneDeep } from 'lodash';
 import {
   EVENT_BUS_COLLECTIONS as bus,
   MODIFIED_SUBTITLE_TYPE as modifiedTypes,
@@ -370,6 +370,7 @@ export default {
         this.triggerCount += 1;
         this.updateChooseIndex(-2);
       } else {
+        this.resetCurrentTime();
         const canChooseSubs = this.currentSub.filter(e => e.track === 1);
         if (canChooseSubs.length > 0) {
           this.updateChooseIndex(canChooseSubs[0].index);
@@ -522,6 +523,7 @@ export default {
   },
   methods: {
     ...mapMutations({
+      toggleSpaceDown: editorMutations.TOGGLE_SPACE_DOWN_IN_PROFESSIONAL,
       toggleDragable: editorMutations.TOGGLE_DRAGABLE_IN_PROFESSIONAL,
       toggleProfessional: editorMutations.TOGGLE_PROFESSIONAL,
       updateEditHistoryLen: editorMutations.UPDATE_EDIT_HISTORY_LEN,
@@ -614,7 +616,10 @@ export default {
     },
     createMirrorSubtitle(obj) {
       this.createSubElement = document.createElement('div');
-      this.createSubElement.setAttribute('style', `width: 1px;
+      const currentLeft = (obj.add.end - this.times[0]) * this.space;
+      const targetLeft = (obj.add.start - this.times[0]) * this.space;
+      const currentRight = (3 * this.winWidth) - currentLeft;
+      this.createSubElement.setAttribute('style', `
         position: absolute;
         top: ${(6 * this.vh) + 33}px;
         height: 3vh;
@@ -624,7 +629,8 @@ export default {
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255,255,255,0.15);
         border-radius: 1px;
-        left: ${(videodata.time - this.times[0]) * this.space}px`);
+        left: ${currentLeft}px;
+        right: ${currentRight}px`);
       this.$refs.subtitles && this.$refs.subtitles.appendChild(this.createSubElement);
       this.createSubElement.style.transition = 'all 0.3s ease-in-out';
       this.createSubElement.addEventListener('transitionend', (e) => {
@@ -633,8 +639,7 @@ export default {
         }
       }, false);
       setImmediate(() => {
-        this.createSubElement.style.left = `${(obj.add.start - this.times[0]) * this.space}px`;
-        this.createSubElement.style.width = `${(obj.add.end - obj.add.start) * this.space}px`;
+        this.createSubElement.style.left = `${targetLeft}px`;
       });
     },
     afterMirrorSubtitleAnimation(obj) {
@@ -657,6 +662,7 @@ export default {
         const b = document.getElementsByTagName('video')[0];
         currentTime = b ? b.currentTime : videodata.time;
       }
+      currentTime = parseFloat(currentTime.toFixed(2), 10);
       this.editorCurrentTime = parseInt(currentTime, 10);
       this.preciseTime = currentTime;
       this.currentLeft = ((this.editorCurrentTime - currentTime) * this.space) -
@@ -693,15 +699,16 @@ export default {
         // 正在拖动时间轴， 处理越界
         this.toggleDragable(true);
         let offset = e.pageX - this.dragStartX;
-        const seekTime = this.preciseTime - (offset / this.space);
+        const seekTime = this.dragStartTime - (offset / this.space);
         if (seekTime <= 0) {
           offset = this.dragStartTime * this.space;
         }
-        if (seekTime <= this.duration) {
-          requestAnimationFrame(throttle(() => {
-            this.updateWhenMoving(offset);
-          }, 100));
+        if (seekTime >= this.duration) {
+          offset = (this.dragStartTime - this.duration) * this.space;
         }
+        requestAnimationFrame(() => {
+          this.updateWhenMoving(offset);
+        });
       }
     },
     handleDragEndEditor(e) {
@@ -715,17 +722,6 @@ export default {
       this.toggleDragable(false);
       // 拖动时间轴结束，重设时间、位置信息
       if (this.timeLineDraging) {
-        // 这段是处理this.chooseIndexs设为-1，但是这次拖拽，下面有字幕，需要选中
-        // let offset = e.pageX - this.dragStartX;
-        // const seekTime = this.preciseTime - (offset / this.space);
-        // if (seekTime <= 0) {
-        //   offset = this.dragStartTime * this.space;
-        // }
-        // if (seekTime <= this.duration) {
-        //   requestAnimationFrame(throttle(() => {
-        //     this.updateWhenMoving(offset);
-        //   }, 100));
-        // }
         if (e.pageX !== this.dragStartX) {
           this.resetCurrentTime();
           this.triggerCount += 1;
@@ -744,11 +740,13 @@ export default {
     },
     updateWhenMoving(offset) {
       // 时间轴偏移计算
-      const preciseTime = this.dragStartTime - (offset / this.space);
+      let preciseTime = this.dragStartTime - (offset / this.space);
+      preciseTime = preciseTime > 0 ? preciseTime : 0;
+      preciseTime = preciseTime < this.duration ? preciseTime : this.duration;
       this.currentLeft = this.dragStartLeft + offset;
-      this.preciseTime = preciseTime > 0 ? preciseTime : 0;
-      // this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
+      this.preciseTime = preciseTime;
       this.$bus.$emit('seek', this.preciseTime);
+      videodata.time = this.preciseTime;
     },
     handleMouseUpOnTimeLine(e) {
       // const nowTamp = Date.now();
@@ -780,6 +778,7 @@ export default {
       this.resetCurrentTime(this.preciseTime);
       // this.triggerCount += 1;
       this.$bus.$emit('seek', this.preciseTime);
+      videodata.time = this.preciseTime;
       this.$refs.timeLine.style.transition = '';
       this.$refs.timeLine.removeEventListener('transitionend', this.transitionend);
       // this.timeLineClickTimestamp = 0;
@@ -819,6 +818,7 @@ export default {
       this.triggerCount += 1;
       // console.log(this.preciseTime);
       this.$bus.$emit('seek', this.preciseTime);
+      videodata.time = this.preciseTime;
       this.$refs.timeLine.style.transition = '';
       this.$refs.timeLine.removeEventListener('transitionend', this.doubleClickTransitionend);
       // this.transitionInfo = null;
@@ -853,7 +853,7 @@ export default {
       return c;
     },
     handleHoverIn(e, sub) {
-      if (!(this.subDragMoving || this.subLeftDraging || this.subRightDraging)) {
+      if (!(this.subDragMoving || this.subLeftDraging || this.subRightDraging) && this.paused) {
         this.hoverIndex = sub.index;
       }
     },
@@ -918,9 +918,9 @@ export default {
       this.resetCurrentTime(this.preciseTime);
       this.triggerCount += 1;
       this.$bus.$emit('seek', this.preciseTime);
+      videodata.time = this.preciseTime;
       this.$refs.timeLine.style.transition = '';
       this.$refs.timeLine.removeEventListener('transitionend', this.timeLineTransitionend);
-      this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
       this.lock = false;
       if (!this.timer) {
         // 鼠标已经up，但是动画刚执行结束，手动触发finishSubDrag
@@ -1331,6 +1331,7 @@ export default {
         this.updateChooseIndex(-2);
         this.hoverIndex = -2;
       } else if (e && e.keyCode === 32 && this.spaceKeyPressStartTime === 0) {
+        this.toggleSpaceDown(true);
         this.spaceKeyPressStartTime = Date.now();
         this.lastPaused = this.paused;
         !this.lastPaused && this.$bus.$emit('toggle-playback');
@@ -1343,6 +1344,7 @@ export default {
         this.$bus.$emit('toggle-playback');
       }
       this.spaceKeyPressStartTime = 0;
+      this.toggleSpaceDown(false);
     },
     transcode(time, num) { // eslint-disable-line
       if (time < 0) {
@@ -1579,10 +1581,7 @@ export default {
       }
     });
     this.$bus.$on(bus.SUBTITLE_EDITOR_FOCUS_BY_ENTER, () => {
-      if (!this.showTextarea) {
-        if (!this.paused) {
-          this.$bus.$emit('toggle-playback');
-        }
+      const show = () => {
         const currentChooseSub = this.validitySubs
           .find(e => e.index === this.chooseIndex);
         const currentSub = this.currentSub.find(e => e.track === 1);
@@ -1596,6 +1595,15 @@ export default {
         } else if (this.showAddInput) {
           this.updateChooseIndex(-1);
           this.showTextarea = true;
+        }
+      };
+      if (!this.showTextarea) {
+        if (!this.paused) {
+          this.$bus.$emit('toggle-playback');
+          // this.$nextTick(show);
+          setImmediate(show);
+        } else {
+          show();
         }
       }
     });

@@ -225,6 +225,7 @@ export default {
         }
       }
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minSize);
+      this.$bus.$emit(bus.SUBTITLE_DELETE_IMMEDIATELY);
       // this.windowMinimumSize(minSize);
       // 处理phase2以下的尺寸，进入高级模式，拉大窗口
     },
@@ -837,7 +838,7 @@ export default {
           this.$bus.$emit(bus.SUBTITLE_DELETE_DONE);
           this.deleteModifiedSubtitleInstance = null;
         });
-      }, 3000);
+      }, 5000);
     },
     exportSubtitle() {
       const currentSubtitle = this.subtitleInstances[this.currentFirstSubtitleId];
@@ -955,6 +956,7 @@ export default {
     this.$bus.$on(bus.DID_MODIFIED_SUBTITLE, this.modifiedSubtitle);
     // 当删除某个字幕的文件
     this.$bus.$on(bus.SUBTITLE_DELETE, this.deleteSubtitle);
+    // 收到取消删除事件
     this.$bus.$on(bus.SUBTITLE_DELETE_CANCEL, () => {
       clearTimeout(this.deleteModifiedSubtitleTimer);
       this.deleteModifiedSubtitleTimer = null;
@@ -976,6 +978,21 @@ export default {
             },
           },
         }]);
+      }
+    });
+    // 立即删除
+    this.$bus.$on(bus.SUBTITLE_DELETE_IMMEDIATELY, () => {
+      clearTimeout(this.deleteModifiedSubtitleTimer);
+      this.deleteModifiedSubtitleTimer = null;
+      if (this.deleteModifiedSubtitleInstance) {
+        const id = this.deleteModifiedSubtitleInstance.id;
+        const path = this.deleteModifiedSubtitleInstance.src;
+        deleteSubtitles([id], this.originSrc).then(async (result) => {
+          this.addLog('info', `Subtitle delete { successId:${result.success}, failureId:${result.failure} }`);
+          await deleteFileByPath(path);
+          this.$bus.$emit(bus.SUBTITLE_DELETE_DONE);
+          this.deleteModifiedSubtitleInstance = null;
+        });
       }
     });
     // 导出自制字幕

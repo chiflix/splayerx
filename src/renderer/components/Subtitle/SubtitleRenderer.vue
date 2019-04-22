@@ -18,8 +18,9 @@
       <div class="cue-wrap" v-if="filter(cue)"
         :style="{
           zoom: isProfessional ? zoom : isFirstSub ? `${scaleNum}` : `${secondarySubScale}`,
-          width: !isEditable ? 'auto' : isProfessional ? `${inputWitdh/zoom}px` : isFirstSub ? `${inputWitdh/scaleNum}px` : `${inputWitdh/secondarySubScale}px`,
-          minWidth: isProfessional ? `${inputWitdh/zoom}px` : isFirstSub ? `${inputWitdh/scaleNum}px` : `${inputWitdh/secondarySubScale}px`,
+          // width: `${inputWitdh}px`,
+          minWidth: minInputWidth,
+          maxWidth: maxInputWitdh,
           lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
         }">
         <cue-editable-renderer class="cueRender"
@@ -42,8 +43,8 @@
       <div class="cue-wrap"
         :style="{
           zoom: zoom,
-          width: !isEditable ? 'auto' : `${inputWitdh/zoom}px`,
-          minWidth: `${inputWitdh/zoom}px`,
+          minWidth: minInputWidth,
+          maxWidth: maxInputWitdh,
           lineHeight: 'normal',
         }">
         <cue-editable-renderer class="cueRender"
@@ -186,7 +187,8 @@ export default {
       // return sizeAvaliable && !this.playlistShow;
       return !this.playlistShow;
     },
-    inputWitdh() { // eslint-disable-line
+    minInputWidth() { // eslint-disable-line
+      // 最小就是 ---|-**最小宽度**-|三个icon
       const winRatio = this.winRatio;
       const width = this.winWidth;
       const height = this.winHeight;
@@ -198,7 +200,25 @@ export default {
       } else if ((winRatio >= 1 && height > 289) || (winRatio < 1 && width > 289)) {
         computed = width - (2 * 140);
       }
-      return computed;
+      if (this.isProfessional) {
+        return `${computed / this.zoom}px`;
+      } else if (!this.isProfessional && this.isFirstSub) {
+        return `${computed / this.scaleNum}px`;
+      } else if (!this.isProfessional) {
+        return `${computed / this.secondarySubScale}px`;
+      }
+    },
+    maxInputWitdh() { // eslint-disable-line
+      const width = this.winWidth;
+      if (!this.isEditable) {
+        return 'none';
+      } else if (this.isProfessional) {
+        return `${width / this.zoom}px`;
+      } else if (!this.isProfessional && this.isFirstSub) {
+        return `${width / this.scaleNum}px`;
+      } else if (!this.isProfessional) {
+        return `${width / this.secondarySubScale}px`;
+      }
     },
     zoom() {
       if (this.isProfessional) {
@@ -284,11 +304,11 @@ export default {
     showTextarea(val) {
       if (val && this.chooseIndex > -2) {
         this.index = this.chooseIndex;
-        this.$nextTick(() => {
-          setImmediate(() => {
-            this.toggleEditable(true);
-          });
+        // this.$nextTick(() => {
+        setImmediate(() => {
+          this.toggleEditable(true);
         });
+        // });
       }
     },
   },
@@ -386,7 +406,7 @@ export default {
         if (editVal !== '' && this.newSubHolder) {
           const { time: currentTime } = videodata;
           let sub = Object.assign({}, JSON.parse(JSON.stringify(this.newSubHolder.last)), {
-            end: parseFloat(currentTime.toFixed(2), 10) + 0.0001,
+            end: parseFloat(currentTime.toFixed(2), 10) + 0.01,
           });
           sub = uniteSubtitleWithFragment(sub);
           delete sub.reference;
@@ -927,7 +947,9 @@ export default {
     cursor: pointer;
   }
   .cue-wrap {
+    padding: 0 5px;
     display: flex;
+    box-sizing: border-box;
     flex-direction: column-reverse;
     position: relative;
     z-index: 2;

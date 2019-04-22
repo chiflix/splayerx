@@ -1514,6 +1514,7 @@ new Vue({
     /* eslint-disable */
     window.addEventListener('wheel', (e) => {
       // ctrlKey is the official way of detecting pinch zoom on mac for chrome
+      if (this.isEditable) return;
       if (!e.ctrlKey) {
         let isAdvanceColumeItem;
         let isSubtitleScrollItem;

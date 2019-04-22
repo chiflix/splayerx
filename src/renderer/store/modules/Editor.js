@@ -4,6 +4,7 @@ import { Editor as editorMutations } from '../mutationTypes';
 const state = {
   isEditable: false, // 字幕编辑模式
   isDragableInProfessional: false, // 在字幕高级模式下，是不是拖拽激活模式
+  isSpaceDownInProfessional: false, // 在字幕高级模式下，是不是按了空格键
   isProfessional: false, // 字幕高级编辑模式
   editHistoryLen: 0, // 编辑模式下操作历史记录的长度
   currentEditHistoryIndex: -1, // 编辑模式下当前undo\redo所在历史记录的索引
@@ -20,6 +21,7 @@ const state = {
 const getters = {
   isEditable: state => state.isEditable,
   isDragableInProfessional: state => state.isDragableInProfessional,
+  isSpaceDownInProfessional: state => state.isSpaceDownInProfessional,
   isProfessional: state => state.isProfessional,
   isCreateSubtitleMode: state => state.isCreateSubtitleMode,
   editHistoryLen: state => state.editHistoryLen,
@@ -39,6 +41,9 @@ const mutations = {
   },
   [editorMutations.TOGGLE_DRAGABLE_IN_PROFESSIONAL](state, payload) {
     state.isDragableInProfessional = payload;
+  },
+  [editorMutations.TOGGLE_SPACE_DOWN_IN_PROFESSIONAL](state, payload) {
+    state.isSpaceDownInProfessional = payload;
   },
   [editorMutations.TOGGLE_PROFESSIONAL](state, payload) {
     // state.isEditable = payload;

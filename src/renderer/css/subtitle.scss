@@ -179,7 +179,10 @@
 
 
 .subtitle-style, .subtitle-style0, .subtitle-style1, .subtitle-style2, .subtitle-style3, .subtitle-style4 {
-  width: 100%;
+  // width: 100%;
+  display: block;
+  min-width: 100%;
+  width: fit-content;
   outline: none;
   border: none;
 }

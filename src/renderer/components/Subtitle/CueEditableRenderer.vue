@@ -122,7 +122,7 @@ export default {
       if (wrap) {
         wrap.style = `
           max-height: 25.5px;
-          overflow-x: hidden;
+          overflow-x: scroll;
           overflow-y: scroll;
         `;
       }
@@ -172,6 +172,7 @@ export default {
       html = html.replace(/<br>/gi, '\n');
       html = html.replace(/(<([^>]+)>)/gi, '');
       html = html.replace(/\n/gi, '<br>');
+      html = html.replace(/&nbsp;/g, ' ');
       this.$bus.$emit(bus.SUBTITLE_TEXTAREA_CHANGE, this.cue, html.trim());
       this.$refs.input.style.opacity = this.opacity;
     },
@@ -223,17 +224,15 @@ export default {
 
 <style lang="scss" scoped>
 .subtitle-wrapper {
-  padding: 0 5px;
-  box-sizing: border-box;
   position: relative;
   z-index: 5;
   &::-webkit-scrollbar {
-    width: 0!important;
+    display: none;  // Safari and Chrome
   }
   &.max {
     max-height: 25.5px;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    max-width: 100%;
+    overflow: scroll;
   }
   &.text {
     cursor: text;
@@ -243,8 +242,7 @@ export default {
   z-index: 1;
   white-space: pre;
   &.pre-line {
-    white-space: pre-line;
-    word-break: break-all;
+    // white-space: pre-line;
   }
   &:focus {
     // background: red;
