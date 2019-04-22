@@ -63,6 +63,8 @@
         :isInRange="index >= firstIndex && index <= lastIndex"
         :isPlaying="index === playingIndex"
         :isShifting="shifting"
+        :isFolderList="isFolderList"
+        :playListHash="playListHash"
         :hovered="hoverIndex === index"
         :winWidth="winWidth"
         :thumbnailWidth="thumbnailWidth"
@@ -431,7 +433,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
+    ...mapGetters(['playingList', 'playListHash', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
     ...mapState({
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,

@@ -136,6 +136,12 @@ export default {
     isShifting: {
       type: Boolean,
     },
+    isFolderList: {
+      type: Boolean,
+    },
+    playListHash: {
+      type: String,
+    },
     canHoverItem: {
       type: Boolean,
     },
@@ -300,14 +306,7 @@ export default {
         });
       }
     });
-    this.infoDB.get('recent-played', 'path', this.path).then((val) => {
-      if (val && val.lastPlayedTime) {
-        this.lastPlayedTime = val.lastPlayedTime;
-        this.smallShortCut = val.smallShortCut;
-      }
-      this.mediaInfo = Object.assign(this.mediaInfo, val);
-    });
-    this.$bus.$on('database-saved', () => {
+    if (this.isFolderList) {
       this.infoDB.get('recent-played', 'path', this.path).then((val) => {
         if (val && val.lastPlayedTime) {
           this.lastPlayedTime = val.lastPlayedTime;
@@ -315,6 +314,35 @@ export default {
         }
         this.mediaInfo = Object.assign(this.mediaInfo, val);
       });
+    } else if (!this.isFolderList && this.playListHash) {
+      this.infoDB.get('recent-played', this.playListHash).then((data) => {
+        const val = data.infos.find(video => video.path === this.path);
+        if (val && val.lastPlayedTime) {
+          this.lastPlayedTime = val.lastPlayedTime;
+          this.smallShortCut = val.smallShortCut;
+        }
+        this.mediaInfo = Object.assign(this.mediaInfo, val);
+      });
+    }
+    this.$bus.$on('database-saved', () => {
+      if (this.isFolderList) {
+        this.infoDB.get('recent-played', 'path', this.path).then((val) => {
+          if (val && val.lastPlayedTime) {
+            this.lastPlayedTime = val.lastPlayedTime;
+            this.smallShortCut = val.smallShortCut;
+          }
+          this.mediaInfo = Object.assign(this.mediaInfo, val);
+        });
+      } else if (!this.isFolderList && this.playListHash) {
+        this.infoDB.get('recent-played', this.playListHash).then((data) => {
+          const val = data.infos.find(video => video.path === this.path);
+          if (val && val.lastPlayedTime) {
+            this.lastPlayedTime = val.lastPlayedTime;
+            this.smallShortCut = val.smallShortCut;
+          }
+          this.mediaInfo = Object.assign(this.mediaInfo, val);
+        });
+      }
     });
   },
   watch: {
