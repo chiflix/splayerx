@@ -49,6 +49,9 @@ const mutations = {
   [mutationTypes.WHEEL_TIMESTAMP_UPDATE](state, payload) {
     state.wheelTimestamp = payload;
   },
+  [mutationTypes.WHEEL_DIRECTION_UPDATE](state, payload) {
+    state.wheelDirection = payload;
+  },
 };
 
 const buttonsToButtonNames = (buttons) => {
