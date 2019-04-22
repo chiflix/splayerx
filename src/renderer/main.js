@@ -1292,14 +1292,16 @@ new Vue({
         const eventName = x < 0 ? 'seek-forward' : 'seek-backward';
         const absX = Math.abs(x);
 
-        let minimumSeekSpeed = 5;
-        const normalSeekSpeed = (this.duration / 100) * 2;
-        if (this.duration <= 100) minimumSeekSpeed = 1;
-        else if (normalSeekSpeed < minimumSeekSpeed) minimumSeekSpeed = normalSeekSpeed;
-
-        let finalSeekSpeed = minimumSeekSpeed;
-        if (absX > 20 && absX < 285) finalSeekSpeed = normalSeekSpeed;
-        else if (absX >= 285) finalSeekSpeed = this.duration;
+        let finalSeekSpeed = 0;
+        if (absX >= 285) finalSeekSpeed = this.duration;
+        else {
+          const maximiumSpeed = this.duration / 50;
+          const minimiumSpeed = 1;
+          const speed = (this.duration / 2000) * absX;
+          if (speed < minimiumSpeed) finalSeekSpeed = 0;
+          else if (speed > maximiumSpeed) finalSeekSpeed = maximiumSpeed;
+          else finalSeekSpeed = speed;
+        }
 
         this.$bus.$emit(eventName, finalSeekSpeed);
       }
