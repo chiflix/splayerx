@@ -2,7 +2,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
 import path from 'path';
 import fs from 'fs';
@@ -369,6 +369,11 @@ function registerMainWindowEvent() {
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
     });
+  });
+  ipcMain.on('restore', () => {
+    const ses = mainWindow?.webContents.session;
+    ses.clearStorageData();
+    mainWindow?.webContents.reload();
   });
   ipcMain.on('preference-to-main', (e, args) => {
     mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
