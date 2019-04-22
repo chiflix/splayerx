@@ -23,17 +23,17 @@
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="(showAllWidgets || progressTriggerStopped)" v-if="!isEditable && !isProfessional"/>
-    <play-button class="play-button no-drag" v-fade-in="!isSpaceDownInProfessional"
+    <play-button class="play-button no-drag" v-show="!(isSpaceDownInProfessional || isEditable || isDragableInProfessional)"
       @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
       :mousemovePosition="mousemoveClientPosition"
-      :showAllWidgets="showAllWidgets && !isEditable && !isDragableInProfessional" :isFocused="isFocused"
+      :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
-    <volume-indicator class="no-drag" 
+    <volume-indicator class="no-drag" v-show="!(isSpaceDownInProfessional || isEditable || isDragableInProfessional)"
       @update:volume-state="updateVolumeState"
       :attachedShown="attachedShown"
       :mousedownOnPlayButton="mousedownOnPlayButton"
-      :showAllWidgets="showAllWidgets && !isEditable && !isDragableInProfessional"/>
+      :showAllWidgets="showAllWidgets"/>
     <div class="control-buttons" ref="control-buttons" v-fade-in="showAllWidgets && !isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
@@ -46,7 +46,7 @@
     <transition name="fade">
       <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable && !isProfessional" />
     </transition>
-    <the-progress-bar ref="progressbar" v-fade-in="!isDragableInProfessional" :showAllWidgets="showAllWidgets && !isEditable" :style="{
+    <the-progress-bar ref="progressbar" v-show="!(isDragableInProfessional)" :showAllWidgets="showAllWidgets && !isEditable" :style="{
       marginBottom: preFullScreen ? '10px' : '0',
     }"/>
     <!-- 将subtitleManager 从PlayingView 移到 VideoController 里 主要是因为mouse事件无法传递 videoController盖住了subtitleManager -->

@@ -912,8 +912,8 @@ export default {
         left: 0;
         top: 0;
         z-index: 1;
-        backdrop-filter: blur(3px);
-        background: rgba(0,0,0,0.05);
+        backdrop-filter: blur(10px);
+        background: rgba(0,0,0,0.1);
         border: 1px solid rgba(255,255,255,0.15);
         border-radius: 5px;
         // visibility: hidden;
@@ -964,8 +964,8 @@ export default {
     left: 0;
     top: 0;
     z-index: 1;
-    backdrop-filter: blur(3px);
-    background: rgba(0,0,0,0.05);
+    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.1);
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 5px;
     visibility: hidden;

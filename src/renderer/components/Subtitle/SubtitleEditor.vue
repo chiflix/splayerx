@@ -1,21 +1,27 @@
 <template>
   <div class="sub-editor"
     :style="{
-      zIndex: dragingMode !== 'default' && isDragableInProfessional ? '9999' : '11',
+      zIndex: dragingMode !== 'default' && isSpaceDownInProfessional ? '9999' : '11',
       cursor: dragingMode
     }">
-    <div class="sub-editor-head">
+    <div class="sub-editor-head no-drag"
+      @mousedown.left.stop="handleDragStartEditor"
+      @mousemove.left="handleDragingEditor"
+      @mouseup.left.stop="handleDragEndEditor"
+      :style="{
+        cursor: dragingMode !== 'default' ? dragingMode : 'grab',
+        height: spaceKeyPressStartTime > 0 ? '100vh' : 'auto',
+        zIndex: spaceKeyPressStartTime > 0 ? '10' : '2',
+      }">
       <div class="sub-editor-time-line no-drag"
         ref="timeLine"
-        @mousedown.left.stop="handleDragStartEditor"
-        @mousemove.left="handleDragingEditor"
-        @mouseup.left.stop="handleDragEndEditor"
+        @mousedown.left.stop="handleDragStartTimeLine"
+        @mousemove.left="handleDragingTimeLine"
+        @mouseup.left.stop="handleDragEndTimeLine"
         :style="{
           width: `${3 * winWidth}px`,
           left: `${currentLeft}px`,
           cursor: dragingMode !== 'default' ? dragingMode : 'grab',
-          height: spaceKeyPressStartTime > 0 ? '100vh' : 'auto',
-          zIndex: spaceKeyPressStartTime > 0 ? '9999' : '2',
         }">
         <div class="scales" :style="{
           width: `${scales * space}px`
@@ -60,7 +66,7 @@
           </div>
         </div>
       </div>
-      <div class="exit-btn-wrap" @click.stop="handleClickProfessional" v-fade-in="!isDragableInProfessional"
+      <div class="exit-btn-wrap" @click.stop="handleClickProfessional" v-fade-in="!(isDragableInProfessional || isSpaceDownInProfessional)"
         :style="{
           cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
         }">
@@ -183,7 +189,7 @@ export default {
   computed: {
     ...mapGetters([
       'winWidth', 'winHeight', 'duration', 'paused', 'isCreateSubtitleMode', 'originSrc', 'referenceSubtitleId', 'currentEditedSubtitleId',
-      'winRatio', 'computedHeight', 'computedWidth', 'messageInfo', 'isDragableInProfessional', 'chooseIndex', 'currentTime',
+      'winRatio', 'computedHeight', 'computedWidth', 'messageInfo', 'isDragableInProfessional', 'chooseIndex', 'currentTime', 'isSpaceDownInProfessional',
     ]),
     computedSize() {
       // zoom依赖的计算属性
@@ -373,7 +379,9 @@ export default {
         this.resetCurrentTime();
         const canChooseSubs = this.currentSub.filter(e => e.track === 1);
         if (canChooseSubs.length > 0) {
-          this.updateChooseIndex(canChooseSubs[0].index);
+          setImmediate(() => {
+            this.updateChooseIndex(canChooseSubs[0].index);
+          });
         }
       }
     },
@@ -683,8 +691,7 @@ export default {
         requestAnimationFrame(this.updateWhenPlaying);
       }
     },
-    handleDragStartEditor(e) {
-      // 开始拖动时间轴，记录拖动位置、时间、暂停播放
+    handleDragStartTimeLine(e) {
       this.dragStartX = e.pageX;
       this.dragStartLeft = this.currentLeft;
       this.dragStartTime = this.preciseTime;
@@ -694,8 +701,58 @@ export default {
         this.$bus.$emit('toggle-playback');
       }
     },
-    handleDragingEditor(e) {
+    handleDragingTimeLine(e) {
       if (this.timeLineDraging) {
+        // 正在拖动时间轴， 处理越界
+        this.toggleDragable(true);
+        let offset = e.pageX - this.dragStartX;
+        const seekTime = this.dragStartTime - (offset / this.space);
+        if (seekTime <= 0) {
+          offset = this.dragStartTime * this.space;
+        }
+        if (seekTime >= this.duration) {
+          offset = (this.dragStartTime - this.duration) * this.space;
+        }
+        requestAnimationFrame(() => {
+          this.updateWhenMoving(offset);
+        });
+      }
+    },
+    handleDragEndTimeLine(e) {
+      this.toggleDragable(false);
+      // 拖动时间轴结束，重设时间、位置信息
+      if (this.timeLineDraging) {
+        if (e.pageX !== this.dragStartX) {
+          this.resetCurrentTime();
+          this.triggerCount += 1;
+        } else if (!this.timeLineClickLock) {
+          this.handleMouseUpOnTimeLine(e);
+          this.timeLineClickLock = true;
+          setTimeout(() => {
+            this.timeLineClickLock = false;
+          }, this.timeLineClickDelay);
+        }
+        this.dragStartX = 0;
+        this.timeLineDraging = false;
+        this.dragingMode = 'default';
+        // this.triggerCount += 1;
+      }
+    },
+    handleDragStartEditor(e) {
+      // 开始拖动时间轴，记录拖动位置、时间、暂停播放
+      if (this.isSpaceDownInProfessional) {
+        this.dragStartX = e.pageX;
+        this.dragStartLeft = this.currentLeft;
+        this.dragStartTime = this.preciseTime;
+        this.timeLineDraging = true;
+        this.dragingMode = 'grabbing';
+        if (!this.paused) {
+          this.$bus.$emit('toggle-playback');
+        }
+      }
+    },
+    handleDragingEditor(e) {
+      if (this.timeLineDraging && this.isSpaceDownInProfessional) {
         // 正在拖动时间轴， 处理越界
         this.toggleDragable(true);
         let offset = e.pageX - this.dragStartX;
@@ -725,12 +782,6 @@ export default {
         if (e.pageX !== this.dragStartX) {
           this.resetCurrentTime();
           this.triggerCount += 1;
-        } else if (!this.timeLineClickLock) {
-          this.handleMouseUpOnTimeLine(e);
-          this.timeLineClickLock = true;
-          setTimeout(() => {
-            this.timeLineClickLock = false;
-          }, this.timeLineClickDelay);
         }
         this.dragStartX = 0;
         this.timeLineDraging = false;
@@ -785,6 +836,7 @@ export default {
       this.transitionInfo = null;
     },
     handleDoubleClickSub(e, sub) {
+      if (this.isSpaceDownInProfessional) return;
       // 双击字幕条，触发时间轴运动到字幕条开始位置
       const offset = (this.preciseTime - sub.start) * this.space;
       if (Math.abs(offset) < 0.5 || this.showTextarea) {
@@ -863,6 +915,7 @@ export default {
       }
     },
     handleDragStartSub(e, sub) {
+      if (this.isSpaceDownInProfessional) return;
       // 开始拖动字幕条，需要计算拉升还是位移
       this.subDragStartX = e.pageX;
       const path = e.path || (e.composedPath && e.composedPath());

@@ -62,7 +62,7 @@
                       :style="{
                         transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                         color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
-                        cursor: currentSubtitleIndex === index ? 'default' : 'pointer',
+                        cursor: currentSubtitleIndex === index && item.type !== 'modified' ? 'default' : 'pointer',
                         display: item.type === 'modified' ? 'block' : 'flex',
                       }">
                       <div :style="{
@@ -363,6 +363,8 @@ export default {
         if (!this.validEnter) {
           this.isShowingHovered = false;
         }
+        this.modifiedAdvancedPanelVisiable = false;
+        this.clickItemArrow = false;
       }
     },
     currentMousedownComponent(val) {
