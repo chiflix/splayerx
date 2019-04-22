@@ -399,6 +399,17 @@ new Vue({
     ableToPushCurrentSubtitle(val) {
       this.menu.getMenuItemById('uploadSelectedSubtitle').enabled = val;
     },
+    originSrc(newVal) {
+      if (newVal && !this.isWheelEnd) {
+        this.$off('wheel-event', this.wheelEventHandler);
+        this.isWheelEndWatcher = this.$watch('isWheelEnd', (newVal) => {
+          if (newVal) {
+            this.isWheelEndWatcher(); // cancel the isWheelEnd watcher
+            this.$on('wheel-event', this.wheelEventHandler); // reset the wheel-event handler
+          }
+        });
+      }
+    },
   },
   methods: {
     ...mapActions({
@@ -1270,6 +1281,29 @@ new Vue({
     isInteger(number) {
       return !/\./.test(number.toString());
     },
+    // eslint-disable-next-line complexity
+    wheelEventHandler({ x, y }) {
+      if (!this.wheelDirection) {
+        if (this.isTrackPad && x) this.wheelDirection = 'horizontal';
+        else if (y) this.wheelDirection = 'vertical';
+      }
+
+      if (this.duration && this.wheelDirection === 'horizontal') {
+        const eventName = x < 0 ? 'seek-forward' : 'seek-backward';
+        const absX = Math.abs(x);
+
+        let minimumSeekSpeed = 5;
+        const normalSeekSpeed = (this.duration / 100) * 2;
+        if (this.duration <= 100) minimumSeekSpeed = 1;
+        else if (normalSeekSpeed < minimumSeekSpeed) minimumSeekSpeed = normalSeekSpeed;
+
+        let finalSeekSpeed = minimumSeekSpeed;
+        if (absX > 20 && absX < 285) finalSeekSpeed = normalSeekSpeed;
+        else if (absX >= 285) finalSeekSpeed = this.duration;
+
+        this.$bus.$emit(eventName, finalSeekSpeed);
+      }
+    },
   },
   mounted() {
     // https://github.com/electron/electron/issues/3609
@@ -1294,6 +1328,7 @@ new Vue({
       // set userUUID to google analytics uid
       this.$ga && this.$ga.set('userId', userUUID);
     });
+    this.$on('wheel-event', this.wheelEventHandler);
 
     window.addEventListener('mousedown', (e) => {
       if (e.button === 2 && process.platform === 'win32') {
@@ -1369,34 +1404,14 @@ new Vue({
       if (!ctrlKey) {
         const { isInteger: int } = this;
         this.isTrackPad = int(x) && int(y) && int(z);
-        this.isEnd = false;
+        this.isWheelEnd = false;
         clearTimeout(this.currentWheelTimer);
         this.currentWheelTimer = setTimeout(() => {
-          this.isEnd = true;
+          this.isWheelEnd = true;
           this.wheelDirection = '';
         }, 200);
 
-        if (!this.wheelDirection) {
-          if (this.isTrackPad && x) this.wheelDirection = 'horizontal';
-          else if (y) this.wheelDirection = 'vertical';
-        }
-
-        if (this.duration && this.wheelDirection === 'horizontal') {
-          let x = event.deltaX;
-          const eventName = x < 0 ? 'seek-forward' : 'seek-backward';
-          x = Math.abs(x);
-
-          let minimumSeekSpeed = 5;
-          const normalSeekSpeed = (this.duration / 100) * 2;
-          if (this.duration <= 100) minimumSeekSpeed = 1;
-          else if (normalSeekSpeed < minimumSeekSpeed) minimumSeekSpeed = normalSeekSpeed;
-
-          let finalSeekSpeed = minimumSeekSpeed;
-          if (x > 20 && x < 285) finalSeekSpeed = normalSeekSpeed;
-          else if (x >= 285) finalSeekSpeed = this.duration;
-
-          this.$bus.$emit(eventName, finalSeekSpeed);
-        }
+        this.$emit('wheel-event', { x, y });
       }
     });
     /* eslint-disable */
@@ -1432,6 +1447,5 @@ new Vue({
         this.openFile(...files);
       }
     });
-
   },
 }).$mount('#app');
