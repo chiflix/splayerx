@@ -270,6 +270,26 @@ export default {
         requestAnimationFrame(this.updateAnimationOut);
       }
     },
+    getLastPlayedInfo() {
+      if (this.isFolderList) {
+        this.infoDB.get('recent-played', 'path', this.path).then((val) => {
+          if (val && val.lastPlayedTime) {
+            this.lastPlayedTime = val.lastPlayedTime;
+            this.smallShortCut = val.smallShortCut;
+          }
+          this.mediaInfo = Object.assign(this.mediaInfo, val);
+        });
+      } else if (!this.isFolderList && this.playListHash) {
+        this.infoDB.get('recent-played', this.playListHash).then((data) => {
+          const val = data.infos.find(video => video.path === this.path);
+          if (val && val.lastPlayedTime) {
+            this.lastPlayedTime = val.lastPlayedTime;
+            this.smallShortCut = val.smallShortCut;
+          }
+          this.mediaInfo = Object.assign(this.mediaInfo, val);
+        });
+      }
+    },
   },
   mounted() {
     this.displayIndex = this.index;
@@ -306,43 +326,9 @@ export default {
         });
       }
     });
-    if (this.isFolderList) {
-      this.infoDB.get('recent-played', 'path', this.path).then((val) => {
-        if (val && val.lastPlayedTime) {
-          this.lastPlayedTime = val.lastPlayedTime;
-          this.smallShortCut = val.smallShortCut;
-        }
-        this.mediaInfo = Object.assign(this.mediaInfo, val);
-      });
-    } else if (!this.isFolderList && this.playListHash) {
-      this.infoDB.get('recent-played', this.playListHash).then((data) => {
-        const val = data.infos.find(video => video.path === this.path);
-        if (val && val.lastPlayedTime) {
-          this.lastPlayedTime = val.lastPlayedTime;
-          this.smallShortCut = val.smallShortCut;
-        }
-        this.mediaInfo = Object.assign(this.mediaInfo, val);
-      });
-    }
+    this.getLastPlayedInfo();
     this.$bus.$on('database-saved', () => {
-      if (this.isFolderList) {
-        this.infoDB.get('recent-played', 'path', this.path).then((val) => {
-          if (val && val.lastPlayedTime) {
-            this.lastPlayedTime = val.lastPlayedTime;
-            this.smallShortCut = val.smallShortCut;
-          }
-          this.mediaInfo = Object.assign(this.mediaInfo, val);
-        });
-      } else if (!this.isFolderList && this.playListHash) {
-        this.infoDB.get('recent-played', this.playListHash).then((data) => {
-          const val = data.infos.find(video => video.path === this.path);
-          if (val && val.lastPlayedTime) {
-            this.lastPlayedTime = val.lastPlayedTime;
-            this.smallShortCut = val.smallShortCut;
-          }
-          this.mediaInfo = Object.assign(this.mediaInfo, val);
-        });
-      }
+      this.getLastPlayedInfo();
     });
   },
   watch: {
