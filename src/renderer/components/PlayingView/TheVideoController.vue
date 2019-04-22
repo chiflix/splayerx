@@ -539,10 +539,11 @@ export default {
     handleKeyup({ code }) {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
-    handleWheel({ target, timeStamp }) {
+    handleWheel({ target, timeStamp, deltaX }) {
       this.updateWheel({
         componentName: this.getComponentName(target),
         timestamp: timeStamp,
+        direction: deltaX ? 'horizontal' : 'vertical',
       });
     },
     // Helper functions
