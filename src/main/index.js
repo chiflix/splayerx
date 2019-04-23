@@ -2,7 +2,7 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
 import path from 'path';
 import fs from 'fs';
@@ -26,6 +26,7 @@ let mainWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let tray = null;
+let needToRestore = false;
 let inited = false;
 const filesToOpen = [];
 const snapShotQueue = [];
@@ -370,6 +371,14 @@ function registerMainWindowEvent() {
       preferenceWindow.show();
     });
   });
+  ipcMain.on('restore', () => {
+    if (!needToRestore) {
+      needToRestore = true;
+    } else {
+      app.relaunch();
+      app.quit();
+    }
+  });
   ipcMain.on('preference-to-main', (e, args) => {
     mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
   });
@@ -435,7 +444,8 @@ function createWindow() {
 }
 
 app.on('before-quit', () => {
-  mainWindow?.webContents.send('quit');
+  mainWindow?.webContents.send('quit', needToRestore);
+  needToRestore = false;
 });
 app.on('second-instance', () => {
   if (mainWindow?.isMinimized()) mainWindow.restore();

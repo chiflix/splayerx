@@ -23,13 +23,12 @@
       <div class="setting-title">{{ $t("preferences.general.setDefault") }}</div>
       <div class="setting-description">{{ $t("preferences.general.setDefaultDescription") }}</div>
     </div>
-    <div class="setting-button no-drag" ref="button"
-      @mousedown="mousedownOnSetDefault"
-      @mouseup="setDefault">
+    <div class="setting-button no-drag" ref="button1"
+      @mousedown="mousedownOnSetDefault">
       <transition name="button" mode="out-in">
-        <div key="" v-if="!setState" class="content">{{ $t("preferences.general.setButton") }}</div>
-        <div :key="setState" v-else class="result">
-          <Icon :type="setState" :class="setState"/>
+        <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
+        <div :key="defaultState" v-else class="result">
+          <Icon :type="defaultState" :class="defaultState"/>
         </div>
       </transition>
     </div>
@@ -39,8 +38,12 @@
       <div class="setting-title">{{ $t("preferences.general.restoreSettings") }}</div>
       <div class="setting-description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
     </div>
-    <div class="setting-button no-drag"
-      @mouseup="restoreSettings"><div class="content">{{ $t("preferences.general.setButton") }}</div></div>
+    <div class="setting-button no-drag" ref="button2"
+      @mousedown="mousedownOnRestore">
+      <transition name="button" mode="out-in">
+        <div :key="needToRelaunch" class="content">{{ needToRelaunch ? $t("preferences.general.relaunch") : $t("preferences.general.setButton") }}</div>
+      </transition>
+    </div>
   </div> -->
   <div class="title other-title">{{ $t("preferences.general.others") }}</div>
   <BaseCheckBox v-if="isMac"
@@ -58,8 +61,6 @@
 
 <script>
 import electron from 'electron';
-import path from 'path';
-import { promises as fsPromises } from 'fs';
 import { setAsDefaultApp } from '@/../shared/system';
 import Icon from '@/components/BaseIconContainer.vue';
 import { codeToLanguageName } from '@/helpers/language';
@@ -75,9 +76,13 @@ export default {
   data() {
     return {
       showSelection: false,
-      isSetting: false,
-      setState: '',
-      buttonContentTimeoutId: NaN,
+      isSettingDefault: false,
+      isRestoring: false,
+      defaultState: '',
+      restoreState: '',
+      defaultButtonTimeoutId: NaN,
+      restoreButtonTimeoutId: NaN,
+      needToRelaunch: false,
       languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
     };
   },
@@ -148,70 +153,72 @@ export default {
   },
   methods: {
     mouseupOnOther() {
-      if (!this.isSetting) {
-        this.$refs.button.style.setProperty('background-color', '');
-        this.$refs.button.style.setProperty('opacity', '');
+      if (!this.isSettingDefault) {
+        this.$refs.button1.style.setProperty('background-color', '');
+        this.$refs.button1.style.setProperty('opacity', '');
+        this.$refs.button2.style.setProperty('background-color', '');
+        this.$refs.button2.style.setProperty('opacity', '');
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
+      this.$refs.button1.removeEventListener('mouseup', this.setDefault);
+      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
     mousedownOnSetDefault() {
-      if (!this.isSetting) {
-        this.$refs.button.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
-        this.$refs.button.style.setProperty('opacity', '0.5');
+      if (!this.isSettingDefault) {
+        this.$refs.button1.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
+        this.$refs.button1.style.setProperty('opacity', '0.5');
+        this.$refs.button1.addEventListener('mouseup', this.setDefault);
+        document.addEventListener('mouseup', this.mouseupOnOther);
+      }
+    },
+    mousedownOnRestore() {
+      if (!this.isSettingDefault) {
+        this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
+        this.$refs.button2.style.setProperty('opacity', '0.5');
+        this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
     },
     async setDefault() {
-      if (this.isSetting) return;
-      this.isSetting = true;
+      if (this.isSettingDefault) return;
+      this.isSettingDefault = true;
       try {
         await setAsDefaultApp();
         // TODO: feedback
-        clearTimeout(this.buttonContentTimeoutId);
-        this.setState = 'success';
-        this.$refs.button.style.setProperty('transition-delay', '350ms');
-        this.$refs.button.style.setProperty('background-color', '');
-        this.$refs.button.style.setProperty('opacity', '');
-        this.buttonContentTimeoutId = setTimeout(() => {
-          this.setState = '';
-          this.isSetting = false;
-          this.$refs.button.style.setProperty('transition-delay', '');
+        clearTimeout(this.defaultButtonTimeoutId);
+        this.defaultState = 'success';
+        this.$refs.button1.style.setProperty('transition-delay', '350ms');
+        this.$refs.button1.style.setProperty('background-color', '');
+        this.$refs.button1.style.setProperty('opacity', '');
+        this.defaultButtonTimeoutId = setTimeout(() => {
+          this.defaultState = '';
+          this.isSettingDefault = false;
+          this.$refs.button1.style.setProperty('transition-delay', '');
         }, 1500);
       } catch (ex) {
         // TODO: feedback
-        clearTimeout(this.buttonContentTimeoutId);
-        this.setState = 'failed';
-        this.$refs.button.style.setProperty('transition-delay', '350ms');
-        this.$refs.button.style.setProperty('background-color', '');
-        this.$refs.button.style.setProperty('opacity', '');
-        this.buttonContentTimeoutId = setTimeout(() => {
-          this.setState = '';
-          this.isSetting = false;
-          this.$refs.button.style.setProperty('transition-delay', '');
+        clearTimeout(this.defaultButtonTimeoutId);
+        this.defaultState = 'failed';
+        this.$refs.button1.style.setProperty('transition-delay', '350ms');
+        this.$refs.button1.style.setProperty('background-color', '');
+        this.$refs.button1.style.setProperty('opacity', '');
+        this.defaultButtonTimeoutId = setTimeout(() => {
+          this.defaultState = '';
+          this.isSettingDefault = false;
+          this.$refs.button1.style.setProperty('transition-delay', '');
         }, 1500);
+      } finally {
+        this.$refs.button1.removeEventListener('mouseup', this.setDefault);
       }
     },
     restoreSettings() {
-      console.log('restore-settings');
-      // remove dir
-      const userData = electron.remote.app.getPath('userData');
-      const removeDir = dir => fsPromises.readdir(dir)
-        .then(files => files.reduce((result, file) => {
-          const filePath = path.join(dir, file);
-          return result.then(() => fsPromises.unlink(filePath)
-            .then(null, () => removeDir(filePath)));
-        }, Promise.resolve()).then(() => {
-          if (dir !== userData) return fsPromises.rmdir(dir);
-          return Promise.resolve();
-        }));
-      removeDir(userData)
-        .then(() => {
-          console.log('success');
-        })
-        .catch((err) => {
-          console.log('failed', err);
-        });
-      // this.$store.dispatch('init-settings');
+      if (!this.needToRelaunch) {
+        this.needToRelaunch = true;
+        electron.ipcRenderer.send('restore');
+        return;
+      }
+      electron.ipcRenderer.send('restore');
+      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
     mapCode(code) {
       return codeToLanguageName(code);

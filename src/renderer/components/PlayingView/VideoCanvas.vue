@@ -391,11 +391,7 @@ export default {
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
           .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
-          .then(() => {
-            this.asyncTasksDone = true;
-            window.close();
-          })
-          .catch(() => {
+          .finally(() => {
             this.asyncTasksDone = true;
             window.close();
           });

@@ -377,9 +377,7 @@ export default {
     // generate playlist
     openVideoFile(...videoFiles) {
       if (videoFiles.length > 1) {
-        const playListHash = videoFiles.reduce((hash, src) => {
-          return `${hash}-${src}`;
-        });
+        const playListHash = videoFiles.reduce((hash, src) => `${hash}-${src}`);
         this.$store.dispatch('PlayingList', {
           hash: playListHash,
           paths: videoFiles,
