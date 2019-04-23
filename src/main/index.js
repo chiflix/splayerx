@@ -5,7 +5,7 @@ import '../shared/sentry';
 import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
 import path from 'path';
-import fs from 'fs';
+import fs, { promises as fsPromises } from 'fs';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
@@ -444,8 +444,30 @@ function createWindow() {
 }
 
 app.on('before-quit', () => {
-  mainWindow?.webContents.send('quit', needToRestore);
-  needToRestore = false;
+  function removeUserData() {
+    const userData = app.getPath('userData');
+    const removeDir = dir => fsPromises.readdir(dir)
+      .then(files => files.reduce((result, file) => {
+        const filePath = path.join(dir, file);
+        return result.then(() => fsPromises.unlink(filePath)
+          .then(null, () => removeDir(filePath)));
+      }, Promise.resolve()).then(() => {
+        if (dir !== userData) return fsPromises.rmdir(dir);
+        return Promise.resolve();
+      }));
+    return removeDir(path.join(userData, 'storage'))
+      .then(() => removeDir(path.join(userData, '__cache_files__')))
+      .then(() => removeDir(userData));
+  }
+
+  if (needToRestore) {
+    mainWindow.destroy();
+    removeUserData().then(() => {
+      needToRestore = false;
+    });
+  } else {
+    mainWindow?.webContents.send('quit');
+  }
 });
 app.on('second-instance', () => {
   if (mainWindow?.isMinimized()) mainWindow.restore();
