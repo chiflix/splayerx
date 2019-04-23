@@ -41,10 +41,7 @@
     <div class="setting-button no-drag" ref="button2"
       @mousedown="mousedownOnRestore">
       <transition name="button" mode="out-in">
-        <div key="" v-if="!restoreState" class="content">{{ needRelaunch ? $t("preferences.general.relaunch") : $t("preferences.general.setButton") }}</div>
-        <div :key="restoreState" v-else class="result">
-          <Icon :type="restoreState" :class="restoreState"/>
-        </div>
+        <div :key="needToRelaunch" class="content">{{ needToRelaunch ? $t("preferences.general.relaunch") : $t("preferences.general.setButton") }}</div>
       </transition>
     </div>
   </div>
@@ -87,7 +84,7 @@ export default {
       restoreState: '',
       defaultButtonTimeoutId: NaN,
       restoreButtonTimeoutId: NaN,
-      needRelaunch: false,
+      needToRelaunch: false,
       languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
     };
   },
@@ -217,42 +214,13 @@ export default {
       }
     },
     restoreSettings() {
-      if (this.isRestoring || this.needRelaunch) return;
-      this.isRestoring = true;
-      // remove dir
-      const removeDir = () => asyncStorage.removeAll().then(clearAll);
-      removeDir()
-        .then(() => {
-          console.log('success');
-          electron.ipcRenderer.send('restore');
-          clearTimeout(this.restoreButtonTimeoutId);
-          this.restoreState = 'success';
-          this.$refs.button2.style.setProperty('transition-delay', '350ms');
-          this.$refs.button2.style.setProperty('background-color', '');
-          this.$refs.button2.style.setProperty('opacity', '');
-          this.restoreButtonTimeoutId = setTimeout(() => {
-            this.restoreState = '';
-            this.isRestoring = false;
-            this.$refs.button2.style.setProperty('transition-delay', '');
-          }, 1500);
-          // this.needRelaunch = true;
-        })
-        .catch((err) => {
-          console.log('failed', err);
-          clearTimeout(this.restoreButtonTimeoutId);
-          this.restoreState = 'failed';
-          this.$refs.button2.style.setProperty('transition-delay', '350ms');
-          this.$refs.button2.style.setProperty('background-color', '');
-          this.$refs.button2.style.setProperty('opacity', '');
-          this.restoreButtonTimeoutId = setTimeout(() => {
-            this.restoreState = '';
-            this.isRestoring = false;
-            this.$refs.button2.style.setProperty('transition-delay', '');
-          }, 1500);
-        })
-        .finally(() => {
-          this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
-        });
+      if (!this.needToRelaunch) {
+        this.needToRelaunch = true;
+        electron.ipcRenderer.send('restore');
+        return;
+      }
+      electron.ipcRenderer.send('restore');
+      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
     mapCode(code) {
       return codeToLanguageName(code);

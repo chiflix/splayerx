@@ -31,6 +31,7 @@
 
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
+import { clearAll } from '@/helpers/cacheFileStorage';
 import { mapGetters, mapActions } from 'vuex';
 import path from 'path';
 import { Video as videoActions } from '@/store/actionTypes';
@@ -53,6 +54,7 @@ export default {
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
       nowRate: 1,
       quit: false,
+      needToRestore: false,
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
     };
@@ -330,7 +332,8 @@ export default {
     },
   },
   mounted() {
-    this.$electron.ipcRenderer.on('quit', () => {
+    this.$electron.ipcRenderer.on('quit', (needToRestore) => {
+      this.needToRestore = needToRestore;
       this.quit = true;
     });
     this.videoElement = this.$refs.videoCanvas.videoElement();
@@ -386,20 +389,23 @@ export default {
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
-        this.$store.dispatch('SRC_SET', { src: '', mediaHash: '' });
-        this.saveScreenshot(this.originSrc)
-          .then(this.saveSubtitleStyle)
-          .then(this.savePlaybackStates)
-          .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
-          .then(() => {
-            this.asyncTasksDone = true;
-            window.close();
-          })
-          .catch(() => {
+        e.returnValue = false;
+        if (this.quit && this.needToRestore) {
+          asyncStorage.removeAll().then(clearAll).finally(() => {
             this.asyncTasksDone = true;
             window.close();
           });
-        e.returnValue = false;
+        } else {
+          this.$store.dispatch('SRC_SET', { src: '', mediaHash: '' });
+          this.saveScreenshot(this.originSrc)
+            .then(this.saveSubtitleStyle)
+            .then(this.savePlaybackStates)
+            .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
+            .finally(() => {
+              this.asyncTasksDone = true;
+              window.close();
+            });
+        }
       } else if (!this.quit) {
         e.returnValue = false;
         this.$bus.$off(); // remove all listeners before back to landing view

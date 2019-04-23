@@ -26,6 +26,7 @@ let mainWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let tray = null;
+let needToRestore = false;
 let inited = false;
 const filesToOpen = [];
 const snapShotQueue = [];
@@ -371,9 +372,12 @@ function registerMainWindowEvent() {
     });
   });
   ipcMain.on('restore', () => {
-    const ses = mainWindow?.webContents.session;
-    ses.clearStorageData();
-    mainWindow?.webContents.reload();
+    if (!needToRestore) {
+      needToRestore = true;
+    } else {
+      app.relaunch();
+      app.quit();
+    }
   });
   ipcMain.on('preference-to-main', (e, args) => {
     mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
@@ -440,7 +444,10 @@ function createWindow() {
 }
 
 app.on('before-quit', () => {
-  mainWindow?.webContents.send('quit');
+  const ses = mainWindow?.webContents.session;
+  ses.clearStorageData();
+  mainWindow?.webContents.send('quit', needToRestore);
+  needToRestore = false;
 });
 app.on('second-instance', () => {
   if (mainWindow?.isMinimized()) mainWindow.restore();

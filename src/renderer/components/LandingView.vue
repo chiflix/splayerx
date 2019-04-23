@@ -89,6 +89,7 @@ import fs from 'fs';
 import { mapState, mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
+import { clearAll } from '@/helpers/cacheFileStorage';
 import Titlebar from './Titlebar.vue';
 import VideoItem from './LandingView/VideoItem.vue';
 import PlaylistItem from './LandingView/PlaylistItem.vue';
@@ -120,6 +121,9 @@ export default {
       tranFlag: true,
       shifting: false,
       firstIndex: 0,
+      asyncTasksDone: false,
+      needToRestore: false,
+      quit: false,
     };
   },
   watch: {
@@ -264,6 +268,24 @@ export default {
     this.$bus.$on('drop', () => {
       this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
+    this.$electron.ipcRenderer.on('quit', (needToRestore) => {
+      this.needToRestore = needToRestore;
+      this.quit = true;
+    });
+    window.onbeforeunload = (e) => {
+      if (!this.asyncTasksDone) {
+        e.returnValue = false;
+        if (this.needToRestore && this.quit) {
+          asyncStorage.removeAll().then(clearAll).finally(() => {
+            this.asyncTasksDone = true;
+            window.close();
+          });
+        } else {
+          this.asyncTasksDone = true;
+          window.close();
+        }
+      }
+    };
   },
   mounted() {
     this.$store.dispatch('refreshVersion');
