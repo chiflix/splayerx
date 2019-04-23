@@ -33,7 +33,7 @@
       </transition>
     </div>
   </div>
-  <div class="description-button">
+  <!-- <div class="description-button">
     <div class="setting-content">
       <div class="setting-title">{{ $t("preferences.general.restoreSettings") }}</div>
       <div class="setting-description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
@@ -44,7 +44,7 @@
         <div :key="needToRelaunch" class="content">{{ needToRelaunch ? $t("preferences.general.relaunch") : $t("preferences.general.setButton") }}</div>
       </transition>
     </div>
-  </div>
+  </div> -->
   <div class="title other-title">{{ $t("preferences.general.others") }}</div>
   <BaseCheckBox v-if="isMac"
     :checkboxValue="reverseScrolling"
