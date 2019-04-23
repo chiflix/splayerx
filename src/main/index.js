@@ -444,8 +444,6 @@ function createWindow() {
 }
 
 app.on('before-quit', () => {
-  const ses = mainWindow?.webContents.session;
-  ses.clearStorageData();
   mainWindow?.webContents.send('quit', needToRestore);
   needToRestore = false;
 });
