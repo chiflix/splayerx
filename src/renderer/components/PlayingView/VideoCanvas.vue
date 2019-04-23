@@ -390,22 +390,15 @@ export default {
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
         e.returnValue = false;
-        if (this.quit && this.needToRestore) {
-          asyncStorage.removeAll().then(clearAll).finally(() => {
+        this.$store.dispatch('SRC_SET', { src: '', mediaHash: '' });
+        this.saveScreenshot(this.originSrc)
+          .then(this.saveSubtitleStyle)
+          .then(this.savePlaybackStates)
+          .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
+          .finally(() => {
             this.asyncTasksDone = true;
             window.close();
           });
-        } else {
-          this.$store.dispatch('SRC_SET', { src: '', mediaHash: '' });
-          this.saveScreenshot(this.originSrc)
-            .then(this.saveSubtitleStyle)
-            .then(this.savePlaybackStates)
-            .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
-            .finally(() => {
-              this.asyncTasksDone = true;
-              window.close();
-            });
-        }
       } else if (!this.quit) {
         e.returnValue = false;
         this.$bus.$off(); // remove all listeners before back to landing view
