@@ -164,9 +164,10 @@ export default {
   },
   created() {
     this.enterArea();
+    this.actionArea();
     setTimeout(() => {
       this.leaveArea();
-    }, 1500);
+    }, 2000);
     if (this.muted) {
       this.volumeTriggerStopped = this.showAllWidgets;
     }
