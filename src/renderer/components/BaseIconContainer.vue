@@ -459,6 +459,14 @@ export default {
   width: 100%;
   height: 100%;
 }
+.success {
+  width: 15px;
+  height: 15px;
+}
+.failed {
+  width: 15px;
+  height: 15px;
+}
 .deleteSub {
   cursor: pointer;
   .default {

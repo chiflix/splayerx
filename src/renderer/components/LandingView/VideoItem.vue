@@ -188,7 +188,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$border-radius: 2px;
+$border-radius: 3px;
 .item {
   transition: bottom 100ms ease-in, transform 10ms ease-in;
   position: relative;

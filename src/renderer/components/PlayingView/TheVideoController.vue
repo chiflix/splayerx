@@ -46,7 +46,7 @@
     <transition name="fade">
       <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable && !isProfessional" />
     </transition>
-    <the-progress-bar ref="progressbar" v-show="!(isDragableInProfessional)" :showAllWidgets="showAllWidgets && !isEditable" :style="{
+    <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{
       marginBottom: preFullScreen ? '10px' : '0',
     }"/>
     <!-- 将subtitleManager 从PlayingView 移到 VideoController 里 主要是因为mouse事件无法传递 videoController盖住了subtitleManager -->

@@ -187,6 +187,12 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
+			"reverseScrolling": "التمرير عكس الماوس",
+			"setDefault": "تعيين كمشغل الفيديو الافتراضي",
+			"setDefaultDescription": ".افتح جميع ملفات الفيديو باستخدام SPlayer",
+			"restoreSettings": "استعادة البيانات والإعدادات",
+			"restoreSettingsDescription": ".مسح جميع بيانات SPlayer وملفات ذاكرة التخزين المؤقت",
+			"setButton": "تطبيق",
 			"displayLanguage": "عرض اللغة",
 			"generalSetting": "جنرال لواء",
 			"others": "الآخرين",

@@ -1,18 +1,10 @@
 <template>
   <div class="sub-editor"
     :style="{
-      zIndex: dragingMode !== 'default' && isSpaceDownInProfessional ? '9999' : '11',
+      // zIndex: dragingMode !== 'default' && isDragableInProfessional ? '9999' : '11',
       cursor: dragingMode
     }">
-    <div class="sub-editor-head no-drag"
-      @mousedown.left.stop="handleDragStartEditor"
-      @mousemove.left="handleDragingEditor"
-      @mouseup.left.stop="handleDragEndEditor"
-      :style="{
-        cursor: dragingMode !== 'default' ? dragingMode : 'grab',
-        height: spaceKeyPressStartTime > 0 ? '100vh' : 'auto',
-        zIndex: spaceKeyPressStartTime > 0 ? '10' : '2',
-      }">
+    <div class="sub-editor-head">
       <div class="sub-editor-time-line no-drag"
         ref="timeLine"
         @mousedown.left.stop="handleDragStartTimeLine"
@@ -72,6 +64,15 @@
         }">
         <Icon type="subtitleEditorExit" class="subtitle-editor-exit"/>
       </div>
+      <div class="drag-mask no-drag"
+        @mousedown.left.stop="handleDragStartEditor"
+        @mousemove.left="handleDragingEditor"
+        @mouseup.left.stop="handleDragEndEditor"
+        :style="{
+          cursor: dragingMode !== 'default' ? dragingMode : 'grab',
+          height: spaceKeyPressStartTime > 0 ? '100vh' : 'auto',
+          zIndex: spaceKeyPressStartTime > 0 ? '22' : '2',
+        }"></div>
     </div>
     <div class="sub-editor-body" :style="{
       bottom: `${(60 / 1080) * 100}%`,
@@ -135,10 +136,10 @@ export default {
   },
   data() {
     return {
+      screens: 3, // 刻度的长度，几倍窗口长度
       currentParseReferenceSubtitleId: null, //
       referenceDialogues: [],
       dialogues: [],
-      chooseIndexs: -1, // 单击字幕条选择字幕条的索引，支持ctrl多选
       hoverIndex: -1, // 目前鼠标hover的字幕条索引
       currentLeft: 0, // 时间轴左偏移 --|-.-|--
       editorCurrentTime: 0, // 当前时间轴中分时间刻度，时间轴的中心时间不一定是播放的时间
@@ -214,10 +215,10 @@ export default {
       return computed;
     },
     scales() {
-      return Math.ceil((3 * this.winWidth) / this.space);
+      return Math.ceil((this.screens * this.winWidth) / this.space);
     },
     offset() {
-      return Math.ceil((3 * this.winWidth) / (this.space * 2));
+      return Math.ceil((this.screens * this.winWidth) / (this.space * 2));
     },
     type() {
       // TODO 删除
@@ -427,6 +428,11 @@ export default {
         this.hook = 0;
         if (val && val.parsed && this.currentEditedSubtitleId) {
           this.dialogues = val.parsed.dialogues;
+          setImmediate(() => {
+            // 处理第一次进入没有选中字幕
+            // document处理了mouseup
+            this.triggerCount += 1;
+          });
         }
         if (val && val.referenceSubtitleId !== this.referenceSubtitleId &&
           this.currentEditedSubtitleId) {
@@ -713,9 +719,9 @@ export default {
         if (seekTime >= this.duration) {
           offset = (this.dragStartTime - this.duration) * this.space;
         }
-        requestAnimationFrame(() => {
-          this.updateWhenMoving(offset);
-        });
+        // requestAnimationFrame(() => {
+        // });
+        this.updateWhenMoving(offset);
       }
     },
     handleDragEndTimeLine(e) {
@@ -752,7 +758,7 @@ export default {
       }
     },
     handleDragingEditor(e) {
-      if (this.timeLineDraging && this.isSpaceDownInProfessional) {
+      if (this.timeLineDraging && this.isSpaceDownInProfessional && this.dragStartX > 0) {
         // 正在拖动时间轴， 处理越界
         this.toggleDragable(true);
         let offset = e.pageX - this.dragStartX;
@@ -763,9 +769,9 @@ export default {
         if (seekTime >= this.duration) {
           offset = (this.dragStartTime - this.duration) * this.space;
         }
-        requestAnimationFrame(() => {
-          this.updateWhenMoving(offset);
-        });
+        // requestAnimationFrame(() => {
+        // });
+        this.updateWhenMoving(offset);
       }
     },
     handleDragEndEditor(e) {
@@ -791,13 +797,22 @@ export default {
     },
     updateWhenMoving(offset) {
       // 时间轴偏移计算
-      let preciseTime = this.dragStartTime - (offset / this.space);
-      preciseTime = preciseTime > 0 ? preciseTime : 0;
-      preciseTime = preciseTime < this.duration ? preciseTime : this.duration;
-      this.currentLeft = this.dragStartLeft + offset;
-      this.preciseTime = preciseTime;
-      this.$bus.$emit('seek', this.preciseTime);
-      videodata.time = this.preciseTime;
+      const currentLeft = this.dragStartLeft + offset;
+      if (currentLeft > -10 || (currentLeft - 10) < -(2 * this.winWidth)) {
+        // 超过边界，重新计算
+        this.resetCurrentTime();
+        this.dragStartLeft = this.currentLeft;
+        this.dragStartTime = this.preciseTime;
+        this.dragStartX += offset;
+      } else {
+        this.currentLeft = currentLeft;
+        let preciseTime = this.dragStartTime - (offset / this.space);
+        preciseTime = preciseTime > 0 ? preciseTime : 0;
+        preciseTime = preciseTime < this.duration ? preciseTime : this.duration;
+        this.preciseTime = preciseTime;
+        this.$bus.$emit('seek', this.preciseTime);
+        videodata.time = this.preciseTime;
+      }
     },
     handleMouseUpOnTimeLine(e) {
       // const nowTamp = Date.now();
@@ -905,13 +920,14 @@ export default {
       return c;
     },
     handleHoverIn(e, sub) {
+      if (this.isSpaceDownInProfessional) return;
       if (!(this.subDragMoving || this.subLeftDraging || this.subRightDraging) && this.paused) {
         this.hoverIndex = sub.index;
       }
     },
     handleHoverOut() {
       if (!(this.subDragMoving || this.subLeftDraging || this.subRightDraging)) {
-        this.hoverIndex = -1;
+        this.hoverIndex = -2;
       }
     },
     handleDragStartSub(e, sub) {
@@ -1248,6 +1264,7 @@ export default {
       if ((this.subRightDraging || this.subLeftDraging || this.subDragMoving) && !this.lock) {
         this.finishSubDrag(this.subDragCurrentSub);
       }
+      this.hoverIndex = -2;
     },
     finishSubDrag(sub) { // eslint-disable-line
       let newStart = 0;
@@ -1590,6 +1607,9 @@ export default {
     // 初始化组件
     document.addEventListener('mousemove', this.handleDragingEditor);
     document.addEventListener('mouseup', this.handleDragEndEditor);
+    document.addEventListener('mousemove', this.handleDragingTimeLine);
+    document.addEventListener('mouseup', this.handleDragEndTimeLine);
+    // sub
     document.addEventListener('mousemove', this.handleDragingSub);
     document.addEventListener('mouseup', this.handleDragEndSub);
     // 键盘事件
@@ -1664,6 +1684,9 @@ export default {
   destroyed() {
     document.removeEventListener('mousemove', this.handleDragingEditor);
     document.removeEventListener('mouseup', this.handleDragEndEditor);
+    document.removeEventListener('mousemove', this.handleDragingTimeLine);
+    document.removeEventListener('mouseup', this.handleDragEndTimeLine);
+    // sub
     document.removeEventListener('mousemove', this.handleDragingSub);
     document.removeEventListener('mouseup', this.handleDragEndSub);
     document.removeEventListener('keydown', this.handleKeyDown);
@@ -1705,6 +1728,9 @@ export default {
       opacity: 0.3;
     }
   }
+  .drag-mask {
+    position: relative;
+  }
   .sub-editor-head {
     // height: 25vh;
     position: relative;
@@ -1717,7 +1743,7 @@ export default {
       position: absolute;
       top: 0;
       left: 50%;
-      z-index: 9999;
+      z-index: 9;
       transform: translateX(-50%);
       background: rgba(216,216,216,0.8);
       border: 0.5px solid rgba(255,255,255,0.10);

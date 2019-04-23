@@ -443,6 +443,7 @@ export default {
       this.updateCurrentEditedSubtitle(null);
       this.swicthReferenceSubtitle(null);
       this.toggleProfessional(true);
+      this.$emit('update:showAttached', false);
     },
     shiftItemHover() {
       this.shiftItemHovered = true;
@@ -461,6 +462,7 @@ export default {
       this.toggleProfessional(true);
       this.modifiedAdvancedPanelVisiable = false;
       this.clickItemArrow = false;
+      this.$emit('update:showAttached', false);
     },
     handleSubExport() {
       this.$bus.$emit(bus.EXPORT_MODIFIED_SUBTITLE);

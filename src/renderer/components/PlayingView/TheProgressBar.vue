@@ -6,7 +6,7 @@
     @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
     @mousedown.stop="handleMousedown">
-    <the-preview-thumbnail class="the-preview-thumbnail" v-show="showThumbnail"
+    <the-preview-thumbnail class="the-preview-thumbnail" v-show="showThumbnail && !isSpaceDownInProfessional"
       :currentTime="hoveredCurrentTime"
       :maxThumbnailWidth="240"
       :videoRatio="ratio"
@@ -77,7 +77,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winHeight', 'winRatio', 'duration', 'ratio', 'nextVideo']),
+    ...mapGetters(['winWidth', 'winHeight', 'winRatio', 'duration', 'ratio', 'nextVideo', 'isSpaceDownInProfessional']),
     hoveredPercent() {
       return this.hovering ? this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100 : 0;
     },
@@ -191,6 +191,7 @@ export default {
       return this.whiteWithOpacity(hoveredEnd && playedEnd ? 0.9 : opacity);
     },
     handleMousemove(event) {
+      if (this.isSpaceDownInProfessional) return;
       this.hoveredPageX = event.pageX;
       this.hovering = true;
       if (this.hoveringId) clearTimeout(this.hoveringId);
@@ -211,6 +212,7 @@ export default {
       }
     },
     handleMousedown(event) {
+      if (this.isSpaceDownInProfessional) return;
       this.mousedown = true;
       if (event.target === this.$refs.leftInvisible || event.target === this.$refs.rightInvisible) {
         this.showThumbnail = false;
