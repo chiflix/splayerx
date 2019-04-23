@@ -6,7 +6,7 @@
     @mouseenter="hoveredmouseenter"
     @mouseleave="handleMouseleave"
     @mousedown.stop="handleMousedown">
-    <the-preview-thumbnail class="the-preview-thumbnail" v-show="showThumbnail && !isSpaceDownInProfessional"
+    <the-preview-thumbnail class="the-preview-thumbnail" v-show="showThumbnail"
       :currentTime="hoveredCurrentTime"
       :maxThumbnailWidth="240"
       :videoRatio="ratio"
@@ -77,7 +77,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'winHeight', 'winRatio', 'duration', 'ratio', 'nextVideo', 'isSpaceDownInProfessional']),
+    ...mapGetters(['winWidth', 'winHeight', 'winRatio', 'duration', 'ratio', 'nextVideo']),
     hoveredPercent() {
       return this.hovering ? this.pageXToProportion(this.hoveredPageX, 20, this.winWidth) * 100 : 0;
     },
@@ -136,10 +136,14 @@ export default {
     updatePlayProgressBar(time) {
       const playedPercent = 100 * (time / this.duration);
       const { playedProgress, fakeProgress } = this.$refs;
-      playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
-      playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
-      playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
-      fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(time);
+      if (playedProgress) {
+        playedProgress.style.width = this.hoveredPercent <= playedPercent ? `${playedPercent - this.hoveredPercent}%` : `${playedPercent}%`;
+        playedProgress.style.backgroundColor = playedPercent <= this.hoveredPercent || !this.hovering ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)';
+        playedProgress.style.order = this.hoveredPercent <= playedPercent ? '1' : '0';
+      }
+      if (fakeProgress) {
+        fakeProgress.style.backgroundColor = this.rightFakeProgressBackgroundColor(time);
+      }
     },
     updateHoveredProgressBar(time, hoveredPercent) {
       const playedPercent = 100 * (time / this.duration);
@@ -191,7 +195,6 @@ export default {
       return this.whiteWithOpacity(hoveredEnd && playedEnd ? 0.9 : opacity);
     },
     handleMousemove(event) {
-      if (this.isSpaceDownInProfessional) return;
       this.hoveredPageX = event.pageX;
       this.hovering = true;
       if (this.hoveringId) clearTimeout(this.hoveringId);
@@ -212,7 +215,6 @@ export default {
       }
     },
     handleMousedown(event) {
-      if (this.isSpaceDownInProfessional) return;
       this.mousedown = true;
       if (event.target === this.$refs.leftInvisible || event.target === this.$refs.rightInvisible) {
         this.showThumbnail = false;

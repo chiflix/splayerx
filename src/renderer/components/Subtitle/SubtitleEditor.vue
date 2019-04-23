@@ -1,115 +1,116 @@
 <template>
-  <div class="sub-editor"
-    :style="{
-      // zIndex: dragingMode !== 'default' && isDragableInProfessional ? '9999' : '11',
-      cursor: dragingMode
-    }">
-    <div class="sub-editor-head">
-      <div class="sub-editor-time-line no-drag"
-        ref="timeLine"
-        @mousedown.left.stop="handleDragStartTimeLine"
-        @mousemove.left="handleDragingTimeLine"
-        @mouseup.left.stop="handleDragEndTimeLine"
-        :style="{
-          width: `${3 * winWidth}px`,
-          left: `${currentLeft}px`,
-          cursor: dragingMode !== 'default' ? dragingMode : 'grab',
-        }">
-        <div class="scales" :style="{
-          width: `${scales * space}px`
-        }">
-          <div v-for="(time) in times"
-            :key="time"
-            :class="'scale' + validityTime(time) + `${isHighlight(time) ? ' highlight' : ''}`"
-            :style="{
-              width: `${space}px`,
-              fontSize: winHeight > 1000 ? '22px': '2.1vh',
-            }">
-            <i></i>
-            <span>{{isHighlight(time) ? transcode(time) : getSecond(time)}}</span>
-          </div>
-        </div> 
-        <div class="subtitles" ref="subtitles">
-          <div v-for="sub in validitySubs"
-            :key="`${sub.width}-${sub.index}-${sub.track}-${sub.text}`"
-            v-fade-in="!(!paused && sub.reference)"
-            @mouseover.stop="handleHoverIn($event, sub)"
-            @mouseleave.stop="handleHoverOut($event, sub)"
-            @mousedown.left.stop="handleDragStartSub($event, sub)"
-            @mousemove.left="handleDragingSub($event, sub)"
-            @mouseup.left="handleDragEndSub($event, sub)"
-            @dblclick.left.stop="handleDoubleClickSub($event, sub)"
-            :class="computedSubClass(sub)+' no-drag sub-mark'+`${sub.focus && !sub.reference ? ' focus' : ''}`+`${sub.reference ? ' reference' : ''}`"
-            :style="{
-              left: `${sub.left}px`,
-              right: `${sub.right}px`,
-              top: `${((6 + (sub.track - 1) * 4) * vh) + 33}px`,
-              opacity: `${sub.opacity}`,
-              cursor: dragingMode !== 'default' ? dragingMode : 'grab'
-            }">
-            <i class="drag-left"
-              :style="{
-                cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
-              }"></i>
-            <i class="drag-right"
-              :style="{
-                cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
-              }"></i>
-          </div>
-        </div>
-      </div>
-      <div class="exit-btn-wrap" @click.stop="handleClickProfessional" v-fade-in="!(isDragableInProfessional || isSpaceDownInProfessional)"
-        :style="{
-          cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
-        }">
-        <Icon type="subtitleEditorExit" class="subtitle-editor-exit"/>
-      </div>
-      <div class="drag-mask no-drag"
-        @mousedown.left.stop="handleDragStartEditor"
-        @mousemove.left="handleDragingEditor"
-        @mouseup.left.stop="handleDragEndEditor"
-        :style="{
-          cursor: dragingMode !== 'default' ? dragingMode : 'grab',
-          height: spaceKeyPressStartTime > 0 ? '100vh' : 'auto',
-          zIndex: spaceKeyPressStartTime > 0 ? '22' : '2',
-        }"></div>
-    </div>
-    <div class="sub-editor-body" :style="{
-      bottom: `${(60 / 1080) * 100}%`,
-      minWidth: `${inputWitdh}px`
-    }">
-      <div v-if="referenceSubtitleId && paused" class="referenceText subtitle-style" v-html="`&nbsp;${getCurrentReferenceCues()}`"
+  <div>
+    <div class="sub-editor"
       :style="{
-        zoom: zoom,
-      }"></div>
-      <div class="renderers">
-        <subtitle-renderer
-          v-fade-in="!subDragTimeLineMoving"
-          :key='originSrc+currentEditedSubtitleId'
-          :showAddInput.sync="showAddInput"
-          :showTextarea.sync="showTextarea"
-          :newSubHolder="newSubHolder"
-          :preciseTime="preciseTime"
-          :currentSub="currentSub"
-          :dragingMode="dragingMode"
-          :referenceDialogues="referenceDialogues"
-          :subtitleInstance="!currentEditedSubtitleId ? null : subtitleInstance"
-          :tags.sync="tags"
-          :firstTags="firstTags"/>
+        cursor: dragingMode
+      }">
+      <div class="sub-editor-head">
+        <div class="sub-editor-time-line no-drag"
+          ref="timeLine"
+          @mousedown.left.stop="handleDragStartTimeLine"
+          @mousemove.left="handleDragingTimeLine"
+          @mouseup.left.stop="handleDragEndTimeLine"
+          :style="{
+            width: `${3 * winWidth}px`,
+            left: `${currentLeft}px`,
+            cursor: dragingMode !== 'default' ? dragingMode : 'grab',
+          }">
+          <div class="scales" :style="{
+            width: `${scales * space}px`
+          }">
+            <div v-for="(time) in times"
+              :key="time"
+              :class="'scale' + validityTime(time) + `${isHighlight(time) ? ' highlight' : ''}`"
+              :style="{
+                width: `${space}px`,
+                fontSize: winHeight > 1000 ? '22px': '2.1vh',
+              }">
+              <i></i>
+              <span>{{isHighlight(time) ? transcode(time) : getSecond(time)}}</span>
+            </div>
+          </div> 
+          <div class="subtitles" ref="subtitles">
+            <div v-for="sub in validitySubs"
+              :key="`${sub.width}-${sub.index}-${sub.track}-${sub.text}`"
+              v-fade-in="!(!paused && sub.reference)"
+              @mouseover.stop="handleHoverIn($event, sub)"
+              @mouseleave.stop="handleHoverOut($event, sub)"
+              @mousedown.left.stop="handleDragStartSub($event, sub)"
+              @mousemove.left="handleDragingSub($event, sub)"
+              @mouseup.left="handleDragEndSub($event, sub)"
+              @dblclick.left.stop="handleDoubleClickSub($event, sub)"
+              :class="computedSubClass(sub)+' no-drag sub-mark'+`${sub.focus && !sub.reference ? ' focus' : ''}`+`${sub.reference ? ' reference' : ''}`"
+              :style="{
+                left: `${sub.left}px`,
+                right: `${sub.right}px`,
+                top: `${((6 + (sub.track - 1) * 4) * vh) + 33}px`,
+                opacity: `${sub.opacity}`,
+                cursor: dragingMode !== 'default' ? dragingMode : 'grab'
+              }">
+              <i class="drag-left"
+                :style="{
+                  cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
+                }"></i>
+              <i class="drag-right"
+                :style="{
+                  cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
+                }"></i>
+            </div>
+          </div>
+        </div>
+        <div class="exit-btn-wrap" @click.stop="handleClickProfessional" v-fade-in="!(isDragableInProfessional)"
+          :style="{
+            cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
+          }">
+          <Icon type="subtitleEditorExit" class="subtitle-editor-exit"/>
+        </div>
       </div>
-    </div>
-    <div class="sub-editor-foot">
-      <div class="times-wrap">
-        <div class="cont">
-          <div class="timing"
-            :style="{
-              cursor: dragingMode
-            }">
-            <span class="timeContent">{{transcode(preciseTime, 1)}}</span>
+      <div class="sub-editor-body" :style="{
+        bottom: `${(60 / 1080) * 100}%`,
+        minWidth: `${inputWitdh}px`
+      }">
+        <div v-if="referenceSubtitleId && paused" class="referenceText subtitle-style" v-html="`&nbsp;${getCurrentReferenceCues()}`"
+        :style="{
+          zoom: zoom,
+        }"></div>
+        <div class="renderers">
+          <subtitle-renderer
+            v-fade-in="!subDragTimeLineMoving"
+            :key='originSrc+currentEditedSubtitleId'
+            :showAddInput.sync="showAddInput"
+            :showTextarea.sync="showTextarea"
+            :newSubHolder="newSubHolder"
+            :preciseTime="preciseTime"
+            :currentSub="currentSub"
+            :dragingMode="dragingMode"
+            :referenceDialogues="referenceDialogues"
+            :subtitleInstance="!currentEditedSubtitleId ? null : subtitleInstance"
+            :tags.sync="tags"
+            :firstTags="firstTags"/>
+        </div>
+      </div>
+      <div class="sub-editor-foot">
+        <div class="times-wrap">
+          <div class="cont">
+            <div class="timing"
+              :style="{
+                cursor: dragingMode
+              }">
+              <span class="timeContent">{{transcode(preciseTime, 1)}}</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <div class="drag-mask no-drag"
+      @mousedown.left.stop="handleDragStartEditor"
+      @mousemove.left="handleDragingEditor"
+      @mouseup.left.stop="handleDragEndEditor"
+      :style="{
+        cursor: dragingMode !== 'default' ? dragingMode : 'grab',
+        height: spaceKeyPressStartTime > 0 ? '100vh' : 'auto',
+        zIndex: spaceKeyPressStartTime > 0 ? '22' : '2',
+      }"></div>
   </div>
 </template>
 <script>
@@ -372,10 +373,11 @@ export default {
   },
   watch: {
     paused(val) {
+      requestAnimationFrame(this.updateWhenPlaying);
       if (!val) {
-        requestAnimationFrame(this.updateWhenPlaying);
         this.triggerCount += 1;
         this.updateChooseIndex(-2);
+        this.showTextarea = false;
       } else {
         this.resetCurrentTime();
         const canChooseSubs = this.currentSub.filter(e => e.track === 1);
@@ -434,6 +436,7 @@ export default {
             this.triggerCount += 1;
           });
         }
+        this.showAddInput = false;
         if (val && val.referenceSubtitleId !== this.referenceSubtitleId &&
           this.currentEditedSubtitleId) {
           const referenceSubtitleId = val.referenceSubtitleId;
@@ -676,7 +679,7 @@ export default {
         const b = document.getElementsByTagName('video')[0];
         currentTime = b ? b.currentTime : videodata.time;
       }
-      currentTime = parseFloat(currentTime.toFixed(2), 10);
+      currentTime = parseFloat(currentTime.toFixed(4), 10);
       this.editorCurrentTime = parseInt(currentTime, 10);
       this.preciseTime = currentTime;
       this.currentLeft = ((this.editorCurrentTime - currentTime) * this.space) -
@@ -686,14 +689,14 @@ export default {
       if (!this.paused) {
         // 播放中，时间轴同步运动，当时间轴中位时间和当前播放时间相差一屏宽度时，重新设置时间轴中位时间
         const b = document.getElementsByTagName('video')[0];
-        const currentTime = b.currentTime;
+        let currentTime = b.currentTime;
+        currentTime = parseFloat(currentTime.toFixed(4), 10);
         if (Math.abs(currentTime - this.editorCurrentTime) * this.space >= this.winWidth) {
           this.editorCurrentTime = parseInt(currentTime, 10);
         }
         this.currentLeft = ((this.editorCurrentTime - currentTime) * this.space) -
         ((this.offset * this.space) - (this.winWidth / 2));
         this.preciseTime = currentTime;
-        this.$refs.progressbar && this.$refs.progressbar.updatePlayProgressBar(this.preciseTime);
         requestAnimationFrame(this.updateWhenPlaying);
       }
     },
@@ -830,7 +833,7 @@ export default {
         this.$refs.timeLine.style.left = `${left}px`;
         this.transitionInfo = {
           currentLeft: left,
-          preciseTime: seekTime,
+          preciseTime: parseFloat(seekTime.toFixed(4), 10),
         };
       }
       // }
@@ -867,7 +870,7 @@ export default {
         this.$refs.timeLine.addEventListener('transitionend', this.doubleClickTransitionend, false);
         this.$refs.timeLine.style.transition = 'left 0.1s ease-in-out';
         this.currentLeft += offset;
-        this.preciseTime = sub.start;
+        this.preciseTime = parseFloat(sub.start.toFixed(4), 10);
         if (!this.protectKeyWithEnterShortKey) {
           this.updateChooseIndex(sub.index);
         }
@@ -1497,11 +1500,14 @@ export default {
       const pick = this.history[this.currentIndex];
       if (pick && pick.type === modifiedTypes.ADD) {
         const sub = cloneDeep(this.subtitleInstance);
-        sub.parsed.dialogues.splice(pick.index);
+        sub.parsed.dialogues.splice(pick.index, 1);
         this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
           sub,
         });
         this.currentIndex -= 1;
+        if (this.chooseIndex === pick.index) {
+          this.updateChooseIndex(-2);
+        }
       } else if (pick && pick.type === modifiedTypes.DELETE) {
         const sub = cloneDeep(this.subtitleInstance);
         const mirror = uniteSubtitleWithFragment(pick.before);
@@ -1532,12 +1538,15 @@ export default {
         this.currentIndex -= 1;
       } else if (pick && pick.type === modifiedTypes.ADD_FROM_REFERENCE) {
         const sub = cloneDeep(this.subtitleInstance);
-        sub.parsed.dialogues.splice(pick.index);
+        sub.parsed.dialogues.splice(pick.index, 1);
         this.referenceDialogues.splice(pick.selfIndex, 0, pick.referenceBefore);
         this.$bus.$emit(bus.DID_MODIFIED_SUBTITLE, {
           sub,
         });
         this.currentIndex -= 1;
+        if (this.chooseIndex === pick.index) {
+          this.updateChooseIndex(-2);
+        }
       } else if (pick && pick.type === modifiedTypes.DELETE_FROM_REFERENCE) {
         this.referenceDialogues.splice(pick.selfIndex, 0, pick.referenceBefore);
         this.currentIndex -= 1;
@@ -1658,13 +1667,16 @@ export default {
         const currentChooseSub = this.validitySubs
           .find(e => e.index === this.chooseIndex);
         const currentSub = this.currentSub.find(e => e.track === 1);
-        if (currentChooseSub) {
+        if (currentChooseSub && !currentSub) {
+          this.protectKeyWithEnterShortKey = true;
+          this.handleDoubleClickSub(null, currentChooseSub);
+        } else if (currentChooseSub && currentSub && currentSub.index !== currentChooseSub.index) {
           this.protectKeyWithEnterShortKey = true;
           this.handleDoubleClickSub(null, currentChooseSub);
         } else if (currentSub) {
           this.updateChooseIndex(currentSub.index);
-          this.protectKeyWithEnterShortKey = true;
-          this.handleDoubleClickSub(null, currentSub);
+          this.showTextarea = true;
+          // this.handleDoubleClickSub(null, currentSub);
         } else if (this.showAddInput) {
           this.updateChooseIndex(-1);
           this.showTextarea = true;
@@ -1729,7 +1741,11 @@ export default {
     }
   }
   .drag-mask {
-    position: relative;
+    width: 100%;
+    height: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
   }
   .sub-editor-head {
     // height: 25vh;
@@ -1941,7 +1957,7 @@ export default {
     position: fixed;
     right: 0;
     top: 0;
-    z-index: 9999;
+    z-index: 12;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1964,7 +1980,7 @@ export default {
     z-index: 5;
     transform: translate(-50%, 0);
     .referenceText {
-      background: rgba(0,0,0,0.30);
+      // background: rgba(0,0,0,0.30);
       // border-radius: 3px 3px 0 0;
       text-align: center;
       margin-bottom: 5px;

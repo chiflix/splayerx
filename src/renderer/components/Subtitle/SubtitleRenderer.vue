@@ -27,6 +27,7 @@
           :text="cue.text"
           :settings="cue.tags"
           @update:show-textarea="hiddenTextArea"
+          @update:textarea-change="handleTextAreaChange"
           :canUseEditor="canUseEditor"
           :cue="cue"></cue-editable-renderer>
       </div>
@@ -51,6 +52,7 @@
           :text="$t('editorCreateSubtitle.button')"
           :settings="{}"
           @update:show-textarea="hiddenTextArea"
+          @update:textarea-change="handleTextAreaChange"
           :canUseEditor="canUseEditor"
           :cue="{
             index: -1,
@@ -337,10 +339,8 @@ export default {
   mounted() {
     // 输入框键盘事件
     this.requestId = requestAnimationFrame(this.currentTimeUpdate);
-    this.$bus.$on(bus.SUBTITLE_TEXTAREA_CHANGE, this.handleTextAreaChange);
   },
   beforeDestroy() {
-    this.$bus.$off(bus.SUBTITLE_TEXTAREA_CHANGE);
     cancelAnimationFrame(this.requestId);
     this.lastIndex = [];
     this.lastAlignment = [];
@@ -401,9 +401,9 @@ export default {
         }
       });
     },
-    handleTextAreaChange(cue, editVal) { // eslint-disable-line
+    handleTextAreaChange({cue, text}) { // eslint-disable-line
       if (cue && cue.index === -1) {
-        if (editVal !== '' && this.newSubHolder) {
+        if (text !== '' && this.newSubHolder) {
           const { time: currentTime } = videodata;
           let sub = Object.assign({}, JSON.parse(JSON.stringify(this.newSubHolder.last)), {
             end: parseFloat(currentTime.toFixed(2), 10) + 0.01,
@@ -416,7 +416,7 @@ export default {
             sub.start = parseFloat((sub.end - 0.2).toFixed(2), 10);
           }
           const firstFragments = sub.fragments[0];
-          firstFragments.text = editVal;
+          firstFragments.text = text;
           sub.fragments = [firstFragments];
           // ****
           let subtitleInstance = null;
@@ -439,7 +439,7 @@ export default {
           this.$bus.$emit(bus.CREATE_MIRROR_SUBTITLE, {
             sub: subtitleInstance, add: sub, index: this.newSubHolder.insertIndex,
           });
-          this.$emit('update:showAddInput', false);
+          // this.$emit('update:showAddInput', false);
         }
       } else if (cue && cue.reference) {
         let subtitleInstance = null;
@@ -461,8 +461,8 @@ export default {
           subtitleInstance = this.subtitleInstance.type !== 'modified' ? cloneDeep(this.subtitleInstance) : this.subtitleInstance;
           index = subtitleInstance.parsed.dialogues.length;
         }
-        if (editVal) {
-          cue.text = editVal;
+        if (text) {
+          cue.text = text;
           const sub = cloneDeep(uniteSubtitleWithFragment(cue));
           delete sub.reference;
           delete sub.selfIndex;
@@ -490,24 +490,24 @@ export default {
         const subtitleInstance = this.subtitleInstance.type !== 'modified' ?
           cloneDeep(this.subtitleInstance) : this.subtitleInstance;
         if (subtitleInstance.metaInfo && subtitleInstance.metaInfo.format === 'ass') {
-          if (editVal.length === 0) {
+          if (text.length === 0) {
             before = subtitleInstance.parsed.dialogues.splice(index, 1);
           } else {
             before = cloneDeep(subtitleInstance.parsed.dialogues[index]);
             const firstFragments = subtitleInstance.parsed.dialogues[index].fragments[0];
-            firstFragments.text = editVal;
+            firstFragments.text = text;
             subtitleInstance.parsed.dialogues[index].fragments = [firstFragments];
           }
         } else if (subtitleInstance.metaInfo) {
-          if (editVal.length === 0) {
+          if (text.length === 0) {
             before = subtitleInstance.parsed.dialogues.splice(index, 1);
           } else {
             before = cloneDeep(subtitleInstance.parsed.dialogues[index]);
-            subtitleInstance.parsed.dialogues[index].text = editVal;
+            subtitleInstance.parsed.dialogues[index].text = text;
           }
         }
         if (this.isProfessional) {
-          if (editVal.length === 0) {
+          if (text.length === 0) {
             this.$bus.$emit(bus.WILL_MODIFIED_SUBTITLE, {
               sub: subtitleInstance,
               type: modifiedTypes.DELETE,
@@ -912,7 +912,6 @@ export default {
         left: 0;
         top: 0;
         z-index: 1;
-        backdrop-filter: blur(10px);
         background: rgba(0,0,0,0.1);
         border: 1px solid rgba(255,255,255,0.15);
         border-radius: 5px;
@@ -926,6 +925,12 @@ export default {
   }
   .enable-hover { 
     &::before {
+      visibility: visible;
+    }
+  }
+  .editable {
+    &::before {
+      backdrop-filter: blur(10px);
       visibility: visible;
     }
   }
@@ -964,7 +969,6 @@ export default {
     left: 0;
     top: 0;
     z-index: 1;
-    backdrop-filter: blur(10px);
     background: rgba(0,0,0,0.1);
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 5px;
@@ -978,6 +982,7 @@ export default {
 }
 .editable {
   &::before {
+    backdrop-filter: blur(10px);
     visibility: visible;
   }
 }

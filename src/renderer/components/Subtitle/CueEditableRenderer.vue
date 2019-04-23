@@ -19,12 +19,12 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import { Editor as editorMutations } from '@/store/mutationTypes';
-import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 
 export default {
   name: 'cue-editable-renderer',
   data() {
     return {
+      tmpText: '',
       focus: false,
       autoFocus: false,
     };
@@ -56,6 +56,8 @@ export default {
         return '0.3';
       } else if (cue && cue.index === -1 && chooseIndex === -1 && isEditable) {
         return '0.9';
+      } else if (cue && cue.index === -1 && this.tmpText) {
+        return '0.9';
       } else if (cue && cue.index === -1) {
         return '0.3';
       }
@@ -72,7 +74,7 @@ export default {
       return 'center';
     },
     finalText() {
-      let tmp = this.text;
+      let tmp = this.tmpText ? this.tmpText : this.text;
       if (this.chooseIndex === this.cue.index && this.isEditable) {
         tmp = this.cue.text;
       }
@@ -160,7 +162,6 @@ export default {
       // console.log(this.$refs.input.innerHTML, this.cue.text);
       this.toggleEditable(false);
       // this.updateChooseIndex(-2);
-      this.$emit('update:show-textarea', false);
       const sel = window.getSelection();
       sel.removeAllRanges();
       this.focus = false;
@@ -173,7 +174,14 @@ export default {
       html = html.replace(/(<([^>]+)>)/gi, '');
       html = html.replace(/\n/gi, '<br>');
       html = html.replace(/&nbsp;/g, ' ');
-      this.$bus.$emit(bus.SUBTITLE_TEXTAREA_CHANGE, this.cue, html.trim());
+      this.tmpText = html.trim();
+      if (this.tmpText !== this.cue.text) {
+        this.$emit('update:textarea-change', {
+          cue: this.cue,
+          text: html.trim(),
+        });
+      }
+      this.$emit('update:show-textarea', false);
       this.$refs.input.style.opacity = this.opacity;
     },
     keydown(e) { // eslint-disable-line

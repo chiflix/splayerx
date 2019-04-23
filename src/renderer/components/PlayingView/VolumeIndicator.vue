@@ -3,7 +3,7 @@
   @mouseenter="enterArea"
   @mouseleave="leaveArea"
   :style="{
-    zIndex: isProfessional ? '15': '4',
+    zIndex: isProfessional ? '12': '4',
   }">
   <div class="trigger-area"
     :class="showVolume ? 'fade-in' : 'fade-out'"

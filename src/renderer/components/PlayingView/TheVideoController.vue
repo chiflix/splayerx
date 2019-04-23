@@ -22,14 +22,14 @@
     @can-hover-item="cancelPlayListTimeout"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-fade-in="(showAllWidgets || progressTriggerStopped)" v-if="!isEditable && !isProfessional"/>
+    <div class="masking" v-fade-in="(showAllWidgets || progressTriggerStopped)" v-if="!isProfessional"/>
     <play-button class="play-button no-drag" v-show="!(isSpaceDownInProfessional || isEditable || isDragableInProfessional)"
       @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
       :mousemovePosition="mousemoveClientPosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
-    <volume-indicator class="no-drag" v-show="!(isSpaceDownInProfessional || isEditable || isDragableInProfessional)"
+    <volume-indicator class="no-drag" v-show="!(isEditable || isDragableInProfessional)"
       @update:volume-state="updateVolumeState"
       :attachedShown="attachedShown"
       :mousedownOnPlayButton="mousedownOnPlayButton"
