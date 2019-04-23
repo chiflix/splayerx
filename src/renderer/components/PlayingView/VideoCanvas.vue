@@ -31,7 +31,6 @@
 
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
-import { clearAll } from '@/helpers/cacheFileStorage';
 import { mapGetters, mapActions } from 'vuex';
 import path from 'path';
 import { Video as videoActions } from '@/store/actionTypes';
@@ -54,7 +53,6 @@ export default {
       asyncTasksDone: false, // window should not be closed until asyncTasks Done (only use
       nowRate: 1,
       quit: false,
-      needToRestore: false,
       winAngleBeforeFullScreen: 0, // winAngel before full screen
       winSizeBeforeFullScreen: [], // winSize before full screen
     };
@@ -332,8 +330,7 @@ export default {
     },
   },
   mounted() {
-    this.$electron.ipcRenderer.on('quit', (needToRestore) => {
-      this.needToRestore = needToRestore;
+    this.$electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
     this.videoElement = this.$refs.videoCanvas.videoElement();
@@ -389,7 +386,6 @@ export default {
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone) {
-        e.returnValue = false;
         this.$store.dispatch('SRC_SET', { src: '', mediaHash: '' });
         this.saveScreenshot(this.originSrc)
           .then(this.saveSubtitleStyle)
@@ -399,6 +395,7 @@ export default {
             this.asyncTasksDone = true;
             window.close();
           });
+        e.returnValue = false;
       } else if (!this.quit) {
         e.returnValue = false;
         this.$bus.$off(); // remove all listeners before back to landing view

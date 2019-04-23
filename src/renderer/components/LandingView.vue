@@ -89,7 +89,6 @@ import fs from 'fs';
 import { mapState, mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
-import { clearAll } from '@/helpers/cacheFileStorage';
 import Titlebar from './Titlebar.vue';
 import VideoItem from './LandingView/VideoItem.vue';
 import PlaylistItem from './LandingView/PlaylistItem.vue';
@@ -121,9 +120,6 @@ export default {
       tranFlag: true,
       shifting: false,
       firstIndex: 0,
-      asyncTasksDone: false,
-      needToRestore: false,
-      quit: false,
     };
   },
   watch: {

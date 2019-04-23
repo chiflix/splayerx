@@ -61,8 +61,6 @@
 
 <script>
 import electron from 'electron';
-import asyncStorage from '@/helpers/asyncStorage';
-import { clearAll } from '@/helpers/cacheFileStorage';
 import { setAsDefaultApp } from '@/../shared/system';
 import Icon from '@/components/BaseIconContainer.vue';
 import { codeToLanguageName } from '@/helpers/language';
