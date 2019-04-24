@@ -456,7 +456,6 @@ app.on('before-quit', () => {
         return Promise.resolve();
       }));
     return removeDir(path.join(userData, 'storage'))
-      .then(() => removeDir(path.join(userData, '__cache_files__')))
       .then(() => removeDir(userData));
   }
 
