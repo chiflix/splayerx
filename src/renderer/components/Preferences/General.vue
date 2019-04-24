@@ -88,7 +88,6 @@ export default {
     };
   },
   created() {
-    electron.ipcRenderer.send('get-restore-state');
     electron.ipcRenderer.on('restore-state', (event, state) => {
       this.restoreContent = state ? this.$t('preferences.general.relaunch')
         : this.$t('preferences.general.setButton');
