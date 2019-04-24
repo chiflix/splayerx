@@ -372,6 +372,9 @@ function registerMainWindowEvent() {
       preferenceWindow?.webContents.send('restore-state', needToRestore);
     });
   });
+  ipcMain.on('get-restore-state', () => {
+    preferenceWindow?.webContents.send('restore-state', needToRestore);
+  });
   ipcMain.on('apply', () => {
     needToRestore = true;
   });

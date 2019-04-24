@@ -88,7 +88,7 @@ export default {
     };
   },
   created() {
-    electron.ipcRenderer.on('restore-state', (event, state) => {
+    electron.ipcRenderer.once('restore-state', (event, state) => {
       this.restoreContent = state ? this.$t('preferences.general.relaunch')
         : this.$t('preferences.general.setButton');
     });
@@ -96,6 +96,11 @@ export default {
   watch: {
     displayLanguage(val) {
       if (val) this.$i18n.locale = val;
+      electron.ipcRenderer.send('get-restore-state');
+      electron.ipcRenderer.once('restore-state', (event, state) => {
+        this.restoreContent = state ? this.$t('preferences.general.relaunch')
+          : this.$t('preferences.general.setButton');
+      });
     },
     mouseDown(val, oldVal) {
       if (!val && oldVal && !this.isMoved) {
