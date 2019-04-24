@@ -369,15 +369,15 @@ function registerMainWindowEvent() {
     }
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
+      preferenceWindow?.webContents.send('restore-state', needToRestore);
     });
   });
-  ipcMain.on('restore', () => {
-    if (!needToRestore) {
-      needToRestore = true;
-    } else {
-      app.relaunch();
-      app.quit();
-    }
+  ipcMain.on('apply', () => {
+    needToRestore = true;
+  });
+  ipcMain.on('relaunch', () => {
+    app.relaunch();
+    app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
     mainWindow?.webContents.send('mainDispatch', 'setPreference', args);

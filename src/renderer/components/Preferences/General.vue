@@ -41,7 +41,7 @@
     <div class="setting-button no-drag" ref="button2"
       @mousedown="mousedownOnRestore">
       <transition name="button" mode="out-in">
-        <div :key="needToRelaunch" class="content">{{ needToRelaunch ? $t("preferences.general.relaunch") : $t("preferences.general.setButton") }}</div>
+        <div :key="needToRelaunch" class="content" ref="restoreContent">{{ restoreContent }}</div>
       </transition>
     </div>
   </div>
@@ -83,8 +83,15 @@ export default {
       defaultButtonTimeoutId: NaN,
       restoreButtonTimeoutId: NaN,
       needToRelaunch: false,
+      restoreContent: '',
       languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
     };
+  },
+  created() {
+    electron.ipcRenderer.on('restore-state', (event, state) => {
+      this.restoreContent = state ? this.$t('preferences.general.relaunch')
+        : this.$t('preferences.general.setButton');
+    });
   },
   watch: {
     displayLanguage(val) {
@@ -212,12 +219,13 @@ export default {
       }
     },
     restoreSettings() {
-      if (!this.needToRelaunch) {
+      if (this.restoreContent === this.$t('preferences.general.setButton')) {
+        electron.ipcRenderer.send('apply');
         this.needToRelaunch = true;
-        electron.ipcRenderer.send('restore');
+        this.restoreContent = this.$t('preferences.general.relaunch');
         return;
       }
-      electron.ipcRenderer.send('restore');
+      electron.ipcRenderer.send('relaunch');
       this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
     mapCode(code) {
