@@ -163,6 +163,8 @@ export default {
       if (!this.isSettingDefault) {
         this.$refs.button1.style.setProperty('background-color', '');
         this.$refs.button1.style.setProperty('opacity', '');
+      }
+      if (!this.isRestoring) {
         this.$refs.button2.style.setProperty('background-color', '');
         this.$refs.button2.style.setProperty('opacity', '');
       }
@@ -180,6 +182,7 @@ export default {
     },
     mousedownOnRestore() {
       if (!this.isSettingDefault) {
+        this.$refs.button2.style.setProperty('transition-delay', '');
         this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
         this.$refs.button2.style.setProperty('opacity', '0.5');
         this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
@@ -219,13 +222,19 @@ export default {
       }
     },
     restoreSettings() {
+      this.isRestoring = true;
       if (this.restoreContent === this.$t('preferences.general.setButton')) {
         electron.ipcRenderer.send('apply');
         this.needToRelaunch = true;
         this.restoreContent = this.$t('preferences.general.relaunch');
+        this.$refs.button2.style.setProperty('transition-delay', '400ms');
+        this.$refs.button2.style.setProperty('background-color', '');
+        this.$refs.button2.style.setProperty('opacity', '');
+        this.isRestoring = false;
         return;
       }
       electron.ipcRenderer.send('relaunch');
+      this.isRestoring = false;
       this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
     mapCode(code) {
