@@ -463,7 +463,6 @@ function removeUserData() {
     .then(() => removeDir(userData));
 }
 app.on('before-quit', (e) => {
-  const userData = app.getPath('userData');
   if (needToRestore) {
     mainWindow?.webContents.send('quit', needToRestore);
     e.preventDefault();
