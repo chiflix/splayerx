@@ -11,7 +11,7 @@
     @mousedown.left="handleMousedownLeft"
     @click.left="handleMouseupLeft">
     <!-- 当目前字幕处于快速编辑模式或者高级编辑模式正常播放的组件都从DOM节点删除 -->
-    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']" v-if="!isEditable && !isProfessional"></titlebar>
+    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']" v-if="!isProfessional"></titlebar>
     <notification-bubble ref="nextVideoUI" v-if="!isEditable"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"  v-fade-in="!isEditable && !isProfessional"
     :displayState="displayState['recent-playlist']"
@@ -34,17 +34,19 @@
       :attachedShown="attachedShown"
       :mousedownOnPlayButton="mousedownOnPlayButton"
       :showAllWidgets="showAllWidgets"/>
-    <div class="control-buttons" ref="control-buttons" v-fade-in="showAllWidgets && !isEditable && !isProfessional" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
-      <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
-      <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
-      v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging.sync="lastDragging"
-      @conflict-resolve="conflictResolve"/>
-      <advance-control class="button advance" v-fade-in="displayState['advance-control']"
-      v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
-      @conflict-resolve="conflictResolve"/>
-    </div>
     <transition name="fade">
-      <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-if="!isEditable && !isProfessional" />
+      <div class="control-buttons" ref="control-buttons" v-show="!isEditable && !afterBlurControlShowDelay && !isProfessional"  v-fade-in="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
+        <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
+        <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
+        v-bind.sync="widgetsStatus['subtitle-control']" :lastDragging.sync="lastDragging"
+        @conflict-resolve="conflictResolve"/>
+        <advance-control class="button advance" v-fade-in="displayState['advance-control']"
+        v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
+        @conflict-resolve="conflictResolve"/>
+      </div>
+    </transition>
+    <transition name="fade">
+      <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }" v-show="!isEditable && !afterBlurControlShowDelay && !isProfessional" />
     </transition>
     <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{
       marginBottom: preFullScreen ? '10px' : '0',
@@ -128,6 +130,8 @@ export default {
       dragOver: false,
       progressTriggerStopped: false,
       openPlayListTimeId: NaN,
+      afterBlurClicks: 0,
+      afterBlurControlShowDelay: false, // 输入框失去焦点，延迟显示控件
     };
   },
   computed: {
@@ -216,6 +220,19 @@ export default {
     ratio() {
       this.updateMinimumSize();
     },
+    isEditable(val) {
+      if (val) {
+        this.afterBlurControlShowDelay = true;
+        this.afterBlurClicks = 0;
+        Object.keys(this.widgetsStatus).forEach((item) => {
+          this.widgetsStatus[item].showAttached = false;
+        });
+      } else {
+        setTimeout(() => {
+          this.afterBlurClicks = 1;
+        }, 300);
+      }
+    },
     isFullScreen(val) {
       if (this.fullScreenBar) {
         if (!val) {
@@ -289,6 +306,7 @@ export default {
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
     document.addEventListener('wheel', this.handleWheel);
+    document.addEventListener('click', this.handleReleaseEditShowDelay);
   },
   methods: {
     ...mapActions({
@@ -610,6 +628,13 @@ export default {
     },
     toggleFullScreenState() {
       this.$bus.$emit('toggle-fullscreen');
+    },
+    handleReleaseEditShowDelay() {
+      this.afterBlurClicks += 1;
+      if (!this.isEditable && this.afterBlurClicks > 1) {
+        this.afterBlurControlShowDelay = false;
+        this.afterBlurClicks = 0;
+      }
     },
   },
 };

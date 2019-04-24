@@ -12,6 +12,7 @@
       @focus.stop="handleFocus"
       @keydown.stop="keydown"
       @mosueup.stop=""
+      @click.stop="handleClick"
       @blur="handleBlurTextArea"></div>
   </div>
 </template>
@@ -27,6 +28,7 @@ export default {
       tmpText: '',
       focus: false,
       autoFocus: false,
+      offsetDone: false, // 光标定位
     };
   },
   props: {
@@ -36,9 +38,14 @@ export default {
     cue: {
       type: Object,
     },
+    isFirstSub: {
+      type: Boolean,
+      default: true,
+    },
+    zoom: String,
   },
   computed: {
-    ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth', 'isProfessional', 'paused', 'isEditable', 'chooseIndex']),
+    ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth', 'isProfessional', 'paused', 'isEditable', 'chooseIndex', 'isClickFirstSub']),
     chosenStyleIndex() {
       // 如果是字幕高级编辑模式，字幕块就使用默认的样式
       if (this.isProfessional) {
@@ -97,7 +104,8 @@ export default {
   },
   watch: {
     isEditable(v) {
-      if (v && !this.focus && this.chooseIndex === this.cue.index) {
+      if (v && !this.focus && this.chooseIndex === this.cue.index &&
+        this.isFirstSub === this.isClickFirstSub) {
         const input = this.$refs.input;
         this.autoFocus = true;
         input.focus();
@@ -108,8 +116,35 @@ export default {
     ...mapMutations({
       toggleEditable: editorMutations.TOGGLE_EDITABLE,
       updateChooseIndex: editorMutations.UPDATE_CHOOSE_SUBTITLE_INDEX,
+      updateClickSubtitle: editorMutations.UPDATE_IS_CLICK_FIRST_SUBTITLE,
     }),
+    handleClick(e) {
+      if (!this.canUseEditor) return;
+      if (this.offsetDone) return;
+      const isPaused = this.paused;
+      if (isPaused) {
+        if (!this.isEditable) {
+          this.toggleEditable(isPaused);
+        }
+        this.updateClickSubtitle(this.isFirstSub);
+        const wrap = this.$refs.wrap;
+        const input = this.$refs.input;
+        const offsetY = e.offsetY;
+        if (wrap && this.focus) {
+          wrap.style = `
+            max-height: 27px;
+            overflow-x: scroll;
+            overflow-y: scroll;
+          `;
+          wrap.scrollTop = input.offsetHeight > 27 ? (offsetY / this.zoom) - 9 : 0;
+          this.offsetDone = true;
+        }
+      } else {
+        this.$bus.$emit('toggle-playback');
+      }
+    },
     handleFocus() {// eslint-disable-line
+      if (this.isFirstSub !== this.isClickFirstSub) return;
       this.focus = true;
       const input = this.$refs.input;
       let sel;
@@ -119,14 +154,6 @@ export default {
       }
       if (this.chooseIndex !== this.cue.index) {
         this.updateChooseIndex(this.cue.index);
-      }
-      const wrap = this.$refs.wrap;
-      if (wrap) {
-        wrap.style = `
-          max-height: 25.5px;
-          overflow-x: scroll;
-          overflow-y: scroll;
-        `;
       }
       if (this.cue.reference) {
         if (window.getSelection && document.createRange) {
@@ -140,6 +167,16 @@ export default {
           range.moveToElementText(input);
           range.select();
         }
+      }
+      const wrap = this.$refs.wrap;
+      if (wrap && this.autoFocus) {
+        wrap.style = `
+          max-height: 27px;
+          overflow-x: scroll;
+          overflow-y: scroll;
+        `;
+        wrap.scrollTop = input.offsetHeight > 27 ? 9999 : 0;
+        this.offsetDone = true;
       }
       if (this.autoFocus && !this.cue.reference) { // 非主动点击触发输入，光标需要定位末尾
         if (window.getSelection && document.createRange) {
@@ -159,7 +196,7 @@ export default {
       }
     },
     handleBlurTextArea() {
-      // console.log(this.$refs.input.innerHTML, this.cue.text);
+      if (this.isFirstSub !== this.isClickFirstSub) return;
       this.toggleEditable(false);
       // this.updateChooseIndex(-2);
       const sel = window.getSelection();
@@ -167,15 +204,17 @@ export default {
       this.focus = false;
       const wrap = this.$refs.wrap;
       if (wrap) {
+        wrap.scrollTop = 9999;
         wrap.style = '';
       }
+      this.offsetDone = false;
       let html = this.$refs.input.innerHTML;
       html = html.replace(/<br>/gi, '\n');
       html = html.replace(/(<([^>]+)>)/gi, '');
       html = html.replace(/\n/gi, '<br>');
       html = html.replace(/&nbsp;/g, ' ');
       this.tmpText = html.trim();
-      if (this.tmpText !== this.cue.text) {
+      if (this.tmpText !== this.cue.text || this.cue.reference) {
         this.$emit('update:textarea-change', {
           cue: this.cue,
           text: html.trim(),
@@ -249,6 +288,8 @@ export default {
 .subtitle-content {
   z-index: 1;
   white-space: pre;
+  padding: 0 5px;
+  box-sizing: border-box;
   &.pre-line {
     // white-space: pre-line;
   }

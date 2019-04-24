@@ -1,7 +1,6 @@
 <template>
   <div :class="isProfessional ? 'professional' : ''">
     <div class="subContainer"
-      @click.stop="handleClickSubContainer($event, cue)"
       v-for="(cue, i) in currentCues"
       v-fade-in="!(isProfessional && cue.reference && !paused)"
       :key="i"
@@ -14,21 +13,24 @@
         display: !isProfessional || checkCurrentSub(cue) ? 'flex' : 'none',
         cursor: dragingMode !== 'default' ? dragingMode : canUseEditor ? 'pointer' : 'default'
       }"
-      :class="avaliableClass(i)+`${paused && canUseEditor ? ' enable-hover': ''}`+`${isEditable && index === cue.index ? ' editable': ''}`+isCueFocus(cue)">
+      :class="avaliableClass(i)+`${paused && canUseEditor ? ' enable-hover': ''}`+isCueEditable(cue)+isCueFocus(cue)">
       <div class="cue-wrap" v-if="filter(cue)"
         :style="{
-          zoom: isProfessional ? zoom : isFirstSub ? `${scaleNum}` : `${secondarySubScale}`,
+          zoom: zoom,
           // width: `${inputWitdh}px`,
           minWidth: minInputWidth,
           maxWidth: maxInputWitdh,
           lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
         }">
         <cue-editable-renderer class="cueRender"
+          :key="`${cue.index}-${cue.text}`"
+          :isFirstSub="isFirstSub"
           :text="cue.text"
           :settings="cue.tags"
           @update:show-textarea="hiddenTextArea"
           @update:textarea-change="handleTextAreaChange"
           :canUseEditor="canUseEditor"
+          :zoom="zoom"
           :cue="cue"></cue-editable-renderer>
       </div>
     </div>
@@ -37,7 +39,7 @@
       @click.stop="handleClickSubContainer($event, {
         index: -1,
       })"
-      :class="'subContainer subtitle-alignment2'+`${paused ? ' enable-hover': ''}`+`${isEditable && index === -1 ? ' editable': ''}`"
+      :class="'subContainer subtitle-alignment2'+`${paused ? ' enable-hover': ''}`+`${isEditable && chooseIndex === -1 ? ' editable': ''}`"
       :style="{
         cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
       }">
@@ -51,9 +53,11 @@
         <cue-editable-renderer class="cueRender"
           :text="$t('editorCreateSubtitle.button')"
           :settings="{}"
+          :isFirstSub="isFirstSub"
           @update:show-textarea="hiddenTextArea"
           @update:textarea-change="handleTextAreaChange"
           :canUseEditor="canUseEditor"
+          :zoom="zoom"
           :cue="{
             index: -1,
           }"></cue-editable-renderer>
@@ -154,7 +158,7 @@ export default {
       'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleList', 'winHeight',
       'paused', 'isFullScreen', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'enabledSecondarySub', 'chosenSize', 'currentTime',
       'isEditable', 'isProfessional', 'winRatio', 'winWidth', 'winHeight', 'chosenStyle', 'isCreateSubtitleMode', 'currentEditedSubtitleId',
-      'computedWidth', 'computedHeight', 'chooseIndex', // to determine the subtitle renderer's container size
+      'computedWidth', 'computedHeight', 'chooseIndex', 'isClickFirstSub', // to determine the subtitle renderer's container size
     ]),
     computedSize() {
       return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
@@ -212,7 +216,7 @@ export default {
     },
     maxInputWitdh() { // eslint-disable-line
       const width = this.winWidth;
-      if (!this.isEditable) {
+      if (!this.isEditable || (this.isEditable && this.isClickFirstSub !== this.isFirstSub)) {
         return 'none';
       } else if (this.isProfessional) {
         return `${width / this.zoom}px`;
@@ -366,6 +370,15 @@ export default {
       }
       return this.isProfessional && this.currentSub.some(e => e.start === sub.start);
     },
+    isCueEditable(cue) {
+      if (this.isProfessional && this.isEditable && this.chooseIndex === cue.index) {
+        return ' editable';
+      } else if (this.isEditable && this.chooseIndex === cue.index &&
+        this.isClickFirstSub === this.isFirstSub) {
+        return ' editable';
+      }
+      return '';
+    },
     isCueFocus(cue) {
       if (this.currentSub.length === 0 || !this.isProfessional) {
         return '';
@@ -385,21 +398,6 @@ export default {
       }
       const result = this.currentSub.find(e => cue.start === e.start && cue.end === e.end);
       return result ? result.index : -1;
-    },
-    handleClickSubContainer(e, cue) {
-      this.index = -2;
-      if (!this.canUseEditor) return;
-      const isPaused = this.paused;
-      setImmediate(() => {
-        if (isPaused) {
-          this.index = cue.index;
-          if (!this.isEditable) {
-            this.toggleEditable(isPaused);
-          }
-        } else {
-          this.$bus.$emit('toggle-playback');
-        }
-      });
     },
     handleTextAreaChange({cue, text}) { // eslint-disable-line
       if (cue && cue.index === -1) {
@@ -903,35 +901,13 @@ export default {
     transform: translate(0, 0)!important;
     justify-content: center;
     &.focus {
-      // padding: 0 12px;
       &::before {
-        content: "";
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        left: 0;
-        top: 0;
-        z-index: 1;
-        background: rgba(0,0,0,0.1);
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 5px;
-        // visibility: hidden;
+        visibility: visible;
       }
     }
     .add-cue-render {
       opacity: 0.3;
       // cursor: pointer;
-    }
-  }
-  .enable-hover { 
-    &::before {
-      visibility: visible;
-    }
-  }
-  .editable {
-    &::before {
-      backdrop-filter: blur(10px);
-      visibility: visible;
     }
   }
   .edit-box {
@@ -952,7 +928,6 @@ export default {
     cursor: pointer;
   }
   .cue-wrap {
-    padding: 0 5px;
     display: flex;
     box-sizing: border-box;
     flex-direction: column-reverse;
@@ -969,9 +944,9 @@ export default {
     left: 0;
     top: 0;
     z-index: 1;
-    background: rgba(0,0,0,0.1);
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 5px;
+    overflow: hidden;
     visibility: hidden;
   }
   &:hover {
@@ -982,6 +957,7 @@ export default {
 }
 .editable {
   &::before {
+    background: rgba(0,0,0,0.1);
     backdrop-filter: blur(10px);
     visibility: visible;
   }

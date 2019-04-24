@@ -507,6 +507,8 @@ export default {
         }, 0);
       }
       this.clickItemArrow = true;
+      // 处理显示
+      this.handleModifiedAdvancedPanelScrollTop(index);
     },
     finishAnimation() {
       this.refAnimation = '';
@@ -656,6 +658,8 @@ export default {
       if (isEffectiveClick && this.currentSubtitleIndex === index && currentItem && currentItem.type === 'modified') {
         this.modifiedAdvancedPanelVisiable = !this.modifiedAdvancedPanelVisiable;
         this.clickItemArrow = true;
+        // 处理显示
+        this.handleModifiedAdvancedPanelScrollTop(index);
       } else if (isEffectiveClick && currentItem) {
         this.clickItem = true;
         this.$bus.$emit('change-subtitle', currentItem.id);
@@ -664,6 +668,19 @@ export default {
         }, 0);
         this.clickItemArrow = false;
       }
+    },
+    handleModifiedAdvancedPanelScrollTop(index) {
+      setImmediate(() => {
+        const currentScrollTop = this.$refs.scroll.scrollTop;
+        const parentHeight = this.$refs.scroll.parentNode.offsetHeight;
+        const offsetTop = document.getElementById(`item${index}`).offsetTop;
+        const targetScrollTop = (offsetTop + (2 * this.itemHeight)) - parentHeight;
+        if (this.modifiedAdvancedPanelVisiable && offsetTop < currentScrollTop) {
+          this.$refs.scroll.scrollTop = offsetTop;
+        } else if (this.modifiedAdvancedPanelVisiable && targetScrollTop > currentScrollTop) {
+          this.$refs.scroll.scrollTop = targetScrollTop;
+        }
+      });
     },
   },
   created() {
@@ -803,6 +820,9 @@ export default {
       background-color: transparent;
       box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
     }
+  }
+  .scrollScope {
+    position: relative;
   }
   .title {
     color: rgba(255, 255, 255, 0.6);

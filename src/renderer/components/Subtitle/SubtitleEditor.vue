@@ -5,8 +5,7 @@
         cursor: dragingMode
       }">
       <div class="sub-editor-head">
-        <div class="sub-editor-time-line no-drag"
-          ref="timeLine"
+        <div class="sub-editor-time-line no-drag" ref="timeLine"
           @mousedown.left.stop="handleDragStartTimeLine"
           @mousemove.left="handleDragingTimeLine"
           @mouseup.left.stop="handleDragEndTimeLine"
@@ -15,9 +14,12 @@
             left: `${currentLeft}px`,
             cursor: dragingMode !== 'default' ? dragingMode : 'grab',
           }">
-          <div class="scales" :style="{
-            width: `${scales * space}px`
-          }">
+          <div :class="'scales'+`${timeLineHover ? ' hover' : ''}`"
+            :style="{
+              width: `${scales * space}px`
+            }"
+            @mouseenter.stop="handleTimeLineHoverIn"
+            @mouseleave.stop="handleTimeLineHoverOut">
             <div v-for="(time) in times"
               :key="time"
               :class="'scale' + validityTime(time) + `${isHighlight(time) ? ' highlight' : ''}`"
@@ -58,7 +60,10 @@
             </div>
           </div>
         </div>
-        <div class="exit-btn-wrap" @click.stop="handleClickProfessional" v-fade-in="!(isDragableInProfessional)"
+        <div :class="'exit-btn-wrap'+`${exitBtnHover ? ' hover' : ''}`+`${isSpaceDownInProfessional ? ' mask' : ''}`" v-fade-in="!(isDragableInProfessional)"
+          @mouseenter.stop="handleExitBtnHoverIn"
+          @mouseleave.stop="handleExitBtnHoverOut"
+          @click.stop="handleClickProfessional"
           :style="{
             cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
           }">
@@ -71,9 +76,11 @@
       }">
         <div v-if="referenceSubtitleId && paused" class="referenceText subtitle-style" v-html="`&nbsp;${getCurrentReferenceCues()}`"
         :style="{
-          zoom: zoom,
+          zoom: zoom(0),
         }"></div>
-        <div class="renderers">
+        <div class="renderers" :style="{
+          minHeight: `${zoom(2) * 28}px`
+        }">
           <subtitle-renderer
             v-fade-in="!subDragTimeLineMoving"
             :key='originSrc+currentEditedSubtitleId'
@@ -85,6 +92,7 @@
             :dragingMode="dragingMode"
             :referenceDialogues="referenceDialogues"
             :subtitleInstance="!currentEditedSubtitleId ? null : subtitleInstance"
+            :isFirstSub="true"
             :tags.sync="tags"
             :firstTags="firstTags"/>
         </div>
@@ -102,14 +110,12 @@
         </div>
       </div>
     </div>
-    <div class="drag-mask no-drag"
+    <div :class="'drag-mask no-drag'+`${spaceKeyPressStartTime > 0 ? ' active' : ''}`"
       @mousedown.left.stop="handleDragStartEditor"
       @mousemove.left="handleDragingEditor"
       @mouseup.left.stop="handleDragEndEditor"
       :style="{
         cursor: dragingMode !== 'default' ? dragingMode : 'grab',
-        height: spaceKeyPressStartTime > 0 ? '100vh' : 'auto',
-        zIndex: spaceKeyPressStartTime > 0 ? '22' : '2',
       }"></div>
   </div>
 </template>
@@ -182,6 +188,8 @@ export default {
       transitionInfo: null, // 时间轴动画中，包括动画end 需要的数据
       matchSwitchReferenceBubble: null, // 当切换参考字幕的时候，记录当前是否有气泡
       protectKeyWithEnterShortKey: false, // 保护回车选择前
+      timeLineHover: false,
+      exitBtnHover: false,
     };
   },
   props: {
@@ -345,31 +353,6 @@ export default {
       return this.validitySubs
         .filter(e => e.start <= this.preciseTime && e.end > this.preciseTime);
     },
-    zoom() {
-      // update video scale that width is larger than height
-      const updatePCVideoScaleByFactors = (index) => {
-        const firstFactors = [21, 29, 37, 45];
-        const secondFactors = [24, 26, 28, 30];
-        return `${(((firstFactors[index] / 900) * this.computedSize) + (secondFactors[index] / 5)) / 9}`;
-      };
-      // update video scale that height is larger than width
-      const updateMobileVideoScaleByFactors = (index) => {
-        const firstFactors = [21, 29, 37, 45];
-        const secondFactors = [12, -92, -196, -300];
-        return `${(((firstFactors[index] / 760) * this.computedSize) + (secondFactors[index] / 76)) / 9}`;
-      };
-      // update video scale when width or height is larger than 1080
-      const updateVideoScaleByFactors = (val) => {
-        const factors = [30, 40, 50, 60];
-        return `${((val / 1080) * factors[0]) / 9}`;
-      };
-      if (this.computedSize >= 1080) {
-        return updateVideoScaleByFactors(this.computedSize);
-      } else if (this.winRatio >= 1) {
-        return updatePCVideoScaleByFactors(0);
-      }
-      return updateMobileVideoScaleByFactors(0);
-    },
   },
   watch: {
     paused(val) {
@@ -408,7 +391,7 @@ export default {
       this.enableMenuEnter(val.length > 0 || this.showAddInput);
       const canChooseSubs = val.filter(e => e.track === 1);
       if (!this.protectKeyWithEnterShortKey && canChooseSubs.length > 0 &&
-        this.paused && this.chooseIndex === -2) {
+        this.paused && this.chooseIndex < 0) {
         this.updateChooseIndex(canChooseSubs[0].index);
       }
     },
@@ -556,6 +539,31 @@ export default {
       addMessages: 'addMessages',
       removeMessages: 'removeMessages',
     }),
+    zoom(i) {
+      // update video scale that width is larger than height
+      const updatePCVideoScaleByFactors = (index) => {
+        const firstFactors = [13, 21, 29, 37, 45];
+        const secondFactors = [22, 24, 26, 28, 30];
+        return `${(((firstFactors[index] / 900) * this.computedSize) + (secondFactors[index] / 5)) / 9}`;
+      };
+      // update video scale that height is larger than width
+      const updateMobileVideoScaleByFactors = (index) => {
+        const firstFactors = [13, 21, 29, 37, 45];
+        const secondFactors = [116, 12, -92, -196, -300];
+        return `${(((firstFactors[index] / 760) * this.computedSize) + (secondFactors[index] / 76)) / 9}`;
+      };
+      // update video scale when width or height is larger than 1080
+      const updateVideoScaleByFactors = (val) => {
+        const factors = [20, 30, 40, 50, 60];
+        return `${((val / 1080) * factors[i]) / 9}`;
+      };
+      if (this.computedSize >= 1080) {
+        return updateVideoScaleByFactors(this.computedSize);
+      } else if (this.winRatio >= 1) {
+        return updatePCVideoScaleByFactors(i);
+      }
+      return updateMobileVideoScaleByFactors(i);
+    },
     computedCanShowAddBtn(currentSub) { // eslint-disable-line
       currentSub = currentSub.filter(e => e.track === 1);
       // 当前有显示的字幕, 或者刚刚开始
@@ -700,6 +708,22 @@ export default {
         requestAnimationFrame(this.updateWhenPlaying);
       }
     },
+    handleTimeLineHoverIn() {
+      if (!this.isSpaceDownInProfessional) {
+        this.timeLineHover = true;
+      }
+    },
+    handleTimeLineHoverOut() {
+      this.timeLineHover = false;
+    },
+    handleExitBtnHoverIn() {
+      if (!this.isSpaceDownInProfessional) {
+        this.exitBtnHover = true;
+      }
+    },
+    handleExitBtnHoverOut() {
+      this.exitBtnHover = false;
+    },
     handleDragStartTimeLine(e) {
       this.dragStartX = e.pageX;
       this.dragStartLeft = this.currentLeft;
@@ -734,7 +758,7 @@ export default {
         if (e.pageX !== this.dragStartX) {
           this.resetCurrentTime();
           this.triggerCount += 1;
-        } else if (!this.timeLineClickLock) {
+        } else if (!this.timeLineClickLock && !this.isSpaceDownInProfessional) {
           this.handleMouseUpOnTimeLine(e);
           this.timeLineClickLock = true;
           setTimeout(() => {
@@ -1460,7 +1484,9 @@ export default {
       // 如果退出高级模式，需要恢复原来播放尺寸
       // 进入高级模式，需要设定window的信息，在本组件的watch里
       // this.toggleProfessional(false);
-      this.$bus.$emit(bus.SUBTITLE_EDITOR_EXIT);
+      if (!this.isSpaceDownInProfessional && !this.isDragableInProfessional) {
+        this.$bus.$emit(bus.SUBTITLE_EDITOR_EXIT);
+      }
     },
     intercept({
       sub, type, index, before, selfIndex,
@@ -1745,7 +1771,13 @@ export default {
     height: 0;
     position: absolute;
     left: 0;
-    top: 0;
+    bottom: 0;
+    &.active {
+      // height: 100vh;
+      height: 94vh;
+      min-height: calc(100vh - 60px);
+      z-index: 22;
+    }
   }
   .sub-editor-head {
     // height: 25vh;
@@ -1799,7 +1831,7 @@ export default {
         background: rgba(255,255,255,0.06);
         transition: background 0.2s ease-in-out;
       }
-      &:hover {
+      &.hover {
         &::before {
           background: rgba(255,255,255,0.10);
         }
@@ -1964,8 +1996,21 @@ export default {
     backdrop-filter: blur(3px);
     background: rgba(255,255,255,0.1);
     transition: background 0.2s ease-in-out;
-    &:hover {
+    &.hover {
       background: rgba(255,255,255,0.2);
+    }
+    &.mask {
+      &:after {
+        content: "";
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: block;
+        z-index: 2;
+        cursor: grab;
+      }
     }
     .subtitle-editor-exit {
       width: 60%;
@@ -1985,9 +2030,10 @@ export default {
       text-align: center;
       margin-bottom: 5px;
       white-space: pre;
+      font-size: 11px;
+      color: #ffffff;
     }
     .renderers {
-      min-height: 80px;
       display: flex;
       flex-direction: column-reverse;
     }
