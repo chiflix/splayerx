@@ -445,27 +445,31 @@ function createWindow() {
     }, 1000);
   }
 }
-
-app.on('before-quit', () => {
-  function removeUserData() {
-    const userData = app.getPath('userData');
-    const removeDir = dir => fsPromises.readdir(dir)
-      .then(files => files.reduce((result, file) => {
-        const filePath = path.join(dir, file);
-        return result.then(() => fsPromises.unlink(filePath)
-          .then(null, () => removeDir(filePath)));
-      }, Promise.resolve()).then(() => {
-        if (dir !== userData) return fsPromises.rmdir(dir);
-        return Promise.resolve();
-      }));
-    return removeDir(path.join(userData, 'storage'))
-      .then(() => removeDir(userData));
-  }
-
+function removeDir(dir) {
+  const userData = app.getPath('userData');
+  return fsPromises.readdir(dir)
+    .then(files => files.reduce((result, file) => {
+      const filePath = path.join(dir, file);
+      return result.then(() => fsPromises.unlink(filePath)
+        .then(null, () => removeDir(filePath)));
+    }, Promise.resolve()).then(() => {
+      if (dir !== userData) return fsPromises.rmdir(dir);
+      return Promise.resolve();
+    }));
+}
+function removeUserData() {
+  const userData = app.getPath('userData');
+  return removeDir(path.join(userData, 'storage'))
+    .then(() => removeDir(userData));
+}
+app.on('before-quit', (e) => {
+  const userData = app.getPath('userData');
   if (needToRestore) {
-    mainWindow.destroy();
+    mainWindow?.webContents.send('quit', needToRestore);
+    e.preventDefault();
     removeUserData().then(() => {
       needToRestore = false;
+      app.quit();
     });
   } else {
     mainWindow?.webContents.send('quit');
@@ -528,7 +532,14 @@ app.on('ready', () => {
 
 app.on('window-all-closed', () => {
   if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
-    app.quit();
+    if (needToRestore) {
+      removeUserData().then(() => {
+        needToRestore = false;
+        app.quit();
+      });
+    } else {
+      app.quit();
+    }
   }
 });
 
