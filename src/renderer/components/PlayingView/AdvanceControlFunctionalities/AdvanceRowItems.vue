@@ -32,19 +32,20 @@
                 width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}%` : `${difWidth[1]}%`,
                 cursor: itemChosen(index) ? 'default' : 'pointer',
               }">
-              <div class="text"
+              <p class="text"
                 :style="{
                   color: itemChosen(index) || index === hoverIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                   margin: 'auto',
                   transition: 'color 300ms',
                 }">{{ list }}
-              </div>
+              </p>
             </div>
             <div :class="cardType"
               v-show="!this.isRateMenu || this.lists.includes(this.rate)"
               :style="{
                 left: `${moveLength}px`,
                 transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
+                boxSizing: 'border-box',
               }"></div>
           </div>
         </div>
@@ -317,7 +318,6 @@ export default {
         width: 80%;
         height: 27px;
         .text {
-          line-height: 12px;
           font-size: 10px;
         }
         .speedCard {
@@ -367,7 +367,6 @@ export default {
         width: 80%;
         height: 32.4px;
         .text {
-          line-height: 14.4px;
           font-size: 12px;
         }
         .speedCard {
@@ -417,7 +416,6 @@ export default {
         width: 80%;
         height: 45.36px;
         .text {
-          line-height: 20.16px;
           font-size: 16.8px;
         }
         .speedCard {
