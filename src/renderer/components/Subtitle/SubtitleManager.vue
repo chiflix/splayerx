@@ -753,6 +753,11 @@ export default {
       });
       return result;
     },
+    /**
+     * 快速修改一个非自制字幕，会创建新的自制字幕，执行写文件，加载字幕的动作
+     * 快速修改一个自制字幕，会覆盖原先的自制字幕内容。
+     * 在高级模式下，修改自制字幕，不会触发读写操作，仅修改内存数据
+     */
     modifiedSubtitle({ sub, isSecondSub }) {
       // 这里统一处理新增或者修改自制
       // 如果type 不是 modified 就是创建新的自制字幕
@@ -785,6 +790,11 @@ export default {
         });
         // 创建新的自制字幕
         addSubtitleByMediaHash(this.mediaHash, subString, { type: 'modified' }).then((result) => {
+          // 如果是快捷修改
+          if (!this.isProfessional) {
+            const whichSub = isSecondSub ? 'second-subtitle' : 'first-subtitle';
+            this.$ga.event('app', 'quick-modified', whichSub);
+          }
           // 创建成功后往当前字幕列表添加新创建的自制字幕
           this.$bus.$emit('add-subtitles', [{
             src: result.path,
@@ -804,6 +814,9 @@ export default {
         });
       }
     },
+    /**
+     * 保存正在操作字幕的内存数据到文件
+     */
     async saveSubtitle() {
       // 主动触发保存操作
       const currentSubtitle = this.subtitleInstances[this.currentFirstSubtitleId];
@@ -828,6 +841,10 @@ export default {
         }
       }
     },
+    /**
+     * 字幕面板触发删除自制字幕
+     * 定时5s后触发真删除（删infoDB、file）
+     */
     deleteSubtitle({ sub }) {
       // 删除字幕文件(自制字幕)
       // 拿到字幕的src发到气泡确认删除
@@ -845,6 +862,9 @@ export default {
         });
       }, 5000);
     },
+    /**
+     *导出当前字幕vtt
+     */
     exportSubtitle() {
       const currentSubtitle = this.subtitleInstances[this.currentFirstSubtitleId];
       if (currentSubtitle && currentSubtitle.type === 'modified') {
@@ -1004,6 +1024,7 @@ export default {
     this.$bus.$on(bus.EXPORT_MODIFIED_SUBTITLE, this.exportSubtitle);
     // 保存字幕
     this.$bus.$on(bus.SUBTITLE_EDITOR_SAVE, this.saveSubtitle);
+    // 加载本地字幕为参考字幕
     this.$bus.$on(bus.SUBTITLE_EDITOR_LOAD_LOCAL, (src) => {
       this.watchLoadSubtitleFromLocal = src;
     });

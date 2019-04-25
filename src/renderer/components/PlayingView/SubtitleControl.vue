@@ -440,6 +440,9 @@ export default {
       swicthReferenceSubtitle: editorMutations.SWITCH_REFERENCE_SUBTITLE,
       updateCurrentEditedSubtitle: editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
     }),
+    /**
+     * 创建新字幕的按钮
+     */
     handleCreateBtnClick() {
       // 当点击创建按钮后，先暂停播放、再切换高级编辑模式
       if (!this.paused) this.$bus.$emit('toggle-playback');
@@ -447,6 +450,8 @@ export default {
       this.swicthReferenceSubtitle(null);
       this.toggleProfessional(true);
       this.$emit('update:showAttached', false);
+      // 字幕面板点击创建字幕按钮
+      this.$ga.event('app', 'create-subtitle', 'subtitle-contorl-button');
     },
     shiftItemHover() {
       this.shiftItemHovered = true;
@@ -457,6 +462,9 @@ export default {
     subTypeShift() {
       this.updateSubtitleType(!this.isFirstSubtitle);
     },
+    /**
+     * 点击自制字幕进入高级编辑模式的按钮
+     */
     handleSubEdit(e, item) {
       if (!this.paused) {
         this.$bus.$emit('toggle-playback');
@@ -466,10 +474,20 @@ export default {
       this.modifiedAdvancedPanelVisiable = false;
       this.clickItemArrow = false;
       this.$emit('update:showAttached', false);
+      // 字幕面板点击编辑字幕按钮
+      this.$ga.event('app', 'enter-professional-editor');
     },
+    /**
+     * 自制字幕导出按钮
+     */
     handleSubExport() {
       this.$bus.$emit(bus.EXPORT_MODIFIED_SUBTITLE);
+      // 字幕面板点击导出字幕按钮
+      this.$ga.event('app', 'export-subtitle');
     },
+    /**
+     * 在字幕面板触发删除自制字幕，先删除Vuex数据，在删除subtitle-manager里的数据
+     */
     handleSubConfirmDelete(e, item) {
       if (e.target.nodeName !== 'DIV') {
         this.modifiedAdvancedPanelVisiable = false;
@@ -496,6 +514,9 @@ export default {
         });
       }
     },
+    /**
+     * 点击自制字幕的箭头
+     */
     handleSubToggle(e, index) {
       if (this.currentSubtitleIndex === index) {
         this.modifiedAdvancedPanelVisiable = !this.modifiedAdvancedPanelVisiable;
@@ -659,7 +680,7 @@ export default {
       if (isEffectiveClick && this.currentSubtitleIndex === index && currentItem && currentItem.type === 'modified') {
         this.modifiedAdvancedPanelVisiable = !this.modifiedAdvancedPanelVisiable;
         this.clickItemArrow = true;
-        // 处理显示
+        // 点击字幕button也可以伸缩自制字幕功能面板
         this.handleModifiedAdvancedPanelScrollTop(index);
       } else if (isEffectiveClick && currentItem) {
         this.clickItem = true;
@@ -670,6 +691,9 @@ export default {
         this.clickItemArrow = false;
       }
     },
+    /**
+     * 处理当自制字幕功能面板不在可是范围内，滚动父级的视窗
+     */
     handleModifiedAdvancedPanelScrollTop(index) {
       setImmediate(() => {
         const currentScrollTop = this.$refs.scroll.scrollTop;
@@ -677,14 +701,15 @@ export default {
         const offsetTop = document.getElementById(`item${index}`).offsetTop;
         const targetScrollTop = (offsetTop + (2 * this.itemHeight)) - parentHeight;
         if (this.modifiedAdvancedPanelVisiable && offsetTop < currentScrollTop) {
-          // this.$refs.scroll.scrollTop = offsetTop;
           this.animateScrollTop(currentScrollTop, offsetTop);
         } else if (this.modifiedAdvancedPanelVisiable && targetScrollTop > currentScrollTop) {
-          // this.$refs.scroll.scrollTop = targetScrollTop;
           this.animateScrollTop(currentScrollTop, targetScrollTop);
         }
       });
     },
+    /**
+     * 处理scrollTop动画
+     */
     animateScrollTop(origin, target) {
       const cosParameter = (origin - target) / 2;
       let scrollCount = 0;

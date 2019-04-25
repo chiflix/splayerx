@@ -845,11 +845,12 @@ new Vue({
               label: this.$t('msg.subtitle.createSubtitle'),
               id: 'createSelectedSubtitle',
               click: () => {
-                // this.$bus.$emit('upload-current-subtitle');
                 if (!this.paused) this.$bus.$emit('toggle-playback');
                 this.updateCurrentEditedSubtitle(null);
                 this.swicthReferenceSubtitle(null);
                 this.toggleProfessional(true);
+                // 快捷键创建字幕
+                this.$ga.event('app', 'create-subtitle', 'short-cut');
               },
             },
             {

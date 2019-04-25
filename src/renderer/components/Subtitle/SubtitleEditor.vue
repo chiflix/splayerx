@@ -476,6 +476,8 @@ export default {
             // 加载完成可以新增字幕
             this.showAddInput = true;
           }
+          // 切换参考字幕
+          this.$ga.event('app', 'switch-reference-subtitle');
         } else if (!val) {
           this.currentParseReferenceSubtitleId = null;
           this.referenceDialogues = [];
@@ -621,6 +623,7 @@ export default {
       }
     },
     getCurrentReferenceCues() {
+      // 获取参考字幕的内容
       const instance = this.referenceSubtitleInstance;
       if (instance && instance.parsed && instance.parsed.dialogues) {
         const filter = instance.parsed.dialogues.filter((e) => {
@@ -750,8 +753,6 @@ export default {
         if (seekTime >= this.duration) {
           offset = (this.dragStartTime - this.duration) * this.space;
         }
-        // requestAnimationFrame(() => {
-        // });
         this.updateWhenMoving(offset);
       }
     },
@@ -800,8 +801,6 @@ export default {
         if (seekTime >= this.duration) {
           offset = (this.dragStartTime - this.duration) * this.space;
         }
-        // requestAnimationFrame(() => {
-        // });
         this.updateWhenMoving(offset);
       }
     },
@@ -846,15 +845,9 @@ export default {
       }
     },
     handleMouseUpOnTimeLine(e) {
-      // const nowTamp = Date.now();
-      // const doubleClickTime = (Date.now() - this.timeLineClickTimestamp);
-      // this.timeLineClickTimestamp = nowTamp;
-      // // 单机时间轴、触发时间轴运动到点击位置
-      // if (doubleClickTime > this.timeLineClickDelay) {
       const offset = (this.winWidth / 2) - e.pageX;
       const seekTime = this.preciseTime - (offset / this.space);
       if (seekTime >= 0 && seekTime <= this.duration && !this.transitionInfo) {
-        // this.$refs.timeLine.style.transition = '';
         this.$refs.timeLine.addEventListener('transitionend', this.transitionend, false);
         this.$refs.timeLine.style.transition = 'left 100ms ease-in-out';
         const left = this.currentLeft + offset;
@@ -864,7 +857,6 @@ export default {
           preciseTime: parseFloat(seekTime.toFixed(4), 10),
         };
       }
-      // }
     },
     transitionend() {
       // 时间轴运动到点击位置，动画结束，重设时间
@@ -906,12 +898,6 @@ export default {
     },
     doubleClickTransitionend() {
       // 时间轴运动到字幕条开始位置，动画结束，重设时间
-      // if (this.transitionInfo) {
-      //   // this.currentLeft = this.transitionInfo.currentLeft;
-      //   this.preciseTime = this.transitionInfo.preciseTime;
-      //   this.chooseIndexs = this.transitionInfo.chooseIndexs;
-      // }
-      // this.$bus.$emit('seek', this.preciseTime);
       this.resetCurrentTime(this.preciseTime);
       this.triggerCount += 1;
       // console.log(this.preciseTime);
@@ -988,16 +974,6 @@ export default {
     handleDragingSub(e) {
       if (this.subRightDraging || this.subLeftDraging || this.subDragMoving) {
         this.toggleDragable(true);
-        // const pointerL = this.subDragCurrentSub.minLeft +
-        //   (this.currentLeft + (this.subDragCurrentSub.width * 0.03));
-        // const pointerR = this.subDragCurrentSub.maxLeft +
-        //   (this.currentLeft + (this.subDragCurrentSub.width * 0.97));
-        // if (e.pageX > pointerR || e.pageX < pointerL) return;
-        // requestAnimationFrame(throttle(() => {
-        //   const offset = e.pageX - this.subDragStartX;
-        //   this.updateSubWhenDraging(offset, this.subDragCurrentSub, this.subDragElement);
-        //   this.subDragStartX = e.pageX;
-        // }, 100));
         const offset = e.pageX - this.subDragStartX;
         this.updateSubWhenDraging(offset, this.subDragCurrentSub, this.subDragElement, e.pageX);
         this.subDragStartX = e.pageX;
@@ -1096,45 +1072,14 @@ export default {
                 subElement.style.left = `${sub.left}px`;
                 subElement.style.right = `${sub.right}px`;
               } else {
-                // 如果字幕条往右运动一个步长还不超出这个字幕的最右定位
-                // 就让这个字幕条在时间轴上面往前加一步
-                // if (this.subDragCurrentSub.maxLeft > (sub.left + (this.step * this.space))) {
-                //   let newStart = sub.originStart +
-                //     (Math.floor(sub.left - sub.originLeft) / this.space);
-                //   newStart += this.step;
-                //   newStart = newStart < 0 ? 0 : newStart;
-                //   let newEnd = newStart + (sub.originEnd - sub.originStart);
-                //   newStart = parseFloat(newStart.toFixed(2), 10);
-                //   newEnd = parseFloat(newEnd.toFixed(2), 10);
-                //   this.subtitleInstance.parsed.dialogues[sub.index].start = newStart;
-                //   this.subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
-                //   this.$bus.$emit('modified-subtitle', { sub: this.subtitleInstance });
-                //   this.hook = this.step;
-                // }
-                // const b = ((3 * this.winWidth) - ((left - this.currentLeft) + sub.width));
-                // console.log(b, sub.minRight, b < (sub.minRight + (this.step * this.space)));
-                // 精准吸附，但是步长加速度就会跳了。
                 if (((3 * this.winWidth) - ((left - this.currentLeft) + sub.width)) <
                   (sub.minRight + (this.step * this.space))) {
+                  // 当字幕贴到右边的字幕是，定住
                   this.createSubElement.style.position = 'absolute';
                   this.createSubElement.style.left = `${sub.maxLeft}px`;
                 } else {
-                  // let newStart = sub.originStart +
-                  //   (Math.floor(sub.left - sub.originLeft) / this.space);
-                  // newStart += this.step;
-                  // newStart = newStart < 0 ? 0 : newStart;
-                  // let newEnd = newStart + (sub.originEnd - sub.originStart);
-                  // newStart = parseFloat(newStart.toFixed(2), 10);
-                  // newEnd = parseFloat(newEnd.toFixed(2), 10);
-                  // const before = cloneDeep(this.subtitleInstance.parsed.dialogues[sub.index]);
-                  // this.subtitleInstance.parsed.dialogues[sub.index].start = newStart;
-                  // this.subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
-                  // this.$bus.$emit('modified-subtitle', {
-                  //   sub: this.subtitleInstance,
-                  //   action: 'replace',
-                  //   index: sub.index,
-                  //   before,
-                  // });
+                  // 如果字幕条往右运动一个步长还不超出这个字幕的最右定位
+                  // 就让这个字幕条在时间轴上面往前加一步
                   this.hook = this.step;
                 }
                 // 时间轴往右运动一个步长
@@ -1200,30 +1145,13 @@ export default {
                 subElement.style.left = `${sub.left}px`;
                 subElement.style.right = `${sub.right}px`;
               } else {
-                // 如果字幕条往左运动一个步长还不超出这个字幕的最左定位
-                // 就让这个字幕条在时间轴上面往前加一步
-                // if (this.subDragCurrentSub.maxLeft > (sub.left + (this.step * this.space))) {
-                //   let newStart = sub.originStart +
-                //     (Math.floor(sub.left - sub.originLeft) / this.space);
-                //   newStart -= this.step;
-                //   newStart = newStart < 0 ? 0 : newStart;
-                //   let newEnd = newStart + (sub.originEnd - sub.originStart);
-                //   newStart = parseFloat(newStart.toFixed(2), 10);
-                //   newEnd = parseFloat(newEnd.toFixed(2), 10);
-                //   const before = cloneDeep(this.subtitleInstance.parsed.dialogues[sub.index]);
-                //   this.subtitleInstance.parsed.dialogues[sub.index].start = newStart;
-                //   this.subtitleInstance.parsed.dialogues[sub.index].end = newEnd;
-                //   this.$bus.$emit('modified-subtitle', {
-                //     sub: this.subtitleInstance,
-                //     action: 'replace',
-                //     index: sub.index,
-                //     before,
-                //   });
-                // }
                 if ((left - this.currentLeft) < (sub.minLeft + (this.step * this.space))) {
+                  // 当字幕贴到左边的字幕是，定住
                   this.createSubElement.style.position = 'absolute';
                   this.createSubElement.style.left = `${sub.minLeft}px`;
                 } else {
+                  // 如果字幕条往左运动一个步长还不超出这个字幕的最左定位
+                  // 就让这个字幕条在时间轴上面往前加一步
                   this.hook = this.step;
                 }
                 // 时间轴往左运动一个步长
@@ -1265,13 +1193,6 @@ export default {
         const maxL = (sub.originLeft + sub.originWidth) - (0.2 * this.space);
         sub.left = sub.left > maxL ? maxL : sub.left;
         subElement.style.left = `${sub.left}px`;
-        // if (!(offset < 0 && sub.left === sub.minLeft)) {
-        //   sub.left += offset;
-        //   sub.left = sub.left < sub.minLeft ? sub.minLeft : sub.left;
-        //   const maxL = (sub.originLeft + sub.originWidth) - (0.2 * this.space);
-        //   sub.left = sub.left > maxL ? maxL : sub.left;
-        //   subElement.style.left = `${sub.left}px`;
-        // }
       } else if (this.subRightDraging && subElement) {
         const l = pageX - (this.subDragStartOffsetLeft + this.currentLeft);
         sub.right = (3 * this.winWidth) - (l + sub.width);
@@ -1279,11 +1200,6 @@ export default {
         const maxR = sub.originRight + (sub.originWidth - (0.2 * this.space));
         sub.right = sub.right > maxR ? maxR : sub.right;
         subElement.style.right = `${sub.right}px`;
-        // sub.right -= offset;
-        // sub.right = sub.right < sub.minRight ? sub.minRight : sub.right;
-        // const maxR = sub.originRight + (sub.originWidth - (0.2 * this.space));
-        // sub.right = sub.right > maxR ? maxR : sub.right;
-        // subElement.style.right = `${sub.right}px`;
       }
     },
     handleDragEndSub() {
@@ -1656,12 +1572,13 @@ export default {
     document.addEventListener('keyup', this.handleKeyUp);
     // 添加字幕条，需要先播放动画，在往字幕对象新增一条字幕
     this.$bus.$on(bus.CREATE_MIRROR_SUBTITLE, this.createMirrorSubtitle);
-    // 拦截modified-subtitle，push到操作历史记录里面
+    // 准备修改字幕，push到操作历史记录里面
     this.$bus.$on(bus.WILL_MODIFIED_SUBTITLE, this.intercept);
-    //
+    // undo操作
     this.$bus.$on(bus.SUBTITLE_EDITOR_UNDO, this.undo);
+    // redo操作
     this.$bus.$on(bus.SUBTITLE_EDITOR_REDO, this.redo);
-    //
+    // 推出字幕高级编辑
     this.$bus.$on(bus.SUBTITLE_EDITOR_EXIT, () => {
       if (this.currentEditedSubtitleId) {
         this.addMessages({
@@ -1672,6 +1589,7 @@ export default {
       }
       this.toggleProfessional(false);
     });
+    // 快捷键J，上一个字幕
     this.$bus.$on(bus.SUBTITLE_EDITOR_SELECT_PREV_SUBTITLE, () => {
       if (!this.paused) {
         this.$bus.$emit('toggle-playback');
@@ -1682,6 +1600,7 @@ export default {
         this.handleDoubleClickSub(null, prevs[prevs.length - 1]);
       }
     });
+    // 快捷键K，下一个字幕
     this.$bus.$on(bus.SUBTITLE_EDITOR_SELECT_NEXT_SUBTITLE, () => {
       if (!this.paused) {
         this.$bus.$emit('toggle-playback');
@@ -1692,7 +1611,9 @@ export default {
         this.handleDoubleClickSub(null, prevs[0]);
       }
     });
+    // 快捷键Enter，快速输入
     this.$bus.$on(bus.SUBTITLE_EDITOR_FOCUS_BY_ENTER, () => {
+      if (this.isSpaceDownInProfessional || this.isDragableInProfessional) return;
       const show = () => {
         const currentChooseSub = this.validitySubs
           .find(e => e.index === this.chooseIndex);

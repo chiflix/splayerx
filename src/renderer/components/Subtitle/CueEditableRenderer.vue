@@ -232,19 +232,20 @@ export default {
           text: html.trim(),
         });
       }
-      // this.$emit('update:show-textarea', false);
       this.updateAutoFocus(false);
       this.$refs.input.style.opacity = this.opacity;
     },
+    /**
+     * 处理输入框快捷键
+     */
     keydown(e) { // eslint-disable-line
       // 处理输入框快捷键
       const { remote } = this.$electron;
       const input = this.$refs.input;
-      // const opacity = this.opacity;
       const browserWindow = remote.BrowserWindow;
       const focusWindow = browserWindow.getFocusedWindow();
       const checkCmdOrCtrl = (process.platform === 'darwin' && e.metaKey) || (process.platform !== 'darwin' && e.ctrlKey);
-      if (e && e.keyCode === 27) {
+      if (e && e.keyCode === 27) { // esc 失去焦点
         e.target && e.target.blur();
         e.preventDefault();
       } else if (e && e.keyCode === 65 && checkCmdOrCtrl) { // c+a
@@ -305,7 +306,8 @@ export default {
   box-sizing: border-box;
   &.pre-line {
     white-space: pre-wrap;
-    // word-break: break-all;
+    word-wrap: break-word;
+    word-break: break-all;
   }
   &:focus {
     // background: red;
