@@ -45,11 +45,11 @@ export default {
     }),
   },
   mounted() {
+    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
     if (this.winSize[0] < 1200) {
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 675]);
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
     }
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
     const windowRect = [
       window.screen.availLeft, window.screen.availTop,
       window.screen.availWidth, window.screen.availHeight,
@@ -57,7 +57,7 @@ export default {
     const newPosition = this.calculateWindowPosition(
       this.winPos.concat(this.winSize),
       windowRect,
-      [1200, 675],
+      [1200, 900],
     );
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', newPosition);
     this.$bus.$on('url-back', () => {

@@ -16,8 +16,8 @@ export default {
   name: 'BrowsingControl',
   data() {
     return {
-      backType: 'back',
-      forwardType: 'forward',
+      backType: 'backDisabled',
+      forwardType: 'forwardDisabled',
     };
   },
   computed: {
@@ -35,7 +35,7 @@ export default {
       if (val === 'forward') {
         this.$refs.forward.$el.classList.add('able-opacity');
       } else {
-        this.$refs.back.$el.classList.remove('able-opacity');
+        this.$refs.forward.$el.classList.remove('able-opacity');
       }
     },
   },
@@ -89,6 +89,9 @@ export default {
     cursor: pointer;
   }
   .able-opacity:active {
+    opacity: 0.5;
+  }
+  .page-refresh-icon:active {
     opacity: 0.5;
   }
   .page-refresh-icon, .video-record-icon, .pic-in-pic {

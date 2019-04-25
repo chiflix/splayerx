@@ -111,13 +111,11 @@ export default {
       p {
         font-size: 13px;
         margin: auto 10px auto 0;
-        cursor: pointer;
       }
       .marks-icon {
         margin: auto 5px auto 10px;
         width: 20px;
         height: 20px;
-        cursor: pointer;
       }
     }
   }
