@@ -1,6 +1,6 @@
 <template>
   <div class="fav-icons" :style="{ left: isDarwin ? '' : '15px', right: isDarwin ? '10px' : '' }">
-    <div class="fav-icons-details" ref="favDetail" :class="showFavicon ? 'fav-show-animation' : 'fav-hide-animation'" @animationend="handleFavAnimEnd" :style="{ order: isDarwin ? '1' : '2' }">
+    <div class="fav-icons-details" ref="favDetail" :class="favAnimClass" @animationend="handleFavAnimEnd" :style="{ order: isDarwin ? '1' : '2' }">
       <div class="fav-icon-container" v-for="(item, index) in favicon" @mouseover="favIconMouseOver(index)" @mouseleave="favIconMouseLeave"
       @mouseup="handleFavOpen(item)" :style="{
         margin: isDarwin ? 'auto 0 auto 15px' : 'auto 15px auto 0'
@@ -24,7 +24,7 @@ export default {
   name: 'BrowsingFavicons',
   data() {
     return {
-      showFavicon: false,
+      showFavicon: true,
       favicon: [
         { name: '优酷', type: 'youku', url: 'https://www.youku.com' },
         { name: 'Bilibili', type: 'bilibili', url: 'https://www.bilibili.com' },
@@ -34,6 +34,12 @@ export default {
     };
   },
   computed: {
+    favAnimClass() {
+      if (this.isDarwin) {
+        return this.showFavicon ? 'fav-show-animation' : 'fav-hide-animation';
+      }
+      return this.showFavicon ? 'win-fav-show-animation' : 'win-fav-hide-animation';
+    },
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -67,7 +73,7 @@ export default {
       this.updateInitialUrl(item.url);
     },
     handleFavAnimEnd(e) {
-      if (e.target.classList.contains('fav-hide-animation')) {
+      if (e.target.classList.contains('fav-hide-animation') || e.target.classList.contains('win-fav-hide-animation')) {
         this.$refs.favDetail.style.display = 'none';
       }
     },
@@ -86,7 +92,7 @@ export default {
   .fav-icons-details {
     width: auto;
     height: 20px;
-    display: none;
+    display: flex;
     .fav-icon-container {
       width: 20px;
       height: 20px;
@@ -114,5 +120,21 @@ export default {
   0% { transform: translateX(0); opacity: 1 }
   50% { transform: translateX(5px); opacity: 0.5 }
   100% { transform: translateX(10px); opacity: 0 }
+}
+.win-fav-show-animation {
+  animation: win-fav-show 100ms linear 1 normal forwards;
+}
+.win-fav-hide-animation {
+  animation: win-fav-hide 100ms linear 1 normal forwards;
+}
+@keyframes win-fav-show {
+  0% { transform: translateX(-10px); opacity: 0 }
+  50% { transform: translateX(-5px); opacity: 0.5 }
+  100% { transform: translateX(0); opacity: 1 }
+}
+@keyframes win-fav-hide {
+  0% { transform: translateX(0); opacity: 1 }
+  50% { transform: translateX(-5px); opacity: 0.5 }
+  100% { transform: translateX(-10px); opacity: 0 }
 }
 </style>

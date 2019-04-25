@@ -1,7 +1,7 @@
 <template>
   <div class="browsing-control">
-    <Icon :type="backType" class="back-icon" @mouseup.native="handleUrlBack"></Icon>
-    <Icon :type="forwardType" class="forward-icon" @mouseup.native="handleUrlForward"></Icon>
+    <Icon :type="backType" ref="back" class="back-icon" @mouseup.native="handleUrlBack"></Icon>
+    <Icon :type="forwardType" ref="forward" class="forward-icon" @mouseup.native="handleUrlForward"></Icon>
     <Icon type="pageRefresh" class="page-refresh-icon" @mouseup.native="handleUrlReload"></Icon>
     <Icon type="videoRecordDisabled" class="video-record-icon"></Icon>
     <Icon type="pipDisabled" class="pic-in-pic"></Icon>
@@ -23,14 +23,28 @@ export default {
   computed: {
     ...mapGetters(['winWidth']),
   },
+  watch: {
+    backType(val) {
+      if (val === 'back') {
+        this.$refs.back.$el.classList.add('able-opacity');
+      } else {
+        this.$refs.back.$el.classList.remove('able-opacity');
+      }
+    },
+    forwardType(val) {
+      if (val === 'forward') {
+        this.$refs.forward.$el.classList.add('able-opacity');
+      } else {
+        this.$refs.back.$el.classList.remove('able-opacity');
+      }
+    },
+  },
   mounted() {
     this.$bus.$on('web-info', (info) => {
       this.url = info.url;
       this.backType = info.canGoBack ? 'back' : 'backDisabled';
       this.forwardType = info.canGoForward ? 'forward' : 'forwardDisabled';
     });
-  },
-  watch: {
   },
   components: {
     Icon,
@@ -73,6 +87,9 @@ export default {
     height: 32px;
     margin: auto 0 auto 15px;
     cursor: pointer;
+  }
+  .able-opacity:active {
+    opacity: 0.5;
   }
   .page-refresh-icon, .video-record-icon, .pic-in-pic {
     width: 32px;

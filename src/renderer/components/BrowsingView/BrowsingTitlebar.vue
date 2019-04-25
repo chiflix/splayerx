@@ -181,21 +181,21 @@ export default {
 <style scoped lang="scss">
   .titlebar {
     top: 0;
+    right: 0;
     border-radius: 10px;
-    width: 120px;
+    width: 135px;
     height: 36px;
     z-index: 6;
     display: flex;
-    order: 2;
+    position: absolute;
     .win-icons {
       display: flex;
       flex-wrap: nowrap;
       margin: auto;
-      height: 28px;
-      border-left: 0.6px solid rgba(0, 0, 0, 0.2);
       .title-button {
-        width: 40px;
-        height: 28px;
+        width: 45px;
+        height: 36px;
+        display: flex;
         background-color: rgba(255,255,255,0);
         transition: background-color 200ms;
       }
@@ -212,7 +212,7 @@ export default {
     height: 36px;
     width: 90px;
     display: flex;
-    order: 0;
+    position: absolute;
     .mac-icons {
       margin: auto auto auto 10px;
       display: flex;

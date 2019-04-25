@@ -1,6 +1,6 @@
 <template>
   <div class="short-marks" :style="{ right: isDarwin ? '15px' : '', left: isDarwin ? '' : '15px' }">
-    <div class="marks-details" ref="marksDetail" :class="showMarks ? 'marks-show-animation' : 'marks-hide-animation'" @animationend="handleMarksAnimEnd" :style="{ order: isDarwin ? '1' : '2' }">
+    <div class="marks-details" ref="marksDetail" :class="marksAnimClass" @animationend="handleMarksAnimEnd" :style="{ order: isDarwin ? '1' : '2' }">
       <div class="marks-container" v-for="(item, index) in marks" @mouseover="marksMouseOver(index)" @mouseleave="marksMouseLeave()"
       @mouseup="handleBrowsingOpen(item)"
       :style="{
@@ -42,6 +42,12 @@ export default {
     };
   },
   computed: {
+    marksAnimClass() {
+      if (this.isDarwin) {
+        return this.showMarks ? 'marks-show-animation' : 'marks-hide-animation';
+      }
+      return this.showMarks ? 'win-marks-show-animation' : 'win-marks-hide-animation';
+    },
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -75,7 +81,7 @@ export default {
       });
     },
     handleMarksAnimEnd(e) {
-      if (e.target.classList.contains('marks-hide-animation')) {
+      if (e.target.classList.contains('marks-hide-animation') || e.target.classList.contains('win-marks-hide-animation')) {
         this.$refs.marksDetail.style.display = 'none';
       }
     },
@@ -137,5 +143,22 @@ export default {
   0% { transform: translateX(0); opacity: 1 }
   50% { transform: translateX(21.5px); opacity: 0.5 }
   100% { transform: translateX(43px); opacity: 0 }
+}
+
+.win-marks-show-animation {
+  animation: win-marks-show 100ms linear 1 normal forwards;
+}
+.win-marks-hide-animation {
+  animation: win-marks-hide 100ms linear 1 normal forwards;
+}
+@keyframes win-marks-show {
+  0% { transform: translateX(-43px); opacity: 0 }
+  50% { transform: translateX(-21.5px); opacity: 0.5 }
+  100% { transform: translateX(0); opacity: 1 }
+}
+@keyframes win-marks-hide {
+  0% { transform: translateX(0); opacity: 1 }
+  50% { transform: translateX(-21.5px); opacity: 0.5 }
+  100% { transform: translateX(-43px); opacity: 0 }
 }
 </style>

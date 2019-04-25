@@ -47,8 +47,9 @@ export default {
 <style lang="scss" scoped>
 .titleBarWinExitFull, .titleBarWinFull, .titleBarWinClose, .titleBarWinRestore, .titleBarWinResize {
   display: flex;
-  width: 40px;
-  height: 28px;
+  width: 45px;
+  height: 36px;
+  margin: auto;
 }
 .hoverState {
   display: flex;

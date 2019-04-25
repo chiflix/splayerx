@@ -64,7 +64,7 @@ import fs from 'fs';
 import { mapState, mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
-import Titlebar from './Titlebar.vue';
+import Titlebar from './BrowsingView/BrowsingTitlebar.vue';
 import Playlist from './LandingView/Playlist.vue';
 import NotificationBubble from './NotificationBubble.vue';
 import ShortMarks from './LandingView/ShortMarks.vue';
