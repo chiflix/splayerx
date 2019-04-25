@@ -7,7 +7,7 @@
           :style="{
             cursor: 'default',
             transition: showAttached ? '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)' : '150ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-            height: this.hiddenText ? `${this.contHeight + this.hoverHeight}px` : `${this.contHeight}px`,
+            height: hiddenText ? modifiedAdvancedPanelVisiable ? `${contHeight + hoverHeight + itemHeight}px`: `${contHeight + hoverHeight}px` : modifiedAdvancedPanelVisiable ? `${contHeight + itemHeight}px` : `${contHeight}px`,
             fontWeight: '900',
           }">
           <div class="element bottom">
@@ -36,7 +36,7 @@
                   @animationend="finishAnimation"
                   :style="{
                     transition: '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
-                    height: hiddenText ? `${scopeHeight + hoverHeight}px` : `${scopeHeight}px`,
+                    height: hiddenText ? modifiedAdvancedPanelVisiable ? `${contHeight + hoverHeight + itemHeight}px`: `${scopeHeight + hoverHeight}px` : modifiedAdvancedPanelVisiable ? `${scopeHeight + itemHeight}px` : `${scopeHeight}px`,
                     overflowY: isOverFlow,
                   }">
                   <div v-if="!(loadingSubsPlaceholders.length > 0)">
@@ -263,12 +263,15 @@ export default {
       return this.computedAvailableItems.length + 2 + this.loadingTypes.length;
     },
     isOverFlow() { // eslint-disable-line complexity
-      if (this.modifiedAdvancedPanelVisiable) {
-        return 'scroll';
-      } else if (this.computedSize >= 289 && this.computedSize <= 480) {
-        return this.realItemsNum > 3 || (this.scopeHeight + this.hoverHeight > 89 && this.hiddenText) ? 'scroll' : '';
+      // modifiedAdvancedPanelVisiable overflow logic
+      if (this.computedSize >= 289 && this.computedSize <= 480) {
+        return this.realItemsNum > 3 ||
+          (this.scopeHeight + this.hoverHeight > 89 && this.hiddenText) ||
+          (this.scopeHeight + this.itemHeight > 89 && this.modifiedAdvancedPanelVisiable) ? 'scroll' : '';
       } else if (this.computedSize >= 481 && this.computedSize < 1080) {
-        return this.realItemsNum > 5 || (this.scopeHeight + this.hoverHeight > 180 && this.hiddenText) ? 'scroll' : '';
+        return this.realItemsNum > 5 ||
+          (this.scopeHeight + this.hoverHeight > 180 && this.hiddenText) ||
+          (this.scopeHeight + this.itemHeight > 180 && this.modifiedAdvancedPanelVisiable) ? 'scroll' : '';
       }
       return this.realItemsNum > 7 || (this.scopeHeight + this.hoverHeight > 350 && this.hiddenText) ? 'scroll' : '';
     },
@@ -466,8 +469,6 @@ export default {
     },
     handleSubExport() {
       this.$bus.$emit(bus.EXPORT_MODIFIED_SUBTITLE);
-      this.modifiedAdvancedPanelVisiable = false;
-      this.clickItemArrow = false;
     },
     handleSubConfirmDelete(e, item) {
       if (e.target.nodeName !== 'DIV') {
@@ -676,11 +677,34 @@ export default {
         const offsetTop = document.getElementById(`item${index}`).offsetTop;
         const targetScrollTop = (offsetTop + (2 * this.itemHeight)) - parentHeight;
         if (this.modifiedAdvancedPanelVisiable && offsetTop < currentScrollTop) {
-          this.$refs.scroll.scrollTop = offsetTop;
+          // this.$refs.scroll.scrollTop = offsetTop;
+          this.animateScrollTop(currentScrollTop, offsetTop);
         } else if (this.modifiedAdvancedPanelVisiable && targetScrollTop > currentScrollTop) {
-          this.$refs.scroll.scrollTop = targetScrollTop;
+          // this.$refs.scroll.scrollTop = targetScrollTop;
+          this.animateScrollTop(currentScrollTop, targetScrollTop);
         }
       });
+    },
+    animateScrollTop(origin, target) {
+      const cosParameter = (origin - target) / 2;
+      let scrollCount = 0;
+      let oldTimestamp = window.performance.now();
+      const step = (newTimestamp) => {
+        let tsDiff = newTimestamp - oldTimestamp;
+        if (tsDiff > 100) {
+          tsDiff = 30;
+        }
+        scrollCount += Math.PI / (300 / tsDiff);
+        if (scrollCount >= Math.PI) {
+          return;
+        }
+        const moveStep = Math.round((target + cosParameter) +
+          (cosParameter * Math.cos(scrollCount)));
+        this.$refs.scroll.scrollTop = moveStep;
+        oldTimestamp = newTimestamp;
+        window.requestAnimationFrame(step);
+      };
+      window.requestAnimationFrame(step);
     },
   },
   created() {
@@ -720,7 +744,9 @@ export default {
           this.anim.loop = false;
         }
         this.refAnimation = 'refresh-animation';
-        this.$refs.scroll.scrollTop = 0;
+        if (this.$refs.scroll) {
+          this.$refs.scroll.scrollTop = 0;
+        }
       }, 1000);
     });
   },

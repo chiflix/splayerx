@@ -6,13 +6,15 @@
       :style="{
         textAlign: this.textAlign,
         opacity: this.opacity,
+        maxWidth: isEditable && chooseIndex === cue.index && isClickFirstSub === isFirstSub ? `${(winWidth-50)/zoom}px` : 'none',
       }"
-      :class="'subtitle-content subtitle-style'+chosenStyleIndex+`${isEditable ? ' pre-line' : ''}`"
+      :class="'subtitle-content subtitle-style'+chosenStyleIndex+`${isEditable && chooseIndex === cue.index && isClickFirstSub === isFirstSub ? ' pre-line' : ''}`"
       v-html="finalText"
       @focus.stop="handleFocus"
       @keydown.stop="keydown"
-      @mosueup.stop=""
-      @click.stop="handleClick"
+      @mouseup.stop=""
+      @mousedown.stop="handleMouseDown"
+      @click.stop=""
       @blur="handleBlurTextArea"></div>
   </div>
 </template>
@@ -27,7 +29,6 @@ export default {
     return {
       tmpText: '',
       focus: false,
-      autoFocus: false,
       offsetDone: false, // 光标定位
     };
   },
@@ -45,7 +46,7 @@ export default {
     zoom: String,
   },
   computed: {
-    ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth', 'isProfessional', 'paused', 'isEditable', 'chooseIndex', 'isClickFirstSub']),
+    ...mapGetters(['chosenStyle', 'scaleNum', 'winWidth', 'isProfessional', 'paused', 'isEditable', 'chooseIndex', 'isClickFirstSub', 'enabledSecondarySub', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'autoFocus']),
     chosenStyleIndex() {
       // 如果是字幕高级编辑模式，字幕块就使用默认的样式
       if (this.isProfessional) {
@@ -101,13 +102,18 @@ export default {
       }
       return tmp;
     },
+    factor() {
+      if (this.enabledSecondarySub && this.currentFirstSubtitleId !== '' && this.currentSecondSubtitleId !== '') {
+        return 0.85;
+      }
+      return 1;
+    },
   },
   watch: {
-    isEditable(v) {
+    autoFocus(v) {
       if (v && !this.focus && this.chooseIndex === this.cue.index &&
         this.isFirstSub === this.isClickFirstSub) {
         const input = this.$refs.input;
-        this.autoFocus = true;
         input.focus();
       }
     },
@@ -117,30 +123,35 @@ export default {
       toggleEditable: editorMutations.TOGGLE_EDITABLE,
       updateChooseIndex: editorMutations.UPDATE_CHOOSE_SUBTITLE_INDEX,
       updateClickSubtitle: editorMutations.UPDATE_IS_CLICK_FIRST_SUBTITLE,
+      updateAutoFocus: editorMutations.UPDATE_AUTO_FOCUS,
     }),
-    handleClick(e) {
+    handleMouseDown(e) {
       if (!this.canUseEditor) return;
-      if (this.offsetDone) return;
+      // if (this.offsetDone) return;
       const isPaused = this.paused;
       if (isPaused) {
-        if (!this.isEditable) {
-          this.toggleEditable(isPaused);
-        }
         this.updateClickSubtitle(this.isFirstSub);
         const wrap = this.$refs.wrap;
-        const input = this.$refs.input;
-        const offsetY = e.offsetY;
-        if (wrap && this.focus) {
+        if (!this.offsetDone && wrap) {
+          const factor = this.factor;
+          const zoom = this.zoom;
           wrap.style = `
-            max-height: 27px;
+            max-height: ${27 * factor}px;
             overflow-x: scroll;
             overflow-y: scroll;
           `;
-          wrap.scrollTop = input.offsetHeight > 27 ? (offsetY / this.zoom) - 9 : 0;
+          setImmediate(() => {
+            const input = this.$refs.input;
+            const offsetY = e.offsetY;
+            const cell = (Math.ceil(((offsetY / factor) / zoom) / 13) - 2) * 13;
+            wrap.scrollTop = (input.offsetHeight / factor) > 27 ? cell : 0;
+          });
           this.offsetDone = true;
         }
       } else {
-        this.$bus.$emit('toggle-playback');
+        setImmediate(() => {
+          this.$bus.$emit('toggle-playback');
+        });
       }
     },
     handleFocus() {// eslint-disable-line
@@ -175,7 +186,9 @@ export default {
           overflow-x: scroll;
           overflow-y: scroll;
         `;
-        wrap.scrollTop = input.offsetHeight > 27 ? 9999 : 0;
+        setImmediate(() => {
+          wrap.scrollTop = input.offsetHeight > 27 ? 9999 : 0;
+        });
         this.offsetDone = true;
       }
       if (this.autoFocus && !this.cue.reference) { // 非主动点击触发输入，光标需要定位末尾
@@ -192,13 +205,12 @@ export default {
           range.collapse(false);
           range.select();
         }
-        this.autoFocus = false;
+        this.updateAutoFocus(false);
       }
     },
     handleBlurTextArea() {
       if (this.isFirstSub !== this.isClickFirstSub) return;
       this.toggleEditable(false);
-      // this.updateChooseIndex(-2);
       const sel = window.getSelection();
       sel.removeAllRanges();
       this.focus = false;
@@ -220,7 +232,8 @@ export default {
           text: html.trim(),
         });
       }
-      this.$emit('update:show-textarea', false);
+      // this.$emit('update:show-textarea', false);
+      this.updateAutoFocus(false);
       this.$refs.input.style.opacity = this.opacity;
     },
     keydown(e) { // eslint-disable-line
@@ -291,7 +304,8 @@ export default {
   padding: 0 5px;
   box-sizing: border-box;
   &.pre-line {
-    // white-space: pre-line;
+    white-space: pre-wrap;
+    // word-break: break-all;
   }
   &:focus {
     // background: red;

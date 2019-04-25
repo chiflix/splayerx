@@ -130,7 +130,6 @@ export default {
       dragOver: false,
       progressTriggerStopped: false,
       openPlayListTimeId: NaN,
-      afterBlurClicks: 0,
       afterBlurControlShowDelay: false, // 输入框失去焦点，延迟显示控件
     };
   },
@@ -223,14 +222,11 @@ export default {
     isEditable(val) {
       if (val) {
         this.afterBlurControlShowDelay = true;
-        this.afterBlurClicks = 0;
         Object.keys(this.widgetsStatus).forEach((item) => {
           this.widgetsStatus[item].showAttached = false;
         });
       } else {
-        setTimeout(() => {
-          this.afterBlurClicks = 1;
-        }, 300);
+        setTimeout(this.handleReleaseEditShowDelay, 800);
       }
     },
     isFullScreen(val) {
@@ -630,10 +626,8 @@ export default {
       this.$bus.$emit('toggle-fullscreen');
     },
     handleReleaseEditShowDelay() {
-      this.afterBlurClicks += 1;
-      if (!this.isEditable && this.afterBlurClicks > 1) {
+      if (!this.isEditable && this.afterBlurControlShowDelay) {
         this.afterBlurControlShowDelay = false;
-        this.afterBlurClicks = 0;
       }
     },
   },

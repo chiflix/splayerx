@@ -1,6 +1,6 @@
 <template>
 <transition name="bubble" mode="out-in">
-<div
+<div @mouseup.stop=""
   class="privacy-bubble">
   <div class="plane-background">
     <div class="plane">
@@ -14,7 +14,7 @@
           }"
           @mouseover.stop="hovered = true"
           @mouseout.stop="hovered = false"
-          @mouseup="handleCloseMouseup">
+          @mouseup.stop="handleCloseMouseup">
           <div class="button-info">{{ $t('deleteSubtitleBubble.button') }}</div>
         </div>
       </div>

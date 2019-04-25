@@ -85,7 +85,6 @@
             v-fade-in="!subDragTimeLineMoving"
             :key='originSrc+currentEditedSubtitleId'
             :showAddInput.sync="showAddInput"
-            :showTextarea.sync="showTextarea"
             :newSubHolder="newSubHolder"
             :preciseTime="preciseTime"
             :currentSub="currentSub"
@@ -175,7 +174,6 @@ export default {
       triggerCount: 1, // rerender doms count
       createSubElement: null, // 添加字幕动画依赖的dom
       space: 85, // 1s pxs
-      showTextarea: false, //
       showAddInput: false, // 可以显示添加字幕的属性
       newSubHolder: null, // 配合showAddInput，存储添加字幕的数据格式以及插入位置
       history: [],
@@ -199,7 +197,7 @@ export default {
   computed: {
     ...mapGetters([
       'winWidth', 'winHeight', 'duration', 'paused', 'isCreateSubtitleMode', 'originSrc', 'referenceSubtitleId', 'currentEditedSubtitleId',
-      'winRatio', 'computedHeight', 'computedWidth', 'messageInfo', 'isDragableInProfessional', 'chooseIndex', 'currentTime', 'isSpaceDownInProfessional',
+      'winRatio', 'computedHeight', 'computedWidth', 'messageInfo', 'isDragableInProfessional', 'chooseIndex', 'currentTime', 'isSpaceDownInProfessional', 'isEditable', 'autoFocus',
     ]),
     computedSize() {
       // zoom依赖的计算属性
@@ -360,7 +358,7 @@ export default {
       if (!val) {
         this.triggerCount += 1;
         this.updateChooseIndex(-2);
-        this.showTextarea = false;
+        this.updateAutoFocus(false);
       } else {
         this.resetCurrentTime();
         const canChooseSubs = this.currentSub.filter(e => e.track === 1);
@@ -428,12 +426,7 @@ export default {
             this.swicthReferenceSubtitle(referenceSubtitleId);
           });
         }
-        // hooks for clear doms
-        if (this.createSubElement && !this.subDragTimeLineMoving) {
-          this.createSubElement.parentNode &&
-          this.createSubElement.parentNode.removeChild(this.createSubElement);
-          this.createSubElement = null;
-        }
+        this.clearDom();
       },
     },
     referenceSubtitleInstance: {
@@ -519,6 +512,7 @@ export default {
       this.enableMenuPrev(prevs.length > 0);
       const next = this.filterSubs.filter(e => e.start > v && e.track === 1);
       this.enableMenuNext(next.length > 0);
+      this.clearDom();
     },
   },
   methods: {
@@ -534,11 +528,20 @@ export default {
       enableMenuPrev: editorMutations.UPDATE_CURRENT_EDIT_MENU_PREV_ENABLE,
       enableMenuNext: editorMutations.UPDATE_CURRENT_EDIT_MENU_NEXT_ENABLE,
       updateChooseIndex: editorMutations.UPDATE_CHOOSE_SUBTITLE_INDEX,
+      updateAutoFocus: editorMutations.UPDATE_AUTO_FOCUS,
     }),
     ...mapActions({
       addMessages: 'addMessages',
       removeMessages: 'removeMessages',
     }),
+    clearDom() {
+      // hooks for clear doms
+      if (this.createSubElement && !this.subDragTimeLineMoving) {
+        this.createSubElement.parentNode &&
+        this.createSubElement.parentNode.removeChild(this.createSubElement);
+        this.createSubElement = null;
+      }
+    },
     zoom(i) {
       // update video scale that width is larger than height
       const updatePCVideoScaleByFactors = (index) => {
@@ -654,6 +657,7 @@ export default {
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255,255,255,0.15);
         border-radius: 1px;
+        box-sizing: border-box;
         left: ${currentLeft}px;
         right: ${currentRight}px`);
       this.$refs.subtitles && this.$refs.subtitles.appendChild(this.createSubElement);
@@ -805,7 +809,7 @@ export default {
       // 判断path里面有没有sub，没有就取消当前选中的sub
       const path = e.path || (e.composedPath && e.composedPath());
       const hasSubElement = path.find(e => e.tagName === 'DIV' && e.className.includes('sub-mark'));
-      if (!hasSubElement) {
+      if (!hasSubElement && !this.isEditable) {
         this.updateChooseIndex(-2);
         // this.triggerCount += 1;
       }
@@ -881,10 +885,10 @@ export default {
       if (this.isSpaceDownInProfessional) return;
       // 双击字幕条，触发时间轴运动到字幕条开始位置
       const offset = (this.preciseTime - sub.start) * this.space;
-      if (Math.abs(offset) < 0.5 || this.showTextarea) {
+      if (Math.abs(offset) < 0.5 || this.autoFocus) {
         // 偏移太小就不触发运动
         if (this.protectKeyWithEnterShortKey) {
-          this.showTextarea = true;
+          this.updateAutoFocus(true);
           setImmediate(() => {
             this.protectKeyWithEnterShortKey = false;
           });
@@ -915,13 +919,8 @@ export default {
       videodata.time = this.preciseTime;
       this.$refs.timeLine.style.transition = '';
       this.$refs.timeLine.removeEventListener('transitionend', this.doubleClickTransitionend);
-      // this.transitionInfo = null;
-      // this.showTextarea = true;
-      // setImmediate(() => {
-      //   this.showTextarea = false;
-      // });
       if (this.protectKeyWithEnterShortKey) {
-        this.showTextarea = true;
+        this.updateAutoFocus(true);
         setImmediate(() => {
           this.protectKeyWithEnterShortKey = false;
         });
@@ -1068,6 +1067,7 @@ export default {
               border: 1px solid rgba(255,255,255,0.46);
               border-radius: 1px;
               cursor: pointer;
+              box-sizing: border-box;
               left: ${left}px`);
             // 插入拖拽的DOM镜像
             this.$refs.timeLine && this.$refs.timeLine.appendChild(this.createSubElement);
@@ -1170,6 +1170,7 @@ export default {
               border: 1px solid rgba(255,255,255,0.46);
               border-radius: 1px;
               cursor: pointer;
+              box-sizing: border-box;
               left: ${left}px`);
             // 插入拖拽的DOM镜像
             this.$refs.timeLine && this.$refs.timeLine.appendChild(this.createSubElement);
@@ -1508,6 +1509,9 @@ export default {
         } else if (type === modifiedTypes.DELETE_FROM_REFERENCE) {
           job.referenceBefore = this.referenceDialogues.splice(selfIndex, 1)[0];
           job.selfIndex = selfIndex;
+          this.updateChooseIndex(-2);
+        } else if (type === modifiedTypes.DELETE) {
+          this.updateChooseIndex(-2);
         }
         this.updateHistory(job);
       }
@@ -1701,14 +1705,14 @@ export default {
           this.handleDoubleClickSub(null, currentChooseSub);
         } else if (currentSub) {
           this.updateChooseIndex(currentSub.index);
-          this.showTextarea = true;
+          this.updateAutoFocus(true);
           // this.handleDoubleClickSub(null, currentSub);
         } else if (this.showAddInput) {
           this.updateChooseIndex(-1);
-          this.showTextarea = true;
+          this.updateAutoFocus(true);
         }
       };
-      if (!this.showTextarea) {
+      if (!this.autoFocus) {
         if (!this.paused) {
           this.$bus.$emit('toggle-playback');
           // this.$nextTick(show);
@@ -1901,6 +1905,7 @@ export default {
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 2px;
+      box-sizing: border-box;
       transition: background 0.1s ease-in-out, border 0.1s ease-in-out;
       // &::before {
       //   content: "";
@@ -1958,8 +1963,9 @@ export default {
       .drag-left {
         position: absolute;
         width: 5%;
+        max-width: 5px;
         height: 100%;
-        left: 0;
+        left: -1px;
         top: 0;
         z-index: 1;
         cursor: col-resize;
@@ -1971,7 +1977,8 @@ export default {
         position: absolute;
         width: 5%;
         height: 100%;
-        right: 0;
+        max-width: 5px;
+        right: -1px;
         top: 0;
         z-index: 1;
         cursor: col-resize;
@@ -2032,6 +2039,7 @@ export default {
       white-space: pre;
       font-size: 11px;
       color: #ffffff;
+      font-style: italic;
     }
     .renderers {
       display: flex;

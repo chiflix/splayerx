@@ -185,6 +185,10 @@
   width: fit-content;
   outline: none;
   border: none;
+  * {
+    background: transparent!important;
+    font-size: 9px!important;
+  }
 }
 
 

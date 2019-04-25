@@ -17,6 +17,7 @@ const state = {
   referenceSubtitleId: null, // 参考字幕的ID
   chooseIndex: -2, // 编辑模式下选中的字幕
   isClickFirstSub: true, // 快速编辑，是不是编辑第一字幕
+  autoFocus: false,
 };
 
 const getters = {
@@ -35,6 +36,7 @@ const getters = {
   referenceSubtitleId: state => state.referenceSubtitleId,
   chooseIndex: state => state.chooseIndex,
   isClickFirstSub: state => state.isClickFirstSub,
+  autoFocus: state => state.autoFocus,
 };
 
 const mutations = {
@@ -90,6 +92,9 @@ const mutations = {
   },
   [editorMutations.UPDATE_IS_CLICK_FIRST_SUBTITLE](state, payload) {
     state.isClickFirstSub = payload;
+  },
+  [editorMutations.UPDATE_AUTO_FOCUS](state, payload) {
+    state.autoFocus = payload;
   },
 };
 

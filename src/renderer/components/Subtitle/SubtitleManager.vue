@@ -215,6 +215,9 @@ export default {
       const winRatio = this.winRatio;
       if (!val && store && store.minimumSize) {
         minSize = store.minimumSize;
+      } else if (!val) {
+        this.toggleEditable(false);
+        this.updateAutoFocus(false);
       } else if (val) {
         // 进入编辑模式，设定phase2为最小的尺寸
         minSize = winRatio > 1 ? [480 * winRatio, 480] : [480, 480 / winRatio];
@@ -247,9 +250,11 @@ export default {
       addMessages: 'addMessages',
     }),
     ...mapMutations({
+      toggleEditable: editorMutations.TOGGLE_EDITABLE,
       swicthReferenceSubtitle: editorMutations.SWITCH_REFERENCE_SUBTITLE,
       resetSubtitlesByMutation: subtitleMutations.RESET_SUBTITLES,
       updateCurrentEditedSubtitle: editorMutations.UPDATE_CURRENT_EDITED_SUBTITLE,
+      updateAutoFocus: editorMutations.UPDATE_AUTO_FOCUS,
       windowMinimumSize: 'windowMinimumSize', // 需要设置到常量里面
     }),
     async refreshSubtitles(types, videoSrc) {

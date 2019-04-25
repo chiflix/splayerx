@@ -19,7 +19,7 @@
           zoom: zoom,
           // width: `${inputWitdh}px`,
           minWidth: minInputWidth,
-          maxWidth: maxInputWitdh,
+          // maxWidth: maxInputWitdh,
           lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
         }">
         <cue-editable-renderer class="cueRender"
@@ -27,7 +27,6 @@
           :isFirstSub="isFirstSub"
           :text="cue.text"
           :settings="cue.tags"
-          @update:show-textarea="hiddenTextArea"
           @update:textarea-change="handleTextAreaChange"
           :canUseEditor="canUseEditor"
           :zoom="zoom"
@@ -47,14 +46,13 @@
         :style="{
           zoom: zoom,
           minWidth: minInputWidth,
-          maxWidth: maxInputWitdh,
+          // maxWidth: maxInputWitdh,
           lineHeight: 'normal',
         }">
         <cue-editable-renderer class="cueRender"
           :text="$t('editorCreateSubtitle.button')"
           :settings="{}"
           :isFirstSub="isFirstSub"
-          @update:show-textarea="hiddenTextArea"
           @update:textarea-change="handleTextAreaChange"
           :canUseEditor="canUseEditor"
           :zoom="zoom"
@@ -87,10 +85,6 @@ export default {
       default: () => [],
     },
     playlistShow: { // 监听是否可以使用编辑
-      type: Boolean,
-      default: false,
-    },
-    showTextarea: { // 高级模式回车触发自动输入
       type: Boolean,
       default: false,
     },
@@ -307,16 +301,6 @@ export default {
         });
       }
     },
-    showTextarea(val) {
-      if (val && this.chooseIndex > -2) {
-        this.index = this.chooseIndex;
-        // this.$nextTick(() => {
-        setImmediate(() => {
-          this.toggleEditable(true);
-        });
-        // });
-      }
-    },
   },
   created() {
     const { subtitleInstance } = this;
@@ -388,9 +372,6 @@ export default {
         return ' focus';
       }
       return '';
-    },
-    hiddenTextArea() {
-      this.$emit('update:showTextarea', false);
     },
     getCueIndex(cue) {
       if (this.currentSub.length === 0 || !this.isProfessional) {
