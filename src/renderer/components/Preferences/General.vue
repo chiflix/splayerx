@@ -33,7 +33,7 @@
       </transition>
     </div>
   </div>
-  <div class="description-button">
+  <div class="description-button" v-if="isMac">
     <div class="setting-content">
       <div class="setting-title">{{ $t("preferences.general.restoreSettings") }}</div>
       <div class="setting-description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>

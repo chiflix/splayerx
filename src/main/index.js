@@ -466,10 +466,15 @@ app.on('before-quit', (e) => {
   if (needToRestore) {
     mainWindow?.webContents.send('quit', needToRestore);
     e.preventDefault();
-    removeUserData().then(() => {
-      needToRestore = false;
-      app.quit();
-    });
+    removeUserData()
+      .catch((err) => {
+        needToRestore = false;
+        writeLog('info', { message: `error: ${err}` });
+      })
+      .finally(() => {
+        needToRestore = false;
+        app.quit();
+      });
   } else {
     mainWindow?.webContents.send('quit');
   }
