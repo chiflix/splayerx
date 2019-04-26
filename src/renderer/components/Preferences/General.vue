@@ -28,7 +28,7 @@
       <transition name="button" mode="out-in">
         <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
         <div :key="defaultState" v-else class="result">
-          <Icon :type="defaultState" :class="defaultState"/>
+          <Icon :type="defaultState" :class="defaultState" :style="{ top: !isMac ? '2px' : '' }"/>
         </div>
       </transition>
     </div>
@@ -412,7 +412,6 @@ $dropdown-height: 156px;
       }
       .result {
         position: absolute;
-        top: 2px;
       }
     }
   }
