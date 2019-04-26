@@ -7,6 +7,9 @@
   "description": "a media player",
   "license": "GPL-3.0-or-later",
   "main": "./dist/electron/main.js",
+  "engines": {
+    "node": "^11"
+  },
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",
     "build:appx": "node .electron-vue/build.js && electron-builder --p never -w appx",
