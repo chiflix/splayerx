@@ -29,9 +29,11 @@
         <Icon class="title-button-disable" type="titleBarWinFull"/>
         <Icon class="title-button" type="titleBarWinClose" @click.native="handleClose"/>
       </div>
-      <component :is="currentPreference"
-      @move-stoped="isMoved = false"
-      :mouseDown="mouseDown" :isMoved="isMoved"/>
+      <keep-alive>
+        <component :is="currentPreference"
+        @move-stoped="isMoved = false"
+        :mouseDown="mouseDown" :isMoved="isMoved"/>
+      </keep-alive>
     </div>
   </div>
 </template>
