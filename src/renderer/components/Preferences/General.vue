@@ -412,6 +412,7 @@ $dropdown-height: 156px;
       }
       .result {
         position: absolute;
+        top: 2px;
       }
     }
   }
