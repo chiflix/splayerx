@@ -6,6 +6,7 @@
       :style="{
         textAlign: this.textAlign,
         opacity: this.opacity,
+        lineHeight: isProfessional ? '145%' : enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '116%' : '145%',
         maxWidth: isEditable && chooseIndex === cue.index && isClickFirstSub === isFirstSub ? `${(winWidth-10)/zoom}px` : 'none',
       }"
       :class="'subtitle-content subtitle-style'+chosenStyleIndex+`${isEditable && chooseIndex === cue.index && isClickFirstSub === isFirstSub ? ' pre-line' : ''}`"
@@ -153,7 +154,7 @@ export default {
         range.select();
       }
     },
-    scrollToCursor(rangeText) { // eslint-disable-line
+    scrollToCursor(rangeText, targetHeight) { // eslint-disable-line
       const input = this.$refs.input;
       const wrap = this.$refs.wrap;
       let len = rangeText.length;
@@ -174,11 +175,11 @@ export default {
       });
       if (wrap && input && brIndexs.length > 0) {
         const inputHeight = input.offsetHeight / this.factor;
-        const oneRowHeight = Math.round((inputHeight - 27) / brIndexs.length);
-        wrap.scrollTop = inputHeight > 27 ? oneRowHeight * beforeBrs : 0;
-        if (inputHeight > 27 && beforeBrs > 1 && beforeBrs === brIndexs.length - 1) {
-          wrap.scrollTop = inputHeight - 27;
-        } else if (inputHeight > 27 && beforeBrs !== 0) {
+        const oneRowHeight = Math.round((inputHeight - targetHeight) / brIndexs.length);
+        wrap.scrollTop = inputHeight > targetHeight ? oneRowHeight * beforeBrs : 0;
+        if (inputHeight > targetHeight && beforeBrs > 1 && beforeBrs === brIndexs.length - 1) {
+          wrap.scrollTop = inputHeight - targetHeight;
+        } else if (inputHeight > targetHeight && beforeBrs !== 0) {
           wrap.scrollTop = oneRowHeight * beforeBrs;
         }
       }
@@ -200,25 +201,49 @@ export default {
         this.updateAutoFocus(false);
       }
       const wrap = this.$refs.wrap;
-      if (wrap) {
+      if (wrap && wrap.parentNode) {
+        // zoom会影响line-height，导致line-height不准确
+        // 这里创建一个两行的临时dom来计算真实两行高度
+        const computedHeightDom = document.createElement('div');
+        computedHeightDom.innerHTML = '<br><br>';
+        computedHeightDom.style = `
+          position: absolute;
+          left: 0;
+          top: 0;
+          font-size: 9px;
+          line-height: 145%;
+          width: 10px;
+          z-index: -1;
+          opacity: 0,
+        `;
+        wrap.parentNode.appendChild(computedHeightDom);
+        let computedHeight = computedHeightDom.getBoundingClientRect() ?
+          computedHeightDom.getBoundingClientRect().height : computedHeightDom.offsetHeight;
+        // css 计算两行高度为 9 * 1.45 * = 26.1 但是实际高度要少一点点px
+        // 如果临时dom高度是在预计范围内部，就使用临时的dom高度
+        computedHeight = computedHeight > 24 && computedHeight < 28 ? computedHeight : 25.5;
+        // computedHeight += 2;
         wrap.style = `
-          max-height: 27px;
+          max-height: ${computedHeight}px;
           overflow-x: scroll;
           overflow-y: scroll;
         `;
+        wrap.parentNode.removeChild(computedHeightDom);
+        setImmediate(() => {
+          // 这里计算光标前的文本，注意<br>被忽略
+          const input = this.$refs.input;
+          const doc = input.ownerDocument || input.document;
+          const win = doc.defaultView || doc.parentWindow;
+          if (win.getSelection().rangeCount > 0) { // 选中的区域
+            const range = win.getSelection().getRangeAt(0);
+            const preCaretRange = range.cloneRange(); // 克隆一个选中区域
+            preCaretRange.selectNodeContents(input); // 设置选中区域的节点内容为当前节点
+            preCaretRange.setEnd(range.endContainer, range.endOffset); // 重置选中区域的结束位置
+            // 得到光标前面的文本，计算光标之前有几个换行，在定位到光标位置
+            this.scrollToCursor(preCaretRange.toString(), computedHeight);
+          }
+        });
       }
-      setImmediate(() => {
-        const input = this.$refs.input;
-        const doc = input.ownerDocument || input.document;
-        const win = doc.defaultView || doc.parentWindow;
-        if (win.getSelection().rangeCount > 0) { // 选中的区域
-          const range = win.getSelection().getRangeAt(0);
-          const preCaretRange = range.cloneRange(); // 克隆一个选中区域
-          preCaretRange.selectNodeContents(input); // 设置选中区域的节点内容为当前节点
-          preCaretRange.setEnd(range.endContainer, range.endOffset); // 重置选中区域的结束位置
-          this.scrollToCursor(preCaretRange.toString());
-        }
-      });
     },
     handleBlurTextArea() {
       if (this.isFirstSub !== this.isClickFirstSub) return;

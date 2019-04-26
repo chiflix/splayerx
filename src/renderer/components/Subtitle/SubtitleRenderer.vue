@@ -17,10 +17,7 @@
       <div class="cue-wrap" v-if="filter(cue)"
         :style="{
           zoom: zoom,
-          // width: `${inputWitdh}px`,
           minWidth: minInputWidth,
-          // maxWidth: maxInputWitdh,
-          lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
         }">
         <cue-editable-renderer class="cueRender"
           :key="`${cue.index}-${cue.text}`"
@@ -46,8 +43,6 @@
         :style="{
           zoom: zoom,
           minWidth: minInputWidth,
-          // maxWidth: maxInputWitdh,
-          lineHeight: 'normal',
         }">
         <cue-editable-renderer class="cueRender"
           :text="$t('editorCreateSubtitle.button')"
@@ -206,18 +201,6 @@ export default {
         return `${computed / this.scaleNum}px`;
       } else if (!this.isProfessional) {
         return `${computed / this.secondarySubScale}px`;
-      }
-    },
-    maxInputWitdh() { // eslint-disable-line
-      const width = this.winWidth;
-      if (!this.isEditable || (this.isEditable && this.isClickFirstSub !== this.isFirstSub)) {
-        return 'none';
-      } else if (this.isProfessional) {
-        return `${width / this.zoom}px`;
-      } else if (!this.isProfessional && this.isFirstSub) {
-        return `${width / this.scaleNum}px`;
-      } else if (!this.isProfessional) {
-        return `${width / this.secondarySubScale}px`;
       }
     },
     zoom() {
