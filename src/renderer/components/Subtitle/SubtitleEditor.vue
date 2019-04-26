@@ -46,7 +46,7 @@
                 left: `${sub.left}px`,
                 right: `${sub.right}px`,
                 top: `${((6 + (sub.track - 1) * 4) * vh) + 33}px`,
-                opacity: `${sub.opacity}`,
+                display: sub.opacity === 0 ? 'none' : 'block',
                 cursor: dragingMode !== 'default' ? dragingMode : 'grab'
               }">
               <i class="drag-left no-drag"
@@ -664,8 +664,8 @@ export default {
         z-index: 1;
         background: rgba(255,255,255,0.24);
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 1px;
+        border: 2px solid rgba(255,255,255,0.15);
+        border-radius: 2px;
         box-sizing: border-box;
         left: ${currentLeft}px;
         right: ${currentRight}px`);
@@ -899,11 +899,10 @@ export default {
             });
           }
         } else {
-          // this.$refs.timeLine.style.transition = '';
           this.$refs.timeLine.addEventListener('transitionend', this.doubleClickTransitionend, false);
           this.$refs.timeLine.style.transition = 'left 0.1s ease-in-out';
           this.currentLeft += offset;
-          this.preciseTime = parseFloat(sub.start.toFixed(4), 10);
+          this.preciseTime = parseFloat((sub.start + 0.011).toFixed(4), 10);
           if (!this.protectKeyWithEnterShortKey) {
             this.updateChooseIndex(sub.index);
           }
@@ -914,7 +913,6 @@ export default {
       // 时间轴运动到字幕条开始位置，动画结束，重设时间
       this.resetCurrentTime(this.preciseTime);
       this.triggerCount += 1;
-      // console.log(this.preciseTime);
       this.$bus.$emit('seek', this.preciseTime);
       videodata.time = this.preciseTime;
       this.$refs.timeLine.style.transition = '';
@@ -922,6 +920,8 @@ export default {
       if (this.protectKeyWithEnterShortKey) {
         this.updateAutoFocus(true);
         setImmediate(() => {
+          // 输入组件autoFocus watcher 失效， 手动发射事件
+          this.$bus.$emit(bus.SUBTITLE_EDITOR_AUTO_FOCUS);
           this.protectKeyWithEnterShortKey = false;
         });
       }
@@ -1052,8 +1052,9 @@ export default {
               max-height: 30px;
               z-index: 1;
               background: rgba(255,255,255,0.39);
-              border: 1px solid rgba(255,255,255,0.46);
-              border-radius: 1px;
+              backdrop-filter: blur(10px);
+              border: 2px solid rgba(255,255,255,0.46);
+              border-radius: 2px;
               cursor: pointer;
               box-sizing: border-box;
               left: ${left}px`);
@@ -1124,8 +1125,9 @@ export default {
               max-height: 30px;
               z-index: 1;
               background: rgba(255,255,255,0.39);
-              border: 1px solid rgba(255,255,255,0.46);
-              border-radius: 1px;
+              backdrop-filter: blur(10px);
+              border: 2px solid rgba(255,255,255,0.46);
+              border-radius: 2px;
               cursor: pointer;
               box-sizing: border-box;
               left: ${left}px`);

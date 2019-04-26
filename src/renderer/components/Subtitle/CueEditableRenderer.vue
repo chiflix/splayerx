@@ -22,6 +22,7 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex';
 import { Editor as editorMutations } from '@/store/mutationTypes';
+import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 
 export default {
   name: 'cue-editable-renderer',
@@ -118,6 +119,19 @@ export default {
       }
     },
   },
+  mounted() {
+    // autoFocus watcher 失效
+    this.$bus.$on(bus.SUBTITLE_EDITOR_AUTO_FOCUS, () => {
+      if (!this.focus && this.chooseIndex === this.cue.index &&
+        this.isFirstSub === this.isClickFirstSub) {
+        const input = this.$refs.input;
+        input.focus();
+      }
+    });
+  },
+  destroyed() {
+    this.$bus.$off(bus.SUBTITLE_EDITOR_AUTO_FOCUS);
+  },
   methods: {
     ...mapMutations({
       toggleEditable: editorMutations.TOGGLE_EDITABLE,
@@ -185,7 +199,7 @@ export default {
       }
     },
     handleFocus() { // eslint-disable-line
-      if (this.isFirstSub !== this.isClickFirstSub) return;
+      if (this.isFirstSub !== this.isClickFirstSub || this.focus) return;
       this.focus = true;
       if (!this.isEditable) {
         this.toggleEditable(true);
