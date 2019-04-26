@@ -27,8 +27,8 @@
       @mousedown="mousedownOnSetDefault">
       <transition name="button" mode="out-in">
         <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
-        <div :key="defaultState" v-else class="result">
-          <Icon :type="defaultState" :class="defaultState" :style="{ top: !isMac ? '2px' : '' }"/>
+        <div :key="defaultState" v-else class="result"  :style="{ top: !isMac ? '2px' : '' }">
+          <Icon :type="defaultState" :class="defaultState"/>
         </div>
       </transition>
     </div>
