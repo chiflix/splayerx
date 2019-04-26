@@ -922,10 +922,10 @@ export default {
     width: 100%;
     height: 100%;
     position: absolute;
-    left: 0;
-    top: 0;
+    left: -2px;
+    top: -2px;
     z-index: 1;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.15);
     border-radius: 5px;
     overflow: hidden;
     visibility: hidden;

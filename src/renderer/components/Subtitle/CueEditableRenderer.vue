@@ -2,17 +2,16 @@
   <div ref="wrap" :class="'subtitle-wrapper sub-mark'+`${paused && canUseEditor ? ' text no-drag' : ''}`">
     <div
       ref="input"
-      :contenteditable="paused && canUseEditor"
+      :contenteditable="paused && canUseEditor ? 'plaintext-only' : false"
       :style="{
         textAlign: this.textAlign,
         opacity: this.opacity,
-        maxWidth: isEditable && chooseIndex === cue.index && isClickFirstSub === isFirstSub ? `${(winWidth-50)/zoom}px` : 'none',
+        maxWidth: isEditable && chooseIndex === cue.index && isClickFirstSub === isFirstSub ? `${(winWidth-10)/zoom}px` : 'none',
       }"
       :class="'subtitle-content subtitle-style'+chosenStyleIndex+`${isEditable && chooseIndex === cue.index && isClickFirstSub === isFirstSub ? ' pre-line' : ''}`"
       v-html="finalText"
       @focus.stop="handleFocus"
       @keydown.stop="keydown"
-      @mouseup.stop=""
       @mousedown.stop="handleMouseDown"
       @click.stop=""
       @blur="handleBlurTextArea"></div>
@@ -125,41 +124,68 @@ export default {
       updateClickSubtitle: editorMutations.UPDATE_IS_CLICK_FIRST_SUBTITLE,
       updateAutoFocus: editorMutations.UPDATE_AUTO_FOCUS,
     }),
-    handleMouseDown(e) {
+    handleMouseDown() {
       if (!this.canUseEditor) return;
-      // if (this.offsetDone) return;
       const isPaused = this.paused;
       if (isPaused) {
         this.updateClickSubtitle(this.isFirstSub);
-        const wrap = this.$refs.wrap;
-        if (!this.offsetDone && wrap) {
-          const factor = this.factor;
-          const zoom = this.zoom;
-          wrap.style = `
-            max-height: ${27 * factor}px;
-            overflow-x: scroll;
-            overflow-y: scroll;
-          `;
-          setImmediate(() => {
-            const input = this.$refs.input;
-            const offsetY = e.offsetY;
-            const cell = (Math.ceil(((offsetY / factor) / zoom) / 13) - 2) * 13;
-            wrap.scrollTop = (input.offsetHeight / factor) > 27 ? cell : 0;
-          });
-          this.offsetDone = true;
-        }
       } else {
         setImmediate(() => {
           this.$bus.$emit('toggle-playback');
         });
       }
     },
-    handleFocus() {// eslint-disable-line
-      if (this.isFirstSub !== this.isClickFirstSub) return;
-      this.focus = true;
+    select(collapse) {
       const input = this.$refs.input;
       let sel;
       let range;
+      if (window.getSelection && document.createRange) {
+        range = document.createRange();
+        range.selectNodeContents(input);
+        !collapse && range.collapse(collapse);
+        sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } else if (document.body.createTextRange) {
+        range = document.body.createTextRange();
+        range.moveToElementText(input);
+        !collapse && range.collapse(collapse);
+        range.select();
+      }
+    },
+    scrollToCursor(rangeText) { // eslint-disable-line
+      const input = this.$refs.input;
+      const wrap = this.$refs.wrap;
+      let len = rangeText.length;
+      let beforeBrs = 0;
+      const brIndexs = [];
+      input.innerHTML.replace(/<br>/gi, '\n').split('\n').forEach((e, i) => {
+        if (i === 0) {
+          brIndexs.push(e.length + 1);
+        } else {
+          brIndexs.push((e.length + 1) + brIndexs[i - 1]);
+        }
+      });
+      brIndexs.forEach((e) => {
+        if (len >= e) {
+          len += 1;
+          beforeBrs += 1;
+        }
+      });
+      if (wrap && input && brIndexs.length > 0) {
+        const inputHeight = input.offsetHeight / this.factor;
+        const oneRowHeight = Math.round((inputHeight - 27) / brIndexs.length);
+        wrap.scrollTop = inputHeight > 27 ? oneRowHeight * beforeBrs : 0;
+        if (inputHeight > 27 && beforeBrs > 1 && beforeBrs === brIndexs.length - 1) {
+          wrap.scrollTop = inputHeight - 27;
+        } else if (inputHeight > 27 && beforeBrs !== 0) {
+          wrap.scrollTop = oneRowHeight * beforeBrs;
+        }
+      }
+    },
+    handleFocus() { // eslint-disable-line
+      if (this.isFirstSub !== this.isClickFirstSub) return;
+      this.focus = true;
       if (!this.isEditable) {
         this.toggleEditable(true);
       }
@@ -167,46 +193,32 @@ export default {
         this.updateChooseIndex(this.cue.index);
       }
       if (this.cue.reference) {
-        if (window.getSelection && document.createRange) {
-          range = document.createRange();
-          range.selectNodeContents(input);
-          sel = window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range);
-        } else if (document.body.createTextRange) {
-          range = document.body.createTextRange();
-          range.moveToElementText(input);
-          range.select();
-        }
+        this.select(true);
+      } else if (this.autoFocus) {
+        // 非主动点击触发输入，光标需要定位末尾
+        this.select(false);
+        this.updateAutoFocus(false);
       }
       const wrap = this.$refs.wrap;
-      if (wrap && this.autoFocus) {
+      if (wrap) {
         wrap.style = `
           max-height: 27px;
           overflow-x: scroll;
           overflow-y: scroll;
         `;
-        setImmediate(() => {
-          wrap.scrollTop = input.offsetHeight > 27 ? 9999 : 0;
-        });
-        this.offsetDone = true;
       }
-      if (this.autoFocus && !this.cue.reference) { // 非主动点击触发输入，光标需要定位末尾
-        if (window.getSelection && document.createRange) {
-          range = document.createRange();
-          range.selectNodeContents(input);
-          range.collapse(false);
-          sel = window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range);
-        } else if (document.body.createTextRange) {
-          range = document.body.createTextRange();
-          range.moveToElementText(input);
-          range.collapse(false);
-          range.select();
+      setImmediate(() => {
+        const input = this.$refs.input;
+        const doc = input.ownerDocument || input.document;
+        const win = doc.defaultView || doc.parentWindow;
+        if (win.getSelection().rangeCount > 0) { // 选中的区域
+          const range = win.getSelection().getRangeAt(0);
+          const preCaretRange = range.cloneRange(); // 克隆一个选中区域
+          preCaretRange.selectNodeContents(input); // 设置选中区域的节点内容为当前节点
+          preCaretRange.setEnd(range.endContainer, range.endOffset); // 重置选中区域的结束位置
+          this.scrollToCursor(preCaretRange.toString());
         }
-        this.updateAutoFocus(false);
-      }
+      });
     },
     handleBlurTextArea() {
       if (this.isFirstSub !== this.isClickFirstSub) return;
@@ -309,6 +321,10 @@ export default {
     word-wrap: break-word;
     word-break: break-all;
   }
+  &::-webkit-scrollbar {
+    display: none;  // Safari and Chrome
+  }
+  overflow: scroll;
   &:focus {
     // background: red;
   }

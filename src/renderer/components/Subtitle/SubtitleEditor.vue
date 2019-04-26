@@ -49,11 +49,11 @@
                 opacity: `${sub.opacity}`,
                 cursor: dragingMode !== 'default' ? dragingMode : 'grab'
               }">
-              <i class="drag-left"
+              <i class="drag-left no-drag"
                 :style="{
                   cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
                 }"></i>
-              <i class="drag-right"
+              <i class="drag-right no-drag"
                 :style="{
                   cursor: dragingMode !== 'default' ? dragingMode : 'col-resize'
                 }"></i>
@@ -361,6 +361,12 @@ export default {
         this.updateAutoFocus(false);
       } else {
         this.resetCurrentTime();
+        setImmediate(() => {
+          // 处理暂停播放，0.2s跳的问题
+          const b = document.getElementsByTagName('video')[0];
+          const currentTime = b.currentTime;
+          b.currentTime = currentTime + 0.007;
+        });
         const canChooseSubs = this.currentSub.filter(e => e.track === 1);
         if (canChooseSubs.length > 0) {
           setImmediate(() => {
@@ -732,13 +738,14 @@ export default {
       this.exitBtnHover = false;
     },
     handleDragStartTimeLine(e) {
-      this.dragStartX = e.pageX;
-      this.dragStartLeft = this.currentLeft;
-      this.dragStartTime = this.preciseTime;
-      this.timeLineDraging = true;
-      this.dragingMode = 'grabbing';
       if (!this.paused) {
         this.$bus.$emit('toggle-playback');
+      } else {
+        this.dragStartX = e.pageX;
+        this.dragStartLeft = this.currentLeft;
+        this.dragStartTime = this.preciseTime;
+        this.timeLineDraging = true;
+        this.dragingMode = 'grabbing';
       }
     },
     handleDragingTimeLine(e) {
@@ -775,17 +782,19 @@ export default {
         this.dragingMode = 'default';
         // this.triggerCount += 1;
       }
+      this.handleDragEndSub();
     },
     handleDragStartEditor(e) {
       // 开始拖动时间轴，记录拖动位置、时间、暂停播放
       if (this.isSpaceDownInProfessional) {
-        this.dragStartX = e.pageX;
-        this.dragStartLeft = this.currentLeft;
-        this.dragStartTime = this.preciseTime;
-        this.timeLineDraging = true;
-        this.dragingMode = 'grabbing';
         if (!this.paused) {
           this.$bus.$emit('toggle-playback');
+        } else {
+          this.dragStartX = e.pageX;
+          this.dragStartLeft = this.currentLeft;
+          this.dragStartTime = this.preciseTime;
+          this.timeLineDraging = true;
+          this.dragingMode = 'grabbing';
         }
       }
     },
@@ -824,6 +833,7 @@ export default {
         this.dragingMode = 'default';
         // this.triggerCount += 1;
       }
+      this.handleDragEndSub();
     },
     updateWhenMoving(offset) {
       // 时间轴偏移计算
@@ -875,24 +885,28 @@ export default {
     },
     handleDoubleClickSub(e, sub) {
       if (this.isSpaceDownInProfessional) return;
-      // 双击字幕条，触发时间轴运动到字幕条开始位置
-      const offset = (this.preciseTime - sub.start) * this.space;
-      if (Math.abs(offset) < 0.5 || this.autoFocus) {
-        // 偏移太小就不触发运动
-        if (this.protectKeyWithEnterShortKey) {
-          this.updateAutoFocus(true);
-          setImmediate(() => {
-            this.protectKeyWithEnterShortKey = false;
-          });
-        }
+      if (!this.paused) {
+        this.$bus.$emit('toggle-playback');
       } else {
-        // this.$refs.timeLine.style.transition = '';
-        this.$refs.timeLine.addEventListener('transitionend', this.doubleClickTransitionend, false);
-        this.$refs.timeLine.style.transition = 'left 0.1s ease-in-out';
-        this.currentLeft += offset;
-        this.preciseTime = parseFloat(sub.start.toFixed(4), 10);
-        if (!this.protectKeyWithEnterShortKey) {
-          this.updateChooseIndex(sub.index);
+        // 双击字幕条，触发时间轴运动到字幕条开始位置
+        const offset = (this.preciseTime - sub.start) * this.space;
+        if (Math.abs(offset) < 0.5 || this.autoFocus) {
+          // 偏移太小就不触发运动
+          if (this.protectKeyWithEnterShortKey) {
+            this.updateAutoFocus(true);
+            setImmediate(() => {
+              this.protectKeyWithEnterShortKey = false;
+            });
+          }
+        } else {
+          // this.$refs.timeLine.style.transition = '';
+          this.$refs.timeLine.addEventListener('transitionend', this.doubleClickTransitionend, false);
+          this.$refs.timeLine.style.transition = 'left 0.1s ease-in-out';
+          this.currentLeft += offset;
+          this.preciseTime = parseFloat(sub.start.toFixed(4), 10);
+          if (!this.protectKeyWithEnterShortKey) {
+            this.updateChooseIndex(sub.index);
+          }
         }
       }
     },
@@ -944,32 +958,30 @@ export default {
     },
     handleDragStartSub(e, sub) {
       if (this.isSpaceDownInProfessional) return;
-      // 开始拖动字幕条，需要计算拉升还是位移
-      this.subDragStartX = e.pageX;
-      const path = e.path || (e.composedPath && e.composedPath());
-      const subElement = path.find(e => e.tagName === 'DIV' && e.className.includes('sub-mark'));
-      const leftTarget = path.find(e => e.tagName === 'I' && e.className.includes('drag-left'));
-      const rightTarget = path.find(e => e.tagName === 'I' && e.className.includes('drag-right'));
-      this.subDragElement = subElement;
-      this.subDragCurrentSub = sub;
-      this.updateChooseIndex(sub.index);
-      this.subDragStartOffsetLeft = (e.pageX - (sub.left + this.currentLeft));
-      if (leftTarget) {
-        this.subLeftDraging = true;
-        this.dragingMode = 'col-resize';
-      } else if (rightTarget) {
-        this.subRightDraging = true;
-        this.dragingMode = 'col-resize';
-      } else {
-        this.subDragMoving = true;
-        this.dragingMode = 'grabbing';
-      }
       if (!this.paused) {
         this.$bus.$emit('toggle-playback');
+      } else {
+        // 开始拖动字幕条，需要计算拉升还是位移
+        this.subDragStartX = e.pageX;
+        const path = e.path || (e.composedPath && e.composedPath());
+        const subElement = path.find(e => e.tagName === 'DIV' && e.className.includes('sub-mark'));
+        const leftTarget = path.find(e => e.tagName === 'I' && e.className.includes('drag-left'));
+        const rightTarget = path.find(e => e.tagName === 'I' && e.className.includes('drag-right'));
+        this.subDragElement = subElement;
+        this.subDragCurrentSub = sub;
+        this.updateChooseIndex(sub.index);
+        this.subDragStartOffsetLeft = (e.pageX - (sub.left + this.currentLeft));
+        if (leftTarget) {
+          this.subLeftDraging = true;
+          this.dragingMode = 'col-resize';
+        } else if (rightTarget) {
+          this.subRightDraging = true;
+          this.dragingMode = 'col-resize';
+        } else {
+          this.subDragMoving = true;
+          this.dragingMode = 'grabbing';
+        }
       }
-      // 当拖拽字幕条时，保持hover的UI
-      // const className = `sub draging${sub.index === this.chooseIndexs ? ' focus' : ''}`;
-      // subElement.setAttribute('class', className);
     },
     handleDragingSub(e) {
       if (this.subRightDraging || this.subLeftDraging || this.subDragMoving) {
@@ -1824,7 +1836,7 @@ export default {
       z-index: 1;
       background: rgba(255,255,255,0.24);
       backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.15);
+      border: 2px solid rgba(255,255,255,0.15);
       border-radius: 2px;
       box-sizing: border-box;
       transition: background 0.1s ease-in-out, border 0.1s ease-in-out;
@@ -1886,7 +1898,7 @@ export default {
         width: 5%;
         max-width: 5px;
         height: 100%;
-        left: -1px;
+        left: -2px;
         top: 0;
         z-index: 1;
         cursor: col-resize;
@@ -1899,7 +1911,7 @@ export default {
         width: 5%;
         height: 100%;
         max-width: 5px;
-        right: -1px;
+        right: -2px;
         top: 0;
         z-index: 1;
         cursor: col-resize;
