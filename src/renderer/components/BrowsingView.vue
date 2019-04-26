@@ -90,6 +90,10 @@ export default {
       this.startTime = new Date();
       this.loadingState = true;
     });
+    this.$bus.$on('cal-current-time', () => {
+      console.log(this.$refs.webView);
+      this.$refs.webView.executeJavaScript('console.log(document.querySelector("video").currentTime)');
+    });
     this.$refs.webView.addEventListener('did-stop-loading', () => {
       const loadingTime = new Date() - this.startTime;
       if (loadingTime % 3000 === 0) {
@@ -114,6 +118,11 @@ export default {
         if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
       }
     };
+    this.$electron.ipcRenderer.on('recover-video', () => {
+      if (this.$refs.webView.canGoForward()) {
+        this.$refs.webView.goForward();
+      }
+    });
   },
   beforeDestroy() {
     window.onbeforeunload = null;

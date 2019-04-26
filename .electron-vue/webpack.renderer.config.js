@@ -42,7 +42,8 @@ let rendererConfig = {
   entry: {
     preference: path.join(__dirname, '../src/renderer/preference.js'),
     about: path.join(__dirname, '../src/renderer/about.js'),
-    index: path.join(__dirname, '../src/renderer/main.js')
+    index: path.join(__dirname, '../src/renderer/main.js'),
+    picInPic: path.join(__dirname, '../src/renderer/picInPic.js')
   },
   externals: [
     ...Object.keys(Object.assign({}, dependencies, optionalDependencies)).filter(d => !whiteListedModules.includes(d))
@@ -176,6 +177,7 @@ let rendererConfig = {
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('index')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('about')),
     new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('preference')),
+    new HtmlWebpackPlugin(generateHtmlWebpackPluginConfig('picInPic')),
     new webpack.HotModuleReplacementPlugin()
   ],
   output: {

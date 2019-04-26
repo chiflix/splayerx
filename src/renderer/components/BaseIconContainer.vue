@@ -511,11 +511,6 @@ export default {
     }
   }
 }
-.picInpicDisabled {
-  width: 20px;
-  height: 16px;
-  display: block;
-}
 .back, .forward {
   width: 24px;
   height: 32px;
@@ -600,5 +595,53 @@ export default {
   display: block;
   width: 32px;
   height: 32px;
+}
+.pip {
+  width: 32px;
+  height: 32px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
+.pipRecord, .pipBack {
+  width: 20px;
+  height: 20px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
 }
 </style>

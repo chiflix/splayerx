@@ -82,4 +82,5 @@ export const Input = {
 
 export const Browsing = {
   INITIAL_URL_UPDATE: 'INITIAL_URL_UPDATE',
+  YOUTUBE_ID_UPDATE: 'YOUTUBE_ID_UPDATE',
 };

@@ -25,6 +25,7 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 let mainWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
+let picInPicWindow = null;
 let tray = null;
 let inited = false;
 const filesToOpen = [];
@@ -41,6 +42,9 @@ const aboutURL = process.env.NODE_ENV === 'development'
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
+const picInPicURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/picInPic.html'
+  : `file://${__dirname}/picInPic.html`;
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -338,6 +342,38 @@ function registerMainWindowEvent() {
       aboutWindow.show();
     });
   });
+  ipcMain.on('add-picInPic', (e, args) => {
+    const picInPicWindowOptions = {
+      useContentSize: true,
+      frame: false,
+      titleBarStyle: 'none',
+      width: 320,
+      height: 180,
+      transparent: true,
+      show: false,
+      resizable: true,
+      alwaysOnTop: true,
+      minWidth: 320,
+      minHeight: 180,
+      webPreferences: {
+        webSecurity: false,
+        experimentalFeatures: true,
+      },
+      acceptFirstMouse: true,
+    };
+    if (!picInPicWindow) {
+      picInPicWindow = new BrowserWindow(picInPicWindowOptions);
+      picInPicWindow.loadURL(`${picInPicURL}`);
+      picInPicWindow.on('closed', () => {
+        picInPicWindow = null;
+      });
+    }
+    picInPicWindow.once('ready-to-show', () => {
+      picInPicWindow.show();
+      picInPicWindow.setAspectRatio(16 / 9);
+      picInPicWindow.webContents.send('picInPicDispatch', args);
+    });
+  });
   ipcMain.on('add-preference', () => {
     const preferenceWindowOptions = {
       useContentSize: true,
@@ -375,6 +411,9 @@ function registerMainWindowEvent() {
   });
   ipcMain.on('main-to-preference', (e, args) => {
     preferenceWindow?.webContents.send('preferenceDispatch', 'setPreference', args);
+  });
+  ipcMain.on('exit-picInPic', () => {
+    mainWindow?.webContents.send('recover-video');
   });
 }
 
