@@ -902,7 +902,7 @@ export default {
           this.$refs.timeLine.addEventListener('transitionend', this.doubleClickTransitionend, false);
           this.$refs.timeLine.style.transition = 'left 0.1s ease-in-out';
           this.currentLeft += offset;
-          this.preciseTime = parseFloat((sub.start + 0.011).toFixed(4), 10);
+          this.preciseTime = parseFloat(sub.start.toFixed(4), 10);
           if (!this.protectKeyWithEnterShortKey) {
             this.updateChooseIndex(sub.index);
           }
