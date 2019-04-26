@@ -23,7 +23,7 @@
       <div class="top"
         :style="{
           fontSize: sizeAdaption(14),
-          lineHeight: sizeAdaption(13),
+          lineHeight: sizeAdaption(14),
         }">
         <span ref="lastPlayedTime"></span>
         {{timecodeFromSeconds(videoDuration)}}&nbsp&nbsp·&nbsp&nbsp{{inWhichSource}}&nbsp&nbsp{{indexInPlaylist}} / {{numberOfPlaylistItem}}
@@ -63,6 +63,8 @@
         :isInRange="index >= firstIndex && index <= lastIndex"
         :isPlaying="index === playingIndex"
         :isShifting="shifting"
+        :isFolderList="isFolderList"
+        :playListHash="playListHash"
         :hovered="hoverIndex === index"
         :winWidth="winWidth"
         :thumbnailWidth="thumbnailWidth"
@@ -331,6 +333,7 @@ export default {
       this.movementX = this.movementY = 0;
     },
     onItemMouseover(index, media) {
+      this.$emit('can-hover-item');
       this.hoverIndex = index;
       this.hoveredMediaInfo = media;
       this.filename = path.basename(
@@ -430,7 +433,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['playingList', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
+    ...mapGetters(['playingList', 'playListHash', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
     ...mapState({
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,
