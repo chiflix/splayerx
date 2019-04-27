@@ -1,7 +1,5 @@
 <template>
-<div
-  :data-component-name="$options.name"
-  class="next-video">
+<div class="next-video">
   <div class="plane-background"></div>
   <div class="plane">
     <div class="progress">

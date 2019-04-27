@@ -35,10 +35,12 @@ import { mapGetters } from 'vuex';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
 import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from './BaseIconContainer.vue';
 
 export default {
   name: 'notification-bubble',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     Icon,
     NextVideo,

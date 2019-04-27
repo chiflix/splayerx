@@ -1,7 +1,5 @@
 <template>
-  <div
-    :data-component-name="$options.name"
-    class="base-video-player">
+  <div class="base-video-player">
     <video class="video-element" ref="video"></video>
   </div>
 </template>

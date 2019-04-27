@@ -1,7 +1,6 @@
 <template>
-  <div class="wrapper"
-    :data-component-name="$options.name">
-    <titlebar currentView="LandingView"></titlebar>
+  <div class="wrapper">
+    <titlebar key="playing-view" currentView="LandingView"></titlebar>
     <transition name="background-container-transition">
       <div class="background" v-if="showShortcutImage">
         <transition name="background-transition" mode="in-out">
