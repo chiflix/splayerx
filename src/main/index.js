@@ -108,6 +108,8 @@ function registerMainWindowEvent() {
   mainWindow.on('blur', () => {
     mainWindow?.webContents.send('mainCommit', 'isFocused', false);
   });
+  mainWindow.on('scroll-touch-begin', () => mainWindow?.webContents.send('scroll-touch-begin'));
+  mainWindow.on('scroll-touch-end', () => mainWindow?.webContents.send('scroll-touch-end'));
 
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
