@@ -97,8 +97,17 @@ Vue.use(VueAnalytics, {
 });
 
 // Custom plugin area
-// Input plugin
-Vue.use(InputPlugin);
+Vue.use(InputPlugin, {
+  namespace: true,
+  mouse: {
+    mousemove: {
+      component: true,
+    },
+  },
+  keyboard: {},
+  wheel: {},
+});
+// Vue.use(InputPlugin);
 // i18n and its plugin
 const i18n = new VueI18n({
   locale: getSystemLocale(), // set locale

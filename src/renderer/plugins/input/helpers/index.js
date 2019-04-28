@@ -1,5 +1,5 @@
 export * from './buttonsToButtonNames';
-export * from './numberValidation';
+export * from './validators';
 export * from './keyboardCalculator';
 export * from './wheelDetector';
 export * from './componentStore';

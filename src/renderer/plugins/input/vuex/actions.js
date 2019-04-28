@@ -15,7 +15,7 @@ import {
 import {
   namespacedNameHelper,
   getComponentName,
-  isInteger,
+  isInteger, isValidComponentName,
   buttonsToButtonNames,
   keydownCalculator as keydownCalc,
   specialKeydownCalculator as speKeydownCalc,
@@ -28,7 +28,7 @@ let mousemoveTimer = 0;
 const allActions = {
   [at.UPDATE_MOUSEMOVE_COMPONENT]: ({ commit }, { target }) => {
     const { name } = getComponentName(target);
-    if (name) commit(mt.MOUSEMOVE_COMPONENT_NAME, name);
+    if (isValidComponentName(name)) commit(mt.MOUSEMOVE_COMPONENT_NAME, name);
   },
   [at.UPDATE_MOUSEMOVE_POSITION]: ({ commit }, { clientX, clientY }) => {
     commit(mt.MOUSEMOVE_CLIENT_POSITION, [clientX, clientY]);
@@ -43,14 +43,14 @@ const allActions = {
   },
   [at.UPDATE_MOUSEDOWN_COMPONENT]: ({ commit }, { target }) => {
     const { name } = getComponentName(target);
-    if (name) commit(mt.MOUSEDOWN_COMPONENT_NAME, name);
+    if (isValidComponentName(name)) commit(mt.MOUSEDOWN_COMPONENT_NAME, name);
   },
   [at.UPDATE_MOUSEUP_BUTTONS]: ({ commit }, { buttons }) => {
     commit(mt.MOUSEDOWN_BUTTON_NAMES, buttonsToButtonNames(buttons));
   },
   [at.UPDATE_MOUSEUP_COMPONENT]: ({ commit }, { target }) => {
     const { name } = getComponentName(target);
-    if (name) commit(mt.MOUSEUP_COMPONENT_NAME, name);
+    if (isValidComponentName(name)) commit(mt.MOUSEUP_COMPONENT_NAME, name);
   },
   [at.UPDATE_KEYDOWN_CODES]: ({ commit, getters }, { code }) => {
     const { keys } = getters;
@@ -122,7 +122,7 @@ const allActions = {
   },
   [at.UPDATE_WHEEL_COMPONENT]: ({ commit }, { target }) => {
     const { name } = getComponentName(target);
-    if (name) commit(mt.WHEEL_COMPONENT_NAME, name);
+    if (isValidComponentName(name)) commit(mt.WHEEL_COMPONENT_NAME, name);
   },
   [at.UPDATE_WHEEL_DEVICE]: ({ commit }, { deltaX, deltaY, deltaZ }) => {
     if (isInteger(deltaX) && isInteger(deltaY) && isInteger(deltaZ)) {
