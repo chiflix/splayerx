@@ -253,8 +253,7 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-$dropdown-width: 218px;
-$dropdown-height: 156px;
+$dropdown-height: 148px;
 .preference-setting {
   box-sizing: border-box;
   padding-top: 37px;
@@ -274,15 +273,17 @@ $dropdown-height: 156px;
   }
   .down-arrow {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 7px;
+    right: 8px;
     transform: rotate(90deg);
+    transition: transform 200ms;
   }
   .up-arrow {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 7px;
+    right: 8px;
     transform: rotate(-90deg);
+    transition: transform 200ms;
   }
   .description {
     margin-bottom: 13px;
@@ -293,35 +294,38 @@ $dropdown-height: 156px;
   }
   .drop-down {
     width: $dropdown-width;
-    height: 28px;
     margin-bottom: 35px;
+    height: 28px;
+    -webkit-app-region: no-drag;
     .drop-down-brief {
       position: relative;
       -webkit-app-region: no-drag;
       cursor: pointer;
-      z-index: 100;
-      width: $dropdown-width;
-      height: 22px;
-      padding-top: 4px;
-      background-color: rgba(255,255,255,0.04);
+      width: 100%;
+      height: 28px;
+      background-color: rgba(0,0,0,0.05);
       border: 1px solid rgba(255,255,255,0.07);
       border-radius: 2px;
       font-family: $font-semibold;
       font-size: 12px;
+      line-height: 28px;
       color: #FFFFFF;
       letter-spacing: 0;
       text-align: center;
+      transition: border 200ms, background-color 200ms;
+      &:hover {
+        border: 1px solid rgba(255,255,255,0.3);
+        background-color: rgba(255,255,255,0.07);
+      }
     }
     .drop-down-content {
       cursor: pointer;
       position: relative;
       z-index: 50;
-      width: $dropdown-width;
+      width: 100%;
       height: $dropdown-height;
-      background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
-      border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.0) rgba(255,255,255,0.1) rgba(255,255,255,0.3);
-      border-width: 1px 1px 1px 1px;
-      border-style: solid;
+      background-color: rgba(100,100,100,.95);
+      border: 1px solid rgba(255,255,255,0.3);
       border-radius: 2px;
       font-family: $font-semibold;
       font-size: 12px;
@@ -329,22 +333,21 @@ $dropdown-height: 156px;
       letter-spacing: 0;
       text-align: center;
       .selected {
-        margin-top: -1px;
-        padding-top: 5px;
-        height: 24px;
+        height: 28px;
+        line-height: 28px;
         background-color: rgba(255,255,255,0.1);
       }
       .content {
-        position: absolute;
         cursor: pointer;
-        top: 30px;
+        position: absolute;
+        top: 32px;
         left: 8px;
         right: 4px;
-        bottom: 3px;
+        bottom: 4px;
         overflow-y: scroll;
         .selection {
-          padding-top: 4px;
-          height: 22px;
+          height: 28px;
+          line-height: 28px;
         }
         .selection:hover {
           background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
