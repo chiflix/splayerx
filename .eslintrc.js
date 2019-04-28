@@ -25,6 +25,7 @@ module.exports = {
     'no-shadow': 0,
     'import/extensions': ['error', { js: 'never', json: 'ignorePackages', vue: 'always', scss: 'always' }],
     'import/newline-after-import': 1,
+    'import/prefer-default-export': 0,
     'prefer-destructuring': ['error', { AssignmentExpression: { array: false } }],
     'no-multi-assign': 0,
     // allow debugger during development
