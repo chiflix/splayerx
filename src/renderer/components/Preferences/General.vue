@@ -384,13 +384,13 @@ $dropdown-height: 148px;
       box-sizing: border-box;
       align-self: center;
       background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
-      border: 0.5px solid rgba(255,255,255,0.20);
+      border: 1px solid rgba(255,255,255,0.20);
       border-radius: 2px;
       transition-property: background-color, opacity;
       transition-duration: 80ms;
       transition-timing-function: ease-in;
       width: 61px;
-      height: 23px;
+      height: 25px;
 
       .button-enter, .button-leave-to {
         opacity: 0;
@@ -411,7 +411,7 @@ $dropdown-height: 148px;
       }
       .result {
         position: relative;
-        top: 3px;
+        top: 4px;
         left: 23px;
       }
     }
