@@ -910,6 +910,7 @@ export default {
     z-index: 1;
     border: 2px solid rgba(255,255,255,0.15);
     border-radius: 5px;
+    clip-path: inset(0 round 5px);
     overflow: hidden;
     visibility: hidden;
   }

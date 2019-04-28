@@ -455,15 +455,11 @@ export default {
               this.addMessages({
                 type: 'state',
                 content: t,
-                dismissAfter: 200000,
+                dismissAfter: 10000,
               });
               this.matchSwitchReferenceBubble = this.messageInfo.find(e => e && e.content === t);
             }
-            val.once('data', () => {
-              setTimeout(() => {
-                val.parse();
-              }, Math.random() * 3000);
-            });
+            val.once('data', val.parse);
             val.on('parse', (parsed) => {
               if (this.dialogues && parsed.dialogues) {
                 this.referenceDialogues =
@@ -1658,6 +1654,12 @@ export default {
       }
     });
   },
+  beforeDestroy() {
+    const matchSwitchReferenceBubble = this.matchSwitchReferenceBubble;
+    if (matchSwitchReferenceBubble && matchSwitchReferenceBubble.id) {
+      this.removeMessages(this.matchSwitchReferenceBubble.id);
+    }
+  },
   destroyed() {
     document.removeEventListener('mousemove', this.handleDragingEditor);
     document.removeEventListener('mouseup', this.handleDragEndEditor);
@@ -1691,10 +1693,11 @@ export default {
     // background-color: rgba(0, 0, 0, .36);
     &::before {
       content: "";
+      width: 100%;
+      height: 94vh;
+      min-height: calc(100vh - 60px);
       position: absolute;
       left: 0;
-      top: 6vh;
-      right: 0;
       bottom: 0;
       background-image: url(../../assets/subtitle-editor-dot.svg);
       // background-image: image-set( url(../../assets/dot.png) 1x, url(../../assets/dot2x.png) 2x );
