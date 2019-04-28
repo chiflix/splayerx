@@ -293,7 +293,7 @@ $dropdown-height: 148px;
     letter-spacing: 0;
   }
   .drop-down {
-    width: $dropdown-width;
+    width: 200px;
     margin-bottom: 35px;
     height: 28px;
     -webkit-app-region: no-drag;
