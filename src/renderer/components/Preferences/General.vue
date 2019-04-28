@@ -381,7 +381,7 @@ $dropdown-height: 148px;
     }
     .setting-button {
       cursor: pointer;
-      position: relative;
+      box-sizing: border-box;
       align-self: center;
       display: flex;
       justify-content: center;
@@ -392,9 +392,9 @@ $dropdown-height: 148px;
       transition-property: background-color, opacity;
       transition-duration: 80ms;
       transition-timing-function: ease-in;
-
       width: 61px;
-      height: 23px;
+      height: 25px;
+
       .button-enter, .button-leave-to {
         opacity: 0;
       }
@@ -411,10 +411,8 @@ $dropdown-height: 148px;
         color: #FFFFFF;
         letter-spacing: 0;
         text-align: center;
-        line-height: 24px;
       }
       .result {
-        position: absolute;
       }
     }
   }
