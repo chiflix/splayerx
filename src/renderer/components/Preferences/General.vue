@@ -408,7 +408,7 @@ $dropdown-height: 156px;
         color: #FFFFFF;
         letter-spacing: 0;
         text-align: center;
-        line-height: 13px;
+        line-height: 24px;
       }
       .result {
         position: absolute;
