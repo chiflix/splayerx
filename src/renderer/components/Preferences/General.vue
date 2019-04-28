@@ -27,13 +27,13 @@
       @mousedown="mousedownOnSetDefault">
       <transition name="button" mode="out-in">
         <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
-        <div :key="defaultState" v-else class="result">
+        <div :key="defaultState" v-else class="result"  :style="{ top: !isMac ? '2px' : '' }">
           <Icon :type="defaultState" :class="defaultState"/>
         </div>
       </transition>
     </div>
   </div>
-  <!-- <div class="description-button">
+  <div class="description-button" v-if="isMac">
     <div class="setting-content">
       <div class="setting-title">{{ $t("preferences.general.restoreSettings") }}</div>
       <div class="setting-description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
@@ -41,10 +41,10 @@
     <div class="setting-button no-drag" ref="button2"
       @mousedown="mousedownOnRestore">
       <transition name="button" mode="out-in">
-        <div :key="needToRelaunch" class="content">{{ needToRelaunch ? $t("preferences.general.relaunch") : $t("preferences.general.setButton") }}</div>
+        <div :key="needToRelaunch" class="content" ref="restoreContent">{{ restoreContent }}</div>
       </transition>
     </div>
-  </div> -->
+  </div>
   <div class="title other-title">{{ $t("preferences.general.others") }}</div>
   <BaseCheckBox v-if="isMac"
     :checkboxValue="reverseScrolling"
@@ -83,12 +83,24 @@ export default {
       defaultButtonTimeoutId: NaN,
       restoreButtonTimeoutId: NaN,
       needToRelaunch: false,
+      restoreContent: '',
       languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
     };
+  },
+  created() {
+    electron.ipcRenderer.once('restore-state', (event, state) => {
+      this.restoreContent = state ? this.$t('preferences.general.relaunch')
+        : this.$t('preferences.general.setButton');
+    });
   },
   watch: {
     displayLanguage(val) {
       if (val) this.$i18n.locale = val;
+      electron.ipcRenderer.send('get-restore-state');
+      electron.ipcRenderer.once('restore-state', (event, state) => {
+        this.restoreContent = state ? this.$t('preferences.general.relaunch')
+          : this.$t('preferences.general.setButton');
+      });
     },
     mouseDown(val, oldVal) {
       if (!val && oldVal && !this.isMoved) {
@@ -156,6 +168,8 @@ export default {
       if (!this.isSettingDefault) {
         this.$refs.button1.style.setProperty('background-color', '');
         this.$refs.button1.style.setProperty('opacity', '');
+      }
+      if (!this.isRestoring) {
         this.$refs.button2.style.setProperty('background-color', '');
         this.$refs.button2.style.setProperty('opacity', '');
       }
@@ -173,6 +187,7 @@ export default {
     },
     mousedownOnRestore() {
       if (!this.isSettingDefault) {
+        this.$refs.button2.style.setProperty('transition-delay', '');
         this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
         this.$refs.button2.style.setProperty('opacity', '0.5');
         this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
@@ -212,12 +227,19 @@ export default {
       }
     },
     restoreSettings() {
-      if (!this.needToRelaunch) {
+      this.isRestoring = true;
+      if (this.restoreContent === this.$t('preferences.general.setButton')) {
+        electron.ipcRenderer.send('apply');
         this.needToRelaunch = true;
-        electron.ipcRenderer.send('restore');
+        this.restoreContent = this.$t('preferences.general.relaunch');
+        this.$refs.button2.style.setProperty('transition-delay', '400ms');
+        this.$refs.button2.style.setProperty('background-color', '');
+        this.$refs.button2.style.setProperty('opacity', '');
+        this.isRestoring = false;
         return;
       }
-      electron.ipcRenderer.send('restore');
+      electron.ipcRenderer.send('relaunch');
+      this.isRestoring = false;
       this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
     mapCode(code) {

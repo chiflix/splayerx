@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/prefer-default-export
 export function buttonsToButtonNames(buttons) {
   // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
   const buttonsMap = ['left', 'right', 'middle', 'back', 'forward'];

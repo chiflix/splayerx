@@ -31,6 +31,7 @@ import { videodata } from '@/store/video';
 import NotificationBubble, { addBubble } from '../shared/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
 import InputPlugin from '@/plugins/input';
+import { VueDevtools } from './plugins/vueDevtools.dev';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -96,6 +97,7 @@ Vue.use(VueAnalytics, {
 });
 
 // Custom plugin area
+// Input plugin
 Vue.use(InputPlugin);
 // i18n and its plugin
 const i18n = new VueI18n({
@@ -103,6 +105,11 @@ const i18n = new VueI18n({
   messages, // set locale messages
 });
 Vue.use(NotificationBubble, i18n);
+// Development-only devtools area
+// VueDevtools plugin
+if (process.env.NODE_ENV === 'development') {
+  Vue.use(VueDevtools);
+}
 
 Vue.mixin(helpers);
 

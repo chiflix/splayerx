@@ -7,6 +7,9 @@
   "description": "a media player",
   "license": "GPL-3.0-or-later",
   "main": "./dist/electron/main.js",
+  "engines": {
+    "node": "^11"
+  },
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",
     "build:appx": "node .electron-vue/build.js && electron-builder --p never -w appx",
@@ -490,6 +493,7 @@
     "vue": "^2.5.18",
     "vue-analytics": "^5.16.1",
     "vue-async-computed": "^3.5.1",
+    "vue-devtools": "^5.0.0-beta.1",
     "vue-electron": "^1.0.6",
     "vue-electron-json-storage": "^1.0.1",
     "vue-i18n": "^7.7.0",
@@ -538,7 +542,6 @@
     "devtron": "^1.4.0",
     "electron-builder": "^20.38.2",
     "electron-debug": "^1.4.0",
-    "electron-devtools-installer": "^2.2.4",
     "electron-mocha": "^6.0.4",
     "electron-rebuild": "^1.8.2",
     "eslint": "^4.19.1",
