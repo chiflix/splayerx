@@ -178,6 +178,7 @@ export default {
         }
         if (files) {
           // if selected files contain folders only, then call openFolder()
+          this.$store.commit('source', '');
           const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
           files.forEach(file => remote.app.addRecentDocument(file));
           if (onlyFolders) {
@@ -359,13 +360,47 @@ export default {
         this.$bus.$emit('add-subtitles', subtitleFiles);
       }
     },
+    async openPlaylist(playListHash) {
+      const value = await this.infoDB.get('recent-played', playListHash);
+      if (value.type === 'playlist') {
+        this.playFile(value.currentVideo).then(() => {
+          this.$bus.$emit('open-playlist');
+        });
+        this.$store.dispatch('PlayingList', {
+          hash: value.quickHash,
+          paths: value.paths,
+        });
+        this.infoDB.add('recent-played', { ...value, lastOpened: Date.now() });
+      }
+    },
     /* eslint-disable */
     // generate playlist
     openVideoFile(...videoFiles) {
-      this.playFile(videoFiles[0]);
       if (videoFiles.length > 1) {
-        this.$store.dispatch('PlayingList', videoFiles);
+        const playListHash = videoFiles.reduce((hash, src) => `${hash}-${src}`);
+        this.$store.dispatch('PlayingList', {
+          hash: playListHash,
+          paths: videoFiles,
+        });
+        let dbPromise;
+        if (!process.mas || (process.mas && this.$store.getters.source !== 'drop')) {
+          dbPromise = this.infoDB.add('recent-played', {
+            quickHash: playListHash,
+            currentVideo: videoFiles[0],
+            type: 'playlist',
+            paths: videoFiles,
+            lastOpened: Date.now(),
+          });
+        }
+        if (dbPromise) {
+          dbPromise.then(() => {
+            this.playFile(videoFiles[0]);
+          });
+        } else {
+          this.playFile(videoFiles[0]);
+        }
       } else {
+        this.playFile(videoFiles[0]);
         this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
           this.$store.dispatch('FolderList', similarVideos);
         }, (err) => {
@@ -414,22 +449,58 @@ export default {
 
         return;
       }
+      this.$router.push({ name: 'playing-view' });
+
+      if (this.$store.getters.isFolderList) {
+        const value = await this.infoDB.get('recent-played', mediaQuickHash);
+        if (value) {
+          this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
+          await this.infoDB.add('recent-played', { ...value, path: originPath, lastOpened: Date.now() });
+        } else {
+          await this.infoDB.add('recent-played', {
+            quickHash: mediaQuickHash,
+            path: originPath,
+            lastOpened: Date.now(),
+          });
+        }
+      } else if (!process.mas || (process.mas && this.$store.getters.source !== 'drop')) {
+        let playlist = await this.infoDB.get('recent-played', this.$store.getters.playListHash);
+        if (!playlist) {
+          const playListHash = this.$store.getters.playingList.reduce((hash, src) => `${hash}-${src}`);
+          playlist = {
+            quickHash: playListHash,
+            currentVideo: vidPath,
+            paths: this.$store.getters.playingList,
+            type: 'playlist',
+            lastOpened: Date.now(),
+            infos: [{
+              quickHash: mediaQuickHash,
+              path: originPath,
+            }],
+          };
+          this.$store.commit('hash', playListHash);
+        } else if (!playlist.infos) {
+          playlist.infos = [{
+            quickHash: mediaQuickHash,
+            path: originPath,
+          }];
+        } else {
+          const videoInfo = playlist.infos.find(info => info.path === originPath);
+          if (videoInfo) {
+            this.$bus.$emit('send-lastplayedtime', videoInfo.lastPlayedTime);
+            const videoIndex = playlist.infos?.findIndex(info => info.path === originPath);
+            playlist.infos.splice(videoIndex, 1, { ...videoInfo, path: originPath, quickHash: mediaQuickHash });
+          } else {
+            playlist.infos.push({
+              quickHash: mediaQuickHash,
+              path: originPath,
+            });
+          }
+        }
+        await this.infoDB.add('recent-played', playlist);
+      }
       this.$bus.$emit('new-file-open');
       this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
-      this.$router.push({
-        name: 'playing-view',
-      });
-      const value = await this.infoDB.get('recent-played', mediaQuickHash);
-      if (value) {
-        this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
-        this.infoDB.add('recent-played', Object.assign(value, { path: originPath, lastOpened: Date.now() }));
-      } else {
-        this.infoDB.add('recent-played', {
-          quickHash: mediaQuickHash,
-          path: originPath,
-          lastOpened: Date.now(),
-        });
-      }
     },
     async mediaQuickHash(filePath) {
       function md5Hex(text) {

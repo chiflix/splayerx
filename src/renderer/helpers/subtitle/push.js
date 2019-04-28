@@ -67,5 +67,18 @@ export class TranscriptQueue {
 
     return { success, failure };
   }
+  async addAllManual(subtitles) {
+    const success = [];
+    const failure = [];
+    const addSubtitle = async (subtitle) => {
+      const result = await this.add(subtitle);
+      if (result) success.push(subtitle);
+      else failure.push(subtitle);
+    };
+
+    await Promise.all(subtitles.map(i => addSubtitle(i, true)));
+
+    return { success, failure };
+  }
 }
 export default new TranscriptQueue(new PQueue());

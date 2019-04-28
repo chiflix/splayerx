@@ -51,11 +51,13 @@ export class InfoDB {
   async add(schema, data) {
     if (!data || !data.quickHash) throw new Error(`Invalid data: ${JSON.stringify(data)}`);
     const db = await this.getDB();
-    addLog.methods.addLog('info', `adding ${data.path || JSON.stringify(data)} to ${schema}`);
+    if (data.path) addLog.methods.addLog('info', `adding ${data.path || JSON.stringify(data)} to ${schema}`);
+    else addLog.methods.addLog('info', 'adding playlist');
     const tx = db.transaction(schema, 'readwrite');
     tx.objectStore(schema).put(data);
     return tx.complete.then(() => {
-      addLog.methods.addLog('info', `added ${data.path || JSON.stringify(data)} to ${schema}`);
+      if (data.path) addLog.methods.addLog('info', `added ${data.path || JSON.stringify(data)} to ${schema}`);
+      else addLog.methods.addLog('info', 'added playlist');
     });
   }
 

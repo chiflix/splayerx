@@ -30,6 +30,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import NotificationBubble, { addBubble } from '../shared/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
+import { VueDevtools } from './plugins/vueDevtools.dev';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -95,6 +96,10 @@ Vue.use(VueAnalytics, {
   ],
 });
 
+if (process.env.NODE_ENV === 'development') {
+  Vue.use(VueDevtools);
+}
+
 Vue.mixin(helpers);
 
 hookVue(Vue);
@@ -122,8 +127,66 @@ new Vue({
     };
   },
   computed: {
-    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
+    ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub', 'reverseScrolling',
       'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath']),
+    darwinPlayback() {
+      return [
+        {
+          label: this.$t('msg.playback.forwardL'),
+          accelerator: 'Up',
+          click: () => {
+            this.$bus.$emit('seek', videodata.time + 60);
+          },
+        },
+        {
+          label: this.$t('msg.playback.backwardL'),
+          accelerator: 'Down',
+          click: () => {
+            this.$bus.$emit('seek', videodata.time - 60);
+          },
+        },
+      ];
+    },
+    winPlayback() {
+      return [
+        {
+          label: this.$t('msg.playback.forwardL'),
+          accelerator: 'Alt+Right',
+          click: () => {
+            this.$bus.$emit('seek', videodata.time + 60);
+          },
+        },
+        {
+          label: this.$t('msg.playback.backwardL'),
+          accelerator: 'Alt+Left',
+          click: () => {
+            this.$bus.$emit('seek', videodata.time - 60);
+          },
+        },
+      ];
+    },
+    winVolume() {
+      return [
+        {
+          label: this.$t('msg.audio.increaseVolume'),
+          accelerator: 'Up',
+          id: 'inVolume',
+          click: () => {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.INCREASE_VOLUME);
+          },
+        },
+        {
+          label: this.$t('msg.audio.decreaseVolume'),
+          accelerator: 'Down',
+          id: 'deVolume',
+          click: () => {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.DECREASE_VOLUME);
+          },
+        },
+      ];
+    },
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -436,20 +499,6 @@ new Vue({
               accelerator: 'Left',
               click: () => {
                 this.$bus.$emit('seek', videodata.time - 5);
-              },
-            },
-            {
-              label: this.$t('msg.playback.forwardL'),
-              accelerator: 'Up',
-              click: () => {
-                this.$bus.$emit('seek', videodata.time + 60);
-              },
-            },
-            {
-              label: this.$t('msg.playback.backwardL'),
-              accelerator: 'Down',
-              click: () => {
-                this.$bus.$emit('seek', videodata.time - 60);
               },
             },
             { type: 'separator' },
@@ -847,6 +896,7 @@ new Vue({
         template[0].submenu.splice(1, 0, result);
         // menu.about
         if (process.platform === 'darwin') {
+          template[1].submenu.splice(3, 0, ...this.darwinPlayback);
           template.unshift({
             label: app.getName(),
             submenu: [
@@ -883,6 +933,8 @@ new Vue({
           });
         }
         if (process.platform === 'win32') {
+          template[2].submenu.splice(0, 0, ...this.winVolume);
+          template[1].submenu.splice(3, 0, ...this.winPlayback);
           const file = template.shift();
           const winFile = file.submenu.slice(0, 3);
           winFile[1].submenu.unshift(file.submenu[3], file.submenu[2]);
@@ -1300,7 +1352,7 @@ new Vue({
           }
         }
         if (!isAdvanceColumeItem && !isSubtitleScrollItem) {
-          if (Math.abs(e.deltaY) !== 0) {
+          if (e.deltaY) {
             if (this.canSendVolumeGa) {
               this.$ga.event('app', 'volume', 'wheel');
               this.canSendVolumeGa = false;
@@ -1308,7 +1360,7 @@ new Vue({
                 this.canSendVolumeGa = true;
               }, 1000);
             }
-            if (process.platform !== 'darwin') {
+            if (process.platform !== 'darwin' || this.reverseScrolling) {
               this.$store.dispatch(
                 e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
                 Math.abs(e.deltaY) * 0.06,
@@ -1328,6 +1380,7 @@ new Vue({
     window.addEventListener('drop', (e) => {
       e.preventDefault();
       this.$bus.$emit('drop');
+      this.$store.commit('source', 'drop');
       const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
       const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
       files.forEach(file => this.$electron.remote.app.addRecentDocument(file));

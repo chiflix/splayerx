@@ -124,6 +124,10 @@ export default {
   }
 }
 
+.logo {
+  width: 118px;
+  height: 118px;
+}
 .add, .delete {
   width: 24px;
   height: 27px;
@@ -413,6 +417,14 @@ export default {
       display: none;
     }
   }
+}
+.success {
+  width: 15px;
+  height: 15px;
+}
+.failed {
+  width: 15px;
+  height: 15px;
 }
 .deleteSub {
   cursor: pointer;
