@@ -383,9 +383,6 @@ $dropdown-height: 148px;
       cursor: pointer;
       box-sizing: border-box;
       align-self: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
       border: 0.5px solid rgba(255,255,255,0.20);
       border-radius: 2px;
@@ -393,7 +390,7 @@ $dropdown-height: 148px;
       transition-duration: 80ms;
       transition-timing-function: ease-in;
       width: 61px;
-      height: 25px;
+      height: 23px;
 
       .button-enter, .button-leave-to {
         opacity: 0;
@@ -405,14 +402,17 @@ $dropdown-height: 148px;
         transition: opacity 300ms ease-in;
       }
       .content {
-        width: 100%;
         font-family: $font-medium;
         font-size: 11px;
         color: #FFFFFF;
         letter-spacing: 0;
         text-align: center;
+        line-height: 23px;
       }
       .result {
+        position: relative;
+        top: 3px;
+        left: 23px;
       }
     }
   }
