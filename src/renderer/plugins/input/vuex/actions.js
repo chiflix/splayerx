@@ -1,4 +1,4 @@
-/* eslint-disable no-fallthrough */
+import { get } from 'lodash';
 import {
   defaultOptions,
   mutationTypes as mt,
@@ -142,50 +142,66 @@ const allActions = {
 // eslint-disable-next-line complexity
 export default function actions(options = defaultOptions) {
   const result = {};
-  // eslint-disable-next-line default-case
-  switch (true) {
-    case options.mouse.mousemove.position:
-      result[at.UPDATE_MOUSEMOVE_POSITION] = allActions[at.UPDATE_MOUSEMOVE_POSITION];
-    case options.mouse.mousemove.component:
-      result[at.UPDATE_MOUSEMOVE_COMPONENT] = allActions[at.UPDATE_MOUSEMOVE_COMPONENT];
-    case options.mouse.mousemove.phase:
-      result[at.UPDATE_MOUSEMOVE_PHASE] = allActions[at.UPDATE_MOUSEMOVE_PHASE];
-    case options.mouse.mousedown.buttons:
-      result[at.UPDATE_MOUSEDOWN_BUTTONS] = allActions[at.UPDATE_MOUSEDOWN_BUTTONS];
-      result[at.UPDATE_MOUSEUP_BUTTONS] = allActions[at.UPDATE_MOUSEUP_BUTTONS];
-    case options.mouse.mousedown.component:
-      result[at.UPDATE_MOUSEDOWN_COMPONENT] = allActions[at.UPDATE_MOUSEDOWN_COMPONENT];
-    case options.mouse.mouseup.component:
-      result[at.UPDATE_MOUSEUP_COMPONENT] = allActions[at.UPDATE_MOUSEUP_COMPONENT];
-    case options.keyboard.keys:
-      result[at.UPDATE_KEYDOWN_CODES] = allActions[at.UPDATE_KEYDOWN_CODES];
-      result[at.UPDATE_KEYUP_CODES] = allActions[at.UPDATE_KEYUP_CODES];
-    case options.keyboard.alt:
-      result[at.UPDATE_ALT_KEYDOWN_CODES] = allActions[at.UPDATE_ALT_KEYDOWN_CODES];
-      result[at.UPDATE_ALT_KEYUP_CODES] = allActions[at.UPDATE_ALT_KEYUP_CODES];
-    case options.keyboard.shift:
-      result[at.UPDATE_SHIFT_KEYDOWN_CODES] = allActions[at.UPDATE_SHIFT_KEYDOWN_CODES];
-      result[at.UPDATE_SHIFT_KEYUP_CODES] = allActions[at.UPDATE_SHIFT_KEYUP_CODES];
-    case options.keyboard.ctrl:
-      result[at.UPDATE_CTRL_KEYDOWN_CODES] = allActions[at.UPDATE_CTRL_KEYDOWN_CODES];
-      result[at.UPDATE_CTRL_KEYUP_CODES] = allActions[at.UPDATE_CTRL_KEYUP_CODES];
-    case options.keyboard.meta:
-      result[at.UPDATE_META_KEYDOWN_CODES] = allActions[at.UPDATE_META_KEYDOWN_CODES];
-      result[at.UPDATE_META_KEYUP_CODES] = allActions[at.UPDATE_META_KEYUP_CODES];
-    case options.wheel.phase:
-      result[at.UPDATE_WHEEL_PHASE] = allActions[at.UPDATE_WHEEL_PHASE];
-    case options.wheel.direction:
-      result[at.UPDATE_WHEEL_DIRECTION] = allActions[at.UPDATE_WHEEL_DIRECTION];
-    case options.wheel.component:
-      result[at.UPDATE_WHEEL_COMPONENT] = allActions[at.UPDATE_WHEEL_COMPONENT];
-    case options.wheel.device:
-      result[at.UPDATE_WHEEL_DEVICE] = allActions[at.UPDATE_WHEEL_DEVICE];
-    case options.wheel.deltaX:
-      result[at.UPDATE_WHEEL_DELTA_X] = allActions[at.UPDATE_WHEEL_DELTA_X];
-    case options.wheel.deltaY:
-      result[at.UPDATE_WHEEL_DELTA_Y] = allActions[at.UPDATE_WHEEL_DELTA_Y];
-    case options.wheel.deltaZ:
-      result[at.UPDATE_WHEEL_DELTA_Z] = allActions[at.UPDATE_WHEEL_DELTA_Z];
+  const { mouse, keyboard, wheel } = options;
+  if (get(mouse, 'mousemove.position')) {
+    result[at.UPDATE_MOUSEMOVE_POSITION] = allActions[at.UPDATE_MOUSEMOVE_POSITION];
+  }
+  if (get(mouse, 'mousemove.component')) {
+    result[at.UPDATE_MOUSEMOVE_COMPONENT] = allActions[at.UPDATE_MOUSEMOVE_COMPONENT];
+  }
+  if (get(mouse, 'mousemove.phase')) {
+    result[at.UPDATE_MOUSEMOVE_PHASE] = allActions[at.UPDATE_MOUSEMOVE_PHASE];
+  }
+  if (get(mouse, 'mousedown.buttons')) {
+    result[at.UPDATE_MOUSEDOWN_BUTTONS] = allActions[at.UPDATE_MOUSEDOWN_BUTTONS];
+    result[at.UPDATE_MOUSEUP_BUTTONS] = allActions[at.UPDATE_MOUSEUP_BUTTONS];
+  }
+  if (get(mouse, 'mousedown.component')) {
+    result[at.UPDATE_MOUSEDOWN_COMPONENT] = allActions[at.UPDATE_MOUSEDOWN_COMPONENT];
+  }
+  if (get(mouse, 'mosueup.component')) {
+    result[at.UPDATE_MOUSEUP_COMPONENT] = allActions[at.UPDATE_MOUSEUP_COMPONENT];
+  }
+  if (get(keyboard, 'keys')) {
+    result[at.UPDATE_KEYDOWN_CODES] = allActions[at.UPDATE_KEYDOWN_CODES];
+    result[at.UPDATE_KEYUP_CODES] = allActions[at.UPDATE_KEYUP_CODES];
+  }
+  if (get(keyboard, 'alt')) {
+    result[at.UPDATE_ALT_KEYDOWN_CODES] = allActions[at.UPDATE_ALT_KEYDOWN_CODES];
+    result[at.UPDATE_ALT_KEYUP_CODES] = allActions[at.UPDATE_ALT_KEYUP_CODES];
+  }
+  if (get(keyboard, 'shift')) {
+    result[at.UPDATE_SHIFT_KEYDOWN_CODES] = allActions[at.UPDATE_SHIFT_KEYDOWN_CODES];
+    result[at.UPDATE_SHIFT_KEYUP_CODES] = allActions[at.UPDATE_SHIFT_KEYUP_CODES];
+  }
+  if (get(keyboard, 'ctrl')) {
+    result[at.UPDATE_CTRL_KEYDOWN_CODES] = allActions[at.UPDATE_CTRL_KEYDOWN_CODES];
+    result[at.UPDATE_CTRL_KEYUP_CODES] = allActions[at.UPDATE_CTRL_KEYUP_CODES];
+  }
+  if (get(keyboard, 'meta')) {
+    result[at.UPDATE_META_KEYDOWN_CODES] = allActions[at.UPDATE_META_KEYDOWN_CODES];
+    result[at.UPDATE_META_KEYUP_CODES] = allActions[at.UPDATE_META_KEYUP_CODES];
+  }
+  if (get(wheel, 'phase')) {
+    result[at.UPDATE_WHEEL_PHASE] = allActions[at.UPDATE_WHEEL_PHASE];
+  }
+  if (get(wheel, 'direction')) {
+    result[at.UPDATE_WHEEL_DIRECTION] = allActions[at.UPDATE_WHEEL_DIRECTION];
+  }
+  if (get(wheel, 'component')) {
+    result[at.UPDATE_WHEEL_COMPONENT] = allActions[at.UPDATE_WHEEL_COMPONENT];
+  }
+  if (get(wheel, 'device')) {
+    result[at.UPDATE_WHEEL_DEVICE] = allActions[at.UPDATE_WHEEL_DEVICE];
+  }
+  if (get(wheel, 'deltaX')) {
+    result[at.UPDATE_WHEEL_DELTA_X] = allActions[at.UPDATE_WHEEL_DELTA_X];
+  }
+  if (get(wheel, 'deltaY')) {
+    result[at.UPDATE_WHEEL_DELTA_Y] = allActions[at.UPDATE_WHEEL_DELTA_Y];
+  }
+  if (get(wheel, 'deltaZ')) {
+    result[at.UPDATE_WHEEL_DELTA_Z] = allActions[at.UPDATE_WHEEL_DELTA_Z];
   }
   return result;
 }

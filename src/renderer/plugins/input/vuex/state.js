@@ -1,47 +1,63 @@
-/* eslint-disable no-fallthrough */
+import { get } from 'lodash';
 import { defaultOptions } from '../constants';
 
 // eslint-disable-next-line complexity
 export default function state(options = defaultOptions) {
   const result = {};
-  // eslint-disable-next-line default-case
-  switch (true) {
-    case options.mouse.mousemove.position:
-      result.mousemoveClientPosition = { x: 0, y: 0 };
-    case options.mouse.mousemove.component:
-      result.mousemoveComponentName = '';
-    case options.mouse.mousemove.phase:
-      result.mousemovePhase = 'stopped';
-    case options.mouse.mousedown.buttons:
-      result.mousedownButtonNames = [];
-    case options.mouse.mousedown.component:
-      result.mousedownComponentName = '';
-    case options.mouse.mouseup.component:
-      result.mouseupComponentName = '';
-    case options.keyboard.keys:
-      result.pressedKeyCodes = [];
-    case options.keyboard.alt:
-      result.altKeyPressedKeyCodes = [];
-    case options.keyboard.shift:
-      result.shiftKeyPressedKeyCodes = [];
-    case options.keyboard.ctrl:
-      result.ctrlKeyPressedKeyCodes = [];
-    case options.keyboard.meta:
-      result.metaKeyPressedKeyCodes = [];
-    case options.wheel.phase:
-      result.wheelPhase = 'stopped';
-    case options.wheel.direction:
-      result.wheelDirection = '';
-    case options.wheel.component:
-      result.wheelComponentName = '';
-    case options.wheel.device:
-      result.wheelDeviceType = 'mouse';
-    case options.wheel.deltaX:
-      result.wheelDeltaX = 0;
-    case options.wheel.deltaY:
-      result.wheelDeltaY = 0;
-    case options.wheel.deltaZ:
-      result.wheelDeltaZ = 0;
+  const { mouse, keyboard, wheel } = options;
+  if (get(mouse, 'mousemove.position')) {
+    result.mousemoveClientPosition = { x: 0, y: 0 };
+  }
+  if (get(mouse, 'mousemove.component')) {
+    result.mousemoveComponentName = '';
+  }
+  if (get(mouse, 'mousemove.phase')) {
+    result.mousemovePhase = 'stopped';
+  }
+  if (get(mouse, 'mousedown.buttons')) {
+    result.mousedownButtonNames = [];
+  }
+  if (get(mouse, 'mousedown.component')) {
+    result.mousedownComponentName = '';
+  }
+  if (get(mouse, 'mosueup.component')) {
+    result.mouseupComponentName = '';
+  }
+  if (get(keyboard, 'keys')) {
+    result.pressedKeyCodes = [];
+  }
+  if (get(keyboard, 'alt')) {
+    result.altKeyPressedKeyCodes = [];
+  }
+  if (get(keyboard, 'shift')) {
+    result.shiftKeyPressedKeyCodes = [];
+  }
+  if (get(keyboard, 'ctrl')) {
+    result.ctrlKeyPressedKeyCodes = [];
+  }
+  if (get(keyboard, 'meta')) {
+    result.metaKeyPressedKeyCodes = [];
+  }
+  if (get(wheel, 'phase')) {
+    result.wheelPhase = 'stopped';
+  }
+  if (get(wheel, 'direction')) {
+    result.wheelDirection = '';
+  }
+  if (get(wheel, 'component')) {
+    result.wheelComponentName = '';
+  }
+  if (get(wheel, 'device')) {
+    result.wheelDeviceType = 'mouse';
+  }
+  if (get(wheel, 'deltaX')) {
+    result.wheelDeltaX = 0;
+  }
+  if (get(wheel, 'deltaY')) {
+    result.wheelDeltaY = 0;
+  }
+  if (get(wheel, 'deltaZ')) {
+    result.wheelDeltaZ = 0;
   }
   return result;
 }
