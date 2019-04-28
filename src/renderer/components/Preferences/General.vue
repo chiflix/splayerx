@@ -293,7 +293,7 @@ $dropdown-height: 156px;
   }
   .drop-down {
     width: $dropdown-width;
-    height: 22px;
+    height: 28px;
     margin-bottom: 35px;
     .drop-down-brief {
       position: relative;
