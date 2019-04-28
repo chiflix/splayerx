@@ -58,7 +58,7 @@
                       @mouseover="toggleItemsMouseOver(index)"
                       @mouseleave="toggleItemsMouseLeave(index)"
                       :class="'menu-item-text-wrapper'+`${!backCardVisiable && currentSubtitleIndex === index ? ' focused' : ''}`"
-                      :id="'item'+index"
+                      :id="'sub-item'+index"
                       :style="{
                         transition: isOverFlow ? '' : '80ms cubic-bezier(0.17, 0.67, 0.17, 0.98)',
                         color: hoverIndex === index || currentSubtitleIndex === index ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
@@ -657,7 +657,7 @@ export default {
     showSubtitleDetails(index) {
       if (index >= 0) {
         clearTimeout(this.detailTimer);
-        const hoverItem = document.querySelector(`#item${index} .text`);
+        const hoverItem = document.querySelector(`#sub-item${index} .text`);
         if (hoverItem.clientWidth < hoverItem.scrollWidth) {
           this.hoverHeight = this.textHeight *
             (Math.ceil(hoverItem.scrollWidth / hoverItem.clientWidth) - 1);
@@ -698,7 +698,7 @@ export default {
       setImmediate(() => {
         const currentScrollTop = this.$refs.scroll.scrollTop;
         const parentHeight = this.$refs.scroll.parentNode.offsetHeight;
-        const offsetTop = document.getElementById(`item${index}`).offsetTop;
+        const offsetTop = document.getElementById(`sub-item${index}`).offsetTop;
         const targetScrollTop = (offsetTop + (2 * this.itemHeight)) - parentHeight;
         if (this.modifiedAdvancedPanelVisiable && offsetTop < currentScrollTop) {
           this.animateScrollTop(currentScrollTop, offsetTop);

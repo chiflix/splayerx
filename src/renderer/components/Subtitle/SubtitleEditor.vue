@@ -34,7 +34,7 @@
           <div class="subtitles" ref="subtitles">
             <div v-for="sub in validitySubs"
               :key="`${sub.width}-${sub.index}-${sub.track}-${sub.text}`"
-              v-fade-in="!(!paused && sub.reference)"
+              v-show="!(!paused && sub.reference)"
               @mouseover.stop="handleHoverIn($event, sub)"
               @mouseleave.stop="handleHoverOut($event, sub)"
               @mousedown.left.stop="handleDragStartSub($event, sub)"
@@ -74,7 +74,7 @@
         bottom: `${(60 / 1080) * 100}%`,
         minWidth: `${inputWitdh}px`
       }">
-        <div v-if="referenceSubtitleId && paused" class="referenceText subtitle-style" v-html="`&nbsp;${getCurrentReferenceCues()}`"
+        <div v-fade-in="referenceSubtitleId && paused" class="referenceText subtitle-style" v-html="`&nbsp;${getCurrentReferenceCues()}`"
         :style="{
           zoom: zoom(0),
         }"></div>
@@ -1319,6 +1319,7 @@ export default {
         this.createSubElement = null;
       }
       this.toggleDragable(false);
+      this.updateChooseIndex(sub.index);
     },
     handleKeyDown(e) { // eslint-disable-line
       if (e && (e.keyCode === 46 || e.keyCode === 8) && this.chooseIndex !== -2) {
@@ -1601,23 +1602,25 @@ export default {
     });
     // 快捷键J，上一个字幕
     this.$bus.$on(bus.SUBTITLE_EDITOR_SELECT_PREV_SUBTITLE, () => {
-      if (!this.paused) {
+      const prevs = this.filterSubs.filter(e => e.start < this.preciseTime && e.track === 1);
+      if (prevs && prevs[prevs.length - 1] && !this.paused) {
+        // 在播放状态下，J 先pause 再seek到前面,
+        const seekTime = prevs[prevs.length - 1].start;
         this.$bus.$emit('toggle-playback');
-      }
-      const prevs = this.filterSubs
-        .filter(e => e.start < this.preciseTime && e.track === 1);
-      if (prevs && prevs[prevs.length - 1]) {
+        this.$bus.$emit('seek', seekTime);
+      } else if (prevs && prevs[prevs.length - 1]) {
+        // 暂停状态下，J position到前面
         this.handleDoubleClickSub(null, prevs[prevs.length - 1]);
       }
     });
     // 快捷键K，下一个字幕
     this.$bus.$on(bus.SUBTITLE_EDITOR_SELECT_NEXT_SUBTITLE, () => {
-      if (!this.paused) {
+      const prevs = this.filterSubs.filter(e => e.start > this.preciseTime && e.track === 1);
+      if (prevs && prevs[0] && !this.paused) {
+        const seekTime = prevs[0].start;
         this.$bus.$emit('toggle-playback');
-      }
-      const prevs = this.filterSubs
-        .filter(e => e.start > this.preciseTime && e.track === 1);
-      if (prevs && prevs[0]) {
+        this.$bus.$emit('seek', seekTime);
+      } else if (prevs && prevs[0]) {
         this.handleDoubleClickSub(null, prevs[0]);
       }
     });
@@ -1726,7 +1729,7 @@ export default {
     position: relative;
     &:after {
       content: "";
-      width: 0.5px;
+      width: 1px;
       // height: calc(15.75vh)
       height: calc(9vh + 35px);
       max-height: 125px;
@@ -1999,7 +2002,7 @@ export default {
   .fade-out {
     visibility: hidden;
     opacity: 0;
-    transition: visibility 0s 300ms, opacity 300ms ease-out;
+    transition: visibility 0s 100ms, opacity 100ms ease-out;
   }
   .fade-enter-active, .fade-leave-active {
     transition: opacity 200ms ease-in;

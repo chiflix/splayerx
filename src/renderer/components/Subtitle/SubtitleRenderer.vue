@@ -30,32 +30,34 @@
           :cue="cue"></cue-editable-renderer>
       </div>
     </div>
-    <div
-      v-if="(isProfessional && showAddInput && paused)"
-      @click.stop="handleClickSubContainer($event, {
-        index: -1,
-      })"
-      :class="'subContainer subtitle-alignment2'+`${paused ? ' enable-hover': ''}`+`${isEditable && chooseIndex === -1 ? ' editable': ''}`"
-      :style="{
-        cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
-      }">
-      <div class="cue-wrap"
+    <transition name="fade" mode="out-in" appear>
+      <div
+        v-if="(isProfessional && showAddInput && paused)"
+        @click.stop="handleClickSubContainer($event, {
+          index: -1,
+        })"
+        :class="'subContainer subtitle-alignment2 focus'+`${paused ? ' enable-hover': ''}`+`${isEditable && chooseIndex === -1 ? ' editable': ''}`"
         :style="{
-          zoom: zoom,
-          minWidth: minInputWidth,
+          cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
         }">
-        <cue-editable-renderer class="cueRender"
-          :text="$t('editorCreateSubtitle.button')"
-          :settings="{}"
-          :isFirstSub="isFirstSub"
-          @update:textarea-change="handleTextAreaChange"
-          :canUseEditor="canUseEditor"
-          :zoom="zoom"
-          :cue="{
-            index: -1,
-          }"></cue-editable-renderer>
+        <div class="cue-wrap"
+          :style="{
+            zoom: zoom,
+            minWidth: minInputWidth,
+          }">
+          <cue-editable-renderer class="cueRender"
+            :text="$t('editorCreateSubtitle.button')"
+            :settings="{}"
+            :isFirstSub="isFirstSub"
+            @update:textarea-change="handleTextAreaChange"
+            :canUseEditor="canUseEditor"
+            :zoom="zoom"
+            :cue="{
+              index: -1,
+            }"></cue-editable-renderer>
+        </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 <script>
@@ -351,7 +353,7 @@ export default {
         return '';
       }
       const result = this.currentSub.find(e => cue.start === e.start && cue.end === e.end);
-      if (result && result.index === this.chooseIndex) {
+      if (result) {
         return ' focus';
       }
       return '';
@@ -962,5 +964,11 @@ export default {
     z-index: 1;
     opacity: 0;
   }
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 100ms ease-in;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>
