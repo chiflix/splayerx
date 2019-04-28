@@ -16,10 +16,18 @@ export default {
     VuexStore.registerModule('InputPlugin', module(options));
 
     // generate event listeners
-    const mousemove = generateMousemoveListener(options);
-    const { mousedown, mouseup } = generateMousedownAndMouseupListener(options);
-    const { keydown, keyup } = generateKeyDownAndKeyUpListener(options);
-    const wheel = generateWheelListener(options);
+    const {
+      mouse: mouseOptions, keyboard: keyboardOptions, wheel: wheelOptions,
+      name, namespaced, // vuex options
+    } = options;
+    const mousemoveOptions = mouseOptions?.mousemove;
+    const mousedownOptions = mouseOptions?.mousedown;
+    const vuexOptions = { name, namespaced };
+    const mousemove = generateMousemoveListener(mousemoveOptions, vuexOptions);
+    const { mousedown, mouseup } =
+      generateMousedownAndMouseupListener(mousedownOptions, vuexOptions);
+    const { keydown, keyup } = generateKeyDownAndKeyUpListener(keyboardOptions, vuexOptions);
+    const wheel = generateWheelListener(wheelOptions, vuexOptions);
 
     Vue.mixin({
       mounted() {
