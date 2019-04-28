@@ -13,6 +13,7 @@ import {
   WHEEL_VERTICAL_DIRECTION as vertical,
 } from '../constants';
 import {
+  namespacedNameHelper,
   getComponentName,
   isInteger,
   buttonsToButtonNames,
@@ -142,66 +143,72 @@ const allActions = {
 // eslint-disable-next-line complexity
 export default function actions(options = defaultOptions) {
   const result = {};
-  const { mouse, keyboard, wheel } = options;
+  const {
+    name, namespaced,
+    mouse, keyboard, wheel,
+  } = options;
+  function nameHelper(mutationName) {
+    return namespacedNameHelper(namespaced, mutationName, name);
+  }
   if (get(mouse, 'mousemove.position')) {
-    result[at.UPDATE_MOUSEMOVE_POSITION] = allActions[at.UPDATE_MOUSEMOVE_POSITION];
+    result[nameHelper(at.UPDATE_MOUSEMOVE_POSITION)] = allActions[at.UPDATE_MOUSEMOVE_POSITION];
   }
   if (get(mouse, 'mousemove.component')) {
-    result[at.UPDATE_MOUSEMOVE_COMPONENT] = allActions[at.UPDATE_MOUSEMOVE_COMPONENT];
+    result[nameHelper(at.UPDATE_MOUSEMOVE_COMPONENT)] = allActions[at.UPDATE_MOUSEMOVE_COMPONENT];
   }
   if (get(mouse, 'mousemove.phase')) {
-    result[at.UPDATE_MOUSEMOVE_PHASE] = allActions[at.UPDATE_MOUSEMOVE_PHASE];
+    result[nameHelper(at.UPDATE_MOUSEMOVE_PHASE)] = allActions[at.UPDATE_MOUSEMOVE_PHASE];
   }
   if (get(mouse, 'mousedown.buttons')) {
-    result[at.UPDATE_MOUSEDOWN_BUTTONS] = allActions[at.UPDATE_MOUSEDOWN_BUTTONS];
-    result[at.UPDATE_MOUSEUP_BUTTONS] = allActions[at.UPDATE_MOUSEUP_BUTTONS];
+    result[nameHelper(at.UPDATE_MOUSEDOWN_BUTTONS)] = allActions[at.UPDATE_MOUSEDOWN_BUTTONS];
+    result[nameHelper(at.UPDATE_MOUSEUP_BUTTONS)] = allActions[at.UPDATE_MOUSEUP_BUTTONS];
   }
   if (get(mouse, 'mousedown.component')) {
-    result[at.UPDATE_MOUSEDOWN_COMPONENT] = allActions[at.UPDATE_MOUSEDOWN_COMPONENT];
+    result[nameHelper(at.UPDATE_MOUSEDOWN_COMPONENT)] = allActions[at.UPDATE_MOUSEDOWN_COMPONENT];
   }
   if (get(mouse, 'mosueup.component')) {
-    result[at.UPDATE_MOUSEUP_COMPONENT] = allActions[at.UPDATE_MOUSEUP_COMPONENT];
+    result[nameHelper(at.UPDATE_MOUSEUP_COMPONENT)] = allActions[at.UPDATE_MOUSEUP_COMPONENT];
   }
   if (get(keyboard, 'keys')) {
-    result[at.UPDATE_KEYDOWN_CODES] = allActions[at.UPDATE_KEYDOWN_CODES];
-    result[at.UPDATE_KEYUP_CODES] = allActions[at.UPDATE_KEYUP_CODES];
+    result[nameHelper(at.UPDATE_KEYDOWN_CODES)] = allActions[at.UPDATE_KEYDOWN_CODES];
+    result[nameHelper(at.UPDATE_KEYUP_CODES)] = allActions[at.UPDATE_KEYUP_CODES];
   }
   if (get(keyboard, 'alt')) {
-    result[at.UPDATE_ALT_KEYDOWN_CODES] = allActions[at.UPDATE_ALT_KEYDOWN_CODES];
-    result[at.UPDATE_ALT_KEYUP_CODES] = allActions[at.UPDATE_ALT_KEYUP_CODES];
+    result[nameHelper(at.UPDATE_ALT_KEYDOWN_CODES)] = allActions[at.UPDATE_ALT_KEYDOWN_CODES];
+    result[nameHelper(at.UPDATE_ALT_KEYUP_CODES)] = allActions[at.UPDATE_ALT_KEYUP_CODES];
   }
   if (get(keyboard, 'shift')) {
-    result[at.UPDATE_SHIFT_KEYDOWN_CODES] = allActions[at.UPDATE_SHIFT_KEYDOWN_CODES];
-    result[at.UPDATE_SHIFT_KEYUP_CODES] = allActions[at.UPDATE_SHIFT_KEYUP_CODES];
+    result[nameHelper(at.UPDATE_SHIFT_KEYDOWN_CODES)] = allActions[at.UPDATE_SHIFT_KEYDOWN_CODES];
+    result[nameHelper(at.UPDATE_SHIFT_KEYUP_CODES)] = allActions[at.UPDATE_SHIFT_KEYUP_CODES];
   }
   if (get(keyboard, 'ctrl')) {
-    result[at.UPDATE_CTRL_KEYDOWN_CODES] = allActions[at.UPDATE_CTRL_KEYDOWN_CODES];
-    result[at.UPDATE_CTRL_KEYUP_CODES] = allActions[at.UPDATE_CTRL_KEYUP_CODES];
+    result[nameHelper(at.UPDATE_CTRL_KEYDOWN_CODES)] = allActions[at.UPDATE_CTRL_KEYDOWN_CODES];
+    result[nameHelper(at.UPDATE_CTRL_KEYUP_CODES)] = allActions[at.UPDATE_CTRL_KEYUP_CODES];
   }
   if (get(keyboard, 'meta')) {
-    result[at.UPDATE_META_KEYDOWN_CODES] = allActions[at.UPDATE_META_KEYDOWN_CODES];
-    result[at.UPDATE_META_KEYUP_CODES] = allActions[at.UPDATE_META_KEYUP_CODES];
+    result[nameHelper(at.UPDATE_META_KEYDOWN_CODES)] = allActions[at.UPDATE_META_KEYDOWN_CODES];
+    result[nameHelper(at.UPDATE_META_KEYUP_CODES)] = allActions[at.UPDATE_META_KEYUP_CODES];
   }
   if (get(wheel, 'phase')) {
-    result[at.UPDATE_WHEEL_PHASE] = allActions[at.UPDATE_WHEEL_PHASE];
+    result[nameHelper(at.UPDATE_WHEEL_PHASE)] = allActions[at.UPDATE_WHEEL_PHASE];
   }
   if (get(wheel, 'direction')) {
-    result[at.UPDATE_WHEEL_DIRECTION] = allActions[at.UPDATE_WHEEL_DIRECTION];
+    result[nameHelper(at.UPDATE_WHEEL_DIRECTION)] = allActions[at.UPDATE_WHEEL_DIRECTION];
   }
   if (get(wheel, 'component')) {
-    result[at.UPDATE_WHEEL_COMPONENT] = allActions[at.UPDATE_WHEEL_COMPONENT];
+    result[nameHelper(at.UPDATE_WHEEL_COMPONENT)] = allActions[at.UPDATE_WHEEL_COMPONENT];
   }
   if (get(wheel, 'device')) {
-    result[at.UPDATE_WHEEL_DEVICE] = allActions[at.UPDATE_WHEEL_DEVICE];
+    result[nameHelper(at.UPDATE_WHEEL_DEVICE)] = allActions[at.UPDATE_WHEEL_DEVICE];
   }
   if (get(wheel, 'deltaX')) {
-    result[at.UPDATE_WHEEL_DELTA_X] = allActions[at.UPDATE_WHEEL_DELTA_X];
+    result[nameHelper(at.UPDATE_WHEEL_DELTA_X)] = allActions[at.UPDATE_WHEEL_DELTA_X];
   }
   if (get(wheel, 'deltaY')) {
-    result[at.UPDATE_WHEEL_DELTA_Y] = allActions[at.UPDATE_WHEEL_DELTA_Y];
+    result[nameHelper(at.UPDATE_WHEEL_DELTA_Y)] = allActions[at.UPDATE_WHEEL_DELTA_Y];
   }
   if (get(wheel, 'deltaZ')) {
-    result[at.UPDATE_WHEEL_DELTA_Z] = allActions[at.UPDATE_WHEEL_DELTA_Z];
+    result[nameHelper(at.UPDATE_WHEEL_DELTA_Z)] = allActions[at.UPDATE_WHEEL_DELTA_Z];
   }
   return result;
 }

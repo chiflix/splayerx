@@ -2,6 +2,8 @@
 export const INPUT_COMPONENT_TYPE = 'INPUT_COMPONENT_TYPE';
 
 // default options
+export const nameDefaultOption = 'InputPlugin';
+export const namespacedDefaultOption = false;
 export const mouseDefaultOptions = {
   mousemove: {
     position: true,
@@ -30,6 +32,8 @@ export const wheelDefaultOptions = {
   component: true,
 };
 export const defaultOptions = {
+  name: nameDefaultOption,
+  namespaced: namespacedDefaultOption,
   mouse: mouseDefaultOptions,
   keyboard: keyboardDefaultOptions,
   wheel: wheelDefaultOptions,
