@@ -128,5 +128,28 @@ export const actionTypes = {
   UPDATE_WHEEL_DELTA_Z: 'UPDATE_WHEEL_DELTA_Z',
 };
 
+// getter types
+export const getterTypes = {
+  GET_MOUSEMOVE_POSITION: 'mousemovePosition',
+  GET_MOUSEMOVE_COMPONENT: 'mousemoveComponent',
+  GET_MOUSEMOVE_PHASE: 'mousemovePhase',
+  GET_MOUSEMOVE_STOPPED: 'mousemoveStopped',
+  GET_MOUSEDOWN_BUTTONS: 'mousedownButtons',
+  GET_WHICH_BUTTON_PRESSED: 'whichButtonPressed',
+  GET_MOUSEDOWN_COMPONENT: 'mousedownComponent',
+  GET_MOUSEUP_COMPONENT: 'mouseupComponent',
+  GET_WHICH_KEY_PRESSED: 'whichKeyPressed',
+  GET_KEYS: 'keys',
+  GET_ALT_KEYS: 'altKeys',
+  GET_SHIFT_KEYS: 'shiftKeys',
+  GET_CTRL_KEYS: 'ctrlKeys',
+  GET_META_KEYS: 'metaKeys',
+  GET_WHEEL_PHASE: 'wheelPhase',
+  GET_WHEEL_STOPPED: 'wheelStopped',
+  GET_WHEEL_DIRECTION: 'wheelDirection',
+  GET_WHEEL_COMPONENT: 'wheelComponent',
+  GET_WHEEL_DEVICE: 'wheelDevice',
+};
+
 // vuex module
 export { default as VuexStore } from '@/store';
