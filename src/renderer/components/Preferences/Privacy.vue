@@ -218,6 +218,10 @@ export default {
 </script>
 <style scoped lang="scss">
 $dropdown-height: 148px;
+$interactor-backgroundColor-default: rgba(255,255,255,0.03);
+$interactor-border-default: 1px solid rgba(255,255,255,0.1);
+$interactor-backgroundColor-hover: rgba(255,255,255,0.08);
+$interactor-border-hover: 1px solid rgba(255,255,255,0.2);
 
 .preference-setting {
   box-sizing: border-box;
@@ -288,19 +292,19 @@ $dropdown-height: 148px;
             cursor: pointer;
             width: 100%;
             height: 28px;
-            background-color: rgba(0,0,0,0.05);
-            border: 1px solid rgba(255,255,255,0.07);
+            background-color: $interactor-backgroundColor-default;
+            border: $interactor-border-default;
             border-radius: 2px;
             font-family: $font-semibold;
-            font-size: 12px;
+            font-size: 11px;
             line-height: 28px;
             color: #FFFFFF;
             letter-spacing: 0;
             text-align: center;
             transition: border 200ms, background-color 200ms;
             &:hover {
-              border: 1px solid rgba(255,255,255,0.3);
-              background-color: rgba(255,255,255,0.07);
+              border: $interactor-border-hover;
+              background-color: $interactor-backgroundColor-hover;
             }
           }
           .drop-down-content {
