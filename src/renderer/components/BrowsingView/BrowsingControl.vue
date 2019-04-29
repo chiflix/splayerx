@@ -4,12 +4,13 @@
     <Icon :type="forwardType" ref="forward" class="forward-icon" @mouseup.native="handleUrlForward"></Icon>
     <Icon type="pageRefresh" class="page-refresh-icon" @mouseup.native="handleUrlReload"></Icon>
     <Icon type="videoRecordDisabled" class="video-record-icon"></Icon>
-    <Icon type="pipDisabled" class="pic-in-pic"></Icon>
+    <Icon :type="picInPicType" class="pic-in-pic" @mouseup.native="handlePicInPic"></Icon>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
+import getYouTubeID from 'get-youtube-id';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -18,10 +19,17 @@ export default {
     return {
       backType: 'backDisabled',
       forwardType: 'forwardDisabled',
+      url: '',
     };
   },
   computed: {
     ...mapGetters(['winWidth']),
+    picInPicType() {
+      return this.youtubeId ? 'pip' : 'pipDisabled';
+    },
+    youtubeId() {
+      return getYouTubeID(this.url);
+    },
   },
   watch: {
     backType(val) {
@@ -50,6 +58,9 @@ export default {
     Icon,
   },
   methods: {
+    handlePicInPic() {
+      this.$bus.$emit('enter-pip');
+    },
     handleUrlReload() {
       this.$bus.$emit('url-reload');
     },

@@ -613,4 +613,28 @@ export default {
   width: 32px;
   height: 32px;
 }
+.pip {
+  width: 32px;
+  height: 32px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
 </style>

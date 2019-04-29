@@ -1,9 +1,9 @@
 <template>
  <div class="browsing">
-   <browsing-header></browsing-header>
-   <div class="loading-state loading-animation" v-show="loadingState"></div>
-   <webview :src="availableUrl" autosize class="web-view" ref="webView" allowpopups></webview>
-   <browsing-control></browsing-control>
+   <browsing-header v-show="!isPip"></browsing-header>
+   <div class="loading-state loading-animation" v-show="loadingState && !isPip"></div>
+   <webview :src="availableUrl" autosize class="web-view" ref="webView" allowpopups :style="{ webkitAppRegion: isPip ? 'drag' : 'no-drag' }"></webview>
+   <browsing-control v-show="!isPip"></browsing-control>
  </div>
 </template>
 
@@ -21,6 +21,7 @@ export default {
       quit: false,
       loadingState: false,
       startTime: 0,
+      isPip: false,
     };
   },
   components: {
@@ -28,7 +29,7 @@ export default {
     'browsing-control': BrowsingControl,
   },
   computed: {
-    ...mapGetters(['winSize', 'winPos', 'isFullScreen', 'initialUrl']),
+    ...mapGetters(['winSize', 'winPos', 'isFullScreen', 'initialUrl', 'winWidth']),
     availableUrl() {
       const parsedUrl = urlParseLax(this.initialUrl);
       return parsedUrl.protocol ? parsedUrl.href : `http://${this.initialUrl}`;
@@ -37,6 +38,13 @@ export default {
   watch: {
     initialUrl(val) {
       console.log(val);
+    },
+    winWidth(val) {
+      if (this.isPip) {
+        this.$refs.webView.executeJavaScript('document.querySelector(".ytp-preview").style.top = "";document.querySelector(".ytp-preview").style.bottom = "50px"');
+        this.$refs.webView.executeJavaScript(`document.querySelector(".html5-video-player").style.position = "absolute";document.querySelector(".html5-video-player").style.width = "${val}px";document.querySelector(".html5-video-player").style.height = "${this.winSize[1]}px";`);
+        this.$refs.webView.executeJavaScript(`document.querySelector("video").style.width = "${val}px";document.querySelector("video").style.height = "${this.winSize[1]}px"`);
+      }
     },
   },
   methods: {
@@ -100,6 +108,22 @@ export default {
         }, 3000 - (loadingTime % 3000));
       }
     });
+    this.$bus.$on('enter-pip', () => {
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
+      this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].appendChild(document.querySelector(".html5-video-player"));');
+      this.$refs.webView.executeJavaScript('document.querySelector("#content").remove()');
+      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [320, 180]);
+      this.$refs.webView.executeJavaScript('document.querySelector("video").style', (result) => {
+        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [parseFloat(result.width) / parseFloat(result.height)]);
+      });
+      this.$refs.webView.executeJavaScript('document.querySelector(".video-ads").style.display = "none"');
+      this.$refs.webView.executeJavaScript('document.querySelector(".ytp-chrome-bottom").style.width = "calc(100% - 24px)"');
+      this.$refs.webView.executeJavaScript('document.querySelector("video").style.width = "320px";document.querySelector("video").style.height = "180px";');
+      this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.position = "absolute";document.querySelector(".html5-video-player").style.width = "320px";document.querySelector(".html5-video-player").style.height = "180px";');
+      this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.left = "50%";document.querySelector(".html5-video-player").style.transform = "translateX(-50%)";');
+      this.$refs.webView.executeJavaScript('document.querySelector("video").play()');
+      this.isPip = true;
+    });
     window.onbeforeunload = (e) => {
       if (!this.quit) {
         e.returnValue = false;
@@ -129,7 +153,6 @@ export default {
   flex-direction: column;
   .web-view {
     flex: 1;
-    -webkit-app-region: no-drag;
     background: rgba(255, 255, 255, 1);
   }
   .loading-state {
