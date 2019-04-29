@@ -2,7 +2,6 @@ import { Input as mutationTypes } from '../mutationTypes';
 import { Input as actionTypes } from '../actionTypes';
 
 const state = {
-  mousemoveClientPosition: { x: 0, y: 0 },
   mousemoveComponentName: 'the-video-controller',
   pressedMouseButtonNames: [],
   mousedownComponentName: 'the-video-controller',
@@ -21,9 +20,6 @@ const getters = {
 };
 
 const mutations = {
-  [mutationTypes.MOUSEMOVE_CLIENT_POSITION_UPDATE](state, payload) {
-    state.mousemoveClientPosition = payload;
-  },
   [mutationTypes.MOUSEMOVE_COMPONENT_NAME_UPDATE](state, payload) {
     state.mousemoveComponentName = payload;
   },
@@ -56,8 +52,7 @@ const buttonsToButtonNames = (buttons) => {
 };
 
 const actions = {
-  [actionTypes.MOUSEMOVE_UPDATE]({ commit }, { clientPosition: position, componentName }) {
-    commit(mutationTypes.MOUSEMOVE_CLIENT_POSITION_UPDATE, { x: position[0], y: position[1] });
+  [actionTypes.MOUSEMOVE_UPDATE]({ commit }, { clientPosition: componentName }) {
     commit(mutationTypes.MOUSEMOVE_COMPONENT_NAME_UPDATE, componentName);
   },
   [actionTypes.MOUSEDOWN_UPDATE]({ commit }, { buttons, componentName }) {
