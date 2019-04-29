@@ -458,7 +458,7 @@ export default {
     },
     // Event listeners
     handleMousemove(event) {
-      const { clientX, clientY, target } = event;
+      const { target } = event;
       this.mouseStopped = false;
       if (this.isMousedown) {
         this.isMousemove = true;
@@ -473,7 +473,6 @@ export default {
       }
       this.updateMousemove({
         componentName: this.getComponentName(target),
-        clientPosition: [clientX, clientY],
       });
     },
     handleMouseenter() {
