@@ -48,7 +48,7 @@ describe('helper.path', () => {
       '美剧.EP01.x264-SVA.mp4',
       '天龙八部第一集.test.mp4',
       '天龙八部.第1集.mp4',
-      ' 天龙八部第01集.mkv',
+      ' 天龙八部第01集.mkv'
     ].forEach((e) => {
       expect(JSON.stringify(parseNameFromPath(e))).to.be.equals(JSON.stringify({
         season: null,

@@ -186,11 +186,11 @@
 			"switchDisplayLanguages": "SPlayerの言語表示を修正。"
 		},
 		"privacy": {
-			"languageDescription": "次の言語で翻訳結果を取得するために匿名データをアップロードします。プライバシー情報は含まれません。",
-			"languagePriority": "言語選択",
+			"languageDescription": "ビデオ再生時、SPlayerは以下の順番で通訳結果を推薦します。",
+			"languagePriority": "言語の優先順位",
 			"none": "なし",
 			"primary": "ファースト",
-			"privacyConfirm": "Smart Translationを開く",
+			"privacyConfirm": "プライバシーとSmart Translationに許可",
 			"privacySetting": "翻訳設定",
 			"secondary": "セカンド",
 			"setAsDefault": "SPlayerをデフォルトにする",

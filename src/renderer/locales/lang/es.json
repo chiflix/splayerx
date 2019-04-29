@@ -186,11 +186,11 @@
 			"switchDisplayLanguages": "Mostrar idioma controla el idioma que ves en SPlayer."
 		},
 		"privacy": {
-			"languageDescription": "Cargue datos anónimos para obtener resultados de traducción en el siguiente idioma, no se incluirá información de privacidad.",
-			"languagePriority": "Preferencia de idioma",
+			"languageDescription": "Encuentre los resultados de traducción en la siguiente secuencia de idioma mientras se reproduce el video.",
+			"languagePriority": "Prioridad de idioma",
 			"none": "Ninguna",
 			"primary": "Primario",
-			"privacyConfirm": "Habilitar la traducción inteligente",
+			"privacyConfirm": "Permitir datos anónimos / Traducción inteligente",
 			"privacySetting": "Traducción",
 			"secondary": "Secundario",
 			"setAsDefault": "Establecer SPlayer como la aplicación predeterminada",

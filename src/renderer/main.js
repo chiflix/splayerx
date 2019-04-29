@@ -30,7 +30,6 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import NotificationBubble, { addBubble } from '../shared/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
-import { VueDevtools } from './plugins/vueDevtools.dev';
 
 // causing callbacks-registry.js 404 error. disable temporarily
 // require('source-map-support').install();
@@ -95,10 +94,6 @@ Vue.use(VueAnalytics, {
     { field: 'historyImportTask', value: null }, // fix ga not work from file:// url
   ],
 });
-
-if (process.env.NODE_ENV === 'development') {
-  Vue.use(VueDevtools);
-}
 
 Vue.mixin(helpers);
 
