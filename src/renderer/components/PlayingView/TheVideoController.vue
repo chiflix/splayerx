@@ -133,7 +133,7 @@ export default {
       currentMousedownWidget: state => state.Input.mousedownComponentName,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['paused', 'duration', 'isFullScreen', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
     ...inputMapGetters({
       mousemoveClientPosition: iGT.GET_MOUSEMOVE_POSITION,
       currentWidget: iGT.GET_MOUSEMOVE_COMPONENT,
@@ -483,12 +483,12 @@ export default {
       }
     },
     handleMousedown(event) {
-      const { target, buttons } = event;
-      this.updateMousedown({ componentName: this.getComponentName(target), buttons });
+      const { target } = event;
+      this.updateMousedown({ componentName: this.getComponentName(target) });
     },
     handleMouseup(event) {
-      const { target, buttons } = event;
-      this.updateMouseup({ componentName: this.getComponentName(target), buttons });
+      const { target } = event;
+      this.updateMouseup({ componentName: this.getComponentName(target) });
     },
     handleMouseleave() {
       this.mouseLeftId = this.clock.setTimeout(() => {

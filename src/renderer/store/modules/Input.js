@@ -2,7 +2,6 @@ import { Input as mutationTypes } from '../mutationTypes';
 import { Input as actionTypes } from '../actionTypes';
 
 const state = {
-  pressedMouseButtonNames: [],
   mousedownComponentName: 'the-video-controller',
   mouseupComponentName: 'the-video-controller',
   pressedKeyboardCodes: [],
@@ -13,15 +12,11 @@ const state = {
 const getters = {
   progressKeydown: state => state.pressedKeyboardCodes.includes('ArrowLeft') || state.pressedKeyboardCodes.includes('ArrowRight') || state.pressedKeyboardCodes.includes('BracketLeft') || state.pressedKeyboardCodes.includes('BracketRight'),
   volumeKeydown: state => state.pressedKeyboardCodes.includes('KeyM'),
-  leftMousedown: state => state.pressedMouseButtonNames.includes('left'),
   wheelTriggered: state => state.wheelTimestamp,
   volumeWheelTriggered: state => state.wheelComponentName !== 'subtitle-control' && state.wheelComponenetName !== 'advance-control',
 };
 
 const mutations = {
-  [mutationTypes.PRESSED_MOUSE_BUTTON_NAMES_UPDATE](state, payload) {
-    state.pressedMouseButtonNames = payload;
-  },
   [mutationTypes.MOUSEDOWN_COMPONENT_NAME_UPDATE](state, payload) {
     state.mousedownComponentName = payload;
   },
@@ -39,25 +34,11 @@ const mutations = {
   },
 };
 
-const buttonsToButtonNames = (buttons) => {
-  // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
-  const buttonsMap = ['left', 'right', 'middle', 'back', 'forward'];
-  return buttons.toString(2).split('').reverse()
-    .map((number, index) => (number === '1' ? buttonsMap[index] : ''))
-    .filter(button => button !== '');
-};
-
 const actions = {
-  [actionTypes.MOUSEDOWN_UPDATE]({ commit }, { buttons, componentName }) {
-    if (buttons) {
-      commit(mutationTypes.PRESSED_MOUSE_BUTTON_NAMES_UPDATE, buttonsToButtonNames(buttons));
-    }
+  [actionTypes.MOUSEDOWN_UPDATE]({ commit }, { componentName }) {
     commit(mutationTypes.MOUSEDOWN_COMPONENT_NAME_UPDATE, componentName);
   },
-  [actionTypes.MOUSEUP_UPDATE]({ commit }, { buttons, componentName }) {
-    if (buttons) {
-      commit(mutationTypes.PRESSED_MOUSE_BUTTON_NAMES_UPDATE, buttonsToButtonNames(buttons));
-    }
+  [actionTypes.MOUSEUP_UPDATE]({ commit }, { componentName }) {
     commit(mutationTypes.MOUSEUP_COMPONENT_NAME_UPDATE, componentName);
   },
   [actionTypes.KEYDOWN_UPDATE]({ commit, state }, { pressedKeyboardCode: code }) {
