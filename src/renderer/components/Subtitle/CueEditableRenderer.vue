@@ -192,11 +192,12 @@ export default {
       if (wrap && input && brIndexs.length > 0) {
         const inputHeight = input.offsetHeight / this.factor;
         const oneRowHeight = Math.round((inputHeight - targetHeight) / brIndexs.length);
-        wrap.scrollTop = inputHeight > targetHeight ? oneRowHeight * beforeBrs : 0;
+        const zoom = this.zoom;
+        wrap.scrollTop = inputHeight > targetHeight ? (oneRowHeight * beforeBrs) * zoom : 0;
         if (inputHeight > targetHeight && beforeBrs > 1 && beforeBrs === brIndexs.length - 1) {
-          wrap.scrollTop = inputHeight - targetHeight;
+          wrap.scrollTop = (inputHeight - targetHeight) * zoom;
         } else if (inputHeight > targetHeight && beforeBrs !== 0) {
-          wrap.scrollTop = oneRowHeight * beforeBrs;
+          wrap.scrollTop = (oneRowHeight * beforeBrs) * zoom;
         }
       }
     },

@@ -879,7 +879,7 @@ export default {
         }
         const originSrc = this.originSrc;
         const videoName = `${basename(originSrc, extname(originSrc))}`;
-        const name = `${this.$t('subtitle.modified')} ${romanize(currentSubtitle.metaInfo.name)}-${videoName}`;
+        const name = `${this.$t('subtitle.modified')} ${romanize(currentSubtitle.metaInfo.name)}-${videoName}-SPlayer`;
         const fileName = `${basename(name, '.vtt')}.vtt`;
         defaultPath = join(defaultPath, fileName);
         dialog.showSaveDialog(focusWindow, {

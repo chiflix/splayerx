@@ -459,6 +459,7 @@ export default {
                 dismissAfter: 10000,
               });
               this.matchSwitchReferenceBubble = this.messageInfo.find(e => e && e.content === t);
+              this.matchSwitchReferenceBubble.startTime = Date.now(); // 记录开始气泡时间
             }
             val.once('data', val.parse);
             val.on('parse', (parsed) => {
@@ -468,7 +469,16 @@ export default {
               }
               // 加载完成，
               if (val.id === this.referenceSubtitleId && this.matchSwitchReferenceBubble) {
-                this.removeMessages(this.matchSwitchReferenceBubble.id);
+                const dis = Date.now() - this.matchSwitchReferenceBubble.startTime;
+                if (dis > 2000) {
+                  this.removeMessages(this.matchSwitchReferenceBubble.id);
+                  this.matchSwitchReferenceBubble = null;
+                } else {
+                  setTimeout(() => {
+                    this.removeMessages(this.matchSwitchReferenceBubble.id);
+                    this.matchSwitchReferenceBubble = null;
+                  }, 2000);
+                }
                 this.currentParseReferenceSubtitleId = null;
               }
             });

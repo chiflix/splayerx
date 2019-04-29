@@ -547,8 +547,7 @@ export default {
       if (parsedData) {
         const cues = parsedData
           .filter(subtitle => subtitle.start <= currentTime && subtitle.end > currentTime);
-        if (!isEqual(cues, this.currentCues) &&
-          !(cues.length === 0 && this.isProfessional && this.showAddInput)) {
+        if (!isEqual(cues, this.currentCues)) {
           let rev = false;
           const tmp = cues;
           if (cues.length >= 2) {
@@ -566,6 +565,17 @@ export default {
           }
           this.currentCues = rev ? this.parsedFragments(cues).reverse()
             : this.parsedFragments(cues);
+          if (this.isProfessional && this.showAddInput) {
+            this.currentCues.push({
+              tags: {
+                alignment: 2,
+                pos: null,
+              },
+              text: '',
+              index: -1,
+              track: 1,
+            });
+          }
         } else if (cues.length === 0 && this.isProfessional && this.showAddInput &&
           !this.currentCues.find(e => e.index === -1)) {
           this.currentCues = [{

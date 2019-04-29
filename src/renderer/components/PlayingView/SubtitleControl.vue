@@ -360,7 +360,9 @@ export default {
       this.modifiedAdvancedPanelVisiable = this.clickItemArrow;
     },
     showAttached(val) {
-      this.$refs.scroll.scrollTop = this.currentScrollTop;
+      setImmediate(() => {
+        this.$refs.scroll.scrollTop = this.currentScrollTop;
+      });
       if (!val) {
         this.anim.playSegments([79, 92], true);
         if (!this.validEnter) {
