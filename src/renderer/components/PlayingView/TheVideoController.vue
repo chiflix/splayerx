@@ -46,9 +46,12 @@
   </div>
 </template>
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
+import {
+  mapState, mapGetters, mapActions,
+  createNamespacedHelpers,
+} from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
-import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
+import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import path from 'path';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
@@ -61,6 +64,8 @@ import TheProgressBar from './TheProgressBar.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
 import { videodata } from '../../store/video';
+
+const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
 
 export default {
   name: 'the-video-controller',
@@ -130,6 +135,9 @@ export default {
       wheelTime: state => state.Input.wheelTimestamp,
     }),
     ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
+    ...inputMapGetters({
+      inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
+    }),
     showAllWidgets() {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
@@ -540,11 +548,11 @@ export default {
     handleKeyup({ code }) {
       this.updateKeyup({ releasedKeyboardCode: code });
     },
-    handleWheel({ target, timeStamp, deltaX }) {
+    handleWheel({ target, timeStamp }) {
       this.updateWheel({
         componentName: this.getComponentName(target),
         timestamp: timeStamp,
-        direction: deltaX ? 'horizontal' : 'vertical',
+        direction: this.inputWheelDirection,
       });
     },
     // Helper functions
