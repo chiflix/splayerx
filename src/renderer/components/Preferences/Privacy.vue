@@ -317,7 +317,7 @@ $interactor-border-hover: 1px solid rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.3);
             border-radius: 2px;
             font-family: $font-semibold;
-            font-size: 12px;
+            font-size: 11px;
             color: #FFFFFF;
             letter-spacing: 0;
             text-align: center;
