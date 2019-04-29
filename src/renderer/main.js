@@ -98,12 +98,8 @@ Vue.use(VueAnalytics, {
 
 // Custom plugin area
 Vue.use(InputPlugin, {
-  namespace: true,
-  mouse: {
-    mousemove: {
-      component: true,
-    },
-  },
+  namespaced: true,
+  mouse: {},
   keyboard: {},
   wheel: {},
 });
