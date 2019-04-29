@@ -11,6 +11,7 @@ const state = {
   errorCode: 0,
   errorMessage: '',
   // network state
+  id: NaN,
   src: process.env.NODE_ENV === 'testing' ? './test/assets/test.avi' : '',
   mediaHash: process.env.NODE_ENV === 'testing'
     ? '84f0e9e5e05f04b58f53e2617cc9c866-'
@@ -109,6 +110,7 @@ const getters = {
   ratio: state => state.ratio,
   AudioDelay: state => state.AudioDelay,
   mediaHash: state => state.mediaHash,
+  videoId: state => state.id,
   defaultDir: state => state.defaultDir,
   snapshotSavedPath: state => state.snapshotSavedPath,
 };
@@ -193,7 +195,7 @@ function generateRate(rateInfo, nowRate, oldRateGroup) {
 const mutations = mutationsGenerator(videoMutations);
 
 const actions = {
-  [videoActions.SRC_SET]({ commit, dispatch }, { src, mediaHash }) {
+  [videoActions.SRC_SET]({ commit, dispatch }, { src, mediaHash, id }) {
     const srcRegexes = {
       unix: RegExp(/^[^\0]+$/),
       windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
@@ -205,6 +207,7 @@ const actions = {
           videoMutations.MEDIA_HASH_UPDATE,
           mediaHash || await Helpers.methods.mediaQuickHash(src),
         );
+        commit(videoMutations.ID_UPDATE, id);
         dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
       }
     });

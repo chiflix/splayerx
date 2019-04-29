@@ -5,7 +5,6 @@
     bottom: chosen ? '9px' : '0',
     width: `${thumbnailWidth}px`,
     height: `${thumbnailHeight}px`,
-    backgroundImage: itemShortcut(item.smallShortCut, item.cover, item.lastPlayedTime, item.duration),
   }">
   <div class="content"
     @click.stop="onRecentItemClick(item)"
@@ -41,6 +40,7 @@ export default {
   data() {
     return {
       displayInfo: [],
+      item: null,
       isDragging: false,
       aboutToDelete: false,
       showShadow: true,
@@ -65,7 +65,7 @@ export default {
     index: {
       type: Number,
     },
-    item: {
+    playlist: {
       type: Object,
     },
     thumbnailHeight: {
@@ -85,6 +85,15 @@ export default {
     filePathNeedToDelete: {
       type: String,
     },
+  },
+  created() {
+    this.infoDB.get('media-item', this.playlist.items[this.playlist.playedIndex]).then((data) => {
+      this.item = data;
+      this.$refs.item.style.setProperty(
+        'background-image',
+        this.itemShortcut(data.smallShortCut, data.cover, data.lastPlayedTime, data.duration),
+      );
+    });
   },
   destroyed() {
     document.removeEventListener('mousemove', this.onRecentItemMousemove);
@@ -165,7 +174,7 @@ export default {
       this.$refs.item.style.setProperty('z-index', '');
       if (this.aboutToDelete) {
         this.$emit('showLandingLogo');
-        this.$emit('delete-item', this.item);
+        this.$emit('delete-item', this.playlist);
         this.aboutToDelete = false;
       }
       if (this.firstIndex !== 0) {
@@ -179,7 +188,7 @@ export default {
         } else if (this.index + 1 < this.firstIndex && !this.isFullScreen) {
           this.$emit('previous-page');
         } else if (!this.filePathNeedToDelete) {
-          this.openVideoFile(this.item.path);
+          this.openPlayList(this.playlist.id);
         }
       }
     },

@@ -70,7 +70,7 @@ export const INFO_SCHEMAS = [
       keyPath: 'id',
       autoIncrement: true,
     },
-    indexes: ['lastOpened'],
+    indexes: ['lastOpened', 'hpaths'],
   },
   {
     name: VIDEO_OBJECT_STORE_NAME,
@@ -78,7 +78,7 @@ export const INFO_SCHEMAS = [
       keyPath: 'videoId',
       autoIncrement: true,
     },
-    indexes: ['path', 'lastPlayedTime'],
+    indexes: ['path', 'lastPlayedTime', 'source'],
   },
 ];
 

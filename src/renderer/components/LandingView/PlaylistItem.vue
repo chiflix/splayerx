@@ -16,7 +16,6 @@
       bottom: chosen ? '10px' : '0',
       width: `${thumbnailWidth}px`,
       height: `${thumbnailHeight}px`,
-      backgroundImage: itemShortcut(coverVideo.smallShortCut, coverVideo.cover, coverVideo.lastPlayedTime, coverVideo.duration),
     }">
     <div class="content"
       @click.stop="onRecentItemClick"
@@ -56,6 +55,7 @@ export default {
   data() {
     return {
       displayInfo: [],
+      coverVideo: null,
       isDragging: false,
       moving: false,
       aboutToDelete: false,
@@ -80,7 +80,7 @@ export default {
     index: {
       type: Number,
     },
-    item: {
+    playlist: {
       type: Object,
     },
     thumbnailHeight: {
@@ -101,14 +101,18 @@ export default {
       type: String,
     },
   },
+  created() {
+    this.infoDB.get('media-item', this.playlist.items[this.playlist.playedIndex]).then((data) => {
+      this.coverVideo = data;
+      this.$refs.item.style.setProperty(
+        'background-image',
+        this.itemShortcut(data.smallShortCut, data.cover, data.lastPlayedTime, data.duration),
+      );
+    });
+  },
   destroyed() {
     document.removeEventListener('mousemove', this.onRecentItemMousemove);
     document.removeEventListener('mouseup', this.onRecentItemMouseup);
-  },
-  computed: {
-    coverVideo() {
-      return this.item.infos.find(video => video.path === this.item.currentVideo);
-    },
   },
   methods: {
     itemShortcut(shortCut, cover, lastPlayedTime, duration) {
@@ -122,8 +126,8 @@ export default {
         percentage: (this.coverVideo.lastPlayedTime / this.coverVideo.duration) * 100,
         path: this.coverVideo.path,
         cover: this.coverVideo.cover,
-        index: this.item.paths.findIndex(src => src === this.item.currentVideo),
-        playListLength: this.item.paths.length,
+        index: this.playlist.playedIndex,
+        playListLength: this.playlist.items.length,
       };
     },
     onRecentItemMouseenter() {
@@ -206,7 +210,7 @@ export default {
       this.$refs.playlistItem.style.setProperty('z-index', '');
       if (this.aboutToDelete) {
         this.$emit('showLandingLogo');
-        this.$emit('delete-item', this.item);
+        this.$emit('delete-item', this.playlist);
         this.aboutToDelete = false;
       }
       if (this.firstIndex !== 0) {
@@ -220,7 +224,7 @@ export default {
         } else if (this.index + 1 < this.firstIndex && !this.isFullScreen) {
           this.$emit('previous-page');
         } else if (!this.filePathNeedToDelete) {
-          this.openPlaylist(this.item.quickHash);
+          this.openPlayList(this.playlist.id);
         }
       }
     },

@@ -108,7 +108,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['audioTrackList', 'originSrc']),
+    ...mapGetters(['audioTrackList', 'originSrc', 'videoId']),
   },
   data() {
     return {
@@ -217,7 +217,7 @@ export default {
             this.$refs.video.addEventListener(event, listener);
             this.eventListeners.set(event, listener);
           } else {
-            const playInfo = await this.infoDB.get('recent-played', 'path', this.originSrc);
+            const playInfo = await this.infoDB.get('media-item', this.videoId);
             const generateAudioEvent = type => (trackEvent) => {
               const {
                 id, kind, label, language,

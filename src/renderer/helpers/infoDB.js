@@ -45,12 +45,11 @@ export class InfoDB {
             if (!data.type) {
               const convertedData = {
                 items: [],
-                hpaths: [`${data.path}-${data.quichHash}`],
+                hpaths: [`${data.quichHash}-${data.path}`],
                 playedIndex: 0,
                 lastOpened: data.lastOpened,
               };
               const videoid = await upgradeDB.transaction.objectStore(VIDEO_OBJECT_STORE_NAME).add(data);
-              console.log(`video: ${videoid}`);
               convertedData.items.push(videoid);
               await upgradeDB.transaction.objectStore(RECENT_OBJECT_STORE_NAME).add(convertedData);
             } else {
@@ -63,8 +62,7 @@ export class InfoDB {
               for (const playlistItem of data.infos) {
                 const videoid = await upgradeDB.transaction.objectStore(VIDEO_OBJECT_STORE_NAME).add(playlistItem);
                 convertedData.items.push(videoid);
-                console.log(`video in playlist: ${videoid}`);
-                convertedData.hpaths.push(`${playlistItem.path}-${playlistItem.quickHash}`);
+                convertedData.hpaths.push(`${playlistItem.quickHash}-${playlistItem.path}`);
               }
               await upgradeDB.transaction.objectStore(RECENT_OBJECT_STORE_NAME).add(convertedData);
             }
@@ -95,12 +93,7 @@ export class InfoDB {
     const db = await this.getDB();
     addLog.methods.addLog('info', `adding ${JSON.stringify(data)} to ${schema}`);
     const tx = db.transaction(schema, 'readwrite');
-    tx.objectStore(schema).add(data);
-    return tx.complete.then(() => {
-      addLog.methods.addLog('info', `added ${JSON.stringify(data)} to ${schema}`);
-    }, (err) => {
-      addLog.methods.addLog('error', `failed to add ${JSON.stringify(data)} to ${schema}`);
-    });
+    return tx.objectStore(schema).add(data);
   }
   
   /**
@@ -109,17 +102,12 @@ export class InfoDB {
    * Add a record if no same quickHash in the current schema
    * Replace a record if the given quickHash existed
    */
-  async put(schema, data) {
-    if (!data || !data.quickHash) throw new Error(`Invalid data: ${JSON.stringify(data)}`);
+  async update(schema, data) {
+    if (!data.id && !data.videoId) throw new Error(`Invalid data: Require Media ID !`);
     const db = await this.getDB();
-    addLog.methods.addLog('info', `puting ${JSON.stringify(data)} to ${schema}`);
+    addLog.methods.addLog('info', `Updating ${data.path || data.videoId || data.id} to ${schema}`);
     const tx = db.transaction(schema, 'readwrite');
-    tx.objectStore(schema).put(data);
-    return tx.complete.then(() => {
-      addLog.methods.addLog('info', `put ${JSON.stringify(data)} to ${schema}`);
-    }, (err) => {
-      addLog.methods.addLog('error', `failed to put ${JSON.stringify(data)} to ${schema}`);
-    });
+    return tx.objectStore(schema).put(data);
   }
 
   /**
@@ -131,8 +119,7 @@ export class InfoDB {
     addLog.methods.addLog('info', `deleting ${key} from ${schema}`);
     const db = await this.getDB();
     const tx = db.transaction(schema, 'readwrite');
-    tx.objectStore(schema).delete(key);
-    return tx.complete;
+    return tx.objectStore(schema).delete(key);
   }
 
   /**
@@ -142,8 +129,8 @@ export class InfoDB {
   async deletePlaylist(id) {
     addLog.methods.addLog('info', `deleting ${id} from recent-played`);
     const db = await this.getDB();
-    const playlistItems = this.get('recent-played', id).items;
-    for (const item of playlistItems) {
+    const playlistItem = await this.get('recent-played', id);
+    for (const item of playlistItem.items) {
       await this.delete('media-item', item);
     }
     return this.delete('recent-played', id);
@@ -153,25 +140,46 @@ export class InfoDB {
    * @param  {Array} videos
    * Add a new playlist to recent-played and add the corresponding media-items
    */
-  async addPlaylist(...videos) {
-    const playlist = {
+  async addPlaylist(videos) {
+    let playlist = {
       items: [],
       hpaths: [],
       playedIndex: 0,
       lastOpened: Date.now(),
     };
     const db = await this.getDB();
-    for (const videoPath of videos) {
-      const hash = await Helpers.methods.mediaQuickHash(videoPath);
-      const data = {
-        hash,
-        type: 'video',
-        path: videoPath,
-        source: 'playlist',
-      };
-      const videoId = await this.add('media-item', data);
-      playlist.items.push(videoId);
-      playlist.hpaths.push(`${videoPath}-${hash}`);
+    if (videos.length > 1) {
+      for (const videoPath of videos) {
+        const hash = await Helpers.methods.mediaQuickHash(videoPath);
+        const data = {
+          hash,
+          type: 'video',
+          path: videoPath,
+          source: 'playlist',
+        };
+        const videoId = await this.add('media-item', data);
+        playlist.items.push(videoId);
+        playlist.hpaths.push(`${hash}-${videoPath}`);
+      }
+    } else if (videos.length === 1) {
+      const hash = await Helpers.methods.mediaQuickHash(videos[0]);
+      const playlistRecord = await this.get('recent-played', 'hpaths', [`${hash}-${videos[0]}`]);
+      if (playlistRecord) {
+        playlist = playlistRecord;
+        playlist.lastOpened = Date.now();
+        await this.update('recent-played', playlist);
+        return playlistRecord.id;
+      } else {
+        const data = {
+          hash,
+          type: 'video',
+          path: videos[0],
+          source: '',
+        };
+        const videoId = await this.add('media-item', data);
+        playlist.items.push(videoId);
+        playlist.hpaths.push(`${hash}-${videos[0]}`);
+      }
     }
     return this.add('recent-played', playlist);
   }
@@ -224,6 +232,7 @@ export class InfoDB {
    * Otherwise retrieve the record which specified key equal to the given val.
    */
   async get(schema, key, val) {
+    if (!key) throw new Error(`Invalid get method: ${key} to ${schema}`);
     const db = await this.getDB();
     if (val) {
       const value = await db
@@ -239,6 +248,26 @@ export class InfoDB {
       .objectStore(schema)
       .get(val);
     return value;
+  }
+
+  /**
+   * @param  {String} schema
+   * @param  {String} key
+   * @param  {Any} value
+   * Return the specified records that equal to value from the given schema
+   */
+  async getValueByKey(schema, key, value) {
+    const db = await this.getDB();
+    const tx = db.transaction(schema);
+    const res = [];
+    tx.objectStore(schema)
+      .index(key)
+      .iterateCursor(null, 'next', (cursor) => {
+        if (!cursor) return;
+        if (cursor.value[key] === value) res.push(cursor.value);
+        cursor.continue();
+      });
+    return tx.complete.then(() => Promise.resolve(res));
   }
 
   /**
