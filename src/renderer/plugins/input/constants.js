@@ -78,6 +78,29 @@ export const wheelDeviceTypes = [
   WHEEL_TRACKPAD_DEVICE,
 ];
 
+// state types
+
+export const stateTypes = {
+  MOUSEMOVE_CLIENT_POSITION: 'mousemoveClientPosition',
+  MOUSEMOVE_COMPONENT_NAME: 'mousemoveComponentName',
+  MOUSEMOVE_PHASE: 'mousemovePhase',
+  MOUSEDOWN_BUTTON_NAMES: 'mousedownButtonNames',
+  MOUSEDOWN_COMPONENT_NAME: 'mousedownComponentName',
+  MOUSEUP_COMPONENT_NAME: 'mouseupComponentName',
+  PRESSED_KEY_CODES: 'pressedKeyCodes',
+  ALT_KEY_PRESSED_KEY_CODES: 'altKeyPressedKeyCodes',
+  SHIFT_KEY_PRESSED_KEY_CODES: 'shiftKeyPressedKeyCodes',
+  CTRL_KEY_PRESSED_KEY_CODES: 'ctrlKeyPressedKeyCodes',
+  META_KEY_PRESSED_KEY_CODES: 'metaKeyPressedKeyCodes',
+  WHEEL_PHASE: 'wheelPhase',
+  WHEEL_DIRECTION: 'wheelDirection',
+  WHEEL_COMPONENT_NAME: 'wheelComponentName',
+  WHEEL_DEVICE_TYPE: 'wheelDeviceType',
+  WHEEL_DELTA_X: 'wheelDeltaX',
+  WHEEL_DELTA_Y: 'wheelDeltaY',
+  WHEEL_DELTA_Z: 'wheelDeltaZ',
+};
+
 // mutation types
 export const mutationTypes = {
   MOUSEMOVE_CLIENT_POSITION: 'MOUSEMOVE_CLIENT_POSITION_UPDATE',

@@ -11,7 +11,7 @@ import {
 
 export {
   INPUT_COMPONENT_TYPE,
-  actionTypes, mutationTypes, getterTypes,
+  stateTypes, getterTypes,
 } from './constants';
 export default {
   install(Vue, options) {
