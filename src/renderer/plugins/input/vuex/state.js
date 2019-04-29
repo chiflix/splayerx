@@ -38,10 +38,8 @@ export default function state(options = defaultOptions) {
   if (get(keyboard, 'meta')) {
     result.metaKeyPressedKeyCodes = [];
   }
-  if (get(wheel, 'phase')) {
+  if (get(wheel, 'phase') || get(wheel, 'direction')) {
     result.wheelPhase = 'stopped';
-  }
-  if (get(wheel, 'direction')) {
     result.wheelDirection = '';
   }
   if (get(wheel, 'component')) {

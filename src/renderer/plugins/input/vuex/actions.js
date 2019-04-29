@@ -11,6 +11,8 @@ import {
   WHEEL_NO_DIRECTION as no,
   WHEEL_HORIZONTAL_DIRECTION as horizontal,
   WHEEL_VERTICAL_DIRECTION as vertical,
+  // wheel phases
+  WHEEL_STOPPED_PHASE as wheelStopped,
 } from '../constants';
 import {
   getComponentName,
@@ -109,7 +111,10 @@ const allActions = {
   },
   [at.UPDATE_WHEEL_PHASE]: ({ commit }, event) => {
     if (!wheelDetector.listeners('phase-change').length) {
-      wheelDetector.on('phase-change', phase => commit(mt.WHEEL_PHASE, phase));
+      wheelDetector.on('phase-change', (phase) => {
+        commit(mt.WHEEL_PHASE, phase);
+        if (phase === wheelStopped) commit(mt.WHEEL_DIRECTION, no);
+      });
     }
     wheelDetector.calcalate(event);
   },
@@ -117,7 +122,6 @@ const allActions = {
     const { wheelDirection: d } = getters;
     if (deltaX && (d === no || d === horizontal)) commit(mt.WHEEL_DIRECTION, horizontal);
     else if (deltaY && (d === no || d === vertical)) commit(mt.WHEEL_DIRECTION, vertical);
-    else commit(mt.WHEEL_DIRECTION, no);
   },
   [at.UPDATE_WHEEL_COMPONENT]: ({ commit }, { target }) => {
     const { name } = getComponentName(target);
@@ -182,10 +186,8 @@ export default function actions(options = defaultOptions) {
     result[at.UPDATE_META_KEYDOWN_CODES] = allActions[at.UPDATE_META_KEYDOWN_CODES];
     result[at.UPDATE_META_KEYUP_CODES] = allActions[at.UPDATE_META_KEYUP_CODES];
   }
-  if (get(wheel, 'phase')) {
+  if (get(wheel, 'phase') || get(wheel, 'direction')) {
     result[at.UPDATE_WHEEL_PHASE] = allActions[at.UPDATE_WHEEL_PHASE];
-  }
-  if (get(wheel, 'direction')) {
     result[at.UPDATE_WHEEL_DIRECTION] = allActions[at.UPDATE_WHEEL_DIRECTION];
   }
   if (get(wheel, 'component')) {
