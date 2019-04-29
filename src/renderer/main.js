@@ -14,7 +14,7 @@ import VueAnalytics from 'vue-analytics';
 import VueElectron from 'vue-electron';
 import Path from 'path';
 import fs from 'fs';
-import { mapGetters, mapActions } from 'vuex';
+import { mapGetters, mapActions, createNamespacedHelpers } from 'vuex';
 import osLocale from 'os-locale';
 import AsyncComputed from 'vue-async-computed';
 
@@ -30,7 +30,8 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import NotificationBubble, { addBubble } from '../shared/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
-import InputPlugin from '@/plugins/input';
+import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
+import { WHEEL_INERTIAL_SCROLLING_PHASE } from '@/plugins/input/constants';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -101,7 +102,11 @@ Vue.use(InputPlugin, {
   namespaced: true,
   mouse: {},
   keyboard: {},
-  wheel: {},
+  wheel: {
+    phase: true,
+    device: true,
+    direction: true,
+  },
 });
 // Vue.use(InputPlugin);
 // i18n and its plugin
@@ -122,6 +127,8 @@ hookVue(Vue);
 
 Vue.prototype.$bus = new Vue(); // Global event bus
 
+
+const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
 /* eslint-disable no-new */
 new Vue({
   i18n,
@@ -134,14 +141,16 @@ new Vue({
       menu: null,
       topOnWindow: false,
       canSendVolumeGa: true,
-      isTrackPad: false,
-      isWheelEnd: true,
-      wheelDirection: '',
     };
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
-      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration']),
+      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration',
+    ]),
+    ...inputMapGetters({
+      wheelDirection: iGT.GET_WHEEL_DIRECTION,
+      isWheelEnd: iGT.GET_WHEEL_STOPPED,
+    }),
     darwinPlayback() {
       return [
         {
@@ -304,8 +313,6 @@ new Vue({
     this.$bus.$on('delete-file', () => {
       this.refreshMenu();
     });
-
-    this.currentWheelTimer = 0;
   },
   watch: {
     isSubtitleAvailable(val) {
@@ -1293,16 +1300,8 @@ new Vue({
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', rect.slice(0, 2));
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [rect.slice(2, 4)[0] / rect.slice(2, 4)[1]]);
     },
-    isInteger(number) {
-      return !/\./.test(number.toString());
-    },
     // eslint-disable-next-line complexity
-    wheelEventHandler({ x, y }) {
-      if (!this.wheelDirection) {
-        if (this.isTrackPad && x) this.wheelDirection = 'horizontal';
-        else if (y) this.wheelDirection = 'vertical';
-      }
-
+    wheelEventHandler({ x }) {
       if (this.duration && this.wheelDirection === 'horizontal') {
         const eventName = x < 0 ? 'seek-forward' : 'seek-backward';
         const absX = Math.abs(x);
@@ -1417,19 +1416,8 @@ new Vue({
       }
     });
     window.addEventListener('wheel', (event) => {
-      const { deltaX: x, deltaY: y, deltaZ: z, ctrlKey } = event;
-      if (!ctrlKey) {
-        const { isInteger: int } = this;
-        this.isTrackPad = int(x) && int(y) && int(z);
-        this.isWheelEnd = false;
-        clearTimeout(this.currentWheelTimer);
-        this.currentWheelTimer = setTimeout(() => {
-          this.isWheelEnd = true;
-          this.wheelDirection = '';
-        }, 200);
-
-        this.$emit('wheel-event', { x, y });
-      }
+      const { deltaX: x, ctrlKey } = event;
+      if (!ctrlKey) this.$emit('wheel-event', { x });
     });
     /* eslint-disable */
 
