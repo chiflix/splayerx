@@ -1122,7 +1122,13 @@ new Vue({
           label: '',
         })),
       };
-      return this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev').then((data) => {
+      return this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev').then(async (playlists) => {
+        const data = [];
+        /* eslint-disable */
+        for (const playlist of playlists) {
+          const mediaItem = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
+          data.push(mediaItem);
+        }
         let menuRecentData = null;
         menuRecentData = this.processRecentPlay(data);
         recentMenuTemplate.submenu.forEach((element, index) => {
