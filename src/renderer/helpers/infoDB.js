@@ -1,5 +1,6 @@
 import { openDb } from 'idb';
-import { INFO_DATABASE_NAME, INFO_SCHEMA, INFODB_VERSION } from '@/constants';
+import { INFO_DATABASE_NAME, INFO_SCHEMAS, INFODB_VERSION, RECENT_OBJECT_STORE_NAME, VIDEO_OBJECT_STORE_NAME } from '@/constants';
+import Helpers from '@/helpers';
 import addLog from './index';
 
 /**
@@ -14,21 +15,63 @@ export class InfoDB {
    */
   async getDB() {
     if (this.db) return this.db;
-    this.db = await openDb(INFO_DATABASE_NAME, INFODB_VERSION, (upgradeDB) => {
-      INFO_SCHEMA.forEach((schema) => {
-        let store;
-        if (!upgradeDB.objectStoreNames.contains(schema.name)) {
-          store = upgradeDB.createObjectStore(schema.name, { keyPath: 'quickHash' });
-        } else {
-          store = upgradeDB.transaction.objectStore(schema.name);
-        }
-        if (schema.indexes) {
-          schema.indexes.forEach((val) => {
-            if (!store.indexNames.contains(val)) store.createIndex(val, val);
+    this.db = await openDb(
+      INFO_DATABASE_NAME, INFODB_VERSION,
+      async (upgradeDB) => {
+        if (upgradeDB.oldVersion < 1) {
+          INFO_SCHEMAS.forEach(({ name, options, indexes }) => {
+            const store = upgradeDB.createObjectStore(name, options);
+            if (indexes) {
+              indexes.forEach((val) => {
+                if (!store.indexNames.contains(val)) store.createIndex(val, val);
+              });
+            }
           });
+        } else {
+          const oldRecords = await upgradeDB.transaction
+            .objectStore(RECENT_OBJECT_STORE_NAME).getAll();
+          await upgradeDB.deleteObjectStore(RECENT_OBJECT_STORE_NAME);
+          INFO_SCHEMAS.forEach(({ name, options, indexes }) => {
+            const store = upgradeDB.createObjectStore(name, options);
+            if (indexes) {
+              indexes.forEach((val) => {
+                store.createIndex(val, val);
+              });
+            }
+          });
+
+          /* eslint-disable */
+          for (const data of oldRecords) {
+            if (!data.type) {
+              const convertedData = {
+                items: [],
+                hpaths: [`${data.path}-${data.quichHash}`],
+                playedIndex: 0,
+                lastOpened: data.lastOpened,
+              };
+              const videoid = await upgradeDB.transaction.objectStore(VIDEO_OBJECT_STORE_NAME).add(data);
+              console.log(`video: ${videoid}`);
+              convertedData.items.push(videoid);
+              await upgradeDB.transaction.objectStore(RECENT_OBJECT_STORE_NAME).add(convertedData);
+            } else {
+              const convertedData = {
+                items: [],
+                hpaths: [],
+                playedIndex: 0,
+                lastOpened: data.lastOpened,
+              };
+              for (const playlistItem of data.infos) {
+                const videoid = await upgradeDB.transaction.objectStore(VIDEO_OBJECT_STORE_NAME).add(playlistItem);
+                convertedData.items.push(videoid);
+                console.log(`video in playlist: ${videoid}`);
+                convertedData.hpaths.push(`${playlistItem.path}-${playlistItem.quickHash}`);
+              }
+              await upgradeDB.transaction.objectStore(RECENT_OBJECT_STORE_NAME).add(convertedData);
+            }
+          }
         }
-      });
-    });
+      },
+    );
     return this.db;
   }
 
@@ -44,36 +87,93 @@ export class InfoDB {
 
   /**
    * @param  {String} schema
-   * @param  {Object} data Must contain quickHash property
+   * @param  {Object} data
+   * Add a new record
+   */
+  async add(schema, data) {
+    if (!data) throw new Error(`Invalid data: ${JSON.stringify(data)}`);
+    const db = await this.getDB();
+    addLog.methods.addLog('info', `adding ${JSON.stringify(data)} to ${schema}`);
+    const tx = db.transaction(schema, 'readwrite');
+    tx.objectStore(schema).add(data);
+    return tx.complete.then(() => {
+      addLog.methods.addLog('info', `added ${JSON.stringify(data)} to ${schema}`);
+    }, (err) => {
+      addLog.methods.addLog('error', `failed to add ${JSON.stringify(data)} to ${schema}`);
+    });
+  }
+  
+  /**
+   * @param  {String} schema
+   * @param  {Object} data
    * Add a record if no same quickHash in the current schema
    * Replace a record if the given quickHash existed
    */
-  async add(schema, data) {
+  async put(schema, data) {
     if (!data || !data.quickHash) throw new Error(`Invalid data: ${JSON.stringify(data)}`);
     const db = await this.getDB();
-    if (data.path) addLog.methods.addLog('info', `adding ${data.path || JSON.stringify(data)} to ${schema}`);
-    else addLog.methods.addLog('info', 'adding playlist');
+    addLog.methods.addLog('info', `puting ${JSON.stringify(data)} to ${schema}`);
     const tx = db.transaction(schema, 'readwrite');
     tx.objectStore(schema).put(data);
     return tx.complete.then(() => {
-      if (data.path) addLog.methods.addLog('info', `added ${data.path || JSON.stringify(data)} to ${schema}`);
-      else addLog.methods.addLog('info', 'added playlist');
+      addLog.methods.addLog('info', `put ${JSON.stringify(data)} to ${schema}`);
+    }, (err) => {
+      addLog.methods.addLog('error', `failed to put ${JSON.stringify(data)} to ${schema}`);
     });
   }
 
   /**
    * @param  {String} schema
-   * @param  {String} quickHash
-   * Delete the record which match the given quickHash
+   * @param  {String} key
+   * Delete the record which match the given key
    */
-  async delete(schema, quickHash) {
-    addLog.methods.addLog('info', `deleting ${quickHash} from ${schema}`);
+  async delete(schema, key) {
+    addLog.methods.addLog('info', `deleting ${key} from ${schema}`);
     const db = await this.getDB();
     const tx = db.transaction(schema, 'readwrite');
-    tx.objectStore(schema).delete(quickHash);
-    return tx.complete.then(() => {
-      addLog.methods.addLog('info', `deleted ${quickHash} from ${schema}`);
-    });
+    tx.objectStore(schema).delete(key);
+    return tx.complete;
+  }
+
+  /**
+   * @param  {String} id
+   * Delete the playlist and its contained media items which match the given id
+   */
+  async deletePlaylist(id) {
+    addLog.methods.addLog('info', `deleting ${id} from recent-played`);
+    const db = await this.getDB();
+    const playlistItems = this.get('recent-played', id).items;
+    for (const item of playlistItems) {
+      await this.delete('media-item', item);
+    }
+    return this.delete('recent-played', id);
+  }
+
+  /**
+   * @param  {Array} videos
+   * Add a new playlist to recent-played and add the corresponding media-items
+   */
+  async addPlaylist(...videos) {
+    const playlist = {
+      items: [],
+      hpaths: [],
+      playedIndex: 0,
+      lastOpened: Date.now(),
+    };
+    const db = await this.getDB();
+    for (const videoPath of videos) {
+      const hash = await Helpers.methods.mediaQuickHash(videoPath);
+      const data = {
+        hash,
+        type: 'video',
+        path: videoPath,
+        source: 'playlist',
+      };
+      const videoId = await this.add('media-item', data);
+      playlist.items.push(videoId);
+      playlist.hpaths.push(`${videoPath}-${hash}`);
+    }
+    return this.add('recent-played', playlist);
   }
 
   /**
