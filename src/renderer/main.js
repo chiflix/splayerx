@@ -31,7 +31,6 @@ import { videodata } from '@/store/video';
 import NotificationBubble, { addBubble } from '../shared/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
 import InputPlugin, { getterTypes as iGT } from '@/plugins/input';
-import { WHEEL_INERTIAL_SCROLLING_PHASE } from '@/plugins/input/constants';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -104,7 +103,6 @@ Vue.use(InputPlugin, {
   keyboard: {},
   wheel: {
     phase: true,
-    device: true,
     direction: true,
   },
 });
