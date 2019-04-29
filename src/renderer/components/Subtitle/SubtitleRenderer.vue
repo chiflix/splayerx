@@ -527,7 +527,8 @@ export default {
     setCurrentCues(currentTime) { // eslint-disable-line
       const currentDialogues = this.subtitleInstance && this.subtitleInstance.parsed ?
         this.subtitleInstance.parsed.dialogues : [];
-      if ((currentDialogues.length + this.referenceDialogues.length) === 0) return;
+      if ((currentDialogues.length + this.referenceDialogues.length) === 0 &&
+        !(this.isProfessional && this.showAddInput)) return;
       const referenceFilters = this.referenceDialogues
         .map((e, i) => Object.assign({ reference: true }, e, { selfIndex: i }));
       let parsedData = [];
