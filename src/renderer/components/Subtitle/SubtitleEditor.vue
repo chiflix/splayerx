@@ -735,8 +735,9 @@ export default {
     handleExitBtnHoverOut() {
       this.exitBtnHover = false;
     },
-    handleEditorMouseUp() {
+    handleEditorMouseUp(e) {
       this.updateMouseUp('the-video-controller');
+      this.handleDragEndTimeLine(e);
     },
     handleDragStartTimeLine(e) {
       if (!this.paused) {
