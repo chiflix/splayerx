@@ -226,7 +226,7 @@ export default {
         }
       });
     },
-    async addFiles(...files) {
+    async addFiles(...files) { // eslint-disable-line complexity
       const videoFiles = [];
 
       for (let i = 0; i < files.length; i += 1) {
@@ -245,24 +245,26 @@ export default {
       }
       if (videoFiles.length !== 0) {
         this.$store.dispatch('AddItemsToPlayingList', videoFiles);
-        const playlist = await this.infoDB.get('recent-played', this.playListId);
-        /* eslint-disable */
-        for (const videoPath of this.playingList) {
-          if (videoPath !== this.originSrc) {
-            const hash = await this.mediaQuickHash(videoPath);
-            const data = {
-              hash,
-              type: 'video',
-              path: videoPath,
-              source: 'playlist',
-            };
-            const videoId = await this.add('media-item', data);
-            playlist.items.push(videoId);
-            playlist.hpaths.push(`${hash}-${videoPath}`);
+        if (this.$store.getters.isFolderList) {
+          const playlist = await this.infoDB.get('recent-played', this.playListId);
+          /* eslint-disable */
+          for (const videoPath of this.playingList) {
+            if (videoPath !== this.originSrc) {
+              const hash = await this.mediaQuickHash(videoPath);
+              const data = {
+                hash,
+                type: 'video',
+                path: videoPath,
+                source: 'playlist',
+              };
+              const videoId = await this.add('media-item', data);
+              playlist.items.push(videoId);
+              playlist.hpaths.push(`${hash}-${videoPath}`);
+            }
           }
+          this.infoDB.update('recent-played', playlist);
+          this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
         }
-        this.infoDB.update('recent-played', playlist);
-        this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
       } else {
         this.addLog('error', {
           errcode: ADD_NO_VIDEO,
