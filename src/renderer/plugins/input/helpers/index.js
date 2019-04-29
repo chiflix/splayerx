@@ -5,3 +5,4 @@ export * from './wheelDetector';
 export * from './componentStore';
 export * from './dispatch';
 export * from './namespacedNameHelper';
+export * from './destructProperties';

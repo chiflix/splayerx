@@ -1,5 +1,5 @@
-import { INPUT_COMPONENT_TYPE, VuexStore } from './constants';
-import { addComponent, removeComponent } from './helpers';
+import { INPUT_COMPONENT_TYPE, VuexStore, nameDefaultOption } from './constants';
+import { destructProperties as destruct, addComponent, removeComponent } from './helpers';
 import module from './vuex';
 import {
   generateMousemoveListener,
@@ -9,19 +9,23 @@ import {
 } from './listeners';
 
 
-export { INPUT_COMPONENT_TYPE } from './constants';
+export {
+  INPUT_COMPONENT_TYPE,
+  actionTypes, mutationTypes, getterTypes,
+} from './constants';
 export default {
   install(Vue, options) {
     // register generated vuex module
-    VuexStore.registerModule('InputPlugin', module(options));
+    const name = options.name || nameDefaultOption;
+    VuexStore.registerModule(name, module(options));
 
     // generate event listeners
     const {
       mouse: mouseOptions, keyboard: keyboardOptions, wheel: wheelOptions,
-      name, namespaced, // vuex options
-    } = options;
-    const mousemoveOptions = mouseOptions?.mousemove;
-    const mousedownOptions = mouseOptions?.mousedown;
+      namespaced, // vuex options
+    } = destruct(options, 'mouse', 'keyboard', 'wheel', 'namespaced');
+    const { mousemove: mousemoveOptions } = destruct(mouseOptions, 'mousemove');
+    const { mousedown: mousedownOptions } = destruct(mouseOptions, 'mousedown');
     const vuexOptions = { name, namespaced };
     const mousemove = generateMousemoveListener(mousemoveOptions, vuexOptions);
     const { mousedown, mouseup } =
