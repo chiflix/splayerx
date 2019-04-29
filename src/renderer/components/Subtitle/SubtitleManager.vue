@@ -39,7 +39,7 @@
 <script>
 import { mapGetters, mapActions, mapMutations, mapState } from 'vuex';
 import romanize from 'romanize';
-import { sep, join, basename } from 'path';
+import { sep, join, basename, extname } from 'path';
 import { flatten, isEqual, sortBy, differenceWith, isFunction, partial, pick, values, keyBy, merge, castArray, intersectionBy, cloneDeep } from 'lodash';
 import { existsSync } from 'fs';
 import { codeToLanguageName } from '@/helpers/language';
@@ -877,7 +877,10 @@ export default {
           defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
           this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
         }
-        const fileName = `${basename(`${currentSubtitle.metaInfo.name}`, '.vtt')}.vtt`;
+        const originSrc = this.originSrc;
+        const videoName = `${basename(originSrc, extname(originSrc))}`;
+        const name = `${this.$t('subtitle.modified')} ${romanize(currentSubtitle.metaInfo.name)}-${videoName}`;
+        const fileName = `${basename(name, '.vtt')}.vtt`;
         defaultPath = join(defaultPath, fileName);
         dialog.showSaveDialog(focusWindow, {
           defaultPath,

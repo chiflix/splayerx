@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="sub-editor"
+    @mouseup.stop="handleEditorMouseUp"
       :style="{
         cursor: dragingMode
       }">
@@ -126,7 +127,7 @@ import {
   MODIFIED_SUBTITLE_TYPE as modifiedTypes,
 } from '@/constants';
 import { videodata } from '@/store/video';
-import { Editor as editorMutations } from '@/store/mutationTypes';
+import { Editor as editorMutations, Input as inputMutations } from '@/store/mutationTypes';
 import TheProgressBar from '@/components/PlayingView/TheProgressBar.vue';
 import SubtitleRenderer from './SubtitleRenderer.vue';
 import SubtitleInstance from './SubtitleLoader/index';
@@ -386,7 +387,7 @@ export default {
       }
     },
     currentLeft() {
-      if (!this.protectKeyWithEnterShortKey) {
+      if (!(this.protectKeyWithEnterShortKey || this.isEditable)) {
         this.updateChooseIndex(-2);
       }
     },
@@ -533,6 +534,7 @@ export default {
       enableMenuNext: editorMutations.UPDATE_CURRENT_EDIT_MENU_NEXT_ENABLE,
       updateChooseIndex: editorMutations.UPDATE_CHOOSE_SUBTITLE_INDEX,
       updateAutoFocus: editorMutations.UPDATE_AUTO_FOCUS,
+      updateMouseUp: inputMutations.MOUSEUP_COMPONENT_NAME_UPDATE,
     }),
     ...mapActions({
       addMessages: 'addMessages',
@@ -732,6 +734,9 @@ export default {
     },
     handleExitBtnHoverOut() {
       this.exitBtnHover = false;
+    },
+    handleEditorMouseUp() {
+      this.updateMouseUp('the-video-controller');
     },
     handleDragStartTimeLine(e) {
       if (!this.paused) {
@@ -1650,7 +1655,8 @@ export default {
         if (!this.paused) {
           this.$bus.$emit('toggle-playback');
           // this.$nextTick(show);
-          setImmediate(show);
+          // setImmediate(show);
+          setTimeout(show, 100);
         } else {
           show();
         }

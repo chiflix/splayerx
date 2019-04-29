@@ -2,7 +2,7 @@
   <div :class="isProfessional ? 'professional' : ''">
     <div class="subContainer"
       v-for="(cue, i) in currentCues"
-      v-fade-in="!(isProfessional && cue.reference && !paused)"
+      v-fade-in="!(isProfessional && (cue.reference || cue.index === -1) && !paused)"
       :key="i"
       :style="{
         writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
@@ -30,34 +30,32 @@
           :cue="cue"></cue-editable-renderer>
       </div>
     </div>
-    <transition name="fade" mode="out-in" appear>
-      <div
-        v-if="(isProfessional && showAddInput && paused)"
-        @click.stop="handleClickSubContainer($event, {
-          index: -1,
-        })"
-        :class="'subContainer subtitle-alignment2 focus'+`${paused ? ' enable-hover': ''}`+`${isEditable && chooseIndex === -1 ? ' editable': ''}`"
+    <!-- <div
+      v-if="(isProfessional && showAddInput && paused)"
+      @click.stop="handleClickSubContainer($event, {
+        index: -1,
+      })"
+      :class="'subContainer subtitle-alignment2 focus'+`${paused ? ' enable-hover': ''}`+`${isEditable && chooseIndex === -1 ? ' editable': ''}`"
+      :style="{
+        cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
+      }">
+      <div class="cue-wrap"
         :style="{
-          cursor: dragingMode !== 'default' ? dragingMode : 'pointer'
+          zoom: zoom,
+          minWidth: minInputWidth,
         }">
-        <div class="cue-wrap"
-          :style="{
-            zoom: zoom,
-            minWidth: minInputWidth,
-          }">
-          <cue-editable-renderer class="cueRender"
-            :text="$t('editorCreateSubtitle.button')"
-            :settings="{}"
-            :isFirstSub="isFirstSub"
-            @update:textarea-change="handleTextAreaChange"
-            :canUseEditor="canUseEditor"
-            :zoom="zoom"
-            :cue="{
-              index: -1,
-            }"></cue-editable-renderer>
-        </div>
+        <cue-editable-renderer class="cueRender"
+          :text="$t('editorCreateSubtitle.button')"
+          :settings="{}"
+          :isFirstSub="isFirstSub"
+          @update:textarea-change="handleTextAreaChange"
+          :canUseEditor="canUseEditor"
+          :zoom="zoom"
+          :cue="{
+            index: -1,
+          }"></cue-editable-renderer>
       </div>
-    </transition>
+    </div> -->
   </div>
 </template>
 <script>
@@ -334,7 +332,9 @@ export default {
       return true;
     },
     checkCurrentSub(sub) {
-      if (this.currentSub.length === 0) {
+      if (sub.index === -1 && this.isProfessional) {
+        return true;
+      } else if (this.currentSub.length === 0) {
         return false;
       }
       return this.isProfessional && this.currentSub.some(e => e.start === sub.start);
@@ -349,7 +349,9 @@ export default {
       return '';
     },
     isCueFocus(cue) {
-      if (this.currentSub.length === 0 || !this.isProfessional) {
+      if (cue.index === -1 && this.isProfessional) {
+        return ' focus';
+      } else if (this.currentSub.length === 0 || !this.isProfessional) {
         return '';
       }
       const result = this.currentSub.find(e => cue.start === e.start && cue.end === e.end);
@@ -544,7 +546,8 @@ export default {
       if (parsedData) {
         const cues = parsedData
           .filter(subtitle => subtitle.start <= currentTime && subtitle.end > currentTime);
-        if (!isEqual(cues, this.currentCues)) {
+        if (!isEqual(cues, this.currentCues) &&
+          !(cues.length === 0 && this.isProfessional && this.showAddInput)) {
           let rev = false;
           const tmp = cues;
           if (cues.length >= 2) {
@@ -562,6 +565,17 @@ export default {
           }
           this.currentCues = rev ? this.parsedFragments(cues).reverse()
             : this.parsedFragments(cues);
+        } else if (cues.length === 0 && this.isProfessional && this.showAddInput &&
+          !this.currentCues.find(e => e.index === -1)) {
+          this.currentCues = [{
+            tags: {
+              alignment: 2,
+              pos: null,
+            },
+            text: '',
+            index: -1,
+            track: 1,
+          }];
         }
       }
     },
@@ -964,11 +978,5 @@ export default {
     z-index: 1;
     opacity: 0;
   }
-}
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 100ms ease-in;
-}
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
 }
 </style>

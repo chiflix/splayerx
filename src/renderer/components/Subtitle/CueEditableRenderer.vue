@@ -83,10 +83,12 @@ export default {
       return 'center';
     },
     finalText() {
-      let tmp = this.tmpText ? this.tmpText : this.text;
-      if (this.chooseIndex === this.cue.index && this.isEditable) {
-        tmp = this.cue.text;
+      // let tmp = this.tmpText ? this.tmpText : this.text;
+      let tmp = this.text;
+      if (this.cue.index === -1 && !this.isEditable) {
+        tmp = this.$t('editorCreateSubtitle.button');
       }
+      tmp = this.tmpText ? this.tmpText : tmp;
       if (this.settings) {
         if (this.settings.i) {
           tmp = `<i>${tmp}`;
