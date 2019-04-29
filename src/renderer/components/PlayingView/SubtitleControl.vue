@@ -856,7 +856,7 @@ export default {
       .text {
         font-size: 13.2px;
         letter-spacing: 0.2px;
-        line-height: 14px;
+        line-height: 16px;
         margin: auto 0 auto 12.73px;
       }
       .iconContainer {
@@ -878,7 +878,7 @@ export default {
       .text {
         font-size: 12px;
         letter-spacing: 0.2px;
-        line-height: 14px;
+        line-height: 16px;
         margin: auto 12.73px;
       }
     }

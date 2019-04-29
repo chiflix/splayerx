@@ -422,7 +422,7 @@ $themeColor-Light: white;
     .background-mask {
       width: 100%;
       height: 100%;
-      background-image: radial-gradient(circle at 37% 35%, rgba(0,0,0,0.00) 13%, rgba(0,0,0,0.43) 47%, rgba(0,0,0,0.80) 100%);
+      background-image: radial-gradient(circle 80.5vw at 27.8vw 32.1vh, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.41) 45%, rgba(0,0,0,0.7) 100%);
     }
   }
   .item-info {

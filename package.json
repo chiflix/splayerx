@@ -2,11 +2,14 @@
   "name": "splayer",
   "productName": "splayer",
   "homepage": "https://splayer.org",
-  "version": "4.1.8",
+  "version": "4.1.9",
   "author": "tomasen <tomasen@gmail.com>",
   "description": "a media player",
   "license": "GPL-3.0-or-later",
   "main": "./dist/electron/main.js",
+  "engines": {
+    "node": "^11"
+  },
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder --p never",
     "build:appx": "node .electron-vue/build.js && electron-builder --p never -w appx",
@@ -568,6 +571,7 @@
     "node-loader": "^0.6.0",
     "node-sass": "^4.11.0",
     "npm": "^6.1.0",
+    "raw-loader": "^2.0.0",
     "require-dir": "^1.2.0",
     "sass-loader": "^7.1.0",
     "sass-resources-loader": "^2.0.0",
@@ -582,7 +586,7 @@
     "vue-loader": "^15.4.2",
     "vue-style-loader": "^4.1.2",
     "vue-template-compiler": "^2.5.18",
-    "webpack": "^4.27.1",
+    "webpack": "4.28.4",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10",
     "webpack-hot-middleware": "^2.24.3",

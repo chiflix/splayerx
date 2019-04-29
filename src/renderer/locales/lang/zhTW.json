@@ -173,7 +173,13 @@
 	"preferences": {
 		"general": {
 			"clearHistory": "退出時自動清空播放記錄",
-			"reverseScrolling": "觸摸板與鼠標反向滾動",
+			"reverseScrolling": "鼠标滚轮反向",
+			"setDefault": "設為默認播放器",
+			"setDefaultDescription": "所有視頻文件都自動使用 SPlayer 打開。",
+			"restoreSettings": "抹掉所有內容和設置",
+			"restoreSettingsDescription": "刪除所有本地數據和緩存文件并重啟應用。",
+			"setButton": "應用",
+			"relaunch": "重啟",
 			"displayLanguage": "顯示語言",
 			"generalSetting": "通用設置",
 			"others": "其他",

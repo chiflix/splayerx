@@ -1385,7 +1385,7 @@ new Vue({
               }, 1000);
             }
             if (this.wheelDirection === 'vertical') {
-              if (process.platform !== 'darwin') {
+              if (process.platform !== 'darwin' || this.reverseScrolling) {
                 this.$store.dispatch(
                   e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
                   Math.abs(e.deltaY) * 0.06,
