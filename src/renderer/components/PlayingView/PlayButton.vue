@@ -21,10 +21,12 @@
 </template>
 
 <script>
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
   name: 'play-button',
+  type: INPUT_COMPONENT_TYPE,
   props: {
     paused: false,
     isFocused: true,

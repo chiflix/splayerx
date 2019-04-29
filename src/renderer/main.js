@@ -104,9 +104,21 @@ Vue.use(InputPlugin, {
       position: true,
       component: true,
     },
+    mousedown: {
+      component: true,
+    },
+    mouseup: {
+      component: true,
+    },
   },
-  keyboard: {},
-  wheel: {},
+  keyboard: {
+    keys: true,
+  },
+  wheel: {
+    component: true,
+    direction: true,
+    phase: true,
+  },
 });
 // Vue.use(InputPlugin);
 // i18n and its plugin

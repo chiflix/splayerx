@@ -29,7 +29,7 @@ export default function getters(options = defaultOptions) {
   if (get(mouse, 'mousedown.component')) {
     result[t.GET_MOUSEDOWN_COMPONENT] = ({ mousedownComponentName }) => mousedownComponentName;
   }
-  if (get(mouse, 'mosueup.component')) {
+  if (get(mouse, 'mouseup.component')) {
     result[t.GET_MOUSEUP_COMPONENT] = ({ mouseupComponentName }) => mouseupComponentName;
   }
   if (get(keyboard, 'keys')) {

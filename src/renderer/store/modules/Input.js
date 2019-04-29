@@ -5,15 +5,10 @@ const state = {
   mousedownComponentName: 'the-video-controller',
   mouseupComponentName: 'the-video-controller',
   pressedKeyboardCodes: [],
-  wheelComponentName: 'the-video-controller',
-  wheelTimestamp: 0,
 };
 
 const getters = {
   progressKeydown: state => state.pressedKeyboardCodes.includes('ArrowLeft') || state.pressedKeyboardCodes.includes('ArrowRight') || state.pressedKeyboardCodes.includes('BracketLeft') || state.pressedKeyboardCodes.includes('BracketRight'),
-  volumeKeydown: state => state.pressedKeyboardCodes.includes('KeyM'),
-  wheelTriggered: state => state.wheelTimestamp,
-  volumeWheelTriggered: state => state.wheelComponentName !== 'subtitle-control' && state.wheelComponenetName !== 'advance-control',
 };
 
 const mutations = {
@@ -25,12 +20,6 @@ const mutations = {
   },
   [mutationTypes.PRESSED_KEYBOARD_CODES_UPDATE](state, payload) {
     state.pressedKeyboardCodes = payload;
-  },
-  [mutationTypes.WHEEL_COMPONENT_NAME_UPDATE](state, payload) {
-    state.wheelComponentName = payload;
-  },
-  [mutationTypes.WHEEL_TIMESTAMP_UPDATE](state, payload) {
-    state.wheelTimestamp = payload;
   },
 };
 
@@ -50,10 +39,6 @@ const actions = {
     const pressedKeys = [...state.pressedKeyboardCodes];
     if (pressedKeys.includes(code)) pressedKeys.splice(pressedKeys.indexOf(code), 1);
     commit(mutationTypes.PRESSED_KEYBOARD_CODES_UPDATE, pressedKeys);
-  },
-  [actionTypes.WHEEL_UPDATE]({ commit }, { componentName, timestamp }) {
-    commit(mutationTypes.WHEEL_COMPONENT_NAME_UPDATE, componentName);
-    commit(mutationTypes.WHEEL_TIMESTAMP_UPDATE, timestamp);
   },
 };
 

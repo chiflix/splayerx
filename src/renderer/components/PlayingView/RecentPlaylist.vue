@@ -94,8 +94,7 @@
 </template>
 <script>
 import path from 'path';
-import { mapState, mapGetters, mapActions, mapMutations } from 'vuex';
-import { Input as inputMutations } from '@/store/mutationTypes';
+import { mapState, mapGetters, mapActions } from 'vuex';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 import Add from '@/components/PlayingView/Add.vue';
@@ -163,9 +162,6 @@ export default {
     this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
   },
   methods: {
-    ...mapMutations({
-      updateMousemoveTarget: inputMutations.MOUSEMOVE_COMPONENT_NAME_UPDATE,
-    }),
     ...mapActions({
       clearMousedown: InputActions.MOUSEDOWN_UPDATE,
       clearMouseup: InputActions.MOUSEUP_UPDATE,
@@ -182,7 +178,6 @@ export default {
         this.clearMousedown({ componentName: '' });
       } else if (this.backgroundDisplayState) {
         this.$emit('update:playlistcontrol-showattached', false);
-        this.updateMousemoveTarget('the-video-controller');
       }
     },
     updatelastPlayedTime(time) {

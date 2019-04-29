@@ -3,7 +3,7 @@
   @mouseenter="enterArea"
   @mouseleave="leaveArea">
   <div class="trigger-area"
-    :class="showVolume ? 'fade-in' : 'fade-out'"
+    :class="!volumeTriggerStopped ? 'fade-in' : 'fade-out'"
     :style="{cursor: showAllWidgets ? 'pointer' : 'none'}"
     @mouseenter="actionArea"
     @mouseleave="leaveActionArea"
@@ -30,11 +30,14 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, createNamespacedHelpers } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
-import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
+import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
+import { WHEEL_STOPPED_PHASE, WHEEL_VERTICAL_DIRECTION } from '@/plugins/input/constants';
 import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
+
+const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
 
 export default {
   name: 'volume-indicator',
@@ -45,8 +48,8 @@ export default {
   },
   data() {
     return {
-      volumeTriggerStopped: false, // true when volume's changing
       volumeTriggerTimerId: 0,
+      volumeTriggerStopped: true,
       volumeFadingId: NaN,
       borderFadingId: NaN,
       inArea: false,
@@ -56,13 +59,46 @@ export default {
       currentWidget: '',
     };
   },
-  props: ['showAllWidgets', 'mousedownOnPlayButton', 'attachedShown'],
+  props: ['showAllWidgets'],
   computed: {
-    ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen', 'wheelTriggered', 'volumeWheelTriggered']),
-    showVolume() {
-      return (this.inArea && this.showAllWidgets
-        && !this.mousedownOnPlayButton && !this.attachedShown)
-        || this.mousedown || this.volumeTriggerStopped || (this.muted && this.showAllWidgets);
+    ...mapGetters(['muted', 'ratio', 'isFullScreen']),
+    ...inputMapGetters({
+      mousemoveComponent: iGT.GET_MOUSEMOVE_COMPONENT,
+      mousedownComponent: iGT.GET_MOUSEDOWN_COMPONENT,
+      mouseupComponent: iGT.GET_MOUSEUP_COMPONENT,
+      keys: iGT.GET_KEYS,
+      wheelDirection: iGT.GET_WHEEL_DIRECTION,
+      wheelPhase: iGT.GET_WHEEL_PHASE,
+    }),
+    volumeTriggeredByMouse() {
+      // mousedown, mouseup or mousemove on the component
+      return (
+        this.mousedownComponent === this.$options.name ||
+        this.mouseupComponent === this.$options.name ||
+        this.mousemoveComponent === this.$options.name
+      );
+    },
+    volumeTriggeredByKeyboard() {
+      // M, UpArrow or DownArrow key pressed
+      const windowsVolumeShortcuts = ['UpArrow', 'DownArrow', 'KeyM'];
+      const darwinVolumeShortcuts = ['KeyM'];
+      return (process.platform === 'darwin' ? darwinVolumeShortcuts : windowsVolumeShortcuts)
+        .some(key => this.keys.includes(key));
+    },
+    volumeTriggeredByWheel() {
+      // wheel happened horizontal not in an inertial way
+      // console.log('Input|Wheel:', this.wheelDirection, this.wheelPhase);
+      return (
+        this.wheelDirection === WHEEL_VERTICAL_DIRECTION &&
+        this.wheelPhase !== WHEEL_STOPPED_PHASE
+      );
+    },
+    volumeTriggered() {
+      return (
+        this.volumeTriggeredByMouse ||
+        this.volumeTriggeredByKeyboard ||
+        this.volumeTriggeredByWheel
+      );
     },
     volume: {
       get() {
@@ -168,71 +204,18 @@ export default {
     setTimeout(() => {
       this.leaveArea();
     }, 2000);
-    if (this.muted) {
-      this.volumeTriggerStopped = this.showAllWidgets;
-    }
     this.$bus.$on('toggle-fullscreen', this.handleFullScreen);
     this.$bus.$on('to-fullscreen', this.handleFullScreen);
     this.$bus.$on('off-fullscreen', this.handleFullScreen);
   },
   watch: {
-    showAllWidgets(val) {
-      if (!val) this.volumeTriggerStopped = false;
-    },
-    wheelTriggered() {
-      if (this.volumeWheelTriggered) {
-        const { clock, volumeTriggerTimerId } = this;
-        this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
-          this.volumeTriggerStopped = false;
-        }, 1000);
-      }
-    },
-    showVolume(val) {
-      if (!val) document.onmouseup = null;
-    },
-    muted(val) {
-      const { clock, volumeTriggerTimerId } = this;
-      if (!this.volumeKeydown && this.volume !== 0) {
-        this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
-          this.volumeTriggerStopped = false;
-        }, 1000);
-      } else if (this.volumeKeydown && val) {
-        if (!this.showAllWidgets) {
-          this.volumeTriggerStopped = true;
-          clock.clearTimeout(volumeTriggerTimerId);
-          this.volumeTriggerTimerId = clock.setTimeout(() => {
-            this.volumeTriggerStopped = false;
-          }, 1000);
-        } else {
-          this.volumeTriggerStopped = this.showAllWidgets;
-          clock.clearTimeout(volumeTriggerTimerId);
-        }
-      }
-    },
-    volume() {
-      const { clock, volumeTriggerTimerId } = this;
-      if (!this.volumeKeydown) {
-        this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
-          this.volumeTriggerStopped = false;
-        }, 1000);
-      }
-    },
-    volumeKeydown(newVal, oldVal) {
-      const { clock, volumeTriggerTimerId } = this;
-      if (newVal) {
-        this.volumeTriggerStopped = true;
-        clock.clearTimeout(volumeTriggerTimerId);
-      } else if (!newVal && oldVal) {
-        clock.clearTimeout(volumeTriggerTimerId);
-        this.volumeTriggerTimerId = clock.setTimeout(() => {
-          this.volumeTriggerStopped = false;
-        }, 1000);
+    volumeTriggered(val) {
+      if (val) {
+        this.clock.clearTimeout(this.volumeTriggerTimerId);
+        this.volumeTriggerStopped = false;
+      } else {
+        this.volumeTriggerTimerId =
+          this.clock.setTimeout(() => { this.volumeTriggerStopped = true; }, 1000);
       }
     },
   },

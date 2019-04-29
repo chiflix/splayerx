@@ -7,6 +7,8 @@ import {
   MOUSEMOVE_MOVING_PHASE as mouseMoving, MOUSEMOVE_STOPPED_PHASE as mouseStopped,
   // wheel devices
   WHEEL_MOUSE_DEVICE as mouse, WHEEL_TRACKPAD_DEVICE as trackpad,
+  // wheel phases
+  WHEEL_STOPPED_PHASE,
   // wheel directions
   WHEEL_NO_DIRECTION as no,
   WHEEL_HORIZONTAL_DIRECTION as horizontal,
@@ -109,7 +111,10 @@ const allActions = {
   },
   [at.UPDATE_WHEEL_PHASE]: ({ commit }, event) => {
     if (!wheelDetector.listeners('phase-change').length) {
-      wheelDetector.on('phase-change', phase => commit(mt.WHEEL_PHASE, phase));
+      wheelDetector.on('phase-change', (phase) => {
+        commit(mt.WHEEL_PHASE, phase);
+        if (phase === WHEEL_STOPPED_PHASE) commit(mt.WHEEL_DIRECTION, no);
+      });
     }
     wheelDetector.calcalate(event);
   },
@@ -117,7 +122,6 @@ const allActions = {
     const { wheelDirection: d } = getters;
     if (deltaX && (d === no || d === horizontal)) commit(mt.WHEEL_DIRECTION, horizontal);
     else if (deltaY && (d === no || d === vertical)) commit(mt.WHEEL_DIRECTION, vertical);
-    else commit(mt.WHEEL_DIRECTION, no);
   },
   [at.UPDATE_WHEEL_COMPONENT]: ({ commit }, { target }) => {
     const { name } = getComponentName(target);
@@ -182,11 +186,9 @@ export default function actions(options = defaultOptions) {
     result[at.UPDATE_META_KEYDOWN_CODES] = allActions[at.UPDATE_META_KEYDOWN_CODES];
     result[at.UPDATE_META_KEYUP_CODES] = allActions[at.UPDATE_META_KEYUP_CODES];
   }
-  if (get(wheel, 'phase')) {
-    result[at.UPDATE_WHEEL_PHASE] = allActions[at.UPDATE_WHEEL_PHASE];
-  }
-  if (get(wheel, 'direction')) {
+  if (get(wheel, 'phase') || get(wheel, 'direction')) {
     result[at.UPDATE_WHEEL_DIRECTION] = allActions[at.UPDATE_WHEEL_DIRECTION];
+    result[at.UPDATE_WHEEL_PHASE] = allActions[at.UPDATE_WHEEL_PHASE];
   }
   if (get(wheel, 'component')) {
     result[at.UPDATE_WHEEL_COMPONENT] = allActions[at.UPDATE_WHEEL_COMPONENT];

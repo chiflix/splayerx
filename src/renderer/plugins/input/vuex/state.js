@@ -20,7 +20,7 @@ export default function state(options = defaultOptions) {
   if (get(mouse, 'mousedown.component')) {
     result[t.MOUSEDOWN_COMPONENT_NAME] = '';
   }
-  if (get(mouse, 'mosueup.component')) {
+  if (get(mouse, 'mouseup.component')) {
     result[t.MOUSEUP_COMPONENT_NAME] = '';
   }
   if (get(keyboard, 'keys')) {

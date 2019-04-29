@@ -22,7 +22,6 @@
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
     <div class="masking" v-fade-in="showAllWidgets || progressTriggerStopped"/>
     <play-button class="play-button no-drag"
-      @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
       :mousemovePosition="mousemoveClientPosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
@@ -30,7 +29,6 @@
     <volume-indicator class="no-drag"
       @update:volume-state="updateVolumeState"
       :attachedShown="attachedShown"
-      :mousedownOnPlayButton="mousedownOnPlayButton"
       :showAllWidgets="showAllWidgets"
       :currentWidget="currentWidget" />
     <div class="control-buttons" v-fade-in="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
@@ -119,7 +117,6 @@ export default {
       scrubber: null,
       touchBar: null,
       lastMousedownVolume: false,
-      mousedownOnPlayButton: false,
       mousedownOnVolume: false,
       preFullScreen: false,
       dragOver: false,
@@ -131,7 +128,6 @@ export default {
     ...mapState({
       currentMouseupWidget: state => state.Input.mouseupComponentName,
       currentMousedownWidget: state => state.Input.mousedownComponentName,
-      wheelTime: state => state.Input.wheelTimestamp,
     }),
     ...mapGetters(['paused', 'duration', 'isFullScreen', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
     ...inputMapGetters({
@@ -284,7 +280,6 @@ export default {
     });
     document.addEventListener('keydown', this.handleKeydown);
     document.addEventListener('keyup', this.handleKeyup);
-    document.addEventListener('wheel', this.handleWheel);
   },
   methods: {
     ...mapActions({
@@ -292,7 +287,6 @@ export default {
       updateMouseup: inputActions.MOUSEUP_UPDATE,
       updateKeydown: inputActions.KEYDOWN_UPDATE,
       updateKeyup: inputActions.KEYUP_UPDATE,
-      updateWheel: inputActions.WHEEL_UPDATE,
     }),
     createIcon(iconPath) {
       const { nativeImage } = this.$electron.remote;
@@ -350,9 +344,6 @@ export default {
     },
     updatePlaylistShowAttached(event) {
       this.widgetsStatus['playlist-control'].showAttached = event;
-    },
-    updatePlayButtonState(mousedownState) {
-      this.mousedownOnPlayButton = mousedownState;
     },
     updateVolumeState(mousedownState) {
       this.mousedownOnVolume = mousedownState;
@@ -457,8 +448,7 @@ export default {
         .some(key => this.widgetsStatus[key].showAttached === true);
     },
     // Event listeners
-    handleMousemove(event) {
-      const { target } = event;
+    handleMousemove() {
       this.mouseStopped = false;
       if (this.isMousedown) {
         this.isMousemove = true;
@@ -471,9 +461,6 @@ export default {
           this.mouseStopped = true;
         }, this.mousestopDelay);
       }
-      this.updateMousemove({
-        componentName: this.getComponentName(target),
-      });
     },
     handleMouseenter() {
       this.mouseLeftWindow = false;
@@ -545,12 +532,6 @@ export default {
     },
     handleKeyup({ code }) {
       this.updateKeyup({ releasedKeyboardCode: code });
-    },
-    handleWheel({ target, timeStamp }) {
-      this.updateWheel({
-        componentName: this.getComponentName(target),
-        timestamp: timeStamp,
-      });
     },
     // Helper functions
     getAllUIComponents(rootElement) {
