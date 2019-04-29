@@ -174,7 +174,7 @@
 		"general": {
 			"clearHistory": "Always clear playback history on exit",
 			"reverseScrolling": "Reverse mouse scrolling",
-			"setDefault": "Set as the default video player",
+			"setDefault": "Set as the Default Video Player",
 			"setDefaultDescription": "Open all video files with SPlayer.",
 			"restoreSettings": "Reset All Content and Settings",
 			"restoreSettingsDescription": "Restart application with all data and caches erased.",
@@ -186,11 +186,11 @@
 			"switchDisplayLanguages": "Display Language controls the language you see in SPlayer."
 		},
 		"privacy": {
-			"languageDescription": "Find translation results in the following language sequence while the video is being played.",
-			"languagePriority": "Language Priority",
+			"languageDescription": "Upload anonymous data to fetch translation results in the following language,  no privacy information will be included.",
+			"languagePriority": "Language Preference",
 			"none": "None",
 			"primary": "Primary",
-			"privacyConfirm": "Allow anonymous data / Smart Translation",
+			"privacyConfirm": "Enable Smart Translation",
 			"privacySetting": "Translation",
 			"secondary": "Secondary",
 			"setAsDefault": "Set SPlayer as the Default Application",

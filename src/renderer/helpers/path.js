@@ -33,9 +33,9 @@ export function fileUrlToPath(fileUrl) {
 }
 
 // season math reg
-const SEREG = /([\u005b.-\s_]s[e]?(\d+)|season(\d+)|第(\d+)季|第([零一二三四五六七八九十百千]+)季)/i;
+const SEREG = /([\u005b.-\s_]?s[e]?(\d+)|season(\d+)|第(\d+)季|第([零一二三四五六七八九十百千]+)季)/i;
 // episode match reg
-const EPREG = /(e[p]?(\d+)[\u005d.-\s_]|episode(\d+)|第(\d+)集|第([零一二三四五六七八九十百千]+)集)/i;
+const EPREG = /(e[p]?(\d+)[\u005d.-\s_]?|episode(\d+)|第(\d+)集|第([零一二三四五六七八九十百千]+)集)/i;
 
 /**
  * 匹配路径中视频文件名称里面的season和episode

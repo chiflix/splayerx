@@ -413,6 +413,8 @@ export default {
         return `S${parsedName.season}E${parsedName.episode}`;
       } else if (parsedName.episode && !parsedName.season) {
         return `EP${parsedName.episode}`;
+      } else if (parsedName.season && !parsedName.episode) {
+        return `SE${parsedName.season}`;
       }
       return path.basename(this.path, path.extname(this.path));
     },
