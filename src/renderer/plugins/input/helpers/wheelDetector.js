@@ -141,4 +141,4 @@ class ElectronWheel extends WheelPhaseCalculator {
     }
   }
 }
-export const electronWheel = new ElectronWheel();
+export const electronWheel = process.platform === 'darwin' ? new ElectronWheel() : new LethargyWheel();
