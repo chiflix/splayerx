@@ -31,7 +31,8 @@
       @update:volume-state="updateVolumeState"
       :attachedShown="attachedShown"
       :mousedownOnPlayButton="mousedownOnPlayButton"
-      :showAllWidgets="showAllWidgets"/>
+      :showAllWidgets="showAllWidgets"
+      :currentWidget="currentWidget" />
     <div class="control-buttons" v-fade-in="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }">
       <playlist-control class="button playlist" v-fade-in="displayState['playlist-control']" v-bind.sync="widgetsStatus['playlist-control']"/>
       <subtitle-control class="button subtitle" v-fade-in="displayState['subtitle-control']"
@@ -65,7 +66,7 @@ import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
 import { videodata } from '../../store/video';
 
-const { mapGetters: iG } = createNamespacedHelpers('InputPlugin');
+const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
 
 export default {
   name: 'the-video-controller',
@@ -128,14 +129,14 @@ export default {
   },
   computed: {
     ...mapState({
-      currentWidget: ({ Input }) => Input.mousemoveComponentName,
       currentMouseupWidget: state => state.Input.mouseupComponentName,
       currentMousedownWidget: state => state.Input.mousedownComponentName,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
     ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
-    ...iG({
+    ...inputMapGetters({
       mousemoveClientPosition: iGT.GET_MOUSEMOVE_POSITION,
+      currentWidget: iGT.GET_MOUSEMOVE_COMPONENT,
     }),
     showAllWidgets() {
       return !this.tempRecentPlaylistDisplayState &&
@@ -287,7 +288,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      updateMousemove: inputActions.MOUSEMOVE_UPDATE,
       updateMousedown: inputActions.MOUSEDOWN_UPDATE,
       updateMouseup: inputActions.MOUSEUP_UPDATE,
       updateKeydown: inputActions.KEYDOWN_UPDATE,

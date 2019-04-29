@@ -102,6 +102,7 @@ Vue.use(InputPlugin, {
   mouse: {
     mousemove: {
       position: true,
+      component: true,
     },
   },
   keyboard: {},

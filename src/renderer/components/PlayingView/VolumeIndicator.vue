@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
 import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import BaseInfoCard from './InfoCard.vue';
@@ -53,14 +53,12 @@ export default {
       mouseover: false,
       mousedown: false,
       canToggleMute: false,
+      currentWidget: '',
     };
   },
   props: ['showAllWidgets', 'mousedownOnPlayButton', 'attachedShown'],
   computed: {
     ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen', 'wheelTriggered', 'volumeWheelTriggered']),
-    ...mapState({
-      currentWidget: ({ Input }) => Input.mousemoveComponentName,
-    }),
     showVolume() {
       return (this.inArea && this.showAllWidgets
         && !this.mousedownOnPlayButton && !this.attachedShown)
