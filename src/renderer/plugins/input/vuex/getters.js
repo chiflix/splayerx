@@ -49,11 +49,9 @@ export default function getters(options = defaultOptions) {
   if (get(keyboard, 'meta')) {
     result[t.GET_META_KEYS] = ({ metaKeyPressedKeyCodes }) => metaKeyPressedKeyCodes;
   }
-  if (get(wheel, 'phase')) {
+  if (get(wheel, 'phase') || get(wheel, 'direction')) {
     result[t.GET_WHEEL_PHASE] = ({ wheelPhase }) => wheelPhase;
     result[t.GET_WHEEL_STOPPED] = ({ wheelPhase }) => wheelPhase === WHEEL_STOPPED_PHASE;
-  }
-  if (get(wheel, 'direction')) {
     result[t.GET_WHEEL_DIRECTION] = ({ wheelDirection }) => wheelDirection;
   }
   if (get(wheel, 'component')) {

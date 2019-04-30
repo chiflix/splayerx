@@ -10,6 +10,7 @@ const state = {
   pressedKeyboardCodes: [],
   wheelComponentName: 'the-video-controller',
   wheelTimestamp: 0,
+  wheelDirection: '',
 };
 
 const getters = {
@@ -17,7 +18,10 @@ const getters = {
   volumeKeydown: state => state.pressedKeyboardCodes.includes('KeyM'),
   leftMousedown: state => state.pressedMouseButtonNames.includes('left'),
   wheelTriggered: state => state.wheelTimestamp,
-  volumeWheelTriggered: state => state.wheelComponentName !== 'subtitle-control' && state.wheelComponenetName !== 'advance-control',
+  volumeWheelTriggered: ({ wheelDirection, wheelComponentName }) => (
+    wheelDirection === 'vertical' &&
+    wheelComponentName !== 'subtitle-control' && wheelComponentName !== 'advance-control'
+  ),
 };
 
 const mutations = {
@@ -44,6 +48,9 @@ const mutations = {
   },
   [mutationTypes.WHEEL_TIMESTAMP_UPDATE](state, payload) {
     state.wheelTimestamp = payload;
+  },
+  [mutationTypes.WHEEL_DIRECTION_UPDATE](state, payload) {
+    state.wheelDirection = payload;
   },
 };
 
@@ -82,9 +89,10 @@ const actions = {
     if (pressedKeys.includes(code)) pressedKeys.splice(pressedKeys.indexOf(code), 1);
     commit(mutationTypes.PRESSED_KEYBOARD_CODES_UPDATE, pressedKeys);
   },
-  [actionTypes.WHEEL_UPDATE]({ commit }, { componentName, timestamp }) {
+  [actionTypes.WHEEL_UPDATE]({ commit }, { componentName, timestamp, direction }) {
     commit(mutationTypes.WHEEL_COMPONENT_NAME_UPDATE, componentName);
     commit(mutationTypes.WHEEL_TIMESTAMP_UPDATE, timestamp);
+    commit(mutationTypes.WHEEL_DIRECTION_UPDATE, direction);
   },
 };
 

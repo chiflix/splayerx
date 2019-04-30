@@ -46,7 +46,7 @@
     </div>
   </div>
   <div class="title other-title">{{ $t("preferences.general.others") }}</div>
-  <BaseCheckBox v-if="isMac"
+  <BaseCheckBox
     :checkboxValue="reverseScrolling"
     @update:checkbox-value="reverseScrolling = $event">
     {{ $t('preferences.general.reverseScrolling') }}
