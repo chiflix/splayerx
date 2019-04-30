@@ -200,7 +200,7 @@ function registerMainWindowEvent() {
   }
 
   function snapShotQueueProcess(event) {
-    const maxWaitingCount = 40;
+    const maxWaitingCount = 100;
     let waitingCount = 0;
     const callback = (resultCode, imgPath) => {
       if (resultCode === 'Waiting for the task completion.') {
@@ -237,12 +237,10 @@ function registerMainWindowEvent() {
   ipcMain.on('snapShot', (event, video, type = 'cover', time = 0) => {
     if (!video.videoWidth) video.videoWidth = 1920;
     if (!video.videoHeight) video.videoHeight = 1080;
-    const imgFolderPath = path.join(tempFolderPath, video.quickHash);
-    if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
-    const imgPath = path.join(imgFolderPath, `${type}.jpg`);
+    const imgPath = video.imgPath;
 
     if (!fs.existsSync(imgPath)) {
-      snapShotQueue.push(Object.assign({ imgPath, type, time }, video));
+      snapShotQueue.push(Object.assign({ type, time }, video));
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
       }

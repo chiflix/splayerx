@@ -83,6 +83,11 @@ export class InfoDB {
     });
   }
 
+  async clearAll() {
+    await this.cleanData();
+    await this.cleanData('media-item');
+  }
+
   /**
    * @param  {String} schema
    * @param  {Object} data

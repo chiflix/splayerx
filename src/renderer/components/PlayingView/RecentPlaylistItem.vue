@@ -96,6 +96,7 @@ import fs from 'fs';
 import path from 'path';
 import { mapGetters } from 'vuex';
 import { filePathToUrl, parseNameFromPath } from '@/helpers/path';
+import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -287,19 +288,20 @@ export default {
   mounted() {
     this.displayIndex = this.index;
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
-    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
+    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event, info) => {
       const videoStream = JSON.parse(info).streams.find(stream => stream.codec_type === 'video');
       this.videoHeight = videoStream.height;
       this.videoWidth = videoStream.width;
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
-      this.mediaQuickHash(this.path).then((quickHash) => {
-        this.$electron.ipcRenderer.send('snapShot', {
-          videoPath: this.path,
-          quickHash,
-          duration: this.mediaInfo.duration,
-          videoWidth: this.videoWidth,
-          videoHeight: this.videoHeight,
-        });
+      const quickHash = await this.mediaQuickHash(this.path);
+      const imgPath = await generateCoverPathByMediaHash(quickHash);
+      this.$electron.ipcRenderer.send('snapShot', {
+        videoPath: this.path,
+        imgPath,
+        quickHash,
+        duration: this.mediaInfo.duration,
+        videoWidth: this.videoWidth,
+        videoHeight: this.videoHeight,
       });
     });
     this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {

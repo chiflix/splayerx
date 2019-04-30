@@ -32,6 +32,8 @@
 
 <script>
 import path from 'path';
+import { filePathToUrl } from '@/helpers/path';
+import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -41,6 +43,7 @@ export default {
     return {
       displayInfo: [],
       item: null,
+      coverSrc: '',
       isDragging: false,
       aboutToDelete: false,
       showShadow: true,
@@ -89,10 +92,13 @@ export default {
   created() {
     this.infoDB.get('media-item', this.playlist.items[this.playlist.playedIndex]).then((data) => {
       this.item = data;
-      this.$refs.item.style.setProperty(
-        'background-image',
-        this.itemShortcut(data.smallShortCut, data.cover, data.lastPlayedTime, data.duration),
-      );
+      generateCoverPathByMediaHash(data.hash).then((path) => {
+        this.coverSrc = filePathToUrl(path);
+        this.$refs.item.style.setProperty(
+          'background-image',
+          this.itemShortcut(data.smallShortCut, data.lastPlayedTime, data.duration),
+        );
+      });
     });
   },
   destroyed() {
@@ -100,8 +106,8 @@ export default {
     document.removeEventListener('mouseup', this.onRecentItemMouseup);
   },
   methods: {
-    itemShortcut(shortCut, cover, lastPlayedTime, duration) {
-      return duration - lastPlayedTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
+    itemShortcut(shortCut, lastPlayedTime, duration) {
+      return duration - lastPlayedTime < 5 ? `url("${this.coverSrc}")` : `url("${shortCut}")`;
     },
     itemInfo() {
       return {
@@ -127,7 +133,6 @@ export default {
           ...this.itemInfo(),
           backgroundUrl: this.itemShortcut(
             this.item.shortCut,
-            this.item.cover,
             this.item.lastPlayedTime,
             this.item.duration,
           ),
