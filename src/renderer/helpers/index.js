@@ -240,9 +240,10 @@ export default {
         }
       }
       if (videoFiles.length !== 0) {
+        const addFiles = videoFiles.filter(file => !this.$store.getters.playingList.includes(file));
         this.$store.dispatch('AddItemsToPlayingList', videoFiles);
+        const playlist = await this.infoDB.get('recent-played', this.playListId);
         if (this.$store.getters.isFolderList) {
-          const playlist = await this.infoDB.get('recent-played', this.playListId);
           /* eslint-disable */
           for (const videoPath of this.$store.getters.playingList) {
             if (videoPath !== this.$store.getters.originSrc) {
@@ -253,7 +254,7 @@ export default {
                 path: videoPath,
                 source: 'playlist',
               };
-              const videoId = await this.add('media-item', data);
+              const videoId = await this.infoDB.add('media-item', data);
               playlist.items.push(videoId);
               playlist.hpaths.push(`${quickHash}-${videoPath}`);
             }
@@ -261,7 +262,20 @@ export default {
           this.infoDB.update('recent-played', playlist);
           this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.$store.getters.playingList, items: playlist.items });
         } else {
-
+          for (const videoPath of addFiles) {
+            const quickHash = await this.mediaQuickHash(videoPath);
+            const data = {
+              quickHash,
+              type: 'video',
+              path: videoPath,
+              source: 'playlist',
+            };
+            const videoId = await this.infoDB.add('media-item', data);
+            playlist.items.push(videoId);
+            playlist.hpaths.push(`${quickHash}-${videoPath}`);
+          }
+          this.infoDB.update('recent-played', playlist);
+          this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.$store.getters.playingList, items: playlist.items });
         }
       } else {
         this.addLog('error', {

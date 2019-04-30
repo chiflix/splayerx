@@ -96,7 +96,6 @@ export class InfoDB {
   async add(schema, data) {
     if (!data) throw new Error(`Invalid data: ${JSON.stringify(data)}`);
     const db = await this.getDB();
-    addLog.methods.addLog('info', `adding ${JSON.stringify(data)} to ${schema}`);
     const tx = db.transaction(schema, 'readwrite');
     return tx.objectStore(schema).add(data);
   }
