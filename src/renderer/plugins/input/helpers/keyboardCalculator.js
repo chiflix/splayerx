@@ -1,7 +1,7 @@
 export function keydownCalculator(existedCodes, currentCode, ignoredKeys = []) {
   existedCodes = [...existedCodes];
   const isIgnoredKey = (
-    ignoredKeys instanceof Array &&
+    Array.isArray(ignoredKeys) &&
     ignoredKeys.length &&
     ignoredKeys.some(code => currentCode.startsWith(code))
   );
@@ -15,7 +15,7 @@ export function specialKeydownCalculator(existedCodes, currentCode) {
 export function keyupCalculator(existedCodes, currentCode, ignoredKeys = []) {
   existedCodes = [...existedCodes];
   const isIgnoredKey = (
-    ignoredKeys instanceof Array &&
+    Array.isArray(ignoredKeys) &&
     ignoredKeys.length &&
     ignoredKeys.some(code => currentCode.startsWith(code))
   );
