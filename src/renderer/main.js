@@ -143,7 +143,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
-      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration',
+      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling',
     ]),
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -1397,12 +1397,18 @@ new Vue({
               }, 1000);
             }
             if (this.wheelDirection === 'vertical') {
-              if (process.platform !== 'darwin' || this.reverseScrolling) {
+              if (
+                (process.platform !== 'darwin' && !this.reverseScrolling) ||
+                (process.platform === 'darwin' && this.reverseScrolling)
+              ) {
                 this.$store.dispatch(
                   e.deltaY < 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
                   Math.abs(e.deltaY) * 0.06,
                 );
-              } else {
+              } else if (
+                (process.platform === 'darwin' && !this.reverseScrolling) ||
+                (process.platform !== 'darwin' && this.reverseScrolling)
+              ) {
                 this.$store.dispatch(
                   e.deltaY > 0 ? videoActions.INCREASE_VOLUME : videoActions.DECREASE_VOLUME,
                   Math.abs(e.deltaY) * 0.06,
