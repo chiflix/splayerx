@@ -46,7 +46,7 @@ class WheelPhaseCalculator extends EventEmitter {
     if (interval) this.interval = interval;
   }
 
-  calcalate(event) {
+  calculate(event) {
     this.lastPhase = event ? this.scrollingPhase : this.inertialPhase;
   }
 }
@@ -81,7 +81,7 @@ class LethargyWheel extends WheelPhaseCalculator {
       tolerance || 0.1,
     );
   }
-  calcalate(event) {
+  calculate(event) {
     if (this.lethargy.check(event)) {
       // It's scrolling phase now
       if (this.wheelInertialingTimer) clearTimeout(this.wheelInertialingTimer);
@@ -122,7 +122,7 @@ class ElectronWheel extends WheelPhaseCalculator {
     ipcRenderer.on('scroll-touch-end', () => { this.lastPhase = this.touchEndPhase; });
   }
 
-  calcalate(event) {
+  calculate(event) {
     if (event) {
       clearTimeout(this.wheelScrollingTimer);
       /* eslint-disable no-default-case */

@@ -111,7 +111,7 @@ const allActions = {
     if (!wheelDetector.listeners('phase-change').length) {
       wheelDetector.on('phase-change', phase => commit(mt.WHEEL_PHASE, phase));
     }
-    wheelDetector.calcalate(event);
+    wheelDetector.calculate(event);
   },
   [at.UPDATE_WHEEL_DIRECTION]: ({ commit, getters }, { deltaX, deltaY }) => {
     const { wheelDirection: d } = getters;
