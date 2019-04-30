@@ -150,17 +150,13 @@ export default {
         }
         if (files) {
           this.$store.commit('source', '');
-          if (files.length > 1) {
-            // if selected files contain folders only, then call openFolder()
-            const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
-            files.forEach(file => remote.app.addRecentDocument(file));
-            if (onlyFolders) {
-              this.openFolder(...files);
-            } else {
-              this.openFile(...files);
-            }
-          } else if (files.length === 1) {
-            this.openVideoFile(...files);
+          // if selected files contain folders only, then call openFolder()
+          const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+          files.forEach(file => remote.app.addRecentDocument(file));
+          if (onlyFolders) {
+            this.openFolder(...files);
+          } else {
+            this.openFile(...files);
           }
         }
       });
@@ -248,8 +244,8 @@ export default {
         if (this.$store.getters.isFolderList) {
           const playlist = await this.infoDB.get('recent-played', this.playListId);
           /* eslint-disable */
-          for (const videoPath of this.playingList) {
-            if (videoPath !== this.originSrc) {
+          for (const videoPath of this.$store.getters.playingList) {
+            if (videoPath !== this.$store.getters.originSrc) {
               const quickHash = await this.mediaQuickHash(videoPath);
               const data = {
                 quickHash,
@@ -263,7 +259,9 @@ export default {
             }
           }
           this.infoDB.update('recent-played', playlist);
-          this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
+          this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.$store.getters.playingList, items: playlist.items });
+        } else {
+
         }
       } else {
         this.addLog('error', {
