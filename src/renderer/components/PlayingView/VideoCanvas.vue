@@ -1,6 +1,5 @@
 <template>
   <div
-    :data-component-name="$options.name"
     class="video">
     <transition name="fade" mode="out-in">
     <base-video-player

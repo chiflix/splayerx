@@ -123,11 +123,13 @@ import { Subtitle as subtitleActions, Input as InputActions } from '@/store/acti
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import { deleteSubtitles } from '@/helpers/subtitle';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from '../BaseIconContainer.vue';
 import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-control',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
     Icon,

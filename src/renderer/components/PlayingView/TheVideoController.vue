@@ -1,6 +1,5 @@
 <template>
   <div ref="controller"
-    :data-component-name="$options.name"
     class="the-video-controller"
     :style="{ cursor: cursorStyle }"
     @mousemove="handleMousemove"
@@ -10,7 +9,7 @@
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
     @click.left="handleMouseupLeft">
-    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
+    <titlebar key="playing-view" currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
@@ -49,6 +48,7 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import path from 'path';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
@@ -64,6 +64,7 @@ import { videodata } from '../../store/video';
 
 export default {
   name: 'the-video-controller',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     titlebar: Titlebar,
     'play-button': PlayButton,

@@ -1,5 +1,5 @@
 <template>
-<div :data-component-name="$options.name"
+<div
   @mousedown="handleMousedown"
   @mouseup="handleMouseup"
   @mouseenter="handleMouseenter"

@@ -30,6 +30,7 @@ import asyncStorage from '@/helpers/asyncStorage';
 import { videodata } from '@/store/video';
 import NotificationBubble, { addBubble } from '../shared/notificationControl';
 import { SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '../shared/notificationcodes';
+import InputPlugin from '@/plugins/input';
 import { VueDevtools } from './plugins/vueDevtools.dev';
 
 // causing callbacks-registry.js 404 error. disable temporarily
@@ -84,7 +85,6 @@ Vue.use(VueI18n);
 Vue.use(VueElectronJSONStorage);
 Vue.use(VueResource);
 Vue.use(AsyncComputed);
-
 Vue.use(VueAnalytics, {
   id: (process.env.NODE_ENV === 'production') ? 'UA-2468227-6' : 'UA-2468227-5',
   router,
@@ -96,6 +96,22 @@ Vue.use(VueAnalytics, {
   ],
 });
 
+// Custom plugin area
+Vue.use(InputPlugin, {
+  namespaced: true,
+  mouse: {},
+  keyboard: {},
+  wheel: {},
+});
+// Vue.use(InputPlugin);
+// i18n and its plugin
+const i18n = new VueI18n({
+  locale: getSystemLocale(), // set locale
+  messages, // set locale messages
+});
+Vue.use(NotificationBubble, i18n);
+// Development-only devtools area
+// VueDevtools plugin
 if (process.env.NODE_ENV === 'development') {
   Vue.use(VueDevtools);
 }
@@ -105,12 +121,6 @@ Vue.mixin(helpers);
 hookVue(Vue);
 
 Vue.prototype.$bus = new Vue(); // Global event bus
-
-const i18n = new VueI18n({
-  locale: getSystemLocale(), // set locale
-  messages, // set locale messages
-});
-Vue.use(NotificationBubble, i18n);
 
 /* eslint-disable no-new */
 new Vue({

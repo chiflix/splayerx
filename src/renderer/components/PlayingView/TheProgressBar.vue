@@ -54,11 +54,13 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
+import { videodata } from '@/store/video';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import ThePreviewThumbnail from './ThePreviewThumbnail.vue';
-import { videodata } from '../../store/video';
 
 export default {
   name: 'the-progress-bar',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     'the-preview-thumbnail': ThePreviewThumbnail,
   },
