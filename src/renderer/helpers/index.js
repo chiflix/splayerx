@@ -250,16 +250,16 @@ export default {
           /* eslint-disable */
           for (const videoPath of this.playingList) {
             if (videoPath !== this.originSrc) {
-              const hash = await this.mediaQuickHash(videoPath);
+              const quickHash = await this.mediaQuickHash(videoPath);
               const data = {
-                hash,
+                quickHash,
                 type: 'video',
                 path: videoPath,
                 source: 'playlist',
               };
               const videoId = await this.add('media-item', data);
               playlist.items.push(videoId);
-              playlist.hpaths.push(`${hash}-${videoPath}`);
+              playlist.hpaths.push(`${quickHash}-${videoPath}`);
             }
           }
           this.infoDB.update('recent-played', playlist);
@@ -376,11 +376,11 @@ export default {
           items: playlist.items,
         });
       } else {
-        // TODO
         const video = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
         this.playFile(video.path, video.videoId);
-        if (!process.mas) {
-          const similarVideos = await this.findSimilarVideoByVidPath(video.path);
+        let similarVideos;
+        try {
+          similarVideos = await this.findSimilarVideoByVidPath(video.path);
           const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
           const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
           const items = [];
@@ -393,12 +393,20 @@ export default {
             paths: similarVideos,
             items,
           });
-        } else {
-          this.$store.dispatch('FolderList', {
-            id,
-            paths: [],
-            items: [],
-          });
+        } catch (err) {
+          if (process.mas && err?.code === 'EPERM') {
+            // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+            console.log({
+              id,
+              paths: [video.path],
+              items: [video.videoId],
+            });
+            this.$store.dispatch('FolderList', {
+              id,
+              paths: [video.path],
+              items: [video.videoId],
+            });
+          }
         }
       }
       this.infoDB.add('recent-played', { ...playlist, lastOpened: Date.now() });
@@ -420,8 +428,9 @@ export default {
       const id = await this.infoDB.addPlaylist([videoFile]);
       const playlistItem = await this.infoDB.get('recent-played', id);
       this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);
-      if (!process.mas) {
-        const similarVideos = await this.findSimilarVideoByVidPath(videoFile);
+      let similarVideos;
+      try {
+        similarVideos = await this.findSimilarVideoByVidPath(videoFile);
         const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
         const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
         const items = [];
@@ -434,12 +443,20 @@ export default {
           paths: similarVideos,
           items,
         });
-      } else {
-        this.$store.dispatch('FolderList', {
-          id,
-          paths: [],
-          items: [],
-        });
+      } catch (err) {
+        if (process.mas && err?.code === 'EPERM') {
+          // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+          console.log({
+            id,
+            paths: [videoFile],
+            items: [playlistItem.items[playlistItem.playedIndex]],
+          });
+          this.$store.dispatch('FolderList', {
+            id,
+            paths: [videoFile],
+            items: [playlistItem.items[playlistItem.playedIndex]],
+          });
+        }
       }
     },
     bookmarkAccessing(vidPath) {

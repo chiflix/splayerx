@@ -1372,12 +1372,16 @@ new Vue({
       this.$bus.$emit('drop');
       this.$store.commit('source', 'drop');
       const files = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
-      const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
-      files.forEach(file => this.$electron.remote.app.addRecentDocument(file));
-      if (onlyFolders) {
-        this.openFolder(...files);
-      } else {
-        this.openFile(...files);
+      if (files.length > 1) {
+        const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
+        files.forEach(file => this.$electron.remote.app.addRecentDocument(file));
+        if (onlyFolders) {
+          this.openFolder(...files);
+        } else {
+          this.openFile(...files);
+        }
+      } else if (files.length === 1) {
+        this.openVideoFile(...files);
       }
     });
     window.addEventListener('dragover', (e) => {

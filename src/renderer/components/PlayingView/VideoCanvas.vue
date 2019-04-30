@@ -253,7 +253,12 @@ export default {
         this.$bus.$emit('database-saved');
       }
       const playlist = await this.infoDB.get('recent-played', this.playListId);
-      await this.infoDB.update('recent-played', { ...playlist, playedIndex: this.isFolderList ? 0 : this.playingIndex, lastOpened: Date.now() });
+      await this.infoDB.update('recent-played', {
+        ...playlist,
+        items: this.items,
+        playedIndex: this.isFolderList ? 0 : this.playingIndex,
+        lastOpened: Date.now(),
+      });
     },
     saveSubtitleStyle() {
       return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize, enabledSecondarySub: this.enabledSecondarySub });
@@ -265,7 +270,7 @@ export default {
   computed: {
     ...mapGetters([
       'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize',
-      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId']),
+      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -363,9 +368,9 @@ export default {
       if (!this.asyncTasksDone && !this.needToRestore) {
         this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
         let savePromise = this.saveScreenshot(this.videoId);
-        if (process.mas && this.$store.getters.source !== 'drop') {
-          savePromise = savePromise.then(() => {
-            this.infoDB.deletePlaylist(this.playListId);
+        if (process.mas && this.$store.getters.source === 'drop') {
+          savePromise = savePromise.then(async () => {
+            await this.infoDB.deletePlaylist(this.playListId);
           });
         }
         savePromise

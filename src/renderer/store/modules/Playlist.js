@@ -67,11 +67,13 @@ const mutations = {
   RemoveItemFromPlayingListByPos(state, pos) {
     if (pos >= 0) {
       state.playList.splice(pos, 1);
+      state.items.splice(pos, 1);
     }
   },
   InsertItemToPlayingList(state, item) {
     if (item.newPosition >= 0) {
       state.playList.splice(item.newPosition, 0, item.src);
+      state.items.splice(item.newPosition, 0, item.id);
     }
   },
 };
@@ -128,7 +130,11 @@ const actions = {
         commit('playList', videoFiles);
       }, (err) => {
         if (process.mas && err?.code === 'EPERM') {
-          dispatch('FolderList', state.playList);
+          dispatch('FolderList', {
+            id: state.id,
+            paths: state.playList,
+            items: state.items,
+          });
         }
       });
     } else {
