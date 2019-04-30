@@ -25,7 +25,6 @@ class WheelPhaseCalculator extends EventEmitter {
   get lastPhase() { return this._lastPhase; }
   set lastPhase(phase) {
     if (phase !== this._lastPhase && this._availablePhases.includes(phase)) {
-      console.log('Wheel:', phase);
       this._lastPhase = phase;
       if (this._availablePhases.includes(phase)) this.emit('phase-change', phase);
     }
