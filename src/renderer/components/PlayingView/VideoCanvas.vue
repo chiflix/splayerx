@@ -335,6 +335,7 @@ export default {
     this.$bus.$on('next-video', () => {
       videodata.paused = false;
       if (this.nextVideo) {
+        if (this.isFolderList) this.openVideoFile(this.nextVideo);
         this.playFile(this.nextVideo, this.nextVideoId);
       }
     });
