@@ -364,9 +364,7 @@ export default {
         this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
         let savePromise = this.saveScreenshot(this.videoId);
         if (process.mas && this.$store.getters.source !== 'drop') {
-          savePromise = savePromise.then(() => {
-            this.infoDB.deletePlaylist(this.playListId);
-          });
+          savePromise = savePromise.then(() => this.infoDB.deletePlaylist(this.playListId));
         }
         savePromise
           .then(this.saveSubtitleStyle)
