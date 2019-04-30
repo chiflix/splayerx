@@ -92,7 +92,7 @@ export default {
   created() {
     this.infoDB.get('media-item', this.playlist.items[this.playlist.playedIndex]).then((data) => {
       this.item = data;
-      generateCoverPathByMediaHash(data.hash).then((path) => {
+      generateCoverPathByMediaHash(data.quickHash).then((path) => {
         this.coverSrc = filePathToUrl(path);
         this.$refs.item.style.setProperty(
           'background-image',

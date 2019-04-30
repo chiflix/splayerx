@@ -96,7 +96,6 @@ export class InfoDB {
   async add(schema, data) {
     if (!data) throw new Error(`Invalid data: ${JSON.stringify(data)}`);
     const db = await this.getDB();
-    addLog.methods.addLog('info', `adding ${JSON.stringify(data)} to ${schema}`);
     const tx = db.transaction(schema, 'readwrite');
     return tx.objectStore(schema).add(data);
   }
@@ -155,20 +154,20 @@ export class InfoDB {
     const db = await this.getDB();
     if (videos.length > 1) {
       for (const videoPath of videos) {
-        const hash = await Helpers.methods.mediaQuickHash(videoPath);
+        const quickHash = await Helpers.methods.mediaQuickHash(videoPath);
         const data = {
-          hash,
+          quickHash,
           type: 'video',
           path: videoPath,
           source: 'playlist',
         };
         const videoId = await this.add('media-item', data);
         playlist.items.push(videoId);
-        playlist.hpaths.push(`${hash}-${videoPath}`);
+        playlist.hpaths.push(`${quickHash}-${videoPath}`);
       }
     } else if (videos.length === 1) {
-      const hash = await Helpers.methods.mediaQuickHash(videos[0]);
-      const playlistRecord = await this.get('recent-played', 'hpaths', [`${hash}-${videos[0]}`]);
+      const quickHash = await Helpers.methods.mediaQuickHash(videos[0]);
+      const playlistRecord = await this.get('recent-played', 'hpaths', [`${quickHash}-${videos[0]}`]);
       if (playlistRecord) {
         playlist = playlistRecord;
         playlist.lastOpened = Date.now();
@@ -176,14 +175,14 @@ export class InfoDB {
         return playlistRecord.id;
       } else {
         const data = {
-          hash,
+          quickHash,
           type: 'video',
           path: videos[0],
           source: '',
         };
         const videoId = await this.add('media-item', data);
         playlist.items.push(videoId);
-        playlist.hpaths.push(`${hash}-${videos[0]}`);
+        playlist.hpaths.push(`${quickHash}-${videos[0]}`);
       }
     }
     return this.add('recent-played', playlist);

@@ -277,16 +277,16 @@ export default {
       /* eslint-disable */
       for (const videoPath of this.playingList) {
         if (videoPath !== this.originSrc) {
-          const hash = await this.mediaQuickHash(videoPath);
+          const quickHash = await this.mediaQuickHash(videoPath);
           const data = {
-            hash,
+            quickHash,
             type: 'video',
             path: videoPath,
             source: 'playlist',
           };
           const videoId = await this.infoDB.add('media-item', data);
           playlist.items.push(videoId);
-          playlist.hpaths.push(`${hash}-${videoPath}`);
+          playlist.hpaths.push(`${quickHash}-${videoPath}`);
         }
       }
       this.infoDB.update('recent-played', playlist);
@@ -305,6 +305,7 @@ export default {
       } else if (this.movingOffset !== 0
         && Math.abs(this.movementY) < this.thumbnailHeight) {
         this.$store.dispatch('RepositionItemFromPlayingList', {
+          id: this.items[index],
           src: this.playingList[index],
           newPosition: this.indexOfMovingTo,
         });
