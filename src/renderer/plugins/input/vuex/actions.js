@@ -22,8 +22,10 @@ import {
   specialKeydownCalculator as speKeydownCalc,
   keyupCalculator as keyupCalc,
   specialKeyupCalculator as speKeyupCalc,
-  electronWheel as wheelDetector,
+  lethargyWheel, electronWheel,
 } from '../helpers';
+
+const wheelDetector = process.platform === 'darwin' ? electronWheel : lethargyWheel;
 
 let mousemoveTimer = 0;
 const allActions = {
