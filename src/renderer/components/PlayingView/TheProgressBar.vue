@@ -36,29 +36,31 @@
     </div>
     <div class="progress"
       :style="{ height: this.hovering ? '10px' : '4px' }">
-      <div class="hovered" ref="hoveredProgress"
-        :style="{
-        }"></div>
-      <div class="played" ref="playedProgress"
-        :style="{
-        }" ></div>
-      <div class="default" ref="defaultProgress"
-        :style="{
-          order: '2',
-        }"></div>
+      <div class="hovered" ref="hoveredProgress" />
+      <div class="played" ref="playedProgress" />
+      <div class="default" ref="defaultProgress" :style="{ order: '2' }" />
     </div>
-    <div class="fake-button right" ref="rightInvisible"
-      :style="{ height: fakeButtonHeight }">
-      <div class="fake-progress" ref="fakeProgress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.rightFakeProgressBackgroundColor }"></div></div>
+    <div class="fake-button right" ref="rightInvisible" :style="{ height: fakeButtonHeight }">
+      <div
+        class="fake-progress"
+        ref="fakeProgress"
+        :style="{
+          height: this.hovering ? '10px' : '4px',
+          backgroundColor: this.rightFakeProgressBackgroundColor,
+        }"
+      />
+    </div>
   </div>
 </template>
 <script>
 import { mapGetters } from 'vuex';
+import { videodata } from '@/store/video';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import ThePreviewThumbnail from './ThePreviewThumbnail.vue';
-import { videodata } from '../../store/video';
 
 export default {
   name: 'the-progress-bar',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     'the-preview-thumbnail': ThePreviewThumbnail,
   },

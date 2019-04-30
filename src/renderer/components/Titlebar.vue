@@ -1,6 +1,5 @@
 <template>
   <div
-    :data-component-name="$options.name"
     :class="isDarwin ? 'darwin-titlebar' : 'titlebar'"
     @dblclick.stop="handleDbClick">
     <div class="win-icons" v-if="!isDarwin" v-fade-in="showTitleBar">
@@ -64,10 +63,12 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from './BaseIconContainer.vue';
 
 export default {
   name: 'titlebar',
+  type: INPUT_COMPONENT_TYPE,
   data() {
     return {
       state: 'default',

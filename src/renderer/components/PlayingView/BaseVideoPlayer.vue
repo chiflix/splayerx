@@ -1,7 +1,5 @@
 <template>
-  <div
-    :data-component-name="$options.name"
-    class="base-video-player">
+  <div class="base-video-player">
     <video class="video-element" ref="video"></video>
   </div>
 </template>
@@ -41,7 +39,7 @@ export default {
     currentTime: {
       type: Array,
       default: () => [0],
-      validator: value => value[0] >= 0,
+      validator: value => Number.isFinite(value[0]),
     },
     playbackRate: {
       type: Number,
@@ -114,14 +112,19 @@ export default {
     return {
       eventListeners: new Map(),
       currentTimeAnimationFrameId: 0,
+      duration: 0,
     };
   },
   watch: {
     // network state
     // playback state
     currentTime(newVal) {
-      [this.$refs.video.currentTime] = newVal || 0;
-
+      // calculate the seek time
+      let [finalSeekTime] = newVal;
+      if (newVal < 0 || !newVal) finalSeekTime = 0;
+      else if (newVal > this.duration) finalSeekTime = this.duration;
+      // seek the video
+      this.$refs.video.currentTime = finalSeekTime;
       // update the seek time
       if (this.needtimeupdate) {
         videodata.time = this.$refs.video.currentTime;
@@ -178,6 +181,7 @@ export default {
       videodata.paused = false;
       this.$refs.video.ontimeupdate = this.currentTimeUpdate;
     }
+    this.duration = this.$refs.video.duration;
   },
   methods: {
     basicInfoInitialization(videoElement) {

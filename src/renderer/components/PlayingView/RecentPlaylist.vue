@@ -98,9 +98,11 @@ import { Input as inputMutations } from '@/store/mutationTypes';
 import { Input as InputActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 import RecentPlaylistItem from '@/components/PlayingView/RecentPlaylistItem.vue';
 import Add from '@/components/PlayingView/Add.vue';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 
 export default {
   name: 'recent-playlist',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     RecentPlaylistItem,
     Add,

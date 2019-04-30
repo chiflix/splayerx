@@ -27,7 +27,7 @@
       @mousedown="mousedownOnSetDefault">
       <transition name="button" mode="out-in">
         <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
-        <div :key="defaultState" v-else class="result"  :style="{ top: !isMac ? '2px' : '' }">
+        <div :key="defaultState" v-else class="result">
           <Icon :type="defaultState" :class="defaultState"/>
         </div>
       </transition>
@@ -46,7 +46,7 @@
     </div>
   </div>
   <div class="title other-title">{{ $t("preferences.general.others") }}</div>
-  <BaseCheckBox v-if="isMac"
+  <BaseCheckBox
     :checkboxValue="reverseScrolling"
     @update:checkbox-value="reverseScrolling = $event">
     {{ $t('preferences.general.reverseScrolling') }}
@@ -179,7 +179,7 @@ export default {
     },
     mousedownOnSetDefault() {
       if (!this.isSettingDefault) {
-        this.$refs.button1.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
+        this.$refs.button1.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
         this.$refs.button1.style.setProperty('opacity', '0.5');
         this.$refs.button1.addEventListener('mouseup', this.setDefault);
         document.addEventListener('mouseup', this.mouseupOnOther);
@@ -188,7 +188,7 @@ export default {
     mousedownOnRestore() {
       if (!this.isSettingDefault) {
         this.$refs.button2.style.setProperty('transition-delay', '');
-        this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
+        this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
         this.$refs.button2.style.setProperty('opacity', '0.5');
         this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
         document.addEventListener('mouseup', this.mouseupOnOther);
@@ -254,6 +254,11 @@ export default {
 </script>
 <style scoped lang="scss">
 $dropdown-height: 148px;
+$interactor-backgroundColor-default: rgba(255,255,255,0.03);
+$interactor-border-default: 1px solid rgba(255,255,255,0.1);
+$interactor-backgroundColor-hover: rgba(255,255,255,0.08);
+$interactor-border-hover: 1px solid rgba(255,255,255,0.2);
+
 .preference-setting {
   box-sizing: border-box;
   padding-top: 37px;
@@ -293,7 +298,7 @@ $dropdown-height: 148px;
     letter-spacing: 0;
   }
   .drop-down {
-    width: 200px;
+    width: 240px;
     margin-bottom: 35px;
     height: 28px;
     -webkit-app-region: no-drag;
@@ -303,19 +308,19 @@ $dropdown-height: 148px;
       cursor: pointer;
       width: 100%;
       height: 28px;
-      background-color: rgba(0,0,0,0.05);
-      border: 1px solid rgba(255,255,255,0.07);
+      background-color: $interactor-backgroundColor-default;
+      border: $interactor-border-default;
       border-radius: 2px;
       font-family: $font-semibold;
-      font-size: 12px;
+      font-size: 11px;
       line-height: 28px;
       color: #FFFFFF;
       letter-spacing: 0;
       text-align: center;
       transition: border 200ms, background-color 200ms;
       &:hover {
-        border: 1px solid rgba(255,255,255,0.3);
-        background-color: rgba(255,255,255,0.07);
+        border: $interactor-border-hover;
+        background-color: $interactor-backgroundColor-hover;
       }
     }
     .drop-down-content {
@@ -328,7 +333,7 @@ $dropdown-height: 148px;
       border: 1px solid rgba(255,255,255,0.3);
       border-radius: 2px;
       font-family: $font-semibold;
-      font-size: 12px;
+      font-size: 11px;
       color: #FFFFFF;
       letter-spacing: 0;
       text-align: center;
@@ -383,35 +388,40 @@ $dropdown-height: 148px;
       cursor: pointer;
       box-sizing: border-box;
       align-self: center;
-      background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
-      border: 1px solid rgba(255,255,255,0.20);
+      background-color: $interactor-backgroundColor-default;
+      border: $interactor-border-default;
       border-radius: 2px;
-      transition-property: background-color, opacity;
-      transition-duration: 80ms;
+      transition-property: background-color, opacity, border;
+      transition-duration: 200ms;
       transition-timing-function: ease-in;
       width: 61px;
-      height: 25px;
+      height: 28px;
+      &:hover {
+        border: $interactor-border-hover;
+        background-color: $interactor-backgroundColor-hover;
+      }
 
       .button-enter, .button-leave-to {
         opacity: 0;
       }
       .button-enter-active {
-        transition: opacity 250ms ease-in;
+        transition: opacity 200ms ease-in;
       }
       .button-leave-active {
-        transition: opacity 300ms ease-in;
+        transition: opacity 200ms ease-in;
       }
+
       .content {
         font-family: $font-medium;
         font-size: 11px;
         color: #FFFFFF;
         letter-spacing: 0;
         text-align: center;
-        line-height: 23px;
+        line-height: 26px;
       }
       .result {
         position: relative;
-        top: 4px;
+        top: 5px;
         left: 23px;
       }
     }
