@@ -1,5 +1,5 @@
 import { INPUT_COMPONENT_TYPE, VuexStore, nameDefaultOption } from './constants';
-import { destructProperties as destruct, addComponent, removeComponent } from './helpers';
+import { addComponent, removeComponent } from './helpers';
 import module from './vuex';
 import {
   generateMousemoveListener,
@@ -21,11 +21,15 @@ export default {
 
     // generate event listeners
     const {
-      mouse: mouseOptions, keyboard: keyboardOptions, wheel: wheelOptions,
+      mouse: mouseOptions = {},
+      keyboard: keyboardOptions = {},
+      wheel: wheelOptions = {},
       namespaced, // vuex options
-    } = destruct(options, 'mouse', 'keyboard', 'wheel', 'namespaced');
-    const { mousemove: mousemoveOptions } = destruct(mouseOptions, 'mousemove');
-    const { mousedown: mousedownOptions } = destruct(mouseOptions, 'mousedown');
+    } = options;
+    const {
+      mousemove: mousemoveOptions = {},
+      mousedown: mousedownOptions = {},
+    } = mouseOptions;
     const vuexOptions = { name, namespaced };
     const mousemove = generateMousemoveListener(mousemoveOptions, vuexOptions);
     const { mousedown, mouseup } =
