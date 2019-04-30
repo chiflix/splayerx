@@ -1,5 +1,5 @@
 <template>
-  <div :class="container">
+  <div :class="[container, { rtl: isRtl }]">
     <transition name="nextvideo">
       <NextVideo class="next-video" ref="nextVideo"
         v-if="showNextVideo"
@@ -20,8 +20,8 @@
         <div :class="m.type === 'result' ? 'black-gradient-result' : 'black-gradient-state'"/>
         <div :class="m.type === 'result' ? 'resultContainer' : `stateContainer`">
           <div class="bubbleContent">
-            <div class="title" v-if="m.type === 'result'">{{ m.title }}</div>
-            <div class="content">{{ m.content }}</div>
+            <p class="title" v-if="m.type === 'result'">{{ m.title }}</p>
+            <p class="content">{{ m.content }}</p>
           </div>
           <Icon v-if="m.type === 'result'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id, m.title)"></Icon>
         </div>
@@ -35,10 +35,12 @@ import { mapGetters } from 'vuex';
 import NextVideo from '@/components/PlayingView/NextVideo.vue';
 import PrivacyBubble from '@/components/PlayingView/PrivacyConfirmBubble.vue';
 import MASPrivacyBubble from '@/components/PlayingView/MASPrivacyConfirmBubble.vue';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from './BaseIconContainer.vue';
 
 export default {
   name: 'notification-bubble',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     Icon,
     NextVideo,
@@ -72,6 +74,9 @@ export default {
     },
     container() {
       return process.platform === 'win32' ? 'winContainer' : 'container';
+    },
+    isRtl() {
+      return /ar/.test(this.$i18n.locale);
     },
   },
   watch: {

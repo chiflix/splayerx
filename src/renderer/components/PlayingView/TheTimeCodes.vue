@@ -1,8 +1,6 @@
 <template>
   <div class="cont" v-fade-in="showAllWidgets || progressTriggerStopped">
-    <div class="timing"
-      :data-component-name="$options.name"
-      @mousedown="switchTimeContent">
+    <div class="timing" @mousedown="switchTimeContent">
           <span class="timeContent" ref="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration"></span>
     </div>
     <Labels class="rate"/>
@@ -10,19 +8,20 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import { videodata } from '../../store/video';
+import { videodata } from '@/store/video';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Labels from './Labels.vue';
 
 export default {
   name: 'the-time-codes',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     Labels,
   },
-  props: ['showAllWidgets'],
+  props: ['showAllWidgets', 'progressTriggerStopped'],
   data() {
     return {
       isRemainTime: false,
-      progressTriggerStopped: false,
       progressTriggerId: 0,
       progressDisappearDelay: 1000,
     };
@@ -36,18 +35,18 @@ export default {
   watch: {
     rate() {
       if (!this.progressKeydown) {
-        this.progressTriggerStopped = true;
+        this.$emit('update:progressTriggerStopped', true);
         this.clock.clearTimeout(this.progressTriggerId);
         this.progressTriggerId = this.clock.setTimeout(() => {
-          this.progressTriggerStopped = false;
+          this.$emit('update:progressTriggerStopped', false);
         }, this.progressDisappearDelay);
       }
     },
     singleCycle() {
-      this.progressTriggerStopped = true;
+      this.$emit('update:progressTriggerStopped', true);
       this.clock.clearTimeout(this.progressTriggerId);
       this.progressTriggerId = this.clock.setTimeout(() => {
-        this.progressTriggerStopped = false;
+        this.$emit('update:progressTriggerStopped', false);
       }, this.progressDisappearDelay);
     },
   },
@@ -74,10 +73,10 @@ export default {
   },
   created() {
     this.$bus.$on('seek', () => {
-      this.progressTriggerStopped = true;
+      this.$emit('update:progressTriggerStopped', true);
       this.clock.clearTimeout(this.progressTriggerId);
       this.progressTriggerId = this.clock.setTimeout(() => {
-        this.progressTriggerStopped = false;
+        this.$emit('update:progressTriggerStopped', false);
       }, this.progressDisappearDelay);
     });
   },

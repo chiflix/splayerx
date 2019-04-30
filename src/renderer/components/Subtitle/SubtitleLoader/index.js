@@ -1,9 +1,10 @@
 import { EventEmitter } from 'events';
+import { existsSync } from 'fs';
 import flatten from 'lodash/flatten';
-import helpers from '@/helpers';
 import { storeSubtitle } from '@/helpers/subtitle';
-import { localFormatLoader, castArray, promisify, functionExtraction } from './utils';
+import { localFormatLoader, castArray, promisify, functionExtraction, detectEncodingFromFileSync, embeddedSrcLoader } from './utils';
 import { SubtitleError, ErrorCodes } from './errors';
+import { NOT_SUPPORTED_SUBTITLE } from '../../../../shared/notificationcodes';
 
 const files = require.context('.', false, /\.loader\.js$/);
 const loaders = {};
@@ -48,47 +49,75 @@ export default class SubtitleLoader extends EventEmitter {
    * @param {object} options - (optional)other info about subtitle,
    * like language or name(for online subtitle)
    */
+  // eslint-disable-next-line complexity
   constructor(src, type, options) {
     super();
-    this.src = src; // to-do: src validator
+    try {
+      this.src = src;
 
-    if (!type || ['local', 'embedded', 'online'].indexOf(type) === -1) {
-      helpers.methods.addLog('error', {
-        message: 'Unsupported Subtitle .',
-        errcode: 'NOT_SUPPORTED_SUBTITLE',
-      });
-      throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE, `Unknown subtitle type ${type}.`);
-    }
-    this.type = type;
+      // format validator (mainly for local subtitle)
+      const format = type === 'local' ? localFormatLoader(src) : type;
+      if (supportedFormats.includes(format)) {
+        this.metaInfo.format = format;
+        if (format === 'embedded' && options.codec) {
+          this.metaInfo.codecFormat = SubtitleLoader.codecToFormat(options.codec);
+        }
+        this.loader = Object.values(loaders)
+          .find(loader => castArray(loader.supportedFormats).includes(format));
+      } else {
+        throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_FORMAT, `Unknown subtitle format for subtitle ${src}.`);
+      }
 
-    const format = type === 'local' ? localFormatLoader(src) : type;
-    if (supportedFormats.includes(format)) {
-      this.metaInfo.format = format;
-      this.loader = Object.values(loaders)
-        .find(loader => castArray(loader.supportedFormats).includes(format));
-    } else {
-      helpers.methods.addLog('error', {
-        message: 'Unsupported Subtitle .',
-        errcode: 'NOT_SUPPORTED_SUBTITLE',
-      });
-      throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_FORMAT, `Unknown subtitle format for subtitle ${src}.`);
-    }
+      // type validator (src and encoding validators for local subtitle)
+      switch (type.toLowerCase()) {
+        default:
+          throw new SubtitleError(ErrorCodes.SUBTITLE_INVALID_TYPE, `Unknown subtitle type ${type}.`);
+        case 'embedded':
+        case 'online':
+          break;
+        case 'local': {
+          if (existsSync(src)) this.metaInfo.encoding = detectEncodingFromFileSync(src);
+          break;
+        }
+      }
+      this.type = type.toLowerCase();
 
-    this.options = options || {};
-    this.data = this.options.data;
+      this.options = options || {};
+      this.data = this.options.data; // set data for stored online subtitles
+      this.videoSrc = this.options.videoSrc; // set videoSrc
 
-    if (this.options.id) {
-      this.id = this.options.id.toString();
-      setImmediate(() => this.emit('loading', this.id));
-    } else {
-      storeSubtitle({
-        src: this.src,
-        type: this.type,
-        format: this.metaInfo.format,
-      }).then((id) => {
-        this.id = id.toString();
-        setImmediate(() => this.emit('loading', id));
-      });
+      // subtitle id
+      if (this.options.id) {
+        this.id = this.options.id.toString();
+        setImmediate(() => this.emit('loading', this.id));
+      } else if (this.type === 'embedded') {
+        embeddedSrcLoader(options.videoSrc, src, this.metaInfo.codecFormat)
+          .then((embeddedSrc) => {
+            this.options.src = embeddedSrc;
+            this.metaInfo.encoding = detectEncodingFromFileSync(embeddedSrc);
+            return storeSubtitle({
+              src: this.src,
+              type: this.type,
+              format: this.metaInfo.codecFormat,
+            });
+          })
+          .then((id) => {
+            this.id = id.toString();
+            setImmediate(() => this.emit('loading', id));
+          })
+          .catch(this.fail);
+      } else {
+        storeSubtitle({
+          src: this.src,
+          type: this.type,
+          format: this.metaInfo.format,
+        }).then((id) => {
+          this.id = id.toString();
+          setImmediate(() => this.emit('loading', id));
+        });
+      }
+    } catch (err) {
+      this.fail.bind(this)(err);
     }
   }
 
@@ -106,18 +135,21 @@ export default class SubtitleLoader extends EventEmitter {
       });
       this.emit('ready', metaInfo);
     } catch (e) {
-      this.emit('failed', this.id);
-      throw e;
+      this.fail.bind(this)(e);
     }
   }
 
   async load() {
-    const loader = functionExtraction(this.loader.loader);
-    if (this.data) this.emit('data', this.data);
-    else {
-      this.data =
-        await promisify(loader.func.bind(this, ...this._getParams(castArray(loader.params))));
-      this.emit('data', this.data);
+    try {
+      const loader = functionExtraction(this.loader.loader);
+      if (this.data) this.emit('data', this.data);
+      else {
+        this.data =
+          await promisify(loader.func.bind(this, ...this._getParams(castArray(loader.params))));
+        this.emit('data', this.data);
+      }
+    } catch (e) {
+      this.fail.bind(this)(e);
     }
   }
 
@@ -128,11 +160,15 @@ export default class SubtitleLoader extends EventEmitter {
         await promisify(parser.func.bind(null, ...this._getParams(castArray(parser.params))));
       this.emit('parse', this.parsed);
     } catch (e) {
-      helpers.methods.addLog('error', {
-        message: 'Unsupported Subtitle .',
-        errcode: 'NOT_SUPPORTED_SUBTITLE',
-      });
-      throw e;
+      this.fail.bind(this)(e);
     }
+  }
+
+  fail(error) {
+    console.log('SubtitleError:', error);
+    this.emit('failed', {
+      error,
+      bubble: NOT_SUPPORTED_SUBTITLE,
+    });
   }
 }

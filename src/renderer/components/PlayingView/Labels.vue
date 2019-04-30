@@ -8,7 +8,7 @@
     <transition name="label">
     <div class="speed-label" v-show="showSpeedLabel" key="speed">
       <Icon type="speed" class="speed-icon"/>
-      <div class="rate-num">{{ rate }}</div>
+      <div class="rate-num">{{ Number.parseFloat(rate).toFixed(1) }}</div>
     </div>
     </transition>
   </div>

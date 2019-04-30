@@ -1,7 +1,5 @@
 <template>
-<div
-  :data-component-name="$options.name"
-  class="next-video">
+<div class="next-video">
   <div class="plane-background"></div>
   <div class="plane">
     <div class="progress">
@@ -14,8 +12,8 @@
     <div class="content">
       <div class="info">
         <div class="top">
-          <div class="duration">{{ timecode }}</div>
-          <div class="title">&nbsp;· {{ title }}</div>
+          <div class="duration">{{ timecode }}&nbsp;· </div>
+          <p class="title">{{ title }}</p>
         </div>
         <div class="vid-name">{{ videoName }}</div>
       </div>
@@ -182,7 +180,9 @@ export default {
       width: 207px;
     }
     video {
+      width: 100%;
       height: 100%;
+      object-fit: cover;
       background-color: black;
     }
     .blur {
@@ -261,19 +261,19 @@ export default {
       border-radius: 11px;
       @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
         top: 1.5px;
-        height: 68px;
+        height: 70px;
         left: 122px;
         width: 217px;
       }
       @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
         top: 1.5px;
-        height: 82px;
+        height: 84px;
         left: 147px;
         width: 260px;
       }
       @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
         top: 1.5px;
-        height: 116px;
+        height: 118px;
         left: 206px;
         width: 364px;
       }

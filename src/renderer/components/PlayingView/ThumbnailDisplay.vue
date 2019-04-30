@@ -1,6 +1,5 @@
 <template>
   <div
-    :data-component-name="$options.name"
     class="thumbnail-display">
     <div
      :style="{

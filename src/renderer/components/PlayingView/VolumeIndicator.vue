@@ -32,11 +32,13 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
 
 export default {
   name: 'volume-indicator',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     'base-info-card': BaseInfoCard,
     'base-icon': BaseIcon,
@@ -55,7 +57,7 @@ export default {
   },
   props: ['showAllWidgets', 'mousedownOnPlayButton', 'attachedShown'],
   computed: {
-    ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen']),
+    ...mapGetters(['muted', 'volumeKeydown', 'ratio', 'isFullScreen', 'wheelTriggered', 'volumeWheelTriggered']),
     ...mapState({
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
     }),
@@ -163,12 +165,32 @@ export default {
     },
   },
   created() {
-    if (this.muted) this.volumeTriggerStopped = this.showAllWidgets;
+    this.enterArea();
+    this.actionArea();
+    setTimeout(() => {
+      this.leaveArea();
+    }, 2000);
+    if (this.muted) {
+      this.volumeTriggerStopped = this.showAllWidgets;
+    }
     this.$bus.$on('toggle-fullscreen', this.handleFullScreen);
     this.$bus.$on('to-fullscreen', this.handleFullScreen);
     this.$bus.$on('off-fullscreen', this.handleFullScreen);
   },
   watch: {
+    showAllWidgets(val) {
+      if (!val) this.volumeTriggerStopped = false;
+    },
+    wheelTriggered() {
+      if (this.volumeWheelTriggered) {
+        const { clock, volumeTriggerTimerId } = this;
+        this.volumeTriggerStopped = true;
+        clock.clearTimeout(volumeTriggerTimerId);
+        this.volumeTriggerTimerId = clock.setTimeout(() => {
+          this.volumeTriggerStopped = false;
+        }, 1000);
+      }
+    },
     showVolume(val) {
       if (!val) document.onmouseup = null;
     },
@@ -301,11 +323,12 @@ export default {
     height: calc(var(--background-height) + 30px);
     cursor: pointer;
     .indicator-container {
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: center;
       border-radius: 2.5px;
-      width: calc(var(--indicator-container-width));
+      width: var(--indicator-container-width);
       height: calc(var(--background-height) + 4px);
       top: 0;
       .card {

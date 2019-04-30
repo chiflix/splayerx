@@ -1,6 +1,5 @@
 <template>
   <div ref="controller"
-    :data-component-name="$options.name"
     class="the-video-controller"
     :style="{ cursor: cursorStyle }"
     @mousemove="handleMousemove"
@@ -10,21 +9,22 @@
     @mouseup="handleMouseup"
     @mousedown.left="handleMousedownLeft"
     @click.left="handleMouseupLeft">
-    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
+    <titlebar key="playing-view" currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
     <notification-bubble ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
-    :mousemovePosition="mousemovePosition"
+    :mousemoveClientPosition="mousemoveClientPosition"
     :isDragging="isDragging"
     :lastDragging.sync="lastDragging"
     v-bind.sync="widgetsStatus['recent-playlist']"
+    @can-hover-item="cancelPlayListTimeout"
     @conflict-resolve="conflictResolve"
     @update:playlistcontrol-showattached="updatePlaylistShowAttached"/>
-    <div class="masking" v-fade-in="showAllWidgets"/>
+    <div class="masking" v-fade-in="showAllWidgets || progressTriggerStopped"/>
     <play-button class="play-button no-drag"
       @update:playbutton-state="updatePlayButtonState"
       :mousedownOnVolume="mousedownOnVolume"
-      :mousemovePosition="mousemovePosition"
+      :mousemovePosition="mousemoveClientPosition"
       :showAllWidgets="showAllWidgets" :isFocused="isFocused"
       :paused="paused" :attachedShown="attachedShown"/>
     <volume-indicator class="no-drag"
@@ -41,13 +41,17 @@
       v-bind.sync="widgetsStatus['advance-control']" :lastDragging.sync="lastDragging"
       @conflict-resolve="conflictResolve"/>
     </div>
-    <the-time-codes ref="theTimeCodes" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
+    <the-time-codes ref="theTimeCodes" :progressTriggerStopped.sync="progressTriggerStopped" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
     <the-progress-bar ref="progressbar" :showAllWidgets="showAllWidgets" :style="{ marginBottom: preFullScreen ? '10px' : '0' }"/>
   </div>
 </template>
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
+import {
+  mapState, mapGetters, mapActions,
+  createNamespacedHelpers,
+} from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
+import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import path from 'path';
 import Titlebar from '../Titlebar.vue';
 import PlayButton from './PlayButton.vue';
@@ -61,8 +65,11 @@ import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
 import { videodata } from '../../store/video';
 
+const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
+
 export default {
   name: 'the-video-controller',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     titlebar: Titlebar,
     'play-button': PlayButton,
@@ -114,6 +121,9 @@ export default {
       mousedownOnPlayButton: false,
       mousedownOnVolume: false,
       preFullScreen: false,
+      dragOver: false,
+      progressTriggerStopped: false,
+      openPlayListTimeId: NaN,
     };
   },
   computed: {
@@ -121,13 +131,13 @@ export default {
       currentWidget: ({ Input }) => Input.mousemoveComponentName,
       currentMouseupWidget: state => state.Input.mouseupComponentName,
       currentMousedownWidget: state => state.Input.mousedownComponentName,
-      mousemovePosition: state => state.Input.mousemoveClientPosition,
+      mousemoveClientPosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
     ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
-    onlyOneVideo() {
-      return this.playingList.length === 1;
-    },
+    ...inputMapGetters({
+      inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
+    }),
     showAllWidgets() {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
@@ -189,8 +199,15 @@ export default {
     currentMouseupWidget(newVal, oldVal) {
       this.lastMouseupWidget = oldVal;
     },
-    tempRecentPlaylistDisplayState() {
+    tempRecentPlaylistDisplayState(val) {
       this.updateMinimumSize();
+      if (!val) {
+        clearTimeout(this.openPlayListTimeId);
+        clearTimeout(this.mouseStoppedId);
+        this.mouseStoppedId = this.clock.setTimeout(() => {
+          this.mouseStopped = true;
+        }, this.mousestopDelay);
+      }
     },
     ratio() {
       this.updateMinimumSize();
@@ -221,6 +238,9 @@ export default {
     this.UIElements.forEach((value) => {
       this.displayState[value.name] = true;
       if (value.name === 'recent-playlist') this.displayState[value.name] = false;
+      if (value.name === 'playlist-control' && !this.playingList.length) {
+        this.displayState['playlist-control'] = false;
+      }
       this.widgetsStatus[value.name] = {
         selected: false,
         showAttached: false,
@@ -228,6 +248,21 @@ export default {
         mouseupOnOther: false,
         hovering: false,
       };
+    });
+    this.$bus.$on('open-playlist', () => {
+      this.widgetsStatus['playlist-control'].showAttached = true;
+      this.openPlayListTimeId = setTimeout(() => {
+        this.widgetsStatus['playlist-control'].showAttached = false;
+      }, 4000);
+    });
+    this.$bus.$on('drag-over', () => {
+      this.dragOver = true;
+    });
+    this.$bus.$on('drag-leave', () => {
+      this.dragOver = false;
+    });
+    this.$bus.$on('drop', () => {
+      this.dragOver = false;
     });
     this.$bus.$on('to-fullscreen', () => {
       if (process.platform === 'darwin' &&
@@ -311,6 +346,9 @@ export default {
         }
       });
     },
+    cancelPlayListTimeout() {
+      clearTimeout(this.openPlayListTimeId);
+    },
     updatePlaylistShowAttached(event) {
       this.widgetsStatus['playlist-control'].showAttached = event;
     },
@@ -329,7 +367,7 @@ export default {
       this.clock.tick(timestamp - this.start);
       this.UIStateManager();
 
-      if (!videodata.paused && videodata.time + 1 >= this.duration) {
+      if (videodata.time + 1 >= this.duration) {
         // we need set the paused state to go to next video
         // this state will be reset on mounted of BaseVideoPlayer
         videodata.paused = true;
@@ -377,7 +415,8 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
-      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached;
+      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached && !this.dragOver;
+      tempObject['playlist-control'] = !(this.playingList.length === 0);
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
@@ -428,7 +467,7 @@ export default {
       if (this.mouseStoppedId) {
         this.clock.clearTimeout(this.mouseStoppedId);
       }
-      if (!this.lastMousedownPlaybutton) {
+      if (!this.lastMousedownPlaybutton && !this.tempRecentPlaylistDisplayState) {
         this.mouseStoppedId = this.clock.setTimeout(() => {
           this.mouseStopped = true;
         }, this.mousestopDelay);
@@ -513,6 +552,7 @@ export default {
       this.updateWheel({
         componentName: this.getComponentName(target),
         timestamp: timeStamp,
+        direction: this.inputWheelDirection,
       });
     },
     // Helper functions
@@ -592,7 +632,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 101;
+  z-index: 99;
 }
 .masking {
   position: absolute;

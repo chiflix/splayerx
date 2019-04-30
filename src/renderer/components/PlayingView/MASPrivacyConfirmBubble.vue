@@ -5,9 +5,9 @@
   <div class="plane-background">
     <div class="plane">
       <div class="content">
-        <div :class="infoCSS">
+        <p :class="infoCSS">
           {{ content }}
-        </div>
+        </p>
         <div :class="$i18n.locale === 'en' ? 'en-buttons' : 'buttons'">
           <div class="agree-button"
             :class="{

@@ -2,27 +2,15 @@
 // Be sure to call Sentry function as early as possible in the main process
 import '../shared/sentry';
 
-import { app, BrowserWindow, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
+import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
 import path from 'path';
-import fs from 'fs';
+import fs, { promises as fsPromises } from 'fs';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
-import {
-  FILE_NON_EXIST,
-  EMPTY_FOLDER,
-  OPEN_FAILED,
-  NOT_SUPPORTED_SUBTITLE,
-  REQUEST_TIMEOUT,
-  SUBTITLE_OFFLINE,
-  ONLINE_LOADING,
-  SUBTITLE_UPLOAD,
-  UPLOAD_FAILED,
-  UPLOAD_SUCCESS,
-} from '../shared/notificationcodes';
 
 /**
  * Set `__static` path to static files in production
@@ -38,6 +26,7 @@ let mainWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
 let tray = null;
+let needToRestore = false;
 let inited = false;
 const filesToOpen = [];
 const snapShotQueue = [];
@@ -119,6 +108,8 @@ function registerMainWindowEvent() {
   mainWindow.on('blur', () => {
     mainWindow?.webContents.send('mainCommit', 'isFocused', false);
   });
+  mainWindow.on('scroll-touch-begin', () => mainWindow?.webContents.send('scroll-touch-begin'));
+  mainWindow.on('scroll-touch-end', () => mainWindow?.webContents.send('scroll-touch-end'));
 
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
@@ -319,33 +310,6 @@ function registerMainWindowEvent() {
   ipcMain.on('writeLog', (event, level, log) => { // eslint-disable-line complexity
     if (!log) return;
     writeLog(level, log);
-    if (mainWindow && log.message) {
-      if (log.errcode) {
-        switch (log.errcode) {
-          case FILE_NON_EXIST:
-          case EMPTY_FOLDER:
-          case OPEN_FAILED:
-          case SUBTITLE_OFFLINE:
-          case NOT_SUPPORTED_SUBTITLE:
-          case REQUEST_TIMEOUT:
-          case UPLOAD_FAILED:
-            mainWindow.webContents.send('addMessages', log.errcode);
-            break;
-          default:
-            break;
-        }
-      } else if (log.code) {
-        switch (log.code) {
-          case ONLINE_LOADING:
-          case SUBTITLE_UPLOAD:
-          case UPLOAD_SUCCESS:
-            mainWindow.webContents.send('addMessages', log.code);
-            break;
-          default:
-            break;
-        }
-      }
-    }
   });
   ipcMain.on('add-windows-about', () => {
     const aboutWindowOptions = {
@@ -384,7 +348,7 @@ function registerMainWindowEvent() {
       frame: false,
       titleBarStyle: 'none',
       width: 540,
-      height: 370,
+      height: 426,
       transparent: true,
       resizable: false,
       show: false,
@@ -409,7 +373,18 @@ function registerMainWindowEvent() {
     }
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
+      preferenceWindow?.webContents.send('restore-state', needToRestore);
     });
+  });
+  ipcMain.on('get-restore-state', () => {
+    preferenceWindow?.webContents.send('restore-state', needToRestore);
+  });
+  ipcMain.on('apply', () => {
+    needToRestore = true;
+  });
+  ipcMain.on('relaunch', () => {
+    app.relaunch();
+    app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
     mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
@@ -439,7 +414,7 @@ function createWindow() {
       experimentalFeatures: true,
     },
     // See https://github.com/electron/electron/blob/master/docs/api/browser-window.md#showing-window-gracefully
-    backgroundColor: '#802e2c29',
+    backgroundColor: '#6a6a6a',
     acceptFirstMouse: true,
     show: false,
     ...({
@@ -475,7 +450,40 @@ function createWindow() {
     }, 1000);
   }
 }
-
+function removeDir(dir) {
+  const userData = app.getPath('userData');
+  return fsPromises.readdir(dir)
+    .then(files => files.reduce((result, file) => {
+      const filePath = path.join(dir, file);
+      return result.then(() => fsPromises.unlink(filePath)
+        .then(null, () => removeDir(filePath)));
+    }, Promise.resolve()).then(() => {
+      if (dir !== userData) return fsPromises.rmdir(dir);
+      return Promise.resolve();
+    }));
+}
+function removeUserData() {
+  const userData = app.getPath('userData');
+  return removeDir(path.join(userData, 'storage'))
+    .then(() => removeDir(userData));
+}
+app.on('before-quit', (e) => {
+  if (needToRestore) {
+    mainWindow?.webContents.send('quit', needToRestore);
+    e.preventDefault();
+    removeUserData()
+      .catch((err) => {
+        needToRestore = false;
+        writeLog('info', { message: `error: ${err}` });
+      })
+      .finally(() => {
+        needToRestore = false;
+        app.quit();
+      });
+  } else {
+    mainWindow?.webContents.send('quit');
+  }
+});
 app.on('second-instance', () => {
   if (mainWindow?.isMinimized()) mainWindow.restore();
   mainWindow?.focus();
@@ -518,6 +526,9 @@ app.on('ready', () => {
   globalShortcut.register('CmdOrCtrl+Shift+I+O+P', () => {
     mainWindow?.openDevTools();
   });
+  globalShortcut.register('CmdOrCtrl+Shift+J+K+L', () => {
+    preferenceWindow?.openDevTools();
+  });
 
   if (process.platform === 'win32') {
     globalShortcut.register('CmdOrCtrl+`', () => {
@@ -530,7 +541,14 @@ app.on('ready', () => {
 
 app.on('window-all-closed', () => {
   if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
-    app.quit();
+    if (needToRestore) {
+      removeUserData().then(() => {
+        needToRestore = false;
+        app.quit();
+      });
+    } else {
+      app.quit();
+    }
   }
 });
 

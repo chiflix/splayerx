@@ -1,5 +1,5 @@
 <template>
-  <div :data-component-name="$options.name" class="player">
+  <div class="player">
     <the-video-canvas ref="videoCanvas" />
     <the-video-controller ref="videoctrl" />
     <subtitle-manager />
@@ -28,6 +28,7 @@ export default {
     },
   },
   mounted() {
+    this.$store.dispatch('initWindowRotate');
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
     videodata.checkTick();
     videodata.onTick = this.onUpdateTick;

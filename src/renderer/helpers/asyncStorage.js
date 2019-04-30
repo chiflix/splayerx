@@ -1,4 +1,6 @@
+import path from 'path';
 import storage from 'electron-json-storage';
+import { promises as fsPromises } from 'fs';
 import helpers from './index';
 
 /*
@@ -6,6 +8,20 @@ import helpers from './index';
     在需要使用的组件中
     import asyncStorage from '@/helpers/asyncStorage';
 */
+function removeAll() {
+  const dirPath = storage.getDataPath();
+  const taskArray = [];
+  return fsPromises.readdir(dirPath).then((files) => {
+    files.forEach((file) => {
+      taskArray.push(new Promise((resolve) => {
+        storage.remove(path.basename(file), () => {
+          resolve();
+        });
+      }));
+    });
+    return Promise.all(taskArray);
+  });
+}
 function get(key) {
   return new Promise((resolve, reject) => {
     storage.get(key, (err, data) => {
@@ -33,4 +49,5 @@ function set(key, json) {
 export default {
   set,
   get,
+  removeAll,
 };
