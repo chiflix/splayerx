@@ -367,7 +367,7 @@ export default {
       this.clock.tick(timestamp - this.start);
       this.UIStateManager();
 
-      if (!videodata.paused && videodata.time + 1 >= this.duration) {
+      if (videodata.time + 1 >= this.duration) {
         // we need set the paused state to go to next video
         // this state will be reset on mounted of BaseVideoPlayer
         videodata.paused = true;
