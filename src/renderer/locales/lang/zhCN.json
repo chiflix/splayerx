@@ -188,11 +188,11 @@
 			"switchDisplayLanguages": "您可以在此修改射手影音播放器菜单、对话框中的显示语言。"
 		},
 		"privacy": {
-			"languageDescription": "在您观赏影片时，射手影音会为您推送以下语言的翻译结果。",
-			"languagePriority": "语言优先级",
+			"languageDescription": "按以下语言提供翻译结果，翻译需上传匿名信息但不会包含任何隐私数据。",
+			"languagePriority": "选择翻译语言",
 			"none": "无",
 			"primary": "首要语言",
-			"privacyConfirm": "启用匿名信息和智能翻译",
+			"privacyConfirm": "启用智能翻译",
 			"privacySetting": "智能翻译",
 			"secondary": "次要语言",
 			"setAsDefault": "将SPlayer设为默认播放器",

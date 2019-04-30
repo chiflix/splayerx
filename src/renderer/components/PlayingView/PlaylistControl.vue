@@ -6,10 +6,12 @@
 <script>
 import { mapState } from 'vuex';
 import lottie from '@/components/lottie.vue';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import animationData from '@/assets/playlist.json';
 
 export default {
   name: 'playlist-control',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
   },

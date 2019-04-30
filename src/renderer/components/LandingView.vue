@@ -1,7 +1,6 @@
 <template>
-  <div class="wrapper"
-    :data-component-name="$options.name">
-    <titlebar currentView="LandingView"></titlebar>
+  <div class="wrapper">
+    <titlebar key="playing-view" currentView="LandingView"></titlebar>
     <short-marks v-show="!openUrlShow"></short-marks>
     <open-url v-show="openUrlShow"></open-url>
     <transition name="background-container-transition">
@@ -358,8 +357,7 @@ $themeColor-Light: white;
 }
 
 .wrapper {
-  background-image: url(../assets/gradient-bg.png);
-  background-size: cover;
+  background-image: linear-gradient(-28deg, #414141 0%, #545454 47%, #7B7B7B 100%);
   height: 100vh;
   width: 100vw;
   z-index: -1;
@@ -369,6 +367,8 @@ $themeColor-Light: white;
     left: 0;
     right: 0;
     bottom: 0;
+    background-image: url(../assets/noise-bg.png);
+    background-repeat: repeat;
     transition: background-color 120ms linear;
   }
 }

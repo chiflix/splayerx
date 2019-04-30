@@ -27,7 +27,7 @@
       @mousedown="mousedownOnSetDefault">
       <transition name="button" mode="out-in">
         <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
-        <div :key="defaultState" v-else class="result"  :style="{ top: !isMac ? '2px' : '' }">
+        <div :key="defaultState" v-else class="result">
           <Icon :type="defaultState" :class="defaultState"/>
         </div>
       </transition>
@@ -179,7 +179,7 @@ export default {
     },
     mousedownOnSetDefault() {
       if (!this.isSettingDefault) {
-        this.$refs.button1.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
+        this.$refs.button1.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
         this.$refs.button1.style.setProperty('opacity', '0.5');
         this.$refs.button1.addEventListener('mouseup', this.setDefault);
         document.addEventListener('mouseup', this.mouseupOnOther);
@@ -188,7 +188,7 @@ export default {
     mousedownOnRestore() {
       if (!this.isSettingDefault) {
         this.$refs.button2.style.setProperty('transition-delay', '');
-        this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
+        this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
         this.$refs.button2.style.setProperty('opacity', '0.5');
         this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
         document.addEventListener('mouseup', this.mouseupOnOther);
@@ -253,8 +253,12 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-$dropdown-width: 218px;
-$dropdown-height: 156px;
+$dropdown-height: 148px;
+$interactor-backgroundColor-default: rgba(255,255,255,0.03);
+$interactor-border-default: 1px solid rgba(255,255,255,0.1);
+$interactor-backgroundColor-hover: rgba(255,255,255,0.08);
+$interactor-border-hover: 1px solid rgba(255,255,255,0.2);
+
 .preference-setting {
   box-sizing: border-box;
   padding-top: 37px;
@@ -274,15 +278,17 @@ $dropdown-height: 156px;
   }
   .down-arrow {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 7px;
+    right: 8px;
     transform: rotate(90deg);
+    transition: transform 200ms;
   }
   .up-arrow {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 7px;
+    right: 8px;
     transform: rotate(-90deg);
+    transition: transform 200ms;
   }
   .description {
     margin-bottom: 13px;
@@ -292,59 +298,61 @@ $dropdown-height: 156px;
     letter-spacing: 0;
   }
   .drop-down {
-    width: $dropdown-width;
-    height: 22px;
+    width: 240px;
     margin-bottom: 35px;
+    height: 28px;
+    -webkit-app-region: no-drag;
     .drop-down-brief {
       position: relative;
       -webkit-app-region: no-drag;
       cursor: pointer;
-      z-index: 100;
-      width: $dropdown-width;
-      height: 22px;
-      padding-top: 4px;
-      background-color: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.07);
+      width: 100%;
+      height: 28px;
+      background-color: $interactor-backgroundColor-default;
+      border: $interactor-border-default;
       border-radius: 2px;
       font-family: $font-semibold;
-      font-size: 12px;
+      font-size: 11px;
+      line-height: 28px;
       color: #FFFFFF;
       letter-spacing: 0;
       text-align: center;
+      transition: border 200ms, background-color 200ms;
+      &:hover {
+        border: $interactor-border-hover;
+        background-color: $interactor-backgroundColor-hover;
+      }
     }
     .drop-down-content {
       cursor: pointer;
       position: relative;
       z-index: 50;
-      width: $dropdown-width;
+      width: 100%;
       height: $dropdown-height;
-      background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
-      border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.0) rgba(255,255,255,0.1) rgba(255,255,255,0.3);
-      border-width: 1px 1px 1px 1px;
-      border-style: solid;
+      background-color: rgba(100,100,100,.95);
+      border: 1px solid rgba(255,255,255,0.3);
       border-radius: 2px;
       font-family: $font-semibold;
-      font-size: 12px;
+      font-size: 11px;
       color: #FFFFFF;
       letter-spacing: 0;
       text-align: center;
       .selected {
-        margin-top: -1px;
-        padding-top: 5px;
-        height: 24px;
+        height: 28px;
+        line-height: 28px;
         background-color: rgba(255,255,255,0.1);
       }
       .content {
-        position: absolute;
         cursor: pointer;
-        top: 30px;
+        position: absolute;
+        top: 32px;
         left: 8px;
         right: 4px;
-        bottom: 3px;
+        bottom: 4px;
         overflow-y: scroll;
         .selection {
-          padding-top: 4px;
-          height: 22px;
+          height: 28px;
+          line-height: 28px;
         }
         .selection:hover {
           background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
@@ -378,40 +386,43 @@ $dropdown-height: 156px;
     }
     .setting-button {
       cursor: pointer;
-      position: relative;
+      box-sizing: border-box;
       align-self: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
-      border: 0.5px solid rgba(255,255,255,0.20);
+      background-color: $interactor-backgroundColor-default;
+      border: $interactor-border-default;
       border-radius: 2px;
-      transition-property: background-color, opacity;
-      transition-duration: 80ms;
+      transition-property: background-color, opacity, border;
+      transition-duration: 200ms;
       transition-timing-function: ease-in;
-
       width: 61px;
-      height: 23px;
+      height: 28px;
+      &:hover {
+        border: $interactor-border-hover;
+        background-color: $interactor-backgroundColor-hover;
+      }
+
       .button-enter, .button-leave-to {
         opacity: 0;
       }
       .button-enter-active {
-        transition: opacity 250ms ease-in;
+        transition: opacity 200ms ease-in;
       }
       .button-leave-active {
-        transition: opacity 300ms ease-in;
+        transition: opacity 200ms ease-in;
       }
+
       .content {
-        width: 100%;
         font-family: $font-medium;
         font-size: 11px;
         color: #FFFFFF;
         letter-spacing: 0;
         text-align: center;
-        line-height: 13px;
+        line-height: 26px;
       }
       .result {
-        position: absolute;
+        position: relative;
+        top: 5px;
+        left: 23px;
       }
     }
   }
