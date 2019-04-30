@@ -6,9 +6,24 @@ import TaskQueue from '@/helpers/proceduralQueue';
 import { SUBTITLE_OBJECTSTORE_NAME, DATADB_SHCEMAS, DATADB_VERSION } from '@/constants';
 
 const taskQueues = {};
+const videoInfos = new Map();
 
-function getVideoInfoFromVideoSrc(videoSrc) {
-  return infoDB.get('recent-played', 'path', videoSrc);
+async function getVideoInfoFromVideoSrc(videoSrc) {
+  const result = await infoDB.get('recent-played', 'path', videoSrc);
+  if (!result && !videoInfos.size) {
+    (await infoDB.getAll('recent-played'))
+      .forEach((result) => {
+        if (result.infos) {
+          // it's playlist info
+          result.infos.forEach((videoInfo) => {
+            videoInfos.set(videoInfo.path, videoInfo);
+          });
+        } else {
+          videoInfos.set(result.path, result);
+        }
+      });
+  }
+  return result || videoInfos.get(videoSrc);
 }
 function setVideoInfo(infoPayload) {
   return infoDB.add('recent-played', infoPayload);
