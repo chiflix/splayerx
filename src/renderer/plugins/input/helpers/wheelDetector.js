@@ -2,9 +2,7 @@
 import { EventEmitter } from 'events';
 import { ipcRenderer } from 'electron';
 import {
-  WHEEL_SCROLL_TOUCH_BEGIN_PHASE as touchBegin,
   WHEEL_SCROLLING_PHASE as scrolling,
-  WHEEL_SCROLL_TOUCH_END_PHASE as touchEnd,
   WHEEL_INERTIAL_SCROLLING_PHASE as inertial,
   WHEEL_STOPPED_PHASE as stopped,
 } from '../constants';
@@ -14,18 +12,11 @@ const Lethargy = require('exports-loader?this.Lethargy!lethargy/lethargy');
 class WheelPhaseCalculator extends EventEmitter {
   wheelTimer = 0;
 
-  touchBeginPhase = touchBegin;
   scrollingPhase = scrolling;
-  touchEndPhase = touchEnd;
   inertialPhase = inertial;
   stoppedPhase = stopped;
 
   _lastPhase = this.stoppedPhase;
-  _availableLastPhases = [
-    this.scrollingPhase,
-    this.inertialPhase,
-    this.stoppedPhase,
-  ];
   _availablePhases = [
     this.scrollingPhase,
     this.inertialPhase,
@@ -33,7 +24,8 @@ class WheelPhaseCalculator extends EventEmitter {
   ];
   get lastPhase() { return this._lastPhase; }
   set lastPhase(phase) {
-    if (phase !== this._lastPhase && this._availableLastPhases.includes(phase)) {
+    if (phase !== this._lastPhase && this._availablePhases.includes(phase)) {
+      console.log('Wheel:', phase);
       this._lastPhase = phase;
       if (this._availablePhases.includes(phase)) this.emit('phase-change', phase);
     }
@@ -96,33 +88,23 @@ class LethargyWheel extends WheelPhaseCalculator {
 export const lethargyWheel = new LethargyWheel();
 
 class ElectronWheel extends WheelPhaseCalculator {
-  _availableLastPhases = this._availablePhases.concat([
-    this.touchBeginPhase,
-    this.touchEndPhase,
-  ]);
-
+  _isTrackPad = false;
+  _canInertialScroll = false;
   constructor(interval) {
     super(interval);
 
-    ipcRenderer.on('scroll-touch-begin', () => { this.lastPhase = this.touchBeginPhase; });
-    ipcRenderer.on('scroll-touch-end', () => { this.lastPhase = this.touchEndPhase; });
+    ipcRenderer.on('scroll-touch-begin', () => { this._isTrackPad = true; });
+    ipcRenderer.on('scroll-touch-end', () => { this._canInertialScroll = true; });
   }
 
   calculate(event) {
     if (event) {
       clearTimeout(this.wheelTimer);
-      /* eslint-disable no-default-case */
-      switch (this.lastPhase) {
-        case this.touchBeginPhase:
-          this.lastPhase = this.scrollingPhase;
-          break;
-        case this.touchEndPhase:
-          this.lastPhase = this.inertialPhase;
-          break;
-      }
-      /* eslint-disable no-default-case */
+      this.lastPhase = this._isTrackPad && this._canInertialScroll ?
+        this.inertialPhase : this.scrollingPhase;
       this.wheelTimer = setTimeout(() => {
         this.lastPhase = this.stoppedPhase;
+        this._isTrackPad = this._canInertialScroll = false;
       }, this.interval);
     }
   }
