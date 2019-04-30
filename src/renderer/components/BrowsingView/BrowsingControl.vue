@@ -10,7 +10,6 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import getYouTubeID from 'get-youtube-id';
 import Icon from '../BaseIconContainer.vue';
 
 export default {

@@ -1,6 +1,5 @@
 <template>
   <div class="header">
-    <browsing-titlebar></browsing-titlebar>
     <browsing-favicons v-show="!showOpenUrl"></browsing-favicons>
     <browsing-input v-show="showOpenUrl"></browsing-input>
   </div>

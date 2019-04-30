@@ -1,5 +1,6 @@
 <template>
  <div class="browsing">
+   <browsing-titlebar></browsing-titlebar>
    <browsing-header v-show="!isPip"></browsing-header>
    <div class="loading-state loading-animation" v-show="loadingState && !isPip"></div>
    <div class="pip-buttons" v-show="isPip">
@@ -19,6 +20,7 @@ import urlParseLax from 'url-parse-lax';
 import BrowsingHeader from './BrowsingView/BrowsingHeader.vue';
 import BrowsingControl from './BrowsingView/BrowsingControl.vue';
 import Icon from './BaseIconContainer.vue';
+import BrowsingTitleBar from './BrowsingView/BrowsingTitlebar.vue';
 
 export default {
   name: 'BrowsingView',
@@ -34,6 +36,7 @@ export default {
   components: {
     'browsing-header': BrowsingHeader,
     'browsing-control': BrowsingControl,
+    'browsing-titlebar': BrowsingTitleBar,
     Icon,
   },
   computed: {
@@ -82,7 +85,7 @@ export default {
       this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "none"');
       this.$refs.webView.executeJavaScript('if (document.querySelector(".video-ads")) document.querySelector(".video-ads").style.display = "none"'); // remove youtube ads
       this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.left = "50%";document.querySelector(".html5-video-player").style.transform = "translateX(-50%)";');
-      this.$refs.webView.executeJavaScript('var setZoom = function() {setTimeout(() => { document.querySelector("video").style.zoom = document.body.clientWidth / parseFloat(document.querySelector("video").style.width);document.querySelector(".ytp-chrome-bottom").style.width = "calc(100% - 24px)"; }, 200);};window.addEventListener("resize", setZoom);');
+      this.$refs.webView.executeJavaScript('var setZoom = function() {setTimeout(() => { document.querySelector("video").style.zoom = document.body.clientWidth / parseFloat(document.querySelector("video").style.width);document.querySelector(".ytp-chrome-bottom").style.width = "calc(100% - 24px)"; }, 250);};window.addEventListener("resize", setZoom);');
     },
     youtubeWatcher(val) {
       this.$refs.webView.executeJavaScript(`document.querySelector(".html5-video-player").style.position = "absolute";document.querySelector(".html5-video-player").style.width = "${val}px";document.querySelector(".html5-video-player").style.height = "${this.browsingWinSize[1]}px";`);
