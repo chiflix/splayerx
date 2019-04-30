@@ -301,7 +301,7 @@ export default {
         }
       }
       if (videoFiles.length !== 0) {
-        this.createPlaylist(...videoFiles);
+        this.createPlayList(...videoFiles);
       } else {
         // TODO: no videoFiles in folders error catch
         this.addLog('error', {
@@ -350,7 +350,7 @@ export default {
         }
       }
       if (videoFiles.length > 1) {
-        this.createPlaylist(...videoFiles);
+        this.createPlayList(...videoFiles);
       } else if (videoFiles.length === 1) {
         this.openVideoFile(...videoFiles);
       }
@@ -404,24 +404,16 @@ export default {
       this.infoDB.add('recent-played', { ...playlist, lastOpened: Date.now() });
     },
     // create new play list record in recent-played and play the video
-    async createPlaylist(...videoFiles) {
+    async createPlayList(...videoFiles) {
       const hash = await this.mediaQuickHash(videoFiles[0]);
-      if (!process.mas || (process.mas && this.$store.getters.source !== 'drop')) {
-        const id = await this.infoDB.addPlaylist(videoFiles);
-        const playlistItem = await this.infoDB.get('recent-played', id);
-        this.$store.dispatch('PlayingList', { id, paths: videoFiles, items: playlistItem.items });
+      const id = await this.infoDB.addPlaylist(videoFiles);
+      const playlistItem = await this.infoDB.get('recent-played', id);
+      this.$store.dispatch('PlayingList', { id, paths: videoFiles, items: playlistItem.items });
 
-        const videoId = playlistItem.items[playlistItem.playedIndex];
-        this.$store.dispatch('SRC_SET', { src: videoFiles[0], id: videoId, mediaHash: hash });
-        this.$router.push({ name: 'playing-view' });
-        this.$bus.$emit('new-file-open');
-      } else {
-        this.$store.dispatch('PlayingList', { paths: videoFiles });
-
-        this.$store.dispatch('SRC_SET', { src: videoFiles[0], mediaHash: hash });
-        this.$router.push({ name: 'playing-view' });
-        this.$bus.$emit('new-file-open');
-      }
+      const videoId = playlistItem.items[playlistItem.playedIndex];
+      this.$store.dispatch('SRC_SET', { src: videoFiles[0], id: videoId, mediaHash: hash });
+      this.$router.push({ name: 'playing-view' });
+      this.$bus.$emit('new-file-open');
     },
     // open single video
     async openVideoFile(videoFile) {
@@ -490,10 +482,12 @@ export default {
       this.$store.dispatch('SRC_SET', { src: vidPath, mediaHash: mediaQuickHash, id });
       this.$router.push({ name: 'playing-view' });
 
-      const value = await this.infoDB.get('media-item', id);
-      this.$bus.$emit('new-file-open');
-      if (value.lastPlayedTime) {
-        this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
+      if (id) {
+        const value = await this.infoDB.get('media-item', id);
+        this.$bus.$emit('new-file-open');
+        if (value.lastPlayedTime) {
+          this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
+        }
       }
     },
     async mediaQuickHash(filePath) {
