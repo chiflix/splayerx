@@ -365,27 +365,13 @@ export default {
         this.playFile(this.nextVideo);
       }
     });
-    this.$bus.$on('seek', (e) => {
-      this.seekTime = [e];
-      // todo: use vuex get video element src
-      const filePath = decodeURI(this.src);
-      const indexOfLastDot = filePath.lastIndexOf('.');
-      const ext = filePath.substring(indexOfLastDot + 1);
-      if (ext === 'mkv') {
-        this.$bus.$emit('seek-subtitle', e);
-      }
-    });
-    this.$bus.$on('seek-forward', (delta) => {
-      if (videodata.time < this.duration) {
-        this.$bus.$emit('seek', [videodata.time + delta > this.duration ?
-          this.duration : videodata.time + delta]);
-      }
-    });
+    this.$bus.$on('seek', (e) => { this.seekTime = [e]; });
+    this.$bus.$on('seek-forward', delta => this.$bus.$emit('seek', videodata.time + Math.abs(delta)));
     this.$bus.$on('seek-backward', (delta) => {
-      if (videodata.time > 0) {
-        this.$bus.$emit('seek', [videodata.time - delta < 0 ?
-          0 : videodata.time - delta]);
-      }
+      const finalSeekTime = videodata.time - Math.abs(delta);
+      // find a way to stop wheel event until next begin
+      // if (finalSeekTime <= 0)
+      this.$bus.$emit('seek', finalSeekTime);
     });
     this.$bus.$on('drag-over', () => {
       this.maskBackground = 'rgba(255, 255, 255, 0.18)';
