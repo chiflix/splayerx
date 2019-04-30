@@ -25,6 +25,7 @@ app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 let mainWindow = null;
 let aboutWindow = null;
 let preferenceWindow = null;
+let browsingViewWindow = null;
 let tray = null;
 let needToRestore = false;
 let inited = false;
@@ -42,6 +43,9 @@ const aboutURL = process.env.NODE_ENV === 'development'
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
+const browsingViewURL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:9080/browsingView.html'
+  : `file://${__dirname}/browsingView.html`;
 
 // requestSingleInstanceLock is not going to work for mas
 // https://github.com/electron-userland/electron-packager/issues/923
@@ -73,6 +77,12 @@ function handleBossKey() {
   }
 }
 
+function registerBrowsingWindowEvent() {
+  if (!browsingViewWindow) return;
+  browsingViewWindow.on('resize', throttle(() => {
+    browsingViewWindow?.webContents.send('browsingViewSize', browsingViewWindow.getSize());
+  }, 100));
+}
 function registerMainWindowEvent() {
   if (!mainWindow) return;
   // TODO: should be able to use window.outerWidth/outerHeight directly
@@ -114,6 +124,13 @@ function registerMainWindowEvent() {
       mainWindow?.[method]?.(...args);
     } catch (ex) {
       console.error('callMainWindowMethod', ex, method, JSON.stringify(args));
+    }
+  });
+  ipcMain.on('callBrowsingViewWindowMethod', (evt, method, args = []) => {
+    try {
+      browsingViewWindow?.[method]?.(...args);
+    } catch (ex) {
+      console.error('callBrowsingViewWindowMethod', ex, method, JSON.stringify(args));
     }
   });
   /* eslint-disable no-unused-vars */
@@ -337,6 +354,37 @@ function registerMainWindowEvent() {
     }
     aboutWindow.once('ready-to-show', () => {
       aboutWindow.show();
+    });
+  });
+  ipcMain.on('add-browsingView', (e, url) => {
+    const browsingWindowOptions = {
+      useContentSize: true,
+      frame: false,
+      titleBarStyle: 'none',
+      width: 1200,
+      height: 900,
+      transparent: true,
+      show: false,
+      resizable: true,
+      minWidth: 720,
+      minHeight: 405,
+      webPreferences: {
+        webSecurity: false,
+        experimentalFeatures: true,
+      },
+      acceptFirstMouse: true,
+    };
+    if (!browsingViewWindow) {
+      browsingViewWindow = new BrowserWindow(browsingWindowOptions);
+      browsingViewWindow.loadURL(`${browsingViewURL}`);
+      browsingViewWindow.on('closed', () => {
+        browsingViewWindow = null;
+      });
+    }
+    browsingViewWindow.once('ready-to-show', () => {
+      browsingViewWindow.show();
+      registerBrowsingWindowEvent();
+      browsingViewWindow.webContents.send('initial-url', url);
     });
   });
   ipcMain.on('add-preference', () => {

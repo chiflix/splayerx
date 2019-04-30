@@ -637,4 +637,28 @@ export default {
     }
   }
 }
+.pipRecord, .pipBack {
+  width: 20px;
+  height: 20px;
+  .default {
+    display: block;
+  }
+  .hover {
+    display: none;
+  }
+  .active {
+    display: none;
+  }
+  &:active {
+    .default {
+      display: none;
+    }
+    .hover {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+  }
+}
 </style>

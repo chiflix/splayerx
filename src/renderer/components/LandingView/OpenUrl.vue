@@ -34,10 +34,7 @@ export default {
     },
     handleEnterKey(e) {
       if (e.key === 'Enter') {
-        this.updateInitialUrl(this.$refs.inputValue.value);
-        this.$router.push({
-          name: 'browsing-view',
-        });
+        this.$electron.ipcRenderer.send('add-browsingView', this.$refs.inputValue.value);
       }
     },
   },

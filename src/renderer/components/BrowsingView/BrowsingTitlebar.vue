@@ -2,7 +2,7 @@
   <div
     :data-component-name="$options.name"
     :class="isDarwin ? 'darwin-titlebar' : 'titlebar'">
-    <div class="win-icons" v-if="!isDarwin" v-fade-in="showTitleBar">
+    <div class="win-icons" v-if="!isDarwin">
       <Icon class="title-button no-drag"
             @mouseup.native="handleMinimize"
             type="titleBarWinExitFull">
@@ -29,7 +29,6 @@
     </div>
     <div class="mac-icons"
          v-if="isDarwin"
-         v-fade-in="showTitleBar"
          @mouseover="handleMouseOver"
          @mouseout="handleMouseOut">
       <Icon id="close" class="title-button no-drag"
@@ -62,7 +61,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import electron from 'electron';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -77,16 +76,9 @@ export default {
       itemType: 'titleBarFull',
       keyAlt: false,
       keyOver: false,
-      showTitleBar: true,
+      isMaximized: false,
+      isFullScreen: false,
     };
-  },
-  props: {
-    currentView: String,
-    showAllWidgets: {
-      type: Boolean,
-      default: true,
-    },
-    recentPlaylist: Boolean,
   },
   components: {
     Icon,
@@ -104,11 +96,8 @@ export default {
     });
   },
   watch: {
-    recentPlaylist(val) {
-      if (!val) this.showTitleBar = this.showAllWidgets;
-    },
-    showAllWidgets(val) {
-      this.showTitleBar = this.recentPlaylist || val;
+    middleButtonStatus(val) {
+      console.log(val);
     },
     keyAlt(val) {
       if (!val || !this.keyOver) {
@@ -136,38 +125,39 @@ export default {
     },
     // Methods to handle window behavior
     handleMinimize() {
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'minimize');
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'minimize');
+      this.isMaximized = false;
     },
     handleWinFull() {
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'maximize');
+      this.isMaximized = true;
     },
     handleClose() {
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'close');
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'close');
     },
     handleRestore() {
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'unmaximize');
+      this.isMaximized = false;
     },
     handleFullscreenExit() {
-      this.$bus.$emit('off-fullscreen');
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setFullScreen', [false]);
+      this.isFullScreen = false;
     },
     // OS-specific methods
     handleMacFull() {
       if (this.itemType === this.itemTypeEnum.FULLSCREEN) {
-        this.$bus.$emit('to-fullscreen');
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setFullScreen', [true]);
+        this.isFullScreen = true;
       } else if (this.isMaximized) {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'unmaximize');
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'unmaximize');
+        this.isMaximized = false;
       } else {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'maximize');
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'maximize');
+        this.isMaximized = true;
       }
     },
   },
   computed: {
-    ...mapGetters([
-      'isMaximized',
-      'isFullScreen',
-    ]),
     isDarwin() {
       return process.platform === 'darwin';
     },

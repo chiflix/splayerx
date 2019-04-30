@@ -2,6 +2,10 @@
  <div class="browsing">
    <browsing-header v-show="!isPip"></browsing-header>
    <div class="loading-state loading-animation" v-show="loadingState && !isPip"></div>
+   <div class="pip-buttons" v-show="isPip">
+     <Icon type="pipRecord" :style="{ marginRight: '12px' }"></Icon>
+     <Icon type="pipBack" @mouseup.native="handleExitPip"></Icon>
+   </div>
    <webview :src="availableUrl" autosize class="web-view" ref="webView" allowpopups :style="{ webkitAppRegion: isPip ? 'drag' : 'no-drag' }"></webview>
    <browsing-control v-show="!isPip"></browsing-control>
  </div>
@@ -9,10 +13,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
+import electron from 'electron';
 import { Browsing as browsingActions } from '@/store/actionTypes';
 import urlParseLax from 'url-parse-lax';
 import BrowsingHeader from './BrowsingView/BrowsingHeader.vue';
 import BrowsingControl from './BrowsingView/BrowsingControl.vue';
+import Icon from './BaseIconContainer.vue';
 
 export default {
   name: 'BrowsingView',
@@ -22,14 +28,16 @@ export default {
       loadingState: false,
       startTime: 0,
       isPip: false,
+      pipType: '',
     };
   },
   components: {
     'browsing-header': BrowsingHeader,
     'browsing-control': BrowsingControl,
+    Icon,
   },
   computed: {
-    ...mapGetters(['winSize', 'winPos', 'isFullScreen', 'initialUrl', 'winWidth']),
+    ...mapGetters(['browsingWinSize', 'winPos', 'isFullScreen', 'initialUrl', 'browsingWinWidth']),
     availableUrl() {
       const parsedUrl = urlParseLax(this.initialUrl);
       return parsedUrl.protocol ? parsedUrl.href : `http://${this.initialUrl}`;
@@ -39,35 +47,100 @@ export default {
     initialUrl(val) {
       console.log(val);
     },
-    winWidth(val) {
+    browsingWinWidth(val) {
       if (this.isPip) {
-        this.$refs.webView.executeJavaScript('document.querySelector(".ytp-preview").style.top = "";document.querySelector(".ytp-preview").style.bottom = "50px"');
-        this.$refs.webView.executeJavaScript(`document.querySelector(".html5-video-player").style.position = "absolute";document.querySelector(".html5-video-player").style.width = "${val}px";document.querySelector(".html5-video-player").style.height = "${this.winSize[1]}px";`);
-        this.$refs.webView.executeJavaScript(`document.querySelector("video").style.width = "${val}px";document.querySelector("video").style.height = "${this.winSize[1]}px"`);
+        if (this.pipType === 'youtube') {
+          this.youtubeWatcher(val);
+        } else if (this.pipType === 'bilibili') {
+          this.bilibiliWatcher(val);
+        }
       }
     },
   },
   methods: {
     ...mapActions({
       updateInitialUrl: browsingActions.UPDATE_INITIAL_URL,
+      updateBrowsingSize: browsingActions.UPDATE_BROWSING_SIZE,
     }),
+    handleExitPip() {
+      if (this.isPip) {
+        if (this.pipType === 'youtube') {
+          this.youtubeRecover();
+        } else if (this.pipType === 'bilibili') {
+          this.bilibiliRecover();
+        }
+        this.isPip = false;
+      }
+    },
+    youtubeAdapter() {
+      this.$refs.webView.executeJavaScript('document.querySelector("video").style', (result) => {
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [parseFloat(result.width) / parseFloat(result.height)]);
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [parseInt(180 * (parseFloat(result.width) / parseFloat(result.height)), 10), 180]);
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [parseInt(180 * (parseFloat(result.width) / parseFloat(result.height)), 10), 180]);
+      });
+      this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.body.appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
+      this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "none"');
+      this.$refs.webView.executeJavaScript('if (document.querySelector(".video-ads")) document.querySelector(".video-ads").style.display = "none"'); // remove youtube ads
+      this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.left = "50%";document.querySelector(".html5-video-player").style.transform = "translateX(-50%)";');
+      this.$refs.webView.executeJavaScript('var setZoom = function() {setTimeout(() => { document.querySelector("video").style.zoom = document.body.clientWidth / parseFloat(document.querySelector("video").style.width);document.querySelector(".ytp-chrome-bottom").style.width = "calc(100% - 24px)"; }, 200);};window.addEventListener("resize", setZoom);');
+    },
+    youtubeWatcher(val) {
+      this.$refs.webView.executeJavaScript(`document.querySelector(".html5-video-player").style.position = "absolute";document.querySelector(".html5-video-player").style.width = "${val}px";document.querySelector(".html5-video-player").style.height = "${this.browsingWinSize[1]}px";`);
+    },
+    youtubeRecover() {
+      this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].style.display = "";' +
+        'document.querySelector(".html5-video-player").style.left = "";' +
+        'document.querySelector(".html5-video-player").style.transform = "";' +
+        'document.querySelector(".html5-video-player").style.position = "relative";' +
+        'document.querySelector(".html5-video-player").style.width = "100%";' +
+        'document.querySelector(".html5-video-player").style.height = "100%";' +
+        'window.removeEventListener("resize", setZoom);' +
+        'document.querySelector("video").style.zoom = 1');
+      this.$refs.webView.executeJavaScript('if (document.querySelector(".video-ads")) document.querySelector(".video-ads").style.display = ""'); // remove youtube ads
+      this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.querySelector(".ytd-player").appendChild(document.querySelector(".html5-video-player")); if (!isPaused) {document.querySelector("video").play()}');
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [0, 0]);
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [720, 405]);
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [1200, 900]);
+    },
+    bilibiliAdapter() {
+      this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.body.appendChild(document.querySelector(".player")); if (!isPaused) {document.querySelector("video").play()}');
+      this.$refs.webView.executeJavaScript('document.querySelector("#bofqi").style', (result) => {
+        const videoAspectRatio = parseFloat(result.width) / (parseFloat(result.height) - 46);
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [videoAspectRatio]);
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [parseInt(180 * (parseFloat(result.width) / parseFloat(result.height)), 10), 180]);
+        electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [parseInt(180 * videoAspectRatio, 10), 180]);
+      });
+      this.$refs.webView.executeJavaScript('document.querySelector("#app").style.display = "none"');
+      this.$refs.webView.executeJavaScript('document.body.style.overflow = "hidden"');
+      this.$refs.webView.executeJavaScript('document.querySelector(".bili-header-m").style.display = "none"');
+    },
+    bilibiliWatcher(val) {
+      if (val >= 480) {
+        this.$refs.webView.executeJavaScript('document.querySelector(".player").style.width= "100%"; document.querySelector(".player").style.height= "calc(100% + 46px)"');
+      } else {
+        this.$refs.webView.executeJavaScript('document.querySelector(".player").style.width= "100%"; document.querySelector(".player").style.height= "100%"');
+      }
+    },
+    bilibiliRecover() {
+      this.$refs.webView.executeJavaScript('var isPaused = document.querySelector("video").paused;document.querySelector("#bofqi").prepend(document.querySelector(".player")); if (!isPaused) {document.querySelector("video").play()}');
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setAspectRatio', [0, 0]);
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setMinimumSize', [720, 405]);
+      electron.ipcRenderer.send('callBrowsingViewWindowMethod', 'setSize', [1200, 900]);
+      this.$refs.webView.executeJavaScript('document.querySelector("#app").style.display = ""');
+      this.$refs.webView.executeJavaScript('document.body.style.overflow = ""');
+      this.$refs.webView.executeJavaScript('document.querySelector(".bili-header-m").style.display = ""');
+      this.$refs.webView.executeJavaScript('document.querySelector(".player").style.height= "100%"');
+    },
+  },
+  created() {
+    electron.ipcRenderer.on('initial-url', (e, url) => {
+      this.updateInitialUrl(url);
+    });
+    electron.ipcRenderer.on('browsingViewSize', (e, size) => {
+      this.updateBrowsingSize(size);
+    });
   },
   mounted() {
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [0, 0]);
-    if (this.winSize[0] < 1200) {
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [1200, 900]);
-    }
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [720, 405]);
-    const windowRect = [
-      window.screen.availLeft, window.screen.availTop,
-      window.screen.availWidth, window.screen.availHeight,
-    ];
-    const newPosition = this.calculateWindowPosition(
-      this.winPos.concat(this.winSize),
-      windowRect,
-      [1200, 900],
-    );
-    this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', newPosition);
     this.$bus.$on('url-back', () => {
       if (this.$refs.webView.canGoBack()) {
         this.$refs.webView.goBack();
@@ -83,9 +156,16 @@ export default {
     });
     this.$refs.webView.addEventListener('load-commit', () => {
       this.$refs.webView.blur();
-      this.$bus.$emit('web-info', { url: this.$refs.webView.getURL(), canGoBack: this.$refs.webView.canGoBack(), canGoForward: this.$refs.webView.canGoForward() });
+      this.$refs.webView.executeJavaScript('document.querySelector("video")', (r) => {
+        this.$bus.$emit('web-info', {
+          hasVideo: !!r,
+          url: this.$refs.webView.getURL(),
+          canGoBack: this.$refs.webView.canGoBack(),
+          canGoForward: this.$refs.webView.canGoForward(),
+        });
+      });
     });
-    this.$electron.ipcRenderer.on('quit', () => {
+    electron.ipcRenderer.on('quit', () => {
       this.quit = true;
     });
     this.$refs.webView.addEventListener('dom-ready', () => { // for webview test
@@ -109,38 +189,16 @@ export default {
       }
     });
     this.$bus.$on('enter-pip', () => {
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
-      this.$refs.webView.executeJavaScript('document.getElementsByTagName("ytd-app")[0].appendChild(document.querySelector(".html5-video-player"));');
-      this.$refs.webView.executeJavaScript('document.querySelector("#content").remove()');
-      this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [320, 180]);
-      this.$refs.webView.executeJavaScript('document.querySelector("video").style', (result) => {
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setAspectRatio', [parseFloat(result.width) / parseFloat(result.height)]);
-      });
-      this.$refs.webView.executeJavaScript('document.querySelector(".video-ads").style.display = "none"');
-      this.$refs.webView.executeJavaScript('document.querySelector(".ytp-chrome-bottom").style.width = "calc(100% - 24px)"');
-      this.$refs.webView.executeJavaScript('document.querySelector("video").style.width = "320px";document.querySelector("video").style.height = "180px";');
-      this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.position = "absolute";document.querySelector(".html5-video-player").style.width = "320px";document.querySelector(".html5-video-player").style.height = "180px";');
-      this.$refs.webView.executeJavaScript('document.querySelector(".html5-video-player").style.left = "50%";document.querySelector(".html5-video-player").style.transform = "translateX(-50%)";');
-      this.$refs.webView.executeJavaScript('document.querySelector("video").play()');
+      const parseUrl = urlParseLax(this.initialUrl);
+      if (parseUrl.host.includes('youtube')) {
+        this.pipType = 'youtube';
+        this.youtubeAdapter();
+      } else if (parseUrl.host.includes('bilibili')) {
+        this.pipType = 'bilibili';
+        this.bilibiliAdapter();
+      }
       this.isPip = true;
     });
-    window.onbeforeunload = (e) => {
-      if (!this.quit) {
-        e.returnValue = false;
-        this.$bus.$off(); // remove all listeners before back to landing view
-        const x = (window.screen.width / 2) - 360;
-        const y = (window.screen.height / 2) - 200;
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', [720, 405]);
-        this.$electron.ipcRenderer.send('callMainWindowMethod', 'setPosition', [x, y]);
-        this.$router.push({
-          name: 'landing-view',
-        });
-        if (this.isFullScreen) this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [!this.isFullScreen]);
-      }
-    };
-  },
-  beforeDestroy() {
-    window.onbeforeunload = null;
   },
 };
 </script>
@@ -160,6 +218,15 @@ export default {
     height: 36px;
     position: absolute;
     background-image: linear-gradient(-90deg, #414141 18%, #555555 34%, #626262 51%, #626262 56%, #555555 69%, #414141 86%);
+  }
+  .pip-buttons {
+    width: auto;
+    height: 20px;
+    display: flex;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 100;
   }
 }
 .loading-animation {

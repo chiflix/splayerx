@@ -20,15 +20,13 @@ export default {
       backType: 'backDisabled',
       forwardType: 'forwardDisabled',
       url: '',
+      hasVideo: false,
     };
   },
   computed: {
     ...mapGetters(['winWidth']),
     picInPicType() {
-      return this.youtubeId ? 'pip' : 'pipDisabled';
-    },
-    youtubeId() {
-      return getYouTubeID(this.url);
+      return this.hasVideo ? 'pip' : 'pipDisabled';
     },
   },
   watch: {
@@ -49,6 +47,7 @@ export default {
   },
   mounted() {
     this.$bus.$on('web-info', (info) => {
+      this.hasVideo = info.hasVideo;
       this.url = info.url;
       this.backType = info.canGoBack ? 'back' : 'backDisabled';
       this.forwardType = info.canGoForward ? 'forward' : 'forwardDisabled';

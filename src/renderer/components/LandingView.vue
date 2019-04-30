@@ -91,7 +91,7 @@ import fs from 'fs';
 import { mapState, mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 import asyncStorage from '@/helpers/asyncStorage';
-import Titlebar from './BrowsingView/BrowsingTitlebar.vue';
+import Titlebar from './LandingTitlebar.vue';
 import VideoItem from './LandingView/VideoItem.vue';
 import PlaylistItem from './LandingView/PlaylistItem.vue';
 import NotificationBubble from './NotificationBubble.vue';

@@ -75,10 +75,7 @@ export default {
       this.showMarks = !this.showMarks;
     },
     handleBrowsingOpen(item) {
-      this.updateInitialUrl(item.url);
-      this.$router.push({
-        name: 'browsing-view',
-      });
+      this.$electron.ipcRenderer.send('add-browsingView', item.url);
     },
     handleMarksAnimEnd(e) {
       if (e.target.classList.contains('marks-hide-animation') || e.target.classList.contains('win-marks-hide-animation')) {

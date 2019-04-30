@@ -82,4 +82,5 @@ export const Input = {
 
 export const Browsing = {
   INITIAL_URL_UPDATE: 'INITIAL_URL_UPDATE',
+  BROWSING_SIZE_UPDATE: 'BROWSING_SIZE_UPDATE',
 };
