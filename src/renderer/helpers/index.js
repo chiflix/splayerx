@@ -408,11 +408,6 @@ export default {
         } catch (err) {
           if (process.mas && err?.code === 'EPERM') {
             // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
-            console.log({
-              id,
-              paths: [video.path],
-              items: [video.videoId],
-            });
             this.$store.dispatch('FolderList', {
               id,
               paths: [video.path],
@@ -458,11 +453,6 @@ export default {
       } catch (err) {
         if (process.mas && err?.code === 'EPERM') {
           // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
-          console.log({
-            id,
-            paths: [videoFile],
-            items: [playlistItem.items[playlistItem.playedIndex]],
-          });
           this.$store.dispatch('FolderList', {
             id,
             paths: [videoFile],
