@@ -163,11 +163,13 @@ import { EVENT_BUS_COLLECTIONS as bus } from '@/constants';
 import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/subtitle.json';
 import { deleteSubtitles } from '@/helpers/subtitle';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Icon from '../BaseIconContainer.vue';
 import { ONLINE_LOADING, SUBTITLE_OFFLINE, REQUEST_TIMEOUT } from '../../../shared/notificationcodes';
 
 export default {
   name: 'subtitle-control',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
     Icon,
@@ -1167,7 +1169,7 @@ export default {
       .text, .confirm-delete-wrap {
         font-size: 13.2px;
         letter-spacing: 0.2px;
-        line-height: 14px;
+        line-height: 16px;
         margin: auto 0 auto 12.73px;
       }
       .iconContainer {
@@ -1189,7 +1191,7 @@ export default {
       .text {
         font-size: 12px;
         letter-spacing: 0.2px;
-        line-height: 14px;
+        line-height: 16px;
         margin: auto 12.73px;
       }
     }

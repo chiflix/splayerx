@@ -1,5 +1,5 @@
 <template>
-  <div :data-component-name="$options.name">
+  <div>
     <div class="advanceControl">
       <transition name="advance-trans-l">
       <div class="advanced" v-show="showAttached"
@@ -23,10 +23,12 @@ import lottie from '@/components/lottie.vue';
 import animationData from '@/assets/advance.json';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { Input as InputActions } from '@/store/actionTypes';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import AdvanceMainMenu from './AdvanceControlFunctionalities/AdvanceMainMenu.vue';
 
 export default {
   name: 'advance-control',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     lottie,
     'advance-main-menu': AdvanceMainMenu,

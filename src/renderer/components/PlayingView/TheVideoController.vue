@@ -1,6 +1,5 @@
 <template>
   <div ref="controller"
-    :data-component-name="$options.name"
     class="the-video-controller"
     :style="{ cursor: cursorStyle }"
     @mousemove="handleMousemove"
@@ -11,7 +10,7 @@
     @mousedown.left="handleMousedownLeft"
     @click.left="handleMouseupLeft">
     <!-- 当目前字幕处于快速编辑模式或者高级编辑模式正常播放的组件都从DOM节点删除 -->
-    <titlebar currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']" v-if="!isProfessional"></titlebar>
+    <titlebar key="playing-view" currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']" v-if="!isProfessional"></titlebar>
     <notification-bubble ref="nextVideoUI" v-if="!isEditable"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"  v-fade-in="!isEditable && !isProfessional"
     :displayState="displayState['recent-playlist']"
@@ -58,6 +57,7 @@
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import path from 'path';
 import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import Titlebar from '../Titlebar.vue';
@@ -74,6 +74,7 @@ import { videodata } from '../../store/video';
 
 export default {
   name: 'the-video-controller',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     titlebar: Titlebar,
     'play-button': PlayButton,
@@ -253,18 +254,21 @@ export default {
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
-      this.displayState[value.name] = true;
-      if (value.name === 'recent-playlist') this.displayState[value.name] = false;
-      if (value.name === 'playlist-control' && !this.playingList.length) {
-        this.displayState['playlist-control'] = false;
+      // unit test not pass, so add if value
+      if (value) {
+        this.displayState[value.name] = true;
+        if (value.name === 'recent-playlist') this.displayState[value.name] = false;
+        if (value.name === 'playlist-control' && !this.playingList.length) {
+          this.displayState['playlist-control'] = false;
+        }
+        this.widgetsStatus[value.name] = {
+          selected: false,
+          showAttached: false,
+          mousedownOnOther: false,
+          mouseupOnOther: false,
+          hovering: false,
+        };
       }
-      this.widgetsStatus[value.name] = {
-        selected: false,
-        showAttached: false,
-        mousedownOnOther: false,
-        mouseupOnOther: false,
-        hovering: false,
-      };
     });
     this.$bus.$on('open-playlist', () => {
       this.widgetsStatus['playlist-control'].showAttached = true;

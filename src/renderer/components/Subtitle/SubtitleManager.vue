@@ -226,6 +226,7 @@ export default {
           (winRatio <= 1 && this.winWidth < 480)) {
           this.$electron.ipcRenderer.send('callMainWindowMethod', 'setSize', minSize);
         }
+        this.updateSubDelay(0);
       }
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', minSize);
       this.$bus.$emit(bus.SUBTITLE_DELETE_IMMEDIATELY);
@@ -235,6 +236,7 @@ export default {
   },
   methods: {
     ...mapActions({
+      updateSubDelay: subtitleActions.UPDATE_SUBTITLE_DELAY,
       resetSubtitles: subtitleActions.RESET_SUBTITLES,
       resetOnlineSubtitles: subtitleActions.RESET_ONLINE_SUBTITLES,
       changeCurrentFirstSubtitle: subtitleActions.CHANGE_CURRENT_FIRST_SUBTITLE,
@@ -715,7 +717,7 @@ export default {
       const instance = this.subtitleInstances[id];
       if (instance) {
         const {
-          src, type, data, metaInfo,
+          src, type, data, metaInfo, parsed,
         } = instance;
         const {
           language: languageCode,
@@ -728,6 +730,10 @@ export default {
           case 'online':
             result.format = 'online';
             result.transcriptIdentity = src;
+            break;
+          case 'modified':
+            result.format = 'vtt';
+            result.payload = Buffer.from(dialogueToString(parsed.dialogues));
             break;
           case 'embedded':
           case 'local':
@@ -888,7 +894,7 @@ export default {
           if (filePath) {
             const str = dialogueToString(currentSubtitle.parsed.dialogues);
             try {
-              writeSubtitleByPath(filePath, str);
+              writeSubtitleByPath(filePath, Buffer.from(str));
             } catch (err) {
               console.log(err);
             }

@@ -23,25 +23,28 @@
       <div class="setting-title">{{ $t("preferences.general.setDefault") }}</div>
       <div class="setting-description">{{ $t("preferences.general.setDefaultDescription") }}</div>
     </div>
-    <div class="setting-button no-drag" ref="button"
-      @mousedown="mousedownOnSetDefault"
-      @mouseup="setDefault">
+    <div class="setting-button no-drag" ref="button1"
+      @mousedown="mousedownOnSetDefault">
       <transition name="button" mode="out-in">
-        <div key="" v-if="!setState" class="content">{{ $t("preferences.general.setButton") }}</div>
-        <div :key="setState" v-else class="result">
-          <Icon :type="setState" :class="setState"/>
+        <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
+        <div :key="defaultState" v-else class="result">
+          <Icon :type="defaultState" :class="defaultState"/>
         </div>
       </transition>
     </div>
   </div>
-  <!-- <div class="description-button">
+  <div class="description-button" v-if="isMac">
     <div class="setting-content">
       <div class="setting-title">{{ $t("preferences.general.restoreSettings") }}</div>
       <div class="setting-description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
     </div>
-    <div class="setting-button no-drag"
-      @mouseup="restoreSettings"><div class="content">{{ $t("preferences.general.setButton") }}</div></div>
-  </div> -->
+    <div class="setting-button no-drag" ref="button2"
+      @mousedown="mousedownOnRestore">
+      <transition name="button" mode="out-in">
+        <div :key="needToRelaunch" class="content" ref="restoreContent">{{ restoreContent }}</div>
+      </transition>
+    </div>
+  </div>
   <div class="title other-title">{{ $t("preferences.general.others") }}</div>
   <BaseCheckBox v-if="isMac"
     :checkboxValue="reverseScrolling"
@@ -58,8 +61,6 @@
 
 <script>
 import electron from 'electron';
-import path from 'path';
-import { promises as fsPromises } from 'fs';
 import { setAsDefaultApp } from '@/../shared/system';
 import Icon from '@/components/BaseIconContainer.vue';
 import { codeToLanguageName } from '@/helpers/language';
@@ -75,15 +76,31 @@ export default {
   data() {
     return {
       showSelection: false,
-      isSetting: false,
-      setState: '',
-      buttonContentTimeoutId: NaN,
+      isSettingDefault: false,
+      isRestoring: false,
+      defaultState: '',
+      restoreState: '',
+      defaultButtonTimeoutId: NaN,
+      restoreButtonTimeoutId: NaN,
+      needToRelaunch: false,
+      restoreContent: '',
       languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
     };
+  },
+  created() {
+    electron.ipcRenderer.once('restore-state', (event, state) => {
+      this.restoreContent = state ? this.$t('preferences.general.relaunch')
+        : this.$t('preferences.general.setButton');
+    });
   },
   watch: {
     displayLanguage(val) {
       if (val) this.$i18n.locale = val;
+      electron.ipcRenderer.send('get-restore-state');
+      electron.ipcRenderer.once('restore-state', (event, state) => {
+        this.restoreContent = state ? this.$t('preferences.general.relaunch')
+          : this.$t('preferences.general.setButton');
+      });
     },
     mouseDown(val, oldVal) {
       if (!val && oldVal && !this.isMoved) {
@@ -148,70 +165,82 @@ export default {
   },
   methods: {
     mouseupOnOther() {
-      if (!this.isSetting) {
-        this.$refs.button.style.setProperty('background-color', '');
-        this.$refs.button.style.setProperty('opacity', '');
+      if (!this.isSettingDefault) {
+        this.$refs.button1.style.setProperty('background-color', '');
+        this.$refs.button1.style.setProperty('opacity', '');
+      }
+      if (!this.isRestoring) {
+        this.$refs.button2.style.setProperty('background-color', '');
+        this.$refs.button2.style.setProperty('opacity', '');
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
+      this.$refs.button1.removeEventListener('mouseup', this.setDefault);
+      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
     mousedownOnSetDefault() {
-      if (!this.isSetting) {
-        this.$refs.button.style.setProperty('background-color', 'rgba(0,0,0,0.20)');
-        this.$refs.button.style.setProperty('opacity', '0.5');
+      if (!this.isSettingDefault) {
+        this.$refs.button1.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
+        this.$refs.button1.style.setProperty('opacity', '0.5');
+        this.$refs.button1.addEventListener('mouseup', this.setDefault);
+        document.addEventListener('mouseup', this.mouseupOnOther);
+      }
+    },
+    mousedownOnRestore() {
+      if (!this.isSettingDefault) {
+        this.$refs.button2.style.setProperty('transition-delay', '');
+        this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
+        this.$refs.button2.style.setProperty('opacity', '0.5');
+        this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
     },
     async setDefault() {
-      if (this.isSetting) return;
-      this.isSetting = true;
+      if (this.isSettingDefault) return;
+      this.isSettingDefault = true;
       try {
         await setAsDefaultApp();
         // TODO: feedback
-        clearTimeout(this.buttonContentTimeoutId);
-        this.setState = 'success';
-        this.$refs.button.style.setProperty('transition-delay', '350ms');
-        this.$refs.button.style.setProperty('background-color', '');
-        this.$refs.button.style.setProperty('opacity', '');
-        this.buttonContentTimeoutId = setTimeout(() => {
-          this.setState = '';
-          this.isSetting = false;
-          this.$refs.button.style.setProperty('transition-delay', '');
+        clearTimeout(this.defaultButtonTimeoutId);
+        this.defaultState = 'success';
+        this.$refs.button1.style.setProperty('transition-delay', '350ms');
+        this.$refs.button1.style.setProperty('background-color', '');
+        this.$refs.button1.style.setProperty('opacity', '');
+        this.defaultButtonTimeoutId = setTimeout(() => {
+          this.defaultState = '';
+          this.isSettingDefault = false;
+          this.$refs.button1.style.setProperty('transition-delay', '');
         }, 1500);
       } catch (ex) {
         // TODO: feedback
-        clearTimeout(this.buttonContentTimeoutId);
-        this.setState = 'failed';
-        this.$refs.button.style.setProperty('transition-delay', '350ms');
-        this.$refs.button.style.setProperty('background-color', '');
-        this.$refs.button.style.setProperty('opacity', '');
-        this.buttonContentTimeoutId = setTimeout(() => {
-          this.setState = '';
-          this.isSetting = false;
-          this.$refs.button.style.setProperty('transition-delay', '');
+        clearTimeout(this.defaultButtonTimeoutId);
+        this.defaultState = 'failed';
+        this.$refs.button1.style.setProperty('transition-delay', '350ms');
+        this.$refs.button1.style.setProperty('background-color', '');
+        this.$refs.button1.style.setProperty('opacity', '');
+        this.defaultButtonTimeoutId = setTimeout(() => {
+          this.defaultState = '';
+          this.isSettingDefault = false;
+          this.$refs.button1.style.setProperty('transition-delay', '');
         }, 1500);
+      } finally {
+        this.$refs.button1.removeEventListener('mouseup', this.setDefault);
       }
     },
     restoreSettings() {
-      console.log('restore-settings');
-      // remove dir
-      const userData = electron.remote.app.getPath('userData');
-      const removeDir = dir => fsPromises.readdir(dir)
-        .then(files => files.reduce((result, file) => {
-          const filePath = path.join(dir, file);
-          return result.then(() => fsPromises.unlink(filePath)
-            .then(null, () => removeDir(filePath)));
-        }, Promise.resolve()).then(() => {
-          if (dir !== userData) return fsPromises.rmdir(dir);
-          return Promise.resolve();
-        }));
-      removeDir(userData)
-        .then(() => {
-          console.log('success');
-        })
-        .catch((err) => {
-          console.log('failed', err);
-        });
-      // this.$store.dispatch('init-settings');
+      this.isRestoring = true;
+      if (this.restoreContent === this.$t('preferences.general.setButton')) {
+        electron.ipcRenderer.send('apply');
+        this.needToRelaunch = true;
+        this.restoreContent = this.$t('preferences.general.relaunch');
+        this.$refs.button2.style.setProperty('transition-delay', '400ms');
+        this.$refs.button2.style.setProperty('background-color', '');
+        this.$refs.button2.style.setProperty('opacity', '');
+        this.isRestoring = false;
+        return;
+      }
+      electron.ipcRenderer.send('relaunch');
+      this.isRestoring = false;
+      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
     mapCode(code) {
       return codeToLanguageName(code);
@@ -224,8 +253,12 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-$dropdown-width: 218px;
-$dropdown-height: 156px;
+$dropdown-height: 148px;
+$interactor-backgroundColor-default: rgba(255,255,255,0.03);
+$interactor-border-default: 1px solid rgba(255,255,255,0.1);
+$interactor-backgroundColor-hover: rgba(255,255,255,0.08);
+$interactor-border-hover: 1px solid rgba(255,255,255,0.2);
+
 .preference-setting {
   box-sizing: border-box;
   padding-top: 37px;
@@ -245,15 +278,17 @@ $dropdown-height: 156px;
   }
   .down-arrow {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 7px;
+    right: 8px;
     transform: rotate(90deg);
+    transition: transform 200ms;
   }
   .up-arrow {
     position: absolute;
-    top: 6px;
-    right: 6px;
+    top: 7px;
+    right: 8px;
     transform: rotate(-90deg);
+    transition: transform 200ms;
   }
   .description {
     margin-bottom: 13px;
@@ -263,59 +298,61 @@ $dropdown-height: 156px;
     letter-spacing: 0;
   }
   .drop-down {
-    width: $dropdown-width;
-    height: 22px;
+    width: 240px;
     margin-bottom: 35px;
+    height: 28px;
+    -webkit-app-region: no-drag;
     .drop-down-brief {
       position: relative;
       -webkit-app-region: no-drag;
       cursor: pointer;
-      z-index: 100;
-      width: $dropdown-width;
-      height: 22px;
-      padding-top: 4px;
-      background-color: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.07);
+      width: 100%;
+      height: 28px;
+      background-color: $interactor-backgroundColor-default;
+      border: $interactor-border-default;
       border-radius: 2px;
       font-family: $font-semibold;
-      font-size: 12px;
+      font-size: 11px;
+      line-height: 28px;
       color: #FFFFFF;
       letter-spacing: 0;
       text-align: center;
+      transition: border 200ms, background-color 200ms;
+      &:hover {
+        border: $interactor-border-hover;
+        background-color: $interactor-backgroundColor-hover;
+      }
     }
     .drop-down-content {
       cursor: pointer;
       position: relative;
       z-index: 50;
-      width: $dropdown-width;
+      width: 100%;
       height: $dropdown-height;
-      background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
-      border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.0) rgba(255,255,255,0.1) rgba(255,255,255,0.3);
-      border-width: 1px 1px 1px 1px;
-      border-style: solid;
+      background-color: rgba(100,100,100,.95);
+      border: 1px solid rgba(255,255,255,0.3);
       border-radius: 2px;
       font-family: $font-semibold;
-      font-size: 12px;
+      font-size: 11px;
       color: #FFFFFF;
       letter-spacing: 0;
       text-align: center;
       .selected {
-        margin-top: -1px;
-        padding-top: 5px;
-        height: 24px;
+        height: 28px;
+        line-height: 28px;
         background-color: rgba(255,255,255,0.1);
       }
       .content {
-        position: absolute;
         cursor: pointer;
-        top: 30px;
+        position: absolute;
+        top: 32px;
         left: 8px;
         right: 4px;
-        bottom: 3px;
+        bottom: 4px;
         overflow-y: scroll;
         .selection {
-          padding-top: 4px;
-          height: 22px;
+          height: 28px;
+          line-height: 28px;
         }
         .selection:hover {
           background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
@@ -349,40 +386,43 @@ $dropdown-height: 156px;
     }
     .setting-button {
       cursor: pointer;
-      position: relative;
+      box-sizing: border-box;
       align-self: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
-      border: 0.5px solid rgba(255,255,255,0.20);
+      background-color: $interactor-backgroundColor-default;
+      border: $interactor-border-default;
       border-radius: 2px;
-      transition-property: background-color, opacity;
-      transition-duration: 80ms;
+      transition-property: background-color, opacity, border;
+      transition-duration: 200ms;
       transition-timing-function: ease-in;
-
       width: 61px;
-      height: 23px;
+      height: 28px;
+      &:hover {
+        border: $interactor-border-hover;
+        background-color: $interactor-backgroundColor-hover;
+      }
+
       .button-enter, .button-leave-to {
         opacity: 0;
       }
       .button-enter-active {
-        transition: opacity 250ms ease-in;
+        transition: opacity 200ms ease-in;
       }
       .button-leave-active {
-        transition: opacity 300ms ease-in;
+        transition: opacity 200ms ease-in;
       }
+
       .content {
-        width: 100%;
         font-family: $font-medium;
         font-size: 11px;
         color: #FFFFFF;
         letter-spacing: 0;
         text-align: center;
-        line-height: 13px;
+        line-height: 26px;
       }
       .result {
-        position: absolute;
+        position: relative;
+        top: 5px;
+        left: 23px;
       }
     }
   }

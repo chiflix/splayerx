@@ -35,11 +35,13 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { Video as videoActions } from '@/store/actionTypes';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import BaseInfoCard from './InfoCard.vue';
 import BaseIcon from '../BaseIconContainer.vue';
 
 export default {
   name: 'volume-indicator',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     'base-info-card': BaseInfoCard,
     'base-icon': BaseIcon,
@@ -166,6 +168,11 @@ export default {
     },
   },
   created() {
+    this.enterArea();
+    this.actionArea();
+    setTimeout(() => {
+      this.leaveArea();
+    }, 2000);
     if (this.muted) {
       this.volumeTriggerStopped = this.showAllWidgets;
     }

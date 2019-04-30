@@ -64,19 +64,43 @@ function generateCurrentCueToRaw(currentCue) { // eslint-disable-line
 //   });
 // }
 
+/**
+ * @description 将ass字幕数组，拼接成字符
+ * @author tanghaixiang@xindong.com
+ * @date 2019-04-30
+ * @export
+ * @param {Object} subtitle
+ * @returns String
+ */
 export function stringifyAss(subtitle) {
   return generateCurrentCueToRaw(subtitle);
 }
 
+/**
+ * @description 将单个字幕拼接成vtt格式的字幕
+ * @author tanghaixiang@xindong.com
+ * @date 2019-04-30
+ * @export
+ * @param {Object} subtitle 单条字幕的信息
+ * @returns String
+ */
 export function stringifyVtt(subtitle) {
   // todo text with style
   const start = toVttTime(subtitle.start * 1000);
   const end = toVttTime(subtitle.end * 1000);
   const text = !subtitle.fragments ? subtitle.text :
-    subtitle.fragments.filter(e => e.text).map(e => e.text.split('<br>')).join('\n');
+    subtitle.fragments.filter(e => e.text).map(e => e.text.split('<br>').join('\n')).join('\n');
   return `${start} --> ${end}\n${text}`;
 }
 
+/**
+ * @description 将字幕数组转成字符
+ * @author tanghaixiang@xindong.com
+ * @date 2019-04-30
+ * @export
+ * @param {Array} dialogues
+ * @returns String
+ */
 export function dialogueToString(dialogues) {
   return dialogues.map((e, i) => `\n${i + 1}\n${stringifyVtt(e)}`).join('\n');
 }

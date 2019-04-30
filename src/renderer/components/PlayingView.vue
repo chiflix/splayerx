@@ -1,5 +1,5 @@
 <template>
-  <div :data-component-name="$options.name" class="player">
+  <div class="player">
     <the-video-canvas ref="videoCanvas" />
     <the-video-controller ref="videoctrl" />
     <!-- <subtitle-manager /> -->

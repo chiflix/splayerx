@@ -76,6 +76,12 @@ const actions = {
     const pos = state.playList.indexOf(item);
     if (pos >= 0) commit('RemoveItemFromPlayingListByPos', pos);
   },
+  /*
+    item: {
+      newPosition: Number,
+      src: String,
+    }
+   */
   RepositionItemFromPlayingList({ state, commit }, item) {
     commit('isPlayingList');
     const pos = state.playList.indexOf(item.src);

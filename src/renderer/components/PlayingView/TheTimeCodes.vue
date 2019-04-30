@@ -1,8 +1,6 @@
 <template>
   <div class="cont" v-fade-in="showAllWidgets || progressTriggerStopped">
-    <div class="timing"
-      :data-component-name="$options.name"
-      @mousedown="switchTimeContent">
+    <div class="timing" @mousedown="switchTimeContent">
           <span class="timeContent" ref="timeContent" :class="{ remainTime: isRemainTime }" v-if="hasDuration"></span>
     </div>
     <Labels class="rate"/>
@@ -10,11 +8,13 @@
 </template>
 <script>
 import { mapGetters } from 'vuex';
-import { videodata } from '../../store/video';
+import { videodata } from '@/store/video';
+import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
 import Labels from './Labels.vue';
 
 export default {
   name: 'the-time-codes',
+  type: INPUT_COMPONENT_TYPE,
   components: {
     Labels,
   },
