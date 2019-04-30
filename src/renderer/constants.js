@@ -71,3 +71,50 @@ export const INFO_SCHEMA = [
     name: THUMBNAIL_OBJECT_STORE_NAME,
   },
 ];
+
+export const DATADB_NAME = 'data';
+export const SUBTITLE_OBJECTSTORE_NAME = 'subtitles';
+export const DATADB_VERSION = 1;
+export const DATADB_SHCEMAS = [
+  {
+    version: 1,
+    schema: [
+      {
+        name: SUBTITLE_OBJECTSTORE_NAME,
+        options: {
+          autoIncrement: true,
+        },
+        indexes: [
+          {
+            name: 'type',
+            unique: false,
+          },
+          {
+            name: 'src',
+            unique: false,
+          },
+          {
+            name: 'format',
+            unique: false,
+          },
+          {
+            name: 'language',
+            unique: false,
+          },
+          {
+            name: 'lastOpened',
+            unique: false,
+          },
+        ],
+        properties: [
+          'type',
+          'src',
+          'format',
+          'language',
+          'data',
+          'lastOpened',
+        ],
+      },
+    ],
+  },
+];

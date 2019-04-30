@@ -22,22 +22,31 @@ export default {
 </script>
 
 <style scoped lang="scss">
+$interactor-backgroundColor-default: rgba(255,255,255,0.03);
+$interactor-border-default: 1px solid rgba(255,255,255,0.1);
+$interactor-backgroundColor-hover: rgba(255,255,255,0.1);
+$interactor-border-hover: 1px solid rgba(255,255,255,0.2);
+
 .container {
   -webkit-app-region: no-drag;
   display: block;
   position: relative;
   padding-left: 29px;
-  padding-top: 2px;
-  margin-bottom: 18px;
+  margin-bottom: 15px;
   width: fit-content;
   cursor: pointer;
-  opacity: 0.7;
   font-family: $font-medium;
   font-size: 13px;
-  color: #FFFFFF;
-  letter-spacing: 0.32px;
-  line-height: 13px;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.3px;
+  line-height: 19px;
   user-select: none;
+
+  &:hover .checkmark {
+    border: $interactor-border-hover;
+    background-color: $interactor-backgroundColor-hover;
+  }
+      
   input {
     position: absolute;
     display: none;
@@ -49,9 +58,10 @@ export default {
     left: 0;
     width: 17px;
     height: 17px;
-    border-radius: 4px;
-    border: 0.5px solid rgba(255,255,255,0.20);
-    background-image: radial-gradient(60% 134%, rgba(255,255,255,0.09) 44%, rgba(255,255,255,0.05) 100%);
+    border-radius: 2px;
+    background-color: $interactor-backgroundColor-default;
+    border: $interactor-border-default;
+    transition: border 200ms, background-color 200ms;
   }
   input:checked ~ .nike {
     display: block;
@@ -59,8 +69,8 @@ export default {
   .nike {
     position: absolute;
     display: none;
-    top: 3px;
-    left: 1.5px;
+    top: 2px;
+    left: 2px;
   }
 }
 </style>

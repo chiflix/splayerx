@@ -2,8 +2,21 @@ import flow from 'lodash/flow';
 import pick from 'lodash/pick';
 import { compile } from 'ass-compiler';
 
-import { localLanguageLoader, localNameLoader, loadLocalFile, localIdLoader } from './utils';
+import { localLanguageLoader, localNameLoader, loadLocalFile } from './utils';
 
+const baseInfo = {
+  // Title: '',
+  // ScriptType: '',
+  // WrapStyle: '',
+  PlayResX: '',
+  PlayResY: '',
+  // ScaledBorderAndShadow: 'yes',
+  // 'Last Style Storage': 'Default',
+  // 'Video File': '',
+  // 'Video Aspect Ratio': '0',
+  // 'Video Zoom': '8',
+  // 'Video Position': '0',
+};
 const baseTags = {
   // fn: '',
   // fs: '',
@@ -32,8 +45,9 @@ const baseTags = {
   pos: null,
 };
 const normalizer = (parsedSubtitle) => {
-  const finalSubtitles = [];
-  const { dialogues } = parsedSubtitle;
+  const finalDialogues = [];
+  const { info, dialogues } = parsedSubtitle;
+  const validInfo = pick(info, Object.keys(baseInfo));
   dialogues.forEach((dialogue) => {
     const {
       start, end, alignment, slices, pos,
@@ -43,31 +57,41 @@ const normalizer = (parsedSubtitle) => {
     };
     Object.values(slices).forEach((slice) => {
       const { tag: sliceTag, fragments } = slice;
-      fragments.forEach((fragment) => {
-        const { tag: fragmentTag, text } = fragment;
-        const finalTags = {
-          ...baseTags,
-          alignment,
-          pos,
-          ...pick(Object.assign({}, sliceTag, fragmentTag), ['b', 'i', 'u', 's']),
+      const hasDrawing = fragments.some(({ drawing }) => !!drawing);
+      if (!hasDrawing) {
+        const processedFragments = fragments.map((fragment) => {
+          const { tag: fragmentTag, text } = fragment;
+          const finalTags = {
+            ...baseTags,
+            alignment,
+            pos,
+            ...pick(Object.assign({}, sliceTag, fragmentTag), ['b', 'i', 'u', 's']),
+          };
+          return {
+            text: text
+              .replace(/[\\/][Nn]|\r?\n|\r/g, '<br>') // replace soft and hard line breaks with <br/>
+              .replace(/\\h/g, ' '), // replace hard space with space
+            tags: finalTags,
+          };
+        });
+        const finalDialogue = {
+          ...baseDiagolue,
+          fragments: processedFragments,
         };
-        const finalDiagolue = Object.assign(
-          {},
-          baseDiagolue,
-          { text: text.replace(/[\\/][Nn]/g, ''), tags: finalTags },
-        );
-        finalSubtitles.push(finalDiagolue);
-      });
+        finalDialogues.push(finalDialogue);
+      }
     });
   });
-  return finalSubtitles;
+  return {
+    info: validInfo,
+    dialogues: finalDialogues,
+  };
 };
 
 export default {
   longName: 'ASS (Advanced SSA) subtitle',
   name: 'ass',
   supportedFormats: ['ass'],
-  id: localIdLoader,
   infoLoaders: {
     language: {
       func: localLanguageLoader,

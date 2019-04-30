@@ -1,6 +1,6 @@
 <template>
   <div class="itemContainer advance-column-items">
-    <div class="textContainer" :style="{
+    <div class="textContainer advanceNormalTitle" :style="{
       cursor: 'default',
     }">
       <div class="textItem">{{ item }}</div>
@@ -21,7 +21,7 @@
             @mouseout="handleOut(index)"
             @click="handleClick(index)"
             :style="{ cursor: track.enabled ? 'default' : 'pointer' }">
-            <div class="text"
+            <div class="text advanceNormalItem"
               :style="{
                 color: index === hoverIndex || track.enabled  ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                 transition: 'color 300ms',
@@ -56,7 +56,7 @@ export default {
     item: {
       type: String,
     },
-    winWidth: {
+    size: {
       type: Number,
     },
     isChosen: {
@@ -89,9 +89,9 @@ export default {
   },
   methods: {
     initialSize(size) {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
+      if (this.size >= 289 && this.size <= 480) {
         return size;
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.size >= 481 && this.size < 1080) {
         return size * 1.2;
       }
       return size * 1.2 * 1.4;
@@ -116,30 +116,30 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (min-width: 513px) and (max-width: 854px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
-    width: 170px;
+    width: 100%;
     .textContainer {
-      width: 136px;
+      width: 100%;
       height: 37px;
-      font-size: 13px;
-      margin: auto auto auto 17px;
+      .textItem {
+        margin: auto auto auto 17px;
+      }
     }
     .listContainer {
       height: 37px;
       .scrollScope {
-        width: 165px;
+        width: 97%;
         .columnNumDetail {
-          width: 136px;
+          width: 100%;
           height: 27px;
-          margin: 0 auto 5px 17px;
+          margin: 0 auto 5px auto;
           .text {
-            font-size: 11px;
-            margin: auto auto auto 10px;
+            margin: auto auto auto 27px;
           }
         }
         .card {
-          width: 136px;
+          width: 82%;
           height: 27px;
           margin-left: 17px;
         }
@@ -147,30 +147,30 @@ export default {
     }
   }
 }
-@media screen and (min-width: 855px) and (max-width: 1920px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
-    width: 204px;
+    width: 100%;
     .textContainer {
-      width: 163.2px;
+      width: 100%;
       height: 44.4px;
-      font-size: 15.6px;
-      margin: auto auto auto 20.4px;
+      .textItem {
+        margin: auto auto auto 20.4px;
+      }
     }
     .listContainer {
       height: 44.4px;
       .scrollScope {
-        width: 198px;
+        width: 97%;
         .columnNumDetail {
-          width: 163.2px;
+          width: 100%;
           height: 32.4px;
-          margin: 0 auto 6px 20.4px;
+          margin: 0 auto 6px auto;
           .text {
-            font-size: 13.2px;
-            margin: auto auto auto 12px;
+            margin: auto auto auto 32.4px;
           }
         }
         .card {
-          width: 163.2px;
+          width: 82%;
           height: 32.4px;
           margin-left: 20.4px;
         }
@@ -178,30 +178,30 @@ export default {
     }
   }
 }
-@media screen and (min-width: 1921px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
-    width: 285.6px;
+    width: 100%;
     .textContainer {
-      width: 228.48px;
+      width: 100%;
       height: 62.16px;
-      font-size: 21.84px;
-      margin: auto auto auto 28.56px;
+      .textItem {
+        margin: auto auto auto 28.56px;
+      }
     }
     .listContainer {
       height: 62.16px;
       .scrollScope {
-        width: 277.2px;
+        width: 97%;
         .columnNumDetail {
-          width: 228.48px;
+          width: 100%;
           height: 45.36px;
-          margin: 0 auto 8.4px 28.56px;
+          margin: 0 auto 8.4px auto;
           .text {
-            font-size: 18.48px;
-            margin: auto auto auto 16.8px;
+            margin: auto auto auto 45.36px;
           }
         }
         .card {
-          width: 228.48px;
+          width: 82%;
           height: 45.36px;
           margin-left: 28.56px;
         }
@@ -230,7 +230,6 @@ export default {
     color: rgba(255, 255, 255, 0.6);
     .textItem {
       letter-spacing: 0.2px;
-      margin: auto 0;
     }
   }
   .listContainer {

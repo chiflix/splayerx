@@ -1,6 +1,7 @@
 @charset "UTF-8";
 @import './fonts.scss';
 @import './subtitle.scss';
+@import './ja.scss';
 
 * {
   margin: 0;
@@ -42,4 +43,8 @@ body {
 
 .no-drag {
   -webkit-app-region: no-drag;
+}
+
+.rtl p {
+  direction: rtl;
 }

@@ -12,12 +12,12 @@
         :style="{
            cursor: isChosen ? 'default' : 'pointer',
         }">
-        <div class="textItem"
+        <div class="textItem advanceNormalTitle"
           :style="{
             color: color,
             transition: 'color 300ms',
           }">{{ item }}</div>
-        <div class="rightItem" v-show="!isChosen">{{ showDetail }}</div>
+        <div class="rightItem advanceNormalItem" v-show="!isChosen || isRateMenu">{{ showDetail }}</div>
       </div>
       <transition name="detail">
         <div class="listContainer" v-show="isChosen">
@@ -29,21 +29,23 @@
               @mouseout="handleOut(index)"
               @click="handleClick(index)"
               :style="{
-                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}px` : `${difWidth[1]}px`,
-                cursor: list.chosen ? 'default' : 'pointer',
+                width: index === difIndex[0] || index === difIndex[1] ? `${difWidth[0]}%` : `${difWidth[1]}%`,
+                cursor: itemChosen(index) ? 'default' : 'pointer',
               }">
               <div class="text"
                 :style="{
-                  color: list.chosen || index === hoverIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
+                  color: itemChosen(index) || index === hoverIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.6)',
                   margin: 'auto',
                   transition: 'color 300ms',
-                }">{{ list[0] }}
+                }">{{ list }}
               </div>
             </div>
-            <div :class="cardType" :style="{
-              left: cardPos,
-              transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
-            }"></div>
+            <div :class="cardType"
+              v-show="!this.isRateMenu || this.lists.includes(this.rate)"
+              :style="{
+                left: `${moveLength}px`,
+                transition: 'left 200ms cubic-bezier(0.17, 0.67, 0.17, 0.98), width 200ms',
+              }"></div>
           </div>
         </div>
       </transition>
@@ -53,8 +55,8 @@
 
 <script>
 import asyncStorage from '@/helpers/asyncStorage';
-import { mapGetters } from 'vuex';
-import { Video as videoActions } from '@/store/actionTypes';
+import { mapGetters, mapActions } from 'vuex';
+import { Video as videoActions, Subtitle as subtitleActions } from '@/store/actionTypes';
 
 export default {
   name: 'AdvanceRowItems',
@@ -81,153 +83,22 @@ export default {
     isChosen: {
       type: Boolean,
     },
-    winWidth: {
+    size: {
+      type: Number,
+    },
+    isRateMenu: {
+      type: Boolean,
+    },
+    ChosenSize: {
+      type: String,
+    },
+    cardWidth: {
       type: Number,
     },
   },
   watch: {
-    rate(val) {
-      if (this.item === this.$t('advance.rateTitle')) {
-        const numList = [0.5, 1, 1.2, 1.5, 2];
-        this.lists.forEach((i, ind) => {
-          if (ind !== numList.indexOf(val)) {
-            this.$set(this.lists[ind], 'chosen', false);
-          } else {
-            this.$set(this.lists[ind], 'chosen', true);
-          }
-        });
-        this.selectedIndex = numList.indexOf(val);
-        this.calculateSpeedLength(numList.indexOf(val));
-      }
-    },
-    chosenSize(val) {
-      if (this.item === this.$t('advance.fontSize')) {
-        this.lists.forEach((i, ind) => {
-          if (ind !== val) {
-            this.$set(this.lists[ind], 'chosen', false);
-          } else {
-            this.$set(this.lists[ind], 'chosen', true);
-          }
-        });
-        this.selectedIndex = val;
-        this.calculateFontLength(val);
-      }
-    },
-    winWidth(val) {
-      if (val > 1920) {
-        if (this.chosenSize === 0) {
-          this.$store.dispatch('updateScale', `${(30 / 11) * (val / 1920)}`);
-        }
-        if (this.chosenSize === 1) {
-          this.$store.dispatch('updateScale', `${(40 / 11) * (val / 1920)}`);
-        }
-        if (this.chosenSize === 2) {
-          this.$store.dispatch('updateScale', `${(50 / 11) * (val / 1920)}`);
-        }
-        if (this.chosenSize === 3) {
-          this.$store.dispatch('updateScale', `${(60 / 11) * (val / 1920)}`);
-        }
-      } else {
-        if (this.chosenSize === 0) {
-          this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * val) + (24 / 55)}`);
-        }
-        if (this.chosenSize === 1) {
-          this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * val) + (26 / 55)}`);
-        }
-        if (this.chosenSize === 2) {
-          this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * val) + (28 / 55)}`);
-        }
-        if (this.chosenSize === 3) {
-          this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * val) + (30 / 55)}`);
-        }
-      }
-    },
-  },
-  computed: {
-    ...mapGetters(['rate', 'chosenSize']),
-    /**
-     * @return {string}
-     */
-    ChosenSize() {
-      switch (this.chosenSize) {
-        case 0:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'S' ? 'Small' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
-        case 1:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'M' ? 'Normal' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
-        case 2:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'L' ? 'Large' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
-        case 3:
-          return this.$t(`advance.fontItems[${this.selectedIndex}]`)[0] === 'XL' ? 'Extra Large' : this.$t(`advance.fontItems[${this.selectedIndex}]`);
-        default:
-          return this.$t('advance.fontItems[1]');
-      }
-    },
-    cardPos() {
-      if (this.moveLength) {
-        if (this.winWidth > 514 && this.winWidth <= 854) {
-          return `${this.moveLength}px`;
-        } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-          return `${this.moveLength * 1.2}px`;
-        }
-        return `${this.moveLength * 1.2 * 1.4}px`;
-      }
-      return '';
-    },
-    showDetail() {
-      if (this.item === this.$t('advance.rateTitle')) {
-        return `${this.rate} x`;
-      } else if (this.item === this.$t('advance.fontSize')) {
-        return `${this.ChosenSize}`;
-      }
-      return null;
-    },
-    cardType() {
-      if (this.selectedIndex === this.difIndex[0] || this.selectedIndex === this.difIndex[1]) {
-        if (this.item === this.$t('advance.rateTitle')) {
-          return 'speedCard smallSpeedCard';
-        }
-        return 'fontCard smallFontCard';
-      }
-      if (this.item === this.$t('advance.rateTitle')) {
-        return 'speedCard bigSpeedCard';
-      }
-      return 'fontCard bigFontCard';
-    },
-    heightSize() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.isChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
-      }
-      return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
-    },
-    rowNumDetail() {
-      return this.item === this.$t('advance.fontSize') ? 'fontRowNumDetail' : 'speedRowNumDetail';
-    },
-    difIndex() {
-      return this.item === this.$t('advance.fontSize') ? [0, 2] : [1, 4];
-    },
-    difWidth() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
-        return this.item === this.$t('advance.fontSize') ? [29, 35] : [25, 29];
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
-        return this.item === this.$t('advance.fontSize') ? [29 * 1.2, 35 * 1.2] : [25 * 1.2, 29 * 1.2];
-      }
-      return this.item === this.$t('advance.fontSize') ? [29 * 1.2 * 1.4, 35 * 1.2 * 1.4] : [25 * 1.2 * 1.4, 29 * 1.2 * 1.4];
-    },
-  },
-  created() {
-    asyncStorage.get('subtitle-style').then((data) => {
-      if (data.chosenSize) {
-        if (this.item === this.$t('advance.fontSize')) {
-          this.handleClick(data.chosenSize);
-        }
-      }
-    });
-  },
-  mounted() {
-    this.$bus.$on('subtitle-to-top', (val) => {
-      if (this.item === this.$t('advance.fontSize')) {
+    subToTop(val) {
+      if (!this.isRateMenu) {
         if (val) {
           this.lastSize = this.chosenSize;
           this.handleClick(0);
@@ -235,9 +106,115 @@ export default {
           this.handleClick(this.lastSize);
         }
       }
+    },
+    rate(val) {
+      if (this.isRateMenu) {
+        const numList = [0.5, 1, 1.2, 1.5, 2];
+        this.selectedIndex = numList.indexOf(val);
+        this.calculateSpeedLength(numList.indexOf(val));
+      }
+    },
+    chosenSize(val) {
+      if (!this.isRateMenu) {
+        this.selectedIndex = val;
+        this.calculateFontLength(val);
+      }
+    },
+    computedSize(val) {
+      if (val >= 1080) {
+        this.updateVideoScaleByFactors(val);
+      } else if (this.winRatio >= 1) {
+        this.updatePCVideoScaleByFactors(this.chosenSize);
+      } else if (this.winRatio < 1) {
+        this.updateMobileVideoScaleByFactors(this.chosenSize);
+      }
+    },
+  },
+  computed: {
+    ...mapGetters(['rate', 'chosenSize', 'computedHeight', 'computedWidth', 'subToTop', 'winRatio']),
+    computedSize() {
+      return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
+    },
+    showDetail() {
+      if (this.isRateMenu) {
+        return `${this.rate} x`;
+      } else if (!this.isRateMenu) {
+        return `${this.ChosenSize}`;
+      }
+      return null;
+    },
+    cardType() {
+      if (this.selectedIndex === this.difIndex[0] || this.selectedIndex === this.difIndex[1]) {
+        if (this.isRateMenu) {
+          return 'speedCard smallSpeedCard';
+        }
+        return 'fontCard smallFontCard';
+      }
+      if (this.isRateMenu) {
+        return 'speedCard bigSpeedCard';
+      }
+      return 'fontCard bigFontCard';
+    },
+    heightSize() {
+      if (this.size >= 289 && this.size <= 480) {
+        return this.isChosen ? '74px' : '37px';
+      } else if (this.size >= 481 && this.size < 1080) {
+        return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
+      }
+      return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
+    },
+    rowNumDetail() {
+      return !this.isRateMenu ? 'fontRowNumDetail' : 'speedRowNumDetail';
+    },
+    difIndex() {
+      return !this.isRateMenu ? [0, 2] : [1, 4];
+    },
+    difWidth() {
+      if (this.size >= 289 && this.size <= 480) {
+        return !this.isRateMenu ? [23, 27] : [18.5, 23];
+      } else if (this.size >= 481 && this.size < 1080) {
+        return !this.isRateMenu ? [23 * 1.2, 27 * 1.2] : [18.5 * 1.2, 23 * 1.2];
+      }
+      return !this.isRateMenu ? [23 * 1.2 * 1.4, 27 * 1.2 * 1.4] :
+        [18.5 * 1.2 * 1.4, 23 * 1.2 * 1.4];
+    },
+  },
+  created() {
+    asyncStorage.get('subtitle-style').then((data) => {
+      if (data.chosenSize) {
+        if (!this.isRateMenu) {
+          this.handleClick(data.chosenSize);
+        }
+      }
+    });
+  },
+  mounted() {
+    this.$bus.$on('card-init-left', () => {
+      setTimeout(() => {
+        if (this.isRateMenu) {
+          this.selectedIndex = 1;
+          this.calculateSpeedLength(1);
+        } else {
+          this.handleClick(this.chosenSize);
+        }
+      }, 0);
+    });
+    this.$bus.$on('change-size-by-menu', (index) => {
+      this.changeFontSize(index);
     });
   },
   methods: {
+    ...mapActions({
+      changeRate: videoActions.CHANGE_RATE,
+      updateSubScale: subtitleActions.UPDATE_SUBTITLE_SCALE,
+      updateSubSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
+    }),
+    itemChosen(index) {
+      if (this.isRateMenu) {
+        return [0.5, 1, 1.2, 1.5, 2].indexOf(this.rate) === index;
+      }
+      return this.chosenSize === index;
+    },
     handleOver(index) {
       this.hoverIndex = index;
     },
@@ -246,40 +223,33 @@ export default {
     },
     handleClick(index) {
       this.selectedIndex = index;
-      if (this.item === this.$t('advance.rateTitle')) {
+      if (this.isRateMenu) {
         this.calculateSpeedLength(index);
       } else {
         this.calculateFontLength(index);
       }
-      this.lists.forEach((i, ind) => {
-        if (ind !== index) {
-          this.$set(this.lists[ind], 'chosen', false);
-        } else {
-          this.$set(this.lists[ind], 'chosen', true);
-        }
-      });
-      if (this.item === this.$t('advance.rateTitle')) {
-        this.$store.dispatch(videoActions.CHANGE_RATE, this.lists[index][0]);
-      } else if (this.item === this.$t('advance.fontSize')) {
+      if (this.isRateMenu) {
+        this.changeRate(this.lists[index]);
+      } else {
         this.changeFontSize(index);
       }
     },
     calculateSpeedLength(index) {
       switch (index) {
         case 0:
-          this.moveLength = 17;
+          this.moveLength = (17 / 170) * this.cardWidth;
           break;
         case 1:
-          this.moveLength = 46;
+          this.moveLength = (46 / 170) * this.cardWidth;
           break;
         case 2:
-          this.moveLength = 71;
+          this.moveLength = (71 / 170) * this.cardWidth;
           break;
         case 3:
-          this.moveLength = 100;
+          this.moveLength = (100 / 170) * this.cardWidth;
           break;
         case 4:
-          this.moveLength = 129;
+          this.moveLength = (129 / 170) * this.cardWidth;
           break;
         default:
           break;
@@ -288,41 +258,44 @@ export default {
     calculateFontLength(index) {
       switch (index) {
         case 0:
-          this.moveLength = 17;
+          this.moveLength = (17 / 170) * this.cardWidth;
           break;
         case 1:
-          this.moveLength = 49;
+          this.moveLength = (49 / 170) * this.cardWidth;
           break;
         case 2:
-          this.moveLength = 86;
+          this.moveLength = (86 / 170) * this.cardWidth;
           break;
         case 3:
-          this.moveLength = 117;
+          this.moveLength = (117 / 170) * this.cardWidth;
           break;
         default:
           break;
       }
     },
+    // update video scale that width is larger than height
+    updatePCVideoScaleByFactors(index) {
+      const firstFactors = [21, 29, 37, 45];
+      const secondFactors = [24, 26, 28, 30];
+      this.updateSubScale(`${(((firstFactors[index] / 900) * this.computedSize) + (secondFactors[index] / 5)) / 9}`);
+    },
+    // update video scale that height is larger than width
+    updateMobileVideoScaleByFactors(index) {
+      const firstFactors = [21, 29, 37, 45];
+      const secondFactors = [12, -92, -196, -300];
+      this.updateSubScale(`${(((firstFactors[index] / 760) * this.computedSize) + (secondFactors[index] / 76)) / 9}`);
+    },
+    // update video scale when width or height is larger than 1080
+    updateVideoScaleByFactors(val) {
+      const factors = [30, 40, 50, 60];
+      this.updateSubScale(`${((val / 1080) * factors[this.chosenSize]) / 9}`);
+    },
     changeFontSize(index) {
-      switch (index) {
-        case 0:
-          this.$store.dispatch('updateChosenSize', 0);
-          this.$store.dispatch('updateScale', `${((21 / (11 * 1600)) * this.winWidth) + (24 / 55)}`);
-          break;
-        case 1:
-          this.$store.dispatch('updateChosenSize', 1);
-          this.$store.dispatch('updateScale', `${((29 / (11 * 1600)) * this.winWidth) + (26 / 55)}`);
-          break;
-        case 2:
-          this.$store.dispatch('updateChosenSize', 2);
-          this.$store.dispatch('updateScale', `${((37 / (11 * 1600)) * this.winWidth) + (28 / 55)}`);
-          break;
-        case 3:
-          this.$store.dispatch('updateChosenSize', 3);
-          this.$store.dispatch('updateScale', `${((45 / (11 * 1600)) * this.winWidth) + (30 / 55)}`);
-          break;
-        default:
-          break;
+      this.updateSubSize(index);
+      if (this.winRatio >= 1) {
+        this.updatePCVideoScaleByFactors(index);
+      } else if (this.winRatio < 1) {
+        this.updateMobileVideoScaleByFactors(index);
       }
     },
   },
@@ -330,46 +303,42 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@media screen and (min-width: 513px) and (max-width: 854px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
-    width: 170px;
+    width: 100%;
     .textContainer {
-      width: 136px;
+      width: auto;
       height: 37px;
-      font-size: 13px;
-      margin: auto auto auto 17px;
-      .rightItem {
-        font-size: 11px;
-      }
+      margin: auto 17px auto 17px;
     }
     .listContainer {
       height: 37px;
       .rowContainer {
-        width: 137px;
+        width: 80%;
         height: 27px;
         .text {
           line-height: 12px;
           font-size: 10px;
         }
         .speedCard {
-          left: 46px;
+          /*left: 46px;*/
           height: 27px;
         }
         .fontCard {
-          left: 49px;
+          /*left: 49px;*/
           height: 27px;
         }
         .smallSpeedCard {
-          width: 25px;
+          width: 14.8%;
         }
         .smallFontCard {
-          width: 29px;
+          width: 18.4%;
         }
         .bigSpeedCard {
-          width: 29px;
+          width: 16.8%;
         }
         .bigFontCard {
-          width: 35px;
+          width: 21.6%;
         }
       }
     }
@@ -384,46 +353,42 @@ export default {
     animation: hideP1 100ms;
   }
 }
-@media screen and (min-width: 855px) and (max-width: 1920px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
-    width: 204px;
+    width: 100%;
     .textContainer {
-      width: 163.2px;
+      width: auto;
       height: 44.4px;
-      font-size: 15.6px;
-      margin: auto auto auto 20.4px;
-      .rightItem {
-        font-size: 13.2px;
-      }
+      margin: auto 20.4px auto 20.4px;
     }
     .listContainer {
       height: 44.4px;
       .rowContainer {
-        width: 164.4px;
+        width: 80%;
         height: 32.4px;
         .text {
           line-height: 14.4px;
           font-size: 12px;
         }
         .speedCard {
-          left: 55.2px;
+          /*left: 55.2px;*/
           height: 32.4px;
         }
         .fontCard {
-          left: 58.8px;
+          /*left: 58.8px;*/
           height: 32.4px;
         }
         .smallSpeedCard {
-          width: 30px;
+          width: 14.8%;
         }
         .smallFontCard {
-          width: 34.8px;
+          width: 18.4%;
         }
         .bigSpeedCard {
-          width: 34.8px;
+          width: 16.8%;
         }
         .bigFontCard {
-          width: 42px;
+          width: 21.6%;
         }
       }
     }
@@ -438,46 +403,42 @@ export default {
     animation: hideP2 100ms;
   }
 }
-@media screen and (min-width: 1921px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
-    width: 285.6px;
+    width: 100%;
     .textContainer {
       width: 228.48px;
       height: 62.16px;
-      font-size: 21.84px;
       margin: auto auto auto 28.56px;
-      .rightItem {
-        font-size: 18.48px;
-      }
     }
     .listContainer {
       height: 62.16px;
       .rowContainer {
-        width: 230.16px;
+        width: 80%;
         height: 45.36px;
         .text {
           line-height: 20.16px;
           font-size: 16.8px;
         }
         .speedCard {
-          left: 77.28px;
+          /*left: 77.28px;*/
           height: 45.36px;
         }
         .fontCard {
-          left: 82.32px;
+          /*left: 82.32px;*/
           height: 45.36px;
         }
         .smallSpeedCard {
-          width: 42px;
+          width: 14.8%;
         }
         .smallFontCard {
-          width: 48.72px;
+          width: 18.4%;
         }
         .bigSpeedCard {
-          width: 48.72px;
+          width: 16.8%;
         }
         .bigFontCard {
-          width: 58.8px;
+          width: 21.6%;
         }
       }
     }

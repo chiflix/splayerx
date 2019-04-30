@@ -1,180 +1,133 @@
 <template>
-<div class="general-setting">
-  <BaseCheckBox
-    :checkboxValue="privacyAgreement"
-    @update:checkbox-value="privacyAgreement = $event">
-    {{ $t('preferences.privacyConfirm') }}
-  </BaseCheckBox>
-  <div class="languages-select">
-    <div class="select-content" :style="{opacity: privacyAgreement ? 1 : 0.3}">
-      <div class="title">{{ $t('preferences.languagePriority')}}</div>
-      <div class="description">{{ $t('preferences.languageDescription')}}</div>
-      <div class="first-selection">
-        <div class="selection-title">{{ $t('preferences.primary')}}</div>
-        <div class="drop-down"
-          :class="{ 'drop-down-en': $i18n.locale === 'en' }"
-          :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-          @mouseup.stop="openFirstDropdown">
-          {{ primaryLanguage }}
-          <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
-        </div>
-        <div class="drop-down-content no-drag"
-          :class="{ 'drop-down-content-en': $i18n.locale === 'en' }"
-          v-if="showFirstSelection">
-          <div class="content">
-            <div class="selection"
-              v-for="(language, index) in primaryLanguages"
-              @mouseup.stop="handleFirstSelection(language)">
-              {{ language }}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="second-selection">
-        <div class="selection-title">{{ $t('preferences.secondary')}}</div>
-        <div class="drop-down"
-          :class="{ 'drop-down-en': $i18n.locale === 'en' }"
-          :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-          @mouseup.stop="openSecondDropdown">
-          {{ secondaryLanguage }}
-          <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>                
-        </div>
-        <div class="drop-down-content no-drag"
-          :class="{ 'drop-down-content-en': $i18n.locale === 'en' }"
-          v-if="showSecondSelection">
-          <div class="content">
-            <div class="selection" ref="secondarySelection"
-              v-for="(language, index) in secondaryLanguages"
-              :style="{
-                color: (language === primaryLanguage && language !== $t('preferences.none')) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
-              }"
-              @mouseover="mouseover(index)"
-              @mouseout="mouseout(index)"
-              @mouseup.stop="handleSecondSelection(language, index)">
-              {{ language }}
-              <span v-if="language === primaryLanguage && language !== $t('preferences.none')"
-                style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.primary') }}</span>
-            </div>
-          </div>
+<div class="preference-setting">
+  <div class="title">{{ $t("preferences.general.displayLanguage") }}</div>
+  <div class="description">{{ $t("preferences.general.switchDisplayLanguages")}}</div>
+  <div class="drop-down">
+    <div class="no-drag" :class="showSelection ? 'drop-down-content' : 'drop-down-brief'"
+      @mouseup.stop="showSelection = !showSelection">
+      <div class="selected">{{ mapCode(displayLanguage) }}</div>
+      <Icon type="rightArrow" :class="showSelection ? 'up-arrow' : 'down-arrow'"/>
+      <div class="content" v-if="showSelection"
+        @mouseup.stop="">
+        <div class="selection"
+          v-for="(language, index) in displayLanguages"
+          :key="index"
+          @mouseup.stop="handleSelection(language)">
+          {{ mapCode(language) }}
         </div>
       </div>
     </div>
   </div>
+  <div class="description-button">
+    <div class="setting-content">
+      <div class="setting-title">{{ $t("preferences.general.setDefault") }}</div>
+      <div class="setting-description">{{ $t("preferences.general.setDefaultDescription") }}</div>
+    </div>
+    <div class="setting-button no-drag" ref="button1"
+      @mousedown="mousedownOnSetDefault">
+      <transition name="button" mode="out-in">
+        <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
+        <div :key="defaultState" v-else class="result">
+          <Icon :type="defaultState" :class="defaultState"/>
+        </div>
+      </transition>
+    </div>
+  </div>
+  <div class="description-button" v-if="isMac">
+    <div class="setting-content">
+      <div class="setting-title">{{ $t("preferences.general.restoreSettings") }}</div>
+      <div class="setting-description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
+    </div>
+    <div class="setting-button no-drag" ref="button2"
+      @mousedown="mousedownOnRestore">
+      <transition name="button" mode="out-in">
+        <div :key="needToRelaunch" class="content" ref="restoreContent">{{ restoreContent }}</div>
+      </transition>
+    </div>
+  </div>
+  <div class="title other-title">{{ $t("preferences.general.others") }}</div>
+  <BaseCheckBox v-if="isMac"
+    :checkboxValue="reverseScrolling"
+    @update:checkbox-value="reverseScrolling = $event">
+    {{ $t('preferences.general.reverseScrolling') }}
+  </BaseCheckBox>
   <BaseCheckBox
     :checkboxValue="deleteVideoHistoryOnExit"
     @update:checkbox-value="deleteVideoHistoryOnExit = $event">
-    {{ $t('preferences.clearHistory') }}
+    {{ $t('preferences.general.clearHistory') }}
   </BaseCheckBox>
 </div>
 </template>
 
 <script>
 import electron from 'electron';
+import { setAsDefaultApp } from '@/../shared/system';
 import Icon from '@/components/BaseIconContainer.vue';
+import { codeToLanguageName } from '@/helpers/language';
 import BaseCheckBox from './BaseCheckBox.vue';
 
 export default {
   name: 'General',
   components: {
-    Icon,
     BaseCheckBox,
+    Icon,
   },
+  props: ['mouseDown', 'isMoved'],
   data() {
     return {
-      showFirstSelection: false,
-      showSecondSelection: false,
-      languages: [
-        this.$t('preferences.none'),
-        '简体中文',
-        '繁體中文',
-        'English',
-        'Español',
-        '日本語',
-        'Français',
-        '한국어',
-        'Português',
-        'العربية',
-        'Deutsch',
-        'Русский',
-        'हिन्दी',
-        'Italiano',
-      ],
-      mouseDown: false,
-      isMoved: false,
+      showSelection: false,
+      isSettingDefault: false,
+      isRestoring: false,
+      defaultState: '',
+      restoreState: '',
+      defaultButtonTimeoutId: NaN,
+      restoreButtonTimeoutId: NaN,
+      needToRelaunch: false,
+      restoreContent: '',
+      languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
     };
   },
   created() {
-    window.onmousedown = () => {
-      this.mouseDown = true;
-      this.isMoved = false;
-    };
-    window.onmousemove = () => {
-      if (this.mouseDown) this.isMoved = true;
-    };
-    window.onmouseup = () => {
-      if (!this.isMoved) {
-        this.showFirstSelection = this.showSecondSelection = false;
-      }
-      this.mouseDown = false;
-      this.isMoved = false;
-    };
-  },
-  beforeDestroy() {
-    window.onmousedown = null;
-    window.onmousemove = null;
-    window.onmouseup = null;
+    electron.ipcRenderer.once('restore-state', (event, state) => {
+      this.restoreContent = state ? this.$t('preferences.general.relaunch')
+        : this.$t('preferences.general.setButton');
+    });
   },
   watch: {
-    privacyAgreement(val) {
-      if (!val) {
-        this.showFirstSelection = this.showSecondSelection = false;
+    displayLanguage(val) {
+      if (val) this.$i18n.locale = val;
+      electron.ipcRenderer.send('get-restore-state');
+      electron.ipcRenderer.once('restore-state', (event, state) => {
+        this.restoreContent = state ? this.$t('preferences.general.relaunch')
+          : this.$t('preferences.general.setButton');
+      });
+    },
+    mouseDown(val, oldVal) {
+      if (!val && oldVal && !this.isMoved) {
+        this.showSelection = false;
+      } else if (!val && oldVal && this.isMoved) {
+        this.$emit('move-stoped');
       }
     },
   },
   computed: {
-    primaryLanguages() {
-      return this.languages.filter(language => language !== this.primaryLanguage && language !== this.$t('preferences.none'));
-    },
-    secondaryLanguages() {
-      return this.languages.filter(language => language !== this.secondaryLanguage);
+    isMac() {
+      return process.platform === 'darwin';
     },
     preferenceData() {
       return this.$store.getters.preferenceData;
     },
-    primaryLanguage: {
+    reverseScrolling: {
       get() {
-        return this.$store.getters.primaryLanguage;
-      },
-      set(val) {
-        this.$store.dispatch('primaryLanguage', val).then(() => {
-          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-        });
-      },
-    },
-    secondaryLanguage: {
-      get() {
-        if (this.$store.getters.secondaryLanguage === '') return this.$t('preferences.none');
-        return this.$store.getters.secondaryLanguage;
-      },
-      set(val) {
-        if (val === this.$t('preferences.none')) val = '';
-        this.$store.dispatch('secondaryLanguage', val).then(() => {
-          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
-        });
-      },
-    },
-    privacyAgreement: {
-      get() {
-        return this.$store.getters.privacyAgreement;
+        return this.$store.getters.reverseScrolling;
       },
       set(val) {
         if (val) {
-          this.$store.dispatch('agreeOnPrivacyPolicy').then(() => {
-            console.log('ddd');
+          this.$store.dispatch('reverseScrolling').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         } else {
-          this.$store.dispatch('disagreeOnPrivacyPolicy').then(() => {
+          this.$store.dispatch('notReverseScrolling').then(() => {
             electron.ipcRenderer.send('preference-to-main', this.preferenceData);
           });
         }
@@ -196,252 +149,296 @@ export default {
         }
       },
     },
+    displayLanguage: {
+      get() {
+        return this.$store.getters.displayLanguage;
+      },
+      set(val) {
+        this.$store.dispatch('displayLanguage', val).then(() => {
+          electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+        });
+      },
+    },
+    displayLanguages() {
+      return this.languages.filter(language => language !== this.displayLanguage);
+    },
   },
   methods: {
-    mouseover(index) {
-      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
-        this.$refs.secondarySelection[index].classList.add('selection-hover');
+    mouseupOnOther() {
+      if (!this.isSettingDefault) {
+        this.$refs.button1.style.setProperty('background-color', '');
+        this.$refs.button1.style.setProperty('opacity', '');
+      }
+      if (!this.isRestoring) {
+        this.$refs.button2.style.setProperty('background-color', '');
+        this.$refs.button2.style.setProperty('opacity', '');
+      }
+      document.removeEventListener('mouseup', this.mouseupOnOther);
+      this.$refs.button1.removeEventListener('mouseup', this.setDefault);
+      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
+    },
+    mousedownOnSetDefault() {
+      if (!this.isSettingDefault) {
+        this.$refs.button1.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
+        this.$refs.button1.style.setProperty('opacity', '0.5');
+        this.$refs.button1.addEventListener('mouseup', this.setDefault);
+        document.addEventListener('mouseup', this.mouseupOnOther);
       }
     },
-    mouseout(index) {
-      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
-        this.$refs.secondarySelection[index].classList.remove('selection-hover');
+    mousedownOnRestore() {
+      if (!this.isSettingDefault) {
+        this.$refs.button2.style.setProperty('transition-delay', '');
+        this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
+        this.$refs.button2.style.setProperty('opacity', '0.5');
+        this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
+        document.addEventListener('mouseup', this.mouseupOnOther);
       }
     },
-    handleFirstSelection(selection) {
-      if (selection === this.secondaryLanguage) this.secondaryLanguage = this.$t('preferences.none');
-      this.primaryLanguage = selection;
-      this.showFirstSelection = false;
-    },
-    handleSecondSelection(selection, index) {
-      if (selection !== this.primaryLanguage) {
-        this.secondaryLanguage = selection;
-        this.showSecondSelection = false;
-        this.$refs.secondarySelection[index].classList.remove('selection-hover');
+    async setDefault() {
+      if (this.isSettingDefault) return;
+      this.isSettingDefault = true;
+      try {
+        await setAsDefaultApp();
+        // TODO: feedback
+        clearTimeout(this.defaultButtonTimeoutId);
+        this.defaultState = 'success';
+        this.$refs.button1.style.setProperty('transition-delay', '350ms');
+        this.$refs.button1.style.setProperty('background-color', '');
+        this.$refs.button1.style.setProperty('opacity', '');
+        this.defaultButtonTimeoutId = setTimeout(() => {
+          this.defaultState = '';
+          this.isSettingDefault = false;
+          this.$refs.button1.style.setProperty('transition-delay', '');
+        }, 1500);
+      } catch (ex) {
+        // TODO: feedback
+        clearTimeout(this.defaultButtonTimeoutId);
+        this.defaultState = 'failed';
+        this.$refs.button1.style.setProperty('transition-delay', '350ms');
+        this.$refs.button1.style.setProperty('background-color', '');
+        this.$refs.button1.style.setProperty('opacity', '');
+        this.defaultButtonTimeoutId = setTimeout(() => {
+          this.defaultState = '';
+          this.isSettingDefault = false;
+          this.$refs.button1.style.setProperty('transition-delay', '');
+        }, 1500);
+      } finally {
+        this.$refs.button1.removeEventListener('mouseup', this.setDefault);
       }
     },
-    openFirstDropdown() {
-      if (this.privacyAgreement) {
-        if (this.showFirstSelection) {
-          this.showFirstSelection = false;
-        } else {
-          this.showFirstSelection = true;
-          this.showSecondSelection = false;
-        }
+    restoreSettings() {
+      this.isRestoring = true;
+      if (this.restoreContent === this.$t('preferences.general.setButton')) {
+        electron.ipcRenderer.send('apply');
+        this.needToRelaunch = true;
+        this.restoreContent = this.$t('preferences.general.relaunch');
+        this.$refs.button2.style.setProperty('transition-delay', '400ms');
+        this.$refs.button2.style.setProperty('background-color', '');
+        this.$refs.button2.style.setProperty('opacity', '');
+        this.isRestoring = false;
+        return;
       }
+      electron.ipcRenderer.send('relaunch');
+      this.isRestoring = false;
+      this.$refs.button2.removeEventListener('mouseup', this.restoreSettings);
     },
-    openSecondDropdown() {
-      if (this.privacyAgreement) {
-        if (this.showSecondSelection) {
-          this.showSecondSelection = false;
-        } else {
-          this.showSecondSelection = true;
-          this.showFirstSelection = false;
-        }
-      }
+    mapCode(code) {
+      return codeToLanguageName(code);
+    },
+    handleSelection(language) {
+      this.displayLanguage = language;
+      this.showSelection = false;
     },
   },
 };
 </script>
 <style scoped lang="scss">
-.general-setting {
+$dropdown-height: 148px;
+$interactor-backgroundColor-default: rgba(255,255,255,0.03);
+$interactor-border-default: 1px solid rgba(255,255,255,0.1);
+$interactor-backgroundColor-hover: rgba(255,255,255,0.08);
+$interactor-border-hover: 1px solid rgba(255,255,255,0.2);
+
+.preference-setting {
   box-sizing: border-box;
   padding-top: 37px;
   padding-left: 26px;
   width: 100%;
   height: 100%;
-  .languages-select {
-    background-color: rgba(0,0,0,0.05);
-    width: 348px;
-    margin-bottom: 24px;
-    .select-content {
-      padding-top: 20px;
-      padding-left: 28px;
-      padding-right: 22px;
-      padding-bottom: 24px;
-      .title {
-        font-family: $font-medium;
-        font-size: 13px;
-        margin-bottom: 5px;
-        color: rgba(255,255,255,0.9);
-        letter-spacing: 0;
+  .title {
+    margin-bottom: 7px;
+    font-family: $font-medium;
+    font-size: 13px;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 0;
+    line-height: 13px;
+  }
+  .other-title {
+    margin-bottom: 12px;
+  }
+  .down-arrow {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    transform: rotate(90deg);
+    transition: transform 200ms;
+  }
+  .up-arrow {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    transform: rotate(-90deg);
+    transition: transform 200ms;
+  }
+  .description {
+    margin-bottom: 13px;
+    font-family: $font-medium;
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0;
+  }
+  .drop-down {
+    width: 240px;
+    margin-bottom: 35px;
+    height: 28px;
+    -webkit-app-region: no-drag;
+    .drop-down-brief {
+      position: relative;
+      -webkit-app-region: no-drag;
+      cursor: pointer;
+      width: 100%;
+      height: 28px;
+      background-color: $interactor-backgroundColor-default;
+      border: $interactor-border-default;
+      border-radius: 2px;
+      font-family: $font-semibold;
+      font-size: 11px;
+      line-height: 28px;
+      color: #FFFFFF;
+      letter-spacing: 0;
+      text-align: center;
+      transition: border 200ms, background-color 200ms;
+      &:hover {
+        border: $interactor-border-hover;
+        background-color: $interactor-backgroundColor-hover;
       }
-      .description {
-        font-family: $font-medium;
-        font-size: 11px;
-        color: rgba(255,255,255,0.5);
-        letter-spacing: 0;
-        margin-bottom: 14px;
-      }
-      .selection-title {
-        text-overflow:ellipsis;
-        white-space:nowrap;
-        margin-right: 12px;
-        font-family: $font-medium;
-        font-size: 12px;
-        color: rgba(255,255,255,0.7);
-        letter-spacing: 0;
+    }
+    .drop-down-content {
+      cursor: pointer;
+      position: relative;
+      z-index: 50;
+      width: 100%;
+      height: $dropdown-height;
+      background-color: rgba(100,100,100,.95);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 2px;
+      font-family: $font-semibold;
+      font-size: 11px;
+      color: #FFFFFF;
+      letter-spacing: 0;
+      text-align: center;
+      .selected {
+        height: 28px;
         line-height: 28px;
+        background-color: rgba(255,255,255,0.1);
       }
-      .down-arrow {
+      .content {
+        cursor: pointer;
         position: absolute;
-        top: 7px;
-        right: 10px;
-        bottom: 7px;
-        transform: rotate(90deg);
-      }
-      .up-arrow {
-        position: absolute;
-        top: 7px;
-        right: 10px;
-        bottom: 7px;
-        transform: rotate(-90deg);
-      }
-      .first-selection {
-        display: flex;
-        flex-direction: row;
-        margin-bottom: 14px;
-        position: relative;
-        .drop-down {
-          -webkit-app-region: no-drag;
-          cursor: pointer;
-          position: absolute;
-          right: 10px;
-          z-index: 100;
-          width: 228px;
-          height: 22px;
-          padding-top: 4px;
-          background-color: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 2px;
-          font-family: $font-semibold;
-          font-size: 12px;
-          color: #FFFFFF;
-          letter-spacing: 0;
-          text-align: center;
+        top: 32px;
+        left: 8px;
+        right: 4px;
+        bottom: 4px;
+        overflow-y: scroll;
+        .selection {
+          height: 28px;
+          line-height: 28px;
         }
-        .drop-down-en {
-          width: 210px;
-        }
-        .drop-down-content {
-          cursor: pointer;
-          position: absolute;
-          z-index: 50;
-          top: 0;
-          left: 58px;
-          width: 228px;
-          height: 164px;
-          background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
-          border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
-          border-width: 1px 1px 1px 1px;
-          border-style: solid;
-          border-radius: 2px;
-          .content {
-            position: absolute;
-            top: 30px;
-            left: 8px;
-            right: 4px;
-            bottom: 3px;
-            overflow-y: scroll;
-            .selection {
-              padding-top: 5px;
-              height: 21px;
-              font-family: $font-semibold;
-              font-size: 12px;
-              color: #FFFFFF;
-              letter-spacing: 0;
-              text-align: center;
-            }
-            .selection:hover {
-              background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
-            }
-          }
-        }
-        .drop-down-content-en {
-          left: 76px;
-          width: 210px;
-          height: 138px;
-        }
-      }
-      .second-selection {
-        display: flex;
-        flex-direction: row;
-        position: relative;
-        .drop-down {
-          -webkit-app-region: no-drag;
-          cursor: pointer;
-          position: absolute;
-          right: 10px;
-          z-index: 40;
-          width: 228px;
-          height: 22px;
-          padding-top: 4px;
-          background-color: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.07);
-          border-radius: 2px;
-          font-family: $font-semibold;
-          font-size: 12px;
-          color: #FFFFFF;
-          letter-spacing: 0;
-          text-align: center;
-        }
-        .drop-down-en {
-          width: 210px;
-        }
-        .drop-down-content {
-          position: absolute;
-          z-index: 10;
-          top: 0;
-          left: 58px;
-          width: 228px;
-          height: 164px;
-          background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
-          border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.07) rgba(255,255,255,0.25) rgba(255,255,255,0.35);
-          border-width: 1px 1px 1px 1px;
-          border-style: solid;
-          border-radius: 2px;
-          .content {
-            position: absolute;
-            top: 30px;
-            left: 8px;
-            right: 4px;
-            bottom: 3px;
-            overflow-y: scroll;
-            .selection {
-              padding-top: 5px;
-              height: 21px;
-              font-family: $font-semibold;
-              font-size: 12px;
-              letter-spacing: 0;
-              text-align: center;
-            }
-            .selection-hover {
-              cursor: pointer;
-              background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
-            }
-          }
-        }
-        .drop-down-content-en {
-          left: 76px;
-          width: 210px;
-          height: 138px;
+        .selection:hover {
+          background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
         }
       }
     }
   }
-}
-::-webkit-scrollbar {
+  .description-button {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 35px;
+    width: 349px;
+    height: fit-content;
+    .setting-content {
+      width: 238px;
+      .setting-title {
+        white-space: nowrap;
+        margin-bottom: 6px;
+        font-family: $font-medium;
+        font-size: 13px;
+        color: rgba(255,255,255,0.9);
+        letter-spacing: 0;
+        line-height: 13px;
+      }
+      .setting-description {
+        font-family: $font-medium;
+        font-size: 11px;
+        color: rgba(255,255,255,0.5);
+        letter-spacing: 0;
+      }
+    }
+    .setting-button {
+      cursor: pointer;
+      box-sizing: border-box;
+      align-self: center;
+      background-color: $interactor-backgroundColor-default;
+      border: $interactor-border-default;
+      border-radius: 2px;
+      transition-property: background-color, opacity, border;
+      transition-duration: 200ms;
+      transition-timing-function: ease-in;
+      width: 61px;
+      height: 28px;
+      &:hover {
+        border: $interactor-border-hover;
+        background-color: $interactor-backgroundColor-hover;
+      }
+
+      .button-enter, .button-leave-to {
+        opacity: 0;
+      }
+      .button-enter-active {
+        transition: opacity 200ms ease-in;
+      }
+      .button-leave-active {
+        transition: opacity 200ms ease-in;
+      }
+
+      .content {
+        font-family: $font-medium;
+        font-size: 11px;
+        color: #FFFFFF;
+        letter-spacing: 0;
+        text-align: center;
+        line-height: 26px;
+      }
+      .result {
+        position: relative;
+        top: 5px;
+        left: 23px;
+      }
+    }
+  }
+  ::-webkit-scrollbar {
   width: 3px;
   user-select: none;
 }
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1); 
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 1.5px;
 }
 ::-webkit-scrollbar-track {
   border-radius: 2px;
   width: 10px;
   user-select: none;
+}
 }
 </style>

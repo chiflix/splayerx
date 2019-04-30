@@ -1,7 +1,7 @@
-import SubtitleLoader from '@/components/Subtitle/SubtitleLoader';
-import { SubtitleError, ErrorCodes } from '@/components/Subtitle/SubtitleLoader/errors';
+import SubtitleLoader, { __RewireAPI__ as subtitleLoaderRewireAPI } from '@/components/Subtitle/SubtitleLoader';
 import sinon from 'sinon';
 import EventEmitter from 'events';
+import { randStr } from '../../../helpers';
 
 describe('SubtitleLoader unit tests', () => {
   let sandbox;
@@ -16,16 +16,39 @@ describe('SubtitleLoader unit tests', () => {
   });
 
   describe('SubtitleLoader constructor test', () => {
+    let storeSubtitleStub;
+    beforeEach(() => {
+      storeSubtitleStub = sandbox.stub().resolves();
+      subtitleLoaderRewireAPI.__Rewire__('storeSubtitle', storeSubtitleStub);
+    });
+    afterEach(() => {
+      subtitleLoaderRewireAPI.__ResetDependency__('storeSubtitle');
+    });
     it('should SubtitleLoader instanceof EventEmitter', () => {
       expect(loader).to.be.an.instanceOf(EventEmitter);
     });
+    it('should use storeSubtitle\'s id as subtitle\'s id', (done) => {
+      const testId = randStr();
+      storeSubtitleStub.resolves(testId);
+      const testSrc = randStr();
+      const testSubtitleLoader = new SubtitleLoader(testSrc, 'online');
 
-    it(`should throw ${ErrorCodes.SUBTITLE_INVALID_TYPE} when pass invalid type`, () => {
-      expect(() => new SubtitleLoader('', 'invalid')).to.throw(SubtitleError).with.property('code', ErrorCodes.SUBTITLE_INVALID_TYPE);
+      testSubtitleLoader.on('loading', (id) => {
+        expect(testSubtitleLoader.id).to.equal(id);
+        expect(id).to.equal(testId);
+        done();
+      });
     });
+    it('should not invoke storeSubtitle when id available', (done) => {
+      const testSrc = randStr();
+      const testId = randStr();
+      const testSubtitleLoader = new SubtitleLoader(testSrc, 'online', { id: testId });
 
-    it(`should throw ${ErrorCodes.SUBTITLE_INVALID_FORMAT} when no loader found`, () => {
-      expect(() => new SubtitleLoader('', 'local')).to.throw(SubtitleError).with.property('code', ErrorCodes.SUBTITLE_INVALID_FORMAT);
+      testSubtitleLoader.on('loading', (id) => {
+        expect(storeSubtitleStub).to.not.have.been.called;
+        expect(id).to.equal(testId);
+        done();
+      });
     });
   });
 

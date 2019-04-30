@@ -1,5 +1,5 @@
 <template>
-  <div :data-component-name="$options.name" class="player">
+  <div class="player">
     <the-video-canvas ref="videoCanvas" />
     <the-video-controller ref="videoctrl" />
     <subtitle-manager />
@@ -24,12 +24,11 @@ export default {
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
     // else it is triggered by setInterval.
     onUpdateTick() {
-      // might be used in the future
-      // this.$refs.videoCanvas.checkPresentTime();
       this.$refs.videoctrl.onTickUpdate();
     },
   },
   mounted() {
+    this.$store.dispatch('initWindowRotate');
     this.$electron.ipcRenderer.send('callMainWindowMethod', 'setMinimumSize', [320, 180]);
     videodata.checkTick();
     videodata.onTick = this.onUpdateTick;

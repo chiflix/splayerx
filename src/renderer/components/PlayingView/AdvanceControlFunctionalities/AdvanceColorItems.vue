@@ -14,7 +14,7 @@
           transition: 'color 300ms',
           cursor: isChosen ? 'default' : 'pointer',
         }">
-        <div class="textItem">{{ item }}</div>
+        <div class="textItem advanceNormalTitle">{{ item }}</div>
         <div class="rightItem" v-show="!isChosen"><img :src="chosenStyle"></div>
       </div>
       <transition name="detail">
@@ -35,6 +35,7 @@
 </template>
 
 <script>
+import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import style0 from '../../../assets/subtitle-style1-normal.png';
 import style1 from '../../../assets/subtitle-style2-normal.png';
 import style2 from '../../../assets/subtitle-style3-normal.png';
@@ -69,15 +70,15 @@ export default {
     isChosen: {
       type: Boolean,
     },
-    winWidth: {
+    size: {
       type: Number,
     },
   },
   computed: {
     heightSize() {
-      if (this.winWidth > 514 && this.winWidth <= 854) {
+      if (this.size >= 289 && this.size <= 480) {
         return this.isChosen ? '74px' : '37px';
-      } else if (this.winWidth > 854 && this.winWidth <= 1920) {
+      } else if (this.size >= 481 && this.size < 1080) {
         return this.isChosen ? `${74 * 1.2}px` : `${37 * 1.2}px`;
       }
       return this.isChosen ? `${74 * 1.2 * 1.4}px` : `${37 * 1.2 * 1.4}px`;
@@ -100,30 +101,32 @@ export default {
       this.hoverIndex = -1;
     },
     handleClick(e, index) {
-      this.$store.dispatch('updateChosenStyle', index);
+      this.$store.dispatch(subtitleActions.UPDATE_SUBTITLE_STYLE, index);
     },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-@media screen and (min-width: 513px) and (max-width: 854px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
   .itemContainer {
-    width: 170px;
+    width: 100%;
     .textContainer {
-      width: 136px;
+      width: 100%;
       height: 37px;
-      font-size: 13px;
-      margin: auto auto auto 17px;
+      .textItem {
+        margin: auto auto auto 17px;
+      }
       .rightItem {
         width: 17px;
         height: 17px;
+        margin: auto 17px auto auto;
       }
     }
     .listContainer {
       height: 37px;
       .rowContainer {
-        width: 137px;
+        width: 80%;
         height: 27px;
         .imgContainer {
           width: 17px;
@@ -143,23 +146,25 @@ export default {
     animation: hideP1 100ms;
   }
 }
-@media screen and (min-width: 855px) and (max-width: 1920px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
   .itemContainer {
-    width: 204px;
+    width: 100%;
     .textContainer {
-      width: 163.2px;
+      width: 100%;
       height: 44.4px;
-      font-size: 15.6px;
-      margin: auto auto auto 20.4px;
+      .textItem {
+        margin: auto auto auto 20.4px;
+      }
       .rightItem {
-        width: 21px;
-        height: 21px;
+        width: 20.4px;
+        height: 20.4px;
+        margin: auto 20.4px auto auto;
       }
     }
     .listContainer {
       height: 44.4px;
       .rowContainer {
-        width: 164.4px;
+        width: 80%;
         height: 32.4px;
         .imgContainer {
           width: 21px;
@@ -179,23 +184,25 @@ export default {
     animation: hideP2 100ms;
   }
 }
-@media screen and (min-width: 1921px) {
+@media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
   .itemContainer {
-    width: 285.6px;
+    width: 100%;
     .textContainer {
-      width: 228.48px;
+      width: 100%;
       height: 62.16px;
-      font-size: 21.84px;
-      margin: auto auto auto 28.56px;
+      .textItem {
+        margin: auto auto auto 28.56px;
+      }
       .rightItem {
-        width: 29px;
-        height: 29px;
+        width: 28.56px;
+        height: 28.56px;
+        margin: auto 28.56px auto auto;
       }
     }
     .listContainer {
       height: 62.16px;
       .rowContainer {
-        width: 230.16px;
+        width: 80%;
         height: 45.36px;
         .imgContainer {
           width: 29px;
@@ -231,10 +238,6 @@ export default {
     color: rgba(255, 255, 255, 0.6);
     .textItem {
       letter-spacing: 0.2px;
-      margin: auto auto auto 0;
-    }
-    .rightItem {
-      margin: auto 0 auto auto;
     }
   }
   .listContainer {

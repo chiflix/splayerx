@@ -10,6 +10,7 @@
   },
   "rules": {
     "func-names": 0,
-    "prefer-arrow-callback": 0
+    "prefer-arrow-callback": 0,
+    "no-underscore-dangle": 0
   }
 }

@@ -2,8 +2,9 @@ import Vue from 'vue';
 
 import Helpers from '@/helpers';
 import romanize from 'romanize';
-import { Video as mutationTypes } from '../mutationTypes';
-import { Video as actionTypes } from '../actionTypes';
+import isEqual from 'lodash/isEqual';
+import { Video as videoMutations } from '../mutationTypes';
+import { Video as videoActions, Subtitle as subtitleActions } from '../actionTypes';
 
 const state = {
   // error state
@@ -29,6 +30,7 @@ const state = {
   // playback state
   duration: NaN,
   rate: 1,
+  playinglistRate: [],
   defaultPlaybackRate: 1,
   paused: false,
   ended: false,
@@ -51,6 +53,8 @@ const state = {
   intrinsicHeight: 0,
   ratio: 0,
   AudioDelay: 0,
+  defaultDir: '',
+  snapshotSavedPath: '',
 };
 
 const getters = {
@@ -62,6 +66,7 @@ const getters = {
     return process.platform === 'win32' ? converted : `file://${converted}`;
   },
   // playback state
+  loop: state => state.loop,
   duration: state => state.duration,
   nextVideoPreviewTime: (state) => {
     const time = state.duration > 3000 ? 60 : state.duration * 0.02;
@@ -74,6 +79,7 @@ const getters = {
   volume: state => state.volume / 100,
   muted: state => state.muted,
   rate: state => state.rate,
+  playinglistRate: state => state.playinglistRate,
   // tracks
   audioTrackList: state => state.audioTrackList,
   currentAudioTrackId: (state) => {
@@ -84,13 +90,27 @@ const getters = {
   // meta info
   intrinsicWidth: state => state.intrinsicWidth,
   intrinsicHeight: state => state.intrinsicHeight,
-  computedWidth: (state, getters) => Math
-    .round(getters.winRatio > getters.ratio ? getters.winHeight * getters.ratio : getters.winWidth),
-  computedHeight: (state, getters) => Math
-    .round(getters.winRatio < getters.ratio ? getters.winWidth / getters.ratio : getters.winHeight),
+  computedWidth: (state, getters) => {
+    if (getters.winAngle === 0 || getters.winAngle === 180) {
+      return Math.round(getters.winRatio > getters.ratio ?
+        getters.winHeight * getters.ratio : getters.winWidth);
+    }
+    return Math.round(getters.winRatio > 1 / getters.ratio ?
+      getters.winHeight * (1 / getters.ratio) : getters.winWidth);
+  },
+  computedHeight: (state, getters) => {
+    if (getters.winAngle === 0 || getters.winAngle === 180) {
+      return Math.round(getters.winRatio < getters.ratio ?
+        getters.winWidth / getters.ratio : getters.winHeight);
+    }
+    return Math.round(getters.winRatio < 1 / getters.ratio ?
+      getters.winWidth / (1 / getters.ratio) : getters.winHeight);
+  },
   ratio: state => state.ratio,
   AudioDelay: state => state.AudioDelay,
   mediaHash: state => state.mediaHash,
+  defaultDir: state => state.defaultDir,
+  snapshotSavedPath: state => state.snapshotSavedPath,
 };
 
 function stateToMutation(stateType) {
@@ -113,9 +133,9 @@ function mutationer(mutationType) {
   };
 }
 
-function mutationsGenerator(mutationTypes) {
+function mutationsGenerator(videoMutations) {
   const mutations = {};
-  Object.keys(mutationTypes).forEach((type) => {
+  Object.keys(videoMutations).forEach((type) => {
     mutations[type] = mutationer(type);
   });
   return mutations;
@@ -133,11 +153,7 @@ function generateTracks(actionType, newTrack, oldTracks) {
       if (newTracks.includes(newTrack)) {
         newTracks.splice(0, newTracks.length, ...newTracks.map((track) => {
           const tempTrack = Object.assign({}, track);
-          if (tempTrack.id === newTrack.id) {
-            tempTrack.enabled = true;
-          } else {
-            tempTrack.enabled = false;
-          }
+          tempTrack.enabled = tempTrack.id === newTrack.id;
           return tempTrack;
         }));
       }
@@ -150,66 +166,109 @@ function generateTracks(actionType, newTrack, oldTracks) {
   }
   return newTracks;
 }
-const mutations = mutationsGenerator(mutationTypes);
+function generateRate(rateInfo, nowRate, oldRateGroup) {
+  const newRateGroup = [...oldRateGroup];
+  let existed;
+  oldRateGroup.forEach((item, index) => {
+    if (item.dirPath === rateInfo.oldDir) {
+      newRateGroup.splice(index, 1, {
+        dirPath: item.dirPath, rate: nowRate, playingList: item.playingList,
+      });
+    } else if (item.dirPath === rateInfo.newDir) {
+      existed = true;
+      if (!isEqual(item.playingList, rateInfo.playingList)) {
+        newRateGroup.splice(index, 1, {
+          dirPath: rateInfo.newDir, rate: 1, playingList: rateInfo.playingList,
+        });
+      }
+    }
+  });
+  if (!existed && rateInfo.oldDir !== rateInfo.newDir) {
+    newRateGroup.splice(newRateGroup.length, 0, {
+      dirPath: rateInfo.newDir, rate: 1, playingList: rateInfo.playingList,
+    });
+  }
+  return newRateGroup;
+}
+const mutations = mutationsGenerator(videoMutations);
 
 const actions = {
-  [actionTypes.SRC_SET]({ commit }, { src, mediaHash }) {
+  [videoActions.SRC_SET]({ commit, dispatch }, { src, mediaHash }) {
     const srcRegexes = {
       unix: RegExp(/^[^\0]+$/),
       windows: RegExp(/^[a-zA-Z]:\/(((?![<>:"//|?*]).)+((?<![ .])\/)?)*$/),
     };
     Object.keys(srcRegexes).forEach(async (type) => {
       if (srcRegexes[type].test(src)) {
-        commit(mutationTypes.SRC_UPDATE, src);
+        commit(videoMutations.SRC_UPDATE, src);
         commit(
-          mutationTypes.MEDIA_HASH_UPDATE,
+          videoMutations.MEDIA_HASH_UPDATE,
           mediaHash || await Helpers.methods.mediaQuickHash(src),
         );
+        dispatch(subtitleActions.INITIALIZE_VIDEO_SUBTITLE_MAP, { videoSrc: src });
       }
     });
   },
-  [actionTypes.INITIALIZE]({ commit }, config) {
+  [videoActions.INITIALIZE]({ commit }, config) {
     Object.keys(config).forEach((item) => {
       const mutation = stateToMutation(item);
-      if (mutationTypes[mutation]) commit(mutation, config[item]);
+      if (videoMutations[mutation]) commit(mutation, config[item]);
     });
   },
-  [actionTypes.INCREASE_VOLUME]({ dispatch, commit, state }, delta) {
-    if (state.muted) dispatch(actionTypes.TOGGLE_MUTED);
-    const finalDelta = delta || 10;
+  [videoActions.VOLUME_UPDATE]({ commit }, delta) {
+    if (delta > 100) {
+      delta = 100;
+    } else if (delta <= 0) {
+      delta = 0;
+      commit(videoMutations.MUTED_UPDATE, true);
+    } else {
+      commit(videoMutations.MUTED_UPDATE, false);
+    }
+    commit(videoMutations.VOLUME_UPDATE, delta);
+  },
+  [videoActions.INCREASE_VOLUME]({ dispatch, commit, state }, delta) {
+    if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
+    const finalDelta = delta || 5;
     const finalVolume = state.volume + finalDelta;
-    commit(mutationTypes.VOLUME_UPDATE, finalVolume > 100 ? 100 : finalVolume);
+    commit(videoMutations.VOLUME_UPDATE, finalVolume > 100 ? 100 : finalVolume);
   },
-  [actionTypes.DECREASE_VOLUME]({ dispatch, commit, state }, delta) {
-    if (state.muted) dispatch(actionTypes.TOGGLE_MUTED);
-    const finalDelta = delta || 10;
+  [videoActions.DECREASE_VOLUME]({ dispatch, commit, state }, delta) {
+    if (state.muted) dispatch(videoActions.TOGGLE_MUTED);
+    const finalDelta = delta || 5;
     const finalVolume = state.volume - finalDelta;
-    commit(mutationTypes.VOLUME_UPDATE, finalVolume < 0 ? 0 : finalVolume);
-    if (finalVolume <= 0) commit(mutationTypes.MUTED_UPDATE, true);
+    commit(videoMutations.VOLUME_UPDATE, finalVolume < 0 ? 0 : finalVolume);
+    if (finalVolume <= 0) commit(videoMutations.MUTED_UPDATE, true);
   },
-  [actionTypes.TOGGLE_MUTED]({ commit, state }) {
-    commit(mutationTypes.MUTED_UPDATE, !state.muted);
+  [videoActions.MUTED_UPDATE]({ commit }, mute) {
+    commit(videoMutations.MUTED_UPDATE, mute);
   },
-  [actionTypes.INCREASE_RATE]({ commit, state }) {
-    const rateArr = [0.5, 1, 1.2, 1.5, 2];
-    const finalRate = rateArr[rateArr.indexOf(state.rate) + 1];
-    commit(mutationTypes.RATE_UPDATE, finalRate || state.rate);
+  [videoActions.TOGGLE_MUTED]({ commit, state }) {
+    commit(videoMutations.MUTED_UPDATE, !state.muted);
   },
-  [actionTypes.DECREASE_RATE]({ commit, state }) {
-    const rateArr = [0.5, 1, 1.2, 1.5, 2];
-    const finalRate = rateArr[rateArr.indexOf(state.rate) - 1];
-    commit(mutationTypes.RATE_UPDATE, finalRate || state.rate);
+  [videoActions.INCREASE_RATE]({ commit, state }) {
+    let nowRate = state.rate;
+    const finalRate = nowRate < 4 ? nowRate += 0.1 : nowRate;
+    commit(videoMutations.RATE_UPDATE, parseFloat(finalRate.toPrecision(12)));
   },
-  [actionTypes.CHANGE_RATE]({ commit }, delta) {
-    commit(mutationTypes.RATE_UPDATE, delta);
+  [videoActions.UPDATE_PLAYINGLIST_RATE]({ commit, state }, delta) {
+    const newPlayinglistRateGroup = generateRate(delta, state.rate, state.playinglistRate);
+    commit(videoMutations.PLAYINGLIST_RATE_UPDATE, newPlayinglistRateGroup);
   },
-  [actionTypes.PLAY_VIDEO]({ commit }) {
-    commit(mutationTypes.PAUSED_UPDATE, false);
+  [videoActions.DECREASE_RATE]({ commit, state }) {
+    let nowRate = state.rate;
+    const finalRate = nowRate > 0.1 ? nowRate -= 0.1 : nowRate;
+    commit(videoMutations.RATE_UPDATE, parseFloat(finalRate.toPrecision(12)));
   },
-  [actionTypes.PAUSE_VIDEO]({ commit }) {
-    commit(mutationTypes.PAUSED_UPDATE, true);
+  [videoActions.CHANGE_RATE]({ commit }, delta) {
+    commit(videoMutations.RATE_UPDATE, delta);
   },
-  [actionTypes.META_INFO]({ commit }, metaInfo) {
+  [videoActions.PLAY_VIDEO]({ commit }) {
+    commit(videoMutations.PAUSED_UPDATE, false);
+  },
+  [videoActions.PAUSE_VIDEO]({ commit }) {
+    commit(videoMutations.PAUSED_UPDATE, true);
+  },
+  [videoActions.META_INFO]({ commit }, metaInfo) {
     const validMetaInfo = [
       'intrinsicWidth',
       'intrinsicHeight',
@@ -217,14 +276,16 @@ const actions = {
     ];
     Object.keys(metaInfo).forEach((item) => {
       const mutation = stateToMutation(item);
-      if (validMetaInfo.includes(item) && mutationTypes[mutation]) commit(mutation, metaInfo[item]);
+      if (validMetaInfo.includes(item) && videoMutations[mutation]) {
+        commit(mutation, metaInfo[item]);
+      }
     });
   },
-  [actionTypes.UPDATE_DELAY]({ commit }, delta) {
+  [videoActions.UPDATE_DELAY]({ commit }, delta) {
     const finalDelay = state.AudioDelay + delta;
-    commit(mutationTypes.DELAY_UPDATE, finalDelay);
+    commit(videoMutations.DELAY_UPDATE, finalDelay);
   },
-  [actionTypes.ADD_AUDIO_TRACK]({ commit, state }, trackToAdd) {
+  [videoActions.ADD_AUDIO_TRACK]({ commit, state }, trackToAdd) {
     let times = 1;
     state.audioTrackList.forEach((item) => {
       if (item.language === trackToAdd.language) {
@@ -233,15 +294,21 @@ const actions = {
     });
     trackToAdd = Object.assign(trackToAdd, { name: `${trackToAdd.language} ${romanize(times)}` });
     const newAudioTracks = generateTracks('add', trackToAdd, state.audioTrackList);
-    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+    commit(videoMutations.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
-  [actionTypes.SWITCH_AUDIO_TRACK]({ commit, state }, trackToSwitch) {
+  [videoActions.SWITCH_AUDIO_TRACK]({ commit, state }, trackToSwitch) {
     const newAudioTracks = generateTracks('switch', trackToSwitch, state.audioTrackList);
-    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+    commit(videoMutations.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
   },
-  [actionTypes.REMOVE_ALL_AUDIO_TRACK]({ commit, state }) {
+  [videoActions.REMOVE_ALL_AUDIO_TRACK]({ commit, state }) {
     const newAudioTracks = generateTracks('removeAll', null, state.audioTrackList);
-    commit(mutationTypes.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+    commit(videoMutations.AUDIO_TRACK_LIST_UPDATE, newAudioTracks);
+  },
+  [videoActions.UPDATE_DEFAULT_DIR]({ commit }, delta) {
+    commit(videoMutations.DEFAULT_DIR_UPDATE, delta);
+  },
+  [videoActions.UPDATE_SNAPSHOT_SAVED_PATH]({ commit }, delta) {
+    commit(videoMutations.SNAPSHOT_SAVED_PATH_UPDATE, delta);
   },
 };
 

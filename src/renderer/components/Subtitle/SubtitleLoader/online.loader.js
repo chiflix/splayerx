@@ -1,20 +1,33 @@
-import { tagsGetter, loadOnlineTranscript } from './utils';
+import { tagsGetter, loadOnlineTranscript, normalizeCode } from './utils';
 
 const baseTags = { alignment: 2, pos: null };
-const normalizer = parsedSubtitle => parsedSubtitle.map(subtitle => ({
-  start: subtitle[0],
-  end: subtitle[1],
-  text: subtitle[2].replace(/\{[^{}]*\}/g, ''),
-  tags: tagsGetter(subtitle[2], baseTags),
-}));
+const normalizer = (parsedSubtitle) => {
+  const finalDialogues = [];
+  parsedSubtitle.forEach(({ startTime, endTime, text }) => {
+    finalDialogues.push({
+      start: startTime,
+      end: endTime,
+      text: text
+        .replace(/[\\/][Nn]|\r?\n|\r/g, '<br>') // replace soft and hard line breaks with <br/>
+        .replace(/\\h/g, ' '), // replace hard space with space
+      tags: tagsGetter(text, baseTags),
+    });
+  });
+  return {
+    info: {},
+    dialogues: finalDialogues,
+  };
+};
 
 export default {
   longName: 'Online Transcript',
   name: 'online',
   supportedFormats: ['online'],
-  id: 'src',
   infoLoaders: {
-    language: 'language',
+    language: {
+      func: normalizeCode,
+      params: 'language',
+    },
   },
   loader: loadOnlineTranscript,
   parser: normalizer,

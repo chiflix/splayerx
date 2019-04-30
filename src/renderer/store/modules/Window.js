@@ -2,9 +2,12 @@ const state = {
   windowSize: [0, 0],
   windowMinimumSize: [0, 0],
   windowPosition: [0, 0],
+  windowAngle: 0,
   isFullScreen: false,
   isFocused: true,
   isMaximized: false,
+  isMinimized: false,
+  sizePercent: 0,
 };
 
 const getters = {
@@ -15,14 +18,18 @@ const getters = {
   winPosX: state => state.windowPosition[0],
   winPosY: state => state.windowPosition[1],
   winPos: state => state.windowPosition,
+  winAngle: state => state.windowAngle,
   isFullScreen: state => state.isFullScreen,
   isFocused: state => state.isFocused,
   isMaximized: state => state.isMaximized,
+  isMinimized: state => state.isMinimized,
+  sizePercent: state => state.sizePercent,
 };
 
 const mutations = {
   windowSize(state, payload) {
     state.windowSize = payload;
+    state.sizePercent = 0;
   },
   windowMinimumSize(state, payload) {
     state.windowMinimumSize = payload;
@@ -39,9 +46,28 @@ const mutations = {
   isMaximized(state, payload) {
     state.isMaximized = payload;
   },
+  isMinimized(state, payload) {
+    state.isMinimized = payload;
+  },
+  sizePercentUpdate(state, payload) {
+    state.sizePercent = payload;
+  },
+  windowAngle(state, payload) {
+    state.windowAngle = payload;
+  },
 };
 
-const actions = {};
+const actions = {
+  updateSizePercent({ commit }, delta) {
+    commit('sizePercentUpdate', delta);
+  },
+  windowRotate90Deg({ commit, state }) {
+    (state.windowAngle + 90) === 360 ? commit('windowAngle', 0) : commit('windowAngle', state.windowAngle + 90);
+  },
+  initWindowRotate({ commit }) {
+    commit('windowAngle', 0);
+  },
+};
 
 export default {
   state,
