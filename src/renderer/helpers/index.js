@@ -393,6 +393,12 @@ export default {
             paths: similarVideos,
             items,
           });
+        } else {
+          this.$store.dispatch('FolderList', {
+            id,
+            paths: [],
+            items: [],
+          });
         }
       }
       this.infoDB.add('recent-played', { ...playlist, lastOpened: Date.now() });
@@ -435,6 +441,12 @@ export default {
           id,
           paths: similarVideos,
           items,
+        });
+      } else {
+        this.$store.dispatch('FolderList', {
+          id,
+          paths: [],
+          items: [],
         });
       }
     },
