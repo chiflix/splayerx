@@ -215,8 +215,7 @@ export default {
             this.lastPlayedFile = data.slice(0, 9);
           });
       } else {
-        this.infoDB.cleanData();
-        this.infoDB.cleanData('media-item'); // merge later...
+        this.infoDB.clearAll();
       }
     });
     this.$bus.$on('clean-lastPlayedFile', () => {

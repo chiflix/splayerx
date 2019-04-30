@@ -456,7 +456,7 @@ new Vue({
             {
               label: this.$t('msg.file.clearHistory'),
               click: () => {
-                this.infoDB.cleanData();
+                this.infoDB.clearAll();
                 app.clearRecentDocuments();
                 this.$bus.$emit('clean-lastPlayedFile');
                 this.refreshMenu();
