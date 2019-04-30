@@ -149,9 +149,9 @@ export default {
           bookmark.resolveBookmarks(files, bookmarks);
         }
         if (files) {
+          this.$store.commit('source', '');
           if (files.length > 1) {
             // if selected files contain folders only, then call openFolder()
-            this.$store.commit('source', '');
             const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
             files.forEach(file => remote.app.addRecentDocument(file));
             if (onlyFolders) {
@@ -470,7 +470,7 @@ export default {
     // openFile and db operation
     async playFile(vidPath, id) {
       let mediaQuickHash;
-      if (process.mas) this.bookmarkAccessing(vidPath);
+      if (process.mas && this.$store.getters.source !== 'drop') this.bookmarkAccessing(vidPath);
       try {
         mediaQuickHash = await this.mediaQuickHash(vidPath);
       } catch (err) {
