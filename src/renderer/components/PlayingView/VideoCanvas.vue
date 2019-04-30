@@ -255,7 +255,7 @@ export default {
       const playlist = await this.infoDB.get('recent-played', this.playListId);
       await this.infoDB.update('recent-played', {
         ...playlist,
-        items: this.isFolderList ? [this.items[this.playingIndex]] :this.items,
+        items: this.isFolderList ? [this.items[this.playingIndex]] : this.items,
         playedIndex: this.isFolderList ? 0 : this.playingIndex,
         lastOpened: Date.now(),
       });
