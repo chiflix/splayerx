@@ -92,7 +92,6 @@
 </div>
 </template>
 <script>
-import fs from 'fs';
 import path from 'path';
 import { mapGetters } from 'vuex';
 import { filePathToUrl, parseNameFromPath } from '@/helpers/path';
