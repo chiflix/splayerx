@@ -7,11 +7,20 @@ import { SUBTITLE_OBJECTSTORE_NAME, DATADB_SHCEMAS, DATADB_VERSION } from '@/con
 
 const taskQueues = {};
 
-function getVideoInfoFromVideoSrc(videoSrc) {
-  return infoDB.get('recent-played', 'path', videoSrc);
+async function getVideoInfoFromVideoSrc(videoSrc) {
+  let result;
+  try {
+    result = await infoDB.get('recent-played', 'path', videoSrc);
+  } catch (e) {
+    result = await infoDB.get('media-item', 'path', videoSrc);
+  }
+  return result;
 }
-function setVideoInfo(infoPayload) {
-  return infoDB.add('recent-played', infoPayload);
+async function setVideoInfo(infoPayload) {
+  if (infoPayload.videoId) {
+    return infoDB.update('media-item', infoPayload);
+  }
+  return infoDB.add('media-item', infoPayload);
 }
 function updateSubtitlePreferenceRaw(videoSrc, preference, isDelete) {
   return getVideoInfoFromVideoSrc(videoSrc).then((videoInfo) => {

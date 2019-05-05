@@ -100,10 +100,8 @@ export default function mutations(options = defaultOptions) {
   if (get(keyboard, 'meta')) {
     result[t.META_KEY_PRESSED_KEY_CODES] = allMutations[t.META_KEY_PRESSED_KEY_CODES];
   }
-  if (get(wheel, 'phase')) {
+  if (get(wheel, 'phase') || get(wheel, 'direction')) {
     result[t.WHEEL_PHASE] = allMutations[t.WHEEL_PHASE];
-  }
-  if (get(wheel, 'direction')) {
     result[t.WHEEL_DIRECTION] = allMutations[t.WHEEL_DIRECTION];
   }
   if (get(wheel, 'component')) {
