@@ -144,10 +144,10 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'mediaHash', 'subToTop', 'subtitleList', 'winHeight',
-      'paused', 'isFullScreen', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'enabledSecondarySub', 'chosenSize', 'currentTime',
-      'isEditable', 'isProfessional', 'winRatio', 'winWidth', 'winHeight', 'chosenStyle', 'isCreateSubtitleMode', 'currentEditedSubtitleId',
-      'computedWidth', 'computedHeight', 'chooseIndex', 'isClickFirstSub', // to determine the subtitle renderer's container size
+      'duration', 'scaleNum', 'mediaHash', 'paused', 'isFullScreen', 'currentTime',
+      'subtitleDelay', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'enabledSecondarySub', 'chosenStyle', 'chosenSize', 'subToTop', 'subtitleList',
+      'winRatio', 'winWidth', 'winHeight', 'computedWidth', 'computedHeight', 'intrinsicHeight', 'intrinsicWidth',
+      'isEditable', 'isProfessional', 'isCreateSubtitleMode', 'currentEditedSubtitleId', 'chooseIndex', 'isClickFirstSub', 'disableQuickEdit', // to determine the subtitle renderer's container size
     ]),
     computedSize() {
       return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
@@ -168,19 +168,9 @@ export default {
       return this.type === 'vtt';
     },
     canUseEditor() {
-      // 是否可以使用编辑模式
-      // 暂时使用computed属性来控制是否可以使用编辑模式
-      // 后期采用vuex统一管理界面版本 [0,1,2,3]
-      // let sizeAvaliable = false;
-      // if (this.winRatio > 1) {
-      //   // 当视频的宽度大于等于高度，如果高度超过480px,才可以使用编辑模式
-      //   sizeAvaliable = this.winHeight >= 480;
-      // } else {
-      //   // 当视频宽度小于高度，如果宽度超过480px,才可以使用编辑模式
-      //   sizeAvaliable = this.winWidth >= 480;
-      // }
-      // return sizeAvaliable && !this.playlistShow;
-      return !this.playlistShow;
+      // 当播放列表出现时，不可以快捷编辑
+      // 当设置禁用快捷编辑，在非高级模式下不可快捷编辑
+      return !this.playlistShow && (!this.isProfessional && !this.disableQuickEdit);
     },
     minInputWidth() { // eslint-disable-line
       // 最小就是 ---|-**最小宽度**-|三个icon

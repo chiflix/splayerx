@@ -36,20 +36,20 @@
     </div>
     <div class="progress"
       :style="{ height: this.hovering ? '10px' : '4px' }">
-      <div class="hovered" ref="hoveredProgress"
-        :style="{
-        }"></div>
-      <div class="played" ref="playedProgress"
-        :style="{
-        }" ></div>
-      <div class="default" ref="defaultProgress"
-        :style="{
-          order: '2',
-        }"></div>
+      <div class="hovered" ref="hoveredProgress" />
+      <div class="played" ref="playedProgress" />
+      <div class="default" ref="defaultProgress" :style="{ order: '2' }" />
     </div>
-    <div class="fake-button right" ref="rightInvisible"
-      :style="{ height: fakeButtonHeight }">
-      <div class="fake-progress" ref="fakeProgress" :style="{ height: this.hovering ? '10px' : '4px', backgroundColor: this.rightFakeProgressBackgroundColor }"></div></div>
+    <div class="fake-button right" ref="rightInvisible" :style="{ height: fakeButtonHeight }">
+      <div
+        class="fake-progress"
+        ref="fakeProgress"
+        :style="{
+          height: this.hovering ? '10px' : '4px',
+          backgroundColor: this.rightFakeProgressBackgroundColor,
+        }"
+      />
+    </div>
   </div>
 </template>
 <script>

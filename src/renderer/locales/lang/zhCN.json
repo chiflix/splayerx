@@ -209,7 +209,12 @@
 			"secondary": "次要语言",
 			"setAsDefault": "将SPlayer设为默认播放器",
 			"settings": "设置"
-		}
+    },
+    "translationEdit": {
+      "translationEditSetting": "译文编辑",
+      "quickEdit": "快速编辑",
+      "quickEditDescription": "允许在影片暂停时编辑正在使用的翻译结果。"
+    }
 	},
 	"privacyBubble": {
 		"confirmDisable": {

@@ -209,7 +209,12 @@
 			"secondary": "반성",
 			"setAsDefault": "SPlayer를 기본 응용 프로그램으로 설정",
 			"settings": "설정"
-		}
+		},
+    "translationEdit": {
+      "translationEditSetting": "번역 편집",
+      "quickEdit": "빠른 편집",
+      "quickEditDescription": "일시 중지시 선택한 번역 결과 편집 허용."
+    }
 	},
 	"privacyBubble": {
 		"confirmDisable": {

@@ -39,7 +39,7 @@ export default {
     currentTime: {
       type: Array,
       default: () => [0],
-      validator: value => value[0] >= 0,
+      validator: value => Number.isFinite(value[0]),
     },
     playbackRate: {
       type: Number,
@@ -106,20 +106,25 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['audioTrackList', 'originSrc']),
+    ...mapGetters(['audioTrackList', 'originSrc', 'videoId']),
   },
   data() {
     return {
       eventListeners: new Map(),
       currentTimeAnimationFrameId: 0,
+      duration: 0,
     };
   },
   watch: {
     // network state
     // playback state
     currentTime(newVal) {
-      [this.$refs.video.currentTime] = newVal || 0;
-
+      // calculate the seek time
+      let [finalSeekTime] = newVal;
+      if (newVal < 0 || !newVal) finalSeekTime = 0;
+      else if (newVal > this.duration) finalSeekTime = this.duration;
+      // seek the video
+      this.$refs.video.currentTime = finalSeekTime;
       // update the seek time
       if (this.needtimeupdate) {
         videodata.time = this.$refs.video.currentTime;
@@ -176,6 +181,7 @@ export default {
       videodata.paused = false;
       this.$refs.video.ontimeupdate = this.currentTimeUpdate;
     }
+    this.duration = this.$refs.video.duration;
   },
   methods: {
     basicInfoInitialization(videoElement) {
@@ -215,7 +221,7 @@ export default {
             this.$refs.video.addEventListener(event, listener);
             this.eventListeners.set(event, listener);
           } else {
-            const playInfo = await this.infoDB.get('recent-played', 'path', this.originSrc);
+            const playInfo = await this.infoDB.get('media-item', this.videoId);
             const generateAudioEvent = type => (trackEvent) => {
               const {
                 id, kind, label, language,

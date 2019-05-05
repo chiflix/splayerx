@@ -13,11 +13,14 @@
         <Icon class="title-button-disable" type="titleBarFull"/>
       </div>
       <div class="preferenceTitle"
-          :class="currentPreference === 'General' ? 'chosen' : ''"
+          :class="currentPreference === 'General' ? `chosen ${fontSize}` : `${fontSize}`"
           @mouseup="handleMouseup('General')">{{ $t('preferences.general.generalSetting') }}</div>
       <div class="preferenceTitle"
-          :class="currentPreference === 'Privacy' ? 'chosen' : ''"
+          :class="currentPreference === 'Privacy' ? `chosen ${fontSize}` : `${fontSize}`"
           @mouseup="handleMouseup('Privacy')">{{ $t('preferences.privacy.privacySetting') }}</div>
+      <div class="preferenceTitle"
+          :class="currentPreference === 'Editor' ? `chosen ${fontSize}` : `${fontSize}`"
+          @mouseup="handleMouseup('Editor')">{{ $t('preferences.translationEdit.translationEditSetting') }}</div>
     </div>
     <div class="right">
       <div class="win-icons no-drag"
@@ -40,9 +43,11 @@
 
 <script>
 import electron from 'electron';
+import { mapGetters } from 'vuex';
 import Icon from '@/components/BaseIconContainer.vue';
 import General from './Preferences/General.vue';
 import Privacy from './Preferences/Privacy.vue';
+import Editor from './Preferences/Editor.vue';
 
 export default {
   name: 'Preference',
@@ -50,6 +55,7 @@ export default {
     Icon,
     General,
     Privacy,
+    Editor,
   },
   data() {
     return {
@@ -57,9 +63,11 @@ export default {
       currentPreference: 'General',
       mouseDown: false,
       isMoved: false,
+      fontSize: 'normal',
     };
   },
   computed: {
+    ...mapGetters(['displayLanguage']),
     isDarwin() {
       return process.platform === 'darwin';
     },
@@ -74,6 +82,14 @@ export default {
     },
     handleMouseup(panel) {
       this.currentPreference = panel;
+    },
+    isAsiaLanguage(v) {
+      return v === 'ja' || v === 'zhCN' || v === 'zhTW' || v === 'ko';
+    },
+  },
+  watch: {
+    displayLanguage(v) {
+      this.fontSize = this.isAsiaLanguage(v) ? 'normal' : 'small';
     },
   },
   created() {
@@ -90,6 +106,9 @@ export default {
     window.onmouseup = () => {
       this.mouseDown = false;
     };
+    if (!this.isAsiaLanguage(this.displayLanguage)) {
+      this.fontSize = 'small';
+    }
   },
   beforeDestroy() {
     window.onmousedown = null;
@@ -170,6 +189,12 @@ export default {
       transition: background-color 200ms;
       &:hover {
         background-color: rgba(255,255,255,0.03);
+      }
+      &.normal {
+        font-size: 14px;
+      }
+      &.small {
+        font-size: 12px;
       }
     }
     .chosen {

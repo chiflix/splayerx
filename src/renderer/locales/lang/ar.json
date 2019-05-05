@@ -209,7 +209,12 @@
 			"secondary": "ثانوي",
 			"setAsDefault": "تعيين SPlayer كتطبيق افتراضي",
 			"settings": "الإعدادات"
-		}
+		},
+    "translationEdit": {
+      "translationEditSetting": "ترجمة التحرير",
+      "quickEdit": "تعديل سريع",
+      "quickEditDescription": ".السماح بتحرير نتيجة الترجمة المحددة عند الإيقاف المؤقت"
+    }
 	},
 	"privacyBubble": {
 		"confirmDisable": {

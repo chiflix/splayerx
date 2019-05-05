@@ -209,7 +209,12 @@
 			"secondary": "Secundario",
 			"setAsDefault": "Establecer SPlayer como la aplicación predeterminada",
 			"settings": "Ajustes"
-		}
+		},
+    "translationEdit": {
+      "translationEditSetting": "Traducción Editar",
+      "quickEdit": "Edición rapida",
+      "quickEditDescription": "Permitir la edición del resultado de traducción seleccionado cuando está en pausa."
+    }
 	},
 	"privacyBubble": {
 		"confirmDisable": {

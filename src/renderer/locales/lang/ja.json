@@ -209,7 +209,12 @@
 			"secondary": "セカンド",
 			"setAsDefault": "SPlayerをデフォルトにする",
 			"settings": "設定"
-		}
+		},
+    "translationEdit": {
+      "translationEditSetting": "翻訳編集",
+      "quickEdit": "速い編集",
+      "quickEditDescription": "一時停止時に選択した翻訳結果の編集を許可する。"
+    }
 	},
 	"privacyBubble": {
 		"confirmDisable": {

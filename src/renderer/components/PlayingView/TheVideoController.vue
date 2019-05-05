@@ -55,9 +55,12 @@
   </div>
 </template>
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex';
+import {
+  mapState, mapGetters, mapActions,
+  createNamespacedHelpers,
+} from 'vuex';
 import { Input as inputActions } from '@/store/actionTypes';
-import { INPUT_COMPONENT_TYPE } from '@/plugins/input';
+import { INPUT_COMPONENT_TYPE, getterTypes as iGT } from '@/plugins/input';
 import path from 'path';
 import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
 import Titlebar from '../Titlebar.vue';
@@ -71,6 +74,8 @@ import TheProgressBar from './TheProgressBar.vue';
 import NotificationBubble from '../NotificationBubble.vue';
 import RecentPlaylist from './RecentPlaylist.vue';
 import { videodata } from '../../store/video';
+
+const { mapGetters: inputMapGetters } = createNamespacedHelpers('InputPlugin');
 
 export default {
   name: 'the-video-controller',
@@ -142,10 +147,13 @@ export default {
       mousemoveClientPosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight', 'isEditable', 'isProfessional', 'isDragableInProfessional', 'isSpaceDownInProfessional']),
+    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight', 'isEditable', 'isProfessional', 'isDragableInProfessional', 'isSpaceDownInProfessional']),
     onlyOneVideo() {
       return this.playingList.length === 1;
     },
+    ...inputMapGetters({
+      inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
+    }),
     showAllWidgets() {
       return !this.tempRecentPlaylistDisplayState &&
         ((!this.mouseStopped && !this.mouseLeftWindow) ||
@@ -439,7 +447,6 @@ export default {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached && !this.dragOver;
-      tempObject['playlist-control'] = !(this.playingList.length === 0);
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
@@ -575,6 +582,7 @@ export default {
       this.updateWheel({
         componentName: this.getComponentName(target),
         timestamp: timeStamp,
+        direction: this.inputWheelDirection,
       });
     },
     // Helper functions

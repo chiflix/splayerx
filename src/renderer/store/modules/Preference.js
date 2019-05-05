@@ -4,6 +4,7 @@ import syncStorage from '@/helpers/syncStorage';
 const state = {
   deleteVideoHistoryOnExit: false,
   privacyAgreement: undefined,
+  disableQuickEdit: false,
   displayLanguage: '',
   primaryLanguage: '',
   secondaryLanguage: '',
@@ -16,6 +17,7 @@ const getters = {
   deleteVideoHistoryOnExit: state => state.deleteVideoHistoryOnExit,
   reverseScrolling: state => state.reverseScrolling,
   privacyAgreement: state => state.privacyAgreement,
+  disableQuickEdit: state => state.disableQuickEdit,
   displayLanguage: state => state.displayLanguage,
   primaryLanguage: state => state.primaryLanguage,
   secondaryLanguage: state => state.secondaryLanguage,
@@ -35,6 +37,9 @@ const mutations = {
   },
   privacyAgreement(state, payload) {
     state.privacyAgreement = payload;
+  },
+  disableQuickEdit(state, payload) {
+    state.disableQuickEdit = payload;
   },
   primaryLanguage(state, payload) {
     state.primaryLanguage = payload;
@@ -67,6 +72,10 @@ const actions = {
   },
   disagreeOnPrivacyPolicy({ commit, state }) {
     commit('privacyAgreement', false);
+    return asyncStorage.set('preferences', state);
+  },
+  quickEditStatus({ commit, state }, payload) {
+    commit('disableQuickEdit', payload);
     return asyncStorage.set('preferences', state);
   },
   reverseScrolling({ commit, state }) {

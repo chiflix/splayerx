@@ -57,18 +57,28 @@ export const DEFAULT_VIDEO_OPTIONS = [
 ];
 export const THUMBNAIL_DB_NAME = 'splayerx-preview-thumbnails';
 export const INFO_DATABASE_NAME = 'Info';
-export const THUMBNAIL_OBJECT_STORE_NAME = 'the-preview-thumbnail';
-export const INFODB_VERSION = 1;
+export const VIDEO_OBJECT_STORE_NAME = 'media-item';
+export const RECENT_OBJECT_STORE_NAME = 'recent-played';
+export const INFODB_VERSION = 2;
 /**
  * Remember to increment the INFODB_VERSION after updating the following INFO_SCHEMA
  */
-export const INFO_SCHEMA = [
+export const INFO_SCHEMAS = [
   {
-    name: 'recent-played',
-    indexes: ['lastOpened', 'path', 'lastPlayedTime'],
+    name: RECENT_OBJECT_STORE_NAME,
+    options: {
+      keyPath: 'id',
+      autoIncrement: true,
+    },
+    indexes: ['lastOpened', 'hpaths'],
   },
   {
-    name: THUMBNAIL_OBJECT_STORE_NAME,
+    name: VIDEO_OBJECT_STORE_NAME,
+    options: {
+      keyPath: 'videoId',
+      autoIncrement: true,
+    },
+    indexes: ['path', 'lastPlayedTime', 'source'],
   },
 ];
 
