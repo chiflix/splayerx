@@ -207,6 +207,28 @@ new Vue({
         },
       ];
     },
+    darwinVolume() {
+      return [
+        {
+          label: this.$t('msg.audio.increaseVolume'),
+          accelerator: '=',
+          id: 'inVolume',
+          click: () => {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.INCREASE_VOLUME);
+          },
+        },
+        {
+          label: this.$t('msg.audio.decreaseVolume'),
+          accelerator: '-',
+          id: 'deVolume',
+          click: () => {
+            this.$ga.event('app', 'volume', 'keyboard');
+            this.$store.dispatch(videoActions.DECREASE_VOLUME);
+          },
+        },
+      ];
+    },
     updateFullScreen() {
       if (this.isFullScreen) {
         return {
@@ -764,7 +786,7 @@ new Vue({
             {
               label: this.$t('msg.subtitle.increaseSubtitleDelayS'),
               id: 'increaseSubDelay',
-              accelerator: 'CmdOrCtrl+=',
+              accelerator: 'CmdOrCtrl+.',
               click: () => {
                 this.updateSubDelay(0.1);
               },
@@ -772,7 +794,7 @@ new Vue({
             {
               label: this.$t('msg.subtitle.decreaseSubtitleDelayS'),
               id: 'decreaseSubDelay',
-              accelerator: 'CmdOrCtrl+-',
+              accelerator: 'CmdOrCtrl+,',
               click: () => {
                 this.updateSubDelay(-0.1);
               },
@@ -914,6 +936,7 @@ new Vue({
         template[0].submenu.splice(1, 0, result);
         // menu.about
         if (process.platform === 'darwin') {
+          template[2].submenu.splice(0, 0, ...this.darwinVolume);
           template[1].submenu.splice(3, 0, ...this.darwinPlayback);
           template.unshift({
             label: app.getName(),
