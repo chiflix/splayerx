@@ -170,7 +170,10 @@ export default {
     canUseEditor() {
       // 当播放列表出现时，不可以快捷编辑
       // 当设置禁用快捷编辑，在非高级模式下不可快捷编辑
-      return !this.playlistShow && (!this.isProfessional && !this.disableQuickEdit);
+      if (this.isProfessional) {
+        return true;
+      }
+      return !(this.playlistShow || this.disableQuickEdit);
     },
     minInputWidth() { // eslint-disable-line
       // 最小就是 ---|-**最小宽度**-|三个icon
