@@ -247,13 +247,13 @@ export default {
       }
     });
     this.$bus.$on('drag-over', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
+      if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
     });
     this.$bus.$on('drag-leave', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
     this.$bus.$on('drop', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
   },
   mounted() {
