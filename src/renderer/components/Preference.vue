@@ -29,9 +29,11 @@
         <Icon class="title-button-disable" type="titleBarWinFull"/>
         <Icon class="title-button" type="titleBarWinClose" @click.native="handleClose"/>
       </div>
-      <component :is="currentPreference"
-      @move-stoped="isMoved = false"
-      :mouseDown="mouseDown" :isMoved="isMoved"/>
+      <keep-alive>
+        <component :is="currentPreference"
+        @move-stoped="isMoved = false"
+        :mouseDown="mouseDown" :isMoved="isMoved"/>
+      </keep-alive>
     </div>
   </div>
 </template>
@@ -150,7 +152,7 @@ export default {
   .left {
     flex-basis: 110px;
     height: 100%;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.9) 0%, rgba(84,84,84,0.9) 47%, rgba(123,123,123,0.9) 100%);
+    background-image: linear-gradient(-28deg, rgba(65,65,65,0.97) 0%, rgba(84,84,84,0.97) 47%, rgba(123,123,123,0.97) 100%);
     .preferenceTitle {
       cursor: pointer;
       -webkit-app-region: no-drag;
@@ -158,22 +160,30 @@ export default {
       padding-left: 15px;
       padding-top: 13px;
       padding-bottom: 13px;
+      background-color: rgba(255,255,255,0);
 
       font-family: $font-semibold;
       font-size: 14px;
       color: rgba(255,255,255,0.3);
       letter-spacing: 0;
       line-height: 16px;
+      transition: background-color 200ms;
+      &:hover {
+        background-color: rgba(255,255,255,0.03);
+      }
     }
     .chosen {
       border-left: 1px solid white;
       color: rgba(255,255,255,1);
       background-image: linear-gradient(99deg, rgba(243,243,243,0.15) 0%, rgba(255,255,255,0.0675) 81%);
+      &:hover {
+        background-color: rgba(255,255,255,0);
+      }
     }
   }
   .right {
     flex-basis: 430px;
-    background-image: linear-gradient(-28deg, rgba(65,65,65,0.97) 0%, rgba(84,84,84,0.97) 47%, rgba(123,123,123,0.97) 100%);
+    background-image: linear-gradient(-28deg, rgba(65,65,65,0.99) 0%, rgba(84,84,84,0.99) 47%, rgba(123,123,123,0.99) 100%);
   }
 }
 </style>

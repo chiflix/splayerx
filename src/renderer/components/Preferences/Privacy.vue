@@ -12,7 +12,7 @@
       <table>
         <tr>
           <td class="selection-title">{{ $t('preferences.privacy.primary')}}</td>
-          <td class="first-selection">
+          <td class="selection-box">
             <div class="drop-down">
             <div class="no-drag" :class="showFirstSelection ? 'drop-down-content' : 'drop-down-brief'"
               :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
@@ -34,7 +34,7 @@
         </tr>
         <tr>
           <td class="selection-title">{{ $t('preferences.privacy.secondary')}}</td>
-          <td class="second-selection">
+          <td class="selection-box">
             <div class="drop-down">
               <div class="no-drag" :class="showSecondSelection ? 'drop-down-content' : 'drop-down-brief'"
                 :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
@@ -217,8 +217,11 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-$dropdown-width: 218px;
-$dropdown-height: 156px;
+$dropdown-height: 148px;
+$interactor-backgroundColor-default: rgba(255,255,255,0.03);
+$interactor-border-default: 1px solid rgba(255,255,255,0.1);
+$interactor-backgroundColor-hover: rgba(255,255,255,0.08);
+$interactor-border-hover: 1px solid rgba(255,255,255,0.2);
 
 .preference-setting {
   box-sizing: border-box;
@@ -231,10 +234,7 @@ $dropdown-height: 156px;
     width: 380px;
     margin-bottom: 24px;
     .select-content {
-      padding-top: 20px;
-      padding-left: 28px;
-      padding-right: 22px;
-      padding-bottom: 19px;
+      padding: 20px 28px;
       .title {
         font-family: $font-medium;
         font-size: 13px;
@@ -250,86 +250,93 @@ $dropdown-height: 156px;
         margin-bottom: 9px;
       }
       .selection-title {
-        text-overflow:ellipsis;
-        white-space:nowrap;
+        height: 28px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 10%;
         padding-right: 10px;
-        padding-top: 13px;
-        padding-bottom: 13px;
+        line-height: 28px;
         font-family: $font-medium;
         font-size: 12px;
         color: rgba(255,255,255,0.7);
         letter-spacing: 0;
-        line-height: 13px;
       }
       .down-arrow {
         position: absolute;
-        top: 6px;
-        right: 6px;
+        top: 7px;
+        right: 8px;
         transform: rotate(90deg);
+        transition: transform 200ms;
       }
       .up-arrow {
         position: absolute;
-        top: 6px;
-        right: 6px;
+        top: 7px;
+        right: 8px;
         transform: rotate(-90deg);
+        transition: transform 200ms;
       }
-      .first-selection {
-        display: flex;
-        flex-direction: row;
-        padding-top: 7px;
-        padding-bottom: 7px;
+      table {
+        width: 100%;
+        tr {
+          height: 40px;
+        }
+      }
+      .selection-box {
+        width: 100%;
         .drop-down {
-          width: $dropdown-width;
-          height: 22px;
+          width: 100%;
+          height: 28px;
           -webkit-app-region: no-drag;
           .drop-down-brief {
             position: relative;
             cursor: pointer;
-            z-index: 100;
-            width: $dropdown-width;
-            height: 22px;
-            padding-top: 4px;
-            background-color: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.07);
+            width: 100%;
+            height: 28px;
+            background-color: $interactor-backgroundColor-default;
+            border: $interactor-border-default;
             border-radius: 2px;
             font-family: $font-semibold;
-            font-size: 12px;
+            font-size: 11px;
+            line-height: 28px;
             color: #FFFFFF;
             letter-spacing: 0;
             text-align: center;
+            transition: border 200ms, background-color 200ms;
+            &:hover {
+              border: $interactor-border-hover;
+              background-color: $interactor-backgroundColor-hover;
+            }
           }
           .drop-down-content {
             cursor: pointer;
             position: relative;
             z-index: 50;
-            width: $dropdown-width;
+            width: 100%;
             height: $dropdown-height;
-            background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
-            border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.0) rgba(255,255,255,0.1) rgba(255,255,255,0.35);
-            border-width: 1px 1px 1px 1px;
-            border-style: solid;
+            background-color: rgba(100,100,100,.95);
+            border: 1px solid rgba(255,255,255,0.3);
             border-radius: 2px;
             font-family: $font-semibold;
-            font-size: 12px;
+            font-size: 11px;
             color: #FFFFFF;
             letter-spacing: 0;
             text-align: center;
             .selected {
-              padding-top: 4px;
-              height: 23px;
-              background-color: rgba(255,255,255,0.07);
+              height: 28px;
+              line-height: 28px;
+              background-color: rgba(255,255,255,0.1);
             }
             .content {
               cursor: pointer;
               position: absolute;
-              top: 30px;
+              top: 32px;
               left: 8px;
               right: 4px;
-              bottom: 3px;
+              bottom: 4px;
               overflow-y: scroll;
               .selection {
-                padding-top: 4px;
-                height: 22px;
+                height: 28px;
+                line-height: 28px;
               }
               .selection:hover {
                 background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
@@ -338,67 +345,8 @@ $dropdown-height: 156px;
           }
         }
       }
-      .second-selection {
-        display: flex;
-        flex-direction: row;
-        padding-top: 7px;
-        padding-bottom: 7px;
-        .drop-down {
-          width: $dropdown-width;
-          height: 22px;
-          .drop-down-brief {
-            position: relative;
-            cursor: pointer;
-            width: $dropdown-width;
-            height: 22px;
-            padding-top: 4px;
-            background-color: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 2px;
-            font-family: $font-semibold;
-            font-size: 12px;
-            color: #FFFFFF;
-            letter-spacing: 0;
-            text-align: center;
-          }
-          .drop-down-content {
-            position: relative;
-            cursor: pointer;
-            width: $dropdown-width;
-            height: $dropdown-height;
-            background-image: linear-gradient(90deg, rgba(115,115,115,0.95) 0%, rgba(117,117,117,0.95) 22%, rgba(86,86,86,0.95) 99%);
-            border-color: rgba(255,255,255,0.07) rgba(255,255,255,0.0) rgba(255,255,255,0.1) rgba(255,255,255,0.35);
-            border-width: 1px 1px 1px 1px;
-            border-style: solid;
-            border-radius: 2px;
-            font-family: $font-semibold;
-            font-size: 12px;
-            color: #FFFFFF;
-            letter-spacing: 0;
-            text-align: center;
-            .selected {
-              padding-top: 4px;
-              height: 23px;
-              background-color: rgba(255,255,255,0.07);
-            }
-            .content {
-              cursor: pointer;
-              position: absolute;
-              top: 30px;
-              left: 8px;
-              right: 4px;
-              bottom: 3px;
-              overflow-y: scroll;
-              .selection {
-                padding-top: 4px;
-                height: 22px;
-              }
-              .selection:hover {
-                background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
-              }
-            }
-          }
-        }
+      .selection-box:nth-of-type(1) {
+        z-index: 1;
       }
     }
   }

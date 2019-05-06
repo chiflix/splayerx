@@ -4,15 +4,30 @@ import helpers from '@/helpers/index';
 
 const state = {
   source: '', // 'drop' or '', used on mas version
-  hash: '',
+  id: '',
+  items: [],
   playList: [],
   isFolderList: undefined,
 };
 
 const getters = {
   source: state => state.source,
-  playListHash: state => state.hash,
   isFolderList: state => state.isFolderList,
+  items: state => state.items,
+  playListId: state => state.id,
+  playingList: state => state.playList,
+  playingIndex: (state, getters) => state.playList.findIndex(value => value === getters.originSrc),
+  nextVideoId: (state, getters) => {
+    const index = state.items.findIndex(value => value === getters.videoId);
+    if (!getters.singleCycle) {
+      if (index !== -1 && index + 1 < state.items.length) {
+        return state.items[index + 1];
+      } else if (index + 1 >= state.items.length) {
+        return state.items[0];
+      }
+    }
+    return NaN;
+  },
   nextVideo: (state, getters) => {
     const list = state.playList;
     const index = list.findIndex(value => value === getters.originSrc);
@@ -25,22 +40,23 @@ const getters = {
     }
     return '';
   },
-  playingList: state => state.playList,
-  playingIndex: (state, getters) => state.playList.findIndex(value => value === getters.originSrc),
 };
 
 const mutations = {
   source(state, type) {
     state.source = type;
   },
-  hash(state, h) {
-    state.hash = h;
+  id(state, id) {
+    state.id = id;
   },
   isFolderList(state) {
     state.isFolderList = true;
   },
   isPlayingList(state) {
     state.isFolderList = false;
+  },
+  items(state, t) {
+    state.items = t;
   },
   playList(state, t) {
     state.playList = t;
@@ -51,11 +67,13 @@ const mutations = {
   RemoveItemFromPlayingListByPos(state, pos) {
     if (pos >= 0) {
       state.playList.splice(pos, 1);
+      state.items.splice(pos, 1);
     }
   },
   InsertItemToPlayingList(state, item) {
     if (item.newPosition >= 0) {
       state.playList.splice(item.newPosition, 0, item.src);
+      state.items.splice(item.newPosition, 0, item.id);
     }
   },
 };
@@ -64,26 +82,31 @@ const actions = {
   PlayingList({ commit }, payload) {
     commit('isPlayingList');
     commit('playList', payload.paths);
-    commit('hash', payload.hash);
+    commit('items', payload.items);
+    commit('id', payload.id ? payload.id : '');
   },
   FolderList({ commit }, payload) {
     commit('isFolderList');
-    commit('playList', payload);
-    commit('hash', '');
+    commit('playList', payload.paths);
+    commit('items', payload.items);
+    commit('id', payload.id);
   },
   RemoveItemFromPlayingList({ state, commit }, item) {
-    commit('isPlayingList');
     const pos = state.playList.indexOf(item);
     if (pos >= 0) commit('RemoveItemFromPlayingListByPos', pos);
   },
+  /*
+    item: {
+      newPosition: Number,
+      src: String,
+    }
+   */
   RepositionItemFromPlayingList({ state, commit }, item) {
-    commit('isPlayingList');
     const pos = state.playList.indexOf(item.src);
     commit('RemoveItemFromPlayingListByPos', pos);
     commit('InsertItemToPlayingList', item);
   },
   AddItemsToPlayingList({ commit, dispatch }, items) {
-    commit('isPlayingList');
     if (items.length) {
       items.forEach((item) => {
         dispatch('RemoveItemFromPlayingList', item);
@@ -107,7 +130,11 @@ const actions = {
         commit('playList', videoFiles);
       }, (err) => {
         if (process.mas && err?.code === 'EPERM') {
-          dispatch('FolderList', state.playList);
+          dispatch('FolderList', {
+            id: state.id,
+            paths: state.playList,
+            items: state.items,
+          });
         }
       });
     } else {

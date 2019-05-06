@@ -92,10 +92,10 @@
 </div>
 </template>
 <script>
-import fs from 'fs';
 import path from 'path';
 import { mapGetters } from 'vuex';
 import { filePathToUrl, parseNameFromPath } from '@/helpers/path';
+import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '@/components/BaseIconContainer.vue';
 
 export default {
@@ -139,9 +139,6 @@ export default {
     isFolderList: {
       type: Boolean,
     },
-    playListHash: {
-      type: String,
-    },
     canHoverItem: {
       type: Boolean,
     },
@@ -178,6 +175,7 @@ export default {
   data() {
     return {
       showVideo: false,
+      videoId: NaN,
       coverSrc: '',
       lastPlayedTime: 0,
       mediaInfo: { path: this.path },
@@ -271,18 +269,13 @@ export default {
       }
     },
     getLastPlayedInfo() {
-      if (this.isFolderList) {
-        this.infoDB.get('recent-played', 'path', this.path).then((val) => {
-          if (val && val.lastPlayedTime) {
-            this.lastPlayedTime = val.lastPlayedTime;
-            this.smallShortCut = val.smallShortCut;
-          }
-          this.mediaInfo = Object.assign(this.mediaInfo, val);
-        });
-      } else if (!this.isFolderList && this.playListHash) {
-        this.infoDB.get('recent-played', this.playListHash).then((data) => {
-          const val = data.infos.find(video => video.path === this.path);
-          if (val && val.lastPlayedTime) {
+      this.videoId = this.items[this.index];
+      if (this.videoId) {
+        this.infoDB.get('media-item', this.videoId).then((val) => {
+          if (!val.lastPlayedTime) {
+            this.lastPlayedTime = 0;
+            this.smallShortCut = '';
+          } else if (val && val.lastPlayedTime) {
             this.lastPlayedTime = val.lastPlayedTime;
             this.smallShortCut = val.smallShortCut;
           }
@@ -294,37 +287,25 @@ export default {
   mounted() {
     this.displayIndex = this.index;
     this.$electron.ipcRenderer.send('mediaInfo', this.path);
-    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, (event, info) => {
+    this.$electron.ipcRenderer.once(`mediaInfo-${this.path}-reply`, async (event, info) => {
       const videoStream = JSON.parse(info).streams.find(stream => stream.codec_type === 'video');
       this.videoHeight = videoStream.height;
       this.videoWidth = videoStream.width;
       this.mediaInfo = Object.assign(this.mediaInfo, JSON.parse(info).format);
-      this.mediaQuickHash(this.path).then((quickHash) => {
-        this.$electron.ipcRenderer.send('snapShot', {
-          videoPath: this.path,
-          quickHash,
-          duration: this.mediaInfo.duration,
-          videoWidth: this.videoWidth,
-          videoHeight: this.videoHeight,
-        });
+      const quickHash = await this.mediaQuickHash(this.path);
+      const imgPath = await generateCoverPathByMediaHash(quickHash);
+      this.$electron.ipcRenderer.send('snapShot', {
+        videoPath: this.path,
+        imgPath,
+        quickHash,
+        duration: this.mediaInfo.duration,
+        videoWidth: this.videoWidth,
+        videoHeight: this.videoHeight,
       });
     });
     this.$electron.ipcRenderer.once(`snapShot-${this.path}-reply`, (event, imgPath) => {
       this.coverSrc = filePathToUrl(`${imgPath}`);
       this.imgPath = imgPath;
-      if (this.isPlaying || this.lastPlayedTime) {
-        fs.readFile(`${imgPath}`, 'base64', (err, data) => {
-          if (!err) {
-            const cover = `data:image/png;base64, ${data}`;
-            this.infoDB.get('recent-played', 'path', this.path).then((data) => {
-              if (data) {
-                const mergedData = Object.assign(data, { cover });
-                this.infoDB.add('recent-played', mergedData);
-              }
-            });
-          }
-        });
-      }
     });
     this.getLastPlayedInfo();
     this.$bus.$on('database-saved', () => {
@@ -349,20 +330,12 @@ export default {
         });
       }
     },
+    items() {
+      this.getLastPlayedInfo();
+    },
     isPlaying(val) {
       if (val) {
         requestAnimationFrame(this.updateAnimationOut);
-        fs.readFile(`${this.imgPath}`, 'base64', (err, data) => {
-          if (!err) {
-            const cover = `data:image/png;base64, ${data}`;
-            this.infoDB.get('recent-played', 'path', this.path).then((data) => {
-              if (data) {
-                const mergedData = Object.assign(data, { cover });
-                this.infoDB.add('recent-played', mergedData);
-              }
-            });
-          }
-        });
       }
     },
     displayIndex(val) {
@@ -431,7 +404,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['playingList']),
+    ...mapGetters(['playingList', 'items']),
     aboutToDelete() {
       return this.selfMoving && (-(this.movementY) > this.thumbnailHeight * 1.5);
     },
@@ -441,6 +414,8 @@ export default {
         return `S${parsedName.season}E${parsedName.episode}`;
       } else if (parsedName.episode && !parsedName.season) {
         return `EP${parsedName.episode}`;
+      } else if (parsedName.season && !parsedName.episode) {
+        return `SE${parsedName.season}`;
       }
       return path.basename(this.path, path.extname(this.path));
     },

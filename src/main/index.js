@@ -5,7 +5,7 @@ import '../shared/sentry';
 import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
 import path from 'path';
-import fs from 'fs';
+import fs, { promises as fsPromises } from 'fs';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
@@ -108,6 +108,8 @@ function registerMainWindowEvent() {
   mainWindow.on('blur', () => {
     mainWindow?.webContents.send('mainCommit', 'isFocused', false);
   });
+  mainWindow.on('scroll-touch-begin', () => mainWindow?.webContents.send('scroll-touch-begin'));
+  mainWindow.on('scroll-touch-end', () => mainWindow?.webContents.send('scroll-touch-end'));
 
   ipcMain.on('callMainWindowMethod', (evt, method, args = []) => {
     try {
@@ -200,7 +202,7 @@ function registerMainWindowEvent() {
   }
 
   function snapShotQueueProcess(event) {
-    const maxWaitingCount = 40;
+    const maxWaitingCount = 100;
     let waitingCount = 0;
     const callback = (resultCode, imgPath) => {
       if (resultCode === 'Waiting for the task completion.') {
@@ -237,12 +239,10 @@ function registerMainWindowEvent() {
   ipcMain.on('snapShot', (event, video, type = 'cover', time = 0) => {
     if (!video.videoWidth) video.videoWidth = 1920;
     if (!video.videoHeight) video.videoHeight = 1080;
-    const imgFolderPath = path.join(tempFolderPath, video.quickHash);
-    if (!fs.existsSync(imgFolderPath)) fs.mkdirSync(imgFolderPath);
-    const imgPath = path.join(imgFolderPath, `${type}.jpg`);
+    const imgPath = video.imgPath;
 
     if (!fs.existsSync(imgPath)) {
-      snapShotQueue.push(Object.assign({ imgPath, type, time }, video));
+      snapShotQueue.push(Object.assign({ type, time }, video));
       if (snapShotQueue.length === 1) {
         snapShotQueueProcess(event);
       }
@@ -369,15 +369,18 @@ function registerMainWindowEvent() {
     }
     preferenceWindow.once('ready-to-show', () => {
       preferenceWindow.show();
+      preferenceWindow?.webContents.send('restore-state', needToRestore);
     });
   });
-  ipcMain.on('restore', () => {
-    if (!needToRestore) {
-      needToRestore = true;
-    } else {
-      app.relaunch();
-      app.quit();
-    }
+  ipcMain.on('get-restore-state', () => {
+    preferenceWindow?.webContents.send('restore-state', needToRestore);
+  });
+  ipcMain.on('apply', () => {
+    needToRestore = true;
+  });
+  ipcMain.on('relaunch', () => {
+    app.relaunch();
+    app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
     mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
@@ -442,10 +445,39 @@ function createWindow() {
     }, 1000);
   }
 }
-
-app.on('before-quit', () => {
-  mainWindow?.webContents.send('quit', needToRestore);
-  needToRestore = false;
+function removeDir(dir) {
+  const userData = app.getPath('userData');
+  return fsPromises.readdir(dir)
+    .then(files => files.reduce((result, file) => {
+      const filePath = path.join(dir, file);
+      return result.then(() => fsPromises.unlink(filePath)
+        .then(null, () => removeDir(filePath)));
+    }, Promise.resolve()).then(() => {
+      if (dir !== userData) return fsPromises.rmdir(dir);
+      return Promise.resolve();
+    }));
+}
+function removeUserData() {
+  const userData = app.getPath('userData');
+  return removeDir(path.join(userData, 'storage'))
+    .then(() => removeDir(userData));
+}
+app.on('before-quit', (e) => {
+  if (needToRestore) {
+    mainWindow?.webContents.send('quit', needToRestore);
+    e.preventDefault();
+    removeUserData()
+      .catch((err) => {
+        needToRestore = false;
+        writeLog('info', { message: `error: ${err}` });
+      })
+      .finally(() => {
+        needToRestore = false;
+        app.quit();
+      });
+  } else {
+    mainWindow?.webContents.send('quit');
+  }
 });
 app.on('second-instance', () => {
   if (mainWindow?.isMinimized()) mainWindow.restore();
@@ -504,7 +536,14 @@ app.on('ready', () => {
 
 app.on('window-all-closed', () => {
   if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
-    app.quit();
+    if (needToRestore) {
+      removeUserData().then(() => {
+        needToRestore = false;
+        app.quit();
+      });
+    } else {
+      app.quit();
+    }
   }
 });
 
