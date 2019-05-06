@@ -11,13 +11,14 @@
         bottom: subBottom(index),
         transform: transPos(index),
       }">
-      <CueRenderer class="cueRender"
+      <cue-renderer
         :text="cue.text"
         :settings="cue.tags"
         :style="{
           zoom: isFirstSub ? `${scaleNum}` : `${secondarySubScale}`,
           lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
-        }"></CueRenderer>
+        }"
+      />
     </div>
   </div>
 </template>
@@ -52,9 +53,7 @@ export default {
       type: Object,
     },
   },
-  components: {
-    CueRenderer,
-  },
+  components: { CueRenderer },
   data() {
     return {
       subtitle: null,
@@ -129,13 +128,6 @@ export default {
     subtitleInstance.on('parse', (parsed) => {
       const parsedData = parsed.dialogues;
       this.videoSegments = this.getVideoSegments(parsedData, this.duration);
-      if (parsedData.length) {
-        const cues = parsedData
-          .filter(subtitle => subtitle.start <= this.subtitleCurrentTime && subtitle.end >= this.subtitleCurrentTime && subtitle.text !== '');
-        if (!isEqual(cues, this.currentCues)) {
-          this.currentCues = cues;
-        }
-      }
       this.subPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth;
       this.subPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY) :
         this.intrinsicHeight;
@@ -189,8 +181,15 @@ export default {
       const parsedData = this.subtitleInstance.parsed.dialogues;
       if (parsedData) {
         const cues = parsedData
-          .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');
-        if (!isEqual(cues, this.currentCues)) {
+          .filter(({ text, start, end }) => (
+            !!text &&
+            start <= currentTime &&
+            end >= currentTime
+          ));
+        if (!isEqual(
+          cues.map(({ text }) => text),
+          this.currentCues.map(({ text }) => text),
+        )) {
           let rev = false;
           const tmp = cues;
           if (cues.length >= 2) {
@@ -351,7 +350,7 @@ export default {
             return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.firstSubTransPercent(transPercent, tags[index].alignment), tags[index].alignment) + this.assLine(index)}%)`;
           }
           // 只有第一字幕时需要translate的值
-          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1], tags[index].alignment) + this.assLine(index)}%)`;
+          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1], tags[index].alignment)}%)`;
         }
         if (tags[index].pos) { // 第二字幕不是VTT
           // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
