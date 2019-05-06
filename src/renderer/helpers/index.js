@@ -373,6 +373,7 @@ export default {
     // open an existed play list
     async openPlayList(id) {
       const playlist = await this.infoDB.get('recent-played', id);
+      this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() });
       if (playlist.items.length > 1) {
         const currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
         await this.playFile(currentVideo.path, currentVideo.videoId);
@@ -416,7 +417,6 @@ export default {
           }
         }
       }
-      this.infoDB.add('recent-played', { ...playlist, lastOpened: Date.now() });
     },
     // create new play list record in recent-played and play the video
     async createPlayList(...videoFiles) {

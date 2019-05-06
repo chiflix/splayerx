@@ -439,7 +439,6 @@ export default {
       this.canHoverItem = false;
       this.mousePosition = this.mousemoveClientPosition;
       if (val) {
-        this.$store.dispatch('UpdatePlayingList');
         this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;

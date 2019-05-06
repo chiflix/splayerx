@@ -340,7 +340,7 @@ export default {
       videodata.paused = false;
       if (this.nextVideo) {
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
-        this.playFile(this.nextVideo, this.nextVideoId);
+        else this.playFile(this.nextVideo, this.nextVideoId);
       }
     });
     this.$bus.$on('seek', (e) => { this.seekTime = [e]; });
