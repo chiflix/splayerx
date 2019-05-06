@@ -786,7 +786,7 @@ new Vue({
             {
               label: this.$t('msg.subtitle.increaseSubtitleDelayS'),
               id: 'increaseSubDelay',
-              accelerator: 'CmdOrCtrl+.',
+              accelerator: 'CmdOrCtrl+',
               click: () => {
                 this.updateSubDelay(0.1);
               },
@@ -794,7 +794,7 @@ new Vue({
             {
               label: this.$t('msg.subtitle.decreaseSubtitleDelayS'),
               id: 'decreaseSubDelay',
-              accelerator: 'CmdOrCtrl+,',
+              accelerator: 'CmdOrCtrl+;',
               click: () => {
                 this.updateSubDelay(-0.1);
               },
