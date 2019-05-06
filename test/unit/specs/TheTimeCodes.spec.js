@@ -1,7 +1,6 @@
 import Vuex from 'vuex';
 import { createSandbox } from 'sinon';
 import Video from '@/store/modules/Video';
-import Editor from '@/store/modules/Editor';
 import Preference from '@/store/modules/Preference';
 import TheTimeCodes from '@/components/PlayingView/TheTimeCodes.vue';
 import { shallowMount, createLocalVue } from '@vue/test-utils';

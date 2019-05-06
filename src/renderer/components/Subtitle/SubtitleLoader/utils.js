@@ -368,7 +368,7 @@ export function megreSameTime(dialogues, type) {
  */
 export function uniteSubtitleWithFragment(cell) {
   if (!cell.fragments && cell.tags) {
-    const tags = cloneDeep(cell.tags);
+    const tags = Object.assign({ alignment: 2, pos: null }, cloneDeep(cell.tags));
     const text = cell.text;
     delete cell.tags;
     delete cell.text;

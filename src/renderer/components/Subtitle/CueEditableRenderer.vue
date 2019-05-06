@@ -276,6 +276,7 @@ export default {
       this.offsetDone = false;
       let html = this.$refs.input.innerHTML;
       html = html.replace(/<br>/gi, '\n');
+      html = html.trim();
       html = html.replace(/(<([^>]+)>)/gi, '');
       html = html.replace(/\n/gi, '<br>');
       html = html.replace(/&nbsp;/g, ' ');
@@ -285,6 +286,8 @@ export default {
           cue: this.cue,
           text: html.trim(),
         });
+      } else if (this.tmpText === this.cue.text) {
+        this.$refs.input.innerHTML = this.finalText;
       }
       this.updateAutoFocus(false);
       this.$refs.input.style.opacity = this.opacity;
