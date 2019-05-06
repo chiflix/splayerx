@@ -31,6 +31,7 @@ describe('helper - subtitle - storage', () => {
 
   describe('language preference storage unit tests', () => {
     const recentPlaySchemaName = 'recent-played';
+    const mediaItemSchemaName = 'media-item';
     const databaseIndexName = 'path';
     let videoSrc;
     let infoDBGetStub;
@@ -41,7 +42,7 @@ describe('helper - subtitle - storage', () => {
 
       infoDBGetStub = sandbox.stub().resolves({});
       infoDBGetStub.withArgs(
-        recentPlaySchemaName,
+        mediaItemSchemaName,
         databaseIndexName,
         emptyVideoSrc,
       ).resolves();
@@ -72,7 +73,7 @@ describe('helper - subtitle - storage', () => {
           .then(() => {
             sandbox.assert.calledWithExactly(
               infoDBAddStub,
-              recentPlaySchemaName,
+              mediaItemSchemaName,
               {
                 preference: {
                   subtitle: {
@@ -92,9 +93,8 @@ describe('helper - subtitle - storage', () => {
           .then(() => {
             sandbox.assert.calledWithExactly(
               infoDBAddStub,
-              recentPlaySchemaName,
+              mediaItemSchemaName,
               {
-                path: emptyVideoSrc,
                 preference: {
                   subtitle: {
                     language: sampleLanguagePreference,
@@ -172,7 +172,7 @@ describe('helper - subtitle - storage', () => {
             const veryDeepArrayMatcher = match(arr =>
               !differenceWith(arr, testSubtitleList, isEqual).length);
             expect(infoDBAddStub).to.have.been.calledWithMatch(
-              recentPlaySchemaName,
+              mediaItemSchemaName,
               match.hasNested('preference.subtitle.list', veryDeepArrayMatcher),
             );
             done();

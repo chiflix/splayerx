@@ -64,7 +64,6 @@
         :isPlaying="index === playingIndex"
         :isShifting="shifting"
         :isFolderList="isFolderList"
-        :playListHash="playListHash"
         :hovered="hoverIndex === index"
         :winWidth="winWidth"
         :thumbnailWidth="thumbnailWidth"
@@ -273,21 +272,44 @@ export default {
         this.indexOfMovingItem = this.playingList.length;
       }
     },
+    async setPlayList() {
+      const playlist = await this.infoDB.get('recent-played', this.playListId);
+      /* eslint-disable */
+      for (const videoPath of this.playingList) {
+        if (videoPath !== this.originSrc) {
+          const quickHash = await this.mediaQuickHash(videoPath);
+          const data = {
+            quickHash,
+            type: 'video',
+            path: videoPath,
+            source: 'playlist',
+          };
+          const videoId = await this.infoDB.add('media-item', data);
+          playlist.items.push(videoId);
+          playlist.hpaths.push(`${quickHash}-${videoPath}`);
+        }
+      }
+      this.infoDB.update('recent-played', playlist);
+      this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
+    },
     onItemMouseup(index) { // eslint-disable-line complexity
       if (this.pageSwitching) clearTimeout(this.pageSwitchingTimeId);
       document.onmouseup = null;
       if (-(this.movementY) > this.thumbnailHeight * 1.5
        && this.itemMoving && this.canRemove) {
         this.$store.dispatch('RemoveItemFromPlayingList', this.playingList[index]);
+        if (this.isFolderList) this.setPlayList();
         this.hoverIndex = this.playingIndex;
         this.filename = path.basename(this.originSrc, path.extname(this.originSrc));
         this.canRemove = false;
       } else if (this.movingOffset !== 0
         && Math.abs(this.movementY) < this.thumbnailHeight) {
         this.$store.dispatch('RepositionItemFromPlayingList', {
+          id: this.items[index],
           src: this.playingList[index],
           newPosition: this.indexOfMovingTo,
         });
+        if (this.isFolderList) this.setPlayList();
         if (this.indexOfMovingTo > this.lastIndex
           && this.lastIndex + 1 !== this.playingList.length) {
           this.lastIndex += 1;
@@ -329,7 +351,8 @@ export default {
         && this.indexOfMovingItem === this.playingList.length
         && this.filePathNeedToDelete !== this.playingList[index]) {
         this.changeByRecent = true;
-        this.playFile(this.playingList[index]);
+        if (this.isFolderList) this.openVideoFile(this.playingList[index]);
+        else this.playFile(this.playingList[index], this.items[index]);
       }
       this.indexOfMovingItem = this.playingList.length;
       this.movementX = this.movementY = 0;
@@ -416,7 +439,6 @@ export default {
       this.canHoverItem = false;
       this.mousePosition = this.mousemoveClientPosition;
       if (val) {
-        this.$store.dispatch('UpdatePlayingList');
         this.backgroundDisplayState = val;
         this.firstIndex = Math.floor(this.playingIndex / this.thumbnailNumber)
           * this.thumbnailNumber;
@@ -435,7 +457,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['playingList', 'playListHash', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
+    ...mapGetters(['playingList', 'playListId', 'items', 'playListId', 'isFolderList', 'winWidth', 'playingIndex', 'duration', 'originSrc']),
     ...mapState({
       currentMousedownComponent: ({ Input }) => Input.mousedownComponentName,
       currentMouseupComponent: ({ Input }) => Input.mouseupComponentName,

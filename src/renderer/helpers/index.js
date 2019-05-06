@@ -123,34 +123,6 @@ export default {
 
       return videoFiles;
     },
-    findSubtitleFilesByVidPath(vidPath, callback) {
-      if (process.platform === 'win32') {
-        vidPath = vidPath.replace(/^file:\/\/\//, '');
-      } else {
-        vidPath = vidPath.replace(/^file:\/\//, '');
-      }
-
-      const baseName = path.basename(vidPath, path.extname(vidPath));
-      const dirPath = path.dirname(vidPath);
-      const filter = /\.(srt|vtt|ass)$/;
-
-      if (!fs.existsSync(dirPath)) {
-        this.addLog('error', `no dir ${dirPath}`);
-        return;
-      }
-
-      const files = fs.readdirSync(dirPath);
-      for (let i = 0; i < files.length; i += 1) {
-        const filename = path.join(dirPath, files[i]);
-        const stat = fs.lstatSync(filename);
-        if (!stat.isDirectory()) {
-          if (files[i].startsWith(baseName) && filter.test(files[i])) {
-            this.addLog('info', `found subtitle file: ${files[i]}`);
-            callback(filename);
-          }
-        }
-      }
-    },
     openFilesByDialog({ defaultPath } = {}) {
       if (this.showingPopupDialog) return;
       this.showingPopupDialog = true;
@@ -177,8 +149,8 @@ export default {
           bookmark.resolveBookmarks(files, bookmarks);
         }
         if (files) {
-          // if selected files contain folders only, then call openFolder()
           this.$store.commit('source', '');
+          // if selected files contain folders only, then call openFolder()
           const onlyFolders = files.every(file => fs.statSync(file).isDirectory());
           files.forEach(file => remote.app.addRecentDocument(file));
           if (onlyFolders) {
@@ -250,7 +222,7 @@ export default {
         }
       });
     },
-    addFiles(...files) {
+    async addFiles(...files) { // eslint-disable-line complexity
       const videoFiles = [];
 
       for (let i = 0; i < files.length; i += 1) {
@@ -268,7 +240,43 @@ export default {
         }
       }
       if (videoFiles.length !== 0) {
+        const addFiles = videoFiles.filter(file => !this.$store.getters.playingList.includes(file));
         this.$store.dispatch('AddItemsToPlayingList', videoFiles);
+        const playlist = await this.infoDB.get('recent-played', this.playListId);
+        if (this.$store.getters.isFolderList) {
+          /* eslint-disable */
+          for (const videoPath of this.$store.getters.playingList) {
+            if (videoPath !== this.$store.getters.originSrc) {
+              const quickHash = await this.mediaQuickHash(videoPath);
+              const data = {
+                quickHash,
+                type: 'video',
+                path: videoPath,
+                source: 'playlist',
+              };
+              const videoId = await this.infoDB.add('media-item', data);
+              playlist.items.push(videoId);
+              playlist.hpaths.push(`${quickHash}-${videoPath}`);
+            }
+          }
+          this.infoDB.update('recent-played', playlist);
+          this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.$store.getters.playingList, items: playlist.items });
+        } else {
+          for (const videoPath of addFiles) {
+            const quickHash = await this.mediaQuickHash(videoPath);
+            const data = {
+              quickHash,
+              type: 'video',
+              path: videoPath,
+              source: 'playlist',
+            };
+            const videoId = await this.infoDB.add('media-item', data);
+            playlist.items.push(videoId);
+            playlist.hpaths.push(`${quickHash}-${videoPath}`);
+          }
+          this.infoDB.update('recent-played', playlist);
+          this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.$store.getters.playingList, items: playlist.items });
+        }
       } else {
         this.addLog('error', {
           errcode: ADD_NO_VIDEO,
@@ -305,7 +313,7 @@ export default {
         }
       }
       if (videoFiles.length !== 0) {
-        this.openVideoFile(...videoFiles);
+        this.createPlayList(...videoFiles);
       } else {
         // TODO: no videoFiles in folders error catch
         this.addLog('error', {
@@ -353,87 +361,129 @@ export default {
           addBubble(OPEN_FAILED, this.$i18n);
         }
       }
-      if (videoFiles.length !== 0) {
+      if (videoFiles.length > 1) {
+        this.createPlayList(...videoFiles);
+      } else if (videoFiles.length === 1) {
         this.openVideoFile(...videoFiles);
       }
       if (containsSubFiles) {
         this.$bus.$emit('add-subtitles', subtitleFiles);
       }
     },
-    async openPlaylist(playListHash) {
-      const value = await this.infoDB.get('recent-played', playListHash);
-      if (value.type === 'playlist') {
-        this.playFile(value.currentVideo).then(() => {
-          this.$bus.$emit('open-playlist');
-        });
-        this.$store.dispatch('PlayingList', {
-          hash: value.quickHash,
-          paths: value.paths,
-        });
-        this.infoDB.add('recent-played', { ...value, lastOpened: Date.now() });
-      }
-    },
-    /* eslint-disable */
-    // generate playlist
-    openVideoFile(...videoFiles) {
-      if (videoFiles.length > 1) {
-        const playListHash = videoFiles.reduce((hash, src) => `${hash}-${src}`);
-        this.$store.dispatch('PlayingList', {
-          hash: playListHash,
-          paths: videoFiles,
-        });
-        let dbPromise;
-        if (!process.mas || (process.mas && this.$store.getters.source !== 'drop')) {
-          dbPromise = this.infoDB.add('recent-played', {
-            quickHash: playListHash,
-            currentVideo: videoFiles[0],
-            type: 'playlist',
-            paths: videoFiles,
-            lastOpened: Date.now(),
-          });
+    // open an existed play list
+    async openPlayList(id) {
+      const playlist = await this.infoDB.get('recent-played', id);
+      this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() });
+      if (playlist.items.length > 1) {
+        const currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
+        await this.playFile(currentVideo.path, currentVideo.videoId);
+        this.$bus.$emit('open-playlist');
+        let paths = [];
+        for (const videoId of playlist.items) {
+          const mediaItem = await this.infoDB.get('media-item', videoId);
+          paths.push(mediaItem.path);
         }
-        if (dbPromise) {
-          dbPromise.then(() => {
-            this.playFile(videoFiles[0]);
-          });
-        } else {
-          this.playFile(videoFiles[0]);
-        }
+        this.$store.dispatch('PlayingList', {
+          id,
+          paths,
+          items: playlist.items,
+        });
       } else {
-        this.playFile(videoFiles[0]);
-        this.findSimilarVideoByVidPath(videoFiles[0]).then((similarVideos) => {
-          this.$store.dispatch('FolderList', similarVideos);
-        }, (err) => {
+        const video = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
+        this.playFile(video.path, video.videoId);
+        let similarVideos;
+        try {
+          similarVideos = await this.findSimilarVideoByVidPath(video.path);
+          const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
+          const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
+          const items = [];
+          filtered.forEach((media) => {
+            const mediaIndex = similarVideos.findIndex(path => path === media.path);
+            items[mediaIndex] = media.videoId;
+          });
+          this.$store.dispatch('FolderList', {
+            id,
+            paths: similarVideos,
+            items,
+          });
+        } catch (err) {
           if (process.mas && err?.code === 'EPERM') {
             // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
-            this.$store.dispatch('FolderList', [videoFiles[0]]);
+            this.$store.dispatch('FolderList', {
+              id,
+              paths: [video.path],
+              items: [video.videoId],
+            });
           }
+        }
+      }
+    },
+    // create new play list record in recent-played and play the video
+    async createPlayList(...videoFiles) {
+      const hash = await this.mediaQuickHash(videoFiles[0]);
+      const id = await this.infoDB.addPlaylist(videoFiles);
+      const playlistItem = await this.infoDB.get('recent-played', id);
+      this.$store.dispatch('PlayingList', { id, paths: videoFiles, items: playlistItem.items });
+
+      const videoId = playlistItem.items[playlistItem.playedIndex];
+      this.$store.dispatch('SRC_SET', { src: videoFiles[0], id: videoId, mediaHash: hash });
+      this.$router.push({ name: 'playing-view' });
+      this.$bus.$emit('new-file-open');
+    },
+    // open single video
+    async openVideoFile(videoFile) {
+      const id = await this.infoDB.addPlaylist([videoFile]);
+      const playlistItem = await this.infoDB.get('recent-played', id);
+      this.playFile(videoFile, playlistItem.items[playlistItem.playedIndex]);
+      let similarVideos;
+      try {
+        similarVideos = await this.findSimilarVideoByVidPath(videoFile);
+        const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
+        const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
+        const items = [];
+        filtered.forEach((media) => {
+          const mediaIndex = similarVideos.findIndex(path => path === media.path);
+          items[mediaIndex] = media.videoId;
+        });
+        this.$store.dispatch('FolderList', {
+          id,
+          paths: similarVideos,
+          items,
+        });
+      } catch (err) {
+        if (process.mas && err?.code === 'EPERM') {
+          // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+          this.$store.dispatch('FolderList', {
+            id,
+            paths: [videoFile],
+            items: [playlistItem.items[playlistItem.playedIndex]],
+          });
+        }
+      }
+    },
+    bookmarkAccessing(vidPath) {
+      const bookmarkObj = syncStorage.getSync('bookmark');
+      if (bookmarkObj.hasOwnProperty(vidPath)) {
+        const { app } = remote;
+        const bookmark = bookmarkObj[vidPath];
+        const stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
+        this.access.push({
+          src: vidPath,
+          stopAccessing
+        });
+        this.$bus.$once(`stop-accessing-${vidPath}`, (e) => {
+          this.access.find(item => item.src === e)?.stopAccessing();
+          const index = this.access.findIndex(item => item.src === e);
+          if (index >= 0) this.access.splice(index, 1);
         });
       }
     },
     // openFile and db operation
-    async playFile(vidPath) {
-      const originPath = vidPath;
+    async playFile(vidPath, id) {
       let mediaQuickHash;
-      if (process.mas) {
-        const bookmarkObj = syncStorage.getSync('bookmark');
-        if (bookmarkObj.hasOwnProperty(vidPath)) {
-          const { app } = remote;
-          const bookmark = bookmarkObj[vidPath];
-          const stopAccessing = app.startAccessingSecurityScopedResource(bookmark);
-          this.access.push({
-            src: vidPath,
-            stopAccessing
-          });
-          this.$bus.$once(`stop-accessing-${vidPath}`, (e) => {
-            this.access.find(item => item.src === e)?.stopAccessing();
-            const index = this.access.findIndex(item => item.src === e);
-            if (index >= 0) this.access.splice(index, 1);
-          });
-        }
-      }
+      if (process.mas && this.$store.getters.source !== 'drop') this.bookmarkAccessing(vidPath);
       try {
-        mediaQuickHash = await this.mediaQuickHash(originPath);
+        mediaQuickHash = await this.mediaQuickHash(vidPath);
       } catch (err) {
         if (err?.code === 'ENOENT') {
           this.addLog('error', {
@@ -441,66 +491,23 @@ export default {
             message: 'Failed to open file, it will be removed from list.'
           });
           addBubble(FILE_NON_EXIST, this.$i18n);
-          this.$bus.$emit('file-not-existed', originPath);
+          this.$bus.$emit('file-not-existed', vidPath);
         }
         if (process.mas && err?.code === 'EPERM') {
-          this.openFilesByDialog({ defaultPath: originPath });
+          this.openFilesByDialog({ defaultPath: vidPath });
         }
-
         return;
       }
+      this.$store.dispatch('SRC_SET', { src: vidPath, mediaHash: mediaQuickHash, id });
       this.$router.push({ name: 'playing-view' });
 
-      if (this.$store.getters.isFolderList) {
-        const value = await this.infoDB.get('recent-played', mediaQuickHash);
-        if (value) {
+      if (id) {
+        const value = await this.infoDB.get('media-item', id);
+        this.$bus.$emit('new-file-open');
+        if (value.lastPlayedTime) {
           this.$bus.$emit('send-lastplayedtime', value.lastPlayedTime);
-          await this.infoDB.add('recent-played', { ...value, path: originPath, lastOpened: Date.now() });
-        } else {
-          await this.infoDB.add('recent-played', {
-            quickHash: mediaQuickHash,
-            path: originPath,
-            lastOpened: Date.now(),
-          });
         }
-      } else if (!process.mas || (process.mas && this.$store.getters.source !== 'drop')) {
-        let playlist = await this.infoDB.get('recent-played', this.$store.getters.playListHash);
-        if (!playlist) {
-          const playListHash = this.$store.getters.playingList.reduce((hash, src) => `${hash}-${src}`);
-          playlist = {
-            quickHash: playListHash,
-            currentVideo: vidPath,
-            paths: this.$store.getters.playingList,
-            type: 'playlist',
-            lastOpened: Date.now(),
-            infos: [{
-              quickHash: mediaQuickHash,
-              path: originPath,
-            }],
-          };
-          this.$store.commit('hash', playListHash);
-        } else if (!playlist.infos) {
-          playlist.infos = [{
-            quickHash: mediaQuickHash,
-            path: originPath,
-          }];
-        } else {
-          const videoInfo = playlist.infos.find(info => info.path === originPath);
-          if (videoInfo) {
-            this.$bus.$emit('send-lastplayedtime', videoInfo.lastPlayedTime);
-            const videoIndex = playlist.infos?.findIndex(info => info.path === originPath);
-            playlist.infos.splice(videoIndex, 1, { ...videoInfo, path: originPath, quickHash: mediaQuickHash });
-          } else {
-            playlist.infos.push({
-              quickHash: mediaQuickHash,
-              path: originPath,
-            });
-          }
-        }
-        await this.infoDB.add('recent-played', playlist);
       }
-      this.$bus.$emit('new-file-open');
-      this.$store.dispatch('SRC_SET', { src: originPath, mediaHash: mediaQuickHash });
     },
     async mediaQuickHash(filePath) {
       function md5Hex(text) {

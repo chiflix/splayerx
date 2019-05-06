@@ -416,7 +416,6 @@ export default {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
       tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached && !this.dragOver;
-      tempObject['playlist-control'] = !(this.playingList.length === 0);
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },

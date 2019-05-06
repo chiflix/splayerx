@@ -41,11 +41,11 @@
     <div class="controller"
       :style="{
         transform: isFullScreen ? '' : `translateX(${move}px)`,
-        bottom : winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
+        bottom: winWidth > 1355 ? `${40 / 1355 * winWidth}px` : '40px',
         transition: tranFlag ? 'transform 400ms cubic-bezier(0.42, 0, 0.58, 1)' : '',
       }">
       <div class="playlist no-drag"
-        :style="{marginLeft: this.winWidth > 1355 ? `${50 / 1355 * this.winWidth}px` : '50px'}">
+        :style="{marginLeft: winWidth > 1355 ? `${50 / 1355 * winWidth}px` : '50px'}">
         <div class="button"
           :style="{
             height:`${thumbnailHeight}px`,
@@ -57,14 +57,14 @@
             <Icon class="addUi" type="add"/>
           </div>
         </div>
-        <component v-for="(item, index) in lastPlayedFile"
-          :is="item.type === 'playlist' ? 'PlaylistItem' : 'VideoItem'"
-          :key="item.quickHash"
+        <component v-for="(playlist, index) in lastPlayedFile"
+          :is="playlist.items.length > 1 ? 'PlaylistItem' : 'VideoItem'"
+          :key="playlist.id"
           :index="index"
           :firstIndex="firstIndex"
           :lastIndex="lastIndex"
           :isInRange="index + 1 >= firstIndex && index + 1 <= lastIndex"
-          :item="item"
+          :playlist="playlist"
           :thumbnailWidth="thumbnailWidth"
           :thumbnailHeight="thumbnailHeight"
           :shifting="shifting"
@@ -192,27 +192,19 @@ export default {
     asyncStorage.get('preferences').then((data) => {
       if (!data.deleteVideoHistoryOnExit) {
         this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
-          .then((data) => {
-            const waitArray = [];
-            for (let i = 0; i < data.length; i += 1) {
-              const accessPromise = new Promise((resolve) => {
-                if (data[i].type !== 'playlist') {
-                  fs.access(data[i].path, fs.constants.F_OK, (err) => {
-                    if (err) {
-                      this.infoDB.delete('recent-played', data[i].quickHash);
-                      resolve();
-                    } else {
-                      resolve(data[i]);
-                    }
-                  });
+          .then(data => Promise.all(data.map(playlistItem => new Promise((resolve) => {
+            this.infoDB.get('media-item', playlistItem.items[playlistItem.playedIndex]).then((mediaItem) => {
+              fs.access(mediaItem.path, fs.constants.F_OK, (err) => {
+                if (err) {
+                  // TODO: delete playlist inaccessible record
+                  this.infoDB.delete('media-item', mediaItem.videoId);
+                  resolve();
                 } else {
-                  resolve(data[i]);
+                  resolve(playlistItem);
                 }
               });
-              waitArray.push(accessPromise);
-            }
-            return Promise.all(waitArray);
-          })
+            });
+          }))))
           .then((data) => {
             for (let i = 0; i < data.length; i += 1) {
               if (data[i] === undefined) {
@@ -222,7 +214,7 @@ export default {
             this.lastPlayedFile = data.slice(0, 9);
           });
       } else {
-        this.infoDB.cleanData();
+        this.infoDB.clearAll();
       }
     });
     this.$bus.$on('clean-lastPlayedFile', () => {
@@ -255,13 +247,13 @@ export default {
       }
     });
     this.$bus.$on('drag-over', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
+      if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
     });
     this.$bus.$on('drag-leave', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
     this.$bus.$on('drop', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      if (this.$refs.mask) this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
     });
   },
   mounted() {
@@ -316,9 +308,9 @@ export default {
       }
     },
     deleteItem(item) {
-      const dataIndex = this.lastPlayedFile.findIndex(file => file.quickHash === item.quickHash);
+      const dataIndex = this.lastPlayedFile.findIndex(file => file.id === item.id);
       this.lastPlayedFile.splice(dataIndex, 1);
-      this.infoDB.delete('recent-played', item.quickHash);
+      this.infoDB.deletePlaylist(item.id);
     },
     showShortcut(flag) {
       this.showShortcutImage = flag;

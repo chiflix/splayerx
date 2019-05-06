@@ -5,7 +5,6 @@
     bottom: chosen ? '9px' : '0',
     width: `${thumbnailWidth}px`,
     height: `${thumbnailHeight}px`,
-    backgroundImage: itemShortcut(item.smallShortCut, item.cover, item.lastPlayedTime, item.duration),
   }">
   <div class="content"
     @click.stop="onRecentItemClick(item)"
@@ -33,6 +32,8 @@
 
 <script>
 import path from 'path';
+import { filePathToUrl } from '@/helpers/path';
+import { generateCoverPathByMediaHash } from '@/helpers/cacheFileStorage';
 import Icon from '../BaseIconContainer.vue';
 
 export default {
@@ -41,6 +42,8 @@ export default {
   data() {
     return {
       displayInfo: [],
+      item: null,
+      coverSrc: '',
       isDragging: false,
       aboutToDelete: false,
       showShadow: true,
@@ -65,7 +68,7 @@ export default {
     index: {
       type: Number,
     },
-    item: {
+    playlist: {
       type: Object,
     },
     thumbnailHeight: {
@@ -86,13 +89,25 @@ export default {
       type: String,
     },
   },
+  created() {
+    this.infoDB.get('media-item', this.playlist.items[this.playlist.playedIndex]).then((data) => {
+      this.item = data;
+      generateCoverPathByMediaHash(data.quickHash).then((path) => {
+        this.coverSrc = filePathToUrl(path);
+        this.$refs.item.style.setProperty(
+          'background-image',
+          this.itemShortcut(data.smallShortCut, data.lastPlayedTime, data.duration),
+        );
+      });
+    });
+  },
   destroyed() {
     document.removeEventListener('mousemove', this.onRecentItemMousemove);
     document.removeEventListener('mouseup', this.onRecentItemMouseup);
   },
   methods: {
-    itemShortcut(shortCut, cover, lastPlayedTime, duration) {
-      return duration - lastPlayedTime < 5 ? `url("${cover}")` : `url("${shortCut}")`;
+    itemShortcut(shortCut, lastPlayedTime, duration) {
+      return duration - lastPlayedTime < 5 ? `url("${this.coverSrc}")` : `url("${shortCut}")`;
     },
     itemInfo() {
       return {
@@ -118,7 +133,6 @@ export default {
           ...this.itemInfo(),
           backgroundUrl: this.itemShortcut(
             this.item.shortCut,
-            this.item.cover,
             this.item.lastPlayedTime,
             this.item.duration,
           ),
@@ -165,7 +179,7 @@ export default {
       this.$refs.item.style.setProperty('z-index', '');
       if (this.aboutToDelete) {
         this.$emit('showLandingLogo');
-        this.$emit('delete-item', this.item);
+        this.$emit('delete-item', this.playlist);
         this.aboutToDelete = false;
       }
       if (this.firstIndex !== 0) {
@@ -179,7 +193,7 @@ export default {
         } else if (this.index + 1 < this.firstIndex && !this.isFullScreen) {
           this.$emit('previous-page');
         } else if (!this.filePathNeedToDelete) {
-          this.openVideoFile(this.item.path);
+          this.openPlayList(this.playlist.id);
         }
       }
     },

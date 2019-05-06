@@ -4,7 +4,7 @@
     <transition name="fade" mode="out-in">
     <base-video-player
       ref="videoCanvas"
-      :key="originSrc"
+      :key="videoId"
       :needtimeupdate=true
       :events="['loadedmetadata', 'audiotrack']"
       :styles="{objectFit: 'contain', width: 'calc(100% - 0.1px)', height: '100%'}"
@@ -216,7 +216,7 @@ export default {
         this.controlWindowRect(newPosition.concat(newSize));
       }
     },
-    async saveScreenshot(videoPath) {
+    async saveScreenshot(videoId) {
       const { videoElement } = this;
       const canvas = this.$refs.thumbnailCanvas;
       const canvasCTX = canvas.getContext('2d');
@@ -246,43 +246,18 @@ export default {
         audioTrackId: this.currentAudioTrackId,
       };
 
-      if (!this.$store.getters.isFolderList
-        && (!process.mas || (process.mas && this.$store.getters.source !== 'drop'))) {
-        let playlist;
-        if (this.playListHash) {
-          playlist = await this.infoDB.get('recent-played', this.playListHash);
-        } else {
-          const playListHash = this.playingList.reduce((hash, src) => `${hash}-${src}`);
-          const currentVideoInfo = await this.infoDB.get('recent-played', 'path', videoPath);
-          this.infoDB.delete('recent-played', currentVideoInfo.quickHash);
-          playlist = {
-            quickHash: playListHash,
-            type: 'playlist',
-            lastOpened: Date.now(),
-            infos: [currentVideoInfo],
-          };
-          this.$store.commit('hash', playListHash);
-        }
-        playlist.currentVideo = this.originSrc;
-        playlist.paths = this.playingList;
-        const videoInfo = playlist.infos.find(info => info.path === videoPath);
-        if (videoInfo) {
-          const videoIndex = playlist.infos.findIndex(info => info.path === videoPath);
-          playlist.infos.splice(videoIndex, 1, {
-            ...videoInfo,
-            ...data,
-          });
-        }
-        await this.infoDB.add('recent-played', playlist);
+      const val = await this.infoDB.get('media-item', videoId);
+      if (val) {
+        await this.infoDB.update('media-item', { ...val, ...data });
         this.$bus.$emit('database-saved');
-      } else {
-        const val = await this.infoDB.get('recent-played', 'path', videoPath);
-        if (val) {
-          const mergedData = Object.assign(val, data);
-          await this.infoDB.add('recent-played', mergedData);
-          this.$bus.$emit('database-saved');
-        }
       }
+      const playlist = await this.infoDB.get('recent-played', this.playListId);
+      await this.infoDB.update('recent-played', {
+        ...playlist,
+        items: this.isFolderList ? [videoId] : this.items,
+        playedIndex: this.isFolderList ? 0 : this.playingIndex,
+        lastOpened: Date.now(),
+      });
     },
     saveSubtitleStyle() {
       return asyncStorage.set('subtitle-style', { chosenStyle: this.chosenStyle, chosenSize: this.chosenSize, enabledSecondarySub: this.enabledSecondarySub });
@@ -293,8 +268,8 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize',
-      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'playingList', 'playListHash']),
+      'videoId', 'nextVideoId', 'originSrc', 'convertedSrc', 'volume', 'muted', 'rate', 'paused', 'duration', 'ratio', 'currentAudioTrackId', 'enabledSecondarySub', 'lastWinSize',
+      'winSize', 'winPos', 'winAngle', 'isFullScreen', 'winWidth', 'winHeight', 'chosenStyle', 'chosenSize', 'nextVideo', 'loop', 'playinglistRate', 'isFolderList', 'playingList', 'playingIndex', 'playListId', 'items']),
     ...mapGetters({
       videoWidth: 'intrinsicWidth',
       videoHeight: 'intrinsicHeight',
@@ -308,11 +283,13 @@ export default {
     winAngle(val) {
       this.changeWindowRotate(val);
     },
+    videoId(val, oldVal) {
+      this.saveScreenshot(oldVal);
+    },
     originSrc(val, oldVal) {
       if (process.mas && oldVal) {
         this.$bus.$emit(`stop-accessing-${oldVal}`, oldVal);
       }
-      this.saveScreenshot(oldVal);
       this.$bus.$emit('show-speedlabel');
       this.videoConfigInitialize({
         audioTrackList: [],
@@ -362,7 +339,8 @@ export default {
     this.$bus.$on('next-video', () => {
       videodata.paused = false;
       if (this.nextVideo) {
-        this.playFile(this.nextVideo);
+        if (this.isFolderList) this.openVideoFile(this.nextVideo);
+        else this.playFile(this.nextVideo, this.nextVideoId);
       }
     });
     this.$bus.$on('seek', (e) => { this.seekTime = [e]; });
@@ -385,8 +363,14 @@ export default {
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone && !this.needToRestore) {
-        this.$store.dispatch('SRC_SET', { src: '', mediaHash: '' });
-        this.saveScreenshot(this.originSrc)
+        this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
+        let savePromise = this.saveScreenshot(this.videoId);
+        if (process.mas && this.$store.getters.source === 'drop') {
+          savePromise = savePromise.then(async () => {
+            await this.infoDB.deletePlaylist(this.playListId);
+          });
+        }
+        savePromise
           .then(this.saveSubtitleStyle)
           .then(this.savePlaybackStates)
           .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
