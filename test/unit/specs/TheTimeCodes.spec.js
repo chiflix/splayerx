@@ -1,14 +1,15 @@
 import Vuex from 'vuex';
+import { createSandbox } from 'sinon';
 import Video from '@/store/modules/Video';
+import Editor from '@/store/modules/Editor';
 import Preference from '@/store/modules/Preference';
 import TheTimeCodes from '@/components/PlayingView/TheTimeCodes.vue';
-import { mount, createLocalVue } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
 describe('Component - TheTimeCodes', () => {
-  let wrapper;
   const store = new Vuex.Store({
     modules: {
       Video: {
@@ -19,13 +20,17 @@ describe('Component - TheTimeCodes', () => {
       },
     },
   });
+  let wrapper;
+  let sandbox = createSandbox();
 
   beforeEach(() => {
-    wrapper = mount(TheTimeCodes, { store, localVue });
+    sandbox = createSandbox();
+    wrapper = shallowMount(TheTimeCodes, { store, localVue });
   });
 
   afterEach(() => {
     wrapper.destroy();
+    sandbox.restore();
   });
 
   it('sanity - should render correct component', () => {

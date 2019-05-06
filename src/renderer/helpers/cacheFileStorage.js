@@ -2,7 +2,7 @@
  * @Author: tanghaixiang@xindong.com
  * @Date: 2019-02-22 11:37:18
  * @Last Modified by: tanghaixiang@xindong.com
- * @Last Modified time: 2019-04-01 11:47:15
+ * @Last Modified time: 2019-05-05 18:35:13
  */
 
 /** file dir list
@@ -265,7 +265,7 @@ export function addSubtitleByMediaHash(key, s, { type }) {
           name += 1;
           const fileName = `${basename(`${name}`, '.json')}.json`;
           const filePath = join(p, fileName);
-          writeFile(filePath, s, (err) => {
+          writeFile(filePath, s, 'utf8', (err) => {
             if (err) {
               reject(err);
             } else {
@@ -295,7 +295,7 @@ export function addSubtitleByMediaHash(key, s, { type }) {
 export function writeSubtitleByPath(p, s) {
   return new Promise(async (resolve, reject) => {
     try {
-      writeFile(path.join(p), s, (err) => {
+      writeFile(path.join(p), s, 'utf8', (err) => {
         if (err) {
           reject(err);
         } else {

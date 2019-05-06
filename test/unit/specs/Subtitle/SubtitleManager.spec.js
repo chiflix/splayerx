@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import { createSandbox, match } from 'sinon';
 import { merge } from 'lodash';
 import Subtitle from '@/store/modules/Subtitle';
+import Editor from '@/store/modules/Editor';
 import Video from '@/store/modules/Video';
 import Preference from '@/store/modules/Preference';
 import Window from '@/store/modules/Window';
@@ -40,6 +41,11 @@ describe('Subtitle Manager Unit Tests', () => {
       Window: {
         getters: Window.getters,
         mutations: Window.mutations,
+      },
+      Editor: {
+        state: Editor.state,
+        getters: Editor.getters,
+        mutations: Editor.mutations,
       },
     },
   };

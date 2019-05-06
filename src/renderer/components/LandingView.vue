@@ -21,7 +21,7 @@
             <span class="timing-played">
               {{ timeInValidForm(timecodeFromSeconds(item.lastTime)) }}
             / {{ timeInValidForm(timecodeFromSeconds(item.duration)) }}
-            <span v-if="item.playListLength">·&nbsp{{ $t('recentPlaylist.playlistSource') }}&nbsp&nbsp{{ item.index + 1 }} / {{ item.playListLength }}</span>
+            <span v-if="item.playListLength">·&nbsp;{{ $t('recentPlaylist.playlistSource') }}&nbsp;&nbsp;{{ item.index + 1 }} / {{ item.playListLength }}</span>
             </span>
           </div>
           <div class="item-progress">
@@ -247,13 +247,19 @@ export default {
       }
     });
     this.$bus.$on('drag-over', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
+      if (this.$refs.mask) {
+        this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0.18)');
+      }
     });
     this.$bus.$on('drag-leave', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      if (this.$refs.mask) {
+        this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      }
     });
     this.$bus.$on('drop', () => {
-      this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      if (this.$refs.mask) {
+        this.$refs.mask.style.setProperty('background-color', 'rgba(255, 255, 255, 0)');
+      }
     });
   },
   mounted() {

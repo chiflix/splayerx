@@ -1,13 +1,38 @@
+import Vuex from 'vuex';
+import { createSandbox } from 'sinon';
 import PlayButton from '@/components/PlayingView/PlayButton.vue';
-import { mount } from '@vue/test-utils';
+import Editor from '@/store/modules/Editor';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 describe('PlayButton.vue', () => {
+  let store;
   const propsData = {
     paused: false,
   };
+  const baseStore = {
+    modules: {
+      Editor: {
+        state: Editor.state,
+        getters: Editor.getters,
+        mutations: Editor.mutations,
+      },
+    },
+  };
   let wrapper;
+  let sandbox = createSandbox();
+
   beforeEach(() => {
-    wrapper = mount(PlayButton, { propsData });
+    sandbox = createSandbox();
+    store = new Vuex.Store(baseStore);
+    wrapper = shallowMount(PlayButton, { localVue, store, propsData });
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
+    sandbox.restore();
   });
 
   it('should changed paused value trigger iconAppear to false', () => {

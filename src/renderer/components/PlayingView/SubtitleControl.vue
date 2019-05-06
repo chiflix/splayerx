@@ -217,8 +217,11 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['winWidth', 'originSrc', 'privacyAgreement', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub', 'winHeight', 'intrinsicWidth', 'intrinsicHeight', 'paused',
-      'winRatio', 'winWidth', 'winHeight', 'winPos', 'winSize', 'isFirstSubtitle', 'enabledSecondarySub', 'isProfessional',
+    ...mapGetters(['originSrc', 'paused',
+      'winRatio', 'winWidth', 'winHeight', 'winPos', 'winSize',
+      'intrinsicWidth', 'intrinsicHeight', 'isFirstSubtitle', 'enabledSecondarySub', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'subtitleList', 'calculatedNoSub',
+      'isProfessional',
+      'privacyAgreement',
     ]),
     ...mapState({
       loadingTypes: ({ Subtitle }) => {

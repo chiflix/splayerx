@@ -894,7 +894,7 @@ export default {
           if (filePath) {
             const str = dialogueToString(currentSubtitle.parsed.dialogues);
             try {
-              writeSubtitleByPath(filePath, Buffer.from(str));
+              writeSubtitleByPath(filePath, Buffer.from(`\ufeff${str}`, 'utf8'));
             } catch (err) {
               console.log(err);
             }

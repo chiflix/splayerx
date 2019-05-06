@@ -147,7 +147,10 @@ export default {
       mousemoveClientPosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight', 'isEditable', 'isProfessional', 'isDragableInProfessional', 'isSpaceDownInProfessional']),
+    ...mapGetters(['paused', 'duration', 'leftMousedown', 'ratio', 'playingList', 'originSrc',
+      'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight',
+      'isEditable', 'isProfessional', 'isDragableInProfessional', 'isSpaceDownInProfessional',
+    ]),
     onlyOneVideo() {
       return this.playingList.length === 1;
     },

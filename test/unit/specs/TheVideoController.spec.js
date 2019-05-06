@@ -1,5 +1,6 @@
 import Vuex from 'vuex';
 import Window from '@/store/modules/Window';
+import Editor from '@/store/modules/Editor';
 import Video from '@/store/modules/Video';
 import Input from '@/store/modules/Input';
 import Playlist from '@/store/modules/Playlist';
@@ -34,6 +35,11 @@ describe('Component - TheVideoController Unit Test', () => {
           mutations: Input.mutations,
           actions: Input.actions,
           getters: Input.getters,
+        },
+        Editor: {
+          state: Editor.state,
+          getters: Editor.getters,
+          mutations: Editor.mutations,
         },
       },
     });

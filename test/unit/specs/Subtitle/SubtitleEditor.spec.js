@@ -1,6 +1,7 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import Window from '@/store/modules/Window';
+import Editor from '@/store/modules/Editor';
 import Video from '@/store/modules/Video';
 import SubtitleEditor from '@/components/Subtitle/SubtitleEditor.vue';
 
@@ -17,6 +18,11 @@ describe('Component - SubtitleEditor', () => {
       Video: {
         state: Video.state,
         getters: Video.getters,
+      },
+      Editor: {
+        state: Editor.state,
+        getters: Editor.getters,
+        mutations: Editor.mutations,
       },
     },
   });
