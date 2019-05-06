@@ -48,12 +48,12 @@
     "directories": {
       "output": "build"
     },
-    "electronVersion": "5.0.0-beta.5",
+    "electronVersion": "5.0.1",
     "electronDist": "node_modules/@chiflix/electron/dist",
     "electronDownload": {
       "mirror": "https://github.com/chiflix/electron/releases/download/v",
       "isVerifyChecksum": false,
-      "version": "5.0.0-beta.5"
+      "version": "5.0.1"
     },
     "files": [
       "dist/electron/**/*"
@@ -541,7 +541,7 @@
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/register": "^7.0.0",
-    "@chiflix/electron": "^5.0.0-beta.5",
+    "@chiflix/electron": "^5.0.1",
     "@vue/test-utils": "^1.0.0-beta.26",
     "babel-eslint": "^9.0.0",
     "babel-loader": "^8.0.0",
