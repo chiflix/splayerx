@@ -204,6 +204,11 @@ export default {
 };
 </script>
 <style scoped lang="scss">
+.privicy {
+  .checkbox:nth-of-type(1) {
+    margin-top: 0;
+  }
+}
 .tabcontent {
   .settingItem {
     &__attached {
@@ -329,26 +334,26 @@ export default {
           transform: rotate(-90deg);
         }
       }
+    
+      ::-webkit-scrollbar {
+        width: 3px;
+        user-select: none;
+      }
+      /* Handle */
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.1);
+        border-radius: 1.5px;
+      }
+      ::-webkit-scrollbar-track {
+        cursor: pointer;
+        border-radius: 2px;
+        width: 10px;
+        user-select: none;
+      }
     }
 
     tr:nth-of-type(1) .dropdown {
       z-index: 1;
-    }
-
-    ::-webkit-scrollbar {
-      width: 3px;
-      user-select: none;
-    }
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.1);
-      border-radius: 1.5px;
-    }
-    ::-webkit-scrollbar-track {
-      cursor: pointer;
-      border-radius: 2px;
-      width: 10px;
-      user-select: none;
     }
   }
 }
