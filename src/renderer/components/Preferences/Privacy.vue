@@ -48,8 +48,6 @@
                       :style="{
                         color: (language === primaryLanguage && language !== noLanguage) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
                       }"
-                      @mouseover="mouseover(index)"
-                      @mouseout="mouseout(index)"
                       @mouseup.stop="handleSecondSelection(language, index)">
                       {{ codeToLanguageName(language) }}
                       <span v-if="language === primaryLanguage && language !== noLanguage"
@@ -171,16 +169,6 @@ export default {
       if (!code) return this.noLanguage;
       return codeToLanguageName(code);
     },
-    mouseover(index) {
-      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
-        this.$refs.secondarySelection[index].classList.add('selection-hover');
-      }
-    },
-    mouseout(index) {
-      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
-        this.$refs.secondarySelection[index].classList.remove('selection-hover');
-      }
-    },
     handleFirstSelection(selection) {
       if (selection === this.secondaryLanguage) this.secondaryLanguage = '';
       this.primaryLanguage = selection;
@@ -190,7 +178,6 @@ export default {
       if (selection !== this.primaryLanguage) {
         this.secondaryLanguage = selection;
         this.showSecondSelection = false;
-        this.$refs.secondarySelection[index].classList.remove('selection-hover');
       }
     },
     openFirstDropdown() {
