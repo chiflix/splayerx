@@ -4,12 +4,12 @@
       :class="avaliableClass(index)"
       v-for="(cue, index) in currentCues"
       :key="index"
+      :id="'cue'+index"
       :style="{
         writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
         left: subLeft(index),
         top: subTop(index),
         bottom: subBottom(index),
-        transform: transPos(index),
       }">
       <cue-renderer
         :text="cue.text"
@@ -24,7 +24,7 @@
 </template>
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import { isEqual, castArray, isEmpty } from 'lodash';
+import { isEqual, differenceWith, isEmpty } from 'lodash';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
 import CueRenderer from './CueRenderer.vue';
@@ -173,40 +173,44 @@ export default {
       const { lastCurrentTime } = this;
       this.setCurrentCues(currentTime - (subtitleDelay / 1000));
       this.updateVideoSegments(lastCurrentTime, currentTime);
-
       this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+    },
+    isSameCues(cues1, cues2) {
+      return !differenceWith(
+        cues1,
+        cues2,
+        (cue1, cue2) => {
+          const { text: text1, tags: tags1 } = cue1;
+          const { text: text2, tags: tags2 } = cue2;
+          return (
+            text1 === text2 &&
+            isEqual(tags1, tags2)
+          );
+        },
+      ).length;
     },
     setCurrentCues(currentTime) {
       if (!this.subtitleInstance.parsed) return;
       const parsedData = this.subtitleInstance.parsed.dialogues;
       if (parsedData) {
-        const cues = parsedData
-          .filter(({ text, start, end }) => (
-            !!text &&
+        const cues = this.parsedFragments(parsedData
+          .filter(({
+            start, end,
+            text, fragments,
+          }) => (
             start <= currentTime &&
-            end >= currentTime
-          ));
-        if (!isEqual(
-          cues.map(({ text }) => text),
-          this.currentCues.map(({ text }) => text),
-        )) {
-          let rev = false;
-          const tmp = cues;
-          if (cues.length >= 2) {
-            for (let i = 0; i < tmp.length; i += 1) {
-              const pre = castArray(tmp[i]);
-              const next = castArray(tmp[i + 1]);
-              if (next) {
-                pre.splice(2, 1);
-                next.splice(2, 1);
-                if (isEqual(pre, next)) {
-                  rev = true;
-                }
+            end >= currentTime &&
+            (!!text || !!fragments)
+          )));
+        if (cues.length !== this.currentCues.length || !this.isSameCues(cues, this.currentCues)) {
+          this.currentCues = cues;
+          this.$nextTick(() => {
+            this.currentCues.forEach((item, index) => {
+              if (document.querySelector(`#cue${index}`)) {
+                document.querySelector(`#cue${index}`).style.transform = this.transPos(index);
               }
-            }
-          }
-          this.currentCues = rev ? this.parsedFragments(cues).reverse()
-            : this.parsedFragments(cues);
+            });
+          });
         }
       }
     },
@@ -350,7 +354,7 @@ export default {
             return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1] + this.firstSubTransPercent(transPercent, tags[index].alignment), tags[index].alignment) + this.assLine(index)}%)`;
           }
           // 只有第一字幕时需要translate的值
-          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1], tags[index].alignment)}%)`;
+          return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1], tags[index].alignment) + this.assLine(index)}%)`;
         }
         if (tags[index].pos) { // 第二字幕不是VTT
           // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
