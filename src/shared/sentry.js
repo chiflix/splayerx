@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/electron';
 import * as Integrations from '@sentry/integrations';
 
 
-if (1 || process.env.NODE_ENV !== 'development') {
+if (process.env.NODE_ENV !== 'development') {
   Sentry.init({
     dsn: 'https://6a94feb674b54686a6d88d7278727b7c@sentry.io/1449341',
     enableNative: true,
