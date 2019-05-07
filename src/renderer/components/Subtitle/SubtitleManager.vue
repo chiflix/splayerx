@@ -879,9 +879,8 @@ export default {
         const browserWindow = remote.BrowserWindow;
         const focusWindow = browserWindow.getFocusedWindow();
         let defaultPath = this.defaultDir;
-        if (!this.defaultDir) {
+        if (!defaultPath) {
           defaultPath = process.platform === 'darwin' ? app.getPath('home') : app.getPath('desktop');
-          this.$store.dispatch('UPDATE_DEFAULT_DIR', defaultPath);
         }
         const originSrc = this.originSrc;
         const videoName = `${basename(originSrc, extname(originSrc))}`;
@@ -898,6 +897,7 @@ export default {
             } catch (err) {
               console.log(err);
             }
+            this.$store.dispatch('UPDATE_DEFAULT_DIR', filePath);
           }
         });
       }

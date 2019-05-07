@@ -1262,7 +1262,7 @@ export default {
       .text, .confirm-delete-wrap {
         font-size: 18.48px;
         letter-spacing: 0.27px;
-        line-height: 18px;
+        line-height: 20px;
         margin: auto 0 auto 17.89px;
       }
       .iconContainer {
