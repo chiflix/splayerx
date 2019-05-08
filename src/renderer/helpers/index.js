@@ -533,7 +533,7 @@ export default {
       switch (level) {
         case 'error':
           console.error(log);
-          if (log && process.env.NODE_ENV !== 'development') {
+          if ((log instanceof Error || typeof log === 'string') && process.env.NODE_ENV !== 'development') {
             this.$ga && this.$ga.exception(log.message || log);
             Sentry.captureException(log);
           }
