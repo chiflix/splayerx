@@ -192,8 +192,8 @@ export default {
   },
   methods: {
     mousedownVideo(e) {
-      if (this.isPlaying) return;
       this.eventTarget.onItemMousedown(this.index, e.pageX, e.pageY, e);
+      if (this.isPlaying) return;
       document.onmousemove = (e) => {
         this.selfMoving = true;
         this.tranFlag = false;
