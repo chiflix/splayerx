@@ -4,26 +4,27 @@
       :class="avaliableClass(index)"
       v-for="(cue, index) in currentCues"
       :key="index"
+      :id="'cue'+index"
       :style="{
         writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
         left: subLeft(index),
         top: subTop(index),
         bottom: subBottom(index),
-        transform: transPos(index),
       }">
-      <CueRenderer class="cueRender"
+      <cue-renderer
         :text="cue.text"
         :settings="cue.tags"
         :style="{
           zoom: isFirstSub ? `${scaleNum}` : `${secondarySubScale}`,
           lineHeight: enabledSecondarySub && currentFirstSubtitleId !== '' && currentSecondSubtitleId !== '' ? '68%' : 'normal',
-        }"></CueRenderer>
+        }"
+      />
     </div>
   </div>
 </template>
 <script>
 import { mapGetters, mapMutations } from 'vuex';
-import { isEqual, castArray, isEmpty } from 'lodash';
+import { isEqual, differenceWith, isEmpty } from 'lodash';
 import { Subtitle as subtitleMutations } from '@/store/mutationTypes';
 import { videodata } from '@/store/video';
 import CueRenderer from './CueRenderer.vue';
@@ -52,9 +53,7 @@ export default {
       type: Object,
     },
   },
-  components: {
-    CueRenderer,
-  },
+  components: { CueRenderer },
   data() {
     return {
       subtitle: null,
@@ -129,13 +128,6 @@ export default {
     subtitleInstance.on('parse', (parsed) => {
       const parsedData = parsed.dialogues;
       this.videoSegments = this.getVideoSegments(parsedData, this.duration);
-      if (parsedData.length) {
-        const cues = parsedData
-          .filter(subtitle => subtitle.start <= this.subtitleCurrentTime && subtitle.end >= this.subtitleCurrentTime && subtitle.text !== '');
-        if (!isEqual(cues, this.currentCues)) {
-          this.currentCues = cues;
-        }
-      }
       this.subPlayResX = !isEmpty(parsed.info) ? Number(parsed.info.PlayResX) : this.intrinsicWidth;
       this.subPlayResY = !isEmpty(parsed.info) ? Number(parsed.info.PlayResY) :
         this.intrinsicHeight;
@@ -181,33 +173,44 @@ export default {
       const { lastCurrentTime } = this;
       this.setCurrentCues(currentTime - (subtitleDelay / 1000));
       this.updateVideoSegments(lastCurrentTime, currentTime);
-
       this.requestId = requestAnimationFrame(this.currentTimeUpdate);
+    },
+    isSameCues(cues1, cues2) {
+      return !differenceWith(
+        cues1,
+        cues2,
+        (cue1, cue2) => {
+          const { text: text1, tags: tags1 } = cue1;
+          const { text: text2, tags: tags2 } = cue2;
+          return (
+            text1 === text2 &&
+            isEqual(tags1, tags2)
+          );
+        },
+      ).length;
     },
     setCurrentCues(currentTime) {
       if (!this.subtitleInstance.parsed) return;
       const parsedData = this.subtitleInstance.parsed.dialogues;
       if (parsedData) {
-        const cues = parsedData
-          .filter(subtitle => subtitle.start <= currentTime && subtitle.end >= currentTime && subtitle.text !== '');
-        if (!isEqual(cues, this.currentCues)) {
-          let rev = false;
-          const tmp = cues;
-          if (cues.length >= 2) {
-            for (let i = 0; i < tmp.length; i += 1) {
-              const pre = castArray(tmp[i]);
-              const next = castArray(tmp[i + 1]);
-              if (next) {
-                pre.splice(2, 1);
-                next.splice(2, 1);
-                if (isEqual(pre, next)) {
-                  rev = true;
-                }
+        const cues = this.parsedFragments(parsedData
+          .filter(({
+            start, end,
+            text, fragments,
+          }) => (
+            start <= currentTime &&
+            end >= currentTime &&
+            (!!text || !!fragments)
+          )));
+        if (cues.length !== this.currentCues.length || !this.isSameCues(cues, this.currentCues)) {
+          this.currentCues = cues;
+          this.$nextTick(() => {
+            this.currentCues.forEach((item, index) => {
+              if (document.querySelector(`#cue${index}`)) {
+                document.querySelector(`#cue${index}`).style.transform = this.transPos(index);
               }
-            }
-          }
-          this.currentCues = rev ? this.parsedFragments(cues).reverse()
-            : this.parsedFragments(cues);
+            });
+          });
         }
       }
     },
