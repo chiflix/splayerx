@@ -90,7 +90,7 @@
 		"playback": {
 			"backwardL": "后退 -60s",
 			"backwardS": "后退 -5s",
-			"windowRotate": "旋转 90°",
+			"windowRotate": "正时针旋转 90°",
 			"captureScreen": "截图",
 			"captureVideoClip": "截取视频片段",
 			"decreasePlaybackSpeed": "减缓播放速度",

@@ -90,7 +90,7 @@
 		"playback": {
 			"backwardL": "خطوة الى الوراء - 60s",
 			"backwardS": "خطوة الى الوراء - 5S",
-			"windowRotate": "تدوير 90 درجة",
+			"windowRotate": "تدوير °90 في اتجاه عقارب الساعة",
 			"captureScreen": "التقاط الشاشة",
 			"captureVideoClip": "التقاط الفيديو كليب",
 			"decreasePlaybackSpeed": "تقليل سرعة التشغيل",
