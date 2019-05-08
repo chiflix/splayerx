@@ -4,7 +4,6 @@ import '../shared/sentry';
 
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
-import os from 'os';
 import axios from 'axios';
 import uuidv4 from 'uuid/v4';
 import electron from 'electron';
@@ -1383,12 +1382,8 @@ new Vue({
         userUUID = uuidv4();
         this.$storage.set('user-uuid', userUUID);
       }
-      const platform = os.platform() + os.release();
-      const { app } = this.$electron.remote;
-      const version = app.getVersion();
 
       Vue.http.headers.common['X-Application-Token'] = userUUID;
-      Vue.http.headers.common['User-Agent'] = `SPlayerX@2018 ${platform} Version ${version}`;
 
       // set userUUID to google analytics uid
       this.$ga && this.$ga.set('userId', userUUID);

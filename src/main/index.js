@@ -4,6 +4,7 @@ import '../shared/sentry';
 
 import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage, splayerx } from 'electron' // eslint-disable-line
 import { throttle, debounce } from 'lodash';
+import os from 'os';
 import path from 'path';
 import fs, { promises as fsPromises } from 'fs';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
@@ -421,6 +422,7 @@ function createWindow() {
   };
 
   mainWindow = new BrowserWindow(windowOptions);
+  mainWindow.webContents.setUserAgent(`SPlayerX@2018 ${os.platform() + os.release()} Version ${app.getVersion()}`);
 
   mainWindow.loadURL(filesToOpen.length ? `${mainURL}#/play` : mainURL);
 
