@@ -1,70 +1,68 @@
 <template>
-<div class="preference-setting">
-  <BaseCheckBox
-    :checkboxValue="privacyAgreement"
-    @update:checkbox-value="privacyAgreement = $event">
-    {{ $t('preferences.privacy.privacyConfirm') }}
-  </BaseCheckBox>
-  <div class="languages-select">
-    <div class="select-content" :style="{opacity: privacyAgreement ? 1 : 0.3}">
-      <div class="title">{{ $t('preferences.privacy.languagePriority')}}</div>
-      <div class="description">{{ $t('preferences.privacy.languageDescription')}}</div>
-      <table>
-        <tr>
-          <td class="selection-title">{{ $t('preferences.privacy.primary')}}</td>
-          <td class="selection-box">
-            <div class="drop-down">
-            <div class="no-drag" :class="showFirstSelection ? 'drop-down-content' : 'drop-down-brief'"
-              :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-              @mouseup.stop="openFirstDropdown">
-              <div class="selected">{{ codeToLanguageName(primaryLanguage) }}</div>
-              <Icon type="rightArrow" :class="showFirstSelection ? 'up-arrow' : 'down-arrow'"/>
-              <div class="content" v-if="showFirstSelection"
-                @mouseup.stop="">
-                <div class="selection"
-                  v-for="(language, index) in primaryLanguages"
-                  :key="index"
-                  @mouseup.stop="handleFirstSelection(language)">
-                  {{ codeToLanguageName(language) }}
-                </div>
-              </div>
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td class="selection-title">{{ $t('preferences.privacy.secondary')}}</td>
-          <td class="selection-box">
-            <div class="drop-down">
-              <div class="no-drag" :class="showSecondSelection ? 'drop-down-content' : 'drop-down-brief'"
-                :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
-                @mouseup.stop="openSecondDropdown">
-                <div class="selected">{{ codeToLanguageName(secondaryLanguage) }}</div>
-                <Icon type="rightArrow" :class="showSecondSelection ? 'up-arrow' : 'down-arrow'"/>
-                <div class="content" v-if="showSecondSelection"
-                  @mouseup.stop="">
-                  <div class="selection" ref="secondarySelection"
-                    v-for="(language, index) in secondaryLanguages"
-                    :key="index"
-                    :style="{
-                      color: (language === primaryLanguage && language !== noLanguage) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
-                    }"
-                    @mouseover="mouseover(index)"
-                    @mouseout="mouseout(index)"
-                    @mouseup.stop="handleSecondSelection(language, index)">
-                    {{ codeToLanguageName(language) }}
-                    <span v-if="language === primaryLanguage && language !== noLanguage"
-                      style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.privacy.primary') }}</span>
+  <div class="privicy tabcontent">
+    <div class="settingItem">
+      <BaseCheckBox
+        :checkboxValue="privacyAgreement"
+        @update:checkbox-value="privacyAgreement = $event">
+        {{ $t('preferences.privacy.privacyConfirm') }}
+      </BaseCheckBox>
+      <div class="settingItem__attached" :style="{opacity: privacyAgreement ? 1 : 0.3}">
+        <div class="settingItem__title">{{ $t('preferences.privacy.languagePriority')}}</div>
+        <div class="settingItem__description">{{ $t('preferences.privacy.languageDescription')}}</div>
+        <table>
+          <tr>
+            <td class="dropdown__title">{{ $t('preferences.privacy.primary')}}</td>
+            <td>
+              <div class="settingItem__input dropdown">
+                <div class="dropdown__toggle no-drag" :class="showFirstSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
+                  :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
+                  @mouseup.stop="openFirstDropdown">
+                  <div class="dropdown__displayItem">{{ codeToLanguageName(primaryLanguage) }}</div>
+                  <div class="dropdown__listItems"
+                    @mouseup.stop="">
+                    <div class="dropdownListItem dropdownListItem--default"
+                      v-for="(language, index) in primaryLanguages"
+                      :key="index"
+                      @mouseup.stop="handleFirstSelection(language)">
+                      {{ codeToLanguageName(language) }}
+                    </div>
                   </div>
+                  <Icon class="dropdown__icon" type="rightArrow" :class="showFirstSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
                 </div>
               </div>
-            </div>
-          </td>
-        </tr>
-      </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="dropdown__title">{{ $t('preferences.privacy.secondary')}}</td>
+            <td>
+              <div class="settingItem__input dropdown">
+                <div class="dropdown__toggle no-drag" :class="showSecondSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
+                  :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
+                  @mouseup.stop="openSecondDropdown">
+                  <div class="dropdown__displayItem">{{ codeToLanguageName(secondaryLanguage) }}</div>
+                  <div class="dropdown__listItems"
+                    @mouseup.stop="">
+                    <div class="dropdownListItem dropdownListItem--default" ref="secondarySelection"
+                      v-for="(language, index) in secondaryLanguages"
+                      :key="index"
+                      :style="{
+                        color: (language === primaryLanguage && language !== noLanguage) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
+                      }"
+                      @mouseup.stop="handleSecondSelection(language, index)">
+                      {{ codeToLanguageName(language) }}
+                      <span v-if="language === primaryLanguage && language !== noLanguage"
+                        style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.privacy.primary') }}</span>
+                    </div>
+                  </div>
+                  <Icon class="dropdown__icon" type="rightArrow" :class="showSecondSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -171,16 +169,6 @@ export default {
       if (!code) return this.noLanguage;
       return codeToLanguageName(code);
     },
-    mouseover(index) {
-      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
-        this.$refs.secondarySelection[index].classList.add('selection-hover');
-      }
-    },
-    mouseout(index) {
-      if (this.secondaryLanguages[index] !== this.primaryLanguage) {
-        this.$refs.secondarySelection[index].classList.remove('selection-hover');
-      }
-    },
     handleFirstSelection(selection) {
       if (selection === this.secondaryLanguage) this.secondaryLanguage = '';
       this.primaryLanguage = selection;
@@ -190,7 +178,6 @@ export default {
       if (selection !== this.primaryLanguage) {
         this.secondaryLanguage = selection;
         this.showSecondSelection = false;
-        this.$refs.secondarySelection[index].classList.remove('selection-hover');
       }
     },
     openFirstDropdown() {
@@ -217,39 +204,63 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-$dropdown-height: 148px;
-$interactor-backgroundColor-default: rgba(255,255,255,0.03);
-$interactor-border-default: 1px solid rgba(255,255,255,0.1);
-$interactor-backgroundColor-hover: rgba(255,255,255,0.08);
-$interactor-border-hover: 1px solid rgba(255,255,255,0.2);
-
-.preference-setting {
-  box-sizing: border-box;
-  padding-top: 37px;
-  padding-left: 24px;
-  width: 100%;
-  height: 100%;
-  .languages-select {
-    background-color: rgba(0,0,0,0.05);
-    width: 380px;
-    margin-bottom: 24px;
-    .select-content {
+.privicy {
+  .checkbox:nth-of-type(1) {
+    margin-top: 0;
+  }
+}
+.tabcontent {
+  .settingItem {
+    &__attached {
+      background-color: rgba(0,0,0,0.05);
+      margin-top: 15px;
       padding: 20px 28px;
-      .title {
-        font-family: $font-medium;
-        font-size: 13px;
-        margin-bottom: 5px;
-        color: rgba(255,255,255,0.9);
-        letter-spacing: 0;
+
+      table {
+        width: 100%;
+        tr {
+          height: 40px;
+        }
       }
-      .description {
-        font-family: $font-medium;
-        font-size: 11px;
-        color: rgba(255,255,255,0.5);
-        letter-spacing: 0;
-        margin-bottom: 9px;
+    }
+
+    &__title {
+      font-family: $font-medium;
+      font-size: 13px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    &__description {
+      font-family: $font-medium;
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 7px;
+    }
+
+    &__input {
+      -webkit-app-region: no-drag;
+      cursor: pointer;
+      font-family: $font-semibold;
+      font-size: 11px;
+      color: #FFFFFF;
+      text-align: center;
+      border-radius: 2px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background-color: rgba(255,255,255,0.03);
+      transition: all 200ms;
+
+      &:hover {
+        border: 1px solid rgba(255,255,255,0.2);
+        background-color: rgba(255,255,255,0.08);
       }
-      .selection-title {
+    }
+
+    .dropdown {
+      position: relative;
+      width: 240px;
+      height: 28px;
+
+      &__title {
         height: 28px;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -259,111 +270,91 @@ $interactor-border-hover: 1px solid rgba(255,255,255,0.2);
         font-family: $font-medium;
         font-size: 12px;
         color: rgba(255,255,255,0.7);
-        letter-spacing: 0;
       }
-      .down-arrow {
+      
+      &__toggle {
         position: absolute;
-        top: 7px;
-        right: 8px;
-        transform: rotate(90deg);
-        transition: transform 200ms;
-      }
-      .up-arrow {
-        position: absolute;
-        top: 7px;
-        right: 8px;
-        transform: rotate(-90deg);
-        transition: transform 200ms;
-      }
-      table {
+        top: 0;
         width: 100%;
-        tr {
-          height: 40px;
-        }
-      }
-      .selection-box {
-        width: 100%;
-        .drop-down {
-          width: 100%;
+        margin-top: -1px;
+        margin-left: -1px;
+        transition: all 200ms;
+        border-radius: 2px;
+        overflow: hidden;
+        
+        &--display {
           height: 28px;
-          -webkit-app-region: no-drag;
-          .drop-down-brief {
-            position: relative;
-            cursor: pointer;
-            width: 100%;
-            height: 28px;
-            background-color: $interactor-backgroundColor-default;
-            border: $interactor-border-default;
-            border-radius: 2px;
-            font-family: $font-semibold;
-            font-size: 11px;
-            line-height: 28px;
-            color: #FFFFFF;
-            letter-spacing: 0;
-            text-align: center;
-            transition: border 200ms, background-color 200ms;
-            &:hover {
-              border: $interactor-border-hover;
-              background-color: $interactor-backgroundColor-hover;
-            }
-          }
-          .drop-down-content {
-            cursor: pointer;
-            position: relative;
-            z-index: 50;
-            width: 100%;
-            height: $dropdown-height;
-            background-color: rgba(100,100,100,.95);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 2px;
-            font-family: $font-semibold;
-            font-size: 11px;
-            color: #FFFFFF;
-            letter-spacing: 0;
-            text-align: center;
-            .selected {
-              height: 28px;
-              line-height: 28px;
-              background-color: rgba(255,255,255,0.1);
-            }
-            .content {
-              cursor: pointer;
-              position: absolute;
-              top: 32px;
-              left: 8px;
-              right: 4px;
-              bottom: 4px;
-              overflow-y: scroll;
-              .selection {
-                height: 28px;
-                line-height: 28px;
-              }
-              .selection:hover {
-                background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
-              }
-            }
+          border: 1px solid rgba(255,255,255,0);
+          background-color: rgba(255, 255, 255, 0);
+        }
+        
+        &--list { 
+          height: 148px;
+          border: 1px solid rgba(255,255,255,0.3);
+          background-color: rgba(120,120,120,1);
+          .dropdown__displayItem {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
           }
         }
       }
-      .selection-box:nth-of-type(1) {
-        z-index: 1;
+
+      &__displayItem {
+        height: 28px;
+        line-height: 28px;
+        border-bottom: 1px solid rgba(255,255,255,0);
+      }
+
+      &__listItems {
+        cursor: pointer;
+        position: relative;
+        height: 112px;
+        margin: 4px 4px 4px 6px;
+        overflow-y: scroll;
+      }
+
+      .dropdownListItem {
+        height: 28px;
+        line-height: 28px;
+
+        &--default:hover {
+          background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
+        }
+      }
+
+      &__icon {
+        position: absolute;
+        top: 7px;
+        right: 8px;
+        transition: transform 200ms;
+        &--arrowDown {
+          transform: rotate(90deg);
+        }
+        &--arrowUp {
+          z-index: 100;
+          transform: rotate(-90deg);
+        }
+      }
+    
+      ::-webkit-scrollbar {
+        width: 3px;
+        user-select: none;
+      }
+      /* Handle */
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.1);
+        border-radius: 1.5px;
+      }
+      ::-webkit-scrollbar-track {
+        cursor: pointer;
+        border-radius: 2px;
+        width: 10px;
+        user-select: none;
       }
     }
+
+    tr:nth-of-type(1) .dropdown {
+      z-index: 1;
+    }
   }
-}
-::-webkit-scrollbar {
-  width: 3px;
-  user-select: none;
-}
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.1);
-  border-radius: 1.5px;
-}
-::-webkit-scrollbar-track {
-  cursor: pointer;
-  border-radius: 2px;
-  width: 10px;
-  user-select: none;
 }
 </style>
