@@ -274,6 +274,10 @@ export default {
     },
     async setPlayList() {
       const playlist = await this.infoDB.get('recent-played', this.playListId);
+      const currentVideoId = playlist.items[0];
+      const currentVideoHp = playlist.hpaths[0];
+      const items = [];
+      const hpaths = [];
       /* eslint-disable */
       for (const videoPath of this.playingList) {
         if (videoPath !== this.originSrc) {
@@ -285,10 +289,15 @@ export default {
             source: 'playlist',
           };
           const videoId = await this.infoDB.add('media-item', data);
-          playlist.items.push(videoId);
-          playlist.hpaths.push(`${quickHash}-${videoPath}`);
+          items.push(videoId);
+          hpaths.push(`${quickHash}-${videoPath}`);
+        } else {
+          items.push(currentVideoId);
+          hpaths.push(currentVideoHp);
         }
       }
+      playlist.items = items;
+      playlist.hpaths = hpaths;
       this.infoDB.update('recent-played', playlist);
       this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.playingList, items: playlist.items });
     },
