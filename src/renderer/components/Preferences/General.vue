@@ -35,7 +35,7 @@
         </transition>
       </div>
     </div>
-    <div class="settingItem settingItem--justify" v-if="isMac">
+    <div class="settingItem settingItem--justify">
       <div class="setting-content">
         <div class="settingItem__title">{{ $t("preferences.general.restoreSettings") }}</div>
         <div class="settingItem__description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
@@ -113,9 +113,6 @@ export default {
     },
   },
   computed: {
-    isMac() {
-      return process.platform === 'darwin';
-    },
     preferenceData() {
       return this.$store.getters.preferenceData;
     },
@@ -201,7 +198,6 @@ export default {
       this.isSettingDefault = true;
       try {
         await setAsDefaultApp();
-        // TODO: feedback
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'success';
         this.$refs.button1.style.setProperty('transition-delay', '350ms');
@@ -213,7 +209,6 @@ export default {
           this.$refs.button1.style.setProperty('transition-delay', '');
         }, 1500);
       } catch (ex) {
-        // TODO: feedback
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'failed';
         this.$refs.button1.style.setProperty('transition-delay', '350ms');
@@ -231,7 +226,7 @@ export default {
     restoreSettings() {
       this.isRestoring = true;
       if (this.restoreContent === this.$t('preferences.general.setButton')) {
-        electron.ipcRenderer.send('apply');
+        electron.ipcRenderer.send('need-to-restore');
         this.needToRelaunch = true;
         this.restoreContent = this.$t('preferences.general.relaunch');
         this.$refs.button2.style.setProperty('transition-delay', '400ms');

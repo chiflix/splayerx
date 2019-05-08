@@ -6,7 +6,8 @@ import { app, BrowserWindow, session, Tray, ipcMain, globalShortcut, nativeImage
 import { throttle, debounce } from 'lodash';
 import os from 'os';
 import path from 'path';
-import fs, { promises as fsPromises } from 'fs';
+import fs from 'fs';
+import rimraf from 'rimraf';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
@@ -379,7 +380,7 @@ function registerMainWindowEvent() {
   ipcMain.on('get-restore-state', () => {
     preferenceWindow?.webContents.send('restore-state', needToRestore);
   });
-  ipcMain.on('apply', () => {
+  ipcMain.on('need-to-restore', () => {
     needToRestore = true;
   });
   ipcMain.on('relaunch', () => {
@@ -450,36 +451,18 @@ function createWindow() {
     }, 1000);
   }
 }
-function removeDir(dir) {
-  const userData = app.getPath('userData');
-  return fsPromises.readdir(dir)
-    .then(files => files.reduce((result, file) => {
-      const filePath = path.join(dir, file);
-      return result.then(() => fsPromises.unlink(filePath)
-        .then(null, () => removeDir(filePath)));
-    }, Promise.resolve()).then(() => {
-      if (dir !== userData) return fsPromises.rmdir(dir);
-      return Promise.resolve();
-    }));
-}
-function removeUserData() {
-  const userData = app.getPath('userData');
-  return removeDir(path.join(userData, 'storage'))
-    .then(() => removeDir(userData));
-}
+
 app.on('before-quit', (e) => {
   if (needToRestore) {
     mainWindow?.webContents.send('quit', needToRestore);
     e.preventDefault();
-    removeUserData()
-      .catch((err) => {
-        needToRestore = false;
+    rimraf(app.getPath('userData'), (err) => {
+      if (err) {
         writeLog('info', { message: `error: ${err}` });
-      })
-      .finally(() => {
-        needToRestore = false;
-        app.quit();
-      });
+      }
+      needToRestore = false;
+      app.quit();
+    });
   } else {
     mainWindow?.webContents.send('quit');
   }
@@ -541,14 +524,7 @@ app.on('ready', () => {
 
 app.on('window-all-closed', () => {
   if (process.env.NODE_ENV !== 'development' || process.platform !== 'darwin') {
-    if (needToRestore) {
-      removeUserData().then(() => {
-        needToRestore = false;
-        app.quit();
-      });
-    } else {
-      app.quit();
-    }
+    app.quit();
   }
 });
 
