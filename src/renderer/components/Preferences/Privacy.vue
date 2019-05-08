@@ -48,7 +48,7 @@
                       :style="{
                         color: (language === primaryLanguage && language !== noLanguage) ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,1)',
                       }"
-                      @mouseup.stop="handleSecondSelection(language, index)">
+                      @mouseup.stop="handleSecondSelection(language)">
                       {{ codeToLanguageName(language) }}
                       <span v-if="language === primaryLanguage && language !== noLanguage"
                         style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.privacy.primary') }}</span>
@@ -174,7 +174,7 @@ export default {
       this.primaryLanguage = selection;
       this.showFirstSelection = false;
     },
-    handleSecondSelection(selection, index) {
+    handleSecondSelection(selection) {
       if (selection !== this.primaryLanguage) {
         this.secondaryLanguage = selection;
         this.showSecondSelection = false;
