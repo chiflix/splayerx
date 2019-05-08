@@ -4,7 +4,7 @@
       :class="avaliableClass(index)"
       v-for="(cue, index) in currentCues"
       :key="index"
-      :id="'cue'+index"
+      :id="cueType+index"
       :style="{
         writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
         left: subLeft(index),
@@ -74,6 +74,9 @@ export default {
     ...mapGetters(['duration', 'scaleNum', 'subtitleDelay', 'intrinsicHeight', 'intrinsicWidth', 'subToTop', 'currentFirstSubtitleId', 'currentSecondSubtitleId', 'winHeight', 'enabledSecondarySub', 'chosenSize']),
     type() {
       return this.subtitleInstance.metaInfo.format;
+    },
+    cueType() {
+      return this.isFirstSub ? 'first-cue' : 'secondary-cue';
     },
     currentTags() {
       return this.currentCues.map(cue => cue.tags);
@@ -204,14 +207,12 @@ export default {
           )));
         if (cues.length !== this.currentCues.length || !this.isSameCues(cues, this.currentCues)) {
           this.currentCues = cues;
-          this.$nextTick(() => {
-            this.currentCues.forEach((item, index) => {
-              if (document.querySelector(`#cue${index}`)) {
-                document.querySelector(`#cue${index}`).style.transform = this.transPos(index);
-              }
-            });
-          });
         }
+        this.currentCues.forEach((item, index) => {
+          if (document.querySelector(`#${this.cueType}${index}`)) {
+            document.querySelector(`#${this.cueType}${index}`).style.transform = this.transPos(index);
+          }
+        });
       }
     },
     parsedFragments(cues) {
