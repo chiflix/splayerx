@@ -905,6 +905,7 @@ new Vue({
             {
               label: this.$t('msg.playback.windowRotate'),
               id: 'windowRotate',
+              accelerator: 'CmdOrCtrl+L',
               click: () => {
                 this.windowRotate();
               },
@@ -1227,6 +1228,8 @@ new Vue({
         });
         item.enabled = flag;
       });
+      // windowRotate 菜单状态随着路由状态一起变
+      this.menu.getMenuItemById('windowRotate').enabled = flag;
     },
     processRecentPlay(recentPlayData) {
       const menuRecentData = new Map([
