@@ -366,7 +366,6 @@ export default {
     });
     window.onbeforeunload = (e) => {
       if (!this.asyncTasksDone && !this.needToRestore) {
-        this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
         let savePromise = this.saveScreenshot(this.videoId);
         if (process.mas && this.$store.getters.source === 'drop') {
           savePromise = savePromise.then(async () => {
@@ -378,6 +377,7 @@ export default {
           .then(this.savePlaybackStates)
           .then(this.$store.dispatch('saveWinSize', this.isFullScreen ? { size: this.winSizeBeforeFullScreen, angle: this.winAngleBeforeFullScreen } : { size: this.winSize, angle: this.winAngle }))
           .finally(() => {
+            this.$store.dispatch('SRC_SET', { src: '', mediaHash: '', id: NaN });
             this.asyncTasksDone = true;
             window.close();
           });
