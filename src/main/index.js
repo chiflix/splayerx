@@ -7,7 +7,6 @@ import { throttle, debounce } from 'lodash';
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
-import rimraf from 'rimraf';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
@@ -76,6 +75,19 @@ function handleBossKey() {
     }
   }
 }
+
+function exitAndClear(relaunch = false) {
+  app.relaunch(process.platform === 'win32'
+    ? {
+      args: ['/c', `"DEL /Q /F /S ${app.getPath('userData')}${relaunch ? ` && start ${process.argv[0]}` : ''}"`],
+      execPath: 'C:\\WINDOWS\\system32\\cmd.EXE',
+    } : {
+      args: ['-c', `"rm -fr ${app.getPath('userData')}${relaunch ? ` && ${process.argv[0]}` : ''}"`],
+      execPath: 'sh',
+    });
+  app.exit();
+}
+
 
 function registerMainWindowEvent() {
   if (!mainWindow) return;
@@ -275,7 +287,6 @@ function registerMainWindowEvent() {
       callback(info);
     });
   }
-
   function mediaInfoQueueProcess(event) {
     const callback = (info) => {
       event.sender.send(`mediaInfo-${mediaInfoQueue[0]}-reply`, info);
@@ -384,8 +395,12 @@ function registerMainWindowEvent() {
     needToRestore = true;
   });
   ipcMain.on('relaunch', () => {
-    app.relaunch({ args: [] });
-    app.quit();
+    if (needToRestore) {
+      exitAndClear(true);
+    } else {
+      app.relaunch();
+      app.quit();
+    }
   });
   ipcMain.on('preference-to-main', (e, args) => {
     mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
@@ -455,14 +470,7 @@ function createWindow() {
 app.on('before-quit', (e) => {
   if (needToRestore) {
     mainWindow?.webContents.send('quit', needToRestore);
-    e.preventDefault();
-    rimraf(app.getPath('userData'), (err) => {
-      if (err) {
-        writeLog('info', { message: `error: ${err}` });
-      }
-      needToRestore = false;
-      app.quit();
-    });
+    exitAndClear(false);
   } else {
     mainWindow?.webContents.send('quit');
   }
