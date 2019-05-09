@@ -23,7 +23,7 @@
             <p class="title" v-if="m.type === 'result'">{{ m.title }}</p>
             <p class="content">{{ m.content }}</p>
           </div>
-          <Icon v-if="m.type === 'result'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id, m.title, m.payload)"></Icon>
+          <Icon v-if="m.type === 'result'" type="close" class="bubbleClose" @click.native.left="closeMessage(m.id, m.title)"></Icon>
         </div>
       </div>
     </transition-group>
@@ -106,11 +106,8 @@ export default {
       this.manualClosed = false;
       this.showNextVideo = false;
     },
-    closeMessage(id, title, payload) {
+    closeMessage(id, title) {
       this.$store.dispatch('removeMessages', id);
-      if (title === this.$t('errorFile.fileNonExist.title')) {
-        this.$bus.$emit('delete-file', payload.id);
-      }
     },
     checkNextVideoUI(time) {
       if (time > this.nextVideoPreviewTime && time < this.duration - 1 && this.duration > 240) {

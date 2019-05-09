@@ -400,10 +400,8 @@ export default {
             addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
           } else {
             this.infoDB.delete('recent-played', playlist.id);
-            addBubble(PLAYLIST_NON_EXIST, this.$i18n, { id });
-            setTimeout(() => {
-              this.$bus.$emit('delete-file', id);
-            }, 5000);
+            addBubble(PLAYLIST_NON_EXIST, this.$i18n);
+            this.$bus.$emit('delete-file', id);
             return;
           }
         }
@@ -452,7 +450,8 @@ export default {
           }
         } catch (err) {
           this.infoDB.delete('recent-played', id);
-          addBubble(FILE_NON_EXIST, this.$i18n, { id });
+          addBubble(FILE_NON_EXIST, this.$i18n);
+          this.$bus.$emit('delete-file', id);
         }
       }
     },
