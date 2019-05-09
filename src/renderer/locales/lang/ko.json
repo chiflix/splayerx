@@ -4,7 +4,12 @@
     "audioMenu": "오디오 설정",
     "changeTrack": "오디오 트랙",
     "chosenTrack": "태만",
-    "fontItems": ["에스", "엠", "엘", "특대"],
+    "fontItems": [
+      "에스",
+      "엠",
+      "엘",
+      "특대"
+    ],
     "fontSize": "글자 크기",
     "fontStyle": "글꼴 스타일",
     "rateTitle": "재생 속도",
@@ -38,13 +43,13 @@
       "title": "파일을 찾을 수 없음"
     },
     "playlistNonExist": {
-			"content": "이 항목은 제거되었습니다.",
-			"title": "파일을 찾을 수 없음"
-		},
-		"fileNonExistInPlaylist": {
-			"content": "파일이 목록에서 제거됩니다.",
-			"title": "일부 파일을 찾을 수 없습니다"
-		},
+      "content": "이 항목은 제거되었습니다.",
+      "title": "파일을 찾을 수 없음"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "파일이 목록에서 제거됩니다.",
+      "title": "일부 파일을 찾을 수 없습니다"
+    },
     "loadFailed": {
       "content": "자막 유형이 지원되지 않습니다.",
       "title": "로드 자막 실패"
