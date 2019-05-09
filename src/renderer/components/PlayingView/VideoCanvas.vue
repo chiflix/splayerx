@@ -149,15 +149,16 @@ export default {
         case 270:
           if (!this.isFullScreen) {
             requestAnimationFrame(() => {
-              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${this.ratio}, ${this.ratio})`);
+              // 非全屏状态下，竖状视频，需要放大
+              const scale = this.ratio < 1 ? 1 / this.ratio : this.ratio;
+              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
             });
           } else {
             requestAnimationFrame(() => {
-              const newWidth = window.screen.height;
-              const newHeight = newWidth / this.ratio;
-              const scale1 = newWidth / window.screen.width;
-              const scale2 = newHeight / window.screen.height;
-              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale1}, ${scale2})`);
+              // 在全屏情况下，显示器如果是竖着的话，需要根据视频的ratio反向缩放
+              const winRatio = window.screen.width / window.screen.height;
+              const scale = winRatio < 1 ? this.ratio : 1 / this.ratio;
+              this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
             });
           }
           break;
@@ -175,16 +176,15 @@ export default {
       this.winAngleBeforeFullScreen = this.winAngle;
       if (this.winAngle === 90 || this.winAngle === 270) {
         requestAnimationFrame(() => {
-          const newWidth = window.screen.height;
-          const newHeight = newWidth / this.ratio;
-          const scale1 = newWidth / window.screen.width;
-          const scale2 = newHeight / window.screen.height;
-          this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale1}, ${scale2})`);
+          // 逻辑可以参考changeWindowRotate里的
+          const winRatio = window.screen.width / window.screen.height;
+          const scale = winRatio < 1 ? this.ratio : 1 / this.ratio;
+          this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
         });
       }
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [true]);
     },
-    offFullScreen() {
+    offFullScreen() { // eslint-disable-line
       this.$electron.ipcRenderer.send('callMainWindowMethod', 'setFullScreen', [false]);
       let newSize = [];
       const windowRect = [
@@ -192,7 +192,9 @@ export default {
         window.screen.availWidth, window.screen.availHeight,
       ];
       if (this.winAngle === 90 || this.winAngle === 270) {
-        this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${this.ratio}, ${this.ratio})`);
+        // 逻辑可以参考changeWindowRotate里的
+        const scale = this.ratio < 1 ? 1 / this.ratio : this.ratio;
+        this.$refs.videoCanvas.$el.style.setProperty('transform', `rotate(${this.winAngle}deg) scale(${scale}, ${scale})`);
         if (this.winAngleBeforeFullScreen === 0 || this.winAngleBeforeFullScreen === 180) {
           newSize = this.calculateWindowSize(
             [320, 180],
