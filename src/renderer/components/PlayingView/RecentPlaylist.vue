@@ -146,6 +146,12 @@ export default {
     this.$bus.$on('delete-file', (path, id) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
+      const playlist = await this.infoDB.get('recent-played', this.playListId);
+      await this.infoDB.update('recent-played', {
+        ...playlist,
+        items: this.items,
+        playedIndex: this.playingIndex,
+      });
     });
     this.hoverIndex = this.playingIndex;
     this.eventTarget.onItemMousemove = this.onItemMousemove;
