@@ -150,6 +150,23 @@ export default {
     top: 45px;
     right: 52px;
   }
+
+  .nextVideo {
+    transition: 200ms ease-out;
+    transition-property: opacity, transform;
+    @media screen and (max-aspect-ratio: 1/1) and (max-width: 288px), screen and (min-aspect-ratio: 1/1) and (max-height: 288px) {
+      display: none;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 289px) and (max-width: 480px), screen and (min-aspect-ratio: 1/1) and (min-height: 289px) and (max-height: 480px) {
+      margin-bottom: 12px;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 481px) and (max-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 481px) and (max-height: 1080px) {
+      margin-bottom: 15px;
+    }
+    @media screen and (max-aspect-ratio: 1/1) and (min-width: 1080px), screen and (min-aspect-ratio: 1/1) and (min-height: 1080px) {
+      margin-bottom: 18px;
+    }
+  }
 }
 .container {
   -webkit-app-region: no-drag;
