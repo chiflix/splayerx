@@ -61,6 +61,9 @@ const mutations = {
   playList(state, t) {
     state.playList = t;
   },
+  AddIdsToPlayingList(state, t) {
+    state.items.push(...t);
+  },
   AddItemsToPlayingList(state, t) {
     state.playList.push(...t);
   },

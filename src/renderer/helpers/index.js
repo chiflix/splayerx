@@ -262,6 +262,7 @@ export default {
           this.infoDB.update('recent-played', playlist);
           this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.$store.getters.playingList, items: playlist.items });
         } else {
+          const addIds = [];
           for (const videoPath of addFiles) {
             const quickHash = await this.mediaQuickHash(videoPath);
             const data = {
@@ -271,9 +272,11 @@ export default {
               source: 'playlist',
             };
             const videoId = await this.infoDB.add('media-item', data);
+            addIds.push(videoId);
             playlist.items.push(videoId);
             playlist.hpaths.push(`${quickHash}-${videoPath}`);
           }
+          this.$store.commit('AddIdsToPlayingList', addIds);
           this.infoDB.update('recent-played', playlist);
           this.$store.dispatch('PlayingList', { id: playlist.id, paths: this.$store.getters.playingList, items: playlist.items });
         }
