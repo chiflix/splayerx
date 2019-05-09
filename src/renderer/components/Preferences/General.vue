@@ -409,7 +409,6 @@ export default {
       height: 15px;
     }
     &--mouseDown {
-      background-color: rgba(0, 0, 0, 0.1);
       opacity: 0.5;
     }
   }
