@@ -35,6 +35,9 @@ module.exports = {
     // limit the cyclomatic complexity to 10
     'complexity': ['error', { max: 10 }],
     // allow dangling after this and super
-    'no-underscore-dangle': ['error', { allowAfterThis: true, allowAfterSuper: true }]
+    'no-underscore-dangle': ['error', { allowAfterThis: true, allowAfterSuper: true }],
+    // allow for-of and await in for-of loop
+    'no-restricted-syntax': 0,
+    'no-await-in-loop': 0,
   }
 }

@@ -84,8 +84,8 @@ const mutations = {
 const actions = {
   PlayingList({ commit }, payload) {
     commit('isPlayingList');
-    commit('playList', payload.paths);
-    commit('items', payload.items);
+    if (payload.paths) commit('playList', payload.paths);
+    if (payload.items) commit('items', payload.items);
     commit('id', payload.id ? payload.id : '');
   },
   FolderList({ commit }, payload) {
@@ -109,15 +109,9 @@ const actions = {
     commit('RemoveItemFromPlayingListByPos', pos);
     commit('InsertItemToPlayingList', item);
   },
-  AddItemsToPlayingList({ commit, dispatch }, items) {
-    if (items.length) {
-      items.forEach((item) => {
-        dispatch('RemoveItemFromPlayingList', item);
-      });
-    } else {
-      dispatch('RemoveItemFromPlayingList', items);
-    }
-    commit('AddItemsToPlayingList', items);
+  AddItemsToPlayingList({ commit }, items) {
+    commit('AddItemsToPlayingList', items.paths);
+    commit('AddIdsToPlayingList', items.ids);
   },
   UpdatePlayingList({ dispatch, commit, state }) {
     const dirPath = path.dirname(state.playList[0]);
