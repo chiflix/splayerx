@@ -168,6 +168,7 @@
   "preferences": {
     "general": {
       "clearHistory": "Always clear playback history on exit",
+      "continuousPlayback" : "Continuous playback",
       "reverseScrolling": "Reverse mouse scrolling",
       "setDefault": "Set as the Default Video Player",
       "setDefaultDescription": "Open all video files with SPlayer.",

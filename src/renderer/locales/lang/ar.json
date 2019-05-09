@@ -168,6 +168,7 @@
   "preferences": {
     "general": {
       "clearHistory": "قم دائمًا بمسح سجل التشغيل عند الخروج",
+      "continuousPlayback" : "التشغيل المستمر",
       "reverseScrolling": "التمرير عكس الماوس",
       "setDefault": "تعيين كمشغل الفيديو الافتراضي",
       "setDefaultDescription": ".افتح جميع ملفات الفيديو باستخدام SPlayer",

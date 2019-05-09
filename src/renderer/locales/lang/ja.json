@@ -168,6 +168,7 @@
   "preferences": {
     "general": {
       "clearHistory": "終了時にプレイ履歴を削除",
+      "continuousPlayback" : "連続再生",
       "reverseScrolling": "マウスの逆スクロール",
       "setDefault": "デフォルトのプレーヤーとして設定",
       "setDefaultDescription": "SPlayer ですべてのビデオファイルを開く。",

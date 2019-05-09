@@ -168,6 +168,7 @@
   "preferences": {
     "general": {
       "clearHistory": "Borrar siempre el historial de reproducción al salir",
+      "continuousPlayback": "Kontinua reproduktado",
       "reverseScrolling": "Desplazamiento inverso del ratón",
       "setDefault": "Establecer como el jugador por defecto",
       "setDefaultDescription": "Todos los formatos de video se abren automáticamente usando SPlayer.",

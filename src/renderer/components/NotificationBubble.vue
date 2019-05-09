@@ -56,7 +56,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'privacyAgreement']),
+    ...mapGetters(['nextVideo', 'nextVideoPreviewTime', 'duration', 'singleCycle', 'continuousPlayback', 'privacyAgreement']),
     messages() {
       const messages = this.$store.getters.messageInfo;
       if (this.showNextVideo && this.showPrivacyBubble) {
@@ -81,7 +81,9 @@ export default {
   },
   watch: {
     singleCycle(val) {
-      this.showNextVideo = !val;
+      if (this.continuousPlayback) {
+        this.showNextVideo = !val;
+      }
     },
     privacyAgreement(val) {
       if (val) {
@@ -116,7 +118,9 @@ export default {
       if (time > this.nextVideoPreviewTime && time < this.duration - 1 && this.duration > 240) {
         if (this.nextVideo && !this.manualClosed) {
           this.$store.dispatch('UpdatePlayingList');
-          this.showNextVideo = true;
+          if (this.$store.getters.continuousPlayback) {
+            this.showNextVideo = true;
+          }
         }
       } else {
         this.manualClosed = false;

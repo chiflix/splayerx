@@ -49,6 +49,11 @@
     </div>
     <div class="settingItem__title">{{ $t("preferences.general.others") }}</div>
     <BaseCheckBox
+      :checkboxValue="continuousPlayback"
+      @update:checkbox-value="continuousPlayback = $event">
+      {{ $t('preferences.general.continuousPlayback') }}
+    </BaseCheckBox>
+    <BaseCheckBox
       :checkboxValue="reverseScrolling"
       @update:checkbox-value="reverseScrolling = $event">
       {{ $t('preferences.general.reverseScrolling') }}
@@ -118,6 +123,22 @@ export default {
     },
     preferenceData() {
       return this.$store.getters.preferenceData;
+    },
+    continuousPlayback: {
+      get() {
+        return this.$store.getters.continuousPlayback;
+      },
+      set(val) {
+        if (val) {
+          this.$store.dispatch('continuousPlayback').then(() => {
+            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+          });
+        } else {
+          this.$store.dispatch('notContinuousPlayback').then(() => {
+            electron.ipcRenderer.send('preference-to-main', this.preferenceData);
+          });
+        }
+      },
     },
     reverseScrolling: {
       get() {

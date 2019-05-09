@@ -143,7 +143,7 @@ new Vue({
   },
   computed: {
     ...mapGetters(['volume', 'muted', 'intrinsicWidth', 'intrinsicHeight', 'ratio', 'winAngle', 'winWidth', 'winHeight', 'winPos', 'winSize', 'chosenStyle', 'chosenSize', 'mediaHash', 'subtitleList', 'enabledSecondarySub',
-      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'reverseScrolling',
+      'currentFirstSubtitleId', 'currentSecondSubtitleId', 'audioTrackList', 'isFullScreen', 'paused', 'singleCycle', 'isHiddenByBossKey', 'isMinimized', 'isFocused', 'originSrc', 'defaultDir', 'ableToPushCurrentSubtitle', 'displayLanguage', 'calculatedNoSub', 'sizePercent', 'snapshotSavedPath', 'duration', 'continuousPlayback', 'reverseScrolling',
     ]),
     ...inputMapGetters({
       wheelDirection: iGT.GET_WHEEL_DIRECTION,
@@ -345,8 +345,13 @@ new Vue({
       this.$i18n.locale = val;
       this.refreshMenu();
     },
-    singleCycle(val) {
+    continuousPlayback(val) {
       if (this.menu) {
+        this.menu.getMenuItemById('singleCycle').enabled = val;
+      }
+    },
+    singleCycle(val) {
+      if (this.menu && this.continuousPlayback) {
         this.menu.getMenuItemById('singleCycle').checked = val;
       }
     },
@@ -588,11 +593,14 @@ new Vue({
               type: 'checkbox',
               id: 'singleCycle',
               checked: this.singleCycle,
+              enabled: this.continuousPlayback,
               click: () => {
-                if (this.singleCycle) {
-                  this.$store.dispatch('notSingleCycle');
-                } else {
-                  this.$store.dispatch('singleCycle');
+                if (this.continuousPlayback) {
+                  if (this.singleCycle) {
+                    this.$store.dispatch('notSingleCycle');
+                  } else {
+                    this.$store.dispatch('singleCycle');
+                  }
                 }
               },
             },
