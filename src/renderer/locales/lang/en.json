@@ -47,7 +47,7 @@
       "title": "File Not Found"
     },
     "fileNonExistInPlaylist": {
-      "content": "Files will be removed from the list.",
+      "content": "Files has been removed from the list.",
       "title": "File(s) Not Found"
     },
     "loadFailed": {
