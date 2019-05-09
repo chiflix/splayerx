@@ -376,34 +376,31 @@ export default {
       await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() });
       if (playlist.items.length > 1) {
         let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
-        try {
-          await fsPromises.access(currentVideo.path, fs.constants.F_OK);
-        } catch (err) {
-          const deleteItems = [];
-          for (const item of playlist.items) {
-            const video = await this.infoDB.get('media-item', item);
-            try {
-              await fsPromises.access(video.path, fs.constants.F_OK);
-            } catch (err) {
-              deleteItems.push(item);
-              this.infoDB.delete('media-item', video.videoId);
-            }
+
+        const deleteItems = [];
+        for (const item of playlist.items) {
+          const video = await this.infoDB.get('media-item', item);
+          try {
+            await fsPromises.access(video.path, fs.constants.F_OK);
+          } catch (err) {
+            deleteItems.push(item);
+            this.infoDB.delete('media-item', video.videoId);
           }
-          deleteItems.forEach((id) => {
-            const index = playlist.items.findIndex(videoId => videoId === id);
-            playlist.items.splice(index, 1);
-          });
-          if (playlist.items.length > 0) {
-            playlist.playedIndex = 0;
-            await this.infoDB.update('recent-played', playlist);
-            currentVideo = await this.infoDB.get('media-item', playlist.items[0]);
-            addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
-          } else {
-            this.infoDB.delete('recent-played', playlist.id);
-            addBubble(PLAYLIST_NON_EXIST, this.$i18n);
-            this.$bus.$emit('delete-file', id);
-            return;
-          }
+        }
+        deleteItems.forEach((id) => {
+          const index = playlist.items.findIndex(videoId => videoId === id);
+          playlist.items.splice(index, 1);
+        });
+        if (playlist.items.length > 0) {
+          playlist.playedIndex = 0;
+          await this.infoDB.update('recent-played', playlist);
+          currentVideo = await this.infoDB.get('media-item', playlist.items[0]);
+          addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
+        } else {
+          this.infoDB.delete('recent-played', playlist.id);
+          addBubble(PLAYLIST_NON_EXIST, this.$i18n);
+          this.$bus.$emit('delete-file', id);
+          return;
         }
 
         await this.playFile(currentVideo.path, currentVideo.videoId);
@@ -527,7 +524,7 @@ export default {
             errcode: FILE_NON_EXIST,
             message: 'Failed to open file, it will be removed from list.'
           });
-          addBubble(FILE_NON_EXIST, this.$i18n);
+          addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
           this.$bus.$emit('delete-file', vidPath, id);
         }
         if (process.mas && err?.code === 'EPERM') {
