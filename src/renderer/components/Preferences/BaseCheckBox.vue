@@ -29,11 +29,11 @@ export default {
   -webkit-app-region: no-drag;
   margin-top: 15px;
   width: fit-content;
-  cursor: pointer;
   position: relative;
 
   &__label {
     display: block;
+    cursor: pointer;
     padding-left: 29px;
     font-family: $font-medium;
     font-size: 13px;
@@ -64,7 +64,7 @@ export default {
     position: absolute;
     display: none;
     cursor: pointer;
-
+    
     &:checked ~ .checkbox__icon {
       display: block;
     }

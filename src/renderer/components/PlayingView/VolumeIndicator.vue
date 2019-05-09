@@ -347,6 +347,9 @@ export default {
       }
     }
     .volume {
+      display: flex;
+      justify-content: center;
+      align-items: center;
       padding: 0 auto 0 auto;
       width: 100%;
       height: calc(var(--indicator-container-width) + 10px);
