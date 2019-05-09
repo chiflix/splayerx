@@ -191,25 +191,6 @@ export default {
     asyncStorage.get('preferences').then((data) => {
       if (!data.deleteVideoHistoryOnExit) {
         this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
-          .then(data => Promise.all(data.map(playlistItem => new Promise((resolve) => {
-            let index = playlistItem.playedIndex;
-            if (index < 0 || index > playlistItem.length - 1) index = 0;
-            this.infoDB.get('media-item', playlistItem.items[index]).then((mediaItem) => {
-              if (!mediaItem && playlistItem.items.length === 1) {
-                this.infoDB.delete('recent-played', playlistItem.id);
-              } else {
-                fs.access(mediaItem.path, fs.constants.F_OK, (err) => {
-                  if (err) {
-                    // TODO: delete playlist inaccessible record
-                    this.infoDB.delete('media-item', mediaItem.videoId);
-                    resolve();
-                  } else {
-                    resolve(playlistItem);
-                  }
-                });
-              }
-            });
-          }))))
           .then((data) => {
             for (let i = 0; i < data.length; i += 1) {
               if (data[i] === undefined) {
