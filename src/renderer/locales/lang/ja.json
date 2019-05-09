@@ -42,6 +42,10 @@
 			"content": "プライリストから削除する。",
 			"title": "ファイルが見つかりませんでした。"
 		},
+		"fileNonExistInPlaylist": {
+			"content": "ファイルはリストから削除されます。",
+			"title": "ファイルが見つかりません"
+		},
 		"loadFailed": {
 			"content": "字幕タイプが読み込めません。",
 			"title": "字幕読み込みエラー"

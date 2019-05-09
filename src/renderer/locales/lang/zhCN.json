@@ -42,6 +42,10 @@
 			"content": "将从列表中移除此项目。",
 			"title": "未找到文件"
 		},
+		"fileNonExistInPlaylist": {
+			"content": "已从列表中移除。",
+			"title": "部分文件未找到"
+		},
 		"loadFailed": {
 			"content": "暂不支持该字幕类型。",
 			"title": "未能加载字幕"

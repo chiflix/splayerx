@@ -22,12 +22,12 @@ const actions = {
     commit('removeMessages', id);
   },
   addMessages({ commit }, {
-    type, title, content, dismissAfter, cb,
+    type, title, content, dismissAfter, payload, cb,
   }) {
     i += 1;
     const id = i;
     commit('addMessages', {
-      id, type, title, content, dismissAfter,
+      id, type, title, content, dismissAfter, payload,
     });
     if (dismissAfter) {
       setTimeout(() => {

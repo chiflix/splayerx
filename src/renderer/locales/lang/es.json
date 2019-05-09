@@ -42,6 +42,10 @@
 			"content": "Será eliminado de la lista.",
 			"title": "Archivo no encontrado"
 		},
+		"fileNonExistInPlaylist": {
+			"content": "Los archivos serán eliminados de la lista.",
+			"title": "Archivos no encontrados"
+		},
 		"loadFailed": {
 			"content": "Tipo de subtítulo no soportado.",
 			"title": "Subtitulo de carga fallado"

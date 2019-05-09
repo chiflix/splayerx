@@ -1,5 +1,6 @@
 import store from '@/store';
 import {
+  FILE_NON_EXIST_IN_PLAYLIST,
   FILE_NON_EXIST,
   EMPTY_FOLDER,
   OPEN_FAILED,
@@ -16,17 +17,24 @@ import {
   SNAPSHOT_FAILED,
 } from './notificationcodes';
 
-export function addBubble(code, i18n) { // eslint-disable-line complexity
+export function addBubble(code, i18n, payload) { // eslint-disable-line complexity
   switch (code) {
+    case FILE_NON_EXIST_IN_PLAYLIST:
+      store.dispatch('addMessages', {
+        type: 'result',
+        title: i18n.t('errorFile.fileNonExistInPlaylist.title', i18n.locale, i18n.messages),
+        content: i18n.t('errorFile.fileNonExistInPlaylist.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+        payload,
+      });
+      break;
     case FILE_NON_EXIST:
       store.dispatch('addMessages', {
         type: 'result',
         title: i18n.t('errorFile.fileNonExist.title', i18n.locale, i18n.messages),
         content: i18n.t('errorFile.fileNonExist.content', i18n.locale, i18n.messages),
         dismissAfter: 5000,
-        cb: () => {
-          this.$bus.$emit('delete-file');
-        },
+        payload,
       });
       break;
     case ADD_NO_VIDEO:

@@ -272,7 +272,7 @@ export default {
       this.videoId = this.items[this.index];
       if (this.videoId) {
         this.infoDB.get('media-item', this.videoId).then((val) => {
-          if (!val.lastPlayedTime) {
+          if (!val || !val.lastPlayedTime) {
             this.lastPlayedTime = 0;
             this.smallShortCut = '';
           } else if (val && val.lastPlayedTime) {

@@ -42,6 +42,10 @@
 			"content": "It will be removed from the list.",
 			"title": "File Not Found"
 		},
+		"fileNonExistInPlaylist": {
+			"content": "Files will be removed from the list.",
+			"title": "File(s) Not Found"
+		},
 		"loadFailed": {
 			"content": "Subtitle type unsupported.",
 			"title": "Load Subtitle Failed"

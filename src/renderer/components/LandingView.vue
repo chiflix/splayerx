@@ -114,7 +114,6 @@ export default {
       cover: '',
       item: [],
       isDragging: false,
-      filePathNeedToDelete: '',
       displayInfo: [],
       tranFlag: true,
       shifting: false,
@@ -193,16 +192,22 @@ export default {
       if (!data.deleteVideoHistoryOnExit) {
         this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
           .then(data => Promise.all(data.map(playlistItem => new Promise((resolve) => {
-            this.infoDB.get('media-item', playlistItem.items[playlistItem.playedIndex]).then((mediaItem) => {
-              fs.access(mediaItem.path, fs.constants.F_OK, (err) => {
-                if (err) {
-                  // TODO: delete playlist inaccessible record
-                  this.infoDB.delete('media-item', mediaItem.videoId);
-                  resolve();
-                } else {
-                  resolve(playlistItem);
-                }
-              });
+            let index = playlistItem.playedIndex;
+            if (index < 0 || index > playlistItem.length - 1) index = 0;
+            this.infoDB.get('media-item', playlistItem.items[index]).then((mediaItem) => {
+              if (!mediaItem && playlistItem.items.length === 1) {
+                this.infoDB.delete('recent-played', playlistItem.id);
+              } else {
+                fs.access(mediaItem.path, fs.constants.F_OK, (err) => {
+                  if (err) {
+                    // TODO: delete playlist inaccessible record
+                    this.infoDB.delete('media-item', mediaItem.videoId);
+                    resolve();
+                  } else {
+                    resolve(playlistItem);
+                  }
+                });
+              }
             });
           }))))
           .then((data) => {
@@ -223,27 +228,14 @@ export default {
       this.landingLogoAppear = true;
       this.showShortcutImage = false;
     });
-    // trigger by playFile function when opened file not existed
-    this.$bus.$on('file-not-existed', (filePath) => {
-      this.filePathNeedToDelete = filePath;
-      this.lastPlayedFile.forEach((file) => {
-        if (file.path === filePath) {
-          this.infoDB.delete('recent-played', file.quickHash);
-        }
-      });
-    });
     // responsible for delete the thumbnail on display which had already deleted in DB
-    this.$bus.$on('delete-file', () => {
-      if (this.filePathNeedToDelete) {
-        for (let i = 0; i < this.lastPlayedFile.length; i += 1) {
-          if (this.lastPlayedFile[i].path === this.filePathNeedToDelete) {
-            this.lastPlayedFile.splice(i, 1);
-            this.landingLogoAppear = true;
-            this.showShortcutImage = false;
-            this.filePathNeedToDelete = '';
-            break;
-          }
-        }
+    this.$bus.$on('delete-file', (id) => {
+      const deleteIndex = this.lastPlayedFile
+        .findIndex(file => file.id === id);
+      if (deleteIndex >= 0) {
+        this.lastPlayedFile.splice(deleteIndex, 1);
+        this.landingLogoAppear = true;
+        this.showShortcutImage = false;
       }
     });
     this.$bus.$on('drag-over', () => {

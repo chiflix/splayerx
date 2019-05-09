@@ -7,7 +7,7 @@ import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, SNAPSHOT_FAILED, SNAPSHOT_SUCCESS } from '@/../shared/notificationcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
 import { addBubble } from '../../shared/notificationControl';
@@ -373,9 +373,41 @@ export default {
     // open an existed play list
     async openPlayList(id) {
       const playlist = await this.infoDB.get('recent-played', id);
-      this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() });
+      await this.infoDB.update('recent-played', { ...playlist, lastOpened: Date.now() });
       if (playlist.items.length > 1) {
-        const currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
+        let currentVideo = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
+        try {
+          await fsPromises.access(currentVideo.path, fs.constants.F_OK);
+        } catch (err) {
+          const deleteItems = [];
+          for (const item of playlist.items) {
+            const video = await this.infoDB.get('media-item', item);
+            try {
+              await fsPromises.access(video.path, fs.constants.F_OK);
+            } catch (err) {
+              deleteItems.push(item);
+              this.infoDB.delete('media-item', video.videoId);
+            }
+          }
+          deleteItems.forEach((id) => {
+            const index = playlist.items.findIndex(videoId => videoId === id);
+            playlist.items.splice(index, 1);
+          });
+          if (playlist.items.length > 0) {
+            playlist.playedIndex = 0;
+            await this.infoDB.update('recent-played', playlist);
+            currentVideo = await this.infoDB.get('media-item', playlist.items[0]);
+            addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
+          } else {
+            this.infoDB.delete('recent-played', playlist.id);
+            addBubble(FILE_NON_EXIST, this.$i18n, { id });
+            setTimeout(() => {
+              this.$bus.$emit('delete-file', id);
+            }, 5000);
+            return;
+          }
+        }
+
         await this.playFile(currentVideo.path, currentVideo.videoId);
         this.$bus.$emit('open-playlist');
         let paths = [];
@@ -390,31 +422,37 @@ export default {
         });
       } else {
         const video = await this.infoDB.get('media-item', playlist.items[playlist.playedIndex]);
-        this.playFile(video.path, video.videoId);
-        let similarVideos;
         try {
-          similarVideos = await this.findSimilarVideoByVidPath(video.path);
-          const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
-          const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
-          const items = [];
-          filtered.forEach((media) => {
-            const mediaIndex = similarVideos.findIndex(path => path === media.path);
-            items[mediaIndex] = media.videoId;
-          });
-          this.$store.dispatch('FolderList', {
-            id,
-            paths: similarVideos,
-            items,
-          });
-        } catch (err) {
-          if (process.mas && err?.code === 'EPERM') {
-            // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+          await fsPromises.access(video.path, fs.constants.F_OK);
+          this.playFile(video.path, video.videoId);
+          let similarVideos;
+          try {
+            similarVideos = await this.findSimilarVideoByVidPath(video.path);
+            const singleItems = await this.infoDB.getValueByKey('media-item', 'source', '');
+            const filtered = singleItems.filter((item) => similarVideos.includes(item.path));
+            const items = [];
+            filtered.forEach((media) => {
+              const mediaIndex = similarVideos.findIndex(path => path === media.path);
+              items[mediaIndex] = media.videoId;
+            });
             this.$store.dispatch('FolderList', {
               id,
-              paths: [video.path],
-              items: [video.videoId],
+              paths: similarVideos,
+              items,
             });
+          } catch (err) {
+            if (process.mas && err?.code === 'EPERM') {
+              // TODO: maybe this.openFolderByDialog(videoFiles[0]) ?
+              this.$store.dispatch('FolderList', {
+                id,
+                paths: [video.path],
+                items: [video.videoId],
+              });
+            }
           }
+        } catch (err) {
+          this.infoDB.delete('recent-played', id);
+          addBubble(FILE_NON_EXIST, this.$i18n, { id });
         }
       }
     },
