@@ -191,7 +191,7 @@ export default {
       return this.winRatio >= 1 ? this.winHeight : this.winWidth;
     },
     noSubtitle() {
-      if (this.animClass && this.isInitial) {
+      if (this.animClass) {
         return this.$t('msg.subtitle.menuLoading');
       }
       return this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
