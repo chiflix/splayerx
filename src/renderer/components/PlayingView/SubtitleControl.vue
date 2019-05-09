@@ -674,6 +674,9 @@ export default {
     cursor: pointer;
   }
   .menu-item-text-wrapper {
+    .iconContainer {
+      display: flex;
+    }
     .deleteIcon {
       transition-delay: 75ms;
     }
@@ -775,9 +778,7 @@ export default {
         width: 26px;
         height: 27px;
         .deleteIcon {
-          width: 100%;
-          height: 100%;
-          display: flex;
+          margin: auto 9px auto auto;
         }
       }
     }
@@ -865,9 +866,7 @@ export default {
         width: 33px;
         height: 32px;
         .deleteIcon {
-          width: 100%;
-          height: 100%;
-          display: flex;
+          margin: auto 10.8px auto auto;
         }
       }
     }
@@ -955,9 +954,7 @@ export default {
         width: 46px;
         height: 44px;
         .deleteIcon {
-          width: 100%;
-          height: 100%;
-          display: flex;
+          margin: auto 15.12px auto auto;
         }
       }
     }
