@@ -384,7 +384,7 @@ function registerMainWindowEvent() {
     needToRestore = true;
   });
   ipcMain.on('relaunch', () => {
-    app.relaunch();
+    app.relaunch({ args: [] });
     app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
