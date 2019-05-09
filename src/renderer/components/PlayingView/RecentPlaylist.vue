@@ -143,7 +143,7 @@ export default {
     };
   },
   created() {
-    this.$bus.$on('delete-file', (path, id) => {
+    this.$bus.$on('delete-file', async (path, id) => {
       this.$store.dispatch('RemoveItemFromPlayingList', path);
       this.infoDB.delete('media-item', id);
       const playlist = await this.infoDB.get('recent-played', this.playListId);
