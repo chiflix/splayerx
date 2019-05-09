@@ -1,6 +1,7 @@
 import store from '@/store';
 import {
   FILE_NON_EXIST_IN_PLAYLIST,
+  PLAYLIST_NON_EXIST,
   FILE_NON_EXIST,
   EMPTY_FOLDER,
   OPEN_FAILED,
@@ -24,6 +25,15 @@ export function addBubble(code, i18n, payload) { // eslint-disable-line complexi
         type: 'result',
         title: i18n.t('errorFile.fileNonExistInPlaylist.title', i18n.locale, i18n.messages),
         content: i18n.t('errorFile.fileNonExistInPlaylist.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+        payload,
+      });
+      break;
+    case PLAYLIST_NON_EXIST:
+      store.dispatch('addMessages', {
+        type: 'result',
+        title: i18n.t('errorFile.playlistNonExist.title', i18n.locale, i18n.messages),
+        content: i18n.t('errorFile.playlistNonExist.content', i18n.locale, i18n.messages),
         dismissAfter: 5000,
         payload,
       });

@@ -7,7 +7,7 @@ import bookmark from '@/helpers/bookmark';
 import syncStorage from '@/helpers/syncStorage';
 import infoDB from '@/helpers/infoDB';
 import { getValidVideoExtensions, getValidVideoRegex } from '@/../shared/utils';
-import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST } from '@/../shared/notificationcodes';
+import { FILE_NON_EXIST, EMPTY_FOLDER, OPEN_FAILED, ADD_NO_VIDEO, SNAPSHOT_FAILED, SNAPSHOT_SUCCESS, FILE_NON_EXIST_IN_PLAYLIST, PLAYLIST_NON_EXIST } from '@/../shared/notificationcodes';
 import Sentry from '@/../shared/sentry';
 import Sagi from './sagi';
 import { addBubble } from '../../shared/notificationControl';
@@ -400,7 +400,7 @@ export default {
             addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
           } else {
             this.infoDB.delete('recent-played', playlist.id);
-            addBubble(FILE_NON_EXIST, this.$i18n, { id });
+            addBubble(PLAYLIST_NON_EXIST, this.$i18n, { id });
             setTimeout(() => {
               this.$bus.$emit('delete-file', id);
             }, 5000);
