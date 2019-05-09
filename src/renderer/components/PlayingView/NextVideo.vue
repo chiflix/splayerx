@@ -7,11 +7,11 @@
       <div class="progressBorderLight"></div>
     </div>
     <div class="nextVideo__infoWrap">
-      <div class="nextVideo__info nextVideo__info--upper">
+      <div class="nextVideo__info--upper">
         <span>{{ timecode }}&nbsp;· </span>
         <span>{{ title }}</span>
       </div>
-      <div class="nextVideo__info nextVideo__info--mainly">{{ videoName }}</div>
+      <div class="nextVideo__info--mainly">{{ videoName }}</div>
     </div>
     <div class="nextVideo__closeButton"
       @mouseup.stop="handleCloseMouseup">
@@ -185,6 +185,7 @@ export default {
   &__info {
     color: #FFFFFF;
     &--upper {
+      @extend .nextVideo__info;
       padding-left: 1px;
       opacity: 0.7;
       font-family: $font-light;
@@ -196,6 +197,7 @@ export default {
       }
     }
     &--mainly {
+      @extend .nextVideo__info;
       margin-top: 3px;
       font-family: $font-semibold;
       opacity: 0.9;
