@@ -9,18 +9,18 @@
           <div class="dropdown__displayItem">{{ mapCode(displayLanguage) }}</div>
           <div class="dropdown__listItems"
             @mouseup.stop="">
-            <div class="dropdownListItem dropdownListItem--default"
+            <div class="dropdownListItem"
               v-for="(language, index) in displayLanguages"
               :key="index"
               @mouseup.stop="handleSelection(language)">
               {{ mapCode(language) }}
             </div>
           </div>
-          <Icon class="dropdown__icon" type="rightArrow" :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
+          <Icon type="rightArrow" :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
         </div>
       </div>
     </div>
-    <div class="settingItem settingItem--justify">
+    <div class="settingItem--justify">
       <div class="setting-content">
         <div class="settingItem__title">{{ $t("preferences.general.setDefault") }}</div>
         <div class="settingItem__description">{{ $t("preferences.general.setDefaultDescription") }}</div>
@@ -35,7 +35,7 @@
         </transition>
       </div>
     </div>
-    <div class="settingItem settingItem--justify" v-if="isMac">
+    <div class="settingItem--justify" v-if="isMac">
       <div class="setting-content">
         <div class="settingItem__title">{{ $t("preferences.general.restoreSettings") }}</div>
         <div class="settingItem__description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
@@ -290,125 +290,126 @@ export default {
       }
     }
 
-    .dropdown {
-      position: relative;
-      width: 240px;
-      height: 28px;
-      margin-top: 13px;
-      
-      &__toggle {
-        position: absolute;
-        width: 100%;
-        margin-top: -1px;
-        margin-left: -1px;
-        transition: all 200ms;
-        border-radius: 2px;
-        overflow: hidden;
-        
-
-        &--display {
-          height: 28px;
-          border: 1px solid rgba(255,255,255,0);
-          background-color: rgba(255, 255, 255, 0);
-        }
-        
-        &--list { 
-          height: 148px;
-          border: 1px solid rgba(255,255,255,0.3);
-          background-color: rgba(120,120,120,1);
-          .dropdown__displayItem {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-          }
-        }
-      }
-
-      &__displayItem {
-        height: 28px;
-        line-height: 28px;
-        border-bottom: 1px solid rgba(255,255,255,0);
-      }
-
-      &__listItems {
-        cursor: pointer;
-        position: relative;
-        height: 112px;
-        margin: 4px 4px 4px 6px;
-        overflow-y: scroll;
-      }
-
-      .dropdownListItem {
-        height: 28px;
-        line-height: 28px;
-
-        &--default:hover {
-          background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
-        }
-      }
-
-      &__icon {
-        position: absolute;
-        top: 7px;
-        right: 8px;
-        transition: transform 200ms;
-        &--arrowDown {
-          transform: rotate(90deg);
-        }
-        &--arrowUp {
-          z-index: 100;
-          transform: rotate(-90deg);
-        }
-      }
-
-      ::-webkit-scrollbar {
-        width: 3px;
-        user-select: none;
-      }
-      /* Handle */
-      ::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 1.5px;
-      }
-      ::-webkit-scrollbar-track {
-        border-radius: 2px;
-        width: 10px;
-        user-select: none;
-      }
-    }
-
-    .button {
-      box-sizing: border-box;
-      align-self: center;
-      width: 61px;
-      height: 28px;
-
-      .button-enter, .button-leave-to {
-        opacity: 0;
-      }
-      .button-enter-active {
-        transition: opacity 200ms ease-in;
-      }
-      .button-leave-active {
-        transition: opacity 200ms ease-in;
-      }
-
-      .content {
-        font-family: $font-medium;
-        font-size: 11px;
-        color: #FFFFFF;
-        letter-spacing: 0;
-        text-align: center;
-        line-height: 26px;
-      }
-      .result {
-        position: relative;
-        top: 5px;
-        left: 23px;
-      }
-    }
-
     &--justify {
+      @extend .settingItem;
       display: flex;
       justify-content: space-between;
+    }
+  }
+  .dropdown {
+    position: relative;
+    width: 240px;
+    height: 28px;
+    margin-top: 13px;
+    
+    &__toggle {
+      position: absolute;
+      width: 100%;
+      margin-top: -1px;
+      margin-left: -1px;
+      transition: all 200ms;
+      border-radius: 2px;
+      overflow: hidden;
+      
+
+      &--display {
+        height: 28px;
+        border: 1px solid rgba(255,255,255,0);
+        background-color: rgba(255, 255, 255, 0);
+      }
+      
+      &--list { 
+        height: 148px;
+        border: 1px solid rgba(255,255,255,0.3);
+        background-color: rgba(120,120,120,1);
+        .dropdown__displayItem {
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+      }
+    }
+
+    &__displayItem {
+      height: 28px;
+      line-height: 28px;
+      border-bottom: 1px solid rgba(255,255,255,0);
+    }
+
+    &__listItems {
+      cursor: pointer;
+      position: relative;
+      height: 112px;
+      margin: 4px 4px 4px 6px;
+      overflow-y: scroll;
+    }
+
+    .dropdownListItem {
+      height: 28px;
+      line-height: 28px;
+
+      &:hover {
+        background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
+      }
+    }
+
+    &__icon {
+      position: absolute;
+      top: 7px;
+      right: 8px;
+      transition: transform 200ms;
+      &--arrowDown {
+        @extend .dropdown__icon;
+        transform: rotate(90deg);
+      }
+      &--arrowUp {
+        @extend .dropdown__icon;
+        z-index: 100;
+        transform: rotate(-90deg);
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 3px;
+      user-select: none;
+    }
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1.5px;
+    }
+    ::-webkit-scrollbar-track {
+      border-radius: 2px;
+      width: 10px;
+      user-select: none;
+    }
+  }
+  .button {
+    box-sizing: border-box;
+    align-self: center;
+    width: 61px;
+    height: 28px;
+
+    .button-enter, .button-leave-to {
+      opacity: 0;
+    }
+    .button-enter-active {
+      transition: opacity 200ms ease-in;
+    }
+    .button-leave-active {
+      transition: opacity 200ms ease-in;
+    }
+
+    .content {
+      font-family: $font-medium;
+      font-size: 11px;
+      color: #FFFFFF;
+      letter-spacing: 0;
+      text-align: center;
+      line-height: 26px;
+    }
+    .result {
+      position: relative;
+      top: 5px;
+      left: 23px;
     }
   }
 }
