@@ -53,6 +53,7 @@ export default {
       mouseover: false,
       mousedown: false,
       canToggleMute: false,
+      firstAppear: true, // appear the volume indicator when switch from LandingView to PlayingView
     };
   },
   props: ['showAllWidgets', 'mousedownOnPlayButton', 'attachedShown'],
@@ -64,6 +65,7 @@ export default {
     showVolume() {
       return (this.inArea && this.showAllWidgets
         && !this.mousedownOnPlayButton && !this.attachedShown)
+        || this.firstAppear
         || this.mousedown || this.volumeTriggerStopped || (this.muted && this.showAllWidgets);
     },
     volume: {
@@ -169,6 +171,7 @@ export default {
     this.actionArea();
     setTimeout(() => {
       this.leaveArea();
+      this.firstAppear = false;
     }, 2000);
     if (this.muted) {
       this.volumeTriggerStopped = this.showAllWidgets;
