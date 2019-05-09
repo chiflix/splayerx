@@ -4,12 +4,13 @@
       :class="avaliableClass(index)"
       v-for="(cue, index) in currentCues"
       :key="index"
-      :id="'cue'+index"
+      :id="cueType+index"
       :style="{
         writingMode: isVtt ? `vertical-${cue.tags.vertical}` : '',
         left: subLeft(index),
         top: subTop(index),
         bottom: subBottom(index),
+        transform: transPos(index),
       }">
       <cue-renderer
         :text="cue.text"
@@ -75,6 +76,9 @@ export default {
     type() {
       return this.subtitleInstance.metaInfo.format;
     },
+    cueType() {
+      return this.isFirstSub ? 'first-cue' : 'secondary-cue';
+    },
     currentTags() {
       return this.currentCues.map(cue => cue.tags);
     },
@@ -110,6 +114,22 @@ export default {
           this.currentCues[index].tags.alignment = this.lastAlignment[ind];
         }
       });
+      const { currentTags: tags } = this;
+      const len = val.length;
+      // 在这里监听当前currentCues,来更新firstLinesNum，linesNum
+      if (len > 0 && !this.isFirstSub) {
+        this.$emit('update:linesNum', this.lastLineNum(len - 1) + val[len - 1].split('<br>').length); // 第二字幕的行数
+        this.$emit('update:tags', tags[len - 1]); // 第二字幕的tags
+      } else if (len > 0) {
+        this.$emit('update:firstLinesNum', this.lastLineNum(len - 1) + val[len - 1].split('<br>').length);
+        this.$emit('update:firstTags', tags[len - 1]); // 第一字幕的tags
+      } else if (!this.isFirstSub) {
+        this.$emit('update:linesNum', 0); // 第二字幕的行数
+        this.$emit('update:tags', {}); // 第二字幕的tags
+      } else {
+        this.$emit('update:firstLinesNum', 0);
+        this.$emit('update:firstTags', {}); // 第一字幕的tags
+      }
     },
     subToTop(val) {
       if (!val) {
@@ -204,13 +224,6 @@ export default {
           )));
         if (cues.length !== this.currentCues.length || !this.isSameCues(cues, this.currentCues)) {
           this.currentCues = cues;
-          this.$nextTick(() => {
-            this.currentCues.forEach((item, index) => {
-              if (document.querySelector(`#cue${index}`)) {
-                document.querySelector(`#cue${index}`).style.transform = this.transPos(index);
-              }
-            });
-          });
         }
       }
     },
@@ -270,14 +283,7 @@ export default {
     },
     lineNum(index) {
       // 最新一条字幕需要换行的translate比例
-      const { currentTags: tags, currentTexts: texts } = this;
-      if (!this.isFirstSub) {
-        this.$emit('update:linesNum', this.subToTop || [7, 8, 9].includes(tags[index].alignment) ? texts[index].split('<br>').length : this.lastLineNum(index) + texts[index].split('<br>').length); // 第二字幕的行数
-        this.$emit('update:tags', tags[index]); // 第二字幕的tags
-      } else {
-        this.$emit('update:firstLinesNum', this.subToTop || [7, 8, 9].includes(tags[index].alignment) ? this.lastLineNum(index) + texts[index].split('<br>').length : texts[index].split('<br>').length); // 第一字幕的行数
-        this.$emit('update:firstTags', tags[index]); // 第一字幕的tags
-      }
+      const { currentTexts: texts } = this;
       return this.lastLineNum(index) / texts[index].split('<br>').length;
     },
     assLine(index) {
@@ -327,25 +333,36 @@ export default {
       // 两个字幕的间距，由不同字幕大小下的不同表达式决定
       const subSpaceFactorsA = [5 / 900, 9 / 900, 10 / 900, 12 / 900];
       const subSpaceFactorsB = [4, 21 / 5, 4, 23 / 5];
-      const secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
-      const firstSubHeight = this.firstLinesNum * 9 * this.scaleNum;
-      // 当播放列表打开时，计算为第二字幕相对于第一字幕需要translate的值
-      const subHeightWithDirection = this.subToTop || [7, 8, 9].includes(tags[index].alignment) ?
-        [firstSubHeight, secondSubHeight] : [secondSubHeight, firstSubHeight];
-      // 根据字体尺寸和换行数计算字幕需要translate的百分比，当第一字幕同时存在多条且之前条存在位置信息时，之前条不纳入translate计算
+      let secondSubHeight = 0;
+      let firstSubHeight = 0;
       let transPercent;
-      if (texts[index - 1] && isEqual(tags[index], tags[index - 1]) && this.linesNum === texts[index - 1].split('<br>').length) {
-        transPercent = this.lastTransPercent;
-      } else if (this.tags.alignment !== this.firstTags.alignment && !texts[index - 1]) {
+      let subHeightWithDirection = [];
+      // 当出现第二字幕的情况下
+      // *. 当第一字幕和第二字幕的alignment不同时，不需要transPercent
+      // 1。正常情况：第二字幕没有transPercent，第一字幕参考第二字幕的有效总行数，来计算transPercent
+      // 2。字幕在上面：第一字幕没有transPercent，第二字幕参考第一字幕的有效总行数，来计算transPercent
+      if (this.tags && this.firstTags && this.tags.alignment !== this.firstTags.alignment) {
         transPercent = 0;
-      } else {
+      } else if (this.isFirstSub && !(this.subToTop || [7, 8, 9].includes(tags[index].alignment))) {
+        // 根据第二字幕的有效行数，计算第二字幕的比较高度
+        secondSubHeight = this.linesNum * 9 * this.secondarySubScale;
+        // 第一字幕的按顺序，计算当前自己的比较高度
+        firstSubHeight = texts[index].split('<br>').length * 9 * this.scaleNum;
+        subHeightWithDirection = [secondSubHeight, firstSubHeight];
+      } else if (!this.isFirstSub && (this.subToTop || [7, 8, 9].includes(tags[index].alignment))) {
+        // 第二字幕的按顺序，计算当前自己的比较高度
+        secondSubHeight = texts[index].split('<br>').length * 9 * this.secondarySubScale;
+        // 根据第一字幕的有效行数，计算第一字幕的比较高度
+        firstSubHeight = this.firstLinesNum * 9 * this.scaleNum;
+        subHeightWithDirection = [firstSubHeight, secondSubHeight];
+      }
+      if (subHeightWithDirection.length === 2) {
         transPercent = -((subHeightWithDirection[0] + ((subSpaceFactorsA[this.chosenSize] *
           this.winHeight) + subSpaceFactorsB[this.chosenSize])) / subHeightWithDirection[1]) * 100;
       }
-      this.lastTransPercent = transPercent;
       if (!isVtt) {
         if (this.isFirstSub) { // 第一字幕不是VTT
-          if (tags[index].pos) {
+          if (tags[index] && tags[index].pos) {
             // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
             return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.translateNum(tags[index].alignment)[1] + this.assLine(index)}%)`;
           }
@@ -356,7 +373,7 @@ export default {
           // 只有第一字幕时需要translate的值
           return `translate(${initialTranslate[tags[index].alignment - 1][0]}%, ${this.transDirection(initialTranslate[tags[index].alignment - 1][1], tags[index].alignment) + this.assLine(index)}%)`;
         }
-        if (tags[index].pos) { // 第二字幕不是VTT
+        if (tags[index] && tags[index].pos) { // 第二字幕不是VTT
           // 字幕不为vtt且存在pos属性时，translate字幕使字幕alignment与pos点重合
           return `translate(${this.translateNum(tags[index].alignment)[0]}%, ${this.transDirection(this.translateNum(tags[index].alignment)[1], tags[index].alignment) + this.assLine(index)}%)`;
         }
@@ -368,13 +385,13 @@ export default {
       if (this.isFirstSub) {
         if (this.currentSecondSubtitleId !== '' && this.enabledSecondarySub) {
           // vtt字幕没有位置信息时且同时存在第一第二字幕时第一字幕需要translate的值
-          if (tags[index].vertical) {
+          if (tags[index] && tags[index].vertical) {
             return `translate(${initialTranslate[1][0] + this.vttLine(index)}%, ${this.transDirection(initialTranslate[1][1] + this.firstSubTransPercent(transPercent))}%)`;
           }
           return `translate(${initialTranslate[1][0]}%, ${this.transDirection(initialTranslate[1][1] + this.firstSubTransPercent(transPercent)) + this.vttLine(index)}%)`;
         }
         // 只有第一字幕时需要translate的值
-        if (tags[index].vertical) {
+        if (tags[index] && tags[index].vertical) {
           return `translate(${initialTranslate[1][0] + this.vttLine(index)}%, ${this.transDirection([1][1], tags[index].alignment)}%)`;
         }
         return `translate(${initialTranslate[1][0]}%, ${this.transDirection([1][1], tags[index].alignment) + this.vttLine(index)}%)`;
@@ -419,7 +436,6 @@ export default {
       return '';
     },
     subBottom(index) {
-      // 把subtitle.scss里固定的bottom移到这里进行计算
       const { currentTags: tags, isVtt } = this;
       if (((!isVtt && [1, 2, 3].includes(tags[index].alignment)) && !tags[index].pos) ||
         (isVtt && (!tags[index].line || !tags[index].position))) {

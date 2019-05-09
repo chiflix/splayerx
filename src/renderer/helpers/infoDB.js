@@ -18,56 +18,20 @@ export class InfoDB {
     this.db = await openDb(
       INFO_DATABASE_NAME, INFODB_VERSION,
       async (upgradeDB) => {
-        if (upgradeDB.oldVersion < 1) {
-          INFO_SCHEMAS.forEach(({ name, options, indexes }) => {
-            const store = upgradeDB.createObjectStore(name, options);
-            if (indexes) {
-              indexes.forEach((val) => {
-                if (!store.indexNames.contains(val)) store.createIndex(val, val);
-              });
-            }
-          });
-        } else {
-          const oldRecords = await upgradeDB.transaction
-            .objectStore(RECENT_OBJECT_STORE_NAME).getAll();
+        if (upgradeDB.oldVersion === 1) {
           await upgradeDB.deleteObjectStore(RECENT_OBJECT_STORE_NAME);
-          INFO_SCHEMAS.forEach(({ name, options, indexes }) => {
-            const store = upgradeDB.createObjectStore(name, options);
-            if (indexes) {
-              indexes.forEach((val) => {
-                store.createIndex(val, val);
-              });
-            }
-          });
-
-          /* eslint-disable */
-          for (const data of oldRecords) {
-            if (!data.type) {
-              const convertedData = {
-                items: [],
-                hpaths: [`${data.quichHash}-${data.path}`],
-                playedIndex: 0,
-                lastOpened: data.lastOpened,
-              };
-              const videoid = await upgradeDB.transaction.objectStore(VIDEO_OBJECT_STORE_NAME).add(data);
-              convertedData.items.push(videoid);
-              await upgradeDB.transaction.objectStore(RECENT_OBJECT_STORE_NAME).add(convertedData);
-            } else {
-              const convertedData = {
-                items: [],
-                hpaths: [],
-                playedIndex: 0,
-                lastOpened: data.lastOpened,
-              };
-              for (const playlistItem of data.infos) {
-                const videoid = await upgradeDB.transaction.objectStore(VIDEO_OBJECT_STORE_NAME).add(playlistItem);
-                convertedData.items.push(videoid);
-                convertedData.hpaths.push(`${playlistItem.quickHash}-${playlistItem.path}`);
-              }
-              await upgradeDB.transaction.objectStore(RECENT_OBJECT_STORE_NAME).add(convertedData);
-            }
-          }
+        } else if (upgradeDB.oldVersion === 2) {
+          await upgradeDB.deleteObjectStore(RECENT_OBJECT_STORE_NAME);
+          await upgradeDB.deleteObjectStore(VIDEO_OBJECT_STORE_NAME);
         }
+        INFO_SCHEMAS.forEach(({ name, options, indexes }) => {
+          const store = upgradeDB.createObjectStore(name, options);
+          if (indexes) {
+            indexes.forEach((val) => {
+              if (!store.indexNames.contains(val)) store.createIndex(val, val);
+            });
+          }
+        });
       },
     );
     return this.db;
@@ -99,7 +63,7 @@ export class InfoDB {
     const tx = db.transaction(schema, 'readwrite');
     return tx.objectStore(schema).add(data);
   }
-  
+
   /**
    * @param  {String} schema
    * @param  {Object} data
@@ -107,7 +71,7 @@ export class InfoDB {
    * Replace a record if the given quickHash existed
    */
   async update(schema, data) {
-    if (!data.id && !data.videoId) throw new Error(`Invalid data: Require Media ID !`);
+    if (!data.id && !data.videoId) throw new Error('Invalid data: Require Media ID !');
     const db = await this.getDB();
     addLog.methods.addLog('info', `Updating ${data.path || data.videoId || data.id} to ${schema}`);
     const tx = db.transaction(schema, 'readwrite');
@@ -134,6 +98,7 @@ export class InfoDB {
     addLog.methods.addLog('info', `deleting ${id} from recent-played`);
     const db = await this.getDB();
     const playlistItem = await this.get('recent-played', id);
+    /* eslint-disable */
     for (const item of playlistItem.items) {
       await this.delete('media-item', item);
     }
