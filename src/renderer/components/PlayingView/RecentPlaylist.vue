@@ -579,7 +579,7 @@ export default {
 <style lang="scss" scoped>
 .recent-playlist {
   width: 100%;
-  height: 100%;
+  height: calc(100% - 36px);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
