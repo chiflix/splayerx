@@ -106,7 +106,6 @@ export default {
     return {
       lastPlayedFile: [],
       sagiHealthStatus: 'UNSET',
-      showShortcutImage: false,
       mouseDown: false,
       invalidTimeRepresentation: '--',
       landingLogoAppear: true,
@@ -153,6 +152,9 @@ export default {
         }
       },
     },
+    showShortcutImage() {
+      return !this.landingLogoAppear;
+    },
     move() {
       return -(this.firstIndex * (this.thumbnailWidth + this.marginRight));
     },
@@ -188,26 +190,24 @@ export default {
   },
   created() {
     // Get all data and show
-    asyncStorage.get('preferences').then((data) => {
-      if (!data.deleteVideoHistoryOnExit) {
-        this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
-          .then((data) => {
-            for (let i = 0; i < data.length; i += 1) {
-              if (data[i] === undefined) {
-                data.splice(i, 1);
-              }
+    if (!this.$store.getters.deleteVideoHistoryOnExit) {
+      this.infoDB.sortedResult('recent-played', 'lastOpened', 'prev')
+        .then((data) => {
+          for (let i = 0; i < data.length; i += 1) {
+            if (data[i] === undefined) {
+              data.splice(i, 1);
             }
-            this.lastPlayedFile = data.slice(0, 9);
-          });
-      } else {
-        this.infoDB.clearAll();
-      }
-    });
+          }
+          this.lastPlayedFile = data.slice(0, 9);
+        });
+    } else {
+      this.infoDB.clearAll();
+    }
     this.$bus.$on('clean-lastPlayedFile', () => {
       // just for delete thumbnail display
+      this.firstIndex = 0;
       this.lastPlayedFile = [];
       this.landingLogoAppear = true;
-      this.showShortcutImage = false;
     });
     // responsible for delete the thumbnail on display which had already deleted in DB
     this.$bus.$on('delete-file', (id) => {
@@ -216,7 +216,6 @@ export default {
       if (deleteIndex >= 0) {
         this.lastPlayedFile.splice(deleteIndex, 1);
         this.landingLogoAppear = true;
-        this.showShortcutImage = false;
       }
     });
     this.$bus.$on('drag-over', () => {
@@ -243,9 +242,6 @@ export default {
         this.addLog('info', `launching: ${app.getName()} ${app.getVersion()}`);
         this.addLog('info', `sagi API Status: ${this.sagiHealthStatus}`);
       }
-    });
-    this.$bus.$on('clean-lastPlayedFile', () => {
-      this.firstIndex = 0;
     });
     window.onkeyup = (e) => {
       if (e.keyCode === 39) {
@@ -286,7 +282,6 @@ export default {
       this.infoDB.deletePlaylist(item.id);
     },
     showShortcut(flag) {
-      this.showShortcutImage = flag;
       this.landingLogoAppear = !flag;
     },
     displayInfoUpdate(displayInfo) {
