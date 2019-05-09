@@ -39,8 +39,8 @@ export function addBubble(code, i18n) { // eslint-disable-line complexity
     case FILE_NON_EXIST:
       store.dispatch('addMessages', {
         type: 'result',
-        title: i18n.t('errorFile.fileNonExist.title', i18n.locale, i18n.messages),
-        content: i18n.t('errorFile.fileNonExist.content', i18n.locale, i18n.messages),
+        title: i18n.t('errorFile.playlistNonExist.title', i18n.locale, i18n.messages),
+        content: i18n.t('errorFile.playlistNonExist.content', i18n.locale, i18n.messages),
         dismissAfter: 5000,
       });
       break;
