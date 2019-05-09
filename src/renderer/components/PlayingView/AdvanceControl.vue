@@ -85,17 +85,19 @@ export default {
       }
     },
     currentMouseupComponent(val) {
-      if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
-        if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
-          if (this.showAttached) {
-            this.anim.playSegments([68, 73], true);
-            this.$emit('update:lastDragging', false);
+      setTimeout(() => {
+        if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
+          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
+            if (this.showAttached) {
+              this.anim.playSegments([68, 73], true);
+              this.$emit('update:lastDragging', false);
+            }
+            this.clearMousedown({ componentName: '' });
+          } else if (val !== this.$options.name && this.showAttached) {
+            this.$emit('update:showAttached', false);
           }
-          this.clearMousedown({ componentName: '' });
-        } else if (val !== this.$options.name && this.showAttached) {
-          this.$emit('update:showAttached', false);
         }
-      }
+      }, 0);
     },
   },
   methods: {
