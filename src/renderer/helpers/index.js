@@ -387,20 +387,22 @@ export default {
             this.infoDB.delete('media-item', video.videoId);
           }
         }
-        deleteItems.forEach((id) => {
-          const index = playlist.items.findIndex(videoId => videoId === id);
-          playlist.items.splice(index, 1);
-        });
-        if (playlist.items.length > 0) {
-          playlist.playedIndex = 0;
-          await this.infoDB.update('recent-played', playlist);
-          currentVideo = await this.infoDB.get('media-item', playlist.items[0]);
-          addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
-        } else {
-          this.infoDB.delete('recent-played', playlist.id);
-          addBubble(PLAYLIST_NON_EXIST, this.$i18n);
-          this.$bus.$emit('delete-file', id);
-          return;
+        if (deleteItems.length > 0) {
+          deleteItems.forEach((id) => {
+            const index = playlist.items.findIndex(videoId => videoId === id);
+            playlist.items.splice(index, 1);
+          });
+          if (playlist.items.length > 0) {
+            playlist.playedIndex = 0;
+            await this.infoDB.update('recent-played', playlist);
+            currentVideo = await this.infoDB.get('media-item', playlist.items[0]);
+            addBubble(FILE_NON_EXIST_IN_PLAYLIST, this.$i18n);
+          } else {
+            this.infoDB.delete('recent-played', playlist.id);
+            addBubble(PLAYLIST_NON_EXIST, this.$i18n);
+            this.$bus.$emit('delete-file', id);
+            return;
+          }
         }
 
         await this.playFile(currentVideo.path, currentVideo.videoId);
