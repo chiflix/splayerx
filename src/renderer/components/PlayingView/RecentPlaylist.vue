@@ -143,12 +143,9 @@ export default {
     };
   },
   created() {
-    this.$bus.$on('file-not-existed', (path) => {
-      this.filePathNeedToDelete = path;
-    });
-    this.$bus.$on('delete-file', () => {
-      this.$store.dispatch('RemoveItemFromPlayingList', this.filePathNeedToDelete);
-      this.filePathNeedToDelete = '';
+    this.$bus.$on('delete-file', (path, id) => {
+      this.$store.dispatch('RemoveItemFromPlayingList', path);
+      this.infoDB.delete('media-item', id);
     });
     this.hoverIndex = this.playingIndex;
     this.eventTarget.onItemMousemove = this.onItemMousemove;

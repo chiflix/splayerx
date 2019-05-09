@@ -528,7 +528,7 @@ export default {
             message: 'Failed to open file, it will be removed from list.'
           });
           addBubble(FILE_NON_EXIST, this.$i18n);
-          this.$bus.$emit('file-not-existed', vidPath);
+          this.$bus.$emit('delete-file', vidPath, id);
         }
         if (process.mas && err?.code === 'EPERM') {
           this.openFilesByDialog({ defaultPath: vidPath });
