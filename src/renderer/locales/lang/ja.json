@@ -4,7 +4,12 @@
     "audioMenu": "オーディオ",
     "changeTrack": "オディオトラック",
     "chosenTrack": "デフォルト",
-    "fontItems": ["小", "通常", "大", "最大"],
+    "fontItems": [
+      "小",
+      "通常",
+      "大",
+      "最大"
+    ],
     "fontSize": "文字サイズ",
     "fontStyle": "文字スタイル",
     "rateTitle": "再生速度",
@@ -36,6 +41,14 @@
     "fileNonExist": {
       "content": "プライリストから削除する。",
       "title": "ファイルが見つかりませんでした。"
+    },
+    "playlistNonExist": {
+      "content": "このアイテムは削除されました。",
+      "title": "ファイルが見つかりませんでした"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "ファイルはリストから削除されます。",
+      "title": "ファイルが見つかりません"
     },
     "loadFailed": {
       "content": "字幕タイプが読み込めません。",

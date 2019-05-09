@@ -4,7 +4,12 @@
     "audioMenu": "إعدادات الصوت",
     "changeTrack": "مقطع صوتي",
     "chosenTrack": "افتراضي",
-    "fontItems": ["S", "M", "L", "XL"],
+    "fontItems": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
     "fontSize": "حجم الخط",
     "fontStyle": "نوع الخط",
     "rateTitle": "لعب السرعة",
@@ -36,6 +41,14 @@
     "fileNonExist": {
       "content": "ستتم إزالته من القائمة.",
       "title": "لم يتم العثور على الملف"
+    },
+    "playlistNonExist": {
+      "content": ".تمت إزالة هذا العنصر",
+      "title": "لم يتم العثور على الملف"
+    },
+    "fileNonExistInPlaylist": {
+      "content": ".ستتم إزالة الملفات من القائمة",
+      "title": "لم يتم العثور على بعض الملفات"
     },
     "loadFailed": {
       "content": "نوع العنوان الفرعي غير مدعوم.",

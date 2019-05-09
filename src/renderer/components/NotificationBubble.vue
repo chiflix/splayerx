@@ -108,9 +108,6 @@ export default {
     },
     closeMessage(id, title) {
       this.$store.dispatch('removeMessages', id);
-      if (title === this.$t('errorFile.fileNonExist.title')) {
-        this.$bus.$emit('delete-file');
-      }
     },
     checkNextVideoUI(time) {
       if (time > this.nextVideoPreviewTime && time < this.duration - 1 && this.duration > 240) {

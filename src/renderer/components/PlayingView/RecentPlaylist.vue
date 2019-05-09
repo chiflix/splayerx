@@ -110,8 +110,6 @@ export default {
   props: {
     mousemoveClientPosition: {},
     displayState: Boolean,
-    mousedownOnOther: Boolean,
-    mouseupOnOther: Boolean,
     isDragging: Boolean,
     lastDragging: Boolean,
   },
@@ -145,12 +143,15 @@ export default {
     };
   },
   created() {
-    this.$bus.$on('file-not-existed', (path) => {
-      this.filePathNeedToDelete = path;
-    });
-    this.$bus.$on('delete-file', () => {
-      this.$store.dispatch('RemoveItemFromPlayingList', this.filePathNeedToDelete);
-      this.filePathNeedToDelete = '';
+    this.$bus.$on('delete-file', async (path, id) => {
+      this.$store.dispatch('RemoveItemFromPlayingList', path);
+      this.infoDB.delete('media-item', id);
+      const playlist = await this.infoDB.get('recent-played', this.playListId);
+      await this.infoDB.update('recent-played', {
+        ...playlist,
+        items: this.items,
+        playedIndex: this.playingIndex,
+      });
     });
     this.hoverIndex = this.playingIndex;
     this.eventTarget.onItemMousemove = this.onItemMousemove;
@@ -580,15 +581,10 @@ export default {
 <style lang="scss" scoped>
 .recent-playlist {
   width: 100%;
+  height: calc(100% - 36px);
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  @media screen and (max-width: 1355px) {
-    height: 282px;
-  }
-  @media screen and (min-width: 1356px) {
-    height: 20.81vw;
-  }
   .background-gradient {
     position: absolute;
     z-index: -1;
