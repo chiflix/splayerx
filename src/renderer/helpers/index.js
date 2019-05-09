@@ -450,7 +450,7 @@ export default {
           }
         } catch (err) {
           this.infoDB.delete('recent-played', id);
-          addBubble(FILE_NON_EXIST, this.$i18n);
+          addBubble(PLAYLIST_NON_EXIST, this.$i18n);
           this.$bus.$emit('delete-file', id);
         }
       }
