@@ -1295,13 +1295,15 @@ new Vue({
     windowRotate() {
       this.$store.dispatch('windowRotate90Deg');
       if (this.isFullScreen) return;
+      const winSize = [this.winSize[0], this.winSize[1]];
       let newSize = [];
       const windowRect = [
         window.screen.availLeft, window.screen.availTop,
         window.screen.availWidth, window.screen.availHeight,
       ];
-      const videoSize = (this.winAngle === 90 || this.winAngle === 270) ?
-        [this.intrinsicHeight, this.intrinsicWidth] : [this.intrinsicWidth, this.intrinsicHeight];
+      // 旋转后，画面会恢复为原始分辨率，原始分辨率就是之前的窗口大小
+      // 这里在旋转窗口后，以之前的宽为新的高，以之前的高为新的宽,
+      const videoSize = winSize.reverse();
       newSize = this.calculateWindowSize(
         [320, 180],
         windowRect.slice(2, 4),

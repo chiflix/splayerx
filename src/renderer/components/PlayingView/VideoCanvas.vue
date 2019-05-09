@@ -211,8 +211,10 @@ export default {
         }
       }
       if (newSize.length > 0) {
+        // 退出全屏，计算pos依赖旧窗口大小，现在设置旧窗口大小为新大小的反转，
+        // 这样在那里全屏，退出全屏后窗口还在那个位置。
         const newPosition = this.calculateWindowPosition(
-          this.winPos.concat(this.winSize),
+          this.winPos.concat([newSize[1], newSize[0]]),
           windowRect,
           newSize,
         );
