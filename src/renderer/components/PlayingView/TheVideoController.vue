@@ -10,7 +10,7 @@
     @mousedown.left="handleMousedownLeft"
     @click.left="handleMouseupLeft">
     <titlebar key="playing-view" currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']"></titlebar>
-    <notification-bubble ref="nextVideoUI"/>
+    <notification-bubble class="notification-bubble" ref="nextVideoUI"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"
     :displayState="displayState['recent-playlist']"
     :mousemoveClientPosition="mousemoveClientPosition"
@@ -647,6 +647,9 @@ export default {
     rgba(0, 0, 0, 0.19) 62%,
     rgba(0, 0, 0, 0.29) 100%
   );
+}
+.notification-bubble {
+  z-index: 105;
 }
 .recent-playlist {
   position: absolute;
