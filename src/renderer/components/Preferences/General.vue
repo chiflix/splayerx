@@ -21,29 +21,33 @@
       </div>
     </div>
     <div class="settingItem--justify">
-      <div class="setting-content">
+      <div>
         <div class="settingItem__title">{{ $t("preferences.general.setDefault") }}</div>
         <div class="settingItem__description">{{ $t("preferences.general.setDefaultDescription") }}</div>
       </div>
-      <div class="settingItem__input button no-drag" ref="button1"
+      <div class="settingItem__input button no-drag"
+        :class="button1Styles"
+        ref="button1"
         @mousedown="mousedownOnSetDefault">
         <transition name="button" mode="out-in">
-          <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
-          <div :key="defaultState" v-else class="result">
+          <div key="" v-if="!defaultState" class="button__text">{{ $t("preferences.general.setButton") }}</div>
+          <div :key="defaultState" v-else class="button__result">
             <Icon :type="defaultState" :class="defaultState"/>
           </div>
         </transition>
       </div>
     </div>
     <div class="settingItem--justify" v-if="isMac">
-      <div class="setting-content">
+      <div>
         <div class="settingItem__title">{{ $t("preferences.general.restoreSettings") }}</div>
         <div class="settingItem__description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
       </div>
-      <div class="settingItem__input button no-drag" ref="button2"
+      <div class="settingItem__input button no-drag"
+        :class="button2Styles"
+        ref="button2"
         @mousedown="mousedownOnRestore">
         <transition name="button" mode="out-in">
-          <div :key="needToRelaunch" class="content" ref="restoreContent">{{ restoreContent }}</div>
+          <div :key="needToRelaunch" class="button__text" ref="restoreContent">{{ restoreContent }}</div>
         </transition>
       </div>
     </div>
@@ -87,6 +91,8 @@ export default {
       needToRelaunch: false,
       restoreContent: '',
       languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
+      button1Styles: [''],
+      button2Styles: [''],
     };
   },
   created() {
@@ -168,12 +174,10 @@ export default {
   methods: {
     mouseupOnOther() {
       if (!this.isSettingDefault) {
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
+        this.button1Styles.pop();
       }
       if (!this.isRestoring) {
-        this.$refs.button2.style.setProperty('background-color', '');
-        this.$refs.button2.style.setProperty('opacity', '');
+        this.button2Styles.pop();
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
       this.$refs.button1.removeEventListener('mouseup', this.setDefault);
@@ -181,17 +185,14 @@ export default {
     },
     mousedownOnSetDefault() {
       if (!this.isSettingDefault) {
-        this.$refs.button1.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
-        this.$refs.button1.style.setProperty('opacity', '0.5');
+        this.button1Styles.push('button--mouseDown');
         this.$refs.button1.addEventListener('mouseup', this.setDefault);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
     },
     mousedownOnRestore() {
       if (!this.isSettingDefault) {
-        this.$refs.button2.style.setProperty('transition-delay', '');
-        this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
-        this.$refs.button2.style.setProperty('opacity', '0.5');
+        this.button2Styles.push('button--mouseDown');
         this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
@@ -204,9 +205,7 @@ export default {
         // TODO: feedback
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'success';
-        this.$refs.button1.style.setProperty('transition-delay', '350ms');
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
+        this.button1Styles.pop();
         this.defaultButtonTimeoutId = setTimeout(() => {
           this.defaultState = '';
           this.isSettingDefault = false;
@@ -216,9 +215,7 @@ export default {
         // TODO: feedback
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'failed';
-        this.$refs.button1.style.setProperty('transition-delay', '350ms');
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
+        this.button2Styles.pop();
         this.defaultButtonTimeoutId = setTimeout(() => {
           this.defaultState = '';
           this.isSettingDefault = false;
@@ -234,9 +231,7 @@ export default {
         electron.ipcRenderer.send('apply');
         this.needToRelaunch = true;
         this.restoreContent = this.$t('preferences.general.relaunch');
-        this.$refs.button2.style.setProperty('transition-delay', '400ms');
-        this.$refs.button2.style.setProperty('background-color', '');
-        this.$refs.button2.style.setProperty('opacity', '');
+        this.button2Styles.pop();
         this.isRestoring = false;
         return;
       }
@@ -387,6 +382,9 @@ export default {
     align-self: center;
     width: 61px;
     height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     .button-enter, .button-leave-to {
       opacity: 0;
@@ -398,7 +396,7 @@ export default {
       transition: opacity 200ms ease-in;
     }
 
-    .content {
+    &__text {
       font-family: $font-medium;
       font-size: 11px;
       color: #FFFFFF;
@@ -406,10 +404,13 @@ export default {
       text-align: center;
       line-height: 26px;
     }
-    .result {
-      position: relative;
-      top: 5px;
-      left: 23px;
+    &__result {
+      width: 15px;
+      height: 15px;
+    }
+    &--mouseDown {
+      background-color: rgba(0, 0, 0, 0.1);
+      opacity: 0.5;
     }
   }
 }
