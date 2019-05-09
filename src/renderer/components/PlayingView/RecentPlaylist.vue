@@ -110,8 +110,6 @@ export default {
   props: {
     mousemoveClientPosition: {},
     displayState: Boolean,
-    mousedownOnOther: Boolean,
-    mouseupOnOther: Boolean,
     isDragging: Boolean,
     lastDragging: Boolean,
   },
@@ -181,6 +179,7 @@ export default {
       if (this.isDragging) {
         this.clearMousedown({ componentName: '' });
       } else if (this.backgroundDisplayState) {
+        console.log('mouseup');
         this.$emit('update:playlistcontrol-showattached', false);
         this.updateMousemoveTarget('the-video-controller');
       }
@@ -578,15 +577,10 @@ export default {
 <style lang="scss" scoped>
 .recent-playlist {
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  @media screen and (max-width: 1355px) {
-    height: 282px;
-  }
-  @media screen and (min-width: 1356px) {
-    height: 20.81vw;
-  }
   .background-gradient {
     position: absolute;
     z-index: -1;
