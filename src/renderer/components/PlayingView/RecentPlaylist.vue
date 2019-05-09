@@ -179,7 +179,6 @@ export default {
       if (this.isDragging) {
         this.clearMousedown({ componentName: '' });
       } else if (this.backgroundDisplayState) {
-        console.log('mouseup');
         this.$emit('update:playlistcontrol-showattached', false);
         this.updateMousemoveTarget('the-video-controller');
       }
