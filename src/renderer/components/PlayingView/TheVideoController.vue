@@ -232,12 +232,13 @@ export default {
     },
   },
   mounted() {
-    this.preFullScreen = this.isFullScreen;
+    if (process.platform === 'darwin') {
+      this.preFullScreen = this.isFullScreen;
+    }
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
-      this.displayState[value.name] = true;
-      if (value.name === 'recent-playlist') this.displayState[value.name] = false;
+      this.displayState[value.name] = value.name !== 'recent-playlist';
       if (value.name === 'playlist-control' && !this.playingList.length) {
         this.displayState['playlist-control'] = false;
       }

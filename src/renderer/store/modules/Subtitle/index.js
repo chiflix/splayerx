@@ -224,6 +224,7 @@ const actions = {
   },
   [subtitleActions.RESET_SUBTITLES]({ commit }) {
     commit(subtitleMutations.CURRENT_FIRST_SUBTITLE_ID_UPDATE, '');
+    commit(subtitleMutations.CURRENT_SECOND_SUBTITLE_ID_UPDATE, '');
   },
   [subtitleActions.RESET_ONLINE_SUBTITLES]({
     commit, state, getters, dispatch,
