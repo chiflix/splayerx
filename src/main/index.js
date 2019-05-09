@@ -77,12 +77,15 @@ function handleBossKey() {
 }
 
 function exitAndClear(relaunch = false) {
+  const cmd = process.env.NODE_ENV === 'development'
+    ? `${process.argv[0]} ${process.argv[1]}`
+    : `${process.argv[0]}`;
   app.relaunch(process.platform === 'win32'
     ? {
-      args: ['/c', `"DEL /Q /F /S ${app.getPath('userData')}${relaunch ? ` && start ${process.argv[0]}` : ''}"`],
-      execPath: 'C:\\WINDOWS\\system32\\cmd.EXE',
+      args: ['/c', `"DEL /Q /F /S "${app.getPath('userData')}"${relaunch ? ` && start "${cmd}"` : ''}"`],
+      execPath: 'C:\\WINDOWS\\system32\\cmd.EXE', // TODO: detect path
     } : {
-      args: ['-c', `"rm -fr ${app.getPath('userData')}${relaunch ? ` && ${process.argv[0]}` : ''}"`],
+      args: ['-c', `"rm -fr "${app.getPath('userData')}"${relaunch ? ` && "${cmd}"` : ''}"`],
       execPath: 'sh',
     });
   app.exit();
