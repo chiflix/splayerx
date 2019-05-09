@@ -14,20 +14,20 @@
             <td class="dropdown__title">{{ $t('preferences.privacy.primary')}}</td>
             <td>
               <div class="settingItem__input dropdown">
-                <div class="dropdown__toggle no-drag" :class="showFirstSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
+                <div :class="showFirstSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
                   :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
                   @mouseup.stop="openFirstDropdown">
                   <div class="dropdown__displayItem">{{ codeToLanguageName(primaryLanguage) }}</div>
                   <div class="dropdown__listItems"
                     @mouseup.stop="">
-                    <div class="dropdownListItem dropdownListItem--default"
+                    <div class="dropdownListItem"
                       v-for="(language, index) in primaryLanguages"
                       :key="index"
                       @mouseup.stop="handleFirstSelection(language)">
                       {{ codeToLanguageName(language) }}
                     </div>
                   </div>
-                  <Icon class="dropdown__icon" type="rightArrow" :class="showFirstSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
+                  <Icon type="rightArrow" :class="showFirstSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
                 </div>
               </div>
             </td>
@@ -36,13 +36,13 @@
             <td class="dropdown__title">{{ $t('preferences.privacy.secondary')}}</td>
             <td>
               <div class="settingItem__input dropdown">
-                <div class="dropdown__toggle no-drag" :class="showSecondSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
+                <div :class="showSecondSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
                   :style="{ cursor: privacyAgreement ? 'pointer' : 'default' }"
                   @mouseup.stop="openSecondDropdown">
                   <div class="dropdown__displayItem">{{ codeToLanguageName(secondaryLanguage) }}</div>
                   <div class="dropdown__listItems"
                     @mouseup.stop="">
-                    <div class="dropdownListItem dropdownListItem--default" ref="secondarySelection"
+                    <div class="dropdownListItem" ref="secondarySelection"
                       v-for="(language, index) in secondaryLanguages"
                       :key="index"
                       :style="{
@@ -54,7 +54,7 @@
                         style="color: rgba(255,255,255,0.5)">- {{ $t('preferences.privacy.primary') }}</span>
                     </div>
                   </div>
-                  <Icon class="dropdown__icon" type="rightArrow" :class="showSecondSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
+                  <Icon type="rightArrow" :class="showSecondSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
                 </div>
               </div>
             </td>
@@ -255,105 +255,109 @@ export default {
       }
     }
 
-    .dropdown {
-      position: relative;
-      width: 240px;
-      height: 28px;
+    tr:nth-of-type(1) .dropdown {
+      z-index: 1;
+    }
+  }
+  .dropdown {
+    position: relative;
+    width: 240px;
+    height: 28px;
 
-      &__title {
+    &__title {
+      height: 28px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      width: 10%;
+      padding-right: 10px;
+      line-height: 28px;
+      font-family: $font-medium;
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+    }
+    
+    &__toggle {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      margin-top: -1px;
+      margin-left: -1px;
+      transition: all 200ms;
+      border-radius: 2px;
+      overflow: hidden;
+      -webkit-app-region: no-drag;
+      
+      &--display {
+        @extend .dropdown__toggle;
         height: 28px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 10%;
-        padding-right: 10px;
-        line-height: 28px;
-        font-family: $font-medium;
-        font-size: 12px;
-        color: rgba(255,255,255,0.7);
+        border: 1px solid rgba(255,255,255,0);
+        background-color: rgba(255, 255, 255, 0);
       }
       
-      &__toggle {
-        position: absolute;
-        top: 0;
-        width: 100%;
-        margin-top: -1px;
-        margin-left: -1px;
-        transition: all 200ms;
-        border-radius: 2px;
-        overflow: hidden;
-        
-        &--display {
-          height: 28px;
-          border: 1px solid rgba(255,255,255,0);
-          background-color: rgba(255, 255, 255, 0);
+      &--list { 
+        @extend .dropdown__toggle;
+        height: 148px;
+        border: 1px solid rgba(255,255,255,0.3);
+        background-color: rgba(120,120,120,1);
+        .dropdown__displayItem {
+          border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        
-        &--list { 
-          height: 148px;
-          border: 1px solid rgba(255,255,255,0.3);
-          background-color: rgba(120,120,120,1);
-          .dropdown__displayItem {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-          }
-        }
-      }
-
-      &__displayItem {
-        height: 28px;
-        line-height: 28px;
-        border-bottom: 1px solid rgba(255,255,255,0);
-      }
-
-      &__listItems {
-        cursor: pointer;
-        position: relative;
-        height: 112px;
-        margin: 4px 4px 4px 6px;
-        overflow-y: scroll;
-      }
-
-      .dropdownListItem {
-        height: 28px;
-        line-height: 28px;
-
-        &--default:hover {
-          background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
-        }
-      }
-
-      &__icon {
-        position: absolute;
-        top: 7px;
-        right: 8px;
-        transition: transform 200ms;
-        &--arrowDown {
-          transform: rotate(90deg);
-        }
-        &--arrowUp {
-          z-index: 100;
-          transform: rotate(-90deg);
-        }
-      }
-    
-      ::-webkit-scrollbar {
-        width: 3px;
-        user-select: none;
-      }
-      /* Handle */
-      ::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.1);
-        border-radius: 1.5px;
-      }
-      ::-webkit-scrollbar-track {
-        cursor: pointer;
-        border-radius: 2px;
-        width: 10px;
-        user-select: none;
       }
     }
 
-    tr:nth-of-type(1) .dropdown {
-      z-index: 1;
+    &__displayItem {
+      height: 28px;
+      line-height: 28px;
+      border-bottom: 1px solid rgba(255,255,255,0);
+    }
+
+    &__listItems {
+      cursor: pointer;
+      position: relative;
+      height: 112px;
+      margin: 4px 4px 4px 6px;
+      overflow-y: scroll;
+    }
+
+    .dropdownListItem {
+      height: 28px;
+      line-height: 28px;
+
+      &:hover {
+        background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
+      }
+    }
+
+    &__icon {
+      position: absolute;
+      top: 7px;
+      right: 8px;
+      transition: transform 200ms;
+      &--arrowDown {
+        @extend .dropdown__icon;
+        transform: rotate(90deg);
+      }
+      &--arrowUp {
+        @extend .dropdown__icon;
+        z-index: 100;
+        transform: rotate(-90deg);
+      }
+    }
+  
+    ::-webkit-scrollbar {
+      width: 3px;
+      user-select: none;
+    }
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 1.5px;
+    }
+    ::-webkit-scrollbar-track {
+      cursor: pointer;
+      border-radius: 2px;
+      width: 10px;
+      user-select: none;
     }
   }
 }
