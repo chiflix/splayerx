@@ -434,16 +434,18 @@ export default {
       }
     },
     currentMouseupComponent(val) {
-      if (this.currentMousedownComponent !== 'notification-bubble' && this.currentMousedownComponent !== 'titlebar' && val !== '') {
-        if (this.lastDragging) {
-          this.clearMousedown({ componentName: '' });
-          if (this.displayState) {
-            this.$emit('update:lastDragging', false);
+      setTimeout(() => {
+        if (this.currentMousedownComponent !== 'notification-bubble' && this.currentMousedownComponent !== 'titlebar' && val !== '') {
+          if (this.lastDragging) {
+            this.clearMousedown({ componentName: '' });
+            if (this.displayState) {
+              this.$emit('update:lastDragging', false);
+            }
+          } else if (val !== this.$options.name && this.backgroundDisplayState) {
+            this.$emit('update:playlistcontrol-showattached', false);
           }
-        } else if (val !== this.$options.name && this.backgroundDisplayState) {
-          this.$emit('update:playlistcontrol-showattached', false);
         }
-      }
+      }, 0);
     },
     displayState(val, oldval) {
       if (oldval !== undefined) {
@@ -599,7 +601,7 @@ export default {
       width: 90%;
       .top {
         font-family: $font-heavy;
-        white-space:nowrap; 
+        white-space:nowrap;
         color: rgba(235,235,235,0.6);
         letter-spacing: 0.64px;
         width: fit-content;
