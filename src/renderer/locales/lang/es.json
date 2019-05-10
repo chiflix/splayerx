@@ -1,58 +1,66 @@
 {
-	"advance": {
-		"audioDelay": "Retraso auditivo",
-		"audioMenu": "Configuraciones de audio",
-		"changeTrack": "Pista de audio",
-		"chosenTrack": "Defecto",
-		"fontItems": [
-			"S",
-			"M",
-			"L",
-			"XL"
-		],
-		"fontSize": "Tamaño de fuente",
-		"fontStyle": "Estilo de fuente",
-		"rateTitle": "Velocidad de juego",
-		"subDelay": "Retraso de subtítulos",
-		"subMenu": "Ajustes de subtítulos",
-		"track": "Pista"
-	},
-	"css": {
-		"titleFontSize": {
-			"fontSize": "21px"
-		},
-		"versionFontSize": {
-			"fontSize": "14px"
-		}
-	},
-	"errorFile": {
-		"addNoVideo": {
-			"content": "No se puede encontrar el archivo reproducible.",
-			"title": "Agregar archivo fallido"
-		},
-		"default": {
-			"content": "Tipo de video no soportado.",
-			"title": "Error de apertura"
-		},
-		"emptyFolder": {
-			"content": "No se puede encontrar el archivo reproducible.",
-			"title": "Error de apertura"
-		},
-		"fileNonExist": {
-			"content": "Será eliminado de la lista.",
-			"title": "Archivo no encontrado"
-		},
-		"loadFailed": {
-			"content": "Tipo de subtítulo no soportado.",
-			"title": "Subtitulo de carga fallado"
-		},
-		"offLine": {
-			"content": "Por favor, compruebe la red y vuelva a intentarlo.",
-			"title": "Sin acceso a internet"
-		},
-		"timeout": {
-			"content": "Retraso en la red o error del servidor.",
-			"title": "Pide tiempo fuera"
+  "advance": {
+    "audioDelay": "Retraso auditivo",
+    "audioMenu": "Configuraciones de audio",
+    "changeTrack": "Pista de audio",
+    "chosenTrack": "Defecto",
+    "fontItems": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "fontSize": "Tamaño de fuente",
+    "fontStyle": "Estilo de fuente",
+    "rateTitle": "Velocidad de juego",
+    "subDelay": "Retraso de subtítulos",
+    "subMenu": "Ajustes de subtítulos",
+    "track": "Pista"
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": "21px"
+    },
+    "versionFontSize": {
+      "fontSize": "14px"
+    }
+  },
+  "errorFile": {
+    "addNoVideo": {
+      "content": "No se puede encontrar el archivo reproducible.",
+      "title": "Agregar archivo fallido"
+    },
+    "default": {
+      "content": "Tipo de video no soportado.",
+      "title": "Error de apertura"
+    },
+    "emptyFolder": {
+      "content": "No se puede encontrar el archivo reproducible.",
+      "title": "Error de apertura"
+    },
+    "fileNonExist": {
+      "content": "Será eliminado de la lista.",
+      "title": "Archivo no encontrado"
+    },
+    "playlistNonExist": {
+      "content": "Este elemento se ha eliminado.",
+      "title": "Archivo no encontrado"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "Los archivos serán eliminados de la lista.",
+      "title": "Archivos no encontrados"
+    },
+    "loadFailed": {
+      "content": "Tipo de subtítulo no soportado.",
+      "title": "Subtitulo de carga fallado"
+    },
+    "offLine": {
+      "content": "Por favor, compruebe la red y vuelva a intentarlo.",
+      "title": "Sin acceso a internet"
+    },
+    "timeout": {
+      "content": "Retraso en la red o error del servidor.",
+      "title": "Pide tiempo fuera"
     },
     "localSubtitleRemoved": {
       "title": "Fallo en el subtítulo de carga",
@@ -103,7 +111,7 @@
 		"playback": {
 			"backwardL": "Paso atrás -60s",
 			"backwardS": "Paso hacia atrás -5s",
-      		"windowRotate": "Girar 90 °",
+      "windowRotate": "Girar 90 en sentido horario",
 			"captureScreen": "Captura de pantalla",
 			"captureVideoClip": "Captura de video clip",
 			"decreasePlaybackSpeed": "Disminuir la velocidad de reproducción",

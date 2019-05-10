@@ -13,11 +13,7 @@
 import { mapGetters } from 'vuex';
 
 export default {
-  name: 'CueRender',
-  data() {
-    return {
-    };
-  },
+  name: 'cue-renderer',
   props: {
     text: String,
     settings: Object,

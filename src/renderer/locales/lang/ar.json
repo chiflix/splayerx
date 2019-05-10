@@ -1,58 +1,66 @@
 {
-	"advance": {
-		"audioDelay": "تأخير الصوت",
-		"audioMenu": "إعدادات الصوت",
-		"changeTrack": "مقطع صوتي",
-		"chosenTrack": "افتراضي",
-		"fontItems": [
-			"S",
-			"M",
-			"L",
-			"XL"
-		],
-		"fontSize": "حجم الخط",
-		"fontStyle": "نوع الخط",
-		"rateTitle": "لعب السرعة",
-		"subDelay": "العنوان الفرعي تأخير",
-		"subMenu": "إعدادات الترجمة",
-		"track": "مسار"
-	},
-	"css": {
-		"titleFontSize": {
-			"fontSize": "21px"
-		},
-		"versionFontSize": {
-			"fontSize": "14px"
-		}
-	},
-	"errorFile": {
-		"addNoVideo": {
-			"content": "لا يمكن العثور على الملف القابل للتشغيل.",
-			"title": "إضافة ملف فشل"
-		},
-		"default": {
-			"content": "نوع الفيديو غير مدعوم.",
-			"title": "فتح فشل"
-		},
-		"emptyFolder": {
-			"content": "لا يمكن العثور على الملف القابل للتشغيل.",
-			"title": "فتح فشل"
-		},
-		"fileNonExist": {
-			"content": "ستتم إزالته من القائمة.",
-			"title": "لم يتم العثور على الملف"
-		},
-		"loadFailed": {
-			"content": "نوع العنوان الفرعي غير مدعوم.",
-			"title": "فشل تحميل الترجمة"
-		},
-		"offLine": {
-			"content": "يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
-			"title": "لا الوصول إلى الشبكة"
-		},
-		"timeout": {
-			"content": "تأخير الشبكة أو خطأ في الخادم.",
-			"title": "طلب مهلة"
+  "advance": {
+    "audioDelay": "تأخير الصوت",
+    "audioMenu": "إعدادات الصوت",
+    "changeTrack": "مقطع صوتي",
+    "chosenTrack": "افتراضي",
+    "fontItems": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "fontSize": "حجم الخط",
+    "fontStyle": "نوع الخط",
+    "rateTitle": "لعب السرعة",
+    "subDelay": "العنوان الفرعي تأخير",
+    "subMenu": "إعدادات الترجمة",
+    "track": "مسار"
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": "21px"
+    },
+    "versionFontSize": {
+      "fontSize": "14px"
+    }
+  },
+  "errorFile": {
+    "addNoVideo": {
+      "content": "لا يمكن العثور على الملف القابل للتشغيل.",
+      "title": "إضافة ملف فشل"
+    },
+    "default": {
+      "content": "نوع الفيديو غير مدعوم.",
+      "title": "فتح فشل"
+    },
+    "emptyFolder": {
+      "content": "لا يمكن العثور على الملف القابل للتشغيل.",
+      "title": "فتح فشل"
+    },
+    "fileNonExist": {
+      "content": "ستتم إزالته من القائمة.",
+      "title": "لم يتم العثور على الملف"
+    },
+    "playlistNonExist": {
+      "content": ".تمت إزالة هذا العنصر",
+      "title": "لم يتم العثور على الملف"
+    },
+    "fileNonExistInPlaylist": {
+      "content": ".ستتم إزالة الملفات من القائمة",
+      "title": "لم يتم العثور على بعض الملفات"
+    },
+    "loadFailed": {
+      "content": "نوع العنوان الفرعي غير مدعوم.",
+      "title": "فشل تحميل الترجمة"
+    },
+    "offLine": {
+      "content": "يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
+      "title": "لا الوصول إلى الشبكة"
+    },
+    "timeout": {
+      "content": "تأخير الشبكة أو خطأ في الخادم.",
+      "title": "طلب مهلة"
     },
     "localSubtitleRemoved": {
       "title": "فشل تحميل الترجمة",
@@ -103,7 +111,7 @@
 		"playback": {
 			"backwardL": "خطوة الى الوراء - 60s",
 			"backwardS": "خطوة الى الوراء - 5S",
-			"windowRotate": "تدوير 90 درجة",
+			"windowRotate": "تدوير °90 في اتجاه عقارب الساعة",
 			"captureScreen": "التقاط الشاشة",
 			"captureVideoClip": "التقاط الفيديو كليب",
 			"decreasePlaybackSpeed": "تقليل سرعة التشغيل",

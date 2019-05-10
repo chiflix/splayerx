@@ -8,6 +8,7 @@ const state = {
   isFocused: true,
   isMaximized: false,
   isMinimized: false,
+  isHiddenByBossKey: false,
   sizePercent: 0,
 };
 
@@ -24,6 +25,7 @@ const getters = {
   isFocused: state => state.isFocused,
   isMaximized: state => state.isMaximized,
   isMinimized: state => state.isMinimized,
+  isHiddenByBossKey: state => state.isHiddenByBossKey,
   sizePercent: state => state.sizePercent,
 };
 
@@ -49,6 +51,9 @@ const mutations = {
   },
   isMinimized(state, payload) {
     state.isMinimized = payload;
+  },
+  isHiddenByBossKey(state, payload) {
+    state.isHiddenByBossKey = payload;
   },
   sizePercentUpdate(state, payload) {
     state.sizePercent = payload;

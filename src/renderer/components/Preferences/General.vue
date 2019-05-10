@@ -1,62 +1,68 @@
 <template>
-<div class="preference-setting">
-  <div class="title">{{ $t("preferences.general.displayLanguage") }}</div>
-  <div class="description">{{ $t("preferences.general.switchDisplayLanguages")}}</div>
-  <div class="drop-down">
-    <div class="no-drag" :class="showSelection ? 'drop-down-content' : 'drop-down-brief'"
-      @mouseup.stop="showSelection = !showSelection">
-      <div class="selected">{{ mapCode(displayLanguage) }}</div>
-      <Icon type="rightArrow" :class="showSelection ? 'up-arrow' : 'down-arrow'"/>
-      <div class="content" v-if="showSelection"
-        @mouseup.stop="">
-        <div class="selection"
-          v-for="(language, index) in displayLanguages"
-          :key="index"
-          @mouseup.stop="handleSelection(language)">
-          {{ mapCode(language) }}
+  <div class="general tabcontent">
+    <div class="settingItem">
+      <div class="settingItem__title">{{ $t("preferences.general.displayLanguage") }}</div>
+      <div class="settingItem__description">{{ $t("preferences.general.switchDisplayLanguages")}}</div>
+      <div class="settingItem__input dropdown">
+        <div class="dropdown__toggle no-drag" :class="showSelection ? 'dropdown__toggle--list' : 'dropdown__toggle--display'"
+          @mouseup.stop="showSelection = !showSelection">
+          <div class="dropdown__displayItem">{{ mapCode(displayLanguage) }}</div>
+          <div class="dropdown__listItems"
+            @mouseup.stop="">
+            <div class="dropdownListItem"
+              v-for="(language, index) in displayLanguages"
+              :key="index"
+              @mouseup.stop="handleSelection(language)">
+              {{ mapCode(language) }}
+            </div>
+          </div>
+          <Icon type="rightArrow" :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
         </div>
       </div>
     </div>
+    <div class="settingItem--justify">
+      <div>
+        <div class="settingItem__title">{{ $t("preferences.general.setDefault") }}</div>
+        <div class="settingItem__description">{{ $t("preferences.general.setDefaultDescription") }}</div>
+      </div>
+      <div class="settingItem__input button no-drag"
+        :class="button1Styles"
+        ref="button1"
+        @mousedown="mousedownOnSetDefault">
+        <transition name="button" mode="out-in">
+          <div key="" v-if="!defaultState" class="button__text">{{ $t("preferences.general.setButton") }}</div>
+          <div :key="defaultState" v-else class="button__result">
+            <Icon :type="defaultState" :class="defaultState"/>
+          </div>
+        </transition>
+      </div>
+    </div>
+    <div class="settingItem--justify" v-if="isMac">
+      <div>
+        <div class="settingItem__title">{{ $t("preferences.general.restoreSettings") }}</div>
+        <div class="settingItem__description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
+      </div>
+      <div class="settingItem__input button no-drag"
+        :class="button2Styles"
+        ref="button2"
+        @mousedown="mousedownOnRestore">
+        <transition name="button" mode="out-in">
+          <div :key="needToRelaunch" class="button__text" ref="restoreContent">{{ restoreContent }}</div>
+        </transition>
+      </div>
+    </div>
+    <div class="settingItem__title">{{ $t("preferences.general.others") }}</div>
+    <BaseCheckBox
+      :checkboxValue="reverseScrolling"
+      @update:checkbox-value="reverseScrolling = $event">
+      {{ $t('preferences.general.reverseScrolling') }}
+    </BaseCheckBox>
+    <BaseCheckBox
+      :checkboxValue="deleteVideoHistoryOnExit"
+      @update:checkbox-value="deleteVideoHistoryOnExit = $event">
+      {{ $t('preferences.general.clearHistory') }}
+    </BaseCheckBox>
   </div>
-  <div class="description-button">
-    <div class="setting-content">
-      <div class="setting-title">{{ $t("preferences.general.setDefault") }}</div>
-      <div class="setting-description">{{ $t("preferences.general.setDefaultDescription") }}</div>
-    </div>
-    <div class="setting-button no-drag" ref="button1"
-      @mousedown="mousedownOnSetDefault">
-      <transition name="button" mode="out-in">
-        <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
-        <div :key="defaultState" v-else class="result">
-          <Icon :type="defaultState" :class="defaultState"/>
-        </div>
-      </transition>
-    </div>
-  </div>
-  <div class="description-button" v-if="isMac">
-    <div class="setting-content">
-      <div class="setting-title">{{ $t("preferences.general.restoreSettings") }}</div>
-      <div class="setting-description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
-    </div>
-    <div class="setting-button no-drag" ref="button2"
-      @mousedown="mousedownOnRestore">
-      <transition name="button" mode="out-in">
-        <div :key="needToRelaunch" class="content" ref="restoreContent">{{ restoreContent }}</div>
-      </transition>
-    </div>
-  </div>
-  <div class="title other-title">{{ $t("preferences.general.others") }}</div>
-  <BaseCheckBox
-    :checkboxValue="reverseScrolling"
-    @update:checkbox-value="reverseScrolling = $event">
-    {{ $t('preferences.general.reverseScrolling') }}
-  </BaseCheckBox>
-  <BaseCheckBox
-    :checkboxValue="deleteVideoHistoryOnExit"
-    @update:checkbox-value="deleteVideoHistoryOnExit = $event">
-    {{ $t('preferences.general.clearHistory') }}
-  </BaseCheckBox>
-</div>
 </template>
 
 <script>
@@ -85,6 +91,8 @@ export default {
       needToRelaunch: false,
       restoreContent: '',
       languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
+      button1Styles: [''],
+      button2Styles: [''],
     };
   },
   created() {
@@ -166,12 +174,10 @@ export default {
   methods: {
     mouseupOnOther() {
       if (!this.isSettingDefault) {
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
+        this.button1Styles.pop();
       }
       if (!this.isRestoring) {
-        this.$refs.button2.style.setProperty('background-color', '');
-        this.$refs.button2.style.setProperty('opacity', '');
+        this.button2Styles.pop();
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
       this.$refs.button1.removeEventListener('mouseup', this.setDefault);
@@ -179,17 +185,14 @@ export default {
     },
     mousedownOnSetDefault() {
       if (!this.isSettingDefault) {
-        this.$refs.button1.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
-        this.$refs.button1.style.setProperty('opacity', '0.5');
+        this.button1Styles.push('button--mouseDown');
         this.$refs.button1.addEventListener('mouseup', this.setDefault);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
     },
     mousedownOnRestore() {
       if (!this.isSettingDefault) {
-        this.$refs.button2.style.setProperty('transition-delay', '');
-        this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
-        this.$refs.button2.style.setProperty('opacity', '0.5');
+        this.button2Styles.push('button--mouseDown');
         this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
@@ -202,9 +205,7 @@ export default {
         // TODO: feedback
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'success';
-        this.$refs.button1.style.setProperty('transition-delay', '350ms');
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
+        this.button1Styles.pop();
         this.defaultButtonTimeoutId = setTimeout(() => {
           this.defaultState = '';
           this.isSettingDefault = false;
@@ -214,9 +215,7 @@ export default {
         // TODO: feedback
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'failed';
-        this.$refs.button1.style.setProperty('transition-delay', '350ms');
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
+        this.button2Styles.pop();
         this.defaultButtonTimeoutId = setTimeout(() => {
           this.defaultState = '';
           this.isSettingDefault = false;
@@ -232,9 +231,7 @@ export default {
         electron.ipcRenderer.send('apply');
         this.needToRelaunch = true;
         this.restoreContent = this.$t('preferences.general.relaunch');
-        this.$refs.button2.style.setProperty('transition-delay', '400ms');
-        this.$refs.button2.style.setProperty('background-color', '');
-        this.$refs.button2.style.setProperty('opacity', '');
+        this.button2Styles.pop();
         this.isRestoring = false;
         return;
       }
@@ -253,192 +250,167 @@ export default {
 };
 </script>
 <style scoped lang="scss">
-$dropdown-height: 148px;
-$interactor-backgroundColor-default: rgba(255,255,255,0.03);
-$interactor-border-default: 1px solid rgba(255,255,255,0.1);
-$interactor-backgroundColor-hover: rgba(255,255,255,0.08);
-$interactor-border-hover: 1px solid rgba(255,255,255,0.2);
+.tabcontent {
+  .settingItem {
+    margin-bottom: 30px;
 
-.preference-setting {
-  box-sizing: border-box;
-  padding-top: 37px;
-  padding-left: 26px;
-  width: 100%;
-  height: 100%;
-  .title {
-    margin-bottom: 7px;
-    font-family: $font-medium;
-    font-size: 13px;
-    color: rgba(255,255,255,0.9);
-    letter-spacing: 0;
-    line-height: 13px;
-  }
-  .other-title {
-    margin-bottom: 12px;
-  }
-  .down-arrow {
-    position: absolute;
-    top: 7px;
-    right: 8px;
-    transform: rotate(90deg);
-    transition: transform 200ms;
-  }
-  .up-arrow {
-    position: absolute;
-    top: 7px;
-    right: 8px;
-    transform: rotate(-90deg);
-    transition: transform 200ms;
-  }
-  .description {
-    margin-bottom: 13px;
-    font-family: $font-medium;
-    font-size: 11px;
-    color: rgba(255,255,255,0.5);
-    letter-spacing: 0;
-  }
-  .drop-down {
-    width: 240px;
-    margin-bottom: 35px;
-    height: 28px;
-    -webkit-app-region: no-drag;
-    .drop-down-brief {
-      position: relative;
+    &__title {
+      font-family: $font-medium;
+      font-size: 13px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    &__description {
+      font-family: $font-medium;
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 7px;
+    }
+
+    &__input {
       -webkit-app-region: no-drag;
       cursor: pointer;
-      width: 100%;
-      height: 28px;
-      background-color: $interactor-backgroundColor-default;
-      border: $interactor-border-default;
-      border-radius: 2px;
       font-family: $font-semibold;
       font-size: 11px;
-      line-height: 28px;
       color: #FFFFFF;
-      letter-spacing: 0;
       text-align: center;
-      transition: border 200ms, background-color 200ms;
+      border-radius: 2px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background-color: rgba(255,255,255,0.03);
+      transition: all 200ms;
+
       &:hover {
-        border: $interactor-border-hover;
-        background-color: $interactor-backgroundColor-hover;
+        border: 1px solid rgba(255,255,255,0.2);
+        background-color: rgba(255,255,255,0.08);
       }
     }
-    .drop-down-content {
+
+    &--justify {
+      @extend .settingItem;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+  .dropdown {
+    position: relative;
+    width: 240px;
+    height: 28px;
+    margin-top: 13px;
+    
+    &__toggle {
+      position: absolute;
+      width: 100%;
+      margin-top: -1px;
+      margin-left: -1px;
+      transition: all 200ms;
+      border-radius: 2px;
+      overflow: hidden;
+      
+
+      &--display {
+        height: 28px;
+        border: 1px solid rgba(255,255,255,0);
+        background-color: rgba(255, 255, 255, 0);
+      }
+      
+      &--list { 
+        height: 148px;
+        border: 1px solid rgba(255,255,255,0.3);
+        background-color: rgba(120,120,120,1);
+        .dropdown__displayItem {
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+      }
+    }
+
+    &__displayItem {
+      height: 28px;
+      line-height: 28px;
+      border-bottom: 1px solid rgba(255,255,255,0);
+    }
+
+    &__listItems {
       cursor: pointer;
       position: relative;
-      z-index: 50;
-      width: 100%;
-      height: $dropdown-height;
-      background-color: rgba(100,100,100,.95);
-      border: 1px solid rgba(255,255,255,0.3);
+      height: 112px;
+      margin: 4px 4px 4px 6px;
+      overflow-y: scroll;
+    }
+
+    .dropdownListItem {
+      height: 28px;
+      line-height: 28px;
+
+      &:hover {
+        background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
+      }
+    }
+
+    &__icon {
+      position: absolute;
+      top: 7px;
+      right: 8px;
+      transition: transform 200ms;
+      &--arrowDown {
+        @extend .dropdown__icon;
+        transform: rotate(90deg);
+      }
+      &--arrowUp {
+        @extend .dropdown__icon;
+        z-index: 100;
+        transform: rotate(-90deg);
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 3px;
+      user-select: none;
+    }
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1.5px;
+    }
+    ::-webkit-scrollbar-track {
       border-radius: 2px;
-      font-family: $font-semibold;
+      width: 10px;
+      user-select: none;
+    }
+  }
+  .button {
+    box-sizing: border-box;
+    align-self: center;
+    width: 61px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .button-enter, .button-leave-to {
+      opacity: 0;
+    }
+    .button-enter-active {
+      transition: opacity 200ms ease-in;
+    }
+    .button-leave-active {
+      transition: opacity 200ms ease-in;
+    }
+
+    &__text {
+      font-family: $font-medium;
       font-size: 11px;
       color: #FFFFFF;
       letter-spacing: 0;
       text-align: center;
-      .selected {
-        height: 28px;
-        line-height: 28px;
-        background-color: rgba(255,255,255,0.1);
-      }
-      .content {
-        cursor: pointer;
-        position: absolute;
-        top: 32px;
-        left: 8px;
-        right: 4px;
-        bottom: 4px;
-        overflow-y: scroll;
-        .selection {
-          height: 28px;
-          line-height: 28px;
-        }
-        .selection:hover {
-          background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
-        }
-      }
+      line-height: 26px;
+    }
+    &__result {
+      width: 15px;
+      height: 15px;
+    }
+    &--mouseDown {
+      opacity: 0.5;
     }
   }
-  .description-button {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 35px;
-    width: 349px;
-    height: fit-content;
-    .setting-content {
-      width: 238px;
-      .setting-title {
-        white-space: nowrap;
-        margin-bottom: 6px;
-        font-family: $font-medium;
-        font-size: 13px;
-        color: rgba(255,255,255,0.9);
-        letter-spacing: 0;
-        line-height: 13px;
-      }
-      .setting-description {
-        font-family: $font-medium;
-        font-size: 11px;
-        color: rgba(255,255,255,0.5);
-        letter-spacing: 0;
-      }
-    }
-    .setting-button {
-      cursor: pointer;
-      box-sizing: border-box;
-      align-self: center;
-      background-color: $interactor-backgroundColor-default;
-      border: $interactor-border-default;
-      border-radius: 2px;
-      transition-property: background-color, opacity, border;
-      transition-duration: 200ms;
-      transition-timing-function: ease-in;
-      width: 61px;
-      height: 28px;
-      &:hover {
-        border: $interactor-border-hover;
-        background-color: $interactor-backgroundColor-hover;
-      }
-
-      .button-enter, .button-leave-to {
-        opacity: 0;
-      }
-      .button-enter-active {
-        transition: opacity 200ms ease-in;
-      }
-      .button-leave-active {
-        transition: opacity 200ms ease-in;
-      }
-
-      .content {
-        font-family: $font-medium;
-        font-size: 11px;
-        color: #FFFFFF;
-        letter-spacing: 0;
-        text-align: center;
-        line-height: 26px;
-      }
-      .result {
-        position: relative;
-        top: 5px;
-        left: 23px;
-      }
-    }
-  }
-  ::-webkit-scrollbar {
-  width: 3px;
-  user-select: none;
-}
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 1.5px;
-}
-::-webkit-scrollbar-track {
-  border-radius: 2px;
-  width: 10px;
-  user-select: none;
-}
 }
 </style>

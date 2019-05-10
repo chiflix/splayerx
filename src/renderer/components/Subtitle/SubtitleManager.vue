@@ -207,7 +207,7 @@ export default {
           metaInfo: currentSubtitle.metaInfo,
           referenceSubtitleId: this.referenceSubtitleId,
         });
-        writeSubtitleByPath(currentSubtitle.src, subString);
+        writeSubtitleByPath(currentSubtitle.src, Buffer.from(`\ufeff${subString}`, 'utf8'));
       }
       // 处理最小尺寸设置
       let minSize = [];
@@ -781,7 +781,7 @@ export default {
             referenceSubtitleId: sub.referenceSubtitleId,
             // reference: sub.reference,
           });
-          writeSubtitleByPath(sub.src, subString);
+          writeSubtitleByPath(sub.src, Buffer.from(`\ufeff${subString}`, 'utf8'));
         }
       } else if (sub) {
         // 如果不是自制的字幕出现修改，就是先创建新的自制字幕
@@ -795,7 +795,7 @@ export default {
           // reference: sub.reference,
         });
         // 创建新的自制字幕
-        addSubtitleByMediaHash(this.mediaHash, subString, { type: 'modified' }).then((result) => {
+        addSubtitleByMediaHash(this.mediaHash, Buffer.from(`\ufeff${subString}`, 'utf8'), { type: 'modified' }).then((result) => {
           // 如果是快捷修改
           if (!this.isProfessional) {
             const whichSub = isSecondSub ? 'second-subtitle' : 'first-subtitle';
@@ -836,7 +836,7 @@ export default {
           // reference: currentSubtitle.reference,
         });
         try {
-          await writeSubtitleByPath(currentSubtitle.src, subString);
+          await writeSubtitleByPath(currentSubtitle.src, Buffer.from(`\ufeff${subString}`, 'utf8'));
           this.addMessages({
             type: 'state',
             content: this.$t('notificationMessage.subtitle.saveSuccess.content'),

@@ -11,7 +11,7 @@
     @click.left="handleMouseupLeft">
     <!-- 当目前字幕处于快速编辑模式或者高级编辑模式正常播放的组件都从DOM节点删除 -->
     <titlebar key="playing-view" currentView="Playingview" :showAllWidgets="showAllWidgets" :recentPlaylist="displayState['recent-playlist']" v-if="!isProfessional"></titlebar>
-    <notification-bubble ref="nextVideoUI" v-if="!isEditable"/>
+    <notification-bubble class="notification-bubble" ref="nextVideoUI" v-if="!isEditable"/>
     <recent-playlist class="recent-playlist" ref="recentPlaylist"  v-fade-in="!isEditable && !isProfessional"
     :displayState="displayState['recent-playlist']"
     :mousemoveClientPosition="mousemoveClientPosition"
@@ -261,14 +261,15 @@ export default {
     },
   },
   mounted() {
-    this.preFullScreen = this.isFullScreen;
+    if (process.platform === 'darwin') {
+      this.preFullScreen = this.isFullScreen;
+    }
     this.createTouchBar();
     this.UIElements = this.getAllUIComponents(this.$refs.controller);
     this.UIElements.forEach((value) => {
       // unit test not pass, so add if value
       if (value) {
-        this.displayState[value.name] = true;
-        if (value.name === 'recent-playlist') this.displayState[value.name] = false;
+        this.displayState[value.name] = value.name !== 'recent-playlist';
         if (value.name === 'playlist-control' && !this.playingList.length) {
           this.displayState['playlist-control'] = false;
         }
@@ -686,6 +687,9 @@ export default {
     rgba(0, 0, 0, 0.19) 62%,
     rgba(0, 0, 0, 0.29) 100%
   );
+}
+.notification-bubble {
+  z-index: 105;
 }
 .recent-playlist {
   position: absolute;

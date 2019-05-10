@@ -240,7 +240,7 @@ export default {
       return this.winRatio >= 1 ? this.winHeight : this.winWidth;
     },
     noSubtitle() {
-      if (this.animClass && this.isInitial) {
+      if (this.animClass) {
         return this.$t('msg.subtitle.menuLoading');
       }
       return this.calculatedNoSub ? this.$t('msg.subtitle.noSubtitle') : this.$t('msg.subtitle.notToShowSubtitle');
@@ -386,17 +386,19 @@ export default {
       }
     },
     currentMouseupComponent(val) {
-      if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
-        if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
-          if (this.showAttached) {
-            this.anim.playSegments([79, 85]);
-            this.$emit('update:lastDragging', false);
+      setTimeout(() => {
+        if (this.currentMousedownComponent !== 'notification-bubble' && val !== '') {
+          if (this.lastDragging || (this.currentMousedownComponent === this.$options.name && val === 'the-video-controller')) {
+            if (this.showAttached) {
+              this.anim.playSegments([79, 85]);
+              this.$emit('update:lastDragging', false);
+            }
+            this.clearMousedown({ componentName: '' });
+          } else if (val !== this.$options.name && this.showAttached) {
+            this.$emit('update:showAttached', false);
           }
-          this.clearMousedown({ componentName: '' });
-        } else if (val !== this.$options.name && this.showAttached) {
-          this.$emit('update:showAttached', false);
         }
-      }
+      }, 0);
     },
     subtitleList(val, oldval) {
       if (val.length > oldval.length) {
@@ -919,6 +921,9 @@ export default {
     .deleteIcon, .detach-icon {
       transition-delay: 75ms;
     }
+    .iconContainer {
+      display: flex;
+    }
     .detach-icon {
       height: 48%;
       display: flex;
@@ -1089,9 +1094,7 @@ export default {
         width: 26px;
         height: 27px;
         .deleteIcon {
-          width: 100%;
-          height: 100%;
-          display: flex;
+          margin: auto 9px auto auto;
         }
       }
     }
@@ -1179,9 +1182,7 @@ export default {
         width: 33px;
         height: 32px;
         .deleteIcon {
-          width: 100%;
-          height: 100%;
-          display: flex;
+          margin: auto 10.8px auto auto;
         }
       }
     }
@@ -1269,9 +1270,7 @@ export default {
         width: 46px;
         height: 44px;
         .deleteIcon {
-          width: 100%;
-          height: 100%;
-          display: flex;
+          margin: auto 15.12px auto auto;
         }
       }
     }

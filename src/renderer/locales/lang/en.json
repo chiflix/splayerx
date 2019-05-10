@@ -1,58 +1,66 @@
 {
-	"advance": {
-		"audioDelay": "Audio Delay",
-		"audioMenu": "Audio Settings",
-		"changeTrack": "Audio Track",
-		"chosenTrack": "Default",
-		"fontItems": [
-			"S",
-			"M",
-			"L",
-			"XL"
-		],
-		"fontSize": "Font Size",
-		"fontStyle": "Font Style",
-		"rateTitle": "Play Speed",
-		"subDelay": "Subtitle Delay",
-		"subMenu": "Subtitle Settings",
-		"track": "Track"
-	},
-	"css": {
-		"titleFontSize": {
-			"fontSize": "21px"
-		},
-		"versionFontSize": {
-			"fontSize": "14px"
-		}
-	},
-	"errorFile": {
-		"addNoVideo": {
-			"content": "Cannot find playable file.",
-			"title": "Add File Failed"
-		},
-		"default": {
-			"content": "Video type unsupported.",
-			"title": "Open Failed"
-		},
-		"emptyFolder": {
-			"content": "Cannot find playable file.",
-			"title": "Open Failed"
-		},
-		"fileNonExist": {
-			"content": "It will be removed from the list.",
-			"title": "File Not Found"
-		},
-		"loadFailed": {
-			"content": "Subtitle type unsupported.",
-			"title": "Load Subtitle Failed"
-		},
-		"offLine": {
-			"content": "Please check network and try again.",
-			"title": "No Network Access"
-		},
-		"timeout": {
-			"content": "Network delay or server error.",
-			"title": "Request Timeout"
+  "advance": {
+    "audioDelay": "Audio Delay",
+    "audioMenu": "Audio Settings",
+    "changeTrack": "Audio Track",
+    "chosenTrack": "Default",
+    "fontItems": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "fontSize": "Font Size",
+    "fontStyle": "Font Style",
+    "rateTitle": "Play Speed",
+    "subDelay": "Subtitle Delay",
+    "subMenu": "Subtitle Settings",
+    "track": "Track"
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": "21px"
+    },
+    "versionFontSize": {
+      "fontSize": "14px"
+    }
+  },
+  "errorFile": {
+    "addNoVideo": {
+      "content": "Cannot find playable file.",
+      "title": "Add File Failed"
+    },
+    "default": {
+      "content": "Video type unsupported.",
+      "title": "Open Failed"
+    },
+    "emptyFolder": {
+      "content": "Cannot find playable file.",
+      "title": "Open Failed"
+    },
+    "fileNonExist": {
+      "content": "It will be removed from the list.",
+      "title": "File Not Found"
+    },
+    "playlistNonExist": {
+      "content": "This item is removed.",
+      "title": "File Not Found"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "Files has been removed from the list.",
+      "title": "File(s) Not Found"
+    },
+    "loadFailed": {
+      "content": "Subtitle type unsupported.",
+      "title": "Load Subtitle Failed"
+    },
+    "offLine": {
+      "content": "Please check network and try again.",
+      "title": "No Network Access"
+    },
+    "timeout": {
+      "content": "Network delay or server error.",
+      "title": "Request Timeout"
     },
     "localSubtitleRemoved": {
       "title": "Load Subtitle Failed",

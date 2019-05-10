@@ -2,13 +2,12 @@
   <div class="player">
     <the-video-canvas ref="videoCanvas" />
     <the-video-controller ref="videoctrl" />
-    <!-- <subtitle-manager /> -->
   </div>
 </template>
 
 <script>
-import { mapMutations } from 'vuex';
-// import SubtitleManager from '@/components/Subtitle/SubtitleManager.vue';
+import { mapMutations, mapActions } from 'vuex';
+import { Subtitle as subtitleActions } from '@/store/actionTypes';
 import VideoCanvas from './PlayingView/VideoCanvas.vue';
 import TheVideoController from './PlayingView/TheVideoController.vue';
 import { videodata } from '../store/video';
@@ -18,11 +17,13 @@ export default {
   components: {
     'the-video-controller': TheVideoController,
     'the-video-canvas': VideoCanvas,
-    // 'subtitle-manager': SubtitleManager,
   },
   methods: {
     ...mapMutations({
       windowMinimumSize: 'windowMinimumSize',
+    }),
+    ...mapActions({
+      updateSubToTop: subtitleActions.UPDATE_SUBTITLE_TOP,
     }),
     // Compute UI states
     // When the video is playing the ontick is triggered by ontimeupdate of Video tag,
@@ -40,6 +41,7 @@ export default {
     videodata.onTick = this.onUpdateTick;
   },
   beforeDestroy() {
+    this.updateSubToTop(false);
     videodata.stopCheckTick();
   },
 };

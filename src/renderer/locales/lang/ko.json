@@ -1,58 +1,66 @@
 {
-	"advance": {
-		"audioDelay": "오디오 지연",
-		"audioMenu": "오디오 설정",
-		"changeTrack": "오디오 트랙",
-		"chosenTrack": "태만",
-		"fontItems": [
-			"에스",
-			"엠",
-			"엘",
-			"특대"
-		],
-		"fontSize": "글자 크기",
-		"fontStyle": "글꼴 스타일",
-		"rateTitle": "재생 속도",
-		"subDelay": "자막 지연",
-		"subMenu": "자막 설정",
-		"track": "선로"
-	},
-	"css": {
-		"titleFontSize": {
-			"fontSize": "21px"
-		},
-		"versionFontSize": {
-			"fontSize": "14px"
-		}
-	},
-	"errorFile": {
-		"addNoVideo": {
-			"content": "재생할 수있는 파일을 찾을 수 없습니다.",
-			"title": "파일 추가 실패"
-		},
-		"default": {
-			"content": "지원되지 않는 비디오 유형입니다.",
-			"title": "열기 실패"
-		},
-		"emptyFolder": {
-			"content": "재생할 수있는 파일을 찾을 수 없습니다.",
-			"title": "열기 실패"
-		},
-		"fileNonExist": {
-			"content": "목록에서 제거됩니다.",
-			"title": "파일을 찾을 수 없음"
-		},
-		"loadFailed": {
-			"content": "자막 유형이 지원되지 않습니다.",
-			"title": "로드 자막 실패"
-		},
-		"offLine": {
-			"content": "네트워크를 확인한 후 다시 시도하십시오.",
-			"title": "네트워크 액세스 없음"
-		},
-		"timeout": {
-			"content": "네트워크 지연 또는 서버 오류.",
-			"title": "요청 시간 초과"
+  "advance": {
+    "audioDelay": "오디오 지연",
+    "audioMenu": "오디오 설정",
+    "changeTrack": "오디오 트랙",
+    "chosenTrack": "태만",
+    "fontItems": [
+      "에스",
+      "엠",
+      "엘",
+      "특대"
+    ],
+    "fontSize": "글자 크기",
+    "fontStyle": "글꼴 스타일",
+    "rateTitle": "재생 속도",
+    "subDelay": "자막 지연",
+    "subMenu": "자막 설정",
+    "track": "선로"
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": "21px"
+    },
+    "versionFontSize": {
+      "fontSize": "14px"
+    }
+  },
+  "errorFile": {
+    "addNoVideo": {
+      "content": "재생할 수있는 파일을 찾을 수 없습니다.",
+      "title": "파일 추가 실패"
+    },
+    "default": {
+      "content": "지원되지 않는 비디오 유형입니다.",
+      "title": "열기 실패"
+    },
+    "emptyFolder": {
+      "content": "재생할 수있는 파일을 찾을 수 없습니다.",
+      "title": "열기 실패"
+    },
+    "fileNonExist": {
+      "content": "목록에서 제거됩니다.",
+      "title": "파일을 찾을 수 없음"
+    },
+    "playlistNonExist": {
+      "content": "이 항목은 제거되었습니다.",
+      "title": "파일을 찾을 수 없음"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "파일이 목록에서 제거됩니다.",
+      "title": "일부 파일을 찾을 수 없습니다"
+    },
+    "loadFailed": {
+      "content": "자막 유형이 지원되지 않습니다.",
+      "title": "로드 자막 실패"
+    },
+    "offLine": {
+      "content": "네트워크를 확인한 후 다시 시도하십시오.",
+      "title": "네트워크 액세스 없음"
+    },
+    "timeout": {
+      "content": "네트워크 지연 또는 서버 오류.",
+      "title": "요청 시간 초과"
     },
     "localSubtitleRemoved": {
       "title": "로드 자막 실패",
@@ -103,7 +111,7 @@
 		"playback": {
 			"backwardL": "단계 뒤로 -60 년대",
 			"backwardS": "스텝 뒤로 -5s",
-			"windowRotate": "90도 회전",
+			"windowRotate": "시계 방향으로 90 ° 회전",
 			"captureScreen": "화면 캡처",
 			"captureVideoClip": "비디오 클립 캡처",
 			"decreasePlaybackSpeed": "재생 속도 감소",

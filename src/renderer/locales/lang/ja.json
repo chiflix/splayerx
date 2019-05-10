@@ -1,58 +1,66 @@
 {
-	"advance": {
-		"audioDelay": "オディオディレイ",
-		"audioMenu": "オーディオ",
-		"changeTrack": "オディオトラック",
-		"chosenTrack": "デフォルト",
-		"fontItems": [
-			"小",
-			"通常",
-			"大",
-			"最大"
-		],
-		"fontSize": "文字サイズ",
-		"fontStyle": "文字スタイル",
-		"rateTitle": "再生速度",
-		"subDelay": "字幕ディレイ",
-		"subMenu": "字幕設定",
-		"track": "トラック"
-	},
-	"css": {
-		"titleFontSize": {
-			"fontSize": "21px"
-		},
-		"versionFontSize": {
-			"fontSize": "14px"
-		}
-	},
-	"errorFile": {
-		"addNoVideo": {
-			"content": "再生できるファイルが見つかりませんでした。",
-			"title": "追加錯誤"
-		},
-		"default": {
-			"content": "ビデオタイプが再生できません。",
-			"title": "エラー"
-		},
-		"emptyFolder": {
-			"content": "再生できるファイルが見つかりませんでした。",
-			"title": "エラー"
-		},
-		"fileNonExist": {
-			"content": "プライリストから削除する。",
-			"title": "ファイルが見つかりませんでした。"
-		},
-		"loadFailed": {
-			"content": "字幕タイプが読み込めません。",
-			"title": "字幕読み込みエラー"
-		},
-		"offLine": {
-			"content": "ネットワークをお確かめの上、もう一度お試し下さい。",
-			"title": "ネットワーク接続エラー"
-		},
-		"timeout": {
-			"content": "ネットワークディレイもしくはサーバーエラー。",
-			"title": "リクエストタイムアウト"
+  "advance": {
+    "audioDelay": "オディオディレイ",
+    "audioMenu": "オーディオ",
+    "changeTrack": "オディオトラック",
+    "chosenTrack": "デフォルト",
+    "fontItems": [
+      "小",
+      "通常",
+      "大",
+      "最大"
+    ],
+    "fontSize": "文字サイズ",
+    "fontStyle": "文字スタイル",
+    "rateTitle": "再生速度",
+    "subDelay": "字幕ディレイ",
+    "subMenu": "字幕設定",
+    "track": "トラック"
+  },
+  "css": {
+    "titleFontSize": {
+      "fontSize": "21px"
+    },
+    "versionFontSize": {
+      "fontSize": "14px"
+    }
+  },
+  "errorFile": {
+    "addNoVideo": {
+      "content": "再生できるファイルが見つかりませんでした。",
+      "title": "追加錯誤"
+    },
+    "default": {
+      "content": "ビデオタイプが再生できません。",
+      "title": "エラー"
+    },
+    "emptyFolder": {
+      "content": "再生できるファイルが見つかりませんでした。",
+      "title": "エラー"
+    },
+    "fileNonExist": {
+      "content": "プライリストから削除する。",
+      "title": "ファイルが見つかりませんでした。"
+    },
+    "playlistNonExist": {
+      "content": "このアイテムは削除されました。",
+      "title": "ファイルが見つかりませんでした"
+    },
+    "fileNonExistInPlaylist": {
+      "content": "ファイルはリストから削除されます。",
+      "title": "ファイルが見つかりません"
+    },
+    "loadFailed": {
+      "content": "字幕タイプが読み込めません。",
+      "title": "字幕読み込みエラー"
+    },
+    "offLine": {
+      "content": "ネットワークをお確かめの上、もう一度お試し下さい。",
+      "title": "ネットワーク接続エラー"
+    },
+    "timeout": {
+      "content": "ネットワークディレイもしくはサーバーエラー。",
+      "title": "リクエストタイムアウト"
     },
     "localSubtitleRemoved": {
       "title": "字幕読み込みエラー",
@@ -103,7 +111,7 @@
 		"playback": {
 			"backwardL": "戻る -60s",
 			"backwardS": "戻る -5s",
-			"windowRotate": "90° 回転",
+			"windowRotate": "時計回りに90°回転",
 			"captureScreen": "スクリンショット",
 			"captureVideoClip": "トリム",
 			"decreasePlaybackSpeed": "再生速度の低下",
