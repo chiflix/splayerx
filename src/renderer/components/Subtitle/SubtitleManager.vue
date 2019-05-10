@@ -209,7 +209,7 @@ export default {
       if (!this.isInitial) {
         this.selectionComplete = false;
         this.selectionSecondaryComplete = false;
-        this.checkCurrentSubtitleList();
+        this.checkCurrentSubtitleList(Ids);
       }
 
       return Promise.all(subtitleRequests)
@@ -236,7 +236,7 @@ export default {
             }
             this.isInitial = false;
           }
-          this.checkCurrentSubtitleList();
+          this.checkCurrentSubtitleList(Ids);
           return storeLanguagePreference(videoSrc, preferredLanguages);
         });
     },
