@@ -23,16 +23,25 @@ if (!process.mas && !app.requestSingleInstanceLock()) {
 /**
  * Check for restore mark and delete all user data
  */
-if (fs.existsSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'))) {
+const userDataPath = app.getPath('userData');
+if (fs.existsSync(path.join(userDataPath, 'NEED_TO_RESTORE_MARK'))) {
   try {
-    rimraf.sync(`${app.getPath('userData')}/**/!(lockfile)`);
-    console.log('Successfully removed all user data.');
+    const tbdPath = `${userDataPath}-TBD`;
+    if (fs.existsSync(tbdPath)) rimraf.sync(tbdPath);
+    fs.renameSync(userDataPath, tbdPath);
+    rimraf(tbdPath, (err) => {
+      if (err) console.error(err);
+    });
   } catch (ex) {
     console.error(ex);
+    try {
+      rimraf.sync(`${userDataPath}/**/!(lockfile)`);
+      console.log('Successfully removed all user data.');
+    } catch (ex) {
+      console.error(ex);
+    }
   }
 }
-
-app.quit();
 
 /**
  * Set `__static` path to static files in production
