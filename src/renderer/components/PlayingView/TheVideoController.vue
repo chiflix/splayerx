@@ -124,6 +124,7 @@ export default {
       dragOver: false,
       progressTriggerStopped: false,
       openPlayListTimeId: NaN,
+      openPlayList: false,
     };
   },
   computed: {
@@ -250,15 +251,17 @@ export default {
       };
     });
     if (!this.isFolderList) {
-      this.widgetsStatus['playlist-control'].showAttached = true;
+      clearTimeout(this.openPlayListTimeId);
+      this.openPlayList = true;
       this.openPlayListTimeId = setTimeout(() => {
-        this.widgetsStatus['playlist-control'].showAttached = false;
+        this.openPlayList = false;
       }, 4000);
     }
     this.$bus.$on('open-playlist', () => {
-      this.widgetsStatus['playlist-control'].showAttached = true;
+      clearTimeout(this.openPlayListTimeId);
+      this.openPlayList = true;
       this.openPlayListTimeId = setTimeout(() => {
-        this.widgetsStatus['playlist-control'].showAttached = false;
+        this.openPlayList = false;
       }, 4000);
     });
     this.$bus.$on('drag-over', () => {
@@ -421,7 +424,7 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
-      tempObject['recent-playlist'] = this.widgetsStatus['playlist-control'].showAttached && !this.dragOver;
+      tempObject['recent-playlist'] = this.openPlayList || (this.widgetsStatus['playlist-control'].showAttached && !this.dragOver);
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
