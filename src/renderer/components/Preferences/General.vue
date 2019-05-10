@@ -37,7 +37,7 @@
         </transition>
       </div>
     </div>
-    <div class="settingItem--justify">
+    <div class="settingItem--justify" v-if="!process.mas">
       <div>
         <div class="settingItem__title">{{ $t("preferences.general.restoreSettings") }}</div>
         <div class="settingItem__description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
@@ -291,7 +291,7 @@ export default {
     width: 240px;
     height: 28px;
     margin-top: 13px;
-    
+
     &__toggle {
       position: absolute;
       width: 100%;
@@ -300,15 +300,15 @@ export default {
       transition: all 200ms;
       border-radius: 2px;
       overflow: hidden;
-      
+
 
       &--display {
         height: 28px;
         border: 1px solid rgba(255,255,255,0);
         background-color: rgba(255, 255, 255, 0);
       }
-      
-      &--list { 
+
+      &--list {
         height: 148px;
         border: 1px solid rgba(255,255,255,0.3);
         background-color: rgba(120,120,120,1);

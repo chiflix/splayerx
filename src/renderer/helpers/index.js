@@ -391,7 +391,6 @@ export default {
         }
 
         await this.playFile(currentVideo.path, currentVideo.videoId);
-        this.$bus.$emit('open-playlist');
         let paths = [];
         for (const videoId of playlist.items) {
           const mediaItem = await this.infoDB.get('media-item', videoId);
@@ -450,6 +449,7 @@ export default {
       this.$store.dispatch('SRC_SET', { src: videoFiles[0], id: videoId, mediaHash: hash });
       this.$router.push({ name: 'playing-view' });
       this.$bus.$emit('new-file-open');
+      this.$bus.$emit('open-playlist');
     },
     // open single video
     async openVideoFile(videoFile) {

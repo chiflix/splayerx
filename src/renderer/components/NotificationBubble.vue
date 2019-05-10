@@ -106,7 +106,7 @@ export default {
       this.manualClosed = false;
       this.showNextVideo = false;
     },
-    closeMessage(id, title) {
+    closeMessage(id) {
       this.$store.dispatch('removeMessages', id);
     },
     checkNextVideoUI(time) {
