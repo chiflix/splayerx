@@ -95,10 +95,10 @@
                           height: currentSubtitleIndex === index && !backCardVisiable && modifiedAdvancedPanelVisiable ? `${itemHeight}px`: 0,
                         }">
                         <div class="icons-wrap">
-                          <Icon type="subtitleEdit" @mouseup.native="handleSubEdit($event, item)"></Icon>
-                          <Icon type="subtitleExport" @mouseup.native="handleSubExport($event, item)"></Icon>
+                          <div><Icon type="subtitleEdit" @mouseup.native="handleSubEdit($event, item)"></Icon></div>
+                          <div><Icon type="subtitleExport" @mouseup.native="handleSubExport($event, item)"></Icon></div>
+                          <div><Icon type="subtitleDelete" @mouseup.native="handleSubConfirmDelete($event, item)"></Icon></div>
                           <!-- <Icon type="subtitleDelete" @mouseup.native="handleSubDelete($event, item)"></Icon> -->
-                          <Icon type="subtitleDelete" @mouseup.native="handleSubConfirmDelete($event, item)"></Icon>
                         </div>
                         <!-- <div class="confirm-delete-wrap" v-show="confirmDeletePanelVisiable">
                           <span class="submit" @mouseup.native.stop="handleSubDelete($event, item)">确认删除</span>
