@@ -7,19 +7,39 @@ import { throttle, debounce } from 'lodash';
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
-import which from 'which';
+import rimraf from 'rimraf';
 import TaskQueue from '../renderer/helpers/proceduralQueue';
 import './helpers/electronPrototypes';
 import writeLog from './helpers/writeLog';
 import { getOpenedFiles } from './helpers/argv';
 import { getValidVideoRegex } from '../shared/utils';
 
+// requestSingleInstanceLock is not going to work for mas
+// https://github.com/electron-userland/electron-packager/issues/923
+if (!process.mas && !app.requestSingleInstanceLock()) {
+  app.quit();
+}
+
+/**
+ * Check for restore mark and delete all user data
+ */
+if (fs.existsSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'))) {
+  try {
+    rimraf.sync(`${app.getPath('userData')}/**/!(lockfile)`);
+    console.log('Successfully removed all user data.');
+  } catch (ex) {
+    console.error(ex);
+  }
+}
+
+app.quit();
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
 if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
+  global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\') // eslint-disable-line
 }
 
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
@@ -44,12 +64,6 @@ const aboutURL = process.env.NODE_ENV === 'development'
 const preferenceURL = process.env.NODE_ENV === 'development'
   ? 'http://localhost:9080/preference.html'
   : `file://${__dirname}/preference.html`;
-
-// requestSingleInstanceLock is not going to work for mas
-// https://github.com/electron-userland/electron-packager/issues/923
-if (process.mas === undefined && !app.requestSingleInstanceLock()) {
-  app.quit();
-}
 
 const tempFolderPath = path.join(app.getPath('temp'), 'splayer');
 if (!fs.existsSync(tempFolderPath)) fs.mkdirSync(tempFolderPath);
@@ -77,14 +91,8 @@ function handleBossKey() {
   }
 }
 
-function exitAndClear(relaunch = false) {
-  const execPath = which.sync(process.platform === 'win32' ? 'cmd' : 'sh');
-  const cmd = process.argv[0];
-  const args = process.platform === 'win32'
-    ? ['/c', `DEL /Q /F /S "${app.getPath('userData')}"${relaunch ? ` && start "${cmd}"` : ''}`]
-    : ['-c', `rm -fr "${app.getPath('userData')}"${relaunch ? ` && "${cmd}"` : ''}`];
-  app.relaunch({ args, execPath });
-  app.exit();
+function markNeedToRestore() {
+  fs.closeSync(fs.openSync(path.join(app.getPath('userData'), 'NEED_TO_RESTORE_MARK'), 'w'));
 }
 
 
@@ -392,14 +400,14 @@ function registerMainWindowEvent() {
   });
   ipcMain.on('need-to-restore', () => {
     needToRestore = true;
+    markNeedToRestore();
   });
   ipcMain.on('relaunch', () => {
-    if (needToRestore) {
-      exitAndClear(true);
-    } else {
-      app.relaunch();
-      app.quit();
-    }
+    const switches = process.argv.filter(a => a.startsWith('-'));
+    const argv = process.argv.filter(a => !a.startsWith('-'))
+      .slice(0, process.isPackaged ? 1 : 2).concat(switches);
+    app.relaunch({ args: argv.slice(1), execPath: argv[0] });
+    app.quit();
   });
   ipcMain.on('preference-to-main', (e, args) => {
     mainWindow?.webContents.send('mainDispatch', 'setPreference', args);
@@ -469,7 +477,6 @@ function createWindow() {
 app.on('before-quit', (e) => {
   if (needToRestore) {
     mainWindow?.webContents.send('quit', needToRestore);
-    exitAndClear(false);
   } else {
     mainWindow?.webContents.send('quit');
   }
