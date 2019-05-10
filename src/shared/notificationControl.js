@@ -1,5 +1,7 @@
 import store from '@/store';
 import {
+  FILE_NON_EXIST_IN_PLAYLIST,
+  PLAYLIST_NON_EXIST,
   FILE_NON_EXIST,
   EMPTY_FOLDER,
   OPEN_FAILED,
@@ -18,15 +20,28 @@ import {
 
 export function addBubble(code, i18n) { // eslint-disable-line complexity
   switch (code) {
+    case FILE_NON_EXIST_IN_PLAYLIST:
+      store.dispatch('addMessages', {
+        type: 'result',
+        title: i18n.t('errorFile.fileNonExistInPlaylist.title', i18n.locale, i18n.messages),
+        content: i18n.t('errorFile.fileNonExistInPlaylist.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
+    case PLAYLIST_NON_EXIST:
+      store.dispatch('addMessages', {
+        type: 'result',
+        title: i18n.t('errorFile.playlistNonExist.title', i18n.locale, i18n.messages),
+        content: i18n.t('errorFile.playlistNonExist.content', i18n.locale, i18n.messages),
+        dismissAfter: 5000,
+      });
+      break;
     case FILE_NON_EXIST:
       store.dispatch('addMessages', {
         type: 'result',
-        title: i18n.t('errorFile.fileNonExist.title', i18n.locale, i18n.messages),
-        content: i18n.t('errorFile.fileNonExist.content', i18n.locale, i18n.messages),
+        title: i18n.t('errorFile.playlistNonExist.title', i18n.locale, i18n.messages),
+        content: i18n.t('errorFile.playlistNonExist.content', i18n.locale, i18n.messages),
         dismissAfter: 5000,
-        cb: () => {
-          this.$bus.$emit('delete-file');
-        },
       });
       break;
     case ADD_NO_VIDEO:

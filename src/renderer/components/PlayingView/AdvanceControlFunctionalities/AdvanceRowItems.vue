@@ -66,7 +66,6 @@ export default {
       hoverIndex: -1,
       selectedIndex: 1,
       moveLength: '',
-      lastSize: 1,
     };
   },
   props: {
@@ -101,10 +100,10 @@ export default {
     subToTop(val) {
       if (!this.isRateMenu) {
         if (val) {
-          this.lastSize = this.chosenSize;
+          this.updateLastSubSize(this.chosenSize);
           this.handleClick(0);
         } else {
-          this.handleClick(this.lastSize);
+          this.handleClick(this.lastChosenSize);
         }
       }
     },
@@ -132,7 +131,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(['rate', 'chosenSize', 'computedHeight', 'computedWidth', 'subToTop', 'winRatio']),
+    ...mapGetters(['rate', 'chosenSize', 'computedHeight', 'computedWidth', 'subToTop', 'winRatio', 'lastChosenSize']),
     computedSize() {
       return this.winRatio >= 1 ? this.computedHeight : this.computedWidth;
     },
@@ -209,6 +208,7 @@ export default {
       changeRate: videoActions.CHANGE_RATE,
       updateSubScale: subtitleActions.UPDATE_SUBTITLE_SCALE,
       updateSubSize: subtitleActions.UPDATE_SUBTITLE_SIZE,
+      updateLastSubSize: subtitleActions.UPDATE_LAST_SUBTITLE_SIZE,
     }),
     itemChosen(index) {
       if (this.isRateMenu) {

@@ -9,41 +9,45 @@
           <div class="dropdown__displayItem">{{ mapCode(displayLanguage) }}</div>
           <div class="dropdown__listItems"
             @mouseup.stop="">
-            <div class="dropdownListItem dropdownListItem--default"
+            <div class="dropdownListItem"
               v-for="(language, index) in displayLanguages"
               :key="index"
               @mouseup.stop="handleSelection(language)">
               {{ mapCode(language) }}
             </div>
           </div>
-          <Icon class="dropdown__icon" type="rightArrow" :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
+          <Icon type="rightArrow" :class="showSelection ? 'dropdown__icon--arrowUp' : 'dropdown__icon--arrowDown'"/>
         </div>
       </div>
     </div>
-    <div class="settingItem settingItem--justify">
-      <div class="setting-content">
+    <div class="settingItem--justify">
+      <div>
         <div class="settingItem__title">{{ $t("preferences.general.setDefault") }}</div>
         <div class="settingItem__description">{{ $t("preferences.general.setDefaultDescription") }}</div>
       </div>
-      <div class="settingItem__input button no-drag" ref="button1"
+      <div class="settingItem__input button no-drag"
+        :class="button1Styles"
+        ref="button1"
         @mousedown="mousedownOnSetDefault">
         <transition name="button" mode="out-in">
-          <div key="" v-if="!defaultState" class="content">{{ $t("preferences.general.setButton") }}</div>
-          <div :key="defaultState" v-else class="result">
+          <div key="" v-if="!defaultState" class="button__text">{{ $t("preferences.general.setButton") }}</div>
+          <div :key="defaultState" v-else class="button__result">
             <Icon :type="defaultState" :class="defaultState"/>
           </div>
         </transition>
       </div>
     </div>
-    <div class="settingItem settingItem--justify">
-      <div class="setting-content">
+    <div class="settingItem--justify">
+      <div>
         <div class="settingItem__title">{{ $t("preferences.general.restoreSettings") }}</div>
         <div class="settingItem__description">{{ $t("preferences.general.restoreSettingsDescription") }}</div>
       </div>
-      <div class="settingItem__input button no-drag" ref="button2"
+      <div class="settingItem__input button no-drag"
+        :class="button2Styles"
+        ref="button2"
         @mousedown="mousedownOnRestore">
         <transition name="button" mode="out-in">
-          <div :key="needToRelaunch" class="content" ref="restoreContent">{{ restoreContent }}</div>
+          <div :key="needToRelaunch" class="button__text" ref="restoreContent">{{ restoreContent }}</div>
         </transition>
       </div>
     </div>
@@ -87,6 +91,8 @@ export default {
       needToRelaunch: false,
       restoreContent: '',
       languages: ['zhCN', 'zhTW', 'ja', 'ko', 'en', 'es', 'ar'],
+      button1Styles: [''],
+      button2Styles: [''],
     };
   },
   created() {
@@ -165,12 +171,10 @@ export default {
   methods: {
     mouseupOnOther() {
       if (!this.isSettingDefault) {
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
+        this.button1Styles.pop();
       }
       if (!this.isRestoring) {
-        this.$refs.button2.style.setProperty('background-color', '');
-        this.$refs.button2.style.setProperty('opacity', '');
+        this.button2Styles.pop();
       }
       document.removeEventListener('mouseup', this.mouseupOnOther);
       this.$refs.button1.removeEventListener('mouseup', this.setDefault);
@@ -178,17 +182,14 @@ export default {
     },
     mousedownOnSetDefault() {
       if (!this.isSettingDefault) {
-        this.$refs.button1.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
-        this.$refs.button1.style.setProperty('opacity', '0.5');
+        this.button1Styles.push('button--mouseDown');
         this.$refs.button1.addEventListener('mouseup', this.setDefault);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
     },
     mousedownOnRestore() {
       if (!this.isSettingDefault) {
-        this.$refs.button2.style.setProperty('transition-delay', '');
-        this.$refs.button2.style.setProperty('background-color', 'rgba(0,0,0,0.10)');
-        this.$refs.button2.style.setProperty('opacity', '0.5');
+        this.button2Styles.push('button--mouseDown');
         this.$refs.button2.addEventListener('mouseup', this.restoreSettings);
         document.addEventListener('mouseup', this.mouseupOnOther);
       }
@@ -200,9 +201,7 @@ export default {
         await setAsDefaultApp();
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'success';
-        this.$refs.button1.style.setProperty('transition-delay', '350ms');
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
+        this.button1Styles.pop();
         this.defaultButtonTimeoutId = setTimeout(() => {
           this.defaultState = '';
           this.isSettingDefault = false;
@@ -211,9 +210,7 @@ export default {
       } catch (ex) {
         clearTimeout(this.defaultButtonTimeoutId);
         this.defaultState = 'failed';
-        this.$refs.button1.style.setProperty('transition-delay', '350ms');
-        this.$refs.button1.style.setProperty('background-color', '');
-        this.$refs.button1.style.setProperty('opacity', '');
+        this.button2Styles.pop();
         this.defaultButtonTimeoutId = setTimeout(() => {
           this.defaultState = '';
           this.isSettingDefault = false;
@@ -229,9 +226,7 @@ export default {
         electron.ipcRenderer.send('need-to-restore');
         this.needToRelaunch = true;
         this.restoreContent = this.$t('preferences.general.relaunch');
-        this.$refs.button2.style.setProperty('transition-delay', '400ms');
-        this.$refs.button2.style.setProperty('background-color', '');
-        this.$refs.button2.style.setProperty('opacity', '');
+        this.button2Styles.pop();
         this.isRestoring = false;
         return;
       }
@@ -285,125 +280,131 @@ export default {
       }
     }
 
-    .dropdown {
-      position: relative;
-      width: 240px;
-      height: 28px;
-      margin-top: 13px;
-      
-      &__toggle {
-        position: absolute;
-        width: 100%;
-        margin-top: -1px;
-        margin-left: -1px;
-        transition: all 200ms;
-        border-radius: 2px;
-        overflow: hidden;
-        
-
-        &--display {
-          height: 28px;
-          border: 1px solid rgba(255,255,255,0);
-          background-color: rgba(255, 255, 255, 0);
-        }
-        
-        &--list { 
-          height: 148px;
-          border: 1px solid rgba(255,255,255,0.3);
-          background-color: rgba(120,120,120,1);
-          .dropdown__displayItem {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-          }
-        }
-      }
-
-      &__displayItem {
-        height: 28px;
-        line-height: 28px;
-        border-bottom: 1px solid rgba(255,255,255,0);
-      }
-
-      &__listItems {
-        cursor: pointer;
-        position: relative;
-        height: 112px;
-        margin: 4px 4px 4px 6px;
-        overflow-y: scroll;
-      }
-
-      .dropdownListItem {
-        height: 28px;
-        line-height: 28px;
-
-        &--default:hover {
-          background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
-        }
-      }
-
-      &__icon {
-        position: absolute;
-        top: 7px;
-        right: 8px;
-        transition: transform 200ms;
-        &--arrowDown {
-          transform: rotate(90deg);
-        }
-        &--arrowUp {
-          z-index: 100;
-          transform: rotate(-90deg);
-        }
-      }
-
-      ::-webkit-scrollbar {
-        width: 3px;
-        user-select: none;
-      }
-      /* Handle */
-      ::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 1.5px;
-      }
-      ::-webkit-scrollbar-track {
-        border-radius: 2px;
-        width: 10px;
-        user-select: none;
-      }
-    }
-
-    .button {
-      box-sizing: border-box;
-      align-self: center;
-      width: 61px;
-      height: 28px;
-
-      .button-enter, .button-leave-to {
-        opacity: 0;
-      }
-      .button-enter-active {
-        transition: opacity 200ms ease-in;
-      }
-      .button-leave-active {
-        transition: opacity 200ms ease-in;
-      }
-
-      .content {
-        font-family: $font-medium;
-        font-size: 11px;
-        color: #FFFFFF;
-        letter-spacing: 0;
-        text-align: center;
-        line-height: 26px;
-      }
-      .result {
-        position: relative;
-        top: 5px;
-        left: 23px;
-      }
-    }
-
     &--justify {
+      @extend .settingItem;
       display: flex;
       justify-content: space-between;
+    }
+  }
+  .dropdown {
+    position: relative;
+    width: 240px;
+    height: 28px;
+    margin-top: 13px;
+    
+    &__toggle {
+      position: absolute;
+      width: 100%;
+      margin-top: -1px;
+      margin-left: -1px;
+      transition: all 200ms;
+      border-radius: 2px;
+      overflow: hidden;
+      
+
+      &--display {
+        height: 28px;
+        border: 1px solid rgba(255,255,255,0);
+        background-color: rgba(255, 255, 255, 0);
+      }
+      
+      &--list { 
+        height: 148px;
+        border: 1px solid rgba(255,255,255,0.3);
+        background-color: rgba(120,120,120,1);
+        .dropdown__displayItem {
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+      }
+    }
+
+    &__displayItem {
+      height: 28px;
+      line-height: 28px;
+      border-bottom: 1px solid rgba(255,255,255,0);
+    }
+
+    &__listItems {
+      cursor: pointer;
+      position: relative;
+      height: 112px;
+      margin: 4px 4px 4px 6px;
+      overflow-y: scroll;
+    }
+
+    .dropdownListItem {
+      height: 28px;
+      line-height: 28px;
+
+      &:hover {
+        background-image: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.069) 23%, rgba(255,255,255,0.00) 100%);
+      }
+    }
+
+    &__icon {
+      position: absolute;
+      top: 7px;
+      right: 8px;
+      transition: transform 200ms;
+      &--arrowDown {
+        @extend .dropdown__icon;
+        transform: rotate(90deg);
+      }
+      &--arrowUp {
+        @extend .dropdown__icon;
+        z-index: 100;
+        transform: rotate(-90deg);
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 3px;
+      user-select: none;
+    }
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 1.5px;
+    }
+    ::-webkit-scrollbar-track {
+      border-radius: 2px;
+      width: 10px;
+      user-select: none;
+    }
+  }
+  .button {
+    box-sizing: border-box;
+    align-self: center;
+    width: 61px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .button-enter, .button-leave-to {
+      opacity: 0;
+    }
+    .button-enter-active {
+      transition: opacity 200ms ease-in;
+    }
+    .button-leave-active {
+      transition: opacity 200ms ease-in;
+    }
+
+    &__text {
+      font-family: $font-medium;
+      font-size: 11px;
+      color: #FFFFFF;
+      letter-spacing: 0;
+      text-align: center;
+      line-height: 26px;
+    }
+    &__result {
+      width: 15px;
+      height: 15px;
+    }
+    &--mouseDown {
+      opacity: 0.5;
     }
   }
 }
