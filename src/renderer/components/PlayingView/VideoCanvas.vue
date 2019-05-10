@@ -346,8 +346,11 @@ export default {
     this.$bus.$on('next-video', () => {
       videodata.paused = false;
       if (this.nextVideo) {
+        this.$store.commit('LOOP_UPDATE', false);
         if (this.isFolderList) this.openVideoFile(this.nextVideo);
         else this.playFile(this.nextVideo, this.nextVideoId);
+      } else {
+        this.$store.commit('LOOP_UPDATE', true);
       }
     });
     this.$bus.$on('seek', (e) => { this.seekTime = [e]; });

@@ -22,7 +22,7 @@ const getters = {
     if (!getters.singleCycle) {
       if (index !== -1 && index + 1 < state.items.length) {
         return state.items[index + 1];
-      } else if (index + 1 >= state.items.length) {
+      } else if (state.playList.length !== 1 && index + 1 >= state.items.length) {
         return state.items[0];
       }
     }
@@ -34,7 +34,7 @@ const getters = {
     if (!getters.singleCycle) {
       if (index !== -1 && index + 1 < list.length) {
         return list[index + 1];
-      } else if (index + 1 >= list.length) {
+      } else if (list.length !== 1 && index + 1 >= list.length) {
         return list[0];
       }
     }
