@@ -391,7 +391,6 @@ export default {
         }
 
         await this.playFile(currentVideo.path, currentVideo.videoId);
-        this.$bus.$emit('open-playlist');
         let paths = [];
         for (const videoId of playlist.items) {
           const mediaItem = await this.infoDB.get('media-item', videoId);

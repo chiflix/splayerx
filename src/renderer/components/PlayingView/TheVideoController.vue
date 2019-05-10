@@ -134,7 +134,7 @@ export default {
       mousemoveClientPosition: state => state.Input.mousemoveClientPosition,
       wheelTime: state => state.Input.wheelTimestamp,
     }),
-    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
+    ...mapGetters(['paused', 'duration', 'isFullScreen', 'leftMousedown', 'ratio', 'playingList', 'originSrc', 'isFocused', 'isMinimized', 'isFolderList', 'isFullScreen', 'intrinsicWidth', 'intrinsicHeight']),
     ...inputMapGetters({
       inputWheelDirection: iGT.GET_WHEEL_DIRECTION,
     }),
@@ -249,12 +249,12 @@ export default {
         hovering: false,
       };
     });
-    this.$bus.$on('open-playlist', () => {
+    if (!this.isFolderList) {
       this.widgetsStatus['playlist-control'].showAttached = true;
       this.openPlayListTimeId = setTimeout(() => {
         this.widgetsStatus['playlist-control'].showAttached = false;
       }, 4000);
-    });
+    }
     this.$bus.$on('drag-over', () => {
       this.dragOver = true;
     });
