@@ -359,7 +359,7 @@ export default {
       clearTimeout(this.openPlayListTimeId);
     },
     updatePlaylistShowAttached(event) {
-      this.widgetsStatus['playlist-control'].showAttached = event;
+      this.widgetsStatus['playlist-control'].showAttached = this.openPlayList = event;
     },
     updatePlayButtonState(mousedownState) {
       this.mousedownOnPlayButton = mousedownState;
@@ -424,7 +424,7 @@ export default {
       Object.keys(this.displayState).forEach((index) => {
         tempObject[index] = !this.widgetsStatus['playlist-control'].showAttached;
       });
-      tempObject['recent-playlist'] = this.openPlayList || (this.widgetsStatus['playlist-control'].showAttached && !this.dragOver);
+      tempObject['recent-playlist'] = (this.openPlayList || this.widgetsStatus['playlist-control'].showAttached) && !this.dragOver;
       this.displayState = tempObject;
       this.tempRecentPlaylistDisplayState = this.widgetsStatus['playlist-control'].showAttached;
     },
